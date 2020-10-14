@@ -99,7 +99,7 @@ optimiseProcDefBU pspec def = do
 --  marked to be inlined, don't second guess that.
 decideInlining :: ProcDef -> Compiler ProcDef
 decideInlining def
-    |  NoFork == bodyFork body && not (procInline def) = do
+    |  NoFork == bodyFork body && procInlining def == MayInline = do
     logOptimise $ "Considering inline of " ++ procName def
     benefit <- (4 +) <$> procCost proto -- add 4 for time saving
     logOptimise $ "  benefit = " ++ show benefit
@@ -108,7 +108,7 @@ decideInlining def
     -- Inline procs where benefit >= cost and private procs with only one use
     if benefit >= cost
        || procCallCount def <= 1 && procVis def == Private
-    then return $ def { procInline = True }
+    then return $ def { procInlining = Inline }
     else return def
     where ProcDefPrim proto body _ _ = procImpln def
 decideInlining def = return def

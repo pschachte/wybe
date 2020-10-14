@@ -12,7 +12,7 @@ module Util (sameLength, maybeNth, setMapInsert,
              addConnectedGroupToDS, removeOneFromDS,
              removeFromDS, connectedItemsInDS,
              mapDS, filterDS, dsToTransitivePairs,
-             intersectMapIdentity) where
+             intersectMapIdentity, orElse) where
 
 
 import           Data.Graph
@@ -204,3 +204,8 @@ intersectMapIdentity :: (Ord k, Eq v) => Map k v -> Map k v -> Map k v
 intersectMapIdentity = merge dropMissing dropMissing
                        (zipWithMaybeMatched
                         $ \_ v1 v2 -> if v1 == v2 then Just v1 else Nothing)
+
+-- | a `orElse` b returns a if it's a Just, otherwise b
+orElse :: Maybe a -> Maybe a -> Maybe a
+orElse Nothing b  = b
+orElse a@Just{} _ = a

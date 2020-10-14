@@ -7,32 +7,49 @@
 #include <gc.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <inttypes.h>
 #include <stdbool.h>
 #include <math.h>
 
 unsigned long long g_malloc_count = 0;
 
-int print_int(int x) {
-    return printf("%d", x);
+int64_t print_int(int64_t x) {
+    return (int64_t)printf("%"PRId64, x);
 }
 
-int print_float(double x) {
-    return printf("%f", x);
+int64_t print_float(double x) {
+    return (int64_t)printf("%f", x);
 }
 
-int print_string(const char *s) {
-    return printf("%s", s);
+int64_t print_string(const char *s) {
+    return (int64_t)printf("%s", s);
 }
 
-int read_char() {
-    int ch;
-    ch = getchar();
+int64_t log_int(int64_t x) {
+  return (int64_t)fprintf(stderr, "%"PRId64, x);
+}
+
+int64_t log_float(double x) {
+  return (int64_t)fprintf(stderr, "%f", x);
+}
+
+int64_t log_string(const char *s) {
+  return (int64_t)fprintf(stderr, "%s", s);
+}
+
+int64_t log_char(const char c) {
+  return (int64_t)fprintf(stderr, "%c", c);
+}
+
+int64_t read_char() {
+    int64_t ch;
+    ch = (int64_t)getchar();
     return ch;
 }
 
-int read_int() {
-    int x;
-    scanf("%d", &x);
+int64_t read_int() {
+    int64_t x;
+    scanf("%"PRId64, &x);
     return x;
 }
 
@@ -58,8 +75,8 @@ char *read_line() {
     return GC_realloc(str, sizeof(char) * len);
 }
 
-int ipow(int base, int exp) {
-    int result = 1;
+int64_t ipow(int64_t base, int64_t exp) {
+    int64_t result = 1;
     while (exp)
     {
         if (exp & 1)
@@ -71,15 +88,15 @@ int ipow(int base, int exp) {
     return result;
 }
 
-int isqrt(int x) {
+int64_t isqrt(int64_t x) {
     double s;
     s = sqrt((double) x);
-    return (int)s;
+    return (int64_t)s;
 }
 
 
 // Boehm GC
-void *wybe_malloc(int size) {
+void *wybe_malloc(int64_t size) {
     g_malloc_count += 1;
     return GC_MALLOC(size);
 }
@@ -93,9 +110,9 @@ void gc_init() {
 }
 
 
-int malloc_count() {
+int64_t malloc_count() {
     // XXX may overflow
-    return (int)g_malloc_count;
+    return (int64_t)g_malloc_count;
 }
 
 

@@ -8,11 +8,11 @@ pub type bool { pub false | true
     pub def `&&`(p:bool, q:bool):bool = foreign llvm and(p,q)
     pub def `||`(p:bool, q:bool):bool = foreign llvm or(p,q)
     pub def `~`(p:bool):bool = foreign llvm xor(p,true)
-    pub def =(x:bool, y:bool):bool = foreign llvm icmp eq(x,y)
-    pub def /=(x:bool,y:bool):bool = foreign llvm icmp ne(x,y)
+    pub def =(x:bool, y:bool):bool = foreign llvm icmp_eq(x,y)
+    pub def /=(x:bool,y:bool):bool = foreign llvm icmp_ne(x,y)
     pub def otherwise { } # not a test, empty body, so always true
     pub def succeed { } # always succeed
-    pub def test fail { false } # always fail (compiler will optimise)
+    pub def {test} fail { false } # always fail (compiler will optimise)
 }
 
 
@@ -27,16 +27,45 @@ pub type int is signed {
     pub def -(?x:int,y:int) { ?x = foreign llvm sub(0,y) }
     pub def *(x:int,y:int):int = foreign llvm mul(x,y)
     pub def /(x:int,y:int):int = foreign llvm sdiv(x,y)
-    pub def /=(x:int,y:int):bool = foreign llvm icmp ne(x,y)
-    pub def <(x:int,y:int):bool = foreign llvm icmp slt(x,y)
-    pub def <=(x:int,y:int):bool = foreign llvm icmp sle(x,y)
-    pub def >(x:int,y:int):bool = foreign llvm icmp sgt(x,y)
-    pub def >=(x:int,y:int):bool = foreign llvm icmp sge(x,y)
-    pub def =(x:int, y:int):bool = foreign llvm icmp eq(x,y)
+    pub def %(x:int,y:int):int = foreign llvm srem(x,y)
+    pub def /=(x:int,y:int):bool = foreign llvm icmp_ne(x,y)
+    pub def <(x:int,y:int):bool = foreign llvm icmp_slt(x,y)
+    pub def <=(x:int,y:int):bool = foreign llvm icmp_sle(x,y)
+    pub def >(x:int,y:int):bool = foreign llvm icmp_sgt(x,y)
+    pub def >=(x:int,y:int):bool = foreign llvm icmp_sge(x,y)
+    pub def =(x:int, y:int):bool = foreign llvm icmp_eq(x,y)
     pub def sqrt(x:int):int = foreign c isqrt(x)
     pub def power(x:int,y:int):int = foreign c ipow(x,y)
     pub def incr(!x:int) { ?x = x + 1 }
     pub def decr(!x:int) { ?x = x - 1 }
+}
+
+
+pub type count is unsigned {
+    pub def +(x:count,y:count):count = foreign llvm add(x,y)
+    pub def {partial} +(?x:count,y:count,z:count) {
+        (z >= y)
+        ?x = foreign llvm sub(z,y)
+    }
+    pub def {partial} +(x:count,?y:count,z:count) {
+        (z >= x)
+        ?y = foreign llvm sub(z,x)
+    }
+    pub def {partial} -(x:count,y:count):count =
+        foreign llvm sub(x,y) where { (y >= x) }
+    pub def -(?x:count,y:count,z:count) { ?x = foreign llvm add(z,y) }
+    pub def -(x:count,?y:count,z:count) { ?y = foreign llvm sub(z,x) }
+    pub def *(x:count,y:count):count = foreign llvm mul(x,y)
+    pub def /(x:count,y:count):count = foreign llvm udiv(x,y)
+    pub def %(x:count,y:count):count = foreign llvm urem(x,y)
+    pub def /=(x:count,y:count):bool = foreign llvm icmp_ne(x,y)
+    pub def <(x:count,y:count):bool = foreign llvm icmp_ult(x,y)
+    pub def <=(x:count,y:count):bool = foreign llvm icmp_ule(x,y)
+    pub def >(x:count,y:count):bool = foreign llvm icmp_ugt(x,y)
+    pub def >=(x:count,y:count):bool = foreign llvm icmp_uge(x,y)
+    pub def =(x:count, y:count):bool = foreign llvm icmp_eq(x,y)
+    pub def incr(!x:count) { ?x = x + 1:count }
+    pub def {partial} decr(!x:count) { ?x = x - 1:count }
 }
 
 
@@ -51,12 +80,12 @@ pub type float is 64 bit float {
     pub def -(?x:float,y:float) { ?x = foreign llvm fsub(0.0,y) }
     pub def *(x:float,y:float):float = foreign llvm fmul(x,y)
     pub def /(x:float,y:float):float = foreign llvm fdiv(x,y)
-    pub def /=(x:float,y:float):bool = foreign llvm fcmp ne(x,y)
-    pub def <(x:float,y:float):bool = foreign llvm fcmp slt(x,y)
-    pub def <=(x:float,y:float):bool = foreign llvm fcmp sle(x,y)
-    pub def >(x:float,y:float):bool = foreign llvm fcmp sgt(x,y)
-    pub def >=(x:float,y:float):bool = foreign llvm fcmp sge(x,y)
-    pub def =(x:float, y:float):bool = foreign llvm fcmp eq(x,y)
+    pub def /=(x:float,y:float):bool = foreign llvm fcmp_ne(x,y)
+    pub def <(x:float,y:float):bool = foreign llvm fcmp_slt(x,y)
+    pub def <=(x:float,y:float):bool = foreign llvm fcmp_sle(x,y)
+    pub def >(x:float,y:float):bool = foreign llvm fcmp_sgt(x,y)
+    pub def >=(x:float,y:float):bool = foreign llvm fcmp_sge(x,y)
+    pub def =(x:float, y:float):bool = foreign llvm fcmp_eq(x,y)
     pub def sqrt(x:float):float = foreign c sqrt(x)
     pub def power(x:float,y:float):float = foreign c pow(x,y)
 }
@@ -75,8 +104,8 @@ pub type string is address {
 
 
 pub type char is 8 bit unsigned {
-    pub def =(x:char, y:char):bool = foreign llvm icmp eq(x,y)
-    pub def /=(x:char,y:char):bool = foreign llvm icmp ne(x,y)
+    pub def =(x:char, y:char):bool = foreign llvm icmp_eq(x,y)
+    pub def /=(x:char,y:char):bool = foreign llvm icmp_ne(x,y)
 }
 
 
@@ -102,13 +131,25 @@ pub module io {
     pub def read(?x:string) use !io { foreign c read_line(?x,!io) }
 
     pub def print(x:bool) use !io {
-       !print(if false(x) then "false" else "true")
+       !print(if x then "true" else "false")
     }
     pub def println(x:bool) use !io { !print(x) !nl }
     pub def eof:char = foreign lpvm cast(-1)
 
     pub def malloc_count(?x:int) use !io { foreign c malloc_count(?x,!io) }
 }
+
+pub module logging {
+    pub def {semipure} logmsg(x:int) { foreign c {impure} log_int(x) }
+    pub def {semipure} logmsg(x:float) { foreign c {impure} log_float(x) }
+    pub def {semipure} logmsg(x:char) { foreign c {impure} log_char(x) }
+    pub def {semipure} logmsg(x:string) { foreign c {impure} log_string(x) }
+    pub def {semipure} logmsg(x:bool) {
+       !logmsg(if x then "true" else "false")
+    }
+    pub def {semipure} lognl { !logmsg('\n') }
+}
+
 
 pub type phantom {
     pub phantom
@@ -141,12 +182,12 @@ pub module command_line {
     }
 
     # Exit right away with the specified code (0 = successful termination).
-    pub def terminal exit(code:int) {
-        foreign c exit terminal(code)
+    pub def {terminal,semipure} exit(code:int) {
+        foreign c {terminal,semipure} exit(code)
     }
 
     # Print an error message and abort the computation.
-    pub def terminal error(message:string) {
-        foreign c error_exit terminal(message)
+    pub def {terminal,semipure} error(message:string) {
+        foreign c {terminal,semipure} error_exit(message)
     }
 }

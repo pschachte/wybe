@@ -10,7 +10,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-nothing_interesting > public inline (0 calls)
+nothing_interesting > public {inline} (0 calls)
 0: nothing_interesting(?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []

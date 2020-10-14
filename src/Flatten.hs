@@ -47,13 +47,12 @@ import Control.Monad.Trans (lift,liftIO)
 ----------------------------------------------------------------
 
 flattenProcDecl :: Item -> Compiler (Item,Int)
-flattenProcDecl (ProcDecl vis detism inline 
-                 proto@ProcProto{procProtoParams=params}
-                 stmts pos) = do
+flattenProcDecl (ProcDecl vis mods proto stmts pos) = do
+    let params = procProtoParams proto
     logMsg Flatten $ "** Flattening "
-           ++ (if inline then "inline " else "")
-           ++ show detism ++ " proc "
-           ++ show proto ++ ":" ++ showBody 4 stmts
+           ++ "def "
+           ++ showProcModifiers mods
+           ++ show proto ++ " {" ++ showBody 4 stmts ++ "}"
     let proto' = proto {procProtoParams = concatMap flattenParam params}
               -- flattenProto proto detism
     let inParams = Set.fromList $
@@ -64,8 +63,8 @@ flattenProcDecl (ProcDecl vis detism inline
                    Set.filter (flowsIn . resourceFlowFlow) $
                    procProtoResources proto'
     (stmts',tmpCtr) <- flattenBody stmts (inParams `Set.union` inResources)
-                       detism
-    return (ProcDecl vis detism inline proto' stmts' pos,tmpCtr)
+                       (modifierDetism mods)
+    return (ProcDecl vis mods proto' stmts' pos,tmpCtr)
 flattenProcDecl _ =
     shouldnt "flattening a non-proc item"
 
@@ -268,15 +267,6 @@ flattenStmt' (ProcCall maybeMod name procID detism res args) pos _ = do
     logFlatten "   call is Det"
     args' <- flattenStmtArgs args pos
     emit pos $ ProcCall maybeMod name procID detism res args'
-flattenStmt' (ForeignCall "llvm" "test" flags args) pos SemiDet = do
-    args' <- flattenStmtArgs args pos
-    resultName <- tempVar
-    let vSet = Unplaced
-               $ Typed (Var resultName ParamOut $ Implicit pos) boolType False
-    emit pos $ ForeignCall "llvm" "icmp" flags $ args' ++ [vSet]
-    emit pos $ TestBool $ varGet resultName
-flattenStmt' stmt@(ForeignCall "llvm" "test" _ _) _ detism | detism < SemiDet =
-    shouldnt $ "llvm test in " ++ show detism ++ " context: " ++ show stmt
 flattenStmt' (ForeignCall lang name flags args) pos _ = do
     args' <- flattenStmtArgs args pos
     emit pos $ ForeignCall lang name flags args'
@@ -290,7 +280,12 @@ flattenStmt' (Cond tstStmt thn els defVars) pos detism = do
     thn' <- flattenInner False False detism (flattenStmts thn detism)
     els' <- flattenInner False False detism (flattenStmts els detism)
     emit pos $ Cond tstStmt' thn' els' defVars
-flattenStmt' stmt@(TestBool _) pos SemiDet = emit pos stmt
+flattenStmt' (TestBool expr) pos SemiDet = do
+    exprs' <- flattenPExp $ Unplaced expr
+    case exprs' of
+        [Unplaced expr'] -> emit pos $ TestBool expr'
+        _ -> shouldnt $ "Flatten expr " ++ show expr
+                        ++ " produced " ++ show exprs'
 flattenStmt' (TestBool expr) _pos detism =
     shouldnt $ "TestBool " ++ show expr ++ " in " ++ show detism ++ " context"
 flattenStmt' (And tsts) pos SemiDet = do

@@ -10,7 +10,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public inline (0 calls)
+*main* > public {inline} (0 calls)
 0: (argc#0:wybe.int, ?argc#1:wybe.int, argv#0:wybe.int, ?argv#1:wybe.int, exit_code#0:wybe.int, ?exit_code#1:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -21,7 +21,7 @@ gen$1 > (2 calls)
 0: gen$1(argc#0:wybe.int, argv#0:wybe.int, exit_code#0:wybe.int, io#0:wybe.phantom, n#0:wybe.int, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp slt(n#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_slt(n#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
     case ~tmp$1#0:wybe.bool of
     0:
         stmt_until.gen$2<0>(~argc#0:wybe.int, ~argv#0:wybe.int, ~exit_code#0:wybe.int, ~io#0:wybe.phantom, ~n#0:wybe.int, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#1:wybe.phantom) #1
@@ -34,7 +34,7 @@ gen$1 > (2 calls)
 
 
 
-gen$2 > inline (1 calls)
+gen$2 > {inline} (1 calls)
 0: gen$2(argc#0:wybe.int, argv#0:wybe.int, exit_code#0:wybe.int, io#0:wybe.phantom, n#0:wybe.int, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []

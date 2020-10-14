@@ -71,23 +71,21 @@ normaliseItem (ResourceDecl vis name typ init pos) = do
     Nothing  -> return ()
     Just val -> normaliseItem (StmtDecl (ProcCall [] "=" Nothing Det False
                                          [Unplaced $ varSet name, val]) pos)
-normaliseItem (FuncDecl vis detism inline
-                           (ProcProto name params resources)
-                           resulttype result pos) =
+normaliseItem (FuncDecl vis mods (ProcProto name params resources)
+                        resulttype result pos) =
   let flowType = Implicit pos
   in  normaliseItem
-   (ProcDecl
-    vis detism inline
-    (ProcProto name (params ++ [Param "$" resulttype ParamOut flowType])
-     resources)
-    [maybePlace (ForeignCall "llvm" "move" []
+        (ProcDecl vis mods
+            (ProcProto name (params ++ [Param "$" resulttype ParamOut flowType])
+                       resources)
+             [maybePlace (ForeignCall "llvm" "move" []
                  [maybePlace (Typed (content result) resulttype False)
                   $ place result,
                   Unplaced
                   $ Typed (Var "$" ParamOut flowType) resulttype False])
-     pos]
-    pos)
-normaliseItem item@(ProcDecl _ _ _ _ _ _) = do
+              pos]
+        pos)
+normaliseItem item@(ProcDecl _ _ _ _ _) = do
     (item',tmpCtr) <- flattenProcDecl item
     logNormalise $ "Normalised proc:" ++ show item'
     addProc tmpCtr item'
@@ -289,8 +287,6 @@ completeType (name,modspec)
       when (numConsts >= fromIntegral smallestAllocatedAddress)
         $ nyi $ "Type '" ++ name ++ "' has too many constant constructors"
       let typespec = TypeSpec modspec name []
-                   -- XXX not right:  these should be param names, not types
-                   -- $ List.map (\n->TypeSpec [] n []) params
       let constItems =
             concatMap (constCtorItems ctorVis typespec) $ zip constCtors [0..]
       infos <- zipWithM nonConstCtorInfo nonConstCtors [0..]
@@ -371,7 +367,7 @@ normaliseModMain = do
     logNormalise $ "Top-level statements = " ++ show stmts
     unless (List.null stmts) $ do
       resources <- initResources
-      normaliseItem (ProcDecl Public Det False (ProcProto "" [] resources)
+      normaliseItem (ProcDecl Public detModifiers (ProcProto "" [] resources)
                       (List.reverse stmts) Nothing)
 
 -- |The resources available at the top level of this module
@@ -419,7 +415,7 @@ constCtorItems :: Visibility -> TypeSpec -> (Placed ProcProto,Integer) -> [Item]
 constCtorItems  vis typeSpec (placedProto,num) =
     let (proto,pos) = unPlace placedProto
         constName = procProtoName proto
-    in [ProcDecl vis Det True
+    in [ProcDecl vis inlineDetModifiers
         (ProcProto constName [Param "$" typeSpec ParamOut Ordinary] Set.empty)
         [lpvmCastToVar (castTo (iVal num) typeSpec) "$"] pos
        ]
@@ -533,7 +529,6 @@ alignOffset offset alignment =
 
 
 -- |Generate constructor code for a non-const constructor
---  XXX generalise to generate unboxed constructors
 constructorItems :: ProcName -> TypeSpec
                  -> [(VarName,TypeSpec,TypeRepresentation,Int)]
                  -> Int -> Int -> Int -> OptPos -> [Item]
@@ -545,7 +540,7 @@ constructorItems ctorName typeSpec fields size tag tagLimit pos =
                   | (name,paramType,_,_) <- fields]
                    ++[Param "$" typeSpec ParamOut Ordinary])
                  Set.empty)
-    in [ProcDecl Public Det True proto
+    in [ProcDecl Public inlineDetModifiers proto
         -- Code to allocate memory for the value
         ([Unplaced $ ForeignCall "lpvm" "alloc" []
           [Unplaced $ iVal size,
@@ -589,8 +584,8 @@ deconstructorItems ctorName typeSpec numConsts numNonConsts tag tagLimit
                    pos fields size =
     let startOffset = (if tag > tagLimit then tagLimit+1 else tag) in
     let flowType = Implicit pos
-        detism = if numConsts + numNonConsts > 1 then SemiDet else Det
-    in [ProcDecl Public detism True
+        detism = deconstructorDetism numConsts numNonConsts
+    in [ProcDecl Public (inlineModifier detism)
         (ProcProto ctorName
          (List.map (\(n,t,_,_) -> (Param n t ParamOut Ordinary)) fields
           ++ [Param "$" typeSpec ParamIn Ordinary])
@@ -619,7 +614,7 @@ tagCheck numConsts numNonConsts tag tagLimit size varName =
     let tests =
           (case numConsts of
                0 -> []
-               _ -> [comparison "uge"
+               _ -> [comparison "icmp_uge"
                      (varGet varName)
                      (intCast $ iVal numConsts)]
            ++
@@ -627,7 +622,7 @@ tagCheck numConsts numNonConsts tag tagLimit size varName =
            -- it's the right one
            (case numNonConsts of
                1 -> []  -- Nothing to do if it's the only non-const constructor
-               _ -> [comparison "eq"
+               _ -> [comparison "icmp_eq"
                      (intCast $ ForeignFn "llvm" "and" []
                       [Unplaced $ varGet varName,
                        Unplaced $ iVal tagMask])
@@ -644,7 +639,7 @@ tagCheck numConsts numNonConsts tag tagLimit size varName =
                              "unboxed type shouldn't have a secondary tag" size,
                   Unplaced $ iVal startOffset,
                   Unplaced $ varSet "$tag"],
-                 comparison "eq" (varGet "$tag") (iVal tag)]
+                 comparison "icmp_eq" (varGet "$tag") (iVal tag)]
            else [])
 
     in if List.null tests
@@ -664,14 +659,14 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
     -- XXX generate cleverer code if multiple constructors have some of
     --     the same field names
     let startOffset = (if tag > tagLimit then tagLimit+1 else tag) in
-    let detism = if numConsts + numNonConsts == 1 then Det else SemiDet
+    let detism = deconstructorDetism numConsts numNonConsts
         -- Set the "noalias" flag when all other fields (exclude the one
         -- that is being changed) in this struct aren't [Address].
         -- This flag is used in [AliasAnalysis.hs]
         otherPtrCount = if rep == Address then ptrCount-1 else ptrCount
         flags = if otherPtrCount == 0 then ["noalias"] else []
     in [-- The getter:
-        ProcDecl vis detism True
+        ProcDecl vis (inlineModifier detism)
         (ProcProto field [Param "$rec" rectype ParamIn Ordinary,
                           Param "$" fieldtype ParamOut Ordinary] Set.empty)
         -- Code to check we have the right constructor
@@ -686,7 +681,7 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
            Unplaced $ varSet "$"]])
         pos,
         -- The setter:
-        ProcDecl vis detism True
+        ProcDecl vis (inlineModifier detism)
         (ProcProto field [Param "$rec" rectype ParamInOut Ordinary,
                           Param "$field" fieldtype ParamIn Ordinary] Set.empty)
         -- Code to check we have the right constructor
@@ -721,7 +716,7 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
                   | (name,paramType,_,_) <- fields]
                    ++[Param "$" typeSpec ParamOut Ordinary])
                  Set.empty)
-    in [ProcDecl vis Det True proto
+    in [ProcDecl vis inlineDetModifiers proto
          -- Initialise result to 0
         ([Unplaced $ ForeignCall "llvm" "move" []
           [Unplaced $ Typed (iVal 0) typeSpec False,
@@ -764,8 +759,8 @@ unboxedDeconstructorItems :: Visibility -> ProcName -> TypeSpec -> Int -> Int
 unboxedDeconstructorItems vis ctorName recType numConsts numNonConsts tag
                           pos fields =
     let flowType = Implicit pos
-        detism = if numConsts + numNonConsts > 1 then SemiDet else Det
-    in [ProcDecl vis detism True
+        detism = deconstructorDetism numConsts numNonConsts
+    in [ProcDecl vis (inlineModifier detism)
         (ProcProto ctorName
          (List.map (\(n,fieldType,_,_) -> (Param n fieldType ParamOut Ordinary))
           fields
@@ -800,11 +795,11 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
                          (field,fieldType,shift,sz) =
     -- XXX generate cleverer code if multiple constructors have some of
     --     the same field names
-    let detism = if numConsts + numNonConsts == 1 then Det else SemiDet
+    let detism = deconstructorDetism numConsts numNonConsts
         fieldMask = (bit sz::Int) - 1
         shiftedHoleMask = complement $ fieldMask `shiftL` shift
     in [-- The getter:
-        ProcDecl vis detism True
+        ProcDecl vis (inlineModifier detism)
         (ProcProto field [Param "$rec" recType ParamIn Ordinary,
                           Param "$" fieldType ParamOut Ordinary] Set.empty)
         -- Code to check we have the right constructor
@@ -826,7 +821,7 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
          ])
         pos,
         -- The setter:
-        ProcDecl vis detism True
+        ProcDecl vis (inlineModifier detism)
         (ProcProto field [Param "$rec" recType ParamInOut Ordinary,
                           Param "$field" fieldType ParamIn Ordinary] Set.empty)
         -- Code to check we have the right constructor
@@ -849,6 +844,11 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
          ])
         pos]
 
+
+deconstructorDetism :: Int -> Int -> Determinism
+deconstructorDetism numConsts numNonConsts
+    | numConsts + numNonConsts > 1 = SemiDet
+    | otherwise                    = Det
 
 ----------------------------------------------------------------
 --                     Generating implicit procs
@@ -877,7 +877,8 @@ implicitEquality typespec consts nonconsts rep items =
                                    Param "$right" typespec ParamIn Ordinary]
                     Set.empty
           (body,inline) = equalityBody consts nonconsts rep
-      in [ProcDecl Public SemiDet inline eqProto body Nothing]
+      in [ProcDecl Public (setInline inline $ setDetism SemiDet detModifiers)
+                   eqProto body Nothing]
 
 
 
@@ -893,16 +894,17 @@ implicitDisequality typespec consts nonconsts _ items =
           neBody = [Unplaced $ Not $ Unplaced $
                     ProcCall [] "=" Nothing SemiDet False
                     [Unplaced $ varGet "$left", Unplaced $ varGet "$right"]]
-      in [ProcDecl Public SemiDet True neProto neBody Nothing]
+      in [ProcDecl Public inlineSemiDetModifiers neProto neBody Nothing]
 
 
 -- |Does the item declare a test or Boolean function with the specified
 -- name and arity?
 isTestProc :: ProcName -> Int -> Item -> Bool
-isTestProc name arity (ProcDecl _ SemiDet _ (ProcProto n params _) _ _) =
-    n == name && length params == arity
-isTestProc name arity (FuncDecl _ Det _ (ProcProto n params _) ty _ _) =
-    n == name && length params == arity && ty == boolType
+isTestProc name arity (ProcDecl _ mods (ProcProto n params _) _ _) =
+    n == name && modifierDetism mods == SemiDet && length params == arity
+isTestProc name arity (FuncDecl _ mods (ProcProto n params _) ty _ _) =
+    n == name && modifierDetism mods == Det
+    && length params == arity && ty == boolType
 isTestProc _ _ _ = False
 
 
@@ -924,15 +926,15 @@ isTestProc _ _ _ = False
 --   than two arguments or there are no const constructors.
 --
 equalityBody :: [Placed ProcProto] -> [Placed ProcProto] -> TypeRepresentation
-             -> ([Placed Stmt],Bool)
+             -> ([Placed Stmt],Inlining)
 -- Special case for phantom (void) types
-equalityBody _ _ (Bits 0) = ([succeedTest], True)
+equalityBody _ _ (Bits 0) = ([succeedTest], Inline)
 equalityBody [] [] _ = shouldnt "trying to generate = test with no constructors"
-equalityBody _ _ (Bits _) = ([simpleEqualityTest],True)
-equalityBody consts [] _ = ([equalityConsts consts],True)
+equalityBody _ _ (Bits _) = ([simpleEqualityTest],Inline)
+equalityBody consts [] _ = ([equalityConsts consts],Inline)
 equalityBody consts nonconsts _ =
     -- decide whether $left is const or non const, and handle accordingly
-    ([Unplaced $ Cond (comparison "uge"
+    ([Unplaced $ Cond (comparison "icmp_uge"
                          (castTo (varGet "$left") intType)
                          (iVal $ length consts))
                 [equalityNonconsts (content <$> nonconsts) (List.null consts)]
@@ -941,8 +943,9 @@ equalityBody consts nonconsts _ =
      -- Decide to inline if only 1 non-const constructor, no non-const
      -- constructors (so not recursive), and at most 4 fields
      case List.map content nonconsts of
-         [ProcProto _ params _ ] -> length params <= 4 && List.null consts
-         _ -> False
+         [ProcProto _ params _ ] | length params <= 4 && List.null consts ->
+              Inline
+         _ -> MayInline
         )
 
 
@@ -955,7 +958,7 @@ equalityConsts _  = simpleEqualityTest
 
 -- |An equality test that just compares $left and $right for identity
 simpleEqualityTest :: Placed Stmt
-simpleEqualityTest = comparison "eq" (varGet "$left") (varGet "$right")
+simpleEqualityTest = comparison "icmp_eq" (varGet "$left") (varGet "$right")
 
 
 -- |Return code to check that two values are equal when the first is known
@@ -1007,6 +1010,19 @@ equalityField param =
     in  [Unplaced $ ProcCall [] "=" Nothing SemiDet False
             [Unplaced $ varGet leftField,
              Unplaced $ varGet rightField]]
+
+
+inlineModifier :: Determinism -> ProcModifiers
+inlineModifier detism = setInline Inline $ setDetism detism detModifiers
+
+
+inlineDetModifiers :: ProcModifiers
+inlineDetModifiers = setInline Inline detModifiers
+
+
+inlineSemiDetModifiers :: ProcModifiers
+inlineSemiDetModifiers = inlineModifier SemiDet
+
 
 -- |Log a message about normalised input items.
 logNormalise :: String -> Compiler ()

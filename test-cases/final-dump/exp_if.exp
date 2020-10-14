@@ -11,7 +11,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public inline (0 calls)
+*main* > public {inline} (0 calls)
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -24,7 +24,7 @@ if_test > public (1 calls)
 0: if_test(x#0:wybe.int, ?$#0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp sgt(~x#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_sgt(~x#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
     case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move("smaller":wybe.string, ?$#0:wybe.string) @exp_if:2:5

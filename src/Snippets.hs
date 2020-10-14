@@ -9,7 +9,7 @@ module Snippets (intType, intCast, boolType, boolCast, boolTrue, boolFalse,
                  boolBool, phantomType, varSet, varGet, varGetSet,
                  boolVarSet, boolVarGet, intVarSet, intVarGet, castTo,
                  lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, primMove,
-                 boolNegate, comparison, succeedTest, failTest,
+                 boolNegate, comparison, succeedTest, failTest, testVar,
                  succeedIfSemiDet) where
 
 import AST
@@ -124,15 +124,15 @@ primMove src dest =
   PrimForeign "llvm" "move" [] [src, dest]
 
 -- |An unplaced instruction to compare two integer values
-comparison :: Ident -> Exp -> Exp  -> Placed Stmt
+comparison :: Ident -> Exp -> Exp -> Placed Stmt
 comparison tst left right =
-    Unplaced $ ForeignCall "llvm" "test" [tst]
-     [Unplaced left, Unplaced right]
+    Unplaced $ TestBool $ boolCast
+    $ ForeignFn "llvm" tst [] [Unplaced left, Unplaced right]
 
 
 -- |A TestBool statement that always succeeds
 succeedTest :: Placed Stmt
-succeedTest = Unplaced $ TestBool $ castTo (iVal 1) boolType
+succeedTest = Unplaced $ TestBool $ boolCast (iVal 1)
 
 
 -- |In a SemiDet context, generates code to succeed, otherwise generates no code
@@ -145,4 +145,9 @@ succeedIfSemiDet SemiDet  = [succeedTest]
 
 -- |A TestBool statement that always fails
 failTest :: Placed Stmt
-failTest = Unplaced $ TestBool $ castTo (iVal 0) boolType
+failTest = Unplaced $ TestBool $ boolCast (iVal 0)
+
+
+-- |An unplaced TestBool of a Boolean variable
+testVar :: Ident -> Placed Stmt
+testVar name = Unplaced $ TestBool $ boolCast $ varGet name

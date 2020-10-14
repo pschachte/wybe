@@ -239,7 +239,7 @@ genProc proto detism stmts = do
     tmpCtr <- gets brTempCtr
     -- call site count will be refilled later
     let procDef = ProcDef name proto (ProcDefSrc stmts) Nothing tmpCtr 0
-                  Map.empty Private detism False NoSuperproc
+                  Map.empty Private detism MayInline Pure NoSuperproc
     logUnbranch $ "Generating fresh " ++ show detism ++ " proc:"
                   ++ showProcDef 8 procDef
     logUnbranch $ "Unbranched generated " ++ show detism ++ " proc:"
@@ -589,8 +589,8 @@ factorContinuationProc inVars pos detism stmts alt sense = do
                   ++ pname ++ ":" ++ showBody 4 stmts
     stmts' <- unbranchStmts detism stmts alt sense
     proto <- newProcProto pname inVars
-    genProc proto detism stmts'
-    newProcCall pname inVars pos detism
+    genProc proto Det stmts' -- Continuation procs are always Det
+    newProcCall pname inVars pos Det
 
 
 -- |Generate a fresh proc with all the vars in the supplied dictionary
@@ -604,14 +604,14 @@ factorLoopProc break inVars pos detism stmts alt sense = do
     logUnbranch $ "Factoring " ++ show detism ++ " loop proc "
                   ++ pname ++ ":" ++ showBody 4 stmts
                   ++ "\nLoop input vars = " ++ show inVars
-    next <- newProcCall pname inVars pos detism
+    next <- newProcCall pname inVars pos Det -- Continuation procs always Det
     let loopinfo = Just (LoopInfo next break)
     oldLoopinfo <- gets brLoopInfo
     modify (\s -> s { brLoopInfo = loopinfo })
     stmts' <- withVars inVars $ unbranchStmts detism stmts alt sense
     modify (\s -> s { brLoopInfo = oldLoopinfo })
     proto <- newProcProto pname inVars
-    genProc proto detism stmts'
+    genProc proto Det stmts'
     return next
 
 varExp :: FlowDirection -> VarName -> TypeSpec -> Placed Exp

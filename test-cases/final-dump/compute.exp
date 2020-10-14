@@ -11,7 +11,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public inline (0 calls)
+*main* > public {inline} (0 calls)
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -95,7 +95,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
   resources       : 
   procs           : 
 
-toCelsius > public inline (0 calls)
+toCelsius > public {inline} (0 calls)
 0: toCelsius(f#0:wybe.float, ?$#0:wybe.float):
  AliasPairs: []
  InterestingCallProperties: []
@@ -134,7 +134,7 @@ entry:
   resources       : 
   procs           : 
 
-*main* > public inline (0 calls)
+*main* > public {inline} (0 calls)
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
@@ -146,7 +146,7 @@ factorial > public (1 calls)
 0: factorial(n#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp sle(n#0:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_sle(n#0:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.bool) @wybe:nn:nn
     case ~tmp$4#0:wybe.bool of
     0:
         foreign llvm sub(n#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.int) @wybe:nn:nn

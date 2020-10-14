@@ -1012,7 +1012,7 @@ buildMain mainImports =
                                      (ResourceSpec ["wybe","io"] "io")
                                      ParamOut]
     in ProcDef "" proto mainBody Nothing 0 0 Map.empty
-       Private Det False NoSuperproc
+       Private Det MayInline Pure NoSuperproc
 
 
 -- | Traverse and collect a depth first dependency list from the given initial

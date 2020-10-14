@@ -215,30 +215,31 @@ fromUseItemParser v = do
 procOrFuncItemParser :: Visibility -> Parser Item
 procOrFuncItemParser vis = do
     pos <- tokenPosition <$> ident "def"
-    det <- determinism
+    modifiers <- modifierList
+    -- det <- determinism
     name <- funcNamePlaced <?> "no keywords"
     params <- option [] $ betweenB Paren (procParamParser `sepBy` comma)
     ty <- optType
     -- Resources
     rs <- option [] (ident "use" *> sepBy resourceFlowSpec comma)
     let proto = ProcProto (content name) params $ fromList rs
-    funcBody vis det proto ty pos <|> procBody vis det proto ty pos
+    funcBody vis modifiers proto ty pos <|> procBody vis modifiers proto ty pos
 
 
-
-funcBody :: Visibility -> Determinism -> ProcProto -> TypeSpec -> SourcePos
+funcBody :: Visibility -> [String] -> ProcProto -> TypeSpec -> SourcePos
          -> Parser Item
-funcBody vis det proto ty pos = do
+funcBody vis modifiers proto ty pos = do
     body <- symbol "=" *> expParser
-    return $ FuncDecl vis det False proto ty body (Just pos)
+    return
+     $ FuncDecl vis (processProcModifiers modifiers) proto ty body (Just pos)
 
 
-procBody :: Visibility -> Determinism -> ProcProto -> TypeSpec -> SourcePos
+procBody :: Visibility -> [String] -> ProcProto -> TypeSpec -> SourcePos
          -> Parser Item
-procBody vis det proto ty pos = do
+procBody vis modifiers proto ty pos = do
     body <- betweenB Brace $ many stmtParser
     -- XXX must test that ty is AnyType, otherwise syntax error
-    return $ ProcDecl vis det False proto body (Just pos)
+    return $ ProcDecl vis (processProcModifiers modifiers) proto body (Just pos)
 
 
 
@@ -261,6 +262,66 @@ funcProtoParser = do
     rs <- option [] (ident "use" *> sepBy resourceFlowSpec comma)
     return $ maybePlace (ProcProto (content pName) params $fromList rs)
              (place pName)
+
+
+-- |Parse an optional list of identifiers enclosed in braces
+modifierList :: Parser [Ident]
+modifierList = option [] $ betweenB Brace (identString `sepBy` comma)
+
+
+-- | Extract a ProcModifiers from a list of identifiers.  If the Bool is False,
+-- then don't report any errors in the modifiers.  The position is the source
+-- location of the list of modifiers.
+processProcModifiers :: [String] -> ProcModifiers
+processProcModifiers =
+    List.foldl processProcModifier $ ProcModifiers Det MayInline Pure [] []
+
+
+processProcModifier :: ProcModifiers -> String -> ProcModifiers
+processProcModifier ms "test"     = updateModsDetism   ms "test" SemiDet
+processProcModifier ms "partial"  = updateModsDetism   ms "partial" SemiDet
+processProcModifier ms "failure"  = updateModsDetism   ms "failure" Failure
+processProcModifier ms "terminal" = updateModsDetism   ms "terminal" Terminal
+processProcModifier ms "inline"   = updateModsInlining ms "inline" Inline
+processProcModifier ms "noinline" = updateModsInlining ms "noinline" NoInline
+processProcModifier ms "pure"     = updateModsImpurity   ms "pure" PromisedPure
+processProcModifier ms "semipure" = updateModsImpurity   ms "semipure" Semipure
+processProcModifier ms "impure"   = updateModsImpurity   ms "impure" Impure
+processProcModifier ms modName    =
+    ms {modifierUnknown=modName:modifierUnknown ms}
+    
+
+
+-- | Update the ProcModifiers to specify the given determinism, which was
+-- specified with the given identifier.  Since Det is the default, and can't be
+-- explicitly specified, it's alway OK to change from Det to something else.
+updateModsDetism :: ProcModifiers -> String -> Determinism -> ProcModifiers
+updateModsDetism mods@ProcModifiers{modifierDetism=Det} _ detism =
+    mods {modifierDetism=detism}
+updateModsDetism mods modName detism =
+    mods {modifierConflict=modName:modifierConflict mods}
+
+
+-- | Update the ProcModifiers to specify the given inlining, which was specified
+-- with the given identifier.  Since MayInline is the default, and can't be
+-- explicitly specified, it's alway OK to change from MayInline to something
+-- else.
+updateModsInlining :: ProcModifiers -> String -> Inlining -> ProcModifiers
+updateModsInlining mods@ProcModifiers{modifierInline=MayInline} _ inlining =
+    mods {modifierInline=inlining}
+updateModsInlining mods modName inlining =
+    mods {modifierConflict=modName:modifierConflict mods}
+
+
+-- | Update the ProcModifiers to specify the given Impurity, which was specified
+-- with the given identifier.  Since Pure is the default, and can't be
+-- explicitly specified, it's alway OK to change from Pure to something
+-- else.
+updateModsImpurity :: ProcModifiers -> String -> Impurity -> ProcModifiers
+updateModsImpurity mods@ProcModifiers{modifierImpurity=Pure} _ impurity =
+    mods {modifierImpurity=impurity}
+updateModsImpurity mods modName _ =
+    mods {modifierConflict=modName:modifierConflict mods}
 
 
 -- | Parser for a function 'Param'. The flow is implicitly 'ParamIn' unlike for
@@ -592,7 +653,7 @@ completeOperatorTable =
     , [ binary "^" AssocLeft ]
     , [ binary "*"   AssocLeft
       , binary "/"   AssocLeft
-      , binary "mod" AssocLeft
+      , binary "%"   AssocLeft
       ]
     , [ binary "+" AssocLeft
       , binary "-" AssocLeft
@@ -740,8 +801,8 @@ foreignExp :: Parser (Placed Exp)
 foreignExp = do
     pos <- tokenPosition <$> ident "foreign"
     group <- identString
+    flags <- modifierList
     fname <- content <$> funcNamePlaced
-    flags <- option [] (identString `sepBy` comma)
     args <- argListParser
     return $ Placed (ForeignFn group fname flags args) pos
 

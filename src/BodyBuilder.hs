@@ -12,15 +12,15 @@ module BodyBuilder (
   ) where
 
 import AST
-import Snippets
+import Snippets ( boolType, intType, primMove )
 import Util
 import Options (LogSelection(BodyBuilder))
 import Data.Map as Map
 import Data.List as List
 import Data.Set as Set
 import Data.Maybe
+import Data.Tuple.HT (mapFst)
 import Data.Bits
-import Control.Applicative
 import Control.Monad
 import Control.Monad.Extra (whenJust)
 import Control.Monad.Trans (lift)
@@ -54,12 +54,12 @@ import Control.Monad.Trans.State
 -- a fork should end with a call to another proc, which does whatever
 -- should come after the fork. To handle this, once a fork is completed,
 -- the BodyBuilder starts a new Unforked instruction sequence, and records
--- the completed fork as the predecessor of the Unforked sequence. This
+-- the completed fork as the prev of the Unforked sequence. This
 -- also permits a fork to follow the Unforked sequence which follows a
 -- fork. When producing the final ProcBody, if the current Unforked
--- sequence is short (or empty) and there is a predecessor fork, we simply
+-- sequence is short (or empty) and there is a prev fork, we simply
 -- add the sequence to the end of each of branch of the fork and remove the
--- Unforked sequence. If it is not short and there is a predecessor, we
+-- Unforked sequence. If it is not short and there is a prev, we
 -- create a fresh proc whose input arguments are all the live variables,
 -- whose outputs are the current proc's outputs, and whose body is built
 -- from Unforked sequence, add a call to this fresh proc to each branch of
@@ -125,14 +125,14 @@ data BodyState = BodyState {
       subExprs    :: ComputedCalls,   -- ^Previously computed calls to reuse
       failed      :: Bool,            -- ^True if this body always fails
       tmpCount    :: Int,             -- ^The next temp variable number to use
-      buildState  :: BuildState,      -- ^What state this node is in
+      buildState  :: BuildState,      -- ^The fork at the bottom of this node
       parent      :: Maybe BodyState  -- ^What comes before/above this
       } deriving (Eq,Show)
 
 
 data BuildState
-    = Unforked           -- ^Still building; ready for more instrs
-    | Forked {           -- ^Building a new fork
+    = Unforked                         -- ^Still building; ready for more instrs
+    | Forked {
         forkingVar   :: PrimVarName,   -- ^Variable that selects branch to take
         forkingVarTy :: TypeSpec,      -- ^Type of forkingVar
         knownVal     :: Maybe Integer, -- ^Definite value of forkingVar if known
@@ -141,7 +141,7 @@ data BuildState
                                        -- fork will be fused with parent fork
         bodies       :: [BodyState],   -- ^Rev'd BodyStates of branches so far
         complete     :: Bool           -- ^Whether the fork has been completed
-        }
+        }                              -- ^Building a new fork
     deriving (Eq,Show)
 
 
@@ -196,9 +196,10 @@ buildBody tmp oSubst builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
     (a, st) <- runStateT builder $ initState tmp oSubst
     logMsg BodyBuilder ">>>> Finished building a proc body"
-    logMsg BodyBuilder "     Current state:"
+    logMsg BodyBuilder "     Final state:"
     logMsg BodyBuilder $ fst $ showState 8 st
-    (tmp', used, body) <- currBody (ProcBody [] NoFork) st
+    st' <- fuseBodies st
+    (tmp', used, body) <- currBody (ProcBody [] NoFork) st'
     return (a, tmp', used, body)
 
 
@@ -228,7 +229,7 @@ buildFork var ty = do
             logBuild $ "This fork "
                        ++ (if fused then "WILL " else "will NOT ")
                        ++ "be fused with parent"
-            put $ childState st $ Forked var' ty Nothing fused [] False
+            put $ st {buildState=Forked var' ty Nothing fused [] False}
           _ -> shouldnt "switch on non-integer variable"
         logState
 
@@ -281,8 +282,7 @@ beginBranch = do
                    ++ (if fused then "fused " else "") ++ "branch "
                    ++ show branchNum ++ " on " ++ show var
         when fused $ do
-          par <- gets $ trustFromJust "forkConst with no grandparent branch"
-                      . (>>= parent) . parent
+          par <- gets $ trustFromJust "forkConst with no parent branch" . parent
           case buildState par of
             Forked{bodies=bods} -> do
               let matchingSubsts =
@@ -294,9 +294,9 @@ beginBranch = do
                     else List.foldr1 intersectMapIdentity matchingSubsts
               logBuild $ "          Adding substs " ++ show extraSubsts
               -- XXX shouldn't need to do this sanity check
-              -- lostSubsts <- (Map.\\ extraSubsts) <$> gets currSubst
-              -- unless (Map.null lostSubsts )
-              --   $ shouldnt $ "Fusion loses substs " ++ show lostSubsts
+        --       lostSubsts <- (Map.\\ extraSubsts) <$> gets currSubst
+        --       unless (Map.null lostSubsts )
+        --         $ shouldnt $ "Fusion loses substs " ++ simpleShowMap lostSubsts
               modify $ \st -> st { currSubst =
                                    Map.union extraSubsts (currSubst st) }
             Unforked -> shouldnt "forkConst predicted parent branch"
@@ -338,20 +338,20 @@ popParent st@BodyState{parent=Just par} =
 -- specified BodyState.
 matchingSubst :: PrimVarName -> Int -> BodyState -> Bool
 matchingSubst var branchNum bod =
-  maybe False ((== branchNum) . fromIntegral)
-  ((Map.lookup var $ currSubst bod) >>= argIntegerValue)
+  maybe False ((== branchNum) . fromIntegral) $ varIntValue var bod
 
 
 -- |Return Just the known value of the specified variable, or Nothing
+varIntValue :: PrimVarName -> BodyState -> Maybe Integer
+varIntValue var bod = Map.lookup var (currSubst bod) >>= argIntegerValue
+
+
 definiteVariableValue :: PrimVarName -> BodyBuilder (Maybe PrimArg)
 definiteVariableValue var = do
     arg <- expandVar var AnyType
     case arg of
         ArgVar{} -> return Nothing -- variable (unknown) result
         _ -> return $ Just arg
-
-buildPrims :: BodyState -> BodyBuilder a -> Compiler (a,BodyState)
-buildPrims st builder = runStateT builder st
 
 
 -- |Add an instruction to the current body, after applying the current
@@ -366,6 +366,8 @@ instr prim pos = do
         return ()
       BodyState{failed=False,buildState=Unforked} -> do
         prim' <- argExpandedPrim prim
+        outNaming <- gets outSubst
+        logBuild $ "With outSubst " ++ simpleShowMap outNaming
         logBuild $ "Generating instr " ++ show prim ++ " -> " ++ show prim'
         instr' prim' pos
       _ ->
@@ -381,6 +383,8 @@ instr' prim@(PrimForeign "llvm" "move" []
       shouldnt "move instruction with wrong flow"
     outVar <- gets (Map.findWithDefault var var . outSubst)
     addSubst outVar val
+    -- XXX since we're recording the subst, so this instr will be removed later,
+    -- can we just not generate it?
     rawInstr prim pos
     recordVarSet argvar
 --     this is a bit of a hack to work around not threading a heap
@@ -392,10 +396,12 @@ instr' prim@(PrimForeign "llvm" "move" []
 --     the only problem that needs fixing.  We don't want to fix this
 --     by threading a heap through, because it's fine to reorder calls
 --     to alloc.
+-- XXX can we git rid of this special case by making lpvm alloc "impure"?
 instr' prim@(PrimForeign "lpvm" "alloc" [] [_,argvar]) pos = do
     logBuild "  Leaving alloc alone"
     rawInstr prim pos
     recordVarSet argvar
+-- XXX can we get rid of this pseudo-instruction?
 instr' prim@(PrimForeign "lpvm" "cast" []
              [from, to@ArgVar{argVarName=var, argVarFlow=flow}]) pos
   = do
@@ -562,6 +568,13 @@ instrConsequences'
     (PrimForeign "lpvm" "mutate" [] [_,addr,offset,_,size,startOffset,val]) =
     return [(PrimForeign "lpvm" "access" []
             [addr,offset,size,startOffset], [val])]
+-- XXX handle flags
+instrConsequences'
+    (PrimForeign "lpvm" "access" [] [struct,offset,size,startOffset,val]) =
+    return [(PrimForeign "lpvm" "mutate" []
+            [struct,offset,ArgInt 1 intType,size,startOffset, val], [struct]),
+            (PrimForeign "lpvm" "mutate" []
+            [struct,offset,ArgInt 0 intType,size,startOffset, val], [struct])]
 instrConsequences' (PrimForeign "llvm" "add" flags [a1,a2,a3]) =
     return [(PrimForeign "llvm" "sub" flags [a3,a2], [a1]),
             (PrimForeign "llvm" "sub" flags [a3,a1], [a2]),
@@ -580,26 +593,26 @@ instrConsequences' (PrimForeign "llvm" "and" flags [a1,a2,a3]) =
     return [(PrimForeign "llvm" "and" flags [a2,a1], [a3])]
 instrConsequences' (PrimForeign "llvm" "or" flags [a1,a2,a3]) =
     return [(PrimForeign "llvm" "or" flags [a2,a1], [a3])]
-instrConsequences' (PrimForeign "llvm" "icmp" ["eq"] [a1,a2,a3]) =
-    return [(PrimForeign "llvm" "icmp" ["eq"] [a2,a1], [a3])]
-instrConsequences' (PrimForeign "llvm" "icmp" ["ne"] [a1,a2,a3]) =
-    return [(PrimForeign "llvm" "icmp" ["ne"] [a2,a1], [a3])]
-instrConsequences' (PrimForeign "llvm" "icmp" ["slt"] [a1,a2,a3]) =
-    return [(PrimForeign "llvm" "icmp" ["sgt"] [a2,a1], [a3])]
-instrConsequences' (PrimForeign "llvm" "icmp" ["sgt"] [a1,a2,a3]) =
-    return [(PrimForeign "llvm" "icmp" ["slt"] [a2,a1], [a3])]
-instrConsequences' (PrimForeign "llvm" "icmp" ["ult"] [a1,a2,a3]) =
-    return [(PrimForeign "llvm" "icmp" ["ugt"] [a2,a1], [a3])]
-instrConsequences' (PrimForeign "llvm" "icmp" ["ugt"] [a1,a2,a3]) =
-    return [(PrimForeign "llvm" "icmp" ["ult"] [a2,a1], [a3])]
-instrConsequences' (PrimForeign "llvm" "icmp" ["sle"] [a1,a2,a3]) =
-    return [(PrimForeign "llvm" "icmp" ["sge"] [a2,a1], [a3])]
-instrConsequences' (PrimForeign "llvm" "icmp" ["sge"] [a1,a2,a3]) =
-    return [(PrimForeign "llvm" "icmp" ["sle"] [a2,a1], [a3])]
-instrConsequences' (PrimForeign "llvm" "icmp" ["ule"] [a1,a2,a3]) =
-    return [(PrimForeign "llvm" "icmp" ["uge"] [a2,a1], [a3])]
-instrConsequences' (PrimForeign "llvm" "icmp" ["uge"] [a1,a2,a3]) =
-    return [(PrimForeign "llvm" "icmp" ["ule"] [a2,a1], [a3])]
+instrConsequences' (PrimForeign "llvm" "icmp_eq" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp_eq" flags [a2,a1], [a3])]
+instrConsequences' (PrimForeign "llvm" "icmp_ne" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp_ne" flags [a2,a1], [a3])]
+instrConsequences' (PrimForeign "llvm" "icmp_slt" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp_sgt" flags [a2,a1], [a3])]
+instrConsequences' (PrimForeign "llvm" "icmp_sgt" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp_slt" flags [a2,a1], [a3])]
+instrConsequences' (PrimForeign "llvm" "icmp_ult" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp_ugt" flags [a2,a1], [a3])]
+instrConsequences' (PrimForeign "llvm" "icmp_ugt" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp_ult" flags [a2,a1], [a3])]
+instrConsequences' (PrimForeign "llvm" "icmp_sle" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp_sge" flags [a2,a1], [a3])]
+instrConsequences' (PrimForeign "llvm" "icmp_sge" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp_sle" flags [a2,a1], [a3])]
+instrConsequences' (PrimForeign "llvm" "icmp_ule" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp_uge" flags [a2,a1], [a3])]
+instrConsequences' (PrimForeign "llvm" "icmp_uge" flags [a1,a2,a3]) =
+    return [(PrimForeign "llvm" "icmp_ule" flags [a2,a1], [a3])]
 instrConsequences' _ = return []
 
 
@@ -656,9 +669,6 @@ validateArg instr (ArgUnneeded _ ty)  = validateType ty instr
 validateType :: TypeSpec -> Prim -> BodyBuilder ()
 validateType InvalidType instr =
     shouldnt $ "InvalidType in argument of " ++ show instr
--- XXX AnyType is now a valid type treated as a word type
--- validateType AnyType instr =
---     shouldnt $ "AnyType in argument of " ++ show instr
 validateType _ instr = return ()
 
 
@@ -683,10 +693,13 @@ expandVar var ty = expandArg $ ArgVar var ty False FlowIn Ordinary False
 expandArg :: PrimArg -> BodyBuilder PrimArg
 expandArg arg@ArgVar{argVarName=var, argVarFlow=FlowIn} = do
     var' <- gets (Map.lookup var . currSubst)
-    logBuild $ "Expanded " ++ show var ++ " to variable " ++ show var'
+    logBuild $ "Expanded " ++ show var ++ " to " ++ show var'
     maybe (return arg) expandArg var'
 expandArg (ArgVar var typ coerce FlowOut ftype lst) = do
     var' <- gets (Map.findWithDefault var var . outSubst)
+    when (var /= var')
+      $ logBuild $ "Replaced output variable " ++ show var
+                   ++ " with " ++ show var'
     return $ ArgVar var' typ coerce FlowOut ftype lst
 expandArg arg = return arg
 
@@ -789,70 +802,70 @@ simplifyOp "ashr" _ [arg, ArgInt 0 _, output] =
 simplifyOp "lshr" _ [arg, ArgInt 0 _, output] =
   primMove arg output
 -- Integer comparisons, including special handling of unsigned comparison to 0
-simplifyOp "icmp" ["eq"] [ArgInt n1 _, ArgInt n2 _, output] =
+simplifyOp "icmp_eq" _ [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1==n2) output
-simplifyOp "icmp" ["eq"] [arg1, arg2, output]
-    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["eq"] [arg2, arg1, output]
-simplifyOp "icmp" ["ne"] [ArgInt n1 _, ArgInt n2 _, output] =
+simplifyOp "icmp_eq" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp_eq" flags [arg2, arg1, output]
+simplifyOp "icmp_ne" _ [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1/=n2) output
-simplifyOp "icmp" ["ne"] [arg1, arg2, output]
-    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["ne"] [arg2, arg1, output]
-simplifyOp "icmp" ["slt"] [ArgInt n1 _, ArgInt n2 _, output] =
+simplifyOp "icmp_ne" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp_ne" flags [arg2, arg1, output]
+simplifyOp "icmp_slt" _ [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1<n2) output
-simplifyOp "icmp" ["slt"] [arg1, arg2, output]
-    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["sgt"] [arg2, arg1, output]
-simplifyOp "icmp" ["sle"] [ArgInt n1 _, ArgInt n2 _, output] =
+simplifyOp "icmp_slt" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp_sgt" flags [arg2, arg1, output]
+simplifyOp "icmp_sle" _ [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1<=n2) output
-simplifyOp "icmp" ["sle"] [arg1, arg2, output]
-    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["sge"] [arg2, arg1, output]
-simplifyOp "icmp" ["sgt"] [ArgInt n1 _, ArgInt n2 _, output] =
+simplifyOp "icmp_sle" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp_sge" flags [arg2, arg1, output]
+simplifyOp "icmp_sgt" _ [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1>n2) output
-simplifyOp "icmp" ["sgt"] [arg1, arg2, output]
-    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["slt"] [arg2, arg1, output]
-simplifyOp "icmp" ["sge"] [ArgInt n1 _, ArgInt n2 _, output] =
+simplifyOp "icmp_sgt" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp_slt" flags [arg2, arg1, output]
+simplifyOp "icmp_sge" _ [ArgInt n1 _, ArgInt n2 _, output] =
   primMove (boolConstant $ n1>=n2) output
-simplifyOp "icmp" ["sge"] [arg1, arg2, output]
-    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["sle"] [arg2, arg1, output]
-simplifyOp "icmp" ["ult"] [ArgInt n1 _, ArgInt n2 _, output] =
+simplifyOp "icmp_sge" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp_sle" flags [arg2, arg1, output]
+simplifyOp "icmp_ult" _ [ArgInt n1 _, ArgInt n2 _, output] =
   let n1' = fromIntegral n1 :: Word
       n2' = fromIntegral n2 :: Word
   in primMove (boolConstant $ n1'<n2') output
-simplifyOp "icmp" ["ult"] [_, ArgInt 0 _, output] = -- nothing is < 0
+simplifyOp "icmp_ult" _ [_, ArgInt 0 _, output] = -- nothing is < 0
   primMove (ArgInt 0 boolType) output
-simplifyOp "icmp" ["ult"] [a1, ArgInt 1 ty, output] = -- only 0 is < 1
-  PrimForeign "llvm" "icmp" ["eq"] [a1,ArgInt 0 ty,output]
-simplifyOp "icmp" ["ult"] [arg1, arg2, output]
-    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["ugt"] [arg2, arg1, output]
-simplifyOp "icmp" ["ule"] [ArgInt n1 _, ArgInt n2 _, output] =
+simplifyOp "icmp_ult" flags [a1, ArgInt 1 ty, output] = -- only 0 is < 1
+  PrimForeign "llvm" "icmp_eq" flags [a1,ArgInt 0 ty,output]
+simplifyOp "icmp_ult" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp_ugt" flags [arg2, arg1, output]
+simplifyOp "icmp_ule" _ [ArgInt n1 _, ArgInt n2 _, output] =
   let n1' = fromIntegral n1 :: Word
       n2' = fromIntegral n2 :: Word
   in primMove (boolConstant $ n1'<=n2') output
-simplifyOp "icmp" ["ule"] [ArgInt 0 _, _, output] = -- 0 is <= everything
+simplifyOp "icmp_ule" _ [ArgInt 0 _, _, output] = -- 0 is <= everything
   primMove (ArgInt 1 boolType) output
-simplifyOp "icmp" ["ule"] [ArgInt 1 ty, a2, output] = -- 1 is <= all but 0
-  PrimForeign "llvm" "icmp" ["ne"] [ArgInt 0 ty,a2,output]
-simplifyOp "icmp" ["ule"] [arg1, arg2, output]
-    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["uge"] [arg2, arg1, output]
-simplifyOp "icmp" ["ugt"] [ArgInt n1 _, ArgInt n2 _, output] =
+simplifyOp "icmp_ule" flags [ArgInt 1 ty, a2, output] = -- 1 is <= all but 0
+  PrimForeign "llvm" "icmp_ne" flags [ArgInt 0 ty,a2,output]
+simplifyOp "icmp_ule" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp_uge" flags [arg2, arg1, output]
+simplifyOp "icmp_ugt" _ [ArgInt n1 _, ArgInt n2 _, output] =
   let n1' = fromIntegral n1 :: Word
       n2' = fromIntegral n2 :: Word
   in primMove (boolConstant $ n1'>n2') output
-simplifyOp "icmp" ["ugt"] [ArgInt 0 _, _, output] = -- 0 is > nothing
+simplifyOp "icmp_ugt" _ [ArgInt 0 _, _, output] = -- 0 is > nothing
   primMove (ArgInt 0 boolType) output
-simplifyOp "icmp" ["ugt"] [ArgInt 1 ty, a2, output] = -- 1 is > only 0
-  PrimForeign "llvm" "icmp" ["eq"] [ArgInt 0 ty,a2,output]
-simplifyOp "icmp" ["ugt"] [arg1, arg2, output]
-    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["ult"] [arg2, arg1, output]
-simplifyOp "icmp" ["uge"] [ArgInt n1 _, ArgInt n2 _, output] =
+simplifyOp "icmp_ugt" flags [ArgInt 1 ty, a2, output] = -- 1 is > only 0
+  PrimForeign "llvm" "icmp_eq" flags [ArgInt 0 ty,a2,output]
+simplifyOp "icmp_ugt" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp_ult" flags [arg2, arg1, output]
+simplifyOp "icmp_uge" _ [ArgInt n1 _, ArgInt n2 _, output] =
   let n1' = fromIntegral n1 :: Word
       n2' = fromIntegral n2 :: Word
   in primMove (boolConstant $ n1'>=n2') output
-simplifyOp "icmp" ["uge"] [_, ArgInt 0 _, output] = -- everything is >= 0
+simplifyOp "icmp_uge" _ [_, ArgInt 0 _, output] = -- everything is >= 0
   primMove (ArgInt 1 boolType) output
-simplifyOp "icmp" ["uge"] [a1, ArgInt 1 ty, output] = -- all but 0 is >= 1
-  PrimForeign "llvm" "icmp" ["ne"] [a1,ArgInt 0 ty,output]
-simplifyOp "icmp" ["uge"] [arg1, arg2, output]
-    | arg2 < arg1 = PrimForeign "llvm" "icmp" ["ule"] [arg2, arg1, output]
+simplifyOp "icmp_uge" flags [a1, ArgInt 1 ty, output] = -- all but 0 is >= 1
+  PrimForeign "llvm" "icmp_ne" flags [a1,ArgInt 0 ty,output]
+simplifyOp "icmp_uge" flags [arg1, arg2, output]
+    | arg2 < arg1 = PrimForeign "llvm" "icmp_ule" flags [arg2, arg1, output]
 -- Float ops
 simplifyOp "fadd" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
   primMove (ArgFloat (n1+n2) ty) output
@@ -876,23 +889,134 @@ simplifyOp "fdiv" _ [ArgFloat n1 ty, ArgFloat n2 _, output] =
 simplifyOp "fdiv" _ [arg, ArgFloat 1 _, output] =
   primMove arg output
 -- Float comparisons
-simplifyOp "fcmp" ["eq"] [ArgFloat n1 _, ArgFloat n2 _, output] =
+simplifyOp "fcmp_eq" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1==n2) output
-simplifyOp "fcmp" ["ne"] [ArgFloat n1 _, ArgFloat n2 _, output] =
+simplifyOp "fcmp_ne" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1/=n2) output
-simplifyOp "fcmp" ["slt"] [ArgFloat n1 _, ArgFloat n2 _, output] =
+simplifyOp "fcmp_slt" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1<n2) output
-simplifyOp "fcmp" ["sle"] [ArgFloat n1 _, ArgFloat n2 _, output] =
+simplifyOp "fcmp_sle" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1<=n2) output
-simplifyOp "fcmp" ["sgt"] [ArgFloat n1 _, ArgFloat n2 _, output] =
+simplifyOp "fcmp_sgt" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1>n2) output
-simplifyOp "fcmp" ["sge"] [ArgFloat n1 _, ArgFloat n2 _, output] =
+simplifyOp "fcmp_sge" _ [ArgFloat n1 _, ArgFloat n2 _, output] =
   primMove (boolConstant $ n1>=n2) output
 simplifyOp name flags args = PrimForeign "llvm" name flags args
 
 
 boolConstant :: Bool -> PrimArg
 boolConstant bool = ArgInt (fromIntegral $ fromEnum bool) boolType
+
+----------------------------------------------------------------
+--                  Fusing Forks in BodyStates
+--
+-- BodyStates allow code to follow a branch; this code injects subsequent code
+-- at the end of previous code.  Crucially, it also uses information about fixed
+-- variable values from earlier forks to specialise following forks.  In
+-- particular, when appending a fork to the end of an earlier fork, it is often
+-- possible to determine the branch that will be selected in the later fork,
+-- avoiding the need for the test.  This has the effect of fusing successive
+-- forks on the same variable into a single fork.
+--
+-- This code ensures that code is compatible with LPVM form by producing a
+-- BodyState that has no parent, and where all the bodies recursively within the
+-- BuildState also have no parent.
+----------------------------------------------------------------
+
+-- | Recursively fuse Bodystate, as described above.
+fuseBodies :: BodyState -> Compiler BodyState
+fuseBodies st@BodyState{parent=Nothing, buildState=bst} = do
+    logMsg BodyBuilder $ "Fusing origin bodyState:" ++ fst (showState 4 st)
+    bst' <- fuseBranches bst
+    let st' = st {buildState = bst'}
+    logMsg BodyBuilder $ "Fused origin state:" ++ fst (showState 4 st')
+    return st'
+fuseBodies st@BodyState{parent=Just par, buildState=bst} = do
+    logMsg BodyBuilder $ "Fusing child bodyState:" ++ fst (showState 4 st)
+    par' <- fuseBodies par
+    st' <- addBodyContinuation par' $ st {parent=Nothing}
+    logMsg BodyBuilder $ "Fused child state:" ++ fst (showState 4 st')
+    return st'
+
+
+fuseBranches :: BuildState -> Compiler BuildState
+fuseBranches Unforked = return Unforked
+fuseBranches bst@Forked{forkingVar=var,bodies=bods} = do
+    logMsg BodyBuilder $ "Fusing branches of fork on " ++ show var
+    bods' <- mapM fuseBodies $ bodies bst
+    return $ bst {bodies=bods'}
+
+
+-- | Add the second BodyState at the end of the first.  The second BodyState is
+-- known to be a tree, ie, its parent is Nothing, and its branches, if it has
+-- any, have been fused.
+addBodyContinuation :: BodyState -> BodyState -> Compiler BodyState
+addBodyContinuation _ next@BodyState{parent=Just _} =
+    shouldnt $ "addBodyContinuation with non-singular second argument:"
+               ++ fst (showState 4 next)
+addBodyContinuation prev@BodyState{buildState=Unforked, currBuild=bld,
+                                   currSubst=subst, blockDefs=defs,
+                                   outSubst=osubst} next = do
+    logMsg BodyBuilder $ "Adding state:" ++ fst (showState 4 next)
+    logMsg BodyBuilder $ "... after unforked body:" ++ fst (showState 4 prev)
+    addSelectedContinuation bld subst defs osubst next
+addBodyContinuation prev@BodyState{buildState=Forked{}} next = do
+    logMsg BodyBuilder $ "Adding state:" ++ fst (showState 4 next)
+    logMsg BodyBuilder $ "... after forked body:" ++ fst (showState 4 prev)
+    let build = buildState prev
+    bods <- mapM (`addBodyContinuation` next) $ bodies build
+    return $ prev {buildState = build {bodies = bods}}
+
+
+-- | Add the appropriate branch(es) to follow the specified list of prims, which
+-- includes both the prims of the previous unforked body and the unforked part
+-- of the following 
+addSelectedContinuation :: [Placed Prim] -> Substitution -> Set PrimVarName
+                        -> VarSubstitution -> BodyState -> Compiler BodyState
+                        -- XXX Must merge subst with currSubst of st
+addSelectedContinuation prevPrims subst defs osubst
+                        st@BodyState{buildState=Unforked} = do
+    let subst'  = Map.union (currSubst st) subst
+    let defs'   = Set.union (blockDefs st) defs
+    let oSubst' = Map.union (outSubst st)  osubst
+    let st' = st { currBuild = currBuild st ++ prevPrims
+                 , currSubst = subst'
+                 , blockDefs = defs'
+                 , outSubst  = oSubst' }
+    logMsg BodyBuilder $ "Adding unforked continuation produces:"
+                         ++ fst (showState 4 st')
+    return st'
+addSelectedContinuation prevPrims subst defs osubst
+                        st@BodyState{buildState=bst@Forked{}} = do
+    let subst'  = Map.union (currSubst st) subst
+    let defs'   = Set.union (blockDefs st) defs
+    let osubst' = Map.union (outSubst st)  osubst
+    case selectedBranch subst bst of
+        Nothing -> do
+            bst <- fuseBranches $ buildState st
+            let st' = st { currBuild  = currBuild st ++ prevPrims
+                         , currSubst  = subst'
+                         , blockDefs  = defs'
+                         , outSubst   = osubst'
+                         , buildState = bst }
+            logMsg BodyBuilder $ "No fork selection possible, producing:"
+                         ++ fst (showState 4 st')
+            return st'
+        Just branchNum -> do
+            let selectedBranch = revSelectElt branchNum $ bodies bst
+            logMsg BodyBuilder $ "Selected branch " ++ show branchNum
+            selectedBranch' <- fuseBodies selectedBranch
+            addSelectedContinuation (currBuild st ++ prevPrims)
+                                    subst' defs' osubst' selectedBranch'
+
+
+-- |Given a variable substitution, determine which branch will be selected,
+-- if possible.
+selectedBranch :: Substitution -> BuildState -> Maybe Integer
+selectedBranch subst Unforked = Nothing
+selectedBranch subst Forked{knownVal=known, forkingVar=var} =
+    known `orElse` (Map.lookup var subst >>= argIntegerValue)    
+
 
 ----------------------------------------------------------------
 --                  Reassembling the ProcBody
@@ -919,6 +1043,7 @@ currBody body st = do
     return (tmpCount st, bkwdUsedLater st', bkwdFollowing st')
 
 
+-- |Another monad, this one for rebuilding a proc body bottom-up.
 type BkwdBuilder = StateT BkwdBuilderState Compiler
 
 -- |BkwdBuilderState is used to store context info while building a ProcBody
@@ -937,17 +1062,16 @@ data BkwdBuilderState = BkwdBuilderState {
       } deriving (Eq,Show)
 
 
-
 rebuildBody :: BodyState -> BkwdBuilder ()
+rebuildBody st@BodyState{parent=Just par} =
+    shouldnt $ "Body parent left by fusion: " ++ fst (showState 4 par)
 rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
-                         buildState=bldst, parent=par} = do
+                         buildState=bldst, parent=Nothing} = do
     usedLater <- gets bkwdUsedLater
     following <- gets bkwdFollowing
     logBkwd $ "Rebuilding body:" ++ fst (showState 8 st)
-              ++ "\nwith currSubst = " ++ show subst
-              ++ "\n     usedLater = " ++ show usedLater
-    -- First see if we can prune away a later fork based on
-    pruneBody subst
+              ++ "\nwith currSubst = " ++ simpleShowMap subst
+              ++ "\n     usedLater = " ++ simpleShowSet usedLater
     case bldst of
       Unforked -> nop
       Forked{complete=False} ->
@@ -955,11 +1079,10 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
       Forked var ty fixedval fused bods True ->
         case fixedval of
           Just val ->
-            rebuildBody $ selectElt val bods
+            rebuildBody $ revSelectElt val bods
           Nothing -> do
             -- XXX Perhaps we should generate a new proc for the parent par in
-            -- cases where it's more than a few prims.  Currently UnBranch
-            -- ensures that's not needed, but maybe it shouldn't.
+            -- cases where it's more than a few prims.
             sts <- mapM (rebuildBranch subst) $ reverse bods
             usedLater' <- gets bkwdUsedLater
             let usedLaters = bkwdUsedLater <$> sts
@@ -969,7 +1092,7 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
                   then Just usedLaters
                   else Nothing
             logBkwd $ "Switch on " ++ show var
-                      ++ " with usedLater " ++ show usedLater''
+                      ++ " with usedLater " ++ simpleShowSet usedLater''
             logBkwd $ "branchesUsedLater = "
                       ++ show branchesUsedLater
             let lastUse = Set.notMember var usedLater''
@@ -982,7 +1105,6 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
     mapM_ (placedApply (bkwdBuildStmt defs)) prims
     finalUsedLater <- gets bkwdUsedLater
     logBkwd $ "Finished rebuild with usedLater = " ++ show finalUsedLater
-    maybe nop rebuildBody par
 
 
 -- |Select the element of bods specified by num
@@ -994,47 +1116,26 @@ selectElt num bods =
   where num' = fromIntegral num
 
 
+-- |Select the element of bods, which is reversed, by num
+revSelectElt :: Integral a => a -> [b] -> b
+revSelectElt num revBods =
+    selectElt (length revBods - 1 - fromIntegral num) revBods
+
+
 rebuildBranch :: Substitution -> BodyState -> BkwdBuilder BkwdBuilderState
 rebuildBranch subst bod = do
     bkwdSt <- get
     lift $ execStateT (rebuildBody bod) bkwdSt
 
 
--- |Prune the specified ProcBody according to the variable bindings of
--- subst, eliminating any forks whose selection is forced by the bindings.
--- XXX This is weak.  First, it should prune forks recursively, and second,
--- the returned used var set should only include the bodies that are not
--- pruned.  But to do that, ProcBody needs to track used variables, or else
--- we have to recompute it from scratch.
-pruneBody :: Substitution -> BkwdBuilder ()
-pruneBody subst = do
-    logBkwd "Trying to prune body"
-    body <- gets bkwdFollowing
-    case bodyFork body of
-      PrimFork{forkVar=var, forkBodies=bods} ->
-        case Map.lookup var subst of
-          Just (ArgInt num _) -> do
-            used0 <- gets bkwdUsedLater
-            used <- maybe used0 (selectElt num) <$> gets bkwdBranchesUsedLater
-            logBkwd $ "pruneBody successful:  selecting branch " ++ show num
-            logBkwd $ "usedLater set to " ++ show used
-            let prevBody = selectElt num bods
-            let prims = bodyPrims body
-            let newBody = prevBody { bodyPrims = prims ++ bodyPrims prevBody }
-            modify $ \st -> st { bkwdUsedLater = used, bkwdFollowing = newBody }
-          _ -> do
-            logBkwd "Can't prune body"
-            return ()
-      _ -> do
-        logBkwd "Can't prune body"
-        return ()
-
-
 bkwdBuildStmt :: Set PrimVarName -> Prim -> OptPos -> BkwdBuilder ()
 bkwdBuildStmt defs prim pos = do
     usedLater <- gets bkwdUsedLater
-    logBkwd $ "  Rebuilding prim:" ++ show prim
-              ++ "\n    with usedLater = " ++ show usedLater
+    renaming <- gets bkwdRenaming
+    logBkwd $ "  Rebuilding prim: " ++ show prim
+              ++ "\n    with usedLater   = " ++ show usedLater
+              ++ "\n    and bkwdRenaming = " ++ simpleShowMap renaming
+              ++ "\n    and defs         = " ++ simpleShowSet defs
     let args = primArgs prim
     args' <- mapM renameArg args
     logBkwd $ "    renamed args = " ++ show args'
@@ -1046,17 +1147,20 @@ bkwdBuildStmt defs prim pos = do
                                             $ bkwdRenaming s })
       _ -> do
         let (ins, outs) = splitArgsByMode $ List.filter argIsVar args'
-        -- Filter out instructions that produce no needed outputs
-        when (any (`Set.member` usedLater)
-              $ argVarName <$> outs) $ do
+        -- Filter out pure instructions that produce no needed outputs
+        purity <- lift $ primImpurity prim
+        when ( purity > Pure 
+             || any (`Set.member` usedLater) (argVarName <$> outs)) $ do
+          -- XXX Careful:  probably shouldn't mark last use of variable passed
+          -- as input argument more than once in the call
           let prim' = replacePrimArgs prim $ markIfLastUse usedLater <$> args'
           logBkwd $ "    updated prim = " ++ show prim'
           let inVars = argVarName <$> ins
           let usedLater' = List.foldr Set.insert usedLater inVars
           st@BkwdBuilderState{bkwdFollowing=bd@ProcBody{bodyPrims=prims}} <- get
           put $ st { bkwdFollowing =
-                       bd { bodyPrims = maybePlace prim' pos:prims },
-                     bkwdUsedLater = usedLater' }
+                       bd { bodyPrims     = maybePlace prim' pos:prims },
+                            bkwdUsedLater = usedLater' }
 
 
 renameArg :: PrimArg -> BkwdBuilder PrimArg
@@ -1098,23 +1202,26 @@ logState = do
 -- start by showing the parent, then we show the current state.
 showState :: Int -> BodyState -> (String,Int)
 showState indent BodyState{parent=par, currBuild=revPrims, buildState=bld,
-                           blockDefs=defed, forkConsts=consts} =
-    let (str  ,indent')   = maybe ("",indent) (showState indent) par
+                           blockDefs=defs, forkConsts=consts,
+                           currSubst=substs} =
+    let (str  ,indent')   = maybe ("",indent)
+                            (mapFst (++ (startLine indent ++ "----------")) 
+                            . showState indent) par
+        substStr          = startLine indent
+                            ++ "# Substs: " ++ simpleShowMap substs
         str'              = showPlacedPrims indent' (reverse revPrims)
         sets              = if List.null revPrims
                             then ""
                             else startLine indent
-                                 ++ "# retargetable assignments: {"
-                                 ++ intercalate ", " (List.map show $
-                                                      Set.toList defed)
-                                 ++ "}"
+                                 ++ "# Vars defined: "
+                                 ++ simpleShowSet defs
         suffix            = case bld of
                               Forked{} ->
                                 startLine indent
-                                ++ "Fusion consts: " ++ show consts
+                                ++ "# Fusion consts: " ++ show consts
                               _ -> ""
         (str'',indent'') = showBuildState indent' bld
-    in  (str ++ str' ++ sets ++ str'' ++ suffix, indent'')
+    in  (str ++ str' ++ substStr ++ sets ++ str'' ++ suffix, indent'')
 
 
 -- | Show the current part of a build state.

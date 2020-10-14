@@ -11,13 +11,13 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public inline (0 calls)
+*main* > public {inline} (0 calls)
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, [?io#0:wybe.phantom]):
  AliasPairs: []
  InterestingCallProperties: []
 
 
-onetwothree > public inline (1 calls)
+onetwothree > public {inline} (1 calls)
 0: onetwothree(?x#0:wybe.int, ?y#0:wybe.int, ?z#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []

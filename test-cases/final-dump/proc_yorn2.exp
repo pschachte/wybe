@@ -17,10 +17,10 @@ gen$1 > (2 calls)
     foreign c print_string(prompt#0:wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
     foreign c print_string(" (y/n) ":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
     foreign c read_char(?response#0:wybe.char, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @wybe:nn:nn
-    foreign llvm icmp eq(response#0:wybe.char, 'Y':wybe.char, ?tmp$0#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_eq(response#0:wybe.char, 'Y':wybe.char, ?tmp$0#0:wybe.bool) @wybe:nn:nn
     case ~tmp$0#0:wybe.bool of
     0:
-        foreign llvm icmp eq(~response#0:wybe.char, 'N':wybe.char, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+        foreign llvm icmp_eq(~response#0:wybe.char, 'N':wybe.char, ?tmp$1#0:wybe.bool) @wybe:nn:nn
         case ~tmp$1#0:wybe.bool of
         0:
             foreign c print_string("Please answer 'yes' or 'no'.":wybe.string, ~#io#3:wybe.phantom, ?tmp$13#0:wybe.phantom) @wybe:nn:nn
@@ -38,7 +38,7 @@ gen$1 > (2 calls)
 
 
 
-yorn > public inline (0 calls)
+yorn > public {inline} (0 calls)
 0: yorn(prompt#0:wybe.string, ?result#0:wybe.bool, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []

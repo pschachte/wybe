@@ -14,11 +14,16 @@ import           Data.List  as List
 import           Data.Map   as Map
 import           Data.Maybe
 
-
+-- | Count calls to all the procs in the specified module from procs in modules
+-- in the specified list of modules, which is a strongly connected component in
+-- the module dependency graph.
 collectCallers :: ModSpec -> Compiler ()
 collectCallers mod = do
   reenterModule mod
   procs <- getModuleImplementationField modProcs
+  -- XXX For what we use this for, we really need to count all the calls to each
+  -- private proc in the same file (ie, having the same modRootModSpec) as the
+  -- caller.
   let procs' = Map.foldrWithKey (noteProcCallers mod) procs procs
   updateImplementation (\imp -> imp {modProcs = procs'})
   reexitModule
@@ -26,19 +31,19 @@ collectCallers mod = do
 
 
 noteProcCallers :: ModSpec -> ProcName -> [ProcDef] ->
-                       Map Ident [ProcDef] -> Map Ident [ProcDef]
+                   Map Ident [ProcDef] -> Map Ident [ProcDef]
 noteProcCallers mod name defs procs =
   List.foldr (\(def,n) ->
-               noteImplnCallers
+               noteImplnCallers mod
                       (ProcSpec mod name n generalVersion) (procImpln def))
   procs $ zip defs [0..]
 
-noteImplnCallers :: ProcSpec -> ProcImpln ->
-                       Map Ident [ProcDef] -> Map Ident [ProcDef]
-noteImplnCallers _ (ProcDefSrc _) _ =
+noteImplnCallers :: ModSpec -> ProcSpec -> ProcImpln ->
+                    Map Ident [ProcDef] -> Map Ident [ProcDef]
+noteImplnCallers _ _ (ProcDefSrc _) _ =
   shouldnt "scanning unprocessed code for calls"
-noteImplnCallers caller (ProcDefPrim _ body _ _) procs =
-  let callers = foldBodyDistrib (noteCall caller)
+noteImplnCallers mod caller (ProcDefPrim _ body _ _) procs =
+  let callers = foldBodyDistrib (noteCall mod caller)
                 Map.empty mergeCallers mergeCallers
                 body
   in  registerCallers caller callers procs
@@ -48,11 +53,12 @@ noteImplnCallers caller (ProcDefPrim _ body _ _) procs =
 type CallRec = Map ProcSpec Int
 
 
-noteCall :: ProcSpec -> Bool -> Prim -> CallRec -> CallRec
-noteCall caller final (PrimCall _ spec _) rec =
-  Map.alter (Just . maybe 1 (1+)) spec rec
-noteCall caller final (PrimTest _) rec = rec
-noteCall caller final (PrimForeign _ _ _ _) rec = rec
+noteCall :: ModSpec -> ProcSpec -> Bool -> Prim -> CallRec -> CallRec
+noteCall mod caller final (PrimCall _ spec _) rec
+  | mod == procSpecMod spec  = Map.alter (Just . maybe 1 (1+)) spec rec
+  | otherwise = rec
+noteCall _ caller final (PrimTest _) rec = rec
+noteCall _ caller final (PrimForeign _ _ _ _) rec = rec
 
 
 mergeCallers :: CallRec -> CallRec -> CallRec

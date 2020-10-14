@@ -63,7 +63,7 @@ type AnalysisInfo =
 -- XXX aliasSccBottomUp :: SCC ProcSpec -> Compiler a
 aliasSccBottomUp :: SCC ProcSpec -> Compiler ()
 aliasSccBottomUp (AcyclicSCC single) = do
-    _ <- aliasProcBottomUp single -- ^immediate fixpoint if no mutual dependency
+    _ <- aliasProcBottomUp single -- immediate fixpoint if no mutual dependency
     return ()
 -- | Gather all flags (indicating if any proc alias information changed or not)
 --     by comparing transitive closure of the (key, value) pairs of the map;
@@ -131,7 +131,7 @@ aliasProcBottomUp pspec = do
     logAlias $ "old: " ++ show oldAliasInfo
     logAlias $ "new: " ++ show newAliasInfo
     return $ isAliasInfoChanged oldAliasInfo newAliasInfo
-    -- ^XXX wrong way to do this. Need to change type signatures of a bunch of
+    -- XXX wrong way to do this. Need to change type signatures of a bunch of
     -- functions start from aliasProcDef which is called by updateProcDefM
 
 
@@ -249,7 +249,7 @@ completeAliasMap caller aliasMap = do
     -- and singletons
     realParams <- Set.fromList . (primParamName <$>)
                     <$> protoRealParams caller
-    -- ^realParams is a list of formal params of this caller
+    -- realParams is a list of formal params of this caller
     let aliasMap' = filterDS (\x -> case x of 
                             MaybeAliasByParam _ -> True
                             _ -> False) aliasMap
@@ -269,7 +269,7 @@ updateAliasedByPrim :: AliasMapLocal -> Placed Prim -> Compiler AliasMapLocal
 updateAliasedByPrim aliasMap prim =
     case content prim of
         PrimCall _ spec args -> do
-            -- | Analyse proc calls
+            -- Analyse proc calls
             calleeDef <- getProcDef spec
             let (ProcDefPrim calleeProto _ analysis _) = procImpln calleeDef
             let calleeParamAliases = procArgAliasMap analysis
@@ -294,7 +294,7 @@ updateAliasedByPrim aliasMap prim =
             logAlias $ "combined:           " ++ show combined
             return combined
         _ -> do
-            -- | Analyse simple prims
+            -- Analyse simple prims
             logAlias $ "--- simple prim:  " ++ show prim
             let prim' = content prim
             maybeAliasedVariables <- maybeAliasPrimArgs prim'

@@ -47,43 +47,43 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
   resources       : 
   procs           : 
 
-/= > public inline (0 calls)
+/= > public {inline} (0 calls)
 0: /=($left#0:type_enum.season, $right#0:type_enum.season, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp eq(~$left#0:type_enum.season, ~$right#0:type_enum.season, ?tmp$0#0:wybe.bool)
+    foreign llvm icmp_eq(~$left#0:type_enum.season, ~$right#0:type_enum.season, ?tmp$0#0:wybe.bool)
     foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
-= > public inline (1 calls)
+= > public {inline} (1 calls)
 0: =($left#0:type_enum.season, $right#0:type_enum.season, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp eq(~$left#0:type_enum.season, ~$right#0:type_enum.season, ?$$#0:wybe.bool)
+    foreign llvm icmp_eq(~$left#0:type_enum.season, ~$right#0:type_enum.season, ?$$#0:!wybe.bool)
 
 
-autumn > public inline (0 calls)
+autumn > public {inline} (0 calls)
 0: autumn(?$#0:type_enum.season):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(3:type_enum.season, ?$#0:type_enum.season)
 
 
-spring > public inline (0 calls)
+spring > public {inline} (0 calls)
 0: spring(?$#0:type_enum.season):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(1:type_enum.season, ?$#0:type_enum.season)
 
 
-summer > public inline (0 calls)
+summer > public {inline} (0 calls)
 0: summer(?$#0:type_enum.season):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(2:type_enum.season, ?$#0:type_enum.season)
 
 
-winter > public inline (0 calls)
+winter > public {inline} (0 calls)
 0: winter(?$#0:type_enum.season):
  AliasPairs: []
  InterestingCallProperties: []

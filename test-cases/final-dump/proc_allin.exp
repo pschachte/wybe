@@ -10,7 +10,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-nada > public inline (0 calls)
+nada > public {inline} (0 calls)
 0: nada([x#0:wybe.int], [y#0:wybe.int]):
  AliasPairs: []
  InterestingCallProperties: []

@@ -66,6 +66,9 @@ instance Binary PubProcInfo
 instance Binary ModuleInterface
 instance Binary Pragma
 
+instance Binary ProcModifiers
+instance Binary Inlining
+instance Binary Impurity
 instance Binary Item
 instance Binary TypeProto
 instance Binary TypeImpln

@@ -10,7 +10,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-print2 > public inline (0 calls)
+print2 > public {inline} (0 calls)
 0: print2([x#0:wybe.int], [y#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []

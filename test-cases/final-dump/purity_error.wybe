@@ -1,0 +1,13 @@
+# test cases for purity errors
+
+pub def not_really_pure(?result:int) { !something_impure(?result) }
+
+pub def {impure} something_impure(?result:int) { ?result = 42 }
+
+pub def also_not_pure:int = foreign llvm {impure} mul(6:int, 7:int)
+
+pub def {impure} another_impure(?val:int) { ?val = 21 + 21 }
+
+pub def {impure} call_with_missing_bang(?val:int) {
+    another_impure(?val)
+}
