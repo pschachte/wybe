@@ -244,8 +244,6 @@ expandPrim (PrimForeign lang nm flags args) pos = do
     addInstr (PrimForeign lang nm flags args')  pos
     st' <- get
     logExpansion $ "    renaming = " ++ show (renaming st')
-expandPrim prim pos = do
-    addInstr prim pos
 
 
 inlineCall :: PrimProto -> [PrimArg] -> ProcBody -> OptPos -> Expander ()

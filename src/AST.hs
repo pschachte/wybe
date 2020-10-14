@@ -1727,7 +1727,6 @@ primImpurity (PrimCall _ pspec _) = do
     return $ procImpurity def
 primImpurity (PrimForeign _ _ flags _) =
     return $ flagsImpurity flags
-primImpurity (PrimTest _) = return Pure
 
 
 -- | Return the impurity level specified by the given foriegn flags list
@@ -2491,7 +2490,6 @@ data PrimVarName =
 data Prim
      = PrimCall CallSiteID ProcSpec [PrimArg]
      | PrimForeign String ProcName [Ident] [PrimArg]
-     | PrimTest PrimArg
      deriving (Eq,Ord,Generic)
 
 instance Show Prim where
@@ -2526,7 +2524,6 @@ data PrimArg
 primArgs :: Prim -> [PrimArg]
 primArgs (PrimCall _ _ args) = args
 primArgs (PrimForeign _ _ _ args) = args
-primArgs (PrimTest arg) = [arg]
 
 
 -- |Returns a list of all arguments to a prim
@@ -2534,10 +2531,6 @@ replacePrimArgs :: Prim -> [PrimArg] -> Prim
 replacePrimArgs (PrimCall id pspec _) args = PrimCall id pspec args
 replacePrimArgs (PrimForeign lang nm flags _) args =
     PrimForeign lang nm flags args
-replacePrimArgs (PrimTest _) [arg] = PrimTest arg
-replacePrimArgs instr args =
-    shouldnt $ "Attempting to replace arguments of " ++ show instr
-               ++ " with " ++ show args
 
 
 argIsVar :: PrimArg -> Bool
@@ -3029,8 +3022,6 @@ showPrim _ (PrimCall id pspec args) =
 showPrim _ (PrimForeign lang name flags args) =
         "foreign " ++ lang ++ " " ++ showFlags flags ++ name ++
         "(" ++ intercalate ", " (List.map show args) ++ ")"
-showPrim _ (PrimTest arg) =
-        "test " ++ show arg
 
 
 -- |Show a variable, with its suffix.

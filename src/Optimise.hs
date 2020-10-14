@@ -134,7 +134,6 @@ primCost :: Prim -> Compiler Int
 primCost (PrimForeign "llvm" _ _ _) = return 1
 primCost (PrimCall _ _ args)          = (1+) . sum <$> mapM argCost args
 primCost (PrimForeign _ _ _ args)   = (1+) . sum <$> mapM argCost args
-primCost (PrimTest _)               = return 0
 
 
 -- |Estimate the "cost" of an argument to a C or Wybe call.  This is 0 for

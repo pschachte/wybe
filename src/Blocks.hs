@@ -574,8 +574,6 @@ cgen prim@(PrimForeign lang name flags args) = do
           inops
     addInstruction ins outArgs
 
-cgen (PrimTest _) = shouldnt "PrimTest should have been removed before code gen"
-
 
 makeCIntOp :: Operand -> Codegen Operand
 makeCIntOp op
@@ -1175,7 +1173,6 @@ declareExtern (PrimCall _ pspec@(ProcSpec m n _ _) args) = do
     fnargs <- mapM makeExArg $ zip [1..] inArgs
     return $ externalWybe retty (show pspec) fnargs
 
-declareExtern (PrimTest _) = shouldnt "Can't declare extern for PrimNop."
 
 -- | Helper to make arguments for an extern declaration.
 makeExArg :: (Word, PrimArg) -> Compiler (Type, LLVMAST.Name)
