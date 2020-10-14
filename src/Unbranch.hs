@@ -380,7 +380,7 @@ unbranchStmt detism stmt@(ProcCall _ _ _ calldetism _ args) pos stmts alt
     defArgs args
     case calldetism of
       Terminal -> return [maybePlace stmt pos] -- no execution after Terminal
-      Failure  -> return [maybePlace stmt pos] -- no execution after Terminal
+      Failure  -> return [maybePlace stmt pos] -- no execution after Failure
       Det      -> leaveStmtAsIs detism stmt pos stmts alt sense
       SemiDet  -> shouldnt "SemiDet case already covered!"
 unbranchStmt detism stmt@(ForeignCall _ _ _ args) pos stmts alt sense = do

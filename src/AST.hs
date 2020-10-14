@@ -2315,7 +2315,7 @@ data Stmt
      | ForeignCall Ident Ident [Ident] [Placed Exp]
      -- |Do nothing (and succeed)
      | Nop
-     -- |Do nothing (and succeed)
+     -- |Do nothing (and fail)
      | Fail
 
      -- After unbranching, this can only appear as the last Stmt in a body.
