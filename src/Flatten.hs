@@ -353,6 +353,7 @@ flattenStmt' for@(For generators body) pos detism = do
     mapM_ (emit pos) instrs
     modify (\s -> s {defdVars = Set.union (Set.fromList tempGens) $ defdVars s})
     modify (\s -> s {defdVars = Set.union (Set.fromList tempNextGens) $ defdVars s})
+    modify (\s -> s {defdVars = Set.insert tempHasNextGen $ defdVars s})
     let nextVals =
             concat $
             zipWith3
