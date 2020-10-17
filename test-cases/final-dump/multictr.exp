@@ -981,6 +981,7 @@ c01 > public {inline} (40 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?f01#0:wybe.int)
 
     1:
         foreign llvm and($#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -988,6 +989,7 @@ c01 > public {inline} (40 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?f01#0:wybe.int)
 
         1:
             foreign lpvm access(~$#0:multictr.complicated, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?f01#0:wybe.int)
@@ -1011,6 +1013,7 @@ c02 > public {inline} (35 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?f02#0:wybe.int)
 
     1:
         foreign llvm and($#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1018,6 +1021,7 @@ c02 > public {inline} (35 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?f02#0:wybe.int)
 
         1:
             foreign lpvm access(~$#0:multictr.complicated, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?f02#0:wybe.int)
@@ -1041,6 +1045,7 @@ c03 > public {inline} (33 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?f03#0:wybe.int)
 
     1:
         foreign llvm and($#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1048,6 +1053,7 @@ c03 > public {inline} (33 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?f03#0:wybe.int)
 
         1:
             foreign lpvm access(~$#0:multictr.complicated, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?f03#0:wybe.int)
@@ -1071,6 +1077,7 @@ c04 > public {inline} (31 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?f04#0:wybe.int)
 
     1:
         foreign llvm and($#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1078,6 +1085,7 @@ c04 > public {inline} (31 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?f04#0:wybe.int)
 
         1:
             foreign lpvm access(~$#0:multictr.complicated, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?f04#0:wybe.int)
@@ -1101,6 +1109,7 @@ c05 > public {inline} (29 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?f05#0:wybe.int)
 
     1:
         foreign llvm and($#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1108,6 +1117,7 @@ c05 > public {inline} (29 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?f05#0:wybe.int)
 
         1:
             foreign lpvm access(~$#0:multictr.complicated, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?f05#0:wybe.int)
@@ -1131,6 +1141,7 @@ c06 > public {inline} (27 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?f06#0:wybe.int)
 
     1:
         foreign llvm and($#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1138,6 +1149,7 @@ c06 > public {inline} (27 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?f06#0:wybe.int)
 
         1:
             foreign lpvm access(~$#0:multictr.complicated, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?f06#0:wybe.int)
@@ -1161,6 +1173,7 @@ c07 > public {inline} (25 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?f07#0:wybe.int)
 
     1:
         foreign llvm and($#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1168,6 +1181,7 @@ c07 > public {inline} (25 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?f07#0:wybe.int)
 
         1:
             foreign lpvm access(~$#0:multictr.complicated, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?f07#0:wybe.int)
@@ -1192,6 +1206,7 @@ c08 > public {inline} (23 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?f08#0:wybe.int)
 
     1:
         foreign llvm and($#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1199,6 +1214,7 @@ c08 > public {inline} (23 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?f08#0:wybe.int)
 
         1:
             foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
@@ -1206,6 +1222,7 @@ c08 > public {inline} (23 calls)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                foreign llvm move(undef:wybe.int, ?f08#0:wybe.int)
 
             1:
                 foreign lpvm access(~$#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f08#0:wybe.int)
@@ -1231,6 +1248,7 @@ c09 > public {inline} (21 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?f09#0:wybe.int)
 
     1:
         foreign llvm and($#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1238,6 +1256,7 @@ c09 > public {inline} (21 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?f09#0:wybe.int)
 
         1:
             foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
@@ -1245,6 +1264,7 @@ c09 > public {inline} (21 calls)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                foreign llvm move(undef:wybe.int, ?f09#0:wybe.int)
 
             1:
                 foreign lpvm access(~$#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f09#0:wybe.int)
@@ -1270,6 +1290,7 @@ c10 > public {inline} (19 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?f10#0:wybe.int)
 
     1:
         foreign llvm and($#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1277,6 +1298,7 @@ c10 > public {inline} (19 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?f10#0:wybe.int)
 
         1:
             foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
@@ -1284,6 +1306,7 @@ c10 > public {inline} (19 calls)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                foreign llvm move(undef:wybe.int, ?f10#0:wybe.int)
 
             1:
                 foreign lpvm access(~$#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f10#0:wybe.int)
@@ -1309,6 +1332,7 @@ c11 > public {inline} (17 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?f11#0:wybe.int)
 
     1:
         foreign llvm and($#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1316,6 +1340,7 @@ c11 > public {inline} (17 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?f11#0:wybe.int)
 
         1:
             foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
@@ -1323,6 +1348,7 @@ c11 > public {inline} (17 calls)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                foreign llvm move(undef:wybe.int, ?f11#0:wybe.int)
 
             1:
                 foreign lpvm access(~$#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f11#0:wybe.int)
@@ -1348,6 +1374,7 @@ c12 > public {inline} (15 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?f12#0:wybe.int)
 
     1:
         foreign llvm and($#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1355,6 +1382,7 @@ c12 > public {inline} (15 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?f12#0:wybe.int)
 
         1:
             foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
@@ -1362,6 +1390,7 @@ c12 > public {inline} (15 calls)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                foreign llvm move(undef:wybe.int, ?f12#0:wybe.int)
 
             1:
                 foreign lpvm access(~$#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f12#0:wybe.int)
@@ -1387,6 +1416,7 @@ c13 > public {inline} (13 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?f13#0:wybe.int)
 
     1:
         foreign llvm and($#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1394,6 +1424,7 @@ c13 > public {inline} (13 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?f13#0:wybe.int)
 
         1:
             foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
@@ -1401,6 +1432,7 @@ c13 > public {inline} (13 calls)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                foreign llvm move(undef:wybe.int, ?f13#0:wybe.int)
 
             1:
                 foreign lpvm access(~$#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f13#0:wybe.int)
@@ -1426,6 +1458,7 @@ c14 > public {inline} (11 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?f14#0:wybe.int)
 
     1:
         foreign llvm and($#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1433,6 +1466,7 @@ c14 > public {inline} (11 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?f14#0:wybe.int)
 
         1:
             foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
@@ -1440,6 +1474,7 @@ c14 > public {inline} (11 calls)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                foreign llvm move(undef:wybe.int, ?f14#0:wybe.int)
 
             1:
                 foreign lpvm access(~$#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f14#0:wybe.int)
@@ -1465,6 +1500,7 @@ c15 > public {inline} (9 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?f15#0:wybe.int)
 
     1:
         foreign llvm and($#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1472,6 +1508,7 @@ c15 > public {inline} (9 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?f15#0:wybe.int)
 
         1:
             foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
@@ -1479,6 +1516,7 @@ c15 > public {inline} (9 calls)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                foreign llvm move(undef:wybe.int, ?f15#0:wybe.int)
 
             1:
                 foreign lpvm access(~$#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f15#0:wybe.int)
@@ -1504,6 +1542,7 @@ c16 > public {inline} (7 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?f16#0:wybe.int)
 
     1:
         foreign llvm and($#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1511,6 +1550,7 @@ c16 > public {inline} (7 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?f16#0:wybe.int)
 
         1:
             foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
@@ -1518,6 +1558,7 @@ c16 > public {inline} (7 calls)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                foreign llvm move(undef:wybe.int, ?f16#0:wybe.int)
 
             1:
                 foreign lpvm access(~$#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f16#0:wybe.int)
@@ -1543,6 +1584,7 @@ c17 > public {inline} (5 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?f17#0:wybe.int)
 
     1:
         foreign llvm and($#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1550,6 +1592,7 @@ c17 > public {inline} (5 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?f17#0:wybe.int)
 
         1:
             foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
@@ -1557,6 +1600,7 @@ c17 > public {inline} (5 calls)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                foreign llvm move(undef:wybe.int, ?f17#0:wybe.int)
 
             1:
                 foreign lpvm access(~$#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f17#0:wybe.int)
@@ -1574,6 +1618,7 @@ f01 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1581,6 +1626,7 @@ f01 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access(~$rec#0:multictr.complicated, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$#0:wybe.int)
@@ -1620,6 +1666,7 @@ f02 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1627,6 +1674,7 @@ f02 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access(~$rec#0:multictr.complicated, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$#0:wybe.int)
@@ -1666,6 +1714,7 @@ f03 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1673,6 +1722,7 @@ f03 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access(~$rec#0:multictr.complicated, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?$#0:wybe.int)
@@ -1712,6 +1762,7 @@ f04 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1719,6 +1770,7 @@ f04 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access(~$rec#0:multictr.complicated, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?$#0:wybe.int)
@@ -1758,6 +1810,7 @@ f05 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1765,6 +1818,7 @@ f05 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access(~$rec#0:multictr.complicated, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?$#0:wybe.int)
@@ -1804,6 +1858,7 @@ f06 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1811,6 +1866,7 @@ f06 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access(~$rec#0:multictr.complicated, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?$#0:wybe.int)
@@ -1850,6 +1906,7 @@ f07 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1857,6 +1914,7 @@ f07 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access(~$rec#0:multictr.complicated, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?$#0:wybe.int)
@@ -1896,6 +1954,7 @@ f08 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1903,6 +1962,7 @@ f08 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
@@ -1910,6 +1970,7 @@ f08 > public {inline} (0 calls)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
             1:
                 foreign lpvm access(~$rec#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?$#0:wybe.int)
@@ -1959,6 +2020,7 @@ f09 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1966,6 +2028,7 @@ f09 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
@@ -1973,6 +2036,7 @@ f09 > public {inline} (0 calls)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
             1:
                 foreign lpvm access(~$rec#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?$#0:wybe.int)
@@ -2022,6 +2086,7 @@ f10 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -2029,6 +2094,7 @@ f10 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
@@ -2036,6 +2102,7 @@ f10 > public {inline} (0 calls)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
             1:
                 foreign lpvm access(~$rec#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?$#0:wybe.int)
@@ -2085,6 +2152,7 @@ f11 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -2092,6 +2160,7 @@ f11 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
@@ -2099,6 +2168,7 @@ f11 > public {inline} (0 calls)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
             1:
                 foreign lpvm access(~$rec#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?$#0:wybe.int)
@@ -2148,6 +2218,7 @@ f12 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -2155,6 +2226,7 @@ f12 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
@@ -2162,6 +2234,7 @@ f12 > public {inline} (0 calls)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
             1:
                 foreign lpvm access(~$rec#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?$#0:wybe.int)
@@ -2211,6 +2284,7 @@ f13 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -2218,6 +2292,7 @@ f13 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
@@ -2225,6 +2300,7 @@ f13 > public {inline} (0 calls)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
             1:
                 foreign lpvm access(~$rec#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?$#0:wybe.int)
@@ -2274,6 +2350,7 @@ f14 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -2281,6 +2358,7 @@ f14 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
@@ -2288,6 +2366,7 @@ f14 > public {inline} (0 calls)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
             1:
                 foreign lpvm access(~$rec#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?$#0:wybe.int)
@@ -2337,6 +2416,7 @@ f15 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -2344,6 +2424,7 @@ f15 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
@@ -2351,6 +2432,7 @@ f15 > public {inline} (0 calls)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
             1:
                 foreign lpvm access(~$rec#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?$#0:wybe.int)
@@ -2400,6 +2482,7 @@ f16 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -2407,6 +2490,7 @@ f16 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
@@ -2414,6 +2498,7 @@ f16 > public {inline} (0 calls)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
             1:
                 foreign lpvm access(~$rec#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?$#0:wybe.int)
@@ -2463,6 +2548,7 @@ f17 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:multictr.complicated, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -2470,6 +2556,7 @@ f17 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
@@ -2477,6 +2564,7 @@ f17 > public {inline} (0 calls)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
             1:
                 foreign lpvm access(~$rec#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?$#0:wybe.int)
@@ -5405,6 +5493,7 @@ just > public {inline} (8 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?value#0:wybe.int)
 
     1:
         foreign lpvm access(~$#0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?value#0:wybe.int)
@@ -5427,6 +5516,7 @@ value > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign lpvm access(~$rec#0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$#0:wybe.int)
@@ -5657,6 +5747,7 @@ float > public {inline} (5 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.float, ?float_value#0:wybe.float)
 
     1:
         foreign lpvm access(~$#0:multictr.number, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?float_value#0:wybe.float)
@@ -5673,6 +5764,7 @@ float_value > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.float, ?$#0:wybe.float)
 
     1:
         foreign lpvm access(~$rec#0:multictr.number, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$#0:wybe.float)
@@ -5710,6 +5802,7 @@ int > public {inline} (10 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?int_value#0:wybe.int)
 
     1:
         foreign lpvm access(~$#0:multictr.number, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?int_value#0:wybe.int)
@@ -5726,6 +5819,7 @@ int_value > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign lpvm access(~$rec#0:multictr.number, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$#0:wybe.int)
@@ -6430,6 +6524,7 @@ one > public {inline} (11 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?one_field#0:wybe.int)
 
     1:
         foreign llvm and($#0:multictr.simple, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -6437,6 +6532,7 @@ one > public {inline} (11 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?one_field#0:wybe.int)
 
         1:
             foreign lpvm access(~$#0:multictr.simple, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?one_field#0:wybe.int)
@@ -6453,6 +6549,7 @@ one_field > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:multictr.simple, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -6460,6 +6557,7 @@ one_field > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access(~$rec#0:multictr.simple, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$#0:wybe.int)
@@ -6507,6 +6605,8 @@ two > public {inline} (7 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?two_field1#0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?two_field2#0:wybe.int)
 
     1:
         foreign llvm and($#0:multictr.simple, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -6514,6 +6614,8 @@ two > public {inline} (7 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?two_field1#0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?two_field2#0:wybe.int)
 
         1:
             foreign lpvm access($#0:multictr.simple, -1:wybe.int, 16:wybe.int, 1:wybe.int, ?two_field1#0:wybe.int)
@@ -6531,6 +6633,7 @@ two_field1 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:multictr.simple, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -6538,6 +6641,7 @@ two_field1 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access(~$rec#0:multictr.simple, -1:wybe.int, 16:wybe.int, 1:wybe.int, ?$#0:wybe.int)
@@ -6577,6 +6681,7 @@ two_field2 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:multictr.simple, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -6584,6 +6689,7 @@ two_field2 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access(~$rec#0:multictr.simple, 7:wybe.int, 16:wybe.int, 1:wybe.int, ?$#0:wybe.int)

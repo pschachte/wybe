@@ -291,6 +291,7 @@ key > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign lpvm access(~$rec#0:stmt_if.tree, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?$#0:wybe.int)
@@ -320,6 +321,7 @@ left > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:stmt_if.tree, ?$#0:stmt_if.tree)
 
     1:
         foreign lpvm access(~$rec#0:stmt_if.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?$#0:stmt_if.tree)
@@ -357,6 +359,9 @@ node > public {inline} (16 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:stmt_if.tree, ?left#0:stmt_if.tree)
+        foreign llvm move(undef:wybe.int, ?key#0:wybe.int)
+        foreign llvm move(undef:stmt_if.tree, ?right#0:stmt_if.tree)
 
     1:
         foreign lpvm access($#0:stmt_if.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?left#0:stmt_if.tree)
@@ -374,6 +379,7 @@ right > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:stmt_if.tree, ?$#0:stmt_if.tree)
 
     1:
         foreign lpvm access(~$rec#0:stmt_if.tree, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?$#0:stmt_if.tree)

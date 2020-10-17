@@ -232,6 +232,8 @@ entry:
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?head#0:wybe.int)
+        foreign llvm move(undef:int_list.int_list, ?tail#0:int_list.int_list)
 
     1:
         foreign lpvm access($#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?head#0:wybe.int)
@@ -248,6 +250,7 @@ head > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign lpvm access(~$rec#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.int)
@@ -277,6 +280,7 @@ tail > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:int_list.int_list, ?$#0:int_list.int_list)
 
     1:
         foreign lpvm access(~$rec#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:int_list.int_list)

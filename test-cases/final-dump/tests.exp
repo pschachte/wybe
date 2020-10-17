@@ -36,6 +36,7 @@ lookup > public (6 calls)
     case ~tmp$15#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?result#0:wybe.int)
 
     1:
         foreign lpvm access(map#0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.int)
@@ -271,6 +272,7 @@ key > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign lpvm access(~$rec#0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:wybe.int)
@@ -300,6 +302,7 @@ left > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:tests.map, ?$#0:tests.map)
 
     1:
         foreign lpvm access(~$rec#0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:tests.map)
@@ -338,6 +341,10 @@ node > public {inline} (20 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:tests.map, ?left#0:tests.map)
+        foreign llvm move(undef:wybe.int, ?key#0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?value#0:wybe.int)
+        foreign llvm move(undef:tests.map, ?right#0:tests.map)
 
     1:
         foreign lpvm access($#0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?left#0:tests.map)
@@ -356,6 +363,7 @@ right > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:tests.map, ?$#0:tests.map)
 
     1:
         foreign lpvm access(~$rec#0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:tests.map)
@@ -385,6 +393,7 @@ value > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign lpvm access(~$rec#0:tests.map, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:wybe.int)

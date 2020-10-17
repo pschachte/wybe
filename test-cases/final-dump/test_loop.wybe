@@ -1,0 +1,36 @@
+# A test case for a semidet loop
+
+pub type int_seq {
+    pub int_seq(low:int, step:int, high:int)
+
+    pub def {partial} seq_next(!seq:int_seq):int = elt where {
+        int_seq(?elt, ?step, ?limit, seq)
+        (elt <= limit)
+        low(!seq, elt+step)
+    }
+}
+
+
+def {test} find_modulo(seq:int_seq, modulus:int, ?i:int) {
+    do {
+        ?i = seq_next(!seq)
+        until (i % modulus = 0)
+    }
+}
+
+
+def find_test(modulus:int) use !io {
+    if {
+        find_modulo(int_seq(2,2,10), modulus, ?i) ::
+           !print("First even number divisible by ")
+           !print(modulus)
+           !print(" is ")
+           !println(i)
+      | otherwise ::
+           !print("Couldn't find even number divisible by ")
+           !println(modulus)
+    }
+}
+
+!find_test(3)
+!find_test(7)

@@ -995,7 +995,10 @@ cgenArg (ArgChar c ty) = do t <- lift $ llvmType ty
                             let bs = getBits t
                             return $ cons $ C.Int bs $ integerOrd c
 cgenArg (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
-
+cgenArg (ArgUndef ty) = do
+    llty <- lift $ llvmType ty
+    return $ cons $ C.Undef llty
+    
 
 
 getBits :: LLVMAST.Type -> Word32

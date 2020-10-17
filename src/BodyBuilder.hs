@@ -450,6 +450,7 @@ mkInput arg@ArgString{} = arg
 mkInput arg@ArgChar{} = arg
 mkInput (ArgUnneeded FlowOut ty) = ArgUnneeded FlowIn ty
 mkInput arg@ArgUnneeded{} = arg
+mkInput arg@ArgUndef{} = arg
 
 
 argExpandedPrim :: Prim -> BodyBuilder Prim
@@ -639,6 +640,7 @@ canonicaliseArg (ArgFloat v _)       = ArgFloat v AnyType
 canonicaliseArg (ArgString v _)      = ArgString v AnyType
 canonicaliseArg (ArgChar v _)        = ArgChar v AnyType
 canonicaliseArg (ArgUnneeded dir _)  = ArgUnneeded dir AnyType
+canonicaliseArg (ArgUndef _)         = ArgUndef AnyType
 
 
 validateInstr :: Prim -> BodyBuilder ()
@@ -653,6 +655,7 @@ validateArg instr (ArgFloat  _ ty)    = validateType ty instr
 validateArg instr (ArgString _ ty)    = validateType ty instr
 validateArg instr (ArgChar   _ ty)    = validateType ty instr
 validateArg instr (ArgUnneeded _ ty)  = validateType ty instr
+validateArg instr (ArgUndef ty)       = validateType ty instr
 
 
 validateType :: TypeSpec -> Prim -> BodyBuilder ()

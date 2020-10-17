@@ -15,7 +15,7 @@
 --  This also includes the Compiler monad and the Module types.
 module AST (
   -- *Types just for parsing
-  Item(..), Visibility(..), maxVisibility, minVisibility, isPublic,
+  Item(..), Visibility(..), isPublic,
   Determinism(..), determinismLEQ, determinismJoin,
   determinismFail, determinismSucceed,
   determinismSeq, determinismProceding, determinismName,
@@ -144,8 +144,8 @@ data Item
      deriving (Generic, Eq)
 
 -- |The visibility of a file item.  We only support public and private.
-data Visibility = Public | Private
-                  deriving (Eq, Show, Generic)
+data Visibility = Private | Public
+                  deriving (Eq, Ord, Show, Generic)
 
 
 -- |Determinism describes whether a statement can succeed or fail if execution
@@ -268,20 +268,6 @@ typeFamily _            = IntFamily
 data TypeImpln = TypeRepresentation TypeRepresentation
                | TypeCtors Visibility [Placed ProcProto]
                deriving (Generic, Eq)
-
-
--- |Combine two visibilities, taking the most visible.
-maxVisibility :: Visibility -> Visibility -> Visibility
-maxVisibility Public _ = Public
-maxVisibility _ Public = Public
-maxVisibility _      _ = Private
-
-
--- |Combine two visibilities, taking the least visible.
-minVisibility :: Visibility -> Visibility -> Visibility
-minVisibility Private _ = Private
-minVisibility _ Private = Private
-minVisibility _       _ = Public
 
 
 -- |Does the specified visibility make the item public?
@@ -2517,6 +2503,8 @@ data PrimArg
      | ArgString String TypeSpec              -- ^Constant string arg
      | ArgChar Char TypeSpec                  -- ^Constant character arg
      | ArgUnneeded PrimFlow TypeSpec          -- ^Unneeded input or output
+     | ArgUndef TypeSpec                      -- ^Undefined variable, used
+                                              --  in failing cases
      deriving (Eq,Ord,Generic)
 
 
@@ -2546,6 +2534,7 @@ argIsConst ArgFloat{} = True
 argIsConst ArgString{} = True
 argIsConst ArgChar{} = True
 argIsConst ArgUnneeded{} = False
+argIsConst ArgUndef{} = False
 
 
 -- | Return Just the integer constant value if a PrimArg iff it is an integer
@@ -2577,6 +2566,7 @@ argFlowDirection ArgFloat{} = FlowIn
 argFlowDirection ArgString{} = FlowIn
 argFlowDirection ArgChar{} = FlowIn
 argFlowDirection (ArgUnneeded flow _) = flow
+argFlowDirection ArgUndef{} = FlowIn
 
 
 -- |Extract the Wybe type of a PrimArg.
@@ -2587,6 +2577,7 @@ argType (ArgFloat _ typ) = typ
 argType (ArgString _ typ) = typ
 argType (ArgChar _ typ) = typ
 argType (ArgUnneeded _ typ) = typ
+argType (ArgUndef typ) = typ
 
 
 argDescription :: PrimArg -> String
@@ -2605,6 +2596,7 @@ argDescription (ArgFloat val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgString val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgChar val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgUnneeded flow _) = "unneeded " ++ argFlowDescription flow
+argDescription (ArgUndef _) = "undefined argument"
 
 
 -- |A printable description of a primitive flow direction
@@ -2709,6 +2701,7 @@ varsInPrimArg _ (ArgFloat _ _)          = Set.empty
 varsInPrimArg _ (ArgString _ _)         = Set.empty
 varsInPrimArg _ (ArgChar _ _)           = Set.empty
 varsInPrimArg _ (ArgUnneeded _ _)       = Set.empty
+varsInPrimArg _ (ArgUndef _)            = Set.empty
 
 
 ----------------------------------------------------------------
@@ -2998,23 +2991,27 @@ showFork ind (PrimFork var ty last bodies) =
 
 
 -- |Show a list of placed prims.
+-- XXX the first argument is unused; can we get rid of it?
 showPlacedPrims :: Int -> [Placed Prim] -> String
 showPlacedPrims ind stmts = List.concatMap (showPlacedPrim ind) stmts
 
 
 -- |Show a single primitive statement with the specified indent.
+-- XXX the first argument is unused; can we get rid of it?
 showPlacedPrim :: Int -> Placed Prim -> String
 showPlacedPrim ind stmt = showPlacedPrim' ind (content stmt) (place stmt)
 
 
 -- |Show a single primitive statement with the specified indent and
 --  optional source position.
+-- XXX the first argument is unused; can we get rid of it?
 showPlacedPrim' :: Int -> Prim -> OptPos -> String
 showPlacedPrim' ind prim pos =
   startLine ind ++ showPrim ind prim ++ showMaybeSourcePos pos
 
 
 -- |Show a single primitive statement.
+-- XXX the first argument is unused; can we get rid of it?
 showPrim :: Int -> Prim -> String
 showPrim _ (PrimCall id pspec args) =
         show pspec ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
@@ -3097,6 +3094,7 @@ instance Show PrimArg where
   show (ArgChar c typ)   = show c ++ showTypeSuffix typ False
   show (ArgUnneeded dir typ) =
       primFlowPrefix dir ++ "_" ++ showTypeSuffix typ False
+  show (ArgUndef typ)    = "undef" ++ showTypeSuffix typ False
 
 
 -- |Show a single typed expression.
