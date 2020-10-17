@@ -341,7 +341,6 @@ doCodegenBody proto body =
        mapM_ assignParam ins
        mapM_ preassignOutput outs
        codegenBody proto body   -- Codegen on body prims
-       return ()
 
 
 -- XXX not using
@@ -435,27 +434,18 @@ structUnPack st tys = do
 
 -- | Generate basic blocks for a procedure body. The first block is named
 -- 'entry' by default. All parameters go on the symbol table (output too).
-codegenBody :: PrimProto -> ProcBody -> Codegen (Maybe Operand)
+codegenBody :: PrimProto -> ProcBody -> Codegen ()
 codegenBody proto body =
     do let ps = List.map content (bodyPrims body)
        -- Filter out prims which contain only phantom arguments
-       -- ops <- mapM cgen $ List.filter (not . phantomPrim) ps
        ops <- mapM cgen ps
        let params = primProtoParams proto
        case bodyFork body of
          NoFork -> do retOp <- buildOutputOp params
                       ret retOp
                       return ()
-         -- NoFork -> if (primProtoName proto) == "<0>"
-         --           -- Empty primitive prototype is the main function in LLVM
-         --           then mainReturnCodegen
-         --           else do retOp <- buildOutputOp params
-         --                   ret retOp
-         --                   return ()
          (PrimFork var ty _ fbody) -> codegenForkBody var fbody proto
-       if List.null ops
-           then return Nothing
-           else return $ last ops
+
 
 -- | Predicate to check whether a Prim is a phantom prim i.e Contains only
 -- phantom arguments.
@@ -482,15 +472,12 @@ codegenForkBody var (b1:b2:[]) proto =
        -- if.then
        preservingSymtab $ do
            setBlock ifthen
-           retop <- codegenBody proto b2
-           return ()
+           codegenBody proto b2
 
        -- if.else
        preservingSymtab $ do
            setBlock ifelse
-           retop <- codegenBody proto b1
-           return ()
-       return ()
+           codegenBody proto b1
 
        -- -- if.exit
        -- setBlock ifexit
