@@ -115,27 +115,27 @@ passes :: PassSetSpec
 passes = defaultCuratedPassSetSpec { optLevel = Just 3 }
 
 
--- | Return a string LLVM IR representation of a LLVMAST.Module after
--- a curated set of passes has been executed on the C++ Module form.
-codeEmitWithPasses :: LLVMAST.Module -> IO BS.ByteString
-codeEmitWithPasses llmod =
-    withContext $ \context ->
-        withModuleFromAST context llmod $ \m ->
-            withPassManager passes $ \pm -> do
-                success <- runPassManager pm m
-                if success
-                    then moduleLLVMAssembly m
-                    else error "Running of optimisation passes not successful!"
+-- -- | Return a string LLVM IR representation of a LLVMAST.Module after
+-- -- a curated set of passes has been executed on the C++ Module form.
+-- codeEmitWithPasses :: LLVMAST.Module -> IO BS.ByteString
+-- codeEmitWithPasses llmod =
+--     withContext $ \context ->
+--         withModuleFromAST context llmod $ \m ->
+--             withPassManager passes $ \pm -> do
+--                 success <- runPassManager pm m
+--                 if success
+--                     then moduleLLVMAssembly m
+--                     else error "Running of optimisation passes not successful!"
 
--- | Testing function to analyse optimisation passes.
-testOptimisations :: LLVMAST.Module -> IO ()
-testOptimisations llmod = do
-    llstr <- codeEmitWithPasses llmod
-    putStrLn $ replicate 80 '-'
-    putStrLn "Optimisation Passes"
-    putStrLn $ replicate 80 '-'
-    B8.putStrLn llstr
-    putStrLn $ replicate 80 '-'
+-- -- | Testing function to analyse optimisation passes.
+-- testOptimisations :: LLVMAST.Module -> IO ()
+-- testOptimisations llmod = do
+--     llstr <- codeEmitWithPasses llmod
+--     putStrLn $ replicate 80 '-'
+--     putStrLn "Optimisation Passes"
+--     putStrLn $ replicate 80 '-'
+--     B8.putStrLn llstr
+--     putStrLn $ replicate 80 '-'
 
 
 -- | Using a bracket pattern, perform an action on the C++ Module
@@ -208,7 +208,7 @@ makeWrappedObjFile :: FilePath -> LLVMAST.Module -> BL.ByteString -> Compiler ()
 makeWrappedObjFile file llmod modBS = do
     tmpDir <- gets tmpDir
     result <- liftIO $ withContext $ \_ ->
-        withModule llmod $ \m -> do
+        withOptimisedModule llmod $ \m -> do
             withHostTargetMachineDefault $ \tm ->
                 writeObjectToFile tm (File file) m
             insertLPVMData tmpDir modBS file
