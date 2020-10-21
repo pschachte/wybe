@@ -145,7 +145,7 @@ succeedIfSemiDet SemiDet  = [succeedTest]
 
 -- |A TestBool statement that always fails
 failTest :: Placed Stmt
-failTest = Unplaced $ TestBool $ boolCast (iVal 0)
+failTest = Unplaced $ Fail
 
 
 -- |An unplaced TestBool of a Boolean variable

@@ -15,9 +15,10 @@
 --  This also includes the Compiler monad and the Module types.
 module AST (
   -- *Types just for parsing
-  Item(..), Visibility(..), maxVisibility, minVisibility, isPublic,
-  Determinism(..), determinismLEQ, determinismMeet, determinismJoin,
-  determinismSeq, determinismTerminal, determinismName,
+  Item(..), Visibility(..), isPublic,
+  Determinism(..), determinismLEQ, determinismJoin,
+  determinismFail, determinismSucceed,
+  determinismSeq, determinismProceding, determinismName,
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
   TypeProto(..), TypeSpec(..), TypeRef(..), VarDict, TypeImpln(..),
@@ -143,8 +144,8 @@ data Item
      deriving (Generic, Eq)
 
 -- |The visibility of a file item.  We only support public and private.
-data Visibility = Public | Private
-                  deriving (Eq, Show, Generic)
+data Visibility = Private | Public
+                  deriving (Eq, Ord, Show, Generic)
 
 
 -- |Determinism describes whether a statement can succeed or fail if execution
@@ -163,11 +164,27 @@ determinismLEQ Failure Det = False
 determinismLEQ det1 det2 = det1 <= det2
 
 
--- |Lattice meet for Determinism.  Probably not needed
-determinismMeet :: Determinism -> Determinism -> Determinism
-determinismMeet Failure Det = Terminal
-determinismMeet Det Failure = Terminal
-determinismMeet det1 det2 = min det1 det2
+-- -- |Lattice meet for Determinism.  Probably not needed
+-- determinismMeet :: Determinism -> Determinism -> Determinism
+-- determinismMeet Failure Det = Terminal
+-- determinismMeet Det Failure = Terminal
+-- determinismMeet det1 det2 = min det1 det2
+
+
+-- |Force the specified determinism to succeed, if it is reachable.
+determinismSucceed :: Determinism -> Determinism
+determinismSucceed Terminal = Terminal
+determinismSucceed Failure  = Det
+determinismSucceed Det      = Det
+determinismSucceed SemiDet  = Det
+
+
+-- |Force the specified determinism to fail, if it is reachable.
+determinismFail  :: Determinism -> Determinism
+determinismFail  Terminal = Terminal
+determinismFail  Failure  = Failure
+determinismFail  Det      = Failure
+determinismFail  SemiDet  = Failure
 
 
 -- |Lattice join for Determinism.
@@ -188,19 +205,19 @@ determinismSeq _        Failure  = Failure
 determinismSeq det1     det2     = max det1 det2
 
 
--- |Does this determinism reflect a state that will definitely not continue to
--- the next statement?
-determinismTerminal :: Determinism -> Bool
-determinismTerminal Terminal = True
-determinismTerminal Failure  = True
-determinismTerminal Det      = False
-determinismTerminal SemiDet  = False
+-- |Does this determinism reflect a state that could continue to the next
+-- statement?
+determinismProceding :: Determinism -> Bool
+determinismProceding Terminal = False
+determinismProceding Failure  = False
+determinismProceding Det      = True
+determinismProceding SemiDet  = True
 
 
 -- |A suitable printable name for each determinism.
 determinismName :: Determinism -> String
 determinismName Terminal = "terminal"
-determinismName Failure  = "failure"
+determinismName Failure  = "failing"
 determinismName Det      = ""
 determinismName SemiDet  = "test"
 
@@ -251,20 +268,6 @@ typeFamily _            = IntFamily
 data TypeImpln = TypeRepresentation TypeRepresentation
                | TypeCtors Visibility [Placed ProcProto]
                deriving (Generic, Eq)
-
-
--- |Combine two visibilities, taking the most visible.
-maxVisibility :: Visibility -> Visibility -> Visibility
-maxVisibility Public _ = Public
-maxVisibility _ Public = Public
-maxVisibility _      _ = Private
-
-
--- |Combine two visibilities, taking the least visible.
-minVisibility :: Visibility -> Visibility -> Visibility
-minVisibility Private _ = Private
-minVisibility _ Private = Private
-minVisibility _       _ = Public
 
 
 -- |Does the specified visibility make the item public?
@@ -1710,7 +1713,6 @@ primImpurity (PrimCall _ pspec _) = do
     return $ procImpurity def
 primImpurity (PrimForeign _ _ flags _) =
     return $ flagsImpurity flags
-primImpurity (PrimTest _) = return Pure
 
 
 -- | Return the impurity level specified by the given foriegn flags list
@@ -1734,7 +1736,7 @@ flagsDetism = List.foldl flagDetism Det
 -- | Gather the Determinism of a flag
 flagDetism :: Determinism  -> String -> Determinism 
 flagDetism _ "terminal" = Terminal
-flagDetism _ "failure"  = Failure
+flagDetism _ "failing"  = Failure
 flagDetism _ "det"      = Det
 flagDetism _ "semidet"  = SemiDet
 flagDetism detism _     = detism
@@ -2041,6 +2043,7 @@ foldStmt' sfn efn val (Or stmts _) = foldStmts sfn efn val stmts
 foldStmt' sfn efn val (Not negated) = foldStmt sfn efn val $ content negated
 foldStmt' sfn efn val (TestBool exp) = foldExp sfn efn val exp
 foldStmt' _   _   val Nop = val
+foldStmt' _   _   val Fail = val
 foldStmt' sfn efn val (Loop body _) = foldStmts sfn efn val body
 foldStmt' sfn efn val (UseResources _ body) = foldStmts sfn efn val body
 foldStmt' sfn efn val (For generators body) = foldStmts sfn efn 
@@ -2300,8 +2303,10 @@ data Stmt
      | ForeignCall Ident Ident [Ident] [Placed Exp]
      -- |Do nothing (and succeed)
      | Nop
+     -- |Do nothing (and fail)
+     | Fail
 
-     -- After unbranching, this con only appear as the last Stmt in a body.
+     -- After unbranching, this can only appear as the last Stmt in a body.
 
      -- |A conditional; execute the first (SemiDet) Stmt; if it succeeds,
      --  execute the second Stmts, else execute the third.  The VarDict
@@ -2477,7 +2482,6 @@ data PrimVarName =
 data Prim
      = PrimCall CallSiteID ProcSpec [PrimArg]
      | PrimForeign String ProcName [Ident] [PrimArg]
-     | PrimTest PrimArg
      deriving (Eq,Ord,Generic)
 
 instance Show Prim where
@@ -2505,6 +2509,8 @@ data PrimArg
      | ArgString String TypeSpec              -- ^Constant string arg
      | ArgChar Char TypeSpec                  -- ^Constant character arg
      | ArgUnneeded PrimFlow TypeSpec          -- ^Unneeded input or output
+     | ArgUndef TypeSpec                      -- ^Undefined variable, used
+                                              --  in failing cases
      deriving (Eq,Ord,Generic)
 
 
@@ -2512,7 +2518,6 @@ data PrimArg
 primArgs :: Prim -> [PrimArg]
 primArgs (PrimCall _ _ args) = args
 primArgs (PrimForeign _ _ _ args) = args
-primArgs (PrimTest arg) = [arg]
 
 
 -- |Returns a list of all arguments to a prim
@@ -2520,10 +2525,6 @@ replacePrimArgs :: Prim -> [PrimArg] -> Prim
 replacePrimArgs (PrimCall id pspec _) args = PrimCall id pspec args
 replacePrimArgs (PrimForeign lang nm flags _) args =
     PrimForeign lang nm flags args
-replacePrimArgs (PrimTest _) [arg] = PrimTest arg
-replacePrimArgs instr args =
-    shouldnt $ "Attempting to replace arguments of " ++ show instr
-               ++ " with " ++ show args
 
 
 argIsVar :: PrimArg -> Bool
@@ -2539,6 +2540,7 @@ argIsConst ArgFloat{} = True
 argIsConst ArgString{} = True
 argIsConst ArgChar{} = True
 argIsConst ArgUnneeded{} = False
+argIsConst ArgUndef{} = False
 
 
 -- | Return Just the integer constant value if a PrimArg iff it is an integer
@@ -2570,6 +2572,7 @@ argFlowDirection ArgFloat{} = FlowIn
 argFlowDirection ArgString{} = FlowIn
 argFlowDirection ArgChar{} = FlowIn
 argFlowDirection (ArgUnneeded flow _) = flow
+argFlowDirection ArgUndef{} = FlowIn
 
 
 -- |Extract the Wybe type of a PrimArg.
@@ -2580,6 +2583,7 @@ argType (ArgFloat _ typ) = typ
 argType (ArgString _ typ) = typ
 argType (ArgChar _ typ) = typ
 argType (ArgUnneeded _ typ) = typ
+argType (ArgUndef typ) = typ
 
 
 argDescription :: PrimArg -> String
@@ -2598,6 +2602,7 @@ argDescription (ArgFloat val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgString val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgChar val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgUnneeded flow _) = "unneeded " ++ argFlowDescription flow
+argDescription (ArgUndef _) = "undefined argument"
 
 
 -- |A printable description of a primitive flow direction
@@ -2702,6 +2707,7 @@ varsInPrimArg _ (ArgFloat _ _)          = Set.empty
 varsInPrimArg _ (ArgString _ _)         = Set.empty
 varsInPrimArg _ (ArgChar _ _)           = Set.empty
 varsInPrimArg _ (ArgUnneeded _ _)       = Set.empty
+varsInPrimArg _ (ArgUndef _)            = Set.empty
 
 
 ----------------------------------------------------------------
@@ -2991,23 +2997,27 @@ showFork ind (PrimFork var ty last bodies) =
 
 
 -- |Show a list of placed prims.
+-- XXX the first argument is unused; can we get rid of it?
 showPlacedPrims :: Int -> [Placed Prim] -> String
 showPlacedPrims ind stmts = List.concatMap (showPlacedPrim ind) stmts
 
 
 -- |Show a single primitive statement with the specified indent.
+-- XXX the first argument is unused; can we get rid of it?
 showPlacedPrim :: Int -> Placed Prim -> String
 showPlacedPrim ind stmt = showPlacedPrim' ind (content stmt) (place stmt)
 
 
 -- |Show a single primitive statement with the specified indent and
 --  optional source position.
+-- XXX the first argument is unused; can we get rid of it?
 showPlacedPrim' :: Int -> Prim -> OptPos -> String
 showPlacedPrim' ind prim pos =
   startLine ind ++ showPrim ind prim ++ showMaybeSourcePos pos
 
 
 -- |Show a single primitive statement.
+-- XXX the first argument is unused; can we get rid of it?
 showPrim :: Int -> Prim -> String
 showPrim _ (PrimCall id pspec args) =
         show pspec ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
@@ -3015,8 +3025,6 @@ showPrim _ (PrimCall id pspec args) =
 showPrim _ (PrimForeign lang name flags args) =
         "foreign " ++ lang ++ " " ++ showFlags flags ++ name ++
         "(" ++ intercalate ", " (List.map show args) ++ ")"
-showPrim _ (PrimTest arg) =
-        "test " ++ show arg
 
 
 -- |Show a variable, with its suffix.
@@ -3095,6 +3103,7 @@ instance Show PrimArg where
   show (ArgChar c typ)   = show c ++ showTypeSuffix typ False
   show (ArgUnneeded dir typ) =
       primFlowPrefix dir ++ "_" ++ showTypeSuffix typ False
+  show (ArgUndef typ)    = "undef" ++ showTypeSuffix typ False
 
 
 -- |Show a single typed expression.

@@ -380,7 +380,7 @@ unbranchStmt detism stmt@(ProcCall _ _ _ calldetism _ args) pos stmts alt
     defArgs args
     case calldetism of
       Terminal -> return [maybePlace stmt pos] -- no execution after Terminal
-      Failure  -> return [maybePlace stmt pos] -- no execution after Terminal
+      Failure  -> return [maybePlace stmt pos] -- no execution after Failure
       Det      -> leaveStmtAsIs detism stmt pos stmts alt sense
       SemiDet  -> shouldnt "SemiDet case already covered!"
 unbranchStmt detism stmt@(ForeignCall _ _ _ args) pos stmts alt sense = do
@@ -448,6 +448,9 @@ unbranchStmt _ (For _ body) _ _ _ _ =
 unbranchStmt detism Nop _ stmts alt sense = do
     logUnbranch "Unbranching a Nop"
     unbranchStmts detism stmts alt sense     -- might as well filter out Nops
+unbranchStmt detism Fail pos stmts alt sense = do
+    logUnbranch "Unbranching a Fail"
+    return [maybePlace Fail pos] -- no execution after Fail
 unbranchStmt _ Break _ _ _ _ = do
     logUnbranch "Unbranching a Break"
     brk <- getLoopBreak

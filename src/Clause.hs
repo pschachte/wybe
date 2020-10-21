@@ -92,24 +92,37 @@ putNumberings numbering =
 -- numbering of the previous statement to be the current variable
 -- numbering for the next statement.
 finishStmt :: ClauseComp ()
-finishStmt = getCurrNumbering >>= putNumberings
-
+finishStmt = do
+    getCurrNumbering >>= putNumberings
+    gets currVars >>= logClause . (("Finish with numbering " ++) . show)
 
 -- |Return a list of prims to complete a proc body.  For a SemiDet body
 -- that hasn't already had $$ assigned a value, this will assign it
 -- True; otherwise it'll be empty.
-closingStmts :: Determinism -> ClauseComp [Placed Prim]
-closingStmts Terminal = return []
-closingStmts Failure  = return []
-closingStmts Det      = return []
-closingStmts SemiDet  = do
+closingStmts :: Determinism -> [Param] -> ClauseComp [Placed Prim]
+closingStmts detism params = do
+    dict <- gets currVars
+    let outs = List.filter (flowsOut . paramFlow) params
+    logClause $ "Closing body with output parameters: " ++ show outs
+    let undefs = List.filter (not . (`Map.member` dict) . paramName) outs
+    logClause $ "  uninitialised outputs: " ++ show undefs
+    assigns <- mapM (\Param{paramName=nm,paramType=ty}
+                    -> assign nm ty (ArgUndef ty))
+                    undefs
     tested <- Map.member "$$" <$> getCurrNumbering
-    return $ if tested
-             then []
-             else [Unplaced $ primMove
-                   (ArgInt 1 boolType)
-                   (ArgVar (PrimVarName "$$" 0) boolType False
-                    FlowOut Ordinary False)]
+    end <- if detism == SemiDet && not tested
+               then (:assigns) <$> assign "$$" boolType (ArgInt 1 boolType)
+               else return assigns
+    logClause $ "Adding ending instructions: " ++ showPlacedPrims 4 end
+    return end
+
+-- |Return a prim to assign the specified value to the specified variable of the
+-- specified type, and record the assignment.
+assign :: String -> TypeSpec -> PrimArg -> ClauseComp (Placed Prim)
+assign name typ val = do
+    primVar <- nextVar name
+    return $ Unplaced $ primMove val
+           $ ArgVar primVar typ False FlowOut Ordinary False
 
 
 -- |Run a clause compiler function from the Compiler monad to compile
@@ -126,6 +139,7 @@ compileProc proc =
     evalClauseComp $ do
         let ProcDefSrc body = procImpln proc
         let proto = procProto proc
+        let procName = procProtoName proto
         let params = procProtoParams proto
         modify (\st -> st {nextCallSiteID = (procCallSiteCount proc)})
         logClause $ "--------------\nCompiling proc " ++ show proto
@@ -138,7 +152,7 @@ compileProc proc =
         logClause $ "  startVars: " ++ show startVars
         logClause $ "  endVars  : " ++ show endVars
         logClause $ "  params   : " ++ show params
-        let params' = List.map (compileParam startVars endVars) params
+        let params' = List.map (compileParam startVars endVars procName) params
         let proto' = PrimProto (procProtoName proto) params'
         logClause $ "  comparams: " ++ show params'
         callSiteCount <- gets nextCallSiteID
@@ -160,8 +174,10 @@ compileProc proc =
 --  body. This code assumes that these invariants are observed, and does not
 --  worry whether the proc is Det or SemiDet.
 compileBody :: [Placed Stmt] -> [Param] -> Determinism -> ClauseComp ProcBody
-compileBody [] _params detism = do
-    end <- closingStmts detism
+compileBody [] params detism = do
+    logClause $ "Compiling empty body"
+    end <- closingStmts detism params
+    logClause $ "Compiling empty body produced:" ++ showPlacedPrims 4 end
     return $ ProcBody end NoFork
 compileBody stmts params detism = do
     logClause $ "Compiling body:" ++ showBody 4 stmts
@@ -195,7 +211,7 @@ compileBody stmts params detism = do
 
         _ -> do
           prims <- mapM compileSimpleStmt stmts
-          end <- closingStmts detism
+          end <- closingStmts detism params
           return $ ProcBody (prims++end) NoFork
 
 
@@ -271,7 +287,10 @@ compileSimpleStmt' (ForeignCall lang name flags args) = do
 compileSimpleStmt' (TestBool expr) =
     -- Only for handling a TestBool other than as the condition of a Cond:
     compileSimpleStmt' $ content $ move (boolCast expr) (boolVarSet "$$")
-compileSimpleStmt' Nop = return $ PrimTest $ ArgInt 1 intType
+compileSimpleStmt' Nop = 
+    compileSimpleStmt' $ content $ move boolTrue (boolVarSet "$$")
+compileSimpleStmt' Fail =
+    compileSimpleStmt' $ content $ move boolFalse (boolVarSet "$$")
 compileSimpleStmt' stmt =
     shouldnt $ "Normalisation left complex statement:\n" ++ showStmt 4 stmt
 
@@ -322,15 +341,22 @@ reconcileOne caseVars jointVars (Param name ty flow ftype) =
        _ -> Nothing
 
 
-compileParam :: Numbering -> Numbering -> Param -> PrimParam
-compileParam startVars endVars param@(Param name ty flow ftype) =
+compileParam :: Numbering -> Numbering -> ProcName -> Param -> PrimParam
+compileParam startVars endVars procName param@(Param name ty flow ftype) =
     let (pflow,num) =
             case flow of
-                ParamIn -> (FlowIn, Map.findWithDefault 0 name startVars)
-                ParamOut -> (FlowOut, Map.findWithDefault 0 name endVars)
-                             -- trustFromJust
-                             -- ("compileParam for param " ++ show param)
-                             -- $ Map.lookup name endVars)
+                -- ParamIn -> (FlowIn, Map.findWithDefault 0 name startVars)
+                ParamIn -> (FlowIn,
+                             trustFromJust
+                             ("compileParam for input param " ++ show param
+                              ++ " of proc " ++ show procName)
+                             $ Map.lookup name startVars)
+                -- ParamOut -> (FlowOut, Map.findWithDefault 0 name endVars)
+                ParamOut -> (FlowOut,
+                             trustFromJust
+                             ("compileParam for output param " ++ show param
+                              ++ " of proc " ++ show procName)
+                             $ Map.lookup name endVars)
                 _ -> shouldnt "non-simple parameter flow in compileParam"
     in PrimParam (PrimVarName name num)
        ty pflow ftype (ParamInfo False)

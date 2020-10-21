@@ -280,7 +280,7 @@ processProcModifiers =
 processProcModifier :: ProcModifiers -> String -> ProcModifiers
 processProcModifier ms "test"     = updateModsDetism   ms "test" SemiDet
 processProcModifier ms "partial"  = updateModsDetism   ms "partial" SemiDet
-processProcModifier ms "failure"  = updateModsDetism   ms "failure" Failure
+processProcModifier ms "failing"  = updateModsDetism   ms "failing" Failure
 processProcModifier ms "terminal" = updateModsDetism   ms "terminal" Terminal
 processProcModifier ms "inline"   = updateModsInlining ms "inline" Inline
 processProcModifier ms "noinline" = updateModsInlining ms "noinline" NoInline

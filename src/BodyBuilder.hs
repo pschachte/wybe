@@ -411,11 +411,6 @@ instr' prim@(PrimForeign "lpvm" "cast" []
     if argType from == argType to
       then instr' (PrimForeign "llvm" "move" [] [from, to]) pos
       else ordinaryInstr prim pos
-instr' prim@(PrimTest (ArgInt 0 _)) pos = do
-    rawInstr prim pos
-    logBuild "  Found fail instruction; noting failing branch"
-    -- note guaranteed failure
-    modify (\s -> s { failed=True })
 instr' prim pos = ordinaryInstr prim pos
 
 
@@ -455,6 +450,7 @@ mkInput arg@ArgString{} = arg
 mkInput arg@ArgChar{} = arg
 mkInput (ArgUnneeded FlowOut ty) = ArgUnneeded FlowIn ty
 mkInput arg@ArgUnneeded{} = arg
+mkInput arg@ArgUndef{} = arg
 
 
 argExpandedPrim :: Prim -> BodyBuilder Prim
@@ -469,9 +465,6 @@ argExpandedPrim call@(PrimCall id pspec args) = do
 argExpandedPrim (PrimForeign lang nm flags args) = do
     args' <- mapM expandArg args
     return $ simplifyForeign lang nm flags args'
-argExpandedPrim (PrimTest arg) = do
-    arg' <- expandArg arg
-    return $ PrimTest arg'
 
 
 -- |Replace any arguments corresponding to unneeded parameters with
@@ -635,8 +628,6 @@ canonicalisePrim (PrimCall id nm args) =
     PrimCall id nm $ List.map (canonicaliseArg . mkInput) args
 canonicalisePrim (PrimForeign lang op flags args) =
     PrimForeign lang op flags $ List.map (canonicaliseArg . mkInput) args
-canonicalisePrim (PrimTest arg) =
-    PrimTest $ (canonicaliseArg . mkInput) arg
 
 
 -- |Standardise unimportant info in an arg, so that it is equal to any
@@ -649,12 +640,12 @@ canonicaliseArg (ArgFloat v _)       = ArgFloat v AnyType
 canonicaliseArg (ArgString v _)      = ArgString v AnyType
 canonicaliseArg (ArgChar v _)        = ArgChar v AnyType
 canonicaliseArg (ArgUnneeded dir _)  = ArgUnneeded dir AnyType
+canonicaliseArg (ArgUndef _)         = ArgUndef AnyType
 
 
 validateInstr :: Prim -> BodyBuilder ()
 validateInstr i@(PrimCall _ _ args)        = mapM_ (validateArg i) args
 validateInstr i@(PrimForeign _ _ _ args) = mapM_ (validateArg i) args
-validateInstr (PrimTest _)               = return ()
 
 
 validateArg :: Prim -> PrimArg -> BodyBuilder ()
@@ -664,6 +655,7 @@ validateArg instr (ArgFloat  _ ty)    = validateType ty instr
 validateArg instr (ArgString _ ty)    = validateType ty instr
 validateArg instr (ArgChar   _ ty)    = validateType ty instr
 validateArg instr (ArgUnneeded _ ty)  = validateType ty instr
+validateArg instr (ArgUndef ty)       = validateType ty instr
 
 
 validateType :: TypeSpec -> Prim -> BodyBuilder ()

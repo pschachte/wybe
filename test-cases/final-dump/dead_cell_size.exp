@@ -772,6 +772,7 @@ tb > public {inline} (14 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?tb1#0:wybe.int)
 
     1:
         foreign llvm and($#0:dead_cell_size.t, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -779,6 +780,7 @@ tb > public {inline} (14 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?tb1#0:wybe.int)
 
         1:
             foreign lpvm access(~$#0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?tb1#0:wybe.int)
@@ -795,6 +797,7 @@ tb1 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:dead_cell_size.t, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -802,6 +805,7 @@ tb1 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access(~$rec#0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$#0:wybe.int)
@@ -850,6 +854,9 @@ tc > public {inline} (11 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?tc1#0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?tc2#0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?tc3#0:wybe.int)
 
     1:
         foreign llvm and($#0:dead_cell_size.t, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -857,6 +864,9 @@ tc > public {inline} (11 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?tc1#0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?tc2#0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?tc3#0:wybe.int)
 
         1:
             foreign lpvm access($#0:dead_cell_size.t, -1:wybe.int, 24:wybe.int, 1:wybe.int, ?tc1#0:wybe.int)
@@ -875,6 +885,7 @@ tc1 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:dead_cell_size.t, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -882,6 +893,7 @@ tc1 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access(~$rec#0:dead_cell_size.t, -1:wybe.int, 24:wybe.int, 1:wybe.int, ?$#0:wybe.int)
@@ -921,6 +933,7 @@ tc2 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:dead_cell_size.t, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -928,6 +941,7 @@ tc2 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access(~$rec#0:dead_cell_size.t, 7:wybe.int, 24:wybe.int, 1:wybe.int, ?$#0:wybe.int)
@@ -967,6 +981,7 @@ tc3 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:dead_cell_size.t, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -974,6 +989,7 @@ tc3 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access(~$rec#0:dead_cell_size.t, 15:wybe.int, 24:wybe.int, 1:wybe.int, ?$#0:wybe.int)
@@ -1020,6 +1036,7 @@ td > public {inline} (5 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?td1#0:wybe.int)
 
     1:
         foreign llvm and($#0:dead_cell_size.t, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1027,6 +1044,7 @@ td > public {inline} (5 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?td1#0:wybe.int)
 
         1:
             foreign lpvm access(~$#0:dead_cell_size.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?td1#0:wybe.int)
@@ -1043,6 +1061,7 @@ td1 > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign llvm and($rec#0:dead_cell_size.t, 7:wybe.int, ?tmp$2#0:!wybe.int)
@@ -1050,6 +1069,7 @@ td1 > public {inline} (0 calls)
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
             foreign lpvm access(~$rec#0:dead_cell_size.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?$#0:wybe.int)
@@ -1726,6 +1746,7 @@ a > public {inline} (0 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
         foreign lpvm access(~$rec#0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$#0:wybe.int)
@@ -1768,6 +1789,7 @@ t2b > public {inline} (8 calls)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?a#0:wybe.int)
 
     1:
         foreign lpvm access(~$#0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a#0:wybe.int)
