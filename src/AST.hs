@@ -1670,7 +1670,7 @@ data ResourceImpln =
 --  normalised to a list of primitives, and an optional source
 --  position.
 data ProcDef = ProcDef {
-    procName :: Ident,          -- ^the proc's name
+    procName :: ProcName,          -- ^the proc's name
     procProto :: ProcProto,     -- ^the proc's prototype
     procImpln :: ProcImpln,     -- ^the actual implementation
     procPos :: OptPos,          -- ^where this proc is defined
@@ -2296,9 +2296,9 @@ data Stmt
      -- |A Wybe procedure call, with module, proc name, proc ID, determinism,
      --   and args.  We assume every call is Det until type checking.
      --   The Bool flag indicates that the proc is allowed to use resources.
-     = ProcCall ModSpec Ident (Maybe Int) Determinism Bool [Placed Exp]
+     = ProcCall ModSpec ProcName (Maybe Int) Determinism Bool [Placed Exp]
      -- |A foreign call, with language, foreign name, tags, and args
-     | ForeignCall Ident Ident [Ident] [Placed Exp]
+     | ForeignCall Ident ProcName [Ident] [Placed Exp]
      -- |Do nothing (and succeed)
      | Nop
      -- |Do nothing (and fail)
@@ -2375,8 +2375,8 @@ data Exp
       -- The following are eliminated during flattening
       | Where [Placed Stmt] (Placed Exp)
       | CondExp (Placed Stmt) (Placed Exp) (Placed Exp)
-      | Fncall ModSpec Ident [Placed Exp]
-      | ForeignFn Ident Ident [Ident] [Placed Exp]
+      | Fncall ModSpec ProcName [Placed Exp]
+      | ForeignFn Ident ProcName [Ident] [Placed Exp]
      deriving (Eq,Ord,Generic)
 
 
@@ -2475,7 +2475,7 @@ data PrimVarName =
 --  loop.
 data Prim
      = PrimCall CallSiteID ProcSpec [PrimArg]
-     | PrimForeign String ProcName [Ident] [PrimArg]
+     | PrimForeign Ident ProcName [Ident] [PrimArg]
      deriving (Eq,Ord,Generic)
 
 instance Show Prim where
