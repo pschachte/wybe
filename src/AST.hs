@@ -83,7 +83,7 @@ module AST (
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
   showModSpecs, showResources, showMaybeSourcePos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
-  showVarDict, showVarMap, simpleShowMap, simpleShowSet,
+  showVarDict, showVarMap, simpleShowMap, simpleShowSet, bracketList,
   maybeShow, showMessages, stopOnError,
   logMsg, whenLogging2, whenLogging,
   -- *Helper functions
@@ -801,7 +801,7 @@ updateImplementation implOp = do
 addType :: Ident -> TypeDef -> Compiler TypeSpec
 addType name def@(TypeDef vis params rep _ _ _ _) = do
     currMod <- getModuleSpec
-    let spec = TypeSpec currMod name [] -- XXX what about type params?
+    let spec = TypeSpec currMod name (flip (TypeSpec currMod) [] <$> params)
     updateImplementation
       (\imp ->
         let set = Set.singleton spec
@@ -3268,6 +3268,13 @@ makeBold :: String -> Compiler String
 makeBold s = do
     noBold <- gets $ optNoFont . options
     return $ if noBold then s else "\x1b[1m" ++ s ++ "\x1b[0m"
+
+
+-- | Wrap brackets around a list of strings, with a separator.  If the list
+-- is empty, just return the empty string.
+bracketList :: String -> String -> String -> [String] -> String
+bracketList _ _ _ [] = ""
+bracketList prefix sep suffix elts = prefix ++ intercalate sep elts ++ suffix
 
 
 ------------------------------ Module Encoding Types -----------------------
