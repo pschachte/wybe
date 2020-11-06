@@ -1,12 +1,11 @@
 ======================================================================
 AFTER EVERYTHING:
  Module proc_print2
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : proc_print2.print2<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

@@ -1,9 +1,9 @@
 ======================================================================
 AFTER EVERYTHING:
  Module alias_type2
-  public submods  : 
-  public types    : position: (alias_type2.position,Just address)
-                    posrec: (alias_type2.posrec,Just address)
+  representation  : (not a type)
+  public submods  : position -> alias_type2.position
+                    posrec -> alias_type2.posrec
   public resources: 
   public procs    : alias_type2.<0>
                     alias_type2.position./=<0>
@@ -25,7 +25,6 @@ AFTER EVERYTHING:
   imports         : public use alias_type2.position
                     public use alias_type2.posrec
                     use wybe
-  types           : position/public  is address { position(x:int, y:int) @alias_type2:2:25  }  @alias_type2:2:5, posrec/public  is address { posrec(p:position, a:int) @alias_type2:4:23  }  @alias_type2:4:5
   resources       : 
   submodules      : alias_type2.position, alias_type2.posrec
   procs           : 
@@ -130,8 +129,8 @@ entry:
 }
 --------------------------------------------------
  Module alias_type2.position
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : alias_type2.position./=<0>
                     alias_type2.position.=<0>
@@ -143,7 +142,6 @@ entry:
                     alias_type2.position.y<1>
   imports         : use alias_type2
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
@@ -374,8 +372,8 @@ entry:
 }
 --------------------------------------------------
  Module alias_type2.posrec
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : alias_type2.posrec./=<0>
                     alias_type2.posrec.=<0>
@@ -387,7 +385,6 @@ entry:
                     alias_type2.posrec.posrec<1>
   imports         : use alias_type2
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 

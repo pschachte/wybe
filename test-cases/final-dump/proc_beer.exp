@@ -1,13 +1,12 @@
 ======================================================================
 AFTER EVERYTHING:
  Module proc_beer
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : proc_beer.<0>
                     proc_beer.beer99<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

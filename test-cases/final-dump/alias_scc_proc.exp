@@ -1,15 +1,14 @@
 ======================================================================
 AFTER EVERYTHING:
  Module alias_scc_proc
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : alias_scc_proc.<0>
                     alias_scc_proc.bar<0>
                     alias_scc_proc.foo<0>
   imports         : use position
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
@@ -334,8 +333,8 @@ if.else:
 }
 --------------------------------------------------
  Module position
-  public submods  : 
-  public types    : position: (position.position,Just address)
+  representation  : (not a type)
+  public submods  : position -> position.position
   public resources: 
   public procs    : position.printPosition<0>
                     position.position./=<0>
@@ -348,7 +347,6 @@ if.else:
                     position.position.y<1>
   imports         : public use position.position
                     use wybe
-  types           : position/public  is address { position(x:int, y:int) @position:1:25  }  @position:1:5
   resources       : 
   submodules      : position.position
   procs           : 
@@ -420,8 +418,8 @@ entry:
 }
 --------------------------------------------------
  Module position.position
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : position.position./=<0>
                     position.position.=<0>
@@ -433,7 +431,6 @@ entry:
                     position.position.y<1>
   imports         : use position
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 

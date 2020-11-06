@@ -1,8 +1,8 @@
 ======================================================================
 AFTER EVERYTHING:
  Module list_loop
-  public submods  : 
-  public types    : intlist: (list_loop.intlist,Just address)
+  representation  : (not a type)
+  public submods  : intlist -> list_loop.intlist
   public resources: 
   public procs    : list_loop.<0>
                     list_loop.intlist./=<0>
@@ -16,7 +16,6 @@ AFTER EVERYTHING:
                     list_loop.intlist.tail<1>
   imports         : public use list_loop.intlist
                     use wybe
-  types           : intlist/public  is address { []() @list_loop:1:24 | [|](head:int, tail:intlist) @list_loop:1:29  }  @list_loop:1:5
   resources       : 
   submodules      : list_loop.intlist
   procs           : 
@@ -259,8 +258,8 @@ entry:
 }
 --------------------------------------------------
  Module list_loop.intlist
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : list_loop.intlist./=<0>
                     list_loop.intlist.=<0>
@@ -273,7 +272,6 @@ entry:
                     list_loop.intlist.tail<1>
   imports         : use list_loop
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 

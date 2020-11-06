@@ -1,12 +1,11 @@
 ======================================================================
 AFTER EVERYTHING:
  Module nested_if
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : nested_if.nested_if<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

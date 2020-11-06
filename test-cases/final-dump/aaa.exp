@@ -1,14 +1,13 @@
 ======================================================================
 AFTER EVERYTHING:
  Module aaa
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : aaa.<0>
   imports         : use bbb
                     use ccc
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
@@ -51,13 +50,12 @@ entry:
 }
 --------------------------------------------------
  Module bbb
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : bbb.<0>
   imports         : use ddd
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
@@ -100,13 +98,12 @@ entry:
 }
 --------------------------------------------------
  Module ccc
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : ccc.<0>
   imports         : use ddd
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
@@ -149,12 +146,11 @@ entry:
 }
 --------------------------------------------------
  Module ddd
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : ddd.<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

@@ -1,12 +1,11 @@
 ======================================================================
 AFTER EVERYTHING:
  Module backwards_assign
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : backwards_assign.<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

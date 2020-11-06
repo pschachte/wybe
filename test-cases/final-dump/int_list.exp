@@ -1,8 +1,8 @@
 ======================================================================
 AFTER EVERYTHING:
  Module int_list
-  public submods  : 
-  public types    : int_list: (int_list.int_list,Just address)
+  representation  : (not a type)
+  public submods  : int_list -> int_list.int_list
   public resources: 
   public procs    : int_list.<0>
                     int_list.print<0>
@@ -18,7 +18,6 @@ AFTER EVERYTHING:
                     int_list.int_list.tail<1>
   imports         : public use int_list.int_list
                     use wybe
-  types           : int_list/public  is address { []() @int_list:1:25 | [|](head:int, tail:int_list) @int_list:1:30  }  @int_list:1:5
   resources       : 
   submodules      : int_list.int_list
   procs           : 
@@ -152,8 +151,8 @@ entry:
 }
 --------------------------------------------------
  Module int_list.int_list
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : int_list.int_list./=<0>
                     int_list.int_list.=<0>
@@ -166,7 +165,6 @@ entry:
                     int_list.int_list.tail<1>
   imports         : use int_list
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 

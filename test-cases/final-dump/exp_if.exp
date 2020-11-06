@@ -1,13 +1,12 @@
 ======================================================================
 AFTER EVERYTHING:
  Module exp_if
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : exp_if.<0>
                     exp_if.if_test<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

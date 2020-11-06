@@ -1,12 +1,11 @@
 ======================================================================
 AFTER EVERYTHING:
  Module commonsubexpr
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : commonsubexpr.<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

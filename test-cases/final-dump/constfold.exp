@@ -1,15 +1,14 @@
 ======================================================================
 AFTER EVERYTHING:
  Module constfold
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : constfold.fold_add<0>
                     constfold.fold_mult<0>
                     constfold.fold_test<0>
                     constfold.fortytwo<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

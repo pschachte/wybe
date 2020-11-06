@@ -1,14 +1,13 @@
 ======================================================================
 AFTER EVERYTHING:
  Module alias5
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : alias5.<0>
                     alias5.bar<0>
                     alias5.replicate1<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

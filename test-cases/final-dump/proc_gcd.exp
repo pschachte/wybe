@@ -1,14 +1,13 @@
 ======================================================================
 AFTER EVERYTHING:
  Module proc_gcd
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : proc_gcd.<0>
                     proc_gcd.gcd<0>
                     proc_gcd.mod<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

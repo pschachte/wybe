@@ -1,12 +1,11 @@
 ======================================================================
 AFTER EVERYTHING:
  Module import_in_sub_mod_lib
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : import_in_sub_mod_lib.foo<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 
@@ -45,13 +44,12 @@ entry:
 }
 --------------------------------------------------
  Module import_in_sub_mod_main
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : import_in_sub_mod_main.<0>
   imports         : use import_in_sub_mod_main.sub
                     use wybe
-  types           : 
   resources       : 
   submodules      : import_in_sub_mod_main.sub
   procs           : 
@@ -91,14 +89,13 @@ entry:
 }
 --------------------------------------------------
  Module import_in_sub_mod_main.sub
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : import_in_sub_mod_main.sub.bar<0>
   imports         : use import_in_sub_mod_lib
                     use import_in_sub_mod_main
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 

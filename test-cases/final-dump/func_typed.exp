@@ -1,12 +1,11 @@
 ======================================================================
 AFTER EVERYTHING:
  Module func_typed
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : func_typed.plus<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

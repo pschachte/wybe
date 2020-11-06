@@ -1,8 +1,8 @@
 ======================================================================
 AFTER EVERYTHING:
  Module stmt_if
-  public submods  : 
-  public types    : tree: (stmt_if.tree,Just address)
+  representation  : (not a type)
+  public submods  : tree -> stmt_if.tree
   public resources: 
   public procs    : stmt_if.lookup<0>
                     stmt_if.tree./=<0>
@@ -18,7 +18,6 @@ AFTER EVERYTHING:
                     stmt_if.tree.right<1>
   imports         : public use stmt_if.tree
                     use wybe
-  types           : tree/public  is address { empty() @stmt_if:3:21 | node(left:tree, key:int, right:tree) @stmt_if:3:29  }  @stmt_if:3:5
   resources       : 
   submodules      : stmt_if.tree
   procs           : 
@@ -207,8 +206,8 @@ if.else2:
 }
 --------------------------------------------------
  Module stmt_if.tree
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : stmt_if.tree./=<0>
                     stmt_if.tree.=<0>
@@ -223,7 +222,6 @@ if.else2:
                     stmt_if.tree.right<1>
   imports         : use stmt_if
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 

@@ -1,8 +1,8 @@
 ======================================================================
 AFTER EVERYTHING:
  Module test_loop
-  public submods  : 
-  public types    : int_seq: (test_loop.int_seq,Just address)
+  representation  : (not a type)
+  public submods  : int_seq -> test_loop.int_seq
   public resources: 
   public procs    : test_loop.<0>
                     test_loop.int_seq./=<0>
@@ -18,10 +18,6 @@ AFTER EVERYTHING:
                     test_loop.int_seq.step<1>
   imports         : public use test_loop.int_seq
                     use wybe
-  types           : int_seq/public  is address { int_seq(low:int, step:int, high:int) @test_loop:4:9 public def {test} seq_next(!seq:int_seq):int @test_loop:6:9 = elt @test_loop:6:52 where
-        int_seq(?elt @test_loop:7:17, ?step @test_loop:7:23, ?limit @test_loop:7:30, seq @test_loop:7:38)
-        <=(elt @test_loop:8:10, limit @test_loop:8:17)
-        low(!seq @test_loop:9:13, +(elt @test_loop:9:19, step @test_loop:9:23) @test_loop:9:19) @test_loop:6:52 }  @test_loop:3:5
   resources       : 
   submodules      : test_loop.int_seq
   procs           : 
@@ -256,8 +252,8 @@ if.else1:
 }
 --------------------------------------------------
  Module test_loop.int_seq
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : test_loop.int_seq./=<0>
                     test_loop.int_seq.=<0>
@@ -272,7 +268,6 @@ if.else1:
                     test_loop.int_seq.step<1>
   imports         : use test_loop
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 

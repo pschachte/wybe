@@ -408,7 +408,7 @@ loadModuleFromSrcFile mspec srcfile = do
     either (\er -> do
                liftIO $ putStrLn $ "Syntax Error: " ++ show er
                liftIO exitFailure)
-           (compileParseTree srcfile mspec Nothing)
+           (compileParseTree srcfile mspec)
            parseTree
 
 
@@ -418,7 +418,7 @@ buildDirectory dir dirmod = do
     logBuild $ "Building DIR: " ++ dir ++ ", into MODULE: "
         ++ showModSpec dirmod
     -- Make the directory a Module package
-    enterModule dir dirmod Nothing Nothing
+    enterModule dir dirmod Nothing
     updateModule (\m -> m { isPackage = True })
 
     -- Get wybe modules (in the directory) to build
@@ -441,11 +441,10 @@ buildDirectory dir dirmod = do
 
 -- |Compile a file module given the parsed source file contents.
 -- Return a list mod that just compiled
-compileParseTree :: FilePath -> ModSpec -> Maybe [Ident] -> [Item]
-        -> Compiler [ModSpec]
-compileParseTree source modspec params items = do
+compileParseTree :: FilePath -> ModSpec -> [Item] -> Compiler [ModSpec]
+compileParseTree source modspec items = do
     logBuild $ "===> Compiling module parse tree: " ++ showModSpec modspec
-    enterModule source modspec (Just modspec) params
+    enterModule source modspec (Just modspec)
     -- Hash the parse items and store it in the module
     let hashOfItems = hashItems items
     logBuild $ "HASH: " ++ hashOfItems
@@ -494,12 +493,12 @@ loadModuleFromObjFile required objfile = do
         case requiredMods of
             [requiredMod] -> do
                 -- don't need to worried about root mod, it will be overridden
-                enterModule objfile required Nothing Nothing
+                enterModule objfile required Nothing
                 updateModule (\m -> requiredMod {modOrigin = modOrigin m})
                 -- inserts sub modules
                 mapM_ (\mod -> do
                     let spec = modSpec mod
-                    enterModule objfile spec Nothing Nothing
+                    enterModule objfile spec Nothing
                     updateModule (\m -> mod {modOrigin = modOrigin m})
                     exitModule
                     ) subMods
@@ -910,7 +909,7 @@ buildExecutable orderedSCCs targetMod target = do
             logBuild $ "Main proc:" ++ showProcDefs 0 [mainProc]
 
             let mainMod = []
-            enterModule target mainMod Nothing Nothing
+            enterModule target mainMod Nothing
             addImport ["wybe"] $ importSpec Nothing Private
             mapM_ (\m -> addImport m $ importSpec (Just [""]) Private)
                   mainImports
@@ -999,9 +998,11 @@ buildMain mainImports =
         -- XXX Should insert assignments of initialised visible resources
         bodyCode = [move (castTo (iVal 0) phantomType) (varSet "io"),
                     move (intCast $ iVal 0) (intVarSet "exit_code"),
-                    Unplaced $ ForeignCall "c" "gc_init" [] 
-                            [Unplaced (varGet "io"), Unplaced (varSet "io")]] 
-                        ++ bodyInner
+                    Unplaced $ ForeignCall "c" "gc_init" ["semipure"] []] 
+                    ++ bodyInner
+                    ++ [Unplaced 
+                        $ ForeignCall "c" "exit" ["semipure","terminal"]
+                                      [Unplaced $ intVarGet "exit_code"]]
         mainBody = ProcDefSrc bodyCode
         -- Program main has argc, argv, exit_code, and io as resources
         proto = ProcProto "" []

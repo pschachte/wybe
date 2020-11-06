@@ -1,8 +1,8 @@
 ======================================================================
 AFTER EVERYTHING:
  Module person4
-  public submods  : 
-  public types    : person: (person4.person,Just address)
+  representation  : (not a type)
+  public submods  : person -> person4.person
   public resources: 
   public procs    : person4.<0>
                     person4.person./=<0>
@@ -15,7 +15,6 @@ AFTER EVERYTHING:
                     person4.person.person<1>
   imports         : public use person4.person
                     use wybe
-  types           : person/public  is address { person(firstname:string, lastname:string) @person4:1:23  }  @person4:1:5
   resources       : 
   submodules      : person4.person
   procs           : 
@@ -60,8 +59,8 @@ entry:
 }
 --------------------------------------------------
  Module person4.person
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : person4.person./=<0>
                     person4.person.=<0>
@@ -73,7 +72,6 @@ entry:
                     person4.person.person<1>
   imports         : use person4
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 

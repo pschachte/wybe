@@ -57,7 +57,6 @@ instance Binary ResourceFlowSpec
 instance Binary ModuleImplementation
 instance Binary ResourceImpln
 instance Binary TypeRepresentation
-instance Binary TypeDef
 instance Binary ImportSpec
 -- Module
 instance Binary Module

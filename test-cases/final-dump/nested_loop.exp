@@ -1,12 +1,11 @@
 ======================================================================
 AFTER EVERYTHING:
  Module nested_loop
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : nested_loop.<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

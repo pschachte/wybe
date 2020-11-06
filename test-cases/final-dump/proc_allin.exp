@@ -1,12 +1,11 @@
 ======================================================================
 AFTER EVERYTHING:
  Module proc_allin
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : proc_allin.nada<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

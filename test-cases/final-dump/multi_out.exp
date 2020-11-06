@@ -1,13 +1,12 @@
 ======================================================================
 AFTER EVERYTHING:
  Module multi_out
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : multi_out.<0>
                     multi_out.onetwothree<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

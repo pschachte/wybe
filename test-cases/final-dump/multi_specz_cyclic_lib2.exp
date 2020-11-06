@@ -1,8 +1,8 @@
 ======================================================================
 AFTER EVERYTHING:
  Module multi_specz_cyclic_lib
-  public submods  : 
-  public types    : position: (multi_specz_cyclic_lib.position,Just address)
+  representation  : (not a type)
+  public submods  : position -> multi_specz_cyclic_lib.position
   public resources: 
   public procs    : multi_specz_cyclic_lib.foo1<0>
                     multi_specz_cyclic_lib.modifyAndPrint<0>
@@ -18,7 +18,6 @@ AFTER EVERYTHING:
   imports         : public use multi_specz_cyclic_lib.position
                     use multi_specz_cyclic_lib2
                     use wybe
-  types           : position/public  is address { position(x:int, y:int) @multi_specz_cyclic_lib:3:25  }  @multi_specz_cyclic_lib:3:5
   resources       : 
   submodules      : multi_specz_cyclic_lib.position
   procs           : 
@@ -154,8 +153,8 @@ entry:
 }
 --------------------------------------------------
  Module multi_specz_cyclic_lib.position
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : multi_specz_cyclic_lib.position./=<0>
                     multi_specz_cyclic_lib.position.=<0>
@@ -167,7 +166,6 @@ entry:
                     multi_specz_cyclic_lib.position.y<1>
   imports         : use multi_specz_cyclic_lib
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
@@ -398,13 +396,12 @@ entry:
 }
 --------------------------------------------------
  Module multi_specz_cyclic_lib2
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : multi_specz_cyclic_lib2.foo2<0>
   imports         : use multi_specz_cyclic_lib
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 

@@ -1,14 +1,13 @@
 ======================================================================
 AFTER EVERYTHING:
  Module call_site_id
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : call_site_id.<0>
                     call_site_id.bar<0>
                     call_site_id.foo<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

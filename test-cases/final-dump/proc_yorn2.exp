@@ -1,12 +1,11 @@
 ======================================================================
 AFTER EVERYTHING:
  Module proc_yorn2
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : proc_yorn2.yorn<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

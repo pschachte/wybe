@@ -89,7 +89,7 @@ blockTransformModule thisMod =
        knownTypesSet <- Map.elems <$>
                          getModuleImplementationField modKnownTypes
        let knownTypes = concatMap Set.toList knownTypesSet
-       trs <- mapM llvmType knownTypes
+       trs <- mapM moduleLLVMType knownTypes
        -- typeList :: [(TypeSpec, LLVMAST.Type)]
        let typeList = zip knownTypes trs
        -- log the assoc list typeList
@@ -1091,6 +1091,13 @@ typeRep ty =
             ++ show ty
             ++ ")"
     in fromMaybe err <$> lookupTypeRepresentation ty
+
+
+-- |The LLVM type of the specified module spec; error if it's not a type.
+moduleLLVMType :: ModSpec -> Compiler LLVMAST.Type
+moduleLLVMType mspec =
+    repLLVMType . trustFromJust "moduleLLVMType of non-type"
+    <$> lookupModuleRepresentation mspec
 
 
 repLLVMType :: TypeRepresentation -> LLVMAST.Type

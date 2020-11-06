@@ -1,12 +1,11 @@
 ======================================================================
 AFTER EVERYTHING:
  Module func_where
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : func_where.quad<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

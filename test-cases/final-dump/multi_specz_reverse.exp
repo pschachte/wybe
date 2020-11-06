@@ -1,8 +1,8 @@
 ======================================================================
 AFTER EVERYTHING:
  Module multi_specz_reverse
-  public submods  : 
-  public types    : intlist: (multi_specz_reverse.intlist,Just address)
+  representation  : (not a type)
+  public submods  : intlist -> multi_specz_reverse.intlist
   public resources: 
   public procs    : multi_specz_reverse.<0>
                     multi_specz_reverse.list_print<0>
@@ -19,7 +19,6 @@ AFTER EVERYTHING:
                     multi_specz_reverse.intlist.tail<1>
   imports         : public use multi_specz_reverse.intlist
                     use wybe
-  types           : intlist/public  is address { []() @multi_specz_reverse:1:24 | [|](head:int, tail:intlist) @multi_specz_reverse:1:29  }  @multi_specz_reverse:1:5
   resources       : 
   submodules      : multi_specz_reverse.intlist
   procs           : 
@@ -350,8 +349,8 @@ if.else:
 }
 --------------------------------------------------
  Module multi_specz_reverse.intlist
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : multi_specz_reverse.intlist./=<0>
                     multi_specz_reverse.intlist.=<0>
@@ -364,7 +363,6 @@ if.else:
                     multi_specz_reverse.intlist.tail<1>
   imports         : use multi_specz_reverse
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 

@@ -1,12 +1,11 @@
 ======================================================================
 AFTER EVERYTHING:
  Module stmt_while
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : stmt_while.<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

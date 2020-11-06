@@ -92,30 +92,30 @@ tests without alias
 ======================================================================
 AFTER BUILDING MAIN:
  Module 
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : 
   imports         : from int_list_test use 
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
 *main* > {inline} (0 calls)
-0: (argc#0:wybe.int, argv#0:wybe.int, ?exit_code#1:wybe.int, ?io#2:wybe.phantom):
+0: (argc#0:wybe.int, argv#0:wybe.int, ?exit_code#1:wybe.int, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(0:wybe.int, ?exit_code#1:wybe.int)
-    foreign c gc_init(0:wybe.phantom, ?io#1:wybe.phantom)
-    int_list_test.<0>(~#argc#0:wybe.int, ?_:wybe.int, ~#argv#0:wybe.int, ?_:wybe.int, 0:wybe.int, ?_:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #0
+    foreign c {semipure} gc_init()
+    int_list_test.<0>(~#argc#0:wybe.int, ?_:wybe.int, ~#argv#0:wybe.int, ?_:wybe.int, 0:wybe.int, ?_:wybe.int, 0:wybe.phantom, ?#io#1:wybe.phantom) #0
+    foreign c {semipure,terminal} exit(0:wybe.int)
 
 LLVM code       : None
 
 --------------------------------------------------
  Module int_list
-  public submods  : 
-  public types    : int_list: (int_list.int_list,Just address)
+  representation  : (not a type)
+  public submods  : int_list -> int_list.int_list
   public resources: 
   public procs    : int_list.append<0>
                     int_list.count<0>
@@ -141,7 +141,6 @@ LLVM code       : None
                     int_list.int_list.tail<1>
   imports         : public use int_list.int_list
                     use wybe
-  types           : int_list/public  is address { []() @int_list:4:25 | [|](head:int, tail:int_list) @int_list:4:30  }  @int_list:4:5
   resources       : 
   submodules      : int_list.int_list
   procs           : 
@@ -486,8 +485,8 @@ LLVM code       : None
 
 --------------------------------------------------
  Module int_list.int_list
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : int_list.int_list./=<0>
                     int_list.int_list.=<0>
@@ -500,7 +499,6 @@ LLVM code       : None
                     int_list.int_list.tail<1>
   imports         : use int_list
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
@@ -639,13 +637,12 @@ LLVM code       : None
 
 --------------------------------------------------
  Module int_list_test
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : int_list_test.<0>
   imports         : use int_list
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
@@ -747,23 +744,23 @@ LLVM code       : None
 ======================================================================
 AFTER EVERYTHING:
  Module 
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : 
   imports         : from int_list_test use 
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
 *main* > {inline} (0 calls)
-0: (argc#0:wybe.int, argv#0:wybe.int, ?exit_code#1:wybe.int, ?io#2:wybe.phantom):
+0: (argc#0:wybe.int, argv#0:wybe.int, ?exit_code#1:wybe.int, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(0:wybe.int, ?exit_code#1:wybe.int)
-    foreign c gc_init(0:wybe.phantom, ?io#1:wybe.phantom)
-    int_list_test.<0>(~#argc#0:wybe.int, ?_:wybe.int, ~#argv#0:wybe.int, ?_:wybe.int, 0:wybe.int, ?_:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #0
+    foreign c {semipure} gc_init()
+    int_list_test.<0>(~#argc#0:wybe.int, ?_:wybe.int, ~#argv#0:wybe.int, ?_:wybe.int, 0:wybe.int, ?_:wybe.int, 0:wybe.phantom, ?#io#1:wybe.phantom) #0
+    foreign c {semipure,terminal} exit(0:wybe.int)
 
   LLVM code       :
 
@@ -771,6 +768,9 @@ AFTER EVERYTHING:
 
 
  
+
+
+declare external ccc  void @exit(i64)    
 
 
 declare external fastcc  void @"int_list_test.<0>"(i64, i64, i64)    
@@ -789,12 +789,13 @@ define external ccc  i32 @main(i64  %"argc#0", i64  %"argv#0")    {
 entry:
   tail call ccc  void  @gc_init()  
   tail call fastcc  void  @"int_list_test.<0>"(i64  %"argc#0", i64  %"argv#0", i64  0)  
+  tail call ccc  void  @exit(i64  0)  
   ret i64 0 
 }
 --------------------------------------------------
  Module int_list
-  public submods  : 
-  public types    : int_list: (int_list.int_list,Just address)
+  representation  : (not a type)
+  public submods  : int_list -> int_list.int_list
   public resources: 
   public procs    : int_list.append<0>
                     int_list.count<0>
@@ -820,7 +821,6 @@ entry:
                     int_list.int_list.tail<1>
   imports         : public use int_list.int_list
                     use wybe
-  types           : int_list/public  is address { []() @int_list:4:25 | [|](head:int, tail:int_list) @int_list:4:30  }  @int_list:4:5
   resources       : 
   submodules      : int_list.int_list
   procs           : 
@@ -1933,8 +1933,8 @@ if.else:
 }
 --------------------------------------------------
  Module int_list.int_list
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : int_list.int_list./=<0>
                     int_list.int_list.=<0>
@@ -1947,7 +1947,6 @@ if.else:
                     int_list.int_list.tail<1>
   imports         : use int_list
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
@@ -2275,13 +2274,12 @@ if.else:
 }
 --------------------------------------------------
  Module int_list_test
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : int_list_test.<0>
   imports         : use int_list
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 

@@ -1,14 +1,13 @@
 ======================================================================
 AFTER EVERYTHING:
  Module alias_fork2
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : alias_fork2.<0>
                     alias_fork2.simpleMerge<0>
   imports         : use mytree
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
@@ -241,8 +240,8 @@ entry:
 }
 --------------------------------------------------
  Module mytree
-  public submods  : 
-  public types    : tree: (mytree.tree,Just address)
+  representation  : (not a type)
+  public submods  : tree -> mytree.tree
   public resources: 
   public procs    : mytree.printTree<0>
                     mytree.printTree1<0>
@@ -259,7 +258,6 @@ entry:
                     mytree.tree.right<1>
   imports         : public use mytree.tree
                     use wybe
-  types           : tree/public  is address { empty() @mytree:1:21 | node(left:tree, key:int, right:tree) @mytree:1:29  }  @mytree:1:5
   resources       : 
   submodules      : mytree.tree
   procs           : 
@@ -358,8 +356,8 @@ if.else:
 }
 --------------------------------------------------
  Module mytree.tree
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : mytree.tree./=<0>
                     mytree.tree.=<0>
@@ -374,7 +372,6 @@ if.else:
                     mytree.tree.right<1>
   imports         : use mytree
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 

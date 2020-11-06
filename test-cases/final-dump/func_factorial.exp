@@ -1,13 +1,12 @@
 ======================================================================
 AFTER EVERYTHING:
  Module func_factorial
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : func_factorial.<0>
                     func_factorial.factorial<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

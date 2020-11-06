@@ -1,12 +1,11 @@
 ======================================================================
 AFTER EVERYTHING:
  Module exp_simple
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : exp_simple.<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

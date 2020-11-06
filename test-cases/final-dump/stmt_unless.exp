@@ -1,13 +1,12 @@
 ======================================================================
 AFTER EVERYTHING:
  Module stmt_unless
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : stmt_unless.<0>
                     stmt_unless.mod<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

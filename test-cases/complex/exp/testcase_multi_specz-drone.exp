@@ -24,34 +24,33 @@
 ======================================================================
 AFTER BUILDING MAIN:
  Module 
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : 
   imports         : from drone use 
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
 *main* > {inline} (0 calls)
-0: (argc#0:wybe.int, argv#0:wybe.int, ?exit_code#1:wybe.int, ?io#2:wybe.phantom):
+0: (argc#0:wybe.int, argv#0:wybe.int, ?exit_code#1:wybe.int, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c gc_init(0:wybe.phantom, ?io#1:wybe.phantom)
-    drone.<0>(~#argc#0:wybe.int, ?#argc#1:wybe.int, ~#argv#0:wybe.int, ?#argv#1:wybe.int, 0:wybe.int, ?#exit_code#1:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #0
+    foreign c {semipure} gc_init()
+    drone.<0>(~#argc#0:wybe.int, ?#argc#1:wybe.int, ~#argv#0:wybe.int, ?#argv#1:wybe.int, 0:wybe.int, ?#exit_code#1:wybe.int, 0:wybe.phantom, ?#io#1:wybe.phantom) #0
+    foreign c {semipure,terminal} exit(exit_code#1:wybe.int)
 
 LLVM code       : None
 
 --------------------------------------------------
  Module drone
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : drone.<0>
   imports         : use drone.drone_info
                     use wybe
-  types           : drone_info/ is address { drone_info(x:int, y:int, z:int, count:int) @drone:2:23  }  @drone:2:1
   resources       : 
   submodules      : drone.drone_info
   procs           : 
@@ -289,8 +288,8 @@ LLVM code       : None
 
 --------------------------------------------------
  Module drone.drone_info
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : drone.drone_info./=<0>
                     drone.drone_info.=<0>
@@ -306,7 +305,6 @@ LLVM code       : None
                     drone.drone_info.z<1>
   imports         : use drone
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
@@ -457,22 +455,22 @@ LLVM code       : None
 ======================================================================
 AFTER EVERYTHING:
  Module 
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : 
   imports         : from drone use 
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
 *main* > {inline} (0 calls)
-0: (argc#0:wybe.int, argv#0:wybe.int, ?exit_code#1:wybe.int, ?io#2:wybe.phantom):
+0: (argc#0:wybe.int, argv#0:wybe.int, ?exit_code#1:wybe.int, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c gc_init(0:wybe.phantom, ?io#1:wybe.phantom)
-    drone.<0>(~#argc#0:wybe.int, ?#argc#1:wybe.int, ~#argv#0:wybe.int, ?#argv#1:wybe.int, 0:wybe.int, ?#exit_code#1:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #0
+    foreign c {semipure} gc_init()
+    drone.<0>(~#argc#0:wybe.int, ?#argc#1:wybe.int, ~#argv#0:wybe.int, ?#argv#1:wybe.int, 0:wybe.int, ?#exit_code#1:wybe.int, 0:wybe.phantom, ?#io#1:wybe.phantom) #0
+    foreign c {semipure,terminal} exit(exit_code#1:wybe.int)
 
   LLVM code       :
 
@@ -480,6 +478,9 @@ AFTER EVERYTHING:
 
 
  
+
+
+declare external ccc  void @exit(i64)    
 
 
 declare external fastcc  {i64, i64, i64} @"drone.<0>"(i64, i64, i64)    
@@ -501,17 +502,17 @@ entry:
   %2 = extractvalue {i64, i64, i64} %1, 0 
   %3 = extractvalue {i64, i64, i64} %1, 1 
   %4 = extractvalue {i64, i64, i64} %1, 2 
+  tail call ccc  void  @exit(i64  %4)  
   ret i64 %4 
 }
 --------------------------------------------------
  Module drone
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : drone.<0>
   imports         : use drone.drone_info
                     use wybe
-  types           : drone_info/ is address { drone_info(x:int, y:int, z:int, count:int) @drone:2:23  }  @drone:2:1
   resources       : 
   submodules      : drone.drone_info
   procs           : 
@@ -1529,8 +1530,8 @@ entry:
 }
 --------------------------------------------------
  Module drone.drone_info
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : drone.drone_info./=<0>
                     drone.drone_info.=<0>
@@ -1546,7 +1547,6 @@ entry:
                     drone.drone_info.z<1>
   imports         : use drone
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 

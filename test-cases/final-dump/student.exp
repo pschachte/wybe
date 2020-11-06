@@ -1,9 +1,9 @@
 ======================================================================
 AFTER EVERYTHING:
  Module student
-  public submods  : 
-  public types    : course: (student.course,Just address)
-                    student: (student.student,Just address)
+  representation  : (not a type)
+  public submods  : course -> student.course
+                    student -> student.student
   public resources: 
   public procs    : student.<0>
                     student.printStudent<0>
@@ -26,7 +26,6 @@ AFTER EVERYTHING:
   imports         : public use student.course
                     public use student.student
                     use wybe
-  types           : course/public  is address { course(code:int, name:string) @student:1:24  }  @student:1:5, student/public  is address { student(id:int, major:course) @student:2:24  }  @student:2:5
   resources       : 
   submodules      : student.course, student.student
   procs           : 
@@ -157,8 +156,8 @@ entry:
 }
 --------------------------------------------------
  Module student.course
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : student.course./=<0>
                     student.course.=<0>
@@ -170,7 +169,6 @@ entry:
                     student.course.name<1>
   imports         : use student
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
@@ -408,8 +406,8 @@ entry:
 }
 --------------------------------------------------
  Module student.student
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : student.student./=<0>
                     student.student.=<0>
@@ -421,7 +419,6 @@ entry:
                     student.student.student<1>
   imports         : use student
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 

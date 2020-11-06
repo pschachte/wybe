@@ -29,6 +29,7 @@ import Data.Tuple.Select
 import Flatten
 import Options (LogSelection(Normalise))
 import Snippets
+import Util
 
 -- |Normalise a list of file items, storing the results in the current module.
 normalise :: [Item] -> Compiler ()
@@ -48,14 +49,26 @@ normalise items = do
 
 -- |Normalise a single file item, storing the result in the current module.
 normaliseItem :: Item -> Compiler ()
-normaliseItem (TypeDecl vis (TypeProto name params) rep items pos)
-  = do
-    let (rep', ctorVis, ctors) = normaliseTypeImpln rep
-    _ <- addType name (TypeDef vis params rep' ctors ctorVis pos items)
-    normaliseSubmodule name (Just params) vis pos items
-    return ()
+normaliseItem (TypeDecl vis (TypeProto name params) (TypeRepresentation rep)
+              items pos) = do
+    let items' =
+            [ModuleParamsDecl params pos | not $ List.null params]
+            ++ [RepresentationDecl rep pos] ++ items
+    normaliseSubmodule name vis pos items'
+normaliseItem (TypeDecl vis (TypeProto name params) (TypeCtors ctorVis ctors)
+              items pos) = do
+    let items' =
+            [ModuleParamsDecl params pos | not $ List.null params]
+            ++ [ConstructorDecl ctorVis ctors] ++ items
+    normaliseSubmodule name vis pos items'
 normaliseItem (ModuleDecl vis name items pos) =
-    normaliseSubmodule name Nothing vis pos items
+    normaliseSubmodule name vis pos items
+normaliseItem (ModuleParamsDecl params pos) =
+    addParameters params pos
+normaliseItem (RepresentationDecl rep pos) =
+    addTypeRep rep pos
+normaliseItem (ConstructorDecl ctorVis ctors) =
+    mapM_ (addConstructor ctorVis) ctors
 normaliseItem (ImportMods vis modspecs pos) =
     mapM_ (\spec -> addImport spec (importSpec Nothing vis)) modspecs
 normaliseItem (ImportItems vis modspec imports pos) =
@@ -96,9 +109,8 @@ normaliseItem (PragmaDecl prag) =
 
 
 
-normaliseSubmodule :: Ident -> Maybe [Ident] -> Visibility -> OptPos ->
-                      [Item] -> Compiler ()
-normaliseSubmodule name typeParams vis pos items = do
+normaliseSubmodule :: Ident -> Visibility -> OptPos -> [Item] -> Compiler ()
+normaliseSubmodule name vis pos items = do
     parentOrigin <- getOrigin
     parentModSpec <- getModuleSpec
     let subModSpec = parentModSpec ++ [name]
@@ -111,18 +123,9 @@ normaliseSubmodule name typeParams vis pos items = do
     alreadyExists <- isJust <$> getLoadingModule subModSpec
     if alreadyExists
       then reenterModule subModSpec
-      else enterModule parentOrigin subModSpec (Just parentModSpec) typeParams
+      else enterModule parentOrigin subModSpec (Just parentModSpec)
     -- submodule always imports parent module
     addImport parentModSpec (importSpec Nothing Private)
-    when (isJust typeParams)
-      $ do
-        updateImplementation
-          (\imp ->
-             let set = Set.singleton $ TypeSpec parentModSpec name []
-             in imp { modKnownTypes = Map.insert name set $ modKnownTypes imp })
-        mapM_
-          (flip addType (TypeDef Private [] (Just Address) [] Private pos []))
-          (fromJust typeParams)
     normalise items
     if alreadyExists
     then reexitModule
@@ -146,88 +149,120 @@ normaliseSubmodule name typeParams vis pos items = do
 
 completeNormalisation :: [ModSpec] -> Compiler ()
 completeNormalisation mods = do
+    logNormalise $ "Completing normalisation of modules " ++ showModSpecs mods
     completeTypeNormalisation mods
     mapM_ (normaliseModMain `inModule`) mods
 
 
--- | Layout the types defined on the specified module list, which comprise
---   a strongly connected component in the module dependency graph. Because
---   SCCs are handled in topologically sorted order (bottom-up), this means
---   all types defined in the specified modules have already been laid out
---   and can be looked up. However, to layout a type, we need to have first
---   laid out the types it depends on. In the case of (mutually) recursive
---   types, we represent all of them as pointers. Thus we first find the
---   SCCs in the type dependency graph restricted to the specified modules,
---   and lay out those types bottom-up. Once a type is laid out, we also
---   generate constructors, deconstructors, accessors, mutators, and
---   auxiliary procedures.
+-- | Layout the types on the specified module list, which comprise a strongly
+--   connected component in the *module* dependency graph.  Some of the
+--   specified modules will not be types, and are ignored here.  Some that are
+--   types will be specified by representation rather than by constructors; for
+--   these, we just accept the specified representation, so there is nothing
+--   more to do here.  The types specified as a list of constructors can only be
+--   defined in terms of types in the specified module list or in modules that
+--   have already been layed out.  Any mutually recursively defined types must
+--   all be listed in the same module dependency SCC.  Also, all (mutually)
+--   recursively defined types may be unbounded in size, and therefore must be
+--   represented as pointers.
+--
+--   Thus we handle struct layout by first finding the SCCs in the *type*
+--   dependency graph limited to the current *module* depenency SCC, and
+--   handling the SCCs in topological order.  For recursive SCCs, we first
+--   automatically assign a pointer representation for each type.  Then we lay
+--   out each type in the type dependency SCC, and finally generate
+--   constructors, deconstructors, accessors, mutators, and auxiliary
+--   procedures.  This ensures we can do the layout in a single pass, and can
+--   safely look up the representation of each type referred in each constructor
+--   as we process it.
 completeTypeNormalisation :: [ModSpec] -> Compiler ()
 completeTypeNormalisation mods = do
-    logNormalise $ "Completing normalisation of modules " ++ showModSpecs mods
-    types <- modSCCTypeDeps mods
-    logNormalise $ "Ordered type dependency SCCs: " ++ show types
-    mapM_ completeTypeSCC types
+    mods' <- filterM (getSpecModule "completeTypeNormalisation" 
+                      (modIsType &&& isNothing . modTypeRep)) mods
+    typeSCCs <- modSCCTypeDeps mods'
+    logNormalise $ "Ordered type dependency SCCs: " ++ show typeSCCs
+    mapM_ completeTypeSCC typeSCCs
 
 
-type TypeKey = (Ident,ModSpec)
+-- |An algebraic type definition, listing all the constructors.
+data TypeDef = TypeDef {
+    typeDefParams :: [TypeVarName],           -- the type parameters
+    typeDefMembers :: [Placed ProcProto],     -- high level representation
+    typeDefMemberVis :: Visibility            -- are members public?
+    } deriving (Eq, Show)
+
+
+-- -- |How to show a type definition.
+-- instance Show TypeDef where
+--   show (TypeDef params members _ pos items) =
+--     bracketList "(" "," ")" params
+--     ++ " { "
+--     ++ intercalate " | " (show <$> members)
+--     ++ " "
+--     ++ intercalate "\n  " (show <$> items)
+--     ++ " } "
+--     ++ showMaybeSourcePos pos
 
 
 -- | Return a topologically sorted list of type dependency SCCs in the
 --   specified modules.
-modSCCTypeDeps :: [ModSpec] -> Compiler [SCC (TypeKey,TypeDef)]
+modSCCTypeDeps :: [ModSpec] -> Compiler [SCC (ModSpec,TypeDef)]
 modSCCTypeDeps sccMods =
-    stronglyConnComp <$>
-      concatMapM (modTypeDeps sccMods `inModule`) sccMods
+    let modSet = Set.fromList sccMods
+    in stronglyConnComp <$> mapM (modTypeDeps modSet `inModule`) sccMods
 
 
 -- | Return a list of type dependencies on types defined in the specified
 -- modules that are defined in the current module
-modTypeDeps :: [ModSpec] -> Compiler [((TypeKey,TypeDef), TypeKey, [TypeKey])]
-modTypeDeps sccMods = do
-    modspec <- getModuleSpec
-    pairs <- Map.toList <$> getModuleImplementationField modTypes
-    mapM (typeDeps sccMods) [((name,modspec),def) | (name,def) <- pairs]
+modTypeDeps :: Set ModSpec -> Compiler ((ModSpec,TypeDef), ModSpec, [ModSpec])
+modTypeDeps modSet = do
+    tyMod <- getModule modSpec
+    tyParams <- getModule modParams
+    ctorsVis <- (reverse . trustFromJust "modTypeDeps")
+               <$> getModuleImplementationField modConstructors
+    -- XXX should pull visibility out of list
+    let vis = fst $ head ctorsVis
+    ctors <- mapM (placedApply resolveCtorTypes . snd) ctorsVis
+    let deps = List.filter (`Set.member` modSet)
+               $ concatMap 
+                 (((typeModule . paramType) <$>) . procProtoParams . content)
+                 ctors
+    return ((tyMod, TypeDef tyParams ctors vis), tyMod, deps)
 
 
--- | Produce the input needed to construct a list of SCCs.
-typeDeps :: [ModSpec] -> (TypeKey,TypeDef)
-         -> Compiler ((TypeKey,TypeDef), TypeKey, [TypeKey])
-typeDeps sccMods (key,def) = do
-    let deps = typeDefMembers def
-    depKeys <- (Set.toList . Set.fromList . concat)
-               <$> mapM (placedApplyM $ protoKeys sccMods) deps
-    return ((key,def), key, depKeys)
+-- | Resolve constructor argument types.
+resolveCtorTypes :: ProcProto -> OptPos -> Compiler (Placed ProcProto)
+resolveCtorTypes proto pos = do
+    params <- mapM (resolveParamType pos) $ procProtoParams proto
+    return $ maybePlace (proto { procProtoParams = params }) pos
 
--- | Return a list of all the types defined in any of the sccMods that are
---   used as parameter types of any of the parameters of the provided ProcProto
-protoKeys :: [ModSpec] -> ProcProto -> OptPos -> Compiler [TypeKey]
-protoKeys sccMods proto pos = do
-    let types = paramType <$> procProtoParams proto
-    -- XXX to handle parametric types, we need to include the type parameters
-    types' <- catMaybes <$> mapM (`lookupType` pos) types
-    return [(name,mod) | (TypeSpec mod name _) <- types', mod `elem` sccMods]
+
+-- | Resolve the type of a parameter
+resolveParamType :: OptPos -> Param -> Compiler Param
+resolveParamType pos param@Param{paramType=ty} = do
+    maybeTy <- lookupType ty pos
+    case maybeTy of
+        Nothing -> do errmsg pos $ "Unknown type " ++ show ty
+                      return param
+        Just ty' -> return $ param {paramType=ty'}
 
 
 -- | Layout the types defined in the specified type dependency SCC, and then
 --   generate constructors, deconstructors, accessors, mutators, and
 --   auxiliary procedures.
-completeTypeSCC :: SCC (TypeKey,TypeDef) -> Compiler ()
-completeTypeSCC (AcyclicSCC ((name,mod),typedef)) = do
+completeTypeSCC :: SCC (ModSpec,TypeDef) -> Compiler ()
+completeTypeSCC (AcyclicSCC (mod,typedef)) = do
     logNormalise $ "Completing non-recursive type "
-                   ++ showModSpec mod ++ "." ++ name ++ " = "
-                   ++ show typedef
-    completeType (name,mod) typedef
-completeTypeSCC (CyclicSCC nameTypedefs) = do
-    logNormalise $ "Completing recursive type(s):" ++ show nameTypedefs
-    mapM_ (\((name,mod),typedef) ->
-             logNormalise $ "   " ++ showModSpec mod ++ "." ++ name ++ " = "
-               ++ show typedef) nameTypedefs
-    -- Update type representations for recursive types to addresses
-    mapM_ (\((name,mod),typedef) ->
-             addType name (typedef {typeDefRepresentation = Just Address})
-               `inModule` mod)
-          nameTypedefs
-    mapM_ (uncurry completeType) nameTypedefs
+                   ++ showModSpec mod ++ " = " ++ show typedef
+    completeType mod typedef
+completeTypeSCC (CyclicSCC modTypeDefs) = do
+    logNormalise $ "Completing recursive type(s):" ++ show modTypeDefs
+    mapM_ (\(mod,typedef) ->
+             logNormalise $ "   " ++ showModSpec mod ++ " = " ++ show typedef)
+          modTypeDefs
+    -- First set representations to addresses, then layout types
+    mapM_ ((setTypeRep Address `inModule`) . fst) modTypeDefs
+    mapM_ (uncurry completeType) modTypeDefs
 
 
 -- | Information about a non-constant constructor
@@ -244,6 +279,7 @@ data CtorInfo = CtorInfo {
 
 -- | Layout the specified type, and then generate constructors,
 --   deconstructors, accessors, mutators, and auxiliary procedures.
+--   When called, all referred types have established representations.
 --
 --   Our type layout strategy:
 --     * Let numConsts = the number of constant constructors
@@ -262,54 +298,49 @@ data CtorInfo = CtorInfo {
 --     * elif numConsts == 0 && max ctorSize <= wordSizeBytes:
 --          rep = integer with max ctorSize bits
 --     * else: rep = integer with wordSizeBytes bits
-completeType :: TypeKey -> TypeDef -> Compiler ()
-completeType (name,modspec)
-             typedef@(TypeDef vis params rep ctors ctorVis pos items) = do
-    logNormalise $ "Completing type " ++ showModSpec modspec ++ "." ++ name
-    let subModSpec = modspec ++ [name]
-    let rep0  = trustFromJust "completeType with equiv type decl" rep
-    if List.null ctors
-      then return () -- we should have already determined the representation
-      else do
-      reenterModule modspec -- XXX should be subModSpec?
-      let (constCtors,nonConstCtors) =
-            List.partition (List.null . procProtoParams . content) ctors
-      let numConsts = length constCtors
-      let numNonConsts = length nonConstCtors
-      let (tagBits,tagLimit) =
-            if numNonConsts > wordSizeBytes
-            then -- must set aside one tag to indicate secondary tag
-              (availableTagBits, wordSizeBytes - 2)
-            else if numNonConsts == 0
-            then (0, 0)
-            else (ceiling $ logBase 2 (fromIntegral numNonConsts),
-                  wordSizeBytes - 1)
-      logNormalise $ "Complete " ++ showModSpec modspec ++ "." ++ name
-                     ++ " with " ++ show tagBits ++ " tag bits and "
-                     ++ show tagLimit ++ " tag limit"
-      when (numConsts >= fromIntegral smallestAllocatedAddress)
-        $ nyi $ "Type '" ++ name ++ "' has too many constant constructors"
-      let typespec = TypeSpec modspec name
-                     $ List.map (\n->TypeSpec [] n []) params
-      let constItems =
-            concatMap (constCtorItems ctorVis typespec) $ zip constCtors [0..]
-      infos <- zipWithM nonConstCtorInfo nonConstCtors [0..]
-      (reps,nonconstItemsList) <-
-           unzip <$> mapM
-           (nonConstCtorItems ctorVis typespec numConsts numNonConsts
-            tagBits tagLimit)
-           infos
-      let rep = typeRepresentation reps numConsts
-      let extraItems =
-            implicitItems typespec constCtors nonConstCtors rep items
-      logNormalise $ "Representation of type "
-                     ++ showModSpec modspec ++ "." ++ name
-                     ++ " is " ++ show rep
-      addType name (typedef {typeDefRepresentation = Just rep })
-      normaliseSubmodule name (Just params) vis pos
-        $ constItems ++ concat nonconstItemsList ++ extraItems
-      reexitModule
-      return ()
+completeType :: ModSpec -> TypeDef -> Compiler ()
+completeType modspec (TypeDef params ctors ctorVis) = do
+    logNormalise $ "Completing type " ++ showModSpec modspec
+    when (List.null ctors)
+      $ shouldnt $ "completeType with no constructors: " ++ show modspec
+    reenterModule modspec
+    let (constCtors,nonConstCtors) =
+            List.partition (List.null . procProtoParams . content) $ ctors
+    let numConsts = length constCtors
+    let numNonConsts = length nonConstCtors
+    let (tagBits,tagLimit) =
+          if numNonConsts > wordSizeBytes
+          then -- must set aside one tag to indicate secondary tag
+            (availableTagBits, wordSizeBytes - 2)
+          else if numNonConsts == 0
+          then (0, 0)
+          else (ceiling $ logBase 2 (fromIntegral numNonConsts),
+                wordSizeBytes - 1)
+    logNormalise $ "Complete " ++ showModSpec modspec
+                   ++ " with " ++ show tagBits ++ " tag bits and "
+                   ++ show tagLimit ++ " tag limit"
+    -- XXX if numNonConsts == 0, then we could handle more consts.
+    when (numConsts >= fromIntegral smallestAllocatedAddress)
+      $ nyi $ "Type '" ++ show modspec ++ "' has too many constant constructors"
+    -- XXX remove name from TypeSpec, and add type variable as an alternative ctor
+    let typespec = TypeSpec (init modspec) (last modspec)
+                   $ List.map (\n->TypeSpec [] n []) params
+    let constItems =
+          concatMap (constCtorItems ctorVis typespec) $ zip constCtors [0..]
+    infos <- zipWithM nonConstCtorInfo nonConstCtors [0..]
+    (reps,nonconstItemsList) <-
+         unzip <$> mapM
+         (nonConstCtorItems ctorVis typespec numConsts numNonConsts
+          tagBits tagLimit)
+         infos
+    let rep = typeRepresentation reps numConsts
+    extraItems <- implicitItems typespec constCtors nonConstCtors rep
+    logNormalise $ "Representation of type " ++ showModSpec modspec
+                   ++ " is " ++ show rep
+    setTypeRep rep
+    normalise $ constItems ++ concat nonconstItemsList ++ extraItems
+    reexitModule
+    return ()
 
 
 -- | Analyse the representation of a single constructor, determining the
@@ -864,41 +895,45 @@ deconstructorDetism numConsts numNonConsts
 ----------------------------------------------------------------
 
 implicitItems :: TypeSpec -> [Placed ProcProto] -> [Placed ProcProto]
-              -> TypeRepresentation -> [Item] -> [Item]
-implicitItems typespec consts nonconsts rep items =
-    implicitEquality typespec consts nonconsts rep items
-    ++ implicitDisequality typespec consts nonconsts rep items
+              -> TypeRepresentation -> Compiler [Item]
+implicitItems typespec consts nonconsts rep = do
+    eq <- implicitEquality typespec consts nonconsts rep
+    dis <- implicitDisequality typespec consts nonconsts rep
+    return $ eq ++ dis
     -- XXX add comparison, print, display, maybe prettyprint, and lots more
 
 
 implicitEquality :: TypeSpec -> [Placed ProcProto] -> [Placed ProcProto]
-                 -> TypeRepresentation -> [Item] -> [Item]
-implicitEquality typespec consts nonconsts rep items =
-    if consts==[] && nonconsts==[] || List.any (isTestProc "=" 2) items
-    then [] -- don't generate if user-defined or if no constructors at all
-    else
+                 -> TypeRepresentation -> Compiler [Item]
+implicitEquality typespec consts nonconsts rep = do
+    defs <- lookupProc "="
+    -- XXX should verify that it's an arity 2 test with two inputs of the right type
+    if isJust defs
+    then return [] -- don't generate if user-defined
+    else do
       let eqProto = ProcProto "=" [Param "$left" typespec ParamIn Ordinary,
                                    Param "$right" typespec ParamIn Ordinary]
                     Set.empty
-          (body,inline) = equalityBody consts nonconsts rep
-      in [ProcDecl Public (setInline inline $ setDetism SemiDet detModifiers)
+      let (body,inline) = equalityBody consts nonconsts rep
+      return [ProcDecl Public (setInline inline $ setDetism SemiDet detModifiers)
                    eqProto body Nothing]
 
 
 
 implicitDisequality :: TypeSpec -> [Placed ProcProto] -> [Placed ProcProto]
-                    -> TypeRepresentation -> [Item] -> [Item]
-implicitDisequality typespec consts nonconsts _ items =
-    if consts==[] && nonconsts==[] || List.any (isTestProc "/=" 2) items
-    then [] -- don't generate if user-defined or if no constructors at all
-    else
+                    -> TypeRepresentation -> Compiler [Item]
+implicitDisequality typespec consts nonconsts _ = do
+    defs <- lookupProc "/="
+    if isJust defs
+    then return [] -- don't generate if user-defined
+    else do
       let neProto = ProcProto "/=" [Param "$left" typespec ParamIn Ordinary,
                                      Param "$right" typespec ParamIn Ordinary]
                     Set.empty
-          neBody = [Unplaced $ Not $ Unplaced $
+      let neBody = [Unplaced $ Not $ Unplaced $
                     ProcCall [] "=" Nothing SemiDet False
                     [Unplaced $ varGet "$left", Unplaced $ varGet "$right"]]
-      in [ProcDecl Public inlineSemiDetModifiers neProto neBody Nothing]
+      return [ProcDecl Public inlineSemiDetModifiers neProto neBody Nothing]
 
 
 -- |Does the item declare a test or Boolean function with the specified

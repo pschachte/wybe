@@ -1,12 +1,11 @@
 ======================================================================
 AFTER EVERYTHING:
  Module decimal
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : decimal.<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

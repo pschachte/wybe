@@ -1,14 +1,13 @@
 ======================================================================
 AFTER EVERYTHING:
  Module io
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : io.<0>
                     io.myprint_a<0>
                     io.myprint_b<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

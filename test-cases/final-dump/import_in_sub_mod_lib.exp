@@ -1,12 +1,11 @@
 ======================================================================
 AFTER EVERYTHING:
  Module import_in_sub_mod_lib
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : import_in_sub_mod_lib.foo<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

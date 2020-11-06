@@ -1,14 +1,13 @@
 ======================================================================
 AFTER EVERYTHING:
  Module inline_decl
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : inline_decl.<0>
                     inline_decl.finish<0>
                     inline_decl.long<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

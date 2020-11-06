@@ -1,13 +1,12 @@
 ======================================================================
 AFTER EVERYTHING:
  Module bar
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : bar.<0>
   imports         : use numbers
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
@@ -58,14 +57,13 @@ entry:
 }
 --------------------------------------------------
  Module numbers
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : numbers.<0>
                     numbers.factorial<0>
                     numbers.toCelsius<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

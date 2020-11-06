@@ -1,13 +1,12 @@
 ======================================================================
 AFTER EVERYTHING:
  Module stmt_when
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : stmt_when.<0>
                     stmt_when.mod<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

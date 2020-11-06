@@ -60,6 +60,7 @@ It may contain the following sorts of items:
 statements,
 function definitions,
 procedure definitions,
+constructor declarations,
 type declarations,
 resource declarations, and
 module declarations.
@@ -492,45 +493,48 @@ A submodule is declared as follows:
 where *name* is the module name and *items* are the contents of the submodule.
 
 
-## Type declarations
+## <a name="constructors"></a>Constructor declarations
 
-Wybe provides an algebraic type system.
-Types may be declared with the syntax:
+Wybe supports abstract algebraic data types. Every Wybe type is a module, and
+each type's primitive operations are the operations of that module. A module
+becomes a type just by declaring the type's constructor(s) with a declaration of
+the form:
 
-> `type` *type* `{` *ctors* *defs* `}`
+> `constructors` *ctors*
 
-where *ctors* is one or more constructor declaration, separated by vertical bar
-characters (`|`).
-To make the declared *type* public, precede the `type` keyword with the keyword
-`pub`.
-If you wish for the constructors of the type public,
-precede the first constructor declaration with the `pub` keyword
-(this makes all the constructors public).
+where *ctors* is one or more constructor declarations, separated by vertical bar
+characters (`|`).  Each constructor declaration takes the same form as the
+prototype part of a function declaration:
 
-The *defs* part may be empty, but if specified, may include any number of
-procedure and function declarations, which will have full access to the
-constructors of the type, whether or not they are public.
+> *name*`(`*param*`:`*type*, ... *param*`:`*type*`)`
 
-Each constructor declaration takes the form of a function declaration (with no
-function body):
+This declaration defines a constructor function that takes parameters of the
+specified types and returns a value of the type being defined (namely, the
+current module) holding all the provided data.  Constructor functions can also
+be used "backwards", with the constructed value provided and the arguments taken
+as outputs, to extract the data stored in the constructed value.
 
-> *ctor*`(`*member*`:`*memtype*, ... *member*`:`*memtype*`)`
+The form of declaration above keeps the constructors of a type private; they may
+be used within the current module, but not outside.  To make the constructors
+public, simply precede the `constructor` keyword with `pub`.
 
-Each *ctor* is a distinct constructor name specifying an alternative constructor
-for the *type* being defined.
-Any number of *member*`:`*memtype* pairs may be specified, specifying
-information that must be supplied for that constructor.
-If no members are specified, the parentheses are omitted.
+Note that, unlike most Object Oriented languages, making constructors public
+does not commit you to any particular representation of the type, because
+constructors are not special; they are simply automatically generated functions.
+You may define your own public functions to act as constructors, and they will
+be indistinguishable from the actual constructors by users of the type.
 
-Each constructor defined automatically becomes a function that may be used to
-construct a value of the *type* being defined.
-It also becomes a function that can be used backwards, extracting the
-constructor
-arguments as *outputs*, allowing a value to be deconstructed into its parts.
-For example, given the definition
+As a convenience, you may use the keyword `constructor` instead of
+`constructors` in the declaration; Wybe makes no distinction between them.
+
+For example, you can make the enclosing module define a Cartesian coordinate
+type with the following declaration:
+
 ```
-type coordinate { coordinate(x:int, y:int) }
+pub constructor coordinate(x:int, y:int)
 ```
+
+With this declaration,
 the following statement may be used to construct a Cartesian coordinate with X
 component 7 and Y component 4:
 ```
@@ -541,7 +545,7 @@ And this statement will unpack a coordinate `pos` into variables `x` and `y`:
 coordinate(?x,?y) = pos
 ```
 
-Additionally, two procedures are automatically generate for each *member*:
+Additionally, two procedures are automatically generated for each *member*:
 one to access the member, and one to mutate it.
 The first has the prototype:
 
@@ -595,16 +599,20 @@ x(!pos) = x(pos) + 1  # shift position to the right
 so that it does in fact mutate the coordinate object in place,
 saving an unnecessary object creation.
 
+The `constructors` declaration must specify the forms of all the possible values
+of that type.  Wybe does not support a special *null* or *nil* value.  For
+example, you could define a binary tree type as follows:
+```
+constructors empty | node(left:tree, value:int, right:tree)
+```
+This would be written in a module named `tree`.
+
 Deconstructing a value of a type with multiple constructors,
 or accessing or altering any of its members, is a test, since the
 value may not have the intended constructor.
 This ensures that it is not possible to mistake a value created with one
 constructor for one made with a different constructor.
-For example, if a tree type is defined as:
-```
-type tree { empty | node(left:tree, value:int, right:tree) }
-```
-then it may be used as follows:
+In the `tree` type example, you might write:
 ```
 def {test} member(elt:int, tree:tree) {
     if { node(?left, ?value, ?right) = tree ::
@@ -617,12 +625,27 @@ def {test} member(elt:int, tree:tree) {
 }
 ```
 
-Note that a type is just a special kind of module that is also taken as a valid
-type name.
-The constructors, deconstructors, accessors, and mutators of the type are merely
-members of the type that are automatically generated by the Wybe compiler.
-Any procedures or functions you define inside the type will be indistinguishable
-from its constructors, deconstructors, accessors, and mutators.
+## Type declarations
+
+In some cases, a module may wish to define multiple types.  This can be done by
+declaring separate submodules within the module, and declaring constructors in
+each of those submodules.  As a convenience, Wybe allows the submodule and its
+constructors to be declared with a single declaration of the form:
+
+> `type` *type* `{` *ctors* *defs* `}`
+
+where *type* is the module name and *ctors* declares one or more constructors,
+separated by vertical bar characters (`|`), just as they would appear in a
+`constructor` declaration.
+To make the declared *type* public, precede the `type` keyword with the keyword
+`pub`.
+If you wish for the constructors of the type public,
+precede the first constructor declaration with the `pub` keyword
+(this makes all the constructors public).
+
+The *defs* part may be empty, but if specified, may include any number of
+procedure and function declarations, which will have full access to the
+constructors of the type, whether or not they are public.
 
 
 ## Resources
@@ -805,11 +828,6 @@ If you wish to include other modifiers along with one of these, include them all
 ### Foreign interface
 
 
-#### Foreign types
-
-To be documented....
-
-
 #### Calling C code
 
 To call C code from Wybe, use the `foreign` construct.
@@ -942,6 +960,39 @@ Convert float to unsigned integer
 - foreign llvm fptosi(arg1:float):int  
 Convert float to signed integer
 
+
+#### Foreign types
+
+In addition to the [`constructor`](#constructors) declaration, it is possible to
+declare a low-level type by specifying its representation.  This declaration has
+the form:
+
+> `representation is` *rep*
+
+where *rep* has one of these forms:
+
+- `address`  
+the type is a machine address, similar to the `void *` type in C.
+- *n* `bit` *numbertype*  
+a primitive number type comprising *n* bits, where *numbertype* is one of:
+  - `signed`  
+  a signed integer type
+  - `unsigned`  
+  an unsigned integer type
+  - `float`  
+  a floating point number; *n* must be 16, 32, 64, or 128.
+
+Like a `constructor` declaration, a `representation` declaration makes the
+enclosing module into type.  Also like a `constructor` declaration, a submodule
+declaration may be combined with the specification of a representation using the
+form:
+
+> `type` *type* `is` *rep* `{` *defs* `}`
+
+where *rep* is as above, and *defs* specifies other members of the type.
+
+Note that it is not permitted to specify both constructors and an explicit
+representation for a type.
 
 #### Wybe low-level memory management primitives
 

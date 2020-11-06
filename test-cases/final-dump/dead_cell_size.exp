@@ -1,9 +1,9 @@
 ======================================================================
 AFTER EVERYTHING:
  Module dead_cell_size
-  public submods  : 
-  public types    : t: (dead_cell_size.t,Just address)
-                    t2: (dead_cell_size.t2,Just address)
+  representation  : (not a type)
+  public submods  : t -> dead_cell_size.t
+                    t2 -> dead_cell_size.t2
   public resources: 
   public procs    : dead_cell_size.<0>
                     dead_cell_size.bar<0>
@@ -40,7 +40,6 @@ AFTER EVERYTHING:
   imports         : public use dead_cell_size.t
                     public use dead_cell_size.t2
                     use wybe
-  types           : t/public  is address { ta() @dead_cell_size:1:18 | tb(tb1:int) @dead_cell_size:1:23 | tc(tc1:int, tc2:int, tc3:int) @dead_cell_size:1:37 | td(td1:int) @dead_cell_size:1:69  }  @dead_cell_size:1:5, t2/public  is address { t2a() @dead_cell_size:2:19 | t2b(a:int) @dead_cell_size:2:25  }  @dead_cell_size:2:5
   resources       : 
   submodules      : dead_cell_size.t, dead_cell_size.t2
   procs           : 
@@ -610,8 +609,8 @@ if.else1:
 }
 --------------------------------------------------
  Module dead_cell_size.t
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : dead_cell_size.t./=<0>
                     dead_cell_size.t.=<0>
@@ -634,7 +633,6 @@ if.else1:
                     dead_cell_size.t.td1<1>
   imports         : use dead_cell_size
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
@@ -1691,8 +1689,8 @@ if.else1:
 }
 --------------------------------------------------
  Module dead_cell_size.t2
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : dead_cell_size.t2./=<0>
                     dead_cell_size.t2.=<0>
@@ -1703,7 +1701,6 @@ if.else1:
                     dead_cell_size.t2.t2b<1>
   imports         : use dead_cell_size
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 

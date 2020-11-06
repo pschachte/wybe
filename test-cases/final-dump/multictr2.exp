@@ -1,8 +1,8 @@
 ======================================================================
 AFTER EVERYTHING:
  Module multictr2
-  public submods  : 
-  public types    : t: (multictr2.t,Just address)
+  representation  : (not a type)
+  public submods  : t -> multictr2.t
   public resources: 
   public procs    : multictr2.print_t<0>
                     multictr2.t./=<0>
@@ -45,7 +45,6 @@ AFTER EVERYTHING:
                     multictr2.t.f08_c<1>
   imports         : public use multictr2.t
                     use wybe
-  types           : t/public  is address { c01(f01:int) @multictr2:3:8 | c02(f02:int) @multictr2:4:8 | c03(f03:int) @multictr2:5:8 | c04(f04:int) @multictr2:6:8 | c05(f05:int) @multictr2:7:8 | c06(f06:int) @multictr2:8:8 | c07(f07:int) @multictr2:9:8 | c08(f08_a:int, f08_b:int, f08_c:float) @multictr2:10:8  }  @multictr2:2:5
   resources       : 
   submodules      : multictr2.t
   procs           : 
@@ -372,8 +371,8 @@ if.else7:
 }
 --------------------------------------------------
  Module multictr2.t
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : multictr2.t./=<0>
                     multictr2.t.=<0>
@@ -415,7 +414,6 @@ if.else7:
                     multictr2.t.f08_c<1>
   imports         : use multictr2
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 

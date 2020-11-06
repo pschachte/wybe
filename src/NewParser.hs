@@ -85,7 +85,7 @@ writeItems file to = do
 -- | Parser entry for a Wybe program.
 itemParser :: Parser [Item]
 itemParser =
-    many (pragmaItem <|> visibilityItem <|> topLevelStmtItem)
+    many (pragmaItem <|> visibilityItem <|> privateItem <|> topLevelStmtItem)
 
 
 topLevelStmtItem :: Parser Item
@@ -101,9 +101,14 @@ visibilityItem = do
     procOrFuncItemParser v
         <|> moduleItemParser v
         <|> typeItemParser v
+        <|> dataCtorItemParser v
         <|> resourceItemParser v
         <|> useItemParser v
         <|> fromUseItemParser v
+
+
+-- | Parse module-local items (with no visibility prefix).
+privateItem = moduleParamItemParser  <|> typeRepItemParser
 
 pragmaItem :: Parser Item
 pragmaItem = do
@@ -139,6 +144,31 @@ typeItemParser v = do
              option [] (betweenB Paren (identString `sepBy` comma))
     (imp,items) <- typeImpln <|> typeCtors
     return $ TypeDecl v proto imp items (Just pos)
+
+
+-- | Module parameter declaration
+moduleParamItemParser :: Parser Item
+moduleParamItemParser = do
+    keypos <- tokenPosition <$> (ident "parameter" <|> ident "parameters")
+    params <- (symbol "@" *> identString) `sepBy1` comma
+    return $ ModuleParamsDecl params $ Just keypos
+
+
+-- | Module type representation declaration
+typeRepItemParser :: Parser Item
+typeRepItemParser = do
+    keypos <- tokenPosition <$> ident "representation"
+    ident "is"
+    rep <- typeRep
+    return $ RepresentationDecl rep $ Just keypos
+
+
+-- | Module type representation declaration
+dataCtorItemParser :: Visibility -> Parser Item
+dataCtorItemParser v = do
+    (ident "constructor" <|> ident "constructors")
+    ctors <- funcProtoParser `sepBy` symbol "|"
+    return $ ConstructorDecl v ctors
 
 
 -- | Type declaration body where representation and items are given
