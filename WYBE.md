@@ -384,12 +384,13 @@ or in the definition of a test/partial procedure or function.
 Any procedure or function call can also become a test if an input is provided
 where an output argument is expected.  In this case, the call is made
 producing the output, and then the output is compared for equality with
-supplied input.  Equality `=` with two input arguments is a test, so
-these two calls are equivalent tests:
+supplied input.  Equality (`=`) with two input arguments is a test, so
+these two calls are equivalent tests (in fact, the former is transformed to the
+latter):
 
 ```
-add(x, y, ?xy)
-?xy = add(x, y)
+add(x, y, xy)
+xy = add(x, y)
 ```
 
 
