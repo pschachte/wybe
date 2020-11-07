@@ -225,7 +225,8 @@ modTypeDeps modSet = do
     ctors <- mapM (placedApply resolveCtorTypes . snd) ctorsVis
     let deps = List.filter (`Set.member` modSet)
                $ concatMap 
-                 (((typeModule . paramType) <$>) . procProtoParams . content)
+                 (catMaybes . (typeModule . paramType <$>)
+                  . procProtoParams . content)
                  ctors
     return ((tyMod, TypeDef tyParams ctors vis), tyMod, deps)
 

@@ -874,6 +874,7 @@ addKnownType mspec = do
 lookupType :: TypeSpec -> OptPos -> Compiler (Maybe TypeSpec)
 lookupType AnyType _ = return $ Just AnyType
 lookupType InvalidType _ = return $ Just InvalidType
+lookupType ty@TypeVariable{} _ = return $ Just ty
 lookupType ty@(TypeSpec mod name args) pos = do
     currMod <- getModuleSpec
     logAST $ "In module " ++ showModSpec currMod
@@ -1484,6 +1485,8 @@ updateModLLVM fn modimp = do
 lookupTypeRepresentation :: TypeSpec -> Compiler (Maybe TypeRepresentation)
 lookupTypeRepresentation AnyType = return $ Just defaultTypeRepresentation
 lookupTypeRepresentation InvalidType = return Nothing
+lookupTypeRepresentation TypeVariable{} =
+    return $ Just defaultTypeRepresentation
 lookupTypeRepresentation (TypeSpec modSpec name _) =
     lookupModuleRepresentation $ modSpec ++ [name]
 
@@ -2181,12 +2184,17 @@ data TypeSpec = TypeSpec {
     typeMod::ModSpec,
     typeName::Ident,
     typeParams::[TypeSpec]
-    } | AnyType | InvalidType
+    }
+    | TypeVariable { typeVariableName :: Ident }
+    | AnyType | InvalidType
               deriving (Eq,Ord,Generic)
 
--- XXX must handle AnyType and InvalidType Typespecs
-typeModule :: TypeSpec -> ModSpec
-typeModule (TypeSpec mod name _) = mod ++ [name]
+-- | Return the module of the specified type, if it has one.
+typeModule :: TypeSpec -> Maybe ModSpec
+typeModule (TypeSpec mod name _) = Just $ mod ++ [name]
+typeModule TypeVariable{}        = Nothing
+typeModule AnyType               = Nothing
+typeModule InvalidType           = Nothing
 
 
 -- |This specifies a type, but permits a type to be specified indirectly,
@@ -2928,6 +2936,7 @@ showProcDef thisID
 instance Show TypeSpec where
   show AnyType = "?"
   show InvalidType = "XXX"
+  show (TypeVariable name) = "@" ++ name
   show (TypeSpec optmod ident args) =
       maybeModPrefix optmod ++ ident ++
       if List.null args then ""

@@ -402,13 +402,15 @@ optType = option AnyType (symbol ":" *> typeParser)
 -- | Parser a type.
 -- Type -> ident OptTypeList
 typeParser :: Parser TypeSpec
-typeParser = do
-    name <- identString
-    optTypeList <- option [] $ betweenB Paren (typeParser `sepBy` comma)
-    case name of
-        "any"     -> return AnyType
-        "invalid" -> return InvalidType
-        _         -> return $ TypeSpec [] name optTypeList
+typeParser =
+    symbol "@" *> (TypeVariable <$> identString)
+    <|> do
+        name <- identString
+        optTypeList <- option [] $ betweenB Paren (typeParser `sepBy` comma)
+        case name of
+            "any"     -> return AnyType
+            "invalid" -> return InvalidType
+            _         -> return $ TypeSpec [] name optTypeList
 
 
 
