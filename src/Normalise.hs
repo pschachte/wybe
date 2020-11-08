@@ -241,11 +241,9 @@ resolveCtorTypes proto pos = do
 -- | Resolve the type of a parameter
 resolveParamType :: OptPos -> Param -> Compiler Param
 resolveParamType pos param@Param{paramType=ty} = do
-    maybeTy <- lookupType ty pos
-    case maybeTy of
-        Nothing -> do errmsg pos $ "Unknown type " ++ show ty
-                      return param
-        Just ty' -> return $ param {paramType=ty'}
+    ty' <- lookupType "constructor parameter" pos ty
+    return $ param { paramType = ty' }
+
 
 
 -- | Layout the types defined in the specified type dependency SCC, and then
@@ -358,7 +356,7 @@ nonConstCtorInfo placedProto tag = do
       $ shouldnt $ "Constructor with resources: " ++ show placedProto
     let name   = procProtoName proto
     let params = procProtoParams proto
-    params' <- mapM (fixParamType pos) params
+    params' <- mapM (resolveParamType pos) params
     logNormalise $ "With types resolved: " ++ show placedProto
     reps <- mapM ( lookupTypeRepresentation . paramType ) params'
     let reps' = catMaybes reps
@@ -368,16 +366,6 @@ nonConstCtorInfo placedProto tag = do
     let bitSize  = sum bitSizes
     let typeReps = zip3 params' reps' bitSizes
     return $ CtorInfo name typeReps pos tag bitSize
-
-
-
-fixParamType :: OptPos -> Param -> Compiler Param
-fixParamType pos param = do
-    let ty = paramType param
-    ty' <- lookupType ty pos
-    when (isNothing ty') (message Error ("Unknown type " ++ show ty) pos)
-    let ty'' = fromMaybe InvalidType ty'
-    return $ param { paramType = ty'' }
 
 
 -- | Determine the appropriate representation for a type based on a list of

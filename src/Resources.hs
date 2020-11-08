@@ -56,13 +56,9 @@ checkOneResource :: ResourceSpec -> Maybe ResourceImpln ->
 checkOneResource rspec impln@(Just (SimpleResource ty init pos)) = do
     logResources $ "Check resource " ++ show rspec ++
            " with implementation " ++ show impln
-    ty' <- lookupType ty pos
+    ty' <- lookupType "resource declaration" pos ty
     logResources $ "Actual type is " ++ show ty'
-    case ty' of
-        -- lookupType reports any undefined types
-        Nothing -> return (False,[],(rspec,impln))
-        Just ty'' ->
-          return (ty'' /= ty,[],(rspec,Just (SimpleResource ty'' init pos)))
+    return (ty' /= ty,[],(rspec,Just (SimpleResource ty' init pos)))
 checkOneResource rspec Nothing = do
     -- XXX don't currently handle compound resources
     nyi "compound resources"

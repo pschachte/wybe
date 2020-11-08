@@ -73,7 +73,7 @@ module AST (
   updateModImplementation, updateModImplementationM, updateModLLVM,
   addForeignImport, addForeignLib,
   updateModInterface, updateAllProcs, updateModSubmods, updateModProcs,
-  getModuleSpec, moduleIsType, getModuleParams, option,
+  getModuleSpec, moduleIsType, option,
   getOrigin, getSource, getDirectory,
   optionallyPutStr, message, errmsg, (<!>), genProcName,
   addImport, doImport, lookupType,
@@ -705,10 +705,6 @@ getSource = do
 getModuleSpec :: Compiler ModSpec
 getModuleSpec = getModule modSpec
 
--- |Return the module (type) parameters of the current module.
-getModuleParams :: Compiler [TypeVarName]
-getModuleParams = getModule modParams
-
 -- |Return the interface of the current module.
 getModuleInterface :: Compiler ModuleInterface
 getModuleInterface = getModule modInterface
@@ -871,11 +867,11 @@ addKnownType mspec = do
 
 
 -- |Find the definition of the specified type visible from the current module.
-lookupType :: TypeSpec -> OptPos -> Compiler (Maybe TypeSpec)
-lookupType AnyType _ = return $ Just AnyType
-lookupType InvalidType _ = return $ Just InvalidType
-lookupType ty@TypeVariable{} _ = return $ Just ty
-lookupType ty@(TypeSpec mod name args) pos = do
+lookupType :: String -> OptPos -> TypeSpec -> Compiler TypeSpec
+lookupType _ _ AnyType = return AnyType
+lookupType _ _ InvalidType = return InvalidType
+lookupType _ _ ty@TypeVariable{} = return ty
+lookupType context pos ty@(TypeSpec mod name args) = do
     currMod <- getModuleSpec
     logAST $ "In module " ++ showModSpec currMod
              ++ ", looking up type " ++ show ty
@@ -883,8 +879,8 @@ lookupType ty@(TypeSpec mod name args) pos = do
     logAST $ "Candidates: " ++ showModSpecs (Set.toList mspecs)
     case Set.size mspecs of
         0 -> do
-            errmsg pos $ "Unknown type " ++ show ty
-            return Nothing
+            errmsg pos $ "In " ++ context ++ ", unknown type " ++ show ty
+            return InvalidType
         1 -> do
             let mspec = Set.findMin mspecs
             maybeMod <- getLoadingModule mspec
@@ -893,22 +889,21 @@ lookupType ty@(TypeSpec mod name args) pos = do
             then shouldnt $ "Found type isn't a type: " ++ show mspec
             else if length params == length args
             then do
-                args' <- catMaybes <$> mapM (flip lookupType pos) args
+                args' <- mapM (lookupType context pos) args
                 let matchingType = TypeSpec (init mspec) (last mspec) args'
                 logAST $ "Matching type = " ++ show matchingType
-                return $ Just matchingType
+                return matchingType
             else do
-                errmsg pos $
-                    "Type '" ++ name ++ "' expects "
+                errmsg pos $ "In " ++ context
+                    ++ ", type '" ++ name ++ "' expects "
                     ++ show (length params)
                     ++ " arguments, but " ++ show (length args)
-                    ++ " were given"
-                return Nothing
+                    ++ " was given"
+                return InvalidType
         _ -> do
-            errmsg pos $ "Ambiguous type " ++ show ty ++
-                        " defined in modules: " ++
-                        showModSpecs (Set.toList mspecs)
-            return Nothing
+            errmsg pos $ "In " ++ context ++ ", type " ++ show ty ++
+                        " could refer to: " ++ showModSpecs (Set.toList mspecs)
+            return InvalidType
 
 -- |Add the specified resource to the current module.
 addSimpleResource :: ResourceName -> ResourceImpln -> Visibility -> Compiler ()

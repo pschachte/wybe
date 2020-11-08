@@ -77,7 +77,7 @@ validateParamType pname ppos public param = do
     let ty = paramType param
     checkDeclIfPublic pname ppos public ty
     logTypes $ "Checking type " ++ show ty ++ " of param " ++ show param
-    ty' <- fromMaybe AnyType <$> lookupType ty ppos
+    ty' <- lookupType "proc declaration" ppos ty
     let param' = param { paramType = ty' }
     logTypes $ "Param is " ++ show param'
     return param'
@@ -510,7 +510,7 @@ expType' _ (FloatValue _) _ = return $ TypeSpec ["wybe"] "float" []
 expType' _ (StringValue _) _ = return $ TypeSpec ["wybe"] "string" []
 expType' _ (CharValue _) _ = return $ TypeSpec ["wybe"] "char" []
 expType' typing (Var name _ _) _ = return $ varType name typing
-expType' _ (Typed _ typ _) pos = fromMaybe AnyType <$> lookupType typ pos
+expType' _ (Typed _ typ _) pos = lookupType "typed expression" pos typ
 expType' _ expr _ =
     shouldnt $ "Expression '" ++ show expr ++ "' left after flattening"
 
@@ -802,7 +802,7 @@ typecheckProcDecl m pdef = do
 addDeclaredType :: ProcName -> OptPos -> Int -> Typing -> (Param,Int) ->
                    Compiler Typing
 addDeclaredType procname pos arity typs (Param name typ flow _,argNum) = do
-    typ' <- fromMaybe AnyType <$> lookupType typ pos
+    typ' <- lookupType "proc declaration" pos typ
     logTypes $ "    type of '" ++ name ++ "' is " ++ show typ'
     return $ constrainVarType (ReasonParam procname arity pos) name typ' typs
 
