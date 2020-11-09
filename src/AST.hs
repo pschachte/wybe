@@ -21,7 +21,8 @@ module AST (
   determinismSeq, determinismProceding, determinismName,
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
-  TypeProto(..), TypeSpec(..), typeModule, TypeRef(..), VarDict, TypeImpln(..),
+  TypeProto(..), TypeSpec(..), genericType, typeModule,
+  TypeRef(..), VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), detStmt, expIsConstant,
@@ -2183,6 +2184,14 @@ data TypeSpec = TypeSpec {
     | TypeVariable { typeVariableName :: Ident }
     | AnyType | InvalidType
               deriving (Eq,Ord,Generic)
+
+
+genericType :: TypeSpec -> Bool
+genericType TypeSpec{typeParams=params} = any genericType params
+genericType TypeVariable{} = True
+genericType AnyType        = False
+genericType InvalidType    = False
+
 
 -- | Return the module of the specified type, if it has one.
 typeModule :: TypeSpec -> Maybe ModSpec

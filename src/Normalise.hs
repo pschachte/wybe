@@ -323,7 +323,7 @@ completeType modspec (TypeDef params ctors ctorVis) = do
       $ nyi $ "Type '" ++ show modspec ++ "' has too many constant constructors"
     -- XXX remove name from TypeSpec, and add type variable as an alternative ctor
     let typespec = TypeSpec (init modspec) (last modspec)
-                   $ List.map (\n->TypeSpec [] n []) params
+                   $ List.map TypeVariable params
     let constItems =
           concatMap (constCtorItems ctorVis typespec) $ zip constCtors [0..]
     infos <- zipWithM nonConstCtorInfo nonConstCtors [0..]
@@ -459,7 +459,8 @@ nonConstCtorItems vis typeSpec numConsts numNonConsts tagBits tagLimit
             else let constSize = ceiling $ logBase 2 $ fromIntegral numConsts
                      size' = 1 + max nonConstsize constSize
                  in (size', Just $ size' - 1)
-    logNormalise $ "Making constructor items for " ++ show info
+    logNormalise $ "Making constructor items for type " ++ show typeSpec
+                   ++ ": " ++ show info
     logNormalise $ show bits ++ " data bit(s)"
     logNormalise $ show tagBits ++ " tag bit(s)"
     logNormalise $ "nonConst bit = " ++ show nonConstBit
@@ -885,7 +886,9 @@ deconstructorDetism numConsts numNonConsts
 
 implicitItems :: TypeSpec -> [Placed ProcProto] -> [Placed ProcProto]
               -> TypeRepresentation -> Compiler [Item]
-implicitItems typespec consts nonconsts rep = do
+implicitItems typespec consts nonconsts rep
+ | genericType typespec = return []
+ | otherwise = do
     eq <- implicitEquality typespec consts nonconsts rep
     dis <- implicitDisequality typespec consts nonconsts rep
     return $ eq ++ dis
