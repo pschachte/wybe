@@ -86,7 +86,7 @@ module AST (
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
   showModSpecs, showResources, showMaybeSourcePos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
-  showVarDict, showVarMap, simpleShowMap, simpleShowSet, bracketList,
+  showMap, showVarMap, simpleShowMap, simpleShowSet, bracketList,
   maybeShow, showMessages, stopOnError,
   logMsg, whenLogging2, whenLogging,
   -- *Helper functions
@@ -3072,7 +3072,7 @@ showStmt indent (Or stmts genVars) =
     "(   " ++
     intercalate ("\n" ++ replicate indent ' ' ++ "|| ")
         (List.map (showStmt indent' . content) stmts) ++
-    ")" ++ maybe "" ((" -> "++) . showVarDict) genVars
+    ")" ++ maybe "" ((" -> "++) . showVarMap) genVars
     where indent' = indent + 4
 showStmt indent (Not stmt) =
     "~(" ++ showStmt indent' (content stmt) ++ ")"
@@ -3083,11 +3083,11 @@ showStmt indent (Cond condstmt thn els genVars) =
     ++ startLine indent ++ "else::"
     ++ showBody (indent+4) els ++ "\n"
     ++ startLine indent ++ "}"
-    ++ maybe "" ((" -> "++) . showVarDict) genVars
+    ++ maybe "" ((" -> "++) . showVarMap) genVars
 showStmt indent (Loop lstmts genVars) =
     "do {" ++  showBody (indent + 4) lstmts
     ++ startLine indent ++ "}"
-    ++ maybe "" ((" -> "++) . showVarDict) genVars
+    ++ maybe "" ((" -> "++) . showVarMap) genVars
 showStmt indent (UseResources resources stmts) =
     "use " ++ intercalate ", " (List.map show resources) ++ " in"
     ++ showBody (indent + 4) stmts
@@ -3143,25 +3143,22 @@ instance Show Exp where
       show exp ++ showTypeSuffix typ cast
 
 
--- |Show a readable version of a VarDict
-showVarDict :: VarDict -> String
-showVarDict = showVarMap
+showMap :: String -> String -> String -> (k->String) -> (v->String)
+        -> Map k v -> String
+showMap pre sep post kfn vfn m =
+    pre
+    ++ intercalate sep (List.map (\(k,v) -> kfn k ++ vfn v) $ Map.toList m)
+    ++ post
+
+-- |Show a readable version of a VarDict showVarMap :: VarDict -> String showVarMap = showVarMap
 
 -- |Show a readable version of a Map from variable names to showable things
 showVarMap :: Show a => Map VarName a -> String
-showVarMap dict =
-    "{"
-    ++ intercalate ", "
-       (List.map (\(v,t) -> v ++ "::" ++ show t) $ Map.toList dict)
-    ++ "}"
+showVarMap = showMap "{" ", " "}" (++"::") show
 
 -- |Show a readable version of a Map of showable things
-simpleShowMap :: (Show a, Show b) => Map a b -> String
-simpleShowMap dict =
-    "{"
-    ++ intercalate ", "
-       (List.map (\(v,t) -> show v ++ "::" ++ show t) $ Map.toList dict)
-    ++ "}"
+simpleShowMap :: (Show k, Show v) => Map k v -> String
+simpleShowMap = showMap "{" ", " "}" ((++"::") . show) show
 
 
 -- |Show a readable version of a Map of showable things

@@ -35,7 +35,7 @@ instance Show Module where
             then maybe "(not yet known)" show (modTypeRep mod)
             else "(not a type)") ++
            "\n  public submods  : " ++
-           showMap "\n                    " (++ " -> ")
+           showMap "" "\n                    " "" (++ " -> ")
                    showModSpec (pubSubmods int) ++
            "\n  public resources: " ++ showMapLines (pubResources int) ++
            "\n  public procs    : " ++
@@ -53,9 +53,10 @@ instance Show Module where
                  (if Map.null (modSubmods impl)
                   then ""
                   else "\n  submodules      : " ++
-                       showMap ", " (const "") showModSpec (modSubmods impl)) ++
+                       showMap "" ", " "" (const "") showModSpec 
+                       (modSubmods impl)) ++
                  "\n  procs           : " ++ "\n" ++
-                 (showMap "\n\n" (const "") (showProcDefs 0)
+                 (showMap "" "\n\n" "" (const "") (showProcDefs 0)
                   (modProcs impl)) ++
                  (maybe "\n\nLLVM code       : None\n"
                   (("\n\n  LLVM code       :\n\n" ++) . TL.unpack . ppllvm)
@@ -64,7 +65,7 @@ instance Show Module where
 
 -- |How to show a map, one line per item.
 showMapLines :: Show v => Map Ident v -> String
-showMapLines = showMap "\n                    " (++": ") show
+showMapLines = showMap "" "\n                    " "" (++": ") show
 
 showSetMapItems :: (Show b, Ord b) => (Map a (Set b)) -> String
 showSetMapItems setMap =
@@ -75,15 +76,7 @@ showSetMapItems setMap =
 
 -- |How to show a map to source positions, one line per item.
 showMapPoses :: Map Ident OptPos -> String
-showMapPoses = showMap ", " id showMaybeSourcePos
-
--- |How to show a map from identifiers to values, given a separator
---  for items, and a separator for keys from values, and a function
---  to show the values.
-showMap :: String -> (k -> String) -> (v -> String) -> Map k v -> String
-showMap outersep keyFn valFn m =
-    intercalate outersep $ List.map (\(k,v) -> keyFn k ++ valFn v) $
-    Map.assocs m
+showMapPoses = showMap "" ", " "" id showMaybeSourcePos
 
 
 -- |Dump the content of the specified module and all submodules if either

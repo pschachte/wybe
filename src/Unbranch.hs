@@ -295,7 +295,7 @@ unbranchStmts detism (stmt:stmts) alt sense = do
     vars <- gets brVars
     logUnbranch $ "unbranching (" ++ show detism ++ ") stmt"
         ++ "\n    " ++ showStmt 4 (content stmt)
-        ++ "\n  with vars " ++ showVarDict vars
+        ++ "\n  with vars " ++ showVarMap vars
     placedApply (unbranchStmt detism) stmt stmts alt sense
 
 
@@ -434,7 +434,7 @@ unbranchStmt detism (Loop body exitVars) pos stmts alt sense = do
     let exitVars' = trustFromJust "unbranching Loop without exitVars" exitVars
     logUnbranch $ "Handling loop:" ++ showBody 4 body
     beforeVars <- gets brVars
-    logUnbranch $ "  with entry vars " ++ showVarDict beforeVars
+    logUnbranch $ "  with entry vars " ++ showVarMap beforeVars
     brk <- maybeFactorContinuation detism exitVars' stmts alt sense
     logUnbranch $ "Generated break: " ++ showBody 4 brk
     next <- factorLoopProc brk beforeVars pos detism body alt sense
@@ -518,7 +518,7 @@ maybeFactorContinuation :: Determinism -> VarDict -> [Placed Stmt]
                         -> [Placed Stmt] -> Bool -> Unbrancher [Placed Stmt]
 maybeFactorContinuation detism vars stmts alt sense = do
     logUnbranch $ "Maybe factor continuation: " ++ showBody 4 stmts
-    logUnbranch $ "  with brVars: " ++ showVarDict vars
+    logUnbranch $ "  with brVars: " ++ showVarMap vars
     withVars vars
       $ if length stmts <= 2 && all (flatStmt . content) stmts
         then unbranchStmts detism stmts alt sense
