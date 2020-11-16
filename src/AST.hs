@@ -2181,7 +2181,7 @@ data TypeSpec = TypeSpec {
     typeName::Ident,
     typeParams::[TypeSpec]
     }
-    | TypeVariable { typeVariableName :: Ident }
+    | TypeVariable { typeVariableName :: TypeVarName }
     | AnyType | InvalidType
               deriving (Eq,Ord,Generic)
 

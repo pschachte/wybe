@@ -327,13 +327,15 @@ instance Show TypeError where
 -- | A variable type assignment (symbol table), with a list of type errors.
 data Typing = Typing {
                   typingDict::Map VarName TypeRef,
+                  typeVarDict::Map TypeVarName TypeSpec,
                   typingErrs::[TypeError]
                   }
             deriving (Eq,Ord)
 
 instance Show Typing where
-  show (Typing dict errs) =
+  show (Typing dict tvdict errs) =
     "Typing " ++ showVarMap dict
+    ++ showMap "{" ", " "}" (("@"++) . (++"::")) show tvdict
     ++ if List.null errs
        then " with no errors"
        else " with errors: " ++ show errs
@@ -341,12 +343,12 @@ instance Show Typing where
 
 -- |The empty typing, assigning every var the type AnyType.
 initTyping :: Typing
-initTyping = Typing Map.empty []
+initTyping = Typing Map.empty Map.empty []
 
 
 -- |Does this typing have no type errors?
 validTyping :: Typing -> Bool
-validTyping (Typing _ errs) = List.null errs
+validTyping (Typing _ _ errs) = List.null errs
 
 
 -- |Follow a chain of TypeRefs to find the final IndirectType reference.
@@ -418,39 +420,8 @@ typeError err = typeErrors [err]
 
 
 typeErrors :: [TypeError] -> Typing -> Typing
-typeErrors newErrs (Typing dict errs) = Typing dict $ newErrs ++ errs
-
-
--- |Returns the first argument restricted to the variables appearing in the
---  second. This must handle cases where variable appearing in chains of
---  indirections (equivalence classes of variables) are projected away.
-projectTyping :: Typing -> Typing -> Typing
-projectTyping (Typing typing errs) (Typing interest _) =
-    -- Typing (Map.filterWithKey (\k _ -> Map.member k interest) typing) errs
-    Typing (projectTypingDict (Map.keys interest) typing Map.empty Map.empty)
-    errs
-
-
--- |Return a map containing the types of the first input map projected onto
--- the supplied list of variables (which is in ascending alphabetical
--- order) and maintaining the equivalences of the original. The second map
--- argument holds the translation from the smallest equivalent variable
--- name in the input map to the same for the result.
---
--- This works by traversing the list of variable names, looking up each in
--- the input map.  I
-projectTypingDict :: [VarName] -> Map VarName TypeRef -> Map VarName TypeRef
-                  -> Map VarName VarName -> Map VarName TypeRef
-projectTypingDict [] _ result _ = result
-projectTypingDict (v:vs) dict result renaming
-    = let (v',dict') = ultimateRef' v dict
-          ty = varType' v' dict
-      in  case Map.lookup v' renaming of
-              Nothing -> projectTypingDict vs dict
-                         (Map.insert v (DirectType ty) result)
-                         (Map.insert v' v renaming)
-              Just v'' -> projectTypingDict vs dict
-                         (Map.insert v (IndirectType v'') result) renaming
+typeErrors newErrs (Typing dict tvdict errs) =
+    Typing dict tvdict $ newErrs ++ errs
 
 
 ----------------------------------------------------------------
