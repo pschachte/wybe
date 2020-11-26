@@ -29,7 +29,7 @@ pub type int_list { pub [] | [|](head:int, tail:int_list) }
 pub def print(x:int_list) use !io {
     if { x = [ ?h | ?t] :: 
         !print(h)
-        foreign c putchar(' ', !io)
+        !print(' ')
         !print(t)
     }
 }
