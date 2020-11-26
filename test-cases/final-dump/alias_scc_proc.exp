@@ -42,20 +42,20 @@ bar > public (1 calls)
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
         foreign lpvm {noalias} mutate(~%p1#0:position.position, ?%p1#1:position.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
-        alias_scc_proc.foo<0>[04d1467a4d](~p1#1:position.position, ?p2#0:position.position, ?p3#1:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #6 @alias_scc_proc:24:19
+        alias_scc_proc.foo<0>[410bae77d3](~p1#1:position.position, ?p2#0:position.position, ?p3#1:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #6 @alias_scc_proc:24:19
 
     1:
         foreign llvm move(~p1#0:position.position, ?p3#1:position.position)
         foreign llvm move(~io#0:wybe.phantom, ?io#1:wybe.phantom)
 
- [04d1467a4d] [NonAliasedParam 0] :
+ [410bae77d3] [NonAliasedParam 0] :
     foreign lpvm access(p1#0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.int)
     foreign llvm icmp_sgt(tmp$0#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
     case ~tmp$3#0:wybe.bool of
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
         foreign lpvm {noalias} mutate(~%p1#0:position.position, ?%p1#1:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
-        alias_scc_proc.foo<0>[04d1467a4d](~p1#1:position.position, ?p2#0:position.position, ?p3#1:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #6 @alias_scc_proc:24:19
+        alias_scc_proc.foo<0>[410bae77d3](~p1#1:position.position, ?p2#0:position.position, ?p3#1:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #6 @alias_scc_proc:24:19
 
     1:
         foreign llvm move(~p1#0:position.position, ?p3#1:position.position)
@@ -74,7 +74,7 @@ foo > public (2 calls)
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.int) @wybe:nn:nn
         foreign lpvm {noalias} mutate(~%p1#0:position.position, ?%p1#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$3#0:wybe.int)
-        alias_scc_proc.bar<0>[04d1467a4d](~p1#1:position.position, ?p3#0:position.position, ~#io#0:wybe.phantom, ?#io#2:wybe.phantom) #9 @alias_scc_proc:13:16
+        alias_scc_proc.bar<0>[410bae77d3](~p1#1:position.position, ?p3#0:position.position, ~#io#0:wybe.phantom, ?#io#2:wybe.phantom) #9 @alias_scc_proc:13:16
         foreign lpvm alloc(16:wybe.int, ?tmp$16#0:position.position)
         foreign lpvm mutate(~tmp$16#0:position.position, ?tmp$17#0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int)
         foreign lpvm mutate(~tmp$17#0:position.position, ?p2#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int)
@@ -88,14 +88,14 @@ foo > public (2 calls)
         foreign c print_string("--- Inside foo: expect p3(3,3):":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
         position.printPosition<0>(~tmp$1#0:position.position, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #4 @alias_scc_proc:10:22
 
- [04d1467a4d] [NonAliasedParam 0] :
+ [410bae77d3] [NonAliasedParam 0] :
     foreign lpvm access(p1#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.int)
     foreign llvm icmp_sgt(tmp$0#0:wybe.int, 1:wybe.int, ?tmp$5#0:wybe.bool) @wybe:nn:nn
     case ~tmp$5#0:wybe.bool of
     0:
         foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.int) @wybe:nn:nn
         foreign lpvm {noalias} mutate(~%p1#0:position.position, ?%p1#1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$3#0:wybe.int)
-        alias_scc_proc.bar<0>[04d1467a4d](~p1#1:position.position, ?p3#0:position.position, ~#io#0:wybe.phantom, ?#io#2:wybe.phantom) #9 @alias_scc_proc:13:16
+        alias_scc_proc.bar<0>[410bae77d3](~p1#1:position.position, ?p3#0:position.position, ~#io#0:wybe.phantom, ?#io#2:wybe.phantom) #9 @alias_scc_proc:13:16
         foreign lpvm alloc(16:wybe.int, ?tmp$16#0:position.position)
         foreign lpvm mutate(~tmp$16#0:position.position, ?tmp$17#0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int)
         foreign lpvm mutate(~tmp$17#0:position.position, ?p2#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int)
@@ -205,14 +205,14 @@ if.else:
   %31 = inttoptr i64 %30 to i64* 
   %32 = getelementptr  i64, i64* %31, i64 0 
   store  i64 %"3$tmp$2#0", i64* %32 
-  %33 = tail call fastcc  {i64, i64}  @"alias_scc_proc.foo<0>[04d1467a4d]"(i64  %26)  
+  %33 = tail call fastcc  {i64, i64}  @"alias_scc_proc.foo<0>[410bae77d3]"(i64  %26)  
   %34 = extractvalue {i64, i64} %33, 0 
   %35 = extractvalue {i64, i64} %33, 1 
   ret i64 %35 
 }
 
 
-define external fastcc  i64 @"alias_scc_proc.bar<0>[04d1467a4d]"(i64  %"p1#0")    {
+define external fastcc  i64 @"alias_scc_proc.bar<0>[410bae77d3]"(i64  %"p1#0")    {
 entry:
   %36 = add   i64 %"p1#0", 8 
   %37 = inttoptr i64 %36 to i64* 
@@ -228,7 +228,7 @@ if.else:
   %41 = inttoptr i64 %40 to i64* 
   %42 = getelementptr  i64, i64* %41, i64 0 
   store  i64 %"3$tmp$2#0", i64* %42 
-  %43 = tail call fastcc  {i64, i64}  @"alias_scc_proc.foo<0>[04d1467a4d]"(i64  %"p1#0")  
+  %43 = tail call fastcc  {i64, i64}  @"alias_scc_proc.foo<0>[410bae77d3]"(i64  %"p1#0")  
   %44 = extractvalue {i64, i64} %43, 0 
   %45 = extractvalue {i64, i64} %43, 1 
   ret i64 %45 
@@ -271,7 +271,7 @@ if.else:
   %67 = inttoptr i64 %63 to i64* 
   %68 = getelementptr  i64, i64* %67, i64 0 
   store  i64 %"3$tmp$3#0", i64* %68 
-  %"3$p3#0" = tail call fastcc  i64  @"alias_scc_proc.bar<0>[04d1467a4d]"(i64  %63)  
+  %"3$p3#0" = tail call fastcc  i64  @"alias_scc_proc.bar<0>[410bae77d3]"(i64  %63)  
   %69 = trunc i64 16 to i32  
   %70 = tail call ccc  i8*  @wybe_malloc(i32  %69)  
   %71 = ptrtoint i8* %70 to i64 
@@ -288,7 +288,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i64} @"alias_scc_proc.foo<0>[04d1467a4d]"(i64  %"p1#0")    {
+define external fastcc  {i64, i64} @"alias_scc_proc.foo<0>[410bae77d3]"(i64  %"p1#0")    {
 entry:
   %79 = inttoptr i64 %"p1#0" to i64* 
   %80 = getelementptr  i64, i64* %79, i64 0 
@@ -317,7 +317,7 @@ if.else:
   %94 = inttoptr i64 %"p1#0" to i64* 
   %95 = getelementptr  i64, i64* %94, i64 0 
   store  i64 %"3$tmp$3#0", i64* %95 
-  %"3$p3#0" = tail call fastcc  i64  @"alias_scc_proc.bar<0>[04d1467a4d]"(i64  %"p1#0")  
+  %"3$p3#0" = tail call fastcc  i64  @"alias_scc_proc.bar<0>[410bae77d3]"(i64  %"p1#0")  
   %96 = trunc i64 16 to i32  
   %97 = tail call ccc  i8*  @wybe_malloc(i32  %96)  
   %98 = ptrtoint i8* %97 to i64 
