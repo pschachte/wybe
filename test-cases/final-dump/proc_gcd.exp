@@ -16,7 +16,7 @@ AFTER EVERYTHING:
 0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    proc_gcd.gen$1<0>(18:wybe.int, 24:wybe.int, ~#io#0:wybe.phantom, 18:wybe.int, 18:wybe.int, 24:wybe.int, ?r#0:wybe.int, ?#io#1:wybe.phantom) #2 @proc_gcd:13:3
+    proc_gcd.gen$1<0>(18:wybe.int, 24:wybe.int, ~#io#0:wybe.phantom, _:wybe.int, 18:wybe.int, 24:wybe.int, ?r#0:wybe.int, ?#io#1:wybe.phantom) #2 @proc_gcd:13:3
     foreign c print_int(~r#0:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
 
 
@@ -24,11 +24,11 @@ gcd > public {inline} (1 calls)
 0: gcd(a#0:wybe.int, b#0:wybe.int, ?r#0:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    proc_gcd.gen$1<0>(~a#0:wybe.int, ~b#0:wybe.int, ~io#0:wybe.phantom, ~a#0:wybe.int, ~a#0:wybe.int, ~b#0:wybe.int, ?r#0:wybe.int, ?io#1:wybe.phantom) #0 @proc_gcd:13:3
+    proc_gcd.gen$1<0>(~a#0:wybe.int, ~b#0:wybe.int, ~io#0:wybe.phantom, _:wybe.int, ~a#0:wybe.int, ~b#0:wybe.int, ?r#0:wybe.int, ?io#1:wybe.phantom) #0 @proc_gcd:13:3
 
 
 gen$1 > (2 calls)
-0: gen$1(a#0:wybe.int, b#0:wybe.int, io#0:wybe.phantom, t#0:wybe.int, x#0:wybe.int, y#0:wybe.int, ?r#0:wybe.int, ?io#1:wybe.phantom):
+0: gen$1(a#0:wybe.int, b#0:wybe.int, io#0:wybe.phantom, [t#0:wybe.int], x#0:wybe.int, y#0:wybe.int, ?r#0:wybe.int, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(y#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:nn:nn
@@ -38,7 +38,8 @@ gen$1 > (2 calls)
         foreign llvm move(~io#0:wybe.phantom, ?io#1:wybe.phantom)
 
     1:
-        proc_gcd.gen$2<0>(~a#0:wybe.int, ~b#0:wybe.int, ~io#0:wybe.phantom, _:wybe.int, ~x#0:wybe.int, ~y#0:wybe.int, ?r#0:wybe.int, ?io#1:wybe.phantom) #1
+        proc_gcd.mod<0>(~x#0:wybe.int, y#0:wybe.int, ?tmp$9#0:wybe.int, ~io#0:wybe.phantom, ?tmp$10#0:wybe.phantom) #2 @proc_gcd:16:8
+        proc_gcd.gen$1<0>(~a#0:wybe.int, ~b#0:wybe.int, ~tmp$10#0:wybe.phantom, _:wybe.int, ~y#0:wybe.int, ~tmp$9#0:wybe.int, ?r#0:wybe.int, ?io#1:wybe.phantom) #3 @proc_gcd:13:3
 
 
 
@@ -47,7 +48,7 @@ gen$2 > {inline} (1 calls)
  AliasPairs: []
  InterestingCallProperties: []
     proc_gcd.mod<0>(~x#0:wybe.int, y#0:wybe.int, ?y#1:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @proc_gcd:16:8
-    proc_gcd.gen$1<0>(~a#0:wybe.int, ~b#0:wybe.int, ~io#1:wybe.phantom, ~y#0:wybe.int, ~y#0:wybe.int, ~y#1:wybe.int, ?r#0:wybe.int, ?io#2:wybe.phantom) #1 @proc_gcd:13:3
+    proc_gcd.gen$1<0>(~a#0:wybe.int, ~b#0:wybe.int, ~io#1:wybe.phantom, _:wybe.int, ~y#0:wybe.int, ~y#1:wybe.int, ?r#0:wybe.int, ?io#2:wybe.phantom) #1 @proc_gcd:13:3
 
 
 mod > public (1 calls)
@@ -84,7 +85,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"proc_gcd.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
 entry:
-  %"1$r#0" = tail call fastcc  i64  @"proc_gcd.gen$1<0>"(i64  18, i64  24, i64  18, i64  18, i64  24)  
+  %"1$r#0" = tail call fastcc  i64  @"proc_gcd.gen$1<0>"(i64  18, i64  24, i64  18, i64  24)  
   tail call ccc  void  @print_int(i64  %"1$r#0")  
   ret void 
 }
@@ -92,17 +93,18 @@ entry:
 
 define external fastcc  i64 @"proc_gcd.gcd<0>"(i64  %"a#0", i64  %"b#0")    {
 entry:
-  %"1$r#0" = tail call fastcc  i64  @"proc_gcd.gen$1<0>"(i64  %"a#0", i64  %"b#0", i64  %"a#0", i64  %"a#0", i64  %"b#0")  
+  %"1$r#0" = tail call fastcc  i64  @"proc_gcd.gen$1<0>"(i64  %"a#0", i64  %"b#0", i64  %"a#0", i64  %"b#0")  
   ret i64 %"1$r#0" 
 }
 
 
-define external fastcc  i64 @"proc_gcd.gen$1<0>"(i64  %"a#0", i64  %"b#0", i64  %"t#0", i64  %"x#0", i64  %"y#0")    {
+define external fastcc  i64 @"proc_gcd.gen$1<0>"(i64  %"a#0", i64  %"b#0", i64  %"x#0", i64  %"y#0")    {
 entry:
   %"1$tmp$0#0" = icmp ne i64 %"y#0", 0 
   br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"2$r#0" = tail call fastcc  i64  @"proc_gcd.gen$2<0>"(i64  %"a#0", i64  %"b#0", i64  %"x#0", i64  %"y#0")  
+  %"2$tmp$9#0" = tail call fastcc  i64  @"proc_gcd.mod<0>"(i64  %"x#0", i64  %"y#0")  
+  %"2$r#0" = tail call fastcc  i64  @"proc_gcd.gen$1<0>"(i64  %"a#0", i64  %"b#0", i64  %"y#0", i64  %"2$tmp$9#0")  
   ret i64 %"2$r#0" 
 if.else:
   ret i64 %"x#0" 
@@ -112,7 +114,7 @@ if.else:
 define external fastcc  i64 @"proc_gcd.gen$2<0>"(i64  %"a#0", i64  %"b#0", i64  %"x#0", i64  %"y#0")    {
 entry:
   %"1$y#1" = tail call fastcc  i64  @"proc_gcd.mod<0>"(i64  %"x#0", i64  %"y#0")  
-  %"1$r#0" = tail call fastcc  i64  @"proc_gcd.gen$1<0>"(i64  %"a#0", i64  %"b#0", i64  %"y#0", i64  %"y#0", i64  %"1$y#1")  
+  %"1$r#0" = tail call fastcc  i64  @"proc_gcd.gen$1<0>"(i64  %"a#0", i64  %"b#0", i64  %"y#0", i64  %"1$y#1")  
   ret i64 %"1$r#0" 
 }
 
