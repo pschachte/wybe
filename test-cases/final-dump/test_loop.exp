@@ -50,7 +50,7 @@ find_test > (2 calls)
     foreign lpvm mutate(~tmp$5#0:test_loop.int_seq, ?tmp$6#0:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 2:wybe.int)
     foreign lpvm mutate(~tmp$6#0:test_loop.int_seq, ?tmp$7#0:test_loop.int_seq, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 2:wybe.int)
     foreign lpvm mutate(~tmp$7#0:test_loop.int_seq, ?tmp$8#0:test_loop.int_seq, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 10:wybe.int)
-    test_loop.gen$1<0>[145401e434](modulus#0:wybe.int, ~tmp$8#0:test_loop.int_seq, ?i#0:wybe.int, ?tmp$1#0:wybe.bool) #9 @test_loop:15:5
+    test_loop.gen$1<0>[6dacb8fd25](modulus#0:wybe.int, ~tmp$8#0:test_loop.int_seq, ?i#0:wybe.int, ?tmp$1#0:wybe.bool) #9 @test_loop:15:5
     case ~tmp$1#0:wybe.bool of
     0:
         foreign c print_string("Couldn't find even number divisible by ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
@@ -89,8 +89,8 @@ gen$1 > (2 calls)
             foreign llvm move(~tmp$0#0:wybe.int, ?i#1:wybe.int)
 
 
- [145401e434] [NonAliasedParam 1] :
-    test_loop.int_seq.seq_next<0>[04d1467a4d](~%seq#0:test_loop.int_seq, ?%seq#1:test_loop.int_seq, ?tmp$0#0:wybe.int, ?tmp$2#0:wybe.bool) #0 @test_loop:16:14
+ [6dacb8fd25] [NonAliasedParam 1] :
+    test_loop.int_seq.seq_next<0>[410bae77d3](~%seq#0:test_loop.int_seq, ?%seq#1:test_loop.int_seq, ?tmp$0#0:wybe.int, ?tmp$2#0:wybe.bool) #0 @test_loop:16:14
     case ~tmp$2#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -101,7 +101,7 @@ gen$1 > (2 calls)
         foreign llvm icmp_eq(~tmp$1#0:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
         case ~tmp$3#0:wybe.bool of
         0:
-            test_loop.gen$1<0>[145401e434](~modulus#0:wybe.int, ~seq#1:test_loop.int_seq, ?i#1:wybe.int, ?$$#0:wybe.bool) #3 @test_loop:15:5
+            test_loop.gen$1<0>[6dacb8fd25](~modulus#0:wybe.int, ~seq#1:test_loop.int_seq, ?i#1:wybe.int, ?$$#0:wybe.bool) #3 @test_loop:15:5
 
         1:
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
@@ -176,7 +176,7 @@ entry:
   %15 = inttoptr i64 %14 to i64* 
   %16 = getelementptr  i64, i64* %15, i64 0 
   store  i64 10, i64* %16 
-  %17 = tail call fastcc  {i64, i1}  @"test_loop.gen$1<0>[145401e434]"(i64  %"modulus#0", i64  %8)  
+  %17 = tail call fastcc  {i64, i1}  @"test_loop.gen$1<0>[6dacb8fd25]"(i64  %"modulus#0", i64  %8)  
   %18 = extractvalue {i64, i1} %17, 0 
   %19 = extractvalue {i64, i1} %17, 1 
   br i1 %19, label %if.then, label %if.else 
@@ -227,9 +227,9 @@ if.else1:
 }
 
 
-define external fastcc  {i64, i1} @"test_loop.gen$1<0>[145401e434]"(i64  %"modulus#0", i64  %"seq#0")    {
+define external fastcc  {i64, i1} @"test_loop.gen$1<0>[6dacb8fd25]"(i64  %"modulus#0", i64  %"seq#0")    {
 entry:
-  %39 = tail call fastcc  {i64, i64, i1}  @"test_loop.int_seq.seq_next<0>[04d1467a4d]"(i64  %"seq#0")  
+  %39 = tail call fastcc  {i64, i64, i1}  @"test_loop.int_seq.seq_next<0>[410bae77d3]"(i64  %"seq#0")  
   %40 = extractvalue {i64, i64, i1} %39, 0 
   %41 = extractvalue {i64, i64, i1} %39, 1 
   %42 = extractvalue {i64, i64, i1} %39, 2 
@@ -247,7 +247,7 @@ if.then1:
   %44 = insertvalue {i64, i1} %43, i1 1, 1 
   ret {i64, i1} %44 
 if.else1:
-  %45 = tail call fastcc  {i64, i1}  @"test_loop.gen$1<0>[145401e434]"(i64  %"modulus#0", i64  %40)  
+  %45 = tail call fastcc  {i64, i1}  @"test_loop.gen$1<0>[6dacb8fd25]"(i64  %"modulus#0", i64  %40)  
   %46 = extractvalue {i64, i1} %45, 0 
   %47 = extractvalue {i64, i1} %45, 1 
   %48 = insertvalue {i64, i1} undef, i64 %46, 0 
@@ -394,7 +394,7 @@ seq_next > public (0 calls)
         foreign llvm move(~elt#0:wybe.int, ?$#0:wybe.int) @test_loop:6:9
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
- [04d1467a4d] [NonAliasedParam 0] :
+ [410bae77d3] [NonAliasedParam 0] :
     foreign lpvm access(seq#0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?elt#0:wybe.int)
     foreign lpvm access(seq#0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?step#0:wybe.int)
     foreign lpvm access(seq#0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?limit#0:wybe.int)
@@ -650,7 +650,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i64, i1} @"test_loop.int_seq.seq_next<0>[04d1467a4d]"(i64  %"seq#0")    {
+define external fastcc  {i64, i64, i1} @"test_loop.int_seq.seq_next<0>[410bae77d3]"(i64  %"seq#0")    {
 entry:
   %119 = inttoptr i64 %"seq#0" to i64* 
   %120 = getelementptr  i64, i64* %119, i64 0 
