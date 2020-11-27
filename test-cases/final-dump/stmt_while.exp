@@ -30,7 +30,10 @@ gen$1 > (2 calls)
         foreign llvm move(~io#0:wybe.phantom, ?io#1:wybe.phantom)
 
     1:
-        stmt_while.gen$2<0>(~argc#0:wybe.int, ~argv#0:wybe.int, ~exit_code#0:wybe.int, ~io#0:wybe.phantom, ~n#0:wybe.int, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#1:wybe.phantom) #1
+        foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$9#0:wybe.int) @wybe:nn:nn
+        foreign c print_int(tmp$9#0:wybe.int, ~io#0:wybe.phantom, ?tmp$10#0:wybe.phantom) @wybe:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?tmp$11#0:wybe.phantom) @wybe:nn:nn
+        stmt_while.gen$1<0>(~argc#0:wybe.int, ~argv#0:wybe.int, ~exit_code#0:wybe.int, ~tmp$11#0:wybe.phantom, ~tmp$9#0:wybe.int, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#1:wybe.phantom) #2 @stmt_while:2:1
 
 
 
@@ -81,7 +84,10 @@ entry:
   %"1$tmp$1#0" = icmp sgt i64 %"n#0", 0 
   br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
-  %8 = tail call fastcc  {i64, i64, i64}  @"stmt_while.gen$2<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0", i64  %"n#0")  
+  %"2$tmp$9#0" = sub   i64 %"n#0", 1 
+  tail call ccc  void  @print_int(i64  %"2$tmp$9#0")  
+  tail call ccc  void  @putchar(i8  10)  
+  %8 = tail call fastcc  {i64, i64, i64}  @"stmt_while.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0", i64  %"2$tmp$9#0")  
   %9 = extractvalue {i64, i64, i64} %8, 0 
   %10 = extractvalue {i64, i64, i64} %8, 1 
   %11 = extractvalue {i64, i64, i64} %8, 2 
