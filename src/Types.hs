@@ -110,10 +110,7 @@ typeCheckMod thisMod = do
              | (name,procDefs) <- procs]
     logTypes $ "**** Strongly connected components:\n" ++
       intercalate "\n"
-       (List.map (\scc -> "    " ++ intercalate ", "
-                         (case scc of
-                             AcyclicSCC name -> [name]
-                             CyclicSCC list -> list)) ordered)
+       (List.map (("    " ++) . intercalate ", " . sccElts) ordered)
     errs <- mapM (typecheckProcSCC thisMod) ordered
     mapM_ (\e -> message Error (show e) Nothing) $ concat $ reverse errs
     loggedFinishModule thisMod
@@ -325,6 +322,7 @@ instance Show TypeError where
 ----------------------------------------------------------------
 
 -- | A variable type assignment (symbol table), with a list of type errors.
+--   Also records bindings of type variables.
 data Typing = Typing {
                   typingDict::Map VarName TypeRef,
                   typeVarDict::Map TypeVarName TypeSpec,
