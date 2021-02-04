@@ -12,6 +12,7 @@ are defined in `AST.hs`
 
 The body of the compiler lies in the semantic analysis, compilation, and
 optimisation.  This part can be seen in more detail as several separate passes:
+
 ![Compilation detail](Detail.png)
 
 # Wybe compiler source directory
