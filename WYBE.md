@@ -948,8 +948,6 @@ Convert float to signed integer
 
 #### Wybe low-level memory management primitives
 
-# LPVM Instructions #
-
 The LPVM instructions are low-level memory manipulation instructions.  Note
 these are foreign instructions specifying the `lpvm` (rather than `llvm`)
 language. 
