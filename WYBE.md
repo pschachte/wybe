@@ -851,7 +851,8 @@ you can write
 foreign llvm add(x, 1, ?x2)
 ```
 
-For more detail on the behaviour of these operations, please consult the [LLVM documentation](https://llvm.org/docs/).
+For more detail on the behaviour of these operations, please consult the
+[LLVM documentation](https://llvm.org/docs/).
 
 
 ##### Integer operations
@@ -859,89 +860,89 @@ For more detail on the behaviour of these operations, please consult the [LLVM d
 In the following, all inputs and outputs listed as `int` can in fact be any integer type:  signed or unsigned, and any number of bits of precision.  However, all `int` inputs and outputs must be the same number of bits of precision.  All `bool` outputs may be any 1-bit integer type.
 
 
-- foreign llvm add(arg1:int, arg2:int):int  
+- `foreign llvm add(`arg1:int, arg2:int`)`:int  
 Integer addition
-- foreign llvm sub(arg1:int, arg2:int):int  
+- `foreign llvm sub(`arg1:int, arg2:int`)`:int  
 Integer subtraction
-- foreign llvm mul(arg1:int, arg2:int):int   
+- `foreign llvm mul(`arg1:int, arg2:int`)`:int   
 Integer multiplication
-- foreign llvm udiv(arg1:int, arg2:int):int  
+- `foreign llvm udiv(`arg1:int, arg2:int`)`:int  
 unsigned integer division
-- foreign llvm sdiv(arg1:int, arg2:int):int  
+- `foreign llvm sdiv(`arg1:int, arg2:int`)`:int  
 Signed integer division
-- foreign llvm urem(arg1:int, arg2:int):int  
+- `foreign llvm urem(`arg1:int, arg2:int`)`:int  
 unsigned integer remainder
-- foreign llvm srem(arg1:int, arg2:int):int  
+- `foreign llvm srem(`arg1:int, arg2:int`)`:int  
 Signed integer remainder
-- foreign llvm icmp_eq(arg1:int, arg2:int):bool  
+- `foreign llvm icmp_eq(`arg1:int, arg2:int`)`:bool  
 Integer equality
-- foreign llvm icmp_ne(arg1:int, arg2:int):bool  
+- `foreign llvm icmp_ne(`arg1:int, arg2:int`)`:bool  
 Integer disequality
-- foreign llvm icmp_ugt(arg1:int, arg2:int):bool  
+- `foreign llvm icmp_ugt(`arg1:int, arg2:int`)`:bool  
 Integer unsigned strictly greater
-- foreign llvm icmp_uge(arg1:int, arg2:int):bool  
+- `foreign llvm icmp_uge(`arg1:int, arg2:int`)`:bool  
 Integer unsigned greater or equal
-- foreign llvm icmp_ult(arg1:int, arg2:int):bool  
+- `foreign llvm icmp_ult(`arg1:int, arg2:int`)`:bool  
 Integer unsigned strictly less
-- foreign llvm icmp_ule(arg1:int, arg2:int):bool  
+- `foreign llvm icmp_ule(`arg1:int, arg2:int`)`:bool  
 Integer unsigned less or equal
-- foreign llvm icmp_sgt(arg1:int, arg2:int):bool  
+- `foreign llvm icmp_sgt(`arg1:int, arg2:int`)`:bool  
 Integer unsigned strictly greater
-- foreign llvm icmp_sge(arg1:int, arg2:int):bool  
+- `foreign llvm icmp_sge(`arg1:int, arg2:int`)`:bool  
 Integer signed greater or equal
-- foreign llvm icmp_slt(arg1:int, arg2:int):bool  
+- `foreign llvm icmp_slt(`arg1:int, arg2:int`)`:bool  
 Integer signed strictly less
-- foreign llvm icmp_sle(arg1:int, arg2:int):bool  
+- `foreign llvm icmp_sle(`arg1:int, arg2:int`)`:bool  
 Integer signed less or equal
-- foreign llvm shl(arg1:int, arg2:int):int  
+- `foreign llvm shl(`arg1:int, arg2:int`)`:int  
 Left shift
-- foreign llvm lshr(arg1:int, arg2:int):int  
+- `foreign llvm lshr(`arg1:int, arg2:int`)`:int  
 Logical right shift (shift zeros in at right)
-- foreign llvm ashr(arg1:int, arg2:int):int  
+- `foreign llvm ashr(`arg1:int, arg2:int`)`:int  
 Arithmetic right shift (copy sign bit at right)
-- foreign llvm or(arg1:int, arg2:int):int  
+- `foreign llvm or(`arg1:int, arg2:int`)`:int  
 Bitwise or
-- foreign llvm and(arg1:int, arg2:int):int  
+- `foreign llvm and(`arg1:int, arg2:int`)`:int  
 Bitwise and
-- foreign llvm xor(arg1:int, arg2:int):int  
+- `foreign llvm xor(`arg1:int, arg2:int`)`:int  
 Bitwise exclusive or
 
 ##### Floating point operations
 
 Similar to above, all inputs and outputs listed as `float` can be any legal LLVM floating point type:  16, 32, 64, or 128 bits.  Again, in a single instruction, all the `float` inputs and outputs must be the same bit width.
 
-- foreign llvm fadd(arg1:float, arg2:float):float  
+- `foreign llvm fadd(`arg1:float, arg2:float`)`:float  
 Floating point addition
-- foreign llvm fsub(arg1:float, arg2:float):float  
+- `foreign llvm fsub(`arg1:float, arg2:float`)`:float  
 Floating point subtraction
-- foreign llvm fmul(arg1:float, arg2:float):float  
+- `foreign llvm fmul(`arg1:float, arg2:float`)`:float  
 Floating point multiplication
-- foreign llvm fdiv(arg1:float, arg2:float):float  
+- `foreign llvm fdiv(`arg1:float, arg2:float`)`:float  
 Floating point division
-- foreign llvm frem(arg1:float, arg2:float):float  
+- `foreign llvm frem(`arg1:float, arg2:float`)`:float  
 Floating point remainder
-- foreign llvm fcmp_eq(arg1:float, arg2:float):bool  
+- `foreign llvm fcmp_eq(`arg1:float, arg2:float`)`:bool  
 Floating point equality
-- foreign llvm fcmp_ne(arg1:float, arg2:float):bool  
+- `foreign llvm fcmp_ne(`arg1:float, arg2:float`)`:bool  
 Floating point disequality
-- foreign llvm fcmp_slt(arg1:float, arg2:float):bool  
+- `foreign llvm fcmp_slt(`arg1:float, arg2:float`)`:bool  
 Floating point (signed) strictly less
-- foreign llvm fcmp_sle(arg1:float, arg2:float):bool  
+- `foreign llvm fcmp_sle(`arg1:float, arg2:float`)`:bool  
 Floating point (signed) less or equal
-- foreign llvm fcmp_sgt(arg1:float, arg2:float):bool  
+- `foreign llvm fcmp_sgt(`arg1:float, arg2:float`)`:bool  
 Floating point (signed) strictly greater
-- foreign llvm fcmp_sge(arg1:float, arg2:float):bool  
+- `foreign llvm fcmp_sge(`arg1:float, arg2:float`)`:bool  
 Floating point (signed) greater or equal
 
 ##### Integer/floating point conversion
 
-- foreign llvm uitofp(arg1:int):float  
+- `foreign llvm uitofp(`arg1:int`)`:float  
 Convert unsigned integer to float
-- foreign llvm sitofp(arg1:int):float  
+- `foreign llvm sitofp(`arg1:int`)`:float  
 Convert signed integer to float
-- foreign llvm fptoui(arg1:float):int  
+- `foreign llvm fptoui(`arg1:float`)`:int  
 Convert float to unsigned integer
-- foreign llvm fptosi(arg1:float):int  
+- `foreign llvm fptosi(`arg1:float`)`:int  
 Convert float to signed integer
 
 
