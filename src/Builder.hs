@@ -201,7 +201,7 @@ import           System.IO.Temp            (createTempDirectory)
 import           Transform                 (transformProc,
                                             generateSpeczVersionInProc,
                                             expandRequiredSpeczVersionsByMod)
-import           Types                     (typeCheckMod,
+import           Types                     (typeCheckModSCC,
                                             validateModExportTypes)
 import           Unbranch                  (unbranchProc)
 import           Util                      (sccElts)
@@ -694,7 +694,7 @@ compileModSCC mspecs = do
     fixpointProcessSCC resourceCheckMod mspecs
     stopOnError $ "processing resources for module(s) " ++ showModSpecs mspecs
     -- No fixed point needed because public procs must have types declared
-    mapM_ typeCheckMod mspecs
+    typeCheckModSCC mspecs
     stopOnError $ "type checking of module(s) "
                   ++ showModSpecs mspecs
     logDump Types Unbranch "TYPE CHECK"

@@ -1,1 +1,7 @@
+# Wybe compiler
+
+The architecture of the Wybe compiler exhibits the following structure:
+
+![Compiler Architecture](Compiler.png)
+
 # Wybe compiler source directory

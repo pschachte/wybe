@@ -21,8 +21,8 @@ module AST (
   determinismSeq, determinismProceding, determinismName,
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
-  TypeProto(..), TypeSpec(..), genericType, typeModule,
-  TypeRef(..), VarDict, TypeImpln(..),
+  TypeProto(..), TypeSpec(..), TypeVarName, genericType, typeModule,
+  VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), detStmt, expIsConstant,
@@ -46,14 +46,14 @@ module AST (
   emptyInterface, emptyImplementation,
   getParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
-  ModSpec, ProcImpln(..), ProcDef(..), procInline, procCallCount,
+  ModSpec, maybeModPrefix, ProcImpln(..), ProcDef(..), procInline, procCallCount,
   primImpurity, flagsImpurity, flagsDetism,
   AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
   parameterVarNameToID, SpeczVersion, CallProperty(..), generalVersion,
   speczVersionToId, SpeczProcBodies,
   MultiSpeczDepInfo, CallSiteProperty(..), InterestingCallProperty(..),
   ProcAnalysis(..), emptyProcAnalysis, 
-  ProcBody(..), PrimFork(..), Ident, VarName, TypeVarName,
+  ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, ResourceDef(..), ResourceIFace(..), FlowDirection(..),
   argFlowDirection, argType, argDescription, flowsIn, flowsOut,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
@@ -462,7 +462,7 @@ updateLoadedModule :: (Module -> Module) -> ModSpec -> Compiler ()
 updateLoadedModule updater modspec = do
     underComp <- gets underCompilation
     let (found,underComp') =
-            mapAccumL (\found m -> if (not found) && modSpec m == modspec
+            mapAccumL (\found m -> if not found && modSpec m == modspec
                                    then (True, updater m)
                                    else (found, m))
             False underComp
@@ -512,10 +512,9 @@ getLoadedModuleImpln modspec = do
 -- if the module is not loaded or does not have an implementation.
 updateLoadedModuleImpln :: (ModuleImplementation -> ModuleImplementation) ->
                            ModSpec -> Compiler ()
-updateLoadedModuleImpln updater modspec =
+updateLoadedModuleImpln updater =
     updateLoadedModule (\m -> m { modImplementation =
                                       fmap updater $ modImplementation m })
-    modspec
 
 
 -- |Return the ModuleImplementation of the specified module.  An error
@@ -891,7 +890,7 @@ lookupType context pos ty@(TypeSpec mod name args) = do
             else if length params == length args
             then do
                 args' <- mapM (lookupType context pos) args
-                let matchingType = TypeSpec (init mspec) (last mspec) args'
+                let matchingType = TypeSpec (init mspec) (last mspec) args'::TypeSpec
                 logAST $ "Matching type = " ++ show matchingType
                 return matchingType
             else do
@@ -2172,10 +2171,11 @@ instance Show ProcSpec where
 -- |An ID for a proc.
 type ProcID = Int
 
--- |A type specification:  the type name and type parameters.  Also
---  could be AnyType or InvalidType, the top and bottom of the type lattice,
---  respectively.
--- XXX eliminate typeName part, since the module *is* the base type
+-- |A type specification:  the type name and type parameters.  Also could be
+--  AnyType or InvalidType, the top and bottom of the type lattice,
+--  respectively.  Finally, it could be a type variable, which can have
+--  different representations, so the whole type is parametric in the type of
+--  type variables.
 data TypeSpec = TypeSpec {
     typeMod::ModSpec,
     typeName::Ident,
@@ -2184,7 +2184,6 @@ data TypeSpec = TypeSpec {
     | TypeVariable { typeVariableName :: TypeVarName }
     | AnyType | InvalidType
               deriving (Eq,Ord,Generic)
-
 
 genericType :: TypeSpec -> Bool
 genericType TypeSpec{typeParams=params} = any genericType params
@@ -2201,19 +2200,9 @@ typeModule AnyType               = Nothing
 typeModule InvalidType           = Nothing
 
 
--- |This specifies a type, but permits a type to be specified indirectly,
---  as simply identical to the type of another variable, or directly.
-data TypeRef = DirectType {typeRefType :: TypeSpec}
-             | IndirectType {typeRefVar :: VarName}
-             deriving (Eq,Ord)
-
 -- |This type keeps track of the types of source variables.
 type VarDict = Map VarName TypeSpec
 
-
-instance Show TypeRef where
-    show (DirectType tspec) = show tspec
-    show (IndirectType var) = "@" ++ show var
 
 data ResourceSpec = ResourceSpec {
     resourceMod::ModSpec,
@@ -2940,11 +2929,12 @@ showProcDef thisID
 instance Show TypeSpec where
   show AnyType = "?"
   show InvalidType = "XXX"
-  show (TypeVariable name) = "@" ++ name
+  show (TypeVariable name) = "?" ++ show name
   show (TypeSpec optmod ident args) =
       maybeModPrefix optmod ++ ident ++
       if List.null args then ""
       else "(" ++ (intercalate "," $ List.map show args) ++ ")"
+
 
 -- |Show the use declaration for a set of resources, if it's non-empty.
 showResources :: Set.Set ResourceFlowSpec -> String

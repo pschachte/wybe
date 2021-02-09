@@ -92,14 +92,14 @@ insertOutVar varSet (Var name ParamOut _) = Set.insert name varSet
 insertOutVar varSet expr = varSet
 
 
+----------------------------------------------------------------
+--                       The Flattener Monad
+----------------------------------------------------------------
+
 -- |The Flattener monad is a state transformer monad carrying the 
 --  flattener state over the compiler monad.
 type Flattener = StateT FlattenerState Compiler
 
-
-----------------------------------------------------------------
---                       The Flattener Monad
-----------------------------------------------------------------
 
 data FlattenerState = Flattener {
     prefixStmts :: [Placed Stmt],   -- ^Code to be generated earlier, reversed
