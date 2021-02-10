@@ -10,6 +10,7 @@ module Types (validateModExportTypes, typeCheckModSCC, -- modeCheckMod,
               checkFullyTyped) where
 
 import           AST
+import           Control.Monad
 import           Control.Monad.State
 import           Data.Graph
 import           Data.List           as List
@@ -401,10 +402,10 @@ data Typing = Typing {
 
 
 instance Show Typing where
-  show (Typing dict _ _ errs) =
-    "Typing " ++ simpleShowMap dict
+  show (Typing dict tvardict _ errs) =
+    "Typing " ++ showVarMap dict ++ "; " ++ showVarMap tvardict
     ++ if List.null errs
-       then " with no errors"
+       then " (with no errors)"
        else " with errors: " ++ show errs
 
 
@@ -468,7 +469,7 @@ unifyVarTypes pos v1 v2 = do
     t1 <- varType v1
     t2 <- varType v2
     ty <- unifyTypes
-          (ReasonEqual (Var v1 ParamIn Ordinary) (Var v1 ParamOut Ordinary) pos)
+          (ReasonEqual (Var v1 ParamIn Ordinary) (Var v2 ParamOut Ordinary) pos)
           t1 t2
     ty' <- case ty of
         AnyType -> -- two unconstrained vars:  must create type var
@@ -1366,7 +1367,8 @@ modecheckStmt m name defPos delayed assigned detism
     logTyped $ "Mode checking call   : " ++ show stmt
     logTyped $ "    with assigned    : " ++ show assigned
     callInfos <- lift $ callProcInfos $ maybePlace stmt pos
-    actualTypes <- mapM expType args
+    -- Find arg types and expand type variables
+    actualTypes <- mapM (expType >=> ultimateType) args
     let actualModes = List.map (expMode assigned) args
     let flowErrs = [ReasonArgFlow cname num pos
                    | ((mode,avail,_),num) <- zip actualModes [1..]
@@ -1439,7 +1441,7 @@ modecheckStmt m name defPos delayed assigned detism
     stmt@(ForeignCall lang cname flags args) pos = do
     logTyped $ "Mode checking foreign call " ++ show stmt
     logTyped $ "    with assigned " ++ show assigned
-    actualTypes <- mapM expType args
+    actualTypes <- mapM (expType >=> ultimateType) args
     let actualModes = List.map (expMode assigned) args
     let flowErrs = [ReasonArgFlow ("foreign " ++ lang ++ " " ++ cname) num pos
                    | ((mode,avail,_yy),num) <- zip actualModes [1..]
@@ -1536,7 +1538,7 @@ modecheckStmt m name defPos delayed assigned detism
     (stmts', assigned') <- modecheckStmts m name defPos [] assigned detism stmts
     return ([maybePlace (UseResources resources stmts') pos],
             delayed, assigned')
--- XXX Need to implement these:
+-- XXX Need to implement these correctly:
 modecheckStmt m name defPos delayed assigned detism
     stmt@(And stmts) pos = do
     logTyped $ "Mode checking conjunction " ++ show stmt
@@ -1588,7 +1590,6 @@ selectMode _ _ = shouldnt "selectMode with empty list of modes"
 unifyExprTypes :: OptPos -> Placed Exp -> Placed Exp -> Typed ()
 unifyExprTypes pos a1 a2 = do
     let args = [a1,a2]
-    let call = ForeignCall "llvm" "move" [] args
     logTyped $ "Type checking foreign instruction unifying arguments "
                ++ show a1 ++ " and " ++ show a2
     let a1Content = content a1
@@ -1636,7 +1637,7 @@ reportErrorUnless err True = return ()
 -- | Make sure a foreign call is valid; otherwise report an error
 validateForeign :: Stmt -> OptPos -> Typed ()
 validateForeign stmt@(ForeignCall lang name tags args) pos = do
-    argTypes <- mapM expType args
+    argTypes <- mapM (expType >=> ultimateType) args
     maybeReps <- lift $ mapM lookupTypeRepresentation argTypes
     let numberedMaybes = zip maybeReps [1..]
     let untyped = snd <$> List.filter (isNothing . fst) numberedMaybes
