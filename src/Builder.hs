@@ -693,7 +693,6 @@ compileModSCC mspecs = do
     -- resources from other modules
     fixpointProcessSCC resourceCheckMod mspecs
     stopOnError $ "processing resources for module(s) " ++ showModSpecs mspecs
-    -- No fixed point needed because public procs must have types declared
     typeCheckModSCC mspecs
     stopOnError $ "type checking of module(s) "
                   ++ showModSpecs mspecs

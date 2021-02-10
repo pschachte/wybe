@@ -2929,7 +2929,7 @@ showProcDef thisID
 instance Show TypeSpec where
   show AnyType = "?"
   show InvalidType = "XXX"
-  show (TypeVariable name) = "?" ++ show name
+  show (TypeVariable name) = "?" ++ name
   show (TypeSpec optmod ident args) =
       maybeModPrefix optmod ++ ident ++
       if List.null args then ""

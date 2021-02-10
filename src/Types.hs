@@ -514,7 +514,7 @@ freshTypeVar :: Typed TypeSpec
 freshTypeVar = do
     next <- gets typeVarCounter
     modify $ \st -> st { typeVarCounter = next+1 }
-    return $ TypeVariable $ "$" ++ show next
+    return $ TypeVariable $ show next
 
 
 -- |Record a type error in the current typing.
@@ -635,23 +635,25 @@ typecheckProcSCC (CyclicSCC list) = do
 typecheckProcDecl :: RoughProcSpec -> Compiler (Bool,[TypeError])
 typecheckProcDecl (RoughProc m name) = do
     logTypes $ "** Type checking decl of proc " ++ name
+    reenterModule m
     defs <- getModuleImplementationField
             (Map.findWithDefault (error "missing proc definition")
              name . modProcs)
+    logTypes $ "found " ++ (show . length) defs ++ " definition(s)"
     (revdefs,sccAgain,reasons) <-
         foldM (\(ds,sccAgain,rs) def -> do
-                ((d,again),st) <- runStateT (typecheckProcDecl m def) initTyping
+                ((d,again),st) <- runStateT (typecheckProcDecl' m def) initTyping
                 return (d:ds, sccAgain || again, typingErrs st++rs))
         ([],False,[]) defs
     updateModImplementation
       (\imp -> imp { modProcs = Map.insert name (reverse revdefs)
                                 $ modProcs imp })
-      `inModule` m
     logTypes $ "** New definition of " ++ name ++ ":"
     logTypes $ intercalate "\n" $ List.map (showProcDef 4) (reverse revdefs)
     -- XXX this shouldn't be necessary anymore, but keep it for now for safety
     unless (sccAgain || not (List.null reasons)) $
         mapM_ checkProcDefFullytyped revdefs
+    reexitModule
     return (sccAgain,reasons)
 
 
@@ -737,9 +739,10 @@ data StmtTypings = StmtTypings {typingStmt::Placed Stmt,
 -- calls, handling implied modes, and appropriately ordering calls from
 -- nested function application.  We search for a valid resolution
 -- deterministically if possible.
-typecheckProcDecl :: ModSpec -> ProcDef -> Typed (ProcDef,Bool)
-typecheckProcDecl m pdef = do
+typecheckProcDecl' :: ModSpec -> ProcDef -> Typed (ProcDef,Bool)
+typecheckProcDecl' m pdef = do
     let name = procName pdef
+    logTyped $ "Type checking proc " ++ name
     let proto = procProto pdef
     let params = procProtoParams proto
     let resources = procProtoResources proto
@@ -750,7 +753,11 @@ typecheckProcDecl m pdef = do
     when (vis == Public && any ((==AnyType) . paramType) params)
         $ typeError $ ReasonUndeclared name pos
     ifOK pdef $ do
+        logTyped $ "Recording parameter types: "
+                   ++ intercalate ", " (show <$> params)
         mapM_ (addDeclaredType name pos (length params)) $ zip params [1..]
+        logTyped $ "Recording resource types: "
+                   ++ intercalate ", " (show <$> Set.toList resources)
         mapM_ (addResourceType name pos) resources
         ifOK pdef $ do
             logTyping $ "** Type checking proc " ++ name ++ ": "
@@ -768,7 +775,7 @@ typecheckProcDecl m pdef = do
             mapM_ (\pcall -> case content pcall of
                     ProcCall _ callee _ _ _ _ ->
                         typeError $ ReasonUndef name callee $ place pcall
-                    _ -> shouldnt "typecheckProcDecl"
+                    _ -> shouldnt "typecheckProcDecl'"
                   ) badCalls
             ifOK pdef $ do
                 typecheckCalls m name pos calls' [] False
@@ -825,7 +832,7 @@ typecheckProcDecl m pdef = do
 
 -- | If no type errors have been recorded, execute the enclosed code; otherwise
 -- just return the specified proc definition.  This is probably only useful in
--- defining typecheckProcDecl.
+-- defining typecheckProcDecl'.
 ifOK :: ProcDef -> Typed (ProcDef,Bool) -> Typed (ProcDef,Bool)
 ifOK pdef body = do
     allGood <- validTyping
