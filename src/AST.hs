@@ -200,6 +200,8 @@ determinismJoin det1 det2 = max det1 det2
 determinismSeq :: Determinism -> Determinism -> Determinism
 determinismSeq Terminal _        = Terminal
 determinismSeq Failure  _        = Failure
+-- NonDet Failure = Failure
+-- NonDet Terminal = Failure
 determinismSeq _        Terminal = Terminal
 determinismSeq _        Failure  = Failure
 determinismSeq det1     det2     = max det1 det2
@@ -212,6 +214,7 @@ determinismProceding Terminal = False
 determinismProceding Failure  = False
 determinismProceding Det      = True
 determinismProceding SemiDet  = True
+-- NonDet = True
 
 
 -- |A suitable printable name for each determinism.
@@ -220,6 +223,7 @@ determinismName Terminal = "terminal"
 determinismName Failure  = "failing"
 determinismName Det      = ""
 determinismName SemiDet  = "test"
+-- NonDet = "generator"
 
 
 -- | Internal representation of data
