@@ -411,17 +411,23 @@ instance Show Typing where
 
 -- |Follow type variables to resolve a type.
 ultimateType  :: TypeSpec -> Typed TypeSpec
-ultimateType ty@TypeVariable{typeVariableName=tvar} =
-    gets (Map.findWithDefault AnyType tvar . tvarDict) >>= ultimateType
+ultimateType ty@TypeVariable{typeVariableName=tvar} = do
+    mbval <- gets $ Map.lookup tvar . tvarDict
+    logTyped $ "Type variable ?" ++ tvar ++ " is bound to " ++ show mbval
+    case mbval of
+        Nothing -> return ty
+        Just ty' -> ultimateType ty'
 ultimateType ty = return ty
 
 
--- |Bind all type variables in chain to specified type.
+-- |Bind all type variables in chain to specified type.  Make sure we don't bind
+-- a type variable to itself.
 bindTypeVariables :: TypeSpec -> TypeSpec -> Typed ()
-bindTypeVariables TypeVariable{typeVariableName=var} ty = do
+bindTypeVariables ty1@TypeVariable{typeVariableName=var} ty2
+ | ty1 /= ty2 = do
     nxt <- gets $ Map.lookup var . tvarDict
-    modify $ \t -> t { tvarDict = Map.insert var ty $ tvarDict t }
-    when (isJust nxt) $ bindTypeVariables (fromJust nxt) ty
+    modify $ \t -> t { tvarDict = Map.insert var ty2 $ tvarDict t }
+    when (isJust nxt) $ bindTypeVariables (fromJust nxt) ty2
 bindTypeVariables _ _ = return ()
 
 
@@ -484,19 +490,28 @@ unifyVarTypes pos v1 v2 = do
 -- the error.  Unifying types may have the effect of binding variables.
 unifyTypes :: TypeError -> TypeSpec -> TypeSpec -> Typed TypeSpec
 unifyTypes reason t1 t2 = do
+    logTyped $ "Unifying types " ++ show t1 ++ " and " ++ show t2
     t1' <- ultimateType t1
     t2' <- ultimateType t2
     t <- unifyTypes' reason t1' t2'
+    logTyped $ "  Unification yields " ++ show t
     bindTypeVariables t1 t
     bindTypeVariables t2 t
     return t
 
 
+-- | Find the type that matches both specified type specs.  If there is no such
+-- type, report the specified type error and return InvalidType.  If either or
+-- both arguments are type variables, this need not bind them, as unifyTypes
+-- will do that.
 unifyTypes' :: TypeError -> TypeSpec -> TypeSpec -> Typed TypeSpec
 unifyTypes' reason InvalidType _ = return InvalidType
 unifyTypes' reason _ InvalidType = return InvalidType
 unifyTypes' reason AnyType ty    = return ty
 unifyTypes' reason ty AnyType    = return ty
+unifyTypes' reason t1@TypeVariable{} t2@TypeVariable{} = return $ min t1 t2
+unifyTypes' reason TypeVariable{} ty = return ty
+unifyTypes' reason ty TypeVariable{} = return ty
 unifyTypes' reason ty1@(TypeSpec m1 n1 ps1) ty2@(TypeSpec m2 n2 ps2)
     | n1 == n2 && modsMatch && length ps1 == length ps2 = do
         ps <- zipWithM (unifyTypes reason) ps1 ps2
@@ -506,8 +521,6 @@ unifyTypes' reason ty1@(TypeSpec m1 n1 ps1) ty2@(TypeSpec m2 n2 ps2)
           | m1 `isSuffixOf` m2 = (True,  m2)
           | m2 `isSuffixOf` m1 = (True,  m1)
           | otherwise          = (False, [])
-unifyTypes' reason t1 t2 =
-    shouldnt $ "ultimateType left type var: " ++ show t1 ++ " or " ++ show t2
 
 
 -- |Generate a unique fresh type variable.
@@ -861,7 +874,7 @@ addResourceType procname pos rfspec = do
 updateParamTypes :: [Param] -> Typed [Param]
 updateParamTypes =
     mapM (\p@(Param name typ fl afl) -> do
-            ty <- varType name
+            ty <- varType name >>= ultimateType
             return $ Param name ty fl afl)
 
 
@@ -1066,6 +1079,8 @@ matchTypeList caller callee pos callArgTypes detismContext calleeInfo
 matchTypeList' :: Ident -> OptPos -> [TypeSpec] -> ProcInfo
                -> Typed (MaybeErr ProcInfo)
 matchTypeList' callee pos callArgTypes calleeInfo = do
+    logTyped $ "Matching types " ++ show callArgTypes
+               ++ " with " ++ show calleeInfo
     let args = procInfoArgs calleeInfo
     let calleeTypes = typeFlowType <$> args
     let calleeFlows = typeFlowMode <$> args
