@@ -650,6 +650,57 @@ procedure and function declarations, which will have full access to the
 constructors of the type, whether or not they are public.
 
 
+## <a name="generics"></a>Generic types
+
+Wybe supports *generic* types, sometimes called *parametric polymorphism*. A
+generic type is one that takes other types as parameters, specified by following
+the type name with the desired parameters, separated by commas and enclosed in
+parentheses. For example, the elements of a list must all be the same type, but
+that can be any valid Wybe type; a list of integers can be specified by
+`list(int)` and a list of lists of strings can be specified as
+`list(list(string))`. This allows list operations to work with lists of any
+element type, without the need to separately define different kinds of lists.
+
+The basis of generic types is the *type variable*, which stands for a type we
+don't know yet, and thus is a variable in the type system.  A type variable
+follows the same naming convention as normal program variables, except they are
+always preceded with a question mark.  Since we rarely have more than one or two
+type variables in any given context, we conventionally use a single upper case
+letter for a type variable.
+
+Generic types are defined in the same way as described above, except that:
+
+    * the keyword `constructor` or `constructors` is followed by a list of type
+      variables separated by commas and enclosed in parentheses; and
+    * these type variables may be used as types in the definitions of the
+      constructors of the type.
+
+For example, a generic list type can be defined as:
+
+```
+constructors(?T) null | cons(head:?T, tail:list(?T))
+```
+
+If specified with a `type` declaration, this would be written:
+
+```
+type list(?T) {null | cons(head:?T, tail:list(?T)) ... }
+```
+
+Generic types can also be specified in procedure parameters by using type
+variables.  Each occurrence of the same type variable must signify the same
+type.  For example, you can define list concatenation:
+
+```
+def concat(a:list(?T), b:list(?T)):list(?T) =
+    if a = cons(h, t) then cons(h, concat(t,b)) else b
+```
+
+This will concatenate lists of any type, but the types of the elements of the
+two input lists must be the same, and the result will be a list of the same
+type.
+
+
 ## Resources
 
 Resources provide an alternative argument passing mechanism,
