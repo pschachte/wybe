@@ -150,7 +150,7 @@ typeItemParser v = do
 moduleParamItemParser :: Parser Item
 moduleParamItemParser = do
     keypos <- tokenPosition <$> (ident "parameter" <|> ident "parameters")
-    params <- (symbol "@" *> identString) `sepBy1` comma
+    params <- (symbol "?" *> identString) `sepBy1` comma
     return $ ModuleParamsDecl params $ Just keypos
 
 
