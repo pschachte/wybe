@@ -67,17 +67,6 @@ writeItems file to = do
         Right is -> writeFile to (show is)
 
 
--- compareOld :: FilePath -> IO ()
--- compareOld file = do
---     stream <- fileTokens file
---     case parseWybe stream file of
---         Left err -> print err
---         Right is -> do
---             let old = OldParser.parse stream
---             let diff = getGroupedDiff (map show old) (map show is)
---             putStrLn "Comparing..."
---             putStrLn $ ppDiff diff
-
 -----------------------------------------------------------------------------
 -- Grammar                                                                 --
 -----------------------------------------------------------------------------
@@ -120,7 +109,6 @@ parsePragma :: Parser Pragma
 parsePragma = do
     ident "no_standard_library"
     return NoStd
-
 
 
 -----------------------------------------------------------------------------
@@ -207,19 +195,11 @@ resourceItemParser v = do
         <*> optType <*> optInit <*> return (Just pos)
 
 
-
 useItemParser :: Visibility -> Parser Item
 useItemParser v = do
     pos <- Just . tokenPosition <$> ident "use"
     ( ident "foreign" *> foreignFileOrLib v pos
       <|> ImportMods v <$> (modSpecParser `sepBy` comma) <*> return pos)
-    -- useForeignOrMod v (Just pos)
-
-
--- useForeignOrMod :: Visibility -> OptPos -> Parser Item
--- useForeignOrMod v pos =
---     ident "foreign" *> foreignFileOrLib v pos
---     <|> ImportMods v <$> (modSpecParser `sepBy` comma) <*> return pos
 
 
 foreignFileOrLib :: Visibility -> OptPos -> Parser Item
@@ -236,8 +216,6 @@ fromUseItemParser v = do
     m <- modSpecParser <* ident "use"
     ids <- identString `sepBy` comma
     return $ ImportItems v m ids (Just pos)
-
-
 
 
 -- | Parse a procedure or function, since both items share the same prefix of
@@ -270,7 +248,6 @@ procBody vis modifiers proto ty pos = do
     body <- betweenB Brace $ many stmtParser
     -- XXX must test that ty is AnyType, otherwise syntax error
     return $ ProcDecl vis (processProcModifiers modifiers) proto body (Just pos)
-
 
 
 -- | A procedure param parser.
@@ -467,7 +444,6 @@ procCallParser = do
       (place p)
 
 
-
 doStmt :: Parser (Placed Stmt)
 doStmt = do
     pos <- tokenPosition <$> ident "do"
@@ -529,20 +505,6 @@ ifCaseParser = do
     return (cond, body)
 
 
--- | Test statement parser.
--- testStmt :: Parser (Placed Stmt)
--- testStmt = do
---     pos <- tokenPosition <$> ident "test"
---     rel <- relExpParser
---     let e = case rel of
---                 Placed (Var s ParamIn Ordinary) p ->
---                     Placed (Fncall [] s []) p
---                 _ ->
---                     rel
---     return $ Placed (TestBool e) pos
-
-
-
 useStmt :: Parser (Placed Stmt)
 useStmt = do
     pos <- tokenPosition <$> ident "use"
@@ -570,10 +532,6 @@ assignmentParser = do
     x <- simpleExpTerms <* symbol "="
     y <- expParser
     return $ maybePlace (ProcCall [] "=" Nothing Det False [x,y]) (place x)
-
-
-
-
 
 
 -----------------------------------------------------------------------------
@@ -652,10 +610,6 @@ parenExp = do
     return $ Placed e pos
 
 
-
-
-
-
 -- | Table defining operator precedence and associativeness, helps parsec to
 -- deal with expression parsing without ambiguity.
 completeOperatorTable :: WybeOperatorTable (Placed Exp)
@@ -699,8 +653,6 @@ relOperatorTable =
       , binary "="  AssocNone
       ]
     ]
-
-
 
 
 -- | Helper to make a placed function call expression out of n number of
