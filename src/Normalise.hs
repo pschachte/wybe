@@ -51,23 +51,19 @@ normalise items = do
 normaliseItem :: Item -> Compiler ()
 normaliseItem (TypeDecl vis (TypeProto name params) (TypeRepresentation rep)
               items pos) = do
-    let items' =
-            [ModuleParamsDecl params pos | not $ List.null params]
-            ++ [RepresentationDecl rep pos] ++ items
+    let items' = RepresentationDecl params rep pos : items
     normaliseSubmodule name vis pos items'
 normaliseItem (TypeDecl vis (TypeProto name params) (TypeCtors ctorVis ctors)
               items pos) = do
-    let items' =
-            [ModuleParamsDecl params pos | not $ List.null params]
-            ++ [ConstructorDecl ctorVis ctors] ++ items
+    let items' = ConstructorDecl ctorVis params ctors pos : items
     normaliseSubmodule name vis pos items'
 normaliseItem (ModuleDecl vis name items pos) =
     normaliseSubmodule name vis pos items
-normaliseItem (ModuleParamsDecl params pos) =
+normaliseItem (RepresentationDecl params rep pos) = do
     addParameters params pos
-normaliseItem (RepresentationDecl rep pos) =
     addTypeRep rep pos
-normaliseItem (ConstructorDecl ctorVis ctors) =
+normaliseItem (ConstructorDecl ctorVis params ctors pos) = do
+    addParameters params pos
     mapM_ (addConstructor ctorVis) ctors
 normaliseItem (ImportMods vis modspecs pos) =
     mapM_ (\spec -> addImport spec (importSpec Nothing vis)) modspecs

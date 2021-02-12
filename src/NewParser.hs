@@ -97,7 +97,8 @@ visibilityItem = do
 
 
 -- | Parse module-local items (with no visibility prefix).
-privateItem = moduleParamItemParser  <|> typeRepItemParser
+privateItem :: Parser Item
+privateItem = typeRepItemParser
 
 pragmaItem :: Parser Item
 pragmaItem = do
@@ -134,29 +135,31 @@ typeItemParser v = do
     return $ TypeDecl v proto imp items (Just pos)
 
 
--- | Module parameter declaration
-moduleParamItemParser :: Parser Item
-moduleParamItemParser = do
-    keypos <- tokenPosition <$> (ident "parameter" <|> ident "parameters")
-    params <- (symbol "?" *> identString) `sepBy1` comma
-    return $ ModuleParamsDecl params $ Just keypos
+-- -- | Module parameter declaration
+-- moduleParamItemParser :: Parser Item
+-- moduleParamItemParser = do
+--     keypos <- tokenPosition <$> (ident "parameter" <|> ident "parameters")
+--     params <- (symbol "?" *> identString) `sepBy1` comma
+--     return $ ModuleParamsDecl params $ Just keypos
 
 
 -- | Module type representation declaration
 typeRepItemParser :: Parser Item
 typeRepItemParser = do
     keypos <- tokenPosition <$> ident "representation"
+    params <- option [] $ betweenB Paren (typeVarName `sepBy` comma)
     ident "is"
     rep <- typeRep
-    return $ RepresentationDecl rep $ Just keypos
+    return $ RepresentationDecl params rep $ Just keypos
 
 
 -- | Module type representation declaration
 dataCtorItemParser :: Visibility -> Parser Item
 dataCtorItemParser v = do
-    (ident "constructor" <|> ident "constructors")
+    pos <- tokenPosition <$> (ident "constructor" <|> ident "constructors")
+    params <- option [] $ betweenB Paren (typeVarName `sepBy` comma)
     ctors <- funcProtoParser `sepBy` symbol "|"
-    return $ ConstructorDecl v ctors
+    return $ ConstructorDecl v params ctors $ Just pos
 
 
 -- | Type declaration body where representation and items are given
@@ -380,7 +383,7 @@ optType = option AnyType (symbol ":" *> typeParser)
 -- Type -> ident OptTypeList
 typeParser :: Parser TypeSpec
 typeParser =
-    symbol "?" *> (TypeVariable <$> identString)
+    TypeVariable <$> typeVarName
     <|> do
         name <- identString
         optTypeList <- option [] $ betweenB Paren (typeParser `sepBy` comma)
@@ -390,6 +393,9 @@ typeParser =
             _         -> return $ TypeSpec [] name optTypeList
 
 
+-- | Parse a type variable name
+typeVarName :: Parser Ident
+typeVarName = symbol "?" *> identString
 
 -----------------------------------------------------------------------------
 -- Statement Parsing                                                       --

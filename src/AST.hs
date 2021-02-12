@@ -134,9 +134,8 @@ import qualified LLVM.AST as LLVMAST
 data Item
      = TypeDecl Visibility TypeProto TypeImpln [Item] OptPos
      | ModuleDecl Visibility Ident [Item] OptPos
-     | ModuleParamsDecl [Ident] OptPos
-     | RepresentationDecl TypeRepresentation OptPos
-     | ConstructorDecl Visibility [Placed ProcProto]
+     | RepresentationDecl [Ident] TypeRepresentation OptPos
+     | ConstructorDecl Visibility [Ident] [Placed ProcProto] OptPos
      | ImportMods Visibility [ModSpec] OptPos
      | ImportItems Visibility ModSpec [Ident] OptPos
      | ImportForeign [FilePath] OptPos
@@ -2766,13 +2765,14 @@ instance Show Item where
     ++ intercalate "\n  | " (List.map show ctors) ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
     ++ "\n}\n"
-  show (ModuleParamsDecl [] _) = "" -- if no parameters, don't mention it
-  show (ModuleParamsDecl params pos) =
-    "parameters " ++ intercalate ", " params ++ showMaybeSourcePos pos ++ "\n"
-  show (RepresentationDecl repn pos) =
-    "representation " ++ show repn ++ showMaybeSourcePos pos ++ "\n"
-  show (ConstructorDecl vis ctors) =
-    visibilityPrefix vis ++ "constructors " ++ show ctors ++ "\n"
+  show (RepresentationDecl params repn pos) =
+    "representation"
+    ++ bracketList "(" ")" ", " (("?"++) <$> params)
+    ++ " " ++ show repn ++ showMaybeSourcePos pos ++ "\n"
+  show (ConstructorDecl vis params ctors pos) =
+    visibilityPrefix vis ++ "constructors" 
+    ++ bracketList "(" ")" ", " (("?"++) <$> params)
+    ++ " " ++ show ctors ++ showMaybeSourcePos pos ++ "\n"
   show (ImportMods vis mods pos) =
       visibilityPrefix vis ++ "use " ++
       showModSpecs mods ++ showMaybeSourcePos pos ++ "\n  "
