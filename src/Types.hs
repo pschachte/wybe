@@ -466,6 +466,7 @@ constrainVarType :: TypeError -> VarName -> TypeSpec -> Typed ()
 constrainVarType reason var ty = do
     ty' <- varType var
     ty'' <- unifyTypes reason ty ty'
+    logTyped $ "Variable " ++ var ++ " type constrained to " ++ show ty''
     setVarType var ty''
 
 
@@ -767,6 +768,10 @@ typecheckProcDecl' m pdef = do
     when (vis == Public && any ((==AnyType) . paramType) params)
         $ typeError $ ReasonUndeclared name pos
     ifOK pdef $ do
+        logTyping $ "** Type checking proc " ++ name ++ ": "
+        logTyped $ "   with resources: " ++ show resources
+        calls <- bodyCalls def detism
+        logTyped $ "   containing calls: " ++ showBody 8 (fst <$> calls)
         logTyped $ "Recording parameter types: "
                    ++ intercalate ", " (show <$> params)
         mapM_ (addDeclaredType name pos (length params)) $ zip params [1..]
@@ -774,10 +779,7 @@ typecheckProcDecl' m pdef = do
                    ++ intercalate ", " (show <$> Set.toList resources)
         mapM_ (addResourceType name pos) resources
         ifOK pdef $ do
-            logTyping $ "** Type checking proc " ++ name ++ ": "
-            logTyped $ "   with resources: " ++ show resources
-            calls <- bodyCalls def detism
-            logTyped $ "   containing calls: " ++ showBody 8 (fst <$> calls)
+            mapM_ (recordCasts name . content . fst) calls
             let procCalls = List.filter (isRealProcCall . content . fst) calls
             let unifs = List.concatMap foreignTypeEquivs
                         (content . fst <$> calls)
@@ -861,6 +863,7 @@ addDeclaredType procname pos arity (Param name typ flow _,argNum) = do
     constrainVarType (ReasonParam procname arity pos) name typ'
 
 
+-- | 
 addResourceType :: ProcName -> OptPos -> ResourceFlowSpec -> Typed ()
 addResourceType procname pos rfspec = do
     let rspec = resourceFlowRes rfspec
@@ -869,6 +872,26 @@ addResourceType procname pos rfspec = do
     let names = List.map resourceName rspecs
     zipWithM_ (\n -> constrainVarType (ReasonResource procname n pos) n)
           names types
+
+
+-- | Register cast variable types on arguments of the specified item.  Casts are
+-- only permitted on foreign call arguments.
+recordCasts :: ProcName -> Stmt -> Typed ()
+recordCasts caller (ForeignCall _ callee tags args) =
+    mapM_ (uncurry $ recordCast caller callee) $ zip args [1..]
+-- XXX Need to report error for casts on ProCall args
+-- recordCasts caller (ProcCall _ callee _ _ _ args) =
+--     mapM_ (uncurry $ recordCast caller callee) $ zip args [1..]
+recordCasts caller _ = return ()
+
+
+-- | Record 
+recordCast :: ProcName -> Ident -> Placed Exp -> Int -> Typed ()
+recordCast caller instr pexp argNum =
+    case content pexp of
+        (Typed (Var name flow _) typ True) | flowsOut flow
+            -> constrainVarType ReasonShouldnt name typ
+        _   -> return ()
 
 
 updateParamTypes :: [Param] -> Typed [Param]
@@ -1469,6 +1492,7 @@ modecheckStmt m name defPos delayed assigned detism
         else do
             let typeflows = List.zipWith TypeFlow actualTypes
                             $ sel1 <$> actualModes
+            logTyped $ "    types and modes = " ++ show typeflows
             let actualImpurity = flagsImpurity flags
             let impurity = bindingImpurity assigned
             let stmtDetism = flagsDetism flags
@@ -1604,13 +1628,10 @@ selectMode _ _ = shouldnt "selectMode with empty list of modes"
 --  means unifying their types.
 unifyExprTypes :: OptPos -> Placed Exp -> Placed Exp -> Typed ()
 unifyExprTypes pos a1 a2 = do
-    let args = [a1,a2]
-    logTyped $ "Type checking foreign instruction unifying arguments "
+    logTyped $ "Type checking foreign instruction unifying types "
                ++ show a1 ++ " and " ++ show a2
     let a1Content = content a1
     let a2Content = content a2
-    noteOutputCast a1Content
-    noteOutputCast a2Content
     case expVar' $ content a2 of
         Nothing -> typeError (ReasonBadMove a2Content pos)
         Just toVar ->
