@@ -1,3 +1,11 @@
+-- TODO:
+-- - 1 constructor: TypeMoifier
+-- - 1 member: boolean(unique or not) (in TypeProto - TypeImpln)
+
+-- a function defaultTypeModifier - default false
+
+
+
 --  File     : AST.hs
 --  Author   : Peter Schachte
 --  Purpose  : Wybe Abstract Syntax Tree and LPVM representation
@@ -21,7 +29,7 @@ module AST (
   determinismSeq, determinismProceding, determinismName,
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
-  TypeProto(..), TypeSpec(..), TypeRef(..), VarDict, TypeImpln(..),
+  TypeProto(..), TypeModifier(..), TypeSpec(..), TypeRef(..), VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), detStmt, expIsConstant,
@@ -128,7 +136,7 @@ import qualified LLVM.AST as LLVMAST
 
 -- |An item appearing at the top level of a source file.
 data Item
-     = TypeDecl Visibility TypeProto TypeImpln [Item] OptPos
+     = TypeDecl Visibility TypeProto TypeModifier TypeImpln [Item] OptPos  -- EDIT
      | ModuleDecl Visibility Ident [Item] OptPos
      | ImportMods Visibility [ModSpec] OptPos
      | ImportItems Visibility ModSpec [Ident] OptPos
@@ -279,6 +287,14 @@ isPublic = (==Public)
 data TypeProto = TypeProto Ident [Ident]
                  deriving (Generic, Eq)
 
+
+-- | A type modifier consists of a boolean indicating its uniqueness.
+data TypeModifier = TypeModifier Bool
+                    deriving (Generic, Eq)
+
+-- | A default boolean value for Uniqueness (false)
+defaultTypeModifier :: TypeModifier
+defaultTypeModifier = TypeModifier False
 
 ----------------------------------------------------------------
 --                    Handling Source Positions
@@ -2739,16 +2755,19 @@ varsInPrimArg _ (ArgUndef _)            = Set.empty
 
 ----------------------------------------------------------------
 
--- |How to show an Item.
+-- TypeDecl Visibility TypeProto TypeModifier TypeImpln [Item] OptPos
+-- | How to show an Item.
 instance Show Item where
-  show (TypeDecl vis name (TypeRepresentation repn) items pos) =
+  show (TypeDecl vis name typeModifier (TypeRepresentation repn) items pos) =  -- EDIT
     visibilityPrefix vis ++ "type " ++ show name
+    ++ showTypeModifier typeModifier  -- EDIT
     ++ " is" ++ show repn
     ++ showMaybeSourcePos pos ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
     ++ "\n}\n"
-  show (TypeDecl vis name (TypeCtors ctorvis ctors) items pos) =
+  show (TypeDecl vis name typeModifier (TypeCtors ctorvis ctors) items pos) =
     visibilityPrefix vis ++ "type " ++ show name
+    ++ showTypeModifier typeModifier
     ++ " " ++ visibilityPrefix ctorvis
     ++ showMaybeSourcePos pos ++ "\n    "
     ++ intercalate "\n  | " (List.map show ctors) ++ "\n  "
@@ -2859,6 +2878,12 @@ instance Show TypeProto where
 instance Show t => Show (Placed t) where
     show (Placed t pos) = show t ++ showMaybeSourcePos (Just pos)
     show (Unplaced t) =   show t
+
+-- EDIT
+-- | How to show a type modifier
+showTypeModifier :: TypeModifier -> String
+showTypeModifier (TypeModifier True)  = "unique "
+showTypeModifier (TypeModifier False) = ""
 
 
 -- |How to show an optional source position

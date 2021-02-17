@@ -1,3 +1,6 @@
+
+
+
 --  File     : NewParser.hs
 --  Author   : Ashutosh Rishi Ranjan <ashutoshrishi92@gmail.com>
 --  Purpose  : Parser for the Wybe language using Parsec.
@@ -138,8 +141,18 @@ typeItemParser v = do
     proto <- TypeProto <$> identString <*>
              option [] (betweenB Paren (identString `sepBy` comma))
     (imp,items) <- typeImpln <|> typeCtors
-    return $ TypeDecl v proto imp items (Just pos)
+    return $ TypeDecl v proto imp items (Just pos)    -- TODO: insert `mod` between proto and imp
 
+-- TODO: typeModifierParser <- `mod` ,, typeModifiers
+-- option takes Parser, tries, if cannot, return default
+-- optionally parse, one or more ?? wrapped with paren
+-- TODO: option defaultTypeModifiers (ident unique stargrader)  ! if success on left, return right
+    -- return TypeModifiers -> whether unique
+
+-- public ? foo {unique} ctors
+-- ERRS
+
+-- test case: unique type ?
 
 -- | Type declaration body where representation and items are given
 typeImpln = do
