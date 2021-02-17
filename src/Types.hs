@@ -613,14 +613,10 @@ setExpType otherExp _ _ _ _
 --                         Type Checking Procs
 ----------------------------------------------------------------
 
--- |Type check one strongly connected component in the local call graph
---  of a module.  The call graph contains only procs in the one module,
---  because this is being done for type inference, and imported procs
---  must have had their types declared.  Returns True if the inferred
---  types are more specific than the old ones and some proc(s) in the
---  SCC depend on procs in the list of mods.  In this case, we will
---  have to rerun the typecheck after typechecking the other modules
---  on that list.
+-- |Type check one strongly connected component in the call graph.  Returns True
+--  if the inferred types are more specific than the old ones.  In this case, we
+--  will have to rerun the typecheck after typechecking the other modules on
+--  that list.
 typecheckProcSCC :: SCC RoughProcSpec -> Compiler [TypeError]
 typecheckProcSCC (AcyclicSCC proc) = do
     -- A single pass is always enough for non-cyclic SCCs
