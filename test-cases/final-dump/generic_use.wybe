@@ -6,9 +6,9 @@ def fromto1(lo:int, hi:int, sofar:generic_list(int)) : generic_list(int) =
     if lo <= hi then fromto1(lo, hi-1, [hi|sofar]) else sofar
 
 pub def nrev(lst:generic_list(?t)) : generic_list(?t) =
-    if lst = [?h|?t] then append(nrev(t),[h]) else []
+    if lst = [?h | ?t] then nrev(t) ++ [h] else []
 
 pub def reverse(lst:generic_list(?t)) : generic_list(?t) = reverse1(lst, [])
 pub def reverse1(lst:generic_list(?t), suffix:generic_list(?t))
         : generic_list(?t) =
-    if lst = [?h|?t] then reverse1(t,[h|suffix]) else suffix
+    if lst = [?h | ?t] then reverse1(t,[h|suffix]) else suffix
