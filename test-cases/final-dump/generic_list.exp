@@ -99,19 +99,26 @@ head > public {inline} (0 calls)
 
 
 
-length > public (1 calls)
+length > public {inline} (0 calls)
 0: length(x#0:generic_list(?T), ?$#0:wybe.int):
+ AliasPairs: []
+ InterestingCallProperties: []
+    generic_list.length1<0>(~x#0:generic_list(?T), 0:wybe.int, ?$#0:wybe.int) #0 @generic_list:8:44
+
+
+length1 > (2 calls)
+0: length1(x#0:generic_list(?T), acc#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(x#0:generic_list(?T), 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.int, ?$#0:wybe.int) @generic_list:8:5
+        foreign llvm move(~acc#0:wybe.int, ?$#0:wybe.int) @generic_list:10:1
 
     1:
         foreign lpvm access(~x#0:generic_list(?T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:generic_list(?T))
-        generic_list.length<0>(~t#0:generic_list(?T), ?tmp$2#0:wybe.int) #1 @generic_list:9:32
-        foreign llvm add(~tmp$2#0:wybe.int, 1:wybe.int, ?$#0:wybe.int) @wybe:nn:nn
+        foreign llvm add(~acc#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
+        generic_list.length1<0>(~t#0:generic_list(?T), ~tmp$2#0:wybe.int, ?$#0:wybe.int) #2 @generic_list:11:28
 
 
 
@@ -278,6 +285,13 @@ if.else:
 
 define external fastcc  i64 @"generic_list.length<0>"(i64  %"x#0")    {
 entry:
+  %"1$$#0" = tail call fastcc  i64  @"generic_list.length1<0>"(i64  %"x#0", i64  0)  
+  ret i64 %"1$$#0" 
+}
+
+
+define external fastcc  i64 @"generic_list.length1<0>"(i64  %"x#0", i64  %"acc#0")    {
+entry:
   %"1$tmp$5#0" = icmp ne i64 %"x#0", 0 
   br i1 %"1$tmp$5#0", label %if.then, label %if.else 
 if.then:
@@ -285,11 +299,11 @@ if.then:
   %57 = inttoptr i64 %56 to i64* 
   %58 = getelementptr  i64, i64* %57, i64 0 
   %59 = load  i64, i64* %58 
-  %"2$tmp$2#0" = tail call fastcc  i64  @"generic_list.length<0>"(i64  %59)  
-  %"2$$#0" = add   i64 %"2$tmp$2#0", 1 
+  %"2$tmp$2#0" = add   i64 %"acc#0", 1 
+  %"2$$#0" = tail call fastcc  i64  @"generic_list.length1<0>"(i64  %59, i64  %"2$tmp$2#0")  
   ret i64 %"2$$#0" 
 if.else:
-  ret i64 0 
+  ret i64 %"acc#0" 
 }
 
 
