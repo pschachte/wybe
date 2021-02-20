@@ -417,6 +417,9 @@ ultimateType ty@TypeVariable{typeVariableName=tvar} = do
     case mbval of
         Nothing -> return ty
         Just ty' -> ultimateType ty'
+ultimateType (TypeSpec mod name args) = do
+    args' <- mapM ultimateType args
+    return $ TypeSpec mod name args'
 ultimateType ty = return ty
 
 
@@ -441,8 +444,23 @@ validTyping :: Typed Bool
 validTyping = gets $ List.null . typingErrs
 
 
+-- |Get the ultimate type of variable.  If the type of the variable is
+-- completely unknown, a type variable will be assigned, so this will never
+-- return AnyType as a type.  It will also follow type variable bindings to get
+-- the ultimate type of the variable.
+ultimateVarType :: VarName -> Typed TypeSpec
+ultimateVarType var = do
+    ty <- varType var >>= ultimateType
+    case ty of
+        AnyType -> do
+            ty' <- freshTypeVar
+            setVarType var ty'
+            return ty'
+        _ -> return ty
+
+
 -- |Get the type associated with a variable; AnyType if no constraint has
---  been imposed on that variable.
+--  been imposed on that variable.  Does not follow type variable chains.
 varType :: VarName -> Typed TypeSpec
 varType var = gets $ lookupVarType var
 
@@ -510,7 +528,7 @@ unifyTypes' reason InvalidType _ = return InvalidType
 unifyTypes' reason _ InvalidType = return InvalidType
 unifyTypes' reason AnyType ty    = return ty
 unifyTypes' reason ty AnyType    = return ty
-unifyTypes' reason t1@TypeVariable{} t2@TypeVariable{} = return $ min t1 t2
+unifyTypes' reason t1@TypeVariable{} t2@TypeVariable{} = return $ max t1 t2
 unifyTypes' reason TypeVariable{} ty = return ty
 unifyTypes' reason ty TypeVariable{} = return ty
 unifyTypes' reason ty1@(TypeSpec m1 n1 ps1) ty2@(TypeSpec m2 n2 ps2)
@@ -554,6 +572,7 @@ localCalls idents (ProcCall m name _ _ _ _)
 localCalls idents _ = idents
 
 
+-- |Return the ultimate type of an expression.  Does 
 expType :: Placed Exp -> Typed TypeSpec
 expType expr = do
     logTyped $ "Finding type of expr " ++ show expr
@@ -567,8 +586,9 @@ expType' (IntValue _) _      = return $ TypeSpec ["wybe"] "int" []
 expType' (FloatValue _) _    = return $ TypeSpec ["wybe"] "float" []
 expType' (StringValue _) _   = return $ TypeSpec ["wybe"] "string" []
 expType' (CharValue _) _     = return $ TypeSpec ["wybe"] "char" []
-expType' (Var name _ _) _    = varType name
-expType' (Typed _ typ _) pos = lift $ lookupType "typed expression" pos typ
+expType' (Var name _ _) _    = ultimateVarType name
+expType' (Typed _ typ _) pos =
+    lift (lookupType "typed expression" pos typ) >>= ultimateType
 expType' expr _ =
     shouldnt $ "Expression '" ++ show expr ++ "' left after flattening"
 
@@ -1537,10 +1557,14 @@ modecheckStmt m name defPos delayed assigned detism
       else do
         let finalAssigned = assigned2 `joinState` assigned3
         logTyped $ "Assigned by conditional: " ++ show finalAssigned
-        typing <- get
-        let vars = Map.fromSet (`lookupVarType` typing) <$> bindingVars finalAssigned
+        let vars = maybe [] Set.toAscList $ bindingVars finalAssigned
+        types <- mapM ultimateVarType vars
+        let bindings = Map.fromAscList $ zip vars types
         return
-          ([maybePlace (Cond (seqToStmt tstStmt') thnStmts' elsStmts' vars)
+          ([maybePlace (Cond (seqToStmt tstStmt') thnStmts' elsStmts'
+                        (if isJust (bindingVars finalAssigned) 
+                         then Just bindings else Nothing)
+          )
             pos], delayed'++delayed, finalAssigned)
 modecheckStmt m name defPos delayed assigned detism
     stmt@(TestBool exp) pos = do
