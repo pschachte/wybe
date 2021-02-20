@@ -1,6 +1,3 @@
-
-
-
 --  File     : NewParser.hs
 --  Author   : Ashutosh Rishi Ranjan <ashutoshrishi92@gmail.com>
 --  Purpose  : Parser for the Wybe language using Parsec.
@@ -140,8 +137,17 @@ typeItemParser v = do
     pos <- tokenPosition <$> ident "type"
     proto <- TypeProto <$> identString <*>
              option [] (betweenB Paren (identString `sepBy` comma))
+    mod <- typeModifierParser
     (imp,items) <- typeImpln <|> typeCtors
-    return $ TypeDecl v proto imp items (Just pos)    -- TODO: insert `mod` between proto and imp
+    return $ TypeDecl v proto mod imp items (Just pos)
+    -- EDIT: inserted `mod` between proto and imp
+
+-- | Type modifier parser
+-- Currently simply checked if the string is empty
+typeModifierParser :: TypeModifier
+typeModifierParser = TypeModifier $ List.null $
+                        option [] $ betweenB Brace (identString `sepBy` comma)
+
 
 -- TODO: typeModifierParser <- `mod` ,, typeModifiers
 -- option takes Parser, tries, if cannot, return default
