@@ -5,8 +5,10 @@ pub def ++(x:generic_list(?T), y:generic_list(?T)):generic_list(?T) =
     then [h|t++y]
     else y
 
-pub def length(x:generic_list(?T)) : int =
-    if x = [ ?h | ?t] then 1 + length(t) else 0
+pub def length(x:generic_list(?T)) : int = length1(x, 0)
+
+def length1(x:generic_list(?T), acc:int) : int =
+    if x = [ ?h | ?t] then length(t, acc+1) else acc
 
 
 # ?x = [1,2,3]
