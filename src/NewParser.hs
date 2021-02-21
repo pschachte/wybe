@@ -170,6 +170,7 @@ typeImpln = do
 
 
 -- | Type declaration body where representation and items are given
+typeRep :: ParsecT [Token] () Identity TypeRepresentation
 typeRep = do
     ident "address" $> Address
     <|> do bits <- option wordSize

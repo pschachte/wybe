@@ -5,8 +5,9 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
-module Snippets (intType, intCast, boolType, boolCast, boolTrue, boolFalse,
-                 boolBool, phantomType, varSet, varGet, varGetSet,
+module Snippets (intType, intCast, tagType, tagCast,
+                 boolType, boolCast, boolTrue, boolFalse, boolBool,
+                 phantomType, varSet, varGet, varGetSet,
                  boolVarSet, boolVarGet, intVarSet, intVarGet, castTo,
                  lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, primMove,
                  boolNegate, comparison, succeedTest, failTest, testVar,
@@ -25,6 +26,14 @@ intType = TypeSpec ["wybe"] "int" []
 -- |Cast an expr to the int type
 intCast :: Exp -> Exp
 intCast exp = castTo exp intType
+
+-- |The type of a secondary tag (currently 16 bits unsigned)
+tagType :: TypeSpec
+tagType = Representation $ Bits 16
+
+-- |Cast an expr to the int type
+tagCast :: Exp -> Exp
+tagCast exp = castTo exp tagType
 
 -- |The bool type
 boolType :: TypeSpec

@@ -870,6 +870,7 @@ lookupType :: String -> OptPos -> TypeSpec -> Compiler TypeSpec
 lookupType _ _ AnyType = return AnyType
 lookupType _ _ InvalidType = return InvalidType
 lookupType _ _ ty@TypeVariable{} = return ty
+lookupType _ _ ty@Representation{} = return ty
 lookupType context pos ty@(TypeSpec mod name args) = do
     currMod <- getModuleSpec
     logAST $ "In module " ++ showModSpec currMod
@@ -1481,6 +1482,8 @@ lookupTypeRepresentation AnyType = return $ Just defaultTypeRepresentation
 lookupTypeRepresentation InvalidType = return Nothing
 lookupTypeRepresentation TypeVariable{} =
     return $ Just defaultTypeRepresentation
+lookupTypeRepresentation Representation{typeSpecRepresentation=rep} =
+    return $ Just rep
 lookupTypeRepresentation (TypeSpec modSpec name _) =
     lookupModuleRepresentation $ modSpec ++ [name]
 
@@ -2181,20 +2184,23 @@ data TypeSpec = TypeSpec {
     typeParams::[TypeSpec]
     }
     | TypeVariable { typeVariableName :: TypeVarName }
+    | Representation { typeSpecRepresentation :: TypeRepresentation }
     | AnyType | InvalidType
               deriving (Eq,Ord,Generic)
 
 genericType :: TypeSpec -> Bool
 genericType TypeSpec{typeParams=params} = any genericType params
-genericType TypeVariable{} = True
-genericType AnyType        = False
-genericType InvalidType    = False
+genericType TypeVariable{}   = True
+genericType Representation{} = False
+genericType AnyType          = False
+genericType InvalidType      = False
 
 
 -- | Return the module of the specified type, if it has one.
 typeModule :: TypeSpec -> Maybe ModSpec
 typeModule (TypeSpec mod name _) = Just $ mod ++ [name]
 typeModule TypeVariable{}        = Nothing
+typeModule Representation{}      = Nothing
 typeModule AnyType               = Nothing
 typeModule InvalidType           = Nothing
 
@@ -2927,9 +2933,10 @@ showProcDef thisID
 
 -- |How to show a type specification.
 instance Show TypeSpec where
-  show AnyType = "?"
-  show InvalidType = "XXX"
-  show (TypeVariable name) = "?" ++ name
+  show AnyType              = "?"
+  show InvalidType          = "XXX"
+  show (TypeVariable name)  = "?" ++ name
+  show (Representation rep) = show rep
   show (TypeSpec optmod ident args) =
       maybeModPrefix optmod ++ ident ++
       if List.null args then ""

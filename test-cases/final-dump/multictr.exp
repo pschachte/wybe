@@ -484,35 +484,35 @@ entry:
                                         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                                     1:
-                                        foreign lpvm access($left#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$85#0)
-                                        foreign llvm icmp_eq(tmp$85#0, 7:wybe.int, ?tmp$86#0:wybe.bool)
+                                        foreign lpvm access($left#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$85#0:16 bit unsigned)
+                                        foreign llvm icmp_eq(tmp$85#0:16 bit unsigned, 7:16 bit unsigned, ?tmp$86#0:wybe.bool)
                                         case ~tmp$86#0:wybe.bool of
                                         0:
-                                            foreign llvm icmp_eq(tmp$85#0, 8:wybe.int, ?tmp$92#0:wybe.bool)
+                                            foreign llvm icmp_eq(tmp$85#0:16 bit unsigned, 8:16 bit unsigned, ?tmp$92#0:wybe.bool)
                                             case ~tmp$92#0:wybe.bool of
                                             0:
-                                                foreign llvm icmp_eq(tmp$85#0, 9:wybe.int, ?tmp$98#0:wybe.bool)
+                                                foreign llvm icmp_eq(tmp$85#0:16 bit unsigned, 9:16 bit unsigned, ?tmp$98#0:wybe.bool)
                                                 case ~tmp$98#0:wybe.bool of
                                                 0:
-                                                    foreign llvm icmp_eq(tmp$85#0, 10:wybe.int, ?tmp$104#0:wybe.bool)
+                                                    foreign llvm icmp_eq(tmp$85#0:16 bit unsigned, 10:16 bit unsigned, ?tmp$104#0:wybe.bool)
                                                     case ~tmp$104#0:wybe.bool of
                                                     0:
-                                                        foreign llvm icmp_eq(tmp$85#0, 11:wybe.int, ?tmp$110#0:wybe.bool)
+                                                        foreign llvm icmp_eq(tmp$85#0:16 bit unsigned, 11:16 bit unsigned, ?tmp$110#0:wybe.bool)
                                                         case ~tmp$110#0:wybe.bool of
                                                         0:
-                                                            foreign llvm icmp_eq(tmp$85#0, 12:wybe.int, ?tmp$116#0:wybe.bool)
+                                                            foreign llvm icmp_eq(tmp$85#0:16 bit unsigned, 12:16 bit unsigned, ?tmp$116#0:wybe.bool)
                                                             case ~tmp$116#0:wybe.bool of
                                                             0:
-                                                                foreign llvm icmp_eq(tmp$85#0, 13:wybe.int, ?tmp$122#0:wybe.bool)
+                                                                foreign llvm icmp_eq(tmp$85#0:16 bit unsigned, 13:16 bit unsigned, ?tmp$122#0:wybe.bool)
                                                                 case ~tmp$122#0:wybe.bool of
                                                                 0:
-                                                                    foreign llvm icmp_eq(tmp$85#0, 14:wybe.int, ?tmp$128#0:wybe.bool)
+                                                                    foreign llvm icmp_eq(tmp$85#0:16 bit unsigned, 14:16 bit unsigned, ?tmp$128#0:wybe.bool)
                                                                     case ~tmp$128#0:wybe.bool of
                                                                     0:
-                                                                        foreign llvm icmp_eq(tmp$85#0, 15:wybe.int, ?tmp$134#0:wybe.bool)
+                                                                        foreign llvm icmp_eq(tmp$85#0:16 bit unsigned, 15:16 bit unsigned, ?tmp$134#0:wybe.bool)
                                                                         case ~tmp$134#0:wybe.bool of
                                                                         0:
-                                                                            foreign llvm icmp_eq(~tmp$85#0, 16:wybe.int, ?tmp$140#0:wybe.bool)
+                                                                            foreign llvm icmp_eq(~tmp$85#0:16 bit unsigned, 16:16 bit unsigned, ?tmp$140#0:wybe.bool)
                                                                             case ~tmp$140#0:wybe.bool of
                                                                             0:
                                                                                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -532,8 +532,8 @@ entry:
                                                                                         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                                                                                     1:
-                                                                                        foreign lpvm access($right#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$145#0)
-                                                                                        foreign llvm icmp_eq(~tmp$145#0, 16:wybe.int, ?tmp$146#0:wybe.bool)
+                                                                                        foreign lpvm access($right#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$145#0:16 bit unsigned)
+                                                                                        foreign llvm icmp_eq(~tmp$145#0:16 bit unsigned, 16:16 bit unsigned, ?tmp$146#0:wybe.bool)
                                                                                         case ~tmp$146#0:wybe.bool of
                                                                                         0:
                                                                                             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -561,8 +561,8 @@ entry:
                                                                                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                                                                                 1:
-                                                                                    foreign lpvm access($right#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$139#0)
-                                                                                    foreign llvm icmp_eq(~tmp$139#0, 15:wybe.int, ?tmp$140#0:wybe.bool)
+                                                                                    foreign lpvm access($right#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$139#0:16 bit unsigned)
+                                                                                    foreign llvm icmp_eq(~tmp$139#0:16 bit unsigned, 15:16 bit unsigned, ?tmp$140#0:wybe.bool)
                                                                                     case ~tmp$140#0:wybe.bool of
                                                                                     0:
                                                                                         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -590,8 +590,8 @@ entry:
                                                                                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                                                                             1:
-                                                                                foreign lpvm access($right#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$133#0)
-                                                                                foreign llvm icmp_eq(~tmp$133#0, 14:wybe.int, ?tmp$134#0:wybe.bool)
+                                                                                foreign lpvm access($right#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$133#0:16 bit unsigned)
+                                                                                foreign llvm icmp_eq(~tmp$133#0:16 bit unsigned, 14:16 bit unsigned, ?tmp$134#0:wybe.bool)
                                                                                 case ~tmp$134#0:wybe.bool of
                                                                                 0:
                                                                                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -619,8 +619,8 @@ entry:
                                                                             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                                                                         1:
-                                                                            foreign lpvm access($right#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$127#0)
-                                                                            foreign llvm icmp_eq(~tmp$127#0, 13:wybe.int, ?tmp$128#0:wybe.bool)
+                                                                            foreign lpvm access($right#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$127#0:16 bit unsigned)
+                                                                            foreign llvm icmp_eq(~tmp$127#0:16 bit unsigned, 13:16 bit unsigned, ?tmp$128#0:wybe.bool)
                                                                             case ~tmp$128#0:wybe.bool of
                                                                             0:
                                                                                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -648,8 +648,8 @@ entry:
                                                                         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                                                                     1:
-                                                                        foreign lpvm access($right#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$121#0)
-                                                                        foreign llvm icmp_eq(~tmp$121#0, 12:wybe.int, ?tmp$122#0:wybe.bool)
+                                                                        foreign lpvm access($right#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$121#0:16 bit unsigned)
+                                                                        foreign llvm icmp_eq(~tmp$121#0:16 bit unsigned, 12:16 bit unsigned, ?tmp$122#0:wybe.bool)
                                                                         case ~tmp$122#0:wybe.bool of
                                                                         0:
                                                                             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -677,8 +677,8 @@ entry:
                                                                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                                                                 1:
-                                                                    foreign lpvm access($right#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$115#0)
-                                                                    foreign llvm icmp_eq(~tmp$115#0, 11:wybe.int, ?tmp$116#0:wybe.bool)
+                                                                    foreign lpvm access($right#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$115#0:16 bit unsigned)
+                                                                    foreign llvm icmp_eq(~tmp$115#0:16 bit unsigned, 11:16 bit unsigned, ?tmp$116#0:wybe.bool)
                                                                     case ~tmp$116#0:wybe.bool of
                                                                     0:
                                                                         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -706,8 +706,8 @@ entry:
                                                                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                                                             1:
-                                                                foreign lpvm access($right#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$109#0)
-                                                                foreign llvm icmp_eq(~tmp$109#0, 10:wybe.int, ?tmp$110#0:wybe.bool)
+                                                                foreign lpvm access($right#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$109#0:16 bit unsigned)
+                                                                foreign llvm icmp_eq(~tmp$109#0:16 bit unsigned, 10:16 bit unsigned, ?tmp$110#0:wybe.bool)
                                                                 case ~tmp$110#0:wybe.bool of
                                                                 0:
                                                                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -735,8 +735,8 @@ entry:
                                                             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                                                         1:
-                                                            foreign lpvm access($right#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$103#0)
-                                                            foreign llvm icmp_eq(~tmp$103#0, 9:wybe.int, ?tmp$104#0:wybe.bool)
+                                                            foreign lpvm access($right#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$103#0:16 bit unsigned)
+                                                            foreign llvm icmp_eq(~tmp$103#0:16 bit unsigned, 9:16 bit unsigned, ?tmp$104#0:wybe.bool)
                                                             case ~tmp$104#0:wybe.bool of
                                                             0:
                                                                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -764,8 +764,8 @@ entry:
                                                         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                                                     1:
-                                                        foreign lpvm access($right#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$97#0)
-                                                        foreign llvm icmp_eq(~tmp$97#0, 8:wybe.int, ?tmp$98#0:wybe.bool)
+                                                        foreign lpvm access($right#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$97#0:16 bit unsigned)
+                                                        foreign llvm icmp_eq(~tmp$97#0:16 bit unsigned, 8:16 bit unsigned, ?tmp$98#0:wybe.bool)
                                                         case ~tmp$98#0:wybe.bool of
                                                         0:
                                                             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -793,8 +793,8 @@ entry:
                                                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                                                 1:
-                                                    foreign lpvm access($right#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$91#0)
-                                                    foreign llvm icmp_eq(~tmp$91#0, 7:wybe.int, ?tmp$92#0:wybe.bool)
+                                                    foreign lpvm access($right#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?tmp$91#0:16 bit unsigned)
+                                                    foreign llvm icmp_eq(~tmp$91#0:16 bit unsigned, 7:16 bit unsigned, ?tmp$92#0:wybe.bool)
                                                     case ~tmp$92#0:wybe.bool of
                                                     0:
                                                         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -1214,8 +1214,8 @@ c08 > public {inline} (23 calls)
             foreign llvm move(undef:wybe.int, ?f08#0:wybe.int)
 
         1:
-            foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 7:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 7:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -1256,8 +1256,8 @@ c09 > public {inline} (21 calls)
             foreign llvm move(undef:wybe.int, ?f09#0:wybe.int)
 
         1:
-            foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 8:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 8:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -1298,8 +1298,8 @@ c10 > public {inline} (19 calls)
             foreign llvm move(undef:wybe.int, ?f10#0:wybe.int)
 
         1:
-            foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 9:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 9:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -1340,8 +1340,8 @@ c11 > public {inline} (17 calls)
             foreign llvm move(undef:wybe.int, ?f11#0:wybe.int)
 
         1:
-            foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 10:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 10:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -1382,8 +1382,8 @@ c12 > public {inline} (15 calls)
             foreign llvm move(undef:wybe.int, ?f12#0:wybe.int)
 
         1:
-            foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 11:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 11:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -1424,8 +1424,8 @@ c13 > public {inline} (13 calls)
             foreign llvm move(undef:wybe.int, ?f13#0:wybe.int)
 
         1:
-            foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 12:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 12:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -1466,8 +1466,8 @@ c14 > public {inline} (11 calls)
             foreign llvm move(undef:wybe.int, ?f14#0:wybe.int)
 
         1:
-            foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 13:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 13:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -1508,8 +1508,8 @@ c15 > public {inline} (9 calls)
             foreign llvm move(undef:wybe.int, ?f15#0:wybe.int)
 
         1:
-            foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 14:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 14:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -1550,8 +1550,8 @@ c16 > public {inline} (7 calls)
             foreign llvm move(undef:wybe.int, ?f16#0:wybe.int)
 
         1:
-            foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 15:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 15:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -1592,8 +1592,8 @@ c17 > public {inline} (5 calls)
             foreign llvm move(undef:wybe.int, ?f17#0:wybe.int)
 
         1:
-            foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 16:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 16:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -1962,8 +1962,8 @@ f08 > public {inline} (0 calls)
             foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
-            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 7:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 7:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -1994,8 +1994,8 @@ f08 > public {inline} (0 calls)
             foreign llvm move(~$rec#0:multictr.complicated, ?$rec#1:multictr.complicated)
 
         1:
-            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 7:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 7:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -2028,8 +2028,8 @@ f09 > public {inline} (0 calls)
             foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
-            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 8:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 8:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -2060,8 +2060,8 @@ f09 > public {inline} (0 calls)
             foreign llvm move(~$rec#0:multictr.complicated, ?$rec#1:multictr.complicated)
 
         1:
-            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 8:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 8:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -2094,8 +2094,8 @@ f10 > public {inline} (0 calls)
             foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
-            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 9:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 9:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -2126,8 +2126,8 @@ f10 > public {inline} (0 calls)
             foreign llvm move(~$rec#0:multictr.complicated, ?$rec#1:multictr.complicated)
 
         1:
-            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 9:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 9:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -2160,8 +2160,8 @@ f11 > public {inline} (0 calls)
             foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
-            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 10:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 10:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -2192,8 +2192,8 @@ f11 > public {inline} (0 calls)
             foreign llvm move(~$rec#0:multictr.complicated, ?$rec#1:multictr.complicated)
 
         1:
-            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 10:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 10:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -2226,8 +2226,8 @@ f12 > public {inline} (0 calls)
             foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
-            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 11:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 11:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -2258,8 +2258,8 @@ f12 > public {inline} (0 calls)
             foreign llvm move(~$rec#0:multictr.complicated, ?$rec#1:multictr.complicated)
 
         1:
-            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 11:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 11:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -2292,8 +2292,8 @@ f13 > public {inline} (0 calls)
             foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
-            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 12:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 12:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -2324,8 +2324,8 @@ f13 > public {inline} (0 calls)
             foreign llvm move(~$rec#0:multictr.complicated, ?$rec#1:multictr.complicated)
 
         1:
-            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 12:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 12:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -2358,8 +2358,8 @@ f14 > public {inline} (0 calls)
             foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
-            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 13:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 13:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -2390,8 +2390,8 @@ f14 > public {inline} (0 calls)
             foreign llvm move(~$rec#0:multictr.complicated, ?$rec#1:multictr.complicated)
 
         1:
-            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 13:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 13:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -2424,8 +2424,8 @@ f15 > public {inline} (0 calls)
             foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
-            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 14:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 14:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -2456,8 +2456,8 @@ f15 > public {inline} (0 calls)
             foreign llvm move(~$rec#0:multictr.complicated, ?$rec#1:multictr.complicated)
 
         1:
-            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 14:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 14:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -2490,8 +2490,8 @@ f16 > public {inline} (0 calls)
             foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
-            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 15:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 15:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -2522,8 +2522,8 @@ f16 > public {inline} (0 calls)
             foreign llvm move(~$rec#0:multictr.complicated, ?$rec#1:multictr.complicated)
 
         1:
-            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 15:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 15:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -2556,8 +2556,8 @@ f17 > public {inline} (0 calls)
             foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
         1:
-            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 16:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 16:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -2588,8 +2588,8 @@ f17 > public {inline} (0 calls)
             foreign llvm move(~$rec#0:multictr.complicated, ?$rec#1:multictr.complicated)
 
         1:
-            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0)
-            foreign llvm icmp_eq(~$tag#0, 16:wybe.int, ?tmp$3#0:!wybe.bool)
+            foreign lpvm access($rec#0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?$tag#0:!16 bit unsigned)
+            foreign llvm icmp_eq(~$tag#0:16 bit unsigned, 16:16 bit unsigned, ?tmp$3#0:!wybe.bool)
             case ~tmp$3#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -2831,10 +2831,10 @@ if.else21:
   ret i1 0 
 if.then22:
   %55 = add   i64 %"$left#0", -7 
-  %56 = inttoptr i64 %55 to i64* 
-  %57 = getelementptr  i64, i64* %56, i64 0 
-  %58 = load  i64, i64* %57 
-  %"46$tmp$86#0" = icmp eq i64 %58, 7 
+  %56 = inttoptr i64 %55 to i16* 
+  %57 = getelementptr  i16, i16* %56, i64 0 
+  %58 = load  i16, i16* %57 
+  %"46$tmp$86#0" = icmp eq i16 %58, 7 
   br i1 %"46$tmp$86#0", label %if.then23, label %if.else23 
 if.else22:
   ret i1 0 
@@ -2846,7 +2846,7 @@ if.then23:
   %"48$tmp$88#0" = icmp uge i64 %"$right#0", 4 
   br i1 %"48$tmp$88#0", label %if.then24, label %if.else24 
 if.else23:
-  %"49$tmp$92#0" = icmp eq i64 %58, 8 
+  %"49$tmp$92#0" = icmp eq i16 %58, 8 
   br i1 %"49$tmp$92#0", label %if.then27, label %if.else27 
 if.then24:
   %"50$tmp$89#0" = and i64 %"$right#0", 7 
@@ -2856,10 +2856,10 @@ if.else24:
   ret i1 0 
 if.then25:
   %63 = add   i64 %"$right#0", -7 
-  %64 = inttoptr i64 %63 to i64* 
-  %65 = getelementptr  i64, i64* %64, i64 0 
-  %66 = load  i64, i64* %65 
-  %"52$tmp$92#0" = icmp eq i64 %66, 7 
+  %64 = inttoptr i64 %63 to i16* 
+  %65 = getelementptr  i16, i16* %64, i64 0 
+  %66 = load  i16, i16* %65 
+  %"52$tmp$92#0" = icmp eq i16 %66, 7 
   br i1 %"52$tmp$92#0", label %if.then26, label %if.else26 
 if.else25:
   ret i1 0 
@@ -2880,7 +2880,7 @@ if.then27:
   %"56$tmp$94#0" = icmp uge i64 %"$right#0", 4 
   br i1 %"56$tmp$94#0", label %if.then28, label %if.else28 
 if.else27:
-  %"57$tmp$98#0" = icmp eq i64 %58, 9 
+  %"57$tmp$98#0" = icmp eq i16 %58, 9 
   br i1 %"57$tmp$98#0", label %if.then31, label %if.else31 
 if.then28:
   %"58$tmp$95#0" = and i64 %"$right#0", 7 
@@ -2890,10 +2890,10 @@ if.else28:
   ret i1 0 
 if.then29:
   %75 = add   i64 %"$right#0", -7 
-  %76 = inttoptr i64 %75 to i64* 
-  %77 = getelementptr  i64, i64* %76, i64 0 
-  %78 = load  i64, i64* %77 
-  %"60$tmp$98#0" = icmp eq i64 %78, 8 
+  %76 = inttoptr i64 %75 to i16* 
+  %77 = getelementptr  i16, i16* %76, i64 0 
+  %78 = load  i16, i16* %77 
+  %"60$tmp$98#0" = icmp eq i16 %78, 8 
   br i1 %"60$tmp$98#0", label %if.then30, label %if.else30 
 if.else29:
   ret i1 0 
@@ -2914,7 +2914,7 @@ if.then31:
   %"64$tmp$100#0" = icmp uge i64 %"$right#0", 4 
   br i1 %"64$tmp$100#0", label %if.then32, label %if.else32 
 if.else31:
-  %"65$tmp$104#0" = icmp eq i64 %58, 10 
+  %"65$tmp$104#0" = icmp eq i16 %58, 10 
   br i1 %"65$tmp$104#0", label %if.then35, label %if.else35 
 if.then32:
   %"66$tmp$101#0" = and i64 %"$right#0", 7 
@@ -2924,10 +2924,10 @@ if.else32:
   ret i1 0 
 if.then33:
   %87 = add   i64 %"$right#0", -7 
-  %88 = inttoptr i64 %87 to i64* 
-  %89 = getelementptr  i64, i64* %88, i64 0 
-  %90 = load  i64, i64* %89 
-  %"68$tmp$104#0" = icmp eq i64 %90, 9 
+  %88 = inttoptr i64 %87 to i16* 
+  %89 = getelementptr  i16, i16* %88, i64 0 
+  %90 = load  i16, i16* %89 
+  %"68$tmp$104#0" = icmp eq i16 %90, 9 
   br i1 %"68$tmp$104#0", label %if.then34, label %if.else34 
 if.else33:
   ret i1 0 
@@ -2948,7 +2948,7 @@ if.then35:
   %"72$tmp$106#0" = icmp uge i64 %"$right#0", 4 
   br i1 %"72$tmp$106#0", label %if.then36, label %if.else36 
 if.else35:
-  %"73$tmp$110#0" = icmp eq i64 %58, 11 
+  %"73$tmp$110#0" = icmp eq i16 %58, 11 
   br i1 %"73$tmp$110#0", label %if.then39, label %if.else39 
 if.then36:
   %"74$tmp$107#0" = and i64 %"$right#0", 7 
@@ -2958,10 +2958,10 @@ if.else36:
   ret i1 0 
 if.then37:
   %99 = add   i64 %"$right#0", -7 
-  %100 = inttoptr i64 %99 to i64* 
-  %101 = getelementptr  i64, i64* %100, i64 0 
-  %102 = load  i64, i64* %101 
-  %"76$tmp$110#0" = icmp eq i64 %102, 10 
+  %100 = inttoptr i64 %99 to i16* 
+  %101 = getelementptr  i16, i16* %100, i64 0 
+  %102 = load  i16, i16* %101 
+  %"76$tmp$110#0" = icmp eq i16 %102, 10 
   br i1 %"76$tmp$110#0", label %if.then38, label %if.else38 
 if.else37:
   ret i1 0 
@@ -2982,7 +2982,7 @@ if.then39:
   %"80$tmp$112#0" = icmp uge i64 %"$right#0", 4 
   br i1 %"80$tmp$112#0", label %if.then40, label %if.else40 
 if.else39:
-  %"81$tmp$116#0" = icmp eq i64 %58, 12 
+  %"81$tmp$116#0" = icmp eq i16 %58, 12 
   br i1 %"81$tmp$116#0", label %if.then43, label %if.else43 
 if.then40:
   %"82$tmp$113#0" = and i64 %"$right#0", 7 
@@ -2992,10 +2992,10 @@ if.else40:
   ret i1 0 
 if.then41:
   %111 = add   i64 %"$right#0", -7 
-  %112 = inttoptr i64 %111 to i64* 
-  %113 = getelementptr  i64, i64* %112, i64 0 
-  %114 = load  i64, i64* %113 
-  %"84$tmp$116#0" = icmp eq i64 %114, 11 
+  %112 = inttoptr i64 %111 to i16* 
+  %113 = getelementptr  i16, i16* %112, i64 0 
+  %114 = load  i16, i16* %113 
+  %"84$tmp$116#0" = icmp eq i16 %114, 11 
   br i1 %"84$tmp$116#0", label %if.then42, label %if.else42 
 if.else41:
   ret i1 0 
@@ -3016,7 +3016,7 @@ if.then43:
   %"88$tmp$118#0" = icmp uge i64 %"$right#0", 4 
   br i1 %"88$tmp$118#0", label %if.then44, label %if.else44 
 if.else43:
-  %"89$tmp$122#0" = icmp eq i64 %58, 13 
+  %"89$tmp$122#0" = icmp eq i16 %58, 13 
   br i1 %"89$tmp$122#0", label %if.then47, label %if.else47 
 if.then44:
   %"90$tmp$119#0" = and i64 %"$right#0", 7 
@@ -3026,10 +3026,10 @@ if.else44:
   ret i1 0 
 if.then45:
   %123 = add   i64 %"$right#0", -7 
-  %124 = inttoptr i64 %123 to i64* 
-  %125 = getelementptr  i64, i64* %124, i64 0 
-  %126 = load  i64, i64* %125 
-  %"92$tmp$122#0" = icmp eq i64 %126, 12 
+  %124 = inttoptr i64 %123 to i16* 
+  %125 = getelementptr  i16, i16* %124, i64 0 
+  %126 = load  i16, i16* %125 
+  %"92$tmp$122#0" = icmp eq i16 %126, 12 
   br i1 %"92$tmp$122#0", label %if.then46, label %if.else46 
 if.else45:
   ret i1 0 
@@ -3050,7 +3050,7 @@ if.then47:
   %"96$tmp$124#0" = icmp uge i64 %"$right#0", 4 
   br i1 %"96$tmp$124#0", label %if.then48, label %if.else48 
 if.else47:
-  %"97$tmp$128#0" = icmp eq i64 %58, 14 
+  %"97$tmp$128#0" = icmp eq i16 %58, 14 
   br i1 %"97$tmp$128#0", label %if.then51, label %if.else51 
 if.then48:
   %"98$tmp$125#0" = and i64 %"$right#0", 7 
@@ -3060,10 +3060,10 @@ if.else48:
   ret i1 0 
 if.then49:
   %135 = add   i64 %"$right#0", -7 
-  %136 = inttoptr i64 %135 to i64* 
-  %137 = getelementptr  i64, i64* %136, i64 0 
-  %138 = load  i64, i64* %137 
-  %"100$tmp$128#0" = icmp eq i64 %138, 13 
+  %136 = inttoptr i64 %135 to i16* 
+  %137 = getelementptr  i16, i16* %136, i64 0 
+  %138 = load  i16, i16* %137 
+  %"100$tmp$128#0" = icmp eq i16 %138, 13 
   br i1 %"100$tmp$128#0", label %if.then50, label %if.else50 
 if.else49:
   ret i1 0 
@@ -3084,7 +3084,7 @@ if.then51:
   %"104$tmp$130#0" = icmp uge i64 %"$right#0", 4 
   br i1 %"104$tmp$130#0", label %if.then52, label %if.else52 
 if.else51:
-  %"105$tmp$134#0" = icmp eq i64 %58, 15 
+  %"105$tmp$134#0" = icmp eq i16 %58, 15 
   br i1 %"105$tmp$134#0", label %if.then55, label %if.else55 
 if.then52:
   %"106$tmp$131#0" = and i64 %"$right#0", 7 
@@ -3094,10 +3094,10 @@ if.else52:
   ret i1 0 
 if.then53:
   %147 = add   i64 %"$right#0", -7 
-  %148 = inttoptr i64 %147 to i64* 
-  %149 = getelementptr  i64, i64* %148, i64 0 
-  %150 = load  i64, i64* %149 
-  %"108$tmp$134#0" = icmp eq i64 %150, 14 
+  %148 = inttoptr i64 %147 to i16* 
+  %149 = getelementptr  i16, i16* %148, i64 0 
+  %150 = load  i16, i16* %149 
+  %"108$tmp$134#0" = icmp eq i16 %150, 14 
   br i1 %"108$tmp$134#0", label %if.then54, label %if.else54 
 if.else53:
   ret i1 0 
@@ -3118,7 +3118,7 @@ if.then55:
   %"112$tmp$136#0" = icmp uge i64 %"$right#0", 4 
   br i1 %"112$tmp$136#0", label %if.then56, label %if.else56 
 if.else55:
-  %"113$tmp$140#0" = icmp eq i64 %58, 16 
+  %"113$tmp$140#0" = icmp eq i16 %58, 16 
   br i1 %"113$tmp$140#0", label %if.then59, label %if.else59 
 if.then56:
   %"114$tmp$137#0" = and i64 %"$right#0", 7 
@@ -3128,10 +3128,10 @@ if.else56:
   ret i1 0 
 if.then57:
   %159 = add   i64 %"$right#0", -7 
-  %160 = inttoptr i64 %159 to i64* 
-  %161 = getelementptr  i64, i64* %160, i64 0 
-  %162 = load  i64, i64* %161 
-  %"116$tmp$140#0" = icmp eq i64 %162, 15 
+  %160 = inttoptr i64 %159 to i16* 
+  %161 = getelementptr  i16, i16* %160, i64 0 
+  %162 = load  i16, i16* %161 
+  %"116$tmp$140#0" = icmp eq i16 %162, 15 
   br i1 %"116$tmp$140#0", label %if.then58, label %if.else58 
 if.else57:
   ret i1 0 
@@ -3161,10 +3161,10 @@ if.else60:
   ret i1 0 
 if.then61:
   %171 = add   i64 %"$right#0", -7 
-  %172 = inttoptr i64 %171 to i64* 
-  %173 = getelementptr  i64, i64* %172, i64 0 
-  %174 = load  i64, i64* %173 
-  %"124$tmp$146#0" = icmp eq i64 %174, 16 
+  %172 = inttoptr i64 %171 to i16* 
+  %173 = getelementptr  i16, i16* %172, i64 0 
+  %174 = load  i16, i16* %173 
+  %"124$tmp$146#0" = icmp eq i16 %174, 16 
   br i1 %"124$tmp$146#0", label %if.then62, label %if.else62 
 if.else61:
   ret i1 0 
@@ -3495,10 +3495,10 @@ if.else:
   ret {i64, i1} %306 
 if.then1:
   %291 = add   i64 %"$#0", -7 
-  %292 = inttoptr i64 %291 to i64* 
-  %293 = getelementptr  i64, i64* %292, i64 0 
-  %294 = load  i64, i64* %293 
-  %"4$tmp$3#0" = icmp eq i64 %294, 7 
+  %292 = inttoptr i64 %291 to i16* 
+  %293 = getelementptr  i16, i16* %292, i64 0 
+  %294 = load  i16, i16* %293 
+  %"4$tmp$3#0" = icmp eq i16 %294, 7 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %303 = insertvalue {i64, i1} undef, i64 undef, 0 
@@ -3550,10 +3550,10 @@ if.else:
   ret {i64, i1} %330 
 if.then1:
   %315 = add   i64 %"$#0", -7 
-  %316 = inttoptr i64 %315 to i64* 
-  %317 = getelementptr  i64, i64* %316, i64 0 
-  %318 = load  i64, i64* %317 
-  %"4$tmp$3#0" = icmp eq i64 %318, 8 
+  %316 = inttoptr i64 %315 to i16* 
+  %317 = getelementptr  i16, i16* %316, i64 0 
+  %318 = load  i16, i16* %317 
+  %"4$tmp$3#0" = icmp eq i16 %318, 8 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %327 = insertvalue {i64, i1} undef, i64 undef, 0 
@@ -3605,10 +3605,10 @@ if.else:
   ret {i64, i1} %354 
 if.then1:
   %339 = add   i64 %"$#0", -7 
-  %340 = inttoptr i64 %339 to i64* 
-  %341 = getelementptr  i64, i64* %340, i64 0 
-  %342 = load  i64, i64* %341 
-  %"4$tmp$3#0" = icmp eq i64 %342, 9 
+  %340 = inttoptr i64 %339 to i16* 
+  %341 = getelementptr  i16, i16* %340, i64 0 
+  %342 = load  i16, i16* %341 
+  %"4$tmp$3#0" = icmp eq i16 %342, 9 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %351 = insertvalue {i64, i1} undef, i64 undef, 0 
@@ -3660,10 +3660,10 @@ if.else:
   ret {i64, i1} %378 
 if.then1:
   %363 = add   i64 %"$#0", -7 
-  %364 = inttoptr i64 %363 to i64* 
-  %365 = getelementptr  i64, i64* %364, i64 0 
-  %366 = load  i64, i64* %365 
-  %"4$tmp$3#0" = icmp eq i64 %366, 10 
+  %364 = inttoptr i64 %363 to i16* 
+  %365 = getelementptr  i16, i16* %364, i64 0 
+  %366 = load  i16, i16* %365 
+  %"4$tmp$3#0" = icmp eq i16 %366, 10 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %375 = insertvalue {i64, i1} undef, i64 undef, 0 
@@ -3715,10 +3715,10 @@ if.else:
   ret {i64, i1} %402 
 if.then1:
   %387 = add   i64 %"$#0", -7 
-  %388 = inttoptr i64 %387 to i64* 
-  %389 = getelementptr  i64, i64* %388, i64 0 
-  %390 = load  i64, i64* %389 
-  %"4$tmp$3#0" = icmp eq i64 %390, 11 
+  %388 = inttoptr i64 %387 to i16* 
+  %389 = getelementptr  i16, i16* %388, i64 0 
+  %390 = load  i16, i16* %389 
+  %"4$tmp$3#0" = icmp eq i16 %390, 11 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %399 = insertvalue {i64, i1} undef, i64 undef, 0 
@@ -3770,10 +3770,10 @@ if.else:
   ret {i64, i1} %426 
 if.then1:
   %411 = add   i64 %"$#0", -7 
-  %412 = inttoptr i64 %411 to i64* 
-  %413 = getelementptr  i64, i64* %412, i64 0 
-  %414 = load  i64, i64* %413 
-  %"4$tmp$3#0" = icmp eq i64 %414, 12 
+  %412 = inttoptr i64 %411 to i16* 
+  %413 = getelementptr  i16, i16* %412, i64 0 
+  %414 = load  i16, i16* %413 
+  %"4$tmp$3#0" = icmp eq i16 %414, 12 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %423 = insertvalue {i64, i1} undef, i64 undef, 0 
@@ -3825,10 +3825,10 @@ if.else:
   ret {i64, i1} %450 
 if.then1:
   %435 = add   i64 %"$#0", -7 
-  %436 = inttoptr i64 %435 to i64* 
-  %437 = getelementptr  i64, i64* %436, i64 0 
-  %438 = load  i64, i64* %437 
-  %"4$tmp$3#0" = icmp eq i64 %438, 13 
+  %436 = inttoptr i64 %435 to i16* 
+  %437 = getelementptr  i16, i16* %436, i64 0 
+  %438 = load  i16, i16* %437 
+  %"4$tmp$3#0" = icmp eq i16 %438, 13 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %447 = insertvalue {i64, i1} undef, i64 undef, 0 
@@ -3880,10 +3880,10 @@ if.else:
   ret {i64, i1} %474 
 if.then1:
   %459 = add   i64 %"$#0", -7 
-  %460 = inttoptr i64 %459 to i64* 
-  %461 = getelementptr  i64, i64* %460, i64 0 
-  %462 = load  i64, i64* %461 
-  %"4$tmp$3#0" = icmp eq i64 %462, 14 
+  %460 = inttoptr i64 %459 to i16* 
+  %461 = getelementptr  i16, i16* %460, i64 0 
+  %462 = load  i16, i16* %461 
+  %"4$tmp$3#0" = icmp eq i16 %462, 14 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %471 = insertvalue {i64, i1} undef, i64 undef, 0 
@@ -3935,10 +3935,10 @@ if.else:
   ret {i64, i1} %498 
 if.then1:
   %483 = add   i64 %"$#0", -7 
-  %484 = inttoptr i64 %483 to i64* 
-  %485 = getelementptr  i64, i64* %484, i64 0 
-  %486 = load  i64, i64* %485 
-  %"4$tmp$3#0" = icmp eq i64 %486, 15 
+  %484 = inttoptr i64 %483 to i16* 
+  %485 = getelementptr  i16, i16* %484, i64 0 
+  %486 = load  i16, i16* %485 
+  %"4$tmp$3#0" = icmp eq i16 %486, 15 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %495 = insertvalue {i64, i1} undef, i64 undef, 0 
@@ -3990,10 +3990,10 @@ if.else:
   ret {i64, i1} %522 
 if.then1:
   %507 = add   i64 %"$#0", -7 
-  %508 = inttoptr i64 %507 to i64* 
-  %509 = getelementptr  i64, i64* %508, i64 0 
-  %510 = load  i64, i64* %509 
-  %"4$tmp$3#0" = icmp eq i64 %510, 16 
+  %508 = inttoptr i64 %507 to i16* 
+  %509 = getelementptr  i16, i16* %508, i64 0 
+  %510 = load  i16, i16* %509 
+  %"4$tmp$3#0" = icmp eq i16 %510, 16 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %519 = insertvalue {i64, i1} undef, i64 undef, 0 
@@ -4465,10 +4465,10 @@ if.else:
   ret {i64, i1} %723 
 if.then1:
   %708 = add   i64 %"$rec#0", -7 
-  %709 = inttoptr i64 %708 to i64* 
-  %710 = getelementptr  i64, i64* %709, i64 0 
-  %711 = load  i64, i64* %710 
-  %"4$tmp$3#0" = icmp eq i64 %711, 7 
+  %709 = inttoptr i64 %708 to i16* 
+  %710 = getelementptr  i16, i16* %709, i64 0 
+  %711 = load  i16, i16* %710 
+  %"4$tmp$3#0" = icmp eq i16 %711, 7 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %720 = insertvalue {i64, i1} undef, i64 undef, 0 
@@ -4503,10 +4503,10 @@ if.else:
   ret {i64, i1} %746 
 if.then1:
   %724 = add   i64 %"$rec#0", -7 
-  %725 = inttoptr i64 %724 to i64* 
-  %726 = getelementptr  i64, i64* %725, i64 0 
-  %727 = load  i64, i64* %726 
-  %"4$tmp$3#0" = icmp eq i64 %727, 7 
+  %725 = inttoptr i64 %724 to i16* 
+  %726 = getelementptr  i16, i16* %725, i64 0 
+  %727 = load  i16, i16* %726 
+  %"4$tmp$3#0" = icmp eq i16 %727, 7 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %743 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
@@ -4550,10 +4550,10 @@ if.else:
   ret {i64, i1} %762 
 if.then1:
   %747 = add   i64 %"$rec#0", -7 
-  %748 = inttoptr i64 %747 to i64* 
-  %749 = getelementptr  i64, i64* %748, i64 0 
-  %750 = load  i64, i64* %749 
-  %"4$tmp$3#0" = icmp eq i64 %750, 8 
+  %748 = inttoptr i64 %747 to i16* 
+  %749 = getelementptr  i16, i16* %748, i64 0 
+  %750 = load  i16, i16* %749 
+  %"4$tmp$3#0" = icmp eq i16 %750, 8 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %759 = insertvalue {i64, i1} undef, i64 undef, 0 
@@ -4588,10 +4588,10 @@ if.else:
   ret {i64, i1} %785 
 if.then1:
   %763 = add   i64 %"$rec#0", -7 
-  %764 = inttoptr i64 %763 to i64* 
-  %765 = getelementptr  i64, i64* %764, i64 0 
-  %766 = load  i64, i64* %765 
-  %"4$tmp$3#0" = icmp eq i64 %766, 8 
+  %764 = inttoptr i64 %763 to i16* 
+  %765 = getelementptr  i16, i16* %764, i64 0 
+  %766 = load  i16, i16* %765 
+  %"4$tmp$3#0" = icmp eq i16 %766, 8 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %782 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
@@ -4635,10 +4635,10 @@ if.else:
   ret {i64, i1} %801 
 if.then1:
   %786 = add   i64 %"$rec#0", -7 
-  %787 = inttoptr i64 %786 to i64* 
-  %788 = getelementptr  i64, i64* %787, i64 0 
-  %789 = load  i64, i64* %788 
-  %"4$tmp$3#0" = icmp eq i64 %789, 9 
+  %787 = inttoptr i64 %786 to i16* 
+  %788 = getelementptr  i16, i16* %787, i64 0 
+  %789 = load  i16, i16* %788 
+  %"4$tmp$3#0" = icmp eq i16 %789, 9 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %798 = insertvalue {i64, i1} undef, i64 undef, 0 
@@ -4673,10 +4673,10 @@ if.else:
   ret {i64, i1} %824 
 if.then1:
   %802 = add   i64 %"$rec#0", -7 
-  %803 = inttoptr i64 %802 to i64* 
-  %804 = getelementptr  i64, i64* %803, i64 0 
-  %805 = load  i64, i64* %804 
-  %"4$tmp$3#0" = icmp eq i64 %805, 9 
+  %803 = inttoptr i64 %802 to i16* 
+  %804 = getelementptr  i16, i16* %803, i64 0 
+  %805 = load  i16, i16* %804 
+  %"4$tmp$3#0" = icmp eq i16 %805, 9 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %821 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
@@ -4720,10 +4720,10 @@ if.else:
   ret {i64, i1} %840 
 if.then1:
   %825 = add   i64 %"$rec#0", -7 
-  %826 = inttoptr i64 %825 to i64* 
-  %827 = getelementptr  i64, i64* %826, i64 0 
-  %828 = load  i64, i64* %827 
-  %"4$tmp$3#0" = icmp eq i64 %828, 10 
+  %826 = inttoptr i64 %825 to i16* 
+  %827 = getelementptr  i16, i16* %826, i64 0 
+  %828 = load  i16, i16* %827 
+  %"4$tmp$3#0" = icmp eq i16 %828, 10 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %837 = insertvalue {i64, i1} undef, i64 undef, 0 
@@ -4758,10 +4758,10 @@ if.else:
   ret {i64, i1} %863 
 if.then1:
   %841 = add   i64 %"$rec#0", -7 
-  %842 = inttoptr i64 %841 to i64* 
-  %843 = getelementptr  i64, i64* %842, i64 0 
-  %844 = load  i64, i64* %843 
-  %"4$tmp$3#0" = icmp eq i64 %844, 10 
+  %842 = inttoptr i64 %841 to i16* 
+  %843 = getelementptr  i16, i16* %842, i64 0 
+  %844 = load  i16, i16* %843 
+  %"4$tmp$3#0" = icmp eq i16 %844, 10 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %860 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
@@ -4805,10 +4805,10 @@ if.else:
   ret {i64, i1} %879 
 if.then1:
   %864 = add   i64 %"$rec#0", -7 
-  %865 = inttoptr i64 %864 to i64* 
-  %866 = getelementptr  i64, i64* %865, i64 0 
-  %867 = load  i64, i64* %866 
-  %"4$tmp$3#0" = icmp eq i64 %867, 11 
+  %865 = inttoptr i64 %864 to i16* 
+  %866 = getelementptr  i16, i16* %865, i64 0 
+  %867 = load  i16, i16* %866 
+  %"4$tmp$3#0" = icmp eq i16 %867, 11 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %876 = insertvalue {i64, i1} undef, i64 undef, 0 
@@ -4843,10 +4843,10 @@ if.else:
   ret {i64, i1} %902 
 if.then1:
   %880 = add   i64 %"$rec#0", -7 
-  %881 = inttoptr i64 %880 to i64* 
-  %882 = getelementptr  i64, i64* %881, i64 0 
-  %883 = load  i64, i64* %882 
-  %"4$tmp$3#0" = icmp eq i64 %883, 11 
+  %881 = inttoptr i64 %880 to i16* 
+  %882 = getelementptr  i16, i16* %881, i64 0 
+  %883 = load  i16, i16* %882 
+  %"4$tmp$3#0" = icmp eq i16 %883, 11 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %899 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
@@ -4890,10 +4890,10 @@ if.else:
   ret {i64, i1} %918 
 if.then1:
   %903 = add   i64 %"$rec#0", -7 
-  %904 = inttoptr i64 %903 to i64* 
-  %905 = getelementptr  i64, i64* %904, i64 0 
-  %906 = load  i64, i64* %905 
-  %"4$tmp$3#0" = icmp eq i64 %906, 12 
+  %904 = inttoptr i64 %903 to i16* 
+  %905 = getelementptr  i16, i16* %904, i64 0 
+  %906 = load  i16, i16* %905 
+  %"4$tmp$3#0" = icmp eq i16 %906, 12 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %915 = insertvalue {i64, i1} undef, i64 undef, 0 
@@ -4928,10 +4928,10 @@ if.else:
   ret {i64, i1} %941 
 if.then1:
   %919 = add   i64 %"$rec#0", -7 
-  %920 = inttoptr i64 %919 to i64* 
-  %921 = getelementptr  i64, i64* %920, i64 0 
-  %922 = load  i64, i64* %921 
-  %"4$tmp$3#0" = icmp eq i64 %922, 12 
+  %920 = inttoptr i64 %919 to i16* 
+  %921 = getelementptr  i16, i16* %920, i64 0 
+  %922 = load  i16, i16* %921 
+  %"4$tmp$3#0" = icmp eq i16 %922, 12 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %938 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
@@ -4975,10 +4975,10 @@ if.else:
   ret {i64, i1} %957 
 if.then1:
   %942 = add   i64 %"$rec#0", -7 
-  %943 = inttoptr i64 %942 to i64* 
-  %944 = getelementptr  i64, i64* %943, i64 0 
-  %945 = load  i64, i64* %944 
-  %"4$tmp$3#0" = icmp eq i64 %945, 13 
+  %943 = inttoptr i64 %942 to i16* 
+  %944 = getelementptr  i16, i16* %943, i64 0 
+  %945 = load  i16, i16* %944 
+  %"4$tmp$3#0" = icmp eq i16 %945, 13 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %954 = insertvalue {i64, i1} undef, i64 undef, 0 
@@ -5013,10 +5013,10 @@ if.else:
   ret {i64, i1} %980 
 if.then1:
   %958 = add   i64 %"$rec#0", -7 
-  %959 = inttoptr i64 %958 to i64* 
-  %960 = getelementptr  i64, i64* %959, i64 0 
-  %961 = load  i64, i64* %960 
-  %"4$tmp$3#0" = icmp eq i64 %961, 13 
+  %959 = inttoptr i64 %958 to i16* 
+  %960 = getelementptr  i16, i16* %959, i64 0 
+  %961 = load  i16, i16* %960 
+  %"4$tmp$3#0" = icmp eq i16 %961, 13 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %977 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
@@ -5060,10 +5060,10 @@ if.else:
   ret {i64, i1} %996 
 if.then1:
   %981 = add   i64 %"$rec#0", -7 
-  %982 = inttoptr i64 %981 to i64* 
-  %983 = getelementptr  i64, i64* %982, i64 0 
-  %984 = load  i64, i64* %983 
-  %"4$tmp$3#0" = icmp eq i64 %984, 14 
+  %982 = inttoptr i64 %981 to i16* 
+  %983 = getelementptr  i16, i16* %982, i64 0 
+  %984 = load  i16, i16* %983 
+  %"4$tmp$3#0" = icmp eq i16 %984, 14 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %993 = insertvalue {i64, i1} undef, i64 undef, 0 
@@ -5098,10 +5098,10 @@ if.else:
   ret {i64, i1} %1019 
 if.then1:
   %997 = add   i64 %"$rec#0", -7 
-  %998 = inttoptr i64 %997 to i64* 
-  %999 = getelementptr  i64, i64* %998, i64 0 
-  %1000 = load  i64, i64* %999 
-  %"4$tmp$3#0" = icmp eq i64 %1000, 14 
+  %998 = inttoptr i64 %997 to i16* 
+  %999 = getelementptr  i16, i16* %998, i64 0 
+  %1000 = load  i16, i16* %999 
+  %"4$tmp$3#0" = icmp eq i16 %1000, 14 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %1016 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
@@ -5145,10 +5145,10 @@ if.else:
   ret {i64, i1} %1035 
 if.then1:
   %1020 = add   i64 %"$rec#0", -7 
-  %1021 = inttoptr i64 %1020 to i64* 
-  %1022 = getelementptr  i64, i64* %1021, i64 0 
-  %1023 = load  i64, i64* %1022 
-  %"4$tmp$3#0" = icmp eq i64 %1023, 15 
+  %1021 = inttoptr i64 %1020 to i16* 
+  %1022 = getelementptr  i16, i16* %1021, i64 0 
+  %1023 = load  i16, i16* %1022 
+  %"4$tmp$3#0" = icmp eq i16 %1023, 15 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %1032 = insertvalue {i64, i1} undef, i64 undef, 0 
@@ -5183,10 +5183,10 @@ if.else:
   ret {i64, i1} %1058 
 if.then1:
   %1036 = add   i64 %"$rec#0", -7 
-  %1037 = inttoptr i64 %1036 to i64* 
-  %1038 = getelementptr  i64, i64* %1037, i64 0 
-  %1039 = load  i64, i64* %1038 
-  %"4$tmp$3#0" = icmp eq i64 %1039, 15 
+  %1037 = inttoptr i64 %1036 to i16* 
+  %1038 = getelementptr  i16, i16* %1037, i64 0 
+  %1039 = load  i16, i16* %1038 
+  %"4$tmp$3#0" = icmp eq i16 %1039, 15 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %1055 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
@@ -5230,10 +5230,10 @@ if.else:
   ret {i64, i1} %1074 
 if.then1:
   %1059 = add   i64 %"$rec#0", -7 
-  %1060 = inttoptr i64 %1059 to i64* 
-  %1061 = getelementptr  i64, i64* %1060, i64 0 
-  %1062 = load  i64, i64* %1061 
-  %"4$tmp$3#0" = icmp eq i64 %1062, 16 
+  %1060 = inttoptr i64 %1059 to i16* 
+  %1061 = getelementptr  i16, i16* %1060, i64 0 
+  %1062 = load  i16, i16* %1061 
+  %"4$tmp$3#0" = icmp eq i16 %1062, 16 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %1071 = insertvalue {i64, i1} undef, i64 undef, 0 
@@ -5268,10 +5268,10 @@ if.else:
   ret {i64, i1} %1097 
 if.then1:
   %1075 = add   i64 %"$rec#0", -7 
-  %1076 = inttoptr i64 %1075 to i64* 
-  %1077 = getelementptr  i64, i64* %1076, i64 0 
-  %1078 = load  i64, i64* %1077 
-  %"4$tmp$3#0" = icmp eq i64 %1078, 16 
+  %1076 = inttoptr i64 %1075 to i16* 
+  %1077 = getelementptr  i16, i16* %1076, i64 0 
+  %1078 = load  i16, i16* %1077 
+  %"4$tmp$3#0" = icmp eq i16 %1078, 16 
   br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
 if.else1:
   %1094 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 

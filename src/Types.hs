@@ -531,6 +531,19 @@ unifyTypes' reason ty AnyType    = return ty
 unifyTypes' reason t1@TypeVariable{} t2@TypeVariable{} = return $ max t1 t2
 unifyTypes' reason TypeVariable{} ty = return ty
 unifyTypes' reason ty TypeVariable{} = return ty
+unifyTypes' reason t1@Representation{} t2@Representation{}
+    | t1 == t2  = return t1
+    | otherwise = typeError reason >> return InvalidType
+unifyTypes' reason ty1@(Representation rep1) ty2@TypeSpec{} = do
+    rep2 <- lift $ lookupTypeRepresentation ty2
+    if Just rep1 == rep2
+        then return ty2
+        else typeError reason >> return InvalidType
+unifyTypes' reason ty1@TypeSpec{} ty2@(Representation rep2) = do
+    rep1 <- lift $ lookupTypeRepresentation ty1
+    if rep1 == Just rep2
+        then return ty1
+        else typeError reason >> return InvalidType
 unifyTypes' reason ty1@(TypeSpec m1 n1 ps1) ty2@(TypeSpec m2 n2 ps2)
     | n1 == n2 && modsMatch && length ps1 == length ps2 = do
         ps <- zipWithM (unifyTypes reason) ps1 ps2

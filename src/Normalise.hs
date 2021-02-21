@@ -659,8 +659,8 @@ tagCheck numConsts numNonConsts tag tagLimit size varName =
                   Unplaced $ iVal $ trustFromJust
                              "unboxed type shouldn't have a secondary tag" size,
                   Unplaced $ iVal startOffset,
-                  Unplaced $ varSet "$tag"],
-                 comparison "icmp_eq" (varGet "$tag") (iVal tag)]
+                  Unplaced $ tagCast (varSet "$tag")],
+                 comparison "icmp_eq" (varGet "$tag") (Typed (iVal tag) tagType False)]
            else [])
 
     in if List.null tests
