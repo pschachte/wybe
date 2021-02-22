@@ -28,7 +28,7 @@ The file [src/README.md](src/README.md), which is (re-)built by the Makefile,
 describes the architecture of the compiler and gives more detail about the
 files comprising the compiler.
 
-There is a (growing) [list of programming and research projects](PROJECTS.md)
+There is a (growing) [list of programming and research projects](https://github.com/pschachte/wybe/issues?q=is%3Aopen+label%3A%22research+project%22+-label%3A%22in+progress%22)
 to further develop the Wybe language.
 
 We are indebted to the several [contributors](CONTRIBUTORS.md)
