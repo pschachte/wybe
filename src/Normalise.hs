@@ -48,7 +48,7 @@ normalise items = do
 
 -- |Normalise a single file item, storing the result in the current module.
 normaliseItem :: Item -> Compiler ()
-normaliseItem (TypeDecl vis (TypeProto name params) rep items pos)
+normaliseItem (TypeDecl vis (TypeProto name params) mod rep items pos)
   = do
     -- let (rep', ctorVis, consts, nonconsts) = normaliseTypeImpln rep
     let (rep', ctorVis, ctors) = normaliseTypeImpln rep

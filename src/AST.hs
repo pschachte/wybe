@@ -21,12 +21,13 @@ module AST (
   determinismSeq, determinismProceding, determinismName,
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
-  TypeProto(..), TypeModifier(..), TypeSpec(..), TypeRef(..), VarDict, TypeImpln(..),
+  TypeProto(..), TypeModifiers(..), TypeSpec(..), TypeRef(..), VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), Generator(..), Stmt(..), detStmt, expIsConstant,
   TypeRepresentation(..), TypeFamily(..), typeFamily,
   defaultTypeRepresentation, typeRepSize, integerTypeRep,
+  defaultTypeModifiers,
   lookupTypeRepresentation,
   paramIsPhantom, argIsPhantom, typeIsPhantom, repIsPhantom,
   primProtoParamNames,
@@ -128,7 +129,7 @@ import qualified LLVM.AST as LLVMAST
 
 -- |An item appearing at the top level of a source file.
 data Item
-     = TypeDecl Visibility TypeProto TypeModifier TypeImpln [Item] OptPos  -- EDIT
+     = TypeDecl Visibility TypeProto TypeModifiers TypeImpln [Item] OptPos
      | ModuleDecl Visibility Ident [Item] OptPos
      | ImportMods Visibility [ModSpec] OptPos
      | ImportItems Visibility ModSpec [Ident] OptPos
@@ -281,12 +282,17 @@ data TypeProto = TypeProto Ident [Ident]
 
 
 -- | A type modifier consists of a boolean indicating its uniqueness.
-data TypeModifier = TypeModifier Bool
-                    deriving (Generic, Eq)
+data TypeModifiers = TypeModifiers Bool
+                     deriving (Generic, Eq)
+
+-- ISSUE: is this better for future implementation?
+-- data TypeModifiers = TypeModifiers {
+--     modifierUnique::Uniqueness
+-- } deriving (Generic, Eq)
 
 -- | A default boolean value for Uniqueness (false)
-defaultTypeModifier :: TypeModifier
-defaultTypeModifier = TypeModifier False
+defaultTypeModifiers :: TypeModifiers
+defaultTypeModifiers = TypeModifiers False
 
 ----------------------------------------------------------------
 --                    Handling Source Positions
@@ -2747,19 +2753,18 @@ varsInPrimArg _ (ArgUndef _)            = Set.empty
 
 ----------------------------------------------------------------
 
--- TypeDecl Visibility TypeProto TypeModifier TypeImpln [Item] OptPos
 -- | How to show an Item.
 instance Show Item where
-  show (TypeDecl vis name typeModifier (TypeRepresentation repn) items pos) =  -- EDIT
+  show (TypeDecl vis name typeModifiers (TypeRepresentation repn) items pos) = 
     visibilityPrefix vis ++ "type " ++ show name
-    ++ showTypeModifier typeModifier  -- EDIT
+    ++ showTypeModifiers typeModifiers
     ++ " is" ++ show repn
     ++ showMaybeSourcePos pos ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
     ++ "\n}\n"
-  show (TypeDecl vis name typeModifier (TypeCtors ctorvis ctors) items pos) =
+  show (TypeDecl vis name typeModifiers (TypeCtors ctorvis ctors) items pos) =
     visibilityPrefix vis ++ "type " ++ show name
-    ++ showTypeModifier typeModifier
+    ++ showTypeModifiers typeModifiers
     ++ " " ++ visibilityPrefix ctorvis
     ++ showMaybeSourcePos pos ++ "\n    "
     ++ intercalate "\n  | " (List.map show ctors) ++ "\n  "
@@ -2871,12 +2876,10 @@ instance Show t => Show (Placed t) where
     show (Placed t pos) = show t ++ showMaybeSourcePos (Just pos)
     show (Unplaced t) =   show t
 
--- EDIT
 -- | How to show a type modifier
-showTypeModifier :: TypeModifier -> String
-showTypeModifier (TypeModifier True)  = "unique "
-showTypeModifier (TypeModifier False) = ""
-
+showTypeModifiers :: TypeModifiers -> String
+showTypeModifiers (TypeModifiers True)  = "unique "
+showTypeModifiers _                     = ""
 
 -- |How to show an optional source position
 showMaybeSourcePos :: OptPos -> String

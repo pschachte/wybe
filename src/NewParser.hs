@@ -137,28 +137,17 @@ typeItemParser v = do
     pos <- tokenPosition <$> ident "type"
     proto <- TypeProto <$> identString <*>
              option [] (betweenB Paren (identString `sepBy` comma))
-    mod <- typeModifierParser
+    modifiers <- modifierList
     (imp,items) <- typeImpln <|> typeCtors
-    return $ TypeDecl v proto mod imp items (Just pos)
+    return $ TypeDecl v proto (processTypeModifiers modifiers) imp items
+            (Just pos)
     -- EDIT: inserted `mod` between proto and imp
 
--- | Type modifier parser
--- Currently simply checked if the string is empty
-typeModifierParser :: TypeModifier
-typeModifierParser = TypeModifier $ List.null $
-                        option [] $ betweenB Brace (identString `sepBy` comma)
+-- | Process type modifiers.
+processTypeModifiers :: [Ident] -> TypeModifiers
+processTypeModifiers ["unique"] = TypeModifiers True
+processTypeModifiers _          = defaultTypeModifiers
 
-
--- TODO: typeModifierParser <- `mod` ,, typeModifiers
--- option takes Parser, tries, if cannot, return default
--- optionally parse, one or more ?? wrapped with paren
--- TODO: option defaultTypeModifiers (ident unique stargrader)  ! if success on left, return right
-    -- return TypeModifiers -> whether unique
-
--- public ? foo {unique} ctors
--- ERRS
-
--- test case: unique type ?
 
 -- | Type declaration body where representation and items are given
 typeImpln = do
