@@ -715,7 +715,7 @@ type.  For example, you can define list concatenation:
 
 ```
 def concat(a:list(?T), b:list(?T)):list(?T) =
-    if a = cons(h, t) then cons(h, concat(t,b)) else b
+    if cons(?h, ?t) = a then cons(h, concat(t,b)) else b
 ```
 
 This will concatenate lists of any type, but the types of the elements of the
