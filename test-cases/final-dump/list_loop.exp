@@ -7,11 +7,11 @@ AFTER EVERYTHING:
   public procs    : list_loop.<0>
                     list_loop.intlist./=<0>
                     list_loop.intlist.=<0>
-                    list_loop.intlist.[]<0>
-                    list_loop.intlist.[|]<0>
-                    list_loop.intlist.[|]<1>
+                    list_loop.intlist.cons<0>
+                    list_loop.intlist.cons<1>
                     list_loop.intlist.head<0>
                     list_loop.intlist.head<1>
+                    list_loop.intlist.nil<0>
                     list_loop.intlist.tail<0>
                     list_loop.intlist.tail<1>
   imports         : public use list_loop.intlist
@@ -263,11 +263,11 @@ entry:
   public resources: 
   public procs    : list_loop.intlist./=<0>
                     list_loop.intlist.=<0>
-                    list_loop.intlist.[]<0>
-                    list_loop.intlist.[|]<0>
-                    list_loop.intlist.[|]<1>
+                    list_loop.intlist.cons<0>
+                    list_loop.intlist.cons<1>
                     list_loop.intlist.head<0>
                     list_loop.intlist.head<1>
+                    list_loop.intlist.nil<0>
                     list_loop.intlist.tail<0>
                     list_loop.intlist.tail<1>
   imports         : use list_loop
@@ -315,22 +315,15 @@ entry:
 
 
 
-[] > public {inline} (0 calls)
-0: [](?$#0:list_loop.intlist):
- AliasPairs: []
- InterestingCallProperties: []
-    foreign llvm move(0:list_loop.intlist, ?$#0:list_loop.intlist)
-
-
-[|] > public {inline} (0 calls)
-0: [|](head#0:wybe.int, tail#0:list_loop.intlist, ?$#0:list_loop.intlist):
+cons > public {inline} (0 calls)
+0: cons(head#0:wybe.int, tail#0:list_loop.intlist, ?$#0:list_loop.intlist):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:!list_loop.intlist)
     foreign lpvm mutate(~%$rec#0:list_loop.intlist, ?%$rec#1:list_loop.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:list_loop.intlist, ?%$#0:list_loop.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:list_loop.intlist)
-[|] > public {inline} (12 calls)
-1: [|](?head#0:wybe.int, ?tail#0:list_loop.intlist, $#0:list_loop.intlist, ?$$#0:wybe.bool):
+cons > public {inline} (12 calls)
+1: cons(?head#0:wybe.int, ?tail#0:list_loop.intlist, $#0:list_loop.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($#0:list_loop.intlist, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -375,6 +368,13 @@ head > public {inline} (0 calls)
         foreign lpvm mutate(~%$rec#0:list_loop.intlist, ?%$rec#1:list_loop.intlist, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
+
+
+nil > public {inline} (0 calls)
+0: nil(?$#0:list_loop.intlist):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm move(0:list_loop.intlist, ?$#0:list_loop.intlist)
 
 
 tail > public {inline} (0 calls)
@@ -465,13 +465,7 @@ if.else2:
 }
 
 
-define external fastcc  i64 @"list_loop.intlist.[]<0>"()    {
-entry:
-  ret i64 0 
-}
-
-
-define external fastcc  i64 @"list_loop.intlist.[|]<0>"(i64  %"head#0", i64  %"tail#0")    {
+define external fastcc  i64 @"list_loop.intlist.cons<0>"(i64  %"head#0", i64  %"tail#0")    {
 entry:
   %15 = trunc i64 16 to i32  
   %16 = tail call ccc  i8*  @wybe_malloc(i32  %15)  
@@ -487,7 +481,7 @@ entry:
 }
 
 
-define external fastcc  {i64, i64, i1} @"list_loop.intlist.[|]<1>"(i64  %"$#0")    {
+define external fastcc  {i64, i64, i1} @"list_loop.intlist.cons<1>"(i64  %"$#0")    {
 entry:
   %"1$tmp$0#0" = icmp ne i64 %"$#0", 0 
   br i1 %"1$tmp$0#0", label %if.then, label %if.else 
@@ -551,6 +545,12 @@ if.else:
   %53 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
   %54 = insertvalue {i64, i1} %53, i1 0, 1 
   ret {i64, i1} %54 
+}
+
+
+define external fastcc  i64 @"list_loop.intlist.nil<0>"()    {
+entry:
+  ret i64 0 
 }
 
 

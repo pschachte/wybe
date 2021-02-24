@@ -1,11 +1,11 @@
-pub type intlist { pub [] | [|](head:int, tail:intlist) }
+pub type intlist { pub nil | cons(head:int, tail:intlist) }
 
-?x = [1,2,3]
+?x = cons(1,cons(2,cons(3,nil)))
 ?l = x
-do {while (l = [?h | ?l])
+do {while (l = cons(?h, ?l))
     !println(h)
     ?l2 = x
-    do {while (l2 = [?h2 | ?l2])
+    do {while (l2 = cons(?h2, ?l2))
         !print("    ")
         !print(h)
         !print(" ")

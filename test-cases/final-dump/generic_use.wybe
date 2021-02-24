@@ -1,14 +1,46 @@
 use generic_list
 
 pub def iota(n:int) : generic_list(int) = fromto(1, n)
-pub def fromto(lo:int, hi:int) : generic_list(int) = fromto1(lo, hi, [])
+pub def fromto(lo:int, hi:int) : generic_list(int) = fromto1(lo, hi, nil)
 def fromto1(lo:int, hi:int, sofar:generic_list(int)) : generic_list(int) =
-    if lo <= hi then fromto1(lo, hi-1, [hi|sofar]) else sofar
+    if lo <= hi then fromto1(lo, hi-1, cons(hi,sofar)) else sofar
+
+pub def concat(l1:generic_list(?t), l2:generic_list(?t)):generic_list(?t) =
+    if l1 = cons(?h , ?t) then cons(h,concat(t,l2)) else l2
 
 pub def nrev(lst:generic_list(?t)) : generic_list(?t) =
-    if lst = [?h | ?t] then nrev(t) ++ [h] else []
+    if lst = cons(?h , ?t) then concat(nrev(t), cons(h,nil)) else nil
 
-pub def reverse(lst:generic_list(?t)) : generic_list(?t) = reverse1(lst, [])
+pub def reverse(lst:generic_list(?t)) : generic_list(?t) = reverse1(lst, nil)
 pub def reverse1(lst:generic_list(?t), suffix:generic_list(?t))
         : generic_list(?t) =
-    if lst = [?h | ?t] then reverse1(t,[h|suffix]) else suffix
+    if lst = cons(?h , ?t) then reverse1(t,cons(h,suffix)) else suffix
+
+
+def print(lst:generic_list(int)) use !io {
+    !print('[')
+    if { cons(?h,?t) = lst ::
+           !print(h)
+           !print_tail(t)
+    }
+    !print(']')
+}
+
+
+def print_tail(lst:generic_list(int)) use !io {
+    if { cons(?h,?t) = lst ::
+           !print(", ")
+           !print(h)
+           !print_tail(t)
+    }
+}
+
+def println(lst:generic_list(int)) use !io { !print(lst) !nl }
+
+?l1 = iota(5)
+?l2 = fromto(6, 10)
+!println(l1)
+!println(l2)
+!println(concat(l1,l2))
+!println(reverse(l1))
+!println(nrev(l2))

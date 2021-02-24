@@ -16,7 +16,7 @@ import           ASTShow
 import           BinaryFactory                   ()
 import           Codegen
 import           Config                          (wordSize, wordSizeBytes)
-import           Util                            (maybeNth)
+import           Util                            (maybeNth, zipWith3M_)
 import           Control.Monad
 import           Control.Monad.Trans             (lift, liftIO)
 import           Control.Monad.Trans.Class
@@ -877,15 +877,6 @@ addInstruction ins outArgs = do
             -- lift $ logBlocks $ "-=-=-=-= Structure names:" ++ show outNames
             zipWith3M_ assign outNames fields treps
             return $ Just $ last fields -- XXX this looks bogus!
-
-
-zipWith3M_ :: Monad m => (a -> b -> c -> m ()) -> [a] -> [b] -> [c] -> m ()
-zipWith3M_ f [] _ _ = return ()
-zipWith3M_ f _ [] _ = return ()
-zipWith3M_ f _ _ [] = return ()
-zipWith3M_ f (a:as) (b:bs) (c:cs) = do
-    f a b c
-    zipWith3M_ f as bs cs
 
 
 pullName ArgVar{argVarName=var} = show var

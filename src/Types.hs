@@ -25,6 +25,7 @@ import           Options             (LogSelection (Types))
 import           Util
 import           Snippets
 import           Blocks              (llvmMapBinop, llvmMapUnop)
+import Data.Function (on)
 
 -- import           Debug.Trace
 
@@ -394,7 +395,7 @@ type Typed = StateT Typing Compiler
 --   records bindings of type variables, and contains a counter for generating
 --   new type variables.
 data Typing = Typing {
-                  typingDict::Map VarName TypeSpec,     -- ^variable types
+                  typingDict::VarDict,     -- ^variable types
                   tvarDict::Map TypeVarName TypeSpec,   -- ^type variable types
                   typeVarCounter::Int,                  -- for renumbering tvars
                   typingErrs::[TypeError]               -- type errors seen
@@ -468,6 +469,17 @@ varType var = gets $ lookupVarType var
 -- |Extract the type of a variable from a Typing.
 lookupVarType :: VarName -> Typing -> TypeSpec
 lookupVarType var typing = Map.findWithDefault AnyType var $ typingDict typing
+
+
+-- |Maybe make a map of the ultimate types of the given maybe set of variables.
+typeMapFromSet :: Maybe (Set VarName) -> Typed (Maybe VarDict)
+typeMapFromSet vars =
+    case vars of
+        Nothing  -> return Nothing
+        Just set ->
+            let varList = Set.toAscList set
+            in  Just . Map.fromAscList . zip varList
+                <$> mapM ultimateVarType varList
 
 
 -- |Set the type associated with a variable; does not check that the type is
@@ -861,7 +873,7 @@ typecheckProcDecl' m pdef = do
                     let proto' = proto { procProtoParams = params' }
                     let pdef' = pdef { procProto = proto',
                                        procImpln = ProcDefSrc def' }
-                    sccAgain <- (&& pdef' /= pdef) <$> validTyping
+                    sccAgain <- (&& params' /= params) <$> validTyping
                     logTyped $ "===== "
                                ++ (if sccAgain then "" else "NO ")
                                ++ "Need to check again."
@@ -1073,7 +1085,6 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt detism typs):calls)
     logTyped $ "Type checking call " ++ show pstmt
     logTyped $ "Calling context is " ++ show detism
     logTyped $ "Candidate types: " ++ show typs
-    -- XXX Must handle reification of test as a bool
     let (callee,pexps) = case content pstmt of
                              ProcCall _ callee' _ _ _ pexps' -> (callee',pexps')
                              noncall -> shouldnt
@@ -1085,30 +1096,29 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt detism typs):calls)
                (matchTypeList name callee (place pstmt) actualTypes detism)
                typs
     let validMatches = catOKs matches
-    let validTypes = nub $ procInfoTypes <$> validMatches
-    logTyped $ "Valid types = " ++ show validTypes
+    let validTypes = nubBy ((==) `on` (procInfoTypes . fst)) validMatches
+    logTyped $ "Valid types = " ++ show (snd <$> validTypes)
     logTyped $ "Converted types = " ++ show (boolFnToTest <$> typs)
     case validTypes of
         [] -> do
           logTyped "Type error: no valid types for call"
           typeErrors (concatMap errList matches)
-        [match] -> do
-          mapM_(\ (pexp,ty,argnum) ->
-                           placedApply setExpType pexp ty argnum name)
-                        $ zip3 pexps match [1..]
+        [(match,typing)] -> do
+          put typing
           logTyping "Resulting typing = "
           typecheckCalls m name pos calls residue True
         _ -> do
-          let stmtTyping' = stmtTyping {typingArgsTypes = validMatches}
+          let matchProcInfos = fst <$> validMatches
+          let stmtTyping' = stmtTyping {typingArgsTypes = matchProcInfos}
           typecheckCalls m name pos calls (stmtTyping':residue)
-              $ chg || validMatches /= typs
+              $ chg || matchProcInfos /= typs
 
 
 -- |Match up the argument types of a call with the parameter types of the
 -- callee, producing a list of the actual types.  If this list contains
 -- InvalidType, then the call would be a type error.
 matchTypeList :: Ident -> Ident -> OptPos -> [TypeSpec] -> Determinism
-              -> ProcInfo -> Typed (MaybeErr ProcInfo)
+              -> ProcInfo -> Typed (MaybeErr (ProcInfo,Typing))
 matchTypeList caller callee pos callArgTypes detismContext calleeInfo
     | sameLength callArgTypes args
     = matchTypeList' callee pos callArgTypes calleeInfo
@@ -1129,7 +1139,7 @@ matchTypeList caller callee pos callArgTypes detismContext calleeInfo
           calleeInfo'' = fromJust detCallInfo
 
 matchTypeList' :: Ident -> OptPos -> [TypeSpec] -> ProcInfo
-               -> Typed (MaybeErr ProcInfo)
+               -> Typed (MaybeErr (ProcInfo,Typing))
 matchTypeList' callee pos callArgTypes calleeInfo = do
     logTyped $ "Matching types " ++ show callArgTypes
                ++ " with " ++ show calleeInfo
@@ -1137,16 +1147,18 @@ matchTypeList' callee pos callArgTypes calleeInfo = do
     let calleeTypes = typeFlowType <$> args
     let calleeFlows = typeFlowMode <$> args
     typing0 <- get
-    -- XXX argument number is wrong
-    matches <- zipWithM (unifyTypes $ ReasonArgType callee 0 pos)
-               callArgTypes calleeTypes
+    matches <- zipWith3M (unifyTypes . flip (ReasonArgType callee) pos)
+               [1..] callArgTypes calleeTypes
+    logTyping "Matched with typing: "
     typing <- get
     put typing0 -- reset to initial typing
     let mismatches = List.map fst $ List.filter ((==InvalidType) . snd)
                        $ zip [1..] matches
     if List.null mismatches
-    then return $ OK $ calleeInfo
-         {procInfoArgs = List.zipWith TypeFlow matches calleeFlows}
+    then return $ OK
+         (calleeInfo
+          {procInfoArgs = List.zipWith TypeFlow matches calleeFlows},
+          typing)
     else return $ Err [ReasonArgType callee n pos | n <- mismatches]
 
 
@@ -1403,7 +1415,8 @@ modecheckStmts m name pos delayed assigned detism (pstmt:pstmts) = do
 
 -- |Mode check a single statement, returning a list of moded statements,
 --  plus a list of delayed statements, a set of variables bound by this
---  statement, and a list of errors.
+--  statement, and a list of errors.  When this is called, all variable
+--  and type variable types have already been established in the Typed monad.
 --
 --  We select a mode as follows:
 --    0.  If some input arguments are not assigned, report an uninitialised
@@ -1446,7 +1459,7 @@ modecheckStmt m name defPos delayed assigned detism
             typeErrors flowErrs
             return ([],delayed,assigned)
         else do
-            typeMatches <- catOKs <$> mapM
+            typeMatches <- ((fst <$>) . catOKs) <$> mapM
                         (matchTypeList name cname pos actualTypes detism)
                         callInfos
             -- All the possibly matching modes
@@ -1599,9 +1612,7 @@ modecheckStmt m name defPos delayed assigned detism
     (stmts', assigned') <-
       modecheckStmts m name defPos [] assigned detism stmts
     logTyped $ "Assigned by loop: " ++ show assigned'
-    let break = bindingBreakVars assigned'
-    typing <- get
-    let vars = Map.fromSet (`lookupVarType` typing) <$> break
+    vars <- typeMapFromSet $ bindingBreakVars assigned'
     logTyped $ "Loop exit vars: " ++ show vars
     return ([maybePlace (Loop stmts' vars) pos], delayed, assigned')
 modecheckStmt m name defPos delayed assigned detism
@@ -1621,8 +1632,7 @@ modecheckStmt m name defPos delayed assigned detism
     logTyped $ "Mode checking disjunction " ++ show stmt
     -- XXX must mode check individually and join the resulting states
     (stmts', assigned') <- modecheckStmts m name defPos [] assigned detism stmts
-    typing <- get
-    let vars = Map.fromSet (`lookupVarType` typing) <$> bindingVars assigned'
+    vars <- typeMapFromSet $ bindingVars assigned'
     return ([maybePlace (Or stmts' vars) pos], delayed, assigned')
 modecheckStmt m name defPos delayed assigned detism
     (Not stmt) pos = do

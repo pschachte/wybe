@@ -13,7 +13,7 @@ module Util (sameLength, maybeNth, setMapInsert,
              removeFromDS, connectedItemsInDS,
              mapDS, filterDS, dsToTransitivePairs,
              intersectMapIdentity, orElse,
-             apply2way, (&&&)) where
+             apply2way, (&&&), zipWith3M, zipWith3M_) where
 
 
 import           Data.Graph
@@ -219,3 +219,19 @@ apply2way combine f1 f2 input = combine (f1 input) (f2 input)
 infix 4 &&&
 (&&&) :: (a->Bool) -> (a->Bool) -> a -> Bool
 (&&&) = apply2way (&&)
+
+
+-- |zipWithM version for 3 lists.
+zipWith3M :: Monad m => (a -> b -> c -> m d) -> [a] -> [b] -> [c] -> m [d]
+zipWith3M f [] _ _ = return []
+zipWith3M f _ [] _ = return []
+zipWith3M f _ _ [] = return []
+zipWith3M f (a:as) (b:bs) (c:cs) = do
+    d <- f a b c
+    ds <- zipWith3M f as bs cs
+    return $ d:ds
+
+
+-- |zipWithM version for 3 lists.
+zipWith3M_ :: Monad m => (a -> b -> c -> m d) -> [a] -> [b] -> [c] -> m ()
+zipWith3M_ f as bs cs = zipWith3M f as bs cs >> return ()
