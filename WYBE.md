@@ -161,7 +161,7 @@ to that procedure.
 
 A procedure call must be preceded by an exclamation point (`!`) if it uses any
 resources, as described in the section on
-[calling a resourceful procedure](calling resourceful).
+[calling a resourceful procedure](#calling resourceful).
 
 A procedure whose name consists of any number of the operator characters
 ```
@@ -1094,7 +1094,10 @@ foreign instruction, a type cast specifies the type of the value that will be
 stored in the variable, but does not constrain the type of the output of the
 instruction.
 
-It is also important to understand that type casts may extend or truncate the value being passed, but it will not change the bits of the value.  If you wish to convert between floating point and integer representations, see the [integer/floating point conversion](conversion) instructions.
+It is also important to understand that type casts may extend or truncate the
+value being passed, but it will not change the bits of the value.  If you wish
+to convert between floating point and integer representations, see the
+[integer/floating point conversion](#conversion) instructions.
 
 
 #### Wybe low-level memory management primitives
