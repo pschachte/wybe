@@ -1,0 +1,9 @@
+pub type {unique} unique_position { pub unique_position(x:int, y:int) }
+
+pub def printPosition(pos:unique_position) use !io {
+    !print(" (")
+    !print(pos.x)
+    !print(",")
+    !print(pos.y)
+    !println(")")
+}
