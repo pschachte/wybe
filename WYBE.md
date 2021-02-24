@@ -25,8 +25,8 @@ Wybe comments begin with a hash (`#`) character and continue to the end
 of the line.
 
 The leading exclamation point is needed on statements that perform input/output,
-and in a few other contexts that will be explained in Section
-[Resources](#resources).
+and in a few other contexts that will be explained in the
+[Resources](#resources) section.
 
 
 ## Building
@@ -85,7 +85,7 @@ containing this declaration.
 In effect, this re-exports everything imported from the named module(s).
 
 
-## Primitive types
+##  <a name="primitives"></a>Primitive types
 
 Wybe has the usual complement of primitive types:
 
@@ -233,6 +233,25 @@ may use the alternative infix syntax:
 > *arg* *op* *arg*,
 
 where *op* is the function name (there must be exactly two arguments).
+
+
+##  <a name="type constraints"></a>Type constraints
+In most cases, the compiler can determine the types of expressions used in your
+code.  However, occasionally the compiler needs some help in resolving
+overloading.  For example, a procedure `read(?value)` may be overloaded such
+that it can read various forms of input, such as integers, floating point
+numbers, and strings.  If a later operation uniquely determines the
+expressions's type, the compiler will work this out.  However, if other
+references to the variables do not uniquely determine a type, you will need to
+explicitly specify the expression type.  This is done by following the expression with its type, separated by a colon, similar to the way parameter types are specified:
+
+> *expr* `:` *type*
+
+For example,
+
+```
+read(?value:int)
+```
 
 
 ## Function definitions
@@ -687,6 +706,9 @@ If specified with a `type` declaration, this would be written:
 type list(?T) {null | cons(head:?T, tail:list(?T)) ... }
 ```
 
+All type variables appearing in the definition of any constructor must appear in
+the list of type parameters.
+
 Generic types can also be specified in procedure parameters by using type
 variables.  Each occurrence of the same type variable must signify the same
 type.  For example, you can define list concatenation:
@@ -1002,7 +1024,7 @@ Floating point (signed) strictly greater
 - foreign llvm fcmp_sge(arg1:float, arg2:float):bool  
 Floating point (signed) greater or equal
 
-##### Integer/floating point conversion
+#####  <a name="conversion"></a>Integer/floating point conversion
 
 - foreign llvm uitofp(arg1:int):float  
 Convert unsigned integer to float
@@ -1046,6 +1068,34 @@ where *rep* is as above, and *defs* specifies other members of the type.
 
 Note that it is not permitted to specify both constructors and an explicit
 representation for a type.
+
+
+#### Type casting
+In some cases, foreign code may need to cast values of one Wybe type to another,
+to satisfy both sides of an interface.  This follows a syntax similar to
+applying [type constraints](type constraints), except that the variable is
+separated from its type with a `:!`:
+
+> *expr* `:!` *type*
+
+This differs from an ordinary type constraint in that:
+
+    -  this may only be used in foreign calls;
+    -  it may only be applied to (input or output) variables; and
+    -  it only specifies the type of the *output* of the expression; it does not
+       require the input to be the same type.
+
+The final point is the key difference:  a *type constraint* specifies the type
+of both the value being passed and the value being received, while a *type cast*
+only specifies the type of the value received.  In the case of an input to a
+foreign instruction, this does not specify the type of the variable appearing,
+but only the type of the value used in the instruction.  For the output of a
+foreign instruction, a type cast specifies the type of the value that will be
+stored in the variable, but does not constrain the type of the output of the
+instruction.
+
+It is also important to understand that type casts may extend or truncate the value being passed, but it will not change the bits of the value.  If you wish to convert between floating point and integer representations, see the [integer/floating point conversion](conversion) instructions.
+
 
 #### Wybe low-level memory management primitives
 
