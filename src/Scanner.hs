@@ -115,13 +115,15 @@ tokenise pos str@(c:cs)
   | isAlpha c = let (name,rest) = span isIdentChar str
                 in  multiCharTok name rest (TokIdent name pos) pos
   | otherwise = case c of
-                    ',' -> singleCharTok c cs pos $ TokComma pos
+                    ',' -> commaTok cs pos
                     '(' -> singleCharTok c cs pos $ TokLBracket Paren pos
                     '[' -> singleCharTok c cs pos $ TokLBracket Bracket pos
                     '{' -> singleCharTok c cs pos $ TokLBracket Brace pos
                     ')' -> singleCharTok c cs pos $ TokRBracket Paren pos
                     ']' -> singleCharTok c cs pos $ TokRBracket Bracket pos
                     '}' -> singleCharTok c cs pos $ TokRBracket Brace pos
+                    '?' -> singleCharTok c cs pos $ TokSymbol "?" pos
+                    '!' -> singleCharTok c cs pos $ TokSymbol "!" pos
                     '\'' -> tokeniseChar pos cs
                     '\"' -> tokeniseString DoubleQuote pos cs
                     -- backquote makes anything an identifier
@@ -134,6 +136,20 @@ tokenise pos str@(c:cs)
 -- |Handle a single character token and tokenize the rest of the input.
 singleCharTok :: Char -> String -> SourcePos -> Token -> [Token]
 singleCharTok c cs pos tok = tok:(tokenise (updatePosChar pos c) cs)
+
+-- |Handle a token beginning with comma, and tokenize the rest of the input.
+commaTok :: String -> SourcePos -> [Token]
+commaTok rest pos =
+    case span isSymbolContinuation rest of
+        ([],_) -> TokComma pos : tokenise (updatePosChar pos ',') rest
+        (tokRest,rest') ->
+            let sym = ',':tokRest
+            in  TokSymbol sym pos : tokenise (updatePosString pos sym) rest'
+
+-- |Recognise a character that cannot begin an expression, and therefore can
+-- follow a comma in a symbol.
+isSymbolContinuation :: Char -> Bool
+isSymbolContinuation = (`elem` ",@$%^&*+=.<>")
 
 -- |Handle a mult-character token and tokenize the rest of the input.
 multiCharTok :: String -> String -> Token -> SourcePos -> [Token]
@@ -283,7 +299,7 @@ isIdentChar ch = isAlphaNum ch || ch == '_'
 -- |Is this a character that can appear in a symbol?
 isSymbolChar :: Char -> Bool
 isSymbolChar ch = not (isAlphaNum ch || isSpace ch || isControl ch 
-                       || ch `elem` ",.([{)]}#'\"\\")
+                       || ch `elem` ",.?!([{)]}#'\"\\")
 
 -- |Is this character part of a single (not necessarily valid) number token,
 -- following a digit character?  This means any alphanumeric character or a
