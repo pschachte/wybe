@@ -261,6 +261,8 @@ data TypeError = ReasonParam ProcName Int OptPos
                | ReasonForeignArgRep Ident Int TypeRepresentation
                  String OptPos
                    -- ^Foreign call with wrong argument type
+               | ReasonBadCast Ident Ident Int OptPos
+                   -- ^Cast operation appearing in non-foreign call argument
                | ReasonShouldnt
                    -- ^This error should never happen
                deriving (Eq, Ord)
@@ -378,6 +380,10 @@ instance Show TypeError where
         makeMessage pos $
         "LLVM instruction '" ++ instr ++ "' argument " ++ show argNum
         ++ " is " ++ show wrongRep ++ ", should be " ++ rightDesc
+    show (ReasonBadCast caller callee argNum pos) =
+        makeMessage pos $
+        "Type cast (:!) in call from " ++ caller
+        ++ " to non-foreign " ++ callee ++ ", argument " ++ show argNum
     show ReasonShouldnt =
         makeMessage Nothing "Mysterious typing error"
 
@@ -522,8 +528,8 @@ unifyVarTypes pos v1 v2 = do
 unifyTypes :: TypeError -> TypeSpec -> TypeSpec -> Typed TypeSpec
 unifyTypes reason t1 t2 = do
     logTyped $ "Unifying types " ++ show t1 ++ " and " ++ show t2
-    t1' <- ultimateType t1
-    t2' <- ultimateType t2
+    t1' <- lift (lookupType "proc declaration" Nothing t1) >>= ultimateType
+    t2' <- lift (lookupType "proc declaration" Nothing t2) >>= ultimateType
     t <- unifyTypes' reason t1' t2'
     logTyped $ "  Unification yields " ++ show t
     bindTypeVariables t1 t
@@ -820,7 +826,7 @@ typecheckProcDecl' m pdef = do
                    ++ intercalate ", " (show <$> Set.toList resources)
         mapM_ (addResourceType name pos) resources
         ifOK pdef $ do
-            mapM_ (recordCasts name . content . fst) calls
+            mapM_ (placedApply (recordCasts name) . fst) calls
             let procCalls = List.filter (isRealProcCall . content . fst) calls
             let unifs = List.concatMap foreignTypeEquivs
                         (content . fst <$> calls)
@@ -915,24 +921,36 @@ addResourceType procname pos rfspec = do
           names types
 
 
--- | Register cast variable types on arguments of the specified item.  Casts are
--- only permitted on foreign call arguments.
-recordCasts :: ProcName -> Stmt -> Typed ()
-recordCasts caller (ForeignCall _ callee tags args) =
-    mapM_ (uncurry $ recordCast caller callee) $ zip args [1..]
+-- | Register variable types coming from explicit type constraints and type
+-- casts.  Casts are only permitted on foreign call arguments, and only specify
+-- the type of the receiving variable, while type constraints can appear
+-- anywhere and constrain the type of both the source and destination
+-- expressions.
+recordCasts :: ProcName -> Stmt -> OptPos -> Typed ()
+recordCasts caller (ForeignCall _ callee _ args) pos =
+    mapM_ (uncurry $ recordCast True caller callee) $ zip args [1..]
 -- XXX Need to report error for casts on ProCall args
--- recordCasts caller (ProcCall _ callee _ _ _ args) =
---     mapM_ (uncurry $ recordCast caller callee) $ zip args [1..]
-recordCasts caller _ = return ()
+recordCasts caller (ProcCall _ callee _ _ _ args) pos =
+    mapM_ (uncurry $ recordCast False caller callee) $ zip args [1..]
+recordCasts caller stmt _ =
+    shouldnt $ "recordCasts of non-call statement " ++ show stmt
 
 
--- | Record 
-recordCast :: ProcName -> Ident -> Placed Exp -> Int -> Typed ()
-recordCast caller instr pexp argNum =
+-- | Record the constraints on the contents of a single type constraint or type
+-- cast.  Note that the Typed wrapper gives the type of the expression itself,
+-- so this only needs to record the type of the variable inside the Typed
+-- constructor.
+recordCast :: Bool -> ProcName -> Ident -> Placed Exp -> Int -> Typed ()
+recordCast isForeign caller callee pexp argNum =
     case content pexp of
+        (Typed _ typ True) | not isForeign
+            -> typeError $ ReasonBadCast caller callee argNum pos
         (Typed (Var name flow _) typ True) | flowsOut flow
-            -> constrainVarType ReasonShouldnt name typ
+            -> constrainVarType (ReasonArgType callee argNum pos) name typ
+        (Typed (Var name _ _) typ False)
+            -> constrainVarType (ReasonArgType callee argNum pos) name typ
         _   -> return ()
+    where pos = place pexp
 
 
 updateParamTypes :: [Param] -> Typed [Param]
@@ -1689,12 +1707,6 @@ unifyExprTypes pos a1 a2 = do
                 constrainVarType
                          (ReasonEqual a1Content a2Content (place a2))
                          toVar ty
-
-
-noteOutputCast :: Exp -> Typed ()
-noteOutputCast (Typed (Var name flow _) typ True)
-  | flowsOut flow = constrainVarType ReasonShouldnt name typ
-noteOutputCast _ = return ()
 
 
 -- |Does this parameter correspond to a manifest argument?

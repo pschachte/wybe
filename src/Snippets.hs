@@ -5,7 +5,7 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
-module Snippets (intType, intCast, tagType, tagCast,
+module Snippets (withType, intType, intCast, tagType, tagCast,
                  boolType, boolCast, boolTrue, boolFalse, boolBool,
                  phantomType, varSet, varGet, varGetSet,
                  boolVarSet, boolVarGet, intVarSet, intVarGet, castTo,
@@ -18,6 +18,10 @@ import AST
 -- |An expression to cast a value to the specified type
 castTo :: Exp -> TypeSpec -> Exp
 castTo exp typ = Typed exp typ True
+
+-- |An expression to constrain a value to have the specified type
+withType :: Exp -> TypeSpec -> Exp
+withType exp typ = Typed exp typ False
 
 -- |The int type
 intType :: TypeSpec
@@ -45,15 +49,15 @@ boolCast exp = castTo exp boolType
 
 -- |True as a bool Exp
 boolTrue :: Exp
-boolTrue = boolCast $ iVal 1
+boolTrue = iVal 1 `withType` boolType
 
 -- |False as a bool Exp
 boolFalse :: Exp
-boolFalse = boolCast $ iVal 0
+boolFalse = iVal 0 `withType` boolType
 
 -- |Return an expression holding value of a Haskell Bool
 boolBool :: Bool -> Exp
-boolBool bool = boolCast $ iVal $ if bool then 1 else 0
+boolBool bool = iVal (if bool then 1 else 0) `withType` boolType
 
 -- | The phantom type
 phantomType :: TypeSpec
@@ -73,19 +77,19 @@ varGetSet name flowType = Var name ParamInOut flowType
 
 -- |A Boolean typed output variable reference (lvalue)
 boolVarSet :: Ident -> Exp
-boolVarSet name = Typed (varSet name) boolType False
+boolVarSet name = varSet name `withType` boolType
 
 -- |A Boolean typed input variable reference (rvalue)
 boolVarGet :: Ident -> Exp
-boolVarGet name = Typed (varGet name) boolType False
+boolVarGet name = varGet name `withType` boolType
 
 -- |An integer type output variable reference (lvalue)
 intVarSet :: Ident -> Exp
-intVarSet name = Typed (varSet name) intType False
+intVarSet name = varSet name `withType` intType
 
 -- |An integer type input variable reference (rvalue)
 intVarGet :: Ident -> Exp
-intVarGet name = Typed (varGet name) intType False
+intVarGet name = varGet name `withType` intType
 
 -- |An unplaced statement to cast a value into fresh variable
 lpvmCast :: Exp -> Ident -> TypeSpec -> Placed Stmt
