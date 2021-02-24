@@ -130,7 +130,7 @@ typeItemParser :: Visibility -> Parser Item
 typeItemParser v = do
     pos <- tokenPosition <$> ident "type"
     proto <- TypeProto <$> identString <*>
-             option [] (betweenB Paren (identString `sepBy` comma))
+             option [] (betweenB Paren (typeVarName `sepBy` comma))
     (imp,items) <- typeImpln <|> typeCtors
     return $ TypeDecl v proto imp items (Just pos)
 
@@ -632,7 +632,9 @@ completeOperatorTable =
     , [ binary "+" AssocLeft
       , binary "-" AssocLeft
       ]
-    , [ binary "++" AssocRight ]
+    , [ binary ",," AssocRight
+      , binary "++" AssocRight
+      ]
     , [ binary' ".." AssocNone [ Unplaced (IntValue 1) ] ]
     , [ binary ">"  AssocNone
       , binary "<"  AssocNone

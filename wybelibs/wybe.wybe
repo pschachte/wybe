@@ -108,6 +108,20 @@ pub type char is 8 bit unsigned {
 }
 
 
+pub type list(?T) { pub [] | [|](head:?T, tail:list(?T))
+
+    pub def ,,(x:list(?T), y:list(?T)):list(?T) =
+        if x = [?h|?t]
+        then [h|t,,y]
+        else y
+
+    pub def length(x:list(?T)) : int = length1(x, 0)
+
+    def length1(x:list(?T), acc:int) : int =
+        if x = [?h|?t] then length1(t, acc+1) else acc
+}
+
+
 pub module io {
     pub resource io:phantom = phantom
 
