@@ -135,9 +135,9 @@ moduleItemParser v = do
 typeItemParser :: Visibility -> Parser Item
 typeItemParser v = do
     pos <- tokenPosition <$> ident "type"
+    modifiers <- modifierList
     proto <- TypeProto <$> identString <*>
              option [] (betweenB Paren (identString `sepBy` comma))
-    modifiers <- modifierList
     (imp,items) <- typeImpln <|> typeCtors
     return $ TypeDecl v proto (processTypeModifiers modifiers) imp items
             (Just pos)
