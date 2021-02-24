@@ -1073,17 +1073,17 @@ representation for a type.
 #### Type casting
 In some cases, foreign code may need to cast values of one Wybe type to another,
 to satisfy both sides of an interface.  This follows a syntax similar to
-applying [type constraints](type constraints), except that the variable is
+applying [type constraints](#type-constraints), except that the variable is
 separated from its type with a `:!`:
 
 > *expr* `:!` *type*
 
 This differs from an ordinary type constraint in that:
 
-    -  this may only be used in foreign calls;
-    -  it may only be applied to (input or output) variables; and
-    -  it only specifies the type of the *output* of the expression; it does not
-       require the input to be the same type.
+-  this may only be used in foreign calls;
+-  it may only be applied to (input or output) variables; and
+-  it only specifies the type of the *output* of the expression; it does not
+   require the input to be the same type.
 
 The final point is the key difference:  a *type constraint* specifies the type
 of both the value being passed and the value being received, while a *type cast*
