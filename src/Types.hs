@@ -1900,20 +1900,23 @@ checkStmtTyped _ _ (TestBool _) _ = return ()
 checkStmtTyped name pos (And stmts) _ppos =
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
 checkStmtTyped name pos stmt@(Or stmts exitVars) _ppos = do
-    when (isNothing exitVars) $
-         shouldnt $ "exit vars of disjunction undetermined: " ++ showStmt 4 stmt
+    -- exit vars are Nothing when both disjuncts are infinite loops, so don't report this:
+    -- when (isNothing exitVars) $
+    --      shouldnt $ "exit vars of disjunction undetermined: " ++ showStmt 4 stmt
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
 checkStmtTyped name pos (Not stmt) _ppos =
     placedApply (checkStmtTyped name pos) stmt
 checkStmtTyped name pos stmt@(Cond tst thenstmts elsestmts exitVars) _ppos = do
-    when (isNothing exitVars) $
-         shouldnt $ "exit vars of conditional undetermined: " ++ showStmt 4 stmt
+    -- exit vars are Nothing when both branches are infinite loops, so don't report this:
+    -- when (isNothing exitVars) $
+    --      shouldnt $ "exit vars of conditional undetermined: " ++ showStmt 4 stmt
     placedApply (checkStmtTyped name pos) tst
     mapM_ (placedApply (checkStmtTyped name pos)) thenstmts
     mapM_ (placedApply (checkStmtTyped name pos)) elsestmts
 checkStmtTyped name pos stmt@(Loop stmts exitVars) _ppos = do
-    when (isNothing exitVars) $
-         shouldnt $ "exit vars of loop undetermined: " ++ showStmt 4 stmt
+    -- exit vars are Nothing for infinite loops, so don't report this:
+    -- when (isNothing exitVars) $
+    --      shouldnt $ "exit vars of loop undetermined: " ++ showStmt 4 stmt
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
 checkStmtTyped name pos (UseResources _ stmts) _ppos =
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
