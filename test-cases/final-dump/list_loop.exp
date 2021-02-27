@@ -319,7 +319,7 @@ cons > public {inline} (0 calls)
 0: cons(head#0:wybe.int, tail#0:list_loop.intlist, ?$#0:list_loop.intlist):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?$rec#0:!list_loop.intlist)
+    foreign lpvm alloc(16:wybe.int, ?$rec#0:list_loop.intlist)
     foreign lpvm mutate(~%$rec#0:list_loop.intlist, ?%$rec#1:list_loop.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:list_loop.intlist, ?%$#0:list_loop.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:list_loop.intlist)
 cons > public {inline} (12 calls)

@@ -16,12 +16,16 @@ module Snippets (withType, intType, intCast, tagType, tagCast,
 import AST
 
 -- |An expression to cast a value to the specified type
-castTo :: Exp -> TypeSpec -> Exp
-castTo exp typ = Typed exp typ True
+castFromTo :: TypeSpec -> TypeSpec -> Exp -> Exp
+castFromTo innerType outerType exp = Typed exp outerType $ Just innerType
 
--- |An expression to constrain a value to have the specified type
+-- |An expression to cast a value to the specified type
+castTo :: Exp -> TypeSpec -> Exp
+castTo = flip $ castFromTo AnyType 
+
+-- |An expression to constrain th subexpression to have the specified type
 withType :: Exp -> TypeSpec -> Exp
-withType exp typ = Typed exp typ False
+withType exp typ = Typed exp typ Nothing
 
 -- |The int type
 intType :: TypeSpec
@@ -29,7 +33,7 @@ intType = TypeSpec ["wybe"] "int" []
 
 -- |Cast an expr to the int type
 intCast :: Exp -> Exp
-intCast exp = castTo exp intType
+intCast = (`castTo` intType)
 
 -- |The type of a secondary tag (currently 16 bits unsigned)
 tagType :: TypeSpec
@@ -37,7 +41,7 @@ tagType = Representation $ Bits 16
 
 -- |Cast an expr to the int type
 tagCast :: Exp -> Exp
-tagCast exp = castTo exp tagType
+tagCast = (`castTo` tagType)
 
 -- |The bool type
 boolType :: TypeSpec
@@ -45,7 +49,7 @@ boolType = TypeSpec ["wybe"] "bool" []
 
 -- |Cast an expr to the bool type
 boolCast :: Exp -> Exp
-boolCast exp = castTo exp boolType
+boolCast = (`castTo` boolType)
 
 -- |True as a bool Exp
 boolTrue :: Exp
@@ -95,12 +99,12 @@ intVarGet name = varGet name `withType` intType
 lpvmCast :: Exp -> Ident -> TypeSpec -> Placed Stmt
 lpvmCast from to totype =
     Unplaced $ ForeignCall "lpvm" "cast" []
-    [Unplaced from, Unplaced $ Typed (varSet to) totype True]
+    [Unplaced from, Unplaced $ varSet to `castTo` totype]
 
 -- |An expr to cast a value
 lpvmCastExp :: Exp -> TypeSpec -> Exp
 lpvmCastExp from totype =
-    Typed (ForeignFn "lpvm" "cast" [] [Unplaced from]) totype True
+    ForeignFn "lpvm" "cast" [] [Unplaced from] `castTo` totype
 
 -- |An unplaced statement to cast a value into fresh variable
 lpvmCastToVar :: Exp -> Ident -> Placed Stmt

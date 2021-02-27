@@ -1082,22 +1082,31 @@ This differs from an ordinary type constraint in that:
 
 -  this may only be used in foreign calls;
 -  it may only be applied to (input or output) variables; and
--  it only specifies the type of the *output* of the expression; it does not
-   require the input to be the same type.
+-  it specifies the type of the expression without requiring that the value
+   produced by the expression should be the same; ie, the type of the expression
+   is *changed* to the specified type.
 
-The final point is the key difference:  a *type constraint* specifies the type
-of both the value being passed and the value being received, while a *type cast*
-only specifies the type of the value received.  In the case of an input to a
-foreign instruction, this does not specify the type of the variable appearing,
-but only the type of the value used in the instruction.  For the output of a
-foreign instruction, a type cast specifies the type of the value that will be
-stored in the variable, but does not constrain the type of the output of the
-instruction.
+The final point is the key difference:  a *type constraint* specifies the what
+the type of the expression must be, while a *type cast* specifies that its type
+should be converted from whatever it is to the specified type.  A type
+constraint will cause a type error if the specified type is incompatible with
+the type of the expression, while a type cast will silently convert the type.
+
+The behaviour of a type cast is slightly different for input and output
+arguments.  In both cases, a cast specifies the type of the argument to the
+foreign instruction.  For an input argument, this means you are specifying the
+type *to* which the argument should be converted; for an output argument you are
+specifying the type *from* which the argument should be converted.  In most
+cases, for output arguments, you will want to specify the type to convert *to*.
+You can do this by combining a type constraint with a type cast by following the
+output variable name with a type constraint (giving the type to convert *to*),
+and following that with a type cast (giving the type to convert *from*).
 
 It is also important to understand that type casts may extend or truncate the
-value being passed, but it will not change the bits of the value.  If you wish
-to convert between floating point and integer representations, see the
-[integer/floating point conversion](#conversion) instructions.
+value being passed by adding or removing most siginficant bits to the value, but
+it will not change the bits of the value.  If you wish to convert between
+floating point and integer representations, see the [integer/floating point
+conversion](#conversion) instructions.
 
 
 #### Wybe low-level memory management primitives

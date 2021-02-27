@@ -588,7 +588,9 @@ typeError = typeErrors . (:[])
 
 -- |Record a list of type errors in the current typing.
 typeErrors :: [TypeError] -> Typed ()
-typeErrors errs = modify $ \t -> t { typingErrs=errs ++ typingErrs t }
+typeErrors errs = do
+    unless (List.null errs) $ logTyped $ "Recording error(s): " ++ show errs
+    modify $ \t -> t { typingErrs=errs ++ typingErrs t }
 
 
 localBodyProcs :: ProcImpln -> Set RoughProcSpec
@@ -929,7 +931,6 @@ addResourceType procname pos rfspec = do
 recordCasts :: ProcName -> Stmt -> OptPos -> Typed ()
 recordCasts caller (ForeignCall _ callee _ args) pos =
     mapM_ (uncurry $ recordCast True caller callee) $ zip args [1..]
--- XXX Need to report error for casts on ProCall args
 recordCasts caller (ProcCall _ callee _ _ _ args) pos =
     mapM_ (uncurry $ recordCast False caller callee) $ zip args [1..]
 recordCasts caller stmt _ =
@@ -943,11 +944,9 @@ recordCasts caller stmt _ =
 recordCast :: Bool -> ProcName -> Ident -> Placed Exp -> Int -> Typed ()
 recordCast isForeign caller callee pexp argNum =
     case content pexp of
-        (Typed _ typ True) | not isForeign
+        (Typed _ _ (Just typ)) | not isForeign
             -> typeError $ ReasonBadCast caller callee argNum pos
-        (Typed (Var name flow _) typ True) | flowsOut flow
-            -> constrainVarType (ReasonArgType callee argNum pos) name typ
-        (Typed (Var name _ _) typ False)
+        (Typed (Var name flow _) _ (Just typ))
             -> constrainVarType (ReasonArgType callee argNum pos) name typ
         _   -> return ()
     where pos = place pexp

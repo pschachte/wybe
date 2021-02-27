@@ -303,7 +303,7 @@ if.else:
 0: [|](head#0:wybe.int, tail#0:type_list.intlist, ?$#0:type_list.intlist):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?$rec#0:!type_list.intlist)
+    foreign lpvm alloc(16:wybe.int, ?$rec#0:type_list.intlist)
     foreign lpvm mutate(~%$rec#0:type_list.intlist, ?%$rec#1:type_list.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:type_list.intlist, ?%$#0:type_list.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:type_list.intlist)
 [|] > public {inline} (12 calls)

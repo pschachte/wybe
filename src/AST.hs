@@ -52,7 +52,7 @@ module AST (
   parameterVarNameToID, SpeczVersion, CallProperty(..), generalVersion,
   speczVersionToId, SpeczProcBodies,
   MultiSpeczDepInfo, CallSiteProperty(..), InterestingCallProperty(..),
-  ProcAnalysis(..), emptyProcAnalysis, 
+  ProcAnalysis(..), emptyProcAnalysis,
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, ResourceDef(..), ResourceIFace(..), FlowDirection(..),
   argFlowDirection, argType, argDescription, flowsIn, flowsOut,
@@ -1061,12 +1061,12 @@ addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
     let name = procProtoName proto
     let ProcModifiers detism inlining impurity unknown conflict = mods
-    mapM_ (\m -> message Error 
+    mapM_ (\m -> message Error
                 ("Unknown proc modifier '" ++ m
                  ++ "' in declaration of " ++ name)
                  pos)
            unknown
-    mapM_ (\m -> message Error 
+    mapM_ (\m -> message Error
                 ("Proc modifier '" ++ m
                  ++ "' conflicts with earlier modifier in declaration of "
                  ++ name)
@@ -1288,7 +1288,7 @@ refersTo modspec name implMapFn specModFn = do
         ++ showModSpecs (Set.toList (Set.map specModFn defined))
     let matched = Set.filter ((modspec `isSuffixOf`) . specModFn) defined
     case (Set.null matched,parentModule currMod) of
-        (True,Just par) -> 
+        (True,Just par) ->
             (refersTo modspec name implMapFn specModFn) `inModule` par
         _ -> return matched
 
@@ -1560,7 +1560,7 @@ doImport mod (imports, _) = do
       " into " ++
       let modStr = showModSpec currMod
       in modStr ++ ":  " ++ showUse (27 + length modStr) mod imports
-    fromIFace <- (modInterface . trustFromJust "doImport") 
+    fromIFace <- (modInterface . trustFromJust "doImport")
                  <$> getLoadingModule mod
     let pubImports = importPublic imports
     let allImports = combineImportPart pubImports $ importPrivate imports
@@ -1749,7 +1749,7 @@ flagsDetism = List.foldl flagDetism Det
 
 
 -- | Gather the Determinism of a flag
-flagDetism :: Determinism  -> String -> Determinism 
+flagDetism :: Determinism  -> String -> Determinism
 flagDetism _ "terminal" = Terminal
 flagDetism _ "failing"  = Failure
 flagDetism _ "det"      = Det
@@ -1881,7 +1881,7 @@ aliasMapToAliasPairs aliasMap = Set.toList $ dsToTransitivePairs aliasMap
 -- For a given specialization version of the current proc, this info should be
 -- enough to compute all specz versions it required. A sample case is
 -- "expandSpeczVersionsAlias" in "Transform.hs".
-type MultiSpeczDepInfo = 
+type MultiSpeczDepInfo =
         Map CallSiteID (ProcSpec, Set CallSiteProperty)
 
 
@@ -1935,7 +1935,7 @@ instance Show ProcImpln where
                             Just body -> showBlock 4 body)
                 |> intercalate "\n"
         in
-            show proto ++ ":" ++ show analysis ++ showBlock 4 body 
+            show proto ++ ":" ++ show analysis ++ showBlock 4 body
                     ++ speczBodies
 
 
@@ -1948,7 +1948,7 @@ instance Show ProcAnalysis where
         ++ "\n InterestingCallProperties: "
         ++ show (Set.toAscList interestingCallProperties)
         ++ if List.null multiSpeczDepInfo'
-            then "" 
+            then ""
             else "\n MultiSpeczDepInfo: " ++ show multiSpeczDepInfo'
 
 
@@ -2382,9 +2382,8 @@ detStmt _ = True
 -- |Produce a single statement comprising the conjunctions of the statements
 --  in the supplied list.
 seqToStmt :: [Placed Stmt] -> Placed Stmt
-seqToStmt [] = Unplaced $ TestBool $ Typed (IntValue 1)
-                                           (TypeSpec ["wybe"] "bool" [])
-                                           True
+seqToStmt [] = Unplaced $ TestBool
+               $ Typed (IntValue 1) AnyType $ Just $ TypeSpec ["wybe"] "bool" []
 seqToStmt [stmt] = stmt
 seqToStmt stmts = Unplaced $ And stmts
 
@@ -2396,8 +2395,10 @@ data Exp
       | StringValue String
       | CharValue Char
       | Var VarName FlowDirection ArgFlowType
-      | Typed Exp TypeSpec Bool       -- ^explicitly typed expr giving type
-                                      -- and whether type is a cast
+      | Typed Exp TypeSpec (Maybe TypeSpec)
+               -- ^explicitly typed expr giving type the expression, and, if it
+               -- is a cast, the type of the Exp argument.  If not a cast, these
+               -- two must be the same.
       -- The following are eliminated during flattening
       | Where [Placed Stmt] (Placed Exp)
       | CondExp (Placed Stmt) (Placed Exp) (Placed Exp)
@@ -2677,20 +2678,24 @@ pexpListOutputs :: [Placed Exp] -> Set VarName
 pexpListOutputs = List.foldr (Set.union . expOutputs . content) Set.empty
 
 
+-- | Apply the specified TypeFlow to the given expression, ensuring they're
+-- explicitly attached to the expression.
 setExpTypeFlow :: TypeFlow -> Exp -> Exp
-setExpTypeFlow typeflow (Typed expr _ cast)
-    = Typed expr' ty cast
-    where Typed expr' ty _ = setExpTypeFlow typeflow expr
+setExpTypeFlow typeflow (Typed expr _ castInner)
+    = Typed expr' ty' castInner
+    where Typed expr' ty' _ = setExpTypeFlow typeflow expr
 setExpTypeFlow (TypeFlow ty fl) (Var name _ ftype)
-    = Typed (Var name fl ftype) ty False
+    = Typed (Var name fl ftype) ty Nothing
 setExpTypeFlow (TypeFlow ty ParamIn) expr
-    = Typed expr ty False
-setExpTypeFlow (TypeFlow ty fl) expr =
-    shouldnt $ "Cannot set type/flow of " ++ show expr
+    = Typed expr ty Nothing
+setExpTypeFlow (TypeFlow ty fl) expr
+    = shouldnt $ "Cannot set type/flow of " ++ show expr
 
 
+-- | Apply the specified TypeFlow to the given expression, ensuring they're
+-- explicitly attached to the expression.
 setPExpTypeFlow :: TypeFlow -> Placed Exp -> Placed Exp
-setPExpTypeFlow typeflow pexpr = (setExpTypeFlow typeflow) <$> pexpr
+setPExpTypeFlow typeflow pexpr = setExpTypeFlow typeflow <$> pexpr
 
 
 isHalfUpdate :: FlowDirection -> Exp -> Bool
@@ -2776,7 +2781,7 @@ instance Show Item where
     ++ bracketList "(" ")" ", " (("?"++) <$> params)
     ++ " " ++ show repn ++ showMaybeSourcePos pos ++ "\n"
   show (ConstructorDecl vis params ctors pos) =
-    visibilityPrefix vis ++ "constructors" 
+    visibilityPrefix vis ++ "constructors"
     ++ bracketList "(" ")" ", " (("?"++) <$> params)
     ++ " " ++ show ctors ++ showMaybeSourcePos pos ++ "\n"
   show (ImportMods vis mods pos) =
@@ -2917,7 +2922,7 @@ showProcDefs firstID (def:defs) =
 
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
-showProcDef thisID 
+showProcDef thisID
         procdef@(ProcDef n proto def pos _ _ _ vis detism inline impurity sub) =
     "\n"
     ++ (if n == "" then "*main*" else n) ++ " > "
@@ -2933,7 +2938,7 @@ showProcDef thisID
 
 -- |How to show a type specification.
 instance Show TypeSpec where
-  show AnyType              = "?"
+  show AnyType              = "any"
   show InvalidType          = "XXX"
   show (TypeVariable name)  = "?" ++ name
   show (Representation rep) = show rep
@@ -2960,21 +2965,22 @@ instance Show ProcProto where
 -- |How to show a formal parameter.
 instance Show Param where
   show (Param name typ dir flowType) =
-    (show flowType) ++ flowPrefix dir ++ name ++ showTypeSuffix typ False
+    (show flowType) ++ flowPrefix dir ++ name ++ showTypeSuffix typ Nothing
 
 -- |How to show a formal parameter.
 instance Show PrimParam where
   show (PrimParam name typ dir _ (ParamInfo unneeded)) =
       let (pre,post) = if unneeded then ("[","]") else ("","")
-      in  pre ++ primFlowPrefix dir ++ show name ++ showTypeSuffix typ False
+      in  pre ++ primFlowPrefix dir ++ show name ++ showTypeSuffix typ Nothing
           ++ post
 
 
 -- |Show the type of an expression, if it's known.
-showTypeSuffix :: TypeSpec -> Bool -> String
-showTypeSuffix AnyType _ = ""
-showTypeSuffix typ True  = ":!" ++ show typ
-showTypeSuffix typ False = ":" ++ show typ
+showTypeSuffix :: TypeSpec -> Maybe TypeSpec -> String
+showTypeSuffix AnyType Nothing     = ""
+showTypeSuffix typ Nothing         = ":" ++ show typ
+showTypeSuffix typ (Just AnyType)  = ":!" ++ show typ
+showTypeSuffix typ (Just cast)     = ":" ++ show cast ++ ":!" ++ show typ
 
 
 -- |How to show a dataflow direction.
@@ -3037,7 +3043,7 @@ showPlacedPrim' ind prim pos =
 showPrim :: Int -> Prim -> String
 showPrim _ (PrimCall id pspec args) =
         show pspec ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
-            ++ " #" ++ show id 
+            ++ " #" ++ show id
 showPrim _ (PrimForeign lang name flags args) =
         "foreign " ++ lang ++ " " ++ showFlags flags ++ name ++
         "(" ++ intercalate ", " (List.map show args) ++ ")"
@@ -3109,14 +3115,14 @@ instance Show PrimArg where
       (if final then "~" else "") ++
       primFlowPrefix dir ++
       show ftype ++
-      show name ++ showTypeSuffix typ coerce
-  show (ArgInt i typ)    = show i ++ showTypeSuffix typ False
-  show (ArgFloat f typ)  = show f ++ showTypeSuffix typ False
-  show (ArgString s typ) = show s ++ showTypeSuffix typ False
-  show (ArgChar c typ)   = show c ++ showTypeSuffix typ False
+      show name ++ showTypeSuffix typ (if coerce then Just AnyType else Nothing)
+  show (ArgInt i typ)    = show i ++ showTypeSuffix typ Nothing
+  show (ArgFloat f typ)  = show f ++ showTypeSuffix typ Nothing
+  show (ArgString s typ) = show s ++ showTypeSuffix typ Nothing
+  show (ArgChar c typ)   = show c ++ showTypeSuffix typ Nothing
   show (ArgUnneeded dir typ) =
-      primFlowPrefix dir ++ "_" ++ showTypeSuffix typ False
-  show (ArgUndef typ)    = "undef" ++ showTypeSuffix typ False
+      primFlowPrefix dir ++ "_" ++ showTypeSuffix typ Nothing
+  show (ArgUndef typ)    = "undef" ++ showTypeSuffix typ Nothing
 
 
 -- |Show a single typed expression.

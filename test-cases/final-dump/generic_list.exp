@@ -101,7 +101,7 @@ cons > public {inline} (1 calls)
 0: cons(car#0:?T, cdr#0:generic_list(?T), ?$#0:generic_list(?T)):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?$rec#0:!generic_list(?T))
+    foreign lpvm alloc(16:wybe.int, ?$rec#0:generic_list(?T))
     foreign lpvm mutate(~%$rec#0:generic_list(?T), ?%$rec#1:generic_list(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~car#0:?T)
     foreign lpvm mutate(~%$rec#1:generic_list(?T), ?%$#0:generic_list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~cdr#0:generic_list(?T))
 cons > public {inline} (6 calls)

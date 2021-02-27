@@ -50,7 +50,7 @@ just > public {inline} (0 calls)
 0: just(value#0:wybe.int, ?$#0:constructors):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?$rec#0:!constructors)
+    foreign lpvm alloc(8:wybe.int, ?$rec#0:constructors)
     foreign lpvm mutate(~%$rec#0:constructors, ?%$#0:constructors, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~value#0:wybe.int)
 just > public {inline} (8 calls)
 1: just(?value#0:wybe.int, $#0:constructors, ?$$#0:wybe.bool):

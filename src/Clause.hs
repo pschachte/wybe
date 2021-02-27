@@ -313,7 +313,8 @@ compileArg' typ coerce (Var name ParamIn flowType) pos = do
 compileArg' typ coerce (Var name ParamOut flowType) _ = do
     name' <- nextVar name
     return $ ArgVar name' typ coerce FlowOut flowType False
-compileArg' _   _ (Typed exp typ coerce) pos = compileArg' typ coerce exp pos
+compileArg' _   _ (Typed exp typ coerce) pos =
+    compileArg' typ (isJust coerce) exp pos
 compileArg' _   _ arg _ =
     shouldnt $ "Normalisation left complex argument: " ++ show arg
 

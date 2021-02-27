@@ -145,7 +145,7 @@ person > public {inline} (0 calls)
 0: person(firstname#0:wybe.string, lastname#0:wybe.string, ?$#0:person2.person):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?$rec#0:!person2.person)
+    foreign lpvm alloc(16:wybe.int, ?$rec#0:person2.person)
     foreign lpvm mutate(~%$rec#0:person2.person, ?%$rec#1:person2.person, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~firstname#0:wybe.string)
     foreign lpvm mutate(~%$rec#1:person2.person, ?%$#0:person2.person, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~lastname#0:wybe.string)
 person > public {inline} (6 calls)

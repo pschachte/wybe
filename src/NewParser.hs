@@ -713,9 +713,23 @@ funcAppExp = do
 
 typedExp :: Parser (Placed Exp -> Placed Exp)
 typedExp = do
-    coerce <- symbol ":!" $> True <|> symbol ":" $> False
+    cast <- symbol ":!" $> True <|> symbol ":" $> False
     ty <- typeParser
-    return $ \e -> maybePlace (Typed (content e) ty coerce) (place e)
+    return $ placedApply $ specifyType ty cast
+
+
+-- |Either cast or apply a type constraint
+specifyType :: TypeSpec -> Bool -> Exp -> OptPos -> Placed Exp
+specifyType ty False (Typed exp _ Nothing) pos =
+    maybePlace (Typed exp ty Nothing) pos -- replace type constraint
+specifyType ty False (Typed exp outer (Just _)) pos = -- was cast to outer
+    maybePlace (Typed exp outer (Just ty)) pos  -- now cast from ty to outer
+specifyType ty True (Typed exp ty' _) pos = -- was constrained to ty'
+    maybePlace (Typed exp ty (Just ty')) pos -- now cast from ty' to ty
+specifyType ty False exp pos =
+    maybePlace (Typed exp ty Nothing) pos -- just add type constraint
+specifyType ty True exp pos =
+    maybePlace (Typed exp ty (Just AnyType)) pos -- cast from AnyType to ty
 
 
 whereBodyParser :: Parser (Placed Exp -> Placed Exp)

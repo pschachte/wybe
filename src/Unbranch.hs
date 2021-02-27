@@ -192,7 +192,7 @@ initUnbrancherState loopinfo tmpCtr params =
         outParams = [Param nm ty ParamOut Ordinary
                     | Param nm ty fl _ <- params
                     , flowsOut fl]
-        outArgs   = [Unplaced $ Typed (varSet nm) ty False
+        outArgs   = [Unplaced $ Typed (varSet nm) ty Nothing
                     | Param nm ty fl _ <- params
                     , flowsOut fl]
     in Unbrancher loopinfo defined tmpCtr outParams outArgs []
@@ -618,7 +618,7 @@ factorLoopProc break inVars pos detism stmts alt sense = do
     return next
 
 varExp :: FlowDirection -> VarName -> TypeSpec -> Placed Exp
-varExp flow var ty = Unplaced $ Typed (Var var flow Ordinary) ty False
+varExp flow var ty = Unplaced $ Typed (Var var flow Ordinary) ty Nothing
 
 
 newProcCall :: ProcName -> VarDict -> OptPos -> Determinism

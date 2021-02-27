@@ -234,11 +234,11 @@ resourceArgs pos rflow = do
                    let ftype = Resource res
                    let inExp = if flowsIn flow
                             then [Unplaced $
-                                  Typed (Var var ParamIn ftype) ty False]
+                                  Typed (Var var ParamIn ftype) ty Nothing]
                             else []
                    let outExp = if flowsOut flow
                                 then [Unplaced $
-                                      Typed (Var var ParamOut ftype) ty False]
+                                      Typed (Var var ParamOut ftype) ty Nothing]
                                 else []
                    return $ inExp ++ outExp)
          simpleSpecs

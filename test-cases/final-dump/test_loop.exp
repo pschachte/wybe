@@ -344,7 +344,7 @@ int_seq > public {inline} (0 calls)
 0: int_seq(low#0:wybe.int, step#0:wybe.int, high#0:wybe.int, ?$#0:test_loop.int_seq):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(24:wybe.int, ?$rec#0:!test_loop.int_seq)
+    foreign lpvm alloc(24:wybe.int, ?$rec#0:test_loop.int_seq)
     foreign lpvm mutate(~%$rec#0:test_loop.int_seq, ?%$rec#1:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~low#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:test_loop.int_seq, ?%$rec#2:test_loop.int_seq, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~step#0:wybe.int)
     foreign lpvm mutate(~%$rec#2:test_loop.int_seq, ?%$#0:test_loop.int_seq, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~high#0:wybe.int)

@@ -211,7 +211,7 @@ position > public {inline} (0 calls)
 0: position(x#0:wybe.int, y#0:wybe.int, ?$#0:multi_specz_cyclic_lib.position):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?$rec#0:!multi_specz_cyclic_lib.position)
+    foreign lpvm alloc(16:wybe.int, ?$rec#0:multi_specz_cyclic_lib.position)
     foreign lpvm mutate(~%$rec#0:multi_specz_cyclic_lib.position, ?%$rec#1:multi_specz_cyclic_lib.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:multi_specz_cyclic_lib.position, ?%$#0:multi_specz_cyclic_lib.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y#0:wybe.int)
 position > public {inline} (6 calls)
