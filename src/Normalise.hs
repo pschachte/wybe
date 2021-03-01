@@ -855,10 +855,8 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
            [Unplaced $ Typed (varGet "$rec") recType Nothing,
             Unplaced $ Typed (iVal shiftedHoleMask) recType Nothing,
             Unplaced $ Typed (varSet "$rec") recType Nothing],
-          move (varGet "$field" `withType` fieldType)
-               (castFromTo recType fieldType (varSet "$tmp")),
           Unplaced $ ForeignCall "llvm" "shl" []
-           [Unplaced $ varGet "$tmp" `withType` recType,
+           [Unplaced $ (castFromTo fieldType recType (varGet "$field")),
             Unplaced $ Typed (iVal shift) recType Nothing,
             Unplaced $ Typed (varSet "$tmp") recType Nothing],
           Unplaced $ ForeignCall "llvm" "or" []
