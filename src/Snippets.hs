@@ -5,10 +5,10 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
-module Snippets (withType, intType, intCast, tagType, tagCast,
+module Snippets (castFromTo, castTo, withType, intType, intCast,
+                 tagType, tagCast, phantomType, varSet, varGet, varGetSet,
                  boolType, boolCast, boolTrue, boolFalse, boolBool,
-                 phantomType, varSet, varGet, varGetSet,
-                 boolVarSet, boolVarGet, intVarSet, intVarGet, castTo,
+                 boolVarSet, boolVarGet, intVarSet, intVarGet,
                  lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, primMove,
                  boolNegate, comparison, succeedTest, failTest, testVar,
                  succeedIfSemiDet) where

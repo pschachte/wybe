@@ -741,20 +741,20 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
     in [ProcDecl vis inlineDetModifiers proto
          -- Initialise result to 0
         ([Unplaced $ ForeignCall "llvm" "move" []
-          [Unplaced $ Typed (iVal 0) intType $ Just typeSpec,
-           Unplaced $ Typed (varSet "$") typeSpec Nothing]]
+          [Unplaced $ castFromTo intType typeSpec $ iVal 0,
+           Unplaced $ varSet "$" `castTo` typeSpec]]
          ++
          -- Shift each field into place and or with the result
          List.concatMap
           (\(var,ty,shift,sz) ->
                [Unplaced $ ForeignCall "llvm" "shl" []
-                 [Unplaced $ Typed (varGet var) intType $ Just ty,
-                  Unplaced $ Typed (iVal shift) intType Nothing,
-                  Unplaced $ Typed (varSet "$temp") intType $ Just typeSpec],
+                 [Unplaced $ castFromTo ty intType $ varGet var,
+                  Unplaced $ iVal shift `withType` intType,
+                  Unplaced $ varSet "$temp" `withType` intType],
                 Unplaced $ ForeignCall "llvm" "or" []
-                 [Unplaced $ Typed (varGet "$") typeSpec Nothing,
-                  Unplaced $ Typed (varGet "$temp") typeSpec Nothing,
-                  Unplaced $ Typed (varSet "$") typeSpec Nothing]])
+                 [Unplaced $ castFromTo typeSpec intType $ varGet "$",
+                  Unplaced $ varGet "$temp" `withType` intType,
+                  Unplaced $ castFromTo typeSpec intType $ varSet "$"]])
           fields
          ++
          -- Or in the bit to ensure the value is greater than the greatest
@@ -855,9 +855,10 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
            [Unplaced $ Typed (varGet "$rec") recType Nothing,
             Unplaced $ Typed (iVal shiftedHoleMask) recType Nothing,
             Unplaced $ Typed (varSet "$rec") recType Nothing],
-          move (varGet "$field" `withType` fieldType) (varSet "$tmp" `castTo` recType),
+          move (varGet "$field" `withType` fieldType)
+               (castFromTo recType fieldType (varSet "$tmp")),
           Unplaced $ ForeignCall "llvm" "shl" []
-           [Unplaced $ Typed (varGet "$tmp") recType Nothing,
+           [Unplaced $ varGet "$tmp" `withType` recType,
             Unplaced $ Typed (iVal shift) recType Nothing,
             Unplaced $ Typed (varSet "$tmp") recType Nothing],
           Unplaced $ ForeignCall "llvm" "or" []

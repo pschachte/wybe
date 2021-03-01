@@ -6,8 +6,7 @@
 --           : LICENSE in the root directory of this project.
 
 -- |Support for type checking/inference.
-module Types (validateModExportTypes, typeCheckModSCC, -- modeCheckMod,
-              checkFullyTyped) where
+module Types (validateModExportTypes, typeCheckModSCC) where
 
 import           AST
 import           Control.Monad
@@ -165,8 +164,6 @@ resolveCalls mods (spec,spec2,deps) = do
 -- of modules, all of which are imported into the context module.  The
 -- RoughProcSpec of the call may not include a module spec, but the specified
 -- context will be a proper ModSpec.
---
--- This code assumes that all the procs defined 
 callResolutions :: ModSpec -> Set ModSpec -> RoughProcSpec
                 -> Compiler [RoughProcSpec]
 callResolutions context mods (RoughProc m name) = do
@@ -416,7 +413,7 @@ instance Show Typing where
        else " with errors: " ++ show errs
 
 
--- |Follow type variables to resolve a type.
+-- |Follow type variables to fully recursively resolve a type.
 ultimateType  :: TypeSpec -> Typed TypeSpec
 ultimateType ty@TypeVariable{typeVariableName=tvar} = do
     mbval <- gets $ Map.lookup tvar . tvarDict
@@ -469,12 +466,7 @@ ultimateVarType var = do
 -- |Get the type associated with a variable; AnyType if no constraint has
 --  been imposed on that variable.  Does not follow type variable chains.
 varType :: VarName -> Typed TypeSpec
-varType var = gets $ lookupVarType var
-
-
--- |Extract the type of a variable from a Typing.
-lookupVarType :: VarName -> Typing -> TypeSpec
-lookupVarType var typing = Map.findWithDefault AnyType var $ typingDict typing
+varType var = gets $ Map.findWithDefault AnyType var . typingDict
 
 
 -- |Maybe make a map of the ultimate types of the given maybe set of variables.
@@ -605,7 +597,7 @@ localCalls idents (ProcCall m name _ _ _ _)
 localCalls idents _ = idents
 
 
--- |Return the ultimate type of an expression.  Does 
+-- |Return the ultimate type of an expression. 
 expType :: Placed Exp -> Typed TypeSpec
 expType expr = do
     logTyped $ "Finding type of expr " ++ show expr
@@ -648,19 +640,6 @@ expMode' assigned (Typed expr _ _) = expMode' assigned expr
 expMode' _ expr =
     shouldnt $ "Expression '" ++ show expr ++ "' left after flattening"
 
-
--- |Update the typing to assign the specified type to the specified expr
-setExpType :: Exp -> OptPos -> TypeSpec -> Int -> ProcName -> Typed ()
-setExpType (IntValue _) _ _ _ _ = return ()
-setExpType (FloatValue _) _ _ _ _ = return ()
-setExpType (StringValue _) _ _ _ _ = return ()
-setExpType (CharValue _) _ _ _ _ = return ()
-setExpType (Var var _ _) pos typ argnum procName
-    = constrainVarType (ReasonArgType procName argnum pos) var typ
-setExpType (Typed expr _ _) pos typ argnum procName
-    = setExpType expr pos typ argnum procName
-setExpType otherExp _ _ _ _
-    = shouldnt $ "Invalid expr left after flattening " ++ show otherExp
 
 ----------------------------------------------------------------
 --                         Type Checking Procs
@@ -829,10 +808,12 @@ typecheckProcDecl' m pdef = do
         mapM_ (addResourceType name pos) resources
         ifOK pdef $ do
             mapM_ (placedApply (recordCasts name) . fst) calls
+            -- XXX use partition to split into proc and foreign calls, and then
+            -- process all foreign calls in one pass to type their arguments.
             let procCalls = List.filter (isRealProcCall . content . fst) calls
-            let unifs = List.concatMap foreignTypeEquivs
-                        (content . fst <$> calls)
-            mapM_ (uncurry $ unifyExprTypes pos) unifs
+            -- let unifs = List.concatMap foreignTypeEquivs
+            --             (content . fst <$> calls)
+            -- mapM_ (uncurry $ unifyExprTypes pos) unifs
             calls' <- zipWith (uncurry StmtTypings) procCalls
                       <$> mapM (lift . callProcInfos . fst) procCalls
             let badCalls = List.map typingStmt
@@ -929,9 +910,20 @@ addResourceType procname pos rfspec = do
 -- anywhere and constrain the type of both the source and destination
 -- expressions.
 recordCasts :: ProcName -> Stmt -> OptPos -> Typed ()
-recordCasts caller (ForeignCall _ callee _ args) pos =
+recordCasts caller instr@(ForeignCall "llvm" "move" _ [v1,v2]) pos = do
+    logTyped $ "Recording casts in " ++ show instr
+    recordCast True caller "move" v1 1
+    recordCast True caller "move" v2 2
+    logTyped $ "Unifying move argument types " ++ show v1 ++ " and " ++ show v2
+    t1 <- expType v1
+    t2 <- expType v2
+    void $ unifyTypes (ReasonEqual (content v1) (content v2) pos)
+           t1 t2
+recordCasts caller instr@(ForeignCall _ callee _ args) pos = do
+    logTyped $ "Recording casts in " ++ show instr
     mapM_ (uncurry $ recordCast True caller callee) $ zip args [1..]
-recordCasts caller (ProcCall _ callee _ _ _ args) pos =
+recordCasts caller instr@(ProcCall _ callee _ _ _ args) pos = do
+    logTyped $ "Recording casts in " ++ show instr
     mapM_ (uncurry $ recordCast False caller callee) $ zip args [1..]
 recordCasts caller stmt _ =
     shouldnt $ "recordCasts of non-call statement " ++ show stmt
@@ -944,17 +936,20 @@ recordCasts caller stmt _ =
 recordCast :: Bool -> ProcName -> Ident -> Placed Exp -> Int -> Typed ()
 recordCast isForeign caller callee pexp argNum =
     case content pexp of
-        (Typed _ _ (Just typ)) | not isForeign
+        (Typed _ _ (Just _)) | not isForeign
             -> typeError $ ReasonBadCast caller callee argNum pos
+        (Typed (Var name flow _) typ Nothing)
+            -> constrainVarType (ReasonArgType callee argNum pos) name typ
         (Typed (Var name flow _) _ (Just typ))
             -> constrainVarType (ReasonArgType callee argNum pos) name typ
+        -- XXX should check casts/constraints on manifest constants
         _   -> return ()
     where pos = place pexp
 
 
 updateParamTypes :: [Param] -> Typed [Param]
 updateParamTypes =
-    mapM (\p@(Param name typ fl afl) -> do
+    mapM (\p@(Param name _ fl afl) -> do
             ty <- varType name >>= ultimateType
             return $ Param name ty fl afl)
 
@@ -1605,7 +1600,7 @@ modecheckStmt m name defPos delayed assigned detism
         let bindings = Map.fromAscList $ zip vars types
         return
           ([maybePlace (Cond (seqToStmt tstStmt') thnStmts' elsStmts'
-                        (if isJust (bindingVars finalAssigned) 
+                        (if isJust (bindingVars finalAssigned)
                          then Just bindings else Nothing)
           )
             pos], delayed'++delayed, finalAssigned)
@@ -1867,14 +1862,6 @@ checkLPVMArgs name _ args stmt pos =
 --                    Check that everything is typed
 ----------------------------------------------------------------
 
--- |Sanity check: make sure all args and params of all procs in the
--- current module are fully typed.  If not, report an internal error.
-checkFullyTyped :: Compiler ()
-checkFullyTyped = do
-    procs <- getModuleImplementationField (concat . Map.elems . modProcs)
-    mapM_ checkProcDefFullytyped procs
-
-
 -- |Make sure all args and params in the specified proc def are typed.
 checkProcDefFullytyped :: ProcDef -> Compiler ()
 checkProcDefFullytyped def = do
@@ -1973,6 +1960,10 @@ reportUntyped procname pos msg =
     liftIO $ putStrLn $ "Internal error: In " ++ procname ++
       showMaybeSourcePos pos ++ ", " ++ msg ++ " left untyped"
 
+
+--------------------------------------------------------------------------------
+--                               Logging
+--------------------------------------------------------------------------------
 
 -- |Log a message, if we are logging type checker activity.
 logTypes :: String -> Compiler ()
