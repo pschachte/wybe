@@ -87,9 +87,9 @@ canonicaliseProcResources pd = do
 canonicaliseResourceFlow :: OptPos -> ResourceFlowSpec
                          -> Compiler ResourceFlowSpec
 canonicaliseResourceFlow pos spec = do
-    let res = resourceFlowRes spec
-    res' <- canonicaliseResourceSpec pos res
-    return $ spec { resourceFlowRes = res'}
+    resTy <- canonicaliseResourceSpec pos "proc declaration"
+             $ resourceFlowRes spec
+    return $ spec { resourceFlowRes = fst resTy}
 
 
 --------- Transform resources into variables and parameters ---------
@@ -150,7 +150,7 @@ transformStmt :: Int -> Stmt -> OptPos -> Compiler ([Placed Stmt], Int)
 transformStmt tmp stmt@(ProcCall m n id detism resourceful args) pos = do
     let procID = trustFromJust "transformStmt" id
     callResources <-
-        procProtoResources . procProto <$> getProcDef 
+        procProtoResources . procProto <$> getProcDef
                 (ProcSpec m n procID generalVersion)
     unless (resourceful || Set.null callResources)
       $ message Error
@@ -194,17 +194,18 @@ transformStmt tmp (Loop body defVars) pos = do
     (body',tmp') <- transformBody tmp body
     return ([maybePlace (Loop body' defVars) pos], tmp')
 transformStmt tmp (UseResources res body) pos = do
-    scoped <- mapM (canonicaliseResourceSpec pos) res
+    resTypes <- List.filter (isJust . snd)
+                <$> mapM (canonicaliseResourceSpec pos "use statement") res
     -- XXX what about resources with same name and different modules?
-    let toSave = resourceName <$> scoped
+    let toSave = resourceName . fst <$> resTypes
+    let types = fromJust . snd <$> resTypes
     let resCount = length toSave
-    let var n f = Unplaced $ Var n f Ordinary
     let tmp' = tmp + resCount
-    let pairs = zip toSave (mkTempName <$> [tmp..])
-    let saves = (\(r,t) -> Unplaced $ ForeignCall "llvm" "move" []
-                  [var r ParamIn,var t ParamOut]) <$> pairs
-    let restores = (\(r,t) -> Unplaced $ ForeignCall "llvm" "move" []
-                     [var t ParamIn,var r ParamOut]) <$> pairs
+    let ress = zip3 toSave (mkTempName <$> [tmp..]) types
+    let get v ty = varGet v `withType` ty
+    let set v ty = varSet v `withType` ty
+    let saves = (\(r,t,ty) -> move (get r ty) (set t ty)) <$> ress
+    let restores = (\(r,t,ty) -> move (get t ty) (set r ty)) <$> ress
     (body',tmp'') <- transformBody tmp' body
     return (saves ++ body' ++ restores, tmp'')
 -- transformStmt tmp (For itr gen) pos =
@@ -246,14 +247,20 @@ resourceArgs pos rflow = do
 
 ------------------------- General support code -------------------------
 
--- |Canonicalise a single resource spec, based on visible modules.
-canonicaliseResourceSpec :: OptPos -> ResourceSpec -> Compiler ResourceSpec
-canonicaliseResourceSpec pos spec = do
+-- |Canonicalise a single resource spec, based on visible modules.  Report
+-- unknown resource error in the specified context if resource or its type is
+-- unknown.
+canonicaliseResourceSpec :: OptPos -> String -> ResourceSpec
+                         -> Compiler (ResourceSpec, Maybe TypeSpec)
+canonicaliseResourceSpec pos context spec = do
     logResources $ "canonicalising resource " ++ show spec
-    mbRes <- (fst <$>) <$> lookupResource spec pos
-    let res' = fromMaybe spec mbRes
-    logResources $ "    to --> " ++ show res'
-    return res'
+    resType <- maybe (spec,Nothing) (\(res,iface) -> (res,Map.lookup res iface))
+               <$> lookupResource spec pos
+    when (isNothing $ snd resType)
+         $ errmsg pos $ "Unknown resource " ++ show (fst resType)
+                        ++ " in " ++ context
+    logResources $ "    to --> " ++ show resType
+    return resType
 
 
 -- |Get a list of all the SimpleResources, and their types, referred

@@ -935,8 +935,10 @@ lookupResource res@(ResourceSpec mod name) pos = do
             maybeMod <- getLoadingModule $ resourceMod rspec
             let maybeDef = maybeMod >>= modImplementation >>=
                         (Map.lookup (resourceName rspec) . modResources)
+            logAST $ "Found resource:  " ++ show maybeDef
             let iface = resourceDefToIFace $
                         trustFromJust "lookupResource" maybeDef
+            logAST $ "  with interface:  " ++ show iface
             return $ Just (rspec,iface)
         _   -> do
             message Error ("Ambiguous resource " ++ show res ++

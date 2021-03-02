@@ -398,7 +398,7 @@ type Typed = StateT Typing Compiler
 --   records bindings of type variables, and contains a counter for generating
 --   new type variables.
 data Typing = Typing {
-                  typingDict::VarDict,     -- ^variable types
+                  typingDict::VarDict,                  -- ^variable types
                   tvarDict::Map TypeVarName TypeSpec,   -- ^type variable types
                   typeVarCounter::Int,                  -- for renumbering tvars
                   typingErrs::[TypeError]               -- type errors seen
