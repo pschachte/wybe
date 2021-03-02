@@ -141,7 +141,6 @@ typeItemParser v = do
     (imp,items) <- typeImpln <|> typeCtors
     return $ TypeDecl v proto (processTypeModifiers modifiers) imp items
             (Just pos)
-    -- EDIT: inserted `mod` between proto and imp
 
 -- | Process type modifiers.
 processTypeModifiers :: [Ident] -> TypeModifiers

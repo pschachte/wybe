@@ -30,6 +30,9 @@ instance Show Module where
             maybeimpl = modImplementation mod
         in " Module " ++ showModSpec (modSpec mod) ++
            maybeShow "(" (modParams mod) ")" ++
+           (if maybe False tmUniqueness (typeModifiers int)
+               then "\n  modifiers       : {unique}"
+               else "") ++
            "\n  public submods  : " ++ showMapPoses (pubDependencies int) ++
            "\n  public types    : " ++ showMapLines (pubTypes int) ++
            "\n  public resources: " ++ showMapLines (pubResources int) ++

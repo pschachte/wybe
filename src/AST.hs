@@ -282,13 +282,10 @@ data TypeProto = TypeProto Ident [Ident]
 
 
 -- | A type modifier consists of a boolean indicating its uniqueness.
-data TypeModifiers = TypeModifiers Bool
-                     deriving (Generic, Eq)
+data TypeModifiers = TypeModifiers {
+    tmUniqueness :: Bool
+} deriving (Generic, Eq)
 
--- ISSUE: is this better for future implementation?
--- data TypeModifiers = TypeModifiers {
---     modifierUnique::Uniqueness
--- } deriving (Generic, Eq)
 
 -- | A default boolean value for Uniqueness (false)
 defaultTypeModifiers :: TypeModifiers
@@ -811,9 +808,12 @@ updateImplementation implOp = do
         Just impl ->
             updateModule (\mod -> mod { modImplementation = Just $ implOp impl })
 
+updateTypeModifiers :: TypeModifiers -> ModuleInterface -> ModuleInterface
+updateTypeModifiers typeMods int = int {typeModifiers = Just typeMods}
+
 -- |Add the specified type definition to the current module.
 addType :: Ident -> TypeDef -> Compiler TypeSpec
-addType name def@(TypeDef vis params rep _ _ _ _) = do
+addType name def@(TypeDef vis params rep _ _ typeMods _ _) = do
     currMod <- getModuleSpec
     let spec = TypeSpec currMod name [] -- XXX what about type params?
     updateImplementation
@@ -822,6 +822,7 @@ addType name def@(TypeDef vis params rep _ _ _ _) = do
         in imp { modTypes = Map.insert name def $ modTypes imp,
                  modKnownTypes = Map.insert name set $ modKnownTypes imp })
     updateInterface vis (updatePubTypes (Map.insert name (spec,rep)))
+    updateInterface Public (updateTypeModifiers typeMods)
     return spec
 
 
@@ -1321,13 +1322,16 @@ data ModuleInterface = ModuleInterface {
                                      -- ^The procs this module exports
     pubDependencies :: Map Ident OptPos,
                                      -- ^The other modules this module exports
-    dependencies :: Set ModSpec      -- ^The other modules that must be linked
-    }                               --  in by modules that depend on this one
+    dependencies :: Set ModSpec,     -- ^The other modules that must be linked
+
+    typeModifiers :: Maybe TypeModifiers
+                                     -- ^The extra information of the type
+    }                                --  in by modules that depend on this one
     deriving (Eq, Generic)
 
 emptyInterface :: ModuleInterface
 emptyInterface =
-    ModuleInterface Map.empty Map.empty Map.empty Map.empty Set.empty
+    ModuleInterface Map.empty Map.empty Map.empty Map.empty Set.empty Nothing  -- EDIT
 
 
 -- |Holds information describing public procedures of a module.
@@ -1648,6 +1652,7 @@ data TypeDef = TypeDef {
                                                   -- low level representation
     typeDefMembers :: [Placed ProcProto],         -- high level representation
     typeDefMemberVis :: Visibility,               -- are members public?
+    typeDefModifiers :: TypeModifiers,            -- type modifiers
     typeDefOptPos :: OptPos,                      -- source position of decl
     typeDefItems  :: [Item]                       -- other items in decl
     } deriving (Eq, Generic)
@@ -2757,14 +2762,14 @@ varsInPrimArg _ (ArgUndef _)            = Set.empty
 instance Show Item where
   show (TypeDecl vis name typeModifiers (TypeRepresentation repn) items pos) = 
     visibilityPrefix vis ++ "type " ++ show name
-    ++ showTypeModifiers typeModifiers
+    ++ show typeModifiers
     ++ " is" ++ show repn
     ++ showMaybeSourcePos pos ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
     ++ "\n}\n"
   show (TypeDecl vis name typeModifiers (TypeCtors ctorvis ctors) items pos) =
     visibilityPrefix vis ++ "type " ++ show name
-    ++ showTypeModifiers typeModifiers
+    ++ show typeModifiers
     ++ " " ++ visibilityPrefix ctorvis
     ++ showMaybeSourcePos pos ++ "\n    "
     ++ intercalate "\n  | " (List.map show ctors) ++ "\n  "
@@ -2877,9 +2882,9 @@ instance Show t => Show (Placed t) where
     show (Unplaced t) =   show t
 
 -- | How to show a type modifier
-showTypeModifiers :: TypeModifiers -> String
-showTypeModifiers (TypeModifiers True)  = "unique "
-showTypeModifiers _                     = ""
+instance Show TypeModifiers where
+    show (TypeModifiers True)  = "{unique} "
+    show (TypeModifiers False) = ""
 
 -- |How to show an optional source position
 showMaybeSourcePos :: OptPos -> String
@@ -2900,9 +2905,10 @@ showIdSet set = intercalate ", " $ Set.elems set
 
 -- |How to show a type definition.
 instance Show TypeDef where
-  show (TypeDef vis params rep members _ pos items) =
+  show (TypeDef vis params rep members _ typeMods pos items) =
     visibilityPrefix vis
     ++ (if List.null params then "" else "(" ++ intercalate "," params ++ ")")
+    ++ show typeMods
     ++ maybe "" (" is " ++) (show <$> rep)
     ++ " { "
     ++ intercalate " | " (show <$> members)

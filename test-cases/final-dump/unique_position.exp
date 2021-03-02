@@ -1,6 +1,7 @@
 ======================================================================
 AFTER EVERYTHING:
  Module unique_position
+  modifiers       : {unique}
   public submods  : 
   public types    : unique_position: (unique_position.unique_position,Just address)
   public resources: 
@@ -15,7 +16,7 @@ AFTER EVERYTHING:
                     unique_position.unique_position.y<1>
   imports         : public use unique_position.unique_position
                     use wybe
-  types           : unique_position/public  is address { unique_position(x:int, y:int) @unique_position:1:41  }  @unique_position:1:5
+  types           : unique_position/public {unique}  is address { unique_position(x:int, y:int) @unique_position:1:41  }  @unique_position:1:5
   resources       : 
   submodules      : unique_position.unique_position
   procs           : 

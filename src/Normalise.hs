@@ -48,11 +48,11 @@ normalise items = do
 
 -- |Normalise a single file item, storing the result in the current module.
 normaliseItem :: Item -> Compiler ()
-normaliseItem (TypeDecl vis (TypeProto name params) mod rep items pos)
+normaliseItem (TypeDecl vis (TypeProto name params) mods rep items pos)
   = do
     -- let (rep', ctorVis, consts, nonconsts) = normaliseTypeImpln rep
     let (rep', ctorVis, ctors) = normaliseTypeImpln rep
-    _ <- addType name (TypeDef vis params rep' ctors ctorVis pos items)
+    _ <- addType name (TypeDef vis params rep' ctors ctorVis mods pos items)
     normaliseSubmodule name Nothing vis pos items
     return ()
 normaliseItem (ModuleDecl vis name items pos) =
@@ -262,7 +262,7 @@ data CtorInfo = CtorInfo {
 --     * else: rep = integer with wordSizeBytes bits
 completeType :: TypeKey -> TypeDef -> Compiler ()
 completeType (name,modspec)
-             typedef@(TypeDef vis params rep ctors ctorVis pos items) = do
+             typedef@(TypeDef vis params rep ctors ctorVis _ pos items) = do
     logNormalise $ "Completing type " ++ showModSpec modspec ++ "." ++ name
     let rep0  = trustFromJust "completeType with equiv type decl" rep
     if List.null ctors
@@ -301,7 +301,7 @@ completeType (name,modspec)
       logNormalise $ "Representation of type "
                      ++ showModSpec modspec ++ "." ++ name
                      ++ " is " ++ show rep
-      addType name (typedef {typeDefRepresentation = Just rep })
+      addType name (typedef {typeDefRepresentation = Just rep } )
       normaliseSubmodule name (Just params) vis pos
         $ constItems ++ concat nonconstItemsList ++ extraItems
       reexitModule
