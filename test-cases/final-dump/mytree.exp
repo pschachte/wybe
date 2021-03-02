@@ -196,7 +196,7 @@ key > public {inline} (0 calls)
 0: key($rec#0:mytree.tree, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:mytree.tree, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -210,7 +210,7 @@ key > public {inline} (0 calls)
 1: key($rec#0:mytree.tree, ?$rec#1:mytree.tree, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:mytree.tree, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -226,7 +226,7 @@ left > public {inline} (0 calls)
 0: left($rec#0:mytree.tree, ?$#0:mytree.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:mytree.tree, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -240,7 +240,7 @@ left > public {inline} (0 calls)
 1: left($rec#0:mytree.tree, ?$rec#1:mytree.tree, $field#0:mytree.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:mytree.tree, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -264,7 +264,7 @@ node > public {inline} (16 calls)
 1: node(?left#0:mytree.tree, ?key#0:wybe.int, ?right#0:mytree.tree, $#0:mytree.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($#0:mytree.tree, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -284,7 +284,7 @@ right > public {inline} (0 calls)
 0: right($rec#0:mytree.tree, ?$#0:mytree.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:mytree.tree, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -298,7 +298,7 @@ right > public {inline} (0 calls)
 1: right($rec#0:mytree.tree, ?$rec#1:mytree.tree, $field#0:mytree.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:mytree.tree, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)

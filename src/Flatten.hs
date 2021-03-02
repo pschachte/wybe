@@ -388,9 +388,6 @@ flattenExp expr@(StringValue _) ty castFrom pos =
     return [typeAndPlace expr ty castFrom pos]
 flattenExp expr@(CharValue _) ty castFrom pos =
     return [typeAndPlace expr ty castFrom pos]
--- XXX should need this:
--- flattenExp (Var "phantom" ParamIn _ ) _ _ pos =
---     return [typeAndPlace (IntValue 0) (TypeSpec [] "phantom" []) True pos]
 flattenExp expr@(Var name dir flowType) ty castFrom pos = do
     logFlatten $ "  Flattening arg " ++ show expr
     let isIn  = flowsIn dir

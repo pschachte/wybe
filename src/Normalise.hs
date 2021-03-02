@@ -565,7 +565,7 @@ constructorItems ctorName typeSpec fields size tag tagLimit pos =
         -- Code to allocate memory for the value
         ([Unplaced $ ForeignCall "lpvm" "alloc" []
           [Unplaced $ iVal size,
-           Unplaced $ Typed (varSet "$rec") typeSpec Nothing]]
+           Unplaced $ varSet "$rec" `withType` typeSpec]]
          ++
          -- fill in the secondary tag, if necessary
          (if tag > tagLimit
@@ -636,7 +636,7 @@ tagCheck numConsts numNonConsts tag tagLimit size varName =
           (case numConsts of
                0 -> []
                _ -> [comparison "icmp_uge"
-                     (varGet varName)
+                     (intCast $ varGet varName)
                      (intCast $ iVal numConsts)]
            ++
            -- If there is more than one non-const constructors, check that
@@ -645,8 +645,8 @@ tagCheck numConsts numNonConsts tag tagLimit size varName =
                1 -> []  -- Nothing to do if it's the only non-const constructor
                _ -> [comparison "icmp_eq"
                      (intCast $ ForeignFn "llvm" "and" []
-                      [Unplaced $ varGet varName,
-                       Unplaced $ iVal tagMask])
+                      [Unplaced $ intCast $ varGet varName,
+                       Unplaced $ iVal tagMask `withType` intType])
                      (intCast $ iVal (if tag > tagLimit
                                       then wordSizeBytes-1
                                       else tag))])
@@ -660,8 +660,8 @@ tagCheck numConsts numNonConsts tag tagLimit size varName =
                              "unboxed type shouldn't have a secondary tag" size,
                   Unplaced $ iVal startOffset,
                   Unplaced $ tagCast (varSet "$tag")],
-                 comparison "icmp_eq" (varGet "$tag")
-                                      (Typed (iVal tag) tagType Nothing)]
+                 comparison "icmp_eq" (varGet "$tag" `withType` tagType)
+                                      (iVal tag `withType` tagType)]
            else [])
 
     in if List.null tests
@@ -733,28 +733,28 @@ unboxedConstructorItems :: Visibility -> ProcName -> TypeSpec -> Int
 unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
     let flowType = Implicit pos
         params = sel1 <$> fields
-        proto = (ProcProto ctorName
-                 ([Param name paramType ParamIn Ordinary
-                  | (name,paramType,_,_) <- fields]
-                   ++[Param "$" typeSpec ParamOut Ordinary])
-                 Set.empty)
+        proto = ProcProto ctorName
+                ([Param name paramType ParamIn Ordinary
+                 | (name,paramType,_,_) <- fields]
+                  ++[Param "$" typeSpec ParamOut Ordinary])
+                Set.empty
     in [ProcDecl vis inlineDetModifiers proto
          -- Initialise result to 0
         ([Unplaced $ ForeignCall "llvm" "move" []
           [Unplaced $ castFromTo intType typeSpec $ iVal 0,
-           Unplaced $ varSet "$" `castTo` typeSpec]]
+           Unplaced $ varSet "$" `withType` typeSpec]]
          ++
          -- Shift each field into place and or with the result
          List.concatMap
           (\(var,ty,shift,sz) ->
                [Unplaced $ ForeignCall "llvm" "shl" []
-                 [Unplaced $ castFromTo ty intType $ varGet var,
-                  Unplaced $ iVal shift `withType` intType,
-                  Unplaced $ varSet "$temp" `withType` intType],
+                 [Unplaced $ castFromTo ty typeSpec $ varGet var,
+                  Unplaced $ iVal shift `castTo` typeSpec,
+                  Unplaced $ varSet "$temp" `withType` typeSpec],
                 Unplaced $ ForeignCall "llvm" "or" []
-                 [Unplaced $ castFromTo typeSpec intType $ varGet "$",
-                  Unplaced $ varGet "$temp" `withType` intType,
-                  Unplaced $ castFromTo typeSpec intType $ varSet "$"]])
+                 [Unplaced $ varGet "$temp" `withType` typeSpec,
+                  Unplaced $ varGet "$" `withType` typeSpec,
+                  Unplaced $ varSet "$" `withType` typeSpec]])
           fields
          ++
          -- Or in the bit to ensure the value is greater than the greatest
@@ -857,11 +857,11 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
             Unplaced $ Typed (varSet "$rec") recType Nothing],
           Unplaced $ ForeignCall "llvm" "shl" []
            [Unplaced $ (castFromTo fieldType recType (varGet "$field")),
-            Unplaced $ Typed (iVal shift) recType Nothing,
+            Unplaced $ iVal shift `castTo` recType,
             Unplaced $ Typed (varSet "$tmp") recType Nothing],
           Unplaced $ ForeignCall "llvm" "or" []
-           [Unplaced $ Typed (varGet "$rec") recType Nothing,
-            Unplaced $ Typed (varGet "$tmp") recType Nothing,
+           [Unplaced $ Typed (varGet "$tmp") recType Nothing,
+            Unplaced $ Typed (varGet "$rec") recType Nothing,
             Unplaced $ Typed (varSet "$rec") recType Nothing]
          ])
         pos]

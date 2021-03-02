@@ -56,7 +56,7 @@ just > public {inline} (8 calls)
 1: just(?value#0:wybe.int, $#0:constructors, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($#0:constructors, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -79,7 +79,7 @@ value > public {inline} (0 calls)
 0: value($rec#0:constructors, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:constructors, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -93,7 +93,7 @@ value > public {inline} (0 calls)
 1: value($rec#0:constructors, ?$rec#1:constructors, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:constructors, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
