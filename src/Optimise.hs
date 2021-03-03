@@ -15,6 +15,7 @@ import           Control.Monad.Trans.State
 import           Data.List                 as List
 import           Data.Map                  as Map
 import           Data.Set                  as Set
+import           Data.Graph
 import           Expansion
 import           Options                   (LogSelection (Optimise))
 import           Types
@@ -51,13 +52,15 @@ optimiseMod _ thisMod = do
 --   it won't do anything.  It's also possible that this may need to be
 --   repeated to a fixed point, but I'm not confident that optimisation
 --   is monotone and I don't want an infinite loop.
-optimiseSccBottomUp procs = do
-    inlines <- mapM optimiseProcBottomUp $ sccElts procs
-    -- XXX Don't bother to repeat optimisation to a fixed point.  That doesn't
-    --     seem to hurt us.
-    -- when (or $ tail inlines) $ do
-    --     mapM_ optimiseProcBottomUp $ sccElts procs
-    return ()
+optimiseSccBottomUp :: SCC ProcSpec -> Compiler ()
+optimiseSccBottomUp (AcyclicSCC single) =
+    optimiseProcBottomUp single >> return ()
+optimiseSccBottomUp (CyclicSCC procs) = do
+    inlines <- mapM optimiseProcBottomUp procs
+    -- If any but first in SCC were marked for inlining, repeat to inline
+    -- in earlier procs in the SCC.
+    when (or $ tail inlines) $ do
+        mapM_ optimiseProcBottomUp procs
 
 
 optimiseProcTopDown :: ProcSpec -> Compiler ()

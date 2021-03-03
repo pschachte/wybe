@@ -1849,6 +1849,11 @@ data CallProperty
 -- "NonAliasedParam v1" is used for global CTGC, it means that the argument
 -- passed to parameter v1 is nonaliased.
     = NonAliasedParam ParameterID
+    -- Remove the placeholder below and add more items when adding new 
+    -- specializations. The placeholder is used to avoid overlapping-patterns
+    -- warning as well as the suggestion of using newtype instead of data from
+    -- linter.
+    | CallPropertyPlaceholder
     deriving (Eq, Ord, Show, Generic)
 
 -- XXX Those should be put in "BinaryFactory.hs". However we need to compute the
@@ -1907,6 +1912,8 @@ data CallSiteProperty
     -- of the caller proc is nonaliased, then the parameter v1 of the callee is
     -- nonaliased and we could specialize it.
     = NonAliasedParamCond ParameterID [ParameterID]
+    -- Refer to `CallProperty` for information regarding this placeholder
+    | CallSitePropertyPlaceholder
     deriving (Eq, Generic, Ord, Show)
 
 
@@ -1917,6 +1924,8 @@ data InterestingCallProperty
     -- "InterestingUnaliased v" means that if parameter v is known as unaliased,
     -- then we can make use of it.
     = InterestingUnaliased ParameterID
+    -- Refer to `CallProperty` for information regarding this placeholder
+    | InterestingCallPropertyPlaceholder
     deriving (Eq, Generic, Ord, Show)
 
 

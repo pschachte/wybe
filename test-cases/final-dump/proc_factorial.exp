@@ -36,7 +36,9 @@ gen$1 > (2 calls)
         foreign llvm move(~result#0:wybe.int, ?result#1:wybe.int)
 
     1:
-        proc_factorial.gen$2<0>(~n#0:wybe.int, ~result#0:wybe.int, ?result#1:wybe.int) #1
+        foreign llvm mul(n#0:wybe.int, ~result#0:wybe.int, ?tmp$7#0:wybe.int) @wybe:nn:nn
+        foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$8#0:wybe.int) @wybe:nn:nn
+        proc_factorial.gen$1<0>(~tmp$8#0:wybe.int, ~tmp$7#0:wybe.int, ?result#1:wybe.int) #2 @proc_factorial:3:5
 
 
 
@@ -89,7 +91,9 @@ entry:
   %"1$tmp$2#0" = icmp sgt i64 %"n#0", 1 
   br i1 %"1$tmp$2#0", label %if.then, label %if.else 
 if.then:
-  %"2$result#1" = tail call fastcc  i64  @"proc_factorial.gen$2<0>"(i64  %"n#0", i64  %"result#0")  
+  %"2$tmp$7#0" = mul   i64 %"n#0", %"result#0" 
+  %"2$tmp$8#0" = sub   i64 %"n#0", 1 
+  %"2$result#1" = tail call fastcc  i64  @"proc_factorial.gen$1<0>"(i64  %"2$tmp$8#0", i64  %"2$tmp$7#0")  
   ret i64 %"2$result#1" 
 if.else:
   ret i64 %"result#0" 

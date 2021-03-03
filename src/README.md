@@ -1,4 +1,22 @@
+# Wybe compiler
+
+The architecture of the Wybe compiler has the following structure:
+
+![Compiler Architecture](Compiler.png)
+
+`wybemk.hs` holds the top level of the compiler, which delegates the bulk of the
+work to `Builder.hs`.  This module overseas the phases of compilation, as well
+as determining which files actually need to be (re-)compiled.  All of the
+compiler phases are built upon the basic data structures and operations, which
+are defined in `AST.hs`
+
+The body of the compiler lies in the semantic analysis, compilation, and
+optimisation.  This part can be seen in more detail as several separate passes:
+
+![Compilation detail](Detail.png)
+
 # Wybe compiler source directory
+
 The source files in this directory and their purposes are:
 
 | File                         | Purpose                                                  |

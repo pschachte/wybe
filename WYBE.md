@@ -943,7 +943,8 @@ you can write
 foreign llvm add(x, 1, ?x2)
 ```
 
-For more detail on the behaviour of these operations, please consult the [LLVM documentation](https://llvm.org/docs/).
+For more detail on the behaviour of these operations, please consult the
+[LLVM documentation](https://llvm.org/docs/).
 
 
 ##### Integer operations
@@ -951,89 +952,89 @@ For more detail on the behaviour of these operations, please consult the [LLVM d
 In the following, all inputs and outputs listed as `int` can in fact be any integer type:  signed or unsigned, and any number of bits of precision.  However, all `int` inputs and outputs must be the same number of bits of precision.  All `bool` outputs may be any 1-bit integer type.
 
 
-- foreign llvm add(arg1:int, arg2:int):int  
+- `foreign llvm add(`arg1:int, arg2:int`)`:int  
 Integer addition
-- foreign llvm sub(arg1:int, arg2:int):int  
+- `foreign llvm sub(`arg1:int, arg2:int`)`:int  
 Integer subtraction
-- foreign llvm mul(arg1:int, arg2:int):int   
+- `foreign llvm mul(`arg1:int, arg2:int`)`:int   
 Integer multiplication
-- foreign llvm udiv(arg1:int, arg2:int):int  
+- `foreign llvm udiv(`arg1:int, arg2:int`)`:int  
 unsigned integer division
-- foreign llvm sdiv(arg1:int, arg2:int):int  
+- `foreign llvm sdiv(`arg1:int, arg2:int`)`:int  
 Signed integer division
-- foreign llvm urem(arg1:int, arg2:int):int  
+- `foreign llvm urem(`arg1:int, arg2:int`)`:int  
 unsigned integer remainder
-- foreign llvm srem(arg1:int, arg2:int):int  
+- `foreign llvm srem(`arg1:int, arg2:int`)`:int  
 Signed integer remainder
-- foreign llvm icmp_eq(arg1:int, arg2:int):bool  
+- `foreign llvm icmp_eq(`arg1:int, arg2:int`)`:bool  
 Integer equality
-- foreign llvm icmp_ne(arg1:int, arg2:int):bool  
+- `foreign llvm icmp_ne(`arg1:int, arg2:int`)`:bool  
 Integer disequality
-- foreign llvm icmp_ugt(arg1:int, arg2:int):bool  
+- `foreign llvm icmp_ugt(`arg1:int, arg2:int`)`:bool  
 Integer unsigned strictly greater
-- foreign llvm icmp_uge(arg1:int, arg2:int):bool  
+- `foreign llvm icmp_uge(`arg1:int, arg2:int`)`:bool  
 Integer unsigned greater or equal
-- foreign llvm icmp_ult(arg1:int, arg2:int):bool  
+- `foreign llvm icmp_ult(`arg1:int, arg2:int`)`:bool  
 Integer unsigned strictly less
-- foreign llvm icmp_ule(arg1:int, arg2:int):bool  
+- `foreign llvm icmp_ule(`arg1:int, arg2:int`)`:bool  
 Integer unsigned less or equal
-- foreign llvm icmp_sgt(arg1:int, arg2:int):bool  
+- `foreign llvm icmp_sgt(`arg1:int, arg2:int`)`:bool  
 Integer unsigned strictly greater
-- foreign llvm icmp_sge(arg1:int, arg2:int):bool  
+- `foreign llvm icmp_sge(`arg1:int, arg2:int`)`:bool  
 Integer signed greater or equal
-- foreign llvm icmp_slt(arg1:int, arg2:int):bool  
+- `foreign llvm icmp_slt(`arg1:int, arg2:int`)`:bool  
 Integer signed strictly less
-- foreign llvm icmp_sle(arg1:int, arg2:int):bool  
+- `foreign llvm icmp_sle(`arg1:int, arg2:int`)`:bool  
 Integer signed less or equal
-- foreign llvm shl(arg1:int, arg2:int):int  
+- `foreign llvm shl(`arg1:int, arg2:int`)`:int  
 Left shift
-- foreign llvm lshr(arg1:int, arg2:int):int  
+- `foreign llvm lshr(`arg1:int, arg2:int`)`:int  
 Logical right shift (shift zeros in at right)
-- foreign llvm ashr(arg1:int, arg2:int):int  
+- `foreign llvm ashr(`arg1:int, arg2:int`)`:int  
 Arithmetic right shift (copy sign bit at right)
-- foreign llvm or(arg1:int, arg2:int):int  
+- `foreign llvm or(`arg1:int, arg2:int`)`:int  
 Bitwise or
-- foreign llvm and(arg1:int, arg2:int):int  
+- `foreign llvm and(`arg1:int, arg2:int`)`:int  
 Bitwise and
-- foreign llvm xor(arg1:int, arg2:int):int  
+- `foreign llvm xor(`arg1:int, arg2:int`)`:int  
 Bitwise exclusive or
 
 ##### Floating point operations
 
 Similar to above, all inputs and outputs listed as `float` can be any legal LLVM floating point type:  16, 32, 64, or 128 bits.  Again, in a single instruction, all the `float` inputs and outputs must be the same bit width.
 
-- foreign llvm fadd(arg1:float, arg2:float):float  
+- `foreign llvm fadd(`arg1:float, arg2:float`)`:float  
 Floating point addition
-- foreign llvm fsub(arg1:float, arg2:float):float  
+- `foreign llvm fsub(`arg1:float, arg2:float`)`:float  
 Floating point subtraction
-- foreign llvm fmul(arg1:float, arg2:float):float  
+- `foreign llvm fmul(`arg1:float, arg2:float`)`:float  
 Floating point multiplication
-- foreign llvm fdiv(arg1:float, arg2:float):float  
+- `foreign llvm fdiv(`arg1:float, arg2:float`)`:float  
 Floating point division
-- foreign llvm frem(arg1:float, arg2:float):float  
+- `foreign llvm frem(`arg1:float, arg2:float`)`:float  
 Floating point remainder
-- foreign llvm fcmp_eq(arg1:float, arg2:float):bool  
+- `foreign llvm fcmp_eq(`arg1:float, arg2:float`)`:bool  
 Floating point equality
-- foreign llvm fcmp_ne(arg1:float, arg2:float):bool  
+- `foreign llvm fcmp_ne(`arg1:float, arg2:float`)`:bool  
 Floating point disequality
-- foreign llvm fcmp_slt(arg1:float, arg2:float):bool  
+- `foreign llvm fcmp_slt(`arg1:float, arg2:float`)`:bool  
 Floating point (signed) strictly less
-- foreign llvm fcmp_sle(arg1:float, arg2:float):bool  
+- `foreign llvm fcmp_sle(`arg1:float, arg2:float`)`:bool  
 Floating point (signed) less or equal
-- foreign llvm fcmp_sgt(arg1:float, arg2:float):bool  
+- `foreign llvm fcmp_sgt(`arg1:float, arg2:float`)`:bool  
 Floating point (signed) strictly greater
-- foreign llvm fcmp_sge(arg1:float, arg2:float):bool  
+- `foreign llvm fcmp_sge(`arg1:float, arg2:float`)`:bool  
 Floating point (signed) greater or equal
 
 #####  <a name="conversion"></a>Integer/floating point conversion
 
-- foreign llvm uitofp(arg1:int):float  
+- `foreign llvm uitofp(`arg1:int`)`:float  
 Convert unsigned integer to float
-- foreign llvm sitofp(arg1:int):float  
+- `foreign llvm sitofp(`arg1:int`)`:float  
 Convert signed integer to float
-- foreign llvm fptoui(arg1:float):int  
+- `foreign llvm fptoui(`arg1:float`)`:int  
 Convert float to unsigned integer
-- foreign llvm fptosi(arg1:float):int  
+- `foreign llvm fptosi(`arg1:float`)`:int  
 Convert float to signed integer
 
 
@@ -1112,4 +1113,37 @@ conversion](#conversion) instructions.
 
 #### Wybe low-level memory management primitives
 
-To be documented....
+The LPVM instructions are low-level memory manipulation instructions.  Note
+these are foreign instructions specifying the `lpvm` (rather than `llvm`)
+language. 
+
+
+- `foreign lpvm alloc(`*size:*`int`, `?`*struct:type*`)`  
+Allocate (at least) *size* bytes of memory and store the address in *struct*,
+which has its specified type.
+
+- `foreign lpvm access(`*struct:type*, *offset:*`int`, *size*:`int`,
+                        *start_offset*:`int`, `?`*member:type2*`)`  
+Access the field of type *type2* at address *struct* + *offset*. The size of the
+structure is *size* bytes. The intention of the *start_offset* is to handle
+tagged pointers: a tagged pointer will appear to point *start_offset* bytes past
+the start of the actual structure in memory; subtracting this will allow the
+start of the structure to be found, so it can be copied.
+
+- `foreign lpvm mutate(`*struct:type*, `?`*struct2:type*,
+                        *offset:*`int`, *destructive*:`bool`,
+                        *size*:`int`, *start_offset*:`int`, *member:type2*`)`  
+*struct2* is the same as *struct*, except that it has *member*, with type
+*type2*, at *struct* + *offset*. The start of the structure is actually
+*start_offset* bytes before *struct* in memory, and the size of the structure is
+*size* bytes. The intention of the *start_offset* is to handle tagged pointers:
+a tagged pointer will appear to point *start_offset* bytes past the start of the
+actual structure in memory; subtracting this will allow the start of the
+structure to be found, so it can be copied. If *destructive* is `true`, then
+this instruction is permitted to perform the operation destructively, making
+*struct2* the same address as *struct*.
+
+- `foreign lpvm cast(`*var1:type1*, `?`*var2:type2*`)` Move *var1* to *var2*
+converting its type from *type1* to *type2*, without changing the
+representation. This just allows getting around LLVM strong typing; it does not
+actually require any instructions.
