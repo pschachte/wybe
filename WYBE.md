@@ -678,7 +678,8 @@ parentheses. For example, the elements of a list must all be the same type, but
 that can be any valid Wybe type; a list of integers can be specified by
 `list(int)` and a list of lists of strings can be specified as
 `list(list(string))`. This allows list operations to work with lists of any
-element type, without the need to separately define different kinds of lists.
+element type, without the need to separately define different kinds of lists, or
+the operations on them.
 
 The basis of generic types is the *type variable*, which stands for a type we
 don't know yet, and thus is a variable in the type system.  A type variable
@@ -694,7 +695,7 @@ Generic types are defined in the same way as described above, except that:
     * these type variables may be used as types in the definitions of the
       constructors of the type.
 
-For example, a generic list type can be defined as:
+For example, a generic list type can be defined in module `list` as:
 
 ```
 constructors(?T) null | cons(head:?T, tail:list(?T))

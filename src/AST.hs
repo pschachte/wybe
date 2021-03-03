@@ -825,7 +825,8 @@ setTypeRep repn = updateModule (\m -> m { modTypeRep = Just repn
                                         , modIsType  = True })
 
 -- |Add the specified data constructor to the current module.  This makes the
--- module a type.
+-- module a type.  Also verify that all mentioned type variables are parameters
+-- of this type.
 addConstructor :: Visibility -> Placed ProcProto -> Compiler ()
 addConstructor vis pctor = do
     let pos = place pctor
