@@ -21,7 +21,7 @@ module AST (
   determinismSeq, determinismProceding, determinismName,
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
-  TypeProto(..), TypeSpec(..), TypeVarName, genericType, typeModule,
+  TypeProto(..), TypeSpec(..), typeVarSet, TypeVarName, genericType, typeModule,
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
@@ -98,6 +98,7 @@ module AST (
 import           Config (magicVersion, wordSize, objectExtension,
                          sourceExtension)
 import           Control.Monad
+import           Control.Monad.Extra
 import           Control.Monad.Trans (lift,liftIO)
 import           Control.Monad.Trans.State
 import           Crypto.Hash
@@ -838,19 +839,29 @@ addConstructor vis pctor = do
           any (\c -> procProtoName c == procProtoName ctor
                 && length (procProtoParams c) == length (procProtoParams ctor))
           $ content . snd <$> pctors
+    let typeVars = Set.unions 
+                   (typeVarSet . paramType <$> procProtoParams (content pctor))
+    missingParams <- Set.difference typeVars . Set.fromList
+                     <$> getModule modParams
     if hasRepn
       then errmsg pos
-           $ "Declaring constructor for type " ++ show currMod
+           $ "Declaring constructor for type " ++ showModSpec currMod
            ++ " with declared representation"
       else if redundant
       then  errmsg pos
-           $ "Declaring constructor for type " ++ show currMod
+           $ "Declaring constructor for type " ++ showModSpec currMod
            ++ " with repeated name/arity"
-      else do
-           updateImplementation (\m -> m { modConstructors =
-                                           Just ((vis,pctor):pctors) })
-           updateModule (\m -> m { modIsType  = True })
-           addKnownType currMod
+      else if Set.null missingParams
+            then do
+                updateImplementation (\m -> m { modConstructors =
+                                                Just ((vis,pctor):pctors) })
+                updateModule (\m -> m { modIsType  = True })
+                addKnownType currMod
+            else
+                errmsg pos 
+                $ "Constructors for type " ++ showModSpec currMod
+                  ++ " use unbound type variable(s) "
+                  ++ intercalate ", " (("?"++) <$> Set.toList missingParams)
 
 
 -- |Record that the specified type is known in the current module.
@@ -2190,6 +2201,15 @@ data TypeSpec = TypeSpec {
     | Representation { typeSpecRepresentation :: TypeRepresentation }
     | AnyType | InvalidType
               deriving (Eq,Ord,Generic)
+
+-- |Return the set of type variables appearing (recursively) in a TypeSpec.
+typeVarSet :: TypeSpec -> Set TypeVarName
+typeVarSet TypeSpec{typeParams=params}
+    = List.foldr (Set.union . typeVarSet) Set.empty params
+typeVarSet (TypeVariable v) = Set.singleton v
+typeVarSet Representation{} = Set.empty
+typeVarSet AnyType = Set.empty
+typeVarSet InvalidType = Set.empty
 
 genericType :: TypeSpec -> Bool
 genericType TypeSpec{typeParams=params} = any genericType params
