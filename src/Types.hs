@@ -808,8 +808,6 @@ typecheckProcDecl' m pdef = do
         mapM_ (addResourceType name pos) resources
         ifOK pdef $ do
             mapM_ (placedApply (recordCasts name) . fst) calls
-            -- XXX use partition to split into proc and foreign calls, and then
-            -- process all foreign calls in one pass to type their arguments.
             let procCalls = List.filter (isRealProcCall . content . fst) calls
             -- let unifs = List.concatMap foreignTypeEquivs
             --             (content . fst <$> calls)
@@ -1814,7 +1812,6 @@ compatibleReps (Floating m)      (Floating n)      = m == n
 -- | Check arg types of an LPVM instruction
 checkLPVMArgs :: String -> [String] -> [TypeRepresentation] -> Stmt -> OptPos
               -> Typed ()
--- XXX must check arg type representations
 checkLPVMArgs "alloc" _ [Bits _,Address] stmt pos = return ()
 checkLPVMArgs "alloc" _ [Signed _,Address] stmt pos = return ()
 checkLPVMArgs "alloc" _ [sz,struct] stmt pos = do
