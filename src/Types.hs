@@ -971,7 +971,7 @@ bodyCalls (pstmt:pstmts) detism = do
         Not stmt -> bodyCalls [stmt] detism
         Nop -> return rest
         Fail -> return rest
-        Cond cond thn els _ -> do
+        Cond cond thn els _ _ -> do
           -- modify $ constrainVarType (ReasonCond pos)
           --          (expVar $ content expr) boolType
           cond' <- bodyCalls [cond] SemiDet
@@ -1570,11 +1570,15 @@ modecheckStmt _ _ _ delayed assigned _ Fail pos = do
     logTyped "Mode checking Fail"
     return ([maybePlace Fail pos], delayed, forceFailure assigned)
 modecheckStmt m name defPos delayed assigned detism
-    stmt@(Cond tstStmt thnStmts elsStmts _) pos = do
+    stmt@(Cond tstStmt thnStmts elsStmts _ _) pos = do
     logTyped $ "Mode checking conditional " ++ show stmt
     (tstStmt', delayed', assigned1) <-
         placedApplyM (modecheckStmt m name defPos delayed assigned SemiDet)
         tstStmt
+    logTyped $ "Assigned by test: " ++ show assigned1
+    let condVars = maybe [] Set.toAscList $ bindingVars assigned1
+    condTypes <- mapM ultimateVarType condVars
+    let condBindings = Map.fromAscList $ zip condVars condTypes
     logTyped $ "Assigned by test: " ++ show assigned1
     (thnStmts', assigned2) <-
         modecheckStmts m name defPos [] (forceDet assigned1) detism thnStmts
@@ -1596,8 +1600,9 @@ modecheckStmt m name defPos delayed assigned detism
         let vars = maybe [] Set.toAscList $ bindingVars finalAssigned
         types <- mapM ultimateVarType vars
         let bindings = Map.fromAscList $ zip vars types
-        return
+        return -- XXX Fix Nothing to be set of variables assigned by condition
           ([maybePlace (Cond (seqToStmt tstStmt') thnStmts' elsStmts'
+                        (Just condBindings)
                         (if isJust (bindingVars finalAssigned)
                          then Just bindings else Nothing)
           )
@@ -1901,7 +1906,8 @@ checkStmtTyped name pos stmt@(Or stmts exitVars) _ppos = do
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
 checkStmtTyped name pos (Not stmt) _ppos =
     placedApply (checkStmtTyped name pos) stmt
-checkStmtTyped name pos stmt@(Cond tst thenstmts elsestmts exitVars) _ppos = do
+checkStmtTyped name pos
+               stmt@(Cond tst thenstmts elsestmts condVars exitVars) _ppos = do
     -- exit vars are Nothing when both branches are infinite loops, so don't report this:
     -- when (isNothing exitVars) $
     --      shouldnt $ "exit vars of conditional undetermined: " ++ showStmt 4 stmt

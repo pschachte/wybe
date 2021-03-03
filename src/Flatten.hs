@@ -276,12 +276,12 @@ flattenStmt' (ForeignCall lang name flags args) pos _ = do
 --     to be retained between condition and then branch, but forgotten for
 --     the else branch.  Also note that 'transparent' arg to flattenInner is
 --     always False
-flattenStmt' (Cond tstStmt thn els defVars) pos detism = do
+flattenStmt' (Cond tstStmt thn els condVars defVars) pos detism = do
     tstStmt' <- seqToStmt <$> flattenInner False True SemiDet
                 (placedApply flattenStmt tstStmt SemiDet)
     thn' <- flattenInner False False detism (flattenStmts thn detism)
     els' <- flattenInner False False detism (flattenStmts els detism)
-    emit pos $ Cond tstStmt' thn' els' defVars
+    emit pos $ Cond tstStmt' thn' els' condVars defVars
 flattenStmt' (TestBool expr) pos SemiDet = do
     exprs' <- flattenPExp $ Unplaced expr
     case exprs' of
@@ -429,7 +429,7 @@ flattenExp (CondExp cond thn els) ty castFrom pos = do
                               [typeAndPlace (content els) ty castFrom (place els),
                                Unplaced $ Var resultName ParamOut flowType])
                   pos]
-                Nothing)
+                Nothing Nothing)
         pos Det
     return $ [maybePlace (Var resultName ParamIn flowType) pos]
 flattenExp (Fncall maybeMod name exps) ty castFrom pos = do

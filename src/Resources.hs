@@ -184,11 +184,12 @@ transformStmt tmp Nop _ =
     return ([], tmp)
 transformStmt tmp Fail pos =
     return ([maybePlace Fail pos], tmp)
-transformStmt tmp (Cond test thn els defVars) pos = do
+transformStmt tmp (Cond test thn els condVars defVars) pos = do
     (test',tmp1) <- placedApplyM (transformStmt tmp) test
     (thn',tmp2) <- transformBody tmp1 thn
     (els',tmp3) <- transformBody tmp2 els
-    return ([maybePlace (Cond (Unplaced $ And test') thn' els' defVars) pos],
+    return ([maybePlace
+             (Cond (Unplaced $ And test') thn' els' condVars defVars) pos],
             tmp3)
 transformStmt tmp (Loop body defVars) pos = do
     (body',tmp') <- transformBody tmp body

@@ -470,27 +470,28 @@ whileStmt :: Parser (Placed Stmt)
 whileStmt = do
     pos <- tokenPosition <$> ident "while"
     cond <- testStmt
-    return $ Placed (Cond cond [Unplaced Nop] [Unplaced Break] Nothing) pos
+    return $ Placed
+             (Cond cond [Unplaced Nop] [Unplaced Break] Nothing Nothing) pos
 
 
 untilStmt :: Parser (Placed Stmt)
 untilStmt = do
     pos <- tokenPosition <$> ident "until"
     e <- testStmt
-    return $ Placed (Cond e [Unplaced Break] [Unplaced Nop] Nothing) pos
+    return $ Placed (Cond e [Unplaced Break] [Unplaced Nop] Nothing Nothing) pos
 
 
 unlessStmt :: Parser (Placed Stmt)
 unlessStmt = do
     pos <- tokenPosition <$> ident "unless"
     e <- testStmt
-    return $ Placed (Cond e [Unplaced Next] [Unplaced Nop] Nothing) pos
+    return $ Placed (Cond e [Unplaced Next] [Unplaced Nop] Nothing Nothing) pos
 
 whenStmt :: Parser (Placed Stmt)
 whenStmt = do
     pos <- tokenPosition <$> ident "when"
     e <- testStmt
-    return $ Placed (Cond e [Unplaced Nop] [Unplaced Next] Nothing) pos
+    return $ Placed (Cond e [Unplaced Nop] [Unplaced Next] Nothing Nothing) pos
 
 
 -- | If statement parser.
@@ -499,7 +500,8 @@ ifStmtParser = do
     pos <- tokenPosition <$> ident "if"
     cases <- betweenB Brace $ ifCaseParser `sepBy` symbol "|"
     let final = List.foldr (\(cond, body) rest ->
-                           [Unplaced (Cond cond body rest Nothing)]) [] cases
+                           [Unplaced (Cond cond body rest Nothing Nothing)]) []
+                           cases
     case final of
       []     -> unexpected "if cases statement structure."
       (hd:_) -> return $ Placed (content hd) pos
