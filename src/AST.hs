@@ -885,6 +885,9 @@ lookupType _ _ AnyType = return AnyType
 lookupType _ _ InvalidType = return InvalidType
 lookupType _ _ ty@TypeVariable{} = return ty
 lookupType _ _ ty@Representation{} = return ty
+lookupType context pos ty@(TypeSpec [] "this" args) = do
+    currMod <- getModuleSpec
+    return $ TypeSpec (init currMod) (last currMod) args
 lookupType context pos ty@(TypeSpec mod name args) = do
     currMod <- getModuleSpec
     logAST $ "In module " ++ showModSpec currMod

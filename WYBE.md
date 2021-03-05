@@ -245,7 +245,7 @@ code.  However, occasionally the compiler needs some help in resolving
 overloading.  For example, a procedure `read(?value)` may be overloaded such
 that it can read various forms of input, such as integers, floating point
 numbers, and strings.  If a later operation uniquely determines the
-expressions's type, the compiler will work this out.  However, if other
+expression's type, the compiler will work this out.  However, if other
 references to the variables do not uniquely determine a type, you will need to
 explicitly specify the expression type.  This is done by following the expression with its type, separated by a colon, similar to the way parameter types are specified:
 
@@ -728,6 +728,24 @@ def concat(a:list(?T), b:list(?T)):list(?T) =
 This will concatenate lists of any type, but the types of the elements of the
 two input lists must be the same, and the result will be a list of the same
 type.
+
+
+## `this` type
+
+As a special case, the type `this` is treated as an alias for whatever type is
+defined by the module in which it appears.  That provides a (possibly) shorter
+name for the type being defined, and also allows the type to be renamed simply
+by renaming the file it is defined in.  For example, if the following code could
+be placed in an Wybe source file to define a linked list type with whatever name
+is deemed suitable.
+
+```
+constructors(?T) null | cons(head:?T, tail:this(?T))
+
+
+def concat(a:this(?T), b:this(?T)):this(?T) =
+    if cons(?h, ?t) = a then cons(h, concat(t,b)) else b
+```
 
 
 ## Resources
