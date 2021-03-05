@@ -1,0 +1,206 @@
+pragma no_standard_library  # Standard library can't depend on itself!
+
+use foreign object cbits
+use foreign library gc
+use foreign library m
+
+pub type bool { pub false | true
+    pub def `&&`(p:bool, q:bool):bool = foreign llvm and(p,q)
+    pub def `||`(p:bool, q:bool):bool = foreign llvm or(p,q)
+    pub def `~`(p:bool):bool = foreign llvm xor(p,true)
+    pub def =(x:bool, y:bool):bool = foreign llvm icmp_eq(x,y)
+    pub def /=(x:bool,y:bool):bool = foreign llvm icmp_ne(x,y)
+    pub def otherwise { } # not a test, empty body, so always true
+    pub def succeed { } # always succeed
+}
+
+
+pub type int is signed {
+    pub def +(x:int,y:int):int = foreign llvm add(x,y)
+    pub def +(?x:int,y:int,z:int) { ?x = foreign llvm sub(z,y) }
+    pub def +(x:int,?y:int,z:int) { ?y = foreign llvm sub(z,x) }
+    pub def -(x:int,y:int):int = foreign llvm sub(x,y)
+    pub def -(?x:int,y:int,z:int) { ?x = foreign llvm add(z,y) }
+    pub def -(x:int,?y:int,z:int) { ?y = foreign llvm sub(z,x) }
+    pub def -(x:int):int = foreign llvm sub(0,x)
+    pub def -(?x:int,y:int) { ?x = foreign llvm sub(0,y) }
+    pub def *(x:int,y:int):int = foreign llvm mul(x,y)
+    pub def /(x:int,y:int):int = foreign llvm sdiv(x,y)
+    pub def %(x:int,y:int):int = foreign llvm srem(x,y)
+    pub def /=(x:int,y:int):bool = foreign llvm icmp_ne(x,y)
+    pub def <(x:int,y:int):bool = foreign llvm icmp_slt(x,y)
+    pub def <=(x:int,y:int):bool = foreign llvm icmp_sle(x,y)
+    pub def >(x:int,y:int):bool = foreign llvm icmp_sgt(x,y)
+    pub def >=(x:int,y:int):bool = foreign llvm icmp_sge(x,y)
+    pub def =(x:int, y:int):bool = foreign llvm icmp_eq(x,y)
+    pub def sqrt(x:int):int = foreign c isqrt(x)
+    pub def power(x:int,y:int):int = foreign c ipow(x,y)
+    pub def incr(!x:int) { ?x = x + 1 }
+    pub def decr(!x:int) { ?x = x - 1 }
+}
+
+
+pub type count is unsigned {
+    pub def +(x:count,y:count):count = foreign llvm add(x,y)
+    pub def {partial} +(?x:count,y:count,z:count) {
+        (z >= y)
+        ?x = foreign llvm sub(z,y)
+    }
+    pub def {partial} +(x:count,?y:count,z:count) {
+        (z >= x)
+        ?y = foreign llvm sub(z,x)
+    }
+    pub def {partial} -(x:count,y:count):count =
+        foreign llvm sub(x,y) where { (y >= x) }
+    pub def -(?x:count,y:count,z:count) { ?x = foreign llvm add(z,y) }
+    pub def -(x:count,?y:count,z:count) { ?y = foreign llvm sub(z,x) }
+    pub def *(x:count,y:count):count = foreign llvm mul(x,y)
+    pub def /(x:count,y:count):count = foreign llvm udiv(x,y)
+    pub def %(x:count,y:count):count = foreign llvm urem(x,y)
+    pub def /=(x:count,y:count):bool = foreign llvm icmp_ne(x,y)
+    pub def <(x:count,y:count):bool = foreign llvm icmp_ult(x,y)
+    pub def <=(x:count,y:count):bool = foreign llvm icmp_ule(x,y)
+    pub def >(x:count,y:count):bool = foreign llvm icmp_ugt(x,y)
+    pub def >=(x:count,y:count):bool = foreign llvm icmp_uge(x,y)
+    pub def =(x:count, y:count):bool = foreign llvm icmp_eq(x,y)
+    pub def incr(!x:count) { ?x = x + 1:count }
+    pub def {partial} decr(!x:count) { ?x = x - 1:count }
+}
+
+
+pub type float is 64 bit float {
+    pub def +(x:float,y:float):float = foreign llvm fadd(x,y)
+    pub def +(?x:float,y:float,z:float) { ?x = foreign llvm fsub(z,y) }
+    pub def +(x:float,?y:float,z:float) { ?y = foreign llvm fsub(z,x) }
+    pub def -(x:float,y:float):float = foreign llvm fsub(x,y)
+    pub def -(?x:float,y:float,z:float) { ?x = foreign llvm fadd(z,y) }
+    pub def -(x:float,?y:float,z:float) { ?y = foreign llvm fsub(z,x) }
+    pub def -(x:float):float = foreign llvm fsub(0.0,x)
+    pub def -(?x:float,y:float) { ?x = foreign llvm fsub(0.0,y) }
+    pub def *(x:float,y:float):float = foreign llvm fmul(x,y)
+    pub def /(x:float,y:float):float = foreign llvm fdiv(x,y)
+    pub def /=(x:float,y:float):bool = foreign llvm fcmp_ne(x,y)
+    pub def <(x:float,y:float):bool = foreign llvm fcmp_slt(x,y)
+    pub def <=(x:float,y:float):bool = foreign llvm fcmp_sle(x,y)
+    pub def >(x:float,y:float):bool = foreign llvm fcmp_sgt(x,y)
+    pub def >=(x:float,y:float):bool = foreign llvm fcmp_sge(x,y)
+    pub def =(x:float, y:float):bool = foreign llvm fcmp_eq(x,y)
+    pub def sqrt(x:float):float = foreign c sqrt(x)
+    pub def power(x:float,y:float):float = foreign c pow(x,y)
+}
+
+
+pub type string is address {
+    # this whole implementation is completely wrong, but will do for now
+    #wrong: pub def ++(x:string, y:string):string = foreign c strcat(x,y)
+    pub def =(x:string, y:string):bool  = foreign c strcmp(x,y) = 0
+    pub def /=(x:string,y:string):bool  = foreign c strcmp(x,y) /= 0
+    pub def <(x:string, y:string):bool  = foreign c strcmp(x,y) < 0
+    pub def <=(x:string, y:string):bool = foreign c strcmp(x,y) <= 0
+    pub def >(x:string, y:string):bool  = foreign c strcmp(x,y) > 0
+    pub def >=(x:string, y:string):bool = foreign c strcmp(x,y) >= 0
+}
+
+
+pub type char is 8 bit unsigned {
+    pub def =(x:char, y:char):bool = foreign llvm icmp_eq(x,y)
+    pub def /=(x:char,y:char):bool = foreign llvm icmp_ne(x,y)
+}
+
+
+pub type list(?T) { pub [] | [|](head:?T, tail:list(?T))
+
+    pub def ,,(x:list(?T), y:list(?T)):list(?T) =
+        if x = [?h|?t]
+        then [h|t,,y]
+        else y
+
+    pub def length(x:list(?T)) : int = length1(x, 0)
+
+    def length1(x:list(?T), acc:int) : int =
+        if x = [?h|?t] then length1(t, acc+1) else acc
+}
+
+
+pub module io {
+    pub resource io:phantom = phantom
+
+    pub def nl use !io { foreign c putchar('\n', !io) }
+
+    pub def print(x:int) use !io { foreign c print_int(x, !io) }
+    pub def println(x:int) use !io { !print(x) !nl }
+    pub def read(?x:int) use !io { foreign c read_int(?x,!io) }
+
+    pub def print(x:float) use !io { foreign c print_float(x,!io) }
+    pub def println(x:float) use !io { !print(x) !nl }
+    pub def read(?x:float) use !io { foreign c read_float(?x,!io) }
+
+    pub def print(x:char) use !io { foreign c putchar(x,!io) }
+    pub def println(x:char) use !io { !print(x) !nl }
+    pub def read(?x:char) use !io { foreign c read_char(?x,!io) }
+
+    pub def print(x:string) use !io { foreign c print_string(x,!io) }
+    pub def println(x:string) use !io { !print(x) !nl }
+    pub def read(?x:string) use !io { foreign c read_line(?x,!io) }
+
+    pub def print(x:bool) use !io {
+       !print(if x then "true" else "false")
+    }
+    pub def println(x:bool) use !io { !print(x) !nl }
+    pub def eof:char = foreign lpvm cast(-1)
+
+    pub def malloc_count(?x:int) use !io { foreign c malloc_count(?x,!io) }
+}
+
+pub module logging {
+    pub def {semipure} logmsg(x:int) { foreign c {impure} log_int(x) }
+    pub def {semipure} logmsg(x:float) { foreign c {impure} log_float(x) }
+    pub def {semipure} logmsg(x:char) { foreign c {impure} log_char(x) }
+    pub def {semipure} logmsg(x:string) { foreign c {impure} log_string(x) }
+    pub def {semipure} logmsg(x:bool) {
+       !logmsg(if x then "true" else "false")
+    }
+    pub def {semipure} lognl { !logmsg('\n') }
+}
+
+
+pub type phantom {
+    pub phantom
+}
+
+# pub module allocation {
+#     use wybe.io
+#     foreign c gc_init(!io)
+# }
+
+
+pub module command_line {
+    # The number of command line arguments.  This is automatically
+    # initialised by the code that builds executables.
+    pub resource argc:int
+
+    # The actual command line arguments. This is really a C array of
+    # strings, but we don't support them yet, so I'm just calling it an int
+    # for now. That means you can't actually get the arguments yet. This is
+    # automatically initialised by the code that builds executables.
+    pub resource argv:int      # until we support C arrays
+
+    # The exit code to return to the invoking shell.  This is initialised to
+    # zero, so it only needs to be assigned for error cases.
+    pub resource exit_code:int # = 0 when we support resource initialisation
+
+    # Set the exit code, but don't exit immediately.
+    pub def set_exit_code(code:int) use !exit_code {
+        ?exit_code = code
+    }
+
+    # Exit right away with the specified code (0 = successful termination).
+    pub def {terminal,semipure} exit(code:int) {
+        foreign c {terminal,semipure} exit(code)
+    }
+
+    # Print an error message and abort the computation.
+    pub def {terminal,semipure} error(message:string) {
+        foreign c {terminal,semipure} error_exit(message)
+    }
+}

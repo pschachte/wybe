@@ -620,6 +620,8 @@ enterModule source modspec rootMod = do
     when (isJust oldMod)
       $ shouldnt $ "enterModule " ++ showModSpec modspec ++ " already exists"
     logAST $ "Entering module " ++ showModSpec modspec
+    logAST $ "From file " ++ source
+    logAST $ "Root module " ++ maybe "<none>" showModSpec rootMod
     absSource <- liftIO $ makeAbsolute source
     modify (\comp -> let newMod = emptyModule
                                   { modOrigin        = absSource

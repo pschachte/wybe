@@ -174,7 +174,6 @@ import           Control.Monad
 import           Control.Monad.Extra
 import           Control.Monad.Trans
 import           Control.Monad.Trans.State
-import qualified Data.ByteString.Char8     as BS
 import           Data.Graph                as Graph
 import           Data.List                 as List
 import           Data.Map                  as Map
@@ -236,11 +235,12 @@ buildTarget target = do
         UnknownFile ->
             Error <!> "Unknown target file type: " ++ target
         _ -> do
-            let modname = takeBaseName target
-            let dir = takeDirectory target
+            (modspec,dir) <- liftIO $ identifyRootModule target
+            logBuild $ "Base directory: " ++ dir
+                       ++ " Module: " ++ showModSpec modspec
             -- target should be in the working directory, lib dir will be added
             -- later
-            depGraph <- loadAllNeededModules [modname] True [dir]
+            depGraph <- loadAllNeededModules modspec True [dir]
 
             -- topological sort (bottom-up)
             let orderedSCCs = List.map (\(m, ms) -> (m, m, ms)) depGraph
@@ -252,7 +252,7 @@ buildTarget target = do
             logBuild $ "Emitting Target: " ++ target
             if tType == ExecutableFile
             then
-                buildExecutable orderedSCCs [modname] target
+                buildExecutable orderedSCCs modspec target
             else do
                 multiSpeczTopDownPass orderedSCCs
                 case tType of
@@ -261,26 +261,26 @@ buildTarget target = do
                     -- to emit object files of all it's dependencies. Especially
                     -- we now have multiple specialization, an object file is
                     -- useless without its dependencies.
-                    ObjectFile     -> emitObjectFile [modname] target
-                    BitcodeFile    -> emitBitcodeFile [modname] target
-                    AssemblyFile   -> emitAssemblyFile [modname] target
+                    ObjectFile     -> emitObjectFile modspec target
+                    BitcodeFile    -> emitBitcodeFile modspec target
+                    AssemblyFile   -> emitAssemblyFile modspec target
                     ArchiveFile    -> buildArchive target
                     other          -> nyi $ "output file type " ++ show other
-            whenLogging Emit $ logLLVMString [modname]
+            whenLogging Emit $ logLLVMString modspec
     liftIO $ removeDirectoryRecursive tmpDir
 
 
--- |Search and load all needed modules starting from the given "rootMod".
--- Return a directed graph representing its dependencies.
+-- |Search and load all needed modules starting from the given modspec.
+-- Return a directed graph representing module dependencies.
 loadAllNeededModules :: ModSpec -- ^Module name
               -> Bool           -- ^Whether the provided mod is the final target
               -> [FilePath]     -- ^Directories to look in
               -> Compiler [(ModSpec, [ModSpec])]
-loadAllNeededModules rootMod isTarget possDirs = do
+loadAllNeededModules modspec isTarget possDirs = do
     opts <- gets options
     let force = optForceAll opts || (optForce opts && isTarget)
-    mods <- loadModuleIfNeeded force rootMod possDirs
-    stopOnError $ "loading module: " ++ showModSpec rootMod
+    mods <- loadModuleIfNeeded force modspec possDirs
+    stopOnError $ "loading module: " ++ showModSpec modspec
 
     if List.null mods
     then return []
@@ -463,7 +463,7 @@ compileParseTree source modspec items = do
     stopOnError $ "preliminary processing of module " ++ showModSpec modspec
     subMods <- Map.elems <$> getModuleImplementationField modSubmods
     exitModule
-    logBuild $ "<=== finished Compiling module parse tree"
+    logBuild $ "<=== finished normalising module parse tree "
             ++ showModSpec modspec
     return (modspec:subMods)
 
@@ -1100,11 +1100,11 @@ multiSpeczTopDownPass orderedSCCs = do
 -- first found non-empty (not of constr NoSource) of ModuleSource is returned.
 moduleSources :: ModSpec -> [FilePath] -> Compiler ModuleSource
 moduleSources modspec possDirs = do
-    let splits = List.map (`List.take` modspec) [1..length modspec]
-    dirs <- mapM (\d -> mapM (sourceInDir d) splits) possDirs
+    logBuild $ "Finding location of module " ++ showModSpec modspec
+               ++ " in directories " ++ intercalate ", " possDirs
+    dirs <- mapM (sourceInDir modspec) possDirs
     -- Return the last valid Source
-    return $ (fromMaybe NoSource . List.find (/= NoSource) . reverse )
-        $ concat dirs
+    return $ (fromMaybe NoSource . List.find (/= NoSource)) dirs
 
 
 
@@ -1112,10 +1112,11 @@ moduleSources modspec possDirs = do
 -- file (.wybe), an object file (.o), an archive file (.a), or a sub-directory
 -- in the given directory `d`. This information is returned as a `ModuleSource`
 -- record.
-sourceInDir :: FilePath -> ModSpec -> Compiler ModuleSource
-sourceInDir d ms = do
+sourceInDir :: ModSpec -> FilePath -> Compiler ModuleSource
+sourceInDir ms d = do
     logBuild $ "Looking for source for module " ++ showModSpec ms
-    let dirName = joinPath [d, showModSpec ms]
+    -- XXX Should we be checking for a _.wybe file in each directory?
+    let dirName = joinPath $ d : ms
     -- Helper to convert a boolean to a Maybe [maybeFile True f == Just f]
     let maybeFile b f = if b then Just f else Nothing
     -- Different paths which can be a source for a module in the directory `d`
@@ -1170,6 +1171,28 @@ instance Show ModuleSource where
            ++ "\n]\n"
 
 
+------------------------ Filename Handling ------------------------
+
+-- |Given a filename, find its module and the parent directory of its root
+-- module.
+identifyRootModule :: FilePath -> IO (ModSpec,FilePath)
+identifyRootModule target = do
+    absTarget <- makeAbsolute target
+    buildDirModSpec (takeDirectory absTarget) [takeBaseName absTarget]
+
+
+-- |Given a directory, build up its module spec as a prefix to the specified
+-- ModSpec.  This climbs the directory hierarchy looking for the root of the
+-- Wybe module hierarchy.  A directory containing a file named `_.wybe` is
+-- considered to be a Wybe module, with each `.wybe` file and each Wybe module
+-- directory its submodules.
+buildDirModSpec :: FilePath -> ModSpec -> IO (ModSpec,FilePath)
+buildDirModSpec path modspec = do
+    isMod <- doesFileExist $ path </> "_" <.> sourceExtension
+    if isMod
+        then buildDirModSpec (takeDirectory path) (takeFileName path:modspec)
+        else return (modspec,path)
+
 
 -- |Return list of wybe module sources in the specified directory.
 -- XXX This should also return subdirectory, which could also be modules.
@@ -1179,18 +1202,12 @@ wybeSourcesInDir dir = do
     isWybe <$> listDirectory dir
 
 
-
------------------------- Filename Handling ------------------------
-
 -- |The different sorts of files that could be specified on the
 --  command line.
 data TargetType = InterfaceFile | ObjectFile | ExecutableFile
                 | UnknownFile | BitcodeFile | AssemblyFile
                 | ArchiveFile
                 deriving (Show,Eq)
-
-
-
 
 
 -- |Given a file specification, return what sort of file it is.  The
@@ -1214,7 +1231,7 @@ moduleFilePath extension dir spec =
     addExtension (joinPath $ splitDirectories dir ++ spec) extension
 
 
-
+------------------------ Logging ------------------------
 
 -- |Log a message, if we are logging builder activity (file-level compilation).
 logBuild :: String -> Compiler ()
