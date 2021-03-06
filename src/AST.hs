@@ -585,7 +585,7 @@ updateModuleM updater =
 -- |Return some function of the specified module.  Error if it's not a module.
 getSpecModule :: String -> (Module -> t) -> ModSpec -> Compiler t
 getSpecModule context getter spec = do
-    let msg = context ++ " looking up module " ++ show spec
+    let msg = context ++ " looking up module " ++ showModSpec spec
     underComp <- gets underCompilation
     let curr = List.filter ((==spec) . modSpec) underComp
     logAST $ "Under compilation: " ++ showModSpecs (modSpec <$> underComp)
@@ -1303,9 +1303,10 @@ refersTo modspec name implMapFn specModFn = do
     -- imports <- getModuleImplementationField (Map.assocs . modImports)
     -- imported <- mapM getLoadingModule imports
     -- let visible = defined `Set.union` imported
-    logAST $ "*** ALL visible modules: "
+    logAST $ "*** ALL matching visible modules: "
         ++ showModSpecs (Set.toList (Set.map specModFn defined))
     let matched = Set.filter ((modspec `isSuffixOf`) . specModFn) defined
+    -- XXX Can't assume parent module exists
     case (Set.null matched,parentModule currMod) of
         (True,Just par) ->
             (refersTo modspec name implMapFn specModFn) `inModule` par
