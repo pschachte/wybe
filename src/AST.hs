@@ -38,8 +38,7 @@ module AST (
   placedApply, placedApply1, placedApplyM, contentApply,
   makeMessage, updatePlacedM,
   -- *AST types
-  Module(..), ModuleInterface(..), ModuleImplementation(..), InterfaceHash,
-  PubProcInfo(..),
+  Module(..), isRootModule, ModuleInterface(..), ModuleImplementation(..), InterfaceHash, PubProcInfo(..),
   ImportSpec(..), importSpec, Pragma(..), addPragma,
   descendentModules,
   enterModule, reenterModule, exitModule, reexitModule, inModule,
@@ -1263,12 +1262,10 @@ emptyModule = Module
     }
 
 
+isRootModule :: ModSpec -> Compiler Bool
+isRootModule modspec =
+    maybe False ((Just modspec ==) . modRootModSpec) <$> getLoadedModule modspec
 
-descendantModuleOf :: ModSpec -> ModSpec -> Bool
-descendantModuleOf sub [] = True
-descendantModuleOf (a:as) (b:bs)
-  | a == b = descendantModuleOf as bs
-descendantModuleOf _ _ = False
 
 parentModule :: ModSpec -> Maybe ModSpec
 parentModule []  = Nothing

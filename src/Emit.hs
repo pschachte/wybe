@@ -36,6 +36,7 @@ import           ObjectInterface
 import           Options                    (LogSelection (Blocks,Builder,Emit))
 import           System.Exit                (ExitCode (..))
 import           System.Process
+import           System.FilePath
 
 
 
@@ -44,8 +45,9 @@ import           System.Process
 -- into the '__lpvm' section of the Macho-O object file.
 emitObjectFile :: ModSpec -> FilePath -> Compiler ()
 emitObjectFile m f = do
+    let filename = f -<.> objectExtension
     logEmit $ "Creating object file for *" ++ showModSpec m ++ "*" ++
-        " @ '" ++ f ++ "'"
+        " @ '" ++ filename ++ "'"
     -- astMod <- getModule id
     logEmit $ "Encoding and wrapping Module *" ++ showModSpec m
               ++ "* in a wrapped object."
@@ -54,34 +56,36 @@ emitObjectFile m f = do
     -- modBS <- encodeModule astMod
     modBS <- encodeModule m
     llmod <- descendentModuleLLVM m
-    makeWrappedObjFile f llmod modBS
+    makeWrappedObjFile filename llmod modBS
 
 
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target LLVM Bitcode file.
 emitBitcodeFile :: ModSpec -> FilePath -> Compiler ()
 emitBitcodeFile m f = do
+    let filename = f -<.> bitcodeExtension
     logEmit $ "Creating wrapped bitcode file for *" ++ showModSpec m ++ "*"
-              ++ " @ '" ++ f ++ "'"
+              ++ " @ '" ++ filename ++ "'"
     -- astMod <- getModule id
     logEmit $ "Encoding and wrapping Module *" ++ showModSpec m
               ++ "* in a wrapped bitcodefile."
     -- modBS <- encodeModule astMod
     modBS <- encodeModule m
     llmod <- descendentModuleLLVM m
-    liftIO $ makeWrappedBCFile f llmod modBS
+    liftIO $ makeWrappedBCFile filename llmod modBS
 
 
 -- | With the LLVM AST representation of a LPVM Module, create a
 -- target LLVM Assembly file.
 emitAssemblyFile :: ModSpec -> FilePath -> Compiler ()
 emitAssemblyFile m f = do
+    let filename = f -<.> assemblyExtension
     logEmit $ "Creating assembly file for " ++ showModSpec m ++
         ", with optimisations."
     llmod <- descendentModuleLLVM m
     liftIO $ withOptimisedModule llmod
         (\mm -> withHostTargetMachineDefault $ \_ ->
-            writeLLVMAssemblyToFile (File f) mm)
+            writeLLVMAssemblyToFile (File filename) mm)
 
 
 -- | Concatenate the LLVMAST.Module implementations of the descendents of

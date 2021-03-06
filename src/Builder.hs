@@ -252,20 +252,28 @@ buildTarget target = do
             logBuild $ "Emitting Target: " ++ target
             if tType == ExecutableFile
             then
+                -- XXX shouldn't we do: multiSpeczTopDownPass orderedSCCs?
+
                 buildExecutable orderedSCCs modspec target
             else do
                 multiSpeczTopDownPass orderedSCCs
+                unchanged <- gets unchangedMods
+                toDump <- filterM isRootModule $ concat orderedSCCs
+                let toDump' =
+                        List.filter (not . (`Set.member` unchanged)) toDump
+                targets <- zip toDump' <$> mapM
+                    (((modOrigin . trustFromJust "buildTarget") <$>)
+                     <$> getLoadedModule)
+                    toDump'
+                logBuild $ "Modules to write: " ++ showModSpecs toDump'
                 case tType of
-                    -- XXX I think we need to rethink the behavior of those
-                    -- emitting below, eg. for "emitObjectFile", we need
-                    -- to emit object files of all its dependencies. Especially
-                    -- we now have multiple specialization, an object file is
-                    -- useless without its dependencies.
-                    ObjectFile       -> emitObjectFile modspec target
-                    BitcodeFile      -> emitBitcodeFile modspec target
-                    AssemblyFile     -> emitAssemblyFile modspec target
-                    ArchiveFile      -> buildArchive target
-                    LibraryDirectory -> return ()
+                    ObjectFile       -> mapM_ (uncurry emitObjectFile) targets
+                    BitcodeFile      -> mapM_ (uncurry emitBitcodeFile) targets
+                    AssemblyFile     -> mapM_ (uncurry emitAssemblyFile) targets
+                    ArchiveFile      -> do
+                        mapM_ (uncurry emitObjectFile) targets
+                        buildArchive target
+                    LibraryDirectory -> mapM_ (uncurry emitObjectFile) targets
                     other            -> nyi $ "output file type " ++ show other
             whenLogging Emit $ logLLVMString modspec
     liftIO $ removeDirectoryRecursive tmpDir
