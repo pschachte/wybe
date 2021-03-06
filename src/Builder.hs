@@ -230,7 +230,7 @@ buildTarget target = do
     updateCompiler (\st -> st { tmpDir = tmpDir })
 
     Informational <!> "Building target: " ++ target
-    let tType = targetType target
+    tType <- targetType target
     case tType of
         UnknownFile ->
             Error <!> "Unknown target file type: " ++ target
@@ -258,14 +258,15 @@ buildTarget target = do
                 case tType of
                     -- XXX I think we need to rethink the behavior of those
                     -- emitting below, eg. for "emitObjectFile", we need
-                    -- to emit object files of all it's dependencies. Especially
+                    -- to emit object files of all its dependencies. Especially
                     -- we now have multiple specialization, an object file is
                     -- useless without its dependencies.
-                    ObjectFile     -> emitObjectFile modspec target
-                    BitcodeFile    -> emitBitcodeFile modspec target
-                    AssemblyFile   -> emitAssemblyFile modspec target
-                    ArchiveFile    -> buildArchive target
-                    other          -> nyi $ "output file type " ++ show other
+                    ObjectFile       -> emitObjectFile modspec target
+                    BitcodeFile      -> emitBitcodeFile modspec target
+                    AssemblyFile     -> emitAssemblyFile modspec target
+                    ArchiveFile      -> buildArchive target
+                    LibraryDirectory -> return ()
+                    other            -> nyi $ "output file type " ++ show other
             whenLogging Emit $ logLLVMString modspec
     liftIO $ removeDirectoryRecursive tmpDir
 
@@ -434,7 +435,7 @@ buildDirectory dir dirmod = do
     -- The module package imports all wybe modules in its source dir
     mapM_ updateImport wybemods
     exitModule
-    logBuild $ "Generated directory module containing" ++ showModSpecs wybemods
+    logBuild $ "Generated directory module containing: " ++ showModSpecs wybemods
     -- Run the compilation passes on this module package to append the
     -- procs from the imports to the interface.
 
@@ -1206,14 +1207,23 @@ wybeSourcesInDir dir = do
 --  command line.
 data TargetType = InterfaceFile | ObjectFile | ExecutableFile
                 | UnknownFile | BitcodeFile | AssemblyFile
-                | ArchiveFile
+                | ArchiveFile | LibraryDirectory
                 deriving (Show,Eq)
 
 
 -- |Given a file specification, return what sort of file it is.  The
 --  file need not exist.
-targetType :: FilePath -> TargetType
-targetType filename
+targetType :: FilePath -> Compiler TargetType
+targetType fileOrDirName = do
+    isMod <- liftIO $ doesFileExist $ fileOrDirName </> "_" <.> sourceExtension
+    if isMod
+        then return LibraryDirectory
+        else return $ targetType' fileOrDirName
+
+-- |Given a file specification, return what sort of file it is.  The
+--  file need not exist.
+targetType' :: FilePath -> TargetType
+targetType' filename
   | ext' == interfaceExtension  = InterfaceFile
   | ext' == objectExtension     = ObjectFile
   | ext' == executableExtension = ExecutableFile
