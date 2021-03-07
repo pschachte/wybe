@@ -540,7 +540,7 @@ entry:
 
                                                                                         1:
                                                                                             foreign lpvm access(~$right#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?$right$f17#0:wybe.int)
-                                                                                            foreign llvm icmp_eq(~$left$f17#0:wybe.int, ~$right$f17#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+                                                                                            foreign llvm icmp_eq(~$left$f17#0:wybe.int, ~$right$f17#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
@@ -569,7 +569,7 @@ entry:
 
                                                                                     1:
                                                                                         foreign lpvm access(~$right#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?$right$f16#0:wybe.int)
-                                                                                        foreign llvm icmp_eq(~$left$f16#0:wybe.int, ~$right$f16#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+                                                                                        foreign llvm icmp_eq(~$left$f16#0:wybe.int, ~$right$f16#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
@@ -598,7 +598,7 @@ entry:
 
                                                                                 1:
                                                                                     foreign lpvm access(~$right#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?$right$f15#0:wybe.int)
-                                                                                    foreign llvm icmp_eq(~$left$f15#0:wybe.int, ~$right$f15#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+                                                                                    foreign llvm icmp_eq(~$left$f15#0:wybe.int, ~$right$f15#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
@@ -627,7 +627,7 @@ entry:
 
                                                                             1:
                                                                                 foreign lpvm access(~$right#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?$right$f14#0:wybe.int)
-                                                                                foreign llvm icmp_eq(~$left$f14#0:wybe.int, ~$right$f14#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+                                                                                foreign llvm icmp_eq(~$left$f14#0:wybe.int, ~$right$f14#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
@@ -656,7 +656,7 @@ entry:
 
                                                                         1:
                                                                             foreign lpvm access(~$right#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?$right$f13#0:wybe.int)
-                                                                            foreign llvm icmp_eq(~$left$f13#0:wybe.int, ~$right$f13#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+                                                                            foreign llvm icmp_eq(~$left$f13#0:wybe.int, ~$right$f13#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
@@ -685,7 +685,7 @@ entry:
 
                                                                     1:
                                                                         foreign lpvm access(~$right#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?$right$f12#0:wybe.int)
-                                                                        foreign llvm icmp_eq(~$left$f12#0:wybe.int, ~$right$f12#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+                                                                        foreign llvm icmp_eq(~$left$f12#0:wybe.int, ~$right$f12#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
@@ -714,7 +714,7 @@ entry:
 
                                                                 1:
                                                                     foreign lpvm access(~$right#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?$right$f11#0:wybe.int)
-                                                                    foreign llvm icmp_eq(~$left$f11#0:wybe.int, ~$right$f11#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+                                                                    foreign llvm icmp_eq(~$left$f11#0:wybe.int, ~$right$f11#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
@@ -743,7 +743,7 @@ entry:
 
                                                             1:
                                                                 foreign lpvm access(~$right#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?$right$f10#0:wybe.int)
-                                                                foreign llvm icmp_eq(~$left$f10#0:wybe.int, ~$right$f10#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+                                                                foreign llvm icmp_eq(~$left$f10#0:wybe.int, ~$right$f10#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
@@ -772,7 +772,7 @@ entry:
 
                                                         1:
                                                             foreign lpvm access(~$right#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?$right$f09#0:wybe.int)
-                                                            foreign llvm icmp_eq(~$left$f09#0:wybe.int, ~$right$f09#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+                                                            foreign llvm icmp_eq(~$left$f09#0:wybe.int, ~$right$f09#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
@@ -801,7 +801,7 @@ entry:
 
                                                     1:
                                                         foreign lpvm access(~$right#0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?$right$f08#0:wybe.int)
-                                                        foreign llvm icmp_eq(~$left$f08#0:wybe.int, ~$right$f08#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+                                                        foreign llvm icmp_eq(~$left$f08#0:wybe.int, ~$right$f08#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
@@ -824,7 +824,7 @@ entry:
 
                                         1:
                                             foreign lpvm access(~$right#0:multictr.complicated, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?$right$f07#0:wybe.int)
-                                            foreign llvm icmp_eq(~$left$f07#0:wybe.int, ~$right$f07#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+                                            foreign llvm icmp_eq(~$left$f07#0:wybe.int, ~$right$f07#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
@@ -845,7 +845,7 @@ entry:
 
                                     1:
                                         foreign lpvm access(~$right#0:multictr.complicated, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?$right$f06#0:wybe.int)
-                                        foreign llvm icmp_eq(~$left$f06#0:wybe.int, ~$right$f06#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+                                        foreign llvm icmp_eq(~$left$f06#0:wybe.int, ~$right$f06#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
@@ -866,7 +866,7 @@ entry:
 
                                 1:
                                     foreign lpvm access(~$right#0:multictr.complicated, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?$right$f05#0:wybe.int)
-                                    foreign llvm icmp_eq(~$left$f05#0:wybe.int, ~$right$f05#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+                                    foreign llvm icmp_eq(~$left$f05#0:wybe.int, ~$right$f05#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
@@ -887,7 +887,7 @@ entry:
 
                             1:
                                 foreign lpvm access(~$right#0:multictr.complicated, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?$right$f04#0:wybe.int)
-                                foreign llvm icmp_eq(~$left$f04#0:wybe.int, ~$right$f04#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+                                foreign llvm icmp_eq(~$left$f04#0:wybe.int, ~$right$f04#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
@@ -908,7 +908,7 @@ entry:
 
                         1:
                             foreign lpvm access(~$right#0:multictr.complicated, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?$right$f03#0:wybe.int)
-                            foreign llvm icmp_eq(~$left$f03#0:wybe.int, ~$right$f03#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+                            foreign llvm icmp_eq(~$left$f03#0:wybe.int, ~$right$f03#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
@@ -929,7 +929,7 @@ entry:
 
                     1:
                         foreign lpvm access(~$right#0:multictr.complicated, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$right$f02#0:wybe.int)
-                        foreign llvm icmp_eq(~$left$f02#0:wybe.int, ~$right$f02#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+                        foreign llvm icmp_eq(~$left$f02#0:wybe.int, ~$right$f02#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
@@ -950,7 +950,7 @@ entry:
 
                 1:
                     foreign lpvm access(~$right#0:multictr.complicated, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$right$f01#0:wybe.int)
-                    foreign llvm icmp_eq(~$left$f01#0:wybe.int, ~$right$f01#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+                    foreign llvm icmp_eq(~$left$f01#0:wybe.int, ~$right$f01#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
@@ -5469,7 +5469,7 @@ entry:
 
         1:
             foreign lpvm access(~$right#0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$right$value#0:wybe.int)
-            foreign llvm icmp_eq(~$left$value#0:wybe.int, ~$right$value#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+            foreign llvm icmp_eq(~$left$value#0:wybe.int, ~$right$value#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
@@ -5706,7 +5706,7 @@ if.else:
 
             1:
                 foreign lpvm access(~$right#0:multictr.number, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$right$float_value#0:wybe.float)
-                foreign llvm fcmp_eq(~$left$float_value#0:wybe.float, ~$right$float_value#0:wybe.float, ?$$#0:wybe.bool) @wybe:nn:nn
+                foreign llvm fcmp_eq(~$left$float_value#0:wybe.float, ~$right$float_value#0:wybe.float, ?$$#0:wybe.bool) @float:nn:nn
 
 
 
@@ -5720,7 +5720,7 @@ if.else:
 
         1:
             foreign lpvm access(~$right#0:multictr.number, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$right$int_value#0:wybe.int)
-            foreign llvm icmp_eq(~$left$int_value#0:wybe.int, ~$right$int_value#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+            foreign llvm icmp_eq(~$left$int_value#0:wybe.int, ~$right$int_value#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
@@ -6466,13 +6466,13 @@ entry:
                     1:
                         foreign lpvm access($right#0:multictr.simple, -1:wybe.int, 16:wybe.int, 1:wybe.int, ?$right$two_field1#0:wybe.int)
                         foreign lpvm access(~$right#0:multictr.simple, 7:wybe.int, 16:wybe.int, 1:wybe.int, ?$right$two_field2#0:wybe.int)
-                        foreign llvm icmp_eq(~$left$two_field1#0:wybe.int, ~$right$two_field1#0:wybe.int, ?tmp$5#0:wybe.bool) @wybe:nn:nn
+                        foreign llvm icmp_eq(~$left$two_field1#0:wybe.int, ~$right$two_field1#0:wybe.int, ?tmp$5#0:wybe.bool) @int:nn:nn
                         case ~tmp$5#0:wybe.bool of
                         0:
                             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                         1:
-                            foreign llvm icmp_eq(~$left$two_field2#0:wybe.int, ~$right$two_field2#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+                            foreign llvm icmp_eq(~$left$two_field2#0:wybe.int, ~$right$two_field2#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
@@ -6494,7 +6494,7 @@ entry:
 
                 1:
                     foreign lpvm access(~$right#0:multictr.simple, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$right$one_field#0:wybe.int)
-                    foreign llvm icmp_eq(~$left$one_field#0:wybe.int, ~$right$one_field#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+                    foreign llvm icmp_eq(~$left$one_field#0:wybe.int, ~$right$one_field#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 

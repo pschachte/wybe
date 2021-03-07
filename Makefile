@@ -68,8 +68,6 @@ $(SRCDIR)/Version.lhs:	$(addprefix $(SRCDIR)/,*.hs)
 	@printf "> libDir :: String\n> libDir = \"%s\"\n\n" "$(INSTALLLIB)" >> "$@"
 
 
-TESTCASES = $(wildcard test-cases/*.wybe)
-
 # Assemble README markdown source file automatically
 src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro
 	cat src/README.md.intro > "$@"
@@ -101,7 +99,7 @@ src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro
 
 test:	wybemk
 	@rm -f ERRS ; touch ERRS
-	@rm -f $(LIBDIR)/*.o
+	@rm -f $(LIBDIR)/*.o $(LIBDIR)/wybe/*.o
 	@echo -e "Building $(LIBDIR)/wybe/cbits.o"
 	@make $(LIBDIR)/wybe/cbits.o
 	@printf "Testing building wybe library ("

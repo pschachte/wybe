@@ -23,17 +23,3 @@ pub resource exit_code:int # = 0 when we support resource initialisation
 pub def set_exit_code(code:int) use !exit_code {
     ?exit_code = code
 }
-
-
-# Exit right away with the specified code (0 = successful termination).
-
-pub def {terminal,semipure} exit(code:int) {
-    foreign c {terminal,semipure} exit(code)
-}
-
-
-# Print an error message and abort the computation.
-
-pub def {terminal,semipure} error(message:string) {
-    foreign c {terminal,semipure} error_exit(message)
-}

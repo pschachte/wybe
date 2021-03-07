@@ -1,2 +1,2 @@
-Syntax Error: "final-dump/syntax_error.wybe" (line 2, column 1):
-unexpected TokIdent "bill" "final-dump/syntax_error.wybe" (line 2, column 1)
+Syntax Error: "!ROOT!/final-dump/syntax_error.wybe" (line 2, column 1):
+unexpected TokIdent "bill" "!ROOT!/final-dump/syntax_error.wybe" (line 2, column 1)

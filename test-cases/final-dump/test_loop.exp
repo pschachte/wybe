@@ -23,18 +23,18 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public {inline} (0 calls)
-0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#2:wybe.phantom):
+0: (io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    test_loop.find_test<0>(3:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @test_loop:35:2
-    test_loop.find_test<0>(7:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #1 @test_loop:36:2
+    test_loop.find_test<0>(3:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @test_loop:nn:nn
+    test_loop.find_test<0>(7:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #1 @test_loop:nn:nn
 
 
 find_modulo > {inline} (3 calls)
 0: find_modulo(seq#0:test_loop.int_seq, modulus#0:wybe.int, ?i#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    test_loop.gen$1<0>(~modulus#0:wybe.int, ~seq#0:test_loop.int_seq, ?i#0:wybe.int, ?$$#0:wybe.bool) #0 @test_loop:15:5
+    test_loop.gen$1<0>(~modulus#0:wybe.int, ~seq#0:test_loop.int_seq, ?i#0:wybe.int, ?$$#0:wybe.bool) #0 @test_loop:nn:nn
 
 
 find_test > (2 calls)
@@ -46,19 +46,19 @@ find_test > (2 calls)
     foreign lpvm mutate(~tmp$5#0:test_loop.int_seq, ?tmp$6#0:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 2:wybe.int)
     foreign lpvm mutate(~tmp$6#0:test_loop.int_seq, ?tmp$7#0:test_loop.int_seq, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 2:wybe.int)
     foreign lpvm mutate(~tmp$7#0:test_loop.int_seq, ?tmp$8#0:test_loop.int_seq, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 10:wybe.int)
-    test_loop.gen$1<0>[6dacb8fd25](modulus#0:wybe.int, ~tmp$8#0:test_loop.int_seq, ?i#0:wybe.int, ?tmp$1#0:wybe.bool) #9 @test_loop:15:5
+    test_loop.gen$1<0>[6dacb8fd25](modulus#0:wybe.int, ~tmp$8#0:test_loop.int_seq, ?i#0:wybe.int, ?tmp$1#0:wybe.bool) #9 @test_loop:nn:nn
     case ~tmp$1#0:wybe.bool of
     0:
-        foreign c print_string("Couldn't find even number divisible by ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
-        foreign c print_int(~modulus#0:wybe.int, ~#io#1:wybe.phantom, ?tmp$15#0:wybe.phantom) @wybe:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp$15#0:wybe.phantom, ?#io#4:wybe.phantom) @wybe:nn:nn
+        foreign c print_string("Couldn't find even number divisible by ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+        foreign c print_int(~modulus#0:wybe.int, ~#io#1:wybe.phantom, ?tmp$15#0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp$15#0:wybe.phantom, ?#io#4:wybe.phantom) @io:nn:nn
 
     1:
-        foreign c print_string("First even number divisible by ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
-        foreign c print_int(~modulus#0:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
-        foreign c print_string(" is ":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @wybe:nn:nn
-        foreign c print_int(~i#0:wybe.int, ~#io#3:wybe.phantom, ?tmp$19#0:wybe.phantom) @wybe:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp$19#0:wybe.phantom, ?#io#4:wybe.phantom) @wybe:nn:nn
+        foreign c print_string("First even number divisible by ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+        foreign c print_int(~modulus#0:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
+        foreign c print_string(" is ":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
+        foreign c print_int(~i#0:wybe.int, ~#io#3:wybe.phantom, ?tmp$19#0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp$19#0:wybe.phantom, ?#io#4:wybe.phantom) @io:nn:nn
 
 
 
@@ -67,18 +67,18 @@ gen$1 > (2 calls)
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 1]
  MultiSpeczDepInfo: [(0,(test_loop.int_seq.seq_next<0>,fromList [NonAliasedParamCond 0 [1]])),(3,(test_loop.gen$1<0>,fromList [NonAliasedParamCond 1 [1]]))]
-    test_loop.int_seq.seq_next<0>(~%seq#0:test_loop.int_seq, ?%seq#1:test_loop.int_seq, ?tmp$0#0:wybe.int, ?tmp$2#0:wybe.bool) #0 @test_loop:16:14
+    test_loop.int_seq.seq_next<0>(~%seq#0:test_loop.int_seq, ?%seq#1:test_loop.int_seq, ?tmp$0#0:wybe.int, ?tmp$2#0:wybe.bool) #0 @test_loop:nn:nn
     case ~tmp$2#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?i#1:wybe.int)
 
     1:
-        foreign llvm srem(tmp$0#0:wybe.int, modulus#0:wybe.int, ?tmp$1#0:wybe.int) @wybe:nn:nn
-        foreign llvm icmp_eq(~tmp$1#0:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
+        foreign llvm srem(tmp$0#0:wybe.int, modulus#0:wybe.int, ?tmp$1#0:wybe.int) @int:nn:nn
+        foreign llvm icmp_eq(~tmp$1#0:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.bool) @int:nn:nn
         case ~tmp$3#0:wybe.bool of
         0:
-            test_loop.gen$1<0>(~modulus#0:wybe.int, ~seq#1:test_loop.int_seq, ?i#1:wybe.int, ?$$#0:wybe.bool) #3 @test_loop:15:5
+            test_loop.gen$1<0>(~modulus#0:wybe.int, ~seq#1:test_loop.int_seq, ?i#1:wybe.int, ?$$#0:wybe.bool) #3 @test_loop:nn:nn
 
         1:
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
@@ -86,18 +86,18 @@ gen$1 > (2 calls)
 
 
  [6dacb8fd25] [NonAliasedParam 1] :
-    test_loop.int_seq.seq_next<0>[410bae77d3](~%seq#0:test_loop.int_seq, ?%seq#1:test_loop.int_seq, ?tmp$0#0:wybe.int, ?tmp$2#0:wybe.bool) #0 @test_loop:16:14
+    test_loop.int_seq.seq_next<0>[410bae77d3](~%seq#0:test_loop.int_seq, ?%seq#1:test_loop.int_seq, ?tmp$0#0:wybe.int, ?tmp$2#0:wybe.bool) #0 @test_loop:nn:nn
     case ~tmp$2#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?i#1:wybe.int)
 
     1:
-        foreign llvm srem(tmp$0#0:wybe.int, modulus#0:wybe.int, ?tmp$1#0:wybe.int) @wybe:nn:nn
-        foreign llvm icmp_eq(~tmp$1#0:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
+        foreign llvm srem(tmp$0#0:wybe.int, modulus#0:wybe.int, ?tmp$1#0:wybe.int) @int:nn:nn
+        foreign llvm icmp_eq(~tmp$1#0:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.bool) @int:nn:nn
         case ~tmp$3#0:wybe.bool of
         0:
-            test_loop.gen$1<0>[6dacb8fd25](~modulus#0:wybe.int, ~seq#1:test_loop.int_seq, ?i#1:wybe.int, ?$$#0:wybe.bool) #3 @test_loop:15:5
+            test_loop.gen$1<0>[6dacb8fd25](~modulus#0:wybe.int, ~seq#1:test_loop.int_seq, ?i#1:wybe.int, ?$$#0:wybe.bool) #3 @test_loop:nn:nn
 
         1:
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
@@ -137,7 +137,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external fastcc  void @"test_loop.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
+define external fastcc  void @"test_loop.<0>"()    {
 entry:
   tail call fastcc  void  @"test_loop.find_test<0>"(i64  3)  
   tail call fastcc  void  @"test_loop.find_test<0>"(i64  7)  
@@ -281,21 +281,21 @@ if.else1:
     foreign lpvm access($right#0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.int)
     foreign lpvm access($right#0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$7#0:wybe.int)
     foreign lpvm access(~$right#0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$8#0:wybe.int)
-    foreign llvm icmp_eq(~tmp$3#0:wybe.int, ~tmp$6#0:wybe.int, ?tmp$9#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_eq(~tmp$3#0:wybe.int, ~tmp$6#0:wybe.int, ?tmp$9#0:wybe.bool) @int:nn:nn
     case ~tmp$9#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?tmp$0#0:wybe.bool)
         foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign llvm icmp_eq(~tmp$4#0:wybe.int, ~tmp$7#0:wybe.int, ?tmp$10#0:wybe.bool) @wybe:nn:nn
+        foreign llvm icmp_eq(~tmp$4#0:wybe.int, ~tmp$7#0:wybe.int, ?tmp$10#0:wybe.bool) @int:nn:nn
         case ~tmp$10#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?tmp$0#0:wybe.bool)
             foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign llvm icmp_eq(~tmp$5#0:wybe.int, ~tmp$8#0:wybe.int, ?tmp$0#0:wybe.bool) @wybe:nn:nn
+            foreign llvm icmp_eq(~tmp$5#0:wybe.int, ~tmp$8#0:wybe.int, ?tmp$0#0:wybe.bool) @int:nn:nn
             foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -311,19 +311,19 @@ if.else1:
     foreign lpvm access($right#0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?$right$low#0:wybe.int)
     foreign lpvm access($right#0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?$right$step#0:wybe.int)
     foreign lpvm access(~$right#0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?$right$high#0:wybe.int)
-    foreign llvm icmp_eq(~$left$low#0:wybe.int, ~$right$low#0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_eq(~$left$low#0:wybe.int, ~$right$low#0:wybe.int, ?tmp$1#0:wybe.bool) @int:nn:nn
     case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign llvm icmp_eq(~$left$step#0:wybe.int, ~$right$step#0:wybe.int, ?tmp$2#0:wybe.bool) @wybe:nn:nn
+        foreign llvm icmp_eq(~$left$step#0:wybe.int, ~$right$step#0:wybe.int, ?tmp$2#0:wybe.bool) @int:nn:nn
         case ~tmp$2#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
         1:
-            foreign llvm icmp_eq(~$left$high#0:wybe.int, ~$right$high#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+            foreign llvm icmp_eq(~$left$high#0:wybe.int, ~$right$high#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
@@ -376,7 +376,7 @@ seq_next > public (0 calls)
     foreign lpvm access(seq#0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?elt#0:wybe.int)
     foreign lpvm access(seq#0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?step#0:wybe.int)
     foreign lpvm access(seq#0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?limit#0:wybe.int)
-    foreign llvm icmp_sle(elt#0:wybe.int, ~limit#0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_sle(elt#0:wybe.int, ~limit#0:wybe.int, ?tmp$1#0:wybe.bool) @int:nn:nn
     case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -384,16 +384,16 @@ seq_next > public (0 calls)
         foreign llvm move(~seq#0:test_loop.int_seq, ?seq#1:test_loop.int_seq)
 
     1:
-        foreign llvm add(elt#0:wybe.int, ~step#0:wybe.int, ?tmp$0#0:wybe.int) @wybe:nn:nn
+        foreign llvm add(elt#0:wybe.int, ~step#0:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn
         foreign lpvm {noalias} mutate(~%seq#0:test_loop.int_seq, ?%seq#1:test_loop.int_seq, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp$0#0:wybe.int)
-        foreign llvm move(~elt#0:wybe.int, ?$#0:wybe.int) @test_loop:6:9
+        foreign llvm move(~elt#0:wybe.int, ?$#0:wybe.int) @test_loop:nn:nn
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
  [410bae77d3] [NonAliasedParam 0] :
     foreign lpvm access(seq#0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?elt#0:wybe.int)
     foreign lpvm access(seq#0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?step#0:wybe.int)
     foreign lpvm access(seq#0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?limit#0:wybe.int)
-    foreign llvm icmp_sle(elt#0:wybe.int, ~limit#0:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_sle(elt#0:wybe.int, ~limit#0:wybe.int, ?tmp$1#0:wybe.bool) @int:nn:nn
     case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -401,9 +401,9 @@ seq_next > public (0 calls)
         foreign llvm move(~seq#0:test_loop.int_seq, ?seq#1:test_loop.int_seq)
 
     1:
-        foreign llvm add(elt#0:wybe.int, ~step#0:wybe.int, ?tmp$0#0:wybe.int) @wybe:nn:nn
+        foreign llvm add(elt#0:wybe.int, ~step#0:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn
         foreign lpvm {noalias} mutate(~%seq#0:test_loop.int_seq, ?%seq#1:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp$0#0:wybe.int)
-        foreign llvm move(~elt#0:wybe.int, ?$#0:wybe.int) @test_loop:6:9
+        foreign llvm move(~elt#0:wybe.int, ?$#0:wybe.int) @test_loop:nn:nn
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 

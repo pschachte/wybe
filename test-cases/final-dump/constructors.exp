@@ -41,7 +41,7 @@ AFTER EVERYTHING:
 
         1:
             foreign lpvm access(~$right#0:constructors, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$right$value#0:wybe.int)
-            foreign llvm icmp_eq(~$left$value#0:wybe.int, ~$right$value#0:wybe.int, ?$$#0:wybe.bool) @wybe:nn:nn
+            foreign llvm icmp_eq(~$left$value#0:wybe.int, ~$right$value#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
