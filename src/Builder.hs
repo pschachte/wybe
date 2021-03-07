@@ -919,6 +919,9 @@ buildExecutable orderedSCCs targetMod target = do
             let mainMod = []
             enterModule target mainMod Nothing
             addImport ["wybe"] $ importSpec Nothing Private
+            addImport ["command_line"] $ importSpec Nothing Private
+            possDirs <- gets $ optLibDirs . options
+            loadModuleIfNeeded False ["command_line"] possDirs
             mapM_ (\m -> addImport m $ importSpec (Just [""]) Private)
                   mainImports
             addProcDef mainProc
@@ -1004,7 +1007,8 @@ buildMain mainImports =
                     | m <- mainImports]
         -- XXX Shouldn't have to hard code assignment of phantom to io
         -- XXX Should insert assignments of initialised visible resources
-        bodyCode = [move (castTo (iVal 0) phantomType) (varSet "io"),
+        bodyCode = [move (iVal 0 `castTo` phantomType)
+                         (varSet "io" `withType` phantomType),
                     move (intCast $ iVal 0) (intVarSet "exit_code"),
                     Unplaced $ ForeignCall "c" "gc_init" ["semipure"] []] 
                     ++ bodyInner

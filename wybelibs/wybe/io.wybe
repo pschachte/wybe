@@ -1,6 +1,7 @@
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use foreign object cbits
+use foreign library gc
 
 use wybe.bool, wybe.int, wybe.count, wybe.float, wybe.char, wybe.string
 use wybe.phantom
