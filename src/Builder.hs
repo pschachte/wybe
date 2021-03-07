@@ -246,7 +246,7 @@ buildTarget target = do
             let orderedSCCs = List.map (\(m, ms) -> (m, m, ms)) depGraph
                                 |> Graph.stronglyConnComp
                                 |> List.map sccElts
-            
+
             compileModBottomUpPass orderedSCCs
 
             logBuild $ "Emitting Target: " ++ target
@@ -303,7 +303,7 @@ loadAllNeededModules modspec isTarget possDirs = do
         concatMapM (\m -> do
             imports <- getModuleImplementationField (keys . modImports)
                         `inModule` m
-            
+
             logBuild $ "handle imports: " ++ showModSpecs imports ++ " in "
                         ++ showModSpec m
             depGraph <- concatMapM (\importMod ->
@@ -325,7 +325,7 @@ loadModuleIfNeeded force modspec possDirs = do
     let clash kind1 f1 kind2 f2 =
           Error <!> kind1 ++ " " ++ f1 ++ " and "
                     ++ kind2 ++ " " ++ f2 ++ " clash. There can only be one!"
-        
+
     maybemod <- getLoadedModule modspec
     logBuild $ "module " ++ showModSpec modspec ++ " is " ++
         (if isNothing maybemod then "not yet" else "already") ++
@@ -412,7 +412,6 @@ loadModuleIfNeeded force modspec possDirs = do
 loadModuleFromSrcFile :: ModSpec -> FilePath -> Compiler [ModSpec]
 loadModuleFromSrcFile mspec srcfile = do
     tokens <- (liftIO . fileTokens) srcfile
-    -- let parseTree = parse tokens
     let parseTree = parseWybe tokens srcfile
     either (\er -> do
                liftIO $ putStrLn $ "Syntax Error: " ++ show er
@@ -428,6 +427,7 @@ buildDirectory dir dirmod = do
         ++ showModSpec dirmod
     -- Make the directory a Module package
     enterModule dir dirmod Nothing
+    -- XXX load _.wybe into the current module
     updateModule (\m -> m { isPackage = True })
 
     -- Get wybe modules (in the directory) to build
@@ -492,7 +492,7 @@ loadModuleFromObjFile required objfile = do
         logBuild $ "=== >>> Extracted Module bytes from " ++ objfile
         logBuild $ "=== >>> Found modules: "
                 ++ showModSpecs (List.map modSpec extracted)
-        
+
         -- This object should contain the required mod (parent mod) and some
         -- sub mods.
         let (requiredMods, subMods) = List.partition (\m ->
@@ -520,7 +520,7 @@ loadModuleFromObjFile required objfile = do
                 return $ List.map modSpec extracted
             _ ->
                 -- The required modspec was not part of the extracted, abort.
-                shouldnt $ "Invalid Wybe object file" 
+                shouldnt $ "Invalid Wybe object file"
                         ++ "(can't find matching module)" ++ objfile
 
 
@@ -529,12 +529,12 @@ loadLPVMFromObjFile :: FilePath -> [ModSpec] -> Compiler [Module]
 loadLPVMFromObjFile objFile required = do
     tmpDir <- gets tmpDir
     result <- liftIO $ extractLPVMData tmpDir objFile
-    case result of 
-        Left err -> do 
+    case result of
+        Left err -> do
             logMsg Builder err
             return []
         Right modBS -> do
-            mods <- decodeModule required modBS 
+            mods <- decodeModule required modBS
             unless (List.null mods) $ logMsg Builder "Decoding successful!"
             return $ List.map (\m -> m { modOrigin = objFile } ) mods
 
@@ -546,7 +546,7 @@ buildArchive arch = do
     let dir = dropExtension arch
     archiveMods <- liftIO $ List.map dropExtension <$> wybeSourcesInDir dir
     logBuild $ "Building modules to archive: " ++ show archiveMods
-    let oFileOf m = joinPath [dir, m] ++ ".o"
+    let oFileOf m = joinPath [dir, m] <.> objectExtension
     mapM_ (\m -> emitObjectFile [m] (oFileOf m)) archiveMods
     makeArchive (List.map oFileOf archiveMods) arch
 
@@ -581,10 +581,10 @@ isCompileNeeded modSCC = do
     if List.all (`Set.member` unchanged) modSCC
     then do
         upToDate <- andM $ List.map (\m -> do
-            imports <- getModuleImplementationField modImports `inModule` m 
+            imports <- getModuleImplementationField modImports `inModule` m
             andM $ List.map (\(m', (_, hash)) ->
                 if isNothing hash
-                then do 
+                then do
                     logBuild $ "mod: " ++ showModSpec m ++ " imports: "
                         ++ showModSpec m' ++ " with empty hash"
                     return False
@@ -613,7 +613,7 @@ prepareToCompileModSCC modSCC = do
     unchanged <- gets unchangedMods
     let compiledMods = List.filter (`Set.member` unchanged) modSCC
     if List.null compiledMods
-    then 
+    then
         return ()
     else do
         logBuild $ "Mods that need reload: " ++ showModSpecs compiledMods
@@ -644,7 +644,7 @@ prepareToCompileModSCC modSCC = do
                 in
                 st { modules = mods, unchangedMods = unchanged }
             )
-        
+
         logBuild $ "ModsGroupByRoot: " ++ show modsGroupByRoot
 
         -- reload
@@ -777,17 +777,17 @@ updateInterfaceHash mspec = do
                 let p = (modProcs impl ! procName) !! procID in
                 let ProcDefPrim proto body analysis _ = procImpln p in
                 if procInline p
-                then InlineProc proto body 
+                then InlineProc proto body
                 else NormalProc proto analysis
             else
-                ReexportedProc 
+                ReexportedProc
             )) (pubProcs interface)
     updateModInterface (\i -> i {pubProcs = procs})
     -- re-compute the hash
     interface' <- getModuleInterface
     let hash = hashInterface interface'
     updateModule (\m -> m {modInterfaceHash = hash})
-    reexitModule 
+    reexitModule
 
 
 -- Update the recorded interface hashes of all imports in the given module to
@@ -803,7 +803,7 @@ updateImportsInterfaceHash mspec = do
             ) importsList
         let imports = Map.fromDistinctAscList importsList'
         return $ imp {modImports = imports})
-    reexitModule 
+    reexitModule
 
 
 -- | Filter for avoiding the standard library modules
@@ -973,7 +973,7 @@ emitObjectFilesIfNeeded depends = do
         if changed
         then do
             logBuild $ "emitting to: " ++ objFile
-            emitObjectFile m objFile 
+            emitObjectFile m objFile
         else
             logBuild $ "unchanged, skip it: " ++ objFile
         reexitModule
@@ -1010,9 +1010,9 @@ buildMain mainImports =
         bodyCode = [move (iVal 0 `castTo` phantomType)
                          (varSet "io" `withType` phantomType),
                     move (intCast $ iVal 0) (intVarSet "exit_code"),
-                    Unplaced $ ForeignCall "c" "gc_init" ["semipure"] []] 
+                    Unplaced $ ForeignCall "c" "gc_init" ["semipure"] []]
                     ++ bodyInner
-                    ++ [Unplaced 
+                    ++ [Unplaced
                         $ ForeignCall "c" "exit" ["semipure","terminal"]
                                       [Unplaced $ intVarGet "exit_code"]]
         mainBody = ProcDefSrc bodyCode
@@ -1060,7 +1060,7 @@ orderedDependencies targetMod =
                     (False, flag) -> (m, flag) : collected
         -- Don't visit any modspec already in `ms' (will be visited as it is)
         -- Don't visit any modspec already in `collected''
-        let remains = 
+        let remains =
                 List.foldr (\x acc -> if x `elem` acc then acc else x:acc)
                         ms imports
                 |> List.filter (\x -> x `notElem` List.map fst collected')
@@ -1211,7 +1211,7 @@ buildDirModSpec path modspec = do
 -- XXX This should also return subdirectory, which could also be modules.
 wybeSourcesInDir :: FilePath -> IO [FilePath]
 wybeSourcesInDir dir = do
-    let isWybe = List.filter ((== ".wybe") . takeExtension)
+    let isWybe = List.filter ((== ('.':sourceExtension)) . takeExtension)
     isWybe <$> listDirectory dir
 
 
