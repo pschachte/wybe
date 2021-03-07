@@ -2880,7 +2880,7 @@ instance Show TypeFamily where
 
 -- |How to show a ModSpec.
 showModSpec :: ModSpec -> String
-showModSpec spec = intercalate "." spec
+showModSpec spec = intercalate "." $ (\case "" -> "``" ; m -> m) <$> spec
 
 
 -- |How to show a list of ModSpecs.
