@@ -4,27 +4,27 @@ use wybe.bool
 
 representation is unsigned
 
-pub def +(x:this,y:this):this = foreign llvm add(x,y)
-pub def {partial} +(?x:this,y:this,z:this) {
+pub def +(x:_,y:_):_ = foreign llvm add(x,y)
+pub def {partial} +(?x:_,y:_,z:_) {
     (z >= y)
     ?x = foreign llvm sub(z,y)
 }
-pub def {partial} +(x:this,?y:this,z:this) {
+pub def {partial} +(x:_,?y:_,z:_) {
     (z >= x)
     ?y = foreign llvm sub(z,x)
 }
-pub def {partial} -(x:this,y:this):this =
+pub def {partial} -(x:_,y:_):_ =
     foreign llvm sub(x,y) where { (y >= x) }
-pub def -(?x:this,y:this,z:this) { ?x = foreign llvm add(z,y) }
-pub def -(x:this,?y:this,z:this) { ?y = foreign llvm sub(z,x) }
-pub def *(x:this,y:this):this = foreign llvm mul(x,y)
-pub def /(x:this,y:this):this = foreign llvm udiv(x,y)
-pub def %(x:this,y:this):this = foreign llvm urem(x,y)
-pub def /=(x:this,y:this):bool = foreign llvm icmp_ne(x,y)
-pub def <(x:this,y:this):bool = foreign llvm icmp_ult(x,y)
-pub def <=(x:this,y:this):bool = foreign llvm icmp_ule(x,y)
-pub def >(x:this,y:this):bool = foreign llvm icmp_ugt(x,y)
-pub def >=(x:this,y:this):bool = foreign llvm icmp_uge(x,y)
-pub def =(x:this, y:this):bool = foreign llvm icmp_eq(x,y)
-pub def incr(!x:this) { ?x = x + 1:this }
-pub def {partial} decr(!x:this) { ?x = x - 1:this }
+pub def -(?x:_,y:_,z:_) { ?x = foreign llvm add(z,y) }
+pub def -(x:_,?y:_,z:_) { ?y = foreign llvm sub(z,x) }
+pub def *(x:_,y:_):_ = foreign llvm mul(x,y)
+pub def /(x:_,y:_):_ = foreign llvm udiv(x,y)
+pub def %(x:_,y:_):_ = foreign llvm urem(x,y)
+pub def /=(x:_,y:_):bool = foreign llvm icmp_ne(x,y)
+pub def <(x:_,y:_):bool = foreign llvm icmp_ult(x,y)
+pub def <=(x:_,y:_):bool = foreign llvm icmp_ule(x,y)
+pub def >(x:_,y:_):bool = foreign llvm icmp_ugt(x,y)
+pub def >=(x:_,y:_):bool = foreign llvm icmp_uge(x,y)
+pub def =(x:_, y:_):bool = foreign llvm icmp_eq(x,y)
+pub def incr(!x:_) { ?x = x + 1:_ }
+pub def {partial} decr(!x:_) { ?x = x - 1:_ }

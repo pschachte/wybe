@@ -1,13 +1,13 @@
-# test case for special `this` type
+# test case for special `_` type
 
-pub constructors nil | cons(head:int, tail:this)
+pub constructors nil | cons(head:int, tail:_)
 
-pub def concat(x:this, y:this):this =
+pub def concat(x:_, y:_):_ =
     if x = cons(?h, ?t)
     then cons(h,concat(t,y))
     else y
 
-pub def length(x:this):int =
+pub def length(x:_):int =
     if x = cons(?h, ?t) then 1 + length(t) else 0
 
 

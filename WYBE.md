@@ -730,9 +730,9 @@ two input lists must be the same, and the result will be a list of the same
 type.
 
 
-## `this` type
+## `_` type
 
-As a special case, the type `this` is treated as an alias for whatever type is
+As a special case, the type `_` is treated as an alias for whatever type is
 defined by the module in which it appears.  That provides a (possibly) shorter
 name for the type being defined, and also allows the type to be renamed simply
 by renaming the file it is defined in.  For example, if the following code could
@@ -740,10 +740,10 @@ be placed in an Wybe source file to define a linked list type with whatever name
 is deemed suitable.
 
 ```
-constructors(?T) null | cons(head:?T, tail:this(?T))
+constructors(?T) null | cons(head:?T, tail:_(?T))
 
 
-def concat(a:this(?T), b:this(?T)):this(?T) =
+def concat(a:_(?T), b:_(?T)):_(?T) =
     if cons(?h, ?t) = a then cons(h, concat(t,b)) else b
 ```
 

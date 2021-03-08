@@ -229,6 +229,7 @@ buildTarget target = do
     logBuild $ "Temp Directory: " ++ tmpDir
     updateCompiler (\st -> st { tmpDir = tmpDir })
 
+    target <- liftIO $ makeAbsolute target
     Informational <!> "Building target: " ++ target
     tType <- targetType target
     case tType of
@@ -279,8 +280,9 @@ buildTarget target = do
     liftIO $ removeDirectoryRecursive tmpDir
 
 
--- |Search and load all needed modules starting from the given modspec.
--- Return a directed graph representing module dependencies.
+-- |Search and load all needed modules starting from the given modspec, defined
+-- in one of the specified absolute directories. Return a directed graph
+-- representing module dependencies.
 loadAllNeededModules :: ModSpec -- ^Module name
               -> Bool           -- ^Whether the provided mod is the final target
               -> [FilePath]     -- ^Directories to look in
@@ -1133,9 +1135,9 @@ sourceInDir ms d = do
     -- Helper to convert a boolean to a Maybe [maybeFile True f == Just f]
     let maybeFile b f = if b then Just f else Nothing
     -- Different paths which can be a source for a module in the directory `d`
-    let srcfile = moduleFilePath sourceExtension d ms
-    let objfile = moduleFilePath objectExtension d ms
-    let arfile = moduleFilePath archiveExtension d ms
+    let srcfile = dirName <.> sourceExtension
+    let objfile = dirName <.> objectExtension
+    let arfile  = dirName <.> archiveExtension
     -- Flags checking
     dirExists <- liftIO $ doesDirectoryExist dirName
     srcExists <- liftIO $ doesFileExist srcfile
@@ -1190,8 +1192,7 @@ instance Show ModuleSource where
 -- module.
 identifyRootModule :: FilePath -> IO (ModSpec,FilePath)
 identifyRootModule target = do
-    absTarget <- makeAbsolute target
-    buildDirModSpec (takeDirectory absTarget) [takeBaseName absTarget]
+    buildDirModSpec (takeDirectory target) [takeBaseName target]
 
 
 -- |Given a directory, build up its module spec as a prefix to the specified
@@ -1201,7 +1202,7 @@ identifyRootModule target = do
 -- directory its submodules.
 buildDirModSpec :: FilePath -> ModSpec -> IO (ModSpec,FilePath)
 buildDirModSpec path modspec = do
-    isMod <- doesFileExist $ path </> "_" <.> sourceExtension
+    isMod <- doesFileExist $ path </> directoryModuleFilename
     if isMod
         then buildDirModSpec (takeDirectory path) (takeFileName path:modspec)
         else return (modspec,path)
@@ -1227,7 +1228,7 @@ data TargetType = InterfaceFile | ObjectFile | ExecutableFile
 --  file need not exist.
 targetType :: FilePath -> Compiler TargetType
 targetType fileOrDirName = do
-    isMod <- liftIO $ doesFileExist $ fileOrDirName </> "_" <.> sourceExtension
+    isMod <- liftIO $ doesFileExist $ fileOrDirName </> directoryModuleFilename
     if isMod
         then return LibraryDirectory
         else return $ targetType' fileOrDirName
@@ -1244,13 +1245,6 @@ targetType' filename
   | ext' == archiveExtension    = ArchiveFile
   | otherwise                   = UnknownFile
       where ext' = dropWhile (=='.') $ takeExtension filename
-
-
--- |Find the file path for the specified module spec relative to the
---  specified file path for the referencing module.
-moduleFilePath :: String -> FilePath -> ModSpec -> FilePath
-moduleFilePath extension dir spec =
-    addExtension (joinPath $ splitDirectories dir ++ spec) extension
 
 
 ------------------------ Logging ------------------------

@@ -10,6 +10,7 @@
 --  OSes.
 module Config (sourceExtension, objectExtension, executableExtension,
                interfaceExtension, bitcodeExtension,
+               directoryModuleFilename, currentTypeAlias,
                wordSize, wordSizeBytes,
                availableTagBits, tagMask, smallestAllocatedAddress,
                assemblyExtension, archiveExtension, magicVersion,
@@ -22,6 +23,7 @@ import Distribution.System (buildOS, OS (..))
 import Foreign.Storable
 import System.Exit (ExitCode (..))
 import System.Process
+import System.FilePath
 
 -- |The file extension for source files.
 sourceExtension :: String
@@ -56,6 +58,16 @@ assemblyExtension = "ll"
 -- |The file extension for object archive files.
 archiveExtension :: String
 archiveExtension = "a"
+
+
+-- |The file that must exist in a directory for it to be a module.
+directoryModuleFilename :: String
+directoryModuleFilename = "_" <.> sourceExtension
+
+
+-- |The special name given to the type defined by the current module.
+currentTypeAlias :: String
+currentTypeAlias = "_"
 
 
 -- |Determining word size of the machine in bits

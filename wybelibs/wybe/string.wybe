@@ -7,11 +7,11 @@ representation is address
 
 # this whole implementation is completely wrong, but will do for now
 
-pub def =(x:string, y:string):bool  = foreign c strcmp(x,y):int = 0
-pub def /=(x:string,y:string):bool  = foreign c strcmp(x,y):int /= 0
-pub def <(x:string, y:string):bool  = foreign c strcmp(x,y):int < 0
-pub def <=(x:string, y:string):bool = foreign c strcmp(x,y):int <= 0
-pub def >(x:string, y:string):bool  = foreign c strcmp(x,y):int > 0
-pub def >=(x:string, y:string):bool = foreign c strcmp(x,y):int >= 0
+pub def =(x:_, y:_):bool  = foreign c strcmp(x,y):int = 0
+pub def /=(x:_,y:_):bool  = foreign c strcmp(x,y):int /= 0
+pub def <(x:_, y:_):bool  = foreign c strcmp(x,y):int < 0
+pub def <=(x:_, y:_):bool = foreign c strcmp(x,y):int <= 0
+pub def >(x:_, y:_):bool  = foreign c strcmp(x,y):int > 0
+pub def >=(x:_, y:_):bool = foreign c strcmp(x,y):int >= 0
 
-#wrong: pub def ,,(x:string, y:string):string = foreign c strcat(x,y)
+#wrong: pub def ,,(x:_, y:_):_ = foreign c strcat(x,y)
