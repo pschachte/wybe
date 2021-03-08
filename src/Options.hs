@@ -20,6 +20,7 @@ import           System.Environment
 import           System.Exit
 import           System.FilePath
 import           Version
+import System.Directory
 
 -- |Command line options for the wybe compiler.
 data Options = Options{
@@ -165,11 +166,11 @@ handleCmdline = do
     assocList <- getEnvironment
     let env = Map.fromList assocList
     (opts0,files) <- compilerOpts argv
-    let opts = if List.null $ optLibDirs opts0
-                then maybe (opts0  { optLibDirs = [libDir] })
-                     (\l -> opts0 { optLibDirs = splitSearchPath l }) $
-                     Map.lookup "WYBELIBS" env
-                else opts0
+    let libs0 = case optLibDirs opts0 of
+                [] -> maybe [libDir] splitSearchPath $ Map.lookup "WYBELIBS" env
+                lst -> lst
+    libs <- mapM makeAbsolute libs0
+    let opts = opts0 { optLibDirs = libs }
     if optShowHelp opts
       then do
         putStrLn $ usageInfo header options
