@@ -66,6 +66,7 @@ entry:
                     math.utils.factorial<0>
   imports         : public use math.temperature
                     public use math.utils
+                    use wybe
   resources       : 
   submodules      : math.temperature, math.utils
   procs           : 

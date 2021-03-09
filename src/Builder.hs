@@ -385,7 +385,7 @@ loadModuleIfNeeded force modspec possDirs = do
                     else return loaded
 
             ModuleSource Nothing Nothing (Just dir) _ -> do
-                -- directory exists:  rebuild contents if necessary
+                -- directory and _.wybe exist:  rebuild contents if necessary
                 logBuild $ "Modname for directory: " ++ showModSpec modspec
                 buildDirectory dir modspec
                 return [modspec]
@@ -428,8 +428,8 @@ buildDirectory dir dirmod = do
     logBuild $ "Building DIR: " ++ dir ++ ", into MODULE: "
         ++ showModSpec dirmod
     -- Make the directory a Module package
-    enterModule dir dirmod Nothing
-    -- XXX load _.wybe into the current module
+    loadModuleFromSrcFile dirmod $ dir </> directoryModuleFilename
+    reenterModule dirmod
     updateModule (\m -> m { isPackage = True })
 
     -- Get wybe modules (in the directory) to build
@@ -444,7 +444,7 @@ buildDirectory dir dirmod = do
                 updateModSubmods $ Map.insert (last m) m
     -- The module package imports all wybe modules in its source dir
     mapM_ updateImport wybemods
-    exitModule
+    reexitModule
     logBuild $ "Generated directory module containing: " ++ showModSpecs wybemods
     -- Run the compilation passes on this module package to append the
     -- procs from the imports to the interface.
@@ -1043,6 +1043,7 @@ orderedDependencies targetMod =
   where
     visit [] cs = return cs
     visit (m:ms) collected = do
+        logBuild $ "Visiting: " ++ showModSpecs (m:ms)
         thisMod <- getLoadedModuleImpln m
         let procs = (keys . modProcs) thisMod
         packageFlag <- moduleIsPackage m
@@ -1117,7 +1118,7 @@ moduleSources :: ModSpec -> [FilePath] -> Compiler ModuleSource
 moduleSources modspec possDirs = do
     logBuild $ "Finding location of module " ++ showModSpec modspec
                ++ " in directories " ++ intercalate ", " possDirs
-    dirs <- mapM (sourceInDir modspec) possDirs
+    dirs <- mapM (sourceInDir . joinPath . (:modspec)) possDirs
     -- Return the last valid Source
     return $ (fromMaybe NoSource . List.find (/= NoSource)) dirs
 
@@ -1127,23 +1128,22 @@ moduleSources modspec possDirs = do
 -- file (.wybe), an object file (.o), an archive file (.a), or a sub-directory
 -- in the given directory `d`. This information is returned as a `ModuleSource`
 -- record.
-sourceInDir :: ModSpec -> FilePath -> Compiler ModuleSource
-sourceInDir ms d = do
-    logBuild $ "Looking for source for module " ++ showModSpec ms
+sourceInDir :: FilePath -> Compiler ModuleSource
+sourceInDir baseName = do
+    logBuild $ "Looking for source of " ++ baseName
     -- XXX Should we be checking for a _.wybe file in each directory?
-    let dirName = joinPath $ d : ms
     -- Helper to convert a boolean to a Maybe [maybeFile True f == Just f]
     let maybeFile b f = if b then Just f else Nothing
     -- Different paths which can be a source for a module in the directory `d`
-    let srcfile = dirName <.> sourceExtension
-    let objfile = dirName <.> objectExtension
-    let arfile  = dirName <.> archiveExtension
+    let srcfile = baseName <.> sourceExtension
+    let objfile = baseName <.> objectExtension
+    let arfile  = baseName <.> archiveExtension
     -- Flags checking
-    dirExists <- liftIO $ doesDirectoryExist dirName
+    dirExists <- liftIO $ doesDirectoryExist baseName
     srcExists <- liftIO $ doesFileExist srcfile
     objExists <- liftIO $ doesFileExist objfile
     arExists  <- liftIO $ doesFileExist arfile
-    logBuild $ "Directory   " ++ dirName ++ " exists? " ++ show dirExists
+    logBuild $ "Directory   " ++ baseName ++ " exists? " ++ show dirExists
     logBuild $ "Source file " ++ srcfile ++ " exists? " ++ show srcExists
     logBuild $ "Object file " ++ objfile ++ " exists? " ++ show objExists
     logBuild $ "Archive     " ++ arfile ++  " exists? " ++ show arExists
@@ -1152,7 +1152,7 @@ sourceInDir ms d = do
              ModuleSource
              { srcWybe = maybeFile srcExists srcfile
              , srcObj = maybeFile objExists objfile
-             , srcDir = maybeFile dirExists dirName
+             , srcDir = maybeFile dirExists baseName
              , srcArchive = maybeFile arExists arfile
              }
         else return NoSource
@@ -1208,12 +1208,17 @@ buildDirModSpec path modspec = do
         else return (modspec,path)
 
 
--- |Return list of wybe module sources in the specified directory.
--- XXX This should also return subdirectory, which could also be modules.
+-- |Return list of wybe module sources in the specified directory.  This
+-- includes .wybe files (other than the special _.wybe  file) plus and Wybe
+-- module directories.
 wybeSourcesInDir :: FilePath -> IO [FilePath]
-wybeSourcesInDir dir = do
-    let isWybe = List.filter ((== ('.':sourceExtension)) . takeExtension)
-    isWybe <$> listDirectory dir
+wybeSourcesInDir dir =
+    listDirectory dir >>=
+    filterM (\f -> do
+        isDirMod <- doesFileExist $ f </> directoryModuleFilename
+        let isSource = takeExtension f == ('.':sourceExtension)
+        let notModFile = takeFileName f /= directoryModuleFilename
+        return $ isSource && notModFile || isDirMod)
 
 
 -- |The different sorts of files that could be specified on the
