@@ -48,14 +48,13 @@ emitObjectFile m f = do
     let filename = f -<.> objectExtension
     logEmit $ "Creating object file for *" ++ showModSpec m ++ "*" ++
         " @ '" ++ filename ++ "'"
-    -- astMod <- getModule id
     logEmit $ "Encoding and wrapping Module *" ++ showModSpec m
               ++ "* in a wrapped object."
     logEmit $ "Running passmanager on the generated LLVM for *"
               ++ showModSpec m ++ "*."
-    -- modBS <- encodeModule astMod
     modBS <- encodeModule m
     llmod <- descendentModuleLLVM m
+    logEmit $ "===> Writing object file " ++ filename
     makeWrappedObjFile filename llmod modBS
 
 
@@ -72,6 +71,7 @@ emitBitcodeFile m f = do
     -- modBS <- encodeModule astMod
     modBS <- encodeModule m
     llmod <- descendentModuleLLVM m
+    logEmit $ "===> Writing bitcode file " ++ filename
     liftIO $ makeWrappedBCFile filename llmod modBS
 
 
@@ -83,6 +83,7 @@ emitAssemblyFile m f = do
     logEmit $ "Creating assembly file for " ++ showModSpec m ++
         ", with optimisations."
     llmod <- descendentModuleLLVM m
+    logEmit $ "===> Writing assembly file " ++ filename
     liftIO $ withOptimisedModule llmod
         (\mm -> withHostTargetMachineDefault $ \_ ->
             writeLLVMAssemblyToFile (File filename) mm)

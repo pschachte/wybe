@@ -10,7 +10,7 @@
 --  OSes.
 module Config (sourceExtension, objectExtension, executableExtension,
                interfaceExtension, bitcodeExtension,
-               directoryModuleFilename, currentTypeAlias,
+               moduleDirectoryBasename, currentTypeAlias,
                wordSize, wordSizeBytes,
                availableTagBits, tagMask, smallestAllocatedAddress,
                assemblyExtension, archiveExtension, magicVersion,
@@ -60,9 +60,10 @@ archiveExtension :: String
 archiveExtension = "a"
 
 
--- |The file that must exist in a directory for it to be a module.
-directoryModuleFilename :: String
-directoryModuleFilename = "_" <.> sourceExtension
+-- |The basename of the Wybe file that must exist in a directory for it to be a
+-- module.
+moduleDirectoryBasename :: String
+moduleDirectoryBasename = "_"
 
 
 -- |The special name given to the type defined by the current module.
