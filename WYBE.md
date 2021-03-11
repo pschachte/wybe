@@ -14,7 +14,7 @@ may be passed around at will without worrying that they may be modified.
 
 ## Hello, World!
 
-Code appearing at the top level of a file is executed when the program
+Code appearing at the top level of a module is executed when the program
 is run, so Hello, World! in Wybe is quite simple:
 ```
 # Print a friendly greeting
@@ -73,6 +73,7 @@ However, each of these sorts of items can be made public by preceding them with
 the keyword `pub`, meaning that by importing the module that defines them,
 you gain access to them.
 
+###  <a name="importing"></a>Importing modules
 To import a module into your own module, you need only include a declaration of
 the form:
 
@@ -96,6 +97,9 @@ Wybe has the usual complement of primitive types:
 | `bool`     | Boolean; either `true` or `false`          |
 | `string`   | Character string (double quotes)           |
 | `char`     | Individual ascii character (single quotes) |
+
+These are all defined in the `wybe` module, which is automatically imported into
+every module; there is no need to explicitly import them.
 
 
 ## Constants
@@ -149,7 +153,7 @@ specifies a single quote character.
 
 ## Procedure calls
 
-`!println("Hello, World!")` is a call the procedure `println` with the string
+`!println("Hello, World!")` is a call to the procedure `println` with the string
 `Hello, World` as its only argument.
 In general, procedure calls have the form:
 
@@ -497,6 +501,7 @@ do {!print(prompt)
 }
 ```
 
+
 ## (sub)modules
 
 A Wybe module may contain submodules.
@@ -618,7 +623,8 @@ x(!pos) = x(pos) + 1  # shift position to the right
 !println(x(pos))
 ```
 so that it does in fact mutate the coordinate object in place,
-saving an unnecessary object creation.
+saving an unnecessary object creation.  Thus Wybe implements a
+[copy-on-write](https://en.wikipedia.org/wiki/Copy-on-write) semantics.
 
 The `constructors` declaration must specify the forms of all the possible values
 of that type.  Wybe does not support a special *null* or *nil* value.  For
@@ -724,9 +730,9 @@ two input lists must be the same, and the result will be a list of the same
 type.
 
 
-## `this` type
+## `_` type
 
-As a special case, the type `this` is treated as an alias for whatever type is
+As a special case, the type `_` is treated as an alias for whatever type is
 defined by the module in which it appears.  That provides a (possibly) shorter
 name for the type being defined, and also allows the type to be renamed simply
 by renaming the file it is defined in.  For example, if the following code could
@@ -734,10 +740,10 @@ be placed in an Wybe source file to define a linked list type with whatever name
 is deemed suitable.
 
 ```
-constructors(?T) null | cons(head:?T, tail:this(?T))
+constructors(?T) null | cons(head:?T, tail:_(?T))
 
 
-def concat(a:this(?T), b:this(?T)):this(?T) =
+def concat(a:_(?T), b:_(?T)):_(?T) =
     if cons(?h, ?t) = a then cons(h, concat(t,b)) else b
 ```
 
@@ -860,6 +866,43 @@ Finally, the `exit_code` resource is initialised to 0 at the start of execution,
 and may be changed to any integer during the computation to set the exit
 condition that will be returned to the operating system at the termination of
 the program.
+
+## Packages
+
+Each Wybe source file defines a module whose name is the base name of the file.
+A number of modules may be grouped together into an overarching module by
+putting them together in a directory containing a (possibly empty) file named
+`_.wybe`.  The name of the overarching module is the base name of the directory.
+For example, given a directory hierarchy:
+
+    /a/b/c/d/
+    /a/b/c/d/_.wybe
+    /a/b/c/d/e.wybe
+    /a/b/c/d/f.wybe
+    /a/b/c/d/g/
+    /a/b/c/d/g/_.wybe
+    /a/b/c/d/g/h.wybe
+    /a/b/c/d/g/i.wybe
+
+In this case, the name of the module defined in `e.wybe` is `d.e`, because the
+file `/a/b/c/d/_.wybe` makes `d` a module.  Likewise, `h.wybe` is the module
+`d.g.h`.
+
+As discussed in the section on [importing modules](#importing), a module may be
+imported by specifying its full name in a `use` declaration.  For example,
+either the `e.wybe` or `h.wybe` file could import both the `f.wybe` and
+`i.wybe` files with the declaration:
+
+```
+use d.f, d.g.i
+```
+
+## Libraries
+
+In addition to modules nested under a module's topmost ancestor module, modules
+may import any modules in any of the Wybe library directories.  These are
+configured when Wybe is installed, but can be overridden with the `--libdir` or
+`-L` command line options, or by setting the `$WYBELIBS` shell variable.
 
 ## Low-level features (foreign interface)
 

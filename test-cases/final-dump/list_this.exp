@@ -25,12 +25,12 @@ append > public (1 calls)
     foreign llvm icmp_ne(x#0:list_this(?T), 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
-        foreign llvm move(~y#0:list_this(?T), ?$#0:list_this(?T)) @list_this:3:5
+        foreign llvm move(~y#0:list_this(?T), ?$#0:list_this(?T)) @list_this:nn:nn
 
     1:
         foreign lpvm access(x#0:list_this(?T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:?T)
         foreign lpvm access(~x#0:list_this(?T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:list_this(?T))
-        list_this.append<0>(~t#0:list_this(?T), ~y#0:list_this(?T), ?tmp$2#0:list_this(?T)) #1 @list_this:5:18
+        list_this.append<0>(~t#0:list_this(?T), ~y#0:list_this(?T), ?tmp$2#0:list_this(?T)) #1 @list_this:nn:nn
         foreign lpvm alloc(16:wybe.int, ?tmp$8#0:list_this(?T))
         foreign lpvm mutate(~tmp$8#0:list_this(?T), ?tmp$9#0:list_this(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:?T)
         foreign lpvm mutate(~tmp$9#0:list_this(?T), ?$#0:list_this(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:list_this(?T))
@@ -126,7 +126,7 @@ length > public {inline} (0 calls)
 0: length(x#0:list_this(?T), ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    list_this.length1<0>(~x#0:list_this(?T), 0:wybe.int, ?$#0:wybe.int) #0 @list_this:8:36
+    list_this.length1<0>(~x#0:list_this(?T), 0:wybe.int, ?$#0:wybe.int) #0 @list_this:nn:nn
 
 
 length1 > (2 calls)
@@ -136,12 +136,12 @@ length1 > (2 calls)
     foreign llvm icmp_ne(x#0:list_this(?T), 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
-        foreign llvm move(~acc#0:wybe.int, ?$#0:wybe.int) @list_this:10:1
+        foreign llvm move(~acc#0:wybe.int, ?$#0:wybe.int) @list_this:nn:nn
 
     1:
         foreign lpvm access(~x#0:list_this(?T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:list_this(?T))
-        foreign llvm add(~acc#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @wybe:nn:nn
-        list_this.length1<0>(~t#0:list_this(?T), ~tmp$2#0:wybe.int, ?$#0:wybe.int) #2 @list_this:11:30
+        foreign llvm add(~acc#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @int:nn:nn
+        list_this.length1<0>(~t#0:list_this(?T), ~tmp$2#0:wybe.int, ?$#0:wybe.int) #2 @list_this:nn:nn
 
 
 

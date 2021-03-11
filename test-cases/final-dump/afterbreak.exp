@@ -10,39 +10,36 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public {inline} (0 calls)
-0: (argc#0:wybe.int, ?argc#1:wybe.int, argv#0:wybe.int, ?argv#1:wybe.int, exit_code#0:wybe.int, ?exit_code#1:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: (io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    afterbreak.gen$1<0>(~argc#0:wybe.int, ~argv#0:wybe.int, ~exit_code#0:wybe.int, ~io#0:wybe.phantom, 1:wybe.int, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#1:wybe.phantom) #0 @afterbreak:5:1
+    afterbreak.gen$1<0>(~io#0:wybe.phantom, 1:wybe.int, ?io#1:wybe.phantom) #0 @afterbreak:nn:nn
 
 
 gen$1 > (2 calls)
-0: gen$1(argc#0:wybe.int, argv#0:wybe.int, exit_code#0:wybe.int, io#0:wybe.phantom, x#0:wybe.int, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#1:wybe.phantom):
+0: gen$1(io#0:wybe.phantom, x#0:wybe.int, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_sgt(x#0:wybe.int, 10:wybe.int, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_sgt(x#0:wybe.int, 10:wybe.int, ?tmp$1#0:wybe.bool) @int:nn:nn
     case ~tmp$1#0:wybe.bool of
     0:
-        foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @wybe:nn:nn
-        foreign c print_int(tmp$0#0:wybe.int, ~io#0:wybe.phantom, ?tmp$13#0:wybe.phantom) @wybe:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp$13#0:wybe.phantom, ?tmp$14#0:wybe.phantom) @wybe:nn:nn
-        afterbreak.gen$1<0>(~argc#0:wybe.int, ~argv#0:wybe.int, ~exit_code#0:wybe.int, ~tmp$14#0:wybe.phantom, ~tmp$0#0:wybe.int, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#1:wybe.phantom) #4 @afterbreak:5:1
+        foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn
+        foreign c print_int(tmp$0#0:wybe.int, ~io#0:wybe.phantom, ?tmp$10#0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?tmp$11#0:wybe.phantom) @io:nn:nn
+        afterbreak.gen$1<0>(~tmp$11#0:wybe.phantom, ~tmp$0#0:wybe.int, ?io#1:wybe.phantom) #4 @afterbreak:nn:nn
 
     1:
-        foreign llvm move(~argc#0:wybe.int, ?argc#1:wybe.int)
-        foreign llvm move(~argv#0:wybe.int, ?argv#1:wybe.int)
-        foreign llvm move(~exit_code#0:wybe.int, ?exit_code#1:wybe.int)
         foreign llvm move(~io#0:wybe.phantom, ?io#1:wybe.phantom)
 
 
 
 gen$2 > {inline} (1 calls)
-0: gen$2(argc#0:wybe.int, argv#0:wybe.int, exit_code#0:wybe.int, io#0:wybe.phantom, [tmp$0#0:wybe.int], [x#0:wybe.int], y#0:wybe.int, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#2:wybe.phantom):
+0: gen$2(io#0:wybe.phantom, [tmp$0#0:wybe.int], [x#0:wybe.int], y#0:wybe.int, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_int(y#0:wybe.int, ~#io#0:wybe.phantom, ?tmp$3#0:wybe.phantom) @wybe:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$3#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
-    afterbreak.gen$1<0>(~argc#0:wybe.int, ~argv#0:wybe.int, ~exit_code#0:wybe.int, ~io#1:wybe.phantom, ~y#0:wybe.int, ?argc#1:wybe.int, ?argv#1:wybe.int, ?exit_code#1:wybe.int, ?io#2:wybe.phantom) #1 @afterbreak:5:1
+    foreign c print_int(y#0:wybe.int, ~#io#0:wybe.phantom, ?tmp$3#0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$3#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    afterbreak.gen$1<0>(~io#1:wybe.phantom, ~y#0:wybe.int, ?io#2:wybe.phantom) #1 @afterbreak:nn:nn
 
   LLVM code       :
 
@@ -64,53 +61,32 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external fastcc  {i64, i64, i64} @"afterbreak.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
+define external fastcc  void @"afterbreak.<0>"()    {
 entry:
-  %1 = tail call fastcc  {i64, i64, i64}  @"afterbreak.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0", i64  1)  
-  %2 = extractvalue {i64, i64, i64} %1, 0 
-  %3 = extractvalue {i64, i64, i64} %1, 1 
-  %4 = extractvalue {i64, i64, i64} %1, 2 
-  %5 = insertvalue {i64, i64, i64} undef, i64 %2, 0 
-  %6 = insertvalue {i64, i64, i64} %5, i64 %3, 1 
-  %7 = insertvalue {i64, i64, i64} %6, i64 %4, 2 
-  ret {i64, i64, i64} %7 
+  tail call fastcc  void  @"afterbreak.gen$1<0>"(i64  1)  
+  ret void 
 }
 
 
-define external fastcc  {i64, i64, i64} @"afterbreak.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0", i64  %"x#0")    {
+define external fastcc  void @"afterbreak.gen$1<0>"(i64  %"x#0")    {
 entry:
   %"1$tmp$1#0" = icmp sgt i64 %"x#0", 10 
   br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
-  %8 = insertvalue {i64, i64, i64} undef, i64 %"argc#0", 0 
-  %9 = insertvalue {i64, i64, i64} %8, i64 %"argv#0", 1 
-  %10 = insertvalue {i64, i64, i64} %9, i64 %"exit_code#0", 2 
-  ret {i64, i64, i64} %10 
+  ret void 
 if.else:
   %"3$tmp$0#0" = add   i64 %"x#0", 1 
   tail call ccc  void  @print_int(i64  %"3$tmp$0#0")  
   tail call ccc  void  @putchar(i8  10)  
-  %11 = tail call fastcc  {i64, i64, i64}  @"afterbreak.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0", i64  %"3$tmp$0#0")  
-  %12 = extractvalue {i64, i64, i64} %11, 0 
-  %13 = extractvalue {i64, i64, i64} %11, 1 
-  %14 = extractvalue {i64, i64, i64} %11, 2 
-  %15 = insertvalue {i64, i64, i64} undef, i64 %12, 0 
-  %16 = insertvalue {i64, i64, i64} %15, i64 %13, 1 
-  %17 = insertvalue {i64, i64, i64} %16, i64 %14, 2 
-  ret {i64, i64, i64} %17 
+  tail call fastcc  void  @"afterbreak.gen$1<0>"(i64  %"3$tmp$0#0")  
+  ret void 
 }
 
 
-define external fastcc  {i64, i64, i64} @"afterbreak.gen$2<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0", i64  %"y#0")    {
+define external fastcc  void @"afterbreak.gen$2<0>"(i64  %"y#0")    {
 entry:
   tail call ccc  void  @print_int(i64  %"y#0")  
   tail call ccc  void  @putchar(i8  10)  
-  %18 = tail call fastcc  {i64, i64, i64}  @"afterbreak.gen$1<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0", i64  %"y#0")  
-  %19 = extractvalue {i64, i64, i64} %18, 0 
-  %20 = extractvalue {i64, i64, i64} %18, 1 
-  %21 = extractvalue {i64, i64, i64} %18, 2 
-  %22 = insertvalue {i64, i64, i64} undef, i64 %19, 0 
-  %23 = insertvalue {i64, i64, i64} %22, i64 %20, 1 
-  %24 = insertvalue {i64, i64, i64} %23, i64 %21, 2 
-  ret {i64, i64, i64} %24 
+  tail call fastcc  void  @"afterbreak.gen$1<0>"(i64  %"y#0")  
+  ret void 
 }

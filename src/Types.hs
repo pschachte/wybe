@@ -139,8 +139,8 @@ typeCheckModSCC scc = do
       intercalate "\n"
        (List.map (("    " ++) . intercalate ", " . List.map show . sccElts)
        ordered)
-    errs <- mapM typecheckProcSCC ordered
-    mapM_ (\e -> message Error (show e) Nothing) $ concat $ reverse errs
+    errs <- concat <$> mapM typecheckProcSCC ordered
+    mapM_ (queueMessage . typeErrorMessage) $ reverse errs
 
 
 -- |Return the module, name, and defn of all procs in the specified module
@@ -266,123 +266,129 @@ data TypeError = ReasonParam ProcName Int OptPos
 
 
 instance Show TypeError where
-    show (ReasonParam name num pos) =
-        makeMessage pos $
-            "Type/flow error in definition of " ++ name ++
-            ", parameter " ++ show num
-    show (ReasonOutputUndef proc param pos) =
-        makeMessage pos $
-        "Output parameter " ++ param ++ " not defined by proc " ++ show proc
-    show (ReasonResource name resName pos) =
-            "Type/flow error in definition of " ++ name ++
-            ", resource " ++ resName
-    show (ReasonArgType name num pos) =
-        makeMessage pos $
-            "Type error in call to " ++ name ++ ", argument " ++ show num
-    show (ReasonCond pos) =
-        makeMessage pos
-            "Conditional or test expression with non-boolean result"
-    show (ReasonArgFlow name num pos) =
-        makeMessage pos $
-            "Uninitialised argument in call to " ++ name
-            ++ ", argument " ++ show num
-    show (ReasonUndefinedFlow name pos) =
-        makeMessage pos $
-            "No matching mode in call to " ++ name
-    show (ReasonOverload pspecs pos) =
-        makeMessage pos $
-            "Ambiguous overloading: call could refer to:" ++
-            List.concatMap (("\n    "++) . show) (reverse pspecs)
-    show (ReasonAmbig procName pos varAmbigs) =
-        makeMessage pos $
-            "Type ambiguity in defn of " ++ procName ++ ":" ++
-            concat ["\n    Variable '" ++ v ++ "' could be: " ++
-                    intercalate ", " (List.map show typs)
-                   | (v,typs) <- varAmbigs]
-    show (ReasonUndef callFrom callTo pos) =
-        makeMessage pos $
-            "'" ++ callTo ++ "' unknown in "
-            ++ if callFrom == ""
-               then "top-level statement"
-               else "'" ++ callFrom ++ "'"
-    show (ReasonUninit callFrom var pos) =
-        makeMessage pos $
-            "Unknown variable/constant '" ++ var ++ "'"
-    show (ReasonArity callFrom callTo pos callArity procArity) =
-        makeMessage pos $
-            (if callFrom == ""
-             then "Toplevel call"
-             else "Call from " ++ callFrom) ++
-            " to " ++ callTo ++ " with " ++
-            (if callArity == procArity
-             then "unsupported argument flow"
-             else show callArity ++ " arguments, expected " ++ show procArity)
-    show (ReasonUndeclared name pos) =
-        makeMessage pos $
-        "Public definition of '" ++ name ++ "' with some undeclared types."
-    show (ReasonEqual exp1 exp2 pos) =
-        makeMessage pos $
-        "Type of " ++ show exp2 ++ " incompatible with " ++ show exp1
-    show (ReasonDeterminism name stmtDetism contextDetism pos) =
-        makeMessage pos $
-        "Calling " ++ determinismFullName stmtDetism ++ " " ++ name
-        ++ " in a " ++ determinismFullName contextDetism ++ " context"
-    show (ReasonWeakDetism name actualDetism expectedDetism pos) =
-        makeMessage pos $ name ++ " has " ++ determinismFullName actualDetism
-        ++ " determinism, but declared " ++ determinismFullName expectedDetism
-    show (ReasonPurity descrip stmtPurity contextPurity pos) =
-        makeMessage pos $
-        "Calling " ++ impurityFullName stmtPurity ++ " " ++ descrip
-        ++ ", expecting at least " ++ impurityFullName contextPurity
-    show (ReasonLooksPure name impurity pos) =
-        makeMessage pos $
-        "Calling " ++ impurityFullName impurity ++ " proc " ++ name
-        ++ " without ! non-purity marker"
-    show (ReasonForeignLanguage lang instr pos) =
-        makeMessage pos $
-        "Foreign call '" ++ instr ++ "' with unknown language '" ++ lang ++ "'"
-    show (ReasonForeignArgType instr argNum pos) =
-        makeMessage pos $
-        "Foreign call '" ++ instr ++ "' with unknown type in argument "
-        ++ show argNum
-    show (ReasonForeignArity instr actualArity expectedArity pos) =
-        makeMessage pos $
-        "Foreign call '" ++ instr ++ "' with arity " ++ show actualArity
-        ++ "; should be " ++ show expectedArity
-    show (ReasonBadForeign lang instr pos) =
-        makeMessage pos $
-        "Unknown " ++ lang ++ " instruction '" ++ instr ++ "'"
-    show (ReasonBadMove dest pos) =
-        makeMessage pos $
-        "Instruction moves result to non-variable expression " ++ show dest
-    show (ReasonResourceUndef proc res pos) =
-        makeMessage pos $
-        "Output resource " ++ res ++ " not defined by proc " ++ proc
-    show (ReasonResourceUnavail proc res pos) =
-        makeMessage pos $
-        "Input resource " ++ res ++ " not available at call to proc " ++ proc
-    show (ReasonWrongFamily instr argNum fam pos) =
-        makeMessage pos $
-        "LLVM instruction '" ++ instr ++ "' argument " ++ show argNum
-        ++ ": expected " ++ show fam ++ " argument"
-    show (ReasonIncompatible instr rep1 rep2 pos) =
-        makeMessage pos $
-        "LLVM instruction '" ++ instr ++ "' inconsistent arguments "
-        ++ show rep1 ++ " and " ++ show rep2
-    show (ReasonWrongOutput instr wrongRep rightRep pos) =
-        makeMessage pos $
-        "LLVM instruction '" ++ instr ++ "' wrong output "
-        ++ show wrongRep ++ ", should be " ++ show rightRep
-    show (ReasonForeignArgRep instr argNum wrongRep rightDesc pos) =
-        makeMessage pos $
-        "LLVM instruction '" ++ instr ++ "' argument " ++ show argNum
-        ++ " is " ++ show wrongRep ++ ", should be " ++ rightDesc
-    show (ReasonBadCast caller callee argNum pos) =
-        makeMessage pos $
-        "Type cast (:!) in call from " ++ caller
-        ++ " to non-foreign " ++ callee ++ ", argument " ++ show argNum
-    show ReasonShouldnt =
-        makeMessage Nothing "Mysterious typing error"
+    show = show . typeErrorMessage
+
+
+-- |Produce a Message to be stored from a TypeError.
+typeErrorMessage :: TypeError -> Message
+typeErrorMessage (ReasonParam name num pos) =
+    Message Error pos $
+        "Type/flow error in definition of " ++ name ++
+        ", parameter " ++ show num
+typeErrorMessage (ReasonOutputUndef proc param pos) =
+    Message Error pos $
+    "Output parameter " ++ param ++ " not defined by proc " ++ show proc
+typeErrorMessage (ReasonResource name resName pos) =
+    Message Error pos $
+        "Type/flow error in definition of " ++ name ++
+        ", resource " ++ resName
+typeErrorMessage (ReasonArgType name num pos) =
+    Message Error pos $
+        "Type error in call to " ++ name ++ ", argument " ++ show num
+typeErrorMessage (ReasonCond pos) =
+    Message Error pos
+        "Conditional or test expression with non-boolean result"
+typeErrorMessage (ReasonArgFlow name num pos) =
+    Message Error pos $
+        "Uninitialised argument in call to " ++ name
+        ++ ", argument " ++ show num
+typeErrorMessage (ReasonUndefinedFlow name pos) =
+    Message Error pos $
+        "No matching mode in call to " ++ name
+typeErrorMessage (ReasonOverload pspecs pos) =
+    Message Error pos $
+        "Ambiguous overloading: call could refer to:" ++
+        List.concatMap (("\n    "++) . show) (reverse pspecs)
+typeErrorMessage (ReasonAmbig procName pos varAmbigs) =
+    Message Error pos $
+        "Type ambiguity in defn of " ++ procName ++ ":" ++
+        concat ["\n    Variable '" ++ v ++ "' could be: " ++
+                intercalate ", " (List.map show typs)
+                | (v,typs) <- varAmbigs]
+typeErrorMessage (ReasonUndef callFrom callTo pos) =
+    Message Error pos $
+        "'" ++ callTo ++ "' unknown in "
+        ++ if callFrom == ""
+            then "top-level statement"
+            else "'" ++ callFrom ++ "'"
+typeErrorMessage (ReasonUninit callFrom var pos) =
+    Message Error pos $
+        "Unknown variable/constant '" ++ var ++ "'"
+typeErrorMessage (ReasonArity callFrom callTo pos callArity procArity) =
+    Message Error pos $
+        (if callFrom == ""
+            then "Toplevel call"
+            else "Call from " ++ callFrom) ++
+        " to " ++ callTo ++ " with " ++
+        (if callArity == procArity
+            then "unsupported argument flow"
+            else show callArity ++ " arguments, expected " ++ show procArity)
+typeErrorMessage (ReasonUndeclared name pos) =
+    Message Error pos $
+    "Public definition of '" ++ name ++ "' with some undeclared types."
+typeErrorMessage (ReasonEqual exp1 exp2 pos) =
+    Message Error pos $
+    "Type of " ++ show exp2 ++ " incompatible with " ++ show exp1
+typeErrorMessage (ReasonDeterminism name stmtDetism contextDetism pos) =
+    Message Error pos $
+    "Calling " ++ determinismFullName stmtDetism ++ " " ++ name
+    ++ " in a " ++ determinismFullName contextDetism ++ " context"
+typeErrorMessage (ReasonWeakDetism name actualDetism expectedDetism pos) =
+    Message Error pos $ name ++ " has " ++ determinismFullName actualDetism
+    ++ " determinism, but declared " ++ determinismFullName expectedDetism
+typeErrorMessage (ReasonPurity descrip stmtPurity contextPurity pos) =
+    Message Error pos $
+    "Calling " ++ impurityFullName stmtPurity ++ " " ++ descrip
+    ++ ", expecting at least " ++ impurityFullName contextPurity
+typeErrorMessage (ReasonLooksPure name impurity pos) =
+    Message Error pos $
+    "Calling " ++ impurityFullName impurity ++ " proc " ++ name
+    ++ " without ! non-purity marker"
+typeErrorMessage (ReasonForeignLanguage lang instr pos) =
+    Message Error pos $
+    "Foreign call '" ++ instr ++ "' with unknown language '" ++ lang ++ "'"
+typeErrorMessage (ReasonForeignArgType instr argNum pos) =
+    Message Error pos $
+    "Foreign call '" ++ instr ++ "' with unknown type in argument "
+    ++ show argNum
+typeErrorMessage (ReasonForeignArity instr actualArity expectedArity pos) =
+    Message Error pos $
+    "Foreign call '" ++ instr ++ "' with arity " ++ show actualArity
+    ++ "; should be " ++ show expectedArity
+typeErrorMessage (ReasonBadForeign lang instr pos) =
+    Message Error pos $
+    "Unknown " ++ lang ++ " instruction '" ++ instr ++ "'"
+typeErrorMessage (ReasonBadMove dest pos) =
+    Message Error pos $
+    "Instruction moves result to non-variable expression " ++ show dest
+typeErrorMessage (ReasonResourceUndef proc res pos) =
+    Message Error pos $
+    "Output resource " ++ res ++ " not defined by proc " ++ proc
+typeErrorMessage (ReasonResourceUnavail proc res pos) =
+    Message Error pos $
+    "Input resource " ++ res ++ " not available at call to proc " ++ proc
+typeErrorMessage (ReasonWrongFamily instr argNum fam pos) =
+    Message Error pos $
+    "LLVM instruction '" ++ instr ++ "' argument " ++ show argNum
+    ++ ": expected " ++ show fam ++ " argument"
+typeErrorMessage (ReasonIncompatible instr rep1 rep2 pos) =
+    Message Error pos $
+    "LLVM instruction '" ++ instr ++ "' inconsistent arguments "
+    ++ show rep1 ++ " and " ++ show rep2
+typeErrorMessage (ReasonWrongOutput instr wrongRep rightRep pos) =
+    Message Error pos $
+    "LLVM instruction '" ++ instr ++ "' wrong output "
+    ++ show wrongRep ++ ", should be " ++ show rightRep
+typeErrorMessage (ReasonForeignArgRep instr argNum wrongRep rightDesc pos) =
+    Message Error pos $
+    "LLVM instruction '" ++ instr ++ "' argument " ++ show argNum
+    ++ " is " ++ show wrongRep ++ ", should be " ++ rightDesc
+typeErrorMessage (ReasonBadCast caller callee argNum pos) =
+    Message Error pos $
+    "Type cast (:!) in call from " ++ caller
+    ++ " to non-foreign " ++ callee ++ ", argument " ++ show argNum
+typeErrorMessage ReasonShouldnt =
+    Message Error Nothing "Mysterious typing error"
 
 
 ----------------------------------------------------------------

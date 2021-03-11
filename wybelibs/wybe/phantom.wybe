@@ -1,0 +1,6 @@
+pragma no_standard_library  # Standard library can't depend on itself!
+
+use wybe.bool
+
+# This is a unit type, and needs 0 bits to represent.
+pub constructor phantom

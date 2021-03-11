@@ -65,90 +65,90 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 0: *(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm mul(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:8:40
+    foreign llvm mul(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:nn:nn
 
 
 + > public {inline} (0 calls)
 0: +(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm add(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:2:40
+    foreign llvm add(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:nn:nn
 + > public {inline} (0 calls)
 1: +(?x#0:type_int.myint, y#0:type_int.myint, z#0:type_int.myint):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm sub(~z#0:type_int.myint, ~y#0:type_int.myint, ?x#0:type_int.myint) @type_int:3:48
+    foreign llvm sub(~z#0:type_int.myint, ~y#0:type_int.myint, ?x#0:type_int.myint) @type_int:nn:nn
 + > public {inline} (0 calls)
 2: +(x#0:type_int.myint, ?y#0:type_int.myint, z#0:type_int.myint):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm sub(~z#0:type_int.myint, ~x#0:type_int.myint, ?y#0:type_int.myint) @type_int:4:48
+    foreign llvm sub(~z#0:type_int.myint, ~x#0:type_int.myint, ?y#0:type_int.myint) @type_int:nn:nn
 
 
 - > public {inline} (0 calls)
 0: -(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm sub(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:5:40
+    foreign llvm sub(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:nn:nn
 - > public {inline} (0 calls)
 1: -(?x#0:type_int.myint, y#0:type_int.myint, z#0:type_int.myint):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm add(~y#0:type_int.myint, ~z#0:type_int.myint, ?x#0:type_int.myint) @type_int:6:48
+    foreign llvm add(~y#0:type_int.myint, ~z#0:type_int.myint, ?x#0:type_int.myint) @type_int:nn:nn
 - > public {inline} (0 calls)
 2: -(x#0:type_int.myint, ?y#0:type_int.myint, z#0:type_int.myint):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm sub(~z#0:type_int.myint, ~x#0:type_int.myint, ?y#0:type_int.myint) @type_int:7:48
+    foreign llvm sub(~z#0:type_int.myint, ~x#0:type_int.myint, ?y#0:type_int.myint) @type_int:nn:nn
 
 
 / > public {inline} (0 calls)
 0: /(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm sdiv(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:9:40
+    foreign llvm sdiv(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:nn:nn
 
 
 /= > public {inline} (0 calls)
 0: /=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:11:40
+    foreign llvm icmp_ne(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:nn:nn
 
 
 < > public {inline} (0 calls)
 0: <(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_slt(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:12:39
+    foreign llvm icmp_slt(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:nn:nn
 
 
 <= > public {inline} (0 calls)
 0: <=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_sle(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:13:40
+    foreign llvm icmp_sle(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:nn:nn
 
 
 = > public {inline} (0 calls)
 0: =(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_eq(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:10:39
+    foreign llvm icmp_eq(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:nn:nn
 
 
 > > public {inline} (0 calls)
 0: >(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_sgt(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:14:39
+    foreign llvm icmp_sgt(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:nn:nn
 
 
 >= > public {inline} (0 calls)
 0: >=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_sge(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:15:40
+    foreign llvm icmp_sge(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:nn:nn
 
   LLVM code       :
 

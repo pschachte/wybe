@@ -112,8 +112,8 @@ tokenise _ [] = []
 tokenise pos str@(c:cs)
   | isSpace c || isControl c = tokenise (updatePosChar pos c) cs
   | isDigit c = scanNumberToken pos str
-  | isAlpha c = let (name,rest) = span isIdentChar str
-                in  multiCharTok name rest (TokIdent name pos) pos
+  | isIdentChar c = let (name,rest) = span isIdentChar str
+                    in  multiCharTok name rest (TokIdent name pos) pos
   | otherwise = case c of
                     ',' -> commaTok cs pos
                     '(' -> singleCharTok c cs pos $ TokLBracket Paren pos
@@ -298,7 +298,7 @@ isIdentChar ch = isAlphaNum ch || ch == '_'
 
 -- |Is this a character that can appear in a symbol?
 isSymbolChar :: Char -> Bool
-isSymbolChar ch = not (isAlphaNum ch || isSpace ch || isControl ch 
+isSymbolChar ch = not (isIdentChar ch || isSpace ch || isControl ch 
                        || ch `elem` ",.?!([{)]}#'\"\\")
 
 -- |Is this character part of a single (not necessarily valid) number token,

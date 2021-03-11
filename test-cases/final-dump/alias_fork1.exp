@@ -12,7 +12,7 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public (0 calls)
-0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#2:wybe.phantom):
+0: (io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?tmp$10#0:mytree.tree)
@@ -24,9 +24,9 @@ AFTER EVERYTHING:
     foreign lpvm mutate(~tmp$17#0:mytree.tree, ?tmp$18#0:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 111:wybe.int)
     foreign lpvm mutate(~tmp$18#0:mytree.tree, ?tmp$3#0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree)
     alias_fork1.simpleMerge<0>(~tmp$0#0:mytree.tree, ~tmp$3#0:mytree.tree, ?tmp$6#0:mytree.tree) #6 @alias_fork1:15:6
-    mytree.printTree1<0>(~tmp$6#0:mytree.tree, "{":wybe.string, ?tmp$21#0:wybe.string, ~#io#0:wybe.phantom, ?tmp$22#0:wybe.phantom) #9 @mytree:8:10
-    foreign c print_string("}":wybe.string, ~tmp$22#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
-    foreign c putchar('\n':wybe.char, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
+    mytree.printTree1<0>(~tmp$6#0:mytree.tree, "{":wybe.string, ?tmp$21#0:wybe.string, ~#io#0:wybe.phantom, ?tmp$22#0:wybe.phantom) #9 @mytree:nn:nn
+    foreign c print_string("}":wybe.string, ~tmp$22#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
 
 
 gen$1 > {inline} (2 calls)
@@ -62,7 +62,7 @@ simpleMerge > public (1 calls)
         1:
             foreign lpvm access(tr#0:mytree.tree, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?k2#0:wybe.int)
             foreign lpvm access(tr#0:mytree.tree, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?r2#0:mytree.tree)
-            foreign llvm icmp_slt(k1#0:wybe.int, k2#0:wybe.int, ?tmp$11#0:wybe.bool) @wybe:nn:nn
+            foreign llvm icmp_slt(k1#0:wybe.int, k2#0:wybe.int, ?tmp$11#0:wybe.bool) @int:nn:nn
             case ~tmp$11#0:wybe.bool of
             0:
                 foreign lpvm alloc(24:wybe.int, ?tmp$23#0:mytree.tree)
@@ -108,7 +108,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external fastcc  void @"alias_fork1.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
+define external fastcc  void @"alias_fork1.<0>"()    {
 entry:
   %1 = trunc i64 24 to i32  
   %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
@@ -273,8 +273,8 @@ printTree > public {inline} (0 calls)
 0: printTree(t#0:mytree.tree, io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    mytree.printTree1<0>(~t#0:mytree.tree, "{":wybe.string, ?%prefix#1:wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @mytree:8:10
-    foreign c print_string("}":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
+    mytree.printTree1<0>(~t#0:mytree.tree, "{":wybe.string, ?%prefix#1:wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @mytree:nn:nn
+    foreign c print_string("}":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
 
 
 printTree1 > public (3 calls)
@@ -291,10 +291,10 @@ printTree1 > public (3 calls)
         foreign lpvm access(t#0:mytree.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?l#0:mytree.tree)
         foreign lpvm access(t#0:mytree.tree, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?k#0:wybe.int)
         foreign lpvm access(~t#0:mytree.tree, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?r#0:mytree.tree)
-        mytree.printTree1<0>(~l#0:mytree.tree, ~%prefix#0:wybe.string, ?%prefix#1:wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #1 @mytree:15:13
-        foreign c print_string(~prefix#1:wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
-        foreign c print_int(~k#0:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @wybe:nn:nn
-        mytree.printTree1<0>(~r#0:mytree.tree, ", ":wybe.string, ?%prefix#3:wybe.string, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #4 @mytree:19:13
+        mytree.printTree1<0>(~l#0:mytree.tree, ~%prefix#0:wybe.string, ?%prefix#1:wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #1 @mytree:nn:nn
+        foreign c print_string(~prefix#1:wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
+        foreign c print_int(~k#0:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
+        mytree.printTree1<0>(~r#0:mytree.tree, ", ":wybe.string, ?%prefix#3:wybe.string, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #4 @mytree:nn:nn
 
 
   LLVM code       :
@@ -418,7 +418,7 @@ if.else:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
             1:
-                foreign llvm icmp_eq(~$left$key#0:wybe.int, ~$right$key#0:wybe.int, ?tmp$5#0:wybe.bool) @wybe:nn:nn
+                foreign llvm icmp_eq(~$left$key#0:wybe.int, ~$right$key#0:wybe.int, ?tmp$5#0:wybe.bool) @int:nn:nn
                 case ~tmp$5#0:wybe.bool of
                 0:
                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
