@@ -158,6 +158,7 @@
 --  END MAJOR DOC
 
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE TupleSections #-}
 
 -- |Code to oversee the compilation process.
 module Builder (buildTargets) where
@@ -242,7 +243,7 @@ buildTarget target = do
                        ++ " Module: " ++ showModSpec modspec
             -- target should be in the working directory, lib dir will be added
             -- later
-            depGraph <- loadAllNeededModules modspec True [dir]
+            depGraph <- loadAllNeededModules modspec True [(dir,False)]
 
             -- topological sort (bottom-up)
             let orderedSCCs = List.map (\(m, ms) -> (m, m, ms)) depGraph
@@ -306,7 +307,7 @@ buildTarget target = do
 -- representing module dependencies.
 loadAllNeededModules :: ModSpec -- ^Module name
               -> Bool           -- ^Whether the provided mod is the final target
-              -> [FilePath]     -- ^Directories to look in
+              -> [(FilePath,Bool)] -- ^Directories to look in and whether libs
               -> Compiler [(ModSpec, [ModSpec])]
 loadAllNeededModules modspec isTarget possDirs = do
     opts <- gets options
@@ -319,7 +320,7 @@ loadAllNeededModules modspec isTarget possDirs = do
     else do
         -- add lib dir to the possDirs when moving from target to dependencies
         let possDirs' = if isTarget
-            then possDirs ++ optLibDirs opts
+            then possDirs ++ ((,True) <$> optLibDirs opts)
             else possDirs
 
         -- handle dependencies of recently loaded modules
@@ -340,11 +341,12 @@ loadAllNeededModules modspec isTarget possDirs = do
 -- object files if possible.
 loadModuleIfNeeded :: Bool    -- ^Force compilation of this module
               -> ModSpec       -- ^Module name
-              -> [FilePath]    -- ^Directories to look in
+              -> [(FilePath,Bool)] -- ^Directories to look in and whether libs
               -> Compiler [ModSpec] -- ^Return newly loaded module
 loadModuleIfNeeded force modspec possDirs = do
     logBuild $ "Loading " ++ showModSpec modspec
-               ++ " with library directories " ++ intercalate ", " possDirs
+               ++ " with library directories "
+               ++ intercalate ", " (fst <$> possDirs)
     let clash kind1 f1 kind2 f2 =
           Error <!> kind1 ++ " " ++ f1 ++ " and "
                     ++ kind2 ++ " " ++ f2 ++ " clash. There can only be one!"
@@ -365,39 +367,45 @@ loadModuleIfNeeded force modspec possDirs = do
                 Error <!> "Could not find source for module " ++
                             showModSpec modspec
                             ++ "\nin directories:\n    "
-                            ++ intercalate "\n    " possDirs
+                            ++ intercalate "\n    " (fst <$> possDirs)
                 return []
 
-            ModuleSource Nothing (Just objfile) Nothing Nothing -> do
+            ModuleSource Nothing (Just objfile) Nothing Nothing _ -> do
                 -- only object file exists
                 loadModuleFromObjFile modspec objfile
 
-            ModuleSource (Just srcfile) Nothing Nothing Nothing ->
-                -- only source file exists
+            ModuleSource (Just srcfile) Nothing Nothing Nothing False ->
+                -- only source file exists, and not a library
                 loadModuleFromSrcFile modspec srcfile Nothing
 
-            ModuleSource (Just srcfile) (Just objfile) Nothing Nothing -> do
-                -- both source and object files exist:  rebuild if necessary
-                loadModuleFromSrcOrObj force modspec srcfile objfile Nothing
+            ModuleSource (Just srcfile) Nothing Nothing Nothing True -> do
+                -- only source file exists, but it's a library
+                Error <!> "No compiled code for library file " ++ srcfile
+                return []
 
-            ModuleSource Nothing Nothing (Just dir) _ -> do
+            ModuleSource (Just srcfile) (Just objfile) Nothing Nothing isLib ->
+                -- both source and object files exist:  rebuild if necessary
+                loadModuleFromSrcOrObj force modspec srcfile objfile
+                                       Nothing isLib
+
+            ModuleSource Nothing Nothing (Just dir) _ isLib -> do
                 -- directory and _.wybe exist:  rebuild contents if necessary
-                loadDirectoryModule force dir modspec
+                loadDirectoryModule force dir modspec isLib
 
             -- Error cases:
-            ModuleSource (Just srcfile) Nothing (Just dir) _ -> do
+            ModuleSource (Just srcfile) Nothing (Just dir) _ _ -> do
                 clash "Directory" dir "source file" srcfile
                 return []
 
-            ModuleSource (Just srcfile) Nothing _ (Just archive) -> do
+            ModuleSource (Just srcfile) Nothing _ (Just archive) _ -> do
                 clash "Archive" archive "source file" srcfile
                 return []
 
-            ModuleSource Nothing (Just objfile) (Just dir) _ -> do
+            ModuleSource Nothing (Just objfile) (Just dir) _ _ -> do
                 clash "Directory" dir "object file" objfile
                 return []
 
-            ModuleSource Nothing (Just objfile) _ (Just archive) -> do
+            ModuleSource Nothing (Just objfile) _ (Just archive) _ -> do
                 clash "Archive" archive "object file" objfile
                 return []
 
@@ -446,51 +454,54 @@ loadModuleFromSrcFile mspec srcfile maybeDir = do
 -- directory is specified and we're loading from source, also import the modules
 -- in that directory.
 loadModuleFromSrcOrObj :: Bool -> ModSpec -> FilePath -> FilePath
-                       -> Maybe FilePath -> Compiler [ModSpec]
-loadModuleFromSrcOrObj force modspec srcfile objfile maybeDir = do
+                       -> Maybe FilePath -> Bool -> Compiler [ModSpec]
+loadModuleFromSrcOrObj force modspec srcfile objfile maybeDir isLib = do
     srcDate <- (liftIO . getModificationTime) srcfile
     dstDate <- (liftIO . getModificationTime) objfile
-    if force || srcDate > dstDate
-    then
-        loadModuleFromSrcFile modspec srcfile maybeDir
-    else do
+    if srcDate <= dstDate && (not force || isLib)
+    then do
         loaded <- loadModuleFromObjFile modspec objfile
         -- XXX Currently we don't support fall back to source code.
         -- i.e. "loadModuleFromObjFile" never returns an empty list.
         -- We should consider to rebuild it from source code if
         -- the "wybe object file version" is too old. 
-        if List.null loaded
-        then do
-            -- Loading failed, fallback on source building
-            Warning <!> "Wybe object file " ++ objfile
-                        ++ " contained no modules: building from source"
-            logBuild $ "Falling back on building " ++
-                showModSpec modspec
-            loadModuleFromSrcFile modspec srcfile maybeDir
-        else return loaded
-
+        when (List.null loaded)
+            (Error <!> "Wybe object file " ++ objfile
+                       ++ " contained no modules")
+        return loaded
+    else if isLib && srcDate > dstDate
+    then do
+        Error <!> "Library " ++ objfile ++ " needs to be rebuilt"
+        return []
+    else loadModuleFromSrcFile modspec srcfile maybeDir
 
 -- |Build a directory as the module `dirmod`.
-loadDirectoryModule :: Bool -> FilePath -> ModSpec -> Compiler [ModSpec]
-loadDirectoryModule force dir dirmod = do
+loadDirectoryModule :: Bool -> FilePath -> ModSpec -> Bool -> Compiler [ModSpec]
+loadDirectoryModule force dir dirmod isLib = do
     logBuild $ "Loading directory " ++ dir ++ " into module "
         ++ showModSpec dirmod
     -- Make the directory a Module package
     let fileBase = dir </> moduleDirectoryBasename
-    modSrc <- sourceInDir fileBase
-
+    modSrc <- sourceInDir fileBase isLib
     case modSrc of
-            ModuleSource Nothing (Just objfile) Nothing Nothing -> do
+            ModuleSource Nothing (Just objfile) Nothing Nothing _ -> do
                 -- only object file exists
                 loadModuleFromObjFile dirmod objfile
 
-            ModuleSource (Just srcfile) Nothing Nothing Nothing ->
+            ModuleSource (Just srcfile) Nothing Nothing Nothing False ->
                 -- only source file exists
                 loadModuleFromSrcFile dirmod srcfile $ Just dir
 
-            ModuleSource (Just srcfile) (Just objfile) Nothing Nothing -> do
+            ModuleSource (Just srcfile) Nothing Nothing Nothing True -> do
+                -- only source file for library exists
+                Error <!> "No compiled version of library module "
+                          ++ showModSpec dirmod ++ " exists"
+                return []  
+
+            ModuleSource (Just srcfile) (Just objfile) Nothing Nothing isLib' ->
                 -- both source and object files exist:  rebuild if necessary
-                loadModuleFromSrcOrObj force dirmod srcfile objfile $ Just dir
+                loadModuleFromSrcOrObj force dirmod srcfile objfile
+                                       (Just dir) isLib'
 
             otherModSrc ->
                 shouldnt $ "Unexpected ModuleSource for base file " ++ fileBase
@@ -710,10 +721,9 @@ prepareToCompileModSCC modSCC = do
                 if srcDate > dstDate
                 then
                     Error <!> "Source: " ++ src ++ " has been changed during "
-                        ++ "the compilation."
-                else do
-                    _ <- loadModuleFromSrcFile rootM src Nothing
-                    return ()
+                              ++ "the compilation."
+                else
+                    loadModuleFromSrcFile rootM src Nothing >> return ()
             else Error <!>
                     "Unable to find corresponding source for object: " ++ obj
                     ++ ". Failed to reload modules:" ++ showModSpecs ms
@@ -952,10 +962,9 @@ buildExecutable orderedSCCs targetMod target = do
     if List.null depends || not (snd (last depends))
         then
             -- No main code in the selected module: don't build executable
-            message Error
+            Error <!>
             ("No main (top-level) code in module '"
              ++ showModSpec targetMod ++ "'; not building executable")
-            Nothing
         else do
             -- find dependencies (including module itself) that have a main
             logBuild $ "Dependencies: " ++ show depends
@@ -969,7 +978,7 @@ buildExecutable orderedSCCs targetMod target = do
             enterModule target mainMod Nothing
             addImport ["wybe"] $ importSpec Nothing Private
             addImport ["command_line"] $ importSpec Nothing Private
-            possDirs <- gets $ optLibDirs . options
+            possDirs <- gets $ ((,True) <$>) . optLibDirs . options
             loadModuleIfNeeded False ["command_line"] possDirs
             mapM_ (\m -> addImport m $ importSpec (Just [""]) Private)
                   mainImports
@@ -1161,11 +1170,11 @@ multiSpeczTopDownPass orderedSCCs = do
 -- | Search for different sources module `modspec` in the possible directory
 -- list `possDirs`. This information is encapsulated as a ModuleSource. The
 -- first found non-empty (not of constr NoSource) of ModuleSource is returned.
-moduleSources :: ModSpec -> [FilePath] -> Compiler ModuleSource
+moduleSources :: ModSpec -> [(FilePath,Bool)] -> Compiler ModuleSource
 moduleSources modspec possDirs = do
     logBuild $ "Finding location of module " ++ showModSpec modspec
-               ++ " in directories " ++ intercalate ", " possDirs
-    dirs <- mapM (sourceInDir . joinPath . (:modspec)) possDirs
+               ++ " in directories " ++ intercalate ", " (fst <$> possDirs)
+    dirs <- mapM (\(d,l) -> sourceInDir (joinPath (d:modspec)) l) possDirs
     -- Return the last valid Source
     return $ (fromMaybe NoSource . List.find (/= NoSource)) dirs
 
@@ -1175,8 +1184,8 @@ moduleSources modspec possDirs = do
 -- file (.wybe), an object file (.o), an archive file (.a), or a sub-directory
 -- in the given directory `d`. This information is returned as a `ModuleSource`
 -- record.
-sourceInDir :: FilePath -> Compiler ModuleSource
-sourceInDir baseName = do
+sourceInDir :: FilePath -> Bool -> Compiler ModuleSource
+sourceInDir baseName isLib = do
     logBuild $ "Looking for source of " ++ baseName
     -- Helper to convert a boolean to a Maybe [maybeFile True f == Just f]
     let maybeFile b f = if b then Just f else Nothing
@@ -1193,15 +1202,15 @@ sourceInDir baseName = do
     logBuild $ "Source file " ++ srcfile ++ " exists? " ++ show srcExists
     logBuild $ "Object file " ++ objfile ++ " exists? " ++ show objExists
     logBuild $ "Archive     " ++ arfile ++  " exists? " ++ show arExists
-    if srcExists || objExists || arExists || dirExists
-        then return
-             ModuleSource
+    return $ if srcExists || objExists || arExists || dirExists
+        then ModuleSource
              { srcWybe = maybeFile srcExists srcfile
              , srcObj = maybeFile objExists objfile
              , srcDir = maybeFile dirExists baseName
              , srcArchive = maybeFile arExists arfile
+             , srcIsLib = isLib
              }
-        else return NoSource
+        else NoSource
 
 
 -- |The different sources that can provide implementation of a Module.
@@ -1211,6 +1220,7 @@ data ModuleSource = NoSource
                     , srcObj     :: Maybe FilePath
                     , srcDir     :: Maybe FilePath
                     , srcArchive :: Maybe FilePath
+                    , srcIsLib   :: Bool
                     }
                   deriving (Eq)
 
@@ -1229,6 +1239,8 @@ instance Show ModuleSource where
            ++ "D: " ++ showPath (srcDir m)
            ++ "\n| "
            ++ "A: " ++ showPath (srcArchive m)
+           ++ "\n| "
+           ++ "L: " ++ show (srcIsLib m)
            ++ "\n]\n"
 
 

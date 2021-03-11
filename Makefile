@@ -47,9 +47,8 @@ libs:	$(addprefix $(LIBDIR)/,$(LIBS))
 $(LIBDIR)/%.o:	$(LIBDIR)/%.wybe wybemk
 	./wybemk $@
 
-.PHONY:	$(LIBDIR)/wybe
-$(LIBDIR)/wybe:
-	./wybemk $@
+$(LIBDIR)/wybe:	wybemk $(LIBDIR)/wybe/*.wybe
+	./wybemk $@ && touch $@
 
 
 $(LIBDIR)/wybe/cbits.o: $(LIBDIR)/wybe/cbits.c
@@ -103,13 +102,7 @@ test:	wybemk
 	@echo -e "Building $(LIBDIR)/wybe/cbits.o"
 	@make $(LIBDIR)/wybe/cbits.o
 	@printf "Testing building wybe library ("
-	@printf wybe
 	@$(TIMEOUT) 5 $(MAKE) libs
-	@for f in $(LIBDIR)/*.wybe ; do \
-           [ "$$f" = "$(LIBDIR)/wybe.wybe" ] && continue ; \
-	   printf " %s" `basename $$f .wybe` ; \
-	   timeout 2 ./wybemk --force -L $(LIBDIR) $${f/.wybe/.o} ; \
-	done
 	@printf ") done.\n"
 	@time ( cd test-cases/ && ./run-all-test.sh )
 
