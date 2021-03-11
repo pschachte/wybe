@@ -223,6 +223,7 @@ buildTargets targets = do
 -- |Build a single target
 buildTarget :: FilePath -> Compiler ()
 buildTarget target = do
+    logBuild $ "===> Building target " ++ target
     -- Create a clean temp directory for each build
     sysTmpDir <- liftIO getTemporaryDirectory
     tmpDir <- liftIO $ createTempDirectory sysTmpDir "wybe"
@@ -253,12 +254,12 @@ buildTarget target = do
             logBuild $ "Emitting Target: " ++ target
             if tType == ExecutableFile
             then
-                -- XXX shouldn't we do: multiSpeczTopDownPass orderedSCCs?
-
                 buildExecutable orderedSCCs modspec target
             else do
                 multiSpeczTopDownPass orderedSCCs
                 unchanged <- gets unchangedMods
+                logBuild $ "These modules are unchanged: "
+                           ++ showModSpecs (Set.toList unchanged)
                 toDump <- filterM isRootModule $ concat orderedSCCs
                 let toDump' =
                         List.filter (not . (`Set.member` unchanged)) toDump
@@ -266,18 +267,38 @@ buildTarget target = do
                     (((modOrigin . trustFromJust "buildTarget") <$>)
                      <$> getLoadedModule)
                     toDump'
-                logBuild $ "===> writing modules: " ++ showModSpecs toDump'
-                case tType of
-                    ObjectFile       -> mapM_ (uncurry emitObjectFile) targets
-                    BitcodeFile      -> mapM_ (uncurry emitBitcodeFile) targets
-                    AssemblyFile     -> mapM_ (uncurry emitAssemblyFile) targets
-                    ArchiveFile      -> do
-                        mapM_ (uncurry emitObjectFile) targets
-                        buildArchive target
-                    LibraryDirectory -> mapM_ (uncurry emitObjectFile) targets
-                    other            -> nyi $ "output file type " ++ show other
-            whenLogging Emit $ logLLVMString modspec
+                if List.null targets
+                then do
+                    logBuild "===> No files to write"
+                    Informational <!> "Nothing to be done for target "
+                                        ++ target
+                else do
+                    logBuild $ "===> writing files:"
+                               ++ concat [ "\n     " ++ showModSpec m
+                                           ++ " -> " ++ f
+                                         | (m,f) <- targets]
+                    let emitMod fn ext (m,f) = do
+                            Informational
+                                <!> "Writing module " ++ showModSpec m
+                                    ++ " to file " ++ f -<.> ext
+                            fn m f
+                    case tType of
+                        ObjectFile -> mapM_ 
+                            (emitMod emitObjectFile objectExtension) targets
+                        BitcodeFile -> mapM_
+                            (emitMod emitBitcodeFile bitcodeExtension) targets
+                        AssemblyFile -> mapM_
+                            (emitMod emitAssemblyFile assemblyExtension) targets
+                        ArchiveFile -> do
+                            mapM_ (uncurry emitObjectFile) targets
+                            buildArchive target
+                        LibraryDirectory ->
+                            mapM_ (uncurry emitObjectFile) targets
+                        other ->
+                            nyi $ "output file type " ++ show other
+                    whenLogging Emit $ logLLVMString modspec
     liftIO $ removeDirectoryRecursive tmpDir
+    logBuild $ "<=== Finished building target " ++ target
 
 
 -- |Search and load all needed modules starting from the given modspec, defined
@@ -388,6 +409,8 @@ loadModuleFromSrcFile :: ModSpec -> FilePath -> Maybe FilePath
                       -> Compiler [ModSpec]
 loadModuleFromSrcFile mspec srcfile maybeDir = do
     logBuild $ "===> Compiling source file " ++ srcfile
+    Informational <!> "Loading module " ++ showModSpec mspec
+                      ++ " from " ++ srcfile
     tokens <- (liftIO . fileTokens) srcfile
     let parseTree = parseWybe tokens srcfile
     mods <- either (\er -> do
@@ -498,6 +521,8 @@ compileParseTree source modspec items = do
 loadModuleFromObjFile :: ModSpec -> FilePath -> Compiler [ModSpec]
 loadModuleFromObjFile required objfile = do
     logBuild $ "===> Trying to load LPVM Module(s) from " ++ objfile
+    Informational <!> "Loading module " ++ showModSpec required
+                      ++ " from " ++ objfile
     extracted <- loadLPVMFromObjFile objfile [required]
     if List.null extracted
     then do

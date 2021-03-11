@@ -1,5 +1,5 @@
 Error detected during type checking of module(s) alias_recursion3, alias_recursion3.mynode
-[91m!ROOT!/final-dump/alias_recursion3.wybe:15:17: Calling test proc alias_recursion3.mynode.next<0> in a normal (total) context
-[0m[91m!ROOT!/final-dump/alias_recursion3.wybe:16:28: Calling test proc alias_recursion3.mynode.next<0> in a normal (total) context
-[0m[91m!ROOT!/final-dump/alias_recursion3.wybe:16:13: Calling test proc alias_recursion3.mynode.next<1> in a normal (total) context
+[91mfinal-dump/alias_recursion3.wybe:15:17: Calling test proc alias_recursion3.mynode.next<0> in a normal (total) context
+[0m[91mfinal-dump/alias_recursion3.wybe:16:13: Calling test proc alias_recursion3.mynode.next<1> in a normal (total) context
+[0m[91mfinal-dump/alias_recursion3.wybe:16:28: Calling test proc alias_recursion3.mynode.next<0> in a normal (total) context
 [0m

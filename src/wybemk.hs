@@ -37,8 +37,3 @@ main = do
 
 catchAny :: IO a -> (SomeException -> IO a) -> IO a
 catchAny = Control.Exception.catch
-
-
-testFile :: String -> IO ()
-testFile file =
-    runCompiler defaultOptions (buildTargets [file])

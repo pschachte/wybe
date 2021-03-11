@@ -35,8 +35,7 @@ module AST (
   protoInputParamNames, isProcProtoArg,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace, unPlace,
-  placedApply, placedApply1, placedApplyM, contentApply,
-  makeMessage, updatePlacedM,
+  placedApply, placedApply1, placedApplyM, contentApply, updatePlacedM,
   -- *AST types
   Module(..), isRootModule, ModuleInterface(..), ModuleImplementation(..), InterfaceHash, PubProcInfo(..),
   ImportSpec(..), importSpec, Pragma(..), addPragma,
@@ -75,8 +74,8 @@ module AST (
   updateModInterface, updateAllProcs, updateModSubmods, updateModProcs,
   getModuleSpec, moduleIsType, option,
   getOrigin, getSource, getDirectory,
-  optionallyPutStr, message, errmsg, (<!>), genProcName,
-  addImport, doImport, lookupType,
+  optionallyPutStr, message, errmsg, (<!>), Message(..), queueMessage,
+  genProcName, addImport, doImport, lookupType,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   addSimpleResource, lookupResource, publicResource,
   ProcModifiers(..), detModifiers, setDetism, setInline, setImpurity,
@@ -115,7 +114,7 @@ import           Options
 import           System.Exit
 import           System.FilePath
 import           System.IO
-import           System.Directory (makeAbsolute)
+import           System.Directory (makeAbsolute, makeRelativeToCurrentDirectory)
 -- import           Text.ParserCombinators.Parsec.Pos
 import           Text.Parsec.Pos
                  ( SourcePos, sourceName, sourceColumn, sourceLine )
@@ -394,7 +393,7 @@ data MessageLevel = Informational | Warning | Error
 data CompilerState = Compiler {
   options :: Options,            -- ^compiler options specified on command line
   tmpDir  :: FilePath,             -- ^tmp directory for this build
-  msgs :: [(MessageLevel, String)],  -- ^warnings, error messages, and info messages
+  msgs :: [Message],             -- ^warnings, error messages, and info messages
   errorState :: Bool,            -- ^whether or not we've seen any errors
   modules :: Map ModSpec Module, -- ^all known modules except what we're loading
   underCompilation :: [Module],  -- ^the modules in the process of being compiled
@@ -730,38 +729,6 @@ getModuleImplementationMaybe fn = do
   case imp of
       Nothing -> return Nothing
       Just imp' -> return $ fn imp'
-
-
--- |Add the specified string as a message of the specified severity
---  referring to the optionally specified source location to the
---  collected compiler output messages.
-message :: MessageLevel -> String -> OptPos -> Compiler ()
-message lvl msg pos = do
-    let posMsg = makeMessage pos msg
-    modify (\bldr ->
-                bldr { msgs = msgs bldr ++ [(lvl, posMsg)] })
-    when (lvl == Error) (modify (\bldr -> bldr { errorState = True }))
-
-
--- |Add the specified string as an error message referring to the optionally
---  specified source location to the collected compiler output messages.
-errmsg :: OptPos -> String -> Compiler ()
-errmsg = flip (message Error)
-
-
--- |Pretty helper operator for adding messages to the compiler state.
-(<!>) :: MessageLevel -> String -> Compiler ()
-lvl <!> msg = message lvl msg Nothing
-infix 0 <!>
-
--- |Construct a message string from the specified text and location.
-makeMessage :: OptPos -> String -> String
-makeMessage Nothing msg = msg
-makeMessage (Just pos) msg =
-  sourceName pos ++ ":" ++
-  show (sourceLine pos) ++ ":" ++
-  show (sourceColumn pos) ++ ": " ++
-  msg
 
 
 -- |Return a new, unused proc name.
@@ -3219,6 +3186,8 @@ maybeShow pre (Just something) post =
   pre ++ show something ++ post
 
 
+------------------------------ Error Reporting -----------------------
+
 -- |Report an internal error and abort.
 shouldnt :: String -> a
 shouldnt what = error $ "Internal error: " ++ what
@@ -3252,33 +3221,79 @@ trustFromJustM msg computation = do
     return $ trustFromJust msg maybe
 
 
+data Message = Message {
+    messageLevel :: MessageLevel,  -- ^The inportance of the message
+    messagePlace :: OptPos,        -- ^The source location the message refers to
+    messageText  :: String         -- ^The text of the message
+}
+
+-- Not for displaying error messages, just for debugging printouts.
+instance Show Message where
+    show (Message lvl pos txt) = show lvl ++ " " ++ show pos ++ ": " ++ txt
+
+-- |Add the specified string as a message of the specified severity
+--  referring to the optionally specified source location to the
+--  collected compiler output messages.
+message :: MessageLevel -> String -> OptPos -> Compiler ()
+message lvl msg pos = queueMessage $ Message lvl pos msg
+
+
+-- |Add the specified message to the collected compiler output messages.
+queueMessage :: Message -> Compiler ()
+queueMessage msg = do
+    modify (\bldr -> bldr { msgs = msg : msgs bldr })
+    when (messageLevel msg == Error)
+         (modify (\bldr -> bldr { errorState = True }))
+
+
+-- |Add the specified string as an error message referring to the optionally
+--  specified source location to the collected compiler output messages.
+errmsg :: OptPos -> String -> Compiler ()
+errmsg = flip (message Error)
+
+
+-- |Pretty helper operator for adding messages to the compiler state.
+(<!>) :: MessageLevel -> String -> Compiler ()
+lvl <!> msg = message lvl msg Nothing
+infix 0 <!>
+
+
+-- |Construct a message string from the specified text and location.
+makeMessage :: OptPos -> String -> IO String
+makeMessage Nothing msg    = return msg
+makeMessage (Just pos) msg = do
+    relFile <- makeRelativeToCurrentDirectory $ sourceName pos
+    return $ relFile ++ ":" ++ show (sourceLine pos)
+             ++ ":" ++ show (sourceColumn pos) ++ ": " ++ msg
+
+
 -- |Prettify and show compiler messages. Only Error messages are shown always,
 -- the other message levels are shown only when the 'verbose' option is set.
 showMessages :: Compiler ()
 showMessages = do
     verbose <- optVerbose <$> gets options
-    messages <- reverse <$> gets msgs
+    messages <- reverse <$> gets msgs -- messages are collected in reverse order
     let filtered =
             if verbose
             then messages
-            -- XXX should probably include Warnings, too.
-            else List.filter (\(a,_) -> a == Error) messages
-    liftIO $ mapM_ showMessage filtered
+            else List.filter ((>=Warning) . messageLevel) messages
+    liftIO $ mapM_ showMessage $ sortOn messagePlace filtered
 
 
 -- |Prettify and show one compiler message.
-showMessage :: (MessageLevel, String) -> IO ()
-showMessage (lvl, msg) =
-  case lvl of
+showMessage :: Message -> IO ()
+showMessage (Message lvl pos msg) = do
+    posMsg <- makeMessage pos msg
+    case lvl of
       Informational ->
-          putStrLn msg
+          putStrLn posMsg
       Warning -> do
           setSGR [SetColor Foreground Vivid Yellow]
-          putStrLn msg
+          putStrLn posMsg
           setSGR [Reset]
       Error -> do
           setSGR [SetColor Foreground Vivid Red]
-          putStrLn msg
+          putStrLn posMsg
           setSGR [Reset]
 
 
