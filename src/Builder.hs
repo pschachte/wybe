@@ -12,6 +12,32 @@
 --  what source files need to be compiled, and for building the
 --  final outputs (whether executable, object file, archive, etc.).
 --
+--  Wybe allows a module to be defined by a single .wybe file, or
+--  by a directory containing multiple submodules.  In the latter
+--  case, the directory must contain a (possibly empty) file named
+--  _.wybe, which should contain all of that module's source code
+--  other than its submodules.
+--
+--  The compiler can generate all these output formats, using the file
+--  extension to work out which type of file to build:  executable,
+--  object code, LLVM bitcode, LLVM assembly code, or archive file.
+--  In general, it can build any type of output from either type of
+--  input, but note that on unix-style systems, both directories and
+--  executables have empty file extensions, so it is not possible to
+--  build an executable from a directory.  Asking to build an object,
+--  LLVM bitcode, or LLVM assembler file for a directory module is
+--  interpreted as asking to recursively build that type of file for
+--  each wybe source file and module directory within that directory.
+--
+--  The compiler stores its internal data structures in object files it
+--  generates, and extracts that information from the object file, rather
+--  than loading and compiling the source file, if the object file is
+--  younger than the source file.  In the case of a directory module, the
+--  nested _.o, _.bc, or _.ll file holds all of the contents of that
+--  module that come from the _.wybe file.  That is, the _.wybe file is
+--  compiled much like other modules, except that its module name is that
+--  of the parent directory, rather than the file itself.
+--
 --  To keep compile times manageable while supporting optimisation,
 --  we compile modules bottom-up, ensuring that all a module's
 --  imports are compiled before compling the module itself. In the
@@ -19,28 +45,24 @@
 --  component in the module dependency graph is compiled as a unit.
 --  This is handled by the compileModule function, which includes
 --  the functionality for finding the SCCs in the module dependency
---  graph. The monadic functions enterModule and exitModule,
---  imported from the AST module, implement the SCC functionality,
---  with exitModule returning a list of modules that form an SCC.
---  Between enterModule and exitModule, the Normalise.normalise
---  function is called to record the code of the module and to
---  record all its dependencies. Each SCC is compiled by the
---  compileModSCC function.
+--  graph.  Then each SCC is compiled by the compileModSCC function.
 --
---  One shortcoming of the bottom-up approach is that some analyses
---  are best performed top-down.  For example, we can only eliminate
---  unneeded procedures when we've seen all the calls to all
---  procedures in the module.  By compiling bottom-up, we do not have
---  access to this information.  Our solution to this problem is to
---  perform the top-down analysis after the bottom-up compilation,
---  generating results that we can use for the next compilation.  If
---  the top-down analysis produces results that conflict with the
---  previous top-down analysis, so that the compilation produced
---  invalid results, then we must re-compile enough of the program to
---  fix the problem.  It is hoped that this will happen infrequently
---  enough that the time saved by not usually having to make separate
---  traversals for analysis and compilation will more than make up
---  for the few times we need to recompile.
+--  One shortcoming of the bottom-up approach is that some optimisations
+--  depend upon the way a procedure is used, which cannot be determined
+--  from the code itself.  Such analyses are best performed top-down.
+--  For example, if we can determine that a structure will not be
+--  referenced after the call to a procedure, that procedure may be
+--  compiled to destructive modify or reuse that structure.  Our
+--  approach to this is to apply multiple specialisation:  we compile
+--  different versions of this code for for calls that may reference
+--  that argument again and calls that cannot.  Our approach is to
+--  to have the bottom-up analysis produce "requests", which indicate
+--  what top-down analysis results would allow more efficient
+--  specialisations of the code.  This information os produced bottom-
+--  up.  Then, when generating the final executable, when all the code
+--  is available, we determine how beneficial each specialisation would
+--  be, and select the most useful specialisations to actually produce,
+--  and generate code for any that have not already been generated.
 --
 --  Ensuring that all compiler phases happen in the right order is
 --  subtle, particularly in the face of mutual module dependencies.
@@ -49,8 +71,8 @@
 --  * Types: the types a type depends on need to have been processed
 --  before the type itself, so that sizes are known. In the case of
 --  recursive or mutually recursive type dependencies, all types in
---  the recursion must be pointers. Types are transformed into
---  submodules, and constructors, deconstructors, accessors,
+--  the recursion must be implemented as pointers. Types are transformed
+--  into (sub)modules, and constructors, deconstructors, accessors,
 --  mutators, and auxiliary type procedures (equality tests, plus
 --  eventually comparisons, printers, pretty printers, etc.) are all
 --  generated as procedures within those submodules.  Therefore,
@@ -61,8 +83,8 @@
 --  support defining resources in terms of others, but the plan is
 --  to support that.)  The types in the module that defines a
 --  resource, and all module dependencies, must have been processed
---  at least enough to know they have been defined to process the
---  resource declaration.
+--  at least enough to know they have been defined before processing
+--  the resource declaration.
 --
 --  * Top-level statements in a module: these are transformed to
 --  statements in a special procedure whose name is the empty string
@@ -82,12 +104,18 @@
 --  parameter or local variable type, must have been processed the
 --  same way before processing the procedure itself.
 --
---  * Submodules: the submodules of a module, including the types,
---  must be processed as mutual dependencies of that module, which
---  they are. The nested submodules of a module (including types)
---  have access to all public and private members of the parent
---  module, and the parent has access to all public members of the
---  parent, so they are mutual dependencies.
+--  * Nested submodules: the submodules defined within a module file,
+--  including the types, must be processed as mutual dependencies of
+--  that module, which they are. The nested submodules of a module
+--  (including types) have access to all public and private members
+--  of the parent module, and the parent has access to all public
+--  members of the parent, so they are mutual dependencies.
+--
+--  * Directory modules:  A directory containing a file named _.wybe
+--  is also a module, with all the contained .wybe files as submodules.
+--  However, these submodules do not automatically import all the other
+--  modules in that directory, although they can explicitly import any
+--  sibling modules they need.
 --
 --  This means only minimal processing can be done before module
 --  dependencies are noted and read in.  So we handle all these
@@ -104,8 +132,8 @@
 --
 --  * Pragmas:  Record for later processing.
 --
---  * Constructors: record for later type layout, code generation,
---  etc.
+--  * Constructors and low-level (representation) types: record for
+--  later type layout, code generation, etc.
 --
 --  * Top level statements:  add statements to the special "" proc
 --  in the module, creating it if necessary.
@@ -113,10 +141,10 @@
 --  * Procs and functions:  record them for later normalisation,
 --  analysis, optimisation, etc.
 --
---  Once we reach the end of a module or submodule, we call
---  exitModule, which returns a list of modules that form an SCC in
---  the module dependency graph.  That list is passed to
---  compileModSCC, which does the following:
+--  Once we have finished loading the sources for the specified
+--  targets, and all their dependencies, we compute the SCCs in
+--  the module dependency graph.  Then for each SCC, in topographic
+--  order, we call compileModSCC, which does the following:
 --
 --    1. Traverse all recorded type submodules in the module list
 --       finding all type dependencies; topologically sort them and
@@ -132,21 +160,21 @@
 --
 --       This is handled in the Normalise module.
 --
---    2. Check all resource imports and exports. (Resources)
+--    2. Check all resource imports and exports. (Resources.hs)
 --
 --    3. Normalise all recorded procs in their modules, including
---       generated constructors, etc. (Normalise)
+--       generated constructors, etc. (Normalise.hs)
 --
---    4. Validate the types of exported procs. (Types)
+--    4. Validate the types of exported procs. (Types.hs)
 --
---    5. Check proc argument types and modes are checked, and
---       resolve called procs. (Types)
+--    5. Check proc argument types, resolve overloading, and
+--       mode check all procs. (Types.hs)
 --
 --    6. Check proc resources and transform them to args.
---      (Resources)
+--      (Resources.hs)
 --
 --    7. Transform away branches, loops, and nondeterminism.
---       (Unbranch)
+--       (Unbranch.hs)
 --
 --    8. Topologically sort proc call graph and identify SCCs.  For
 --       each SCC, bottom-up, do the following:
