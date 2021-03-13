@@ -1258,7 +1258,7 @@ sameOriginModules mspec = do
     file <- origin mspec
     subMods <- Map.elems . modSubmods <$> getLoadedModuleImpln mspec
     sameOriginSubMods <- filterM (((== file) <$>) . origin) subMods
-    (subMods ++) . concat <$> mapM sameOriginModules sameOriginSubMods
+    (sameOriginSubMods ++) . concat <$> mapM sameOriginModules sameOriginSubMods
 
 
 -- XXX Looks like this isn't actually needed
