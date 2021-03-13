@@ -12,7 +12,7 @@ INSTALLLIB=/usr/local/lib/wybe
 VERSION = 0.1
 SRCDIR = src
 LIBDIR = wybelibs
-LIBS = wybe command_line.o logging.o wybe/cbits.o
+LIBS = wybe.o command_line.o logging.o wybe/cbits.o
 SHELL := /bin/bash
 
 
@@ -45,10 +45,10 @@ wybemk:	$(SRCDIR)/*.hs $(SRCDIR)/Version.lhs
 libs:	$(addprefix $(LIBDIR)/,$(LIBS))
 
 $(LIBDIR)/%.o:	$(LIBDIR)/%.wybe wybemk
-	./wybemk $@
+	./wybemk -L $(LIBDIR) $@
 
-$(LIBDIR)/wybe:	wybemk $(LIBDIR)/wybe/*.wybe
-	./wybemk $@ && touch $@
+$(LIBDIR)/wybe.o:	wybemk $(LIBDIR)/wybe/*.wybe
+	./wybemk --force-all -L $(LIBDIR) $@
 
 
 $(LIBDIR)/wybe/cbits.o: $(LIBDIR)/wybe/cbits.c

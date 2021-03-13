@@ -93,7 +93,7 @@ emitAssemblyFile m f = do
 -- the given module.
 descendentModuleLLVM :: ModSpec -> Compiler LLVMAST.Module
 descendentModuleLLVM mspec = do
-    someMods <- descendentModules mspec
+    someMods <- sameOriginModules mspec
     unless (List.null someMods) $
         logEmit $ "### Combining descendents of " ++ showModSpec mspec
                    ++ ": " ++ showModSpecs someMods

@@ -249,7 +249,7 @@ buildTargets targets = do
     logDump FinalDump FinalDump "EVERYTHING"
 
 
--- |Build a single target
+-- |Build a single top-level target
 buildTarget :: FilePath -> Compiler ()
 buildTarget target = do
     logBuild $ "===> Building target " ++ target
@@ -261,7 +261,7 @@ buildTarget target = do
 
     target <- liftIO $ makeAbsolute target
     Informational <!> "Building target: " ++ target
-    tType <- targetType target
+    let tType = targetType target
     case tType of
         UnknownFile ->
             Error <!> "Unknown target file type: " ++ target
@@ -318,11 +318,11 @@ buildTarget target = do
                             (emitMod emitBitcodeFile bitcodeExtension) targets
                         AssemblyFile -> mapM_
                             (emitMod emitAssemblyFile assemblyExtension) targets
-                        ArchiveFile -> do
-                            mapM_ (uncurry emitObjectFile) targets
-                            buildArchive target
-                        LibraryDirectory ->
-                            mapM_ (uncurry emitObjectFile) targets
+                        -- ArchiveFile -> do
+                        --     mapM_ (uncurry emitObjectFile) targets
+                        --     buildArchive target
+                        -- LibraryDirectory ->
+                        --     mapM_ (uncurry emitObjectFile) targets
                         other ->
                             nyi $ "output file type " ++ show other
                     whenLogging Emit $ logLLVMString modspec
@@ -339,7 +339,7 @@ loadAllNeededModules :: ModSpec -- ^Module name
               -> Compiler [(ModSpec, [ModSpec])]
 loadAllNeededModules modspec isTarget possDirs = do
     opts <- gets options
-    let force = optForceAll opts || (optForce opts && isTarget)
+    let force = optForceAll opts || (isTarget && optForce opts)
     mods <- loadModuleIfNeeded force modspec possDirs
     stopOnError $ "loading module: " ++ showModSpec modspec
 
@@ -367,9 +367,9 @@ loadAllNeededModules modspec isTarget possDirs = do
 
 -- | Try to load the given "modspec" and try to use the compiled version from
 -- object files if possible.
-loadModuleIfNeeded :: Bool    -- ^Force compilation of this module
-              -> ModSpec       -- ^Module name
-              -> [(FilePath,Bool)] -- ^Directories to look in and whether libs
+loadModuleIfNeeded :: Bool          -- ^Force compilation of this module
+              -> ModSpec            -- ^Module name
+              -> [(FilePath,Bool)]  -- ^Directories to look in and whether libs
               -> Compiler [ModSpec] -- ^Return newly loaded module
 loadModuleIfNeeded force modspec possDirs = do
     logBuild $ "Loading " ++ showModSpec modspec
@@ -386,8 +386,6 @@ loadModuleIfNeeded force modspec possDirs = do
     if isJust maybemod
         then return [] -- already loaded:  nothing more to do
         else do
-        -- XXX the "modSrc" might be describing the parent mod of "modspec".
-        -- We doesn't handle that correctly for now.
         modSrc <- moduleSources modspec possDirs
         logBuild $ show modSrc
         case modSrc of
@@ -627,16 +625,17 @@ loadLPVMFromObjFile objFile required = do
             return $ List.map (\m -> m { modOrigin = objFile } ) mods
 
 
--- | Compile and build modules inside a folder, compacting everything into
--- one object file archive.
-buildArchive :: FilePath -> Compiler ()
-buildArchive arch = do
-    let dir = dropExtension arch
-    archiveMods <- liftIO $ List.map dropExtension <$> wybeSourcesInDir dir
-    logBuild $ "Building modules to archive: " ++ show archiveMods
-    let oFileOf m = joinPath [dir, m] <.> objectExtension
-    mapM_ (\m -> emitObjectFile [m] (oFileOf m)) archiveMods
-    makeArchive (List.map oFileOf archiveMods) arch
+-- XXX This needs to be rewritten:
+-- -- | Compile and build modules inside a folder, compacting everything into
+-- -- one object file archive.
+-- buildArchive :: FilePath -> Compiler ()
+-- buildArchive arch = do
+--     let dir = dropExtension arch
+--     archiveMods <- liftIO $ List.map dropExtension <$> wybeSourcesInDir dir
+--     logBuild $ "Building modules to archive: " ++ show archiveMods
+--     let oFileOf m = joinPath [dir, m] <.> objectExtension
+--     mapM_ (\m -> emitObjectFile [m] (oFileOf m)) archiveMods
+--     makeArchive (List.map oFileOf archiveMods) arch
 
 -------------------- Actually compiling some modules --------------------
 
@@ -1222,7 +1221,7 @@ sourceInDir baseName isLib = do
     let objfile = baseName <.> objectExtension
     let arfile  = baseName <.> archiveExtension
     -- Flags checking
-    dirExists <- liftIO $ doesDirectoryExist baseName
+    dirExists <- liftIO $ isModuleDirectory baseName
     srcExists <- liftIO $ doesFileExist srcfile
     objExists <- liftIO $ doesFileExist objfile
     arExists  <- liftIO $ doesFileExist arfile
@@ -1318,33 +1317,22 @@ isModuleDirectory path = do
 
 -- |The different sorts of files that could be specified on the
 --  command line.
-data TargetType = InterfaceFile | ObjectFile | ExecutableFile
-                | UnknownFile | BitcodeFile | AssemblyFile
-                | ArchiveFile | LibraryDirectory
+data TargetType = ObjectFile | BitcodeFile | AssemblyFile
+                | ArchiveFile | ExecutableFile | UnknownFile 
                 deriving (Show,Eq)
 
 
 -- |Given a file specification, return what sort of file it is.  The
 --  file need not exist.
-targetType :: FilePath -> Compiler TargetType
-targetType fileOrDirName = do
-    isMod <- liftIO $ doesFileExist $ fileOrDirName </> moduleDirectoryBasename <.> sourceExtension
-    if isMod
-        then return LibraryDirectory
-        else return $ targetType' fileOrDirName
-
--- |Given a file specification, return what sort of file it is.  The
---  file need not exist.
-targetType' :: FilePath -> TargetType
-targetType' filename
-  | ext' == interfaceExtension  = InterfaceFile
-  | ext' == objectExtension     = ObjectFile
-  | ext' == executableExtension = ExecutableFile
-  | ext' == bitcodeExtension    = BitcodeFile
-  | ext' == assemblyExtension   = AssemblyFile
-  | ext' == archiveExtension    = ArchiveFile
+targetType :: FilePath -> TargetType
+targetType filename
+  | ext == objectExtension     = ObjectFile
+  | ext == bitcodeExtension    = BitcodeFile
+  | ext == assemblyExtension   = AssemblyFile
+  | ext == archiveExtension    = ArchiveFile
+  | ext == executableExtension = ExecutableFile
   | otherwise                   = UnknownFile
-      where ext' = dropWhile (=='.') $ takeExtension filename
+      where ext = dropWhile (=='.') $ takeExtension filename
 
 
 ------------------------ Logging ------------------------
