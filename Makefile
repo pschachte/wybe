@@ -45,7 +45,7 @@ wybemk:	$(SRCDIR)/*.hs $(SRCDIR)/Version.lhs
 libs:	$(addprefix $(LIBDIR)/,$(LIBS))
 
 $(LIBDIR)/%.o:	$(LIBDIR)/%.wybe wybemk
-	./wybemk -L $(LIBDIR) $@
+	./wybemk --force-all -L $(LIBDIR) $@
 
 $(LIBDIR)/wybe.o:	wybemk $(LIBDIR)/wybe/*.wybe
 	./wybemk --force-all -L $(LIBDIR) $@

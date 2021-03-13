@@ -894,7 +894,7 @@ addSimpleResource :: ResourceName -> ResourceImpln -> Visibility -> Compiler ()
 addSimpleResource name impln vis = do
     currMod <- getModuleSpec
     let rspec = ResourceSpec currMod name
-    let rdef = maybePlace (Map.singleton rspec $ Just impln) $
+    let rdef = maybePlace (Map.singleton rspec impln) $
                resourcePos impln
     updateImplementation
       (\imp -> imp { modResources = Map.insert name rdef $ modResources imp,
@@ -1673,7 +1673,7 @@ type ResourceIFace = Map ResourceSpec TypeSpec
 
 resourceDefToIFace :: ResourceDef -> ResourceIFace
 resourceDefToIFace def =
-    Map.map (maybe AnyType resourceType) $ content def
+    Map.map resourceType $ content def
 
 
 -- |A resource definition.  Since a resource may be defined as a
@@ -1681,7 +1681,7 @@ resourceDefToIFace def =
 --  simple resources, this will be a singleton), each with type and
 --  possibly an initial value.  There's also an optional source
 -- position.
-type ResourceDef = Placed (Map ResourceSpec (Maybe ResourceImpln))
+type ResourceDef = Placed (Map ResourceSpec ResourceImpln)
 
 data ResourceImpln =
     SimpleResource {

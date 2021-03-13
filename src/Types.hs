@@ -1493,6 +1493,7 @@ modecheckStmt m name defPos delayed assigned detism
                   let matchProc = procInfoProc match
                   let matchDetism = procInfoDetism match
                   let matchImpurity = procInfoImpurity match
+                  let matchResources = procInfoOutRes match
                   let impurity = bindingImpurity assigned
                   let args' = List.zipWith setPExpTypeFlow
                               (procInfoArgs match) args
@@ -1519,7 +1520,9 @@ modecheckStmt m name defPos delayed assigned detism
                   typeErrors errs
                   let assigned' =
                         bindingStateSeq matchDetism matchImpurity
-                        (pexpListOutputs args') assigned
+                        (pexpListOutputs args')
+                        (assigned {bindingVars =
+                            Set.union matchResources <$> bindingVars assigned })
                   return ([maybePlace stmt' pos],delayed,assigned')
                 [] -> if List.any (delayModeMatch actualModes) modeMatches
                       then do

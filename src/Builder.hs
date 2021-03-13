@@ -1090,18 +1090,14 @@ buildMain mainImports =
         -- Construct argumentless resourceful calls to all main procs
         bodyInner = [Unplaced $ ProcCall m "" Nothing Det True []
                     | m <- mainImports]
-        -- XXX Shouldn't have to hard code assignment of phantom to io
-        -- XXX Should insert assignments of initialised visible resources
-        bodyCode = [move (iVal 0 `castTo` phantomType)
-                         (varSet "io" `withType` phantomType),
-                    move (intCast $ iVal 0) (intVarSet "exit_code"),
-                    Unplaced $ ForeignCall "c" "gc_init" ["semipure"] []]
-                    ++ bodyInner
-                    ++ [Unplaced
-                        $ ForeignCall "c" "exit" ["semipure","terminal"]
-                                      [Unplaced $ intVarGet "exit_code"]]
+        -- If someone is using command_line module, exit with exit_code
+        bodyCode = if List.elem ["command_line"] mainImports
+                   then bodyInner ++ [Unplaced
+                            $ ForeignCall "c" "exit" ["semipure","terminal"]
+                                          [Unplaced $ intVarGet "exit_code"]]
+                   else bodyInner
         mainBody = ProcDefSrc bodyCode
-        -- Program main has argc, argv, exit_code, and io as resources
+        -- Program main has argc, argv, and exit_code as resources
         proto = ProcProto "" []
                 $ Set.fromList [cmdResource "argc" ParamIn,
                                  cmdResource "argv" ParamIn,
