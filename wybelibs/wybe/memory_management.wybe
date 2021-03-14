@@ -6,7 +6,7 @@ pragma no_standard_library  # Standard library can't depend on itself!
 use wybe.int
 
 pub def {semipure} malloc_count(?x:int) {
-    foreign c malloc_count(?x)
+    foreign c {impure} malloc_count(?x)
 }
 
 foreign c {semipure} gc_init()

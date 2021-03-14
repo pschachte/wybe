@@ -32,6 +32,7 @@ AFTER BUILDING MAIN:
                     from drone use 
                     use wybe
                     from wybe.io use 
+                    from wybe.memory_management use 
   resources       : 
   procs           : 
 
@@ -39,9 +40,9 @@ AFTER BUILDING MAIN:
 0: ([argc#0:wybe.int], [argv#0:wybe.int], ?exit_code#0:wybe.int, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(0:wybe.int, ?exit_code#0:wybe.int)
-    foreign c {semipure} gc_init()
-    drone.<0>(0:wybe.phantom, ?#io#2:wybe.phantom) #1
+    foreign c {semipure} gc_init() @memory_management:12:1
+    foreign llvm move(0:wybe.int, ?#exit_code#0:wybe.int) @command_line:18:5
+    drone.<0>(0:wybe.phantom, ?#io#2:wybe.phantom) #3
     foreign c {semipure,terminal} exit(0:wybe.int)
 
 LLVM code       : None
@@ -53,12 +54,20 @@ LLVM code       : None
   public resources: argc: command_line.argc
                     argv: command_line.argv
                     exit_code: command_line.exit_code
-  public procs    : command_line.set_exit_code<0>
+  public procs    : command_line.<0>
+                    command_line.set_exit_code<0>
   imports         : use wybe
-  resources       : argc: fromList [(command_line.argc,Just wybe.int @command_line:4:5)] @command_line:4:5
-                    argv: fromList [(command_line.argv,Just wybe.int @command_line:12:5)] @command_line:12:5
-                    exit_code: fromList [(command_line.exit_code,Just wybe.int @command_line:18:5)] @command_line:18:5
+  resources       : argc: fromList [(command_line.argc,wybe.int @command_line:4:5)] @command_line:4:5
+                    argv: fromList [(command_line.argv,wybe.int @command_line:12:5)] @command_line:12:5
+                    exit_code: fromList [(command_line.exit_code,wybe.int = 0 @command_line:18:30 @command_line:18:5)] @command_line:18:5
   procs           : 
+
+*main* > public {inline} (0 calls)
+0: (?exit_code#1:wybe.int, io#0:wybe.phantom, [?io#0:wybe.phantom]):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm move(0:wybe.int, ?exit_code#1:wybe.int) @command_line:18:5
+
 
 set_exit_code > public {inline} (0 calls)
 0: set_exit_code(code#0:wybe.int, [exit_code#0:wybe.int], ?exit_code#1:wybe.int):
@@ -80,6 +89,12 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
+define external fastcc  i64 @"command_line.<0>"()    {
+entry:
+  ret i64 0 
+}
+
+
 define external fastcc  i64 @"command_line.set_exit_code<0>"(i64  %"code#0")    {
 entry:
   ret i64 %"code#0" 
@@ -90,7 +105,8 @@ entry:
   public submods  : 
   public resources: 
   public procs    : drone.<0>
-  imports         : use drone.drone_info
+  imports         : use command_line
+                    use drone.drone_info
                     use wybe
   resources       : 
   submodules      : drone.drone_info
@@ -107,17 +123,17 @@ entry:
     foreign llvm icmp_ne(ch#0:wybe.char, ~tmp$1#0:wybe.char, ?tmp$2#0:wybe.bool) @char:8:28
     case ~tmp$2#0:wybe.bool of
     0:
-        foreign c malloc_count(?tmp$10#0:wybe.int, ~io#1:wybe.phantom, ?tmp$11#0:wybe.phantom) @io:41:5
-        foreign c print_string("** malloc count: ":wybe.string, ~tmp$11#0:wybe.phantom, ?tmp$12#0:wybe.phantom) @io:30:35
-        foreign c print_int(~tmp$10#0:wybe.int, ~tmp$12#0:wybe.phantom, ?tmp$13#0:wybe.phantom) @io:13:32
-        foreign c putchar('\n':wybe.char, ~tmp$13#0:wybe.phantom, ?io#3:wybe.phantom) @io:11:22
+        foreign c {impure} malloc_count(?tmp$10#0:wybe.int) @memory_management:9:5
+        foreign c print_string("** malloc count: ":wybe.string, ~io#1:wybe.phantom, ?tmp$11#0:wybe.phantom) @io:30:35
+        foreign c print_int(~tmp$10#0:wybe.int, ~tmp$11#0:wybe.phantom, ?tmp$12#0:wybe.phantom) @io:13:32
+        foreign c putchar('\n':wybe.char, ~tmp$12#0:wybe.phantom, ?io#3:wybe.phantom) @io:11:22
 
     1:
         drone.loop<0>[410bae77d3](~tmp$0#0:drone.drone_info, ~ch#0:wybe.char, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #4 @drone:60:6
-        foreign c malloc_count(?tmp$10#0:wybe.int, ~io#2:wybe.phantom, ?tmp$11#0:wybe.phantom) @io:41:5
-        foreign c print_string("** malloc count: ":wybe.string, ~tmp$11#0:wybe.phantom, ?tmp$12#0:wybe.phantom) @io:30:35
-        foreign c print_int(~tmp$10#0:wybe.int, ~tmp$12#0:wybe.phantom, ?tmp$13#0:wybe.phantom) @io:13:32
-        foreign c putchar('\n':wybe.char, ~tmp$13#0:wybe.phantom, ?io#3:wybe.phantom) @io:11:22
+        foreign c {impure} malloc_count(?tmp$10#0:wybe.int) @memory_management:9:5
+        foreign c print_string("** malloc count: ":wybe.string, ~io#2:wybe.phantom, ?tmp$11#0:wybe.phantom) @io:30:35
+        foreign c print_int(~tmp$10#0:wybe.int, ~tmp$11#0:wybe.phantom, ?tmp$12#0:wybe.phantom) @io:13:32
+        foreign c putchar('\n':wybe.char, ~tmp$12#0:wybe.phantom, ?io#3:wybe.phantom) @io:11:22
 
 
 
@@ -208,13 +224,13 @@ drone_init > (3 calls)
 
 
 gen$1 > {inline} (2 calls)
-0: gen$1([ch#0:wybe.char], [d#0:drone.drone_info], io#0:wybe.phantom, [tmp$0#0:drone.drone_info], ?io#3:wybe.phantom):
+0: gen$1([ch#0:wybe.char], [d#0:drone.drone_info], io#0:wybe.phantom, [tmp$0#0:drone.drone_info], ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c malloc_count(?mc#0:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:41:5
-    foreign c print_string("** malloc count: ":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:30:35
-    foreign c print_int(~mc#0:wybe.int, ~#io#2:wybe.phantom, ?tmp$7#0:wybe.phantom) @io:13:32
-    foreign c putchar('\n':wybe.char, ~tmp$7#0:wybe.phantom, ?#io#3:wybe.phantom) @io:11:22
+    foreign c {impure} malloc_count(?mc#0:wybe.int) @memory_management:9:5
+    foreign c print_string("** malloc count: ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:30:35
+    foreign c print_int(~mc#0:wybe.int, ~#io#1:wybe.phantom, ?tmp$6#0:wybe.phantom) @io:13:32
+    foreign c putchar('\n':wybe.char, ~tmp$6#0:wybe.phantom, ?#io#2:wybe.phantom) @io:11:22
 
 
 gen$2 > (7 calls)
@@ -498,6 +514,7 @@ AFTER EVERYTHING:
                     from drone use 
                     use wybe
                     from wybe.io use 
+                    from wybe.memory_management use 
   resources       : 
   procs           : 
 
@@ -505,9 +522,9 @@ AFTER EVERYTHING:
 0: ([argc#0:wybe.int], [argv#0:wybe.int], ?exit_code#0:wybe.int, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(0:wybe.int, ?exit_code#0:wybe.int)
-    foreign c {semipure} gc_init()
-    drone.<0>(0:wybe.phantom, ?#io#2:wybe.phantom) #1
+    foreign c {semipure} gc_init() @memory_management:12:1
+    foreign llvm move(0:wybe.int, ?#exit_code#0:wybe.int) @command_line:18:5
+    drone.<0>(0:wybe.phantom, ?#io#2:wybe.phantom) #3
     foreign c {semipure,terminal} exit(0:wybe.int)
 
   LLVM code       :
@@ -547,12 +564,20 @@ entry:
   public resources: argc: command_line.argc
                     argv: command_line.argv
                     exit_code: command_line.exit_code
-  public procs    : command_line.set_exit_code<0>
+  public procs    : command_line.<0>
+                    command_line.set_exit_code<0>
   imports         : use wybe
-  resources       : argc: fromList [(command_line.argc,Just wybe.int @command_line:4:5)] @command_line:4:5
-                    argv: fromList [(command_line.argv,Just wybe.int @command_line:12:5)] @command_line:12:5
-                    exit_code: fromList [(command_line.exit_code,Just wybe.int @command_line:18:5)] @command_line:18:5
+  resources       : argc: fromList [(command_line.argc,wybe.int @command_line:4:5)] @command_line:4:5
+                    argv: fromList [(command_line.argv,wybe.int @command_line:12:5)] @command_line:12:5
+                    exit_code: fromList [(command_line.exit_code,wybe.int = 0 @command_line:18:30 @command_line:18:5)] @command_line:18:5
   procs           : 
+
+*main* > public {inline} (0 calls)
+0: (?exit_code#1:wybe.int, io#0:wybe.phantom, [?io#0:wybe.phantom]):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm move(0:wybe.int, ?exit_code#1:wybe.int) @command_line:18:5
+
 
 set_exit_code > public {inline} (0 calls)
 0: set_exit_code(code#0:wybe.int, [exit_code#0:wybe.int], ?exit_code#1:wybe.int):
@@ -574,6 +599,12 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
+define external fastcc  i64 @"command_line.<0>"()    {
+entry:
+  ret i64 0 
+}
+
+
 define external fastcc  i64 @"command_line.set_exit_code<0>"(i64  %"code#0")    {
 entry:
   ret i64 %"code#0" 
@@ -584,7 +615,8 @@ entry:
   public submods  : 
   public resources: 
   public procs    : drone.<0>
-  imports         : use drone.drone_info
+  imports         : use command_line
+                    use drone.drone_info
                     use wybe
   resources       : 
   submodules      : drone.drone_info
@@ -601,17 +633,17 @@ entry:
     foreign llvm icmp_ne(ch#0:wybe.char, ~tmp$1#0:wybe.char, ?tmp$2#0:wybe.bool) @char:8:28
     case ~tmp$2#0:wybe.bool of
     0:
-        foreign c malloc_count(?tmp$10#0:wybe.int, ~io#1:wybe.phantom, ?tmp$11#0:wybe.phantom) @io:41:5
-        foreign c print_string("** malloc count: ":wybe.string, ~tmp$11#0:wybe.phantom, ?tmp$12#0:wybe.phantom) @io:30:35
-        foreign c print_int(~tmp$10#0:wybe.int, ~tmp$12#0:wybe.phantom, ?tmp$13#0:wybe.phantom) @io:13:32
-        foreign c putchar('\n':wybe.char, ~tmp$13#0:wybe.phantom, ?io#3:wybe.phantom) @io:11:22
+        foreign c {impure} malloc_count(?tmp$10#0:wybe.int) @memory_management:9:5
+        foreign c print_string("** malloc count: ":wybe.string, ~io#1:wybe.phantom, ?tmp$11#0:wybe.phantom) @io:30:35
+        foreign c print_int(~tmp$10#0:wybe.int, ~tmp$11#0:wybe.phantom, ?tmp$12#0:wybe.phantom) @io:13:32
+        foreign c putchar('\n':wybe.char, ~tmp$12#0:wybe.phantom, ?io#3:wybe.phantom) @io:11:22
 
     1:
         drone.loop<0>[410bae77d3](~tmp$0#0:drone.drone_info, ~ch#0:wybe.char, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #4 @drone:60:6
-        foreign c malloc_count(?tmp$10#0:wybe.int, ~io#2:wybe.phantom, ?tmp$11#0:wybe.phantom) @io:41:5
-        foreign c print_string("** malloc count: ":wybe.string, ~tmp$11#0:wybe.phantom, ?tmp$12#0:wybe.phantom) @io:30:35
-        foreign c print_int(~tmp$10#0:wybe.int, ~tmp$12#0:wybe.phantom, ?tmp$13#0:wybe.phantom) @io:13:32
-        foreign c putchar('\n':wybe.char, ~tmp$13#0:wybe.phantom, ?io#3:wybe.phantom) @io:11:22
+        foreign c {impure} malloc_count(?tmp$10#0:wybe.int) @memory_management:9:5
+        foreign c print_string("** malloc count: ":wybe.string, ~io#2:wybe.phantom, ?tmp$11#0:wybe.phantom) @io:30:35
+        foreign c print_int(~tmp$10#0:wybe.int, ~tmp$11#0:wybe.phantom, ?tmp$12#0:wybe.phantom) @io:13:32
+        foreign c putchar('\n':wybe.char, ~tmp$12#0:wybe.phantom, ?io#3:wybe.phantom) @io:11:22
 
 
 
@@ -771,13 +803,13 @@ drone_init > (3 calls)
 
 
 gen$1 > {inline} (2 calls)
-0: gen$1([ch#0:wybe.char], [d#0:drone.drone_info], io#0:wybe.phantom, [tmp$0#0:drone.drone_info], ?io#3:wybe.phantom):
+0: gen$1([ch#0:wybe.char], [d#0:drone.drone_info], io#0:wybe.phantom, [tmp$0#0:drone.drone_info], ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c malloc_count(?mc#0:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:41:5
-    foreign c print_string("** malloc count: ":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:30:35
-    foreign c print_int(~mc#0:wybe.int, ~#io#2:wybe.phantom, ?tmp$7#0:wybe.phantom) @io:13:32
-    foreign c putchar('\n':wybe.char, ~tmp$7#0:wybe.phantom, ?#io#3:wybe.phantom) @io:11:22
+    foreign c {impure} malloc_count(?mc#0:wybe.int) @memory_management:9:5
+    foreign c print_string("** malloc count: ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:30:35
+    foreign c print_int(~mc#0:wybe.int, ~#io#1:wybe.phantom, ?tmp$6#0:wybe.phantom) @io:13:32
+    foreign c putchar('\n':wybe.char, ~tmp$6#0:wybe.phantom, ?#io#2:wybe.phantom) @io:11:22
 
 
 gen$2 > (7 calls)

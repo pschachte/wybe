@@ -985,6 +985,10 @@ handleModImports _ thisMod = do
 -- mains defined as 'modName.main'.
 buildExecutable :: [[ModSpec]] -> ModSpec -> FilePath -> Compiler ()
 buildExecutable orderedSCCs targetMod target = do
+    possDirs <- gets $ ((,True) <$>) . optLibDirs . options
+    loadModuleIfNeeded False ["command_line"] possDirs
+    let privateImport = importSpec Nothing Private
+    addImport ["command_line"] privateImport `inModule` targetMod
     depends <- orderedDependencies targetMod
     if List.null depends || not (snd (last depends))
         then
@@ -996,6 +1000,7 @@ buildExecutable orderedSCCs targetMod target = do
             -- find dependencies (including module itself) that have a main
             logBuild $ "Dependencies: " ++ show depends
             let mainImports = fst <$> List.filter snd depends
+            -- We need to insert 
             logBuild $ "o Modules with 'main': " ++ showModSpecs mainImports
 
             let mainProc = buildMain mainImports
@@ -1003,10 +1008,8 @@ buildExecutable orderedSCCs targetMod target = do
 
             let mainMod = []
             enterModule target mainMod Nothing
-            addImport ["wybe"] $ importSpec Nothing Private
-            addImport ["command_line"] $ importSpec Nothing Private
-            possDirs <- gets $ ((,True) <$>) . optLibDirs . options
-            loadModuleIfNeeded False ["command_line"] possDirs
+            addImport ["wybe"] privateImport
+            addImport ["command_line"] privateImport
             mapM_ (\m -> addImport m $ importSpec (Just [""]) Private)
                   mainImports
             addProcDef mainProc
@@ -1091,11 +1094,14 @@ buildMain mainImports =
         bodyInner = [Unplaced $ ProcCall m "" Nothing Det True []
                     | m <- mainImports]
         -- If someone is using command_line module, exit with exit_code
-        bodyCode = if List.elem ["command_line"] mainImports
-                   then bodyInner ++ [Unplaced
+        -- bodyCode = if List.elem ["command_line"] mainImports
+        --            then bodyInner ++ [Unplaced
+        --                     $ ForeignCall "c" "exit" ["semipure","terminal"]
+        --                                   [Unplaced $ intVarGet "exit_code"]]
+        --            else bodyInner
+        bodyCode = bodyInner ++ [Unplaced
                             $ ForeignCall "c" "exit" ["semipure","terminal"]
                                           [Unplaced $ intVarGet "exit_code"]]
-                   else bodyInner
         mainBody = ProcDefSrc bodyCode
         -- Program main has argc, argv, and exit_code as resources
         proto = ProcProto "" []
