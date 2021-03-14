@@ -384,33 +384,61 @@ normaliseModMain = do
     modSpec <- getModuleSpec
     logNormalise $ "Completing main normalisation of module "
                    ++ showModSpec modSpec
-    logNormalise $ "Top-level statements = " ++ show stmts
-    unless (List.null stmts) $ do
-      resources <- initResources
-      normaliseItem (ProcDecl Public detModifiers (ProcProto "" [] resources)
-                      (List.reverse stmts) Nothing)
+    (resources,inits) <- initResources
+    let initBody = inits ++ List.reverse stmts
+    logNormalise $ "Top-level statements = " ++ show initBody
+    unless (List.null stmts && List.null inits)
+      $ normaliseItem $ ProcDecl Public detModifiers (ProcProto "" [] resources)
+                                 initBody Nothing
 
--- |The resources available at the top level of this module
-initResources :: Compiler (Set ResourceFlowSpec)
+
+-- |The resources available at the top level of this module, plus the
+-- initialisations to be performed before executing any code that uses this
+-- module.
+initResources :: Compiler (Set ResourceFlowSpec, [Placed Stmt])
 initResources = do
     mods <- getModuleImplementationField (Map.keys . modImports)
     mods' <- ((mods ++) . concat) <$> mapM descendentModules mods
     logNormalise $ "in initResources, mods = " ++ showModSpecs mods'
     importedMods <- catMaybes <$> mapM getLoadingModule mods'
     let importImplns = catMaybes (modImplementation <$> importedMods)
-    let importResources = (Map.assocs . content . snd) <$>
+    let importedResources = (Map.assocs . content . snd) <$>
                      (concat $ (Map.assocs . modResources) <$> importImplns)
-    let initialisedImports = List.filter (isJust . snd) $ concat importResources
     impln <- getModuleImplementationField id
-    let localResources = (Map.assocs . content . snd) <$>
-                         (Map.assocs $ modResources impln)
-    let initialisedLocal = List.filter (isJust . snd) $ concat localResources
-    let resources = ((\spec -> ResourceFlowSpec (fst spec) ParamInOut)
-                     <$> initialisedImports)
+    let localResources = (Map.assocs . content) <$>
+                         (Map.elems $ modResources impln)
+    let initialised = List.filter (isJust . resourceInit . snd) . concat
+    let initialisedImports = initialised importedResources
+    let initialisedLocal = initialised localResources
+    -- Direct tie-in to command_line library module:  for any module that
+    -- imports command_line, we add argc and argv as input/output resources.
+    -- This is necessary because argc and argv are effectively initialised by
+    -- the fact that they're automatically generated as arguments to the
+    -- top-level main, but we can't declare them with resource initialisations,
+    -- because that would overwrite them.
+    let cmdlineModSpec = ["command_line"]
+    let cmdlineResources =
+            if List.elem cmdlineModSpec mods
+            then let cmdline = ResourceSpec cmdlineModSpec
+                 in [ResourceFlowSpec (cmdline "argc") ParamInOut
+                    ,ResourceFlowSpec (cmdline "argv") ParamInOut]
+            else []
+    let resources = cmdlineResources
+                    ++ ((\spec -> ResourceFlowSpec (fst spec) ParamInOut)
+                        <$> initialisedImports)
                     ++ ((\spec -> ResourceFlowSpec (fst spec) ParamOut)
                         <$> initialisedLocal)
+    let inits = [Unplaced $ ForeignCall "llvm" "move" []
+                            [maybePlace ((content initExp) `withType` resType)
+                             (place initExp)
+                            ,Unplaced (varSet $ resourceName resSpec)]
+                | (resSpec, resImpln) <- initialisedLocal
+                , let initExp = trustFromJust "initResources"
+                                $ resourceInit resImpln
+                , let resType = resourceType resImpln]
     logNormalise $ "In initResources, resources = " ++ show resources
-    return $ Set.fromList resources
+    logNormalise $ "In initResources, initialisations =" ++ showBody 4 inits
+    return (Set.fromList resources, inits)
 
 
 

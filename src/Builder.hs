@@ -12,6 +12,32 @@
 --  what source files need to be compiled, and for building the
 --  final outputs (whether executable, object file, archive, etc.).
 --
+--  Wybe allows a module to be defined by a single .wybe file, or
+--  by a directory containing multiple submodules.  In the latter
+--  case, the directory must contain a (possibly empty) file named
+--  _.wybe, which should contain all of that module's source code
+--  other than its submodules.
+--
+--  The compiler can generate all these output formats, using the file
+--  extension to work out which type of file to build:  executable,
+--  object code, LLVM bitcode, LLVM assembly code, or archive file.
+--  In general, it can build any type of output from either type of
+--  input, but note that on unix-style systems, both directories and
+--  executables have empty file extensions, so it is not possible to
+--  build an executable from a directory.  Asking to build an object,
+--  LLVM bitcode, or LLVM assembler file for a directory module is
+--  interpreted as asking to recursively build that type of file for
+--  each wybe source file and module directory within that directory.
+--
+--  The compiler stores its internal data structures in object files it
+--  generates, and extracts that information from the object file, rather
+--  than loading and compiling the source file, if the object file is
+--  younger than the source file.  In the case of a directory module, the
+--  nested _.o, _.bc, or _.ll file holds all of the contents of that
+--  module that come from the _.wybe file.  That is, the _.wybe file is
+--  compiled much like other modules, except that its module name is that
+--  of the parent directory, rather than the file itself.
+--
 --  To keep compile times manageable while supporting optimisation,
 --  we compile modules bottom-up, ensuring that all a module's
 --  imports are compiled before compling the module itself. In the
@@ -19,28 +45,24 @@
 --  component in the module dependency graph is compiled as a unit.
 --  This is handled by the compileModule function, which includes
 --  the functionality for finding the SCCs in the module dependency
---  graph. The monadic functions enterModule and exitModule,
---  imported from the AST module, implement the SCC functionality,
---  with exitModule returning a list of modules that form an SCC.
---  Between enterModule and exitModule, the Normalise.normalise
---  function is called to record the code of the module and to
---  record all its dependencies. Each SCC is compiled by the
---  compileModSCC function.
+--  graph.  Then each SCC is compiled by the compileModSCC function.
 --
---  One shortcoming of the bottom-up approach is that some analyses
---  are best performed top-down.  For example, we can only eliminate
---  unneeded procedures when we've seen all the calls to all
---  procedures in the module.  By compiling bottom-up, we do not have
---  access to this information.  Our solution to this problem is to
---  perform the top-down analysis after the bottom-up compilation,
---  generating results that we can use for the next compilation.  If
---  the top-down analysis produces results that conflict with the
---  previous top-down analysis, so that the compilation produced
---  invalid results, then we must re-compile enough of the program to
---  fix the problem.  It is hoped that this will happen infrequently
---  enough that the time saved by not usually having to make separate
---  traversals for analysis and compilation will more than make up
---  for the few times we need to recompile.
+--  One shortcoming of the bottom-up approach is that some optimisations
+--  depend upon the way a procedure is used, which cannot be determined
+--  from the code itself.  Such analyses are best performed top-down.
+--  For example, if we can determine that a structure will not be
+--  referenced after the call to a procedure, that procedure may be
+--  compiled to destructive modify or reuse that structure.  Our
+--  approach to this is to apply multiple specialisation:  we compile
+--  different versions of this code for for calls that may reference
+--  that argument again and calls that cannot.  Our approach is to
+--  to have the bottom-up analysis produce "requests", which indicate
+--  what top-down analysis results would allow more efficient
+--  specialisations of the code.  This information os produced bottom-
+--  up.  Then, when generating the final executable, when all the code
+--  is available, we determine how beneficial each specialisation would
+--  be, and select the most useful specialisations to actually produce,
+--  and generate code for any that have not already been generated.
 --
 --  Ensuring that all compiler phases happen in the right order is
 --  subtle, particularly in the face of mutual module dependencies.
@@ -49,8 +71,8 @@
 --  * Types: the types a type depends on need to have been processed
 --  before the type itself, so that sizes are known. In the case of
 --  recursive or mutually recursive type dependencies, all types in
---  the recursion must be pointers. Types are transformed into
---  submodules, and constructors, deconstructors, accessors,
+--  the recursion must be implemented as pointers. Types are transformed
+--  into (sub)modules, and constructors, deconstructors, accessors,
 --  mutators, and auxiliary type procedures (equality tests, plus
 --  eventually comparisons, printers, pretty printers, etc.) are all
 --  generated as procedures within those submodules.  Therefore,
@@ -61,8 +83,8 @@
 --  support defining resources in terms of others, but the plan is
 --  to support that.)  The types in the module that defines a
 --  resource, and all module dependencies, must have been processed
---  at least enough to know they have been defined to process the
---  resource declaration.
+--  at least enough to know they have been defined before processing
+--  the resource declaration.
 --
 --  * Top-level statements in a module: these are transformed to
 --  statements in a special procedure whose name is the empty string
@@ -82,12 +104,18 @@
 --  parameter or local variable type, must have been processed the
 --  same way before processing the procedure itself.
 --
---  * Submodules: the submodules of a module, including the types,
---  must be processed as mutual dependencies of that module, which
---  they are. The nested submodules of a module (including types)
---  have access to all public and private members of the parent
---  module, and the parent has access to all public members of the
---  parent, so they are mutual dependencies.
+--  * Nested submodules: the submodules defined within a module file,
+--  including the types, must be processed as mutual dependencies of
+--  that module, which they are. The nested submodules of a module
+--  (including types) have access to all public and private members
+--  of the parent module, and the parent has access to all public
+--  members of the parent, so they are mutual dependencies.
+--
+--  * Directory modules:  A directory containing a file named _.wybe
+--  is also a module, with all the contained .wybe files as submodules.
+--  However, these submodules do not automatically import all the other
+--  modules in that directory, although they can explicitly import any
+--  sibling modules they need.
 --
 --  This means only minimal processing can be done before module
 --  dependencies are noted and read in.  So we handle all these
@@ -104,8 +132,8 @@
 --
 --  * Pragmas:  Record for later processing.
 --
---  * Constructors: record for later type layout, code generation,
---  etc.
+--  * Constructors and low-level (representation) types: record for
+--  later type layout, code generation, etc.
 --
 --  * Top level statements:  add statements to the special "" proc
 --  in the module, creating it if necessary.
@@ -113,10 +141,10 @@
 --  * Procs and functions:  record them for later normalisation,
 --  analysis, optimisation, etc.
 --
---  Once we reach the end of a module or submodule, we call
---  exitModule, which returns a list of modules that form an SCC in
---  the module dependency graph.  That list is passed to
---  compileModSCC, which does the following:
+--  Once we have finished loading the sources for the specified
+--  targets, and all their dependencies, we compute the SCCs in
+--  the module dependency graph.  Then for each SCC, in topographic
+--  order, we call compileModSCC, which does the following:
 --
 --    1. Traverse all recorded type submodules in the module list
 --       finding all type dependencies; topologically sort them and
@@ -132,21 +160,21 @@
 --
 --       This is handled in the Normalise module.
 --
---    2. Check all resource imports and exports. (Resources)
+--    2. Check all resource imports and exports. (Resources.hs)
 --
 --    3. Normalise all recorded procs in their modules, including
---       generated constructors, etc. (Normalise)
+--       generated constructors, etc. (Normalise.hs)
 --
---    4. Validate the types of exported procs. (Types)
+--    4. Validate the types of exported procs. (Types.hs)
 --
---    5. Check proc argument types and modes are checked, and
---       resolve called procs. (Types)
+--    5. Check proc argument types, resolve overloading, and
+--       mode check all procs. (Types.hs)
 --
 --    6. Check proc resources and transform them to args.
---      (Resources)
+--      (Resources.hs)
 --
 --    7. Transform away branches, loops, and nondeterminism.
---       (Unbranch)
+--       (Unbranch.hs)
 --
 --    8. Topologically sort proc call graph and identify SCCs.  For
 --       each SCC, bottom-up, do the following:
@@ -221,7 +249,7 @@ buildTargets targets = do
     logDump FinalDump FinalDump "EVERYTHING"
 
 
--- |Build a single target
+-- |Build a single top-level target
 buildTarget :: FilePath -> Compiler ()
 buildTarget target = do
     logBuild $ "===> Building target " ++ target
@@ -233,7 +261,7 @@ buildTarget target = do
 
     target <- liftIO $ makeAbsolute target
     Informational <!> "Building target: " ++ target
-    tType <- targetType target
+    let tType = targetType target
     case tType of
         UnknownFile ->
             Error <!> "Unknown target file type: " ++ target
@@ -290,11 +318,11 @@ buildTarget target = do
                             (emitMod emitBitcodeFile bitcodeExtension) targets
                         AssemblyFile -> mapM_
                             (emitMod emitAssemblyFile assemblyExtension) targets
-                        ArchiveFile -> do
-                            mapM_ (uncurry emitObjectFile) targets
-                            buildArchive target
-                        LibraryDirectory ->
-                            mapM_ (uncurry emitObjectFile) targets
+                        -- ArchiveFile -> do
+                        --     mapM_ (uncurry emitObjectFile) targets
+                        --     buildArchive target
+                        -- LibraryDirectory ->
+                        --     mapM_ (uncurry emitObjectFile) targets
                         other ->
                             nyi $ "output file type " ++ show other
                     whenLogging Emit $ logLLVMString modspec
@@ -311,7 +339,7 @@ loadAllNeededModules :: ModSpec -- ^Module name
               -> Compiler [(ModSpec, [ModSpec])]
 loadAllNeededModules modspec isTarget possDirs = do
     opts <- gets options
-    let force = optForceAll opts || (optForce opts && isTarget)
+    let force = optForceAll opts || (isTarget && optForce opts)
     mods <- loadModuleIfNeeded force modspec possDirs
     stopOnError $ "loading module: " ++ showModSpec modspec
 
@@ -339,9 +367,9 @@ loadAllNeededModules modspec isTarget possDirs = do
 
 -- | Try to load the given "modspec" and try to use the compiled version from
 -- object files if possible.
-loadModuleIfNeeded :: Bool    -- ^Force compilation of this module
-              -> ModSpec       -- ^Module name
-              -> [(FilePath,Bool)] -- ^Directories to look in and whether libs
+loadModuleIfNeeded :: Bool          -- ^Force compilation of this module
+              -> ModSpec            -- ^Module name
+              -> [(FilePath,Bool)]  -- ^Directories to look in and whether libs
               -> Compiler [ModSpec] -- ^Return newly loaded module
 loadModuleIfNeeded force modspec possDirs = do
     logBuild $ "Loading " ++ showModSpec modspec
@@ -358,8 +386,6 @@ loadModuleIfNeeded force modspec possDirs = do
     if isJust maybemod
         then return [] -- already loaded:  nothing more to do
         else do
-        -- XXX the "modSrc" might be describing the parent mod of "modspec".
-        -- We doesn't handle that correctly for now.
         modSrc <- moduleSources modspec possDirs
         logBuild $ show modSrc
         case modSrc of
@@ -599,16 +625,17 @@ loadLPVMFromObjFile objFile required = do
             return $ List.map (\m -> m { modOrigin = objFile } ) mods
 
 
--- | Compile and build modules inside a folder, compacting everything into
--- one object file archive.
-buildArchive :: FilePath -> Compiler ()
-buildArchive arch = do
-    let dir = dropExtension arch
-    archiveMods <- liftIO $ List.map dropExtension <$> wybeSourcesInDir dir
-    logBuild $ "Building modules to archive: " ++ show archiveMods
-    let oFileOf m = joinPath [dir, m] <.> objectExtension
-    mapM_ (\m -> emitObjectFile [m] (oFileOf m)) archiveMods
-    makeArchive (List.map oFileOf archiveMods) arch
+-- XXX This needs to be rewritten:
+-- -- | Compile and build modules inside a folder, compacting everything into
+-- -- one object file archive.
+-- buildArchive :: FilePath -> Compiler ()
+-- buildArchive arch = do
+--     let dir = dropExtension arch
+--     archiveMods <- liftIO $ List.map dropExtension <$> wybeSourcesInDir dir
+--     logBuild $ "Building modules to archive: " ++ show archiveMods
+--     let oFileOf m = joinPath [dir, m] <.> objectExtension
+--     mapM_ (\m -> emitObjectFile [m] (oFileOf m)) archiveMods
+--     makeArchive (List.map oFileOf archiveMods) arch
 
 -------------------- Actually compiling some modules --------------------
 
@@ -958,6 +985,10 @@ handleModImports _ thisMod = do
 -- mains defined as 'modName.main'.
 buildExecutable :: [[ModSpec]] -> ModSpec -> FilePath -> Compiler ()
 buildExecutable orderedSCCs targetMod target = do
+    possDirs <- gets $ ((,True) <$>) . optLibDirs . options
+    loadModuleIfNeeded False ["command_line"] possDirs
+    let privateImport = importSpec Nothing Private
+    addImport ["command_line"] privateImport `inModule` targetMod
     depends <- orderedDependencies targetMod
     if List.null depends || not (snd (last depends))
         then
@@ -969,6 +1000,7 @@ buildExecutable orderedSCCs targetMod target = do
             -- find dependencies (including module itself) that have a main
             logBuild $ "Dependencies: " ++ show depends
             let mainImports = fst <$> List.filter snd depends
+            -- We need to insert 
             logBuild $ "o Modules with 'main': " ++ showModSpecs mainImports
 
             let mainProc = buildMain mainImports
@@ -976,10 +1008,8 @@ buildExecutable orderedSCCs targetMod target = do
 
             let mainMod = []
             enterModule target mainMod Nothing
-            addImport ["wybe"] $ importSpec Nothing Private
-            addImport ["command_line"] $ importSpec Nothing Private
-            possDirs <- gets $ ((,True) <$>) . optLibDirs . options
-            loadModuleIfNeeded False ["command_line"] possDirs
+            addImport ["wybe"] privateImport
+            addImport ["command_line"] privateImport
             mapM_ (\m -> addImport m $ importSpec (Just [""]) Private)
                   mainImports
             addProcDef mainProc
@@ -1063,18 +1093,17 @@ buildMain mainImports =
         -- Construct argumentless resourceful calls to all main procs
         bodyInner = [Unplaced $ ProcCall m "" Nothing Det True []
                     | m <- mainImports]
-        -- XXX Shouldn't have to hard code assignment of phantom to io
-        -- XXX Should insert assignments of initialised visible resources
-        bodyCode = [move (iVal 0 `castTo` phantomType)
-                         (varSet "io" `withType` phantomType),
-                    move (intCast $ iVal 0) (intVarSet "exit_code"),
-                    Unplaced $ ForeignCall "c" "gc_init" ["semipure"] []]
-                    ++ bodyInner
-                    ++ [Unplaced
-                        $ ForeignCall "c" "exit" ["semipure","terminal"]
-                                      [Unplaced $ intVarGet "exit_code"]]
+        -- If someone is using command_line module, exit with exit_code
+        -- bodyCode = if List.elem ["command_line"] mainImports
+        --            then bodyInner ++ [Unplaced
+        --                     $ ForeignCall "c" "exit" ["semipure","terminal"]
+        --                                   [Unplaced $ intVarGet "exit_code"]]
+        --            else bodyInner
+        bodyCode = bodyInner ++ [Unplaced
+                            $ ForeignCall "c" "exit" ["semipure","terminal"]
+                                          [Unplaced $ intVarGet "exit_code"]]
         mainBody = ProcDefSrc bodyCode
-        -- Program main has argc, argv, exit_code, and io as resources
+        -- Program main has argc, argv, and exit_code as resources
         proto = ProcProto "" []
                 $ Set.fromList [cmdResource "argc" ParamIn,
                                  cmdResource "argv" ParamIn,
@@ -1194,7 +1223,7 @@ sourceInDir baseName isLib = do
     let objfile = baseName <.> objectExtension
     let arfile  = baseName <.> archiveExtension
     -- Flags checking
-    dirExists <- liftIO $ doesDirectoryExist baseName
+    dirExists <- liftIO $ isModuleDirectory baseName
     srcExists <- liftIO $ doesFileExist srcfile
     objExists <- liftIO $ doesFileExist objfile
     arExists  <- liftIO $ doesFileExist arfile
@@ -1290,33 +1319,22 @@ isModuleDirectory path = do
 
 -- |The different sorts of files that could be specified on the
 --  command line.
-data TargetType = InterfaceFile | ObjectFile | ExecutableFile
-                | UnknownFile | BitcodeFile | AssemblyFile
-                | ArchiveFile | LibraryDirectory
+data TargetType = ObjectFile | BitcodeFile | AssemblyFile
+                | ArchiveFile | ExecutableFile | UnknownFile 
                 deriving (Show,Eq)
 
 
 -- |Given a file specification, return what sort of file it is.  The
 --  file need not exist.
-targetType :: FilePath -> Compiler TargetType
-targetType fileOrDirName = do
-    isMod <- liftIO $ doesFileExist $ fileOrDirName </> moduleDirectoryBasename <.> sourceExtension
-    if isMod
-        then return LibraryDirectory
-        else return $ targetType' fileOrDirName
-
--- |Given a file specification, return what sort of file it is.  The
---  file need not exist.
-targetType' :: FilePath -> TargetType
-targetType' filename
-  | ext' == interfaceExtension  = InterfaceFile
-  | ext' == objectExtension     = ObjectFile
-  | ext' == executableExtension = ExecutableFile
-  | ext' == bitcodeExtension    = BitcodeFile
-  | ext' == assemblyExtension   = AssemblyFile
-  | ext' == archiveExtension    = ArchiveFile
+targetType :: FilePath -> TargetType
+targetType filename
+  | ext == objectExtension     = ObjectFile
+  | ext == bitcodeExtension    = BitcodeFile
+  | ext == assemblyExtension   = AssemblyFile
+  | ext == archiveExtension    = ArchiveFile
+  | ext == executableExtension = ExecutableFile
   | otherwise                   = UnknownFile
-      where ext' = dropWhile (=='.') $ takeExtension filename
+      where ext = dropWhile (=='.') $ takeExtension filename
 
 
 ------------------------ Logging ------------------------

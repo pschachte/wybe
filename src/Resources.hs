@@ -50,18 +50,18 @@ checkResourceDef name def = do
     return (or chg, concat errs, (name,rePlace (Map.fromList m) def))
 
 
-checkOneResource :: ResourceSpec -> Maybe ResourceImpln ->
+checkOneResource :: ResourceSpec -> ResourceImpln ->
                     Compiler (Bool,[(String,OptPos)],
-                              (ResourceSpec,Maybe ResourceImpln))
-checkOneResource rspec impln@(Just (SimpleResource ty init pos)) = do
+                              (ResourceSpec,ResourceImpln))
+checkOneResource rspec impln@(SimpleResource ty init pos) = do
     logResources $ "Check resource " ++ show rspec ++
            " with implementation " ++ show impln
     ty' <- lookupType "resource declaration" pos ty
     logResources $ "Actual type is " ++ show ty'
-    return (ty' /= ty,[],(rspec,Just (SimpleResource ty' init pos)))
-checkOneResource rspec Nothing = do
-    -- XXX don't currently handle compound resources
-    nyi "compound resources"
+    return (ty' /= ty,[],(rspec,SimpleResource ty' init pos))
+-- checkOneResource rspec Nothing = do
+--     -- XXX don't currently handle compound resources
+--     nyi "compound resources"
 
 
 ------------- Canonicalising resources in proc definitions ---------

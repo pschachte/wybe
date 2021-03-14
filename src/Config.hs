@@ -9,11 +9,11 @@
 -- |Compiler configuration parameters.  These may vary between
 --  OSes.
 module Config (sourceExtension, objectExtension, executableExtension,
-               interfaceExtension, bitcodeExtension,
+               bitcodeExtension, assemblyExtension, archiveExtension, 
                moduleDirectoryBasename, currentTypeAlias,
                wordSize, wordSizeBytes,
                availableTagBits, tagMask, smallestAllocatedAddress,
-               assemblyExtension, archiveExtension, magicVersion,
+               magicVersion,
                linkerDeadStripArgs, functionDefSection, removeLPVMSection)
     where
 
@@ -38,11 +38,6 @@ objectExtension = "o"
 -- |The file extension for executable files.
 executableExtension :: String
 executableExtension = ""
-
-
--- |The file extension for interface files.
-interfaceExtension :: String
-interfaceExtension = "int"
 
 
 -- |The file extension for bitcode files.

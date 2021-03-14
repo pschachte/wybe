@@ -39,7 +39,7 @@ module AST (
   -- *AST types
   Module(..), isRootModule, ModuleInterface(..), ModuleImplementation(..), InterfaceHash, PubProcInfo(..),
   ImportSpec(..), importSpec, Pragma(..), addPragma,
-  descendentModules,
+  descendentModules, sameOriginModules, -- XXX not needed? differentOriginModules,
   enterModule, reenterModule, exitModule, reexitModule, inModule,
   emptyInterface, emptyImplementation,
   getParams, getDetism, getProcDef, getProcPrimProto,
@@ -894,7 +894,7 @@ addSimpleResource :: ResourceName -> ResourceImpln -> Visibility -> Compiler ()
 addSimpleResource name impln vis = do
     currMod <- getModuleSpec
     let rspec = ResourceSpec currMod name
-    let rdef = maybePlace (Map.singleton rspec $ Just impln) $
+    let rdef = maybePlace (Map.singleton rspec impln) $
                resourcePos impln
     updateImplementation
       (\imp -> imp { modResources = Map.insert name rdef $ modResources imp,
@@ -1240,6 +1240,7 @@ parentModule []  = Nothing
 parentModule [m] = Nothing
 parentModule modspec = Just $ init modspec
 
+
 -- | Collect all the descendent modules of the given modspec.
 descendentModules :: ModSpec -> Compiler [ModSpec]
 descendentModules mspec = do
@@ -1247,6 +1248,31 @@ descendentModules mspec = do
     desc <- fmap concat $ mapM descendentModules subMods
     return $ subMods ++ desc
 
+
+-- | Collect all the descendent modules of the given modspec that come from
+-- the same origin and hence should go in the same target file.
+sameOriginModules :: ModSpec -> Compiler [ModSpec]
+sameOriginModules mspec = do
+    let origin m = modOrigin . trustFromJust "sameOriginModules"
+                   <$> getLoadedModule m
+    file <- origin mspec
+    subMods <- Map.elems . modSubmods <$> getLoadedModuleImpln mspec
+    sameOriginSubMods <- filterM (((== file) <$>) . origin) subMods
+    (sameOriginSubMods ++) . concat <$> mapM sameOriginModules sameOriginSubMods
+
+
+-- XXX Looks like this isn't actually needed
+-- -- | Collect the nearest descendent modules of the given modspec that come from
+-- -- a different origin and hence should be written to different target files.
+-- differentOriginModules :: ModSpec -> Compiler [ModSpec]
+-- differentOriginModules mspec = do
+--     let origin m = modOrigin . trustFromJust "sameOriginModules"
+--                    <$> getLoadedModule m
+--     file <- origin mspec
+--     subMods <- Map.elems . modSubmods <$> getLoadedModuleImpln mspec
+--     (same,diff) <- List.partition snd . zip subMods 
+--                    <$> mapM (((== file) <$>) . origin) subMods
+--     ((fst <$> diff) ++) . concat <$> mapM differentOriginModules (fst <$> same)
 
 
 -- |The set of defining modules that the given (possibly
@@ -1384,7 +1410,6 @@ data ModuleImplementation = ModuleImplementation {
     modSubmods   :: Map Ident ModSpec,        -- ^This module's submodules
     modResources :: Map Ident ResourceDef,    -- ^Resources defined by this mod
     modProcs     :: Map Ident [ProcDef],      -- ^Procs defined by this module
-    -- XXX Pull visibility out of list; all ctrs share one visibility
     modConstructors :: Maybe [(Visibility,Placed ProcProto)],
                                               -- ^reversed list of data
                                               -- constructors for this
@@ -1648,7 +1673,7 @@ type ResourceIFace = Map ResourceSpec TypeSpec
 
 resourceDefToIFace :: ResourceDef -> ResourceIFace
 resourceDefToIFace def =
-    Map.map (maybe AnyType resourceType) $ content def
+    Map.map resourceType $ content def
 
 
 -- |A resource definition.  Since a resource may be defined as a
@@ -1656,7 +1681,7 @@ resourceDefToIFace def =
 --  simple resources, this will be a singleton), each with type and
 --  possibly an initial value.  There's also an optional source
 -- position.
-type ResourceDef = Placed (Map ResourceSpec (Maybe ResourceImpln))
+type ResourceDef = Placed (Map ResourceSpec ResourceImpln)
 
 data ResourceImpln =
     SimpleResource {

@@ -36,7 +36,3 @@ pub def print(x:bool) use !io {
 }
 pub def println(x:bool) use !io { !print(x) !nl }
 pub def eof:char = foreign lpvm cast(-1)
-
-pub def malloc_count(?x:int) use !io {
-    foreign c malloc_count(?x, !io)
-}
