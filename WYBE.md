@@ -778,12 +778,10 @@ A resource can be declared at the level of a module, as follows:
 
 > `resource` *name*`:`*type*
 
-[//]: # (This does not work; see issue #7.)
+It may optionally specify an initial value, in which case the resource is
+defined throughout the execution of the program.
 
-[//]: # (It may optionally specify an initial value, in which case the resource is)
-[//]: # (defined throughout the execution of the program.)
-
-[//]: # (> `resource` *name*`:`*type* `=` *expr*)
+> `resource` *name*`:`*type* `=` *expr*
 
 A resource may be exported, allowing it to be referred to in other modules, by
 preceding the `resource` declaration with the `pub` keyword.
@@ -861,11 +859,13 @@ resource.
 
 The `io` resource is implicitly defined at the top level of a Wybe program.
 There is also a predefined `argc` and `argv` resource holding the number of
-command line arguments and an array of the arguments themselves.
-Finally, the `exit_code` resource is initialised to 0 at the start of execution,
-and may be changed to any integer during the computation to set the exit
-condition that will be returned to the operating system at the termination of
-the program.
+command line arguments and an array of the arguments themselves. Finally, the
+`exit_code` resource is initialised to 0 at the start of execution, and may be
+changed to any integer during the computation to set the exit condition that
+will be returned to the operating system at the termination of the program.  To
+use the `argc`, `argv`, or `exit_code` resources, a module must `use` the
+`command_line` module.  This is part of the Wybe library, but is not
+automatially imported.
 
 ## Packages
 
