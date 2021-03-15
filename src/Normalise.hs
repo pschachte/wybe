@@ -514,21 +514,17 @@ nonConstCtorItems vis typeSpec numConsts numNonConsts tagBits tagLimit
       logNormalise $ "Structure contains " ++ show ptrCount ++ " pointers, "
                      ++ show numConsts ++ " const constructors, "
                      ++ show numNonConsts ++ " non-const constructors"
+      let params = sel1 <$> paramsReps
       return (Address,
-              constructorItems ctorName typeSpec fields size tag tagLimit pos
-              ++ deconstructorItems ctorName typeSpec numConsts numNonConsts
-                 tag tagLimit pos fields size
+              constructorItems ctorName typeSpec params fields
+                  size tag tagLimit pos
+              ++ deconstructorItems ctorName typeSpec params numConsts
+                     numNonConsts tag tagLimit pos fields size
               ++ concatMap
                  (getterSetterItems vis typeSpec pos numConsts numNonConsts
                   ptrCount size tag tagLimit)
                  fields
              )
-
--- |The number of bytes occupied by a value of the specified type.  If the
---  type is boxed, this is the word size.
-fieldSize :: TypeSpec -> Compiler Int
--- XXX Generalise to allow non-word size fields
-fieldSize _ = return wordSizeBytes
 
 
 ----------------------------------------------------------------
@@ -578,18 +574,16 @@ alignOffset offset alignment =
 
 
 -- |Generate constructor code for a non-const constructor
-constructorItems :: ProcName -> TypeSpec
+constructorItems :: ProcName -> TypeSpec -> [Param]
                  -> [(VarName,TypeSpec,TypeRepresentation,Int)]
                  -> Int -> Int -> Int -> OptPos -> [Item]
-constructorItems ctorName typeSpec fields size tag tagLimit pos =
+constructorItems ctorName typeSpec params fields size tag tagLimit pos =
     let flowType = Implicit pos
-        params = sel1 <$> fields
-        proto = (ProcProto ctorName
-                 ([Param name paramType ParamIn Ordinary
-                  | (name,paramType,_,_) <- fields]
-                   ++[Param "$" typeSpec ParamOut Ordinary])
-                 Set.empty)
-    in [ProcDecl Public inlineDetModifiers proto
+    in [ProcDecl Public inlineDetModifiers
+        (ProcProto ctorName
+            (((\p -> p {paramFlow=ParamIn, paramFlowType=Ordinary}) <$> params)
+             ++ [Param "$" typeSpec ParamOut Ordinary])
+            Set.empty)
         -- Code to allocate memory for the value
         ([Unplaced $ ForeignCall "lpvm" "alloc" []
           [Unplaced $ iVal size,
@@ -627,16 +621,17 @@ constructorItems ctorName typeSpec fields size tag tagLimit pos =
 
 
 -- |Generate deconstructor code for a non-const constructor
-deconstructorItems :: Ident -> TypeSpec -> Int -> Int -> Int -> Int -> OptPos
-                   -> [(Ident,TypeSpec,TypeRepresentation,Int)] -> Int -> [Item]
-deconstructorItems ctorName typeSpec numConsts numNonConsts tag tagLimit
+deconstructorItems :: Ident -> TypeSpec -> [Param] -> Int -> Int -> Int -> Int
+                   -> OptPos -> [(Ident,TypeSpec,TypeRepresentation,Int)]
+                   -> Int -> [Item]
+deconstructorItems ctorName typeSpec params numConsts numNonConsts tag tagLimit
                    pos fields size =
-    let startOffset = (if tag > tagLimit then tagLimit+1 else tag) in
-    let flowType = Implicit pos
+    let startOffset = (if tag > tagLimit then tagLimit+1 else tag)
+        flowType = Implicit pos
         detism = deconstructorDetism numConsts numNonConsts
     in [ProcDecl Public (inlineModifier detism)
         (ProcProto ctorName
-         (List.map (\(n,t,_,_) -> (Param n t ParamOut Ordinary)) fields
+         (((\p -> p {paramFlow=ParamOut, paramFlowType=Ordinary}) <$> params)
           ++ [Param "$" typeSpec ParamIn Ordinary])
          Set.empty)
         -- Code to check we have the right constructor
@@ -760,7 +755,6 @@ unboxedConstructorItems :: Visibility -> ProcName -> TypeSpec -> Int
                         -> OptPos -> [Item]
 unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
     let flowType = Implicit pos
-        params = sel1 <$> fields
         proto = ProcProto ctorName
                 ([Param name paramType ParamIn Ordinary
                  | (name,paramType,_,_) <- fields]
