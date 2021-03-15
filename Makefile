@@ -30,13 +30,13 @@ endif
 
 all:	wybemk libs
 
-install:	wybemk libs
+install:	wybemk
 	cp wybemk "$(INSTALLBIN)"
 	rm -rf "$(INSTALLLIB)"
 	mkdir -p "$(INSTALLLIB)"
-	for f in $(LIBS) ; do \
-		cp -r "$(LIBDIR)/$$f" "$(INSTALLLIB)" ; \
-	done
+	cp -r "$(LIBDIR)/*" "$(INSTALLLIB)"
+	"$(INSTALLBIN)"/wybemk --force-all "$(INSTALLLIB)"/wybe
+	"$(INSTALLBIN)"/wybemk --force-all $(patsubst %.wybe,%.o,"$(INSTALLLIB)/*.wybe")
 
 
 wybemk:	$(SRCDIR)/*.hs $(SRCDIR)/Version.lhs
