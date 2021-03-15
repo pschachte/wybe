@@ -140,7 +140,7 @@ typeCheckModSCC scc = do
        (List.map (("    " ++) . intercalate ", " . List.map show . sccElts)
        ordered)
     errs <- concat <$> mapM typecheckProcSCC ordered
-    mapM_ (queueMessage . typeErrorMessage) $ reverse errs
+    mapM_ (queueMessage . typeErrorMessage) errs
 
 
 -- |Return the module, name, and defn of all procs in the specified module
