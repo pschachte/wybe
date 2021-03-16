@@ -747,7 +747,16 @@ data ProcInfo = ProcInfo {
   procInfoImpurity:: Impurity,
   procInfoInRes   :: Set ResourceName,
   procInfoOutRes  :: Set ResourceName
-  } deriving (Eq,Show)
+  } deriving (Eq)
+
+instance Show ProcInfo where
+    show (ProcInfo procSpec args detism impurity inRes outRes) =
+        showProcModifiers (ProcModifiers detism MayInline impurity [] [])
+        ++ show procSpec ++ "(" ++ intercalate "," (show <$> args) ++ ")"
+        ++ if Set.null inRes && Set.null outRes
+            then ""
+            else " use " ++ intercalate ", "
+                 (Set.toList inRes ++ (('?':) <$> Set.toList outRes))
 
 
 procInfoTypes :: ProcInfo -> [TypeSpec]
@@ -1100,7 +1109,7 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt detism typs):calls)
         residue chg = do
     logTyped $ "Type checking call " ++ show pstmt
     logTyped $ "Calling context is " ++ show detism
-    logTyped $ "Candidate types: " ++ show typs
+    logTyped $ "Candidate types:\n    " ++ intercalate "\n    " (show <$> typs)
     let (callee,pexps) = case content pstmt of
                              ProcCall _ callee' _ _ _ pexps' -> (callee',pexps')
                              noncall -> shouldnt
