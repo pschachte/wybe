@@ -75,7 +75,7 @@ module AST (
   getModuleSpec, moduleIsType, option,
   getOrigin, getSource, getDirectory,
   optionallyPutStr, message, errmsg, (<!>), Message(..), queueMessage,
-  genProcName, addImport, doImport, lookupType,
+  genProcName, addImport, doImport, importFromSupermodule, lookupType,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   addSimpleResource, lookupResource, publicResource,
   ProcModifiers(..), detModifiers, setDetism, setInline, setImpurity,
@@ -1407,6 +1407,7 @@ data ModuleImplementation = ModuleImplementation {
     modPragmas   :: Set Pragma,               -- ^pragmas for this module
     modImports   :: Map ModSpec (ImportSpec, InterfaceHash),
                                               -- ^This module's imports
+    modNestedIn  :: Maybe ModSpec,            -- ^Module's parent, if nested
     modSubmods   :: Map Ident ModSpec,        -- ^This module's submodules
     modResources :: Map Ident ResourceDef,    -- ^Resources defined by this mod
     modProcs     :: Map Ident [ProcDef],      -- ^Procs defined by this module
@@ -1425,8 +1426,8 @@ data ModuleImplementation = ModuleImplementation {
 
 emptyImplementation :: ModuleImplementation
 emptyImplementation =
-    ModuleImplementation Set.empty Map.empty Map.empty Map.empty Map.empty
-                         Nothing Map.empty Map.empty Map.empty
+    ModuleImplementation Set.empty Map.empty Nothing Map.empty Map.empty
+                         Map.empty Nothing Map.empty Map.empty Map.empty
                          Set.empty Set.empty Nothing
 
 
@@ -1613,6 +1614,24 @@ doImport mod (imports, _) = do
                 pubProcs = Map.unionWith Map.union (pubProcs i) exportedProcs })
     -- Update what's exported from the module
     return ()
+
+
+-- |Import known types, resources, and procs from the specified module into the
+-- current one.  This is used to give a nested submodule access to its parent's
+-- members.
+importFromSupermodule :: ModSpec -> Compiler ()
+importFromSupermodule modspec = do
+    impl       <- getLoadedModuleImpln modspec
+    kTypes     <- getModuleImplementationField modKnownTypes
+    kResources <- getModuleImplementationField modKnownResources
+    kProcs     <- getModuleImplementationField modKnownProcs
+    let knownTypes = Map.unionWith Set.union (modKnownTypes impl) kTypes
+    let knownResources =
+            Map.unionWith Set.union (modKnownResources impl) kResources
+    let knownProcs = Map.unionWith Set.union (modKnownProcs impl) kProcs
+    updateModImplementation (\imp -> imp { modKnownTypes = knownTypes,
+                                           modKnownResources = knownResources,
+                                           modKnownProcs = knownProcs })
 
 
 -- | Resolve a (possibly) relative module spec into an absolute one.  The

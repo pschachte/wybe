@@ -104,7 +104,7 @@ normaliseItem (PragmaDecl prag) =
     addPragma prag
 
 
-
+-- |Normalise a nested submodule containing the specified items.
 normaliseSubmodule :: Ident -> Visibility -> OptPos -> [Item] -> Compiler ()
 normaliseSubmodule name vis pos items = do
     parentOrigin <- getOrigin
@@ -121,6 +121,8 @@ normaliseSubmodule name vis pos items = do
       then reenterModule subModSpec
       else enterModule parentOrigin subModSpec (Just parentModSpec)
     -- submodule always imports parent module
+    updateImplementation $ \i -> i { modNestedIn = Just parentModSpec }
+    -- XXX This shouldn't be needed
     addImport parentModSpec (importSpec Nothing Private)
     normalise items
     if alreadyExists
