@@ -26,7 +26,7 @@
 # Translating the second generator. First proc generates the first solution,
 # plus a choicepoint.
 
-def gen2first(?parity:int, ?cp:gen2cp) {
+def gen2_first(?parity:int, ?cp:gen2cp) {
     ?parity = 0
     ?cp = gen2_choice2 # no arguments needed for this
 }
@@ -34,7 +34,7 @@ def gen2first(?parity:int, ?cp:gen2cp) {
 # Second proc takes in choicepoint and generates all other solutions, with
 # new choicepoint.
 
-def {test} gen2rest(?parity:int, !cp:gen2cp) {
+def {test} gen2_rest(?parity:int, !cp:gen2cp) {
     if {cp = gen2_choice2::
             ?parity = 1
             ?cp = gen2_nomore
@@ -42,7 +42,7 @@ def {test} gen2rest(?parity:int, !cp:gen2cp) {
     }
 }
 
-type gen2cp { pub gen2_choice2 | gen2_nomore }
+pub type gen2cp { pub gen2_choice2 | gen2_nomore }
 
 
 
@@ -77,7 +77,7 @@ def {test} gen1_rest(?val:int, !cp:gen1cp) {
     }
 }
 
-type gen1cp { pub
+pub type gen1cp { pub
               gen1_choice2(start:int, end:int)
             | gen1_choice3(start:int, end:int)
             | gen1_choice3_rest(innercp:int_seq_cp)
@@ -95,29 +95,29 @@ def {test} int_seq_first(start:int,
 }
 
 def {test} int_seq_cont1(start:int, end:int, val:int, gen1_cp:gen1cp, ?val:int, ?cp:int_seq_cp) {
-    gen2first(?parity, ?gen2_cp)
+    gen2_first(?parity, ?gen2_cp)
     int_seq_cont2(start, end, val, parity, ?val, gen1_cp, gen2_cp, ?cp)
 }
 
-def int_seq_cont2(start:int, end:int, val:int, parity:int, ?val:int, gen1_cp:gen1cp, gen2_cp:gen2cp, ?cp:int_seq_cp) {
-    ?val = val + parity + 1
-    ?cp = int_seq_cp(start, end, val, gen1_cp, gen2_cp)
+def int_seq_cont2(start:int, end:int, val0:int, parity:int, ?val:int, gen1_cp:gen1cp, gen2_cp:gen2cp, ?cp:int_seq_cp) {
+    ?val = val0 + parity + 1
+    ?cp = int_seq_cp(start, end, val0, gen1_cp, gen2_cp)
 }
 
 
 def {test} int_seq_rest(?val:int,
                         !cp:int_seq_cp) {
     (cp = int_seq_cp(?start, ?end, ?val, ?gen1_cp, ?gen2_cp))
-    if {gen2rest(?parity, !gen2_cp)::
-            int_seq_cont2(start, end, val, parity, gen1_cp, ?cp)
-       |gen1_rest(?parity, !gen1_cp)::
-            int_seq_cont1(start, end, val, gen1_cp, ?cp)
+    if {gen2_rest(?parity, !gen2_cp)::
+            int_seq_cont2(start, end, val, parity, ?val, gen1_cp, gen2_cp, ?cp)
+       |gen1_rest(?val, !gen1_cp)::
+            int_seq_cont1(start, end, val, gen1_cp, ?val, ?cp)
        |otherwise::
             fail
        }
 }
 
-type int_seq_cp { pub
+pub type int_seq_cp { pub
     int_seq_cp(start:int, end:int, val:int, gen1_cp:gen1cp, gen2_cp:gen2cp)
 }
 
@@ -125,8 +125,8 @@ type int_seq_cp { pub
 # testing it:
 
 if {int_seq_first(1, 10, ?val, ?cp)::
-    println(val)
+    !println(val)
     do {while int_seq_rest(?val, !cp)
-        println(val)
+        !println(val)
     }
 }
