@@ -7,7 +7,7 @@
 
 
 module Scanner (Token(..), tokenPosition, floatValue, intValue, stringValue,
-                charValue, identName, symbolName, showPosition, 
+                charValue, identName, symbolName, showPosition,
                 StringDelim(..), BracketStyle(..), fileTokens, tokenise,
                 inputTokens) where
 
@@ -79,7 +79,7 @@ symbolName _ = shouldnt "not a symbol"
 -- |How to display a source position.
 showPosition :: SourcePos -> String
 showPosition pos
-  = sourceName pos ++ ":" 
+  = sourceName pos ++ ":"
     ++ show (sourceLine pos) ++ ":"
     ++ show (sourceColumn pos)
 
@@ -130,7 +130,7 @@ tokenise pos str@(c:cs)
                     '`' -> let (name,_:rest) = break (=='`') cs
                            in  multiCharTok name rest (TokIdent name pos) pos
                     '#' -> tokenise (setSourceColumn pos 1)
-                           $ dropWhile (not . (=='\n')) cs
+                           $ dropWhile (/= '\n') cs
                     _   -> tokeniseSymbol pos str
 
 -- |Handle a single character token and tokenize the rest of the input.
@@ -159,8 +159,8 @@ multiCharTok str cs tok pos = tok:(tokenise (updatePosString pos str) cs)
 tokeniseChar :: SourcePos -> String -> [Token]
 tokeniseChar pos ('\\':c:'\'':rest) =
   (TokChar (escapedChar c) pos) :
-  tokenise 
-  (updatePosChar 
+  tokenise
+  (updatePosChar
    (updatePosChar (updatePosChar (updatePosChar pos '\'') c) '\\')
    '\'')
   rest
@@ -168,15 +168,15 @@ tokeniseChar pos (c:'\'':cs) =
   (TokChar c pos):
   tokenise (updatePosChar (updatePosChar (updatePosChar pos '\'') c) '\'') cs
 tokeniseChar pos chars =
-    error $ showPosition pos 
-    ++ ": Syntax error in single character constant beginning '" 
+    error $ showPosition pos
+    ++ ": Syntax error in single character constant beginning '"
     ++ take 3 chars ++ "..."
 
 -- |Handle a symbol token and tokenize the rest of the input.
 tokeniseSymbol :: SourcePos -> String -> [Token]
 tokeniseSymbol pos (c:cs) =
   let (sym,rest) = span isSymbolChar cs
-      pos' = updatePosString pos 
+      pos' = updatePosString pos
   in  multiCharTok (c:sym) rest (TokSymbol (c:sym) pos) pos
 tokeniseSymbol _ [] = shouldnt "empty symbol does not exist"
 
@@ -187,7 +187,7 @@ tokeniseString delim pos cs =
   let termchar = delimChar delim
       (str,rest) = span (/= termchar) cs
   in  (TokString delim str pos):
-      (if null rest then [] else tokenise (updatePosChar 
+      (if null rest then [] else tokenise (updatePosChar
                                            (updatePosString
                                             (updatePosChar pos termchar)
                                             str)
@@ -298,8 +298,8 @@ isIdentChar ch = isAlphaNum ch || ch == '_'
 
 -- |Is this a character that can appear in a symbol?
 isSymbolChar :: Char -> Bool
-isSymbolChar ch = not (isIdentChar ch || isSpace ch || isControl ch 
-                       || ch `elem` ",.?!([{)]}#'\"\\")
+isSymbolChar ch = not (isIdentChar ch || isSpace ch || isControl ch
+                       || ch `elem` ",.?([{)]}#'\"\\")
 
 -- |Is this character part of a single (not necessarily valid) number token,
 -- following a digit character?  This means any alphanumeric character or a
