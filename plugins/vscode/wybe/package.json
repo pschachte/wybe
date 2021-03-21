@@ -9,9 +9,14 @@
         "languages": [{
             "id": "wybe",
             "aliases": ["Wybe", "wybe"],
-            "extensions": [".wybe",".wyb"]
+            "extensions": [".wybe",".wyb"],
+            "configuration": "./language-configuration.json"
         }],
-        "configuration": "./language-configuration.json"
+        "grammars": [{
+                    "language": "wybe",
+                    "scopeName": "source.wybe",
+                    "path": "./syntaxes/wybe.tmLanguage"
+            }]
     }
 }
 
