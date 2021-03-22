@@ -809,7 +809,7 @@ updateImplementation implOp = do
             updateModule (\mod -> mod { modImplementation = Just $ implOp impl })
 
 updateTypeModifiers :: TypeModifiers -> ModuleInterface -> ModuleInterface
-updateTypeModifiers typeMods int = int {typeModifiers = Just typeMods}
+updateTypeModifiers typeMods int = int {typeModifiers = typeMods}
 
 -- |Add the specified type definition to the current module.
 addType :: Ident -> TypeDef -> Compiler TypeSpec
@@ -1324,14 +1324,14 @@ data ModuleInterface = ModuleInterface {
                                      -- ^The other modules this module exports
     dependencies :: Set ModSpec,     -- ^The other modules that must be linked
 
-    typeModifiers :: Maybe TypeModifiers
-                                     -- ^The extra information of the type
+    typeModifiers :: TypeModifiers   -- ^The extra information of the type
     }                                --  in by modules that depend on this one
     deriving (Eq, Generic)
 
 emptyInterface :: ModuleInterface
 emptyInterface =
-    ModuleInterface Map.empty Map.empty Map.empty Map.empty Set.empty Nothing  -- EDIT
+    ModuleInterface Map.empty Map.empty Map.empty Map.empty Set.empty
+                    defaultTypeModifiers
 
 
 -- |Holds information describing public procedures of a module.
