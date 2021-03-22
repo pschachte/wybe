@@ -1,0 +1,12 @@
+# test case of deconstructing a string as a list
+
+(?str = "This is a test\n")
+
+!print("length of '")
+!print(str)
+!print("' is ")
+!println(length(str))
+
+do {while [?ch | ?str] = str
+    !print(ch)
+}

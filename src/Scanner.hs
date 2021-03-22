@@ -185,13 +185,29 @@ tokeniseSymbol _ [] = shouldnt "empty symbol does not exist"
 tokeniseString :: StringDelim -> SourcePos -> String -> [Token]
 tokeniseString delim pos cs =
   let termchar = delimChar delim
-      (str,rest) = span (/= termchar) cs
-  in  (TokString delim str pos):
-      (if null rest then [] else tokenise (updatePosChar
-                                           (updatePosString
-                                            (updatePosChar pos termchar)
-                                            str)
-                                           termchar) $ tail rest)
+      (str,pos',rest) = scanString termchar pos cs
+  in  TokString delim str pos : tokenise pos' rest
+
+
+-- |Scan a string literal that has already been opened, and will close with the
+-- specified terminator character.  Also return the remainder of the input and
+-- the new source position.
+scanString :: Char -> SourcePos -> String -> (String,SourcePos,String)
+scanString termchar pos input =
+    case break (`elem` [termchar,'\\']) input of
+        (_,[]) -> error $ showPosition pos
+                          ++ ": Unterminated string begins here"
+        (front,'\\':c:cs) ->
+            let pos' = updatePosChar
+                       (updatePosChar (updatePosString pos front) '\\')
+                       c
+                (rest,finalPos,remainder) = scanString termchar pos' cs
+            in (front ++ (escapedChar c : rest), finalPos, remainder)
+        (front,t:cs) | t == termchar ->
+            let pos' = updatePosChar (updatePosString pos front) t
+            in (front, pos', cs)
+        (front,rest) -> shouldnt "break broke in scanString"
+
 
 -- |Is the specified char the expected final delimiter?
 delimChar DoubleQuote = '\"'
