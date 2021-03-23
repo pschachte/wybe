@@ -16,11 +16,16 @@ for f in `ls execution/*.wybe`
 do
 	in=`echo -e "$f" | sed 's/.wybe$/.in/'`
 	out=`echo -e "$f" | sed 's/.wybe$/.out/'`
+	cmdline=`echo -e "$f" | sed 's/.wybe$/.cmdline/'`
 	exp=`echo -e "$f" | sed 's/.wybe$/.exp/'`
 	targ=`echo -e "$f" | sed 's/.wybe$//'`
 	rm -f $targ
+        cmd="$targ"
+        if [ -r $cmdline ] ; then
+            cmd="$targ `cat $cmdline`"
+        fi
 	$TIMEOUT 2 ../wybemk --force-all -L $LIBDIR $targ >/dev/null
-    $TIMEOUT 2 $targ < $in &> $out
+    $TIMEOUT 2 $cmd< $in &> $out
 	if [ ! -r $exp ] ; then 
 		printf "[31m?[39m"
 		NEW="$NEW\n    $out"
