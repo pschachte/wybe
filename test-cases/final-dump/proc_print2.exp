@@ -1,12 +1,11 @@
 ======================================================================
 AFTER EVERYTHING:
  Module proc_print2
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : proc_print2.print2<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 
@@ -14,8 +13,8 @@ print2 > public {inline} (0 calls)
 0: print2(x#0:wybe.int, y#0:wybe.int, io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_int(~x#0:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
-    foreign c print_int(~y#0:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
+    foreign c print_int(~x#0:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign c print_int(~y#0:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 

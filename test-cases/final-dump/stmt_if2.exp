@@ -1,8 +1,8 @@
 ======================================================================
 AFTER EVERYTHING:
  Module stmt_if2
-  public submods  : 
-  public types    : tree: (stmt_if2.tree,Just address)
+  representation  : (not a type)
+  public submods  : tree -> stmt_if2.tree
   public resources: 
   public procs    : stmt_if2.<0>
                     stmt_if2.lookup<0>
@@ -19,13 +19,12 @@ AFTER EVERYTHING:
                     stmt_if2.tree.right<1>
   imports         : public use stmt_if2.tree
                     use wybe
-  types           : tree/public  is address { empty() @stmt_if2:3:21 | node(left:tree, key:int, right:tree) @stmt_if2:3:29  }  @stmt_if2:3:5
   resources       : 
   submodules      : stmt_if2.tree
   procs           : 
 
 *main* > public (0 calls)
-0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: (io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?tmp$7#0:stmt_if2.tree)
@@ -38,7 +37,7 @@ AFTER EVERYTHING:
         foreign llvm move(~io#0:wybe.phantom, ?io#1:wybe.phantom)
 
     1:
-        foreign c print_string("found":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
+        foreign c print_string("found":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
 
 
 
@@ -65,10 +64,10 @@ lookup > public (5 calls)
             foreign lpvm access(tree#0:stmt_if2.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?l#0:stmt_if2.tree)
             foreign lpvm access(tree#0:stmt_if2.tree, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?k#0:wybe.int)
             foreign lpvm access(~tree#0:stmt_if2.tree, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?r#0:stmt_if2.tree)
-            foreign llvm icmp_eq(k#0:wybe.int, key#0:wybe.int, ?tmp$11#0:wybe.bool) @wybe:nn:nn
+            foreign llvm icmp_eq(k#0:wybe.int, key#0:wybe.int, ?tmp$11#0:wybe.bool) @int:nn:nn
             case ~tmp$11#0:wybe.bool of
             0:
-                foreign llvm icmp_sgt(~k#0:wybe.int, key#0:wybe.int, ?tmp$10#0:wybe.bool) @wybe:nn:nn
+                foreign llvm icmp_sgt(~k#0:wybe.int, key#0:wybe.int, ?tmp$10#0:wybe.bool) @int:nn:nn
                 case ~tmp$10#0:wybe.bool of
                 0:
                     stmt_if2.lookup<0>(~key#0:wybe.int, ~r#0:stmt_if2.tree, ?$#0:wybe.bool) #10 @stmt_if2:10:14
@@ -106,7 +105,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external fastcc  void @"stmt_if2.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
+define external fastcc  void @"stmt_if2.<0>"()    {
 entry:
   %1 = trunc i64 24 to i32  
   %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
@@ -178,8 +177,8 @@ if.else3:
 }
 --------------------------------------------------
  Module stmt_if2.tree
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : stmt_if2.tree./=<0>
                     stmt_if2.tree.=<0>
@@ -194,7 +193,6 @@ if.else3:
                     stmt_if2.tree.right<1>
   imports         : use stmt_if2
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
@@ -234,7 +232,7 @@ if.else3:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
             1:
-                foreign llvm icmp_eq(~$left$key#0:wybe.int, ~$right$key#0:wybe.int, ?tmp$5#0:wybe.bool) @wybe:nn:nn
+                foreign llvm icmp_eq(~$left$key#0:wybe.int, ~$right$key#0:wybe.int, ?tmp$5#0:wybe.bool) @int:nn:nn
                 case ~tmp$5#0:wybe.bool of
                 0:
                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -258,7 +256,7 @@ key > public {inline} (0 calls)
 0: key($rec#0:stmt_if2.tree, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:stmt_if2.tree, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -272,7 +270,7 @@ key > public {inline} (0 calls)
 1: key($rec#0:stmt_if2.tree, ?$rec#1:stmt_if2.tree, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:stmt_if2.tree, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -288,7 +286,7 @@ left > public {inline} (0 calls)
 0: left($rec#0:stmt_if2.tree, ?$#0:stmt_if2.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:stmt_if2.tree, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -302,7 +300,7 @@ left > public {inline} (0 calls)
 1: left($rec#0:stmt_if2.tree, ?$rec#1:stmt_if2.tree, $field#0:stmt_if2.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:stmt_if2.tree, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -318,7 +316,7 @@ node > public {inline} (0 calls)
 0: node(left#0:stmt_if2.tree, key#0:wybe.int, right#0:stmt_if2.tree, ?$#0:stmt_if2.tree):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(24:wybe.int, ?$rec#0:!stmt_if2.tree)
+    foreign lpvm alloc(24:wybe.int, ?$rec#0:stmt_if2.tree)
     foreign lpvm mutate(~%$rec#0:stmt_if2.tree, ?%$rec#1:stmt_if2.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~left#0:stmt_if2.tree)
     foreign lpvm mutate(~%$rec#1:stmt_if2.tree, ?%$rec#2:stmt_if2.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~key#0:wybe.int)
     foreign lpvm mutate(~%$rec#2:stmt_if2.tree, ?%$#0:stmt_if2.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~right#0:stmt_if2.tree)
@@ -326,7 +324,7 @@ node > public {inline} (16 calls)
 1: node(?left#0:stmt_if2.tree, ?key#0:wybe.int, ?right#0:stmt_if2.tree, $#0:stmt_if2.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($#0:stmt_if2.tree, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -346,7 +344,7 @@ right > public {inline} (0 calls)
 0: right($rec#0:stmt_if2.tree, ?$#0:stmt_if2.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:stmt_if2.tree, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -360,7 +358,7 @@ right > public {inline} (0 calls)
 1: right($rec#0:stmt_if2.tree, ?$rec#1:stmt_if2.tree, $field#0:stmt_if2.tree, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:stmt_if2.tree, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)

@@ -1,0 +1,18 @@
+pragma no_standard_library  # Standard library can't depend on itself!
+
+use wybe.bool, wybe.int
+
+pub constructors(?T) [] | [|](head:?T, tail:_(?T))
+
+pub def ,,(x:_(?T), y:_(?T)):_(?T) =
+    if x = [?h|?t] then [h|t,,y] else y
+
+pub def length(x:_(?T)) : int = length1(x, 0)
+
+def length1(x:_(?T), acc:int) : int =
+    if x = [?h|?t] then length1(t, acc+1) else acc
+
+def reverse(x:_(?T)) = reverse1(x, [])
+
+def reverse1(x:_(?T), tail:_(?T)) =
+    if x = [?h|?t] then reverse1(t, [h|tail]) else tail

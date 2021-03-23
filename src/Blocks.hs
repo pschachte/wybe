@@ -16,7 +16,7 @@ import           ASTShow
 import           BinaryFactory                   ()
 import           Codegen
 import           Config                          (wordSize, wordSizeBytes)
-import           Util                            (maybeNth)
+import           Util                            (maybeNth, zipWith3M_)
 import           Control.Monad
 import           Control.Monad.Trans             (lift, liftIO)
 import           Control.Monad.Trans.Class
@@ -89,7 +89,7 @@ blockTransformModule thisMod =
        knownTypesSet <- Map.elems <$>
                          getModuleImplementationField modKnownTypes
        let knownTypes = concatMap Set.toList knownTypesSet
-       trs <- mapM llvmType knownTypes
+       trs <- mapM moduleLLVMType knownTypes
        -- typeList :: [(TypeSpec, LLVMAST.Type)]
        let typeList = zip knownTypes trs
        -- log the assoc list typeList
@@ -879,15 +879,6 @@ addInstruction ins outArgs = do
             return $ Just $ last fields -- XXX this looks bogus!
 
 
-zipWith3M_ :: Monad m => (a -> b -> c -> m ()) -> [a] -> [b] -> [c] -> m ()
-zipWith3M_ f [] _ _ = return ()
-zipWith3M_ f _ [] _ = return ()
-zipWith3M_ f _ _ [] = return ()
-zipWith3M_ f (a:as) (b:bs) (c:cs) = do
-    f a b c
-    zipWith3M_ f as bs cs
-
-
 pullName ArgVar{argVarName=var} = show var
 pullName _                    = shouldnt $ "Expected variable as output."
 
@@ -1091,6 +1082,13 @@ typeRep ty =
             ++ show ty
             ++ ")"
     in fromMaybe err <$> lookupTypeRepresentation ty
+
+
+-- |The LLVM type of the specified module spec; error if it's not a type.
+moduleLLVMType :: ModSpec -> Compiler LLVMAST.Type
+moduleLLVMType mspec =
+    repLLVMType . trustFromJust "moduleLLVMType of non-type"
+    <$> lookupModuleRepresentation mspec
 
 
 repLLVMType :: TypeRepresentation -> LLVMAST.Type

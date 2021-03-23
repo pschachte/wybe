@@ -1,8 +1,8 @@
 ======================================================================
 AFTER EVERYTHING:
  Module type_int
-  public submods  : 
-  public types    : myint: (type_int.myint,Just 64 bit signed)
+  representation  : (not a type)
+  public submods  : myint -> type_int.myint
   public resources: 
   public procs    : type_int.myint.*<0>
                     type_int.myint.+<0>
@@ -20,28 +20,6 @@ AFTER EVERYTHING:
                     type_int.myint.>=<0>
   imports         : public use type_int.myint
                     use wybe
-  types           : myint/public  is 64 bit signed {  public def +(x:myint, y:myint):myint @type_int:2:9 = foreign llvm add(x @type_int:2:57, y @type_int:2:59) @type_int:2:40
-  public def +(?x:myint, y:myint, z:myint) @type_int:3:9 {
-    =(?x @type_int:3:43, foreign llvm sub(z @type_int:3:65, y @type_int:3:67) @type_int:3:48)
-  }
-  public def +(x:myint, ?y:myint, z:myint) @type_int:4:9 {
-    =(?y @type_int:4:43, foreign llvm sub(z @type_int:4:65, x @type_int:4:67) @type_int:4:48)
-  }
-  public def -(x:myint, y:myint):myint @type_int:5:9 = foreign llvm sub(x @type_int:5:57, y @type_int:5:59) @type_int:5:40
-  public def -(?x:myint, y:myint, z:myint) @type_int:6:9 {
-    =(?x @type_int:6:43, foreign llvm add(z @type_int:6:65, y @type_int:6:67) @type_int:6:48)
-  }
-  public def -(x:myint, ?y:myint, z:myint) @type_int:7:9 {
-    =(?y @type_int:7:43, foreign llvm sub(z @type_int:7:65, x @type_int:7:67) @type_int:7:48)
-  }
-  public def *(x:myint, y:myint):myint @type_int:8:9 = foreign llvm mul(x @type_int:8:57, y @type_int:8:59) @type_int:8:40
-  public def /(x:myint, y:myint):myint @type_int:9:9 = foreign llvm sdiv(x @type_int:9:58, y @type_int:9:60) @type_int:9:40
-  public def =(x:myint, y:myint):bool @type_int:10:9 = foreign llvm icmp_eq(x @type_int:10:60, y @type_int:10:62) @type_int:10:39
-  public def /=(x:myint, y:myint):bool @type_int:11:9 = foreign llvm icmp_ne(x @type_int:11:61, y @type_int:11:63) @type_int:11:40
-  public def <(x:myint, y:myint):bool @type_int:12:9 = foreign llvm icmp_slt(x @type_int:12:61, y @type_int:12:63) @type_int:12:39
-  public def <=(x:myint, y:myint):bool @type_int:13:9 = foreign llvm icmp_sle(x @type_int:13:62, y @type_int:13:64) @type_int:13:40
-  public def >(x:myint, y:myint):bool @type_int:14:9 = foreign llvm icmp_sgt(x @type_int:14:61, y @type_int:14:63) @type_int:14:39
-  public def >=(x:myint, y:myint):bool @type_int:15:9 = foreign llvm icmp_sge(x @type_int:15:62, y @type_int:15:64) @type_int:15:40 }  @type_int:1:5
   resources       : 
   submodules      : type_int.myint
   procs           : 
@@ -61,8 +39,8 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 --------------------------------------------------
  Module type_int.myint
+  representation  : 64 bit signed
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : type_int.myint.*<0>
                     type_int.myint.+<0>
@@ -80,7 +58,6 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
                     type_int.myint.>=<0>
   imports         : use type_int
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
@@ -88,90 +65,90 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 0: *(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm mul(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:8:40
+    foreign llvm mul(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:nn:nn
 
 
 + > public {inline} (0 calls)
 0: +(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm add(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:2:40
+    foreign llvm add(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:nn:nn
 + > public {inline} (0 calls)
 1: +(?x#0:type_int.myint, y#0:type_int.myint, z#0:type_int.myint):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm sub(~z#0:type_int.myint, ~y#0:type_int.myint, ?x#0:type_int.myint) @type_int:3:48
+    foreign llvm sub(~z#0:type_int.myint, ~y#0:type_int.myint, ?x#0:type_int.myint) @type_int:nn:nn
 + > public {inline} (0 calls)
 2: +(x#0:type_int.myint, ?y#0:type_int.myint, z#0:type_int.myint):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm sub(~z#0:type_int.myint, ~x#0:type_int.myint, ?y#0:type_int.myint) @type_int:4:48
+    foreign llvm sub(~z#0:type_int.myint, ~x#0:type_int.myint, ?y#0:type_int.myint) @type_int:nn:nn
 
 
 - > public {inline} (0 calls)
 0: -(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm sub(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:5:40
+    foreign llvm sub(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:nn:nn
 - > public {inline} (0 calls)
 1: -(?x#0:type_int.myint, y#0:type_int.myint, z#0:type_int.myint):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm add(~y#0:type_int.myint, ~z#0:type_int.myint, ?x#0:type_int.myint) @type_int:6:48
+    foreign llvm add(~y#0:type_int.myint, ~z#0:type_int.myint, ?x#0:type_int.myint) @type_int:nn:nn
 - > public {inline} (0 calls)
 2: -(x#0:type_int.myint, ?y#0:type_int.myint, z#0:type_int.myint):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm sub(~z#0:type_int.myint, ~x#0:type_int.myint, ?y#0:type_int.myint) @type_int:7:48
+    foreign llvm sub(~z#0:type_int.myint, ~x#0:type_int.myint, ?y#0:type_int.myint) @type_int:nn:nn
 
 
 / > public {inline} (0 calls)
 0: /(x#0:type_int.myint, y#0:type_int.myint, ?$#0:type_int.myint):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm sdiv(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:9:40
+    foreign llvm sdiv(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:nn:nn
 
 
 /= > public {inline} (0 calls)
 0: /=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:11:40
+    foreign llvm icmp_ne(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:nn:nn
 
 
 < > public {inline} (0 calls)
 0: <(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_slt(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:12:39
+    foreign llvm icmp_slt(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:nn:nn
 
 
 <= > public {inline} (0 calls)
 0: <=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_sle(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:13:40
+    foreign llvm icmp_sle(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:nn:nn
 
 
 = > public {inline} (0 calls)
 0: =(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_eq(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:10:39
+    foreign llvm icmp_eq(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:nn:nn
 
 
 > > public {inline} (0 calls)
 0: >(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_sgt(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:14:39
+    foreign llvm icmp_sgt(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:nn:nn
 
 
 >= > public {inline} (0 calls)
 0: >=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_sge(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:15:40
+    foreign llvm icmp_sge(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:nn:nn
 
   LLVM code       :
 

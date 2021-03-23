@@ -1,8 +1,8 @@
-pub type int_list { pub [] | [|](head:int, tail:int_list) }
+pub type int_list { pub nil | cons(head:int, tail:int_list) }
 
 
 pub def print(x:int_list) use !io {
-    if { x = [ ?h | ?t] ::
+    if { x = cons( ?h, ?t) ::
         !print(h)
         !print(' ') # the problem seems related to this one.
         !print(t)
@@ -14,5 +14,5 @@ pub def println(x:int_list) use !io {
     !nl
 }
 
-?x = [1,2,3]
+?x = cons(1,cons(2,cons(3,nil)))
 !println(x)

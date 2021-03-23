@@ -1,8 +1,8 @@
 ======================================================================
 AFTER EVERYTHING:
  Module tests
-  public submods  : 
-  public types    : map: (tests.map,Just address)
+  representation  : (not a type)
+  public submods  : map -> tests.map
   public resources: 
   public procs    : tests.lookup<0>
                     tests.lt<0>
@@ -23,7 +23,6 @@ AFTER EVERYTHING:
                     tests.map.value<1>
   imports         : public use tests.map
                     use wybe
-  types           : map/public  is address { empty() @tests:19:20 | node(left:map, key:int, value:int, right:map) @tests:19:28  }  @tests:19:5
   resources       : 
   submodules      : tests.map
   procs           : 
@@ -40,18 +39,18 @@ lookup > public (6 calls)
 
     1:
         foreign lpvm access(map#0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.int)
-        foreign llvm icmp_eq(key#0:wybe.int, tmp$0#0:wybe.int, ?tmp$13#0:wybe.bool) @wybe:nn:nn
+        foreign llvm icmp_eq(key#0:wybe.int, tmp$0#0:wybe.int, ?tmp$13#0:wybe.bool) @int:nn:nn
         case ~tmp$13#0:wybe.bool of
         0:
-            foreign llvm icmp_slt(key#0:wybe.int, ~tmp$0#0:wybe.int, ?tmp$11#0:wybe.bool) @wybe:nn:nn
+            foreign llvm icmp_slt(key#0:wybe.int, ~tmp$0#0:wybe.int, ?tmp$11#0:wybe.bool) @int:nn:nn
             case ~tmp$11#0:wybe.bool of
             0:
                 foreign lpvm access(~map#0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$4#0:tests.map)
-                tests.lookup<0>(~key#0:wybe.int, ~tmp$4#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #9 @tests:24:25
+                tests.lookup<0>(~key#0:wybe.int, ~tmp$4#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #9 @tests:nn:nn
 
             1:
                 foreign lpvm access(~map#0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$3#0:tests.map)
-                tests.lookup<0>(~key#0:wybe.int, ~tmp$3#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #6 @tests:23:25
+                tests.lookup<0>(~key#0:wybe.int, ~tmp$3#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #6 @tests:nn:nn
 
 
         1:
@@ -65,7 +64,7 @@ lt > public (1 calls)
 0: lt(x#0:wybe.int, y#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_slt(~x#0:wybe.int, ~y#0:wybe.int, ?tmp$3#0:wybe.bool) @wybe:nn:nn
+    foreign llvm icmp_slt(~x#0:wybe.int, ~y#0:wybe.int, ?tmp$3#0:wybe.bool) @int:nn:nn
     case ~tmp$3#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -79,14 +78,14 @@ lt2 > public {inline} (1 calls)
 0: lt2(x#0:wybe.int, y#0:wybe.int, ?res#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    tests.lt<0>(~x#0:wybe.int, ~y#0:wybe.int, ?res#0:wybe.bool) #0 @tests:11:12
+    tests.lt<0>(~x#0:wybe.int, ~y#0:wybe.int, ?res#0:wybe.bool) #0 @tests:nn:nn
 
 
 lt3 > public {inline} (0 calls)
 0: lt3(x#0:wybe.int, y#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    tests.lt<0>(~y#0:wybe.int, ~x#0:wybe.int, ?$$#0:wybe.bool) #1 @tests:11:12
+    tests.lt<0>(~y#0:wybe.int, ~x#0:wybe.int, ?$$#0:wybe.bool) #1 @tests:nn:nn
 
   LLVM code       :
 
@@ -177,8 +176,8 @@ entry:
 }
 --------------------------------------------------
  Module tests.map
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : tests.map./=<0>
                     tests.map.=<0>
@@ -195,7 +194,6 @@ entry:
                     tests.map.value<1>
   imports         : use tests
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
@@ -237,13 +235,13 @@ entry:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
             1:
-                foreign llvm icmp_eq(~$left$key#0:wybe.int, ~$right$key#0:wybe.int, ?tmp$5#0:wybe.bool) @wybe:nn:nn
+                foreign llvm icmp_eq(~$left$key#0:wybe.int, ~$right$key#0:wybe.int, ?tmp$5#0:wybe.bool) @int:nn:nn
                 case ~tmp$5#0:wybe.bool of
                 0:
                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                 1:
-                    foreign llvm icmp_eq(~$left$value#0:wybe.int, ~$right$value#0:wybe.int, ?tmp$6#0:wybe.bool) @wybe:nn:nn
+                    foreign llvm icmp_eq(~$left$value#0:wybe.int, ~$right$value#0:wybe.int, ?tmp$6#0:wybe.bool) @int:nn:nn
                     case ~tmp$6#0:wybe.bool of
                     0:
                         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -268,7 +266,7 @@ key > public {inline} (0 calls)
 0: key($rec#0:tests.map, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -282,7 +280,7 @@ key > public {inline} (0 calls)
 1: key($rec#0:tests.map, ?$rec#1:tests.map, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -298,7 +296,7 @@ left > public {inline} (0 calls)
 0: left($rec#0:tests.map, ?$#0:tests.map, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -312,7 +310,7 @@ left > public {inline} (0 calls)
 1: left($rec#0:tests.map, ?$rec#1:tests.map, $field#0:tests.map, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -328,7 +326,7 @@ node > public {inline} (0 calls)
 0: node(left#0:tests.map, key#0:wybe.int, value#0:wybe.int, right#0:tests.map, ?$#0:tests.map):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(32:wybe.int, ?$rec#0:!tests.map)
+    foreign lpvm alloc(32:wybe.int, ?$rec#0:tests.map)
     foreign lpvm mutate(~%$rec#0:tests.map, ?%$rec#1:tests.map, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~left#0:tests.map)
     foreign lpvm mutate(~%$rec#1:tests.map, ?%$rec#2:tests.map, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~key#0:wybe.int)
     foreign lpvm mutate(~%$rec#2:tests.map, ?%$rec#3:tests.map, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~value#0:wybe.int)
@@ -337,7 +335,7 @@ node > public {inline} (20 calls)
 1: node(?left#0:tests.map, ?key#0:wybe.int, ?value#0:wybe.int, ?right#0:tests.map, $#0:tests.map, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($#0:tests.map, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -359,7 +357,7 @@ right > public {inline} (0 calls)
 0: right($rec#0:tests.map, ?$#0:tests.map, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -373,7 +371,7 @@ right > public {inline} (0 calls)
 1: right($rec#0:tests.map, ?$rec#1:tests.map, $field#0:tests.map, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -389,7 +387,7 @@ value > public {inline} (0 calls)
 0: value($rec#0:tests.map, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -403,7 +401,7 @@ value > public {inline} (0 calls)
 1: value($rec#0:tests.map, ?$rec#1:tests.map, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:tests.map, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)

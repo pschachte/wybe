@@ -1,0 +1,8 @@
+pragma no_standard_library  # Standard library can't depend on itself!
+
+use wybe.bool
+
+representation is 8 bit unsigned
+
+pub def =(x:_, y:_):bool = foreign llvm icmp_eq(x,y)
+pub def /=(x:_,y:_):bool = foreign llvm icmp_ne(x,y)

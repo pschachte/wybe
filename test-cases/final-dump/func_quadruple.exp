@@ -1,13 +1,12 @@
 ======================================================================
 AFTER EVERYTHING:
  Module func_quadruple
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : func_quadruple.double<0>
                     func_quadruple.quadruple<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 
@@ -15,15 +14,15 @@ double > public {inline} (2 calls)
 0: double(a#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm add(~a#0:wybe.int, ~a#0:wybe.int, ?$#0:wybe.int) @wybe:nn:nn
+    foreign llvm add(~a#0:wybe.int, ~a#0:wybe.int, ?$#0:wybe.int) @int:nn:nn
 
 
 quadruple > public {inline} (0 calls)
 0: quadruple(a#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm add(~a#0:wybe.int, ~a#0:wybe.int, ?tmp$1#0:wybe.int) @wybe:nn:nn
-    foreign llvm add(~tmp$1#0:wybe.int, ~tmp$1#0:wybe.int, ?$#0:wybe.int) @wybe:nn:nn
+    foreign llvm add(~a#0:wybe.int, ~a#0:wybe.int, ?tmp$1#0:wybe.int) @int:nn:nn
+    foreign llvm add(~tmp$1#0:wybe.int, ~tmp$1#0:wybe.int, ?$#0:wybe.int) @int:nn:nn
 
   LLVM code       :
 

@@ -1,29 +1,28 @@
 ======================================================================
 AFTER EVERYTHING:
  Module func_let
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : func_let.<0>
                     func_let.quad<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 
 *main* > public {inline} (0 calls)
-0: (argc#0:wybe.int, [?argc#0:wybe.int], argv#0:wybe.int, [?argv#0:wybe.int], exit_code#0:wybe.int, [?exit_code#0:wybe.int], io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: (io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_int(40:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
+    foreign c print_int(40:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
 
 
 quad > public {inline} (1 calls)
 0: quad(x#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm add(~x#0:wybe.int, ~x#0:wybe.int, ?tmp$0#0:wybe.int) @wybe:nn:nn
-    foreign llvm add(~tmp$0#0:wybe.int, ~tmp$0#0:wybe.int, ?$#0:wybe.int) @wybe:nn:nn
+    foreign llvm add(~x#0:wybe.int, ~x#0:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn
+    foreign llvm add(~tmp$0#0:wybe.int, ~tmp$0#0:wybe.int, ?$#0:wybe.int) @int:nn:nn
 
   LLVM code       :
 
@@ -42,7 +41,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external fastcc  void @"func_let.<0>"(i64  %"argc#0", i64  %"argv#0", i64  %"exit_code#0")    {
+define external fastcc  void @"func_let.<0>"()    {
 entry:
   tail call ccc  void  @print_int(i64  40)  
   ret void 

@@ -1,0 +1,16 @@
+pragma no_standard_library  # Standard library can't depend on itself!
+
+use wybe.int, wybe.string
+
+# Exit right away with the specified code (0 = successful termination).
+
+pub def {terminal,semipure} exit(code:int) {
+    foreign c {terminal,semipure} exit(code)
+}
+
+
+# Print an error message and abort the computation.
+
+pub def {terminal,semipure} error(message:string) {
+    foreign c {terminal,semipure} error_exit(message)
+}

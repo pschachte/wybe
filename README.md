@@ -21,12 +21,14 @@ Currently, the compiler supports recent versions of macOS and Linux (Ubuntu).
 All this is documented in the
 [installation instructions](INSTALL.md).
 
-If you are interested in the workings of the compiler, the source code
-is in the `src` subdirectory.
 See the [SUBDIRECTORIES.md file](SUBDIRECTORIES.md) file for
-a tour of the directories making up the Wybe project.
+a tour of all the directories making up the Wybe project.
+In particular, the source code of the compiler is in the `src` subdirectory.
+The file [src/README.md](src/README.md), which is (re-)built by the Makefile,
+describes the architecture of the compiler and gives more detail about the
+files comprising the compiler.
 
-There is a (growing) [list of programming and research projects](PROJECTS.md)
+There is a (growing) [list of programming and research projects](https://github.com/pschachte/wybe/issues?q=is%3Aopen+label%3A%22research+project%22+-label%3A%22in+progress%22)
 to further develop the Wybe language.
 
 We are indebted to the several [contributors](CONTRIBUTORS.md)
