@@ -537,11 +537,15 @@ cgen prim@(PrimForeign "llvm" name flags args) = do
        0 | name == "move" -> return Nothing -- move phantom to phantom
        2 -> cgenLLVMUnop name flags args'
        3 -> cgenLLVMBinop name flags args'
-       _ -> shouldnt $ "LLVM instruction " ++ name ++ " with wrong arity!"
+       _ -> shouldnt $ "LLVM instruction " ++ name
+                       ++ " with wrong arity (" ++ show (length args') ++ ")!"
 
 cgen prim@(PrimForeign "lpvm" name flags args) = do
     logCodegen $ "Compiling " ++ show prim
-    filterPhantomArgs args >>= cgenLPVM name flags
+    args' <- filterPhantomArgs args
+    if List.null args' && name == "cast"
+      then return Nothing
+      else cgenLPVM name flags args'
 
 cgen prim@(PrimForeign lang name flags args) = do
     logCodegen $ "Compiling " ++ show prim
@@ -779,7 +783,8 @@ cgenLPVM "cast" [] args@[inArg,outArg] =
 
 
 cgenLPVM pname flags args = do
-    shouldnt $ "Instruction " ++ pname ++ " not imlemented."
+    shouldnt $ "Instruction " ++ pname ++ " arity " ++ show (length args)
+               ++ " not implemented."
 
 
 -- | Generate code to add an offset to an address
