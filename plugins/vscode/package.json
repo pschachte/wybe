@@ -1,0 +1,25 @@
+{
+    "name": "vscode-wybe",
+    "displayName": "Wybe",
+    "description": "",
+    "version": "0.0.1",
+    "engines": {
+        "vscode": "^1.39.0"
+    },
+    "categories": [
+        "Programming Languages"
+    ],
+    "contributes": {
+        "languages": [{
+            "id": "wybe",
+            "aliases": ["Wybe", "wybe"],
+            "extensions": [".wybe"],
+            "configuration": "./language-configuration.json"
+        }],
+        "grammars": [{
+            "language": "wybe",
+            "scopeName": "source.wybe",
+            "path": "./syntaxes/wybe.tmLanguage.json"
+        }]
+    }
+}

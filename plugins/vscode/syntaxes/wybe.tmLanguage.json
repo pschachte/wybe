@@ -1,0 +1,50 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Wybe",
+	"patterns": [
+		{
+			"include": "#general"
+		},
+		{
+			"include": "#strings"
+		}
+	],
+	"repository": {
+		"general": {
+			"patterns": [
+				{
+					"name": "keyword.control.wybe",
+					"match": "\\b(case|if|else)\\b"
+				},
+				{
+					"name": "storage.type.function.wybe",
+					"match": "\\b(def)\\b"
+				},
+				{
+					"name": "storage.type.wybe",
+					"match": "\\b(int|float|bool|string|char)\\b"
+				},
+				{
+					"name": "storage.modifier.wybe",
+					"match": "\\b(pub|use)\\b"
+				},
+				{
+					"name": "comment.line.number-sign.wybe",
+					"match": "(#).*$\\n?"
+				}
+			]
+		},
+		"strings": {
+			"name": "string.quoted.double.wybe",
+			"begin": "\"",
+			"end": "\"",
+			"patterns": [
+				{
+					"name": "constant.character.escape.wybe",
+					"match": "\\\\."
+				}
+			]
+		}
+	},
+	"scopeName": "source.wybe"
+}
