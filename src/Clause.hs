@@ -135,7 +135,7 @@ evalClauseComp clcomp =
 -- |Compile a ProcDefSrc to a ProcDefPrim, ie, compile a proc
 --  definition in source form to one in clausal form.
 compileProc :: ProcDef -> Int -> Compiler ProcDef
-compileProc proc procID = -- XXX use the id to generate procSpec
+compileProc proc procID = 
     evalClauseComp $ do
         let ProcDefSrc body = procImpln proc
         let proto = procProto proc

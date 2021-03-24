@@ -1829,8 +1829,8 @@ data ProcImpln
     | ProcDefPrim {
         procImplnProcSpec :: ProcSpec, 
         procImplnProto :: PrimProto, 
-        procImplnBody :: ProcBody,       -- ^defn in LPVM (clausal) form
-        procImplnAnalysis :: ProcAnalysis, 
+        procImplnBody :: ProcBody,       
+        procImplnAnalysis :: ProcAnalysis, -- ^defn in LPVM (clausal) form
         procImplnSpeczBodies :: SpeczProcBodies
     }
     -- defn in SSA (LLVM) form along with any needed extern definitions
