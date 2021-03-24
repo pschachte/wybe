@@ -28,7 +28,7 @@ data Token = TokFloat Double SourcePos          -- ^A floating point number
               | TokRBracket BracketStyle SourcePos
                                                 -- ^Some kind of right bracket
               | TokComma SourcePos              -- ^A comma
-              | TokSymbol String SourcePos      -- ^A symbol of made up of
+              | TokSymbol String SourcePos      -- ^A symbol made up of
                                                 --  non-identifier chars
               | TokError String SourcePos       -- ^A lexical error
               deriving (Show)
@@ -101,9 +101,7 @@ fileTokens filename =
 
 -- |The contents of stdin as a list of tokens.
 inputTokens :: IO [Token]
-inputTokens =
-  do content <- getContents
-     return (tokenise (initialPos "<stdin>") content)
+inputTokens = tokenise (initialPos "<stdin>") <$> getContents
 
 
 -- |Convert a sequence of characters to a sequence of tokens.
@@ -135,7 +133,7 @@ tokenise pos str@(c:cs)
 
 -- |Handle a single character token and tokenize the rest of the input.
 singleCharTok :: Char -> String -> SourcePos -> Token -> [Token]
-singleCharTok c cs pos tok = tok:(tokenise (updatePosChar pos c) cs)
+singleCharTok c cs pos tok = tok:tokenise (updatePosChar pos c) cs
 
 -- |Handle a token beginning with comma, and tokenize the rest of the input.
 commaTok :: String -> SourcePos -> [Token]
@@ -153,19 +151,19 @@ isSymbolContinuation = (`elem` ",@$%^&*+=.<>")
 
 -- |Handle a mult-character token and tokenize the rest of the input.
 multiCharTok :: String -> String -> Token -> SourcePos -> [Token]
-multiCharTok str cs tok pos = tok:(tokenise (updatePosString pos str) cs)
+multiCharTok str cs tok pos = tok:tokenise (updatePosString pos str) cs
 
 -- |Handle a character constant token and tokenize the rest of the input.
 tokeniseChar :: SourcePos -> String -> [Token]
 tokeniseChar pos ('\\':c:'\'':rest) =
-  (TokChar (escapedChar c) pos) :
+  TokChar (escapedChar c) pos :
   tokenise
   (updatePosChar
    (updatePosChar (updatePosChar (updatePosChar pos '\'') c) '\\')
    '\'')
   rest
 tokeniseChar pos (c:'\'':cs) =
-  (TokChar c pos):
+  TokChar c pos:
   tokenise (updatePosChar (updatePosChar (updatePosChar pos '\'') c) '\'') cs
 tokeniseChar pos chars =
     error $ showPosition pos
@@ -181,7 +179,6 @@ tokeniseSymbol pos (c:cs) =
 tokeniseSymbol _ [] = shouldnt "empty symbol does not exist"
 
 -- |Tokenise a delimited string and tokenize the rest of the input..
--- XXX This doesn't handle escapes within strings
 tokeniseString :: StringDelim -> SourcePos -> String -> [Token]
 tokeniseString delim pos cs =
   let termchar = delimChar delim
@@ -257,13 +254,13 @@ scanNumberToken pos cs =
                     (_, "e", _)  -> errFloat
                     (_, "e-", _) -> errFloat
                     (_, 'e':'-':expDigits, _)
-                      | any (not . isDigit) expDigits -> errFloat
+                      | not (all isDigit expDigits) -> errFloat
                     (_, 'e':digit1:expDigits, _)
                       | not (digit1 == '-' || isDigit digit1)
-                        || any (not . isDigit) expDigits -> errFloat
+                        || not (all isDigit expDigits) -> errFloat
                     (_, _, ".")  -> errFloat
                     (_, _, '.':fracDigits)
-                      | any (not . isDigit) fracDigits -> errFloat
+                      | not (all isDigit fracDigits) -> errFloat
                     (TokInt intPart _, _, _) ->
                       let fracDigits =
                             if null fracPart then [] else tail fracPart
@@ -279,7 +276,7 @@ scanNumberToken pos cs =
                               ('e':rest)     -> (rest,1)
                               _ -> shouldnt "exponent must begin with e"
                           exponent =
-                            foldl (\e c -> e * 10 + (digitToInt c)) 0 expDigits
+                            foldl (\e c -> e * 10 + digitToInt c) 0 expDigits
                           multiplier = 10.0 ** fromIntegral (expMult * exponent)
                           value = (fromIntegral intPart + frac) * multiplier
                       in TokFloat value pos
