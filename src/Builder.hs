@@ -859,7 +859,9 @@ updateInterfaceHash mspec = do
             if mod == mspec
             then
                 let p = (modProcs impl ! procName) !! procID in
-                let ProcDefPrim proto body analysis _ = procImpln p in
+                let proto = procImplnProto $ procImpln p in
+                let body = procImplnBody $ procImpln p in
+                let analysis = procImplnAnalysis $ procImpln p in
                 if procInline p
                 then InlineProc proto body
                 else NormalProc proto analysis
@@ -926,7 +928,7 @@ fixpointProcessSCC processor scc = do        -- must find fixpoint
 
 
 
-transformModuleProcs :: (ProcDef -> Compiler ProcDef) -> ModSpec ->
+transformModuleProcs :: (ProcDef -> Int -> Compiler ProcDef) -> ModSpec ->
                         Compiler ()
 transformModuleProcs trans thisMod = do
     logBuild $ "**** Reentering module " ++ showModSpec thisMod
@@ -935,7 +937,7 @@ transformModuleProcs trans thisMod = do
     (names,procs) <- unzip <$>
                      getModuleImplementationField (Map.toList . modProcs)
     -- for each name we have a list of procdefs, so we must double map
-    procs' <- mapM (mapM trans) procs
+    procs' <- mapM (zipWithM (flip trans) [0..]) procs
     updateImplementation
         (\imp -> imp { modProcs = Map.union
                                   (Map.fromList $ zip names procs')

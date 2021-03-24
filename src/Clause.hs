@@ -134,8 +134,8 @@ evalClauseComp clcomp =
 
 -- |Compile a ProcDefSrc to a ProcDefPrim, ie, compile a proc
 --  definition in source form to one in clausal form.
-compileProc :: ProcDef -> Compiler ProcDef
-compileProc proc =
+compileProc :: ProcDef -> Int -> Compiler ProcDef
+compileProc proc procID = -- XXX use the id to generate procSpec
     evalClauseComp $ do
         let ProcDefSrc body = procImpln proc
         let proto = procProto proc
@@ -156,7 +156,9 @@ compileProc proc =
         let proto' = PrimProto (procProtoName proto) params'
         logClause $ "  comparams: " ++ show params'
         callSiteCount <- gets nextCallSiteID
-        return $ proc { procImpln = ProcDefPrim proto' compiled
+        mSpec <- lift $ getModule modSpec
+        let pSpec = ProcSpec mSpec procName procID Set.empty
+        return $ proc { procImpln = ProcDefPrim pSpec proto' compiled
                                         emptyProcAnalysis Map.empty,
                         procCallSiteCount = callSiteCount}
 

@@ -30,7 +30,8 @@ procExpansion :: ProcSpec -> ProcDef -> Compiler ProcDef
 procExpansion pspec def = do
     logMsg Expansion $ replicate 50 '='
     logMsg Expansion $ "*** Try to expand proc " ++ show pspec
-    let ProcDefPrim proto body analysis speczBodies = procImpln def
+    let ProcDefPrim { procImplnProto = proto, procImplnBody = body } = 
+         procImpln def
     logMsg Expansion $ "    initial body: " ++ show (procImpln def)
     let tmp = procTmpCount def
     let (ins,outs) = inputOutputParams proto
@@ -39,7 +40,9 @@ procExpansion pspec def = do
                         execStateT (expandBody body) st
     let proto' = proto {primProtoParams = markParamNeededness used ins
                                           <$> primProtoParams proto}
-    let def' = def { procImpln = ProcDefPrim proto' body' analysis speczBodies,
+    let procImpln' = 
+         (procImpln def){ procImplnProto = proto, procImplnBody = body }
+    let def' = def { procImpln = procImpln', 
                      procTmpCount = tmp',
                      procCallSiteCount = nextCallSiteID st' }
     if def /= def'
@@ -220,7 +223,7 @@ expandPrim (PrimCall id pspec args) pos = do
         def <- lift $ lift $ getProcDef pspec
         case procImpln def of
           ProcDefSrc _ -> shouldnt $ "uncompiled proc: " ++ show pspec
-          ProcDefPrim proto body _ _ ->
+          ProcDefPrim{procImplnProto = proto, procImplnBody = body}->
             if procInline def
               then inlineCall proto args' body pos
               else do
