@@ -14,7 +14,7 @@ pub def pcopy(p1:position, ?p2:position) use !io {
 # copy as a deftion
 # p2 is fresh
 pub def fcopy(p1:position):position =
-  let ?p2 = position(0,0) x(!p2, p1.x) y(!p2, p1.y) in p2
+  let { ?p2 = position(0,0) ; x(!p2, p1.x) ; y(!p2, p1.y) } in p2
 
 !println("copy a position")
 !pcopy(position(0,20), ?r)

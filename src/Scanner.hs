@@ -14,6 +14,7 @@ module Scanner (Token(..), tokenPosition, floatValue, intValue, stringValue,
 import AST
 import Data.Char
 import Data.List
+import Data.Tuple.Extra
 import Text.ParserCombinators.Parsec.Pos
 
 -- |The tokens of the wybe language, each carrying its source position.
@@ -30,8 +31,26 @@ data Token = TokFloat Double SourcePos          -- ^A floating point number
               | TokComma SourcePos              -- ^A comma
               | TokSymbol String SourcePos      -- ^A symbol made up of
                                                 --  non-identifier chars
+              | TokSeparator Bool SourcePos     -- ^A statement separator
+                                                -- indicating whether explicit
               | TokError String SourcePos       -- ^A lexical error
-              deriving (Show)
+
+
+instance Show Token where
+    show (TokFloat n _)         = "floating point number " ++ show n
+    show (TokInt n _)           = "integer " ++ show n
+    show (TokString delim s _)  =
+        "literal string " ++ delimString delim ++ s ++ delimString delim
+    show (TokChar ch _)         = "literal character " ++ show ch
+    show (TokIdent s _)         = "identifier " ++ s
+    show (TokLBracket br _)     = "'" ++ bracketString True br  ++ "'"
+    show (TokRBracket br _)     = "'" ++ bracketString False br ++ "'"
+    show (TokComma _)           = "comma"
+    show (TokSymbol s _)        = "operator symbol " ++ s
+    show (TokSeparator True _)  = "semicolon"
+    show (TokSeparator False _) = "newline"
+    show (TokError str _)       = str
+
 
 -- |Returns the source position of a token.
 tokenPosition :: Token -> SourcePos
@@ -44,6 +63,7 @@ tokenPosition (TokLBracket _  pos) = pos
 tokenPosition (TokRBracket _  pos) = pos
 tokenPosition (TokComma       pos) = pos
 tokenPosition (TokSymbol _    pos) = pos
+tokenPosition (TokSeparator _ pos) = pos
 tokenPosition (TokError _     pos) = pos
 
 -- |Returns the value of a float token.
@@ -85,35 +105,97 @@ showPosition pos
 
 -- |The different string delimiters.
 data StringDelim = DoubleQuote | BackQuote | LongQuote String
-                 deriving (Show)
+
+-- |Return the specified quote as a string.  Assumes matching left and right
+-- quotes are identical.
+delimString :: StringDelim -> String
+delimString DoubleQuote   = "\""
+delimString BackQuote     = "`"
+delimString (LongQuote s) = s
+
 
 -- |The different kinds of brackets.
 data BracketStyle = Paren | Bracket | Brace
-                  deriving (Show, Eq)
+                  deriving (Eq)
+
+-- |Return the specified bracket as a string, where the Bool specifies whether
+-- it should be a left bracket.
+bracketString :: Bool -> BracketStyle -> String
+bracketString True  Paren   = "("
+bracketString True  Bracket = "["
+bracketString True  Brace   = "{"
+bracketString False Paren   = ")"
+bracketString False Bracket = "]"
+bracketString False Brace   = "}"
 
 
 -- |The contents of a file as a list of tokens.
 fileTokens :: FilePath -> IO [Token]
 fileTokens filename =
-  do content <- readFile filename
-     return (tokenise (initialPos filename) content)
+    pruneSeparators . tokenise (initialPos filename) <$> readFile filename
 
 
 -- |The contents of stdin as a list of tokens.
 inputTokens :: IO [Token]
-inputTokens = tokenise (initialPos "<stdin>") <$> getContents
+inputTokens =
+    pruneSeparators . tokenise (initialPos "<stdin>") <$> getContents
+
+
+-- |Prune out unneeded implicit TokSeparators, which indicate newlines.  The
+-- unneeded ones are those that couldn't separate two statements or items.  We
+-- eliminate them when the previous token was a symbol, comma, left parenthesis,
+-- bracket, or brace, or another separator, or when the following
+-- token is a symbol, comma, right parenthesis, bracket, or brace, left brace,
+-- or explict separator.  We also eliminate implicit separators that begin or
+-- end a file.  All explicit TokSeparators (semicolons) are kept.
+pruneSeparators :: [Token] -> [Token]
+pruneSeparators [] = []
+pruneSeparators (TokSeparator False _:rest) = pruneSeparators rest
+pruneSeparators (tok:rest) = tok:pruneSeparators' rest tok
+
+pruneSeparators' :: [Token] -> Token -> [Token]
+pruneSeparators' [] _ = []
+pruneSeparators' (sep@(TokSeparator False _):rest) prev
+    | omitAfter prev || omitBefore rest = pruneSeparators' rest prev
+    | otherwise                         = sep : pruneSeparators' rest sep
+pruneSeparators' (tok:rest) _           = tok : pruneSeparators' rest tok
+
+
+-- |Test whether an implicit separator following the specified token should be
+-- pruned.
+omitAfter :: Token -> Bool
+omitAfter TokSymbol{}    = True
+omitAfter TokComma{}     = True
+omitAfter TokLBracket{}  = True
+omitAfter TokSeparator{} = True
+omitAfter (TokIdent s _) = nonendingKeyword s
+omitAfter _              = False
+
+
+-- |Test whether an implicit separator preceding the specified list of tokens
+-- should be pruned.
+omitBefore :: [Token] -> Bool
+omitBefore []                       = True
+omitBefore (TokSymbol s _:_)        = not $ statementStartSymbol s
+omitBefore (TokComma{}:_)           = True
+omitBefore (TokRBracket{}:_)        = True
+omitBefore (TokIdent s _:_)         = nonstartingKeyword s
+omitBefore (TokSeparator{}:_)       = True
+omitBefore _                        = False
 
 
 -- |Convert a sequence of characters to a sequence of tokens.
 tokenise :: SourcePos -> String -> [Token]
 tokenise _ [] = []
 tokenise pos str@(c:cs)
+  | c == '\n' = singleCharTok c cs pos $ TokSeparator False pos
   | isSpace c || isControl c = tokenise (updatePosChar pos c) cs
   | isDigit c = scanNumberToken pos str
   | isIdentChar c = let (name,rest) = span isIdentChar str
                     in  multiCharTok name rest (TokIdent name pos) pos
   | otherwise = case c of
                     ',' -> commaTok cs pos
+                    ';' -> singleCharTok c cs pos $ TokSeparator True pos
                     '(' -> singleCharTok c cs pos $ TokLBracket Paren pos
                     '[' -> singleCharTok c cs pos $ TokLBracket Bracket pos
                     '{' -> singleCharTok c cs pos $ TokLBracket Brace pos
@@ -125,8 +207,11 @@ tokenise pos str@(c:cs)
                     '\'' -> tokeniseChar pos cs
                     '\"' -> tokeniseString DoubleQuote pos cs
                     -- backquote makes anything an identifier
-                    '`' -> let (name,_:rest) = break (=='`') cs
-                           in  multiCharTok name rest (TokIdent name pos) pos
+                    '`' -> case break (=='`') cs of
+                         (name,_:rest) ->
+                              multiCharTok name rest (TokIdent name pos) pos
+                         (name,[]) ->
+                             [TokError "Unclosed backquote beginning here" pos]
                     '#' -> tokenise (setSourceColumn pos 1)
                            $ dropWhile (/= '\n') cs
                     _   -> tokeniseSymbol pos str
@@ -166,9 +251,10 @@ tokeniseChar pos (c:'\'':cs) =
   TokChar c pos:
   tokenise (updatePosChar (updatePosChar (updatePosChar pos '\'') c) '\'') cs
 tokeniseChar pos chars =
-    error $ showPosition pos
-    ++ ": Syntax error in single character constant beginning '"
-    ++ take 3 chars ++ "..."
+    TokError
+     ("Syntax error in character constant beginning '" ++ front ++ "'...") pos
+    : tokenise (updatePosString pos ('\'':front)) back
+    where (front,back) = splitAt 2 chars
 
 -- |Handle a symbol token and tokenize the rest of the input.
 tokeniseSymbol :: SourcePos -> String -> [Token]
@@ -178,31 +264,32 @@ tokeniseSymbol pos (c:cs) =
   in  multiCharTok (c:sym) rest (TokSymbol (c:sym) pos) pos
 tokeniseSymbol _ [] = shouldnt "empty symbol does not exist"
 
+
 -- |Tokenise a delimited string and tokenize the rest of the input..
 tokeniseString :: StringDelim -> SourcePos -> String -> [Token]
 tokeniseString delim pos cs =
   let termchar = delimChar delim
-      (str,pos',rest) = scanString termchar pos cs
-  in  TokString delim str pos : tokenise pos' rest
+  in  case scanString termchar pos cs of
+      Just (str,pos',rest) -> TokString delim str pos : tokenise pos' rest
+      Nothing              -> [TokError "Unterminated string begins here" pos]
 
 
 -- |Scan a string literal that has already been opened, and will close with the
 -- specified terminator character.  Also return the remainder of the input and
 -- the new source position.
-scanString :: Char -> SourcePos -> String -> (String,SourcePos,String)
+scanString :: Char -> SourcePos -> String -> Maybe (String,SourcePos,String)
 scanString termchar pos input =
     case break (`elem` [termchar,'\\']) input of
-        (_,[]) -> error $ showPosition pos
-                          ++ ": Unterminated string begins here"
+        (_,[]) -> Nothing
         (front,'\\':c:cs) ->
             let pos' = updatePosChar
                        (updatePosChar (updatePosString pos front) '\\')
                        c
-                (rest,finalPos,remainder) = scanString termchar pos' cs
-            in (front ++ (escapedChar c : rest), finalPos, remainder)
+            in first3 ((front++) . (escapedChar c:))
+               <$> scanString termchar pos' cs
         (front,t:cs) | t == termchar ->
             let pos' = updatePosChar (updatePosString pos front) t
-            in (front, pos', cs)
+            in Just (front, pos', cs)
         (front,rest) -> shouldnt "break broke in scanString"
 
 
@@ -319,3 +406,42 @@ isSymbolChar ch = not (isIdentChar ch || isSpace ch || isControl ch
 -- decimal point.
 isNumberChar :: Char -> Bool
 isNumberChar ch = isIdentChar ch || ch == '.'
+
+
+-- |Keywords that can appear in the middle of a statement or declaration.
+-- Newlines immediately before or after these words should not be taken as
+-- separators.
+-- XXX remove "then" and "else" once we've revised conditional expression syntax
+nonstartingKeyword :: Ident -> Bool
+nonstartingKeyword "then"  = True
+nonstartingKeyword "else"  = True
+nonstartingKeyword "in"    = True
+nonstartingKeyword "is"    = True
+nonstartingKeyword "where" = True
+nonstartingKeyword _       = False
+
+
+-- |Keywords that can appear in the middle of a statement or declaration.
+-- Newlines immediately before or after these words should not be taken as
+-- separators.
+-- XXX remove "then" and "else" once we've revised conditional expression syntax
+nonendingKeyword :: Ident -> Bool
+nonendingKeyword "then"         = True
+nonendingKeyword "else"         = True
+nonendingKeyword "in"           = True
+nonendingKeyword "is"           = True
+nonendingKeyword "where"        = True
+nonendingKeyword "pub"          = True
+nonendingKeyword "def"          = True
+nonendingKeyword "type"         = True
+nonendingKeyword "constructor"  = True
+nonendingKeyword "constructors" = True
+nonendingKeyword _              = False
+
+
+-- |Prefix operator symbols that could begin a statement.
+statementStartSymbol :: String -> Bool
+statementStartSymbol "!" = True 
+statementStartSymbol "?" = True 
+statementStartSymbol "~" = True 
+statementStartSymbol _   = False 

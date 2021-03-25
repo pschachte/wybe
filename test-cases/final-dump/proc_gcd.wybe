@@ -2,7 +2,7 @@
 #pub def mod(x:int, y:int, ?r:int)  {?r = foreign llvm urem(x, y) end
 
 pub def mod(x:int, y:int, ?r:int) use !io {
-  !print('x') !print(x) !print(' ') !print('y') !println(y)
+  !print('x') ; !print(x) ; !print(' ') ; !print('y') ; !println(y)
   ?r = foreign llvm urem(x, y)
 }
 

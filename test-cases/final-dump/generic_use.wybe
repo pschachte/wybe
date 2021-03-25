@@ -35,7 +35,7 @@ def print_tail(lst:generic_list(int)) use !io {
     }
 }
 
-def println(lst:generic_list(int)) use !io { !print(lst) !nl }
+def println(lst:generic_list(int)) use !io { !print(lst) ; !nl }
 
 ?l1 = iota(5)
 ?l2 = fromto(6, 10)

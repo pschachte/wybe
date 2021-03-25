@@ -67,8 +67,12 @@ resource declarations, and
 module declarations.
 Each of these will be described in due course.
 
+Each module item should begin on a new line, or they should be separated by
+semicolon (`;`) characters.  See the section on [code layout](#code layout) for
+more details on how newlines are treated.
+
 These items are all private by default, meaning that even if the enclosing
-module is imported, they will not be visible.
+module is imported, they will not be visible in any importing modules.
 However, each of these sorts of items can be made public by preceding them with
 the keyword `pub`, meaning that by importing the module that defines them,
 you gain access to them.
@@ -257,6 +261,26 @@ For example,
 read(?value:int)
 ```
 
+## <a name="code layout"></a>Code layout
+
+In general, statements in procedure body must be separated by semicolon (`;`)
+characters.  However, as a convenience, and to improve the appearance of the
+code, the semicolons can be omitted when statements are on separate lines.  It
+is generally recommended to lay your code out this way.
+
+The Wybe compiler tries to distinguish line breaks that appear in the middle of
+a statement from ones that separate statements by considering adjacent
+characters.  If what preceeded the line break was an operator symbol, a comma,
+semicolon, left parenthesis, bracket, or brace, or one of the keywords `then`,
+`else`, `in`, `is`, `where`, `pub`, `def`, `constructor`, or `constructors`,
+then the line break is not considered to be a separator.  Likewise, if what
+follows is an operator symbol other than `?`, `!`, or `~`, a comma, semicolon, a
+right parenthesis, bracket, or brace, or one of the keywords `then`, `else`,
+`in`, `is`, or `where`, then the line break is not considered to be a separator.
+Otherwise, the line break is treated as a separator, as if you had written an
+explicit semicolon.
+
+
 
 ## Function definitions
 
@@ -290,8 +314,10 @@ Procedures are defined with the syntax:
 > `def` *name*`(`*dir* *param*`:`*type*, ... *dir* *param*`:`*type*`) {` *body* `}`
 
 Again *name* is the procedure name, each *param* is a parameter name, the
-corresponding *type* is its type, and *body* is a sequence of statements
-making up the body of the procedure.  Each *dir* is a dataflow
+corresponding *type* is its type, and *body* is a sequence of statements making
+up the body of the procedure.  The statements in *body* should be place on
+separate lines, or should be separated with semicolon (`;`) characters.  Each
+*dir* is a dataflow
 direction annotation, either nothing to indicate an input, `?` for an
 output, or `!` to indicate both an input and an output.
 Procedures may have any number of input, output, and input/output
@@ -429,7 +455,8 @@ Each case takes the form:
 
 > *test* `::` *statements*
 
-where *test* is a test statement and *statements* is one or more statements.
+where *test* is a test statement and *statements* is one or more statements
+separated by semicolons (`;`) or newlines.
 Execution proceeds by executing the first *test*, and if it succeeds, executing
 the corresponding *statements*, thereby completing the `if` statement.
 If the first *test* fails, its corresponding *statements* are skipped and
@@ -470,8 +497,8 @@ Iteration is specified with the `do` statement, of the form:
 This executes the enclosed *statements* repeatedly, until a termination
 condition is reached.
 
-The enclosed *statements* may include any ordinary Wybe statements, plus any of
-the following:
+The enclosed *statements* may include any ordinary Wybe statements, separated by
+newline characters or semicolons, plus any of the following:
 
 > `while` *test*
 
@@ -516,7 +543,8 @@ A submodule is declared as follows:
 
 > `module` *name* `{` *items* `}`
 
-where *name* is the module name and *items* are the contents of the submodule.
+where *name* is the module name and *items* are the contents of the submodule,
+separated by newlines or semicolons.
 
 
 ## <a name="constructors"></a>Constructor declarations
@@ -733,7 +761,7 @@ type.
 ## `_` type
 
 As a special case, the type `_` is treated as an alias for whatever type is
-defined by the module in which it appears.  That provides a (possibly) shorter
+defined by the module in which it appears.  That provides a shorter
 name for the type being defined, and also allows the type to be renamed simply
 by renaming the file it is defined in.  For example, if the following code could
 be placed in an Wybe source file to define a linked list type with whatever name
@@ -859,12 +887,15 @@ resource.
 
 The `io` resource is implicitly defined at the top level of a Wybe program.
 There is also a predefined `argc` and `argv` resource holding the number of
-command line arguments and an array of the arguments themselves. Finally, the
-`exit_code` resource is initialised to 0 at the start of execution, and may be
-changed to any integer during the computation to set the exit condition that
-will be returned to the operating system at the termination of the program.  To
-use the `argc`, `argv`, or `exit_code` resources, a module must `use` the
-`command_line` module.  This is part of the Wybe library, but is not
+command line arguments and an array of the arguments themselves.  The `command`
+resource holds the name by which the current executable was executed, as a
+string, and the `arguments` resource holds the command line arguments supplied
+when the program was run, as an array of strings.  Finally, the `exit_code`
+resource is initialised to 0 at the start of execution, and may be changed to
+any integer during the computation to set the exit condition that will be
+returned to the operating system at the termination of the program.  To use the
+`argc`, `argv`, `command`, `arguments`, or `exit_code` resources, a module must
+`use` the `command_line` module.  This is part of the Wybe library, but is not
 automatially imported.
 
 ## Packages

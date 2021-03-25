@@ -73,8 +73,11 @@ writeItems file to = do
 
 -- | Parser entry for a Wybe program.
 itemParser :: Parser [Item]
-itemParser =
-    many (pragmaItem <|> visibilityItem <|> privateItem <|> topLevelStmtItem)
+itemParser = singleItem `sepBy` separator
+
+
+singleItem :: Parser Item
+singleItem = pragmaItem <|> visibilityItem <|> privateItem <|> topLevelStmtItem
 
 
 topLevelStmtItem :: Parser Item
@@ -185,7 +188,7 @@ typeCtors :: Parser (TypeImpln,[Item])
 typeCtors = betweenB Brace $ do
     vis <- visibility
     ctors <- funcProtoParser `sepBy` symbol "|"
-    items <- itemParser
+    items <- option [] (separator *> itemParser)
     return $ (TypeCtors vis ctors,items)
 
 
@@ -249,10 +252,13 @@ funcBody vis modifiers proto ty pos = do
 procBody :: Visibility -> [String] -> ProcProto -> TypeSpec -> SourcePos
          -> Parser Item
 procBody vis modifiers proto ty pos = do
-    body <- betweenB Brace $ many stmtParser
+    body <- stmtSeq
     -- XXX must test that ty is AnyType, otherwise syntax error
     return $ ProcDecl vis (processProcModifiers modifiers) proto body (Just pos)
 
+
+stmtSeq :: Parser [Placed Stmt]
+stmtSeq = betweenB Brace $ stmtParser `sepBy` separator
 
 -- | A procedure param parser.
 -- ProcParam -> FlowDirection ident OptType
@@ -454,7 +460,7 @@ procCallParser = do
 doStmt :: Parser (Placed Stmt)
 doStmt = do
     pos <- tokenPosition <$> ident "do"
-    body <- betweenB Brace $ many1 stmtParser
+    body <- stmtSeq
     return $ Placed (Loop body Nothing) pos
 
 
@@ -510,7 +516,7 @@ ifStmtParser = do
 ifCaseParser :: Parser (Placed Stmt, [Placed Stmt])
 ifCaseParser = do
     cond <- testStmt <* symbol "::"
-    body <- many stmtParser
+    body <- stmtParser `sepBy` separator
     return (cond, body)
 
 
@@ -518,7 +524,7 @@ useStmt :: Parser (Placed Stmt)
 useStmt = do
     pos <- tokenPosition <$> ident "use"
     resources <- resourceSpec `sepBy` comma <* ident "in"
-    body <- betweenB Brace $ many1 stmtParser
+    body <- stmtSeq
     return $ Placed (UseResources resources body) pos
 
 
@@ -580,7 +586,7 @@ ifExpParser = do
 letExpParser :: Parser (Placed Exp)
 letExpParser = do
     pos <- tokenPosition <$> ident "let"
-    body <- many stmtParser <* ident "in"
+    body <- stmtSeq <* ident "in"
     e <- expParser
     return $ Placed (Where body e) pos
 
@@ -737,7 +743,7 @@ specifyType ty True exp pos =
 whereBodyParser :: Parser (Placed Exp -> Placed Exp)
 whereBodyParser = do
     ident "where"
-    body <- betweenB Brace $ many1 stmtParser
+    body <- stmtSeq
     return $ \e -> maybePlace (Where body e) (place e)
 
 
@@ -949,6 +955,14 @@ comma = takeToken test
     test _              = Nothing
 
 
+-- | Parse a statement separator token.
+separator :: Parser Token
+separator = takeToken test
+  where
+    test tok@TokSeparator{} = Just tok
+    test _                  = Nothing
+
+
 
 -- | Parse a left bracket of style 'bs'.
 leftBracket :: BracketStyle -> Parser Token
@@ -998,11 +1012,9 @@ determinism = option Det (ident "test" *> return SemiDet
 
 
 -- | Wybe keywords to exclude from identitfier tokens conditionally.
--- XXX revisit this list; replace and with &&, or with ||, not with ~,
--- maybe remove 'import', and probably need to add others.
 keywords :: [String]
 keywords =
     [ "if", "then", "else", "def", "use"
-    , "do",  "until", "unless", "test", "import"
+    , "do",  "until", "unless", "test"
     , "while", "foreign", "in", "when"
     ]

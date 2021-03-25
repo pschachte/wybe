@@ -234,6 +234,7 @@ import           Types                     (typeCheckModSCC,
 import           Unbranch                  (unbranchProc)
 import           Util                      (sccElts)
 import           Snippets
+import           Text.Parsec.Error
 import           BinaryFactory
 import qualified Data.ByteString.Char8 as BS
 import qualified LLVM.AST              as LLVMAST
@@ -447,11 +448,13 @@ loadModuleFromSrcFile mspec srcfile maybeDir = do
                       ++ " from " ++ srcfile
     tokens <- (liftIO . fileTokens) srcfile
     let parseTree = parseWybe tokens srcfile
-    mods <- either (\er -> do
-               liftIO $ putStrLn $ "Syntax Error: " ++ show er
-               liftIO exitFailure)
-           (compileParseTree srcfile mspec)
-           parseTree
+    mods <- either 
+            (\er -> errmsg
+                    (Just $ errorPos er)
+                    ("Syntax error: " ++ tail (dropWhile (/='\n') $ show er))
+                     >> return [])
+            (compileParseTree srcfile mspec)
+            parseTree
     -- If we just loaded a _.wybe file, now import sources in the directory
     case maybeDir of
       Nothing -> return ()

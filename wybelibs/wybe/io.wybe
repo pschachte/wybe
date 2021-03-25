@@ -11,28 +11,28 @@ pub resource io:phantom = phantom
 pub def nl use !io { foreign c putchar('\n', !io) }
 
 pub def print(x:int) use !io { foreign c print_int(x, !io) }
-pub def println(x:int) use !io { !print(x) !nl }
+pub def println(x:int) use !io { !print(x); !nl }
 pub def read(?x:int) use !io { foreign c read_int(?x,!io) }
 
 # XXX these won't handle counts with the top bit set.
 pub def print(x:count) use !io { foreign c print_int(x, !io) }
-pub def println(x:count) use !io { !print(x) !nl }
+pub def println(x:count) use !io { !print(x); !nl }
 pub def read(?x:count) use !io { foreign c read_int(?x,!io) }
 
 pub def print(x:float) use !io { foreign c print_float(x,!io) }
-pub def println(x:float) use !io { !print(x) !nl }
+pub def println(x:float) use !io { !print(x); !nl }
 pub def read(?x:float) use !io { foreign c read_float(?x,!io) }
 
 pub def print(x:char) use !io { foreign c putchar(x,!io) }
-pub def println(x:char) use !io { !print(x) !nl }
+pub def println(x:char) use !io { !print(x); !nl }
 pub def read(?x:char) use !io { foreign c read_char(?x,!io) }
 
 pub def print(x:string) use !io { foreign c print_string(x,!io) }
-pub def println(x:string) use !io { !print(x) !nl }
+pub def println(x:string) use !io { !print(x); !nl }
 pub def read(?x:string) use !io { foreign c read_line(?x,!io) }
 
 pub def print(x:bool) use !io {
    !print(if x then "true" else "false")
 }
-pub def println(x:bool) use !io { !print(x) !nl }
+pub def println(x:bool) use !io { !print(x); !nl }
 pub def eof:char = foreign lpvm cast(-1)
