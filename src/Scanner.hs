@@ -15,6 +15,7 @@ import AST
 import Data.Char
 import Data.List
 import Data.Tuple.Extra
+import Data.Tuple.HT
 import Text.ParserCombinators.Parsec.Pos
 
 -- |The tokens of the wybe language, each carrying its source position.
@@ -212,9 +213,29 @@ tokenise pos str@(c:cs)
                               multiCharTok name rest (TokIdent name pos) pos
                          (name,[]) ->
                              [TokError "Unclosed backquote beginning here" pos]
-                    '#' -> tokenise (setSourceColumn pos 1)
-                           $ dropWhile (/= '\n') cs
+                    '#' -> let  (target,trim) = case cs of
+                                    ('|':_) -> ("|#","|#")
+                                    _       -> ("\n","")
+                                (comment,rest) =
+                                    breakList (target `isPrefixOf`) cs
+                                pos' = updatePosString pos (c:comment++trim)
+                            in if null rest
+                               then [TokError "Unterminated comment begins here"
+                                              pos]
+                               else tokenise pos' $ drop (length trim) rest
                     _   -> tokeniseSymbol pos str
+
+
+-- | Splits a list into the initial part whose prefix does not satisfy the
+-- predicate and the first suffix that does.  Like the List.break function,
+-- except that the predicate is applied to whole tails of the input list rather
+-- than individual elements.
+breakList :: ([a] -> Bool) -> [a] -> ([a],[a])
+breakList pred [] = ([],[])
+breakList pred lst@(h:t)
+  | pred lst  = ([],lst)
+  | otherwise = mapFst (h:) $ breakList pred t
+
 
 -- |Handle a single character token and tokenize the rest of the input.
 singleCharTok :: Char -> String -> SourcePos -> Token -> [Token]

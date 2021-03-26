@@ -21,8 +21,9 @@ is run, so Hello, World! in Wybe is quite simple:
 !println("Hello, World!")
 ```
 
-Wybe comments begin with a hash (`#`) character and continue to the end
-of the line.
+Wybe comments begin with a hash (`#`) character and continue to the end of the
+line.  Block comments are written beginning with `#|` and continuing until the
+following `|#` sequence.
 
 The leading exclamation point is needed on statements that perform input/output,
 and in a few other contexts that will be explained in the
