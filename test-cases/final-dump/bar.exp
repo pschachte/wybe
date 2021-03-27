@@ -11,7 +11,8 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public (0 calls)
-0: (io#0:wybe.phantom, ?io#2:wybe.phantom):
+0: bar.<0>
+(io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     numbers.factorial<0>(4:wybe.int, ?tmp$0#0:wybe.int) #0 @bar:nn:nn
@@ -68,7 +69,8 @@ entry:
   procs           : 
 
 *main* > public {inline} (0 calls)
-0: (io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: numbers.<0>
+(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_string("Numbers has been initialised.":wybe.string, ~#io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @io:nn:nn
@@ -76,7 +78,8 @@ entry:
 
 
 factorial > public (1 calls)
-0: factorial(n#0:wybe.int, ?$#0:wybe.int):
+0: numbers.factorial<0>
+factorial(n#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_sle(n#0:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.bool) @int:nn:nn
@@ -92,7 +95,8 @@ factorial > public (1 calls)
 
 
 toCelsius > public {inline} (0 calls)
-0: toCelsius(f#0:wybe.float, ?$#0:wybe.float):
+0: numbers.toCelsius<0>
+toCelsius(f#0:wybe.float, ?$#0:wybe.float):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm fsub(~f#0:wybe.float, 32.0:wybe.float, ?tmp$1#0:wybe.float) @float:nn:nn

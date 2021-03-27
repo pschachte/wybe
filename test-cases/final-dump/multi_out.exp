@@ -11,13 +11,15 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public {inline} (0 calls)
-0: (io#0:wybe.phantom, [?io#0:wybe.phantom]):
+0: multi_out.<0>
+(io#0:wybe.phantom, [?io#0:wybe.phantom]):
  AliasPairs: []
  InterestingCallProperties: []
 
 
 onetwothree > public {inline} (1 calls)
-0: onetwothree(?x#0:wybe.int, ?y#0:wybe.int, ?z#0:wybe.int):
+0: multi_out.onetwothree<0>
+onetwothree(?x#0:wybe.int, ?y#0:wybe.int, ?z#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(1:wybe.int, ?x#0:wybe.int) @multi_out:nn:nn

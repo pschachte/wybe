@@ -10,7 +10,8 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public (0 calls)
-0: (io#0:wybe.phantom, ?io#10:wybe.phantom):
+0: decimal.<0>
+(io#0:wybe.phantom, ?io#10:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_float(1.0e-2:wybe.float, ~#io#0:wybe.phantom, ?tmp$3#0:wybe.phantom) @io:nn:nn

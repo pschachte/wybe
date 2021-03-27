@@ -37,14 +37,16 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
   procs           : 
 
 hidden > {inline} (0 calls)
-0: hidden(io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: submodule.privatetest.hidden<0>
+hidden(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_string("private proc in a private module":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
 
 
 semi_hidden > public {inline} (0 calls)
-0: semi_hidden(io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: submodule.privatetest.semi_hidden<0>
+semi_hidden(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_string("public proc in a private module":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
@@ -98,14 +100,16 @@ entry:
   procs           : 
 
 semi_visible > {inline} (0 calls)
-0: semi_visible(io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: submodule.publictest.semi_visible<0>
+semi_visible(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_string("private proc in a public module":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
 
 
 visible > public {inline} (0 calls)
-0: visible(io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: submodule.publictest.visible<0>
+visible(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_string("public proc in a public module":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn

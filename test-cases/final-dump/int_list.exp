@@ -23,7 +23,8 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public (0 calls)
-0: (io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: int_list.<0>
+(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp$6#0:int_list.int_list)
@@ -40,7 +41,8 @@ AFTER EVERYTHING:
 
 
 print > public (2 calls)
-0: print(x#0:int_list.int_list, io#0:wybe.phantom, ?io#3:wybe.phantom):
+0: int_list.print<0>
+print(x#0:int_list.int_list, io#0:wybe.phantom, ?io#3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(x#0:int_list.int_list, 0:wybe.int, ?tmp$2#0:wybe.bool)
@@ -58,7 +60,8 @@ print > public (2 calls)
 
 
 println > public {inline} (1 calls)
-0: println(x#0:int_list.int_list, io#0:wybe.phantom, ?io#2:wybe.phantom):
+0: int_list.println<0>
+println(x#0:int_list.int_list, io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     int_list.print<0>(~x#0:int_list.int_list, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @int_list:nn:nn
@@ -169,7 +172,8 @@ entry:
   procs           : 
 
 /= > public {inline} (0 calls)
-0: /=($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
+0: int_list.int_list./=<0>
+/=($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     int_list.int_list.=<0>(~$left#0:int_list.int_list, ~$right#0:int_list.int_list, ?tmp$0#0:wybe.bool) #0
@@ -177,7 +181,8 @@ entry:
 
 
 = > public (2 calls)
-0: =($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
+0: int_list.int_list.=<0>
+=($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($left#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -209,14 +214,16 @@ entry:
 
 
 cons > public {inline} (0 calls)
-0: cons(head#0:wybe.int, tail#0:int_list.int_list, ?$#0:int_list.int_list):
+0: int_list.int_list.cons<0>
+cons(head#0:wybe.int, tail#0:int_list.int_list, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:int_list.int_list)
     foreign lpvm mutate(~%$rec#0:int_list.int_list, ?%$rec#1:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:int_list.int_list, ?%$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:int_list.int_list)
 cons > public {inline} (12 calls)
-1: cons(?head#0:wybe.int, ?tail#0:int_list.int_list, $#0:int_list.int_list, ?$$#0:wybe.bool):
+1: int_list.int_list.cons<1>
+cons(?head#0:wybe.int, ?tail#0:int_list.int_list, $#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -234,7 +241,8 @@ cons > public {inline} (12 calls)
 
 
 head > public {inline} (0 calls)
-0: head($rec#0:int_list.int_list, ?$#0:wybe.int, ?$$#0:wybe.bool):
+0: int_list.int_list.head<0>
+head($rec#0:int_list.int_list, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -248,7 +256,8 @@ head > public {inline} (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 head > public {inline} (0 calls)
-1: head($rec#0:int_list.int_list, ?$rec#1:int_list.int_list, $field#0:wybe.int, ?$$#0:wybe.bool):
+1: int_list.int_list.head<1>
+head($rec#0:int_list.int_list, ?$rec#1:int_list.int_list, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -264,14 +273,16 @@ head > public {inline} (0 calls)
 
 
 nil > public {inline} (0 calls)
-0: nil(?$#0:int_list.int_list):
+0: int_list.int_list.nil<0>
+nil(?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list)
 
 
 tail > public {inline} (0 calls)
-0: tail($rec#0:int_list.int_list, ?$#0:int_list.int_list, ?$$#0:wybe.bool):
+0: int_list.int_list.tail<0>
+tail($rec#0:int_list.int_list, ?$#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -285,7 +296,8 @@ tail > public {inline} (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 tail > public {inline} (0 calls)
-1: tail($rec#0:int_list.int_list, ?$rec#1:int_list.int_list, $field#0:int_list.int_list, ?$$#0:wybe.bool):
+1: int_list.int_list.tail<1>
+tail($rec#0:int_list.int_list, ?$rec#1:int_list.int_list, $field#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)

@@ -10,7 +10,8 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public (0 calls)
-0: (io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: early_exit2.<0>
+(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_string("should print this":wybe.string, ~#io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @io:nn:nn
@@ -19,7 +20,8 @@ AFTER EVERYTHING:
 
 
 my_exit > {terminal,inline} (1 calls)
-0: my_exit(code#0:wybe.int):
+0: early_exit2.my_exit<0>
+my_exit(code#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c {terminal,semipure} exit(~code#0:wybe.int) @early_exit2:7:5

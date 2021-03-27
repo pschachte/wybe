@@ -12,7 +12,8 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public {inline} (0 calls)
-0: (io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: aaa.<0>
+(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_string("AAA: Init":wybe.string, ~#io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @io:nn:nn
@@ -60,7 +61,8 @@ entry:
   procs           : 
 
 *main* > public {inline} (0 calls)
-0: (io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: bbb.<0>
+(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_string("BBB: Init":wybe.string, ~#io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @io:nn:nn
@@ -108,7 +110,8 @@ entry:
   procs           : 
 
 *main* > public {inline} (0 calls)
-0: (io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: ccc.<0>
+(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_string("CCC: Init":wybe.string, ~#io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @io:nn:nn
@@ -155,7 +158,8 @@ entry:
   procs           : 
 
 *main* > public {inline} (0 calls)
-0: (io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: ddd.<0>
+(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_string("DDD: Init":wybe.string, ~#io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @io:nn:nn
