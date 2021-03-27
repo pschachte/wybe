@@ -1116,8 +1116,14 @@ getProcPrimProto :: ProcSpec -> Compiler PrimProto
 getProcPrimProto pspec = do
     def <- getProcDef pspec
     case procImpln def of
-        ProcDefPrim{ procImplnProcSpec = pspec2, procImplnProto = proto}
+        impln@ProcDefPrim{ procImplnProcSpec = pspec2, procImplnProto = proto}
             | pspec == pspec2 -> return proto
+            | and [ procSpecMod pspec == procSpecMod pspec2, 
+                    procSpecName pspec == procSpecName pspec2, 
+                    procSpecID pspec == procSpecID pspec2 ] -> do
+                let impln' = impln{procImplnProcSpec = pspec}
+                updateProcDef (\_ -> def{procImpln = impln'}) pspec
+                return proto
             | otherwise -> 
                 shouldnt $ "get compiled proc but procSpec not mathcing: " ++ 
                            show pspec ++ ", " ++ show pspec2

@@ -41,8 +41,7 @@ procExpansion pspec def = do
                         execStateT (expandBody body) st
     let proto' = proto {primProtoParams = markParamNeededness used ins
                                           <$> primProtoParams proto}
-    let impln' = 
-         (procImpln def){ procImplnProto = proto', procImplnBody = body' }
+    let impln' = impln{ procImplnProto = proto', procImplnBody = body' }
     let def' = def { procImpln = impln', 
                      procTmpCount = tmp',
                      procCallSiteCount = nextCallSiteID st' }

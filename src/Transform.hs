@@ -37,9 +37,10 @@ import           Util
 transformProc :: ProcDef -> Int -> Compiler ProcDef
 transformProc def _
     | not (procInline def) = do
-        let ProcDefPrim{procImplnBody = body} = procImpln def
+        let impln = procImpln def
+        let body = procImplnBody impln
         body' <- transformProcBody def generalVersion
-        return def {procImpln = (procImpln def){procImplnBody = body'}}
+        return def {procImpln = impln{procImplnBody = body'}}
 
 transformProc def _ = return def
 
