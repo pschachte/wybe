@@ -11,7 +11,8 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public (0 calls)
-0: (io#0:wybe.phantom, ?io#2:wybe.phantom):
+0: compute.<0>
+(io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     math.utils.factorial<0>(4:wybe.int, ?tmp$0#0:wybe.int) #0 @compute:nn:nn
@@ -95,7 +96,8 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
   procs           : 
 
 toCelsius > public {inline} (0 calls)
-0: toCelsius(f#0:wybe.float, ?$#0:wybe.float):
+0: math.temperature.toCelsius<0>
+toCelsius(f#0:wybe.float, ?$#0:wybe.float):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm fsub(~f#0:wybe.float, 32.0:wybe.float, ?tmp$1#0:wybe.float) @float:nn:nn
@@ -133,7 +135,8 @@ entry:
   procs           : 
 
 *main* > public {inline} (0 calls)
-0: (io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: math.utils.<0>
+(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_string("Utils has been initialised.":wybe.string, ~#io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @io:nn:nn
@@ -141,7 +144,8 @@ entry:
 
 
 factorial > public (1 calls)
-0: factorial(n#0:wybe.int, ?$#0:wybe.int):
+0: math.utils.factorial<0>
+factorial(n#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_sle(n#0:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.bool) @int:nn:nn

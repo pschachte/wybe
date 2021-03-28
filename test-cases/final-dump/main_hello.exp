@@ -19,7 +19,8 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public (0 calls)
-0: (argc#0:wybe.int, [?argc#0:wybe.int], ?arguments#2:wybe.array(wybe.string), argv#0:wybe.array.raw_array(wybe.string), [?argv#0:wybe.array.raw_array(wybe.string)], ?command#2:wybe.string, ?exit_code#1:wybe.int, io#0:wybe.phantom, [?io#0:wybe.phantom]):
+0: command_line.<0>
+(argc#0:wybe.int, [?argc#0:wybe.int], ?arguments#2:wybe.array(wybe.string), argv#0:wybe.array.raw_array(wybe.string), [?argv#0:wybe.array.raw_array(wybe.string)], ?command#2:wybe.string, ?exit_code#1:wybe.int, io#0:wybe.phantom, [?io#0:wybe.phantom]):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp$9#0:wybe.array(?T))
@@ -37,7 +38,8 @@ AFTER EVERYTHING:
 
 
 set_exit_code > public {inline} (0 calls)
-0: set_exit_code(code#0:wybe.int, [exit_code#0:wybe.int], ?exit_code#1:wybe.int):
+0: command_line.set_exit_code<0>
+set_exit_code(code#0:wybe.int, [exit_code#0:wybe.int], ?exit_code#1:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(~code#0:wybe.int, ?exit_code#1:wybe.int) @command_line:nn:nn
@@ -113,7 +115,8 @@ entry:
   procs           : 
 
 *main* > public (0 calls)
-0: (arguments#0:wybe.array(wybe.string), [?arguments#0:wybe.array(wybe.string)], command#0:wybe.string, [?command#0:wybe.string], [exit_code#0:wybe.int], ?exit_code#1:wybe.int, io#0:wybe.phantom, ?io#3:wybe.phantom):
+0: main_hello.<0>
+(arguments#0:wybe.array(wybe.string), [?arguments#0:wybe.array(wybe.string)], command#0:wybe.string, [?command#0:wybe.string], [exit_code#0:wybe.int], ?exit_code#1:wybe.int, io#0:wybe.phantom, ?io#3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(42:wybe.int, ?#exit_code#1:wybe.int) @command_line:nn:nn

@@ -12,7 +12,8 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public (0 calls)
-0: (io#0:wybe.phantom, ?io#2:wybe.phantom):
+0: io.<0>
+(io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_int(100:wybe.int, ~#io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @io:nn:nn
@@ -22,7 +23,8 @@ AFTER EVERYTHING:
 
 
 myprint_a > public {inline} (1 calls)
-0: myprint_a(x#0:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: io.myprint_a<0>
+myprint_a(x#0:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_int(~x#0:wybe.int, ~#io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @io:nn:nn
@@ -30,7 +32,8 @@ myprint_a > public {inline} (1 calls)
 
 
 myprint_b > public {inline} (1 calls)
-0: myprint_b(x#0:wybe.int, ?y#0:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: io.myprint_b<0>
+myprint_b(x#0:wybe.int, ?y#0:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_int(~x#0:wybe.int, ~#io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @io:nn:nn

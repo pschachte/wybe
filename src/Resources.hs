@@ -68,8 +68,8 @@ checkOneResource rspec impln@(SimpleResource ty init pos) = do
 
 -- |Make sure all resource for the specified proc are module qualified,
 --  making them canonical.
-canonicaliseProcResources :: ProcDef -> Compiler ProcDef
-canonicaliseProcResources pd = do
+canonicaliseProcResources :: ProcDef -> Int -> Compiler ProcDef
+canonicaliseProcResources pd _ = do
     logResources $ "Canonicalising resources used by proc " ++ procName pd
     let proto = procProto pd
     let pos = procPos pd
@@ -100,8 +100,8 @@ canonicaliseResourceFlow pos spec = do
 --  just blindly transforms resources into variables and parameters,
 --  counting on the later variable use/def analysis to ensure that
 --  resources are defined before they're used or returned.
-transformProcResources :: ProcDef -> Compiler ProcDef
-transformProcResources pd = do
+transformProcResources :: ProcDef -> Int -> Compiler ProcDef
+transformProcResources pd _ = do
     logResources $ "--------------------------------------\n"
     logResources $ "Adding resources to:" ++ showProcDef 4 pd
     let proto = procProto pd

@@ -10,7 +10,8 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public (0 calls)
-0: (?count#2:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: use_resource.<0>
+(?count#2:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_string("Inner count (4): ":wybe.string, ~#io#0:wybe.phantom, ?tmp$6#0:wybe.phantom) @io:nn:nn
@@ -23,14 +24,16 @@ AFTER EVERYTHING:
 
 
 inc_count > {inline} (4 calls)
-0: inc_count(count#0:wybe.int, ?count#1:wybe.int):
+0: use_resource.inc_count<0>
+inc_count(count#0:wybe.int, ?count#1:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm add(~count#0:wybe.int, 1:wybe.int, ?count#1:wybe.int) @int:nn:nn
 
 
 use_test > {inline} (1 calls)
-0: use_test(count#0:wybe.int, ?count#5:wybe.int, io#0:wybe.phantom, ?io#4:wybe.phantom):
+0: use_resource.use_test<0>
+use_test(count#0:wybe.int, ?count#5:wybe.int, io#0:wybe.phantom, ?io#4:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm add(~#count#0:wybe.int, 1:wybe.int, ?#count#1:wybe.int) @int:nn:nn

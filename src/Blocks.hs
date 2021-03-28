@@ -123,13 +123,12 @@ mangleProcs ps = zipWith mangleProc ps [0..]
 
 mangleProc :: ProcDef -> Int -> ProcDef
 mangleProc def i =
-    let (ProcDefPrim proto body analysis speczBodies) = 
-                procImpln def
+    let proto = procImplnProto $ procImpln def
         s = primProtoName proto
         pname = s ++ "<" ++ show i ++ ">"
         newProto = proto {primProtoName = pname}
     in 
-    def {procImpln = ProcDefPrim newProto body analysis speczBodies}
+    def {procImpln = (procImpln def){procImplnProto = newProto}}
 
 
 
@@ -171,7 +170,7 @@ mangleProc def i =
 extractLPVMProto :: ProcDef -> PrimProto
 extractLPVMProto procdef =
     case procImpln procdef of
-       (ProcDefPrim proto _ _ _) -> proto
+       ProcDefPrim{procImplnProto = proto} -> proto
        uncompiled ->
          shouldnt $ "Proc reached backend uncompiled: " ++ show uncompiled
 
@@ -203,7 +202,9 @@ isStdLib (m:_) = m == "wybe"
 translateProc :: [PrimProto] -> ProcDef -> Translation [ProcDefBlock]
 translateProc modProtos proc = do
     count <- getCount
-    let ProcDefPrim proto body _ speczBodies = procImpln proc
+    let proto = procImplnProto $ procImpln proc
+    let body = procImplnBody $ procImpln proc
+    let speczBodies = procImplnSpeczBodies $ procImpln proc
     -- translate the standard version
     (block, count') <- 
             lift $ _translateProcImpl modProtos proto body count

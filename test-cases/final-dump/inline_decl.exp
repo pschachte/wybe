@@ -12,7 +12,8 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public (0 calls)
-0: (io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: inline_decl.<0>
+(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c putchar('h':wybe.char, ~#io#0:wybe.phantom, ?tmp$1#0:wybe.phantom) @io:nn:nn
@@ -31,14 +32,16 @@ AFTER EVERYTHING:
 
 
 finish > public {noinline} (1 calls)
-0: finish(io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: inline_decl.finish<0>
+finish(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c putchar('\n':wybe.char, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
 
 
 long > public {inline} (1 calls)
-0: long(io#0:wybe.phantom, ?io#13:wybe.phantom):
+0: inline_decl.long<0>
+long(io#0:wybe.phantom, ?io#13:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c putchar('h':wybe.char, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn

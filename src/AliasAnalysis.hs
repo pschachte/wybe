@@ -87,12 +87,12 @@ currentAliasInfo :: SCC ProcSpec
         -> Compiler [(AliasMap, Set InterestingCallProperty)]
 currentAliasInfo (AcyclicSCC single) = do
     def <- getProcDef single
-    let (ProcDefPrim _ _ analysis _) = procImpln def
+    let ProcDefPrim{procImplnAnalysis = analysis} = procImpln def
     return [extractAliasInfoFromAnalysis analysis]
 currentAliasInfo procs@(CyclicSCC multi) =
     foldM (\info pspec -> do
         def <- getProcDef pspec
-        let (ProcDefPrim _ _ analysis _) = procImpln def
+        let ProcDefPrim{procImplnAnalysis = analysis} = procImpln def
         return $ info ++ [extractAliasInfoFromAnalysis analysis]
         ) [] multi
 
@@ -118,12 +118,12 @@ aliasProcBottomUp pspec = do
     logAlias $ replicate 50 '-'
 
     oldDef <- getProcDef pspec
-    let (ProcDefPrim _ _ oldAnalysis _) = procImpln oldDef
+    let ProcDefPrim{procImplnAnalysis = oldAnalysis} = procImpln oldDef
     -- Update alias analysis info to this proc
     updateProcDefM aliasProcDef pspec
     -- Get the new analysis info from the updated proc
     newDef <- getProcDef pspec
-    let (ProcDefPrim _ _ newAnalysis _) = procImpln newDef
+    let ProcDefPrim{procImplnAnalysis = newAnalysis} = procImpln newDef
     -- And compare if the [AliasInfo] changed.
     let oldAliasInfo = extractAliasInfoFromAnalysis oldAnalysis
     let newAliasInfo = extractAliasInfoFromAnalysis newAnalysis
@@ -141,7 +141,8 @@ aliasProcBottomUp pspec = do
 aliasProcDef :: ProcDef -> Compiler ProcDef
 aliasProcDef def
     | not (procInline def) = do
-        let (ProcDefPrim caller body oldAnalysis speczBodies) = procImpln def
+        let oldImpln@(ProcDefPrim _ caller body oldAnalysis speczBodies) = 
+             procImpln def
         logAlias $ show caller
 
         realParams <- (primParamName <$>) <$> protoRealParams caller
@@ -161,7 +162,7 @@ aliasProcDef def
                     procInterestingCallProperties = interestingCallProperties,
                     procMultiSpeczDepInfo = multiSpeczDepInfo}
         return $ 
-            def { procImpln = ProcDefPrim caller body newAnalysis speczBodies}
+            def { procImpln = oldImpln { procImplnAnalysis = newAnalysis } }
 aliasProcDef def = return def
 
 
@@ -271,7 +272,7 @@ updateAliasedByPrim aliasMap prim =
         PrimCall _ spec args -> do
             -- Analyse proc calls
             calleeDef <- getProcDef spec
-            let (ProcDefPrim calleeProto _ analysis _) = procImpln calleeDef
+            let (ProcDefPrim _ calleeProto _ analysis _) = procImpln calleeDef
             let calleeParamAliases = procArgAliasMap analysis
             logAlias $ "--- call          " ++ show spec ++" (callee): "
             logAlias $ "" ++ show calleeProto
@@ -433,7 +434,7 @@ updateMultiSpeczInfoByPrim proto
     case content prim of
         PrimCall callSiteID spec args -> do
             calleeDef <- getProcDef spec
-            let (ProcDefPrim calleeProto _ analysis _) = procImpln calleeDef
+            let (ProcDefPrim _ calleeProto _ analysis _) = procImpln calleeDef
             let interestingPrimCallInfo = List.zip args [0..]
                     |> List.filter (\(arg, paramID) -> 
                         -- we only care parameters that are interesting,

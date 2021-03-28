@@ -1116,7 +1116,17 @@ getProcPrimProto :: ProcSpec -> Compiler PrimProto
 getProcPrimProto pspec = do
     def <- getProcDef pspec
     case procImpln def of
-        ProcDefPrim proto _ _ _-> return proto
+        impln@ProcDefPrim{ procImplnProcSpec = pspec2, procImplnProto = proto}
+            | pspec == pspec2 -> return proto
+            | and [ procSpecMod pspec == procSpecMod pspec2, 
+                    procSpecName pspec == procSpecName pspec2, 
+                    procSpecID pspec == procSpecID pspec2 ] -> do
+                let impln' = impln{procImplnProcSpec = pspec}
+                updateProcDef (\_ -> def{procImpln = impln'}) pspec
+                return proto
+            | otherwise -> 
+                shouldnt $ "get compiled proc but procSpec not mathcing: " ++ 
+                           show pspec ++ ", " ++ show pspec2
         _ -> shouldnt $ "get prim proto of uncompiled proc " ++ show pspec
 
 
@@ -1822,9 +1832,14 @@ showSuperProc (SuperprocIs super) =
 -- Finally it is turned into SSA form (LLVM).
 data ProcImpln
     = ProcDefSrc [Placed Stmt]           -- ^defn in source-like form
-    | ProcDefPrim PrimProto ProcBody ProcAnalysis SpeczProcBodies
-                                         -- ^defn in LPVM (clausal) form
-      -- defn in SSA (LLVM) form along with any needed extern definitions
+    | ProcDefPrim {
+        procImplnProcSpec :: ProcSpec, 
+        procImplnProto :: PrimProto, 
+        procImplnBody :: ProcBody,       
+        procImplnAnalysis :: ProcAnalysis, -- ^defn in LPVM (clausal) form
+        procImplnSpeczBodies :: SpeczProcBodies
+    }
+    -- defn in SSA (LLVM) form along with any needed extern definitions
     deriving (Eq,Generic)
 
 
@@ -1963,7 +1978,7 @@ isCompiled (ProcDefSrc _) = False
 
 instance Show ProcImpln where
     show (ProcDefSrc stmts) = showBody 4 stmts
-    show (ProcDefPrim proto body analysis speczVersions) =
+    show (ProcDefPrim pSpec proto body analysis speczVersions) =
         let speczBodies = Map.toList speczVersions
                 |> List.map (\(ver, body) ->
                         "\n [" ++ speczVersionToId ver ++ "] "
@@ -1973,8 +1988,8 @@ instance Show ProcImpln where
                             Just body -> showBlock 4 body)
                 |> intercalate "\n"
         in
-            show proto ++ ":" ++ show analysis ++ showBlock 4 body
-                    ++ speczBodies
+            show pSpec ++ "\n" ++ show proto ++ ":" ++ show analysis 
+                    ++ showBlock 4 body ++ speczBodies
 
 
 instance Show ProcAnalysis where

@@ -34,14 +34,15 @@ import           Util
 -- This is the extra pass after found the alais analysis fixed point
 --
 ----------------------------------------------------------------
-transformProc :: ProcDef -> Compiler ProcDef
-transformProc def
+transformProc :: ProcDef -> Int -> Compiler ProcDef
+transformProc def _
     | not (procInline def) = do
-        let (ProcDefPrim proto body analysis speczBodies) = procImpln def
+        let impln = procImpln def
+        let body = procImplnBody impln
         body' <- transformProcBody def generalVersion
-        return def {procImpln = ProcDefPrim proto body' analysis speczBodies}
+        return def {procImpln = impln{procImplnBody = body'}}
 
-transformProc def = return def
+transformProc def _ = return def
 
 
 -- init aliasMap based on the given "nonAliasedParams",
@@ -71,7 +72,9 @@ transformProcBody :: ProcDef -> SpeczVersion -> Compiler ProcBody
 transformProcBody procDef speczVersion = do
     when (procInline procDef) $ shouldnt "transforming an inline proc"
 
-    let (ProcDefPrim proto body analysis speczBodies) = procImpln procDef
+    let proto = procImplnProto $ procImpln procDef
+    let body = procImplnBody $ procImpln procDef
+    let analysis = procImplnAnalysis $ procImpln procDef
     logTransform $ replicate 60 '~'
     logTransform $ show proto
     logTransform $ "[" ++ show (speczVersionToId speczVersion) ++ "] :"
@@ -282,7 +285,8 @@ expandRequiredSpeczVersionsByProc :: Set ProcSpec -> ProcSpec
         -> Compiler (Set ProcSpec)
 expandRequiredSpeczVersionsByProc required pspec = do
     procDef <- getProcDef pspec
-    let ProcDefPrim _ _ analysis speczBodies = procImpln procDef
+    let analysis = procImplnAnalysis $ procImpln procDef
+    let speczBodies = procImplnSpeczBodies $ procImpln procDef
     -- get it's currently existed/required versions
     let speczVersions = Set.filter (sameBaseProc pspec) required
                         |> Set.map procSpeczVersion
@@ -359,13 +363,15 @@ updateRequiredMultiSpeczInMod mod versions = do
                         Nothing -> proc
                         Just versions ->
                             let procImp = procImpln proc in
-                            let ProcDefPrim pp pb pa speczBodies = procImp in
+                            let speczBodies = procImplnSpeczBodies procImp in
                             let speczBodies' = List.foldl (\bodies version ->
                                     Map.insertWith (\_ old -> old) 
                                             version Nothing bodies
-                                    ) speczBodies versions
+                                    ) speczBodies versions in
+                            let newProcImpln = 
+                                    procImp{procImplnSpeczBodies=speczBodies'}
                             in
-                            proc {procImpln = ProcDefPrim pp pb pa speczBodies'}
+                            proc {procImpln=newProcImpln}
                             ) procs [0..]
                 ) procName procMap
             ) procMap (groupByFst versions)
@@ -379,11 +385,11 @@ updateRequiredMultiSpeczInMod mod versions = do
 
 -- For the given "ProcDef", generates all specz versions that are required but
 -- haven't got generated.
-generateSpeczVersionInProc :: ProcDef -> Compiler ProcDef
-generateSpeczVersionInProc def
+generateSpeczVersionInProc :: ProcDef -> Int -> Compiler ProcDef
+generateSpeczVersionInProc def _
     | not (procInline def) = do
         let procImp = procImpln def
-        let ProcDefPrim proto body analysis speczBodies = procImp
+        let speczBodies = procImplnSpeczBodies procImp
         if List.any isNothing (Map.elems speczBodies)
         then do -- missing required specz versions
             -- mark the current module as changed
@@ -402,11 +408,11 @@ generateSpeczVersionInProc def
                         ) (Map.toAscList speczBodies)
             let speczBodies' = Map.fromDistinctAscList speczBodiesList
             return $
-                def {procImpln = ProcDefPrim proto body analysis speczBodies'}
+                def {procImpln = procImp{procImplnSpeczBodies=speczBodies'}}
         else
             return def
 
-generateSpeczVersionInProc def = return def
+generateSpeczVersionInProc def _ = return def
 
 
 -- Similar to "List.groupBy"

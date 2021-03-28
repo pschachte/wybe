@@ -10,7 +10,8 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public (0 calls)
-0: (io#0:wybe.phantom, ?io#7:wybe.phantom):
+0: exp_simple.<0>
+(io#0:wybe.phantom, ?io#7:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_int(3:wybe.int, ~#io#0:wybe.phantom, ?tmp$8#0:wybe.phantom) @io:nn:nn
@@ -28,7 +29,8 @@ AFTER EVERYTHING:
 
 
 foreign_add > {inline} (1 calls)
-0: foreign_add(?$#0:wybe.int):
+0: exp_simple.foreign_add<0>
+foreign_add(?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(3:wybe.int, ?$#0:wybe.int) @exp_simple:nn:nn
