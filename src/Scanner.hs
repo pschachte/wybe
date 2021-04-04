@@ -7,9 +7,9 @@
 
 
 module Scanner (Token(..), tokenPosition, floatValue, intValue, stringValue,
-                charValue, identName, symbolName, showPosition,
+                charValue, identName, symbolName, tokenName, showPosition,
                 StringDelim(..), BracketStyle(..), fileTokens, tokenise,
-                inputTokens) where
+                inputTokens, inputLineTokens) where
 
 import AST
 import Data.Char
@@ -30,6 +30,7 @@ data Token = TokFloat Double SourcePos          -- ^A floating point number
               | TokRBracket BracketStyle SourcePos
                                                 -- ^Some kind of right bracket
               | TokComma SourcePos              -- ^A comma
+              | TokPeriod SourcePos             -- ^A period (full stop)
               | TokSymbol String SourcePos      -- ^A symbol made up of
                                                 --  non-identifier chars
               | TokSeparator Bool SourcePos     -- ^A statement separator
@@ -47,6 +48,7 @@ instance Show Token where
     show (TokLBracket br _)     = "'" ++ bracketString True br  ++ "'"
     show (TokRBracket br _)     = "'" ++ bracketString False br ++ "'"
     show (TokComma _)           = "comma"
+    show (TokPeriod _)          = "period"
     show (TokSymbol s _)        = "operator symbol " ++ s
     show (TokSeparator True _)  = "semicolon"
     show (TokSeparator False _) = "newline"
@@ -63,6 +65,7 @@ tokenPosition (TokIdent _     pos) = pos
 tokenPosition (TokLBracket _  pos) = pos
 tokenPosition (TokRBracket _  pos) = pos
 tokenPosition (TokComma       pos) = pos
+tokenPosition (TokPeriod      pos) = pos
 tokenPosition (TokSymbol _    pos) = pos
 tokenPosition (TokSeparator _ pos) = pos
 tokenPosition (TokError _     pos) = pos
@@ -96,6 +99,24 @@ identName _ = shouldnt "not an ident"
 symbolName :: Token -> String
 symbolName (TokSymbol str _) = str
 symbolName _ = shouldnt "not a symbol"
+
+
+-- |Returns the text of the token.
+tokenName :: Token -> String
+tokenName (TokFloat n _)         = show n
+tokenName (TokInt n _)           = show n
+tokenName (TokString delim s _)  = delimString delim ++ s ++ delimString delim
+tokenName (TokChar ch _)         = [ch]
+tokenName (TokIdent s _)         = s
+tokenName (TokLBracket br _)     = bracketString True br
+tokenName (TokRBracket br _)     = bracketString False br
+tokenName (TokComma _)           = ","
+tokenName (TokPeriod _)          = "."
+tokenName (TokSymbol s _)        = s
+tokenName (TokSeparator True _)  = ";"
+tokenName (TokSeparator False _) = "\n"
+tokenName (TokError str _)       = shouldnt $ "tokenName of error " ++ str
+
 
 -- |How to display a source position.
 showPosition :: SourcePos -> String
@@ -140,6 +161,12 @@ fileTokens filename =
 inputTokens :: IO [Token]
 inputTokens =
     pruneSeparators . tokenise (initialPos "<stdin>") <$> getContents
+
+
+-- |The contents of one line of stdin as a list of tokens.
+inputLineTokens :: IO [Token]
+inputLineTokens =
+    pruneSeparators . tokenise (initialPos "<stdin>") <$> getLine
 
 
 -- |Prune out unneeded implicit TokSeparators, which indicate newlines.  The
@@ -195,8 +222,9 @@ tokenise pos str@(c:cs)
   | isIdentChar c = let (name,rest) = span isIdentChar str
                     in  multiCharTok name rest (TokIdent name pos) pos
   | otherwise = case c of
-                    ',' -> commaTok cs pos
-                    ';' -> singleCharTok c cs pos $ TokSeparator True pos
+                    ',' -> specialToken ',' cs pos $ TokComma pos
+                    '.' -> specialToken '.' cs pos $ TokPeriod pos
+                    ';' -> specialToken ';' cs pos $ TokSeparator True pos
                     '(' -> singleCharTok c cs pos $ TokLBracket Paren pos
                     '[' -> singleCharTok c cs pos $ TokLBracket Bracket pos
                     '{' -> singleCharTok c cs pos $ TokLBracket Brace pos
@@ -241,19 +269,35 @@ breakList pred lst@(h:t)
 singleCharTok :: Char -> String -> SourcePos -> Token -> [Token]
 singleCharTok c cs pos tok = tok:tokenise (updatePosChar pos c) cs
 
--- |Handle a token beginning with comma, and tokenize the rest of the input.
-commaTok :: String -> SourcePos -> [Token]
-commaTok rest pos =
+-- |Handle a token that is treated specially if not followed by symbol
+-- characters, and tokenize the rest of the input.  Special characters are
+-- comma, period, and semicolon.
+specialToken :: Char -> String -> SourcePos -> Token -> [Token]
+specialToken ch rest pos singleTok =
     case span isSymbolContinuation rest of
-        ([],_) -> TokComma pos : tokenise (updatePosChar pos ',') rest
+        ([],_) -> singleTok : tokenise (updatePosChar pos ch) rest
         (tokRest,rest') ->
-            let sym = ',':tokRest
+            let sym = ch:tokRest
             in  TokSymbol sym pos : tokenise (updatePosString pos sym) rest'
+
 
 -- |Recognise a character that cannot begin an expression, and therefore can
 -- follow a comma in a symbol.
 isSymbolContinuation :: Char -> Bool
-isSymbolContinuation = (`elem` ",@$%^&*+=.<>")
+isSymbolContinuation ',' = True
+isSymbolContinuation ';' = True
+isSymbolContinuation '.' = True
+isSymbolContinuation '@' = True
+isSymbolContinuation '$' = True
+isSymbolContinuation '%' = True
+isSymbolContinuation '^' = True
+isSymbolContinuation '&' = True
+isSymbolContinuation '*' = True
+isSymbolContinuation '=' = True
+isSymbolContinuation '<' = True
+isSymbolContinuation '>' = True
+isSymbolContinuation _   = False
+
 
 -- |Handle a mult-character token and tokenize the rest of the input.
 multiCharTok :: String -> String -> Token -> SourcePos -> [Token]
@@ -332,7 +376,7 @@ escapedChar c = c
 
 -- |Scan a number token and the rest of the input.  Handles decimal and hex
 --  ints, floats with decimal point and/or e notation, and ignores embedded
---  underscores in integers. Doesn't handle negative numbers.
+--  underscores in integers. Doesn't handle negative numbers (these are handled by the parser).
 scanNumberToken :: SourcePos -> [Char] -> [Token]
 scanNumberToken pos cs =
     let (num0,rest0) = span isNumberChar cs

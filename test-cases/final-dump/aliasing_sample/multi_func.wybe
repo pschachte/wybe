@@ -3,7 +3,7 @@ use position
 public proc replicate2(p1:position, ?p2:position) use !io
     ?pp = position(0,0)
     !print("some noise...")
-    !println(pp.x)
+    !println(pp^x)
 
     ?p2 = p1
 end

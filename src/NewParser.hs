@@ -25,6 +25,7 @@ import Data.Functor
 -- import           Data.Algorithm.Diff       (getGroupedDiff)
 -- import           Data.Algorithm.DiffOutput (ppDiff)
 import           Text.Parsec.Expr
+import Control.Monad
 
 
 
@@ -103,16 +104,13 @@ visibilityItem = do
 privateItem :: Parser Item
 privateItem = typeRepItemParser
 
+
 pragmaItem :: Parser Item
-pragmaItem = do
-    ident "pragma"
-    prag <- parsePragma
-    return $ PragmaDecl prag
+pragmaItem = ident "pragma" *> (PragmaDecl <$> parsePragma)
+
 
 parsePragma :: Parser Pragma
-parsePragma = do
-    ident "no_standard_library"
-    return NoStd
+parsePragma = ident "no_standard_library" $> NoStd
 
 
 -----------------------------------------------------------------------------
@@ -177,7 +175,7 @@ typeRep :: ParsecT [Token] () Identity TypeRepresentation
 typeRep = do
     ident "address" $> Address
     <|> do bits <- option wordSize
-                   (fromIntegral <$> content <$> intLiteral <* ident "bit")
+                   (fromIntegral . content <$> intLiteral <* ident "bit")
            ident "unsigned" $> Bits bits
             <|> ident "signed" $> Signed bits
             <|> ident "float" $> Floating bits
@@ -189,13 +187,12 @@ typeCtors = betweenB Brace $ do
     vis <- visibility
     ctors <- funcProtoParser `sepBy` symbol "|"
     items <- option [] (separator *> itemParser)
-    return $ (TypeCtors vis ctors,items)
+    return (TypeCtors vis ctors,items)
 
 
 -- | Resource declaration parser.
 resourceItemParser :: Visibility -> Parser Item
 resourceItemParser v = do
-    -- XXX might be better to use the position of the resource name as pos
     pos <- tokenPosition <$> ident "resource"
     let optInit = optionMaybe (symbol "=" *> expParser)
     ResourceDecl v <$> identString
@@ -231,7 +228,6 @@ procOrFuncItemParser :: Visibility -> Parser Item
 procOrFuncItemParser vis = do
     pos <- tokenPosition <$> ident "def"
     modifiers <- modifierList
-    -- det <- determinism
     name <- funcNamePlaced <?> "no keywords"
     params <- option [] $ betweenB Paren (procParamParser `sepBy` comma)
     ty <- optType
@@ -252,8 +248,8 @@ funcBody vis modifiers proto ty pos = do
 procBody :: Visibility -> [String] -> ProcProto -> TypeSpec -> SourcePos
          -> Parser Item
 procBody vis modifiers proto ty pos = do
+    when (ty /= AnyType) $ fail "procedure declaration with a return type"
     body <- stmtSeq
-    -- XXX must test that ty is AnyType, otherwise syntax error
     return $ ProcDecl vis (processProcModifiers modifiers) proto body (Just pos)
 
 
@@ -369,16 +365,12 @@ resourceSpec = do
 -- | Optional flow direction symbol prefix.
 flowDirection :: Parser FlowDirection
 flowDirection =
-    option ParamIn $ (ParamOut <$ symbol "?") <|> (ParamInOut <$ symbol "!")
+    option ParamIn $ ParamOut <$ symbol "?" <|> ParamInOut <$ symbol "!"
 
 
 -- | Module name, period separated
 modSpecParser :: Parser ModSpec
-modSpecParser = modSpecComponent `sepBy` symbol "."
-
-
-modSpecComponent :: Parser String
-modSpecComponent = (symbol "^" >> return "^") <|> identString
+modSpecParser = identString `sepBy1` period
 
 
 -- | Parser for an optional type.
@@ -396,13 +388,14 @@ typeParser =
         optTypeList <- option [] $ betweenB Paren (typeParser `sepBy` comma)
         case name of
             "any"     -> return AnyType
-            "invalid" -> return InvalidType
+            "invalid" -> return InvalidType -- XXX remove this?
             _         -> return $ TypeSpec [] name optTypeList
 
 
 -- | Parse a type variable name
 typeVarName :: Parser Ident
 typeVarName = symbol "?" *> identString
+
 
 -----------------------------------------------------------------------------
 -- Statement Parsing                                                       --
@@ -421,6 +414,7 @@ stmtParser =
           <|> useStmt
           <|> simpleStmt
 
+
 nopStmt :: Parser (Placed Stmt)
 nopStmt = do
     pos <- tokenPosition <$> ident "pass"
@@ -436,15 +430,6 @@ simpleStmt = try procCallParser
 testStmt :: Parser (Placed Stmt)
 testStmt =
           fmap expToStmt <$> simpleExpParser
-          -- XXX Need to handle and, or, and not
-          -- (   do pos <- tokenPosition <$> ident "and"
-          --        rest <- testStmt
-          --        return maybePlace (And [stmt1,rest]) pos
-          -- <|> do pos <- tokenPosition <$> ident "or"
-          --        rest <- testStmt
-          --        return maybePlace (And [stmt1,rest]) pos
-          -- <|> return [stmt1]
-          -- )
 
 
 -- | A simple proc call stmt.
@@ -674,32 +659,32 @@ relOperatorTable =
 
 -- | Helper to make a placed function call expression out of n number of
 -- arguments.
-makeFnCall :: String -> [Placed Exp] -> Placed Exp
-makeFnCall sym args@(x:_) = maybePlace (Fncall [] sym args) (place x)
-makeFnCall sym []         = Unplaced (Fncall [] sym [])
+makeFncall :: String -> [Placed Exp] -> Placed Exp
+makeFncall sym args@(x:_) = maybePlace (Fncall [] sym args) (place x)
+makeFncall sym []         = Unplaced (Fncall [] sym [])
 
 
 -- | Helper to create a binary operator expression parser.
 binary :: String -> Assoc -> WybeOperator (Placed Exp)
-binary sym = Infix (symOrIdent sym *> return (binFn sym))
+binary sym = Infix (symOrIdent sym $> binFn sym)
   where
-    binFn s a b = makeFnCall s [a, b]
+    binFn s a b = makeFncall s [a, b]
 
 
 -- | Same as 'binary', but takes a list of extra expression arguments to be
 -- given to the combined function call expression.
 binary' :: String -> Assoc -> [Placed Exp] -> WybeOperator (Placed Exp)
 binary' sym assoc exArgs =
-    Infix (symOrIdent sym *> return (binFnEx sym)) assoc
+    Infix (symOrIdent sym $> binFnEx sym) assoc
   where
-    binFnEx s a b = makeFnCall s ([a, b] ++ exArgs)
+    binFnEx s a b = makeFncall s ([a, b] ++ exArgs)
 
 
 -- | Helper to create an unary prefix operator expression parser.
 prefix :: String -> WybeOperator (Placed Exp)
-prefix sym = Prefix (symOrIdent sym *> return (unFn sym))
+prefix sym = Prefix (symOrIdent sym $> unFn sym)
   where
-    unFn s a = makeFnCall s [a]
+    unFn s a = makeFncall s [a]
 
 
 -- | Helper to parse a symbol or an identifier as the same semantic token.
@@ -713,7 +698,7 @@ symOrIdent s = choice [ symbol s, ident s]
 -- . ident ( ArgList )
 funcAppExp :: Parser (Placed Exp -> Placed Exp)
 funcAppExp = do
-    nm <- content <$> (symbol "." *> identButNot keywords)
+    nm <- content <$> (symbol "^" *> identButNot keywords)
     optargs <- option [] argListParser
     return $ \a ->
         maybePlace (Fncall [] nm (a:optargs)) (place a)
@@ -754,7 +739,7 @@ whereBodyParser = do
 listExpParser :: Parser (Placed Exp)
 listExpParser = do
     pos <- (tokenPosition <$> leftBracket Bracket) <?> "list"
-    rightBracket Bracket *> return (Placed (Fncall [] "[]" []) pos)
+    rightBracket Bracket $> Placed (Fncall [] "[]" []) pos
         <|> listHeadParser pos
 
 
@@ -769,7 +754,7 @@ listHeadParser pos = do
 -- ListTail -> ']' | ',' Exp ListTail
 listTailParser :: Parser (Placed Exp)
 listTailParser =
-        rightBracket Bracket *> return (Unplaced (Fncall [] "[]" []))
+        rightBracket Bracket $> Unplaced (Fncall [] "[]" [])
     <|> comma *>
         do hd <- expParser
            tl <- listTailParser
@@ -879,7 +864,6 @@ identifier = takeToken test
     test _ = Nothing
 
 
-
 identString :: Parser String
 identString = takeToken test
   where
@@ -934,17 +918,14 @@ funcSymbolPlaced =
 
               -- [] or [|]
               , do p <- tokenPosition <$> leftBracket Bracket
-                   rightBracket Bracket *> return (Placed "[]" p)
+                   rightBracket Bracket $> Placed "[]" p
                        <|> symbol "|"
-                       *>  rightBracket Bracket
-                       *>  return (Placed "[|]" p)
+                       *>  rightBracket Bracket $> Placed "[|]" p
 
               -- {}
-              , tokenPosition <$> leftBracket Brace
-                  >>= \p -> return (Placed "{}" p)
-                  <*  rightBracket Brace
+              , leftBracket Brace
+                >>= (\p -> Placed "{}" p <$ rightBracket Brace) . tokenPosition
               ]
-
 
 
 -- | Parse a comma token.
@@ -953,6 +934,14 @@ comma = takeToken test
   where
     test tok@TokComma{} = Just tok
     test _              = Nothing
+
+
+-- | Parse a period token.
+period :: Parser Token
+period = takeToken test
+  where
+    test tok@TokPeriod{} = Just tok
+    test _               = Nothing
 
 
 -- | Parse a statement separator token.
@@ -1002,13 +991,13 @@ betweenB bs = between (leftBracket bs) (rightBracket bs)
 
 -- | Terminal "public" / "private".
 visibility :: Parser Visibility
-visibility = option Private (ident "pub" *> return Public)
+visibility = option Private (ident "pub" $> Public)
 
 
 -- | Terminal for determinism.
 determinism :: Parser Determinism
-determinism = option Det (ident "test" *> return SemiDet
-                          <|> ident "terminal" *> return Terminal)
+determinism = option Det (ident "test" $> SemiDet
+                          <|> ident "terminal" $> Terminal)
 
 
 -- | Wybe keywords to exclude from identitfier tokens conditionally.

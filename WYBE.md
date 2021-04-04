@@ -95,16 +95,17 @@ In effect, this re-exports everything imported from the named module(s).
 
 Wybe has the usual complement of primitive types:
 
-| Type       | Meaning                                    |
-| ---------- | ------------------------------------------ |
-| `int`      | Fixed precision integer (32 or 64 bits)    |
-| `float`    | Double precision floating point number     |
-| `bool`     | Boolean; either `true` or `false`          |
-| `string`   | Character string (double quotes)           |
-| `char`     | Individual ascii character (single quotes) |
+| Type     | Meaning                                          |
+| -------- | ------------------------------------------------ |
+| `int`    | Fixed precision integer (32 or 64 bits)          |
+| `float`  | Double precision floating point number           |
+| `count`  | Fixed precision unsigned integer (32 or 64 bits) |
+| `bool`   | Boolean; either `true` or `false`                |
+| `string` | Character string (double quotes)                 |
+| `char`   | Individual ascii character (single quotes)       |
 
 These are all defined in the `wybe` module, which is automatically imported into
-every module; there is no need to explicitly import them.
+every module, so there is no need to explicitly import them.
 
 
 ## Constants
@@ -141,15 +142,15 @@ If the first character following the opening quote is a backslash (`\`), then
 the following character is considered part of the character constant, and is
 interpreted as follows:
 
-| Character  | Meaning                                    |
-| ---------- | ------------------------------------------ |
-| `a`        | Alert or bell (ASCII code 0x07)            |
-| `b`        | Backspace (ASCII code 0x08)                |
-| `f`        | Formfeed (ASCII code 0x0c)                 |
-| `n`        | Newline or Line feed (ASCII code 0x0a)     |
-| `r`        | Carriage return (ASCII code 0x0d)          |
-| `t`        | Horizontal tab (ASCII code 0x09)           |
-| `v`        | Vertical tab (ASCII code 0x0b)             |
+| Character | Meaning                                |
+| --------- | -------------------------------------- |
+| `a`       | Alert or bell (ASCII code 0x07)        |
+| `b`       | Backspace (ASCII code 0x08)            |
+| `f`       | Formfeed (ASCII code 0x0c)             |
+| `n`       | Newline or Line feed (ASCII code 0x0a) |
+| `r`       | Carriage return (ASCII code 0x0d)      |
+| `t`       | Horizontal tab (ASCII code 0x09)       |
+| `v`       | Vertical tab (ASCII code 0x0b)         |
 
 Any other character following a backslash is interpreted as itself.
 In particular, `'\\'` specifies a backslash character and `'\''`
@@ -182,6 +183,16 @@ may use the alternative infix syntax:
 
 where *op* is the procedure name (there must be exactly two arguments).
 
+A second alternative syntax puts the (first) procedure argument first, with the
+operation and its other arguments second:
+
+> *arg*`^`*op*(*other args*)
+
+and in the special case of operations taking only one argument:
+
+> *arg*`^`*op*
+
+This syntax is akin to the common object-oriented *object.method* syntax.  There is no difference between this syntax and the standard *op*`(`*arg*,*other args*`)` or  *op*`(`*arg*`)` syntax.
 
 ## <a name="variables"></a>Variables
 The simplest form of expression is a variable reference.
@@ -242,6 +253,28 @@ may use the alternative infix syntax:
 > *arg* *op* *arg*,
 
 where *op* is the function name (there must be exactly two arguments).
+
+As for procedure calls, function calls can also be written with the first
+argument first, an infix `^` operator, and the operation with its other
+arguments last:
+
+> *arg*`^`*op*(*other args*)
+
+and in the special case of operations taking only one argument:
+
+> *arg*`^`*op*
+
+Again, this syntax is like the common object-oriented *object.method* syntax.  Because the `^` associates to the left, this syntax can be chained to apply a "pipeline" of operations to an initial input, so the expression:
+
+```
+    ob^foo^bar^baz
+```
+
+is equivalent to
+
+```
+    baz(bar(foo(ob)))
+```
 
 
 ##  <a name="type constraints"></a>Type constraints
@@ -617,6 +650,14 @@ These are more conveniently used as functions, for example:
 x(!pos) = x(pos) + 1  # shift position to the right
 ```
 
+Even more conveniently, for the first of these, you can use the infix `^`
+function call syntax.  In the example above, the second line could instead be
+written:
+
+```
+!println(pos^x)
+```
+
 It is important to note that "mutating" a value does not actually modify it in
 place; it creates a fresh value of that type that is identical except for the
 member being changed.
@@ -625,15 +666,16 @@ Wybe does not have the concept of
 nor the concepts of pointers or references.
 You can safely have multiple variables refer to the same data without worrying
 that modifying the data through one of them will change the values of the
-others.
+others.  Thus Wybe implements a
+[copy-on-write](https://en.wikipedia.org/wiki/Copy-on-write) semantics.
 For example
 ```
 ?pos = coordinate(7,4)
-!println(x(pos))
+!println(pos^x)
 ?oldpos = pos
-x(!pos) = x(pos) + 1  # shift position to the right
-!println(x(pos))
-!println(x(oldpos))
+x(!pos) = pos^x + 1  # shift position to the right
+!println(pos^x)
+!println(oldpos^x)
 ```
 will print
 ```
@@ -647,13 +689,12 @@ can safely do so.
 For example, the compiler will optimise this code
 ```
 ?pos = coordinate(7,4)
-!println(x(pos))
-x(!pos) = x(pos) + 1  # shift position to the right
-!println(x(pos))
+!println(pos^x)
+x(!pos) = pos^x + 1  # shift position to the right
+!println(pos^x)
 ```
 so that it does in fact mutate the coordinate object in place,
-saving an unnecessary object creation.  Thus Wybe implements a
-[copy-on-write](https://en.wikipedia.org/wiki/Copy-on-write) semantics.
+saving an unnecessary object creation.
 
 The `constructors` declaration must specify the forms of all the possible values
 of that type.  Wybe does not support a special *null* or *nil* value.  For

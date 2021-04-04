@@ -7,5 +7,5 @@ pub type person { pub person(firstname:string, lastname:string) }
 
 firstname(!personB, "Jane")
 lastname(!personB, "Wang")
-!print(personA.lastname)
-!print(personB.lastname)
+!print(personA^lastname)
+!print(personB^lastname)

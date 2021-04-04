@@ -38,7 +38,7 @@ AFTER EVERYTHING:
     foreign c putchar('\n':wybe.char, ~tmp$31#0:wybe.phantom, ?#io#11:wybe.phantom) @io:nn:nn
     foreign c print_string("expect r(-200,-201):":wybe.string, ~#io#11:wybe.phantom, ?#io#12:wybe.phantom) @io:nn:nn
     position.printPosition<0>(r#0:position.position, ~#io#12:wybe.phantom, ?#io#13:wybe.phantom) #17 @alias_recursion1:34:2
-    foreign c print_string("--- modify pa.x: ":wybe.string, ~#io#13:wybe.phantom, ?tmp$36#0:wybe.phantom) @io:nn:nn
+    foreign c print_string("--- modify pa^x: ":wybe.string, ~#io#13:wybe.phantom, ?tmp$36#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$36#0:wybe.phantom, ?#io#14:wybe.phantom) @io:nn:nn
     foreign lpvm {noalias} mutate(~tmp$0#0:position.position, ?%pa#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, -1000:wybe.int)
     foreign c print_string("expect pa(-1000,101):":wybe.string, ~#io#14:wybe.phantom, ?#io#15:wybe.phantom) @io:nn:nn
@@ -84,7 +84,7 @@ declare external ccc  void @putchar(i8)
 @alias_recursion1.43 =    constant [22 x i8] c"expect pa(-1000,101):\00"
 
 
-@alias_recursion1.33 =    constant [18 x i8] c"--- modify pa.x: \00"
+@alias_recursion1.33 =    constant [18 x i8] c"--- modify pa^x: \00"
 
 
 @alias_recursion1.31 =    constant [21 x i8] c"expect r(-200,-201):\00"

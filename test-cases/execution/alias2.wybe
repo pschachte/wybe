@@ -2,9 +2,9 @@ pub type position { pub position(x:int, y:int) }
 
 pub def printPosition(pos:position) use !io {
     !print(" (")
-    !print(pos.x)
+    !print(pos^x)
     !print(",")
-    !print(pos.y)
+    !print(pos^y)
     !println(")")
 }
 
@@ -12,8 +12,8 @@ pub def printPosition(pos:position) use !io {
 # p2 is fresh in this def {
 pub def pcopy(p1:position, ?p2:position) use !io {
   ?p2 = position(0,0)
-  x(!p2, p1.x)
-  y(!p2, p1.y)
+  x(!p2, p1^x)
+  y(!p2, p1^y)
   !println("--- Inside pcopy: ")
   !print("expect p2(0,20):")
   !printPosition(p2)
@@ -22,7 +22,7 @@ pub def pcopy(p1:position, ?p2:position) use !io {
 # copy as a deftion
 # p2 is fresh
 pub def fcopy(p1:position):position =
-  let { ?p2 = position(0,0) ; x(!p2, p1.x) ; y(!p2, p1.y) } in p2
+  let { ?p2 = position(0,0) ; x(!p2, p1^x) ; y(!p2, p1^y) } in p2
 
 !println("copy a position")
 !pcopy(position(0,20), ?r)

@@ -3,7 +3,7 @@ use position
 pub def replicate(p1:position, ?p2:position) use !io {
   ?pp = position(0,0)
   !print("random print")
-  !println(pp.x)
+  !println(pp^x)
   ?p2 = p1
 }
 
@@ -55,7 +55,7 @@ pub def baz use !io {
   !print("expect p2(101,102):")
   !printPosition(p2)
 
-  ?p3 = position(33333333, p2.y)
+  ?p3 = position(33333333, p2^y)
   !print("expect p3(33333333,102):")
   !printPosition(p3)
 

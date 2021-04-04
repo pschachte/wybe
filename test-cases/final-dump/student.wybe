@@ -3,12 +3,12 @@ pub type student { pub student(id:int, major:course) }
 
 pub def printStudent(stu:student) use !io {
   !print("student id: ")
-  !println(stu.id)
-  ?cour = stu.major
+  !println(stu^id)
+  ?cour = stu^major
   !print("course code: ")
-  !println(cour.code)
+  !println(cour^code)
   !print("course name: ")
-  !println(cour.name)
+  !println(cour^name)
 }
 
 !printStudent(student(12345,course(90048, "Declarative Programming")))

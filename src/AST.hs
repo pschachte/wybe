@@ -84,6 +84,7 @@ module AST (
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
   showModSpecs, showResources, showMaybeSourcePos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
+  flowPrefix, showFlags,
   showMap, showVarMap, simpleShowMap, simpleShowSet, bracketList,
   maybeShow, showMessages, stopOnError,
   logMsg, whenLogging2, whenLogging,
@@ -2991,9 +2992,7 @@ instance Show TypeSpec where
   show (TypeVariable name)  = "?" ++ name
   show (Representation rep) = show rep
   show (TypeSpec optmod ident args) =
-      maybeModPrefix optmod ++ ident ++
-      if List.null args then ""
-      else "(" ++ (intercalate "," $ List.map show args) ++ ")"
+      maybeModPrefix optmod ++ ident ++ showArguments args
 
 
 -- |Show the use declaration for a set of resources, if it's non-empty.
@@ -3090,11 +3089,11 @@ showPlacedPrim' ind prim pos =
 -- XXX the first argument is unused; can we get rid of it?
 showPrim :: Int -> Prim -> String
 showPrim _ (PrimCall id pspec args) =
-        show pspec ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+        show pspec ++ showArguments args
             ++ " #" ++ show id
 showPrim _ (PrimForeign lang name flags args) =
         "foreign " ++ lang ++ " " ++ showFlags flags ++ name ++
-        "(" ++ intercalate ", " (List.map show args) ++ ")"
+        showArguments args
 
 
 -- |Show a variable, with its suffix.
@@ -3108,10 +3107,10 @@ showStmt _ (ProcCall maybeMod name procID detism resourceful args) =
     (if resourceful then "!" else "")
     ++ maybeModPrefix maybeMod
     ++ maybe "" (\n -> "<" ++ show n ++ ">") procID ++
-    name ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+    name ++ showArguments args
 showStmt _ (ForeignCall lang name flags args) =
     "foreign " ++ lang ++ " " ++ showFlags flags ++ name ++
-    "(" ++ intercalate ", " (List.map show args) ++ ")"
+    showArguments args
 showStmt _ (TestBool test) =
     "testbool " ++ show test
 showStmt indent (And stmts) =
@@ -3185,12 +3184,11 @@ instance Show Exp where
   show (CondExp cond thn els) =
     "if\n" ++ show cond ++ " then " ++ show thn ++ " else " ++ show els
   show (Fncall maybeMod fn args) =
-    maybeModPrefix maybeMod ++
-    fn ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+    maybeModPrefix maybeMod ++ fn ++ showArguments args
   show (ForeignFn lang fn flags args) =
     "foreign " ++ lang ++ " " ++ fn
     ++ (if List.null flags then "" else " " ++ unwords flags)
-    ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+    ++ showArguments args
   show (Typed exp typ cast) =
       show exp ++ showTypeSuffix typ cast
 
