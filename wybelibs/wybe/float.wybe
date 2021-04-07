@@ -5,21 +5,21 @@ use wybe.bool
 
 representation is 64 bit float
 
-pub def +(x:float,y:float):float = foreign llvm fadd(x,y)
-pub def +(?x:float,y:float,z:float) { ?x = foreign llvm fsub(z,y) }
-pub def +(x:float,?y:float,z:float) { ?y = foreign llvm fsub(z,x) }
-pub def -(x:float,y:float):float = foreign llvm fsub(x,y)
-pub def -(?x:float,y:float,z:float) { ?x = foreign llvm fadd(z,y) }
-pub def -(x:float,?y:float,z:float) { ?y = foreign llvm fsub(z,x) }
-pub def -(x:float):float = foreign llvm fsub(0.0,x)
-pub def -(?x:float,y:float) { ?x = foreign llvm fsub(0.0,y) }
-pub def *(x:float,y:float):float = foreign llvm fmul(x,y)
-pub def /(x:float,y:float):float = foreign llvm fdiv(x,y)
-pub def /=(x:float,y:float):bool = foreign llvm fcmp_ne(x,y)
-pub def <(x:float,y:float):bool = foreign llvm fcmp_slt(x,y)
-pub def <=(x:float,y:float):bool = foreign llvm fcmp_sle(x,y)
-pub def >(x:float,y:float):bool = foreign llvm fcmp_sgt(x,y)
-pub def >=(x:float,y:float):bool = foreign llvm fcmp_sge(x,y)
-pub def =(x:float, y:float):bool = foreign llvm fcmp_eq(x,y)
-pub def sqrt(x:float):float = foreign c sqrt(x)
-pub def power(x:float,y:float):float = foreign c pow(x,y)
+pub def (x:_ + y:_):_ = foreign llvm fadd(x,y)
+pub def `+`(?x:_,y:_,z:_) { ?x = foreign llvm fsub(z,y) }
+pub def `+`(x:_,?y:_,z:_) { ?y = foreign llvm fsub(z,x) }
+pub def (x:_ - y:_):_ = foreign llvm fsub(x,y)
+pub def `-`(?x:_,y:_,z:_) { ?x = foreign llvm fadd(z,y) }
+pub def `-`(x:_,?y:_,z:_) { ?y = foreign llvm fsub(z,x) }
+pub def -(x:_):_ = foreign llvm fsub(0.0,x)
+pub def `-`(?x:_,y:_) { ?x = foreign llvm fsub(0.0,y) }
+pub def (x:_ * y:_):_ = foreign llvm fmul(x,y)
+pub def (x:_ / y:_):_ = foreign llvm fdiv(x,y)
+pub def (x:_ ~= y:_):bool = foreign llvm fcmp_ne(x,y)
+pub def (x:_ < y:_):bool = foreign llvm fcmp_slt(x,y)
+pub def (x:_ <= y:_):bool = foreign llvm fcmp_sle(x,y)
+pub def (x:_ > y:_):bool = foreign llvm fcmp_sgt(x,y)
+pub def (x:_ >= y:_):bool = foreign llvm fcmp_sge(x,y)
+pub def (x:_ = y:_):bool = foreign llvm fcmp_eq(x,y)
+pub def sqrt(x:_):_ = foreign c sqrt(x)
+pub def power(x:_,y:_):_ = foreign c pow(x,y)

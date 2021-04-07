@@ -30,8 +30,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
   representation  : address
   public submods  : 
   public resources: 
-  public procs    : mutual_type.a./=<0>
-                    mutual_type.a.=<0>
+  public procs    : mutual_type.a.=<0>
                     mutual_type.a.a<0>
                     mutual_type.a.a<1>
                     mutual_type.a.ahead<0>
@@ -39,18 +38,11 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
                     mutual_type.a.atail<0>
                     mutual_type.a.atail<1>
                     mutual_type.a.no_a<0>
+                    mutual_type.a.~=<0>
   imports         : use mutual_type
                     use wybe
   resources       : 
   procs           : 
-
-/= > public {inline} (0 calls)
-0: /=($left#0:mutual_type.a, $right#0:mutual_type.a, ?$$#0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
-    mutual_type.a.=<0>(~$left#0:mutual_type.a, ~$right#0:mutual_type.a, ?tmp$0#0:wybe.bool) #0
-    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
-
 
 = > public (1 calls)
 0: =($left#0:mutual_type.a, $right#0:mutual_type.a, ?$$#0:wybe.bool):
@@ -175,6 +167,14 @@ no_a > public {inline} (0 calls)
  InterestingCallProperties: []
     foreign llvm move(0:mutual_type.a, ?$#0:mutual_type.a)
 
+
+~= > public {inline} (0 calls)
+0: ~=($left#0:mutual_type.a, $right#0:mutual_type.a, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    mutual_type.a.=<0>(~$left#0:mutual_type.a, ~$right#0:mutual_type.a, ?tmp$0#0:wybe.bool) #0
+    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
+
   LLVM code       :
 
 ; ModuleID = 'mutual_type.a'
@@ -187,14 +187,6 @@ declare external ccc  i8* @wybe_malloc(i32)
 
 
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
-
-
-define external fastcc  i1 @"mutual_type.a./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
-entry:
-  %"1$tmp$0#0" = tail call fastcc  i1  @"mutual_type.a.=<0>"(i64  %"$left#0", i64  %"$right#0")  
-  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
-  ret i1 %"1$$$#0" 
-}
 
 
 define external fastcc  i1 @"mutual_type.a.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
@@ -366,13 +358,20 @@ define external fastcc  i64 @"mutual_type.a.no_a<0>"()    {
 entry:
   ret i64 0 
 }
+
+
+define external fastcc  i1 @"mutual_type.a.~=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+entry:
+  %"1$tmp$0#0" = tail call fastcc  i1  @"mutual_type.a.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
+  ret i1 %"1$$$#0" 
+}
 --------------------------------------------------
  Module mutual_type.b
   representation  : address
   public submods  : 
   public resources: 
-  public procs    : mutual_type.b./=<0>
-                    mutual_type.b.=<0>
+  public procs    : mutual_type.b.=<0>
                     mutual_type.b.b<0>
                     mutual_type.b.b<1>
                     mutual_type.b.bhead<0>
@@ -380,18 +379,11 @@ entry:
                     mutual_type.b.btail<0>
                     mutual_type.b.btail<1>
                     mutual_type.b.no_b<0>
+                    mutual_type.b.~=<0>
   imports         : use mutual_type
                     use wybe
   resources       : 
   procs           : 
-
-/= > public {inline} (0 calls)
-0: /=($left#0:mutual_type.b, $right#0:mutual_type.b, ?$$#0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
-    mutual_type.b.=<0>(~$left#0:mutual_type.b, ~$right#0:mutual_type.b, ?tmp$0#0:wybe.bool) #0
-    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
-
 
 = > public (1 calls)
 0: =($left#0:mutual_type.b, $right#0:mutual_type.b, ?$$#0:wybe.bool):
@@ -516,6 +508,14 @@ no_b > public {inline} (0 calls)
  InterestingCallProperties: []
     foreign llvm move(0:mutual_type.b, ?$#0:mutual_type.b)
 
+
+~= > public {inline} (0 calls)
+0: ~=($left#0:mutual_type.b, $right#0:mutual_type.b, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    mutual_type.b.=<0>(~$left#0:mutual_type.b, ~$right#0:mutual_type.b, ?tmp$0#0:wybe.bool) #0
+    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
+
   LLVM code       :
 
 ; ModuleID = 'mutual_type.b'
@@ -528,14 +528,6 @@ declare external ccc  i8* @wybe_malloc(i32)
 
 
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
-
-
-define external fastcc  i1 @"mutual_type.b./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
-entry:
-  %"1$tmp$0#0" = tail call fastcc  i1  @"mutual_type.b.=<0>"(i64  %"$left#0", i64  %"$right#0")  
-  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
-  ret i1 %"1$$$#0" 
-}
 
 
 define external fastcc  i1 @"mutual_type.b.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
@@ -706,4 +698,12 @@ if.else:
 define external fastcc  i64 @"mutual_type.b.no_b<0>"()    {
 entry:
   ret i64 0 
+}
+
+
+define external fastcc  i1 @"mutual_type.b.~=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+entry:
+  %"1$tmp$0#0" = tail call fastcc  i1  @"mutual_type.b.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
+  ret i1 %"1$$$#0" 
 }

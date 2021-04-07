@@ -8,7 +8,6 @@ AFTER EVERYTHING:
                     tests.lt<0>
                     tests.lt2<0>
                     tests.lt3<0>
-                    tests.map./=<0>
                     tests.map.=<0>
                     tests.map.empty<0>
                     tests.map.key<0>
@@ -21,6 +20,7 @@ AFTER EVERYTHING:
                     tests.map.right<1>
                     tests.map.value<0>
                     tests.map.value<1>
+                    tests.map.~=<0>
   imports         : public use tests.map
                     use wybe
   resources       : 
@@ -46,7 +46,7 @@ lookup > public (6 calls)
             case ~tmp$11#0:wybe.bool of
             0:
                 foreign lpvm access(~map#0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$4#0:tests.map)
-                tests.lookup<0>(~key#0:wybe.int, ~tmp$4#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #9 @tests:nn:nn
+                tests.lookup<0>(~key#0:wybe.int, ~tmp$4#0:tests.map, ?result#0:wybe.int, ?$$#0:wybe.bool) #8 @tests:nn:nn
 
             1:
                 foreign lpvm access(~map#0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$3#0:tests.map)
@@ -179,8 +179,7 @@ entry:
   representation  : address
   public submods  : 
   public resources: 
-  public procs    : tests.map./=<0>
-                    tests.map.=<0>
+  public procs    : tests.map.=<0>
                     tests.map.empty<0>
                     tests.map.key<0>
                     tests.map.key<1>
@@ -192,18 +191,11 @@ entry:
                     tests.map.right<1>
                     tests.map.value<0>
                     tests.map.value<1>
+                    tests.map.~=<0>
   imports         : use tests
                     use wybe
   resources       : 
   procs           : 
-
-/= > public {inline} (0 calls)
-0: /=($left#0:tests.map, $right#0:tests.map, ?$$#0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
-    tests.map.=<0>(~$left#0:tests.map, ~$right#0:tests.map, ?tmp$0#0:wybe.bool) #0
-    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
-
 
 = > public (9 calls)
 0: =($left#0:tests.map, $right#0:tests.map, ?$$#0:wybe.bool):
@@ -412,6 +404,14 @@ value > public {inline} (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
+
+~= > public {inline} (0 calls)
+0: ~=($left#0:tests.map, $right#0:tests.map, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    tests.map.=<0>(~$left#0:tests.map, ~$right#0:tests.map, ?tmp$0#0:wybe.bool) #0
+    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
+
   LLVM code       :
 
 ; ModuleID = 'tests.map'
@@ -424,14 +424,6 @@ declare external ccc  i8* @wybe_malloc(i32)
 
 
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
-
-
-define external fastcc  i1 @"tests.map./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
-entry:
-  %"1$tmp$0#0" = tail call fastcc  i1  @"tests.map.=<0>"(i64  %"$left#0", i64  %"$right#0")  
-  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
-  ret i1 %"1$$$#0" 
-}
 
 
 define external fastcc  i1 @"tests.map.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
@@ -738,4 +730,12 @@ if.else:
   %150 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
   %151 = insertvalue {i64, i1} %150, i1 0, 1 
   ret {i64, i1} %151 
+}
+
+
+define external fastcc  i1 @"tests.map.~=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+entry:
+  %"1$tmp$0#0" = tail call fastcc  i1  @"tests.map.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
+  ret i1 %"1$$$#0" 
 }

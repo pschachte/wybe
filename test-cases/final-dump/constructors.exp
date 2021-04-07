@@ -4,24 +4,16 @@ AFTER EVERYTHING:
   representation  : address
   public submods  : 
   public resources: 
-  public procs    : constructors./=<0>
-                    constructors.=<0>
+  public procs    : constructors.=<0>
                     constructors.just<0>
                     constructors.just<1>
                     constructors.nothing<0>
                     constructors.value<0>
                     constructors.value<1>
+                    constructors.~=<0>
   imports         : use wybe
   resources       : 
   procs           : 
-
-/= > public {inline} (0 calls)
-0: /=($left#0:constructors, $right#0:constructors, ?$$#0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
-    constructors.=<0>(~$left#0:constructors, ~$right#0:constructors, ?tmp$0#0:wybe.bool) #0
-    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
-
 
 = > public (1 calls)
 0: =($left#0:constructors, $right#0:constructors, ?$$#0:wybe.bool):
@@ -104,6 +96,14 @@ value > public {inline} (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
+
+~= > public {inline} (0 calls)
+0: ~=($left#0:constructors, $right#0:constructors, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    constructors.=<0>(~$left#0:constructors, ~$right#0:constructors, ?tmp$0#0:wybe.bool) #0
+    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
+
   LLVM code       :
 
 ; ModuleID = 'constructors'
@@ -116,14 +116,6 @@ declare external ccc  i8* @wybe_malloc(i32)
 
 
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
-
-
-define external fastcc  i1 @"constructors./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
-entry:
-  %"1$tmp$0#0" = tail call fastcc  i1  @"constructors.=<0>"(i64  %"$left#0", i64  %"$right#0")  
-  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
-  ret i1 %"1$$$#0" 
-}
 
 
 define external fastcc  i1 @"constructors.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
@@ -226,4 +218,12 @@ if.else:
   %36 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
   %37 = insertvalue {i64, i1} %36, i1 0, 1 
   ret {i64, i1} %37 
+}
+
+
+define external fastcc  i1 @"constructors.~=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+entry:
+  %"1$tmp$0#0" = tail call fastcc  i1  @"constructors.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
+  ret i1 %"1$$$#0" 
 }

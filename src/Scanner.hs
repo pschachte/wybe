@@ -9,7 +9,7 @@
 module Scanner (Token(..), tokenPosition, floatValue, intValue, stringValue,
                 charValue, identName, symbolName, tokenName, showPosition,
                 StringDelim(..), BracketStyle(..), fileTokens, tokenise,
-                inputTokens, inputLineTokens) where
+                inputTokens, stringTokens) where
 
 import AST
 import Data.Char
@@ -164,9 +164,8 @@ inputTokens =
 
 
 -- |The contents of one line of stdin as a list of tokens.
-inputLineTokens :: IO [Token]
-inputLineTokens =
-    pruneSeparators . tokenise (initialPos "<stdin>") <$> getLine
+stringTokens :: String -> [Token]
+stringTokens = pruneSeparators . tokenise (initialPos "<string>")
 
 
 -- |Prune out unneeded implicit TokSeparators, which indicate newlines.  The

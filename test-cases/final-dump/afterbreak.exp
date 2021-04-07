@@ -26,7 +26,7 @@ gen$1 > (2 calls)
         foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn
         foreign c print_int(tmp$0#0:wybe.int, ~io#0:wybe.phantom, ?tmp$10#0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?tmp$11#0:wybe.phantom) @io:nn:nn
-        afterbreak.gen$1<0>(~tmp$11#0:wybe.phantom, ~tmp$0#0:wybe.int, ?io#1:wybe.phantom) #4 @afterbreak:nn:nn
+        afterbreak.gen$1<0>(~tmp$11#0:wybe.phantom, ~tmp$0#0:wybe.int, ?io#1:wybe.phantom) #3 @afterbreak:nn:nn
 
     1:
         foreign llvm move(~io#0:wybe.phantom, ?io#1:wybe.phantom)

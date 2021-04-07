@@ -32,7 +32,7 @@ pub def println(x:string) use !io { !print(x); !nl }
 pub def read(?x:string) use !io { foreign c read_line(?x,!io) }
 
 pub def print(x:bool) use !io {
-   !print(if x then "true" else "false")
+   !print(if {x:: "true" | else:: "false"})
 }
 pub def println(x:bool) use !io { !print(x); !nl }
 pub def eof:char = foreign lpvm cast(-1)

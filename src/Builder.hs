@@ -217,7 +217,7 @@ import           Optimise                  (optimiseMod)
 import           Options                   (LogSelection (..), Options,
                                             optForce, optForceAll, optLibDirs,
                                             optNoMultiSpecz)
-import           NewParser                 (parseWybe)
+import           Parser                    (parseWybe)
 import           Resources                 (resourceCheckMod,
                                             transformProcResources,
                                             canonicaliseProcResources)

@@ -692,7 +692,7 @@ symOrIdent :: String -> Parser Token
 symOrIdent s = choice [ symbol s, ident s]
 
 
--- | Postfix '.' operator. There are two variants of the postfix
+-- | Infix '^' operator. There are two variants of the
 -- . operator. They are:
 -- . ident
 -- . ident ( ArgList )

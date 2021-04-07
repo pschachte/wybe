@@ -393,7 +393,7 @@ data MessageLevel = Informational | Warning | Error
 --  compiling the module's dependencies.
 data CompilerState = Compiler {
   options :: Options,            -- ^compiler options specified on command line
-  tmpDir  :: FilePath,             -- ^tmp directory for this build
+  tmpDir  :: FilePath,           -- ^tmp directory for this build
   msgs :: [Message],             -- ^warnings, error messages, and info messages
   errorState :: Bool,            -- ^whether or not we've seen any errors
   modules :: Map ModSpec Module, -- ^all known modules except what we're loading
@@ -808,7 +808,7 @@ addConstructor vis pctor = do
           any (\c -> procProtoName c == procProtoName ctor
                 && length (procProtoParams c) == length (procProtoParams ctor))
           $ content . snd <$> pctors
-    let typeVars = Set.unions 
+    let typeVars = Set.unions
                    (typeVarSet . paramType <$> procProtoParams (content pctor))
     missingParams <- Set.difference typeVars . Set.fromList
                      <$> getModule modParams
@@ -827,7 +827,7 @@ addConstructor vis pctor = do
                 updateModule (\m -> m { modIsType  = True })
                 addKnownType currMod
             else
-                errmsg pos 
+                errmsg pos
                 $ "Constructors for type " ++ showModSpec currMod
                   ++ " use unbound type variable(s) "
                   ++ intercalate ", " (("?"++) <$> Set.toList missingParams)
@@ -2441,8 +2441,8 @@ seqToStmt stmts = Unplaced $ And stmts
 data Exp
       = IntValue Integer
       | FloatValue Double
-      | StringValue String
       | CharValue Char
+      | StringValue String
       | Var VarName FlowDirection ArgFlowType
       | Typed Exp TypeSpec (Maybe TypeSpec)
                -- ^explicitly typed expr giving type the expression, and, if it
@@ -2814,25 +2814,26 @@ varsInPrimArg _ (ArgUndef _)            = Set.empty
 instance Show Item where
   show (TypeDecl vis name (TypeRepresentation repn) items pos) =
     visibilityPrefix vis ++ "type " ++ show name
-    ++ " is" ++ show repn
-    ++ showMaybeSourcePos pos ++ "\n  "
-    ++ intercalate "\n  " (List.map show items)
+    ++ " is " ++ show repn
+    ++ showMaybeSourcePos pos ++ " {"
+    ++ concatMap (("\n  "++) . show) items
     ++ "\n}\n"
   show (TypeDecl vis name (TypeCtors ctorvis ctors) items pos) =
     visibilityPrefix vis ++ "type " ++ show name
     ++ " " ++ visibilityPrefix ctorvis
     ++ showMaybeSourcePos pos ++ "\n    "
-    ++ intercalate "\n  | " (List.map show ctors) ++ "\n  "
-    ++ intercalate "\n  " (List.map show items)
+    ++ intercalate "\n  | " (List.map show ctors)
+    ++ concatMap (("\n  "++) . show) items
     ++ "\n}\n"
   show (RepresentationDecl params repn pos) =
     "representation"
-    ++ bracketList "(" ")" ", " (("?"++) <$> params)
-    ++ " " ++ show repn ++ showMaybeSourcePos pos ++ "\n"
+    ++ bracketList "(" ", " ")" (("?"++) <$> params)
+    ++ " is " ++ show repn ++ showMaybeSourcePos pos ++ "\n"
   show (ConstructorDecl vis params ctors pos) =
     visibilityPrefix vis ++ "constructors"
-    ++ bracketList "(" ")" ", " (("?"++) <$> params)
-    ++ " " ++ show ctors ++ showMaybeSourcePos pos ++ "\n"
+    ++ bracketList "(" ", " ")" (("?"++) <$> params) ++ " "
+    ++ intercalate " | " (show <$> ctors)
+    ++ showMaybeSourcePos pos ++ "\n"
   show (ImportMods vis mods pos) =
       visibilityPrefix vis ++ "use " ++
       showModSpecs mods ++ showMaybeSourcePos pos ++ "\n  "
@@ -3128,7 +3129,7 @@ showStmt indent (Not stmt) =
     "~(" ++ showStmt indent' (content stmt) ++ ")"
     where indent' = indent + 2
 showStmt indent (Cond condstmt thn els condVars genVars) =
-    "if {" ++ showStmt (indent+4) (content condstmt) ++ "}::\n"
+    "if {" ++ showStmt (indent+4) (content condstmt) ++ "::\n"
     ++ showBody (indent+4) thn
     ++ startLine indent ++ "else::"
     ++ showBody (indent+4) els ++ "\n"

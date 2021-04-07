@@ -937,11 +937,11 @@ implicitEquality typespec consts nonconsts rep = do
 implicitDisequality :: TypeSpec -> [Placed ProcProto] -> [Placed ProcProto]
                     -> TypeRepresentation -> Compiler [Item]
 implicitDisequality typespec consts nonconsts _ = do
-    defs <- lookupProc "/="
+    defs <- lookupProc "~="
     if isJust defs
     then return [] -- don't generate if user-defined
     else do
-      let neProto = ProcProto "/=" [Param "$left" typespec ParamIn Ordinary,
+      let neProto = ProcProto "~=" [Param "$left" typespec ParamIn Ordinary,
                                      Param "$right" typespec ParamIn Ordinary]
                     Set.empty
       let neBody = [Unplaced $ Not $ Unplaced $
