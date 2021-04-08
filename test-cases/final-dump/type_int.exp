@@ -12,12 +12,12 @@ AFTER EVERYTHING:
                     type_int.myint.-<1>
                     type_int.myint.-<2>
                     type_int.myint./<0>
-                    type_int.myint./=<0>
                     type_int.myint.<<0>
                     type_int.myint.<=<0>
                     type_int.myint.=<0>
                     type_int.myint.><0>
                     type_int.myint.>=<0>
+                    type_int.myint.~=<0>
   imports         : public use type_int.myint
                     use wybe
   resources       : 
@@ -50,12 +50,12 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
                     type_int.myint.-<1>
                     type_int.myint.-<2>
                     type_int.myint./<0>
-                    type_int.myint./=<0>
                     type_int.myint.<<0>
                     type_int.myint.<=<0>
                     type_int.myint.=<0>
                     type_int.myint.><0>
                     type_int.myint.>=<0>
+                    type_int.myint.~=<0>
   imports         : use type_int
                     use wybe
   resources       : 
@@ -109,13 +109,6 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
     foreign llvm sdiv(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:type_int.myint) @type_int:nn:nn
 
 
-/= > public {inline} (0 calls)
-0: /=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
-    foreign llvm icmp_ne(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:nn:nn
-
-
 < > public {inline} (0 calls)
 0: <(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
  AliasPairs: []
@@ -149,6 +142,13 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_sge(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:nn:nn
+
+
+~= > public {inline} (0 calls)
+0: ~=(x#0:type_int.myint, y#0:type_int.myint, ?$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp_ne(~x#0:type_int.myint, ~y#0:type_int.myint, ?$#0:wybe.bool) @type_int:nn:nn
 
   LLVM code       :
 
@@ -220,13 +220,6 @@ entry:
 }
 
 
-define external fastcc  i1 @"type_int.myint./=<0>"(i64  %"x#0", i64  %"y#0")    {
-entry:
-  %"1$$#0" = icmp ne i64 %"x#0", %"y#0" 
-  ret i1 %"1$$#0" 
-}
-
-
 define external fastcc  i1 @"type_int.myint.<<0>"(i64  %"x#0", i64  %"y#0")    {
 entry:
   %"1$$#0" = icmp slt i64 %"x#0", %"y#0" 
@@ -258,5 +251,12 @@ entry:
 define external fastcc  i1 @"type_int.myint.>=<0>"(i64  %"x#0", i64  %"y#0")    {
 entry:
   %"1$$#0" = icmp sge i64 %"x#0", %"y#0" 
+  ret i1 %"1$$#0" 
+}
+
+
+define external fastcc  i1 @"type_int.myint.~=<0>"(i64  %"x#0", i64  %"y#0")    {
+entry:
+  %"1$$#0" = icmp ne i64 %"x#0", %"y#0" 
   ret i1 %"1$$#0" 
 }

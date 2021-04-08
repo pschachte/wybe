@@ -1,12 +1,14 @@
 pub type intlist { pub [] | [|](head:int, tail:intlist) }
 
 pub def ++(x:intlist, y:intlist):intlist =
-    if x = [ ?h | ?t]
-    then [h|t++y]
-    else y
+    if {x = [ ?h | ?t]::
+        [h|t++y]
+    | else::
+        y
+    }
 
 pub def length(x:intlist) : int =
-    if x = [ ?h | ?t] then 1 + length(t) else 0
+    if{ x = [ ?h | ?t]:: 1 + length(t) | else:: 0 }
 
 
 ?x = [1,2,3]

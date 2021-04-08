@@ -59,110 +59,107 @@ pub def append(lst:int_list, v: int):int_list = extend(lst, [v])
 
 # Extend the first list by appending all the items from the second list.
 pub def extend(lst1:int_list, lst2:int_list):int_list = 
-    if lst1 = [?h | ?t] then [h | extend(t, lst2)] else lst2
+    if {lst1 = [?h | ?t]:: [h | extend(t, lst2)] | else:: lst2 }
 
 
 # Insert an item at a given position.
 pub def insert(lst:int_list, idx:int, v:int):int_list = 
-    if idx = 0
-    then
+    if {idx = 0::
         [v | lst]
-    else
-        if lst = [?h | ?t]
-        then
+    | else::
+        if {lst = [?h | ?t]::
             [h | insert(t, idx-1, v)]
-        else
+        | else::
             # list not long enough
             insert(lst, idx-1, v)
+        }
+    }
 
 
 # Remove the first item from the list whose value is equal to v.
 pub def remove(lst:int_list, v:int):int_list =
-    if lst = [?h | ?t]
-    then
-        if h = v
-        then
+    if {lst = [?h | ?t]::
+        if h = v::
             t
-        else
+        | else::
             [h | remove(t, v)]
-    else
+        }
+    | else::
         []
-
+    }
 
 # Remove the item at the given position in the list
 pub def pop(lst:int_list, idx:int):int_list = 
-    if lst = [?h | ?t]
-    then
-        if idx = 0
-        then
+    if {lst = [?h | ?t]::
+        if {idx = 0::
             t
-        else
+        | else::
             [h | pop(t, idx-1)]
-    else
+        }
+    | else::
         []
-
+    }
 
 
 # Return the number of times x appears in the list.
 pub def count(lst:int_list, x:int):int =
-    if lst = [?h | ?t]
-    then
-        count(t, x) + if h = x then 1 else 0
-    else
+    if {lst = [?h | ?t]::
+        count(t, x) + if {h = x:: 1 | else:: 0}
+    | else::
         0
-
+    }
 
 # Return zero-based index in the list of the first item whose value is equal to x.
 pub def index(lst:int_list, x:int):int = index_helper(lst, 0, x)
 
 def index_helper(lst:int_list, idx:int, x:int):int = 
-    if lst = [?h | ?t]
-    then
-        if h = x
-        then
+    if {lst = [?h | ?t]::
+        if {h = x::
             idx
-        else
+        | else::
             index_helper(t, idx+1, x)
-    else
+        }
+    | else::
         -1
+    }
 
 
 # Sort the items of the list
 pub def sort(lst:int_list):int_list =
-    if lst = [?h | ?t]
-    then
+    if {lst = [?h | ?t]::
         extend(sort(lesser(t, h)), [h | sort(greater(t, h))])
-    else
+    | else::
         []
+    }
 
 def lesser(lst:int_list, v:int):int_list =
-    if lst = [?h | ?t]
-    then
-        if h < v
-        then
+    if {lst = [?h | ?t]::
+        if {h < v::
             [h | lesser(t, v)]
-        else
+        | else::
             lesser(t, v)
-    else
+        }
+    | else::
         []
+    }
 
 def greater(lst:int_list, v:int):int_list =
-    if lst = [?h | ?t]
-    then
-        if h >= v
-        then
+    if {lst = [?h | ?t]::
+        if {h >= v::
             [h | greater(t, v)]
-        else
+        | else::
             greater(t, v)
-    else
+        }
+    | else::
         []
+    }
 
 
 # Reverse the elements of the list.
 pub def reverse(lst:int_list):int_list = reverse_helper(lst, [])
 
 def reverse_helper(lst:int_list, acc:int_list):int_list =
-    if lst = [?h | ?t] then reverse_helper(t, [h|acc]) else acc
+    if {lst = [?h | ?t]:: reverse_helper(t, [h|acc]) | else:: acc}
 """
 
 WYBE_INT_LIST_TEST = """
@@ -298,7 +295,7 @@ def do_action(!d:drone_info, action:char, ?success:bool) {
 }
 
 def loop(d:drone_info, ch:char) use !io {
-    if { ch /= ' ' && ch /= '\n' ::
+    if { ch ~= ' ' && ch ~= '\n' ::
         if { ch = 'p' ::
             !print_info(d)
         | otherwise ::
@@ -309,14 +306,14 @@ def loop(d:drone_info, ch:char) use !io {
         }
     }
     !read(?ch:char)
-    if { ch /= eof ::
+    if { ch ~= eof ::
         !loop(d, ch)
     }
 }
 
 ?d = drone_init()
 !read(?ch:char)
-if { ch /= eof ::
+if { ch ~= eof ::
     !loop(d, ch)
 }
 !malloc_count(?mc)
@@ -328,7 +325,7 @@ if { ch /= eof ::
 # do {
 #     !read(?ch:char)
 #     until ch = eof
-#     if { ch /= ' ' && ch /= '\n' ::
+#     if { ch ~= ' ' && ch ~= '\n' ::
 #         if { ch = 'p' ::
 #             !print_info(d)
 #         | otherwise ::

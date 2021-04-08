@@ -23,7 +23,7 @@ AFTER EVERYTHING:
     foreign lpvm mutate(~tmp$16#0:mytree.tree, ?tmp$17#0:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree)
     foreign lpvm mutate(~tmp$17#0:mytree.tree, ?tmp$18#0:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 111:wybe.int)
     foreign lpvm mutate(~tmp$18#0:mytree.tree, ?tmp$3#0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree)
-    alias_fork1.simpleMerge<0>(~tmp$0#0:mytree.tree, ~tmp$3#0:mytree.tree, ?tmp$6#0:mytree.tree) #6 @alias_fork1:15:6
+    alias_fork1.simpleMerge<0>(~tmp$0#0:mytree.tree, ~tmp$3#0:mytree.tree, ?tmp$6#0:mytree.tree) #6 @alias_fork1:18:6
     mytree.printTree1<0>(~tmp$6#0:mytree.tree, "{":wybe.string, ?tmp$21#0:wybe.string, ~#io#0:wybe.phantom, ?tmp$22#0:wybe.phantom) #9 @mytree:nn:nn
     foreign c print_string("}":wybe.string, ~tmp$22#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
@@ -252,7 +252,6 @@ if.else2:
   public resources: 
   public procs    : mytree.printTree<0>
                     mytree.printTree1<0>
-                    mytree.tree./=<0>
                     mytree.tree.=<0>
                     mytree.tree.empty<0>
                     mytree.tree.key<0>
@@ -263,6 +262,7 @@ if.else2:
                     mytree.tree.node<1>
                     mytree.tree.right<0>
                     mytree.tree.right<1>
+                    mytree.tree.~=<0>
   imports         : public use mytree.tree
                     use wybe
   resources       : 
@@ -366,8 +366,7 @@ if.else:
   representation  : address
   public submods  : 
   public resources: 
-  public procs    : mytree.tree./=<0>
-                    mytree.tree.=<0>
+  public procs    : mytree.tree.=<0>
                     mytree.tree.empty<0>
                     mytree.tree.key<0>
                     mytree.tree.key<1>
@@ -377,18 +376,11 @@ if.else:
                     mytree.tree.node<1>
                     mytree.tree.right<0>
                     mytree.tree.right<1>
+                    mytree.tree.~=<0>
   imports         : use mytree
                     use wybe
   resources       : 
   procs           : 
-
-/= > public {inline} (0 calls)
-0: /=($left#0:mytree.tree, $right#0:mytree.tree, ?$$#0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
-    mytree.tree.=<0>(~$left#0:mytree.tree, ~$right#0:mytree.tree, ?tmp$0#0:wybe.bool) #0
-    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
-
 
 = > public (7 calls)
 0: =($left#0:mytree.tree, $right#0:mytree.tree, ?$$#0:wybe.bool):
@@ -555,6 +547,14 @@ right > public {inline} (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
+
+~= > public {inline} (0 calls)
+0: ~=($left#0:mytree.tree, $right#0:mytree.tree, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    mytree.tree.=<0>(~$left#0:mytree.tree, ~$right#0:mytree.tree, ?tmp$0#0:wybe.bool) #0
+    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
+
   LLVM code       :
 
 ; ModuleID = 'mytree.tree'
@@ -567,14 +567,6 @@ declare external ccc  i8* @wybe_malloc(i32)
 
 
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
-
-
-define external fastcc  i1 @"mytree.tree./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
-entry:
-  %"1$tmp$0#0" = tail call fastcc  i1  @"mytree.tree.=<0>"(i64  %"$left#0", i64  %"$right#0")  
-  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
-  ret i1 %"1$$$#0" 
-}
 
 
 define external fastcc  i1 @"mytree.tree.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
@@ -813,4 +805,12 @@ if.else:
   %112 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
   %113 = insertvalue {i64, i1} %112, i1 0, 1 
   ret {i64, i1} %113 
+}
+
+
+define external fastcc  i1 @"mytree.tree.~=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+entry:
+  %"1$tmp$0#0" = tail call fastcc  i1  @"mytree.tree.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
+  ret i1 %"1$$$#0" 
 }

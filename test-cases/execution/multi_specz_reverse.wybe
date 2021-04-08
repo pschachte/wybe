@@ -11,7 +11,7 @@ pub def list_print(x:intlist) use !io {
 pub def list_reverse(lst:intlist):intlist = list_reverse_helper(lst, [])
 
 pub def list_reverse_helper(lst:intlist, acc:intlist):intlist =
-    if lst = [?h | ?t] then list_reverse_helper(t, [h|acc]) else acc
+    if{ lst = [?h | ?t]:: list_reverse_helper(t, [h|acc]) | else:: acc }
 
 ?foo = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 list_reverse(!foo)
