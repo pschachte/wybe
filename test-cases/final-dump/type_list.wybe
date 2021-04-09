@@ -1,16 +1,16 @@
-pub type intlist { pub [] | [|](head:int, tail:intlist) }
+pub type intlist { pub nil | cons(head:int, tail:intlist) }
 
-pub def ++(x:intlist, y:intlist):intlist =
-    if {x = [ ?h | ?t]::
-        [h|t++y]
+pub def (x:intlist ,, y:intlist):intlist =
+    if {x = cons(?h, ?t)::
+        cons(h,t,,y)
     | else::
         y
     }
 
 pub def length(x:intlist) : int =
-    if{ x = [ ?h | ?t]:: 1 + length(t) | else:: 0 }
+    if{ x = cons(?h, ?t):: 1 + length(t) | else:: 0 }
 
 
-?x = [1,2,3]
-?y = [100, 200]
-!print(length(x++y))
+?x = cons(1,cons(2,cons(3,nil)))
+?y = cons(100, cons(200, nil))
+!print(length(x,,y))

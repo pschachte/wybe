@@ -1,9 +1,9 @@
 # related to issue: https://github.com/pschachte/wybe/issues/23
 
-pub type intlist { pub [] | [|](head:int, tail:intlist) }
+pub type intlist { pub nil | cons(head:int, tail:intlist) }
 
 pub def list_print(x:intlist) use !io {
-    if { x = [ ?h | ?t] :: 
+    if { x = cons(?h, ?t) ::
         !print(h)
         !print(" ")
         !list_print(t)
@@ -15,8 +15,8 @@ pub def list_println(x:intlist) use !io {
     !println("")
 }
 
-?x = [1,2,3]
-?y = [0]
+?x = cons(1, cons(2, cons(3, nil)))
+?y = cons(0, nil)
 !println("----------")
 !list_println(x)
 !list_println(y)

@@ -156,7 +156,7 @@ set_exit_code > public {inline} (0 calls)
 0: set_exit_code(code#0:wybe.int, [exit_code#0:wybe.int], ?exit_code#1:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(~code#0:wybe.int, ?exit_code#1:wybe.int) @command_line:27:5
+    foreign llvm move(~code#0:wybe.int, ?exit_code#1:wybe.int) @command_line:27:6
 
   LLVM code       :
 
@@ -234,15 +234,15 @@ entry:
                     int_list.remove<0>
                     int_list.reverse<0>
                     int_list.sort<0>
-                    int_list.int_list./=<0>
                     int_list.int_list.=<0>
-                    int_list.int_list.[]<0>
-                    int_list.int_list.[|]<0>
-                    int_list.int_list.[|]<1>
+                    int_list.int_list.cons<0>
+                    int_list.int_list.cons<1>
                     int_list.int_list.head<0>
                     int_list.int_list.head<1>
+                    int_list.int_list.nil<0>
                     int_list.int_list.tail<0>
                     int_list.int_list.tail<1>
+                    int_list.int_list.~=<0>
   imports         : public use int_list.int_list
                     use wybe
   resources       : 
@@ -267,19 +267,19 @@ count > public (3 calls)
     foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$7#0:wybe.bool)
     case ~tmp$7#0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.int, ?$#0:wybe.int) @int_list:85:5
+        foreign llvm move(0:wybe.int, ?$#0:wybe.int) @int_list:83:5
 
     1:
         foreign lpvm access(lst#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
         foreign lpvm access(~lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
-        int_list.count<0>(~t#0:int_list.int_list, x#0:wybe.int, ?tmp$2#0:wybe.int) #1 @int_list:88:9
+        int_list.count<0>(~t#0:int_list.int_list, x#0:wybe.int, ?tmp$2#0:wybe.int) #1 @int_list:85:9
         foreign llvm icmp_eq(~h#0:wybe.int, ~x#0:wybe.int, ?tmp$4#0:wybe.bool) @int:24:28
         case ~tmp$4#0:wybe.bool of
         0:
-            foreign llvm move(~tmp$2#0:wybe.int, ?$#0:wybe.int) @int:8:24
+            foreign llvm move(~tmp$2#0:wybe.int, ?$#0:wybe.int) @int:8:25
 
         1:
-            foreign llvm add(~tmp$2#0:wybe.int, 1:wybe.int, ?$#0:wybe.int) @int:8:24
+            foreign llvm add(~tmp$2#0:wybe.int, 1:wybe.int, ?$#0:wybe.int) @int:8:25
 
 
 
@@ -297,7 +297,7 @@ extend > public (3 calls)
     1:
         foreign lpvm access(lst1#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
         foreign lpvm access(~lst1#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
-        int_list.extend<0>(~t#0:int_list.int_list, ~lst2#0:int_list.int_list, ?tmp$2#0:int_list.int_list) #1 @int_list:40:35
+        int_list.extend<0>(~t#0:int_list.int_list, ~lst2#0:int_list.int_list, ?tmp$2#0:int_list.int_list) #1 @int_list:40:39
         foreign lpvm alloc(16:wybe.int, ?tmp$8#0:int_list.int_list)
         foreign lpvm mutate(~tmp$8#0:int_list.int_list, ?tmp$9#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
         foreign lpvm mutate(~tmp$9#0:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:int_list.int_list)
@@ -308,7 +308,7 @@ gen$1 > {inline} (2 calls)
 0: gen$1([h#0:wybe.int], [lst#0:int_list.int_list], [t#0:int_list.int_list], tmp$2#0:wybe.int, tmp$3#0:wybe.int, [x#0:wybe.int], ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm add(~tmp$2#0:wybe.int, ~tmp$3#0:wybe.int, ?$#0:wybe.int) @int:8:24
+    foreign llvm add(~tmp$2#0:wybe.int, ~tmp$3#0:wybe.int, ?$#0:wybe.int) @int:8:25
 
 
 gen$2 > (2 calls)
@@ -316,16 +316,16 @@ gen$2 > (2 calls)
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(3,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.gen$2<0>,fromList [NonAliasedParamCond 0 [0]]))]
-    foreign llvm icmp_slt(start#0:wybe.int, stop#0:wybe.int, ?tmp$3#0:wybe.bool) @int:20:27
+    foreign llvm icmp_slt(start#0:wybe.int, stop#0:wybe.int, ?tmp$3#0:wybe.bool) @int:20:28
     case ~tmp$3#0:wybe.bool of
     0:
-        int_list.reverse_helper<0>(~%result#0:int_list.int_list, 0:int_list.int_list, ?%result#1:int_list.int_list) #3 @int_list:140:42
+        int_list.reverse_helper<0>(~%result#0:int_list.int_list, 0:int_list.int_list, ?%result#1:int_list.int_list) #3 @int_list:137:42
 
     1:
         foreign lpvm alloc(16:wybe.int, ?tmp$12#0:int_list.int_list)
         foreign lpvm mutate(~tmp$12#0:int_list.int_list, ?tmp$13#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, start#0:wybe.int)
         foreign lpvm mutate(~tmp$13#0:int_list.int_list, ?tmp$14#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~result#0:int_list.int_list)
-        foreign llvm add(~start#0:wybe.int, step#0:wybe.int, ?tmp$15#0:wybe.int) @int:8:24
+        foreign llvm add(~start#0:wybe.int, step#0:wybe.int, ?tmp$15#0:wybe.int) @int:8:25
         int_list.gen$2<0>(~tmp$14#0:int_list.int_list, ~tmp$15#0:wybe.int, ~step#0:wybe.int, ~stop#0:wybe.int, ~tmp$0#0:int_list.int_list, ?result#1:int_list.int_list) #4 @int_list:26:5
 
 
@@ -337,7 +337,7 @@ gen$3 > {inline} (1 calls)
     foreign lpvm alloc(16:wybe.int, ?tmp$5#0:int_list.int_list)
     foreign lpvm mutate(~tmp$5#0:int_list.int_list, ?tmp$6#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, start#0:wybe.int)
     foreign lpvm mutate(~tmp$6#0:int_list.int_list, ?tmp$7#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~result#0:int_list.int_list)
-    foreign llvm add(~start#0:wybe.int, step#0:wybe.int, ?tmp$2#0:wybe.int) @int:8:24
+    foreign llvm add(~start#0:wybe.int, step#0:wybe.int, ?tmp$2#0:wybe.int) @int:8:25
     int_list.gen$2<0>(~tmp$7#0:int_list.int_list, ~tmp$2#0:wybe.int, ~step#0:wybe.int, ~stop#0:wybe.int, ~tmp$0#0:int_list.int_list, ?result#2:int_list.int_list) #2 @int_list:26:5
 
 
@@ -349,18 +349,18 @@ greater > (3 calls)
     foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$9#0:wybe.bool)
     case ~tmp$9#0:wybe.bool of
     0:
-        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:127:1
+        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:124:1
 
     1:
         foreign lpvm access(lst#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
         foreign lpvm access(~lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
-        foreign llvm icmp_sge(h#0:wybe.int, v#0:wybe.int, ?tmp$6#0:wybe.bool) @int:23:28
+        foreign llvm icmp_sge(h#0:wybe.int, v#0:wybe.int, ?tmp$6#0:wybe.bool) @int:23:29
         case ~tmp$6#0:wybe.bool of
         0:
-            int_list.greater<0>(~t#0:int_list.int_list, ~v#0:wybe.int, ?$#0:int_list.int_list) #4 @int_list:134:13
+            int_list.greater<0>(~t#0:int_list.int_list, ~v#0:wybe.int, ?$#0:int_list.int_list) #4 @int_list:129:13
 
         1:
-            int_list.greater<0>(~t#0:int_list.int_list, ~v#0:wybe.int, ?tmp$3#0:int_list.int_list) #2 @int_list:132:18
+            int_list.greater<0>(~t#0:int_list.int_list, ~v#0:wybe.int, ?tmp$3#0:int_list.int_list) #2 @int_list:127:21
             foreign lpvm alloc(16:wybe.int, ?tmp$14#0:int_list.int_list)
             foreign lpvm mutate(~tmp$14#0:int_list.int_list, ?tmp$15#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
             foreign lpvm mutate(~tmp$15#0:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$3#0:int_list.int_list)
@@ -372,29 +372,29 @@ index > public {inline} (0 calls)
 0: index(lst#0:int_list.int_list, x#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    int_list.index_helper<0>(~lst#0:int_list.int_list, 0:wybe.int, ~x#0:wybe.int, ?$#0:wybe.int) #0 @int_list:94:42
+    int_list.index_helper<0>(~lst#0:int_list.int_list, 0:wybe.int, ~x#0:wybe.int, ?$#0:wybe.int) #0 @int_list:91:42
 
 
 index_helper > (2 calls)
 0: index_helper(lst#0:int_list.int_list, idx#0:wybe.int, x#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$8#0:wybe.bool)
-    case ~tmp$8#0:wybe.bool of
+    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$7#0:wybe.bool)
+    case ~tmp$7#0:wybe.bool of
     0:
-        foreign llvm move(-1:wybe.int, ?$#0:wybe.int) @int_list:96:1
+        foreign llvm move(-1:wybe.int, ?$#0:wybe.int) @int_list:93:1
 
     1:
         foreign lpvm access(lst#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
         foreign lpvm access(~lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
-        foreign llvm icmp_eq(~h#0:wybe.int, x#0:wybe.int, ?tmp$5#0:wybe.bool) @int:24:28
-        case ~tmp$5#0:wybe.bool of
+        foreign llvm icmp_eq(~h#0:wybe.int, x#0:wybe.int, ?tmp$4#0:wybe.bool) @int:24:28
+        case ~tmp$4#0:wybe.bool of
         0:
-            foreign llvm add(~idx#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.int) @int:8:24
-            int_list.index_helper<0>(~t#0:int_list.int_list, ~tmp$3#0:wybe.int, ~x#0:wybe.int, ?$#0:wybe.int) #3 @int_list:103:13
+            foreign llvm add(~idx#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.int) @int:8:25
+            int_list.index_helper<0>(~t#0:int_list.int_list, ~tmp$3#0:wybe.int, ~x#0:wybe.int, ?$#0:wybe.int) #3 @int_list:98:13
 
         1:
-            foreign llvm move(~idx#0:wybe.int, ?$#0:wybe.int) @int_list:96:1
+            foreign llvm move(~idx#0:wybe.int, ?$#0:wybe.int) @int_list:93:1
 
 
 
@@ -410,14 +410,14 @@ insert > public (2 calls)
         foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$13#0:wybe.bool)
         case ~tmp$13#0:wybe.bool of
         0:
-            foreign llvm sub(~idx#0:wybe.int, 1:wybe.int, ?tmp$7#0:wybe.int) @int:11:24
-            int_list.insert<0>(~lst#0:int_list.int_list, ~tmp$7#0:wybe.int, ~v#0:wybe.int, ?$#0:int_list.int_list) #7 @int_list:54:13
+            foreign llvm sub(~idx#0:wybe.int, 1:wybe.int, ?tmp$7#0:wybe.int) @int:11:25
+            int_list.insert<0>(~lst#0:int_list.int_list, ~tmp$7#0:wybe.int, ~v#0:wybe.int, ?$#0:int_list.int_list) #7 @int_list:52:13
 
         1:
             foreign lpvm access(lst#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
             foreign lpvm access(~lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
-            foreign llvm sub(~idx#0:wybe.int, 1:wybe.int, ?tmp$5#0:wybe.int) @int:11:24
-            int_list.insert<0>(~t#0:int_list.int_list, ~tmp$5#0:wybe.int, ~v#0:wybe.int, ?tmp$4#0:int_list.int_list) #4 @int_list:51:18
+            foreign llvm sub(~idx#0:wybe.int, 1:wybe.int, ?tmp$5#0:wybe.int) @int:11:25
+            int_list.insert<0>(~t#0:int_list.int_list, ~tmp$5#0:wybe.int, ~v#0:wybe.int, ?tmp$4#0:int_list.int_list) #4 @int_list:49:21
             foreign lpvm alloc(16:wybe.int, ?tmp$18#0:int_list.int_list)
             foreign lpvm mutate(~tmp$18#0:int_list.int_list, ?tmp$19#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
             foreign lpvm mutate(~tmp$19#0:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$4#0:int_list.int_list)
@@ -438,18 +438,18 @@ lesser > (3 calls)
     foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$9#0:wybe.bool)
     case ~tmp$9#0:wybe.bool of
     0:
-        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:116:1
+        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:113:1
 
     1:
         foreign lpvm access(lst#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
         foreign lpvm access(~lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
-        foreign llvm icmp_slt(h#0:wybe.int, v#0:wybe.int, ?tmp$6#0:wybe.bool) @int:20:27
+        foreign llvm icmp_slt(h#0:wybe.int, v#0:wybe.int, ?tmp$6#0:wybe.bool) @int:20:28
         case ~tmp$6#0:wybe.bool of
         0:
-            int_list.lesser<0>(~t#0:int_list.int_list, ~v#0:wybe.int, ?$#0:int_list.int_list) #4 @int_list:123:13
+            int_list.lesser<0>(~t#0:int_list.int_list, ~v#0:wybe.int, ?$#0:int_list.int_list) #4 @int_list:118:13
 
         1:
-            int_list.lesser<0>(~t#0:int_list.int_list, ~v#0:wybe.int, ?tmp$3#0:int_list.int_list) #2 @int_list:121:18
+            int_list.lesser<0>(~t#0:int_list.int_list, ~v#0:wybe.int, ?tmp$3#0:int_list.int_list) #2 @int_list:116:21
             foreign lpvm alloc(16:wybe.int, ?tmp$14#0:int_list.int_list)
             foreign lpvm mutate(~tmp$14#0:int_list.int_list, ?tmp$15#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
             foreign lpvm mutate(~tmp$15#0:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$3#0:int_list.int_list)
@@ -465,7 +465,7 @@ pop > public (1 calls)
     foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$9#0:wybe.bool)
     case ~tmp$9#0:wybe.bool of
     0:
-        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:71:5
+        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:70:5
 
     1:
         foreign lpvm access(lst#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
@@ -473,14 +473,14 @@ pop > public (1 calls)
         foreign llvm icmp_eq(idx#0:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.bool) @int:24:28
         case ~tmp$6#0:wybe.bool of
         0:
-            foreign llvm sub(~idx#0:wybe.int, 1:wybe.int, ?tmp$4#0:wybe.int) @int:11:24
-            int_list.pop<0>(~t#0:int_list.int_list, ~tmp$4#0:wybe.int, ?tmp$3#0:int_list.int_list) #3 @int_list:78:18
+            foreign llvm sub(~idx#0:wybe.int, 1:wybe.int, ?tmp$4#0:wybe.int) @int:11:25
+            int_list.pop<0>(~t#0:int_list.int_list, ~tmp$4#0:wybe.int, ?tmp$3#0:int_list.int_list) #3 @int_list:75:21
             foreign lpvm alloc(16:wybe.int, ?tmp$16#0:int_list.int_list)
             foreign lpvm mutate(~tmp$16#0:int_list.int_list, ?tmp$17#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
             foreign lpvm mutate(~tmp$17#0:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$3#0:int_list.int_list)
 
         1:
-            foreign llvm move(~t#0:int_list.int_list, ?$#0:int_list.int_list) @int_list:71:5
+            foreign llvm move(~t#0:int_list.int_list, ?$#0:int_list.int_list) @int_list:70:5
 
 
 
@@ -534,7 +534,7 @@ remove > public (1 calls)
         foreign llvm icmp_eq(h#0:wybe.int, v#0:wybe.int, ?tmp$5#0:wybe.bool) @int:24:28
         case ~tmp$5#0:wybe.bool of
         0:
-            int_list.remove<0>(~t#0:int_list.int_list, ~v#0:wybe.int, ?tmp$3#0:int_list.int_list) #2 @int_list:65:18
+            int_list.remove<0>(~t#0:int_list.int_list, ~v#0:wybe.int, ?tmp$3#0:int_list.int_list) #2 @int_list:63:21
             foreign lpvm alloc(16:wybe.int, ?tmp$13#0:int_list.int_list)
             foreign lpvm mutate(~tmp$13#0:int_list.int_list, ?tmp$14#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
             foreign lpvm mutate(~tmp$14#0:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$3#0:int_list.int_list)
@@ -549,7 +549,7 @@ reverse > public {inline} (1 calls)
 0: reverse(lst#0:int_list.int_list, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
-    int_list.reverse_helper<0>(~lst#0:int_list.int_list, 0:int_list.int_list, ?$#0:int_list.int_list) #1 @int_list:140:42
+    int_list.reverse_helper<0>(~lst#0:int_list.int_list, 0:int_list.int_list, ?$#0:int_list.int_list) #1 @int_list:137:42
 
 
 reverse_helper > (2 calls)
@@ -560,7 +560,7 @@ reverse_helper > (2 calls)
     foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
-        foreign llvm move(~acc#0:int_list.int_list, ?$#0:int_list.int_list) @int_list:142:1
+        foreign llvm move(~acc#0:int_list.int_list, ?$#0:int_list.int_list) @int_list:139:1
 
     1:
         foreign lpvm access(lst#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
@@ -568,7 +568,7 @@ reverse_helper > (2 calls)
         foreign lpvm alloc(16:wybe.int, ?tmp$8#0:int_list.int_list)
         foreign lpvm mutate(~tmp$8#0:int_list.int_list, ?tmp$9#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
         foreign lpvm mutate(~tmp$9#0:int_list.int_list, ?tmp$10#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~acc#0:int_list.int_list)
-        int_list.reverse_helper<0>(~t#0:int_list.int_list, ~tmp$10#0:int_list.int_list, ?$#0:int_list.int_list) #2 @int_list:143:29
+        int_list.reverse_helper<0>(~t#0:int_list.int_list, ~tmp$10#0:int_list.int_list, ?$#0:int_list.int_list) #2 @int_list:140:30
 
 
 
@@ -580,19 +580,19 @@ sort > public (2 calls)
     foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$10#0:wybe.bool)
     case ~tmp$10#0:wybe.bool of
     0:
-        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:109:5
+        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:106:5
 
     1:
         foreign lpvm access(lst#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
         foreign lpvm access(~lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
-        int_list.lesser<0>(t#0:int_list.int_list, h#0:wybe.int, ?tmp$3#0:int_list.int_list) #1 @int_list:112:21
-        int_list.sort<0>[410bae77d3](~tmp$3#0:int_list.int_list, ?tmp$2#0:int_list.int_list) #2 @int_list:112:16
-        int_list.greater<0>(~t#0:int_list.int_list, h#0:wybe.int, ?tmp$6#0:int_list.int_list) #3 @int_list:112:46
-        int_list.sort<0>[410bae77d3](~tmp$6#0:int_list.int_list, ?tmp$5#0:int_list.int_list) #4 @int_list:112:41
+        int_list.lesser<0>(t#0:int_list.int_list, h#0:wybe.int, ?tmp$3#0:int_list.int_list) #1 @int_list:108:21
+        int_list.sort<0>[410bae77d3](~tmp$3#0:int_list.int_list, ?tmp$2#0:int_list.int_list) #2 @int_list:108:16
+        int_list.greater<0>(~t#0:int_list.int_list, h#0:wybe.int, ?tmp$6#0:int_list.int_list) #3 @int_list:108:49
+        int_list.sort<0>[410bae77d3](~tmp$6#0:int_list.int_list, ?tmp$5#0:int_list.int_list) #4 @int_list:108:44
         foreign lpvm alloc(16:wybe.int, ?tmp$13#0:int_list.int_list)
         foreign lpvm mutate(~tmp$13#0:int_list.int_list, ?tmp$14#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
         foreign lpvm mutate(~tmp$14#0:int_list.int_list, ?tmp$15#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$5#0:int_list.int_list)
-        int_list.extend<0>[410bae77d3](~tmp$2#0:int_list.int_list, ~tmp$15#0:int_list.int_list, ?$#0:int_list.int_list) #6 @int_list:112:9
+        int_list.extend<0>[410bae77d3](~tmp$2#0:int_list.int_list, ~tmp$15#0:int_list.int_list, ?$#0:int_list.int_list) #6 @int_list:108:9
 
 
 LLVM code       : None
@@ -602,27 +602,19 @@ LLVM code       : None
   representation  : address
   public submods  : 
   public resources: 
-  public procs    : int_list.int_list./=<0>
-                    int_list.int_list.=<0>
-                    int_list.int_list.[]<0>
-                    int_list.int_list.[|]<0>
-                    int_list.int_list.[|]<1>
+  public procs    : int_list.int_list.=<0>
+                    int_list.int_list.cons<0>
+                    int_list.int_list.cons<1>
                     int_list.int_list.head<0>
                     int_list.int_list.head<1>
+                    int_list.int_list.nil<0>
                     int_list.int_list.tail<0>
                     int_list.int_list.tail<1>
+                    int_list.int_list.~=<0>
   imports         : use int_list
                     use wybe
   resources       : 
   procs           : 
-
-/= > public {inline} (0 calls)
-0: /=($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
-    int_list.int_list.=<0>(~$left#0:int_list.int_list, ~$right#0:int_list.int_list, ?tmp$0#0:wybe.bool) #0
-    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
-
 
 = > public (2 calls)
 0: =($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
@@ -656,22 +648,15 @@ LLVM code       : None
 
 
 
-[] > public {inline} (0 calls)
-0: [](?$#0:int_list.int_list):
- AliasPairs: []
- InterestingCallProperties: []
-    foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list)
-
-
-[|] > public {inline} (0 calls)
-0: [|](head#0:wybe.int, tail#0:int_list.int_list, ?$#0:int_list.int_list):
+cons > public {inline} (0 calls)
+0: cons(head#0:wybe.int, tail#0:int_list.int_list, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:int_list.int_list)
     foreign lpvm mutate(~%$rec#0:int_list.int_list, ?%$rec#1:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:int_list.int_list, ?%$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:int_list.int_list)
-[|] > public {inline} (12 calls)
-1: [|](?head#0:wybe.int, ?tail#0:int_list.int_list, $#0:int_list.int_list, ?$$#0:wybe.bool):
+cons > public {inline} (12 calls)
+1: cons(?head#0:wybe.int, ?tail#0:int_list.int_list, $#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -718,6 +703,13 @@ head > public {inline} (0 calls)
 
 
 
+nil > public {inline} (0 calls)
+0: nil(?$#0:int_list.int_list):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list)
+
+
 tail > public {inline} (0 calls)
 0: tail($rec#0:int_list.int_list, ?$#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
@@ -746,6 +738,14 @@ tail > public {inline} (0 calls)
         foreign lpvm {noalias} mutate(~%$rec#0:int_list.int_list, ?%$rec#1:int_list.int_list, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:int_list.int_list)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
+
+
+~= > public {inline} (0 calls)
+0: ~=($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    int_list.int_list.=<0>(~$left#0:int_list.int_list, ~$right#0:int_list.int_list, ?tmp$0#0:wybe.bool) #0
+    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 LLVM code       : None
 
@@ -779,7 +779,7 @@ LLVM code       : None
     int_list.print<0>(tmp$2#0:int_list.int_list, ~#io#3:wybe.phantom, ?tmp$26#0:wybe.phantom) #39 @int_list:17:6
     foreign c putchar('\n':wybe.char, ~tmp$26#0:wybe.phantom, ?#io#4:wybe.phantom) @io:11:22
     foreign c {impure} malloc_count(?mc2#0:wybe.int) @memory_management:9:5
-    foreign llvm sub(~mc2#0:wybe.int, ~mc1#0:wybe.int, ?tmp$3#0:wybe.int) @int:11:24
+    foreign llvm sub(~mc2#0:wybe.int, ~mc1#0:wybe.int, ?tmp$3#0:wybe.int) @int:11:25
     foreign c print_string("--------------------":wybe.string, ~#io#4:wybe.phantom, ?tmp$31#0:wybe.phantom) @io:30:35
     foreign c putchar('\n':wybe.char, ~tmp$31#0:wybe.phantom, ?#io#5:wybe.phantom) @io:11:22
     foreign c print_string("tests with alias":wybe.string, ~#io#5:wybe.phantom, ?tmp$34#0:wybe.phantom) @io:30:35
@@ -787,7 +787,7 @@ LLVM code       : None
     foreign c {impure} malloc_count(?mc1#1:wybe.int) @memory_management:9:5
     int_list_test.test_int_list<0>(tmp$0#0:int_list.int_list, tmp$1#0:int_list.int_list, tmp$2#0:int_list.int_list, ~#io#6:wybe.phantom, ?#io#7:wybe.phantom) #13 @int_list_test:47:2
     foreign c {impure} malloc_count(?mc2#1:wybe.int) @memory_management:9:5
-    foreign llvm sub(~mc2#1:wybe.int, ~mc1#1:wybe.int, ?tmp$4#0:wybe.int) @int:11:24
+    foreign llvm sub(~mc2#1:wybe.int, ~mc1#1:wybe.int, ?tmp$4#0:wybe.int) @int:11:25
     foreign c print_string("original x y z:":wybe.string, ~#io#7:wybe.phantom, ?tmp$39#0:wybe.phantom) @io:30:35
     foreign c putchar('\n':wybe.char, ~tmp$39#0:wybe.phantom, ?#io#8:wybe.phantom) @io:11:22
     int_list.print<0>(tmp$0#0:int_list.int_list, ~#io#8:wybe.phantom, ?tmp$42#0:wybe.phantom) #40 @int_list:17:6
@@ -805,7 +805,7 @@ LLVM code       : None
     foreign c {impure} malloc_count(?mc1#2:wybe.int) @memory_management:9:5
     int_list_test.test_int_list<0>[9e35cb823b](~tmp$0#0:int_list.int_list, ~tmp$1#0:int_list.int_list, ~tmp$2#0:int_list.int_list, ~#io#14:wybe.phantom, ?#io#15:wybe.phantom) #24 @int_list_test:60:2
     foreign c {impure} malloc_count(?mc2#2:wybe.int) @memory_management:9:5
-    foreign llvm sub(~mc2#2:wybe.int, ~mc1#2:wybe.int, ?tmp$5#0:wybe.int) @int:11:24
+    foreign llvm sub(~mc2#2:wybe.int, ~mc1#2:wybe.int, ?tmp$5#0:wybe.int) @int:11:25
     foreign c print_string("--------------------":wybe.string, ~#io#15:wybe.phantom, ?tmp$62#0:wybe.phantom) @io:30:35
     foreign c putchar('\n':wybe.char, ~tmp$62#0:wybe.phantom, ?#io#16:wybe.phantom) @io:11:22
     foreign c print_string(" ** malloc count of building lists: ":wybe.string, ~#io#16:wybe.phantom, ?#io#17:wybe.phantom) @io:30:35
@@ -824,8 +824,8 @@ test_int_list > (2 calls)
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1,InterestingUnaliased 2]
  MultiSpeczDepInfo: [(2,(int_list.append<0>,fromList [NonAliasedParamCond 0 [1]])),(7,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []])),(8,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []])),(11,(int_list.insert<0>,fromList [NonAliasedParamCond 0 []])),(12,(int_list.pop<0>,fromList [NonAliasedParamCond 0 []])),(13,(int_list.remove<0>,fromList [NonAliasedParamCond 0 []])),(16,(int_list.sort<0>,fromList [NonAliasedParamCond 0 []])),(19,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [0]])),(20,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [2]]))]
-    int_list.reverse_helper<0>(~%x#0:int_list.int_list, 0:int_list.int_list, ?%x#1:int_list.int_list) #19 @int_list:140:42
-    int_list.reverse_helper<0>(~%z#0:int_list.int_list, 0:int_list.int_list, ?%z#1:int_list.int_list) #20 @int_list:140:42
+    int_list.reverse_helper<0>(~%x#0:int_list.int_list, 0:int_list.int_list, ?%x#1:int_list.int_list) #19 @int_list:137:42
+    int_list.reverse_helper<0>(~%z#0:int_list.int_list, 0:int_list.int_list, ?%z#1:int_list.int_list) #20 @int_list:137:42
     int_list.append<0>(~y#0:int_list.int_list, 99:wybe.int, ?tmp$0#0:int_list.int_list) #2 @int_list_test:8:10
     foreign c print_string("-":wybe.string, ~#io#0:wybe.phantom, ?tmp$10#0:wybe.phantom) @io:30:35
     foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?#io#1:wybe.phantom) @io:11:22
@@ -958,7 +958,7 @@ set_exit_code > public {inline} (0 calls)
 0: set_exit_code(code#0:wybe.int, [exit_code#0:wybe.int], ?exit_code#1:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(~code#0:wybe.int, ?exit_code#1:wybe.int) @command_line:27:5
+    foreign llvm move(~code#0:wybe.int, ?exit_code#1:wybe.int) @command_line:27:6
 
   LLVM code       :
 
@@ -1036,15 +1036,15 @@ entry:
                     int_list.remove<0>
                     int_list.reverse<0>
                     int_list.sort<0>
-                    int_list.int_list./=<0>
                     int_list.int_list.=<0>
-                    int_list.int_list.[]<0>
-                    int_list.int_list.[|]<0>
-                    int_list.int_list.[|]<1>
+                    int_list.int_list.cons<0>
+                    int_list.int_list.cons<1>
                     int_list.int_list.head<0>
                     int_list.int_list.head<1>
+                    int_list.int_list.nil<0>
                     int_list.int_list.tail<0>
                     int_list.int_list.tail<1>
+                    int_list.int_list.~=<0>
   imports         : public use int_list.int_list
                     use wybe
   resources       : 
@@ -1074,19 +1074,19 @@ count > public (3 calls)
     foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$7#0:wybe.bool)
     case ~tmp$7#0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.int, ?$#0:wybe.int) @int_list:85:5
+        foreign llvm move(0:wybe.int, ?$#0:wybe.int) @int_list:83:5
 
     1:
         foreign lpvm access(lst#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
         foreign lpvm access(~lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
-        int_list.count<0>(~t#0:int_list.int_list, x#0:wybe.int, ?tmp$2#0:wybe.int) #1 @int_list:88:9
+        int_list.count<0>(~t#0:int_list.int_list, x#0:wybe.int, ?tmp$2#0:wybe.int) #1 @int_list:85:9
         foreign llvm icmp_eq(~h#0:wybe.int, ~x#0:wybe.int, ?tmp$4#0:wybe.bool) @int:24:28
         case ~tmp$4#0:wybe.bool of
         0:
-            foreign llvm move(~tmp$2#0:wybe.int, ?$#0:wybe.int) @int:8:24
+            foreign llvm move(~tmp$2#0:wybe.int, ?$#0:wybe.int) @int:8:25
 
         1:
-            foreign llvm add(~tmp$2#0:wybe.int, 1:wybe.int, ?$#0:wybe.int) @int:8:24
+            foreign llvm add(~tmp$2#0:wybe.int, 1:wybe.int, ?$#0:wybe.int) @int:8:25
 
 
 
@@ -1104,7 +1104,7 @@ extend > public (3 calls)
     1:
         foreign lpvm access(lst1#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
         foreign lpvm access(~lst1#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
-        int_list.extend<0>(~t#0:int_list.int_list, ~lst2#0:int_list.int_list, ?tmp$2#0:int_list.int_list) #1 @int_list:40:35
+        int_list.extend<0>(~t#0:int_list.int_list, ~lst2#0:int_list.int_list, ?tmp$2#0:int_list.int_list) #1 @int_list:40:39
         foreign lpvm alloc(16:wybe.int, ?tmp$8#0:int_list.int_list)
         foreign lpvm mutate(~tmp$8#0:int_list.int_list, ?tmp$9#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
         foreign lpvm mutate(~tmp$9#0:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:int_list.int_list)
@@ -1117,7 +1117,7 @@ extend > public (3 calls)
 
     1:
         foreign lpvm access(lst1#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
-        int_list.extend<0>[410bae77d3](~t#0:int_list.int_list, ~lst2#0:int_list.int_list, ?tmp$2#0:int_list.int_list) #1 @int_list:40:35
+        int_list.extend<0>[410bae77d3](~t#0:int_list.int_list, ~lst2#0:int_list.int_list, ?tmp$2#0:int_list.int_list) #1 @int_list:40:39
         foreign lpvm mutate(~lst1#0:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:int_list.int_list)
 
 
@@ -1126,7 +1126,7 @@ gen$1 > {inline} (2 calls)
 0: gen$1([h#0:wybe.int], [lst#0:int_list.int_list], [t#0:int_list.int_list], tmp$2#0:wybe.int, tmp$3#0:wybe.int, [x#0:wybe.int], ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm add(~tmp$2#0:wybe.int, ~tmp$3#0:wybe.int, ?$#0:wybe.int) @int:8:24
+    foreign llvm add(~tmp$2#0:wybe.int, ~tmp$3#0:wybe.int, ?$#0:wybe.int) @int:8:25
 
 
 gen$2 > (2 calls)
@@ -1134,29 +1134,29 @@ gen$2 > (2 calls)
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(3,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.gen$2<0>,fromList [NonAliasedParamCond 0 [0]]))]
-    foreign llvm icmp_slt(start#0:wybe.int, stop#0:wybe.int, ?tmp$3#0:wybe.bool) @int:20:27
+    foreign llvm icmp_slt(start#0:wybe.int, stop#0:wybe.int, ?tmp$3#0:wybe.bool) @int:20:28
     case ~tmp$3#0:wybe.bool of
     0:
-        int_list.reverse_helper<0>(~%result#0:int_list.int_list, 0:int_list.int_list, ?%result#1:int_list.int_list) #3 @int_list:140:42
+        int_list.reverse_helper<0>(~%result#0:int_list.int_list, 0:int_list.int_list, ?%result#1:int_list.int_list) #3 @int_list:137:42
 
     1:
         foreign lpvm alloc(16:wybe.int, ?tmp$12#0:int_list.int_list)
         foreign lpvm mutate(~tmp$12#0:int_list.int_list, ?tmp$13#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, start#0:wybe.int)
         foreign lpvm mutate(~tmp$13#0:int_list.int_list, ?tmp$14#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~result#0:int_list.int_list)
-        foreign llvm add(~start#0:wybe.int, step#0:wybe.int, ?tmp$15#0:wybe.int) @int:8:24
+        foreign llvm add(~start#0:wybe.int, step#0:wybe.int, ?tmp$15#0:wybe.int) @int:8:25
         int_list.gen$2<0>(~tmp$14#0:int_list.int_list, ~tmp$15#0:wybe.int, ~step#0:wybe.int, ~stop#0:wybe.int, ~tmp$0#0:int_list.int_list, ?result#1:int_list.int_list) #4 @int_list:26:5
 
  [410bae77d3] [NonAliasedParam 0] :
-    foreign llvm icmp_slt(start#0:wybe.int, stop#0:wybe.int, ?tmp$3#0:wybe.bool) @int:20:27
+    foreign llvm icmp_slt(start#0:wybe.int, stop#0:wybe.int, ?tmp$3#0:wybe.bool) @int:20:28
     case ~tmp$3#0:wybe.bool of
     0:
-        int_list.reverse_helper<0>[410bae77d3](~%result#0:int_list.int_list, 0:int_list.int_list, ?%result#1:int_list.int_list) #3 @int_list:140:42
+        int_list.reverse_helper<0>[410bae77d3](~%result#0:int_list.int_list, 0:int_list.int_list, ?%result#1:int_list.int_list) #3 @int_list:137:42
 
     1:
         foreign lpvm alloc(16:wybe.int, ?tmp$12#0:int_list.int_list)
         foreign lpvm mutate(~tmp$12#0:int_list.int_list, ?tmp$13#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, start#0:wybe.int)
         foreign lpvm mutate(~tmp$13#0:int_list.int_list, ?tmp$14#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~result#0:int_list.int_list)
-        foreign llvm add(~start#0:wybe.int, step#0:wybe.int, ?tmp$15#0:wybe.int) @int:8:24
+        foreign llvm add(~start#0:wybe.int, step#0:wybe.int, ?tmp$15#0:wybe.int) @int:8:25
         int_list.gen$2<0>[410bae77d3](~tmp$14#0:int_list.int_list, ~tmp$15#0:wybe.int, ~step#0:wybe.int, ~stop#0:wybe.int, ~tmp$0#0:int_list.int_list, ?result#1:int_list.int_list) #4 @int_list:26:5
 
 
@@ -1168,7 +1168,7 @@ gen$3 > {inline} (1 calls)
     foreign lpvm alloc(16:wybe.int, ?tmp$5#0:int_list.int_list)
     foreign lpvm mutate(~tmp$5#0:int_list.int_list, ?tmp$6#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, start#0:wybe.int)
     foreign lpvm mutate(~tmp$6#0:int_list.int_list, ?tmp$7#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~result#0:int_list.int_list)
-    foreign llvm add(~start#0:wybe.int, step#0:wybe.int, ?tmp$2#0:wybe.int) @int:8:24
+    foreign llvm add(~start#0:wybe.int, step#0:wybe.int, ?tmp$2#0:wybe.int) @int:8:25
     int_list.gen$2<0>(~tmp$7#0:int_list.int_list, ~tmp$2#0:wybe.int, ~step#0:wybe.int, ~stop#0:wybe.int, ~tmp$0#0:int_list.int_list, ?result#2:int_list.int_list) #2 @int_list:26:5
 
 
@@ -1180,18 +1180,18 @@ greater > (3 calls)
     foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$9#0:wybe.bool)
     case ~tmp$9#0:wybe.bool of
     0:
-        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:127:1
+        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:124:1
 
     1:
         foreign lpvm access(lst#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
         foreign lpvm access(~lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
-        foreign llvm icmp_sge(h#0:wybe.int, v#0:wybe.int, ?tmp$6#0:wybe.bool) @int:23:28
+        foreign llvm icmp_sge(h#0:wybe.int, v#0:wybe.int, ?tmp$6#0:wybe.bool) @int:23:29
         case ~tmp$6#0:wybe.bool of
         0:
-            int_list.greater<0>(~t#0:int_list.int_list, ~v#0:wybe.int, ?$#0:int_list.int_list) #4 @int_list:134:13
+            int_list.greater<0>(~t#0:int_list.int_list, ~v#0:wybe.int, ?$#0:int_list.int_list) #4 @int_list:129:13
 
         1:
-            int_list.greater<0>(~t#0:int_list.int_list, ~v#0:wybe.int, ?tmp$3#0:int_list.int_list) #2 @int_list:132:18
+            int_list.greater<0>(~t#0:int_list.int_list, ~v#0:wybe.int, ?tmp$3#0:int_list.int_list) #2 @int_list:127:21
             foreign lpvm alloc(16:wybe.int, ?tmp$14#0:int_list.int_list)
             foreign lpvm mutate(~tmp$14#0:int_list.int_list, ?tmp$15#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
             foreign lpvm mutate(~tmp$15#0:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$3#0:int_list.int_list)
@@ -1201,18 +1201,18 @@ greater > (3 calls)
     foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$9#0:wybe.bool)
     case ~tmp$9#0:wybe.bool of
     0:
-        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:127:1
+        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:124:1
 
     1:
         foreign lpvm access(lst#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
         foreign lpvm access(lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
-        foreign llvm icmp_sge(~h#0:wybe.int, v#0:wybe.int, ?tmp$6#0:wybe.bool) @int:23:28
+        foreign llvm icmp_sge(~h#0:wybe.int, v#0:wybe.int, ?tmp$6#0:wybe.bool) @int:23:29
         case ~tmp$6#0:wybe.bool of
         0:
-            int_list.greater<0>[410bae77d3](~t#0:int_list.int_list, ~v#0:wybe.int, ?$#0:int_list.int_list) #4 @int_list:134:13
+            int_list.greater<0>[410bae77d3](~t#0:int_list.int_list, ~v#0:wybe.int, ?$#0:int_list.int_list) #4 @int_list:129:13
 
         1:
-            int_list.greater<0>[410bae77d3](~t#0:int_list.int_list, ~v#0:wybe.int, ?tmp$3#0:int_list.int_list) #2 @int_list:132:18
+            int_list.greater<0>[410bae77d3](~t#0:int_list.int_list, ~v#0:wybe.int, ?tmp$3#0:int_list.int_list) #2 @int_list:127:21
             foreign lpvm mutate(~lst#0:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$3#0:int_list.int_list)
 
 
@@ -1222,29 +1222,29 @@ index > public {inline} (0 calls)
 0: index(lst#0:int_list.int_list, x#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    int_list.index_helper<0>(~lst#0:int_list.int_list, 0:wybe.int, ~x#0:wybe.int, ?$#0:wybe.int) #0 @int_list:94:42
+    int_list.index_helper<0>(~lst#0:int_list.int_list, 0:wybe.int, ~x#0:wybe.int, ?$#0:wybe.int) #0 @int_list:91:42
 
 
 index_helper > (2 calls)
 0: index_helper(lst#0:int_list.int_list, idx#0:wybe.int, x#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$8#0:wybe.bool)
-    case ~tmp$8#0:wybe.bool of
+    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$7#0:wybe.bool)
+    case ~tmp$7#0:wybe.bool of
     0:
-        foreign llvm move(-1:wybe.int, ?$#0:wybe.int) @int_list:96:1
+        foreign llvm move(-1:wybe.int, ?$#0:wybe.int) @int_list:93:1
 
     1:
         foreign lpvm access(lst#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
         foreign lpvm access(~lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
-        foreign llvm icmp_eq(~h#0:wybe.int, x#0:wybe.int, ?tmp$5#0:wybe.bool) @int:24:28
-        case ~tmp$5#0:wybe.bool of
+        foreign llvm icmp_eq(~h#0:wybe.int, x#0:wybe.int, ?tmp$4#0:wybe.bool) @int:24:28
+        case ~tmp$4#0:wybe.bool of
         0:
-            foreign llvm add(~idx#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.int) @int:8:24
-            int_list.index_helper<0>(~t#0:int_list.int_list, ~tmp$3#0:wybe.int, ~x#0:wybe.int, ?$#0:wybe.int) #3 @int_list:103:13
+            foreign llvm add(~idx#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.int) @int:8:25
+            int_list.index_helper<0>(~t#0:int_list.int_list, ~tmp$3#0:wybe.int, ~x#0:wybe.int, ?$#0:wybe.int) #3 @int_list:98:13
 
         1:
-            foreign llvm move(~idx#0:wybe.int, ?$#0:wybe.int) @int_list:96:1
+            foreign llvm move(~idx#0:wybe.int, ?$#0:wybe.int) @int_list:93:1
 
 
 
@@ -1260,14 +1260,14 @@ insert > public (2 calls)
         foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$13#0:wybe.bool)
         case ~tmp$13#0:wybe.bool of
         0:
-            foreign llvm sub(~idx#0:wybe.int, 1:wybe.int, ?tmp$7#0:wybe.int) @int:11:24
-            int_list.insert<0>(~lst#0:int_list.int_list, ~tmp$7#0:wybe.int, ~v#0:wybe.int, ?$#0:int_list.int_list) #7 @int_list:54:13
+            foreign llvm sub(~idx#0:wybe.int, 1:wybe.int, ?tmp$7#0:wybe.int) @int:11:25
+            int_list.insert<0>(~lst#0:int_list.int_list, ~tmp$7#0:wybe.int, ~v#0:wybe.int, ?$#0:int_list.int_list) #7 @int_list:52:13
 
         1:
             foreign lpvm access(lst#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
             foreign lpvm access(~lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
-            foreign llvm sub(~idx#0:wybe.int, 1:wybe.int, ?tmp$5#0:wybe.int) @int:11:24
-            int_list.insert<0>(~t#0:int_list.int_list, ~tmp$5#0:wybe.int, ~v#0:wybe.int, ?tmp$4#0:int_list.int_list) #4 @int_list:51:18
+            foreign llvm sub(~idx#0:wybe.int, 1:wybe.int, ?tmp$5#0:wybe.int) @int:11:25
+            int_list.insert<0>(~t#0:int_list.int_list, ~tmp$5#0:wybe.int, ~v#0:wybe.int, ?tmp$4#0:int_list.int_list) #4 @int_list:49:21
             foreign lpvm alloc(16:wybe.int, ?tmp$18#0:int_list.int_list)
             foreign lpvm mutate(~tmp$18#0:int_list.int_list, ?tmp$19#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
             foreign lpvm mutate(~tmp$19#0:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$4#0:int_list.int_list)
@@ -1285,13 +1285,13 @@ insert > public (2 calls)
         foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$13#0:wybe.bool)
         case ~tmp$13#0:wybe.bool of
         0:
-            foreign llvm sub(~idx#0:wybe.int, 1:wybe.int, ?tmp$7#0:wybe.int) @int:11:24
-            int_list.insert<0>[410bae77d3](~lst#0:int_list.int_list, ~tmp$7#0:wybe.int, ~v#0:wybe.int, ?$#0:int_list.int_list) #7 @int_list:54:13
+            foreign llvm sub(~idx#0:wybe.int, 1:wybe.int, ?tmp$7#0:wybe.int) @int:11:25
+            int_list.insert<0>[410bae77d3](~lst#0:int_list.int_list, ~tmp$7#0:wybe.int, ~v#0:wybe.int, ?$#0:int_list.int_list) #7 @int_list:52:13
 
         1:
             foreign lpvm access(lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
-            foreign llvm sub(~idx#0:wybe.int, 1:wybe.int, ?tmp$5#0:wybe.int) @int:11:24
-            int_list.insert<0>[410bae77d3](~t#0:int_list.int_list, ~tmp$5#0:wybe.int, ~v#0:wybe.int, ?tmp$4#0:int_list.int_list) #4 @int_list:51:18
+            foreign llvm sub(~idx#0:wybe.int, 1:wybe.int, ?tmp$5#0:wybe.int) @int:11:25
+            int_list.insert<0>[410bae77d3](~t#0:int_list.int_list, ~tmp$5#0:wybe.int, ~v#0:wybe.int, ?tmp$4#0:int_list.int_list) #4 @int_list:49:21
             foreign lpvm mutate(~lst#0:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$4#0:int_list.int_list)
 
 
@@ -1310,18 +1310,18 @@ lesser > (3 calls)
     foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$9#0:wybe.bool)
     case ~tmp$9#0:wybe.bool of
     0:
-        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:116:1
+        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:113:1
 
     1:
         foreign lpvm access(lst#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
         foreign lpvm access(~lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
-        foreign llvm icmp_slt(h#0:wybe.int, v#0:wybe.int, ?tmp$6#0:wybe.bool) @int:20:27
+        foreign llvm icmp_slt(h#0:wybe.int, v#0:wybe.int, ?tmp$6#0:wybe.bool) @int:20:28
         case ~tmp$6#0:wybe.bool of
         0:
-            int_list.lesser<0>(~t#0:int_list.int_list, ~v#0:wybe.int, ?$#0:int_list.int_list) #4 @int_list:123:13
+            int_list.lesser<0>(~t#0:int_list.int_list, ~v#0:wybe.int, ?$#0:int_list.int_list) #4 @int_list:118:13
 
         1:
-            int_list.lesser<0>(~t#0:int_list.int_list, ~v#0:wybe.int, ?tmp$3#0:int_list.int_list) #2 @int_list:121:18
+            int_list.lesser<0>(~t#0:int_list.int_list, ~v#0:wybe.int, ?tmp$3#0:int_list.int_list) #2 @int_list:116:21
             foreign lpvm alloc(16:wybe.int, ?tmp$14#0:int_list.int_list)
             foreign lpvm mutate(~tmp$14#0:int_list.int_list, ?tmp$15#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
             foreign lpvm mutate(~tmp$15#0:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$3#0:int_list.int_list)
@@ -1337,7 +1337,7 @@ pop > public (1 calls)
     foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$9#0:wybe.bool)
     case ~tmp$9#0:wybe.bool of
     0:
-        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:71:5
+        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:70:5
 
     1:
         foreign lpvm access(lst#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
@@ -1345,33 +1345,33 @@ pop > public (1 calls)
         foreign llvm icmp_eq(idx#0:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.bool) @int:24:28
         case ~tmp$6#0:wybe.bool of
         0:
-            foreign llvm sub(~idx#0:wybe.int, 1:wybe.int, ?tmp$4#0:wybe.int) @int:11:24
-            int_list.pop<0>(~t#0:int_list.int_list, ~tmp$4#0:wybe.int, ?tmp$3#0:int_list.int_list) #3 @int_list:78:18
+            foreign llvm sub(~idx#0:wybe.int, 1:wybe.int, ?tmp$4#0:wybe.int) @int:11:25
+            int_list.pop<0>(~t#0:int_list.int_list, ~tmp$4#0:wybe.int, ?tmp$3#0:int_list.int_list) #3 @int_list:75:21
             foreign lpvm alloc(16:wybe.int, ?tmp$16#0:int_list.int_list)
             foreign lpvm mutate(~tmp$16#0:int_list.int_list, ?tmp$17#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
             foreign lpvm mutate(~tmp$17#0:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$3#0:int_list.int_list)
 
         1:
-            foreign llvm move(~t#0:int_list.int_list, ?$#0:int_list.int_list) @int_list:71:5
+            foreign llvm move(~t#0:int_list.int_list, ?$#0:int_list.int_list) @int_list:70:5
 
 
  [410bae77d3] [NonAliasedParam 0] :
     foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$9#0:wybe.bool)
     case ~tmp$9#0:wybe.bool of
     0:
-        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:71:5
+        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:70:5
 
     1:
         foreign lpvm access(lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
         foreign llvm icmp_eq(idx#0:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.bool) @int:24:28
         case ~tmp$6#0:wybe.bool of
         0:
-            foreign llvm sub(~idx#0:wybe.int, 1:wybe.int, ?tmp$4#0:wybe.int) @int:11:24
-            int_list.pop<0>[410bae77d3](~t#0:int_list.int_list, ~tmp$4#0:wybe.int, ?tmp$3#0:int_list.int_list) #3 @int_list:78:18
+            foreign llvm sub(~idx#0:wybe.int, 1:wybe.int, ?tmp$4#0:wybe.int) @int:11:25
+            int_list.pop<0>[410bae77d3](~t#0:int_list.int_list, ~tmp$4#0:wybe.int, ?tmp$3#0:int_list.int_list) #3 @int_list:75:21
             foreign lpvm mutate(~lst#0:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$3#0:int_list.int_list)
 
         1:
-            foreign llvm move(~t#0:int_list.int_list, ?$#0:int_list.int_list) @int_list:71:5
+            foreign llvm move(~t#0:int_list.int_list, ?$#0:int_list.int_list) @int_list:70:5
 
 
 
@@ -1425,7 +1425,7 @@ remove > public (1 calls)
         foreign llvm icmp_eq(h#0:wybe.int, v#0:wybe.int, ?tmp$5#0:wybe.bool) @int:24:28
         case ~tmp$5#0:wybe.bool of
         0:
-            int_list.remove<0>(~t#0:int_list.int_list, ~v#0:wybe.int, ?tmp$3#0:int_list.int_list) #2 @int_list:65:18
+            int_list.remove<0>(~t#0:int_list.int_list, ~v#0:wybe.int, ?tmp$3#0:int_list.int_list) #2 @int_list:63:21
             foreign lpvm alloc(16:wybe.int, ?tmp$13#0:int_list.int_list)
             foreign lpvm mutate(~tmp$13#0:int_list.int_list, ?tmp$14#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
             foreign lpvm mutate(~tmp$14#0:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$3#0:int_list.int_list)
@@ -1446,7 +1446,7 @@ remove > public (1 calls)
         foreign llvm icmp_eq(~h#0:wybe.int, v#0:wybe.int, ?tmp$5#0:wybe.bool) @int:24:28
         case ~tmp$5#0:wybe.bool of
         0:
-            int_list.remove<0>[410bae77d3](~t#0:int_list.int_list, ~v#0:wybe.int, ?tmp$3#0:int_list.int_list) #2 @int_list:65:18
+            int_list.remove<0>[410bae77d3](~t#0:int_list.int_list, ~v#0:wybe.int, ?tmp$3#0:int_list.int_list) #2 @int_list:63:21
             foreign lpvm mutate(~lst#0:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$3#0:int_list.int_list)
 
         1:
@@ -1459,7 +1459,7 @@ reverse > public {inline} (1 calls)
 0: reverse(lst#0:int_list.int_list, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
-    int_list.reverse_helper<0>(~lst#0:int_list.int_list, 0:int_list.int_list, ?$#0:int_list.int_list) #1 @int_list:140:42
+    int_list.reverse_helper<0>(~lst#0:int_list.int_list, 0:int_list.int_list, ?$#0:int_list.int_list) #1 @int_list:137:42
 
 
 reverse_helper > (2 calls)
@@ -1470,7 +1470,7 @@ reverse_helper > (2 calls)
     foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
-        foreign llvm move(~acc#0:int_list.int_list, ?$#0:int_list.int_list) @int_list:142:1
+        foreign llvm move(~acc#0:int_list.int_list, ?$#0:int_list.int_list) @int_list:139:1
 
     1:
         foreign lpvm access(lst#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
@@ -1478,18 +1478,18 @@ reverse_helper > (2 calls)
         foreign lpvm alloc(16:wybe.int, ?tmp$8#0:int_list.int_list)
         foreign lpvm mutate(~tmp$8#0:int_list.int_list, ?tmp$9#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
         foreign lpvm mutate(~tmp$9#0:int_list.int_list, ?tmp$10#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~acc#0:int_list.int_list)
-        int_list.reverse_helper<0>(~t#0:int_list.int_list, ~tmp$10#0:int_list.int_list, ?$#0:int_list.int_list) #2 @int_list:143:29
+        int_list.reverse_helper<0>(~t#0:int_list.int_list, ~tmp$10#0:int_list.int_list, ?$#0:int_list.int_list) #2 @int_list:140:30
 
  [410bae77d3] [NonAliasedParam 0] :
     foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
-        foreign llvm move(~acc#0:int_list.int_list, ?$#0:int_list.int_list) @int_list:142:1
+        foreign llvm move(~acc#0:int_list.int_list, ?$#0:int_list.int_list) @int_list:139:1
 
     1:
         foreign lpvm access(lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
         foreign lpvm mutate(~lst#0:int_list.int_list, ?tmp$10#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~acc#0:int_list.int_list)
-        int_list.reverse_helper<0>[410bae77d3](~t#0:int_list.int_list, ~tmp$10#0:int_list.int_list, ?$#0:int_list.int_list) #2 @int_list:143:29
+        int_list.reverse_helper<0>[410bae77d3](~t#0:int_list.int_list, ~tmp$10#0:int_list.int_list, ?$#0:int_list.int_list) #2 @int_list:140:30
 
 
 
@@ -1501,35 +1501,35 @@ sort > public (2 calls)
     foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$10#0:wybe.bool)
     case ~tmp$10#0:wybe.bool of
     0:
-        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:109:5
+        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:106:5
 
     1:
         foreign lpvm access(lst#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
         foreign lpvm access(~lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
-        int_list.lesser<0>(t#0:int_list.int_list, h#0:wybe.int, ?tmp$3#0:int_list.int_list) #1 @int_list:112:21
-        int_list.sort<0>[410bae77d3](~tmp$3#0:int_list.int_list, ?tmp$2#0:int_list.int_list) #2 @int_list:112:16
-        int_list.greater<0>(~t#0:int_list.int_list, h#0:wybe.int, ?tmp$6#0:int_list.int_list) #3 @int_list:112:46
-        int_list.sort<0>[410bae77d3](~tmp$6#0:int_list.int_list, ?tmp$5#0:int_list.int_list) #4 @int_list:112:41
+        int_list.lesser<0>(t#0:int_list.int_list, h#0:wybe.int, ?tmp$3#0:int_list.int_list) #1 @int_list:108:21
+        int_list.sort<0>[410bae77d3](~tmp$3#0:int_list.int_list, ?tmp$2#0:int_list.int_list) #2 @int_list:108:16
+        int_list.greater<0>(~t#0:int_list.int_list, h#0:wybe.int, ?tmp$6#0:int_list.int_list) #3 @int_list:108:49
+        int_list.sort<0>[410bae77d3](~tmp$6#0:int_list.int_list, ?tmp$5#0:int_list.int_list) #4 @int_list:108:44
         foreign lpvm alloc(16:wybe.int, ?tmp$13#0:int_list.int_list)
         foreign lpvm mutate(~tmp$13#0:int_list.int_list, ?tmp$14#0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
         foreign lpvm mutate(~tmp$14#0:int_list.int_list, ?tmp$15#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$5#0:int_list.int_list)
-        int_list.extend<0>[410bae77d3](~tmp$2#0:int_list.int_list, ~tmp$15#0:int_list.int_list, ?$#0:int_list.int_list) #6 @int_list:112:9
+        int_list.extend<0>[410bae77d3](~tmp$2#0:int_list.int_list, ~tmp$15#0:int_list.int_list, ?$#0:int_list.int_list) #6 @int_list:108:9
 
  [410bae77d3] [NonAliasedParam 0] :
     foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$10#0:wybe.bool)
     case ~tmp$10#0:wybe.bool of
     0:
-        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:109:5
+        foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:106:5
 
     1:
         foreign lpvm access(lst#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
         foreign lpvm access(lst#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:int_list.int_list)
-        int_list.lesser<0>(t#0:int_list.int_list, h#0:wybe.int, ?tmp$3#0:int_list.int_list) #1 @int_list:112:21
-        int_list.sort<0>[410bae77d3](~tmp$3#0:int_list.int_list, ?tmp$2#0:int_list.int_list) #2 @int_list:112:16
-        int_list.greater<0>[410bae77d3](~t#0:int_list.int_list, ~h#0:wybe.int, ?tmp$6#0:int_list.int_list) #3 @int_list:112:46
-        int_list.sort<0>[410bae77d3](~tmp$6#0:int_list.int_list, ?tmp$5#0:int_list.int_list) #4 @int_list:112:41
+        int_list.lesser<0>(t#0:int_list.int_list, h#0:wybe.int, ?tmp$3#0:int_list.int_list) #1 @int_list:108:21
+        int_list.sort<0>[410bae77d3](~tmp$3#0:int_list.int_list, ?tmp$2#0:int_list.int_list) #2 @int_list:108:16
+        int_list.greater<0>[410bae77d3](~t#0:int_list.int_list, ~h#0:wybe.int, ?tmp$6#0:int_list.int_list) #3 @int_list:108:49
+        int_list.sort<0>[410bae77d3](~tmp$6#0:int_list.int_list, ?tmp$5#0:int_list.int_list) #4 @int_list:108:44
         foreign lpvm mutate(~lst#0:int_list.int_list, ?tmp$15#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$5#0:int_list.int_list)
-        int_list.extend<0>[410bae77d3](~tmp$2#0:int_list.int_list, ~tmp$15#0:int_list.int_list, ?$#0:int_list.int_list) #6 @int_list:112:9
+        int_list.extend<0>[410bae77d3](~tmp$2#0:int_list.int_list, ~tmp$15#0:int_list.int_list, ?$#0:int_list.int_list) #6 @int_list:108:9
 
 
   LLVM code       :
@@ -1806,8 +1806,8 @@ entry:
 
 define external fastcc  i64 @"int_list.index_helper<0>"(i64  %"lst#0", i64  %"idx#0", i64  %"x#0")    {
 entry:
-  %"1$tmp$8#0" = icmp ne i64 %"lst#0", 0 
-  br i1 %"1$tmp$8#0", label %if.then, label %if.else 
+  %"1$tmp$7#0" = icmp ne i64 %"lst#0", 0 
+  br i1 %"1$tmp$7#0", label %if.then, label %if.else 
 if.then:
   %95 = inttoptr i64 %"lst#0" to i64* 
   %96 = getelementptr  i64, i64* %95, i64 0 
@@ -1816,8 +1816,8 @@ if.then:
   %99 = inttoptr i64 %98 to i64* 
   %100 = getelementptr  i64, i64* %99, i64 0 
   %101 = load  i64, i64* %100 
-  %"2$tmp$5#0" = icmp eq i64 %97, %"x#0" 
-  br i1 %"2$tmp$5#0", label %if.then1, label %if.else1 
+  %"2$tmp$4#0" = icmp eq i64 %97, %"x#0" 
+  br i1 %"2$tmp$4#0", label %if.then1, label %if.else1 
 if.else:
   ret i64 -1 
 if.then1:
@@ -2227,27 +2227,19 @@ if.else:
   representation  : address
   public submods  : 
   public resources: 
-  public procs    : int_list.int_list./=<0>
-                    int_list.int_list.=<0>
-                    int_list.int_list.[]<0>
-                    int_list.int_list.[|]<0>
-                    int_list.int_list.[|]<1>
+  public procs    : int_list.int_list.=<0>
+                    int_list.int_list.cons<0>
+                    int_list.int_list.cons<1>
                     int_list.int_list.head<0>
                     int_list.int_list.head<1>
+                    int_list.int_list.nil<0>
                     int_list.int_list.tail<0>
                     int_list.int_list.tail<1>
+                    int_list.int_list.~=<0>
   imports         : use int_list
                     use wybe
   resources       : 
   procs           : 
-
-/= > public {inline} (0 calls)
-0: /=($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
-    int_list.int_list.=<0>(~$left#0:int_list.int_list, ~$right#0:int_list.int_list, ?tmp$0#0:wybe.bool) #0
-    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
-
 
 = > public (2 calls)
 0: =($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
@@ -2281,22 +2273,15 @@ if.else:
 
 
 
-[] > public {inline} (0 calls)
-0: [](?$#0:int_list.int_list):
- AliasPairs: []
- InterestingCallProperties: []
-    foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list)
-
-
-[|] > public {inline} (0 calls)
-0: [|](head#0:wybe.int, tail#0:int_list.int_list, ?$#0:int_list.int_list):
+cons > public {inline} (0 calls)
+0: cons(head#0:wybe.int, tail#0:int_list.int_list, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:int_list.int_list)
     foreign lpvm mutate(~%$rec#0:int_list.int_list, ?%$rec#1:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:wybe.int)
     foreign lpvm mutate(~%$rec#1:int_list.int_list, ?%$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:int_list.int_list)
-[|] > public {inline} (12 calls)
-1: [|](?head#0:wybe.int, ?tail#0:int_list.int_list, $#0:int_list.int_list, ?$$#0:wybe.bool):
+cons > public {inline} (12 calls)
+1: cons(?head#0:wybe.int, ?tail#0:int_list.int_list, $#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -2343,6 +2328,13 @@ head > public {inline} (0 calls)
 
 
 
+nil > public {inline} (0 calls)
+0: nil(?$#0:int_list.int_list):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list)
+
+
 tail > public {inline} (0 calls)
 0: tail($rec#0:int_list.int_list, ?$#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
@@ -2372,6 +2364,14 @@ tail > public {inline} (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
+
+~= > public {inline} (0 calls)
+0: ~=($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    int_list.int_list.=<0>(~$left#0:int_list.int_list, ~$right#0:int_list.int_list, ?tmp$0#0:wybe.bool) #0
+    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
+
   LLVM code       :
 
 ; ModuleID = 'int_list.int_list'
@@ -2384,14 +2384,6 @@ declare external ccc  i8* @wybe_malloc(i32)
 
 
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
-
-
-define external fastcc  i1 @"int_list.int_list./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
-entry:
-  %"1$tmp$0#0" = tail call fastcc  i1  @"int_list.int_list.=<0>"(i64  %"$left#0", i64  %"$right#0")  
-  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
-  ret i1 %"1$$$#0" 
-}
 
 
 define external fastcc  i1 @"int_list.int_list.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
@@ -2431,13 +2423,7 @@ if.else2:
 }
 
 
-define external fastcc  i64 @"int_list.int_list.[]<0>"()    {
-entry:
-  ret i64 0 
-}
-
-
-define external fastcc  i64 @"int_list.int_list.[|]<0>"(i64  %"head#0", i64  %"tail#0")    {
+define external fastcc  i64 @"int_list.int_list.cons<0>"(i64  %"head#0", i64  %"tail#0")    {
 entry:
   %15 = trunc i64 16 to i32  
   %16 = tail call ccc  i8*  @wybe_malloc(i32  %15)  
@@ -2453,7 +2439,7 @@ entry:
 }
 
 
-define external fastcc  {i64, i64, i1} @"int_list.int_list.[|]<1>"(i64  %"$#0")    {
+define external fastcc  {i64, i64, i1} @"int_list.int_list.cons<1>"(i64  %"$#0")    {
 entry:
   %"1$tmp$0#0" = icmp ne i64 %"$#0", 0 
   br i1 %"1$tmp$0#0", label %if.then, label %if.else 
@@ -2520,6 +2506,12 @@ if.else:
 }
 
 
+define external fastcc  i64 @"int_list.int_list.nil<0>"()    {
+entry:
+  ret i64 0 
+}
+
+
 define external fastcc  {i64, i1} @"int_list.int_list.tail<0>"(i64  %"$rec#0")    {
 entry:
   %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
@@ -2563,6 +2555,14 @@ if.else:
   %75 = insertvalue {i64, i1} %74, i1 0, 1 
   ret {i64, i1} %75 
 }
+
+
+define external fastcc  i1 @"int_list.int_list.~=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+entry:
+  %"1$tmp$0#0" = tail call fastcc  i1  @"int_list.int_list.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
+  ret i1 %"1$$$#0" 
+}
 --------------------------------------------------
  Module int_list_test
   representation  : (not a type)
@@ -2593,7 +2593,7 @@ if.else:
     int_list.print<0>(tmp$2#0:int_list.int_list, ~#io#3:wybe.phantom, ?tmp$26#0:wybe.phantom) #39 @int_list:17:6
     foreign c putchar('\n':wybe.char, ~tmp$26#0:wybe.phantom, ?#io#4:wybe.phantom) @io:11:22
     foreign c {impure} malloc_count(?mc2#0:wybe.int) @memory_management:9:5
-    foreign llvm sub(~mc2#0:wybe.int, ~mc1#0:wybe.int, ?tmp$3#0:wybe.int) @int:11:24
+    foreign llvm sub(~mc2#0:wybe.int, ~mc1#0:wybe.int, ?tmp$3#0:wybe.int) @int:11:25
     foreign c print_string("--------------------":wybe.string, ~#io#4:wybe.phantom, ?tmp$31#0:wybe.phantom) @io:30:35
     foreign c putchar('\n':wybe.char, ~tmp$31#0:wybe.phantom, ?#io#5:wybe.phantom) @io:11:22
     foreign c print_string("tests with alias":wybe.string, ~#io#5:wybe.phantom, ?tmp$34#0:wybe.phantom) @io:30:35
@@ -2601,7 +2601,7 @@ if.else:
     foreign c {impure} malloc_count(?mc1#1:wybe.int) @memory_management:9:5
     int_list_test.test_int_list<0>(tmp$0#0:int_list.int_list, tmp$1#0:int_list.int_list, tmp$2#0:int_list.int_list, ~#io#6:wybe.phantom, ?#io#7:wybe.phantom) #13 @int_list_test:47:2
     foreign c {impure} malloc_count(?mc2#1:wybe.int) @memory_management:9:5
-    foreign llvm sub(~mc2#1:wybe.int, ~mc1#1:wybe.int, ?tmp$4#0:wybe.int) @int:11:24
+    foreign llvm sub(~mc2#1:wybe.int, ~mc1#1:wybe.int, ?tmp$4#0:wybe.int) @int:11:25
     foreign c print_string("original x y z:":wybe.string, ~#io#7:wybe.phantom, ?tmp$39#0:wybe.phantom) @io:30:35
     foreign c putchar('\n':wybe.char, ~tmp$39#0:wybe.phantom, ?#io#8:wybe.phantom) @io:11:22
     int_list.print<0>(tmp$0#0:int_list.int_list, ~#io#8:wybe.phantom, ?tmp$42#0:wybe.phantom) #40 @int_list:17:6
@@ -2619,7 +2619,7 @@ if.else:
     foreign c {impure} malloc_count(?mc1#2:wybe.int) @memory_management:9:5
     int_list_test.test_int_list<0>[9e35cb823b](~tmp$0#0:int_list.int_list, ~tmp$1#0:int_list.int_list, ~tmp$2#0:int_list.int_list, ~#io#14:wybe.phantom, ?#io#15:wybe.phantom) #24 @int_list_test:60:2
     foreign c {impure} malloc_count(?mc2#2:wybe.int) @memory_management:9:5
-    foreign llvm sub(~mc2#2:wybe.int, ~mc1#2:wybe.int, ?tmp$5#0:wybe.int) @int:11:24
+    foreign llvm sub(~mc2#2:wybe.int, ~mc1#2:wybe.int, ?tmp$5#0:wybe.int) @int:11:25
     foreign c print_string("--------------------":wybe.string, ~#io#15:wybe.phantom, ?tmp$62#0:wybe.phantom) @io:30:35
     foreign c putchar('\n':wybe.char, ~tmp$62#0:wybe.phantom, ?#io#16:wybe.phantom) @io:11:22
     foreign c print_string(" ** malloc count of building lists: ":wybe.string, ~#io#16:wybe.phantom, ?#io#17:wybe.phantom) @io:30:35
@@ -2638,8 +2638,8 @@ test_int_list > (2 calls)
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1,InterestingUnaliased 2]
  MultiSpeczDepInfo: [(2,(int_list.append<0>,fromList [NonAliasedParamCond 0 [1]])),(7,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []])),(8,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []])),(11,(int_list.insert<0>,fromList [NonAliasedParamCond 0 []])),(12,(int_list.pop<0>,fromList [NonAliasedParamCond 0 []])),(13,(int_list.remove<0>,fromList [NonAliasedParamCond 0 []])),(16,(int_list.sort<0>,fromList [NonAliasedParamCond 0 []])),(19,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [0]])),(20,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [2]]))]
-    int_list.reverse_helper<0>(~%x#0:int_list.int_list, 0:int_list.int_list, ?%x#1:int_list.int_list) #19 @int_list:140:42
-    int_list.reverse_helper<0>(~%z#0:int_list.int_list, 0:int_list.int_list, ?%z#1:int_list.int_list) #20 @int_list:140:42
+    int_list.reverse_helper<0>(~%x#0:int_list.int_list, 0:int_list.int_list, ?%x#1:int_list.int_list) #19 @int_list:137:42
+    int_list.reverse_helper<0>(~%z#0:int_list.int_list, 0:int_list.int_list, ?%z#1:int_list.int_list) #20 @int_list:137:42
     int_list.append<0>(~y#0:int_list.int_list, 99:wybe.int, ?tmp$0#0:int_list.int_list) #2 @int_list_test:8:10
     foreign c print_string("-":wybe.string, ~#io#0:wybe.phantom, ?tmp$10#0:wybe.phantom) @io:30:35
     foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?#io#1:wybe.phantom) @io:11:22
@@ -2668,8 +2668,8 @@ test_int_list > (2 calls)
     int_list.print<0>(~l#5:int_list.int_list, ~#io#9:wybe.phantom, ?tmp$37#0:wybe.phantom) #26 @int_list:17:6
     foreign c putchar('\n':wybe.char, ~tmp$37#0:wybe.phantom, ?#io#10:wybe.phantom) @io:11:22
  [9e35cb823b] [NonAliasedParam 0,NonAliasedParam 1,NonAliasedParam 2] :
-    int_list.reverse_helper<0>[410bae77d3](~%x#0:int_list.int_list, 0:int_list.int_list, ?%x#1:int_list.int_list) #19 @int_list:140:42
-    int_list.reverse_helper<0>[410bae77d3](~%z#0:int_list.int_list, 0:int_list.int_list, ?%z#1:int_list.int_list) #20 @int_list:140:42
+    int_list.reverse_helper<0>[410bae77d3](~%x#0:int_list.int_list, 0:int_list.int_list, ?%x#1:int_list.int_list) #19 @int_list:137:42
+    int_list.reverse_helper<0>[410bae77d3](~%z#0:int_list.int_list, 0:int_list.int_list, ?%z#1:int_list.int_list) #20 @int_list:137:42
     int_list.append<0>[410bae77d3](~y#0:int_list.int_list, 99:wybe.int, ?tmp$0#0:int_list.int_list) #2 @int_list_test:8:10
     foreign c print_string("-":wybe.string, ~#io#0:wybe.phantom, ?tmp$10#0:wybe.phantom) @io:30:35
     foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?#io#1:wybe.phantom) @io:11:22

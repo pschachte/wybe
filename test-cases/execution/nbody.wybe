@@ -164,7 +164,7 @@ pub def update_body_v_inner(dt:float, x1:float, y1:float, z1:float, !vx1:float, 
             ?dy = y1 - y2
             ?dz = z1 - z2
             ?d2 = dx * dx + dy * dy + dz * dz
-            if { d2 = 0.0 ::
+            if { d2 = 0.0 :: pass
                | otherwise :: 
                     ?mag = dt * power(d2, -1.5)
                     ?b2m = m2 * mag

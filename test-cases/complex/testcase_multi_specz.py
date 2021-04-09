@@ -23,11 +23,11 @@ def int_list(ctx: Context) -> None:
 WYBE_INT_LIST = r"""
 # contains the def of a int list and some helper functions
 # (similar to the python list)
-pub type int_list { pub [] | [|](head:int, tail:int_list) }
+pub type int_list { pub nil | cons(head:int, tail:int_list) }
 
 
 pub def print(x:int_list) use !io {
-    if { x = [ ?h | ?t] :: 
+    if { x = cons(?h, ?t) ::
         !print(h)
         !print(' ')
         !print(t)
@@ -44,31 +44,31 @@ pub def println(x:int_list) use !io {
 # Returns an `int_list`, starting from `start`, and increments by `step`,
 # and stops before `stop`
 pub def range(start:int, stop:int, step:int, ?result:int_list) {
-    ?result = []
+    ?result = nil
     do {
         while start < stop
-        ?result = [start | result]
+        ?result = cons(start, result)
         ?start = start + step
     }
     reverse(!result)
 }
 
 # Add an item to the end of the list.
-pub def append(lst:int_list, v: int):int_list = extend(lst, [v])
+pub def append(lst:int_list, v: int):int_list = extend(lst, cons(v,nil))
 
 
 # Extend the first list by appending all the items from the second list.
 pub def extend(lst1:int_list, lst2:int_list):int_list = 
-    if {lst1 = [?h | ?t]:: [h | extend(t, lst2)] | else:: lst2 }
+    if {lst1 = cons(?h, ?t):: cons(h, extend(t, lst2)) | else:: lst2 }
 
 
 # Insert an item at a given position.
 pub def insert(lst:int_list, idx:int, v:int):int_list = 
     if {idx = 0::
-        [v | lst]
+        cons(v, lst)
     | else::
-        if {lst = [?h | ?t]::
-            [h | insert(t, idx-1, v)]
+        if {lst = cons(?h, ?t)::
+            cons(h, insert(t, idx-1, v))
         | else::
             # list not long enough
             insert(lst, idx-1, v)
@@ -78,32 +78,32 @@ pub def insert(lst:int_list, idx:int, v:int):int_list =
 
 # Remove the first item from the list whose value is equal to v.
 pub def remove(lst:int_list, v:int):int_list =
-    if {lst = [?h | ?t]::
-        if h = v::
+    if {lst = cons(?h, ?t)::
+        if { h = v::
             t
         | else::
-            [h | remove(t, v)]
+            cons(h, remove(t, v))
         }
     | else::
-        []
+        nil
     }
 
 # Remove the item at the given position in the list
 pub def pop(lst:int_list, idx:int):int_list = 
-    if {lst = [?h | ?t]::
+    if {lst = cons(?h, ?t)::
         if {idx = 0::
             t
         | else::
-            [h | pop(t, idx-1)]
+            cons(h, pop(t, idx-1))
         }
     | else::
-        []
+        nil
     }
 
 
 # Return the number of times x appears in the list.
 pub def count(lst:int_list, x:int):int =
-    if {lst = [?h | ?t]::
+    if {lst = cons(?h, ?t)::
         count(t, x) + if {h = x:: 1 | else:: 0}
     | else::
         0
@@ -113,7 +113,7 @@ pub def count(lst:int_list, x:int):int =
 pub def index(lst:int_list, x:int):int = index_helper(lst, 0, x)
 
 def index_helper(lst:int_list, idx:int, x:int):int = 
-    if {lst = [?h | ?t]::
+    if {lst = cons(?h, ?t)::
         if {h = x::
             idx
         | else::
@@ -126,40 +126,40 @@ def index_helper(lst:int_list, idx:int, x:int):int =
 
 # Sort the items of the list
 pub def sort(lst:int_list):int_list =
-    if {lst = [?h | ?t]::
-        extend(sort(lesser(t, h)), [h | sort(greater(t, h))])
+    if {lst = cons(?h, ?t)::
+        extend(sort(lesser(t, h)), cons(h, sort(greater(t, h))))
     | else::
-        []
+        nil
     }
 
 def lesser(lst:int_list, v:int):int_list =
-    if {lst = [?h | ?t]::
+    if {lst = cons(?h, ?t)::
         if {h < v::
-            [h | lesser(t, v)]
+            cons(h, lesser(t, v))
         | else::
             lesser(t, v)
         }
     | else::
-        []
+        nil
     }
 
 def greater(lst:int_list, v:int):int_list =
-    if {lst = [?h | ?t]::
+    if {lst = cons(?h, ?t)::
         if {h >= v::
-            [h | greater(t, v)]
+            cons(h, greater(t, v))
         | else::
             greater(t, v)
         }
     | else::
-        []
+        nil
     }
 
 
 # Reverse the elements of the list.
-pub def reverse(lst:int_list):int_list = reverse_helper(lst, [])
+pub def reverse(lst:int_list):int_list = reverse_helper(lst, nil)
 
 def reverse_helper(lst:int_list, acc:int_list):int_list =
-    if {lst = [?h | ?t]:: reverse_helper(t, [h|acc]) | else:: acc}
+    if {lst = cons(?h, ?t):: reverse_helper(t, cons(h,acc)) | else:: acc}
 """
 
 WYBE_INT_LIST_TEST = """
