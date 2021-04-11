@@ -29,3 +29,5 @@ pub def (x:_ >= y:_):bool = foreign llvm icmp_uge(x,y)
 pub def (x:_ = y:_):bool = foreign llvm icmp_eq(x,y)
 pub def incr(!x:_) { ?x = x + 1:_ }
 pub def {partial} decr(!x:_) { ?x = x - 1:_ }
+pub def min(x:_, y:_):_ = if {x<=y:: x | else:: y}
+pub def max(x:_, y:_):_ = if {x>=y:: x | else:: y}

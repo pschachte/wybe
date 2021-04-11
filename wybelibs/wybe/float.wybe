@@ -23,3 +23,5 @@ pub def (x:_ >= y:_):bool = foreign llvm fcmp_sge(x,y)
 pub def (x:_ = y:_):bool = foreign llvm fcmp_eq(x,y)
 pub def sqrt(x:_):_ = foreign c sqrt(x)
 pub def power(x:_,y:_):_ = foreign c pow(x,y)
+pub def min(x:_, y:_):_ = if {x<=y:: x | else:: y}
+pub def max(x:_, y:_):_ = if {x>=y:: x | else:: y}

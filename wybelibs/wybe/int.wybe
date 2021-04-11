@@ -26,3 +26,5 @@ pub def sqrt(x:_):_ = foreign c isqrt(x)
 pub def power(x:_,y:_):_ = foreign c ipow(x,y)
 pub def incr(!x:_) { ?x = x + 1 }
 pub def decr(!x:_) { ?x = x - 1 }
+pub def min(x:_, y:_):_ = if {x<=y:: x | else:: y}
+pub def max(x:_, y:_):_ = if {x>=y:: x | else:: y}
