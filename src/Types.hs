@@ -1483,7 +1483,24 @@ modecheckStmt m name defPos delayed assigned detism
             logTyped $ "Unpreventable mode errors: " ++ show flowErrs
             typeErrors flowErrs
             return ([],delayed,assigned)
-        else do
+        else case (cmod, cname, actualModes) of
+          -- Special cases to handle = as assignment when one argument is
+          -- known to be defined and the other is an output or unknown.
+          ([], "=", [(ParamIn,True,_),(ParamOut,_,_)]) ->
+                modecheckStmt m name defPos delayed assigned detism
+                    (ForeignCall "llvm" "move" [] [args!!0, args!!1]) pos
+          ([], "=", [(ParamIn,True,_),(FlowUnknown,_,_)]) ->
+                modecheckStmt m name defPos delayed assigned detism
+                    (ForeignCall "llvm" "move" []
+                        [args!!0, forceOut <$> args!!1]) pos
+          ([], "=", [(ParamOut,_,_),(ParamIn,True,_)]) ->
+                modecheckStmt m name defPos delayed assigned detism
+                    (ForeignCall "llvm" "move" [] [args!!1, args!!0]) pos
+          ([], "=", [(FlowUnknown,_,_),(ParamIn,True,_)]) ->
+                modecheckStmt m name defPos delayed assigned detism
+                    (ForeignCall "llvm" "move" []
+                        [args!!1, forceOut <$> args!!0]) pos
+          _ -> do
             typeMatches <- ((fst <$>) . catOKs) <$> mapM
                         (matchTypeList name cname pos actualTypes detism)
                         callInfos
@@ -1684,6 +1701,12 @@ modecheckStmt m name defPos delayed assigned detism
     Next pos = do
     logTyped $ "Mode checking continue with assigned=" ++ show assigned
     return ([maybePlace Next pos],delayed,bindingStateAfterNext assigned)
+
+
+forceOut :: Exp -> Exp
+forceOut (Var name _ ftype) = Var name ParamOut ftype
+forceOut (Typed exp ty ty') = Typed (forceOut exp) ty ty'
+forceOut other = shouldnt $ "forceOut non-variable " ++ show other
 
 -- |Return a list of error messages for too weak a determinism at the end of a
 -- statement sequence.
