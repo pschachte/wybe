@@ -224,6 +224,7 @@ tokenise pos str@(c:cs)
                     ',' -> specialToken ',' cs pos $ TokComma pos
                     '.' -> specialToken '.' cs pos $ TokPeriod pos
                     ';' -> specialToken ';' cs pos $ TokSeparator True pos
+                    ':' -> specialToken ':' cs pos $ TokSymbol ":" pos
                     '(' -> singleCharTok c cs pos $ TokLBracket Paren pos
                     '[' -> singleCharTok c cs pos $ TokLBracket Bracket pos
                     '{' -> singleCharTok c cs pos $ TokLBracket Brace pos
@@ -268,12 +269,21 @@ breakList pred lst@(h:t)
 singleCharTok :: Char -> String -> SourcePos -> Token -> [Token]
 singleCharTok c cs pos tok = tok:tokenise (updatePosChar pos c) cs
 
+-- |Handle a symbol token and tokenize the rest of the input.
+tokeniseSymbol :: SourcePos -> String -> [Token]
+tokeniseSymbol pos (c:cs) =
+  let (sym,rest) = span (isSymbolContinuation c) cs
+      pos' = updatePosString pos
+  in  multiCharTok (c:sym) rest (TokSymbol (c:sym) pos) pos
+tokeniseSymbol _ [] = shouldnt "empty symbol does not exist"
+
+
 -- |Handle a token that is treated specially if not followed by symbol
 -- characters, and tokenize the rest of the input.  Special characters are
 -- comma, period, and semicolon.
 specialToken :: Char -> String -> SourcePos -> Token -> [Token]
 specialToken ch rest pos singleTok =
-    case span isSymbolContinuation rest of
+    case span (isSymbolContinuation ch) rest of
         ([],_) -> singleTok : tokenise (updatePosChar pos ch) rest
         (tokRest,rest') ->
             let sym = ch:tokRest
@@ -282,20 +292,23 @@ specialToken ch rest pos singleTok =
 
 -- |Recognise a character that cannot begin an expression, and therefore can
 -- follow a comma in a symbol.
-isSymbolContinuation :: Char -> Bool
-isSymbolContinuation ',' = True
-isSymbolContinuation ';' = True
-isSymbolContinuation '.' = True
-isSymbolContinuation '@' = True
-isSymbolContinuation '$' = True
-isSymbolContinuation '%' = True
-isSymbolContinuation '^' = True
-isSymbolContinuation '&' = True
-isSymbolContinuation '*' = True
-isSymbolContinuation '=' = True
-isSymbolContinuation '<' = True
-isSymbolContinuation '>' = True
-isSymbolContinuation _   = False
+isSymbolContinuation :: Char -> Char -> Bool
+isSymbolContinuation startChar ',' = True
+isSymbolContinuation startChar ';' = True
+isSymbolContinuation startChar '.' = True
+isSymbolContinuation startChar ':' = True
+isSymbolContinuation startChar '!' = startChar == ':'
+isSymbolContinuation startChar '@' = True
+isSymbolContinuation startChar '$' = True
+isSymbolContinuation startChar '%' = True
+isSymbolContinuation startChar '^' = True
+isSymbolContinuation startChar '&' = True
+isSymbolContinuation startChar '|' = True
+isSymbolContinuation startChar '*' = True
+isSymbolContinuation startChar '=' = True
+isSymbolContinuation startChar '<' = True
+isSymbolContinuation startChar '>' = True
+isSymbolContinuation startChar _   = False
 
 
 -- |Handle a mult-character token and tokenize the rest of the input.
@@ -319,15 +332,6 @@ tokeniseChar pos chars =
      ("Syntax error in character constant beginning '" ++ front ++ "'...") pos
     : tokenise (updatePosString pos ('\'':front)) back
     where (front,back) = splitAt 2 chars
-
--- |Handle a symbol token and tokenize the rest of the input.
-tokeniseSymbol :: SourcePos -> String -> [Token]
-tokeniseSymbol pos (c:cs) =
-  let (sym,rest) = span isSymbolChar cs
-      pos' = updatePosString pos
-  in  multiCharTok (c:sym) rest (TokSymbol (c:sym) pos) pos
-tokeniseSymbol _ [] = shouldnt "empty symbol does not exist"
-
 
 -- |Tokenise a delimited string and tokenize the rest of the input..
 tokeniseString :: StringDelim -> SourcePos -> String -> [Token]
@@ -460,11 +464,6 @@ alNumToInteger ch
 isIdentChar :: Char -> Bool
 isIdentChar ch = isAlphaNum ch || ch == '_'
 
--- |Is this a character that can appear in a symbol?
-isSymbolChar :: Char -> Bool
-isSymbolChar ch = not (isIdentChar ch || isSpace ch || isControl ch
-                       || ch `elem` ",.?([{)]}#'\"\\")
-
 -- |Is this character part of a single (not necessarily valid) number token,
 -- following a digit character?  This means any alphanumeric character or a
 -- decimal point.
@@ -475,10 +474,7 @@ isNumberChar ch = isIdentChar ch || ch == '.'
 -- |Keywords that can appear in the middle of a statement or declaration.
 -- Newlines immediately before or after these words should not be taken as
 -- separators.
--- XXX remove "then" and "else" once we've revised conditional expression syntax
 nonstartingKeyword :: Ident -> Bool
-nonstartingKeyword "then"  = True
-nonstartingKeyword "else"  = True
 nonstartingKeyword "in"    = True
 nonstartingKeyword "is"    = True
 nonstartingKeyword "where" = True
@@ -488,10 +484,7 @@ nonstartingKeyword _       = False
 -- |Keywords that can appear in the middle of a statement or declaration.
 -- Newlines immediately before or after these words should not be taken as
 -- separators.
--- XXX remove "then" and "else" once we've revised conditional expression syntax
 nonendingKeyword :: Ident -> Bool
-nonendingKeyword "then"         = True
-nonendingKeyword "else"         = True
 nonendingKeyword "in"           = True
 nonendingKeyword "is"           = True
 nonendingKeyword "where"        = True
