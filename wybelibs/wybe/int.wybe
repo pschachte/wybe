@@ -6,13 +6,13 @@ use wybe.bool
 representation is signed
 
 pub def (x:_ + y:_):_ = foreign llvm add(x,y)
-pub def `+`(?x:_,y:_,z:_) { ?x = foreign llvm sub(z,y) }
-pub def `+`(x:_,?y:_,z:_) { ?y = foreign llvm sub(z,x) }
+pub def (?x:_ + y:_):_ = ?z where ?x = foreign llvm sub(z,y)
+pub def (x:_ + ?y:_):_ = ?z where { ?y = foreign llvm sub(z,x) }
 pub def (x:_ - y:_):_ = foreign llvm sub(x,y)
-pub def `-`(?x:_,y:_,z:_) { ?x = foreign llvm add(z,y) }
-pub def `-`(x:_,?y:_,z:_) { ?y = foreign llvm sub(z,x) }
+pub def (?x:_ - y:_):_ = ?z where { ?x = foreign llvm add(z,y) }
+pub def (x:_ - ?y:_):_ = ?z where { ?y = foreign llvm sub(z,x) }
 pub def -(x:_):_ = foreign llvm sub(0,x)
-pub def `-`(?x:_,y:_) { ?x = foreign llvm sub(0,y) }
+pub def -(?x:_):_ = ?y where { ?x = foreign llvm sub(0,y) }
 pub def (x:_ * y:_):_ = foreign llvm mul(x,y)
 pub def (x:_ / y:_):_ = foreign llvm sdiv(x,y)
 pub def (x:_ % y:_):_ = foreign llvm srem(x,y)

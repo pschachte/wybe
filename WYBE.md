@@ -357,6 +357,18 @@ is always equivalent to
 f(x, ?y)
 ```
 
+You can also explicitly define a "reverse mode" of a function, that is, a mode
+in which the function result is an input and some or all of the arguments are
+outputs, by preceding output arguments with a `?`, and by making the value of
+the function as an expression of the form
+
+> `?`*var* `where {` *body* `}`
+
+and defining *body* to compute the values of the output arguments.  The *body*
+may assume that the value of *var* is an input.  That is, when decorating a
+variable on the right side of the equal sign in a function definition, the `?`
+annotation means that the function result is taken as an input stored in the
+named variable.
 
 ##  <a name="operator syntax"></a>Operator syntax
 

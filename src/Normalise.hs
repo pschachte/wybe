@@ -79,6 +79,15 @@ normaliseItem (ResourceDecl vis name typ init pos) = do
     Nothing  -> return ()
     Just val -> normaliseItem (StmtDecl (ProcCall [] "=" Nothing Det False
                                          [Unplaced $ varSet name, val]) pos)
+normaliseItem (FuncDecl vis mods (ProcProto name params resources) resulttype
+    (Placed (Where body (Placed (Var var ParamOut rflow) _)) _) pos) =
+    -- Handle special reverse mode case of def foo(...) = var where ....
+    normaliseItem
+        (ProcDecl vis mods
+            (ProcProto name (params ++ [Param var resulttype ParamIn rflow])
+                       resources)
+             body
+        pos)
 normaliseItem (FuncDecl vis mods (ProcProto name params resources)
                         resulttype result pos) =
   let flowType = Implicit pos

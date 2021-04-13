@@ -6,13 +6,13 @@ use wybe.bool
 representation is 64 bit float
 
 pub def (x:_ + y:_):_ = foreign llvm fadd(x,y)
-pub def `+`(?x:_,y:_,z:_) { ?x = foreign llvm fsub(z,y) }
-pub def `+`(x:_,?y:_,z:_) { ?y = foreign llvm fsub(z,x) }
+pub def (?x:_ + y:_):_ = ?z where { ?x = foreign llvm fsub(z,y) }
+pub def (x:_ + ?y:_):_ = ?z where { ?y = foreign llvm fsub(z,x) }
 pub def (x:_ - y:_):_ = foreign llvm fsub(x,y)
-pub def `-`(?x:_,y:_,z:_) { ?x = foreign llvm fadd(z,y) }
-pub def `-`(x:_,?y:_,z:_) { ?y = foreign llvm fsub(z,x) }
+pub def (?x:_ - y:_):_  = ?z where { ?x = foreign llvm fadd(z,y) }
+pub def (x:_ - ?y:_):_  = ?z where { ?y = foreign llvm fsub(z,x) }
 pub def -(x:_):_ = foreign llvm fsub(0.0,x)
-pub def `-`(?x:_,y:_) { ?x = foreign llvm fsub(0.0,y) }
+pub def -(?x:_):_ = ?y where { ?x = foreign llvm fsub(0.0,y) }
 pub def (x:_ * y:_):_ = foreign llvm fmul(x,y)
 pub def (x:_ / y:_):_ = foreign llvm fdiv(x,y)
 pub def (x:_ ~= y:_):bool = foreign llvm fcmp_ne(x,y)
