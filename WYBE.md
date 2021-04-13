@@ -173,26 +173,6 @@ A procedure call must be preceded by an exclamation point (`!`) if it uses any
 resources, as described in the section on
 [calling a resourceful procedure](#calling resourceful).
 
-A procedure whose name consists of any number of the operator characters
-```
-~ @ $ % ^ & * - + = \ < > /
-```
-may use the alternative infix syntax:
-
-> *arg* *op* *arg*,
-
-where *op* is the procedure name (there must be exactly two arguments).
-
-A second alternative syntax puts the (first) procedure argument first, with the
-operation and its other arguments second:
-
-> *arg*`^`*op*(*other args*)
-
-and in the special case of operations taking only one argument:
-
-> *arg*`^`*op*
-
-This syntax is akin to the common object-oriented *object.method* syntax.  There is no difference between this syntax and the standard *op*`(`*arg*,*other args*`)` or  *op*`(`*arg*`)` syntax.
 
 ## <a name="variables"></a>Variables
 The simplest form of expression is a variable reference.
@@ -244,40 +224,14 @@ In general, these have the syntax:
 (that is, the same as procedure calls).
 Again, each *arg* is an expression.
 
-A function whose name consists of any number of the operator characters
-```
-~ @ $ % ^ & * - + = \ < > /
-```
-may use the alternative infix syntax:
-
-> *arg* *op* *arg*,
-
-where *op* is the function name (there must be exactly two arguments).
-
-As for procedure calls, function calls can also be written with the first
-argument first, an infix `^` operator, and the operation with its other
-arguments last:
-
-> *arg*`^`*op*(*other args*)
-
-and in the special case of operations taking only one argument:
-
-> *arg*`^`*op*
-
-Again, this syntax is like the common object-oriented *object.method* syntax.  Because the `^` associates to the left, this syntax can be chained to apply a "pipeline" of operations to an initial input, so the expression:
-
-```
-    ob^foo^bar^baz
-```
-
-is equivalent to
-
-```
-    baz(bar(foo(ob)))
-```
+A function name may consist of any number of upper and lower case letters,
+digits, and underscore (`_`) characters, as long as it does not begin with a
+digit.  Also see (the operator syntax section)[#operator syntax] for special
+infix and prefix operator syntax.
 
 
 ##  <a name="type constraints"></a>Type constraints
+
 In most cases, the compiler can determine the types of expressions used in your
 code.  However, occasionally the compiler needs some help in resolving
 overloading.  For example, a procedure `read(?value)` may be overloaded such
@@ -297,7 +251,8 @@ read(?value:int)
 
 ## <a name="code layout"></a>Code layout
 
-In general, statements in procedure body must be separated by semicolon (`;`)
+In general, declarations in a module and statements in procedure body must be
+separated by semicolon (`;`)
 characters.  However, as a convenience, and to improve the appearance of the
 code, the semicolons can be omitted when statements are on separate lines.  It
 is generally recommended to lay your code out this way.
@@ -327,8 +282,6 @@ corresponding *type* is its type, the final *type* is the function
 result type, and *expr* is an expression giving the function value.
 Each `:`*type* is optional; if omitted, the compiler will infer the
 type.  If there are no parameters, the parentheses are also omitted.
-If the function name comprises operator characters, it should be surrounded with
-backquote characters (`` ` ``).
 
 This syntax declares a private (not exported) function.  To export the
 function, the definition should be preceded by the `pub` keyword.
@@ -358,8 +311,6 @@ Procedures may have any number of input, output, and input/output
 arguments in any order.
 Again each `:`*type* is optional, with types inferred if omitted,
 and parentheses omitted for niladic procedures.
-If the procedure name comprises operator characters, it should be surrounded
-with backquote characters (`` ` ``).
 
 The procedure is private unless preceded by the `pub` keyword.
 All types must be included in public procedure definitions.
@@ -405,6 +356,156 @@ is always equivalent to
 ```
 f(x, ?y)
 ```
+
+
+##  <a name="operator syntax"></a>Operator syntax
+
+A procedure, function, or constructor whose name entirely consists of one or
+more of the operator characters
+```
+    @ $ % ^ ~ & | + - * / = < > \ , ; . :
+```
+as well as the special operator name `in`, may use the alternative infix syntax:
+
+> *arg1* *op* *arg2*,
+
+where *op* is the procedure or function name (there must be exactly two
+arguments).  This is *exactly* equivalent to `` `op`(``*arg1*,*arg2*`)`.
+
+There is no need to explicitly declare operators.  Aside from the
+few reserved operator symbols documented in the
+(reserved words)[#reserved words] section, every sequence of operator characters
+is a valid infix operator name.
+
+The precedence and associativity of infix operator symbols is determined by the
+last character in the operator, as follows:
+
+| Last character | Precedence    | Associativity   |
+| -------------- | ------------- | --------------- |
+| `^`            | 10 (Highest)  | Left            |
+| `* / %`        | 9             | Left            |
+| `+ -`          | 8             | Left            |
+| `, .`          | 7             | Right           |
+| `.`            | 7             | Right           |
+| `< >`          | 6             | Not associative |
+| `;`            | 5             | Right           |
+| `: =`          | 5             | Not associative |
+| `~`            | 5             | Left            |
+| `&`            | 4             | Right           |
+| `|`            | 3 (Lowest)    | Right           |
+
+Additionally, `in` is a non-associative infix operator of precedence 5.
+
+Wybe also has two prefix operators:  `-` and `~`.  These have precedence 11, so
+they bind tighter than any infix operator.
+
+Wybe has no postfix operators, however it does support following an expression
+with a sequence of zero or more expressions enclosed within square brackets, the
+conventional syntax for array indexing.  This has precedence 12, so it binds
+tighter than any infix or prefix operator.
+
+As in most programming languages, parentheses may be used to override operator
+precedence and associativity.
+
+Wybe also supports an alternative syntax for invoking procedures, functions, or constructors that puts the first argument first, and the procedure, function, or constructor name, with its other arguments, second:
+
+> *arg*`^`*operation*(*other args*)
+
+and in the special case of operations taking only one argument:
+
+> *arg*`^`*operation*
+
+This syntax is akin to the common object-oriented *object.method* syntax.  There
+is no semantic difference between this syntax and the standard
+*operation*`(`*arg*,*other args*`)` or *operation*`(`*arg*`)` syntax.
+Because the `^` associates to the left, this syntax can be chained to apply a
+"pipeline" of operations to an initial input, so the expression:
+
+```
+    ob^foo^bar^baz
+```
+
+is equivalent to
+
+```
+    baz(bar(foo(ob)))
+```
+
+Finally, as a convenience, for procedures (but not functions) with only one
+argument, Wybe allows the parentheses surrounding the argument to be omitted.
+For example, Wybe allows you to write
+```
+    !print 3+4
+```
+
+as an alternative to
+
+```
+    !print(3+4)
+```
+
+Wybe supports a special syntax for lists.  For example, a list of the first 3
+counting numbers would be written `[1,2,3]`.  The syntax `[h|t]` denotes a list
+whose head is `h` and whose tail is `t`, and `[e1,e2|es]` is a list whose first
+two elements are `e1` and `e2`, and the rest of which is `es`.  Note that what
+appears before the `|` symbol are individual list elements, separated by commas,
+and what appears after it is another list.  The empty list is denoted `[]`. The
+list constructor is named `[|]`, so the list `[e1,e2|es]` can also be written ``
+`[|]`(e1,`[|]`(e2,es))`` and the list `[1,2,3]` can be written 
+`` `[|]`(1,`[|]`(2,`[|]`(3,[])))``.
+
+## Declaring operator functions and procedures
+
+Procedures and functions whose names are operators should be declared using
+their operator syntax, but with the function name and arguments enclosed in
+parentheses.  For example, the `+` function should be declared using the
+following syntax:
+
+```
+def (a:int + b:int):int = ...
+```
+
+Alternatively, the "operatorness" of a name can be overriden, making the
+compiler treat it as an ordinary identifier, by surrounding it with backquote
+characters (`` ` ``).  So the `+` function could also be defined with the
+syntax:
+```
+def `+`(a:int, b:int):int = ...
+```
+These two definitions are equivalent:  whichever is used, the `+` function name
+can be used as an infix operator.
+
+Backquotes can also be used in function calls, so `` `+`(3,4)`` is semantically
+identical to `3 + 4`, regardless of which syntax was used to define the `+`
+function.
+
+
+##  <a name="reserved words"></a>Reserved operators
+
+The following special operators are predefined by the Wybe language. These may
+not be defined as procedure, function, or constructor names.  Except where
+otherwise indicated, they are infix operators.
+
+| Reserved names | Meaning
+| -------------- | -------------------------------------------------- |
+| `,`            | Function, procedure, a list argument separator     |
+| `.`            | Module prefix separator                            |
+| `^`            | Procedure/function pipeline application            |
+| `;`            | Statement separator                                |
+| `:`            | Type specification                                 |
+| `:!`           | Type cast specification (in foreign code)          |
+| `::`           | Condition/case separator                           |
+| `|`            | Disjunction                                        |
+| `&`            | Conjunction                                        |
+| `?`            | Output variable annotation (prefix)                |
+| `!`            | Input/Output variable annotation (prefix)          |
+| `if`           | If statement/expression (`if {` ... `::` ... `}`)  |
+| `else`         | Final default case in `if` statement/expression    |
+| `otherwise`    | Final default case in `if` statement/expression    |
+| `let`          | Local variable definition (`let` ... `in` ...)     |
+| `where`        | Local variable definition (... `where` ... )       |
+| `use`          | Local resource binding (`use {`...`} in {`...`}`)  |
+
 
 
 ## Modes
@@ -595,6 +696,12 @@ characters (`|`).  Each constructor declaration takes the same form as the
 prototype part of a function declaration:
 
 > *name*`(`*param*`:`*type*, ... *param*`:`*type*`)`
+
+If *name* is an infix operator symbol, you must surround it with backquotes, or
+declare the constructor with infix infix syntax, much like defining a function
+whose name is an operator:
+
+> `(`*param*`:`*type* *name* *param*`:`*type*`)`
 
 This declaration defines a constructor function that takes parameters of the
 specified types and returns a value of the type being defined (namely, the
@@ -979,7 +1086,7 @@ configured when Wybe is installed, but can be overridden with the `--libdir` or
 
 ## Low-level features (foreign interface)
 
-### Purity
+### <a name="purity"></a>Purity
 
 Wybe code is mostly purely logical, and the Wybe compiler takes advantage of
 this.  For example, if none of the outputs of a proc call are actually used, the compiler will eliminate the call.  A proc call may also be omitted if a proc call has previously been made with the same inputs, with the compiler assuming the output(s) will be identical.  The compiler may also reorder calls however it likes, as long as all the inputs to a proc are available when the proc is called.  As long as your code is purely logical, all of these optimisations and more are perfectly safe.
@@ -1035,7 +1142,39 @@ prevent inlining of calls to this proc
 
 If you wish to include other modifiers along with one of these, include them all between the braces, in any order, separated by commas.
 
-### Foreign interface
+### Foreign language interface
+
+The foreign language interface allows Wybe to call functions written in other
+languages.  In particular, Wybe is built on the LLVM infrastructure, so Wybe
+allows LLVM instructions to be used as low level operations.  Wybe also permits
+C code to be called.  It should be noted that the Wybe compiler does minimal
+checking of arguments to these instructions, and cannot ensure that these
+operations are pure, so it is quite possible to cause type errors or purity
+errors through the foreign language interface.  Therefore, it is recommended to
+define a Wybe procedure or function as an interface to each foreign operation to
+be used, and to code that function paying close attention to argument types and
+purity.  After that, the Wybe type and purity system will ensure the correctness
+of calls to these interface functions or procedures.
+
+
+#### Linking foreign code
+
+A Wybe module my specify a dependency on a foreign object file using a variant
+of the `use` declaration:
+
+> `use foreign object` *filebasename*
+
+where *filebasename* is the base name of the foreign file, omitting any file
+extension.  This will ensure that when an executable is built, the specified
+file will be linked in.
+
+A dependency on a foreign library file may be specified with the following declaration:
+
+> `use foreign library` *libarybasename*
+
+where *librarybasename* is the base name of the foreign library, omitting any
+file extension.  When an executable is built, the specified library will be
+linked in with a `-l`*librarybasename* switch.
 
 
 #### Calling C code
@@ -1072,9 +1211,9 @@ The lowest-level interface is to raw LLVM instructions.  These have a functional
 ```
 ?x2 = foreign llvm add(x, 1)
 ```
-you can write
 ```
 foreign llvm add(x, 1, ?x2)
+you can write
 ```
 
 For more detail on the behaviour of these operations, please consult the
@@ -1244,6 +1383,12 @@ it will not change the bits of the value.  If you wish to convert between
 floating point and integer representations, see the [integer/floating point
 conversion](#conversion) instructions.
 
+A type cast may be combined with a type constraint to specify both the type of the expression *and* the type of the value:
+
+> *var* `:!` *type*`:`*type2*
+
+This specifies that the type of the variable *var* is *type2*, but that the type of the whole *var* `:!` *type*`:`*type2* expression is *type*.
+
 
 #### Wybe low-level memory management primitives
 
@@ -1281,3 +1426,42 @@ this instruction is permitted to perform the operation destructively, making
 converting its type from *type1* to *type2*, without changing the
 representation. This just allows getting around LLVM strong typing; it does not
 actually require any instructions.
+
+
+#### Handling impurity
+
+Impure operations, such as input/output operations, can present a challenge in
+Wybe.  The Wybe compiler is entitled to, and does, eliminate operations that do
+not produce needed values.  Likewise, it can and does reorder operations in
+function and procedure definitions, as long as it ensures that the inputs to an
+operation are all computed before executing that operation.  However, the
+compiler respects (purity declarations)[#purity]:  if a procedure is declared
+`impure` or `semipure`, calls to it will not be eliminated or reordered.
+
+Additionally, the Wybe library defines a type `phantom`, whose representation
+has zero bits (it is a type with one constructor with no arguments).  The
+compiler automatically removes any input or output arguments whose types have
+zero bits when LLVM code is being generated, including calls to foreign code.
+The type of the `io` resource is `phantom`, thus the `io` resource can be passed
+into or out of any foreign call without anything actually being passed to the
+foreign function or LLVM instruction.  Yet the phantom value is threaded through
+the code, ensuring that the compiler respects the ordering of operations.
+
+This gives two ways of managing impurity in Wybe:
+
+ * An operation can `use` the `!io` resource or another resource or value of
+   type `phantom`; or
+ * It can be declared `impure` or `semipure`.
+
+If impurity is managed through a `phantom` (or other zero-bit type) resource or
+value, that resource or value will need to be threaded through the entire
+application.  In most cases, this is the prefered approach:  it gives the
+compiler more scope for optimisation, and provides documentation to the user of
+how operations impact the state of the computation.
+
+Managing impurity through the purity system allows low-level Wybe code to
+circumvent the purity of the language, but then to present a pure interface to
+that code.  For example, the `logging` library module allows the programmer to
+insert "debugging printfs" in their code.  Such operations are not meant to be
+used in a released application, but can be very useful for the programmer to
+understand the behaviour of their code.

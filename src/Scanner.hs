@@ -302,12 +302,17 @@ isSymbolContinuation startChar '@' = True
 isSymbolContinuation startChar '$' = True
 isSymbolContinuation startChar '%' = True
 isSymbolContinuation startChar '^' = True
+isSymbolContinuation startChar '~' = True
 isSymbolContinuation startChar '&' = True
 isSymbolContinuation startChar '|' = True
+isSymbolContinuation startChar '+' = True
+isSymbolContinuation startChar '-' = True
 isSymbolContinuation startChar '*' = True
+isSymbolContinuation startChar '/' = True
 isSymbolContinuation startChar '=' = True
 isSymbolContinuation startChar '<' = True
 isSymbolContinuation startChar '>' = True
+isSymbolContinuation startChar '\\' = True
 isSymbolContinuation startChar _   = False
 
 
