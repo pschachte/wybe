@@ -439,7 +439,7 @@ codegenBody :: PrimProto -> ProcBody -> Codegen ()
 codegenBody proto body =
     do let ps = List.map content (bodyPrims body)
        -- Filter out prims which contain only phantom arguments
-       ops <- mapM cgen ps
+       mapM_ cgen ps
        let params = primProtoParams proto
        case bodyFork body of
          NoFork -> do retOp <- buildOutputOp params
@@ -620,7 +620,6 @@ cgenLLVMUnop "move" flags args =
            (outTy, outNm) <- openPrimArg output
            inop <- cgenArg input
            assign outNm inop outRep
-           return ()
       _ ->
            shouldnt "llvm move instruction with wrong arity"
 
@@ -688,7 +687,6 @@ cgenLPVM "alloc" [] args@[sizeArg,addrArg] = do
                 let outTy = repLLVMType outRep
                 op <- gcAllocate sizeArg outTy
                 assign (pullName addrArg) op outRep
-                return ()
             _ ->
               shouldnt $ "alloc instruction with " ++ show (length inputs)
                          ++ " inputs"
@@ -703,7 +701,6 @@ cgenLPVM "access" [] args@[addrArg,offsetArg,_,_,val] = do
           logCodegen $ "outTy = " ++ show outTy
           op <- gcAccess finalAddr outTy
           assign (pullName val) op outRep
-          return ()
 
 cgenLPVM "mutate" flags
     [addrArg, outArg, offsetArg, ArgInt 0 intTy, sizeArg, startOffsetArg,
@@ -741,7 +738,6 @@ cgenLPVM "mutate" _
           baseAddr <- cgenArg addrArg
           gcMutate baseAddr offsetArg valArg
           assign (pullName outArg) baseAddr Address
-          return ()
 
 cgenLPVM "mutate" _ [_, _, _, destructiveArg, _, _, _] =
       nyi "lpvm mutate instruction with non-constant destructive flag"
@@ -773,7 +769,6 @@ cgenLPVM "cast" [] args@[inArg,outArg] =
                 _ -> doCast inOp inTy outTy
 
             assign (pullName outArg) castOp outRep
-            return ()
 
         -- A cast with no outputs:  do nothing
         (_, []) -> return ()
@@ -864,15 +859,14 @@ addInstruction ins outArgs = do
     logCodegen $ "outTy = " ++ show outTy
     case outArgs of
           [] -> case outTy of
-            VoidType -> voidInstr ins >> return ()
-            _        -> Just <$> instr outTy ins >> return ()
+            VoidType -> voidInstr ins
+            _        -> instr outTy ins >> return ()
           [outArg] -> do
             outRep <- lift $ typeRep $ argType outArg
             logCodegen $ "outRep = " ++ show outRep
             let outName = pullName outArg
             outop <- namedInstr outTy outName ins
             assign outName outop outRep
-            return ()
           _ -> do
             outOp <- instr outTy ins
             let outTySpecs = argType <$> outArgs
@@ -882,7 +876,6 @@ addInstruction ins outArgs = do
             let outNames = List.map pullName outArgs
             -- lift $ logBlocks $ "-=-=-=-= Structure names:" ++ show outNames
             zipWith3M_ assign outNames fields treps
-            return ()
 
 
 pullName ArgVar{argVarName=var} = show var
