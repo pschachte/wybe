@@ -80,9 +80,7 @@ flattenBody stmts varSet detism = do
     logMsg Flatten $ "Flattening with all vars = " ++ show varSet'
     finalState <- execStateT (flattenStmts stmts detism)
                   $ initFlattenerState varSet'
-    return (List.reverse (prefixStmts finalState) ++
-            List.reverse (flattened finalState),
-            tempCtr finalState)
+    return (List.reverse (flattened finalState), tempCtr finalState)
 
 
 -- | Insert the expression var name if it's an output variable; otherwise leave
@@ -102,8 +100,6 @@ type Flattener = StateT FlattenerState Compiler
 
 
 data FlattenerState = Flattener {
-    prefixStmts :: [Placed Stmt],   -- ^Code to be generated earlier, reversed
-                                    -- (used for loop initialisation)
     flattened   :: [Placed Stmt],   -- ^Flattened code generated, reversed
     tempCtr     :: Int,             -- ^Temp variable counter
     currPos     :: OptPos,          -- ^Position of current statement
@@ -115,7 +111,7 @@ data FlattenerState = Flattener {
 
 initFlattenerState :: Set VarName -> FlattenerState
 initFlattenerState varSet = 
-    Flattener [] [] 0 Nothing Set.empty varSet
+    Flattener [] 0 Nothing Set.empty varSet
 
 
 emit :: OptPos -> Stmt -> Flattener ()
@@ -123,14 +119,6 @@ emit pos stmt = do
     logFlatten $ "-- Emitting:  " ++ showStmt 14 stmt
     stmts <- gets flattened
     modify (\s -> s { flattened = maybePlace stmt pos:stmts })
-
-
--- | Add an initialisation statement to the list of initialisations
---   XXX This will be needed for for loops, but is not used yet
-saveInit :: OptPos -> Stmt -> Flattener ()
-saveInit pos stmt = do
-    stmts <- gets prefixStmts
-    modify (\s -> s { prefixStmts = maybePlace stmt pos:stmts })
 
 
 -- |Return a fresh variable name.
@@ -153,9 +141,7 @@ flattenInner isLoop transparent detism inner = do
     (_,innerState) <-
         lift (runStateT inner
               (initFlattenerState (defdVars oldState)) {
-                    tempCtr = tempCtr oldState,
-                    prefixStmts = if isLoop then [] else prefixStmts oldState})
-    logFlatten $ "-- Prefix:\n" ++ showBody 4 (prefixStmts innerState)
+                    tempCtr = tempCtr oldState})
     logFlatten $ "-- Flattened:" ++ showBody 4 (List.reverse
                                                 $ flattened innerState)
     -- logFlatten $ "-- Postponed:\n" ++ 
@@ -164,9 +150,6 @@ flattenInner isLoop transparent detism inner = do
       then put $ oldState { tempCtr = tempCtr innerState,
                             defdVars = defdVars innerState }
       else put $ oldState { tempCtr = tempCtr innerState }
-    if isLoop
-      then flattenStmts (prefixStmts innerState) detism
-      else modify (\s -> s { prefixStmts = prefixStmts innerState })
     return $ List.reverse $ flattened innerState
 
 
