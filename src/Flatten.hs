@@ -265,10 +265,10 @@ flattenStmt' stmt@(ProcCall [] name _ _ _ []) pos _ = do
     if name `elem` defined
         then emit pos $ TestBool $ Var name ParamIn Ordinary
         else emit pos stmt
-flattenStmt' (ProcCall maybeMod name procID detism res args) pos _ = do
+flattenStmt' (ProcCall mod name procID detism res args) pos _ = do
     logFlatten "   call is Det"
     args' <- flattenStmtArgs args pos
-    emit pos $ ProcCall maybeMod name procID detism res args'
+    emit pos $ ProcCall mod name procID detism res args'
 flattenStmt' (ForeignCall lang name flags args) pos _ = do
     args' <- flattenStmtArgs args pos
     emit pos $ ForeignCall lang name flags args'
@@ -432,9 +432,8 @@ flattenExp (CondExp cond thn els) ty castFrom pos = do
                 Nothing Nothing)
         pos Det
     return $ [maybePlace (Var resultName ParamIn flowType) pos]
-flattenExp (Fncall maybeMod name exps) ty castFrom pos = do
-    flattenCall (ProcCall maybeMod name Nothing Det False) False ty castFrom pos
-      exps
+flattenExp (Fncall mod name exps) ty castFrom pos = do
+    flattenCall (ProcCall mod name Nothing Det False) False ty castFrom pos exps
 flattenExp (ForeignFn lang name flags exps) ty castFrom pos = do
     flattenCall (ForeignCall lang name flags) True ty castFrom pos exps
 flattenExp (Typed exp AnyType _) ty castFrom pos = do

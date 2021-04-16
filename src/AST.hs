@@ -2842,7 +2842,7 @@ instance Show Item where
       " use " ++ intercalate ", " specs
       ++ showMaybeSourcePos pos ++ "\n  "
   show (ImportForeign files pos) =
-      "use foreign " ++ intercalate ", " files
+      "use foreign object " ++ intercalate ", " files
       ++ showMaybeSourcePos pos ++ "\n  "
   show (ImportForeignLib names pos) =
       "use foreign library " ++ intercalate ", " names
