@@ -8,7 +8,7 @@ pub def list_print(x:intlist) use !io {
     }
 }
 
-pub def list_reverse(lst:intlist):intlist = list_reverse_helper(lst, nil)
+pub def list_reverse(!lst:intlist) { ?lst = list_reverse_helper(lst, nil) }
 
 pub def list_reverse_helper(lst:intlist, acc:intlist):intlist =
     if{ lst = cons(?h, ?t):: list_reverse_helper(t, cons(h,acc)) | else:: acc }

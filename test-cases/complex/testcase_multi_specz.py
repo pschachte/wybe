@@ -50,7 +50,7 @@ pub def range(start:int, stop:int, step:int, ?result:int_list) {
         ?result = cons(start, result)
         ?start = start + step
     }
-    reverse(!result)
+    reverse(result, ?result)
 }
 
 # Add an item to the end of the list.
@@ -167,8 +167,8 @@ use int_list
 
 
 def test_int_list(x:int_list, y:int_list, z:int_list) use !io {
-    reverse(!x)
-    reverse(!z)
+    reverse(x, ?x)
+    reverse(z, ?z)
     ?y = append(y, 99)
     !println("-")
     !println(x)
@@ -186,7 +186,7 @@ def test_int_list(x:int_list, y:int_list, z:int_list) use !io {
     !println("-")
     !println(l)
 
-    sort(!l)
+    sort(l, ?l)
     !println("-")
     !println(l)
 }
