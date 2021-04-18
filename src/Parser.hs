@@ -574,8 +574,8 @@ applyPrefixOp tok stmtExpr = do
         ("-", Foreign{}) -> return $ call1 pos "-" stmtExpr
         ("-", _) -> fail $ "cannot negate " ++ show stmtExpr
         ("~", IntConst _ num) -> return $ IntConst pos (complement num)
-        ("~", Call{}) -> return $ call1 pos "-" stmtExpr
-        ("~", Foreign{}) -> return $ call1 pos "-" stmtExpr
+        ("~", Call{}) -> return $ call1 pos "~" stmtExpr
+        ("~", Foreign{}) -> return $ call1 pos "~" stmtExpr
         ("~", _) -> fail $ "cannot negate " ++ show stmtExpr
         ("?", Call{callArguments=[]}) -> return $ setCallFlow ParamOut stmtExpr'
         ("?", _) -> fail $ "unexpected " ++ show stmtExpr'++ " following '?'"

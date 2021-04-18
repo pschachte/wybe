@@ -62,7 +62,7 @@ car > public {inline} (0 calls)
         foreign llvm move(~$rec#0:list_this(?T), ?$rec#1:list_this(?T))
 
     1:
-        foreign lpvm mutate(~%$rec#0:list_this(?T), ?%$rec#1:list_this(?T), 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:?T)
+        foreign lpvm mutate(~$rec#0:list_this(?T), ?$rec#1:list_this(?T), 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:?T)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -92,7 +92,7 @@ cdr > public {inline} (0 calls)
         foreign llvm move(~$rec#0:list_this(?T), ?$rec#1:list_this(?T))
 
     1:
-        foreign lpvm {noalias} mutate(~%$rec#0:list_this(?T), ?%$rec#1:list_this(?T), 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:list_this(?T))
+        foreign lpvm {noalias} mutate(~$rec#0:list_this(?T), ?$rec#1:list_this(?T), 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:list_this(?T))
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -102,8 +102,8 @@ cons > public {inline} (1 calls)
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:list_this(?T))
-    foreign lpvm mutate(~%$rec#0:list_this(?T), ?%$rec#1:list_this(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~car#0:?T)
-    foreign lpvm mutate(~%$rec#1:list_this(?T), ?%$#0:list_this(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~cdr#0:list_this(?T))
+    foreign lpvm mutate(~$rec#0:list_this(?T), ?$rec#1:list_this(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~car#0:?T)
+    foreign lpvm mutate(~$rec#1:list_this(?T), ?$#0:list_this(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~cdr#0:list_this(?T))
 cons > public {inline} (6 calls)
 1: cons(?car#0:?T, ?cdr#0:list_this(?T), $#0:list_this(?T), ?$$#0:wybe.bool):
  AliasPairs: []

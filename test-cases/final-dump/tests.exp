@@ -279,7 +279,7 @@ key > public {inline} (0 calls)
         foreign llvm move(~$rec#0:tests.map, ?$rec#1:tests.map)
 
     1:
-        foreign lpvm mutate(~%$rec#0:tests.map, ?%$rec#1:tests.map, 8:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+        foreign lpvm mutate(~$rec#0:tests.map, ?$rec#1:tests.map, 8:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -309,7 +309,7 @@ left > public {inline} (0 calls)
         foreign llvm move(~$rec#0:tests.map, ?$rec#1:tests.map)
 
     1:
-        foreign lpvm mutate(~%$rec#0:tests.map, ?%$rec#1:tests.map, 0:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:tests.map)
+        foreign lpvm mutate(~$rec#0:tests.map, ?$rec#1:tests.map, 0:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:tests.map)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -319,10 +319,10 @@ node > public {inline} (0 calls)
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(32:wybe.int, ?$rec#0:tests.map)
-    foreign lpvm mutate(~%$rec#0:tests.map, ?%$rec#1:tests.map, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~left#0:tests.map)
-    foreign lpvm mutate(~%$rec#1:tests.map, ?%$rec#2:tests.map, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~key#0:wybe.int)
-    foreign lpvm mutate(~%$rec#2:tests.map, ?%$rec#3:tests.map, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~value#0:wybe.int)
-    foreign lpvm mutate(~%$rec#3:tests.map, ?%$#0:tests.map, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~right#0:tests.map)
+    foreign lpvm mutate(~$rec#0:tests.map, ?$rec#1:tests.map, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~left#0:tests.map)
+    foreign lpvm mutate(~$rec#1:tests.map, ?$rec#2:tests.map, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~key#0:wybe.int)
+    foreign lpvm mutate(~$rec#2:tests.map, ?$rec#3:tests.map, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~value#0:wybe.int)
+    foreign lpvm mutate(~$rec#3:tests.map, ?$#0:tests.map, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~right#0:tests.map)
 node > public {inline} (20 calls)
 1: node(?left#0:tests.map, ?key#0:wybe.int, ?value#0:wybe.int, ?right#0:tests.map, $#0:tests.map, ?$$#0:wybe.bool):
  AliasPairs: []
@@ -370,7 +370,7 @@ right > public {inline} (0 calls)
         foreign llvm move(~$rec#0:tests.map, ?$rec#1:tests.map)
 
     1:
-        foreign lpvm mutate(~%$rec#0:tests.map, ?%$rec#1:tests.map, 24:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:tests.map)
+        foreign lpvm mutate(~$rec#0:tests.map, ?$rec#1:tests.map, 24:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:tests.map)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -400,7 +400,7 @@ value > public {inline} (0 calls)
         foreign llvm move(~$rec#0:tests.map, ?$rec#1:tests.map)
 
     1:
-        foreign lpvm mutate(~%$rec#0:tests.map, ?%$rec#1:tests.map, 16:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+        foreign lpvm mutate(~$rec#0:tests.map, ?$rec#1:tests.map, 16:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 

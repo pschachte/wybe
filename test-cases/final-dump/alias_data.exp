@@ -322,7 +322,7 @@ code > public {inline} (0 calls)
 1: code($rec#0:student.course, ?$rec#1:student.course, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm mutate(~%$rec#0:student.course, ?%$rec#1:student.course, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm mutate(~$rec#0:student.course, ?$rec#1:student.course, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 course > public {inline} (0 calls)
@@ -330,8 +330,8 @@ course > public {inline} (0 calls)
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:student.course)
-    foreign lpvm mutate(~%$rec#0:student.course, ?%$rec#1:student.course, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~code#0:wybe.int)
-    foreign lpvm mutate(~%$rec#1:student.course, ?%$#0:student.course, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~name#0:wybe.string)
+    foreign lpvm mutate(~$rec#0:student.course, ?$rec#1:student.course, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~code#0:wybe.int)
+    foreign lpvm mutate(~$rec#1:student.course, ?$#0:student.course, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~name#0:wybe.string)
 course > public {inline} (6 calls)
 1: course(?code#0:wybe.int, ?name#0:wybe.string, $#0:student.course):
  AliasPairs: []
@@ -349,7 +349,7 @@ name > public {inline} (0 calls)
 1: name($rec#0:student.course, ?$rec#1:student.course, $field#0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~%$rec#0:student.course, ?%$rec#1:student.course, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.string)
+    foreign lpvm {noalias} mutate(~$rec#0:student.course, ?$rec#1:student.course, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.string)
 
 
 ~= > public {inline} (0 calls)
@@ -583,7 +583,7 @@ id > public {inline} (0 calls)
 1: id($rec#0:student.student, ?$rec#1:student.student, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm mutate(~%$rec#0:student.student, ?%$rec#1:student.student, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm mutate(~$rec#0:student.student, ?$rec#1:student.student, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 major > public {inline} (0 calls)
@@ -595,7 +595,7 @@ major > public {inline} (0 calls)
 1: major($rec#0:student.student, ?$rec#1:student.student, $field#0:student.course):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~%$rec#0:student.student, ?%$rec#1:student.student, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:student.course)
+    foreign lpvm {noalias} mutate(~$rec#0:student.student, ?$rec#1:student.student, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:student.course)
 
 
 student > public {inline} (0 calls)
@@ -603,8 +603,8 @@ student > public {inline} (0 calls)
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:student.student)
-    foreign lpvm mutate(~%$rec#0:student.student, ?%$rec#1:student.student, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~id#0:wybe.int)
-    foreign lpvm mutate(~%$rec#1:student.student, ?%$#0:student.student, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~major#0:student.course)
+    foreign lpvm mutate(~$rec#0:student.student, ?$rec#1:student.student, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~id#0:wybe.int)
+    foreign lpvm mutate(~$rec#1:student.student, ?$#0:student.student, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~major#0:student.course)
 student > public {inline} (6 calls)
 1: student(?id#0:wybe.int, ?major#0:student.course, $#0:student.student):
  AliasPairs: []

@@ -104,7 +104,7 @@ firstname > public {inline} (0 calls)
 1: firstname($rec#0:person3.person, ?$rec#1:person3.person, $field#0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm mutate(~%$rec#0:person3.person, ?%$rec#1:person3.person, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.string)
+    foreign lpvm mutate(~$rec#0:person3.person, ?$rec#1:person3.person, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.string)
 
 
 lastname > public {inline} (0 calls)
@@ -116,7 +116,7 @@ lastname > public {inline} (0 calls)
 1: lastname($rec#0:person3.person, ?$rec#1:person3.person, $field#0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm mutate(~%$rec#0:person3.person, ?%$rec#1:person3.person, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.string)
+    foreign lpvm mutate(~$rec#0:person3.person, ?$rec#1:person3.person, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.string)
 
 
 person > public {inline} (0 calls)
@@ -124,8 +124,8 @@ person > public {inline} (0 calls)
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:person3.person)
-    foreign lpvm mutate(~%$rec#0:person3.person, ?%$rec#1:person3.person, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~firstname#0:wybe.string)
-    foreign lpvm mutate(~%$rec#1:person3.person, ?%$#0:person3.person, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~lastname#0:wybe.string)
+    foreign lpvm mutate(~$rec#0:person3.person, ?$rec#1:person3.person, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~firstname#0:wybe.string)
+    foreign lpvm mutate(~$rec#1:person3.person, ?$#0:person3.person, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~lastname#0:wybe.string)
 person > public {inline} (6 calls)
 1: person(?firstname#0:wybe.string, ?lastname#0:wybe.string, $#0:person3.person):
  AliasPairs: []

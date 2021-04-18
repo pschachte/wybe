@@ -298,7 +298,7 @@ key > public {inline} (0 calls)
         foreign llvm move(~$rec#0:stmt_if.tree, ?$rec#1:stmt_if.tree)
 
     1:
-        foreign lpvm mutate(~%$rec#0:stmt_if.tree, ?%$rec#1:stmt_if.tree, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+        foreign lpvm mutate(~$rec#0:stmt_if.tree, ?$rec#1:stmt_if.tree, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -328,7 +328,7 @@ left > public {inline} (0 calls)
         foreign llvm move(~$rec#0:stmt_if.tree, ?$rec#1:stmt_if.tree)
 
     1:
-        foreign lpvm mutate(~%$rec#0:stmt_if.tree, ?%$rec#1:stmt_if.tree, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field#0:stmt_if.tree)
+        foreign lpvm mutate(~$rec#0:stmt_if.tree, ?$rec#1:stmt_if.tree, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field#0:stmt_if.tree)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -338,9 +338,9 @@ node > public {inline} (0 calls)
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?$rec#0:stmt_if.tree)
-    foreign lpvm mutate(~%$rec#0:stmt_if.tree, ?%$rec#1:stmt_if.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~left#0:stmt_if.tree)
-    foreign lpvm mutate(~%$rec#1:stmt_if.tree, ?%$rec#2:stmt_if.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~key#0:wybe.int)
-    foreign lpvm mutate(~%$rec#2:stmt_if.tree, ?%$#0:stmt_if.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~right#0:stmt_if.tree)
+    foreign lpvm mutate(~$rec#0:stmt_if.tree, ?$rec#1:stmt_if.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~left#0:stmt_if.tree)
+    foreign lpvm mutate(~$rec#1:stmt_if.tree, ?$rec#2:stmt_if.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~key#0:wybe.int)
+    foreign lpvm mutate(~$rec#2:stmt_if.tree, ?$#0:stmt_if.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~right#0:stmt_if.tree)
 node > public {inline} (16 calls)
 1: node(?left#0:stmt_if.tree, ?key#0:wybe.int, ?right#0:stmt_if.tree, $#0:stmt_if.tree, ?$$#0:wybe.bool):
  AliasPairs: []
@@ -386,7 +386,7 @@ right > public {inline} (0 calls)
         foreign llvm move(~$rec#0:stmt_if.tree, ?$rec#1:stmt_if.tree)
 
     1:
-        foreign lpvm mutate(~%$rec#0:stmt_if.tree, ?%$rec#1:stmt_if.tree, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field#0:stmt_if.tree)
+        foreign lpvm mutate(~$rec#0:stmt_if.tree, ?$rec#1:stmt_if.tree, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field#0:stmt_if.tree)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 

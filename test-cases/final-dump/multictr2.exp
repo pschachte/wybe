@@ -584,7 +584,7 @@ c01 > public {inline} (0 calls)
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:multictr2.t)
-    foreign lpvm mutate(~%$rec#0:multictr2.t, ?%$#0:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f01#0:wybe.int)
+    foreign lpvm mutate(~$rec#0:multictr2.t, ?$#0:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f01#0:wybe.int)
 c01 > public {inline} (24 calls)
 1: c01(?f01#0:wybe.int, $#0:multictr2.t, ?$$#0:wybe.bool):
  AliasPairs: []
@@ -607,7 +607,7 @@ c02 > public {inline} (0 calls)
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:multictr2.t)
-    foreign lpvm mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f02#0:wybe.int)
+    foreign lpvm mutate(~$rec#0:multictr2.t, ?$rec#1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f02#0:wybe.int)
     foreign llvm or(~$rec#1:multictr2.t, 1:wybe.int, ?$#0:multictr2.t)
 c02 > public {inline} (19 calls)
 1: c02(?f02#0:wybe.int, $#0:multictr2.t, ?$$#0:wybe.bool):
@@ -631,7 +631,7 @@ c03 > public {inline} (0 calls)
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:multictr2.t)
-    foreign lpvm mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f03#0:wybe.int)
+    foreign lpvm mutate(~$rec#0:multictr2.t, ?$rec#1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f03#0:wybe.int)
     foreign llvm or(~$rec#1:multictr2.t, 2:wybe.int, ?$#0:multictr2.t)
 c03 > public {inline} (17 calls)
 1: c03(?f03#0:wybe.int, $#0:multictr2.t, ?$$#0:wybe.bool):
@@ -655,7 +655,7 @@ c04 > public {inline} (0 calls)
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:multictr2.t)
-    foreign lpvm mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f04#0:wybe.int)
+    foreign lpvm mutate(~$rec#0:multictr2.t, ?$rec#1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f04#0:wybe.int)
     foreign llvm or(~$rec#1:multictr2.t, 3:wybe.int, ?$#0:multictr2.t)
 c04 > public {inline} (15 calls)
 1: c04(?f04#0:wybe.int, $#0:multictr2.t, ?$$#0:wybe.bool):
@@ -679,7 +679,7 @@ c05 > public {inline} (0 calls)
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:multictr2.t)
-    foreign lpvm mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f05#0:wybe.int)
+    foreign lpvm mutate(~$rec#0:multictr2.t, ?$rec#1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f05#0:wybe.int)
     foreign llvm or(~$rec#1:multictr2.t, 4:wybe.int, ?$#0:multictr2.t)
 c05 > public {inline} (13 calls)
 1: c05(?f05#0:wybe.int, $#0:multictr2.t, ?$$#0:wybe.bool):
@@ -703,7 +703,7 @@ c06 > public {inline} (0 calls)
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:multictr2.t)
-    foreign lpvm mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f06#0:wybe.int)
+    foreign lpvm mutate(~$rec#0:multictr2.t, ?$rec#1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f06#0:wybe.int)
     foreign llvm or(~$rec#1:multictr2.t, 5:wybe.int, ?$#0:multictr2.t)
 c06 > public {inline} (11 calls)
 1: c06(?f06#0:wybe.int, $#0:multictr2.t, ?$$#0:wybe.bool):
@@ -727,7 +727,7 @@ c07 > public {inline} (0 calls)
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:multictr2.t)
-    foreign lpvm mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f07#0:wybe.int)
+    foreign lpvm mutate(~$rec#0:multictr2.t, ?$rec#1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f07#0:wybe.int)
     foreign llvm or(~$rec#1:multictr2.t, 6:wybe.int, ?$#0:multictr2.t)
 c07 > public {inline} (9 calls)
 1: c07(?f07#0:wybe.int, $#0:multictr2.t, ?$$#0:wybe.bool):
@@ -751,9 +751,9 @@ c08 > public {inline} (0 calls)
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?$rec#0:multictr2.t)
-    foreign lpvm mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~f08_a#0:wybe.int)
-    foreign lpvm mutate(~%$rec#1:multictr2.t, ?%$rec#2:multictr2.t, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~f08_b#0:wybe.int)
-    foreign lpvm mutate(~%$rec#2:multictr2.t, ?%$rec#3:multictr2.t, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~f08_c#0:wybe.float)
+    foreign lpvm mutate(~$rec#0:multictr2.t, ?$rec#1:multictr2.t, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~f08_a#0:wybe.int)
+    foreign lpvm mutate(~$rec#1:multictr2.t, ?$rec#2:multictr2.t, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~f08_b#0:wybe.int)
+    foreign lpvm mutate(~$rec#2:multictr2.t, ?$rec#3:multictr2.t, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~f08_c#0:wybe.float)
     foreign llvm or(~$rec#3:multictr2.t, 7:wybe.int, ?$#0:multictr2.t)
 c08 > public {inline} (9 calls)
 1: c08(?f08_a#0:wybe.int, ?f08_b#0:wybe.int, ?f08_c#0:wybe.float, $#0:multictr2.t, ?$$#0:wybe.bool):
@@ -803,7 +803,7 @@ f01 > public {inline} (0 calls)
         foreign llvm move(~$rec#0:multictr2.t, ?$rec#1:multictr2.t)
 
     1:
-        foreign lpvm {noalias} mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+        foreign lpvm {noalias} mutate(~$rec#0:multictr2.t, ?$rec#1:multictr2.t, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -835,7 +835,7 @@ f02 > public {inline} (0 calls)
         foreign llvm move(~$rec#0:multictr2.t, ?$rec#1:multictr2.t)
 
     1:
-        foreign lpvm {noalias} mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, -1:wybe.int, 0:wybe.int, 8:wybe.int, 1:wybe.int, ~$field#0:wybe.int)
+        foreign lpvm {noalias} mutate(~$rec#0:multictr2.t, ?$rec#1:multictr2.t, -1:wybe.int, 0:wybe.int, 8:wybe.int, 1:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -867,7 +867,7 @@ f03 > public {inline} (0 calls)
         foreign llvm move(~$rec#0:multictr2.t, ?$rec#1:multictr2.t)
 
     1:
-        foreign lpvm {noalias} mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, -2:wybe.int, 0:wybe.int, 8:wybe.int, 2:wybe.int, ~$field#0:wybe.int)
+        foreign lpvm {noalias} mutate(~$rec#0:multictr2.t, ?$rec#1:multictr2.t, -2:wybe.int, 0:wybe.int, 8:wybe.int, 2:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -899,7 +899,7 @@ f04 > public {inline} (0 calls)
         foreign llvm move(~$rec#0:multictr2.t, ?$rec#1:multictr2.t)
 
     1:
-        foreign lpvm {noalias} mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, -3:wybe.int, 0:wybe.int, 8:wybe.int, 3:wybe.int, ~$field#0:wybe.int)
+        foreign lpvm {noalias} mutate(~$rec#0:multictr2.t, ?$rec#1:multictr2.t, -3:wybe.int, 0:wybe.int, 8:wybe.int, 3:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -931,7 +931,7 @@ f05 > public {inline} (0 calls)
         foreign llvm move(~$rec#0:multictr2.t, ?$rec#1:multictr2.t)
 
     1:
-        foreign lpvm {noalias} mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, -4:wybe.int, 0:wybe.int, 8:wybe.int, 4:wybe.int, ~$field#0:wybe.int)
+        foreign lpvm {noalias} mutate(~$rec#0:multictr2.t, ?$rec#1:multictr2.t, -4:wybe.int, 0:wybe.int, 8:wybe.int, 4:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -963,7 +963,7 @@ f06 > public {inline} (0 calls)
         foreign llvm move(~$rec#0:multictr2.t, ?$rec#1:multictr2.t)
 
     1:
-        foreign lpvm {noalias} mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, -5:wybe.int, 0:wybe.int, 8:wybe.int, 5:wybe.int, ~$field#0:wybe.int)
+        foreign lpvm {noalias} mutate(~$rec#0:multictr2.t, ?$rec#1:multictr2.t, -5:wybe.int, 0:wybe.int, 8:wybe.int, 5:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -995,7 +995,7 @@ f07 > public {inline} (0 calls)
         foreign llvm move(~$rec#0:multictr2.t, ?$rec#1:multictr2.t)
 
     1:
-        foreign lpvm {noalias} mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, -6:wybe.int, 0:wybe.int, 8:wybe.int, 6:wybe.int, ~$field#0:wybe.int)
+        foreign lpvm {noalias} mutate(~$rec#0:multictr2.t, ?$rec#1:multictr2.t, -6:wybe.int, 0:wybe.int, 8:wybe.int, 6:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -1027,7 +1027,7 @@ f08_a > public {inline} (0 calls)
         foreign llvm move(~$rec#0:multictr2.t, ?$rec#1:multictr2.t)
 
     1:
-        foreign lpvm {noalias} mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, -7:wybe.int, 0:wybe.int, 24:wybe.int, 7:wybe.int, ~$field#0:wybe.int)
+        foreign lpvm {noalias} mutate(~$rec#0:multictr2.t, ?$rec#1:multictr2.t, -7:wybe.int, 0:wybe.int, 24:wybe.int, 7:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -1059,7 +1059,7 @@ f08_b > public {inline} (0 calls)
         foreign llvm move(~$rec#0:multictr2.t, ?$rec#1:multictr2.t)
 
     1:
-        foreign lpvm {noalias} mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, 1:wybe.int, 0:wybe.int, 24:wybe.int, 7:wybe.int, ~$field#0:wybe.int)
+        foreign lpvm {noalias} mutate(~$rec#0:multictr2.t, ?$rec#1:multictr2.t, 1:wybe.int, 0:wybe.int, 24:wybe.int, 7:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -1091,7 +1091,7 @@ f08_c > public {inline} (0 calls)
         foreign llvm move(~$rec#0:multictr2.t, ?$rec#1:multictr2.t)
 
     1:
-        foreign lpvm {noalias} mutate(~%$rec#0:multictr2.t, ?%$rec#1:multictr2.t, 9:wybe.int, 0:wybe.int, 24:wybe.int, 7:wybe.int, ~$field#0:wybe.float)
+        foreign lpvm {noalias} mutate(~$rec#0:multictr2.t, ?$rec#1:multictr2.t, 9:wybe.int, 0:wybe.int, 24:wybe.int, 7:wybe.int, ~$field#0:wybe.float)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 

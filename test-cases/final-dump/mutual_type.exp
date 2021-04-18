@@ -81,8 +81,8 @@ a > public {inline} (0 calls)
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:mutual_type.a)
-    foreign lpvm mutate(~%$rec#0:mutual_type.a, ?%$rec#1:mutual_type.a, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~ahead#0:wybe.int)
-    foreign lpvm mutate(~%$rec#1:mutual_type.a, ?%$#0:mutual_type.a, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~atail#0:mutual_type.b)
+    foreign lpvm mutate(~$rec#0:mutual_type.a, ?$rec#1:mutual_type.a, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~ahead#0:wybe.int)
+    foreign lpvm mutate(~$rec#1:mutual_type.a, ?$#0:mutual_type.a, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~atail#0:mutual_type.b)
 a > public {inline} (12 calls)
 1: a(?ahead#0:wybe.int, ?atail#0:mutual_type.b, $#0:mutual_type.a, ?$$#0:wybe.bool):
  AliasPairs: []
@@ -126,7 +126,7 @@ ahead > public {inline} (0 calls)
         foreign llvm move(~$rec#0:mutual_type.a, ?$rec#1:mutual_type.a)
 
     1:
-        foreign lpvm mutate(~%$rec#0:mutual_type.a, ?%$rec#1:mutual_type.a, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+        foreign lpvm mutate(~$rec#0:mutual_type.a, ?$rec#1:mutual_type.a, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -156,7 +156,7 @@ atail > public {inline} (0 calls)
         foreign llvm move(~$rec#0:mutual_type.a, ?$rec#1:mutual_type.a)
 
     1:
-        foreign lpvm {noalias} mutate(~%$rec#0:mutual_type.a, ?%$rec#1:mutual_type.a, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:mutual_type.b)
+        foreign lpvm {noalias} mutate(~$rec#0:mutual_type.a, ?$rec#1:mutual_type.a, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:mutual_type.b)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -422,8 +422,8 @@ b > public {inline} (0 calls)
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:mutual_type.b)
-    foreign lpvm mutate(~%$rec#0:mutual_type.b, ?%$rec#1:mutual_type.b, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~bhead#0:wybe.int)
-    foreign lpvm mutate(~%$rec#1:mutual_type.b, ?%$#0:mutual_type.b, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~btail#0:mutual_type.a)
+    foreign lpvm mutate(~$rec#0:mutual_type.b, ?$rec#1:mutual_type.b, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~bhead#0:wybe.int)
+    foreign lpvm mutate(~$rec#1:mutual_type.b, ?$#0:mutual_type.b, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~btail#0:mutual_type.a)
 b > public {inline} (12 calls)
 1: b(?bhead#0:wybe.int, ?btail#0:mutual_type.a, $#0:mutual_type.b, ?$$#0:wybe.bool):
  AliasPairs: []
@@ -467,7 +467,7 @@ bhead > public {inline} (0 calls)
         foreign llvm move(~$rec#0:mutual_type.b, ?$rec#1:mutual_type.b)
 
     1:
-        foreign lpvm mutate(~%$rec#0:mutual_type.b, ?%$rec#1:mutual_type.b, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+        foreign lpvm mutate(~$rec#0:mutual_type.b, ?$rec#1:mutual_type.b, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -497,7 +497,7 @@ btail > public {inline} (0 calls)
         foreign llvm move(~$rec#0:mutual_type.b, ?$rec#1:mutual_type.b)
 
     1:
-        foreign lpvm {noalias} mutate(~%$rec#0:mutual_type.b, ?%$rec#1:mutual_type.b, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:mutual_type.a)
+        foreign lpvm {noalias} mutate(~$rec#0:mutual_type.b, ?$rec#1:mutual_type.b, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:mutual_type.a)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 

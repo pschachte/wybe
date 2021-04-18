@@ -43,7 +43,7 @@ just > public {inline} (0 calls)
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:constructors)
-    foreign lpvm mutate(~%$rec#0:constructors, ?%$#0:constructors, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~value#0:wybe.int)
+    foreign lpvm mutate(~$rec#0:constructors, ?$#0:constructors, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~value#0:wybe.int)
 just > public {inline} (8 calls)
 1: just(?value#0:wybe.int, $#0:constructors, ?$$#0:wybe.bool):
  AliasPairs: []
@@ -92,7 +92,7 @@ value > public {inline} (0 calls)
         foreign llvm move(~$rec#0:constructors, ?$rec#1:constructors)
 
     1:
-        foreign lpvm {noalias} mutate(~%$rec#0:constructors, ?%$rec#1:constructors, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+        foreign lpvm {noalias} mutate(~$rec#0:constructors, ?$rec#1:constructors, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 

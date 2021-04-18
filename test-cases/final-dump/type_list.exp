@@ -289,8 +289,8 @@ cons > public {inline} (0 calls)
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:type_list.intlist)
-    foreign lpvm mutate(~%$rec#0:type_list.intlist, ?%$rec#1:type_list.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:wybe.int)
-    foreign lpvm mutate(~%$rec#1:type_list.intlist, ?%$#0:type_list.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:type_list.intlist)
+    foreign lpvm mutate(~$rec#0:type_list.intlist, ?$rec#1:type_list.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:wybe.int)
+    foreign lpvm mutate(~$rec#1:type_list.intlist, ?$#0:type_list.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:type_list.intlist)
 cons > public {inline} (12 calls)
 1: cons(?head#0:wybe.int, ?tail#0:type_list.intlist, $#0:type_list.intlist, ?$$#0:wybe.bool):
  AliasPairs: []
@@ -334,7 +334,7 @@ head > public {inline} (0 calls)
         foreign llvm move(~$rec#0:type_list.intlist, ?$rec#1:type_list.intlist)
 
     1:
-        foreign lpvm mutate(~%$rec#0:type_list.intlist, ?%$rec#1:type_list.intlist, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+        foreign lpvm mutate(~$rec#0:type_list.intlist, ?$rec#1:type_list.intlist, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -371,7 +371,7 @@ tail > public {inline} (0 calls)
         foreign llvm move(~$rec#0:type_list.intlist, ?$rec#1:type_list.intlist)
 
     1:
-        foreign lpvm {noalias} mutate(~%$rec#0:type_list.intlist, ?%$rec#1:type_list.intlist, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:type_list.intlist)
+        foreign lpvm {noalias} mutate(~$rec#0:type_list.intlist, ?$rec#1:type_list.intlist, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:type_list.intlist)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 

@@ -71,6 +71,7 @@ currVar name pos = do
     dict <- gets currVars
     case Map.lookup name dict of
         Nothing -> do
+            logClause $ "Found uninitialised variable " ++ name
             lift $ message Error
                      ("Uninitialised variable '" ++ name ++ "'") pos
             return $ PrimVarName name (-1)
@@ -152,7 +153,7 @@ compileProc proc =
         logClause $ "  startVars: " ++ show startVars
         logClause $ "  endVars  : " ++ show endVars
         logClause $ "  params   : " ++ show params
-        let params' = List.map (compileParam startVars endVars procName) params
+        let params' = concatMap (compileParam startVars endVars procName) params
         let proto' = PrimProto (procProtoName proto) params'
         logClause $ "  comparams: " ++ show params'
         callSiteCount <- gets nextCallSiteID
@@ -195,7 +196,7 @@ compileBody stmts params detism = do
         call@(ProcCall maybeMod name procID SemiDet _ args)
           | detism == SemiDet -> do
           logClause $ "Compiling SemiDet tail call " ++ showStmt 4 call
-          args' <- mapM (placedApply compileArg) args
+          args' <- concat <$> mapM (placedApply compileArg) args
           front <- mapM compileSimpleStmt $ init stmts
           callSiteID <- gets nextCallSiteID
           let final' = Unplaced
@@ -275,14 +276,14 @@ compileSimpleStmt' call@(ProcCall maybeMod name procID _ _ args) = do
     logClause $ "Compiling call " ++ showStmt 4 call
     callSiteID <- gets nextCallSiteID
     modify (\st -> st {nextCallSiteID = callSiteID + 1})
-    args' <- mapM (placedApply compileArg) args
+    args' <- concat <$> mapM (placedApply compileArg) args
     return $ PrimCall callSiteID (ProcSpec maybeMod name
                        (trustFromJust
                        ("compileSimpleStmt' for " ++ showStmt 4 call)
                        procID) generalVersion)
         args'
 compileSimpleStmt' (ForeignCall lang name flags args) = do
-    args' <- mapM (placedApply compileArg) args
+    args' <- concat <$> mapM (placedApply compileArg) args
     return $ PrimForeign lang name flags args'
 compileSimpleStmt' (TestBool expr) =
     -- Only for handling a TestBool other than as the condition of a Cond:
@@ -295,25 +296,32 @@ compileSimpleStmt' stmt =
     shouldnt $ "Normalisation left complex statement:\n" ++ showStmt 4 stmt
 
 
-compileArg :: Exp -> OptPos -> ClauseComp PrimArg
+compileArg :: Exp -> OptPos -> ClauseComp [PrimArg]
 compileArg (Typed exp typ coerce) pos = do
     logClause $ "Compiling expression " ++ show exp
-    arg <- compileArg' typ (isJust coerce) exp pos
-    logClause $ "Expression compiled to " ++ show arg
-    return arg
+    args <- compileArg' typ (isJust coerce) exp pos
+    logClause $ "Expression compiled to " ++ show args
+    return args
 compileArg exp pos = shouldnt $ "Compiling untyped argument " ++ show exp
 
-compileArg' :: TypeSpec -> Bool -> Exp -> OptPos -> ClauseComp PrimArg
-compileArg' typ _ (IntValue int) _ = return $ ArgInt int typ
-compileArg' typ _ (FloatValue float) _ = return $ ArgFloat float typ
-compileArg' typ _ (StringValue string) _ = return $ ArgString string typ
-compileArg' typ _ (CharValue char) _ = return $ ArgChar char typ
-compileArg' typ coerce (Var name ParamIn flowType) pos = do
-    name' <- currVar name pos
-    return $ ArgVar name' typ coerce FlowIn flowType False
-compileArg' typ coerce (Var name ParamOut flowType) _ = do
-    name' <- nextVar name
-    return $ ArgVar name' typ coerce FlowOut flowType False
+compileArg' :: TypeSpec -> Bool -> Exp -> OptPos -> ClauseComp [PrimArg]
+compileArg' typ _ (IntValue int) _ = return $ [ArgInt int typ]
+compileArg' typ _ (FloatValue float) _ = return $ [ArgFloat float typ]
+compileArg' typ _ (StringValue string) _ = return $ [ArgString string typ]
+compileArg' typ _ (CharValue char) _ = return $ [ArgChar char typ]
+compileArg' typ coerce var@(Var name flow flowType) pos = do
+    let flowType' = if flow == ParamInOut then HalfUpdate else flowType
+    inArg <- if flowsIn flow
+        then do
+            currName <- currVar name pos
+            return [ArgVar currName typ coerce FlowIn flowType' False]
+        else return []
+    outArg <- if flowsOut flow
+        then do
+            nextName <- nextVar name
+            return [ArgVar nextName typ coerce FlowOut flowType' False]
+        else return []
+    return $ inArg ++ outArg
 compileArg' _   _ (Typed exp typ coerce) pos =
     shouldnt $ "Compiling multi-typed expression " ++ show exp
 compileArg' _   _ arg _ =
@@ -343,25 +351,20 @@ reconcileOne caseVars jointVars (Param name ty flow ftype) =
        _ -> Nothing
 
 
-compileParam :: Numbering -> Numbering -> ProcName -> Param -> PrimParam
+compileParam :: Numbering -> Numbering -> ProcName -> Param -> [PrimParam]
 compileParam startVars endVars procName param@(Param name ty flow ftype) =
-    let (pflow,num) =
-            case flow of
-                -- ParamIn -> (FlowIn, Map.findWithDefault 0 name startVars)
-                ParamIn -> (FlowIn,
-                             trustFromJust
-                             ("compileParam for input param " ++ show param
-                              ++ " of proc " ++ show procName)
-                             $ Map.lookup name startVars)
-                -- ParamOut -> (FlowOut, Map.findWithDefault 0 name endVars)
-                ParamOut -> (FlowOut,
-                             trustFromJust
-                             ("compileParam for output param " ++ show param
-                              ++ " of proc " ++ show procName)
-                             $ Map.lookup name endVars)
-                _ -> shouldnt "non-simple parameter flow in compileParam"
-    in PrimParam (PrimVarName name num)
-       ty pflow ftype (ParamInfo False)
+    [PrimParam (PrimVarName name num) ty FlowIn ftype (ParamInfo False)
+    | flowsIn flow
+    , let num = Map.findWithDefault 
+                (shouldnt ("compileParam for input param " ++ show param
+                            ++ " of proc " ++ show procName))
+                name startVars]
+    ++ [PrimParam (PrimVarName name num) ty FlowOut ftype (ParamInfo False)
+    | flowsOut flow
+    , let num = Map.findWithDefault 
+                (shouldnt ("compileParam for output param " ++ show param
+                            ++ " of proc " ++ show procName))
+                name endVars]
 
 
 -- |A synthetic output parameter carrying the test result

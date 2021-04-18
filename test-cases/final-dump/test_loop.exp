@@ -307,7 +307,7 @@ high > public {inline} (0 calls)
 1: high($rec#0:test_loop.int_seq, ?$rec#1:test_loop.int_seq, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~%$rec#0:test_loop.int_seq, ?%$rec#1:test_loop.int_seq, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm {noalias} mutate(~$rec#0:test_loop.int_seq, ?$rec#1:test_loop.int_seq, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 int_seq > public {inline} (0 calls)
@@ -315,9 +315,9 @@ int_seq > public {inline} (0 calls)
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?$rec#0:test_loop.int_seq)
-    foreign lpvm mutate(~%$rec#0:test_loop.int_seq, ?%$rec#1:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~low#0:wybe.int)
-    foreign lpvm mutate(~%$rec#1:test_loop.int_seq, ?%$rec#2:test_loop.int_seq, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~step#0:wybe.int)
-    foreign lpvm mutate(~%$rec#2:test_loop.int_seq, ?%$#0:test_loop.int_seq, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~high#0:wybe.int)
+    foreign lpvm mutate(~$rec#0:test_loop.int_seq, ?$rec#1:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~low#0:wybe.int)
+    foreign lpvm mutate(~$rec#1:test_loop.int_seq, ?$rec#2:test_loop.int_seq, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~step#0:wybe.int)
+    foreign lpvm mutate(~$rec#2:test_loop.int_seq, ?$#0:test_loop.int_seq, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~high#0:wybe.int)
 int_seq > public {inline} (13 calls)
 1: int_seq(?low#0:wybe.int, ?step#0:wybe.int, ?high#0:wybe.int, $#0:test_loop.int_seq):
  AliasPairs: []
@@ -336,7 +336,7 @@ low > public {inline} (1 calls)
 1: low($rec#0:test_loop.int_seq, ?$rec#1:test_loop.int_seq, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~%$rec#0:test_loop.int_seq, ?%$rec#1:test_loop.int_seq, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm {noalias} mutate(~$rec#0:test_loop.int_seq, ?$rec#1:test_loop.int_seq, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 seq_next > public (0 calls)
@@ -387,7 +387,7 @@ step > public {inline} (0 calls)
 1: step($rec#0:test_loop.int_seq, ?$rec#1:test_loop.int_seq, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~%$rec#0:test_loop.int_seq, ?%$rec#1:test_loop.int_seq, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm {noalias} mutate(~$rec#0:test_loop.int_seq, ?$rec#1:test_loop.int_seq, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 ~= > public {inline} (0 calls)

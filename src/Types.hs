@@ -1474,10 +1474,12 @@ modecheckStmt m name defPos delayed assigned detism
     callInfos <- lift $ callProcInfos $ maybePlace stmt pos
     -- Find arg types and expand type variables
     actualTypes <- mapM (expType >=> ultimateType) args
+    logTyped $ "    actual types     : " ++ show actualTypes
     let actualModes = List.map (expMode assigned) args
+    logTyped $ "    actual modes     : " ++ show actualModes
     let flowErrs = [ReasonArgFlow cname num pos
                    | ((mode,avail,_),num) <- zip actualModes [1..]
-                   , mode == ParamIn && not avail]
+                   , not avail && (mode == ParamIn || mode == ParamInOut)]
     if not $ List.null flowErrs -- Using undefined var as input?
         then do
             logTyped $ "Unpreventable mode errors: " ++ show flowErrs
@@ -1486,30 +1488,28 @@ modecheckStmt m name defPos delayed assigned detism
         else case (cmod, cname, actualModes) of
           -- Special cases to handle = as assignment when one argument is
           -- known to be defined and the other is an output or unknown.
-          ([], "=", [(ParamIn,True,_),(ParamOut,_,_)]) ->
-                modecheckStmt m name defPos delayed assigned detism
-                    (ForeignCall "llvm" "move" [] [args!!0, args!!1]) pos
-          ([], "=", [(ParamIn,True,_),(FlowUnknown,_,_)]) ->
-                modecheckStmt m name defPos delayed assigned detism
-                    (ForeignCall "llvm" "move" []
-                        [args!!0, forceOut <$> args!!1]) pos
-          ([], "=", [(ParamOut,_,_),(ParamIn,True,_)]) ->
-                modecheckStmt m name defPos delayed assigned detism
-                    (ForeignCall "llvm" "move" [] [args!!1, args!!0]) pos
-          ([], "=", [(FlowUnknown,_,_),(ParamIn,True,_)]) ->
-                modecheckStmt m name defPos delayed assigned detism
-                    (ForeignCall "llvm" "move" []
-                        [args!!1, forceOut <$> args!!0]) pos
+        --   ([], "=", [(ParamIn,True,_),(ParamOut,_,_)]) ->
+        --         modecheckStmt m name defPos delayed assigned detism
+        --             (ForeignCall "llvm" "move" [] [args!!0, args!!1]) pos
+        --   ([], "=", [(ParamIn,True,_),(FlowUnknown,_,_)]) ->
+        --         modecheckStmt m name defPos delayed assigned detism
+        --             (ForeignCall "llvm" "move" []
+        --                 [args!!0, forceOut <$> args!!1]) pos
+        --   ([], "=", [(ParamOut,_,_),(ParamIn,True,_)]) ->
+        --         modecheckStmt m name defPos delayed assigned detism
+        --             (ForeignCall "llvm" "move" [] [args!!1, args!!0]) pos
+        --   ([], "=", [(FlowUnknown,_,_),(ParamIn,True,_)]) ->
+        --         modecheckStmt m name defPos delayed assigned detism
+        --             (ForeignCall "llvm" "move" []
+        --                 [args!!1, forceOut <$> args!!0]) pos
           _ -> do
             typeMatches <- ((fst <$>) . catOKs) <$> mapM
                         (matchTypeList name cname pos actualTypes detism)
                         callInfos
+            logTyped $ "Type-correct modes   : " ++ show typeMatches
             -- All the possibly matching modes
             let modeMatches
                     = List.filter (matchModeList actualModes) typeMatches
-            logTyped $ "Actual types         : " ++ show actualTypes
-            logTyped $ "Actual call modes    : " ++ show actualModes
-            logTyped $ "Type-correct modes   : " ++ show typeMatches
             logTyped $ "Possible mode matches: " ++ show modeMatches
             let exactMatches
                     = List.filter (exactModeMatch actualModes) modeMatches
@@ -1549,6 +1549,7 @@ modecheckStmt m name defPos delayed assigned detism
                         (pexpListOutputs args')
                         (assigned {bindingVars =
                             Set.union matchResources <$> bindingVars assigned })
+                  logTyped $ "New instr = " ++ show stmt'
                   return ([maybePlace stmt' pos],delayed,assigned')
                 [] -> if List.any (delayModeMatch actualModes) modeMatches
                       then do
