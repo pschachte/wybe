@@ -99,6 +99,7 @@ type Flattener = StateT FlattenerState Compiler
 
 data FlattenerState = Flattener {
     flattened   :: [Placed Stmt],   -- ^Flattened code generated, reversed
+    postponed   :: [Placed Stmt],   -- ^Flattened code to come after
     tempCtr     :: Int,             -- ^Temp variable counter
     currPos     :: OptPos,          -- ^Position of current statement
     stmtDefs    :: Set VarName,     -- ^Variables defined by this statement
@@ -109,7 +110,7 @@ data FlattenerState = Flattener {
 
 initFlattenerState :: Set VarName -> FlattenerState
 initFlattenerState varSet = 
-    Flattener [] 0 Nothing Set.empty varSet
+    Flattener [] [] 0 Nothing Set.empty varSet
 
 
 emit :: OptPos -> Stmt -> Flattener ()
@@ -154,8 +155,17 @@ flattenInner isLoop transparent detism inner = do
 flattenStmtArgs :: [Placed Exp] -> OptPos -> Flattener [Placed Exp]
 flattenStmtArgs args pos = do
     modify (\s -> s { stmtDefs = Set.empty, currPos = pos})
+    currPostponed <- gets postponed
+    unless (List.null currPostponed)
+        $ shouldnt "postponed stmts remain on starting stmt flattening"
     flattenArgs args
 
+
+flushPostponed ::  Flattener ()
+flushPostponed = do
+    currPostponed <- gets postponed
+    modify (\s -> s  {flattened = reverse currPostponed ++ flattened s,
+                      postponed = []})
 
 noteVarDef :: VarName -> Flattener ()
 noteVarDef var = do
@@ -211,6 +221,7 @@ flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos detism = do
         logFlatten $ "  transformed to " ++ showStmt 4 instr
         noteVarDef var
         emit pos instr
+        flushPostponed
       (_, Var var ParamOut Ordinary) | Set.null arg1Vars -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
         [arg1'] <- flattenStmtArgs [arg1] pos
@@ -218,6 +229,7 @@ flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos detism = do
         logFlatten $ "  transformed to " ++ showStmt 4 instr
         noteVarDef var
         emit pos instr
+        flushPostponed
       (Fncall mod name args, _)
         | not (Set.null arg1Vars) && Set.null arg2Vars -> do
         let stmt' = ProcCall mod name Nothing Det False (args++[arg2])
@@ -230,6 +242,7 @@ flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos detism = do
         logFlatten $ "Leaving equality test alone: " ++ showStmt 4 stmt
         args' <- flattenStmtArgs [arg1,arg2] pos
         emit pos $ ProcCall [] "=" id Det res args'
+        flushPostponed
       _ -> do
         -- Must be a mode error:  both sides want to bind variables
         lift $ message Error "Cannot generate bindings on both sides of '='" pos
@@ -250,9 +263,11 @@ flattenStmt' (ProcCall mod name procID detism res args) pos _ = do
     logFlatten "   call is Det"
     args' <- flattenStmtArgs args pos
     emit pos $ ProcCall mod name procID detism res args'
+    flushPostponed
 flattenStmt' (ForeignCall lang name flags args) pos _ = do
     args' <- flattenStmtArgs args pos
     emit pos $ ForeignCall lang name flags args'
+    flushPostponed
 -- XXX must handle Flattener state more carefully.  Defined variables need
 --     to be retained between condition and then branch, but forgotten for
 --     the else branch.  Also note that 'transparent' arg to flattenInner is
@@ -410,7 +425,8 @@ flattenExp (Typed exp AnyType _) ty castFrom pos = do
 flattenExp (Typed exp ty castFrom) _ _ pos = do
     flattenExp exp ty castFrom pos
 
-
+-- |Flatten a Wybe or foreign *function* call, returning a simple expression for
+-- the value (ie, a variable).  Emits a proc call to compute the value.
 flattenCall :: ([Placed Exp] -> Stmt) -> Bool -> TypeSpec -> Maybe TypeSpec
             -> OptPos -> [Placed Exp] -> Flattener (Placed Exp)
 flattenCall stmtBuilder isForeign ty castFrom pos exps = do
@@ -420,7 +436,6 @@ flattenCall stmtBuilder isForeign ty castFrom pos exps = do
     defs <- gets stmtDefs
     modify (\s -> s { stmtDefs = Set.empty, currPos = pos})
     exps' <- flattenArgs exps
-    -- let exps'' = List.filter (isInExp . content) exps'
     defs' <- gets stmtDefs
     modify (\s -> s { stmtDefs = defs `Set.union` defs', 
                       currPos = oldPos})

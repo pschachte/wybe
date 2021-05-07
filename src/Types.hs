@@ -1488,20 +1488,20 @@ modecheckStmt m name defPos delayed assigned detism
         else case (cmod, cname, actualModes) of
           -- Special cases to handle = as assignment when one argument is
           -- known to be defined and the other is an output or unknown.
-        --   ([], "=", [(ParamIn,True,_),(ParamOut,_,_)]) ->
-        --         modecheckStmt m name defPos delayed assigned detism
-        --             (ForeignCall "llvm" "move" [] [args!!0, args!!1]) pos
-        --   ([], "=", [(ParamIn,True,_),(FlowUnknown,_,_)]) ->
-        --         modecheckStmt m name defPos delayed assigned detism
-        --             (ForeignCall "llvm" "move" []
-        --                 [args!!0, forceOut <$> args!!1]) pos
-        --   ([], "=", [(ParamOut,_,_),(ParamIn,True,_)]) ->
-        --         modecheckStmt m name defPos delayed assigned detism
-        --             (ForeignCall "llvm" "move" [] [args!!1, args!!0]) pos
-        --   ([], "=", [(FlowUnknown,_,_),(ParamIn,True,_)]) ->
-        --         modecheckStmt m name defPos delayed assigned detism
-        --             (ForeignCall "llvm" "move" []
-        --                 [args!!1, forceOut <$> args!!0]) pos
+          ([], "=", [(ParamIn,True,_),(ParamOut,_,_)]) ->
+                modecheckStmt m name defPos delayed assigned detism
+                    (ForeignCall "llvm" "move" [] [args!!0, args!!1]) pos
+          ([], "=", [(ParamIn,True,_),(FlowUnknown,_,_)]) ->
+                modecheckStmt m name defPos delayed assigned detism
+                    (ForeignCall "llvm" "move" []
+                        [args!!0, forceOut <$> args!!1]) pos
+          ([], "=", [(ParamOut,_,_),(ParamIn,True,_)]) ->
+                modecheckStmt m name defPos delayed assigned detism
+                    (ForeignCall "llvm" "move" [] [args!!1, args!!0]) pos
+          ([], "=", [(FlowUnknown,_,_),(ParamIn,True,_)]) ->
+                modecheckStmt m name defPos delayed assigned detism
+                    (ForeignCall "llvm" "move" []
+                        [args!!1, forceOut <$> args!!0]) pos
           _ -> do
             typeMatches <- ((fst <$>) . catOKs) <$> mapM
                         (matchTypeList name cname pos actualTypes detism)
