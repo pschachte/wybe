@@ -839,6 +839,9 @@ typecheckProcDecl' m pdef = do
             ifOK pdef $ do
                 typecheckCalls m name pos calls' [] False
                 logTyping "Typing independent of mode: "
+                mapM_ (placedApply validateForeign)
+                      (List.filter (isForeign . content)
+                        $ fst <$> calls)
                 ifOK pdef $ do
                     logTyped $ "Now mode checking proc " ++ name
                     let inParams = Set.fromList $ paramName <$>
@@ -857,6 +860,7 @@ typecheckProcDecl' m pdef = do
                     logTyped $ "Initialised vars: " ++ show initialised
                     (def',assigned) <-
                         modecheckStmts m name pos [] initialised detism def
+                    logTyped $ "Mode checked body   : " ++ show def'
                     logTyped $ "Vars defined by body: " ++ show assigned
                     logTyped $ "Output parameters   : "
                                ++ intercalate ", " (Set.toList outParams)
@@ -884,8 +888,6 @@ typecheckProcDecl' m pdef = do
                                     ++ showProcDef 4 pdef
                                     ++ "\n-----------------NEW:"
                                     ++ showProcDef 4 pdef' ++ "\n")
-                    mapM_ (placedApply validateForeign)
-                          (List.filter (isForeign . content) def')
                     return (pdef',sccAgain)
 
 
