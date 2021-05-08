@@ -11,7 +11,8 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public (0 calls)
-0: (io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: func_factorial.<0>
+(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     func_factorial.factorial<0>(5:wybe.int, ?tmp$0#0:wybe.int) #0 @func_factorial:nn:nn
@@ -20,7 +21,8 @@ AFTER EVERYTHING:
 
 
 factorial > public (2 calls)
-0: factorial(n#0:wybe.int, ?$#0:wybe.int):
+0: func_factorial.factorial<0>
+factorial(n#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_sle(n#0:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.bool) @int:nn:nn

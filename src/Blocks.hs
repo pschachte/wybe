@@ -123,13 +123,12 @@ mangleProcs ps = zipWith mangleProc ps [0..]
 
 mangleProc :: ProcDef -> Int -> ProcDef
 mangleProc def i =
-    let (ProcDefPrim proto body analysis speczBodies) = 
-                procImpln def
+    let proto = procImplnProto $ procImpln def
         s = primProtoName proto
         pname = s ++ "<" ++ show i ++ ">"
         newProto = proto {primProtoName = pname}
     in 
-    def {procImpln = ProcDefPrim newProto body analysis speczBodies}
+    def {procImpln = (procImpln def){procImplnProto = newProto}}
 
 
 
@@ -171,7 +170,7 @@ mangleProc def i =
 extractLPVMProto :: ProcDef -> PrimProto
 extractLPVMProto procdef =
     case procImpln procdef of
-       (ProcDefPrim proto _ _ _) -> proto
+       ProcDefPrim{procImplnProto = proto} -> proto
        uncompiled ->
          shouldnt $ "Proc reached backend uncompiled: " ++ show uncompiled
 
@@ -203,7 +202,9 @@ isStdLib (m:_) = m == "wybe"
 translateProc :: [PrimProto] -> ProcDef -> Translation [ProcDefBlock]
 translateProc modProtos proc = do
     count <- getCount
-    let ProcDefPrim proto body _ speczBodies = procImpln proc
+    let proto = procImplnProto $ procImpln proc
+    let body = procImplnBody $ procImpln proc
+    let speczBodies = procImplnSpeczBodies $ procImpln proc
     -- translate the standard version
     (block, count') <- 
             lift $ _translateProcImpl modProtos proto body count
@@ -537,11 +538,15 @@ cgen prim@(PrimForeign "llvm" name flags args) = do
        0 | name == "move" -> return Nothing -- move phantom to phantom
        2 -> cgenLLVMUnop name flags args'
        3 -> cgenLLVMBinop name flags args'
-       _ -> shouldnt $ "LLVM instruction " ++ name ++ " with wrong arity!"
+       _ -> shouldnt $ "LLVM instruction " ++ name
+                       ++ " with wrong arity (" ++ show (length args') ++ ")!"
 
 cgen prim@(PrimForeign "lpvm" name flags args) = do
     logCodegen $ "Compiling " ++ show prim
-    filterPhantomArgs args >>= cgenLPVM name flags
+    args' <- filterPhantomArgs args
+    if List.null args' && name == "cast"
+      then return Nothing
+      else cgenLPVM name flags args'
 
 cgen prim@(PrimForeign lang name flags args) = do
     logCodegen $ "Compiling " ++ show prim
@@ -779,7 +784,8 @@ cgenLPVM "cast" [] args@[inArg,outArg] =
 
 
 cgenLPVM pname flags args = do
-    shouldnt $ "Instruction " ++ pname ++ " not imlemented."
+    shouldnt $ "Instruction " ++ pname ++ " arity " ++ show (length args)
+               ++ " not implemented."
 
 
 -- | Generate code to add an offset to an address

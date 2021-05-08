@@ -11,14 +11,16 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public {inline} (0 calls)
-0: (io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: func_let.<0>
+(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_int(40:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
 
 
 quad > public {inline} (1 calls)
-0: quad(x#0:wybe.int, ?$#0:wybe.int):
+0: func_let.quad<0>
+quad(x#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm add(~x#0:wybe.int, ~x#0:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn

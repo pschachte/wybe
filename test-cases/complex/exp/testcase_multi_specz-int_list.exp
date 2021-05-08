@@ -105,7 +105,8 @@ AFTER BUILDING MAIN:
   procs           : 
 
 *main* > {inline} (0 calls)
-0: (argc#0:wybe.int, argv#0:wybe.array.raw_array(wybe.string), ?exit_code#0:wybe.int, ?io#2:wybe.phantom):
+0: .<0>
+(argc#0:wybe.int, argv#0:wybe.array.raw_array(wybe.string), ?exit_code#0:wybe.int, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c {semipure} gc_init @memory_management:12:1
@@ -135,7 +136,8 @@ LLVM code       : None
   procs           : 
 
 *main* > public (0 calls)
-0: (argc#0:wybe.int, [?argc#0:wybe.int], ?arguments#2:wybe.array(wybe.string), argv#0:wybe.array.raw_array(wybe.string), [?argv#0:wybe.array.raw_array(wybe.string)], ?command#2:wybe.string, ?exit_code#1:wybe.int, io#0:wybe.phantom, [?io#0:wybe.phantom]):
+0: command_line.<0>
+(argc#0:wybe.int, [?argc#0:wybe.int], ?arguments#2:wybe.array(wybe.string), argv#0:wybe.array.raw_array(wybe.string), [?argv#0:wybe.array.raw_array(wybe.string)], ?command#2:wybe.string, ?exit_code#1:wybe.int, io#0:wybe.phantom, [?io#0:wybe.phantom]):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp$9#0:wybe.array(?T))
@@ -153,7 +155,8 @@ LLVM code       : None
 
 
 set_exit_code > public {inline} (0 calls)
-0: set_exit_code(code#0:wybe.int, [exit_code#0:wybe.int], ?exit_code#1:wybe.int):
+0: command_line.set_exit_code<0>
+set_exit_code(code#0:wybe.int, [exit_code#0:wybe.int], ?exit_code#1:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(~code#0:wybe.int, ?exit_code#1:wybe.int) @command_line:27:6
@@ -250,7 +253,8 @@ entry:
   procs           : 
 
 append > public (0 calls)
-0: append(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
+0: int_list.append<0>
+append(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.extend<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -261,7 +265,8 @@ append > public (0 calls)
 
 
 count > public (3 calls)
-0: count(lst#0:int_list.int_list, x#0:wybe.int, ?$#0:wybe.int):
+0: int_list.count<0>
+count(lst#0:int_list.int_list, x#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$7#0:wybe.bool)
@@ -285,7 +290,8 @@ count > public (3 calls)
 
 
 extend > public (3 calls)
-0: extend(lst1#0:int_list.int_list, lst2#0:int_list.int_list, ?$#0:int_list.int_list):
+0: int_list.extend<0>[410bae77d3]
+extend(lst1#0:int_list.int_list, lst2#0:int_list.int_list, ?$#0:int_list.int_list):
  AliasPairs: [($#0,lst2#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(1,(int_list.extend<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -305,14 +311,16 @@ extend > public (3 calls)
 
 
 gen$1 > {inline} (2 calls)
-0: gen$1([h#0:wybe.int], [lst#0:int_list.int_list], [t#0:int_list.int_list], tmp$2#0:wybe.int, tmp$3#0:wybe.int, [x#0:wybe.int], ?$#0:wybe.int):
+0: int_list.gen$1<0>
+gen$1([h#0:wybe.int], [lst#0:int_list.int_list], [t#0:int_list.int_list], tmp$2#0:wybe.int, tmp$3#0:wybe.int, [x#0:wybe.int], ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm add(~tmp$2#0:wybe.int, ~tmp$3#0:wybe.int, ?$#0:wybe.int) @int:8:25
 
 
 gen$2 > (2 calls)
-0: gen$2(result#0:int_list.int_list, start#0:wybe.int, step#0:wybe.int, stop#0:wybe.int, tmp$0#0:int_list.int_list, ?result#1:int_list.int_list):
+0: int_list.gen$2<0>[410bae77d3]
+gen$2(result#0:int_list.int_list, start#0:wybe.int, step#0:wybe.int, stop#0:wybe.int, tmp$0#0:int_list.int_list, ?result#1:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(3,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.gen$2<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -331,7 +339,8 @@ gen$2 > (2 calls)
 
 
 gen$3 > {inline} (1 calls)
-0: gen$3(result#0:int_list.int_list, start#0:wybe.int, step#0:wybe.int, stop#0:wybe.int, tmp$0#0:int_list.int_list, ?result#2:int_list.int_list):
+0: int_list.gen$3<0>
+gen$3(result#0:int_list.int_list, start#0:wybe.int, step#0:wybe.int, stop#0:wybe.int, tmp$0#0:int_list.int_list, ?result#2:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp$5#0:int_list.int_list)
@@ -342,7 +351,8 @@ gen$3 > {inline} (1 calls)
 
 
 greater > (3 calls)
-0: greater(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
+0: int_list.greater<0>
+greater(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.greater<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.greater<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -369,14 +379,16 @@ greater > (3 calls)
 
 
 index > public {inline} (0 calls)
-0: index(lst#0:int_list.int_list, x#0:wybe.int, ?$#0:wybe.int):
+0: int_list.index<0>
+index(lst#0:int_list.int_list, x#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     int_list.index_helper<0>(~lst#0:int_list.int_list, 0:wybe.int, ~x#0:wybe.int, ?$#0:wybe.int) #0 @int_list:91:42
 
 
 index_helper > (2 calls)
-0: index_helper(lst#0:int_list.int_list, idx#0:wybe.int, x#0:wybe.int, ?$#0:wybe.int):
+0: int_list.index_helper<0>
+index_helper(lst#0:int_list.int_list, idx#0:wybe.int, x#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$7#0:wybe.bool)
@@ -400,7 +412,8 @@ index_helper > (2 calls)
 
 
 insert > public (2 calls)
-0: insert(lst#0:int_list.int_list, idx#0:wybe.int, v#0:wybe.int, ?$#0:int_list.int_list):
+0: int_list.insert<0>[410bae77d3]
+insert(lst#0:int_list.int_list, idx#0:wybe.int, v#0:wybe.int, ?$#0:int_list.int_list):
  AliasPairs: [($#0,lst#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(4,(int_list.insert<0>,fromList [NonAliasedParamCond 0 [0]])),(7,(int_list.insert<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -431,7 +444,8 @@ insert > public (2 calls)
 
 
 lesser > (3 calls)
-0: lesser(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
+0: int_list.lesser<0>
+lesser(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.lesser<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.lesser<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -458,7 +472,8 @@ lesser > (3 calls)
 
 
 pop > public (1 calls)
-0: pop(lst#0:int_list.int_list, idx#0:wybe.int, ?$#0:int_list.int_list):
+0: int_list.pop<0>[410bae77d3]
+pop(lst#0:int_list.int_list, idx#0:wybe.int, ?$#0:int_list.int_list):
  AliasPairs: [($#0,lst#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(3,(int_list.pop<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -486,7 +501,8 @@ pop > public (1 calls)
 
 
 print > public (2 calls)
-0: print(x#0:int_list.int_list, io#0:wybe.phantom, ?io#3:wybe.phantom):
+0: int_list.print<0>
+print(x#0:int_list.int_list, io#0:wybe.phantom, ?io#3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(x#0:int_list.int_list, 0:wybe.int, ?tmp$2#0:wybe.bool)
@@ -504,7 +520,8 @@ print > public (2 calls)
 
 
 println > public {inline} (0 calls)
-0: println(x#0:int_list.int_list, io#0:wybe.phantom, ?io#2:wybe.phantom):
+0: int_list.println<0>
+println(x#0:int_list.int_list, io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     int_list.print<0>(~x#0:int_list.int_list, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @int_list:17:6
@@ -512,14 +529,16 @@ println > public {inline} (0 calls)
 
 
 range > public {inline} (0 calls)
-0: range(start#0:wybe.int, stop#0:wybe.int, step#0:wybe.int, ?result#1:int_list.int_list):
+0: int_list.range<0>
+range(start#0:wybe.int, stop#0:wybe.int, step#0:wybe.int, ?result#1:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
     int_list.gen$2<0>(0:int_list.int_list, ~start#0:wybe.int, ~step#0:wybe.int, ~stop#0:wybe.int, 0:int_list.int_list, ?result#1:int_list.int_list) #1 @int_list:26:5
 
 
 remove > public (1 calls)
-0: remove(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
+0: int_list.remove<0>[410bae77d3]
+remove(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
  AliasPairs: [($#0,lst#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.remove<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -546,14 +565,16 @@ remove > public (1 calls)
 
 
 reverse > public {inline} (1 calls)
-0: reverse(lst#0:int_list.int_list, ?$#0:int_list.int_list):
+0: int_list.reverse<0>
+reverse(lst#0:int_list.int_list, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
     int_list.reverse_helper<0>(~lst#0:int_list.int_list, 0:int_list.int_list, ?$#0:int_list.int_list) #1 @int_list:137:42
 
 
 reverse_helper > (2 calls)
-0: reverse_helper(lst#0:int_list.int_list, acc#0:int_list.int_list, ?$#0:int_list.int_list):
+0: int_list.reverse_helper<0>
+reverse_helper(lst#0:int_list.int_list, acc#0:int_list.int_list, ?$#0:int_list.int_list):
  AliasPairs: [($#0,acc#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -573,7 +594,8 @@ reverse_helper > (2 calls)
 
 
 sort > public (2 calls)
-0: sort(lst#0:int_list.int_list, ?$#0:int_list.int_list):
+0: int_list.sort<0>[410bae77d3]
+sort(lst#0:int_list.int_list, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.sort<0>,fromList [NonAliasedParamCond 0 []])),(3,(int_list.greater<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.sort<0>,fromList [NonAliasedParamCond 0 []])),(6,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -617,7 +639,8 @@ LLVM code       : None
   procs           : 
 
 = > public (2 calls)
-0: =($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
+0: int_list.int_list.=<0>
+=($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($left#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -649,14 +672,16 @@ LLVM code       : None
 
 
 cons > public {inline} (0 calls)
-0: cons(head#0:wybe.int, tail#0:int_list.int_list, ?$#0:int_list.int_list):
+0: int_list.int_list.cons<0>
+cons(head#0:wybe.int, tail#0:int_list.int_list, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:int_list.int_list)
     foreign lpvm mutate(~$rec#0:int_list.int_list, ?$rec#1:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:wybe.int)
     foreign lpvm mutate(~$rec#1:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:int_list.int_list)
 cons > public {inline} (12 calls)
-1: cons(?head#0:wybe.int, ?tail#0:int_list.int_list, $#0:int_list.int_list, ?$$#0:wybe.bool):
+1: int_list.int_list.cons<1>
+cons(?head#0:wybe.int, ?tail#0:int_list.int_list, $#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -674,7 +699,8 @@ cons > public {inline} (12 calls)
 
 
 head > public {inline} (0 calls)
-0: head($rec#0:int_list.int_list, ?$#0:wybe.int, ?$$#0:wybe.bool):
+0: int_list.int_list.head<0>
+head($rec#0:int_list.int_list, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -688,7 +714,8 @@ head > public {inline} (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 head > public {inline} (0 calls)
-1: head($rec#0:int_list.int_list, ?$rec#1:int_list.int_list, $field#0:wybe.int, ?$$#0:wybe.bool):
+1: int_list.int_list.head<1>
+head($rec#0:int_list.int_list, ?$rec#1:int_list.int_list, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -704,14 +731,16 @@ head > public {inline} (0 calls)
 
 
 nil > public {inline} (0 calls)
-0: nil(?$#0:int_list.int_list):
+0: int_list.int_list.nil<0>
+nil(?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list)
 
 
 tail > public {inline} (0 calls)
-0: tail($rec#0:int_list.int_list, ?$#0:int_list.int_list, ?$$#0:wybe.bool):
+0: int_list.int_list.tail<0>
+tail($rec#0:int_list.int_list, ?$#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -725,7 +754,8 @@ tail > public {inline} (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 tail > public {inline} (0 calls)
-1: tail($rec#0:int_list.int_list, ?$rec#1:int_list.int_list, $field#0:int_list.int_list, ?$$#0:wybe.bool):
+1: int_list.int_list.tail<1>
+tail($rec#0:int_list.int_list, ?$rec#1:int_list.int_list, $field#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -741,7 +771,8 @@ tail > public {inline} (0 calls)
 
 
 ~= > public {inline} (0 calls)
-0: ~=($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
+0: int_list.int_list.~=<0>
+~=($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     int_list.int_list.=<0>(~$left#0:int_list.int_list, ~$right#0:int_list.int_list, ?tmp$0#0:wybe.bool) #0
@@ -762,7 +793,8 @@ LLVM code       : None
   procs           : 
 
 *main* > public (0 calls)
-0: (io#0:wybe.phantom, ?io#22:wybe.phantom):
+0: int_list_test.<0>
+(io#0:wybe.phantom, ?io#22:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
  MultiSpeczDepInfo: [(24,(int_list_test.test_int_list<0>,fromList [NonAliasedParamCond 0 [],NonAliasedParamCond 1 [],NonAliasedParamCond 2 []])),(34,(int_list.gen$2<0>,fromList [NonAliasedParamCond 0 []])),(35,(int_list.gen$2<0>,fromList [NonAliasedParamCond 0 []])),(36,(int_list.gen$2<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -820,7 +852,8 @@ LLVM code       : None
 
 
 test_int_list > (2 calls)
-0: test_int_list(x#0:int_list.int_list, y#0:int_list.int_list, z#0:int_list.int_list, io#0:wybe.phantom, ?io#10:wybe.phantom):
+0: int_list_test.test_int_list<0>
+test_int_list(x#0:int_list.int_list, y#0:int_list.int_list, z#0:int_list.int_list, io#0:wybe.phantom, ?io#10:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1,InterestingUnaliased 2]
  MultiSpeczDepInfo: [(2,(int_list.append<0>,fromList [NonAliasedParamCond 0 [1]])),(7,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []])),(8,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []])),(11,(int_list.insert<0>,fromList [NonAliasedParamCond 0 []])),(12,(int_list.pop<0>,fromList [NonAliasedParamCond 0 []])),(13,(int_list.remove<0>,fromList [NonAliasedParamCond 0 []])),(16,(int_list.sort<0>,fromList [NonAliasedParamCond 0 []])),(19,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [0]])),(20,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [2]]))]
@@ -872,7 +905,8 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > {inline} (0 calls)
-0: (argc#0:wybe.int, argv#0:wybe.array.raw_array(wybe.string), ?exit_code#0:wybe.int, ?io#2:wybe.phantom):
+0: .<0>
+(argc#0:wybe.int, argv#0:wybe.array.raw_array(wybe.string), ?exit_code#0:wybe.int, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c {semipure} gc_init @memory_management:12:1
@@ -937,7 +971,8 @@ entry:
   procs           : 
 
 *main* > public (0 calls)
-0: (argc#0:wybe.int, [?argc#0:wybe.int], ?arguments#2:wybe.array(wybe.string), argv#0:wybe.array.raw_array(wybe.string), [?argv#0:wybe.array.raw_array(wybe.string)], ?command#2:wybe.string, ?exit_code#1:wybe.int, io#0:wybe.phantom, [?io#0:wybe.phantom]):
+0: command_line.<0>
+(argc#0:wybe.int, [?argc#0:wybe.int], ?arguments#2:wybe.array(wybe.string), argv#0:wybe.array.raw_array(wybe.string), [?argv#0:wybe.array.raw_array(wybe.string)], ?command#2:wybe.string, ?exit_code#1:wybe.int, io#0:wybe.phantom, [?io#0:wybe.phantom]):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp$9#0:wybe.array(?T))
@@ -955,7 +990,8 @@ entry:
 
 
 set_exit_code > public {inline} (0 calls)
-0: set_exit_code(code#0:wybe.int, [exit_code#0:wybe.int], ?exit_code#1:wybe.int):
+0: command_line.set_exit_code<0>
+set_exit_code(code#0:wybe.int, [exit_code#0:wybe.int], ?exit_code#1:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(~code#0:wybe.int, ?exit_code#1:wybe.int) @command_line:27:6
@@ -1052,7 +1088,8 @@ entry:
   procs           : 
 
 append > public (0 calls)
-0: append(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
+0: int_list.append<0>[410bae77d3]
+append(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.extend<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -1068,7 +1105,8 @@ append > public (0 calls)
 
 
 count > public (3 calls)
-0: count(lst#0:int_list.int_list, x#0:wybe.int, ?$#0:wybe.int):
+0: int_list.count<0>
+count(lst#0:int_list.int_list, x#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$7#0:wybe.bool)
@@ -1092,7 +1130,8 @@ count > public (3 calls)
 
 
 extend > public (3 calls)
-0: extend(lst1#0:int_list.int_list, lst2#0:int_list.int_list, ?$#0:int_list.int_list):
+0: int_list.extend<0>[410bae77d3]
+extend(lst1#0:int_list.int_list, lst2#0:int_list.int_list, ?$#0:int_list.int_list):
  AliasPairs: [($#0,lst2#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(1,(int_list.extend<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -1123,14 +1162,16 @@ extend > public (3 calls)
 
 
 gen$1 > {inline} (2 calls)
-0: gen$1([h#0:wybe.int], [lst#0:int_list.int_list], [t#0:int_list.int_list], tmp$2#0:wybe.int, tmp$3#0:wybe.int, [x#0:wybe.int], ?$#0:wybe.int):
+0: int_list.gen$1<0>
+gen$1([h#0:wybe.int], [lst#0:int_list.int_list], [t#0:int_list.int_list], tmp$2#0:wybe.int, tmp$3#0:wybe.int, [x#0:wybe.int], ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm add(~tmp$2#0:wybe.int, ~tmp$3#0:wybe.int, ?$#0:wybe.int) @int:8:25
 
 
 gen$2 > (2 calls)
-0: gen$2(result#0:int_list.int_list, start#0:wybe.int, step#0:wybe.int, stop#0:wybe.int, tmp$0#0:int_list.int_list, ?result#1:int_list.int_list):
+0: int_list.gen$2<0>
+gen$2(result#0:int_list.int_list, start#0:wybe.int, step#0:wybe.int, stop#0:wybe.int, tmp$0#0:int_list.int_list, ?result#1:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(3,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.gen$2<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -1162,7 +1203,8 @@ gen$2 > (2 calls)
 
 
 gen$3 > {inline} (1 calls)
-0: gen$3(result#0:int_list.int_list, start#0:wybe.int, step#0:wybe.int, stop#0:wybe.int, tmp$0#0:int_list.int_list, ?result#2:int_list.int_list):
+0: int_list.gen$3<0>
+gen$3(result#0:int_list.int_list, start#0:wybe.int, step#0:wybe.int, stop#0:wybe.int, tmp$0#0:int_list.int_list, ?result#2:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp$5#0:int_list.int_list)
@@ -1173,7 +1215,8 @@ gen$3 > {inline} (1 calls)
 
 
 greater > (3 calls)
-0: greater(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
+0: int_list.greater<0>[410bae77d3]
+greater(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.greater<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.greater<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -1219,14 +1262,16 @@ greater > (3 calls)
 
 
 index > public {inline} (0 calls)
-0: index(lst#0:int_list.int_list, x#0:wybe.int, ?$#0:wybe.int):
+0: int_list.index<0>
+index(lst#0:int_list.int_list, x#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     int_list.index_helper<0>(~lst#0:int_list.int_list, 0:wybe.int, ~x#0:wybe.int, ?$#0:wybe.int) #0 @int_list:91:42
 
 
 index_helper > (2 calls)
-0: index_helper(lst#0:int_list.int_list, idx#0:wybe.int, x#0:wybe.int, ?$#0:wybe.int):
+0: int_list.index_helper<0>
+index_helper(lst#0:int_list.int_list, idx#0:wybe.int, x#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$7#0:wybe.bool)
@@ -1250,7 +1295,8 @@ index_helper > (2 calls)
 
 
 insert > public (2 calls)
-0: insert(lst#0:int_list.int_list, idx#0:wybe.int, v#0:wybe.int, ?$#0:int_list.int_list):
+0: int_list.insert<0>[410bae77d3]
+insert(lst#0:int_list.int_list, idx#0:wybe.int, v#0:wybe.int, ?$#0:int_list.int_list):
  AliasPairs: [($#0,lst#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(4,(int_list.insert<0>,fromList [NonAliasedParamCond 0 [0]])),(7,(int_list.insert<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -1303,7 +1349,8 @@ insert > public (2 calls)
 
 
 lesser > (3 calls)
-0: lesser(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
+0: int_list.lesser<0>
+lesser(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.lesser<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.lesser<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -1330,7 +1377,8 @@ lesser > (3 calls)
 
 
 pop > public (1 calls)
-0: pop(lst#0:int_list.int_list, idx#0:wybe.int, ?$#0:int_list.int_list):
+0: int_list.pop<0>[410bae77d3]
+pop(lst#0:int_list.int_list, idx#0:wybe.int, ?$#0:int_list.int_list):
  AliasPairs: [($#0,lst#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(3,(int_list.pop<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -1377,7 +1425,8 @@ pop > public (1 calls)
 
 
 print > public (2 calls)
-0: print(x#0:int_list.int_list, io#0:wybe.phantom, ?io#3:wybe.phantom):
+0: int_list.print<0>
+print(x#0:int_list.int_list, io#0:wybe.phantom, ?io#3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(x#0:int_list.int_list, 0:wybe.int, ?tmp$2#0:wybe.bool)
@@ -1395,7 +1444,8 @@ print > public (2 calls)
 
 
 println > public {inline} (0 calls)
-0: println(x#0:int_list.int_list, io#0:wybe.phantom, ?io#2:wybe.phantom):
+0: int_list.println<0>
+println(x#0:int_list.int_list, io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     int_list.print<0>(~x#0:int_list.int_list, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @int_list:17:6
@@ -1403,14 +1453,16 @@ println > public {inline} (0 calls)
 
 
 range > public {inline} (0 calls)
-0: range(start#0:wybe.int, stop#0:wybe.int, step#0:wybe.int, ?result#1:int_list.int_list):
+0: int_list.range<0>
+range(start#0:wybe.int, stop#0:wybe.int, step#0:wybe.int, ?result#1:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
     int_list.gen$2<0>(0:int_list.int_list, ~start#0:wybe.int, ~step#0:wybe.int, ~stop#0:wybe.int, 0:int_list.int_list, ?result#1:int_list.int_list) #1 @int_list:26:5
 
 
 remove > public (1 calls)
-0: remove(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
+0: int_list.remove<0>[410bae77d3]
+remove(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
  AliasPairs: [($#0,lst#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.remove<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -1456,14 +1508,16 @@ remove > public (1 calls)
 
 
 reverse > public {inline} (1 calls)
-0: reverse(lst#0:int_list.int_list, ?$#0:int_list.int_list):
+0: int_list.reverse<0>
+reverse(lst#0:int_list.int_list, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
     int_list.reverse_helper<0>(~lst#0:int_list.int_list, 0:int_list.int_list, ?$#0:int_list.int_list) #1 @int_list:137:42
 
 
 reverse_helper > (2 calls)
-0: reverse_helper(lst#0:int_list.int_list, acc#0:int_list.int_list, ?$#0:int_list.int_list):
+0: int_list.reverse_helper<0>[410bae77d3]
+reverse_helper(lst#0:int_list.int_list, acc#0:int_list.int_list, ?$#0:int_list.int_list):
  AliasPairs: [($#0,acc#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -1494,7 +1548,8 @@ reverse_helper > (2 calls)
 
 
 sort > public (2 calls)
-0: sort(lst#0:int_list.int_list, ?$#0:int_list.int_list):
+0: int_list.sort<0>[410bae77d3]
+sort(lst#0:int_list.int_list, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.sort<0>,fromList [NonAliasedParamCond 0 []])),(3,(int_list.greater<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.sort<0>,fromList [NonAliasedParamCond 0 []])),(6,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -2242,7 +2297,8 @@ if.else:
   procs           : 
 
 = > public (2 calls)
-0: =($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
+0: int_list.int_list.=<0>
+=($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($left#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -2274,14 +2330,16 @@ if.else:
 
 
 cons > public {inline} (0 calls)
-0: cons(head#0:wybe.int, tail#0:int_list.int_list, ?$#0:int_list.int_list):
+0: int_list.int_list.cons<0>
+cons(head#0:wybe.int, tail#0:int_list.int_list, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:int_list.int_list)
     foreign lpvm mutate(~$rec#0:int_list.int_list, ?$rec#1:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:wybe.int)
     foreign lpvm mutate(~$rec#1:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:int_list.int_list)
 cons > public {inline} (12 calls)
-1: cons(?head#0:wybe.int, ?tail#0:int_list.int_list, $#0:int_list.int_list, ?$$#0:wybe.bool):
+1: int_list.int_list.cons<1>
+cons(?head#0:wybe.int, ?tail#0:int_list.int_list, $#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -2299,7 +2357,8 @@ cons > public {inline} (12 calls)
 
 
 head > public {inline} (0 calls)
-0: head($rec#0:int_list.int_list, ?$#0:wybe.int, ?$$#0:wybe.bool):
+0: int_list.int_list.head<0>
+head($rec#0:int_list.int_list, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -2313,7 +2372,8 @@ head > public {inline} (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 head > public {inline} (0 calls)
-1: head($rec#0:int_list.int_list, ?$rec#1:int_list.int_list, $field#0:wybe.int, ?$$#0:wybe.bool):
+1: int_list.int_list.head<1>
+head($rec#0:int_list.int_list, ?$rec#1:int_list.int_list, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -2329,14 +2389,16 @@ head > public {inline} (0 calls)
 
 
 nil > public {inline} (0 calls)
-0: nil(?$#0:int_list.int_list):
+0: int_list.int_list.nil<0>
+nil(?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list)
 
 
 tail > public {inline} (0 calls)
-0: tail($rec#0:int_list.int_list, ?$#0:int_list.int_list, ?$$#0:wybe.bool):
+0: int_list.int_list.tail<0>
+tail($rec#0:int_list.int_list, ?$#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -2350,7 +2412,8 @@ tail > public {inline} (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 tail > public {inline} (0 calls)
-1: tail($rec#0:int_list.int_list, ?$rec#1:int_list.int_list, $field#0:int_list.int_list, ?$$#0:wybe.bool):
+1: int_list.int_list.tail<1>
+tail($rec#0:int_list.int_list, ?$rec#1:int_list.int_list, $field#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -2366,7 +2429,8 @@ tail > public {inline} (0 calls)
 
 
 ~= > public {inline} (0 calls)
-0: ~=($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
+0: int_list.int_list.~=<0>
+~=($left#0:int_list.int_list, $right#0:int_list.int_list, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     int_list.int_list.=<0>(~$left#0:int_list.int_list, ~$right#0:int_list.int_list, ?tmp$0#0:wybe.bool) #0
@@ -2576,7 +2640,8 @@ entry:
   procs           : 
 
 *main* > public (0 calls)
-0: (io#0:wybe.phantom, ?io#22:wybe.phantom):
+0: int_list_test.<0>
+(io#0:wybe.phantom, ?io#22:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
  MultiSpeczDepInfo: [(24,(int_list_test.test_int_list<0>,fromList [NonAliasedParamCond 0 [],NonAliasedParamCond 1 [],NonAliasedParamCond 2 []])),(34,(int_list.gen$2<0>,fromList [NonAliasedParamCond 0 []])),(35,(int_list.gen$2<0>,fromList [NonAliasedParamCond 0 []])),(36,(int_list.gen$2<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -2634,7 +2699,8 @@ entry:
 
 
 test_int_list > (2 calls)
-0: test_int_list(x#0:int_list.int_list, y#0:int_list.int_list, z#0:int_list.int_list, io#0:wybe.phantom, ?io#10:wybe.phantom):
+0: int_list_test.test_int_list<0>[9e35cb823b]
+test_int_list(x#0:int_list.int_list, y#0:int_list.int_list, z#0:int_list.int_list, io#0:wybe.phantom, ?io#10:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1,InterestingUnaliased 2]
  MultiSpeczDepInfo: [(2,(int_list.append<0>,fromList [NonAliasedParamCond 0 [1]])),(7,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []])),(8,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []])),(11,(int_list.insert<0>,fromList [NonAliasedParamCond 0 []])),(12,(int_list.pop<0>,fromList [NonAliasedParamCond 0 []])),(13,(int_list.remove<0>,fromList [NonAliasedParamCond 0 []])),(16,(int_list.sort<0>,fromList [NonAliasedParamCond 0 []])),(19,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [0]])),(20,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [2]]))]

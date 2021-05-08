@@ -18,7 +18,8 @@ AFTER EVERYTHING:
   procs           : 
 
 append > public (1 calls)
-0: append(x#0:generic_list(?T), y#0:generic_list(?T), ?$#0:generic_list(?T)):
+0: generic_list.append<0>
+append(x#0:generic_list(?T), y#0:generic_list(?T), ?$#0:generic_list(?T)):
  AliasPairs: [($#0,y#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(1,(generic_list.append<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -38,7 +39,8 @@ append > public (1 calls)
 
 
 car > public {inline} (0 calls)
-0: car($rec#0:generic_list(?T), ?$#0:?T, ?$$#0:wybe.bool):
+0: generic_list.car<0>
+car($rec#0:generic_list(?T), ?$#0:?T, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -52,7 +54,8 @@ car > public {inline} (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 car > public {inline} (0 calls)
-1: car($rec#0:generic_list(?T), ?$rec#1:generic_list(?T), $field#0:?T, ?$$#0:wybe.bool):
+1: generic_list.car<1>
+car($rec#0:generic_list(?T), ?$rec#1:generic_list(?T), $field#0:?T, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -68,7 +71,8 @@ car > public {inline} (0 calls)
 
 
 cdr > public {inline} (0 calls)
-0: cdr($rec#0:generic_list(?T), ?$#0:generic_list(?T), ?$$#0:wybe.bool):
+0: generic_list.cdr<0>
+cdr($rec#0:generic_list(?T), ?$#0:generic_list(?T), ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -82,7 +86,8 @@ cdr > public {inline} (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 cdr > public {inline} (0 calls)
-1: cdr($rec#0:generic_list(?T), ?$rec#1:generic_list(?T), $field#0:generic_list(?T), ?$$#0:wybe.bool):
+1: generic_list.cdr<1>
+cdr($rec#0:generic_list(?T), ?$rec#1:generic_list(?T), $field#0:generic_list(?T), ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -98,14 +103,16 @@ cdr > public {inline} (0 calls)
 
 
 cons > public {inline} (1 calls)
-0: cons(car#0:?T, cdr#0:generic_list(?T), ?$#0:generic_list(?T)):
+0: generic_list.cons<0>
+cons(car#0:?T, cdr#0:generic_list(?T), ?$#0:generic_list(?T)):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:generic_list(?T))
     foreign lpvm mutate(~$rec#0:generic_list(?T), ?$rec#1:generic_list(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~car#0:?T)
     foreign lpvm mutate(~$rec#1:generic_list(?T), ?$#0:generic_list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~cdr#0:generic_list(?T))
 cons > public {inline} (6 calls)
-1: cons(?car#0:?T, ?cdr#0:generic_list(?T), $#0:generic_list(?T), ?$$#0:wybe.bool):
+1: generic_list.cons<1>
+cons(?car#0:?T, ?cdr#0:generic_list(?T), $#0:generic_list(?T), ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -123,14 +130,16 @@ cons > public {inline} (6 calls)
 
 
 length > public {inline} (0 calls)
-0: length(x#0:generic_list(?T), ?$#0:wybe.int):
+0: generic_list.length<0>
+length(x#0:generic_list(?T), ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     generic_list.length1<0>(~x#0:generic_list(?T), 0:wybe.int, ?$#0:wybe.int) #0 @generic_list:nn:nn
 
 
 length1 > (2 calls)
-0: length1(x#0:generic_list(?T), acc#0:wybe.int, ?$#0:wybe.int):
+0: generic_list.length1<0>
+length1(x#0:generic_list(?T), acc#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(x#0:generic_list(?T), 0:wybe.int, ?tmp$5#0:wybe.bool)
@@ -146,7 +155,8 @@ length1 > (2 calls)
 
 
 nil > public {inline} (0 calls)
-0: nil(?$#0:generic_list(?T)):
+0: generic_list.nil<0>
+nil(?$#0:generic_list(?T)):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(0:generic_list(?T), ?$#0:generic_list(?T))

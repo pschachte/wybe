@@ -21,7 +21,8 @@ AFTER EVERYTHING:
   procs           : 
 
 *main* > public (0 calls)
-0: (io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: thistype.<0>
+(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
  MultiSpeczDepInfo: [(7,(thistype.concat<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -47,7 +48,8 @@ AFTER EVERYTHING:
 
 
 = > public (2 calls)
-0: =($left#0:thistype, $right#0:thistype, ?$$#0:wybe.bool):
+0: thistype.=<0>
+=($left#0:thistype, $right#0:thistype, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($left#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -79,7 +81,8 @@ AFTER EVERYTHING:
 
 
 concat > public (2 calls)
-0: concat(x#0:thistype, y#0:thistype, ?$#0:thistype):
+0: thistype.concat<0>[410bae77d3]
+concat(x#0:thistype, y#0:thistype, ?$#0:thistype):
  AliasPairs: [($#0,y#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(1,(thistype.concat<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -110,14 +113,16 @@ concat > public (2 calls)
 
 
 cons > public {inline} (6 calls)
-0: cons(head#0:wybe.int, tail#0:thistype, ?$#0:thistype):
+0: thistype.cons<0>
+cons(head#0:wybe.int, tail#0:thistype, ?$#0:thistype):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:thistype)
     foreign lpvm mutate(~$rec#0:thistype, ?$rec#1:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:wybe.int)
     foreign lpvm mutate(~$rec#1:thistype, ?$#0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:thistype)
 cons > public {inline} (18 calls)
-1: cons(?head#0:wybe.int, ?tail#0:thistype, $#0:thistype, ?$$#0:wybe.bool):
+1: thistype.cons<1>
+cons(?head#0:wybe.int, ?tail#0:thistype, $#0:thistype, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -135,7 +140,8 @@ cons > public {inline} (18 calls)
 
 
 head > public {inline} (0 calls)
-0: head($rec#0:thistype, ?$#0:wybe.int, ?$$#0:wybe.bool):
+0: thistype.head<0>
+head($rec#0:thistype, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -149,7 +155,8 @@ head > public {inline} (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 head > public {inline} (0 calls)
-1: head($rec#0:thistype, ?$rec#1:thistype, $field#0:wybe.int, ?$$#0:wybe.bool):
+1: thistype.head<1>
+head($rec#0:thistype, ?$rec#1:thistype, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -165,7 +172,8 @@ head > public {inline} (0 calls)
 
 
 length > public (2 calls)
-0: length(x#0:thistype, ?$#0:wybe.int):
+0: thistype.length<0>
+length(x#0:thistype, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(x#0:thistype, 0:wybe.int, ?tmp$5#0:wybe.bool)
@@ -181,14 +189,16 @@ length > public (2 calls)
 
 
 nil > public {inline} (2 calls)
-0: nil(?$#0:thistype):
+0: thistype.nil<0>
+nil(?$#0:thistype):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(0:thistype, ?$#0:thistype)
 
 
 tail > public {inline} (0 calls)
-0: tail($rec#0:thistype, ?$#0:thistype, ?$$#0:wybe.bool):
+0: thistype.tail<0>
+tail($rec#0:thistype, ?$#0:thistype, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -202,7 +212,8 @@ tail > public {inline} (0 calls)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 tail > public {inline} (0 calls)
-1: tail($rec#0:thistype, ?$rec#1:thistype, $field#0:thistype, ?$$#0:wybe.bool):
+1: thistype.tail<1>
+tail($rec#0:thistype, ?$rec#1:thistype, $field#0:thistype, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
@@ -218,7 +229,8 @@ tail > public {inline} (0 calls)
 
 
 ~= > public {inline} (0 calls)
-0: ~=($left#0:thistype, $right#0:thistype, ?$$#0:wybe.bool):
+0: thistype.~=<0>
+~=($left#0:thistype, $right#0:thistype, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     thistype.=<0>(~$left#0:thistype, ~$right#0:thistype, ?tmp$0#0:wybe.bool) #0

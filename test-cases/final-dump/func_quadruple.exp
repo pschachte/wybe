@@ -11,14 +11,16 @@ AFTER EVERYTHING:
   procs           : 
 
 double > public {inline} (2 calls)
-0: double(a#0:wybe.int, ?$#0:wybe.int):
+0: func_quadruple.double<0>
+double(a#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm add(~a#0:wybe.int, ~a#0:wybe.int, ?$#0:wybe.int) @int:nn:nn
 
 
 quadruple > public {inline} (0 calls)
-0: quadruple(a#0:wybe.int, ?$#0:wybe.int):
+0: func_quadruple.quadruple<0>
+quadruple(a#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm add(~a#0:wybe.int, ~a#0:wybe.int, ?tmp$1#0:wybe.int) @int:nn:nn

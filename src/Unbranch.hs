@@ -93,8 +93,8 @@ import Options (LogSelection(Unbranch))
 --  to a SemiDet proc, or a fork each of whose branches satisfies this
 --  constraint.
 
-unbranchProc :: ProcDef -> Compiler ProcDef
-unbranchProc = unbranchProc' Nothing
+unbranchProc :: ProcDef -> Int -> Compiler ProcDef
+unbranchProc proc _ = unbranchProc' Nothing proc
 
 
 unbranchProc' :: Maybe LoopInfo -> ProcDef -> Compiler ProcDef
