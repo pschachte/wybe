@@ -169,14 +169,6 @@ withModule llmod action =
 -- Target Emitters                                                        --
 ----------------------------------------------------------------------------
 
--- | Drop an LLVMAST.Module (haskell) into a LLVM Module.Module (C++),
--- and write it as an object file.
-makeObjFile :: FilePath -> LLVMAST.Module -> IO ()
-makeObjFile file llmod =
-    withHostTargetMachineDefault $ \tm ->
-        withOptimisedModule llmod $ \m ->
-            writeObjectToFile tm (File file) m
-
 -- | Drop an LLVMAST.Module (haskell) intop a Mod.Module (C++)
 -- represenation and write is a bitcode file.
 makeBCFile :: FilePath -> LLVMAST.Module -> IO ()
