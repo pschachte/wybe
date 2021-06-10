@@ -34,9 +34,9 @@ install:	wybemk
 	cp wybemk "$(INSTALLBIN)"
 	rm -rf "$(INSTALLLIB)"
 	mkdir -p "$(INSTALLLIB)"
-	cp -r "$(LIBDIR)/*" "$(INSTALLLIB)"
-	"$(INSTALLBIN)"/wybemk --force-all "$(INSTALLLIB)"/wybe
-	"$(INSTALLBIN)"/wybemk --force-all $(patsubst %.wybe,%.o,"$(INSTALLLIB)/*.wybe")
+	cp -r "$(LIBDIR)/" "$(INSTALLLIB)"
+	"$(INSTALLBIN)/wybemk" --force-all "$(INSTALLLIB)/wybe.o"
+	"$(INSTALLBIN)/wybemk" --force-all $(patsubst %.wybe, %.o, $(wildcard $(INSTALLLIB)/*.wybe))
 
 
 wybemk:	$(SRCDIR)/*.hs $(SRCDIR)/Version.lhs
