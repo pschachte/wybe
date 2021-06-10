@@ -12,7 +12,9 @@ INSTALLLIB=/usr/local/lib/wybe
 VERSION = 0.1
 SRCDIR = src
 LIBDIR = wybelibs
-LIBS = wybe.o command_line.o logging.o wybe/cbits.o
+WYBELIBS = wybe.o command_line.o logging.o
+CLIBS = wybe/cbits.o
+LIBS = $(WYBELIBS) $(CLIBS)
 SHELL := /bin/bash
 
 
@@ -34,9 +36,8 @@ install:	wybemk
 	cp wybemk "$(INSTALLBIN)"
 	rm -rf "$(INSTALLLIB)"
 	mkdir -p "$(INSTALLLIB)"
-	cp -r "$(LIBDIR)/" "$(INSTALLLIB)"
-	"$(INSTALLBIN)/wybemk" --force-all "$(INSTALLLIB)/wybe.o"
-	"$(INSTALLBIN)/wybemk" --force-all $(patsubst %.wybe, %.o, $(wildcard $(INSTALLLIB)/*.wybe))
+	cp -r "$(LIBDIR)/." "$(INSTALLLIB)"
+	"$(INSTALLBIN)/wybemk" --force-all $(addsuffix ", $(addprefix "$(INSTALLLIB)/,$(WYBELIBS)))
 
 
 wybemk:	$(SRCDIR)/*.hs $(SRCDIR)/Version.lhs
