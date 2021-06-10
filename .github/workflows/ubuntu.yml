@@ -57,3 +57,5 @@ jobs:
       run: make
     - name: Run tests
       run: make test
+    - name: Install
+      run: sudo make install
