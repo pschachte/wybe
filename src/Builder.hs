@@ -52,13 +52,13 @@
 --  from the code itself.  Such analyses are best performed top-down.
 --  For example, if we can determine that a structure will not be
 --  referenced after the call to a procedure, that procedure may be
---  compiled to destructive modify or reuse that structure.  Our
+--  compiled to destructively modify or reuse that structure.  Our
 --  approach to this is to apply multiple specialisation:  we compile
---  different versions of this code for for calls that may reference
+--  different versions of this code for calls that may reference
 --  that argument again and calls that cannot.  Our approach is to
 --  to have the bottom-up analysis produce "requests", which indicate
 --  what top-down analysis results would allow more efficient
---  specialisations of the code.  This information os produced bottom-
+--  specialisations of the code.  This information is produced bottom-
 --  up.  Then, when generating the final executable, when all the code
 --  is available, we determine how beneficial each specialisation would
 --  be, and select the most useful specialisations to actually produce,
@@ -122,7 +122,7 @@
 --  dependencies by initially reading a module to be compiled and
 --  handling contents as follows:
 --
---  * Types:  create and enter the submodule, note that parent
+--  * Types:  create and enter the submodule, note that the parent
 --  imports it, and process its constructors and other contents.
 --
 --  * Submodules:  create and enter the submodule, note that parent
