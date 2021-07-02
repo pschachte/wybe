@@ -33,7 +33,6 @@ import Options (LogSelection(Flatten))
 import Data.Map as Map
 import Data.Set as Set
 import Data.List as List
-import Data.Set as Set
 import Data.Maybe
 import Text.ParserCombinators.Parsec.Pos
 import Control.Monad
@@ -109,7 +108,7 @@ data FlattenerState = Flattener {
 
 
 initFlattenerState :: Set VarName -> FlattenerState
-initFlattenerState varSet = 
+initFlattenerState varSet =
     Flattener [] [] 0 Nothing Set.empty varSet
 
 
@@ -170,11 +169,11 @@ flushPostponed = do
 noteVarDef :: VarName -> Flattener ()
 noteVarDef var = do
     redef <- gets (Set.member var . stmtDefs)
-    when redef 
+    when redef
       (do
             pos <- gets currPos
             lift $ message Error
-              ("Variable '" ++ var ++ 
+              ("Variable '" ++ var ++
                "' multiply defined in a single statement")
               pos
       )
@@ -192,7 +191,7 @@ noteVarMention name dir = do
 -- |Flatten the specified statements to primitive statements, in a context
 --  whose determinism is as specified.
 flattenStmts :: [Placed Stmt] -> Determinism -> Flattener ()
-flattenStmts stmts detism = 
+flattenStmts stmts detism =
     mapM_ (\pstmt -> flattenStmt (content pstmt) (place pstmt) detism) stmts
 
 
@@ -214,7 +213,7 @@ flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos detism = do
     let arg1Vars = expOutputs arg1content
     let arg2Vars = expOutputs arg2content
     case (content arg1, content arg2) of
-      (Var var ParamOut Ordinary, _) | Set.null arg2Vars -> do
+      (Var var flow1 Ordinary, _) | flowsOut flow1 && Set.null arg2Vars -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
         [arg2'] <- flattenStmtArgs [arg2] pos
         let instr = ForeignCall "llvm" "move" [] [arg2', arg1]
@@ -222,7 +221,15 @@ flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos detism = do
         noteVarDef var
         emit pos instr
         flushPostponed
-      (_, Var var ParamOut Ordinary) | Set.null arg1Vars -> do
+      (Var var flow1 Ordinary, _) | flowsOut flow1 && Set.null arg2Vars -> do
+        logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
+        [arg2'] <- flattenStmtArgs [arg2] pos
+        let instr = ForeignCall "llvm" "move" [] [arg2', arg1]
+        logFlatten $ "  transformed to " ++ showStmt 4 instr
+        noteVarDef var
+        emit pos instr
+        flushPostponed
+      (_, Var var flow2 Ordinary) | flowsOut flow2 && Set.null arg1Vars -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
         [arg1'] <- flattenStmtArgs [arg1] pos
         let instr = ForeignCall "llvm" "move" [] [arg1', arg2]
@@ -387,7 +394,7 @@ flattenExp expr@(CharValue _) ty castFrom pos =
 flattenExp expr@(Var name dir flowType) ty castFrom pos = do
     logFlatten $ "  Flattening arg " ++ show expr
     defd <- gets (Set.member name . defdVars)
-    if (dir == ParamIn && (not defd))
+    if dir == ParamIn && not defd
       then do -- Reference to an undefined variable: assume it's meant to be
               -- a niladic function instead of a variable reference
         logFlatten $ "  Unknown variable '" ++ show name
@@ -437,14 +444,14 @@ flattenCall stmtBuilder isForeign ty castFrom pos exps = do
     modify (\s -> s { stmtDefs = Set.empty, currPos = pos})
     exps' <- flattenArgs exps
     defs' <- gets stmtDefs
-    modify (\s -> s { stmtDefs = defs `Set.union` defs', 
+    modify (\s -> s { stmtDefs = defs `Set.union` defs',
                       currPos = oldPos})
     logFlatten $ "-- defines:  " ++ show defs'
     let (argflow,varflow) =
           if isForeign -- implicit arg of foreign function calls is always out
           then (ParamOut,ParamIn)
           else (FlowUnknown,FlowUnknown)
-    emit pos $ stmtBuilder $ 
+    emit pos $ stmtBuilder $
         exps' ++ [typeAndPlace (Var resultName argflow $ Implicit pos)
                   ty castFrom pos]
     return $ Unplaced $ maybeType (Var resultName varflow $ Implicit pos)
