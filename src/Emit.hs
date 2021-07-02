@@ -169,35 +169,14 @@ withModule llmod action =
 -- Target Emitters                                                        --
 ----------------------------------------------------------------------------
 
--- | Drop an LLVMAST.Module (haskell) intop a Mod.Module (C++)
--- represenation and write is a bitcode file.
-makeBCFile :: FilePath -> LLVMAST.Module -> IO ()
-makeBCFile file llmod =
-    withContext $ \context ->
-        withModuleFromAST context llmod $ \m ->
-            writeBitcodeToFile (File file) m
-
-
 -- | Use the bitcode wrapper structure to wrap both the AST.Module
 -- (serialised) and the bitcode generated for the Module
 makeWrappedBCFile :: FilePath -> LLVMAST.Module -> BL.ByteString -> IO ()
 makeWrappedBCFile file llmod modBS =
-    withContext $ \context ->
-        withModuleFromAST context llmod $ \m ->
-            do bc <- moduleBitcode m
-               let wrapped = getWrappedBitcode (BL.fromStrict bc) modBS
-               BL.writeFile file wrapped
-
-
--- | Drop an LLVMAST.Module (haskell) into a Module.Module (C++),
--- and write it as an object file.
-makeAssemblyFile :: FilePath -> LLVMAST.Module -> IO ()
-makeAssemblyFile file llmod =
-    withContext $ \context ->
-        withModuleFromAST context llmod $ \m ->
-            withHostTargetMachineDefault $ \_ ->
-                writeLLVMAssemblyToFile (File file) m
-
+    withOptimisedModule llmod $ \m -> do
+        bc <- moduleBitcode m
+        let wrapped = getWrappedBitcode (BL.fromStrict bc) modBS
+        BL.writeFile file wrapped
 
 -- | Create a Macho-O object file and embed a 'AST.Module' bytestring
 -- representation into the '__lpvm' section in it.
