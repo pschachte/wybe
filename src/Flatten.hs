@@ -5,23 +5,33 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 --
+-- BEGIN MAJOR DOC
 --  We transform away all expression types except for constants and
 --  variables.  Where, let, conditional, and function call
 --  expressions are turned into statements that bind a variable, and
---  then the variable is used in place of the expression.  In-out
---  variable uses, like !x, are expanded into separate input and
---  output expressions, like x, ?x.
+--  then the variable is used in place of the expression.  All function
+--  calls are transformed into procedure calls by adding an extra
+--  argument corresponding to the function result.
 --
---  An expression that assigns one or more variables is an output
---  expression.  This is turned into an output variable, with
---  following statements generated to do the assignment.  An
---  expression that assigns variables that it also uses is an
---  input-output expression, which is turned into statements to bind a
---  variable placed before the variable use plus statements to use the
---  variable placed after the variable use.  For example, we transform
---  statements of the form p(f(x)) into f(x,?t) p(t).  Similarly, we
---  transform statements like p(f(?x)) into p(?t) f(?x, t).  Finally,
---  we transform p(f(!x)) into f(x, ?t) p(t, ?t) f(?x, t).
+--  Function call expressions can take one of three forms.  Expressions
+--  where all arguments are inputs are turned into a procedure call
+--  with a fresh temporary variable as an output, which is called before
+--  the statement in which that function call appears.  The function
+--  call itself is then replaced by a referenced to the temporary
+--  variable.  For example, p(f(x,y),z) is replaced by f(x,y,?t); p(t,z).
+--
+--  A function call containing some output arguments, and perhaps some
+--  inputs, is transformed into a fresh output variable, with a later
+--  call to that function containing that variable as an added input.
+--  For example, p(f(?x,y),z) is transformed to p(?t,z); f(?x,y,t).
+
+--  Finally, a function call containing some input-output arguments,
+--  and perhaps some input arguments, is transformed into an
+--  input-output variable, plus two procedure calls, one to compute
+--  the initial value of the expression, and a second to assign it
+--  the specified new value.  For example, a statement p(f(!x,y),z) is
+--  transformed to f(x,y,?t); p(!t,z); f(!x,y,t).
+-- END MAJOR DOC
 --
 ----------------------------------------------------------------
 
@@ -212,31 +222,13 @@ flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos detism = do
     let arg2content = content arg2
     let arg1Vars = expOutputs arg1content
     let arg2Vars = expOutputs arg2content
-    case (content arg1, content arg2) of
+    case (arg1content, arg2content) of
       (Var var flow1 Ordinary, _) | flowsOut flow1 && Set.null arg2Vars -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
-        [arg2'] <- flattenStmtArgs [arg2] pos
-        let instr = ForeignCall "llvm" "move" [] [arg2', arg1]
-        logFlatten $ "  transformed to " ++ showStmt 4 instr
-        noteVarDef var
-        emit pos instr
-        flushPostponed
-      (Var var flow1 Ordinary, _) | flowsOut flow1 && Set.null arg2Vars -> do
-        logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
-        [arg2'] <- flattenStmtArgs [arg2] pos
-        let instr = ForeignCall "llvm" "move" [] [arg2', arg1]
-        logFlatten $ "  transformed to " ++ showStmt 4 instr
-        noteVarDef var
-        emit pos instr
-        flushPostponed
+        flattenAssignment var arg1 arg2 pos
       (_, Var var flow2 Ordinary) | flowsOut flow2 && Set.null arg1Vars -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
-        [arg1'] <- flattenStmtArgs [arg1] pos
-        let instr = ForeignCall "llvm" "move" [] [arg1', arg2]
-        logFlatten $ "  transformed to " ++ showStmt 4 instr
-        noteVarDef var
-        emit pos instr
-        flushPostponed
+        flattenAssignment var arg2 arg1 pos
       (Fncall mod name args, _)
         | not (Set.null arg1Vars) && Set.null arg2Vars -> do
         let stmt' = ProcCall mod name Nothing Det False (args++[arg2])
@@ -349,6 +341,14 @@ flattenStmt' Break pos _ = emit pos Break
 flattenStmt' Next pos _ = emit pos Next
 
 
+flattenAssignment :: Ident -> Placed Exp -> Placed Exp -> OptPos -> Flattener ()
+flattenAssignment var varArg value pos = do
+    [valueArg] <- flattenStmtArgs [value] pos
+    let instr = ForeignCall "llvm" "move" [] [valueArg, varArg]
+    logFlatten $ "  transformed to " ++ showStmt 4 instr
+    noteVarDef var
+    emit pos instr
+    flushPostponed
 ----------------------------------------------------------------
 --                      Flattening Expressions
 ----------------------------------------------------------------
