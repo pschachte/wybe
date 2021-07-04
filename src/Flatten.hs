@@ -21,8 +21,8 @@
 --  variable.  For example, p(f(x,y),z) is replaced by f(x,y,?t); p(t,z).
 --
 --  A function call containing some output arguments, and perhaps some
---  inputs, is transformed into a fresh output variable, with a later
---  call to that function containing that variable as an added input.
+--  inputs, is transformed into a fresh input variable, with a later
+--  proc call to that function with that variable as an added input.
 --  For example, p(f(?x,y),z) is transformed to p(?t,z); f(?x,y,t).
 
 --  Finally, a function call containing some input-output arguments,
@@ -118,15 +118,19 @@ data FlattenerState = Flattener {
 
 
 initFlattenerState :: Set VarName -> FlattenerState
-initFlattenerState varSet =
-    Flattener [] [] 0 Nothing Set.empty varSet
+initFlattenerState = Flattener [] [] 0 Nothing Set.empty
 
 
 emit :: OptPos -> Stmt -> Flattener ()
 emit pos stmt = do
     logFlatten $ "-- Emitting:  " ++ showStmt 14 stmt
-    stmts <- gets flattened
-    modify (\s -> s { flattened = maybePlace stmt pos:stmts })
+    modify (\s -> s { flattened = maybePlace stmt pos:flattened s })
+
+
+postpone :: OptPos -> Stmt -> Flattener ()
+postpone pos stmt = do
+    logFlatten $ "-- Postponing:  " ++ showStmt 14 stmt
+    modify (\s -> s { postponed = maybePlace stmt pos:postponed s })
 
 
 -- |Return a fresh variable name.
@@ -447,26 +451,48 @@ flattenCall stmtBuilder isForeign ty castFrom pos exps = do
     modify (\s -> s { stmtDefs = defs `Set.union` defs',
                       currPos = oldPos})
     logFlatten $ "-- defines:  " ++ show defs'
-    let (argflow,varflow) =
-          if isForeign -- implicit arg of foreign function calls is always out
-          then (ParamOut,ParamIn)
-          else (FlowUnknown,FlowUnknown)
-    emit pos $ stmtBuilder $
-        exps' ++ [typeAndPlace (Var resultName argflow $ Implicit pos)
-                  ty castFrom pos]
+    -- let (argflow,varflow) =
+    --       if isForeign -- implicit arg of foreign function calls is always out
+    --       then (ParamOut,ParamIn)
+    --       else (FlowUnknown,FlowUnknown)
+    let outFlows = Set.fromList
+                        $ List.filter (/= ParamIn) 
+                        $ List.map (flattenedExpFlow . content) exps'
+    logFlatten $ "-- set of flows:  " ++ show outFlows
+    varflow <- if Set.null outFlows
+                then return ParamIn
+                else if outFlows == Set.singleton ParamOut
+                then return ParamOut
+                else if outFlows == Set.singleton ParamInOut
+                then return ParamInOut
+                else lift $ do
+                    errmsg pos "Expression mixes out and in/out arguments: "
+                    return ParamOut
+    when (flowsIn varflow)
+        $ emit pos $ stmtBuilder
+        $ exps' ++ [typeAndPlace (Var resultName ParamOut $ Implicit pos)
+                     ty castFrom pos]
+    when (flowsOut varflow)
+        $ postpone pos $ stmtBuilder
+        $ exps' ++ [typeAndPlace (Var resultName ParamIn $ Implicit pos)
+                     ty castFrom pos]
     return $ Unplaced $ maybeType (Var resultName varflow $ Implicit pos)
                        ty castFrom
 
+
 typeAndPlace :: Exp -> TypeSpec -> Maybe TypeSpec -> OptPos -> Placed Exp
-typeAndPlace exp ty castFrom pos = maybePlace (maybeType exp ty castFrom) pos
+typeAndPlace exp ty castFrom = maybePlace (maybeType exp ty castFrom)
+
 
 maybeType :: Exp -> TypeSpec -> Maybe TypeSpec -> Exp
 maybeType exp AnyType Nothing = exp
 maybeType exp ty castFrom = Typed exp ty castFrom
 
+
 isInExp :: Exp -> Bool
 isInExp (Var _ dir _) = flowsIn dir
 isInExp _ = True
+
 
 flattenParam :: Param -> [Param]
 flattenParam (Param name typ dir flowType) =

@@ -25,7 +25,7 @@ module AST (
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
-  Exp(..), Generator(..), Stmt(..), detStmt, expIsConstant,
+  Exp(..), Generator(..), Stmt(..), detStmt, flattenedExpFlow, expIsConstant,
   TypeRepresentation(..), TypeFamily(..), typeFamily,
   defaultTypeRepresentation, typeRepSize, integerTypeRep,
   lookupTypeRepresentation, lookupModuleRepresentation,
@@ -2469,6 +2469,18 @@ data Exp
       | Fncall ModSpec ProcName [Placed Exp]
       | ForeignFn Ident ProcName [Ident] [Placed Exp]
      deriving (Eq,Ord,Generic)
+
+
+-- | Return the FlowDirection of an Exp, assuming it has been flattened.
+flattenedExpFlow :: Exp -> FlowDirection
+flattenedExpFlow (IntValue _)    = ParamIn
+flattenedExpFlow (FloatValue _)  = ParamIn
+flattenedExpFlow (CharValue _)   = ParamIn
+flattenedExpFlow (StringValue _) = ParamIn
+flattenedExpFlow (Var _ flow _)  = flow
+flattenedExpFlow (Typed exp _ _) = flattenedExpFlow exp
+flattenedExpFlow otherExp =
+    shouldnt $ "Getting flow direction of unflattened exp " ++ show otherExp
 
 
 -- | If the input is a constant value, return it (with any Typed wrapper

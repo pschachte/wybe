@@ -71,41 +71,41 @@ gen$1(modulus#0:wybe.int, seq#0:test_loop.int_seq, ?i#1:wybe.int, ?$$#0:wybe.boo
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 1]
  MultiSpeczDepInfo: [(0,(test_loop.int_seq.seq_next<0>,fromList [NonAliasedParamCond 0 [1]])),(3,(test_loop.gen$1<0>,fromList [NonAliasedParamCond 1 [1]]))]
-    test_loop.int_seq.seq_next<0>(~%seq#0:test_loop.int_seq, ?%seq#1:test_loop.int_seq, ?tmp$0#0:wybe.int, ?tmp$2#0:wybe.bool) #0 @test_loop:nn:nn
-    case ~tmp$2#0:wybe.bool of
+    test_loop.int_seq.seq_next<0>(~%seq#0:test_loop.int_seq, ?%seq#1:test_loop.int_seq, ?i#0:wybe.int, ?tmp$1#0:wybe.bool) #0 @test_loop:nn:nn
+    case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?i#1:wybe.int)
+        foreign llvm move(~i#0:wybe.int, ?i#1:wybe.int)
 
     1:
-        foreign llvm srem(tmp$0#0:wybe.int, modulus#0:wybe.int, ?tmp$1#0:wybe.int) @int:nn:nn
-        foreign llvm icmp_eq(~tmp$1#0:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.bool) @int:nn:nn
-        case ~tmp$3#0:wybe.bool of
+        foreign llvm srem(i#0:wybe.int, modulus#0:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn
+        foreign llvm icmp_eq(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$2#0:wybe.bool) @int:nn:nn
+        case ~tmp$2#0:wybe.bool of
         0:
             test_loop.gen$1<0>(~modulus#0:wybe.int, ~seq#1:test_loop.int_seq, ?i#1:wybe.int, ?$$#0:wybe.bool) #3 @test_loop:nn:nn
 
         1:
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
-            foreign llvm move(~tmp$0#0:wybe.int, ?i#1:wybe.int)
+            foreign llvm move(~i#0:wybe.int, ?i#1:wybe.int)
 
 
  [6dacb8fd25] [NonAliasedParam 1] :
-    test_loop.int_seq.seq_next<0>[410bae77d3](~%seq#0:test_loop.int_seq, ?%seq#1:test_loop.int_seq, ?tmp$0#0:wybe.int, ?tmp$2#0:wybe.bool) #0 @test_loop:nn:nn
-    case ~tmp$2#0:wybe.bool of
+    test_loop.int_seq.seq_next<0>[410bae77d3](~%seq#0:test_loop.int_seq, ?%seq#1:test_loop.int_seq, ?i#0:wybe.int, ?tmp$1#0:wybe.bool) #0 @test_loop:nn:nn
+    case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?i#1:wybe.int)
+        foreign llvm move(~i#0:wybe.int, ?i#1:wybe.int)
 
     1:
-        foreign llvm srem(tmp$0#0:wybe.int, modulus#0:wybe.int, ?tmp$1#0:wybe.int) @int:nn:nn
-        foreign llvm icmp_eq(~tmp$1#0:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.bool) @int:nn:nn
-        case ~tmp$3#0:wybe.bool of
+        foreign llvm srem(i#0:wybe.int, modulus#0:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn
+        foreign llvm icmp_eq(~tmp$0#0:wybe.int, 0:wybe.int, ?tmp$2#0:wybe.bool) @int:nn:nn
+        case ~tmp$2#0:wybe.bool of
         0:
             test_loop.gen$1<0>[6dacb8fd25](~modulus#0:wybe.int, ~seq#1:test_loop.int_seq, ?i#1:wybe.int, ?$$#0:wybe.bool) #3 @test_loop:nn:nn
 
         1:
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
-            foreign llvm move(~tmp$0#0:wybe.int, ?i#1:wybe.int)
+            foreign llvm move(~i#0:wybe.int, ?i#1:wybe.int)
 
 
 
@@ -206,11 +206,11 @@ entry:
   %29 = extractvalue {i64, i64, i1} %26, 2 
   br i1 %29, label %if.then, label %if.else 
 if.then:
-  %"2$tmp$1#0" = srem i64 %28, %"modulus#0" 
-  %"2$tmp$3#0" = icmp eq i64 %"2$tmp$1#0", 0 
-  br i1 %"2$tmp$3#0", label %if.then1, label %if.else1 
+  %"2$tmp$0#0" = srem i64 %28, %"modulus#0" 
+  %"2$tmp$2#0" = icmp eq i64 %"2$tmp$0#0", 0 
+  br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
-  %37 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %37 = insertvalue {i64, i1} undef, i64 %28, 0 
   %38 = insertvalue {i64, i1} %37, i1 0, 1 
   ret {i64, i1} %38 
 if.then1:
@@ -235,11 +235,11 @@ entry:
   %42 = extractvalue {i64, i64, i1} %39, 2 
   br i1 %42, label %if.then, label %if.else 
 if.then:
-  %"2$tmp$1#0" = srem i64 %41, %"modulus#0" 
-  %"2$tmp$3#0" = icmp eq i64 %"2$tmp$1#0", 0 
-  br i1 %"2$tmp$3#0", label %if.then1, label %if.else1 
+  %"2$tmp$0#0" = srem i64 %41, %"modulus#0" 
+  %"2$tmp$2#0" = icmp eq i64 %"2$tmp$0#0", 0 
+  br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
 if.else:
-  %50 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %50 = insertvalue {i64, i1} undef, i64 %41, 0 
   %51 = insertvalue {i64, i1} %50, i1 0, 1 
   ret {i64, i1} %51 
 if.then1:
@@ -352,7 +352,7 @@ low($rec#0:test_loop.int_seq, ?$rec#1:test_loop.int_seq, $field#0:wybe.int):
 
 seq_next > public (0 calls)
 0: test_loop.int_seq.seq_next<0>[410bae77d3]
-seq_next(seq#0:test_loop.int_seq, ?seq#1:test_loop.int_seq, ?$#0:wybe.int, ?$$#0:wybe.bool):
+seq_next(seq#0:test_loop.int_seq, ?seq#1:test_loop.int_seq, ?elt#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: [(seq#0,seq#1)]
  InterestingCallProperties: [InterestingUnaliased 0]
     foreign lpvm access(seq#0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?elt#0:wybe.int)
@@ -362,13 +362,11 @@ seq_next(seq#0:test_loop.int_seq, ?seq#1:test_loop.int_seq, ?$#0:wybe.int, ?$$#0
     case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
         foreign llvm move(~seq#0:test_loop.int_seq, ?seq#1:test_loop.int_seq)
 
     1:
         foreign llvm add(elt#0:wybe.int, ~step#0:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn
         foreign lpvm {noalias} mutate(~%seq#0:test_loop.int_seq, ?%seq#1:test_loop.int_seq, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp$0#0:wybe.int)
-        foreign llvm move(~elt#0:wybe.int, ?$#0:wybe.int) @test_loop:nn:nn
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
  [410bae77d3] [NonAliasedParam 0] :
@@ -379,13 +377,11 @@ seq_next(seq#0:test_loop.int_seq, ?seq#1:test_loop.int_seq, ?$#0:wybe.int, ?$$#0
     case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
         foreign llvm move(~seq#0:test_loop.int_seq, ?seq#1:test_loop.int_seq)
 
     1:
         foreign llvm add(elt#0:wybe.int, ~step#0:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn
         foreign lpvm {noalias} mutate(~%seq#0:test_loop.int_seq, ?%seq#1:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp$0#0:wybe.int)
-        foreign llvm move(~elt#0:wybe.int, ?$#0:wybe.int) @test_loop:nn:nn
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -612,7 +608,7 @@ if.then:
   ret {i64, i64, i1} %93 
 if.else:
   %94 = insertvalue {i64, i64, i1} undef, i64 %"seq#0", 0 
-  %95 = insertvalue {i64, i64, i1} %94, i64 undef, 1 
+  %95 = insertvalue {i64, i64, i1} %94, i64 %74, 1 
   %96 = insertvalue {i64, i64, i1} %95, i1 0, 2 
   ret {i64, i64, i1} %96 
 }
@@ -644,7 +640,7 @@ if.then:
   ret {i64, i64, i1} %112 
 if.else:
   %113 = insertvalue {i64, i64, i1} undef, i64 %"seq#0", 0 
-  %114 = insertvalue {i64, i64, i1} %113, i64 undef, 1 
+  %114 = insertvalue {i64, i64, i1} %113, i64 %99, 1 
   %115 = insertvalue {i64, i64, i1} %114, i1 0, 2 
   ret {i64, i64, i1} %115 
 }
