@@ -226,6 +226,8 @@ flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos detism = do
     let arg2content = content arg2
     let arg1Vars = expOutputs arg1content
     let arg2Vars = expOutputs arg2content
+    logFlatten $ "Flattening assignment with outputs " ++ show arg1Vars
+                 ++ " and " ++ show arg2Vars
     case (arg1content, arg2content) of
       (Var var flow1 Ordinary, _) | flowsOut flow1 && Set.null arg2Vars -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
@@ -236,11 +238,11 @@ flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos detism = do
       (Fncall mod name args, _)
         | not (Set.null arg1Vars) && Set.null arg2Vars -> do
         let stmt' = ProcCall mod name Nothing Det False (args++[arg2])
-        flattenStmt' stmt' pos detism
+        flattenStmt stmt' pos detism
       (_, Fncall mod name args)
         | not (Set.null arg2Vars) && Set.null arg1Vars -> do
         let stmt' = ProcCall mod name Nothing Det False (args++[arg1])
-        flattenStmt' stmt' pos detism
+        flattenStmt stmt' pos detism
       (_,_) | Set.null arg1Vars && Set.null arg2Vars -> do
         logFlatten $ "Leaving equality test alone: " ++ showStmt 4 stmt
         args' <- flattenStmtArgs [arg1,arg2] pos
@@ -458,7 +460,7 @@ flattenCall stmtBuilder isForeign ty castFrom pos exps = do
     let outFlows = Set.fromList
                         $ List.filter (/= ParamIn) 
                         $ List.map (flattenedExpFlow . content) exps'
-    logFlatten $ "-- set of flows:  " ++ show outFlows
+    logFlatten $ "-- set of out flows:  " ++ show outFlows
     varflow <- if Set.null outFlows
                 then return ParamIn
                 else if outFlows == Set.singleton ParamOut
@@ -470,8 +472,9 @@ flattenCall stmtBuilder isForeign ty castFrom pos exps = do
                     return ParamOut
     when (flowsIn varflow)
         $ emit pos $ stmtBuilder
-        $ exps' ++ [typeAndPlace (Var resultName ParamOut $ Implicit pos)
-                     ty castFrom pos]
+        $ ((inputOnlyExp <$>) <$> exps')
+          ++ [typeAndPlace (Var resultName ParamOut $ Implicit pos)
+                            ty castFrom pos]
     when (flowsOut varflow)
         $ postpone pos $ stmtBuilder
         $ exps' ++ [typeAndPlace (Var resultName ParamIn $ Implicit pos)
@@ -492,6 +495,14 @@ maybeType exp ty castFrom = Typed exp ty castFrom
 isInExp :: Exp -> Bool
 isInExp (Var _ dir _) = flowsIn dir
 isInExp _ = True
+
+
+-- | Return the input-only version of an Exp that is known to be either in or
+-- in-out.
+inputOnlyExp (Var name ParamInOut flowType) = Var name ParamIn flowType
+inputOnlyExp (Var name ParamOut flowType) =
+    shouldnt $ "Making input-only version of output variable " ++ name
+inputOnlyExp exp = exp
 
 
 flattenParam :: Param -> [Param]

@@ -2740,7 +2740,7 @@ expOutputs (FloatValue _) = Set.empty
 expOutputs (StringValue _) = Set.empty
 expOutputs (CharValue _) = Set.empty
 expOutputs (Var name flow _) =
-    if flow == ParamOut then Set.singleton name else Set.empty
+    if flowsOut flow then Set.singleton name else Set.empty
 expOutputs (Typed expr _ _) = expOutputs expr
 expOutputs (Where _ pexp) = expOutputs $ content pexp
 expOutputs (CondExp _ pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]

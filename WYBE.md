@@ -12,9 +12,10 @@ immutable, but *variables* may be reassigned.  This means that values
 may be passed around at will without worrying that they may be modified.
 
 
-## Hello, World!
+## <a name="hello-world"></a>Hello, World!
 
-Code appearing at the top level of a module is executed when the program
+Code appearing at the top level of a module (that is, not inside a procedure
+or function definition) is executed when the program
 is run, so Hello, World! in Wybe is quite simple:
 ```
 # Print a friendly greeting
@@ -27,10 +28,10 @@ following `|#` sequence.
 
 The leading exclamation point is needed on statements that perform input/output,
 and in a few other contexts that will be explained in the
-[Resources](#resources) section.
+[Resources](#resource-declarations) section.
 
 
-## Building
+## Compiling Wybe code
 
 Use `wybemk` to build object and executable files.  If the above program
 is put in a file named `hello.wybe`, then an executable program can be
@@ -55,17 +56,20 @@ file you want it to build, and it figures out what files it needs
 to compile.
 
 
-## Module items
+# Wybe Source files
 
 Every Wybe source file is a module.
 It may contain the following sorts of items:
-statements,
-function definitions,
-procedure definitions,
-constructor declarations,
-type declarations,
-resource declarations, and
-module declarations.
+
+  * [module imports](#importing),
+  * [(top level) statements](#hello-world),
+  * [function definitions](#function-definitions),
+  * [procedure definitions](#procedure-definitions),
+  * [constructor declarations](#constructor-declarations),
+  * [type declarations](#type-declarations),
+  * [resource declarations](#resource-declarations), and
+  * [module declarations](#submodules).
+
 Each of these will be described in due course.
 
 Each module item should begin on a new line, or they should be separated by
@@ -78,7 +82,7 @@ However, each of these sorts of items can be made public by preceding them with
 the keyword `pub`, meaning that by importing the module that defines them,
 you gain access to them.
 
-###  <a name="importing"></a>Importing modules
+### <a name="importing"></a>Importing modules
 To import a module into your own module, you need only include a declaration of
 the form:
 
@@ -226,11 +230,34 @@ Again, each *arg* is an expression.
 
 A function name may consist of any number of upper and lower case letters,
 digits, and underscore (`_`) characters, as long as it does not begin with a
-digit.  Also see (the operator syntax section)[#operator syntax] for special
+digit.  Also see (the operator syntax section)[#operator-syntax] for special
 infix and prefix operator syntax.
 
+Function calls may have one of the following forms:
+  - A call with all arguments inputs.  This is the conventional form, where all
+    arguments are evaluated and then the function is called, producing the
+    function value.  This form of expression is considered to be an input.
 
-##  <a name="type constraints"></a>Type constraints
+  - A call where one or more argumens are outputs (prefixed with `?`), and all
+    others, if any, are inputs.  This form of expression is considered to be an
+    output.  In this case, the function is run "backwards", working from the
+    result to determine the output arguments.  So the value of the function must
+    be supplied by the context in which it is called, and then the function is
+    called to produce the values for the outputs.
+
+  - A call where one or more argumens are input/outputs (prefixed with `!`), and
+    all others, if any, are inputs.  This form of expression is itself
+    considered to be an input/output.  In this form, the expression is first
+    treated as an input, producing the initial value of the expression, then the
+    enclosing operation is performed to update the expression value, and finally
+    the expression is treated as an update operation.
+
+Expressions containing both output and input/output arguments are not permitted.
+
+
+
+
+## <a name="type constraints"></a>Type constraints
 
 In most cases, the compiler can determine the types of expressions used in your
 code.  However, occasionally the compiler needs some help in resolving
@@ -260,18 +287,17 @@ is generally recommended to lay your code out this way.
 The Wybe compiler tries to distinguish line breaks that appear in the middle of
 a statement from ones that separate statements by considering adjacent
 characters.  If what preceeded the line break was an operator symbol, a comma,
-semicolon, left parenthesis, bracket, or brace, or one of the keywords `then`,
-`else`, `in`, `is`, `where`, `pub`, `def`, `constructor`, or `constructors`,
+semicolon, left parenthesis, bracket, or brace, or one of the keywords `in`, `is`, `where`, `pub`, `def`, `type`, `constructor`, or `constructors`,
 then the line break is not considered to be a separator.  Likewise, if what
 follows is an operator symbol other than `?`, `!`, or `~`, a comma, semicolon, a
-right parenthesis, bracket, or brace, or one of the keywords `then`, `else`,
+right parenthesis, bracket, or brace, or one of the keywords
 `in`, `is`, or `where`, then the line break is not considered to be a separator.
 Otherwise, the line break is treated as a separator, as if you had written an
 explicit semicolon.
 
 
 
-## Function definitions
+## <a name="function-definitions"></a>Function definitions
 
 Functions are defined with the syntax:
 
@@ -294,7 +320,7 @@ pub def toCelsius(f:float):float = (f - 32.0) / 1.8
 ```
 
 
-## Procedure definitions
+## <a name="procedure-definitions"></a>Procedure definitions
 
 Procedures are defined with the syntax:
 
@@ -302,7 +328,7 @@ Procedures are defined with the syntax:
 
 Again *name* is the procedure name, each *param* is a parameter name, the
 corresponding *type* is its type, and *body* is a sequence of statements making
-up the body of the procedure.  The statements in *body* should be place on
+up the body of the procedure.  The statements in *body* should be placed on
 separate lines, or should be separated with semicolon (`;`) characters.  Each
 *dir* is a dataflow
 direction annotation, either nothing to indicate an input, `?` for an
@@ -357,20 +383,8 @@ is always equivalent to
 f(x, ?y)
 ```
 
-You can also explicitly define a "reverse mode" of a function, that is, a mode
-in which the function result is an input and some or all of the arguments are
-outputs, by preceding output arguments with a `?`, and by making the value of
-the function as an expression of the form
 
-> `?`*var* `where {` *body* `}`
-
-and defining *body* to compute the values of the output arguments.  The *body*
-may assume that the value of *var* is an input.  That is, when decorating a
-variable on the right side of the equal sign in a function definition, the `?`
-annotation means that the function result is taken as an input stored in the
-named variable.
-
-##  <a name="operator syntax"></a>Operator syntax
+##  <a name="operator-syntax"></a>Operator syntax
 
 A procedure, function, or constructor whose name entirely consists of one or
 more of the operator characters
@@ -500,14 +514,14 @@ otherwise indicated, they are infix operators.
 
 | Reserved names | Meaning
 | -------------- | -------------------------------------------------- |
-| `,`            | Function, procedure, a list argument separator     |
+| `,`            | Function, procedure, and list argument separator     |
 | `.`            | Module prefix separator                            |
 | `^`            | Procedure/function pipeline application            |
 | `;`            | Statement separator                                |
 | `:`            | Type specification                                 |
 | `:!`           | Type cast specification (in foreign code)          |
 | `::`           | Condition/case separator                           |
-| `|`            | Disjunction                                        |
+| `\|`           | Disjunction                                        |
 | `&`            | Conjunction                                        |
 | `?`            | Output variable annotation (prefix)                |
 | `!`            | Input/Output variable annotation (prefix)          |
@@ -589,6 +603,100 @@ latter):
 add(x, y, xy)
 xy = add(x, y)
 ```
+
+
+## <a name="pattern matching"></a>Pattern matching
+
+Like procedures, some Wybe functions can be "run backwards", where the function
+result is supplied as input and some or all of its arguments are produced as
+outputs.  You can explicitly define such a "reverse mode" of a function, by
+preceding output arguments with a `?`, and by making the value of the function
+an expression of the form
+
+> `?`*var* `where {` *body* `}`
+
+and defining *body* to compute the values of the output arguments treating *var*
+as an input.
+
+This can serve the role filled by *pattern matching* in other programming
+languages.  Indeed, when constructors are defined in Wybe (see the section on
+[constructor declarations](#constructor-declarations)), the compiler
+automatically generates a backward mode function for each construcor function.
+For example, if you define a type `position` with a constructor `position(x:int,
+y:int)`, the compiler automatically generates a backward mode function
+`position(?x:int,?y:int)`.  Thus a new position can be created with the
+statement
+```
+?pos = position(x, y)
+```
+and an existing position can be deconstructed to extract its `x` and `y`
+components with the statement
+```
+pos = position(?x, ?y)
+```
+
+For types with multiple constructors, backwards construction can fail.  For
+example, if `lst` is a list, then exactly one of the statements
+```
+lst = []
+```
+or
+```
+lst = [?h | ?t]
+```
+will succeed, and the other will fail.  Therefore, these statements are tests,
+and can only appear where test statements are allowed, such as in a [conditional
+statement](#conditionals).  Note that variables assigned by such a test cannot
+be used outside of the context in which that test has succeeded.
+
+Patterns can also be nested.  For example, the statement
+```
+lst = [?elt1, ?elt2, ?elt3]
+```
+which is equivalent to
+```
+lst = `[|]`(?elt1, `[|]`(?elt2, `[|]`(?elt3, [])))
+```
+will succeed if `lst` is a three-element list, binding `elt11`, `elt2`, and
+`elt3` to the first, second, and third elements, respectively.
+
+
+## <a name="structure-update"></a>Structure update
+
+Wybe semantics does not allow data structures to be destructively modified.
+
+However, variables can be reassigned, and new data structures can be created
+that differ from existing ones only in one field, and Wybe provides a convenient
+to combine these two things to support data structure update.  For example, if
+you define a type `position` with a constructor `position(x:int, y:int)`, the
+compiler not only generates a constructor and deconstructor function, and
+accessor functions `x` and `y` that map from a `position` to an `int`, it also
+generates backward mode structure update functions `x` and `y`.  Using the
+convenient infix `^` [operator syntax](#operator-syntax), a statement
+```
+!pos^x = 0
+```
+would set `pos` to a position with the same `y` component as the previous versin
+of `pos`, but with 0 for the `x` component.  Effectively, this just sets the `x`
+component of `pos` to 0 without changing its `y` component.  However, this does
+not affect any variable other than `pos`.  Similarly,
+```
+incr(!pos^y)
+```
+would increment the `y` component of `pos`.
+
+For types with multiple constructors, structure updates become tests, and therefore can only be used in test contexts.  For example,
+```
+!lst^head = 42
+```
+might appear in a [conditional statement](#conditionals), which would also
+specify what to do if `lst` is empty.  These can all be combined to replace the
+`y` component of the second element of `lst` with 0:
+```
+!lst^tail^head^y = 0
+```
+This will fail if either the list is empty or its tail is empty, therefore,
+again, this must appear in a test context, such as a conditional.
 
 
 ## <a name="conditionals"></a>Conditional statements
@@ -676,7 +784,7 @@ do {!print(prompt)
 ```
 
 
-## (sub)modules
+## <a name="submodules"></a>(sub)modules
 
 A Wybe module may contain submodules.
 Each submodule of a module has access to everything in the containing module,
@@ -694,7 +802,8 @@ where *name* is the module name and *items* are the contents of the submodule,
 separated by newlines or semicolons.
 
 
-## <a name="constructors"></a>Constructor declarations
+## <a name="defining-types"></a>Defining Types
+### <a name="constructor-declarations"></a>Constructor declarations
 
 Wybe supports abstract algebraic data types. Every Wybe type is a module, and
 each type's primitive operations are the operations of that module. A module
@@ -710,7 +819,7 @@ prototype part of a function declaration:
 > *name*`(`*param*`:`*type*, ... *param*`:`*type*`)`
 
 If *name* is an infix operator symbol, you must surround it with backquotes, or
-declare the constructor with infix infix syntax, much like defining a function
+declare the constructor with infix syntax, much like defining a function
 whose name is an operator:
 
 > `(`*param*`:`*type* *name* *param*`:`*type*`)`
@@ -841,7 +950,7 @@ def {test} member(elt:int, tree:tree) {
 }
 ```
 
-## Type declarations
+## <a name="type-declarations"></a>Type declarations
 
 In some cases, a module may wish to define multiple types.  This can be done by
 declaring separate submodules within the module, and declaring constructors in
@@ -924,8 +1033,8 @@ type.
 As a special case, the type `_` is treated as an alias for whatever type is
 defined by the module in which it appears.  That provides a shorter
 name for the type being defined, and also allows the type to be renamed simply
-by renaming the file it is defined in.  For example, if the following code could
-be placed in an Wybe source file to define a linked list type with whatever name
+by renaming the file it is defined in.  For example, the following code could
+be placed in a Wybe source file to define a linked list type with whatever name
 is deemed suitable.
 
 ```
@@ -937,7 +1046,7 @@ def concat(a:_(?T), b:_(?T)):_(?T) =
 ```
 
 
-## Resources
+## <a name="resources"></a>Resources
 
 Resources provide an alternative argument passing mechanism,
 based on name rather than argument position.
@@ -953,7 +1062,7 @@ Resources are often useful where an imperative application would use a global or
 static variable, or where an object oriented application would use a class
 variable.
 
-### Declaring a resource
+### <a name="resource-declarations"></a>Declaring a resource
 
 The benefit of resources is that they are lightweight,
 because they do not need to be explicitly passed between procedures
@@ -1076,7 +1185,7 @@ For example, given a directory hierarchy:
     /a/b/c/d/g/h.wybe
     /a/b/c/d/g/i.wybe
 
-In this case, the name of the module defined in `e.wybe` is `d.e`, because the
+the name of the module defined in `e.wybe` is `d.e`, because the
 file `/a/b/c/d/_.wybe` makes `d` a module.  Likewise, `h.wybe` is the module
 `d.g.h`.
 
@@ -1325,7 +1434,7 @@ Convert float to signed integer
 
 #### Foreign types
 
-In addition to the [`constructor`](#constructors) declaration, it is possible to
+In addition to the [`constructor`](#constructor-declarations) declaration, it is possible to
 declare a low-level type by specifying its representation.  This declaration has
 the form:
 
