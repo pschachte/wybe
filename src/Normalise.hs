@@ -29,6 +29,7 @@ import Data.Tuple.Select
 import Flatten
 import Options (LogSelection(Normalise))
 import Snippets
+import Util
 
 -- |Normalise a list of file items, storing the results in the current module.
 normalise :: [Item] -> Compiler ()
@@ -48,15 +49,22 @@ normalise items = do
 
 -- |Normalise a single file item, storing the result in the current module.
 normaliseItem :: Item -> Compiler ()
-normaliseItem (TypeDecl vis (TypeProto name params) rep items pos)
-  = do
-    -- let (rep', ctorVis, consts, nonconsts) = normaliseTypeImpln rep
-    let (rep', ctorVis, ctors) = normaliseTypeImpln rep
-    _ <- addType name (TypeDef vis params rep' ctors ctorVis pos items)
-    normaliseSubmodule name Nothing vis pos items
-    return ()
+normaliseItem (TypeDecl vis (TypeProto name params) (TypeRepresentation rep)
+              items pos) = do
+    let items' = RepresentationDecl params rep pos : items
+    normaliseSubmodule name vis pos items'
+normaliseItem (TypeDecl vis (TypeProto name params) (TypeCtors ctorVis ctors)
+              items pos) = do
+    let items' = ConstructorDecl ctorVis params ctors pos : items
+    normaliseSubmodule name vis pos items'
 normaliseItem (ModuleDecl vis name items pos) =
-    normaliseSubmodule name Nothing vis pos items
+    normaliseSubmodule name vis pos items
+normaliseItem (RepresentationDecl params rep pos) = do
+    addParameters params pos
+    addTypeRep rep pos
+normaliseItem (ConstructorDecl ctorVis params ctors pos) = do
+    addParameters params pos
+    mapM_ (addConstructor ctorVis) ctors
 normaliseItem (ImportMods vis modspecs pos) =
     mapM_ (\spec -> addImport spec (importSpec Nothing vis)) modspecs
 normaliseItem (ImportItems vis modspec imports pos) =
@@ -79,10 +87,10 @@ normaliseItem (FuncDecl vis mods (ProcProto name params resources)
             (ProcProto name (params ++ [Param "$" resulttype ParamOut flowType])
                        resources)
              [maybePlace (ForeignCall "llvm" "move" []
-                 [maybePlace (Typed (content result) resulttype False)
+                 [maybePlace (Typed (content result) resulttype Nothing)
                   $ place result,
                   Unplaced
-                  $ Typed (Var "$" ParamOut flowType) resulttype False])
+                  $ Typed (Var "$" ParamOut flowType) resulttype Nothing])
               pos]
         pos)
 normaliseItem item@(ProcDecl _ _ _ _ _) = do
@@ -96,10 +104,9 @@ normaliseItem (PragmaDecl prag) =
     addPragma prag
 
 
-
-normaliseSubmodule :: Ident -> Maybe [Ident] -> Visibility -> OptPos ->
-                      [Item] -> Compiler ()
-normaliseSubmodule name typeParams vis pos items = do
+-- |Normalise a nested submodule containing the specified items.
+normaliseSubmodule :: Ident -> Visibility -> OptPos -> [Item] -> Compiler ()
+normaliseSubmodule name vis pos items = do
     parentOrigin <- getOrigin
     parentModSpec <- getModuleSpec
     let subModSpec = parentModSpec ++ [name]
@@ -112,14 +119,11 @@ normaliseSubmodule name typeParams vis pos items = do
     alreadyExists <- isJust <$> getLoadingModule subModSpec
     if alreadyExists
       then reenterModule subModSpec
-      else enterModule parentOrigin subModSpec (Just parentModSpec) typeParams
+      else enterModule parentOrigin subModSpec (Just parentModSpec)
     -- submodule always imports parent module
+    updateImplementation $ \i -> i { modNestedIn = Just parentModSpec }
+    -- XXX This shouldn't be needed
     addImport parentModSpec (importSpec Nothing Private)
-    when (isJust typeParams)
-      $ updateImplementation
-        (\imp ->
-          let set = Set.singleton $ TypeSpec parentModSpec name []
-          in imp { modKnownTypes = Map.insert name set $ modKnownTypes imp })
     normalise items
     if alreadyExists
     then reexitModule
@@ -143,89 +147,119 @@ normaliseSubmodule name typeParams vis pos items = do
 
 completeNormalisation :: [ModSpec] -> Compiler ()
 completeNormalisation mods = do
+    logNormalise $ "Completing normalisation of modules " ++ showModSpecs mods
     completeTypeNormalisation mods
     mapM_ (normaliseModMain `inModule`) mods
 
 
--- | Layout the types defined on the specified module list, which comprise
---   a strongly connected component in the module dependency graph. Because
---   SCCs are handled in topologically sorted order (bottom-up), this means
---   all types defined in the specified modules have already been laid out
---   and can be looked up. However, to layout a type, we need to have first
---   laid out the types it depends on. In the case of (mutually) recursive
---   types, we represent all of them as pointers. Thus we first find the
---   SCCs in the type dependency graph restricted to the specified modules,
---   and lay out those types bottom-up. Once a type is laid out, we also
---   generate constructors, deconstructors, accessors, mutators, and
---   auxiliary procedures.
+-- | Layout the types on the specified module list, which comprise a strongly
+--   connected component in the *module* dependency graph.  Some of the
+--   specified modules will not be types, and are ignored here.  Some that are
+--   types will be specified by representation rather than by constructors; for
+--   these, we just accept the specified representation, so there is nothing
+--   more to do here.  The types specified as a list of constructors can only be
+--   defined in terms of types in the specified module list or in modules that
+--   have already been layed out.  Any mutually recursively defined types must
+--   all be listed in the same module dependency SCC.  Also, all (mutually)
+--   recursively defined types may be unbounded in size, and therefore must be
+--   represented as pointers.
+--
+--   Thus we handle struct layout by first finding the SCCs in the *type*
+--   dependency graph limited to the current *module* depenency SCC, and
+--   handling the SCCs in topological order.  For recursive SCCs, we first
+--   automatically assign a pointer representation for each type.  Then we lay
+--   out each type in the type dependency SCC, and finally generate
+--   constructors, deconstructors, accessors, mutators, and auxiliary
+--   procedures.  This ensures we can do the layout in a single pass, and can
+--   safely look up the representation of each type referred in each constructor
+--   as we process it.
 completeTypeNormalisation :: [ModSpec] -> Compiler ()
 completeTypeNormalisation mods = do
-    logNormalise $ "Completing normalisation of modules " ++ showModSpecs mods
-    types <- modSCCTypeDeps mods
-    logNormalise $ "Ordered type dependency SCCs: " ++ show types
-    mapM_ completeTypeSCC types
+    mods' <- filterM (getSpecModule "completeTypeNormalisation" 
+                      (modIsType &&& isNothing . modTypeRep)) mods
+    typeSCCs <- modSCCTypeDeps mods'
+    logNormalise $ "Ordered type dependency SCCs: " ++ show typeSCCs
+    mapM_ completeTypeSCC typeSCCs
 
 
-type TypeKey = (Ident,ModSpec)
+-- |An algebraic type definition, listing all the constructors.
+data TypeDef = TypeDef {
+    typeDefParams :: [TypeVarName],           -- the type parameters
+    typeDefMembers :: [Placed ProcProto],     -- high level representation
+    typeDefMemberVis :: Visibility            -- are members public?
+    } deriving (Eq, Show)
+
+
+-- -- |How to show a type definition.
+-- instance Show TypeDef where
+--   show (TypeDef params members _ pos items) =
+--     bracketList "(" "," ")" params
+--     ++ " { "
+--     ++ intercalate " | " (show <$> members)
+--     ++ " "
+--     ++ intercalate "\n  " (show <$> items)
+--     ++ " } "
+--     ++ showMaybeSourcePos pos
 
 
 -- | Return a topologically sorted list of type dependency SCCs in the
 --   specified modules.
-modSCCTypeDeps :: [ModSpec] -> Compiler [SCC (TypeKey,TypeDef)]
+modSCCTypeDeps :: [ModSpec] -> Compiler [SCC (ModSpec,TypeDef)]
 modSCCTypeDeps sccMods =
-    stronglyConnComp <$>
-      concatMapM (modTypeDeps sccMods `inModule`) sccMods
+    let modSet = Set.fromList sccMods
+    in stronglyConnComp <$> mapM (modTypeDeps modSet `inModule`) sccMods
 
 
 -- | Return a list of type dependencies on types defined in the specified
 -- modules that are defined in the current module
-modTypeDeps :: [ModSpec] -> Compiler [((TypeKey,TypeDef), TypeKey, [TypeKey])]
-modTypeDeps sccMods = do
-    modspec <- getModuleSpec
-    pairs <- Map.toList <$> getModuleImplementationField modTypes
-    mapM (typeDeps sccMods) [((name,modspec),def) | (name,def) <- pairs]
+modTypeDeps :: Set ModSpec -> Compiler ((ModSpec,TypeDef), ModSpec, [ModSpec])
+modTypeDeps modSet = do
+    tyMod <- getModule modSpec
+    tyParams <- getModule modParams
+    ctorsVis <- (reverse . trustFromJust "modTypeDeps")
+               <$> getModuleImplementationField modConstructors
+    -- XXX should pull visibility out of list
+    let vis = fst $ head ctorsVis
+    ctors <- mapM (placedApply resolveCtorTypes . snd) ctorsVis
+    let deps = List.filter (`Set.member` modSet)
+               $ concatMap 
+                 (catMaybes . (typeModule . paramType <$>)
+                  . procProtoParams . content)
+                 ctors
+    return ((tyMod, TypeDef tyParams ctors vis), tyMod, deps)
 
 
--- | Produce the input needed to construct a list of SCCs.
-typeDeps :: [ModSpec] -> (TypeKey,TypeDef)
-         -> Compiler ((TypeKey,TypeDef), TypeKey, [TypeKey])
-typeDeps sccMods (key,def) = do
-    let deps = typeDefMembers def
-    depKeys <- (Set.toList . Set.fromList . concat)
-               <$> mapM (placedApplyM $ protoKeys sccMods) deps
-    return ((key,def), key, depKeys)
+-- | Resolve constructor argument types.
+resolveCtorTypes :: ProcProto -> OptPos -> Compiler (Placed ProcProto)
+resolveCtorTypes proto pos = do
+    params <- mapM (resolveParamType pos) $ procProtoParams proto
+    return $ maybePlace (proto { procProtoParams = params }) pos
 
--- | Return a list of all the types defined in any of the sccMods that are
---   used as parameter types of any of the parameters of the provided ProcProto
-protoKeys :: [ModSpec] -> ProcProto -> OptPos -> Compiler [TypeKey]
-protoKeys sccMods proto pos = do
-    let types = paramType <$> procProtoParams proto
-    -- XXX to handle parametric types, we need to include the type parameters
-    types' <- catMaybes <$> mapM (`lookupType` pos) types
-    return [(name,mod) | (TypeSpec mod name _) <- types', mod `elem` sccMods]
+
+-- | Resolve the type of a parameter
+resolveParamType :: OptPos -> Param -> Compiler Param
+resolveParamType pos param@Param{paramType=ty} = do
+    ty' <- lookupType "constructor parameter" pos ty
+    return $ param { paramType = ty' }
+
 
 
 -- | Layout the types defined in the specified type dependency SCC, and then
 --   generate constructors, deconstructors, accessors, mutators, and
 --   auxiliary procedures.
-
-completeTypeSCC :: SCC (TypeKey,TypeDef) -> Compiler ()
-completeTypeSCC (AcyclicSCC ((name,mod),typedef)) = do
+completeTypeSCC :: SCC (ModSpec,TypeDef) -> Compiler ()
+completeTypeSCC (AcyclicSCC (mod,typedef)) = do
     logNormalise $ "Completing non-recursive type "
-                   ++ showModSpec mod ++ "." ++ name ++ " = "
-                   ++ show typedef
-    completeType (name,mod) typedef
-completeTypeSCC (CyclicSCC nameTypedefs) = do
-    logNormalise $ "Completing recursive type(s):" ++ show nameTypedefs
-    mapM_ (\((name,mod),typedef) ->
-             logNormalise $ "   " ++ showModSpec mod ++ "." ++ name ++ " = "
-               ++ show typedef) nameTypedefs
-    -- Update type representations for recursive types to addresses
-    mapM_ (\((name,mod),typedef) ->
-             addType name (typedef {typeDefRepresentation = Just Address})
-               `inModule` mod)
-          nameTypedefs
-    mapM_ (uncurry completeType) nameTypedefs
+                   ++ showModSpec mod ++ " = " ++ show typedef
+    completeType mod typedef
+completeTypeSCC (CyclicSCC modTypeDefs) = do
+    logNormalise $ "Completing recursive type(s):" ++ show modTypeDefs
+    mapM_ (\(mod,typedef) ->
+             logNormalise $ "   " ++ showModSpec mod ++ " = " ++ show typedef)
+          modTypeDefs
+    -- First set representations to addresses, then layout types
+    mapM_ ((setTypeRep Address `inModule`) . fst) modTypeDefs
+    mapM_ (uncurry completeType) modTypeDefs
 
 
 -- | Information about a non-constant constructor
@@ -242,6 +276,7 @@ data CtorInfo = CtorInfo {
 
 -- | Layout the specified type, and then generate constructors,
 --   deconstructors, accessors, mutators, and auxiliary procedures.
+--   When called, all referred types have established representations.
 --
 --   Our type layout strategy:
 --     * Let numConsts = the number of constant constructors
@@ -260,52 +295,49 @@ data CtorInfo = CtorInfo {
 --     * elif numConsts == 0 && max ctorSize <= wordSizeBytes:
 --          rep = integer with max ctorSize bits
 --     * else: rep = integer with wordSizeBytes bits
-completeType :: TypeKey -> TypeDef -> Compiler ()
-completeType (name,modspec)
-             typedef@(TypeDef vis params rep ctors ctorVis pos items) = do
-    logNormalise $ "Completing type " ++ showModSpec modspec ++ "." ++ name
-    let rep0  = trustFromJust "completeType with equiv type decl" rep
-    if List.null ctors
-      then return () -- we should have already determined the representation
-      else do
-      reenterModule modspec
-      let (constCtors,nonConstCtors) =
-            List.partition (List.null . procProtoParams . content) ctors
-      let numConsts = length constCtors
-      let numNonConsts = length nonConstCtors
-      let (tagBits,tagLimit) =
-            if numNonConsts > wordSizeBytes
-            then -- must set aside one tag to indicate secondary tag
-              (availableTagBits, wordSizeBytes - 2)
-            else if numNonConsts == 0
-            then (0, 0)
-            else (ceiling $ logBase 2 (fromIntegral numNonConsts),
-                  wordSizeBytes - 1)
-      logNormalise $ "Complete " ++ showModSpec modspec ++ "." ++ name
-                     ++ " with " ++ show tagBits ++ " tag bits and "
-                     ++ show tagLimit ++ " tag limit"
-      when (numConsts >= fromIntegral smallestAllocatedAddress)
-        $ nyi $ "Type '" ++ name ++ "' has too many constant constructors"
-      let typespec = TypeSpec modspec name []
-      let constItems =
-            concatMap (constCtorItems ctorVis typespec) $ zip constCtors [0..]
-      infos <- zipWithM nonConstCtorInfo nonConstCtors [0..]
-      (reps,nonconstItemsList) <-
-           unzip <$> mapM
-           (nonConstCtorItems ctorVis typespec numConsts numNonConsts
-            tagBits tagLimit)
-           infos
-      let rep = typeRepresentation reps numConsts
-      let extraItems =
-            implicitItems typespec constCtors nonConstCtors rep items
-      logNormalise $ "Representation of type "
-                     ++ showModSpec modspec ++ "." ++ name
-                     ++ " is " ++ show rep
-      addType name (typedef {typeDefRepresentation = Just rep })
-      normaliseSubmodule name (Just params) vis pos
-        $ constItems ++ concat nonconstItemsList ++ extraItems
-      reexitModule
-      return ()
+completeType :: ModSpec -> TypeDef -> Compiler ()
+completeType modspec (TypeDef params ctors ctorVis) = do
+    logNormalise $ "Completing type " ++ showModSpec modspec
+    when (List.null ctors)
+      $ shouldnt $ "completeType with no constructors: " ++ show modspec
+    reenterModule modspec
+    let (constCtors,nonConstCtors) =
+            List.partition (List.null . procProtoParams . content) $ ctors
+    let numConsts = length constCtors
+    let numNonConsts = length nonConstCtors
+    let (tagBits,tagLimit) =
+          if numNonConsts > wordSizeBytes
+          then -- must set aside one tag to indicate secondary tag
+            (availableTagBits, wordSizeBytes - 2)
+          else if numNonConsts == 0
+          then (0, 0)
+          else (ceiling $ logBase 2 (fromIntegral numNonConsts),
+                wordSizeBytes - 1)
+    logNormalise $ "Complete " ++ showModSpec modspec
+                   ++ " with " ++ show tagBits ++ " tag bits and "
+                   ++ show tagLimit ++ " tag limit"
+    -- XXX if numNonConsts == 0, then we could handle more consts.
+    when (numConsts >= fromIntegral smallestAllocatedAddress)
+      $ nyi $ "Type '" ++ show modspec ++ "' has too many constant constructors"
+    -- XXX remove name from TypeSpec, and add type variable as an alternative ctor
+    let typespec = TypeSpec (init modspec) (last modspec)
+                   $ List.map TypeVariable params
+    let constItems =
+          concatMap (constCtorItems ctorVis typespec) $ zip constCtors [0..]
+    infos <- zipWithM nonConstCtorInfo nonConstCtors [0..]
+    (reps,nonconstItemsList) <-
+         unzip <$> mapM
+         (nonConstCtorItems ctorVis typespec numConsts numNonConsts
+          tagBits tagLimit)
+         infos
+    let rep = typeRepresentation reps numConsts
+    extraItems <- implicitItems typespec constCtors nonConstCtors rep
+    logNormalise $ "Representation of type " ++ showModSpec modspec
+                   ++ " is " ++ show rep
+    setTypeRep rep
+    normalise $ constItems ++ concat nonconstItemsList ++ extraItems
+    reexitModule
+    return ()
 
 
 -- | Analyse the representation of a single constructor, determining the
@@ -322,7 +354,7 @@ nonConstCtorInfo placedProto tag = do
       $ shouldnt $ "Constructor with resources: " ++ show placedProto
     let name   = procProtoName proto
     let params = procProtoParams proto
-    params' <- mapM (fixParamType pos) params
+    params' <- mapM (resolveParamType pos) params
     logNormalise $ "With types resolved: " ++ show placedProto
     reps <- mapM ( lookupTypeRepresentation . paramType ) params'
     let reps' = catMaybes reps
@@ -332,16 +364,6 @@ nonConstCtorInfo placedProto tag = do
     let bitSize  = sum bitSizes
     let typeReps = zip3 params' reps' bitSizes
     return $ CtorInfo name typeReps pos tag bitSize
-
-
-
-fixParamType :: OptPos -> Param -> Compiler Param
-fixParamType pos param = do
-    let ty = paramType param
-    ty' <- lookupType ty pos
-    when (isNothing ty') (message Error ("Unknown type " ++ show ty) pos)
-    let ty'' = fromMaybe InvalidType ty'
-    return $ param { paramType = ty'' }
 
 
 -- | Determine the appropriate representation for a type based on a list of
@@ -364,33 +386,62 @@ normaliseModMain = do
     modSpec <- getModuleSpec
     logNormalise $ "Completing main normalisation of module "
                    ++ showModSpec modSpec
-    logNormalise $ "Top-level statements = " ++ show stmts
-    unless (List.null stmts) $ do
-      resources <- initResources
-      normaliseItem (ProcDecl Public detModifiers (ProcProto "" [] resources)
-                      (List.reverse stmts) Nothing)
+    (resources,inits) <- initResources
+    let initBody = inits ++ List.reverse stmts
+    logNormalise $ "Top-level statements = " ++ show initBody
+    unless (List.null stmts && List.null inits)
+      $ normaliseItem $ ProcDecl Public detModifiers (ProcProto "" [] resources)
+                                 initBody Nothing
 
--- |The resources available at the top level of this module
-initResources :: Compiler (Set ResourceFlowSpec)
+
+-- |The resources available at the top level of this module, plus the
+-- initialisations to be performed before executing any code that uses this
+-- module.
+initResources :: Compiler (Set ResourceFlowSpec, [Placed Stmt])
 initResources = do
+    thisMod <- getModule modSpec
     mods <- getModuleImplementationField (Map.keys . modImports)
     mods' <- ((mods ++) . concat) <$> mapM descendentModules mods
     logNormalise $ "in initResources, mods = " ++ showModSpecs mods'
     importedMods <- catMaybes <$> mapM getLoadingModule mods'
     let importImplns = catMaybes (modImplementation <$> importedMods)
-    let importResources = (Map.assocs . content . snd) <$>
+    let importedResources = (Map.assocs . content . snd) <$>
                      (concat $ (Map.assocs . modResources) <$> importImplns)
-    let initialisedImports = List.filter (isJust . snd) $ concat importResources
     impln <- getModuleImplementationField id
-    let localResources = (Map.assocs . content . snd) <$>
-                         (Map.assocs $ modResources impln)
-    let initialisedLocal = List.filter (isJust . snd) $ concat localResources
-    let resources = ((\spec -> ResourceFlowSpec (fst spec) ParamInOut)
-                     <$> initialisedImports)
+    let localResources = (Map.assocs . content) <$>
+                         (Map.elems $ modResources impln)
+    let initialised = List.filter (isJust . resourceInit . snd) . concat
+    let initialisedImports = initialised importedResources
+    let initialisedLocal = initialised localResources
+    -- Direct tie-in to command_line library module:  for the command_line
+    -- module, or any module that imports it, we add argc and argv as resources.
+    -- This is necessary because argc and argv are effectively initialised by
+    -- the fact that they're automatically generated as arguments to the
+    -- top-level main, but we can't declare them with resource initialisations,
+    -- because that would overwrite them.
+    let cmdlineModSpec = ["command_line"]
+    let cmdlineResources =
+            if cmdlineModSpec == thisMod
+            then let cmdline = ResourceSpec cmdlineModSpec
+                 in [ResourceFlowSpec (cmdline "argc") ParamInOut
+                    ,ResourceFlowSpec (cmdline "argv") ParamInOut]
+            else []
+    let resources = cmdlineResources
+                    ++ ((\spec -> ResourceFlowSpec (fst spec) ParamInOut)
+                        <$> initialisedImports)
                     ++ ((\spec -> ResourceFlowSpec (fst spec) ParamOut)
                         <$> initialisedLocal)
+    let inits = [Unplaced $ ForeignCall "llvm" "move" []
+                            [maybePlace ((content initExp) `withType` resType)
+                             (place initExp)
+                            ,Unplaced (varSet $ resourceName resSpec)]
+                | (resSpec, resImpln) <- initialisedLocal
+                , let initExp = trustFromJust "initResources"
+                                $ resourceInit resImpln
+                , let resType = resourceType resImpln]
     logNormalise $ "In initResources, resources = " ++ show resources
-    return $ Set.fromList resources
+    logNormalise $ "In initResources, initialisations =" ++ showBody 4 inits
+    return (Set.fromList resources, inits)
 
 
 
@@ -435,7 +486,8 @@ nonConstCtorItems vis typeSpec numConsts numNonConsts tagBits tagLimit
             else let constSize = ceiling $ logBase 2 $ fromIntegral numConsts
                      size' = 1 + max nonConstsize constSize
                  in (size', Just $ size' - 1)
-    logNormalise $ "Making constructor items for " ++ show info
+    logNormalise $ "Making constructor items for type " ++ show typeSpec
+                   ++ ": " ++ show info
     logNormalise $ show bits ++ " data bit(s)"
     logNormalise $ show tagBits ++ " tag bit(s)"
     logNormalise $ "nonConst bit = " ++ show nonConstBit
@@ -465,21 +517,17 @@ nonConstCtorItems vis typeSpec numConsts numNonConsts tagBits tagLimit
       logNormalise $ "Structure contains " ++ show ptrCount ++ " pointers, "
                      ++ show numConsts ++ " const constructors, "
                      ++ show numNonConsts ++ " non-const constructors"
+      let params = sel1 <$> paramsReps
       return (Address,
-              constructorItems ctorName typeSpec fields size tag tagLimit pos
-              ++ deconstructorItems ctorName typeSpec numConsts numNonConsts
-                 tag tagLimit pos fields size
+              constructorItems ctorName typeSpec params fields
+                  size tag tagLimit pos
+              ++ deconstructorItems ctorName typeSpec params numConsts
+                     numNonConsts tag tagLimit pos fields size
               ++ concatMap
                  (getterSetterItems vis typeSpec pos numConsts numNonConsts
                   ptrCount size tag tagLimit)
                  fields
              )
-
--- |The number of bytes occupied by a value of the specified type.  If the
---  type is boxed, this is the word size.
-fieldSize :: TypeSpec -> Compiler Int
--- XXX Generalise to allow non-word size fields
-fieldSize _ = return wordSizeBytes
 
 
 ----------------------------------------------------------------
@@ -529,27 +577,25 @@ alignOffset offset alignment =
 
 
 -- |Generate constructor code for a non-const constructor
-constructorItems :: ProcName -> TypeSpec
+constructorItems :: ProcName -> TypeSpec -> [Param]
                  -> [(VarName,TypeSpec,TypeRepresentation,Int)]
                  -> Int -> Int -> Int -> OptPos -> [Item]
-constructorItems ctorName typeSpec fields size tag tagLimit pos =
+constructorItems ctorName typeSpec params fields size tag tagLimit pos =
     let flowType = Implicit pos
-        params = sel1 <$> fields
-        proto = (ProcProto ctorName
-                 ([Param name paramType ParamIn Ordinary
-                  | (name,paramType,_,_) <- fields]
-                   ++[Param "$" typeSpec ParamOut Ordinary])
-                 Set.empty)
-    in [ProcDecl Public inlineDetModifiers proto
+    in [ProcDecl Public inlineDetModifiers
+        (ProcProto ctorName
+            (((\p -> p {paramFlow=ParamIn, paramFlowType=Ordinary}) <$> params)
+             ++ [Param "$" typeSpec ParamOut Ordinary])
+            Set.empty)
         -- Code to allocate memory for the value
         ([Unplaced $ ForeignCall "lpvm" "alloc" []
           [Unplaced $ iVal size,
-           Unplaced $ Typed (varSet "$rec") typeSpec True]]
+           Unplaced $ varSet "$rec" `withType` typeSpec]]
          ++
          -- fill in the secondary tag, if necessary
          (if tag > tagLimit
           then [Unplaced $ ForeignCall "lpvm" "mutate" []
-                 [Unplaced $ Typed (varGetSet "$rec" flowType) typeSpec False,
+                 [Unplaced $ Typed (varGetSet "$rec" flowType) typeSpec Nothing,
                   Unplaced $ iVal 0,
                   Unplaced $ iVal 1,
                   Unplaced $ iVal size,
@@ -561,12 +607,12 @@ constructorItems ctorName typeSpec fields size tag tagLimit pos =
          (List.map
           (\(var,ty,_,offset) ->
                (Unplaced $ ForeignCall "lpvm" "mutate" []
-                 [Unplaced $ Typed (varGetSet "$rec" flowType) typeSpec False,
+                 [Unplaced $ Typed (varGetSet "$rec" flowType) typeSpec Nothing,
                   Unplaced $ iVal offset,
                   Unplaced $ iVal 1,
                   Unplaced $ iVal size,
                   Unplaced $ iVal 0,
-                  Unplaced $ Typed (Var var ParamIn flowType) ty False]))
+                  Unplaced $ Typed (Var var ParamIn flowType) ty Nothing]))
           fields)
          ++
          -- Finally, code to tag the reference
@@ -578,16 +624,17 @@ constructorItems ctorName typeSpec fields size tag tagLimit pos =
 
 
 -- |Generate deconstructor code for a non-const constructor
-deconstructorItems :: Ident -> TypeSpec -> Int -> Int -> Int -> Int -> OptPos
-                   -> [(Ident,TypeSpec,TypeRepresentation,Int)] -> Int -> [Item]
-deconstructorItems ctorName typeSpec numConsts numNonConsts tag tagLimit
+deconstructorItems :: Ident -> TypeSpec -> [Param] -> Int -> Int -> Int -> Int
+                   -> OptPos -> [(Ident,TypeSpec,TypeRepresentation,Int)]
+                   -> Int -> [Item]
+deconstructorItems ctorName typeSpec params numConsts numNonConsts tag tagLimit
                    pos fields size =
-    let startOffset = (if tag > tagLimit then tagLimit+1 else tag) in
-    let flowType = Implicit pos
+    let startOffset = (if tag > tagLimit then tagLimit+1 else tag)
+        flowType = Implicit pos
         detism = deconstructorDetism numConsts numNonConsts
     in [ProcDecl Public (inlineModifier detism)
         (ProcProto ctorName
-         (List.map (\(n,t,_,_) -> (Param n t ParamOut Ordinary)) fields
+         (((\p -> p {paramFlow=ParamOut, paramFlowType=Ordinary}) <$> params)
           ++ [Param "$" typeSpec ParamIn Ordinary])
          Set.empty)
         -- Code to check we have the right constructor
@@ -615,7 +662,7 @@ tagCheck numConsts numNonConsts tag tagLimit size varName =
           (case numConsts of
                0 -> []
                _ -> [comparison "icmp_uge"
-                     (varGet varName)
+                     (intCast $ varGet varName)
                      (intCast $ iVal numConsts)]
            ++
            -- If there is more than one non-const constructors, check that
@@ -624,8 +671,8 @@ tagCheck numConsts numNonConsts tag tagLimit size varName =
                1 -> []  -- Nothing to do if it's the only non-const constructor
                _ -> [comparison "icmp_eq"
                      (intCast $ ForeignFn "llvm" "and" []
-                      [Unplaced $ varGet varName,
-                       Unplaced $ iVal tagMask])
+                      [Unplaced $ intCast $ varGet varName,
+                       Unplaced $ iVal tagMask `withType` intType])
                      (intCast $ iVal (if tag > tagLimit
                                       then wordSizeBytes-1
                                       else tag))])
@@ -638,8 +685,9 @@ tagCheck numConsts numNonConsts tag tagLimit size varName =
                   Unplaced $ iVal $ trustFromJust
                              "unboxed type shouldn't have a secondary tag" size,
                   Unplaced $ iVal startOffset,
-                  Unplaced $ varSet "$tag"],
-                 comparison "icmp_eq" (varGet "$tag") (iVal tag)]
+                  Unplaced $ tagCast (varSet "$tag")],
+                 comparison "icmp_eq" (varGet "$tag" `withType` tagType)
+                                      (iVal tag `withType` tagType)]
            else [])
 
     in if List.null tests
@@ -690,7 +738,7 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
         -- Code to mutate the selected field
          [Unplaced $ ForeignCall "lpvm" "mutate" flags
           [Unplaced $ Typed (Var "$rec" ParamInOut $ Implicit pos)
-                      rectype False,
+                      rectype Nothing,
            Unplaced $ iVal (offset - startOffset),
            Unplaced $ iVal 0,    -- May be changed to 1 by CTGC transform
            Unplaced $ iVal size,
@@ -710,30 +758,29 @@ unboxedConstructorItems :: Visibility -> ProcName -> TypeSpec -> Int
                         -> OptPos -> [Item]
 unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
     let flowType = Implicit pos
-        params = sel1 <$> fields
-        proto = (ProcProto ctorName
-                 ([Param name paramType ParamIn Ordinary
-                  | (name,paramType,_,_) <- fields]
-                   ++[Param "$" typeSpec ParamOut Ordinary])
-                 Set.empty)
+        proto = ProcProto ctorName
+                ([Param name paramType ParamIn Ordinary
+                 | (name,paramType,_,_) <- fields]
+                  ++[Param "$" typeSpec ParamOut Ordinary])
+                Set.empty
     in [ProcDecl vis inlineDetModifiers proto
          -- Initialise result to 0
         ([Unplaced $ ForeignCall "llvm" "move" []
-          [Unplaced $ Typed (iVal 0) typeSpec False,
-           Unplaced $ Typed (varSet "$") typeSpec False]]
+          [Unplaced $ castFromTo intType typeSpec $ iVal 0,
+           Unplaced $ varSet "$" `withType` typeSpec]]
          ++
          -- Shift each field into place and or with the result
-         (List.concatMap
+         List.concatMap
           (\(var,ty,shift,sz) ->
                [Unplaced $ ForeignCall "llvm" "shl" []
-                 [Unplaced $ Typed (varGet var) typeSpec True,
-                  Unplaced $ Typed (iVal shift) typeSpec False,
-                  Unplaced $ Typed (varSet "$temp") typeSpec False],
+                 [Unplaced $ castFromTo ty typeSpec $ varGet var,
+                  Unplaced $ iVal shift `castTo` typeSpec,
+                  Unplaced $ varSet "$temp" `withType` typeSpec],
                 Unplaced $ ForeignCall "llvm" "or" []
-                 [Unplaced $ Typed (varGet "$") typeSpec False,
-                  Unplaced $ Typed (varGet "$temp") typeSpec False,
-                  Unplaced $ Typed (varSet "$") typeSpec False]])
-          fields)
+                 [Unplaced $ varGet "$temp" `withType` typeSpec,
+                  Unplaced $ varGet "$" `withType` typeSpec,
+                  Unplaced $ varSet "$" `withType` typeSpec]])
+          fields
          ++
          -- Or in the bit to ensure the value is greater than the greatest
          -- possible const value, if necessary
@@ -741,14 +788,14 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
             Nothing -> []
             Just shift ->
               [Unplaced $ ForeignCall "llvm" "or" []
-               [Unplaced $ Typed (varGet "$") typeSpec False,
-                Unplaced $ Typed (iVal (bit shift::Int)) typeSpec False,
-                Unplaced $ Typed (varSet "$") typeSpec False]])
+               [Unplaced $ Typed (varGet "$") typeSpec Nothing,
+                Unplaced $ Typed (iVal (bit shift::Int)) typeSpec Nothing,
+                Unplaced $ Typed (varSet "$") typeSpec Nothing]])
          -- Or in the tag value
           ++ [Unplaced $ ForeignCall "llvm" "or" []
-               [Unplaced $ Typed (varGet "$") typeSpec False,
-                Unplaced $ Typed (iVal tag) typeSpec False,
-                Unplaced $ Typed (varSet "$") typeSpec False]]
+               [Unplaced $ Typed (varGet "$") typeSpec Nothing,
+                Unplaced $ Typed (iVal tag) typeSpec Nothing,
+                Unplaced $ Typed (varSet "$") typeSpec Nothing]]
         ) pos]
 
 
@@ -773,16 +820,16 @@ unboxedDeconstructorItems vis ctorName recType numConsts numNonConsts tag
             (\(var,fieldType,shift,sz) ->
                -- Code to access the selected field
                [Unplaced $ ForeignCall "llvm" "lshr" []
-                 [Unplaced $ Typed (varGet "$") recType False,
-                  Unplaced $ Typed (iVal shift) recType False,
-                  Unplaced $ Typed (varSet "$temp") recType False],
+                 [Unplaced $ Typed (varGet "$") recType Nothing,
+                  Unplaced $ Typed (iVal shift) recType Nothing,
+                  Unplaced $ Typed (varSet "$temp") recType Nothing],
                 Unplaced $ ForeignCall "llvm" "and" []
-                 [Unplaced $ Typed (varGet "$temp") recType False,
-                  Unplaced $ Typed (iVal $ (bit sz::Int) - 1) recType False,
-                  Unplaced $ Typed (varSet "$temp2") recType False],
+                 [Unplaced $ Typed (varGet "$temp") recType Nothing,
+                  Unplaced $ Typed (iVal $ (bit sz::Int) - 1) recType Nothing,
+                  Unplaced $ Typed (varSet "$temp2") recType Nothing],
                 Unplaced $ ForeignCall "lpvm" "cast" []
-                 [Unplaced $ Typed (varGet "$temp2") recType False,
-                  Unplaced $ Typed (varSet var) fieldType False]
+                 [Unplaced $ Typed (varGet "$temp2") recType Nothing,
+                  Unplaced $ Typed (varSet var) fieldType Nothing]
                ])
             fields)
         pos]
@@ -807,17 +854,17 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
          ++
         -- Code to access the selected field
          [Unplaced $ ForeignCall "llvm" "lshr" []
-           [Unplaced $ Typed (varGet "$rec") recType False,
-            Unplaced $ Typed (iVal shift) recType False,
-            Unplaced $ Typed (varSet "$rec") recType False],
+           [Unplaced $ Typed (varGet "$rec") recType Nothing,
+            Unplaced $ Typed (iVal shift) recType Nothing,
+            Unplaced $ Typed (varSet "$rec") recType Nothing],
           -- XXX Don't need to do this for the most significant field:
           Unplaced $ ForeignCall "llvm" "and" []
-           [Unplaced $ Typed (varGet "$rec") recType False,
-            Unplaced $ Typed (iVal fieldMask) recType False,
-            Unplaced $ Typed (varSet "$field") recType False],
+           [Unplaced $ Typed (varGet "$rec") recType Nothing,
+            Unplaced $ Typed (iVal fieldMask) recType Nothing,
+            Unplaced $ Typed (varSet "$field") recType Nothing],
           Unplaced $ ForeignCall "lpvm" "cast" []
-           [Unplaced $ Typed (varGet "$field") recType False,
-            Unplaced $ Typed (varSet "$") fieldType False]
+           [Unplaced $ Typed (varGet "$field") recType Nothing,
+            Unplaced $ Typed (varSet "$") fieldType Nothing]
          ])
         pos,
         -- The setter:
@@ -830,17 +877,17 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
         -- Code to mutate the selected field by masking out the current
         -- value, shifting the new value into place and bitwise or-ing it
          [Unplaced $ ForeignCall "llvm" "and" []
-           [Unplaced $ Typed (varGet "$rec") recType False,
-            Unplaced $ Typed (iVal shiftedHoleMask) recType False,
-            Unplaced $ Typed (varSet "$rec") recType False],
+           [Unplaced $ Typed (varGet "$rec") recType Nothing,
+            Unplaced $ Typed (iVal shiftedHoleMask) recType Nothing,
+            Unplaced $ Typed (varSet "$rec") recType Nothing],
           Unplaced $ ForeignCall "llvm" "shl" []
-           [Unplaced $ Typed (varGet "$field") recType True,
-            Unplaced $ Typed (iVal shift) recType False,
-            Unplaced $ Typed (varSet "$field") recType False],
+           [Unplaced $ (castFromTo fieldType recType (varGet "$field")),
+            Unplaced $ iVal shift `castTo` recType,
+            Unplaced $ Typed (varSet "$tmp") recType Nothing],
           Unplaced $ ForeignCall "llvm" "or" []
-           [Unplaced $ Typed (varGet "$rec") recType False,
-            Unplaced $ Typed (varGet "$field") recType False,
-            Unplaced $ Typed (varSet "$rec") recType False]
+           [Unplaced $ Typed (varGet "$tmp") recType Nothing,
+            Unplaced $ Typed (varGet "$rec") recType Nothing,
+            Unplaced $ Typed (varSet "$rec") recType Nothing]
          ])
         pos]
 
@@ -860,41 +907,47 @@ deconstructorDetism numConsts numNonConsts
 ----------------------------------------------------------------
 
 implicitItems :: TypeSpec -> [Placed ProcProto] -> [Placed ProcProto]
-              -> TypeRepresentation -> [Item] -> [Item]
-implicitItems typespec consts nonconsts rep items =
-    implicitEquality typespec consts nonconsts rep items
-    ++ implicitDisequality typespec consts nonconsts rep items
+              -> TypeRepresentation -> Compiler [Item]
+implicitItems typespec consts nonconsts rep
+ | genericType typespec = return []
+ | otherwise = do
+    eq <- implicitEquality typespec consts nonconsts rep
+    dis <- implicitDisequality typespec consts nonconsts rep
+    return $ eq ++ dis
     -- XXX add comparison, print, display, maybe prettyprint, and lots more
 
 
 implicitEquality :: TypeSpec -> [Placed ProcProto] -> [Placed ProcProto]
-                 -> TypeRepresentation -> [Item] -> [Item]
-implicitEquality typespec consts nonconsts rep items =
-    if consts==[] && nonconsts==[] || List.any (isTestProc "=" 2) items
-    then [] -- don't generate if user-defined or if no constructors at all
-    else
+                 -> TypeRepresentation -> Compiler [Item]
+implicitEquality typespec consts nonconsts rep = do
+    defs <- lookupProc "="
+    -- XXX should verify that it's an arity 2 test with two inputs of the right type
+    if isJust defs
+    then return [] -- don't generate if user-defined
+    else do
       let eqProto = ProcProto "=" [Param "$left" typespec ParamIn Ordinary,
                                    Param "$right" typespec ParamIn Ordinary]
                     Set.empty
-          (body,inline) = equalityBody consts nonconsts rep
-      in [ProcDecl Public (setInline inline $ setDetism SemiDet detModifiers)
+      let (body,inline) = equalityBody consts nonconsts rep
+      return [ProcDecl Public (setInline inline $ setDetism SemiDet detModifiers)
                    eqProto body Nothing]
 
 
 
 implicitDisequality :: TypeSpec -> [Placed ProcProto] -> [Placed ProcProto]
-                    -> TypeRepresentation -> [Item] -> [Item]
-implicitDisequality typespec consts nonconsts _ items =
-    if consts==[] && nonconsts==[] || List.any (isTestProc "/=" 2) items
-    then [] -- don't generate if user-defined or if no constructors at all
-    else
+                    -> TypeRepresentation -> Compiler [Item]
+implicitDisequality typespec consts nonconsts _ = do
+    defs <- lookupProc "/="
+    if isJust defs
+    then return [] -- don't generate if user-defined
+    else do
       let neProto = ProcProto "/=" [Param "$left" typespec ParamIn Ordinary,
                                      Param "$right" typespec ParamIn Ordinary]
                     Set.empty
-          neBody = [Unplaced $ Not $ Unplaced $
+      let neBody = [Unplaced $ Not $ Unplaced $
                     ProcCall [] "=" Nothing SemiDet False
                     [Unplaced $ varGet "$left", Unplaced $ varGet "$right"]]
-      in [ProcDecl Public inlineSemiDetModifiers neProto neBody Nothing]
+      return [ProcDecl Public inlineSemiDetModifiers neProto neBody Nothing]
 
 
 -- |Does the item declare a test or Boolean function with the specified
@@ -939,7 +992,7 @@ equalityBody consts nonconsts _ =
                          (iVal $ length consts))
                 [equalityNonconsts (content <$> nonconsts) (List.null consts)]
                 [equalityConsts consts]
-                Nothing],
+                Nothing Nothing],
      -- Decide to inline if only 1 non-const constructor, no non-const
      -- constructors (so not recursive), and at most 4 fields
      case List.map content nonconsts of
@@ -990,7 +1043,7 @@ equalityMultiNonconsts (ProcProto name params _:ctrs) =
      $ Cond (deconstructCall name "$left" params SemiDet)
         [Unplaced $ And ([deconstructCall name "$right" params SemiDet]
                          ++ concatMap equalityField params)]
-        [equalityMultiNonconsts ctrs] Nothing
+        [equalityMultiNonconsts ctrs] Nothing Nothing
 
 -- |Return code to deconstruct
 deconstructCall :: Ident -> Ident -> [Param] -> Determinism -> Placed Stmt

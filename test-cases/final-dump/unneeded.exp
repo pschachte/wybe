@@ -1,20 +1,20 @@
 ======================================================================
 AFTER EVERYTHING:
  Module unneeded
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : 
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 
 unneeded > {inline} (0 calls)
-0: unneeded(x#0:wybe.int, [y#0:wybe.int], ?z#0:wybe.int, q#0:wybe.int, [?q#0:wybe.int]):
+0: unneeded.unneeded<0>
+unneeded(x#0:wybe.int, [y#0:wybe.int], ?z#0:wybe.int, q#0:wybe.int, [?q#0:wybe.int]):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?z#0:wybe.int) @wybe:nn:nn
+    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?z#0:wybe.int) @int:nn:nn
 
   LLVM code       :
 

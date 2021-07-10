@@ -1,0 +1,10 @@
+use command_line
+
+if {[?arg|?args] = arguments ::
+    !print(arg)
+    do {while [?arg|?args] = args
+        !print(' ')
+        !print(arg)
+    }
+}
+!nl

@@ -12,7 +12,9 @@ INSTALLLIB=/usr/local/lib/wybe
 VERSION = 0.1
 SRCDIR = src
 LIBDIR = wybelibs
-LIBS = cbits.o wybe.o
+WYBELIBS = wybe.o command_line.o logging.o
+CLIBS = wybe/cbits.o
+LIBS = $(WYBELIBS) $(CLIBS)
 SHELL := /bin/bash
 
 
@@ -30,33 +32,28 @@ endif
 
 all:	wybemk libs
 
-install:	wybemk libs
+install:	wybemk
 	cp wybemk "$(INSTALLBIN)"
 	rm -rf "$(INSTALLLIB)"
 	mkdir -p "$(INSTALLLIB)"
-	for f in $(LIBS) ; do \
-		cp -r "$(LIBDIR)/$$f" "$(INSTALLLIB)" ; \
-	done
+	cp -r "$(LIBDIR)/." "$(INSTALLLIB)"
+	"$(INSTALLBIN)/wybemk" --force-all $(addsuffix ", $(addprefix "$(INSTALLLIB)/,$(WYBELIBS)))
 
 
 wybemk:	$(SRCDIR)/*.hs $(SRCDIR)/Version.lhs
 	stack -j3 build && cp "`stack path --local-install-root`/bin/$@" "$@"
 
-libs:	wybemk
-	for f in $(LIBS) ; do \
-		$(MAKE) "$(LIBDIR)/$$f" ; \
-	done
+libs:	$(addprefix $(LIBDIR)/,$(LIBS))
 
-$(LIBDIR)%.o:	$(LIBDIR)/%.wybe wybemk
-	./wybemk $@
+$(LIBDIR)/%.o:	$(LIBDIR)/%.wybe wybemk
+	./wybemk --force-all -L $(LIBDIR) $@
+
+$(LIBDIR)/wybe.o:	wybemk $(LIBDIR)/wybe/*.wybe
+	./wybemk --force-all -L $(LIBDIR) $@
 
 
-$(LIBDIR)/cbits.o: $(LIBDIR)/cbits.c
+$(LIBDIR)/wybe/cbits.o: $(LIBDIR)/wybe/cbits.c
 	clang $(ISSYSROOT) -I /usr/local/include -c "$<" -o "$@"
-
-
-$(LIBDIR)/wybe.o:	wybemk $(LIBDIR)/wybe.wybe
-	./wybemk "$@"
 
 
 $(SRCDIR)/Version.lhs:	$(addprefix $(SRCDIR)/,*.hs)
@@ -70,8 +67,6 @@ $(SRCDIR)/Version.lhs:	$(addprefix $(SRCDIR)/,*.hs)
 	@printf "> buildDate :: String\n> buildDate = \"%s\"\n\n" "`date`" >> "$@"
 	@printf "> libDir :: String\n> libDir = \"%s\"\n\n" "$(INSTALLLIB)" >> "$@"
 
-
-TESTCASES = $(wildcard test-cases/*.wybe)
 
 # Assemble README markdown source file automatically
 src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro
@@ -104,20 +99,14 @@ src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro
 
 test:	wybemk
 	@rm -f ERRS ; touch ERRS
-	@rm -f $(LIBDIR)/*.o
-	@echo -e "Building $(LIBDIR)/cbits.o"
-	@make $(LIBDIR)/cbits.o
+	@rm -f $(LIBDIR)/*.o $(LIBDIR)/wybe/*.o
+	@echo -e "Building $(LIBDIR)/wybe/cbits.o"
+	@make $(LIBDIR)/wybe/cbits.o
 	@printf "Testing building wybe library ("
-	@printf wybe
-	@$(TIMEOUT) 5 ./wybemk --force-all $(LIBDIR)/wybe.o
-	@for f in $(LIBDIR)/*.wybe ; do \
-           [ "$$f" = "$(LIBDIR)/wybe.wybe" ] && continue ; \
-	   printf " %s" `basename $$f .wybe` ; \
-	   timeout 2 ./wybemk --force -L $(LIBDIR) $${f/.wybe/.o} ; \
-	done
+	@$(TIMEOUT) 5 $(MAKE) libs
 	@printf ") done.\n"
 	@time ( cd test-cases/ && ./run-all-test.sh )
 
 clean:
 	stack clean
-	rm -f $(SRCDIR)/*.o $(SRCDIR)/*.hi $(SRCDIR)/Version.lhs documentation/*.pdf publications/*.pdf $(LIBDIR)/*.o test-cases/*.o
+	rm -f $(SRCDIR)/*.o $(SRCDIR)/*.hi $(SRCDIR)/Version.lhs documentation/*.pdf publications/*.pdf $(LIBDIR)/*.o $(LIBDIR)/wybe/*.o test-cases/*.o

@@ -1,0 +1,28 @@
+# The number of command line arguments.  These are automatically
+# initialised by the code that builds executables.
+pub resource argc:int
+pub resource argv:raw_array(string)
+
+
+# The command line arguments. This is a C array of strings.
+pub resource arguments:array(string) = array(argc, argv)
+
+# The command that caused execution of this program.  This is not necessarily an
+# absolute file name.
+pub resource command:string = ""
+
+if {[?command | ?arguments] = arguments ::
+        pass
+|   otherwise ::
+        !error("Erroneous program argument vector")
+}
+
+# The exit code to return to the invoking shell.  This is initialised to
+# zero, so it only needs to be assigned for error cases.
+pub resource exit_code:int = 0 # when we support resource initialisation
+
+
+# Set the exit code, but don't exit immediately.
+pub def set_exit_code(code:int) use !exit_code {
+    ?exit_code = code
+}

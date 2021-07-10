@@ -1,20 +1,20 @@
 ======================================================================
 AFTER EVERYTHING:
  Module func_untyped
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : 
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 
 incr > {inline} (0 calls)
-0: incr(a#0:wybe.int, ?$#0:wybe.int):
+0: func_untyped.incr<0>
+incr(a#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm add(~a#0:wybe.int, 1:wybe.int, ?$#0:wybe.int) @wybe:nn:nn
+    foreign llvm add(~a#0:wybe.int, 1:wybe.int, ?$#0:wybe.int) @int:nn:nn
 
   LLVM code       :
 

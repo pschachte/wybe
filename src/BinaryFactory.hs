@@ -58,7 +58,6 @@ instance Binary ResourceFlowSpec
 instance Binary ModuleImplementation
 instance Binary ResourceImpln
 instance Binary TypeRepresentation
-instance Binary TypeDef
 instance Binary ImportSpec
 -- Module
 instance Binary Module
@@ -108,7 +107,7 @@ encodeModule m = do
     let msg = "Unable to get loaded Module for binary encoding."
     -- func to get get a trusted loaded Module from it's spec
     let getm name = trustFromJustM msg $ getLoadedModule name
-    descendents <- descendentModules m
+    descendents <- sameOriginModules m
     mods <- mapM getm (m:descendents)
     let encoded = B.encode $ makeEncodedLPVM mods
     return $ BL.append (BL.pack magicVersion) encoded

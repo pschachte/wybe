@@ -16,7 +16,7 @@ import           ASTShow
 import           BinaryFactory                   ()
 import           Codegen
 import           Config                          (wordSize, wordSizeBytes)
-import           Util                            (maybeNth)
+import           Util                            (maybeNth, zipWith3M_)
 import           Control.Monad
 import           Control.Monad.Trans             (lift, liftIO)
 import           Control.Monad.Trans.Class
@@ -89,7 +89,7 @@ blockTransformModule thisMod =
        knownTypesSet <- Map.elems <$>
                          getModuleImplementationField modKnownTypes
        let knownTypes = concatMap Set.toList knownTypesSet
-       trs <- mapM llvmType knownTypes
+       trs <- mapM moduleLLVMType knownTypes
        -- typeList :: [(TypeSpec, LLVMAST.Type)]
        let typeList = zip knownTypes trs
        -- log the assoc list typeList
@@ -123,13 +123,12 @@ mangleProcs ps = zipWith mangleProc ps [0..]
 
 mangleProc :: ProcDef -> Int -> ProcDef
 mangleProc def i =
-    let (ProcDefPrim proto body analysis speczBodies) = 
-                procImpln def
+    let proto = procImplnProto $ procImpln def
         s = primProtoName proto
         pname = s ++ "<" ++ show i ++ ">"
         newProto = proto {primProtoName = pname}
     in 
-    def {procImpln = ProcDefPrim newProto body analysis speczBodies}
+    def {procImpln = (procImpln def){procImplnProto = newProto}}
 
 
 
@@ -171,7 +170,7 @@ mangleProc def i =
 extractLPVMProto :: ProcDef -> PrimProto
 extractLPVMProto procdef =
     case procImpln procdef of
-       (ProcDefPrim proto _ _ _) -> proto
+       ProcDefPrim{procImplnProto = proto} -> proto
        uncompiled ->
          shouldnt $ "Proc reached backend uncompiled: " ++ show uncompiled
 
@@ -203,7 +202,9 @@ isStdLib (m:_) = m == "wybe"
 translateProc :: [PrimProto] -> ProcDef -> Translation [ProcDefBlock]
 translateProc modProtos proc = do
     count <- getCount
-    let ProcDefPrim proto body _ speczBodies = procImpln proc
+    let proto = procImplnProto $ procImpln proc
+    let body = procImplnBody $ procImpln proc
+    let speczBodies = procImplnSpeczBodies $ procImpln proc
     -- translate the standard version
     (block, count') <- 
             lift $ _translateProcImpl modProtos proto body count
@@ -438,7 +439,7 @@ codegenBody :: PrimProto -> ProcBody -> Codegen ()
 codegenBody proto body =
     do let ps = List.map content (bodyPrims body)
        -- Filter out prims which contain only phantom arguments
-       ops <- mapM cgen ps
+       mapM_ cgen ps
        let params = primProtoParams proto
        case bodyFork body of
          NoFork -> do retOp <- buildOutputOp params
@@ -497,7 +498,7 @@ codegenForkBody var _ _ =
 -- in the current module and imported modules. All primitive calls' arguments
 -- are position checked with the respective prototype, eliminating arguments
 -- which do not eventually appear in the prototype.
-cgen :: Prim -> Codegen (Maybe Operand)
+cgen :: Prim -> Codegen ()
 cgen prim@(PrimCall callSiteID pspec args) = do
     logCodegen $ "Compiling " ++ show prim
     thisMod <- lift getModuleSpec
@@ -534,14 +535,18 @@ cgen prim@(PrimForeign "llvm" name flags args) = do
     args' <- filterPhantomArgs args
     case length args' of
       -- XXX deconstruct args' in these calls
-       0 | name == "move" -> return Nothing -- move phantom to phantom
+       0 | name == "move" -> return () -- move phantom to phantom
        2 -> cgenLLVMUnop name flags args'
        3 -> cgenLLVMBinop name flags args'
-       _ -> shouldnt $ "LLVM instruction " ++ name ++ " with wrong arity!"
+       _ -> shouldnt $ "LLVM instruction " ++ name
+                       ++ " with wrong arity (" ++ show (length args') ++ ")!"
 
 cgen prim@(PrimForeign "lpvm" name flags args) = do
     logCodegen $ "Compiling " ++ show prim
-    filterPhantomArgs args >>= cgenLPVM name flags
+    args' <- filterPhantomArgs args
+    if List.null args' && name == "cast"
+      then return ()
+      else cgenLPVM name flags args'
 
 cgen prim@(PrimForeign lang name flags args) = do
     logCodegen $ "Compiling " ++ show prim
@@ -589,7 +594,7 @@ isIntOp _                                          = False
 -- arguments are split into inputs and outputs (according to their flow
 -- type). The output argument is used to name and reference the resulting
 -- Operand of the instruction.
-cgenLLVMBinop :: ProcName -> [Ident] -> [PrimArg] -> Codegen (Maybe Operand)
+cgenLLVMBinop :: ProcName -> [Ident] -> [PrimArg] -> Codegen ()
 cgenLLVMBinop name flags args =
     do let (inArgs,outArgs) = partitionArgs args
        inOps <- mapM cgenArg inArgs
@@ -606,7 +611,7 @@ cgenLLVMBinop name flags args =
 -- input operant at the front of the symbol table. The next time the output
 -- name is referenced, the symbol table will return the latest assignment to
 -- it.
-cgenLLVMUnop :: ProcName -> [Ident] -> [PrimArg] -> Codegen (Maybe Operand)
+cgenLLVMUnop :: ProcName -> [Ident] -> [PrimArg] -> Codegen ()
 cgenLLVMUnop "move" flags args =
     case partitionArgs args of
       ([input],[output]) -> do
@@ -615,7 +620,6 @@ cgenLLVMUnop "move" flags args =
            (outTy, outNm) <- openPrimArg output
            inop <- cgenArg input
            assign outNm inop outRep
-           return $ Just inop
       _ ->
            shouldnt "llvm move instruction with wrong arity"
 
@@ -673,7 +677,7 @@ trustArgInt arg = trustFromJust
 
 
 -- | Code generation for LPVM instructions.
-cgenLPVM :: ProcName -> [Ident] -> [PrimArg] -> Codegen (Maybe Operand)
+cgenLPVM :: ProcName -> [Ident] -> [PrimArg] -> Codegen ()
 cgenLPVM "alloc" [] args@[sizeArg,addrArg] = do
           logCodegen $ "lpvm alloc " ++ show sizeArg ++ " " ++ show addrArg
           let (inputs,outputs) = partitionArgs args
@@ -683,7 +687,6 @@ cgenLPVM "alloc" [] args@[sizeArg,addrArg] = do
                 let outTy = repLLVMType outRep
                 op <- gcAllocate sizeArg outTy
                 assign (pullName addrArg) op outRep
-                return $ Just op
             _ ->
               shouldnt $ "alloc instruction with " ++ show (length inputs)
                          ++ " inputs"
@@ -698,7 +701,6 @@ cgenLPVM "access" [] args@[addrArg,offsetArg,_,_,val] = do
           logCodegen $ "outTy = " ++ show outTy
           op <- gcAccess finalAddr outTy
           assign (pullName val) op outRep
-          return $ Just op
 
 cgenLPVM "mutate" flags
     [addrArg, outArg, offsetArg, ArgInt 0 intTy, sizeArg, startOffsetArg,
@@ -736,7 +738,6 @@ cgenLPVM "mutate" _
           baseAddr <- cgenArg addrArg
           gcMutate baseAddr offsetArg valArg
           assign (pullName outArg) baseAddr Address
-          return $ Just baseAddr
 
 cgenLPVM "mutate" _ [_, _, _, destructiveArg, _, _, _] =
       nyi "lpvm mutate instruction with non-constant destructive flag"
@@ -768,10 +769,9 @@ cgenLPVM "cast" [] args@[inArg,outArg] =
                 _ -> doCast inOp inTy outTy
 
             assign (pullName outArg) castOp outRep
-            return $ Just castOp
 
         -- A cast with no outputs:  do nothing
-        (_, []) -> return Nothing
+        (_, []) -> return ()
         (inputs,outputs) ->
             shouldnt $ "cast instruction with " ++ show (length inputs)
                        ++ " inputs and " ++ show (length outputs)
@@ -779,7 +779,8 @@ cgenLPVM "cast" [] args@[inArg,outArg] =
 
 
 cgenLPVM pname flags args = do
-    shouldnt $ "Instruction " ++ pname ++ " not imlemented."
+    shouldnt $ "Instruction " ++ pname ++ " arity " ++ show (length args)
+               ++ " not implemented."
 
 
 -- | Generate code to add an offset to an address
@@ -851,22 +852,21 @@ constantType _            = shouldnt "Cannot determine constant type."
 -- The return type of the operand value generated by the instruction call is
 -- inferred depending on the output arguments. The name is inferred from
 -- the output argument's name (LPVM is in SSA form).
-addInstruction :: Instruction -> [PrimArg] -> Codegen (Maybe Operand)
+addInstruction :: Instruction -> [PrimArg] -> Codegen ()
 addInstruction ins outArgs = do
     logCodegen $ "addInstruction " ++ show outArgs ++ " = " ++ show ins
     outTy <- lift $ primReturnType outArgs
     logCodegen $ "outTy = " ++ show outTy
     case outArgs of
           [] -> case outTy of
-            VoidType -> voidInstr ins >> return Nothing
-            _        -> Just <$> instr outTy ins
+            VoidType -> voidInstr ins
+            _        -> instr outTy ins >> return ()
           [outArg] -> do
             outRep <- lift $ typeRep $ argType outArg
             logCodegen $ "outRep = " ++ show outRep
             let outName = pullName outArg
             outop <- namedInstr outTy outName ins
             assign outName outop outRep
-            return (Just outop)
           _ -> do
             outOp <- instr outTy ins
             let outTySpecs = argType <$> outArgs
@@ -876,16 +876,6 @@ addInstruction ins outArgs = do
             let outNames = List.map pullName outArgs
             -- lift $ logBlocks $ "-=-=-=-= Structure names:" ++ show outNames
             zipWith3M_ assign outNames fields treps
-            return $ Just $ last fields -- XXX this looks bogus!
-
-
-zipWith3M_ :: Monad m => (a -> b -> c -> m ()) -> [a] -> [b] -> [c] -> m ()
-zipWith3M_ f [] _ _ = return ()
-zipWith3M_ f _ [] _ = return ()
-zipWith3M_ f _ _ [] = return ()
-zipWith3M_ f (a:as) (b:bs) (c:cs) = do
-    f a b c
-    zipWith3M_ f as bs cs
 
 
 pullName ArgVar{argVarName=var} = show var
@@ -1091,6 +1081,13 @@ typeRep ty =
             ++ show ty
             ++ ")"
     in fromMaybe err <$> lookupTypeRepresentation ty
+
+
+-- |The LLVM type of the specified module spec; error if it's not a type.
+moduleLLVMType :: ModSpec -> Compiler LLVMAST.Type
+moduleLLVMType mspec =
+    repLLVMType . trustFromJust "moduleLLVMType of non-type"
+    <$> lookupModuleRepresentation mspec
 
 
 repLLVMType :: TypeRepresentation -> LLVMAST.Type

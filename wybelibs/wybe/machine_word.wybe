@@ -1,0 +1,3 @@
+# A low level type holding a machine address
+
+representation is address

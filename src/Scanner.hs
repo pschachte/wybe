@@ -7,7 +7,7 @@
 
 
 module Scanner (Token(..), tokenPosition, floatValue, intValue, stringValue,
-                charValue, identName, symbolName, showPosition, 
+                charValue, identName, symbolName, showPosition,
                 StringDelim(..), BracketStyle(..), fileTokens, tokenise,
                 inputTokens) where
 
@@ -28,7 +28,7 @@ data Token = TokFloat Double SourcePos          -- ^A floating point number
               | TokRBracket BracketStyle SourcePos
                                                 -- ^Some kind of right bracket
               | TokComma SourcePos              -- ^A comma
-              | TokSymbol String SourcePos      -- ^A symbol of made up of
+              | TokSymbol String SourcePos      -- ^A symbol made up of
                                                 --  non-identifier chars
               | TokError String SourcePos       -- ^A lexical error
               deriving (Show)
@@ -79,7 +79,7 @@ symbolName _ = shouldnt "not a symbol"
 -- |How to display a source position.
 showPosition :: SourcePos -> String
 showPosition pos
-  = sourceName pos ++ ":" 
+  = sourceName pos ++ ":"
     ++ show (sourceLine pos) ++ ":"
     ++ show (sourceColumn pos)
 
@@ -101,9 +101,7 @@ fileTokens filename =
 
 -- |The contents of stdin as a list of tokens.
 inputTokens :: IO [Token]
-inputTokens =
-  do content <- getContents
-     return (tokenise (initialPos "<stdin>") content)
+inputTokens = tokenise (initialPos "<stdin>") <$> getContents
 
 
 -- |Convert a sequence of characters to a sequence of tokens.
@@ -112,70 +110,101 @@ tokenise _ [] = []
 tokenise pos str@(c:cs)
   | isSpace c || isControl c = tokenise (updatePosChar pos c) cs
   | isDigit c = scanNumberToken pos str
-  | isAlpha c = let (name,rest) = span isIdentChar str
-                in  multiCharTok name rest (TokIdent name pos) pos
+  | isIdentChar c = let (name,rest) = span isIdentChar str
+                    in  multiCharTok name rest (TokIdent name pos) pos
   | otherwise = case c of
-                    ',' -> singleCharTok c cs pos $ TokComma pos
+                    ',' -> commaTok cs pos
                     '(' -> singleCharTok c cs pos $ TokLBracket Paren pos
                     '[' -> singleCharTok c cs pos $ TokLBracket Bracket pos
                     '{' -> singleCharTok c cs pos $ TokLBracket Brace pos
                     ')' -> singleCharTok c cs pos $ TokRBracket Paren pos
                     ']' -> singleCharTok c cs pos $ TokRBracket Bracket pos
                     '}' -> singleCharTok c cs pos $ TokRBracket Brace pos
+                    '?' -> singleCharTok c cs pos $ TokSymbol "?" pos
+                    '!' -> singleCharTok c cs pos $ TokSymbol "!" pos
                     '\'' -> tokeniseChar pos cs
                     '\"' -> tokeniseString DoubleQuote pos cs
                     -- backquote makes anything an identifier
                     '`' -> let (name,_:rest) = break (=='`') cs
                            in  multiCharTok name rest (TokIdent name pos) pos
                     '#' -> tokenise (setSourceColumn pos 1)
-                           $ dropWhile (not . (=='\n')) cs
+                           $ dropWhile (/= '\n') cs
                     _   -> tokeniseSymbol pos str
 
 -- |Handle a single character token and tokenize the rest of the input.
 singleCharTok :: Char -> String -> SourcePos -> Token -> [Token]
-singleCharTok c cs pos tok = tok:(tokenise (updatePosChar pos c) cs)
+singleCharTok c cs pos tok = tok:tokenise (updatePosChar pos c) cs
+
+-- |Handle a token beginning with comma, and tokenize the rest of the input.
+commaTok :: String -> SourcePos -> [Token]
+commaTok rest pos =
+    case span isSymbolContinuation rest of
+        ([],_) -> TokComma pos : tokenise (updatePosChar pos ',') rest
+        (tokRest,rest') ->
+            let sym = ',':tokRest
+            in  TokSymbol sym pos : tokenise (updatePosString pos sym) rest'
+
+-- |Recognise a character that cannot begin an expression, and therefore can
+-- follow a comma in a symbol.
+isSymbolContinuation :: Char -> Bool
+isSymbolContinuation = (`elem` ",@$%^&*+=.<>")
 
 -- |Handle a mult-character token and tokenize the rest of the input.
 multiCharTok :: String -> String -> Token -> SourcePos -> [Token]
-multiCharTok str cs tok pos = tok:(tokenise (updatePosString pos str) cs)
+multiCharTok str cs tok pos = tok:tokenise (updatePosString pos str) cs
 
 -- |Handle a character constant token and tokenize the rest of the input.
 tokeniseChar :: SourcePos -> String -> [Token]
 tokeniseChar pos ('\\':c:'\'':rest) =
-  (TokChar (escapedChar c) pos) :
-  tokenise 
-  (updatePosChar 
+  TokChar (escapedChar c) pos :
+  tokenise
+  (updatePosChar
    (updatePosChar (updatePosChar (updatePosChar pos '\'') c) '\\')
    '\'')
   rest
 tokeniseChar pos (c:'\'':cs) =
-  (TokChar c pos):
+  TokChar c pos:
   tokenise (updatePosChar (updatePosChar (updatePosChar pos '\'') c) '\'') cs
 tokeniseChar pos chars =
-    error $ showPosition pos 
-    ++ ": Syntax error in single character constant beginning '" 
+    error $ showPosition pos
+    ++ ": Syntax error in single character constant beginning '"
     ++ take 3 chars ++ "..."
 
 -- |Handle a symbol token and tokenize the rest of the input.
 tokeniseSymbol :: SourcePos -> String -> [Token]
 tokeniseSymbol pos (c:cs) =
   let (sym,rest) = span isSymbolChar cs
-      pos' = updatePosString pos 
+      pos' = updatePosString pos
   in  multiCharTok (c:sym) rest (TokSymbol (c:sym) pos) pos
 tokeniseSymbol _ [] = shouldnt "empty symbol does not exist"
 
 -- |Tokenise a delimited string and tokenize the rest of the input..
--- XXX This doesn't handle escapes within strings
 tokeniseString :: StringDelim -> SourcePos -> String -> [Token]
 tokeniseString delim pos cs =
   let termchar = delimChar delim
-      (str,rest) = span (/= termchar) cs
-  in  (TokString delim str pos):
-      (if null rest then [] else tokenise (updatePosChar 
-                                           (updatePosString
-                                            (updatePosChar pos termchar)
-                                            str)
-                                           termchar) $ tail rest)
+      (str,pos',rest) = scanString termchar pos cs
+  in  TokString delim str pos : tokenise pos' rest
+
+
+-- |Scan a string literal that has already been opened, and will close with the
+-- specified terminator character.  Also return the remainder of the input and
+-- the new source position.
+scanString :: Char -> SourcePos -> String -> (String,SourcePos,String)
+scanString termchar pos input =
+    case break (`elem` [termchar,'\\']) input of
+        (_,[]) -> error $ showPosition pos
+                          ++ ": Unterminated string begins here"
+        (front,'\\':c:cs) ->
+            let pos' = updatePosChar
+                       (updatePosChar (updatePosString pos front) '\\')
+                       c
+                (rest,finalPos,remainder) = scanString termchar pos' cs
+            in (front ++ (escapedChar c : rest), finalPos, remainder)
+        (front,t:cs) | t == termchar ->
+            let pos' = updatePosChar (updatePosString pos front) t
+            in (front, pos', cs)
+        (front,rest) -> shouldnt "break broke in scanString"
+
 
 -- |Is the specified char the expected final delimiter?
 delimChar DoubleQuote = '\"'
@@ -225,13 +254,13 @@ scanNumberToken pos cs =
                     (_, "e", _)  -> errFloat
                     (_, "e-", _) -> errFloat
                     (_, 'e':'-':expDigits, _)
-                      | any (not . isDigit) expDigits -> errFloat
+                      | not (all isDigit expDigits) -> errFloat
                     (_, 'e':digit1:expDigits, _)
                       | not (digit1 == '-' || isDigit digit1)
-                        || any (not . isDigit) expDigits -> errFloat
+                        || not (all isDigit expDigits) -> errFloat
                     (_, _, ".")  -> errFloat
                     (_, _, '.':fracDigits)
-                      | any (not . isDigit) fracDigits -> errFloat
+                      | not (all isDigit fracDigits) -> errFloat
                     (TokInt intPart _, _, _) ->
                       let fracDigits =
                             if null fracPart then [] else tail fracPart
@@ -247,7 +276,7 @@ scanNumberToken pos cs =
                               ('e':rest)     -> (rest,1)
                               _ -> shouldnt "exponent must begin with e"
                           exponent =
-                            foldl (\e c -> e * 10 + (digitToInt c)) 0 expDigits
+                            foldl (\e c -> e * 10 + digitToInt c) 0 expDigits
                           multiplier = 10.0 ** fromIntegral (expMult * exponent)
                           value = (fromIntegral intPart + frac) * multiplier
                       in TokFloat value pos
@@ -282,8 +311,8 @@ isIdentChar ch = isAlphaNum ch || ch == '_'
 
 -- |Is this a character that can appear in a symbol?
 isSymbolChar :: Char -> Bool
-isSymbolChar ch = not (isAlphaNum ch || isSpace ch || isControl ch 
-                       || ch `elem` ",.([{)]}#'\"\\")
+isSymbolChar ch = not (isIdentChar ch || isSpace ch || isControl ch
+                       || ch `elem` ",.?([{)]}#'\"\\")
 
 -- |Is this character part of a single (not necessarily valid) number token,
 -- following a digit character?  This means any alphanumeric character or a

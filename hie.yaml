@@ -1,0 +1,94 @@
+cradle:
+  stack:
+    - path: "./src/wybemk.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/AST.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/BinaryFactory.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Blocks.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/BodyBuilder.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Builder.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Callers.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Clause.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Codegen.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Config.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Emit.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Expansion.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Flatten.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Macho.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/NewParser.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Normalise.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/ObjectInterface.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Optimise.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Analysis.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/AliasAnalysis.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Transform.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Options.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Resources.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Scanner.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Snippets.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Types.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Unbranch.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Util.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/Version.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src/ASTShow.hs"
+      component: "wybe:exe:wybemk"
+
+    - path: "./src"
+      component: "wybe:test:wybe-test"

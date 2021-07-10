@@ -12,7 +12,8 @@ module Util (sameLength, maybeNth, setMapInsert,
              addConnectedGroupToDS, removeOneFromDS,
              removeFromDS, connectedItemsInDS,
              mapDS, filterDS, dsToTransitivePairs,
-             intersectMapIdentity, orElse) where
+             intersectMapIdentity, orElse,
+             apply2way, (&&&), zipWith3M, zipWith3M_) where
 
 
 import           Data.Graph
@@ -89,11 +90,11 @@ sccElts (CyclicSCC multi)   = multi
 ----------------------------------------------------------------
 -- XXX Using Union-Find instead of this naive implementation
 -- The old implement is wrong https://github.com/pschachte/wybe/issues/25
+emptyDS = Set.empty
 -- So we use this version as a quick fix.
 
 type DisjointSet a = Set (Set a)
 
-emptyDS = Set.empty
 
 
 _findOneInSet :: (a -> Bool) -> Set a -> Maybe a
@@ -209,3 +210,28 @@ intersectMapIdentity = merge dropMissing dropMissing
 orElse :: Maybe a -> Maybe a -> Maybe a
 orElse Nothing b  = b
 orElse a@Just{} _ = a
+
+-- | apply two functions to the same input and combine the results
+apply2way :: (a->b->c) -> (d->a) -> (d->b) -> d -> c
+apply2way combine f1 f2 input = combine (f1 input) (f2 input)
+
+-- | conjoin two functions
+infix 4 &&&
+(&&&) :: (a->Bool) -> (a->Bool) -> a -> Bool
+(&&&) = apply2way (&&)
+
+
+-- |zipWithM version for 3 lists.
+zipWith3M :: Monad m => (a -> b -> c -> m d) -> [a] -> [b] -> [c] -> m [d]
+zipWith3M f [] _ _ = return []
+zipWith3M f _ [] _ = return []
+zipWith3M f _ _ [] = return []
+zipWith3M f (a:as) (b:bs) (c:cs) = do
+    d <- f a b c
+    ds <- zipWith3M f as bs cs
+    return $ d:ds
+
+
+-- |zipWithM version for 3 lists.
+zipWith3M_ :: Monad m => (a -> b -> c -> m d) -> [a] -> [b] -> [c] -> m ()
+zipWith3M_ f as bs cs = zipWith3M f as bs cs >> return ()

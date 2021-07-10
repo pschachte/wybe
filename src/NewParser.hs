@@ -67,17 +67,6 @@ writeItems file to = do
         Right is -> writeFile to (show is)
 
 
--- compareOld :: FilePath -> IO ()
--- compareOld file = do
---     stream <- fileTokens file
---     case parseWybe stream file of
---         Left err -> print err
---         Right is -> do
---             let old = OldParser.parse stream
---             let diff = getGroupedDiff (map show old) (map show is)
---             putStrLn "Comparing..."
---             putStrLn $ ppDiff diff
-
 -----------------------------------------------------------------------------
 -- Grammar                                                                 --
 -----------------------------------------------------------------------------
@@ -85,7 +74,7 @@ writeItems file to = do
 -- | Parser entry for a Wybe program.
 itemParser :: Parser [Item]
 itemParser =
-    many (pragmaItem <|> visibilityItem <|> topLevelStmtItem)
+    many (pragmaItem <|> visibilityItem <|> privateItem <|> topLevelStmtItem)
 
 
 topLevelStmtItem :: Parser Item
@@ -101,9 +90,15 @@ visibilityItem = do
     procOrFuncItemParser v
         <|> moduleItemParser v
         <|> typeItemParser v
+        <|> dataCtorItemParser v
         <|> resourceItemParser v
         <|> useItemParser v
         <|> fromUseItemParser v
+
+
+-- | Parse module-local items (with no visibility prefix).
+privateItem :: Parser Item
+privateItem = typeRepItemParser
 
 pragmaItem :: Parser Item
 pragmaItem = do
@@ -115,7 +110,6 @@ parsePragma :: Parser Pragma
 parsePragma = do
     ident "no_standard_library"
     return NoStd
-
 
 
 -----------------------------------------------------------------------------
@@ -136,9 +130,36 @@ typeItemParser :: Visibility -> Parser Item
 typeItemParser v = do
     pos <- tokenPosition <$> ident "type"
     proto <- TypeProto <$> identString <*>
-             option [] (betweenB Paren (identString `sepBy` comma))
+             option [] (betweenB Paren (typeVarName `sepBy` comma))
     (imp,items) <- typeImpln <|> typeCtors
     return $ TypeDecl v proto imp items (Just pos)
+
+
+-- -- | Module parameter declaration
+-- moduleParamItemParser :: Parser Item
+-- moduleParamItemParser = do
+--     keypos <- tokenPosition <$> (ident "parameter" <|> ident "parameters")
+--     params <- (symbol "?" *> identString) `sepBy1` comma
+--     return $ ModuleParamsDecl params $ Just keypos
+
+
+-- | Module type representation declaration
+typeRepItemParser :: Parser Item
+typeRepItemParser = do
+    keypos <- tokenPosition <$> ident "representation"
+    params <- option [] $ betweenB Paren (typeVarName `sepBy` comma)
+    ident "is"
+    rep <- typeRep
+    return $ RepresentationDecl params rep $ Just keypos
+
+
+-- | Module type representation declaration
+dataCtorItemParser :: Visibility -> Parser Item
+dataCtorItemParser v = do
+    pos <- tokenPosition <$> (ident "constructor" <|> ident "constructors")
+    params <- option [] $ betweenB Paren (typeVarName `sepBy` comma)
+    ctors <- funcProtoParser `sepBy` symbol "|"
+    return $ ConstructorDecl v params ctors $ Just pos
 
 
 -- | Type declaration body where representation and items are given
@@ -149,6 +170,7 @@ typeImpln = do
 
 
 -- | Type declaration body where representation and items are given
+typeRep :: ParsecT [Token] () Identity TypeRepresentation
 typeRep = do
     ident "address" $> Address
     <|> do bits <- option wordSize
@@ -177,19 +199,11 @@ resourceItemParser v = do
         <*> optType <*> optInit <*> return (Just pos)
 
 
-
 useItemParser :: Visibility -> Parser Item
 useItemParser v = do
     pos <- Just . tokenPosition <$> ident "use"
     ( ident "foreign" *> foreignFileOrLib v pos
       <|> ImportMods v <$> (modSpecParser `sepBy` comma) <*> return pos)
-    -- useForeignOrMod v (Just pos)
-
-
--- useForeignOrMod :: Visibility -> OptPos -> Parser Item
--- useForeignOrMod v pos =
---     ident "foreign" *> foreignFileOrLib v pos
---     <|> ImportMods v <$> (modSpecParser `sepBy` comma) <*> return pos
 
 
 foreignFileOrLib :: Visibility -> OptPos -> Parser Item
@@ -206,8 +220,6 @@ fromUseItemParser v = do
     m <- modSpecParser <* ident "use"
     ids <- identString `sepBy` comma
     return $ ImportItems v m ids (Just pos)
-
-
 
 
 -- | Parse a procedure or function, since both items share the same prefix of
@@ -240,7 +252,6 @@ procBody vis modifiers proto ty pos = do
     body <- betweenB Brace $ many stmtParser
     -- XXX must test that ty is AnyType, otherwise syntax error
     return $ ProcDecl vis (processProcModifiers modifiers) proto body (Just pos)
-
 
 
 -- | A procedure param parser.
@@ -372,15 +383,20 @@ optType = option AnyType (symbol ":" *> typeParser)
 -- | Parser a type.
 -- Type -> ident OptTypeList
 typeParser :: Parser TypeSpec
-typeParser = do
-    name <- identString
-    optTypeList <- option [] $ betweenB Paren (typeParser `sepBy` comma)
-    case name of
-        "any"     -> return AnyType
-        "invalid" -> return InvalidType
-        _         -> return $ TypeSpec [] name optTypeList
+typeParser =
+    TypeVariable <$> typeVarName
+    <|> do
+        name <- identString
+        optTypeList <- option [] $ betweenB Paren (typeParser `sepBy` comma)
+        case name of
+            "any"     -> return AnyType
+            "invalid" -> return InvalidType
+            _         -> return $ TypeSpec [] name optTypeList
 
 
+-- | Parse a type variable name
+typeVarName :: Parser Ident
+typeVarName = symbol "?" *> identString
 
 -----------------------------------------------------------------------------
 -- Statement Parsing                                                       --
@@ -464,7 +480,8 @@ whileStmt :: Parser (Placed Stmt)
 whileStmt = do
     pos <- tokenPosition <$> ident "while"
     cond <- testStmt
-    return $ Placed (Cond cond [Unplaced Nop] [Unplaced Break] Nothing) pos
+    return $ Placed
+             (Cond cond [Unplaced Nop] [Unplaced Break] Nothing Nothing) pos
 
 breakStmt :: Parser (Placed Stmt)
 breakStmt = do
@@ -481,20 +498,20 @@ untilStmt :: Parser (Placed Stmt)
 untilStmt = do
     pos <- tokenPosition <$> ident "until"
     e <- testStmt
-    return $ Placed (Cond e [Unplaced Break] [Unplaced Nop] Nothing) pos
+    return $ Placed (Cond e [Unplaced Break] [Unplaced Nop] Nothing Nothing) pos
 
 
 unlessStmt :: Parser (Placed Stmt)
 unlessStmt = do
     pos <- tokenPosition <$> ident "unless"
     e <- testStmt
-    return $ Placed (Cond e [Unplaced Next] [Unplaced Nop] Nothing) pos
+    return $ Placed (Cond e [Unplaced Next] [Unplaced Nop] Nothing Nothing) pos
 
 whenStmt :: Parser (Placed Stmt)
 whenStmt = do
     pos <- tokenPosition <$> ident "when"
     e <- testStmt
-    return $ Placed (Cond e [Unplaced Nop] [Unplaced Next] Nothing) pos
+    return $ Placed (Cond e [Unplaced Nop] [Unplaced Next] Nothing Nothing) pos
 
 
 -- | If statement parser.
@@ -503,7 +520,8 @@ ifStmtParser = do
     pos <- tokenPosition <$> ident "if"
     cases <- betweenB Brace $ ifCaseParser `sepBy` symbol "|"
     let final = List.foldr (\(cond, body) rest ->
-                           [Unplaced (Cond cond body rest Nothing)]) [] cases
+                           [Unplaced (Cond cond body rest Nothing Nothing)]) []
+                           cases
     case final of
       []     -> unexpected "if cases statement structure."
       (hd:_) -> return $ Placed (content hd) pos
@@ -514,20 +532,6 @@ ifCaseParser = do
     cond <- testStmt <* symbol "::"
     body <- many stmtParser
     return (cond, body)
-
-
--- | Test statement parser.
--- testStmt :: Parser (Placed Stmt)
--- testStmt = do
---     pos <- tokenPosition <$> ident "test"
---     rel <- relExpParser
---     let e = case rel of
---                 Placed (Var s ParamIn Ordinary) p ->
---                     Placed (Fncall [] s []) p
---                 _ ->
---                     rel
---     return $ Placed (TestBool e) pos
-
 
 
 useStmt :: Parser (Placed Stmt)
@@ -557,10 +561,6 @@ assignmentParser = do
     x <- simpleExpTerms <* symbol "="
     y <- expParser
     return $ maybePlace (ProcCall [] "=" Nothing Det False [x,y]) (place x)
-
-
-
-
 
 
 -----------------------------------------------------------------------------
@@ -639,10 +639,6 @@ parenExp = do
     return $ Placed e pos
 
 
-
-
-
-
 -- | Table defining operator precedence and associativeness, helps parsec to
 -- deal with expression parsing without ambiguity.
 completeOperatorTable :: WybeOperatorTable (Placed Exp)
@@ -658,7 +654,9 @@ completeOperatorTable =
     , [ binary "+" AssocLeft
       , binary "-" AssocLeft
       ]
-    , [ binary "++" AssocRight ]
+    , [ binary ",," AssocRight
+      , binary "++" AssocRight
+      ]
     , [ binary' ".." AssocNone [ Unplaced (IntValue 1) ] ]
     , [ binary ">"  AssocNone
       , binary "<"  AssocNone
@@ -686,8 +684,6 @@ relOperatorTable =
       , binary "="  AssocNone
       ]
     ]
-
-
 
 
 -- | Helper to make a placed function call expression out of n number of
@@ -739,9 +735,23 @@ funcAppExp = do
 
 typedExp :: Parser (Placed Exp -> Placed Exp)
 typedExp = do
-    coerce <- symbol ":!" $> True <|> symbol ":" $> False
+    cast <- symbol ":!" $> True <|> symbol ":" $> False
     ty <- typeParser
-    return $ \e -> maybePlace (Typed (content e) ty coerce) (place e)
+    return $ placedApply $ specifyType ty cast
+
+
+-- |Either cast or apply a type constraint
+specifyType :: TypeSpec -> Bool -> Exp -> OptPos -> Placed Exp
+specifyType ty False (Typed exp _ Nothing) pos =
+    maybePlace (Typed exp ty Nothing) pos -- replace type constraint
+specifyType ty False (Typed exp outer (Just _)) pos = -- was cast to outer
+    maybePlace (Typed exp outer (Just ty)) pos  -- now cast from ty to outer
+specifyType ty True (Typed exp ty' _) pos = -- was constrained to ty'
+    maybePlace (Typed exp ty (Just ty')) pos -- now cast from ty' to ty
+specifyType ty False exp pos =
+    maybePlace (Typed exp ty Nothing) pos -- just add type constraint
+specifyType ty True exp pos =
+    maybePlace (Typed exp ty (Just AnyType)) pos -- cast from AnyType to ty
 
 
 whereBodyParser :: Parser (Placed Exp -> Placed Exp)

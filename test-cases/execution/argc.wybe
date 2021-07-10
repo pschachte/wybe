@@ -1,0 +1,3 @@
+use command_line
+
+!println(length(arguments)+1)

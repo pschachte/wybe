@@ -42,7 +42,7 @@ noteImplnCallers :: ModSpec -> ProcSpec -> ProcImpln ->
                     Map Ident [ProcDef] -> Map Ident [ProcDef]
 noteImplnCallers _ _ (ProcDefSrc _) _ =
   shouldnt "scanning unprocessed code for calls"
-noteImplnCallers mod caller (ProcDefPrim _ body _ _) procs =
+noteImplnCallers mod caller ProcDefPrim{procImplnBody = body} procs =
   let callers = foldBodyDistrib (noteCall mod caller)
                 Map.empty mergeCallers mergeCallers
                 body
@@ -109,7 +109,7 @@ procBody :: ProcDef -> ProcBody
 procBody def =
   case procImpln def of
       ProcDefSrc _         -> shouldnt "Analysing un-compiled code"
-      ProcDefPrim _ body _ _-> body
+      ProcDefPrim{procImplnBody = body} -> body
 
 
 -- |Finding all procs called by a given proc body

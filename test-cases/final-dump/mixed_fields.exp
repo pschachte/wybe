@@ -1,0 +1,648 @@
+======================================================================
+AFTER EVERYTHING:
+ Module mixed_fields
+  representation  : address
+  public submods  : 
+  public resources: 
+  public procs    : mixed_fields.<0>
+                    mixed_fields./=<0>
+                    mixed_fields.=<0>
+                    mixed_fields.f1<0>
+                    mixed_fields.f1<1>
+                    mixed_fields.f2<0>
+                    mixed_fields.f2<1>
+                    mixed_fields.f3<0>
+                    mixed_fields.f3<1>
+                    mixed_fields.f4<0>
+                    mixed_fields.f4<1>
+                    mixed_fields.f5<0>
+                    mixed_fields.f5<1>
+                    mixed_fields.f6<0>
+                    mixed_fields.f6<1>
+                    mixed_fields.mixed<0>
+                    mixed_fields.mixed<1>
+                    mixed_fields.printit<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+*main* > public (0 calls)
+0: mixed_fields.<0>
+(io#0:wybe.phantom, ?io#1:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm alloc(32:wybe.int, ?tmp$8#0:mixed_fields)
+    foreign lpvm mutate(~tmp$8#0:mixed_fields, ?tmp$9#0:mixed_fields, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 'a':wybe.char)
+    foreign lpvm mutate(~tmp$9#0:mixed_fields, ?tmp$10#0:mixed_fields, 1:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 1:wybe.bool)
+    foreign lpvm mutate(~tmp$10#0:mixed_fields, ?tmp$11#0:mixed_fields, 2:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 'A':wybe.char)
+    foreign lpvm mutate(~tmp$11#0:mixed_fields, ?tmp$12#0:mixed_fields, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 3:wybe.int)
+    foreign lpvm mutate(~tmp$12#0:mixed_fields, ?tmp$13#0:mixed_fields, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 42:wybe.int)
+    foreign lpvm mutate(~tmp$13#0:mixed_fields, ?tmp$0#0:mixed_fields, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 17:wybe.int)
+    mixed_fields.printit<0>(~tmp$0#0:mixed_fields, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #2 @mixed_fields:nn:nn
+
+
+/= > public {inline} (0 calls)
+0: mixed_fields./=<0>
+/=($left#0:mixed_fields, $right#0:mixed_fields, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    mixed_fields.=<0>(~$left#0:mixed_fields, ~$right#0:mixed_fields, ?tmp$0#0:wybe.bool) #0
+    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
+
+
+= > public (1 calls)
+0: mixed_fields.=<0>
+=($left#0:mixed_fields, $right#0:mixed_fields, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm access($left#0:mixed_fields, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?$left$f2#0:wybe.char)
+    foreign lpvm access($left#0:mixed_fields, 1:wybe.int, 32:wybe.int, 0:wybe.int, ?$left$f4#0:wybe.bool)
+    foreign lpvm access($left#0:mixed_fields, 2:wybe.int, 32:wybe.int, 0:wybe.int, ?$left$f6#0:wybe.char)
+    foreign lpvm access($left#0:mixed_fields, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?$left$f1#0:wybe.int)
+    foreign lpvm access($left#0:mixed_fields, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?$left$f3#0:wybe.int)
+    foreign lpvm access(~$left#0:mixed_fields, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?$left$f5#0:wybe.int)
+    foreign lpvm access($right#0:mixed_fields, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?$right$f2#0:wybe.char)
+    foreign lpvm access($right#0:mixed_fields, 1:wybe.int, 32:wybe.int, 0:wybe.int, ?$right$f4#0:wybe.bool)
+    foreign lpvm access($right#0:mixed_fields, 2:wybe.int, 32:wybe.int, 0:wybe.int, ?$right$f6#0:wybe.char)
+    foreign lpvm access($right#0:mixed_fields, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?$right$f1#0:wybe.int)
+    foreign lpvm access($right#0:mixed_fields, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?$right$f3#0:wybe.int)
+    foreign lpvm access(~$right#0:mixed_fields, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?$right$f5#0:wybe.int)
+    foreign llvm icmp_eq(~$left$f1#0:wybe.int, ~$right$f1#0:wybe.int, ?tmp$1#0:wybe.bool) @int:nn:nn
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign llvm icmp_eq(~$left$f2#0:wybe.char, ~$right$f2#0:wybe.char, ?tmp$2#0:wybe.bool) @char:nn:nn
+        case ~tmp$2#0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+        1:
+            foreign llvm icmp_eq(~$left$f3#0:wybe.int, ~$right$f3#0:wybe.int, ?tmp$3#0:wybe.bool) @int:nn:nn
+            case ~tmp$3#0:wybe.bool of
+            0:
+                foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+            1:
+                foreign llvm icmp_eq(~$left$f4#0:wybe.bool, ~$right$f4#0:wybe.bool, ?tmp$4#0:wybe.bool) @bool:nn:nn
+                case ~tmp$4#0:wybe.bool of
+                0:
+                    foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                1:
+                    foreign llvm icmp_eq(~$left$f5#0:wybe.int, ~$right$f5#0:wybe.int, ?tmp$5#0:wybe.bool) @int:nn:nn
+                    case ~tmp$5#0:wybe.bool of
+                    0:
+                        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+                    1:
+                        foreign llvm icmp_eq(~$left$f6#0:wybe.char, ~$right$f6#0:wybe.char, ?$$#0:wybe.bool) @char:nn:nn
+
+
+
+
+
+
+
+f1 > public {inline} (1 calls)
+0: mixed_fields.f1<0>
+f1($rec#0:mixed_fields, ?$#0:wybe.int):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm access(~$rec#0:mixed_fields, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:wybe.int)
+f1 > public {inline} (0 calls)
+1: mixed_fields.f1<1>
+f1($rec#0:mixed_fields, ?$rec#1:mixed_fields, $field#0:wybe.int):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm {noalias} mutate(~%$rec#0:mixed_fields, ?%$rec#1:mixed_fields, 8:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+
+
+f2 > public {inline} (1 calls)
+0: mixed_fields.f2<0>
+f2($rec#0:mixed_fields, ?$#0:wybe.char):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm access(~$rec#0:mixed_fields, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:wybe.char)
+f2 > public {inline} (0 calls)
+1: mixed_fields.f2<1>
+f2($rec#0:mixed_fields, ?$rec#1:mixed_fields, $field#0:wybe.char):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm {noalias} mutate(~%$rec#0:mixed_fields, ?%$rec#1:mixed_fields, 0:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:wybe.char)
+
+
+f3 > public {inline} (1 calls)
+0: mixed_fields.f3<0>
+f3($rec#0:mixed_fields, ?$#0:wybe.int):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm access(~$rec#0:mixed_fields, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:wybe.int)
+f3 > public {inline} (0 calls)
+1: mixed_fields.f3<1>
+f3($rec#0:mixed_fields, ?$rec#1:mixed_fields, $field#0:wybe.int):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm {noalias} mutate(~%$rec#0:mixed_fields, ?%$rec#1:mixed_fields, 16:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+
+
+f4 > public {inline} (1 calls)
+0: mixed_fields.f4<0>
+f4($rec#0:mixed_fields, ?$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm access(~$rec#0:mixed_fields, 1:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:wybe.bool)
+f4 > public {inline} (0 calls)
+1: mixed_fields.f4<1>
+f4($rec#0:mixed_fields, ?$rec#1:mixed_fields, $field#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm {noalias} mutate(~%$rec#0:mixed_fields, ?%$rec#1:mixed_fields, 1:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:wybe.bool)
+
+
+f5 > public {inline} (1 calls)
+0: mixed_fields.f5<0>
+f5($rec#0:mixed_fields, ?$#0:wybe.int):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm access(~$rec#0:mixed_fields, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:wybe.int)
+f5 > public {inline} (0 calls)
+1: mixed_fields.f5<1>
+f5($rec#0:mixed_fields, ?$rec#1:mixed_fields, $field#0:wybe.int):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm {noalias} mutate(~%$rec#0:mixed_fields, ?%$rec#1:mixed_fields, 24:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+
+
+f6 > public {inline} (1 calls)
+0: mixed_fields.f6<0>
+f6($rec#0:mixed_fields, ?$#0:wybe.char):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm access(~$rec#0:mixed_fields, 2:wybe.int, 32:wybe.int, 0:wybe.int, ?$#0:wybe.char)
+f6 > public {inline} (0 calls)
+1: mixed_fields.f6<1>
+f6($rec#0:mixed_fields, ?$rec#1:mixed_fields, $field#0:wybe.char):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm {noalias} mutate(~%$rec#0:mixed_fields, ?%$rec#1:mixed_fields, 2:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~$field#0:wybe.char)
+
+
+mixed > public {inline} (1 calls)
+0: mixed_fields.mixed<0>
+mixed(f1#0:wybe.int, f2#0:wybe.char, f3#0:wybe.int, f4#0:wybe.bool, f5#0:wybe.int, f6#0:wybe.char, ?$#0:mixed_fields):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm alloc(32:wybe.int, ?$rec#0:mixed_fields)
+    foreign lpvm mutate(~%$rec#0:mixed_fields, ?%$rec#1:mixed_fields, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~f2#0:wybe.char)
+    foreign lpvm mutate(~%$rec#1:mixed_fields, ?%$rec#2:mixed_fields, 1:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~f4#0:wybe.bool)
+    foreign lpvm mutate(~%$rec#2:mixed_fields, ?%$rec#3:mixed_fields, 2:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~f6#0:wybe.char)
+    foreign lpvm mutate(~%$rec#3:mixed_fields, ?%$rec#4:mixed_fields, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~f1#0:wybe.int)
+    foreign lpvm mutate(~%$rec#4:mixed_fields, ?%$rec#5:mixed_fields, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~f3#0:wybe.int)
+    foreign lpvm mutate(~%$rec#5:mixed_fields, ?%$#0:mixed_fields, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~f5#0:wybe.int)
+mixed > public {inline} (22 calls)
+1: mixed_fields.mixed<1>
+mixed(?f1#0:wybe.int, ?f2#0:wybe.char, ?f3#0:wybe.int, ?f4#0:wybe.bool, ?f5#0:wybe.int, ?f6#0:wybe.char, $#0:mixed_fields):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm access($#0:mixed_fields, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?f2#0:wybe.char)
+    foreign lpvm access($#0:mixed_fields, 1:wybe.int, 32:wybe.int, 0:wybe.int, ?f4#0:wybe.bool)
+    foreign lpvm access($#0:mixed_fields, 2:wybe.int, 32:wybe.int, 0:wybe.int, ?f6#0:wybe.char)
+    foreign lpvm access($#0:mixed_fields, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?f1#0:wybe.int)
+    foreign lpvm access($#0:mixed_fields, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?f3#0:wybe.int)
+    foreign lpvm access(~$#0:mixed_fields, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?f5#0:wybe.int)
+
+
+printit > public (1 calls)
+0: mixed_fields.printit<0>
+printit(ob#0:mixed_fields, io#0:wybe.phantom, ?io#6:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm access(ob#0:mixed_fields, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.int)
+    foreign c print_int(~tmp$0#0:wybe.int, ~#io#0:wybe.phantom, ?tmp$9#0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$9#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign lpvm access(ob#0:mixed_fields, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.char)
+    foreign c putchar(~tmp$1#0:wybe.char, ~#io#1:wybe.phantom, ?tmp$13#0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$13#0:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
+    foreign lpvm access(ob#0:mixed_fields, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$2#0:wybe.int)
+    foreign c print_int(~tmp$2#0:wybe.int, ~#io#2:wybe.phantom, ?tmp$17#0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$17#0:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
+    foreign lpvm access(ob#0:mixed_fields, 1:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.bool)
+    wybe.io.print<5>(~tmp$3#0:wybe.bool, ~#io#3:wybe.phantom, ?tmp$21#0:wybe.phantom) #12 @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$21#0:wybe.phantom, ?#io#4:wybe.phantom) @io:nn:nn
+    foreign lpvm access(ob#0:mixed_fields, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.int)
+    foreign c print_int(~tmp$4#0:wybe.int, ~#io#4:wybe.phantom, ?tmp$25#0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$25#0:wybe.phantom, ?#io#5:wybe.phantom) @io:nn:nn
+    foreign lpvm access(~ob#0:mixed_fields, 2:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.char)
+    foreign c putchar(~tmp$5#0:wybe.char, ~#io#5:wybe.phantom, ?tmp$29#0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$29#0:wybe.phantom, ?#io#6:wybe.phantom) @io:nn:nn
+
+  LLVM code       :
+
+; ModuleID = 'mixed_fields'
+
+
+ 
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_int(i64)    
+
+
+declare external fastcc  void @"wybe.io.print<5>"(i1)    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+
+
+define external fastcc  void @"mixed_fields.<0>"()    {
+entry:
+  %1 = trunc i64 32 to i32  
+  %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
+  %3 = ptrtoint i8* %2 to i64 
+  %4 = inttoptr i64 %3 to i8* 
+  %5 = getelementptr  i8, i8* %4, i64 0 
+  store  i8 97, i8* %5 
+  %6 = add   i64 %3, 1 
+  %7 = inttoptr i64 %6 to i1* 
+  %8 = getelementptr  i1, i1* %7, i64 0 
+  store  i1 1, i1* %8 
+  %9 = add   i64 %3, 2 
+  %10 = inttoptr i64 %9 to i8* 
+  %11 = getelementptr  i8, i8* %10, i64 0 
+  store  i8 65, i8* %11 
+  %12 = add   i64 %3, 8 
+  %13 = inttoptr i64 %12 to i64* 
+  %14 = getelementptr  i64, i64* %13, i64 0 
+  store  i64 3, i64* %14 
+  %15 = add   i64 %3, 16 
+  %16 = inttoptr i64 %15 to i64* 
+  %17 = getelementptr  i64, i64* %16, i64 0 
+  store  i64 42, i64* %17 
+  %18 = add   i64 %3, 24 
+  %19 = inttoptr i64 %18 to i64* 
+  %20 = getelementptr  i64, i64* %19, i64 0 
+  store  i64 17, i64* %20 
+  tail call fastcc  void  @"mixed_fields.printit<0>"(i64  %3)  
+  ret void 
+}
+
+
+define external fastcc  i1 @"mixed_fields./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+entry:
+  %"1$tmp$0#0" = tail call fastcc  i1  @"mixed_fields.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
+  ret i1 %"1$$$#0" 
+}
+
+
+define external fastcc  i1 @"mixed_fields.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+entry:
+  %21 = inttoptr i64 %"$left#0" to i8* 
+  %22 = getelementptr  i8, i8* %21, i64 0 
+  %23 = load  i8, i8* %22 
+  %24 = add   i64 %"$left#0", 1 
+  %25 = inttoptr i64 %24 to i1* 
+  %26 = getelementptr  i1, i1* %25, i64 0 
+  %27 = load  i1, i1* %26 
+  %28 = add   i64 %"$left#0", 2 
+  %29 = inttoptr i64 %28 to i8* 
+  %30 = getelementptr  i8, i8* %29, i64 0 
+  %31 = load  i8, i8* %30 
+  %32 = add   i64 %"$left#0", 8 
+  %33 = inttoptr i64 %32 to i64* 
+  %34 = getelementptr  i64, i64* %33, i64 0 
+  %35 = load  i64, i64* %34 
+  %36 = add   i64 %"$left#0", 16 
+  %37 = inttoptr i64 %36 to i64* 
+  %38 = getelementptr  i64, i64* %37, i64 0 
+  %39 = load  i64, i64* %38 
+  %40 = add   i64 %"$left#0", 24 
+  %41 = inttoptr i64 %40 to i64* 
+  %42 = getelementptr  i64, i64* %41, i64 0 
+  %43 = load  i64, i64* %42 
+  %44 = inttoptr i64 %"$right#0" to i8* 
+  %45 = getelementptr  i8, i8* %44, i64 0 
+  %46 = load  i8, i8* %45 
+  %47 = add   i64 %"$right#0", 1 
+  %48 = inttoptr i64 %47 to i1* 
+  %49 = getelementptr  i1, i1* %48, i64 0 
+  %50 = load  i1, i1* %49 
+  %51 = add   i64 %"$right#0", 2 
+  %52 = inttoptr i64 %51 to i8* 
+  %53 = getelementptr  i8, i8* %52, i64 0 
+  %54 = load  i8, i8* %53 
+  %55 = add   i64 %"$right#0", 8 
+  %56 = inttoptr i64 %55 to i64* 
+  %57 = getelementptr  i64, i64* %56, i64 0 
+  %58 = load  i64, i64* %57 
+  %59 = add   i64 %"$right#0", 16 
+  %60 = inttoptr i64 %59 to i64* 
+  %61 = getelementptr  i64, i64* %60, i64 0 
+  %62 = load  i64, i64* %61 
+  %63 = add   i64 %"$right#0", 24 
+  %64 = inttoptr i64 %63 to i64* 
+  %65 = getelementptr  i64, i64* %64, i64 0 
+  %66 = load  i64, i64* %65 
+  %"1$tmp$1#0" = icmp eq i64 %35, %58 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
+if.then:
+  %"2$tmp$2#0" = icmp eq i8 %23, %46 
+  br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
+if.else:
+  ret i1 0 
+if.then1:
+  %"4$tmp$3#0" = icmp eq i64 %39, %62 
+  br i1 %"4$tmp$3#0", label %if.then2, label %if.else2 
+if.else1:
+  ret i1 0 
+if.then2:
+  %"6$tmp$4#0" = icmp eq i1 %27, %50 
+  br i1 %"6$tmp$4#0", label %if.then3, label %if.else3 
+if.else2:
+  ret i1 0 
+if.then3:
+  %"8$tmp$5#0" = icmp eq i64 %43, %66 
+  br i1 %"8$tmp$5#0", label %if.then4, label %if.else4 
+if.else3:
+  ret i1 0 
+if.then4:
+  %"10$$$#0" = icmp eq i8 %31, %54 
+  ret i1 %"10$$$#0" 
+if.else4:
+  ret i1 0 
+}
+
+
+define external fastcc  i64 @"mixed_fields.f1<0>"(i64  %"$rec#0")    {
+entry:
+  %67 = add   i64 %"$rec#0", 8 
+  %68 = inttoptr i64 %67 to i64* 
+  %69 = getelementptr  i64, i64* %68, i64 0 
+  %70 = load  i64, i64* %69 
+  ret i64 %70 
+}
+
+
+define external fastcc  i64 @"mixed_fields.f1<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+entry:
+  %71 = trunc i64 32 to i32  
+  %72 = tail call ccc  i8*  @wybe_malloc(i32  %71)  
+  %73 = ptrtoint i8* %72 to i64 
+  %74 = inttoptr i64 %73 to i8* 
+  %75 = inttoptr i64 %"$rec#0" to i8* 
+  %76 = trunc i64 32 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %74, i8*  %75, i32  %76, i32  8, i1  0)  
+  %77 = add   i64 %73, 8 
+  %78 = inttoptr i64 %77 to i64* 
+  %79 = getelementptr  i64, i64* %78, i64 0 
+  store  i64 %"$field#0", i64* %79 
+  ret i64 %73 
+}
+
+
+define external fastcc  i8 @"mixed_fields.f2<0>"(i64  %"$rec#0")    {
+entry:
+  %80 = inttoptr i64 %"$rec#0" to i8* 
+  %81 = getelementptr  i8, i8* %80, i64 0 
+  %82 = load  i8, i8* %81 
+  ret i8 %82 
+}
+
+
+define external fastcc  i64 @"mixed_fields.f2<1>"(i64  %"$rec#0", i8  %"$field#0")    {
+entry:
+  %83 = trunc i64 32 to i32  
+  %84 = tail call ccc  i8*  @wybe_malloc(i32  %83)  
+  %85 = ptrtoint i8* %84 to i64 
+  %86 = inttoptr i64 %85 to i8* 
+  %87 = inttoptr i64 %"$rec#0" to i8* 
+  %88 = trunc i64 32 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %86, i8*  %87, i32  %88, i32  8, i1  0)  
+  %89 = inttoptr i64 %85 to i8* 
+  %90 = getelementptr  i8, i8* %89, i64 0 
+  store  i8 %"$field#0", i8* %90 
+  ret i64 %85 
+}
+
+
+define external fastcc  i64 @"mixed_fields.f3<0>"(i64  %"$rec#0")    {
+entry:
+  %91 = add   i64 %"$rec#0", 16 
+  %92 = inttoptr i64 %91 to i64* 
+  %93 = getelementptr  i64, i64* %92, i64 0 
+  %94 = load  i64, i64* %93 
+  ret i64 %94 
+}
+
+
+define external fastcc  i64 @"mixed_fields.f3<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+entry:
+  %95 = trunc i64 32 to i32  
+  %96 = tail call ccc  i8*  @wybe_malloc(i32  %95)  
+  %97 = ptrtoint i8* %96 to i64 
+  %98 = inttoptr i64 %97 to i8* 
+  %99 = inttoptr i64 %"$rec#0" to i8* 
+  %100 = trunc i64 32 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %98, i8*  %99, i32  %100, i32  8, i1  0)  
+  %101 = add   i64 %97, 16 
+  %102 = inttoptr i64 %101 to i64* 
+  %103 = getelementptr  i64, i64* %102, i64 0 
+  store  i64 %"$field#0", i64* %103 
+  ret i64 %97 
+}
+
+
+define external fastcc  i1 @"mixed_fields.f4<0>"(i64  %"$rec#0")    {
+entry:
+  %104 = add   i64 %"$rec#0", 1 
+  %105 = inttoptr i64 %104 to i1* 
+  %106 = getelementptr  i1, i1* %105, i64 0 
+  %107 = load  i1, i1* %106 
+  ret i1 %107 
+}
+
+
+define external fastcc  i64 @"mixed_fields.f4<1>"(i64  %"$rec#0", i1  %"$field#0")    {
+entry:
+  %108 = trunc i64 32 to i32  
+  %109 = tail call ccc  i8*  @wybe_malloc(i32  %108)  
+  %110 = ptrtoint i8* %109 to i64 
+  %111 = inttoptr i64 %110 to i8* 
+  %112 = inttoptr i64 %"$rec#0" to i8* 
+  %113 = trunc i64 32 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %111, i8*  %112, i32  %113, i32  8, i1  0)  
+  %114 = add   i64 %110, 1 
+  %115 = inttoptr i64 %114 to i1* 
+  %116 = getelementptr  i1, i1* %115, i64 0 
+  store  i1 %"$field#0", i1* %116 
+  ret i64 %110 
+}
+
+
+define external fastcc  i64 @"mixed_fields.f5<0>"(i64  %"$rec#0")    {
+entry:
+  %117 = add   i64 %"$rec#0", 24 
+  %118 = inttoptr i64 %117 to i64* 
+  %119 = getelementptr  i64, i64* %118, i64 0 
+  %120 = load  i64, i64* %119 
+  ret i64 %120 
+}
+
+
+define external fastcc  i64 @"mixed_fields.f5<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+entry:
+  %121 = trunc i64 32 to i32  
+  %122 = tail call ccc  i8*  @wybe_malloc(i32  %121)  
+  %123 = ptrtoint i8* %122 to i64 
+  %124 = inttoptr i64 %123 to i8* 
+  %125 = inttoptr i64 %"$rec#0" to i8* 
+  %126 = trunc i64 32 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %124, i8*  %125, i32  %126, i32  8, i1  0)  
+  %127 = add   i64 %123, 24 
+  %128 = inttoptr i64 %127 to i64* 
+  %129 = getelementptr  i64, i64* %128, i64 0 
+  store  i64 %"$field#0", i64* %129 
+  ret i64 %123 
+}
+
+
+define external fastcc  i8 @"mixed_fields.f6<0>"(i64  %"$rec#0")    {
+entry:
+  %130 = add   i64 %"$rec#0", 2 
+  %131 = inttoptr i64 %130 to i8* 
+  %132 = getelementptr  i8, i8* %131, i64 0 
+  %133 = load  i8, i8* %132 
+  ret i8 %133 
+}
+
+
+define external fastcc  i64 @"mixed_fields.f6<1>"(i64  %"$rec#0", i8  %"$field#0")    {
+entry:
+  %134 = trunc i64 32 to i32  
+  %135 = tail call ccc  i8*  @wybe_malloc(i32  %134)  
+  %136 = ptrtoint i8* %135 to i64 
+  %137 = inttoptr i64 %136 to i8* 
+  %138 = inttoptr i64 %"$rec#0" to i8* 
+  %139 = trunc i64 32 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %137, i8*  %138, i32  %139, i32  8, i1  0)  
+  %140 = add   i64 %136, 2 
+  %141 = inttoptr i64 %140 to i8* 
+  %142 = getelementptr  i8, i8* %141, i64 0 
+  store  i8 %"$field#0", i8* %142 
+  ret i64 %136 
+}
+
+
+define external fastcc  i64 @"mixed_fields.mixed<0>"(i64  %"f1#0", i8  %"f2#0", i64  %"f3#0", i1  %"f4#0", i64  %"f5#0", i8  %"f6#0")    {
+entry:
+  %143 = trunc i64 32 to i32  
+  %144 = tail call ccc  i8*  @wybe_malloc(i32  %143)  
+  %145 = ptrtoint i8* %144 to i64 
+  %146 = inttoptr i64 %145 to i8* 
+  %147 = getelementptr  i8, i8* %146, i64 0 
+  store  i8 %"f2#0", i8* %147 
+  %148 = add   i64 %145, 1 
+  %149 = inttoptr i64 %148 to i1* 
+  %150 = getelementptr  i1, i1* %149, i64 0 
+  store  i1 %"f4#0", i1* %150 
+  %151 = add   i64 %145, 2 
+  %152 = inttoptr i64 %151 to i8* 
+  %153 = getelementptr  i8, i8* %152, i64 0 
+  store  i8 %"f6#0", i8* %153 
+  %154 = add   i64 %145, 8 
+  %155 = inttoptr i64 %154 to i64* 
+  %156 = getelementptr  i64, i64* %155, i64 0 
+  store  i64 %"f1#0", i64* %156 
+  %157 = add   i64 %145, 16 
+  %158 = inttoptr i64 %157 to i64* 
+  %159 = getelementptr  i64, i64* %158, i64 0 
+  store  i64 %"f3#0", i64* %159 
+  %160 = add   i64 %145, 24 
+  %161 = inttoptr i64 %160 to i64* 
+  %162 = getelementptr  i64, i64* %161, i64 0 
+  store  i64 %"f5#0", i64* %162 
+  ret i64 %145 
+}
+
+
+define external fastcc  {i64, i8, i64, i1, i64, i8} @"mixed_fields.mixed<1>"(i64  %"$#0")    {
+entry:
+  %163 = inttoptr i64 %"$#0" to i8* 
+  %164 = getelementptr  i8, i8* %163, i64 0 
+  %165 = load  i8, i8* %164 
+  %166 = add   i64 %"$#0", 1 
+  %167 = inttoptr i64 %166 to i1* 
+  %168 = getelementptr  i1, i1* %167, i64 0 
+  %169 = load  i1, i1* %168 
+  %170 = add   i64 %"$#0", 2 
+  %171 = inttoptr i64 %170 to i8* 
+  %172 = getelementptr  i8, i8* %171, i64 0 
+  %173 = load  i8, i8* %172 
+  %174 = add   i64 %"$#0", 8 
+  %175 = inttoptr i64 %174 to i64* 
+  %176 = getelementptr  i64, i64* %175, i64 0 
+  %177 = load  i64, i64* %176 
+  %178 = add   i64 %"$#0", 16 
+  %179 = inttoptr i64 %178 to i64* 
+  %180 = getelementptr  i64, i64* %179, i64 0 
+  %181 = load  i64, i64* %180 
+  %182 = add   i64 %"$#0", 24 
+  %183 = inttoptr i64 %182 to i64* 
+  %184 = getelementptr  i64, i64* %183, i64 0 
+  %185 = load  i64, i64* %184 
+  %186 = insertvalue {i64, i8, i64, i1, i64, i8} undef, i64 %177, 0 
+  %187 = insertvalue {i64, i8, i64, i1, i64, i8} %186, i8 %165, 1 
+  %188 = insertvalue {i64, i8, i64, i1, i64, i8} %187, i64 %181, 2 
+  %189 = insertvalue {i64, i8, i64, i1, i64, i8} %188, i1 %169, 3 
+  %190 = insertvalue {i64, i8, i64, i1, i64, i8} %189, i64 %185, 4 
+  %191 = insertvalue {i64, i8, i64, i1, i64, i8} %190, i8 %173, 5 
+  ret {i64, i8, i64, i1, i64, i8} %191 
+}
+
+
+define external fastcc  void @"mixed_fields.printit<0>"(i64  %"ob#0")    {
+entry:
+  %192 = add   i64 %"ob#0", 8 
+  %193 = inttoptr i64 %192 to i64* 
+  %194 = getelementptr  i64, i64* %193, i64 0 
+  %195 = load  i64, i64* %194 
+  tail call ccc  void  @print_int(i64  %195)  
+  tail call ccc  void  @putchar(i8  10)  
+  %196 = inttoptr i64 %"ob#0" to i8* 
+  %197 = getelementptr  i8, i8* %196, i64 0 
+  %198 = load  i8, i8* %197 
+  tail call ccc  void  @putchar(i8  %198)  
+  tail call ccc  void  @putchar(i8  10)  
+  %199 = add   i64 %"ob#0", 16 
+  %200 = inttoptr i64 %199 to i64* 
+  %201 = getelementptr  i64, i64* %200, i64 0 
+  %202 = load  i64, i64* %201 
+  tail call ccc  void  @print_int(i64  %202)  
+  tail call ccc  void  @putchar(i8  10)  
+  %203 = add   i64 %"ob#0", 1 
+  %204 = inttoptr i64 %203 to i1* 
+  %205 = getelementptr  i1, i1* %204, i64 0 
+  %206 = load  i1, i1* %205 
+  tail call fastcc  void  @"wybe.io.print<5>"(i1  %206)  
+  tail call ccc  void  @putchar(i8  10)  
+  %207 = add   i64 %"ob#0", 24 
+  %208 = inttoptr i64 %207 to i64* 
+  %209 = getelementptr  i64, i64* %208, i64 0 
+  %210 = load  i64, i64* %209 
+  tail call ccc  void  @print_int(i64  %210)  
+  tail call ccc  void  @putchar(i8  10)  
+  %211 = add   i64 %"ob#0", 2 
+  %212 = inttoptr i64 %211 to i8* 
+  %213 = getelementptr  i8, i8* %212, i64 0 
+  %214 = load  i8, i8* %213 
+  tail call ccc  void  @putchar(i8  %214)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+}

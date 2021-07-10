@@ -1,12 +1,11 @@
 ======================================================================
 AFTER EVERYTHING:
  Module mod3
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : 
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 

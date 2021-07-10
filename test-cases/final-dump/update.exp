@@ -1,28 +1,29 @@
 ======================================================================
 AFTER EVERYTHING:
  Module update
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : update.inc2<0>
                     update.inc2<1>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 
 inc2 > public {inline} (0 calls)
-0: inc2(x#0:wybe.int, ?$#0:wybe.int):
+0: update.inc2<0>
+inc2(x#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$1#0:wybe.int) @wybe:nn:nn
-    foreign llvm add(~tmp$1#0:wybe.int, 1:wybe.int, ?$#0:wybe.int) @wybe:nn:nn
+    foreign llvm add(~x#0:wybe.int, 1:wybe.int, ?tmp$1#0:wybe.int) @int:nn:nn
+    foreign llvm add(~tmp$1#0:wybe.int, 1:wybe.int, ?$#0:wybe.int) @int:nn:nn
 inc2 > public {inline} (0 calls)
-1: inc2(?x#0:wybe.int, y#0:wybe.int):
+1: update.inc2<1>
+inc2(?x#0:wybe.int, y#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm sub(~y#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @wybe:nn:nn
-    foreign llvm sub(~tmp$0#0:wybe.int, 1:wybe.int, ?x#0:wybe.int) @wybe:nn:nn
+    foreign llvm sub(~y#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn
+    foreign llvm sub(~tmp$0#0:wybe.int, 1:wybe.int, ?x#0:wybe.int) @int:nn:nn
 
   LLVM code       :
 

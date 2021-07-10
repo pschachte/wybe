@@ -134,8 +134,8 @@ evalClauseComp clcomp =
 
 -- |Compile a ProcDefSrc to a ProcDefPrim, ie, compile a proc
 --  definition in source form to one in clausal form.
-compileProc :: ProcDef -> Compiler ProcDef
-compileProc proc =
+compileProc :: ProcDef -> Int -> Compiler ProcDef
+compileProc proc procID = 
     evalClauseComp $ do
         let ProcDefSrc body = procImpln proc
         let proto = procProto proc
@@ -156,7 +156,9 @@ compileProc proc =
         let proto' = PrimProto (procProtoName proto) params'
         logClause $ "  comparams: " ++ show params'
         callSiteCount <- gets nextCallSiteID
-        return $ proc { procImpln = ProcDefPrim proto' compiled
+        mSpec <- lift $ getModule modSpec
+        let pSpec = ProcSpec mSpec procName procID Set.empty
+        return $ proc { procImpln = ProcDefPrim pSpec proto' compiled
                                         emptyProcAnalysis Map.empty,
                         procCallSiteCount = callSiteCount}
 
@@ -183,7 +185,7 @@ compileBody stmts params detism = do
     logClause $ "Compiling body:" ++ showBody 4 stmts
     let final = last stmts
     case content final of
-        Cond tst thn els _ ->
+        Cond tst thn els _ _ ->
           case content tst of
               TestBool var -> do
                 front <- mapM compileSimpleStmt $ init stmts
@@ -296,11 +298,12 @@ compileSimpleStmt' stmt =
 
 
 compileArg :: Exp -> OptPos -> ClauseComp PrimArg
-compileArg exp pos = do
+compileArg (Typed exp typ coerce) pos = do
     logClause $ "Compiling expression " ++ show exp
-    arg <- compileArg' AnyType False exp pos
+    arg <- compileArg' typ (isJust coerce) exp pos
     logClause $ "Expression compiled to " ++ show arg
     return arg
+compileArg exp pos = shouldnt $ "Compiling untyped argument " ++ show exp
 
 compileArg' :: TypeSpec -> Bool -> Exp -> OptPos -> ClauseComp PrimArg
 compileArg' typ _ (IntValue int) _ = return $ ArgInt int typ
@@ -313,7 +316,8 @@ compileArg' typ coerce (Var name ParamIn flowType) pos = do
 compileArg' typ coerce (Var name ParamOut flowType) _ = do
     name' <- nextVar name
     return $ ArgVar name' typ coerce FlowOut flowType False
-compileArg' _   _ (Typed exp typ coerce) pos = compileArg' typ coerce exp pos
+compileArg' _   _ (Typed exp typ coerce) pos =
+    shouldnt $ "Compiling multi-typed expression " ++ show exp
 compileArg' _   _ arg _ =
     shouldnt $ "Normalisation left complex argument: " ++ show arg
 

@@ -1,20 +1,20 @@
 ======================================================================
 AFTER EVERYTHING:
  Module mainless
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : mainless.nothing_interesting<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 
 nothing_interesting > public {inline} (0 calls)
-0: nothing_interesting(?$#0:wybe.int):
+0: mainless.nothing_interesting<0>
+nothing_interesting(?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(7:wybe.int, ?$#0:wybe.int) @mainless:4:5
+    foreign llvm move(7:wybe.int, ?$#0:wybe.int) @mainless:nn:nn
 
   LLVM code       :
 

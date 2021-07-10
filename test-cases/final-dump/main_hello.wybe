@@ -1,4 +1,6 @@
+use command_line
+
 !set_exit_code(42)
 !println("hello, world!")
-!print(argc-1)
+!print(length(arguments))
 !println(" command line argument(s)")

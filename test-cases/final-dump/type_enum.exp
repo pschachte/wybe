@@ -1,8 +1,8 @@
 ======================================================================
 AFTER EVERYTHING:
  Module type_enum
-  public submods  : 
-  public types    : season: (type_enum.season,Just 2 bit unsigned)
+  representation  : (not a type)
+  public submods  : season -> type_enum.season
   public resources: 
   public procs    : type_enum.season./=<0>
                     type_enum.season.=<0>
@@ -12,7 +12,6 @@ AFTER EVERYTHING:
                     type_enum.season.winter<0>
   imports         : public use type_enum.season
                     use wybe
-  types           : season/public  is 2 bit unsigned { winter() @type_enum:1:23 | spring() @type_enum:1:32 | summer() @type_enum:1:41 | autumn() @type_enum:1:50  }  @type_enum:1:5
   resources       : 
   submodules      : type_enum.season
   procs           : 
@@ -32,8 +31,8 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 --------------------------------------------------
  Module type_enum.season
+  representation  : 2 bit unsigned
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : type_enum.season./=<0>
                     type_enum.season.=<0>
@@ -43,12 +42,12 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
                     type_enum.season.winter<0>
   imports         : use type_enum
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
 /= > public {inline} (0 calls)
-0: /=($left#0:type_enum.season, $right#0:type_enum.season, ?$$#0:wybe.bool):
+0: type_enum.season./=<0>
+/=($left#0:type_enum.season, $right#0:type_enum.season, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_eq(~$left#0:type_enum.season, ~$right#0:type_enum.season, ?tmp$0#0:wybe.bool)
@@ -56,35 +55,40 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 
 = > public {inline} (1 calls)
-0: =($left#0:type_enum.season, $right#0:type_enum.season, ?$$#0:wybe.bool):
+0: type_enum.season.=<0>
+=($left#0:type_enum.season, $right#0:type_enum.season, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_eq(~$left#0:type_enum.season, ~$right#0:type_enum.season, ?$$#0:!wybe.bool)
 
 
 autumn > public {inline} (0 calls)
-0: autumn(?$#0:type_enum.season):
+0: type_enum.season.autumn<0>
+autumn(?$#0:type_enum.season):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(3:type_enum.season, ?$#0:type_enum.season)
 
 
 spring > public {inline} (0 calls)
-0: spring(?$#0:type_enum.season):
+0: type_enum.season.spring<0>
+spring(?$#0:type_enum.season):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(1:type_enum.season, ?$#0:type_enum.season)
 
 
 summer > public {inline} (0 calls)
-0: summer(?$#0:type_enum.season):
+0: type_enum.season.summer<0>
+summer(?$#0:type_enum.season):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(2:type_enum.season, ?$#0:type_enum.season)
 
 
 winter > public {inline} (0 calls)
-0: winter(?$#0:type_enum.season):
+0: type_enum.season.winter<0>
+winter(?$#0:type_enum.season):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(0:type_enum.season, ?$#0:type_enum.season)

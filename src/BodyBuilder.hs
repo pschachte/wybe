@@ -425,7 +425,8 @@ ordinaryInstr prim pos = do
         Nothing -> do
             -- record prim executed (and other modes), and generate instr
             logBuild "not found"
-            recordEntailedPrims prim
+            impurity <- lift $ primImpurity prim
+            when (impurity <= Pure) $ recordEntailedPrims prim
             rawInstr prim pos
             mapM_ recordVarSet $ primOutputs prim
         Just oldOuts -> do

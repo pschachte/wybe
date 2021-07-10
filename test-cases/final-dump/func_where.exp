@@ -1,21 +1,21 @@
 ======================================================================
 AFTER EVERYTHING:
  Module func_where
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : func_where.quad<0>
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 
 quad > public {inline} (0 calls)
-0: quad(x#0:wybe.int, ?$#0:wybe.int):
+0: func_where.quad<0>
+quad(x#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm add(~x#0:wybe.int, ~x#0:wybe.int, ?tmp$0#0:wybe.int) @wybe:nn:nn
-    foreign llvm add(~tmp$0#0:wybe.int, ~tmp$0#0:wybe.int, ?$#0:wybe.int) @wybe:nn:nn
+    foreign llvm add(~x#0:wybe.int, ~x#0:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn
+    foreign llvm add(~tmp$0#0:wybe.int, ~tmp$0#0:wybe.int, ?$#0:wybe.int) @int:nn:nn
 
   LLVM code       :
 

@@ -20,6 +20,7 @@ import           System.Environment
 import           System.Exit
 import           System.FilePath
 import           Version
+import System.Directory
 
 -- |Command line options for the wybe compiler.
 data Options = Options{
@@ -32,7 +33,8 @@ data Options = Options{
     , optLogAspects   :: Set LogSelection
                                  -- ^Which aspects to log
     , optNoLLVMOpt    :: Bool     -- ^Don't run the LLVM optimisation passes
-    , optNoMultiSpecz :: Bool     -- ^Disable multiple specializatio
+    , optNoMultiSpecz :: Bool     -- ^Disable multiple specialization
+    , optDumpLib      :: Bool     -- ^Also dump wybe.* modules when dumping
     , optVerbose      :: Bool     -- ^Be verbose in compiler output
     , optNoFont       :: Bool     -- ^Disable ISO font change codes in messages
     } deriving Show
@@ -50,6 +52,7 @@ defaultOptions     = Options
  , optLogAspects   = Set.empty
  , optNoLLVMOpt    = False
  , optNoMultiSpecz = False 
+ , optDumpLib      = False
  , optVerbose      = False
  , optNoFont       = False
  }
@@ -132,10 +135,13 @@ options =
  , Option []     ["no-multi-specz"]
      (NoArg (\opts -> opts { optNoMultiSpecz = True }))
      "disable multiple specialization"
+ , Option []     ["dump-lib"]
+     (NoArg (\opts -> opts { optDumpLib = True }))
+     "Also dump wybe library when dumping"
  , Option ['v']     ["verbose"]
      (NoArg (\opts -> opts { optVerbose = True }))
      "dump verbose messages after compilation"
-     , Option ['n'] ["no-fonts"]
+ , Option ['n'] ["no-fonts"]
      (NoArg (\opts -> opts { optNoFont = True }))
      "disable font highlighting in messages"
  ]
@@ -160,11 +166,11 @@ handleCmdline = do
     assocList <- getEnvironment
     let env = Map.fromList assocList
     (opts0,files) <- compilerOpts argv
-    let opts = if List.null $ optLibDirs opts0
-                then maybe (opts0  { optLibDirs = [libDir] })
-                     (\l -> opts0 { optLibDirs = splitSearchPath l }) $
-                     Map.lookup "WYBELIBS" env
-                else opts0
+    let libs0 = case optLibDirs opts0 of
+                [] -> maybe [libDir] splitSearchPath $ Map.lookup "WYBELIBS" env
+                lst -> lst
+    libs <- mapM makeAbsolute libs0
+    let opts = opts0 { optLibDirs = libs }
     if optShowHelp opts
       then do
         putStrLn $ usageInfo header options

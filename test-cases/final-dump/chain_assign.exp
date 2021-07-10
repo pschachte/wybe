@@ -1,20 +1,20 @@
 ======================================================================
 AFTER EVERYTHING:
  Module chain_assign
+  representation  : (not a type)
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : 
   imports         : use wybe
-  types           : 
   resources       : 
   procs           : 
 
 chain > {inline} (0 calls)
-0: chain(?z#0:wybe.int):
+0: chain_assign.chain<0>
+chain(?z#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(1:wybe.int, ?z#0:wybe.int) @chain_assign:4:5
+    foreign llvm move(1:wybe.int, ?z#0:wybe.int) @chain_assign:nn:nn
 
   LLVM code       :
 

@@ -10,7 +10,7 @@ module ASTShow (
   ) where
 
 import AST
-import Options (LogSelection)
+import Options (optDumpLib, LogSelection)
 import Data.List as List
 import Data.Set  as Set
 import Data.Map  as Map
@@ -29,9 +29,14 @@ instance Show Module where
         let int  = modInterface mod
             maybeimpl = modImplementation mod
         in " Module " ++ showModSpec (modSpec mod) ++
-           maybeShow "(" (modParams mod) ")" ++
-           "\n  public submods  : " ++ showMapPoses (pubDependencies int) ++
-           "\n  public types    : " ++ showMapLines (pubTypes int) ++
+           bracketList "(" ", " ")" (modParams mod) ++
+           "\n  representation  : " ++
+           (if modIsType mod
+            then maybe "(not yet known)" show (modTypeRep mod)
+            else "(not a type)") ++
+           "\n  public submods  : " ++
+           showMap "" "\n                    " "" (++ " -> ")
+                   showModSpec (pubSubmods int) ++
            "\n  public resources: " ++ showMapLines (pubResources int) ++
            "\n  public procs    : " ++
            intercalate "\n                    "
@@ -39,29 +44,19 @@ instance Show Module where
             List.map Map.keysSet $ Map.elems $ pubProcs int) ++
            if isNothing maybeimpl then "\n  implementation not available"
            else let impl = fromJust maybeimpl
-                    indent = replicate 20 ' '
                 in
                  "\n  imports         : " ++
                  intercalate "\n                    "
                  [showUse 20 mod dep |
                   (mod,(dep,_)) <- Map.assocs $ modImports impl] ++
-                 -- "\n  vis types       : " ++
-                 -- (fillLines indent 20 80 $
-                 --  showSetMapItems $ modKnownTypes impl) ++
-                 -- "\n  vis resources   : " ++
-                 -- (fillLines indent 20 80 $
-                 --  showSetMapItems $ modKnownResources impl) ++
-                 -- "\n  vis procs       : " ++
-                 -- (fillLines indent 20 80 $
-                 --  showSetMapItems $ modKnownProcs impl) ++
-                 "\n  types           : " ++ showMapTypes (modTypes impl) ++
                  "\n  resources       : " ++ showMapLines (modResources impl) ++
                  (if Map.null (modSubmods impl)
                   then ""
                   else "\n  submodules      : " ++
-                       showMap ", " (const "") showModSpec (modSubmods impl)) ++
+                       showMap "" ", " "" (const "") showModSpec 
+                       (modSubmods impl)) ++
                  "\n  procs           : " ++ "\n" ++
-                 (showMap "\n\n" (const "") (showProcDefs 0)
+                 (showMap "" "\n\n" "" (const "") (showProcDefs 0)
                   (modProcs impl)) ++
                  (maybe "\n\nLLVM code       : None\n"
                   (("\n\n  LLVM code       :\n\n" ++) . TL.unpack . ppllvm)
@@ -70,7 +65,7 @@ instance Show Module where
 
 -- |How to show a map, one line per item.
 showMapLines :: Show v => Map Ident v -> String
-showMapLines = showMap "\n                    " (++": ") show
+showMapLines = showMap "" "\n                    " "" (++": ") show
 
 showSetMapItems :: (Show b, Ord b) => (Map a (Set b)) -> String
 showSetMapItems setMap =
@@ -79,21 +74,9 @@ showSetMapItems setMap =
     List.foldr Set.union Set.empty $ Map.elems setMap
 
 
--- |How to show a map, items separated by commas.
-showMapTypes :: Map Ident TypeDef -> String
-showMapTypes = showMap ", " (++ "/") show
-
 -- |How to show a map to source positions, one line per item.
 showMapPoses :: Map Ident OptPos -> String
-showMapPoses = showMap ", " id showMaybeSourcePos
-
--- |How to show a map from identifiers to values, given a separator
---  for items, and a separator for keys from values, and a function
---  to show the values.
-showMap :: String -> (k -> String) -> (v -> String) -> Map k v -> String
-showMap outersep keyFn valFn m =
-    intercalate outersep $ List.map (\(k,v) -> keyFn k ++ valFn v) $
-    Map.assocs m
+showMapPoses = showMap "" ", " "" id showMaybeSourcePos
 
 
 -- |Dump the content of the specified module and all submodules if either
@@ -103,8 +86,9 @@ logDump :: LogSelection -> LogSelection -> String -> Compiler ()
 logDump selector1 selector2 pass =
     whenLogging2 selector1 selector2 $ do
       modList <- gets (Map.elems . modules)
+      dumpLib <- gets (optDumpLib . options)
       let toLog mod = let spec  = modSpec mod
-                      in  List.null spec || head spec /= "wybe"
+                      in  List.null spec || dumpLib || head spec /= "wybe"
       liftIO $ hPutStrLn stderr $ replicate 70 '='
         ++ "\nAFTER " ++ pass ++ ":\n"
         ++ intercalate ("\n" ++ replicate 50 '-' ++ "\n")

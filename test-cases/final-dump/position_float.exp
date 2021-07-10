@@ -1,8 +1,8 @@
 ======================================================================
 AFTER EVERYTHING:
  Module position_float
-  public submods  : 
-  public types    : position: (position_float.position,Just address)
+  representation  : (not a type)
+  public submods  : position -> position_float.position
   public resources: 
   public procs    : position_float.position./=<0>
                     position_float.position.=<0>
@@ -14,7 +14,6 @@ AFTER EVERYTHING:
                     position_float.position.y<1>
   imports         : public use position_float.position
                     use wybe
-  types           : position/public  is address { position(x:float, y:float) @position_float:1:25  }  @position_float:1:5
   resources       : 
   submodules      : position_float.position
   procs           : 
@@ -34,8 +33,8 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 --------------------------------------------------
  Module position_float.position
+  representation  : address
   public submods  : 
-  public types    : 
   public resources: 
   public procs    : position_float.position./=<0>
                     position_float.position.=<0>
@@ -47,57 +46,60 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
                     position_float.position.y<1>
   imports         : use position_float
                     use wybe
-  types           : 
   resources       : 
   procs           : 
 
 /= > public {inline} (0 calls)
-0: /=($left#0:position_float.position, $right#0:position_float.position, ?$$#0:wybe.bool):
+0: position_float.position./=<0>
+/=($left#0:position_float.position, $right#0:position_float.position, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access($left#0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.float)
     foreign lpvm access(~$left#0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.float)
     foreign lpvm access($right#0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.float)
     foreign lpvm access(~$right#0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.float)
-    foreign llvm fcmp_eq(~tmp$3#0:wybe.float, ~tmp$5#0:wybe.float, ?tmp$7#0:wybe.bool) @wybe:nn:nn
+    foreign llvm fcmp_eq(~tmp$3#0:wybe.float, ~tmp$5#0:wybe.float, ?tmp$7#0:wybe.bool) @float:nn:nn
     case ~tmp$7#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?tmp$0#0:wybe.bool)
         foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign llvm fcmp_eq(~tmp$4#0:wybe.float, ~tmp$6#0:wybe.float, ?tmp$0#0:wybe.bool) @wybe:nn:nn
+        foreign llvm fcmp_eq(~tmp$4#0:wybe.float, ~tmp$6#0:wybe.float, ?tmp$0#0:wybe.bool) @float:nn:nn
         foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
 
 = > public {inline} (1 calls)
-0: =($left#0:position_float.position, $right#0:position_float.position, ?$$#0:wybe.bool):
+0: position_float.position.=<0>
+=($left#0:position_float.position, $right#0:position_float.position, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access($left#0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$x#0:wybe.float)
     foreign lpvm access(~$left#0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$y#0:wybe.float)
     foreign lpvm access($right#0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$x#0:wybe.float)
     foreign lpvm access(~$right#0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$y#0:wybe.float)
-    foreign llvm fcmp_eq(~$left$x#0:wybe.float, ~$right$x#0:wybe.float, ?tmp$1#0:wybe.bool) @wybe:nn:nn
+    foreign llvm fcmp_eq(~$left$x#0:wybe.float, ~$right$x#0:wybe.float, ?tmp$1#0:wybe.bool) @float:nn:nn
     case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign llvm fcmp_eq(~$left$y#0:wybe.float, ~$right$y#0:wybe.float, ?$$#0:wybe.bool) @wybe:nn:nn
+        foreign llvm fcmp_eq(~$left$y#0:wybe.float, ~$right$y#0:wybe.float, ?$$#0:wybe.bool) @float:nn:nn
 
 
 
 position > public {inline} (0 calls)
-0: position(x#0:wybe.float, y#0:wybe.float, ?$#0:position_float.position):
+0: position_float.position.position<0>
+position(x#0:wybe.float, y#0:wybe.float, ?$#0:position_float.position):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?$rec#0:!position_float.position)
+    foreign lpvm alloc(16:wybe.int, ?$rec#0:position_float.position)
     foreign lpvm mutate(~%$rec#0:position_float.position, ?%$rec#1:position_float.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x#0:wybe.float)
     foreign lpvm mutate(~%$rec#1:position_float.position, ?%$#0:position_float.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y#0:wybe.float)
 position > public {inline} (6 calls)
-1: position(?x#0:wybe.float, ?y#0:wybe.float, $#0:position_float.position):
+1: position_float.position.position<1>
+position(?x#0:wybe.float, ?y#0:wybe.float, $#0:position_float.position):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access($#0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x#0:wybe.float)
@@ -105,24 +107,28 @@ position > public {inline} (6 calls)
 
 
 x > public {inline} (0 calls)
-0: x($rec#0:position_float.position, ?$#0:wybe.float):
+0: position_float.position.x<0>
+x($rec#0:position_float.position, ?$#0:wybe.float):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~$rec#0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.float)
 x > public {inline} (0 calls)
-1: x($rec#0:position_float.position, ?$rec#1:position_float.position, $field#0:wybe.float):
+1: position_float.position.x<1>
+x($rec#0:position_float.position, ?$rec#1:position_float.position, $field#0:wybe.float):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~%$rec#0:position_float.position, ?%$rec#1:position_float.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.float)
 
 
 y > public {inline} (0 calls)
-0: y($rec#0:position_float.position, ?$#0:wybe.float):
+0: position_float.position.y<0>
+y($rec#0:position_float.position, ?$#0:wybe.float):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~$rec#0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.float)
 y > public {inline} (0 calls)
-1: y($rec#0:position_float.position, ?$rec#1:position_float.position, $field#0:wybe.float):
+1: position_float.position.y<1>
+y($rec#0:position_float.position, ?$rec#1:position_float.position, $field#0:wybe.float):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~%$rec#0:position_float.position, ?%$rec#1:position_float.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.float)

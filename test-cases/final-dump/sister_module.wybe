@@ -1,5 +1,4 @@
 module m2 {
-    use ^
     pub def bar(i:int,?j:int) { foo(i,?k) baz(k,?j) }
 }
 
