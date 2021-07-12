@@ -470,11 +470,10 @@ Iteration is specified with the `do` statement, of the form:
 This executes the enclosed *statements* repeatedly, until a termination
 condition is reached.
 
-For looping through a sequence or collection, `for` loops are also available
-with the syntax:
-
+Types that implement the cons operator (`[|]`) can be looped over using
+`for` loops. Presently `array` and `list` in the stdlib implement this operator:
 ```
-for <var1>[, <var2>]* in <gen1>[, <gen2>]* { 
+for <outvar1>[, <outvar2>]* in <gen1>[, <gen2>]* { 
     *statements* 
 }
 ```
