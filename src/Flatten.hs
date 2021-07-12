@@ -383,7 +383,7 @@ flattenStmt' for@(For generators body) pos detism = do
                                     [Unplaced $ varGet tempNextGen, Unplaced $ varSet tempGen]
                             ]
                             [Unplaced Break]
-                            Nothing -- TODO: Replace Nothing with actual
+                            Nothing -- TODO: Check if we need to replace Nothing with actual
                             Nothing
                     ]
                 )

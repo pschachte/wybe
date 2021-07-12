@@ -1,5 +1,3 @@
-pub type intlist { pub [] | [|](head:int, tail:intlist) }
-
 pub def single_generator use !io {
     ?x = [1, 2, 3]
 
@@ -33,7 +31,7 @@ pub def using_break use !io {
 
     for ?i in x {
         if {
-            i = 3 :: break # TODO: Does not break!
+            i = 3 :: break
         }
         !println(i)
     }
