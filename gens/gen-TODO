@@ -1,0 +1,6 @@
+Clean for-loop code and docs and send pull request (for-loop branch)
+Add a new determinism (NonDet)
+Parse {generator} procs
+Implement { || } and code transformation
+Mode-checker
+Change for-loops to use {generator}

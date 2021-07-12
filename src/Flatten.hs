@@ -310,36 +310,93 @@ flattenStmt' (Loop body defVars) pos detism = do
     body' <- flattenInner True False detism
              (flattenStmts (body ++ [Unplaced Next]) detism)
     emit pos $ Loop body' defVars
+flattenStmt' for@(For generators body) pos detism = do
+    -- For loops are transformed into `do` loops
+    -- E.g. for i in x, j in y {
+    --          <stmts>
+    --      }
+    -- will be transformed into
+    -- ?tempGen1 = x
+    -- ?tempGen2 = y
+    -- do {
+    --     `[|]`(?i, ?tempGen3, tempGen1, ?tempHasNextGen)
+    --      if {
+    --          tempHasNextGen :: ?tempGen1 = tempGen3
+    --          otherwise      :: break
+    --      }
+    --      `[|]`(?j, ?tempGen4, tempGen2, ?tempHasNextGen)
+    --      if {
+    --          tempHasNextGen :: ?tempGen2 = tempGen4
+    --          otherwise      :: break
+    --      }
+    --      
+    --      <stmts>
+    -- }
+    -- OR
+    -- ?tempGen1 = x
+    -- ?tempGen2
+    tempGens <- mapM (const tempVar) generators
+    tempNextGens <- mapM (const tempVar) generators
+    tempHasNextGen <- tempVar
+    logFlatten $ "Generating for " ++ showStmt 4 for
+    -- XXX Should check for input only
+    generators' <- mapM ((head <$>) . flattenPExp . genExp) generators
+    let instrs =
+            zipWith
+            ( \g' g ->
+                ForeignCall
+                    "llvm"
+                    "move"
+                    []
+                    [g', Unplaced $ varSet g]
+            )
+            generators'
+            tempGens
+    mapM_ (emit pos) instrs
+    modify (\s -> s {defdVars = Set.union (Set.fromList tempGens) $ defdVars s})
+    modify (\s -> s {defdVars = Set.union (Set.fromList tempNextGens) $ defdVars s})
+    modify (\s -> s {defdVars = Set.insert tempHasNextGen $ defdVars s})
+    let nextVals =
+            concat $
+            zipWith3
+                ( \generator tempNextGen tempGen ->
+                    [ Unplaced $
+                        ProcCall
+                        []
+                        "[|]"
+                        Nothing
+                        Det
+                        False
+                        [ loopVar generator,
+                          Unplaced $ Var tempNextGen ParamOut Ordinary,
+                          Unplaced $ Var tempGen ParamIn Ordinary,
+                          Unplaced $ Var tempHasNextGen ParamOut Ordinary
+                        ]
+                    , Unplaced $
+                            Cond
+                            (Unplaced $ TestBool $ varGet tempHasNextGen)
+                            [ Unplaced $
+                                ForeignCall
+                                    "llvm"
+                                    "move"
+                                    []
+                                    [Unplaced $ varGet tempNextGen, Unplaced $ varSet tempGen]
+                            ]
+                            [Unplaced Break]
+                            Nothing -- TODO: Check if we need to replace Nothing with actual
+                            Nothing
+                    ]
+                )
+                generators
+                tempNextGens
+                tempGens
+    let generated = Loop (nextVals ++ body) Nothing -- TODO: Replace Nothing
+    logFlatten $ "Generated for: " ++ showStmt 4 generated
+    -- emit pos generated
+    flattenStmt' generated pos detism
 flattenStmt' (UseResources res body) pos detism = do
     body' <- flattenInner False True detism (flattenStmts body detism)
     emit pos $ UseResources res body'
--- flattenStmt' (For itr gen) pos detism = do
---     vars <- flattenPExp gen
---     logFlatten $ "Flattening For " ++ show itr ++ " in " ++ show gen
---     logFlatten $ "  For vars = " ++ show vars
---     case vars of
---         [] -> lift $
---               message Error "'for' generator does not produce a value"
---               (place gen)
---         (_:_:_) -> lift $
---                    message Error "'for' generator has invalid flow" (place gen)
---         [genVar@(Unplaced (Var genVarName direction flowType))] -> do
---             -- XXX not generating the right code until we have polymorphism
---             flattenStmt
---               (Cond (maybePlace (ProcCall [] "[|]" Nothing SemiDet False
---                                  [itr,
---                                   Unplaced $
---                                   Var genVarName ParamOut flowType,
---                                   Unplaced $
---                                   Var genVarName ParamIn flowType])
---                      pos)
---                   []
---                   [maybePlace (ProcCall [] "[]" Nothing SemiDet False
---                                [Unplaced $ Var genVarName ParamIn flowType])
---                     pos,
---                    Unplaced Break]
---               ) pos detism
---         _ -> shouldnt "Generator expression producing unexpected vars"
 flattenStmt' Nop pos _ = emit pos Nop
 flattenStmt' Fail pos _ = emit pos Fail
 flattenStmt' Break pos _ = emit pos Break

@@ -194,6 +194,9 @@ transformStmt tmp (Cond test thn els condVars defVars) pos = do
 transformStmt tmp (Loop body defVars) pos = do
     (body',tmp') <- transformBody tmp body
     return ([maybePlace (Loop body' defVars) pos], tmp')
+transformStmt tmp (For generators body) pos = do
+    (body', tmp') <- transformBody tmp body
+    return ([maybePlace (For generators body') pos], tmp')
 transformStmt tmp (UseResources res body) pos = do
     resTypes <- List.filter (isJust . snd)
                 <$> mapM (canonicaliseResourceSpec pos "use statement") res

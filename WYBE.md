@@ -470,6 +470,14 @@ Iteration is specified with the `do` statement, of the form:
 This executes the enclosed *statements* repeatedly, until a termination
 condition is reached.
 
+Types that implement the cons operator (`[|]`) can be looped over using
+`for` loops. Presently `array` and `list` in the stdlib implement this operator:
+```
+for <outvar1>[, <outvar2>]* in <gen1>[, <gen2>]* { 
+    *statements* 
+}
+```
+
 The enclosed *statements* may include any ordinary Wybe statements, plus any of
 the following:
 

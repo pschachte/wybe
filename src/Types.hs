@@ -1001,7 +1001,7 @@ bodyCalls (pstmt:pstmts) detism = do
         UseResources _ nested -> do
           nested' <- bodyCalls nested detism
           return $ nested' ++ rest
-        -- For _ _ -> shouldnt "bodyCalls: flattening left For stmt"
+        For _ nested -> shouldnt "bodyCalls: flattening left For stmt"
         Break -> return rest
         Next ->  return rest
 
@@ -1676,8 +1676,8 @@ modecheckStmt m name defPos delayed assigned detism
       placedApplyM (modecheckStmt m name defPos [] assigned detism) stmt
     return ([maybePlace (Not (seqToStmt stmt')) pos],
             delayed'++delayed, assigned)
--- modecheckStmt m name defPos typing delayed assigned detism
---     stmt@(For gen stmts) pos = nyi "mode checking For"
+modecheckStmt m name defPos delayed assigned detism
+     stmt@For {} pos = shouldnt "For should not exist here"
 modecheckStmt m name defPos delayed assigned detism
     Break pos = do
     logTyped $ "Mode checking break with assigned=" ++ show assigned
@@ -1941,11 +1941,8 @@ checkStmtTyped name pos stmt@(Loop stmts exitVars) _ppos = do
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
 checkStmtTyped name pos (UseResources _ stmts) _ppos =
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
--- checkStmtTyped name pos (For itr gen) ppos = do
---     checkExpTyped name pos ("for iterator" ++ showMaybeSourcePos ppos) $
---                   content itr
---     checkExpTyped name pos ("for generator" ++ showMaybeSourcePos ppos) $
---                   content itr
+checkStmtTyped name pos For {} ppos =
+    shouldnt "For should not exist here"
 checkStmtTyped _ _ Nop _ = return ()
 checkStmtTyped _ _ Fail _ = return ()
 checkStmtTyped _ _ Break _ = return ()

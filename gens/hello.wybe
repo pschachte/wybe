@@ -1,0 +1,11 @@
+def {test} something(x: int, ?value: int) {
+    if {
+        (x < 5) :: ?value = 3
+        | otherwise :: fail
+    }
+}
+
+if {
+    something(10, ?value) :: !println(value)
+    | otherwise :: !println("Failed")
+}
