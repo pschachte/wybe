@@ -852,7 +852,7 @@ typecheckProcDecl' m pdef = do
                               $ initBindingState pdef
                     logTyped $ "Initialised vars: " ++ show initialised
                     (def',assigned) <-
-                        modecheckStmts m name pos [] initialised detism def
+                        modecheckStmts m name pos initialised detism def
                     logTyped $ "Vars defined by body: " ++ show assigned
                     logTyped $ "Output parameters   : "
                                ++ intercalate ", " (Set.toList outParams)
@@ -1397,8 +1397,6 @@ overloadErr StmtTypings{typingStmt=call,typingArgsTypes=candidates} =
 -- |Given type assignments to variables, resolve modes in a proc body, building
 --  a revised, properly moded body, or indicate a mode error. This must handle
 --  several cases:
---  * Flow direction for function calls are unspecified; they must be assigned,
---    and may need to be delayed if the use appears before the definition.
 --  * Test statements must be handled, determining which stmts in a test context
 --    are actually tests, and reporting an error for tests outside a test
 --    context
@@ -1411,34 +1409,22 @@ overloadErr StmtTypings{typingStmt=call,typingArgsTypes=candidates} =
 --  This code threads a set of assigned variables through, which starts as
 --  the set of in parameter names.  It also threads through a list of
 --  statements postponed because an unknown flow variable is not assigned yet.
-modecheckStmts :: ModSpec -> ProcName -> OptPos
-                 -> [(Set VarName,Placed Stmt)] -> BindingState -> Determinism
+modecheckStmts :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism
                  -> [Placed Stmt] -> Typed ([Placed Stmt], BindingState)
-modecheckStmts _ name pos delayed assigned detism []
-    | not $ List.null delayed =
-        shouldnt $ "modecheckStmts reached end of body with delayed stmts:\n"
-                   ++ show delayed
-    | otherwise = do
-        typeErrors $ detismCheck name pos detism $ bindingDetism assigned
-        return ([],assigned)
-modecheckStmts m name pos delayed assigned detism (pstmt:pstmts) = do
+modecheckStmts _ name pos assigned detism [] = do
+    typeErrors $ detismCheck name pos detism $ bindingDetism assigned
+    return ([],assigned)
+modecheckStmts m name pos assigned detism (pstmt:pstmts) = do
     logTyped $ "Mode check stmt " ++ showStmt 16 (content pstmt)
-    (pstmt',delayed',assigned') <-
-      placedApply (modecheckStmt m name pos delayed assigned detism) pstmt
+    (pstmt',assigned') <-
+        placedApply (modecheckStmt m name pos assigned detism) pstmt
     logTyped $ "Now assigned = " ++ show assigned'
-    logTyped $ "Now delayed  = " ++ show delayed'
-    let (doNow,delayed'')
-            = List.partition
-              (Set.null . (`missingBindings` assigned') . fst)
-              delayed'
-    (pstmts',assigned'') <-
-      modecheckStmts m name pos delayed'' assigned' detism
-        ((snd <$> doNow) ++ pstmts)
+    (pstmts',assigned'') <- modecheckStmts m name pos assigned' detism pstmts
     return (pstmt'++pstmts',assigned'')
 
 
 -- |Mode check a single statement, returning a list of moded statements,
---  plus a list of delayed statements, a set of variables bound by this
+--  plus a set of variables bound by this
 --  statement, and a list of errors.  When this is called, all variable
 --  and type variable types have already been established in the Typed monad.
 --
@@ -1462,11 +1448,9 @@ modecheckStmts m name pos delayed assigned detism (pstmt:pstmts) = do
 --    In case there are multiple modes that match one of those criteria,
 --    select the first that matches.
 
-modecheckStmt :: ModSpec -> ProcName -> OptPos -> [(Set VarName,Placed Stmt)]
-                 -> BindingState -> Determinism -> Stmt -> OptPos
-                 -> Typed ([Placed Stmt], [(Set VarName,Placed Stmt)],
-                              BindingState)
-modecheckStmt m name defPos delayed assigned detism
+modecheckStmt :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism
+              -> Stmt -> OptPos -> Typed ([Placed Stmt], BindingState)
+modecheckStmt m name defPos assigned detism
     stmt@(ProcCall cmod cname _ _ resourceful args) pos = do
     logTyped $ "Mode checking call   : " ++ show stmt
     logTyped $ "    with assigned    : " ++ show assigned
@@ -1483,15 +1467,15 @@ modecheckStmt m name defPos delayed assigned detism
         then do
             logTyped $ "Unpreventable mode errors: " ++ show flowErrs
             typeErrors flowErrs
-            return ([],delayed,assigned)
+            return ([],assigned)
         else case (cmod, cname, actualModes, args) of
           -- Special cases to handle = as assignment when one argument is
           -- known to be defined and the other is an output or unknown.
           ([], "=", [(ParamIn,True,_),(ParamOut,_,_)],[arg1,arg2]) ->
-                modecheckStmt m name defPos delayed assigned detism
+                modecheckStmt m name defPos assigned detism
                     (ForeignCall "llvm" "move" [] [arg1, arg2]) pos
           ([], "=", [(ParamOut,_,_),(ParamIn,True,_)],[arg1,arg2]) ->
-                modecheckStmt m name defPos delayed assigned detism
+                modecheckStmt m name defPos assigned detism
                     (ForeignCall "llvm" "move" [] [arg2, arg1]) pos
           _ -> do
             typeMatches <- (fst <$>) . catOKs <$> mapM
@@ -1541,20 +1525,18 @@ modecheckStmt m name defPos delayed assigned detism
                         (assigned {bindingVars =
                             Set.union matchResources <$> bindingVars assigned })
                   logTyped $ "New instr = " ++ show stmt'
-                  return ([maybePlace stmt' pos],delayed,assigned')
+                  return ([maybePlace stmt' pos],assigned')
                 [] -> if List.any (delayModeMatch actualModes) modeMatches
                       then do
                         logTyped $ "delaying call: " ++ ": " ++ show stmt
                         let vars = Set.fromList $ catMaybes
                                    $ sel3 <$> actualModes
-                        let delayed' = (vars,maybePlace stmt pos):delayed
-                        logTyped $ "delayed = " ++ show delayed'
-                        return ([],delayed',assigned)
+                        return ([],assigned)
                       else do
                         logTyped $ "Mode errors in call:  " ++ show flowErrs
                         typeError $ ReasonUndefinedFlow cname pos
-                        return ([],delayed,assigned)
-modecheckStmt m name defPos delayed assigned detism
+                        return ([],assigned)
+modecheckStmt m name defPos assigned detism
     stmt@(ForeignCall lang cname flags args) pos = do
     logTyped $ "Mode checking foreign call " ++ show stmt
     logTyped $ "    with assigned " ++ show assigned
@@ -1567,7 +1549,7 @@ modecheckStmt m name defPos delayed assigned detism
         then do
             logTyped "delaying foreign call"
             typeErrors flowErrs
-            return ([],delayed,assigned)
+            return ([],assigned)
         else do
             let typeflows = List.zipWith TypeFlow actualTypes
                             $ sel1 <$> actualModes
@@ -1588,19 +1570,19 @@ modecheckStmt m name defPos delayed assigned detism
             let nextDetism = determinismSeq (bindingDetism assigned) stmtDetism
             let assigned' = assigned {bindingDetism=nextDetism}
             logTyped $ "New instr = " ++ show stmt'
-            return ([maybePlace stmt' pos],delayed,
+            return ([maybePlace stmt' pos],
                     bindingStateSeq stmtDetism impurity vars assigned)
-modecheckStmt _ _ _ delayed assigned _ Nop pos = do
+modecheckStmt _ _ _ assigned _ Nop pos = do
     logTyped "Mode checking Nop"
-    return ([maybePlace Nop pos], delayed, assigned)
-modecheckStmt _ _ _ delayed assigned _ Fail pos = do
+    return ([maybePlace Nop pos], assigned)
+modecheckStmt _ _ _ assigned _ Fail pos = do
     logTyped "Mode checking Fail"
-    return ([maybePlace Fail pos], delayed, forceFailure assigned)
-modecheckStmt m name defPos delayed assigned detism
+    return ([maybePlace Fail pos], forceFailure assigned)
+modecheckStmt m name defPos assigned detism
     stmt@(Cond tstStmt thnStmts elsStmts _ _) pos = do
     logTyped $ "Mode checking conditional " ++ show stmt
-    (tstStmt', delayed', assigned1) <-
-        placedApplyM (modecheckStmt m name defPos delayed assigned SemiDet)
+    (tstStmt', assigned1) <-
+        placedApplyM (modecheckStmt m name defPos assigned SemiDet)
         tstStmt
     logTyped $ "Assigned by test: " ++ show assigned1
     let condVars = maybe [] Set.toAscList $ bindingVars assigned1
@@ -1608,19 +1590,19 @@ modecheckStmt m name defPos delayed assigned detism
     let condBindings = Map.fromAscList $ zip condVars condTypes
     logTyped $ "Assigned by test: " ++ show assigned1
     (thnStmts', assigned2) <-
-        modecheckStmts m name defPos [] (forceDet assigned1) detism thnStmts
+        modecheckStmts m name defPos (forceDet assigned1) detism thnStmts
     logTyped $ "Assigned by then branch: " ++ show assigned2
     (elsStmts', assigned3) <-
-        modecheckStmts m name defPos [] assigned detism elsStmts
+        modecheckStmts m name defPos assigned detism elsStmts
     logTyped $ "Assigned by else branch: " ++ show assigned3
     if mustSucceed assigned1 -- is condition guaranteed to succeed?
       then do
         logTyped $ "Assigned by succeeding conditional: " ++ show assigned2
-        return (tstStmt'++thnStmts', delayed'++delayed, assigned2)
+        return (tstStmt'++thnStmts', assigned2)
       else if mustFail assigned1 -- is condition guaranteed to fail?
       then do
         logTyped $ "Assigned by failing conditional: " ++ show assigned3
-        return (tstStmt'++elsStmts', delayed'++delayed, assigned3)
+        return (tstStmt'++elsStmts', assigned3)
       else do
         let finalAssigned = assigned2 `joinState` assigned3
         logTyped $ "Assigned by conditional: " ++ show finalAssigned
@@ -1633,8 +1615,8 @@ modecheckStmt m name defPos delayed assigned detism
                         (if isJust (bindingVars finalAssigned)
                          then Just bindings else Nothing)
           )
-            pos], delayed'++delayed, finalAssigned)
-modecheckStmt m name defPos delayed assigned detism
+            pos], finalAssigned)
+modecheckStmt m name defPos assigned detism
     stmt@(TestBool exp) pos = do
     logTyped $ "Mode checking test " ++ show exp
     let exp' = [maybePlace
@@ -1643,56 +1625,54 @@ modecheckStmt m name defPos delayed assigned detism
                              (maybePlace exp pos)))
                  pos]
     case expIsConstant exp of
-      Just (IntValue 0) -> return (exp', delayed, forceFailure assigned)
-      Just (IntValue 1) -> return ([maybePlace Nop pos], delayed, assigned)
-      _                 -> return (exp', delayed,
+      Just (IntValue 0) -> return (exp', forceFailure assigned)
+      Just (IntValue 1) -> return ([maybePlace Nop pos], assigned)
+      _                 -> return (exp',
                                    bindingStateSeq SemiDet Pure Set.empty
                                    assigned)
-modecheckStmt m name defPos delayed assigned detism
+modecheckStmt m name defPos assigned detism
     stmt@(Loop stmts _) pos = do
     logTyped $ "Mode checking loop " ++ show stmt
     (stmts', assigned') <-
-      modecheckStmts m name defPos [] assigned detism stmts
+      modecheckStmts m name defPos assigned detism stmts
     logTyped $ "Assigned by loop: " ++ show assigned'
     vars <- typeMapFromSet $ bindingBreakVars assigned'
     logTyped $ "Loop exit vars: " ++ show vars
-    return ([maybePlace (Loop stmts' vars) pos], delayed, assigned')
-modecheckStmt m name defPos delayed assigned detism
+    return ([maybePlace (Loop stmts' vars) pos], assigned')
+modecheckStmt m name defPos assigned detism
     stmt@(UseResources resources stmts) pos = do
     logTyped $ "Mode checking use ... in stmt " ++ show stmt
-    (stmts', assigned') <- modecheckStmts m name defPos [] assigned detism stmts
-    return ([maybePlace (UseResources resources stmts') pos],
-            delayed, assigned')
+    (stmts', assigned') <- modecheckStmts m name defPos assigned detism stmts
+    return ([maybePlace (UseResources resources stmts') pos], assigned')
 -- XXX Need to implement these correctly:
-modecheckStmt m name defPos delayed assigned detism
+modecheckStmt m name defPos assigned detism
     stmt@(And stmts) pos = do
     logTyped $ "Mode checking conjunction " ++ show stmt
-    (stmts', assigned') <- modecheckStmts m name defPos [] assigned detism stmts
-    return ([maybePlace (And stmts') pos], delayed, assigned')
-modecheckStmt m name defPos delayed assigned detism
+    (stmts', assigned') <- modecheckStmts m name defPos assigned detism stmts
+    return ([maybePlace (And stmts') pos], assigned')
+modecheckStmt m name defPos assigned detism
     stmt@(Or stmts _) pos = do
     logTyped $ "Mode checking disjunction " ++ show stmt
     -- XXX must mode check individually and join the resulting states
-    (stmts', assigned') <- modecheckStmts m name defPos [] assigned detism stmts
+    (stmts', assigned') <- modecheckStmts m name defPos assigned detism stmts
     vars <- typeMapFromSet $ bindingVars assigned'
-    return ([maybePlace (Or stmts' vars) pos], delayed, assigned')
-modecheckStmt m name defPos delayed assigned detism
+    return ([maybePlace (Or stmts' vars) pos], assigned')
+modecheckStmt m name defPos assigned detism
     (Not stmt) pos = do
     logTyped $ "Mode checking negation " ++ show stmt
-    (stmt', delayed', _) <-
-      placedApplyM (modecheckStmt m name defPos [] assigned detism) stmt
-    return ([maybePlace (Not (seqToStmt stmt')) pos],
-            delayed'++delayed, assigned)
--- modecheckStmt m name defPos typing delayed assigned detism
+    (stmt', _) <-
+        placedApplyM (modecheckStmt m name defPos assigned detism) stmt
+    return ([maybePlace (Not (seqToStmt stmt')) pos], assigned)
+-- modecheckStmt m name defPos typing assigned detism
 --     stmt@(For gen stmts) pos = nyi "mode checking For"
-modecheckStmt m name defPos delayed assigned detism
+modecheckStmt m name defPos assigned detism
     Break pos = do
     logTyped $ "Mode checking break with assigned=" ++ show assigned
-    return ([maybePlace Break pos],delayed,bindingStateAfterBreak assigned)
-modecheckStmt m name defPos delayed assigned detism
+    return ([maybePlace Break pos],bindingStateAfterBreak assigned)
+modecheckStmt m name defPos assigned detism
     Next pos = do
     logTyped $ "Mode checking continue with assigned=" ++ show assigned
-    return ([maybePlace Next pos],delayed,bindingStateAfterNext assigned)
+    return ([maybePlace Next pos],bindingStateAfterNext assigned)
 
 
 forceOut :: Exp -> Exp
