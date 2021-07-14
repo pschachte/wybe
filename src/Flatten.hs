@@ -397,6 +397,9 @@ flattenExp expr@(StringValue _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos
 flattenExp expr@(CharValue _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos
+flattenExp expr@(Var "_" ParamIn _) ty castFrom pos = do
+    dummyName <- tempVar
+    return $ typeAndPlace (Var dummyName ParamOut Ordinary) AnyType castFrom pos
 flattenExp expr@(Var name dir flowType) ty castFrom pos = do
     logFlatten $ "  Flattening arg " ++ show expr
     defd <- gets (Set.member name . defdVars)

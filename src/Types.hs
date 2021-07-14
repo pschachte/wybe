@@ -1355,15 +1355,21 @@ assignedIn :: VarName -> BindingState -> Bool
 assignedIn var bstate = maybe True (var `elem`) $ bindingVars bstate
 
 
+-- |Return a list of (actual,formal) argument mode pairs.
+actualFormalModes :: [(FlowDirection,Bool,Maybe VarName)] -> ProcInfo
+                  -> [(FlowDirection,FlowDirection)]
+actualFormalModes modes ProcInfo{procInfoArgs=typModes} =
+    zip (typeFlowMode <$> typModes) (sel1 <$> modes)
+
+
 -- |Match up the argument modes of a call with the available parameter
 -- modes of the callee.  Determine if all actual arguments are instantiated
 -- if the corresponding parameter is an input.
 matchModeList :: [(FlowDirection,Bool,Maybe VarName)]
               -> ProcInfo -> Bool
-matchModeList modes ProcInfo{procInfoArgs=typModes}
+matchModeList modes procinfo
     -- Check that no param is in where actual is out
-    = (ParamIn,ParamOut) `notElem` argModes
-    where argModes = zip (typeFlowMode <$> typModes) (sel1 <$> modes)
+    = (ParamIn,ParamOut) `notElem` actualFormalModes modes procinfo
 
 
 -- |Match up the argument modes of a call with the available parameter
@@ -1371,10 +1377,10 @@ matchModeList modes ProcInfo{procInfoArgs=typModes}
 -- proc mode, treating a FlowUnknown argument as ParamOut.
 exactModeMatch :: [(FlowDirection,Bool,Maybe VarName)]
                -> ProcInfo -> Bool
-exactModeMatch modes ProcInfo{procInfoArgs=typModes}
+exactModeMatch modes procinfo
     = all (\(formal,actual) -> formal == actual
                                || formal == ParamOut && actual == FlowUnknown)
-      $ zip (typeFlowMode <$> typModes) (sel1 <$> modes)
+      $ actualFormalModes modes procinfo
 
 
 -- |Match up the argument modes of a call with the available parameter
@@ -1485,25 +1491,25 @@ modecheckStmt m name defPos delayed assigned detism
             logTyped $ "Unpreventable mode errors: " ++ show flowErrs
             typeErrors flowErrs
             return ([],delayed,assigned)
-        else case (cmod, cname, actualModes) of
+        else case (cmod, cname, actualModes, args) of
           -- Special cases to handle = as assignment when one argument is
           -- known to be defined and the other is an output or unknown.
-          ([], "=", [(ParamIn,True,_),(ParamOut,_,_)]) ->
+          ([], "=", [(ParamIn,True,_),(ParamOut,_,_)],[arg1,arg2]) ->
                 modecheckStmt m name defPos delayed assigned detism
-                    (ForeignCall "llvm" "move" [] [args!!0, args!!1]) pos
-          ([], "=", [(ParamIn,True,_),(FlowUnknown,_,_)]) ->
-                modecheckStmt m name defPos delayed assigned detism
-                    (ForeignCall "llvm" "move" []
-                        [args!!0, forceOut <$> args!!1]) pos
-          ([], "=", [(ParamOut,_,_),(ParamIn,True,_)]) ->
-                modecheckStmt m name defPos delayed assigned detism
-                    (ForeignCall "llvm" "move" [] [args!!1, args!!0]) pos
-          ([], "=", [(FlowUnknown,_,_),(ParamIn,True,_)]) ->
+                    (ForeignCall "llvm" "move" [] [arg1, arg2]) pos
+          ([], "=", [(ParamIn,True,_),(FlowUnknown,_,_)],[arg1,arg2]) ->
                 modecheckStmt m name defPos delayed assigned detism
                     (ForeignCall "llvm" "move" []
-                        [args!!1, forceOut <$> args!!0]) pos
+                        [arg1, forceOut <$> arg2]) pos
+          ([], "=", [(ParamOut,_,_),(ParamIn,True,_)],[arg1,arg2]) ->
+                modecheckStmt m name defPos delayed assigned detism
+                    (ForeignCall "llvm" "move" [] [arg2, arg1]) pos
+          ([], "=", [(FlowUnknown,_,_),(ParamIn,True,_)],[arg1,arg2]) ->
+                modecheckStmt m name defPos delayed assigned detism
+                    (ForeignCall "llvm" "move" []
+                        [arg2, forceOut <$> arg1]) pos
           _ -> do
-            typeMatches <- ((fst <$>) . catOKs) <$> mapM
+            typeMatches <- (fst <$>) . catOKs <$> mapM
                         (matchTypeList name cname pos actualTypes detism)
                         callInfos
             logTyped $ "Type-correct modes   : " ++ show typeMatches
