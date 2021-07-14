@@ -636,10 +636,6 @@ expMode' _ (IntValue _) = (ParamIn, True, Nothing)
 expMode' _ (FloatValue _) = (ParamIn, True, Nothing)
 expMode' _ (StringValue _) = (ParamIn, True, Nothing)
 expMode' _ (CharValue _) = (ParamIn, True, Nothing)
-expMode' assigned (Var name FlowUnknown _)
-    = if name `assignedIn` assigned
-      then (ParamIn, True, Nothing)
-      else (FlowUnknown, False, Just name)
 expMode' assigned (Var name flow _) =
     (flow, name `assignedIn` assigned, Nothing)
 expMode' assigned (Typed expr _ _) = expMode' assigned expr
@@ -1378,9 +1374,7 @@ matchModeList modes procinfo
 exactModeMatch :: [(FlowDirection,Bool,Maybe VarName)]
                -> ProcInfo -> Bool
 exactModeMatch modes procinfo
-    = all (\(formal,actual) -> formal == actual
-                               || formal == ParamOut && actual == FlowUnknown)
-      $ actualFormalModes modes procinfo
+    = all (uncurry (==)) $ actualFormalModes modes procinfo
 
 
 -- |Match up the argument modes of a call with the available parameter
@@ -1390,7 +1384,6 @@ delayModeMatch :: [(FlowDirection,Bool,Maybe VarName)]
                -> ProcInfo -> Bool
 delayModeMatch modes ProcInfo{procInfoArgs=typModes}
     = all (\(formal,actual) -> formal == actual
-                               || actual == FlowUnknown
                                && (formal == ParamIn || formal == ParamOut))
       $ zip (typeFlowMode <$> typModes) (sel1 <$> modes)
 
@@ -1497,17 +1490,9 @@ modecheckStmt m name defPos delayed assigned detism
           ([], "=", [(ParamIn,True,_),(ParamOut,_,_)],[arg1,arg2]) ->
                 modecheckStmt m name defPos delayed assigned detism
                     (ForeignCall "llvm" "move" [] [arg1, arg2]) pos
-          ([], "=", [(ParamIn,True,_),(FlowUnknown,_,_)],[arg1,arg2]) ->
-                modecheckStmt m name defPos delayed assigned detism
-                    (ForeignCall "llvm" "move" []
-                        [arg1, forceOut <$> arg2]) pos
           ([], "=", [(ParamOut,_,_),(ParamIn,True,_)],[arg1,arg2]) ->
                 modecheckStmt m name defPos delayed assigned detism
                     (ForeignCall "llvm" "move" [] [arg2, arg1]) pos
-          ([], "=", [(FlowUnknown,_,_),(ParamIn,True,_)],[arg1,arg2]) ->
-                modecheckStmt m name defPos delayed assigned detism
-                    (ForeignCall "llvm" "move" []
-                        [arg2, forceOut <$> arg1]) pos
           _ -> do
             typeMatches <- (fst <$>) . catOKs <$> mapM
                         (matchTypeList name cname pos actualTypes detism)
@@ -1992,18 +1977,9 @@ checkArgTyped callerName callerPos calleeName callPos (n,arg) =
 checkExpTyped :: ProcName -> OptPos -> String -> Exp ->
                  Compiler ()
 checkExpTyped callerName callerPos msg (Typed expr ty _)
-    | ty /= AnyType = checkExpModed callerName callerPos msg expr
+    | ty /= AnyType = return ()
 checkExpTyped callerName callerPos msg _ =
     reportUntyped callerName callerPos msg
-
-
-checkExpModed :: ProcName -> OptPos -> String -> Exp
-              -> Compiler ()
-checkExpModed callerName callerPos msg (Var _ FlowUnknown _)
-    = liftIO $ putStrLn $ "Internal error: In " ++ callerName ++
-      showMaybeSourcePos callerPos ++ ", " ++ msg ++ " left with FlowUnknown"
-checkExpModed _ _ _ _ = return ()
-
 
 
 reportUntyped :: ProcName -> OptPos -> String -> Compiler ()

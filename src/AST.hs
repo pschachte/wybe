@@ -513,7 +513,7 @@ updateLoadedModuleImpln :: (ModuleImplementation -> ModuleImplementation) ->
                            ModSpec -> Compiler ()
 updateLoadedModuleImpln updater =
     updateLoadedModule (\m -> m { modImplementation =
-                                      fmap updater $ modImplementation m })
+                                      updater <$> modImplementation m })
 
 
 -- |Return the ModuleImplementation of the specified module.  An error
@@ -547,8 +547,7 @@ updateImplementations :: (ModuleImplementation -> ModuleImplementation) ->
                          Compiler ()
 updateImplementations updater = do
     updateModules (Map.map (\m -> m { modImplementation =
-                                           (fmap updater) $
-                                           modImplementation m }))
+                                           updater <$> modImplementation m }))
 
 -- |Return the module currently being compiled.  The argument says where
 -- this function is called from for error-reporting purposes.
@@ -1119,14 +1118,14 @@ getProcPrimProto pspec = do
     case procImpln def of
         impln@ProcDefPrim{ procImplnProcSpec = pspec2, procImplnProto = proto}
             | pspec == pspec2 -> return proto
-            | and [ procSpecMod pspec == procSpecMod pspec2, 
-                    procSpecName pspec == procSpecName pspec2, 
+            | and [ procSpecMod pspec == procSpecMod pspec2,
+                    procSpecName pspec == procSpecName pspec2,
                     procSpecID pspec == procSpecID pspec2 ] -> do
                 let impln' = impln{procImplnProcSpec = pspec}
                 updateProcDef (\_ -> def{procImpln = impln'}) pspec
                 return proto
-            | otherwise -> 
-                shouldnt $ "get compiled proc but procSpec not mathcing: " ++ 
+            | otherwise ->
+                shouldnt $ "get compiled proc but procSpec not mathcing: " ++
                            show pspec ++ ", " ++ show pspec2
         _ -> shouldnt $ "get prim proto of uncompiled proc " ++ show pspec
 
@@ -1834,9 +1833,9 @@ showSuperProc (SuperprocIs super) =
 data ProcImpln
     = ProcDefSrc [Placed Stmt]           -- ^defn in source-like form
     | ProcDefPrim {
-        procImplnProcSpec :: ProcSpec, 
-        procImplnProto :: PrimProto, 
-        procImplnBody :: ProcBody,       
+        procImplnProcSpec :: ProcSpec,
+        procImplnProto :: PrimProto,
+        procImplnBody :: ProcBody,
         procImplnAnalysis :: ProcAnalysis, -- ^defn in LPVM (clausal) form
         procImplnSpeczBodies :: SpeczProcBodies
     }
@@ -1989,7 +1988,7 @@ instance Show ProcImpln where
                             Just body -> showBlock 4 body)
                 |> intercalate "\n"
         in
-            show pSpec ++ "\n" ++ show proto ++ ":" ++ show analysis 
+            show pSpec ++ "\n" ++ show proto ++ ":" ++ show analysis
                     ++ showBlock 4 body ++ speczBodies
 
 
@@ -2357,7 +2356,7 @@ data ParamInfo = ParamInfo {
     } deriving (Eq,Generic)
 
 -- |A dataflow direction:  in, out, both, or neither.
-data FlowDirection = ParamIn | ParamOut | ParamInOut | FlowUnknown
+data FlowDirection = ParamIn | ParamOut | ParamInOut
                    deriving (Show,Eq,Ord,Generic)
 
 -- |A primitive dataflow direction:  in or out
@@ -2370,14 +2369,12 @@ flowsIn :: FlowDirection -> Bool
 flowsIn ParamIn    = True
 flowsIn ParamOut   = False
 flowsIn ParamInOut = True
-flowsIn FlowUnknown = shouldnt "checking if unknown flow direction flows in"
 
 -- |Does the specified flow direction flow out?
 flowsOut :: FlowDirection -> Bool
 flowsOut ParamIn = False
 flowsOut ParamOut = True
 flowsOut ParamInOut = True
-flowsOut FlowUnknown = shouldnt "checking if unknown flow direction flows out"
 
 
 -- |Source program statements.  These will be normalised into Prims.
@@ -3063,7 +3060,6 @@ flowPrefix :: FlowDirection -> String
 flowPrefix ParamIn    = ""
 flowPrefix ParamOut   = "?"
 flowPrefix ParamInOut = "!"
-flowPrefix FlowUnknown = "???"
 
 -- |How to show a *primitive* dataflow direction.
 primFlowPrefix :: PrimFlow -> String
