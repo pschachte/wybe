@@ -3169,6 +3169,7 @@ showStmt indent (UseResources resources stmts) =
     "use " ++ intercalate ", " (List.map show resources) ++ " in"
     ++ showBody (indent + 4) stmts
     ++ startLine indent ++ "}"
+showStmt _ Fail = "fail"
 showStmt _ Nop = "pass"
 showStmt indent (For generators body) =
   "for "
