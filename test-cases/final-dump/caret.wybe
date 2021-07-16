@@ -16,20 +16,20 @@ pub def expand_region(!reg:region, point:position) {
     !reg^upper_right^y = max(reg^upper_right^y, point^y)
 }
 
-?lst = [position(0,1), position(10,12)]
+?reg = region(position(0,1), position(10,12))
 
-if { lst = [_,position(?ten,_)] ::
+if { reg = region(_,position(?ten,12)) ::
         !print("ten = ")
         !println(ten)
-   | println("woops!")
+   | !println("woops!")
 }
 
-if { incr(!lst^tail^head^x) :: pass
+if { incr(!reg^upper_right^x) :: pass
    | !error("couldn't udpate x of second position")
 }
 
-# if { lst = [_,position(?ten,_)] ::
-#         !print("now ten = ")
-#         !println(ten)
-#    | println("woops!")
-# }
+if { reg = region(_,position(?ten,_)) ::
+        !print("now ten = ")
+        !println(ten)
+   | !println("woops!")
+}

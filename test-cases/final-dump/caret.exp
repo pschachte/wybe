@@ -4,13 +4,36 @@ AFTER EVERYTHING:
   representation  : (not a type)
   public submods  : 
   public resources: 
-  public procs    : caret.expand_region<0>
+  public procs    : caret.<0>
+                    caret.expand_region<0>
   imports         : use caret.region
                     use position
                     use wybe
   resources       : 
   submodules      : caret.region
   procs           : 
+
+*main* > public (0 calls)
+0: caret.<0>
+(io#0:wybe.phantom, ?io#3:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: []
+ MultiSpeczDepInfo: [(8,(caret.gen$1<0>,fromList [NonAliasedParamCond 1 []]))]
+    foreign lpvm alloc(16:wybe.int, ?tmp$13#0:position.position)
+    foreign lpvm mutate(~tmp$13#0:position.position, ?tmp$14#0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int)
+    foreign lpvm mutate(~tmp$14#0:position.position, ?tmp$1#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int)
+    foreign lpvm alloc(16:wybe.int, ?tmp$17#0:position.position)
+    foreign lpvm mutate(~tmp$17#0:position.position, ?tmp$18#0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int)
+    foreign lpvm mutate(~tmp$18#0:position.position, ?tmp$2#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 12:wybe.int)
+    foreign lpvm alloc(16:wybe.int, ?tmp$21#0:caret.region)
+    foreign lpvm mutate(~tmp$21#0:caret.region, ?tmp$22#0:caret.region, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$1#0:position.position)
+    foreign lpvm mutate(~tmp$22#0:caret.region, ?tmp$23#0:caret.region, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp$2#0:position.position)
+    foreign lpvm access(~tmp$2#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?ten#0:wybe.int)
+    foreign c print_string("ten = ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign c print_int(~ten#0:wybe.int, ~#io#1:wybe.phantom, ?tmp$32#0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$32#0:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
+    caret.gen$1<0>[6dacb8fd25](~io#2:wybe.phantom, ~tmp$23#0:caret.region, _:caret.region, _:position.position, _:position.position, ?io#3:wybe.phantom) #8
+
 
 expand_region > public (0 calls)
 0: caret.expand_region<0>
@@ -38,6 +61,30 @@ expand_region(reg#0:caret.region, ?reg#4:caret.region, point#0:position.position
     foreign lpvm {noalias} mutate(~tmp$10#1:position.position, ?%tmp$15#1:position.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$16#0:wybe.int)
     foreign lpvm mutate(~%reg#3:caret.region, ?%reg#4:caret.region, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$15#1:position.position)
 
+
+gen$1 > (2 calls)
+0: caret.gen$1<0>[6dacb8fd25]
+gen$1(io#0:wybe.phantom, reg#0:caret.region, [tmp$0#0:caret.region], [tmp$1#0:position.position], [tmp$2#0:position.position], ?io#2:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: [InterestingUnaliased 1]
+    foreign lpvm access(~reg#0:caret.region, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$6#0:position.position)
+    foreign lpvm access(tmp$6#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.int)
+    foreign llvm add(~%tmp$5#0:wybe.int, 1:wybe.int, ?%tmp$5#1:wybe.int) @int:nn:nn
+    foreign lpvm {noalias} mutate(~%tmp$6#0:position.position, ?%tmp$6#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$5#1:wybe.int)
+    foreign lpvm access(~tmp$6#1:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?ten#0:wybe.int)
+    foreign c print_string("now ten = ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign c print_int(~ten#0:wybe.int, ~#io#1:wybe.phantom, ?tmp$23#0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$23#0:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
+ [6dacb8fd25] [NonAliasedParam 1] :
+    foreign lpvm access(~reg#0:caret.region, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$6#0:position.position)
+    foreign lpvm access(tmp$6#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.int)
+    foreign llvm add(~%tmp$5#0:wybe.int, 1:wybe.int, ?%tmp$5#1:wybe.int) @int:nn:nn
+    foreign lpvm {noalias} mutate(~%tmp$6#0:position.position, ?%tmp$6#1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$5#1:wybe.int)
+    foreign lpvm access(~tmp$6#1:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?ten#0:wybe.int)
+    foreign c print_string("now ten = ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign c print_int(~ten#0:wybe.int, ~#io#1:wybe.phantom, ?tmp$23#0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$23#0:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
+
   LLVM code       :
 
 ; ModuleID = 'caret'
@@ -46,10 +93,28 @@ expand_region(reg#0:caret.region, ?reg#4:caret.region, point#0:position.position
  
 
 
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_int(i64)    
+
+
+declare external ccc  void @print_string(i64)    
+
+
+@caret.28 =    constant [7 x i8] c"ten = \00"
+
+
 declare external fastcc  i64 @"wybe.int.max<0>"(i64, i64)    
 
 
 declare external fastcc  i64 @"wybe.int.min<0>"(i64, i64)    
+
+
+@caret.144 =    constant [11 x i8] c"now ten = \00"
+
+
+@caret.158 =    constant [11 x i8] c"now ten = \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -58,125 +123,224 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external fastcc  i64 @"caret.expand_region<0>"(i64  %"reg#0", i64  %"point#0")    {
+define external fastcc  void @"caret.<0>"()    {
 entry:
-  %1 = inttoptr i64 %"reg#0" to i64* 
-  %2 = getelementptr  i64, i64* %1, i64 0 
-  %3 = load  i64, i64* %2 
+  %1 = trunc i64 16 to i32  
+  %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
+  %3 = ptrtoint i8* %2 to i64 
   %4 = inttoptr i64 %3 to i64* 
   %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = inttoptr i64 %"point#0" to i64* 
+  store  i64 0, i64* %5 
+  %6 = add   i64 %3, 8 
+  %7 = inttoptr i64 %6 to i64* 
   %8 = getelementptr  i64, i64* %7, i64 0 
-  %9 = load  i64, i64* %8 
-  %"1$tmp$1#0" = tail call fastcc  i64  @"wybe.int.min<0>"(i64  %6, i64  %9)  
-  %10 = trunc i64 16 to i32  
-  %11 = tail call ccc  i8*  @wybe_malloc(i32  %10)  
-  %12 = ptrtoint i8* %11 to i64 
-  %13 = inttoptr i64 %12 to i8* 
-  %14 = inttoptr i64 %3 to i8* 
-  %15 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %13, i8*  %14, i32  %15, i32  8, i1  0)  
-  %16 = inttoptr i64 %12 to i64* 
-  %17 = getelementptr  i64, i64* %16, i64 0 
-  store  i64 %"1$tmp$1#0", i64* %17 
-  %18 = trunc i64 16 to i32  
-  %19 = tail call ccc  i8*  @wybe_malloc(i32  %18)  
-  %20 = ptrtoint i8* %19 to i64 
-  %21 = inttoptr i64 %20 to i8* 
-  %22 = inttoptr i64 %"reg#0" to i8* 
-  %23 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %21, i8*  %22, i32  %23, i32  8, i1  0)  
-  %24 = inttoptr i64 %20 to i64* 
-  %25 = getelementptr  i64, i64* %24, i64 0 
-  store  i64 %12, i64* %25 
-  %26 = add   i64 %12, 8 
-  %27 = inttoptr i64 %26 to i64* 
-  %28 = getelementptr  i64, i64* %27, i64 0 
-  %29 = load  i64, i64* %28 
-  %30 = add   i64 %"point#0", 8 
-  %31 = inttoptr i64 %30 to i64* 
-  %32 = getelementptr  i64, i64* %31, i64 0 
-  %33 = load  i64, i64* %32 
-  %"1$tmp$6#0" = tail call fastcc  i64  @"wybe.int.min<0>"(i64  %29, i64  %33)  
-  %34 = trunc i64 16 to i32  
-  %35 = tail call ccc  i8*  @wybe_malloc(i32  %34)  
-  %36 = ptrtoint i8* %35 to i64 
-  %37 = inttoptr i64 %36 to i8* 
-  %38 = inttoptr i64 %12 to i8* 
+  store  i64 1, i64* %8 
+  %9 = trunc i64 16 to i32  
+  %10 = tail call ccc  i8*  @wybe_malloc(i32  %9)  
+  %11 = ptrtoint i8* %10 to i64 
+  %12 = inttoptr i64 %11 to i64* 
+  %13 = getelementptr  i64, i64* %12, i64 0 
+  store  i64 10, i64* %13 
+  %14 = add   i64 %11, 8 
+  %15 = inttoptr i64 %14 to i64* 
+  %16 = getelementptr  i64, i64* %15, i64 0 
+  store  i64 12, i64* %16 
+  %17 = trunc i64 16 to i32  
+  %18 = tail call ccc  i8*  @wybe_malloc(i32  %17)  
+  %19 = ptrtoint i8* %18 to i64 
+  %20 = inttoptr i64 %19 to i64* 
+  %21 = getelementptr  i64, i64* %20, i64 0 
+  store  i64 %3, i64* %21 
+  %22 = add   i64 %19, 8 
+  %23 = inttoptr i64 %22 to i64* 
+  %24 = getelementptr  i64, i64* %23, i64 0 
+  store  i64 %11, i64* %24 
+  %25 = inttoptr i64 %11 to i64* 
+  %26 = getelementptr  i64, i64* %25, i64 0 
+  %27 = load  i64, i64* %26 
+  %29 = ptrtoint i8* getelementptr inbounds ([7 x i8], [7 x i8]* @caret.28, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %29)  
+  tail call ccc  void  @print_int(i64  %27)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"caret.gen$1<0>[6dacb8fd25]"(i64  %19)  
+  ret void 
+}
+
+
+define external fastcc  i64 @"caret.expand_region<0>"(i64  %"reg#0", i64  %"point#0")    {
+entry:
+  %30 = inttoptr i64 %"reg#0" to i64* 
+  %31 = getelementptr  i64, i64* %30, i64 0 
+  %32 = load  i64, i64* %31 
+  %33 = inttoptr i64 %32 to i64* 
+  %34 = getelementptr  i64, i64* %33, i64 0 
+  %35 = load  i64, i64* %34 
+  %36 = inttoptr i64 %"point#0" to i64* 
+  %37 = getelementptr  i64, i64* %36, i64 0 
+  %38 = load  i64, i64* %37 
+  %"1$tmp$1#0" = tail call fastcc  i64  @"wybe.int.min<0>"(i64  %35, i64  %38)  
   %39 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %37, i8*  %38, i32  %39, i32  8, i1  0)  
-  %40 = add   i64 %36, 8 
-  %41 = inttoptr i64 %40 to i64* 
-  %42 = getelementptr  i64, i64* %41, i64 0 
-  store  i64 %"1$tmp$6#0", i64* %42 
-  %43 = trunc i64 16 to i32  
-  %44 = tail call ccc  i8*  @wybe_malloc(i32  %43)  
-  %45 = ptrtoint i8* %44 to i64 
-  %46 = inttoptr i64 %45 to i8* 
-  %47 = inttoptr i64 %20 to i8* 
-  %48 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %46, i8*  %47, i32  %48, i32  8, i1  0)  
-  %49 = inttoptr i64 %45 to i64* 
-  %50 = getelementptr  i64, i64* %49, i64 0 
-  store  i64 %36, i64* %50 
-  %51 = add   i64 %45, 8 
-  %52 = inttoptr i64 %51 to i64* 
-  %53 = getelementptr  i64, i64* %52, i64 0 
-  %54 = load  i64, i64* %53 
-  %55 = inttoptr i64 %54 to i64* 
-  %56 = getelementptr  i64, i64* %55, i64 0 
-  %57 = load  i64, i64* %56 
-  %"1$tmp$11#0" = tail call fastcc  i64  @"wybe.int.max<0>"(i64  %57, i64  %9)  
-  %58 = trunc i64 16 to i32  
-  %59 = tail call ccc  i8*  @wybe_malloc(i32  %58)  
-  %60 = ptrtoint i8* %59 to i64 
-  %61 = inttoptr i64 %60 to i8* 
-  %62 = inttoptr i64 %54 to i8* 
+  %40 = tail call ccc  i8*  @wybe_malloc(i32  %39)  
+  %41 = ptrtoint i8* %40 to i64 
+  %42 = inttoptr i64 %41 to i8* 
+  %43 = inttoptr i64 %32 to i8* 
+  %44 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %42, i8*  %43, i32  %44, i32  8, i1  0)  
+  %45 = inttoptr i64 %41 to i64* 
+  %46 = getelementptr  i64, i64* %45, i64 0 
+  store  i64 %"1$tmp$1#0", i64* %46 
+  %47 = trunc i64 16 to i32  
+  %48 = tail call ccc  i8*  @wybe_malloc(i32  %47)  
+  %49 = ptrtoint i8* %48 to i64 
+  %50 = inttoptr i64 %49 to i8* 
+  %51 = inttoptr i64 %"reg#0" to i8* 
+  %52 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %50, i8*  %51, i32  %52, i32  8, i1  0)  
+  %53 = inttoptr i64 %49 to i64* 
+  %54 = getelementptr  i64, i64* %53, i64 0 
+  store  i64 %41, i64* %54 
+  %55 = add   i64 %41, 8 
+  %56 = inttoptr i64 %55 to i64* 
+  %57 = getelementptr  i64, i64* %56, i64 0 
+  %58 = load  i64, i64* %57 
+  %59 = add   i64 %"point#0", 8 
+  %60 = inttoptr i64 %59 to i64* 
+  %61 = getelementptr  i64, i64* %60, i64 0 
+  %62 = load  i64, i64* %61 
+  %"1$tmp$6#0" = tail call fastcc  i64  @"wybe.int.min<0>"(i64  %58, i64  %62)  
   %63 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %61, i8*  %62, i32  %63, i32  8, i1  0)  
-  %64 = inttoptr i64 %60 to i64* 
-  %65 = getelementptr  i64, i64* %64, i64 0 
-  store  i64 %"1$tmp$11#0", i64* %65 
-  %66 = trunc i64 16 to i32  
-  %67 = tail call ccc  i8*  @wybe_malloc(i32  %66)  
-  %68 = ptrtoint i8* %67 to i64 
-  %69 = inttoptr i64 %68 to i8* 
-  %70 = inttoptr i64 %45 to i8* 
-  %71 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %69, i8*  %70, i32  %71, i32  8, i1  0)  
-  %72 = add   i64 %68, 8 
-  %73 = inttoptr i64 %72 to i64* 
-  %74 = getelementptr  i64, i64* %73, i64 0 
-  store  i64 %60, i64* %74 
-  %75 = add   i64 %60, 8 
-  %76 = inttoptr i64 %75 to i64* 
-  %77 = getelementptr  i64, i64* %76, i64 0 
-  %78 = load  i64, i64* %77 
-  %"1$tmp$16#0" = tail call fastcc  i64  @"wybe.int.max<0>"(i64  %78, i64  %33)  
-  %79 = trunc i64 16 to i32  
-  %80 = tail call ccc  i8*  @wybe_malloc(i32  %79)  
-  %81 = ptrtoint i8* %80 to i64 
-  %82 = inttoptr i64 %81 to i8* 
-  %83 = inttoptr i64 %60 to i8* 
-  %84 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %82, i8*  %83, i32  %84, i32  8, i1  0)  
-  %85 = add   i64 %81, 8 
-  %86 = inttoptr i64 %85 to i64* 
-  %87 = getelementptr  i64, i64* %86, i64 0 
-  store  i64 %"1$tmp$16#0", i64* %87 
-  %88 = trunc i64 16 to i32  
-  %89 = tail call ccc  i8*  @wybe_malloc(i32  %88)  
-  %90 = ptrtoint i8* %89 to i64 
-  %91 = inttoptr i64 %90 to i8* 
-  %92 = inttoptr i64 %68 to i8* 
-  %93 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %91, i8*  %92, i32  %93, i32  8, i1  0)  
-  %94 = add   i64 %90, 8 
-  %95 = inttoptr i64 %94 to i64* 
-  %96 = getelementptr  i64, i64* %95, i64 0 
-  store  i64 %81, i64* %96 
-  ret i64 %90 
+  %64 = tail call ccc  i8*  @wybe_malloc(i32  %63)  
+  %65 = ptrtoint i8* %64 to i64 
+  %66 = inttoptr i64 %65 to i8* 
+  %67 = inttoptr i64 %41 to i8* 
+  %68 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %66, i8*  %67, i32  %68, i32  8, i1  0)  
+  %69 = add   i64 %65, 8 
+  %70 = inttoptr i64 %69 to i64* 
+  %71 = getelementptr  i64, i64* %70, i64 0 
+  store  i64 %"1$tmp$6#0", i64* %71 
+  %72 = trunc i64 16 to i32  
+  %73 = tail call ccc  i8*  @wybe_malloc(i32  %72)  
+  %74 = ptrtoint i8* %73 to i64 
+  %75 = inttoptr i64 %74 to i8* 
+  %76 = inttoptr i64 %49 to i8* 
+  %77 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %75, i8*  %76, i32  %77, i32  8, i1  0)  
+  %78 = inttoptr i64 %74 to i64* 
+  %79 = getelementptr  i64, i64* %78, i64 0 
+  store  i64 %65, i64* %79 
+  %80 = add   i64 %74, 8 
+  %81 = inttoptr i64 %80 to i64* 
+  %82 = getelementptr  i64, i64* %81, i64 0 
+  %83 = load  i64, i64* %82 
+  %84 = inttoptr i64 %83 to i64* 
+  %85 = getelementptr  i64, i64* %84, i64 0 
+  %86 = load  i64, i64* %85 
+  %"1$tmp$11#0" = tail call fastcc  i64  @"wybe.int.max<0>"(i64  %86, i64  %38)  
+  %87 = trunc i64 16 to i32  
+  %88 = tail call ccc  i8*  @wybe_malloc(i32  %87)  
+  %89 = ptrtoint i8* %88 to i64 
+  %90 = inttoptr i64 %89 to i8* 
+  %91 = inttoptr i64 %83 to i8* 
+  %92 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %90, i8*  %91, i32  %92, i32  8, i1  0)  
+  %93 = inttoptr i64 %89 to i64* 
+  %94 = getelementptr  i64, i64* %93, i64 0 
+  store  i64 %"1$tmp$11#0", i64* %94 
+  %95 = trunc i64 16 to i32  
+  %96 = tail call ccc  i8*  @wybe_malloc(i32  %95)  
+  %97 = ptrtoint i8* %96 to i64 
+  %98 = inttoptr i64 %97 to i8* 
+  %99 = inttoptr i64 %74 to i8* 
+  %100 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %98, i8*  %99, i32  %100, i32  8, i1  0)  
+  %101 = add   i64 %97, 8 
+  %102 = inttoptr i64 %101 to i64* 
+  %103 = getelementptr  i64, i64* %102, i64 0 
+  store  i64 %89, i64* %103 
+  %104 = add   i64 %89, 8 
+  %105 = inttoptr i64 %104 to i64* 
+  %106 = getelementptr  i64, i64* %105, i64 0 
+  %107 = load  i64, i64* %106 
+  %"1$tmp$16#0" = tail call fastcc  i64  @"wybe.int.max<0>"(i64  %107, i64  %62)  
+  %108 = trunc i64 16 to i32  
+  %109 = tail call ccc  i8*  @wybe_malloc(i32  %108)  
+  %110 = ptrtoint i8* %109 to i64 
+  %111 = inttoptr i64 %110 to i8* 
+  %112 = inttoptr i64 %89 to i8* 
+  %113 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %111, i8*  %112, i32  %113, i32  8, i1  0)  
+  %114 = add   i64 %110, 8 
+  %115 = inttoptr i64 %114 to i64* 
+  %116 = getelementptr  i64, i64* %115, i64 0 
+  store  i64 %"1$tmp$16#0", i64* %116 
+  %117 = trunc i64 16 to i32  
+  %118 = tail call ccc  i8*  @wybe_malloc(i32  %117)  
+  %119 = ptrtoint i8* %118 to i64 
+  %120 = inttoptr i64 %119 to i8* 
+  %121 = inttoptr i64 %97 to i8* 
+  %122 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %120, i8*  %121, i32  %122, i32  8, i1  0)  
+  %123 = add   i64 %119, 8 
+  %124 = inttoptr i64 %123 to i64* 
+  %125 = getelementptr  i64, i64* %124, i64 0 
+  store  i64 %110, i64* %125 
+  ret i64 %119 
+}
+
+
+define external fastcc  void @"caret.gen$1<0>"(i64  %"reg#0")    {
+entry:
+  %126 = add   i64 %"reg#0", 8 
+  %127 = inttoptr i64 %126 to i64* 
+  %128 = getelementptr  i64, i64* %127, i64 0 
+  %129 = load  i64, i64* %128 
+  %130 = inttoptr i64 %129 to i64* 
+  %131 = getelementptr  i64, i64* %130, i64 0 
+  %132 = load  i64, i64* %131 
+  %"1$tmp$5#1" = add   i64 %132, 1 
+  %133 = trunc i64 16 to i32  
+  %134 = tail call ccc  i8*  @wybe_malloc(i32  %133)  
+  %135 = ptrtoint i8* %134 to i64 
+  %136 = inttoptr i64 %135 to i8* 
+  %137 = inttoptr i64 %129 to i8* 
+  %138 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %136, i8*  %137, i32  %138, i32  8, i1  0)  
+  %139 = inttoptr i64 %135 to i64* 
+  %140 = getelementptr  i64, i64* %139, i64 0 
+  store  i64 %"1$tmp$5#1", i64* %140 
+  %141 = inttoptr i64 %135 to i64* 
+  %142 = getelementptr  i64, i64* %141, i64 0 
+  %143 = load  i64, i64* %142 
+  %145 = ptrtoint i8* getelementptr inbounds ([11 x i8], [11 x i8]* @caret.144, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %145)  
+  tail call ccc  void  @print_int(i64  %143)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+}
+
+
+define external fastcc  void @"caret.gen$1<0>[6dacb8fd25]"(i64  %"reg#0")    {
+entry:
+  %146 = add   i64 %"reg#0", 8 
+  %147 = inttoptr i64 %146 to i64* 
+  %148 = getelementptr  i64, i64* %147, i64 0 
+  %149 = load  i64, i64* %148 
+  %150 = inttoptr i64 %149 to i64* 
+  %151 = getelementptr  i64, i64* %150, i64 0 
+  %152 = load  i64, i64* %151 
+  %"1$tmp$5#1" = add   i64 %152, 1 
+  %153 = inttoptr i64 %149 to i64* 
+  %154 = getelementptr  i64, i64* %153, i64 0 
+  store  i64 %"1$tmp$5#1", i64* %154 
+  %155 = inttoptr i64 %149 to i64* 
+  %156 = getelementptr  i64, i64* %155, i64 0 
+  %157 = load  i64, i64* %156 
+  %159 = ptrtoint i8* getelementptr inbounds ([11 x i8], [11 x i8]* @caret.158, i32 0, i32 0) to i64 
+  tail call ccc  void  @print_string(i64  %159)  
+  tail call ccc  void  @print_int(i64  %157)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
 }
 --------------------------------------------------
  Module caret.region

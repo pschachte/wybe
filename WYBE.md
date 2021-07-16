@@ -636,29 +636,55 @@ pos = position(?x, ?y)
 ```
 
 For types with multiple constructors, backwards construction can fail.  For
-example, if `lst` is a list, then exactly one of the statements
+example, if the type `position` is defined with two constructors
 ```
-lst = []
+constructors cartesian(x:float, y:float) | polar(r:float, theta:float)
+```
+, then exactly one of the statements
+```
+pos = cartesian(?x, ?y)
 ```
 or
 ```
-lst = [?h | ?t]
+pos = polar(?r, ?theta)
 ```
 will succeed, and the other will fail.  Therefore, these statements are tests,
 and can only appear where test statements are allowed, such as in a [conditional
 statement](#conditionals).  Note that variables assigned by such a test cannot
 be used outside of the context in which that test has succeeded.
 
-Patterns can also be nested.  For example, the statement
+Patterns can also be nested.  For example, with the type `region` definined by:
 ```
-lst = [?elt1, ?elt2, ?elt3]
+constructors region(bottom_left:position, top_right:position)
 ```
-which is equivalent to
+the statement
 ```
-lst = `[|]`(?elt1, `[|]`(?elt2, `[|]`(?elt3, [])))
+region(cartesian(?x1,?y1),cartesian(?x2,?y2)) = reg
 ```
-will succeed if `lst` is a three-element list, binding `elt11`, `elt2`, and
-`elt3` to the first, second, and third elements, respectively.
+will deconstruct a region `reg` expressed as two cartesian coordinates.
+
+It is also possible to include input values where outputs are expected, as long
+as the type supports an equality test.  This is equivalent to providing an
+output variable, and then comparing the value produced for that output to the
+specified value.  This is called an *implied mode* for that argument.
+
+As a convenience, you can specify the special "don't care" value `_` as an
+output.  This matches any value that may be produced.
+
+For
+example, you could define a test that the lower left corner of a region sits at
+the origin as follows:
+```
+def {test} at_origin(reg:region) {
+    reg = region(cartesian(0.0,0.0), _) | reg = region(polar(0.0,_),_)
+}
+```
+Equivalently, it could be written:
+```
+def {test} at_origin(reg:region) {
+    reg^bottom_left = cartesian(0.0,0.0) | reg^bottom_left^r = 0.0
+}
+```
 
 
 ## <a name="structure-update"></a>Structure update

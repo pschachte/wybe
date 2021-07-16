@@ -25,7 +25,7 @@ module AST (
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
-  Exp(..), Generator(..), Stmt(..), detStmt, flattenedExpFlow, expIsConstant,
+  Exp(..), Generator(..), Stmt(..), flattenedExpFlow, expIsConstant,
   TypeRepresentation(..), TypeFamily(..), typeFamily,
   defaultTypeRepresentation, typeRepSize, integerTypeRep,
   lookupTypeRepresentation, lookupModuleRepresentation,
@@ -163,7 +163,7 @@ data Determinism = Terminal | Failure | Det | SemiDet
                   deriving (Eq, Ord, Show, Generic)
 
 
--- |Partial order comparison for Determinism.
+-- |Partial order less or equal for Determinism.
 determinismLEQ :: Determinism -> Determinism -> Bool
 determinismLEQ Failure Det = False
 determinismLEQ det1 det2 = det1 <= det2
@@ -1835,8 +1835,8 @@ data ProcImpln
     | ProcDefPrim {
         procImplnProcSpec :: ProcSpec,
         procImplnProto :: PrimProto,
-        procImplnBody :: ProcBody,
-        procImplnAnalysis :: ProcAnalysis, -- ^defn in LPVM (clausal) form
+        procImplnBody :: ProcBody,       -- ^defn in LPVM (clausal) form
+        procImplnAnalysis :: ProcAnalysis,
         procImplnSpeczBodies :: SpeczProcBodies
     }
     -- defn in SSA (LLVM) form along with any needed extern definitions
@@ -2428,17 +2428,6 @@ data Stmt
 
 instance Show Stmt where
   show s = "{" ++ showStmt 4 s ++ "}"
-
--- |Returns whether the statement is Det
-detStmt :: Stmt -> Bool
-detStmt (ProcCall _ _ _ SemiDet _ _) = False
-detStmt (TestBool _) = False
-detStmt (Cond _ thn els _ _) = all detStmt $ List.map content $ thn++els
-detStmt (And list) = all detStmt $ List.map content list
-detStmt (Or list _) = all detStmt $ List.map content list
-detStmt (Not _) = False
-detStmt _ = True
-
 
 -- |Produce a single statement comprising the conjunctions of the statements
 --  in the supplied list.
