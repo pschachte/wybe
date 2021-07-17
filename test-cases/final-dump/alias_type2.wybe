@@ -9,6 +9,6 @@ pub type posrec { pub posrec(p:position, a:int) }
 a(!rec, 2)
 x(!pos, 200) # Non-destructive
 
-!println(pos.x)
-?rp = rec.p
-!println(rp.x)
+!println(pos^x)
+?rp = rec^p
+!println(rp^x)

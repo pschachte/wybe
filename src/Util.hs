@@ -5,7 +5,7 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
-module Util (sameLength, maybeNth, setMapInsert,
+module Util (sameLength, maybeNth, setMapInsert, showArguments,
              fillLines, nop, sccElts, DisjointSet,
              emptyDS, addOneToDS, unionTwoInDS,
              combineTwoDS, removeSingletonFromDS,
@@ -53,6 +53,11 @@ setMapInsert key item dict =
     key dict
 
 
+-- |Show an argument list; shows nothing for an empty list, otherwise shows all
+-- the list elements, separated by commas, surrounded with parentheses.
+showArguments :: Show a => [a] -> String
+showArguments [] = ""
+showArguments args = "(" ++ intercalate ", " (show <$> args) ++ ")"
 
 -- |fillLines marginText currColumn lineLength text
 --  Fill lines with text.  marginText is the string to start each

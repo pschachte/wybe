@@ -18,7 +18,6 @@ cabal.sandbox.config
 .stack-work/
 *.log
 ERRS
-Parser.hs
 Version.lhs
 wybemk
 *.aux

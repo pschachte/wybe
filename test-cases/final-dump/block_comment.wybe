@@ -1,0 +1,10 @@
+#|
+Test case for block comments.  This one
+spans multiple lines, for no good reason
+|#  !print("print(x:string) creates a newline already")
+
+!println(#|intraline|#"println(x:string) generates an extra newline?")
+!println("println(x:string) generates an extra newline?")
+!println('c' #| a single character |# )
+!println(1)  # regular end-of-line comment
+!print(1)

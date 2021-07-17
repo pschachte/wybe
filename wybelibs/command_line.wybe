@@ -19,7 +19,7 @@ if {[?command | ?arguments] = arguments ::
 
 # The exit code to return to the invoking shell.  This is initialised to
 # zero, so it only needs to be assigned for error cases.
-pub resource exit_code:int = 0 # when we support resource initialisation
+pub resource exit_code:int = 0
 
 
 # Set the exit code, but don't exit immediately.

@@ -2,9 +2,9 @@ pub type position { pub position(x:int, y:int) }
 
 pub def printPosition(pos:position) use !io {
     !print(" (")
-    !print(pos.x)
+    !print(pos^x)
     !print(",")
-    !print(pos.y)
+    !print(pos^y)
     !println(")")
 }
 

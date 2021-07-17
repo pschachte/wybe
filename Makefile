@@ -67,6 +67,9 @@ $(SRCDIR)/Version.lhs:	$(addprefix $(SRCDIR)/,*.hs)
 	@printf "> buildDate :: String\n> buildDate = \"%s\"\n\n" "`date`" >> "$@"
 	@printf "> libDir :: String\n> libDir = \"%s\"\n\n" "$(INSTALLLIB)" >> "$@"
 
+.PHONY:	doc
+doc:	src/README.md
+
 
 # Assemble README markdown source file automatically
 src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro

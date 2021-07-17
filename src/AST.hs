@@ -25,7 +25,7 @@ module AST (
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
-  Exp(..), Generator(..), Stmt(..), detStmt, expIsConstant,
+  Exp(..), Generator(..), Stmt(..), flattenedExpFlow, expIsConstant,
   TypeRepresentation(..), TypeFamily(..), typeFamily,
   defaultTypeRepresentation, typeRepSize, integerTypeRep,
   lookupTypeRepresentation, lookupModuleRepresentation,
@@ -84,6 +84,7 @@ module AST (
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
   showModSpecs, showResources, showMaybeSourcePos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
+  flowPrefix, showFlags,
   showMap, showVarMap, simpleShowMap, simpleShowSet, bracketList,
   maybeShow, showMessages, stopOnError,
   logMsg, whenLogging2, whenLogging,
@@ -162,7 +163,7 @@ data Determinism = Terminal | Failure | Det | SemiDet
                   deriving (Eq, Ord, Show, Generic)
 
 
--- |Partial order comparison for Determinism.
+-- |Partial order less or equal for Determinism.
 determinismLEQ :: Determinism -> Determinism -> Bool
 determinismLEQ Failure Det = False
 determinismLEQ det1 det2 = det1 <= det2
@@ -396,7 +397,7 @@ data MessageLevel = Informational | Warning | Error
 --  compiling the module's dependencies.
 data CompilerState = Compiler {
   options :: Options,            -- ^compiler options specified on command line
-  tmpDir  :: FilePath,             -- ^tmp directory for this build
+  tmpDir  :: FilePath,           -- ^tmp directory for this build
   msgs :: [Message],             -- ^warnings, error messages, and info messages
   errorState :: Bool,            -- ^whether or not we've seen any errors
   modules :: Map ModSpec Module, -- ^all known modules except what we're loading
@@ -516,7 +517,7 @@ updateLoadedModuleImpln :: (ModuleImplementation -> ModuleImplementation) ->
                            ModSpec -> Compiler ()
 updateLoadedModuleImpln updater =
     updateLoadedModule (\m -> m { modImplementation =
-                                      fmap updater $ modImplementation m })
+                                      updater <$> modImplementation m })
 
 
 -- |Return the ModuleImplementation of the specified module.  An error
@@ -550,8 +551,7 @@ updateImplementations :: (ModuleImplementation -> ModuleImplementation) ->
                          Compiler ()
 updateImplementations updater = do
     updateModules (Map.map (\m -> m { modImplementation =
-                                           (fmap updater) $
-                                           modImplementation m }))
+                                           updater <$> modImplementation m }))
 
 -- |Return the module currently being compiled.  The argument says where
 -- this function is called from for error-reporting purposes.
@@ -811,7 +811,7 @@ addConstructor vis pctor = do
           any (\c -> procProtoName c == procProtoName ctor
                 && length (procProtoParams c) == length (procProtoParams ctor))
           $ content . snd <$> pctors
-    let typeVars = Set.unions 
+    let typeVars = Set.unions
                    (typeVarSet . paramType <$> procProtoParams (content pctor))
     missingParams <- Set.difference typeVars . Set.fromList
                      <$> getModule modParams
@@ -830,7 +830,7 @@ addConstructor vis pctor = do
                 updateModule (\m -> m { modIsType  = True })
                 addKnownType currMod
             else
-                errmsg pos 
+                errmsg pos
                 $ "Constructors for type " ++ showModSpec currMod
                   ++ " use unbound type variable(s) "
                   ++ intercalate ", " (("?"++) <$> Set.toList missingParams)
@@ -1122,14 +1122,14 @@ getProcPrimProto pspec = do
     case procImpln def of
         impln@ProcDefPrim{ procImplnProcSpec = pspec2, procImplnProto = proto}
             | pspec == pspec2 -> return proto
-            | and [ procSpecMod pspec == procSpecMod pspec2, 
-                    procSpecName pspec == procSpecName pspec2, 
+            | and [ procSpecMod pspec == procSpecMod pspec2,
+                    procSpecName pspec == procSpecName pspec2,
                     procSpecID pspec == procSpecID pspec2 ] -> do
                 let impln' = impln{procImplnProcSpec = pspec}
                 updateProcDef (\_ -> def{procImpln = impln'}) pspec
                 return proto
-            | otherwise -> 
-                shouldnt $ "get compiled proc but procSpec not mathcing: " ++ 
+            | otherwise ->
+                shouldnt $ "get compiled proc but procSpec not mathcing: " ++
                            show pspec ++ ", " ++ show pspec2
         _ -> shouldnt $ "get prim proto of uncompiled proc " ++ show pspec
 
@@ -1837,10 +1837,10 @@ showSuperProc (SuperprocIs super) =
 data ProcImpln
     = ProcDefSrc [Placed Stmt]           -- ^defn in source-like form
     | ProcDefPrim {
-        procImplnProcSpec :: ProcSpec, 
-        procImplnProto :: PrimProto, 
-        procImplnBody :: ProcBody,       
-        procImplnAnalysis :: ProcAnalysis, -- ^defn in LPVM (clausal) form
+        procImplnProcSpec :: ProcSpec,
+        procImplnProto :: PrimProto,
+        procImplnBody :: ProcBody,       -- ^defn in LPVM (clausal) form
+        procImplnAnalysis :: ProcAnalysis,
         procImplnSpeczBodies :: SpeczProcBodies
     }
     -- defn in SSA (LLVM) form along with any needed extern definitions
@@ -1992,7 +1992,7 @@ instance Show ProcImpln where
                             Just body -> showBlock 4 body)
                 |> intercalate "\n"
         in
-            show pSpec ++ "\n" ++ show proto ++ ":" ++ show analysis 
+            show pSpec ++ "\n" ++ show proto ++ ":" ++ show analysis
                     ++ showBlock 4 body ++ speczBodies
 
 
@@ -2362,7 +2362,7 @@ data ParamInfo = ParamInfo {
     } deriving (Eq,Generic)
 
 -- |A dataflow direction:  in, out, both, or neither.
-data FlowDirection = ParamIn | ParamOut | ParamInOut | FlowUnknown
+data FlowDirection = ParamIn | ParamOut | ParamInOut
                    deriving (Show,Eq,Ord,Generic)
 
 -- |A primitive dataflow direction:  in or out
@@ -2375,14 +2375,12 @@ flowsIn :: FlowDirection -> Bool
 flowsIn ParamIn    = True
 flowsIn ParamOut   = False
 flowsIn ParamInOut = True
-flowsIn FlowUnknown = shouldnt "checking if unknown flow direction flows in"
 
 -- |Does the specified flow direction flow out?
 flowsOut :: FlowDirection -> Bool
 flowsOut ParamIn = False
 flowsOut ParamOut = True
 flowsOut ParamInOut = True
-flowsOut FlowUnknown = shouldnt "checking if unknown flow direction flows out"
 
 
 -- |Source program statements.  These will be normalised into Prims.
@@ -2439,17 +2437,6 @@ data Stmt
 instance Show Stmt where
   show s = "{" ++ showStmt 4 s ++ "}"
 
--- |Returns whether the statement is Det
-detStmt :: Stmt -> Bool
-detStmt (ProcCall _ _ _ SemiDet _ _) = False
-detStmt (TestBool _) = False
-detStmt (Cond _ thn els _ _) = all detStmt $ List.map content $ thn++els
-detStmt (And list) = all detStmt $ List.map content list
-detStmt (Or list _) = all detStmt $ List.map content list
-detStmt (Not _) = False
-detStmt _ = True
-
-
 -- |Produce a single statement comprising the conjunctions of the statements
 --  in the supplied list.
 seqToStmt :: [Placed Stmt] -> Placed Stmt
@@ -2463,8 +2450,8 @@ seqToStmt stmts = Unplaced $ And stmts
 data Exp
       = IntValue Integer
       | FloatValue Double
-      | StringValue String
       | CharValue Char
+      | StringValue String
       | Var VarName FlowDirection ArgFlowType
       | Typed Exp TypeSpec (Maybe TypeSpec)
                -- ^explicitly typed expr giving type the expression, and, if it
@@ -2476,6 +2463,18 @@ data Exp
       | Fncall ModSpec ProcName [Placed Exp]
       | ForeignFn Ident ProcName [Ident] [Placed Exp]
      deriving (Eq,Ord,Generic)
+
+
+-- | Return the FlowDirection of an Exp, assuming it has been flattened.
+flattenedExpFlow :: Exp -> FlowDirection
+flattenedExpFlow (IntValue _)    = ParamIn
+flattenedExpFlow (FloatValue _)  = ParamIn
+flattenedExpFlow (CharValue _)   = ParamIn
+flattenedExpFlow (StringValue _) = ParamIn
+flattenedExpFlow (Var _ flow _)  = flow
+flattenedExpFlow (Typed exp _ _) = flattenedExpFlow exp
+flattenedExpFlow otherExp =
+    shouldnt $ "Getting flow direction of unflattened exp " ++ show otherExp
 
 
 -- | If the input is a constant value, return it (with any Typed wrapper
@@ -2737,7 +2736,7 @@ expOutputs (FloatValue _) = Set.empty
 expOutputs (StringValue _) = Set.empty
 expOutputs (CharValue _) = Set.empty
 expOutputs (Var name flow _) =
-    if flow == ParamOut then Set.singleton name else Set.empty
+    if flowsOut flow then Set.singleton name else Set.empty
 expOutputs (Typed expr _ _) = expOutputs expr
 expOutputs (Where _ pexp) = expOutputs $ content pexp
 expOutputs (CondExp _ pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
@@ -2838,25 +2837,26 @@ varsInPrimArg _ (ArgUndef _)            = Set.empty
 instance Show Item where
   show (TypeDecl vis name (TypeRepresentation repn) items pos) =
     visibilityPrefix vis ++ "type " ++ show name
-    ++ " is" ++ show repn
-    ++ showMaybeSourcePos pos ++ "\n  "
-    ++ intercalate "\n  " (List.map show items)
+    ++ " is " ++ show repn
+    ++ showMaybeSourcePos pos ++ " {"
+    ++ concatMap (("\n  "++) . show) items
     ++ "\n}\n"
   show (TypeDecl vis name (TypeCtors ctorvis ctors) items pos) =
     visibilityPrefix vis ++ "type " ++ show name
     ++ " " ++ visibilityPrefix ctorvis
     ++ showMaybeSourcePos pos ++ "\n    "
-    ++ intercalate "\n  | " (List.map show ctors) ++ "\n  "
-    ++ intercalate "\n  " (List.map show items)
+    ++ intercalate "\n  | " (List.map show ctors)
+    ++ concatMap (("\n  "++) . show) items
     ++ "\n}\n"
   show (RepresentationDecl params repn pos) =
     "representation"
-    ++ bracketList "(" ")" ", " (("?"++) <$> params)
-    ++ " " ++ show repn ++ showMaybeSourcePos pos ++ "\n"
+    ++ bracketList "(" ", " ")" (("?"++) <$> params)
+    ++ " is " ++ show repn ++ showMaybeSourcePos pos ++ "\n"
   show (ConstructorDecl vis params ctors pos) =
     visibilityPrefix vis ++ "constructors"
-    ++ bracketList "(" ")" ", " (("?"++) <$> params)
-    ++ " " ++ show ctors ++ showMaybeSourcePos pos ++ "\n"
+    ++ bracketList "(" ", " ")" (("?"++) <$> params) ++ " "
+    ++ intercalate " | " (show <$> ctors)
+    ++ showMaybeSourcePos pos ++ "\n"
   show (ImportMods vis mods pos) =
       visibilityPrefix vis ++ "use " ++
       showModSpecs mods ++ showMaybeSourcePos pos ++ "\n  "
@@ -2865,7 +2865,7 @@ instance Show Item where
       " use " ++ intercalate ", " specs
       ++ showMaybeSourcePos pos ++ "\n  "
   show (ImportForeign files pos) =
-      "use foreign " ++ intercalate ", " files
+      "use foreign object " ++ intercalate ", " files
       ++ showMaybeSourcePos pos ++ "\n  "
   show (ImportForeignLib names pos) =
       "use foreign library " ++ intercalate ", " names
@@ -3016,9 +3016,7 @@ instance Show TypeSpec where
   show (TypeVariable name)  = "?" ++ name
   show (Representation rep) = show rep
   show (TypeSpec optmod ident args) =
-      maybeModPrefix optmod ++ ident ++
-      if List.null args then ""
-      else "(" ++ (intercalate "," $ List.map show args) ++ ")"
+      maybeModPrefix optmod ++ ident ++ showArguments args
 
 
 -- |Show the use declaration for a set of resources, if it's non-empty.
@@ -3061,7 +3059,6 @@ flowPrefix :: FlowDirection -> String
 flowPrefix ParamIn    = ""
 flowPrefix ParamOut   = "?"
 flowPrefix ParamInOut = "!"
-flowPrefix FlowUnknown = "???"
 
 -- |How to show a *primitive* dataflow direction.
 primFlowPrefix :: PrimFlow -> String
@@ -3115,11 +3112,11 @@ showPlacedPrim' ind prim pos =
 -- XXX the first argument is unused; can we get rid of it?
 showPrim :: Int -> Prim -> String
 showPrim _ (PrimCall id pspec args) =
-        show pspec ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+        show pspec ++ showArguments args
             ++ " #" ++ show id
 showPrim _ (PrimForeign lang name flags args) =
         "foreign " ++ lang ++ " " ++ showFlags flags ++ name ++
-        "(" ++ intercalate ", " (List.map show args) ++ ")"
+        showArguments args
 
 
 -- |Show a variable, with its suffix.
@@ -3133,10 +3130,10 @@ showStmt _ (ProcCall maybeMod name procID detism resourceful args) =
     (if resourceful then "!" else "")
     ++ maybeModPrefix maybeMod
     ++ maybe "" (\n -> "<" ++ show n ++ ">") procID ++
-    name ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+    name ++ showArguments args
 showStmt _ (ForeignCall lang name flags args) =
     "foreign " ++ lang ++ " " ++ showFlags flags ++ name ++
-    "(" ++ intercalate ", " (List.map show args) ++ ")"
+    showArguments args
 showStmt _ (TestBool test) =
     "testbool " ++ show test
 showStmt indent (And stmts) =
@@ -3154,7 +3151,7 @@ showStmt indent (Not stmt) =
     "~(" ++ showStmt indent' (content stmt) ++ ")"
     where indent' = indent + 2
 showStmt indent (Cond condstmt thn els condVars genVars) =
-    "if {" ++ showStmt (indent+4) (content condstmt) ++ "}::\n"
+    "if {" ++ showStmt (indent+4) (content condstmt) ++ "::\n"
     ++ showBody (indent+4) thn
     ++ startLine indent ++ "else::"
     ++ showBody (indent+4) els ++ "\n"
@@ -3214,12 +3211,11 @@ instance Show Exp where
   show (CondExp cond thn els) =
     "if\n" ++ show cond ++ " then " ++ show thn ++ " else " ++ show els
   show (Fncall maybeMod fn args) =
-    maybeModPrefix maybeMod ++
-    fn ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+    maybeModPrefix maybeMod ++ fn ++ showArguments args
   show (ForeignFn lang fn flags args) =
     "foreign " ++ lang ++ " " ++ fn
     ++ (if List.null flags then "" else " " ++ unwords flags)
-    ++ "(" ++ intercalate ", " (List.map show args) ++ ")"
+    ++ showArguments args
   show (Typed exp typ cast) =
       show exp ++ showTypeSuffix typ cast
 

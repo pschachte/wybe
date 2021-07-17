@@ -24,8 +24,8 @@ do
         if [ -r $cmdline ] ; then
             cmd="$targ `cat $cmdline`"
         fi
-	$TIMEOUT 2 ../wybemk --force-all -L $LIBDIR $targ >/dev/null
-    $TIMEOUT 2 $cmd< $in &> $out
+	$TIMEOUT 5 ../wybemk --force-all -L $LIBDIR $targ >/dev/null
+    $TIMEOUT 5 $cmd< $in &> $out
 	if [ ! -r $exp ] ; then 
 		printf "[31m?[39m"
 		NEW="$NEW\n    $out"

@@ -11,9 +11,9 @@ pub def printMyNode(nd:mynode) use !io {
 # reverse linked list and return the new head
 pub def foo(head:mynode, ?resutl1:mynode) {
     do {
-        while head.next /= empty
-            foo(head.next, ?result1)
-            next(!result1, head.next)
+        while head^next ~= empty
+            foo(head^next, ?result1)
+            next(!result1, head^next)
     }
 }
 

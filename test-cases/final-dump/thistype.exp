@@ -5,7 +5,6 @@ AFTER EVERYTHING:
   public submods  : 
   public resources: 
   public procs    : thistype.<0>
-                    thistype./=<0>
                     thistype.=<0>
                     thistype.concat<0>
                     thistype.cons<0>
@@ -16,6 +15,7 @@ AFTER EVERYTHING:
                     thistype.nil<0>
                     thistype.tail<0>
                     thistype.tail<1>
+                    thistype.~=<0>
   imports         : use wybe
   resources       : 
   procs           : 
@@ -45,15 +45,6 @@ AFTER EVERYTHING:
     thistype.length<0>(~tmp$8#0:thistype, ?tmp$7#0:wybe.int) #8 @thistype:nn:nn
     foreign c print_int(~tmp$7#0:wybe.int, ~#io#0:wybe.phantom, ?tmp$31#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$31#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-
-
-/= > public {inline} (0 calls)
-0: thistype./=<0>
-/=($left#0:thistype, $right#0:thistype, ?$$#0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
-    thistype.=<0>(~$left#0:thistype, ~$right#0:thistype, ?tmp$0#0:wybe.bool) #0
-    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
 
 = > public (2 calls)
@@ -127,8 +118,8 @@ cons(head#0:wybe.int, tail#0:thistype, ?$#0:thistype):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:thistype)
-    foreign lpvm mutate(~%$rec#0:thistype, ?%$rec#1:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:wybe.int)
-    foreign lpvm mutate(~%$rec#1:thistype, ?%$#0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:thistype)
+    foreign lpvm mutate(~$rec#0:thistype, ?$rec#1:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:wybe.int)
+    foreign lpvm mutate(~$rec#1:thistype, ?$#0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:thistype)
 cons > public {inline} (18 calls)
 1: thistype.cons<1>
 cons(?head#0:wybe.int, ?tail#0:thistype, $#0:thistype, ?$$#0:wybe.bool):
@@ -175,7 +166,7 @@ head($rec#0:thistype, ?$rec#1:thistype, $field#0:wybe.int, ?$$#0:wybe.bool):
         foreign llvm move(~$rec#0:thistype, ?$rec#1:thistype)
 
     1:
-        foreign lpvm mutate(~%$rec#0:thistype, ?%$rec#1:thistype, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+        foreign lpvm mutate(~$rec#0:thistype, ?$rec#1:thistype, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -232,9 +223,18 @@ tail($rec#0:thistype, ?$rec#1:thistype, $field#0:thistype, ?$$#0:wybe.bool):
         foreign llvm move(~$rec#0:thistype, ?$rec#1:thistype)
 
     1:
-        foreign lpvm {noalias} mutate(~%$rec#0:thistype, ?%$rec#1:thistype, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:thistype)
+        foreign lpvm {noalias} mutate(~$rec#0:thistype, ?$rec#1:thistype, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:thistype)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
+
+
+~= > public {inline} (0 calls)
+0: thistype.~=<0>
+~=($left#0:thistype, $right#0:thistype, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    thistype.=<0>(~$left#0:thistype, ~$right#0:thistype, ?tmp$0#0:wybe.bool) #0
+    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
   LLVM code       :
 
@@ -313,14 +313,6 @@ entry:
   tail call ccc  void  @print_int(i64  %"1$tmp$7#0")  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
-}
-
-
-define external fastcc  i1 @"thistype./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
-entry:
-  %"1$tmp$0#0" = tail call fastcc  i1  @"thistype.=<0>"(i64  %"$left#0", i64  %"$right#0")  
-  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
-  ret i1 %"1$$$#0" 
 }
 
 
@@ -558,4 +550,12 @@ if.else:
   %140 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
   %141 = insertvalue {i64, i1} %140, i1 0, 1 
   ret {i64, i1} %141 
+}
+
+
+define external fastcc  i1 @"thistype.~=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+entry:
+  %"1$tmp$0#0" = tail call fastcc  i1  @"thistype.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
+  ret i1 %"1$$$#0" 
 }

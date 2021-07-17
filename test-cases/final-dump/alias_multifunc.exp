@@ -248,7 +248,6 @@ entry:
   public submods  : position -> position.position
   public resources: 
   public procs    : position.printPosition<0>
-                    position.position./=<0>
                     position.position.=<0>
                     position.position.position<0>
                     position.position.position<1>
@@ -256,6 +255,7 @@ entry:
                     position.position.x<1>
                     position.position.y<0>
                     position.position.y<1>
+                    position.position.~=<0>
   imports         : public use position.position
                     use wybe
   resources       : 
@@ -333,39 +333,18 @@ entry:
   representation  : address
   public submods  : 
   public resources: 
-  public procs    : position.position./=<0>
-                    position.position.=<0>
+  public procs    : position.position.=<0>
                     position.position.position<0>
                     position.position.position<1>
                     position.position.x<0>
                     position.position.x<1>
                     position.position.y<0>
                     position.position.y<1>
+                    position.position.~=<0>
   imports         : use position
                     use wybe
   resources       : 
   procs           : 
-
-/= > public {inline} (0 calls)
-0: position.position./=<0>
-/=($left#0:position.position, $right#0:position.position, ?$$#0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
-    foreign lpvm access($left#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.int)
-    foreign lpvm access(~$left#0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.int)
-    foreign lpvm access($right#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.int)
-    foreign lpvm access(~$right#0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.int)
-    foreign llvm icmp_eq(~tmp$3#0:wybe.int, ~tmp$5#0:wybe.int, ?tmp$7#0:wybe.bool) @int:nn:nn
-    case ~tmp$7#0:wybe.bool of
-    0:
-        foreign llvm move(0:wybe.bool, ?tmp$0#0:wybe.bool)
-        foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
-
-    1:
-        foreign llvm icmp_eq(~tmp$4#0:wybe.int, ~tmp$6#0:wybe.int, ?tmp$0#0:wybe.bool) @int:nn:nn
-        foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
-
-
 
 = > public {inline} (1 calls)
 0: position.position.=<0>
@@ -392,8 +371,8 @@ position(x#0:wybe.int, y#0:wybe.int, ?$#0:position.position):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:position.position)
-    foreign lpvm mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x#0:wybe.int)
-    foreign lpvm mutate(~%$rec#1:position.position, ?%$#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y#0:wybe.int)
+    foreign lpvm mutate(~$rec#0:position.position, ?$rec#1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x#0:wybe.int)
+    foreign lpvm mutate(~$rec#1:position.position, ?$#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y#0:wybe.int)
 position > public {inline} (6 calls)
 1: position.position.position<1>
 position(?x#0:wybe.int, ?y#0:wybe.int, $#0:position.position):
@@ -414,7 +393,7 @@ x > public {inline} (0 calls)
 x($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm {noalias} mutate(~$rec#0:position.position, ?$rec#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
 
 
 y > public {inline} (0 calls)
@@ -428,7 +407,28 @@ y > public {inline} (0 calls)
 y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~%$rec#0:position.position, ?%$rec#1:position.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm {noalias} mutate(~$rec#0:position.position, ?$rec#1:position.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+
+
+~= > public {inline} (0 calls)
+0: position.position.~=<0>
+~=($left#0:position.position, $right#0:position.position, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm access($left#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.int)
+    foreign lpvm access(~$left#0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.int)
+    foreign lpvm access($right#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.int)
+    foreign lpvm access(~$right#0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.int)
+    foreign llvm icmp_eq(~tmp$3#0:wybe.int, ~tmp$5#0:wybe.int, ?tmp$7#0:wybe.bool) @int:nn:nn
+    case ~tmp$7#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?tmp$0#0:wybe.bool)
+        foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign llvm icmp_eq(~tmp$4#0:wybe.int, ~tmp$6#0:wybe.int, ?tmp$0#0:wybe.bool) @int:nn:nn
+        foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
+
 
   LLVM code       :
 
@@ -444,7 +444,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external fastcc  i1 @"position.position./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"position.position.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
 entry:
   %1 = inttoptr i64 %"$left#0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
@@ -460,38 +460,10 @@ entry:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"1$tmp$7#0" = icmp eq i64 %3, %10 
-  br i1 %"1$tmp$7#0", label %if.then, label %if.else 
-if.then:
-  %"2$tmp$0#0" = icmp eq i64 %7, %14 
-  %"2$$$#0" = xor i1 %"2$tmp$0#0", 1 
-  ret i1 %"2$$$#0" 
-if.else:
-  %"3$$$#0" = xor i1 0, 1 
-  ret i1 %"3$$$#0" 
-}
-
-
-define external fastcc  i1 @"position.position.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
-entry:
-  %15 = inttoptr i64 %"$left#0" to i64* 
-  %16 = getelementptr  i64, i64* %15, i64 0 
-  %17 = load  i64, i64* %16 
-  %18 = add   i64 %"$left#0", 8 
-  %19 = inttoptr i64 %18 to i64* 
-  %20 = getelementptr  i64, i64* %19, i64 0 
-  %21 = load  i64, i64* %20 
-  %22 = inttoptr i64 %"$right#0" to i64* 
-  %23 = getelementptr  i64, i64* %22, i64 0 
-  %24 = load  i64, i64* %23 
-  %25 = add   i64 %"$right#0", 8 
-  %26 = inttoptr i64 %25 to i64* 
-  %27 = getelementptr  i64, i64* %26, i64 0 
-  %28 = load  i64, i64* %27 
-  %"1$tmp$1#0" = icmp eq i64 %17, %24 
+  %"1$tmp$1#0" = icmp eq i64 %3, %10 
   br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
-  %"2$$$#0" = icmp eq i64 %21, %28 
+  %"2$$$#0" = icmp eq i64 %7, %14 
   ret i1 %"2$$$#0" 
 if.else:
   ret i1 0 
@@ -500,82 +472,110 @@ if.else:
 
 define external fastcc  i64 @"position.position.position<0>"(i64  %"x#0", i64  %"y#0")    {
 entry:
-  %29 = trunc i64 16 to i32  
-  %30 = tail call ccc  i8*  @wybe_malloc(i32  %29)  
-  %31 = ptrtoint i8* %30 to i64 
-  %32 = inttoptr i64 %31 to i64* 
-  %33 = getelementptr  i64, i64* %32, i64 0 
-  store  i64 %"x#0", i64* %33 
-  %34 = add   i64 %31, 8 
-  %35 = inttoptr i64 %34 to i64* 
-  %36 = getelementptr  i64, i64* %35, i64 0 
-  store  i64 %"y#0", i64* %36 
-  ret i64 %31 
+  %15 = trunc i64 16 to i32  
+  %16 = tail call ccc  i8*  @wybe_malloc(i32  %15)  
+  %17 = ptrtoint i8* %16 to i64 
+  %18 = inttoptr i64 %17 to i64* 
+  %19 = getelementptr  i64, i64* %18, i64 0 
+  store  i64 %"x#0", i64* %19 
+  %20 = add   i64 %17, 8 
+  %21 = inttoptr i64 %20 to i64* 
+  %22 = getelementptr  i64, i64* %21, i64 0 
+  store  i64 %"y#0", i64* %22 
+  ret i64 %17 
 }
 
 
 define external fastcc  {i64, i64} @"position.position.position<1>"(i64  %"$#0")    {
 entry:
-  %37 = inttoptr i64 %"$#0" to i64* 
-  %38 = getelementptr  i64, i64* %37, i64 0 
-  %39 = load  i64, i64* %38 
-  %40 = add   i64 %"$#0", 8 
-  %41 = inttoptr i64 %40 to i64* 
-  %42 = getelementptr  i64, i64* %41, i64 0 
-  %43 = load  i64, i64* %42 
-  %44 = insertvalue {i64, i64} undef, i64 %39, 0 
-  %45 = insertvalue {i64, i64} %44, i64 %43, 1 
-  ret {i64, i64} %45 
+  %23 = inttoptr i64 %"$#0" to i64* 
+  %24 = getelementptr  i64, i64* %23, i64 0 
+  %25 = load  i64, i64* %24 
+  %26 = add   i64 %"$#0", 8 
+  %27 = inttoptr i64 %26 to i64* 
+  %28 = getelementptr  i64, i64* %27, i64 0 
+  %29 = load  i64, i64* %28 
+  %30 = insertvalue {i64, i64} undef, i64 %25, 0 
+  %31 = insertvalue {i64, i64} %30, i64 %29, 1 
+  ret {i64, i64} %31 
 }
 
 
 define external fastcc  i64 @"position.position.x<0>"(i64  %"$rec#0")    {
 entry:
-  %46 = inttoptr i64 %"$rec#0" to i64* 
-  %47 = getelementptr  i64, i64* %46, i64 0 
-  %48 = load  i64, i64* %47 
-  ret i64 %48 
+  %32 = inttoptr i64 %"$rec#0" to i64* 
+  %33 = getelementptr  i64, i64* %32, i64 0 
+  %34 = load  i64, i64* %33 
+  ret i64 %34 
 }
 
 
 define external fastcc  i64 @"position.position.x<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %49 = trunc i64 16 to i32  
-  %50 = tail call ccc  i8*  @wybe_malloc(i32  %49)  
-  %51 = ptrtoint i8* %50 to i64 
-  %52 = inttoptr i64 %51 to i8* 
-  %53 = inttoptr i64 %"$rec#0" to i8* 
-  %54 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %52, i8*  %53, i32  %54, i32  8, i1  0)  
-  %55 = inttoptr i64 %51 to i64* 
-  %56 = getelementptr  i64, i64* %55, i64 0 
-  store  i64 %"$field#0", i64* %56 
-  ret i64 %51 
+  %35 = trunc i64 16 to i32  
+  %36 = tail call ccc  i8*  @wybe_malloc(i32  %35)  
+  %37 = ptrtoint i8* %36 to i64 
+  %38 = inttoptr i64 %37 to i8* 
+  %39 = inttoptr i64 %"$rec#0" to i8* 
+  %40 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %38, i8*  %39, i32  %40, i32  8, i1  0)  
+  %41 = inttoptr i64 %37 to i64* 
+  %42 = getelementptr  i64, i64* %41, i64 0 
+  store  i64 %"$field#0", i64* %42 
+  ret i64 %37 
 }
 
 
 define external fastcc  i64 @"position.position.y<0>"(i64  %"$rec#0")    {
 entry:
-  %57 = add   i64 %"$rec#0", 8 
-  %58 = inttoptr i64 %57 to i64* 
-  %59 = getelementptr  i64, i64* %58, i64 0 
-  %60 = load  i64, i64* %59 
-  ret i64 %60 
+  %43 = add   i64 %"$rec#0", 8 
+  %44 = inttoptr i64 %43 to i64* 
+  %45 = getelementptr  i64, i64* %44, i64 0 
+  %46 = load  i64, i64* %45 
+  ret i64 %46 
 }
 
 
 define external fastcc  i64 @"position.position.y<1>"(i64  %"$rec#0", i64  %"$field#0")    {
 entry:
-  %61 = trunc i64 16 to i32  
-  %62 = tail call ccc  i8*  @wybe_malloc(i32  %61)  
-  %63 = ptrtoint i8* %62 to i64 
-  %64 = inttoptr i64 %63 to i8* 
-  %65 = inttoptr i64 %"$rec#0" to i8* 
-  %66 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %64, i8*  %65, i32  %66, i32  8, i1  0)  
-  %67 = add   i64 %63, 8 
-  %68 = inttoptr i64 %67 to i64* 
-  %69 = getelementptr  i64, i64* %68, i64 0 
-  store  i64 %"$field#0", i64* %69 
-  ret i64 %63 
+  %47 = trunc i64 16 to i32  
+  %48 = tail call ccc  i8*  @wybe_malloc(i32  %47)  
+  %49 = ptrtoint i8* %48 to i64 
+  %50 = inttoptr i64 %49 to i8* 
+  %51 = inttoptr i64 %"$rec#0" to i8* 
+  %52 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %50, i8*  %51, i32  %52, i32  8, i1  0)  
+  %53 = add   i64 %49, 8 
+  %54 = inttoptr i64 %53 to i64* 
+  %55 = getelementptr  i64, i64* %54, i64 0 
+  store  i64 %"$field#0", i64* %55 
+  ret i64 %49 
+}
+
+
+define external fastcc  i1 @"position.position.~=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+entry:
+  %56 = inttoptr i64 %"$left#0" to i64* 
+  %57 = getelementptr  i64, i64* %56, i64 0 
+  %58 = load  i64, i64* %57 
+  %59 = add   i64 %"$left#0", 8 
+  %60 = inttoptr i64 %59 to i64* 
+  %61 = getelementptr  i64, i64* %60, i64 0 
+  %62 = load  i64, i64* %61 
+  %63 = inttoptr i64 %"$right#0" to i64* 
+  %64 = getelementptr  i64, i64* %63, i64 0 
+  %65 = load  i64, i64* %64 
+  %66 = add   i64 %"$right#0", 8 
+  %67 = inttoptr i64 %66 to i64* 
+  %68 = getelementptr  i64, i64* %67, i64 0 
+  %69 = load  i64, i64* %68 
+  %"1$tmp$7#0" = icmp eq i64 %58, %65 
+  br i1 %"1$tmp$7#0", label %if.then, label %if.else 
+if.then:
+  %"2$tmp$0#0" = icmp eq i64 %62, %69 
+  %"2$$$#0" = xor i1 %"2$tmp$0#0", 1 
+  ret i1 %"2$$$#0" 
+if.else:
+  %"3$$$#0" = xor i1 0, 1 
+  ret i1 %"3$$$#0" 
 }

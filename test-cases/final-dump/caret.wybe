@@ -1,0 +1,35 @@
+# test case for use of ob^member syntax
+use position
+
+type region { pub
+    region(lower_left:position, upper_right:position)
+}
+
+
+pub def expand_region(!reg:region, point:position) {
+    # ?ll = reg^lower_left
+    # !ll^x  = min(reg^lower_left^x, point^x)
+    # !reg^lower_left = ll
+    !reg^lower_left^x  = min(reg^lower_left^x, point^x)
+    !reg^lower_left^y  = min(reg^lower_left^y, point^y)
+    !reg^upper_right^x = max(reg^upper_right^x, point^x)
+    !reg^upper_right^y = max(reg^upper_right^y, point^y)
+}
+
+?reg = region(position(0,1), position(10,12))
+
+if { reg = region(_,position(?ten,12)) ::
+        !print("ten = ")
+        !println(ten)
+   | !println("woops!")
+}
+
+if { incr(!reg^upper_right^x) :: pass
+   | !error("couldn't udpate x of second position")
+}
+
+if { reg = region(_,position(?ten,_)) ::
+        !print("now ten = ")
+        !println(ten)
+   | !println("woops!")
+}

@@ -22,27 +22,27 @@ AFTER EVERYTHING:
     case ~tmp$5#0:wybe.bool of
     0:
         foreign llvm sub(0:wybe.int, ~x#0:wybe.int, ?tmp$1#0:wybe.int) @int:nn:nn
-        call_site_id.foo<0>(~tmp$1#0:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #17 @call_site_id:nn:nn
+        call_site_id.foo<0>(~tmp$1#0:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #14 @call_site_id:nn:nn
         foreign llvm icmp_sgt(y#0:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.bool) @int:nn:nn
         case ~tmp$4#0:wybe.bool of
         0:
             foreign llvm sub(0:wybe.int, ~y#0:wybe.int, ?tmp$2#0:wybe.int) @int:nn:nn
-            call_site_id.foo<0>(~tmp$2#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #18 @call_site_id:nn:nn
+            call_site_id.foo<0>(~tmp$2#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #15 @call_site_id:nn:nn
 
         1:
-            call_site_id.foo<0>(~y#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #19 @call_site_id:nn:nn
+            call_site_id.foo<0>(~y#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #16 @call_site_id:nn:nn
 
 
     1:
-        call_site_id.foo<0>(~x#0:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #20 @call_site_id:nn:nn
+        call_site_id.foo<0>(~x#0:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #17 @call_site_id:nn:nn
         foreign llvm icmp_sgt(y#0:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.bool) @int:nn:nn
         case ~tmp$3#0:wybe.bool of
         0:
             foreign llvm sub(0:wybe.int, ~y#0:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn
-            call_site_id.foo<0>(~tmp$0#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #21 @call_site_id:nn:nn
+            call_site_id.foo<0>(~tmp$0#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #18 @call_site_id:nn:nn
 
         1:
-            call_site_id.foo<0>(~y#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #22 @call_site_id:nn:nn
+            call_site_id.foo<0>(~y#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #19 @call_site_id:nn:nn
 
 
 

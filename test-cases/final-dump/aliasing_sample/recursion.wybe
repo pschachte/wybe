@@ -1,7 +1,7 @@
 use position
 
 public proc if_then_else(a:position, b:position, ?r:position)
-    if a.x > 0 ::
+    if a^x > 0 ::
         if_then_else(b, a, ?r)
     | true :: ?r = a
     end

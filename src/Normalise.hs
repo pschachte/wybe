@@ -79,6 +79,15 @@ normaliseItem (ResourceDecl vis name typ init pos) = do
     Nothing  -> return ()
     Just val -> normaliseItem (StmtDecl (ProcCall [] "=" Nothing Det False
                                          [Unplaced $ varSet name, val]) pos)
+normaliseItem (FuncDecl vis mods (ProcProto name params resources) resulttype
+    (Placed (Where body (Placed (Var var ParamOut rflow) _)) _) pos) =
+    -- Handle special reverse mode case of def foo(...) = var where ....
+    normaliseItem
+        (ProcDecl vis mods
+            (ProcProto name (params ++ [Param var resulttype ParamIn rflow])
+                       resources)
+             body
+        pos)
 normaliseItem (FuncDecl vis mods (ProcProto name params resources)
                         resulttype result pos) =
   let flowType = Implicit pos
@@ -595,7 +604,8 @@ constructorItems ctorName typeSpec params fields size tag tagLimit pos =
          -- fill in the secondary tag, if necessary
          (if tag > tagLimit
           then [Unplaced $ ForeignCall "lpvm" "mutate" []
-                 [Unplaced $ Typed (varGetSet "$rec" flowType) typeSpec Nothing,
+                 [Unplaced $ Typed (varGet "$rec") typeSpec Nothing,
+                  Unplaced $ Typed (varSet "$rec") typeSpec Nothing,
                   Unplaced $ iVal 0,
                   Unplaced $ iVal 1,
                   Unplaced $ iVal size,
@@ -607,7 +617,8 @@ constructorItems ctorName typeSpec params fields size tag tagLimit pos =
          (List.map
           (\(var,ty,_,offset) ->
                (Unplaced $ ForeignCall "lpvm" "mutate" []
-                 [Unplaced $ Typed (varGetSet "$rec" flowType) typeSpec Nothing,
+                 [Unplaced $ Typed (varGet "$rec") typeSpec Nothing,
+                  Unplaced $ Typed (varSet "$rec") typeSpec Nothing,
                   Unplaced $ iVal offset,
                   Unplaced $ iVal 1,
                   Unplaced $ iVal size,
@@ -737,8 +748,8 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
          ++
         -- Code to mutate the selected field
          [Unplaced $ ForeignCall "lpvm" "mutate" flags
-          [Unplaced $ Typed (Var "$rec" ParamInOut $ Implicit pos)
-                      rectype Nothing,
+          [Unplaced $ Typed (Var "$rec" ParamIn Ordinary) rectype Nothing,
+           Unplaced $ Typed (Var "$rec" ParamOut Ordinary) rectype Nothing,
            Unplaced $ iVal (offset - startOffset),
            Unplaced $ iVal 0,    -- May be changed to 1 by CTGC transform
            Unplaced $ iVal size,
@@ -937,11 +948,11 @@ implicitEquality typespec consts nonconsts rep = do
 implicitDisequality :: TypeSpec -> [Placed ProcProto] -> [Placed ProcProto]
                     -> TypeRepresentation -> Compiler [Item]
 implicitDisequality typespec consts nonconsts _ = do
-    defs <- lookupProc "/="
+    defs <- lookupProc "~="
     if isJust defs
     then return [] -- don't generate if user-defined
     else do
-      let neProto = ProcProto "/=" [Param "$left" typespec ParamIn Ordinary,
+      let neProto = ProcProto "~=" [Param "$left" typespec ParamIn Ordinary,
                                      Param "$right" typespec ParamIn Ordinary]
                     Set.empty
       let neBody = [Unplaced $ Not $ Unplaced $

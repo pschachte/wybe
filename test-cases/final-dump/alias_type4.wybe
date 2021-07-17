@@ -4,9 +4,9 @@ pub type position { pub position(x:int, y:int) }
 pub type posrec { pub posrec(p:position, a:int) }
 
 pub def foo(r1:posrec) use !io {
-    ?pos1 = r1.p
+    ?pos1 = r1^p
     x(!pos1, 1111) # Non-destructive
-    !println(pos1.x)
+    !println(pos1^x)
 }
 
 

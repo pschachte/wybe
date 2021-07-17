@@ -65,7 +65,7 @@ car($rec#0:generic_list(?T), ?$rec#1:generic_list(?T), $field#0:?T, ?$$#0:wybe.b
         foreign llvm move(~$rec#0:generic_list(?T), ?$rec#1:generic_list(?T))
 
     1:
-        foreign lpvm mutate(~%$rec#0:generic_list(?T), ?%$rec#1:generic_list(?T), 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:?T)
+        foreign lpvm mutate(~$rec#0:generic_list(?T), ?$rec#1:generic_list(?T), 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:?T)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -97,7 +97,7 @@ cdr($rec#0:generic_list(?T), ?$rec#1:generic_list(?T), $field#0:generic_list(?T)
         foreign llvm move(~$rec#0:generic_list(?T), ?$rec#1:generic_list(?T))
 
     1:
-        foreign lpvm {noalias} mutate(~%$rec#0:generic_list(?T), ?%$rec#1:generic_list(?T), 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:generic_list(?T))
+        foreign lpvm {noalias} mutate(~$rec#0:generic_list(?T), ?$rec#1:generic_list(?T), 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:generic_list(?T))
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -108,8 +108,8 @@ cons(car#0:?T, cdr#0:generic_list(?T), ?$#0:generic_list(?T)):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:generic_list(?T))
-    foreign lpvm mutate(~%$rec#0:generic_list(?T), ?%$rec#1:generic_list(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~car#0:?T)
-    foreign lpvm mutate(~%$rec#1:generic_list(?T), ?%$#0:generic_list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~cdr#0:generic_list(?T))
+    foreign lpvm mutate(~$rec#0:generic_list(?T), ?$rec#1:generic_list(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~car#0:?T)
+    foreign lpvm mutate(~$rec#1:generic_list(?T), ?$#0:generic_list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~cdr#0:generic_list(?T))
 cons > public {inline} (6 calls)
 1: generic_list.cons<1>
 cons(?car#0:?T, ?cdr#0:generic_list(?T), $#0:generic_list(?T), ?$$#0:wybe.bool):

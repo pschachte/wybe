@@ -5,7 +5,6 @@ AFTER EVERYTHING:
   public submods  : int_list -> loop_bug.int_list
   public resources: 
   public procs    : loop_bug.print<0>
-                    loop_bug.int_list./=<0>
                     loop_bug.int_list.=<0>
                     loop_bug.int_list.cons<0>
                     loop_bug.int_list.cons<1>
@@ -14,6 +13,7 @@ AFTER EVERYTHING:
                     loop_bug.int_list.nil<0>
                     loop_bug.int_list.tail<0>
                     loop_bug.int_list.tail<1>
+                    loop_bug.int_list.~=<0>
   imports         : public use loop_bug.int_list
                     use wybe
   resources       : 
@@ -154,8 +154,7 @@ if.else:
   representation  : address
   public submods  : 
   public resources: 
-  public procs    : loop_bug.int_list./=<0>
-                    loop_bug.int_list.=<0>
+  public procs    : loop_bug.int_list.=<0>
                     loop_bug.int_list.cons<0>
                     loop_bug.int_list.cons<1>
                     loop_bug.int_list.head<0>
@@ -163,19 +162,11 @@ if.else:
                     loop_bug.int_list.nil<0>
                     loop_bug.int_list.tail<0>
                     loop_bug.int_list.tail<1>
+                    loop_bug.int_list.~=<0>
   imports         : use loop_bug
                     use wybe
   resources       : 
   procs           : 
-
-/= > public {inline} (0 calls)
-0: loop_bug.int_list./=<0>
-/=($left#0:loop_bug.int_list, $right#0:loop_bug.int_list, ?$$#0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
-    loop_bug.int_list.=<0>(~$left#0:loop_bug.int_list, ~$right#0:loop_bug.int_list, ?tmp$0#0:wybe.bool) #0
-    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
-
 
 = > public (2 calls)
 0: loop_bug.int_list.=<0>
@@ -216,8 +207,8 @@ cons(head#0:wybe.int, tail#0:loop_bug.int_list, ?$#0:loop_bug.int_list):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:loop_bug.int_list)
-    foreign lpvm mutate(~%$rec#0:loop_bug.int_list, ?%$rec#1:loop_bug.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:wybe.int)
-    foreign lpvm mutate(~%$rec#1:loop_bug.int_list, ?%$#0:loop_bug.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:loop_bug.int_list)
+    foreign lpvm mutate(~$rec#0:loop_bug.int_list, ?$rec#1:loop_bug.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head#0:wybe.int)
+    foreign lpvm mutate(~$rec#1:loop_bug.int_list, ?$#0:loop_bug.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail#0:loop_bug.int_list)
 cons > public {inline} (12 calls)
 1: loop_bug.int_list.cons<1>
 cons(?head#0:wybe.int, ?tail#0:loop_bug.int_list, $#0:loop_bug.int_list, ?$$#0:wybe.bool):
@@ -264,7 +255,7 @@ head($rec#0:loop_bug.int_list, ?$rec#1:loop_bug.int_list, $field#0:wybe.int, ?$$
         foreign llvm move(~$rec#0:loop_bug.int_list, ?$rec#1:loop_bug.int_list)
 
     1:
-        foreign lpvm mutate(~%$rec#0:loop_bug.int_list, ?%$rec#1:loop_bug.int_list, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+        foreign lpvm mutate(~$rec#0:loop_bug.int_list, ?$rec#1:loop_bug.int_list, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -304,9 +295,18 @@ tail($rec#0:loop_bug.int_list, ?$rec#1:loop_bug.int_list, $field#0:loop_bug.int_
         foreign llvm move(~$rec#0:loop_bug.int_list, ?$rec#1:loop_bug.int_list)
 
     1:
-        foreign lpvm {noalias} mutate(~%$rec#0:loop_bug.int_list, ?%$rec#1:loop_bug.int_list, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:loop_bug.int_list)
+        foreign lpvm {noalias} mutate(~$rec#0:loop_bug.int_list, ?$rec#1:loop_bug.int_list, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:loop_bug.int_list)
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
+
+
+~= > public {inline} (0 calls)
+0: loop_bug.int_list.~=<0>
+~=($left#0:loop_bug.int_list, $right#0:loop_bug.int_list, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    loop_bug.int_list.=<0>(~$left#0:loop_bug.int_list, ~$right#0:loop_bug.int_list, ?tmp$0#0:wybe.bool) #0
+    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
   LLVM code       :
 
@@ -320,14 +320,6 @@ declare external ccc  i8* @wybe_malloc(i32)
 
 
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
-
-
-define external fastcc  i1 @"loop_bug.int_list./=<0>"(i64  %"$left#0", i64  %"$right#0")    {
-entry:
-  %"1$tmp$0#0" = tail call fastcc  i1  @"loop_bug.int_list.=<0>"(i64  %"$left#0", i64  %"$right#0")  
-  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
-  ret i1 %"1$$$#0" 
-}
 
 
 define external fastcc  i1 @"loop_bug.int_list.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
@@ -498,4 +490,12 @@ if.else:
   %74 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
   %75 = insertvalue {i64, i1} %74, i1 0, 1 
   ret {i64, i1} %75 
+}
+
+
+define external fastcc  i1 @"loop_bug.int_list.~=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+entry:
+  %"1$tmp$0#0" = tail call fastcc  i1  @"loop_bug.int_list.=<0>"(i64  %"$left#0", i64  %"$right#0")  
+  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
+  ret i1 %"1$$$#0" 
 }

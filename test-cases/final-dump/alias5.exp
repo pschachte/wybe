@@ -51,7 +51,7 @@ replicate1(v1#0:wybe.int, ?v2#0:wybe.int, v3#0:wybe.int, ?v4#1:wybe.int, io#0:wy
     foreign llvm add(~v3#0:wybe.int, 100:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn
     foreign llvm mul(~tmp$0#0:wybe.int, 200:wybe.int, ?tmp$2#0:wybe.int) @int:nn:nn
     foreign llvm sdiv(~tmp$2#0:wybe.int, 4:wybe.int, ?v4#1:wybe.int) @int:nn:nn
-    foreign llvm move(~v1#0:wybe.int, ?v2#0:wybe.int) @alias5:9:3
+    foreign llvm move(~v1#0:wybe.int, ?v2#0:wybe.int) @alias5:9:4
 
   LLVM code       :
 

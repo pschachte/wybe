@@ -2,7 +2,7 @@
 #pub def mod(x:int, y:int, ?r:int)  {?r = foreign llvm urem(x, y) end
 
 pub def mod(x:int, y:int, ?r:int) use !io {
-  !print('x') !print(x) !print(' ') !print('y') !println(y)
+  !print('x') ; !print(x) ; !print(' ') ; !print('y') ; !println(y)
   ?r = foreign llvm urem(x, y)
 }
 
@@ -11,7 +11,7 @@ pub def gcd(a:int, b:int, ?r:int) use !io {
   ?y = b
   ?t = a
   do {
-    while y /= 0
+    while y ~= 0
       ?t = y
       !mod(x, t, ?y)
       ?x = t

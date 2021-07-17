@@ -1,6 +1,6 @@
 pub def inc2(x:int):int = (x+1)+1
 
-pub def inc2(?x:int,y:int) {
+pub def inc2(?x:int):int = ?y where {
     # until wybe allows !x to be treated as ?x, this doesn't work:
     ((?x+1)+1) = y
 }
