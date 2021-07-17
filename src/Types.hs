@@ -77,6 +77,15 @@ validateProcDefTypes name def = do
 validateParamType :: Ident -> OptPos -> Bool -> Param -> Compiler Param
 validateParamType pname ppos public param = do
     let ty = paramType param
+    -- XXX For Issue #135, but this issues warnings about OK constructor decls
+    -- currMod <- getModuleSpec
+    -- case ty of
+    --     TypeSpec tmod tname _ | tname == last currMod && tmod == init currMod ->
+    --       message Warning
+    --       ("Explicit specification of current type " ++ show ty
+    --        ++ "\n  it is recommended to specify type as _")
+    --       ppos
+    --     _ -> return ()
     checkDeclIfPublic pname ppos public ty
     logTypes $ "Checking type " ++ show ty ++ " of param " ++ show param
     ty' <- lookupType "proc declaration" ppos ty
