@@ -387,7 +387,7 @@ escapedChar c = c
 --  underscores in integers. Doesn't handle negative numbers (these are handled by the parser).
 scanNumberToken :: SourcePos -> [Char] -> [Token]
 scanNumberToken pos cs =
-    let (num0,rest0) = span isNumberChar cs
+    let (num0,rest0) = grabNumberChars False cs
         num = map toLower $ filter (/='_') num0
         (num',rest) = case (last num,rest0) of
           -- Handle negative exponents in scientific notation
@@ -444,6 +444,14 @@ scanNumberToken pos cs =
                                             ++ show tok
                                             ++ " when parsing a number ")
         : tokenise pos' rest
+
+
+grabNumberChars :: Bool -> [Char] -> ([Char],[Char])
+grabNumberChars seenPoint (c:cs)
+ |  isIdentChar c = mapFst (c:) $ grabNumberChars seenPoint cs
+grabNumberChars False ('.':c:cs)
+ |  isDigit c = mapFst (('.':) . (c:)) $ grabNumberChars True cs
+grabNumberChars _ cs = ([], cs)
 
 
 -- |Convert the string to a non-negative integer in the specified radix.  The
