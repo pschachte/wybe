@@ -773,21 +773,25 @@ may fail or never return.  Wybe has a single built-in failing proc, named
 
 ## Iteration statements
 
-Iteration is specified with the `do` statement, of the form:
+Iteration is specified with the `do` and `for` statements, of the form:
+
 > `do` `{` *statements* `}`
-This executes the enclosed *statements* repeatedly, until a termination
-condition is reached.
 
-Types that implement the cons operator (`[|]`) can be looped over using
-`for` loops. Presently `array` and `list` in the stdlib implement this operator:
-```
-for <outvar1>[, <outvar2>]* in <gen1>[, <gen2>]* { 
-    *statements* 
-}
-```
+or
 
-The enclosed *statements* may include any ordinary Wybe statements, plus any of
-the following:
+> `for` *generator* `{` *statements* `}`
+
+where a *generator* is one or more expressions of the form
+
+> `?`*var1* `in` *sequence*
+
+separated by semicolons or newlines. Each *generator* is a value of any
+type that implements the backwards mode of the cons operator (`[|]`),
+where the list is input and the head and tail are outputs. Presently
+`array` and `list` in the standard library implement this operator.
+
+The enclosed *statements* in both `do` and `for` loops may include any ordinary
+Wybe statements, plus any of the following:
 
 > `while` *test*
 
@@ -805,9 +809,8 @@ If *test* fails, restart the loop immediately, otherwise continue
 
 If *test* succeeds, restart the loop immediately, otherwise continue
 
-These special loop control statements may be used anywhere inside a `do`
-statement.
-For example:
+These special loop control statements may be used anywhere inside a `for` or
+`do` statement. For example:
 
 ```
 do {!print(prompt)

@@ -20,7 +20,8 @@ pub def shortest_generator_termination use !io {
     ?x = [1, 2, 3, 4]
     ?y = [4, 5]
 
-    for ?i in x; ?j in y {
+    for ?i in x
+        ?j in y {
         !println(i)
         !println(j)
     }
