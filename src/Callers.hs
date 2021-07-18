@@ -92,6 +92,8 @@ adjustNth fn n (e:es)
 ----------------------------------------------------------------
 --                     Handling the call graph
 ----------------------------------------------------------------
+-- Note: We do not consider Multiple Specialization in the call graph.
+
 getSccProcs :: ModSpec -> Compiler [SCC ProcSpec]
 getSccProcs thisMod = do
   procs <- getModuleImplementationField (Map.toList . modProcs)
@@ -120,5 +122,8 @@ localBodyCallees modspec body =
 
 
 localCallees :: ModSpec -> Prim -> [ProcSpec]
-localCallees modspec (PrimCall _ pspec _) = [pspec]
+localCallees modspec (PrimCall _ pspec _) =
+  -- turn it back to the general version
+  let ProcSpec thisMod name n _ = pspec in
+  [ProcSpec thisMod name n generalVersion]
 localCallees _ _                        = []
