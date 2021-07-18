@@ -273,7 +273,7 @@ expandRequiredSpeczVersionsByProcSCC required scc@(CyclicSCC pspecs) = do
     required' <- foldM expandRequiredSpeczVersionsByProc required pspecs
     -- whether it reaches a fixpoint: is there any newly found required versions
     -- of procs in the current SCC.
-    let fixpoint = Set.difference required required'
+    let fixpoint = Set.difference required' required
                     |> all (\p -> not (List.any (sameBaseProc p) pspecs))
     if fixpoint
     then return required'
