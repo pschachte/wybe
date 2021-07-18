@@ -1,0 +1,458 @@
+======================================================================
+AFTER EVERYTHING:
+ Module int_sequence
+  representation  : address
+  public submods  : 
+  public resources: 
+  public procs    : int_sequence.<0>
+                    int_sequence...<0>
+                    int_sequence...<1>
+                    int_sequence.=<0>
+                    int_sequence.[|]<0>
+                    int_sequence.lower<0>
+                    int_sequence.lower<1>
+                    int_sequence.upper<0>
+                    int_sequence.upper<1>
+                    int_sequence.~=<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+*main* > public (0 calls)
+0: int_sequence.<0>
+(io#0:wybe.phantom, ?io#1:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm alloc(16:wybe.int, ?tmp$6#0:int_sequence)
+    foreign lpvm mutate(~tmp$6#0:int_sequence, ?tmp$7#0:int_sequence, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int)
+    foreign lpvm mutate(~tmp$7#0:int_sequence, ?tmp$3#0:int_sequence, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int)
+    int_sequence.gen$1<0>(~io#0:wybe.phantom, ~tmp$3#0:int_sequence, ~tmp$3#0:int_sequence, ?io#1:wybe.phantom) #1 @int_sequence:nn:nn
+
+
+.. > public {inline} (2 calls)
+0: int_sequence...<0>
+..(lower#0:wybe.int, upper#0:wybe.int, ?$#0:int_sequence):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm alloc(16:wybe.int, ?$rec#0:int_sequence)
+    foreign lpvm mutate(~$rec#0:int_sequence, ?$rec#1:int_sequence, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~lower#0:wybe.int)
+    foreign lpvm mutate(~$rec#1:int_sequence, ?$#0:int_sequence, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~upper#0:wybe.int)
+.. > public {inline} (6 calls)
+1: int_sequence...<1>
+..(?lower#0:wybe.int, ?upper#0:wybe.int, $#0:int_sequence):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm access($#0:int_sequence, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?lower#0:wybe.int)
+    foreign lpvm access(~$#0:int_sequence, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?upper#0:wybe.int)
+
+
+= > public {inline} (1 calls)
+0: int_sequence.=<0>
+=($left#0:int_sequence, $right#0:int_sequence, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm access($left#0:int_sequence, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$lower#0:wybe.int)
+    foreign lpvm access(~$left#0:int_sequence, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$upper#0:wybe.int)
+    foreign lpvm access($right#0:int_sequence, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$lower#0:wybe.int)
+    foreign lpvm access(~$right#0:int_sequence, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$upper#0:wybe.int)
+    foreign llvm icmp_eq(~$left$lower#0:wybe.int, ~$right$lower#0:wybe.int, ?tmp$1#0:wybe.bool) @int:nn:nn
+    case ~tmp$1#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign llvm icmp_eq(~$left$upper#0:wybe.int, ~$right$upper#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
+
+
+
+[|] > public (3 calls)
+0: int_sequence.[|]<0>[785a827a1b]
+[|](?head#0:wybe.int, ?tail#0:int_sequence, seq#0:int_sequence, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: [InterestingUnaliased 2]
+    foreign lpvm access(seq#0:int_sequence, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.int)
+    foreign lpvm access(~seq#0:int_sequence, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.int)
+    foreign llvm icmp_sle(tmp$0#0:wybe.int, tmp$1#0:wybe.int, ?tmp$7#0:wybe.bool) @int:nn:nn
+    case ~tmp$7#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?head#0:wybe.int)
+        foreign llvm move(undef:int_sequence, ?tail#0:int_sequence)
+
+    1:
+        foreign llvm move(tmp$0#0:wybe.int, ?head#0:wybe.int) @int_sequence:nn:nn
+        foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$4#0:wybe.int) @int:nn:nn
+        foreign lpvm alloc(16:wybe.int, ?tmp$19#0:int_sequence)
+        foreign lpvm mutate(~tmp$19#0:int_sequence, ?tmp$20#0:int_sequence, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$4#0:wybe.int)
+        foreign lpvm mutate(~tmp$20#0:int_sequence, ?tail#0:int_sequence, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$1#0:wybe.int)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+ [785a827a1b] [NonAliasedParam 2] :
+    foreign lpvm access(seq#0:int_sequence, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.int)
+    foreign lpvm access(seq#0:int_sequence, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.int)
+    foreign llvm icmp_sle(tmp$0#0:wybe.int, tmp$1#0:wybe.int, ?tmp$7#0:wybe.bool) @int:nn:nn
+    case ~tmp$7#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:wybe.int, ?head#0:wybe.int)
+        foreign llvm move(undef:int_sequence, ?tail#0:int_sequence)
+
+    1:
+        foreign llvm move(tmp$0#0:wybe.int, ?head#0:wybe.int) @int_sequence:nn:nn
+        foreign llvm add(~tmp$0#0:wybe.int, 1:wybe.int, ?tmp$4#0:wybe.int) @int:nn:nn
+        foreign lpvm mutate(~seq#0:int_sequence, ?tmp$20#0:int_sequence, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$4#0:wybe.int)
+        foreign lpvm mutate(~tmp$20#0:int_sequence, ?tail#0:int_sequence, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$1#0:wybe.int)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+gen$1 > (2 calls)
+0: int_sequence.gen$1<0>[6dacb8fd25]
+gen$1(io#0:wybe.phantom, tmp$0#0:int_sequence, tmp$3#0:int_sequence, ?io#2:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: [InterestingUnaliased 1]
+ MultiSpeczDepInfo: [(0,(int_sequence.[|]<0>,fromList [NonAliasedParamCond 2 [1]])),(2,(int_sequence.gen$1<0>,fromList [NonAliasedParamCond 1 []]))]
+    int_sequence.[|]<0>(?i#0:wybe.int, ?tmp$1#0:int_sequence, ~tmp$0#0:int_sequence, ?tmp$2#0:wybe.bool) #0
+    case ~tmp$2#0:wybe.bool of
+    0:
+        foreign llvm move(~io#0:wybe.phantom, ?io#2:wybe.phantom)
+
+    1:
+        foreign c print_int(~i#0:wybe.int, ~#io#0:wybe.phantom, ?tmp$6#0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp$6#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+        int_sequence.gen$1<0>[6dacb8fd25](~io#1:wybe.phantom, ~tmp$1#0:int_sequence, ~tmp$3#0:int_sequence, ?io#2:wybe.phantom) #2 @int_sequence:nn:nn
+
+ [6dacb8fd25] [NonAliasedParam 1] :
+    int_sequence.[|]<0>[785a827a1b](?i#0:wybe.int, ?tmp$1#0:int_sequence, ~tmp$0#0:int_sequence, ?tmp$2#0:wybe.bool) #0
+    case ~tmp$2#0:wybe.bool of
+    0:
+        foreign llvm move(~io#0:wybe.phantom, ?io#2:wybe.phantom)
+
+    1:
+        foreign c print_int(~i#0:wybe.int, ~#io#0:wybe.phantom, ?tmp$6#0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp$6#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+        int_sequence.gen$1<0>[6dacb8fd25](~io#1:wybe.phantom, ~tmp$1#0:int_sequence, ~tmp$3#0:int_sequence, ?io#2:wybe.phantom) #2 @int_sequence:nn:nn
+
+
+
+lower > public {inline} (5 calls)
+0: int_sequence.lower<0>
+lower($rec#0:int_sequence, ?$#0:wybe.int):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm access(~$rec#0:int_sequence, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.int)
+lower > public {inline} (0 calls)
+1: int_sequence.lower<1>
+lower($rec#0:int_sequence, ?$rec#1:int_sequence, $field#0:wybe.int):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm {noalias} mutate(~$rec#0:int_sequence, ?$rec#1:int_sequence, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+
+
+upper > public {inline} (4 calls)
+0: int_sequence.upper<0>
+upper($rec#0:int_sequence, ?$#0:wybe.int):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm access(~$rec#0:int_sequence, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.int)
+upper > public {inline} (0 calls)
+1: int_sequence.upper<1>
+upper($rec#0:int_sequence, ?$rec#1:int_sequence, $field#0:wybe.int):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm {noalias} mutate(~$rec#0:int_sequence, ?$rec#1:int_sequence, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+
+
+~= > public {inline} (0 calls)
+0: int_sequence.~=<0>
+~=($left#0:int_sequence, $right#0:int_sequence, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm access($left#0:int_sequence, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.int)
+    foreign lpvm access(~$left#0:int_sequence, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.int)
+    foreign lpvm access($right#0:int_sequence, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.int)
+    foreign lpvm access(~$right#0:int_sequence, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.int)
+    foreign llvm icmp_eq(~tmp$3#0:wybe.int, ~tmp$5#0:wybe.int, ?tmp$7#0:wybe.bool) @int:nn:nn
+    case ~tmp$7#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?tmp$0#0:wybe.bool)
+        foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
+
+    1:
+        foreign llvm icmp_eq(~tmp$4#0:wybe.int, ~tmp$6#0:wybe.int, ?tmp$0#0:wybe.bool) @int:nn:nn
+        foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
+
+
+  LLVM code       :
+
+; ModuleID = 'int_sequence'
+
+
+ 
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_int(i64)    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+
+
+define external fastcc  void @"int_sequence.<0>"()    {
+entry:
+  %1 = trunc i64 16 to i32  
+  %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
+  %3 = ptrtoint i8* %2 to i64 
+  %4 = inttoptr i64 %3 to i64* 
+  %5 = getelementptr  i64, i64* %4, i64 0 
+  store  i64 1, i64* %5 
+  %6 = add   i64 %3, 8 
+  %7 = inttoptr i64 %6 to i64* 
+  %8 = getelementptr  i64, i64* %7, i64 0 
+  store  i64 10, i64* %8 
+  tail call fastcc  void  @"int_sequence.gen$1<0>"(i64  %3, i64  %3)  
+  ret void 
+}
+
+
+define external fastcc  i64 @"int_sequence...<0>"(i64  %"lower#0", i64  %"upper#0")    {
+entry:
+  %9 = trunc i64 16 to i32  
+  %10 = tail call ccc  i8*  @wybe_malloc(i32  %9)  
+  %11 = ptrtoint i8* %10 to i64 
+  %12 = inttoptr i64 %11 to i64* 
+  %13 = getelementptr  i64, i64* %12, i64 0 
+  store  i64 %"lower#0", i64* %13 
+  %14 = add   i64 %11, 8 
+  %15 = inttoptr i64 %14 to i64* 
+  %16 = getelementptr  i64, i64* %15, i64 0 
+  store  i64 %"upper#0", i64* %16 
+  ret i64 %11 
+}
+
+
+define external fastcc  {i64, i64} @"int_sequence...<1>"(i64  %"$#0")    {
+entry:
+  %17 = inttoptr i64 %"$#0" to i64* 
+  %18 = getelementptr  i64, i64* %17, i64 0 
+  %19 = load  i64, i64* %18 
+  %20 = add   i64 %"$#0", 8 
+  %21 = inttoptr i64 %20 to i64* 
+  %22 = getelementptr  i64, i64* %21, i64 0 
+  %23 = load  i64, i64* %22 
+  %24 = insertvalue {i64, i64} undef, i64 %19, 0 
+  %25 = insertvalue {i64, i64} %24, i64 %23, 1 
+  ret {i64, i64} %25 
+}
+
+
+define external fastcc  i1 @"int_sequence.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+entry:
+  %26 = inttoptr i64 %"$left#0" to i64* 
+  %27 = getelementptr  i64, i64* %26, i64 0 
+  %28 = load  i64, i64* %27 
+  %29 = add   i64 %"$left#0", 8 
+  %30 = inttoptr i64 %29 to i64* 
+  %31 = getelementptr  i64, i64* %30, i64 0 
+  %32 = load  i64, i64* %31 
+  %33 = inttoptr i64 %"$right#0" to i64* 
+  %34 = getelementptr  i64, i64* %33, i64 0 
+  %35 = load  i64, i64* %34 
+  %36 = add   i64 %"$right#0", 8 
+  %37 = inttoptr i64 %36 to i64* 
+  %38 = getelementptr  i64, i64* %37, i64 0 
+  %39 = load  i64, i64* %38 
+  %"1$tmp$1#0" = icmp eq i64 %28, %35 
+  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
+if.then:
+  %"2$$$#0" = icmp eq i64 %32, %39 
+  ret i1 %"2$$$#0" 
+if.else:
+  ret i1 0 
+}
+
+
+define external fastcc  {i64, i64, i1} @"int_sequence.[|]<0>"(i64  %"seq#0")    {
+entry:
+  %40 = inttoptr i64 %"seq#0" to i64* 
+  %41 = getelementptr  i64, i64* %40, i64 0 
+  %42 = load  i64, i64* %41 
+  %43 = add   i64 %"seq#0", 8 
+  %44 = inttoptr i64 %43 to i64* 
+  %45 = getelementptr  i64, i64* %44, i64 0 
+  %46 = load  i64, i64* %45 
+  %"1$tmp$7#0" = icmp sle i64 %42, %46 
+  br i1 %"1$tmp$7#0", label %if.then, label %if.else 
+if.then:
+  %"2$tmp$4#0" = add   i64 %42, 1 
+  %47 = trunc i64 16 to i32  
+  %48 = tail call ccc  i8*  @wybe_malloc(i32  %47)  
+  %49 = ptrtoint i8* %48 to i64 
+  %50 = inttoptr i64 %49 to i64* 
+  %51 = getelementptr  i64, i64* %50, i64 0 
+  store  i64 %"2$tmp$4#0", i64* %51 
+  %52 = add   i64 %49, 8 
+  %53 = inttoptr i64 %52 to i64* 
+  %54 = getelementptr  i64, i64* %53, i64 0 
+  store  i64 %46, i64* %54 
+  %55 = insertvalue {i64, i64, i1} undef, i64 %42, 0 
+  %56 = insertvalue {i64, i64, i1} %55, i64 %49, 1 
+  %57 = insertvalue {i64, i64, i1} %56, i1 1, 2 
+  ret {i64, i64, i1} %57 
+if.else:
+  %58 = insertvalue {i64, i64, i1} undef, i64 undef, 0 
+  %59 = insertvalue {i64, i64, i1} %58, i64 undef, 1 
+  %60 = insertvalue {i64, i64, i1} %59, i1 0, 2 
+  ret {i64, i64, i1} %60 
+}
+
+
+define external fastcc  {i64, i64, i1} @"int_sequence.[|]<0>[785a827a1b]"(i64  %"seq#0")    {
+entry:
+  %61 = inttoptr i64 %"seq#0" to i64* 
+  %62 = getelementptr  i64, i64* %61, i64 0 
+  %63 = load  i64, i64* %62 
+  %64 = add   i64 %"seq#0", 8 
+  %65 = inttoptr i64 %64 to i64* 
+  %66 = getelementptr  i64, i64* %65, i64 0 
+  %67 = load  i64, i64* %66 
+  %"1$tmp$7#0" = icmp sle i64 %63, %67 
+  br i1 %"1$tmp$7#0", label %if.then, label %if.else 
+if.then:
+  %"2$tmp$4#0" = add   i64 %63, 1 
+  %68 = inttoptr i64 %"seq#0" to i64* 
+  %69 = getelementptr  i64, i64* %68, i64 0 
+  store  i64 %"2$tmp$4#0", i64* %69 
+  %70 = add   i64 %"seq#0", 8 
+  %71 = inttoptr i64 %70 to i64* 
+  %72 = getelementptr  i64, i64* %71, i64 0 
+  store  i64 %67, i64* %72 
+  %73 = insertvalue {i64, i64, i1} undef, i64 %63, 0 
+  %74 = insertvalue {i64, i64, i1} %73, i64 %"seq#0", 1 
+  %75 = insertvalue {i64, i64, i1} %74, i1 1, 2 
+  ret {i64, i64, i1} %75 
+if.else:
+  %76 = insertvalue {i64, i64, i1} undef, i64 undef, 0 
+  %77 = insertvalue {i64, i64, i1} %76, i64 undef, 1 
+  %78 = insertvalue {i64, i64, i1} %77, i1 0, 2 
+  ret {i64, i64, i1} %78 
+}
+
+
+define external fastcc  void @"int_sequence.gen$1<0>"(i64  %"tmp$0#0", i64  %"tmp$3#0")    {
+entry:
+  %79 = tail call fastcc  {i64, i64, i1}  @"int_sequence.[|]<0>"(i64  %"tmp$0#0")  
+  %80 = extractvalue {i64, i64, i1} %79, 0 
+  %81 = extractvalue {i64, i64, i1} %79, 1 
+  %82 = extractvalue {i64, i64, i1} %79, 2 
+  br i1 %82, label %if.then, label %if.else 
+if.then:
+  tail call ccc  void  @print_int(i64  %80)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"int_sequence.gen$1<0>[6dacb8fd25]"(i64  %81, i64  %"tmp$3#0")  
+  ret void 
+if.else:
+  ret void 
+}
+
+
+define external fastcc  void @"int_sequence.gen$1<0>[6dacb8fd25]"(i64  %"tmp$0#0", i64  %"tmp$3#0")    {
+entry:
+  %83 = tail call fastcc  {i64, i64, i1}  @"int_sequence.[|]<0>[785a827a1b]"(i64  %"tmp$0#0")  
+  %84 = extractvalue {i64, i64, i1} %83, 0 
+  %85 = extractvalue {i64, i64, i1} %83, 1 
+  %86 = extractvalue {i64, i64, i1} %83, 2 
+  br i1 %86, label %if.then, label %if.else 
+if.then:
+  tail call ccc  void  @print_int(i64  %84)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"int_sequence.gen$1<0>[6dacb8fd25]"(i64  %85, i64  %"tmp$3#0")  
+  ret void 
+if.else:
+  ret void 
+}
+
+
+define external fastcc  i64 @"int_sequence.lower<0>"(i64  %"$rec#0")    {
+entry:
+  %87 = inttoptr i64 %"$rec#0" to i64* 
+  %88 = getelementptr  i64, i64* %87, i64 0 
+  %89 = load  i64, i64* %88 
+  ret i64 %89 
+}
+
+
+define external fastcc  i64 @"int_sequence.lower<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+entry:
+  %90 = trunc i64 16 to i32  
+  %91 = tail call ccc  i8*  @wybe_malloc(i32  %90)  
+  %92 = ptrtoint i8* %91 to i64 
+  %93 = inttoptr i64 %92 to i8* 
+  %94 = inttoptr i64 %"$rec#0" to i8* 
+  %95 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %93, i8*  %94, i32  %95, i32  8, i1  0)  
+  %96 = inttoptr i64 %92 to i64* 
+  %97 = getelementptr  i64, i64* %96, i64 0 
+  store  i64 %"$field#0", i64* %97 
+  ret i64 %92 
+}
+
+
+define external fastcc  i64 @"int_sequence.upper<0>"(i64  %"$rec#0")    {
+entry:
+  %98 = add   i64 %"$rec#0", 8 
+  %99 = inttoptr i64 %98 to i64* 
+  %100 = getelementptr  i64, i64* %99, i64 0 
+  %101 = load  i64, i64* %100 
+  ret i64 %101 
+}
+
+
+define external fastcc  i64 @"int_sequence.upper<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+entry:
+  %102 = trunc i64 16 to i32  
+  %103 = tail call ccc  i8*  @wybe_malloc(i32  %102)  
+  %104 = ptrtoint i8* %103 to i64 
+  %105 = inttoptr i64 %104 to i8* 
+  %106 = inttoptr i64 %"$rec#0" to i8* 
+  %107 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %105, i8*  %106, i32  %107, i32  8, i1  0)  
+  %108 = add   i64 %104, 8 
+  %109 = inttoptr i64 %108 to i64* 
+  %110 = getelementptr  i64, i64* %109, i64 0 
+  store  i64 %"$field#0", i64* %110 
+  ret i64 %104 
+}
+
+
+define external fastcc  i1 @"int_sequence.~=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+entry:
+  %111 = inttoptr i64 %"$left#0" to i64* 
+  %112 = getelementptr  i64, i64* %111, i64 0 
+  %113 = load  i64, i64* %112 
+  %114 = add   i64 %"$left#0", 8 
+  %115 = inttoptr i64 %114 to i64* 
+  %116 = getelementptr  i64, i64* %115, i64 0 
+  %117 = load  i64, i64* %116 
+  %118 = inttoptr i64 %"$right#0" to i64* 
+  %119 = getelementptr  i64, i64* %118, i64 0 
+  %120 = load  i64, i64* %119 
+  %121 = add   i64 %"$right#0", 8 
+  %122 = inttoptr i64 %121 to i64* 
+  %123 = getelementptr  i64, i64* %122, i64 0 
+  %124 = load  i64, i64* %123 
+  %"1$tmp$7#0" = icmp eq i64 %113, %120 
+  br i1 %"1$tmp$7#0", label %if.then, label %if.else 
+if.then:
+  %"2$tmp$0#0" = icmp eq i64 %117, %124 
+  %"2$$$#0" = xor i1 %"2$tmp$0#0", 1 
+  ret i1 %"2$$$#0" 
+if.else:
+  %"3$$$#0" = xor i1 0, 1 
+  ret i1 %"3$$$#0" 
+}
