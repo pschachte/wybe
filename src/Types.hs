@@ -214,8 +214,6 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Declared resource inconsistent
                | ReasonUndef ProcName ProcName OptPos
                    -- ^Call to unknown proc
-               | ReasonUninit ProcName VarName OptPos
-                   -- ^Use of uninitialised variable
                | ReasonArgType ProcName Int OptPos
                    -- ^Actual param type inconsistent
                | ReasonCond OptPos
@@ -320,9 +318,6 @@ typeErrorMessage (ReasonUndef callFrom callTo pos) =
         ++ if callFrom == ""
             then "top-level statement"
             else "'" ++ callFrom ++ "'"
-typeErrorMessage (ReasonUninit callFrom var pos) =
-    Message Error pos $
-        "Unknown variable/constant '" ++ var ++ "'"
 typeErrorMessage (ReasonArity callFrom callTo pos callArity procArity) =
     Message Error pos $
         (if callFrom == ""
