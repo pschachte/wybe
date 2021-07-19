@@ -125,14 +125,8 @@ transformProcResources pd _ = do
 resourceParams :: OptPos -> (ResourceFlowSpec,TypeSpec) -> Compiler [Param]
 resourceParams pos (ResourceFlowSpec res flow, typ) = do
     varName <- resourceVar res
-    inParam <-
-        if flowsIn flow
-        then return [Param varName typ ParamIn (Resource res)]
-        else return []
-    outParam <-
-        if flowsOut flow
-        then return [Param varName typ ParamOut (Resource res)]
-        else return []
+    let inParam  = [Param varName typ ParamIn (Resource res) | flowsIn flow]
+    let outParam = [Param varName typ ParamOut (Resource res) | flowsOut flow]
     return $ inParam ++ outParam
 
 
@@ -237,14 +231,12 @@ resourceArgs pos rflow = do
          mapM (\(ResourceFlowSpec res flow,ty) -> do
                    var <- resourceVar res
                    let ftype = Resource res
-                   let inExp = if flowsIn flow
-                            then [Unplaced $
-                                  Typed (Var var ParamIn ftype) ty Nothing]
-                            else []
-                   let outExp = if flowsOut flow
-                                then [Unplaced $
-                                      Typed (Var var ParamOut ftype) ty Nothing]
-                                else []
+                   let inExp = [Unplaced $
+                                  Typed (Var var ParamIn ftype) ty Nothing
+                               | flowsIn flow]
+                   let outExp = [Unplaced $
+                                 Typed (Var var ParamOut ftype) ty Nothing
+                                | flowsOut flow]
                    return $ inExp ++ outExp)
          simpleSpecs
 
@@ -285,7 +277,7 @@ resourceVar :: ResourceSpec -> Compiler String
 resourceVar (ResourceSpec [] name) = return name
 resourceVar (ResourceSpec mod name) = do
     -- Always use resource name as variable name, regardless of module
-    -- This could cause collisions!
+    -- XXX This could cause collisions!
     return name
     -- currMod <- getModuleSpec
     -- if currMod == mod
