@@ -232,7 +232,7 @@ import           Transform                 (transformProc,
 import           Types                     (typeCheckModSCC,
                                             validateModExportTypes)
 import           Unbranch                  (unbranchProc)
-import           Util                      (sccElts)
+import           Util                      (sccElts, useLocalCacheFileIfPossible)
 import           Snippets
 import           Text.Parsec.Error
 import           BinaryFactory
@@ -617,7 +617,10 @@ loadModuleFromObjFile required objfile = do
 loadLPVMFromObjFile :: FilePath -> [ModSpec] -> Compiler [Module]
 loadLPVMFromObjFile objFile required = do
     tmpDir <- gets tmpDir
-    result <- liftIO $ extractLPVMData tmpDir objFile
+    objFile' <- liftIO $ useLocalCacheFileIfPossible objFile
+    unless (objFile == objFile')
+        (logBuild $ "find local cache file, use it instead: " ++ objFile')
+    result <- liftIO $ extractLPVMData tmpDir objFile'
     case result of
         Left err -> do
             logMsg Builder err
@@ -1071,7 +1074,9 @@ emitObjectFilesIfNeeded depends = do
             logBuild $ "unchanged, skip it: " ++ objFile
         reexitModule
 
-        return objFile
+        -- we might use the local cache file instead of the actual file
+        -- check and overwrite the file name
+        liftIO $ useLocalCacheFileIfPossible objFile
         ) depends
 
 
