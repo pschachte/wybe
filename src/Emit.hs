@@ -36,8 +36,21 @@ import           ObjectInterface
 import           Options                    (LogSelection (Blocks,Builder,Emit))
 import           System.Exit                (ExitCode (..))
 import           System.Process
-import           System.FilePath
+import           System.FilePath            ( (-<.>) )
+import           System.Directory           (getPermissions, writable, doesFileExist)
+import           Util                       ( createLocalCacheFile )
 
+
+-- This does not check the permission if the file does not exists.
+-- It is fine for our current usage, but we should improve it.
+_haveWritePermission :: FilePath -> IO Bool 
+_haveWritePermission file = do
+    exists <- doesFileExist file
+    if exists
+    then do
+        permission <- getPermissions file
+        return $ writable permission
+    else return True
 
 
 -- | With the LLVM AST representation of a LPVM Module, create a
@@ -54,6 +67,14 @@ emitObjectFile m f = do
               ++ showModSpec m ++ "*."
     modBS <- encodeModule m
     llmod <- descendentModuleLLVM m
+    filename <- do
+        writable <- liftIO $ _haveWritePermission filename
+        if writable
+        then return filename
+        else do
+            logEmit $ "Do not have write permission on file " ++ filename
+                ++ ", use local cache file instead"
+            liftIO $ createLocalCacheFile filename
     logEmit $ "===> Writing object file " ++ filename
     makeWrappedObjFile filename llmod modBS
 
