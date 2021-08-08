@@ -262,6 +262,11 @@ zipWith3M_ f as bs cs = zipWith3M f as bs cs >> return ()
 -- Currently, we use this for Multiple Specialization on std libs
 -- when their object files are read-only. Cache file will become invalid
 -- if the original file has changed.
+-- The cache files are stored in "localCacheLibDir". The name of each
+-- cache file is the sha1 of the full path of the original file. There
+-- will also be a ".meta" file next to each cache file and it contains
+-- the sha1 hash of the original file (or empty if the original file
+-- does not exist) so we can invalidate the cache when needed.
 
 _localCachePathOfFile :: FilePath -> IO (FilePath, FilePath)
 _localCachePathOfFile file = do
