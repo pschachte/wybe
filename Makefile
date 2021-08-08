@@ -91,9 +91,8 @@ src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro
 
 	for f in src/*.hs ; do \
       m=`basename $$f .hs` ; \
-	    printf "\n## %s\n" $$m ; \
 	    echo -e ; \
-	    sed -E -e '/^-- *Purpose *:/{s/^-- *Purpose *:/**Purpose**:/; G; p;}' -e '/BEGIN MAJOR DOC/,/END MAJOR DOC/{//d ; s/^-- ? ?//p;}' -e 'd' <$$f ; \
+	    sed -E -e '/^-- *Purpose *:/{s/^-- *Purpose *:/## '"$$m -- "'/; G; p;}' -e '/BEGIN MAJOR DOC/,/END MAJOR DOC/{//d ; s/^-- ? ?//p;}' -e 'd' <$$f ; \
 	done >> "$@"
 
 	printf "\n\n" >> "$@"
