@@ -1,0 +1,6 @@
+use specials
+
+!show_file
+!show_line
+!show_column
+!show_location

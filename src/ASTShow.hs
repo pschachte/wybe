@@ -76,7 +76,7 @@ showSetMapItems setMap =
 
 -- |How to show a map to source positions, one line per item.
 showMapPoses :: Map Ident OptPos -> String
-showMapPoses = showMap "" ", " "" id showMaybeSourcePos
+showMapPoses = showMap "" ", " "" id showOptPos
 
 
 -- |Dump the content of the specified module and all submodules if either
