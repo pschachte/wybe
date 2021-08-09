@@ -1224,7 +1224,34 @@ any integer during the computation to set the exit condition that will be
 returned to the operating system at the termination of the program.  To use the
 `argc`, `argv`, `command`, `arguments`, or `exit_code` resources, a module must
 `use` the `command_line` module.  This is part of the Wybe library, but is not
-automatially imported.
+automatically imported.
+
+### Special resources
+
+Wybe defines a few "special" resources, which do not actually reflect the state
+of the computation, but instead provide access to information about the
+program's source code.  Special resources are built into Wybe, and thus do not
+need to be imported.
+
+Because they do not depend the program source code,
+which is always available, special resources can be used anywhere.  If a
+procedure that uses a special resource is called in the context of a procedure
+that does not `use` that resource, the value supplied for the resource reflects
+the location of the source code of the call to that procedure.  If called in the
+context of a procedure that does `use` that resource, the value of the resource
+in that context is used.
+
+The special resources supported by Wybe are:
+
+| Resource Name              | Type   | Meaning                                            |
+| -------------------------- | ------ | -------------------------------------------------- |
+| call_source_file_name      | string | the name of the file in which the call appears     |
+| call_source_file_full_name | string | the name and directory in which the call appears   |
+| call_source_line_number    | int    | the line number on which the call appears          |
+| call_source_column_number  | int    | the column number of the start of the call         |
+| call_source_location       | string | the file name, line, and column number of the call |
+| call_source_full_location  | string | the call directory, file name, line, and column    |
+
 
 ## Packages
 
