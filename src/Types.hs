@@ -1052,22 +1052,15 @@ callProcInfos pstmt =
                  | (proc,def) <- zip procs defs
                  , let proto = procProto def
                  , let params = procProtoParams proto
-                 , let (resourceParams,realParams) =
-                         List.partition resourceParam params
+                 , let resources = Set.elems $ procProtoResources proto
+                 , let realParams = List.filter (not . resourceParam) params
                  , let typflow = paramTypeFlow <$> realParams
-                 , let inResources =
-                         Set.fromList $ paramName <$>
-                         List.filter (flowsIn . paramFlow) resourceParams
-                 , let outResources =
-                         Set.fromList $ paramName <$>
-                         List.filter (flowsOut . paramFlow) resourceParams
-                --  , let resources = Set.elems $ procProtoResources proto
-                --  , let inResources = Set.fromList
-                --             $ resourceName . resourceFlowRes <$>
-                --               List.filter (flowsIn . resourceFlowFlow) resources
-                --  , let outResources = Set.fromList
-                --             $ resourceName . resourceFlowRes <$>
-                --               List.filter (flowsOut . resourceFlowFlow) resources
+                 , let inResources = Set.fromList
+                        $ resourceName . resourceFlowRes <$>
+                          List.filter (flowsIn . resourceFlowFlow) resources
+                 , let outResources = Set.fromList
+                        $ resourceName . resourceFlowRes <$>
+                          List.filter (flowsOut . resourceFlowFlow) resources
                  , let detism = procDetism def
                  , let imp = procImpurity def
                  ]

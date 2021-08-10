@@ -946,15 +946,21 @@ specialResources =
     let strType = TypeSpec ["wybe"] "string" []
         intType = TypeSpec ["wybe"] "int" []
     in Map.fromList [
-        ("call_source_file_name",(callFilename,strType)),
+        ("call_source_file_name",(callFileName,strType)),
+        ("call_source_file_full_name",(callFileFullName,strType)),
         ("call_source_line_number",(callLineNumber,intType)),
         ("call_source_column_number",(callColumnNumber,intType)),
-        ("call_source_location",(callSourceLocation,strType))
+        ("call_source_location",(callSourceLocation False,strType)),
+        ("call_source_full_location",(callSourceLocation True,strType))
         ]
 
-callFilename :: Placed Stmt -> Exp
-callFilename pstmt =
+callFileName :: Placed Stmt -> Exp
+callFileName pstmt =
     StringValue $ maybe "Unknown file" (takeBaseName . sourceName) (place pstmt)
+
+callFileFullName :: Placed Stmt -> Exp
+callFileFullName pstmt =
+    StringValue $ maybe "Unknown file" sourceName (place pstmt)
 
 callLineNumber :: Placed Stmt -> Exp
 callLineNumber pstmt =
@@ -964,9 +970,9 @@ callColumnNumber :: Placed Stmt -> Exp
 callColumnNumber pstmt =
     IntValue $ fromIntegral $ maybe 0 sourceColumn (place pstmt)
 
-callSourceLocation :: Placed Stmt -> Exp
-callSourceLocation pstmt =
-    StringValue $ maybe "unknown location" showSourcePos (place pstmt)
+callSourceLocation :: Bool -> Placed Stmt -> Exp
+callSourceLocation full pstmt =
+    StringValue $ maybe "unknown location" (showSourcePos full) (place pstmt)
 
 
 -- |Is the specified resource exported by the current module.
@@ -3001,13 +3007,13 @@ showOptPos :: OptPos -> String
 -- uncomment to turn off annoying source positions
 -- showOptPos _ = ""
 -- comment to turn off annoying source positions
-showOptPos = maybe "" ((" @" ++) . showSourcePos)
+showOptPos = maybe "" ((" @" ++) . showSourcePos False)
 
 
--- |Show a source position
-showSourcePos :: SourcePos -> String
-showSourcePos pos =
-  takeBaseName (sourceName pos) ++ ":"
+-- |Show a source position, optionally including directory
+showSourcePos :: Bool -> SourcePos -> String
+showSourcePos full pos =
+  (if full then id else takeBaseName) (sourceName pos) ++ ":"
   ++ show (sourceLine pos) ++ ":" ++ show (sourceColumn pos)
 
 

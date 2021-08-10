@@ -6,6 +6,8 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : specials.show_column<0>
                     specials.show_file<0>
+                    specials.show_full_file<0>
+                    specials.show_full_location<0>
                     specials.show_line<0>
                     specials.show_location<0>
   imports         : use wybe
@@ -27,6 +29,24 @@ show_file(call_source_file_name#0:wybe.string, io#0:wybe.phantom, ?io#1:wybe.pha
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_string(~call_source_file_name#0:wybe.string, ~#io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$2#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+
+
+show_full_file > public {inline} (0 calls)
+0: specials.show_full_file<0>
+show_full_file(call_source_file_full_name#0:wybe.string, io#0:wybe.phantom, ?io#1:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign c print_string(~call_source_file_full_name#0:wybe.string, ~#io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$2#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+
+
+show_full_location > public {inline} (0 calls)
+0: specials.show_full_location<0>
+show_full_location(call_source_full_location#0:wybe.string, io#0:wybe.phantom, ?io#1:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign c print_string(~call_source_full_location#0:wybe.string, ~#io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$2#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
 
 
@@ -81,6 +101,22 @@ entry:
 define external fastcc  void @"specials.show_file<0>"(i64  %"call_source_file_name#0")    {
 entry:
   tail call ccc  void  @print_string(i64  %"call_source_file_name#0")  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+}
+
+
+define external fastcc  void @"specials.show_full_file<0>"(i64  %"call_source_file_full_name#0")    {
+entry:
+  tail call ccc  void  @print_string(i64  %"call_source_file_full_name#0")  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+}
+
+
+define external fastcc  void @"specials.show_full_location<0>"(i64  %"call_source_full_location#0")    {
+entry:
+  tail call ccc  void  @print_string(i64  %"call_source_full_location#0")  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }

@@ -4,6 +4,10 @@ pub def show_file use !io, call_source_file_name {
     !println(call_source_file_name)
 }
 
+pub def show_full_file use !io, call_source_file_full_name {
+    !println(call_source_file_full_name)
+}
+
 pub def show_line use !io, call_source_line_number {
     !println(call_source_line_number)
 }
@@ -14,4 +18,8 @@ pub def show_column use !io, call_source_column_number {
 
 pub def show_location use !io, call_source_location {
     !println(call_source_location)
+}
+
+pub def show_full_location use !io, call_source_full_location {
+    !println(call_source_full_location)
 }
