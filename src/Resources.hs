@@ -7,7 +7,7 @@
 
 
 module Resources (resourceCheckMod, canonicaliseProcResources,
-                  transformProcResources) where
+                  transformProcResources, specialResourcesSet) where
 
 import           AST
 import           Control.Monad
@@ -100,6 +100,10 @@ canonicaliseResourceFlow pos spec = do
 --  just blindly transforms resources into variables and parameters,
 --  counting on the later variable use/def analysis to ensure that
 --  resources are defined before they're used or returned.
+--
+-- Note that type checking of all called procedures must have been completed
+-- before this can be done, because called procs are only resolved when this
+-- proc is type checked.
 transformProcResources :: ProcDef -> Int -> Compiler ProcDef
 transformProcResources pd _ = do
     logResources $ "--------------------------------------\n"
@@ -239,6 +243,9 @@ resourceArgs pos rflow = do
                                 | flowsOut flow]
                    return $ inExp ++ outExp)
          simpleSpecs
+
+
+specialResourcesSet = keysSet specialResources
 
 
 ------------------------- General support code -------------------------

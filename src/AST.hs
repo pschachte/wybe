@@ -77,12 +77,12 @@ module AST (
   optionallyPutStr, message, errmsg, (<!>), Message(..), queueMessage,
   genProcName, addImport, doImport, importFromSupermodule, lookupType,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
-  addSimpleResource, lookupResource, publicResource,
+  addSimpleResource, lookupResource, specialResources, publicResource,
   ProcModifiers(..), detModifiers, setDetism, setInline, setImpurity,
   showProcModifiers, Inlining(..), Impurity(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
-  showModSpecs, showResources, showMaybeSourcePos, showProcDefs, showUse,
+  showModSpecs, showResources, showOptPos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
   flowPrefix, showFlags,
   showMap, showVarMap, simpleShowMap, simpleShowSet, bracketList,
@@ -914,11 +914,13 @@ lookupResource res@(ResourceSpec mod name) pos = do
     logAST $ "Looking up resource " ++ show res
     rspecs <- refersTo mod name modKnownResources resourceMod
     logAST $ "Candidates: " ++ show rspecs
-    case Set.size rspecs of
-        0 -> do
+    case (Set.size rspecs, Map.lookup name specialResources) of
+        (0, Just (_,ty)) | mod == [] ->
+            return $ Just (res,Map.singleton res ty)
+        (0, _) -> do
             message Error ("Unknown resource " ++ show res) pos
             return Nothing
-        1 -> do
+        (1,_) -> do
             let rspec = Set.findMin rspecs
             maybeMod <- getLoadingModule $ resourceMod rspec
             let maybeDef = maybeMod >>= modImplementation >>=
@@ -935,6 +937,42 @@ lookupResource res@(ResourceSpec mod name) pos = do
                                          Set.toList rspecs))
               pos
             return Nothing
+
+
+-- |All the "special" resources, which Wybe automatically generates where they
+-- are used, if necessary.
+specialResources :: Map VarName (Placed Stmt -> Exp,TypeSpec)
+specialResources =
+    let strType = TypeSpec ["wybe"] "string" []
+        intType = TypeSpec ["wybe"] "int" []
+    in Map.fromList [
+        ("call_source_file_name",(callFileName,strType)),
+        ("call_source_file_full_name",(callFileFullName,strType)),
+        ("call_source_line_number",(callLineNumber,intType)),
+        ("call_source_column_number",(callColumnNumber,intType)),
+        ("call_source_location",(callSourceLocation False,strType)),
+        ("call_source_full_location",(callSourceLocation True,strType))
+        ]
+
+callFileName :: Placed Stmt -> Exp
+callFileName pstmt =
+    StringValue $ maybe "Unknown file" (takeBaseName . sourceName) (place pstmt)
+
+callFileFullName :: Placed Stmt -> Exp
+callFileFullName pstmt =
+    StringValue $ maybe "Unknown file" sourceName (place pstmt)
+
+callLineNumber :: Placed Stmt -> Exp
+callLineNumber pstmt =
+    IntValue $ fromIntegral $ maybe 0 sourceLine (place pstmt)
+
+callColumnNumber :: Placed Stmt -> Exp
+callColumnNumber pstmt =
+    IntValue $ fromIntegral $ maybe 0 sourceColumn (place pstmt)
+
+callSourceLocation :: Bool -> Placed Stmt -> Exp
+callSourceLocation full pstmt =
+    StringValue $ maybe "unknown location" (showSourcePos full) (place pstmt)
 
 
 -- |Is the specified resource exported by the current module.
@@ -2118,8 +2156,8 @@ foldStmt' _   _   val Nop = val
 foldStmt' _   _   val Fail = val
 foldStmt' sfn efn val (Loop body _) = foldStmts sfn efn val body
 foldStmt' sfn efn val (UseResources _ body) = foldStmts sfn efn val body
-foldStmt' sfn efn val (For generators body) = foldStmts sfn efn 
-                                                (foldExps sfn efn 
+foldStmt' sfn efn val (For generators body) = foldStmts sfn efn
+                                                (foldExps sfn efn
                                                   (foldExps sfn efn val $ List.map loopVar generators)
                                                   $ List.map genExp generators) body
 foldStmt' _ _ val Break = val
@@ -2688,7 +2726,7 @@ argDescription (ArgVar var _ _ flow ftype _) =
     ++ (case ftype of
           Ordinary       -> " variable " ++ primVarName var
           HalfUpdate     -> " update of variable " ++ primVarName var
-          Implicit pos   -> " expression" ++ showMaybeSourcePos pos
+          Implicit pos   -> " expression" ++ showOptPos pos
           Resource rspec -> " resource " ++ show rspec)
 argDescription (ArgInt val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgFloat val _) = "constant argument '" ++ show val ++ "'"
@@ -2838,65 +2876,65 @@ instance Show Item where
   show (TypeDecl vis name (TypeRepresentation repn) items pos) =
     visibilityPrefix vis ++ "type " ++ show name
     ++ " is " ++ show repn
-    ++ showMaybeSourcePos pos ++ " {"
+    ++ showOptPos pos ++ " {"
     ++ concatMap (("\n  "++) . show) items
     ++ "\n}\n"
   show (TypeDecl vis name (TypeCtors ctorvis ctors) items pos) =
     visibilityPrefix vis ++ "type " ++ show name
     ++ " " ++ visibilityPrefix ctorvis
-    ++ showMaybeSourcePos pos ++ "\n    "
+    ++ showOptPos pos ++ "\n    "
     ++ intercalate "\n  | " (List.map show ctors)
     ++ concatMap (("\n  "++) . show) items
     ++ "\n}\n"
   show (RepresentationDecl params repn pos) =
     "representation"
     ++ bracketList "(" ", " ")" (("?"++) <$> params)
-    ++ " is " ++ show repn ++ showMaybeSourcePos pos ++ "\n"
+    ++ " is " ++ show repn ++ showOptPos pos ++ "\n"
   show (ConstructorDecl vis params ctors pos) =
     visibilityPrefix vis ++ "constructors"
     ++ bracketList "(" ", " ")" (("?"++) <$> params) ++ " "
     ++ intercalate " | " (show <$> ctors)
-    ++ showMaybeSourcePos pos ++ "\n"
+    ++ showOptPos pos ++ "\n"
   show (ImportMods vis mods pos) =
       visibilityPrefix vis ++ "use " ++
-      showModSpecs mods ++ showMaybeSourcePos pos ++ "\n  "
+      showModSpecs mods ++ showOptPos pos ++ "\n  "
   show (ImportItems vis mod specs pos) =
       visibilityPrefix vis ++ "from " ++ showModSpec mod ++
       " use " ++ intercalate ", " specs
-      ++ showMaybeSourcePos pos ++ "\n  "
+      ++ showOptPos pos ++ "\n  "
   show (ImportForeign files pos) =
       "use foreign object " ++ intercalate ", " files
-      ++ showMaybeSourcePos pos ++ "\n  "
+      ++ showOptPos pos ++ "\n  "
   show (ImportForeignLib names pos) =
       "use foreign library " ++ intercalate ", " names
-      ++ showMaybeSourcePos pos ++ "\n  "
+      ++ showOptPos pos ++ "\n  "
   show (ModuleDecl vis name items pos) =
     visibilityPrefix vis ++ "module " ++ show name ++ " is"
-    ++ showMaybeSourcePos pos ++ "\n  "
+    ++ showOptPos pos ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
     ++ "\n}\n"
   show (ResourceDecl vis name typ init pos) =
     visibilityPrefix vis ++ "resource " ++ name ++ ":" ++ show typ
     ++ maybeShow " = " init " "
-    ++ showMaybeSourcePos pos
+    ++ showOptPos pos
   show (FuncDecl vis modifiers proto typ exp pos) =
     visibilityPrefix vis
     ++ "def "
     ++ showProcModifiers modifiers
     ++ show proto ++ ":" ++ show typ
-    ++ showMaybeSourcePos pos
+    ++ showOptPos pos
     ++ " = " ++ show exp
   show (ProcDecl vis modifiers proto stmts pos) =
     visibilityPrefix vis
     ++ "def "
     ++ showProcModifiers modifiers
     ++ show proto
-    ++ showMaybeSourcePos pos
+    ++ showOptPos pos
     ++ " {"
     ++ showBody 4 stmts
     ++ "\n  }"
   show (StmtDecl stmt pos) =
-    showStmt 4 stmt ++ showMaybeSourcePos pos
+    showStmt 4 stmt ++ showOptPos pos
   show (PragmaDecl prag) =
     "pragma " ++ show prag
 
@@ -2960,19 +2998,23 @@ instance Show TypeProto where
 
 -- |How to show something that may have a source position
 instance Show t => Show (Placed t) where
-    show (Placed t pos) = show t ++ showMaybeSourcePos (Just pos)
+    show (Placed t pos) = show t ++ showOptPos (Just pos)
     show (Unplaced t) =   show t
 
 
 -- |How to show an optional source position
-showMaybeSourcePos :: OptPos -> String
--- uncomment turn off annoying source positions
--- showMaybeSourcePos _ = ""
+showOptPos :: OptPos -> String
+-- uncomment to turn off annoying source positions
+-- showOptPos _ = ""
 -- comment to turn off annoying source positions
-showMaybeSourcePos (Just pos) =
-  " @" ++ takeBaseName (sourceName pos) ++ ":"
+showOptPos = maybe "" ((" @" ++) . showSourcePos False)
+
+
+-- |Show a source position, optionally including directory
+showSourcePos :: Bool -> SourcePos -> String
+showSourcePos full pos =
+  (if full then id else takeBaseName) (sourceName pos) ++ ":"
   ++ show (sourceLine pos) ++ ":" ++ show (sourceColumn pos)
-showMaybeSourcePos Nothing = ""
 
 
 -- |How to show a set of identifiers as a comma-separated list
@@ -2983,7 +3025,7 @@ showIdSet set = intercalate ", " $ Set.elems set
 -- |How to show a resource definition.
 instance Show ResourceImpln where
   show (SimpleResource typ init pos) =
-    show typ ++ maybeShow " = " init "" ++ showMaybeSourcePos pos
+    show typ ++ maybeShow " = " init "" ++ showOptPos pos
 
 
 -- |How to show a list of proc definitions.
@@ -3105,7 +3147,7 @@ showPlacedPrim ind stmt = showPlacedPrim' ind (content stmt) (place stmt)
 -- XXX the first argument is unused; can we get rid of it?
 showPlacedPrim' :: Int -> Prim -> OptPos -> String
 showPlacedPrim' ind prim pos =
-  startLine ind ++ showPrim ind prim ++ showMaybeSourcePos pos
+  startLine ind ++ showPrim ind prim ++ showOptPos pos
 
 
 -- |Show a single primitive statement.

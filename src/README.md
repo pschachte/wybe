@@ -54,44 +54,28 @@ The source files in this directory and their purposes are:
 # Modules in more detail
 
 
-## AST
-
-**Purpose**: Wybe Abstract Syntax Tree and LPVM representation
+## AST --  Wybe Abstract Syntax Tree and LPVM representation
 
 
-## ASTShow
-
-**Purpose**: Show Wybe intermediate representation
+## ASTShow --  Show Wybe intermediate representation
 
 
-## AliasAnalysis
-
-**Purpose**: Alias analysis for a single module
+## AliasAnalysis --  Alias analysis for a single module
 
 
-## Analysis
-
-**Purpose**: Entry point of all kinds of analysis for a single module
+## Analysis --  Entry point of all kinds of analysis for a single module
 
 
-## BinaryFactory
-
-**Purpose**: Deriving AST Types to be Binary instances
+## BinaryFactory --  Deriving AST Types to be Binary instances
 
 
-## Blocks
-
-**Purpose**: Transform a clausal form (LPVM) module to LLVM
+## Blocks --  Transform a clausal form (LPVM) module to LLVM
 
 
-## BodyBuilder
-
-**Purpose**: A monad to build up a procedure Body, with copy propagation
+## BodyBuilder --  A monad to build up a procedure Body, with copy propagation
 
 
-## Builder
-
-**Purpose**: Handles compilation at the module level.
+## Builder --  Handles compilation at the module level.
 
 The wybe compiler handles module dependencies, and builds
 executables by itself, without the need for build tools like
@@ -271,39 +255,25 @@ order, we call compileModSCC, which does the following:
        2. Optimise procs (Optimise)
 
 
-## Callers
-
-**Purpose**: Find all callers for each proc and count static calls per caller
+## Callers --  Find all callers for each proc and count static calls per caller
 
 
-## Clause
-
-**Purpose**: Convert Wybe code to clausal (LPVM) form
+## Clause --  Convert Wybe code to clausal (LPVM) form
 
 
-## Codegen
-
-**Purpose**: Generate and emit LLVM from basic blocks of a module
+## Codegen --  Generate and emit LLVM from basic blocks of a module
 
 
-## Config
-
-**Purpose**: Configuration for wybe compiler
+## Config --  Configuration for wybe compiler
 
 
-## Emit
-
-**Purpose**: Emit LLVM code
+## Emit --  Emit LLVM code
 
 
-## Expansion
-
-**Purpose**: Replace certain procedure calls with others
+## Expansion --  Replace certain procedure calls with others
 
 
-## Flatten
-
-**Purpose**: Flatten function calls (expressions) into procedure calls
+## Flatten --  Flatten function calls (expressions) into procedure calls
 
 We transform away all expression types except for constants and
 variables.  Where, let, conditional, and function call
@@ -320,8 +290,8 @@ call itself is then replaced by a referenced to the temporary
 variable.  For example, p(f(x,y),z) is replaced by f(x,y,?t); p(t,z).
 
 A function call containing some output arguments, and perhaps some
-inputs, is transformed into a fresh output variable, with a later
-call to that function containing that variable as an added input.
+inputs, is transformed into a fresh input variable, with a later
+proc call to that function with that variable as an added input.
 For example, p(f(?x,y),z) is transformed to p(?t,z); f(?x,y,t).
 Finally, a function call containing some input-output arguments,
 and perhaps some input arguments, is transformed into an
@@ -330,64 +300,59 @@ the initial value of the expression, and a second to assign it
 the specified new value.  For example, a statement p(f(!x,y),z) is
 transformed to f(x,y,?t); p(!t,z); f(!x,y,t).
 
-## Macho
-
-**Purpose**: Extended version of parser for Mach-O object format files 
+## Macho --  Extended version of parser for Mach-O object format files 
 
 
-## Normalise
-
-**Purpose**: Convert parse tree into an AST
+## Normalise --  Convert parse tree into an AST
 
 
-## ObjectInterface
-
-**Purpose**: Parse and edit a object file.
+## ObjectInterface --  Parse and edit a object file.
 
 
-## Optimise
-
-**Purpose**: Framework to optimise a single module
+## Optimise --  Framework to optimise a single module
 
 
-## Options
-
-**Purpose**: Handle compiler options/switches
+## Options --  Handle compiler options/switches
 
 
-## Parser
-
-**Purpose**: Parser for the Wybe language using Parsec.
+## Parser --  Parser for the Wybe language using Parsec.
 
 
-## Resources
-
-**Purpose**: Resource checker for Wybe
+## Resources --  Resource checker for Wybe
 
 
-## Scanner
-
-**Purpose**: Lexical scanner for the Wybe language
+## Scanner --  Lexical scanner for the Wybe language
 
 
-## Snippets
-
-**Purpose**: Convenience functions for generation of Wybe AST
+## Snippets --  Convenience functions for generation of Wybe AST
 
 
-## Transform
-
-**Purpose**: Transform LPVM after alias analysis
+## Transform --  Transform LPVM after alias analysis
 
 
-## Types
+## Types --  Type checker/inferencer for Wybe
 
-**Purpose**: Type checker/inferencer for Wybe
+###                 Type Checking Module SCCs
 
+Our type inference is flow sensitive, that is, types flow from callees to
+callers, but not vice versa.  Therefore, types must be uniquely determined by
+proc definitions.
 
-## Unbranch
+Because submodules automatically have access to all items (even private ones)
+in their supermodule, submodules are considered to depend on their
+supermodules.  Likewise, supermodules automatically import everything
+exported by their submodules, so supermodules depend on their submodules.
+This means a module is always in the same module dependency SCC as all its
+submodules.
 
-**Purpose**: Turn loops and conditionals into separate procedures
+Type checking is responsible for overloading resolution, therefore during
+type checking, there may be multiple possible procs that could be referenced
+by an individual call.  To support this, we use a type RoughProcSpec which
+represents a proc as best we are able to identify it.  This is only used
+during type checking to determine potential call graph SCCs.  Type
+checking/inference is then performed bottom-up by potential call graph SCC.
+
+## Unbranch --  Turn loops and conditionals into separate procedures
 
 This code transforms loops into fresh recursive procs, and ensures
 that all conditionals are the last statements in their respective
@@ -443,14 +408,10 @@ AST form with the following requirements:
     TestBool, and whose branches are bodies satisfying these
     same conditions.
 
-## Util
-
-**Purpose**: Various small utility functions
+## Util --  Various small utility functions
 
 
-## wybemk
-
-**Purpose**: Wybe compiler/builder main code
+## wybemk --  Wybe compiler/builder main code
 
 
 

@@ -6,7 +6,8 @@
 --           : LICENSE in the root directory of this project.
 
 module Snippets (castFromTo, castTo, withType, intType, intCast,
-                 tagType, tagCast, phantomType, varSet, varGet, varGetSet,
+                 tagType, tagCast, phantomType, stringType,
+                 varSet, varGet, varGetSet,
                  boolType, boolCast, boolTrue, boolFalse, boolBool,
                  boolVarSet, boolVarGet, intVarSet, intVarGet,
                  lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, primMove,
@@ -66,6 +67,10 @@ boolBool bool = iVal (if bool then 1 else 0) `withType` boolType
 -- | The phantom type
 phantomType :: TypeSpec
 phantomType = TypeSpec ["wybe"] "phantom" []
+
+-- | The string type
+stringType :: TypeSpec
+stringType = TypeSpec ["wybe"] "string" []
 
 -- |An output variable reference (lvalue)
 varSet :: Ident -> Exp

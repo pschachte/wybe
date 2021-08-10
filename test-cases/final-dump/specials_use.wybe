@@ -1,0 +1,8 @@
+use specials
+
+!show_file
+!show_full_file
+!show_line
+!show_column
+!show_location
+!show_full_location

@@ -208,7 +208,7 @@ data TypeDef = TypeDef {
 --     ++ " "
 --     ++ intercalate "\n  " (show <$> items)
 --     ++ " } "
---     ++ showMaybeSourcePos pos
+--     ++ showOptPos pos
 
 
 -- | Return a topologically sorted list of type dependency SCCs in the
