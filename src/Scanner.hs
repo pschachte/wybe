@@ -241,13 +241,13 @@ tokenise pos str@(c:cs)
                               multiCharTok name rest (TokIdent name pos) pos
                          (name,[]) ->
                              [TokError "Unclosed backquote beginning here" pos]
-                    '#' -> let  (target,trim) = case cs of
-                                    ('|':_) -> ("|#","|#")
-                                    _       -> ("\n","")
+                    '#' -> let  (target,trim,terminate) = case cs of
+                                    ('|':_) -> ("|#","|#",True)
+                                    _       -> ("\n","",False)
                                 (comment,rest) =
                                     breakList (target `isPrefixOf`) cs
                                 pos' = updatePosString pos (c:comment++trim)
-                            in if null rest
+                            in if terminate && null rest
                                then [TokError "Unterminated comment begins here"
                                               pos]
                                else tokenise pos' $ drop (length trim) rest
