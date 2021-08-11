@@ -1243,14 +1243,14 @@ in that context is used.
 
 The special resources supported by Wybe are:
 
-| Resource Name              | Type   | Meaning                                            |
-| -------------------------- | ------ | -------------------------------------------------- |
-| call_source_file_name      | string | the name of the file in which the call appears     |
-| call_source_file_full_name | string | the name and directory in which the call appears   |
-| call_source_line_number    | int    | the line number on which the call appears          |
-| call_source_column_number  | int    | the column number of the start of the call         |
-| call_source_location       | string | the file name, line, and column number of the call |
-| call_source_full_location  | string | the call directory, file name, line, and column    |
+| Resource Name                | Type     | Meaning                                            |
+| ---------------------------- | -------- | -------------------------------------------------- |
+| `call_source_file_name`      | `string` | the name of the file in which the call appears     |
+| `call_source_file_full_name` | `string` | the name and directory in which the call appears   |
+| `call_source_line_number`    | `int`    | the line number on which the call appears          |
+| `call_source_column_number`  | `int`    | the column number of the start of the call         |
+| `call_source_location`       | `string` | the file name, line, and column number of the call |
+| `call_source_full_location`  | `string` | the call directory, file name, line, and column    |
 
 
 ## Packages
