@@ -116,7 +116,7 @@ int64_t malloc_count() {
 }
 
 
-void error_exit(char *message) {
-    fprintf( stderr, "%s\n", message);
+void error_exit(char* location, char *message) {
+    fprintf( stderr, "%s: %s\n", location, message);
     exit(1);
 }

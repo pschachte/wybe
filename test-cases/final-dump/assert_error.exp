@@ -1,0 +1,57 @@
+======================================================================
+AFTER EVERYTHING:
+ Module assert_error
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : assert_error.<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+*main* > public (0 calls)
+0: assert_error.<0>
+(io#0:wybe.phantom, [?io#0:wybe.phantom]):
+ AliasPairs: []
+ InterestingCallProperties: []
+    wybe.control.assert<0>(0:wybe.bool, "assert_error:3:2":wybe.string) #1 @assert_error:nn:nn
+    foreign c {terminal,semipure} error_exit("assert_error:5:2":wybe.string, "we should never get here":wybe.string) @control:nn:nn
+
+  LLVM code       :
+
+; ModuleID = 'assert_error'
+
+
+ 
+
+
+declare external ccc  void @error_exit(i64, i64)    
+
+
+declare external fastcc  void @"wybe.control.assert<0>"(i1, i64)    
+
+
+@assert_error.5 =    constant [25 x i8] c"we should never get here\00"
+
+
+@assert_error.3 =    constant [17 x i8] c"assert_error:5:2\00"
+
+
+@assert_error.1 =    constant [17 x i8] c"assert_error:3:2\00"
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+
+
+define external fastcc  void @"assert_error.<0>"()    {
+entry:
+  %2 = ptrtoint i8* getelementptr inbounds ([17 x i8], [17 x i8]* @assert_error.1, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.control.assert<0>"(i1  0, i64  %2)  
+  %4 = ptrtoint i8* getelementptr inbounds ([17 x i8], [17 x i8]* @assert_error.3, i32 0, i32 0) to i64 
+  %6 = ptrtoint i8* getelementptr inbounds ([25 x i8], [25 x i8]* @assert_error.5, i32 0, i32 0) to i64 
+  tail call ccc  void  @error_exit(i64  %4, i64  %6)  
+  ret void 
+}

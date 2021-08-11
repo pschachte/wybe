@@ -29,7 +29,7 @@ AFTER EVERYTHING:
     wybe.array.[|]<0>(?command#2:wybe.string, ?arguments#2:wybe.array(wybe.string), ~tmp$1#0:wybe.array(wybe.string), ?tmp$2#0:wybe.bool) #2 @command_line:nn:nn
     case ~tmp$2#0:wybe.bool of
     0:
-        foreign c {terminal,semipure} error_exit("Erroneous program argument vector":wybe.string) @control:nn:nn
+        foreign c {terminal,semipure} error_exit("command_line:17:10":wybe.string, "Erroneous program argument vector":wybe.string) @control:nn:nn
         foreign llvm move(0:wybe.int, ?exit_code#1:wybe.int)
 
     1:
@@ -52,13 +52,16 @@ set_exit_code(code#0:wybe.int, [exit_code#0:wybe.int], ?exit_code#1:wybe.int):
  
 
 
-declare external ccc  void @error_exit(i64)    
+declare external ccc  void @error_exit(i64, i64)    
 
 
 declare external fastcc  {i64, i64, i1} @"wybe.array.[|]<0>"(i64)    
 
 
-@command_line.16 =    constant [34 x i8] c"Erroneous program argument vector\00"
+@command_line.18 =    constant [34 x i8] c"Erroneous program argument vector\00"
+
+
+@command_line.16 =    constant [19 x i8] c"command_line:17:10\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -90,12 +93,13 @@ if.then:
   %15 = insertvalue {i64, i64, i64} %14, i64 0, 2 
   ret {i64, i64, i64} %15 
 if.else:
-  %17 = ptrtoint i8* getelementptr inbounds ([34 x i8], [34 x i8]* @command_line.16, i32 0, i32 0) to i64 
-  tail call ccc  void  @error_exit(i64  %17)  
-  %18 = insertvalue {i64, i64, i64} undef, i64 %11, 0 
-  %19 = insertvalue {i64, i64, i64} %18, i64 %10, 1 
-  %20 = insertvalue {i64, i64, i64} %19, i64 0, 2 
-  ret {i64, i64, i64} %20 
+  %17 = ptrtoint i8* getelementptr inbounds ([19 x i8], [19 x i8]* @command_line.16, i32 0, i32 0) to i64 
+  %19 = ptrtoint i8* getelementptr inbounds ([34 x i8], [34 x i8]* @command_line.18, i32 0, i32 0) to i64 
+  tail call ccc  void  @error_exit(i64  %17, i64  %19)  
+  %20 = insertvalue {i64, i64, i64} undef, i64 %11, 0 
+  %21 = insertvalue {i64, i64, i64} %20, i64 %10, 1 
+  %22 = insertvalue {i64, i64, i64} %21, i64 0, 2 
+  ret {i64, i64, i64} %22 
 }
 
 
