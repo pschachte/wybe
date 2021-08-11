@@ -171,58 +171,58 @@ declare external ccc  void @print_float(double)
 declare external ccc  void @print_int(i64)    
 
 
-@multictr2.74 =    constant [2 x i8] c")\00"
+@multictr2.74 =    constant [?? x i8] c")\00"
 
 
-@multictr2.72 =    constant [3 x i8] c", \00"
+@multictr2.72 =    constant [?? x i8] c", \00"
 
 
-@multictr2.70 =    constant [3 x i8] c", \00"
+@multictr2.70 =    constant [?? x i8] c", \00"
 
 
-@multictr2.68 =    constant [5 x i8] c"c08(\00"
+@multictr2.68 =    constant [?? x i8] c"c08(\00"
 
 
-@multictr2.54 =    constant [2 x i8] c")\00"
+@multictr2.54 =    constant [?? x i8] c")\00"
 
 
-@multictr2.52 =    constant [5 x i8] c"c07(\00"
+@multictr2.52 =    constant [?? x i8] c"c07(\00"
 
 
-@multictr2.46 =    constant [2 x i8] c")\00"
+@multictr2.46 =    constant [?? x i8] c")\00"
 
 
-@multictr2.44 =    constant [5 x i8] c"c06(\00"
+@multictr2.44 =    constant [?? x i8] c"c06(\00"
 
 
-@multictr2.38 =    constant [2 x i8] c")\00"
+@multictr2.38 =    constant [?? x i8] c")\00"
 
 
-@multictr2.36 =    constant [5 x i8] c"c05(\00"
+@multictr2.36 =    constant [?? x i8] c"c05(\00"
 
 
-@multictr2.30 =    constant [2 x i8] c")\00"
+@multictr2.30 =    constant [?? x i8] c")\00"
 
 
-@multictr2.28 =    constant [5 x i8] c"c04(\00"
+@multictr2.28 =    constant [?? x i8] c"c04(\00"
 
 
-@multictr2.22 =    constant [2 x i8] c")\00"
+@multictr2.22 =    constant [?? x i8] c")\00"
 
 
-@multictr2.20 =    constant [5 x i8] c"c03(\00"
+@multictr2.20 =    constant [?? x i8] c"c03(\00"
 
 
-@multictr2.14 =    constant [2 x i8] c")\00"
+@multictr2.14 =    constant [?? x i8] c")\00"
 
 
-@multictr2.12 =    constant [5 x i8] c"c03(\00"
+@multictr2.12 =    constant [?? x i8] c"c03(\00"
 
 
-@multictr2.6 =    constant [2 x i8] c")\00"
+@multictr2.6 =    constant [?? x i8] c")\00"
 
 
-@multictr2.4 =    constant [5 x i8] c"c01(\00"
+@multictr2.4 =    constant [?? x i8] c"c01(\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -240,10 +240,10 @@ if.then:
   %1 = inttoptr i64 %"x#0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   %3 = load  i64, i64* %2 
-  %5 = ptrtoint i8* getelementptr inbounds ([5 x i8], [5 x i8]* @multictr2.4, i32 0, i32 0) to i64 
+  %5 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multictr2.4, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %5)  
   tail call ccc  void  @print_int(i64  %3)  
-  %7 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @multictr2.6, i32 0, i32 0) to i64 
+  %7 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multictr2.6, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %7)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
@@ -255,10 +255,10 @@ if.then1:
   %9 = inttoptr i64 %8 to i64* 
   %10 = getelementptr  i64, i64* %9, i64 0 
   %11 = load  i64, i64* %10 
-  %13 = ptrtoint i8* getelementptr inbounds ([5 x i8], [5 x i8]* @multictr2.12, i32 0, i32 0) to i64 
+  %13 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multictr2.12, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %13)  
   tail call ccc  void  @print_int(i64  %11)  
-  %15 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @multictr2.14, i32 0, i32 0) to i64 
+  %15 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multictr2.14, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %15)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
@@ -270,10 +270,10 @@ if.then2:
   %17 = inttoptr i64 %16 to i64* 
   %18 = getelementptr  i64, i64* %17, i64 0 
   %19 = load  i64, i64* %18 
-  %21 = ptrtoint i8* getelementptr inbounds ([5 x i8], [5 x i8]* @multictr2.20, i32 0, i32 0) to i64 
+  %21 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multictr2.20, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %21)  
   tail call ccc  void  @print_int(i64  %19)  
-  %23 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @multictr2.22, i32 0, i32 0) to i64 
+  %23 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multictr2.22, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %23)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
@@ -285,10 +285,10 @@ if.then3:
   %25 = inttoptr i64 %24 to i64* 
   %26 = getelementptr  i64, i64* %25, i64 0 
   %27 = load  i64, i64* %26 
-  %29 = ptrtoint i8* getelementptr inbounds ([5 x i8], [5 x i8]* @multictr2.28, i32 0, i32 0) to i64 
+  %29 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multictr2.28, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %29)  
   tail call ccc  void  @print_int(i64  %27)  
-  %31 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @multictr2.30, i32 0, i32 0) to i64 
+  %31 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multictr2.30, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %31)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
@@ -300,10 +300,10 @@ if.then4:
   %33 = inttoptr i64 %32 to i64* 
   %34 = getelementptr  i64, i64* %33, i64 0 
   %35 = load  i64, i64* %34 
-  %37 = ptrtoint i8* getelementptr inbounds ([5 x i8], [5 x i8]* @multictr2.36, i32 0, i32 0) to i64 
+  %37 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multictr2.36, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %37)  
   tail call ccc  void  @print_int(i64  %35)  
-  %39 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @multictr2.38, i32 0, i32 0) to i64 
+  %39 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multictr2.38, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %39)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
@@ -315,10 +315,10 @@ if.then5:
   %41 = inttoptr i64 %40 to i64* 
   %42 = getelementptr  i64, i64* %41, i64 0 
   %43 = load  i64, i64* %42 
-  %45 = ptrtoint i8* getelementptr inbounds ([5 x i8], [5 x i8]* @multictr2.44, i32 0, i32 0) to i64 
+  %45 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multictr2.44, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %45)  
   tail call ccc  void  @print_int(i64  %43)  
-  %47 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @multictr2.46, i32 0, i32 0) to i64 
+  %47 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multictr2.46, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %47)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
@@ -330,10 +330,10 @@ if.then6:
   %49 = inttoptr i64 %48 to i64* 
   %50 = getelementptr  i64, i64* %49, i64 0 
   %51 = load  i64, i64* %50 
-  %53 = ptrtoint i8* getelementptr inbounds ([5 x i8], [5 x i8]* @multictr2.52, i32 0, i32 0) to i64 
+  %53 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multictr2.52, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %53)  
   tail call ccc  void  @print_int(i64  %51)  
-  %55 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @multictr2.54, i32 0, i32 0) to i64 
+  %55 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multictr2.54, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %55)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
@@ -353,16 +353,16 @@ if.then7:
   %65 = inttoptr i64 %64 to double* 
   %66 = getelementptr  double, double* %65, i64 0 
   %67 = load  double, double* %66 
-  %69 = ptrtoint i8* getelementptr inbounds ([5 x i8], [5 x i8]* @multictr2.68, i32 0, i32 0) to i64 
+  %69 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multictr2.68, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %69)  
   tail call ccc  void  @print_int(i64  %59)  
-  %71 = ptrtoint i8* getelementptr inbounds ([3 x i8], [3 x i8]* @multictr2.70, i32 0, i32 0) to i64 
+  %71 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multictr2.70, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %71)  
   tail call ccc  void  @print_int(i64  %63)  
-  %73 = ptrtoint i8* getelementptr inbounds ([3 x i8], [3 x i8]* @multictr2.72, i32 0, i32 0) to i64 
+  %73 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multictr2.72, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %73)  
   tail call ccc  void  @print_float(double  %67)  
-  %75 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @multictr2.74, i32 0, i32 0) to i64 
+  %75 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multictr2.74, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %75)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 

@@ -67,13 +67,13 @@ declare external fastcc  void @"multi_specz_cyclic_lib.printPosition<0>"(i64)
 declare external fastcc  void @"multi_specz_cyclic_lib.foo1<0>[7477e50a09]"(i64, i64, i64, i64, i64)    
 
 
-@multi_specz_cyclic_exe.37 =    constant [14 x i8] c"=============\00"
+@multi_specz_cyclic_exe.37 =    constant [?? x i8] c"=============\00"
 
 
-@multi_specz_cyclic_exe.35 =    constant [14 x i8] c"-------------\00"
+@multi_specz_cyclic_exe.35 =    constant [?? x i8] c"-------------\00"
 
 
-@multi_specz_cyclic_exe.33 =    constant [14 x i8] c"=============\00"
+@multi_specz_cyclic_exe.33 =    constant [?? x i8] c"=============\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -131,16 +131,16 @@ entry:
   %31 = inttoptr i64 %30 to i64* 
   %32 = getelementptr  i64, i64* %31, i64 0 
   store  i64 4, i64* %32 
-  %34 = ptrtoint i8* getelementptr inbounds ([14 x i8], [14 x i8]* @multi_specz_cyclic_exe.33, i32 0, i32 0) to i64 
+  %34 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multi_specz_cyclic_exe.33, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %34)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"multi_specz_cyclic_lib.foo1<0>[7477e50a09]"(i64  %3, i64  %11, i64  %19, i64  %27, i64  3)  
-  %36 = ptrtoint i8* getelementptr inbounds ([14 x i8], [14 x i8]* @multi_specz_cyclic_exe.35, i32 0, i32 0) to i64 
+  %36 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multi_specz_cyclic_exe.35, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %36)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"multi_specz_cyclic_lib.printPosition<0>"(i64  %19)  
   tail call fastcc  void  @"multi_specz_cyclic_lib.printPosition<0>"(i64  %27)  
-  %38 = ptrtoint i8* getelementptr inbounds ([14 x i8], [14 x i8]* @multi_specz_cyclic_exe.37, i32 0, i32 0) to i64 
+  %38 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multi_specz_cyclic_exe.37, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %38)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
@@ -267,13 +267,13 @@ declare external ccc  void @print_string(i64)
 declare external ccc  void @print_int(i64)    
 
 
-@multi_specz_cyclic_lib.22 =    constant [2 x i8] c")\00"
+@multi_specz_cyclic_lib.22 =    constant [?? x i8] c")\00"
 
 
-@multi_specz_cyclic_lib.16 =    constant [2 x i8] c",\00"
+@multi_specz_cyclic_lib.16 =    constant [?? x i8] c",\00"
 
 
-@multi_specz_cyclic_lib.11 =    constant [3 x i8] c" (\00"
+@multi_specz_cyclic_lib.11 =    constant [?? x i8] c" (\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -362,20 +362,20 @@ entry:
 
 define external fastcc  void @"multi_specz_cyclic_lib.printPosition<0>"(i64  %"pos#0")    {
 entry:
-  %12 = ptrtoint i8* getelementptr inbounds ([3 x i8], [3 x i8]* @multi_specz_cyclic_lib.11, i32 0, i32 0) to i64 
+  %12 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multi_specz_cyclic_lib.11, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %12)  
   %13 = inttoptr i64 %"pos#0" to i64* 
   %14 = getelementptr  i64, i64* %13, i64 0 
   %15 = load  i64, i64* %14 
   tail call ccc  void  @print_int(i64  %15)  
-  %17 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @multi_specz_cyclic_lib.16, i32 0, i32 0) to i64 
+  %17 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multi_specz_cyclic_lib.16, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %17)  
   %18 = add   i64 %"pos#0", 8 
   %19 = inttoptr i64 %18 to i64* 
   %20 = getelementptr  i64, i64* %19, i64 0 
   %21 = load  i64, i64* %20 
   tail call ccc  void  @print_int(i64  %21)  
-  %23 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @multi_specz_cyclic_lib.22, i32 0, i32 0) to i64 
+  %23 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multi_specz_cyclic_lib.22, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %23)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 

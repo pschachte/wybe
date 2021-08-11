@@ -107,16 +107,16 @@ declare external ccc  void @putchar(i8)
 declare external ccc  void @print_string(i64)    
 
 
-@stmt_if.14 =    constant [36 x i8] c"lookup fails when it should succeed\00"
+@stmt_if.14 =    constant [?? x i8] c"lookup fails when it should succeed\00"
 
 
-@stmt_if.12 =    constant [31 x i8] c"lookup succeeds when it should\00"
+@stmt_if.12 =    constant [?? x i8] c"lookup succeeds when it should\00"
 
 
-@stmt_if.18 =    constant [36 x i8] c"lookup succeeds when it should fail\00"
+@stmt_if.18 =    constant [?? x i8] c"lookup succeeds when it should fail\00"
 
 
-@stmt_if.16 =    constant [28 x i8] c"lookup fails when it should\00"
+@stmt_if.16 =    constant [?? x i8] c"lookup fails when it should\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -144,13 +144,13 @@ entry:
   %"1$tmp$4#0" = tail call fastcc  i1  @"stmt_if.lookup<0>"(i64  1, i64  %3)  
   br i1 %"1$tmp$4#0", label %if.then, label %if.else 
 if.then:
-  %13 = ptrtoint i8* getelementptr inbounds ([31 x i8], [31 x i8]* @stmt_if.12, i32 0, i32 0) to i64 
+  %13 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @stmt_if.12, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %13)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"stmt_if.gen$1<0>"(i64  %3)  
   ret void 
 if.else:
-  %15 = ptrtoint i8* getelementptr inbounds ([36 x i8], [36 x i8]* @stmt_if.14, i32 0, i32 0) to i64 
+  %15 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @stmt_if.14, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %15)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"stmt_if.gen$1<0>"(i64  %3)  
@@ -163,12 +163,12 @@ entry:
   %"1$tmp$3#0" = tail call fastcc  i1  @"stmt_if.lookup<0>"(i64  3, i64  %"tr#0")  
   br i1 %"1$tmp$3#0", label %if.then, label %if.else 
 if.then:
-  %17 = ptrtoint i8* getelementptr inbounds ([28 x i8], [28 x i8]* @stmt_if.16, i32 0, i32 0) to i64 
+  %17 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @stmt_if.16, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %17)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else:
-  %19 = ptrtoint i8* getelementptr inbounds ([36 x i8], [36 x i8]* @stmt_if.18, i32 0, i32 0) to i64 
+  %19 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @stmt_if.18, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %19)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 

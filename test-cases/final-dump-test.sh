@@ -18,7 +18,10 @@ do
 	exp=`echo -e "$f" | sed 's/.wybe$/.exp/'`
 	targ=`echo -e "$f" | sed 's/.wybe$/.o/'`
 	$TIMEOUT 3 ../wybemk --log=FinalDump --force-all -L $LIBDIR $targ 2>&1 \
-	| sed -e 's/@\([a-z_]*\):[0-9:]*/@\1:nn:nn/g' -e "s|`pwd`|!ROOT!|g" > $out
+	    | sed -e 's/@\([a-z_]*\):[0-9:]*/@\1:nn:nn/g' \
+            -e "s|`pwd`|!ROOT!|g" \
+            -e 's/\[[0-9][0-9]* x i8\]/[?? x i8]/g' \
+        > $out
 	# Add a newline to the end of a file if there isn't to resolve platform differences.
 	ed -s $out <<< w > /dev/null 2>&1
 	if [ ! -r $exp ] ; then 

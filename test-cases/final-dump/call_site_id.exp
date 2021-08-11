@@ -92,25 +92,25 @@ declare external ccc  void @print_int(i64)
 declare external ccc  void @print_string(i64)    
 
 
-@call_site_id.13 =    constant [2 x i8] c" \00"
+@call_site_id.13 =    constant [?? x i8] c" \00"
 
 
-@call_site_id.11 =    constant [2 x i8] c" \00"
+@call_site_id.11 =    constant [?? x i8] c" \00"
 
 
-@call_site_id.9 =    constant [2 x i8] c" \00"
+@call_site_id.9 =    constant [?? x i8] c" \00"
 
 
-@call_site_id.7 =    constant [2 x i8] c" \00"
+@call_site_id.7 =    constant [?? x i8] c" \00"
 
 
-@call_site_id.5 =    constant [2 x i8] c" \00"
+@call_site_id.5 =    constant [?? x i8] c" \00"
 
 
-@call_site_id.3 =    constant [2 x i8] c" \00"
+@call_site_id.3 =    constant [?? x i8] c" \00"
 
 
-@call_site_id.1 =    constant [2 x i8] c" \00"
+@call_site_id.1 =    constant [?? x i8] c" \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -160,19 +160,19 @@ entry:
 
 define external fastcc  void @"call_site_id.foo<0>"(i64  %"x#0")    {
 entry:
-  %2 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @call_site_id.1, i32 0, i32 0) to i64 
+  %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @call_site_id.1, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %2)  
-  %4 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @call_site_id.3, i32 0, i32 0) to i64 
+  %4 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @call_site_id.3, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %4)  
-  %6 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @call_site_id.5, i32 0, i32 0) to i64 
+  %6 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @call_site_id.5, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %6)  
-  %8 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @call_site_id.7, i32 0, i32 0) to i64 
+  %8 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @call_site_id.7, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %8)  
-  %10 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @call_site_id.9, i32 0, i32 0) to i64 
+  %10 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @call_site_id.9, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %10)  
-  %12 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @call_site_id.11, i32 0, i32 0) to i64 
+  %12 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @call_site_id.11, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %12)  
-  %14 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @call_site_id.13, i32 0, i32 0) to i64 
+  %14 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @call_site_id.13, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %14)  
   %"1$tmp$1#0" = mul   i64 %"x#0", 5 
   %"1$tmp$0#0" = add   i64 %"1$tmp$1#0", 10 

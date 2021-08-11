@@ -96,37 +96,37 @@ declare external ccc  void @print_string(i64)
 declare external ccc  void @putchar(i8)    
 
 
-@alias_multifunc.34 =    constant [20 x i8] c"expect p3(101,102):\00"
+@alias_multifunc.34 =    constant [?? x i8] c"expect p3(101,102):\00"
 
 
-@alias_multifunc.32 =    constant [20 x i8] c"expect p2(101,102):\00"
+@alias_multifunc.32 =    constant [?? x i8] c"expect p2(101,102):\00"
 
 
-@alias_multifunc.30 =    constant [20 x i8] c"expect p1(555,102):\00"
+@alias_multifunc.30 =    constant [?? x i8] c"expect p1(555,102):\00"
 
 
-@alias_multifunc.28 =    constant [32 x i8] c"--- After calling x(!p1, 555): \00"
+@alias_multifunc.28 =    constant [?? x i8] c"--- After calling x(!p1, 555): \00"
 
 
-@alias_multifunc.18 =    constant [20 x i8] c"expect p3(101,102):\00"
+@alias_multifunc.18 =    constant [?? x i8] c"expect p3(101,102):\00"
 
 
-@alias_multifunc.16 =    constant [20 x i8] c"expect p2(101,102):\00"
+@alias_multifunc.16 =    constant [?? x i8] c"expect p2(101,102):\00"
 
 
-@alias_multifunc.14 =    constant [20 x i8] c"expect p1(101,102):\00"
+@alias_multifunc.14 =    constant [?? x i8] c"expect p1(101,102):\00"
 
 
-@alias_multifunc.12 =    constant [31 x i8] c"--- After calling replicate1: \00"
+@alias_multifunc.12 =    constant [?? x i8] c"--- After calling replicate1: \00"
 
 
 declare external ccc  void @print_int(i64)    
 
 
-@alias_multifunc.44 =    constant [19 x i8] c"random replicate1 \00"
+@alias_multifunc.44 =    constant [?? x i8] c"random replicate1 \00"
 
 
-@alias_multifunc.59 =    constant [19 x i8] c"random replicate2 \00"
+@alias_multifunc.59 =    constant [?? x i8] c"random replicate2 \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -157,16 +157,16 @@ entry:
   %9 = tail call fastcc  {i64, i64}  @"alias_multifunc.replicate1<0>"(i64  %3)  
   %10 = extractvalue {i64, i64} %9, 0 
   %11 = extractvalue {i64, i64} %9, 1 
-  %13 = ptrtoint i8* getelementptr inbounds ([31 x i8], [31 x i8]* @alias_multifunc.12, i32 0, i32 0) to i64 
+  %13 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc.12, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %13)  
   tail call ccc  void  @putchar(i8  10)  
-  %15 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias_multifunc.14, i32 0, i32 0) to i64 
+  %15 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc.14, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %15)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %3)  
-  %17 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias_multifunc.16, i32 0, i32 0) to i64 
+  %17 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc.16, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %17)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %10)  
-  %19 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias_multifunc.18, i32 0, i32 0) to i64 
+  %19 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc.18, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %19)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %11)  
   %20 = trunc i64 16 to i32  
@@ -179,16 +179,16 @@ entry:
   %26 = inttoptr i64 %22 to i64* 
   %27 = getelementptr  i64, i64* %26, i64 0 
   store  i64 555, i64* %27 
-  %29 = ptrtoint i8* getelementptr inbounds ([32 x i8], [32 x i8]* @alias_multifunc.28, i32 0, i32 0) to i64 
+  %29 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc.28, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %29)  
   tail call ccc  void  @putchar(i8  10)  
-  %31 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias_multifunc.30, i32 0, i32 0) to i64 
+  %31 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc.30, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %31)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %22)  
-  %33 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias_multifunc.32, i32 0, i32 0) to i64 
+  %33 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc.32, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %33)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %10)  
-  %35 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias_multifunc.34, i32 0, i32 0) to i64 
+  %35 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc.34, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %35)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %11)  
   ret void 
@@ -207,7 +207,7 @@ entry:
   %42 = inttoptr i64 %41 to i64* 
   %43 = getelementptr  i64, i64* %42, i64 0 
   store  i64 0, i64* %43 
-  %45 = ptrtoint i8* getelementptr inbounds ([19 x i8], [19 x i8]* @alias_multifunc.44, i32 0, i32 0) to i64 
+  %45 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc.44, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %45)  
   %46 = inttoptr i64 %38 to i64* 
   %47 = getelementptr  i64, i64* %46, i64 0 
@@ -233,7 +233,7 @@ entry:
   %57 = inttoptr i64 %56 to i64* 
   %58 = getelementptr  i64, i64* %57, i64 0 
   store  i64 0, i64* %58 
-  %60 = ptrtoint i8* getelementptr inbounds ([19 x i8], [19 x i8]* @alias_multifunc.59, i32 0, i32 0) to i64 
+  %60 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc.59, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %60)  
   %61 = inttoptr i64 %53 to i64* 
   %62 = getelementptr  i64, i64* %61, i64 0 
@@ -293,13 +293,13 @@ declare external ccc  void @print_string(i64)
 declare external ccc  void @print_int(i64)    
 
 
-@position.12 =    constant [2 x i8] c")\00"
+@position.12 =    constant [?? x i8] c")\00"
 
 
-@position.6 =    constant [2 x i8] c",\00"
+@position.6 =    constant [?? x i8] c",\00"
 
 
-@position.1 =    constant [3 x i8] c" (\00"
+@position.1 =    constant [?? x i8] c" (\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -310,20 +310,20 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"position.printPosition<0>"(i64  %"pos#0")    {
 entry:
-  %2 = ptrtoint i8* getelementptr inbounds ([3 x i8], [3 x i8]* @position.1, i32 0, i32 0) to i64 
+  %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @position.1, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %2)  
   %3 = inttoptr i64 %"pos#0" to i64* 
   %4 = getelementptr  i64, i64* %3, i64 0 
   %5 = load  i64, i64* %4 
   tail call ccc  void  @print_int(i64  %5)  
-  %7 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @position.6, i32 0, i32 0) to i64 
+  %7 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @position.6, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %7)  
   %8 = add   i64 %"pos#0", 8 
   %9 = inttoptr i64 %8 to i64* 
   %10 = getelementptr  i64, i64* %9, i64 0 
   %11 = load  i64, i64* %10 
   tail call ccc  void  @print_int(i64  %11)  
-  %13 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @position.12, i32 0, i32 0) to i64 
+  %13 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @position.12, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %13)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 

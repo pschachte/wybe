@@ -55,7 +55,7 @@ declare external ccc  void @print_string(i64)
 declare external ccc  void @print_float(double)    
 
 
-@exp_simple.1 =    constant [6 x i8] c"hello\00"
+@exp_simple.1 =    constant [?? x i8] c"hello\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -72,7 +72,7 @@ entry:
   tail call ccc  void  @putchar(i8  10)  
   tail call ccc  void  @putchar(i8  104)  
   tail call ccc  void  @putchar(i8  10)  
-  %2 = ptrtoint i8* getelementptr inbounds ([6 x i8], [6 x i8]* @exp_simple.1, i32 0, i32 0) to i64 
+  %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @exp_simple.1, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %2)  
   tail call ccc  void  @print_int(i64  3)  
   tail call ccc  void  @putchar(i8  10)  

@@ -99,7 +99,7 @@ lookup(key#0:wybe.int, tree#0:stmt_if2.tree, ?$#0:wybe.bool):
 declare external ccc  void @print_string(i64)    
 
 
-@stmt_if2.12 =    constant [6 x i8] c"found\00"
+@stmt_if2.12 =    constant [?? x i8] c"found\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -127,7 +127,7 @@ entry:
   %"1$tmp$3#0" = tail call fastcc  i1  @"stmt_if2.lookup<0>"(i64  1, i64  %3)  
   br i1 %"1$tmp$3#0", label %if.then, label %if.else 
 if.then:
-  %13 = ptrtoint i8* getelementptr inbounds ([6 x i8], [6 x i8]* @stmt_if2.12, i32 0, i32 0) to i64 
+  %13 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @stmt_if2.12, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %13)  
   ret void 
 if.else:

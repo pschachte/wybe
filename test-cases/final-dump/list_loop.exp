@@ -117,16 +117,16 @@ declare external ccc  void @print_int(i64)
 declare external ccc  void @print_string(i64)    
 
 
-@list_loop.41 =    constant [2 x i8] c" \00"
+@list_loop.41 =    constant [?? x i8] c" \00"
 
 
-@list_loop.39 =    constant [5 x i8] c"    \00"
+@list_loop.39 =    constant [?? x i8] c"    \00"
 
 
-@list_loop.45 =    constant [2 x i8] c" \00"
+@list_loop.45 =    constant [?? x i8] c" \00"
 
 
-@list_loop.43 =    constant [5 x i8] c"    \00"
+@list_loop.43 =    constant [?? x i8] c"    \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -214,10 +214,10 @@ if.then:
   %36 = inttoptr i64 %35 to i64* 
   %37 = getelementptr  i64, i64* %36, i64 0 
   %38 = load  i64, i64* %37 
-  %40 = ptrtoint i8* getelementptr inbounds ([5 x i8], [5 x i8]* @list_loop.39, i32 0, i32 0) to i64 
+  %40 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @list_loop.39, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %40)  
   tail call ccc  void  @print_int(i64  %"h#0")  
-  %42 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @list_loop.41, i32 0, i32 0) to i64 
+  %42 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @list_loop.41, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %42)  
   tail call ccc  void  @print_int(i64  %34)  
   tail call ccc  void  @putchar(i8  10)  
@@ -231,10 +231,10 @@ if.else:
 
 define external fastcc  void @"list_loop.gen$4<0>"(i64  %"h#0", i64  %"h2#0", i64  %"l#0", i64  %"l2#0", i64  %"tmp$0#0", i64  %"tmp$1#0", i64  %"tmp$2#0", i64  %"tmp$3#0", i64  %"x#0")    {
 entry:
-  %44 = ptrtoint i8* getelementptr inbounds ([5 x i8], [5 x i8]* @list_loop.43, i32 0, i32 0) to i64 
+  %44 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @list_loop.43, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %44)  
   tail call ccc  void  @print_int(i64  %"h#0")  
-  %46 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @list_loop.45, i32 0, i32 0) to i64 
+  %46 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @list_loop.45, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %46)  
   tail call ccc  void  @print_int(i64  %"h2#0")  
   tail call ccc  void  @putchar(i8  10)  

@@ -33,7 +33,7 @@ declare external ccc  void @putchar(i8)
 declare external ccc  void @print_string(i64)    
 
 
-@aaa.1 =    constant [10 x i8] c"AAA: Init\00"
+@aaa.1 =    constant [?? x i8] c"AAA: Init\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -44,7 +44,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"aaa.<0>"()    {
 entry:
-  %2 = ptrtoint i8* getelementptr inbounds ([10 x i8], [10 x i8]* @aaa.1, i32 0, i32 0) to i64 
+  %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @aaa.1, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %2)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
@@ -82,7 +82,7 @@ declare external ccc  void @putchar(i8)
 declare external ccc  void @print_string(i64)    
 
 
-@bbb.1 =    constant [10 x i8] c"BBB: Init\00"
+@bbb.1 =    constant [?? x i8] c"BBB: Init\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -93,7 +93,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"bbb.<0>"()    {
 entry:
-  %2 = ptrtoint i8* getelementptr inbounds ([10 x i8], [10 x i8]* @bbb.1, i32 0, i32 0) to i64 
+  %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @bbb.1, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %2)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
@@ -131,7 +131,7 @@ declare external ccc  void @putchar(i8)
 declare external ccc  void @print_string(i64)    
 
 
-@ccc.1 =    constant [10 x i8] c"CCC: Init\00"
+@ccc.1 =    constant [?? x i8] c"CCC: Init\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -142,7 +142,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"ccc.<0>"()    {
 entry:
-  %2 = ptrtoint i8* getelementptr inbounds ([10 x i8], [10 x i8]* @ccc.1, i32 0, i32 0) to i64 
+  %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @ccc.1, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %2)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
@@ -179,7 +179,7 @@ declare external ccc  void @putchar(i8)
 declare external ccc  void @print_string(i64)    
 
 
-@ddd.1 =    constant [10 x i8] c"DDD: Init\00"
+@ddd.1 =    constant [?? x i8] c"DDD: Init\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -190,7 +190,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"ddd.<0>"()    {
 entry:
-  %2 = ptrtoint i8* getelementptr inbounds ([10 x i8], [10 x i8]* @ddd.1, i32 0, i32 0) to i64 
+  %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @ddd.1, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %2)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 

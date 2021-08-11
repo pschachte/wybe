@@ -65,16 +65,16 @@ declare external ccc  void @print_int(i64)
 declare external ccc  void @print_string(i64)    
 
 
-@use_resource.3 =    constant [18 x i8] c"Outer count (1): \00"
+@use_resource.3 =    constant [?? x i8] c"Outer count (1): \00"
 
 
-@use_resource.1 =    constant [18 x i8] c"Inner count (4): \00"
+@use_resource.1 =    constant [?? x i8] c"Inner count (4): \00"
 
 
-@use_resource.7 =    constant [18 x i8] c"Outer count (1): \00"
+@use_resource.7 =    constant [?? x i8] c"Outer count (1): \00"
 
 
-@use_resource.5 =    constant [18 x i8] c"Inner count (4): \00"
+@use_resource.5 =    constant [?? x i8] c"Inner count (4): \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -85,11 +85,11 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  i64 @"use_resource.<0>"()    {
 entry:
-  %2 = ptrtoint i8* getelementptr inbounds ([18 x i8], [18 x i8]* @use_resource.1, i32 0, i32 0) to i64 
+  %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @use_resource.1, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %2)  
   tail call ccc  void  @print_int(i64  4)  
   tail call ccc  void  @putchar(i8  10)  
-  %4 = ptrtoint i8* getelementptr inbounds ([18 x i8], [18 x i8]* @use_resource.3, i32 0, i32 0) to i64 
+  %4 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @use_resource.3, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %4)  
   tail call ccc  void  @print_int(i64  1)  
   tail call ccc  void  @putchar(i8  10)  
@@ -110,11 +110,11 @@ entry:
   %"1$count#2" = add   i64 %"1$count#1", 1 
   %"1$count#3" = add   i64 %"1$count#2", 1 
   %"1$count#4" = add   i64 %"1$count#3", 1 
-  %6 = ptrtoint i8* getelementptr inbounds ([18 x i8], [18 x i8]* @use_resource.5, i32 0, i32 0) to i64 
+  %6 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @use_resource.5, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %6)  
   tail call ccc  void  @print_int(i64  %"1$count#4")  
   tail call ccc  void  @putchar(i8  10)  
-  %8 = ptrtoint i8* getelementptr inbounds ([18 x i8], [18 x i8]* @use_resource.7, i32 0, i32 0) to i64 
+  %8 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @use_resource.7, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %8)  
   tail call ccc  void  @print_int(i64  %"1$count#1")  
   tail call ccc  void  @putchar(i8  10)  

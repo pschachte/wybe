@@ -84,10 +84,10 @@ declare external ccc  void @print_int(i64)
 declare external ccc  void @print_string(i64)    
 
 
-@loop_bug.8 =    constant [3 x i8] c", \00"
+@loop_bug.8 =    constant [?? x i8] c", \00"
 
 
-@loop_bug.10 =    constant [3 x i8] c", \00"
+@loop_bug.10 =    constant [?? x i8] c", \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -108,7 +108,7 @@ if.then:
   %5 = inttoptr i64 %4 to i64* 
   %6 = getelementptr  i64, i64* %5, i64 0 
   %7 = load  i64, i64* %6 
-  %9 = ptrtoint i8* getelementptr inbounds ([3 x i8], [3 x i8]* @loop_bug.8, i32 0, i32 0) to i64 
+  %9 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @loop_bug.8, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %9)  
   tail call ccc  void  @print_int(i64  %3)  
   tail call fastcc  void  @"loop_bug.gen$1<0>"(i64  %"lst#0", i64  %7)  
@@ -121,7 +121,7 @@ if.else:
 
 define external fastcc  void @"loop_bug.gen$2<0>"(i64  %"h#0", i64  %"lst#0", i64  %"t#0")    {
 entry:
-  %11 = ptrtoint i8* getelementptr inbounds ([3 x i8], [3 x i8]* @loop_bug.10, i32 0, i32 0) to i64 
+  %11 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @loop_bug.10, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %11)  
   tail call ccc  void  @print_int(i64  %"h#0")  
   tail call fastcc  void  @"loop_bug.gen$1<0>"(i64  %"lst#0", i64  %"t#0")  

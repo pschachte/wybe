@@ -126,13 +126,13 @@ declare external ccc  void @print_int(i64)
 declare external ccc  void @print_string(i64)    
 
 
-@test_loop.24 =    constant [40 x i8] c"Couldn't find even number divisible by \00"
+@test_loop.24 =    constant [?? x i8] c"Couldn't find even number divisible by \00"
 
 
-@test_loop.22 =    constant [5 x i8] c" is \00"
+@test_loop.22 =    constant [?? x i8] c" is \00"
 
 
-@test_loop.20 =    constant [32 x i8] c"First even number divisible by \00"
+@test_loop.20 =    constant [?? x i8] c"First even number divisible by \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -181,16 +181,16 @@ entry:
   %19 = extractvalue {i64, i1} %17, 1 
   br i1 %19, label %if.then, label %if.else 
 if.then:
-  %21 = ptrtoint i8* getelementptr inbounds ([32 x i8], [32 x i8]* @test_loop.20, i32 0, i32 0) to i64 
+  %21 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @test_loop.20, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %21)  
   tail call ccc  void  @print_int(i64  %"modulus#0")  
-  %23 = ptrtoint i8* getelementptr inbounds ([5 x i8], [5 x i8]* @test_loop.22, i32 0, i32 0) to i64 
+  %23 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @test_loop.22, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %23)  
   tail call ccc  void  @print_int(i64  %18)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else:
-  %25 = ptrtoint i8* getelementptr inbounds ([40 x i8], [40 x i8]* @test_loop.24, i32 0, i32 0) to i64 
+  %25 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @test_loop.24, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %25)  
   tail call ccc  void  @print_int(i64  %"modulus#0")  
   tail call ccc  void  @putchar(i8  10)  

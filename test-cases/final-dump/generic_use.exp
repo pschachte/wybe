@@ -605,7 +605,7 @@ declare external ccc  void @print_int(i64)
 declare external ccc  void @print_string(i64)    
 
 
-@generic_use.67 =    constant [3 x i8] c", \00"
+@generic_use.67 =    constant [?? x i8] c", \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -807,7 +807,7 @@ if.then:
   %64 = inttoptr i64 %63 to i64* 
   %65 = getelementptr  i64, i64* %64, i64 0 
   %66 = load  i64, i64* %65 
-  %68 = ptrtoint i8* getelementptr inbounds ([3 x i8], [3 x i8]* @generic_use.67, i32 0, i32 0) to i64 
+  %68 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @generic_use.67, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %68)  
   tail call ccc  void  @print_int(i64  %62)  
   tail call fastcc  void  @"generic_use.print_tail<0>"(i64  %66)  

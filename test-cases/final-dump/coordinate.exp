@@ -65,10 +65,10 @@ declare external ccc  void @print_int(i64)
 declare external ccc  void @print_string(i64)    
 
 
-@coordinate.21 =    constant [21 x i8] c"expect crd2^z=1000: \00"
+@coordinate.21 =    constant [?? x i8] c"expect crd2^z=1000: \00"
 
 
-@coordinate.15 =    constant [21 x i8] c"expect crd1^z=8000: \00"
+@coordinate.15 =    constant [?? x i8] c"expect crd1^z=8000: \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -97,7 +97,7 @@ entry:
   %13 = inttoptr i64 %12 to i64* 
   %14 = getelementptr  i64, i64* %13, i64 0 
   store  i64 8000, i64* %14 
-  %16 = ptrtoint i8* getelementptr inbounds ([21 x i8], [21 x i8]* @coordinate.15, i32 0, i32 0) to i64 
+  %16 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @coordinate.15, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %16)  
   %17 = add   i64 %3, 16 
   %18 = inttoptr i64 %17 to i64* 
@@ -105,7 +105,7 @@ entry:
   %20 = load  i64, i64* %19 
   tail call ccc  void  @print_int(i64  %20)  
   tail call ccc  void  @putchar(i8  10)  
-  %22 = ptrtoint i8* getelementptr inbounds ([21 x i8], [21 x i8]* @coordinate.21, i32 0, i32 0) to i64 
+  %22 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @coordinate.21, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %22)  
   tail call ccc  void  @print_int(i64  1000)  
   tail call ccc  void  @putchar(i8  10)  

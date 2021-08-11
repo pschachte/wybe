@@ -88,40 +88,40 @@ declare external ccc  void @print_string(i64)
 declare external fastcc  i64 @"mytree.printTree1<0>"(i64, i64)    
 
 
-@alias_fork2.18 =    constant [1 x i8] c"\00"
+@alias_fork2.18 =    constant [?? x i8] c"\00"
 
 
-@alias_fork2.16 =    constant [2 x i8] c"}\00"
+@alias_fork2.16 =    constant [?? x i8] c"}\00"
 
 
-@alias_fork2.14 =    constant [2 x i8] c"{\00"
+@alias_fork2.14 =    constant [?? x i8] c"{\00"
 
 
-@alias_fork2.12 =    constant [19 x i8] c"expect t -  1 200:\00"
+@alias_fork2.12 =    constant [?? x i8] c"expect t -  1 200:\00"
 
 
-@alias_fork2.48 =    constant [1 x i8] c"\00"
+@alias_fork2.48 =    constant [?? x i8] c"\00"
 
 
-@alias_fork2.46 =    constant [2 x i8] c"}\00"
+@alias_fork2.46 =    constant [?? x i8] c"}\00"
 
 
-@alias_fork2.44 =    constant [2 x i8] c"{\00"
+@alias_fork2.44 =    constant [?? x i8] c"{\00"
 
 
-@alias_fork2.42 =    constant [19 x i8] c"expect t1 - 1 200:\00"
+@alias_fork2.42 =    constant [?? x i8] c"expect t1 - 1 200:\00"
 
 
-@alias_fork2.40 =    constant [1 x i8] c"\00"
+@alias_fork2.40 =    constant [?? x i8] c"\00"
 
 
-@alias_fork2.38 =    constant [2 x i8] c"}\00"
+@alias_fork2.38 =    constant [?? x i8] c"}\00"
 
 
-@alias_fork2.36 =    constant [2 x i8] c"{\00"
+@alias_fork2.36 =    constant [?? x i8] c"{\00"
 
 
-@alias_fork2.34 =    constant [18 x i8] c"expect t1 - 1000:\00"
+@alias_fork2.34 =    constant [?? x i8] c"expect t1 - 1000:\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -147,14 +147,14 @@ entry:
   %11 = getelementptr  i64, i64* %10, i64 0 
   store  i64 0, i64* %11 
   %"1$tmp$3#0" = tail call fastcc  i64  @"alias_fork2.simpleMerge<0>"(i64  %3)  
-  %13 = ptrtoint i8* getelementptr inbounds ([19 x i8], [19 x i8]* @alias_fork2.12, i32 0, i32 0) to i64 
+  %13 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_fork2.12, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %13)  
   tail call ccc  void  @putchar(i8  10)  
-  %15 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @alias_fork2.14, i32 0, i32 0) to i64 
+  %15 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_fork2.14, i32 0, i32 0) to i64 
   %"1$tmp$17#0" = tail call fastcc  i64  @"mytree.printTree1<0>"(i64  %"1$tmp$3#0", i64  %15)  
-  %17 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @alias_fork2.16, i32 0, i32 0) to i64 
+  %17 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_fork2.16, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %17)  
-  %19 = ptrtoint i8* getelementptr inbounds ([1 x i8], [1 x i8]* @alias_fork2.18, i32 0, i32 0) to i64 
+  %19 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_fork2.18, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %19)  
   tail call ccc  void  @putchar(i8  10)  
   %"1$tmp$23#0" = icmp ne i64 %3, 0 
@@ -187,24 +187,24 @@ if.else:
 
 define external fastcc  void @"alias_fork2.gen$1<0>"(i64  %"t#0", i64  %"t1#0")    {
 entry:
-  %35 = ptrtoint i8* getelementptr inbounds ([18 x i8], [18 x i8]* @alias_fork2.34, i32 0, i32 0) to i64 
+  %35 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_fork2.34, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %35)  
   tail call ccc  void  @putchar(i8  10)  
-  %37 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @alias_fork2.36, i32 0, i32 0) to i64 
+  %37 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_fork2.36, i32 0, i32 0) to i64 
   %"1$tmp$10#0" = tail call fastcc  i64  @"mytree.printTree1<0>"(i64  %"t1#0", i64  %37)  
-  %39 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @alias_fork2.38, i32 0, i32 0) to i64 
+  %39 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_fork2.38, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %39)  
-  %41 = ptrtoint i8* getelementptr inbounds ([1 x i8], [1 x i8]* @alias_fork2.40, i32 0, i32 0) to i64 
+  %41 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_fork2.40, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %41)  
   tail call ccc  void  @putchar(i8  10)  
-  %43 = ptrtoint i8* getelementptr inbounds ([19 x i8], [19 x i8]* @alias_fork2.42, i32 0, i32 0) to i64 
+  %43 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_fork2.42, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %43)  
   tail call ccc  void  @putchar(i8  10)  
-  %45 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @alias_fork2.44, i32 0, i32 0) to i64 
+  %45 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_fork2.44, i32 0, i32 0) to i64 
   %"1$tmp$20#0" = tail call fastcc  i64  @"mytree.printTree1<0>"(i64  %"t#0", i64  %45)  
-  %47 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @alias_fork2.46, i32 0, i32 0) to i64 
+  %47 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_fork2.46, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %47)  
-  %49 = ptrtoint i8* getelementptr inbounds ([1 x i8], [1 x i8]* @alias_fork2.48, i32 0, i32 0) to i64 
+  %49 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_fork2.48, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %49)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
@@ -294,16 +294,16 @@ printTree1(t#0:mytree.tree, prefix#0:wybe.string, ?prefix#3:wybe.string, io#0:wy
 declare external ccc  void @print_string(i64)    
 
 
-@mytree.3 =    constant [2 x i8] c"}\00"
+@mytree.3 =    constant [?? x i8] c"}\00"
 
 
-@mytree.1 =    constant [2 x i8] c"{\00"
+@mytree.1 =    constant [?? x i8] c"{\00"
 
 
 declare external ccc  void @print_int(i64)    
 
 
-@mytree.16 =    constant [3 x i8] c", \00"
+@mytree.16 =    constant [?? x i8] c", \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -314,9 +314,9 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"mytree.printTree<0>"(i64  %"t#0")    {
 entry:
-  %2 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @mytree.1, i32 0, i32 0) to i64 
+  %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @mytree.1, i32 0, i32 0) to i64 
   %"1$prefix#1" = tail call fastcc  i64  @"mytree.printTree1<0>"(i64  %"t#0", i64  %2)  
-  %4 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @mytree.3, i32 0, i32 0) to i64 
+  %4 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @mytree.3, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %4)  
   ret void 
 }
@@ -341,7 +341,7 @@ if.then:
   %"2$prefix#1" = tail call fastcc  i64  @"mytree.printTree1<0>"(i64  %7, i64  %"prefix#0")  
   tail call ccc  void  @print_string(i64  %"2$prefix#1")  
   tail call ccc  void  @print_int(i64  %11)  
-  %17 = ptrtoint i8* getelementptr inbounds ([3 x i8], [3 x i8]* @mytree.16, i32 0, i32 0) to i64 
+  %17 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @mytree.16, i32 0, i32 0) to i64 
   %"2$prefix#3" = tail call fastcc  i64  @"mytree.printTree1<0>"(i64  %15, i64  %17)  
   ret i64 %"2$prefix#3" 
 if.else:

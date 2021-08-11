@@ -56,19 +56,19 @@ declare external ccc  void @putchar(i8)
 declare external ccc  void @print_string(i64)    
 
 
-@nested_loop.3 =    constant [6 x i8] c"Inner\00"
+@nested_loop.3 =    constant [?? x i8] c"Inner\00"
 
 
-@nested_loop.1 =    constant [6 x i8] c"Outer\00"
+@nested_loop.1 =    constant [?? x i8] c"Outer\00"
 
 
-@nested_loop.7 =    constant [6 x i8] c"Inner\00"
+@nested_loop.7 =    constant [?? x i8] c"Inner\00"
 
 
-@nested_loop.5 =    constant [6 x i8] c"Outer\00"
+@nested_loop.5 =    constant [?? x i8] c"Outer\00"
 
 
-@nested_loop.9 =    constant [6 x i8] c"Inner\00"
+@nested_loop.9 =    constant [?? x i8] c"Inner\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -79,10 +79,10 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"nested_loop.<0>"()    {
 entry:
-  %2 = ptrtoint i8* getelementptr inbounds ([6 x i8], [6 x i8]* @nested_loop.1, i32 0, i32 0) to i64 
+  %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @nested_loop.1, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %2)  
   tail call ccc  void  @putchar(i8  10)  
-  %4 = ptrtoint i8* getelementptr inbounds ([6 x i8], [6 x i8]* @nested_loop.3, i32 0, i32 0) to i64 
+  %4 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @nested_loop.3, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %4)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"nested_loop.gen$2<0>"()  
@@ -92,10 +92,10 @@ entry:
 
 define external fastcc  void @"nested_loop.gen$1<0>"()    {
 entry:
-  %6 = ptrtoint i8* getelementptr inbounds ([6 x i8], [6 x i8]* @nested_loop.5, i32 0, i32 0) to i64 
+  %6 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @nested_loop.5, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %6)  
   tail call ccc  void  @putchar(i8  10)  
-  %8 = ptrtoint i8* getelementptr inbounds ([6 x i8], [6 x i8]* @nested_loop.7, i32 0, i32 0) to i64 
+  %8 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @nested_loop.7, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %8)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"nested_loop.gen$2<0>"()  
@@ -105,7 +105,7 @@ entry:
 
 define external fastcc  void @"nested_loop.gen$2<0>"()    {
 entry:
-  %10 = ptrtoint i8* getelementptr inbounds ([6 x i8], [6 x i8]* @nested_loop.9, i32 0, i32 0) to i64 
+  %10 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @nested_loop.9, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %10)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"nested_loop.gen$2<0>"()  

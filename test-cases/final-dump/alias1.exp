@@ -138,82 +138,82 @@ declare external ccc  void @putchar(i8)
 declare external ccc  void @print_string(i64)    
 
 
-@alias1.5 =    constant [29 x i8] c"-------------- Calling baz: \00"
+@alias1.5 =    constant [?? x i8] c"-------------- Calling baz: \00"
 
 
-@alias1.3 =    constant [29 x i8] c"-------------- Calling bar: \00"
+@alias1.3 =    constant [?? x i8] c"-------------- Calling bar: \00"
 
 
-@alias1.1 =    constant [29 x i8] c"-------------- Calling foo: \00"
+@alias1.1 =    constant [?? x i8] c"-------------- Calling foo: \00"
 
 
 declare external fastcc  void @"position.printPosition<0>"(i64)    
 
 
-@alias1.33 =    constant [20 x i8] c"expect p2(555,102):\00"
+@alias1.33 =    constant [?? x i8] c"expect p2(555,102):\00"
 
 
-@alias1.31 =    constant [20 x i8] c"expect p1(101,102):\00"
+@alias1.31 =    constant [?? x i8] c"expect p1(101,102):\00"
 
 
-@alias1.29 =    constant [44 x i8] c"--- Inside bar, after calling x(!p2, 555): \00"
+@alias1.29 =    constant [?? x i8] c"--- Inside bar, after calling x(!p2, 555): \00"
 
 
-@alias1.19 =    constant [20 x i8] c"expect p2(101,102):\00"
+@alias1.19 =    constant [?? x i8] c"expect p2(101,102):\00"
 
 
-@alias1.17 =    constant [20 x i8] c"expect p1(101,102):\00"
+@alias1.17 =    constant [?? x i8] c"expect p1(101,102):\00"
 
 
-@alias1.15 =    constant [17 x i8] c"--- Inside bar: \00"
+@alias1.15 =    constant [?? x i8] c"--- Inside bar: \00"
 
 
-@alias1.77 =    constant [25 x i8] c"expect p3(33333333,102):\00"
+@alias1.77 =    constant [?? x i8] c"expect p3(33333333,102):\00"
 
 
-@alias1.75 =    constant [20 x i8] c"expect p2(101,102):\00"
+@alias1.75 =    constant [?? x i8] c"expect p2(101,102):\00"
 
 
-@alias1.73 =    constant [20 x i8] c"expect p1(555,102):\00"
+@alias1.73 =    constant [?? x i8] c"expect p1(555,102):\00"
 
 
-@alias1.71 =    constant [44 x i8] c"--- Inside baz, after calling x(!p1, 555): \00"
+@alias1.71 =    constant [?? x i8] c"--- Inside baz, after calling x(!p1, 555): \00"
 
 
-@alias1.61 =    constant [25 x i8] c"expect p3(33333333,102):\00"
+@alias1.61 =    constant [?? x i8] c"expect p3(33333333,102):\00"
 
 
-@alias1.47 =    constant [20 x i8] c"expect p2(101,102):\00"
+@alias1.47 =    constant [?? x i8] c"expect p2(101,102):\00"
 
 
-@alias1.45 =    constant [20 x i8] c"expect p1(101,102):\00"
+@alias1.45 =    constant [?? x i8] c"expect p1(101,102):\00"
 
 
-@alias1.43 =    constant [17 x i8] c"--- Inside baz: \00"
+@alias1.43 =    constant [?? x i8] c"--- Inside baz: \00"
 
 
-@alias1.105 =    constant [20 x i8] c"expect p2(101,102):\00"
+@alias1.105 =    constant [?? x i8] c"expect p2(101,102):\00"
 
 
-@alias1.103 =    constant [20 x i8] c"expect p1(555,102):\00"
+@alias1.103 =    constant [?? x i8] c"expect p1(555,102):\00"
 
 
-@alias1.101 =    constant [44 x i8] c"--- Inside foo, after calling x(!p1, 555): \00"
+@alias1.101 =    constant [?? x i8] c"--- Inside foo, after calling x(!p1, 555): \00"
 
 
-@alias1.91 =    constant [20 x i8] c"expect p2(101,102):\00"
+@alias1.91 =    constant [?? x i8] c"expect p2(101,102):\00"
 
 
-@alias1.89 =    constant [20 x i8] c"expect p1(101,102):\00"
+@alias1.89 =    constant [?? x i8] c"expect p1(101,102):\00"
 
 
-@alias1.87 =    constant [17 x i8] c"--- Inside foo: \00"
+@alias1.87 =    constant [?? x i8] c"--- Inside foo: \00"
 
 
 declare external ccc  void @print_int(i64)    
 
 
-@alias1.115 =    constant [13 x i8] c"random print\00"
+@alias1.115 =    constant [?? x i8] c"random print\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -224,15 +224,15 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"alias1.<0>"()    {
 entry:
-  %2 = ptrtoint i8* getelementptr inbounds ([29 x i8], [29 x i8]* @alias1.1, i32 0, i32 0) to i64 
+  %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.1, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %2)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"alias1.foo<0>"()  
-  %4 = ptrtoint i8* getelementptr inbounds ([29 x i8], [29 x i8]* @alias1.3, i32 0, i32 0) to i64 
+  %4 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.3, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %4)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"alias1.bar<0>"()  
-  %6 = ptrtoint i8* getelementptr inbounds ([29 x i8], [29 x i8]* @alias1.5, i32 0, i32 0) to i64 
+  %6 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.5, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %6)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"alias1.baz<0>"()  
@@ -253,13 +253,13 @@ entry:
   %14 = getelementptr  i64, i64* %13, i64 0 
   store  i64 102, i64* %14 
   %"1$p2#0" = tail call fastcc  i64  @"alias1.replicate<0>"(i64  %9)  
-  %16 = ptrtoint i8* getelementptr inbounds ([17 x i8], [17 x i8]* @alias1.15, i32 0, i32 0) to i64 
+  %16 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.15, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %16)  
   tail call ccc  void  @putchar(i8  10)  
-  %18 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.17, i32 0, i32 0) to i64 
+  %18 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.17, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %18)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %9)  
-  %20 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.19, i32 0, i32 0) to i64 
+  %20 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.19, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %20)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %"1$p2#0")  
   %21 = trunc i64 16 to i32  
@@ -272,13 +272,13 @@ entry:
   %27 = inttoptr i64 %23 to i64* 
   %28 = getelementptr  i64, i64* %27, i64 0 
   store  i64 555, i64* %28 
-  %30 = ptrtoint i8* getelementptr inbounds ([44 x i8], [44 x i8]* @alias1.29, i32 0, i32 0) to i64 
+  %30 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.29, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %30)  
   tail call ccc  void  @putchar(i8  10)  
-  %32 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.31, i32 0, i32 0) to i64 
+  %32 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.31, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %32)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %9)  
-  %34 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.33, i32 0, i32 0) to i64 
+  %34 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.33, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %34)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %23)  
   ret void 
@@ -298,13 +298,13 @@ entry:
   %42 = getelementptr  i64, i64* %41, i64 0 
   store  i64 102, i64* %42 
   %"1$p2#0" = tail call fastcc  i64  @"alias1.replicate<0>"(i64  %37)  
-  %44 = ptrtoint i8* getelementptr inbounds ([17 x i8], [17 x i8]* @alias1.43, i32 0, i32 0) to i64 
+  %44 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.43, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %44)  
   tail call ccc  void  @putchar(i8  10)  
-  %46 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.45, i32 0, i32 0) to i64 
+  %46 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.45, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %46)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %37)  
-  %48 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.47, i32 0, i32 0) to i64 
+  %48 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.47, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %48)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %"1$p2#0")  
   %49 = add   i64 %"1$p2#0", 8 
@@ -321,7 +321,7 @@ entry:
   %59 = inttoptr i64 %58 to i64* 
   %60 = getelementptr  i64, i64* %59, i64 0 
   store  i64 %52, i64* %60 
-  %62 = ptrtoint i8* getelementptr inbounds ([25 x i8], [25 x i8]* @alias1.61, i32 0, i32 0) to i64 
+  %62 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.61, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %62)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %55)  
   %63 = trunc i64 16 to i32  
@@ -334,16 +334,16 @@ entry:
   %69 = inttoptr i64 %65 to i64* 
   %70 = getelementptr  i64, i64* %69, i64 0 
   store  i64 555, i64* %70 
-  %72 = ptrtoint i8* getelementptr inbounds ([44 x i8], [44 x i8]* @alias1.71, i32 0, i32 0) to i64 
+  %72 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.71, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %72)  
   tail call ccc  void  @putchar(i8  10)  
-  %74 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.73, i32 0, i32 0) to i64 
+  %74 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.73, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %74)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %65)  
-  %76 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.75, i32 0, i32 0) to i64 
+  %76 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.75, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %76)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %"1$p2#0")  
-  %78 = ptrtoint i8* getelementptr inbounds ([25 x i8], [25 x i8]* @alias1.77, i32 0, i32 0) to i64 
+  %78 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.77, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %78)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %55)  
   ret void 
@@ -363,13 +363,13 @@ entry:
   %86 = getelementptr  i64, i64* %85, i64 0 
   store  i64 102, i64* %86 
   %"1$p2#0" = tail call fastcc  i64  @"alias1.replicate<0>"(i64  %81)  
-  %88 = ptrtoint i8* getelementptr inbounds ([17 x i8], [17 x i8]* @alias1.87, i32 0, i32 0) to i64 
+  %88 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.87, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %88)  
   tail call ccc  void  @putchar(i8  10)  
-  %90 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.89, i32 0, i32 0) to i64 
+  %90 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.89, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %90)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %81)  
-  %92 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.91, i32 0, i32 0) to i64 
+  %92 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.91, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %92)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %"1$p2#0")  
   %93 = trunc i64 16 to i32  
@@ -382,13 +382,13 @@ entry:
   %99 = inttoptr i64 %95 to i64* 
   %100 = getelementptr  i64, i64* %99, i64 0 
   store  i64 555, i64* %100 
-  %102 = ptrtoint i8* getelementptr inbounds ([44 x i8], [44 x i8]* @alias1.101, i32 0, i32 0) to i64 
+  %102 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.101, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %102)  
   tail call ccc  void  @putchar(i8  10)  
-  %104 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.103, i32 0, i32 0) to i64 
+  %104 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.103, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %104)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %95)  
-  %106 = ptrtoint i8* getelementptr inbounds ([20 x i8], [20 x i8]* @alias1.105, i32 0, i32 0) to i64 
+  %106 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.105, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %106)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %"1$p2#0")  
   ret void 
@@ -407,7 +407,7 @@ entry:
   %113 = inttoptr i64 %112 to i64* 
   %114 = getelementptr  i64, i64* %113, i64 0 
   store  i64 0, i64* %114 
-  %116 = ptrtoint i8* getelementptr inbounds ([13 x i8], [13 x i8]* @alias1.115, i32 0, i32 0) to i64 
+  %116 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias1.115, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %116)  
   %117 = inttoptr i64 %109 to i64* 
   %118 = getelementptr  i64, i64* %117, i64 0 
@@ -467,13 +467,13 @@ declare external ccc  void @print_string(i64)
 declare external ccc  void @print_int(i64)    
 
 
-@position.12 =    constant [2 x i8] c")\00"
+@position.12 =    constant [?? x i8] c")\00"
 
 
-@position.6 =    constant [2 x i8] c",\00"
+@position.6 =    constant [?? x i8] c",\00"
 
 
-@position.1 =    constant [3 x i8] c" (\00"
+@position.1 =    constant [?? x i8] c" (\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -484,20 +484,20 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"position.printPosition<0>"(i64  %"pos#0")    {
 entry:
-  %2 = ptrtoint i8* getelementptr inbounds ([3 x i8], [3 x i8]* @position.1, i32 0, i32 0) to i64 
+  %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @position.1, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %2)  
   %3 = inttoptr i64 %"pos#0" to i64* 
   %4 = getelementptr  i64, i64* %3, i64 0 
   %5 = load  i64, i64* %4 
   tail call ccc  void  @print_int(i64  %5)  
-  %7 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @position.6, i32 0, i32 0) to i64 
+  %7 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @position.6, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %7)  
   %8 = add   i64 %"pos#0", 8 
   %9 = inttoptr i64 %8 to i64* 
   %10 = getelementptr  i64, i64* %9, i64 0 
   %11 = load  i64, i64* %10 
   tail call ccc  void  @print_int(i64  %11)  
-  %13 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @position.12, i32 0, i32 0) to i64 
+  %13 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @position.12, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %13)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
