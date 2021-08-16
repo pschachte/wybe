@@ -1,0 +1,68 @@
+======================================================================
+AFTER EVERYTHING:
+ Module alloc-args
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : alloc-args.<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+*main* > public {inline} (0 calls)
+0: alloc-args.<0>
+(io#0:wybe.phantom, ?io#1:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: []
+    alloc-args.foo<0>(1:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @alloc-args:7:2
+
+
+foo > {noinline} (1 calls)
+0: alloc-args.foo<0>
+foo(size#0:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm alloc(~size#0:wybe.int, ?str#0:wybe.string) @alloc-args:2:5
+    foreign lpvm mutate(~str#0:wybe.string, ?str#1:wybe.string, 0:wybe.int, 1:wybe.bool, 1:wybe.int, 0:wybe.int, 0:wybe.int) @alloc-args:3:5
+    foreign c print_string(~str#1:wybe.string, ~#io#0:wybe.phantom, ?tmp$3#0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$3#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+
+  LLVM code       :
+
+; ModuleID = 'alloc-args'
+
+
+ 
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_string(i64)    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+
+
+define external fastcc  void @"alloc-args.<0>"()    {
+entry:
+  tail call fastcc  void  @"alloc-args.foo<0>"(i64  1)  
+  ret void 
+}
+
+
+define external fastcc  void @"alloc-args.foo<0>"(i64  %"size#0")    {
+entry:
+  %1 = trunc i64 %"size#0" to i32  
+  %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
+  %3 = ptrtoint i8* %2 to i64 
+  %4 = inttoptr i64 %3 to i64* 
+  %5 = getelementptr  i64, i64* %4, i64 0 
+  store  i64 0, i64* %5 
+  tail call ccc  void  @print_string(i64  %3)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+}
