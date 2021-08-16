@@ -650,34 +650,36 @@ updateDeadCellsByAccessArgs (aliasMap, deadCells) primArgs = do
 assignDeadCellsByAllocArgs :: DeadCells -> [PrimArg] 
         -> (Maybe ((PrimArg, PrimArg), [PrimVarName]), DeadCells)
 assignDeadCellsByAllocArgs deadCells primArgs =
-    -- [size:int, ?struct:type]
-    let [ArgInt size _, struct] = primArgs in
-    let size' = fromInteger size in
-    case Map.lookup size' deadCells of 
-        Just cells -> 
-            let assigned = 
-                    -- try to select one without "requiredParams".
-                    case List.find (List.null . snd) cells of
-                        Just x  -> Just x
-                        Nothing -> case cells of 
-                            []    -> Nothing
-                            (x:_) -> Just x
-            in
-            case assigned of 
-                Nothing -> (Nothing, deadCells)
-                Just x  -> 
-                    -- XXX we need something better than this. In order to
-                    -- have better optimization, we combine "requiredParams"
-                    -- from all possible cells. However, it may create some
-                    -- specialized versions that are identical.
-                    let requiredParams =
-                            if List.null $ snd x
-                            then []
-                            else 
-                                List.concatMap snd cells
-                                |> Set.fromList |> Set.toList
+    case primArgs of
+        -- [size:int, ?struct:type]
+        [ArgInt size _, struct] ->
+            let size' = fromInteger size in
+            case Map.lookup size' deadCells of 
+                Just cells -> 
+                    let assigned = 
+                            -- try to select one without "requiredParams".
+                            case List.find (List.null . snd) cells of
+                                Just x  -> Just x
+                                Nothing -> case cells of 
+                                    []    -> Nothing
+                                    (x:_) -> Just x
                     in
-                    let cells' = List.delete x cells in
-                    let deadCells' = Map.insert size' cells' deadCells in
-                    (Just (fst x, requiredParams), deadCells')
-        Nothing    -> (Nothing, deadCells)
+                    case assigned of 
+                        Nothing -> (Nothing, deadCells)
+                        Just x  -> 
+                            -- XXX we need something better than this. In order to
+                            -- have better optimization, we combine "requiredParams"
+                            -- from all possible cells. However, it may create some
+                            -- specialized versions that are identical.
+                            let requiredParams =
+                                    if List.null $ snd x
+                                    then []
+                                    else 
+                                        List.concatMap snd cells
+                                        |> Set.fromList |> Set.toList
+                            in
+                            let cells' = List.delete x cells in
+                            let deadCells' = Map.insert size' cells' deadCells in
+                            (Just (fst x, requiredParams), deadCells')
+                Nothing    -> (Nothing, deadCells)
+        _ -> (Nothing, deadCells)
