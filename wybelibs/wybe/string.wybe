@@ -1,27 +1,148 @@
-pragma no_standard_library  # Standard library can't depend on itself!
+# pragma no_standard_library  # Standard library can't depend on itself!
 
-use wybe.bool
-use wybe.int
-use wybe.char
+# use wybe.int, wybe.char, wybe.bool, wybe.raw_string, wybe.io
+# use wybe.phantom, wybe.float, wybe.count
 
-representation is address
+constructor nul
+          | buf(len:int, raw:raw_string)
+          | cat(l:_, r:_)
+          | slc(base:_, start:int, end:int)
+          | chr(c:char, __:int) # TODO: remove __:int
 
-# this whole implementation is completely wrong, but will do for now
-
-pub def (x:_ = y:_):bool  = foreign c strcmp(x,y):int = 0
-pub def (x:_ ~= y:_):bool = foreign c strcmp(x,y):int ~= 0
-pub def (x:_ < y:_):bool  = foreign c strcmp(x,y):int < 0
-pub def (x:_ <= y:_):bool = foreign c strcmp(x,y):int <= 0
-pub def (x:_ > y:_):bool  = foreign c strcmp(x,y):int > 0
-pub def (x:_ >= y:_):bool = foreign c strcmp(x,y):int >= 0
-
-pub def length(str:string):int = foreign c strlen(str)
-
-pub def {test} `[|]`(?head:char, ?tail:string, str:string) {
-    foreign lpvm access(str, 0, 0, 0, ?head)
-    foreign llvm icmp_ne(head:!int, 0:int, ?not_done:bool)
-    (not_done = true)
-    foreign llvm add(str, 1, ?tail)
+pub def str(str:raw_string, ?s:_) {
+    ?len = length(str)
+    if { len = 0 :: ?s = nul 
+        | len = 1 :: 
+            foreign lpvm access(str, 0, 1, 0, ?c)
+            ?s = ch(c) 
+        | else :: 
+            ?s = buf(length(str), str)
+    }
+}
+pub def str(?str:raw_string, s:_) {
+    if { s = buf(_, ?raw_string) :: ?str = raw_string
+       | else :: 
+            ?len = length(s)
+            foreign lpvm alloc(len + 1, ?str)
+            foreign lpvm mutate(str, ?str, len, true, 1, 0, '\0')
+            ?offset = 0
+            pack(s, !str, !offset)
+    }
 }
 
-#wrong: pub def (x:_ ,, y:_):_ = foreign c strcat(x,y)
+pub def length(s:_):int = 
+    if { s = buf(?len, _) :: len
+       | s = cat(?l, ?r) :: length(l) + length(r)
+       | s = slc(?base, ?start, ?end) :: max(0, end - start)
+       | s = chr(_, _) :: 1
+       | else :: 0
+    }
+
+pub def empty_string:_ = nul
+
+pub def (x:raw_string ,, y:raw_string):_ = str(x) ,, str(y)
+pub def (x:_ ,, y:raw_string):_ = x ,, str(y)
+pub def (x:raw_string ,, y:_):_ = str(x) ,, y
+pub def (x:char ,, y:char):_ = ch(x) ,, ch(y)
+pub def (x:_ ,, y:char):_ = x ,, ch(y)
+pub def (x:char ,, y:_):_ = ch(x) ,, y
+pub def (x:raw_string ,, y:char):_ = str(x) ,, ch(y)
+pub def (x:char ,, y:raw_string):_ = ch(x) ,, str(y)
+pub def (x:_ ,, y:_):_ =
+    if { x = nul :: y 
+       | y = nul :: x
+       | x = cat(?l, ?r) :: cat(l, cat(r, y))
+       | else :: cat(x, y)
+    }
+
+pub def slice(s:raw_string, start:int, end:int):_ = slice(str(s), start, end)
+pub def slice(s:char, start:int, end:int):_ = slice(ch(s), start, end)
+pub def slice(s:_, start:int, end:int, ?out:_) {
+    ?len = min(length(s), end)
+    if { start >= len :: ?out = nul  
+       | s = nul :: ?out = nul 
+       | s = slc(?base, ?start_base, ?end_base) :: 
+            ?start = max(0, start)
+            ?out = slice(base, start + start_base, 
+                               min(end_base, end + start_base))
+       | else :: ?out = slc(s, max(0, start), len)
+    }
+}
+
+pub def ch(c:char):_ = chr(c, 1)
+
+pub def (x:_ = y:_):bool  = cmp(x, y) = 0
+pub def (x:_ ~= y:_):bool = cmp(x, y) ~= 0
+pub def (x:_ < y:_):bool  = cmp(x, y) < 0
+pub def (x:_ <= y:_):bool = cmp(x, y) <= 0
+pub def (x:_ > y:_):bool  = cmp(x, y) > 0
+pub def (x:_ >= y:_):bool = cmp(x, y) >= 0
+
+pub def {test} `[|]`(?head:char, ?tail:_, s:_) {
+    if { s = buf(?len, ?str) :: 
+            [?head | ?str] = str
+            ?tail = if { len = 1 :: nul | else :: buf(len - 1, str) }
+       | s = cat(?l, ?r) :: 
+            if { [?h | ?t] = l :: ?head = h; ?tail = t ,, r
+               | [?h | ?t] = r :: ?head = h; ?tail = t
+               | else :: fail
+            }
+       | s = slc(?base, ?start, ?end) :: 
+            ?i = 0; ?head = '\0'; ?tail = base
+            do {
+                while i < end
+                [?head | ?tail] = tail
+                until i >= start
+                incr(!i)
+            }
+            incr(!i)
+            ?tail = if { i >= end :: nul | else :: slc(base, i, end) }
+       | s = chr(?c, _) :: ?head = c; ?tail = nul
+       | else :: fail
+    }
+}
+
+
+pub def print_string(s:_) use !io {
+    if { s = buf(_, ?str) :: !print(str)
+       | s = cat(?l, ?r) :: !print(l); !print(r)
+       | s = slc(?base, ?start, ?end) :: for ?c in s { !print(c) }
+       | s = chr(?c, _) :: !print(c)
+    }
+}
+
+def pack(s:_, !mem:raw_string, !offset:int) {
+    if { s = buf(_, ?str) :: 
+            for ?c in str {
+                foreign lpvm mutate(mem, ?mem, offset, true, 1, 0, c)
+                incr(!offset)
+            }
+       | s = cat(?l, ?r) :: 
+            pack(l, !mem, !offset)
+            pack(r, !mem, !offset)
+       | s = slc(_, _, _) :: 
+            for ?c in s {
+                foreign lpvm mutate(mem, ?mem, offset, true, 1, 0, c)
+                incr(!offset)
+            }
+       | s = chr(?c, _) ::
+            foreign lpvm mutate(mem, ?mem, offset, true, 1, 0, c)
+            incr(!offset)
+    }
+}
+
+def cmp(x:_, y:_, ?c:int) {
+    ?c = 0 
+    do {
+        if { [?cx| ?x] = x :: 
+                if { [?cy | ?y] = y :: 
+                        if { cx < cy :: ?c = -1; break
+                           | cx > cy :: ?c = 1; break 
+                        }
+                   | else :: ?c = 1; break
+                }
+           | [_ | _] = y :: ?c = -1; break 
+           | else :: break
+        }
+    }
+} 

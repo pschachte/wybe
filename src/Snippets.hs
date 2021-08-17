@@ -70,7 +70,7 @@ phantomType = TypeSpec ["wybe"] "phantom" []
 
 -- | The string type
 stringType :: TypeSpec
-stringType = TypeSpec ["wybe"] "string" []
+stringType = TypeSpec ["wybe"] "raw_string" []
 
 -- |An output variable reference (lvalue)
 varSet :: Ident -> Exp

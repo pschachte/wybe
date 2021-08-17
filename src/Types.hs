@@ -632,7 +632,7 @@ expType expr = do
 expType' :: Exp -> OptPos -> Typed TypeSpec
 expType' (IntValue _) _      = return $ TypeSpec ["wybe"] "int" []
 expType' (FloatValue _) _    = return $ TypeSpec ["wybe"] "float" []
-expType' (StringValue _) _   = return $ TypeSpec ["wybe"] "string" []
+expType' (StringValue _) _   = return $ TypeSpec ["wybe"] "raw_string" []
 expType' (CharValue _) _     = return $ TypeSpec ["wybe"] "char" []
 expType' (Var name _ _) _    = ultimateVarType name
 expType' (Typed _ typ _) pos =

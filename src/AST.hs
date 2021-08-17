@@ -943,7 +943,7 @@ lookupResource res@(ResourceSpec mod name) pos = do
 -- are used, if necessary.
 specialResources :: Map VarName (Placed Stmt -> Exp,TypeSpec)
 specialResources =
-    let strType = TypeSpec ["wybe"] "string" []
+    let strType = TypeSpec ["wybe"] "raw_string" []
         intType = TypeSpec ["wybe"] "int" []
     in Map.fromList [
         ("call_source_file_name",(callFileName,strType)),

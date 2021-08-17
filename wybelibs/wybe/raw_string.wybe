@@ -1,0 +1,27 @@
+pragma no_standard_library  # Standard library can't depend on itself!
+
+use wybe.bool
+use wybe.int
+use wybe.char
+
+representation is address
+
+# this whole implementation is completely wrong, but will do for now
+
+pub def (x:_ = y:_):bool  = foreign c strcmp(x,y):int = 0
+pub def (x:_ ~= y:_):bool = foreign c strcmp(x,y):int ~= 0
+pub def (x:_ < y:_):bool  = foreign c strcmp(x,y):int < 0
+pub def (x:_ <= y:_):bool = foreign c strcmp(x,y):int <= 0
+pub def (x:_ > y:_):bool  = foreign c strcmp(x,y):int > 0
+pub def (x:_ >= y:_):bool = foreign c strcmp(x,y):int >= 0
+
+pub def length(str:_):int = foreign c strlen(str)
+
+pub def {test} `[|]`(?head:char, ?tail:_, str:_) {
+    foreign lpvm access(str, 0, 0, 0, ?head)
+    foreign llvm icmp_ne(head:!int, 0:int, ?not_done:bool)
+    (not_done = true)
+    foreign llvm add(str, 1, ?tail)
+}
+
+#wrong: pub def (x:_ ,, y:_):_ = foreign c strcat(x,y)

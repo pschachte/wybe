@@ -6,3 +6,7 @@ representation is 8 bit unsigned
 
 pub def (x:_ = y:_):bool = foreign llvm icmp_eq(x,y)
 pub def (x:_ ~= y:_):bool = foreign llvm icmp_ne(x,y)
+pub def (x:_ < y:_):bool = foreign llvm icmp_ult(x,y)
+pub def (x:_ <= y:_):bool = foreign llvm icmp_ule(x,y)
+pub def (x:_ > y:_):bool = foreign llvm icmp_ugt(x,y)
+pub def (x:_ >= y:_):bool = foreign llvm icmp_uge(x,y)
