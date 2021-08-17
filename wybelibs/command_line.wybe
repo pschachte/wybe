@@ -1,15 +1,15 @@
 # The number of command line arguments.  These are automatically
 # initialised by the code that builds executables.
 pub resource argc:int
-pub resource argv:raw_array(string)
+pub resource argv:raw_array(raw_string)
 
 
-# The command line arguments. This is a C array of strings.
-pub resource arguments:array(string) = array(argc, argv)
+# The command line arguments. This is a C array of raw_strings.
+pub resource arguments:array(raw_string) = array(argc, argv)
 
 # The command that caused execution of this program.  This is not necessarily an
 # absolute file name.
-pub resource command:string = ""
+pub resource command:raw_string = ""
 
 if {[?command | ?arguments] = arguments ::
         pass
