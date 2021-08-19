@@ -30,7 +30,7 @@ pub def raw(s:_, ?str:raw_string) {
 pub def length(s:_):int = 
     if { s = buf(?len, _) :: len
        | s = cat(?l, ?r) :: length(l) + length(r)
-       | s = slc(?base, ?range) :: size(range)
+       | s = slc(?base, ?range) :: size(range) # incorrect
        | s = chr(_, _) :: 1
        | else :: 0
     }
@@ -65,8 +65,7 @@ pub def {test} `[|]`(?head:char, ?tail:_, s:_) {
             ?tail = if { len = 1 :: nul | else :: buf(len - 1, str) }
        | s = cat(?l, ?r) :: 
             if { [?head | ?t] = l :: ?tail = cat(t, r)
-               | [?head | ?t] = r :: ?tail = t
-               | else :: fail
+               | else :: [?head | ?tail] = r
             }
        | s = slc(?base, ?range) :: 
             do {
@@ -81,7 +80,10 @@ pub def {test} `[|]`(?head:char, ?tail:_, s:_) {
 pub def empty_string:_ = nul
 pub def []:_ = nul
 pub def {test} [](s:_, idx:int, ?c:char) {
-    if { s = buf(_, ?str) :: ?c = str[idx]
+    if { s = buf(?len, ?str) :: 
+            (0 <= idx)
+            (idx < len)
+            ?c = unsafe_index(str, len)
        | s = cat(?l, ?r) :: 
             ?l_len = length(l)
             if { idx < l_len :: ?c = l[idx]

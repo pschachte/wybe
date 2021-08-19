@@ -34,5 +34,5 @@ pub def start(r:_):int = r^s
 pub def stride(r:_):int = r^st
 pub def end(r:_):int = r^e
 
-pub def size(r:_):int = (r^s - r^e) / r^st
+pub def size(r:_):int = (r^s - r^e) / r^st # TODO: incorrect
 
