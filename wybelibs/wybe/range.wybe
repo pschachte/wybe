@@ -1,6 +1,7 @@
 
 constructor range(s:int, st:int, e:int)
 
+
 pub def {test} `[|]`(?value:int, ?rest:_, current:_) {
     current = range(?s, ?st, ?e)
     if { 0 <= st :: (s < e) | else :: (e < s) }
@@ -21,6 +22,8 @@ pub def xrange(start:int, stride:int, end:int):_ =
 pub def irange(start:int, stride:int, end:int):_ =
     range(start, stride, end + if { stride < 0 :: -1 | else :: 1 })
 
+# Good ol' Edsgar
+# https://www.cs.utexas.edu/users/EWD/transcriptions/EWD08xx/EWD831.html
 pub def (start:int .. end:int):_ = 
     xrange(start, if { start <= end :: 1 | else :: -1 }, end)
 
