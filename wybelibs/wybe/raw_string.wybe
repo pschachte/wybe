@@ -1,8 +1,6 @@
 pragma no_standard_library  # Standard library can't depend on itself!
 
-use wybe.bool
-use wybe.int
-use wybe.char
+use wybe.bool, wybe.int, wybe.char
 
 representation is address
 
@@ -18,10 +16,16 @@ pub def (x:_ >= y:_):bool = foreign c strcmp(x,y):int >= 0
 pub def length(str:_):int = foreign c strlen(str)
 
 pub def {test} `[|]`(?head:char, ?tail:_, str:_) {
-    foreign lpvm access(str, 0, 0, 0, ?head)
+    foreign lpvm access(str, 0, 1, 0, ?head)
     foreign llvm icmp_ne(head:!int, 0:int, ?not_done:bool)
     (not_done = true)
     foreign llvm add(str, 1, ?tail)
 }
 
-#wrong: pub def (x:_ ,, y:_):_ = foreign c strcat(x,y)
+pub def {test} [](str:_, idx:int, ?c:char) {
+    (0 <= idx)
+    (idx < length(str))
+    ?c = unsafe_index(str, idx)
+}
+
+pub def unsafe_index(str:_, idx:int):char = foreign lpvm access(str, idx, 1, 0)
