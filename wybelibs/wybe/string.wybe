@@ -30,7 +30,7 @@ pub def raw(s:_, ?str:raw_string) {
 pub def length(s:_):int = 
     if { s = buf(?len, _) :: len
        | s = cat(?l, ?r) :: length(l) + length(r)
-       | s = slc(?base, ?range) :: size(range) # incorrect
+       | s = slc(?base, ?range) :: fixed_range_size(length(base), range)
        | s = chr(_, _) :: 1
        | else :: 0
     }
@@ -68,7 +68,7 @@ pub def {test} `[|]`(?head:char, ?tail:_, s:_) {
                | else :: [?head | ?tail] = r
             }
        | s = slc(?base, ?range) :: 
-            do {
+            do { # this could be faster
                 [?idx | ?range] = range
                 if { ?head = base[idx] :: ?tail = slc(base, range); break }
             }
@@ -143,4 +143,15 @@ def cmp(x:_, y:_, ?c:int) {
            | else :: break
         }
     }
-} 
+}
+
+def fixed_range_size(hi:int, r:range, ?sz:int) {
+    ?s = start(r); ?st = stride(r); ?e = end(r)
+    if { 0 <= st :: 
+            ?lo = max(s, s + -s / st * st); ?hi = min(hi, e)
+       | else :: 
+            ?lo = max(-1, e); ?hi = min(s, hi + st + (s - hi - 1) % -st + 1) 
+            ?st = -st  
+       }
+    ?sz = if { hi <= lo :: 0 | else :: (hi - lo - 1) / st + 1 }
+}

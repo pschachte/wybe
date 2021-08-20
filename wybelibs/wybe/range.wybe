@@ -1,7 +1,6 @@
 
 constructor range(s:int, st:int, e:int)
 
-
 pub def {test} `[|]`(?value:int, ?rest:_, current:_) {
     current = range(?s, ?st, ?e)
     if { 0 <= st :: (s < e) | else :: (e < s) }
@@ -27,12 +26,15 @@ pub def irange(start:int, stride:int, end:int):_ =
 pub def (start:int .. end:int):_ = 
     xrange(start, if { start <= end :: 1 | else :: -1 }, end)
 
-pub def (start:int ... end:int):_ = 
-    irange(start, if { start <= end :: 1 | else :: -1 }, end)
 
 pub def start(r:_):int = r^s
 pub def stride(r:_):int = r^st
 pub def end(r:_):int = r^e
 
-pub def size(r:_):int = (r^s - r^e) / r^st # TODO: incorrect
+pub def size(r:_):int = sz where {
+    r = range(?s, ?st, ?e)
+    ?sz = if { signum(st) ~= signum(e - s) :: 0
+             | 0 <= st :: (e - s - 1) / st + 1 
+             | else :: (s - e - 1) / -st + 1 }
+}
 
