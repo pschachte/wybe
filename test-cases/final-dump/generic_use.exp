@@ -534,7 +534,7 @@ print_tail(lst#0:generic_list(wybe.int), io#0:wybe.phantom, ?io#3:wybe.phantom):
     1:
         foreign lpvm access(lst#0:generic_list(wybe.int), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
         foreign lpvm access(~lst#0:generic_list(wybe.int), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:generic_list(wybe.int))
-        foreign c print_string(", ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+        foreign c print_string(", ":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
         foreign c print_int(~h#0:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
         generic_use.print_tail<0>(~t#0:generic_list(wybe.int), ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #3 @generic_use:nn:nn
 

@@ -58,15 +58,15 @@ AFTER EVERYTHING:
     foreign lpvm alloc(16:wybe.int, ?tmp$58#0:multi_specz_reverse.intlist)
     foreign lpvm mutate(~tmp$58#0:multi_specz_reverse.intlist, ?tmp$59#0:multi_specz_reverse.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int)
     foreign lpvm mutate(~tmp$59#0:multi_specz_reverse.intlist, ?tmp$60#0:multi_specz_reverse.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$55#0:multi_specz_reverse.intlist)
-    multi_specz_reverse.list_reverse_helper<0>[04d1467a4d](~tmp$60#0:multi_specz_reverse.intlist, 0:multi_specz_reverse.intlist, ?%foo#1:multi_specz_reverse.intlist) #20 @multi_specz_reverse:11:45
-    multi_specz_reverse.list_print<0>(foo#1:multi_specz_reverse.intlist, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #12 @multi_specz_reverse:18:2
+    multi_specz_reverse.list_reverse_helper<0>[04d1467a4d](~tmp$60#0:multi_specz_reverse.intlist, 0:multi_specz_reverse.intlist, ?%foo#1:multi_specz_reverse.intlist) #20 @multi_specz_reverse:nn:nn
+    multi_specz_reverse.list_print<0>(foo#1:multi_specz_reverse.intlist, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #12 @multi_specz_reverse:nn:nn
     foreign c putchar('\n':wybe.char, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
-    foreign c print_string("============================":wybe.string, ~#io#2:wybe.phantom, ?tmp$65#0:wybe.phantom) @wybe:nn:nn
+    foreign c print_string("============================":wybe.raw_string, ~#io#2:wybe.phantom, ?tmp$65#0:wybe.phantom) @wybe:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$65#0:wybe.phantom, ?#io#3:wybe.phantom) @wybe:nn:nn
-    multi_specz_reverse.list_reverse_helper<0>(%foo#1:multi_specz_reverse.intlist, 0:multi_specz_reverse.intlist, ?%foo#2:multi_specz_reverse.intlist) #21 @multi_specz_reverse:11:45
-    multi_specz_reverse.list_print<0>(~foo#2:multi_specz_reverse.intlist, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #16 @multi_specz_reverse:25:2
+    multi_specz_reverse.list_reverse_helper<0>(%foo#1:multi_specz_reverse.intlist, 0:multi_specz_reverse.intlist, ?%foo#2:multi_specz_reverse.intlist) #21 @multi_specz_reverse:nn:nn
+    multi_specz_reverse.list_print<0>(~foo#2:multi_specz_reverse.intlist, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #16 @multi_specz_reverse:nn:nn
     foreign c putchar('\n':wybe.char, ~#io#4:wybe.phantom, ?#io#5:wybe.phantom) @wybe:nn:nn
-    multi_specz_reverse.list_print<0>(~foo#1:multi_specz_reverse.intlist, ~#io#5:wybe.phantom, ?#io#6:wybe.phantom) #18 @multi_specz_reverse:27:2
+    multi_specz_reverse.list_print<0>(~foo#1:multi_specz_reverse.intlist, ~#io#5:wybe.phantom, ?#io#6:wybe.phantom) #18 @multi_specz_reverse:nn:nn
     foreign c putchar('\n':wybe.char, ~#io#6:wybe.phantom, ?#io#7:wybe.phantom) @wybe:nn:nn
 
 
@@ -83,8 +83,8 @@ list_print > public (4 calls)
         foreign lpvm access(x#0:multi_specz_reverse.intlist, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
         foreign lpvm access(~x#0:multi_specz_reverse.intlist, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:multi_specz_reverse.intlist)
         foreign c print_int(~h#0:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @wybe:nn:nn
-        foreign c print_string(" ":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
-        multi_specz_reverse.list_print<0>(~t#0:multi_specz_reverse.intlist, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #3 @multi_specz_reverse:7:10
+        foreign c print_string(" ":wybe.raw_string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @wybe:nn:nn
+        multi_specz_reverse.list_print<0>(~t#0:multi_specz_reverse.intlist, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #3 @multi_specz_reverse:nn:nn
 
 
 
@@ -92,7 +92,7 @@ list_reverse > public {inline} (2 calls)
 0: list_reverse(lst#0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist):
  AliasPairs: []
  InterestingCallProperties: []
-    multi_specz_reverse.list_reverse_helper<0>(~lst#0:multi_specz_reverse.intlist, 0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist) #1 @multi_specz_reverse:11:45
+    multi_specz_reverse.list_reverse_helper<0>(~lst#0:multi_specz_reverse.intlist, 0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist) #1 @multi_specz_reverse:nn:nn
 
 
 list_reverse_helper > public (2 calls)
@@ -103,7 +103,7 @@ list_reverse_helper > public (2 calls)
     foreign llvm icmp_ne(lst#0:multi_specz_reverse.intlist, 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
-        foreign llvm move(~acc#0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist) @multi_specz_reverse:13:5
+        foreign llvm move(~acc#0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist) @multi_specz_reverse:nn:nn
 
     1:
         foreign lpvm access(lst#0:multi_specz_reverse.intlist, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#0:wybe.int)
@@ -111,18 +111,18 @@ list_reverse_helper > public (2 calls)
         foreign lpvm alloc(16:wybe.int, ?tmp$8#0:multi_specz_reverse.intlist)
         foreign lpvm mutate(~tmp$8#0:multi_specz_reverse.intlist, ?tmp$9#0:multi_specz_reverse.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h#0:wybe.int)
         foreign lpvm mutate(~tmp$9#0:multi_specz_reverse.intlist, ?tmp$10#0:multi_specz_reverse.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~acc#0:multi_specz_reverse.intlist)
-        multi_specz_reverse.list_reverse_helper<0>(~t#0:multi_specz_reverse.intlist, ~tmp$10#0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist) #2 @multi_specz_reverse:14:29
+        multi_specz_reverse.list_reverse_helper<0>(~t#0:multi_specz_reverse.intlist, ~tmp$10#0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist) #2 @multi_specz_reverse:nn:nn
 
  [04d1467a4d] [NonAliasedParam 0] :
     foreign llvm icmp_ne(lst#0:multi_specz_reverse.intlist, 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
-        foreign llvm move(~acc#0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist) @multi_specz_reverse:13:5
+        foreign llvm move(~acc#0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist) @multi_specz_reverse:nn:nn
 
     1:
         foreign lpvm access(lst#0:multi_specz_reverse.intlist, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#0:multi_specz_reverse.intlist)
         foreign lpvm mutate(~lst#0:multi_specz_reverse.intlist, ?tmp$10#0:multi_specz_reverse.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~acc#0:multi_specz_reverse.intlist)
-        multi_specz_reverse.list_reverse_helper<0>[04d1467a4d](~t#0:multi_specz_reverse.intlist, ~tmp$10#0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist) #2 @multi_specz_reverse:14:29
+        multi_specz_reverse.list_reverse_helper<0>[04d1467a4d](~t#0:multi_specz_reverse.intlist, ~tmp$10#0:multi_specz_reverse.intlist, ?$#0:multi_specz_reverse.intlist) #2 @multi_specz_reverse:nn:nn
 
 
   LLVM code       :
@@ -139,13 +139,13 @@ declare external ccc  void @putchar(i8)
 declare external ccc  void @print_string(i64)    
 
 
-@multi_specz_reverse.81 =    constant [29 x i8] c"============================\00"
+@multi_specz_reverse.81 =    constant [?? x i8] c"============================\00"
 
 
 declare external ccc  void @print_int(i64)    
 
 
-@multi_specz_reverse.90 =    constant [2 x i8] c" \00"
+@multi_specz_reverse.90 =    constant [?? x i8] c" \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -259,7 +259,7 @@ entry:
   %"1$foo#1" = tail call fastcc  i64  @"multi_specz_reverse.list_reverse_helper<0>[04d1467a4d]"(i64  %75, i64  0)  
   tail call fastcc  void  @"multi_specz_reverse.list_print<0>"(i64  %"1$foo#1")  
   tail call ccc  void  @putchar(i8  10)  
-  %82 = ptrtoint i8* getelementptr inbounds ([29 x i8], [29 x i8]* @multi_specz_reverse.81, i32 0, i32 0) to i64 
+  %82 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multi_specz_reverse.81, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %82)  
   tail call ccc  void  @putchar(i8  10)  
   %"1$foo#2" = tail call fastcc  i64  @"multi_specz_reverse.list_reverse_helper<0>"(i64  %"1$foo#1", i64  0)  
@@ -284,7 +284,7 @@ if.then:
   %88 = getelementptr  i64, i64* %87, i64 0 
   %89 = load  i64, i64* %88 
   tail call ccc  void  @print_int(i64  %85)  
-  %91 = ptrtoint i8* getelementptr inbounds ([2 x i8], [2 x i8]* @multi_specz_reverse.90, i32 0, i32 0) to i64 
+  %91 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multi_specz_reverse.90, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %91)  
   tail call fastcc  void  @"multi_specz_reverse.list_print<0>"(i64  %89)  
   ret void 

@@ -24,8 +24,8 @@ AFTER EVERYTHING:
 (io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string("Smith":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-    foreign c print_string("Smith":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
+    foreign c print_string("Smith":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign c print_string("Smith":wybe.raw_string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 
@@ -81,65 +81,65 @@ entry:
 =($left#0:person2.person, $right#0:person2.person, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($left#0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$firstname#0:wybe.string)
-    foreign lpvm access(~$left#0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$lastname#0:wybe.string)
-    foreign lpvm access($right#0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$firstname#0:wybe.string)
-    foreign lpvm access(~$right#0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$lastname#0:wybe.string)
-    foreign c strcmp(~$left$firstname#0:wybe.string, ~$right$firstname#0:wybe.string, ?tmp$7#0:wybe.int) @string:nn:nn
+    foreign lpvm access($left#0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$firstname#0:wybe.raw_string)
+    foreign lpvm access(~$left#0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$lastname#0:wybe.raw_string)
+    foreign lpvm access($right#0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$firstname#0:wybe.raw_string)
+    foreign lpvm access(~$right#0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$lastname#0:wybe.raw_string)
+    foreign c strcmp(~$left$firstname#0:wybe.raw_string, ~$right$firstname#0:wybe.raw_string, ?tmp$7#0:wybe.int) @raw_string:nn:nn
     foreign llvm icmp_eq(~tmp$7#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @int:nn:nn
     case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign c strcmp(~$left$lastname#0:wybe.string, ~$right$lastname#0:wybe.string, ?tmp$10#0:wybe.int) @string:nn:nn
+        foreign c strcmp(~$left$lastname#0:wybe.raw_string, ~$right$lastname#0:wybe.raw_string, ?tmp$10#0:wybe.int) @raw_string:nn:nn
         foreign llvm icmp_eq(~tmp$10#0:wybe.int, 0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
 firstname > public {inline} (0 calls)
 0: person2.person.firstname<0>
-firstname($rec#0:person2.person, ?$#0:wybe.string):
+firstname($rec#0:person2.person, ?$#0:wybe.raw_string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~$rec#0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.string)
+    foreign lpvm access(~$rec#0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.raw_string)
 firstname > public {inline} (0 calls)
 1: person2.person.firstname<1>
-firstname($rec#0:person2.person, ?$rec#1:person2.person, $field#0:wybe.string):
+firstname($rec#0:person2.person, ?$rec#1:person2.person, $field#0:wybe.raw_string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm mutate(~$rec#0:person2.person, ?$rec#1:person2.person, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.string)
+    foreign lpvm mutate(~$rec#0:person2.person, ?$rec#1:person2.person, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.raw_string)
 
 
 lastname > public {inline} (0 calls)
 0: person2.person.lastname<0>
-lastname($rec#0:person2.person, ?$#0:wybe.string):
+lastname($rec#0:person2.person, ?$#0:wybe.raw_string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~$rec#0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.string)
+    foreign lpvm access(~$rec#0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.raw_string)
 lastname > public {inline} (0 calls)
 1: person2.person.lastname<1>
-lastname($rec#0:person2.person, ?$rec#1:person2.person, $field#0:wybe.string):
+lastname($rec#0:person2.person, ?$rec#1:person2.person, $field#0:wybe.raw_string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm mutate(~$rec#0:person2.person, ?$rec#1:person2.person, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.string)
+    foreign lpvm mutate(~$rec#0:person2.person, ?$rec#1:person2.person, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.raw_string)
 
 
 person > public {inline} (0 calls)
 0: person2.person.person<0>
-person(firstname#0:wybe.string, lastname#0:wybe.string, ?$#0:person2.person):
+person(firstname#0:wybe.raw_string, lastname#0:wybe.raw_string, ?$#0:person2.person):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:person2.person)
-    foreign lpvm mutate(~$rec#0:person2.person, ?$rec#1:person2.person, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~firstname#0:wybe.string)
-    foreign lpvm mutate(~$rec#1:person2.person, ?$#0:person2.person, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~lastname#0:wybe.string)
+    foreign lpvm mutate(~$rec#0:person2.person, ?$rec#1:person2.person, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~firstname#0:wybe.raw_string)
+    foreign lpvm mutate(~$rec#1:person2.person, ?$#0:person2.person, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~lastname#0:wybe.raw_string)
 person > public {inline} (6 calls)
 1: person2.person.person<1>
-person(?firstname#0:wybe.string, ?lastname#0:wybe.string, $#0:person2.person):
+person(?firstname#0:wybe.raw_string, ?lastname#0:wybe.raw_string, $#0:person2.person):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($#0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?firstname#0:wybe.string)
-    foreign lpvm access(~$#0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?lastname#0:wybe.string)
+    foreign lpvm access($#0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?firstname#0:wybe.raw_string)
+    foreign lpvm access(~$#0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?lastname#0:wybe.raw_string)
 
 
 ~= > public {inline} (0 calls)
@@ -147,11 +147,11 @@ person(?firstname#0:wybe.string, ?lastname#0:wybe.string, $#0:person2.person):
 ~=($left#0:person2.person, $right#0:person2.person, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($left#0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.string)
-    foreign lpvm access(~$left#0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.string)
-    foreign lpvm access($right#0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.string)
-    foreign lpvm access(~$right#0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.string)
-    foreign c strcmp(~tmp$3#0:wybe.string, ~tmp$5#0:wybe.string, ?tmp$7#0:wybe.int) @string:nn:nn
+    foreign lpvm access($left#0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.raw_string)
+    foreign lpvm access(~$left#0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.raw_string)
+    foreign lpvm access($right#0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.raw_string)
+    foreign lpvm access(~$right#0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.raw_string)
+    foreign c strcmp(~tmp$3#0:wybe.raw_string, ~tmp$5#0:wybe.raw_string, ?tmp$7#0:wybe.int) @raw_string:nn:nn
     foreign llvm icmp_eq(~tmp$7#0:wybe.int, 0:wybe.int, ?tmp$8#0:wybe.bool) @int:nn:nn
     case ~tmp$8#0:wybe.bool of
     0:
@@ -159,7 +159,7 @@ person(?firstname#0:wybe.string, ?lastname#0:wybe.string, $#0:person2.person):
         foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign c strcmp(~tmp$4#0:wybe.string, ~tmp$6#0:wybe.string, ?tmp$9#0:wybe.int) @string:nn:nn
+        foreign c strcmp(~tmp$4#0:wybe.raw_string, ~tmp$6#0:wybe.raw_string, ?tmp$9#0:wybe.int) @raw_string:nn:nn
         foreign llvm icmp_eq(~tmp$9#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool) @int:nn:nn
         foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 

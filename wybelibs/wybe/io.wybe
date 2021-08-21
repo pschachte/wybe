@@ -31,13 +31,13 @@ pub def print(x:raw_string) use !io { foreign c print_string(x, !io) }
 pub def println(x:raw_string) use !io { !print(x); !nl }
 pub def read(?x:raw_string) use !io { foreign c read_line(?x, !io) }
 
-pub def print(x:string) use !io { !print_string(x) }
-pub def println(x:string) use !io { !print(x); !nl }
-pub def read(?x:string) use !io { !read(?raw_string); ?x = str(raw_string) }
-
 pub def print(x:bool) use !io {
    !print(if {x:: "true" | else:: "false"})
 }
 pub def println(x:bool) use !io { !print(x); !nl }
+
+pub def print(x:string) use !io { !print_string(x) }
+pub def println(x:string) use !io { !print(x); !nl }
+pub def read(?x:string) use !io { !read(?raw_string); ?x = str(raw_string) }
 
 pub def eof:char = foreign lpvm cast(-1)

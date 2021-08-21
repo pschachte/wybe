@@ -15,23 +15,23 @@ AFTER EVERYTHING:
 (io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string("expect larger: ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-    exp_if.if_test<0>(3:wybe.int, ?tmp$0#0:wybe.string) #1 @exp_if:nn:nn
-    foreign c print_string(~tmp$0#0:wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
+    foreign c print_string("expect larger: ":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    exp_if.if_test<0>(3:wybe.int, ?tmp$0#0:wybe.raw_string) #1 @exp_if:nn:nn
+    foreign c print_string(~tmp$0#0:wybe.raw_string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
 
 
 if_test > public (1 calls)
 0: exp_if.if_test<0>
-if_test(x#0:wybe.int, ?$#0:wybe.string):
+if_test(x#0:wybe.int, ?$#0:wybe.raw_string):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_sgt(~x#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @int:nn:nn
     case ~tmp$1#0:wybe.bool of
     0:
-        foreign llvm move("smaller":wybe.string, ?$#0:wybe.string) @exp_if:nn:nn
+        foreign llvm move("smaller":wybe.raw_string, ?$#0:wybe.raw_string) @exp_if:nn:nn
 
     1:
-        foreign llvm move("larger":wybe.string, ?$#0:wybe.string) @exp_if:nn:nn
+        foreign llvm move("larger":wybe.raw_string, ?$#0:wybe.raw_string) @exp_if:nn:nn
 
 
   LLVM code       :

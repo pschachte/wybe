@@ -52,14 +52,14 @@ find_test(modulus#0:wybe.int, io#0:wybe.phantom, ?io#4:wybe.phantom):
     test_loop.gen$1<0>[6dacb8fd25](modulus#0:wybe.int, ~tmp$8#0:test_loop.int_seq, ?i#0:wybe.int, ?tmp$1#0:wybe.bool) #8 @test_loop:nn:nn
     case ~tmp$1#0:wybe.bool of
     0:
-        foreign c print_string("Couldn't find even number divisible by ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+        foreign c print_string("Couldn't find even number divisible by ":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
         foreign c print_int(~modulus#0:wybe.int, ~#io#1:wybe.phantom, ?tmp$15#0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp$15#0:wybe.phantom, ?#io#4:wybe.phantom) @io:nn:nn
 
     1:
-        foreign c print_string("First even number divisible by ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+        foreign c print_string("First even number divisible by ":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
         foreign c print_int(~modulus#0:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
-        foreign c print_string(" is ":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
+        foreign c print_string(" is ":wybe.raw_string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
         foreign c print_int(~i#0:wybe.int, ~#io#3:wybe.phantom, ?tmp$19#0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp$19#0:wybe.phantom, ?#io#4:wybe.phantom) @io:nn:nn
 

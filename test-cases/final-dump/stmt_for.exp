@@ -2,10 +2,9 @@
 AFTER EVERYTHING:
  Module stmt_for
   representation  : (not a type)
-  public submods  : int_sequence -> stmt_for.int_sequence
+  public submods  : 
   public resources: 
   public procs    : stmt_for.<0>
-                    stmt_for.irange<0>
                     stmt_for.multiple_generator<0>
                     stmt_for.semi_det_for_loop<0>
                     stmt_for.shortest_generator_termination<0>
@@ -20,22 +19,8 @@ AFTER EVERYTHING:
                     stmt_for.using_while<0>
                     stmt_for.using_xrange<0>
                     stmt_for.using_xrange_reverse<0>
-                    stmt_for.xrange<0>
-                    stmt_for.int_sequence.=<0>
-                    stmt_for.int_sequence.[|]<0>
-                    stmt_for.int_sequence.end<0>
-                    stmt_for.int_sequence.end<1>
-                    stmt_for.int_sequence.int_sequence<0>
-                    stmt_for.int_sequence.int_sequence<1>
-                    stmt_for.int_sequence.start<0>
-                    stmt_for.int_sequence.start<1>
-                    stmt_for.int_sequence.stride<0>
-                    stmt_for.int_sequence.stride<1>
-                    stmt_for.int_sequence.~=<0>
-  imports         : public use stmt_for.int_sequence
-                    use wybe
+  imports         : use wybe
   resources       : 
-  submodules      : stmt_for.int_sequence
   procs           : 
 
 *main* > public (0 calls)
@@ -43,43 +28,43 @@ AFTER EVERYTHING:
 (io#0:wybe.phantom, ?io#26:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string("single_generator:":wybe.string, ~#io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @io:nn:nn
+    foreign c print_string("single_generator:":wybe.raw_string, ~#io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$2#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
     stmt_for.single_generator<0>(~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #1 @stmt_for:nn:nn
-    foreign c print_string("\nmultiple_generator":wybe.string, ~#io#2:wybe.phantom, ?tmp$5#0:wybe.phantom) @io:nn:nn
+    foreign c print_string("\nmultiple_generator":wybe.raw_string, ~#io#2:wybe.phantom, ?tmp$5#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$5#0:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
     stmt_for.multiple_generator<0>(~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #3 @stmt_for:nn:nn
-    foreign c print_string("\nshortest_generator_termination":wybe.string, ~#io#4:wybe.phantom, ?tmp$8#0:wybe.phantom) @io:nn:nn
+    foreign c print_string("\nshortest_generator_termination":wybe.raw_string, ~#io#4:wybe.phantom, ?tmp$8#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$8#0:wybe.phantom, ?#io#5:wybe.phantom) @io:nn:nn
     stmt_for.shortest_generator_termination<0>(~#io#5:wybe.phantom, ?#io#6:wybe.phantom) #5 @stmt_for:nn:nn
-    foreign c print_string("\nusing_break":wybe.string, ~#io#6:wybe.phantom, ?tmp$11#0:wybe.phantom) @io:nn:nn
+    foreign c print_string("\nusing_break":wybe.raw_string, ~#io#6:wybe.phantom, ?tmp$11#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$11#0:wybe.phantom, ?#io#7:wybe.phantom) @io:nn:nn
     stmt_for.using_break<0>(~#io#7:wybe.phantom, ?#io#8:wybe.phantom) #7 @stmt_for:nn:nn
-    foreign c print_string("\nusing_next":wybe.string, ~#io#8:wybe.phantom, ?tmp$14#0:wybe.phantom) @io:nn:nn
+    foreign c print_string("\nusing_next":wybe.raw_string, ~#io#8:wybe.phantom, ?tmp$14#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$14#0:wybe.phantom, ?#io#9:wybe.phantom) @io:nn:nn
     stmt_for.using_next<0>(~#io#9:wybe.phantom, ?#io#10:wybe.phantom) #9 @stmt_for:nn:nn
-    foreign c print_string("\nusing_while":wybe.string, ~#io#10:wybe.phantom, ?tmp$17#0:wybe.phantom) @io:nn:nn
+    foreign c print_string("\nusing_while":wybe.raw_string, ~#io#10:wybe.phantom, ?tmp$17#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$17#0:wybe.phantom, ?#io#11:wybe.phantom) @io:nn:nn
     stmt_for.using_while<0>(~#io#11:wybe.phantom, ?#io#12:wybe.phantom) #11 @stmt_for:nn:nn
-    foreign c print_string("\nusing_until":wybe.string, ~#io#12:wybe.phantom, ?tmp$20#0:wybe.phantom) @io:nn:nn
+    foreign c print_string("\nusing_until":wybe.raw_string, ~#io#12:wybe.phantom, ?tmp$20#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$20#0:wybe.phantom, ?#io#13:wybe.phantom) @io:nn:nn
     stmt_for.using_until<0>(~#io#13:wybe.phantom, ?#io#14:wybe.phantom) #13 @stmt_for:nn:nn
-    foreign c print_string("\nusing_when":wybe.string, ~#io#14:wybe.phantom, ?tmp$23#0:wybe.phantom) @io:nn:nn
+    foreign c print_string("\nusing_when":wybe.raw_string, ~#io#14:wybe.phantom, ?tmp$23#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$23#0:wybe.phantom, ?#io#15:wybe.phantom) @io:nn:nn
     stmt_for.using_when<0>(~#io#15:wybe.phantom, ?#io#16:wybe.phantom) #15 @stmt_for:nn:nn
-    foreign c print_string("\nusing_unless":wybe.string, ~#io#16:wybe.phantom, ?tmp$26#0:wybe.phantom) @io:nn:nn
+    foreign c print_string("\nusing_unless":wybe.raw_string, ~#io#16:wybe.phantom, ?tmp$26#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$26#0:wybe.phantom, ?#io#17:wybe.phantom) @io:nn:nn
     stmt_for.using_unless<0>(~#io#17:wybe.phantom, ?#io#18:wybe.phantom) #17 @stmt_for:nn:nn
-    foreign c print_string("\nusing_xrange":wybe.string, ~#io#18:wybe.phantom, ?tmp$29#0:wybe.phantom) @io:nn:nn
+    foreign c print_string("\nusing_xrange":wybe.raw_string, ~#io#18:wybe.phantom, ?tmp$29#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$29#0:wybe.phantom, ?#io#19:wybe.phantom) @io:nn:nn
     stmt_for.using_xrange<0>(~#io#19:wybe.phantom, ?#io#20:wybe.phantom) #19 @stmt_for:nn:nn
-    foreign c print_string("\nusing_xrange_reverse":wybe.string, ~#io#20:wybe.phantom, ?tmp$32#0:wybe.phantom) @io:nn:nn
+    foreign c print_string("\nusing_xrange_reverse":wybe.raw_string, ~#io#20:wybe.phantom, ?tmp$32#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$32#0:wybe.phantom, ?#io#21:wybe.phantom) @io:nn:nn
     stmt_for.using_xrange_reverse<0>(~#io#21:wybe.phantom, ?#io#22:wybe.phantom) #21 @stmt_for:nn:nn
-    foreign c print_string("\nusing_irange":wybe.string, ~#io#22:wybe.phantom, ?tmp$35#0:wybe.phantom) @io:nn:nn
+    foreign c print_string("\nusing_irange":wybe.raw_string, ~#io#22:wybe.phantom, ?tmp$35#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$35#0:wybe.phantom, ?#io#23:wybe.phantom) @io:nn:nn
     stmt_for.using_irange<0>(~#io#23:wybe.phantom, ?#io#24:wybe.phantom) #23 @stmt_for:nn:nn
-    foreign c print_string("\nusing_irange_reverse":wybe.string, ~#io#24:wybe.phantom, ?tmp$38#0:wybe.phantom) @io:nn:nn
+    foreign c print_string("\nusing_irange_reverse":wybe.raw_string, ~#io#24:wybe.phantom, ?tmp$38#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$38#0:wybe.phantom, ?#io#25:wybe.phantom) @io:nn:nn
     stmt_for.using_irange_reverse<0>(~#io#25:wybe.phantom, ?#io#26:wybe.phantom) #25 @stmt_for:nn:nn
 
@@ -137,10 +122,10 @@ gen$11(i#0:wybe.int, io#0:wybe.phantom, tmp$0#0:wybe.list(wybe.int), tmp$1#0:wyb
 
 gen$12 > (2 calls)
 0: stmt_for.gen$12<0>
-gen$12(io#0:wybe.phantom, tmp$0#0:stmt_for.int_sequence, tmp$3#0:stmt_for.int_sequence, ?io#2:wybe.phantom):
+gen$12(io#0:wybe.phantom, tmp$0#0:wybe.range, tmp$3#0:wybe.range, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    stmt_for.int_sequence.[|]<0>(?i#0:wybe.int, ?tmp$1#0:stmt_for.int_sequence, ~tmp$0#0:stmt_for.int_sequence, ?tmp$2#0:wybe.bool) #0
+    wybe.range.[|]<0>(?i#0:wybe.int, ?tmp$1#0:wybe.range, ~tmp$0#0:wybe.range, ?tmp$2#0:wybe.bool) #0
     case ~tmp$2#0:wybe.bool of
     0:
         foreign llvm move(~io#0:wybe.phantom, ?io#2:wybe.phantom)
@@ -148,16 +133,16 @@ gen$12(io#0:wybe.phantom, tmp$0#0:stmt_for.int_sequence, tmp$3#0:stmt_for.int_se
     1:
         foreign c print_int(~i#0:wybe.int, ~#io#0:wybe.phantom, ?tmp$6#0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp$6#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-        stmt_for.gen$12<0>(~io#1:wybe.phantom, ~tmp$1#0:stmt_for.int_sequence, ~tmp$3#0:stmt_for.int_sequence, ?io#2:wybe.phantom) #2 @stmt_for:nn:nn
+        stmt_for.gen$12<0>(~io#1:wybe.phantom, ~tmp$1#0:wybe.range, ~tmp$3#0:wybe.range, ?io#2:wybe.phantom) #2 @stmt_for:nn:nn
 
 
 
 gen$13 > (2 calls)
 0: stmt_for.gen$13<0>
-gen$13(io#0:wybe.phantom, tmp$0#0:stmt_for.int_sequence, tmp$3#0:stmt_for.int_sequence, ?io#2:wybe.phantom):
+gen$13(io#0:wybe.phantom, tmp$0#0:wybe.range, tmp$3#0:wybe.range, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    stmt_for.int_sequence.[|]<0>(?i#0:wybe.int, ?tmp$1#0:stmt_for.int_sequence, ~tmp$0#0:stmt_for.int_sequence, ?tmp$2#0:wybe.bool) #0
+    wybe.range.[|]<0>(?i#0:wybe.int, ?tmp$1#0:wybe.range, ~tmp$0#0:wybe.range, ?tmp$2#0:wybe.bool) #0
     case ~tmp$2#0:wybe.bool of
     0:
         foreign llvm move(~io#0:wybe.phantom, ?io#2:wybe.phantom)
@@ -165,7 +150,7 @@ gen$13(io#0:wybe.phantom, tmp$0#0:stmt_for.int_sequence, tmp$3#0:stmt_for.int_se
     1:
         foreign c print_int(~i#0:wybe.int, ~#io#0:wybe.phantom, ?tmp$6#0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp$6#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-        stmt_for.gen$13<0>(~io#1:wybe.phantom, ~tmp$1#0:stmt_for.int_sequence, ~tmp$3#0:stmt_for.int_sequence, ?io#2:wybe.phantom) #2 @stmt_for:nn:nn
+        stmt_for.gen$13<0>(~io#1:wybe.phantom, ~tmp$1#0:wybe.range, ~tmp$3#0:wybe.range, ?io#2:wybe.phantom) #2 @stmt_for:nn:nn
 
 
 
@@ -362,10 +347,10 @@ gen$23(i#0:wybe.int, io#0:wybe.phantom, tmp$0#0:wybe.list(wybe.int), tmp$1#0:wyb
 
 gen$24 > (2 calls)
 0: stmt_for.gen$24<0>
-gen$24(io#0:wybe.phantom, tmp$0#0:stmt_for.int_sequence, tmp$3#0:stmt_for.int_sequence, ?io#2:wybe.phantom):
+gen$24(io#0:wybe.phantom, tmp$0#0:wybe.range, tmp$3#0:wybe.range, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    stmt_for.int_sequence.[|]<0>(?i#0:wybe.int, ?tmp$1#0:stmt_for.int_sequence, ~tmp$0#0:stmt_for.int_sequence, ?tmp$2#0:wybe.bool) #0
+    wybe.range.[|]<0>(?i#0:wybe.int, ?tmp$1#0:wybe.range, ~tmp$0#0:wybe.range, ?tmp$2#0:wybe.bool) #0
     case ~tmp$2#0:wybe.bool of
     0:
         foreign llvm move(~io#0:wybe.phantom, ?io#2:wybe.phantom)
@@ -373,16 +358,16 @@ gen$24(io#0:wybe.phantom, tmp$0#0:stmt_for.int_sequence, tmp$3#0:stmt_for.int_se
     1:
         foreign c print_int(~i#0:wybe.int, ~#io#0:wybe.phantom, ?tmp$6#0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp$6#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-        stmt_for.gen$24<0>(~io#1:wybe.phantom, ~tmp$1#0:stmt_for.int_sequence, ~tmp$3#0:stmt_for.int_sequence, ?io#2:wybe.phantom) #2 @stmt_for:nn:nn
+        stmt_for.gen$24<0>(~io#1:wybe.phantom, ~tmp$1#0:wybe.range, ~tmp$3#0:wybe.range, ?io#2:wybe.phantom) #2 @stmt_for:nn:nn
 
 
 
 gen$25 > (2 calls)
 0: stmt_for.gen$25<0>
-gen$25(io#0:wybe.phantom, tmp$0#0:stmt_for.int_sequence, tmp$3#0:stmt_for.int_sequence, ?io#2:wybe.phantom):
+gen$25(io#0:wybe.phantom, tmp$0#0:wybe.range, tmp$3#0:wybe.range, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    stmt_for.int_sequence.[|]<0>(?i#0:wybe.int, ?tmp$1#0:stmt_for.int_sequence, ~tmp$0#0:stmt_for.int_sequence, ?tmp$2#0:wybe.bool) #0
+    wybe.range.[|]<0>(?i#0:wybe.int, ?tmp$1#0:wybe.range, ~tmp$0#0:wybe.range, ?tmp$2#0:wybe.bool) #0
     case ~tmp$2#0:wybe.bool of
     0:
         foreign llvm move(~io#0:wybe.phantom, ?io#2:wybe.phantom)
@@ -390,7 +375,7 @@ gen$25(io#0:wybe.phantom, tmp$0#0:stmt_for.int_sequence, tmp$3#0:stmt_for.int_se
     1:
         foreign c print_int(~i#0:wybe.int, ~#io#0:wybe.phantom, ?tmp$6#0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp$6#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-        stmt_for.gen$25<0>(~io#1:wybe.phantom, ~tmp$1#0:stmt_for.int_sequence, ~tmp$3#0:stmt_for.int_sequence, ?io#2:wybe.phantom) #2 @stmt_for:nn:nn
+        stmt_for.gen$25<0>(~io#1:wybe.phantom, ~tmp$1#0:wybe.range, ~tmp$3#0:wybe.range, ?io#2:wybe.phantom) #2 @stmt_for:nn:nn
 
 
 
@@ -408,23 +393,23 @@ gen$3(i#0:wybe.int, io#0:wybe.phantom, j#0:wybe.int, tmp$0#0:wybe.list(wybe.int)
 
 gen$4 > (2 calls)
 0: stmt_for.gen$4<0>
-gen$4(io#0:wybe.phantom, tmp$0#0:stmt_for.int_sequence, tmp$3#0:stmt_for.int_sequence, ?io#1:wybe.phantom, ?$$#0:wybe.bool):
+gen$4(io#0:wybe.phantom, tmp$0#0:wybe.range, tmp$3#0:wybe.range, ?io#1:wybe.phantom, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    stmt_for.int_sequence.[|]<0>(?i#0:wybe.int, ?tmp$1#0:stmt_for.int_sequence, ~tmp$0#0:stmt_for.int_sequence, ?tmp$2#0:wybe.bool) #0
+    wybe.range.[|]<0>(?i#0:wybe.int, ?tmp$1#0:wybe.range, ~tmp$0#0:wybe.range, ?tmp$2#0:wybe.bool) #0
     case ~tmp$2#0:wybe.bool of
     0:
         foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
         foreign llvm move(~io#0:wybe.phantom, ?io#1:wybe.phantom)
 
     1:
-        stmt_for.gen$5<0>(~i#0:wybe.int, ~io#0:wybe.phantom, ~tmp$1#0:stmt_for.int_sequence, _:stmt_for.int_sequence, _:wybe.bool, ~tmp$3#0:stmt_for.int_sequence, ?io#1:wybe.phantom, ?$$#0:wybe.bool) #1
+        stmt_for.gen$5<0>(~i#0:wybe.int, ~io#0:wybe.phantom, ~tmp$1#0:wybe.range, _:wybe.range, _:wybe.bool, ~tmp$3#0:wybe.range, ?io#1:wybe.phantom, ?$$#0:wybe.bool) #1
 
 
 
 gen$5 > (1 calls)
 0: stmt_for.gen$5<0>
-gen$5(i#0:wybe.int, io#0:wybe.phantom, tmp$0#0:stmt_for.int_sequence, [tmp$1#0:stmt_for.int_sequence], [tmp$2#0:wybe.bool], tmp$3#0:stmt_for.int_sequence, ?io#2:wybe.phantom, ?$$#0:wybe.bool):
+gen$5(i#0:wybe.int, io#0:wybe.phantom, tmp$0#0:wybe.range, [tmp$1#0:wybe.range], [tmp$2#0:wybe.bool], tmp$3#0:wybe.range, ?io#2:wybe.phantom, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_slt(i#0:wybe.int, 5:wybe.int, ?tmp$4#0:wybe.bool) @int:nn:nn
@@ -436,7 +421,7 @@ gen$5(i#0:wybe.int, io#0:wybe.phantom, tmp$0#0:stmt_for.int_sequence, [tmp$1#0:s
     1:
         foreign c print_int(~i#0:wybe.int, ~#io#0:wybe.phantom, ?tmp$9#0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp$9#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-        stmt_for.gen$4<0>(~io#1:wybe.phantom, ~tmp$0#0:stmt_for.int_sequence, ~tmp$3#0:stmt_for.int_sequence, ?io#2:wybe.phantom, ?$$#0:wybe.bool) #2 @stmt_for:nn:nn
+        stmt_for.gen$4<0>(~io#1:wybe.phantom, ~tmp$0#0:wybe.range, ~tmp$3#0:wybe.range, ?io#2:wybe.phantom, ?$$#0:wybe.bool) #2 @stmt_for:nn:nn
 
 
 
@@ -509,29 +494,6 @@ gen$9(io#0:wybe.phantom, tmp$0#0:wybe.list(wybe.int), tmp$1#0:wybe.list(wybe.int
 
 
 
-irange > public (2 calls)
-0: stmt_for.irange<0>
-irange(start#0:wybe.int, stride#0:wybe.int, end#0:wybe.int, ?$#0:stmt_for.int_sequence):
- AliasPairs: []
- InterestingCallProperties: []
-    foreign llvm icmp_slt(stride#0:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.bool) @int:nn:nn
-    case ~tmp$4#0:wybe.bool of
-    0:
-        foreign llvm add(~end#0:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.int) @int:nn:nn
-        foreign lpvm alloc(24:wybe.int, ?tmp$12#0:stmt_for.int_sequence)
-        foreign lpvm mutate(~tmp$12#0:stmt_for.int_sequence, ?tmp$13#0:stmt_for.int_sequence, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~start#0:wybe.int)
-        foreign lpvm mutate(~tmp$13#0:stmt_for.int_sequence, ?tmp$14#0:stmt_for.int_sequence, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~stride#0:wybe.int)
-        foreign lpvm mutate(~tmp$14#0:stmt_for.int_sequence, ?$#0:stmt_for.int_sequence, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp$3#0:wybe.int)
-
-    1:
-        foreign llvm sub(~end#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int) @int:nn:nn
-        foreign lpvm alloc(24:wybe.int, ?tmp$12#0:stmt_for.int_sequence)
-        foreign lpvm mutate(~tmp$12#0:stmt_for.int_sequence, ?tmp$13#0:stmt_for.int_sequence, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~start#0:wybe.int)
-        foreign lpvm mutate(~tmp$13#0:stmt_for.int_sequence, ?tmp$14#0:stmt_for.int_sequence, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~stride#0:wybe.int)
-        foreign lpvm mutate(~tmp$14#0:stmt_for.int_sequence, ?$#0:stmt_for.int_sequence, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp$2#0:wybe.int)
-
-
-
 multiple_generator > public (1 calls)
 0: stmt_for.multiple_generator<0>
 multiple_generator(io#0:wybe.phantom, ?io#1:wybe.phantom):
@@ -563,8 +525,8 @@ semi_det_for_loop > public (0 calls)
 semi_det_for_loop(io#0:wybe.phantom, ?io#1:wybe.phantom, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    stmt_for.xrange<0>(0:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp$3#0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
-    stmt_for.gen$4<0>(~io#0:wybe.phantom, ~tmp$3#0:stmt_for.int_sequence, ~tmp$3#0:stmt_for.int_sequence, ?io#1:wybe.phantom, ?$$#0:wybe.bool) #1 @stmt_for:nn:nn
+    wybe.range.xrange<0>(0:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp$3#0:wybe.range) #0 @stmt_for:nn:nn
+    stmt_for.gen$4<0>(~io#0:wybe.phantom, ~tmp$3#0:wybe.range, ~tmp$3#0:wybe.range, ?io#1:wybe.phantom, ?$$#0:wybe.bool) #1 @stmt_for:nn:nn
 
 
 shortest_generator_termination > public (1 calls)
@@ -635,8 +597,8 @@ using_irange > public (1 calls)
 using_irange(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    stmt_for.irange<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp$3#0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
-    stmt_for.gen$12<0>(~io#0:wybe.phantom, ~tmp$3#0:stmt_for.int_sequence, ~tmp$3#0:stmt_for.int_sequence, ?io#1:wybe.phantom) #1 @stmt_for:nn:nn
+    wybe.range.irange<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp$3#0:wybe.range) #0 @stmt_for:nn:nn
+    stmt_for.gen$12<0>(~io#0:wybe.phantom, ~tmp$3#0:wybe.range, ~tmp$3#0:wybe.range, ?io#1:wybe.phantom) #1 @stmt_for:nn:nn
 
 
 using_irange_reverse > public (1 calls)
@@ -644,8 +606,8 @@ using_irange_reverse > public (1 calls)
 using_irange_reverse(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    stmt_for.irange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp$3#0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
-    stmt_for.gen$13<0>(~io#0:wybe.phantom, ~tmp$3#0:stmt_for.int_sequence, ~tmp$3#0:stmt_for.int_sequence, ?io#1:wybe.phantom) #1 @stmt_for:nn:nn
+    wybe.range.irange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.range) #0 @stmt_for:nn:nn
+    stmt_for.gen$13<0>(~io#0:wybe.phantom, ~tmp$3#0:wybe.range, ~tmp$3#0:wybe.range, ?io#1:wybe.phantom) #1 @stmt_for:nn:nn
 
 
 using_next > public (1 calls)
@@ -753,8 +715,8 @@ using_xrange > public (1 calls)
 using_xrange(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    stmt_for.xrange<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp$3#0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
-    stmt_for.gen$24<0>(~io#0:wybe.phantom, ~tmp$3#0:stmt_for.int_sequence, ~tmp$3#0:stmt_for.int_sequence, ?io#1:wybe.phantom) #1 @stmt_for:nn:nn
+    wybe.range.xrange<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp$3#0:wybe.range) #0 @stmt_for:nn:nn
+    stmt_for.gen$24<0>(~io#0:wybe.phantom, ~tmp$3#0:wybe.range, ~tmp$3#0:wybe.range, ?io#1:wybe.phantom) #1 @stmt_for:nn:nn
 
 
 using_xrange_reverse > public (1 calls)
@@ -762,19 +724,8 @@ using_xrange_reverse > public (1 calls)
 using_xrange_reverse(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    stmt_for.xrange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp$3#0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
-    stmt_for.gen$25<0>(~io#0:wybe.phantom, ~tmp$3#0:stmt_for.int_sequence, ~tmp$3#0:stmt_for.int_sequence, ?io#1:wybe.phantom) #1 @stmt_for:nn:nn
-
-
-xrange > public (3 calls)
-0: stmt_for.xrange<0>
-xrange(start#0:wybe.int, stride#0:wybe.int, end#0:wybe.int, ?$#0:stmt_for.int_sequence):
- AliasPairs: []
- InterestingCallProperties: []
-    foreign lpvm alloc(24:wybe.int, ?tmp$4#0:stmt_for.int_sequence)
-    foreign lpvm mutate(~tmp$4#0:stmt_for.int_sequence, ?tmp$5#0:stmt_for.int_sequence, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~start#0:wybe.int)
-    foreign lpvm mutate(~tmp$5#0:stmt_for.int_sequence, ?tmp$6#0:stmt_for.int_sequence, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~stride#0:wybe.int)
-    foreign lpvm mutate(~tmp$6#0:stmt_for.int_sequence, ?$#0:stmt_for.int_sequence, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~end#0:wybe.int)
+    wybe.range.xrange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp$3#0:wybe.range) #0 @stmt_for:nn:nn
+    stmt_for.gen$25<0>(~io#0:wybe.phantom, ~tmp$3#0:wybe.range, ~tmp$3#0:wybe.range, ?io#1:wybe.phantom) #1 @stmt_for:nn:nn
 
   LLVM code       :
 
@@ -830,6 +781,15 @@ declare external ccc  void @print_string(i64)
 
 
 declare external ccc  void @print_int(i64)    
+
+
+declare external fastcc  {i64, i64, i1} @"wybe.range.[|]<0>"(i64)    
+
+
+declare external fastcc  i64 @"wybe.range.xrange<0>"(i64, i64, i64)    
+
+
+declare external fastcc  i64 @"wybe.range.irange<0>"(i64, i64, i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -950,7 +910,7 @@ if.else:
 
 define external fastcc  void @"stmt_for.gen$12<0>"(i64  %"tmp$0#0", i64  %"tmp$3#0")    {
 entry:
-  %41 = tail call fastcc  {i64, i64, i1}  @"stmt_for.int_sequence.[|]<0>"(i64  %"tmp$0#0")  
+  %41 = tail call fastcc  {i64, i64, i1}  @"wybe.range.[|]<0>"(i64  %"tmp$0#0")  
   %42 = extractvalue {i64, i64, i1} %41, 0 
   %43 = extractvalue {i64, i64, i1} %41, 1 
   %44 = extractvalue {i64, i64, i1} %41, 2 
@@ -967,7 +927,7 @@ if.else:
 
 define external fastcc  void @"stmt_for.gen$13<0>"(i64  %"tmp$0#0", i64  %"tmp$3#0")    {
 entry:
-  %45 = tail call fastcc  {i64, i64, i1}  @"stmt_for.int_sequence.[|]<0>"(i64  %"tmp$0#0")  
+  %45 = tail call fastcc  {i64, i64, i1}  @"wybe.range.[|]<0>"(i64  %"tmp$0#0")  
   %46 = extractvalue {i64, i64, i1} %45, 0 
   %47 = extractvalue {i64, i64, i1} %45, 1 
   %48 = extractvalue {i64, i64, i1} %45, 2 
@@ -1175,7 +1135,7 @@ if.else:
 
 define external fastcc  void @"stmt_for.gen$24<0>"(i64  %"tmp$0#0", i64  %"tmp$3#0")    {
 entry:
-  %91 = tail call fastcc  {i64, i64, i1}  @"stmt_for.int_sequence.[|]<0>"(i64  %"tmp$0#0")  
+  %91 = tail call fastcc  {i64, i64, i1}  @"wybe.range.[|]<0>"(i64  %"tmp$0#0")  
   %92 = extractvalue {i64, i64, i1} %91, 0 
   %93 = extractvalue {i64, i64, i1} %91, 1 
   %94 = extractvalue {i64, i64, i1} %91, 2 
@@ -1192,7 +1152,7 @@ if.else:
 
 define external fastcc  void @"stmt_for.gen$25<0>"(i64  %"tmp$0#0", i64  %"tmp$3#0")    {
 entry:
-  %95 = tail call fastcc  {i64, i64, i1}  @"stmt_for.int_sequence.[|]<0>"(i64  %"tmp$0#0")  
+  %95 = tail call fastcc  {i64, i64, i1}  @"wybe.range.[|]<0>"(i64  %"tmp$0#0")  
   %96 = extractvalue {i64, i64, i1} %95, 0 
   %97 = extractvalue {i64, i64, i1} %95, 1 
   %98 = extractvalue {i64, i64, i1} %95, 2 
@@ -1220,7 +1180,7 @@ entry:
 
 define external fastcc  i1 @"stmt_for.gen$4<0>"(i64  %"tmp$0#0", i64  %"tmp$3#0")    {
 entry:
-  %99 = tail call fastcc  {i64, i64, i1}  @"stmt_for.int_sequence.[|]<0>"(i64  %"tmp$0#0")  
+  %99 = tail call fastcc  {i64, i64, i1}  @"wybe.range.[|]<0>"(i64  %"tmp$0#0")  
   %100 = extractvalue {i64, i64, i1} %99, 0 
   %101 = extractvalue {i64, i64, i1} %99, 1 
   %102 = extractvalue {i64, i64, i1} %99, 2 
@@ -1321,117 +1281,76 @@ if.else:
 }
 
 
-define external fastcc  i64 @"stmt_for.irange<0>"(i64  %"start#0", i64  %"stride#0", i64  %"end#0")    {
+define external fastcc  void @"stmt_for.multiple_generator<0>"()    {
 entry:
-  %"1$tmp$4#0" = icmp slt i64 %"stride#0", 0 
-  br i1 %"1$tmp$4#0", label %if.then, label %if.else 
-if.then:
-  %"2$tmp$2#0" = sub   i64 %"end#0", 1 
-  %124 = trunc i64 24 to i32  
+  %124 = trunc i64 16 to i32  
   %125 = tail call ccc  i8*  @wybe_malloc(i32  %124)  
   %126 = ptrtoint i8* %125 to i64 
   %127 = inttoptr i64 %126 to i64* 
   %128 = getelementptr  i64, i64* %127, i64 0 
-  store  i64 %"start#0", i64* %128 
+  store  i64 3, i64* %128 
   %129 = add   i64 %126, 8 
   %130 = inttoptr i64 %129 to i64* 
   %131 = getelementptr  i64, i64* %130, i64 0 
-  store  i64 %"stride#0", i64* %131 
-  %132 = add   i64 %126, 16 
-  %133 = inttoptr i64 %132 to i64* 
-  %134 = getelementptr  i64, i64* %133, i64 0 
-  store  i64 %"2$tmp$2#0", i64* %134 
-  ret i64 %126 
-if.else:
-  %"3$tmp$3#0" = add   i64 %"end#0", 1 
-  %135 = trunc i64 24 to i32  
-  %136 = tail call ccc  i8*  @wybe_malloc(i32  %135)  
-  %137 = ptrtoint i8* %136 to i64 
+  store  i64 0, i64* %131 
+  %132 = trunc i64 16 to i32  
+  %133 = tail call ccc  i8*  @wybe_malloc(i32  %132)  
+  %134 = ptrtoint i8* %133 to i64 
+  %135 = inttoptr i64 %134 to i64* 
+  %136 = getelementptr  i64, i64* %135, i64 0 
+  store  i64 2, i64* %136 
+  %137 = add   i64 %134, 8 
   %138 = inttoptr i64 %137 to i64* 
   %139 = getelementptr  i64, i64* %138, i64 0 
-  store  i64 %"start#0", i64* %139 
-  %140 = add   i64 %137, 8 
-  %141 = inttoptr i64 %140 to i64* 
-  %142 = getelementptr  i64, i64* %141, i64 0 
-  store  i64 %"stride#0", i64* %142 
-  %143 = add   i64 %137, 16 
-  %144 = inttoptr i64 %143 to i64* 
-  %145 = getelementptr  i64, i64* %144, i64 0 
-  store  i64 %"3$tmp$3#0", i64* %145 
-  ret i64 %137 
-}
-
-
-define external fastcc  void @"stmt_for.multiple_generator<0>"()    {
-entry:
-  %146 = trunc i64 16 to i32  
-  %147 = tail call ccc  i8*  @wybe_malloc(i32  %146)  
-  %148 = ptrtoint i8* %147 to i64 
-  %149 = inttoptr i64 %148 to i64* 
-  %150 = getelementptr  i64, i64* %149, i64 0 
-  store  i64 3, i64* %150 
-  %151 = add   i64 %148, 8 
-  %152 = inttoptr i64 %151 to i64* 
-  %153 = getelementptr  i64, i64* %152, i64 0 
-  store  i64 0, i64* %153 
-  %154 = trunc i64 16 to i32  
-  %155 = tail call ccc  i8*  @wybe_malloc(i32  %154)  
-  %156 = ptrtoint i8* %155 to i64 
-  %157 = inttoptr i64 %156 to i64* 
-  %158 = getelementptr  i64, i64* %157, i64 0 
-  store  i64 2, i64* %158 
-  %159 = add   i64 %156, 8 
-  %160 = inttoptr i64 %159 to i64* 
-  %161 = getelementptr  i64, i64* %160, i64 0 
-  store  i64 %148, i64* %161 
-  %162 = trunc i64 16 to i32  
-  %163 = tail call ccc  i8*  @wybe_malloc(i32  %162)  
-  %164 = ptrtoint i8* %163 to i64 
-  %165 = inttoptr i64 %164 to i64* 
-  %166 = getelementptr  i64, i64* %165, i64 0 
-  store  i64 1, i64* %166 
-  %167 = add   i64 %164, 8 
-  %168 = inttoptr i64 %167 to i64* 
-  %169 = getelementptr  i64, i64* %168, i64 0 
-  store  i64 %156, i64* %169 
-  %170 = trunc i64 16 to i32  
-  %171 = tail call ccc  i8*  @wybe_malloc(i32  %170)  
-  %172 = ptrtoint i8* %171 to i64 
-  %173 = inttoptr i64 %172 to i64* 
-  %174 = getelementptr  i64, i64* %173, i64 0 
-  store  i64 6, i64* %174 
-  %175 = add   i64 %172, 8 
-  %176 = inttoptr i64 %175 to i64* 
-  %177 = getelementptr  i64, i64* %176, i64 0 
-  store  i64 0, i64* %177 
-  %178 = trunc i64 16 to i32  
-  %179 = tail call ccc  i8*  @wybe_malloc(i32  %178)  
-  %180 = ptrtoint i8* %179 to i64 
-  %181 = inttoptr i64 %180 to i64* 
-  %182 = getelementptr  i64, i64* %181, i64 0 
-  store  i64 5, i64* %182 
-  %183 = add   i64 %180, 8 
-  %184 = inttoptr i64 %183 to i64* 
-  %185 = getelementptr  i64, i64* %184, i64 0 
-  store  i64 %172, i64* %185 
-  %186 = trunc i64 16 to i32  
-  %187 = tail call ccc  i8*  @wybe_malloc(i32  %186)  
-  %188 = ptrtoint i8* %187 to i64 
-  %189 = inttoptr i64 %188 to i64* 
-  %190 = getelementptr  i64, i64* %189, i64 0 
-  store  i64 4, i64* %190 
-  %191 = add   i64 %188, 8 
-  %192 = inttoptr i64 %191 to i64* 
-  %193 = getelementptr  i64, i64* %192, i64 0 
-  store  i64 %180, i64* %193 
-  tail call fastcc  void  @"stmt_for.gen$1<0>"(i64  %164, i64  %156, i64  %148, i64  0, i64  %188, i64  %180, i64  %172, i64  0, i64  %164, i64  %188, i64  %164, i64  %188)  
+  store  i64 %126, i64* %139 
+  %140 = trunc i64 16 to i32  
+  %141 = tail call ccc  i8*  @wybe_malloc(i32  %140)  
+  %142 = ptrtoint i8* %141 to i64 
+  %143 = inttoptr i64 %142 to i64* 
+  %144 = getelementptr  i64, i64* %143, i64 0 
+  store  i64 1, i64* %144 
+  %145 = add   i64 %142, 8 
+  %146 = inttoptr i64 %145 to i64* 
+  %147 = getelementptr  i64, i64* %146, i64 0 
+  store  i64 %134, i64* %147 
+  %148 = trunc i64 16 to i32  
+  %149 = tail call ccc  i8*  @wybe_malloc(i32  %148)  
+  %150 = ptrtoint i8* %149 to i64 
+  %151 = inttoptr i64 %150 to i64* 
+  %152 = getelementptr  i64, i64* %151, i64 0 
+  store  i64 6, i64* %152 
+  %153 = add   i64 %150, 8 
+  %154 = inttoptr i64 %153 to i64* 
+  %155 = getelementptr  i64, i64* %154, i64 0 
+  store  i64 0, i64* %155 
+  %156 = trunc i64 16 to i32  
+  %157 = tail call ccc  i8*  @wybe_malloc(i32  %156)  
+  %158 = ptrtoint i8* %157 to i64 
+  %159 = inttoptr i64 %158 to i64* 
+  %160 = getelementptr  i64, i64* %159, i64 0 
+  store  i64 5, i64* %160 
+  %161 = add   i64 %158, 8 
+  %162 = inttoptr i64 %161 to i64* 
+  %163 = getelementptr  i64, i64* %162, i64 0 
+  store  i64 %150, i64* %163 
+  %164 = trunc i64 16 to i32  
+  %165 = tail call ccc  i8*  @wybe_malloc(i32  %164)  
+  %166 = ptrtoint i8* %165 to i64 
+  %167 = inttoptr i64 %166 to i64* 
+  %168 = getelementptr  i64, i64* %167, i64 0 
+  store  i64 4, i64* %168 
+  %169 = add   i64 %166, 8 
+  %170 = inttoptr i64 %169 to i64* 
+  %171 = getelementptr  i64, i64* %170, i64 0 
+  store  i64 %158, i64* %171 
+  tail call fastcc  void  @"stmt_for.gen$1<0>"(i64  %142, i64  %134, i64  %126, i64  0, i64  %166, i64  %158, i64  %150, i64  0, i64  %142, i64  %166, i64  %142, i64  %166)  
   ret void 
 }
 
 
 define external fastcc  i1 @"stmt_for.semi_det_for_loop<0>"()    {
 entry:
-  %"1$tmp$3#0" = tail call fastcc  i64  @"stmt_for.xrange<0>"(i64  0, i64  1, i64  10)  
+  %"1$tmp$3#0" = tail call fastcc  i64  @"wybe.range.xrange<0>"(i64  0, i64  1, i64  10)  
   %"1$$$#0" = tail call fastcc  i1  @"stmt_for.gen$4<0>"(i64  %"1$tmp$3#0", i64  %"1$tmp$3#0")  
   ret i1 %"1$$$#0" 
 }
@@ -1439,158 +1358,158 @@ entry:
 
 define external fastcc  void @"stmt_for.shortest_generator_termination<0>"()    {
 entry:
-  %194 = trunc i64 16 to i32  
-  %195 = tail call ccc  i8*  @wybe_malloc(i32  %194)  
-  %196 = ptrtoint i8* %195 to i64 
-  %197 = inttoptr i64 %196 to i64* 
-  %198 = getelementptr  i64, i64* %197, i64 0 
-  store  i64 4, i64* %198 
-  %199 = add   i64 %196, 8 
-  %200 = inttoptr i64 %199 to i64* 
-  %201 = getelementptr  i64, i64* %200, i64 0 
-  store  i64 0, i64* %201 
-  %202 = trunc i64 16 to i32  
-  %203 = tail call ccc  i8*  @wybe_malloc(i32  %202)  
-  %204 = ptrtoint i8* %203 to i64 
-  %205 = inttoptr i64 %204 to i64* 
-  %206 = getelementptr  i64, i64* %205, i64 0 
-  store  i64 3, i64* %206 
-  %207 = add   i64 %204, 8 
-  %208 = inttoptr i64 %207 to i64* 
-  %209 = getelementptr  i64, i64* %208, i64 0 
-  store  i64 %196, i64* %209 
-  %210 = trunc i64 16 to i32  
-  %211 = tail call ccc  i8*  @wybe_malloc(i32  %210)  
-  %212 = ptrtoint i8* %211 to i64 
-  %213 = inttoptr i64 %212 to i64* 
-  %214 = getelementptr  i64, i64* %213, i64 0 
-  store  i64 2, i64* %214 
-  %215 = add   i64 %212, 8 
-  %216 = inttoptr i64 %215 to i64* 
-  %217 = getelementptr  i64, i64* %216, i64 0 
-  store  i64 %204, i64* %217 
-  %218 = trunc i64 16 to i32  
-  %219 = tail call ccc  i8*  @wybe_malloc(i32  %218)  
-  %220 = ptrtoint i8* %219 to i64 
-  %221 = inttoptr i64 %220 to i64* 
-  %222 = getelementptr  i64, i64* %221, i64 0 
-  store  i64 1, i64* %222 
-  %223 = add   i64 %220, 8 
-  %224 = inttoptr i64 %223 to i64* 
-  %225 = getelementptr  i64, i64* %224, i64 0 
-  store  i64 %212, i64* %225 
-  %226 = trunc i64 16 to i32  
-  %227 = tail call ccc  i8*  @wybe_malloc(i32  %226)  
-  %228 = ptrtoint i8* %227 to i64 
-  %229 = inttoptr i64 %228 to i64* 
-  %230 = getelementptr  i64, i64* %229, i64 0 
-  store  i64 5, i64* %230 
-  %231 = add   i64 %228, 8 
-  %232 = inttoptr i64 %231 to i64* 
-  %233 = getelementptr  i64, i64* %232, i64 0 
-  store  i64 0, i64* %233 
-  %234 = trunc i64 16 to i32  
-  %235 = tail call ccc  i8*  @wybe_malloc(i32  %234)  
-  %236 = ptrtoint i8* %235 to i64 
-  %237 = inttoptr i64 %236 to i64* 
-  %238 = getelementptr  i64, i64* %237, i64 0 
-  store  i64 4, i64* %238 
-  %239 = add   i64 %236, 8 
-  %240 = inttoptr i64 %239 to i64* 
-  %241 = getelementptr  i64, i64* %240, i64 0 
-  store  i64 %228, i64* %241 
-  tail call fastcc  void  @"stmt_for.gen$6<0>"(i64  %220, i64  %212, i64  %204, i64  %196, i64  0, i64  %236, i64  %228, i64  0, i64  %220, i64  %236, i64  %220, i64  %236)  
+  %172 = trunc i64 16 to i32  
+  %173 = tail call ccc  i8*  @wybe_malloc(i32  %172)  
+  %174 = ptrtoint i8* %173 to i64 
+  %175 = inttoptr i64 %174 to i64* 
+  %176 = getelementptr  i64, i64* %175, i64 0 
+  store  i64 4, i64* %176 
+  %177 = add   i64 %174, 8 
+  %178 = inttoptr i64 %177 to i64* 
+  %179 = getelementptr  i64, i64* %178, i64 0 
+  store  i64 0, i64* %179 
+  %180 = trunc i64 16 to i32  
+  %181 = tail call ccc  i8*  @wybe_malloc(i32  %180)  
+  %182 = ptrtoint i8* %181 to i64 
+  %183 = inttoptr i64 %182 to i64* 
+  %184 = getelementptr  i64, i64* %183, i64 0 
+  store  i64 3, i64* %184 
+  %185 = add   i64 %182, 8 
+  %186 = inttoptr i64 %185 to i64* 
+  %187 = getelementptr  i64, i64* %186, i64 0 
+  store  i64 %174, i64* %187 
+  %188 = trunc i64 16 to i32  
+  %189 = tail call ccc  i8*  @wybe_malloc(i32  %188)  
+  %190 = ptrtoint i8* %189 to i64 
+  %191 = inttoptr i64 %190 to i64* 
+  %192 = getelementptr  i64, i64* %191, i64 0 
+  store  i64 2, i64* %192 
+  %193 = add   i64 %190, 8 
+  %194 = inttoptr i64 %193 to i64* 
+  %195 = getelementptr  i64, i64* %194, i64 0 
+  store  i64 %182, i64* %195 
+  %196 = trunc i64 16 to i32  
+  %197 = tail call ccc  i8*  @wybe_malloc(i32  %196)  
+  %198 = ptrtoint i8* %197 to i64 
+  %199 = inttoptr i64 %198 to i64* 
+  %200 = getelementptr  i64, i64* %199, i64 0 
+  store  i64 1, i64* %200 
+  %201 = add   i64 %198, 8 
+  %202 = inttoptr i64 %201 to i64* 
+  %203 = getelementptr  i64, i64* %202, i64 0 
+  store  i64 %190, i64* %203 
+  %204 = trunc i64 16 to i32  
+  %205 = tail call ccc  i8*  @wybe_malloc(i32  %204)  
+  %206 = ptrtoint i8* %205 to i64 
+  %207 = inttoptr i64 %206 to i64* 
+  %208 = getelementptr  i64, i64* %207, i64 0 
+  store  i64 5, i64* %208 
+  %209 = add   i64 %206, 8 
+  %210 = inttoptr i64 %209 to i64* 
+  %211 = getelementptr  i64, i64* %210, i64 0 
+  store  i64 0, i64* %211 
+  %212 = trunc i64 16 to i32  
+  %213 = tail call ccc  i8*  @wybe_malloc(i32  %212)  
+  %214 = ptrtoint i8* %213 to i64 
+  %215 = inttoptr i64 %214 to i64* 
+  %216 = getelementptr  i64, i64* %215, i64 0 
+  store  i64 4, i64* %216 
+  %217 = add   i64 %214, 8 
+  %218 = inttoptr i64 %217 to i64* 
+  %219 = getelementptr  i64, i64* %218, i64 0 
+  store  i64 %206, i64* %219 
+  tail call fastcc  void  @"stmt_for.gen$6<0>"(i64  %198, i64  %190, i64  %182, i64  %174, i64  0, i64  %214, i64  %206, i64  0, i64  %198, i64  %214, i64  %198, i64  %214)  
   ret void 
 }
 
 
 define external fastcc  void @"stmt_for.single_generator<0>"()    {
 entry:
-  %242 = trunc i64 16 to i32  
-  %243 = tail call ccc  i8*  @wybe_malloc(i32  %242)  
-  %244 = ptrtoint i8* %243 to i64 
-  %245 = inttoptr i64 %244 to i64* 
-  %246 = getelementptr  i64, i64* %245, i64 0 
-  store  i64 3, i64* %246 
-  %247 = add   i64 %244, 8 
-  %248 = inttoptr i64 %247 to i64* 
-  %249 = getelementptr  i64, i64* %248, i64 0 
-  store  i64 0, i64* %249 
-  %250 = trunc i64 16 to i32  
-  %251 = tail call ccc  i8*  @wybe_malloc(i32  %250)  
-  %252 = ptrtoint i8* %251 to i64 
-  %253 = inttoptr i64 %252 to i64* 
-  %254 = getelementptr  i64, i64* %253, i64 0 
-  store  i64 2, i64* %254 
-  %255 = add   i64 %252, 8 
-  %256 = inttoptr i64 %255 to i64* 
-  %257 = getelementptr  i64, i64* %256, i64 0 
-  store  i64 %244, i64* %257 
-  %258 = trunc i64 16 to i32  
-  %259 = tail call ccc  i8*  @wybe_malloc(i32  %258)  
-  %260 = ptrtoint i8* %259 to i64 
-  %261 = inttoptr i64 %260 to i64* 
-  %262 = getelementptr  i64, i64* %261, i64 0 
-  store  i64 1, i64* %262 
-  %263 = add   i64 %260, 8 
-  %264 = inttoptr i64 %263 to i64* 
-  %265 = getelementptr  i64, i64* %264, i64 0 
-  store  i64 %252, i64* %265 
-  tail call fastcc  void  @"stmt_for.gen$9<0>"(i64  %260, i64  %252, i64  %244, i64  0, i64  %260, i64  %260)  
+  %220 = trunc i64 16 to i32  
+  %221 = tail call ccc  i8*  @wybe_malloc(i32  %220)  
+  %222 = ptrtoint i8* %221 to i64 
+  %223 = inttoptr i64 %222 to i64* 
+  %224 = getelementptr  i64, i64* %223, i64 0 
+  store  i64 3, i64* %224 
+  %225 = add   i64 %222, 8 
+  %226 = inttoptr i64 %225 to i64* 
+  %227 = getelementptr  i64, i64* %226, i64 0 
+  store  i64 0, i64* %227 
+  %228 = trunc i64 16 to i32  
+  %229 = tail call ccc  i8*  @wybe_malloc(i32  %228)  
+  %230 = ptrtoint i8* %229 to i64 
+  %231 = inttoptr i64 %230 to i64* 
+  %232 = getelementptr  i64, i64* %231, i64 0 
+  store  i64 2, i64* %232 
+  %233 = add   i64 %230, 8 
+  %234 = inttoptr i64 %233 to i64* 
+  %235 = getelementptr  i64, i64* %234, i64 0 
+  store  i64 %222, i64* %235 
+  %236 = trunc i64 16 to i32  
+  %237 = tail call ccc  i8*  @wybe_malloc(i32  %236)  
+  %238 = ptrtoint i8* %237 to i64 
+  %239 = inttoptr i64 %238 to i64* 
+  %240 = getelementptr  i64, i64* %239, i64 0 
+  store  i64 1, i64* %240 
+  %241 = add   i64 %238, 8 
+  %242 = inttoptr i64 %241 to i64* 
+  %243 = getelementptr  i64, i64* %242, i64 0 
+  store  i64 %230, i64* %243 
+  tail call fastcc  void  @"stmt_for.gen$9<0>"(i64  %238, i64  %230, i64  %222, i64  0, i64  %238, i64  %238)  
   ret void 
 }
 
 
 define external fastcc  void @"stmt_for.using_break<0>"()    {
 entry:
-  %266 = trunc i64 16 to i32  
-  %267 = tail call ccc  i8*  @wybe_malloc(i32  %266)  
-  %268 = ptrtoint i8* %267 to i64 
-  %269 = inttoptr i64 %268 to i64* 
-  %270 = getelementptr  i64, i64* %269, i64 0 
-  store  i64 4, i64* %270 
-  %271 = add   i64 %268, 8 
-  %272 = inttoptr i64 %271 to i64* 
-  %273 = getelementptr  i64, i64* %272, i64 0 
-  store  i64 0, i64* %273 
-  %274 = trunc i64 16 to i32  
-  %275 = tail call ccc  i8*  @wybe_malloc(i32  %274)  
-  %276 = ptrtoint i8* %275 to i64 
-  %277 = inttoptr i64 %276 to i64* 
-  %278 = getelementptr  i64, i64* %277, i64 0 
-  store  i64 3, i64* %278 
-  %279 = add   i64 %276, 8 
-  %280 = inttoptr i64 %279 to i64* 
-  %281 = getelementptr  i64, i64* %280, i64 0 
-  store  i64 %268, i64* %281 
-  %282 = trunc i64 16 to i32  
-  %283 = tail call ccc  i8*  @wybe_malloc(i32  %282)  
-  %284 = ptrtoint i8* %283 to i64 
-  %285 = inttoptr i64 %284 to i64* 
-  %286 = getelementptr  i64, i64* %285, i64 0 
-  store  i64 2, i64* %286 
-  %287 = add   i64 %284, 8 
-  %288 = inttoptr i64 %287 to i64* 
-  %289 = getelementptr  i64, i64* %288, i64 0 
-  store  i64 %276, i64* %289 
-  %290 = trunc i64 16 to i32  
-  %291 = tail call ccc  i8*  @wybe_malloc(i32  %290)  
-  %292 = ptrtoint i8* %291 to i64 
-  %293 = inttoptr i64 %292 to i64* 
-  %294 = getelementptr  i64, i64* %293, i64 0 
-  store  i64 1, i64* %294 
-  %295 = add   i64 %292, 8 
-  %296 = inttoptr i64 %295 to i64* 
-  %297 = getelementptr  i64, i64* %296, i64 0 
-  store  i64 %284, i64* %297 
-  tail call fastcc  void  @"stmt_for.gen$10<0>"(i64  %292, i64  %284, i64  %276, i64  %268, i64  0, i64  %292, i64  %292)  
+  %244 = trunc i64 16 to i32  
+  %245 = tail call ccc  i8*  @wybe_malloc(i32  %244)  
+  %246 = ptrtoint i8* %245 to i64 
+  %247 = inttoptr i64 %246 to i64* 
+  %248 = getelementptr  i64, i64* %247, i64 0 
+  store  i64 4, i64* %248 
+  %249 = add   i64 %246, 8 
+  %250 = inttoptr i64 %249 to i64* 
+  %251 = getelementptr  i64, i64* %250, i64 0 
+  store  i64 0, i64* %251 
+  %252 = trunc i64 16 to i32  
+  %253 = tail call ccc  i8*  @wybe_malloc(i32  %252)  
+  %254 = ptrtoint i8* %253 to i64 
+  %255 = inttoptr i64 %254 to i64* 
+  %256 = getelementptr  i64, i64* %255, i64 0 
+  store  i64 3, i64* %256 
+  %257 = add   i64 %254, 8 
+  %258 = inttoptr i64 %257 to i64* 
+  %259 = getelementptr  i64, i64* %258, i64 0 
+  store  i64 %246, i64* %259 
+  %260 = trunc i64 16 to i32  
+  %261 = tail call ccc  i8*  @wybe_malloc(i32  %260)  
+  %262 = ptrtoint i8* %261 to i64 
+  %263 = inttoptr i64 %262 to i64* 
+  %264 = getelementptr  i64, i64* %263, i64 0 
+  store  i64 2, i64* %264 
+  %265 = add   i64 %262, 8 
+  %266 = inttoptr i64 %265 to i64* 
+  %267 = getelementptr  i64, i64* %266, i64 0 
+  store  i64 %254, i64* %267 
+  %268 = trunc i64 16 to i32  
+  %269 = tail call ccc  i8*  @wybe_malloc(i32  %268)  
+  %270 = ptrtoint i8* %269 to i64 
+  %271 = inttoptr i64 %270 to i64* 
+  %272 = getelementptr  i64, i64* %271, i64 0 
+  store  i64 1, i64* %272 
+  %273 = add   i64 %270, 8 
+  %274 = inttoptr i64 %273 to i64* 
+  %275 = getelementptr  i64, i64* %274, i64 0 
+  store  i64 %262, i64* %275 
+  tail call fastcc  void  @"stmt_for.gen$10<0>"(i64  %270, i64  %262, i64  %254, i64  %246, i64  0, i64  %270, i64  %270)  
   ret void 
 }
 
 
 define external fastcc  void @"stmt_for.using_irange<0>"()    {
 entry:
-  %"1$tmp$3#0" = tail call fastcc  i64  @"stmt_for.irange<0>"(i64  1, i64  1, i64  10)  
+  %"1$tmp$3#0" = tail call fastcc  i64  @"wybe.range.irange<0>"(i64  1, i64  1, i64  10)  
   tail call fastcc  void  @"stmt_for.gen$12<0>"(i64  %"1$tmp$3#0", i64  %"1$tmp$3#0")  
   ret void 
 }
@@ -1598,7 +1517,7 @@ entry:
 
 define external fastcc  void @"stmt_for.using_irange_reverse<0>"()    {
 entry:
-  %"1$tmp$3#0" = tail call fastcc  i64  @"stmt_for.irange<0>"(i64  10, i64  -1, i64  1)  
+  %"1$tmp$3#0" = tail call fastcc  i64  @"wybe.range.irange<0>"(i64  10, i64  -1, i64  1)  
   tail call fastcc  void  @"stmt_for.gen$13<0>"(i64  %"1$tmp$3#0", i64  %"1$tmp$3#0")  
   ret void 
 }
@@ -1606,242 +1525,242 @@ entry:
 
 define external fastcc  void @"stmt_for.using_next<0>"()    {
 entry:
-  %298 = trunc i64 16 to i32  
-  %299 = tail call ccc  i8*  @wybe_malloc(i32  %298)  
-  %300 = ptrtoint i8* %299 to i64 
-  %301 = inttoptr i64 %300 to i64* 
-  %302 = getelementptr  i64, i64* %301, i64 0 
-  store  i64 4, i64* %302 
-  %303 = add   i64 %300, 8 
-  %304 = inttoptr i64 %303 to i64* 
-  %305 = getelementptr  i64, i64* %304, i64 0 
-  store  i64 0, i64* %305 
-  %306 = trunc i64 16 to i32  
-  %307 = tail call ccc  i8*  @wybe_malloc(i32  %306)  
-  %308 = ptrtoint i8* %307 to i64 
-  %309 = inttoptr i64 %308 to i64* 
-  %310 = getelementptr  i64, i64* %309, i64 0 
-  store  i64 3, i64* %310 
-  %311 = add   i64 %308, 8 
-  %312 = inttoptr i64 %311 to i64* 
-  %313 = getelementptr  i64, i64* %312, i64 0 
-  store  i64 %300, i64* %313 
-  %314 = trunc i64 16 to i32  
-  %315 = tail call ccc  i8*  @wybe_malloc(i32  %314)  
-  %316 = ptrtoint i8* %315 to i64 
-  %317 = inttoptr i64 %316 to i64* 
-  %318 = getelementptr  i64, i64* %317, i64 0 
-  store  i64 2, i64* %318 
-  %319 = add   i64 %316, 8 
-  %320 = inttoptr i64 %319 to i64* 
-  %321 = getelementptr  i64, i64* %320, i64 0 
-  store  i64 %308, i64* %321 
-  %322 = trunc i64 16 to i32  
-  %323 = tail call ccc  i8*  @wybe_malloc(i32  %322)  
-  %324 = ptrtoint i8* %323 to i64 
-  %325 = inttoptr i64 %324 to i64* 
-  %326 = getelementptr  i64, i64* %325, i64 0 
-  store  i64 1, i64* %326 
-  %327 = add   i64 %324, 8 
-  %328 = inttoptr i64 %327 to i64* 
-  %329 = getelementptr  i64, i64* %328, i64 0 
-  store  i64 %316, i64* %329 
-  tail call fastcc  void  @"stmt_for.gen$14<0>"(i64  %324, i64  %316, i64  %308, i64  %300, i64  0, i64  %324, i64  %324)  
+  %276 = trunc i64 16 to i32  
+  %277 = tail call ccc  i8*  @wybe_malloc(i32  %276)  
+  %278 = ptrtoint i8* %277 to i64 
+  %279 = inttoptr i64 %278 to i64* 
+  %280 = getelementptr  i64, i64* %279, i64 0 
+  store  i64 4, i64* %280 
+  %281 = add   i64 %278, 8 
+  %282 = inttoptr i64 %281 to i64* 
+  %283 = getelementptr  i64, i64* %282, i64 0 
+  store  i64 0, i64* %283 
+  %284 = trunc i64 16 to i32  
+  %285 = tail call ccc  i8*  @wybe_malloc(i32  %284)  
+  %286 = ptrtoint i8* %285 to i64 
+  %287 = inttoptr i64 %286 to i64* 
+  %288 = getelementptr  i64, i64* %287, i64 0 
+  store  i64 3, i64* %288 
+  %289 = add   i64 %286, 8 
+  %290 = inttoptr i64 %289 to i64* 
+  %291 = getelementptr  i64, i64* %290, i64 0 
+  store  i64 %278, i64* %291 
+  %292 = trunc i64 16 to i32  
+  %293 = tail call ccc  i8*  @wybe_malloc(i32  %292)  
+  %294 = ptrtoint i8* %293 to i64 
+  %295 = inttoptr i64 %294 to i64* 
+  %296 = getelementptr  i64, i64* %295, i64 0 
+  store  i64 2, i64* %296 
+  %297 = add   i64 %294, 8 
+  %298 = inttoptr i64 %297 to i64* 
+  %299 = getelementptr  i64, i64* %298, i64 0 
+  store  i64 %286, i64* %299 
+  %300 = trunc i64 16 to i32  
+  %301 = tail call ccc  i8*  @wybe_malloc(i32  %300)  
+  %302 = ptrtoint i8* %301 to i64 
+  %303 = inttoptr i64 %302 to i64* 
+  %304 = getelementptr  i64, i64* %303, i64 0 
+  store  i64 1, i64* %304 
+  %305 = add   i64 %302, 8 
+  %306 = inttoptr i64 %305 to i64* 
+  %307 = getelementptr  i64, i64* %306, i64 0 
+  store  i64 %294, i64* %307 
+  tail call fastcc  void  @"stmt_for.gen$14<0>"(i64  %302, i64  %294, i64  %286, i64  %278, i64  0, i64  %302, i64  %302)  
   ret void 
 }
 
 
 define external fastcc  void @"stmt_for.using_unless<0>"()    {
 entry:
-  %330 = trunc i64 16 to i32  
-  %331 = tail call ccc  i8*  @wybe_malloc(i32  %330)  
-  %332 = ptrtoint i8* %331 to i64 
-  %333 = inttoptr i64 %332 to i64* 
-  %334 = getelementptr  i64, i64* %333, i64 0 
-  store  i64 4, i64* %334 
-  %335 = add   i64 %332, 8 
-  %336 = inttoptr i64 %335 to i64* 
-  %337 = getelementptr  i64, i64* %336, i64 0 
-  store  i64 0, i64* %337 
-  %338 = trunc i64 16 to i32  
-  %339 = tail call ccc  i8*  @wybe_malloc(i32  %338)  
-  %340 = ptrtoint i8* %339 to i64 
-  %341 = inttoptr i64 %340 to i64* 
-  %342 = getelementptr  i64, i64* %341, i64 0 
-  store  i64 3, i64* %342 
-  %343 = add   i64 %340, 8 
-  %344 = inttoptr i64 %343 to i64* 
-  %345 = getelementptr  i64, i64* %344, i64 0 
-  store  i64 %332, i64* %345 
-  %346 = trunc i64 16 to i32  
-  %347 = tail call ccc  i8*  @wybe_malloc(i32  %346)  
-  %348 = ptrtoint i8* %347 to i64 
-  %349 = inttoptr i64 %348 to i64* 
-  %350 = getelementptr  i64, i64* %349, i64 0 
-  store  i64 2, i64* %350 
-  %351 = add   i64 %348, 8 
-  %352 = inttoptr i64 %351 to i64* 
-  %353 = getelementptr  i64, i64* %352, i64 0 
-  store  i64 %340, i64* %353 
-  %354 = trunc i64 16 to i32  
-  %355 = tail call ccc  i8*  @wybe_malloc(i32  %354)  
-  %356 = ptrtoint i8* %355 to i64 
-  %357 = inttoptr i64 %356 to i64* 
-  %358 = getelementptr  i64, i64* %357, i64 0 
-  store  i64 1, i64* %358 
-  %359 = add   i64 %356, 8 
-  %360 = inttoptr i64 %359 to i64* 
-  %361 = getelementptr  i64, i64* %360, i64 0 
-  store  i64 %348, i64* %361 
-  tail call fastcc  void  @"stmt_for.gen$16<0>"(i64  %356, i64  %348, i64  %340, i64  %332, i64  0, i64  %356, i64  %356)  
+  %308 = trunc i64 16 to i32  
+  %309 = tail call ccc  i8*  @wybe_malloc(i32  %308)  
+  %310 = ptrtoint i8* %309 to i64 
+  %311 = inttoptr i64 %310 to i64* 
+  %312 = getelementptr  i64, i64* %311, i64 0 
+  store  i64 4, i64* %312 
+  %313 = add   i64 %310, 8 
+  %314 = inttoptr i64 %313 to i64* 
+  %315 = getelementptr  i64, i64* %314, i64 0 
+  store  i64 0, i64* %315 
+  %316 = trunc i64 16 to i32  
+  %317 = tail call ccc  i8*  @wybe_malloc(i32  %316)  
+  %318 = ptrtoint i8* %317 to i64 
+  %319 = inttoptr i64 %318 to i64* 
+  %320 = getelementptr  i64, i64* %319, i64 0 
+  store  i64 3, i64* %320 
+  %321 = add   i64 %318, 8 
+  %322 = inttoptr i64 %321 to i64* 
+  %323 = getelementptr  i64, i64* %322, i64 0 
+  store  i64 %310, i64* %323 
+  %324 = trunc i64 16 to i32  
+  %325 = tail call ccc  i8*  @wybe_malloc(i32  %324)  
+  %326 = ptrtoint i8* %325 to i64 
+  %327 = inttoptr i64 %326 to i64* 
+  %328 = getelementptr  i64, i64* %327, i64 0 
+  store  i64 2, i64* %328 
+  %329 = add   i64 %326, 8 
+  %330 = inttoptr i64 %329 to i64* 
+  %331 = getelementptr  i64, i64* %330, i64 0 
+  store  i64 %318, i64* %331 
+  %332 = trunc i64 16 to i32  
+  %333 = tail call ccc  i8*  @wybe_malloc(i32  %332)  
+  %334 = ptrtoint i8* %333 to i64 
+  %335 = inttoptr i64 %334 to i64* 
+  %336 = getelementptr  i64, i64* %335, i64 0 
+  store  i64 1, i64* %336 
+  %337 = add   i64 %334, 8 
+  %338 = inttoptr i64 %337 to i64* 
+  %339 = getelementptr  i64, i64* %338, i64 0 
+  store  i64 %326, i64* %339 
+  tail call fastcc  void  @"stmt_for.gen$16<0>"(i64  %334, i64  %326, i64  %318, i64  %310, i64  0, i64  %334, i64  %334)  
   ret void 
 }
 
 
 define external fastcc  void @"stmt_for.using_until<0>"()    {
 entry:
-  %362 = trunc i64 16 to i32  
-  %363 = tail call ccc  i8*  @wybe_malloc(i32  %362)  
-  %364 = ptrtoint i8* %363 to i64 
-  %365 = inttoptr i64 %364 to i64* 
-  %366 = getelementptr  i64, i64* %365, i64 0 
-  store  i64 4, i64* %366 
-  %367 = add   i64 %364, 8 
-  %368 = inttoptr i64 %367 to i64* 
-  %369 = getelementptr  i64, i64* %368, i64 0 
-  store  i64 0, i64* %369 
-  %370 = trunc i64 16 to i32  
-  %371 = tail call ccc  i8*  @wybe_malloc(i32  %370)  
-  %372 = ptrtoint i8* %371 to i64 
-  %373 = inttoptr i64 %372 to i64* 
-  %374 = getelementptr  i64, i64* %373, i64 0 
-  store  i64 3, i64* %374 
-  %375 = add   i64 %372, 8 
-  %376 = inttoptr i64 %375 to i64* 
-  %377 = getelementptr  i64, i64* %376, i64 0 
-  store  i64 %364, i64* %377 
-  %378 = trunc i64 16 to i32  
-  %379 = tail call ccc  i8*  @wybe_malloc(i32  %378)  
-  %380 = ptrtoint i8* %379 to i64 
-  %381 = inttoptr i64 %380 to i64* 
-  %382 = getelementptr  i64, i64* %381, i64 0 
-  store  i64 2, i64* %382 
-  %383 = add   i64 %380, 8 
-  %384 = inttoptr i64 %383 to i64* 
-  %385 = getelementptr  i64, i64* %384, i64 0 
-  store  i64 %372, i64* %385 
-  %386 = trunc i64 16 to i32  
-  %387 = tail call ccc  i8*  @wybe_malloc(i32  %386)  
-  %388 = ptrtoint i8* %387 to i64 
-  %389 = inttoptr i64 %388 to i64* 
-  %390 = getelementptr  i64, i64* %389, i64 0 
-  store  i64 1, i64* %390 
-  %391 = add   i64 %388, 8 
-  %392 = inttoptr i64 %391 to i64* 
-  %393 = getelementptr  i64, i64* %392, i64 0 
-  store  i64 %380, i64* %393 
-  tail call fastcc  void  @"stmt_for.gen$18<0>"(i64  %388, i64  %380, i64  %372, i64  %364, i64  0, i64  %388, i64  %388)  
+  %340 = trunc i64 16 to i32  
+  %341 = tail call ccc  i8*  @wybe_malloc(i32  %340)  
+  %342 = ptrtoint i8* %341 to i64 
+  %343 = inttoptr i64 %342 to i64* 
+  %344 = getelementptr  i64, i64* %343, i64 0 
+  store  i64 4, i64* %344 
+  %345 = add   i64 %342, 8 
+  %346 = inttoptr i64 %345 to i64* 
+  %347 = getelementptr  i64, i64* %346, i64 0 
+  store  i64 0, i64* %347 
+  %348 = trunc i64 16 to i32  
+  %349 = tail call ccc  i8*  @wybe_malloc(i32  %348)  
+  %350 = ptrtoint i8* %349 to i64 
+  %351 = inttoptr i64 %350 to i64* 
+  %352 = getelementptr  i64, i64* %351, i64 0 
+  store  i64 3, i64* %352 
+  %353 = add   i64 %350, 8 
+  %354 = inttoptr i64 %353 to i64* 
+  %355 = getelementptr  i64, i64* %354, i64 0 
+  store  i64 %342, i64* %355 
+  %356 = trunc i64 16 to i32  
+  %357 = tail call ccc  i8*  @wybe_malloc(i32  %356)  
+  %358 = ptrtoint i8* %357 to i64 
+  %359 = inttoptr i64 %358 to i64* 
+  %360 = getelementptr  i64, i64* %359, i64 0 
+  store  i64 2, i64* %360 
+  %361 = add   i64 %358, 8 
+  %362 = inttoptr i64 %361 to i64* 
+  %363 = getelementptr  i64, i64* %362, i64 0 
+  store  i64 %350, i64* %363 
+  %364 = trunc i64 16 to i32  
+  %365 = tail call ccc  i8*  @wybe_malloc(i32  %364)  
+  %366 = ptrtoint i8* %365 to i64 
+  %367 = inttoptr i64 %366 to i64* 
+  %368 = getelementptr  i64, i64* %367, i64 0 
+  store  i64 1, i64* %368 
+  %369 = add   i64 %366, 8 
+  %370 = inttoptr i64 %369 to i64* 
+  %371 = getelementptr  i64, i64* %370, i64 0 
+  store  i64 %358, i64* %371 
+  tail call fastcc  void  @"stmt_for.gen$18<0>"(i64  %366, i64  %358, i64  %350, i64  %342, i64  0, i64  %366, i64  %366)  
   ret void 
 }
 
 
 define external fastcc  void @"stmt_for.using_when<0>"()    {
 entry:
-  %394 = trunc i64 16 to i32  
-  %395 = tail call ccc  i8*  @wybe_malloc(i32  %394)  
-  %396 = ptrtoint i8* %395 to i64 
-  %397 = inttoptr i64 %396 to i64* 
-  %398 = getelementptr  i64, i64* %397, i64 0 
-  store  i64 4, i64* %398 
-  %399 = add   i64 %396, 8 
-  %400 = inttoptr i64 %399 to i64* 
-  %401 = getelementptr  i64, i64* %400, i64 0 
-  store  i64 0, i64* %401 
-  %402 = trunc i64 16 to i32  
-  %403 = tail call ccc  i8*  @wybe_malloc(i32  %402)  
-  %404 = ptrtoint i8* %403 to i64 
-  %405 = inttoptr i64 %404 to i64* 
-  %406 = getelementptr  i64, i64* %405, i64 0 
-  store  i64 3, i64* %406 
-  %407 = add   i64 %404, 8 
-  %408 = inttoptr i64 %407 to i64* 
-  %409 = getelementptr  i64, i64* %408, i64 0 
-  store  i64 %396, i64* %409 
-  %410 = trunc i64 16 to i32  
-  %411 = tail call ccc  i8*  @wybe_malloc(i32  %410)  
-  %412 = ptrtoint i8* %411 to i64 
-  %413 = inttoptr i64 %412 to i64* 
-  %414 = getelementptr  i64, i64* %413, i64 0 
-  store  i64 2, i64* %414 
-  %415 = add   i64 %412, 8 
-  %416 = inttoptr i64 %415 to i64* 
-  %417 = getelementptr  i64, i64* %416, i64 0 
-  store  i64 %404, i64* %417 
-  %418 = trunc i64 16 to i32  
-  %419 = tail call ccc  i8*  @wybe_malloc(i32  %418)  
-  %420 = ptrtoint i8* %419 to i64 
-  %421 = inttoptr i64 %420 to i64* 
-  %422 = getelementptr  i64, i64* %421, i64 0 
-  store  i64 1, i64* %422 
-  %423 = add   i64 %420, 8 
-  %424 = inttoptr i64 %423 to i64* 
-  %425 = getelementptr  i64, i64* %424, i64 0 
-  store  i64 %412, i64* %425 
-  tail call fastcc  void  @"stmt_for.gen$20<0>"(i64  %420, i64  %412, i64  %404, i64  %396, i64  0, i64  %420, i64  %420)  
+  %372 = trunc i64 16 to i32  
+  %373 = tail call ccc  i8*  @wybe_malloc(i32  %372)  
+  %374 = ptrtoint i8* %373 to i64 
+  %375 = inttoptr i64 %374 to i64* 
+  %376 = getelementptr  i64, i64* %375, i64 0 
+  store  i64 4, i64* %376 
+  %377 = add   i64 %374, 8 
+  %378 = inttoptr i64 %377 to i64* 
+  %379 = getelementptr  i64, i64* %378, i64 0 
+  store  i64 0, i64* %379 
+  %380 = trunc i64 16 to i32  
+  %381 = tail call ccc  i8*  @wybe_malloc(i32  %380)  
+  %382 = ptrtoint i8* %381 to i64 
+  %383 = inttoptr i64 %382 to i64* 
+  %384 = getelementptr  i64, i64* %383, i64 0 
+  store  i64 3, i64* %384 
+  %385 = add   i64 %382, 8 
+  %386 = inttoptr i64 %385 to i64* 
+  %387 = getelementptr  i64, i64* %386, i64 0 
+  store  i64 %374, i64* %387 
+  %388 = trunc i64 16 to i32  
+  %389 = tail call ccc  i8*  @wybe_malloc(i32  %388)  
+  %390 = ptrtoint i8* %389 to i64 
+  %391 = inttoptr i64 %390 to i64* 
+  %392 = getelementptr  i64, i64* %391, i64 0 
+  store  i64 2, i64* %392 
+  %393 = add   i64 %390, 8 
+  %394 = inttoptr i64 %393 to i64* 
+  %395 = getelementptr  i64, i64* %394, i64 0 
+  store  i64 %382, i64* %395 
+  %396 = trunc i64 16 to i32  
+  %397 = tail call ccc  i8*  @wybe_malloc(i32  %396)  
+  %398 = ptrtoint i8* %397 to i64 
+  %399 = inttoptr i64 %398 to i64* 
+  %400 = getelementptr  i64, i64* %399, i64 0 
+  store  i64 1, i64* %400 
+  %401 = add   i64 %398, 8 
+  %402 = inttoptr i64 %401 to i64* 
+  %403 = getelementptr  i64, i64* %402, i64 0 
+  store  i64 %390, i64* %403 
+  tail call fastcc  void  @"stmt_for.gen$20<0>"(i64  %398, i64  %390, i64  %382, i64  %374, i64  0, i64  %398, i64  %398)  
   ret void 
 }
 
 
 define external fastcc  void @"stmt_for.using_while<0>"()    {
 entry:
-  %426 = trunc i64 16 to i32  
-  %427 = tail call ccc  i8*  @wybe_malloc(i32  %426)  
-  %428 = ptrtoint i8* %427 to i64 
-  %429 = inttoptr i64 %428 to i64* 
-  %430 = getelementptr  i64, i64* %429, i64 0 
-  store  i64 4, i64* %430 
-  %431 = add   i64 %428, 8 
-  %432 = inttoptr i64 %431 to i64* 
-  %433 = getelementptr  i64, i64* %432, i64 0 
-  store  i64 0, i64* %433 
-  %434 = trunc i64 16 to i32  
-  %435 = tail call ccc  i8*  @wybe_malloc(i32  %434)  
-  %436 = ptrtoint i8* %435 to i64 
-  %437 = inttoptr i64 %436 to i64* 
-  %438 = getelementptr  i64, i64* %437, i64 0 
-  store  i64 3, i64* %438 
-  %439 = add   i64 %436, 8 
-  %440 = inttoptr i64 %439 to i64* 
-  %441 = getelementptr  i64, i64* %440, i64 0 
-  store  i64 %428, i64* %441 
-  %442 = trunc i64 16 to i32  
-  %443 = tail call ccc  i8*  @wybe_malloc(i32  %442)  
-  %444 = ptrtoint i8* %443 to i64 
-  %445 = inttoptr i64 %444 to i64* 
-  %446 = getelementptr  i64, i64* %445, i64 0 
-  store  i64 2, i64* %446 
-  %447 = add   i64 %444, 8 
-  %448 = inttoptr i64 %447 to i64* 
-  %449 = getelementptr  i64, i64* %448, i64 0 
-  store  i64 %436, i64* %449 
-  %450 = trunc i64 16 to i32  
-  %451 = tail call ccc  i8*  @wybe_malloc(i32  %450)  
-  %452 = ptrtoint i8* %451 to i64 
-  %453 = inttoptr i64 %452 to i64* 
-  %454 = getelementptr  i64, i64* %453, i64 0 
-  store  i64 1, i64* %454 
-  %455 = add   i64 %452, 8 
-  %456 = inttoptr i64 %455 to i64* 
-  %457 = getelementptr  i64, i64* %456, i64 0 
-  store  i64 %444, i64* %457 
-  tail call fastcc  void  @"stmt_for.gen$22<0>"(i64  %452, i64  %444, i64  %436, i64  %428, i64  0, i64  %452, i64  %452)  
+  %404 = trunc i64 16 to i32  
+  %405 = tail call ccc  i8*  @wybe_malloc(i32  %404)  
+  %406 = ptrtoint i8* %405 to i64 
+  %407 = inttoptr i64 %406 to i64* 
+  %408 = getelementptr  i64, i64* %407, i64 0 
+  store  i64 4, i64* %408 
+  %409 = add   i64 %406, 8 
+  %410 = inttoptr i64 %409 to i64* 
+  %411 = getelementptr  i64, i64* %410, i64 0 
+  store  i64 0, i64* %411 
+  %412 = trunc i64 16 to i32  
+  %413 = tail call ccc  i8*  @wybe_malloc(i32  %412)  
+  %414 = ptrtoint i8* %413 to i64 
+  %415 = inttoptr i64 %414 to i64* 
+  %416 = getelementptr  i64, i64* %415, i64 0 
+  store  i64 3, i64* %416 
+  %417 = add   i64 %414, 8 
+  %418 = inttoptr i64 %417 to i64* 
+  %419 = getelementptr  i64, i64* %418, i64 0 
+  store  i64 %406, i64* %419 
+  %420 = trunc i64 16 to i32  
+  %421 = tail call ccc  i8*  @wybe_malloc(i32  %420)  
+  %422 = ptrtoint i8* %421 to i64 
+  %423 = inttoptr i64 %422 to i64* 
+  %424 = getelementptr  i64, i64* %423, i64 0 
+  store  i64 2, i64* %424 
+  %425 = add   i64 %422, 8 
+  %426 = inttoptr i64 %425 to i64* 
+  %427 = getelementptr  i64, i64* %426, i64 0 
+  store  i64 %414, i64* %427 
+  %428 = trunc i64 16 to i32  
+  %429 = tail call ccc  i8*  @wybe_malloc(i32  %428)  
+  %430 = ptrtoint i8* %429 to i64 
+  %431 = inttoptr i64 %430 to i64* 
+  %432 = getelementptr  i64, i64* %431, i64 0 
+  store  i64 1, i64* %432 
+  %433 = add   i64 %430, 8 
+  %434 = inttoptr i64 %433 to i64* 
+  %435 = getelementptr  i64, i64* %434, i64 0 
+  store  i64 %422, i64* %435 
+  tail call fastcc  void  @"stmt_for.gen$22<0>"(i64  %430, i64  %422, i64  %414, i64  %406, i64  0, i64  %430, i64  %430)  
   ret void 
 }
 
 
 define external fastcc  void @"stmt_for.using_xrange<0>"()    {
 entry:
-  %"1$tmp$3#0" = tail call fastcc  i64  @"stmt_for.xrange<0>"(i64  1, i64  1, i64  10)  
+  %"1$tmp$3#0" = tail call fastcc  i64  @"wybe.range.xrange<0>"(i64  1, i64  1, i64  10)  
   tail call fastcc  void  @"stmt_for.gen$24<0>"(i64  %"1$tmp$3#0", i64  %"1$tmp$3#0")  
   ret void 
 }
@@ -1849,505 +1768,7 @@ entry:
 
 define external fastcc  void @"stmt_for.using_xrange_reverse<0>"()    {
 entry:
-  %"1$tmp$3#0" = tail call fastcc  i64  @"stmt_for.xrange<0>"(i64  10, i64  -1, i64  1)  
+  %"1$tmp$3#0" = tail call fastcc  i64  @"wybe.range.xrange<0>"(i64  10, i64  -1, i64  1)  
   tail call fastcc  void  @"stmt_for.gen$25<0>"(i64  %"1$tmp$3#0", i64  %"1$tmp$3#0")  
   ret void 
-}
-
-
-define external fastcc  i64 @"stmt_for.xrange<0>"(i64  %"start#0", i64  %"stride#0", i64  %"end#0")    {
-entry:
-  %458 = trunc i64 24 to i32  
-  %459 = tail call ccc  i8*  @wybe_malloc(i32  %458)  
-  %460 = ptrtoint i8* %459 to i64 
-  %461 = inttoptr i64 %460 to i64* 
-  %462 = getelementptr  i64, i64* %461, i64 0 
-  store  i64 %"start#0", i64* %462 
-  %463 = add   i64 %460, 8 
-  %464 = inttoptr i64 %463 to i64* 
-  %465 = getelementptr  i64, i64* %464, i64 0 
-  store  i64 %"stride#0", i64* %465 
-  %466 = add   i64 %460, 16 
-  %467 = inttoptr i64 %466 to i64* 
-  %468 = getelementptr  i64, i64* %467, i64 0 
-  store  i64 %"end#0", i64* %468 
-  ret i64 %460 
-}
---------------------------------------------------
- Module stmt_for.int_sequence
-  representation  : address
-  public submods  : 
-  public resources: 
-  public procs    : stmt_for.int_sequence.=<0>
-                    stmt_for.int_sequence.[|]<0>
-                    stmt_for.int_sequence.end<0>
-                    stmt_for.int_sequence.end<1>
-                    stmt_for.int_sequence.int_sequence<0>
-                    stmt_for.int_sequence.int_sequence<1>
-                    stmt_for.int_sequence.start<0>
-                    stmt_for.int_sequence.start<1>
-                    stmt_for.int_sequence.stride<0>
-                    stmt_for.int_sequence.stride<1>
-                    stmt_for.int_sequence.~=<0>
-  imports         : use stmt_for
-                    use wybe
-  resources       : 
-  procs           : 
-
-= > public {inline} (1 calls)
-0: stmt_for.int_sequence.=<0>
-=($left#0:stmt_for.int_sequence, $right#0:stmt_for.int_sequence, ?$$#0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
-    foreign lpvm access($left#0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?$left$start#0:wybe.int)
-    foreign lpvm access($left#0:stmt_for.int_sequence, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?$left$stride#0:wybe.int)
-    foreign lpvm access(~$left#0:stmt_for.int_sequence, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?$left$end#0:wybe.int)
-    foreign lpvm access($right#0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?$right$start#0:wybe.int)
-    foreign lpvm access($right#0:stmt_for.int_sequence, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?$right$stride#0:wybe.int)
-    foreign lpvm access(~$right#0:stmt_for.int_sequence, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?$right$end#0:wybe.int)
-    foreign llvm icmp_eq(~$left$start#0:wybe.int, ~$right$start#0:wybe.int, ?tmp$1#0:wybe.bool) @int:nn:nn
-    case ~tmp$1#0:wybe.bool of
-    0:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-
-    1:
-        foreign llvm icmp_eq(~$left$stride#0:wybe.int, ~$right$stride#0:wybe.int, ?tmp$2#0:wybe.bool) @int:nn:nn
-        case ~tmp$2#0:wybe.bool of
-        0:
-            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-
-        1:
-            foreign llvm icmp_eq(~$left$end#0:wybe.int, ~$right$end#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
-
-
-
-
-[|] > public (0 calls)
-0: stmt_for.int_sequence.[|]<0>
-[|](?value#0:wybe.int, ?rest#0:stmt_for.int_sequence, current#0:stmt_for.int_sequence, ?$$#0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
-    foreign lpvm access(current#0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?s#0:wybe.int)
-    foreign lpvm access(current#0:stmt_for.int_sequence, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?st#0:wybe.int)
-    foreign lpvm access(~current#0:stmt_for.int_sequence, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?en#0:wybe.int)
-    foreign llvm icmp_slt(st#0:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.bool) @int:nn:nn
-    case ~tmp$4#0:wybe.bool of
-    0:
-        foreign llvm icmp_sgt(en#0:wybe.int, s#0:wybe.int, ?tmp$3#0:wybe.bool) @int:nn:nn
-        case ~tmp$3#0:wybe.bool of
-        0:
-            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?value#0:wybe.int)
-            foreign llvm move(undef:stmt_for.int_sequence, ?rest#0:stmt_for.int_sequence)
-
-        1:
-            stmt_for.int_sequence.gen$1<0>(_:stmt_for.int_sequence, ~en#0:wybe.int, ~s#0:wybe.int, ~st#0:wybe.int, ?value#0:wybe.int, ?rest#0:stmt_for.int_sequence, ?$$#0:wybe.bool) #5
-
-
-    1:
-        foreign llvm icmp_slt(en#0:wybe.int, s#0:wybe.int, ?tmp$2#0:wybe.bool) @int:nn:nn
-        case ~tmp$2#0:wybe.bool of
-        0:
-            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?value#0:wybe.int)
-            foreign llvm move(undef:stmt_for.int_sequence, ?rest#0:stmt_for.int_sequence)
-
-        1:
-            stmt_for.int_sequence.gen$1<0>(_:stmt_for.int_sequence, ~en#0:wybe.int, ~s#0:wybe.int, ~st#0:wybe.int, ?value#0:wybe.int, ?rest#0:stmt_for.int_sequence, ?$$#0:wybe.bool) #3
-
-
-
-
-end > public {inline} (0 calls)
-0: stmt_for.int_sequence.end<0>
-end($rec#0:stmt_for.int_sequence, ?$#0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
-    foreign lpvm access(~$rec#0:stmt_for.int_sequence, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?$#0:wybe.int)
-end > public {inline} (0 calls)
-1: stmt_for.int_sequence.end<1>
-end($rec#0:stmt_for.int_sequence, ?$rec#1:stmt_for.int_sequence, $field#0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~$rec#0:stmt_for.int_sequence, ?$rec#1:stmt_for.int_sequence, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
-
-
-gen$1 > (2 calls)
-0: stmt_for.int_sequence.gen$1<0>
-gen$1([current#0:stmt_for.int_sequence], en#0:wybe.int, s#0:wybe.int, st#0:wybe.int, ?value#0:wybe.int, ?rest#0:stmt_for.int_sequence, ?$$#0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
-    foreign llvm move(s#0:wybe.int, ?value#0:wybe.int) @stmt_for:nn:nn
-    foreign llvm add(~s#0:wybe.int, st#0:wybe.int, ?tmp$1#0:wybe.int) @int:nn:nn
-    foreign lpvm alloc(24:wybe.int, ?tmp$7#0:stmt_for.int_sequence)
-    foreign lpvm mutate(~tmp$7#0:stmt_for.int_sequence, ?tmp$8#0:stmt_for.int_sequence, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp$1#0:wybe.int)
-    foreign lpvm mutate(~tmp$8#0:stmt_for.int_sequence, ?tmp$9#0:stmt_for.int_sequence, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~st#0:wybe.int)
-    foreign lpvm mutate(~tmp$9#0:stmt_for.int_sequence, ?rest#0:stmt_for.int_sequence, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~en#0:wybe.int)
-    foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
-
-
-int_sequence > public {inline} (1 calls)
-0: stmt_for.int_sequence.int_sequence<0>
-int_sequence(start#0:wybe.int, stride#0:wybe.int, end#0:wybe.int, ?$#0:stmt_for.int_sequence):
- AliasPairs: []
- InterestingCallProperties: []
-    foreign lpvm alloc(24:wybe.int, ?$rec#0:stmt_for.int_sequence)
-    foreign lpvm mutate(~$rec#0:stmt_for.int_sequence, ?$rec#1:stmt_for.int_sequence, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~start#0:wybe.int)
-    foreign lpvm mutate(~$rec#1:stmt_for.int_sequence, ?$rec#2:stmt_for.int_sequence, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~stride#0:wybe.int)
-    foreign lpvm mutate(~$rec#2:stmt_for.int_sequence, ?$#0:stmt_for.int_sequence, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~end#0:wybe.int)
-int_sequence > public {inline} (16 calls)
-1: stmt_for.int_sequence.int_sequence<1>
-int_sequence(?start#0:wybe.int, ?stride#0:wybe.int, ?end#0:wybe.int, $#0:stmt_for.int_sequence):
- AliasPairs: []
- InterestingCallProperties: []
-    foreign lpvm access($#0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?start#0:wybe.int)
-    foreign lpvm access($#0:stmt_for.int_sequence, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?stride#0:wybe.int)
-    foreign lpvm access(~$#0:stmt_for.int_sequence, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?end#0:wybe.int)
-
-
-start > public {inline} (0 calls)
-0: stmt_for.int_sequence.start<0>
-start($rec#0:stmt_for.int_sequence, ?$#0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
-    foreign lpvm access(~$rec#0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?$#0:wybe.int)
-start > public {inline} (0 calls)
-1: stmt_for.int_sequence.start<1>
-start($rec#0:stmt_for.int_sequence, ?$rec#1:stmt_for.int_sequence, $field#0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~$rec#0:stmt_for.int_sequence, ?$rec#1:stmt_for.int_sequence, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
-
-
-stride > public {inline} (0 calls)
-0: stmt_for.int_sequence.stride<0>
-stride($rec#0:stmt_for.int_sequence, ?$#0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
-    foreign lpvm access(~$rec#0:stmt_for.int_sequence, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?$#0:wybe.int)
-stride > public {inline} (0 calls)
-1: stmt_for.int_sequence.stride<1>
-stride($rec#0:stmt_for.int_sequence, ?$rec#1:stmt_for.int_sequence, $field#0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~$rec#0:stmt_for.int_sequence, ?$rec#1:stmt_for.int_sequence, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
-
-
-~= > public {inline} (0 calls)
-0: stmt_for.int_sequence.~=<0>
-~=($left#0:stmt_for.int_sequence, $right#0:stmt_for.int_sequence, ?$$#0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
-    foreign lpvm access($left#0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.int)
-    foreign lpvm access($left#0:stmt_for.int_sequence, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.int)
-    foreign lpvm access(~$left#0:stmt_for.int_sequence, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.int)
-    foreign lpvm access($right#0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.int)
-    foreign lpvm access($right#0:stmt_for.int_sequence, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$7#0:wybe.int)
-    foreign lpvm access(~$right#0:stmt_for.int_sequence, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$8#0:wybe.int)
-    foreign llvm icmp_eq(~tmp$3#0:wybe.int, ~tmp$6#0:wybe.int, ?tmp$9#0:wybe.bool) @int:nn:nn
-    case ~tmp$9#0:wybe.bool of
-    0:
-        foreign llvm move(0:wybe.bool, ?tmp$0#0:wybe.bool)
-        foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
-
-    1:
-        foreign llvm icmp_eq(~tmp$4#0:wybe.int, ~tmp$7#0:wybe.int, ?tmp$10#0:wybe.bool) @int:nn:nn
-        case ~tmp$10#0:wybe.bool of
-        0:
-            foreign llvm move(0:wybe.bool, ?tmp$0#0:wybe.bool)
-            foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
-
-        1:
-            foreign llvm icmp_eq(~tmp$5#0:wybe.int, ~tmp$8#0:wybe.int, ?tmp$0#0:wybe.bool) @int:nn:nn
-            foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
-
-
-
-  LLVM code       :
-
-; ModuleID = 'stmt_for.int_sequence'
-
-
- 
-
-
-declare external ccc  i8* @wybe_malloc(i32)    
-
-
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
-
-
-define external fastcc  i1 @"stmt_for.int_sequence.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
-entry:
-  %1 = inttoptr i64 %"$left#0" to i64* 
-  %2 = getelementptr  i64, i64* %1, i64 0 
-  %3 = load  i64, i64* %2 
-  %4 = add   i64 %"$left#0", 8 
-  %5 = inttoptr i64 %4 to i64* 
-  %6 = getelementptr  i64, i64* %5, i64 0 
-  %7 = load  i64, i64* %6 
-  %8 = add   i64 %"$left#0", 16 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = inttoptr i64 %"$right#0" to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
-  %14 = load  i64, i64* %13 
-  %15 = add   i64 %"$right#0", 8 
-  %16 = inttoptr i64 %15 to i64* 
-  %17 = getelementptr  i64, i64* %16, i64 0 
-  %18 = load  i64, i64* %17 
-  %19 = add   i64 %"$right#0", 16 
-  %20 = inttoptr i64 %19 to i64* 
-  %21 = getelementptr  i64, i64* %20, i64 0 
-  %22 = load  i64, i64* %21 
-  %"1$tmp$1#0" = icmp eq i64 %3, %14 
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
-if.then:
-  %"2$tmp$2#0" = icmp eq i64 %7, %18 
-  br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
-if.else:
-  ret i1 0 
-if.then1:
-  %"4$$$#0" = icmp eq i64 %11, %22 
-  ret i1 %"4$$$#0" 
-if.else1:
-  ret i1 0 
-}
-
-
-define external fastcc  {i64, i64, i1} @"stmt_for.int_sequence.[|]<0>"(i64  %"current#0")    {
-entry:
-  %23 = inttoptr i64 %"current#0" to i64* 
-  %24 = getelementptr  i64, i64* %23, i64 0 
-  %25 = load  i64, i64* %24 
-  %26 = add   i64 %"current#0", 8 
-  %27 = inttoptr i64 %26 to i64* 
-  %28 = getelementptr  i64, i64* %27, i64 0 
-  %29 = load  i64, i64* %28 
-  %30 = add   i64 %"current#0", 16 
-  %31 = inttoptr i64 %30 to i64* 
-  %32 = getelementptr  i64, i64* %31, i64 0 
-  %33 = load  i64, i64* %32 
-  %"1$tmp$4#0" = icmp slt i64 %29, 0 
-  br i1 %"1$tmp$4#0", label %if.then, label %if.else 
-if.then:
-  %"2$tmp$2#0" = icmp slt i64 %33, %25 
-  br i1 %"2$tmp$2#0", label %if.then1, label %if.else1 
-if.else:
-  %"3$tmp$3#0" = icmp sgt i64 %33, %25 
-  br i1 %"3$tmp$3#0", label %if.then2, label %if.else2 
-if.then1:
-  %34 = tail call fastcc  {i64, i64, i1}  @"stmt_for.int_sequence.gen$1<0>"(i64  %33, i64  %25, i64  %29)  
-  %35 = extractvalue {i64, i64, i1} %34, 0 
-  %36 = extractvalue {i64, i64, i1} %34, 1 
-  %37 = extractvalue {i64, i64, i1} %34, 2 
-  %38 = insertvalue {i64, i64, i1} undef, i64 %35, 0 
-  %39 = insertvalue {i64, i64, i1} %38, i64 %36, 1 
-  %40 = insertvalue {i64, i64, i1} %39, i1 %37, 2 
-  ret {i64, i64, i1} %40 
-if.else1:
-  %41 = insertvalue {i64, i64, i1} undef, i64 undef, 0 
-  %42 = insertvalue {i64, i64, i1} %41, i64 undef, 1 
-  %43 = insertvalue {i64, i64, i1} %42, i1 0, 2 
-  ret {i64, i64, i1} %43 
-if.then2:
-  %44 = tail call fastcc  {i64, i64, i1}  @"stmt_for.int_sequence.gen$1<0>"(i64  %33, i64  %25, i64  %29)  
-  %45 = extractvalue {i64, i64, i1} %44, 0 
-  %46 = extractvalue {i64, i64, i1} %44, 1 
-  %47 = extractvalue {i64, i64, i1} %44, 2 
-  %48 = insertvalue {i64, i64, i1} undef, i64 %45, 0 
-  %49 = insertvalue {i64, i64, i1} %48, i64 %46, 1 
-  %50 = insertvalue {i64, i64, i1} %49, i1 %47, 2 
-  ret {i64, i64, i1} %50 
-if.else2:
-  %51 = insertvalue {i64, i64, i1} undef, i64 undef, 0 
-  %52 = insertvalue {i64, i64, i1} %51, i64 undef, 1 
-  %53 = insertvalue {i64, i64, i1} %52, i1 0, 2 
-  ret {i64, i64, i1} %53 
-}
-
-
-define external fastcc  i64 @"stmt_for.int_sequence.end<0>"(i64  %"$rec#0")    {
-entry:
-  %54 = add   i64 %"$rec#0", 16 
-  %55 = inttoptr i64 %54 to i64* 
-  %56 = getelementptr  i64, i64* %55, i64 0 
-  %57 = load  i64, i64* %56 
-  ret i64 %57 
-}
-
-
-define external fastcc  i64 @"stmt_for.int_sequence.end<1>"(i64  %"$rec#0", i64  %"$field#0")    {
-entry:
-  %58 = trunc i64 24 to i32  
-  %59 = tail call ccc  i8*  @wybe_malloc(i32  %58)  
-  %60 = ptrtoint i8* %59 to i64 
-  %61 = inttoptr i64 %60 to i8* 
-  %62 = inttoptr i64 %"$rec#0" to i8* 
-  %63 = trunc i64 24 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %61, i8*  %62, i32  %63, i32  8, i1  0)  
-  %64 = add   i64 %60, 16 
-  %65 = inttoptr i64 %64 to i64* 
-  %66 = getelementptr  i64, i64* %65, i64 0 
-  store  i64 %"$field#0", i64* %66 
-  ret i64 %60 
-}
-
-
-define external fastcc  {i64, i64, i1} @"stmt_for.int_sequence.gen$1<0>"(i64  %"en#0", i64  %"s#0", i64  %"st#0")    {
-entry:
-  %"1$tmp$1#0" = add   i64 %"s#0", %"st#0" 
-  %67 = trunc i64 24 to i32  
-  %68 = tail call ccc  i8*  @wybe_malloc(i32  %67)  
-  %69 = ptrtoint i8* %68 to i64 
-  %70 = inttoptr i64 %69 to i64* 
-  %71 = getelementptr  i64, i64* %70, i64 0 
-  store  i64 %"1$tmp$1#0", i64* %71 
-  %72 = add   i64 %69, 8 
-  %73 = inttoptr i64 %72 to i64* 
-  %74 = getelementptr  i64, i64* %73, i64 0 
-  store  i64 %"st#0", i64* %74 
-  %75 = add   i64 %69, 16 
-  %76 = inttoptr i64 %75 to i64* 
-  %77 = getelementptr  i64, i64* %76, i64 0 
-  store  i64 %"en#0", i64* %77 
-  %78 = insertvalue {i64, i64, i1} undef, i64 %"s#0", 0 
-  %79 = insertvalue {i64, i64, i1} %78, i64 %69, 1 
-  %80 = insertvalue {i64, i64, i1} %79, i1 1, 2 
-  ret {i64, i64, i1} %80 
-}
-
-
-define external fastcc  i64 @"stmt_for.int_sequence.int_sequence<0>"(i64  %"start#0", i64  %"stride#0", i64  %"end#0")    {
-entry:
-  %81 = trunc i64 24 to i32  
-  %82 = tail call ccc  i8*  @wybe_malloc(i32  %81)  
-  %83 = ptrtoint i8* %82 to i64 
-  %84 = inttoptr i64 %83 to i64* 
-  %85 = getelementptr  i64, i64* %84, i64 0 
-  store  i64 %"start#0", i64* %85 
-  %86 = add   i64 %83, 8 
-  %87 = inttoptr i64 %86 to i64* 
-  %88 = getelementptr  i64, i64* %87, i64 0 
-  store  i64 %"stride#0", i64* %88 
-  %89 = add   i64 %83, 16 
-  %90 = inttoptr i64 %89 to i64* 
-  %91 = getelementptr  i64, i64* %90, i64 0 
-  store  i64 %"end#0", i64* %91 
-  ret i64 %83 
-}
-
-
-define external fastcc  {i64, i64, i64} @"stmt_for.int_sequence.int_sequence<1>"(i64  %"$#0")    {
-entry:
-  %92 = inttoptr i64 %"$#0" to i64* 
-  %93 = getelementptr  i64, i64* %92, i64 0 
-  %94 = load  i64, i64* %93 
-  %95 = add   i64 %"$#0", 8 
-  %96 = inttoptr i64 %95 to i64* 
-  %97 = getelementptr  i64, i64* %96, i64 0 
-  %98 = load  i64, i64* %97 
-  %99 = add   i64 %"$#0", 16 
-  %100 = inttoptr i64 %99 to i64* 
-  %101 = getelementptr  i64, i64* %100, i64 0 
-  %102 = load  i64, i64* %101 
-  %103 = insertvalue {i64, i64, i64} undef, i64 %94, 0 
-  %104 = insertvalue {i64, i64, i64} %103, i64 %98, 1 
-  %105 = insertvalue {i64, i64, i64} %104, i64 %102, 2 
-  ret {i64, i64, i64} %105 
-}
-
-
-define external fastcc  i64 @"stmt_for.int_sequence.start<0>"(i64  %"$rec#0")    {
-entry:
-  %106 = inttoptr i64 %"$rec#0" to i64* 
-  %107 = getelementptr  i64, i64* %106, i64 0 
-  %108 = load  i64, i64* %107 
-  ret i64 %108 
-}
-
-
-define external fastcc  i64 @"stmt_for.int_sequence.start<1>"(i64  %"$rec#0", i64  %"$field#0")    {
-entry:
-  %109 = trunc i64 24 to i32  
-  %110 = tail call ccc  i8*  @wybe_malloc(i32  %109)  
-  %111 = ptrtoint i8* %110 to i64 
-  %112 = inttoptr i64 %111 to i8* 
-  %113 = inttoptr i64 %"$rec#0" to i8* 
-  %114 = trunc i64 24 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %112, i8*  %113, i32  %114, i32  8, i1  0)  
-  %115 = inttoptr i64 %111 to i64* 
-  %116 = getelementptr  i64, i64* %115, i64 0 
-  store  i64 %"$field#0", i64* %116 
-  ret i64 %111 
-}
-
-
-define external fastcc  i64 @"stmt_for.int_sequence.stride<0>"(i64  %"$rec#0")    {
-entry:
-  %117 = add   i64 %"$rec#0", 8 
-  %118 = inttoptr i64 %117 to i64* 
-  %119 = getelementptr  i64, i64* %118, i64 0 
-  %120 = load  i64, i64* %119 
-  ret i64 %120 
-}
-
-
-define external fastcc  i64 @"stmt_for.int_sequence.stride<1>"(i64  %"$rec#0", i64  %"$field#0")    {
-entry:
-  %121 = trunc i64 24 to i32  
-  %122 = tail call ccc  i8*  @wybe_malloc(i32  %121)  
-  %123 = ptrtoint i8* %122 to i64 
-  %124 = inttoptr i64 %123 to i8* 
-  %125 = inttoptr i64 %"$rec#0" to i8* 
-  %126 = trunc i64 24 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %124, i8*  %125, i32  %126, i32  8, i1  0)  
-  %127 = add   i64 %123, 8 
-  %128 = inttoptr i64 %127 to i64* 
-  %129 = getelementptr  i64, i64* %128, i64 0 
-  store  i64 %"$field#0", i64* %129 
-  ret i64 %123 
-}
-
-
-define external fastcc  i1 @"stmt_for.int_sequence.~=<0>"(i64  %"$left#0", i64  %"$right#0")    {
-entry:
-  %130 = inttoptr i64 %"$left#0" to i64* 
-  %131 = getelementptr  i64, i64* %130, i64 0 
-  %132 = load  i64, i64* %131 
-  %133 = add   i64 %"$left#0", 8 
-  %134 = inttoptr i64 %133 to i64* 
-  %135 = getelementptr  i64, i64* %134, i64 0 
-  %136 = load  i64, i64* %135 
-  %137 = add   i64 %"$left#0", 16 
-  %138 = inttoptr i64 %137 to i64* 
-  %139 = getelementptr  i64, i64* %138, i64 0 
-  %140 = load  i64, i64* %139 
-  %141 = inttoptr i64 %"$right#0" to i64* 
-  %142 = getelementptr  i64, i64* %141, i64 0 
-  %143 = load  i64, i64* %142 
-  %144 = add   i64 %"$right#0", 8 
-  %145 = inttoptr i64 %144 to i64* 
-  %146 = getelementptr  i64, i64* %145, i64 0 
-  %147 = load  i64, i64* %146 
-  %148 = add   i64 %"$right#0", 16 
-  %149 = inttoptr i64 %148 to i64* 
-  %150 = getelementptr  i64, i64* %149, i64 0 
-  %151 = load  i64, i64* %150 
-  %"1$tmp$9#0" = icmp eq i64 %132, %143 
-  br i1 %"1$tmp$9#0", label %if.then, label %if.else 
-if.then:
-  %"2$tmp$10#0" = icmp eq i64 %136, %147 
-  br i1 %"2$tmp$10#0", label %if.then1, label %if.else1 
-if.else:
-  %"3$$$#0" = xor i1 0, 1 
-  ret i1 %"3$$$#0" 
-if.then1:
-  %"4$tmp$0#0" = icmp eq i64 %140, %151 
-  %"4$$$#0" = xor i1 %"4$tmp$0#0", 1 
-  ret i1 %"4$$$#0" 
-if.else1:
-  %"5$$$#0" = xor i1 0, 1 
-  ret i1 %"5$$$#0" 
 }

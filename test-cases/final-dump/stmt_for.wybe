@@ -85,28 +85,6 @@ pub def using_unless use !io {
     }
 }
 
-pub type int_sequence {
-    pub int_sequence(start: int, stride: int, end: int)
-
-    pub def {test} `[|]`(?value: int, ?rest: int_sequence, current: int_sequence) {
-        int_sequence(?s, ?st, ?en, current)
-
-        if {
-            st < 0 :: (s > en)
-            | otherwise :: (s < en)
-        }
-
-        ?value = s
-        ?rest = int_sequence(s + st, st, en)
-    }
-}
-
-pub def xrange(start: int, stride: int, end: int): int_sequence =
-    int_sequence(start, stride, end)
-
-pub def irange(start: int, stride: int, end: int): int_sequence =
-    int_sequence(start, stride, if {stride < 0:: end - 1 | else:: end+1})
-
 pub def using_xrange use !io {
     for ?i in xrange(1, 1, 10) {
         !println(i)

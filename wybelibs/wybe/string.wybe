@@ -78,7 +78,7 @@ pub def {test} `[|]`(?head:char, ?tail:_, s:_) {
 }
 
 pub def empty_string:_ = nul
-pub def []:_ = nul
+# pub def []:_ = nul
 pub def {test} [](s:_, idx:int, ?c:char) {
     if { s = buf(?len, ?str) :: 
             (0 <= idx)

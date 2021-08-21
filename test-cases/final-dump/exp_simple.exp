@@ -20,7 +20,7 @@ AFTER EVERYTHING:
     foreign c putchar('\n':wybe.char, ~tmp$13#0:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
     foreign c putchar('h':wybe.char, ~#io#2:wybe.phantom, ?tmp$16#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$16#0:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
-    foreign c print_string("hello":wybe.string, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) @io:nn:nn
+    foreign c print_string("hello":wybe.raw_string, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) @io:nn:nn
     foreign c print_int(3:wybe.int, ~#io#4:wybe.phantom, ?tmp$23#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$23#0:wybe.phantom, ?#io#5:wybe.phantom) @io:nn:nn
     foreign c print_int(1001:wybe.int, ~#io#5:wybe.phantom, ?tmp$27#0:wybe.phantom) @io:nn:nn

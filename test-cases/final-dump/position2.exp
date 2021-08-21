@@ -24,13 +24,13 @@ printPosition > public (0 calls)
 printPosition(pos#0:position.position, io#0:wybe.phantom, ?io#5:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string(" (":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign c print_string(" (":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
     foreign lpvm access(pos#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.int)
     foreign c print_int(~tmp$0#0:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
-    foreign c print_string(",":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
+    foreign c print_string(",":wybe.raw_string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
     foreign lpvm access(~pos#0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.int)
     foreign c print_int(~tmp$1#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) @io:nn:nn
-    foreign c print_string(")":wybe.string, ~#io#4:wybe.phantom, ?tmp$14#0:wybe.phantom) @io:nn:nn
+    foreign c print_string(")":wybe.raw_string, ~#io#4:wybe.phantom, ?tmp$14#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$14#0:wybe.phantom, ?#io#5:wybe.phantom) @io:nn:nn
 
   LLVM code       :
@@ -358,12 +358,12 @@ if.else:
     foreign lpvm alloc(16:wybe.int, ?tmp$10#0:position.position)
     foreign lpvm mutate(~tmp$10#0:position.position, ?tmp$11#0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 333:wybe.int)
     foreign lpvm mutate(~tmp$11#0:position.position, ?tmp$1#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 222:wybe.int)
-    foreign c print_string("expect posA(111,222):":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign c print_string("expect posA(111,222):":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
     position.printPosition<0>(tmp$0#0:position.position, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #4 @position2:7:2
     foreign lpvm {noalias} mutate(~tmp$0#0:position.position, ?%posA#1:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 20000:wybe.int)
-    foreign c print_string("expect posA(111,20000):":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
+    foreign c print_string("expect posA(111,20000):":wybe.raw_string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
     position.printPosition<0>(~posA#1:position.position, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #7 @position2:11:2
-    foreign c print_string("expect posB(333,222):":wybe.string, ~#io#4:wybe.phantom, ?#io#5:wybe.phantom) @io:nn:nn
+    foreign c print_string("expect posB(333,222):":wybe.raw_string, ~#io#4:wybe.phantom, ?#io#5:wybe.phantom) @io:nn:nn
     position.printPosition<0>(~tmp$1#0:position.position, ~#io#5:wybe.phantom, ?#io#6:wybe.phantom) #9 @position2:13:2
 
   LLVM code       :

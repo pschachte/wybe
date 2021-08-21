@@ -2,6 +2,7 @@ from io import TextIOWrapper
 import os
 import sys
 import hashlib
+import re
 from collections import defaultdict
 import subprocess
 from typing import *
@@ -14,6 +15,11 @@ def test_case(func) -> None:
     filename = os.path.basename(func.__globals__['__file__'])
     TEST_CASES.append((func.__name__, filename, func))
     return func
+
+def normalise(output: str) -> str:
+    output = re.sub(r"@([a-z_]*):[0-9:]*", r"@\1:nn:nn", output)
+    output = re.sub(r"\[[0-9][0-9]* x i8\]", "[?? x i8]", output)
+    return output
 
 
 class Context:
@@ -80,7 +86,7 @@ class Context:
         Returns:
             exit code and outputs (stdin && stdout)
         """
-        TIMEOUT = 5  # sec
+        TIMEOUT = 50  # sec
         wybe_path = os.path.abspath("../wybemk")
         lib_path = os.path.abspath("../wybelibs")
         args = [wybe_path, "-L", lib_path]
@@ -100,7 +106,7 @@ class Context:
                 self.write_section("ERROR OUTPUT", r.stdout.decode("utf-8"))
                 r.check_returncode()
 
-        return (r.returncode, r.stdout.decode("utf-8"))
+        return (r.returncode, normalise(r.stdout.decode("utf-8")))
 
     def execute_program(self, exe: str, check: bool,
             input: Optional[str] = None,

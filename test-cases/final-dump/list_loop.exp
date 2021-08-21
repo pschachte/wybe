@@ -79,9 +79,9 @@ gen$3(h#0:wybe.int, io#0:wybe.phantom, l#0:list_loop.intlist, l2#0:list_loop.int
     1:
         foreign lpvm access(l2#0:list_loop.intlist, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h2#0:wybe.int)
         foreign lpvm access(~l2#0:list_loop.intlist, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?l2#1:list_loop.intlist)
-        foreign c print_string("    ":wybe.string, ~io#0:wybe.phantom, ?tmp$17#0:wybe.phantom) @io:nn:nn
+        foreign c print_string("    ":wybe.raw_string, ~io#0:wybe.phantom, ?tmp$17#0:wybe.phantom) @io:nn:nn
         foreign c print_int(h#0:wybe.int, ~tmp$17#0:wybe.phantom, ?tmp$18#0:wybe.phantom) @io:nn:nn
-        foreign c print_string(" ":wybe.string, ~tmp$18#0:wybe.phantom, ?tmp$19#0:wybe.phantom) @io:nn:nn
+        foreign c print_string(" ":wybe.raw_string, ~tmp$18#0:wybe.phantom, ?tmp$19#0:wybe.phantom) @io:nn:nn
         foreign c print_int(~h2#0:wybe.int, ~tmp$19#0:wybe.phantom, ?tmp$20#0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp$20#0:wybe.phantom, ?tmp$21#0:wybe.phantom) @io:nn:nn
         list_loop.gen$3<0>(~h#0:wybe.int, ~tmp$21#0:wybe.phantom, ~l#0:list_loop.intlist, ~l2#1:list_loop.intlist, ~tmp$0#0:list_loop.intlist, ~tmp$1#0:list_loop.intlist, ~tmp$2#0:list_loop.intlist, ~tmp$3#0:list_loop.intlist, ~x#0:list_loop.intlist, ?io#1:wybe.phantom) #3 @list_loop:nn:nn
@@ -93,9 +93,9 @@ gen$4 > {inline} (1 calls)
 gen$4(h#0:wybe.int, h2#0:wybe.int, io#0:wybe.phantom, l#0:list_loop.intlist, l2#0:list_loop.intlist, tmp$0#0:list_loop.intlist, tmp$1#0:list_loop.intlist, tmp$2#0:list_loop.intlist, tmp$3#0:list_loop.intlist, x#0:list_loop.intlist, ?io#5:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string("    ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign c print_string("    ":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
     foreign c print_int(h#0:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
-    foreign c print_string(" ":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
+    foreign c print_string(" ":wybe.raw_string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
     foreign c print_int(~h2#0:wybe.int, ~#io#3:wybe.phantom, ?tmp$12#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$12#0:wybe.phantom, ?#io#4:wybe.phantom) @io:nn:nn
     list_loop.gen$3<0>(~h#0:wybe.int, ~io#4:wybe.phantom, ~l#0:list_loop.intlist, ~l2#0:list_loop.intlist, ~tmp$0#0:list_loop.intlist, ~tmp$1#0:list_loop.intlist, ~tmp$2#0:list_loop.intlist, ~tmp$3#0:list_loop.intlist, ~x#0:list_loop.intlist, ?io#5:wybe.phantom) #4 @list_loop:nn:nn

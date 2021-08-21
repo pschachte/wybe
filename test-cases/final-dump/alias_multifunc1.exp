@@ -21,25 +21,25 @@ AFTER EVERYTHING:
     foreign lpvm mutate(~tmp$3#0:position.position, ?tmp$4#0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int)
     foreign lpvm mutate(~tmp$4#0:position.position, ?tmp$0#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int)
     alias_multifunc1.replicate1<0>(tmp$0#0:position.position, ?p2#0:position.position, ?p3#0:position.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #1 @alias_multifunc1:19:2
-    foreign c print_string("--- After calling replicate1: ":wybe.string, ~#io#1:wybe.phantom, ?tmp$7#0:wybe.phantom) @io:nn:nn
+    foreign c print_string("--- After calling replicate1: ":wybe.raw_string, ~#io#1:wybe.phantom, ?tmp$7#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$7#0:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
-    foreign c print_string("expect p1(10,10):":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
+    foreign c print_string("expect p1(10,10):":wybe.raw_string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
     position.printPosition<0>(tmp$0#0:position.position, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #4 @alias_multifunc1:23:2
-    foreign c print_string("expect p2(22,10):":wybe.string, ~#io#4:wybe.phantom, ?#io#5:wybe.phantom) @io:nn:nn
+    foreign c print_string("expect p2(22,10):":wybe.raw_string, ~#io#4:wybe.phantom, ?#io#5:wybe.phantom) @io:nn:nn
     position.printPosition<0>(p2#0:position.position, ~#io#5:wybe.phantom, ?#io#6:wybe.phantom) #6 @alias_multifunc1:25:2
-    foreign c print_string("expect p3(10,10):":wybe.string, ~#io#6:wybe.phantom, ?#io#7:wybe.phantom) @io:nn:nn
+    foreign c print_string("expect p3(10,10):":wybe.raw_string, ~#io#6:wybe.phantom, ?#io#7:wybe.phantom) @io:nn:nn
     position.printPosition<0>(p3#0:position.position, ~#io#7:wybe.phantom, ?#io#8:wybe.phantom) #8 @alias_multifunc1:27:2
     foreign lpvm {noalias} mutate(~%p2#0:position.position, ?%p2#1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2222222:wybe.int)
-    foreign c print_string("--- After calling x(!p2, 2222222): ":wybe.string, ~#io#8:wybe.phantom, ?tmp$18#0:wybe.phantom) @io:nn:nn
+    foreign c print_string("--- After calling x(!p2, 2222222): ":wybe.raw_string, ~#io#8:wybe.phantom, ?tmp$18#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$18#0:wybe.phantom, ?#io#9:wybe.phantom) @io:nn:nn
-    foreign c print_string("expect p2(2222222,10):":wybe.string, ~#io#9:wybe.phantom, ?#io#10:wybe.phantom) @io:nn:nn
+    foreign c print_string("expect p2(2222222,10):":wybe.raw_string, ~#io#9:wybe.phantom, ?#io#10:wybe.phantom) @io:nn:nn
     position.printPosition<0>(~p2#1:position.position, ~#io#10:wybe.phantom, ?#io#11:wybe.phantom) #12 @alias_multifunc1:33:2
     foreign lpvm {noalias} mutate(~tmp$0#0:position.position, ?%p1#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 11:wybe.int)
-    foreign c print_string("--- After calling x(!p1, 11): ":wybe.string, ~#io#11:wybe.phantom, ?tmp$25#0:wybe.phantom) @io:nn:nn
+    foreign c print_string("--- After calling x(!p1, 11): ":wybe.raw_string, ~#io#11:wybe.phantom, ?tmp$25#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$25#0:wybe.phantom, ?#io#12:wybe.phantom) @io:nn:nn
-    foreign c print_string("expect p1(11,10):":wybe.string, ~#io#12:wybe.phantom, ?#io#13:wybe.phantom) @io:nn:nn
+    foreign c print_string("expect p1(11,10):":wybe.raw_string, ~#io#12:wybe.phantom, ?#io#13:wybe.phantom) @io:nn:nn
     position.printPosition<0>(~p1#1:position.position, ~#io#13:wybe.phantom, ?#io#14:wybe.phantom) #16 @alias_multifunc1:45:2
-    foreign c print_string("expect p3(10,10):":wybe.string, ~#io#14:wybe.phantom, ?#io#15:wybe.phantom) @io:nn:nn
+    foreign c print_string("expect p3(10,10):":wybe.raw_string, ~#io#14:wybe.phantom, ?#io#15:wybe.phantom) @io:nn:nn
     position.printPosition<0>(~p3#0:position.position, ~#io#15:wybe.phantom, ?#io#16:wybe.phantom) #18 @alias_multifunc1:47:2
 
 
@@ -61,7 +61,7 @@ replicate2(p1#0:position.position, ?p2#0:position.position, io#0:wybe.phantom, ?
     foreign lpvm alloc(16:wybe.int, ?tmp$4#0:position.position)
     foreign lpvm mutate(~tmp$4#0:position.position, ?tmp$5#0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int)
     foreign lpvm mutate(~tmp$5#0:position.position, ?tmp$0#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int)
-    foreign c print_string("some noise...":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign c print_string("some noise...":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
     foreign lpvm access(~tmp$0#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.int)
     foreign c print_int(~tmp$1#0:wybe.int, ~#io#1:wybe.phantom, ?tmp$11#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$11#0:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
@@ -248,13 +248,13 @@ printPosition > public (0 calls)
 printPosition(pos#0:position.position, io#0:wybe.phantom, ?io#5:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string(" (":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign c print_string(" (":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
     foreign lpvm access(pos#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.int)
     foreign c print_int(~tmp$0#0:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
-    foreign c print_string(",":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
+    foreign c print_string(",":wybe.raw_string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
     foreign lpvm access(~pos#0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.int)
     foreign c print_int(~tmp$1#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) @io:nn:nn
-    foreign c print_string(")":wybe.string, ~#io#4:wybe.phantom, ?tmp$14#0:wybe.phantom) @io:nn:nn
+    foreign c print_string(")":wybe.raw_string, ~#io#4:wybe.phantom, ?tmp$14#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$14#0:wybe.phantom, ?#io#5:wybe.phantom) @io:nn:nn
 
   LLVM code       :

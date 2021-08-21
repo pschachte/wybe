@@ -38,7 +38,7 @@ gen$1(count#0:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
 
     1:
         foreign c print_int(count#0:wybe.int, ~io#0:wybe.phantom, ?tmp$5#0:wybe.phantom) @io:nn:nn
-        foreign c print_string(" bottles of beer on the wall":wybe.string, ~tmp$5#0:wybe.phantom, ?tmp$6#0:wybe.phantom) @io:nn:nn
+        foreign c print_string(" bottles of beer on the wall":wybe.raw_string, ~tmp$5#0:wybe.phantom, ?tmp$6#0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp$6#0:wybe.phantom, ?tmp$7#0:wybe.phantom) @io:nn:nn
         foreign llvm sub(~count#0:wybe.int, 1:wybe.int, ?tmp$8#0:wybe.int) @int:nn:nn
         proc_beer.gen$1<0>(~tmp$8#0:wybe.int, ~tmp$7#0:wybe.phantom, ?io#1:wybe.phantom) #2 @proc_beer:nn:nn
@@ -51,7 +51,7 @@ gen$2(count#0:wybe.int, io#0:wybe.phantom, ?io#3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_int(count#0:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-    foreign c print_string(" bottles of beer on the wall":wybe.string, ~#io#1:wybe.phantom, ?tmp$4#0:wybe.phantom) @io:nn:nn
+    foreign c print_string(" bottles of beer on the wall":wybe.raw_string, ~#io#1:wybe.phantom, ?tmp$4#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$4#0:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
     foreign llvm sub(~%count#0:wybe.int, 1:wybe.int, ?%count#1:wybe.int) @int:nn:nn
     proc_beer.gen$1<0>(~count#1:wybe.int, ~io#2:wybe.phantom, ?io#3:wybe.phantom) #3 @proc_beer:nn:nn

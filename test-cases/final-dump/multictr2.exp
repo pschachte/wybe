@@ -85,69 +85,69 @@ print_t(x#0:multictr2.t, io#0:wybe.phantom, ?io#8:wybe.phantom):
                                     foreign lpvm access(x#0:multictr2.t, -7:wybe.int, 24:wybe.int, 7:wybe.int, ?a#7:wybe.int)
                                     foreign lpvm access(x#0:multictr2.t, 1:wybe.int, 24:wybe.int, 7:wybe.int, ?b#0:wybe.int)
                                     foreign lpvm access(~x#0:multictr2.t, 9:wybe.int, 24:wybe.int, 7:wybe.int, ?c#0:wybe.float)
-                                    foreign c print_string("c08(":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+                                    foreign c print_string("c08(":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
                                     foreign c print_int(~a#7:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
-                                    foreign c print_string(", ":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
+                                    foreign c print_string(", ":wybe.raw_string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
                                     foreign c print_int(~b#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) @io:nn:nn
-                                    foreign c print_string(", ":wybe.string, ~#io#4:wybe.phantom, ?#io#5:wybe.phantom) @io:nn:nn
+                                    foreign c print_string(", ":wybe.raw_string, ~#io#4:wybe.phantom, ?#io#5:wybe.phantom) @io:nn:nn
                                     foreign c print_float(~c#0:wybe.float, ~#io#5:wybe.phantom, ?#io#6:wybe.phantom) @io:nn:nn
-                                    foreign c print_string(")":wybe.string, ~#io#6:wybe.phantom, ?#io#7:wybe.phantom) @io:nn:nn
+                                    foreign c print_string(")":wybe.raw_string, ~#io#6:wybe.phantom, ?#io#7:wybe.phantom) @io:nn:nn
                                     foreign c putchar('\n':wybe.char, ~#io#7:wybe.phantom, ?#io#8:wybe.phantom) @io:nn:nn
 
 
                             1:
                                 foreign lpvm access(~x#0:multictr2.t, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?a#6:wybe.int)
-                                foreign c print_string("c07(":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+                                foreign c print_string("c07(":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
                                 foreign c print_int(~a#6:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
-                                foreign c print_string(")":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
+                                foreign c print_string(")":wybe.raw_string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
                                 foreign c putchar('\n':wybe.char, ~#io#3:wybe.phantom, ?#io#8:wybe.phantom) @io:nn:nn
 
 
                         1:
                             foreign lpvm access(~x#0:multictr2.t, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?a#5:wybe.int)
-                            foreign c print_string("c06(":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+                            foreign c print_string("c06(":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
                             foreign c print_int(~a#5:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
-                            foreign c print_string(")":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
+                            foreign c print_string(")":wybe.raw_string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
                             foreign c putchar('\n':wybe.char, ~#io#3:wybe.phantom, ?#io#8:wybe.phantom) @io:nn:nn
 
 
                     1:
                         foreign lpvm access(~x#0:multictr2.t, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?a#4:wybe.int)
-                        foreign c print_string("c05(":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+                        foreign c print_string("c05(":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
                         foreign c print_int(~a#4:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
-                        foreign c print_string(")":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
+                        foreign c print_string(")":wybe.raw_string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
                         foreign c putchar('\n':wybe.char, ~#io#3:wybe.phantom, ?#io#8:wybe.phantom) @io:nn:nn
 
 
                 1:
                     foreign lpvm access(~x#0:multictr2.t, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?a#3:wybe.int)
-                    foreign c print_string("c04(":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+                    foreign c print_string("c04(":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
                     foreign c print_int(~a#3:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
-                    foreign c print_string(")":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
+                    foreign c print_string(")":wybe.raw_string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
                     foreign c putchar('\n':wybe.char, ~#io#3:wybe.phantom, ?#io#8:wybe.phantom) @io:nn:nn
 
 
             1:
                 foreign lpvm access(~x#0:multictr2.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?a#2:wybe.int)
-                foreign c print_string("c03(":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+                foreign c print_string("c03(":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
                 foreign c print_int(~a#2:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
-                foreign c print_string(")":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
+                foreign c print_string(")":wybe.raw_string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
                 foreign c putchar('\n':wybe.char, ~#io#3:wybe.phantom, ?#io#8:wybe.phantom) @io:nn:nn
 
 
         1:
             foreign lpvm access(~x#0:multictr2.t, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?a#1:wybe.int)
-            foreign c print_string("c03(":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+            foreign c print_string("c03(":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
             foreign c print_int(~a#1:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
-            foreign c print_string(")":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
+            foreign c print_string(")":wybe.raw_string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
             foreign c putchar('\n':wybe.char, ~#io#3:wybe.phantom, ?#io#8:wybe.phantom) @io:nn:nn
 
 
     1:
         foreign lpvm access(~x#0:multictr2.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a#0:wybe.int)
-        foreign c print_string("c01(":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+        foreign c print_string("c01(":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
         foreign c print_int(~a#0:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
-        foreign c print_string(")":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
+        foreign c print_string(")":wybe.raw_string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~#io#3:wybe.phantom, ?#io#8:wybe.phantom) @io:nn:nn
 
 

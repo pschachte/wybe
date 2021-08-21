@@ -38,7 +38,7 @@ AFTER EVERYTHING:
         foreign llvm move(~io#0:wybe.phantom, ?io#1:wybe.phantom)
 
     1:
-        foreign c print_string("found":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+        foreign c print_string("found":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
 
 
 

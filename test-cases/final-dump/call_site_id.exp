@@ -60,13 +60,13 @@ foo > public (1 calls)
 foo(x#0:wybe.int, io#0:wybe.phantom, ?io#8:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string(" ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-    foreign c print_string(" ":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
-    foreign c print_string(" ":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
-    foreign c print_string(" ":wybe.string, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) @io:nn:nn
-    foreign c print_string(" ":wybe.string, ~#io#4:wybe.phantom, ?#io#5:wybe.phantom) @io:nn:nn
-    foreign c print_string(" ":wybe.string, ~#io#5:wybe.phantom, ?#io#6:wybe.phantom) @io:nn:nn
-    foreign c print_string(" ":wybe.string, ~#io#6:wybe.phantom, ?#io#7:wybe.phantom) @io:nn:nn
+    foreign c print_string(" ":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign c print_string(" ":wybe.raw_string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
+    foreign c print_string(" ":wybe.raw_string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
+    foreign c print_string(" ":wybe.raw_string, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) @io:nn:nn
+    foreign c print_string(" ":wybe.raw_string, ~#io#4:wybe.phantom, ?#io#5:wybe.phantom) @io:nn:nn
+    foreign c print_string(" ":wybe.raw_string, ~#io#5:wybe.phantom, ?#io#6:wybe.phantom) @io:nn:nn
+    foreign c print_string(" ":wybe.raw_string, ~#io#6:wybe.phantom, ?#io#7:wybe.phantom) @io:nn:nn
     foreign llvm mul(~x#0:wybe.int, 5:wybe.int, ?tmp$1#0:wybe.int) @int:nn:nn
     foreign llvm add(~tmp$1#0:wybe.int, 10:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn
     foreign c print_int(~tmp$0#0:wybe.int, ~#io#7:wybe.phantom, ?tmp$22#0:wybe.phantom) @io:nn:nn

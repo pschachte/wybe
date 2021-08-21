@@ -1,5 +1,5 @@
-pub def yorn(prompt:string, ?result:bool) use !io {
-    do {! print(prompt:string) # XXX shouldn't be necessary to qualify prompt
+pub def yorn(prompt:raw_string, ?result:bool) use !io {
+    do {! print(prompt:raw_string) # XXX shouldn't be necessary to qualify prompt
         ! print(" (y/n) ")
         ! read(?response)
           ?result = response = 'Y'

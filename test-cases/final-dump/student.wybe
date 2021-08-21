@@ -1,4 +1,4 @@
-pub type course  { pub course(code:int, name:string) }
+pub type course  { pub course(code:int, name:raw_string) }
 pub type student { pub student(id:int, major:course) }
 
 pub def printStudent(stu:student) use !io {

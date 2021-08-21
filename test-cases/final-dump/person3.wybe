@@ -1,4 +1,4 @@
-pub type person { pub person(firstname:string, lastname:string) }
+pub type person { pub person(firstname:raw_string, lastname:raw_string) }
 
 # expect: copy B into a new memory and do update
 ?personA = person("John", "Smith")

@@ -33,7 +33,7 @@ gen$1([h#0:wybe.int], io#0:wybe.phantom, lst#0:loop_bug.int_list, t#0:loop_bug.i
     1:
         foreign lpvm access(t#0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h#1:wybe.int)
         foreign lpvm access(~t#0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t#1:loop_bug.int_list)
-        foreign c print_string(", ":wybe.string, ~io#0:wybe.phantom, ?tmp$7#0:wybe.phantom) @io:nn:nn
+        foreign c print_string(", ":wybe.raw_string, ~io#0:wybe.phantom, ?tmp$7#0:wybe.phantom) @io:nn:nn
         foreign c print_int(~h#1:wybe.int, ~tmp$7#0:wybe.phantom, ?tmp$8#0:wybe.phantom) @io:nn:nn
         loop_bug.gen$1<0>(_:wybe.int, ~tmp$8#0:wybe.phantom, ~lst#0:loop_bug.int_list, ~t#1:loop_bug.int_list, ?io#1:wybe.phantom) #3 @loop_bug:nn:nn
 
@@ -44,7 +44,7 @@ gen$2 > {inline} (1 calls)
 gen$2(h#0:wybe.int, io#0:wybe.phantom, lst#0:loop_bug.int_list, t#0:loop_bug.int_list, ?io#3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string(", ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign c print_string(", ":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
     foreign c print_int(~h#0:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
     loop_bug.gen$1<0>(_:wybe.int, ~io#2:wybe.phantom, ~lst#0:loop_bug.int_list, ~t#0:loop_bug.int_list, ?io#3:wybe.phantom) #2 @loop_bug:nn:nn
 

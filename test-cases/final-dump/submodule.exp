@@ -41,7 +41,7 @@ hidden > {inline} (0 calls)
 hidden(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string("private proc in a private module":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign c print_string("private proc in a private module":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
 
 
 semi_hidden > public {inline} (0 calls)
@@ -49,7 +49,7 @@ semi_hidden > public {inline} (0 calls)
 semi_hidden(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string("public proc in a private module":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign c print_string("public proc in a private module":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 
@@ -104,7 +104,7 @@ semi_visible > {inline} (0 calls)
 semi_visible(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string("private proc in a public module":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign c print_string("private proc in a public module":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
 
 
 visible > public {inline} (0 calls)
@@ -112,7 +112,7 @@ visible > public {inline} (0 calls)
 visible(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string("public proc in a public module":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign c print_string("public proc in a public module":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 
