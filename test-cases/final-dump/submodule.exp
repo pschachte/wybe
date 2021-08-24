@@ -41,7 +41,7 @@ hidden > {inline} (0 calls)
 hidden(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string("private proc in a private module":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("private proc in a private module":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #1 @io:nn:nn
 
 
 semi_hidden > public {inline} (0 calls)
@@ -49,7 +49,7 @@ semi_hidden > public {inline} (0 calls)
 semi_hidden(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string("public proc in a private module":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("public proc in a private module":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #1 @io:nn:nn
 
   LLVM code       :
 
@@ -59,13 +59,19 @@ semi_hidden(io#0:wybe.phantom, ?io#1:wybe.phantom):
  
 
 
-declare external ccc  void @print_string(i64)    
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+
+
+@submodule.privatetest.2 =    constant {i64, i64} { i64 32, i64 ptrtoint ([?? x i8]* @submodule.privatetest.1 to i64) }
 
 
 @submodule.privatetest.1 =    constant [?? x i8] c"private proc in a private module\00"
 
 
-@submodule.privatetest.3 =    constant [?? x i8] c"public proc in a private module\00"
+@submodule.privatetest.5 =    constant {i64, i64} { i64 31, i64 ptrtoint ([?? x i8]* @submodule.privatetest.4 to i64) }
+
+
+@submodule.privatetest.4 =    constant [?? x i8] c"public proc in a private module\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -76,16 +82,16 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"submodule.privatetest.hidden<0>"()    {
 entry:
-  %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @submodule.privatetest.1, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %2)  
+  %3 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @submodule.privatetest.2, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %3)  
   ret void 
 }
 
 
 define external fastcc  void @"submodule.privatetest.semi_hidden<0>"()    {
 entry:
-  %4 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @submodule.privatetest.3, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %4)  
+  %6 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @submodule.privatetest.5, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %6)  
   ret void 
 }
 --------------------------------------------------
@@ -104,7 +110,7 @@ semi_visible > {inline} (0 calls)
 semi_visible(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string("private proc in a public module":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("private proc in a public module":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #1 @io:nn:nn
 
 
 visible > public {inline} (0 calls)
@@ -112,7 +118,7 @@ visible > public {inline} (0 calls)
 visible(io#0:wybe.phantom, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string("public proc in a public module":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("public proc in a public module":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #1 @io:nn:nn
 
   LLVM code       :
 
@@ -122,13 +128,19 @@ visible(io#0:wybe.phantom, ?io#1:wybe.phantom):
  
 
 
-declare external ccc  void @print_string(i64)    
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+
+
+@submodule.publictest.2 =    constant {i64, i64} { i64 31, i64 ptrtoint ([?? x i8]* @submodule.publictest.1 to i64) }
 
 
 @submodule.publictest.1 =    constant [?? x i8] c"private proc in a public module\00"
 
 
-@submodule.publictest.3 =    constant [?? x i8] c"public proc in a public module\00"
+@submodule.publictest.5 =    constant {i64, i64} { i64 30, i64 ptrtoint ([?? x i8]* @submodule.publictest.4 to i64) }
+
+
+@submodule.publictest.4 =    constant [?? x i8] c"public proc in a public module\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -139,15 +151,15 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"submodule.publictest.semi_visible<0>"()    {
 entry:
-  %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @submodule.publictest.1, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %2)  
+  %3 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @submodule.publictest.2, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %3)  
   ret void 
 }
 
 
 define external fastcc  void @"submodule.publictest.visible<0>"()    {
 entry:
-  %4 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @submodule.publictest.3, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %4)  
+  %6 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @submodule.publictest.5, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %6)  
   ret void 
 }

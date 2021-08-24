@@ -1,5 +1,5 @@
 constructor empty
-          | buffer(len:int, raw:raw_string)
+          | buffer(len:int, raw:raw_string) # must be first non-const ctor
           | concat(left:_, r:_)
           | slice(base:_, range:range)
           | singleton(c:char, __:int) # TODO: remove __:int
@@ -12,13 +12,14 @@ pub def str(str:raw_string, ?s:_) {
     }
 }
 pub def raw(s:_, ?str:raw_string) {
-    if { s = buffer(_, ?raw_string) :: ?str = raw_string
+    if { s = buffer(_, ?raw_string) :: ?str = raw_string; ?alloc = 0
        | else :: 
             ?len = length(s)
             foreign lpvm alloc(len + 1, ?str)
-            foreign lpvm mutate(str, ?str, len, true, 1, 0, '\0')
+            foreign lpvm mutate(str, ?str, len + 1, true, 1, 0, nullbyte)
             ?offset = 0
             pack(s, !str, !offset)
+            ?alloc = offset
     }
 }
 
@@ -35,14 +36,6 @@ pub def (x:_ ,, y:_):_ =
        | y = empty :: x
        | else :: concat(x, y)
     }
-pub def (x:raw_string ,, y:raw_string):_ = str(x) ,, str(y)
-pub def (x:_ ,, y:raw_string):_ = x ,, str(y)
-pub def (x:raw_string ,, y:_):_ = str(x) ,, y
-pub def (x:char ,, y:char):_ = ch(x) ,, ch(y)
-pub def (x:_ ,, y:char):_ = x ,, ch(y)
-pub def (x:char ,, y:_):_ = ch(x) ,, y
-pub def (x:raw_string ,, y:char):_ = str(x) ,, ch(y)
-pub def (x:char ,, y:raw_string):_ = ch(x) ,, str(y)
 
 pub def ch(c:char):_ = singleton(c, 1)
 
@@ -77,7 +70,7 @@ pub def {test} [](s:_, idx:int, ?c:char) {
     if { s = buffer(?len, ?str) :: 
             (0 <= idx)
             (idx < len)
-            ?c = unsafe_index(str, len)
+            unsafe__raw_string_index(str, idx, ?c)
        | s = concat(?left, ?right) :: 
             ?left_len = length(left)
             if { idx < left_len :: ?c = left[idx]
@@ -89,8 +82,6 @@ pub def {test} [](s:_, idx:int, ?c:char) {
     }
 }
 pub def [](s:_, r:range):_ = slice(s, r)
-pub def [](s:raw_string, r:range):_ = str(s)[r]
-pub def [](s:char, r:range):_ = ch(s)[r]
 
 pub def print_string(s:_) use !io {
     if { s = buffer(_, ?str) :: !print(str)
@@ -99,8 +90,6 @@ pub def print_string(s:_) use !io {
        | s = singleton(?c, _) :: !print(c)
     }
 }
-
-pub def unsafe_str(str:raw_string, n:int):_ = buffer(n, str)
 
 def pack(s:_, !mem:raw_string, !offset:int) {
     if { s = buffer(_, ?str) :: 
@@ -111,6 +100,7 @@ def pack(s:_, !mem:raw_string, !offset:int) {
        | s = concat(?left, ?right) :: 
             pack(left, !mem, !offset)
             pack(right, !mem, !offset)
+            incr(!offset)
        | s = slice(_, _) :: 
             for ?c in s {
                 foreign lpvm mutate(mem, ?mem, offset, true, 1, 0, c)

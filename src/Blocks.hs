@@ -17,6 +17,7 @@ import           BinaryFactory                   ()
 import           Codegen
 import           Config                          (wordSize, wordSizeBytes)
 import           Util                            (maybeNth, zipWith3M_)
+import           Snippets 
 import           Control.Monad
 import           Control.Monad.Trans             (lift, liftIO)
 import           Control.Monad.Trans.Class
@@ -48,6 +49,7 @@ import qualified Data.ByteString.Short           as BSS
 import           Options                         (LogSelection (Blocks))
 import           Unsafe.Coerce
 import           System.FilePath
+import           Debug.Trace
 
 -- | Holds information on the LLVM representation of the LPVM procedure.
 data ProcDefBlock =
@@ -957,17 +959,29 @@ cgenArg (ArgInt val ty) = do
     let intCons = cons $ C.Int bs val
     return intCons
 cgenArg (ArgFloat val ty) = return $ cons $ C.Float (F.Double val)
-cgenArg (ArgString s _) =
-    do let conStr = makeStringConstant s
-       let len = length s + 1
-       let conType = array_t (fromIntegral len) char_t
-       conName <- addGlobalConstant conType conStr
-       let conPtr = C.GlobalReference (ptr_t conType) conName
-       let conElem = C.GetElementPtr True conPtr [C.Int 32 0, C.Int 32 0]
+cgenArg (ArgString s ty) =
+    do let rawStr = makeStringConstant s
+       let len = length s
+       let rawType = array_t (fromIntegral $ len + 1) char_t
+       rawName <- addGlobalConstant rawType rawStr
+       let rawPtr = C.GlobalReference (ptr_t rawType) rawName
+       let rawElem = C.GetElementPtr True rawPtr [C.Int 32 0, C.Int 32 0]
        -- return $ cons conElem
        -- ptrtoint (cons conElem) $ ptr_t (int_c 8)
        -- We return integer address for strings
-       ptrtoint (cons conElem) address_t
+       if ty == rawStringType
+       then ptrtoint (cons rawElem) address_t
+       else if ty == stringType
+       then do
+           let strType = struct_t [address_t, address_t]
+           let strStruct = C.Struct Nothing False 
+                            [ C.Int (fromIntegral wordSize) (fromIntegral len)
+                            , C.PtrToInt rawPtr address_t ]
+           strName <- addGlobalConstant strType strStruct
+           let strPtr = C.GlobalReference (ptr_t strType) strName
+           let strElem = C.GetElementPtr True strPtr [C.Int 32 0, C.Int 32 0]
+           ptrtoint (cons strElem) address_t
+       else shouldnt $ "Trying to use a string constant as a " ++ show ty 
 cgenArg (ArgChar c ty) = do t <- lift $ llvmType ty
                             let bs = getBits t
                             return $ cons $ C.Int bs $ integerOrd c

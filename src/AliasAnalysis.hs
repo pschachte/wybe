@@ -620,23 +620,23 @@ updateDeadCellsByAccessArgs :: (AliasMapLocal, DeadCells) -> [PrimArg]
         -> Compiler DeadCells
 updateDeadCellsByAccessArgs (aliasMap, deadCells) primArgs = do
     -- [struct:type, offset:int, size:int, startOffset:int, ?member:type2]
-    let [struct@ArgVar{argVarName=varName}, _, size, startOffset, _] = primArgs
-    case size of
-        ArgInt size _ -> 
-            let size' = fromInteger size in
-            case isArgUnaliased aliasMap struct of
-                Just requiredParams -> do 
-                    logAlias $ "Found new dead cell: " ++ show varName 
-                            ++ " size:" ++ show size' ++ " requiredParams:"
-                            ++ show requiredParams
-                    let newCell = ((struct, startOffset), requiredParams)
-                    return $ Map.alter (\x ->
-                        (case x of 
-                            Nothing -> [newCell]
-                            Just cells -> newCell:cells) |> Just)
-                                    size' deadCells
-                Nothing ->
-                    return deadCells
+    let [struct, _, size, startOffset, _] = primArgs
+    case (struct, size) of
+        (ArgVar{argVarName=varName}, ArgInt size _) -> 
+                let size' = fromInteger size in
+                case isArgUnaliased aliasMap struct of
+                    Just requiredParams -> do 
+                        logAlias $ "Found new dead cell: " ++ show varName 
+                                ++ " size:" ++ show size' ++ " requiredParams:"
+                                ++ show requiredParams
+                        let newCell = ((struct, startOffset), requiredParams)
+                        return $ Map.alter (\x ->
+                            (case x of 
+                                Nothing -> [newCell]
+                                Just cells -> newCell:cells) |> Just)
+                                        size' deadCells
+                    Nothing ->
+                        return deadCells
         _ -> return deadCells
 
 

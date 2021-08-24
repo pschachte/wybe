@@ -1,6 +1,6 @@
 pub type tree { pub empty | node(left:tree, key:int, right:tree) }
 
-# resource prefix:raw_string
+# resource prefix:string
 
 pub def printTree(t:tree) use !io {
     # use prefix in {
@@ -10,7 +10,7 @@ pub def printTree(t:tree) use !io {
     # }
 }
 
-pub def printTree1(t:tree, !prefix:raw_string) use !io {
+pub def printTree1(t:tree, !prefix:string) use !io {
     if { t = node(?l, ?k, ?r) ::
            !printTree1(l, !prefix)
            !print(prefix)

@@ -9,12 +9,12 @@ pub resource arguments:array(raw_string) = array(argc, argv)
 
 # The command that caused execution of this program.  This is not necessarily an
 # absolute file name.
-pub resource command:raw_string = ""
+pub resource command:raw_string = "":raw_string
 
 if {[?command | ?arguments] = arguments ::
         pass
 |   otherwise ::
-        !error("Erroneous program argument vector")
+        !error("Erroneous program argument vector":raw_string)
 }
 
 # The exit code to return to the invoking shell.  This is initialised to

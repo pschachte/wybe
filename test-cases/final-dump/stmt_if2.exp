@@ -38,7 +38,7 @@ AFTER EVERYTHING:
         foreign llvm move(~io#0:wybe.phantom, ?io#1:wybe.phantom)
 
     1:
-        foreign c print_string("found":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+        wybe.string.print_string<0>("found":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #5 @io:nn:nn
 
 
 
@@ -96,7 +96,10 @@ lookup(key#0:wybe.int, tree#0:stmt_if2.tree, ?$#0:wybe.bool):
  
 
 
-declare external ccc  void @print_string(i64)    
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+
+
+@stmt_if2.13 =    constant {i64, i64} { i64 5, i64 ptrtoint ([?? x i8]* @stmt_if2.12 to i64) }
 
 
 @stmt_if2.12 =    constant [?? x i8] c"found\00"
@@ -127,8 +130,8 @@ entry:
   %"1$tmp$3#0" = tail call fastcc  i1  @"stmt_if2.lookup<0>"(i64  1, i64  %3)  
   br i1 %"1$tmp$3#0", label %if.then, label %if.else 
 if.then:
-  %13 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @stmt_if2.12, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %13)  
+  %14 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_if2.13, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %14)  
   ret void 
 if.else:
   ret void 
@@ -151,31 +154,31 @@ if.else:
   %"3$tmp$15#0" = icmp ne i64 %"tree#0", 0 
   br i1 %"3$tmp$15#0", label %if.then1, label %if.else1 
 if.then1:
-  %14 = inttoptr i64 %"tree#0" to i64* 
-  %15 = getelementptr  i64, i64* %14, i64 0 
-  %16 = load  i64, i64* %15 
-  %17 = add   i64 %"tree#0", 8 
-  %18 = inttoptr i64 %17 to i64* 
-  %19 = getelementptr  i64, i64* %18, i64 0 
-  %20 = load  i64, i64* %19 
-  %21 = add   i64 %"tree#0", 16 
-  %22 = inttoptr i64 %21 to i64* 
-  %23 = getelementptr  i64, i64* %22, i64 0 
-  %24 = load  i64, i64* %23 
-  %"4$tmp$11#0" = icmp eq i64 %20, %"key#0" 
+  %15 = inttoptr i64 %"tree#0" to i64* 
+  %16 = getelementptr  i64, i64* %15, i64 0 
+  %17 = load  i64, i64* %16 
+  %18 = add   i64 %"tree#0", 8 
+  %19 = inttoptr i64 %18 to i64* 
+  %20 = getelementptr  i64, i64* %19, i64 0 
+  %21 = load  i64, i64* %20 
+  %22 = add   i64 %"tree#0", 16 
+  %23 = inttoptr i64 %22 to i64* 
+  %24 = getelementptr  i64, i64* %23, i64 0 
+  %25 = load  i64, i64* %24 
+  %"4$tmp$11#0" = icmp eq i64 %21, %"key#0" 
   br i1 %"4$tmp$11#0", label %if.then2, label %if.else2 
 if.else1:
   ret i1 0 
 if.then2:
   ret i1 1 
 if.else2:
-  %"7$tmp$10#0" = icmp sgt i64 %20, %"key#0" 
+  %"7$tmp$10#0" = icmp sgt i64 %21, %"key#0" 
   br i1 %"7$tmp$10#0", label %if.then3, label %if.else3 
 if.then3:
-  %"8$$#0" = tail call fastcc  i1  @"stmt_if2.lookup<0>"(i64  %"key#0", i64  %16)  
+  %"8$$#0" = tail call fastcc  i1  @"stmt_if2.lookup<0>"(i64  %"key#0", i64  %17)  
   ret i1 %"8$$#0" 
 if.else3:
-  %"9$$#0" = tail call fastcc  i1  @"stmt_if2.lookup<0>"(i64  %"key#0", i64  %24)  
+  %"9$$#0" = tail call fastcc  i1  @"stmt_if2.lookup<0>"(i64  %"key#0", i64  %25)  
   ret i1 %"9$$#0" 
 }
 --------------------------------------------------

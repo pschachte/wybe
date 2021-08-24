@@ -1,7 +1,8 @@
 # stringExp
-!print("print(x:raw_string) creates a newline already")
-!println("println(x:raw_string) generates an extra newline?")
-!println("println(x:raw_string) generates an extra newline?")
+!print("print(x:raw_string) creates a newline already":raw_string)
+!print("print(x:string) creates a newline already")
+!println("println(x:raw_string) generates an extra newline?":raw_string)
+!println("println(x:string) generates an extra newline?")
 !println('c')
 !println(1)
 !print(1)

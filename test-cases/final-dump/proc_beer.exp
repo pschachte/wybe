@@ -38,10 +38,10 @@ gen$1(count#0:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
 
     1:
         foreign c print_int(count#0:wybe.int, ~io#0:wybe.phantom, ?tmp$5#0:wybe.phantom) @io:nn:nn
-        foreign c print_string(" bottles of beer on the wall":wybe.raw_string, ~tmp$5#0:wybe.phantom, ?tmp$6#0:wybe.phantom) @io:nn:nn
+        wybe.string.print_string<0>(" bottles of beer on the wall":wybe.string, ~tmp$5#0:wybe.phantom, ?tmp$6#0:wybe.phantom) #2 @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp$6#0:wybe.phantom, ?tmp$7#0:wybe.phantom) @io:nn:nn
         foreign llvm sub(~count#0:wybe.int, 1:wybe.int, ?tmp$8#0:wybe.int) @int:nn:nn
-        proc_beer.gen$1<0>(~tmp$8#0:wybe.int, ~tmp$7#0:wybe.phantom, ?io#1:wybe.phantom) #2 @proc_beer:nn:nn
+        proc_beer.gen$1<0>(~tmp$8#0:wybe.int, ~tmp$7#0:wybe.phantom, ?io#1:wybe.phantom) #3 @proc_beer:nn:nn
 
 
 
@@ -51,7 +51,7 @@ gen$2(count#0:wybe.int, io#0:wybe.phantom, ?io#3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_int(count#0:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-    foreign c print_string(" bottles of beer on the wall":wybe.raw_string, ~#io#1:wybe.phantom, ?tmp$4#0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(" bottles of beer on the wall":wybe.string, ~#io#1:wybe.phantom, ?tmp$4#0:wybe.phantom) #4 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$4#0:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
     foreign llvm sub(~%count#0:wybe.int, 1:wybe.int, ?%count#1:wybe.int) @int:nn:nn
     proc_beer.gen$1<0>(~count#1:wybe.int, ~io#2:wybe.phantom, ?io#3:wybe.phantom) #3 @proc_beer:nn:nn
@@ -67,16 +67,22 @@ gen$2(count#0:wybe.int, io#0:wybe.phantom, ?io#3:wybe.phantom):
 declare external ccc  void @putchar(i8)    
 
 
-declare external ccc  void @print_string(i64)    
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  void @print_int(i64)    
 
 
+@proc_beer.2 =    constant {i64, i64} { i64 28, i64 ptrtoint ([?? x i8]* @proc_beer.1 to i64) }
+
+
 @proc_beer.1 =    constant [?? x i8] c" bottles of beer on the wall\00"
 
 
-@proc_beer.3 =    constant [?? x i8] c" bottles of beer on the wall\00"
+@proc_beer.5 =    constant {i64, i64} { i64 28, i64 ptrtoint ([?? x i8]* @proc_beer.4 to i64) }
+
+
+@proc_beer.4 =    constant [?? x i8] c" bottles of beer on the wall\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -105,8 +111,8 @@ entry:
   br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
   tail call ccc  void  @print_int(i64  %"count#0")  
-  %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @proc_beer.1, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %2)  
+  %3 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @proc_beer.2, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %3)  
   tail call ccc  void  @putchar(i8  10)  
   %"2$tmp$8#0" = sub   i64 %"count#0", 1 
   tail call fastcc  void  @"proc_beer.gen$1<0>"(i64  %"2$tmp$8#0")  
@@ -119,8 +125,8 @@ if.else:
 define external fastcc  void @"proc_beer.gen$2<0>"(i64  %"count#0")    {
 entry:
   tail call ccc  void  @print_int(i64  %"count#0")  
-  %4 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @proc_beer.3, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %4)  
+  %6 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @proc_beer.5, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %6)  
   tail call ccc  void  @putchar(i8  10)  
   %"1$count#1" = sub   i64 %"count#0", 1 
   tail call fastcc  void  @"proc_beer.gen$1<0>"(i64  %"1$count#1")  

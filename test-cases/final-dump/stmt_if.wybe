@@ -21,7 +21,7 @@ def foobar use !io {
     if{ lookup(1, tr) :: !println("lookup succeeds when it should")
     |   otherwise     :: !println("lookup fails when it should succeed")
     }
-    if{ lookup(3, tr) :: !println("lookup fails when it should")
-    |   otherwise     :: !println("lookup succeeds when it should fail")
+    if{ lookup(3, tr) :: !println("lookup succeeds when it should fail")
+    |   otherwise     :: !println("lookup fails when it should")
     }
 }

@@ -24,8 +24,8 @@ AFTER EVERYTHING:
 (io#0:wybe.phantom, ?io#2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string("Smith":wybe.raw_string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-    foreign c print_string("Wang":wybe.raw_string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("Smith":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #7 @io:nn:nn
+    wybe.string.print_string<0>("Wang":wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #8 @io:nn:nn
 
   LLVM code       :
 
@@ -35,10 +35,16 @@ AFTER EVERYTHING:
  
 
 
-declare external ccc  void @print_string(i64)    
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
-@person3.3 =    constant [?? x i8] c"Wang\00"
+@person3.5 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @person3.4 to i64) }
+
+
+@person3.4 =    constant [?? x i8] c"Wang\00"
+
+
+@person3.2 =    constant {i64, i64} { i64 5, i64 ptrtoint ([?? x i8]* @person3.1 to i64) }
 
 
 @person3.1 =    constant [?? x i8] c"Smith\00"
@@ -52,10 +58,10 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"person3.<0>"()    {
 entry:
-  %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @person3.1, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %2)  
-  %4 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @person3.3, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %4)  
+  %3 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @person3.2, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %3)  
+  %6 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @person3.5, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %6)  
   ret void 
 }
 --------------------------------------------------
@@ -81,65 +87,65 @@ entry:
 =($left#0:person3.person, $right#0:person3.person, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($left#0:person3.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$firstname#0:wybe.raw_string)
-    foreign lpvm access(~$left#0:person3.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$lastname#0:wybe.raw_string)
-    foreign lpvm access($right#0:person3.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$firstname#0:wybe.raw_string)
-    foreign lpvm access(~$right#0:person3.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$lastname#0:wybe.raw_string)
-    foreign c strcmp(~$left$firstname#0:wybe.raw_string, ~$right$firstname#0:wybe.raw_string, ?tmp$7#0:wybe.int) @raw_string:nn:nn
+    foreign lpvm access($left#0:person3.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$firstname#0:wybe.string)
+    foreign lpvm access(~$left#0:person3.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$lastname#0:wybe.string)
+    foreign lpvm access($right#0:person3.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$firstname#0:wybe.string)
+    foreign lpvm access(~$right#0:person3.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$lastname#0:wybe.string)
+    wybe.string.gen$3<0>(0:wybe.int, ~$left$firstname#0:wybe.string, ~$right$firstname#0:wybe.string, ~$left$firstname#0:wybe.string, ~$right$firstname#0:wybe.string, ?tmp$7#0:wybe.int) #4 @string:nn:nn
     foreign llvm icmp_eq(~tmp$7#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @int:nn:nn
     case ~tmp$1#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign c strcmp(~$left$lastname#0:wybe.raw_string, ~$right$lastname#0:wybe.raw_string, ?tmp$10#0:wybe.int) @raw_string:nn:nn
+        wybe.string.gen$3<0>(0:wybe.int, ~$left$lastname#0:wybe.string, ~$right$lastname#0:wybe.string, ~$left$lastname#0:wybe.string, ~$right$lastname#0:wybe.string, ?tmp$10#0:wybe.int) #5 @string:nn:nn
         foreign llvm icmp_eq(~tmp$10#0:wybe.int, 0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
 
 
 
 firstname > public {inline} (0 calls)
 0: person3.person.firstname<0>
-firstname($rec#0:person3.person, ?$#0:wybe.raw_string):
+firstname($rec#0:person3.person, ?$#0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~$rec#0:person3.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.raw_string)
+    foreign lpvm access(~$rec#0:person3.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.string)
 firstname > public {inline} (0 calls)
 1: person3.person.firstname<1>
-firstname($rec#0:person3.person, ?$rec#1:person3.person, $field#0:wybe.raw_string):
+firstname($rec#0:person3.person, ?$rec#1:person3.person, $field#0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm mutate(~$rec#0:person3.person, ?$rec#1:person3.person, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.raw_string)
+    foreign lpvm mutate(~$rec#0:person3.person, ?$rec#1:person3.person, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.string)
 
 
 lastname > public {inline} (0 calls)
 0: person3.person.lastname<0>
-lastname($rec#0:person3.person, ?$#0:wybe.raw_string):
+lastname($rec#0:person3.person, ?$#0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~$rec#0:person3.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.raw_string)
+    foreign lpvm access(~$rec#0:person3.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.string)
 lastname > public {inline} (0 calls)
 1: person3.person.lastname<1>
-lastname($rec#0:person3.person, ?$rec#1:person3.person, $field#0:wybe.raw_string):
+lastname($rec#0:person3.person, ?$rec#1:person3.person, $field#0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm mutate(~$rec#0:person3.person, ?$rec#1:person3.person, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.raw_string)
+    foreign lpvm mutate(~$rec#0:person3.person, ?$rec#1:person3.person, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.string)
 
 
 person > public {inline} (0 calls)
 0: person3.person.person<0>
-person(firstname#0:wybe.raw_string, lastname#0:wybe.raw_string, ?$#0:person3.person):
+person(firstname#0:wybe.string, lastname#0:wybe.string, ?$#0:person3.person):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?$rec#0:person3.person)
-    foreign lpvm mutate(~$rec#0:person3.person, ?$rec#1:person3.person, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~firstname#0:wybe.raw_string)
-    foreign lpvm mutate(~$rec#1:person3.person, ?$#0:person3.person, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~lastname#0:wybe.raw_string)
+    foreign lpvm mutate(~$rec#0:person3.person, ?$rec#1:person3.person, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~firstname#0:wybe.string)
+    foreign lpvm mutate(~$rec#1:person3.person, ?$#0:person3.person, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~lastname#0:wybe.string)
 person > public {inline} (6 calls)
 1: person3.person.person<1>
-person(?firstname#0:wybe.raw_string, ?lastname#0:wybe.raw_string, $#0:person3.person):
+person(?firstname#0:wybe.string, ?lastname#0:wybe.string, $#0:person3.person):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($#0:person3.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?firstname#0:wybe.raw_string)
-    foreign lpvm access(~$#0:person3.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?lastname#0:wybe.raw_string)
+    foreign lpvm access($#0:person3.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?firstname#0:wybe.string)
+    foreign lpvm access(~$#0:person3.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?lastname#0:wybe.string)
 
 
 ~= > public {inline} (0 calls)
@@ -147,11 +153,11 @@ person(?firstname#0:wybe.raw_string, ?lastname#0:wybe.raw_string, $#0:person3.pe
 ~=($left#0:person3.person, $right#0:person3.person, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($left#0:person3.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.raw_string)
-    foreign lpvm access(~$left#0:person3.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.raw_string)
-    foreign lpvm access($right#0:person3.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.raw_string)
-    foreign lpvm access(~$right#0:person3.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.raw_string)
-    foreign c strcmp(~tmp$3#0:wybe.raw_string, ~tmp$5#0:wybe.raw_string, ?tmp$7#0:wybe.int) @raw_string:nn:nn
+    foreign lpvm access($left#0:person3.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.string)
+    foreign lpvm access(~$left#0:person3.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.string)
+    foreign lpvm access($right#0:person3.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.string)
+    foreign lpvm access(~$right#0:person3.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.string)
+    wybe.string.gen$3<0>(0:wybe.int, ~tmp$3#0:wybe.string, ~tmp$5#0:wybe.string, ~tmp$3#0:wybe.string, ~tmp$5#0:wybe.string, ?tmp$7#0:wybe.int) #1 @string:nn:nn
     foreign llvm icmp_eq(~tmp$7#0:wybe.int, 0:wybe.int, ?tmp$8#0:wybe.bool) @int:nn:nn
     case ~tmp$8#0:wybe.bool of
     0:
@@ -159,7 +165,7 @@ person(?firstname#0:wybe.raw_string, ?lastname#0:wybe.raw_string, $#0:person3.pe
         foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
     1:
-        foreign c strcmp(~tmp$4#0:wybe.raw_string, ~tmp$6#0:wybe.raw_string, ?tmp$9#0:wybe.int) @raw_string:nn:nn
+        wybe.string.gen$3<0>(0:wybe.int, ~tmp$4#0:wybe.string, ~tmp$6#0:wybe.string, ~tmp$4#0:wybe.string, ~tmp$6#0:wybe.string, ?tmp$9#0:wybe.int) #2 @string:nn:nn
         foreign llvm icmp_eq(~tmp$9#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool) @int:nn:nn
         foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
 
@@ -172,7 +178,7 @@ person(?firstname#0:wybe.raw_string, ?lastname#0:wybe.raw_string, $#0:person3.pe
  
 
 
-declare external ccc  i64 @strcmp(i64, i64)    
+declare external fastcc  i64 @"wybe.string.gen$3<0>"(i64, i64, i64, i64, i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -197,11 +203,11 @@ entry:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"1$tmp$7#0" = tail call ccc  i64  @strcmp(i64  %3, i64  %10)  
+  %"1$tmp$7#0" = tail call fastcc  i64  @"wybe.string.gen$3<0>"(i64  0, i64  %3, i64  %10, i64  %3, i64  %10)  
   %"1$tmp$1#0" = icmp eq i64 %"1$tmp$7#0", 0 
   br i1 %"1$tmp$1#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$10#0" = tail call ccc  i64  @strcmp(i64  %7, i64  %14)  
+  %"2$tmp$10#0" = tail call fastcc  i64  @"wybe.string.gen$3<0>"(i64  0, i64  %7, i64  %14, i64  %7, i64  %14)  
   %"2$$$#0" = icmp eq i64 %"2$tmp$10#0", 0 
   ret i1 %"2$$$#0" 
 if.else:
@@ -308,11 +314,11 @@ entry:
   %67 = inttoptr i64 %66 to i64* 
   %68 = getelementptr  i64, i64* %67, i64 0 
   %69 = load  i64, i64* %68 
-  %"1$tmp$7#0" = tail call ccc  i64  @strcmp(i64  %58, i64  %65)  
+  %"1$tmp$7#0" = tail call fastcc  i64  @"wybe.string.gen$3<0>"(i64  0, i64  %58, i64  %65, i64  %58, i64  %65)  
   %"1$tmp$8#0" = icmp eq i64 %"1$tmp$7#0", 0 
   br i1 %"1$tmp$8#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$9#0" = tail call ccc  i64  @strcmp(i64  %62, i64  %69)  
+  %"2$tmp$9#0" = tail call fastcc  i64  @"wybe.string.gen$3<0>"(i64  0, i64  %62, i64  %69, i64  %62, i64  %69)  
   %"2$tmp$0#0" = icmp eq i64 %"2$tmp$9#0", 0 
   %"2$$$#0" = xor i1 %"2$tmp$0#0", 1 
   ret i1 %"2$$$#0" 

@@ -18,6 +18,6 @@ pub def {terminal,semipure} error(message:raw_string) use call_source_location {
 
 pub def {semipure} assert(condition:bool) use call_source_location {
     if {condition:: pass
-    |   otherwise:: !error("assertion failed")
+    |   otherwise:: !error("assertion failed":raw_string)
     }
 }

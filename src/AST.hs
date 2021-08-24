@@ -943,15 +943,15 @@ lookupResource res@(ResourceSpec mod name) pos = do
 -- are used, if necessary.
 specialResources :: Map VarName (Placed Stmt -> Exp,TypeSpec)
 specialResources =
-    let strType = TypeSpec ["wybe"] "raw_string" []
+    let rawStrType = TypeSpec ["wybe"] "raw_string" []
         intType = TypeSpec ["wybe"] "int" []
     in Map.fromList [
-        ("call_source_file_name",(callFileName,strType)),
-        ("call_source_file_full_name",(callFileFullName,strType)),
+        ("call_source_file_name",(callFileName,rawStrType)),
+        ("call_source_file_full_name",(callFileFullName,rawStrType)),
         ("call_source_line_number",(callLineNumber,intType)),
         ("call_source_column_number",(callColumnNumber,intType)),
-        ("call_source_location",(callSourceLocation False,strType)),
-        ("call_source_full_location",(callSourceLocation True,strType))
+        ("call_source_location",(callSourceLocation False,rawStrType)),
+        ("call_source_full_location",(callSourceLocation True,rawStrType))
         ]
 
 callFileName :: Placed Stmt -> Exp

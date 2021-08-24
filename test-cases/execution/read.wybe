@@ -2,7 +2,7 @@
 !read(?f:float)
 # get rid of '\n'
 !read(?tmp:char)
-!read(?s:raw_string)
+!read(?s:string)
 !println("----------")
 !println(i)
 !println(f)

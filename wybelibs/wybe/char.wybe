@@ -11,6 +11,4 @@ pub def (x:_ <= y:_):bool = foreign llvm icmp_ule(x, y)
 pub def (x:_ > y:_):bool = foreign llvm icmp_ugt(x, y)
 pub def (x:_ >= y:_):bool = foreign llvm icmp_uge(x, y)
 
-pub def {test} [](c:_, idx:int, ?head:_) {
-    if { idx = 0 :: ?head = c | else :: fail }
-}
+pub def nullbyte:_ = foreign lpvm cast(0:int)
