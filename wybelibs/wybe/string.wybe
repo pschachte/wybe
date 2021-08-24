@@ -70,7 +70,7 @@ pub def {test} [](s:_, idx:int, ?c:char) {
     if { s = buffer(?len, ?str) :: 
             (0 <= idx)
             (idx < len)
-            unsafe__raw_string_index(str, idx, ?c)
+            unsafe_raw_string_index(str, idx, ?c)
        | s = concat(?left, ?right) :: 
             ?left_len = length(left)
             if { idx < left_len :: ?c = left[idx]
