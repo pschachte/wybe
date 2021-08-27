@@ -2,7 +2,7 @@ constructor empty
           | buffer(len:int, raw:raw_string) # must be first non-const ctor
           | concat(left:_, r:_)
           | slice(base:_, range:range)
-          | singleton(c:char, __:int) # TODO: remove __:int
+          | singleton(c:char)
 
 pub def str(str:raw_string, ?s:_) {
     ?len = length(str)
@@ -27,7 +27,7 @@ pub def length(s:_):int =
     if { s = buffer(?len, _) :: len
        | s = concat(?left, ?right) :: length(left) + length(right)
        | s = slice(?base, ?range) :: fixed_range_size(length(base), range)
-       | s = singleton(_, _) :: 1
+       | s = singleton(_) :: 1
        | else :: 0
     }
 
@@ -37,7 +37,7 @@ pub def (x:_ ,, y:_):_ =
        | else :: concat(x, y)
     }
 
-pub def ch(c:char):_ = singleton(c, 1)
+pub def ch(c:char):_ = singleton(c)
 
 pub def (x:_ = y:_):bool  = cmp(x, y) = 0
 pub def (x:_ ~= y:_):bool = cmp(x, y) ~= 0
@@ -59,7 +59,7 @@ pub def {test} `[|]`(?head:char, ?tail:_, s:_) {
                 [?idx | ?range] = range
                 if { ?head = base[idx] :: ?tail = slice(base, range); break }
             }
-       | s = singleton(?head, _) :: ?tail = empty
+       | s = singleton(?head) :: ?tail = empty
        | else :: fail
     }
 }
@@ -77,7 +77,7 @@ pub def {test} [](s:_, idx:int, ?c:char) {
                | else :: ?c = right[idx - left_len]
             }
        | s = slice(?base, ?range) :: ?c = base[range[idx]]
-       | s = singleton(?c, _) :: (idx = 0)
+       | s = singleton(?c) :: (idx = 0)
        | else :: fail
     }
 }
@@ -87,7 +87,7 @@ pub def print_string(s:_) use !io {
     if { s = buffer(_, ?str) :: !print(str)
        | s = concat(?left, ?right) :: !print(left); !print(right)
        | s = slice(_, _) :: for ?c in s { !print(c) }
-       | s = singleton(?c, _) :: !print(c)
+       | s = singleton(?c) :: !print(c)
     }
 }
 
@@ -106,7 +106,7 @@ def pack(s:_, !mem:raw_string, !offset:int) {
                 foreign lpvm mutate(mem, ?mem, offset, true, 1, 0, c)
                 incr(!offset)
             }
-       | s = singleton(?c, _) ::
+       | s = singleton(?c) ::
             foreign lpvm mutate(mem, ?mem, offset, true, 1, 0, c)
             incr(!offset)
     }

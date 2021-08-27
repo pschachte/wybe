@@ -60,7 +60,7 @@ AFTER EVERYTHING:
     1:
         foreign lpvm access($left#0:thistype, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$head#0:wybe.int)
         foreign lpvm access(~$left#0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$tail#0:thistype)
-        foreign llvm icmp_ne($right#0:thistype, 0:wybe.int, ?tmp$9#0:wybe.bool)
+        foreign llvm icmp_ne($right#0:!wybe.int, 0:wybe.int, ?tmp$9#0:wybe.bool)
         case ~tmp$9#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -86,7 +86,7 @@ concat(x#0:thistype, y#0:thistype, ?$#0:thistype):
  AliasPairs: [($#0,y#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(1,(thistype.concat<0>,fromList [NonAliasedParamCond 0 [0]]))]
-    foreign llvm icmp_ne(x#0:thistype, 0:wybe.int, ?tmp$5#0:wybe.bool)
+    foreign llvm icmp_ne(x#0:!wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
         foreign llvm move(~y#0:thistype, ?$#0:thistype) @thistype:nn:nn
@@ -100,7 +100,7 @@ concat(x#0:thistype, y#0:thistype, ?$#0:thistype):
         foreign lpvm mutate(~tmp$9#0:thistype, ?$#0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:thistype)
 
  [410bae77d3] [NonAliasedParam 0] :
-    foreign llvm icmp_ne(x#0:thistype, 0:wybe.int, ?tmp$5#0:wybe.bool)
+    foreign llvm icmp_ne(x#0:!wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
         foreign llvm move(~y#0:thistype, ?$#0:thistype) @thistype:nn:nn
@@ -176,7 +176,7 @@ length > public (2 calls)
 length(x#0:thistype, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne(x#0:thistype, 0:wybe.int, ?tmp$5#0:wybe.bool)
+    foreign llvm icmp_ne(x#0:!wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.int, ?$#0:wybe.int) @thistype:nn:nn

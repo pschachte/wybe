@@ -25,7 +25,7 @@ gen$1 > (2 calls)
 gen$1([h#0:wybe.int], io#0:wybe.phantom, lst#0:loop_bug.int_list, t#0:loop_bug.int_list, ?io#1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne(t#0:loop_bug.int_list, 0:wybe.int, ?tmp$2#0:wybe.bool)
+    foreign llvm icmp_ne(t#0:!wybe.int, 0:wybe.int, ?tmp$2#0:wybe.bool)
     case ~tmp$2#0:wybe.bool of
     0:
         foreign c putchar(']':wybe.char, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
@@ -55,7 +55,7 @@ print(lst#0:loop_bug.int_list, io#0:wybe.phantom, ?io#3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c putchar('[':wybe.char, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-    foreign llvm icmp_ne(lst#0:loop_bug.int_list, 0:wybe.int, ?tmp$5#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
         foreign c putchar(']':wybe.char, ~#io#1:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
@@ -187,7 +187,7 @@ if.else:
     1:
         foreign lpvm access($left#0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$head#0:wybe.int)
         foreign lpvm access(~$left#0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$tail#0:loop_bug.int_list)
-        foreign llvm icmp_ne($right#0:loop_bug.int_list, 0:wybe.int, ?tmp$9#0:wybe.bool)
+        foreign llvm icmp_ne($right#0:!wybe.int, 0:wybe.int, ?tmp$9#0:wybe.bool)
         case ~tmp$9#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)

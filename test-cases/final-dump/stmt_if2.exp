@@ -58,7 +58,7 @@ lookup(key#0:wybe.int, tree#0:stmt_if2.tree, ?$#0:wybe.bool):
     stmt_if2.tree.=<0>(tree#0:stmt_if2.tree, 0:stmt_if2.tree, ?tmp$13#0:wybe.bool) #1 @stmt_if2:6:9
     case ~tmp$13#0:wybe.bool of
     0:
-        foreign llvm icmp_ne(tree#0:stmt_if2.tree, 0:wybe.int, ?tmp$15#0:wybe.bool)
+        foreign llvm icmp_ne(tree#0:!wybe.int, 0:wybe.int, ?tmp$15#0:wybe.bool)
         case ~tmp$15#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$#0:wybe.bool) @stmt_if2:5:5
@@ -216,7 +216,7 @@ if.else3:
         foreign lpvm access($left#0:stmt_if2.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?$left$left#0:stmt_if2.tree)
         foreign lpvm access($left#0:stmt_if2.tree, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?$left$key#0:wybe.int)
         foreign lpvm access(~$left#0:stmt_if2.tree, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?$left$right#0:stmt_if2.tree)
-        foreign llvm icmp_ne($right#0:stmt_if2.tree, 0:wybe.int, ?tmp$10#0:wybe.bool)
+        foreign llvm icmp_ne($right#0:!wybe.int, 0:wybe.int, ?tmp$10#0:wybe.bool)
         case ~tmp$10#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)

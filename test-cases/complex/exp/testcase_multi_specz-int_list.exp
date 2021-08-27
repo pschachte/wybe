@@ -142,7 +142,7 @@ LLVM code       : None
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp$9#0:wybe.array(?T))
     foreign lpvm mutate(~tmp$9#0:wybe.array(?T), ?tmp$10#0:wybe.array(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argc#0:wybe.int)
-    foreign lpvm mutate(~tmp$10#0:wybe.array(?T), ?tmp$1#0:wybe.array(wybe.raw_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argv#0:wybe.array.raw_array(wybe.raw_string))
+    foreign lpvm mutate(~tmp$10#0:wybe.array(?T), ?tmp$1#0:wybe.array(wybe.raw_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argv#0:wybe.array.raw_array(?T))
     wybe.array.[|]<0>(?command#2:wybe.raw_string, ?arguments#2:wybe.array(wybe.raw_string), ~tmp$1#0:wybe.array(wybe.raw_string), ?tmp$2#0:wybe.bool) #2 @command_line:nn:nn
     case ~tmp$2#0:wybe.bool of
     0:
@@ -273,7 +273,7 @@ count > public (3 calls)
 count(lst#0:int_list.int_list, x#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$7#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$7#0:wybe.bool)
     case ~tmp$7#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.int, ?$#0:wybe.int) @int_list:nn:nn
@@ -299,7 +299,7 @@ extend(lst1#0:int_list.int_list, lst2#0:int_list.int_list, ?$#0:int_list.int_lis
  AliasPairs: [($#0,lst2#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(1,(int_list.extend<0>,fromList [NonAliasedParamCond 0 [0]]))]
-    foreign llvm icmp_ne(lst1#0:int_list.int_list, 0:wybe.int, ?tmp$5#0:wybe.bool)
+    foreign llvm icmp_ne(lst1#0:!wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
         foreign llvm move(~lst2#0:int_list.int_list, ?$#0:int_list.int_list) @int_list:nn:nn
@@ -360,7 +360,7 @@ greater(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.greater<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.greater<0>,fromList [NonAliasedParamCond 0 [0]]))]
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$9#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$9#0:wybe.bool)
     case ~tmp$9#0:wybe.bool of
     0:
         foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:nn:nn
@@ -395,7 +395,7 @@ index_helper > (2 calls)
 index_helper(lst#0:int_list.int_list, idx#0:wybe.int, x#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$7#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$7#0:wybe.bool)
     case ~tmp$7#0:wybe.bool of
     0:
         foreign llvm move(-1:wybe.int, ?$#0:wybe.int) @int_list:nn:nn
@@ -424,7 +424,7 @@ insert(lst#0:int_list.int_list, idx#0:wybe.int, v#0:wybe.int, ?$#0:int_list.int_
     foreign llvm icmp_eq(idx#0:wybe.int, 0:wybe.int, ?tmp$9#0:wybe.bool) @int:nn:nn
     case ~tmp$9#0:wybe.bool of
     0:
-        foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$13#0:wybe.bool)
+        foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$13#0:wybe.bool)
         case ~tmp$13#0:wybe.bool of
         0:
             foreign llvm sub(~idx#0:wybe.int, 1:wybe.int, ?tmp$7#0:wybe.int) @int:nn:nn
@@ -453,7 +453,7 @@ lesser(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.lesser<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.lesser<0>,fromList [NonAliasedParamCond 0 [0]]))]
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$9#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$9#0:wybe.bool)
     case ~tmp$9#0:wybe.bool of
     0:
         foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:nn:nn
@@ -481,7 +481,7 @@ pop(lst#0:int_list.int_list, idx#0:wybe.int, ?$#0:int_list.int_list):
  AliasPairs: [($#0,lst#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(3,(int_list.pop<0>,fromList [NonAliasedParamCond 0 [0]]))]
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$9#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$9#0:wybe.bool)
     case ~tmp$9#0:wybe.bool of
     0:
         foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:nn:nn
@@ -509,7 +509,7 @@ print > public (2 calls)
 print(x#0:int_list.int_list, io#0:wybe.phantom, ?io#3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne(x#0:int_list.int_list, 0:wybe.int, ?tmp$2#0:wybe.bool)
+    foreign llvm icmp_ne(x#0:!wybe.int, 0:wybe.int, ?tmp$2#0:wybe.bool)
     case ~tmp$2#0:wybe.bool of
     0:
         foreign llvm move(~io#0:wybe.phantom, ?io#3:wybe.phantom)
@@ -546,7 +546,7 @@ remove(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
  AliasPairs: [($#0,lst#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.remove<0>,fromList [NonAliasedParamCond 0 [0]]))]
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$8#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$8#0:wybe.bool)
     case ~tmp$8#0:wybe.bool of
     0:
         foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:nn:nn
@@ -582,7 +582,7 @@ reverse_helper(lst#0:int_list.int_list, acc#0:int_list.int_list, ?$#0:int_list.i
  AliasPairs: [($#0,acc#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [0]]))]
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$5#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
         foreign llvm move(~acc#0:int_list.int_list, ?$#0:int_list.int_list) @int_list:nn:nn
@@ -603,7 +603,7 @@ sort(lst#0:int_list.int_list, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.sort<0>,fromList [NonAliasedParamCond 0 []])),(3,(int_list.greater<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.sort<0>,fromList [NonAliasedParamCond 0 []])),(6,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []]))]
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$10#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$10#0:wybe.bool)
     case ~tmp$10#0:wybe.bool of
     0:
         foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:nn:nn
@@ -655,7 +655,7 @@ LLVM code       : None
     1:
         foreign lpvm access($left#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$head#0:wybe.int)
         foreign lpvm access(~$left#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$tail#0:int_list.int_list)
-        foreign llvm icmp_ne($right#0:int_list.int_list, 0:wybe.int, ?tmp$9#0:wybe.bool)
+        foreign llvm icmp_ne($right#0:!wybe.int, 0:wybe.int, ?tmp$9#0:wybe.bool)
         case ~tmp$9#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -981,7 +981,7 @@ entry:
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp$9#0:wybe.array(?T))
     foreign lpvm mutate(~tmp$9#0:wybe.array(?T), ?tmp$10#0:wybe.array(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argc#0:wybe.int)
-    foreign lpvm mutate(~tmp$10#0:wybe.array(?T), ?tmp$1#0:wybe.array(wybe.raw_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argv#0:wybe.array.raw_array(wybe.raw_string))
+    foreign lpvm mutate(~tmp$10#0:wybe.array(?T), ?tmp$1#0:wybe.array(wybe.raw_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argv#0:wybe.array.raw_array(?T))
     wybe.array.[|]<0>(?command#2:wybe.raw_string, ?arguments#2:wybe.array(wybe.raw_string), ~tmp$1#0:wybe.array(wybe.raw_string), ?tmp$2#0:wybe.bool) #2 @command_line:nn:nn
     case ~tmp$2#0:wybe.bool of
     0:
@@ -1117,7 +1117,7 @@ count > public (3 calls)
 count(lst#0:int_list.int_list, x#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$7#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$7#0:wybe.bool)
     case ~tmp$7#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.int, ?$#0:wybe.int) @int_list:nn:nn
@@ -1143,7 +1143,7 @@ extend(lst1#0:int_list.int_list, lst2#0:int_list.int_list, ?$#0:int_list.int_lis
  AliasPairs: [($#0,lst2#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(1,(int_list.extend<0>,fromList [NonAliasedParamCond 0 [0]]))]
-    foreign llvm icmp_ne(lst1#0:int_list.int_list, 0:wybe.int, ?tmp$5#0:wybe.bool)
+    foreign llvm icmp_ne(lst1#0:!wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
         foreign llvm move(~lst2#0:int_list.int_list, ?$#0:int_list.int_list) @int_list:nn:nn
@@ -1157,7 +1157,7 @@ extend(lst1#0:int_list.int_list, lst2#0:int_list.int_list, ?$#0:int_list.int_lis
         foreign lpvm mutate(~tmp$9#0:int_list.int_list, ?$#0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$2#0:int_list.int_list)
 
  [410bae77d3] [NonAliasedParam 0] :
-    foreign llvm icmp_ne(lst1#0:int_list.int_list, 0:wybe.int, ?tmp$5#0:wybe.bool)
+    foreign llvm icmp_ne(lst1#0:!wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
         foreign llvm move(~lst2#0:int_list.int_list, ?$#0:int_list.int_list) @int_list:nn:nn
@@ -1228,7 +1228,7 @@ greater(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.greater<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.greater<0>,fromList [NonAliasedParamCond 0 [0]]))]
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$9#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$9#0:wybe.bool)
     case ~tmp$9#0:wybe.bool of
     0:
         foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:nn:nn
@@ -1249,7 +1249,7 @@ greater(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
 
 
  [410bae77d3] [NonAliasedParam 0] :
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$9#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$9#0:wybe.bool)
     case ~tmp$9#0:wybe.bool of
     0:
         foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:nn:nn
@@ -1282,7 +1282,7 @@ index_helper > (2 calls)
 index_helper(lst#0:int_list.int_list, idx#0:wybe.int, x#0:wybe.int, ?$#0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$7#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$7#0:wybe.bool)
     case ~tmp$7#0:wybe.bool of
     0:
         foreign llvm move(-1:wybe.int, ?$#0:wybe.int) @int_list:nn:nn
@@ -1311,7 +1311,7 @@ insert(lst#0:int_list.int_list, idx#0:wybe.int, v#0:wybe.int, ?$#0:int_list.int_
     foreign llvm icmp_eq(idx#0:wybe.int, 0:wybe.int, ?tmp$9#0:wybe.bool) @int:nn:nn
     case ~tmp$9#0:wybe.bool of
     0:
-        foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$13#0:wybe.bool)
+        foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$13#0:wybe.bool)
         case ~tmp$13#0:wybe.bool of
         0:
             foreign llvm sub(~idx#0:wybe.int, 1:wybe.int, ?tmp$7#0:wybe.int) @int:nn:nn
@@ -1336,7 +1336,7 @@ insert(lst#0:int_list.int_list, idx#0:wybe.int, v#0:wybe.int, ?$#0:int_list.int_
     foreign llvm icmp_eq(idx#0:wybe.int, 0:wybe.int, ?tmp$9#0:wybe.bool) @int:nn:nn
     case ~tmp$9#0:wybe.bool of
     0:
-        foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$13#0:wybe.bool)
+        foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$13#0:wybe.bool)
         case ~tmp$13#0:wybe.bool of
         0:
             foreign llvm sub(~idx#0:wybe.int, 1:wybe.int, ?tmp$7#0:wybe.int) @int:nn:nn
@@ -1362,7 +1362,7 @@ lesser(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.lesser<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.lesser<0>,fromList [NonAliasedParamCond 0 [0]]))]
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$9#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$9#0:wybe.bool)
     case ~tmp$9#0:wybe.bool of
     0:
         foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:nn:nn
@@ -1390,7 +1390,7 @@ pop(lst#0:int_list.int_list, idx#0:wybe.int, ?$#0:int_list.int_list):
  AliasPairs: [($#0,lst#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(3,(int_list.pop<0>,fromList [NonAliasedParamCond 0 [0]]))]
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$9#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$9#0:wybe.bool)
     case ~tmp$9#0:wybe.bool of
     0:
         foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:nn:nn
@@ -1412,7 +1412,7 @@ pop(lst#0:int_list.int_list, idx#0:wybe.int, ?$#0:int_list.int_list):
 
 
  [410bae77d3] [NonAliasedParam 0] :
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$9#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$9#0:wybe.bool)
     case ~tmp$9#0:wybe.bool of
     0:
         foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:nn:nn
@@ -1437,7 +1437,7 @@ print > public (2 calls)
 print(x#0:int_list.int_list, io#0:wybe.phantom, ?io#3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne(x#0:int_list.int_list, 0:wybe.int, ?tmp$2#0:wybe.bool)
+    foreign llvm icmp_ne(x#0:!wybe.int, 0:wybe.int, ?tmp$2#0:wybe.bool)
     case ~tmp$2#0:wybe.bool of
     0:
         foreign llvm move(~io#0:wybe.phantom, ?io#3:wybe.phantom)
@@ -1474,7 +1474,7 @@ remove(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
  AliasPairs: [($#0,lst#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.remove<0>,fromList [NonAliasedParamCond 0 [0]]))]
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$8#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$8#0:wybe.bool)
     case ~tmp$8#0:wybe.bool of
     0:
         foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:nn:nn
@@ -1495,7 +1495,7 @@ remove(lst#0:int_list.int_list, v#0:wybe.int, ?$#0:int_list.int_list):
 
 
  [410bae77d3] [NonAliasedParam 0] :
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$8#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$8#0:wybe.bool)
     case ~tmp$8#0:wybe.bool of
     0:
         foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:nn:nn
@@ -1529,7 +1529,7 @@ reverse_helper(lst#0:int_list.int_list, acc#0:int_list.int_list, ?$#0:int_list.i
  AliasPairs: [($#0,acc#0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [0]]))]
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$5#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
         foreign llvm move(~acc#0:int_list.int_list, ?$#0:int_list.int_list) @int_list:nn:nn
@@ -1543,7 +1543,7 @@ reverse_helper(lst#0:int_list.int_list, acc#0:int_list.int_list, ?$#0:int_list.i
         int_list.reverse_helper<0>(~t#0:int_list.int_list, ~tmp$10#0:int_list.int_list, ?$#0:int_list.int_list) #2 @int_list:nn:nn
 
  [410bae77d3] [NonAliasedParam 0] :
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$5#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool)
     case ~tmp$5#0:wybe.bool of
     0:
         foreign llvm move(~acc#0:int_list.int_list, ?$#0:int_list.int_list) @int_list:nn:nn
@@ -1561,7 +1561,7 @@ sort(lst#0:int_list.int_list, ?$#0:int_list.int_list):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(int_list.sort<0>,fromList [NonAliasedParamCond 0 []])),(3,(int_list.greater<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.sort<0>,fromList [NonAliasedParamCond 0 []])),(6,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []]))]
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$10#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$10#0:wybe.bool)
     case ~tmp$10#0:wybe.bool of
     0:
         foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:nn:nn
@@ -1579,7 +1579,7 @@ sort(lst#0:int_list.int_list, ?$#0:int_list.int_list):
         int_list.extend<0>[410bae77d3](~tmp$2#0:int_list.int_list, ~tmp$15#0:int_list.int_list, ?$#0:int_list.int_list) #6 @int_list:nn:nn
 
  [410bae77d3] [NonAliasedParam 0] :
-    foreign llvm icmp_ne(lst#0:int_list.int_list, 0:wybe.int, ?tmp$10#0:wybe.bool)
+    foreign llvm icmp_ne(lst#0:!wybe.int, 0:wybe.int, ?tmp$10#0:wybe.bool)
     case ~tmp$10#0:wybe.bool of
     0:
         foreign llvm move(0:int_list.int_list, ?$#0:int_list.int_list) @int_list:nn:nn
@@ -2317,7 +2317,7 @@ if.else:
     1:
         foreign lpvm access($left#0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$head#0:wybe.int)
         foreign lpvm access(~$left#0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$tail#0:int_list.int_list)
-        foreign llvm icmp_ne($right#0:int_list.int_list, 0:wybe.int, ?tmp$9#0:wybe.bool)
+        foreign llvm icmp_ne($right#0:!wybe.int, 0:wybe.int, ?tmp$9#0:wybe.bool)
         case ~tmp$9#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)

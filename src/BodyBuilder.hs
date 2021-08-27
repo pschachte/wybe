@@ -684,10 +684,13 @@ expandVar var ty = expandArg $ ArgVar var ty False FlowIn Ordinary False
 
 -- |Return the current ultimate value of the input argument.
 expandArg :: PrimArg -> BodyBuilder PrimArg
-expandArg arg@ArgVar{argVarName=var, argVarFlow=FlowIn} = do
+expandArg arg@ArgVar{argVarName=var, argVarFlow=FlowIn, argVarCoerce=coerce} = do
     var' <- gets (Map.lookup var . currSubst)
-    logBuild $ "Expanded " ++ show var ++ " to " ++ show var'
-    maybe (return arg) expandArg var'
+    let var'' = case setArgType (argVarType arg) <$> var' of
+                    Just arg'@ArgVar{} -> Just arg'{argVarCoerce=coerce}
+                    v -> v
+    logBuild $ "Expanded " ++ show var ++ " to " ++ show var''
+    maybe (return arg) expandArg var''
 expandArg (ArgVar var typ coerce FlowOut ftype lst) = do
     var' <- gets (Map.findWithDefault var var . outSubst)
     when (var /= var')
