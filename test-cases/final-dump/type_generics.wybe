@@ -1,0 +1,7 @@
+def foo(x:?T) use !io {
+    ?l = [x]
+    !println(length(l))
+}
+
+!foo(1)
+!foo('a') 

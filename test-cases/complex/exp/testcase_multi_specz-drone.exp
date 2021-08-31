@@ -74,8 +74,8 @@ LLVM code       : None
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp$9#0:wybe.array(?T))
     foreign lpvm mutate(~tmp$9#0:wybe.array(?T), ?tmp$10#0:wybe.array(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argc#0:wybe.int)
-    foreign lpvm mutate(~tmp$10#0:wybe.array(?T), ?tmp$1#0:wybe.array(wybe.string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argv#0:wybe.array.raw_array(wybe.string))
-    wybe.array.[|]<0>(?command#2:wybe.string, ?arguments#2:wybe.array(wybe.string), ~tmp$1#0:wybe.array(wybe.string), ?tmp$2#0:wybe.bool) #2 @command_line:14:5
+    foreign lpvm mutate(~tmp$10#0:wybe.array(?T), ?tmp$1#0:wybe.array(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argv#0:wybe.array.raw_array(?T))
+    wybe.array.[|]<0>(?command#2:?T, ?arguments#2:wybe.array(?T), ~tmp$1#0:wybe.array(wybe.string), ?tmp$2#0:wybe.bool) #2 @command_line:14:5
     case ~tmp$2#0:wybe.bool of
     0:
         foreign c {terminal,semipure} error_exit("command_line:17:10":wybe.string, "Erroneous program argument vector":wybe.string) @control:15:5
@@ -663,8 +663,8 @@ entry:
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp$9#0:wybe.array(?T))
     foreign lpvm mutate(~tmp$9#0:wybe.array(?T), ?tmp$10#0:wybe.array(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argc#0:wybe.int)
-    foreign lpvm mutate(~tmp$10#0:wybe.array(?T), ?tmp$1#0:wybe.array(wybe.string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argv#0:wybe.array.raw_array(wybe.string))
-    wybe.array.[|]<0>(?command#2:wybe.string, ?arguments#2:wybe.array(wybe.string), ~tmp$1#0:wybe.array(wybe.string), ?tmp$2#0:wybe.bool) #2 @command_line:14:5
+    foreign lpvm mutate(~tmp$10#0:wybe.array(?T), ?tmp$1#0:wybe.array(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argv#0:wybe.array.raw_array(?T))
+    wybe.array.[|]<0>(?command#2:?T, ?arguments#2:wybe.array(?T), ~tmp$1#0:wybe.array(wybe.string), ?tmp$2#0:wybe.bool) #2 @command_line:14:5
     case ~tmp$2#0:wybe.bool of
     0:
         foreign c {terminal,semipure} error_exit("command_line:17:10":wybe.string, "Erroneous program argument vector":wybe.string) @control:15:5
