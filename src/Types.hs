@@ -1229,7 +1229,7 @@ matchTypeList' callee pos callArgTypes calleeInfo = do
     if List.null mismatches
     then return $ OK
          (calleeInfo
-          {procInfoArgs = List.zipWith TypeFlow matches calleeFlows},
+          {procInfoArgs = List.zipWith TypeFlow calleeTypes calleeFlows},
           typing)
     else return $ Err [ReasonArgType callee n pos | n <- mismatches]
 
@@ -1237,7 +1237,7 @@ matchTypeList' callee pos callArgTypes calleeInfo = do
 -- | Refresh all type variables in a list of TypeSpecs.
 -- Does not modify the underlying Typing, excluding the typeVarCounter
 refreshTypes :: [TypeSpec] -> Typed [TypeSpec]
-refreshTypes tys = do 
+refreshTypes tys = do
     typing0 <- get
     modify (\s -> initTyping{typeVarCounter=typeVarCounter s})
     tys' <- refreshTypeVars tys
@@ -1257,7 +1257,7 @@ refreshTypeVar ty@TypeVariable{typeVariableName=nm} = do
     mbty' <- gets $ Map.lookup nm . tvarDict
     case mbty' of
         Just ty' -> return ty'
-        Nothing -> do 
+        Nothing -> do
             ty' <- freshTypeVar
             modify (\s -> s{tvarDict=Map.insert nm ty' $ tvarDict s})
             return ty'
