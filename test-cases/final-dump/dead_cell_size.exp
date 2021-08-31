@@ -69,14 +69,14 @@ bar > public (1 calls)
 bar(x#0:dead_cell_size.t, ?x#1:dead_cell_size.t):
  AliasPairs: [(x#0,x#1)]
  InterestingCallProperties: [InterestingUnaliased 0]
-    foreign llvm icmp_ne(x#0:dead_cell_size.t, 0:wybe.int, ?tmp$3#0:wybe.bool)
+    foreign llvm icmp_ne(x#0:!wybe.int, 0:wybe.int, ?tmp$3#0:wybe.bool)
     case ~tmp$3#0:wybe.bool of
     0:
         foreign llvm move(~x#0:dead_cell_size.t, ?x#1:dead_cell_size.t)
 
     1:
-        foreign llvm and(x#0:dead_cell_size.t, 7:wybe.int, ?tmp$4#0:wybe.int)
-        foreign llvm icmp_eq(~tmp$4#0:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool)
+        foreign llvm and(x#0:!wybe.int, 3:wybe.int, ?tmp$4#0:wybe.int)
+        foreign llvm icmp_eq(~tmp$4#0:!wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool)
         case ~tmp$5#0:wybe.bool of
         0:
             foreign llvm move(~x#0:dead_cell_size.t, ?x#1:dead_cell_size.t)
@@ -89,14 +89,14 @@ bar(x#0:dead_cell_size.t, ?x#1:dead_cell_size.t):
 
 
  [410bae77d3] [NonAliasedParam 0] :
-    foreign llvm icmp_ne(x#0:dead_cell_size.t, 0:wybe.int, ?tmp$3#0:wybe.bool)
+    foreign llvm icmp_ne(x#0:!wybe.int, 0:wybe.int, ?tmp$3#0:wybe.bool)
     case ~tmp$3#0:wybe.bool of
     0:
         foreign llvm move(~x#0:dead_cell_size.t, ?x#1:dead_cell_size.t)
 
     1:
-        foreign llvm and(x#0:dead_cell_size.t, 7:wybe.int, ?tmp$4#0:wybe.int)
-        foreign llvm icmp_eq(~tmp$4#0:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool)
+        foreign llvm and(x#0:!wybe.int, 3:wybe.int, ?tmp$4#0:wybe.int)
+        foreign llvm icmp_eq(~tmp$4#0:!wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool)
         case ~tmp$5#0:wybe.bool of
         0:
             foreign llvm move(~x#0:dead_cell_size.t, ?x#1:dead_cell_size.t)
@@ -112,15 +112,15 @@ diff_type > public (1 calls)
 diff_type(x#0:dead_cell_size.t, ?y#0:dead_cell_size.t2):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
-    foreign llvm icmp_ne(x#0:dead_cell_size.t, 0:wybe.int, ?tmp$4#0:wybe.bool)
+    foreign llvm icmp_ne(x#0:!wybe.int, 0:wybe.int, ?tmp$4#0:wybe.bool)
     case ~tmp$4#0:wybe.bool of
     0:
         foreign lpvm alloc(8:wybe.int, ?tmp$8#0:dead_cell_size.t2)
         foreign lpvm mutate(~tmp$8#0:dead_cell_size.t2, ?y#0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, -1:wybe.int)
 
     1:
-        foreign llvm and(x#0:dead_cell_size.t, 7:wybe.int, ?tmp$5#0:wybe.int)
-        foreign llvm icmp_eq(~tmp$5#0:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.bool)
+        foreign llvm and(x#0:!wybe.int, 3:wybe.int, ?tmp$5#0:wybe.int)
+        foreign llvm icmp_eq(~tmp$5#0:!wybe.int, 0:wybe.int, ?tmp$6#0:wybe.bool)
         case ~tmp$6#0:wybe.bool of
         0:
             foreign lpvm alloc(8:wybe.int, ?tmp$8#0:dead_cell_size.t2)
@@ -133,15 +133,15 @@ diff_type(x#0:dead_cell_size.t, ?y#0:dead_cell_size.t2):
 
 
  [410bae77d3] [NonAliasedParam 0] :
-    foreign llvm icmp_ne(x#0:dead_cell_size.t, 0:wybe.int, ?tmp$4#0:wybe.bool)
+    foreign llvm icmp_ne(x#0:!wybe.int, 0:wybe.int, ?tmp$4#0:wybe.bool)
     case ~tmp$4#0:wybe.bool of
     0:
         foreign lpvm alloc(8:wybe.int, ?tmp$8#0:dead_cell_size.t2)
         foreign lpvm mutate(~tmp$8#0:dead_cell_size.t2, ?y#0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, -1:wybe.int)
 
     1:
-        foreign llvm and(x#0:dead_cell_size.t, 7:wybe.int, ?tmp$5#0:wybe.int)
-        foreign llvm icmp_eq(~tmp$5#0:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.bool)
+        foreign llvm and(x#0:!wybe.int, 3:wybe.int, ?tmp$5#0:wybe.int)
+        foreign llvm icmp_eq(~tmp$5#0:!wybe.int, 0:wybe.int, ?tmp$6#0:wybe.bool)
         case ~tmp$6#0:wybe.bool of
         0:
             foreign lpvm alloc(8:wybe.int, ?tmp$8#0:dead_cell_size.t2)
@@ -158,14 +158,14 @@ foo > public (1 calls)
 foo(x#0:dead_cell_size.t, ?x#1:dead_cell_size.t):
  AliasPairs: [(x#0,x#1)]
  InterestingCallProperties: []
-    foreign llvm icmp_ne(x#0:dead_cell_size.t, 0:wybe.int, ?tmp$3#0:wybe.bool)
+    foreign llvm icmp_ne(x#0:!wybe.int, 0:wybe.int, ?tmp$3#0:wybe.bool)
     case ~tmp$3#0:wybe.bool of
     0:
         foreign llvm move(~x#0:dead_cell_size.t, ?x#1:dead_cell_size.t)
 
     1:
-        foreign llvm and(x#0:dead_cell_size.t, 7:wybe.int, ?tmp$4#0:wybe.int)
-        foreign llvm icmp_eq(~tmp$4#0:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool)
+        foreign llvm and(x#0:!wybe.int, 3:wybe.int, ?tmp$4#0:wybe.int)
+        foreign llvm icmp_eq(~tmp$4#0:!wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool)
         case ~tmp$5#0:wybe.bool of
         0:
             foreign llvm move(~x#0:dead_cell_size.t, ?x#1:dead_cell_size.t)
@@ -189,20 +189,20 @@ print_t(x#0:dead_cell_size.t, io#0:wybe.phantom, ?io#8:wybe.phantom):
     dead_cell_size.t.=<0>(0:dead_cell_size.t, x#0:dead_cell_size.t, ?tmp$4#0:wybe.bool) #1 @dead_cell_size:nn:nn
     case ~tmp$4#0:wybe.bool of
     0:
-        foreign llvm icmp_ne(x#0:dead_cell_size.t, 0:wybe.int, ?tmp$6#0:wybe.bool)
+        foreign llvm icmp_ne(x#0:!wybe.int, 0:wybe.int, ?tmp$6#0:wybe.bool)
         case ~tmp$6#0:wybe.bool of
         0:
             foreign c putchar('\n':wybe.char, ~#io#0:wybe.phantom, ?#io#8:wybe.phantom) @io:nn:nn
 
         1:
-            foreign llvm and(x#0:dead_cell_size.t, 7:wybe.int, ?tmp$7#0:wybe.int)
-            foreign llvm icmp_eq(tmp$7#0:wybe.int, 0:wybe.int, ?tmp$8#0:wybe.bool)
+            foreign llvm and(x#0:!wybe.int, 3:wybe.int, ?tmp$7#0:wybe.int)
+            foreign llvm icmp_eq(tmp$7#0:!wybe.int, 0:wybe.int, ?tmp$8#0:wybe.bool)
             case ~tmp$8#0:wybe.bool of
             0:
-                foreign llvm icmp_eq(tmp$7#0:wybe.int, 1:wybe.int, ?tmp$12#0:wybe.bool)
+                foreign llvm icmp_eq(tmp$7#0:!wybe.int, 1:wybe.int, ?tmp$12#0:wybe.bool)
                 case ~tmp$12#0:wybe.bool of
                 0:
-                    foreign llvm icmp_eq(~tmp$7#0:wybe.int, 2:wybe.int, ?tmp$16#0:wybe.bool)
+                    foreign llvm icmp_eq(~tmp$7#0:!wybe.int, 2:wybe.int, ?tmp$16#0:wybe.bool)
                     case ~tmp$16#0:wybe.bool of
                     0:
                         foreign c putchar('\n':wybe.char, ~#io#0:wybe.phantom, ?#io#8:wybe.phantom) @io:nn:nn
@@ -252,7 +252,7 @@ print_t2(x#0:dead_cell_size.t2, io#0:wybe.phantom, ?io#4:wybe.phantom):
     dead_cell_size.t2.=<0>(0:dead_cell_size.t2, x#0:dead_cell_size.t2, ?tmp$2#0:wybe.bool) #1 @dead_cell_size:nn:nn
     case ~tmp$2#0:wybe.bool of
     0:
-        foreign llvm icmp_ne(x#0:dead_cell_size.t2, 0:wybe.int, ?tmp$4#0:wybe.bool)
+        foreign llvm icmp_ne(x#0:!wybe.int, 0:wybe.int, ?tmp$4#0:wybe.bool)
         case ~tmp$4#0:wybe.bool of
         0:
             foreign c putchar('\n':wybe.char, ~#io#0:wybe.phantom, ?#io#4:wybe.phantom) @io:nn:nn
@@ -364,7 +364,7 @@ entry:
   %"1$tmp$3#0" = icmp ne i64 %"x#0", 0 
   br i1 %"1$tmp$3#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$4#0" = and i64 %"x#0", 7 
+  %"2$tmp$4#0" = and i64 %"x#0", 3 
   %"2$tmp$5#0" = icmp eq i64 %"2$tmp$4#0", 0 
   br i1 %"2$tmp$5#0", label %if.then1, label %if.else1 
 if.else:
@@ -391,7 +391,7 @@ entry:
   %"1$tmp$3#0" = icmp ne i64 %"x#0", 0 
   br i1 %"1$tmp$3#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$4#0" = and i64 %"x#0", 7 
+  %"2$tmp$4#0" = and i64 %"x#0", 3 
   %"2$tmp$5#0" = icmp eq i64 %"2$tmp$4#0", 0 
   br i1 %"2$tmp$5#0", label %if.then1, label %if.else1 
 if.else:
@@ -409,7 +409,7 @@ entry:
   %"1$tmp$4#0" = icmp ne i64 %"x#0", 0 
   br i1 %"1$tmp$4#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$5#0" = and i64 %"x#0", 7 
+  %"2$tmp$5#0" = and i64 %"x#0", 3 
   %"2$tmp$6#0" = icmp eq i64 %"2$tmp$5#0", 0 
   br i1 %"2$tmp$6#0", label %if.then1, label %if.else1 
 if.else:
@@ -447,7 +447,7 @@ entry:
   %"1$tmp$4#0" = icmp ne i64 %"x#0", 0 
   br i1 %"1$tmp$4#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$5#0" = and i64 %"x#0", 7 
+  %"2$tmp$5#0" = and i64 %"x#0", 3 
   %"2$tmp$6#0" = icmp eq i64 %"2$tmp$5#0", 0 
   br i1 %"2$tmp$6#0", label %if.then1, label %if.else1 
 if.else:
@@ -476,7 +476,7 @@ entry:
   %"1$tmp$3#0" = icmp ne i64 %"x#0", 0 
   br i1 %"1$tmp$3#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$4#0" = and i64 %"x#0", 7 
+  %"2$tmp$4#0" = and i64 %"x#0", 3 
   %"2$tmp$5#0" = icmp eq i64 %"2$tmp$4#0", 0 
   br i1 %"2$tmp$5#0", label %if.then1, label %if.else1 
 if.else:
@@ -519,7 +519,7 @@ if.else:
   %"3$tmp$6#0" = icmp ne i64 %"x#0", 0 
   br i1 %"3$tmp$6#0", label %if.then1, label %if.else1 
 if.then1:
-  %"4$tmp$7#0" = and i64 %"x#0", 7 
+  %"4$tmp$7#0" = and i64 %"x#0", 3 
   %"4$tmp$8#0" = icmp eq i64 %"4$tmp$7#0", 0 
   br i1 %"4$tmp$8#0", label %if.then2, label %if.else2 
 if.else1:
@@ -653,28 +653,28 @@ if.else1:
         foreign llvm icmp_eq(~$left#0:dead_cell_size.t, ~$right#0:dead_cell_size.t, ?$$#0:!wybe.bool)
 
     1:
-        foreign llvm and($left#0:dead_cell_size.t, 7:wybe.int, ?tmp$15#0:wybe.int)
-        foreign llvm icmp_eq(tmp$15#0:wybe.int, 0:wybe.int, ?tmp$16#0:wybe.bool)
+        foreign llvm and($left#0:!wybe.int, 3:wybe.int, ?tmp$15#0:wybe.int)
+        foreign llvm icmp_eq(tmp$15#0:!wybe.int, 0:wybe.int, ?tmp$16#0:wybe.bool)
         case ~tmp$16#0:wybe.bool of
         0:
-            foreign llvm icmp_eq(tmp$15#0:wybe.int, 1:wybe.int, ?tmp$20#0:wybe.bool)
+            foreign llvm icmp_eq(tmp$15#0:!wybe.int, 1:wybe.int, ?tmp$20#0:wybe.bool)
             case ~tmp$20#0:wybe.bool of
             0:
-                foreign llvm icmp_eq(~tmp$15#0:wybe.int, 2:wybe.int, ?tmp$24#0:wybe.bool)
+                foreign llvm icmp_eq(~tmp$15#0:!wybe.int, 2:wybe.int, ?tmp$24#0:wybe.bool)
                 case ~tmp$24#0:wybe.bool of
                 0:
                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                 1:
                     foreign lpvm access(~$left#0:dead_cell_size.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?$left$td1#0:wybe.int)
-                    foreign llvm icmp_ne($right#0:dead_cell_size.t, 0:wybe.int, ?tmp$26#0:wybe.bool)
+                    foreign llvm icmp_ne($right#0:!wybe.int, 0:wybe.int, ?tmp$26#0:wybe.bool)
                     case ~tmp$26#0:wybe.bool of
                     0:
                         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                     1:
-                        foreign llvm and($right#0:dead_cell_size.t, 7:wybe.int, ?tmp$27#0:wybe.int)
-                        foreign llvm icmp_eq(~tmp$27#0:wybe.int, 2:wybe.int, ?tmp$28#0:wybe.bool)
+                        foreign llvm and($right#0:!wybe.int, 3:wybe.int, ?tmp$27#0:wybe.int)
+                        foreign llvm icmp_eq(~tmp$27#0:!wybe.int, 2:wybe.int, ?tmp$28#0:wybe.bool)
                         case ~tmp$28#0:wybe.bool of
                         0:
                             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -690,14 +690,14 @@ if.else1:
                 foreign lpvm access($left#0:dead_cell_size.t, -1:wybe.int, 24:wybe.int, 1:wybe.int, ?$left$tc1#0:wybe.int)
                 foreign lpvm access($left#0:dead_cell_size.t, 7:wybe.int, 24:wybe.int, 1:wybe.int, ?$left$tc2#0:wybe.int)
                 foreign lpvm access(~$left#0:dead_cell_size.t, 15:wybe.int, 24:wybe.int, 1:wybe.int, ?$left$tc3#0:wybe.int)
-                foreign llvm icmp_ne($right#0:dead_cell_size.t, 0:wybe.int, ?tmp$22#0:wybe.bool)
+                foreign llvm icmp_ne($right#0:!wybe.int, 0:wybe.int, ?tmp$22#0:wybe.bool)
                 case ~tmp$22#0:wybe.bool of
                 0:
                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                 1:
-                    foreign llvm and($right#0:dead_cell_size.t, 7:wybe.int, ?tmp$23#0:wybe.int)
-                    foreign llvm icmp_eq(~tmp$23#0:wybe.int, 1:wybe.int, ?tmp$24#0:wybe.bool)
+                    foreign llvm and($right#0:!wybe.int, 3:wybe.int, ?tmp$23#0:wybe.int)
+                    foreign llvm icmp_eq(~tmp$23#0:!wybe.int, 1:wybe.int, ?tmp$24#0:wybe.bool)
                     case ~tmp$24#0:wybe.bool of
                     0:
                         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -727,14 +727,14 @@ if.else1:
 
         1:
             foreign lpvm access(~$left#0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$left$tb1#0:wybe.int)
-            foreign llvm icmp_ne($right#0:dead_cell_size.t, 0:wybe.int, ?tmp$18#0:wybe.bool)
+            foreign llvm icmp_ne($right#0:!wybe.int, 0:wybe.int, ?tmp$18#0:wybe.bool)
             case ~tmp$18#0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
             1:
-                foreign llvm and($right#0:dead_cell_size.t, 7:wybe.int, ?tmp$19#0:wybe.int)
-                foreign llvm icmp_eq(~tmp$19#0:wybe.int, 0:wybe.int, ?tmp$20#0:wybe.bool)
+                foreign llvm and($right#0:!wybe.int, 3:wybe.int, ?tmp$19#0:wybe.int)
+                foreign llvm icmp_eq(~tmp$19#0:!wybe.int, 0:wybe.int, ?tmp$20#0:wybe.bool)
                 case ~tmp$20#0:wybe.bool of
                 0:
                     foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -775,7 +775,7 @@ tb(?tb1#0:wybe.int, $#0:dead_cell_size.t, ?$$#0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?tb1#0:wybe.int)
 
     1:
-        foreign llvm and($#0:!wybe.int, 7:wybe.int, ?tmp$2#0:!wybe.int)
+        foreign llvm and($#0:!wybe.int, 3:wybe.int, ?tmp$2#0:!wybe.int)
         foreign llvm icmp_eq(~tmp$2#0:!wybe.int, 0:wybe.int, ?tmp$1#0:!wybe.bool)
         case ~tmp$1#0:wybe.bool of
         0:
@@ -801,7 +801,7 @@ tb1($rec#0:dead_cell_size.t, ?$#0:wybe.int, ?$$#0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
-        foreign llvm and($rec#0:!wybe.int, 7:wybe.int, ?tmp$2#0:!wybe.int)
+        foreign llvm and($rec#0:!wybe.int, 3:wybe.int, ?tmp$2#0:!wybe.int)
         foreign llvm icmp_eq(~tmp$2#0:!wybe.int, 0:wybe.int, ?tmp$1#0:!wybe.bool)
         case ~tmp$1#0:wybe.bool of
         0:
@@ -825,7 +825,7 @@ tb1($rec#0:dead_cell_size.t, ?$rec#1:dead_cell_size.t, $field#0:wybe.int, ?$$#0:
         foreign llvm move(~$rec#0:dead_cell_size.t, ?$rec#1:dead_cell_size.t)
 
     1:
-        foreign llvm and($rec#0:!wybe.int, 7:wybe.int, ?tmp$2#0:!wybe.int)
+        foreign llvm and($rec#0:!wybe.int, 3:wybe.int, ?tmp$2#0:!wybe.int)
         foreign llvm icmp_eq(~tmp$2#0:!wybe.int, 0:wybe.int, ?tmp$1#0:!wybe.bool)
         case ~tmp$1#0:wybe.bool of
         0:
@@ -863,7 +863,7 @@ tc(?tc1#0:wybe.int, ?tc2#0:wybe.int, ?tc3#0:wybe.int, $#0:dead_cell_size.t, ?$$#
         foreign llvm move(undef:wybe.int, ?tc3#0:wybe.int)
 
     1:
-        foreign llvm and($#0:!wybe.int, 7:wybe.int, ?tmp$2#0:!wybe.int)
+        foreign llvm and($#0:!wybe.int, 3:wybe.int, ?tmp$2#0:!wybe.int)
         foreign llvm icmp_eq(~tmp$2#0:!wybe.int, 1:wybe.int, ?tmp$1#0:!wybe.bool)
         case ~tmp$1#0:wybe.bool of
         0:
@@ -893,7 +893,7 @@ tc1($rec#0:dead_cell_size.t, ?$#0:wybe.int, ?$$#0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
-        foreign llvm and($rec#0:!wybe.int, 7:wybe.int, ?tmp$2#0:!wybe.int)
+        foreign llvm and($rec#0:!wybe.int, 3:wybe.int, ?tmp$2#0:!wybe.int)
         foreign llvm icmp_eq(~tmp$2#0:!wybe.int, 1:wybe.int, ?tmp$1#0:!wybe.bool)
         case ~tmp$1#0:wybe.bool of
         0:
@@ -917,7 +917,7 @@ tc1($rec#0:dead_cell_size.t, ?$rec#1:dead_cell_size.t, $field#0:wybe.int, ?$$#0:
         foreign llvm move(~$rec#0:dead_cell_size.t, ?$rec#1:dead_cell_size.t)
 
     1:
-        foreign llvm and($rec#0:!wybe.int, 7:wybe.int, ?tmp$2#0:!wybe.int)
+        foreign llvm and($rec#0:!wybe.int, 3:wybe.int, ?tmp$2#0:!wybe.int)
         foreign llvm icmp_eq(~tmp$2#0:!wybe.int, 1:wybe.int, ?tmp$1#0:!wybe.bool)
         case ~tmp$1#0:wybe.bool of
         0:
@@ -943,7 +943,7 @@ tc2($rec#0:dead_cell_size.t, ?$#0:wybe.int, ?$$#0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
-        foreign llvm and($rec#0:!wybe.int, 7:wybe.int, ?tmp$2#0:!wybe.int)
+        foreign llvm and($rec#0:!wybe.int, 3:wybe.int, ?tmp$2#0:!wybe.int)
         foreign llvm icmp_eq(~tmp$2#0:!wybe.int, 1:wybe.int, ?tmp$1#0:!wybe.bool)
         case ~tmp$1#0:wybe.bool of
         0:
@@ -967,7 +967,7 @@ tc2($rec#0:dead_cell_size.t, ?$rec#1:dead_cell_size.t, $field#0:wybe.int, ?$$#0:
         foreign llvm move(~$rec#0:dead_cell_size.t, ?$rec#1:dead_cell_size.t)
 
     1:
-        foreign llvm and($rec#0:!wybe.int, 7:wybe.int, ?tmp$2#0:!wybe.int)
+        foreign llvm and($rec#0:!wybe.int, 3:wybe.int, ?tmp$2#0:!wybe.int)
         foreign llvm icmp_eq(~tmp$2#0:!wybe.int, 1:wybe.int, ?tmp$1#0:!wybe.bool)
         case ~tmp$1#0:wybe.bool of
         0:
@@ -993,7 +993,7 @@ tc3($rec#0:dead_cell_size.t, ?$#0:wybe.int, ?$$#0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
-        foreign llvm and($rec#0:!wybe.int, 7:wybe.int, ?tmp$2#0:!wybe.int)
+        foreign llvm and($rec#0:!wybe.int, 3:wybe.int, ?tmp$2#0:!wybe.int)
         foreign llvm icmp_eq(~tmp$2#0:!wybe.int, 1:wybe.int, ?tmp$1#0:!wybe.bool)
         case ~tmp$1#0:wybe.bool of
         0:
@@ -1017,7 +1017,7 @@ tc3($rec#0:dead_cell_size.t, ?$rec#1:dead_cell_size.t, $field#0:wybe.int, ?$$#0:
         foreign llvm move(~$rec#0:dead_cell_size.t, ?$rec#1:dead_cell_size.t)
 
     1:
-        foreign llvm and($rec#0:!wybe.int, 7:wybe.int, ?tmp$2#0:!wybe.int)
+        foreign llvm and($rec#0:!wybe.int, 3:wybe.int, ?tmp$2#0:!wybe.int)
         foreign llvm icmp_eq(~tmp$2#0:!wybe.int, 1:wybe.int, ?tmp$1#0:!wybe.bool)
         case ~tmp$1#0:wybe.bool of
         0:
@@ -1051,7 +1051,7 @@ td(?td1#0:wybe.int, $#0:dead_cell_size.t, ?$$#0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?td1#0:wybe.int)
 
     1:
-        foreign llvm and($#0:!wybe.int, 7:wybe.int, ?tmp$2#0:!wybe.int)
+        foreign llvm and($#0:!wybe.int, 3:wybe.int, ?tmp$2#0:!wybe.int)
         foreign llvm icmp_eq(~tmp$2#0:!wybe.int, 2:wybe.int, ?tmp$1#0:!wybe.bool)
         case ~tmp$1#0:wybe.bool of
         0:
@@ -1077,7 +1077,7 @@ td1($rec#0:dead_cell_size.t, ?$#0:wybe.int, ?$$#0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?$#0:wybe.int)
 
     1:
-        foreign llvm and($rec#0:!wybe.int, 7:wybe.int, ?tmp$2#0:!wybe.int)
+        foreign llvm and($rec#0:!wybe.int, 3:wybe.int, ?tmp$2#0:!wybe.int)
         foreign llvm icmp_eq(~tmp$2#0:!wybe.int, 2:wybe.int, ?tmp$1#0:!wybe.bool)
         case ~tmp$1#0:wybe.bool of
         0:
@@ -1101,7 +1101,7 @@ td1($rec#0:dead_cell_size.t, ?$rec#1:dead_cell_size.t, $field#0:wybe.int, ?$$#0:
         foreign llvm move(~$rec#0:dead_cell_size.t, ?$rec#1:dead_cell_size.t)
 
     1:
-        foreign llvm and($rec#0:!wybe.int, 7:wybe.int, ?tmp$2#0:!wybe.int)
+        foreign llvm and($rec#0:!wybe.int, 3:wybe.int, ?tmp$2#0:!wybe.int)
         foreign llvm icmp_eq(~tmp$2#0:!wybe.int, 2:wybe.int, ?tmp$1#0:!wybe.bool)
         case ~tmp$1#0:wybe.bool of
         0:
@@ -1142,7 +1142,7 @@ entry:
   %"1$tmp$0#0" = icmp ne i64 %"$left#0", 0 
   br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$15#0" = and i64 %"$left#0", 7 
+  %"2$tmp$15#0" = and i64 %"$left#0", 3 
   %"2$tmp$16#0" = icmp eq i64 %"2$tmp$15#0", 0 
   br i1 %"2$tmp$16#0", label %if.then1, label %if.else1 
 if.else:
@@ -1158,7 +1158,7 @@ if.else1:
   %"5$tmp$20#0" = icmp eq i64 %"2$tmp$15#0", 1 
   br i1 %"5$tmp$20#0", label %if.then4, label %if.else4 
 if.then2:
-  %"6$tmp$19#0" = and i64 %"$right#0", 7 
+  %"6$tmp$19#0" = and i64 %"$right#0", 3 
   %"6$tmp$20#0" = icmp eq i64 %"6$tmp$19#0", 0 
   br i1 %"6$tmp$20#0", label %if.then3, label %if.else3 
 if.else2:
@@ -1190,7 +1190,7 @@ if.else4:
   %"11$tmp$24#0" = icmp eq i64 %"2$tmp$15#0", 2 
   br i1 %"11$tmp$24#0", label %if.then9, label %if.else9 
 if.then5:
-  %"12$tmp$23#0" = and i64 %"$right#0", 7 
+  %"12$tmp$23#0" = and i64 %"$right#0", 3 
   %"12$tmp$24#0" = icmp eq i64 %"12$tmp$23#0", 1 
   br i1 %"12$tmp$24#0", label %if.then6, label %if.else6 
 if.else5:
@@ -1232,7 +1232,7 @@ if.then9:
 if.else9:
   ret i1 0 
 if.then10:
-  %"22$tmp$27#0" = and i64 %"$right#0", 7 
+  %"22$tmp$27#0" = and i64 %"$right#0", 3 
   %"22$tmp$28#0" = icmp eq i64 %"22$tmp$27#0", 2 
   br i1 %"22$tmp$28#0", label %if.then11, label %if.else11 
 if.else10:
@@ -1272,7 +1272,7 @@ entry:
   %"1$tmp$0#0" = icmp ne i64 %"$#0", 0 
   br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$2#0" = and i64 %"$#0", 7 
+  %"2$tmp$2#0" = and i64 %"$#0", 3 
   %"2$tmp$1#0" = icmp eq i64 %"2$tmp$2#0", 0 
   br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
@@ -1298,7 +1298,7 @@ entry:
   %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$2#0" = and i64 %"$rec#0", 7 
+  %"2$tmp$2#0" = and i64 %"$rec#0", 3 
   %"2$tmp$1#0" = icmp eq i64 %"2$tmp$2#0", 0 
   br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
@@ -1324,7 +1324,7 @@ entry:
   %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$2#0" = and i64 %"$rec#0", 7 
+  %"2$tmp$2#0" = and i64 %"$rec#0", 3 
   %"2$tmp$1#0" = icmp eq i64 %"2$tmp$2#0", 0 
   br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
@@ -1378,7 +1378,7 @@ entry:
   %"1$tmp$0#0" = icmp ne i64 %"$#0", 0 
   br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$2#0" = and i64 %"$#0", 7 
+  %"2$tmp$2#0" = and i64 %"$#0", 3 
   %"2$tmp$1#0" = icmp eq i64 %"2$tmp$2#0", 1 
   br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
@@ -1419,7 +1419,7 @@ entry:
   %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$2#0" = and i64 %"$rec#0", 7 
+  %"2$tmp$2#0" = and i64 %"$rec#0", 3 
   %"2$tmp$1#0" = icmp eq i64 %"2$tmp$2#0", 1 
   br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
@@ -1446,7 +1446,7 @@ entry:
   %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$2#0" = and i64 %"$rec#0", 7 
+  %"2$tmp$2#0" = and i64 %"$rec#0", 3 
   %"2$tmp$1#0" = icmp eq i64 %"2$tmp$2#0", 1 
   br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
@@ -1482,7 +1482,7 @@ entry:
   %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$2#0" = and i64 %"$rec#0", 7 
+  %"2$tmp$2#0" = and i64 %"$rec#0", 3 
   %"2$tmp$1#0" = icmp eq i64 %"2$tmp$2#0", 1 
   br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
@@ -1509,7 +1509,7 @@ entry:
   %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$2#0" = and i64 %"$rec#0", 7 
+  %"2$tmp$2#0" = and i64 %"$rec#0", 3 
   %"2$tmp$1#0" = icmp eq i64 %"2$tmp$2#0", 1 
   br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
@@ -1545,7 +1545,7 @@ entry:
   %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$2#0" = and i64 %"$rec#0", 7 
+  %"2$tmp$2#0" = and i64 %"$rec#0", 3 
   %"2$tmp$1#0" = icmp eq i64 %"2$tmp$2#0", 1 
   br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
@@ -1572,7 +1572,7 @@ entry:
   %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$2#0" = and i64 %"$rec#0", 7 
+  %"2$tmp$2#0" = and i64 %"$rec#0", 3 
   %"2$tmp$1#0" = icmp eq i64 %"2$tmp$2#0", 1 
   br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
@@ -1621,7 +1621,7 @@ entry:
   %"1$tmp$0#0" = icmp ne i64 %"$#0", 0 
   br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$2#0" = and i64 %"$#0", 7 
+  %"2$tmp$2#0" = and i64 %"$#0", 3 
   %"2$tmp$1#0" = icmp eq i64 %"2$tmp$2#0", 2 
   br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
@@ -1648,7 +1648,7 @@ entry:
   %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$2#0" = and i64 %"$rec#0", 7 
+  %"2$tmp$2#0" = and i64 %"$rec#0", 3 
   %"2$tmp$1#0" = icmp eq i64 %"2$tmp$2#0", 2 
   br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
@@ -1675,7 +1675,7 @@ entry:
   %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
   br i1 %"1$tmp$0#0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$2#0" = and i64 %"$rec#0", 7 
+  %"2$tmp$2#0" = and i64 %"$rec#0", 3 
   %"2$tmp$1#0" = icmp eq i64 %"2$tmp$2#0", 2 
   br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
 if.else:
@@ -1741,7 +1741,7 @@ entry:
 
     1:
         foreign lpvm access(~$left#0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$left$a#0:wybe.int)
-        foreign llvm icmp_ne($right#0:dead_cell_size.t2, 0:wybe.int, ?tmp$8#0:wybe.bool)
+        foreign llvm icmp_ne($right#0:!wybe.int, 0:wybe.int, ?tmp$8#0:wybe.bool)
         case ~tmp$8#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
