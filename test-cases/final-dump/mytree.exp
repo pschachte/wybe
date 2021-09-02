@@ -37,7 +37,7 @@ printTree1 > public (3 calls)
 printTree1(t#0:mytree.tree, prefix#0:wybe.string, ?prefix#3:wybe.string, io#0:wybe.phantom, ?io#4:wybe.phantom):
  AliasPairs: [(prefix#0,prefix#3)]
  InterestingCallProperties: []
-    foreign llvm icmp_ne(t#0:mytree.tree, 0:wybe.int, ?tmp$2#0:wybe.bool)
+    foreign llvm icmp_ne(t#0:!wybe.int, 0:wybe.int, ?tmp$2#0:wybe.bool)
     case ~tmp$2#0:wybe.bool of
     0:
         foreign llvm move(~prefix#0:wybe.string, ?prefix#3:wybe.string)
@@ -152,7 +152,7 @@ if.else:
         foreign lpvm access($left#0:mytree.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?$left$left#0:mytree.tree)
         foreign lpvm access($left#0:mytree.tree, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?$left$key#0:wybe.int)
         foreign lpvm access(~$left#0:mytree.tree, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?$left$right#0:mytree.tree)
-        foreign llvm icmp_ne($right#0:mytree.tree, 0:wybe.int, ?tmp$10#0:wybe.bool)
+        foreign llvm icmp_ne($right#0:!wybe.int, 0:wybe.int, ?tmp$10#0:wybe.bool)
         case ~tmp$10#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)

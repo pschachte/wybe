@@ -1229,7 +1229,10 @@ matchTypeList' callee pos callArgTypes calleeInfo = do
     if List.null mismatches
     then return $ OK
          (calleeInfo
+        -- XXX this throws away the types of the callee
+        --   {procInfoArgs = List.zipWith TypeFlow matches calleeFlows},
           {procInfoArgs = List.zipWith TypeFlow calleeTypes calleeFlows},
+
           typing)
     else return $ Err [ReasonArgType callee n pos | n <- mismatches]
 
@@ -1265,14 +1268,6 @@ refreshTypeVar ty@TypeSpec{typeParams=tys} = do
     tys' <- refreshTypeVars tys
     return ty{typeParams=tys'}
 refreshTypeVar ty = return ty
-
-
-
-getTypeVars :: TypeSpec -> [TypeSpec]
-getTypeVars ty@(TypeVariable nm) = [ty]
-getTypeVars (TypeSpec _ _ tys) = concatMap getTypeVars tys
-getTypeVars _ = []
-
 
 
 ----------------------------------------------------------------

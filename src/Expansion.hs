@@ -269,18 +269,23 @@ inlineCall proto args body pos = do
 
 
 expandArg :: PrimArg -> Expander PrimArg
-expandArg arg@(ArgVar var typ _ flow _ _) = do
+expandArg arg@(ArgVar var typ coerce flow _ _) = do
     renameAll <- gets inlining
     if renameAll
-      then case flow of
-      FlowOut -> freshVar var typ
-      FlowIn ->
-        gets (Map.findWithDefault
-              -- (shouldnt $ "inlining: reference to unassigned variable "
-              --  ++ show var)
-              arg
-              var . renaming)
-      else return arg
+    then case flow of
+        FlowOut -> freshVar var typ
+        FlowIn -> do
+            arg' <- gets (Map.findWithDefault
+                  -- (shouldnt $ "inlining: reference to unassigned variable "
+                  --  ++ show var)
+                  arg
+                  var . renaming)
+            let typ' = argType arg'
+            return $ case setArgType typ arg' of
+                        arg@ArgVar{argVarCoerce=coerce'} -> 
+                            arg{argVarCoerce=coerce || coerce' || typ /= typ'}
+                        a -> a
+    else return arg
 expandArg arg = return arg
 
 

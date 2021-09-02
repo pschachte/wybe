@@ -53,7 +53,7 @@ module AST (
   ProcAnalysis(..), emptyProcAnalysis,
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, ResourceDef(..), ResourceIFace(..), FlowDirection(..),
-  argFlowDirection, argType, argDescription, flowsIn, flowsOut,
+  argFlowDirection, argType, setArgType, argDescription, flowsIn, flowsOut,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, procCallToExp, expOutputs, pexpListOutputs,
   setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
@@ -2715,6 +2715,17 @@ argType (ArgString _ typ) = typ
 argType (ArgChar _ typ) = typ
 argType (ArgUnneeded _ typ) = typ
 argType (ArgUndef typ) = typ
+
+
+-- |Set the Wybe type of a PrimArg.
+setArgType :: TypeSpec -> PrimArg -> PrimArg
+setArgType typ arg@ArgVar{} = arg{argVarType=typ}
+setArgType typ (ArgInt i _) = ArgInt i typ
+setArgType typ (ArgFloat f _) = ArgFloat f typ
+setArgType typ (ArgString s _) = ArgString s typ
+setArgType typ (ArgChar c _) = ArgChar c typ
+setArgType typ (ArgUnneeded u _) = ArgUnneeded u typ
+setArgType typ (ArgUndef _) = ArgUndef typ
 
 
 argDescription :: PrimArg -> String
