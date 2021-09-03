@@ -2628,7 +2628,6 @@ type CallSiteID = Int
 data PrimArg
      = ArgVar {argVarName     :: PrimVarName, -- ^Name of argument variable
                argVarType     :: TypeSpec,    -- ^Its type
-               argVarCoerce   :: Bool,        -- ^Whether it must be converted
                argVarFlow     :: PrimFlow,    -- ^Its flow direction
                argVarFlowType :: ArgFlowType, -- ^Its flow type
                argVarFinal    :: Bool         -- ^Is this a definite last use
@@ -2729,7 +2728,7 @@ setArgType typ (ArgUndef _) = ArgUndef typ
 
 
 argDescription :: PrimArg -> String
-argDescription (ArgVar var _ _ flow ftype _) =
+argDescription (ArgVar var _ flow ftype _) =
     (case flow of
           FlowIn -> "input "
           FlowOut -> "output ") ++
@@ -3239,11 +3238,11 @@ showBody indent stmts =
 
 -- |Show a primitive argument.
 instance Show PrimArg where
-  show (ArgVar name typ coerce dir ftype final) =
+  show (ArgVar name typ dir ftype final) =
       (if final then "~" else "") ++
       primFlowPrefix dir ++
       show ftype ++
-      show name ++ showTypeSuffix typ (if coerce then Just AnyType else Nothing)
+      show name ++ showTypeSuffix typ Nothing
   show (ArgInt i typ)    = show i ++ showTypeSuffix typ Nothing
   show (ArgFloat f typ)  = show f ++ showTypeSuffix typ Nothing
   show (ArgString s typ) = show s ++ showTypeSuffix typ Nothing

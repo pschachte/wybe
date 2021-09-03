@@ -123,7 +123,7 @@ assign :: String -> TypeSpec -> PrimArg -> ClauseComp (Placed Prim)
 assign name typ val = do
     primVar <- nextVar name
     return $ Unplaced $ primMove val
-           $ ArgVar primVar typ False FlowOut Ordinary False
+           $ ArgVar primVar typ FlowOut Ordinary False
 
 
 -- |Run a clause compiler function from the Compiler monad to compile
@@ -208,7 +208,7 @@ compileBody stmts params detism = do
                                     ("compileBody for " ++ showStmt 4 call)
                                      procID) generalVersion)
                          (args' ++
-                          [ArgVar (PrimVarName "$$" 0) boolType False FlowOut
+                          [ArgVar (PrimVarName "$$" 0) boolType FlowOut
                            (Implicit Nothing) False])
           return $ ProcBody (front++[final']) NoFork
 
@@ -301,32 +301,32 @@ compileSimpleStmt' stmt =
 compileArg :: Exp -> OptPos -> ClauseComp [PrimArg]
 compileArg (Typed exp typ coerce) pos = do
     logClause $ "Compiling expression " ++ show exp
-    args <- compileArg' typ (isJust coerce) exp pos
+    args <- compileArg' typ exp pos
     logClause $ "Expression compiled to " ++ show args
     return args
 compileArg exp pos = shouldnt $ "Compiling untyped argument " ++ show exp
 
-compileArg' :: TypeSpec -> Bool -> Exp -> OptPos -> ClauseComp [PrimArg]
-compileArg' typ _ (IntValue int) _ = return $ [ArgInt int typ]
-compileArg' typ _ (FloatValue float) _ = return $ [ArgFloat float typ]
-compileArg' typ _ (StringValue string) _ = return $ [ArgString string typ]
-compileArg' typ _ (CharValue char) _ = return $ [ArgChar char typ]
-compileArg' typ coerce var@(Var name flow flowType) pos = do
+compileArg' :: TypeSpec -> Exp -> OptPos -> ClauseComp [PrimArg]
+compileArg' typ (IntValue int) _ = return [ArgInt int typ]
+compileArg' typ (FloatValue float) _ = return [ArgFloat float typ]
+compileArg' typ (StringValue string) _ = return [ArgString string typ]
+compileArg' typ (CharValue char) _ = return [ArgChar char typ]
+compileArg' typ var@(Var name flow flowType) pos = do
     let flowType' = if flow == ParamInOut then HalfUpdate else flowType
     inArg <- if flowsIn flow
         then do
             currName <- currVar name pos
-            return [ArgVar currName typ coerce FlowIn flowType' False]
+            return [ArgVar currName typ FlowIn flowType' False]
         else return []
     outArg <- if flowsOut flow
         then do
             nextName <- nextVar name
-            return [ArgVar nextName typ coerce FlowOut flowType' False]
+            return [ArgVar nextName typ FlowOut flowType' False]
         else return []
     return $ inArg ++ outArg
-compileArg' _   _ (Typed exp typ coerce) pos =
+compileArg' _ (Typed exp _ _) pos =
     shouldnt $ "Compiling multi-typed expression " ++ show exp
-compileArg' _   _ arg _ =
+compileArg' _ arg _ =
     shouldnt $ "Normalisation left complex argument: " ++ show arg
 
 
@@ -345,9 +345,9 @@ reconcileOne caseVars jointVars (Param name ty flow ftype) =
          if caseNum /= jointNum && elem flow [ParamOut, ParamInOut]
          then Just $ Unplaced $
               PrimForeign "llvm" "move" []
-              [ArgVar (PrimVarName name caseNum) ty False FlowIn
+              [ArgVar (PrimVarName name caseNum) ty FlowIn
                       Ordinary False,
-               ArgVar (PrimVarName name jointNum) ty False FlowOut
+               ArgVar (PrimVarName name jointNum) ty FlowOut
                       Ordinary False]
          else Nothing
        _ -> Nothing
