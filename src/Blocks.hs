@@ -829,9 +829,24 @@ doCast' op (IntegerType bs1) ty2@(IntegerType bs2)
     | bs1 == bs2 = (,"bitcast no-op") <$> bitcast op ty2
     | bs2 > bs1 = (,"zext") <$> zext op ty2
     | bs1 > bs2 = (,"trunc") <$> trunc op ty2
+doCast' op ty1@(FloatingPointType fp) ty2@(IntegerType bs2)
+    | bs1 == bs2 = caseStr <$> bitcast op ty2 
+    | bs2 > bs1 = caseStr <$> (bitcast op ty' >>= flip zext ty2)
+    | bs1 > bs2 = caseStr <$> (bitcast op ty' >>= flip trunc ty2)
+  where 
+    bs1 = getBits ty1
+    ty' = IntegerType bs1
+    caseStr = (,"fp" ++ show bs1 ++ "-int" ++ show bs2)
+doCast' op ty1@(IntegerType bs1) ty2@(FloatingPointType fp)
+    | bs2 == bs1 = caseStr <$> bitcast op ty2 
+    | bs2 > bs1 = caseStr <$> (zext op ty' >>= flip bitcast ty2)
+    | bs1 > bs2 = caseStr <$> (trunc op ty' >>= flip bitcast ty2) 
+  where 
+    bs2 = getBits ty1
+    ty' = IntegerType bs2
+    caseStr = (,"int" ++ show bs1 ++ "-fp" ++ show bs2)
 doCast' op ty1 ty2 =
     (,"bitcast from " ++ show ty1 ++ " case") <$> bitcast op ty2
-
 
 
 -- | Predicate to check if an operand is a constant
@@ -950,27 +965,35 @@ cgenArg ArgVar{argVarName=nm, argVarType=ty} = do
     let fromTy = repLLVMType rep
     doCast varOp fromTy toTy
 cgenArg (ArgInt val ty) = do
-    reprTy <- lift $ llvmType ty
-    lift $ logBlocks $ show val ++ " :: " ++ show ty
-        ++ " -> " ++ show reprTy
-    let bs = getBits reprTy
-    let intCons = cons $ C.Int bs val
-    return intCons
-cgenArg (ArgFloat val ty) = return $ cons $ C.Float (F.Double val)
-cgenArg (ArgString s _) =
-    do let conStr = makeStringConstant s
-       let len = length s + 1
-       let conType = array_t (fromIntegral len) char_t
-       conName <- addGlobalConstant conType conStr
-       let conPtr = C.GlobalReference (ptr_t conType) conName
-       let conElem = C.GetElementPtr True conPtr [C.Int 32 0, C.Int 32 0]
-       -- return $ cons conElem
-       -- ptrtoint (cons conElem) $ ptr_t (int_c 8)
-       -- We return integer address for strings
-       ptrtoint (cons conElem) address_t
-cgenArg (ArgChar c ty) = do t <- lift $ llvmType ty
-                            let bs = getBits t
-                            return $ cons $ C.Int bs $ integerOrd c
+    toTy <- lift $ llvmType ty
+    case toTy of
+      IntegerType bs -> do
+        lift $ logBlocks $ show val ++ " :: " ++ show ty
+            ++ " -> " ++ show toTy
+        return $ cons $ C.Int bs val
+      _ -> doCast (cons $ C.Int 64 val) int_t toTy 
+cgenArg (ArgFloat val ty) = do
+    toTy <- lift $ llvmType ty
+    case toTy of
+      FloatingPointType DoubleFP -> return $ cons $ C.Float $ F.Double val
+      _ -> doCast (cons $ C.Float $ F.Double val) float_t toTy
+cgenArg (ArgString s _) = do 
+    let conStr = makeStringConstant s
+    let len = length s + 1
+    let conType = array_t (fromIntegral len) char_t
+    conName <- addGlobalConstant conType conStr
+    let conPtr = C.GlobalReference (ptr_t conType) conName
+    let conElem = C.GetElementPtr True conPtr [C.Int 32 0, C.Int 32 0]
+    -- return $ cons conElem
+    -- ptrtoint (cons conElem) $ ptr_t (int_c 8)
+    -- We return integer address for strings
+    ptrtoint (cons conElem) address_t
+cgenArg (ArgChar c ty) = do 
+    let val = integerOrd c
+    toTy <- lift $ llvmType ty
+    case toTy of
+      IntegerType bs -> return $ cons $ C.Int bs val
+      _ -> doCast (cons $ C.Int 64 val) int_t toTy 
 cgenArg (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
 cgenArg (ArgUndef ty) = do
     llty <- lift $ llvmType ty

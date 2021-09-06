@@ -113,8 +113,8 @@ freshVar oldVar typ = do
         Nothing -> do
             newVar <- lift freshVarName
             logExpansion $ "    Generated fresh name " ++ show newVar
-            addRenaming oldVar $ ArgVar newVar typ False FlowIn Ordinary False
-            return $ ArgVar newVar typ False FlowOut Ordinary False
+            addRenaming oldVar $ ArgVar newVar typ FlowIn Ordinary False
+            return $ ArgVar newVar typ FlowOut Ordinary False
         Just newArg -> do
             logExpansion $ "    Already named it " ++ show newArg
             return newArg
@@ -269,18 +269,16 @@ inlineCall proto args body pos = do
 
 
 expandArg :: PrimArg -> Expander PrimArg
-expandArg arg@(ArgVar var typ _ flow _ _) = do
+expandArg arg@(ArgVar var ty flow _ _) = do
     renameAll <- gets inlining
     if renameAll
-      then case flow of
-      FlowOut -> freshVar var typ
-      FlowIn ->
-        gets (Map.findWithDefault
-              -- (shouldnt $ "inlining: reference to unassigned variable "
-              --  ++ show var)
-              arg
-              var . renaming)
-      else return arg
+    then case flow of
+        FlowOut -> freshVar var ty
+        FlowIn ->
+            setArgType ty <$> gets (Map.findWithDefault arg var . renaming)
+            -- (shouldnt $ "inlining: reference to unassigned variable "
+            --  ++ show var)
+    else return arg
 expandArg arg = return arg
 
 

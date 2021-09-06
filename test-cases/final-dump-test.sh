@@ -17,7 +17,7 @@ do
 	out=`echo -e "$f" | sed 's/.wybe$/.out/'`
 	exp=`echo -e "$f" | sed 's/.wybe$/.exp/'`
 	targ=`echo -e "$f" | sed 's/.wybe$/.o/'`
-	$TIMEOUT 3 ../wybemk --log=FinalDump --force-all -L $LIBDIR $targ 2>&1 \
+	$TIMEOUT 15 ../wybemk --log=FinalDump --force-all -L $LIBDIR $targ 2>&1 \
 	    | sed -e 's/@\([a-z_]*\):[0-9:]*/@\1:nn:nn/g' \
             -e "s|`pwd`|!ROOT!|g" \
             -e 's/\[[0-9][0-9]* x i8\]/[?? x i8]/g' \

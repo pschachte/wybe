@@ -53,7 +53,7 @@ module AST (
   ProcAnalysis(..), emptyProcAnalysis,
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, ResourceDef(..), ResourceIFace(..), FlowDirection(..),
-  argFlowDirection, argType, argDescription, flowsIn, flowsOut,
+  argFlowDirection, argType, setArgType, argDescription, flowsIn, flowsOut,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, procCallToExp, expOutputs, pexpListOutputs,
   setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
@@ -2628,7 +2628,6 @@ type CallSiteID = Int
 data PrimArg
      = ArgVar {argVarName     :: PrimVarName, -- ^Name of argument variable
                argVarType     :: TypeSpec,    -- ^Its type
-               argVarCoerce   :: Bool,        -- ^Whether it must be converted
                argVarFlow     :: PrimFlow,    -- ^Its flow direction
                argVarFlowType :: ArgFlowType, -- ^Its flow type
                argVarFinal    :: Bool         -- ^Is this a definite last use
@@ -2717,8 +2716,19 @@ argType (ArgUnneeded _ typ) = typ
 argType (ArgUndef typ) = typ
 
 
+-- |Set the Wybe type of a PrimArg.
+setArgType :: TypeSpec -> PrimArg -> PrimArg
+setArgType typ arg@ArgVar{} = arg{argVarType=typ}
+setArgType typ (ArgInt i _) = ArgInt i typ
+setArgType typ (ArgFloat f _) = ArgFloat f typ
+setArgType typ (ArgString s _) = ArgString s typ
+setArgType typ (ArgChar c _) = ArgChar c typ
+setArgType typ (ArgUnneeded u _) = ArgUnneeded u typ
+setArgType typ (ArgUndef _) = ArgUndef typ
+
+
 argDescription :: PrimArg -> String
-argDescription (ArgVar var _ _ flow ftype _) =
+argDescription (ArgVar var _ flow ftype _) =
     (case flow of
           FlowIn -> "input "
           FlowOut -> "output ") ++
@@ -3228,11 +3238,11 @@ showBody indent stmts =
 
 -- |Show a primitive argument.
 instance Show PrimArg where
-  show (ArgVar name typ coerce dir ftype final) =
+  show (ArgVar name typ dir ftype final) =
       (if final then "~" else "") ++
       primFlowPrefix dir ++
       show ftype ++
-      show name ++ showTypeSuffix typ (if coerce then Just AnyType else Nothing)
+      show name ++ showTypeSuffix typ Nothing
   show (ArgInt i typ)    = show i ++ showTypeSuffix typ Nothing
   show (ArgFloat f typ)  = show f ++ showTypeSuffix typ Nothing
   show (ArgString s typ) = show s ++ showTypeSuffix typ Nothing

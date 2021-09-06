@@ -619,10 +619,9 @@ updateDeadCellsByPrim proto (aliasMap, interestingCallProperties, deadCells)
 updateDeadCellsByAccessArgs :: (AliasMapLocal, DeadCells) -> [PrimArg]
         -> Compiler DeadCells
 updateDeadCellsByAccessArgs (aliasMap, deadCells) primArgs = do
-    -- [struct:type, offset:int, size:int, startOffset:int, ?member:type2]
-    let [struct@ArgVar{argVarName=varName}, _, size, startOffset, _] = primArgs
-    case size of
-        ArgInt size _ -> 
+    case primArgs of
+        -- [struct:type, offset:int, size:int, startOffset:int, ?member:type2]
+        [struct@ArgVar{argVarName=varName}, _, ArgInt size _, startOffset, _] -> 
             let size' = fromInteger size in
             case isArgUnaliased aliasMap struct of
                 Just requiredParams -> do 

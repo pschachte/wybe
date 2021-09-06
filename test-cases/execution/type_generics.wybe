@@ -1,0 +1,21 @@
+def foo(x:?t) use !io {
+    ?l = [x]
+    !println(length(l))
+}
+
+!foo(1)
+!foo(true)
+!foo(1.0)
+?x = 1.0; !foo(x) 
+
+def {test} foo2(x:?T, ?y:?T) {
+    ?l = [x]
+    [?y|_] = l
+}
+
+if {foo2(1, ?y) :: !println(y)}
+?i = 1; if {foo2(i, ?y) :: !println(y)}
+?f = 1.0; if {foo2(f, ?fx) :: !println(fx)}
+if {foo2(1.0, ?x) :: !println(x)}
+if {foo2('a', ?z) :: !println(z)}
+if {foo2(false, ?b) :: !println(b)}
