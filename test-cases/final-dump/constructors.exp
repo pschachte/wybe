@@ -20,14 +20,14 @@ AFTER EVERYTHING:
 =($left#0:constructors, $right#0:constructors, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($left#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($left#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
-        foreign llvm icmp_eq(~$left#0:constructors, ~$right#0:constructors, ?$$#0:!wybe.bool)
+        foreign llvm icmp_eq(~$left#0:constructors, ~$right#0:constructors, ?$$#0:wybe.bool)
 
     1:
         foreign lpvm access(~$left#0:constructors, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?$left$value#0:wybe.int)
-        foreign llvm icmp_ne($right#0:!wybe.int, 0:wybe.int, ?tmp$8#0:wybe.bool)
+        foreign llvm icmp_ne($right#0:wybe.int, 0:wybe.int, ?tmp$8#0:wybe.bool)
         case ~tmp$8#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -51,7 +51,7 @@ just > public {inline} (8 calls)
 just(?value#0:wybe.int, $#0:constructors, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -76,7 +76,7 @@ value > public {inline} (0 calls)
 value($rec#0:constructors, ?$#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
@@ -91,7 +91,7 @@ value > public {inline} (0 calls)
 value($rec#0:constructors, ?$rec#1:constructors, $field#0:wybe.int, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:!wybe.int, 0:wybe.int, ?tmp$0#0:!wybe.bool)
+    foreign llvm icmp_ne($rec#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)

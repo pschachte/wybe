@@ -25,8 +25,8 @@ AFTER EVERYTHING:
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp$9#0:wybe.array(?T))
     foreign lpvm mutate(~tmp$9#0:wybe.array(?T), ?tmp$10#0:wybe.array(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argc#0:wybe.int)
-    foreign lpvm mutate(~tmp$10#0:wybe.array(?T), ?tmp$1#0:wybe.array(wybe.string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argv#0:!wybe.array.raw_array(?T))
-    wybe.array.[|]<0>(?command#2:wybe.string, ?arguments#2:wybe.array(wybe.string), ~tmp$1#0:wybe.array(wybe.string), ?tmp$2#0:wybe.bool) #2 @command_line:nn:nn
+    foreign lpvm mutate(~tmp$10#0:wybe.array(?T), ?tmp$1#0:wybe.array(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argv#0:wybe.array.raw_array(?T))
+    wybe.array.[|]<0>(?command#2:?T, ?arguments#2:wybe.array(?T), ~tmp$1#0:wybe.array(?T), ?tmp$2#0:wybe.bool) #2 @command_line:nn:nn
     case ~tmp$2#0:wybe.bool of
     0:
         foreign c {terminal,semipure} error_exit("command_line:17:10":wybe.string, "Erroneous program argument vector":wybe.string) @control:nn:nn
@@ -126,7 +126,7 @@ entry:
     foreign llvm move(42:wybe.int, ?#exit_code#1:wybe.int) @command_line:nn:nn
     foreign c print_string("hello, world!":wybe.string, ~#io#0:wybe.phantom, ?tmp$5#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$5#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-    foreign lpvm access(arguments#0:!wybe.array(?T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.int)
+    foreign lpvm access(arguments#0:wybe.array(?T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.int)
     foreign c print_int(~tmp$0#0:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
     foreign c print_string(" command line argument(s)":wybe.string, ~#io#2:wybe.phantom, ?tmp$11#0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp$11#0:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn

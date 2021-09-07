@@ -1,0 +1,334 @@
+======================================================================
+AFTER EVERYTHING:
+ Module type_generics
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : type_generics.<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+*main* > public (0 calls)
+0: type_generics.<0>
+(io#0:wybe.phantom, ?io#6:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: []
+    type_generics.foo<0>(1:?t, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @type_generics:nn:nn
+    type_generics.foo<0>(1:?t, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #2 @type_generics:nn:nn
+    type_generics.foo<0>(1.0:?t, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #3 @type_generics:nn:nn
+    type_generics.foo<0>(1.0:?t, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #4 @type_generics:nn:nn
+    type_generics.foo2<0>(1:?T, ?y#0:?T, ?tmp$7#0:wybe.bool) #5 @type_generics:nn:nn
+    case ~tmp$7#0:wybe.bool of
+    0:
+        type_generics.gen$1<0>(~io#4:wybe.phantom, _:wybe.bool, _:wybe.float, ?io#6:wybe.phantom) #8
+
+    1:
+        foreign c print_int(~y#0:wybe.int, ~#io#4:wybe.phantom, ?tmp$10#0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?#io#5:wybe.phantom) @io:nn:nn
+        type_generics.gen$1<0>(~io#5:wybe.phantom, _:wybe.bool, _:wybe.float, ?io#6:wybe.phantom) #7
+
+
+
+foo > (12 calls)
+0: type_generics.foo<0>
+foo(x#0:?t, io#0:wybe.phantom, ?io#1:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm alloc(16:wybe.int, ?tmp$5#0:wybe.list(?T))
+    foreign lpvm mutate(~tmp$5#0:wybe.list(?T), ?tmp$6#0:wybe.list(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x#0:?T)
+    foreign lpvm mutate(~tmp$6#0:wybe.list(?T), ?tmp$0#0:wybe.list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(?T))
+    wybe.list.length1<0>(~tmp$0#0:wybe.list(?T), 0:wybe.int, ?tmp$2#0:wybe.int) #4 @list:nn:nn
+    foreign c print_int(~tmp$2#0:wybe.int, ~#io#0:wybe.phantom, ?tmp$10#0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+
+
+foo2 > (18 calls)
+0: type_generics.foo2<0>
+foo2(x#0:?T, ?y#0:?T, ?$$#0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign lpvm alloc(16:wybe.int, ?tmp$6#0:wybe.list(?T))
+    foreign lpvm mutate(~tmp$6#0:wybe.list(?T), ?tmp$7#0:wybe.list(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x#0:?T)
+    foreign lpvm mutate(~tmp$7#0:wybe.list(?T), ?tmp$0#0:wybe.list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(?T))
+    foreign llvm icmp_ne(tmp$0#0:wybe.int, 0:wybe.int, ?tmp$9#0:wybe.bool)
+    case ~tmp$9#0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(undef:?T, ?y#0:?T)
+
+    1:
+        foreign lpvm access(~tmp$0#0:wybe.list(?T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?y#0:?T)
+        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+
+
+
+gen$1 > (2 calls)
+0: type_generics.gen$1<0>
+gen$1(io#0:wybe.phantom, [tmp$0#0:wybe.bool], [x#0:wybe.float], ?io#2:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: []
+    type_generics.foo2<0>(1:?T, ?y#0:?T, ?tmp$6#0:wybe.bool) #0 @type_generics:nn:nn
+    case ~tmp$6#0:wybe.bool of
+    0:
+        type_generics.gen$2<0>(_:wybe.int, ~io#0:wybe.phantom, _:wybe.bool, _:wybe.float, ?io#2:wybe.phantom) #3
+
+    1:
+        foreign c print_int(~y#0:wybe.int, ~#io#0:wybe.phantom, ?tmp$9#0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp$9#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+        type_generics.gen$2<0>(_:wybe.int, ~io#1:wybe.phantom, _:wybe.bool, _:wybe.float, ?io#2:wybe.phantom) #2
+
+
+
+gen$2 > (2 calls)
+0: type_generics.gen$2<0>
+gen$2([i#0:wybe.int], io#0:wybe.phantom, [tmp$0#0:wybe.bool], [x#0:wybe.float], ?io#2:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: []
+    type_generics.foo2<0>(1.0:?T, ?fx#0:?T, ?tmp$5#0:wybe.bool) #0 @type_generics:nn:nn
+    case ~tmp$5#0:wybe.bool of
+    0:
+        type_generics.gen$3<0>(_:wybe.float, _:wybe.int, ~io#0:wybe.phantom, _:wybe.bool, _:wybe.float, ?io#2:wybe.phantom) #3
+
+    1:
+        foreign c print_float(~fx#0:wybe.float, ~#io#0:wybe.phantom, ?tmp$8#0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp$8#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+        type_generics.gen$3<0>(_:wybe.float, _:wybe.int, ~io#1:wybe.phantom, _:wybe.bool, _:wybe.float, ?io#2:wybe.phantom) #2
+
+
+
+gen$3 > (2 calls)
+0: type_generics.gen$3<0>
+gen$3([f#0:wybe.float], [i#0:wybe.int], io#0:wybe.phantom, [tmp$0#0:wybe.bool], [x#0:wybe.float], ?io#2:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: []
+    type_generics.foo2<0>(1.0:?T, ?x#1:?T, ?tmp$4#0:wybe.bool) #0 @type_generics:nn:nn
+    case ~tmp$4#0:wybe.bool of
+    0:
+        type_generics.gen$4<0>(_:wybe.float, _:wybe.int, ~io#0:wybe.phantom, _:wybe.bool, _:wybe.float, ?io#2:wybe.phantom) #3
+
+    1:
+        foreign c print_float(~x#1:wybe.float, ~#io#0:wybe.phantom, ?tmp$7#0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp$7#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+        type_generics.gen$4<0>(_:wybe.float, _:wybe.int, ~io#1:wybe.phantom, _:wybe.bool, _:wybe.float, ?io#2:wybe.phantom) #2
+
+
+
+gen$4 > (2 calls)
+0: type_generics.gen$4<0>
+gen$4([f#0:wybe.float], [i#0:wybe.int], io#0:wybe.phantom, [tmp$0#0:wybe.bool], [x#0:wybe.float], ?io#2:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: []
+    type_generics.foo2<0>('a':?T, ?z#0:?T, ?tmp$3#0:wybe.bool) #0 @type_generics:nn:nn
+    case ~tmp$3#0:wybe.bool of
+    0:
+        type_generics.gen$5<0>(_:wybe.float, _:wybe.int, ~io#0:wybe.phantom, _:wybe.bool, _:wybe.float, ?io#2:wybe.phantom) #3
+
+    1:
+        foreign c putchar(~z#0:wybe.char, ~#io#0:wybe.phantom, ?tmp$6#0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp$6#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+        type_generics.gen$5<0>(_:wybe.float, _:wybe.int, ~io#1:wybe.phantom, _:wybe.bool, _:wybe.float, ?io#2:wybe.phantom) #2
+
+
+
+gen$5 > (2 calls)
+0: type_generics.gen$5<0>
+gen$5([f#0:wybe.float], [i#0:wybe.int], io#0:wybe.phantom, [tmp$0#0:wybe.bool], [x#0:wybe.float], ?io#1:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: []
+    type_generics.foo2<0>(0:?T, ?b#0:?T, ?tmp$2#0:wybe.bool) #1 @type_generics:nn:nn
+    case ~tmp$2#0:wybe.bool of
+    0:
+        foreign llvm move(~io#0:wybe.phantom, ?io#1:wybe.phantom)
+
+    1:
+        wybe.io.print<5>(~b#0:wybe.bool, ~#io#0:wybe.phantom, ?tmp$5#0:wybe.phantom) #3 @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp$5#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+
+
+  LLVM code       :
+
+; ModuleID = 'type_generics'
+
+
+ 
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_int(i64)    
+
+
+declare external fastcc  i64 @"wybe.list.length1<0>"(i64, i64)    
+
+
+declare external ccc  void @print_float(double)    
+
+
+declare external fastcc  void @"wybe.io.print<5>"(i1)    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+
+
+define external fastcc  void @"type_generics.<0>"()    {
+entry:
+  tail call fastcc  void  @"type_generics.foo<0>"(i64  1)  
+  tail call fastcc  void  @"type_generics.foo<0>"(i64  1)  
+  %1 = bitcast double 1.000000e0 to i64 
+  tail call fastcc  void  @"type_generics.foo<0>"(i64  %1)  
+  %2 = bitcast double 1.000000e0 to i64 
+  tail call fastcc  void  @"type_generics.foo<0>"(i64  %2)  
+  %3 = tail call fastcc  {i64, i1}  @"type_generics.foo2<0>"(i64  1)  
+  %4 = extractvalue {i64, i1} %3, 0 
+  %5 = extractvalue {i64, i1} %3, 1 
+  br i1 %5, label %if.then, label %if.else 
+if.then:
+  tail call ccc  void  @print_int(i64  %4)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"type_generics.gen$1<0>"()  
+  ret void 
+if.else:
+  tail call fastcc  void  @"type_generics.gen$1<0>"()  
+  ret void 
+}
+
+
+define external fastcc  void @"type_generics.foo<0>"(i64  %"x#0")    {
+entry:
+  %6 = trunc i64 16 to i32  
+  %7 = tail call ccc  i8*  @wybe_malloc(i32  %6)  
+  %8 = ptrtoint i8* %7 to i64 
+  %9 = inttoptr i64 %8 to i64* 
+  %10 = getelementptr  i64, i64* %9, i64 0 
+  store  i64 %"x#0", i64* %10 
+  %11 = add   i64 %8, 8 
+  %12 = inttoptr i64 %11 to i64* 
+  %13 = getelementptr  i64, i64* %12, i64 0 
+  store  i64 0, i64* %13 
+  %"1$tmp$2#0" = tail call fastcc  i64  @"wybe.list.length1<0>"(i64  %8, i64  0)  
+  tail call ccc  void  @print_int(i64  %"1$tmp$2#0")  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+}
+
+
+define external fastcc  {i64, i1} @"type_generics.foo2<0>"(i64  %"x#0")    {
+entry:
+  %14 = trunc i64 16 to i32  
+  %15 = tail call ccc  i8*  @wybe_malloc(i32  %14)  
+  %16 = ptrtoint i8* %15 to i64 
+  %17 = inttoptr i64 %16 to i64* 
+  %18 = getelementptr  i64, i64* %17, i64 0 
+  store  i64 %"x#0", i64* %18 
+  %19 = add   i64 %16, 8 
+  %20 = inttoptr i64 %19 to i64* 
+  %21 = getelementptr  i64, i64* %20, i64 0 
+  store  i64 0, i64* %21 
+  %"1$tmp$9#0" = icmp ne i64 %16, 0 
+  br i1 %"1$tmp$9#0", label %if.then, label %if.else 
+if.then:
+  %22 = inttoptr i64 %16 to i64* 
+  %23 = getelementptr  i64, i64* %22, i64 0 
+  %24 = load  i64, i64* %23 
+  %25 = insertvalue {i64, i1} undef, i64 %24, 0 
+  %26 = insertvalue {i64, i1} %25, i1 1, 1 
+  ret {i64, i1} %26 
+if.else:
+  %27 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %28 = insertvalue {i64, i1} %27, i1 0, 1 
+  ret {i64, i1} %28 
+}
+
+
+define external fastcc  void @"type_generics.gen$1<0>"()    {
+entry:
+  %29 = tail call fastcc  {i64, i1}  @"type_generics.foo2<0>"(i64  1)  
+  %30 = extractvalue {i64, i1} %29, 0 
+  %31 = extractvalue {i64, i1} %29, 1 
+  br i1 %31, label %if.then, label %if.else 
+if.then:
+  tail call ccc  void  @print_int(i64  %30)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"type_generics.gen$2<0>"()  
+  ret void 
+if.else:
+  tail call fastcc  void  @"type_generics.gen$2<0>"()  
+  ret void 
+}
+
+
+define external fastcc  void @"type_generics.gen$2<0>"()    {
+entry:
+  %32 = bitcast double 1.000000e0 to i64 
+  %33 = tail call fastcc  {i64, i1}  @"type_generics.foo2<0>"(i64  %32)  
+  %34 = extractvalue {i64, i1} %33, 0 
+  %35 = extractvalue {i64, i1} %33, 1 
+  br i1 %35, label %if.then, label %if.else 
+if.then:
+  %36 = bitcast i64 %34 to double 
+  tail call ccc  void  @print_float(double  %36)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"type_generics.gen$3<0>"()  
+  ret void 
+if.else:
+  tail call fastcc  void  @"type_generics.gen$3<0>"()  
+  ret void 
+}
+
+
+define external fastcc  void @"type_generics.gen$3<0>"()    {
+entry:
+  %37 = bitcast double 1.000000e0 to i64 
+  %38 = tail call fastcc  {i64, i1}  @"type_generics.foo2<0>"(i64  %37)  
+  %39 = extractvalue {i64, i1} %38, 0 
+  %40 = extractvalue {i64, i1} %38, 1 
+  br i1 %40, label %if.then, label %if.else 
+if.then:
+  %41 = bitcast i64 %39 to double 
+  tail call ccc  void  @print_float(double  %41)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"type_generics.gen$4<0>"()  
+  ret void 
+if.else:
+  tail call fastcc  void  @"type_generics.gen$4<0>"()  
+  ret void 
+}
+
+
+define external fastcc  void @"type_generics.gen$4<0>"()    {
+entry:
+  %42 = tail call fastcc  {i64, i1}  @"type_generics.foo2<0>"(i64  97)  
+  %43 = extractvalue {i64, i1} %42, 0 
+  %44 = extractvalue {i64, i1} %42, 1 
+  br i1 %44, label %if.then, label %if.else 
+if.then:
+  %45 = trunc i64 %43 to i8  
+  tail call ccc  void  @putchar(i8  %45)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"type_generics.gen$5<0>"()  
+  ret void 
+if.else:
+  tail call fastcc  void  @"type_generics.gen$5<0>"()  
+  ret void 
+}
+
+
+define external fastcc  void @"type_generics.gen$5<0>"()    {
+entry:
+  %46 = tail call fastcc  {i64, i1}  @"type_generics.foo2<0>"(i64  0)  
+  %47 = extractvalue {i64, i1} %46, 0 
+  %48 = extractvalue {i64, i1} %46, 1 
+  br i1 %48, label %if.then, label %if.else 
+if.then:
+  %49 = trunc i64 %47 to i1  
+  tail call fastcc  void  @"wybe.io.print<5>"(i1  %49)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+if.else:
+  ret void 
+}

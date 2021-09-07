@@ -8,6 +8,7 @@
 -- |Support for type checking/inference.
 module Types (validateModExportTypes, typeCheckModSCC) where
 
+import           Debug.Trace
 import           AST
 import           Control.Monad
 import           Control.Monad.State
@@ -77,7 +78,7 @@ validateProcDefTypes name def = do
 validateParamType :: Ident -> OptPos -> Bool -> Param -> Compiler Param
 validateParamType pname ppos public param = do
     let ty = paramType param
-    -- XXX For Issue #135, but this issues warnings about OK constructor decls
+    -- XXX For Issue #135, but this issues warnings about OK constructor decls 
     -- currMod <- getModuleSpec
     -- case ty of
     --     TypeSpec tmod tname _ | tname == last currMod && tmod == init currMod ->
@@ -557,6 +558,8 @@ unifyTypes reason t1 t2 = do
 -- both arguments are type variables, this need not bind them, as unifyTypes
 -- will do that.
 unifyTypes' :: TypeError -> TypeSpec -> TypeSpec -> Typed TypeSpec
+unifyTypes' reason ty1 ty2
+  | occursCheck ty1 ty2 = typeError reason >> return InvalidType
 unifyTypes' reason InvalidType _ = return InvalidType
 unifyTypes' reason _ InvalidType = return InvalidType
 unifyTypes' reason AnyType ty    = return ty
@@ -586,6 +589,31 @@ unifyTypes' reason ty1@(TypeSpec m1 n1 ps1) ty2@(TypeSpec m2 n2 ps2)
           | m1 `isSuffixOf` m2 = (True,  m2)
           | m2 `isSuffixOf` m1 = (True,  m1)
           | otherwise          = (False, [])
+
+
+-- | Checks if two types' are cyclic. 
+-- That is if one type variable is contained in the other
+occursCheck :: TypeSpec -> TypeSpec -> Bool
+occursCheck ty1@TypeVariable{typeVariableName=nm} ty2
+  = containstypeVar nm ty2
+occursCheck ty1 ty2@TypeVariable{typeVariableName=nm}
+  = containstypeVar nm ty1
+occursCheck _ _ = False
+
+
+-- | Checks if the given TypeVarName is contained within the TypeSpec.
+-- Does not hold for a TypeVariable
+containstypeVar :: TypeVarName -> TypeSpec -> Bool
+containstypeVar nm TypeSpec{typeParams=tys} = any (containstypeVar' nm) tys 
+containstypeVar _ _ = False
+
+
+-- | Checks if the given TypeVarName is contained within the TypeSpec.
+-- Holds for a TypeVariable
+containstypeVar' :: TypeVarName -> TypeSpec -> Bool
+containstypeVar' nm TypeVariable{typeVariableName=nm'} = nm == nm'
+containstypeVar' nm TypeSpec{typeParams=tys} = any (containstypeVar' nm) tys 
+containstypeVar' _ _ = False
 
 
 -- |Generate a unique fresh type variable.
@@ -1190,8 +1218,9 @@ matchTypeList' callee pos callArgTypes calleeInfo = do
     let calleeTypes = typeFlowType <$> args
     let calleeFlows = typeFlowMode <$> args
     typing0 <- get
+    calleeTypes' <- refreshTypes calleeTypes
     matches <- zipWith3M (unifyTypes . flip (ReasonArgType callee) pos)
-               [1..] callArgTypes calleeTypes
+               [1..] callArgTypes calleeTypes'
     logTyping "Matched with typing: "
     typing <- get
     put typing0 -- reset to initial typing
@@ -1200,9 +1229,45 @@ matchTypeList' callee pos callArgTypes calleeInfo = do
     if List.null mismatches
     then return $ OK
          (calleeInfo
-          {procInfoArgs = List.zipWith TypeFlow matches calleeFlows},
+        -- XXX this throws away the types of the callee
+        --   {procInfoArgs = List.zipWith TypeFlow matches calleeFlows},
+          {procInfoArgs = List.zipWith TypeFlow calleeTypes calleeFlows},
+
           typing)
     else return $ Err [ReasonArgType callee n pos | n <- mismatches]
+
+
+-- | Refresh all type variables in a list of TypeSpecs.
+-- Does not modify the underlying Typing, excluding the typeVarCounter
+refreshTypes :: [TypeSpec] -> Typed [TypeSpec]
+refreshTypes tys = do
+    typing0 <- get
+    modify (\s -> initTyping{typeVarCounter=typeVarCounter s})
+    tys' <- refreshTypeVars tys
+    logTyping $ "Refreshed types " ++ show tys ++ " with " ++ show tys'
+    modify (\s -> typing0{typeVarCounter=typeVarCounter s})
+    return tys'
+
+
+-- | Replace all TypeVariables in a list of TypeSpecs with fresh TypeVariables
+refreshTypeVars :: [TypeSpec] -> Typed [TypeSpec]
+refreshTypeVars = mapM refreshTypeVar
+
+
+-- | Replace all TypeVariables in a TypeSpec with fresh TypeVariables
+refreshTypeVar :: TypeSpec -> Typed TypeSpec
+refreshTypeVar ty@TypeVariable{typeVariableName=nm} = do
+    mbty' <- gets $ Map.lookup nm . tvarDict
+    case mbty' of
+        Just ty' -> return ty'
+        Nothing -> do
+            ty' <- freshTypeVar
+            modify (\s -> s{tvarDict=Map.insert nm ty' $ tvarDict s})
+            return ty'
+refreshTypeVar ty@TypeSpec{typeParams=tys} = do
+    tys' <- refreshTypeVars tys
+    return ty{typeParams=tys'}
+refreshTypeVar ty = return ty
 
 
 ----------------------------------------------------------------
