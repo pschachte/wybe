@@ -967,11 +967,8 @@ cgenArg ArgVar{argVarName=nm, argVarType=ty} = do
 cgenArg (ArgInt val ty) = do
     toTy <- lift $ llvmType ty
     case toTy of
-      IntegerType bs -> do
-        lift $ logBlocks $ show val ++ " :: " ++ show ty
-            ++ " -> " ++ show toTy
-        return $ cons $ C.Int bs val
-      _ -> doCast (cons $ C.Int 64 val) int_t toTy 
+      IntegerType bs -> return $ cons $ C.Int bs val
+      _ -> doCast (cons $ C.Int (fromIntegral wordSize) val) int_t toTy 
 cgenArg (ArgFloat val ty) = do
     toTy <- lift $ llvmType ty
     case toTy of
@@ -993,7 +990,7 @@ cgenArg (ArgChar c ty) = do
     toTy <- lift $ llvmType ty
     case toTy of
       IntegerType bs -> return $ cons $ C.Int bs val
-      _ -> doCast (cons $ C.Int 64 val) int_t toTy 
+      _ -> doCast (cons $ C.Int (fromIntegral wordSize) val) int_t toTy 
 cgenArg (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
 cgenArg (ArgUndef ty) = do
     llty <- lift $ llvmType ty
