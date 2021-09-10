@@ -536,9 +536,9 @@ nonConstCtorItems vis typeSpec numConsts numNonConsts tagBits tagLimit
               unboxedConstructorItems vis ctorName typeSpec tag nonConstBit
                fields pos
                ++ unboxedDeconstructorItems vis ctorName typeSpec
-                  numConsts numNonConsts tag pos fields
+                  numConsts numNonConsts tag tagBits pos fields
                ++ concatMap (unboxedGetterSetterItems vis typeSpec
-                             numConsts numNonConsts tag pos) fields
+                             numConsts numNonConsts tag tagBits pos) fields
              )
       else do -- boxed representation
       let (fields,size) = layoutRecord paramsReps tag tagLimit
@@ -553,10 +553,10 @@ nonConstCtorItems vis typeSpec numConsts numNonConsts tagBits tagLimit
               constructorItems ctorName typeSpec params fields
                   size tag tagLimit pos
               ++ deconstructorItems ctorName typeSpec params numConsts
-                     numNonConsts tag tagLimit pos fields size
+                     numNonConsts tag tagBits tagLimit pos fields size
               ++ concatMap
                  (getterSetterItems vis typeSpec pos numConsts numNonConsts
-                  ptrCount size tag tagLimit)
+                  ptrCount size tag tagBits tagLimit)
                  fields
              )
 
@@ -658,10 +658,10 @@ constructorItems ctorName typeSpec params fields size tag tagLimit pos =
 
 -- |Generate deconstructor code for a non-const deconstructor
 deconstructorItems :: Ident -> TypeSpec -> [Param] -> Int -> Int -> Int -> Int
-                   -> OptPos -> [(Ident,TypeSpec,TypeRepresentation,Int)]
+                   -> Int -> OptPos -> [(Ident,TypeSpec,TypeRepresentation,Int)]
                    -> Int -> [Item]
-deconstructorItems ctorName typeSpec params numConsts numNonConsts tag tagLimit
-                   pos fields size =
+deconstructorItems ctorName typeSpec params numConsts numNonConsts tag tagBits 
+                   tagLimit pos fields size =
     let startOffset = (if tag > tagLimit then tagLimit+1 else tag)
         flowType = Implicit pos
         detism = deconstructorDetism numConsts numNonConsts
@@ -671,7 +671,7 @@ deconstructorItems ctorName typeSpec params numConsts numNonConsts tag tagLimit
           ++ [Param "$" typeSpec ParamIn Ordinary])
          Set.empty)
         -- Code to check we have the right constructor
-        ([tagCheck numConsts numNonConsts tag tagLimit (Just size) "$"]
+        ([tagCheck numConsts numNonConsts tag tagBits tagLimit (Just size) "$"]
          -- Code to fetch all the fields
          ++ List.map (\(var,_,_,aligned) ->
                               (Unplaced $ ForeignCall "lpvm" "access" []
@@ -687,8 +687,8 @@ deconstructorItems ctorName typeSpec params numConsts numNonConsts tag tagLimit
 -- |Generate the needed Test statements to check that the tag of the value
 --  of the specified variable matches the specified tag.  If not checking
 --  is necessary, just generate a Nop, rather than a true test.
-tagCheck :: Int -> Int -> Int -> Int -> Maybe Int -> Ident -> Placed Stmt
-tagCheck numConsts numNonConsts tag tagLimit size varName =
+tagCheck :: Int -> Int -> Int -> Int -> Int -> Maybe Int -> Ident -> Placed Stmt
+tagCheck numConsts numNonConsts tag tagBits tagLimit size varName =
     let startOffset = (if tag > tagLimit then tagLimit+1 else tag) in
     -- If there are any constant constructors, be sure it's not one of them
     let tests =
@@ -705,7 +705,7 @@ tagCheck numConsts numNonConsts tag tagLimit size varName =
                _ -> [comparison "icmp_eq"
                      (intCast $ ForeignFn "llvm" "and" []
                       [Unplaced $ intCast $ varGet varName,
-                       Unplaced $ iVal tagMask `withType` intType])
+                       Unplaced $ iVal (2^tagBits-1) `withType` intType])
                      (intCast $ iVal (if tag > tagLimit
                                       then wordSizeBytes-1
                                       else tag))])
@@ -733,12 +733,12 @@ tagCheck numConsts numNonConsts tag tagLimit size varName =
 --  We use the stripped name with "$asInt" appended as a temp var name.
 -- | Produce a getter and a setter for one field of the specified type.
 getterSetterItems :: Visibility -> TypeSpec -> OptPos
-                    -> Int -> Int -> Int -> Int -> Int -> Int
+                    -> Int -> Int -> Int -> Int -> Int -> Int -> Int
                     -> (VarName,TypeSpec,TypeRepresentation,Int) -> [Item]
-getterSetterItems _ _ _ _ _ _ _ _ _ (field,_,_,_)
+getterSetterItems _ _ _ _ _ _ _ _ _ _ (field,_,_,_)
   | isAnonymousField field = []
 getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
-                  tag tagLimit (field,fieldtype,rep,offset) =
+                  tag tagBits tagLimit (field,fieldtype,rep,offset) =
     -- XXX generate cleverer code if multiple constructors have some of
     --     the same field names
     let startOffset = (if tag > tagLimit then tagLimit+1 else tag) in
@@ -753,7 +753,8 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
         (ProcProto field [Param "$rec" rectype ParamIn Ordinary,
                           Param "$" fieldtype ParamOut Ordinary] Set.empty)
         -- Code to check we have the right constructor
-        (tagCheck numConsts numNonConsts tag tagLimit (Just size) "$rec" :
+        ([tagCheck numConsts numNonConsts tag tagBits tagLimit (Just size) "$rec"]
+         ++
         -- Code to access the selected field
          [Unplaced $ ForeignCall "lpvm" "access" []
           [Unplaced $ varGet "$rec",
@@ -767,7 +768,8 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
         (ProcProto field [Param "$rec" rectype ParamInOut Ordinary,
                           Param "$field" fieldtype ParamIn Ordinary] Set.empty)
         -- Code to check we have the right constructor
-        (tagCheck numConsts numNonConsts tag tagLimit (Just size) "$rec" :
+        ([tagCheck numConsts numNonConsts tag tagBits tagLimit (Just size) "$rec"]
+         ++
         -- Code to mutate the selected field
          [Unplaced $ ForeignCall "lpvm" "mutate" flags
           [Unplaced $ Typed (Var "$rec" ParamIn Ordinary) rectype Nothing,
@@ -834,10 +836,10 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
 
 -- |Generate deconstructor code for a unboxed non-const constructor
 unboxedDeconstructorItems :: Visibility -> ProcName -> TypeSpec -> Int -> Int
-                          -> Int -> OptPos -> [(VarName,TypeSpec,Int,Int)]
-                          -> [Item]
+                          -> Int -> Int -> OptPos
+                          -> [(VarName,TypeSpec,Int,Int)] -> [Item]
 unboxedDeconstructorItems vis ctorName recType numConsts numNonConsts tag
-                          pos fields =
+                          tagBits pos fields =
     let flowType = Implicit pos
         detism = deconstructorDetism numConsts numNonConsts
     in [ProcDecl vis (inlineModifier detism)
@@ -847,7 +849,7 @@ unboxedDeconstructorItems vis ctorName recType numConsts numNonConsts tag
           ++ [Param "$" recType ParamIn Ordinary])
          Set.empty)
          -- Code to check we have the right constructor
-        ([tagCheck numConsts numNonConsts tag (wordSizeBytes-1) Nothing "$"]
+        ([tagCheck numConsts numNonConsts tag tagBits (wordSizeBytes-1) Nothing "$"]
          -- Code to fetch all the fields
          ++ List.concatMap
             (\(var,fieldType,shift,sz) ->
@@ -869,11 +871,11 @@ unboxedDeconstructorItems vis ctorName recType numConsts numNonConsts tag
 
 
 -- -- | Produce a getter and a setter for one field of the specified type.
-unboxedGetterSetterItems :: Visibility -> TypeSpec -> Int -> Int -> Int
+unboxedGetterSetterItems :: Visibility -> TypeSpec -> Int -> Int -> Int -> Int
                          -> OptPos -> (VarName,TypeSpec,Int,Int) -> [Item]
-unboxedGetterSetterItems _ _ _ _ _ _ (field,_,_,_)
+unboxedGetterSetterItems _ _ _ _ _ _ _ (field,_,_,_)
   | isAnonymousField field = []
-unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
+unboxedGetterSetterItems vis recType numConsts numNonConsts tag tagBits pos
                          (field,fieldType,shift,sz) =
     -- XXX generate cleverer code if multiple constructors have some of
     --     the same field names
@@ -885,7 +887,8 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
         (ProcProto field [Param "$rec" recType ParamIn Ordinary,
                           Param "$" fieldType ParamOut Ordinary] Set.empty)
         -- Code to check we have the right constructor
-        (tagCheck numConsts numNonConsts tag (wordSizeBytes-1) Nothing "$rec" :
+        ([tagCheck numConsts numNonConsts tag tagBits (wordSizeBytes-1) Nothing "$rec"]
+         ++
         -- Code to access the selected field
          [Unplaced $ ForeignCall "llvm" "lshr" []
            [Unplaced $ Typed (varGet "$rec") recType Nothing,
@@ -906,7 +909,8 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
         (ProcProto field [Param "$rec" recType ParamInOut Ordinary,
                           Param "$field" fieldType ParamIn Ordinary] Set.empty)
         -- Code to check we have the right constructor
-        (tagCheck numConsts numNonConsts tag (wordSizeBytes-1) Nothing "$rec" :
+        ([tagCheck numConsts numNonConsts tag tagBits (wordSizeBytes-1) Nothing "$rec"]
+         ++
         -- Code to mutate the selected field by masking out the current
         -- value, shifting the new value into place and bitwise or-ing it
          [Unplaced $ ForeignCall "llvm" "and" []
