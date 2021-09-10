@@ -12,7 +12,7 @@
 module Normalise (normalise, normaliseItem, completeNormalisation) where
 
 import AST
-import Config (wordSize, wordSizeBytes, availableTagBits,
+import Config (wordSize, wordSizeBytes, availableTagBits, anonFieldName,
                tagMask, smallestAllocatedAddress)
 import Control.Monad
 import Control.Monad.State (gets)
@@ -184,7 +184,7 @@ completeNormalisation mods = do
 --   as we process it.
 completeTypeNormalisation :: [ModSpec] -> Compiler ()
 completeTypeNormalisation mods = do
-    mods' <- filterM (getSpecModule "completeTypeNormalisation" 
+    mods' <- filterM (getSpecModule "completeTypeNormalisation"
                       (modIsType &&& isNothing . modTypeRep)) mods
     typeSCCs <- modSCCTypeDeps mods'
     logNormalise $ "Ordered type dependency SCCs: " ++ show typeSCCs
@@ -231,7 +231,7 @@ modTypeDeps modSet = do
     let vis = fst $ head ctorsVis
     ctors <- mapM (placedApply resolveCtorTypes . snd) ctorsVis
     let deps = List.filter (`Set.member` modSet)
-               $ concatMap 
+               $ concatMap
                  (catMaybes . (typeModule . paramType <$>)
                   . procProtoParams . content)
                  ctors
@@ -311,17 +311,18 @@ completeType modspec (TypeDef params ctors ctorVis) = do
       $ shouldnt $ "completeType with no constructors: " ++ show modspec
     reenterModule modspec
     let (constCtors,nonConstCtors) =
-            List.partition (List.null . procProtoParams . content) $ ctors
+            List.partition (List.null . procProtoParams . content) ctors
+    let anonymisedNonConstCtors = List.map normaliseAnonFields nonConstCtors
     let numConsts = length constCtors
     let numNonConsts = length nonConstCtors
-    let (tagBits,tagLimit) =
-          if numNonConsts > wordSizeBytes
-          then -- must set aside one tag to indicate secondary tag
-            (availableTagBits, wordSizeBytes - 2)
-          else if numNonConsts == 0
-          then (0, 0)
-          else (ceiling $ logBase 2 (fromIntegral numNonConsts),
-                wordSizeBytes - 1)
+    let (tagBits,tagLimit)
+         | numNonConsts > wordSizeBytes
+         = -- must set aside one tag to indicate secondary tag
+           (availableTagBits, wordSizeBytes - 2)
+         | numNonConsts == 0
+         = (0, 0)
+         | otherwise 
+         = (ceiling $ logBase 2 (fromIntegral numNonConsts), wordSizeBytes - 1)
     logNormalise $ "Complete " ++ showModSpec modspec
                    ++ " with " ++ show tagBits ++ " tag bits and "
                    ++ show tagLimit ++ " tag limit"
@@ -333,20 +334,41 @@ completeType modspec (TypeDef params ctors ctorVis) = do
                    $ List.map TypeVariable params
     let constItems =
           concatMap (constCtorItems ctorVis typespec) $ zip constCtors [0..]
-    infos <- zipWithM nonConstCtorInfo nonConstCtors [0..]
+    infos <- zipWithM nonConstCtorInfo anonymisedNonConstCtors [0..]
     (reps,nonconstItemsList) <-
          unzip <$> mapM
          (nonConstCtorItems ctorVis typespec numConsts numNonConsts
           tagBits tagLimit)
          infos
     let rep = typeRepresentation reps numConsts
-    extraItems <- implicitItems typespec constCtors nonConstCtors rep
+    extraItems <- implicitItems typespec constCtors anonymisedNonConstCtors rep
     logNormalise $ "Representation of type " ++ showModSpec modspec
                    ++ " is " ++ show rep
     setTypeRep rep
     normalise $ constItems ++ concat nonconstItemsList ++ extraItems
     reexitModule
     return ()
+
+
+-- | Replaces anonymous fields ("_") with obfustaced names
+normaliseAnonFields :: Placed ProcProto -> Placed ProcProto
+normaliseAnonFields proto = maybePlace proc{procProtoParams=params'} pos
+  where
+    proc@ProcProto{procProtoParams=params} = content proto
+    pos = place proto
+    params' = zipWith anonymiseParamName [1..] params
+
+
+-- | Replaces an anonymous name ("_") with an obfuscated name
+anonymiseParamName :: Int -> Param -> Param
+anonymiseParamName i p@Param{paramName=n}
+  | n == anonFieldName = p{paramName=show i ++ "$" ++ anonFieldName}
+anonymiseParamName _ p = p
+
+
+-- | Checks if a field is anonymous or an obfuscated anonymous field
+isAnonymousField :: VarName -> Bool
+isAnonymousField n = n == anonFieldName || isSuffixOf ("$"++anonFieldName) n
 
 
 -- | Analyse the representation of a single constructor, determining the
@@ -634,7 +656,7 @@ constructorItems ctorName typeSpec params fields size tag tagLimit pos =
         pos]
 
 
--- |Generate deconstructor code for a non-const constructor
+-- |Generate deconstructor code for a non-const deconstructor
 deconstructorItems :: Ident -> TypeSpec -> [Param] -> Int -> Int -> Int -> Int
                    -> OptPos -> [(Ident,TypeSpec,TypeRepresentation,Int)]
                    -> Int -> [Item]
@@ -713,6 +735,8 @@ tagCheck numConsts numNonConsts tag tagLimit size varName =
 getterSetterItems :: Visibility -> TypeSpec -> OptPos
                     -> Int -> Int -> Int -> Int -> Int -> Int
                     -> (VarName,TypeSpec,TypeRepresentation,Int) -> [Item]
+getterSetterItems _ _ _ _ _ _ _ _ _ (field,_,_,_)
+  | isAnonymousField field = []
 getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
                   tag tagLimit (field,fieldtype,rep,offset) =
     -- XXX generate cleverer code if multiple constructors have some of
@@ -723,14 +747,13 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
         -- that is being changed) in this struct aren't [Address].
         -- This flag is used in [AliasAnalysis.hs]
         otherPtrCount = if rep == Address then ptrCount-1 else ptrCount
-        flags = if otherPtrCount == 0 then ["noalias"] else []
+        flags = ["noalias" | otherPtrCount == 0]
     in [-- The getter:
         ProcDecl vis (inlineModifier detism)
         (ProcProto field [Param "$rec" rectype ParamIn Ordinary,
                           Param "$" fieldtype ParamOut Ordinary] Set.empty)
         -- Code to check we have the right constructor
-        ([tagCheck numConsts numNonConsts tag tagLimit (Just size) "$rec"]
-         ++
+        (tagCheck numConsts numNonConsts tag tagLimit (Just size) "$rec" :
         -- Code to access the selected field
          [Unplaced $ ForeignCall "lpvm" "access" []
           [Unplaced $ varGet "$rec",
@@ -744,8 +767,7 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
         (ProcProto field [Param "$rec" rectype ParamInOut Ordinary,
                           Param "$field" fieldtype ParamIn Ordinary] Set.empty)
         -- Code to check we have the right constructor
-        ([tagCheck numConsts numNonConsts tag tagLimit (Just size) "$rec"]
-         ++
+        (tagCheck numConsts numNonConsts tag tagLimit (Just size) "$rec" :
         -- Code to mutate the selected field
          [Unplaced $ ForeignCall "lpvm" "mutate" flags
           [Unplaced $ Typed (Var "$rec" ParamIn Ordinary) rectype Nothing,
@@ -849,6 +871,8 @@ unboxedDeconstructorItems vis ctorName recType numConsts numNonConsts tag
 -- -- | Produce a getter and a setter for one field of the specified type.
 unboxedGetterSetterItems :: Visibility -> TypeSpec -> Int -> Int -> Int
                          -> OptPos -> (VarName,TypeSpec,Int,Int) -> [Item]
+unboxedGetterSetterItems _ _ _ _ _ _ (field,_,_,_)
+  | isAnonymousField field = []
 unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
                          (field,fieldType,shift,sz) =
     -- XXX generate cleverer code if multiple constructors have some of
@@ -861,8 +885,7 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
         (ProcProto field [Param "$rec" recType ParamIn Ordinary,
                           Param "$" fieldType ParamOut Ordinary] Set.empty)
         -- Code to check we have the right constructor
-        ([tagCheck numConsts numNonConsts tag (wordSizeBytes-1) Nothing "$rec"]
-         ++
+        (tagCheck numConsts numNonConsts tag (wordSizeBytes-1) Nothing "$rec" :
         -- Code to access the selected field
          [Unplaced $ ForeignCall "llvm" "lshr" []
            [Unplaced $ Typed (varGet "$rec") recType Nothing,
@@ -883,8 +906,7 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
         (ProcProto field [Param "$rec" recType ParamInOut Ordinary,
                           Param "$field" fieldType ParamIn Ordinary] Set.empty)
         -- Code to check we have the right constructor
-        ([tagCheck numConsts numNonConsts tag (wordSizeBytes-1) Nothing "$rec"]
-         ++
+        (tagCheck numConsts numNonConsts tag (wordSizeBytes-1) Nothing "$rec" :
         -- Code to mutate the selected field by masking out the current
         -- value, shifting the new value into place and bitwise or-ing it
          [Unplaced $ ForeignCall "llvm" "and" []
@@ -892,7 +914,7 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag pos
             Unplaced $ Typed (iVal shiftedHoleMask) recType Nothing,
             Unplaced $ Typed (varSet "$rec") recType Nothing],
           Unplaced $ ForeignCall "llvm" "shl" []
-           [Unplaced $ (castFromTo fieldType recType (varGet "$field")),
+           [Unplaced (castFromTo fieldType recType (varGet "$field")),
             Unplaced $ iVal shift `castTo` recType,
             Unplaced $ Typed (varSet "$tmp") recType Nothing],
           Unplaced $ ForeignCall "llvm" "or" []

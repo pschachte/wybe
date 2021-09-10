@@ -10,7 +10,7 @@
 --  OSes.
 module Config (sourceExtension, objectExtension, executableExtension,
                bitcodeExtension, assemblyExtension, archiveExtension, 
-               moduleDirectoryBasename, currentTypeAlias,
+               moduleDirectoryBasename, currentTypeAlias, anonFieldName,
                wordSize, wordSizeBytes,
                availableTagBits, tagMask, smallestAllocatedAddress,
                magicVersion,
@@ -66,6 +66,11 @@ moduleDirectoryBasename = "_"
 -- |The special name given to the type defined by the current module.
 currentTypeAlias :: String
 currentTypeAlias = "_"
+
+
+-- |The special name given to fields with no implicit getter/setter.
+anonFieldName :: String
+anonFieldName = "_"
 
 
 -- |Determining word size of the machine in bits
