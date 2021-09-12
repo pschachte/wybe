@@ -993,7 +993,7 @@ stmtExprToExp (Foreign pos lang inst flags args) =
 stmtExprToExp (IntConst pos num)    = Right $ Placed (IntValue num) pos
 stmtExprToExp (FloatConst pos num)  = Right $ Placed (FloatValue num) pos
 stmtExprToExp (CharConst pos char)  = Right $ Placed (CharValue char) pos
-stmtExprToExp (StringConst pos str) = Right $ Placed (StringValue str) pos
+stmtExprToExp (StringConst pos str) = Right $ Placed (StringValue str False) pos
 
 
 -- |Translate an `if` expression into a Placed conditional Exp

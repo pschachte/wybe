@@ -1,8 +1,9 @@
 pub def {semipure} logmsg(x:int) { foreign c {impure} log_int(x) }
 pub def {semipure} logmsg(x:float) { foreign c {impure} log_float(x) }
 pub def {semipure} logmsg(x:char) { foreign c {impure} log_char(x) }
-pub def {semipure} logmsg(x:string) { foreign c {impure} log_string(x) }
+pub def {semipure} logmsg(x:raw_string) { foreign c {impure} log_string(x) }
+pub def {semipure} logmsg(x:string) { ?raw = raw_string(x); foreign c {impure} log_string(raw) }
 pub def {semipure} logmsg(x:bool) {
-   !logmsg(if {x:: "true" | else:: "false"})
+   !logmsg(if {x:: "true":raw_string | else:: "false":raw_string})
 }
 pub def {semipure} lognl { !logmsg('\n') }

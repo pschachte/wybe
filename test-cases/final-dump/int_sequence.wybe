@@ -9,6 +9,6 @@ pub def {test} [?head:int | ?tail:_]:_ = ?seq where {
     ?tail = (seq^lower+1)..seq^upper
 }
 
-for ?i in 1..10 {
+for ?i in (1..10):_ {
     !println(i)
 }

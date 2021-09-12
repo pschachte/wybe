@@ -450,7 +450,7 @@ flattenExp expr@(IntValue _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos
 flattenExp expr@(FloatValue _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos
-flattenExp expr@(StringValue _) ty castFrom pos =
+flattenExp expr@(StringValue _ _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos
 flattenExp expr@(CharValue _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos

@@ -1,0 +1,42 @@
+
+TESTING EQULAITY
+true
+false
+false
+false
+false
+
+TESTING INEQULAITY
+false
+true
+true
+true
+true
+
+TESTING LESS
+false
+true
+false
+false
+false
+
+TESTING LESSEQ
+true
+true
+false
+false
+false
+
+TESTING GREATER
+false
+false
+true
+true
+true
+
+TESTING GREATEREQ
+true
+false
+true
+true
+true

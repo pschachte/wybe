@@ -55,8 +55,7 @@ module AST (
   ProcName, ResourceDef(..), ResourceIFace(..), FlowDirection(..),
   argFlowDirection, argType, setArgType, argDescription, flowsIn, flowsOut,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
-  expToStmt, seqToStmt, procCallToExp, expOutputs, pexpListOutputs,
-  setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
+  expToStmt, seqToStmt, procCallToExp, expOutputs, pexpListOutputs, isHalfUpdate,
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
@@ -943,24 +942,24 @@ lookupResource res@(ResourceSpec mod name) pos = do
 -- are used, if necessary.
 specialResources :: Map VarName (Placed Stmt -> Exp,TypeSpec)
 specialResources =
-    let strType = TypeSpec ["wybe"] "string" []
+    let rawStrType = TypeSpec ["wybe"] "raw_string" []
         intType = TypeSpec ["wybe"] "int" []
     in Map.fromList [
-        ("call_source_file_name",(callFileName,strType)),
-        ("call_source_file_full_name",(callFileFullName,strType)),
+        ("call_source_file_name",(callFileName,rawStrType)),
+        ("call_source_file_full_name",(callFileFullName,rawStrType)),
         ("call_source_line_number",(callLineNumber,intType)),
         ("call_source_column_number",(callColumnNumber,intType)),
-        ("call_source_location",(callSourceLocation False,strType)),
-        ("call_source_full_location",(callSourceLocation True,strType))
+        ("call_source_location",(callSourceLocation False,rawStrType)),
+        ("call_source_full_location",(callSourceLocation True,rawStrType))
         ]
 
 callFileName :: Placed Stmt -> Exp
 callFileName pstmt =
-    StringValue $ maybe "Unknown file" (takeBaseName . sourceName) (place pstmt)
+    (`StringValue` True) $ maybe "Unknown file" (takeBaseName . sourceName) (place pstmt)
 
 callFileFullName :: Placed Stmt -> Exp
 callFileFullName pstmt =
-    StringValue $ maybe "Unknown file" sourceName (place pstmt)
+    (`StringValue` True) $ maybe "Unknown file" sourceName (place pstmt)
 
 callLineNumber :: Placed Stmt -> Exp
 callLineNumber pstmt =
@@ -972,7 +971,7 @@ callColumnNumber pstmt =
 
 callSourceLocation :: Bool -> Placed Stmt -> Exp
 callSourceLocation full pstmt =
-    StringValue $ maybe "unknown location" (showSourcePos full) (place pstmt)
+    (`StringValue` True) $ maybe "unknown location" (showSourcePos full) (place pstmt)
 
 
 -- |Is the specified resource exported by the current module.
@@ -1167,7 +1166,7 @@ getProcPrimProto pspec = do
                 updateProcDef (\_ -> def{procImpln = impln'}) pspec
                 return proto
             | otherwise ->
-                shouldnt $ "get compiled proc but procSpec not mathcing: " ++
+                shouldnt $ "get compiled proc but procSpec not matching: " ++
                            show pspec ++ ", " ++ show pspec2
         _ -> shouldnt $ "get prim proto of uncompiled proc " ++ show pspec
 
@@ -2489,7 +2488,7 @@ data Exp
       = IntValue Integer
       | FloatValue Double
       | CharValue Char
-      | StringValue String
+      | StringValue String Bool
       | Var VarName FlowDirection ArgFlowType
       | Typed Exp TypeSpec (Maybe TypeSpec)
                -- ^explicitly typed expr giving type the expression, and, if it
@@ -2508,7 +2507,7 @@ flattenedExpFlow :: Exp -> FlowDirection
 flattenedExpFlow (IntValue _)    = ParamIn
 flattenedExpFlow (FloatValue _)  = ParamIn
 flattenedExpFlow (CharValue _)   = ParamIn
-flattenedExpFlow (StringValue _) = ParamIn
+flattenedExpFlow (StringValue _ _) = ParamIn
 flattenedExpFlow (Var _ flow _)  = flow
 flattenedExpFlow (Typed exp _ _) = flattenedExpFlow exp
 flattenedExpFlow otherExp =
@@ -2636,7 +2635,7 @@ data PrimArg
               }
      | ArgInt Integer TypeSpec                -- ^Constant integer arg
      | ArgFloat Double TypeSpec               -- ^Constant floating point arg
-     | ArgString String TypeSpec              -- ^Constant string arg
+     | ArgString String Bool TypeSpec         -- ^Constant string arg
      | ArgChar Char TypeSpec                  -- ^Constant character arg
      | ArgUnneeded PrimFlow TypeSpec          -- ^Unneeded input or output
      | ArgUndef TypeSpec                      -- ^Undefined variable, used
@@ -2710,7 +2709,7 @@ argType :: PrimArg -> TypeSpec
 argType ArgVar{argVarType=typ} = typ
 argType (ArgInt _ typ) = typ
 argType (ArgFloat _ typ) = typ
-argType (ArgString _ typ) = typ
+argType (ArgString _ _ typ) = typ
 argType (ArgChar _ typ) = typ
 argType (ArgUnneeded _ typ) = typ
 argType (ArgUndef typ) = typ
@@ -2721,7 +2720,7 @@ setArgType :: TypeSpec -> PrimArg -> PrimArg
 setArgType typ arg@ArgVar{} = arg{argVarType=typ}
 setArgType typ (ArgInt i _) = ArgInt i typ
 setArgType typ (ArgFloat f _) = ArgFloat f typ
-setArgType typ (ArgString s _) = ArgString s typ
+setArgType typ (ArgString s r ty) = ArgString s r typ
 setArgType typ (ArgChar c _) = ArgChar c typ
 setArgType typ (ArgUnneeded u _) = ArgUnneeded u typ
 setArgType typ (ArgUndef _) = ArgUndef typ
@@ -2740,7 +2739,8 @@ argDescription (ArgVar var _ flow ftype _) =
           Resource rspec -> " resource " ++ show rspec)
 argDescription (ArgInt val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgFloat val _) = "constant argument '" ++ show val ++ "'"
-argDescription (ArgString val _) = "constant argument '" ++ show val ++ "'"
+argDescription (ArgString val r _) =
+    "constant argument '" ++ show val ++ "'" ++ if r then " (raw)" else ""
 argDescription (ArgChar val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgUnneeded flow _) = "unneeded " ++ argFlowDescription flow
 argDescription (ArgUndef _) = "undefined argument"
@@ -2781,7 +2781,7 @@ procCallToExp stmt =
 expOutputs :: Exp -> Set VarName
 expOutputs (IntValue _) = Set.empty
 expOutputs (FloatValue _) = Set.empty
-expOutputs (StringValue _) = Set.empty
+expOutputs (StringValue _ _) = Set.empty
 expOutputs (CharValue _) = Set.empty
 expOutputs (Var name flow _) =
     if flowsOut flow then Set.singleton name else Set.empty
@@ -2796,26 +2796,6 @@ expOutputs (ForeignFn _ _ _ args) = pexpListOutputs args
 -- the specified list of placed expressions.
 pexpListOutputs :: [Placed Exp] -> Set VarName
 pexpListOutputs = List.foldr (Set.union . expOutputs . content) Set.empty
-
-
--- | Apply the specified TypeFlow to the given expression, ensuring they're
--- explicitly attached to the expression.
-setExpTypeFlow :: TypeFlow -> Exp -> Exp
-setExpTypeFlow typeflow (Typed expr _ castInner)
-    = Typed expr' ty' castInner
-    where Typed expr' ty' _ = setExpTypeFlow typeflow expr
-setExpTypeFlow (TypeFlow ty fl) (Var name _ ftype)
-    = Typed (Var name fl ftype) ty Nothing
-setExpTypeFlow (TypeFlow ty ParamIn) expr
-    = Typed expr ty Nothing
-setExpTypeFlow (TypeFlow ty fl) expr
-    = shouldnt $ "Cannot set type/flow of " ++ show expr
-
-
--- | Apply the specified TypeFlow to the given expression, ensuring they're
--- explicitly attached to the expression.
-setPExpTypeFlow :: TypeFlow -> Placed Exp -> Placed Exp
-setPExpTypeFlow typeflow pexpr = setExpTypeFlow typeflow <$> pexpr
 
 
 isHalfUpdate :: FlowDirection -> Exp -> Bool
@@ -2849,7 +2829,7 @@ varsInPrimArg dir ArgVar{argVarName=var,argVarFlow=dir'} =
   if dir == dir' then Set.singleton var else Set.empty
 varsInPrimArg _ (ArgInt _ _)            = Set.empty
 varsInPrimArg _ (ArgFloat _ _)          = Set.empty
-varsInPrimArg _ (ArgString _ _)         = Set.empty
+varsInPrimArg _ (ArgString _ _ _)       = Set.empty
 varsInPrimArg _ (ArgChar _ _)           = Set.empty
 varsInPrimArg _ (ArgUnneeded _ _)       = Set.empty
 varsInPrimArg _ (ArgUndef _)            = Set.empty
@@ -3245,7 +3225,7 @@ instance Show PrimArg where
       show name ++ showTypeSuffix typ Nothing
   show (ArgInt i typ)    = show i ++ showTypeSuffix typ Nothing
   show (ArgFloat f typ)  = show f ++ showTypeSuffix typ Nothing
-  show (ArgString s typ) = show s ++ showTypeSuffix typ Nothing
+  show (ArgString s _ typ) = show s ++ showTypeSuffix typ Nothing
   show (ArgChar c typ)   = show c ++ showTypeSuffix typ Nothing
   show (ArgUnneeded dir typ) =
       primFlowPrefix dir ++ "_" ++ showTypeSuffix typ Nothing
@@ -3256,9 +3236,9 @@ instance Show PrimArg where
 instance Show Exp where
   show (IntValue i) = show i
   show (FloatValue f) = show f
-  show (StringValue s) = show s
+  show (StringValue s _) = show s
   show (CharValue c) = show c
-  show (Var name dir flowtype) = (show flowtype) ++ (flowPrefix dir) ++ name
+  show (Var name dir flowtype) = show flowtype ++ flowPrefix dir ++ name
   show (Where stmts exp) = show exp ++ " where" ++ showBody 8 stmts
   show (CondExp cond thn els) =
     "if\n" ++ show cond ++ " then " ++ show thn ++ " else " ++ show els

@@ -3,7 +3,7 @@ pragma no_standard_library  # Standard library can't depend on itself!
 use foreign object cbits
 use foreign library gc
 
-use wybe.bool, wybe.int, wybe.count, wybe.float, wybe.char, wybe.string
+use wybe.bool, wybe.int, wybe.count, wybe.float, wybe.char, wybe.string, wybe.raw_string
 use wybe.phantom
 
 pub resource io:phantom = phantom
@@ -12,27 +12,32 @@ pub def nl use !io { foreign c putchar('\n', !io) }
 
 pub def print(x:int) use !io { foreign c print_int(x, !io) }
 pub def println(x:int) use !io { !print(x); !nl }
-pub def read(?x:int) use !io { foreign c read_int(?x,!io) }
+pub def read(?x:int) use !io { foreign c read_int(?x, !io) }
 
 # XXX these won't handle counts with the top bit set.
 pub def print(x:count) use !io { foreign c print_int(x, !io) }
 pub def println(x:count) use !io { !print(x); !nl }
-pub def read(?x:count) use !io { foreign c read_int(?x,!io) }
+pub def read(?x:count) use !io { foreign c read_int(?x, !io) }
 
-pub def print(x:float) use !io { foreign c print_float(x,!io) }
+pub def print(x:float) use !io { foreign c print_float(x, !io) }
 pub def println(x:float) use !io { !print(x); !nl }
-pub def read(?x:float) use !io { foreign c read_float(?x,!io) }
+pub def read(?x:float) use !io { foreign c read_float(?x, !io) }
 
-pub def print(x:char) use !io { foreign c putchar(x,!io) }
+pub def print(x:char) use !io { foreign c putchar(x, !io) }
 pub def println(x:char) use !io { !print(x); !nl }
-pub def read(?x:char) use !io { foreign c read_char(?x,!io) }
+pub def read(?x:char) use !io { foreign c read_char(?x, !io) }
 
-pub def print(x:string) use !io { foreign c print_string(x,!io) }
-pub def println(x:string) use !io { !print(x); !nl }
-pub def read(?x:string) use !io { foreign c read_line(?x,!io) }
+pub def print(x:raw_string) use !io { foreign c print_string(x, !io) }
+pub def println(x:raw_string) use !io { !print(x); !nl }
+pub def read(?x:raw_string) use !io { foreign c read_line(?x, !io) }
 
 pub def print(x:bool) use !io {
-   !print(if {x:: "true" | else:: "false"})
+   !print(if {x:: "true":raw_string | else:: "false":raw_string})
 }
 pub def println(x:bool) use !io { !print(x); !nl }
+
+pub def print(x:string) use !io { !print_string(x) }
+pub def println(x:string) use !io { !print(x); !nl }
+pub def read(?x:string) use !io { !read(?str:raw_string); ?x = string(str) }
+
 pub def eof:char = foreign lpvm cast(-1)

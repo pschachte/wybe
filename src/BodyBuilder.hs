@@ -636,12 +636,12 @@ canonicalisePrim (PrimForeign lang op flags args) =
 canonicaliseArg :: PrimArg -> PrimArg
 canonicaliseArg ArgVar{argVarName=nm, argVarFlow=fl} =
     ArgVar nm AnyType fl Ordinary False
-canonicaliseArg (ArgInt v _)         = ArgInt v AnyType
-canonicaliseArg (ArgFloat v _)       = ArgFloat v AnyType
-canonicaliseArg (ArgString v _)      = ArgString v AnyType
-canonicaliseArg (ArgChar v _)        = ArgChar v AnyType
-canonicaliseArg (ArgUnneeded dir _)  = ArgUnneeded dir AnyType
-canonicaliseArg (ArgUndef _)         = ArgUndef AnyType
+canonicaliseArg (ArgInt v _)        = ArgInt v AnyType
+canonicaliseArg (ArgFloat v _)      = ArgFloat v AnyType
+canonicaliseArg (ArgString v r _)   = ArgString v r AnyType
+canonicaliseArg (ArgChar v _)       = ArgChar v AnyType
+canonicaliseArg (ArgUnneeded dir _) = ArgUnneeded dir AnyType
+canonicaliseArg (ArgUndef _)        = ArgUndef AnyType
 
 
 validateInstr :: Prim -> BodyBuilder ()
@@ -651,12 +651,12 @@ validateInstr i@(PrimForeign _ _ _ args) = mapM_ (validateArg i) args
 
 validateArg :: Prim -> PrimArg -> BodyBuilder ()
 validateArg instr ArgVar{argVarType=ty} = validateType ty instr
-validateArg instr (ArgInt    _ ty)    = validateType ty instr
-validateArg instr (ArgFloat  _ ty)    = validateType ty instr
-validateArg instr (ArgString _ ty)    = validateType ty instr
-validateArg instr (ArgChar   _ ty)    = validateType ty instr
-validateArg instr (ArgUnneeded _ ty)  = validateType ty instr
-validateArg instr (ArgUndef ty)       = validateType ty instr
+validateArg instr (ArgInt    _ ty)   = validateType ty instr
+validateArg instr (ArgFloat  _ ty)   = validateType ty instr
+validateArg instr (ArgString _ _ ty) = validateType ty instr
+validateArg instr (ArgChar   _ ty)   = validateType ty instr
+validateArg instr (ArgUnneeded _ ty) = validateType ty instr
+validateArg instr (ArgUndef ty)      = validateType ty instr
 
 
 validateType :: TypeSpec -> Prim -> BodyBuilder ()

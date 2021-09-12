@@ -17,6 +17,7 @@ import           BinaryFactory                   ()
 import           Codegen
 import           Config                          (wordSize, wordSizeBytes)
 import           Util                            (maybeNth, zipWith3M_)
+import           Snippets 
 import           Control.Monad
 import           Control.Monad.Trans             (lift, liftIO)
 import           Control.Monad.Trans.Class
@@ -974,17 +975,24 @@ cgenArg (ArgFloat val ty) = do
     case toTy of
       FloatingPointType DoubleFP -> return $ cons $ C.Float $ F.Double val
       _ -> doCast (cons $ C.Float $ F.Double val) float_t toTy
-cgenArg (ArgString s _) = do 
-    let conStr = makeStringConstant s
-    let len = length s + 1
-    let conType = array_t (fromIntegral len) char_t
-    conName <- addGlobalConstant conType conStr
-    let conPtr = C.GlobalReference (ptr_t conType) conName
-    let conElem = C.GetElementPtr True conPtr [C.Int 32 0, C.Int 32 0]
-    -- return $ cons conElem
-    -- ptrtoint (cons conElem) $ ptr_t (int_c 8)
-    -- We return integer address for strings
-    ptrtoint (cons conElem) address_t
+cgenArg (ArgString s raw ty) =
+    do let rawStr = makeStringConstant s
+       let len = length s
+       let rawType = array_t (fromIntegral $ len + 1) char_t
+       rawName <- addGlobalConstant rawType rawStr
+       let rawPtr = C.GlobalReference (ptr_t rawType) rawName
+       let rawElem = C.GetElementPtr True rawPtr [C.Int 32 0, C.Int 32 0]
+       if raw || ty == rawStringType
+       then ptrtoint (cons rawElem) address_t
+       else do
+           let strType = struct_t [address_t, address_t]
+           let strStruct = C.Struct Nothing False 
+                            [ C.Int (fromIntegral wordSize) (fromIntegral len)
+                            , C.PtrToInt rawPtr address_t ]
+           strName <- addGlobalConstant strType strStruct
+           let strPtr = C.GlobalReference (ptr_t strType) strName
+           let strElem = C.GetElementPtr True strPtr [C.Int 32 0, C.Int 32 0]
+           ptrtoint (cons strElem) address_t
 cgenArg (ArgChar c ty) = do 
     let val = integerOrd c
     toTy <- lift $ llvmType ty
