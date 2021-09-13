@@ -1,17 +1,17 @@
 pragma no_standard_library
 
-use wybe.int, wybe.raw_string, wybe.range
+use wybe.int, wybe.c_string, wybe.range
 use wybe.int, wybe.char, wybe.bool
 use wybe.io, wybe.float, wybe.count
 use wybe.comparison
 
 constructor empty
-          | buffer(len:int, raw:raw_string) # must be first non-const ctor
+          | buffer(len:int, raw:c_string) # must be first non-const ctor
           | concat(left:_, r:_)
           | slice(base:_, range:range)
           | singleton(c:char)
 
-pub def string(str:raw_string, ?s:_) {
+pub def string(str:c_string, ?s:_) {
     ?len = length(str)
     if { len = 0 :: ?s = empty 
        | len = 1 :: foreign lpvm access(str, 0, 1, 0, ?c); ?s = singleton(c) 
@@ -19,8 +19,8 @@ pub def string(str:raw_string, ?s:_) {
     }
 }
 pub def string(c:char):_ = singleton(c)
-pub def raw_string(s:_, ?str:raw_string) {
-    if { s = buffer(_, ?raw_string) :: ?str = raw_string
+pub def c_string(s:_, ?str:c_string) {
+    if { s = buffer(_, ?c_string) :: ?str = c_string
        | else :: 
             ?len = length(s)
             foreign lpvm alloc(len + 1, ?str)
@@ -75,7 +75,7 @@ pub def {test} [](s:_, idx:int, ?c:char) {
     if { s = buffer(?len, ?str) :: 
             (0 <= idx)
             (idx < len)
-            unsafe_raw_string_index(str, idx, ?c)
+            unsafe_c_string_index(str, idx, ?c)
        | s = concat(?left, ?right) :: 
             ?left_len = length(left)
             if { idx < left_len :: ?c = left[idx]
@@ -96,7 +96,7 @@ pub def print_string(s:_) use !io {
     }
 }
 
-def pack(s:_, !mem:raw_string, !offset:int) {
+def pack(s:_, !mem:c_string, !offset:int) {
     if { s = buffer(_, ?str) :: 
             for ?c in str {
                 foreign lpvm mutate(mem, ?mem, offset, true, 1, 0, c)

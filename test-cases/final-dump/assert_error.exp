@@ -14,8 +14,8 @@ AFTER EVERYTHING:
 (io#0:wybe.phantom, [?io#0:wybe.phantom]):
  AliasPairs: []
  InterestingCallProperties: []
-    wybe.control.assert<0>(0:wybe.bool, "assert_error:3:2":wybe.raw_string) #1 @assert_error:nn:nn
-    foreign c {terminal,semipure} error_exit("assert_error:5:2":wybe.raw_string, "we should never get here":wybe.raw_string) @control:nn:nn
+    wybe.control.assert<0>(0:wybe.bool, "assert_error:3:2":wybe.c_string) #1 @assert_error:nn:nn
+    foreign c {terminal,semipure} error_exit("assert_error:5:2":wybe.c_string, "we should never get here":wybe.c_string) @control:nn:nn
 
   LLVM code       :
 

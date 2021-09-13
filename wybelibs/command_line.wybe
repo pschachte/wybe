@@ -1,20 +1,20 @@
 # The number of command line arguments.  These are automatically
 # initialised by the code that builds executables.
 pub resource argc:int
-pub resource argv:raw_array(raw_string)
+pub resource argv:raw_array(c_string)
 
 
 # The command line arguments. This is a C array of strings.
-pub resource arguments:array(raw_string) = array(argc, argv)
+pub resource arguments:array(c_string) = array(argc, argv)
 
 # The command that caused execution of this program.  This is not necessarily an
 # absolute file name.
-pub resource command:raw_string = "":raw_string
+pub resource command:c_string = c""
 
 if {[?command | ?arguments] = arguments ::
     pass
 |   otherwise ::
-    !error("Erroneous program argument vector":raw_string)
+    !error(c"Erroneous program argument vector")
 }
 
 # The exit code to return to the invoking shell.  This is initialised to

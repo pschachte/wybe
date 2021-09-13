@@ -2,4 +2,4 @@
 
 !assert false
 
-!error("we should never get here":raw_string)
+!error(c"we should never get here")

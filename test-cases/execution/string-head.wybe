@@ -1,10 +1,10 @@
-# test case of deconstructing a string as a list
+# test case of deconstructing a c_string as a list
 
-(?str = "This is a test\n")
+(?str = c"This is a test\n")
 
-!print("length of '")
+!print(c"length of '")
 !print(str)
-!print("' is ")
+!print(c"' is ")
 !println(length(str))
 
 do {while [?ch | ?str] = str

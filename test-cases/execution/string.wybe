@@ -1,9 +1,9 @@
 def test_index(s:string, i:int) use !io {
     if { ?c = s[i] :: !println(c) 
-       | else :: !println("OUT OF RANGE") }
+       | else :: !println(c"OUT OF RANGE") }
 }
 
-!println("TESTING CONSTRUCTION":raw_string)
+!println(c"TESTING CONSTRUCTION")
 !println(empty_string)                         # expect 
 !println("a")                                  # expect a
 !println("abc")                                # expect abc
@@ -12,11 +12,11 @@ def test_index(s:string, i:int) use !io {
 !println("abcdefghi"[xrange(1, 3, 100)])       # expect beh
 !println("abcdefghi"[xrange(1, 3, 100)][1..3]) # expect eh
 
-!println("\nTESTING CONVERSION TO raw_string":raw_string)
-?s = "abc",,string('d'),,"efg"[1..2]; raw_string(s, ?r)
+!println(c"\nTESTING CONVERSION TO c_string")
+?s = "abc",,string('d'),,"efg"[1..2]; c_string(s, ?r)
 !print(s); !print(' '); !println(r) # expect abcdf abcdf
 
-!println("\nTESTING LOOPS":raw_string)
+!println(c"\nTESTING LOOPS")
 def print_loop(s:string) use !io {
     for ?c in s { !print(c) }
     !nl
@@ -24,7 +24,7 @@ def print_loop(s:string) use !io {
 !print_loop("abc")                             # expect abc
 !print_loop("abcdefghijkl"[irange(10, -1, 1)]) # expect kjihgfedcb
 
-!println("\nTESTING INDEXING":raw_string)
+!println(c"\nTESTING INDEXING")
 !test_index("abc", 0)                                         # expect a
 !test_index("abc", 1)                                         # expect b
 !test_index("abcdefghijklmnopqrstuvwxyz", 25)                 # expect z

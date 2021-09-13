@@ -7,7 +7,7 @@ a
 beh
 eh
 
-TESTING CONVERSION TO raw_string
+TESTING CONVERSION TO c_string
 abcdf abcdf
 
 TESTING LOOPS

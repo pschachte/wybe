@@ -25,9 +25,9 @@ pub def {test} `[|]`(?head:char, ?tail:_, str:_) {
 pub def {test} [](str:_, idx:int, ?c:char) {
     (0 <= idx)
     (idx < length(str))
-    ?c = unsafe_raw_string_index(str, idx)
+    ?c = unsafe_c_string_index(str, idx)
 }
 
-pub def unsafe_raw_string_index(str:_, idx:int):char 
+pub def unsafe_c_string_index(str:_, idx:int):char 
     = foreign lpvm access(str, idx, 1, 0)
     

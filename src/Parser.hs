@@ -683,7 +683,7 @@ charConst = takeToken test
 stringConst :: Parser StmtExpr
 stringConst = takeToken test
   where
-    test (TokString _ s p) = Just $ StringConst p s
+    test (TokString d s p) = Just $ StringConst p s d
     test _                 = Nothing
 
 
@@ -990,10 +990,15 @@ stmtExprToExp (Call pos mod fn flow args) =
     (`Placed` pos) . Fncall mod fn <$> mapM stmtExprToExp args
 stmtExprToExp (Foreign pos lang inst flags args) =
     (`Placed` pos) . ForeignFn lang inst flags <$> mapM stmtExprToExp args
-stmtExprToExp (IntConst pos num)    = Right $ Placed (IntValue num) pos
-stmtExprToExp (FloatConst pos num)  = Right $ Placed (FloatValue num) pos
-stmtExprToExp (CharConst pos char)  = Right $ Placed (CharValue char) pos
-stmtExprToExp (StringConst pos str) = Right $ Placed (StringValue str False) pos
+stmtExprToExp (IntConst pos num) = Right $ Placed (IntValue num) pos
+stmtExprToExp (FloatConst pos num) = Right $ Placed (FloatValue num) pos
+stmtExprToExp (CharConst pos char) = Right $ Placed (CharValue char) pos
+stmtExprToExp (StringConst pos str DoubleQuote)
+    = return $ Placed (StringValue str WybeString) pos
+stmtExprToExp (StringConst pos str (IdentQuote "c" DoubleQuote))
+    = return $ Placed (StringValue str CString) pos
+stmtExprToExp str@StringConst{stringPos=pos}
+    = Left (pos, "invalid string literal " ++ show str)
 
 
 -- |Translate an `if` expression into a Placed conditional Exp
@@ -1085,7 +1090,11 @@ data StmtExpr
     -- |a character literal
     | CharConst{charPos::SourcePos, charConstValue::Char}
     -- |a string literal
-    | StringConst{stringPos::SourcePos, stringConstValue::String}
+    | StringConst{
+        stringPos::SourcePos, 
+        stringConstValue::String, 
+        stringConstantDelim::StringDelim 
+    }
 
 
 instance Show StmtExpr where
@@ -1097,17 +1106,17 @@ instance Show StmtExpr where
     show (IntConst _ int) = show int
     show (FloatConst _ float) = show float
     show (CharConst _ char) = show char
-    show (StringConst _ string) = show string
+    show (StringConst _ string delim) = delimitString delim string
 
 
 -- |The SourcePos of a StmtExpr.
 stmtExprPos :: StmtExpr -> SourcePos
-stmtExprPos Call{callPos=pos}          = pos
-stmtExprPos Foreign{foreignPos=pos}    = pos
-stmtExprPos IntConst{intPos=pos}       = pos
-stmtExprPos FloatConst{floatPos=pos}   = pos
-stmtExprPos CharConst{charPos=pos}     = pos
-stmtExprPos StringConst{stringPos=pos} = pos
+stmtExprPos Call{callPos=pos}            = pos
+stmtExprPos Foreign{foreignPos=pos}      = pos
+stmtExprPos IntConst{intPos=pos}         = pos
+stmtExprPos FloatConst{floatPos=pos}     = pos
+stmtExprPos CharConst{charPos=pos}       = pos
+stmtExprPos StringConst{stringPos=pos}   = pos
 
 
 -- |Return the specified StmtExpr with its position replaced.
@@ -1142,7 +1151,7 @@ testFile file = do
 test :: Int -> String -> StmtExpr
 test prec input = do
     case parse (limitedStmtExpr prec <* eof) "<string>" (stringTokens input) of
-        Left err -> StringConst (errorPos err) (show err)
+        Left err -> StringConst (errorPos err) (show err) DoubleQuote
         Right is -> is
 
 testParser :: Parser a -> String -> Either ParseError a

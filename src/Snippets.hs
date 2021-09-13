@@ -6,7 +6,7 @@
 --           : LICENSE in the root directory of this project.
 
 module Snippets (castFromTo, castTo, withType, intType, intCast,
-                 tagType, tagCast, phantomType, stringType, rawStringType,
+                 tagType, tagCast, phantomType, stringType, cStringType,
                  varSet, varGet, varGetSet,
                  boolType, boolCast, boolTrue, boolFalse, boolBool,
                  boolVarSet, boolVarGet, intVarSet, intVarGet,
@@ -72,9 +72,9 @@ phantomType = TypeSpec ["wybe"] "phantom" []
 stringType :: TypeSpec
 stringType = TypeSpec ["wybe"] "string" []
 
--- | The raw_string type, a C string
-rawStringType :: TypeSpec
-rawStringType = TypeSpec ["wybe"] "raw_string" []
+-- | The c_string type, a C string
+cStringType :: TypeSpec
+cStringType = TypeSpec ["wybe"] "c_string" []
 
 -- |An output variable reference (lvalue)
 varSet :: Ident -> Exp
