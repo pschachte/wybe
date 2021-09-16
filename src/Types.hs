@@ -23,6 +23,7 @@ import           Data.Bifunctor
 import           Options             (LogSelection (Types))
 import           Resources
 import           Util
+import           Config
 import           Snippets
 import           Blocks              (llvmMapBinop, llvmMapUnop)
 import Data.Function (on)
@@ -589,6 +590,17 @@ unifyTypes' reason ty1@(TypeSpec m1 n1 ps1) ty2@(TypeSpec m2 n2 ps2)
           | m1 `isSuffixOf` m2 = (True,  m2)
           | m2 `isSuffixOf` m1 = (True,  m1)
           | otherwise          = (False, [])
+unifyTypes' reason (HigherOrderType ps1) (HigherOrderType ps2)
+    | length ps1 == length ps2 && and (zipWith (==) ps2Flows ps2Flows) =
+        HigherOrderType . zipWith (flip TypeFlow) ps1Flows <$> 
+            zipWithM (unifyTypes reason) ps1Types ps2Types
+    | otherwise = typeError reason >> return InvalidType 
+    where 
+        ps1Flows = List.map typeFlowMode ps1
+        ps2Flows = List.map typeFlowMode ps2
+        ps1Types = List.map typeFlowType ps1
+        ps2Types = List.map typeFlowType ps2
+unifyTypes' reason _ _ = return InvalidType
 
 
 -- | Checks if two types' are cyclic. 
@@ -662,6 +674,9 @@ expType' (IntValue _) _      = return $ TypeSpec ["wybe"] "int" []
 expType' (FloatValue _) _    = return $ TypeSpec ["wybe"] "float" []
 expType' (StringValue _) _   = return $ TypeSpec ["wybe"] "string" []
 expType' (CharValue _) _     = return $ TypeSpec ["wybe"] "char" []
+expType' (ProcRef modSpec) _     = do 
+    params <- procProtoParams . procProto <$> lift (getProcDef modSpec)
+    return $ HigherOrderType $ (\(Param _ t f _) -> TypeFlow t f) <$> params
 expType' (Var name _ _) _    = ultimateVarType name
 expType' (Typed _ typ _) pos =
     lift (lookupType "typed expression" pos typ) >>= ultimateType
@@ -681,6 +696,7 @@ expMode' _ (IntValue _) = (ParamIn, True, Nothing)
 expMode' _ (FloatValue _) = (ParamIn, True, Nothing)
 expMode' _ (StringValue _) = (ParamIn, True, Nothing)
 expMode' _ (CharValue _) = (ParamIn, True, Nothing)
+expMode' _ (ProcRef _) = (ParamIn, True, Nothing)
 expMode' assigned (Var name flow _) =
     (flow, name `assignedIn` assigned, Nothing)
 expMode' assigned (Typed expr _ _) = expMode' assigned expr
@@ -781,14 +797,16 @@ typecheckProcDecl (RoughProc m name) = do
 
 
 -- |An individual proc, its formal parameter types and modes, and determinism
-data ProcInfo = ProcInfo {
-  procInfoProc    :: ProcSpec,
-  procInfoArgs    :: [TypeFlow],
-  procInfoDetism  :: Determinism,
-  procInfoImpurity:: Impurity,
-  procInfoInRes   :: Set ResourceName,
-  procInfoOutRes  :: Set ResourceName
-  } deriving (Eq)
+data ProcInfo 
+    = ProcInfo {
+        procInfoProc    :: ProcSpec,
+        procInfoArgs    :: [TypeFlow],
+        procInfoDetism  :: Determinism,
+        procInfoImpurity:: Impurity,
+        procInfoInRes   :: Set ResourceName,
+        procInfoOutRes  :: Set ResourceName             
+    }
+   deriving (Eq)
 
 instance Show ProcInfo where
     show (ProcInfo procSpec args detism impurity inRes outRes) =
@@ -801,7 +819,7 @@ instance Show ProcInfo where
 
 
 procInfoTypes :: ProcInfo -> [TypeSpec]
-procInfoTypes call = typeFlowType <$> procInfoArgs call
+procInfoTypes ProcInfo{procInfoArgs=args} = typeFlowType <$> args
 
 
 -- |Check if ProcInfo is for a proc with a single Bool output as last arg,
@@ -983,6 +1001,9 @@ recordCasts caller instr@(ForeignCall _ callee _ args) pos = do
 recordCasts caller instr@(ProcCall _ callee _ _ _ args) pos = do
     logTyped $ "Recording casts in " ++ show instr
     mapM_ (uncurry $ recordCast False caller callee) $ zip args [1..]
+recordCasts caller instr@(HigherCall fn args) pos = do
+    logTyped $ "Recording casts in " ++ show instr
+    mapM_ (uncurry $ recordCast False caller (show fn)) $ zip args [1..]
 recordCasts caller stmt _ =
     shouldnt $ "recordCasts of non-call statement " ++ show stmt
 
@@ -1024,6 +1045,7 @@ bodyCalls (pstmt:pstmts) detism = do
     case stmt of
         ProcCall{} -> return $  (pstmt,detism):rest
         -- need to handle move instructions:
+        HigherCall{} -> return $ (pstmt,detism):rest
         ForeignCall{} -> return $ (pstmt,detism):rest
         TestBool _ -> return rest
         And stmts -> bodyCalls stmts detism
@@ -1527,7 +1549,7 @@ modecheckStmts m name pos assigned detism tmpCount (pstmt:pstmts) = do
 modecheckStmt :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism
               -> Int -> Stmt -> OptPos -> Typed ([Placed Stmt],BindingState,Int)
 modecheckStmt m name defPos assigned detism tmpCount
-    stmt@(ProcCall cmod cname _ _ resourceful args) pos = do
+  stmt@(ProcCall cmod cname _ _ resourceful args) pos = do
     logTyped $ "Mode checking call   : " ++ show stmt
     logTyped $ "    with assigned    : " ++ show assigned
     callInfos <- lift $ callProcInfos $ maybePlace stmt pos
@@ -1576,8 +1598,29 @@ modecheckStmt m name defPos assigned detism tmpCount
                         logTyped $ "Mode errors in call:  " ++ show flowErrs
                         typeError $ ReasonUndefinedFlow cname pos
                         return ([],assigned,tmpCount)
+modecheckStmt m name defPos assigned detism tmpCount 
+  stmt@(HigherCall fn args) pos = do
+    actualTypes <- mapM (expType >=> ultimateType) (fn:args)
+    let actualModes = List.map (expMode assigned) (fn:args)
+    let flowErrs = [ReasonArgFlow (show fn) num pos
+                   | ((mode,avail,_),num) <- zip actualModes [0..]
+                   , not avail && (mode == ParamIn || mode == ParamInOut)]
+    if not $ List.null flowErrs -- Using undefined var as input?
+    then do
+        logTyped $ "Unpreventable mode errors: " ++ show flowErrs
+        typeErrors flowErrs
+        return ([],assigned,tmpCount)
+    else do
+        let typeflows = List.zipWith TypeFlow actualTypes
+                            $ sel1 <$> actualModes
+        let (fn':args') = List.zipWith setPExpTypeFlow typeflows (fn:args)
+        let stmt' = HigherCall fn' args'
+        return ([maybePlace stmt' pos],
+                assigned{bindingVars=(pexpListOutputs args' `Set.union`) <$> bindingVars assigned},
+                tmpCount)
+            
 modecheckStmt m name defPos assigned detism tmpCount
-    stmt@(ForeignCall lang cname flags args) pos = do
+  stmt@(ForeignCall lang cname flags args) pos = do
     logTyped $ "Mode checking foreign call " ++ show stmt
     logTyped $ "    with assigned " ++ show assigned
     actualTypes <- mapM (expType >=> ultimateType) args
@@ -1946,22 +1989,33 @@ validateForeignCall lang name flags argReps stmt pos =
 -- | Are two types compatible for use as inputs to a binary LLVM op?
 --   Used for type checking LLVM instructions.
 compatibleReps :: TypeRepresentation -> TypeRepresentation -> Bool
-compatibleReps Address           Address           = True
-compatibleReps Address           (Bits wordSize)   = True
-compatibleReps Address           (Signed wordSize) = True
-compatibleReps Address           (Floating _)      = False
-compatibleReps (Bits wordSize)   Address           = True
-compatibleReps (Bits m)          (Bits n)          = m == n
-compatibleReps (Bits m)          (Signed n)        = m == n
-compatibleReps (Bits _)          (Floating _)      = False
-compatibleReps (Signed wordSize) Address           = True
-compatibleReps (Signed m)        (Bits n)          = m == n
-compatibleReps (Signed m)        (Signed n)        = m == n
-compatibleReps (Signed _)        (Floating _)      = False
-compatibleReps (Floating _)      Address           = False
-compatibleReps (Floating _)      (Bits _)          = False
-compatibleReps (Floating _)      (Signed _)        = False
-compatibleReps (Floating m)      (Floating n)      = m == n
+compatibleReps Address      Address      = True
+compatibleReps Address      (Bits bs)    = bs == wordSize
+compatibleReps Address      (Signed bs)  = bs == wordSize
+compatibleReps Address      (Floating _) = False
+compatibleReps Address      (Func _ _)   = True
+compatibleReps (Bits bs)    Address      = bs == wordSize
+compatibleReps (Bits m)     (Bits n)     = m == n
+compatibleReps (Bits m)     (Signed n)   = m == n
+compatibleReps (Bits _)     (Floating _) = False
+compatibleReps (Bits bs)    (Func _ _)   = bs == wordSize
+compatibleReps (Signed bs)  Address      = bs == wordSize
+compatibleReps (Signed m)   (Bits n)     = m == n
+compatibleReps (Signed m)   (Signed n)   = m == n
+compatibleReps (Signed _)   (Floating _) = False
+compatibleReps (Signed bs)  (Func _ _)   = bs == wordSize
+compatibleReps (Floating _) Address      = False
+compatibleReps (Floating _) (Bits _)     = False
+compatibleReps (Floating _) (Signed _)   = False
+compatibleReps (Floating m) (Floating n) = m == n
+compatibleReps (Floating _) (Func _ _)   = False
+compatibleReps (Func _ _)   Address      = True
+compatibleReps (Func i1 o1) (Func i2 o2) = sameLength i1 i2 && sameLength o1 o2 &&
+                                           and (zipWith compatibleReps i1 i2) &&
+                                           and (zipWith compatibleReps o1 o2)
+compatibleReps (Func _ _)   (Bits bs)    = bs == wordSize
+compatibleReps (Func _ _)   (Signed bs)  = bs == wordSize
+compatibleReps (Func _ _)   (Floating _) = False
 
 
 -- | Check arg types of an LPVM instruction
@@ -2042,6 +2096,10 @@ checkStmtTyped name pos (ProcCall pmod pname pid _ _ args) ppos = do
          shouldnt $ "Call to " ++ pname ++ showOptPos ppos ++
                   " left unresolved"
     mapM_ (checkArgTyped name pos pname ppos) $
+          zip [1..] $ List.map content args
+checkStmtTyped name pos (HigherCall fn args) ppos = do
+    checkArgTyped name pos "<higher-fn>" ppos (0,content fn)
+    mapM_ (checkArgTyped name pos "<higher>" ppos) $
           zip [1..] $ List.map content args
 checkStmtTyped name pos (ForeignCall _ pname _ args) ppos =
     mapM_ (checkArgTyped name pos pname ppos) $

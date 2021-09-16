@@ -12,6 +12,7 @@ module BodyBuilder (
   ) where
 
 import AST
+import Debug.Trace
 import Snippets ( boolType, intType, primMove )
 import Util
 import Options (LogSelection(BodyBuilder))
@@ -449,6 +450,7 @@ mkInput arg@ArgInt{} = arg
 mkInput arg@ArgFloat{} = arg
 mkInput arg@ArgString{} = arg
 mkInput arg@ArgChar{} = arg
+mkInput arg@ArgProcRef{} = arg
 mkInput (ArgUnneeded FlowOut ty) = ArgUnneeded FlowIn ty
 mkInput arg@ArgUnneeded{} = arg
 mkInput arg@ArgUndef{} = arg
@@ -463,6 +465,10 @@ argExpandedPrim call@(PrimCall id pspec args) = do
                    ++ " don't match params " ++ show params
     args'' <- zipWithM (transformUnneededArg $ zip params args) params args'
     return $ PrimCall id pspec args''
+argExpandedPrim call@(PrimHigherCall id fn args) = do
+    fn' <- expandArg fn
+    args' <- mapM expandArg args
+    return $ PrimHigherCall id (fn') args'
 argExpandedPrim (PrimForeign lang nm flags args) = do
     args' <- mapM expandArg args
     return $ simplifyForeign lang nm flags args'
@@ -626,7 +632,9 @@ splitArgsByMode = List.partition ((==FlowIn) . argFlowDirection)
 
 canonicalisePrim :: Prim -> Prim
 canonicalisePrim (PrimCall id nm args) =
-    PrimCall id nm $ List.map (canonicaliseArg . mkInput) args
+    PrimCall id nm $ canonicaliseArg . mkInput <$> args
+canonicalisePrim (PrimHigherCall id var args) =
+    PrimHigherCall id (canonicaliseArg $ mkInput var) $ canonicaliseArg . mkInput <$> args
 canonicalisePrim (PrimForeign lang op flags args) =
     PrimForeign lang op flags $ List.map (canonicaliseArg . mkInput) args
 
@@ -640,23 +648,27 @@ canonicaliseArg (ArgInt v _)         = ArgInt v AnyType
 canonicaliseArg (ArgFloat v _)       = ArgFloat v AnyType
 canonicaliseArg (ArgString v _)      = ArgString v AnyType
 canonicaliseArg (ArgChar v _)        = ArgChar v AnyType
+canonicaliseArg (ArgProcRef ms _)   = ArgProcRef ms AnyType
 canonicaliseArg (ArgUnneeded dir _)  = ArgUnneeded dir AnyType
 canonicaliseArg (ArgUndef _)         = ArgUndef AnyType
 
 
 validateInstr :: Prim -> BodyBuilder ()
 validateInstr i@(PrimCall _ _ args)        = mapM_ (validateArg i) args
+validateInstr i@(PrimHigherCall _ fn args) = 
+  validateArg i fn >> mapM_ (validateArg i) args
 validateInstr i@(PrimForeign _ _ _ args) = mapM_ (validateArg i) args
 
 
 validateArg :: Prim -> PrimArg -> BodyBuilder ()
 validateArg instr ArgVar{argVarType=ty} = validateType ty instr
-validateArg instr (ArgInt    _ ty)    = validateType ty instr
-validateArg instr (ArgFloat  _ ty)    = validateType ty instr
-validateArg instr (ArgString _ ty)    = validateType ty instr
-validateArg instr (ArgChar   _ ty)    = validateType ty instr
-validateArg instr (ArgUnneeded _ ty)  = validateType ty instr
-validateArg instr (ArgUndef ty)       = validateType ty instr
+validateArg instr (ArgInt    _ ty)   = validateType ty instr
+validateArg instr (ArgFloat  _ ty)   = validateType ty instr
+validateArg instr (ArgString _ ty)   = validateType ty instr
+validateArg instr (ArgChar   _ ty)   = validateType ty instr
+validateArg instr (ArgProcRef _ ty)  = validateType ty instr
+validateArg instr (ArgUnneeded _ ty) = validateType ty instr
+validateArg instr (ArgUndef ty)      = validateType ty instr
 
 
 validateType :: TypeSpec -> Prim -> BodyBuilder ()

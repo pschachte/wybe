@@ -284,6 +284,11 @@ compileSimpleStmt' call@(ProcCall maybeMod name procID _ _ args) = do
                        ("compileSimpleStmt' for " ++ showStmt 4 call)
                        procID) generalVersion)
         args'
+compileSimpleStmt' call@(HigherCall fn args) = do
+    callSiteID <- gets nextCallSiteID
+    fn' <- head <$> placedApply compileArg fn
+    args' <- concat <$> mapM (placedApply compileArg) args
+    return $ PrimHigherCall callSiteID fn' args'
 compileSimpleStmt' (ForeignCall lang name flags args) = do
     args' <- concat <$> mapM (placedApply compileArg) args
     return $ PrimForeign lang name flags args'
@@ -311,6 +316,7 @@ compileArg' typ (IntValue int) _ = return [ArgInt int typ]
 compileArg' typ (FloatValue float) _ = return [ArgFloat float typ]
 compileArg' typ (StringValue string) _ = return [ArgString string typ]
 compileArg' typ (CharValue char) _ = return [ArgChar char typ]
+compileArg' typ (ProcRef ms) _ = return [ArgProcRef ms typ]
 compileArg' typ var@(Var name flow flowType) pos = do
     let flowType' = if flow == ParamInOut then HalfUpdate else flowType
     inArg <- if flowsIn flow
@@ -326,7 +332,7 @@ compileArg' typ var@(Var name flow flowType) pos = do
     return $ inArg ++ outArg
 compileArg' _ (Typed exp _ _) pos =
     shouldnt $ "Compiling multi-typed expression " ++ show exp
-compileArg' _ arg _ =
+compileArg' typ arg _ =
     shouldnt $ "Normalisation left complex argument: " ++ show arg
 
 

@@ -57,7 +57,7 @@ noteCall :: ModSpec -> ProcSpec -> Bool -> Prim -> CallRec -> CallRec
 noteCall mod caller final (PrimCall _ spec _) rec
   | mod == procSpecMod spec  = Map.alter (Just . maybe 1 (1+)) spec rec
   | otherwise = rec
-noteCall _ caller final (PrimForeign _ _ _ _) rec = rec
+noteCall _ _ _ _ rec = rec
 
 
 mergeCallers :: CallRec -> CallRec -> CallRec

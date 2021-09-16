@@ -38,6 +38,7 @@
 module Flatten (flattenProcDecl) where
 
 import AST
+import Debug.Trace
 import Snippets
 import Options (LogSelection(Flatten))
 import Data.Map as Map
@@ -264,10 +265,21 @@ flattenStmt' stmt@(ProcCall [] name _ _ _ []) pos _ = do
     if name `elem` defined
         then emit pos $ TestBool $ Var name ParamIn Ordinary
         else emit pos stmt
-flattenStmt' (ProcCall mod name procID detism res args) pos _ = do
-    logFlatten "   call is Det"
+flattenStmt' (ProcCall mod name procID detism res args) pos d = do
+    defined <- gets defdVars
+    if name `elem` defined
+    then do
+        unless (isNothing procID && detism == Det && not res)
+          $ shouldnt "bad higher call"
+        flattenStmt' (HigherCall (Unplaced (Var name ParamIn Ordinary)) args) pos d
+    else do
+        logFlatten "   call is Det"
+        args' <- flattenStmtArgs args pos
+        emit pos $ ProcCall mod name procID detism res args'
+        flushPostponed
+flattenStmt' (HigherCall nm args) pos _ = do 
     args' <- flattenStmtArgs args pos
-    emit pos $ ProcCall mod name procID detism res args'
+    emit pos $ HigherCall nm args'
     flushPostponed
 flattenStmt' (ForeignCall lang name flags args) pos _ = do
     args' <- flattenStmtArgs args pos
@@ -460,7 +472,7 @@ flattenExp expr@(Var "_" ParamIn _) ty castFrom pos = do
 flattenExp expr@(Var name dir flowType) ty castFrom pos = do
     logFlatten $ "  Flattening arg " ++ show expr
     defd <- gets (Set.member name . defdVars)
-    if dir == ParamIn && not defd
+    if dir == ParamIn && not defd && not (isHigherOrder ty)
       then do -- Reference to an undefined variable: assume it's meant to be
               -- a niladic function instead of a variable reference
         logFlatten $ "  Unknown variable '" ++ show name
@@ -471,6 +483,8 @@ flattenExp expr@(Var name dir flowType) ty castFrom pos = do
         let expr' = typeAndPlace expr ty castFrom pos
         logFlatten $ "  Arg flattened to " ++ show expr'
         return expr'
+flattenExp expr@(ProcRef _) ty castFrom pos =
+    return $ typeAndPlace expr ty castFrom pos
 flattenExp (Where stmts pexp) _ _ _ = do
     flattenStmts stmts Det
     flattenPExp pexp
@@ -489,6 +503,14 @@ flattenExp (CondExp cond thn els) ty castFrom pos = do
                 Nothing Nothing)
         pos Det
     return $ maybePlace (Var resultName ParamIn flowType) pos
+flattenExp (Fncall [] "@" [arg]) ty castFrom pos = do
+    currMod <- lift getModuleSpec
+    (m, nm) <- case content arg of
+        Var nm ParamIn _ -> return (currMod, nm)
+        Fncall ["_"] nm' []   -> return (currMod, nm')
+        Fncall m nm' []   -> return (m, nm')
+        _ -> shouldnt "flattenExp @"
+    flattenExp (ProcRef (ProcSpec m nm 0 generalVersion)) ty castFrom pos
 flattenExp (Fncall mod name exps) ty castFrom pos = do
     flattenCall (ProcCall mod name Nothing Det False) False ty castFrom pos exps
 flattenExp (ForeignFn lang name flags exps) ty castFrom pos = do

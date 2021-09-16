@@ -238,6 +238,10 @@ expandPrim (PrimCall id pspec args) pos = do
                   else do
                     logExpansion "  Not inlinable"
                     addInstr call' pos
+expandPrim (PrimHigherCall id fn args) pos = do
+    fn' <- expandArg fn
+    args' <- mapM expandArg args
+    addInstr (PrimHigherCall id fn' args') pos
 expandPrim (PrimForeign lang nm flags args) pos = do
     st <- get
     logExpansion $ "  Expanding " ++ show (PrimForeign lang nm flags args)

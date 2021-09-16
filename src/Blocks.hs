@@ -12,6 +12,7 @@ module Blocks (concatLLVMASTModules, blockTransformModule,
               ) where
 
 import           AST
+import           Debug.Trace
 import           ASTShow
 import           BinaryFactory                   ()
 import           Codegen
@@ -27,6 +28,7 @@ import           Data.Foldable
 import           Data.List                       as List
 import           Data.Map                        as Map
 import qualified Data.Set                        as Set
+import           Data.String
 import           Data.Word                       (Word32)
 import           Data.Maybe                      (fromMaybe)
 import           Flow                            ((|>))
@@ -530,6 +532,16 @@ cgen prim@(PrimCall callSiteID pspec args) = do
     logCodegen $ "Translated ins = " ++ show ins
     addInstruction ins outArgs
 
+cgen prim@(PrimHigherCall callSiteId var@ArgVar{argVarName=nm'} args) = do
+    let (inArgs, outArgs) = partitionArgs args
+    inops <- mapM cgenArg inArgs
+    fn <- cgenArg var
+    let callIns = callWybe fn inops
+    addInstruction callIns outArgs
+cgen prim@(PrimHigherCall callSiteId (ArgProcRef pspec ty) args) = 
+    cgen $ PrimCall callSiteId pspec args
+cgen prim@(PrimHigherCall _ _ _) = do
+    shouldnt $ "dont know how to cgen higher call " ++ show prim
 cgen prim@(PrimForeign "llvm" name flags args) = do
     logCodegen $ "Compiling " ++ show prim
     args' <- filterPhantomArgs args
@@ -990,12 +1002,16 @@ cgenArg (ArgChar c ty) = do
     toTy <- lift $ llvmType ty
     case toTy of
       IntegerType bs -> return $ cons $ C.Int bs val
-      _ -> doCast (cons $ C.Int (fromIntegral wordSize) val) int_t toTy 
+      _ -> doCast (cons $ C.Int (fromIntegral wordSize) val) int_t toTy
+cgenArg (ArgProcRef ms ty) = do
+    let fName = LLVMAST.Name $ fromString $ show ms
+    toTy <- lift (llvmType ty)
+    let conFn = C.GlobalReference toTy fName
+    return $ cons conFn
 cgenArg (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
 cgenArg (ArgUndef ty) = do
     llty <- lift $ llvmType ty
     return $ cons $ C.Undef llty
-    
 
 
 getBits :: LLVMAST.Type -> Word32
@@ -1111,24 +1127,30 @@ moduleLLVMType mspec =
 
 
 repLLVMType :: TypeRepresentation -> LLVMAST.Type
-repLLVMType Address        = address_t
-repLLVMType (Bits bits)
-  | bits == 0              = void_t
-  | bits >  0              = int_c $ fromIntegral bits
-  | otherwise              = shouldnt $ "unsigned type with non-positive width "
-                                        ++ show bits
-repLLVMType (Signed bits)
-  | bits > 0               = int_c $ fromIntegral bits
-  | otherwise              = shouldnt $ "signed type with non-positive width "
-                                        ++ show bits
-repLLVMType (Floating 16)  = FloatingPointType HalfFP
-repLLVMType (Floating 32)  = FloatingPointType FloatFP
-repLLVMType (Floating 64)  = FloatingPointType DoubleFP
-repLLVMType (Floating 80)  = FloatingPointType X86_FP80FP
-repLLVMType (Floating 128) = FloatingPointType FP128FP
-repLLVMType (Floating b)   = shouldnt $ "unknown floating point width "
-                                        ++ show b
-
+repLLVMType Address         = address_t
+repLLVMType (Bits bits) 
+  | bits == 0               = void_t
+  | bits >  0               = int_c $ fromIntegral bits
+  | otherwise               = shouldnt $ "unsigned type with non-positive width "
+                                         ++ show bits
+repLLVMType (Signed bits) 
+  | bits > 0                = int_c $ fromIntegral bits
+  | otherwise               = shouldnt $ "signed type with non-positive width "
+                                         ++ show bits
+repLLVMType (Floating 16)   = FloatingPointType HalfFP
+repLLVMType (Floating 32)   = FloatingPointType FloatFP
+repLLVMType (Floating 64)   = FloatingPointType DoubleFP
+repLLVMType (Floating 80)   = FloatingPointType X86_FP80FP
+repLLVMType (Floating 128)  = FloatingPointType FP128FP
+repLLVMType (Floating b)    = shouldnt $ "unknown floating point width "
+                                         ++ show b
+repLLVMType fn@(Func ins outs) = 
+    ptr_t $ case outs of
+        [] -> shouldnt $ show fn ++ " has no return type"
+        [out] -> FunctionType (repLLVMType out) inTypes False
+        _ -> FunctionType (struct_t $ repLLVMType <$> outs) inTypes False
+  where 
+    inTypes = repLLVMType <$> ins
 
 ------------------------------------------------------------------------------
 -- -- Creating LLVM AST module from global definitions                    --
@@ -1173,6 +1195,10 @@ declareExtern (PrimForeign "c" name _ args) = do
 declareExtern (PrimForeign otherlang name _ _) =
     shouldnt $ "Don't know how to declare extern foreign function " ++ name
       ++ " in language " ++ otherlang
+
+      
+declareExtern (PrimHigherCall _ var _) =
+    shouldnt $ "Don't know how to declare extern function var " ++ show var
 
 declareExtern (PrimCall _ pspec@(ProcSpec m n _ _) args) = do
     let (inArgs,outArgs) = partitionArgs args

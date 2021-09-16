@@ -19,7 +19,7 @@ pub def length(str:string):int = foreign c strlen(str)
 
 pub def {test} `[|]`(?head:char, ?tail:string, str:string) {
     foreign lpvm access(str, 0, 0, 0, ?head)
-    foreign llvm icmp_ne(head:!int, 0:int, ?not_done:bool)
+    foreign llvm icmp_ne(head, 0:char, ?not_done:bool)
     (not_done = true)
     foreign llvm add(str, 1, ?tail)
 }

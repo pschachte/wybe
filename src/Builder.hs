@@ -193,6 +193,7 @@ module Builder (buildTargets) where
 
 import           Analysis
 import           AST
+import           Debug.Trace
 import           ASTShow                   (logDump)
 import           Blocks                    (blockTransformModule,
                                             concatLLVMASTModules)

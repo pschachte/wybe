@@ -350,6 +350,9 @@ unbranchStmts detism (stmt:stmts) alt sense = do
 --
 unbranchStmt :: Determinism -> Stmt -> OptPos -> [Placed Stmt] -> [Placed Stmt]
              -> Bool -> Unbrancher [Placed Stmt]
+-- XXX this may not be correct
+unbranchStmt detism stmt@(HigherCall _ _) pos stmts alt sense 
+   = leaveStmtAsIs detism stmt pos stmts alt sense
 unbranchStmt _ stmt@(ProcCall _ _ _ _ True args) _ _ _ _ =
     shouldnt $ "Resources should have been handled before unbranching: "
                ++ showStmt 4 stmt

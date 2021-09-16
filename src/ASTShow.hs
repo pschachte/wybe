@@ -88,7 +88,7 @@ logDump selector1 selector2 pass =
       modList <- gets (Map.elems . modules)
       dumpLib <- gets (optDumpLib . options)
       let toLog mod = let spec  = modSpec mod
-                      in  List.null spec || dumpLib || head spec /= "wybe"
+                      in  List.null spec || dumpLib || not (head spec == "wybe" || head spec == "command_line")
       liftIO $ hPutStrLn stderr $ replicate 70 '='
         ++ "\nAFTER " ++ pass ++ ":\n"
         ++ intercalate ("\n" ++ replicate 50 '-' ++ "\n")

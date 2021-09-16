@@ -21,7 +21,7 @@ module AST (
   determinismSeq, determinismProceding, determinismName,
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
-  TypeProto(..), TypeSpec(..), typeVarSet, TypeVarName, genericType, typeModule,
+  TypeProto(..), TypeSpec(..), typeVarSet, TypeVarName, genericType, isHigherOrder, typeModule,
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
@@ -40,6 +40,7 @@ module AST (
   Module(..), isRootModule, ModuleInterface(..), ModuleImplementation(..), InterfaceHash, PubProcInfo(..),
   ImportSpec(..), importSpec, Pragma(..), addPragma,
   descendentModules, sameOriginModules, -- XXX not needed? differentOriginModules,
+  refersTo, 
   enterModule, reenterModule, exitModule, reexitModule, inModule,
   emptyInterface, emptyImplementation,
   getParams, getDetism, getProcDef, getProcPrimProto,
@@ -96,6 +97,7 @@ module AST (
 
 import           Config (magicVersion, wordSize, objectExtension,
                          sourceExtension, currentTypeAlias)
+import           Debug.Trace
 import           Control.Monad
 import           Control.Monad.Extra
 import           Control.Monad.Trans (lift,liftIO)
@@ -237,6 +239,8 @@ data TypeRepresentation
     | Bits Int          -- ^ An unsigned integer representation
     | Signed Int        -- ^ A signed integer representation
     | Floating Int      -- ^ A floating point representation
+    | Func [TypeRepresentation] [TypeRepresentation]
+                        -- ^ A function pointer with inputs and outputs
     deriving (Eq, Ord, Generic)
 
 
@@ -247,18 +251,17 @@ defaultTypeRepresentation = Bits wordSize
 
 -- | How many bits a type representation occupies
 typeRepSize :: TypeRepresentation -> Int
-typeRepSize Address         = wordSize
 typeRepSize (Bits bits)     = bits
 typeRepSize (Signed bits)   = bits
 typeRepSize (Floating bits) = bits
+typeRepSize _               = wordSize
 
 
 -- | The type representation is for a (signed or unsigned) integer type
 integerTypeRep :: TypeRepresentation -> Bool
-integerTypeRep Address         = False
 integerTypeRep (Bits bits)     = True
 integerTypeRep (Signed bits)   = True
-integerTypeRep (Floating bits) = False
+integerTypeRep _               = False
 
 
 -- | Crude division of types useful for categorising primitive operations
@@ -855,6 +858,7 @@ lookupType _ _ AnyType = return AnyType
 lookupType _ _ InvalidType = return InvalidType
 lookupType _ _ ty@TypeVariable{} = return ty
 lookupType _ _ ty@Representation{} = return ty
+lookupType _ _ ty@HigherOrderType{} = return ty
 lookupType context pos ty@(TypeSpec [] typename args)
   | typename == currentTypeAlias = do
     currMod <- getModuleSpec
@@ -1549,7 +1553,16 @@ lookupTypeRepresentation Representation{typeSpecRepresentation=rep} =
     return $ Just rep
 lookupTypeRepresentation (TypeSpec modSpec name _) =
     lookupModuleRepresentation $ modSpec ++ [name]
-
+lookupTypeRepresentation (HigherOrderType tfs) = do
+    mbInReps <- sequenceRepFlowTypes ins
+    mbOutReps <- sequenceRepFlowTypes outs
+    return $ Func <$> mbInReps <*> mbOutReps
+  where 
+    ins = List.filter (flowsIn . typeFlowMode) tfs
+    outs = List.filter (flowsOut . typeFlowMode) tfs
+    sequenceRepFlowTypes = (sequence <$>) . mapM lookupTypeRepresentation 
+                                          . (typeFlowType <$>)
+                                          
 
 -- |Given a module spec, find its representation, if it is a type.
 lookupModuleRepresentation :: ModSpec -> Compiler (Maybe TypeRepresentation)
@@ -1807,6 +1820,7 @@ primImpurity :: Prim -> Compiler Impurity
 primImpurity (PrimCall _ pspec _) = do
     def <- getProcDef pspec
     return $ procImpurity def
+primImpurity (PrimHigherCall _ _ _) = return Pure
 primImpurity (PrimForeign _ _ flags _) =
     return $ flagsImpurity flags
 
@@ -2142,6 +2156,8 @@ foldStmt' :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> Stmt -> a
 --   = error "Woops!"
 foldStmt' sfn efn val (ProcCall _ _ _ _ _ args) =
     foldExps sfn efn val args
+foldStmt' sfn efn val (HigherCall _ args) =
+    foldExps sfn efn val args
 foldStmt' sfn efn val (ForeignCall _ _ _ args) =
     foldExps sfn efn val args
 foldStmt' sfn efn val (Cond tst thn els _ _) = val4
@@ -2186,6 +2202,7 @@ foldExp' _   _    val FloatValue{}   = val
 foldExp' _   _    val StringValue{}  = val
 foldExp' _   _    val CharValue{}    = val
 foldExp' _   _    val Var{}          = val
+foldExp' _   _    val ProcRef{}      = val
 foldExp' sfn efn val (Typed exp _ _) = foldExp sfn efn val exp
 foldExp' sfn efn val (Where stmts exp) =
     let val1 = foldStmts sfn efn val stmts
@@ -2280,6 +2297,9 @@ data TypeSpec = TypeSpec {
     typeName::Ident,
     typeParams::[TypeSpec]
     }
+    | HigherOrderType {
+        higherTypeParams::[TypeFlow]
+    }
     | TypeVariable { typeVariableName :: TypeVarName }
     | Representation { typeSpecRepresentation :: TypeRepresentation }
     | AnyType | InvalidType
@@ -2289,6 +2309,8 @@ data TypeSpec = TypeSpec {
 typeVarSet :: TypeSpec -> Set TypeVarName
 typeVarSet TypeSpec{typeParams=params}
     = List.foldr (Set.union . typeVarSet) Set.empty params
+typeVarSet HigherOrderType{higherTypeParams=params}
+    = List.foldr ((Set.union . typeVarSet) . typeFlowType) Set.empty params
 typeVarSet (TypeVariable v) = Set.singleton v
 typeVarSet Representation{} = Set.empty
 typeVarSet AnyType = Set.empty
@@ -2296,15 +2318,22 @@ typeVarSet InvalidType = Set.empty
 
 genericType :: TypeSpec -> Bool
 genericType TypeSpec{typeParams=params} = any genericType params
+genericType HigherOrderType{higherTypeParams=params} 
+    = any (genericType . typeFlowType) params
 genericType TypeVariable{}   = True
 genericType Representation{} = False
 genericType AnyType          = False
 genericType InvalidType      = False
 
+isHigherOrder :: TypeSpec -> Bool
+isHigherOrder HigherOrderType{} = True
+isHigherOrder _                 = False
+
 
 -- | Return the module of the specified type, if it has one.
 typeModule :: TypeSpec -> Maybe ModSpec
 typeModule (TypeSpec mod name _) = Just $ mod ++ [name]
+typeModule HigherOrderType{}     = Nothing
 typeModule TypeVariable{}        = Nothing
 typeModule Representation{}      = Nothing
 typeModule AnyType               = Nothing
@@ -2374,10 +2403,10 @@ data Param = Param {
 data TypeFlow = TypeFlow {
   typeFlowType :: TypeSpec,
   typeFlowMode :: FlowDirection
-  } deriving (Eq)
+  } deriving (Eq, Ord, Generic)
 
 instance Show TypeFlow where
-    show (TypeFlow ty fl) = flowPrefix fl ++ show ty
+    show (TypeFlow ty fl) = flowPrefix fl ++ ":" ++ show ty
 
 
 -- |Return the TypeSpec and FlowDirection of a Param
@@ -2427,6 +2456,7 @@ data Stmt
      --   and args.  We assume every call is Det until type checking.
      --   The Bool flag indicates that the proc is allowed to use resources.
      = ProcCall ModSpec ProcName (Maybe Int) Determinism Bool [Placed Exp]
+     | HigherCall (Placed Exp) [Placed Exp]
      -- |A foreign call, with language, foreign name, tags, and args
      | ForeignCall Ident ProcName [Ident] [Placed Exp]
      -- |Do nothing (and succeed)
@@ -2491,6 +2521,7 @@ data Exp
       | CharValue Char
       | StringValue String
       | Var VarName FlowDirection ArgFlowType
+      | ProcRef ProcSpec
       | Typed Exp TypeSpec (Maybe TypeSpec)
                -- ^explicitly typed expr giving type the expression, and, if it
                -- is a cast, the type of the Exp argument.  If not a cast, these
@@ -2612,6 +2643,7 @@ data PrimVarName =
 --  loop.
 data Prim
      = PrimCall CallSiteID ProcSpec [PrimArg]
+     | PrimHigherCall CallSiteID PrimArg [PrimArg]
      | PrimForeign Ident ProcName [Ident] [PrimArg]
      deriving (Eq,Ord,Generic)
 
@@ -2638,6 +2670,7 @@ data PrimArg
      | ArgFloat Double TypeSpec               -- ^Constant floating point arg
      | ArgString String TypeSpec              -- ^Constant string arg
      | ArgChar Char TypeSpec                  -- ^Constant character arg
+     | ArgProcRef ProcSpec TypeSpec           -- ^Constant procedure reference
      | ArgUnneeded PrimFlow TypeSpec          -- ^Unneeded input or output
      | ArgUndef TypeSpec                      -- ^Undefined variable, used
                                               --  in failing cases
@@ -2647,12 +2680,16 @@ data PrimArg
 -- |Returns a list of all arguments to a prim
 primArgs :: Prim -> [PrimArg]
 primArgs (PrimCall _ _ args) = args
+primArgs (PrimHigherCall _ fn args) = fn:args
 primArgs (PrimForeign _ _ _ args) = args
 
 
 -- |Returns a list of all arguments to a prim
 replacePrimArgs :: Prim -> [PrimArg] -> Prim
 replacePrimArgs (PrimCall id pspec _) args = PrimCall id pspec args
+replacePrimArgs (PrimHigherCall id _ _) [] =
+    shouldnt "cant replace higher call with no prims"
+replacePrimArgs (PrimHigherCall id _ _) (fn:args) = PrimHigherCall id fn args
 replacePrimArgs (PrimForeign lang nm flags _) args =
     PrimForeign lang nm flags args
 
@@ -2669,6 +2706,7 @@ argIsConst ArgInt{} = True
 argIsConst ArgFloat{} = True
 argIsConst ArgString{} = True
 argIsConst ArgChar{} = True
+argIsConst ArgProcRef{} = True
 argIsConst ArgUnneeded{} = False
 argIsConst ArgUndef{} = False
 
@@ -2701,6 +2739,7 @@ argFlowDirection ArgInt{} = FlowIn
 argFlowDirection ArgFloat{} = FlowIn
 argFlowDirection ArgString{} = FlowIn
 argFlowDirection ArgChar{} = FlowIn
+argFlowDirection ArgProcRef{} = FlowIn
 argFlowDirection (ArgUnneeded flow _) = flow
 argFlowDirection ArgUndef{} = FlowIn
 
@@ -2712,6 +2751,7 @@ argType (ArgInt _ typ) = typ
 argType (ArgFloat _ typ) = typ
 argType (ArgString _ typ) = typ
 argType (ArgChar _ typ) = typ
+argType (ArgProcRef _ typ) = typ
 argType (ArgUnneeded _ typ) = typ
 argType (ArgUndef typ) = typ
 
@@ -2723,6 +2763,7 @@ setArgType typ (ArgInt i _) = ArgInt i typ
 setArgType typ (ArgFloat f _) = ArgFloat f typ
 setArgType typ (ArgString s _) = ArgString s typ
 setArgType typ (ArgChar c _) = ArgChar c typ
+setArgType typ (ArgProcRef ms _) = ArgProcRef ms typ
 setArgType typ (ArgUnneeded u _) = ArgUnneeded u typ
 setArgType typ (ArgUndef _) = ArgUndef typ
 
@@ -2742,6 +2783,7 @@ argDescription (ArgInt val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgFloat val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgString val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgChar val _) = "constant argument '" ++ show val ++ "'"
+argDescription (ArgProcRef ms _) = "constant procedure ref '" ++ show ms ++ "'"
 argDescription (ArgUnneeded flow _) = "unneeded " ++ argFlowDescription flow
 argDescription (ArgUndef _) = "undefined argument"
 
@@ -2785,6 +2827,7 @@ expOutputs (StringValue _) = Set.empty
 expOutputs (CharValue _) = Set.empty
 expOutputs (Var name flow _) =
     if flowsOut flow then Set.singleton name else Set.empty
+expOutputs (ProcRef _) = Set.empty 
 expOutputs (Typed expr _ _) = expOutputs expr
 expOutputs (Where _ pexp) = expOutputs $ content pexp
 expOutputs (CondExp _ pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
@@ -2847,12 +2890,13 @@ isHalfUpdate _ _ = False
 varsInPrimArg :: PrimFlow -> PrimArg -> Set PrimVarName
 varsInPrimArg dir ArgVar{argVarName=var,argVarFlow=dir'} =
   if dir == dir' then Set.singleton var else Set.empty
-varsInPrimArg _ (ArgInt _ _)            = Set.empty
-varsInPrimArg _ (ArgFloat _ _)          = Set.empty
-varsInPrimArg _ (ArgString _ _)         = Set.empty
-varsInPrimArg _ (ArgChar _ _)           = Set.empty
-varsInPrimArg _ (ArgUnneeded _ _)       = Set.empty
-varsInPrimArg _ (ArgUndef _)            = Set.empty
+varsInPrimArg _ (ArgInt _ _)      = Set.empty
+varsInPrimArg _ (ArgFloat _ _)    = Set.empty
+varsInPrimArg _ (ArgString _ _)   = Set.empty
+varsInPrimArg _ (ArgChar _ _)     = Set.empty
+varsInPrimArg _ (ArgProcRef _ _)  = Set.empty
+varsInPrimArg _ (ArgUnneeded _ _) = Set.empty
+varsInPrimArg _ (ArgUndef _)      = Set.empty
 
 
 ----------------------------------------------------------------
@@ -2955,6 +2999,9 @@ instance Show TypeRepresentation where
   show (Bits bits) = show bits ++ " bit unsigned"
   show (Signed bits) = show bits ++ " bit signed"
   show (Floating bits) = show bits ++ " bit float"
+  show (Func ins outs) = 
+      "funtion {" ++ intercalate ", " (List.map show outs) ++ "}"
+      ++ "(" ++ intercalate ", " (List.map show ins) ++ ")"
 
 
 -- |How to show a type family
@@ -3069,6 +3116,8 @@ instance Show TypeSpec where
   show (Representation rep) = show rep
   show (TypeSpec optmod ident args) =
       maybeModPrefix optmod ++ ident ++ showArguments args
+  show (HigherOrderType params) =
+      "_(" ++ intercalate ", " (List.map (\(TypeFlow t f) -> flowPrefix f ++ "_" ++ ":" ++ show t) params) ++ ")"
 
 
 -- |Show the use declaration for a set of resources, if it's non-empty.
@@ -3103,7 +3152,7 @@ showTypeSuffix :: TypeSpec -> Maybe TypeSpec -> String
 showTypeSuffix AnyType Nothing     = ""
 showTypeSuffix typ Nothing         = ":" ++ show typ
 showTypeSuffix typ (Just AnyType)  = ":!" ++ show typ
-showTypeSuffix typ (Just cast)     = ":" ++ show cast ++ ":!" ++ show typ
+showTypeSuffix typ (Just cast)     = ":" ++ show typ ++ ":!" ++ show cast
 
 
 -- |How to show a dataflow direction.
@@ -3164,11 +3213,13 @@ showPlacedPrim' ind prim pos =
 -- XXX the first argument is unused; can we get rid of it?
 showPrim :: Int -> Prim -> String
 showPrim _ (PrimCall id pspec args) =
-        show pspec ++ showArguments args
-            ++ " #" ++ show id
+    show pspec ++ showArguments args
+        ++ " #" ++ show id
+showPrim _ (PrimHigherCall id var args) =
+    show var ++ showArguments args ++ " #" ++ show id
 showPrim _ (PrimForeign lang name flags args) =
-        "foreign " ++ lang ++ " " ++ showFlags flags ++ name ++
-        showArguments args
+    "foreign " ++ lang ++ " " ++ showFlags flags ++ name ++
+    showArguments args
 
 
 -- |Show a variable, with its suffix.
@@ -3183,6 +3234,8 @@ showStmt _ (ProcCall maybeMod name procID detism resourceful args) =
     ++ maybeModPrefix maybeMod
     ++ maybe "" (\n -> "<" ++ show n ++ ">") procID ++
     name ++ showArguments args
+showStmt _ (HigherCall fn args) =
+    show fn ++ showArguments args
 showStmt _ (ForeignCall lang name flags args) =
     "foreign " ++ lang ++ " " ++ showFlags flags ++ name ++
     showArguments args
@@ -3247,6 +3300,7 @@ instance Show PrimArg where
   show (ArgFloat f typ)  = show f ++ showTypeSuffix typ Nothing
   show (ArgString s typ) = show s ++ showTypeSuffix typ Nothing
   show (ArgChar c typ)   = show c ++ showTypeSuffix typ Nothing
+  show (ArgProcRef ms typ)  = show ms ++ showTypeSuffix typ Nothing
   show (ArgUnneeded dir typ) =
       primFlowPrefix dir ++ "_" ++ showTypeSuffix typ Nothing
   show (ArgUndef typ)    = "undef" ++ showTypeSuffix typ Nothing
@@ -3259,6 +3313,7 @@ instance Show Exp where
   show (StringValue s) = show s
   show (CharValue c) = show c
   show (Var name dir flowtype) = (show flowtype) ++ (flowPrefix dir) ++ name
+  show (ProcRef ps) = "@" ++ show ps
   show (Where stmts exp) = show exp ++ " where" ++ showBody 8 stmts
   show (CondExp cond thn els) =
     "if\n" ++ show cond ++ " then " ++ show thn ++ " else " ++ show els

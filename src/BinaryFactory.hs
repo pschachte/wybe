@@ -31,6 +31,7 @@ instance Binary ResourceSpec
 instance Binary FlowDirection
 instance Binary PrimFlow
 instance Binary TypeSpec
+instance Binary TypeFlow
 instance Binary Exp
 instance Binary Generator
 instance Binary Stmt

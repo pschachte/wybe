@@ -1,3 +1,4 @@
+{-# LANGUAGE LambdaCase #-}
 --  File     : Parser.hs
 --  Author   : Peter Schachte <schachte@unimelb.edu.au>
 --  Purpose  : Parser for the Wybe language using Parsec.
@@ -9,6 +10,7 @@ module Parser where
 
 
 import AST hiding (option)
+import Debug.Trace
 import Data.Set as Set
 import Data.List as List
 import Data.Bits
@@ -569,7 +571,7 @@ prototypePrecedence = 10
 
 -- |Prefix operator symbols; these all bind very tightly
 prefixOp :: Parser Token
-prefixOp = symbol "-" <|> symbol "~" <|> symbol "?" <|> symbol "!"
+prefixOp = choice $ List.map symbol ["-", "~", "?", "!", "@"]
 
 
 -- |Apply the specified prefix op to the specified stmtExpr.  Fail if it should
@@ -592,6 +594,9 @@ applyPrefixOp tok stmtExpr = do
         ("?", _) -> fail $ "unexpected " ++ show stmtExpr'++ " following '?'"
         ("!", Call{}) -> return $ setCallFlow ParamInOut stmtExpr'
         ("!", _) -> fail $ "unexpected " ++ show stmtExpr' ++ " following '!'"
+        ("@", arg@Call{callArguments=[]}) 
+          -> return $ Call pos [] "@" ParamIn [setCallFlow ParamIn stmtExpr']
+        ("@", _) -> fail $ "unexpected " ++ show stmtExpr' ++ " following '@'"
         (_,_) -> shouldnt $ "Unknown prefix operator " ++ show tok
                             ++ " in applyPrefixOp"
 
@@ -951,16 +956,17 @@ stmtExprToExp :: TranslateTo (Placed Exp)
 stmtExprToExp (Call pos [] ":" ParamIn [exp,ty]) = do
     exp' <- content <$> stmtExprToExp exp
     ty' <- stmtExprToTypeSpec ty
-    return $ case exp' of
-        Typed exp'' ty'' (Just _) -> Placed (Typed exp'' ty'' $ Just ty') pos
-        Typed exp'' _ Nothing     -> Placed (Typed exp'' ty' Nothing) pos
-        _                         -> Placed (Typed exp'  ty' Nothing) pos
+    case exp' of
+        Typed exp'' AnyType cast -> return $ Placed (Typed exp'' ty' cast) pos
+        Typed{}                  -> Left (pos, "invalid typed expression")
+        _                        -> return $ Placed (Typed exp' ty' Nothing) pos
 stmtExprToExp (Call pos [] ":!" ParamIn [exp,ty]) = do
     exp' <- content <$> stmtExprToExp exp
     ty' <- stmtExprToTypeSpec ty
-    return $ case exp' of
-        Typed exp'' inner _ -> Placed (Typed exp'' ty' $ Just inner) pos
-        _                   -> Placed (Typed exp'  ty' $ Just AnyType) pos
+    case exp' of
+        Typed exp'' inner Nothing -> return $ Placed (Typed exp'' inner $ Just ty') pos
+        Typed _ _ _               -> Left (pos, "invalid typed expression")
+        _                         -> return $ Placed (Typed exp' AnyType $ Just ty') pos
 stmtExprToExp (Call pos [] "where" ParamIn [exp,body]) = do
     exp' <- stmtExprToExp exp
     body' <- stmtExprToBody body
@@ -979,6 +985,9 @@ stmtExprToExp (Call pos [] "^" ParamIn [exp,op]) = do
         Placed (Var var ParamIn Ordinary) _
             -> return $ Placed (Fncall [] var [exp']) pos
         _ -> Left (pos, "invalid second argument to '^'")
+stmtExprToExp (Call pos [] "@" ParamIn [exp]) = do
+    exp' <- stmtExprToExp exp
+    return $ Placed (Fncall [] "@" [exp']) pos
 stmtExprToExp (Call pos [] "if" ParamIn [conditional]) =
     translateConditionalExp conditional
 stmtExprToExp (Call pos [] sep ParamIn [])
@@ -1019,9 +1028,20 @@ translateConditionalExp' stmtExpr =
 
 -- |Convert a StmtExpr to a TypeSpec, or produce an error
 stmtExprToTypeSpec :: TranslateTo TypeSpec
+-- stmtExprToTypeSpec (Call _ [] ":" flow [Call _ [] nm ParamOut []]) = 
+--     return $ HigherOrderType [TypeFlow (TypeVariable nm) flow]
+-- stmtExprToTypeSpec (Call _ [] ":" flow [Call _ m nm ParamIn args]) = 
+--     HigherOrderType . ((:[]) . flip TypeFlow flow) . TypeSpec m nm <$> mapM stmtExprToTypeSpec args
+stmtExprToTypeSpec (Call _ [] ":" _ [Call _ [] "_" flow [],arg]) = 
+    HigherOrderType . ((:[]) . flip TypeFlow flow) <$> stmtExprToTypeSpec arg
 stmtExprToTypeSpec (Call _ [] name ParamOut []) = Right $ TypeVariable name
-stmtExprToTypeSpec (Call _ mod name ParamIn params) =
-    TypeSpec mod name <$> mapM stmtExprToTypeSpec params
+stmtExprToTypeSpec call@(Call pos mod name ParamIn params) = do
+    specs <- mapM stmtExprToTypeSpec params
+    if not (List.null params) && all isHigherOrder specs && name == "_"
+    then return $ HigherOrderType $ concatMap higherTypeParams specs
+    else if any isHigherOrder specs
+    then Left (pos, "invaid type specification")
+    else return $ TypeSpec mod name specs
 stmtExprToTypeSpec other =
     Left (stmtExprPos other, "invalid type specification " ++ show other)
 

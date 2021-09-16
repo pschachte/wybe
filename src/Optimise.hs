@@ -136,7 +136,8 @@ bodyCost pprims = sum <$> mapM (primCost . content) pprims
 --  cost of the arguments, and a test instruction as free.
 primCost :: Prim -> Compiler Int
 primCost (PrimForeign "llvm" _ _ _) = return 1
-primCost (PrimCall _ _ args)          = (1+) . sum <$> mapM argCost args
+primCost (PrimCall _ _ args)        = (1+) . sum <$> mapM argCost args
+primCost (PrimHigherCall _ fn args) = (1+) . sum <$> mapM argCost (fn:args) 
 primCost (PrimForeign _ _ _ args)   = (1+) . sum <$> mapM argCost args
 
 
