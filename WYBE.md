@@ -867,9 +867,12 @@ prototype part of a function declaration:
 
 > *ctor*`(`*param*`:`*type*, ... *param*`:`*type*`)`
 
+In contrast to regular procedure prototypes, the parameter names are optional, 
+and can be removed, along with the accompanying `:`.
+
 If *name* is an infix operator symbol, you must surround it with backquotes, or
 declare the constructor with infix syntax, much like defining a function
-whose name is an operator:
+whose name is an operator, again with option parameter names:
 
 > `(`*param*`:`*type* *ctor* *param*`:`*type*`)`
 
@@ -916,8 +919,8 @@ And this statement will unpack a coordinate `pos` into variables `x` and `y`:
 coordinate(?x,?y) = pos
 ```
 
-Additionally, two procedures are automatically generated for each *member*:
-one to access the member, and one to mutate it.
+Additionally, two procedures are automatically generated for each named 
+*member*: one to access the member, and one to mutate it.
 The first has the prototype:
 
 > *member*`(structure:`*type*`,` `?value:`*memtype*`)`
