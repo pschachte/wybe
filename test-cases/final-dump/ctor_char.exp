@@ -46,7 +46,7 @@ AFTER EVERYTHING:
                 foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
             1:
-                foreign lpvm access(~$left#0:ctor_char, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$left$1$_#0:ctor_char)
+                foreign lpvm access(~$left#0:ctor_char, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$left$other_ctor$1#0:ctor_char)
                 foreign llvm icmp_ne($right#0:wybe.int, 0:wybe.int, ?tmp$19#0:wybe.bool)
                 case ~tmp$19#0:wybe.bool of
                 0:
@@ -60,8 +60,8 @@ AFTER EVERYTHING:
                         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
 
                     1:
-                        foreign lpvm access(~$right#0:ctor_char, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$right$1$_#0:ctor_char)
-                        ctor_char.=<0>(~$left$1$_#0:ctor_char, ~$right$1$_#0:ctor_char, ?$$#0:wybe.bool) #5
+                        foreign lpvm access(~$right#0:ctor_char, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$right$other_ctor$1#0:ctor_char)
+                        ctor_char.=<0>(~$left$other_ctor$1#0:ctor_char, ~$right$other_ctor$1#0:ctor_char, ?$$#0:wybe.bool) #5
 
 
 
@@ -217,22 +217,22 @@ foo(this#0:ctor_char, ?$#0:wybe.char):
 
 other_ctor > public {inline} (0 calls)
 0: ctor_char.other_ctor<0>
-other_ctor(1$_#0:ctor_char, ?$#0:ctor_char):
+other_ctor(other_ctor$1#0:ctor_char, ?$#0:ctor_char):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?$rec#0:ctor_char)
-    foreign lpvm mutate(~$rec#0:ctor_char, ?$rec#1:ctor_char, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~1$_#0:ctor_char)
+    foreign lpvm mutate(~$rec#0:ctor_char, ?$rec#1:ctor_char, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~other_ctor$1#0:ctor_char)
     foreign llvm or(~$rec#1:ctor_char, 1:wybe.int, ?$#0:ctor_char)
 other_ctor > public {inline} (5 calls)
 1: ctor_char.other_ctor<1>
-other_ctor(?1$_#0:ctor_char, $#0:ctor_char, ?$$#0:wybe.bool):
+other_ctor(?other_ctor$1#0:ctor_char, $#0:ctor_char, ?$$#0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne($#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool)
     case ~tmp$0#0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-        foreign llvm move(undef:ctor_char, ?1$_#0:ctor_char)
+        foreign llvm move(undef:ctor_char, ?other_ctor$1#0:ctor_char)
 
     1:
         foreign llvm and($#0:wybe.int, 1:wybe.int, ?tmp$2#0:wybe.int)
@@ -240,10 +240,10 @@ other_ctor(?1$_#0:ctor_char, $#0:ctor_char, ?$$#0:wybe.bool):
         case ~tmp$1#0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-            foreign llvm move(undef:ctor_char, ?1$_#0:ctor_char)
+            foreign llvm move(undef:ctor_char, ?other_ctor$1#0:ctor_char)
 
         1:
-            foreign lpvm access(~$#0:ctor_char, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?1$_#0:ctor_char)
+            foreign lpvm access(~$#0:ctor_char, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?other_ctor$1#0:ctor_char)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -460,14 +460,14 @@ if.else1:
 }
 
 
-define external fastcc  i64 @"ctor_char.other_ctor<0>"(i64  %"1$_#0")    {
+define external fastcc  i64 @"ctor_char.other_ctor<0>"(i64  %"other_ctor$1#0")    {
 entry:
   %34 = trunc i64 8 to i32  
   %35 = tail call ccc  i8*  @wybe_malloc(i32  %34)  
   %36 = ptrtoint i8* %35 to i64 
   %37 = inttoptr i64 %36 to i64* 
   %38 = getelementptr  i64, i64* %37, i64 0 
-  store  i64 %"1$_#0", i64* %38 
+  store  i64 %"other_ctor$1#0", i64* %38 
   %"1$$#0" = or i64 %36, 1 
   ret i64 %"1$$#0" 
 }
