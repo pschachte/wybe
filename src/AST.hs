@@ -21,7 +21,8 @@ module AST (
   determinismSeq, determinismProceding, determinismName,
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
-  TypeProto(..), TypeSpec(..), typeVarSet, TypeVarName, genericType, isHigherOrder, typeModule,
+  TypeProto(..), TypeSpec(..), typeVarSet, TypeVarName, 
+  genericType, higherOrderType, isHigherOrder, typeModule,
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
@@ -2325,6 +2326,14 @@ genericType Representation{} = False
 genericType AnyType          = False
 genericType InvalidType      = False
 
+higherOrderType :: TypeSpec -> Bool
+higherOrderType TypeSpec{typeParams=params} = any higherOrderType params
+higherOrderType HigherOrderType{} = True
+higherOrderType TypeVariable{}   = False
+higherOrderType Representation{} = False
+higherOrderType AnyType          = False
+higherOrderType InvalidType      = False
+
 isHigherOrder :: TypeSpec -> Bool
 isHigherOrder HigherOrderType{} = True
 isHigherOrder _                 = False
@@ -2541,6 +2550,7 @@ flattenedExpFlow (FloatValue _)  = ParamIn
 flattenedExpFlow (CharValue _)   = ParamIn
 flattenedExpFlow (StringValue _) = ParamIn
 flattenedExpFlow (Var _ flow _)  = flow
+flattenedExpFlow (ProcRef _) = ParamIn
 flattenedExpFlow (Typed exp _ _) = flattenedExpFlow exp
 flattenedExpFlow otherExp =
     shouldnt $ "Getting flow direction of unflattened exp " ++ show otherExp

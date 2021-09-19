@@ -1003,8 +1003,8 @@ cgenArg (ArgChar c ty) = do
     case toTy of
       IntegerType bs -> return $ cons $ C.Int bs val
       _ -> doCast (cons $ C.Int (fromIntegral wordSize) val) int_t toTy
-cgenArg (ArgProcRef ms ty) = do
-    let fName = LLVMAST.Name $ fromString $ show ms
+cgenArg (ArgProcRef ps ty) = do
+    let fName = LLVMAST.Name $ fromString $ show ps
     toTy <- lift (llvmType ty)
     let conFn = C.GlobalReference toTy fName
     return $ cons conFn

@@ -184,7 +184,7 @@ completeNormalisation mods = do
 --   as we process it.
 completeTypeNormalisation :: [ModSpec] -> Compiler ()
 completeTypeNormalisation mods = do
-    mods' <- filterM (getSpecModule "completeTypeNormalisation" 
+    mods' <- filterM (getSpecModule "completeTypeNormalisation"
                       (modIsType &&& isNothing . modTypeRep)) mods
     typeSCCs <- modSCCTypeDeps mods'
     logNormalise $ "Ordered type dependency SCCs: " ++ show typeSCCs
@@ -231,7 +231,7 @@ modTypeDeps modSet = do
     let vis = fst $ head ctorsVis
     ctors <- mapM (placedApply resolveCtorTypes . snd) ctorsVis
     let deps = List.filter (`Set.member` modSet)
-               $ concatMap 
+               $ concatMap
                  (catMaybes . (typeModule . paramType <$>)
                   . procProtoParams . content)
                  ctors
@@ -638,7 +638,7 @@ constructorItems ctorName typeSpec params fields size tag tagLimit pos =
 deconstructorItems :: Ident -> TypeSpec -> [Param] -> Int -> Int -> Int -> Int
                    -> Int -> OptPos -> [(Ident,TypeSpec,TypeRepresentation,Int)]
                    -> Int -> [Item]
-deconstructorItems ctorName typeSpec params numConsts numNonConsts tag tagBits 
+deconstructorItems ctorName typeSpec params numConsts numNonConsts tag tagBits
                    tagLimit pos fields size =
     let startOffset = (if tag > tagLimit then tagLimit+1 else tag)
         flowType = Implicit pos
@@ -920,7 +920,9 @@ deconstructorDetism numConsts numNonConsts
 implicitItems :: TypeSpec -> [Placed ProcProto] -> [Placed ProcProto]
               -> TypeRepresentation -> Compiler [Item]
 implicitItems typespec consts nonconsts rep
- | genericType typespec = return []
+ | genericType typespec
+   || any (higherOrderType . paramType)
+          (concatMap (procProtoParams . content) nonconsts) = return []
  | otherwise = do
     eq <- implicitEquality typespec consts nonconsts rep
     dis <- implicitDisequality typespec consts nonconsts rep
