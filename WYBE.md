@@ -872,7 +872,7 @@ and can be removed, along with the accompanying `:`.
 
 If *name* is an infix operator symbol, you must surround it with backquotes, or
 declare the constructor with infix syntax, much like defining a function
-whose name is an operator, again with option parameter names:
+whose name is an operator, again with optional parameter names:
 
 > `(`*param*`:`*type* *ctor* *param*`:`*type*`)`
 
