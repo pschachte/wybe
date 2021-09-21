@@ -1,0 +1,36 @@
+======================================================================
+AFTER EVERYTHING:
+ Module backquote_OK
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : 
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+OK backquote use! > {inline} (0 calls)
+0: backquote_OK.OK backquote use!<0>
+OK backquote use!(?$#0:wybe.int):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm move(1:wybe.int, ?$#0:wybe.int) @backquote_OK:3:1
+
+  LLVM code       :
+
+; ModuleID = 'backquote_OK'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+
+
+define external fastcc  i64 @"backquote_OK.OK backquote use!<0>"()    {
+entry:
+  ret i64 1 
+}

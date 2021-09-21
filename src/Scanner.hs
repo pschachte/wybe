@@ -12,6 +12,7 @@ module Scanner (Token(..), tokenPosition, floatValue, intValue, stringValue,
                 inputTokens, stringTokens) where
 
 import AST
+import Util
 import Data.Char
 import Data.List
 import Data.Tuple.Extra
@@ -236,11 +237,7 @@ tokenise pos str@(c:cs)
                     '\'' -> tokeniseChar pos cs
                     '\"' -> tokeniseString DoubleQuote pos cs
                     -- backquote makes anything an identifier
-                    '`' -> case break (=='`') cs of
-                         (name,_:rest) ->
-                              multiCharTok name rest (TokIdent name pos) pos
-                         (name,[]) ->
-                             [TokError "Unclosed backquote beginning here" pos]
+                    '`' -> tokeniseBackquote cs pos
                     '#' -> let  (target,trim,terminate) = case cs of
                                     ('|':_) -> ("|#","|#",True)
                                     _       -> ("\n","",False)
@@ -273,8 +270,8 @@ singleCharTok c cs pos tok = tok:tokenise (updatePosChar pos c) cs
 tokeniseSymbol :: SourcePos -> String -> [Token]
 tokeniseSymbol pos (c:cs) =
   let (sym,rest) = span (isSymbolContinuation c) cs
-      pos' = updatePosString pos
-  in  multiCharTok (c:sym) rest (TokSymbol (c:sym) pos) pos
+      pos' = updatePosString pos sym
+  in  multiCharTok (c:sym) rest (TokSymbol (c:sym) pos) pos'
 tokeniseSymbol _ [] = shouldnt "empty symbol does not exist"
 
 
@@ -465,6 +462,22 @@ parseInteger radix str pos =
   where charValues = map alNumToInteger str
 
 
+-- | Tokenise a symbol beginning with a backquote, which we've already scanned,
+-- followed by the rest of the input.  In case of an invalid backquoted symbol,
+-- we give up on tokenising the rest of the file.  Currently the parser gives up
+-- after an erroneous token, so there's not much point trying to carry on.
+tokeniseBackquote :: String -> SourcePos -> [Token]
+tokeniseBackquote cs pos =
+    let pos'  = updatePosChar pos '`'  -- count the opening `
+        pos'' = updatePosChar pos' '`' -- pre-count the closing `
+    in case break ((=='`') ||| (<' ')) cs of
+        (_,[])           -> [TokError "unclosed backquote" pos]
+        (name,'`':rest)  -> multiCharTok name rest (TokIdent name pos) pos''
+        (name,'\n':rest) -> [TokError "multiline backquoted symbol" pos]
+        (name,_:rest)    ->
+            [TokError "control character in a backquoted symbol" pos]
+
+
 -- |Returns the integer value of the specified char which is either a digit or
 -- a lower case letter.
 alNumToInteger :: Char -> Integer
@@ -489,7 +502,7 @@ isNumberChar ch = isIdentChar ch || ch == '.'
 -- separators.
 nonstartingKeyword :: Ident -> Bool
 nonstartingKeyword "in"    = True
-nonstartingKeyword "is"    = True
+-- nonstartingKeyword "is"    = True
 nonstartingKeyword "where" = True
 nonstartingKeyword _       = False
 
@@ -511,7 +524,7 @@ nonendingKeyword _              = False
 
 -- |Prefix operator symbols that could begin a statement.
 statementStartSymbol :: String -> Bool
-statementStartSymbol "!" = True 
-statementStartSymbol "?" = True 
-statementStartSymbol "~" = True 
-statementStartSymbol _   = False 
+statementStartSymbol "!" = True
+statementStartSymbol "?" = True
+statementStartSymbol "~" = True
+statementStartSymbol _   = False
