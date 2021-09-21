@@ -951,15 +951,14 @@ addDeclaredType procname pos arity (Param name typ flow _,argNum) = do
     constrainVarType (ReasonParam procname arity pos) name typ'
 
 
--- | 
+-- | Record the types of available resources as local variables
 addResourceType :: ProcName -> OptPos -> ResourceFlowSpec -> Typed ()
 addResourceType procname pos rfspec = do
     let rspec = resourceFlowRes rfspec
-    resIface <- lift $ lookupResource rspec pos
-    let (rspecs,types) = unzip $ maybe [] (Map.toList . snd) resIface
-    let names = List.map resourceName rspecs
+    resDef <- lift $ lookupResource rspec
+    let (rspecs,implns) = unzip $ maybe [] Map.toList resDef
     zipWithM_ (\n -> constrainVarType (ReasonResource procname n pos) n)
-          names types
+          (resourceName <$> rspecs) (resourceType <$> implns)
 
 
 -- | Register variable types coming from explicit type constraints and type
@@ -1487,6 +1486,7 @@ overloadErr StmtTypings{typingStmt=call,typingArgsTypes=candidates} =
 modecheckStmts :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism
                -> Int -> [Placed Stmt] -> Typed ([Placed Stmt],BindingState,Int)
 modecheckStmts _ name pos assigned detism tmpCount [] = do
+    logTyped $ "Mode check end of " ++ show detism ++ " proc '" ++ name ++ "'"
     typeErrors $ detismCheck name pos detism $ bindingDetism assigned
     return ([],assigned,tmpCount)
 modecheckStmts m name pos assigned detism tmpCount (pstmt:pstmts) = do
@@ -1683,7 +1683,8 @@ modecheckStmt m name defPos assigned detism tmpCount
     stmt@(UseResources resources stmts) pos = do
     logTyped $ "Mode checking use ... in stmt " ++ show stmt
     (stmts', assigned', tmpCount')
-        <- modecheckStmts m name defPos assigned detism tmpCount stmts
+        <- modecheckStmts m name defPos assigned (determinismJoin Det detism)       
+            tmpCount stmts
     return
         ([maybePlace (UseResources resources stmts') pos], assigned',tmpCount')
 -- XXX Need to implement these correctly:
