@@ -110,9 +110,9 @@ closingStmts detism params = do
     assigns <- mapM (\Param{paramName=nm,paramType=ty}
                     -> assign nm ty (ArgUndef ty))
                     undefs
-    tested <- Map.member "$$" <$> getCurrNumbering
+    tested <- Map.member outputStatusName <$> getCurrNumbering
     end <- if detism == SemiDet && not tested
-               then (:assigns) <$> assign "$$" boolType (ArgInt 1 boolType)
+               then (:assigns) <$> assign outputStatusName boolType (ArgInt 1 boolType)
                else return assigns
     logClause $ "Adding ending instructions: " ++ showPlacedPrims 4 end
     return end
@@ -208,7 +208,7 @@ compileBody stmts params detism = do
                                     ("compileBody for " ++ showStmt 4 call)
                                      procID) generalVersion)
                          (args' ++
-                          [ArgVar (PrimVarName "$$" 0) boolType FlowOut
+                          [ArgVar (PrimVarName outputStatusName 0) boolType FlowOut
                            (Implicit Nothing) False])
           return $ ProcBody (front++[final']) NoFork
 
@@ -289,11 +289,11 @@ compileSimpleStmt' (ForeignCall lang name flags args) = do
     return $ PrimForeign lang name flags args'
 compileSimpleStmt' (TestBool expr) =
     -- Only for handling a TestBool other than as the condition of a Cond:
-    compileSimpleStmt' $ content $ move (boolCast expr) (boolVarSet "$$")
+    compileSimpleStmt' $ content $ move (boolCast expr) (boolVarSet outputStatusName)
 compileSimpleStmt' Nop = 
-    compileSimpleStmt' $ content $ move boolTrue (boolVarSet "$$")
+    compileSimpleStmt' $ content $ move boolTrue (boolVarSet outputStatusName)
 compileSimpleStmt' Fail =
-    compileSimpleStmt' $ content $ move boolFalse (boolVarSet "$$")
+    compileSimpleStmt' $ content $ move boolFalse (boolVarSet outputStatusName)
 compileSimpleStmt' stmt =
     shouldnt $ "Normalisation left complex statement:\n" ++ showStmt 4 stmt
 
@@ -371,7 +371,7 @@ compileParam startVars endVars procName param@(Param name ty flow ftype) =
 
 -- |A synthetic output parameter carrying the test result
 testOutParam :: Param
-testOutParam = Param "$$" boolType ParamOut $ Implicit Nothing
+testOutParam = Param outputStatusName boolType ParamOut $ Implicit Nothing
 
 
 -- |Log a message, if we are logging clause generation.

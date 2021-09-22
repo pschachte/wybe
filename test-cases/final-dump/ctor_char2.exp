@@ -200,8 +200,8 @@ c($rec#0:ctor_char2, ?$rec#2:ctor_char2, $field#0:wybe.char, ?$$#0:wybe.bool):
 
         1:
             foreign llvm and(~$rec#0:ctor_char2, -1021:ctor_char2, ?$rec#1:ctor_char2)
-            foreign llvm shl(~$field#0:ctor_char2, 2:ctor_char2, ?$tmp#0:ctor_char2)
-            foreign llvm or(~$rec#1:ctor_char2, ~$tmp#0:ctor_char2, ?$rec#2:ctor_char2)
+            foreign llvm shl(~$field#0:ctor_char2, 2:ctor_char2, ?$temp#0:ctor_char2)
+            foreign llvm or(~$rec#1:ctor_char2, ~$temp#0:ctor_char2, ?$rec#2:ctor_char2)
             foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
 
 
@@ -512,8 +512,8 @@ if.else:
 if.then1:
   %"4$$rec#1" = and i64 %"$rec#0", -1021 
   %41 = zext i8 %"$field#0" to i64  
-  %"4$$tmp#0" = shl   i64 %41, 2 
-  %"4$$rec#2" = or i64 %"4$$rec#1", %"4$$tmp#0" 
+  %"4$$temp#0" = shl   i64 %41, 2 
+  %"4$$rec#2" = or i64 %"4$$rec#1", %"4$$temp#0" 
   %42 = insertvalue {i64, i1} undef, i64 %"4$$rec#2", 0 
   %43 = insertvalue {i64, i1} %42, i1 1, 1 
   ret {i64, i1} %43 

@@ -81,6 +81,7 @@ module AST (
   ProcModifiers(..), detModifiers, setDetism, setInline, setImpurity,
   showProcModifiers, Inlining(..), Impurity(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
+  specialChar, specialName, specialName2, outputVariableName, outputStatusName,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
   showModSpecs, showResources, showOptPos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
@@ -740,7 +741,7 @@ genProcName :: Compiler ProcName
 genProcName = do
   ctr <- getModule procCount
   updateModule (\mod -> mod {procCount = ctr + 1 })
-  return $ "gen$" ++ show (ctr + 1)
+  return $ specialName2 "gen" $ show (ctr + 1)
 
 -- |Apply the given function to the current module interface if the
 --  specified visibility is Public.
@@ -2110,7 +2111,7 @@ data LLTerm = TermNop
 
 -- |The variable name for the temporary variable whose number is given.
 mkTempName :: Int -> String
-mkTempName ctr = "tmp$" ++ show ctr
+mkTempName ctr = specialName2 "tmp" $ show ctr
 
 -- |Make a default LLBlock
 defaultBlock :: LLBlock
@@ -2853,6 +2854,39 @@ varsInPrimArg _ (ArgString _ _)         = Set.empty
 varsInPrimArg _ (ArgChar _ _)           = Set.empty
 varsInPrimArg _ (ArgUnneeded _ _)       = Set.empty
 varsInPrimArg _ (ArgUndef _)            = Set.empty
+
+
+----------------------------------------------------------------
+--                       Generating Symbols
+
+-- | The character we include in every generated identifier to prevent capturing
+-- a user identifier.  It should not be possible for the user to include this
+-- character in an identifier.
+specialChar :: Char
+specialChar = '$' -- for backward compatibility: replace with `
+
+
+-- | Construct a name can't be a valid Wybe symbol from one user string.
+specialName :: String -> String
+specialName = (specialChar:)
+
+
+-- | Construct a name that can't be a valid Wybe symbol from two user strings.
+specialName2 :: String -> String -> String
+specialName2 front back = front ++ specialChar:back
+
+
+-- | The name to give to the output variable when converting a function to a
+-- proc.
+outputVariableName :: Ident
+outputVariableName = [specialChar]
+
+
+-- | The name to give to the output status variable when converting a test proc to a Det proc.
+outputStatusName :: Ident
+outputStatusName = [specialChar,specialChar]
+
+
 
 
 ----------------------------------------------------------------

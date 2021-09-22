@@ -248,8 +248,8 @@ rank($rec#0:multictr.card, ?$rec#2:multictr.card, $field#0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm and(~$rec#0:multictr.card, -61:multictr.card, ?$rec#1:multictr.card)
-    foreign llvm shl(~$field#0:multictr.card, 2:multictr.card, ?$tmp#0:multictr.card)
-    foreign llvm or(~$rec#1:multictr.card, ~$tmp#0:multictr.card, ?$rec#2:multictr.card)
+    foreign llvm shl(~$field#0:multictr.card, 2:multictr.card, ?$temp#0:multictr.card)
+    foreign llvm or(~$rec#1:multictr.card, ~$temp#0:multictr.card, ?$rec#2:multictr.card)
 
 
 suit > public {inline} (0 calls)
@@ -333,8 +333,8 @@ define external fastcc  i6 @"multictr.card.rank<1>"(i6  %"$rec#0", i4  %"$field#
 entry:
   %"1$$rec#1" = and i6 %"$rec#0", -61 
   %8 = zext i4 %"$field#0" to i6  
-  %"1$$tmp#0" = shl   i6 %8, 2 
-  %"1$$rec#2" = or i6 %"1$$rec#1", %"1$$tmp#0" 
+  %"1$$temp#0" = shl   i6 %8, 2 
+  %"1$$rec#2" = or i6 %"1$$rec#1", %"1$$temp#0" 
   ret i6 %"1$$rec#2" 
 }
 
