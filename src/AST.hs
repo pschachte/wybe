@@ -2876,6 +2876,12 @@ specialName2 :: String -> String -> String
 specialName2 front back = front ++ specialChar:back
 
 
+-- | The full name to give to a PrimVarName, including the variable number
+-- suffix.
+numberedVarName :: String -> Int -> String
+numberedVarName name number = name ++ "#" ++ show number
+
+
 -- | The name to give to the output variable when converting a function to a
 -- proc.
 outputVariableName :: Ident
@@ -3207,7 +3213,7 @@ showPrim _ (PrimForeign lang name flags args) =
 
 -- |Show a variable, with its suffix.
 instance Show PrimVarName where
-    show (PrimVarName var suffix) = var ++ "#" ++ show suffix
+    show (PrimVarName var suffix) = numberedVarName var suffix
 
 
 -- |Show a single statement.
