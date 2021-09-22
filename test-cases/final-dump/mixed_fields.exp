@@ -26,7 +26,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public (0 calls)
+*main* > public {impure} (0 calls)
 0: mixed_fields.<0>
 (io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []

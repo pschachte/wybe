@@ -18,7 +18,7 @@ AFTER EVERYTHING:
                     exit_code: fromList [(command_line.exit_code,wybe.int = 0 @command_line:nn:nn @command_line:nn:nn)] @command_line:nn:nn
   procs           : 
 
-*main* > public (0 calls)
+*main* > public {impure} (0 calls)
 0: command_line.<0>
 (argc##0:wybe.int, [?argc##0:wybe.int], ?arguments##2:wybe.array(wybe.string), argv##0:wybe.array.raw_array(wybe.string), [?argv##0:wybe.array.raw_array(wybe.string)], ?command##2:wybe.string, ?exit_code##1:wybe.int, io##0:wybe.phantom, [?io##0:wybe.phantom]):
  AliasPairs: []
@@ -118,7 +118,7 @@ entry:
   resources       : 
   procs           : 
 
-*main* > public (0 calls)
+*main* > public {impure} (0 calls)
 0: main_hello.<0>
 (arguments##0:wybe.array(wybe.string), [?arguments##0:wybe.array(wybe.string)], command##0:wybe.string, [?command##0:wybe.string], [exit_code##0:wybe.int], ?exit_code##1:wybe.int, io##0:wybe.phantom, ?io##3:wybe.phantom):
  AliasPairs: []

@@ -22,7 +22,7 @@ AFTER EVERYTHING:
   submodules      : test_loop.int_seq
   procs           : 
 
-*main* > public {inline} (0 calls)
+*main* > public {inline,impure} (0 calls)
 0: test_loop.<0>
 (io##0:wybe.phantom, ?io##2:wybe.phantom):
  AliasPairs: []

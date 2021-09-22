@@ -410,9 +410,12 @@ normaliseModMain = do
     (resources,inits) <- initResources
     let initBody = inits ++ List.reverse stmts
     logNormalise $ "Top-level statements = " ++ show initBody
+    -- unless (List.null stmts && List.null inits)
+    --   $ normaliseItem $ ProcDecl Public detModifiers (ProcProto "" [] resources)
+    --                              initBody Nothing
     unless (List.null stmts && List.null inits)
-      $ normaliseItem $ ProcDecl Public detModifiers (ProcProto "" [] resources)
-                                 initBody Nothing
+      $ normaliseItem $ ProcDecl Public (setImpurity Impure detModifiers)
+                        (ProcProto "" [] resources) initBody Nothing
 
 
 -- |The resources available at the top level of this module, plus the

@@ -10,7 +10,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public (0 calls)
+*main* > public {impure} (0 calls)
 0: proc_yorn.<0>
 (io##0:wybe.phantom, ?io##2:wybe.phantom):
  AliasPairs: []

@@ -11,7 +11,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public (0 calls)
+*main* > public {impure} (0 calls)
 0: call_site_id.<0>
 (io##0:wybe.phantom, ?io##4:wybe.phantom):
  AliasPairs: []

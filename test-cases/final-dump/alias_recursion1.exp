@@ -11,7 +11,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public (0 calls)
+*main* > public {impure} (0 calls)
 0: alias_recursion1.<0>
 (io##0:wybe.phantom, ?io##18:wybe.phantom):
  AliasPairs: []
