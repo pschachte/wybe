@@ -12,26 +12,26 @@ AFTER EVERYTHING:
 
 *main* > public (0 calls)
 0: exp_if.<0>
-(io#0:wybe.phantom, ?io#2:wybe.phantom):
+(io##0:wybe.phantom, ?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string("expect larger: ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-    exp_if.if_test<0>(3:wybe.int, ?tmp$0#0:wybe.string) #1 @exp_if:nn:nn
-    foreign c print_string(~tmp$0#0:wybe.string, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
+    foreign c print_string("expect larger: ":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+    exp_if.if_test<0>(3:wybe.int, ?tmp#0##0:wybe.string) #1 @exp_if:nn:nn
+    foreign c print_string(~tmp#0##0:wybe.string, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
 
 
 if_test > public (1 calls)
 0: exp_if.if_test<0>
-if_test(x#0:wybe.int, ?$#0:wybe.string):
+if_test(x##0:wybe.int, ?#result##0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_sgt(~x#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @int:nn:nn
-    case ~tmp$1#0:wybe.bool of
+    foreign llvm icmp_sgt(~x##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    case ~tmp#1##0:wybe.bool of
     0:
-        foreign llvm move("smaller":wybe.string, ?$#0:wybe.string) @exp_if:nn:nn
+        foreign llvm move("smaller":wybe.string, ?#result##0:wybe.string) @exp_if:nn:nn
 
     1:
-        foreign llvm move("larger":wybe.string, ?$#0:wybe.string) @exp_if:nn:nn
+        foreign llvm move("larger":wybe.string, ?#result##0:wybe.string) @exp_if:nn:nn
 
 
   LLVM code       :
@@ -64,16 +64,16 @@ define external fastcc  void @"exp_if.<0>"()    {
 entry:
   %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @exp_if.1, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %2)  
-  %"1$tmp$0#0" = tail call fastcc  i64  @"exp_if.if_test<0>"(i64  3)  
-  tail call ccc  void  @print_string(i64  %"1$tmp$0#0")  
+  %"1#tmp#0##0" = tail call fastcc  i64  @"exp_if.if_test<0>"(i64  3)  
+  tail call ccc  void  @print_string(i64  %"1#tmp#0##0")  
   ret void 
 }
 
 
-define external fastcc  i64 @"exp_if.if_test<0>"(i64  %"x#0")    {
+define external fastcc  i64 @"exp_if.if_test<0>"(i64  %"x##0")    {
 entry:
-  %"1$tmp$1#0" = icmp sgt i64 %"x#0", 0 
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
+  %"1#tmp#1##0" = icmp sgt i64 %"x##0", 0 
+  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
   %4 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @exp_if.3, i32 0, i32 0) to i64 
   ret i64 %4 

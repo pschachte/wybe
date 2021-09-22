@@ -13,39 +13,39 @@ AFTER EVERYTHING:
 
 *main* > public {inline} (0 calls)
 0: multi_specz_cyclic_exe.<0>
-(io#0:wybe.phantom, ?io#1:wybe.phantom):
+(io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    multi_specz_cyclic_exe.main<0>(~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @multi_specz_cyclic_exe:nn:nn
+    multi_specz_cyclic_exe.main<0>(~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @multi_specz_cyclic_exe:nn:nn
 
 
 main > public (1 calls)
 0: multi_specz_cyclic_exe.main<0>
-main(io#0:wybe.phantom, ?io#6:wybe.phantom):
+main(io##0:wybe.phantom, ?io##6:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
  MultiSpeczDepInfo: [(5,(multi_specz_cyclic_lib.foo1<0>,fromList [NonAliasedParamCond 0 [],NonAliasedParamCond 1 []]))]
-    foreign lpvm alloc(16:wybe.int, ?tmp$6#0:multi_specz_cyclic_lib.position)
-    foreign lpvm mutate(~tmp$6#0:multi_specz_cyclic_lib.position, ?tmp$7#0:multi_specz_cyclic_lib.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int)
-    foreign lpvm mutate(~tmp$7#0:multi_specz_cyclic_lib.position, ?tmp$0#0:multi_specz_cyclic_lib.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int)
-    foreign lpvm alloc(16:wybe.int, ?tmp$10#0:multi_specz_cyclic_lib.position)
-    foreign lpvm mutate(~tmp$10#0:multi_specz_cyclic_lib.position, ?tmp$11#0:multi_specz_cyclic_lib.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int)
-    foreign lpvm mutate(~tmp$11#0:multi_specz_cyclic_lib.position, ?tmp$1#0:multi_specz_cyclic_lib.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int)
-    foreign lpvm alloc(16:wybe.int, ?tmp$14#0:multi_specz_cyclic_lib.position)
-    foreign lpvm mutate(~tmp$14#0:multi_specz_cyclic_lib.position, ?tmp$15#0:multi_specz_cyclic_lib.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int)
-    foreign lpvm mutate(~tmp$15#0:multi_specz_cyclic_lib.position, ?tmp$2#0:multi_specz_cyclic_lib.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int)
-    foreign lpvm alloc(16:wybe.int, ?tmp$18#0:multi_specz_cyclic_lib.position)
-    foreign lpvm mutate(~tmp$18#0:multi_specz_cyclic_lib.position, ?tmp$19#0:multi_specz_cyclic_lib.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int)
-    foreign lpvm mutate(~tmp$19#0:multi_specz_cyclic_lib.position, ?tmp$3#0:multi_specz_cyclic_lib.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:wybe.int)
-    foreign c print_string("=============":wybe.string, ~#io#0:wybe.phantom, ?tmp$22#0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$22#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-    multi_specz_cyclic_lib.foo1<0>[7477e50a09](~tmp$0#0:multi_specz_cyclic_lib.position, ~tmp$1#0:multi_specz_cyclic_lib.position, tmp$2#0:multi_specz_cyclic_lib.position, tmp$3#0:multi_specz_cyclic_lib.position, 3:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #5 @multi_specz_cyclic_exe:nn:nn
-    foreign c print_string("-------------":wybe.string, ~#io#2:wybe.phantom, ?tmp$25#0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$25#0:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
-    multi_specz_cyclic_lib.printPosition<0>(~tmp$2#0:multi_specz_cyclic_lib.position, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #7 @multi_specz_cyclic_exe:nn:nn
-    multi_specz_cyclic_lib.printPosition<0>(~tmp$3#0:multi_specz_cyclic_lib.position, ~#io#4:wybe.phantom, ?#io#5:wybe.phantom) #8 @multi_specz_cyclic_exe:nn:nn
-    foreign c print_string("=============":wybe.string, ~#io#5:wybe.phantom, ?tmp$28#0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$28#0:wybe.phantom, ?#io#6:wybe.phantom) @io:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#6##0:multi_specz_cyclic_lib.position)
+    foreign lpvm mutate(~tmp#6##0:multi_specz_cyclic_lib.position, ?tmp#7##0:multi_specz_cyclic_lib.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int)
+    foreign lpvm mutate(~tmp#7##0:multi_specz_cyclic_lib.position, ?tmp#0##0:multi_specz_cyclic_lib.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int)
+    foreign lpvm alloc(16:wybe.int, ?tmp#10##0:multi_specz_cyclic_lib.position)
+    foreign lpvm mutate(~tmp#10##0:multi_specz_cyclic_lib.position, ?tmp#11##0:multi_specz_cyclic_lib.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int)
+    foreign lpvm mutate(~tmp#11##0:multi_specz_cyclic_lib.position, ?tmp#1##0:multi_specz_cyclic_lib.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int)
+    foreign lpvm alloc(16:wybe.int, ?tmp#14##0:multi_specz_cyclic_lib.position)
+    foreign lpvm mutate(~tmp#14##0:multi_specz_cyclic_lib.position, ?tmp#15##0:multi_specz_cyclic_lib.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int)
+    foreign lpvm mutate(~tmp#15##0:multi_specz_cyclic_lib.position, ?tmp#2##0:multi_specz_cyclic_lib.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int)
+    foreign lpvm alloc(16:wybe.int, ?tmp#18##0:multi_specz_cyclic_lib.position)
+    foreign lpvm mutate(~tmp#18##0:multi_specz_cyclic_lib.position, ?tmp#19##0:multi_specz_cyclic_lib.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int)
+    foreign lpvm mutate(~tmp#19##0:multi_specz_cyclic_lib.position, ?tmp#3##0:multi_specz_cyclic_lib.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:wybe.int)
+    foreign c print_string("=============":wybe.string, ~#io##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#22##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+    multi_specz_cyclic_lib.foo1<0>[7477e50a09](~tmp#0##0:multi_specz_cyclic_lib.position, ~tmp#1##0:multi_specz_cyclic_lib.position, tmp#2##0:multi_specz_cyclic_lib.position, tmp#3##0:multi_specz_cyclic_lib.position, 3:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #5 @multi_specz_cyclic_exe:nn:nn
+    foreign c print_string("-------------":wybe.string, ~#io##2:wybe.phantom, ?tmp#25##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#25##0:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
+    multi_specz_cyclic_lib.printPosition<0>(~tmp#2##0:multi_specz_cyclic_lib.position, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) #7 @multi_specz_cyclic_exe:nn:nn
+    multi_specz_cyclic_lib.printPosition<0>(~tmp#3##0:multi_specz_cyclic_lib.position, ~#io##4:wybe.phantom, ?#io##5:wybe.phantom) #8 @multi_specz_cyclic_exe:nn:nn
+    foreign c print_string("=============":wybe.string, ~#io##5:wybe.phantom, ?tmp#28##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#28##0:wybe.phantom, ?#io##6:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 
@@ -170,76 +170,76 @@ entry:
 
 foo1 > public (0 calls)
 0: multi_specz_cyclic_lib.foo1<0>[7477e50a09]
-foo1(x1#0:multi_specz_cyclic_lib.position, x2#0:multi_specz_cyclic_lib.position, x3#0:multi_specz_cyclic_lib.position, x4#0:multi_specz_cyclic_lib.position, n#0:wybe.int, io#0:wybe.phantom, ?io#4:wybe.phantom):
+foo1(x1##0:multi_specz_cyclic_lib.position, x2##0:multi_specz_cyclic_lib.position, x3##0:multi_specz_cyclic_lib.position, x4##0:multi_specz_cyclic_lib.position, n##0:wybe.int, io##0:wybe.phantom, ?io##4:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1,InterestingUnaliased 2,InterestingUnaliased 3]
  MultiSpeczDepInfo: [(2,(multi_specz_cyclic_lib.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [0]])),(3,(multi_specz_cyclic_lib.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [1]])),(4,(multi_specz_cyclic_lib.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [2]])),(5,(multi_specz_cyclic_lib.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [3]])),(6,(multi_specz_cyclic_lib2.foo2<0>,fromList [NonAliasedParamCond 0 [1],NonAliasedParamCond 1 [2],NonAliasedParamCond 2 [3],NonAliasedParamCond 3 [0]]))]
-    foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn
-    foreign llvm icmp_slt(tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @int:nn:nn
-    case ~tmp$1#0:wybe.bool of
+    foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
+    foreign llvm icmp_slt(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    case ~tmp#1##0:wybe.bool of
     0:
-        multi_specz_cyclic_lib2.foo2<0>(~x2#0:multi_specz_cyclic_lib.position, ~x3#0:multi_specz_cyclic_lib.position, ~x4#0:multi_specz_cyclic_lib.position, ~x1#0:multi_specz_cyclic_lib.position, ~tmp$0#0:wybe.int, ~#io#0:wybe.phantom, ?#io#4:wybe.phantom) #6 @multi_specz_cyclic_lib:nn:nn
+        multi_specz_cyclic_lib2.foo2<0>(~x2##0:multi_specz_cyclic_lib.position, ~x3##0:multi_specz_cyclic_lib.position, ~x4##0:multi_specz_cyclic_lib.position, ~x1##0:multi_specz_cyclic_lib.position, ~tmp#0##0:wybe.int, ~#io##0:wybe.phantom, ?#io##4:wybe.phantom) #6 @multi_specz_cyclic_lib:nn:nn
 
     1:
-        multi_specz_cyclic_lib.modifyAndPrint<0>(~x1#0:multi_specz_cyclic_lib.position, 111:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #2 @multi_specz_cyclic_lib:nn:nn
-        multi_specz_cyclic_lib.modifyAndPrint<0>(~x2#0:multi_specz_cyclic_lib.position, 222:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #3 @multi_specz_cyclic_lib:nn:nn
-        multi_specz_cyclic_lib.modifyAndPrint<0>(~x3#0:multi_specz_cyclic_lib.position, 333:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #4 @multi_specz_cyclic_lib:nn:nn
-        multi_specz_cyclic_lib.modifyAndPrint<0>(~x4#0:multi_specz_cyclic_lib.position, 444:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #5 @multi_specz_cyclic_lib:nn:nn
+        multi_specz_cyclic_lib.modifyAndPrint<0>(~x1##0:multi_specz_cyclic_lib.position, 111:wybe.int, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #2 @multi_specz_cyclic_lib:nn:nn
+        multi_specz_cyclic_lib.modifyAndPrint<0>(~x2##0:multi_specz_cyclic_lib.position, 222:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #3 @multi_specz_cyclic_lib:nn:nn
+        multi_specz_cyclic_lib.modifyAndPrint<0>(~x3##0:multi_specz_cyclic_lib.position, 333:wybe.int, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #4 @multi_specz_cyclic_lib:nn:nn
+        multi_specz_cyclic_lib.modifyAndPrint<0>(~x4##0:multi_specz_cyclic_lib.position, 444:wybe.int, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) #5 @multi_specz_cyclic_lib:nn:nn
 
  [7477e50a09] [NonAliasedParam 0,NonAliasedParam 1] :
-    foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn
-    foreign llvm icmp_slt(tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @int:nn:nn
-    case ~tmp$1#0:wybe.bool of
+    foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
+    foreign llvm icmp_slt(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    case ~tmp#1##0:wybe.bool of
     0:
-        multi_specz_cyclic_lib2.foo2<0>[d4b0b4930c](~x2#0:multi_specz_cyclic_lib.position, ~x3#0:multi_specz_cyclic_lib.position, ~x4#0:multi_specz_cyclic_lib.position, ~x1#0:multi_specz_cyclic_lib.position, ~tmp$0#0:wybe.int, ~#io#0:wybe.phantom, ?#io#4:wybe.phantom) #6 @multi_specz_cyclic_lib:nn:nn
+        multi_specz_cyclic_lib2.foo2<0>[d4b0b4930c](~x2##0:multi_specz_cyclic_lib.position, ~x3##0:multi_specz_cyclic_lib.position, ~x4##0:multi_specz_cyclic_lib.position, ~x1##0:multi_specz_cyclic_lib.position, ~tmp#0##0:wybe.int, ~#io##0:wybe.phantom, ?#io##4:wybe.phantom) #6 @multi_specz_cyclic_lib:nn:nn
 
     1:
-        multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3](~x1#0:multi_specz_cyclic_lib.position, 111:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #2 @multi_specz_cyclic_lib:nn:nn
-        multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3](~x2#0:multi_specz_cyclic_lib.position, 222:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #3 @multi_specz_cyclic_lib:nn:nn
-        multi_specz_cyclic_lib.modifyAndPrint<0>(~x3#0:multi_specz_cyclic_lib.position, 333:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #4 @multi_specz_cyclic_lib:nn:nn
-        multi_specz_cyclic_lib.modifyAndPrint<0>(~x4#0:multi_specz_cyclic_lib.position, 444:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #5 @multi_specz_cyclic_lib:nn:nn
+        multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3](~x1##0:multi_specz_cyclic_lib.position, 111:wybe.int, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #2 @multi_specz_cyclic_lib:nn:nn
+        multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3](~x2##0:multi_specz_cyclic_lib.position, 222:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #3 @multi_specz_cyclic_lib:nn:nn
+        multi_specz_cyclic_lib.modifyAndPrint<0>(~x3##0:multi_specz_cyclic_lib.position, 333:wybe.int, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #4 @multi_specz_cyclic_lib:nn:nn
+        multi_specz_cyclic_lib.modifyAndPrint<0>(~x4##0:multi_specz_cyclic_lib.position, 444:wybe.int, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) #5 @multi_specz_cyclic_lib:nn:nn
 
 
  [29a1d4275b] [NonAliasedParam 2,NonAliasedParam 3] :
-    foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn
-    foreign llvm icmp_slt(tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @int:nn:nn
-    case ~tmp$1#0:wybe.bool of
+    foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
+    foreign llvm icmp_slt(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    case ~tmp#1##0:wybe.bool of
     0:
-        multi_specz_cyclic_lib2.foo2<0>[ff3a297a4f](~x2#0:multi_specz_cyclic_lib.position, ~x3#0:multi_specz_cyclic_lib.position, ~x4#0:multi_specz_cyclic_lib.position, ~x1#0:multi_specz_cyclic_lib.position, ~tmp$0#0:wybe.int, ~#io#0:wybe.phantom, ?#io#4:wybe.phantom) #6 @multi_specz_cyclic_lib:nn:nn
+        multi_specz_cyclic_lib2.foo2<0>[ff3a297a4f](~x2##0:multi_specz_cyclic_lib.position, ~x3##0:multi_specz_cyclic_lib.position, ~x4##0:multi_specz_cyclic_lib.position, ~x1##0:multi_specz_cyclic_lib.position, ~tmp#0##0:wybe.int, ~#io##0:wybe.phantom, ?#io##4:wybe.phantom) #6 @multi_specz_cyclic_lib:nn:nn
 
     1:
-        multi_specz_cyclic_lib.modifyAndPrint<0>(~x1#0:multi_specz_cyclic_lib.position, 111:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #2 @multi_specz_cyclic_lib:nn:nn
-        multi_specz_cyclic_lib.modifyAndPrint<0>(~x2#0:multi_specz_cyclic_lib.position, 222:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #3 @multi_specz_cyclic_lib:nn:nn
-        multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3](~x3#0:multi_specz_cyclic_lib.position, 333:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #4 @multi_specz_cyclic_lib:nn:nn
-        multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3](~x4#0:multi_specz_cyclic_lib.position, 444:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #5 @multi_specz_cyclic_lib:nn:nn
+        multi_specz_cyclic_lib.modifyAndPrint<0>(~x1##0:multi_specz_cyclic_lib.position, 111:wybe.int, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #2 @multi_specz_cyclic_lib:nn:nn
+        multi_specz_cyclic_lib.modifyAndPrint<0>(~x2##0:multi_specz_cyclic_lib.position, 222:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #3 @multi_specz_cyclic_lib:nn:nn
+        multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3](~x3##0:multi_specz_cyclic_lib.position, 333:wybe.int, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #4 @multi_specz_cyclic_lib:nn:nn
+        multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3](~x4##0:multi_specz_cyclic_lib.position, 444:wybe.int, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) #5 @multi_specz_cyclic_lib:nn:nn
 
 
 
 modifyAndPrint > public (4 calls)
 0: multi_specz_cyclic_lib.modifyAndPrint<0>
-modifyAndPrint(pos#0:multi_specz_cyclic_lib.position, v#0:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
+modifyAndPrint(pos##0:multi_specz_cyclic_lib.position, v##0:wybe.int, io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
-    foreign lpvm {noalias} mutate(~%pos#0:multi_specz_cyclic_lib.position, ?%pos#1:multi_specz_cyclic_lib.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~v#0:wybe.int)
-    multi_specz_cyclic_lib.printPosition<0>(~pos#1:multi_specz_cyclic_lib.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #1 @multi_specz_cyclic_lib:nn:nn
+    foreign lpvm {noalias} mutate(~%pos##0:multi_specz_cyclic_lib.position, ?%pos##1:multi_specz_cyclic_lib.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~v##0:wybe.int)
+    multi_specz_cyclic_lib.printPosition<0>(~pos##1:multi_specz_cyclic_lib.position, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #1 @multi_specz_cyclic_lib:nn:nn
  [410bae77d3] [NonAliasedParam 0] :
-    foreign lpvm {noalias} mutate(~%pos#0:multi_specz_cyclic_lib.position, ?%pos#1:multi_specz_cyclic_lib.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~v#0:wybe.int)
-    multi_specz_cyclic_lib.printPosition<0>(~pos#1:multi_specz_cyclic_lib.position, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #1 @multi_specz_cyclic_lib:nn:nn
+    foreign lpvm {noalias} mutate(~%pos##0:multi_specz_cyclic_lib.position, ?%pos##1:multi_specz_cyclic_lib.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~v##0:wybe.int)
+    multi_specz_cyclic_lib.printPosition<0>(~pos##1:multi_specz_cyclic_lib.position, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #1 @multi_specz_cyclic_lib:nn:nn
 
 
 printPosition > public (1 calls)
 0: multi_specz_cyclic_lib.printPosition<0>
-printPosition(pos#0:multi_specz_cyclic_lib.position, io#0:wybe.phantom, ?io#5:wybe.phantom):
+printPosition(pos##0:multi_specz_cyclic_lib.position, io##0:wybe.phantom, ?io##5:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string(" (":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-    foreign lpvm access(pos#0:multi_specz_cyclic_lib.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.int)
-    foreign c print_int(~tmp$0#0:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
-    foreign c print_string(",":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
-    foreign lpvm access(~pos#0:multi_specz_cyclic_lib.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.int)
-    foreign c print_int(~tmp$1#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) @io:nn:nn
-    foreign c print_string(")":wybe.string, ~#io#4:wybe.phantom, ?tmp$14#0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$14#0:wybe.phantom, ?#io#5:wybe.phantom) @io:nn:nn
+    foreign c print_string(" (":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+    foreign lpvm access(pos##0:multi_specz_cyclic_lib.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int)
+    foreign c print_int(~tmp#0##0:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
+    foreign c print_string(",":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
+    foreign lpvm access(~pos##0:multi_specz_cyclic_lib.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int)
+    foreign c print_int(~tmp#1##0:wybe.int, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
+    foreign c print_string(")":wybe.string, ~#io##4:wybe.phantom, ?tmp#14##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#14##0:wybe.phantom, ?#io##5:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 
@@ -282,95 +282,95 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external fastcc  void @"multi_specz_cyclic_lib.foo1<0>"(i64  %"x1#0", i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"n#0")    {
+define external fastcc  void @"multi_specz_cyclic_lib.foo1<0>"(i64  %"x1##0", i64  %"x2##0", i64  %"x3##0", i64  %"x4##0", i64  %"n##0")    {
 entry:
-  %"1$tmp$0#0" = sub   i64 %"n#0", 1 
-  %"1$tmp$1#0" = icmp slt i64 %"1$tmp$0#0", 0 
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
+  %"1#tmp#0##0" = sub   i64 %"n##0", 1 
+  %"1#tmp#1##0" = icmp slt i64 %"1#tmp#0##0", 0 
+  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x1#0", i64  111)  
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x2#0", i64  222)  
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x3#0", i64  333)  
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x4#0", i64  444)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x1##0", i64  111)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x2##0", i64  222)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x3##0", i64  333)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x4##0", i64  444)  
   ret void 
 if.else:
-  tail call fastcc  void  @"multi_specz_cyclic_lib2.foo2<0>"(i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"x1#0", i64  %"1$tmp$0#0")  
+  tail call fastcc  void  @"multi_specz_cyclic_lib2.foo2<0>"(i64  %"x2##0", i64  %"x3##0", i64  %"x4##0", i64  %"x1##0", i64  %"1#tmp#0##0")  
   ret void 
 }
 
 
-define external fastcc  void @"multi_specz_cyclic_lib.foo1<0>[29a1d4275b]"(i64  %"x1#0", i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"n#0")    {
+define external fastcc  void @"multi_specz_cyclic_lib.foo1<0>[29a1d4275b]"(i64  %"x1##0", i64  %"x2##0", i64  %"x3##0", i64  %"x4##0", i64  %"n##0")    {
 entry:
-  %"1$tmp$0#0" = sub   i64 %"n#0", 1 
-  %"1$tmp$1#0" = icmp slt i64 %"1$tmp$0#0", 0 
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
+  %"1#tmp#0##0" = sub   i64 %"n##0", 1 
+  %"1#tmp#1##0" = icmp slt i64 %"1#tmp#0##0", 0 
+  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x1#0", i64  111)  
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x2#0", i64  222)  
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3]"(i64  %"x3#0", i64  333)  
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3]"(i64  %"x4#0", i64  444)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x1##0", i64  111)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x2##0", i64  222)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3]"(i64  %"x3##0", i64  333)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3]"(i64  %"x4##0", i64  444)  
   ret void 
 if.else:
-  tail call fastcc  void  @"multi_specz_cyclic_lib2.foo2<0>[ff3a297a4f]"(i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"x1#0", i64  %"1$tmp$0#0")  
+  tail call fastcc  void  @"multi_specz_cyclic_lib2.foo2<0>[ff3a297a4f]"(i64  %"x2##0", i64  %"x3##0", i64  %"x4##0", i64  %"x1##0", i64  %"1#tmp#0##0")  
   ret void 
 }
 
 
-define external fastcc  void @"multi_specz_cyclic_lib.foo1<0>[7477e50a09]"(i64  %"x1#0", i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"n#0")    {
+define external fastcc  void @"multi_specz_cyclic_lib.foo1<0>[7477e50a09]"(i64  %"x1##0", i64  %"x2##0", i64  %"x3##0", i64  %"x4##0", i64  %"n##0")    {
 entry:
-  %"1$tmp$0#0" = sub   i64 %"n#0", 1 
-  %"1$tmp$1#0" = icmp slt i64 %"1$tmp$0#0", 0 
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
+  %"1#tmp#0##0" = sub   i64 %"n##0", 1 
+  %"1#tmp#1##0" = icmp slt i64 %"1#tmp#0##0", 0 
+  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3]"(i64  %"x1#0", i64  111)  
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3]"(i64  %"x2#0", i64  222)  
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x3#0", i64  333)  
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x4#0", i64  444)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3]"(i64  %"x1##0", i64  111)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3]"(i64  %"x2##0", i64  222)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x3##0", i64  333)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x4##0", i64  444)  
   ret void 
 if.else:
-  tail call fastcc  void  @"multi_specz_cyclic_lib2.foo2<0>[d4b0b4930c]"(i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"x1#0", i64  %"1$tmp$0#0")  
+  tail call fastcc  void  @"multi_specz_cyclic_lib2.foo2<0>[d4b0b4930c]"(i64  %"x2##0", i64  %"x3##0", i64  %"x4##0", i64  %"x1##0", i64  %"1#tmp#0##0")  
   ret void 
 }
 
 
-define external fastcc  void @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"pos#0", i64  %"v#0")    {
+define external fastcc  void @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"pos##0", i64  %"v##0")    {
 entry:
   %1 = trunc i64 16 to i32  
   %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
   %3 = ptrtoint i8* %2 to i64 
   %4 = inttoptr i64 %3 to i8* 
-  %5 = inttoptr i64 %"pos#0" to i8* 
+  %5 = inttoptr i64 %"pos##0" to i8* 
   %6 = trunc i64 16 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %4, i8*  %5, i32  %6, i32  8, i1  0)  
   %7 = inttoptr i64 %3 to i64* 
   %8 = getelementptr  i64, i64* %7, i64 0 
-  store  i64 %"v#0", i64* %8 
+  store  i64 %"v##0", i64* %8 
   tail call fastcc  void  @"multi_specz_cyclic_lib.printPosition<0>"(i64  %3)  
   ret void 
 }
 
 
-define external fastcc  void @"multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3]"(i64  %"pos#0", i64  %"v#0")    {
+define external fastcc  void @"multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3]"(i64  %"pos##0", i64  %"v##0")    {
 entry:
-  %9 = inttoptr i64 %"pos#0" to i64* 
+  %9 = inttoptr i64 %"pos##0" to i64* 
   %10 = getelementptr  i64, i64* %9, i64 0 
-  store  i64 %"v#0", i64* %10 
-  tail call fastcc  void  @"multi_specz_cyclic_lib.printPosition<0>"(i64  %"pos#0")  
+  store  i64 %"v##0", i64* %10 
+  tail call fastcc  void  @"multi_specz_cyclic_lib.printPosition<0>"(i64  %"pos##0")  
   ret void 
 }
 
 
-define external fastcc  void @"multi_specz_cyclic_lib.printPosition<0>"(i64  %"pos#0")    {
+define external fastcc  void @"multi_specz_cyclic_lib.printPosition<0>"(i64  %"pos##0")    {
 entry:
   %12 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multi_specz_cyclic_lib.11, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %12)  
-  %13 = inttoptr i64 %"pos#0" to i64* 
+  %13 = inttoptr i64 %"pos##0" to i64* 
   %14 = getelementptr  i64, i64* %13, i64 0 
   %15 = load  i64, i64* %14 
   tail call ccc  void  @print_int(i64  %15)  
   %17 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @multi_specz_cyclic_lib.16, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %17)  
-  %18 = add   i64 %"pos#0", 8 
+  %18 = add   i64 %"pos##0", 8 
   %19 = inttoptr i64 %18 to i64* 
   %20 = getelementptr  i64, i64* %19, i64 0 
   %21 = load  i64, i64* %20 
@@ -400,86 +400,86 @@ entry:
 
 = > public {inline} (1 calls)
 0: multi_specz_cyclic_lib.position.=<0>
-=($left#0:multi_specz_cyclic_lib.position, $right#0:multi_specz_cyclic_lib.position, ?$$#0:wybe.bool):
+=(#left##0:multi_specz_cyclic_lib.position, #right##0:multi_specz_cyclic_lib.position, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($left#0:multi_specz_cyclic_lib.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$x#0:wybe.int)
-    foreign lpvm access(~$left#0:multi_specz_cyclic_lib.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$y#0:wybe.int)
-    foreign lpvm access($right#0:multi_specz_cyclic_lib.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$x#0:wybe.int)
-    foreign lpvm access(~$right#0:multi_specz_cyclic_lib.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$y#0:wybe.int)
-    foreign llvm icmp_eq(~$left$x#0:wybe.int, ~$right$x#0:wybe.int, ?tmp$1#0:wybe.bool) @int:nn:nn
-    case ~tmp$1#0:wybe.bool of
+    foreign lpvm access(#left##0:multi_specz_cyclic_lib.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#x##0:wybe.int)
+    foreign lpvm access(~#left##0:multi_specz_cyclic_lib.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#y##0:wybe.int)
+    foreign lpvm access(#right##0:multi_specz_cyclic_lib.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#x##0:wybe.int)
+    foreign lpvm access(~#right##0:multi_specz_cyclic_lib.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#y##0:wybe.int)
+    foreign llvm icmp_eq(~#left#x##0:wybe.int, ~#right#x##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    case ~tmp#1##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
     1:
-        foreign llvm icmp_eq(~$left$y#0:wybe.int, ~$right$y#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
+        foreign llvm icmp_eq(~#left#y##0:wybe.int, ~#right#y##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
 
 position > public {inline} (0 calls)
 0: multi_specz_cyclic_lib.position.position<0>
-position(x#0:wybe.int, y#0:wybe.int, ?$#0:multi_specz_cyclic_lib.position):
+position(x##0:wybe.int, y##0:wybe.int, ?#result##0:multi_specz_cyclic_lib.position):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?$rec#0:multi_specz_cyclic_lib.position)
-    foreign lpvm mutate(~$rec#0:multi_specz_cyclic_lib.position, ?$rec#1:multi_specz_cyclic_lib.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x#0:wybe.int)
-    foreign lpvm mutate(~$rec#1:multi_specz_cyclic_lib.position, ?$#0:multi_specz_cyclic_lib.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y#0:wybe.int)
+    foreign lpvm alloc(16:wybe.int, ?#rec##0:multi_specz_cyclic_lib.position)
+    foreign lpvm mutate(~#rec##0:multi_specz_cyclic_lib.position, ?#rec##1:multi_specz_cyclic_lib.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:wybe.int)
+    foreign lpvm mutate(~#rec##1:multi_specz_cyclic_lib.position, ?#result##0:multi_specz_cyclic_lib.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y##0:wybe.int)
 position > public {inline} (6 calls)
 1: multi_specz_cyclic_lib.position.position<1>
-position(?x#0:wybe.int, ?y#0:wybe.int, $#0:multi_specz_cyclic_lib.position):
+position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:multi_specz_cyclic_lib.position):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($#0:multi_specz_cyclic_lib.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x#0:wybe.int)
-    foreign lpvm access(~$#0:multi_specz_cyclic_lib.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y#0:wybe.int)
+    foreign lpvm access(#result##0:multi_specz_cyclic_lib.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:wybe.int)
+    foreign lpvm access(~#result##0:multi_specz_cyclic_lib.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:wybe.int)
 
 
 x > public {inline} (0 calls)
 0: multi_specz_cyclic_lib.position.x<0>
-x($rec#0:multi_specz_cyclic_lib.position, ?$#0:wybe.int):
+x(#rec##0:multi_specz_cyclic_lib.position, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~$rec#0:multi_specz_cyclic_lib.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.int)
+    foreign lpvm access(~#rec##0:multi_specz_cyclic_lib.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 x > public {inline} (0 calls)
 1: multi_specz_cyclic_lib.position.x<1>
-x($rec#0:multi_specz_cyclic_lib.position, ?$rec#1:multi_specz_cyclic_lib.position, $field#0:wybe.int):
+x(#rec##0:multi_specz_cyclic_lib.position, ?#rec##1:multi_specz_cyclic_lib.position, #field##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~$rec#0:multi_specz_cyclic_lib.position, ?$rec#1:multi_specz_cyclic_lib.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm {noalias} mutate(~#rec##0:multi_specz_cyclic_lib.position, ?#rec##1:multi_specz_cyclic_lib.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
 y > public {inline} (0 calls)
 0: multi_specz_cyclic_lib.position.y<0>
-y($rec#0:multi_specz_cyclic_lib.position, ?$#0:wybe.int):
+y(#rec##0:multi_specz_cyclic_lib.position, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~$rec#0:multi_specz_cyclic_lib.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.int)
+    foreign lpvm access(~#rec##0:multi_specz_cyclic_lib.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 y > public {inline} (0 calls)
 1: multi_specz_cyclic_lib.position.y<1>
-y($rec#0:multi_specz_cyclic_lib.position, ?$rec#1:multi_specz_cyclic_lib.position, $field#0:wybe.int):
+y(#rec##0:multi_specz_cyclic_lib.position, ?#rec##1:multi_specz_cyclic_lib.position, #field##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~$rec#0:multi_specz_cyclic_lib.position, ?$rec#1:multi_specz_cyclic_lib.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm {noalias} mutate(~#rec##0:multi_specz_cyclic_lib.position, ?#rec##1:multi_specz_cyclic_lib.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
 ~= > public {inline} (0 calls)
 0: multi_specz_cyclic_lib.position.~=<0>
-~=($left#0:multi_specz_cyclic_lib.position, $right#0:multi_specz_cyclic_lib.position, ?$$#0:wybe.bool):
+~=(#left##0:multi_specz_cyclic_lib.position, #right##0:multi_specz_cyclic_lib.position, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($left#0:multi_specz_cyclic_lib.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.int)
-    foreign lpvm access(~$left#0:multi_specz_cyclic_lib.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.int)
-    foreign lpvm access($right#0:multi_specz_cyclic_lib.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.int)
-    foreign lpvm access(~$right#0:multi_specz_cyclic_lib.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.int)
-    foreign llvm icmp_eq(~tmp$3#0:wybe.int, ~tmp$5#0:wybe.int, ?tmp$7#0:wybe.bool) @int:nn:nn
-    case ~tmp$7#0:wybe.bool of
+    foreign lpvm access(#left##0:multi_specz_cyclic_lib.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int)
+    foreign lpvm access(~#left##0:multi_specz_cyclic_lib.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int)
+    foreign lpvm access(#right##0:multi_specz_cyclic_lib.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.int)
+    foreign lpvm access(~#right##0:multi_specz_cyclic_lib.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.int)
+    foreign llvm icmp_eq(~tmp#3##0:wybe.int, ~tmp#5##0:wybe.int, ?tmp#7##0:wybe.bool) @int:nn:nn
+    case ~tmp#7##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?tmp$0#0:wybe.bool)
-        foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
     1:
-        foreign llvm icmp_eq(~tmp$4#0:wybe.int, ~tmp$6#0:wybe.int, ?tmp$0#0:wybe.bool) @int:nn:nn
-        foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm icmp_eq(~tmp#4##0:wybe.int, ~tmp#6##0:wybe.int, ?tmp#0##0:wybe.bool) @int:nn:nn
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
 
   LLVM code       :
@@ -496,54 +496,54 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external fastcc  i1 @"multi_specz_cyclic_lib.position.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"multi_specz_cyclic_lib.position.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
 entry:
-  %1 = inttoptr i64 %"$left#0" to i64* 
+  %1 = inttoptr i64 %"#left##0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   %3 = load  i64, i64* %2 
-  %4 = add   i64 %"$left#0", 8 
+  %4 = add   i64 %"#left##0", 8 
   %5 = inttoptr i64 %4 to i64* 
   %6 = getelementptr  i64, i64* %5, i64 0 
   %7 = load  i64, i64* %6 
-  %8 = inttoptr i64 %"$right#0" to i64* 
+  %8 = inttoptr i64 %"#right##0" to i64* 
   %9 = getelementptr  i64, i64* %8, i64 0 
   %10 = load  i64, i64* %9 
-  %11 = add   i64 %"$right#0", 8 
+  %11 = add   i64 %"#right##0", 8 
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"1$tmp$1#0" = icmp eq i64 %3, %10 
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
+  %"1#tmp#1##0" = icmp eq i64 %3, %10 
+  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
-  %"2$$$#0" = icmp eq i64 %7, %14 
-  ret i1 %"2$$$#0" 
+  %"2##success##0" = icmp eq i64 %7, %14 
+  ret i1 %"2##success##0" 
 if.else:
   ret i1 0 
 }
 
 
-define external fastcc  i64 @"multi_specz_cyclic_lib.position.position<0>"(i64  %"x#0", i64  %"y#0")    {
+define external fastcc  i64 @"multi_specz_cyclic_lib.position.position<0>"(i64  %"x##0", i64  %"y##0")    {
 entry:
   %15 = trunc i64 16 to i32  
   %16 = tail call ccc  i8*  @wybe_malloc(i32  %15)  
   %17 = ptrtoint i8* %16 to i64 
   %18 = inttoptr i64 %17 to i64* 
   %19 = getelementptr  i64, i64* %18, i64 0 
-  store  i64 %"x#0", i64* %19 
+  store  i64 %"x##0", i64* %19 
   %20 = add   i64 %17, 8 
   %21 = inttoptr i64 %20 to i64* 
   %22 = getelementptr  i64, i64* %21, i64 0 
-  store  i64 %"y#0", i64* %22 
+  store  i64 %"y##0", i64* %22 
   ret i64 %17 
 }
 
 
-define external fastcc  {i64, i64} @"multi_specz_cyclic_lib.position.position<1>"(i64  %"$#0")    {
+define external fastcc  {i64, i64} @"multi_specz_cyclic_lib.position.position<1>"(i64  %"#result##0")    {
 entry:
-  %23 = inttoptr i64 %"$#0" to i64* 
+  %23 = inttoptr i64 %"#result##0" to i64* 
   %24 = getelementptr  i64, i64* %23, i64 0 
   %25 = load  i64, i64* %24 
-  %26 = add   i64 %"$#0", 8 
+  %26 = add   i64 %"#result##0", 8 
   %27 = inttoptr i64 %26 to i64* 
   %28 = getelementptr  i64, i64* %27, i64 0 
   %29 = load  i64, i64* %28 
@@ -553,34 +553,34 @@ entry:
 }
 
 
-define external fastcc  i64 @"multi_specz_cyclic_lib.position.x<0>"(i64  %"$rec#0")    {
+define external fastcc  i64 @"multi_specz_cyclic_lib.position.x<0>"(i64  %"#rec##0")    {
 entry:
-  %32 = inttoptr i64 %"$rec#0" to i64* 
+  %32 = inttoptr i64 %"#rec##0" to i64* 
   %33 = getelementptr  i64, i64* %32, i64 0 
   %34 = load  i64, i64* %33 
   ret i64 %34 
 }
 
 
-define external fastcc  i64 @"multi_specz_cyclic_lib.position.x<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+define external fastcc  i64 @"multi_specz_cyclic_lib.position.x<1>"(i64  %"#rec##0", i64  %"#field##0")    {
 entry:
   %35 = trunc i64 16 to i32  
   %36 = tail call ccc  i8*  @wybe_malloc(i32  %35)  
   %37 = ptrtoint i8* %36 to i64 
   %38 = inttoptr i64 %37 to i8* 
-  %39 = inttoptr i64 %"$rec#0" to i8* 
+  %39 = inttoptr i64 %"#rec##0" to i8* 
   %40 = trunc i64 16 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %38, i8*  %39, i32  %40, i32  8, i1  0)  
   %41 = inttoptr i64 %37 to i64* 
   %42 = getelementptr  i64, i64* %41, i64 0 
-  store  i64 %"$field#0", i64* %42 
+  store  i64 %"#field##0", i64* %42 
   ret i64 %37 
 }
 
 
-define external fastcc  i64 @"multi_specz_cyclic_lib.position.y<0>"(i64  %"$rec#0")    {
+define external fastcc  i64 @"multi_specz_cyclic_lib.position.y<0>"(i64  %"#rec##0")    {
 entry:
-  %43 = add   i64 %"$rec#0", 8 
+  %43 = add   i64 %"#rec##0", 8 
   %44 = inttoptr i64 %43 to i64* 
   %45 = getelementptr  i64, i64* %44, i64 0 
   %46 = load  i64, i64* %45 
@@ -588,48 +588,48 @@ entry:
 }
 
 
-define external fastcc  i64 @"multi_specz_cyclic_lib.position.y<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+define external fastcc  i64 @"multi_specz_cyclic_lib.position.y<1>"(i64  %"#rec##0", i64  %"#field##0")    {
 entry:
   %47 = trunc i64 16 to i32  
   %48 = tail call ccc  i8*  @wybe_malloc(i32  %47)  
   %49 = ptrtoint i8* %48 to i64 
   %50 = inttoptr i64 %49 to i8* 
-  %51 = inttoptr i64 %"$rec#0" to i8* 
+  %51 = inttoptr i64 %"#rec##0" to i8* 
   %52 = trunc i64 16 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %50, i8*  %51, i32  %52, i32  8, i1  0)  
   %53 = add   i64 %49, 8 
   %54 = inttoptr i64 %53 to i64* 
   %55 = getelementptr  i64, i64* %54, i64 0 
-  store  i64 %"$field#0", i64* %55 
+  store  i64 %"#field##0", i64* %55 
   ret i64 %49 
 }
 
 
-define external fastcc  i1 @"multi_specz_cyclic_lib.position.~=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"multi_specz_cyclic_lib.position.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
 entry:
-  %56 = inttoptr i64 %"$left#0" to i64* 
+  %56 = inttoptr i64 %"#left##0" to i64* 
   %57 = getelementptr  i64, i64* %56, i64 0 
   %58 = load  i64, i64* %57 
-  %59 = add   i64 %"$left#0", 8 
+  %59 = add   i64 %"#left##0", 8 
   %60 = inttoptr i64 %59 to i64* 
   %61 = getelementptr  i64, i64* %60, i64 0 
   %62 = load  i64, i64* %61 
-  %63 = inttoptr i64 %"$right#0" to i64* 
+  %63 = inttoptr i64 %"#right##0" to i64* 
   %64 = getelementptr  i64, i64* %63, i64 0 
   %65 = load  i64, i64* %64 
-  %66 = add   i64 %"$right#0", 8 
+  %66 = add   i64 %"#right##0", 8 
   %67 = inttoptr i64 %66 to i64* 
   %68 = getelementptr  i64, i64* %67, i64 0 
   %69 = load  i64, i64* %68 
-  %"1$tmp$7#0" = icmp eq i64 %58, %65 
-  br i1 %"1$tmp$7#0", label %if.then, label %if.else 
+  %"1#tmp#7##0" = icmp eq i64 %58, %65 
+  br i1 %"1#tmp#7##0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$0#0" = icmp eq i64 %62, %69 
-  %"2$$$#0" = xor i1 %"2$tmp$0#0", 1 
-  ret i1 %"2$$$#0" 
+  %"2#tmp#0##0" = icmp eq i64 %62, %69 
+  %"2##success##0" = xor i1 %"2#tmp#0##0", 1 
+  ret i1 %"2##success##0" 
 if.else:
-  %"3$$$#0" = xor i1 0, 1 
-  ret i1 %"3$$$#0" 
+  %"3##success##0" = xor i1 0, 1 
+  ret i1 %"3##success##0" 
 }
 --------------------------------------------------
  Module multi_specz_cyclic_lib2
@@ -644,48 +644,48 @@ if.else:
 
 foo2 > public (0 calls)
 0: multi_specz_cyclic_lib2.foo2<0>[ff3a297a4f]
-foo2(x1#0:multi_specz_cyclic_lib.position, x2#0:multi_specz_cyclic_lib.position, x3#0:multi_specz_cyclic_lib.position, x4#0:multi_specz_cyclic_lib.position, n#0:wybe.int, io#0:wybe.phantom, ?io#4:wybe.phantom):
+foo2(x1##0:multi_specz_cyclic_lib.position, x2##0:multi_specz_cyclic_lib.position, x3##0:multi_specz_cyclic_lib.position, x4##0:multi_specz_cyclic_lib.position, n##0:wybe.int, io##0:wybe.phantom, ?io##4:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1,InterestingUnaliased 2,InterestingUnaliased 3]
  MultiSpeczDepInfo: [(2,(multi_specz_cyclic_lib.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [0]])),(3,(multi_specz_cyclic_lib.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [1]])),(4,(multi_specz_cyclic_lib.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [2]])),(5,(multi_specz_cyclic_lib.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [3]])),(6,(multi_specz_cyclic_lib.foo1<0>,fromList [NonAliasedParamCond 0 [1],NonAliasedParamCond 1 [2],NonAliasedParamCond 2 [3],NonAliasedParamCond 3 [0]]))]
-    foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn
-    foreign llvm icmp_slt(tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @int:nn:nn
-    case ~tmp$1#0:wybe.bool of
+    foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
+    foreign llvm icmp_slt(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    case ~tmp#1##0:wybe.bool of
     0:
-        multi_specz_cyclic_lib.foo1<0>(~x2#0:multi_specz_cyclic_lib.position, ~x3#0:multi_specz_cyclic_lib.position, ~x4#0:multi_specz_cyclic_lib.position, ~x1#0:multi_specz_cyclic_lib.position, ~tmp$0#0:wybe.int, ~#io#0:wybe.phantom, ?#io#4:wybe.phantom) #6 @multi_specz_cyclic_lib2:11:14
+        multi_specz_cyclic_lib.foo1<0>(~x2##0:multi_specz_cyclic_lib.position, ~x3##0:multi_specz_cyclic_lib.position, ~x4##0:multi_specz_cyclic_lib.position, ~x1##0:multi_specz_cyclic_lib.position, ~tmp#0##0:wybe.int, ~#io##0:wybe.phantom, ?#io##4:wybe.phantom) #6 @multi_specz_cyclic_lib2:11:14
 
     1:
-        multi_specz_cyclic_lib.modifyAndPrint<0>(~x1#0:multi_specz_cyclic_lib.position, 111:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #2 @multi_specz_cyclic_lib2:6:14
-        multi_specz_cyclic_lib.modifyAndPrint<0>(~x2#0:multi_specz_cyclic_lib.position, 222:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #3 @multi_specz_cyclic_lib2:7:14
-        multi_specz_cyclic_lib.modifyAndPrint<0>(~x3#0:multi_specz_cyclic_lib.position, 333:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #4 @multi_specz_cyclic_lib2:8:14
-        multi_specz_cyclic_lib.modifyAndPrint<0>(~x4#0:multi_specz_cyclic_lib.position, 444:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #5 @multi_specz_cyclic_lib2:9:14
+        multi_specz_cyclic_lib.modifyAndPrint<0>(~x1##0:multi_specz_cyclic_lib.position, 111:wybe.int, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #2 @multi_specz_cyclic_lib2:6:14
+        multi_specz_cyclic_lib.modifyAndPrint<0>(~x2##0:multi_specz_cyclic_lib.position, 222:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #3 @multi_specz_cyclic_lib2:7:14
+        multi_specz_cyclic_lib.modifyAndPrint<0>(~x3##0:multi_specz_cyclic_lib.position, 333:wybe.int, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #4 @multi_specz_cyclic_lib2:8:14
+        multi_specz_cyclic_lib.modifyAndPrint<0>(~x4##0:multi_specz_cyclic_lib.position, 444:wybe.int, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) #5 @multi_specz_cyclic_lib2:9:14
 
  [d4b0b4930c] [NonAliasedParam 0,NonAliasedParam 3] :
-    foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn
-    foreign llvm icmp_slt(tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @int:nn:nn
-    case ~tmp$1#0:wybe.bool of
+    foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
+    foreign llvm icmp_slt(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    case ~tmp#1##0:wybe.bool of
     0:
-        multi_specz_cyclic_lib.foo1<0>[29a1d4275b](~x2#0:multi_specz_cyclic_lib.position, ~x3#0:multi_specz_cyclic_lib.position, ~x4#0:multi_specz_cyclic_lib.position, ~x1#0:multi_specz_cyclic_lib.position, ~tmp$0#0:wybe.int, ~#io#0:wybe.phantom, ?#io#4:wybe.phantom) #6 @multi_specz_cyclic_lib2:11:14
+        multi_specz_cyclic_lib.foo1<0>[29a1d4275b](~x2##0:multi_specz_cyclic_lib.position, ~x3##0:multi_specz_cyclic_lib.position, ~x4##0:multi_specz_cyclic_lib.position, ~x1##0:multi_specz_cyclic_lib.position, ~tmp#0##0:wybe.int, ~#io##0:wybe.phantom, ?#io##4:wybe.phantom) #6 @multi_specz_cyclic_lib2:11:14
 
     1:
-        multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3](~x1#0:multi_specz_cyclic_lib.position, 111:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #2 @multi_specz_cyclic_lib2:6:14
-        multi_specz_cyclic_lib.modifyAndPrint<0>(~x2#0:multi_specz_cyclic_lib.position, 222:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #3 @multi_specz_cyclic_lib2:7:14
-        multi_specz_cyclic_lib.modifyAndPrint<0>(~x3#0:multi_specz_cyclic_lib.position, 333:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #4 @multi_specz_cyclic_lib2:8:14
-        multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3](~x4#0:multi_specz_cyclic_lib.position, 444:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #5 @multi_specz_cyclic_lib2:9:14
+        multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3](~x1##0:multi_specz_cyclic_lib.position, 111:wybe.int, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #2 @multi_specz_cyclic_lib2:6:14
+        multi_specz_cyclic_lib.modifyAndPrint<0>(~x2##0:multi_specz_cyclic_lib.position, 222:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #3 @multi_specz_cyclic_lib2:7:14
+        multi_specz_cyclic_lib.modifyAndPrint<0>(~x3##0:multi_specz_cyclic_lib.position, 333:wybe.int, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #4 @multi_specz_cyclic_lib2:8:14
+        multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3](~x4##0:multi_specz_cyclic_lib.position, 444:wybe.int, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) #5 @multi_specz_cyclic_lib2:9:14
 
 
  [ff3a297a4f] [NonAliasedParam 1,NonAliasedParam 2] :
-    foreign llvm sub(~n#0:wybe.int, 1:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn
-    foreign llvm icmp_slt(tmp$0#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool) @int:nn:nn
-    case ~tmp$1#0:wybe.bool of
+    foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
+    foreign llvm icmp_slt(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    case ~tmp#1##0:wybe.bool of
     0:
-        multi_specz_cyclic_lib.foo1<0>[7477e50a09](~x2#0:multi_specz_cyclic_lib.position, ~x3#0:multi_specz_cyclic_lib.position, ~x4#0:multi_specz_cyclic_lib.position, ~x1#0:multi_specz_cyclic_lib.position, ~tmp$0#0:wybe.int, ~#io#0:wybe.phantom, ?#io#4:wybe.phantom) #6 @multi_specz_cyclic_lib2:11:14
+        multi_specz_cyclic_lib.foo1<0>[7477e50a09](~x2##0:multi_specz_cyclic_lib.position, ~x3##0:multi_specz_cyclic_lib.position, ~x4##0:multi_specz_cyclic_lib.position, ~x1##0:multi_specz_cyclic_lib.position, ~tmp#0##0:wybe.int, ~#io##0:wybe.phantom, ?#io##4:wybe.phantom) #6 @multi_specz_cyclic_lib2:11:14
 
     1:
-        multi_specz_cyclic_lib.modifyAndPrint<0>(~x1#0:multi_specz_cyclic_lib.position, 111:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #2 @multi_specz_cyclic_lib2:6:14
-        multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3](~x2#0:multi_specz_cyclic_lib.position, 222:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #3 @multi_specz_cyclic_lib2:7:14
-        multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3](~x3#0:multi_specz_cyclic_lib.position, 333:wybe.int, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #4 @multi_specz_cyclic_lib2:8:14
-        multi_specz_cyclic_lib.modifyAndPrint<0>(~x4#0:multi_specz_cyclic_lib.position, 444:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #5 @multi_specz_cyclic_lib2:9:14
+        multi_specz_cyclic_lib.modifyAndPrint<0>(~x1##0:multi_specz_cyclic_lib.position, 111:wybe.int, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #2 @multi_specz_cyclic_lib2:6:14
+        multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3](~x2##0:multi_specz_cyclic_lib.position, 222:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #3 @multi_specz_cyclic_lib2:7:14
+        multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3](~x3##0:multi_specz_cyclic_lib.position, 333:wybe.int, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #4 @multi_specz_cyclic_lib2:8:14
+        multi_specz_cyclic_lib.modifyAndPrint<0>(~x4##0:multi_specz_cyclic_lib.position, 444:wybe.int, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) #5 @multi_specz_cyclic_lib2:9:14
 
 
   LLVM code       :
@@ -717,52 +717,52 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external fastcc  void @"multi_specz_cyclic_lib2.foo2<0>"(i64  %"x1#0", i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"n#0")    {
+define external fastcc  void @"multi_specz_cyclic_lib2.foo2<0>"(i64  %"x1##0", i64  %"x2##0", i64  %"x3##0", i64  %"x4##0", i64  %"n##0")    {
 entry:
-  %"1$tmp$0#0" = sub   i64 %"n#0", 1 
-  %"1$tmp$1#0" = icmp slt i64 %"1$tmp$0#0", 0 
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
+  %"1#tmp#0##0" = sub   i64 %"n##0", 1 
+  %"1#tmp#1##0" = icmp slt i64 %"1#tmp#0##0", 0 
+  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x1#0", i64  111)  
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x2#0", i64  222)  
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x3#0", i64  333)  
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x4#0", i64  444)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x1##0", i64  111)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x2##0", i64  222)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x3##0", i64  333)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x4##0", i64  444)  
   ret void 
 if.else:
-  tail call fastcc  void  @"multi_specz_cyclic_lib.foo1<0>"(i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"x1#0", i64  %"1$tmp$0#0")  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.foo1<0>"(i64  %"x2##0", i64  %"x3##0", i64  %"x4##0", i64  %"x1##0", i64  %"1#tmp#0##0")  
   ret void 
 }
 
 
-define external fastcc  void @"multi_specz_cyclic_lib2.foo2<0>[ff3a297a4f]"(i64  %"x1#0", i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"n#0")    {
+define external fastcc  void @"multi_specz_cyclic_lib2.foo2<0>[ff3a297a4f]"(i64  %"x1##0", i64  %"x2##0", i64  %"x3##0", i64  %"x4##0", i64  %"n##0")    {
 entry:
-  %"1$tmp$0#0" = sub   i64 %"n#0", 1 
-  %"1$tmp$1#0" = icmp slt i64 %"1$tmp$0#0", 0 
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
+  %"1#tmp#0##0" = sub   i64 %"n##0", 1 
+  %"1#tmp#1##0" = icmp slt i64 %"1#tmp#0##0", 0 
+  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x1#0", i64  111)  
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3]"(i64  %"x2#0", i64  222)  
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3]"(i64  %"x3#0", i64  333)  
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x4#0", i64  444)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x1##0", i64  111)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3]"(i64  %"x2##0", i64  222)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3]"(i64  %"x3##0", i64  333)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x4##0", i64  444)  
   ret void 
 if.else:
-  tail call fastcc  void  @"multi_specz_cyclic_lib.foo1<0>[7477e50a09]"(i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"x1#0", i64  %"1$tmp$0#0")  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.foo1<0>[7477e50a09]"(i64  %"x2##0", i64  %"x3##0", i64  %"x4##0", i64  %"x1##0", i64  %"1#tmp#0##0")  
   ret void 
 }
 
 
-define external fastcc  void @"multi_specz_cyclic_lib2.foo2<0>[d4b0b4930c]"(i64  %"x1#0", i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"n#0")    {
+define external fastcc  void @"multi_specz_cyclic_lib2.foo2<0>[d4b0b4930c]"(i64  %"x1##0", i64  %"x2##0", i64  %"x3##0", i64  %"x4##0", i64  %"n##0")    {
 entry:
-  %"1$tmp$0#0" = sub   i64 %"n#0", 1 
-  %"1$tmp$1#0" = icmp slt i64 %"1$tmp$0#0", 0 
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
+  %"1#tmp#0##0" = sub   i64 %"n##0", 1 
+  %"1#tmp#1##0" = icmp slt i64 %"1#tmp#0##0", 0 
+  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3]"(i64  %"x1#0", i64  111)  
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x2#0", i64  222)  
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x3#0", i64  333)  
-  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3]"(i64  %"x4#0", i64  444)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3]"(i64  %"x1##0", i64  111)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x2##0", i64  222)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x3##0", i64  333)  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>[410bae77d3]"(i64  %"x4##0", i64  444)  
   ret void 
 if.else:
-  tail call fastcc  void  @"multi_specz_cyclic_lib.foo1<0>[29a1d4275b]"(i64  %"x2#0", i64  %"x3#0", i64  %"x4#0", i64  %"x1#0", i64  %"1$tmp$0#0")  
+  tail call fastcc  void  @"multi_specz_cyclic_lib.foo1<0>[29a1d4275b]"(i64  %"x2##0", i64  %"x3##0", i64  %"x4##0", i64  %"x1##0", i64  %"1#tmp#0##0")  
   ret void 
 }

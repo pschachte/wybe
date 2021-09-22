@@ -13,7 +13,7 @@ module Util (sameLength, maybeNth, setMapInsert, showArguments,
              removeFromDS, connectedItemsInDS,
              mapDS, filterDS, dsToTransitivePairs,
              intersectMapIdentity, orElse,
-             apply2way, (&&&), zipWith3M, zipWith3M_,
+             apply2way, (&&&), (|||), zipWith3M, zipWith3M_,
              useLocalCacheFileIfPossible, createLocalCacheFile
              ) where
 
@@ -232,9 +232,15 @@ apply2way :: (a->b->c) -> (d->a) -> (d->b) -> d -> c
 apply2way combine f1 f2 input = combine (f1 input) (f2 input)
 
 -- | conjoin two functions
-infix 4 &&&
+infixl 4 &&&
 (&&&) :: (a->Bool) -> (a->Bool) -> a -> Bool
 (&&&) = apply2way (&&)
+
+
+-- | disjoin two functions
+infixl 4 |||
+(|||) :: (a->Bool) -> (a->Bool) -> a -> Bool
+(|||) = apply2way (||)
 
 
 -- |zipWithM version for 3 lists.

@@ -17,102 +17,102 @@ AFTER EVERYTHING:
 
 *main* > public (0 calls)
 0: ctor_char2.<0>
-(io#0:wybe.phantom, ?io#1:wybe.phantom):
+(io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm shl('a':ctor_char2, 2:ctor_char2, ?tmp$3#0:ctor_char2)
-    foreign llvm or(~tmp$3#0:ctor_char2, 1024:ctor_char2, ?tmp$1#0:ctor_char2)
-    ctor_char2.foo<0>(~tmp$1#0:ctor_char2, ?tmp$0#0:wybe.char) #1 @ctor_char2:5:10
-    foreign c putchar(~tmp$0#0:wybe.char, ~#io#0:wybe.phantom, ?tmp$6#0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$6#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign llvm shl('a':ctor_char2, 2:ctor_char2, ?tmp#3##0:ctor_char2)
+    foreign llvm or(~tmp#3##0:ctor_char2, 1024:ctor_char2, ?tmp#1##0:ctor_char2)
+    ctor_char2.foo<0>(~tmp#1##0:ctor_char2, ?tmp#0##0:wybe.char) #1 @ctor_char2:5:10
+    foreign c putchar(~tmp#0##0:wybe.char, ~#io##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
 
 
 = > public (3 calls)
 0: ctor_char2.=<0>
-=($left#0:ctor_char2, $right#0:ctor_char2, ?$$#0:wybe.bool):
+=(#left##0:ctor_char2, #right##0:ctor_char2, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($left#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool)
-    case ~tmp$0#0:wybe.bool of
+    foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
     0:
-        foreign llvm icmp_eq(~$left#0:ctor_char2, ~$right#0:ctor_char2, ?$$#0:wybe.bool)
+        foreign llvm icmp_eq(~#left##0:ctor_char2, ~#right##0:ctor_char2, ?#success##0:wybe.bool)
 
     1:
-        foreign llvm and($left#0:wybe.int, 3:wybe.int, ?tmp$13#0:wybe.int)
-        foreign llvm icmp_eq(tmp$13#0:wybe.int, 0:wybe.int, ?tmp$14#0:wybe.bool)
-        case ~tmp$14#0:wybe.bool of
+        foreign llvm and(#left##0:wybe.int, 3:wybe.int, ?tmp#13##0:wybe.int)
+        foreign llvm icmp_eq(tmp#13##0:wybe.int, 0:wybe.int, ?tmp#14##0:wybe.bool)
+        case ~tmp#14##0:wybe.bool of
         0:
-            foreign llvm icmp_eq(tmp$13#0:wybe.int, 1:wybe.int, ?tmp$20#0:wybe.bool)
-            case ~tmp$20#0:wybe.bool of
+            foreign llvm icmp_eq(tmp#13##0:wybe.int, 1:wybe.int, ?tmp#20##0:wybe.bool)
+            case ~tmp#20##0:wybe.bool of
             0:
-                foreign llvm icmp_eq(~tmp$13#0:wybe.int, 2:wybe.int, ?tmp$24#0:wybe.bool)
-                case ~tmp$24#0:wybe.bool of
+                foreign llvm icmp_eq(~tmp#13##0:wybe.int, 2:wybe.int, ?tmp#24##0:wybe.bool)
+                case ~tmp#24##0:wybe.bool of
                 0:
-                    foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                    foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                 1:
-                    foreign lpvm access(~$left#0:ctor_char2, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?$left$another_ctor$1#0:ctor_char2)
-                    foreign llvm icmp_ne($right#0:wybe.int, 0:wybe.int, ?tmp$26#0:wybe.bool)
-                    case ~tmp$26#0:wybe.bool of
+                    foreign lpvm access(~#left##0:ctor_char2, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#left#another_ctor#1##0:ctor_char2)
+                    foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#26##0:wybe.bool)
+                    case ~tmp#26##0:wybe.bool of
                     0:
-                        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                     1:
-                        foreign llvm and($right#0:wybe.int, 3:wybe.int, ?tmp$27#0:wybe.int)
-                        foreign llvm icmp_eq(~tmp$27#0:wybe.int, 2:wybe.int, ?tmp$28#0:wybe.bool)
-                        case ~tmp$28#0:wybe.bool of
+                        foreign llvm and(#right##0:wybe.int, 3:wybe.int, ?tmp#27##0:wybe.int)
+                        foreign llvm icmp_eq(~tmp#27##0:wybe.int, 2:wybe.int, ?tmp#28##0:wybe.bool)
+                        case ~tmp#28##0:wybe.bool of
                         0:
-                            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                         1:
-                            foreign lpvm access(~$right#0:ctor_char2, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?$right$another_ctor$1#0:ctor_char2)
-                            ctor_char2.=<0>(~$left$another_ctor$1#0:ctor_char2, ~$right$another_ctor$1#0:ctor_char2, ?$$#0:wybe.bool) #8
+                            foreign lpvm access(~#right##0:ctor_char2, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#right#another_ctor#1##0:ctor_char2)
+                            ctor_char2.=<0>(~#left#another_ctor#1##0:ctor_char2, ~#right#another_ctor#1##0:ctor_char2, ?#success##0:wybe.bool) #8
 
 
 
 
             1:
-                foreign lpvm access(~$left#0:ctor_char2, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$left$other_ctor$1#0:ctor_char2)
-                foreign llvm icmp_ne($right#0:wybe.int, 0:wybe.int, ?tmp$22#0:wybe.bool)
-                case ~tmp$22#0:wybe.bool of
+                foreign lpvm access(~#left##0:ctor_char2, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?#left#other_ctor#1##0:ctor_char2)
+                foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#22##0:wybe.bool)
+                case ~tmp#22##0:wybe.bool of
                 0:
-                    foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                    foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                 1:
-                    foreign llvm and($right#0:wybe.int, 3:wybe.int, ?tmp$23#0:wybe.int)
-                    foreign llvm icmp_eq(~tmp$23#0:wybe.int, 1:wybe.int, ?tmp$24#0:wybe.bool)
-                    case ~tmp$24#0:wybe.bool of
+                    foreign llvm and(#right##0:wybe.int, 3:wybe.int, ?tmp#23##0:wybe.int)
+                    foreign llvm icmp_eq(~tmp#23##0:wybe.int, 1:wybe.int, ?tmp#24##0:wybe.bool)
+                    case ~tmp#24##0:wybe.bool of
                     0:
-                        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                     1:
-                        foreign lpvm access(~$right#0:ctor_char2, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?$right$other_ctor$1#0:ctor_char2)
-                        ctor_char2.=<0>(~$left$other_ctor$1#0:ctor_char2, ~$right$other_ctor$1#0:ctor_char2, ?$$#0:wybe.bool) #5
+                        foreign lpvm access(~#right##0:ctor_char2, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?#right#other_ctor#1##0:ctor_char2)
+                        ctor_char2.=<0>(~#left#other_ctor#1##0:ctor_char2, ~#right#other_ctor#1##0:ctor_char2, ?#success##0:wybe.bool) #5
 
 
 
 
         1:
-            foreign llvm lshr(~$left#0:ctor_char2, 2:ctor_char2, ?tmp$15#0:ctor_char2)
-            foreign llvm and(~tmp$15#0:ctor_char2, 255:ctor_char2, ?tmp$16#0:ctor_char2)
-            foreign lpvm cast(~tmp$16#0:ctor_char2, ?$left$c#0:wybe.char)
-            foreign llvm icmp_ne($right#0:wybe.int, 0:wybe.int, ?tmp$18#0:wybe.bool)
-            case ~tmp$18#0:wybe.bool of
+            foreign llvm lshr(~#left##0:ctor_char2, 2:ctor_char2, ?tmp#15##0:ctor_char2)
+            foreign llvm and(~tmp#15##0:ctor_char2, 255:ctor_char2, ?tmp#16##0:ctor_char2)
+            foreign lpvm cast(~tmp#16##0:ctor_char2, ?#left#c##0:wybe.char)
+            foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#18##0:wybe.bool)
+            case ~tmp#18##0:wybe.bool of
             0:
-                foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
             1:
-                foreign llvm and($right#0:wybe.int, 3:wybe.int, ?tmp$19#0:wybe.int)
-                foreign llvm icmp_eq(~tmp$19#0:wybe.int, 0:wybe.int, ?tmp$20#0:wybe.bool)
-                case ~tmp$20#0:wybe.bool of
+                foreign llvm and(#right##0:wybe.int, 3:wybe.int, ?tmp#19##0:wybe.int)
+                foreign llvm icmp_eq(~tmp#19##0:wybe.int, 0:wybe.int, ?tmp#20##0:wybe.bool)
+                case ~tmp#20##0:wybe.bool of
                 0:
-                    foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+                    foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                 1:
-                    foreign llvm lshr(~$right#0:ctor_char2, 2:ctor_char2, ?tmp$21#0:ctor_char2)
-                    foreign llvm and(~tmp$21#0:ctor_char2, 255:ctor_char2, ?tmp$22#0:ctor_char2)
-                    foreign lpvm cast(~tmp$22#0:ctor_char2, ?$right$c#0:wybe.char)
-                    foreign llvm icmp_eq(~$left$c#0:wybe.char, ~$right$c#0:wybe.char, ?$$#0:wybe.bool) @char:nn:nn
+                    foreign llvm lshr(~#right##0:ctor_char2, 2:ctor_char2, ?tmp#21##0:ctor_char2)
+                    foreign llvm and(~tmp#21##0:ctor_char2, 255:ctor_char2, ?tmp#22##0:ctor_char2)
+                    foreign lpvm cast(~tmp#22##0:ctor_char2, ?#right#c##0:wybe.char)
+                    foreign llvm icmp_eq(~#left#c##0:wybe.char, ~#right#c##0:wybe.char, ?#success##0:wybe.bool) @char:nn:nn
 
 
 
@@ -121,201 +121,201 @@ AFTER EVERYTHING:
 
 another_ctor > public {inline} (0 calls)
 0: ctor_char2.another_ctor<0>
-another_ctor(another_ctor$1#0:ctor_char2, ?$#0:ctor_char2):
+another_ctor(another_ctor#1##0:ctor_char2, ?#result##0:ctor_char2):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?$rec#0:ctor_char2)
-    foreign lpvm mutate(~$rec#0:ctor_char2, ?$rec#1:ctor_char2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~another_ctor$1#0:ctor_char2)
-    foreign llvm or(~$rec#1:ctor_char2, 2:wybe.int, ?$#0:ctor_char2)
+    foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_char2)
+    foreign lpvm mutate(~#rec##0:ctor_char2, ?#rec##1:ctor_char2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~another_ctor#1##0:ctor_char2)
+    foreign llvm or(~#rec##1:ctor_char2, 2:wybe.int, ?#result##0:ctor_char2)
 another_ctor > public {inline} (5 calls)
 1: ctor_char2.another_ctor<1>
-another_ctor(?another_ctor$1#0:ctor_char2, $#0:ctor_char2, ?$$#0:wybe.bool):
+another_ctor(?another_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool)
-    case ~tmp$0#0:wybe.bool of
+    foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-        foreign llvm move(undef:ctor_char2, ?another_ctor$1#0:ctor_char2)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:ctor_char2, ?another_ctor#1##0:ctor_char2)
 
     1:
-        foreign llvm and($#0:wybe.int, 3:wybe.int, ?tmp$2#0:wybe.int)
-        foreign llvm icmp_eq(~tmp$2#0:wybe.int, 2:wybe.int, ?tmp$1#0:wybe.bool)
-        case ~tmp$1#0:wybe.bool of
+        foreign llvm and(#result##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 2:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
         0:
-            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-            foreign llvm move(undef:ctor_char2, ?another_ctor$1#0:ctor_char2)
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(undef:ctor_char2, ?another_ctor#1##0:ctor_char2)
 
         1:
-            foreign lpvm access(~$#0:ctor_char2, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?another_ctor$1#0:ctor_char2)
-            foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+            foreign lpvm access(~#result##0:ctor_char2, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?another_ctor#1##0:ctor_char2)
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 
 
 c > {inline} (0 calls)
 0: ctor_char2.c<0>
-c($rec#0:ctor_char2, ?$#0:wybe.char, ?$$#0:wybe.bool):
+c(#rec##0:ctor_char2, ?#result##0:wybe.char, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool)
-    case ~tmp$0#0:wybe.bool of
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-        foreign llvm move(undef:wybe.char, ?$#0:wybe.char)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:wybe.char, ?#result##0:wybe.char)
 
     1:
-        foreign llvm and($rec#0:wybe.int, 3:wybe.int, ?tmp$2#0:wybe.int)
-        foreign llvm icmp_eq(~tmp$2#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
-        case ~tmp$1#0:wybe.bool of
+        foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
         0:
-            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-            foreign llvm move(undef:wybe.char, ?$#0:wybe.char)
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(undef:wybe.char, ?#result##0:wybe.char)
 
         1:
-            foreign llvm lshr(~$rec#0:ctor_char2, 2:ctor_char2, ?$rec#1:ctor_char2)
-            foreign llvm and(~$rec#1:ctor_char2, 255:ctor_char2, ?$field#0:ctor_char2)
-            foreign lpvm cast(~$field#0:ctor_char2, ?$#0:wybe.char)
-            foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm lshr(~#rec##0:ctor_char2, 2:ctor_char2, ?#rec##1:ctor_char2)
+            foreign llvm and(~#rec##1:ctor_char2, 255:ctor_char2, ?#field##0:ctor_char2)
+            foreign lpvm cast(~#field##0:ctor_char2, ?#result##0:wybe.char)
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 c > {inline} (0 calls)
 1: ctor_char2.c<1>
-c($rec#0:ctor_char2, ?$rec#2:ctor_char2, $field#0:wybe.char, ?$$#0:wybe.bool):
+c(#rec##0:ctor_char2, ?#rec##2:ctor_char2, #field##0:wybe.char, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($rec#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool)
-    case ~tmp$0#0:wybe.bool of
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-        foreign llvm move(~$rec#0:ctor_char2, ?$rec#2:ctor_char2)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(~#rec##0:ctor_char2, ?#rec##2:ctor_char2)
 
     1:
-        foreign llvm and($rec#0:wybe.int, 3:wybe.int, ?tmp$2#0:wybe.int)
-        foreign llvm icmp_eq(~tmp$2#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
-        case ~tmp$1#0:wybe.bool of
+        foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
         0:
-            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-            foreign llvm move(~$rec#0:ctor_char2, ?$rec#2:ctor_char2)
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(~#rec##0:ctor_char2, ?#rec##2:ctor_char2)
 
         1:
-            foreign llvm and(~$rec#0:ctor_char2, -1021:ctor_char2, ?$rec#1:ctor_char2)
-            foreign llvm shl(~$field#0:ctor_char2, 2:ctor_char2, ?$tmp#0:ctor_char2)
-            foreign llvm or(~$rec#1:ctor_char2, ~$tmp#0:ctor_char2, ?$rec#2:ctor_char2)
-            foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm and(~#rec##0:ctor_char2, -1021:ctor_char2, ?#rec##1:ctor_char2)
+            foreign llvm shl(~#field##0:ctor_char2, 2:ctor_char2, ?#temp##0:ctor_char2)
+            foreign llvm or(~#rec##1:ctor_char2, ~#temp##0:ctor_char2, ?#rec##2:ctor_char2)
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 
 
 const > {inline} (0 calls)
 0: ctor_char2.const<0>
-const(?$#0:ctor_char2):
+const(?#result##0:ctor_char2):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(0:ctor_char2, ?$#0:ctor_char2)
+    foreign llvm move(0:ctor_char2, ?#result##0:ctor_char2)
 
 
 ctor > {inline} (1 calls)
 0: ctor_char2.ctor<0>
-ctor(c#0:wybe.char, ?$#3:ctor_char2):
+ctor(c##0:wybe.char, ?#result##3:ctor_char2):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm shl(~c#0:ctor_char2, 2:ctor_char2, ?$temp#0:ctor_char2)
-    foreign llvm or(~$temp#0:ctor_char2, 1024:ctor_char2, ?$#3:ctor_char2)
+    foreign llvm shl(~c##0:ctor_char2, 2:ctor_char2, ?#temp##0:ctor_char2)
+    foreign llvm or(~#temp##0:ctor_char2, 1024:ctor_char2, ?#result##3:ctor_char2)
 ctor > {inline} (15 calls)
 1: ctor_char2.ctor<1>
-ctor(?c#0:wybe.char, $#0:ctor_char2, ?$$#0:wybe.bool):
+ctor(?c##0:wybe.char, #result##0:ctor_char2, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool)
-    case ~tmp$0#0:wybe.bool of
+    foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-        foreign llvm move(undef:wybe.char, ?c#0:wybe.char)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:wybe.char, ?c##0:wybe.char)
 
     1:
-        foreign llvm and($#0:wybe.int, 3:wybe.int, ?tmp$2#0:wybe.int)
-        foreign llvm icmp_eq(~tmp$2#0:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.bool)
-        case ~tmp$1#0:wybe.bool of
+        foreign llvm and(#result##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
         0:
-            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-            foreign llvm move(undef:wybe.char, ?c#0:wybe.char)
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(undef:wybe.char, ?c##0:wybe.char)
 
         1:
-            foreign llvm lshr(~$#0:ctor_char2, 2:ctor_char2, ?$temp#0:ctor_char2)
-            foreign llvm and(~$temp#0:ctor_char2, 255:ctor_char2, ?$temp2#0:ctor_char2)
-            foreign lpvm cast(~$temp2#0:ctor_char2, ?c#0:wybe.char)
-            foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+            foreign llvm lshr(~#result##0:ctor_char2, 2:ctor_char2, ?#temp##0:ctor_char2)
+            foreign llvm and(~#temp##0:ctor_char2, 255:ctor_char2, ?#temp2##0:ctor_char2)
+            foreign lpvm cast(~#temp2##0:ctor_char2, ?c##0:wybe.char)
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 
 
 foo > (1 calls)
 0: ctor_char2.foo<0>
-foo(this#0:ctor_char2, ?$#0:wybe.char):
+foo(this##0:ctor_char2, ?#result##0:wybe.char):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne(this#0:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.bool)
-    case ~tmp$3#0:wybe.bool of
+    foreign llvm icmp_ne(this##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool)
+    case ~tmp#3##0:wybe.bool of
     0:
-        foreign llvm move('0':wybe.char, ?$#0:wybe.char) @ctor_char2:3:1
+        foreign llvm move('0':wybe.char, ?#result##0:wybe.char) @ctor_char2:3:1
 
     1:
-        foreign llvm and(this#0:wybe.int, 3:wybe.int, ?tmp$4#0:wybe.int)
-        foreign llvm icmp_eq(~tmp$4#0:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.bool)
-        case ~tmp$5#0:wybe.bool of
+        foreign llvm and(this##0:wybe.int, 3:wybe.int, ?tmp#4##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#4##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
+        case ~tmp#5##0:wybe.bool of
         0:
-            foreign llvm move('0':wybe.char, ?$#0:wybe.char) @ctor_char2:3:1
+            foreign llvm move('0':wybe.char, ?#result##0:wybe.char) @ctor_char2:3:1
 
         1:
-            foreign llvm lshr(~this#0:ctor_char2, 2:ctor_char2, ?tmp$6#0:ctor_char2)
-            foreign llvm and(~tmp$6#0:ctor_char2, 255:ctor_char2, ?tmp$7#0:ctor_char2)
-            foreign lpvm cast(~tmp$7#0:ctor_char2, ?$#0:wybe.char)
+            foreign llvm lshr(~this##0:ctor_char2, 2:ctor_char2, ?tmp#6##0:ctor_char2)
+            foreign llvm and(~tmp#6##0:ctor_char2, 255:ctor_char2, ?tmp#7##0:ctor_char2)
+            foreign lpvm cast(~tmp#7##0:ctor_char2, ?#result##0:wybe.char)
 
 
 
 
 other_ctor > public {inline} (0 calls)
 0: ctor_char2.other_ctor<0>
-other_ctor(other_ctor$1#0:ctor_char2, ?$#0:ctor_char2):
+other_ctor(other_ctor#1##0:ctor_char2, ?#result##0:ctor_char2):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?$rec#0:ctor_char2)
-    foreign lpvm mutate(~$rec#0:ctor_char2, ?$rec#1:ctor_char2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~other_ctor$1#0:ctor_char2)
-    foreign llvm or(~$rec#1:ctor_char2, 1:wybe.int, ?$#0:ctor_char2)
+    foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_char2)
+    foreign lpvm mutate(~#rec##0:ctor_char2, ?#rec##1:ctor_char2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~other_ctor#1##0:ctor_char2)
+    foreign llvm or(~#rec##1:ctor_char2, 1:wybe.int, ?#result##0:ctor_char2)
 other_ctor > public {inline} (7 calls)
 1: ctor_char2.other_ctor<1>
-other_ctor(?other_ctor$1#0:ctor_char2, $#0:ctor_char2, ?$$#0:wybe.bool):
+other_ctor(?other_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne($#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool)
-    case ~tmp$0#0:wybe.bool of
+    foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-        foreign llvm move(undef:ctor_char2, ?other_ctor$1#0:ctor_char2)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:ctor_char2, ?other_ctor#1##0:ctor_char2)
 
     1:
-        foreign llvm and($#0:wybe.int, 3:wybe.int, ?tmp$2#0:wybe.int)
-        foreign llvm icmp_eq(~tmp$2#0:wybe.int, 1:wybe.int, ?tmp$1#0:wybe.bool)
-        case ~tmp$1#0:wybe.bool of
+        foreign llvm and(#result##0:wybe.int, 3:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#2##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.bool)
+        case ~tmp#1##0:wybe.bool of
         0:
-            foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-            foreign llvm move(undef:ctor_char2, ?other_ctor$1#0:ctor_char2)
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+            foreign llvm move(undef:ctor_char2, ?other_ctor#1##0:ctor_char2)
 
         1:
-            foreign lpvm access(~$#0:ctor_char2, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?other_ctor$1#0:ctor_char2)
-            foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+            foreign lpvm access(~#result##0:ctor_char2, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?other_ctor#1##0:ctor_char2)
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 
 
 ~= > public {inline} (0 calls)
 0: ctor_char2.~=<0>
-~=($left#0:ctor_char2, $right#0:ctor_char2, ?$$#0:wybe.bool):
+~=(#left##0:ctor_char2, #right##0:ctor_char2, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    ctor_char2.=<0>(~$left#0:ctor_char2, ~$right#0:ctor_char2, ?tmp$0#0:wybe.bool) #0
-    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
+    ctor_char2.=<0>(~#left##0:ctor_char2, ~#right##0:ctor_char2, ?tmp#0##0:wybe.bool) #0
+    foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
   LLVM code       :
 
@@ -336,128 +336,128 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"ctor_char2.<0>"()    {
 entry:
-  %"1$tmp$3#0" = shl   i64 97, 2 
-  %"1$tmp$1#0" = or i64 %"1$tmp$3#0", 1024 
-  %"1$tmp$0#0" = tail call fastcc  i8  @"ctor_char2.foo<0>"(i64  %"1$tmp$1#0")  
-  tail call ccc  void  @putchar(i8  %"1$tmp$0#0")  
+  %"1#tmp#3##0" = shl   i64 97, 2 
+  %"1#tmp#1##0" = or i64 %"1#tmp#3##0", 1024 
+  %"1#tmp#0##0" = tail call fastcc  i8  @"ctor_char2.foo<0>"(i64  %"1#tmp#1##0")  
+  tail call ccc  void  @putchar(i8  %"1#tmp#0##0")  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
 
 
-define external fastcc  i1 @"ctor_char2.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"ctor_char2.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
 entry:
-  %"1$tmp$0#0" = icmp ne i64 %"$left#0", 0 
-  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
+  %"1#tmp#0##0" = icmp ne i64 %"#left##0", 0 
+  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$13#0" = and i64 %"$left#0", 3 
-  %"2$tmp$14#0" = icmp eq i64 %"2$tmp$13#0", 0 
-  br i1 %"2$tmp$14#0", label %if.then1, label %if.else1 
+  %"2#tmp#13##0" = and i64 %"#left##0", 3 
+  %"2#tmp#14##0" = icmp eq i64 %"2#tmp#13##0", 0 
+  br i1 %"2#tmp#14##0", label %if.then1, label %if.else1 
 if.else:
-  %"3$$$#0" = icmp eq i64 %"$left#0", %"$right#0" 
-  ret i1 %"3$$$#0" 
+  %"3##success##0" = icmp eq i64 %"#left##0", %"#right##0" 
+  ret i1 %"3##success##0" 
 if.then1:
-  %"4$tmp$15#0" = lshr  i64 %"$left#0", 2 
-  %"4$tmp$16#0" = and i64 %"4$tmp$15#0", 255 
-  %1 = trunc i64 %"4$tmp$16#0" to i8  
-  %"4$tmp$18#0" = icmp ne i64 %"$right#0", 0 
-  br i1 %"4$tmp$18#0", label %if.then2, label %if.else2 
+  %"4#tmp#15##0" = lshr  i64 %"#left##0", 2 
+  %"4#tmp#16##0" = and i64 %"4#tmp#15##0", 255 
+  %1 = trunc i64 %"4#tmp#16##0" to i8  
+  %"4#tmp#18##0" = icmp ne i64 %"#right##0", 0 
+  br i1 %"4#tmp#18##0", label %if.then2, label %if.else2 
 if.else1:
-  %"5$tmp$20#0" = icmp eq i64 %"2$tmp$13#0", 1 
-  br i1 %"5$tmp$20#0", label %if.then4, label %if.else4 
+  %"5#tmp#20##0" = icmp eq i64 %"2#tmp#13##0", 1 
+  br i1 %"5#tmp#20##0", label %if.then4, label %if.else4 
 if.then2:
-  %"6$tmp$19#0" = and i64 %"$right#0", 3 
-  %"6$tmp$20#0" = icmp eq i64 %"6$tmp$19#0", 0 
-  br i1 %"6$tmp$20#0", label %if.then3, label %if.else3 
+  %"6#tmp#19##0" = and i64 %"#right##0", 3 
+  %"6#tmp#20##0" = icmp eq i64 %"6#tmp#19##0", 0 
+  br i1 %"6#tmp#20##0", label %if.then3, label %if.else3 
 if.else2:
   ret i1 0 
 if.then3:
-  %"8$tmp$21#0" = lshr  i64 %"$right#0", 2 
-  %"8$tmp$22#0" = and i64 %"8$tmp$21#0", 255 
-  %2 = trunc i64 %"8$tmp$22#0" to i8  
-  %"8$$$#0" = icmp eq i8 %1, %2 
-  ret i1 %"8$$$#0" 
+  %"8#tmp#21##0" = lshr  i64 %"#right##0", 2 
+  %"8#tmp#22##0" = and i64 %"8#tmp#21##0", 255 
+  %2 = trunc i64 %"8#tmp#22##0" to i8  
+  %"8##success##0" = icmp eq i8 %1, %2 
+  ret i1 %"8##success##0" 
 if.else3:
   ret i1 0 
 if.then4:
-  %3 = add   i64 %"$left#0", -1 
+  %3 = add   i64 %"#left##0", -1 
   %4 = inttoptr i64 %3 to i64* 
   %5 = getelementptr  i64, i64* %4, i64 0 
   %6 = load  i64, i64* %5 
-  %"10$tmp$22#0" = icmp ne i64 %"$right#0", 0 
-  br i1 %"10$tmp$22#0", label %if.then5, label %if.else5 
+  %"10#tmp#22##0" = icmp ne i64 %"#right##0", 0 
+  br i1 %"10#tmp#22##0", label %if.then5, label %if.else5 
 if.else4:
-  %"11$tmp$24#0" = icmp eq i64 %"2$tmp$13#0", 2 
-  br i1 %"11$tmp$24#0", label %if.then7, label %if.else7 
+  %"11#tmp#24##0" = icmp eq i64 %"2#tmp#13##0", 2 
+  br i1 %"11#tmp#24##0", label %if.then7, label %if.else7 
 if.then5:
-  %"12$tmp$23#0" = and i64 %"$right#0", 3 
-  %"12$tmp$24#0" = icmp eq i64 %"12$tmp$23#0", 1 
-  br i1 %"12$tmp$24#0", label %if.then6, label %if.else6 
+  %"12#tmp#23##0" = and i64 %"#right##0", 3 
+  %"12#tmp#24##0" = icmp eq i64 %"12#tmp#23##0", 1 
+  br i1 %"12#tmp#24##0", label %if.then6, label %if.else6 
 if.else5:
   ret i1 0 
 if.then6:
-  %7 = add   i64 %"$right#0", -1 
+  %7 = add   i64 %"#right##0", -1 
   %8 = inttoptr i64 %7 to i64* 
   %9 = getelementptr  i64, i64* %8, i64 0 
   %10 = load  i64, i64* %9 
-  %"14$$$#0" = tail call fastcc  i1  @"ctor_char2.=<0>"(i64  %6, i64  %10)  
-  ret i1 %"14$$$#0" 
+  %"14##success##0" = tail call fastcc  i1  @"ctor_char2.=<0>"(i64  %6, i64  %10)  
+  ret i1 %"14##success##0" 
 if.else6:
   ret i1 0 
 if.then7:
-  %11 = add   i64 %"$left#0", -2 
+  %11 = add   i64 %"#left##0", -2 
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"16$tmp$26#0" = icmp ne i64 %"$right#0", 0 
-  br i1 %"16$tmp$26#0", label %if.then8, label %if.else8 
+  %"16#tmp#26##0" = icmp ne i64 %"#right##0", 0 
+  br i1 %"16#tmp#26##0", label %if.then8, label %if.else8 
 if.else7:
   ret i1 0 
 if.then8:
-  %"18$tmp$27#0" = and i64 %"$right#0", 3 
-  %"18$tmp$28#0" = icmp eq i64 %"18$tmp$27#0", 2 
-  br i1 %"18$tmp$28#0", label %if.then9, label %if.else9 
+  %"18#tmp#27##0" = and i64 %"#right##0", 3 
+  %"18#tmp#28##0" = icmp eq i64 %"18#tmp#27##0", 2 
+  br i1 %"18#tmp#28##0", label %if.then9, label %if.else9 
 if.else8:
   ret i1 0 
 if.then9:
-  %15 = add   i64 %"$right#0", -2 
+  %15 = add   i64 %"#right##0", -2 
   %16 = inttoptr i64 %15 to i64* 
   %17 = getelementptr  i64, i64* %16, i64 0 
   %18 = load  i64, i64* %17 
-  %"20$$$#0" = tail call fastcc  i1  @"ctor_char2.=<0>"(i64  %14, i64  %18)  
-  ret i1 %"20$$$#0" 
+  %"20##success##0" = tail call fastcc  i1  @"ctor_char2.=<0>"(i64  %14, i64  %18)  
+  ret i1 %"20##success##0" 
 if.else9:
   ret i1 0 
 }
 
 
-define external fastcc  i64 @"ctor_char2.another_ctor<0>"(i64  %"another_ctor$1#0")    {
+define external fastcc  i64 @"ctor_char2.another_ctor<0>"(i64  %"another_ctor#1##0")    {
 entry:
   %19 = trunc i64 8 to i32  
   %20 = tail call ccc  i8*  @wybe_malloc(i32  %19)  
   %21 = ptrtoint i8* %20 to i64 
   %22 = inttoptr i64 %21 to i64* 
   %23 = getelementptr  i64, i64* %22, i64 0 
-  store  i64 %"another_ctor$1#0", i64* %23 
-  %"1$$#0" = or i64 %21, 2 
-  ret i64 %"1$$#0" 
+  store  i64 %"another_ctor#1##0", i64* %23 
+  %"1##result##0" = or i64 %21, 2 
+  ret i64 %"1##result##0" 
 }
 
 
-define external fastcc  {i64, i1} @"ctor_char2.another_ctor<1>"(i64  %"$#0")    {
+define external fastcc  {i64, i1} @"ctor_char2.another_ctor<1>"(i64  %"#result##0")    {
 entry:
-  %"1$tmp$0#0" = icmp ne i64 %"$#0", 0 
-  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
+  %"1#tmp#0##0" = icmp ne i64 %"#result##0", 0 
+  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$2#0" = and i64 %"$#0", 3 
-  %"2$tmp$1#0" = icmp eq i64 %"2$tmp$2#0", 2 
-  br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
+  %"2#tmp#2##0" = and i64 %"#result##0", 3 
+  %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 2 
+  br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
   %32 = insertvalue {i64, i1} undef, i64 undef, 0 
   %33 = insertvalue {i64, i1} %32, i1 0, 1 
   ret {i64, i1} %33 
 if.then1:
-  %24 = add   i64 %"$#0", -2 
+  %24 = add   i64 %"#result##0", -2 
   %25 = inttoptr i64 %24 to i64* 
   %26 = getelementptr  i64, i64* %25, i64 0 
   %27 = load  i64, i64* %26 
@@ -471,22 +471,22 @@ if.else1:
 }
 
 
-define external fastcc  {i8, i1} @"ctor_char2.c<0>"(i64  %"$rec#0")    {
+define external fastcc  {i8, i1} @"ctor_char2.c<0>"(i64  %"#rec##0")    {
 entry:
-  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
+  %"1#tmp#0##0" = icmp ne i64 %"#rec##0", 0 
+  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$2#0" = and i64 %"$rec#0", 3 
-  %"2$tmp$1#0" = icmp eq i64 %"2$tmp$2#0", 0 
-  br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
+  %"2#tmp#2##0" = and i64 %"#rec##0", 3 
+  %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 0 
+  br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
   %39 = insertvalue {i8, i1} undef, i8 undef, 0 
   %40 = insertvalue {i8, i1} %39, i1 0, 1 
   ret {i8, i1} %40 
 if.then1:
-  %"4$$rec#1" = lshr  i64 %"$rec#0", 2 
-  %"4$$field#0" = and i64 %"4$$rec#1", 255 
-  %34 = trunc i64 %"4$$field#0" to i8  
+  %"4##rec##1" = lshr  i64 %"#rec##0", 2 
+  %"4##field##0" = and i64 %"4##rec##1", 255 
+  %34 = trunc i64 %"4##field##0" to i8  
   %35 = insertvalue {i8, i1} undef, i8 %34, 0 
   %36 = insertvalue {i8, i1} %35, i1 1, 1 
   ret {i8, i1} %36 
@@ -497,28 +497,28 @@ if.else1:
 }
 
 
-define external fastcc  {i64, i1} @"ctor_char2.c<1>"(i64  %"$rec#0", i8  %"$field#0")    {
+define external fastcc  {i64, i1} @"ctor_char2.c<1>"(i64  %"#rec##0", i8  %"#field##0")    {
 entry:
-  %"1$tmp$0#0" = icmp ne i64 %"$rec#0", 0 
-  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
+  %"1#tmp#0##0" = icmp ne i64 %"#rec##0", 0 
+  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$2#0" = and i64 %"$rec#0", 3 
-  %"2$tmp$1#0" = icmp eq i64 %"2$tmp$2#0", 0 
-  br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
+  %"2#tmp#2##0" = and i64 %"#rec##0", 3 
+  %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 0 
+  br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
-  %46 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %46 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %47 = insertvalue {i64, i1} %46, i1 0, 1 
   ret {i64, i1} %47 
 if.then1:
-  %"4$$rec#1" = and i64 %"$rec#0", -1021 
-  %41 = zext i8 %"$field#0" to i64  
-  %"4$$tmp#0" = shl   i64 %41, 2 
-  %"4$$rec#2" = or i64 %"4$$rec#1", %"4$$tmp#0" 
-  %42 = insertvalue {i64, i1} undef, i64 %"4$$rec#2", 0 
+  %"4##rec##1" = and i64 %"#rec##0", -1021 
+  %41 = zext i8 %"#field##0" to i64  
+  %"4##temp##0" = shl   i64 %41, 2 
+  %"4##rec##2" = or i64 %"4##rec##1", %"4##temp##0" 
+  %42 = insertvalue {i64, i1} undef, i64 %"4##rec##2", 0 
   %43 = insertvalue {i64, i1} %42, i1 1, 1 
   ret {i64, i1} %43 
 if.else1:
-  %44 = insertvalue {i64, i1} undef, i64 %"$rec#0", 0 
+  %44 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %45 = insertvalue {i64, i1} %44, i1 0, 1 
   ret {i64, i1} %45 
 }
@@ -530,31 +530,31 @@ entry:
 }
 
 
-define external fastcc  i64 @"ctor_char2.ctor<0>"(i8  %"c#0")    {
+define external fastcc  i64 @"ctor_char2.ctor<0>"(i8  %"c##0")    {
 entry:
-  %48 = zext i8 %"c#0" to i64  
-  %"1$$temp#0" = shl   i64 %48, 2 
-  %"1$$#3" = or i64 %"1$$temp#0", 1024 
-  ret i64 %"1$$#3" 
+  %48 = zext i8 %"c##0" to i64  
+  %"1##temp##0" = shl   i64 %48, 2 
+  %"1##result##3" = or i64 %"1##temp##0", 1024 
+  ret i64 %"1##result##3" 
 }
 
 
-define external fastcc  {i8, i1} @"ctor_char2.ctor<1>"(i64  %"$#0")    {
+define external fastcc  {i8, i1} @"ctor_char2.ctor<1>"(i64  %"#result##0")    {
 entry:
-  %"1$tmp$0#0" = icmp ne i64 %"$#0", 0 
-  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
+  %"1#tmp#0##0" = icmp ne i64 %"#result##0", 0 
+  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$2#0" = and i64 %"$#0", 3 
-  %"2$tmp$1#0" = icmp eq i64 %"2$tmp$2#0", 0 
-  br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
+  %"2#tmp#2##0" = and i64 %"#result##0", 3 
+  %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 0 
+  br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
   %54 = insertvalue {i8, i1} undef, i8 undef, 0 
   %55 = insertvalue {i8, i1} %54, i1 0, 1 
   ret {i8, i1} %55 
 if.then1:
-  %"4$$temp#0" = lshr  i64 %"$#0", 2 
-  %"4$$temp2#0" = and i64 %"4$$temp#0", 255 
-  %49 = trunc i64 %"4$$temp2#0" to i8  
+  %"4##temp##0" = lshr  i64 %"#result##0", 2 
+  %"4##temp2##0" = and i64 %"4##temp##0", 255 
+  %49 = trunc i64 %"4##temp2##0" to i8  
   %50 = insertvalue {i8, i1} undef, i8 %49, 0 
   %51 = insertvalue {i8, i1} %50, i1 1, 1 
   ret {i8, i1} %51 
@@ -565,53 +565,53 @@ if.else1:
 }
 
 
-define external fastcc  i8 @"ctor_char2.foo<0>"(i64  %"this#0")    {
+define external fastcc  i8 @"ctor_char2.foo<0>"(i64  %"this##0")    {
 entry:
-  %"1$tmp$3#0" = icmp ne i64 %"this#0", 0 
-  br i1 %"1$tmp$3#0", label %if.then, label %if.else 
+  %"1#tmp#3##0" = icmp ne i64 %"this##0", 0 
+  br i1 %"1#tmp#3##0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$4#0" = and i64 %"this#0", 3 
-  %"2$tmp$5#0" = icmp eq i64 %"2$tmp$4#0", 0 
-  br i1 %"2$tmp$5#0", label %if.then1, label %if.else1 
+  %"2#tmp#4##0" = and i64 %"this##0", 3 
+  %"2#tmp#5##0" = icmp eq i64 %"2#tmp#4##0", 0 
+  br i1 %"2#tmp#5##0", label %if.then1, label %if.else1 
 if.else:
   ret i8 48 
 if.then1:
-  %"4$tmp$6#0" = lshr  i64 %"this#0", 2 
-  %"4$tmp$7#0" = and i64 %"4$tmp$6#0", 255 
-  %56 = trunc i64 %"4$tmp$7#0" to i8  
+  %"4#tmp#6##0" = lshr  i64 %"this##0", 2 
+  %"4#tmp#7##0" = and i64 %"4#tmp#6##0", 255 
+  %56 = trunc i64 %"4#tmp#7##0" to i8  
   ret i8 %56 
 if.else1:
   ret i8 48 
 }
 
 
-define external fastcc  i64 @"ctor_char2.other_ctor<0>"(i64  %"other_ctor$1#0")    {
+define external fastcc  i64 @"ctor_char2.other_ctor<0>"(i64  %"other_ctor#1##0")    {
 entry:
   %57 = trunc i64 8 to i32  
   %58 = tail call ccc  i8*  @wybe_malloc(i32  %57)  
   %59 = ptrtoint i8* %58 to i64 
   %60 = inttoptr i64 %59 to i64* 
   %61 = getelementptr  i64, i64* %60, i64 0 
-  store  i64 %"other_ctor$1#0", i64* %61 
-  %"1$$#0" = or i64 %59, 1 
-  ret i64 %"1$$#0" 
+  store  i64 %"other_ctor#1##0", i64* %61 
+  %"1##result##0" = or i64 %59, 1 
+  ret i64 %"1##result##0" 
 }
 
 
-define external fastcc  {i64, i1} @"ctor_char2.other_ctor<1>"(i64  %"$#0")    {
+define external fastcc  {i64, i1} @"ctor_char2.other_ctor<1>"(i64  %"#result##0")    {
 entry:
-  %"1$tmp$0#0" = icmp ne i64 %"$#0", 0 
-  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
+  %"1#tmp#0##0" = icmp ne i64 %"#result##0", 0 
+  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$2#0" = and i64 %"$#0", 3 
-  %"2$tmp$1#0" = icmp eq i64 %"2$tmp$2#0", 1 
-  br i1 %"2$tmp$1#0", label %if.then1, label %if.else1 
+  %"2#tmp#2##0" = and i64 %"#result##0", 3 
+  %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 1 
+  br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
   %70 = insertvalue {i64, i1} undef, i64 undef, 0 
   %71 = insertvalue {i64, i1} %70, i1 0, 1 
   ret {i64, i1} %71 
 if.then1:
-  %62 = add   i64 %"$#0", -1 
+  %62 = add   i64 %"#result##0", -1 
   %63 = inttoptr i64 %62 to i64* 
   %64 = getelementptr  i64, i64* %63, i64 0 
   %65 = load  i64, i64* %64 
@@ -625,9 +625,9 @@ if.else1:
 }
 
 
-define external fastcc  i1 @"ctor_char2.~=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"ctor_char2.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
 entry:
-  %"1$tmp$0#0" = tail call fastcc  i1  @"ctor_char2.=<0>"(i64  %"$left#0", i64  %"$right#0")  
-  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
-  ret i1 %"1$$$#0" 
+  %"1#tmp#0##0" = tail call fastcc  i1  @"ctor_char2.=<0>"(i64  %"#left##0", i64  %"#right##0")  
+  %"1##success##0" = xor i1 %"1#tmp#0##0", 1 
+  ret i1 %"1##success##0" 
 }

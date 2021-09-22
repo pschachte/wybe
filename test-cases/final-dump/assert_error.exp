@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 *main* > public (0 calls)
 0: assert_error.<0>
-(io#0:wybe.phantom, [?io#0:wybe.phantom]):
+(io##0:wybe.phantom, [?io##0:wybe.phantom]):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.control.assert<0>(0:wybe.bool, "assert_error:3:2":wybe.string) #1 @assert_error:nn:nn

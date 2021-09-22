@@ -1,0 +1,2 @@
+def `multiline
+ident is an error` = 1

@@ -15,76 +15,76 @@ AFTER EVERYTHING:
 
 *main* > public (0 calls)
 0: alias_multifunc4.<0>
-(io#0:wybe.phantom, ?io#18:wybe.phantom):
+(io##0:wybe.phantom, ?io##18:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp$3#0:position.position)
-    foreign lpvm mutate(~tmp$3#0:position.position, ?tmp$4#0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int)
-    foreign lpvm mutate(~tmp$4#0:position.position, ?tmp$0#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int)
-    alias_multifunc4.replicate1<0>(tmp$0#0:position.position, ?p2#0:position.position, ?p3#0:position.position, #io#0:wybe.phantom, ?_:wybe.phantom) #1 @alias_multifunc4:36:2
-    foreign c print_string("--- After calling replicate1:":wybe.string, ~#io#0:wybe.phantom, ?tmp$7#0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$7#0:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
-    foreign c print_string("expect p1(10,10):":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
-    position.printPosition<0>(~tmp$0#0:position.position, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #4 @alias_multifunc4:40:2
-    foreign c print_string("expect p2(99,10):":wybe.string, ~#io#4:wybe.phantom, ?#io#5:wybe.phantom) @io:nn:nn
-    position.printPosition<0>(~p2#0:position.position, ~#io#5:wybe.phantom, ?#io#6:wybe.phantom) #6 @alias_multifunc4:42:2
-    foreign c print_string("expect p3(10,10):":wybe.string, ~#io#6:wybe.phantom, ?#io#7:wybe.phantom) @io:nn:nn
-    position.printPosition<0>(~p3#0:position.position, ~#io#7:wybe.phantom, ?#io#8:wybe.phantom) #8 @alias_multifunc4:44:2
-    alias_multifunc4.replicate21<0>(?p4#0:position.position, ~#io#8:wybe.phantom, ?#io#9:wybe.phantom) #9 @alias_multifunc4:47:2
-    foreign c print_string("--- After calling replicate21:":wybe.string, ~#io#9:wybe.phantom, ?tmp$16#0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$16#0:wybe.phantom, ?#io#10:wybe.phantom) @io:nn:nn
-    foreign c print_string("expect p4(99999,99999):":wybe.string, ~#io#10:wybe.phantom, ?#io#11:wybe.phantom) @io:nn:nn
-    position.printPosition<0>(~p4#0:position.position, ~#io#11:wybe.phantom, ?#io#12:wybe.phantom) #12 @alias_multifunc4:50:2
-    alias_multifunc4.replicate22<0>(?p6#0:position.position, ?p7#0:position.position, ~#io#12:wybe.phantom, ?#io#13:wybe.phantom) #13 @alias_multifunc4:53:2
-    foreign c print_string("--- After calling replicate22:":wybe.string, ~#io#13:wybe.phantom, ?tmp$21#0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$21#0:wybe.phantom, ?#io#14:wybe.phantom) @io:nn:nn
-    foreign c print_string("expect p6(99999,99999):":wybe.string, ~#io#14:wybe.phantom, ?#io#15:wybe.phantom) @io:nn:nn
-    position.printPosition<0>(~p6#0:position.position, ~#io#15:wybe.phantom, ?#io#16:wybe.phantom) #16 @alias_multifunc4:56:2
-    foreign c print_string("expect p7(1111111111,99999):":wybe.string, ~#io#16:wybe.phantom, ?#io#17:wybe.phantom) @io:nn:nn
-    position.printPosition<0>(~p7#0:position.position, ~#io#17:wybe.phantom, ?#io#18:wybe.phantom) #18 @alias_multifunc4:58:2
+    foreign lpvm alloc(16:wybe.int, ?tmp#3##0:position.position)
+    foreign lpvm mutate(~tmp#3##0:position.position, ?tmp#4##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int)
+    foreign lpvm mutate(~tmp#4##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int)
+    alias_multifunc4.replicate1<0>(tmp#0##0:position.position, ?p2##0:position.position, ?p3##0:position.position, #io##0:wybe.phantom, ?_:wybe.phantom) #1 @alias_multifunc4:36:2
+    foreign c print_string("--- After calling replicate1:":wybe.string, ~#io##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
+    foreign c print_string("expect p1(10,10):":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
+    position.printPosition<0>(~tmp#0##0:position.position, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) #4 @alias_multifunc4:40:2
+    foreign c print_string("expect p2(99,10):":wybe.string, ~#io##4:wybe.phantom, ?#io##5:wybe.phantom) @io:nn:nn
+    position.printPosition<0>(~p2##0:position.position, ~#io##5:wybe.phantom, ?#io##6:wybe.phantom) #6 @alias_multifunc4:42:2
+    foreign c print_string("expect p3(10,10):":wybe.string, ~#io##6:wybe.phantom, ?#io##7:wybe.phantom) @io:nn:nn
+    position.printPosition<0>(~p3##0:position.position, ~#io##7:wybe.phantom, ?#io##8:wybe.phantom) #8 @alias_multifunc4:44:2
+    alias_multifunc4.replicate21<0>(?p4##0:position.position, ~#io##8:wybe.phantom, ?#io##9:wybe.phantom) #9 @alias_multifunc4:47:2
+    foreign c print_string("--- After calling replicate21:":wybe.string, ~#io##9:wybe.phantom, ?tmp#16##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#16##0:wybe.phantom, ?#io##10:wybe.phantom) @io:nn:nn
+    foreign c print_string("expect p4(99999,99999):":wybe.string, ~#io##10:wybe.phantom, ?#io##11:wybe.phantom) @io:nn:nn
+    position.printPosition<0>(~p4##0:position.position, ~#io##11:wybe.phantom, ?#io##12:wybe.phantom) #12 @alias_multifunc4:50:2
+    alias_multifunc4.replicate22<0>(?p6##0:position.position, ?p7##0:position.position, ~#io##12:wybe.phantom, ?#io##13:wybe.phantom) #13 @alias_multifunc4:53:2
+    foreign c print_string("--- After calling replicate22:":wybe.string, ~#io##13:wybe.phantom, ?tmp#21##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#21##0:wybe.phantom, ?#io##14:wybe.phantom) @io:nn:nn
+    foreign c print_string("expect p6(99999,99999):":wybe.string, ~#io##14:wybe.phantom, ?#io##15:wybe.phantom) @io:nn:nn
+    position.printPosition<0>(~p6##0:position.position, ~#io##15:wybe.phantom, ?#io##16:wybe.phantom) #16 @alias_multifunc4:56:2
+    foreign c print_string("expect p7(1111111111,99999):":wybe.string, ~#io##16:wybe.phantom, ?#io##17:wybe.phantom) @io:nn:nn
+    position.printPosition<0>(~p7##0:position.position, ~#io##17:wybe.phantom, ?#io##18:wybe.phantom) #18 @alias_multifunc4:58:2
 
 
 replicate1 > public (1 calls)
 0: alias_multifunc4.replicate1<0>
-replicate1(pa#0:position.position, ?pb#1:position.position, ?pc#0:position.position, io#0:wybe.phantom, [?io#0:wybe.phantom]):
- AliasPairs: [(pa#0,pc#0)]
+replicate1(pa##0:position.position, ?pb##1:position.position, ?pc##0:position.position, io##0:wybe.phantom, [?io##0:wybe.phantom]):
+ AliasPairs: [(pa##0,pc##0)]
  InterestingCallProperties: []
-    foreign llvm move(pa#0:position.position, ?pc#0:position.position) @alias_multifunc4:8:6
-    foreign lpvm alloc(16:wybe.int, ?tmp$4#0:position.position)
-    foreign lpvm mutate(~tmp$4#0:position.position, ?tmp$5#0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99:wybe.int)
-    foreign lpvm mutate(~tmp$5#0:position.position, ?tmp$0#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99:wybe.int)
-    foreign lpvm access(~tmp$0#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.int)
-    foreign lpvm {noalias} mutate(~pa#0:position.position, ?%pb#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp$1#0:wybe.int)
+    foreign llvm move(pa##0:position.position, ?pc##0:position.position) @alias_multifunc4:8:6
+    foreign lpvm alloc(16:wybe.int, ?tmp#4##0:position.position)
+    foreign lpvm mutate(~tmp#4##0:position.position, ?tmp#5##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99:wybe.int)
+    foreign lpvm mutate(~tmp#5##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99:wybe.int)
+    foreign lpvm access(~tmp#0##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int)
+    foreign lpvm {noalias} mutate(~pa##0:position.position, ?%pb##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.int)
 
 
 replicate21 > public (1 calls)
 0: alias_multifunc4.replicate21<0>
-replicate21(?pb#0:position.position, io#0:wybe.phantom, ?io#2:wybe.phantom):
+replicate21(?pb##0:position.position, io##0:wybe.phantom, ?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp$3#0:position.position)
-    foreign lpvm mutate(~tmp$3#0:position.position, ?tmp$4#0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99999:wybe.int)
-    foreign lpvm mutate(~tmp$4#0:position.position, ?tmp$0#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99999:wybe.int)
-    foreign llvm move(tmp$0#0:position.position, ?pb#0:position.position) @alias_multifunc4:16:6
-    foreign lpvm {noalias} mutate(~tmp$0#0:position.position, ?%pc#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 1111111111:wybe.int)
-    foreign c print_string("--- Inside replicate21, expect pc(1111111111,99999): ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-    position.printPosition<0>(~pc#1:position.position, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #3 @alias_multifunc4:20:6
+    foreign lpvm alloc(16:wybe.int, ?tmp#3##0:position.position)
+    foreign lpvm mutate(~tmp#3##0:position.position, ?tmp#4##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99999:wybe.int)
+    foreign lpvm mutate(~tmp#4##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99999:wybe.int)
+    foreign llvm move(tmp#0##0:position.position, ?pb##0:position.position) @alias_multifunc4:16:6
+    foreign lpvm {noalias} mutate(~tmp#0##0:position.position, ?%pc##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 1111111111:wybe.int)
+    foreign c print_string("--- Inside replicate21, expect pc(1111111111,99999): ":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+    position.printPosition<0>(~pc##1:position.position, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #3 @alias_multifunc4:20:6
 
 
 replicate22 > public (1 calls)
 0: alias_multifunc4.replicate22<0>
-replicate22(?pb#0:position.position, ?pc#1:position.position, io#0:wybe.phantom, ?io#4:wybe.phantom):
+replicate22(?pb##0:position.position, ?pc##1:position.position, io##0:wybe.phantom, ?io##4:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp$3#0:position.position)
-    foreign lpvm mutate(~tmp$3#0:position.position, ?tmp$4#0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99999:wybe.int)
-    foreign lpvm mutate(~tmp$4#0:position.position, ?tmp$0#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99999:wybe.int)
-    foreign llvm move(tmp$0#0:position.position, ?pb#0:position.position) @alias_multifunc4:25:6
-    foreign c print_string("--- Inside replicate22, expect pc(99999,99999):":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-    position.printPosition<0>(tmp$0#0:position.position, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #2 @alias_multifunc4:28:6
-    foreign lpvm {noalias} mutate(~tmp$0#0:position.position, ?%pc#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 1111111111:wybe.int)
-    foreign c print_string("--- Inside replicate22, after calling x(!pc,1111111111), expect pc(1111111111,99999): ":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
-    position.printPosition<0>(pc#1:position.position, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #5 @alias_multifunc4:32:6
+    foreign lpvm alloc(16:wybe.int, ?tmp#3##0:position.position)
+    foreign lpvm mutate(~tmp#3##0:position.position, ?tmp#4##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99999:wybe.int)
+    foreign lpvm mutate(~tmp#4##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99999:wybe.int)
+    foreign llvm move(tmp#0##0:position.position, ?pb##0:position.position) @alias_multifunc4:25:6
+    foreign c print_string("--- Inside replicate22, expect pc(99999,99999):":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+    position.printPosition<0>(tmp#0##0:position.position, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #2 @alias_multifunc4:28:6
+    foreign lpvm {noalias} mutate(~tmp#0##0:position.position, ?%pc##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 1111111111:wybe.int)
+    foreign c print_string("--- Inside replicate22, after calling x(!pc,1111111111), expect pc(1111111111,99999): ":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
+    position.printPosition<0>(pc##1:position.position, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) #5 @alias_multifunc4:32:6
 
   LLVM code       :
 
@@ -172,13 +172,13 @@ entry:
   %19 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc4.18, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %19)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %11)  
-  %"1$p4#0" = tail call fastcc  i64  @"alias_multifunc4.replicate21<0>"()  
+  %"1#p4##0" = tail call fastcc  i64  @"alias_multifunc4.replicate21<0>"()  
   %21 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc4.20, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %21)  
   tail call ccc  void  @putchar(i8  10)  
   %23 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc4.22, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %23)  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %"1$p4#0")  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %"1#p4##0")  
   %24 = tail call fastcc  {i64, i64}  @"alias_multifunc4.replicate22<0>"()  
   %25 = extractvalue {i64, i64} %24, 0 
   %26 = extractvalue {i64, i64} %24, 1 
@@ -195,7 +195,7 @@ entry:
 }
 
 
-define external fastcc  {i64, i64} @"alias_multifunc4.replicate1<0>"(i64  %"pa#0")    {
+define external fastcc  {i64, i64} @"alias_multifunc4.replicate1<0>"(i64  %"pa##0")    {
 entry:
   %33 = trunc i64 16 to i32  
   %34 = tail call ccc  i8*  @wybe_malloc(i32  %33)  
@@ -214,14 +214,14 @@ entry:
   %45 = tail call ccc  i8*  @wybe_malloc(i32  %44)  
   %46 = ptrtoint i8* %45 to i64 
   %47 = inttoptr i64 %46 to i8* 
-  %48 = inttoptr i64 %"pa#0" to i8* 
+  %48 = inttoptr i64 %"pa##0" to i8* 
   %49 = trunc i64 16 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %47, i8*  %48, i32  %49, i32  8, i1  0)  
   %50 = inttoptr i64 %46 to i64* 
   %51 = getelementptr  i64, i64* %50, i64 0 
   store  i64 %43, i64* %51 
   %52 = insertvalue {i64, i64} undef, i64 %46, 0 
-  %53 = insertvalue {i64, i64} %52, i64 %"pa#0", 1 
+  %53 = insertvalue {i64, i64} %52, i64 %"pa##0", 1 
   ret {i64, i64} %53 
 }
 
@@ -309,17 +309,17 @@ entry:
 
 printPosition > public (0 calls)
 0: position.printPosition<0>
-printPosition(pos#0:position.position, io#0:wybe.phantom, ?io#5:wybe.phantom):
+printPosition(pos##0:position.position, io##0:wybe.phantom, ?io##5:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string(" (":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-    foreign lpvm access(pos#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.int)
-    foreign c print_int(~tmp$0#0:wybe.int, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
-    foreign c print_string(",":wybe.string, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) @io:nn:nn
-    foreign lpvm access(~pos#0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$1#0:wybe.int)
-    foreign c print_int(~tmp$1#0:wybe.int, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) @io:nn:nn
-    foreign c print_string(")":wybe.string, ~#io#4:wybe.phantom, ?tmp$14#0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$14#0:wybe.phantom, ?#io#5:wybe.phantom) @io:nn:nn
+    foreign c print_string(" (":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+    foreign lpvm access(pos##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int)
+    foreign c print_int(~tmp#0##0:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
+    foreign c print_string(",":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
+    foreign lpvm access(~pos##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int)
+    foreign c print_int(~tmp#1##0:wybe.int, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
+    foreign c print_string(")":wybe.string, ~#io##4:wybe.phantom, ?tmp#14##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#14##0:wybe.phantom, ?#io##5:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 
@@ -353,17 +353,17 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external fastcc  void @"position.printPosition<0>"(i64  %"pos#0")    {
+define external fastcc  void @"position.printPosition<0>"(i64  %"pos##0")    {
 entry:
   %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @position.1, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %2)  
-  %3 = inttoptr i64 %"pos#0" to i64* 
+  %3 = inttoptr i64 %"pos##0" to i64* 
   %4 = getelementptr  i64, i64* %3, i64 0 
   %5 = load  i64, i64* %4 
   tail call ccc  void  @print_int(i64  %5)  
   %7 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @position.6, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %7)  
-  %8 = add   i64 %"pos#0", 8 
+  %8 = add   i64 %"pos##0", 8 
   %9 = inttoptr i64 %8 to i64* 
   %10 = getelementptr  i64, i64* %9, i64 0 
   %11 = load  i64, i64* %10 
@@ -393,86 +393,86 @@ entry:
 
 = > public {inline} (1 calls)
 0: position.position.=<0>
-=($left#0:position.position, $right#0:position.position, ?$$#0:wybe.bool):
+=(#left##0:position.position, #right##0:position.position, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($left#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$x#0:wybe.int)
-    foreign lpvm access(~$left#0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$y#0:wybe.int)
-    foreign lpvm access($right#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$x#0:wybe.int)
-    foreign lpvm access(~$right#0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$y#0:wybe.int)
-    foreign llvm icmp_eq(~$left$x#0:wybe.int, ~$right$x#0:wybe.int, ?tmp$1#0:wybe.bool) @int:nn:nn
-    case ~tmp$1#0:wybe.bool of
+    foreign lpvm access(#left##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#x##0:wybe.int)
+    foreign lpvm access(~#left##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#y##0:wybe.int)
+    foreign lpvm access(#right##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#x##0:wybe.int)
+    foreign lpvm access(~#right##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#y##0:wybe.int)
+    foreign llvm icmp_eq(~#left#x##0:wybe.int, ~#right#x##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    case ~tmp#1##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
     1:
-        foreign llvm icmp_eq(~$left$y#0:wybe.int, ~$right$y#0:wybe.int, ?$$#0:wybe.bool) @int:nn:nn
+        foreign llvm icmp_eq(~#left#y##0:wybe.int, ~#right#y##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
 
 position > public {inline} (0 calls)
 0: position.position.position<0>
-position(x#0:wybe.int, y#0:wybe.int, ?$#0:position.position):
+position(x##0:wybe.int, y##0:wybe.int, ?#result##0:position.position):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?$rec#0:position.position)
-    foreign lpvm mutate(~$rec#0:position.position, ?$rec#1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x#0:wybe.int)
-    foreign lpvm mutate(~$rec#1:position.position, ?$#0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y#0:wybe.int)
+    foreign lpvm alloc(16:wybe.int, ?#rec##0:position.position)
+    foreign lpvm mutate(~#rec##0:position.position, ?#rec##1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:wybe.int)
+    foreign lpvm mutate(~#rec##1:position.position, ?#result##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y##0:wybe.int)
 position > public {inline} (6 calls)
 1: position.position.position<1>
-position(?x#0:wybe.int, ?y#0:wybe.int, $#0:position.position):
+position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:position.position):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x#0:wybe.int)
-    foreign lpvm access(~$#0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y#0:wybe.int)
+    foreign lpvm access(#result##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:wybe.int)
+    foreign lpvm access(~#result##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:wybe.int)
 
 
 x > public {inline} (0 calls)
 0: position.position.x<0>
-x($rec#0:position.position, ?$#0:wybe.int):
+x(#rec##0:position.position, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~$rec#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.int)
+    foreign lpvm access(~#rec##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 x > public {inline} (0 calls)
 1: position.position.x<1>
-x($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
+x(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~$rec#0:position.position, ?$rec#1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm {noalias} mutate(~#rec##0:position.position, ?#rec##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
 y > public {inline} (0 calls)
 0: position.position.y<0>
-y($rec#0:position.position, ?$#0:wybe.int):
+y(#rec##0:position.position, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~$rec#0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.int)
+    foreign lpvm access(~#rec##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 y > public {inline} (0 calls)
 1: position.position.y<1>
-y($rec#0:position.position, ?$rec#1:position.position, $field#0:wybe.int):
+y(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~$rec#0:position.position, ?$rec#1:position.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.int)
+    foreign lpvm {noalias} mutate(~#rec##0:position.position, ?#rec##1:position.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
 ~= > public {inline} (0 calls)
 0: position.position.~=<0>
-~=($left#0:position.position, $right#0:position.position, ?$$#0:wybe.bool):
+~=(#left##0:position.position, #right##0:position.position, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($left#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.int)
-    foreign lpvm access(~$left#0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.int)
-    foreign lpvm access($right#0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.int)
-    foreign lpvm access(~$right#0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.int)
-    foreign llvm icmp_eq(~tmp$3#0:wybe.int, ~tmp$5#0:wybe.int, ?tmp$7#0:wybe.bool) @int:nn:nn
-    case ~tmp$7#0:wybe.bool of
+    foreign lpvm access(#left##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int)
+    foreign lpvm access(~#left##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int)
+    foreign lpvm access(#right##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.int)
+    foreign lpvm access(~#right##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.int)
+    foreign llvm icmp_eq(~tmp#3##0:wybe.int, ~tmp#5##0:wybe.int, ?tmp#7##0:wybe.bool) @int:nn:nn
+    case ~tmp#7##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?tmp$0#0:wybe.bool)
-        foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
     1:
-        foreign llvm icmp_eq(~tmp$4#0:wybe.int, ~tmp$6#0:wybe.int, ?tmp$0#0:wybe.bool) @int:nn:nn
-        foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm icmp_eq(~tmp#4##0:wybe.int, ~tmp#6##0:wybe.int, ?tmp#0##0:wybe.bool) @int:nn:nn
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
 
   LLVM code       :
@@ -489,54 +489,54 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external fastcc  i1 @"position.position.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"position.position.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
 entry:
-  %1 = inttoptr i64 %"$left#0" to i64* 
+  %1 = inttoptr i64 %"#left##0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   %3 = load  i64, i64* %2 
-  %4 = add   i64 %"$left#0", 8 
+  %4 = add   i64 %"#left##0", 8 
   %5 = inttoptr i64 %4 to i64* 
   %6 = getelementptr  i64, i64* %5, i64 0 
   %7 = load  i64, i64* %6 
-  %8 = inttoptr i64 %"$right#0" to i64* 
+  %8 = inttoptr i64 %"#right##0" to i64* 
   %9 = getelementptr  i64, i64* %8, i64 0 
   %10 = load  i64, i64* %9 
-  %11 = add   i64 %"$right#0", 8 
+  %11 = add   i64 %"#right##0", 8 
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"1$tmp$1#0" = icmp eq i64 %3, %10 
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
+  %"1#tmp#1##0" = icmp eq i64 %3, %10 
+  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
-  %"2$$$#0" = icmp eq i64 %7, %14 
-  ret i1 %"2$$$#0" 
+  %"2##success##0" = icmp eq i64 %7, %14 
+  ret i1 %"2##success##0" 
 if.else:
   ret i1 0 
 }
 
 
-define external fastcc  i64 @"position.position.position<0>"(i64  %"x#0", i64  %"y#0")    {
+define external fastcc  i64 @"position.position.position<0>"(i64  %"x##0", i64  %"y##0")    {
 entry:
   %15 = trunc i64 16 to i32  
   %16 = tail call ccc  i8*  @wybe_malloc(i32  %15)  
   %17 = ptrtoint i8* %16 to i64 
   %18 = inttoptr i64 %17 to i64* 
   %19 = getelementptr  i64, i64* %18, i64 0 
-  store  i64 %"x#0", i64* %19 
+  store  i64 %"x##0", i64* %19 
   %20 = add   i64 %17, 8 
   %21 = inttoptr i64 %20 to i64* 
   %22 = getelementptr  i64, i64* %21, i64 0 
-  store  i64 %"y#0", i64* %22 
+  store  i64 %"y##0", i64* %22 
   ret i64 %17 
 }
 
 
-define external fastcc  {i64, i64} @"position.position.position<1>"(i64  %"$#0")    {
+define external fastcc  {i64, i64} @"position.position.position<1>"(i64  %"#result##0")    {
 entry:
-  %23 = inttoptr i64 %"$#0" to i64* 
+  %23 = inttoptr i64 %"#result##0" to i64* 
   %24 = getelementptr  i64, i64* %23, i64 0 
   %25 = load  i64, i64* %24 
-  %26 = add   i64 %"$#0", 8 
+  %26 = add   i64 %"#result##0", 8 
   %27 = inttoptr i64 %26 to i64* 
   %28 = getelementptr  i64, i64* %27, i64 0 
   %29 = load  i64, i64* %28 
@@ -546,34 +546,34 @@ entry:
 }
 
 
-define external fastcc  i64 @"position.position.x<0>"(i64  %"$rec#0")    {
+define external fastcc  i64 @"position.position.x<0>"(i64  %"#rec##0")    {
 entry:
-  %32 = inttoptr i64 %"$rec#0" to i64* 
+  %32 = inttoptr i64 %"#rec##0" to i64* 
   %33 = getelementptr  i64, i64* %32, i64 0 
   %34 = load  i64, i64* %33 
   ret i64 %34 
 }
 
 
-define external fastcc  i64 @"position.position.x<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+define external fastcc  i64 @"position.position.x<1>"(i64  %"#rec##0", i64  %"#field##0")    {
 entry:
   %35 = trunc i64 16 to i32  
   %36 = tail call ccc  i8*  @wybe_malloc(i32  %35)  
   %37 = ptrtoint i8* %36 to i64 
   %38 = inttoptr i64 %37 to i8* 
-  %39 = inttoptr i64 %"$rec#0" to i8* 
+  %39 = inttoptr i64 %"#rec##0" to i8* 
   %40 = trunc i64 16 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %38, i8*  %39, i32  %40, i32  8, i1  0)  
   %41 = inttoptr i64 %37 to i64* 
   %42 = getelementptr  i64, i64* %41, i64 0 
-  store  i64 %"$field#0", i64* %42 
+  store  i64 %"#field##0", i64* %42 
   ret i64 %37 
 }
 
 
-define external fastcc  i64 @"position.position.y<0>"(i64  %"$rec#0")    {
+define external fastcc  i64 @"position.position.y<0>"(i64  %"#rec##0")    {
 entry:
-  %43 = add   i64 %"$rec#0", 8 
+  %43 = add   i64 %"#rec##0", 8 
   %44 = inttoptr i64 %43 to i64* 
   %45 = getelementptr  i64, i64* %44, i64 0 
   %46 = load  i64, i64* %45 
@@ -581,46 +581,46 @@ entry:
 }
 
 
-define external fastcc  i64 @"position.position.y<1>"(i64  %"$rec#0", i64  %"$field#0")    {
+define external fastcc  i64 @"position.position.y<1>"(i64  %"#rec##0", i64  %"#field##0")    {
 entry:
   %47 = trunc i64 16 to i32  
   %48 = tail call ccc  i8*  @wybe_malloc(i32  %47)  
   %49 = ptrtoint i8* %48 to i64 
   %50 = inttoptr i64 %49 to i8* 
-  %51 = inttoptr i64 %"$rec#0" to i8* 
+  %51 = inttoptr i64 %"#rec##0" to i8* 
   %52 = trunc i64 16 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %50, i8*  %51, i32  %52, i32  8, i1  0)  
   %53 = add   i64 %49, 8 
   %54 = inttoptr i64 %53 to i64* 
   %55 = getelementptr  i64, i64* %54, i64 0 
-  store  i64 %"$field#0", i64* %55 
+  store  i64 %"#field##0", i64* %55 
   ret i64 %49 
 }
 
 
-define external fastcc  i1 @"position.position.~=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"position.position.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
 entry:
-  %56 = inttoptr i64 %"$left#0" to i64* 
+  %56 = inttoptr i64 %"#left##0" to i64* 
   %57 = getelementptr  i64, i64* %56, i64 0 
   %58 = load  i64, i64* %57 
-  %59 = add   i64 %"$left#0", 8 
+  %59 = add   i64 %"#left##0", 8 
   %60 = inttoptr i64 %59 to i64* 
   %61 = getelementptr  i64, i64* %60, i64 0 
   %62 = load  i64, i64* %61 
-  %63 = inttoptr i64 %"$right#0" to i64* 
+  %63 = inttoptr i64 %"#right##0" to i64* 
   %64 = getelementptr  i64, i64* %63, i64 0 
   %65 = load  i64, i64* %64 
-  %66 = add   i64 %"$right#0", 8 
+  %66 = add   i64 %"#right##0", 8 
   %67 = inttoptr i64 %66 to i64* 
   %68 = getelementptr  i64, i64* %67, i64 0 
   %69 = load  i64, i64* %68 
-  %"1$tmp$7#0" = icmp eq i64 %58, %65 
-  br i1 %"1$tmp$7#0", label %if.then, label %if.else 
+  %"1#tmp#7##0" = icmp eq i64 %58, %65 
+  br i1 %"1#tmp#7##0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$0#0" = icmp eq i64 %62, %69 
-  %"2$$$#0" = xor i1 %"2$tmp$0#0", 1 
-  ret i1 %"2$$$#0" 
+  %"2#tmp#0##0" = icmp eq i64 %62, %69 
+  %"2##success##0" = xor i1 %"2#tmp#0##0", 1 
+  ret i1 %"2##success##0" 
 if.else:
-  %"3$$$#0" = xor i1 0, 1 
-  ret i1 %"3$$$#0" 
+  %"3##success##0" = xor i1 0, 1 
+  ret i1 %"3##success##0" 
 }
