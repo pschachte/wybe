@@ -11,10 +11,10 @@ AFTER EVERYTHING:
 
 incr > {inline} (0 calls)
 0: func_untyped.incr<0>
-incr(a#0:wybe.int, ?$#0:wybe.int):
+incr(a##0:wybe.int, ?$##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm add(~a#0:wybe.int, 1:wybe.int, ?$#0:wybe.int) @int:nn:nn
+    foreign llvm add(~a##0:wybe.int, 1:wybe.int, ?$##0:wybe.int) @int:nn:nn
 
   LLVM code       :
 
@@ -30,8 +30,8 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external fastcc  i64 @"func_untyped.incr<0>"(i64  %"a#0")    {
+define external fastcc  i64 @"func_untyped.incr<0>"(i64  %"a##0")    {
 entry:
-  %"1$$#0" = add   i64 %"a#0", 1 
-  ret i64 %"1$$#0" 
+  %"1$$##0" = add   i64 %"a##0", 1 
+  ret i64 %"1$$##0" 
 }

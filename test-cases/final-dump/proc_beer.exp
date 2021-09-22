@@ -12,49 +12,49 @@ AFTER EVERYTHING:
 
 *main* > public {inline} (0 calls)
 0: proc_beer.<0>
-(io#0:wybe.phantom, ?io#1:wybe.phantom):
+(io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    proc_beer.gen$1<0>(99:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #1 @proc_beer:nn:nn
+    proc_beer.gen$1<0>(99:wybe.int, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #1 @proc_beer:nn:nn
 
 
 beer99 > public {inline} (1 calls)
 0: proc_beer.beer99<0>
-beer99(io#0:wybe.phantom, ?io#1:wybe.phantom):
+beer99(io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    proc_beer.gen$1<0>(99:wybe.int, ~io#0:wybe.phantom, ?io#1:wybe.phantom) #0 @proc_beer:nn:nn
+    proc_beer.gen$1<0>(99:wybe.int, ~io##0:wybe.phantom, ?io##1:wybe.phantom) #0 @proc_beer:nn:nn
 
 
 gen$1 > (2 calls)
 0: proc_beer.gen$1<0>
-gen$1(count#0:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
+gen$1(count##0:wybe.int, io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_sge(count#0:wybe.int, 0:wybe.int, ?tmp$0#0:wybe.bool) @int:nn:nn
-    case ~tmp$0#0:wybe.bool of
+    foreign llvm icmp_sge(count##0:wybe.int, 0:wybe.int, ?tmp$0##0:wybe.bool) @int:nn:nn
+    case ~tmp$0##0:wybe.bool of
     0:
-        foreign llvm move(~io#0:wybe.phantom, ?io#1:wybe.phantom)
+        foreign llvm move(~io##0:wybe.phantom, ?io##1:wybe.phantom)
 
     1:
-        foreign c print_int(count#0:wybe.int, ~io#0:wybe.phantom, ?tmp$5#0:wybe.phantom) @io:nn:nn
-        foreign c print_string(" bottles of beer on the wall":wybe.string, ~tmp$5#0:wybe.phantom, ?tmp$6#0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp$6#0:wybe.phantom, ?tmp$7#0:wybe.phantom) @io:nn:nn
-        foreign llvm sub(~count#0:wybe.int, 1:wybe.int, ?tmp$8#0:wybe.int) @int:nn:nn
-        proc_beer.gen$1<0>(~tmp$8#0:wybe.int, ~tmp$7#0:wybe.phantom, ?io#1:wybe.phantom) #2 @proc_beer:nn:nn
+        foreign c print_int(count##0:wybe.int, ~io##0:wybe.phantom, ?tmp$5##0:wybe.phantom) @io:nn:nn
+        foreign c print_string(" bottles of beer on the wall":wybe.string, ~tmp$5##0:wybe.phantom, ?tmp$6##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp$6##0:wybe.phantom, ?tmp$7##0:wybe.phantom) @io:nn:nn
+        foreign llvm sub(~count##0:wybe.int, 1:wybe.int, ?tmp$8##0:wybe.int) @int:nn:nn
+        proc_beer.gen$1<0>(~tmp$8##0:wybe.int, ~tmp$7##0:wybe.phantom, ?io##1:wybe.phantom) #2 @proc_beer:nn:nn
 
 
 
 gen$2 > {inline} (1 calls)
 0: proc_beer.gen$2<0>
-gen$2(count#0:wybe.int, io#0:wybe.phantom, ?io#3:wybe.phantom):
+gen$2(count##0:wybe.int, io##0:wybe.phantom, ?io##3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_int(count#0:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-    foreign c print_string(" bottles of beer on the wall":wybe.string, ~#io#1:wybe.phantom, ?tmp$4#0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$4#0:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
-    foreign llvm sub(~%count#0:wybe.int, 1:wybe.int, ?%count#1:wybe.int) @int:nn:nn
-    proc_beer.gen$1<0>(~count#1:wybe.int, ~io#2:wybe.phantom, ?io#3:wybe.phantom) #3 @proc_beer:nn:nn
+    foreign c print_int(count##0:wybe.int, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+    foreign c print_string(" bottles of beer on the wall":wybe.string, ~#io##1:wybe.phantom, ?tmp$4##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$4##0:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
+    foreign llvm sub(~%count##0:wybe.int, 1:wybe.int, ?%count##1:wybe.int) @int:nn:nn
+    proc_beer.gen$1<0>(~count##1:wybe.int, ~io##2:wybe.phantom, ?io##3:wybe.phantom) #3 @proc_beer:nn:nn
 
   LLVM code       :
 
@@ -99,30 +99,30 @@ entry:
 }
 
 
-define external fastcc  void @"proc_beer.gen$1<0>"(i64  %"count#0")    {
+define external fastcc  void @"proc_beer.gen$1<0>"(i64  %"count##0")    {
 entry:
-  %"1$tmp$0#0" = icmp sge i64 %"count#0", 0 
-  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
+  %"1$tmp$0##0" = icmp sge i64 %"count##0", 0 
+  br i1 %"1$tmp$0##0", label %if.then, label %if.else 
 if.then:
-  tail call ccc  void  @print_int(i64  %"count#0")  
+  tail call ccc  void  @print_int(i64  %"count##0")  
   %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @proc_beer.1, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %2)  
   tail call ccc  void  @putchar(i8  10)  
-  %"2$tmp$8#0" = sub   i64 %"count#0", 1 
-  tail call fastcc  void  @"proc_beer.gen$1<0>"(i64  %"2$tmp$8#0")  
+  %"2$tmp$8##0" = sub   i64 %"count##0", 1 
+  tail call fastcc  void  @"proc_beer.gen$1<0>"(i64  %"2$tmp$8##0")  
   ret void 
 if.else:
   ret void 
 }
 
 
-define external fastcc  void @"proc_beer.gen$2<0>"(i64  %"count#0")    {
+define external fastcc  void @"proc_beer.gen$2<0>"(i64  %"count##0")    {
 entry:
-  tail call ccc  void  @print_int(i64  %"count#0")  
+  tail call ccc  void  @print_int(i64  %"count##0")  
   %4 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @proc_beer.3, i32 0, i32 0) to i64 
   tail call ccc  void  @print_string(i64  %4)  
   tail call ccc  void  @putchar(i8  10)  
-  %"1$count#1" = sub   i64 %"count#0", 1 
-  tail call fastcc  void  @"proc_beer.gen$1<0>"(i64  %"1$count#1")  
+  %"1$count##1" = sub   i64 %"count##0", 1 
+  tail call fastcc  void  @"proc_beer.gen$1<0>"(i64  %"1$count##1")  
   ret void 
 }

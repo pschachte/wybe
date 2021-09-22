@@ -47,51 +47,51 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 = > public {inline} (1 calls)
 0: type_enum.season.=<0>
-=($left#0:type_enum.season, $right#0:type_enum.season, ?$$#0:wybe.bool):
+=($left##0:type_enum.season, $right##0:type_enum.season, ?$$##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_eq(~$left#0:type_enum.season, ~$right#0:type_enum.season, ?$$#0:wybe.bool)
+    foreign llvm icmp_eq(~$left##0:type_enum.season, ~$right##0:type_enum.season, ?$$##0:wybe.bool)
 
 
 autumn > public {inline} (0 calls)
 0: type_enum.season.autumn<0>
-autumn(?$#0:type_enum.season):
+autumn(?$##0:type_enum.season):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(3:type_enum.season, ?$#0:type_enum.season)
+    foreign llvm move(3:type_enum.season, ?$##0:type_enum.season)
 
 
 spring > public {inline} (0 calls)
 0: type_enum.season.spring<0>
-spring(?$#0:type_enum.season):
+spring(?$##0:type_enum.season):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(1:type_enum.season, ?$#0:type_enum.season)
+    foreign llvm move(1:type_enum.season, ?$##0:type_enum.season)
 
 
 summer > public {inline} (0 calls)
 0: type_enum.season.summer<0>
-summer(?$#0:type_enum.season):
+summer(?$##0:type_enum.season):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(2:type_enum.season, ?$#0:type_enum.season)
+    foreign llvm move(2:type_enum.season, ?$##0:type_enum.season)
 
 
 winter > public {inline} (0 calls)
 0: type_enum.season.winter<0>
-winter(?$#0:type_enum.season):
+winter(?$##0:type_enum.season):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(0:type_enum.season, ?$#0:type_enum.season)
+    foreign llvm move(0:type_enum.season, ?$##0:type_enum.season)
 
 
 ~= > public {inline} (0 calls)
 0: type_enum.season.~=<0>
-~=($left#0:type_enum.season, $right#0:type_enum.season, ?$$#0:wybe.bool):
+~=($left##0:type_enum.season, $right##0:type_enum.season, ?$$##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_eq(~$left#0:type_enum.season, ~$right#0:type_enum.season, ?tmp$0#0:wybe.bool)
-    foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
+    foreign llvm icmp_eq(~$left##0:type_enum.season, ~$right##0:type_enum.season, ?tmp$0##0:wybe.bool)
+    foreign llvm xor(~tmp$0##0:wybe.bool, 1:wybe.bool, ?$$##0:wybe.bool)
 
   LLVM code       :
 
@@ -107,10 +107,10 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external fastcc  i1 @"type_enum.season.=<0>"(i2  %"$left#0", i2  %"$right#0")    {
+define external fastcc  i1 @"type_enum.season.=<0>"(i2  %"$left##0", i2  %"$right##0")    {
 entry:
-  %"1$$$#0" = icmp eq i2 %"$left#0", %"$right#0" 
-  ret i1 %"1$$$#0" 
+  %"1$$$##0" = icmp eq i2 %"$left##0", %"$right##0" 
+  ret i1 %"1$$$##0" 
 }
 
 
@@ -138,9 +138,9 @@ entry:
 }
 
 
-define external fastcc  i1 @"type_enum.season.~=<0>"(i2  %"$left#0", i2  %"$right#0")    {
+define external fastcc  i1 @"type_enum.season.~=<0>"(i2  %"$left##0", i2  %"$right##0")    {
 entry:
-  %"1$tmp$0#0" = icmp eq i2 %"$left#0", %"$right#0" 
-  %"1$$$#0" = xor i1 %"1$tmp$0#0", 1 
-  ret i1 %"1$$$#0" 
+  %"1$tmp$0##0" = icmp eq i2 %"$left##0", %"$right##0" 
+  %"1$$$##0" = xor i1 %"1$tmp$0##0", 1 
+  ret i1 %"1$$$##0" 
 }

@@ -11,26 +11,26 @@ AFTER EVERYTHING:
 
 *main* > public {inline} (0 calls)
 0: simple_loop.<0>
-(io#0:wybe.phantom, ?io#1:wybe.phantom):
+(io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    simple_loop.gen$1<0>(~io#0:wybe.phantom, ?io#1:wybe.phantom) #0 @simple_loop:nn:nn
+    simple_loop.gen$1<0>(~io##0:wybe.phantom, ?io##1:wybe.phantom) #0 @simple_loop:nn:nn
 
 
 gen$1 > (2 calls)
 0: simple_loop.gen$1<0>
-gen$1(io#0:wybe.phantom, ?io#3:wybe.phantom):
+gen$1(io##0:wybe.phantom, ?io##3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c read_char(?c#0:wybe.char, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-    foreign llvm icmp_ne(c#0:wybe.char, 'a':wybe.char, ?tmp$0#0:wybe.bool) @char:nn:nn
-    case ~tmp$0#0:wybe.bool of
+    foreign c read_char(?c##0:wybe.char, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+    foreign llvm icmp_ne(c##0:wybe.char, 'a':wybe.char, ?tmp$0##0:wybe.bool) @char:nn:nn
+    case ~tmp$0##0:wybe.bool of
     0:
-        foreign llvm move(~io#1:wybe.phantom, ?io#3:wybe.phantom)
+        foreign llvm move(~io##1:wybe.phantom, ?io##3:wybe.phantom)
 
     1:
-        foreign c putchar(~c#0:wybe.char, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
-        simple_loop.gen$1<0>(~io#2:wybe.phantom, ?io#3:wybe.phantom) #3 @simple_loop:nn:nn
+        foreign c putchar(~c##0:wybe.char, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
+        simple_loop.gen$1<0>(~io##2:wybe.phantom, ?io##3:wybe.phantom) #3 @simple_loop:nn:nn
 
 
   LLVM code       :
@@ -62,11 +62,11 @@ entry:
 
 define external fastcc  void @"simple_loop.gen$1<0>"()    {
 entry:
-  %"1$c#0" = tail call ccc  i8  @read_char()  
-  %"1$tmp$0#0" = icmp ne i8 %"1$c#0", 97 
-  br i1 %"1$tmp$0#0", label %if.then, label %if.else 
+  %"1$c##0" = tail call ccc  i8  @read_char()  
+  %"1$tmp$0##0" = icmp ne i8 %"1$c##0", 97 
+  br i1 %"1$tmp$0##0", label %if.then, label %if.else 
 if.then:
-  tail call ccc  void  @putchar(i8  %"1$c#0")  
+  tail call ccc  void  @putchar(i8  %"1$c##0")  
   tail call fastcc  void  @"simple_loop.gen$1<0>"()  
   ret void 
 if.else:

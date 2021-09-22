@@ -11,139 +11,139 @@ AFTER EVERYTHING:
 
 *main* > public (0 calls)
 0: type_generics.<0>
-(io#0:wybe.phantom, ?io#6:wybe.phantom):
+(io##0:wybe.phantom, ?io##6:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    type_generics.foo<0>(1:?t, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #0 @type_generics:nn:nn
-    type_generics.foo<0>(1:?t, ~#io#1:wybe.phantom, ?#io#2:wybe.phantom) #2 @type_generics:nn:nn
-    type_generics.foo<0>(1.0:?t, ~#io#2:wybe.phantom, ?#io#3:wybe.phantom) #3 @type_generics:nn:nn
-    type_generics.foo<0>(1.0:?t, ~#io#3:wybe.phantom, ?#io#4:wybe.phantom) #4 @type_generics:nn:nn
-    type_generics.foo2<0>(1:?T, ?y#0:?T, ?tmp$7#0:wybe.bool) #5 @type_generics:nn:nn
-    case ~tmp$7#0:wybe.bool of
+    type_generics.foo<0>(1:?t, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @type_generics:nn:nn
+    type_generics.foo<0>(1:?t, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #2 @type_generics:nn:nn
+    type_generics.foo<0>(1.0:?t, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #3 @type_generics:nn:nn
+    type_generics.foo<0>(1.0:?t, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) #4 @type_generics:nn:nn
+    type_generics.foo2<0>(1:?T, ?y##0:?T, ?tmp$7##0:wybe.bool) #5 @type_generics:nn:nn
+    case ~tmp$7##0:wybe.bool of
     0:
-        type_generics.gen$1<0>(~io#4:wybe.phantom, _:wybe.bool, _:wybe.float, ?io#6:wybe.phantom) #8
+        type_generics.gen$1<0>(~io##4:wybe.phantom, _:wybe.bool, _:wybe.float, ?io##6:wybe.phantom) #8
 
     1:
-        foreign c print_int(~y#0:wybe.int, ~#io#4:wybe.phantom, ?tmp$10#0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?#io#5:wybe.phantom) @io:nn:nn
-        type_generics.gen$1<0>(~io#5:wybe.phantom, _:wybe.bool, _:wybe.float, ?io#6:wybe.phantom) #7
+        foreign c print_int(~y##0:wybe.int, ~#io##4:wybe.phantom, ?tmp$10##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp$10##0:wybe.phantom, ?#io##5:wybe.phantom) @io:nn:nn
+        type_generics.gen$1<0>(~io##5:wybe.phantom, _:wybe.bool, _:wybe.float, ?io##6:wybe.phantom) #7
 
 
 
 foo > (12 calls)
 0: type_generics.foo<0>
-foo(x#0:?t, io#0:wybe.phantom, ?io#1:wybe.phantom):
+foo(x##0:?t, io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp$5#0:wybe.list(?T))
-    foreign lpvm mutate(~tmp$5#0:wybe.list(?T), ?tmp$6#0:wybe.list(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x#0:?T)
-    foreign lpvm mutate(~tmp$6#0:wybe.list(?T), ?tmp$0#0:wybe.list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(?T))
-    wybe.list.length1<0>(~tmp$0#0:wybe.list(?T), 0:wybe.int, ?tmp$2#0:wybe.int) #4 @list:nn:nn
-    foreign c print_int(~tmp$2#0:wybe.int, ~#io#0:wybe.phantom, ?tmp$10#0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$10#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp$5##0:wybe.list(?T))
+    foreign lpvm mutate(~tmp$5##0:wybe.list(?T), ?tmp$6##0:wybe.list(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:?T)
+    foreign lpvm mutate(~tmp$6##0:wybe.list(?T), ?tmp$0##0:wybe.list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(?T))
+    wybe.list.length1<0>(~tmp$0##0:wybe.list(?T), 0:wybe.int, ?tmp$2##0:wybe.int) #4 @list:nn:nn
+    foreign c print_int(~tmp$2##0:wybe.int, ~#io##0:wybe.phantom, ?tmp$10##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp$10##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
 
 
 foo2 > (18 calls)
 0: type_generics.foo2<0>
-foo2(x#0:?T, ?y#0:?T, ?$$#0:wybe.bool):
+foo2(x##0:?T, ?y##0:?T, ?$$##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp$6#0:wybe.list(?T))
-    foreign lpvm mutate(~tmp$6#0:wybe.list(?T), ?tmp$7#0:wybe.list(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x#0:?T)
-    foreign lpvm mutate(~tmp$7#0:wybe.list(?T), ?tmp$0#0:wybe.list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(?T))
-    foreign llvm icmp_ne(tmp$0#0:wybe.int, 0:wybe.int, ?tmp$9#0:wybe.bool)
-    case ~tmp$9#0:wybe.bool of
+    foreign lpvm alloc(16:wybe.int, ?tmp$6##0:wybe.list(?T))
+    foreign lpvm mutate(~tmp$6##0:wybe.list(?T), ?tmp$7##0:wybe.list(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:?T)
+    foreign lpvm mutate(~tmp$7##0:wybe.list(?T), ?tmp$0##0:wybe.list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(?T))
+    foreign llvm icmp_ne(tmp$0##0:wybe.int, 0:wybe.int, ?tmp$9##0:wybe.bool)
+    case ~tmp$9##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
-        foreign llvm move(undef:?T, ?y#0:?T)
+        foreign llvm move(0:wybe.bool, ?$$##0:wybe.bool)
+        foreign llvm move(undef:?T, ?y##0:?T)
 
     1:
-        foreign lpvm access(~tmp$0#0:wybe.list(?T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?y#0:?T)
-        foreign llvm move(1:wybe.bool, ?$$#0:wybe.bool)
+        foreign lpvm access(~tmp$0##0:wybe.list(?T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:?T)
+        foreign llvm move(1:wybe.bool, ?$$##0:wybe.bool)
 
 
 
 gen$1 > (2 calls)
 0: type_generics.gen$1<0>
-gen$1(io#0:wybe.phantom, [tmp$0#0:wybe.bool], [x#0:wybe.float], ?io#2:wybe.phantom):
+gen$1(io##0:wybe.phantom, [tmp$0##0:wybe.bool], [x##0:wybe.float], ?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    type_generics.foo2<0>(1:?T, ?y#0:?T, ?tmp$6#0:wybe.bool) #0 @type_generics:nn:nn
-    case ~tmp$6#0:wybe.bool of
+    type_generics.foo2<0>(1:?T, ?y##0:?T, ?tmp$6##0:wybe.bool) #0 @type_generics:nn:nn
+    case ~tmp$6##0:wybe.bool of
     0:
-        type_generics.gen$2<0>(_:wybe.int, ~io#0:wybe.phantom, _:wybe.bool, _:wybe.float, ?io#2:wybe.phantom) #3
+        type_generics.gen$2<0>(_:wybe.int, ~io##0:wybe.phantom, _:wybe.bool, _:wybe.float, ?io##2:wybe.phantom) #3
 
     1:
-        foreign c print_int(~y#0:wybe.int, ~#io#0:wybe.phantom, ?tmp$9#0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp$9#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-        type_generics.gen$2<0>(_:wybe.int, ~io#1:wybe.phantom, _:wybe.bool, _:wybe.float, ?io#2:wybe.phantom) #2
+        foreign c print_int(~y##0:wybe.int, ~#io##0:wybe.phantom, ?tmp$9##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp$9##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+        type_generics.gen$2<0>(_:wybe.int, ~io##1:wybe.phantom, _:wybe.bool, _:wybe.float, ?io##2:wybe.phantom) #2
 
 
 
 gen$2 > (2 calls)
 0: type_generics.gen$2<0>
-gen$2([i#0:wybe.int], io#0:wybe.phantom, [tmp$0#0:wybe.bool], [x#0:wybe.float], ?io#2:wybe.phantom):
+gen$2([i##0:wybe.int], io##0:wybe.phantom, [tmp$0##0:wybe.bool], [x##0:wybe.float], ?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    type_generics.foo2<0>(1.0:?T, ?fx#0:?T, ?tmp$5#0:wybe.bool) #0 @type_generics:nn:nn
-    case ~tmp$5#0:wybe.bool of
+    type_generics.foo2<0>(1.0:?T, ?fx##0:?T, ?tmp$5##0:wybe.bool) #0 @type_generics:nn:nn
+    case ~tmp$5##0:wybe.bool of
     0:
-        type_generics.gen$3<0>(_:wybe.float, _:wybe.int, ~io#0:wybe.phantom, _:wybe.bool, _:wybe.float, ?io#2:wybe.phantom) #3
+        type_generics.gen$3<0>(_:wybe.float, _:wybe.int, ~io##0:wybe.phantom, _:wybe.bool, _:wybe.float, ?io##2:wybe.phantom) #3
 
     1:
-        foreign c print_float(~fx#0:wybe.float, ~#io#0:wybe.phantom, ?tmp$8#0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp$8#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-        type_generics.gen$3<0>(_:wybe.float, _:wybe.int, ~io#1:wybe.phantom, _:wybe.bool, _:wybe.float, ?io#2:wybe.phantom) #2
+        foreign c print_float(~fx##0:wybe.float, ~#io##0:wybe.phantom, ?tmp$8##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp$8##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+        type_generics.gen$3<0>(_:wybe.float, _:wybe.int, ~io##1:wybe.phantom, _:wybe.bool, _:wybe.float, ?io##2:wybe.phantom) #2
 
 
 
 gen$3 > (2 calls)
 0: type_generics.gen$3<0>
-gen$3([f#0:wybe.float], [i#0:wybe.int], io#0:wybe.phantom, [tmp$0#0:wybe.bool], [x#0:wybe.float], ?io#2:wybe.phantom):
+gen$3([f##0:wybe.float], [i##0:wybe.int], io##0:wybe.phantom, [tmp$0##0:wybe.bool], [x##0:wybe.float], ?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    type_generics.foo2<0>(1.0:?T, ?x#1:?T, ?tmp$4#0:wybe.bool) #0 @type_generics:nn:nn
-    case ~tmp$4#0:wybe.bool of
+    type_generics.foo2<0>(1.0:?T, ?x##1:?T, ?tmp$4##0:wybe.bool) #0 @type_generics:nn:nn
+    case ~tmp$4##0:wybe.bool of
     0:
-        type_generics.gen$4<0>(_:wybe.float, _:wybe.int, ~io#0:wybe.phantom, _:wybe.bool, _:wybe.float, ?io#2:wybe.phantom) #3
+        type_generics.gen$4<0>(_:wybe.float, _:wybe.int, ~io##0:wybe.phantom, _:wybe.bool, _:wybe.float, ?io##2:wybe.phantom) #3
 
     1:
-        foreign c print_float(~x#1:wybe.float, ~#io#0:wybe.phantom, ?tmp$7#0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp$7#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-        type_generics.gen$4<0>(_:wybe.float, _:wybe.int, ~io#1:wybe.phantom, _:wybe.bool, _:wybe.float, ?io#2:wybe.phantom) #2
+        foreign c print_float(~x##1:wybe.float, ~#io##0:wybe.phantom, ?tmp$7##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp$7##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+        type_generics.gen$4<0>(_:wybe.float, _:wybe.int, ~io##1:wybe.phantom, _:wybe.bool, _:wybe.float, ?io##2:wybe.phantom) #2
 
 
 
 gen$4 > (2 calls)
 0: type_generics.gen$4<0>
-gen$4([f#0:wybe.float], [i#0:wybe.int], io#0:wybe.phantom, [tmp$0#0:wybe.bool], [x#0:wybe.float], ?io#2:wybe.phantom):
+gen$4([f##0:wybe.float], [i##0:wybe.int], io##0:wybe.phantom, [tmp$0##0:wybe.bool], [x##0:wybe.float], ?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    type_generics.foo2<0>('a':?T, ?z#0:?T, ?tmp$3#0:wybe.bool) #0 @type_generics:nn:nn
-    case ~tmp$3#0:wybe.bool of
+    type_generics.foo2<0>('a':?T, ?z##0:?T, ?tmp$3##0:wybe.bool) #0 @type_generics:nn:nn
+    case ~tmp$3##0:wybe.bool of
     0:
-        type_generics.gen$5<0>(_:wybe.float, _:wybe.int, ~io#0:wybe.phantom, _:wybe.bool, _:wybe.float, ?io#2:wybe.phantom) #3
+        type_generics.gen$5<0>(_:wybe.float, _:wybe.int, ~io##0:wybe.phantom, _:wybe.bool, _:wybe.float, ?io##2:wybe.phantom) #3
 
     1:
-        foreign c putchar(~z#0:wybe.char, ~#io#0:wybe.phantom, ?tmp$6#0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp$6#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
-        type_generics.gen$5<0>(_:wybe.float, _:wybe.int, ~io#1:wybe.phantom, _:wybe.bool, _:wybe.float, ?io#2:wybe.phantom) #2
+        foreign c putchar(~z##0:wybe.char, ~#io##0:wybe.phantom, ?tmp$6##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp$6##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+        type_generics.gen$5<0>(_:wybe.float, _:wybe.int, ~io##1:wybe.phantom, _:wybe.bool, _:wybe.float, ?io##2:wybe.phantom) #2
 
 
 
 gen$5 > (2 calls)
 0: type_generics.gen$5<0>
-gen$5([f#0:wybe.float], [i#0:wybe.int], io#0:wybe.phantom, [tmp$0#0:wybe.bool], [x#0:wybe.float], ?io#1:wybe.phantom):
+gen$5([f##0:wybe.float], [i##0:wybe.int], io##0:wybe.phantom, [tmp$0##0:wybe.bool], [x##0:wybe.float], ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    type_generics.foo2<0>(0:?T, ?b#0:?T, ?tmp$2#0:wybe.bool) #1 @type_generics:nn:nn
-    case ~tmp$2#0:wybe.bool of
+    type_generics.foo2<0>(0:?T, ?b##0:?T, ?tmp$2##0:wybe.bool) #1 @type_generics:nn:nn
+    case ~tmp$2##0:wybe.bool of
     0:
-        foreign llvm move(~io#0:wybe.phantom, ?io#1:wybe.phantom)
+        foreign llvm move(~io##0:wybe.phantom, ?io##1:wybe.phantom)
 
     1:
-        wybe.io.print<5>(~b#0:wybe.bool, ~#io#0:wybe.phantom, ?tmp$5#0:wybe.phantom) #3 @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp$5#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+        wybe.io.print<5>(~b##0:wybe.bool, ~#io##0:wybe.phantom, ?tmp$5##0:wybe.phantom) #3 @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp$5##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
 
 
   LLVM code       :
@@ -198,39 +198,39 @@ if.else:
 }
 
 
-define external fastcc  void @"type_generics.foo<0>"(i64  %"x#0")    {
+define external fastcc  void @"type_generics.foo<0>"(i64  %"x##0")    {
 entry:
   %6 = trunc i64 16 to i32  
   %7 = tail call ccc  i8*  @wybe_malloc(i32  %6)  
   %8 = ptrtoint i8* %7 to i64 
   %9 = inttoptr i64 %8 to i64* 
   %10 = getelementptr  i64, i64* %9, i64 0 
-  store  i64 %"x#0", i64* %10 
+  store  i64 %"x##0", i64* %10 
   %11 = add   i64 %8, 8 
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   store  i64 0, i64* %13 
-  %"1$tmp$2#0" = tail call fastcc  i64  @"wybe.list.length1<0>"(i64  %8, i64  0)  
-  tail call ccc  void  @print_int(i64  %"1$tmp$2#0")  
+  %"1$tmp$2##0" = tail call fastcc  i64  @"wybe.list.length1<0>"(i64  %8, i64  0)  
+  tail call ccc  void  @print_int(i64  %"1$tmp$2##0")  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
 
 
-define external fastcc  {i64, i1} @"type_generics.foo2<0>"(i64  %"x#0")    {
+define external fastcc  {i64, i1} @"type_generics.foo2<0>"(i64  %"x##0")    {
 entry:
   %14 = trunc i64 16 to i32  
   %15 = tail call ccc  i8*  @wybe_malloc(i32  %14)  
   %16 = ptrtoint i8* %15 to i64 
   %17 = inttoptr i64 %16 to i64* 
   %18 = getelementptr  i64, i64* %17, i64 0 
-  store  i64 %"x#0", i64* %18 
+  store  i64 %"x##0", i64* %18 
   %19 = add   i64 %16, 8 
   %20 = inttoptr i64 %19 to i64* 
   %21 = getelementptr  i64, i64* %20, i64 0 
   store  i64 0, i64* %21 
-  %"1$tmp$9#0" = icmp ne i64 %16, 0 
-  br i1 %"1$tmp$9#0", label %if.then, label %if.else 
+  %"1$tmp$9##0" = icmp ne i64 %16, 0 
+  br i1 %"1$tmp$9##0", label %if.then, label %if.else 
 if.then:
   %22 = inttoptr i64 %16 to i64* 
   %23 = getelementptr  i64, i64* %22, i64 0 
