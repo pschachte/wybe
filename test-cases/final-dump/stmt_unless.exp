@@ -54,10 +54,10 @@ gen#2(io##0:wybe.phantom, n##0:wybe.int, ?io##2:wybe.phantom):
 
 mod > public {inline} (3 calls)
 0: stmt_unless.mod<0>
-mod(x##0:wybe.int, y##0:wybe.int, ?###0:wybe.int):
+mod(x##0:wybe.int, y##0:wybe.int, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm urem(~x##0:wybe.int, ~y##0:wybe.int, ?###0:wybe.int) @stmt_unless:nn:nn
+    foreign llvm urem(~x##0:wybe.int, ~y##0:wybe.int, ?#result##0:wybe.int) @stmt_unless:nn:nn
 
   LLVM code       :
 
@@ -117,6 +117,6 @@ if.else:
 
 define external fastcc  i64 @"stmt_unless.mod<0>"(i64  %"x##0", i64  %"y##0")    {
 entry:
-  %"1####0" = urem i64 %"x##0", %"y##0" 
-  ret i64 %"1####0" 
+  %"1##result##0" = urem i64 %"x##0", %"y##0" 
+  ret i64 %"1##result##0" 
 }

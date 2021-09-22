@@ -511,7 +511,7 @@ gen#9(io##0:wybe.phantom, tmp#0##0:wybe.list(?T), tmp#1##0:wybe.list(?T), tmp#2#
 
 irange > public (2 calls)
 0: stmt_for.irange<0>
-irange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?###0:stmt_for.int_sequence):
+irange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_for.int_sequence):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_slt(stride##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @int:nn:nn
@@ -521,14 +521,14 @@ irange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?###0:stmt_for.in
         foreign lpvm alloc(24:wybe.int, ?tmp#12##0:stmt_for.int_sequence)
         foreign lpvm mutate(~tmp#12##0:stmt_for.int_sequence, ?tmp#13##0:stmt_for.int_sequence, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~start##0:wybe.int)
         foreign lpvm mutate(~tmp#13##0:stmt_for.int_sequence, ?tmp#14##0:stmt_for.int_sequence, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~stride##0:wybe.int)
-        foreign lpvm mutate(~tmp#14##0:stmt_for.int_sequence, ?###0:stmt_for.int_sequence, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.int)
+        foreign lpvm mutate(~tmp#14##0:stmt_for.int_sequence, ?#result##0:stmt_for.int_sequence, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.int)
 
     1:
         foreign llvm sub(~end##0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int) @int:nn:nn
         foreign lpvm alloc(24:wybe.int, ?tmp#12##0:stmt_for.int_sequence)
         foreign lpvm mutate(~tmp#12##0:stmt_for.int_sequence, ?tmp#13##0:stmt_for.int_sequence, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~start##0:wybe.int)
         foreign lpvm mutate(~tmp#13##0:stmt_for.int_sequence, ?tmp#14##0:stmt_for.int_sequence, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~stride##0:wybe.int)
-        foreign lpvm mutate(~tmp#14##0:stmt_for.int_sequence, ?###0:stmt_for.int_sequence, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.int)
+        foreign lpvm mutate(~tmp#14##0:stmt_for.int_sequence, ?#result##0:stmt_for.int_sequence, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.int)
 
 
 
@@ -768,13 +768,13 @@ using_xrange_reverse(io##0:wybe.phantom, ?io##1:wybe.phantom):
 
 xrange > public (3 calls)
 0: stmt_for.xrange<0>
-xrange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?###0:stmt_for.int_sequence):
+xrange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_for.int_sequence):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?tmp#4##0:stmt_for.int_sequence)
     foreign lpvm mutate(~tmp#4##0:stmt_for.int_sequence, ?tmp#5##0:stmt_for.int_sequence, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~start##0:wybe.int)
     foreign lpvm mutate(~tmp#5##0:stmt_for.int_sequence, ?tmp#6##0:stmt_for.int_sequence, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~stride##0:wybe.int)
-    foreign lpvm mutate(~tmp#6##0:stmt_for.int_sequence, ?###0:stmt_for.int_sequence, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~end##0:wybe.int)
+    foreign lpvm mutate(~tmp#6##0:stmt_for.int_sequence, ?#result##0:stmt_for.int_sequence, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~end##0:wybe.int)
 
   LLVM code       :
 
@@ -1960,10 +1960,10 @@ entry:
 
 end > public {inline} (0 calls)
 0: stmt_for.int_sequence.end<0>
-end(#rec##0:stmt_for.int_sequence, ?###0:wybe.int):
+end(#rec##0:stmt_for.int_sequence, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:stmt_for.int_sequence, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:stmt_for.int_sequence, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 end > public {inline} (0 calls)
 1: stmt_for.int_sequence.end<1>
 end(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:wybe.int):
@@ -1988,29 +1988,29 @@ gen#1([current##0:stmt_for.int_sequence], en##0:wybe.int, s##0:wybe.int, st##0:w
 
 int_sequence > public {inline} (1 calls)
 0: stmt_for.int_sequence.int_sequence<0>
-int_sequence(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?###0:stmt_for.int_sequence):
+int_sequence(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_for.int_sequence):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:stmt_for.int_sequence)
     foreign lpvm mutate(~#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~start##0:wybe.int)
     foreign lpvm mutate(~#rec##1:stmt_for.int_sequence, ?#rec##2:stmt_for.int_sequence, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~stride##0:wybe.int)
-    foreign lpvm mutate(~#rec##2:stmt_for.int_sequence, ?###0:stmt_for.int_sequence, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~end##0:wybe.int)
+    foreign lpvm mutate(~#rec##2:stmt_for.int_sequence, ?#result##0:stmt_for.int_sequence, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~end##0:wybe.int)
 int_sequence > public {inline} (16 calls)
 1: stmt_for.int_sequence.int_sequence<1>
-int_sequence(?start##0:wybe.int, ?stride##0:wybe.int, ?end##0:wybe.int, ###0:stmt_for.int_sequence):
+int_sequence(?start##0:wybe.int, ?stride##0:wybe.int, ?end##0:wybe.int, #result##0:stmt_for.int_sequence):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(###0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?start##0:wybe.int)
-    foreign lpvm access(###0:stmt_for.int_sequence, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?stride##0:wybe.int)
-    foreign lpvm access(~###0:stmt_for.int_sequence, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?end##0:wybe.int)
+    foreign lpvm access(#result##0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?start##0:wybe.int)
+    foreign lpvm access(#result##0:stmt_for.int_sequence, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?stride##0:wybe.int)
+    foreign lpvm access(~#result##0:stmt_for.int_sequence, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?end##0:wybe.int)
 
 
 start > public {inline} (0 calls)
 0: stmt_for.int_sequence.start<0>
-start(#rec##0:stmt_for.int_sequence, ?###0:wybe.int):
+start(#rec##0:stmt_for.int_sequence, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 start > public {inline} (0 calls)
 1: stmt_for.int_sequence.start<1>
 start(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:wybe.int):
@@ -2021,10 +2021,10 @@ start(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:w
 
 stride > public {inline} (0 calls)
 0: stmt_for.int_sequence.stride<0>
-stride(#rec##0:stmt_for.int_sequence, ?###0:wybe.int):
+stride(#rec##0:stmt_for.int_sequence, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:stmt_for.int_sequence, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:stmt_for.int_sequence, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 stride > public {inline} (0 calls)
 1: stmt_for.int_sequence.stride<1>
 stride(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:wybe.int):
@@ -2239,16 +2239,16 @@ entry:
 }
 
 
-define external fastcc  {i64, i64, i64} @"stmt_for.int_sequence.int_sequence<1>"(i64  %"###0")    {
+define external fastcc  {i64, i64, i64} @"stmt_for.int_sequence.int_sequence<1>"(i64  %"#result##0")    {
 entry:
-  %92 = inttoptr i64 %"###0" to i64* 
+  %92 = inttoptr i64 %"#result##0" to i64* 
   %93 = getelementptr  i64, i64* %92, i64 0 
   %94 = load  i64, i64* %93 
-  %95 = add   i64 %"###0", 8 
+  %95 = add   i64 %"#result##0", 8 
   %96 = inttoptr i64 %95 to i64* 
   %97 = getelementptr  i64, i64* %96, i64 0 
   %98 = load  i64, i64* %97 
-  %99 = add   i64 %"###0", 16 
+  %99 = add   i64 %"#result##0", 16 
   %100 = inttoptr i64 %99 to i64* 
   %101 = getelementptr  i64, i64* %100, i64 0 
   %102 = load  i64, i64* %101 

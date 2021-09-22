@@ -99,10 +99,10 @@ entry:
 
 firstname > public {inline} (0 calls)
 0: person3.person.firstname<0>
-firstname(#rec##0:person3.person, ?###0:wybe.string):
+firstname(#rec##0:person3.person, ?#result##0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:person3.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:wybe.string)
+    foreign lpvm access(~#rec##0:person3.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string)
 firstname > public {inline} (0 calls)
 1: person3.person.firstname<1>
 firstname(#rec##0:person3.person, ?#rec##1:person3.person, #field##0:wybe.string):
@@ -113,10 +113,10 @@ firstname(#rec##0:person3.person, ?#rec##1:person3.person, #field##0:wybe.string
 
 lastname > public {inline} (0 calls)
 0: person3.person.lastname<0>
-lastname(#rec##0:person3.person, ?###0:wybe.string):
+lastname(#rec##0:person3.person, ?#result##0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:person3.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:wybe.string)
+    foreign lpvm access(~#rec##0:person3.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string)
 lastname > public {inline} (0 calls)
 1: person3.person.lastname<1>
 lastname(#rec##0:person3.person, ?#rec##1:person3.person, #field##0:wybe.string):
@@ -127,19 +127,19 @@ lastname(#rec##0:person3.person, ?#rec##1:person3.person, #field##0:wybe.string)
 
 person > public {inline} (0 calls)
 0: person3.person.person<0>
-person(firstname##0:wybe.string, lastname##0:wybe.string, ?###0:person3.person):
+person(firstname##0:wybe.string, lastname##0:wybe.string, ?#result##0:person3.person):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:person3.person)
     foreign lpvm mutate(~#rec##0:person3.person, ?#rec##1:person3.person, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~firstname##0:wybe.string)
-    foreign lpvm mutate(~#rec##1:person3.person, ?###0:person3.person, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~lastname##0:wybe.string)
+    foreign lpvm mutate(~#rec##1:person3.person, ?#result##0:person3.person, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~lastname##0:wybe.string)
 person > public {inline} (6 calls)
 1: person3.person.person<1>
-person(?firstname##0:wybe.string, ?lastname##0:wybe.string, ###0:person3.person):
+person(?firstname##0:wybe.string, ?lastname##0:wybe.string, #result##0:person3.person):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(###0:person3.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?firstname##0:wybe.string)
-    foreign lpvm access(~###0:person3.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?lastname##0:wybe.string)
+    foreign lpvm access(#result##0:person3.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?firstname##0:wybe.string)
+    foreign lpvm access(~#result##0:person3.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?lastname##0:wybe.string)
 
 
 ~= > public {inline} (0 calls)
@@ -277,12 +277,12 @@ entry:
 }
 
 
-define external fastcc  {i64, i64} @"person3.person.person<1>"(i64  %"###0")    {
+define external fastcc  {i64, i64} @"person3.person.person<1>"(i64  %"#result##0")    {
 entry:
-  %47 = inttoptr i64 %"###0" to i64* 
+  %47 = inttoptr i64 %"#result##0" to i64* 
   %48 = getelementptr  i64, i64* %47, i64 0 
   %49 = load  i64, i64* %48 
-  %50 = add   i64 %"###0", 8 
+  %50 = add   i64 %"#result##0", 8 
   %51 = inttoptr i64 %50 to i64* 
   %52 = getelementptr  i64, i64* %51, i64 0 
   %53 = load  i64, i64* %52 

@@ -506,6 +506,11 @@ Backquotes can also be used in function calls, so `` `+`(3,4)`` is semantically
 identical to `3 + 4`, regardless of which syntax was used to define the `+`
 function.
 
+Backquotes can also be used to make almost any sequence of characters act as a
+symbol.  The only characters that cannot appear between backquotes are newlines,
+other control characters (such as tabs and escape characters), the hash (#)
+character, and the backquote character itself.
+
 
 ##  <a name="reserved-words"></a>Reserved operators
 

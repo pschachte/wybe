@@ -35,8 +35,8 @@ AFTER EVERYTHING:
 
 simpleSlice > public (1 calls)
 0: alias_fork3.simpleSlice<0>
-simpleSlice(tr##0:mytree.tree, ?###0:mytree.tree):
- AliasPairs: [(###0,tr##0)]
+simpleSlice(tr##0:mytree.tree, ?#result##0:mytree.tree):
+ AliasPairs: [(#result##0,tr##0)]
  InterestingCallProperties: []
     foreign llvm icmp_ne(tr##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool)
     case ~tmp#6##0:wybe.bool of
@@ -44,10 +44,10 @@ simpleSlice(tr##0:mytree.tree, ?###0:mytree.tree):
         foreign lpvm alloc(24:wybe.int, ?tmp#10##0:mytree.tree)
         foreign lpvm mutate(~tmp#10##0:mytree.tree, ?tmp#11##0:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree)
         foreign lpvm mutate(~tmp#11##0:mytree.tree, ?tmp#12##0:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, -1:wybe.int)
-        foreign lpvm mutate(~tmp#12##0:mytree.tree, ?###0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree)
+        foreign lpvm mutate(~tmp#12##0:mytree.tree, ?#result##0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree)
 
     1:
-        foreign lpvm access(~tr##0:mytree.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?###0:mytree.tree)
+        foreign lpvm access(~tr##0:mytree.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:mytree.tree)
 
 
   LLVM code       :
@@ -339,25 +339,25 @@ if.else:
 
 empty > public {inline} (0 calls)
 0: mytree.tree.empty<0>
-empty(?###0:mytree.tree):
+empty(?#result##0:mytree.tree):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(0:mytree.tree, ?###0:mytree.tree)
+    foreign llvm move(0:mytree.tree, ?#result##0:mytree.tree)
 
 
 key > public {inline} (0 calls)
 0: mytree.tree.key<0>
-key(#rec##0:mytree.tree, ?###0:wybe.int, ?####0:wybe.bool):
+key(#rec##0:mytree.tree, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:mytree.tree, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?###0:wybe.int)
+        foreign lpvm access(~#rec##0:mytree.tree, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 key > public {inline} (0 calls)
@@ -379,17 +379,17 @@ key(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:wybe.int, ?####0:wybe.b
 
 left > public {inline} (0 calls)
 0: mytree.tree.left<0>
-left(#rec##0:mytree.tree, ?###0:mytree.tree, ?####0:wybe.bool):
+left(#rec##0:mytree.tree, ?#result##0:mytree.tree, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:mytree.tree, ?###0:mytree.tree)
+        foreign llvm move(undef:mytree.tree, ?#result##0:mytree.tree)
 
     1:
-        foreign lpvm access(~#rec##0:mytree.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?###0:mytree.tree)
+        foreign lpvm access(~#rec##0:mytree.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:mytree.tree)
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 left > public {inline} (0 calls)
@@ -411,19 +411,19 @@ left(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:mytree.tree, ?####0:wy
 
 node > public {inline} (0 calls)
 0: mytree.tree.node<0>
-node(left##0:mytree.tree, key##0:wybe.int, right##0:mytree.tree, ?###0:mytree.tree):
+node(left##0:mytree.tree, key##0:wybe.int, right##0:mytree.tree, ?#result##0:mytree.tree):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:mytree.tree)
     foreign lpvm mutate(~#rec##0:mytree.tree, ?#rec##1:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~left##0:mytree.tree)
     foreign lpvm mutate(~#rec##1:mytree.tree, ?#rec##2:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~key##0:wybe.int)
-    foreign lpvm mutate(~#rec##2:mytree.tree, ?###0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~right##0:mytree.tree)
+    foreign lpvm mutate(~#rec##2:mytree.tree, ?#result##0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~right##0:mytree.tree)
 node > public {inline} (16 calls)
 1: mytree.tree.node<1>
-node(?left##0:mytree.tree, ?key##0:wybe.int, ?right##0:mytree.tree, ###0:mytree.tree, ?####0:wybe.bool):
+node(?left##0:mytree.tree, ?key##0:wybe.int, ?right##0:mytree.tree, #result##0:mytree.tree, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne(###0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
@@ -432,26 +432,26 @@ node(?left##0:mytree.tree, ?key##0:wybe.int, ?right##0:mytree.tree, ###0:mytree.
         foreign llvm move(undef:mytree.tree, ?right##0:mytree.tree)
 
     1:
-        foreign lpvm access(###0:mytree.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?left##0:mytree.tree)
-        foreign lpvm access(###0:mytree.tree, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?key##0:wybe.int)
-        foreign lpvm access(~###0:mytree.tree, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?right##0:mytree.tree)
+        foreign lpvm access(#result##0:mytree.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?left##0:mytree.tree)
+        foreign lpvm access(#result##0:mytree.tree, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?key##0:wybe.int)
+        foreign lpvm access(~#result##0:mytree.tree, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?right##0:mytree.tree)
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
 
 right > public {inline} (0 calls)
 0: mytree.tree.right<0>
-right(#rec##0:mytree.tree, ?###0:mytree.tree, ?####0:wybe.bool):
+right(#rec##0:mytree.tree, ?#result##0:mytree.tree, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:mytree.tree, ?###0:mytree.tree)
+        foreign llvm move(undef:mytree.tree, ?#result##0:mytree.tree)
 
     1:
-        foreign lpvm access(~#rec##0:mytree.tree, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?###0:mytree.tree)
+        foreign lpvm access(~#rec##0:mytree.tree, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:mytree.tree)
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 right > public {inline} (0 calls)
@@ -657,19 +657,19 @@ entry:
 }
 
 
-define external fastcc  {i64, i64, i64, i1} @"mytree.tree.node<1>"(i64  %"###0")    {
+define external fastcc  {i64, i64, i64, i1} @"mytree.tree.node<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"###0", 0 
+  %"1#tmp#0##0" = icmp ne i64 %"#result##0", 0 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %74 = inttoptr i64 %"###0" to i64* 
+  %74 = inttoptr i64 %"#result##0" to i64* 
   %75 = getelementptr  i64, i64* %74, i64 0 
   %76 = load  i64, i64* %75 
-  %77 = add   i64 %"###0", 8 
+  %77 = add   i64 %"#result##0", 8 
   %78 = inttoptr i64 %77 to i64* 
   %79 = getelementptr  i64, i64* %78, i64 0 
   %80 = load  i64, i64* %79 
-  %81 = add   i64 %"###0", 16 
+  %81 = add   i64 %"#result##0", 16 
   %82 = inttoptr i64 %81 to i64* 
   %83 = getelementptr  i64, i64* %82, i64 0 
   %84 = load  i64, i64* %83 

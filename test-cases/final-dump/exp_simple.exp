@@ -30,10 +30,10 @@ AFTER EVERYTHING:
 
 foreign_add > {inline} (1 calls)
 0: exp_simple.foreign_add<0>
-foreign_add(?###0:wybe.int):
+foreign_add(?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(3:wybe.int, ?###0:wybe.int) @exp_simple:nn:nn
+    foreign llvm move(3:wybe.int, ?#result##0:wybe.int) @exp_simple:nn:nn
 
   LLVM code       :
 

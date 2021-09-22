@@ -203,18 +203,18 @@ if.else:
 
 cons > public {inline} (0 calls)
 0: loop_bug.int_list.cons<0>
-cons(head##0:wybe.int, tail##0:loop_bug.int_list, ?###0:loop_bug.int_list):
+cons(head##0:wybe.int, tail##0:loop_bug.int_list, ?#result##0:loop_bug.int_list):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:loop_bug.int_list)
     foreign lpvm mutate(~#rec##0:loop_bug.int_list, ?#rec##1:loop_bug.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head##0:wybe.int)
-    foreign lpvm mutate(~#rec##1:loop_bug.int_list, ?###0:loop_bug.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail##0:loop_bug.int_list)
+    foreign lpvm mutate(~#rec##1:loop_bug.int_list, ?#result##0:loop_bug.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail##0:loop_bug.int_list)
 cons > public {inline} (12 calls)
 1: loop_bug.int_list.cons<1>
-cons(?head##0:wybe.int, ?tail##0:loop_bug.int_list, ###0:loop_bug.int_list, ?####0:wybe.bool):
+cons(?head##0:wybe.int, ?tail##0:loop_bug.int_list, #result##0:loop_bug.int_list, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne(###0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
@@ -222,25 +222,25 @@ cons(?head##0:wybe.int, ?tail##0:loop_bug.int_list, ###0:loop_bug.int_list, ?###
         foreign llvm move(undef:loop_bug.int_list, ?tail##0:loop_bug.int_list)
 
     1:
-        foreign lpvm access(###0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?head##0:wybe.int)
-        foreign lpvm access(~###0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tail##0:loop_bug.int_list)
+        foreign lpvm access(#result##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?head##0:wybe.int)
+        foreign lpvm access(~#result##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tail##0:loop_bug.int_list)
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
 
 head > public {inline} (0 calls)
 0: loop_bug.int_list.head<0>
-head(#rec##0:loop_bug.int_list, ?###0:wybe.int, ?####0:wybe.bool):
+head(#rec##0:loop_bug.int_list, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:wybe.int)
+        foreign lpvm access(~#rec##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 head > public {inline} (0 calls)
@@ -262,25 +262,25 @@ head(#rec##0:loop_bug.int_list, ?#rec##1:loop_bug.int_list, #field##0:wybe.int, 
 
 nil > public {inline} (0 calls)
 0: loop_bug.int_list.nil<0>
-nil(?###0:loop_bug.int_list):
+nil(?#result##0:loop_bug.int_list):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(0:loop_bug.int_list, ?###0:loop_bug.int_list)
+    foreign llvm move(0:loop_bug.int_list, ?#result##0:loop_bug.int_list)
 
 
 tail > public {inline} (0 calls)
 0: loop_bug.int_list.tail<0>
-tail(#rec##0:loop_bug.int_list, ?###0:loop_bug.int_list, ?####0:wybe.bool):
+tail(#rec##0:loop_bug.int_list, ?#result##0:loop_bug.int_list, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:loop_bug.int_list, ?###0:loop_bug.int_list)
+        foreign llvm move(undef:loop_bug.int_list, ?#result##0:loop_bug.int_list)
 
     1:
-        foreign lpvm access(~#rec##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:loop_bug.int_list)
+        foreign lpvm access(~#rec##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:loop_bug.int_list)
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 tail > public {inline} (0 calls)
@@ -375,15 +375,15 @@ entry:
 }
 
 
-define external fastcc  {i64, i64, i1} @"loop_bug.int_list.cons<1>"(i64  %"###0")    {
+define external fastcc  {i64, i64, i1} @"loop_bug.int_list.cons<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"###0", 0 
+  %"1#tmp#0##0" = icmp ne i64 %"#result##0", 0 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %23 = inttoptr i64 %"###0" to i64* 
+  %23 = inttoptr i64 %"#result##0" to i64* 
   %24 = getelementptr  i64, i64* %23, i64 0 
   %25 = load  i64, i64* %24 
-  %26 = add   i64 %"###0", 8 
+  %26 = add   i64 %"#result##0", 8 
   %27 = inttoptr i64 %26 to i64* 
   %28 = getelementptr  i64, i64* %27, i64 0 
   %29 = load  i64, i64* %28 

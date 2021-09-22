@@ -47,18 +47,18 @@ gen#1(io##0:wybe.phantom, prompt##0:wybe.string, ?result##1:wybe.bool, ?io##5:wy
 
 is_yes > {inline} (4 calls)
 0: proc_yorn.is_yes<0>
-is_yes(ch##0:wybe.char, ?###0:wybe.bool):
+is_yes(ch##0:wybe.char, ?#result##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(ch##0:wybe.char, 'y':wybe.char, ?tmp#2##0:wybe.bool) @char:nn:nn
     foreign llvm icmp_ne(~ch##0:wybe.char, 'Y':wybe.char, ?tmp#3##0:wybe.bool) @char:nn:nn
     foreign llvm and(~tmp#2##0:wybe.bool, ~tmp#3##0:wybe.bool, ?tmp#1##0:wybe.bool) @bool:nn:nn
-    foreign llvm xor(~tmp#1##0:wybe.bool, 1:wybe.bool, ?###0:wybe.bool) @bool:nn:nn
+    foreign llvm xor(~tmp#1##0:wybe.bool, 1:wybe.bool, ?#result##0:wybe.bool) @bool:nn:nn
 
 
 is_yes_or_no > (3 calls)
 0: proc_yorn.is_yes_or_no<0>
-is_yes_or_no(ch##0:wybe.char, ?###0:wybe.bool):
+is_yes_or_no(ch##0:wybe.char, ?#result##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(ch##0:wybe.char, 'y':wybe.char, ?tmp#6##0:wybe.bool) @char:nn:nn
@@ -68,7 +68,7 @@ is_yes_or_no(ch##0:wybe.char, ?###0:wybe.bool):
     foreign llvm icmp_eq(ch##0:wybe.char, 'n':wybe.char, ?tmp#3##0:wybe.bool) @char:nn:nn
     foreign llvm icmp_eq(~ch##0:wybe.char, 'N':wybe.char, ?tmp#4##0:wybe.bool) @char:nn:nn
     foreign llvm or(~tmp#3##0:wybe.bool, ~tmp#4##0:wybe.bool, ?tmp#2##0:wybe.bool) @bool:nn:nn
-    foreign llvm or(~tmp#1##0:wybe.bool, ~tmp#2##0:wybe.bool, ?###0:wybe.bool) @bool:nn:nn
+    foreign llvm or(~tmp#1##0:wybe.bool, ~tmp#2##0:wybe.bool, ?#result##0:wybe.bool) @bool:nn:nn
 
 
 yorn > public {inline} (1 calls)
@@ -151,8 +151,8 @@ entry:
   %"1#tmp#2##0" = icmp ne i8 %"ch##0", 121 
   %"1#tmp#3##0" = icmp ne i8 %"ch##0", 89 
   %"1#tmp#1##0" = and i1 %"1#tmp#2##0", %"1#tmp#3##0" 
-  %"1####0" = xor i1 %"1#tmp#1##0", 1 
-  ret i1 %"1####0" 
+  %"1##result##0" = xor i1 %"1#tmp#1##0", 1 
+  ret i1 %"1##result##0" 
 }
 
 
@@ -165,8 +165,8 @@ entry:
   %"1#tmp#3##0" = icmp eq i8 %"ch##0", 110 
   %"1#tmp#4##0" = icmp eq i8 %"ch##0", 78 
   %"1#tmp#2##0" = or i1 %"1#tmp#3##0", %"1#tmp#4##0" 
-  %"1####0" = or i1 %"1#tmp#1##0", %"1#tmp#2##0" 
-  ret i1 %"1####0" 
+  %"1##result##0" = or i1 %"1#tmp#1##0", %"1#tmp#2##0" 
+  ret i1 %"1##result##0" 
 }
 
 

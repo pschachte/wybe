@@ -31,7 +31,7 @@ AFTER EVERYTHING:
 
 fcopy > public (0 calls)
 0: alias2.fcopy<0>
-fcopy(p1##0:position.position, ?###0:position.position):
+fcopy(p1##0:position.position, ?#result##0:position.position):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#5##0:position.position)
@@ -40,7 +40,7 @@ fcopy(p1##0:position.position, ?###0:position.position):
     foreign lpvm access(p1##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int)
     foreign lpvm {noalias} mutate(~tmp#0##0:position.position, ?%p2##1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.int)
     foreign lpvm access(~p1##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int)
-    foreign lpvm {noalias} mutate(~%p2##1:position.position, ?%###0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.int)
+    foreign lpvm {noalias} mutate(~%p2##1:position.position, ?%#result##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.int)
 
 
 pcopy > public (1 calls)
@@ -313,27 +313,27 @@ entry:
 
 position > public {inline} (0 calls)
 0: position.position.position<0>
-position(x##0:wybe.int, y##0:wybe.int, ?###0:position.position):
+position(x##0:wybe.int, y##0:wybe.int, ?#result##0:position.position):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:position.position)
     foreign lpvm mutate(~#rec##0:position.position, ?#rec##1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:wybe.int)
-    foreign lpvm mutate(~#rec##1:position.position, ?###0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y##0:wybe.int)
+    foreign lpvm mutate(~#rec##1:position.position, ?#result##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y##0:wybe.int)
 position > public {inline} (6 calls)
 1: position.position.position<1>
-position(?x##0:wybe.int, ?y##0:wybe.int, ###0:position.position):
+position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:position.position):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(###0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:wybe.int)
-    foreign lpvm access(~###0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:wybe.int)
+    foreign lpvm access(#result##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:wybe.int)
+    foreign lpvm access(~#result##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:wybe.int)
 
 
 x > public {inline} (0 calls)
 0: position.position.x<0>
-x(#rec##0:position.position, ?###0:wybe.int):
+x(#rec##0:position.position, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 x > public {inline} (0 calls)
 1: position.position.x<1>
 x(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
@@ -344,10 +344,10 @@ x(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
 
 y > public {inline} (0 calls)
 0: position.position.y<0>
-y(#rec##0:position.position, ?###0:wybe.int):
+y(#rec##0:position.position, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 y > public {inline} (0 calls)
 1: position.position.y<1>
 y(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
@@ -432,12 +432,12 @@ entry:
 }
 
 
-define external fastcc  {i64, i64} @"position.position.position<1>"(i64  %"###0")    {
+define external fastcc  {i64, i64} @"position.position.position<1>"(i64  %"#result##0")    {
 entry:
-  %23 = inttoptr i64 %"###0" to i64* 
+  %23 = inttoptr i64 %"#result##0" to i64* 
   %24 = getelementptr  i64, i64* %23, i64 0 
   %25 = load  i64, i64* %24 
-  %26 = add   i64 %"###0", 8 
+  %26 = add   i64 %"#result##0", 8 
   %27 = inttoptr i64 %26 to i64* 
   %28 = getelementptr  i64, i64* %27, i64 0 
   %29 = load  i64, i64* %28 

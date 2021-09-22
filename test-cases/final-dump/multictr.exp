@@ -217,31 +217,31 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 card > public {inline} (0 calls)
 0: multictr.card.card<0>
-card(suit##0:multictr.suit, rank##0:multictr.rank, ?###3:multictr.card):
+card(suit##0:multictr.suit, rank##0:multictr.rank, ?#result##3:multictr.card):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm shl(~rank##0:multictr.card, 2:multictr.card, ?#temp##1:multictr.card)
-    foreign llvm or(~#temp##1:multictr.card, ~suit##0:multictr.card, ?###3:multictr.card)
+    foreign llvm or(~#temp##1:multictr.card, ~suit##0:multictr.card, ?#result##3:multictr.card)
 card > public {inline} (0 calls)
 1: multictr.card.card<1>
-card(?suit##0:multictr.suit, ?rank##0:multictr.rank, ###0:multictr.card):
+card(?suit##0:multictr.suit, ?rank##0:multictr.rank, #result##0:multictr.card):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm and(###0:multictr.card, 3:multictr.card, ?#temp2##0:multictr.card)
+    foreign llvm and(#result##0:multictr.card, 3:multictr.card, ?#temp2##0:multictr.card)
     foreign lpvm cast(~#temp2##0:multictr.card, ?suit##0:multictr.suit)
-    foreign llvm lshr(~###0:multictr.card, 2:multictr.card, ?#temp##1:multictr.card)
+    foreign llvm lshr(~#result##0:multictr.card, 2:multictr.card, ?#temp##1:multictr.card)
     foreign llvm and(~#temp##1:multictr.card, 15:multictr.card, ?#temp2##1:multictr.card)
     foreign lpvm cast(~#temp2##1:multictr.card, ?rank##0:multictr.rank)
 
 
 rank > public {inline} (0 calls)
 0: multictr.card.rank<0>
-rank(#rec##0:multictr.card, ?###0:multictr.rank):
+rank(#rec##0:multictr.card, ?#result##0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm lshr(~#rec##0:multictr.card, 2:multictr.card, ?#rec##1:multictr.card)
     foreign llvm and(~#rec##1:multictr.card, 15:multictr.card, ?#field##0:multictr.card)
-    foreign lpvm cast(~#field##0:multictr.card, ?###0:multictr.rank)
+    foreign lpvm cast(~#field##0:multictr.card, ?#result##0:multictr.rank)
 rank > public {inline} (0 calls)
 1: multictr.card.rank<1>
 rank(#rec##0:multictr.card, ?#rec##2:multictr.card, #field##0:multictr.rank):
@@ -254,11 +254,11 @@ rank(#rec##0:multictr.card, ?#rec##2:multictr.card, #field##0:multictr.rank):
 
 suit > public {inline} (0 calls)
 0: multictr.card.suit<0>
-suit(#rec##0:multictr.card, ?###0:multictr.suit):
+suit(#rec##0:multictr.card, ?#result##0:multictr.suit):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm and(~#rec##0:multictr.card, 3:multictr.card, ?#field##0:multictr.card)
-    foreign lpvm cast(~#field##0:multictr.card, ?###0:multictr.suit)
+    foreign lpvm cast(~#field##0:multictr.card, ?#result##0:multictr.suit)
 suit > public {inline} (0 calls)
 1: multictr.card.suit<1>
 suit(#rec##0:multictr.card, ?#rec##2:multictr.card, #field##0:multictr.suit):
@@ -302,16 +302,16 @@ entry:
   %1 = zext i4 %"rank##0" to i6  
   %"1##temp##1" = shl   i6 %1, 2 
   %2 = zext i2 %"suit##0" to i6  
-  %"1####3" = or i6 %"1##temp##1", %2 
-  ret i6 %"1####3" 
+  %"1##result##3" = or i6 %"1##temp##1", %2 
+  ret i6 %"1##result##3" 
 }
 
 
-define external fastcc  {i2, i4} @"multictr.card.card<1>"(i6  %"###0")    {
+define external fastcc  {i2, i4} @"multictr.card.card<1>"(i6  %"#result##0")    {
 entry:
-  %"1##temp2##0" = and i6 %"###0", 3 
+  %"1##temp2##0" = and i6 %"#result##0", 3 
   %3 = trunc i6 %"1##temp2##0" to i2  
-  %"1##temp##1" = lshr  i6 %"###0", 2 
+  %"1##temp##1" = lshr  i6 %"#result##0", 2 
   %"1##temp2##1" = and i6 %"1##temp##1", 15 
   %4 = trunc i6 %"1##temp2##1" to i4  
   %5 = insertvalue {i2, i4} undef, i2 %3, 0 
@@ -960,32 +960,32 @@ entry:
 
 autumn > public {inline} (0 calls)
 0: multictr.complicated.autumn<0>
-autumn(?###0:multictr.complicated):
+autumn(?#result##0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(3:multictr.complicated, ?###0:multictr.complicated)
+    foreign llvm move(3:multictr.complicated, ?#result##0:multictr.complicated)
 
 
 c01 > public {inline} (0 calls)
 0: multictr.complicated.c01<0>
-c01(f01##0:wybe.int, ?###0:multictr.complicated):
+c01(f01##0:wybe.int, ?#result##0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.complicated)
-    foreign lpvm mutate(~#rec##0:multictr.complicated, ?###0:multictr.complicated, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f01##0:wybe.int)
+    foreign lpvm mutate(~#rec##0:multictr.complicated, ?#result##0:multictr.complicated, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f01##0:wybe.int)
 c01 > public {inline} (40 calls)
 1: multictr.complicated.c01<1>
-c01(?f01##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
+c01(?f01##0:wybe.int, #result##0:multictr.complicated, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_uge(###0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?f01##0:wybe.int)
 
     1:
-        foreign llvm and(###0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
         foreign llvm icmp_eq(~tmp#2##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
@@ -993,7 +993,7 @@ c01(?f01##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?f01##0:wybe.int)
 
         1:
-            foreign lpvm access(~###0:multictr.complicated, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?f01##0:wybe.int)
+            foreign lpvm access(~#result##0:multictr.complicated, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?f01##0:wybe.int)
             foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1001,25 +1001,25 @@ c01(?f01##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
 
 c02 > public {inline} (0 calls)
 0: multictr.complicated.c02<0>
-c02(f02##0:wybe.int, ?###0:multictr.complicated):
+c02(f02##0:wybe.int, ?#result##0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f02##0:wybe.int)
-    foreign llvm or(~#rec##1:multictr.complicated, 1:wybe.int, ?###0:multictr.complicated)
+    foreign llvm or(~#rec##1:multictr.complicated, 1:wybe.int, ?#result##0:multictr.complicated)
 c02 > public {inline} (35 calls)
 1: multictr.complicated.c02<1>
-c02(?f02##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
+c02(?f02##0:wybe.int, #result##0:multictr.complicated, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_uge(###0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?f02##0:wybe.int)
 
     1:
-        foreign llvm and(###0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
         foreign llvm icmp_eq(~tmp#2##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
@@ -1027,7 +1027,7 @@ c02(?f02##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?f02##0:wybe.int)
 
         1:
-            foreign lpvm access(~###0:multictr.complicated, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?f02##0:wybe.int)
+            foreign lpvm access(~#result##0:multictr.complicated, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?f02##0:wybe.int)
             foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1035,25 +1035,25 @@ c02(?f02##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
 
 c03 > public {inline} (0 calls)
 0: multictr.complicated.c03<0>
-c03(f03##0:wybe.int, ?###0:multictr.complicated):
+c03(f03##0:wybe.int, ?#result##0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f03##0:wybe.int)
-    foreign llvm or(~#rec##1:multictr.complicated, 2:wybe.int, ?###0:multictr.complicated)
+    foreign llvm or(~#rec##1:multictr.complicated, 2:wybe.int, ?#result##0:multictr.complicated)
 c03 > public {inline} (33 calls)
 1: multictr.complicated.c03<1>
-c03(?f03##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
+c03(?f03##0:wybe.int, #result##0:multictr.complicated, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_uge(###0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?f03##0:wybe.int)
 
     1:
-        foreign llvm and(###0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
         foreign llvm icmp_eq(~tmp#2##0:wybe.int, 2:wybe.int, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
@@ -1061,7 +1061,7 @@ c03(?f03##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?f03##0:wybe.int)
 
         1:
-            foreign lpvm access(~###0:multictr.complicated, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?f03##0:wybe.int)
+            foreign lpvm access(~#result##0:multictr.complicated, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?f03##0:wybe.int)
             foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1069,25 +1069,25 @@ c03(?f03##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
 
 c04 > public {inline} (0 calls)
 0: multictr.complicated.c04<0>
-c04(f04##0:wybe.int, ?###0:multictr.complicated):
+c04(f04##0:wybe.int, ?#result##0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f04##0:wybe.int)
-    foreign llvm or(~#rec##1:multictr.complicated, 3:wybe.int, ?###0:multictr.complicated)
+    foreign llvm or(~#rec##1:multictr.complicated, 3:wybe.int, ?#result##0:multictr.complicated)
 c04 > public {inline} (31 calls)
 1: multictr.complicated.c04<1>
-c04(?f04##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
+c04(?f04##0:wybe.int, #result##0:multictr.complicated, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_uge(###0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?f04##0:wybe.int)
 
     1:
-        foreign llvm and(###0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
         foreign llvm icmp_eq(~tmp#2##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
@@ -1095,7 +1095,7 @@ c04(?f04##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?f04##0:wybe.int)
 
         1:
-            foreign lpvm access(~###0:multictr.complicated, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?f04##0:wybe.int)
+            foreign lpvm access(~#result##0:multictr.complicated, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?f04##0:wybe.int)
             foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1103,25 +1103,25 @@ c04(?f04##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
 
 c05 > public {inline} (0 calls)
 0: multictr.complicated.c05<0>
-c05(f05##0:wybe.int, ?###0:multictr.complicated):
+c05(f05##0:wybe.int, ?#result##0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f05##0:wybe.int)
-    foreign llvm or(~#rec##1:multictr.complicated, 4:wybe.int, ?###0:multictr.complicated)
+    foreign llvm or(~#rec##1:multictr.complicated, 4:wybe.int, ?#result##0:multictr.complicated)
 c05 > public {inline} (29 calls)
 1: multictr.complicated.c05<1>
-c05(?f05##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
+c05(?f05##0:wybe.int, #result##0:multictr.complicated, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_uge(###0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?f05##0:wybe.int)
 
     1:
-        foreign llvm and(###0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
         foreign llvm icmp_eq(~tmp#2##0:wybe.int, 4:wybe.int, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
@@ -1129,7 +1129,7 @@ c05(?f05##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?f05##0:wybe.int)
 
         1:
-            foreign lpvm access(~###0:multictr.complicated, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?f05##0:wybe.int)
+            foreign lpvm access(~#result##0:multictr.complicated, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?f05##0:wybe.int)
             foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1137,25 +1137,25 @@ c05(?f05##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
 
 c06 > public {inline} (0 calls)
 0: multictr.complicated.c06<0>
-c06(f06##0:wybe.int, ?###0:multictr.complicated):
+c06(f06##0:wybe.int, ?#result##0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f06##0:wybe.int)
-    foreign llvm or(~#rec##1:multictr.complicated, 5:wybe.int, ?###0:multictr.complicated)
+    foreign llvm or(~#rec##1:multictr.complicated, 5:wybe.int, ?#result##0:multictr.complicated)
 c06 > public {inline} (27 calls)
 1: multictr.complicated.c06<1>
-c06(?f06##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
+c06(?f06##0:wybe.int, #result##0:multictr.complicated, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_uge(###0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?f06##0:wybe.int)
 
     1:
-        foreign llvm and(###0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
         foreign llvm icmp_eq(~tmp#2##0:wybe.int, 5:wybe.int, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
@@ -1163,7 +1163,7 @@ c06(?f06##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?f06##0:wybe.int)
 
         1:
-            foreign lpvm access(~###0:multictr.complicated, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?f06##0:wybe.int)
+            foreign lpvm access(~#result##0:multictr.complicated, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?f06##0:wybe.int)
             foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1171,25 +1171,25 @@ c06(?f06##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
 
 c07 > public {inline} (0 calls)
 0: multictr.complicated.c07<0>
-c07(f07##0:wybe.int, ?###0:multictr.complicated):
+c07(f07##0:wybe.int, ?#result##0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f07##0:wybe.int)
-    foreign llvm or(~#rec##1:multictr.complicated, 6:wybe.int, ?###0:multictr.complicated)
+    foreign llvm or(~#rec##1:multictr.complicated, 6:wybe.int, ?#result##0:multictr.complicated)
 c07 > public {inline} (25 calls)
 1: multictr.complicated.c07<1>
-c07(?f07##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
+c07(?f07##0:wybe.int, #result##0:multictr.complicated, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_uge(###0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?f07##0:wybe.int)
 
     1:
-        foreign llvm and(###0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
         foreign llvm icmp_eq(~tmp#2##0:wybe.int, 6:wybe.int, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
@@ -1197,7 +1197,7 @@ c07(?f07##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?f07##0:wybe.int)
 
         1:
-            foreign lpvm access(~###0:multictr.complicated, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?f07##0:wybe.int)
+            foreign lpvm access(~#result##0:multictr.complicated, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?f07##0:wybe.int)
             foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1205,26 +1205,26 @@ c07(?f07##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
 
 c08 > public {inline} (0 calls)
 0: multictr.complicated.c08<0>
-c08(f08##0:wybe.int, ?###0:multictr.complicated):
+c08(f08##0:wybe.int, ?#result##0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 7:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.complicated, ?#rec##2:multictr.complicated, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~f08##0:wybe.int)
-    foreign llvm or(~#rec##2:multictr.complicated, 7:wybe.int, ?###0:multictr.complicated)
+    foreign llvm or(~#rec##2:multictr.complicated, 7:wybe.int, ?#result##0:multictr.complicated)
 c08 > public {inline} (23 calls)
 1: multictr.complicated.c08<1>
-c08(?f08##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
+c08(?f08##0:wybe.int, #result##0:multictr.complicated, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_uge(###0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?f08##0:wybe.int)
 
     1:
-        foreign llvm and(###0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
         foreign llvm icmp_eq(~tmp#2##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
@@ -1232,7 +1232,7 @@ c08(?f08##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?f08##0:wybe.int)
 
         1:
-            foreign lpvm access(###0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
+            foreign lpvm access(#result##0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
             foreign llvm icmp_eq(~#tag##0:16 bit unsigned, 7:16 bit unsigned, ?tmp#3##0:wybe.bool)
             case ~tmp#3##0:wybe.bool of
             0:
@@ -1240,7 +1240,7 @@ c08(?f08##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
                 foreign llvm move(undef:wybe.int, ?f08##0:wybe.int)
 
             1:
-                foreign lpvm access(~###0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f08##0:wybe.int)
+                foreign lpvm access(~#result##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f08##0:wybe.int)
                 foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1249,26 +1249,26 @@ c08(?f08##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
 
 c09 > public {inline} (0 calls)
 0: multictr.complicated.c09<0>
-c09(f09##0:wybe.int, ?###0:multictr.complicated):
+c09(f09##0:wybe.int, ?#result##0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 8:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.complicated, ?#rec##2:multictr.complicated, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~f09##0:wybe.int)
-    foreign llvm or(~#rec##2:multictr.complicated, 7:wybe.int, ?###0:multictr.complicated)
+    foreign llvm or(~#rec##2:multictr.complicated, 7:wybe.int, ?#result##0:multictr.complicated)
 c09 > public {inline} (21 calls)
 1: multictr.complicated.c09<1>
-c09(?f09##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
+c09(?f09##0:wybe.int, #result##0:multictr.complicated, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_uge(###0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?f09##0:wybe.int)
 
     1:
-        foreign llvm and(###0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
         foreign llvm icmp_eq(~tmp#2##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
@@ -1276,7 +1276,7 @@ c09(?f09##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?f09##0:wybe.int)
 
         1:
-            foreign lpvm access(###0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
+            foreign lpvm access(#result##0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
             foreign llvm icmp_eq(~#tag##0:16 bit unsigned, 8:16 bit unsigned, ?tmp#3##0:wybe.bool)
             case ~tmp#3##0:wybe.bool of
             0:
@@ -1284,7 +1284,7 @@ c09(?f09##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
                 foreign llvm move(undef:wybe.int, ?f09##0:wybe.int)
 
             1:
-                foreign lpvm access(~###0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f09##0:wybe.int)
+                foreign lpvm access(~#result##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f09##0:wybe.int)
                 foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1293,26 +1293,26 @@ c09(?f09##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
 
 c10 > public {inline} (0 calls)
 0: multictr.complicated.c10<0>
-c10(f10##0:wybe.int, ?###0:multictr.complicated):
+c10(f10##0:wybe.int, ?#result##0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 9:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.complicated, ?#rec##2:multictr.complicated, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~f10##0:wybe.int)
-    foreign llvm or(~#rec##2:multictr.complicated, 7:wybe.int, ?###0:multictr.complicated)
+    foreign llvm or(~#rec##2:multictr.complicated, 7:wybe.int, ?#result##0:multictr.complicated)
 c10 > public {inline} (19 calls)
 1: multictr.complicated.c10<1>
-c10(?f10##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
+c10(?f10##0:wybe.int, #result##0:multictr.complicated, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_uge(###0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?f10##0:wybe.int)
 
     1:
-        foreign llvm and(###0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
         foreign llvm icmp_eq(~tmp#2##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
@@ -1320,7 +1320,7 @@ c10(?f10##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?f10##0:wybe.int)
 
         1:
-            foreign lpvm access(###0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
+            foreign lpvm access(#result##0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
             foreign llvm icmp_eq(~#tag##0:16 bit unsigned, 9:16 bit unsigned, ?tmp#3##0:wybe.bool)
             case ~tmp#3##0:wybe.bool of
             0:
@@ -1328,7 +1328,7 @@ c10(?f10##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
                 foreign llvm move(undef:wybe.int, ?f10##0:wybe.int)
 
             1:
-                foreign lpvm access(~###0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f10##0:wybe.int)
+                foreign lpvm access(~#result##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f10##0:wybe.int)
                 foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1337,26 +1337,26 @@ c10(?f10##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
 
 c11 > public {inline} (0 calls)
 0: multictr.complicated.c11<0>
-c11(f11##0:wybe.int, ?###0:multictr.complicated):
+c11(f11##0:wybe.int, ?#result##0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.complicated, ?#rec##2:multictr.complicated, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~f11##0:wybe.int)
-    foreign llvm or(~#rec##2:multictr.complicated, 7:wybe.int, ?###0:multictr.complicated)
+    foreign llvm or(~#rec##2:multictr.complicated, 7:wybe.int, ?#result##0:multictr.complicated)
 c11 > public {inline} (17 calls)
 1: multictr.complicated.c11<1>
-c11(?f11##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
+c11(?f11##0:wybe.int, #result##0:multictr.complicated, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_uge(###0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?f11##0:wybe.int)
 
     1:
-        foreign llvm and(###0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
         foreign llvm icmp_eq(~tmp#2##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
@@ -1364,7 +1364,7 @@ c11(?f11##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?f11##0:wybe.int)
 
         1:
-            foreign lpvm access(###0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
+            foreign lpvm access(#result##0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
             foreign llvm icmp_eq(~#tag##0:16 bit unsigned, 10:16 bit unsigned, ?tmp#3##0:wybe.bool)
             case ~tmp#3##0:wybe.bool of
             0:
@@ -1372,7 +1372,7 @@ c11(?f11##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
                 foreign llvm move(undef:wybe.int, ?f11##0:wybe.int)
 
             1:
-                foreign lpvm access(~###0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f11##0:wybe.int)
+                foreign lpvm access(~#result##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f11##0:wybe.int)
                 foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1381,26 +1381,26 @@ c11(?f11##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
 
 c12 > public {inline} (0 calls)
 0: multictr.complicated.c12<0>
-c12(f12##0:wybe.int, ?###0:multictr.complicated):
+c12(f12##0:wybe.int, ?#result##0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 11:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.complicated, ?#rec##2:multictr.complicated, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~f12##0:wybe.int)
-    foreign llvm or(~#rec##2:multictr.complicated, 7:wybe.int, ?###0:multictr.complicated)
+    foreign llvm or(~#rec##2:multictr.complicated, 7:wybe.int, ?#result##0:multictr.complicated)
 c12 > public {inline} (15 calls)
 1: multictr.complicated.c12<1>
-c12(?f12##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
+c12(?f12##0:wybe.int, #result##0:multictr.complicated, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_uge(###0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?f12##0:wybe.int)
 
     1:
-        foreign llvm and(###0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
         foreign llvm icmp_eq(~tmp#2##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
@@ -1408,7 +1408,7 @@ c12(?f12##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?f12##0:wybe.int)
 
         1:
-            foreign lpvm access(###0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
+            foreign lpvm access(#result##0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
             foreign llvm icmp_eq(~#tag##0:16 bit unsigned, 11:16 bit unsigned, ?tmp#3##0:wybe.bool)
             case ~tmp#3##0:wybe.bool of
             0:
@@ -1416,7 +1416,7 @@ c12(?f12##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
                 foreign llvm move(undef:wybe.int, ?f12##0:wybe.int)
 
             1:
-                foreign lpvm access(~###0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f12##0:wybe.int)
+                foreign lpvm access(~#result##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f12##0:wybe.int)
                 foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1425,26 +1425,26 @@ c12(?f12##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
 
 c13 > public {inline} (0 calls)
 0: multictr.complicated.c13<0>
-c13(f13##0:wybe.int, ?###0:multictr.complicated):
+c13(f13##0:wybe.int, ?#result##0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 12:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.complicated, ?#rec##2:multictr.complicated, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~f13##0:wybe.int)
-    foreign llvm or(~#rec##2:multictr.complicated, 7:wybe.int, ?###0:multictr.complicated)
+    foreign llvm or(~#rec##2:multictr.complicated, 7:wybe.int, ?#result##0:multictr.complicated)
 c13 > public {inline} (13 calls)
 1: multictr.complicated.c13<1>
-c13(?f13##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
+c13(?f13##0:wybe.int, #result##0:multictr.complicated, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_uge(###0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?f13##0:wybe.int)
 
     1:
-        foreign llvm and(###0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
         foreign llvm icmp_eq(~tmp#2##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
@@ -1452,7 +1452,7 @@ c13(?f13##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?f13##0:wybe.int)
 
         1:
-            foreign lpvm access(###0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
+            foreign lpvm access(#result##0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
             foreign llvm icmp_eq(~#tag##0:16 bit unsigned, 12:16 bit unsigned, ?tmp#3##0:wybe.bool)
             case ~tmp#3##0:wybe.bool of
             0:
@@ -1460,7 +1460,7 @@ c13(?f13##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
                 foreign llvm move(undef:wybe.int, ?f13##0:wybe.int)
 
             1:
-                foreign lpvm access(~###0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f13##0:wybe.int)
+                foreign lpvm access(~#result##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f13##0:wybe.int)
                 foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1469,26 +1469,26 @@ c13(?f13##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
 
 c14 > public {inline} (0 calls)
 0: multictr.complicated.c14<0>
-c14(f14##0:wybe.int, ?###0:multictr.complicated):
+c14(f14##0:wybe.int, ?#result##0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 13:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.complicated, ?#rec##2:multictr.complicated, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~f14##0:wybe.int)
-    foreign llvm or(~#rec##2:multictr.complicated, 7:wybe.int, ?###0:multictr.complicated)
+    foreign llvm or(~#rec##2:multictr.complicated, 7:wybe.int, ?#result##0:multictr.complicated)
 c14 > public {inline} (11 calls)
 1: multictr.complicated.c14<1>
-c14(?f14##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
+c14(?f14##0:wybe.int, #result##0:multictr.complicated, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_uge(###0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?f14##0:wybe.int)
 
     1:
-        foreign llvm and(###0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
         foreign llvm icmp_eq(~tmp#2##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
@@ -1496,7 +1496,7 @@ c14(?f14##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?f14##0:wybe.int)
 
         1:
-            foreign lpvm access(###0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
+            foreign lpvm access(#result##0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
             foreign llvm icmp_eq(~#tag##0:16 bit unsigned, 13:16 bit unsigned, ?tmp#3##0:wybe.bool)
             case ~tmp#3##0:wybe.bool of
             0:
@@ -1504,7 +1504,7 @@ c14(?f14##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
                 foreign llvm move(undef:wybe.int, ?f14##0:wybe.int)
 
             1:
-                foreign lpvm access(~###0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f14##0:wybe.int)
+                foreign lpvm access(~#result##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f14##0:wybe.int)
                 foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1513,26 +1513,26 @@ c14(?f14##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
 
 c15 > public {inline} (0 calls)
 0: multictr.complicated.c15<0>
-c15(f15##0:wybe.int, ?###0:multictr.complicated):
+c15(f15##0:wybe.int, ?#result##0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 14:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.complicated, ?#rec##2:multictr.complicated, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~f15##0:wybe.int)
-    foreign llvm or(~#rec##2:multictr.complicated, 7:wybe.int, ?###0:multictr.complicated)
+    foreign llvm or(~#rec##2:multictr.complicated, 7:wybe.int, ?#result##0:multictr.complicated)
 c15 > public {inline} (9 calls)
 1: multictr.complicated.c15<1>
-c15(?f15##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
+c15(?f15##0:wybe.int, #result##0:multictr.complicated, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_uge(###0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?f15##0:wybe.int)
 
     1:
-        foreign llvm and(###0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
         foreign llvm icmp_eq(~tmp#2##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
@@ -1540,7 +1540,7 @@ c15(?f15##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?f15##0:wybe.int)
 
         1:
-            foreign lpvm access(###0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
+            foreign lpvm access(#result##0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
             foreign llvm icmp_eq(~#tag##0:16 bit unsigned, 14:16 bit unsigned, ?tmp#3##0:wybe.bool)
             case ~tmp#3##0:wybe.bool of
             0:
@@ -1548,7 +1548,7 @@ c15(?f15##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
                 foreign llvm move(undef:wybe.int, ?f15##0:wybe.int)
 
             1:
-                foreign lpvm access(~###0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f15##0:wybe.int)
+                foreign lpvm access(~#result##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f15##0:wybe.int)
                 foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1557,26 +1557,26 @@ c15(?f15##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
 
 c16 > public {inline} (0 calls)
 0: multictr.complicated.c16<0>
-c16(f16##0:wybe.int, ?###0:multictr.complicated):
+c16(f16##0:wybe.int, ?#result##0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 15:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.complicated, ?#rec##2:multictr.complicated, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~f16##0:wybe.int)
-    foreign llvm or(~#rec##2:multictr.complicated, 7:wybe.int, ?###0:multictr.complicated)
+    foreign llvm or(~#rec##2:multictr.complicated, 7:wybe.int, ?#result##0:multictr.complicated)
 c16 > public {inline} (7 calls)
 1: multictr.complicated.c16<1>
-c16(?f16##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
+c16(?f16##0:wybe.int, #result##0:multictr.complicated, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_uge(###0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?f16##0:wybe.int)
 
     1:
-        foreign llvm and(###0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
         foreign llvm icmp_eq(~tmp#2##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
@@ -1584,7 +1584,7 @@ c16(?f16##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?f16##0:wybe.int)
 
         1:
-            foreign lpvm access(###0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
+            foreign lpvm access(#result##0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
             foreign llvm icmp_eq(~#tag##0:16 bit unsigned, 15:16 bit unsigned, ?tmp#3##0:wybe.bool)
             case ~tmp#3##0:wybe.bool of
             0:
@@ -1592,7 +1592,7 @@ c16(?f16##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
                 foreign llvm move(undef:wybe.int, ?f16##0:wybe.int)
 
             1:
-                foreign lpvm access(~###0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f16##0:wybe.int)
+                foreign lpvm access(~#result##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f16##0:wybe.int)
                 foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1601,26 +1601,26 @@ c16(?f16##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
 
 c17 > public {inline} (0 calls)
 0: multictr.complicated.c17<0>
-c17(f17##0:wybe.int, ?###0:multictr.complicated):
+c17(f17##0:wybe.int, ?#result##0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 16:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.complicated, ?#rec##2:multictr.complicated, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~f17##0:wybe.int)
-    foreign llvm or(~#rec##2:multictr.complicated, 7:wybe.int, ?###0:multictr.complicated)
+    foreign llvm or(~#rec##2:multictr.complicated, 7:wybe.int, ?#result##0:multictr.complicated)
 c17 > public {inline} (5 calls)
 1: multictr.complicated.c17<1>
-c17(?f17##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
+c17(?f17##0:wybe.int, #result##0:multictr.complicated, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_uge(###0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?f17##0:wybe.int)
 
     1:
-        foreign llvm and(###0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
         foreign llvm icmp_eq(~tmp#2##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
@@ -1628,7 +1628,7 @@ c17(?f17##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?f17##0:wybe.int)
 
         1:
-            foreign lpvm access(###0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
+            foreign lpvm access(#result##0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
             foreign llvm icmp_eq(~#tag##0:16 bit unsigned, 16:16 bit unsigned, ?tmp#3##0:wybe.bool)
             case ~tmp#3##0:wybe.bool of
             0:
@@ -1636,7 +1636,7 @@ c17(?f17##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
                 foreign llvm move(undef:wybe.int, ?f17##0:wybe.int)
 
             1:
-                foreign lpvm access(~###0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f17##0:wybe.int)
+                foreign lpvm access(~#result##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?f17##0:wybe.int)
                 foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1645,14 +1645,14 @@ c17(?f17##0:wybe.int, ###0:multictr.complicated, ?####0:wybe.bool):
 
 f01 > public {inline} (0 calls)
 0: multictr.complicated.f01<0>
-f01(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
+f01(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
@@ -1660,10 +1660,10 @@ f01(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
-            foreign lpvm access(~#rec##0:multictr.complicated, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?###0:wybe.int)
+            foreign lpvm access(~#rec##0:multictr.complicated, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
             foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1695,14 +1695,14 @@ f01(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 
 f02 > public {inline} (0 calls)
 0: multictr.complicated.f02<0>
-f02(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
+f02(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
@@ -1710,10 +1710,10 @@ f02(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
-            foreign lpvm access(~#rec##0:multictr.complicated, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?###0:wybe.int)
+            foreign lpvm access(~#rec##0:multictr.complicated, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?#result##0:wybe.int)
             foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1745,14 +1745,14 @@ f02(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 
 f03 > public {inline} (0 calls)
 0: multictr.complicated.f03<0>
-f03(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
+f03(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
@@ -1760,10 +1760,10 @@ f03(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
-            foreign lpvm access(~#rec##0:multictr.complicated, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?###0:wybe.int)
+            foreign lpvm access(~#rec##0:multictr.complicated, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#result##0:wybe.int)
             foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1795,14 +1795,14 @@ f03(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 
 f04 > public {inline} (0 calls)
 0: multictr.complicated.f04<0>
-f04(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
+f04(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
@@ -1810,10 +1810,10 @@ f04(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
-            foreign lpvm access(~#rec##0:multictr.complicated, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?###0:wybe.int)
+            foreign lpvm access(~#rec##0:multictr.complicated, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?#result##0:wybe.int)
             foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1845,14 +1845,14 @@ f04(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 
 f05 > public {inline} (0 calls)
 0: multictr.complicated.f05<0>
-f05(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
+f05(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
@@ -1860,10 +1860,10 @@ f05(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
-            foreign lpvm access(~#rec##0:multictr.complicated, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?###0:wybe.int)
+            foreign lpvm access(~#rec##0:multictr.complicated, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?#result##0:wybe.int)
             foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1895,14 +1895,14 @@ f05(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 
 f06 > public {inline} (0 calls)
 0: multictr.complicated.f06<0>
-f06(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
+f06(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
@@ -1910,10 +1910,10 @@ f06(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
-            foreign lpvm access(~#rec##0:multictr.complicated, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?###0:wybe.int)
+            foreign lpvm access(~#rec##0:multictr.complicated, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?#result##0:wybe.int)
             foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1945,14 +1945,14 @@ f06(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 
 f07 > public {inline} (0 calls)
 0: multictr.complicated.f07<0>
-f07(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
+f07(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
@@ -1960,10 +1960,10 @@ f07(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
-            foreign lpvm access(~#rec##0:multictr.complicated, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?###0:wybe.int)
+            foreign lpvm access(~#rec##0:multictr.complicated, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?#result##0:wybe.int)
             foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -1995,14 +1995,14 @@ f07(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 
 f08 > public {inline} (0 calls)
 0: multictr.complicated.f08<0>
-f08(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
+f08(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
@@ -2010,7 +2010,7 @@ f08(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
             foreign lpvm access(#rec##0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
@@ -2018,10 +2018,10 @@ f08(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
             case ~tmp#3##0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-                foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+                foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
             1:
-                foreign lpvm access(~#rec##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?###0:wybe.int)
+                foreign lpvm access(~#rec##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?#result##0:wybe.int)
                 foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -2063,14 +2063,14 @@ f08(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 
 f09 > public {inline} (0 calls)
 0: multictr.complicated.f09<0>
-f09(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
+f09(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
@@ -2078,7 +2078,7 @@ f09(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
             foreign lpvm access(#rec##0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
@@ -2086,10 +2086,10 @@ f09(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
             case ~tmp#3##0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-                foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+                foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
             1:
-                foreign lpvm access(~#rec##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?###0:wybe.int)
+                foreign lpvm access(~#rec##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?#result##0:wybe.int)
                 foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -2131,14 +2131,14 @@ f09(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 
 f10 > public {inline} (0 calls)
 0: multictr.complicated.f10<0>
-f10(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
+f10(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
@@ -2146,7 +2146,7 @@ f10(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
             foreign lpvm access(#rec##0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
@@ -2154,10 +2154,10 @@ f10(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
             case ~tmp#3##0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-                foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+                foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
             1:
-                foreign lpvm access(~#rec##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?###0:wybe.int)
+                foreign lpvm access(~#rec##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?#result##0:wybe.int)
                 foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -2199,14 +2199,14 @@ f10(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 
 f11 > public {inline} (0 calls)
 0: multictr.complicated.f11<0>
-f11(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
+f11(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
@@ -2214,7 +2214,7 @@ f11(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
             foreign lpvm access(#rec##0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
@@ -2222,10 +2222,10 @@ f11(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
             case ~tmp#3##0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-                foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+                foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
             1:
-                foreign lpvm access(~#rec##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?###0:wybe.int)
+                foreign lpvm access(~#rec##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?#result##0:wybe.int)
                 foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -2267,14 +2267,14 @@ f11(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 
 f12 > public {inline} (0 calls)
 0: multictr.complicated.f12<0>
-f12(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
+f12(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
@@ -2282,7 +2282,7 @@ f12(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
             foreign lpvm access(#rec##0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
@@ -2290,10 +2290,10 @@ f12(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
             case ~tmp#3##0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-                foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+                foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
             1:
-                foreign lpvm access(~#rec##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?###0:wybe.int)
+                foreign lpvm access(~#rec##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?#result##0:wybe.int)
                 foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -2335,14 +2335,14 @@ f12(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 
 f13 > public {inline} (0 calls)
 0: multictr.complicated.f13<0>
-f13(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
+f13(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
@@ -2350,7 +2350,7 @@ f13(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
             foreign lpvm access(#rec##0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
@@ -2358,10 +2358,10 @@ f13(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
             case ~tmp#3##0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-                foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+                foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
             1:
-                foreign lpvm access(~#rec##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?###0:wybe.int)
+                foreign lpvm access(~#rec##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?#result##0:wybe.int)
                 foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -2403,14 +2403,14 @@ f13(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 
 f14 > public {inline} (0 calls)
 0: multictr.complicated.f14<0>
-f14(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
+f14(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
@@ -2418,7 +2418,7 @@ f14(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
             foreign lpvm access(#rec##0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
@@ -2426,10 +2426,10 @@ f14(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
             case ~tmp#3##0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-                foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+                foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
             1:
-                foreign lpvm access(~#rec##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?###0:wybe.int)
+                foreign lpvm access(~#rec##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?#result##0:wybe.int)
                 foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -2471,14 +2471,14 @@ f14(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 
 f15 > public {inline} (0 calls)
 0: multictr.complicated.f15<0>
-f15(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
+f15(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
@@ -2486,7 +2486,7 @@ f15(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
             foreign lpvm access(#rec##0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
@@ -2494,10 +2494,10 @@ f15(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
             case ~tmp#3##0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-                foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+                foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
             1:
-                foreign lpvm access(~#rec##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?###0:wybe.int)
+                foreign lpvm access(~#rec##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?#result##0:wybe.int)
                 foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -2539,14 +2539,14 @@ f15(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 
 f16 > public {inline} (0 calls)
 0: multictr.complicated.f16<0>
-f16(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
+f16(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
@@ -2554,7 +2554,7 @@ f16(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
             foreign lpvm access(#rec##0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
@@ -2562,10 +2562,10 @@ f16(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
             case ~tmp#3##0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-                foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+                foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
             1:
-                foreign lpvm access(~#rec##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?###0:wybe.int)
+                foreign lpvm access(~#rec##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?#result##0:wybe.int)
                 foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -2607,14 +2607,14 @@ f16(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 
 f17 > public {inline} (0 calls)
 0: multictr.complicated.f17<0>
-f17(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
+f17(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#2##0:wybe.int)
@@ -2622,7 +2622,7 @@ f17(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
             foreign lpvm access(#rec##0:multictr.complicated, -7:wybe.int, 16:wybe.int, 7:wybe.int, ?#tag##0:16 bit unsigned)
@@ -2630,10 +2630,10 @@ f17(#rec##0:multictr.complicated, ?###0:wybe.int, ?####0:wybe.bool):
             case ~tmp#3##0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-                foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+                foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
             1:
-                foreign lpvm access(~#rec##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?###0:wybe.int)
+                foreign lpvm access(~#rec##0:multictr.complicated, 1:wybe.int, 16:wybe.int, 7:wybe.int, ?#result##0:wybe.int)
                 foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -2675,26 +2675,26 @@ f17(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 
 spring > public {inline} (0 calls)
 0: multictr.complicated.spring<0>
-spring(?###0:multictr.complicated):
+spring(?#result##0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(1:multictr.complicated, ?###0:multictr.complicated)
+    foreign llvm move(1:multictr.complicated, ?#result##0:multictr.complicated)
 
 
 summer > public {inline} (0 calls)
 0: multictr.complicated.summer<0>
-summer(?###0:multictr.complicated):
+summer(?#result##0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(2:multictr.complicated, ?###0:multictr.complicated)
+    foreign llvm move(2:multictr.complicated, ?#result##0:multictr.complicated)
 
 
 winter > public {inline} (0 calls)
 0: multictr.complicated.winter<0>
-winter(?###0:multictr.complicated):
+winter(?#result##0:multictr.complicated):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(0:multictr.complicated, ?###0:multictr.complicated)
+    foreign llvm move(0:multictr.complicated, ?#result##0:multictr.complicated)
 
 
 ~= > public {inline} (0 calls)
@@ -3272,12 +3272,12 @@ entry:
 }
 
 
-define external fastcc  {i64, i1} @"multictr.complicated.c01<1>"(i64  %"###0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.c01<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp uge i64 %"###0", 4 
+  %"1#tmp#0##0" = icmp uge i64 %"#result##0", 4 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"###0", 7 
+  %"2#tmp#2##0" = and i64 %"#result##0", 7 
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 0 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
@@ -3285,7 +3285,7 @@ if.else:
   %192 = insertvalue {i64, i1} %191, i1 0, 1 
   ret {i64, i1} %192 
 if.then1:
-  %184 = inttoptr i64 %"###0" to i64* 
+  %184 = inttoptr i64 %"#result##0" to i64* 
   %185 = getelementptr  i64, i64* %184, i64 0 
   %186 = load  i64, i64* %185 
   %187 = insertvalue {i64, i1} undef, i64 %186, 0 
@@ -3306,17 +3306,17 @@ entry:
   %196 = inttoptr i64 %195 to i64* 
   %197 = getelementptr  i64, i64* %196, i64 0 
   store  i64 %"f02##0", i64* %197 
-  %"1####0" = or i64 %195, 1 
-  ret i64 %"1####0" 
+  %"1##result##0" = or i64 %195, 1 
+  ret i64 %"1##result##0" 
 }
 
 
-define external fastcc  {i64, i1} @"multictr.complicated.c02<1>"(i64  %"###0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.c02<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp uge i64 %"###0", 4 
+  %"1#tmp#0##0" = icmp uge i64 %"#result##0", 4 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"###0", 7 
+  %"2#tmp#2##0" = and i64 %"#result##0", 7 
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 1 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
@@ -3324,7 +3324,7 @@ if.else:
   %207 = insertvalue {i64, i1} %206, i1 0, 1 
   ret {i64, i1} %207 
 if.then1:
-  %198 = add   i64 %"###0", -1 
+  %198 = add   i64 %"#result##0", -1 
   %199 = inttoptr i64 %198 to i64* 
   %200 = getelementptr  i64, i64* %199, i64 0 
   %201 = load  i64, i64* %200 
@@ -3346,17 +3346,17 @@ entry:
   %211 = inttoptr i64 %210 to i64* 
   %212 = getelementptr  i64, i64* %211, i64 0 
   store  i64 %"f03##0", i64* %212 
-  %"1####0" = or i64 %210, 2 
-  ret i64 %"1####0" 
+  %"1##result##0" = or i64 %210, 2 
+  ret i64 %"1##result##0" 
 }
 
 
-define external fastcc  {i64, i1} @"multictr.complicated.c03<1>"(i64  %"###0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.c03<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp uge i64 %"###0", 4 
+  %"1#tmp#0##0" = icmp uge i64 %"#result##0", 4 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"###0", 7 
+  %"2#tmp#2##0" = and i64 %"#result##0", 7 
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 2 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
@@ -3364,7 +3364,7 @@ if.else:
   %222 = insertvalue {i64, i1} %221, i1 0, 1 
   ret {i64, i1} %222 
 if.then1:
-  %213 = add   i64 %"###0", -2 
+  %213 = add   i64 %"#result##0", -2 
   %214 = inttoptr i64 %213 to i64* 
   %215 = getelementptr  i64, i64* %214, i64 0 
   %216 = load  i64, i64* %215 
@@ -3386,17 +3386,17 @@ entry:
   %226 = inttoptr i64 %225 to i64* 
   %227 = getelementptr  i64, i64* %226, i64 0 
   store  i64 %"f04##0", i64* %227 
-  %"1####0" = or i64 %225, 3 
-  ret i64 %"1####0" 
+  %"1##result##0" = or i64 %225, 3 
+  ret i64 %"1##result##0" 
 }
 
 
-define external fastcc  {i64, i1} @"multictr.complicated.c04<1>"(i64  %"###0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.c04<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp uge i64 %"###0", 4 
+  %"1#tmp#0##0" = icmp uge i64 %"#result##0", 4 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"###0", 7 
+  %"2#tmp#2##0" = and i64 %"#result##0", 7 
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 3 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
@@ -3404,7 +3404,7 @@ if.else:
   %237 = insertvalue {i64, i1} %236, i1 0, 1 
   ret {i64, i1} %237 
 if.then1:
-  %228 = add   i64 %"###0", -3 
+  %228 = add   i64 %"#result##0", -3 
   %229 = inttoptr i64 %228 to i64* 
   %230 = getelementptr  i64, i64* %229, i64 0 
   %231 = load  i64, i64* %230 
@@ -3426,17 +3426,17 @@ entry:
   %241 = inttoptr i64 %240 to i64* 
   %242 = getelementptr  i64, i64* %241, i64 0 
   store  i64 %"f05##0", i64* %242 
-  %"1####0" = or i64 %240, 4 
-  ret i64 %"1####0" 
+  %"1##result##0" = or i64 %240, 4 
+  ret i64 %"1##result##0" 
 }
 
 
-define external fastcc  {i64, i1} @"multictr.complicated.c05<1>"(i64  %"###0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.c05<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp uge i64 %"###0", 4 
+  %"1#tmp#0##0" = icmp uge i64 %"#result##0", 4 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"###0", 7 
+  %"2#tmp#2##0" = and i64 %"#result##0", 7 
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 4 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
@@ -3444,7 +3444,7 @@ if.else:
   %252 = insertvalue {i64, i1} %251, i1 0, 1 
   ret {i64, i1} %252 
 if.then1:
-  %243 = add   i64 %"###0", -4 
+  %243 = add   i64 %"#result##0", -4 
   %244 = inttoptr i64 %243 to i64* 
   %245 = getelementptr  i64, i64* %244, i64 0 
   %246 = load  i64, i64* %245 
@@ -3466,17 +3466,17 @@ entry:
   %256 = inttoptr i64 %255 to i64* 
   %257 = getelementptr  i64, i64* %256, i64 0 
   store  i64 %"f06##0", i64* %257 
-  %"1####0" = or i64 %255, 5 
-  ret i64 %"1####0" 
+  %"1##result##0" = or i64 %255, 5 
+  ret i64 %"1##result##0" 
 }
 
 
-define external fastcc  {i64, i1} @"multictr.complicated.c06<1>"(i64  %"###0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.c06<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp uge i64 %"###0", 4 
+  %"1#tmp#0##0" = icmp uge i64 %"#result##0", 4 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"###0", 7 
+  %"2#tmp#2##0" = and i64 %"#result##0", 7 
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 5 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
@@ -3484,7 +3484,7 @@ if.else:
   %267 = insertvalue {i64, i1} %266, i1 0, 1 
   ret {i64, i1} %267 
 if.then1:
-  %258 = add   i64 %"###0", -5 
+  %258 = add   i64 %"#result##0", -5 
   %259 = inttoptr i64 %258 to i64* 
   %260 = getelementptr  i64, i64* %259, i64 0 
   %261 = load  i64, i64* %260 
@@ -3506,17 +3506,17 @@ entry:
   %271 = inttoptr i64 %270 to i64* 
   %272 = getelementptr  i64, i64* %271, i64 0 
   store  i64 %"f07##0", i64* %272 
-  %"1####0" = or i64 %270, 6 
-  ret i64 %"1####0" 
+  %"1##result##0" = or i64 %270, 6 
+  ret i64 %"1##result##0" 
 }
 
 
-define external fastcc  {i64, i1} @"multictr.complicated.c07<1>"(i64  %"###0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.c07<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp uge i64 %"###0", 4 
+  %"1#tmp#0##0" = icmp uge i64 %"#result##0", 4 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"###0", 7 
+  %"2#tmp#2##0" = and i64 %"#result##0", 7 
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 6 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
@@ -3524,7 +3524,7 @@ if.else:
   %282 = insertvalue {i64, i1} %281, i1 0, 1 
   ret {i64, i1} %282 
 if.then1:
-  %273 = add   i64 %"###0", -6 
+  %273 = add   i64 %"#result##0", -6 
   %274 = inttoptr i64 %273 to i64* 
   %275 = getelementptr  i64, i64* %274, i64 0 
   %276 = load  i64, i64* %275 
@@ -3550,17 +3550,17 @@ entry:
   %289 = inttoptr i64 %288 to i64* 
   %290 = getelementptr  i64, i64* %289, i64 0 
   store  i64 %"f08##0", i64* %290 
-  %"1####0" = or i64 %285, 7 
-  ret i64 %"1####0" 
+  %"1##result##0" = or i64 %285, 7 
+  ret i64 %"1##result##0" 
 }
 
 
-define external fastcc  {i64, i1} @"multictr.complicated.c08<1>"(i64  %"###0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.c08<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp uge i64 %"###0", 4 
+  %"1#tmp#0##0" = icmp uge i64 %"#result##0", 4 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"###0", 7 
+  %"2#tmp#2##0" = and i64 %"#result##0", 7 
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 7 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
@@ -3568,7 +3568,7 @@ if.else:
   %306 = insertvalue {i64, i1} %305, i1 0, 1 
   ret {i64, i1} %306 
 if.then1:
-  %291 = add   i64 %"###0", -7 
+  %291 = add   i64 %"#result##0", -7 
   %292 = inttoptr i64 %291 to i16* 
   %293 = getelementptr  i16, i16* %292, i64 0 
   %294 = load  i16, i16* %293 
@@ -3579,7 +3579,7 @@ if.else1:
   %304 = insertvalue {i64, i1} %303, i1 0, 1 
   ret {i64, i1} %304 
 if.then2:
-  %295 = add   i64 %"###0", 1 
+  %295 = add   i64 %"#result##0", 1 
   %296 = inttoptr i64 %295 to i64* 
   %297 = getelementptr  i64, i64* %296, i64 0 
   %298 = load  i64, i64* %297 
@@ -3605,17 +3605,17 @@ entry:
   %313 = inttoptr i64 %312 to i64* 
   %314 = getelementptr  i64, i64* %313, i64 0 
   store  i64 %"f09##0", i64* %314 
-  %"1####0" = or i64 %309, 7 
-  ret i64 %"1####0" 
+  %"1##result##0" = or i64 %309, 7 
+  ret i64 %"1##result##0" 
 }
 
 
-define external fastcc  {i64, i1} @"multictr.complicated.c09<1>"(i64  %"###0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.c09<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp uge i64 %"###0", 4 
+  %"1#tmp#0##0" = icmp uge i64 %"#result##0", 4 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"###0", 7 
+  %"2#tmp#2##0" = and i64 %"#result##0", 7 
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 7 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
@@ -3623,7 +3623,7 @@ if.else:
   %330 = insertvalue {i64, i1} %329, i1 0, 1 
   ret {i64, i1} %330 
 if.then1:
-  %315 = add   i64 %"###0", -7 
+  %315 = add   i64 %"#result##0", -7 
   %316 = inttoptr i64 %315 to i16* 
   %317 = getelementptr  i16, i16* %316, i64 0 
   %318 = load  i16, i16* %317 
@@ -3634,7 +3634,7 @@ if.else1:
   %328 = insertvalue {i64, i1} %327, i1 0, 1 
   ret {i64, i1} %328 
 if.then2:
-  %319 = add   i64 %"###0", 1 
+  %319 = add   i64 %"#result##0", 1 
   %320 = inttoptr i64 %319 to i64* 
   %321 = getelementptr  i64, i64* %320, i64 0 
   %322 = load  i64, i64* %321 
@@ -3660,17 +3660,17 @@ entry:
   %337 = inttoptr i64 %336 to i64* 
   %338 = getelementptr  i64, i64* %337, i64 0 
   store  i64 %"f10##0", i64* %338 
-  %"1####0" = or i64 %333, 7 
-  ret i64 %"1####0" 
+  %"1##result##0" = or i64 %333, 7 
+  ret i64 %"1##result##0" 
 }
 
 
-define external fastcc  {i64, i1} @"multictr.complicated.c10<1>"(i64  %"###0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.c10<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp uge i64 %"###0", 4 
+  %"1#tmp#0##0" = icmp uge i64 %"#result##0", 4 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"###0", 7 
+  %"2#tmp#2##0" = and i64 %"#result##0", 7 
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 7 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
@@ -3678,7 +3678,7 @@ if.else:
   %354 = insertvalue {i64, i1} %353, i1 0, 1 
   ret {i64, i1} %354 
 if.then1:
-  %339 = add   i64 %"###0", -7 
+  %339 = add   i64 %"#result##0", -7 
   %340 = inttoptr i64 %339 to i16* 
   %341 = getelementptr  i16, i16* %340, i64 0 
   %342 = load  i16, i16* %341 
@@ -3689,7 +3689,7 @@ if.else1:
   %352 = insertvalue {i64, i1} %351, i1 0, 1 
   ret {i64, i1} %352 
 if.then2:
-  %343 = add   i64 %"###0", 1 
+  %343 = add   i64 %"#result##0", 1 
   %344 = inttoptr i64 %343 to i64* 
   %345 = getelementptr  i64, i64* %344, i64 0 
   %346 = load  i64, i64* %345 
@@ -3715,17 +3715,17 @@ entry:
   %361 = inttoptr i64 %360 to i64* 
   %362 = getelementptr  i64, i64* %361, i64 0 
   store  i64 %"f11##0", i64* %362 
-  %"1####0" = or i64 %357, 7 
-  ret i64 %"1####0" 
+  %"1##result##0" = or i64 %357, 7 
+  ret i64 %"1##result##0" 
 }
 
 
-define external fastcc  {i64, i1} @"multictr.complicated.c11<1>"(i64  %"###0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.c11<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp uge i64 %"###0", 4 
+  %"1#tmp#0##0" = icmp uge i64 %"#result##0", 4 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"###0", 7 
+  %"2#tmp#2##0" = and i64 %"#result##0", 7 
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 7 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
@@ -3733,7 +3733,7 @@ if.else:
   %378 = insertvalue {i64, i1} %377, i1 0, 1 
   ret {i64, i1} %378 
 if.then1:
-  %363 = add   i64 %"###0", -7 
+  %363 = add   i64 %"#result##0", -7 
   %364 = inttoptr i64 %363 to i16* 
   %365 = getelementptr  i16, i16* %364, i64 0 
   %366 = load  i16, i16* %365 
@@ -3744,7 +3744,7 @@ if.else1:
   %376 = insertvalue {i64, i1} %375, i1 0, 1 
   ret {i64, i1} %376 
 if.then2:
-  %367 = add   i64 %"###0", 1 
+  %367 = add   i64 %"#result##0", 1 
   %368 = inttoptr i64 %367 to i64* 
   %369 = getelementptr  i64, i64* %368, i64 0 
   %370 = load  i64, i64* %369 
@@ -3770,17 +3770,17 @@ entry:
   %385 = inttoptr i64 %384 to i64* 
   %386 = getelementptr  i64, i64* %385, i64 0 
   store  i64 %"f12##0", i64* %386 
-  %"1####0" = or i64 %381, 7 
-  ret i64 %"1####0" 
+  %"1##result##0" = or i64 %381, 7 
+  ret i64 %"1##result##0" 
 }
 
 
-define external fastcc  {i64, i1} @"multictr.complicated.c12<1>"(i64  %"###0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.c12<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp uge i64 %"###0", 4 
+  %"1#tmp#0##0" = icmp uge i64 %"#result##0", 4 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"###0", 7 
+  %"2#tmp#2##0" = and i64 %"#result##0", 7 
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 7 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
@@ -3788,7 +3788,7 @@ if.else:
   %402 = insertvalue {i64, i1} %401, i1 0, 1 
   ret {i64, i1} %402 
 if.then1:
-  %387 = add   i64 %"###0", -7 
+  %387 = add   i64 %"#result##0", -7 
   %388 = inttoptr i64 %387 to i16* 
   %389 = getelementptr  i16, i16* %388, i64 0 
   %390 = load  i16, i16* %389 
@@ -3799,7 +3799,7 @@ if.else1:
   %400 = insertvalue {i64, i1} %399, i1 0, 1 
   ret {i64, i1} %400 
 if.then2:
-  %391 = add   i64 %"###0", 1 
+  %391 = add   i64 %"#result##0", 1 
   %392 = inttoptr i64 %391 to i64* 
   %393 = getelementptr  i64, i64* %392, i64 0 
   %394 = load  i64, i64* %393 
@@ -3825,17 +3825,17 @@ entry:
   %409 = inttoptr i64 %408 to i64* 
   %410 = getelementptr  i64, i64* %409, i64 0 
   store  i64 %"f13##0", i64* %410 
-  %"1####0" = or i64 %405, 7 
-  ret i64 %"1####0" 
+  %"1##result##0" = or i64 %405, 7 
+  ret i64 %"1##result##0" 
 }
 
 
-define external fastcc  {i64, i1} @"multictr.complicated.c13<1>"(i64  %"###0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.c13<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp uge i64 %"###0", 4 
+  %"1#tmp#0##0" = icmp uge i64 %"#result##0", 4 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"###0", 7 
+  %"2#tmp#2##0" = and i64 %"#result##0", 7 
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 7 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
@@ -3843,7 +3843,7 @@ if.else:
   %426 = insertvalue {i64, i1} %425, i1 0, 1 
   ret {i64, i1} %426 
 if.then1:
-  %411 = add   i64 %"###0", -7 
+  %411 = add   i64 %"#result##0", -7 
   %412 = inttoptr i64 %411 to i16* 
   %413 = getelementptr  i16, i16* %412, i64 0 
   %414 = load  i16, i16* %413 
@@ -3854,7 +3854,7 @@ if.else1:
   %424 = insertvalue {i64, i1} %423, i1 0, 1 
   ret {i64, i1} %424 
 if.then2:
-  %415 = add   i64 %"###0", 1 
+  %415 = add   i64 %"#result##0", 1 
   %416 = inttoptr i64 %415 to i64* 
   %417 = getelementptr  i64, i64* %416, i64 0 
   %418 = load  i64, i64* %417 
@@ -3880,17 +3880,17 @@ entry:
   %433 = inttoptr i64 %432 to i64* 
   %434 = getelementptr  i64, i64* %433, i64 0 
   store  i64 %"f14##0", i64* %434 
-  %"1####0" = or i64 %429, 7 
-  ret i64 %"1####0" 
+  %"1##result##0" = or i64 %429, 7 
+  ret i64 %"1##result##0" 
 }
 
 
-define external fastcc  {i64, i1} @"multictr.complicated.c14<1>"(i64  %"###0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.c14<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp uge i64 %"###0", 4 
+  %"1#tmp#0##0" = icmp uge i64 %"#result##0", 4 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"###0", 7 
+  %"2#tmp#2##0" = and i64 %"#result##0", 7 
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 7 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
@@ -3898,7 +3898,7 @@ if.else:
   %450 = insertvalue {i64, i1} %449, i1 0, 1 
   ret {i64, i1} %450 
 if.then1:
-  %435 = add   i64 %"###0", -7 
+  %435 = add   i64 %"#result##0", -7 
   %436 = inttoptr i64 %435 to i16* 
   %437 = getelementptr  i16, i16* %436, i64 0 
   %438 = load  i16, i16* %437 
@@ -3909,7 +3909,7 @@ if.else1:
   %448 = insertvalue {i64, i1} %447, i1 0, 1 
   ret {i64, i1} %448 
 if.then2:
-  %439 = add   i64 %"###0", 1 
+  %439 = add   i64 %"#result##0", 1 
   %440 = inttoptr i64 %439 to i64* 
   %441 = getelementptr  i64, i64* %440, i64 0 
   %442 = load  i64, i64* %441 
@@ -3935,17 +3935,17 @@ entry:
   %457 = inttoptr i64 %456 to i64* 
   %458 = getelementptr  i64, i64* %457, i64 0 
   store  i64 %"f15##0", i64* %458 
-  %"1####0" = or i64 %453, 7 
-  ret i64 %"1####0" 
+  %"1##result##0" = or i64 %453, 7 
+  ret i64 %"1##result##0" 
 }
 
 
-define external fastcc  {i64, i1} @"multictr.complicated.c15<1>"(i64  %"###0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.c15<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp uge i64 %"###0", 4 
+  %"1#tmp#0##0" = icmp uge i64 %"#result##0", 4 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"###0", 7 
+  %"2#tmp#2##0" = and i64 %"#result##0", 7 
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 7 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
@@ -3953,7 +3953,7 @@ if.else:
   %474 = insertvalue {i64, i1} %473, i1 0, 1 
   ret {i64, i1} %474 
 if.then1:
-  %459 = add   i64 %"###0", -7 
+  %459 = add   i64 %"#result##0", -7 
   %460 = inttoptr i64 %459 to i16* 
   %461 = getelementptr  i16, i16* %460, i64 0 
   %462 = load  i16, i16* %461 
@@ -3964,7 +3964,7 @@ if.else1:
   %472 = insertvalue {i64, i1} %471, i1 0, 1 
   ret {i64, i1} %472 
 if.then2:
-  %463 = add   i64 %"###0", 1 
+  %463 = add   i64 %"#result##0", 1 
   %464 = inttoptr i64 %463 to i64* 
   %465 = getelementptr  i64, i64* %464, i64 0 
   %466 = load  i64, i64* %465 
@@ -3990,17 +3990,17 @@ entry:
   %481 = inttoptr i64 %480 to i64* 
   %482 = getelementptr  i64, i64* %481, i64 0 
   store  i64 %"f16##0", i64* %482 
-  %"1####0" = or i64 %477, 7 
-  ret i64 %"1####0" 
+  %"1##result##0" = or i64 %477, 7 
+  ret i64 %"1##result##0" 
 }
 
 
-define external fastcc  {i64, i1} @"multictr.complicated.c16<1>"(i64  %"###0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.c16<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp uge i64 %"###0", 4 
+  %"1#tmp#0##0" = icmp uge i64 %"#result##0", 4 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"###0", 7 
+  %"2#tmp#2##0" = and i64 %"#result##0", 7 
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 7 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
@@ -4008,7 +4008,7 @@ if.else:
   %498 = insertvalue {i64, i1} %497, i1 0, 1 
   ret {i64, i1} %498 
 if.then1:
-  %483 = add   i64 %"###0", -7 
+  %483 = add   i64 %"#result##0", -7 
   %484 = inttoptr i64 %483 to i16* 
   %485 = getelementptr  i16, i16* %484, i64 0 
   %486 = load  i16, i16* %485 
@@ -4019,7 +4019,7 @@ if.else1:
   %496 = insertvalue {i64, i1} %495, i1 0, 1 
   ret {i64, i1} %496 
 if.then2:
-  %487 = add   i64 %"###0", 1 
+  %487 = add   i64 %"#result##0", 1 
   %488 = inttoptr i64 %487 to i64* 
   %489 = getelementptr  i64, i64* %488, i64 0 
   %490 = load  i64, i64* %489 
@@ -4045,17 +4045,17 @@ entry:
   %505 = inttoptr i64 %504 to i64* 
   %506 = getelementptr  i64, i64* %505, i64 0 
   store  i64 %"f17##0", i64* %506 
-  %"1####0" = or i64 %501, 7 
-  ret i64 %"1####0" 
+  %"1##result##0" = or i64 %501, 7 
+  ret i64 %"1##result##0" 
 }
 
 
-define external fastcc  {i64, i1} @"multictr.complicated.c17<1>"(i64  %"###0")    {
+define external fastcc  {i64, i1} @"multictr.complicated.c17<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp uge i64 %"###0", 4 
+  %"1#tmp#0##0" = icmp uge i64 %"#result##0", 4 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"###0", 7 
+  %"2#tmp#2##0" = and i64 %"#result##0", 7 
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 7 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
@@ -4063,7 +4063,7 @@ if.else:
   %522 = insertvalue {i64, i1} %521, i1 0, 1 
   ret {i64, i1} %522 
 if.then1:
-  %507 = add   i64 %"###0", -7 
+  %507 = add   i64 %"#result##0", -7 
   %508 = inttoptr i64 %507 to i16* 
   %509 = getelementptr  i16, i16* %508, i64 0 
   %510 = load  i16, i16* %509 
@@ -4074,7 +4074,7 @@ if.else1:
   %520 = insertvalue {i64, i1} %519, i1 0, 1 
   ret {i64, i1} %520 
 if.then2:
-  %511 = add   i64 %"###0", 1 
+  %511 = add   i64 %"#result##0", 1 
   %512 = inttoptr i64 %511 to i64* 
   %513 = getelementptr  i64, i64* %512, i64 0 
   %514 = load  i64, i64* %513 
@@ -5425,24 +5425,24 @@ entry:
 
 metres > public {inline} (0 calls)
 0: multictr.length.metres<0>
-metres(value##0:wybe.float, ?###2:multictr.length):
+metres(value##0:wybe.float, ?#result##2:multictr.length):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(~value##0:multictr.length, ?###2:multictr.length)
+    foreign llvm move(~value##0:multictr.length, ?#result##2:multictr.length)
 metres > public {inline} (0 calls)
 1: multictr.length.metres<1>
-metres(?value##0:wybe.float, ###0:multictr.length):
+metres(?value##0:wybe.float, #result##0:multictr.length):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm cast(~###0:multictr.length, ?value##0:wybe.float)
+    foreign lpvm cast(~#result##0:multictr.length, ?value##0:wybe.float)
 
 
 value > public {inline} (0 calls)
 0: multictr.length.value<0>
-value(#rec##0:multictr.length, ?###0:wybe.float):
+value(#rec##0:multictr.length, ?#result##0:wybe.float):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm cast(~#rec##0:multictr.length, ?###0:wybe.float)
+    foreign lpvm cast(~#rec##0:multictr.length, ?#result##0:wybe.float)
 value > public {inline} (0 calls)
 1: multictr.length.value<1>
 value([#rec##0:multictr.length], ?#rec##2:multictr.length, #field##0:wybe.float):
@@ -5487,9 +5487,9 @@ entry:
 }
 
 
-define external fastcc  double @"multictr.length.metres<1>"(i64  %"###0")    {
+define external fastcc  double @"multictr.length.metres<1>"(i64  %"#result##0")    {
 entry:
-  %2 = bitcast i64 %"###0" to double 
+  %2 = bitcast i64 %"#result##0" to double 
   ret double %2 
 }
 
@@ -5557,49 +5557,49 @@ entry:
 
 just > public {inline} (0 calls)
 0: multictr.maybe_int.just<0>
-just(value##0:wybe.int, ?###0:multictr.maybe_int):
+just(value##0:wybe.int, ?#result##0:multictr.maybe_int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.maybe_int)
-    foreign lpvm mutate(~#rec##0:multictr.maybe_int, ?###0:multictr.maybe_int, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~value##0:wybe.int)
+    foreign lpvm mutate(~#rec##0:multictr.maybe_int, ?#result##0:multictr.maybe_int, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~value##0:wybe.int)
 just > public {inline} (8 calls)
 1: multictr.maybe_int.just<1>
-just(?value##0:wybe.int, ###0:multictr.maybe_int, ?####0:wybe.bool):
+just(?value##0:wybe.int, #result##0:multictr.maybe_int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne(###0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?value##0:wybe.int)
 
     1:
-        foreign lpvm access(~###0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?value##0:wybe.int)
+        foreign lpvm access(~#result##0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?value##0:wybe.int)
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
 
 nothing > public {inline} (0 calls)
 0: multictr.maybe_int.nothing<0>
-nothing(?###0:multictr.maybe_int):
+nothing(?#result##0:multictr.maybe_int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(0:multictr.maybe_int, ?###0:multictr.maybe_int)
+    foreign llvm move(0:multictr.maybe_int, ?#result##0:multictr.maybe_int)
 
 
 value > public {inline} (0 calls)
 0: multictr.maybe_int.value<0>
-value(#rec##0:multictr.maybe_int, ?###0:wybe.int, ?####0:wybe.bool):
+value(#rec##0:multictr.maybe_int, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?###0:wybe.int)
+        foreign lpvm access(~#rec##0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 value > public {inline} (0 calls)
@@ -5677,12 +5677,12 @@ entry:
 }
 
 
-define external fastcc  {i64, i1} @"multictr.maybe_int.just<1>"(i64  %"###0")    {
+define external fastcc  {i64, i1} @"multictr.maybe_int.just<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"###0", 0 
+  %"1#tmp#0##0" = icmp ne i64 %"#result##0", 0 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %12 = inttoptr i64 %"###0" to i64* 
+  %12 = inttoptr i64 %"#result##0" to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
   %15 = insertvalue {i64, i1} undef, i64 %14, 0 
@@ -5815,18 +5815,18 @@ entry:
 
 float > public {inline} (0 calls)
 0: multictr.number.float<0>
-float(float_value##0:wybe.float, ?###0:multictr.number):
+float(float_value##0:wybe.float, ?#result##0:multictr.number):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.number)
     foreign lpvm mutate(~#rec##0:multictr.number, ?#rec##1:multictr.number, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~float_value##0:wybe.float)
-    foreign llvm or(~#rec##1:multictr.number, 1:wybe.int, ?###0:multictr.number)
+    foreign llvm or(~#rec##1:multictr.number, 1:wybe.int, ?#result##0:multictr.number)
 float > public {inline} (5 calls)
 1: multictr.number.float<1>
-float(?float_value##0:wybe.float, ###0:multictr.number, ?####0:wybe.bool):
+float(?float_value##0:wybe.float, #result##0:multictr.number, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm and(###0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
+    foreign llvm and(#result##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
     foreign llvm icmp_eq(~tmp#1##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -5834,14 +5834,14 @@ float(?float_value##0:wybe.float, ###0:multictr.number, ?####0:wybe.bool):
         foreign llvm move(undef:wybe.float, ?float_value##0:wybe.float)
 
     1:
-        foreign lpvm access(~###0:multictr.number, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?float_value##0:wybe.float)
+        foreign lpvm access(~#result##0:multictr.number, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?float_value##0:wybe.float)
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
 
 float_value > public {inline} (0 calls)
 0: multictr.number.float_value<0>
-float_value(#rec##0:multictr.number, ?###0:wybe.float, ?####0:wybe.bool):
+float_value(#rec##0:multictr.number, ?#result##0:wybe.float, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
@@ -5849,10 +5849,10 @@ float_value(#rec##0:multictr.number, ?###0:wybe.float, ?####0:wybe.bool):
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.float, ?###0:wybe.float)
+        foreign llvm move(undef:wybe.float, ?#result##0:wybe.float)
 
     1:
-        foreign lpvm access(~#rec##0:multictr.number, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?###0:wybe.float)
+        foreign lpvm access(~#rec##0:multictr.number, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?#result##0:wybe.float)
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 float_value > public {inline} (0 calls)
@@ -5875,17 +5875,17 @@ float_value(#rec##0:multictr.number, ?#rec##1:multictr.number, #field##0:wybe.fl
 
 int > public {inline} (0 calls)
 0: multictr.number.int<0>
-int(int_value##0:wybe.int, ?###0:multictr.number):
+int(int_value##0:wybe.int, ?#result##0:multictr.number):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.number)
-    foreign lpvm mutate(~#rec##0:multictr.number, ?###0:multictr.number, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~int_value##0:wybe.int)
+    foreign lpvm mutate(~#rec##0:multictr.number, ?#result##0:multictr.number, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~int_value##0:wybe.int)
 int > public {inline} (10 calls)
 1: multictr.number.int<1>
-int(?int_value##0:wybe.int, ###0:multictr.number, ?####0:wybe.bool):
+int(?int_value##0:wybe.int, #result##0:multictr.number, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm and(###0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
+    foreign llvm and(#result##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
     foreign llvm icmp_eq(~tmp#1##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -5893,14 +5893,14 @@ int(?int_value##0:wybe.int, ###0:multictr.number, ?####0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?int_value##0:wybe.int)
 
     1:
-        foreign lpvm access(~###0:multictr.number, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?int_value##0:wybe.int)
+        foreign lpvm access(~#result##0:multictr.number, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?int_value##0:wybe.int)
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
 
 int_value > public {inline} (0 calls)
 0: multictr.number.int_value<0>
-int_value(#rec##0:multictr.number, ?###0:wybe.int, ?####0:wybe.bool):
+int_value(#rec##0:multictr.number, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
@@ -5908,10 +5908,10 @@ int_value(#rec##0:multictr.number, ?###0:wybe.int, ?####0:wybe.bool):
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:multictr.number, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?###0:wybe.int)
+        foreign lpvm access(~#rec##0:multictr.number, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 int_value > public {inline} (0 calls)
@@ -6007,18 +6007,18 @@ entry:
   %18 = inttoptr i64 %17 to double* 
   %19 = getelementptr  double, double* %18, i64 0 
   store  double %"float_value##0", double* %19 
-  %"1####0" = or i64 %17, 1 
-  ret i64 %"1####0" 
+  %"1##result##0" = or i64 %17, 1 
+  ret i64 %"1##result##0" 
 }
 
 
-define external fastcc  {double, i1} @"multictr.number.float<1>"(i64  %"###0")    {
+define external fastcc  {double, i1} @"multictr.number.float<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#1##0" = and i64 %"###0", 1 
+  %"1#tmp#1##0" = and i64 %"#result##0", 1 
   %"1#tmp#0##0" = icmp eq i64 %"1#tmp#1##0", 1 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %20 = add   i64 %"###0", -1 
+  %20 = add   i64 %"#result##0", -1 
   %21 = inttoptr i64 %20 to double* 
   %22 = getelementptr  double, double* %21, i64 0 
   %23 = load  double, double* %22 
@@ -6093,13 +6093,13 @@ entry:
 }
 
 
-define external fastcc  {i64, i1} @"multictr.number.int<1>"(i64  %"###0")    {
+define external fastcc  {i64, i1} @"multictr.number.int<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#1##0" = and i64 %"###0", 1 
+  %"1#tmp#1##0" = and i64 %"#result##0", 1 
   %"1#tmp#0##0" = icmp eq i64 %"1#tmp#1##0", 0 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %56 = inttoptr i64 %"###0" to i64* 
+  %56 = inttoptr i64 %"#result##0" to i64* 
   %57 = getelementptr  i64, i64* %56, i64 0 
   %58 = load  i64, i64* %57 
   %59 = insertvalue {i64, i1} undef, i64 %58, 0 
@@ -6189,10 +6189,10 @@ entry:
 
 content > public {inline} (0 calls)
 0: multictr.perhaps.content<0>
-content(#rec##0:multictr.perhaps, ?###0:multictr.maybe_int):
+content(#rec##0:multictr.perhaps, ?#result##0:multictr.maybe_int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm cast(~#rec##0:multictr.perhaps, ?###0:multictr.maybe_int)
+    foreign lpvm cast(~#rec##0:multictr.perhaps, ?#result##0:multictr.maybe_int)
 content > public {inline} (0 calls)
 1: multictr.perhaps.content<1>
 content([#rec##0:multictr.perhaps], ?#rec##2:multictr.perhaps, #field##0:multictr.maybe_int):
@@ -6203,16 +6203,16 @@ content([#rec##0:multictr.perhaps], ?#rec##2:multictr.perhaps, #field##0:multict
 
 perhaps > public {inline} (0 calls)
 0: multictr.perhaps.perhaps<0>
-perhaps(content##0:multictr.maybe_int, ?###2:multictr.perhaps):
+perhaps(content##0:multictr.maybe_int, ?#result##2:multictr.perhaps):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(~content##0:multictr.perhaps, ?###2:multictr.perhaps)
+    foreign llvm move(~content##0:multictr.perhaps, ?#result##2:multictr.perhaps)
 perhaps > public {inline} (0 calls)
 1: multictr.perhaps.perhaps<1>
-perhaps(?content##0:multictr.maybe_int, ###0:multictr.perhaps):
+perhaps(?content##0:multictr.maybe_int, #result##0:multictr.perhaps):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm cast(~###0:multictr.perhaps, ?content##0:multictr.maybe_int)
+    foreign lpvm cast(~#result##0:multictr.perhaps, ?content##0:multictr.maybe_int)
 
 
 ~= > public {inline} (0 calls)
@@ -6262,9 +6262,9 @@ entry:
 }
 
 
-define external fastcc  i64 @"multictr.perhaps.perhaps<1>"(i64  %"###0")    {
+define external fastcc  i64 @"multictr.perhaps.perhaps<1>"(i64  %"#result##0")    {
 entry:
-  ret i64 %"###0" 
+  ret i64 %"#result##0" 
 }
 
 
@@ -6309,106 +6309,106 @@ entry:
 
 ace > public {inline} (0 calls)
 0: multictr.rank.ace<0>
-ace(?###0:multictr.rank):
+ace(?#result##0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(12:multictr.rank, ?###0:multictr.rank)
+    foreign llvm move(12:multictr.rank, ?#result##0:multictr.rank)
 
 
 jack > public {inline} (0 calls)
 0: multictr.rank.jack<0>
-jack(?###0:multictr.rank):
+jack(?#result##0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(9:multictr.rank, ?###0:multictr.rank)
+    foreign llvm move(9:multictr.rank, ?#result##0:multictr.rank)
 
 
 king > public {inline} (0 calls)
 0: multictr.rank.king<0>
-king(?###0:multictr.rank):
+king(?#result##0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(11:multictr.rank, ?###0:multictr.rank)
+    foreign llvm move(11:multictr.rank, ?#result##0:multictr.rank)
 
 
 queen > public {inline} (0 calls)
 0: multictr.rank.queen<0>
-queen(?###0:multictr.rank):
+queen(?#result##0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(10:multictr.rank, ?###0:multictr.rank)
+    foreign llvm move(10:multictr.rank, ?#result##0:multictr.rank)
 
 
 r10 > public {inline} (0 calls)
 0: multictr.rank.r10<0>
-r10(?###0:multictr.rank):
+r10(?#result##0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(8:multictr.rank, ?###0:multictr.rank)
+    foreign llvm move(8:multictr.rank, ?#result##0:multictr.rank)
 
 
 r2 > public {inline} (0 calls)
 0: multictr.rank.r2<0>
-r2(?###0:multictr.rank):
+r2(?#result##0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(0:multictr.rank, ?###0:multictr.rank)
+    foreign llvm move(0:multictr.rank, ?#result##0:multictr.rank)
 
 
 r3 > public {inline} (0 calls)
 0: multictr.rank.r3<0>
-r3(?###0:multictr.rank):
+r3(?#result##0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(1:multictr.rank, ?###0:multictr.rank)
+    foreign llvm move(1:multictr.rank, ?#result##0:multictr.rank)
 
 
 r4 > public {inline} (0 calls)
 0: multictr.rank.r4<0>
-r4(?###0:multictr.rank):
+r4(?#result##0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(2:multictr.rank, ?###0:multictr.rank)
+    foreign llvm move(2:multictr.rank, ?#result##0:multictr.rank)
 
 
 r5 > public {inline} (0 calls)
 0: multictr.rank.r5<0>
-r5(?###0:multictr.rank):
+r5(?#result##0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(3:multictr.rank, ?###0:multictr.rank)
+    foreign llvm move(3:multictr.rank, ?#result##0:multictr.rank)
 
 
 r6 > public {inline} (0 calls)
 0: multictr.rank.r6<0>
-r6(?###0:multictr.rank):
+r6(?#result##0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(4:multictr.rank, ?###0:multictr.rank)
+    foreign llvm move(4:multictr.rank, ?#result##0:multictr.rank)
 
 
 r7 > public {inline} (0 calls)
 0: multictr.rank.r7<0>
-r7(?###0:multictr.rank):
+r7(?#result##0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(5:multictr.rank, ?###0:multictr.rank)
+    foreign llvm move(5:multictr.rank, ?#result##0:multictr.rank)
 
 
 r8 > public {inline} (0 calls)
 0: multictr.rank.r8<0>
-r8(?###0:multictr.rank):
+r8(?#result##0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(6:multictr.rank, ?###0:multictr.rank)
+    foreign llvm move(6:multictr.rank, ?#result##0:multictr.rank)
 
 
 r9 > public {inline} (0 calls)
 0: multictr.rank.r9<0>
-r9(?###0:multictr.rank):
+r9(?#result##0:multictr.rank):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(7:multictr.rank, ?###0:multictr.rank)
+    foreign llvm move(7:multictr.rank, ?#result##0:multictr.rank)
 
 
 ~= > public {inline} (0 calls)
@@ -6622,24 +6622,24 @@ entry:
 
 one > public {inline} (0 calls)
 0: multictr.simple.one<0>
-one(one_field##0:wybe.int, ?###0:multictr.simple):
+one(one_field##0:wybe.int, ?#result##0:multictr.simple):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.simple)
-    foreign lpvm mutate(~#rec##0:multictr.simple, ?###0:multictr.simple, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~one_field##0:wybe.int)
+    foreign lpvm mutate(~#rec##0:multictr.simple, ?#result##0:multictr.simple, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~one_field##0:wybe.int)
 one > public {inline} (11 calls)
 1: multictr.simple.one<1>
-one(?one_field##0:wybe.int, ###0:multictr.simple, ?####0:wybe.bool):
+one(?one_field##0:wybe.int, #result##0:multictr.simple, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne(###0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?one_field##0:wybe.int)
 
     1:
-        foreign llvm and(###0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm and(#result##0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int)
         foreign llvm icmp_eq(~tmp#2##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
@@ -6647,7 +6647,7 @@ one(?one_field##0:wybe.int, ###0:multictr.simple, ?####0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?one_field##0:wybe.int)
 
         1:
-            foreign lpvm access(~###0:multictr.simple, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?one_field##0:wybe.int)
+            foreign lpvm access(~#result##0:multictr.simple, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?one_field##0:wybe.int)
             foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -6655,14 +6655,14 @@ one(?one_field##0:wybe.int, ###0:multictr.simple, ?####0:wybe.bool):
 
 one_field > public {inline} (0 calls)
 0: multictr.simple.one_field<0>
-one_field(#rec##0:multictr.simple, ?###0:wybe.int, ?####0:wybe.bool):
+one_field(#rec##0:multictr.simple, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int)
@@ -6670,10 +6670,10 @@ one_field(#rec##0:multictr.simple, ?###0:wybe.int, ?####0:wybe.bool):
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
-            foreign lpvm access(~#rec##0:multictr.simple, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?###0:wybe.int)
+            foreign lpvm access(~#rec##0:multictr.simple, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
             foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -6705,19 +6705,19 @@ one_field(#rec##0:multictr.simple, ?#rec##1:multictr.simple, #field##0:wybe.int,
 
 two > public {inline} (0 calls)
 0: multictr.simple.two<0>
-two(two_field1##0:wybe.int, two_field2##0:wybe.int, ?###0:multictr.simple):
+two(two_field1##0:wybe.int, two_field2##0:wybe.int, ?#result##0:multictr.simple):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.simple)
     foreign lpvm mutate(~#rec##0:multictr.simple, ?#rec##1:multictr.simple, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~two_field1##0:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.simple, ?#rec##2:multictr.simple, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~two_field2##0:wybe.int)
-    foreign llvm or(~#rec##2:multictr.simple, 1:wybe.int, ?###0:multictr.simple)
+    foreign llvm or(~#rec##2:multictr.simple, 1:wybe.int, ?#result##0:multictr.simple)
 two > public {inline} (7 calls)
 1: multictr.simple.two<1>
-two(?two_field1##0:wybe.int, ?two_field2##0:wybe.int, ###0:multictr.simple, ?####0:wybe.bool):
+two(?two_field1##0:wybe.int, ?two_field2##0:wybe.int, #result##0:multictr.simple, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne(###0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
@@ -6725,7 +6725,7 @@ two(?two_field1##0:wybe.int, ?two_field2##0:wybe.int, ###0:multictr.simple, ?###
         foreign llvm move(undef:wybe.int, ?two_field2##0:wybe.int)
 
     1:
-        foreign llvm and(###0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int)
+        foreign llvm and(#result##0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int)
         foreign llvm icmp_eq(~tmp#2##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.bool)
         case ~tmp#1##0:wybe.bool of
         0:
@@ -6734,8 +6734,8 @@ two(?two_field1##0:wybe.int, ?two_field2##0:wybe.int, ###0:multictr.simple, ?###
             foreign llvm move(undef:wybe.int, ?two_field2##0:wybe.int)
 
         1:
-            foreign lpvm access(###0:multictr.simple, -1:wybe.int, 16:wybe.int, 1:wybe.int, ?two_field1##0:wybe.int)
-            foreign lpvm access(~###0:multictr.simple, 7:wybe.int, 16:wybe.int, 1:wybe.int, ?two_field2##0:wybe.int)
+            foreign lpvm access(#result##0:multictr.simple, -1:wybe.int, 16:wybe.int, 1:wybe.int, ?two_field1##0:wybe.int)
+            foreign lpvm access(~#result##0:multictr.simple, 7:wybe.int, 16:wybe.int, 1:wybe.int, ?two_field2##0:wybe.int)
             foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -6743,14 +6743,14 @@ two(?two_field1##0:wybe.int, ?two_field2##0:wybe.int, ###0:multictr.simple, ?###
 
 two_field1 > public {inline} (0 calls)
 0: multictr.simple.two_field1<0>
-two_field1(#rec##0:multictr.simple, ?###0:wybe.int, ?####0:wybe.bool):
+two_field1(#rec##0:multictr.simple, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int)
@@ -6758,10 +6758,10 @@ two_field1(#rec##0:multictr.simple, ?###0:wybe.int, ?####0:wybe.bool):
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
-            foreign lpvm access(~#rec##0:multictr.simple, -1:wybe.int, 16:wybe.int, 1:wybe.int, ?###0:wybe.int)
+            foreign lpvm access(~#rec##0:multictr.simple, -1:wybe.int, 16:wybe.int, 1:wybe.int, ?#result##0:wybe.int)
             foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -6793,14 +6793,14 @@ two_field1(#rec##0:multictr.simple, ?#rec##1:multictr.simple, #field##0:wybe.int
 
 two_field2 > public {inline} (0 calls)
 0: multictr.simple.two_field2<0>
-two_field2(#rec##0:multictr.simple, ?###0:wybe.int, ?####0:wybe.bool):
+two_field2(#rec##0:multictr.simple, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int)
@@ -6808,10 +6808,10 @@ two_field2(#rec##0:multictr.simple, ?###0:wybe.int, ?####0:wybe.bool):
         case ~tmp#1##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-            foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+            foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
-            foreign lpvm access(~#rec##0:multictr.simple, 7:wybe.int, 16:wybe.int, 1:wybe.int, ?###0:wybe.int)
+            foreign lpvm access(~#rec##0:multictr.simple, 7:wybe.int, 16:wybe.int, 1:wybe.int, ?#result##0:wybe.int)
             foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
@@ -6843,10 +6843,10 @@ two_field2(#rec##0:multictr.simple, ?#rec##1:multictr.simple, #field##0:wybe.int
 
 zero > public {inline} (0 calls)
 0: multictr.simple.zero<0>
-zero(?###0:multictr.simple):
+zero(?#result##0:multictr.simple):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(0:multictr.simple, ?###0:multictr.simple)
+    foreign llvm move(0:multictr.simple, ?#result##0:multictr.simple)
 
 
 ~= > public {inline} (0 calls)
@@ -6957,12 +6957,12 @@ entry:
 }
 
 
-define external fastcc  {i64, i1} @"multictr.simple.one<1>"(i64  %"###0")    {
+define external fastcc  {i64, i1} @"multictr.simple.one<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"###0", 0 
+  %"1#tmp#0##0" = icmp ne i64 %"#result##0", 0 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"###0", 1 
+  %"2#tmp#2##0" = and i64 %"#result##0", 1 
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 0 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
@@ -6970,7 +6970,7 @@ if.else:
   %36 = insertvalue {i64, i1} %35, i1 0, 1 
   ret {i64, i1} %36 
 if.then1:
-  %28 = inttoptr i64 %"###0" to i64* 
+  %28 = inttoptr i64 %"#result##0" to i64* 
   %29 = getelementptr  i64, i64* %28, i64 0 
   %30 = load  i64, i64* %29 
   %31 = insertvalue {i64, i1} undef, i64 %30, 0 
@@ -7054,17 +7054,17 @@ entry:
   %66 = inttoptr i64 %65 to i64* 
   %67 = getelementptr  i64, i64* %66, i64 0 
   store  i64 %"two_field2##0", i64* %67 
-  %"1####0" = or i64 %62, 1 
-  ret i64 %"1####0" 
+  %"1##result##0" = or i64 %62, 1 
+  ret i64 %"1##result##0" 
 }
 
 
-define external fastcc  {i64, i64, i1} @"multictr.simple.two<1>"(i64  %"###0")    {
+define external fastcc  {i64, i64, i1} @"multictr.simple.two<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"###0", 0 
+  %"1#tmp#0##0" = icmp ne i64 %"#result##0", 0 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"###0", 1 
+  %"2#tmp#2##0" = and i64 %"#result##0", 1 
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 1 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
@@ -7073,11 +7073,11 @@ if.else:
   %84 = insertvalue {i64, i64, i1} %83, i1 0, 2 
   ret {i64, i64, i1} %84 
 if.then1:
-  %68 = add   i64 %"###0", -1 
+  %68 = add   i64 %"#result##0", -1 
   %69 = inttoptr i64 %68 to i64* 
   %70 = getelementptr  i64, i64* %69, i64 0 
   %71 = load  i64, i64* %70 
-  %72 = add   i64 %"###0", 7 
+  %72 = add   i64 %"#result##0", 7 
   %73 = inttoptr i64 %72 to i64* 
   %74 = getelementptr  i64, i64* %73, i64 0 
   %75 = load  i64, i64* %74 
@@ -7257,34 +7257,34 @@ entry:
 
 clubs > public {inline} (0 calls)
 0: multictr.suit.clubs<0>
-clubs(?###0:multictr.suit):
+clubs(?#result##0:multictr.suit):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(0:multictr.suit, ?###0:multictr.suit)
+    foreign llvm move(0:multictr.suit, ?#result##0:multictr.suit)
 
 
 diamonds > public {inline} (0 calls)
 0: multictr.suit.diamonds<0>
-diamonds(?###0:multictr.suit):
+diamonds(?#result##0:multictr.suit):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(1:multictr.suit, ?###0:multictr.suit)
+    foreign llvm move(1:multictr.suit, ?#result##0:multictr.suit)
 
 
 hearts > public {inline} (0 calls)
 0: multictr.suit.hearts<0>
-hearts(?###0:multictr.suit):
+hearts(?#result##0:multictr.suit):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(2:multictr.suit, ?###0:multictr.suit)
+    foreign llvm move(2:multictr.suit, ?#result##0:multictr.suit)
 
 
 spades > public {inline} (0 calls)
 0: multictr.suit.spades<0>
-spades(?###0:multictr.suit):
+spades(?#result##0:multictr.suit):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(3:multictr.suit, ?###0:multictr.suit)
+    foreign llvm move(3:multictr.suit, ?#result##0:multictr.suit)
 
 
 ~= > public {inline} (0 calls)
@@ -7369,10 +7369,10 @@ entry:
 
 unit > public {inline} (0 calls)
 0: multictr.unit.unit<0>
-unit(?###0:multictr.unit):
+unit(?#result##0:multictr.unit):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(0:multictr.unit, ?###0:multictr.unit)
+    foreign llvm move(0:multictr.unit, ?#result##0:multictr.unit)
 
 
 ~= > public {inline} (0 calls)

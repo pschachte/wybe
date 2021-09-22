@@ -82,14 +82,14 @@ AFTER EVERYTHING:
 
 concat > public (2 calls)
 0: thistype.concat<0>[410bae77d3]
-concat(x##0:thistype, y##0:thistype, ?###0:thistype):
- AliasPairs: [(###0,y##0)]
+concat(x##0:thistype, y##0:thistype, ?#result##0:thistype):
+ AliasPairs: [(#result##0,y##0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(1,(thistype.concat<0>,fromList [NonAliasedParamCond 0 [0]]))]
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
     case ~tmp#5##0:wybe.bool of
     0:
-        foreign llvm move(~y##0:thistype, ?###0:thistype) @thistype:nn:nn
+        foreign llvm move(~y##0:thistype, ?#result##0:thistype) @thistype:nn:nn
 
     1:
         foreign lpvm access(x##0:thistype, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int)
@@ -97,35 +97,35 @@ concat(x##0:thistype, y##0:thistype, ?###0:thistype):
         thistype.concat<0>(~t##0:thistype, ~y##0:thistype, ?tmp#2##0:thistype) #1 @thistype:nn:nn
         foreign lpvm alloc(16:wybe.int, ?tmp#8##0:thistype)
         foreign lpvm mutate(~tmp#8##0:thistype, ?tmp#9##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h##0:wybe.int)
-        foreign lpvm mutate(~tmp#9##0:thistype, ?###0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:thistype)
+        foreign lpvm mutate(~tmp#9##0:thistype, ?#result##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:thistype)
 
  [410bae77d3] [NonAliasedParam 0] :
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
     case ~tmp#5##0:wybe.bool of
     0:
-        foreign llvm move(~y##0:thistype, ?###0:thistype) @thistype:nn:nn
+        foreign llvm move(~y##0:thistype, ?#result##0:thistype) @thistype:nn:nn
 
     1:
         foreign lpvm access(x##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:thistype)
         thistype.concat<0>[410bae77d3](~t##0:thistype, ~y##0:thistype, ?tmp#2##0:thistype) #1 @thistype:nn:nn
-        foreign lpvm mutate(~x##0:thistype, ?###0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:thistype)
+        foreign lpvm mutate(~x##0:thistype, ?#result##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:thistype)
 
 
 
 cons > public {inline} (6 calls)
 0: thistype.cons<0>
-cons(head##0:wybe.int, tail##0:thistype, ?###0:thistype):
+cons(head##0:wybe.int, tail##0:thistype, ?#result##0:thistype):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:thistype)
     foreign lpvm mutate(~#rec##0:thistype, ?#rec##1:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head##0:wybe.int)
-    foreign lpvm mutate(~#rec##1:thistype, ?###0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail##0:thistype)
+    foreign lpvm mutate(~#rec##1:thistype, ?#result##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail##0:thistype)
 cons > public {inline} (18 calls)
 1: thistype.cons<1>
-cons(?head##0:wybe.int, ?tail##0:thistype, ###0:thistype, ?####0:wybe.bool):
+cons(?head##0:wybe.int, ?tail##0:thistype, #result##0:thistype, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne(###0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
@@ -133,25 +133,25 @@ cons(?head##0:wybe.int, ?tail##0:thistype, ###0:thistype, ?####0:wybe.bool):
         foreign llvm move(undef:thistype, ?tail##0:thistype)
 
     1:
-        foreign lpvm access(###0:thistype, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?head##0:wybe.int)
-        foreign lpvm access(~###0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tail##0:thistype)
+        foreign lpvm access(#result##0:thistype, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?head##0:wybe.int)
+        foreign lpvm access(~#result##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tail##0:thistype)
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
 
 head > public {inline} (0 calls)
 0: thistype.head<0>
-head(#rec##0:thistype, ?###0:wybe.int, ?####0:wybe.bool):
+head(#rec##0:thistype, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:thistype, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:wybe.int)
+        foreign lpvm access(~#rec##0:thistype, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 head > public {inline} (0 calls)
@@ -173,42 +173,42 @@ head(#rec##0:thistype, ?#rec##1:thistype, #field##0:wybe.int, ?####0:wybe.bool):
 
 length > public (2 calls)
 0: thistype.length<0>
-length(x##0:thistype, ?###0:wybe.int):
+length(x##0:thistype, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
     case ~tmp#5##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.int, ?###0:wybe.int) @thistype:nn:nn
+        foreign llvm move(0:wybe.int, ?#result##0:wybe.int) @thistype:nn:nn
 
     1:
         foreign lpvm access(~x##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:thistype)
         thistype.length<0>(~t##0:thistype, ?tmp#2##0:wybe.int) #1 @thistype:nn:nn
-        foreign llvm add(~tmp#2##0:wybe.int, 1:wybe.int, ?###0:wybe.int) @int:nn:nn
+        foreign llvm add(~tmp#2##0:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @int:nn:nn
 
 
 
 nil > public {inline} (2 calls)
 0: thistype.nil<0>
-nil(?###0:thistype):
+nil(?#result##0:thistype):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(0:thistype, ?###0:thistype)
+    foreign llvm move(0:thistype, ?#result##0:thistype)
 
 
 tail > public {inline} (0 calls)
 0: thistype.tail<0>
-tail(#rec##0:thistype, ?###0:thistype, ?####0:wybe.bool):
+tail(#rec##0:thistype, ?#result##0:thistype, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:thistype, ?###0:thistype)
+        foreign llvm move(undef:thistype, ?#result##0:thistype)
 
     1:
-        foreign lpvm access(~#rec##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:thistype)
+        foreign lpvm access(~#rec##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:thistype)
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 tail > public {inline} (0 calls)
@@ -418,15 +418,15 @@ entry:
 }
 
 
-define external fastcc  {i64, i64, i1} @"thistype.cons<1>"(i64  %"###0")    {
+define external fastcc  {i64, i64, i1} @"thistype.cons<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"###0", 0 
+  %"1#tmp#0##0" = icmp ne i64 %"#result##0", 0 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %85 = inttoptr i64 %"###0" to i64* 
+  %85 = inttoptr i64 %"#result##0" to i64* 
   %86 = getelementptr  i64, i64* %85, i64 0 
   %87 = load  i64, i64* %86 
-  %88 = add   i64 %"###0", 8 
+  %88 = add   i64 %"#result##0", 8 
   %89 = inttoptr i64 %88 to i64* 
   %90 = getelementptr  i64, i64* %89, i64 0 
   %91 = load  i64, i64* %90 
@@ -495,8 +495,8 @@ if.then:
   %119 = getelementptr  i64, i64* %118, i64 0 
   %120 = load  i64, i64* %119 
   %"2#tmp#2##0" = tail call fastcc  i64  @"thistype.length<0>"(i64  %120)  
-  %"2####0" = add   i64 %"2#tmp#2##0", 1 
-  ret i64 %"2####0" 
+  %"2##result##0" = add   i64 %"2#tmp#2##0", 1 
+  ret i64 %"2##result##0" 
 if.else:
   ret i64 0 
 }

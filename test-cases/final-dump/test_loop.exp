@@ -305,10 +305,10 @@ if.else1:
 
 high > public {inline} (0 calls)
 0: test_loop.int_seq.high<0>
-high(#rec##0:test_loop.int_seq, ?###0:wybe.int):
+high(#rec##0:test_loop.int_seq, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 high > public {inline} (0 calls)
 1: test_loop.int_seq.high<1>
 high(#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, #field##0:wybe.int):
@@ -319,29 +319,29 @@ high(#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, #field##0:wybe.int):
 
 int_seq > public {inline} (0 calls)
 0: test_loop.int_seq.int_seq<0>
-int_seq(low##0:wybe.int, step##0:wybe.int, high##0:wybe.int, ?###0:test_loop.int_seq):
+int_seq(low##0:wybe.int, step##0:wybe.int, high##0:wybe.int, ?#result##0:test_loop.int_seq):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:test_loop.int_seq)
     foreign lpvm mutate(~#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~low##0:wybe.int)
     foreign lpvm mutate(~#rec##1:test_loop.int_seq, ?#rec##2:test_loop.int_seq, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~step##0:wybe.int)
-    foreign lpvm mutate(~#rec##2:test_loop.int_seq, ?###0:test_loop.int_seq, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~high##0:wybe.int)
+    foreign lpvm mutate(~#rec##2:test_loop.int_seq, ?#result##0:test_loop.int_seq, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~high##0:wybe.int)
 int_seq > public {inline} (13 calls)
 1: test_loop.int_seq.int_seq<1>
-int_seq(?low##0:wybe.int, ?step##0:wybe.int, ?high##0:wybe.int, ###0:test_loop.int_seq):
+int_seq(?low##0:wybe.int, ?step##0:wybe.int, ?high##0:wybe.int, #result##0:test_loop.int_seq):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(###0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?low##0:wybe.int)
-    foreign lpvm access(###0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?step##0:wybe.int)
-    foreign lpvm access(~###0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?high##0:wybe.int)
+    foreign lpvm access(#result##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?low##0:wybe.int)
+    foreign lpvm access(#result##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?step##0:wybe.int)
+    foreign lpvm access(~#result##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?high##0:wybe.int)
 
 
 low > public {inline} (0 calls)
 0: test_loop.int_seq.low<0>
-low(#rec##0:test_loop.int_seq, ?###0:wybe.int):
+low(#rec##0:test_loop.int_seq, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 low > public {inline} (1 calls)
 1: test_loop.int_seq.low<1>
 low(#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, #field##0:wybe.int):
@@ -388,10 +388,10 @@ seq_next(seq##0:test_loop.int_seq, ?seq##1:test_loop.int_seq, ?elt##0:wybe.int, 
 
 step > public {inline} (0 calls)
 0: test_loop.int_seq.step<0>
-step(#rec##0:test_loop.int_seq, ?###0:wybe.int):
+step(#rec##0:test_loop.int_seq, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 step > public {inline} (0 calls)
 1: test_loop.int_seq.step<1>
 step(#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, #field##0:wybe.int):
@@ -530,16 +530,16 @@ entry:
 }
 
 
-define external fastcc  {i64, i64, i64} @"test_loop.int_seq.int_seq<1>"(i64  %"###0")    {
+define external fastcc  {i64, i64, i64} @"test_loop.int_seq.int_seq<1>"(i64  %"#result##0")    {
 entry:
-  %47 = inttoptr i64 %"###0" to i64* 
+  %47 = inttoptr i64 %"#result##0" to i64* 
   %48 = getelementptr  i64, i64* %47, i64 0 
   %49 = load  i64, i64* %48 
-  %50 = add   i64 %"###0", 8 
+  %50 = add   i64 %"#result##0", 8 
   %51 = inttoptr i64 %50 to i64* 
   %52 = getelementptr  i64, i64* %51, i64 0 
   %53 = load  i64, i64* %52 
-  %54 = add   i64 %"###0", 16 
+  %54 = add   i64 %"#result##0", 16 
   %55 = inttoptr i64 %54 to i64* 
   %56 = getelementptr  i64, i64* %55, i64 0 
   %57 = load  i64, i64* %56 

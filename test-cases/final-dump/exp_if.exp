@@ -22,16 +22,16 @@ AFTER EVERYTHING:
 
 if_test > public (1 calls)
 0: exp_if.if_test<0>
-if_test(x##0:wybe.int, ?###0:wybe.string):
+if_test(x##0:wybe.int, ?#result##0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_sgt(~x##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
-        foreign llvm move("smaller":wybe.string, ?###0:wybe.string) @exp_if:nn:nn
+        foreign llvm move("smaller":wybe.string, ?#result##0:wybe.string) @exp_if:nn:nn
 
     1:
-        foreign llvm move("larger":wybe.string, ?###0:wybe.string) @exp_if:nn:nn
+        foreign llvm move("larger":wybe.string, ?#result##0:wybe.string) @exp_if:nn:nn
 
 
   LLVM code       :

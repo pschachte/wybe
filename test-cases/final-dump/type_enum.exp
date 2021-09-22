@@ -55,34 +55,34 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 autumn > public {inline} (0 calls)
 0: type_enum.season.autumn<0>
-autumn(?###0:type_enum.season):
+autumn(?#result##0:type_enum.season):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(3:type_enum.season, ?###0:type_enum.season)
+    foreign llvm move(3:type_enum.season, ?#result##0:type_enum.season)
 
 
 spring > public {inline} (0 calls)
 0: type_enum.season.spring<0>
-spring(?###0:type_enum.season):
+spring(?#result##0:type_enum.season):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(1:type_enum.season, ?###0:type_enum.season)
+    foreign llvm move(1:type_enum.season, ?#result##0:type_enum.season)
 
 
 summer > public {inline} (0 calls)
 0: type_enum.season.summer<0>
-summer(?###0:type_enum.season):
+summer(?#result##0:type_enum.season):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(2:type_enum.season, ?###0:type_enum.season)
+    foreign llvm move(2:type_enum.season, ?#result##0:type_enum.season)
 
 
 winter > public {inline} (0 calls)
 0: type_enum.season.winter<0>
-winter(?###0:type_enum.season):
+winter(?#result##0:type_enum.season):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(0:type_enum.season, ?###0:type_enum.season)
+    foreign llvm move(0:type_enum.season, ?#result##0:type_enum.season)
 
 
 ~= > public {inline} (0 calls)

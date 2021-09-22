@@ -89,21 +89,21 @@ list_print > public (4 calls)
 
 
 list_reverse > public {inline} (2 calls)
-0: list_reverse(lst##0:multi_specz_reverse.intlist, ?###0:multi_specz_reverse.intlist):
+0: list_reverse(lst##0:multi_specz_reverse.intlist, ?#result##0:multi_specz_reverse.intlist):
  AliasPairs: []
  InterestingCallProperties: []
-    multi_specz_reverse.list_reverse_helper<0>(~lst##0:multi_specz_reverse.intlist, 0:multi_specz_reverse.intlist, ?###0:multi_specz_reverse.intlist) #1 @multi_specz_reverse:11:45
+    multi_specz_reverse.list_reverse_helper<0>(~lst##0:multi_specz_reverse.intlist, 0:multi_specz_reverse.intlist, ?#result##0:multi_specz_reverse.intlist) #1 @multi_specz_reverse:11:45
 
 
 list_reverse_helper > public (2 calls)
-0: list_reverse_helper(lst##0:multi_specz_reverse.intlist, acc##0:multi_specz_reverse.intlist, ?###0:multi_specz_reverse.intlist):
- AliasPairs: [(###0,acc##0)]
+0: list_reverse_helper(lst##0:multi_specz_reverse.intlist, acc##0:multi_specz_reverse.intlist, ?#result##0:multi_specz_reverse.intlist):
+ AliasPairs: [(#result##0,acc##0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(multi_specz_reverse.list_reverse_helper<0>,fromList [NonAliasedParamCond 0 [0]]))]
     foreign llvm icmp_ne(lst##0:multi_specz_reverse.intlist, 0:wybe.int, ?tmp#5##0:wybe.bool)
     case ~tmp#5##0:wybe.bool of
     0:
-        foreign llvm move(~acc##0:multi_specz_reverse.intlist, ?###0:multi_specz_reverse.intlist) @multi_specz_reverse:13:5
+        foreign llvm move(~acc##0:multi_specz_reverse.intlist, ?#result##0:multi_specz_reverse.intlist) @multi_specz_reverse:13:5
 
     1:
         foreign lpvm access(lst##0:multi_specz_reverse.intlist, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int)
@@ -111,18 +111,18 @@ list_reverse_helper > public (2 calls)
         foreign lpvm alloc(16:wybe.int, ?tmp#8##0:multi_specz_reverse.intlist)
         foreign lpvm mutate(~tmp#8##0:multi_specz_reverse.intlist, ?tmp#9##0:multi_specz_reverse.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h##0:wybe.int)
         foreign lpvm mutate(~tmp#9##0:multi_specz_reverse.intlist, ?tmp#10##0:multi_specz_reverse.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~acc##0:multi_specz_reverse.intlist)
-        multi_specz_reverse.list_reverse_helper<0>(~t##0:multi_specz_reverse.intlist, ~tmp#10##0:multi_specz_reverse.intlist, ?###0:multi_specz_reverse.intlist) #2 @multi_specz_reverse:14:29
+        multi_specz_reverse.list_reverse_helper<0>(~t##0:multi_specz_reverse.intlist, ~tmp#10##0:multi_specz_reverse.intlist, ?#result##0:multi_specz_reverse.intlist) #2 @multi_specz_reverse:14:29
 
  [04d1467a4d] [NonAliasedParam 0] :
     foreign llvm icmp_ne(lst##0:multi_specz_reverse.intlist, 0:wybe.int, ?tmp#5##0:wybe.bool)
     case ~tmp#5##0:wybe.bool of
     0:
-        foreign llvm move(~acc##0:multi_specz_reverse.intlist, ?###0:multi_specz_reverse.intlist) @multi_specz_reverse:13:5
+        foreign llvm move(~acc##0:multi_specz_reverse.intlist, ?#result##0:multi_specz_reverse.intlist) @multi_specz_reverse:13:5
 
     1:
         foreign lpvm access(lst##0:multi_specz_reverse.intlist, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:multi_specz_reverse.intlist)
         foreign lpvm mutate(~lst##0:multi_specz_reverse.intlist, ?tmp#10##0:multi_specz_reverse.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~acc##0:multi_specz_reverse.intlist)
-        multi_specz_reverse.list_reverse_helper<0>[04d1467a4d](~t##0:multi_specz_reverse.intlist, ~tmp#10##0:multi_specz_reverse.intlist, ?###0:multi_specz_reverse.intlist) #2 @multi_specz_reverse:14:29
+        multi_specz_reverse.list_reverse_helper<0>[04d1467a4d](~t##0:multi_specz_reverse.intlist, ~tmp#10##0:multi_specz_reverse.intlist, ?#result##0:multi_specz_reverse.intlist) #2 @multi_specz_reverse:14:29
 
 
   LLVM code       :
@@ -407,24 +407,24 @@ if.else:
 
 
 [] > public {inline} (0 calls)
-0: [](?###0:multi_specz_reverse.intlist):
+0: [](?#result##0:multi_specz_reverse.intlist):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(0:multi_specz_reverse.intlist, ?###0:multi_specz_reverse.intlist)
+    foreign llvm move(0:multi_specz_reverse.intlist, ?#result##0:multi_specz_reverse.intlist)
 
 
 [|] > public {inline} (0 calls)
-0: [|](head##0:wybe.int, tail##0:multi_specz_reverse.intlist, ?###0:multi_specz_reverse.intlist):
+0: [|](head##0:wybe.int, tail##0:multi_specz_reverse.intlist, ?#result##0:multi_specz_reverse.intlist):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multi_specz_reverse.intlist)
     foreign lpvm mutate(~%#rec##0:multi_specz_reverse.intlist, ?%#rec##1:multi_specz_reverse.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head##0:wybe.int)
-    foreign lpvm mutate(~%#rec##1:multi_specz_reverse.intlist, ?%###0:multi_specz_reverse.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail##0:multi_specz_reverse.intlist)
+    foreign lpvm mutate(~%#rec##1:multi_specz_reverse.intlist, ?%#result##0:multi_specz_reverse.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail##0:multi_specz_reverse.intlist)
 [|] > public {inline} (12 calls)
-1: [|](?head##0:wybe.int, ?tail##0:multi_specz_reverse.intlist, ###0:multi_specz_reverse.intlist, ?####0:wybe.bool):
+1: [|](?head##0:wybe.int, ?tail##0:multi_specz_reverse.intlist, #result##0:multi_specz_reverse.intlist, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne(###0:!wybe.int, 0:wybe.int, ?tmp#0##0:!wybe.bool)
+    foreign llvm icmp_ne(#result##0:!wybe.int, 0:wybe.int, ?tmp#0##0:!wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
@@ -432,24 +432,24 @@ if.else:
         foreign llvm move(undef:multi_specz_reverse.intlist, ?tail##0:multi_specz_reverse.intlist)
 
     1:
-        foreign lpvm access(###0:multi_specz_reverse.intlist, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?head##0:wybe.int)
-        foreign lpvm access(~###0:multi_specz_reverse.intlist, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tail##0:multi_specz_reverse.intlist)
+        foreign lpvm access(#result##0:multi_specz_reverse.intlist, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?head##0:wybe.int)
+        foreign lpvm access(~#result##0:multi_specz_reverse.intlist, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tail##0:multi_specz_reverse.intlist)
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
 
 head > public {inline} (0 calls)
-0: head(#rec##0:multi_specz_reverse.intlist, ?###0:wybe.int, ?####0:wybe.bool):
+0: head(#rec##0:multi_specz_reverse.intlist, ?#result##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:!wybe.int, 0:wybe.int, ?tmp#0##0:!wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:wybe.int, ?###0:wybe.int)
+        foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:multi_specz_reverse.intlist, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:wybe.int)
+        foreign lpvm access(~#rec##0:multi_specz_reverse.intlist, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 head > public {inline} (0 calls)
@@ -469,17 +469,17 @@ head > public {inline} (0 calls)
 
 
 tail > public {inline} (0 calls)
-0: tail(#rec##0:multi_specz_reverse.intlist, ?###0:multi_specz_reverse.intlist, ?####0:wybe.bool):
+0: tail(#rec##0:multi_specz_reverse.intlist, ?#result##0:multi_specz_reverse.intlist, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:!wybe.int, 0:wybe.int, ?tmp#0##0:!wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:multi_specz_reverse.intlist, ?###0:multi_specz_reverse.intlist)
+        foreign llvm move(undef:multi_specz_reverse.intlist, ?#result##0:multi_specz_reverse.intlist)
 
     1:
-        foreign lpvm access(~#rec##0:multi_specz_reverse.intlist, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:multi_specz_reverse.intlist)
+        foreign lpvm access(~#rec##0:multi_specz_reverse.intlist, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:multi_specz_reverse.intlist)
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 tail > public {inline} (0 calls)
@@ -578,15 +578,15 @@ entry:
 }
 
 
-define external fastcc  {i64, i64, i1} @"multi_specz_reverse.intlist.[|]<1>"(i64  %"###0")    {
+define external fastcc  {i64, i64, i1} @"multi_specz_reverse.intlist.[|]<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"###0", 0 
+  %"1#tmp#0##0" = icmp ne i64 %"#result##0", 0 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %23 = inttoptr i64 %"###0" to i64* 
+  %23 = inttoptr i64 %"#result##0" to i64* 
   %24 = getelementptr  i64, i64* %23, i64 0 
   %25 = load  i64, i64* %24 
-  %26 = add   i64 %"###0", 8 
+  %26 = add   i64 %"#result##0", 8 
   %27 = inttoptr i64 %26 to i64* 
   %28 = getelementptr  i64, i64* %27, i64 0 
   %29 = load  i64, i64* %28 

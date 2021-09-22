@@ -273,14 +273,14 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
 drone_init > (3 calls)
 0: drone.drone_init<0>
-drone_init(?###0:drone.drone_info):
+drone_init(?#result##0:drone.drone_info):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(32:wybe.int, ?tmp#5##0:drone.drone_info)
     foreign lpvm mutate(~tmp#5##0:drone.drone_info, ?tmp#6##0:drone.drone_info, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 0:wybe.int)
     foreign lpvm mutate(~tmp#6##0:drone.drone_info, ?tmp#7##0:drone.drone_info, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 0:wybe.int)
     foreign lpvm mutate(~tmp#7##0:drone.drone_info, ?tmp#8##0:drone.drone_info, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 0:wybe.int)
-    foreign lpvm mutate(~tmp#8##0:drone.drone_info, ?###0:drone.drone_info, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 0:wybe.int)
+    foreign lpvm mutate(~tmp#8##0:drone.drone_info, ?#result##0:drone.drone_info, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 0:wybe.int)
 
 
 gen#1 > {inline} (2 calls)
@@ -458,10 +458,10 @@ LLVM code       : None
 
 count > public {inline} (0 calls)
 0: drone.drone_info.count<0>
-count(#rec##0:drone.drone_info, ?###0:wybe.int):
+count(#rec##0:drone.drone_info, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 count > public {inline} (0 calls)
 1: drone.drone_info.count<1>
 count(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int):
@@ -472,31 +472,31 @@ count(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int):
 
 drone_info > public {inline} (0 calls)
 0: drone.drone_info.drone_info<0>
-drone_info(x##0:wybe.int, y##0:wybe.int, z##0:wybe.int, count##0:wybe.int, ?###0:drone.drone_info):
+drone_info(x##0:wybe.int, y##0:wybe.int, z##0:wybe.int, count##0:wybe.int, ?#result##0:drone.drone_info):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(32:wybe.int, ?#rec##0:drone.drone_info)
     foreign lpvm mutate(~#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~x##0:wybe.int)
     foreign lpvm mutate(~#rec##1:drone.drone_info, ?#rec##2:drone.drone_info, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~y##0:wybe.int)
     foreign lpvm mutate(~#rec##2:drone.drone_info, ?#rec##3:drone.drone_info, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~z##0:wybe.int)
-    foreign lpvm mutate(~#rec##3:drone.drone_info, ?###0:drone.drone_info, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~count##0:wybe.int)
+    foreign lpvm mutate(~#rec##3:drone.drone_info, ?#result##0:drone.drone_info, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~count##0:wybe.int)
 drone_info > public {inline} (14 calls)
 1: drone.drone_info.drone_info<1>
-drone_info(?x##0:wybe.int, ?y##0:wybe.int, ?z##0:wybe.int, ?count##0:wybe.int, ###0:drone.drone_info):
+drone_info(?x##0:wybe.int, ?y##0:wybe.int, ?z##0:wybe.int, ?count##0:wybe.int, #result##0:drone.drone_info):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(###0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?x##0:wybe.int)
-    foreign lpvm access(###0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?y##0:wybe.int)
-    foreign lpvm access(###0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?z##0:wybe.int)
-    foreign lpvm access(~###0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?count##0:wybe.int)
+    foreign lpvm access(#result##0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?x##0:wybe.int)
+    foreign lpvm access(#result##0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?y##0:wybe.int)
+    foreign lpvm access(#result##0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?z##0:wybe.int)
+    foreign lpvm access(~#result##0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?count##0:wybe.int)
 
 
 x > public {inline} (0 calls)
 0: drone.drone_info.x<0>
-x(#rec##0:drone.drone_info, ?###0:wybe.int):
+x(#rec##0:drone.drone_info, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 x > public {inline} (0 calls)
 1: drone.drone_info.x<1>
 x(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int):
@@ -507,10 +507,10 @@ x(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int):
 
 y > public {inline} (0 calls)
 0: drone.drone_info.y<0>
-y(#rec##0:drone.drone_info, ?###0:wybe.int):
+y(#rec##0:drone.drone_info, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 y > public {inline} (0 calls)
 1: drone.drone_info.y<1>
 y(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int):
@@ -521,10 +521,10 @@ y(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int):
 
 z > public {inline} (0 calls)
 0: drone.drone_info.z<0>
-z(#rec##0:drone.drone_info, ?###0:wybe.int):
+z(#rec##0:drone.drone_info, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 z > public {inline} (0 calls)
 1: drone.drone_info.z<1>
 z(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int):
@@ -931,14 +931,14 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
 drone_init > (3 calls)
 0: drone.drone_init<0>
-drone_init(?###0:drone.drone_info):
+drone_init(?#result##0:drone.drone_info):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(32:wybe.int, ?tmp#5##0:drone.drone_info)
     foreign lpvm mutate(~tmp#5##0:drone.drone_info, ?tmp#6##0:drone.drone_info, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 0:wybe.int)
     foreign lpvm mutate(~tmp#6##0:drone.drone_info, ?tmp#7##0:drone.drone_info, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 0:wybe.int)
     foreign lpvm mutate(~tmp#7##0:drone.drone_info, ?tmp#8##0:drone.drone_info, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 0:wybe.int)
-    foreign lpvm mutate(~tmp#8##0:drone.drone_info, ?###0:drone.drone_info, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 0:wybe.int)
+    foreign lpvm mutate(~tmp#8##0:drone.drone_info, ?#result##0:drone.drone_info, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 0:wybe.int)
 
 
 gen#1 > {inline} (2 calls)
@@ -1808,10 +1808,10 @@ entry:
 
 count > public {inline} (0 calls)
 0: drone.drone_info.count<0>
-count(#rec##0:drone.drone_info, ?###0:wybe.int):
+count(#rec##0:drone.drone_info, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 count > public {inline} (0 calls)
 1: drone.drone_info.count<1>
 count(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int):
@@ -1822,31 +1822,31 @@ count(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int):
 
 drone_info > public {inline} (0 calls)
 0: drone.drone_info.drone_info<0>
-drone_info(x##0:wybe.int, y##0:wybe.int, z##0:wybe.int, count##0:wybe.int, ?###0:drone.drone_info):
+drone_info(x##0:wybe.int, y##0:wybe.int, z##0:wybe.int, count##0:wybe.int, ?#result##0:drone.drone_info):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(32:wybe.int, ?#rec##0:drone.drone_info)
     foreign lpvm mutate(~#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~x##0:wybe.int)
     foreign lpvm mutate(~#rec##1:drone.drone_info, ?#rec##2:drone.drone_info, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~y##0:wybe.int)
     foreign lpvm mutate(~#rec##2:drone.drone_info, ?#rec##3:drone.drone_info, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~z##0:wybe.int)
-    foreign lpvm mutate(~#rec##3:drone.drone_info, ?###0:drone.drone_info, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~count##0:wybe.int)
+    foreign lpvm mutate(~#rec##3:drone.drone_info, ?#result##0:drone.drone_info, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~count##0:wybe.int)
 drone_info > public {inline} (14 calls)
 1: drone.drone_info.drone_info<1>
-drone_info(?x##0:wybe.int, ?y##0:wybe.int, ?z##0:wybe.int, ?count##0:wybe.int, ###0:drone.drone_info):
+drone_info(?x##0:wybe.int, ?y##0:wybe.int, ?z##0:wybe.int, ?count##0:wybe.int, #result##0:drone.drone_info):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(###0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?x##0:wybe.int)
-    foreign lpvm access(###0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?y##0:wybe.int)
-    foreign lpvm access(###0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?z##0:wybe.int)
-    foreign lpvm access(~###0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?count##0:wybe.int)
+    foreign lpvm access(#result##0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?x##0:wybe.int)
+    foreign lpvm access(#result##0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?y##0:wybe.int)
+    foreign lpvm access(#result##0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?z##0:wybe.int)
+    foreign lpvm access(~#result##0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?count##0:wybe.int)
 
 
 x > public {inline} (0 calls)
 0: drone.drone_info.x<0>
-x(#rec##0:drone.drone_info, ?###0:wybe.int):
+x(#rec##0:drone.drone_info, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 x > public {inline} (0 calls)
 1: drone.drone_info.x<1>
 x(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int):
@@ -1857,10 +1857,10 @@ x(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int):
 
 y > public {inline} (0 calls)
 0: drone.drone_info.y<0>
-y(#rec##0:drone.drone_info, ?###0:wybe.int):
+y(#rec##0:drone.drone_info, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 y > public {inline} (0 calls)
 1: drone.drone_info.y<1>
 y(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int):
@@ -1871,10 +1871,10 @@ y(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int):
 
 z > public {inline} (0 calls)
 0: drone.drone_info.z<0>
-z(#rec##0:drone.drone_info, ?###0:wybe.int):
+z(#rec##0:drone.drone_info, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 z > public {inline} (0 calls)
 1: drone.drone_info.z<1>
 z(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int):
@@ -2040,20 +2040,20 @@ entry:
 }
 
 
-define external fastcc  {i64, i64, i64, i64} @"drone.drone_info.drone_info<1>"(i64  %"###0")    {
+define external fastcc  {i64, i64, i64, i64} @"drone.drone_info.drone_info<1>"(i64  %"#result##0")    {
 entry:
-  %58 = inttoptr i64 %"###0" to i64* 
+  %58 = inttoptr i64 %"#result##0" to i64* 
   %59 = getelementptr  i64, i64* %58, i64 0 
   %60 = load  i64, i64* %59 
-  %61 = add   i64 %"###0", 8 
+  %61 = add   i64 %"#result##0", 8 
   %62 = inttoptr i64 %61 to i64* 
   %63 = getelementptr  i64, i64* %62, i64 0 
   %64 = load  i64, i64* %63 
-  %65 = add   i64 %"###0", 16 
+  %65 = add   i64 %"#result##0", 16 
   %66 = inttoptr i64 %65 to i64* 
   %67 = getelementptr  i64, i64* %66, i64 0 
   %68 = load  i64, i64* %67 
-  %69 = add   i64 %"###0", 24 
+  %69 = add   i64 %"#result##0", 24 
   %70 = inttoptr i64 %69 to i64* 
   %71 = getelementptr  i64, i64* %70, i64 0 
   %72 = load  i64, i64* %71 

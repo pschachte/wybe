@@ -2885,7 +2885,7 @@ numberedVarName name number = name ++ specialChar:specialChar:show number
 -- | The name to give to the output variable when converting a function to a
 -- proc.
 outputVariableName :: Ident
-outputVariableName = [specialChar]
+outputVariableName = specialName "result"
 
 
 -- | The name to give to the output status variable when converting a test proc to a Det proc.

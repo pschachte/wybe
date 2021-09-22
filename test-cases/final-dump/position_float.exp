@@ -70,27 +70,27 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 position > public {inline} (0 calls)
 0: position_float.position.position<0>
-position(x##0:wybe.float, y##0:wybe.float, ?###0:position_float.position):
+position(x##0:wybe.float, y##0:wybe.float, ?#result##0:position_float.position):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:position_float.position)
     foreign lpvm mutate(~#rec##0:position_float.position, ?#rec##1:position_float.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:wybe.float)
-    foreign lpvm mutate(~#rec##1:position_float.position, ?###0:position_float.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y##0:wybe.float)
+    foreign lpvm mutate(~#rec##1:position_float.position, ?#result##0:position_float.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y##0:wybe.float)
 position > public {inline} (6 calls)
 1: position_float.position.position<1>
-position(?x##0:wybe.float, ?y##0:wybe.float, ###0:position_float.position):
+position(?x##0:wybe.float, ?y##0:wybe.float, #result##0:position_float.position):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(###0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:wybe.float)
-    foreign lpvm access(~###0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:wybe.float)
+    foreign lpvm access(#result##0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:wybe.float)
+    foreign lpvm access(~#result##0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:wybe.float)
 
 
 x > public {inline} (0 calls)
 0: position_float.position.x<0>
-x(#rec##0:position_float.position, ?###0:wybe.float):
+x(#rec##0:position_float.position, ?#result##0:wybe.float):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:wybe.float)
+    foreign lpvm access(~#rec##0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.float)
 x > public {inline} (0 calls)
 1: position_float.position.x<1>
 x(#rec##0:position_float.position, ?#rec##1:position_float.position, #field##0:wybe.float):
@@ -101,10 +101,10 @@ x(#rec##0:position_float.position, ?#rec##1:position_float.position, #field##0:w
 
 y > public {inline} (0 calls)
 0: position_float.position.y<0>
-y(#rec##0:position_float.position, ?###0:wybe.float):
+y(#rec##0:position_float.position, ?#result##0:wybe.float):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:wybe.float)
+    foreign lpvm access(~#rec##0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.float)
 y > public {inline} (0 calls)
 1: position_float.position.y<1>
 y(#rec##0:position_float.position, ?#rec##1:position_float.position, #field##0:wybe.float):
@@ -189,12 +189,12 @@ entry:
 }
 
 
-define external fastcc  {double, double} @"position_float.position.position<1>"(i64  %"###0")    {
+define external fastcc  {double, double} @"position_float.position.position<1>"(i64  %"#result##0")    {
 entry:
-  %23 = inttoptr i64 %"###0" to double* 
+  %23 = inttoptr i64 %"#result##0" to double* 
   %24 = getelementptr  double, double* %23, i64 0 
   %25 = load  double, double* %24 
-  %26 = add   i64 %"###0", 8 
+  %26 = add   i64 %"#result##0", 8 
   %27 = inttoptr i64 %26 to double* 
   %28 = getelementptr  double, double* %27, i64 0 
   %29 = load  double, double* %28 

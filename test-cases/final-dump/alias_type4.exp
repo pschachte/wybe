@@ -187,27 +187,27 @@ entry:
 
 position > public {inline} (0 calls)
 0: alias_type4.position.position<0>
-position(x##0:wybe.int, y##0:wybe.int, ?###0:alias_type4.position):
+position(x##0:wybe.int, y##0:wybe.int, ?#result##0:alias_type4.position):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:alias_type4.position)
     foreign lpvm mutate(~#rec##0:alias_type4.position, ?#rec##1:alias_type4.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:wybe.int)
-    foreign lpvm mutate(~#rec##1:alias_type4.position, ?###0:alias_type4.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y##0:wybe.int)
+    foreign lpvm mutate(~#rec##1:alias_type4.position, ?#result##0:alias_type4.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y##0:wybe.int)
 position > public {inline} (6 calls)
 1: alias_type4.position.position<1>
-position(?x##0:wybe.int, ?y##0:wybe.int, ###0:alias_type4.position):
+position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:alias_type4.position):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(###0:alias_type4.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:wybe.int)
-    foreign lpvm access(~###0:alias_type4.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:wybe.int)
+    foreign lpvm access(#result##0:alias_type4.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:wybe.int)
+    foreign lpvm access(~#result##0:alias_type4.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:wybe.int)
 
 
 x > public {inline} (0 calls)
 0: alias_type4.position.x<0>
-x(#rec##0:alias_type4.position, ?###0:wybe.int):
+x(#rec##0:alias_type4.position, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:alias_type4.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:alias_type4.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 x > public {inline} (0 calls)
 1: alias_type4.position.x<1>
 x(#rec##0:alias_type4.position, ?#rec##1:alias_type4.position, #field##0:wybe.int):
@@ -218,10 +218,10 @@ x(#rec##0:alias_type4.position, ?#rec##1:alias_type4.position, #field##0:wybe.in
 
 y > public {inline} (0 calls)
 0: alias_type4.position.y<0>
-y(#rec##0:alias_type4.position, ?###0:wybe.int):
+y(#rec##0:alias_type4.position, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:alias_type4.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:alias_type4.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 y > public {inline} (0 calls)
 1: alias_type4.position.y<1>
 y(#rec##0:alias_type4.position, ?#rec##1:alias_type4.position, #field##0:wybe.int):
@@ -306,12 +306,12 @@ entry:
 }
 
 
-define external fastcc  {i64, i64} @"alias_type4.position.position<1>"(i64  %"###0")    {
+define external fastcc  {i64, i64} @"alias_type4.position.position<1>"(i64  %"#result##0")    {
 entry:
-  %23 = inttoptr i64 %"###0" to i64* 
+  %23 = inttoptr i64 %"#result##0" to i64* 
   %24 = getelementptr  i64, i64* %23, i64 0 
   %25 = load  i64, i64* %24 
-  %26 = add   i64 %"###0", 8 
+  %26 = add   i64 %"#result##0", 8 
   %27 = inttoptr i64 %26 to i64* 
   %28 = getelementptr  i64, i64* %27, i64 0 
   %29 = load  i64, i64* %28 
@@ -449,10 +449,10 @@ if.else:
 
 a > public {inline} (0 calls)
 0: alias_type4.posrec.a<0>
-a(#rec##0:alias_type4.posrec, ?###0:wybe.int):
+a(#rec##0:alias_type4.posrec, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:alias_type4.posrec, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:alias_type4.posrec, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 a > public {inline} (0 calls)
 1: alias_type4.posrec.a<1>
 a(#rec##0:alias_type4.posrec, ?#rec##1:alias_type4.posrec, #field##0:wybe.int):
@@ -463,10 +463,10 @@ a(#rec##0:alias_type4.posrec, ?#rec##1:alias_type4.posrec, #field##0:wybe.int):
 
 p > public {inline} (0 calls)
 0: alias_type4.posrec.p<0>
-p(#rec##0:alias_type4.posrec, ?###0:alias_type4.position):
+p(#rec##0:alias_type4.posrec, ?#result##0:alias_type4.position):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:alias_type4.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:alias_type4.position)
+    foreign lpvm access(~#rec##0:alias_type4.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:alias_type4.position)
 p > public {inline} (0 calls)
 1: alias_type4.posrec.p<1>
 p(#rec##0:alias_type4.posrec, ?#rec##1:alias_type4.posrec, #field##0:alias_type4.position):
@@ -477,19 +477,19 @@ p(#rec##0:alias_type4.posrec, ?#rec##1:alias_type4.posrec, #field##0:alias_type4
 
 posrec > public {inline} (0 calls)
 0: alias_type4.posrec.posrec<0>
-posrec(p##0:alias_type4.position, a##0:wybe.int, ?###0:alias_type4.posrec):
+posrec(p##0:alias_type4.position, a##0:wybe.int, ?#result##0:alias_type4.posrec):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:alias_type4.posrec)
     foreign lpvm mutate(~#rec##0:alias_type4.posrec, ?#rec##1:alias_type4.posrec, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~p##0:alias_type4.position)
-    foreign lpvm mutate(~#rec##1:alias_type4.posrec, ?###0:alias_type4.posrec, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~a##0:wybe.int)
+    foreign lpvm mutate(~#rec##1:alias_type4.posrec, ?#result##0:alias_type4.posrec, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~a##0:wybe.int)
 posrec > public {inline} (6 calls)
 1: alias_type4.posrec.posrec<1>
-posrec(?p##0:alias_type4.position, ?a##0:wybe.int, ###0:alias_type4.posrec):
+posrec(?p##0:alias_type4.position, ?a##0:wybe.int, #result##0:alias_type4.posrec):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(###0:alias_type4.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?p##0:alias_type4.position)
-    foreign lpvm access(~###0:alias_type4.posrec, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?a##0:wybe.int)
+    foreign lpvm access(#result##0:alias_type4.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?p##0:alias_type4.position)
+    foreign lpvm access(~#result##0:alias_type4.posrec, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?a##0:wybe.int)
 
 
 ~= > public {inline} (0 calls)
@@ -651,12 +651,12 @@ entry:
 }
 
 
-define external fastcc  {i64, i64} @"alias_type4.posrec.posrec<1>"(i64  %"###0")    {
+define external fastcc  {i64, i64} @"alias_type4.posrec.posrec<1>"(i64  %"#result##0")    {
 entry:
-  %61 = inttoptr i64 %"###0" to i64* 
+  %61 = inttoptr i64 %"#result##0" to i64* 
   %62 = getelementptr  i64, i64* %61, i64 0 
   %63 = load  i64, i64* %62 
-  %64 = add   i64 %"###0", 8 
+  %64 = add   i64 %"#result##0", 8 
   %65 = inttoptr i64 %64 to i64* 
   %66 = getelementptr  i64, i64* %65, i64 0 
   %67 = load  i64, i64* %66 

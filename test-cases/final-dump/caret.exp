@@ -403,10 +403,10 @@ entry:
 
 lower_left > public {inline} (0 calls)
 0: caret.region.lower_left<0>
-lower_left(#rec##0:caret.region, ?###0:position.position):
+lower_left(#rec##0:caret.region, ?#result##0:position.position):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:caret.region, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:position.position)
+    foreign lpvm access(~#rec##0:caret.region, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:position.position)
 lower_left > public {inline} (0 calls)
 1: caret.region.lower_left<1>
 lower_left(#rec##0:caret.region, ?#rec##1:caret.region, #field##0:position.position):
@@ -417,27 +417,27 @@ lower_left(#rec##0:caret.region, ?#rec##1:caret.region, #field##0:position.posit
 
 region > public {inline} (0 calls)
 0: caret.region.region<0>
-region(lower_left##0:position.position, upper_right##0:position.position, ?###0:caret.region):
+region(lower_left##0:position.position, upper_right##0:position.position, ?#result##0:caret.region):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:caret.region)
     foreign lpvm mutate(~#rec##0:caret.region, ?#rec##1:caret.region, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~lower_left##0:position.position)
-    foreign lpvm mutate(~#rec##1:caret.region, ?###0:caret.region, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~upper_right##0:position.position)
+    foreign lpvm mutate(~#rec##1:caret.region, ?#result##0:caret.region, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~upper_right##0:position.position)
 region > public {inline} (6 calls)
 1: caret.region.region<1>
-region(?lower_left##0:position.position, ?upper_right##0:position.position, ###0:caret.region):
+region(?lower_left##0:position.position, ?upper_right##0:position.position, #result##0:caret.region):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(###0:caret.region, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?lower_left##0:position.position)
-    foreign lpvm access(~###0:caret.region, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?upper_right##0:position.position)
+    foreign lpvm access(#result##0:caret.region, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?lower_left##0:position.position)
+    foreign lpvm access(~#result##0:caret.region, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?upper_right##0:position.position)
 
 
 upper_right > public {inline} (0 calls)
 0: caret.region.upper_right<0>
-upper_right(#rec##0:caret.region, ?###0:position.position):
+upper_right(#rec##0:caret.region, ?#result##0:position.position):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:caret.region, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:position.position)
+    foreign lpvm access(~#rec##0:caret.region, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:position.position)
 upper_right > public {inline} (0 calls)
 1: caret.region.upper_right<1>
 upper_right(#rec##0:caret.region, ?#rec##1:caret.region, #field##0:position.position):
@@ -609,12 +609,12 @@ entry:
 }
 
 
-define external fastcc  {i64, i64} @"caret.region.region<1>"(i64  %"###0")    {
+define external fastcc  {i64, i64} @"caret.region.region<1>"(i64  %"#result##0")    {
 entry:
-  %62 = inttoptr i64 %"###0" to i64* 
+  %62 = inttoptr i64 %"#result##0" to i64* 
   %63 = getelementptr  i64, i64* %62, i64 0 
   %64 = load  i64, i64* %63 
-  %65 = add   i64 %"###0", 8 
+  %65 = add   i64 %"#result##0", 8 
   %66 = inttoptr i64 %65 to i64* 
   %67 = getelementptr  i64, i64* %66, i64 0 
   %68 = load  i64, i64* %67 
@@ -842,27 +842,27 @@ entry:
 
 position > public {inline} (0 calls)
 0: position.position.position<0>
-position(x##0:wybe.int, y##0:wybe.int, ?###0:position.position):
+position(x##0:wybe.int, y##0:wybe.int, ?#result##0:position.position):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:position.position)
     foreign lpvm mutate(~#rec##0:position.position, ?#rec##1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:wybe.int)
-    foreign lpvm mutate(~#rec##1:position.position, ?###0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y##0:wybe.int)
+    foreign lpvm mutate(~#rec##1:position.position, ?#result##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y##0:wybe.int)
 position > public {inline} (6 calls)
 1: position.position.position<1>
-position(?x##0:wybe.int, ?y##0:wybe.int, ###0:position.position):
+position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:position.position):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(###0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:wybe.int)
-    foreign lpvm access(~###0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:wybe.int)
+    foreign lpvm access(#result##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:wybe.int)
+    foreign lpvm access(~#result##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:wybe.int)
 
 
 x > public {inline} (0 calls)
 0: position.position.x<0>
-x(#rec##0:position.position, ?###0:wybe.int):
+x(#rec##0:position.position, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 x > public {inline} (0 calls)
 1: position.position.x<1>
 x(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
@@ -873,10 +873,10 @@ x(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
 
 y > public {inline} (0 calls)
 0: position.position.y<0>
-y(#rec##0:position.position, ?###0:wybe.int):
+y(#rec##0:position.position, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 y > public {inline} (0 calls)
 1: position.position.y<1>
 y(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
@@ -961,12 +961,12 @@ entry:
 }
 
 
-define external fastcc  {i64, i64} @"position.position.position<1>"(i64  %"###0")    {
+define external fastcc  {i64, i64} @"position.position.position<1>"(i64  %"#result##0")    {
 entry:
-  %23 = inttoptr i64 %"###0" to i64* 
+  %23 = inttoptr i64 %"#result##0" to i64* 
   %24 = getelementptr  i64, i64* %23, i64 0 
   %25 = load  i64, i64* %24 
-  %26 = add   i64 %"###0", 8 
+  %26 = add   i64 %"#result##0", 8 
   %27 = inttoptr i64 %26 to i64* 
   %28 = getelementptr  i64, i64* %27, i64 0 
   %29 = load  i64, i64* %28 

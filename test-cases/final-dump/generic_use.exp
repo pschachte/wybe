@@ -19,14 +19,14 @@ AFTER EVERYTHING:
 
 append > public (1 calls)
 0: generic_list.append<0>
-append(x##0:generic_list(?T), y##0:generic_list(?T), ?###0:generic_list(?T)):
- AliasPairs: [(###0,y##0)]
+append(x##0:generic_list(?T), y##0:generic_list(?T), ?#result##0:generic_list(?T)):
+ AliasPairs: [(#result##0,y##0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(1,(generic_list.append<0>,fromList [NonAliasedParamCond 0 [0]]))]
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
     case ~tmp#5##0:wybe.bool of
     0:
-        foreign llvm move(~y##0:generic_list(?T), ?###0:generic_list(?T)) @generic_list:nn:nn
+        foreign llvm move(~y##0:generic_list(?T), ?#result##0:generic_list(?T)) @generic_list:nn:nn
 
     1:
         foreign lpvm access(x##0:generic_list(?T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:?T)
@@ -34,23 +34,23 @@ append(x##0:generic_list(?T), y##0:generic_list(?T), ?###0:generic_list(?T)):
         generic_list.append<0>(~t##0:generic_list(?T), ~y##0:generic_list(?T), ?tmp#2##0:generic_list(?T)) #1 @generic_list:nn:nn
         foreign lpvm alloc(16:wybe.int, ?tmp#8##0:generic_list(?T))
         foreign lpvm mutate(~tmp#8##0:generic_list(?T), ?tmp#9##0:generic_list(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h##0:?T)
-        foreign lpvm mutate(~tmp#9##0:generic_list(?T), ?###0:generic_list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:generic_list(?T))
+        foreign lpvm mutate(~tmp#9##0:generic_list(?T), ?#result##0:generic_list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:generic_list(?T))
 
 
 
 car > public {inline} (0 calls)
 0: generic_list.car<0>
-car(#rec##0:generic_list(?T), ?###0:?T, ?####0:wybe.bool):
+car(#rec##0:generic_list(?T), ?#result##0:?T, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:?T, ?###0:?T)
+        foreign llvm move(undef:?T, ?#result##0:?T)
 
     1:
-        foreign lpvm access(~#rec##0:generic_list(?T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:?T)
+        foreign lpvm access(~#rec##0:generic_list(?T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:?T)
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 car > public {inline} (0 calls)
@@ -72,17 +72,17 @@ car(#rec##0:generic_list(?T), ?#rec##1:generic_list(?T), #field##0:?T, ?####0:wy
 
 cdr > public {inline} (0 calls)
 0: generic_list.cdr<0>
-cdr(#rec##0:generic_list(?T), ?###0:generic_list(?T), ?####0:wybe.bool):
+cdr(#rec##0:generic_list(?T), ?#result##0:generic_list(?T), ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
-        foreign llvm move(undef:generic_list(?T), ?###0:generic_list(?T))
+        foreign llvm move(undef:generic_list(?T), ?#result##0:generic_list(?T))
 
     1:
-        foreign lpvm access(~#rec##0:generic_list(?T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:generic_list(?T))
+        foreign lpvm access(~#rec##0:generic_list(?T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:generic_list(?T))
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 cdr > public {inline} (0 calls)
@@ -104,18 +104,18 @@ cdr(#rec##0:generic_list(?T), ?#rec##1:generic_list(?T), #field##0:generic_list(
 
 cons > public {inline} (1 calls)
 0: generic_list.cons<0>
-cons(car##0:?T, cdr##0:generic_list(?T), ?###0:generic_list(?T)):
+cons(car##0:?T, cdr##0:generic_list(?T), ?#result##0:generic_list(?T)):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:generic_list(?T))
     foreign lpvm mutate(~#rec##0:generic_list(?T), ?#rec##1:generic_list(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~car##0:?T)
-    foreign lpvm mutate(~#rec##1:generic_list(?T), ?###0:generic_list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~cdr##0:generic_list(?T))
+    foreign lpvm mutate(~#rec##1:generic_list(?T), ?#result##0:generic_list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~cdr##0:generic_list(?T))
 cons > public {inline} (6 calls)
 1: generic_list.cons<1>
-cons(?car##0:?T, ?cdr##0:generic_list(?T), ###0:generic_list(?T), ?####0:wybe.bool):
+cons(?car##0:?T, ?cdr##0:generic_list(?T), #result##0:generic_list(?T), ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm icmp_ne(###0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
@@ -123,43 +123,43 @@ cons(?car##0:?T, ?cdr##0:generic_list(?T), ###0:generic_list(?T), ?####0:wybe.bo
         foreign llvm move(undef:generic_list(?T), ?cdr##0:generic_list(?T))
 
     1:
-        foreign lpvm access(###0:generic_list(?T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?car##0:?T)
-        foreign lpvm access(~###0:generic_list(?T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?cdr##0:generic_list(?T))
+        foreign lpvm access(#result##0:generic_list(?T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?car##0:?T)
+        foreign lpvm access(~#result##0:generic_list(?T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?cdr##0:generic_list(?T))
         foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
 
 length > public {inline} (0 calls)
 0: generic_list.length<0>
-length(x##0:generic_list(?T), ?###0:wybe.int):
+length(x##0:generic_list(?T), ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    generic_list.length1<0>(~x##0:generic_list(?T), 0:wybe.int, ?###0:wybe.int) #0 @generic_list:nn:nn
+    generic_list.length1<0>(~x##0:generic_list(?T), 0:wybe.int, ?#result##0:wybe.int) #0 @generic_list:nn:nn
 
 
 length1 > (2 calls)
 0: generic_list.length1<0>
-length1(x##0:generic_list(?T), acc##0:wybe.int, ?###0:wybe.int):
+length1(x##0:generic_list(?T), acc##0:wybe.int, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
     case ~tmp#5##0:wybe.bool of
     0:
-        foreign llvm move(~acc##0:wybe.int, ?###0:wybe.int) @generic_list:nn:nn
+        foreign llvm move(~acc##0:wybe.int, ?#result##0:wybe.int) @generic_list:nn:nn
 
     1:
         foreign lpvm access(~x##0:generic_list(?T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:generic_list(?T))
         foreign llvm add(~acc##0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int) @int:nn:nn
-        generic_list.length1<0>(~t##0:generic_list(?T), ~tmp#2##0:wybe.int, ?###0:wybe.int) #2 @generic_list:nn:nn
+        generic_list.length1<0>(~t##0:generic_list(?T), ~tmp#2##0:wybe.int, ?#result##0:wybe.int) #2 @generic_list:nn:nn
 
 
 
 nil > public {inline} (0 calls)
 0: generic_list.nil<0>
-nil(?###0:generic_list(?T)):
+nil(?#result##0:generic_list(?T)):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(0:generic_list(?T), ?###0:generic_list(?T))
+    foreign llvm move(0:generic_list(?T), ?#result##0:generic_list(?T))
 
   LLVM code       :
 
@@ -308,15 +308,15 @@ entry:
 }
 
 
-define external fastcc  {i64, i64, i1} @"generic_list.cons<1>"(i64  %"###0")    {
+define external fastcc  {i64, i64, i1} @"generic_list.cons<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"###0", 0 
+  %"1#tmp#0##0" = icmp ne i64 %"#result##0", 0 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %64 = inttoptr i64 %"###0" to i64* 
+  %64 = inttoptr i64 %"#result##0" to i64* 
   %65 = getelementptr  i64, i64* %64, i64 0 
   %66 = load  i64, i64* %65 
-  %67 = add   i64 %"###0", 8 
+  %67 = add   i64 %"#result##0", 8 
   %68 = inttoptr i64 %67 to i64* 
   %69 = getelementptr  i64, i64* %68, i64 0 
   %70 = load  i64, i64* %69 
@@ -334,8 +334,8 @@ if.else:
 
 define external fastcc  i64 @"generic_list.length<0>"(i64  %"x##0")    {
 entry:
-  %"1####0" = tail call fastcc  i64  @"generic_list.length1<0>"(i64  %"x##0", i64  0)  
-  ret i64 %"1####0" 
+  %"1##result##0" = tail call fastcc  i64  @"generic_list.length1<0>"(i64  %"x##0", i64  0)  
+  ret i64 %"1##result##0" 
 }
 
 
@@ -349,8 +349,8 @@ if.then:
   %79 = getelementptr  i64, i64* %78, i64 0 
   %80 = load  i64, i64* %79 
   %"2#tmp#2##0" = add   i64 %"acc##0", 1 
-  %"2####0" = tail call fastcc  i64  @"generic_list.length1<0>"(i64  %80, i64  %"2#tmp#2##0")  
-  ret i64 %"2####0" 
+  %"2##result##0" = tail call fastcc  i64  @"generic_list.length1<0>"(i64  %80, i64  %"2#tmp#2##0")  
+  ret i64 %"2##result##0" 
 if.else:
   ret i64 %"acc##0" 
 }
@@ -402,14 +402,14 @@ entry:
 
 concat > public (3 calls)
 0: generic_use.concat<0>[410bae77d3]
-concat(l1##0:generic_list(?t), l2##0:generic_list(?t), ?###0:generic_list(?t)):
- AliasPairs: [(###0,l2##0)]
+concat(l1##0:generic_list(?t), l2##0:generic_list(?t), ?#result##0:generic_list(?t)):
+ AliasPairs: [(#result##0,l2##0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(1,(generic_use.concat<0>,fromList [NonAliasedParamCond 0 [0]]))]
     foreign llvm icmp_ne(l1##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
     case ~tmp#5##0:wybe.bool of
     0:
-        foreign llvm move(~l2##0:generic_list(?t), ?###0:generic_list(?t)) @generic_use:nn:nn
+        foreign llvm move(~l2##0:generic_list(?t), ?#result##0:generic_list(?t)) @generic_use:nn:nn
 
     1:
         foreign lpvm access(l1##0:generic_list(?T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:?T)
@@ -417,66 +417,66 @@ concat(l1##0:generic_list(?t), l2##0:generic_list(?t), ?###0:generic_list(?t)):
         generic_use.concat<0>(~t##0:generic_list(?t), ~l2##0:generic_list(?t), ?tmp#2##0:generic_list(?t)) #1 @generic_use:nn:nn
         foreign lpvm alloc(16:wybe.int, ?tmp#8##0:generic_list(?T))
         foreign lpvm mutate(~tmp#8##0:generic_list(?T), ?tmp#9##0:generic_list(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h##0:?T)
-        foreign lpvm mutate(~tmp#9##0:generic_list(?T), ?###0:generic_list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:generic_list(?T))
+        foreign lpvm mutate(~tmp#9##0:generic_list(?T), ?#result##0:generic_list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:generic_list(?T))
 
  [410bae77d3] [NonAliasedParam 0] :
     foreign llvm icmp_ne(l1##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
     case ~tmp#5##0:wybe.bool of
     0:
-        foreign llvm move(~l2##0:generic_list(?t), ?###0:generic_list(?t)) @generic_use:nn:nn
+        foreign llvm move(~l2##0:generic_list(?t), ?#result##0:generic_list(?t)) @generic_use:nn:nn
 
     1:
         foreign lpvm access(l1##0:generic_list(?T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:generic_list(?T))
         generic_use.concat<0>[410bae77d3](~t##0:generic_list(?t), ~l2##0:generic_list(?t), ?tmp#2##0:generic_list(?t)) #1 @generic_use:nn:nn
-        foreign lpvm mutate(~l1##0:generic_list(?T), ?###0:generic_list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:generic_list(?T))
+        foreign lpvm mutate(~l1##0:generic_list(?T), ?#result##0:generic_list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:generic_list(?T))
 
 
 
 fromto > public {inline} (2 calls)
 0: generic_use.fromto<0>
-fromto(lo##0:wybe.int, hi##0:wybe.int, ?###0:generic_list(wybe.int)):
+fromto(lo##0:wybe.int, hi##0:wybe.int, ?#result##0:generic_list(wybe.int)):
  AliasPairs: []
  InterestingCallProperties: []
-    generic_use.fromto1<0>(~lo##0:wybe.int, ~hi##0:wybe.int, 0:generic_list(wybe.int), ?###0:generic_list(wybe.int)) #1 @generic_use:nn:nn
+    generic_use.fromto1<0>(~lo##0:wybe.int, ~hi##0:wybe.int, 0:generic_list(wybe.int), ?#result##0:generic_list(wybe.int)) #1 @generic_use:nn:nn
 
 
 fromto1 > (2 calls)
 0: generic_use.fromto1<0>
-fromto1(lo##0:wybe.int, hi##0:wybe.int, sofar##0:generic_list(wybe.int), ?###0:generic_list(wybe.int)):
- AliasPairs: [(###0,sofar##0)]
+fromto1(lo##0:wybe.int, hi##0:wybe.int, sofar##0:generic_list(wybe.int), ?#result##0:generic_list(wybe.int)):
+ AliasPairs: [(#result##0,sofar##0)]
  InterestingCallProperties: []
     foreign llvm icmp_sge(hi##0:wybe.int, lo##0:wybe.int, ?tmp#4##0:wybe.bool) @int:nn:nn
     case ~tmp#4##0:wybe.bool of
     0:
-        foreign llvm move(~sofar##0:generic_list(wybe.int), ?###0:generic_list(wybe.int)) @generic_use:nn:nn
+        foreign llvm move(~sofar##0:generic_list(wybe.int), ?#result##0:generic_list(wybe.int)) @generic_use:nn:nn
 
     1:
         foreign llvm sub(hi##0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int) @int:nn:nn
         foreign lpvm alloc(16:wybe.int, ?tmp#11##0:generic_list(?T))
         foreign lpvm mutate(~tmp#11##0:generic_list(?T), ?tmp#12##0:generic_list(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~hi##0:?T)
         foreign lpvm mutate(~tmp#12##0:generic_list(?T), ?tmp#3##0:generic_list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~sofar##0:generic_list(?T))
-        generic_use.fromto1<0>(~lo##0:wybe.int, ~tmp#2##0:wybe.int, ~tmp#3##0:generic_list(wybe.int), ?###0:generic_list(wybe.int)) #3 @generic_use:nn:nn
+        generic_use.fromto1<0>(~lo##0:wybe.int, ~tmp#2##0:wybe.int, ~tmp#3##0:generic_list(wybe.int), ?#result##0:generic_list(wybe.int)) #3 @generic_use:nn:nn
 
 
 
 iota > public {inline} (1 calls)
 0: generic_use.iota<0>
-iota(n##0:wybe.int, ?###0:generic_list(wybe.int)):
+iota(n##0:wybe.int, ?#result##0:generic_list(wybe.int)):
  AliasPairs: []
  InterestingCallProperties: []
-    generic_use.fromto1<0>(1:wybe.int, ~n##0:wybe.int, 0:generic_list(wybe.int), ?###0:generic_list(wybe.int)) #1 @generic_use:nn:nn
+    generic_use.fromto1<0>(1:wybe.int, ~n##0:wybe.int, 0:generic_list(wybe.int), ?#result##0:generic_list(wybe.int)) #1 @generic_use:nn:nn
 
 
 nrev > public (2 calls)
 0: generic_use.nrev<0>[410bae77d3]
-nrev(lst##0:generic_list(?t), ?###0:generic_list(?t)):
+nrev(lst##0:generic_list(?t), ?#result##0:generic_list(?t)):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(1,(generic_use.nrev<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(generic_use.concat<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.bool)
     case ~tmp#8##0:wybe.bool of
     0:
-        foreign llvm move(0:generic_list(?t), ?###0:generic_list(?t)) @generic_use:nn:nn
+        foreign llvm move(0:generic_list(?t), ?#result##0:generic_list(?t)) @generic_use:nn:nn
 
     1:
         foreign lpvm access(lst##0:generic_list(?T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:?T)
@@ -485,19 +485,19 @@ nrev(lst##0:generic_list(?t), ?###0:generic_list(?t)):
         foreign lpvm alloc(16:wybe.int, ?tmp#11##0:generic_list(?T))
         foreign lpvm mutate(~tmp#11##0:generic_list(?T), ?tmp#12##0:generic_list(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h##0:?T)
         foreign lpvm mutate(~tmp#12##0:generic_list(?T), ?tmp#3##0:generic_list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:generic_list(?T))
-        generic_use.concat<0>[410bae77d3](~tmp#2##0:generic_list(?t), ~tmp#3##0:generic_list(?t), ?###0:generic_list(?t)) #4 @generic_use:nn:nn
+        generic_use.concat<0>[410bae77d3](~tmp#2##0:generic_list(?t), ~tmp#3##0:generic_list(?t), ?#result##0:generic_list(?t)) #4 @generic_use:nn:nn
 
  [410bae77d3] [NonAliasedParam 0] :
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.bool)
     case ~tmp#8##0:wybe.bool of
     0:
-        foreign llvm move(0:generic_list(?t), ?###0:generic_list(?t)) @generic_use:nn:nn
+        foreign llvm move(0:generic_list(?t), ?#result##0:generic_list(?t)) @generic_use:nn:nn
 
     1:
         foreign lpvm access(lst##0:generic_list(?T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:generic_list(?T))
         generic_use.nrev<0>[410bae77d3](~t##0:generic_list(?t), ?tmp#2##0:generic_list(?t)) #1 @generic_use:nn:nn
         foreign lpvm mutate(~lst##0:generic_list(?T), ?tmp#3##0:generic_list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:generic_list(?T))
-        generic_use.concat<0>[410bae77d3](~tmp#2##0:generic_list(?t), ~tmp#3##0:generic_list(?t), ?###0:generic_list(?t)) #4 @generic_use:nn:nn
+        generic_use.concat<0>[410bae77d3](~tmp#2##0:generic_list(?t), ~tmp#3##0:generic_list(?t), ?#result##0:generic_list(?t)) #4 @generic_use:nn:nn
 
 
 
@@ -551,22 +551,22 @@ println(lst##0:generic_list(wybe.int), io##0:wybe.phantom, ?io##2:wybe.phantom):
 
 reverse > public {inline} (1 calls)
 0: generic_use.reverse<0>
-reverse(lst##0:generic_list(?t), ?###0:generic_list(?t)):
+reverse(lst##0:generic_list(?t), ?#result##0:generic_list(?t)):
  AliasPairs: []
  InterestingCallProperties: []
-    generic_use.reverse1<0>(~lst##0:generic_list(?t), 0:generic_list(?t), ?###0:generic_list(?t)) #1 @generic_use:nn:nn
+    generic_use.reverse1<0>(~lst##0:generic_list(?t), 0:generic_list(?t), ?#result##0:generic_list(?t)) #1 @generic_use:nn:nn
 
 
 reverse1 > public (2 calls)
 0: generic_use.reverse1<0>[410bae77d3]
-reverse1(lst##0:generic_list(?t), suffix##0:generic_list(?t), ?###0:generic_list(?t)):
- AliasPairs: [(###0,suffix##0)]
+reverse1(lst##0:generic_list(?t), suffix##0:generic_list(?t), ?#result##0:generic_list(?t)):
+ AliasPairs: [(#result##0,suffix##0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(2,(generic_use.reverse1<0>,fromList [NonAliasedParamCond 0 [0]]))]
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
     case ~tmp#5##0:wybe.bool of
     0:
-        foreign llvm move(~suffix##0:generic_list(?t), ?###0:generic_list(?t)) @generic_use:nn:nn
+        foreign llvm move(~suffix##0:generic_list(?t), ?#result##0:generic_list(?t)) @generic_use:nn:nn
 
     1:
         foreign lpvm access(lst##0:generic_list(?T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:?T)
@@ -574,18 +574,18 @@ reverse1(lst##0:generic_list(?t), suffix##0:generic_list(?t), ?###0:generic_list
         foreign lpvm alloc(16:wybe.int, ?tmp#8##0:generic_list(?T))
         foreign lpvm mutate(~tmp#8##0:generic_list(?T), ?tmp#9##0:generic_list(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h##0:?T)
         foreign lpvm mutate(~tmp#9##0:generic_list(?T), ?tmp#2##0:generic_list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~suffix##0:generic_list(?T))
-        generic_use.reverse1<0>(~t##0:generic_list(?t), ~tmp#2##0:generic_list(?t), ?###0:generic_list(?t)) #2 @generic_use:nn:nn
+        generic_use.reverse1<0>(~t##0:generic_list(?t), ~tmp#2##0:generic_list(?t), ?#result##0:generic_list(?t)) #2 @generic_use:nn:nn
 
  [410bae77d3] [NonAliasedParam 0] :
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
     case ~tmp#5##0:wybe.bool of
     0:
-        foreign llvm move(~suffix##0:generic_list(?t), ?###0:generic_list(?t)) @generic_use:nn:nn
+        foreign llvm move(~suffix##0:generic_list(?t), ?#result##0:generic_list(?t)) @generic_use:nn:nn
 
     1:
         foreign lpvm access(lst##0:generic_list(?T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:generic_list(?T))
         foreign lpvm mutate(~lst##0:generic_list(?T), ?tmp#2##0:generic_list(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~suffix##0:generic_list(?T))
-        generic_use.reverse1<0>[410bae77d3](~t##0:generic_list(?t), ~tmp#2##0:generic_list(?t), ?###0:generic_list(?t)) #2 @generic_use:nn:nn
+        generic_use.reverse1<0>[410bae77d3](~t##0:generic_list(?t), ~tmp#2##0:generic_list(?t), ?#result##0:generic_list(?t)) #2 @generic_use:nn:nn
 
 
   LLVM code       :
@@ -686,8 +686,8 @@ if.else:
 
 define external fastcc  i64 @"generic_use.fromto<0>"(i64  %"lo##0", i64  %"hi##0")    {
 entry:
-  %"1####0" = tail call fastcc  i64  @"generic_use.fromto1<0>"(i64  %"lo##0", i64  %"hi##0", i64  0)  
-  ret i64 %"1####0" 
+  %"1##result##0" = tail call fastcc  i64  @"generic_use.fromto1<0>"(i64  %"lo##0", i64  %"hi##0", i64  0)  
+  ret i64 %"1##result##0" 
 }
 
 
@@ -707,8 +707,8 @@ if.then:
   %29 = inttoptr i64 %28 to i64* 
   %30 = getelementptr  i64, i64* %29, i64 0 
   store  i64 %"sofar##0", i64* %30 
-  %"2####0" = tail call fastcc  i64  @"generic_use.fromto1<0>"(i64  %"lo##0", i64  %"2#tmp#2##0", i64  %25)  
-  ret i64 %"2####0" 
+  %"2##result##0" = tail call fastcc  i64  @"generic_use.fromto1<0>"(i64  %"lo##0", i64  %"2#tmp#2##0", i64  %25)  
+  ret i64 %"2##result##0" 
 if.else:
   ret i64 %"sofar##0" 
 }
@@ -716,8 +716,8 @@ if.else:
 
 define external fastcc  i64 @"generic_use.iota<0>"(i64  %"n##0")    {
 entry:
-  %"1####0" = tail call fastcc  i64  @"generic_use.fromto1<0>"(i64  1, i64  %"n##0", i64  0)  
-  ret i64 %"1####0" 
+  %"1##result##0" = tail call fastcc  i64  @"generic_use.fromto1<0>"(i64  1, i64  %"n##0", i64  0)  
+  ret i64 %"1##result##0" 
 }
 
 
@@ -744,8 +744,8 @@ if.then:
   %44 = inttoptr i64 %43 to i64* 
   %45 = getelementptr  i64, i64* %44, i64 0 
   store  i64 0, i64* %45 
-  %"2####0" = tail call fastcc  i64  @"generic_use.concat<0>[410bae77d3]"(i64  %"2#tmp#2##0", i64  %40)  
-  ret i64 %"2####0" 
+  %"2##result##0" = tail call fastcc  i64  @"generic_use.concat<0>[410bae77d3]"(i64  %"2#tmp#2##0", i64  %40)  
+  ret i64 %"2##result##0" 
 if.else:
   ret i64 0 
 }
@@ -765,8 +765,8 @@ if.then:
   %51 = inttoptr i64 %50 to i64* 
   %52 = getelementptr  i64, i64* %51, i64 0 
   store  i64 0, i64* %52 
-  %"2####0" = tail call fastcc  i64  @"generic_use.concat<0>[410bae77d3]"(i64  %"2#tmp#2##0", i64  %"lst##0")  
-  ret i64 %"2####0" 
+  %"2##result##0" = tail call fastcc  i64  @"generic_use.concat<0>[410bae77d3]"(i64  %"2#tmp#2##0", i64  %"lst##0")  
+  ret i64 %"2##result##0" 
 if.else:
   ret i64 0 
 }
@@ -827,8 +827,8 @@ entry:
 
 define external fastcc  i64 @"generic_use.reverse<0>"(i64  %"lst##0")    {
 entry:
-  %"1####0" = tail call fastcc  i64  @"generic_use.reverse1<0>"(i64  %"lst##0", i64  0)  
-  ret i64 %"1####0" 
+  %"1##result##0" = tail call fastcc  i64  @"generic_use.reverse1<0>"(i64  %"lst##0", i64  0)  
+  ret i64 %"1##result##0" 
 }
 
 
@@ -854,8 +854,8 @@ if.then:
   %82 = inttoptr i64 %81 to i64* 
   %83 = getelementptr  i64, i64* %82, i64 0 
   store  i64 %"suffix##0", i64* %83 
-  %"2####0" = tail call fastcc  i64  @"generic_use.reverse1<0>"(i64  %75, i64  %78)  
-  ret i64 %"2####0" 
+  %"2##result##0" = tail call fastcc  i64  @"generic_use.reverse1<0>"(i64  %75, i64  %78)  
+  ret i64 %"2##result##0" 
 if.else:
   ret i64 %"suffix##0" 
 }
@@ -874,8 +874,8 @@ if.then:
   %89 = inttoptr i64 %88 to i64* 
   %90 = getelementptr  i64, i64* %89, i64 0 
   store  i64 %"suffix##0", i64* %90 
-  %"2####0" = tail call fastcc  i64  @"generic_use.reverse1<0>[410bae77d3]"(i64  %87, i64  %"lst##0")  
-  ret i64 %"2####0" 
+  %"2##result##0" = tail call fastcc  i64  @"generic_use.reverse1<0>[410bae77d3]"(i64  %87, i64  %"lst##0")  
+  ret i64 %"2##result##0" 
 if.else:
   ret i64 %"suffix##0" 
 }

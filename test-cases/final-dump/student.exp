@@ -196,10 +196,10 @@ entry:
 
 code > public {inline} (0 calls)
 0: student.course.code<0>
-code(#rec##0:student.course, ?###0:wybe.int):
+code(#rec##0:student.course, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 code > public {inline} (0 calls)
 1: student.course.code<1>
 code(#rec##0:student.course, ?#rec##1:student.course, #field##0:wybe.int):
@@ -210,27 +210,27 @@ code(#rec##0:student.course, ?#rec##1:student.course, #field##0:wybe.int):
 
 course > public {inline} (0 calls)
 0: student.course.course<0>
-course(code##0:wybe.int, name##0:wybe.string, ?###0:student.course):
+course(code##0:wybe.int, name##0:wybe.string, ?#result##0:student.course):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:student.course)
     foreign lpvm mutate(~#rec##0:student.course, ?#rec##1:student.course, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~code##0:wybe.int)
-    foreign lpvm mutate(~#rec##1:student.course, ?###0:student.course, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~name##0:wybe.string)
+    foreign lpvm mutate(~#rec##1:student.course, ?#result##0:student.course, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~name##0:wybe.string)
 course > public {inline} (6 calls)
 1: student.course.course<1>
-course(?code##0:wybe.int, ?name##0:wybe.string, ###0:student.course):
+course(?code##0:wybe.int, ?name##0:wybe.string, #result##0:student.course):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(###0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?code##0:wybe.int)
-    foreign lpvm access(~###0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?name##0:wybe.string)
+    foreign lpvm access(#result##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?code##0:wybe.int)
+    foreign lpvm access(~#result##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?name##0:wybe.string)
 
 
 name > public {inline} (0 calls)
 0: student.course.name<0>
-name(#rec##0:student.course, ?###0:wybe.string):
+name(#rec##0:student.course, ?#result##0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:wybe.string)
+    foreign lpvm access(~#rec##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string)
 name > public {inline} (0 calls)
 1: student.course.name<1>
 name(#rec##0:student.course, ?#rec##1:student.course, #field##0:wybe.string):
@@ -345,12 +345,12 @@ entry:
 }
 
 
-define external fastcc  {i64, i64} @"student.course.course<1>"(i64  %"###0")    {
+define external fastcc  {i64, i64} @"student.course.course<1>"(i64  %"#result##0")    {
 entry:
-  %34 = inttoptr i64 %"###0" to i64* 
+  %34 = inttoptr i64 %"#result##0" to i64* 
   %35 = getelementptr  i64, i64* %34, i64 0 
   %36 = load  i64, i64* %35 
-  %37 = add   i64 %"###0", 8 
+  %37 = add   i64 %"#result##0", 8 
   %38 = inttoptr i64 %37 to i64* 
   %39 = getelementptr  i64, i64* %38, i64 0 
   %40 = load  i64, i64* %39 
@@ -465,10 +465,10 @@ if.else:
 
 id > public {inline} (0 calls)
 0: student.student.id<0>
-id(#rec##0:student.student, ?###0:wybe.int):
+id(#rec##0:student.student, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:wybe.int)
+    foreign lpvm access(~#rec##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 id > public {inline} (0 calls)
 1: student.student.id<1>
 id(#rec##0:student.student, ?#rec##1:student.student, #field##0:wybe.int):
@@ -479,10 +479,10 @@ id(#rec##0:student.student, ?#rec##1:student.student, #field##0:wybe.int):
 
 major > public {inline} (0 calls)
 0: student.student.major<0>
-major(#rec##0:student.student, ?###0:student.course):
+major(#rec##0:student.student, ?#result##0:student.course):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?###0:student.course)
+    foreign lpvm access(~#rec##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:student.course)
 major > public {inline} (0 calls)
 1: student.student.major<1>
 major(#rec##0:student.student, ?#rec##1:student.student, #field##0:student.course):
@@ -493,19 +493,19 @@ major(#rec##0:student.student, ?#rec##1:student.student, #field##0:student.cours
 
 student > public {inline} (0 calls)
 0: student.student.student<0>
-student(id##0:wybe.int, major##0:student.course, ?###0:student.student):
+student(id##0:wybe.int, major##0:student.course, ?#result##0:student.student):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:student.student)
     foreign lpvm mutate(~#rec##0:student.student, ?#rec##1:student.student, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~id##0:wybe.int)
-    foreign lpvm mutate(~#rec##1:student.student, ?###0:student.student, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~major##0:student.course)
+    foreign lpvm mutate(~#rec##1:student.student, ?#result##0:student.student, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~major##0:student.course)
 student > public {inline} (6 calls)
 1: student.student.student<1>
-student(?id##0:wybe.int, ?major##0:student.course, ###0:student.student):
+student(?id##0:wybe.int, ?major##0:student.course, #result##0:student.student):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(###0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?id##0:wybe.int)
-    foreign lpvm access(~###0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?major##0:student.course)
+    foreign lpvm access(#result##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?id##0:wybe.int)
+    foreign lpvm access(~#result##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?major##0:student.course)
 
 
 ~= > public {inline} (0 calls)
@@ -672,12 +672,12 @@ entry:
 }
 
 
-define external fastcc  {i64, i64} @"student.student.student<1>"(i64  %"###0")    {
+define external fastcc  {i64, i64} @"student.student.student<1>"(i64  %"#result##0")    {
 entry:
-  %61 = inttoptr i64 %"###0" to i64* 
+  %61 = inttoptr i64 %"#result##0" to i64* 
   %62 = getelementptr  i64, i64* %61, i64 0 
   %63 = load  i64, i64* %62 
-  %64 = add   i64 %"###0", 8 
+  %64 = add   i64 %"#result##0", 8 
   %65 = inttoptr i64 %64 to i64* 
   %66 = getelementptr  i64, i64* %65, i64 0 
   %67 = load  i64, i64* %66 
