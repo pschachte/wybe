@@ -470,10 +470,13 @@ tokeniseBackquote :: String -> SourcePos -> [Token]
 tokeniseBackquote cs pos =
     let pos'  = updatePosChar pos '`'  -- count the opening `
         pos'' = updatePosChar pos' '`' -- pre-count the closing `
-    in case break ((=='`') ||| (<' ')) cs of
+    in case break ((=='`') ||| (<' ') ||| (=='#')) cs of
+        ([],_)           -> [TokError "empty backquoted symbol" pos]
         (_,[])           -> [TokError "unclosed backquote" pos]
         (name,'`':rest)  -> multiCharTok name rest (TokIdent name pos) pos''
         (name,'\n':rest) -> [TokError "multiline backquoted symbol" pos]
+        (name,'#':rest)  -> [TokError "hash character (#) in backquoted symbol"
+                             pos]
         (name,_:rest)    ->
             [TokError "control character in a backquoted symbol" pos]
 
