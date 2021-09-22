@@ -15,14 +15,14 @@ AFTER EVERYTHING:
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_string("print(x:string) creates a newline already":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-    foreign c print_string("println(x:string) generates an extra newline?":wybe.string, ~#io##1:wybe.phantom, ?tmp$4##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$4##0:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-    foreign c print_string("println(x:string) generates an extra newline?":wybe.string, ~#io##2:wybe.phantom, ?tmp$7##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$7##0:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
-    foreign c putchar('c':wybe.char, ~#io##3:wybe.phantom, ?tmp$10##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$10##0:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
-    foreign c print_int(1:wybe.int, ~#io##4:wybe.phantom, ?tmp$13##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$13##0:wybe.phantom, ?#io##5:wybe.phantom) @io:nn:nn
+    foreign c print_string("println(x:string) generates an extra newline?":wybe.string, ~#io##1:wybe.phantom, ?tmp#4##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#4##0:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
+    foreign c print_string("println(x:string) generates an extra newline?":wybe.string, ~#io##2:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
+    foreign c putchar('c':wybe.char, ~#io##3:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
+    foreign c print_int(1:wybe.int, ~#io##4:wybe.phantom, ?tmp#13##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#13##0:wybe.phantom, ?#io##5:wybe.phantom) @io:nn:nn
     foreign c print_int(1:wybe.int, ~#io##5:wybe.phantom, ?#io##6:wybe.phantom) @io:nn:nn
 
   LLVM code       :

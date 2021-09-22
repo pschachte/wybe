@@ -19,8 +19,8 @@ show_column > public {inline} (0 calls)
 show_column(call_source_column_number##0:wybe.int, io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_int(~call_source_column_number##0:wybe.int, ~#io##0:wybe.phantom, ?tmp$2##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$2##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+    foreign c print_int(~call_source_column_number##0:wybe.int, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#2##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
 
 
 show_file > public {inline} (0 calls)
@@ -28,8 +28,8 @@ show_file > public {inline} (0 calls)
 show_file(call_source_file_name##0:wybe.string, io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string(~call_source_file_name##0:wybe.string, ~#io##0:wybe.phantom, ?tmp$2##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$2##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+    foreign c print_string(~call_source_file_name##0:wybe.string, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#2##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
 
 
 show_full_file > public {inline} (0 calls)
@@ -37,8 +37,8 @@ show_full_file > public {inline} (0 calls)
 show_full_file(call_source_file_full_name##0:wybe.string, io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string(~call_source_file_full_name##0:wybe.string, ~#io##0:wybe.phantom, ?tmp$2##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$2##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+    foreign c print_string(~call_source_file_full_name##0:wybe.string, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#2##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
 
 
 show_full_location > public {inline} (0 calls)
@@ -46,8 +46,8 @@ show_full_location > public {inline} (0 calls)
 show_full_location(call_source_full_location##0:wybe.string, io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string(~call_source_full_location##0:wybe.string, ~#io##0:wybe.phantom, ?tmp$2##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$2##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+    foreign c print_string(~call_source_full_location##0:wybe.string, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#2##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
 
 
 show_line > public {inline} (0 calls)
@@ -55,8 +55,8 @@ show_line > public {inline} (0 calls)
 show_line(call_source_line_number##0:wybe.int, io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_int(~call_source_line_number##0:wybe.int, ~#io##0:wybe.phantom, ?tmp$2##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$2##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+    foreign c print_int(~call_source_line_number##0:wybe.int, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#2##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
 
 
 show_location > public {inline} (0 calls)
@@ -64,8 +64,8 @@ show_location > public {inline} (0 calls)
 show_location(call_source_location##0:wybe.string, io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string(~call_source_location##0:wybe.string, ~#io##0:wybe.phantom, ?tmp$2##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$2##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+    foreign c print_string(~call_source_location##0:wybe.string, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#2##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 

@@ -2863,7 +2863,7 @@ varsInPrimArg _ (ArgUndef _)            = Set.empty
 -- a user identifier.  It should not be possible for the user to include this
 -- character in an identifier.
 specialChar :: Char
-specialChar = '$' -- for backward compatibility: replace with `
+specialChar = '#' -- note # is not allowed in backquoted strings
 
 
 -- | Construct a name can't be a valid Wybe symbol from one user string.
@@ -2877,9 +2877,9 @@ specialName2 front back = front ++ specialChar:back
 
 
 -- | The full name to give to a PrimVarName, including the variable number
--- suffix.
+-- suffix.  Use two specialChars to distinguish from special separator.
 numberedVarName :: String -> Int -> String
-numberedVarName name number = name ++ "##" ++ show number
+numberedVarName name number = name ++ specialChar:specialChar:show number
 
 
 -- | The name to give to the output variable when converting a function to a

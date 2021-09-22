@@ -27,26 +27,26 @@ AFTER EVERYTHING:
 (io##0:wybe.phantom, ?io##4:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(24:wybe.int, ?tmp$7##0:coordinate.Coordinate)
-    foreign lpvm mutate(~tmp$7##0:coordinate.Coordinate, ?tmp$8##0:coordinate.Coordinate, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1000:wybe.int)
-    foreign lpvm mutate(~tmp$8##0:coordinate.Coordinate, ?tmp$9##0:coordinate.Coordinate, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1000:wybe.int)
-    foreign lpvm mutate(~tmp$9##0:coordinate.Coordinate, ?tmp$22##0:coordinate.Coordinate, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1000:wybe.int)
-    foreign lpvm {noalias} mutate(~tmp$22##0:coordinate.Coordinate, ?%crd1##1:coordinate.Coordinate, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 8000:wybe.int)
+    foreign lpvm alloc(24:wybe.int, ?tmp#7##0:coordinate.Coordinate)
+    foreign lpvm mutate(~tmp#7##0:coordinate.Coordinate, ?tmp#8##0:coordinate.Coordinate, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1000:wybe.int)
+    foreign lpvm mutate(~tmp#8##0:coordinate.Coordinate, ?tmp#9##0:coordinate.Coordinate, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1000:wybe.int)
+    foreign lpvm mutate(~tmp#9##0:coordinate.Coordinate, ?tmp#22##0:coordinate.Coordinate, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1000:wybe.int)
+    foreign lpvm {noalias} mutate(~tmp#22##0:coordinate.Coordinate, ?%crd1##1:coordinate.Coordinate, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 8000:wybe.int)
     foreign c print_string("expect crd1^z=8000: ":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-    foreign lpvm access(~crd1##1:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$2##0:wybe.int)
-    foreign c print_int(~tmp$2##0:wybe.int, ~#io##1:wybe.phantom, ?tmp$19##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$19##0:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
+    foreign lpvm access(~crd1##1:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int)
+    foreign c print_int(~tmp#2##0:wybe.int, ~#io##1:wybe.phantom, ?tmp#19##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
     foreign c print_string("expect crd2^z=1000: ":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
-    foreign c print_int(1000:wybe.int, ~#io##3:wybe.phantom, ?tmp$25##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$25##0:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
+    foreign c print_int(1000:wybe.int, ~#io##3:wybe.phantom, ?tmp#25##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#25##0:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
 
 
 fcopy > public {inline} (1 calls)
 0: coordinate.fcopy<0>
-fcopy(crd1##0:coordinate.Coordinate, ?$##0:coordinate.Coordinate):
+fcopy(crd1##0:coordinate.Coordinate, ?###0:coordinate.Coordinate):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(~crd1##0:coordinate.Coordinate, ?$##0:coordinate.Coordinate) @coordinate:nn:nn
+    foreign llvm move(~crd1##0:coordinate.Coordinate, ?###0:coordinate.Coordinate) @coordinate:nn:nn
 
   LLVM code       :
 
@@ -139,120 +139,120 @@ entry:
 
 = > public {inline} (1 calls)
 0: coordinate.Coordinate.=<0>
-=($left##0:coordinate.Coordinate, $right##0:coordinate.Coordinate, ?$$##0:wybe.bool):
+=(#left##0:coordinate.Coordinate, #right##0:coordinate.Coordinate, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($left##0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?$left$x##0:wybe.int)
-    foreign lpvm access($left##0:coordinate.Coordinate, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?$left$y##0:wybe.int)
-    foreign lpvm access(~$left##0:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?$left$z##0:wybe.int)
-    foreign lpvm access($right##0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?$right$x##0:wybe.int)
-    foreign lpvm access($right##0:coordinate.Coordinate, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?$right$y##0:wybe.int)
-    foreign lpvm access(~$right##0:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?$right$z##0:wybe.int)
-    foreign llvm icmp_eq(~$left$x##0:wybe.int, ~$right$x##0:wybe.int, ?tmp$1##0:wybe.bool) @int:nn:nn
-    case ~tmp$1##0:wybe.bool of
+    foreign lpvm access(#left##0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#x##0:wybe.int)
+    foreign lpvm access(#left##0:coordinate.Coordinate, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#y##0:wybe.int)
+    foreign lpvm access(~#left##0:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#z##0:wybe.int)
+    foreign lpvm access(#right##0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#right#x##0:wybe.int)
+    foreign lpvm access(#right##0:coordinate.Coordinate, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#right#y##0:wybe.int)
+    foreign lpvm access(~#right##0:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#right#z##0:wybe.int)
+    foreign llvm icmp_eq(~#left#x##0:wybe.int, ~#right#x##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    case ~tmp#1##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?$$##0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
 
     1:
-        foreign llvm icmp_eq(~$left$y##0:wybe.int, ~$right$y##0:wybe.int, ?tmp$2##0:wybe.bool) @int:nn:nn
-        case ~tmp$2##0:wybe.bool of
+        foreign llvm icmp_eq(~#left#y##0:wybe.int, ~#right#y##0:wybe.int, ?tmp#2##0:wybe.bool) @int:nn:nn
+        case ~tmp#2##0:wybe.bool of
         0:
-            foreign llvm move(0:wybe.bool, ?$$##0:wybe.bool)
+            foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
 
         1:
-            foreign llvm icmp_eq(~$left$z##0:wybe.int, ~$right$z##0:wybe.int, ?$$##0:wybe.bool) @int:nn:nn
+            foreign llvm icmp_eq(~#left#z##0:wybe.int, ~#right#z##0:wybe.int, ?####0:wybe.bool) @int:nn:nn
 
 
 
 
 Coordinate > public {inline} (0 calls)
 0: coordinate.Coordinate.Coordinate<0>
-Coordinate(x##0:wybe.int, y##0:wybe.int, z##0:wybe.int, ?$##0:coordinate.Coordinate):
+Coordinate(x##0:wybe.int, y##0:wybe.int, z##0:wybe.int, ?###0:coordinate.Coordinate):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(24:wybe.int, ?$rec##0:coordinate.Coordinate)
-    foreign lpvm mutate(~$rec##0:coordinate.Coordinate, ?$rec##1:coordinate.Coordinate, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~x##0:wybe.int)
-    foreign lpvm mutate(~$rec##1:coordinate.Coordinate, ?$rec##2:coordinate.Coordinate, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~y##0:wybe.int)
-    foreign lpvm mutate(~$rec##2:coordinate.Coordinate, ?$##0:coordinate.Coordinate, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~z##0:wybe.int)
+    foreign lpvm alloc(24:wybe.int, ?#rec##0:coordinate.Coordinate)
+    foreign lpvm mutate(~#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~x##0:wybe.int)
+    foreign lpvm mutate(~#rec##1:coordinate.Coordinate, ?#rec##2:coordinate.Coordinate, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~y##0:wybe.int)
+    foreign lpvm mutate(~#rec##2:coordinate.Coordinate, ?###0:coordinate.Coordinate, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~z##0:wybe.int)
 Coordinate > public {inline} (10 calls)
 1: coordinate.Coordinate.Coordinate<1>
-Coordinate(?x##0:wybe.int, ?y##0:wybe.int, ?z##0:wybe.int, $##0:coordinate.Coordinate):
+Coordinate(?x##0:wybe.int, ?y##0:wybe.int, ?z##0:wybe.int, ###0:coordinate.Coordinate):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($##0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?x##0:wybe.int)
-    foreign lpvm access($##0:coordinate.Coordinate, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?y##0:wybe.int)
-    foreign lpvm access(~$##0:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?z##0:wybe.int)
+    foreign lpvm access(###0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?x##0:wybe.int)
+    foreign lpvm access(###0:coordinate.Coordinate, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?y##0:wybe.int)
+    foreign lpvm access(~###0:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?z##0:wybe.int)
 
 
 x > public {inline} (0 calls)
 0: coordinate.Coordinate.x<0>
-x($rec##0:coordinate.Coordinate, ?$##0:wybe.int):
+x(#rec##0:coordinate.Coordinate, ?###0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~$rec##0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?$##0:wybe.int)
+    foreign lpvm access(~#rec##0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?###0:wybe.int)
 x > public {inline} (0 calls)
 1: coordinate.Coordinate.x<1>
-x($rec##0:coordinate.Coordinate, ?$rec##1:coordinate.Coordinate, $field##0:wybe.int):
+x(#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, #field##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~$rec##0:coordinate.Coordinate, ?$rec##1:coordinate.Coordinate, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field##0:wybe.int)
+    foreign lpvm {noalias} mutate(~#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
 y > public {inline} (0 calls)
 0: coordinate.Coordinate.y<0>
-y($rec##0:coordinate.Coordinate, ?$##0:wybe.int):
+y(#rec##0:coordinate.Coordinate, ?###0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~$rec##0:coordinate.Coordinate, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?$##0:wybe.int)
+    foreign lpvm access(~#rec##0:coordinate.Coordinate, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?###0:wybe.int)
 y > public {inline} (0 calls)
 1: coordinate.Coordinate.y<1>
-y($rec##0:coordinate.Coordinate, ?$rec##1:coordinate.Coordinate, $field##0:wybe.int):
+y(#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, #field##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~$rec##0:coordinate.Coordinate, ?$rec##1:coordinate.Coordinate, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field##0:wybe.int)
+    foreign lpvm {noalias} mutate(~#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
 z > public {inline} (0 calls)
 0: coordinate.Coordinate.z<0>
-z($rec##0:coordinate.Coordinate, ?$##0:wybe.int):
+z(#rec##0:coordinate.Coordinate, ?###0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~$rec##0:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?$##0:wybe.int)
+    foreign lpvm access(~#rec##0:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?###0:wybe.int)
 z > public {inline} (0 calls)
 1: coordinate.Coordinate.z<1>
-z($rec##0:coordinate.Coordinate, ?$rec##1:coordinate.Coordinate, $field##0:wybe.int):
+z(#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, #field##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~$rec##0:coordinate.Coordinate, ?$rec##1:coordinate.Coordinate, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field##0:wybe.int)
+    foreign lpvm {noalias} mutate(~#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
 ~= > public {inline} (0 calls)
 0: coordinate.Coordinate.~=<0>
-~=($left##0:coordinate.Coordinate, $right##0:coordinate.Coordinate, ?$$##0:wybe.bool):
+~=(#left##0:coordinate.Coordinate, #right##0:coordinate.Coordinate, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($left##0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$3##0:wybe.int)
-    foreign lpvm access($left##0:coordinate.Coordinate, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$4##0:wybe.int)
-    foreign lpvm access(~$left##0:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$5##0:wybe.int)
-    foreign lpvm access($right##0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$6##0:wybe.int)
-    foreign lpvm access($right##0:coordinate.Coordinate, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$7##0:wybe.int)
-    foreign lpvm access(~$right##0:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$8##0:wybe.int)
-    foreign llvm icmp_eq(~tmp$3##0:wybe.int, ~tmp$6##0:wybe.int, ?tmp$9##0:wybe.bool) @int:nn:nn
-    case ~tmp$9##0:wybe.bool of
+    foreign lpvm access(#left##0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int)
+    foreign lpvm access(#left##0:coordinate.Coordinate, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int)
+    foreign lpvm access(~#left##0:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.int)
+    foreign lpvm access(#right##0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.int)
+    foreign lpvm access(#right##0:coordinate.Coordinate, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.int)
+    foreign lpvm access(~#right##0:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.int)
+    foreign llvm icmp_eq(~tmp#3##0:wybe.int, ~tmp#6##0:wybe.int, ?tmp#9##0:wybe.bool) @int:nn:nn
+    case ~tmp#9##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?tmp$0##0:wybe.bool)
-        foreign llvm xor(~tmp$0##0:wybe.bool, 1:wybe.bool, ?$$##0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
 
     1:
-        foreign llvm icmp_eq(~tmp$4##0:wybe.int, ~tmp$7##0:wybe.int, ?tmp$10##0:wybe.bool) @int:nn:nn
-        case ~tmp$10##0:wybe.bool of
+        foreign llvm icmp_eq(~tmp#4##0:wybe.int, ~tmp#7##0:wybe.int, ?tmp#10##0:wybe.bool) @int:nn:nn
+        case ~tmp#10##0:wybe.bool of
         0:
-            foreign llvm move(0:wybe.bool, ?tmp$0##0:wybe.bool)
-            foreign llvm xor(~tmp$0##0:wybe.bool, 1:wybe.bool, ?$$##0:wybe.bool)
+            foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
+            foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
 
         1:
-            foreign llvm icmp_eq(~tmp$5##0:wybe.int, ~tmp$8##0:wybe.int, ?tmp$0##0:wybe.bool) @int:nn:nn
-            foreign llvm xor(~tmp$0##0:wybe.bool, 1:wybe.bool, ?$$##0:wybe.bool)
+            foreign llvm icmp_eq(~tmp#5##0:wybe.int, ~tmp#8##0:wybe.int, ?tmp#0##0:wybe.bool) @int:nn:nn
+            foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
 
 
 
@@ -270,40 +270,40 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external fastcc  i1 @"coordinate.Coordinate.=<0>"(i64  %"$left##0", i64  %"$right##0")    {
+define external fastcc  i1 @"coordinate.Coordinate.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
 entry:
-  %1 = inttoptr i64 %"$left##0" to i64* 
+  %1 = inttoptr i64 %"#left##0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   %3 = load  i64, i64* %2 
-  %4 = add   i64 %"$left##0", 8 
+  %4 = add   i64 %"#left##0", 8 
   %5 = inttoptr i64 %4 to i64* 
   %6 = getelementptr  i64, i64* %5, i64 0 
   %7 = load  i64, i64* %6 
-  %8 = add   i64 %"$left##0", 16 
+  %8 = add   i64 %"#left##0", 16 
   %9 = inttoptr i64 %8 to i64* 
   %10 = getelementptr  i64, i64* %9, i64 0 
   %11 = load  i64, i64* %10 
-  %12 = inttoptr i64 %"$right##0" to i64* 
+  %12 = inttoptr i64 %"#right##0" to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %15 = add   i64 %"$right##0", 8 
+  %15 = add   i64 %"#right##0", 8 
   %16 = inttoptr i64 %15 to i64* 
   %17 = getelementptr  i64, i64* %16, i64 0 
   %18 = load  i64, i64* %17 
-  %19 = add   i64 %"$right##0", 16 
+  %19 = add   i64 %"#right##0", 16 
   %20 = inttoptr i64 %19 to i64* 
   %21 = getelementptr  i64, i64* %20, i64 0 
   %22 = load  i64, i64* %21 
-  %"1$tmp$1##0" = icmp eq i64 %3, %14 
-  br i1 %"1$tmp$1##0", label %if.then, label %if.else 
+  %"1#tmp#1##0" = icmp eq i64 %3, %14 
+  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$2##0" = icmp eq i64 %7, %18 
-  br i1 %"2$tmp$2##0", label %if.then1, label %if.else1 
+  %"2#tmp#2##0" = icmp eq i64 %7, %18 
+  br i1 %"2#tmp#2##0", label %if.then1, label %if.else1 
 if.else:
   ret i1 0 
 if.then1:
-  %"4$$$##0" = icmp eq i64 %11, %22 
-  ret i1 %"4$$$##0" 
+  %"4#####0" = icmp eq i64 %11, %22 
+  ret i1 %"4#####0" 
 if.else1:
   ret i1 0 
 }
@@ -329,16 +329,16 @@ entry:
 }
 
 
-define external fastcc  {i64, i64, i64} @"coordinate.Coordinate.Coordinate<1>"(i64  %"$##0")    {
+define external fastcc  {i64, i64, i64} @"coordinate.Coordinate.Coordinate<1>"(i64  %"###0")    {
 entry:
-  %34 = inttoptr i64 %"$##0" to i64* 
+  %34 = inttoptr i64 %"###0" to i64* 
   %35 = getelementptr  i64, i64* %34, i64 0 
   %36 = load  i64, i64* %35 
-  %37 = add   i64 %"$##0", 8 
+  %37 = add   i64 %"###0", 8 
   %38 = inttoptr i64 %37 to i64* 
   %39 = getelementptr  i64, i64* %38, i64 0 
   %40 = load  i64, i64* %39 
-  %41 = add   i64 %"$##0", 16 
+  %41 = add   i64 %"###0", 16 
   %42 = inttoptr i64 %41 to i64* 
   %43 = getelementptr  i64, i64* %42, i64 0 
   %44 = load  i64, i64* %43 
@@ -349,34 +349,34 @@ entry:
 }
 
 
-define external fastcc  i64 @"coordinate.Coordinate.x<0>"(i64  %"$rec##0")    {
+define external fastcc  i64 @"coordinate.Coordinate.x<0>"(i64  %"#rec##0")    {
 entry:
-  %48 = inttoptr i64 %"$rec##0" to i64* 
+  %48 = inttoptr i64 %"#rec##0" to i64* 
   %49 = getelementptr  i64, i64* %48, i64 0 
   %50 = load  i64, i64* %49 
   ret i64 %50 
 }
 
 
-define external fastcc  i64 @"coordinate.Coordinate.x<1>"(i64  %"$rec##0", i64  %"$field##0")    {
+define external fastcc  i64 @"coordinate.Coordinate.x<1>"(i64  %"#rec##0", i64  %"#field##0")    {
 entry:
   %51 = trunc i64 24 to i32  
   %52 = tail call ccc  i8*  @wybe_malloc(i32  %51)  
   %53 = ptrtoint i8* %52 to i64 
   %54 = inttoptr i64 %53 to i8* 
-  %55 = inttoptr i64 %"$rec##0" to i8* 
+  %55 = inttoptr i64 %"#rec##0" to i8* 
   %56 = trunc i64 24 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %54, i8*  %55, i32  %56, i32  8, i1  0)  
   %57 = inttoptr i64 %53 to i64* 
   %58 = getelementptr  i64, i64* %57, i64 0 
-  store  i64 %"$field##0", i64* %58 
+  store  i64 %"#field##0", i64* %58 
   ret i64 %53 
 }
 
 
-define external fastcc  i64 @"coordinate.Coordinate.y<0>"(i64  %"$rec##0")    {
+define external fastcc  i64 @"coordinate.Coordinate.y<0>"(i64  %"#rec##0")    {
 entry:
-  %59 = add   i64 %"$rec##0", 8 
+  %59 = add   i64 %"#rec##0", 8 
   %60 = inttoptr i64 %59 to i64* 
   %61 = getelementptr  i64, i64* %60, i64 0 
   %62 = load  i64, i64* %61 
@@ -384,26 +384,26 @@ entry:
 }
 
 
-define external fastcc  i64 @"coordinate.Coordinate.y<1>"(i64  %"$rec##0", i64  %"$field##0")    {
+define external fastcc  i64 @"coordinate.Coordinate.y<1>"(i64  %"#rec##0", i64  %"#field##0")    {
 entry:
   %63 = trunc i64 24 to i32  
   %64 = tail call ccc  i8*  @wybe_malloc(i32  %63)  
   %65 = ptrtoint i8* %64 to i64 
   %66 = inttoptr i64 %65 to i8* 
-  %67 = inttoptr i64 %"$rec##0" to i8* 
+  %67 = inttoptr i64 %"#rec##0" to i8* 
   %68 = trunc i64 24 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %66, i8*  %67, i32  %68, i32  8, i1  0)  
   %69 = add   i64 %65, 8 
   %70 = inttoptr i64 %69 to i64* 
   %71 = getelementptr  i64, i64* %70, i64 0 
-  store  i64 %"$field##0", i64* %71 
+  store  i64 %"#field##0", i64* %71 
   ret i64 %65 
 }
 
 
-define external fastcc  i64 @"coordinate.Coordinate.z<0>"(i64  %"$rec##0")    {
+define external fastcc  i64 @"coordinate.Coordinate.z<0>"(i64  %"#rec##0")    {
 entry:
-  %72 = add   i64 %"$rec##0", 16 
+  %72 = add   i64 %"#rec##0", 16 
   %73 = inttoptr i64 %72 to i64* 
   %74 = getelementptr  i64, i64* %73, i64 0 
   %75 = load  i64, i64* %74 
@@ -411,60 +411,60 @@ entry:
 }
 
 
-define external fastcc  i64 @"coordinate.Coordinate.z<1>"(i64  %"$rec##0", i64  %"$field##0")    {
+define external fastcc  i64 @"coordinate.Coordinate.z<1>"(i64  %"#rec##0", i64  %"#field##0")    {
 entry:
   %76 = trunc i64 24 to i32  
   %77 = tail call ccc  i8*  @wybe_malloc(i32  %76)  
   %78 = ptrtoint i8* %77 to i64 
   %79 = inttoptr i64 %78 to i8* 
-  %80 = inttoptr i64 %"$rec##0" to i8* 
+  %80 = inttoptr i64 %"#rec##0" to i8* 
   %81 = trunc i64 24 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %79, i8*  %80, i32  %81, i32  8, i1  0)  
   %82 = add   i64 %78, 16 
   %83 = inttoptr i64 %82 to i64* 
   %84 = getelementptr  i64, i64* %83, i64 0 
-  store  i64 %"$field##0", i64* %84 
+  store  i64 %"#field##0", i64* %84 
   ret i64 %78 
 }
 
 
-define external fastcc  i1 @"coordinate.Coordinate.~=<0>"(i64  %"$left##0", i64  %"$right##0")    {
+define external fastcc  i1 @"coordinate.Coordinate.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
 entry:
-  %85 = inttoptr i64 %"$left##0" to i64* 
+  %85 = inttoptr i64 %"#left##0" to i64* 
   %86 = getelementptr  i64, i64* %85, i64 0 
   %87 = load  i64, i64* %86 
-  %88 = add   i64 %"$left##0", 8 
+  %88 = add   i64 %"#left##0", 8 
   %89 = inttoptr i64 %88 to i64* 
   %90 = getelementptr  i64, i64* %89, i64 0 
   %91 = load  i64, i64* %90 
-  %92 = add   i64 %"$left##0", 16 
+  %92 = add   i64 %"#left##0", 16 
   %93 = inttoptr i64 %92 to i64* 
   %94 = getelementptr  i64, i64* %93, i64 0 
   %95 = load  i64, i64* %94 
-  %96 = inttoptr i64 %"$right##0" to i64* 
+  %96 = inttoptr i64 %"#right##0" to i64* 
   %97 = getelementptr  i64, i64* %96, i64 0 
   %98 = load  i64, i64* %97 
-  %99 = add   i64 %"$right##0", 8 
+  %99 = add   i64 %"#right##0", 8 
   %100 = inttoptr i64 %99 to i64* 
   %101 = getelementptr  i64, i64* %100, i64 0 
   %102 = load  i64, i64* %101 
-  %103 = add   i64 %"$right##0", 16 
+  %103 = add   i64 %"#right##0", 16 
   %104 = inttoptr i64 %103 to i64* 
   %105 = getelementptr  i64, i64* %104, i64 0 
   %106 = load  i64, i64* %105 
-  %"1$tmp$9##0" = icmp eq i64 %87, %98 
-  br i1 %"1$tmp$9##0", label %if.then, label %if.else 
+  %"1#tmp#9##0" = icmp eq i64 %87, %98 
+  br i1 %"1#tmp#9##0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$10##0" = icmp eq i64 %91, %102 
-  br i1 %"2$tmp$10##0", label %if.then1, label %if.else1 
+  %"2#tmp#10##0" = icmp eq i64 %91, %102 
+  br i1 %"2#tmp#10##0", label %if.then1, label %if.else1 
 if.else:
-  %"3$$$##0" = xor i1 0, 1 
-  ret i1 %"3$$$##0" 
+  %"3#####0" = xor i1 0, 1 
+  ret i1 %"3#####0" 
 if.then1:
-  %"4$tmp$0##0" = icmp eq i64 %95, %106 
-  %"4$$$##0" = xor i1 %"4$tmp$0##0", 1 
-  ret i1 %"4$$$##0" 
+  %"4#tmp#0##0" = icmp eq i64 %95, %106 
+  %"4#####0" = xor i1 %"4#tmp#0##0", 1 
+  ret i1 %"4#####0" 
 if.else1:
-  %"5$$$##0" = xor i1 0, 1 
-  ret i1 %"5$$$##0" 
+  %"5#####0" = xor i1 0, 1 
+  ret i1 %"5#####0" 
 }

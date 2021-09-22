@@ -33,10 +33,10 @@ AFTER EVERYTHING:
 
 find_modulo > {inline} (3 calls)
 0: test_loop.find_modulo<0>
-find_modulo(seq##0:test_loop.int_seq, modulus##0:wybe.int, ?i##0:wybe.int, ?$$##0:wybe.bool):
+find_modulo(seq##0:test_loop.int_seq, modulus##0:wybe.int, ?i##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    test_loop.gen$1<0>(~modulus##0:wybe.int, ~seq##0:test_loop.int_seq, ?i##0:wybe.int, ?$$##0:wybe.bool) #0 @test_loop:nn:nn
+    test_loop.gen#1<0>(~modulus##0:wybe.int, ~seq##0:test_loop.int_seq, ?i##0:wybe.int, ?####0:wybe.bool) #0 @test_loop:nn:nn
 
 
 find_test > (2 calls)
@@ -44,67 +44,67 @@ find_test > (2 calls)
 find_test(modulus##0:wybe.int, io##0:wybe.phantom, ?io##4:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
- MultiSpeczDepInfo: [(8,(test_loop.gen$1<0>,fromList [NonAliasedParamCond 1 []]))]
-    foreign lpvm alloc(24:wybe.int, ?tmp$5##0:test_loop.int_seq)
-    foreign lpvm mutate(~tmp$5##0:test_loop.int_seq, ?tmp$6##0:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 2:wybe.int)
-    foreign lpvm mutate(~tmp$6##0:test_loop.int_seq, ?tmp$7##0:test_loop.int_seq, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 2:wybe.int)
-    foreign lpvm mutate(~tmp$7##0:test_loop.int_seq, ?tmp$8##0:test_loop.int_seq, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 10:wybe.int)
-    test_loop.gen$1<0>[6dacb8fd25](modulus##0:wybe.int, ~tmp$8##0:test_loop.int_seq, ?i##0:wybe.int, ?tmp$1##0:wybe.bool) #8 @test_loop:nn:nn
-    case ~tmp$1##0:wybe.bool of
+ MultiSpeczDepInfo: [(8,(test_loop.gen#1<0>,fromList [NonAliasedParamCond 1 []]))]
+    foreign lpvm alloc(24:wybe.int, ?tmp#5##0:test_loop.int_seq)
+    foreign lpvm mutate(~tmp#5##0:test_loop.int_seq, ?tmp#6##0:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 2:wybe.int)
+    foreign lpvm mutate(~tmp#6##0:test_loop.int_seq, ?tmp#7##0:test_loop.int_seq, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 2:wybe.int)
+    foreign lpvm mutate(~tmp#7##0:test_loop.int_seq, ?tmp#8##0:test_loop.int_seq, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 10:wybe.int)
+    test_loop.gen#1<0>[6dacb8fd25](modulus##0:wybe.int, ~tmp#8##0:test_loop.int_seq, ?i##0:wybe.int, ?tmp#1##0:wybe.bool) #8 @test_loop:nn:nn
+    case ~tmp#1##0:wybe.bool of
     0:
         foreign c print_string("Couldn't find even number divisible by ":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-        foreign c print_int(~modulus##0:wybe.int, ~#io##1:wybe.phantom, ?tmp$15##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp$15##0:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
+        foreign c print_int(~modulus##0:wybe.int, ~#io##1:wybe.phantom, ?tmp#15##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#15##0:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
 
     1:
         foreign c print_string("First even number divisible by ":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
         foreign c print_int(~modulus##0:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
         foreign c print_string(" is ":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
-        foreign c print_int(~i##0:wybe.int, ~#io##3:wybe.phantom, ?tmp$19##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp$19##0:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
+        foreign c print_int(~i##0:wybe.int, ~#io##3:wybe.phantom, ?tmp#19##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
 
 
 
-gen$1 > (2 calls)
-0: test_loop.gen$1<0>[6dacb8fd25]
-gen$1(modulus##0:wybe.int, seq##0:test_loop.int_seq, ?i##1:wybe.int, ?$$##0:wybe.bool):
+gen#1 > (2 calls)
+0: test_loop.gen#1<0>[6dacb8fd25]
+gen#1(modulus##0:wybe.int, seq##0:test_loop.int_seq, ?i##1:wybe.int, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 1]
- MultiSpeczDepInfo: [(0,(test_loop.int_seq.seq_next<0>,fromList [NonAliasedParamCond 0 [1]])),(3,(test_loop.gen$1<0>,fromList [NonAliasedParamCond 1 [1]]))]
-    test_loop.int_seq.seq_next<0>(~%seq##0:test_loop.int_seq, ?%seq##1:test_loop.int_seq, ?i##0:wybe.int, ?tmp$1##0:wybe.bool) #0 @test_loop:nn:nn
-    case ~tmp$1##0:wybe.bool of
+ MultiSpeczDepInfo: [(0,(test_loop.int_seq.seq_next<0>,fromList [NonAliasedParamCond 0 [1]])),(3,(test_loop.gen#1<0>,fromList [NonAliasedParamCond 1 [1]]))]
+    test_loop.int_seq.seq_next<0>(~%seq##0:test_loop.int_seq, ?%seq##1:test_loop.int_seq, ?i##0:wybe.int, ?tmp#1##0:wybe.bool) #0 @test_loop:nn:nn
+    case ~tmp#1##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?$$##0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(~i##0:wybe.int, ?i##1:wybe.int)
 
     1:
-        foreign llvm srem(i##0:wybe.int, modulus##0:wybe.int, ?tmp$0##0:wybe.int) @int:nn:nn
-        foreign llvm icmp_eq(~tmp$0##0:wybe.int, 0:wybe.int, ?tmp$2##0:wybe.bool) @int:nn:nn
-        case ~tmp$2##0:wybe.bool of
+        foreign llvm srem(i##0:wybe.int, modulus##0:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
+        foreign llvm icmp_eq(~tmp#0##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool) @int:nn:nn
+        case ~tmp#2##0:wybe.bool of
         0:
-            test_loop.gen$1<0>(~modulus##0:wybe.int, ~seq##1:test_loop.int_seq, ?i##1:wybe.int, ?$$##0:wybe.bool) #3 @test_loop:nn:nn
+            test_loop.gen#1<0>(~modulus##0:wybe.int, ~seq##1:test_loop.int_seq, ?i##1:wybe.int, ?####0:wybe.bool) #3 @test_loop:nn:nn
 
         1:
-            foreign llvm move(1:wybe.bool, ?$$##0:wybe.bool)
+            foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
             foreign llvm move(~i##0:wybe.int, ?i##1:wybe.int)
 
 
  [6dacb8fd25] [NonAliasedParam 1] :
-    test_loop.int_seq.seq_next<0>[410bae77d3](~%seq##0:test_loop.int_seq, ?%seq##1:test_loop.int_seq, ?i##0:wybe.int, ?tmp$1##0:wybe.bool) #0 @test_loop:nn:nn
-    case ~tmp$1##0:wybe.bool of
+    test_loop.int_seq.seq_next<0>[410bae77d3](~%seq##0:test_loop.int_seq, ?%seq##1:test_loop.int_seq, ?i##0:wybe.int, ?tmp#1##0:wybe.bool) #0 @test_loop:nn:nn
+    case ~tmp#1##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?$$##0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(~i##0:wybe.int, ?i##1:wybe.int)
 
     1:
-        foreign llvm srem(i##0:wybe.int, modulus##0:wybe.int, ?tmp$0##0:wybe.int) @int:nn:nn
-        foreign llvm icmp_eq(~tmp$0##0:wybe.int, 0:wybe.int, ?tmp$2##0:wybe.bool) @int:nn:nn
-        case ~tmp$2##0:wybe.bool of
+        foreign llvm srem(i##0:wybe.int, modulus##0:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
+        foreign llvm icmp_eq(~tmp#0##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool) @int:nn:nn
+        case ~tmp#2##0:wybe.bool of
         0:
-            test_loop.gen$1<0>[6dacb8fd25](~modulus##0:wybe.int, ~seq##1:test_loop.int_seq, ?i##1:wybe.int, ?$$##0:wybe.bool) #3 @test_loop:nn:nn
+            test_loop.gen#1<0>[6dacb8fd25](~modulus##0:wybe.int, ~seq##1:test_loop.int_seq, ?i##1:wybe.int, ?####0:wybe.bool) #3 @test_loop:nn:nn
 
         1:
-            foreign llvm move(1:wybe.bool, ?$$##0:wybe.bool)
+            foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
             foreign llvm move(~i##0:wybe.int, ?i##1:wybe.int)
 
 
@@ -151,7 +151,7 @@ entry:
 
 define external fastcc  {i64, i1} @"test_loop.find_modulo<0>"(i64  %"seq##0", i64  %"modulus##0")    {
 entry:
-  %1 = tail call fastcc  {i64, i1}  @"test_loop.gen$1<0>"(i64  %"modulus##0", i64  %"seq##0")  
+  %1 = tail call fastcc  {i64, i1}  @"test_loop.gen#1<0>"(i64  %"modulus##0", i64  %"seq##0")  
   %2 = extractvalue {i64, i1} %1, 0 
   %3 = extractvalue {i64, i1} %1, 1 
   %4 = insertvalue {i64, i1} undef, i64 %2, 0 
@@ -176,7 +176,7 @@ entry:
   %15 = inttoptr i64 %14 to i64* 
   %16 = getelementptr  i64, i64* %15, i64 0 
   store  i64 10, i64* %16 
-  %17 = tail call fastcc  {i64, i1}  @"test_loop.gen$1<0>[6dacb8fd25]"(i64  %"modulus##0", i64  %8)  
+  %17 = tail call fastcc  {i64, i1}  @"test_loop.gen#1<0>[6dacb8fd25]"(i64  %"modulus##0", i64  %8)  
   %18 = extractvalue {i64, i1} %17, 0 
   %19 = extractvalue {i64, i1} %17, 1 
   br i1 %19, label %if.then, label %if.else 
@@ -198,7 +198,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"test_loop.gen$1<0>"(i64  %"modulus##0", i64  %"seq##0")    {
+define external fastcc  {i64, i1} @"test_loop.gen#1<0>"(i64  %"modulus##0", i64  %"seq##0")    {
 entry:
   %26 = tail call fastcc  {i64, i64, i1}  @"test_loop.int_seq.seq_next<0>"(i64  %"seq##0")  
   %27 = extractvalue {i64, i64, i1} %26, 0 
@@ -206,9 +206,9 @@ entry:
   %29 = extractvalue {i64, i64, i1} %26, 2 
   br i1 %29, label %if.then, label %if.else 
 if.then:
-  %"2$tmp$0##0" = srem i64 %28, %"modulus##0" 
-  %"2$tmp$2##0" = icmp eq i64 %"2$tmp$0##0", 0 
-  br i1 %"2$tmp$2##0", label %if.then1, label %if.else1 
+  %"2#tmp#0##0" = srem i64 %28, %"modulus##0" 
+  %"2#tmp#2##0" = icmp eq i64 %"2#tmp#0##0", 0 
+  br i1 %"2#tmp#2##0", label %if.then1, label %if.else1 
 if.else:
   %37 = insertvalue {i64, i1} undef, i64 %28, 0 
   %38 = insertvalue {i64, i1} %37, i1 0, 1 
@@ -218,7 +218,7 @@ if.then1:
   %31 = insertvalue {i64, i1} %30, i1 1, 1 
   ret {i64, i1} %31 
 if.else1:
-  %32 = tail call fastcc  {i64, i1}  @"test_loop.gen$1<0>"(i64  %"modulus##0", i64  %27)  
+  %32 = tail call fastcc  {i64, i1}  @"test_loop.gen#1<0>"(i64  %"modulus##0", i64  %27)  
   %33 = extractvalue {i64, i1} %32, 0 
   %34 = extractvalue {i64, i1} %32, 1 
   %35 = insertvalue {i64, i1} undef, i64 %33, 0 
@@ -227,7 +227,7 @@ if.else1:
 }
 
 
-define external fastcc  {i64, i1} @"test_loop.gen$1<0>[6dacb8fd25]"(i64  %"modulus##0", i64  %"seq##0")    {
+define external fastcc  {i64, i1} @"test_loop.gen#1<0>[6dacb8fd25]"(i64  %"modulus##0", i64  %"seq##0")    {
 entry:
   %39 = tail call fastcc  {i64, i64, i1}  @"test_loop.int_seq.seq_next<0>[410bae77d3]"(i64  %"seq##0")  
   %40 = extractvalue {i64, i64, i1} %39, 0 
@@ -235,9 +235,9 @@ entry:
   %42 = extractvalue {i64, i64, i1} %39, 2 
   br i1 %42, label %if.then, label %if.else 
 if.then:
-  %"2$tmp$0##0" = srem i64 %41, %"modulus##0" 
-  %"2$tmp$2##0" = icmp eq i64 %"2$tmp$0##0", 0 
-  br i1 %"2$tmp$2##0", label %if.then1, label %if.else1 
+  %"2#tmp#0##0" = srem i64 %41, %"modulus##0" 
+  %"2#tmp#2##0" = icmp eq i64 %"2#tmp#0##0", 0 
+  br i1 %"2#tmp#2##0", label %if.then1, label %if.else1 
 if.else:
   %50 = insertvalue {i64, i1} undef, i64 %41, 0 
   %51 = insertvalue {i64, i1} %50, i1 0, 1 
@@ -247,7 +247,7 @@ if.then1:
   %44 = insertvalue {i64, i1} %43, i1 1, 1 
   ret {i64, i1} %44 
 if.else1:
-  %45 = tail call fastcc  {i64, i1}  @"test_loop.gen$1<0>[6dacb8fd25]"(i64  %"modulus##0", i64  %40)  
+  %45 = tail call fastcc  {i64, i1}  @"test_loop.gen#1<0>[6dacb8fd25]"(i64  %"modulus##0", i64  %40)  
   %46 = extractvalue {i64, i1} %45, 0 
   %47 = extractvalue {i64, i1} %45, 1 
   %48 = insertvalue {i64, i1} undef, i64 %46, 0 
@@ -277,156 +277,156 @@ if.else1:
 
 = > public {inline} (1 calls)
 0: test_loop.int_seq.=<0>
-=($left##0:test_loop.int_seq, $right##0:test_loop.int_seq, ?$$##0:wybe.bool):
+=(#left##0:test_loop.int_seq, #right##0:test_loop.int_seq, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($left##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?$left$low##0:wybe.int)
-    foreign lpvm access($left##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?$left$step##0:wybe.int)
-    foreign lpvm access(~$left##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?$left$high##0:wybe.int)
-    foreign lpvm access($right##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?$right$low##0:wybe.int)
-    foreign lpvm access($right##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?$right$step##0:wybe.int)
-    foreign lpvm access(~$right##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?$right$high##0:wybe.int)
-    foreign llvm icmp_eq(~$left$low##0:wybe.int, ~$right$low##0:wybe.int, ?tmp$1##0:wybe.bool) @int:nn:nn
-    case ~tmp$1##0:wybe.bool of
+    foreign lpvm access(#left##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#low##0:wybe.int)
+    foreign lpvm access(#left##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#step##0:wybe.int)
+    foreign lpvm access(~#left##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#high##0:wybe.int)
+    foreign lpvm access(#right##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#right#low##0:wybe.int)
+    foreign lpvm access(#right##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#right#step##0:wybe.int)
+    foreign lpvm access(~#right##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#right#high##0:wybe.int)
+    foreign llvm icmp_eq(~#left#low##0:wybe.int, ~#right#low##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    case ~tmp#1##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?$$##0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
 
     1:
-        foreign llvm icmp_eq(~$left$step##0:wybe.int, ~$right$step##0:wybe.int, ?tmp$2##0:wybe.bool) @int:nn:nn
-        case ~tmp$2##0:wybe.bool of
+        foreign llvm icmp_eq(~#left#step##0:wybe.int, ~#right#step##0:wybe.int, ?tmp#2##0:wybe.bool) @int:nn:nn
+        case ~tmp#2##0:wybe.bool of
         0:
-            foreign llvm move(0:wybe.bool, ?$$##0:wybe.bool)
+            foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
 
         1:
-            foreign llvm icmp_eq(~$left$high##0:wybe.int, ~$right$high##0:wybe.int, ?$$##0:wybe.bool) @int:nn:nn
+            foreign llvm icmp_eq(~#left#high##0:wybe.int, ~#right#high##0:wybe.int, ?####0:wybe.bool) @int:nn:nn
 
 
 
 
 high > public {inline} (0 calls)
 0: test_loop.int_seq.high<0>
-high($rec##0:test_loop.int_seq, ?$##0:wybe.int):
+high(#rec##0:test_loop.int_seq, ?###0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~$rec##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?$##0:wybe.int)
+    foreign lpvm access(~#rec##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?###0:wybe.int)
 high > public {inline} (0 calls)
 1: test_loop.int_seq.high<1>
-high($rec##0:test_loop.int_seq, ?$rec##1:test_loop.int_seq, $field##0:wybe.int):
+high(#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, #field##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~$rec##0:test_loop.int_seq, ?$rec##1:test_loop.int_seq, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field##0:wybe.int)
+    foreign lpvm {noalias} mutate(~#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
 int_seq > public {inline} (0 calls)
 0: test_loop.int_seq.int_seq<0>
-int_seq(low##0:wybe.int, step##0:wybe.int, high##0:wybe.int, ?$##0:test_loop.int_seq):
+int_seq(low##0:wybe.int, step##0:wybe.int, high##0:wybe.int, ?###0:test_loop.int_seq):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(24:wybe.int, ?$rec##0:test_loop.int_seq)
-    foreign lpvm mutate(~$rec##0:test_loop.int_seq, ?$rec##1:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~low##0:wybe.int)
-    foreign lpvm mutate(~$rec##1:test_loop.int_seq, ?$rec##2:test_loop.int_seq, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~step##0:wybe.int)
-    foreign lpvm mutate(~$rec##2:test_loop.int_seq, ?$##0:test_loop.int_seq, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~high##0:wybe.int)
+    foreign lpvm alloc(24:wybe.int, ?#rec##0:test_loop.int_seq)
+    foreign lpvm mutate(~#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~low##0:wybe.int)
+    foreign lpvm mutate(~#rec##1:test_loop.int_seq, ?#rec##2:test_loop.int_seq, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~step##0:wybe.int)
+    foreign lpvm mutate(~#rec##2:test_loop.int_seq, ?###0:test_loop.int_seq, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~high##0:wybe.int)
 int_seq > public {inline} (13 calls)
 1: test_loop.int_seq.int_seq<1>
-int_seq(?low##0:wybe.int, ?step##0:wybe.int, ?high##0:wybe.int, $##0:test_loop.int_seq):
+int_seq(?low##0:wybe.int, ?step##0:wybe.int, ?high##0:wybe.int, ###0:test_loop.int_seq):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?low##0:wybe.int)
-    foreign lpvm access($##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?step##0:wybe.int)
-    foreign lpvm access(~$##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?high##0:wybe.int)
+    foreign lpvm access(###0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?low##0:wybe.int)
+    foreign lpvm access(###0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?step##0:wybe.int)
+    foreign lpvm access(~###0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?high##0:wybe.int)
 
 
 low > public {inline} (0 calls)
 0: test_loop.int_seq.low<0>
-low($rec##0:test_loop.int_seq, ?$##0:wybe.int):
+low(#rec##0:test_loop.int_seq, ?###0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~$rec##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?$##0:wybe.int)
+    foreign lpvm access(~#rec##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?###0:wybe.int)
 low > public {inline} (1 calls)
 1: test_loop.int_seq.low<1>
-low($rec##0:test_loop.int_seq, ?$rec##1:test_loop.int_seq, $field##0:wybe.int):
+low(#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, #field##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~$rec##0:test_loop.int_seq, ?$rec##1:test_loop.int_seq, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field##0:wybe.int)
+    foreign lpvm {noalias} mutate(~#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
 seq_next > public (0 calls)
 0: test_loop.int_seq.seq_next<0>[410bae77d3]
-seq_next(seq##0:test_loop.int_seq, ?seq##1:test_loop.int_seq, ?elt##0:wybe.int, ?$$##0:wybe.bool):
+seq_next(seq##0:test_loop.int_seq, ?seq##1:test_loop.int_seq, ?elt##0:wybe.int, ?####0:wybe.bool):
  AliasPairs: [(seq##0,seq##1)]
  InterestingCallProperties: [InterestingUnaliased 0]
     foreign lpvm access(seq##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?elt##0:wybe.int)
     foreign lpvm access(seq##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?step##0:wybe.int)
     foreign lpvm access(seq##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?limit##0:wybe.int)
-    foreign llvm icmp_sle(elt##0:wybe.int, ~limit##0:wybe.int, ?tmp$1##0:wybe.bool) @int:nn:nn
-    case ~tmp$1##0:wybe.bool of
+    foreign llvm icmp_sle(elt##0:wybe.int, ~limit##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    case ~tmp#1##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?$$##0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(~seq##0:test_loop.int_seq, ?seq##1:test_loop.int_seq)
 
     1:
-        foreign llvm add(elt##0:wybe.int, ~step##0:wybe.int, ?tmp$0##0:wybe.int) @int:nn:nn
-        foreign lpvm {noalias} mutate(~%seq##0:test_loop.int_seq, ?%seq##1:test_loop.int_seq, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp$0##0:wybe.int)
-        foreign llvm move(1:wybe.bool, ?$$##0:wybe.bool)
+        foreign llvm add(elt##0:wybe.int, ~step##0:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
+        foreign lpvm {noalias} mutate(~%seq##0:test_loop.int_seq, ?%seq##1:test_loop.int_seq, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp#0##0:wybe.int)
+        foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
  [410bae77d3] [NonAliasedParam 0] :
     foreign lpvm access(seq##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?elt##0:wybe.int)
     foreign lpvm access(seq##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?step##0:wybe.int)
     foreign lpvm access(seq##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?limit##0:wybe.int)
-    foreign llvm icmp_sle(elt##0:wybe.int, ~limit##0:wybe.int, ?tmp$1##0:wybe.bool) @int:nn:nn
-    case ~tmp$1##0:wybe.bool of
+    foreign llvm icmp_sle(elt##0:wybe.int, ~limit##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    case ~tmp#1##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?$$##0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
         foreign llvm move(~seq##0:test_loop.int_seq, ?seq##1:test_loop.int_seq)
 
     1:
-        foreign llvm add(elt##0:wybe.int, ~step##0:wybe.int, ?tmp$0##0:wybe.int) @int:nn:nn
-        foreign lpvm {noalias} mutate(~%seq##0:test_loop.int_seq, ?%seq##1:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp$0##0:wybe.int)
-        foreign llvm move(1:wybe.bool, ?$$##0:wybe.bool)
+        foreign llvm add(elt##0:wybe.int, ~step##0:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
+        foreign lpvm {noalias} mutate(~%seq##0:test_loop.int_seq, ?%seq##1:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp#0##0:wybe.int)
+        foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
 
 
 
 step > public {inline} (0 calls)
 0: test_loop.int_seq.step<0>
-step($rec##0:test_loop.int_seq, ?$##0:wybe.int):
+step(#rec##0:test_loop.int_seq, ?###0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~$rec##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?$##0:wybe.int)
+    foreign lpvm access(~#rec##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?###0:wybe.int)
 step > public {inline} (0 calls)
 1: test_loop.int_seq.step<1>
-step($rec##0:test_loop.int_seq, ?$rec##1:test_loop.int_seq, $field##0:wybe.int):
+step(#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, #field##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~$rec##0:test_loop.int_seq, ?$rec##1:test_loop.int_seq, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~$field##0:wybe.int)
+    foreign lpvm {noalias} mutate(~#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
 ~= > public {inline} (0 calls)
 0: test_loop.int_seq.~=<0>
-~=($left##0:test_loop.int_seq, $right##0:test_loop.int_seq, ?$$##0:wybe.bool):
+~=(#left##0:test_loop.int_seq, #right##0:test_loop.int_seq, ?####0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($left##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$3##0:wybe.int)
-    foreign lpvm access($left##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$4##0:wybe.int)
-    foreign lpvm access(~$left##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$5##0:wybe.int)
-    foreign lpvm access($right##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$6##0:wybe.int)
-    foreign lpvm access($right##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$7##0:wybe.int)
-    foreign lpvm access(~$right##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp$8##0:wybe.int)
-    foreign llvm icmp_eq(~tmp$3##0:wybe.int, ~tmp$6##0:wybe.int, ?tmp$9##0:wybe.bool) @int:nn:nn
-    case ~tmp$9##0:wybe.bool of
+    foreign lpvm access(#left##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int)
+    foreign lpvm access(#left##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int)
+    foreign lpvm access(~#left##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.int)
+    foreign lpvm access(#right##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.int)
+    foreign lpvm access(#right##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.int)
+    foreign lpvm access(~#right##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.int)
+    foreign llvm icmp_eq(~tmp#3##0:wybe.int, ~tmp#6##0:wybe.int, ?tmp#9##0:wybe.bool) @int:nn:nn
+    case ~tmp#9##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?tmp$0##0:wybe.bool)
-        foreign llvm xor(~tmp$0##0:wybe.bool, 1:wybe.bool, ?$$##0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
 
     1:
-        foreign llvm icmp_eq(~tmp$4##0:wybe.int, ~tmp$7##0:wybe.int, ?tmp$10##0:wybe.bool) @int:nn:nn
-        case ~tmp$10##0:wybe.bool of
+        foreign llvm icmp_eq(~tmp#4##0:wybe.int, ~tmp#7##0:wybe.int, ?tmp#10##0:wybe.bool) @int:nn:nn
+        case ~tmp#10##0:wybe.bool of
         0:
-            foreign llvm move(0:wybe.bool, ?tmp$0##0:wybe.bool)
-            foreign llvm xor(~tmp$0##0:wybe.bool, 1:wybe.bool, ?$$##0:wybe.bool)
+            foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
+            foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
 
         1:
-            foreign llvm icmp_eq(~tmp$5##0:wybe.int, ~tmp$8##0:wybe.int, ?tmp$0##0:wybe.bool) @int:nn:nn
-            foreign llvm xor(~tmp$0##0:wybe.bool, 1:wybe.bool, ?$$##0:wybe.bool)
+            foreign llvm icmp_eq(~tmp#5##0:wybe.int, ~tmp#8##0:wybe.int, ?tmp#0##0:wybe.bool) @int:nn:nn
+            foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
 
 
 
@@ -444,48 +444,48 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external fastcc  i1 @"test_loop.int_seq.=<0>"(i64  %"$left##0", i64  %"$right##0")    {
+define external fastcc  i1 @"test_loop.int_seq.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
 entry:
-  %1 = inttoptr i64 %"$left##0" to i64* 
+  %1 = inttoptr i64 %"#left##0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   %3 = load  i64, i64* %2 
-  %4 = add   i64 %"$left##0", 8 
+  %4 = add   i64 %"#left##0", 8 
   %5 = inttoptr i64 %4 to i64* 
   %6 = getelementptr  i64, i64* %5, i64 0 
   %7 = load  i64, i64* %6 
-  %8 = add   i64 %"$left##0", 16 
+  %8 = add   i64 %"#left##0", 16 
   %9 = inttoptr i64 %8 to i64* 
   %10 = getelementptr  i64, i64* %9, i64 0 
   %11 = load  i64, i64* %10 
-  %12 = inttoptr i64 %"$right##0" to i64* 
+  %12 = inttoptr i64 %"#right##0" to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %15 = add   i64 %"$right##0", 8 
+  %15 = add   i64 %"#right##0", 8 
   %16 = inttoptr i64 %15 to i64* 
   %17 = getelementptr  i64, i64* %16, i64 0 
   %18 = load  i64, i64* %17 
-  %19 = add   i64 %"$right##0", 16 
+  %19 = add   i64 %"#right##0", 16 
   %20 = inttoptr i64 %19 to i64* 
   %21 = getelementptr  i64, i64* %20, i64 0 
   %22 = load  i64, i64* %21 
-  %"1$tmp$1##0" = icmp eq i64 %3, %14 
-  br i1 %"1$tmp$1##0", label %if.then, label %if.else 
+  %"1#tmp#1##0" = icmp eq i64 %3, %14 
+  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$2##0" = icmp eq i64 %7, %18 
-  br i1 %"2$tmp$2##0", label %if.then1, label %if.else1 
+  %"2#tmp#2##0" = icmp eq i64 %7, %18 
+  br i1 %"2#tmp#2##0", label %if.then1, label %if.else1 
 if.else:
   ret i1 0 
 if.then1:
-  %"4$$$##0" = icmp eq i64 %11, %22 
-  ret i1 %"4$$$##0" 
+  %"4#####0" = icmp eq i64 %11, %22 
+  ret i1 %"4#####0" 
 if.else1:
   ret i1 0 
 }
 
 
-define external fastcc  i64 @"test_loop.int_seq.high<0>"(i64  %"$rec##0")    {
+define external fastcc  i64 @"test_loop.int_seq.high<0>"(i64  %"#rec##0")    {
 entry:
-  %23 = add   i64 %"$rec##0", 16 
+  %23 = add   i64 %"#rec##0", 16 
   %24 = inttoptr i64 %23 to i64* 
   %25 = getelementptr  i64, i64* %24, i64 0 
   %26 = load  i64, i64* %25 
@@ -493,19 +493,19 @@ entry:
 }
 
 
-define external fastcc  i64 @"test_loop.int_seq.high<1>"(i64  %"$rec##0", i64  %"$field##0")    {
+define external fastcc  i64 @"test_loop.int_seq.high<1>"(i64  %"#rec##0", i64  %"#field##0")    {
 entry:
   %27 = trunc i64 24 to i32  
   %28 = tail call ccc  i8*  @wybe_malloc(i32  %27)  
   %29 = ptrtoint i8* %28 to i64 
   %30 = inttoptr i64 %29 to i8* 
-  %31 = inttoptr i64 %"$rec##0" to i8* 
+  %31 = inttoptr i64 %"#rec##0" to i8* 
   %32 = trunc i64 24 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %30, i8*  %31, i32  %32, i32  8, i1  0)  
   %33 = add   i64 %29, 16 
   %34 = inttoptr i64 %33 to i64* 
   %35 = getelementptr  i64, i64* %34, i64 0 
-  store  i64 %"$field##0", i64* %35 
+  store  i64 %"#field##0", i64* %35 
   ret i64 %29 
 }
 
@@ -530,16 +530,16 @@ entry:
 }
 
 
-define external fastcc  {i64, i64, i64} @"test_loop.int_seq.int_seq<1>"(i64  %"$##0")    {
+define external fastcc  {i64, i64, i64} @"test_loop.int_seq.int_seq<1>"(i64  %"###0")    {
 entry:
-  %47 = inttoptr i64 %"$##0" to i64* 
+  %47 = inttoptr i64 %"###0" to i64* 
   %48 = getelementptr  i64, i64* %47, i64 0 
   %49 = load  i64, i64* %48 
-  %50 = add   i64 %"$##0", 8 
+  %50 = add   i64 %"###0", 8 
   %51 = inttoptr i64 %50 to i64* 
   %52 = getelementptr  i64, i64* %51, i64 0 
   %53 = load  i64, i64* %52 
-  %54 = add   i64 %"$##0", 16 
+  %54 = add   i64 %"###0", 16 
   %55 = inttoptr i64 %54 to i64* 
   %56 = getelementptr  i64, i64* %55, i64 0 
   %57 = load  i64, i64* %56 
@@ -550,27 +550,27 @@ entry:
 }
 
 
-define external fastcc  i64 @"test_loop.int_seq.low<0>"(i64  %"$rec##0")    {
+define external fastcc  i64 @"test_loop.int_seq.low<0>"(i64  %"#rec##0")    {
 entry:
-  %61 = inttoptr i64 %"$rec##0" to i64* 
+  %61 = inttoptr i64 %"#rec##0" to i64* 
   %62 = getelementptr  i64, i64* %61, i64 0 
   %63 = load  i64, i64* %62 
   ret i64 %63 
 }
 
 
-define external fastcc  i64 @"test_loop.int_seq.low<1>"(i64  %"$rec##0", i64  %"$field##0")    {
+define external fastcc  i64 @"test_loop.int_seq.low<1>"(i64  %"#rec##0", i64  %"#field##0")    {
 entry:
   %64 = trunc i64 24 to i32  
   %65 = tail call ccc  i8*  @wybe_malloc(i32  %64)  
   %66 = ptrtoint i8* %65 to i64 
   %67 = inttoptr i64 %66 to i8* 
-  %68 = inttoptr i64 %"$rec##0" to i8* 
+  %68 = inttoptr i64 %"#rec##0" to i8* 
   %69 = trunc i64 24 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %67, i8*  %68, i32  %69, i32  8, i1  0)  
   %70 = inttoptr i64 %66 to i64* 
   %71 = getelementptr  i64, i64* %70, i64 0 
-  store  i64 %"$field##0", i64* %71 
+  store  i64 %"#field##0", i64* %71 
   ret i64 %66 
 }
 
@@ -588,10 +588,10 @@ entry:
   %80 = inttoptr i64 %79 to i64* 
   %81 = getelementptr  i64, i64* %80, i64 0 
   %82 = load  i64, i64* %81 
-  %"1$tmp$1##0" = icmp sle i64 %74, %82 
-  br i1 %"1$tmp$1##0", label %if.then, label %if.else 
+  %"1#tmp#1##0" = icmp sle i64 %74, %82 
+  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$0##0" = add   i64 %74, %78 
+  %"2#tmp#0##0" = add   i64 %74, %78 
   %83 = trunc i64 24 to i32  
   %84 = tail call ccc  i8*  @wybe_malloc(i32  %83)  
   %85 = ptrtoint i8* %84 to i64 
@@ -601,7 +601,7 @@ if.then:
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %86, i8*  %87, i32  %88, i32  8, i1  0)  
   %89 = inttoptr i64 %85 to i64* 
   %90 = getelementptr  i64, i64* %89, i64 0 
-  store  i64 %"2$tmp$0##0", i64* %90 
+  store  i64 %"2#tmp#0##0", i64* %90 
   %91 = insertvalue {i64, i64, i1} undef, i64 %85, 0 
   %92 = insertvalue {i64, i64, i1} %91, i64 %74, 1 
   %93 = insertvalue {i64, i64, i1} %92, i1 1, 2 
@@ -627,13 +627,13 @@ entry:
   %105 = inttoptr i64 %104 to i64* 
   %106 = getelementptr  i64, i64* %105, i64 0 
   %107 = load  i64, i64* %106 
-  %"1$tmp$1##0" = icmp sle i64 %99, %107 
-  br i1 %"1$tmp$1##0", label %if.then, label %if.else 
+  %"1#tmp#1##0" = icmp sle i64 %99, %107 
+  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$0##0" = add   i64 %99, %103 
+  %"2#tmp#0##0" = add   i64 %99, %103 
   %108 = inttoptr i64 %"seq##0" to i64* 
   %109 = getelementptr  i64, i64* %108, i64 0 
-  store  i64 %"2$tmp$0##0", i64* %109 
+  store  i64 %"2#tmp#0##0", i64* %109 
   %110 = insertvalue {i64, i64, i1} undef, i64 %"seq##0", 0 
   %111 = insertvalue {i64, i64, i1} %110, i64 %99, 1 
   %112 = insertvalue {i64, i64, i1} %111, i1 1, 2 
@@ -646,9 +646,9 @@ if.else:
 }
 
 
-define external fastcc  i64 @"test_loop.int_seq.step<0>"(i64  %"$rec##0")    {
+define external fastcc  i64 @"test_loop.int_seq.step<0>"(i64  %"#rec##0")    {
 entry:
-  %116 = add   i64 %"$rec##0", 8 
+  %116 = add   i64 %"#rec##0", 8 
   %117 = inttoptr i64 %116 to i64* 
   %118 = getelementptr  i64, i64* %117, i64 0 
   %119 = load  i64, i64* %118 
@@ -656,60 +656,60 @@ entry:
 }
 
 
-define external fastcc  i64 @"test_loop.int_seq.step<1>"(i64  %"$rec##0", i64  %"$field##0")    {
+define external fastcc  i64 @"test_loop.int_seq.step<1>"(i64  %"#rec##0", i64  %"#field##0")    {
 entry:
   %120 = trunc i64 24 to i32  
   %121 = tail call ccc  i8*  @wybe_malloc(i32  %120)  
   %122 = ptrtoint i8* %121 to i64 
   %123 = inttoptr i64 %122 to i8* 
-  %124 = inttoptr i64 %"$rec##0" to i8* 
+  %124 = inttoptr i64 %"#rec##0" to i8* 
   %125 = trunc i64 24 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %123, i8*  %124, i32  %125, i32  8, i1  0)  
   %126 = add   i64 %122, 8 
   %127 = inttoptr i64 %126 to i64* 
   %128 = getelementptr  i64, i64* %127, i64 0 
-  store  i64 %"$field##0", i64* %128 
+  store  i64 %"#field##0", i64* %128 
   ret i64 %122 
 }
 
 
-define external fastcc  i1 @"test_loop.int_seq.~=<0>"(i64  %"$left##0", i64  %"$right##0")    {
+define external fastcc  i1 @"test_loop.int_seq.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
 entry:
-  %129 = inttoptr i64 %"$left##0" to i64* 
+  %129 = inttoptr i64 %"#left##0" to i64* 
   %130 = getelementptr  i64, i64* %129, i64 0 
   %131 = load  i64, i64* %130 
-  %132 = add   i64 %"$left##0", 8 
+  %132 = add   i64 %"#left##0", 8 
   %133 = inttoptr i64 %132 to i64* 
   %134 = getelementptr  i64, i64* %133, i64 0 
   %135 = load  i64, i64* %134 
-  %136 = add   i64 %"$left##0", 16 
+  %136 = add   i64 %"#left##0", 16 
   %137 = inttoptr i64 %136 to i64* 
   %138 = getelementptr  i64, i64* %137, i64 0 
   %139 = load  i64, i64* %138 
-  %140 = inttoptr i64 %"$right##0" to i64* 
+  %140 = inttoptr i64 %"#right##0" to i64* 
   %141 = getelementptr  i64, i64* %140, i64 0 
   %142 = load  i64, i64* %141 
-  %143 = add   i64 %"$right##0", 8 
+  %143 = add   i64 %"#right##0", 8 
   %144 = inttoptr i64 %143 to i64* 
   %145 = getelementptr  i64, i64* %144, i64 0 
   %146 = load  i64, i64* %145 
-  %147 = add   i64 %"$right##0", 16 
+  %147 = add   i64 %"#right##0", 16 
   %148 = inttoptr i64 %147 to i64* 
   %149 = getelementptr  i64, i64* %148, i64 0 
   %150 = load  i64, i64* %149 
-  %"1$tmp$9##0" = icmp eq i64 %131, %142 
-  br i1 %"1$tmp$9##0", label %if.then, label %if.else 
+  %"1#tmp#9##0" = icmp eq i64 %131, %142 
+  br i1 %"1#tmp#9##0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$10##0" = icmp eq i64 %135, %146 
-  br i1 %"2$tmp$10##0", label %if.then1, label %if.else1 
+  %"2#tmp#10##0" = icmp eq i64 %135, %146 
+  br i1 %"2#tmp#10##0", label %if.then1, label %if.else1 
 if.else:
-  %"3$$$##0" = xor i1 0, 1 
-  ret i1 %"3$$$##0" 
+  %"3#####0" = xor i1 0, 1 
+  ret i1 %"3#####0" 
 if.then1:
-  %"4$tmp$0##0" = icmp eq i64 %139, %150 
-  %"4$$$##0" = xor i1 %"4$tmp$0##0", 1 
-  ret i1 %"4$$$##0" 
+  %"4#tmp#0##0" = icmp eq i64 %139, %150 
+  %"4#####0" = xor i1 %"4#tmp#0##0", 1 
+  ret i1 %"4#####0" 
 if.else1:
-  %"5$$$##0" = xor i1 0, 1 
-  ret i1 %"5$$$##0" 
+  %"5#####0" = xor i1 0, 1 
+  ret i1 %"5#####0" 
 }

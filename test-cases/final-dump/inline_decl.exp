@@ -16,19 +16,19 @@ AFTER EVERYTHING:
 (io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c putchar('h':wybe.char, ~#io##0:wybe.phantom, ?tmp$1##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('e':wybe.char, ~tmp$1##0:wybe.phantom, ?tmp$2##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('l':wybe.char, ~tmp$2##0:wybe.phantom, ?tmp$3##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('l':wybe.char, ~tmp$3##0:wybe.phantom, ?tmp$4##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('o':wybe.char, ~tmp$4##0:wybe.phantom, ?tmp$5##0:wybe.phantom) @io:nn:nn
-    foreign c putchar(' ':wybe.char, ~tmp$5##0:wybe.phantom, ?tmp$6##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('w':wybe.char, ~tmp$6##0:wybe.phantom, ?tmp$7##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('o':wybe.char, ~tmp$7##0:wybe.phantom, ?tmp$8##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('r':wybe.char, ~tmp$8##0:wybe.phantom, ?tmp$9##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('l':wybe.char, ~tmp$9##0:wybe.phantom, ?tmp$10##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('d':wybe.char, ~tmp$10##0:wybe.phantom, ?tmp$11##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('!':wybe.char, ~tmp$11##0:wybe.phantom, ?tmp$12##0:wybe.phantom) @io:nn:nn
-    inline_decl.finish<0>(~tmp$12##0:wybe.phantom, ?#io##1:wybe.phantom) #1 @inline_decl:nn:nn
+    foreign c putchar('h':wybe.char, ~#io##0:wybe.phantom, ?tmp#1##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('e':wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('l':wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('l':wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('o':wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
+    foreign c putchar(' ':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('w':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('o':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('r':wybe.char, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('l':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('d':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('!':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
+    inline_decl.finish<0>(~tmp#12##0:wybe.phantom, ?#io##1:wybe.phantom) #1 @inline_decl:nn:nn
 
 
 finish > public {noinline} (1 calls)
