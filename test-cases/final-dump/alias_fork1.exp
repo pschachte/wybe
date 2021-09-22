@@ -389,13 +389,13 @@ if.else:
 
 = > public (7 calls)
 0: mytree.tree.=<0>
-=(#left##0:mytree.tree, #right##0:mytree.tree, ?####0:wybe.bool):
+=(#left##0:mytree.tree, #right##0:mytree.tree, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
-        foreign llvm icmp_eq(~#left##0:mytree.tree, ~#right##0:mytree.tree, ?####0:wybe.bool)
+        foreign llvm icmp_eq(~#left##0:mytree.tree, ~#right##0:mytree.tree, ?#success##0:wybe.bool)
 
     1:
         foreign lpvm access(#left##0:mytree.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#left##0:mytree.tree)
@@ -404,7 +404,7 @@ if.else:
         foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.bool)
         case ~tmp#10##0:wybe.bool of
         0:
-            foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
         1:
             foreign lpvm access(#right##0:mytree.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#right#left##0:mytree.tree)
@@ -413,16 +413,16 @@ if.else:
             mytree.tree.=<0>(~#left#left##0:mytree.tree, ~#right#left##0:mytree.tree, ?tmp#4##0:wybe.bool) #2
             case ~tmp#4##0:wybe.bool of
             0:
-                foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+                foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
             1:
                 foreign llvm icmp_eq(~#left#key##0:wybe.int, ~#right#key##0:wybe.int, ?tmp#5##0:wybe.bool) @int:nn:nn
                 case ~tmp#5##0:wybe.bool of
                 0:
-                    foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+                    foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                 1:
-                    mytree.tree.=<0>(~#left#right##0:mytree.tree, ~#right#right##0:mytree.tree, ?####0:wybe.bool) #4
+                    mytree.tree.=<0>(~#left#right##0:mytree.tree, ~#right#right##0:mytree.tree, ?#success##0:wybe.bool) #4
 
 
 
@@ -439,65 +439,65 @@ empty(?#result##0:mytree.tree):
 
 key > public {inline} (0 calls)
 0: mytree.tree.key<0>
-key(#rec##0:mytree.tree, ?#result##0:wybe.int, ?####0:wybe.bool):
+key(#rec##0:mytree.tree, ?#result##0:wybe.int, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
         foreign lpvm access(~#rec##0:mytree.tree, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
-        foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 key > public {inline} (0 calls)
 1: mytree.tree.key<1>
-key(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:wybe.int, ?####0:wybe.bool):
+key(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:wybe.int, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
         foreign llvm move(~#rec##0:mytree.tree, ?#rec##1:mytree.tree)
 
     1:
         foreign lpvm mutate(~#rec##0:mytree.tree, ?#rec##1:mytree.tree, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
-        foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 
 left > public {inline} (0 calls)
 0: mytree.tree.left<0>
-left(#rec##0:mytree.tree, ?#result##0:mytree.tree, ?####0:wybe.bool):
+left(#rec##0:mytree.tree, ?#result##0:mytree.tree, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
         foreign llvm move(undef:mytree.tree, ?#result##0:mytree.tree)
 
     1:
         foreign lpvm access(~#rec##0:mytree.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:mytree.tree)
-        foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 left > public {inline} (0 calls)
 1: mytree.tree.left<1>
-left(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:mytree.tree, ?####0:wybe.bool):
+left(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:mytree.tree, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
         foreign llvm move(~#rec##0:mytree.tree, ?#rec##1:mytree.tree)
 
     1:
         foreign lpvm mutate(~#rec##0:mytree.tree, ?#rec##1:mytree.tree, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:mytree.tree)
-        foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 
@@ -512,13 +512,13 @@ node(left##0:mytree.tree, key##0:wybe.int, right##0:mytree.tree, ?#result##0:myt
     foreign lpvm mutate(~#rec##2:mytree.tree, ?#result##0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~right##0:mytree.tree)
 node > public {inline} (16 calls)
 1: mytree.tree.node<1>
-node(?left##0:mytree.tree, ?key##0:wybe.int, ?right##0:mytree.tree, #result##0:mytree.tree, ?####0:wybe.bool):
+node(?left##0:mytree.tree, ?key##0:wybe.int, ?right##0:mytree.tree, #result##0:mytree.tree, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
         foreign llvm move(undef:mytree.tree, ?left##0:mytree.tree)
         foreign llvm move(undef:wybe.int, ?key##0:wybe.int)
         foreign llvm move(undef:mytree.tree, ?right##0:mytree.tree)
@@ -527,49 +527,49 @@ node(?left##0:mytree.tree, ?key##0:wybe.int, ?right##0:mytree.tree, #result##0:m
         foreign lpvm access(#result##0:mytree.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?left##0:mytree.tree)
         foreign lpvm access(#result##0:mytree.tree, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?key##0:wybe.int)
         foreign lpvm access(~#result##0:mytree.tree, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?right##0:mytree.tree)
-        foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 
 right > public {inline} (0 calls)
 0: mytree.tree.right<0>
-right(#rec##0:mytree.tree, ?#result##0:mytree.tree, ?####0:wybe.bool):
+right(#rec##0:mytree.tree, ?#result##0:mytree.tree, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
         foreign llvm move(undef:mytree.tree, ?#result##0:mytree.tree)
 
     1:
         foreign lpvm access(~#rec##0:mytree.tree, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:mytree.tree)
-        foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 right > public {inline} (0 calls)
 1: mytree.tree.right<1>
-right(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:mytree.tree, ?####0:wybe.bool):
+right(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:mytree.tree, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
         foreign llvm move(~#rec##0:mytree.tree, ?#rec##1:mytree.tree)
 
     1:
         foreign lpvm mutate(~#rec##0:mytree.tree, ?#rec##1:mytree.tree, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:mytree.tree)
-        foreign llvm move(1:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 
 ~= > public {inline} (0 calls)
 0: mytree.tree.~=<0>
-~=(#left##0:mytree.tree, #right##0:mytree.tree, ?####0:wybe.bool):
+~=(#left##0:mytree.tree, #right##0:mytree.tree, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     mytree.tree.=<0>(~#left##0:mytree.tree, ~#right##0:mytree.tree, ?tmp#0##0:wybe.bool) #0
-    foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
+    foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
   LLVM code       :
 
@@ -604,8 +604,8 @@ if.then:
   %"2#tmp#10##0" = icmp ne i64 %"#right##0", 0 
   br i1 %"2#tmp#10##0", label %if.then1, label %if.else1 
 if.else:
-  %"3#####0" = icmp eq i64 %"#left##0", %"#right##0" 
-  ret i1 %"3#####0" 
+  %"3##success##0" = icmp eq i64 %"#left##0", %"#right##0" 
+  ret i1 %"3##success##0" 
 if.then1:
   %12 = inttoptr i64 %"#right##0" to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
@@ -628,8 +628,8 @@ if.then2:
 if.else2:
   ret i1 0 
 if.then3:
-  %"8#####0" = tail call fastcc  i1  @"mytree.tree.=<0>"(i64  %11, i64  %22)  
-  ret i1 %"8#####0" 
+  %"8##success##0" = tail call fastcc  i1  @"mytree.tree.=<0>"(i64  %11, i64  %22)  
+  ret i1 %"8##success##0" 
 if.else3:
   ret i1 0 
 }
@@ -827,6 +827,6 @@ if.else:
 define external fastcc  i1 @"mytree.tree.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
 entry:
   %"1#tmp#0##0" = tail call fastcc  i1  @"mytree.tree.=<0>"(i64  %"#left##0", i64  %"#right##0")  
-  %"1#####0" = xor i1 %"1#tmp#0##0", 1 
-  ret i1 %"1#####0" 
+  %"1##success##0" = xor i1 %"1#tmp#0##0", 1 
+  ret i1 %"1##success##0" 
 }

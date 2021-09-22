@@ -148,7 +148,7 @@ entry:
 
 = > public {inline} (1 calls)
 0: alias_type2.position.=<0>
-=(#left##0:alias_type2.position, #right##0:alias_type2.position, ?####0:wybe.bool):
+=(#left##0:alias_type2.position, #right##0:alias_type2.position, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(#left##0:alias_type2.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#x##0:wybe.int)
@@ -158,10 +158,10 @@ entry:
     foreign llvm icmp_eq(~#left#x##0:wybe.int, ~#right#x##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
     1:
-        foreign llvm icmp_eq(~#left#y##0:wybe.int, ~#right#y##0:wybe.int, ?####0:wybe.bool) @int:nn:nn
+        foreign llvm icmp_eq(~#left#y##0:wybe.int, ~#right#y##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
 
@@ -212,7 +212,7 @@ y(#rec##0:alias_type2.position, ?#rec##1:alias_type2.position, #field##0:wybe.in
 
 ~= > public {inline} (0 calls)
 0: alias_type2.position.~=<0>
-~=(#left##0:alias_type2.position, #right##0:alias_type2.position, ?####0:wybe.bool):
+~=(#left##0:alias_type2.position, #right##0:alias_type2.position, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(#left##0:alias_type2.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int)
@@ -223,11 +223,11 @@ y(#rec##0:alias_type2.position, ?#rec##1:alias_type2.position, #field##0:wybe.in
     case ~tmp#7##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
-        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
     1:
         foreign llvm icmp_eq(~tmp#4##0:wybe.int, ~tmp#6##0:wybe.int, ?tmp#0##0:wybe.bool) @int:nn:nn
-        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
 
   LLVM code       :
@@ -263,8 +263,8 @@ entry:
   %"1#tmp#1##0" = icmp eq i64 %3, %10 
   br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
-  %"2#####0" = icmp eq i64 %7, %14 
-  ret i1 %"2#####0" 
+  %"2##success##0" = icmp eq i64 %7, %14 
+  ret i1 %"2##success##0" 
 if.else:
   ret i1 0 
 }
@@ -373,11 +373,11 @@ entry:
   br i1 %"1#tmp#7##0", label %if.then, label %if.else 
 if.then:
   %"2#tmp#0##0" = icmp eq i64 %62, %69 
-  %"2#####0" = xor i1 %"2#tmp#0##0", 1 
-  ret i1 %"2#####0" 
+  %"2##success##0" = xor i1 %"2#tmp#0##0", 1 
+  ret i1 %"2##success##0" 
 if.else:
-  %"3#####0" = xor i1 0, 1 
-  ret i1 %"3#####0" 
+  %"3##success##0" = xor i1 0, 1 
+  ret i1 %"3##success##0" 
 }
 --------------------------------------------------
  Module alias_type2.posrec
@@ -399,7 +399,7 @@ if.else:
 
 = > public {inline} (1 calls)
 0: alias_type2.posrec.=<0>
-=(#left##0:alias_type2.posrec, #right##0:alias_type2.posrec, ?####0:wybe.bool):
+=(#left##0:alias_type2.posrec, #right##0:alias_type2.posrec, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(#left##0:alias_type2.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#p##0:alias_type2.position)
@@ -413,16 +413,16 @@ if.else:
     foreign llvm icmp_eq(~tmp#7##0:wybe.int, ~tmp#9##0:wybe.int, ?tmp#11##0:wybe.bool) @int:nn:nn
     case ~tmp#11##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
     1:
         foreign llvm icmp_eq(~tmp#10##0:wybe.int, ~tmp#8##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
         case ~tmp#1##0:wybe.bool of
         0:
-            foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
         1:
-            foreign llvm icmp_eq(~#left#a##0:wybe.int, ~#right#a##0:wybe.int, ?####0:wybe.bool) @int:nn:nn
+            foreign llvm icmp_eq(~#left#a##0:wybe.int, ~#right#a##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
 
@@ -474,7 +474,7 @@ posrec(?p##0:alias_type2.position, ?a##0:wybe.int, #result##0:alias_type2.posrec
 
 ~= > public {inline} (0 calls)
 0: alias_type2.posrec.~=<0>
-~=(#left##0:alias_type2.posrec, #right##0:alias_type2.posrec, ?####0:wybe.bool):
+~=(#left##0:alias_type2.posrec, #right##0:alias_type2.posrec, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(#left##0:alias_type2.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:alias_type2.position)
@@ -489,18 +489,18 @@ posrec(?p##0:alias_type2.position, ?a##0:wybe.int, #result##0:alias_type2.posrec
     case ~tmp#11##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
-        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
     1:
         foreign llvm icmp_eq(~tmp#10##0:wybe.int, ~tmp#8##0:wybe.int, ?tmp#12##0:wybe.bool) @int:nn:nn
         case ~tmp#12##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
-            foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
+            foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
         1:
             foreign llvm icmp_eq(~tmp#4##0:wybe.int, ~tmp#6##0:wybe.int, ?tmp#0##0:wybe.bool) @int:nn:nn
-            foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
+            foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
 
 
@@ -556,8 +556,8 @@ if.then:
 if.else:
   ret i1 0 
 if.then1:
-  %"4#####0" = icmp eq i64 %7, %14 
-  ret i1 %"4#####0" 
+  %"4##success##0" = icmp eq i64 %7, %14 
+  ret i1 %"4##success##0" 
 if.else1:
   ret i1 0 
 }
@@ -682,13 +682,13 @@ if.then:
   %"2#tmp#12##0" = icmp eq i64 %97, %90 
   br i1 %"2#tmp#12##0", label %if.then1, label %if.else1 
 if.else:
-  %"3#####0" = xor i1 0, 1 
-  ret i1 %"3#####0" 
+  %"3##success##0" = xor i1 0, 1 
+  ret i1 %"3##success##0" 
 if.then1:
   %"4#tmp#0##0" = icmp eq i64 %76, %83 
-  %"4#####0" = xor i1 %"4#tmp#0##0", 1 
-  ret i1 %"4#####0" 
+  %"4##success##0" = xor i1 %"4#tmp#0##0", 1 
+  ret i1 %"4##success##0" 
 if.else1:
-  %"5#####0" = xor i1 0, 1 
-  ret i1 %"5#####0" 
+  %"5##success##0" = xor i1 0, 1 
+  ret i1 %"5##success##0" 
 }

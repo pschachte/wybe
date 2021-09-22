@@ -72,7 +72,7 @@ entry:
 
 = > public {inline} (1 calls)
 0: person1.person.=<0>
-=(#left##0:person1.person, #right##0:person1.person, ?####0:wybe.bool):
+=(#left##0:person1.person, #right##0:person1.person, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(#left##0:person1.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#firstname##0:wybe.string)
@@ -83,11 +83,11 @@ entry:
     foreign llvm icmp_eq(~tmp#7##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
     1:
         foreign c strcmp(~#left#lastname##0:wybe.string, ~#right#lastname##0:wybe.string, ?tmp#10##0:wybe.int) @string:nn:nn
-        foreign llvm icmp_eq(~tmp#10##0:wybe.int, 0:wybe.int, ?####0:wybe.bool) @int:nn:nn
+        foreign llvm icmp_eq(~tmp#10##0:wybe.int, 0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
 
@@ -138,7 +138,7 @@ person(?firstname##0:wybe.string, ?lastname##0:wybe.string, #result##0:person1.p
 
 ~= > public {inline} (0 calls)
 0: person1.person.~=<0>
-~=(#left##0:person1.person, #right##0:person1.person, ?####0:wybe.bool):
+~=(#left##0:person1.person, #right##0:person1.person, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(#left##0:person1.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.string)
@@ -150,12 +150,12 @@ person(?firstname##0:wybe.string, ?lastname##0:wybe.string, #result##0:person1.p
     case ~tmp#8##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
-        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
     1:
         foreign c strcmp(~tmp#4##0:wybe.string, ~tmp#6##0:wybe.string, ?tmp#9##0:wybe.int) @string:nn:nn
         foreign llvm icmp_eq(~tmp#9##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool) @int:nn:nn
-        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
 
   LLVM code       :
@@ -196,8 +196,8 @@ entry:
   br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
   %"2#tmp#10##0" = tail call ccc  i64  @strcmp(i64  %7, i64  %14)  
-  %"2#####0" = icmp eq i64 %"2#tmp#10##0", 0 
-  ret i1 %"2#####0" 
+  %"2##success##0" = icmp eq i64 %"2#tmp#10##0", 0 
+  ret i1 %"2##success##0" 
 if.else:
   ret i1 0 
 }
@@ -308,9 +308,9 @@ entry:
 if.then:
   %"2#tmp#9##0" = tail call ccc  i64  @strcmp(i64  %62, i64  %69)  
   %"2#tmp#0##0" = icmp eq i64 %"2#tmp#9##0", 0 
-  %"2#####0" = xor i1 %"2#tmp#0##0", 1 
-  ret i1 %"2#####0" 
+  %"2##success##0" = xor i1 %"2#tmp#0##0", 1 
+  ret i1 %"2##success##0" 
 if.else:
-  %"3#####0" = xor i1 0, 1 
-  ret i1 %"3#####0" 
+  %"3##success##0" = xor i1 0, 1 
+  ret i1 %"3##success##0" 
 }

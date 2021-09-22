@@ -2890,7 +2890,7 @@ outputVariableName = specialName "result"
 
 -- | The name to give to the output status variable when converting a test proc to a Det proc.
 outputStatusName :: Ident
-outputStatusName = [specialChar,specialChar]
+outputStatusName = specialName "success"
 
 
 

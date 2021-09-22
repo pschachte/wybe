@@ -362,7 +362,7 @@ entry:
 
 = > public {inline} (1 calls)
 0: caret.region.=<0>
-=(#left##0:caret.region, #right##0:caret.region, ?####0:wybe.bool):
+=(#left##0:caret.region, #right##0:caret.region, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(#left##0:caret.region, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#lower_left##0:position.position)
@@ -376,13 +376,13 @@ entry:
     foreign llvm icmp_eq(~tmp#7##0:wybe.int, ~tmp#9##0:wybe.int, ?tmp#11##0:wybe.bool) @int:nn:nn
     case ~tmp#11##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
     1:
         foreign llvm icmp_eq(~tmp#10##0:wybe.int, ~tmp#8##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
         case ~tmp#1##0:wybe.bool of
         0:
-            foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
         1:
             foreign lpvm access(#left#upper_right##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#14##0:wybe.int)
@@ -392,10 +392,10 @@ entry:
             foreign llvm icmp_eq(~tmp#14##0:wybe.int, ~tmp#16##0:wybe.int, ?tmp#18##0:wybe.bool) @int:nn:nn
             case ~tmp#18##0:wybe.bool of
             0:
-                foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+                foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
             1:
-                foreign llvm icmp_eq(~tmp#15##0:wybe.int, ~tmp#17##0:wybe.int, ?####0:wybe.bool) @int:nn:nn
+                foreign llvm icmp_eq(~tmp#15##0:wybe.int, ~tmp#17##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
 
@@ -448,7 +448,7 @@ upper_right(#rec##0:caret.region, ?#rec##1:caret.region, #field##0:position.posi
 
 ~= > public {inline} (0 calls)
 0: caret.region.~=<0>
-~=(#left##0:caret.region, #right##0:caret.region, ?####0:wybe.bool):
+~=(#left##0:caret.region, #right##0:caret.region, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(#left##0:caret.region, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:position.position)
@@ -463,14 +463,14 @@ upper_right(#rec##0:caret.region, ?#rec##1:caret.region, #field##0:position.posi
     case ~tmp#11##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
-        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
     1:
         foreign llvm icmp_eq(~tmp#10##0:wybe.int, ~tmp#8##0:wybe.int, ?tmp#12##0:wybe.bool) @int:nn:nn
         case ~tmp#12##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
-            foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
+            foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
         1:
             foreign lpvm access(tmp#4##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#13##0:wybe.int)
@@ -481,11 +481,11 @@ upper_right(#rec##0:caret.region, ?#rec##1:caret.region, #field##0:position.posi
             case ~tmp#17##0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
-                foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
+                foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
             1:
                 foreign llvm icmp_eq(~tmp#14##0:wybe.int, ~tmp#16##0:wybe.int, ?tmp#0##0:wybe.bool) @int:nn:nn
-                foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
+                foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
 
 
@@ -561,8 +561,8 @@ if.then1:
 if.else1:
   ret i1 0 
 if.then2:
-  %"6#####0" = icmp eq i64 %35, %42 
-  ret i1 %"6#####0" 
+  %"6##success##0" = icmp eq i64 %35, %42 
+  ret i1 %"6##success##0" 
 if.else2:
   ret i1 0 
 }
@@ -687,8 +687,8 @@ if.then:
   %"2#tmp#12##0" = icmp eq i64 %111, %104 
   br i1 %"2#tmp#12##0", label %if.then1, label %if.else1 
 if.else:
-  %"3#####0" = xor i1 0, 1 
-  ret i1 %"3#####0" 
+  %"3##success##0" = xor i1 0, 1 
+  ret i1 %"3##success##0" 
 if.then1:
   %112 = inttoptr i64 %90 to i64* 
   %113 = getelementptr  i64, i64* %112, i64 0 
@@ -707,15 +707,15 @@ if.then1:
   %"4#tmp#17##0" = icmp eq i64 %114, %121 
   br i1 %"4#tmp#17##0", label %if.then2, label %if.else2 
 if.else1:
-  %"5#####0" = xor i1 0, 1 
-  ret i1 %"5#####0" 
+  %"5##success##0" = xor i1 0, 1 
+  ret i1 %"5##success##0" 
 if.then2:
   %"6#tmp#0##0" = icmp eq i64 %118, %125 
-  %"6#####0" = xor i1 %"6#tmp#0##0", 1 
-  ret i1 %"6#####0" 
+  %"6##success##0" = xor i1 %"6#tmp#0##0", 1 
+  ret i1 %"6##success##0" 
 if.else2:
-  %"7#####0" = xor i1 0, 1 
-  ret i1 %"7#####0" 
+  %"7##success##0" = xor i1 0, 1 
+  ret i1 %"7##success##0" 
 }
 --------------------------------------------------
  Module position
@@ -823,7 +823,7 @@ entry:
 
 = > public {inline} (1 calls)
 0: position.position.=<0>
-=(#left##0:position.position, #right##0:position.position, ?####0:wybe.bool):
+=(#left##0:position.position, #right##0:position.position, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(#left##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#x##0:wybe.int)
@@ -833,10 +833,10 @@ entry:
     foreign llvm icmp_eq(~#left#x##0:wybe.int, ~#right#x##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
     1:
-        foreign llvm icmp_eq(~#left#y##0:wybe.int, ~#right#y##0:wybe.int, ?####0:wybe.bool) @int:nn:nn
+        foreign llvm icmp_eq(~#left#y##0:wybe.int, ~#right#y##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
 
@@ -887,7 +887,7 @@ y(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
 
 ~= > public {inline} (0 calls)
 0: position.position.~=<0>
-~=(#left##0:position.position, #right##0:position.position, ?####0:wybe.bool):
+~=(#left##0:position.position, #right##0:position.position, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(#left##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int)
@@ -898,11 +898,11 @@ y(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
     case ~tmp#7##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
-        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
     1:
         foreign llvm icmp_eq(~tmp#4##0:wybe.int, ~tmp#6##0:wybe.int, ?tmp#0##0:wybe.bool) @int:nn:nn
-        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
 
   LLVM code       :
@@ -938,8 +938,8 @@ entry:
   %"1#tmp#1##0" = icmp eq i64 %3, %10 
   br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
-  %"2#####0" = icmp eq i64 %7, %14 
-  ret i1 %"2#####0" 
+  %"2##success##0" = icmp eq i64 %7, %14 
+  ret i1 %"2##success##0" 
 if.else:
   ret i1 0 
 }
@@ -1048,9 +1048,9 @@ entry:
   br i1 %"1#tmp#7##0", label %if.then, label %if.else 
 if.then:
   %"2#tmp#0##0" = icmp eq i64 %62, %69 
-  %"2#####0" = xor i1 %"2#tmp#0##0", 1 
-  ret i1 %"2#####0" 
+  %"2##success##0" = xor i1 %"2#tmp#0##0", 1 
+  ret i1 %"2##success##0" 
 if.else:
-  %"3#####0" = xor i1 0, 1 
-  ret i1 %"3#####0" 
+  %"3##success##0" = xor i1 0, 1 
+  ret i1 %"3##success##0" 
 }

@@ -43,7 +43,7 @@ AFTER EVERYTHING:
 
 = > public (1 calls)
 0: mixed_fields.=<0>
-=(#left##0:mixed_fields, #right##0:mixed_fields, ?####0:wybe.bool):
+=(#left##0:mixed_fields, #right##0:mixed_fields, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(#left##0:mixed_fields, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#f2##0:wybe.char)
@@ -61,34 +61,34 @@ AFTER EVERYTHING:
     foreign llvm icmp_eq(~#left#f1##0:wybe.int, ~#right#f1##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
     1:
         foreign llvm icmp_eq(~#left#f2##0:wybe.char, ~#right#f2##0:wybe.char, ?tmp#2##0:wybe.bool) @char:nn:nn
         case ~tmp#2##0:wybe.bool of
         0:
-            foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
         1:
             foreign llvm icmp_eq(~#left#f3##0:wybe.int, ~#right#f3##0:wybe.int, ?tmp#3##0:wybe.bool) @int:nn:nn
             case ~tmp#3##0:wybe.bool of
             0:
-                foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+                foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
             1:
                 foreign llvm icmp_eq(~#left#f4##0:wybe.bool, ~#right#f4##0:wybe.bool, ?tmp#4##0:wybe.bool) @bool:nn:nn
                 case ~tmp#4##0:wybe.bool of
                 0:
-                    foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+                    foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                 1:
                     foreign llvm icmp_eq(~#left#f5##0:wybe.int, ~#right#f5##0:wybe.int, ?tmp#5##0:wybe.bool) @int:nn:nn
                     case ~tmp#5##0:wybe.bool of
                     0:
-                        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+                        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                     1:
-                        foreign llvm icmp_eq(~#left#f6##0:wybe.char, ~#right#f6##0:wybe.char, ?####0:wybe.bool) @char:nn:nn
+                        foreign llvm icmp_eq(~#left#f6##0:wybe.char, ~#right#f6##0:wybe.char, ?#success##0:wybe.bool) @char:nn:nn
 
 
 
@@ -232,11 +232,11 @@ printit(ob##0:mixed_fields, io##0:wybe.phantom, ?io##6:wybe.phantom):
 
 ~= > public {inline} (0 calls)
 0: mixed_fields.~=<0>
-~=(#left##0:mixed_fields, #right##0:mixed_fields, ?####0:wybe.bool):
+~=(#left##0:mixed_fields, #right##0:mixed_fields, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     mixed_fields.=<0>(~#left##0:mixed_fields, ~#right##0:mixed_fields, ?tmp#0##0:wybe.bool) #0
-    foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
+    foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
   LLVM code       :
 
@@ -365,8 +365,8 @@ if.then3:
 if.else3:
   ret i1 0 
 if.then4:
-  %"10#####0" = icmp eq i8 %31, %54 
-  ret i1 %"10#####0" 
+  %"10##success##0" = icmp eq i8 %31, %54 
+  ret i1 %"10##success##0" 
 if.else4:
   ret i1 0 
 }
@@ -643,6 +643,6 @@ entry:
 define external fastcc  i1 @"mixed_fields.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
 entry:
   %"1#tmp#0##0" = tail call fastcc  i1  @"mixed_fields.=<0>"(i64  %"#left##0", i64  %"#right##0")  
-  %"1#####0" = xor i1 %"1#tmp#0##0", 1 
-  ret i1 %"1#####0" 
+  %"1##success##0" = xor i1 %"1#tmp#0##0", 1 
+  ret i1 %"1##success##0" 
 }

@@ -301,7 +301,7 @@ entry:
 
 = > public {inline} (1 calls)
 0: student.course.=<0>
-=(#left##0:student.course, #right##0:student.course, ?####0:wybe.bool):
+=(#left##0:student.course, #right##0:student.course, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(#left##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#code##0:wybe.int)
@@ -311,11 +311,11 @@ entry:
     foreign llvm icmp_eq(~#left#code##0:wybe.int, ~#right#code##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
     1:
         foreign c strcmp(~#left#name##0:wybe.string, ~#right#name##0:wybe.string, ?tmp#9##0:wybe.int) @string:nn:nn
-        foreign llvm icmp_eq(~tmp#9##0:wybe.int, 0:wybe.int, ?####0:wybe.bool) @int:nn:nn
+        foreign llvm icmp_eq(~tmp#9##0:wybe.int, 0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
 
@@ -366,7 +366,7 @@ name(#rec##0:student.course, ?#rec##1:student.course, #field##0:wybe.string):
 
 ~= > public {inline} (0 calls)
 0: student.course.~=<0>
-~=(#left##0:student.course, #right##0:student.course, ?####0:wybe.bool):
+~=(#left##0:student.course, #right##0:student.course, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(#left##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int)
@@ -377,12 +377,12 @@ name(#rec##0:student.course, ?#rec##1:student.course, #field##0:wybe.string):
     case ~tmp#7##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
-        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
     1:
         foreign c strcmp(~tmp#4##0:wybe.string, ~tmp#6##0:wybe.string, ?tmp#8##0:wybe.int) @string:nn:nn
         foreign llvm icmp_eq(~tmp#8##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool) @int:nn:nn
-        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
 
   LLVM code       :
@@ -422,8 +422,8 @@ entry:
   br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
   %"2#tmp#9##0" = tail call ccc  i64  @strcmp(i64  %7, i64  %14)  
-  %"2#####0" = icmp eq i64 %"2#tmp#9##0", 0 
-  ret i1 %"2#####0" 
+  %"2##success##0" = icmp eq i64 %"2#tmp#9##0", 0 
+  ret i1 %"2##success##0" 
 if.else:
   ret i1 0 
 }
@@ -533,11 +533,11 @@ entry:
 if.then:
   %"2#tmp#8##0" = tail call ccc  i64  @strcmp(i64  %62, i64  %69)  
   %"2#tmp#0##0" = icmp eq i64 %"2#tmp#8##0", 0 
-  %"2#####0" = xor i1 %"2#tmp#0##0", 1 
-  ret i1 %"2#####0" 
+  %"2##success##0" = xor i1 %"2#tmp#0##0", 1 
+  ret i1 %"2##success##0" 
 if.else:
-  %"3#####0" = xor i1 0, 1 
-  ret i1 %"3#####0" 
+  %"3##success##0" = xor i1 0, 1 
+  ret i1 %"3##success##0" 
 }
 --------------------------------------------------
  Module student.student
@@ -559,7 +559,7 @@ if.else:
 
 = > public {inline} (1 calls)
 0: student.student.=<0>
-=(#left##0:student.student, #right##0:student.student, ?####0:wybe.bool):
+=(#left##0:student.student, #right##0:student.student, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(#left##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#id##0:wybe.int)
@@ -569,7 +569,7 @@ if.else:
     foreign llvm icmp_eq(~#left#id##0:wybe.int, ~#right#id##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
     1:
         foreign lpvm access(#left#major##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.int)
@@ -579,11 +579,11 @@ if.else:
         foreign llvm icmp_eq(~tmp#11##0:wybe.int, ~tmp#9##0:wybe.int, ?tmp#13##0:wybe.bool) @int:nn:nn
         case ~tmp#13##0:wybe.bool of
         0:
-            foreign llvm move(0:wybe.bool, ?####0:wybe.bool)
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
         1:
             foreign c strcmp(~tmp#10##0:wybe.string, ~tmp#12##0:wybe.string, ?tmp#14##0:wybe.int) @string:nn:nn
-            foreign llvm icmp_eq(~tmp#14##0:wybe.int, 0:wybe.int, ?####0:wybe.bool) @int:nn:nn
+            foreign llvm icmp_eq(~tmp#14##0:wybe.int, 0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
 
@@ -635,7 +635,7 @@ student(?id##0:wybe.int, ?major##0:student.course, #result##0:student.student):
 
 ~= > public {inline} (0 calls)
 0: student.student.~=<0>
-~=(#left##0:student.student, #right##0:student.student, ?####0:wybe.bool):
+~=(#left##0:student.student, #right##0:student.student, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(#left##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int)
@@ -646,7 +646,7 @@ student(?id##0:wybe.int, ?major##0:student.course, #result##0:student.student):
     case ~tmp#7##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
-        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
     1:
         foreign lpvm access(tmp#4##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.int)
@@ -657,12 +657,12 @@ student(?id##0:wybe.int, ?major##0:student.course, #result##0:student.student):
         case ~tmp#12##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
-            foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
+            foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
         1:
             foreign c strcmp(~tmp#9##0:wybe.string, ~tmp#11##0:wybe.string, ?tmp#13##0:wybe.int) @string:nn:nn
             foreign llvm icmp_eq(~tmp#13##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool) @int:nn:nn
-            foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?####0:wybe.bool)
+            foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
 
 
@@ -722,8 +722,8 @@ if.else:
   ret i1 0 
 if.then1:
   %"4#tmp#14##0" = tail call ccc  i64  @strcmp(i64  %21, i64  %28)  
-  %"4#####0" = icmp eq i64 %"4#tmp#14##0", 0 
-  ret i1 %"4#####0" 
+  %"4##success##0" = icmp eq i64 %"4#tmp#14##0", 0 
+  ret i1 %"4##success##0" 
 if.else1:
   ret i1 0 
 }
@@ -848,14 +848,14 @@ if.then:
   %"2#tmp#12##0" = icmp eq i64 %93, %86 
   br i1 %"2#tmp#12##0", label %if.then1, label %if.else1 
 if.else:
-  %"3#####0" = xor i1 0, 1 
-  ret i1 %"3#####0" 
+  %"3##success##0" = xor i1 0, 1 
+  ret i1 %"3##success##0" 
 if.then1:
   %"4#tmp#13##0" = tail call ccc  i64  @strcmp(i64  %90, i64  %97)  
   %"4#tmp#0##0" = icmp eq i64 %"4#tmp#13##0", 0 
-  %"4#####0" = xor i1 %"4#tmp#0##0", 1 
-  ret i1 %"4#####0" 
+  %"4##success##0" = xor i1 %"4#tmp#0##0", 1 
+  ret i1 %"4##success##0" 
 if.else1:
-  %"5#####0" = xor i1 0, 1 
-  ret i1 %"5#####0" 
+  %"5##success##0" = xor i1 0, 1 
+  ret i1 %"5##success##0" 
 }
