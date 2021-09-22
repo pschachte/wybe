@@ -11,7 +11,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public {inline} (0 calls)
+*main* > public {inline,impure} (0 calls)
 0: aaa.<0>
 (io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
@@ -60,7 +60,7 @@ entry:
   resources       : 
   procs           : 
 
-*main* > public {inline} (0 calls)
+*main* > public {inline,impure} (0 calls)
 0: bbb.<0>
 (io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
@@ -109,7 +109,7 @@ entry:
   resources       : 
   procs           : 
 
-*main* > public {inline} (0 calls)
+*main* > public {inline,impure} (0 calls)
 0: ccc.<0>
 (io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
@@ -157,7 +157,7 @@ entry:
   resources       : 
   procs           : 
 
-*main* > public {inline} (0 calls)
+*main* > public {inline,impure} (0 calls)
 0: ddd.<0>
 (io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []

@@ -13,7 +13,7 @@ AFTER EVERYTHING:
   submodules      : caret.region
   procs           : 
 
-*main* > public (0 calls)
+*main* > public {impure} (0 calls)
 0: caret.<0>
 (io##0:wybe.phantom, ?io##3:wybe.phantom):
  AliasPairs: []

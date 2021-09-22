@@ -36,12 +36,12 @@ AFTER BUILDING MAIN:
   resources       : 
   procs           : 
 
-*main* > {inline} (0 calls)
+*main* > {inline,impure} (0 calls)
 0: .<0>
 (argc##0:wybe.int, argv##0:wybe.array.raw_array(wybe.string), ?exit_code##0:wybe.int, ?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c {semipure} gc_init @memory_management:nn:nn
+    foreign c {impure} gc_init @memory_management:nn:nn
     command_line.<0>(~#argc##0:wybe.int, ?_:wybe.int, ?#arguments##0:wybe.array(wybe.string), ~#argv##0:wybe.array.raw_array(wybe.string), ?_:wybe.array.raw_array(wybe.string), ?#command##0:wybe.string, ?#exit_code##0:wybe.int, 0:wybe.phantom, ?_:wybe.phantom) #2
     drone.<0>(0:wybe.phantom, ?#io##2:wybe.phantom) #3
     foreign c {semipure,terminal} exit(exit_code##0:wybe.int)
@@ -67,7 +67,7 @@ LLVM code       : None
                     exit_code: fromList [(command_line.exit_code,wybe.int = 0 @command_line:nn:nn @command_line:nn:nn)] @command_line:nn:nn
   procs           : 
 
-*main* > public (0 calls)
+*main* > public {impure} (0 calls)
 0: command_line.<0>
 (argc##0:wybe.int, [?argc##0:wybe.int], ?arguments##2:wybe.array(wybe.string), argv##0:wybe.array.raw_array(wybe.string), [?argv##0:wybe.array.raw_array(wybe.string)], ?command##2:wybe.string, ?exit_code##1:wybe.int, io##0:wybe.phantom, [?io##0:wybe.phantom]):
  AliasPairs: []
@@ -169,7 +169,7 @@ entry:
   submodules      : drone.drone_info
   procs           : 
 
-*main* > public (0 calls)
+*main* > public {impure} (0 calls)
 0: drone.<0>
 (io##0:wybe.phantom, ?io##3:wybe.phantom):
  AliasPairs: []
@@ -590,12 +590,12 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > {inline} (0 calls)
+*main* > {inline,impure} (0 calls)
 0: .<0>
 (argc##0:wybe.int, argv##0:wybe.array.raw_array(wybe.string), ?exit_code##0:wybe.int, ?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c {semipure} gc_init @memory_management:nn:nn
+    foreign c {impure} gc_init @memory_management:nn:nn
     command_line.<0>(~#argc##0:wybe.int, ?_:wybe.int, ?#arguments##0:wybe.array(wybe.string), ~#argv##0:wybe.array.raw_array(wybe.string), ?_:wybe.array.raw_array(wybe.string), ?#command##0:wybe.string, ?#exit_code##0:wybe.int, 0:wybe.phantom, ?_:wybe.phantom) #2
     drone.<0>(0:wybe.phantom, ?#io##2:wybe.phantom) #3
     foreign c {semipure,terminal} exit(exit_code##0:wybe.int)
@@ -656,7 +656,7 @@ entry:
                     exit_code: fromList [(command_line.exit_code,wybe.int = 0 @command_line:nn:nn @command_line:nn:nn)] @command_line:nn:nn
   procs           : 
 
-*main* > public (0 calls)
+*main* > public {impure} (0 calls)
 0: command_line.<0>
 (argc##0:wybe.int, [?argc##0:wybe.int], ?arguments##2:wybe.array(wybe.string), argv##0:wybe.array.raw_array(wybe.string), [?argv##0:wybe.array.raw_array(wybe.string)], ?command##2:wybe.string, ?exit_code##1:wybe.int, io##0:wybe.phantom, [?io##0:wybe.phantom]):
  AliasPairs: []
@@ -758,7 +758,7 @@ entry:
   submodules      : drone.drone_info
   procs           : 
 
-*main* > public (0 calls)
+*main* > public {impure} (0 calls)
 0: drone.<0>
 (io##0:wybe.phantom, ?io##3:wybe.phantom):
  AliasPairs: []

@@ -23,7 +23,7 @@ AFTER EVERYTHING:
   submodules      : stmt_if2.tree
   procs           : 
 
-*main* > public (0 calls)
+*main* > public {impure} (0 calls)
 0: stmt_if2.<0>
 (io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []

@@ -11,7 +11,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public (0 calls)
+*main* > public {impure} (0 calls)
 0: alias_fork3.<0>
 (io##0:wybe.phantom, ?io##3:wybe.phantom):
  AliasPairs: []

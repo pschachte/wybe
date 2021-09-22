@@ -254,6 +254,8 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Calling a proc or foreign in a more pure context
                | ReasonLooksPure ProcName Impurity OptPos
                    -- ^Calling a not-pure proc without ! marker
+               | ReasonActuallyPure ProcName Impurity OptPos
+                   -- ^Calling a pure proc with unneeded ! marker
                | ReasonForeignLanguage String String OptPos
                    -- ^Foreign call with bogus language
                | ReasonForeignArgType String Int OptPos
@@ -362,6 +364,9 @@ typeErrorMessage (ReasonLooksPure name impurity pos) =
     Message Error pos $
     "Calling " ++ impurityFullName impurity ++ " proc " ++ name
     ++ " without ! non-purity marker"
+typeErrorMessage (ReasonActuallyPure name impurity pos) =
+    Message Warning pos $
+    "Calling proc " ++ name ++ " with unneeded ! marker"
 typeErrorMessage (ReasonForeignLanguage lang instr pos) =
     Message Error pos $
     "Foreign call '" ++ instr ++ "' with unknown language '" ++ lang ++ "'"
@@ -1753,6 +1758,9 @@ finaliseCall m name assigned detism resourceful tmpCount pos args match stmt =
                 | matchImpurity > impurity]
             ++ [ReasonLooksPure (show matchProc) matchImpurity pos
                 | matchImpurity > Pure && not resourceful]
+            ++ [ReasonActuallyPure (show matchProc) matchImpurity pos
+                | matchImpurity == Pure && resourceful
+                  && List.null inResources && List.null outResources]
             ++ [ReasonResourceUnavail name res pos
                 | res <- Set.toList
                     $ missingBindings inResources
