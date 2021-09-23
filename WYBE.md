@@ -99,14 +99,15 @@ In effect, this re-exports everything imported from the named module(s).
 
 Wybe has the usual complement of primitive types:
 
-| Type     | Meaning                                          |
-| -------- | ------------------------------------------------ |
-| `int`    | Fixed precision integer (32 or 64 bits)          |
-| `float`  | Double precision floating point number           |
-| `count`  | Fixed precision unsigned integer (32 or 64 bits) |
-| `bool`   | Boolean; either `true` or `false`                |
-| `string` | Character string (double quotes)                 |
-| `char`   | Individual ascii character (single quotes)       |
+| Type       | Meaning                                          |
+| ---------- | ------------------------------------------------ |
+| `int`      | Fixed precision integer (32 or 64 bits)          |
+| `float`    | Double precision floating point number           |
+| `count`    | Fixed precision unsigned integer (32 or 64 bits) |
+| `bool`     | Boolean; either `true` or `false`                |
+| `string`   | Character string (double quotes)                 |
+| `c_string` | C-style character string (double quotes)         |
+| `char`     | Individual ascii character (single quotes)       |
 
 These are all defined in the `wybe` module, which is automatically imported into
 every module, so there is no need to explicitly import them.
@@ -139,9 +140,15 @@ The only Boolean constants are `true` and `false`.
 
 String constants are written as any number of characters between double quote
 (`"`) characters.  Character constants are written as a single character between
-single quote (`'`) characters.
+single quote (`'`) characters. 
 
-In both strings and character constants, the backslash (`\`) character is special, altering the way the following character is interpreted.  The backslash and the following character together are interpreted as a single character, according to the following character:
+To denote a a C-style (null-terminated) string, a `c` precedes the first `"`. 
+This is provided for interoperability with external libraries.
+
+In both strings and character constants, the backslash (`\`) character is special, 
+altering the way the following character is interpreted.  The backslash and the 
+following character together are interpreted as a single character, according to 
+the following character:
 
 | Character | Meaning                                 |
 | --------- | --------------------------------------- |
@@ -1251,14 +1258,14 @@ in that context is used.
 
 The special resources supported by Wybe are:
 
-| Resource Name                | Type     | Meaning                                            |
-| ---------------------------- | -------- | -------------------------------------------------- |
-| `call_source_file_name`      | `string` | the name of the file in which the call appears     |
-| `call_source_file_full_name` | `string` | the name and directory in which the call appears   |
-| `call_source_line_number`    | `int`    | the line number on which the call appears          |
-| `call_source_column_number`  | `int`    | the column number of the start of the call         |
-| `call_source_location`       | `string` | the file name, line, and column number of the call |
-| `call_source_full_location`  | `string` | the call directory, file name, line, and column    |
+| Resource Name                | Type       | Meaning                                            |
+| ---------------------------- | ---------- | -------------------------------------------------- |
+| `call_source_file_name`      | `c_string` | the name of the file in which the call appears     |
+| `call_source_file_full_name` | `c_string` | the name and directory in which the call appears   |
+| `call_source_line_number`    | `int`      | the line number on which the call appears          |
+| `call_source_column_number`  | `int`      | the column number of the start of the call         |
+| `call_source_location`       | `c_string` | the file name, line, and column number of the call |
+| `call_source_full_location`  | `c_string` | the call directory, file name, line, and column    |
 
 
 ## Packages
