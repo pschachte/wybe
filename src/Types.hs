@@ -1734,7 +1734,7 @@ finaliseCall m name assigned detism resourceful tmpCount pos args match stmt =
     let outResources = procInfoOutRes match
     let inResources = procInfoInRes match
     let impurity = bindingImpurity assigned
-    (args',stmts,tmpCount') <- matchArguments tmpCount (procInfoArgs match) args
+    let (args',stmts,tmpCount') = matchArguments tmpCount (procInfoArgs match) args
     let stmt' = ProcCall (procSpecMod matchProc)
                 (procSpecName matchProc)
                 (Just $ procSpecID matchProc)
@@ -1791,21 +1791,21 @@ finaliseCall m name assigned detism resourceful tmpCount pos args match stmt =
 
 
 matchArguments :: Int -> [TypeFlow] -> [Placed Exp]
-               -> Typed ([Placed Exp],[Placed Stmt],Int)
-matchArguments tmpCount [] [] = return ([],[],tmpCount)
+               -> ([Placed Exp],[Placed Stmt],Int)
+matchArguments tmpCount [] [] = ([],[],tmpCount)
 matchArguments _ [] _ = shouldnt "matchArguments arity mismatch"
 matchArguments _ _ [] = shouldnt "matchArguments arity mismatch"
-matchArguments tmpCount (typeflow:typeflows) (arg:args) = do
-    (arg', stmts1, tmpCount') <- matchArgument tmpCount typeflow arg
-    (args', stmts2, tmpCount'') <- matchArguments tmpCount' typeflows args
-    return (arg':args', stmts1++stmts2, tmpCount'')
+matchArguments tmpCount (typeflow:typeflows) (arg:args) =
+    let (arg', stmts1, tmpCount') = matchArgument tmpCount typeflow arg
+        (args', stmts2, tmpCount'') = matchArguments tmpCount' typeflows args
+    in (arg':args', stmts1++stmts2, tmpCount'')
 
 
 -- |Transform an argument as supplied to match the param it is passed to.  This
 -- includes handling implied modes by generating a fresh variable to pass in the
 -- call, and generating code to match it with the provided input.  Thus also
 -- attaches the correct type to the argument.
-matchArgument :: Int -> TypeFlow -> Placed Exp -> Typed (Placed Exp,[Placed Stmt],Int)
+matchArgument :: Int -> TypeFlow -> Placed Exp -> (Placed Exp,[Placed Stmt],Int)
 matchArgument tmpCount typeflow arg
     | ParamOut == typeFlowMode typeflow
       && ParamIn == flattenedExpFlow (content arg) =
@@ -1815,8 +1815,8 @@ matchArgument tmpCount typeflow arg
               setVar = Unplaced $ setExpTypeFlow typeflow (varSet var)
               getVar = Unplaced $ setExpTypeFlow inTypeFlow (varGet var)
               call = ProcCall [] "=" Nothing SemiDet False [getVar, arg']
-          in return (setVar, [maybePlace call $ place arg], tmpCount+1)
-    | otherwise = return (setPExpTypeFlow typeflow arg,[],tmpCount)
+          in (setVar, [maybePlace call $ place arg], tmpCount+1)
+    | otherwise = (setPExpTypeFlow typeflow arg,[],tmpCount)
 
 
 -- |Return a list of error messages for too weak a determinism at the end of a
