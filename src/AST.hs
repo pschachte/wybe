@@ -2810,9 +2810,9 @@ pexpListOutputs = List.foldr (Set.union . expOutputs . content) Set.empty
 -- | Apply the specified TypeFlow to the given expression, ensuring they're
 -- explicitly attached to the expression.
 setExpTypeFlow :: TypeFlow -> Exp -> Exp
-setExpTypeFlow typeflow (Typed expr _ castInner) = 
-    let Typed expr' ty' _ = setExpTypeFlow typeflow expr
-    in Typed expr' ty' castInner
+setExpTypeFlow typeflow (Typed expr _ castInner)
+    = Typed expr' ty' castInner
+    where Typed expr' ty' _ = setExpTypeFlow typeflow expr
 setExpTypeFlow (TypeFlow ty fl) (Var name _ ftype)
     = Typed (Var name fl ftype) ty Nothing
 setExpTypeFlow (TypeFlow ty ParamIn) expr
@@ -2824,8 +2824,7 @@ setExpTypeFlow (TypeFlow ty fl) expr
 -- | Apply the specified TypeFlow to the given expression, ensuring they're
 -- explicitly attached to the expression.
 setPExpTypeFlow :: TypeFlow -> Placed Exp -> Placed Exp
-setPExpTypeFlow typeflow pexpr
-    = (`maybePlace` place pexpr) $ setExpTypeFlow typeflow (content pexpr)
+setPExpTypeFlow typeflow pexpr = setExpTypeFlow typeflow <$> pexpr
 
 
 isHalfUpdate :: FlowDirection -> Exp -> Bool

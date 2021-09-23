@@ -1798,7 +1798,7 @@ matchArguments _ _ [] = shouldnt "matchArguments arity mismatch"
 matchArguments tmpCount (typeflow:typeflows) (arg:args) =
     let (arg', stmts1, tmpCount') = matchArgument tmpCount typeflow arg
         (args', stmts2, tmpCount'') = matchArguments tmpCount' typeflows args
-    in (arg':args', stmts1++stmts2, tmpCount'')
+    in  (arg':args', stmts1++stmts2, tmpCount'')
 
 
 -- |Transform an argument as supplied to match the param it is passed to.  This
