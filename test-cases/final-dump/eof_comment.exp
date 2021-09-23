@@ -9,13 +9,13 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public {inline} (0 calls)
+*main* > public {inline,impure} (0 calls)
 0: eof_comment.<0>
-(io#0:wybe.phantom, ?io#1:wybe.phantom):
+(io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    wybe.string.print_string<0>("Wominjeka!":wybe.string, ~#io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) #1 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$2#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("Wominjeka!":wybe.string, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) #1 @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#2##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 

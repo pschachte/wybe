@@ -51,86 +51,86 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 = > public {inline} (1 calls)
 0: position_float.position.=<0>
-=($left#0:position_float.position, $right#0:position_float.position, ?$$#0:wybe.bool):
+=(#left##0:position_float.position, #right##0:position_float.position, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($left#0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$x#0:wybe.float)
-    foreign lpvm access(~$left#0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$left$y#0:wybe.float)
-    foreign lpvm access($right#0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$x#0:wybe.float)
-    foreign lpvm access(~$right#0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$right$y#0:wybe.float)
-    foreign llvm fcmp_eq(~$left$x#0:wybe.float, ~$right$x#0:wybe.float, ?tmp$1#0:wybe.bool) @float:nn:nn
-    case ~tmp$1#0:wybe.bool of
+    foreign lpvm access(#left##0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#x##0:wybe.float)
+    foreign lpvm access(~#left##0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#y##0:wybe.float)
+    foreign lpvm access(#right##0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#x##0:wybe.float)
+    foreign lpvm access(~#right##0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#y##0:wybe.float)
+    foreign llvm fcmp_eq(~#left#x##0:wybe.float, ~#right#x##0:wybe.float, ?tmp#1##0:wybe.bool) @float:nn:nn
+    case ~tmp#1##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
     1:
-        foreign llvm fcmp_eq(~$left$y#0:wybe.float, ~$right$y#0:wybe.float, ?$$#0:wybe.bool) @float:nn:nn
+        foreign llvm fcmp_eq(~#left#y##0:wybe.float, ~#right#y##0:wybe.float, ?#success##0:wybe.bool) @float:nn:nn
 
 
 
 position > public {inline} (0 calls)
 0: position_float.position.position<0>
-position(x#0:wybe.float, y#0:wybe.float, ?$#0:position_float.position):
+position(x##0:wybe.float, y##0:wybe.float, ?#result##0:position_float.position):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?$rec#0:position_float.position)
-    foreign lpvm mutate(~$rec#0:position_float.position, ?$rec#1:position_float.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x#0:wybe.float)
-    foreign lpvm mutate(~$rec#1:position_float.position, ?$#0:position_float.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y#0:wybe.float)
+    foreign lpvm alloc(16:wybe.int, ?#rec##0:position_float.position)
+    foreign lpvm mutate(~#rec##0:position_float.position, ?#rec##1:position_float.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:wybe.float)
+    foreign lpvm mutate(~#rec##1:position_float.position, ?#result##0:position_float.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y##0:wybe.float)
 position > public {inline} (6 calls)
 1: position_float.position.position<1>
-position(?x#0:wybe.float, ?y#0:wybe.float, $#0:position_float.position):
+position(?x##0:wybe.float, ?y##0:wybe.float, #result##0:position_float.position):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($#0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x#0:wybe.float)
-    foreign lpvm access(~$#0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y#0:wybe.float)
+    foreign lpvm access(#result##0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:wybe.float)
+    foreign lpvm access(~#result##0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:wybe.float)
 
 
 x > public {inline} (0 calls)
 0: position_float.position.x<0>
-x($rec#0:position_float.position, ?$#0:wybe.float):
+x(#rec##0:position_float.position, ?#result##0:wybe.float):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~$rec#0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.float)
+    foreign lpvm access(~#rec##0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.float)
 x > public {inline} (0 calls)
 1: position_float.position.x<1>
-x($rec#0:position_float.position, ?$rec#1:position_float.position, $field#0:wybe.float):
+x(#rec##0:position_float.position, ?#rec##1:position_float.position, #field##0:wybe.float):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~$rec#0:position_float.position, ?$rec#1:position_float.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.float)
+    foreign lpvm {noalias} mutate(~#rec##0:position_float.position, ?#rec##1:position_float.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.float)
 
 
 y > public {inline} (0 calls)
 0: position_float.position.y<0>
-y($rec#0:position_float.position, ?$#0:wybe.float):
+y(#rec##0:position_float.position, ?#result##0:wybe.float):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~$rec#0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?$#0:wybe.float)
+    foreign lpvm access(~#rec##0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.float)
 y > public {inline} (0 calls)
 1: position_float.position.y<1>
-y($rec#0:position_float.position, ?$rec#1:position_float.position, $field#0:wybe.float):
+y(#rec##0:position_float.position, ?#rec##1:position_float.position, #field##0:wybe.float):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~$rec#0:position_float.position, ?$rec#1:position_float.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~$field#0:wybe.float)
+    foreign lpvm {noalias} mutate(~#rec##0:position_float.position, ?#rec##1:position_float.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.float)
 
 
 ~= > public {inline} (0 calls)
 0: position_float.position.~=<0>
-~=($left#0:position_float.position, $right#0:position_float.position, ?$$#0:wybe.bool):
+~=(#left##0:position_float.position, #right##0:position_float.position, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access($left#0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$3#0:wybe.float)
-    foreign lpvm access(~$left#0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$4#0:wybe.float)
-    foreign lpvm access($right#0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$5#0:wybe.float)
-    foreign lpvm access(~$right#0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp$6#0:wybe.float)
-    foreign llvm fcmp_eq(~tmp$3#0:wybe.float, ~tmp$5#0:wybe.float, ?tmp$7#0:wybe.bool) @float:nn:nn
-    case ~tmp$7#0:wybe.bool of
+    foreign lpvm access(#left##0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.float)
+    foreign lpvm access(~#left##0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.float)
+    foreign lpvm access(#right##0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.float)
+    foreign lpvm access(~#right##0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.float)
+    foreign llvm fcmp_eq(~tmp#3##0:wybe.float, ~tmp#5##0:wybe.float, ?tmp#7##0:wybe.bool) @float:nn:nn
+    case ~tmp#7##0:wybe.bool of
     0:
-        foreign llvm move(0:wybe.bool, ?tmp$0#0:wybe.bool)
-        foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
     1:
-        foreign llvm fcmp_eq(~tmp$4#0:wybe.float, ~tmp$6#0:wybe.float, ?tmp$0#0:wybe.bool) @float:nn:nn
-        foreign llvm xor(~tmp$0#0:wybe.bool, 1:wybe.bool, ?$$#0:wybe.bool)
+        foreign llvm fcmp_eq(~tmp#4##0:wybe.float, ~tmp#6##0:wybe.float, ?tmp#0##0:wybe.bool) @float:nn:nn
+        foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
 
   LLVM code       :
@@ -147,54 +147,54 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external fastcc  i1 @"position_float.position.=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"position_float.position.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
 entry:
-  %1 = inttoptr i64 %"$left#0" to double* 
+  %1 = inttoptr i64 %"#left##0" to double* 
   %2 = getelementptr  double, double* %1, i64 0 
   %3 = load  double, double* %2 
-  %4 = add   i64 %"$left#0", 8 
+  %4 = add   i64 %"#left##0", 8 
   %5 = inttoptr i64 %4 to double* 
   %6 = getelementptr  double, double* %5, i64 0 
   %7 = load  double, double* %6 
-  %8 = inttoptr i64 %"$right#0" to double* 
+  %8 = inttoptr i64 %"#right##0" to double* 
   %9 = getelementptr  double, double* %8, i64 0 
   %10 = load  double, double* %9 
-  %11 = add   i64 %"$right#0", 8 
+  %11 = add   i64 %"#right##0", 8 
   %12 = inttoptr i64 %11 to double* 
   %13 = getelementptr  double, double* %12, i64 0 
   %14 = load  double, double* %13 
-  %"1$tmp$1#0" = fcmp oeq double %3, %10 
-  br i1 %"1$tmp$1#0", label %if.then, label %if.else 
+  %"1#tmp#1##0" = fcmp oeq double %3, %10 
+  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
-  %"2$$$#0" = fcmp oeq double %7, %14 
-  ret i1 %"2$$$#0" 
+  %"2##success##0" = fcmp oeq double %7, %14 
+  ret i1 %"2##success##0" 
 if.else:
   ret i1 0 
 }
 
 
-define external fastcc  i64 @"position_float.position.position<0>"(double  %"x#0", double  %"y#0")    {
+define external fastcc  i64 @"position_float.position.position<0>"(double  %"x##0", double  %"y##0")    {
 entry:
   %15 = trunc i64 16 to i32  
   %16 = tail call ccc  i8*  @wybe_malloc(i32  %15)  
   %17 = ptrtoint i8* %16 to i64 
   %18 = inttoptr i64 %17 to double* 
   %19 = getelementptr  double, double* %18, i64 0 
-  store  double %"x#0", double* %19 
+  store  double %"x##0", double* %19 
   %20 = add   i64 %17, 8 
   %21 = inttoptr i64 %20 to double* 
   %22 = getelementptr  double, double* %21, i64 0 
-  store  double %"y#0", double* %22 
+  store  double %"y##0", double* %22 
   ret i64 %17 
 }
 
 
-define external fastcc  {double, double} @"position_float.position.position<1>"(i64  %"$#0")    {
+define external fastcc  {double, double} @"position_float.position.position<1>"(i64  %"#result##0")    {
 entry:
-  %23 = inttoptr i64 %"$#0" to double* 
+  %23 = inttoptr i64 %"#result##0" to double* 
   %24 = getelementptr  double, double* %23, i64 0 
   %25 = load  double, double* %24 
-  %26 = add   i64 %"$#0", 8 
+  %26 = add   i64 %"#result##0", 8 
   %27 = inttoptr i64 %26 to double* 
   %28 = getelementptr  double, double* %27, i64 0 
   %29 = load  double, double* %28 
@@ -204,34 +204,34 @@ entry:
 }
 
 
-define external fastcc  double @"position_float.position.x<0>"(i64  %"$rec#0")    {
+define external fastcc  double @"position_float.position.x<0>"(i64  %"#rec##0")    {
 entry:
-  %32 = inttoptr i64 %"$rec#0" to double* 
+  %32 = inttoptr i64 %"#rec##0" to double* 
   %33 = getelementptr  double, double* %32, i64 0 
   %34 = load  double, double* %33 
   ret double %34 
 }
 
 
-define external fastcc  i64 @"position_float.position.x<1>"(i64  %"$rec#0", double  %"$field#0")    {
+define external fastcc  i64 @"position_float.position.x<1>"(i64  %"#rec##0", double  %"#field##0")    {
 entry:
   %35 = trunc i64 16 to i32  
   %36 = tail call ccc  i8*  @wybe_malloc(i32  %35)  
   %37 = ptrtoint i8* %36 to i64 
   %38 = inttoptr i64 %37 to i8* 
-  %39 = inttoptr i64 %"$rec#0" to i8* 
+  %39 = inttoptr i64 %"#rec##0" to i8* 
   %40 = trunc i64 16 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %38, i8*  %39, i32  %40, i32  8, i1  0)  
   %41 = inttoptr i64 %37 to double* 
   %42 = getelementptr  double, double* %41, i64 0 
-  store  double %"$field#0", double* %42 
+  store  double %"#field##0", double* %42 
   ret i64 %37 
 }
 
 
-define external fastcc  double @"position_float.position.y<0>"(i64  %"$rec#0")    {
+define external fastcc  double @"position_float.position.y<0>"(i64  %"#rec##0")    {
 entry:
-  %43 = add   i64 %"$rec#0", 8 
+  %43 = add   i64 %"#rec##0", 8 
   %44 = inttoptr i64 %43 to double* 
   %45 = getelementptr  double, double* %44, i64 0 
   %46 = load  double, double* %45 
@@ -239,46 +239,46 @@ entry:
 }
 
 
-define external fastcc  i64 @"position_float.position.y<1>"(i64  %"$rec#0", double  %"$field#0")    {
+define external fastcc  i64 @"position_float.position.y<1>"(i64  %"#rec##0", double  %"#field##0")    {
 entry:
   %47 = trunc i64 16 to i32  
   %48 = tail call ccc  i8*  @wybe_malloc(i32  %47)  
   %49 = ptrtoint i8* %48 to i64 
   %50 = inttoptr i64 %49 to i8* 
-  %51 = inttoptr i64 %"$rec#0" to i8* 
+  %51 = inttoptr i64 %"#rec##0" to i8* 
   %52 = trunc i64 16 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %50, i8*  %51, i32  %52, i32  8, i1  0)  
   %53 = add   i64 %49, 8 
   %54 = inttoptr i64 %53 to double* 
   %55 = getelementptr  double, double* %54, i64 0 
-  store  double %"$field#0", double* %55 
+  store  double %"#field##0", double* %55 
   ret i64 %49 
 }
 
 
-define external fastcc  i1 @"position_float.position.~=<0>"(i64  %"$left#0", i64  %"$right#0")    {
+define external fastcc  i1 @"position_float.position.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
 entry:
-  %56 = inttoptr i64 %"$left#0" to double* 
+  %56 = inttoptr i64 %"#left##0" to double* 
   %57 = getelementptr  double, double* %56, i64 0 
   %58 = load  double, double* %57 
-  %59 = add   i64 %"$left#0", 8 
+  %59 = add   i64 %"#left##0", 8 
   %60 = inttoptr i64 %59 to double* 
   %61 = getelementptr  double, double* %60, i64 0 
   %62 = load  double, double* %61 
-  %63 = inttoptr i64 %"$right#0" to double* 
+  %63 = inttoptr i64 %"#right##0" to double* 
   %64 = getelementptr  double, double* %63, i64 0 
   %65 = load  double, double* %64 
-  %66 = add   i64 %"$right#0", 8 
+  %66 = add   i64 %"#right##0", 8 
   %67 = inttoptr i64 %66 to double* 
   %68 = getelementptr  double, double* %67, i64 0 
   %69 = load  double, double* %68 
-  %"1$tmp$7#0" = fcmp oeq double %58, %65 
-  br i1 %"1$tmp$7#0", label %if.then, label %if.else 
+  %"1#tmp#7##0" = fcmp oeq double %58, %65 
+  br i1 %"1#tmp#7##0", label %if.then, label %if.else 
 if.then:
-  %"2$tmp$0#0" = fcmp oeq double %62, %69 
-  %"2$$$#0" = xor i1 %"2$tmp$0#0", 1 
-  ret i1 %"2$$$#0" 
+  %"2#tmp#0##0" = fcmp oeq double %62, %69 
+  %"2##success##0" = xor i1 %"2#tmp#0##0", 1 
+  ret i1 %"2##success##0" 
 if.else:
-  %"3$$$#0" = xor i1 0, 1 
-  ret i1 %"3$$$#0" 
+  %"3##success##0" = xor i1 0, 1 
+  ret i1 %"3##success##0" 
 }

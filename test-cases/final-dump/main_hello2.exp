@@ -9,14 +9,14 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public (0 calls)
+*main* > public {impure} (0 calls)
 0: main_hello2.<0>
-(io#0:wybe.phantom, ?io#2:wybe.phantom):
+(io##0:wybe.phantom, ?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    wybe.string.print_string<0>("hello, ":wybe.string, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) #2 @io:nn:nn
-    wybe.string.print_string<0>("world!":wybe.string, ~#io#1:wybe.phantom, ?tmp$4#0:wybe.phantom) #3 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$4#0:wybe.phantom, ?#io#2:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("hello, ":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #2 @io:nn:nn
+    wybe.string.print_string<0>("world!":wybe.string, ~#io##1:wybe.phantom, ?tmp#4##0:wybe.phantom) #3 @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#4##0:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 

@@ -115,7 +115,7 @@ dataCtorItemParser :: Visibility -> Parser Item
 dataCtorItemParser v = do
     pos <- tokenPosition <$> (ident "constructor" <|> ident "constructors")
     params <- option [] $ betweenB Paren (typeVarName `sepBy` comma)
-    ctors <- procFuncProto `sepBy1` symbol "|"
+    ctors <- ctorDecl `sepBy1` symbol "|"
     return $ ConstructorDecl v params ctors $ Just pos
 
 
@@ -148,6 +148,10 @@ typeCtors = betweenB Brace $ do
 
 procFuncProto :: Parser (Placed ProcProto)
 procFuncProto = stmtExpr >>= parseWith stmtExprToProto
+
+
+ctorDecl :: Parser (Placed ProcProto)
+ctorDecl = stmtExpr >>= parseWith stmtExprToCtorDecl
 
 
 -- | Resource declaration parser.
@@ -1049,6 +1053,27 @@ stmtExprToParam (Call pos [] name flow []) =
     return $ Param name AnyType flow Ordinary
 stmtExprToParam other =
     Left (stmtExprPos other, "invalid parameter " ++ show other)
+
+
+-- | Translate a StmtExpr to a ctor declaration
+stmtExprToCtorDecl :: TranslateTo (Placed ProcProto)
+stmtExprToCtorDecl (Call pos [] name ParamIn fields) = do
+    fields' <- mapM stmtExprToCtorField fields
+    return $ Placed (ProcProto name fields' Set.empty) pos
+stmtExprToCtorDecl other =
+    Left (stmtExprPos other, "invalid constructor declaration " ++ show other)
+
+
+-- | Translate a StmtExpr to a ctor field
+stmtExprToCtorField :: TranslateTo Param
+stmtExprToCtorField (Call _ [] ":" ParamIn [Call _ [] name flow [],ty]) = do
+    ty' <- stmtExprToTypeSpec ty
+    return $ Param name ty' flow Ordinary
+stmtExprToCtorField (Call pos mod name flow params) = do
+    tyParams <- mapM stmtExprToTypeSpec params
+    return $ Param "" (TypeSpec mod name tyParams) flow Ordinary
+stmtExprToCtorField other =
+    Left (stmtExprPos other, "invalid constructor field " ++ show other)
 
 
 -- | Extract a list of resource names from a StmtExpr (from a "use" statement).

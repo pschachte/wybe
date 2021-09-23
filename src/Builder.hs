@@ -1103,12 +1103,6 @@ buildMain mainImports =
         -- Construct argumentless resourceful calls to all main procs
         bodyInner = [Unplaced $ ProcCall m "" Nothing Det True []
                     | m <- mainImports]
-        -- If someone is using command_line module, exit with exit_code
-        -- bodyCode = if List.elem ["command_line"] mainImports
-        --            then bodyInner ++ [Unplaced
-        --                     $ ForeignCall "c" "exit" ["semipure","terminal"]
-        --                                   [Unplaced $ intVarGet "exit_code"]]
-        --            else bodyInner
         bodyCode = bodyInner ++ [Unplaced
                             $ ForeignCall "c" "exit" ["semipure","terminal"]
                                           [Unplaced $ intVarGet "exit_code"]]
@@ -1122,7 +1116,7 @@ buildMain mainImports =
                                      (ResourceSpec ["wybe","io"] "io")
                                      ParamOut]
     in ProcDef "" proto mainBody Nothing 0 0 Map.empty
-       Private Det MayInline Pure NoSuperproc
+       Private Det MayInline Impure NoSuperproc
 
 
 -- | Traverse and collect a depth first dependency list from the given initial

@@ -506,6 +506,11 @@ Backquotes can also be used in function calls, so `` `+`(3,4)`` is semantically
 identical to `3 + 4`, regardless of which syntax was used to define the `+`
 function.
 
+Backquotes can also be used to make almost any sequence of characters act as a
+symbol.  The only characters that cannot appear between backquotes are newlines,
+other control characters (such as tabs and escape characters), the hash (#)
+character, and the backquote character itself.
+
 
 ##  <a name="reserved-words"></a>Reserved operators
 
@@ -867,9 +872,12 @@ prototype part of a function declaration:
 
 > *ctor*`(`*param*`:`*type*, ... *param*`:`*type*`)`
 
+In contrast to regular procedure prototypes, the parameter names are optional, 
+and can be removed, along with the accompanying `:`.
+
 If *name* is an infix operator symbol, you must surround it with backquotes, or
 declare the constructor with infix syntax, much like defining a function
-whose name is an operator:
+whose name is an operator, again with optional parameter names:
 
 > `(`*param*`:`*type* *ctor* *param*`:`*type*`)`
 
@@ -916,8 +924,8 @@ And this statement will unpack a coordinate `pos` into variables `x` and `y`:
 coordinate(?x,?y) = pos
 ```
 
-Additionally, two procedures are automatically generated for each *member*:
-one to access the member, and one to mutate it.
+Additionally, two procedures are automatically generated for each named 
+*member*: one to access the member, and one to mutate it.
 The first has the prototype:
 
 > *member*`(structure:`*type*`,` `?value:`*memtype*`)`
