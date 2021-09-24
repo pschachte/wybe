@@ -10,9 +10,11 @@ pub def {terminal,semipure} exit(code:int) {
 
 
 # Print the source location and and error message, and abort the computation.
-# pub def {terminal,semipure} error(message:string) use call_source_location {
-#     foreign c {terminal,semipure} error_exit(call_source_location, c_string(message))
-# }
+
+pub def {terminal,semipure} error(message:string) use call_source_location {
+    foreign c {terminal,semipure} error_exit(call_source_location, c_string(message))
+}
+
 pub def {terminal,semipure} error(message:c_string) use call_source_location {
     foreign c {terminal,semipure} error_exit(call_source_location, message)
 }
