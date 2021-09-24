@@ -36,6 +36,11 @@ import Control.Monad
 type Parser a = Parsec [Token] () a
 
 
+-- | Report a syntax error
+syntaxError :: SourcePos -> String -> Either (SourcePos,String) a
+syntaxError pos msg = Left (pos,msg)
+
+
 -- | Parse a Wybe module.
 parseWybe :: [Token] -> FilePath -> Either ParseError [Item]
 parseWybe toks file = parse (items <* eof) file toks
@@ -47,12 +52,12 @@ items = singleItem `sepBy` separator
 
 
 singleItem :: Parser Item
-singleItem = pragmaItem <|> visibilityItem <|> privateItem <|> topLevelStmtItem
+singleItem = visibilityItem <|> privateItem <|> topLevelStmtItem
 
 
 topLevelStmtItem :: Parser Item
 topLevelStmtItem = do
-    st <- stmt
+    st <- stmt <?> "top-level statement"
     return $ StmtDecl (content st) (place st)
 
 
@@ -71,7 +76,7 @@ visibilityItem = do
 
 -- | Parse module-local items (with no visibility prefix).
 privateItem :: Parser Item
-privateItem = typeRepItem
+privateItem = typeRepItem <|> pragmaItem
 
 
 pragmaItem :: Parser Item
@@ -117,7 +122,7 @@ dataCtorItemParser :: Visibility -> Parser Item
 dataCtorItemParser v = do
     pos <- tokenPosition <$> (ident "constructor" <|> ident "constructors")
     params <- option [] $ betweenB Paren (typeVarName `sepBy` comma)
-    ctors <- procFuncProto `sepBy1` symbol "|"
+    ctors <- ctorDecl `sepBy1` symbol "|"
     return $ ConstructorDecl v params ctors $ Just pos
 
 
@@ -150,6 +155,10 @@ typeCtors = betweenB Brace $ do
 
 procFuncProto :: Parser (Placed ProcProto)
 procFuncProto = stmtExpr >>= parseWith stmtExprToProto
+
+
+ctorDecl :: Parser (Placed ProcProto)
+ctorDecl = stmtExpr >>= parseWith stmtExprToCtorDecl
 
 
 -- | Resource declaration parser.
@@ -371,8 +380,8 @@ argumentList bracket = betweenB bracket (stmtExpr `sepBy` comma)
 
 -- |Supply arguments to function call we thought was something else.
 applyArguments :: StmtExpr -> [StmtExpr] -> Parser StmtExpr
-applyArguments stmtExpr args =
-    case stmtExpr of
+applyArguments stmtOrExpr args =
+    case stmtOrExpr of
         call@Call{} ->
             return $ call {callArguments = callArguments call ++ args}
         other -> fail $ "unexpected argument list following expression "
@@ -397,7 +406,7 @@ stmtExprRest minPrec left =
     <|> -- Otherwise try to parse a call with 1 un-parenthesised argument;
         -- failing that, the left context is the whole expression.
         case left of
-            Call _ m n _ [] | minPrec <= lowestStmtPrecedence 
+            Call _ m n _ [] | minPrec <= lowestStmtPrecedence
                             || List.null m && prefixKeyword n ->
                 (limitedStmtExpr lowestExprPrecedence
                     >>= applyArguments left . (:[])
@@ -834,7 +843,7 @@ type TranslateTo ty = StmtExpr -> Either (SourcePos,String) ty
 
 
 -- |Convert a StmtExpr to a proc/func prototype and a return type (AnyType for a
--- proc declaration or a function with not return type specified).
+-- proc declaration or a function with no return type specified).
 stmtExprToPrototype :: TranslateTo (ProcProto, TypeSpec)
 stmtExprToPrototype (Call _ [] ":" ParamIn [rawProto,rawTy]) = do
     returnType <- stmtExprToTypeSpec rawTy
@@ -847,7 +856,8 @@ stmtExprToPrototype (Call pos mod name ParamIn rawParams) =
         return (ProcProto name params Set.empty,AnyType)
     else Left (pos, "module not permitted in proc declaration " ++ show mod)
 stmtExprToPrototype other =
-    Left (stmtExprPos other, "invalid proc/func prototype " ++ show other)
+    syntaxError (stmtExprPos other)
+                $ "invalid proc/func prototype " ++ show other
 
 
 -- |Convert a StmtExpr to a body, if possible, or give a syntax error if not.
@@ -895,7 +905,7 @@ stmtExprToStmt (Call pos [] "unless" ParamIn [test]) = do
 stmtExprToStmt (Call pos [] "pass" ParamIn []) = do
     return $ Placed Nop pos
 stmtExprToStmt
-        (Call pos [] "|" ParamIn 
+        (Call pos [] "|" ParamIn
          [Call _ [] "::" ParamIn [test1,thn],
           Call _ [] "::" ParamIn [Call _ [] test2 ParamIn [],els]])
   | defaultGuard test2 = do
@@ -913,7 +923,7 @@ stmtExprToStmt (Call pos [] "|" ParamIn disjs) = do
     flip Placed pos . flip Or Nothing <$> mapM stmtExprToStmt disjs
 stmtExprToStmt (Call pos [] "::" ParamIn [Call _ [] guard ParamIn [],body])
   | defaultGuard guard = do
-    Left (pos, "'else' or 'otherwise' outside an 'if'")
+    syntaxError pos  "'else' or 'otherwise' outside an 'if'"
 stmtExprToStmt (Call pos [] "::" ParamIn [test,body]) = do
     test' <- stmtExprToStmt test
     body' <- stmtExprToBody body
@@ -930,11 +940,11 @@ stmtExprToStmt (Call pos mod fn ParamInOut args)
     = (`Placed` pos) . ProcCall mod fn Nothing Det True
         <$> mapM stmtExprToExp args
 stmtExprToStmt (Call pos mod fn flow args) =
-    Left (pos, "invalid statement prefix: " ++ flowPrefix flow)
+    syntaxError pos $ "invalid statement prefix: " ++ flowPrefix flow
 stmtExprToStmt (Foreign pos lang inst flags args) =
     (`Placed` pos) . ForeignCall lang inst flags <$> mapM stmtExprToExp args
 stmtExprToStmt other =
-    Left (stmtExprPos other, "invalid statement " ++ show other)
+    syntaxError (stmtExprPos other) $ "invalid statement " ++ show other
 
 
 stmtExprToGenerators :: TranslateTo [Generator]
@@ -946,9 +956,9 @@ stmtExprToGenerators (Call pos [] sep ParamIn [left,right])
 stmtExprToGenerators (Call pos [] "in" ParamIn [var,exp]) = do
     var' <- stmtExprToExp var
     exp' <- stmtExprToExp exp
-    return $ [In var' exp']
+    return [In var' exp']
 stmtExprToGenerators other =
-    Left (stmtExprPos other, "invalid generator " ++ show other)
+    syntaxError (stmtExprPos other) $ "invalid generator " ++ show other
 
 
 -- |Convert a StmtExpr to an Exp, if possible, or give a syntax error if not.
@@ -957,16 +967,22 @@ stmtExprToExp (Call pos [] ":" ParamIn [exp,ty]) = do
     exp' <- content <$> stmtExprToExp exp
     ty' <- stmtExprToTypeSpec ty
     case exp' of
-        Typed exp'' AnyType cast -> return $ Placed (Typed exp'' ty' cast) pos
-        Typed{}                  -> Left (pos, "invalid typed expression")
-        _                        -> return $ Placed (Typed exp' ty' Nothing) pos
+        Typed exp'' ty'' (Just AnyType) -> -- already cast, but not typed
+            return $ Placed (Typed exp'' ty'' $ Just ty') pos
+        Typed exp'' _ _ -> -- already typed, whether casted or not
+            syntaxError (stmtExprPos ty) $ "repeated type constraint" ++ show ty
+        _ -> -- no cast, no type
+            return $ Placed (Typed exp'  ty' Nothing) pos
 stmtExprToExp (Call pos [] ":!" ParamIn [exp,ty]) = do
     exp' <- content <$> stmtExprToExp exp
     ty' <- stmtExprToTypeSpec ty
     case exp' of
-        Typed exp'' inner Nothing -> return $ Placed (Typed exp'' inner $ Just ty') pos
-        Typed _ _ _               -> Left (pos, "invalid typed expression")
-        _                         -> return $ Placed (Typed exp' AnyType $ Just ty') pos
+        Typed exp'' inner Just{} ->
+            syntaxError (stmtExprPos ty) $ "repeated cast " ++ show ty
+        Typed exp'' inner Nothing ->
+            return $ Placed (Typed exp'' ty' $ Just inner) pos
+        _  ->
+            return $ Placed (Typed exp'  ty' $ Just AnyType) pos
 stmtExprToExp (Call pos [] "where" ParamIn [exp,body]) = do
     exp' <- stmtExprToExp exp
     body' <- stmtExprToBody body
@@ -984,7 +1000,7 @@ stmtExprToExp (Call pos [] "^" ParamIn [exp,op]) = do
             -> return $ Placed (Fncall mod fn (exp':args)) pos
         Placed (Var var ParamIn Ordinary) _
             -> return $ Placed (Fncall [] var [exp']) pos
-        _ -> Left (pos, "invalid second argument to '^'")
+        _ -> syntaxError pos "invalid second argument to '^'"
 stmtExprToExp (Call pos [] "@" ParamIn [exp]) = do
     exp' <- stmtExprToExp exp
     return $ Placed (Fncall [] "@" [exp']) pos
@@ -992,7 +1008,7 @@ stmtExprToExp (Call pos [] "if" ParamIn [conditional]) =
     translateConditionalExp conditional
 stmtExprToExp (Call pos [] sep ParamIn [])
   | separatorName sep =
-    Left (pos, "invalid separated expression") 
+    syntaxError pos "invalid separated expression"
 stmtExprToExp (Call pos [] var flow []) = -- looks like a var; assume it is
     return $ Placed (Var var flow Ordinary) pos
 stmtExprToExp (Call pos mod fn flow args) =
@@ -1010,7 +1026,7 @@ translateConditionalExp :: TranslateTo (Placed Exp)
 translateConditionalExp (Call _ [] "{}" ParamIn [body]) =
     translateConditionalExp' body
 translateConditionalExp stmtExpr =
-    Left (stmtExprPos stmtExpr, "expecting '{'")
+    syntaxError (stmtExprPos stmtExpr) "expecting '{'"
 
 translateConditionalExp'
         (Call _ [] "|" ParamIn [Call pos [] "::" ParamIn [test,body],rest]) = do
@@ -1022,8 +1038,8 @@ translateConditionalExp'
         (Call pos [] "::" ParamIn [Call _ [] guard ParamIn [],body])
     | defaultGuard guard = stmtExprToExp body
 translateConditionalExp' stmtExpr =
-    Left (stmtExprPos stmtExpr,
-          "missing 'else::' in if expression: " ++ show stmtExpr)
+    syntaxError (stmtExprPos stmtExpr)
+          $ "missing 'else::' in if expression: " ++ show stmtExpr
 
 
 -- |Convert a StmtExpr to a TypeSpec, or produce an error
@@ -1043,7 +1059,8 @@ stmtExprToTypeSpec call@(Call pos mod name ParamIn params) = do
     then Left (pos, "invaid type specification")
     else return $ TypeSpec mod name specs
 stmtExprToTypeSpec other =
-    Left (stmtExprPos other, "invalid type specification " ++ show other)
+    syntaxError (stmtExprPos other)
+        $ "invalid type specification " ++ show other
 
 
 -- | Translate a StmtExpr to a proc or func prototype (with empty resource list)
@@ -1052,7 +1069,7 @@ stmtExprToProto (Call pos [] name ParamIn params) = do
     params' <- mapM stmtExprToParam params
     return $ Placed (ProcProto name params' Set.empty) pos
 stmtExprToProto other =
-    Left (stmtExprPos other, "invalid prototype " ++ show other)
+    syntaxError (stmtExprPos other) $ "invalid prototype " ++ show other
 
 
 -- | Translate a StmtExpr to a proc or func parameter
@@ -1063,7 +1080,29 @@ stmtExprToParam (Call _ [] ":" ParamIn [Call _ [] name flow [],ty]) = do
 stmtExprToParam (Call pos [] name flow []) =
     return $ Param name AnyType flow Ordinary
 stmtExprToParam other =
-    Left (stmtExprPos other, "invalid parameter " ++ show other)
+    syntaxError (stmtExprPos other) $ "invalid parameter " ++ show other
+
+
+-- | Translate a StmtExpr to a ctor declaration
+stmtExprToCtorDecl :: TranslateTo (Placed ProcProto)
+stmtExprToCtorDecl (Call pos [] name ParamIn fields) = do
+    fields' <- mapM stmtExprToCtorField fields
+    return $ Placed (ProcProto name fields' Set.empty) pos
+stmtExprToCtorDecl other =
+    syntaxError (stmtExprPos other)
+        $ "invalid constructor declaration " ++ show other
+
+
+-- | Translate a StmtExpr to a ctor field
+stmtExprToCtorField :: TranslateTo Param
+stmtExprToCtorField (Call _ [] ":" ParamIn [Call _ [] name flow [],ty]) = do
+    ty' <- stmtExprToTypeSpec ty
+    return $ Param name ty' flow Ordinary
+stmtExprToCtorField (Call pos mod name flow params) = do
+    tyParams <- mapM stmtExprToTypeSpec params
+    return $ Param "" (TypeSpec mod name tyParams) flow Ordinary
+stmtExprToCtorField other =
+    syntaxError (stmtExprPos other) $ "invalid constructor field " ++ show other
 
 
 -- | Extract a list of resource names from a StmtExpr (from a "use" statement).
@@ -1073,7 +1112,7 @@ translateResourceList (Call _ [] "{}" ParamIn args) =
 translateResourceList (Call _ mod name ParamIn []) =
     return [ResourceSpec mod name]
 translateResourceList other =
-    Left (stmtExprPos other, "expected resource spec")
+    syntaxError (stmtExprPos other) "expected resource spec"
 
 -----------------------------------------------------------------------------
 -- Data structures                                                         --

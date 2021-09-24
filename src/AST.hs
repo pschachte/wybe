@@ -83,6 +83,7 @@ module AST (
   ProcModifiers(..), detModifiers, setDetism, setInline, setImpurity,
   showProcModifiers, Inlining(..), Impurity(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
+  specialChar, specialName, specialName2, outputVariableName, outputStatusName,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
   showModSpecs, showResources, showOptPos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
@@ -744,7 +745,7 @@ genProcName :: Compiler ProcName
 genProcName = do
   ctr <- getModule procCount
   updateModule (\mod -> mod {procCount = ctr + 1 })
-  return $ "gen$" ++ show (ctr + 1)
+  return $ specialName2 "gen" $ show (ctr + 1)
 
 -- |Apply the given function to the current module interface if the
 --  specified visibility is Public.
@@ -770,7 +771,7 @@ addParameters :: [TypeVarName] -> OptPos -> Compiler ()
 addParameters params pos = do
     currMod <- getModuleSpec
     currParams <- getModule modParams
-    if (nub params /= params)
+    if nub params /= params
       then errmsg pos
            $ "duplicated type/module parameter in: " ++ intercalate ", " params
       else if List.null currParams
@@ -920,7 +921,7 @@ lookupResource res@(ResourceSpec mod name) pos = do
     rspecs <- refersTo mod name modKnownResources resourceMod
     logAST $ "Candidates: " ++ show rspecs
     case (Set.size rspecs, Map.lookup name specialResources) of
-        (0, Just (_,ty)) | mod == [] ->
+        (0, Just (_,ty)) | List.null mod ->
             return $ Just (res,Map.singleton res ty)
         (0, _) -> do
             message Error ("Unknown resource " ++ show res) pos
@@ -1165,11 +1166,11 @@ getProcPrimProto pspec = do
     case procImpln def of
         impln@ProcDefPrim{ procImplnProcSpec = pspec2, procImplnProto = proto}
             | pspec == pspec2 -> return proto
-            | and [ procSpecMod pspec == procSpecMod pspec2,
-                    procSpecName pspec == procSpecName pspec2,
-                    procSpecID pspec == procSpecID pspec2 ] -> do
+            | procSpecMod pspec == procSpecMod pspec2
+                && procSpecName pspec == procSpecName pspec2
+                && procSpecID pspec == procSpecID pspec2 -> do
                 let impln' = impln{procImplnProcSpec = pspec}
-                updateProcDef (\_ -> def{procImpln = impln'}) pspec
+                updateProcDef (const def {procImpln = impln'}) pspec
                 return proto
             | otherwise ->
                 shouldnt $ "get compiled proc but procSpec not mathcing: " ++
@@ -1213,20 +1214,18 @@ updateProcDefM updater pspec@(ProcSpec modspec procName procID _) =
 -- |Prepend the provided elt to mapping for the specified key in the map.
 mapSetInsert :: (Ord a, Ord b) => a -> b -> Map a (Set b) -> Map a (Set b)
 mapSetInsert key elt =
-    Map.alter (\maybe -> Just $ Set.insert elt $ fromMaybe Set.empty maybe) key
+    Map.alter (Just . Set.insert elt . fromMaybe Set.empty) key
 
 
 -- |Return the definition of the specified proc in the current module.
 lookupProc :: Ident -> Compiler (Maybe [ProcDef])
 lookupProc name =
-    getModuleImplementationMaybe (\imp -> Map.lookup name $ modProcs imp)
+    getModuleImplementationMaybe (Map.lookup name . modProcs)
 
 
 -- |Is the specified proc exported from the current module?
 publicProc :: Ident -> Compiler Bool
-publicProc name = do
-  int <- getModuleInterface
-  return $ Map.member name $ pubProcs int
+publicProc name = Map.member name . pubProcs <$> getModuleInterface
 
 
 -- |Return some function applied to the user's specified compiler options.
@@ -1301,8 +1300,8 @@ parentModule modspec = Just $ init modspec
 -- | Collect all the descendent modules of the given modspec.
 descendentModules :: ModSpec -> Compiler [ModSpec]
 descendentModules mspec = do
-    subMods <- fmap (Map.elems . modSubmods) $ getLoadedModuleImpln mspec
-    desc <- fmap concat $ mapM descendentModules subMods
+    subMods <- Map.elems . modSubmods <$> getLoadedModuleImpln mspec
+    desc <- concat <$> mapM descendentModules subMods
     return $ subMods ++ desc
 
 
@@ -1357,7 +1356,7 @@ refersTo modspec name implMapFn specModFn = do
     -- XXX Can't assume parent module exists
     case (Set.null matched,parentModule currMod) of
         (True,Just par) ->
-            (refersTo modspec name implMapFn specModFn) `inModule` par
+            refersTo modspec name implMapFn specModFn `inModule` par
         _ -> return matched
 
 
@@ -2125,7 +2124,7 @@ data LLTerm = TermNop
 
 -- |The variable name for the temporary variable whose number is given.
 mkTempName :: Int -> String
-mkTempName ctr = "tmp$" ++ show ctr
+mkTempName ctr = specialName2 "tmp" $ show ctr
 
 -- |Make a default LLBlock
 defaultBlock :: LLBlock
@@ -2532,9 +2531,9 @@ data Exp
       | Var VarName FlowDirection ArgFlowType
       | ProcRef ProcSpec
       | Typed Exp TypeSpec (Maybe TypeSpec)
-               -- ^explicitly typed expr giving type the expression, and, if it
-               -- is a cast, the type of the Exp argument.  If not a cast, these
-               -- two must be the same.
+               -- ^explicitly typed expr giving the type of the expression, and,
+               -- if it is a cast, the type of the Exp argument.  If not a cast,
+               -- these two must be the same.
       -- The following are eliminated during flattening
       | Where [Placed Stmt] (Placed Exp)
       | CondExp (Placed Stmt) (Placed Exp) (Placed Exp)
@@ -2910,6 +2909,45 @@ varsInPrimArg _ (ArgUndef _)      = Set.empty
 
 
 ----------------------------------------------------------------
+--                       Generating Symbols
+
+-- | The character we include in every generated identifier to prevent capturing
+-- a user identifier.  It should not be possible for the user to include this
+-- character in an identifier.
+specialChar :: Char
+specialChar = '#' -- note # is not allowed in backquoted strings
+
+
+-- | Construct a name can't be a valid Wybe symbol from one user string.
+specialName :: String -> String
+specialName = (specialChar:)
+
+
+-- | Construct a name that can't be a valid Wybe symbol from two user strings.
+specialName2 :: String -> String -> String
+specialName2 front back = front ++ specialChar:back
+
+
+-- | The full name to give to a PrimVarName, including the variable number
+-- suffix.  Use two specialChars to distinguish from special separator.
+numberedVarName :: String -> Int -> String
+numberedVarName name number = name ++ specialChar:specialChar:show number
+
+
+-- | The name to give to the output variable when converting a function to a
+-- proc.
+outputVariableName :: Ident
+outputVariableName = specialName "result"
+
+
+-- | The name to give to the output status variable when converting a test proc to a Det proc.
+outputStatusName :: Ident
+outputStatusName = specialName "success"
+
+
+
+
+----------------------------------------------------------------
 --                      Showing Compiler State
 --
 -- Each module is shown listing submodules, types, resources and procs
@@ -3234,7 +3272,7 @@ showPrim _ (PrimForeign lang name flags args) =
 
 -- |Show a variable, with its suffix.
 instance Show PrimVarName where
-    show (PrimVarName var suffix) = var ++ "#" ++ show suffix
+    show (PrimVarName var suffix) = numberedVarName var suffix
 
 
 -- |Show a single statement.

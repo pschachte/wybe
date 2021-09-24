@@ -143,23 +143,17 @@ unbranchBody loopinfo tmpCtr params detism body alt = do
 --                 Converting SemiDet procs to Det
 ----------------------------------------------------------------
 
-
--- |The name we give to the local variable holding the result of a
--- test (SemiDet) proc when we convert to a Det one.
-testVarName :: Ident
-testVarName = "$$"
-
 -- |A synthetic output parameter carrying the test result
 testOutParam :: Param
-testOutParam = Param testVarName boolType ParamOut $ Implicit Nothing
+testOutParam = Param outputStatusName boolType ParamOut $ Implicit Nothing
 
 -- |The output exp we use to hold the success/failure of a test proc.
 testOutExp :: Exp
-testOutExp = boolVarSet testVarName
+testOutExp = boolVarSet outputStatusName
 
 -- -- |The input exp we use to hold the success/failure of a test proc.
 -- testInExp :: Exp
--- testInExp = boolVarGet testVarName
+-- testInExp = boolVarGet outputStatusName
 
 
 ----------------------------------------------------------------

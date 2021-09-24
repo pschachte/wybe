@@ -287,10 +287,6 @@ resourceVar (ResourceSpec mod name) = do
     -- Always use resource name as variable name, regardless of module
     -- XXX This could cause collisions!
     return name
-    -- currMod <- getModuleSpec
-    -- if currMod == mod
-    -- then return name -- ensure we can use local resources in code
-    -- else return $ intercalate "." mod ++ "$" ++ name
 
 
 -- |Log a message, if we are logging resource transformation activity.
