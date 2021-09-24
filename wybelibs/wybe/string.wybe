@@ -7,7 +7,7 @@ use wybe.comparison
 
 constructor empty
           | buffer(len:int, raw:c_string) # must be first non-const ctor
-          | concat(left:_, r:_)
+          | concat(left:_, right:_)
           | slice(base:_, range:range)
           | singleton(c:char)
 

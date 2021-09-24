@@ -14,7 +14,7 @@ AFTER EVERYTHING:
 (io##0:wybe.phantom, ?io##29:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string("TESTING CONSTRUCTION":wybe.c_string, ~#io##0:wybe.phantom, ?tmp#35##0:wybe.phantom) @io:nn:nn
+    foreign c print_string(c"TESTING CONSTRUCTION":wybe.c_string, ~#io##0:wybe.phantom, ?tmp#35##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#35##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
     wybe.string.print_string<0>(0:wybe.string, ~#io##1:wybe.phantom, ?tmp#38##0:wybe.phantom) #63 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#38##0:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
@@ -40,7 +40,7 @@ AFTER EVERYTHING:
     wybe.string.[]<1>(~tmp#6##0:wybe.string, ~tmp#8##0:wybe.range, ?tmp#5##0:wybe.string) #15 @string:nn:nn
     wybe.string.print_string<0>(~tmp#5##0:wybe.string, ~#io##7:wybe.phantom, ?tmp#65##0:wybe.phantom) #71 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#65##0:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
-    foreign c print_string("\nTESTING CONVERSION TO c_string":wybe.c_string, ~#io##8:wybe.phantom, ?tmp#68##0:wybe.phantom) @io:nn:nn
+    foreign c print_string(c"\nTESTING CONVERSION TO c_string":wybe.c_string, ~#io##8:wybe.phantom, ?tmp#68##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#68##0:wybe.phantom, ?#io##9:wybe.phantom) @io:nn:nn
     foreign llvm shl('d':wybe.string, 2:wybe.string, ?tmp#70##0:wybe.string)
     foreign llvm or(~tmp#70##0:wybe.string, 1024:wybe.string, ?tmp#71##0:wybe.string)
@@ -54,13 +54,13 @@ AFTER EVERYTHING:
     foreign c putchar(' ':wybe.char, ~#io##10:wybe.phantom, ?#io##11:wybe.phantom) @io:nn:nn
     foreign c print_string(~r##0:wybe.c_string, ~#io##11:wybe.phantom, ?tmp#78##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#78##0:wybe.phantom, ?#io##12:wybe.phantom) @io:nn:nn
-    foreign c print_string("\nTESTING LOOPS":wybe.c_string, ~#io##12:wybe.phantom, ?tmp#81##0:wybe.phantom) @io:nn:nn
+    foreign c print_string(c"\nTESTING LOOPS":wybe.c_string, ~#io##12:wybe.phantom, ?tmp#81##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#81##0:wybe.phantom, ?#io##13:wybe.phantom) @io:nn:nn
     string.gen#1<0>(~#io##13:wybe.phantom, "abc":wybe.string, "abc":wybe.string, ?#io##14:wybe.phantom) #73 @string:nn:nn
     wybe.range.irange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp#15##0:wybe.range) #29 @string:nn:nn
     wybe.string.[]<1>("abcdefghijkl":wybe.string, ~tmp#15##0:wybe.range, ?tmp#14##0:wybe.string) #30 @string:nn:nn
     string.gen#1<0>(~#io##14:wybe.phantom, ~tmp#14##0:wybe.string, ~tmp#14##0:wybe.string, ?#io##15:wybe.phantom) #74 @string:nn:nn
-    foreign c print_string("\nTESTING INDEXING":wybe.c_string, ~#io##15:wybe.phantom, ?tmp#88##0:wybe.phantom) @io:nn:nn
+    foreign c print_string(c"\nTESTING INDEXING":wybe.c_string, ~#io##15:wybe.phantom, ?tmp#88##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#88##0:wybe.phantom, ?#io##16:wybe.phantom) @io:nn:nn
     string.test_index<0>("abc":wybe.string, 0:wybe.int, ~#io##16:wybe.phantom, ?#io##17:wybe.phantom) #33 @string:nn:nn
     string.test_index<0>("abc":wybe.string, 1:wybe.int, ~#io##17:wybe.phantom, ?#io##18:wybe.phantom) #34 @string:nn:nn
@@ -137,7 +137,7 @@ test_index(s##0:wybe.string, i##0:wybe.int, io##0:wybe.phantom, ?io##1:wybe.phan
     wybe.string.[]<0>(~s##0:wybe.string, ~i##0:wybe.int, ?tmp#0##0:wybe.char, ?tmp#1##0:wybe.bool) #0 @string:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
-        foreign c print_string("OUT OF RANGE":wybe.c_string, ~#io##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @io:nn:nn
+        foreign c print_string(c"OUT OF RANGE":wybe.c_string, ~#io##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#4##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
 
     1:

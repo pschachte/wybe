@@ -3293,7 +3293,7 @@ instance Show PrimArg where
       show name ++ showTypeSuffix typ Nothing
   show (ArgInt i typ)    = show i ++ showTypeSuffix typ Nothing
   show (ArgFloat f typ)  = show f ++ showTypeSuffix typ Nothing
-  show (ArgString s _ typ) = show s ++ showTypeSuffix typ Nothing
+  show (ArgString s v typ) = show v ++ show s ++ showTypeSuffix typ Nothing
   show (ArgChar c typ)   = show c ++ showTypeSuffix typ Nothing
   show (ArgUnneeded dir typ) =
       primFlowPrefix dir ++ "_" ++ showTypeSuffix typ Nothing
@@ -3304,8 +3304,7 @@ instance Show PrimArg where
 instance Show Exp where
   show (IntValue i) = show i
   show (FloatValue f) = show f
-  show (StringValue s WybeString) = show s
-  show (StringValue s CString) = "c" ++ show s
+  show (StringValue s v) = show v ++ show s
   show (CharValue c) = show c
   show (Var name dir flowtype) = show flowtype ++ flowPrefix dir ++ name
   show (Where stmts exp) = show exp ++ " where" ++ showBody 8 stmts
@@ -3319,6 +3318,12 @@ instance Show Exp where
     ++ showArguments args
   show (Typed exp typ cast) =
       show exp ++ showTypeSuffix typ cast
+
+-- |Show a string variant prefix
+instance Show StringVariant where
+    show WybeString = ""
+    show CString = "c"
+
 
 
 showMap :: String -> String -> String -> (k->String) -> (v->String)

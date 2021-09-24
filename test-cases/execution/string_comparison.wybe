@@ -1,11 +1,11 @@
-!println(c"\nTESTING EQULAITY")
+!println(c"\nTESTING EQUALITY")
 !println("a"  =  "a") # expect true
 !println("a"  =  "b") # expect false
 !println("aa" =  "a") # expect false
 !println("b"  =  "a") # expect false 
 !println("b"  =  "")  # expect false
 
-!println(c"\nTESTING INEQULAITY")
+!println(c"\nTESTING INEQUALITY")
 !println("a"  ~= "a") # expect false
 !println("a"  ~= "b") # expect true
 !println("aa" ~= "a") # expect true
