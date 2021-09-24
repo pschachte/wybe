@@ -7,3 +7,4 @@ The following have contributed code to the Wybe project:
 * Ting Lu
 * Zijun (Zed) Chen
 * Rudolph Almeida
+* Marco Ho
