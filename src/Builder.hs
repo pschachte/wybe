@@ -1105,7 +1105,8 @@ buildMain mainImports = do
     let cmdResource name = ResourceFlowSpec (ResourceSpec ["command_line"] name)
     res <- Set.toList . Set.unions . (keysSet<$>)
            <$> mapM (initialisedResources `inModule`) mainImports
-    let detism = setDetism Terminal defaultProcModifiers
+    let detism = setDetism Terminal
+                 $ setImpurity Impure defaultProcModifiers
     -- Program main has argc, argv, and exit_code as resources
     let proto = ProcProto "" []
                 $ Set.fromList [cmdResource "argc" ParamIn,
