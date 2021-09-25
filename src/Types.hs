@@ -26,6 +26,7 @@ import           Util
 import           Snippets
 import           Blocks              (llvmMapBinop, llvmMapUnop)
 import Data.Function (on)
+-- import qualified Data.List.Extra as Set
 
 
 ----------------------------------------------------------------
@@ -911,9 +912,9 @@ typecheckProcDecl' m pdef = do
                     let outResources =
                           Set.map (resourceName . resourceFlowRes)
                           $ Set.filter (flowsIn . resourceFlowFlow) resources
-                    let bound
-                            = addBindings (inParams `Set.union` inResources)
-                              $ initBindingState pdef
+                    let bound = addBindings (inParams `Set.union` inResources)
+                                $ initBindingState pdef 
+                                  $ Set.map resourceFlowRes resources
                     logTyped $ "bound vars: " ++ show bound
                     (def',assigned,tmpCount') <-
                         modecheckStmts m name pos bound detism tmpCount True def
@@ -966,15 +967,14 @@ addDeclaredType procname pos arity (Param name typ flow _,argNum) = do
     constrainVarType (ReasonParam procname arity pos) name typ'
 
 
--- | 
+-- | Record the types of available resources as local variables
 addResourceType :: ProcName -> OptPos -> ResourceFlowSpec -> Typed ()
 addResourceType procname pos rfspec = do
     let rspec = resourceFlowRes rfspec
-    resIface <- lift $ lookupResource rspec pos
-    let (rspecs,types) = unzip $ maybe [] (Map.toList . snd) resIface
-    let names = List.map resourceName rspecs
+    resDef <- lift $ lookupResource rspec
+    let (rspecs,implns) = unzip $ maybe [] Map.toList resDef
     zipWithM_ (\n -> constrainVarType (ReasonResource procname n pos) n)
-          names types
+          (resourceName <$> rspecs) (resourceType <$> implns)
 
 
 -- | Register variable types coming from explicit type constraints and type
@@ -1056,7 +1056,7 @@ bodyCalls (pstmt:pstmts) detism = do
         Loop nested _ -> do
           nested' <- bodyCalls nested detism
           return $ nested' ++ rest
-        UseResources _ nested -> do
+        UseResources _ _ nested -> do
           nested' <- bodyCalls nested detism
           return $ nested' ++ rest
         For _ nested -> shouldnt "bodyCalls: flattening left For stmt"
@@ -1318,6 +1318,7 @@ refreshTypeVar ty = return ty
 data BindingState = BindingState {
         bindingDetism    :: Determinism,
         bindingImpurity  :: Impurity,
+        bindingResources :: Set ResourceSpec,
         bindingVars      :: Maybe (Set VarName),
         bindingBreakVars :: Maybe (Set VarName)
         }
@@ -1337,11 +1338,11 @@ showMaybeSet f (Just set) = showSet f set
 
 
 instance Show BindingState where
-    show (BindingState detism impurity boundVars breakVars) =
-        impurityFullName impurity ++ " "
-        ++ determinismFullName detism ++ " computation binding "
-        ++ showMaybeSet id boundVars ++ ", break set = "
-        ++ showMaybeSet id breakVars
+    show (BindingState detism impurity resources boundVars breakVars) =
+        impurityFullName impurity ++ " " ++ determinismFullName detism
+        ++ " computation binding " ++ showMaybeSet id boundVars
+        ++ ", break set = " ++ showMaybeSet id breakVars
+        ++ ", with resources " ++ showSet show resources
 
 
 impurityFullName :: Impurity -> String
@@ -1366,9 +1367,9 @@ mustFail = (==Failure) . bindingDetism
 
 
 -- | Initial BindingState with nothing bound and no breaks seen
-initBindingState :: ProcDef -> BindingState
-initBindingState pdef =
-    BindingState Det impurity (Just Set.empty) Nothing
+initBindingState :: ProcDef -> Set ResourceSpec -> BindingState
+initBindingState pdef resources =
+    BindingState Det impurity resources (Just Set.empty) Nothing
     where impurity = expectedImpurity $ procImpurity pdef
 
 
@@ -1383,11 +1384,12 @@ intersectMaybeSets (Just mset1) (Just mset2) =
 
 -- | the join of two BindingStates.
 joinState :: BindingState -> BindingState -> BindingState
-joinState (BindingState detism1 impurity1 boundVars1 breakVars1)
-          (BindingState detism2 impurity2 boundVars2 breakVars2) =
-          BindingState detism  impurity  boundVars  breakVars
+joinState (BindingState detism1 impurity1 resources1 boundVars1 breakVars1)
+          (BindingState detism2 impurity2 resources2 boundVars2 breakVars2) =
+           BindingState detism  impurity  resources  boundVars  breakVars
   where detism    = determinismJoin detism1 detism2
-        impurity    = max impurity1 impurity2
+        impurity  = max impurity1 impurity2
+        resources = Set.intersection resources1 resources2
         breakVars = breakVars1 `intersectMaybeSets` breakVars2
         boundVars = boundVars1 `intersectMaybeSets` boundVars2
 
@@ -1503,6 +1505,7 @@ modecheckStmts :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism
                -> Int -> Bool -> [Placed Stmt]
                -> Typed ([Placed Stmt],BindingState,Int)
 modecheckStmts _ name pos assigned detism tmpCount final [] = do
+    logTyped $ "Mode check end of " ++ show detism ++ " proc '" ++ name ++ "'"
     when final
         $ typeErrors $ detismCheck name pos detism $ bindingDetism assigned
     return ([],assigned,tmpCount)
@@ -1701,12 +1704,15 @@ modecheckStmt m name defPos assigned detism tmpCount final
     logTyped $ "Loop exit vars: " ++ show vars
     return ([maybePlace (Loop stmts' vars) pos], assigned',tmpCount')
 modecheckStmt m name defPos assigned detism tmpCount final
-    stmt@(UseResources resources stmts) pos = do
+    stmt@(UseResources resources _ stmts) pos = do
     logTyped $ "Mode checking use ... in stmt " ++ show stmt
     (stmts', assigned', tmpCount')
         <- modecheckStmts m name defPos assigned detism tmpCount final stmts
+    let boundRes = intersectMaybeSets (bindingVars assigned)
+                   $ (Just . Set.fromList) $ resourceName <$> resources
     return
-        ([maybePlace (UseResources resources stmts') pos], assigned',tmpCount')
+        ([maybePlace (UseResources resources (Set.toList <$> boundRes) stmts')
+          pos],assigned',tmpCount')
 -- XXX Need to implement these correctly:
 modecheckStmt m name defPos assigned detism tmpCount final
     stmt@(And stmts) pos = do
@@ -2094,7 +2100,7 @@ checkStmtTyped name pos stmt@(Loop stmts exitVars) _ppos = do
     -- when (isNothing exitVars) $
     --      shouldnt $ "exit vars of loop undetermined: " ++ showStmt 4 stmt
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
-checkStmtTyped name pos (UseResources _ stmts) _ppos =
+checkStmtTyped name pos (UseResources _ _ stmts) _ppos =
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
 checkStmtTyped name pos For {} ppos =
     shouldnt "For should not exist here"

@@ -97,14 +97,29 @@ AFTER BUILDING MAIN:
   public resources: 
   public procs    : 
   imports         : use command_line
-                    from int_list_test use 
+                    use int_list
+                    use int_list_test
                     use wybe
-                    from wybe.io use 
-                    from wybe.memory_management use 
+                    use wybe.array
+                    use wybe.bool
+                    use wybe.c_string
+                    use wybe.char
+                    use wybe.comparison
+                    use wybe.control
+                    use wybe.count
+                    use wybe.float
+                    use wybe.int
+                    use wybe.io
+                    use wybe.list
+                    use wybe.machine_word
+                    use wybe.memory_management
+                    use wybe.phantom
+                    use wybe.range
+                    use wybe.string
   resources       : 
   procs           : 
 
-*main* > {inline,impure} (0 calls)
+*main* > {terminal,inline,impure} (0 calls)
 0: .<0>
 (argc##0:wybe.int, argv##0:wybe.array.raw_array(wybe.c_string), ?exit_code##0:wybe.int, ?io##2:wybe.phantom):
  AliasPairs: []
@@ -128,29 +143,29 @@ LLVM code       : None
   public procs    : command_line.<0>
                     command_line.set_exit_code<0>
   imports         : use wybe
-  resources       : argc: fromList [(command_line.argc,wybe.int @command_line:nn:nn)] @command_line:nn:nn
-                    arguments: fromList [(command_line.arguments,wybe.array(wybe.c_string) = array(argc @command_line:nn:nn, argv @command_line:nn:nn) @command_line:nn:nn @command_line:nn:nn)] @command_line:nn:nn
-                    argv: fromList [(command_line.argv,wybe.array.raw_array(wybe.c_string) @command_line:nn:nn)] @command_line:nn:nn
-                    command: fromList [(command_line.command,wybe.c_string = c"" @command_line:nn:nn @command_line:nn:nn)] @command_line:nn:nn
-                    exit_code: fromList [(command_line.exit_code,wybe.int = 0 @command_line:nn:nn @command_line:nn:nn)] @command_line:nn:nn
+  resources       : argc: fromList [(command_line.argc,wybe.int @command_line:nn:nn)]
+                    arguments: fromList [(command_line.arguments,wybe.array(wybe.c_string) = array(argc @command_line:nn:nn, argv @command_line:nn:nn) @command_line:nn:nn @command_line:nn:nn)]
+                    argv: fromList [(command_line.argv,wybe.array.raw_array(wybe.c_string) @command_line:nn:nn)]
+                    command: fromList [(command_line.command,wybe.c_string = c"" @command_line:nn:nn @command_line:nn:nn)]
+                    exit_code: fromList [(command_line.exit_code,wybe.int = 0 @command_line:nn:nn @command_line:nn:nn)]
   procs           : 
 
 *main* > public {impure} (0 calls)
 0: command_line.<0>
-(argc##0:wybe.int, [?argc##0:wybe.int], ?arguments##2:wybe.array(wybe.c_string), argv##0:wybe.array.raw_array(wybe.c_string), [?argv##0:wybe.array.raw_array(wybe.c_string)], ?command##2:wybe.c_string, ?exit_code##1:wybe.int, io##0:wybe.phantom, [?io##0:wybe.phantom]):
+(argc##0:wybe.int, [?argc##0:wybe.int], ?arguments##1:wybe.array(wybe.c_string), argv##0:wybe.array.raw_array(wybe.c_string), [?argv##0:wybe.array.raw_array(wybe.c_string)], ?command##1:wybe.c_string, ?exit_code##0:wybe.int, io##0:wybe.phantom, [?io##0:wybe.phantom]):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.array(?T))
-    foreign lpvm mutate(~tmp#9##0:wybe.array(?T), ?tmp#10##0:wybe.array(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argc##0:wybe.int)
-    foreign lpvm mutate(~tmp#10##0:wybe.array(?T), ?tmp#1##0:wybe.array(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argv##0:wybe.array.raw_array(?T))
-    wybe.array.[|]<0>(?command##2:?T, ?arguments##2:wybe.array(?T), ~tmp#1##0:wybe.array(?T), ?tmp#2##0:wybe.bool) #2 @command_line:nn:nn
-    case ~tmp#2##0:wybe.bool of
+    foreign lpvm alloc(16:wybe.int, ?tmp#4##0:wybe.array(?T))
+    foreign lpvm mutate(~tmp#4##0:wybe.array(?T), ?tmp#5##0:wybe.array(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argc##0:wybe.int)
+    foreign lpvm mutate(~tmp#5##0:wybe.array(?T), ?tmp#0##0:wybe.array(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argv##0:wybe.array.raw_array(?T))
+    wybe.array.[|]<0>(?command##1:?T, ?arguments##1:wybe.array(?T), ~tmp#0##0:wybe.array(?T), ?tmp#1##0:wybe.bool) #1 @command_line:nn:nn
+    case ~tmp#1##0:wybe.bool of
     0:
         foreign c {terminal,semipure} error_exit(c"command_line:17:6":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @control:nn:nn
-        foreign llvm move(0:wybe.int, ?exit_code##1:wybe.int)
+        foreign llvm move(undef:wybe.int, ?exit_code##0:wybe.int)
 
     1:
-        foreign llvm move(0:wybe.int, ?exit_code##1:wybe.int) @command_line:nn:nn
+        foreign llvm move(0:wybe.int, ?exit_code##0:wybe.int) @command_line:nn:nn
 
 
 
@@ -215,7 +230,7 @@ if.else:
   tail call ccc  void  @error_exit(i64  %17, i64  %19)  
   %20 = insertvalue {i64, i64, i64} undef, i64 %11, 0 
   %21 = insertvalue {i64, i64, i64} %20, i64 %10, 1 
-  %22 = insertvalue {i64, i64, i64} %21, i64 0, 2 
+  %22 = insertvalue {i64, i64, i64} %21, i64 undef, 2 
   ret {i64, i64, i64} %22 
 }
 
@@ -901,14 +916,29 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : 
   imports         : use command_line
-                    from int_list_test use 
+                    use int_list
+                    use int_list_test
                     use wybe
-                    from wybe.io use 
-                    from wybe.memory_management use 
+                    use wybe.array
+                    use wybe.bool
+                    use wybe.c_string
+                    use wybe.char
+                    use wybe.comparison
+                    use wybe.control
+                    use wybe.count
+                    use wybe.float
+                    use wybe.int
+                    use wybe.io
+                    use wybe.list
+                    use wybe.machine_word
+                    use wybe.memory_management
+                    use wybe.phantom
+                    use wybe.range
+                    use wybe.string
   resources       : 
   procs           : 
 
-*main* > {inline,impure} (0 calls)
+*main* > {terminal,inline,impure} (0 calls)
 0: .<0>
 (argc##0:wybe.int, argv##0:wybe.array.raw_array(wybe.c_string), ?exit_code##0:wybe.int, ?io##2:wybe.phantom):
  AliasPairs: []
@@ -967,29 +997,29 @@ entry:
   public procs    : command_line.<0>
                     command_line.set_exit_code<0>
   imports         : use wybe
-  resources       : argc: fromList [(command_line.argc,wybe.int @command_line:nn:nn)] @command_line:nn:nn
-                    arguments: fromList [(command_line.arguments,wybe.array(wybe.c_string) = array(argc @command_line:nn:nn, argv @command_line:nn:nn) @command_line:nn:nn @command_line:nn:nn)] @command_line:nn:nn
-                    argv: fromList [(command_line.argv,wybe.array.raw_array(wybe.c_string) @command_line:nn:nn)] @command_line:nn:nn
-                    command: fromList [(command_line.command,wybe.c_string = c"" @command_line:nn:nn @command_line:nn:nn)] @command_line:nn:nn
-                    exit_code: fromList [(command_line.exit_code,wybe.int = 0 @command_line:nn:nn @command_line:nn:nn)] @command_line:nn:nn
+  resources       : argc: fromList [(command_line.argc,wybe.int @command_line:nn:nn)]
+                    arguments: fromList [(command_line.arguments,wybe.array(wybe.c_string) = array(argc @command_line:nn:nn, argv @command_line:nn:nn) @command_line:nn:nn @command_line:nn:nn)]
+                    argv: fromList [(command_line.argv,wybe.array.raw_array(wybe.c_string) @command_line:nn:nn)]
+                    command: fromList [(command_line.command,wybe.c_string = c"" @command_line:nn:nn @command_line:nn:nn)]
+                    exit_code: fromList [(command_line.exit_code,wybe.int = 0 @command_line:nn:nn @command_line:nn:nn)]
   procs           : 
 
 *main* > public {impure} (0 calls)
 0: command_line.<0>
-(argc##0:wybe.int, [?argc##0:wybe.int], ?arguments##2:wybe.array(wybe.c_string), argv##0:wybe.array.raw_array(wybe.c_string), [?argv##0:wybe.array.raw_array(wybe.c_string)], ?command##2:wybe.c_string, ?exit_code##1:wybe.int, io##0:wybe.phantom, [?io##0:wybe.phantom]):
+(argc##0:wybe.int, [?argc##0:wybe.int], ?arguments##1:wybe.array(wybe.c_string), argv##0:wybe.array.raw_array(wybe.c_string), [?argv##0:wybe.array.raw_array(wybe.c_string)], ?command##1:wybe.c_string, ?exit_code##0:wybe.int, io##0:wybe.phantom, [?io##0:wybe.phantom]):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.array(?T))
-    foreign lpvm mutate(~tmp#9##0:wybe.array(?T), ?tmp#10##0:wybe.array(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argc##0:wybe.int)
-    foreign lpvm mutate(~tmp#10##0:wybe.array(?T), ?tmp#1##0:wybe.array(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argv##0:wybe.array.raw_array(?T))
-    wybe.array.[|]<0>(?command##2:?T, ?arguments##2:wybe.array(?T), ~tmp#1##0:wybe.array(?T), ?tmp#2##0:wybe.bool) #2 @command_line:nn:nn
-    case ~tmp#2##0:wybe.bool of
+    foreign lpvm alloc(16:wybe.int, ?tmp#4##0:wybe.array(?T))
+    foreign lpvm mutate(~tmp#4##0:wybe.array(?T), ?tmp#5##0:wybe.array(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argc##0:wybe.int)
+    foreign lpvm mutate(~tmp#5##0:wybe.array(?T), ?tmp#0##0:wybe.array(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argv##0:wybe.array.raw_array(?T))
+    wybe.array.[|]<0>(?command##1:?T, ?arguments##1:wybe.array(?T), ~tmp#0##0:wybe.array(?T), ?tmp#1##0:wybe.bool) #1 @command_line:nn:nn
+    case ~tmp#1##0:wybe.bool of
     0:
         foreign c {terminal,semipure} error_exit(c"command_line:17:6":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @control:nn:nn
-        foreign llvm move(0:wybe.int, ?exit_code##1:wybe.int)
+        foreign llvm move(undef:wybe.int, ?exit_code##0:wybe.int)
 
     1:
-        foreign llvm move(0:wybe.int, ?exit_code##1:wybe.int) @command_line:nn:nn
+        foreign llvm move(0:wybe.int, ?exit_code##0:wybe.int) @command_line:nn:nn
 
 
 
@@ -1054,7 +1084,7 @@ if.else:
   tail call ccc  void  @error_exit(i64  %17, i64  %19)  
   %20 = insertvalue {i64, i64, i64} undef, i64 %11, 0 
   %21 = insertvalue {i64, i64, i64} %20, i64 %10, 1 
-  %22 = insertvalue {i64, i64, i64} %21, i64 0, 2 
+  %22 = insertvalue {i64, i64, i64} %21, i64 undef, 2 
   ret {i64, i64, i64} %22 
 }
 

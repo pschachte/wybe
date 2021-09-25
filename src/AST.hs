@@ -52,7 +52,7 @@ module AST (
   MultiSpeczDepInfo, CallSiteProperty(..), InterestingCallProperty(..),
   ProcAnalysis(..), emptyProcAnalysis,
   ProcBody(..), PrimFork(..), Ident, VarName,
-  ProcName, ResourceDef(..), ResourceIFace(..), FlowDirection(..),
+  ProcName, ResourceDef(..), FlowDirection(..),
   argFlowDirection, argType, setArgType, argDescription, flowsIn, flowsOut,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, procCallToExp, expOutputs, 
@@ -77,8 +77,9 @@ module AST (
   optionallyPutStr, message, errmsg, (<!>), Message(..), queueMessage,
   genProcName, addImport, doImport, importFromSupermodule, lookupType,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
+  initialisedResources,
   addSimpleResource, lookupResource, specialResources, publicResource,
-  ProcModifiers(..), detModifiers, setDetism, setInline, setImpurity,
+  ProcModifiers(..), defaultProcModifiers, setDetism, setInline, setImpurity,
   showProcModifiers, Inlining(..), Impurity(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
   specialChar, specialName, specialName2, outputVariableName, outputStatusName,
@@ -899,8 +900,7 @@ addSimpleResource :: ResourceName -> ResourceImpln -> Visibility -> Compiler ()
 addSimpleResource name impln vis = do
     currMod <- getModuleSpec
     let rspec = ResourceSpec currMod name
-    let rdef = maybePlace (Map.singleton rspec impln) $
-               resourcePos impln
+    let rdef = Map.singleton rspec impln
     updateImplementation
       (\imp -> imp { modResources = Map.insert name rdef $ modResources imp,
                      modKnownResources = setMapInsert name rspec $
@@ -909,35 +909,26 @@ addSimpleResource name impln vis = do
 
 
 -- |Find the definition of the specified resource visible in the current module.
-lookupResource :: ResourceSpec -> OptPos
-               -> Compiler (Maybe (ResourceSpec,ResourceIFace))
-lookupResource res@(ResourceSpec mod name) pos = do
+lookupResource :: ResourceSpec -> Compiler (Maybe ResourceDef)
+lookupResource res@(ResourceSpec mod name) = do
     logAST $ "Looking up resource " ++ show res
     rspecs <- refersTo mod name modKnownResources resourceMod
     logAST $ "Candidates: " ++ show rspecs
     case (Set.size rspecs, Map.lookup name specialResources) of
         (0, Just (_,ty)) | List.null mod ->
-            return $ Just (res,Map.singleton res ty)
-        (0, _) -> do
-            message Error ("Unknown resource " ++ show res) pos
-            return Nothing
+            return $ Just $ Map.singleton res
+                   $ SimpleResource ty Nothing Nothing
+        (0, _) -> return Nothing
         (1,_) -> do
             let rspec = Set.findMin rspecs
             maybeMod <- getLoadingModule $ resourceMod rspec
             let maybeDef = maybeMod >>= modImplementation >>=
                         (Map.lookup (resourceName rspec) . modResources)
             logAST $ "Found resource:  " ++ show maybeDef
-            let iface = resourceDefToIFace $
-                        trustFromJust "lookupResource" maybeDef
-            logAST $ "  with interface:  " ++ show iface
-            return $ Just (rspec,iface)
-        _   -> do
-            message Error ("Ambiguous resource " ++ show res ++
-                           " defined in modules: " ++
-                           showModSpecs (List.map resourceMod $
-                                         Set.toList rspecs))
-              pos
-            return Nothing
+            let rdef = trustFromJust "lookupResource" maybeDef
+            logAST $ "  with definition:  " ++ show rdef
+            return $ Just rdef
+        _   -> return Nothing
 
 
 -- |All the "special" resources, which Wybe automatically generates where they
@@ -1005,8 +996,8 @@ addImport modspec imports = do
 -- but to get rid of them, the parser needs to be able to report errors.
 data ProcModifiers = ProcModifiers {
     modifierDetism::Determinism,   -- ^ The proc determinism
-    modifierInline::Inlining,          -- ^ Aggresively inline this proc?
-    modifierImpurity::Impurity,          -- ^ Don't assume purity when optimising
+    modifierInline::Inlining,      -- ^ Aggresively inline this proc?
+    modifierImpurity::Impurity,    -- ^ Don't assume purity when optimising
     modifierUnknown::[String],     -- ^ Unknown modifiers specified
     modifierConflict::[String]     -- ^ Modifiers that conflict with others
 } deriving (Eq, Generic)
@@ -1053,8 +1044,8 @@ expectedImpurity _ = Impure             -- Otherwise, OK for defn to be impure
 
 
 -- | The default Det, non-inlined, pure ProcModifiers.
-detModifiers :: ProcModifiers
-detModifiers = ProcModifiers Det MayInline Pure [] []
+defaultProcModifiers :: ProcModifiers
+defaultProcModifiers = ProcModifiers Det MayInline Pure [] []
 
 
 -- | Set the modifierDetism attribute of a ProcModifiers.
@@ -1350,12 +1341,7 @@ refersTo modspec name implMapFn specModFn = do
     -- let visible = defined `Set.union` imported
     logAST $ "*** ALL matching visible modules: "
         ++ showModSpecs (Set.toList (Set.map specModFn defined))
-    let matched = Set.filter ((modspec `isSuffixOf`) . specModFn) defined
-    -- XXX Can't assume parent module exists
-    case (Set.null matched,parentModule currMod) of
-        (True,Just par) ->
-            refersTo modspec name implMapFn specModFn `inModule` par
-        _ -> return matched
+    return $ Set.filter ((modspec `isSuffixOf`) . specModFn) defined
 
 
 -- |Returns a list of the potential targets of a proc call.
@@ -1672,7 +1658,8 @@ doImport mod (imports, _) = do
 
 -- |Import known types, resources, and procs from the specified module into the
 -- current one.  This is used to give a nested submodule access to its parent's
--- members.
+-- members.  It's also used to give the executable module access to the main
+-- module of the application.
 importFromSupermodule :: ModSpec -> Compiler ()
 importFromSupermodule modspec = do
     impl       <- getLoadedModuleImpln modspec
@@ -1737,24 +1724,12 @@ addPragma prag = do
         (\imp -> imp { modPragmas = Set.insert prag $ modPragmas imp })
 
 
--- |A resource interface: everything a module needs to know to use
---  this resource.  Since a resource may be compound (composed of
---  other resources), this is basically a set of resource specs, each
---  with an associated type.
-type ResourceIFace = Map ResourceSpec TypeSpec
-
-
-resourceDefToIFace :: ResourceDef -> ResourceIFace
-resourceDefToIFace def =
-    Map.map resourceType $ content def
-
-
 -- |A resource definition.  Since a resource may be defined as a
 --  collection of other resources, this is a set of resources (for
 --  simple resources, this will be a singleton), each with type and
 --  possibly an initial value.  There's also an optional source
 -- position.
-type ResourceDef = Placed (Map ResourceSpec ResourceImpln)
+type ResourceDef = Map ResourceSpec ResourceImpln
 
 data ResourceImpln =
     SimpleResource {
@@ -1763,6 +1738,14 @@ data ResourceImpln =
         resourcePos::OptPos
         } deriving (Generic)
 
+
+-- | A list of the initialised resources defined by the current module.
+initialisedResources :: Compiler ResourceDef
+initialisedResources = do
+    modRes <- getModuleImplementationField modResources
+    logAST $ "Getting initialised resources = " ++ show modRes
+    logAST $ "                       unions = " ++ show (Map.unions modRes)
+    return $ Map.filter (isJust . resourceInit) $ Map.unions modRes
 
 -- |A proc definition, including the ID, prototype, the body,
 --  normalised to a list of primitives, and an optional source
@@ -2157,7 +2140,7 @@ foldStmt' sfn efn val (TestBool exp) = foldExp sfn efn val exp
 foldStmt' _   _   val Nop = val
 foldStmt' _   _   val Fail = val
 foldStmt' sfn efn val (Loop body _) = foldStmts sfn efn val body
-foldStmt' sfn efn val (UseResources _ body) = foldStmts sfn efn val body
+foldStmt' sfn efn val (UseResources _ _ body) = foldStmts sfn efn val body
 foldStmt' sfn efn val (For generators body) = foldStmts sfn efn
                                                 (foldExps sfn efn
                                                   (foldExps sfn efn val $ List.map loopVar generators)
@@ -2445,9 +2428,14 @@ data Stmt
      | Cond (Placed Stmt) [Placed Stmt] [Placed Stmt]
             (Maybe VarDict) (Maybe VarDict)
 
-     -- | A scoped construct for resources.  This is eliminated during resource
+     -- | A scoped construct for resources.  This creates a context in which the
+     --   listed resources can be used, and in which those resources do not
+     --   change value.  The Maybe list of resources are the ones that are
+     --   assigned before the UseResources statement, and therefore must be
+     --   restored after it; this is initially Nothing, but it defined during
+     --   mode checking.  This statement is eliminated during resource
      --   processing.
-     | UseResources [ResourceSpec] [Placed Stmt]
+     | UseResources [ResourceSpec] (Maybe [VarName]) [Placed Stmt]
 
      -- All the following are eliminated during unbranching.
 
@@ -3260,9 +3248,10 @@ showStmt indent (Loop lstmts genVars) =
     "do {" ++  showBody (indent + 4) lstmts
     ++ startLine indent ++ "}"
     ++ maybe "" ((" -> "++) . showVarMap) genVars
-showStmt indent (UseResources resources stmts) =
-    "use " ++ intercalate ", " (List.map show resources) ++ " in"
-    ++ showBody (indent + 4) stmts
+showStmt indent (UseResources resources old stmts) =
+    "use " ++ intercalate ", " (List.map show resources)
+    ++ maybe "" (("preserving: " ++) . intercalate ", " . List.map show) old
+    ++ " in" ++ showBody (indent + 4) stmts
     ++ startLine indent ++ "}"
 showStmt _ Fail = "fail"
 showStmt _ Nop = "pass"

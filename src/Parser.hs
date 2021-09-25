@@ -884,7 +884,7 @@ stmtExprToStmt (Call pos [] "use" ParamIn
                     [Call _ [] "in" ParamIn [ress,body]]) = do
     ress' <- translateResourceList ress
     body' <- stmtExprToBody body
-    return $ Placed (UseResources ress' body') pos
+    return $ Placed (UseResources ress' Nothing body') pos
 stmtExprToStmt (Call pos [] "while" ParamIn [test]) = do
     t <- stmtExprToStmt test
     return $ Placed (Cond t [Unplaced Nop] [Unplaced Break] Nothing Nothing) pos

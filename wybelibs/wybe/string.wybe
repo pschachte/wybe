@@ -3,7 +3,7 @@ pragma no_standard_library
 use wybe.int, wybe.c_string, wybe.range
 use wybe.int, wybe.char, wybe.bool
 use wybe.io, wybe.float, wybe.count
-use wybe.comparison
+use wybe.comparison, wybe.phantom
 
 constructor empty
           | buffer(len:int, raw:c_string) # must be first non-const ctor
