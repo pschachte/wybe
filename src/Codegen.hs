@@ -64,7 +64,8 @@ import qualified LLVM.AST.IntegerPredicate       as IP
 import           AST                             (Compiler, Prim, PrimProto,
                                                   TypeRepresentation,
                                                   getModuleSpec, logMsg,
-                                                  shouldnt, showModSpec)
+                                                  shouldnt, specialName2,
+                                                  showModSpec)
 import           LLVM.Context
 import           LLVM.Module
 import           Options                         (LogSelection (Blocks,Codegen))
@@ -448,7 +449,7 @@ namedInstr ty nm ins = do
     -- but llvm doesn't. So the block id is attached to the variable name to
     -- make it unique.
     blockId <- idx <$> current
-    let ref = Name $ fromString $ show blockId ++ "$" ++ nm
+    let ref = Name $ fromString $ specialName2 (show blockId) nm
     addInstr $ ref := ins
     return $ local ty ref
 
