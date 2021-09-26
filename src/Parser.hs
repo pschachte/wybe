@@ -603,8 +603,7 @@ applyPrefixOp tok stmtExpr = do
         ("?", _) -> fail $ "unexpected " ++ show stmtExpr'++ " following '?'"
         ("!", Call{}) -> return $ setCallFlow ParamInOut stmtExpr'
         ("!", _) -> fail $ "unexpected " ++ show stmtExpr' ++ " following '!'"
-        ("@", arg@Call{callArguments=[]}) 
-          -> return $ Call pos [] "@" ParamIn [setCallFlow ParamIn stmtExpr']
+        ("@", arg@IntConst{}) -> return $ Call pos [] "@" ParamIn [arg]
         ("@", _) -> fail $ "unexpected " ++ show stmtExpr' ++ " following '@'"
         (_,_) -> shouldnt $ "Unknown prefix operator " ++ show tok
                             ++ " in applyPrefixOp"
@@ -1001,11 +1000,16 @@ stmtExprToExp (Call pos [] "^" ParamIn [exp,op]) = do
         Placed (Var var ParamIn Ordinary) _
             -> return $ Placed (Fncall [] var [exp']) pos
         _ -> syntaxError pos "invalid second argument to '^'"
-stmtExprToExp (Call pos [] "@" ParamIn [exp]) = do
+stmtExprToExp (Call pos [] "@" flow [exp]) = do
     exp' <- stmtExprToExp exp
-    return $ Placed (Fncall [] "@" [exp']) pos
+    case content exp' of
+        IntValue i | i > 0 -> return $ Placed (Var (show i) flow Hole) pos
+        _ -> syntaxError pos "invalid expression following @"
 stmtExprToExp (Call pos [] "if" ParamIn [conditional]) =
     translateConditionalExp conditional
+stmtExprToExp call@(Call pos [] "{}" ParamIn statements) = do
+    statements' <- stmtExprToBody call
+    return $ Placed (Lambda statements') pos    
 stmtExprToExp (Call pos [] sep ParamIn [])
   | separatorName sep =
     syntaxError pos "invalid separated expression"

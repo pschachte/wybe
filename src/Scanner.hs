@@ -313,7 +313,6 @@ isSymbolContinuation startChar ';' = True
 isSymbolContinuation startChar '.' = True
 isSymbolContinuation startChar ':' = True
 isSymbolContinuation startChar '!' = startChar == ':'
-isSymbolContinuation startChar '@' = True
 isSymbolContinuation startChar '$' = True
 isSymbolContinuation startChar '%' = True
 isSymbolContinuation startChar '^' = True

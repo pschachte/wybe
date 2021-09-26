@@ -2188,6 +2188,7 @@ foldExp' _   _    val FloatValue{}   = val
 foldExp' _   _    val StringValue{}  = val
 foldExp' _   _    val CharValue{}    = val
 foldExp' _   _    val Var{}          = val
+foldExp' sfn efn  val (Lambda ss)    = foldStmts sfn efn val ss
 foldExp' _   _    val ProcRef{}      = val
 foldExp' sfn efn val (Typed exp _ _) = foldExp sfn efn val exp
 foldExp' sfn efn val (Where stmts exp) =
@@ -2521,6 +2522,7 @@ data Exp
       | StringValue String StringVariant
       | Var VarName FlowDirection ArgFlowType
       | ProcRef ProcSpec
+      | Lambda [Placed Stmt]
       | Typed Exp TypeSpec (Maybe TypeSpec)
                -- ^explicitly typed expr giving the type of the expression, and,
                -- if it is a cast, the type of the Exp argument.  If not a cast,
@@ -2727,6 +2729,7 @@ data ArgFlowType = Ordinary        -- ^An argument/parameter as written by user
                  | HalfUpdate      -- ^One half of a variable update (!var)
                  | Implicit OptPos -- ^Temp var for expression at that position
                  | Resource ResourceSpec -- ^An argument to pass a resource
+                 | Hole
      deriving (Eq,Ord,Generic)
 
 instance Show ArgFlowType where
@@ -2734,6 +2737,7 @@ instance Show ArgFlowType where
     show HalfUpdate = "%"
     show (Implicit _) = ""
     show (Resource _) = "#"
+    show Hole = "@"
 
 
 -- |The dataflow direction of an actual argument.
@@ -2782,7 +2786,8 @@ argDescription (ArgVar var _ flow ftype _) =
           Ordinary       -> " variable " ++ primVarName var
           HalfUpdate     -> " update of variable " ++ primVarName var
           Implicit pos   -> " expression" ++ showOptPos pos
-          Resource rspec -> " resource " ++ show rspec)
+          Resource rspec -> " resource " ++ show rspec
+          Hole           -> " hole")
 argDescription (ArgInt val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgFloat val _) = "constant argument '" ++ show val ++ "'"
 argDescription arg@ArgString{} = "constant argument " ++ show arg
@@ -2832,6 +2837,7 @@ expOutputs (StringValue _ _) = Set.empty
 expOutputs (CharValue _) = Set.empty
 expOutputs (Var name flow _) =
     if flowsOut flow then Set.singleton name else Set.empty
+expOutputs (Lambda _) = Set.empty 
 expOutputs (ProcRef _) = Set.empty 
 expOutputs (Typed expr _ _) = expOutputs expr
 expOutputs (Where _ pexp) = expOutputs $ content pexp
@@ -3359,6 +3365,7 @@ instance Show Exp where
   show (CharValue c) = show c
   show (ProcRef ps) = "@" ++ show ps
   show (Var name dir flowtype) = show flowtype ++ flowPrefix dir ++ name
+  show (Lambda ss) = "{" ++ intercalate "\n" (showStmt 0 . content <$> ss) ++ "}" 
   show (Where stmts exp) = show exp ++ " where" ++ showBody 8 stmts
   show (CondExp cond thn els) =
     "if\n" ++ show cond ++ " then " ++ show thn ++ " else " ++ show els

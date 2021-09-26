@@ -713,6 +713,7 @@ expMode' _ (FloatValue _) = (ParamIn, True, Nothing)
 expMode' _ (StringValue _ _) = (ParamIn, True, Nothing)
 expMode' _ (CharValue _) = (ParamIn, True, Nothing)
 expMode' _ (ProcRef _) = (ParamIn, True, Nothing)
+expMode' _ (Lambda _) = (ParamIn, True, Nothing)
 expMode' assigned (Var name flow _) =
     (flow, name `assignedIn` assigned, Nothing)
 expMode' assigned (Typed expr _ _) = expMode' assigned expr
