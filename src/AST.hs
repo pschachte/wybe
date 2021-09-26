@@ -2137,7 +2137,7 @@ foldStmt' sfn efn val (TestBool exp) = foldExp sfn efn val exp
 foldStmt' _   _   val Nop = val
 foldStmt' _   _   val Fail = val
 foldStmt' sfn efn val (Loop body _) = foldStmts sfn efn val body
-foldStmt' sfn efn val (UseResources _ body) = foldStmts sfn efn val body
+foldStmt' sfn efn val (UseResources _ _ body) = foldStmts sfn efn val body
 foldStmt' sfn efn val (For generators body) = foldStmts sfn efn
                                                 (foldExps sfn efn
                                                   (foldExps sfn efn val $ List.map loopVar generators)
@@ -2425,9 +2425,14 @@ data Stmt
      | Cond (Placed Stmt) [Placed Stmt] [Placed Stmt]
             (Maybe VarDict) (Maybe VarDict)
 
-     -- | A scoped construct for resources.  This is eliminated during resource
+     -- | A scoped construct for resources.  This creates a context in which the
+     --   listed resources can be used, and in which those resources do not
+     --   change value.  The Maybe list of resources are the ones that are
+     --   assigned before the UseResources statement, and therefore must be
+     --   restored after it; this is initially Nothing, but it defined during
+     --   mode checking.  This statement is eliminated during resource
      --   processing.
-     | UseResources [ResourceSpec] [Placed Stmt]
+     | UseResources [ResourceSpec] (Maybe [VarName]) [Placed Stmt]
 
      -- All the following are eliminated during unbranching.
 
@@ -3235,9 +3240,10 @@ showStmt indent (Loop lstmts genVars) =
     "do {" ++  showBody (indent + 4) lstmts
     ++ startLine indent ++ "}"
     ++ maybe "" ((" -> "++) . showVarMap) genVars
-showStmt indent (UseResources resources stmts) =
-    "use " ++ intercalate ", " (List.map show resources) ++ " in"
-    ++ showBody (indent + 4) stmts
+showStmt indent (UseResources resources old stmts) =
+    "use " ++ intercalate ", " (List.map show resources)
+    ++ maybe "" (("preserving: " ++) . intercalate ", " . List.map show) old
+    ++ " in" ++ showBody (indent + 4) stmts
     ++ startLine indent ++ "}"
 showStmt _ Fail = "fail"
 showStmt _ Nop = "pass"

@@ -197,9 +197,12 @@ transformStmt tmp res (Loop body defVars) pos = do
 transformStmt tmp res (For generators body) pos = do
     (body', tmp') <- transformBody tmp res body
     return ([maybePlace (For generators body') pos], tmp')
-transformStmt tmp res (UseResources useRes body) pos = do
-    resTypes <- List.filter (isJust . snd)
-                <$> mapM (canonicaliseResourceSpec pos "use statement") useRes
+transformStmt tmp res (UseResources allRes oldRes body) pos = do
+    let resVars = trustFromJust "use stmt without var list after type check"
+                  oldRes
+    resTypes <- List.filter ((`elem` resVars) . resourceName . fst)
+                <$> mapM (canonicaliseResourceSpec pos "use statement") allRes
+                    -- (trustFromJust "un-typechecked use stmt" oldRes)
     toSave <- mapM (resourceVar . fst) resTypes
     let types = fromJust . snd <$> resTypes
     let resCount = length toSave

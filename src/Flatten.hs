@@ -408,12 +408,12 @@ flattenStmt' for@(For generators body) pos detism = do
     logFlatten $ "Generated for: " ++ showStmt 4 generated
     -- emit pos generated
     flattenStmt' generated pos detism
-flattenStmt' (UseResources res body) pos detism = do
+flattenStmt' (UseResources res old body) pos detism = do
     oldVars <- gets defdVars
     mapM_ (noteVarIntro . resourceName) res
     body' <- flattenInner False True detism (flattenStmts body detism)
     modify $ \s -> s { defdVars = oldVars}
-    emit pos $ UseResources res body'
+    emit pos $ UseResources res old body'
 flattenStmt' Nop pos _ = emit pos Nop
 flattenStmt' Fail pos _ = emit pos Fail
 flattenStmt' Break pos _ = emit pos Break

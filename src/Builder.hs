@@ -792,12 +792,12 @@ compileModSCC mspecs = do
     -- Fixed point needed because eventually resources can bundle
     -- resources from other modules
     fixpointProcessSCC resourceCheckMod mspecs
+    mapM_ (transformModuleProcs canonicaliseProcResources)  mspecs
     stopOnError $ "processing resources for module(s) " ++ showModSpecs mspecs
     typeCheckModSCC mspecs
     stopOnError $ "type checking of module(s) "
                   ++ showModSpecs mspecs
     logDump Types Unbranch "TYPE CHECK"
-    mapM_ (transformModuleProcs canonicaliseProcResources)  mspecs
     mapM_ (transformModuleProcs transformProcResources)  mspecs
     stopOnError $ "resource checking of module(s) "
                   ++ showModSpecs mspecs
@@ -1117,7 +1117,7 @@ buildMain mainImports = do
                                      ParamOut]
     let mainBody =
           [ Unplaced $
-            UseResources res $
+            UseResources res Nothing $
             -- Construct argumentless resourceful calls to all main procs
               [Unplaced $ ProcCall m "" Nothing Det True []
               | m <- mainImports]
