@@ -9,7 +9,7 @@
 module Scanner (Token(..), tokenPosition, floatValue, intValue, stringValue,
                 charValue, identName, symbolName, tokenName, showPosition,
                 StringDelim(..), BracketStyle(..), fileTokens, tokenise,
-                inputTokens, stringTokens) where
+                inputTokens, stringTokens, delimitString) where
 
 import AST
 import Util
@@ -38,12 +38,18 @@ data Token = TokFloat Double SourcePos          -- ^A floating point number
                                                 -- indicating whether explicit
               | TokError String SourcePos       -- ^A lexical error
 
+-- |The different string delimiters.
+data StringDelim = DoubleQuote 
+                 | BackQuote 
+                 | LongQuote String
+                 | IdentQuote String StringDelim
+               deriving (Eq, Ord)
+
 
 instance Show Token where
     show (TokFloat n _)         = "floating point number " ++ show n
     show (TokInt n _)           = "integer " ++ show n
-    show (TokString delim s _)  =
-        "literal string " ++ delimString delim ++ s ++ delimString delim
+    show (TokString d s _)      = "literal string " ++ delimitString d s
     show (TokChar ch _)         = "literal character " ++ show ch
     show (TokIdent s _)         = "identifier " ++ s
     show (TokLBracket br _)     = "'" ++ bracketString True br  ++ "'"
@@ -106,7 +112,7 @@ symbolName _ = shouldnt "not a symbol"
 tokenName :: Token -> String
 tokenName (TokFloat n _)         = show n
 tokenName (TokInt n _)           = show n
-tokenName (TokString delim s _)  = delimString delim ++ s ++ delimString delim
+tokenName (TokString d s _)      = delimitString d s
 tokenName (TokChar ch _)         = [ch]
 tokenName (TokIdent s _)         = s
 tokenName (TokLBracket br _)     = bracketString True br
@@ -116,7 +122,7 @@ tokenName (TokPeriod _)          = "."
 tokenName (TokSymbol s _)        = s
 tokenName (TokSeparator True _)  = ";"
 tokenName (TokSeparator False _) = "\n"
-tokenName (TokError str _)       = shouldnt $ "tokenName of error " ++ str
+tokenName (TokError str _)       = "error: " ++ str
 
 
 -- |How to display a source position.
@@ -126,15 +132,26 @@ showPosition pos
     ++ show (sourceLine pos) ++ ":"
     ++ show (sourceColumn pos)
 
--- |The different string delimiters.
-data StringDelim = DoubleQuote | BackQuote | LongQuote String
+-- |Wraps a string in delimiters
+delimitString :: StringDelim -> String -> String
+delimitString d s = delimStringStart d ++ tail (init $ show s) 
+                                       ++ delimStringEnd d
 
--- |Return the specified quote as a string.  Assumes matching left and right
--- quotes are identical.
-delimString :: StringDelim -> String
-delimString DoubleQuote   = "\""
-delimString BackQuote     = "`"
-delimString (LongQuote s) = s
+
+-- |Return the specified starting quote as a string. 
+delimStringStart :: StringDelim -> String
+delimStringStart DoubleQuote      = "\""
+delimStringStart BackQuote        = "`"
+delimStringStart (LongQuote s)    = s
+delimStringStart (IdentQuote i s) = i ++ delimStringStart s
+
+
+-- |Return the specified ending quote as a string. 
+delimStringEnd :: StringDelim -> String
+delimStringEnd DoubleQuote      = "\""
+delimStringEnd BackQuote        = "`"
+delimStringEnd (LongQuote s)    = s
+delimStringEnd (IdentQuote _ s) = delimStringEnd s
 
 
 -- |The different kinds of brackets.
@@ -219,8 +236,10 @@ tokenise pos str@(c:cs)
   | c == '\n' = singleCharTok c cs pos $ TokSeparator False pos
   | isSpace c || isControl c = tokenise (updatePosChar pos c) cs
   | isDigit c = scanNumberToken pos str
-  | isIdentChar c = let (name,rest) = span isIdentChar str
-                    in  multiCharTok name rest (TokIdent name pos) pos
+  | isIdentChar c = 
+    case span isIdentChar str of
+      (v@"c", '\"':cs') -> tokeniseString (IdentQuote "c" DoubleQuote) pos cs'
+      (name, rest) -> multiCharTok name rest (TokIdent name pos) pos
   | otherwise = case c of
                     ',' -> specialToken ',' cs pos $ TokComma pos
                     '.' -> specialToken '.' cs pos $ TokPeriod pos
@@ -245,8 +264,7 @@ tokenise pos str@(c:cs)
                                     breakList (target `isPrefixOf`) cs
                                 pos' = updatePosString pos (c:comment++trim)
                             in if terminate && null rest
-                               then [TokError "Unterminated comment begins here"
-                                              pos]
+                               then [TokError "unterminated comment" pos']
                                else tokenise pos' $ drop (length trim) rest
                     _   -> tokeniseSymbol pos str
 
@@ -330,8 +348,7 @@ tokeniseChar pos (c:'\'':cs) =
   TokChar c pos:
   tokenise (updatePosChar (updatePosChar (updatePosChar pos '\'') c) '\'') cs
 tokeniseChar pos chars =
-    TokError
-     ("Syntax error in character constant beginning '" ++ front ++ "'...") pos
+    TokError ("character constant beginning '" ++ front ++ "'...") pos
     : tokenise (updatePosString pos ('\'':front)) back
     where (front,back) = splitAt 2 chars
 
@@ -341,7 +358,7 @@ tokeniseString delim pos cs =
   let termchar = delimChar delim
   in  case scanString termchar pos cs of
       Just (str,pos',rest) -> TokString delim str pos : tokenise pos' rest
-      Nothing              -> [TokError "Unterminated string begins here" pos]
+      Nothing              -> [TokError "unterminated string" pos]
 
 
 -- |Scan a string literal that has already been opened, and will close with the
@@ -364,7 +381,9 @@ scanString termchar pos input =
 
 
 -- |Is the specified char the expected final delimiter?
+delimChar :: StringDelim -> Char
 delimChar DoubleQuote = '\"'
+delimChar (IdentQuote _ DoubleQuote) = '\"'
 delimChar _ = shouldnt "not a delimiter character"
 
 -- |Recognise an escaped character constant.
@@ -402,7 +421,7 @@ scanNumberToken pos cs =
           _ -> let (numPart,expPart) = span (/='e') num'
                    (wholePart,fracPart) = span (/='.') numPart
                    intTok = parseInteger 10 wholePart pos
-                   errFloat = TokError ("Invalid float '" ++ num' ++ "'") pos
+                   errFloat = TokError ("invalid float '" ++ num' ++ "'") pos
                in case (intTok,expPart,fracPart) of
                     (TokInt int _, [], [])
                       -> intTok
@@ -458,7 +477,7 @@ parseInteger :: Integer -> [Char] -> SourcePos -> Token
 parseInteger radix str pos =
     if all (<radix) charValues
     then TokInt (foldl (\num val -> num * radix + val) 0 charValues) pos
-    else TokError ("Invalid integer '" ++ str ++ "'") pos
+    else TokError ("invalid integer '" ++ str ++ "'") pos
   where charValues = map alNumToInteger str
 
 

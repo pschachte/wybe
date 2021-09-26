@@ -102,7 +102,9 @@ AFTER BUILDING MAIN:
                     use wybe
                     use wybe.array
                     use wybe.bool
+                    use wybe.c_string
                     use wybe.char
+                    use wybe.comparison
                     use wybe.control
                     use wybe.count
                     use wybe.float
@@ -112,17 +114,18 @@ AFTER BUILDING MAIN:
                     use wybe.machine_word
                     use wybe.memory_management
                     use wybe.phantom
+                    use wybe.range
                     use wybe.string
   resources       : 
   procs           : 
 
 *main* > {terminal,inline,impure} (0 calls)
 0: .<0>
-(argc##0:wybe.int, argv##0:wybe.array.raw_array(wybe.string), ?exit_code##0:wybe.int, ?io##2:wybe.phantom):
+(argc##0:wybe.int, argv##0:wybe.array.raw_array(wybe.c_string), ?exit_code##0:wybe.int, ?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c {impure} gc_init @memory_management:nn:nn
-    command_line.<0>(~#argc##0:wybe.int, ?_:wybe.int, ?#arguments##0:wybe.array(wybe.string), ~#argv##0:wybe.array.raw_array(wybe.string), ?_:wybe.array.raw_array(wybe.string), ?#command##0:wybe.string, ?#exit_code##0:wybe.int, 0:wybe.phantom, ?_:wybe.phantom) #2
+    command_line.<0>(~#argc##0:wybe.int, ?_:wybe.int, ?#arguments##0:wybe.array(wybe.c_string), ~#argv##0:wybe.array.raw_array(wybe.c_string), ?_:wybe.array.raw_array(wybe.c_string), ?#command##0:wybe.c_string, ?#exit_code##0:wybe.int, 0:wybe.phantom, ?_:wybe.phantom) #2
     int_list_test.<0>(0:wybe.phantom, ?#io##2:wybe.phantom) #3
     foreign c {semipure,terminal} exit(exit_code##0:wybe.int)
 
@@ -141,15 +144,15 @@ LLVM code       : None
                     command_line.set_exit_code<0>
   imports         : use wybe
   resources       : argc: fromList [(command_line.argc,wybe.int @command_line:nn:nn)]
-                    arguments: fromList [(command_line.arguments,wybe.array(wybe.string) = array(argc @command_line:nn:nn, argv @command_line:nn:nn) @command_line:nn:nn @command_line:nn:nn)]
-                    argv: fromList [(command_line.argv,wybe.array.raw_array(wybe.string) @command_line:nn:nn)]
-                    command: fromList [(command_line.command,wybe.string = "" @command_line:nn:nn @command_line:nn:nn)]
+                    arguments: fromList [(command_line.arguments,wybe.array(wybe.c_string) = array(argc @command_line:nn:nn, argv @command_line:nn:nn) @command_line:nn:nn @command_line:nn:nn)]
+                    argv: fromList [(command_line.argv,wybe.array.raw_array(wybe.c_string) @command_line:nn:nn)]
+                    command: fromList [(command_line.command,wybe.c_string = c"" @command_line:nn:nn @command_line:nn:nn)]
                     exit_code: fromList [(command_line.exit_code,wybe.int = 0 @command_line:nn:nn @command_line:nn:nn)]
   procs           : 
 
 *main* > public {impure} (0 calls)
 0: command_line.<0>
-(argc##0:wybe.int, [?argc##0:wybe.int], ?arguments##1:wybe.array(wybe.string), argv##0:wybe.array.raw_array(wybe.string), [?argv##0:wybe.array.raw_array(wybe.string)], ?command##1:wybe.string, ?exit_code##0:wybe.int, io##0:wybe.phantom, [?io##0:wybe.phantom]):
+(argc##0:wybe.int, [?argc##0:wybe.int], ?arguments##1:wybe.array(wybe.c_string), argv##0:wybe.array.raw_array(wybe.c_string), [?argv##0:wybe.array.raw_array(wybe.c_string)], ?command##1:wybe.c_string, ?exit_code##0:wybe.int, io##0:wybe.phantom, [?io##0:wybe.phantom]):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#4##0:wybe.array(?T))
@@ -158,7 +161,7 @@ LLVM code       : None
     wybe.array.[|]<0>(?command##1:?T, ?arguments##1:wybe.array(?T), ~tmp#0##0:wybe.array(?T), ?tmp#1##0:wybe.bool) #1 @command_line:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
-        foreign c {terminal,semipure} error_exit("command_line:17:10":wybe.string, "Erroneous program argument vector":wybe.string) @control:nn:nn
+        foreign c {terminal,semipure} error_exit(c"command_line:17:6":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @control:nn:nn
         foreign llvm move(undef:wybe.int, ?exit_code##0:wybe.int)
 
     1:
@@ -190,7 +193,7 @@ declare external fastcc  {i64, i64, i1} @"wybe.array.[|]<0>"(i64)
 @command_line.18 =    constant [?? x i8] c"Erroneous program argument vector\00"
 
 
-@command_line.16 =    constant [?? x i8] c"command_line:17:10\00"
+@command_line.16 =    constant [?? x i8] c"command_line:17:6\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -818,51 +821,51 @@ LLVM code       : None
     int_list.gen#2<0>[410bae77d3](0:int_list.int_list, 1:wybe.int, 1:wybe.int, 10:wybe.int, 0:int_list.int_list, ?tmp#0##0:int_list.int_list) #34 @int_list:nn:nn
     int_list.gen#2<0>[410bae77d3](0:int_list.int_list, 2:wybe.int, 2:wybe.int, 20:wybe.int, 0:int_list.int_list, ?tmp#1##0:int_list.int_list) #35 @int_list:nn:nn
     int_list.gen#2<0>[410bae77d3](0:int_list.int_list, 3:wybe.int, 3:wybe.int, 30:wybe.int, 0:int_list.int_list, ?tmp#2##0:int_list.int_list) #36 @int_list:nn:nn
-    foreign c print_string("x y z:":wybe.string, ~#io##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("x y z:":wybe.string, ~#io##0:wybe.phantom, ?tmp#17##0:wybe.phantom) #37 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#17##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-    int_list.print<0>(tmp#0##0:int_list.int_list, ~#io##1:wybe.phantom, ?tmp#20##0:wybe.phantom) #37 @int_list:nn:nn
+    int_list.print<0>(tmp#0##0:int_list.int_list, ~#io##1:wybe.phantom, ?tmp#20##0:wybe.phantom) #38 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#20##0:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-    int_list.print<0>(tmp#1##0:int_list.int_list, ~#io##2:wybe.phantom, ?tmp#23##0:wybe.phantom) #38 @int_list:nn:nn
+    int_list.print<0>(tmp#1##0:int_list.int_list, ~#io##2:wybe.phantom, ?tmp#23##0:wybe.phantom) #39 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#23##0:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
-    int_list.print<0>(tmp#2##0:int_list.int_list, ~#io##3:wybe.phantom, ?tmp#26##0:wybe.phantom) #39 @int_list:nn:nn
+    int_list.print<0>(tmp#2##0:int_list.int_list, ~#io##3:wybe.phantom, ?tmp#26##0:wybe.phantom) #40 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#26##0:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
     foreign c {impure} malloc_count(?mc2##0:wybe.int) @memory_management:nn:nn
     foreign llvm sub(~mc2##0:wybe.int, ~mc1##0:wybe.int, ?tmp#3##0:wybe.int) @int:nn:nn
-    foreign c print_string("--------------------":wybe.string, ~#io##4:wybe.phantom, ?tmp#31##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("--------------------":wybe.string, ~#io##4:wybe.phantom, ?tmp#31##0:wybe.phantom) #41 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#31##0:wybe.phantom, ?#io##5:wybe.phantom) @io:nn:nn
-    foreign c print_string("tests with alias":wybe.string, ~#io##5:wybe.phantom, ?tmp#34##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("tests with alias":wybe.string, ~#io##5:wybe.phantom, ?tmp#34##0:wybe.phantom) #42 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#34##0:wybe.phantom, ?#io##6:wybe.phantom) @io:nn:nn
     foreign c {impure} malloc_count(?mc1##1:wybe.int) @memory_management:nn:nn
     int_list_test.test_int_list<0>(tmp#0##0:int_list.int_list, tmp#1##0:int_list.int_list, tmp#2##0:int_list.int_list, ~#io##6:wybe.phantom, ?#io##7:wybe.phantom) #13 @int_list_test:nn:nn
     foreign c {impure} malloc_count(?mc2##1:wybe.int) @memory_management:nn:nn
     foreign llvm sub(~mc2##1:wybe.int, ~mc1##1:wybe.int, ?tmp#4##0:wybe.int) @int:nn:nn
-    foreign c print_string("original x y z:":wybe.string, ~#io##7:wybe.phantom, ?tmp#39##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("original x y z:":wybe.string, ~#io##7:wybe.phantom, ?tmp#39##0:wybe.phantom) #43 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#39##0:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
-    int_list.print<0>(tmp#0##0:int_list.int_list, ~#io##8:wybe.phantom, ?tmp#42##0:wybe.phantom) #40 @int_list:nn:nn
+    int_list.print<0>(tmp#0##0:int_list.int_list, ~#io##8:wybe.phantom, ?tmp#42##0:wybe.phantom) #44 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#42##0:wybe.phantom, ?#io##9:wybe.phantom) @io:nn:nn
-    int_list.print<0>(tmp#1##0:int_list.int_list, ~#io##9:wybe.phantom, ?tmp#45##0:wybe.phantom) #41 @int_list:nn:nn
+    int_list.print<0>(tmp#1##0:int_list.int_list, ~#io##9:wybe.phantom, ?tmp#45##0:wybe.phantom) #45 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#45##0:wybe.phantom, ?#io##10:wybe.phantom) @io:nn:nn
-    int_list.print<0>(tmp#2##0:int_list.int_list, ~#io##10:wybe.phantom, ?tmp#48##0:wybe.phantom) #42 @int_list:nn:nn
+    int_list.print<0>(tmp#2##0:int_list.int_list, ~#io##10:wybe.phantom, ?tmp#48##0:wybe.phantom) #46 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#48##0:wybe.phantom, ?#io##11:wybe.phantom) @io:nn:nn
-    foreign c print_string("--------------------":wybe.string, ~#io##11:wybe.phantom, ?tmp#51##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("--------------------":wybe.string, ~#io##11:wybe.phantom, ?tmp#51##0:wybe.phantom) #47 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#51##0:wybe.phantom, ?#io##12:wybe.phantom) @io:nn:nn
-    foreign c print_string("--------------------":wybe.string, ~#io##12:wybe.phantom, ?tmp#54##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("--------------------":wybe.string, ~#io##12:wybe.phantom, ?tmp#54##0:wybe.phantom) #48 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#54##0:wybe.phantom, ?#io##13:wybe.phantom) @io:nn:nn
-    foreign c print_string("tests without alias":wybe.string, ~#io##13:wybe.phantom, ?tmp#57##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("tests without alias":wybe.string, ~#io##13:wybe.phantom, ?tmp#57##0:wybe.phantom) #49 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#57##0:wybe.phantom, ?#io##14:wybe.phantom) @io:nn:nn
     foreign c {impure} malloc_count(?mc1##2:wybe.int) @memory_management:nn:nn
     int_list_test.test_int_list<0>[9e35cb823b](~tmp#0##0:int_list.int_list, ~tmp#1##0:int_list.int_list, ~tmp#2##0:int_list.int_list, ~#io##14:wybe.phantom, ?#io##15:wybe.phantom) #24 @int_list_test:nn:nn
     foreign c {impure} malloc_count(?mc2##2:wybe.int) @memory_management:nn:nn
     foreign llvm sub(~mc2##2:wybe.int, ~mc1##2:wybe.int, ?tmp#5##0:wybe.int) @int:nn:nn
-    foreign c print_string("--------------------":wybe.string, ~#io##15:wybe.phantom, ?tmp#62##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("--------------------":wybe.string, ~#io##15:wybe.phantom, ?tmp#62##0:wybe.phantom) #50 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#62##0:wybe.phantom, ?#io##16:wybe.phantom) @io:nn:nn
-    foreign c print_string(" ** malloc count of building lists: ":wybe.string, ~#io##16:wybe.phantom, ?#io##17:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(" ** malloc count of building lists: ":wybe.string, ~#io##16:wybe.phantom, ?#io##17:wybe.phantom) #51 @io:nn:nn
     foreign c print_int(~tmp#3##0:wybe.int, ~#io##17:wybe.phantom, ?tmp#67##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#67##0:wybe.phantom, ?#io##18:wybe.phantom) @io:nn:nn
-    foreign c print_string(" ** malloc count of test(aliased): ":wybe.string, ~#io##18:wybe.phantom, ?#io##19:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(" ** malloc count of test(aliased): ":wybe.string, ~#io##18:wybe.phantom, ?#io##19:wybe.phantom) #52 @io:nn:nn
     foreign c print_int(~tmp#4##0:wybe.int, ~#io##19:wybe.phantom, ?tmp#72##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#72##0:wybe.phantom, ?#io##20:wybe.phantom) @io:nn:nn
-    foreign c print_string(" ** malloc count of test(non-aliased): ":wybe.string, ~#io##20:wybe.phantom, ?#io##21:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(" ** malloc count of test(non-aliased): ":wybe.string, ~#io##20:wybe.phantom, ?#io##21:wybe.phantom) #53 @io:nn:nn
     foreign c print_int(~tmp#5##0:wybe.int, ~#io##21:wybe.phantom, ?tmp#77##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#77##0:wybe.phantom, ?#io##22:wybe.phantom) @io:nn:nn
 
@@ -876,31 +879,31 @@ test_int_list(x##0:int_list.int_list, y##0:int_list.int_list, z##0:int_list.int_
     int_list.reverse_helper<0>(~x##0:int_list.int_list, 0:int_list.int_list, ?x##1:int_list.int_list) #19 @int_list:nn:nn
     int_list.reverse_helper<0>(~z##0:int_list.int_list, 0:int_list.int_list, ?z##1:int_list.int_list) #20 @int_list:nn:nn
     int_list.append<0>(~y##0:int_list.int_list, 99:wybe.int, ?tmp#0##0:int_list.int_list) #2 @int_list_test:nn:nn
-    foreign c print_string("-":wybe.string, ~#io##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("-":wybe.string, ~#io##0:wybe.phantom, ?tmp#10##0:wybe.phantom) #21 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-    int_list.print<0>(x##1:int_list.int_list, ~#io##1:wybe.phantom, ?tmp#13##0:wybe.phantom) #21 @int_list:nn:nn
+    int_list.print<0>(x##1:int_list.int_list, ~#io##1:wybe.phantom, ?tmp#13##0:wybe.phantom) #22 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#13##0:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-    int_list.print<0>(tmp#0##0:int_list.int_list, ~#io##2:wybe.phantom, ?tmp#16##0:wybe.phantom) #22 @int_list:nn:nn
+    int_list.print<0>(tmp#0##0:int_list.int_list, ~#io##2:wybe.phantom, ?tmp#16##0:wybe.phantom) #23 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#16##0:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
-    int_list.print<0>(z##1:int_list.int_list, ~#io##3:wybe.phantom, ?tmp#19##0:wybe.phantom) #23 @int_list:nn:nn
+    int_list.print<0>(z##1:int_list.int_list, ~#io##3:wybe.phantom, ?tmp#19##0:wybe.phantom) #24 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
     int_list.extend<0>[410bae77d3](~x##1:int_list.int_list, ~tmp#0##0:int_list.int_list, ?tmp#1##0:int_list.int_list) #7 @int_list_test:nn:nn
     int_list.extend<0>[410bae77d3](~tmp#1##0:int_list.int_list, ~z##1:int_list.int_list, ?tmp#2##0:int_list.int_list) #8 @int_list_test:nn:nn
-    foreign c print_string("-":wybe.string, ~#io##4:wybe.phantom, ?tmp#22##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("-":wybe.string, ~#io##4:wybe.phantom, ?tmp#22##0:wybe.phantom) #25 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#22##0:wybe.phantom, ?#io##5:wybe.phantom) @io:nn:nn
-    int_list.print<0>(tmp#2##0:int_list.int_list, ~#io##5:wybe.phantom, ?tmp#25##0:wybe.phantom) #24 @int_list:nn:nn
+    int_list.print<0>(tmp#2##0:int_list.int_list, ~#io##5:wybe.phantom, ?tmp#25##0:wybe.phantom) #26 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#25##0:wybe.phantom, ?#io##6:wybe.phantom) @io:nn:nn
     int_list.insert<0>[410bae77d3](~tmp#2##0:int_list.int_list, 4:wybe.int, 78:wybe.int, ?tmp#3##0:int_list.int_list) #11 @int_list_test:nn:nn
     int_list.pop<0>[410bae77d3](~tmp#3##0:int_list.int_list, 20:wybe.int, ?tmp#4##0:int_list.int_list) #12 @int_list_test:nn:nn
     int_list.remove<0>[410bae77d3](~tmp#4##0:int_list.int_list, 2:wybe.int, ?tmp#5##0:int_list.int_list) #13 @int_list_test:nn:nn
-    foreign c print_string("-":wybe.string, ~#io##6:wybe.phantom, ?tmp#28##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("-":wybe.string, ~#io##6:wybe.phantom, ?tmp#28##0:wybe.phantom) #27 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#28##0:wybe.phantom, ?#io##7:wybe.phantom) @io:nn:nn
-    int_list.print<0>(tmp#5##0:int_list.int_list, ~#io##7:wybe.phantom, ?tmp#31##0:wybe.phantom) #25 @int_list:nn:nn
+    int_list.print<0>(tmp#5##0:int_list.int_list, ~#io##7:wybe.phantom, ?tmp#31##0:wybe.phantom) #28 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#31##0:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
     int_list.sort<0>[410bae77d3](~tmp#5##0:int_list.int_list, ?l##5:int_list.int_list) #16 @int_list_test:nn:nn
-    foreign c print_string("-":wybe.string, ~#io##8:wybe.phantom, ?tmp#34##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("-":wybe.string, ~#io##8:wybe.phantom, ?tmp#34##0:wybe.phantom) #29 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#34##0:wybe.phantom, ?#io##9:wybe.phantom) @io:nn:nn
-    int_list.print<0>(~l##5:int_list.int_list, ~#io##9:wybe.phantom, ?tmp#37##0:wybe.phantom) #26 @int_list:nn:nn
+    int_list.print<0>(~l##5:int_list.int_list, ~#io##9:wybe.phantom, ?tmp#37##0:wybe.phantom) #30 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#37##0:wybe.phantom, ?#io##10:wybe.phantom) @io:nn:nn
 
 LLVM code       : None
@@ -918,7 +921,9 @@ AFTER EVERYTHING:
                     use wybe
                     use wybe.array
                     use wybe.bool
+                    use wybe.c_string
                     use wybe.char
+                    use wybe.comparison
                     use wybe.control
                     use wybe.count
                     use wybe.float
@@ -928,17 +933,18 @@ AFTER EVERYTHING:
                     use wybe.machine_word
                     use wybe.memory_management
                     use wybe.phantom
+                    use wybe.range
                     use wybe.string
   resources       : 
   procs           : 
 
 *main* > {terminal,inline,impure} (0 calls)
 0: .<0>
-(argc##0:wybe.int, argv##0:wybe.array.raw_array(wybe.string), ?exit_code##0:wybe.int, ?io##2:wybe.phantom):
+(argc##0:wybe.int, argv##0:wybe.array.raw_array(wybe.c_string), ?exit_code##0:wybe.int, ?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c {impure} gc_init @memory_management:nn:nn
-    command_line.<0>(~#argc##0:wybe.int, ?_:wybe.int, ?#arguments##0:wybe.array(wybe.string), ~#argv##0:wybe.array.raw_array(wybe.string), ?_:wybe.array.raw_array(wybe.string), ?#command##0:wybe.string, ?#exit_code##0:wybe.int, 0:wybe.phantom, ?_:wybe.phantom) #2
+    command_line.<0>(~#argc##0:wybe.int, ?_:wybe.int, ?#arguments##0:wybe.array(wybe.c_string), ~#argv##0:wybe.array.raw_array(wybe.c_string), ?_:wybe.array.raw_array(wybe.c_string), ?#command##0:wybe.c_string, ?#exit_code##0:wybe.int, 0:wybe.phantom, ?_:wybe.phantom) #2
     int_list_test.<0>(0:wybe.phantom, ?#io##2:wybe.phantom) #3
     foreign c {semipure,terminal} exit(exit_code##0:wybe.int)
 
@@ -992,15 +998,15 @@ entry:
                     command_line.set_exit_code<0>
   imports         : use wybe
   resources       : argc: fromList [(command_line.argc,wybe.int @command_line:nn:nn)]
-                    arguments: fromList [(command_line.arguments,wybe.array(wybe.string) = array(argc @command_line:nn:nn, argv @command_line:nn:nn) @command_line:nn:nn @command_line:nn:nn)]
-                    argv: fromList [(command_line.argv,wybe.array.raw_array(wybe.string) @command_line:nn:nn)]
-                    command: fromList [(command_line.command,wybe.string = "" @command_line:nn:nn @command_line:nn:nn)]
+                    arguments: fromList [(command_line.arguments,wybe.array(wybe.c_string) = array(argc @command_line:nn:nn, argv @command_line:nn:nn) @command_line:nn:nn @command_line:nn:nn)]
+                    argv: fromList [(command_line.argv,wybe.array.raw_array(wybe.c_string) @command_line:nn:nn)]
+                    command: fromList [(command_line.command,wybe.c_string = c"" @command_line:nn:nn @command_line:nn:nn)]
                     exit_code: fromList [(command_line.exit_code,wybe.int = 0 @command_line:nn:nn @command_line:nn:nn)]
   procs           : 
 
 *main* > public {impure} (0 calls)
 0: command_line.<0>
-(argc##0:wybe.int, [?argc##0:wybe.int], ?arguments##1:wybe.array(wybe.string), argv##0:wybe.array.raw_array(wybe.string), [?argv##0:wybe.array.raw_array(wybe.string)], ?command##1:wybe.string, ?exit_code##0:wybe.int, io##0:wybe.phantom, [?io##0:wybe.phantom]):
+(argc##0:wybe.int, [?argc##0:wybe.int], ?arguments##1:wybe.array(wybe.c_string), argv##0:wybe.array.raw_array(wybe.c_string), [?argv##0:wybe.array.raw_array(wybe.c_string)], ?command##1:wybe.c_string, ?exit_code##0:wybe.int, io##0:wybe.phantom, [?io##0:wybe.phantom]):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#4##0:wybe.array(?T))
@@ -1009,7 +1015,7 @@ entry:
     wybe.array.[|]<0>(?command##1:?T, ?arguments##1:wybe.array(?T), ~tmp#0##0:wybe.array(?T), ?tmp#1##0:wybe.bool) #1 @command_line:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
-        foreign c {terminal,semipure} error_exit("command_line:17:10":wybe.string, "Erroneous program argument vector":wybe.string) @control:nn:nn
+        foreign c {terminal,semipure} error_exit(c"command_line:17:6":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @control:nn:nn
         foreign llvm move(undef:wybe.int, ?exit_code##0:wybe.int)
 
     1:
@@ -1041,7 +1047,7 @@ declare external fastcc  {i64, i64, i1} @"wybe.array.[|]<0>"(i64)
 @command_line.18 =    constant [?? x i8] c"Erroneous program argument vector\00"
 
 
-@command_line.16 =    constant [?? x i8] c"command_line:17:10\00"
+@command_line.16 =    constant [?? x i8] c"command_line:17:6\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -2681,51 +2687,51 @@ entry:
     int_list.gen#2<0>[410bae77d3](0:int_list.int_list, 1:wybe.int, 1:wybe.int, 10:wybe.int, 0:int_list.int_list, ?tmp#0##0:int_list.int_list) #34 @int_list:nn:nn
     int_list.gen#2<0>[410bae77d3](0:int_list.int_list, 2:wybe.int, 2:wybe.int, 20:wybe.int, 0:int_list.int_list, ?tmp#1##0:int_list.int_list) #35 @int_list:nn:nn
     int_list.gen#2<0>[410bae77d3](0:int_list.int_list, 3:wybe.int, 3:wybe.int, 30:wybe.int, 0:int_list.int_list, ?tmp#2##0:int_list.int_list) #36 @int_list:nn:nn
-    foreign c print_string("x y z:":wybe.string, ~#io##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("x y z:":wybe.string, ~#io##0:wybe.phantom, ?tmp#17##0:wybe.phantom) #37 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#17##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-    int_list.print<0>(tmp#0##0:int_list.int_list, ~#io##1:wybe.phantom, ?tmp#20##0:wybe.phantom) #37 @int_list:nn:nn
+    int_list.print<0>(tmp#0##0:int_list.int_list, ~#io##1:wybe.phantom, ?tmp#20##0:wybe.phantom) #38 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#20##0:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-    int_list.print<0>(tmp#1##0:int_list.int_list, ~#io##2:wybe.phantom, ?tmp#23##0:wybe.phantom) #38 @int_list:nn:nn
+    int_list.print<0>(tmp#1##0:int_list.int_list, ~#io##2:wybe.phantom, ?tmp#23##0:wybe.phantom) #39 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#23##0:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
-    int_list.print<0>(tmp#2##0:int_list.int_list, ~#io##3:wybe.phantom, ?tmp#26##0:wybe.phantom) #39 @int_list:nn:nn
+    int_list.print<0>(tmp#2##0:int_list.int_list, ~#io##3:wybe.phantom, ?tmp#26##0:wybe.phantom) #40 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#26##0:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
     foreign c {impure} malloc_count(?mc2##0:wybe.int) @memory_management:nn:nn
     foreign llvm sub(~mc2##0:wybe.int, ~mc1##0:wybe.int, ?tmp#3##0:wybe.int) @int:nn:nn
-    foreign c print_string("--------------------":wybe.string, ~#io##4:wybe.phantom, ?tmp#31##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("--------------------":wybe.string, ~#io##4:wybe.phantom, ?tmp#31##0:wybe.phantom) #41 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#31##0:wybe.phantom, ?#io##5:wybe.phantom) @io:nn:nn
-    foreign c print_string("tests with alias":wybe.string, ~#io##5:wybe.phantom, ?tmp#34##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("tests with alias":wybe.string, ~#io##5:wybe.phantom, ?tmp#34##0:wybe.phantom) #42 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#34##0:wybe.phantom, ?#io##6:wybe.phantom) @io:nn:nn
     foreign c {impure} malloc_count(?mc1##1:wybe.int) @memory_management:nn:nn
     int_list_test.test_int_list<0>(tmp#0##0:int_list.int_list, tmp#1##0:int_list.int_list, tmp#2##0:int_list.int_list, ~#io##6:wybe.phantom, ?#io##7:wybe.phantom) #13 @int_list_test:nn:nn
     foreign c {impure} malloc_count(?mc2##1:wybe.int) @memory_management:nn:nn
     foreign llvm sub(~mc2##1:wybe.int, ~mc1##1:wybe.int, ?tmp#4##0:wybe.int) @int:nn:nn
-    foreign c print_string("original x y z:":wybe.string, ~#io##7:wybe.phantom, ?tmp#39##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("original x y z:":wybe.string, ~#io##7:wybe.phantom, ?tmp#39##0:wybe.phantom) #43 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#39##0:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
-    int_list.print<0>(tmp#0##0:int_list.int_list, ~#io##8:wybe.phantom, ?tmp#42##0:wybe.phantom) #40 @int_list:nn:nn
+    int_list.print<0>(tmp#0##0:int_list.int_list, ~#io##8:wybe.phantom, ?tmp#42##0:wybe.phantom) #44 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#42##0:wybe.phantom, ?#io##9:wybe.phantom) @io:nn:nn
-    int_list.print<0>(tmp#1##0:int_list.int_list, ~#io##9:wybe.phantom, ?tmp#45##0:wybe.phantom) #41 @int_list:nn:nn
+    int_list.print<0>(tmp#1##0:int_list.int_list, ~#io##9:wybe.phantom, ?tmp#45##0:wybe.phantom) #45 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#45##0:wybe.phantom, ?#io##10:wybe.phantom) @io:nn:nn
-    int_list.print<0>(tmp#2##0:int_list.int_list, ~#io##10:wybe.phantom, ?tmp#48##0:wybe.phantom) #42 @int_list:nn:nn
+    int_list.print<0>(tmp#2##0:int_list.int_list, ~#io##10:wybe.phantom, ?tmp#48##0:wybe.phantom) #46 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#48##0:wybe.phantom, ?#io##11:wybe.phantom) @io:nn:nn
-    foreign c print_string("--------------------":wybe.string, ~#io##11:wybe.phantom, ?tmp#51##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("--------------------":wybe.string, ~#io##11:wybe.phantom, ?tmp#51##0:wybe.phantom) #47 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#51##0:wybe.phantom, ?#io##12:wybe.phantom) @io:nn:nn
-    foreign c print_string("--------------------":wybe.string, ~#io##12:wybe.phantom, ?tmp#54##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("--------------------":wybe.string, ~#io##12:wybe.phantom, ?tmp#54##0:wybe.phantom) #48 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#54##0:wybe.phantom, ?#io##13:wybe.phantom) @io:nn:nn
-    foreign c print_string("tests without alias":wybe.string, ~#io##13:wybe.phantom, ?tmp#57##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("tests without alias":wybe.string, ~#io##13:wybe.phantom, ?tmp#57##0:wybe.phantom) #49 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#57##0:wybe.phantom, ?#io##14:wybe.phantom) @io:nn:nn
     foreign c {impure} malloc_count(?mc1##2:wybe.int) @memory_management:nn:nn
     int_list_test.test_int_list<0>[9e35cb823b](~tmp#0##0:int_list.int_list, ~tmp#1##0:int_list.int_list, ~tmp#2##0:int_list.int_list, ~#io##14:wybe.phantom, ?#io##15:wybe.phantom) #24 @int_list_test:nn:nn
     foreign c {impure} malloc_count(?mc2##2:wybe.int) @memory_management:nn:nn
     foreign llvm sub(~mc2##2:wybe.int, ~mc1##2:wybe.int, ?tmp#5##0:wybe.int) @int:nn:nn
-    foreign c print_string("--------------------":wybe.string, ~#io##15:wybe.phantom, ?tmp#62##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("--------------------":wybe.string, ~#io##15:wybe.phantom, ?tmp#62##0:wybe.phantom) #50 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#62##0:wybe.phantom, ?#io##16:wybe.phantom) @io:nn:nn
-    foreign c print_string(" ** malloc count of building lists: ":wybe.string, ~#io##16:wybe.phantom, ?#io##17:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(" ** malloc count of building lists: ":wybe.string, ~#io##16:wybe.phantom, ?#io##17:wybe.phantom) #51 @io:nn:nn
     foreign c print_int(~tmp#3##0:wybe.int, ~#io##17:wybe.phantom, ?tmp#67##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#67##0:wybe.phantom, ?#io##18:wybe.phantom) @io:nn:nn
-    foreign c print_string(" ** malloc count of test(aliased): ":wybe.string, ~#io##18:wybe.phantom, ?#io##19:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(" ** malloc count of test(aliased): ":wybe.string, ~#io##18:wybe.phantom, ?#io##19:wybe.phantom) #52 @io:nn:nn
     foreign c print_int(~tmp#4##0:wybe.int, ~#io##19:wybe.phantom, ?tmp#72##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#72##0:wybe.phantom, ?#io##20:wybe.phantom) @io:nn:nn
-    foreign c print_string(" ** malloc count of test(non-aliased): ":wybe.string, ~#io##20:wybe.phantom, ?#io##21:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(" ** malloc count of test(non-aliased): ":wybe.string, ~#io##20:wybe.phantom, ?#io##21:wybe.phantom) #53 @io:nn:nn
     foreign c print_int(~tmp#5##0:wybe.int, ~#io##21:wybe.phantom, ?tmp#77##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#77##0:wybe.phantom, ?#io##22:wybe.phantom) @io:nn:nn
 
@@ -2739,61 +2745,61 @@ test_int_list(x##0:int_list.int_list, y##0:int_list.int_list, z##0:int_list.int_
     int_list.reverse_helper<0>(~x##0:int_list.int_list, 0:int_list.int_list, ?x##1:int_list.int_list) #19 @int_list:nn:nn
     int_list.reverse_helper<0>(~z##0:int_list.int_list, 0:int_list.int_list, ?z##1:int_list.int_list) #20 @int_list:nn:nn
     int_list.append<0>(~y##0:int_list.int_list, 99:wybe.int, ?tmp#0##0:int_list.int_list) #2 @int_list_test:nn:nn
-    foreign c print_string("-":wybe.string, ~#io##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("-":wybe.string, ~#io##0:wybe.phantom, ?tmp#10##0:wybe.phantom) #21 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-    int_list.print<0>(x##1:int_list.int_list, ~#io##1:wybe.phantom, ?tmp#13##0:wybe.phantom) #21 @int_list:nn:nn
+    int_list.print<0>(x##1:int_list.int_list, ~#io##1:wybe.phantom, ?tmp#13##0:wybe.phantom) #22 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#13##0:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-    int_list.print<0>(tmp#0##0:int_list.int_list, ~#io##2:wybe.phantom, ?tmp#16##0:wybe.phantom) #22 @int_list:nn:nn
+    int_list.print<0>(tmp#0##0:int_list.int_list, ~#io##2:wybe.phantom, ?tmp#16##0:wybe.phantom) #23 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#16##0:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
-    int_list.print<0>(z##1:int_list.int_list, ~#io##3:wybe.phantom, ?tmp#19##0:wybe.phantom) #23 @int_list:nn:nn
+    int_list.print<0>(z##1:int_list.int_list, ~#io##3:wybe.phantom, ?tmp#19##0:wybe.phantom) #24 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
     int_list.extend<0>[410bae77d3](~x##1:int_list.int_list, ~tmp#0##0:int_list.int_list, ?tmp#1##0:int_list.int_list) #7 @int_list_test:nn:nn
     int_list.extend<0>[410bae77d3](~tmp#1##0:int_list.int_list, ~z##1:int_list.int_list, ?tmp#2##0:int_list.int_list) #8 @int_list_test:nn:nn
-    foreign c print_string("-":wybe.string, ~#io##4:wybe.phantom, ?tmp#22##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("-":wybe.string, ~#io##4:wybe.phantom, ?tmp#22##0:wybe.phantom) #25 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#22##0:wybe.phantom, ?#io##5:wybe.phantom) @io:nn:nn
-    int_list.print<0>(tmp#2##0:int_list.int_list, ~#io##5:wybe.phantom, ?tmp#25##0:wybe.phantom) #24 @int_list:nn:nn
+    int_list.print<0>(tmp#2##0:int_list.int_list, ~#io##5:wybe.phantom, ?tmp#25##0:wybe.phantom) #26 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#25##0:wybe.phantom, ?#io##6:wybe.phantom) @io:nn:nn
     int_list.insert<0>[410bae77d3](~tmp#2##0:int_list.int_list, 4:wybe.int, 78:wybe.int, ?tmp#3##0:int_list.int_list) #11 @int_list_test:nn:nn
     int_list.pop<0>[410bae77d3](~tmp#3##0:int_list.int_list, 20:wybe.int, ?tmp#4##0:int_list.int_list) #12 @int_list_test:nn:nn
     int_list.remove<0>[410bae77d3](~tmp#4##0:int_list.int_list, 2:wybe.int, ?tmp#5##0:int_list.int_list) #13 @int_list_test:nn:nn
-    foreign c print_string("-":wybe.string, ~#io##6:wybe.phantom, ?tmp#28##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("-":wybe.string, ~#io##6:wybe.phantom, ?tmp#28##0:wybe.phantom) #27 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#28##0:wybe.phantom, ?#io##7:wybe.phantom) @io:nn:nn
-    int_list.print<0>(tmp#5##0:int_list.int_list, ~#io##7:wybe.phantom, ?tmp#31##0:wybe.phantom) #25 @int_list:nn:nn
+    int_list.print<0>(tmp#5##0:int_list.int_list, ~#io##7:wybe.phantom, ?tmp#31##0:wybe.phantom) #28 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#31##0:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
     int_list.sort<0>[410bae77d3](~tmp#5##0:int_list.int_list, ?l##5:int_list.int_list) #16 @int_list_test:nn:nn
-    foreign c print_string("-":wybe.string, ~#io##8:wybe.phantom, ?tmp#34##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("-":wybe.string, ~#io##8:wybe.phantom, ?tmp#34##0:wybe.phantom) #29 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#34##0:wybe.phantom, ?#io##9:wybe.phantom) @io:nn:nn
-    int_list.print<0>(~l##5:int_list.int_list, ~#io##9:wybe.phantom, ?tmp#37##0:wybe.phantom) #26 @int_list:nn:nn
+    int_list.print<0>(~l##5:int_list.int_list, ~#io##9:wybe.phantom, ?tmp#37##0:wybe.phantom) #30 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#37##0:wybe.phantom, ?#io##10:wybe.phantom) @io:nn:nn
  [9e35cb823b] [NonAliasedParam 0,NonAliasedParam 1,NonAliasedParam 2] :
     int_list.reverse_helper<0>[410bae77d3](~x##0:int_list.int_list, 0:int_list.int_list, ?x##1:int_list.int_list) #19 @int_list:nn:nn
     int_list.reverse_helper<0>[410bae77d3](~z##0:int_list.int_list, 0:int_list.int_list, ?z##1:int_list.int_list) #20 @int_list:nn:nn
     int_list.append<0>[410bae77d3](~y##0:int_list.int_list, 99:wybe.int, ?tmp#0##0:int_list.int_list) #2 @int_list_test:nn:nn
-    foreign c print_string("-":wybe.string, ~#io##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("-":wybe.string, ~#io##0:wybe.phantom, ?tmp#10##0:wybe.phantom) #21 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-    int_list.print<0>(x##1:int_list.int_list, ~#io##1:wybe.phantom, ?tmp#13##0:wybe.phantom) #21 @int_list:nn:nn
+    int_list.print<0>(x##1:int_list.int_list, ~#io##1:wybe.phantom, ?tmp#13##0:wybe.phantom) #22 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#13##0:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-    int_list.print<0>(tmp#0##0:int_list.int_list, ~#io##2:wybe.phantom, ?tmp#16##0:wybe.phantom) #22 @int_list:nn:nn
+    int_list.print<0>(tmp#0##0:int_list.int_list, ~#io##2:wybe.phantom, ?tmp#16##0:wybe.phantom) #23 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#16##0:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
-    int_list.print<0>(z##1:int_list.int_list, ~#io##3:wybe.phantom, ?tmp#19##0:wybe.phantom) #23 @int_list:nn:nn
+    int_list.print<0>(z##1:int_list.int_list, ~#io##3:wybe.phantom, ?tmp#19##0:wybe.phantom) #24 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
     int_list.extend<0>[410bae77d3](~x##1:int_list.int_list, ~tmp#0##0:int_list.int_list, ?tmp#1##0:int_list.int_list) #7 @int_list_test:nn:nn
     int_list.extend<0>[410bae77d3](~tmp#1##0:int_list.int_list, ~z##1:int_list.int_list, ?tmp#2##0:int_list.int_list) #8 @int_list_test:nn:nn
-    foreign c print_string("-":wybe.string, ~#io##4:wybe.phantom, ?tmp#22##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("-":wybe.string, ~#io##4:wybe.phantom, ?tmp#22##0:wybe.phantom) #25 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#22##0:wybe.phantom, ?#io##5:wybe.phantom) @io:nn:nn
-    int_list.print<0>(tmp#2##0:int_list.int_list, ~#io##5:wybe.phantom, ?tmp#25##0:wybe.phantom) #24 @int_list:nn:nn
+    int_list.print<0>(tmp#2##0:int_list.int_list, ~#io##5:wybe.phantom, ?tmp#25##0:wybe.phantom) #26 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#25##0:wybe.phantom, ?#io##6:wybe.phantom) @io:nn:nn
     int_list.insert<0>[410bae77d3](~tmp#2##0:int_list.int_list, 4:wybe.int, 78:wybe.int, ?tmp#3##0:int_list.int_list) #11 @int_list_test:nn:nn
     int_list.pop<0>[410bae77d3](~tmp#3##0:int_list.int_list, 20:wybe.int, ?tmp#4##0:int_list.int_list) #12 @int_list_test:nn:nn
     int_list.remove<0>[410bae77d3](~tmp#4##0:int_list.int_list, 2:wybe.int, ?tmp#5##0:int_list.int_list) #13 @int_list_test:nn:nn
-    foreign c print_string("-":wybe.string, ~#io##6:wybe.phantom, ?tmp#28##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("-":wybe.string, ~#io##6:wybe.phantom, ?tmp#28##0:wybe.phantom) #27 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#28##0:wybe.phantom, ?#io##7:wybe.phantom) @io:nn:nn
-    int_list.print<0>(tmp#5##0:int_list.int_list, ~#io##7:wybe.phantom, ?tmp#31##0:wybe.phantom) #25 @int_list:nn:nn
+    int_list.print<0>(tmp#5##0:int_list.int_list, ~#io##7:wybe.phantom, ?tmp#31##0:wybe.phantom) #28 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#31##0:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
     int_list.sort<0>[410bae77d3](~tmp#5##0:int_list.int_list, ?l##5:int_list.int_list) #16 @int_list_test:nn:nn
-    foreign c print_string("-":wybe.string, ~#io##8:wybe.phantom, ?tmp#34##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("-":wybe.string, ~#io##8:wybe.phantom, ?tmp#34##0:wybe.phantom) #29 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#34##0:wybe.phantom, ?#io##9:wybe.phantom) @io:nn:nn
-    int_list.print<0>(~l##5:int_list.int_list, ~#io##9:wybe.phantom, ?tmp#37##0:wybe.phantom) #26 @int_list:nn:nn
+    int_list.print<0>(~l##5:int_list.int_list, ~#io##9:wybe.phantom, ?tmp#37##0:wybe.phantom) #30 @int_list:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#37##0:wybe.phantom, ?#io##10:wybe.phantom) @io:nn:nn
 
   LLVM code       :
@@ -2810,7 +2816,7 @@ declare external ccc  void @putchar(i8)
 declare external ccc  void @print_int(i64)    
 
 
-declare external ccc  void @print_string(i64)    
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  i64 @malloc_count()    
@@ -2822,34 +2828,67 @@ declare external fastcc  void @"int_list.print<0>"(i64)
 declare external fastcc  i64 @"int_list.gen#2<0>[410bae77d3]"(i64, i64, i64, i64, i64)    
 
 
-@int_list_test.21 =    constant [?? x i8] c" ** malloc count of test(non-aliased): \00"
+@int_list_test.32 =    constant {i64, i64} { i64 39, i64 ptrtoint ([?? x i8]* @int_list_test.31 to i64) }
 
 
-@int_list_test.19 =    constant [?? x i8] c" ** malloc count of test(aliased): \00"
+@int_list_test.31 =    constant [?? x i8] c" ** malloc count of test(non-aliased): \00"
 
 
-@int_list_test.17 =    constant [?? x i8] c" ** malloc count of building lists: \00"
+@int_list_test.29 =    constant {i64, i64} { i64 35, i64 ptrtoint ([?? x i8]* @int_list_test.28 to i64) }
 
 
-@int_list_test.15 =    constant [?? x i8] c"--------------------\00"
+@int_list_test.28 =    constant [?? x i8] c" ** malloc count of test(aliased): \00"
 
 
-@int_list_test.13 =    constant [?? x i8] c"tests without alias\00"
+@int_list_test.26 =    constant {i64, i64} { i64 36, i64 ptrtoint ([?? x i8]* @int_list_test.25 to i64) }
 
 
-@int_list_test.11 =    constant [?? x i8] c"--------------------\00"
+@int_list_test.25 =    constant [?? x i8] c" ** malloc count of building lists: \00"
 
 
-@int_list_test.9 =    constant [?? x i8] c"--------------------\00"
+@int_list_test.23 =    constant {i64, i64} { i64 20, i64 ptrtoint ([?? x i8]* @int_list_test.22 to i64) }
 
 
-@int_list_test.7 =    constant [?? x i8] c"original x y z:\00"
+@int_list_test.22 =    constant [?? x i8] c"--------------------\00"
 
 
-@int_list_test.5 =    constant [?? x i8] c"tests with alias\00"
+@int_list_test.20 =    constant {i64, i64} { i64 19, i64 ptrtoint ([?? x i8]* @int_list_test.19 to i64) }
 
 
-@int_list_test.3 =    constant [?? x i8] c"--------------------\00"
+@int_list_test.19 =    constant [?? x i8] c"tests without alias\00"
+
+
+@int_list_test.17 =    constant {i64, i64} { i64 20, i64 ptrtoint ([?? x i8]* @int_list_test.16 to i64) }
+
+
+@int_list_test.16 =    constant [?? x i8] c"--------------------\00"
+
+
+@int_list_test.14 =    constant {i64, i64} { i64 20, i64 ptrtoint ([?? x i8]* @int_list_test.13 to i64) }
+
+
+@int_list_test.13 =    constant [?? x i8] c"--------------------\00"
+
+
+@int_list_test.11 =    constant {i64, i64} { i64 15, i64 ptrtoint ([?? x i8]* @int_list_test.10 to i64) }
+
+
+@int_list_test.10 =    constant [?? x i8] c"original x y z:\00"
+
+
+@int_list_test.8 =    constant {i64, i64} { i64 16, i64 ptrtoint ([?? x i8]* @int_list_test.7 to i64) }
+
+
+@int_list_test.7 =    constant [?? x i8] c"tests with alias\00"
+
+
+@int_list_test.5 =    constant {i64, i64} { i64 20, i64 ptrtoint ([?? x i8]* @int_list_test.4 to i64) }
+
+
+@int_list_test.4 =    constant [?? x i8] c"--------------------\00"
+
+
+@int_list_test.2 =    constant {i64, i64} { i64 6, i64 ptrtoint ([?? x i8]* @int_list_test.1 to i64) }
 
 
 @int_list_test.1 =    constant [?? x i8] c"x y z:\00"
@@ -2876,16 +2915,28 @@ declare external fastcc  i64 @"int_list.append<0>"(i64, i64)
 declare external fastcc  i64 @"int_list.reverse_helper<0>"(i64, i64)    
 
 
-@int_list_test.29 =    constant [?? x i8] c"-\00"
+@int_list_test.44 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @int_list_test.43 to i64) }
 
 
-@int_list_test.27 =    constant [?? x i8] c"-\00"
+@int_list_test.43 =    constant [?? x i8] c"-\00"
 
 
-@int_list_test.25 =    constant [?? x i8] c"-\00"
+@int_list_test.41 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @int_list_test.40 to i64) }
 
 
-@int_list_test.23 =    constant [?? x i8] c"-\00"
+@int_list_test.40 =    constant [?? x i8] c"-\00"
+
+
+@int_list_test.38 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @int_list_test.37 to i64) }
+
+
+@int_list_test.37 =    constant [?? x i8] c"-\00"
+
+
+@int_list_test.35 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @int_list_test.34 to i64) }
+
+
+@int_list_test.34 =    constant [?? x i8] c"-\00"
 
 
 declare external fastcc  i64 @"int_list.append<0>[410bae77d3]"(i64, i64)    
@@ -2894,16 +2945,28 @@ declare external fastcc  i64 @"int_list.append<0>[410bae77d3]"(i64, i64)
 declare external fastcc  i64 @"int_list.reverse_helper<0>[410bae77d3]"(i64, i64)    
 
 
-@int_list_test.37 =    constant [?? x i8] c"-\00"
+@int_list_test.56 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @int_list_test.55 to i64) }
 
 
-@int_list_test.35 =    constant [?? x i8] c"-\00"
+@int_list_test.55 =    constant [?? x i8] c"-\00"
 
 
-@int_list_test.33 =    constant [?? x i8] c"-\00"
+@int_list_test.53 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @int_list_test.52 to i64) }
 
 
-@int_list_test.31 =    constant [?? x i8] c"-\00"
+@int_list_test.52 =    constant [?? x i8] c"-\00"
+
+
+@int_list_test.50 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @int_list_test.49 to i64) }
+
+
+@int_list_test.49 =    constant [?? x i8] c"-\00"
+
+
+@int_list_test.47 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @int_list_test.46 to i64) }
+
+
+@int_list_test.46 =    constant [?? x i8] c"-\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -2918,8 +2981,8 @@ entry:
   %"1#tmp#0##0" = tail call fastcc  i64  @"int_list.gen#2<0>[410bae77d3]"(i64  0, i64  1, i64  1, i64  10, i64  0)  
   %"1#tmp#1##0" = tail call fastcc  i64  @"int_list.gen#2<0>[410bae77d3]"(i64  0, i64  2, i64  2, i64  20, i64  0)  
   %"1#tmp#2##0" = tail call fastcc  i64  @"int_list.gen#2<0>[410bae77d3]"(i64  0, i64  3, i64  3, i64  30, i64  0)  
-  %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @int_list_test.1, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %2)  
+  %3 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @int_list_test.2, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %3)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"int_list.print<0>"(i64  %"1#tmp#0##0")  
   tail call ccc  void  @putchar(i8  10)  
@@ -2929,18 +2992,18 @@ entry:
   tail call ccc  void  @putchar(i8  10)  
   %"1#mc2##0" = tail call ccc  i64  @malloc_count()  
   %"1#tmp#3##0" = sub   i64 %"1#mc2##0", %"1#mc1##0" 
-  %4 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @int_list_test.3, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %4)  
+  %6 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @int_list_test.5, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %6)  
   tail call ccc  void  @putchar(i8  10)  
-  %6 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @int_list_test.5, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %6)  
+  %9 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @int_list_test.8, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %9)  
   tail call ccc  void  @putchar(i8  10)  
   %"1#mc1##1" = tail call ccc  i64  @malloc_count()  
   tail call fastcc  void  @"int_list_test.test_int_list<0>"(i64  %"1#tmp#0##0", i64  %"1#tmp#1##0", i64  %"1#tmp#2##0")  
   %"1#mc2##1" = tail call ccc  i64  @malloc_count()  
   %"1#tmp#4##0" = sub   i64 %"1#mc2##1", %"1#mc1##1" 
-  %8 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @int_list_test.7, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %8)  
+  %12 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @int_list_test.11, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %12)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"int_list.print<0>"(i64  %"1#tmp#0##0")  
   tail call ccc  void  @putchar(i8  10)  
@@ -2948,32 +3011,32 @@ entry:
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"int_list.print<0>"(i64  %"1#tmp#2##0")  
   tail call ccc  void  @putchar(i8  10)  
-  %10 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @int_list_test.9, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %10)  
+  %15 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @int_list_test.14, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %15)  
   tail call ccc  void  @putchar(i8  10)  
-  %12 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @int_list_test.11, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %12)  
+  %18 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @int_list_test.17, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %18)  
   tail call ccc  void  @putchar(i8  10)  
-  %14 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @int_list_test.13, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %14)  
+  %21 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @int_list_test.20, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %21)  
   tail call ccc  void  @putchar(i8  10)  
   %"1#mc1##2" = tail call ccc  i64  @malloc_count()  
   tail call fastcc  void  @"int_list_test.test_int_list<0>[9e35cb823b]"(i64  %"1#tmp#0##0", i64  %"1#tmp#1##0", i64  %"1#tmp#2##0")  
   %"1#mc2##2" = tail call ccc  i64  @malloc_count()  
   %"1#tmp#5##0" = sub   i64 %"1#mc2##2", %"1#mc1##2" 
-  %16 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @int_list_test.15, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %16)  
+  %24 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @int_list_test.23, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %24)  
   tail call ccc  void  @putchar(i8  10)  
-  %18 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @int_list_test.17, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %18)  
+  %27 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @int_list_test.26, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %27)  
   tail call ccc  void  @print_int(i64  %"1#tmp#3##0")  
   tail call ccc  void  @putchar(i8  10)  
-  %20 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @int_list_test.19, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %20)  
+  %30 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @int_list_test.29, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %30)  
   tail call ccc  void  @print_int(i64  %"1#tmp#4##0")  
   tail call ccc  void  @putchar(i8  10)  
-  %22 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @int_list_test.21, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %22)  
+  %33 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @int_list_test.32, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %33)  
   tail call ccc  void  @print_int(i64  %"1#tmp#5##0")  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
@@ -2985,8 +3048,8 @@ entry:
   %"1#x##1" = tail call fastcc  i64  @"int_list.reverse_helper<0>"(i64  %"x##0", i64  0)  
   %"1#z##1" = tail call fastcc  i64  @"int_list.reverse_helper<0>"(i64  %"z##0", i64  0)  
   %"1#tmp#0##0" = tail call fastcc  i64  @"int_list.append<0>"(i64  %"y##0", i64  99)  
-  %24 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @int_list_test.23, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %24)  
+  %36 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @int_list_test.35, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %36)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"int_list.print<0>"(i64  %"1#x##1")  
   tail call ccc  void  @putchar(i8  10)  
@@ -2996,22 +3059,22 @@ entry:
   tail call ccc  void  @putchar(i8  10)  
   %"1#tmp#1##0" = tail call fastcc  i64  @"int_list.extend<0>[410bae77d3]"(i64  %"1#x##1", i64  %"1#tmp#0##0")  
   %"1#tmp#2##0" = tail call fastcc  i64  @"int_list.extend<0>[410bae77d3]"(i64  %"1#tmp#1##0", i64  %"1#z##1")  
-  %26 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @int_list_test.25, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %26)  
+  %39 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @int_list_test.38, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %39)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"int_list.print<0>"(i64  %"1#tmp#2##0")  
   tail call ccc  void  @putchar(i8  10)  
   %"1#tmp#3##0" = tail call fastcc  i64  @"int_list.insert<0>[410bae77d3]"(i64  %"1#tmp#2##0", i64  4, i64  78)  
   %"1#tmp#4##0" = tail call fastcc  i64  @"int_list.pop<0>[410bae77d3]"(i64  %"1#tmp#3##0", i64  20)  
   %"1#tmp#5##0" = tail call fastcc  i64  @"int_list.remove<0>[410bae77d3]"(i64  %"1#tmp#4##0", i64  2)  
-  %28 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @int_list_test.27, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %28)  
+  %42 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @int_list_test.41, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %42)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"int_list.print<0>"(i64  %"1#tmp#5##0")  
   tail call ccc  void  @putchar(i8  10)  
   %"1#l##5" = tail call fastcc  i64  @"int_list.sort<0>[410bae77d3]"(i64  %"1#tmp#5##0")  
-  %30 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @int_list_test.29, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %30)  
+  %45 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @int_list_test.44, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %45)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"int_list.print<0>"(i64  %"1#l##5")  
   tail call ccc  void  @putchar(i8  10)  
@@ -3024,8 +3087,8 @@ entry:
   %"1#x##1" = tail call fastcc  i64  @"int_list.reverse_helper<0>[410bae77d3]"(i64  %"x##0", i64  0)  
   %"1#z##1" = tail call fastcc  i64  @"int_list.reverse_helper<0>[410bae77d3]"(i64  %"z##0", i64  0)  
   %"1#tmp#0##0" = tail call fastcc  i64  @"int_list.append<0>[410bae77d3]"(i64  %"y##0", i64  99)  
-  %32 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @int_list_test.31, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %32)  
+  %48 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @int_list_test.47, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %48)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"int_list.print<0>"(i64  %"1#x##1")  
   tail call ccc  void  @putchar(i8  10)  
@@ -3035,22 +3098,22 @@ entry:
   tail call ccc  void  @putchar(i8  10)  
   %"1#tmp#1##0" = tail call fastcc  i64  @"int_list.extend<0>[410bae77d3]"(i64  %"1#x##1", i64  %"1#tmp#0##0")  
   %"1#tmp#2##0" = tail call fastcc  i64  @"int_list.extend<0>[410bae77d3]"(i64  %"1#tmp#1##0", i64  %"1#z##1")  
-  %34 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @int_list_test.33, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %34)  
+  %51 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @int_list_test.50, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %51)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"int_list.print<0>"(i64  %"1#tmp#2##0")  
   tail call ccc  void  @putchar(i8  10)  
   %"1#tmp#3##0" = tail call fastcc  i64  @"int_list.insert<0>[410bae77d3]"(i64  %"1#tmp#2##0", i64  4, i64  78)  
   %"1#tmp#4##0" = tail call fastcc  i64  @"int_list.pop<0>[410bae77d3]"(i64  %"1#tmp#3##0", i64  20)  
   %"1#tmp#5##0" = tail call fastcc  i64  @"int_list.remove<0>[410bae77d3]"(i64  %"1#tmp#4##0", i64  2)  
-  %36 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @int_list_test.35, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %36)  
+  %54 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @int_list_test.53, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %54)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"int_list.print<0>"(i64  %"1#tmp#5##0")  
   tail call ccc  void  @putchar(i8  10)  
   %"1#l##5" = tail call fastcc  i64  @"int_list.sort<0>[410bae77d3]"(i64  %"1#tmp#5##0")  
-  %38 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @int_list_test.37, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %38)  
+  %57 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @int_list_test.56, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %57)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"int_list.print<0>"(i64  %"1#l##5")  
   tail call ccc  void  @putchar(i8  10)  

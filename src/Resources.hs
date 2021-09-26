@@ -22,7 +22,6 @@ import           Options                   (LogSelection (Resources))
 import           Snippets
 import           Util
 
-import           Debug.Trace
 
 ------------------------- Checking resource decls -------------------------
 

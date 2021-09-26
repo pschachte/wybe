@@ -8,7 +8,7 @@
 -- |Support for type checking/inference.
 module Types (validateModExportTypes, typeCheckModSCC) where
 
-import           Debug.Trace
+
 import           AST
 import           Control.Monad
 import           Control.Monad.State
@@ -27,8 +27,6 @@ import           Snippets
 import           Blocks              (llvmMapBinop, llvmMapUnop)
 import Data.Function (on)
 -- import qualified Data.List.Extra as Set
-
--- import           Debug.Trace
 
 
 ----------------------------------------------------------------
@@ -621,7 +619,7 @@ occursCheck _ _ = False
 -- | Checks if the given TypeVarName is contained within the TypeSpec.
 -- Does not hold for a TypeVariable
 containstypeVar :: TypeVarName -> TypeSpec -> Bool
-containstypeVar nm TypeSpec{typeParams=tys} = any (containstypeVar' nm) tys 
+containstypeVar nm TypeSpec{typeParams=tys} = any (containstypeVar' nm) tys
 containstypeVar _ _ = False
 
 
@@ -629,7 +627,7 @@ containstypeVar _ _ = False
 -- Holds for a TypeVariable
 containstypeVar' :: TypeVarName -> TypeSpec -> Bool
 containstypeVar' nm TypeVariable{typeVariableName=nm'} = nm == nm'
-containstypeVar' nm TypeSpec{typeParams=tys} = any (containstypeVar' nm) tys 
+containstypeVar' nm TypeSpec{typeParams=tys} = any (containstypeVar' nm) tys
 containstypeVar' _ _ = False
 
 
@@ -675,12 +673,13 @@ expType expr = do
 
 
 expType' :: Exp -> OptPos -> Typed TypeSpec
-expType' (IntValue _) _      = return $ TypeSpec ["wybe"] "int" []
-expType' (FloatValue _) _    = return $ TypeSpec ["wybe"] "float" []
-expType' (StringValue _) _   = return $ TypeSpec ["wybe"] "string" []
-expType' (CharValue _) _     = return $ TypeSpec ["wybe"] "char" []
-expType' (Var name _ _) _    = ultimateVarType name
-expType' (Typed _ typ _) pos =
+expType' (IntValue _) _               = return $ TypeSpec ["wybe"] "int" []
+expType' (FloatValue _) _             = return $ TypeSpec ["wybe"] "float" []
+expType' (StringValue _ WybeString) _ = return $ TypeSpec ["wybe"] "string" []
+expType' (StringValue _ CString) _    = return $ TypeSpec ["wybe"] "c_string" []
+expType' (CharValue _) _              = return $ TypeSpec ["wybe"] "char" []
+expType' (Var name _ _) _             = ultimateVarType name
+expType' (Typed _ typ _) pos          =
     lift (lookupType "typed expression" pos typ) >>= ultimateType
 expType' expr _ =
     shouldnt $ "Expression '" ++ show expr ++ "' left after flattening"
@@ -696,7 +695,7 @@ expMode assigned pexp = expMode' assigned $ content pexp
 expMode' :: BindingState -> Exp -> (FlowDirection,Bool,Maybe VarName)
 expMode' _ (IntValue _) = (ParamIn, True, Nothing)
 expMode' _ (FloatValue _) = (ParamIn, True, Nothing)
-expMode' _ (StringValue _) = (ParamIn, True, Nothing)
+expMode' _ (StringValue _ _) = (ParamIn, True, Nothing)
 expMode' _ (CharValue _) = (ParamIn, True, Nothing)
 expMode' assigned (Var name flow _) =
     (flow, name `assignedIn` assigned, Nothing)
@@ -1630,7 +1629,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
                        ++ [ReasonPurity foreignIdent actualImpurity impurity pos
                           | actualImpurity > impurity]
             typeErrors errs
-            let args' = List.zipWith setPExpTypeFlow typeflows args
+            let args' = zipWith setPExpTypeFlow typeflows args
             let stmt' = ForeignCall lang cname flags args'
             let vars = pexpListOutputs args'
             let nextDetism = determinismSeq (bindingDetism assigned) stmtDetism
@@ -1687,11 +1686,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
 modecheckStmt m name defPos assigned detism tmpCount final
     stmt@(TestBool exp) pos = do
     logTyped $ "Mode checking test " ++ show exp
-    let exp' = [maybePlace
-                (TestBool (content
-                           $ setPExpTypeFlow (TypeFlow boolType ParamIn)
-                             (maybePlace exp pos)))
-                 pos]
+    let exp' = [maybePlace (TestBool $ setExpTypeFlow (TypeFlow boolType ParamIn) exp) pos]
     case expIsConstant exp of
       Just (IntValue 0) -> return (exp', forceFailure assigned,tmpCount)
       Just (IntValue 1) -> return ([maybePlace Nop pos], assigned,tmpCount)
@@ -1766,8 +1761,7 @@ finaliseCall m name assigned detism resourceful tmpCount final pos args match
     let outResources = procInfoOutRes match
     let inResources = procInfoInRes match
     let impurity = bindingImpurity assigned
-    let (args',stmts,tmpCount') =
-         matchArguments tmpCount (procInfoArgs match) args
+    let (args',stmts,tmpCount') = matchArguments tmpCount (procInfoArgs match) args
     let stmt' = ProcCall (procSpecMod matchProc)
                 (procSpecName matchProc)
                 (Just $ procSpecID matchProc)
@@ -1805,7 +1799,8 @@ finaliseCall m name assigned detism resourceful tmpCount final pos args match
                    (varSet r `withType` ty)
             | resourceful -- no specials unless resourceful
             , r <- Set.elems $ specials Set.\\ avail
-            , let (f,ty) = fromMaybe (const $ StringValue "Unknown",stringType)
+            , let (f,ty) = fromMaybe (const $ StringValue "Unknown" CString,
+                                      cStringType)
                             $ Map.lookup r specialResources
             , let s = f $ maybePlace stmt pos]
     let assigned' =
@@ -1843,13 +1838,12 @@ matchArgument tmpCount typeflow arg
       && ParamIn == flattenedExpFlow (content arg) =
           let var = mkTempName tmpCount
               inTypeFlow = typeflow {typeFlowMode = ParamIn}
-          in  (Unplaced $ setExpTypeFlow typeflow (varSet var),
-               [maybePlace (ProcCall [] "=" Nothing SemiDet False
-                            [Unplaced $ setExpTypeFlow inTypeFlow $ varGet var,
-                             setPExpTypeFlow inTypeFlow arg])
-                           (place arg)],
-               tmpCount+1)
-    | otherwise = (setPExpTypeFlow typeflow arg, [], tmpCount)
+              arg' = setPExpTypeFlow inTypeFlow arg
+              setVar = Unplaced $ setExpTypeFlow typeflow (varSet var)
+              getVar = Unplaced $ setExpTypeFlow inTypeFlow (varGet var)
+              call = ProcCall [] "=" Nothing SemiDet False [getVar, arg']
+          in (setVar, [maybePlace call $ place arg], tmpCount+1)
+    | otherwise = (setPExpTypeFlow typeflow arg,[],tmpCount)
 
 
 -- |Return a list of error messages for too weak a determinism at the end of a

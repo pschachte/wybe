@@ -24,8 +24,8 @@ AFTER EVERYTHING:
 (io##0:wybe.phantom, ?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string("Wang":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-    foreign c print_string("Smith":wybe.string, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("Wang":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #7 @io:nn:nn
+    wybe.string.print_string<0>("Smith":wybe.string, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #8 @io:nn:nn
 
   LLVM code       :
 
@@ -35,10 +35,16 @@ AFTER EVERYTHING:
  
 
 
-declare external ccc  void @print_string(i64)    
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
-@person4.3 =    constant [?? x i8] c"Smith\00"
+@person4.5 =    constant {i64, i64} { i64 5, i64 ptrtoint ([?? x i8]* @person4.4 to i64) }
+
+
+@person4.4 =    constant [?? x i8] c"Smith\00"
+
+
+@person4.2 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @person4.1 to i64) }
 
 
 @person4.1 =    constant [?? x i8] c"Wang\00"
@@ -52,10 +58,10 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"person4.<0>"()    {
 entry:
-  %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @person4.1, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %2)  
-  %4 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @person4.3, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %4)  
+  %3 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @person4.2, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %3)  
+  %6 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @person4.5, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %6)  
   ret void 
 }
 --------------------------------------------------
@@ -85,15 +91,13 @@ entry:
     foreign lpvm access(~#left##0:person4.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#lastname##0:wybe.string)
     foreign lpvm access(#right##0:person4.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#firstname##0:wybe.string)
     foreign lpvm access(~#right##0:person4.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#lastname##0:wybe.string)
-    foreign c strcmp(~#left#firstname##0:wybe.string, ~#right#firstname##0:wybe.string, ?tmp#7##0:wybe.int) @string:nn:nn
-    foreign llvm icmp_eq(~tmp#7##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    wybe.string.=<0>(~#left#firstname##0:wybe.string, ~#right#firstname##0:wybe.string, ?tmp#1##0:wybe.bool) #2
     case ~tmp#1##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
     1:
-        foreign c strcmp(~#left#lastname##0:wybe.string, ~#right#lastname##0:wybe.string, ?tmp#10##0:wybe.int) @string:nn:nn
-        foreign llvm icmp_eq(~tmp#10##0:wybe.int, 0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
+        wybe.string.=<0>(~#left#lastname##0:wybe.string, ~#right#lastname##0:wybe.string, ?#success##0:wybe.bool) #3
 
 
 
@@ -151,16 +155,14 @@ person(?firstname##0:wybe.string, ?lastname##0:wybe.string, #result##0:person4.p
     foreign lpvm access(~#left##0:person4.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.string)
     foreign lpvm access(#right##0:person4.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.string)
     foreign lpvm access(~#right##0:person4.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.string)
-    foreign c strcmp(~tmp#3##0:wybe.string, ~tmp#5##0:wybe.string, ?tmp#7##0:wybe.int) @string:nn:nn
-    foreign llvm icmp_eq(~tmp#7##0:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.bool) @int:nn:nn
-    case ~tmp#8##0:wybe.bool of
+    wybe.string.=<0>(~tmp#3##0:wybe.string, ~tmp#5##0:wybe.string, ?tmp#7##0:wybe.bool) #1
+    case ~tmp#7##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
         foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
     1:
-        foreign c strcmp(~tmp#4##0:wybe.string, ~tmp#6##0:wybe.string, ?tmp#9##0:wybe.int) @string:nn:nn
-        foreign llvm icmp_eq(~tmp#9##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool) @int:nn:nn
+        wybe.string.=<0>(~tmp#4##0:wybe.string, ~tmp#6##0:wybe.string, ?tmp#0##0:wybe.bool) #2
         foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -172,7 +174,7 @@ person(?firstname##0:wybe.string, ?lastname##0:wybe.string, #result##0:person4.p
  
 
 
-declare external ccc  i64 @strcmp(i64, i64)    
+declare external fastcc  i1 @"wybe.string.=<0>"(i64, i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -197,12 +199,10 @@ entry:
   %12 = inttoptr i64 %11 to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 
   %14 = load  i64, i64* %13 
-  %"1#tmp#7##0" = tail call ccc  i64  @strcmp(i64  %3, i64  %10)  
-  %"1#tmp#1##0" = icmp eq i64 %"1#tmp#7##0", 0 
+  %"1#tmp#1##0" = tail call fastcc  i1  @"wybe.string.=<0>"(i64  %3, i64  %10)  
   br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#10##0" = tail call ccc  i64  @strcmp(i64  %7, i64  %14)  
-  %"2##success##0" = icmp eq i64 %"2#tmp#10##0", 0 
+  %"2##success##0" = tail call fastcc  i1  @"wybe.string.=<0>"(i64  %7, i64  %14)  
   ret i1 %"2##success##0" 
 if.else:
   ret i1 0 
@@ -308,12 +308,10 @@ entry:
   %67 = inttoptr i64 %66 to i64* 
   %68 = getelementptr  i64, i64* %67, i64 0 
   %69 = load  i64, i64* %68 
-  %"1#tmp#7##0" = tail call ccc  i64  @strcmp(i64  %58, i64  %65)  
-  %"1#tmp#8##0" = icmp eq i64 %"1#tmp#7##0", 0 
-  br i1 %"1#tmp#8##0", label %if.then, label %if.else 
+  %"1#tmp#7##0" = tail call fastcc  i1  @"wybe.string.=<0>"(i64  %58, i64  %65)  
+  br i1 %"1#tmp#7##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#9##0" = tail call ccc  i64  @strcmp(i64  %62, i64  %69)  
-  %"2#tmp#0##0" = icmp eq i64 %"2#tmp#9##0", 0 
+  %"2#tmp#0##0" = tail call fastcc  i1  @"wybe.string.=<0>"(i64  %62, i64  %69)  
   %"2##success##0" = xor i1 %"2#tmp#0##0", 1 
   ret i1 %"2##success##0" 
 if.else:

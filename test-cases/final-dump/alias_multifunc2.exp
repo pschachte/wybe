@@ -21,22 +21,22 @@ AFTER EVERYTHING:
     foreign lpvm mutate(~tmp#3##0:position.position, ?tmp#4##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int)
     foreign lpvm mutate(~tmp#4##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int)
     alias_multifunc2.replicate1<0>(tmp#0##0:position.position, ?p2##0:position.position, ?p3##0:position.position, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #1 @alias_multifunc2:20:2
-    foreign c print_string("--- After calling replicate1: ":wybe.string, ~#io##1:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("--- After calling replicate1: ":wybe.string, ~#io##1:wybe.phantom, ?tmp#7##0:wybe.phantom) #17 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-    foreign c print_string("expect p1(10,10):":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("expect p1(10,10):":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #18 @io:nn:nn
     position.printPosition<0>(tmp#0##0:position.position, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) #4 @alias_multifunc2:24:2
-    foreign c print_string("expect p2(22,10):":wybe.string, ~#io##4:wybe.phantom, ?#io##5:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("expect p2(22,10):":wybe.string, ~#io##4:wybe.phantom, ?#io##5:wybe.phantom) #19 @io:nn:nn
     position.printPosition<0>(p2##0:position.position, ~#io##5:wybe.phantom, ?#io##6:wybe.phantom) #6 @alias_multifunc2:26:2
-    foreign c print_string("expect p3(10,10):":wybe.string, ~#io##6:wybe.phantom, ?#io##7:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("expect p3(10,10):":wybe.string, ~#io##6:wybe.phantom, ?#io##7:wybe.phantom) #20 @io:nn:nn
     position.printPosition<0>(p3##0:position.position, ~#io##7:wybe.phantom, ?#io##8:wybe.phantom) #8 @alias_multifunc2:28:2
     foreign lpvm {noalias} mutate(~tmp#0##0:position.position, ?%p1##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 11:wybe.int)
-    foreign c print_string("--- After calling x(!p1, 11): ":wybe.string, ~#io##8:wybe.phantom, ?tmp#18##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("--- After calling x(!p1, 11): ":wybe.string, ~#io##8:wybe.phantom, ?tmp#18##0:wybe.phantom) #21 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#18##0:wybe.phantom, ?#io##9:wybe.phantom) @io:nn:nn
-    foreign c print_string("expect p1(11,10):":wybe.string, ~#io##9:wybe.phantom, ?#io##10:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("expect p1(11,10):":wybe.string, ~#io##9:wybe.phantom, ?#io##10:wybe.phantom) #22 @io:nn:nn
     position.printPosition<0>(~p1##1:position.position, ~#io##10:wybe.phantom, ?#io##11:wybe.phantom) #12 @alias_multifunc2:34:2
-    foreign c print_string("expect p2(22,10):":wybe.string, ~#io##11:wybe.phantom, ?#io##12:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("expect p2(22,10):":wybe.string, ~#io##11:wybe.phantom, ?#io##12:wybe.phantom) #23 @io:nn:nn
     position.printPosition<0>(~p2##0:position.position, ~#io##12:wybe.phantom, ?#io##13:wybe.phantom) #14 @alias_multifunc2:36:2
-    foreign c print_string("expect p3(10,10):":wybe.string, ~#io##13:wybe.phantom, ?#io##14:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("expect p3(10,10):":wybe.string, ~#io##13:wybe.phantom, ?#io##14:wybe.phantom) #24 @io:nn:nn
     position.printPosition<0>(~p3##0:position.position, ~#io##14:wybe.phantom, ?#io##15:wybe.phantom) #16 @alias_multifunc2:38:2
 
 
@@ -58,7 +58,7 @@ replicate2(p1##0:position.position, ?p2##0:position.position, io##0:wybe.phantom
     foreign lpvm alloc(16:wybe.int, ?tmp#4##0:position.position)
     foreign lpvm mutate(~tmp#4##0:position.position, ?tmp#5##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int)
     foreign lpvm mutate(~tmp#5##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int)
-    foreign c print_string("random replicate2 ":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("random replicate2 ":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #4 @io:nn:nn
     foreign lpvm access(~tmp#0##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int)
     foreign c print_int(~tmp#1##0:wybe.int, ~#io##1:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
@@ -75,31 +75,55 @@ replicate2(p1##0:position.position, ?p2##0:position.position, io##0:wybe.phantom
 declare external fastcc  void @"position.printPosition<0>"(i64)    
 
 
-declare external ccc  void @print_string(i64)    
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  void @putchar(i8)    
 
 
-@alias_multifunc2.34 =    constant [?? x i8] c"expect p3(10,10):\00"
+@alias_multifunc2.42 =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @alias_multifunc2.41 to i64) }
 
 
-@alias_multifunc2.32 =    constant [?? x i8] c"expect p2(22,10):\00"
+@alias_multifunc2.41 =    constant [?? x i8] c"expect p3(10,10):\00"
 
 
-@alias_multifunc2.30 =    constant [?? x i8] c"expect p1(11,10):\00"
+@alias_multifunc2.39 =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @alias_multifunc2.38 to i64) }
 
 
-@alias_multifunc2.28 =    constant [?? x i8] c"--- After calling x(!p1, 11): \00"
+@alias_multifunc2.38 =    constant [?? x i8] c"expect p2(22,10):\00"
 
 
-@alias_multifunc2.18 =    constant [?? x i8] c"expect p3(10,10):\00"
+@alias_multifunc2.36 =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @alias_multifunc2.35 to i64) }
 
 
-@alias_multifunc2.16 =    constant [?? x i8] c"expect p2(22,10):\00"
+@alias_multifunc2.35 =    constant [?? x i8] c"expect p1(11,10):\00"
 
 
-@alias_multifunc2.14 =    constant [?? x i8] c"expect p1(10,10):\00"
+@alias_multifunc2.33 =    constant {i64, i64} { i64 30, i64 ptrtoint ([?? x i8]* @alias_multifunc2.32 to i64) }
+
+
+@alias_multifunc2.32 =    constant [?? x i8] c"--- After calling x(!p1, 11): \00"
+
+
+@alias_multifunc2.22 =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @alias_multifunc2.21 to i64) }
+
+
+@alias_multifunc2.21 =    constant [?? x i8] c"expect p3(10,10):\00"
+
+
+@alias_multifunc2.19 =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @alias_multifunc2.18 to i64) }
+
+
+@alias_multifunc2.18 =    constant [?? x i8] c"expect p2(22,10):\00"
+
+
+@alias_multifunc2.16 =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @alias_multifunc2.15 to i64) }
+
+
+@alias_multifunc2.15 =    constant [?? x i8] c"expect p1(10,10):\00"
+
+
+@alias_multifunc2.13 =    constant {i64, i64} { i64 30, i64 ptrtoint ([?? x i8]* @alias_multifunc2.12 to i64) }
 
 
 @alias_multifunc2.12 =    constant [?? x i8] c"--- After calling replicate1: \00"
@@ -108,7 +132,10 @@ declare external ccc  void @putchar(i8)
 declare external ccc  void @print_int(i64)    
 
 
-@alias_multifunc2.54 =    constant [?? x i8] c"random replicate2 \00"
+@alias_multifunc2.63 =    constant {i64, i64} { i64 18, i64 ptrtoint ([?? x i8]* @alias_multifunc2.62 to i64) }
+
+
+@alias_multifunc2.62 =    constant [?? x i8] c"random replicate2 \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -132,39 +159,39 @@ entry:
   %9 = tail call fastcc  {i64, i64}  @"alias_multifunc2.replicate1<0>"(i64  %3)  
   %10 = extractvalue {i64, i64} %9, 0 
   %11 = extractvalue {i64, i64} %9, 1 
-  %13 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc2.12, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %13)  
+  %14 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.13, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %14)  
   tail call ccc  void  @putchar(i8  10)  
-  %15 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc2.14, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %15)  
+  %17 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.16, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %17)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %3)  
-  %17 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc2.16, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %17)  
+  %20 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.19, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %20)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %10)  
-  %19 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc2.18, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %19)  
+  %23 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.22, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %23)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %11)  
-  %20 = trunc i64 16 to i32  
-  %21 = tail call ccc  i8*  @wybe_malloc(i32  %20)  
-  %22 = ptrtoint i8* %21 to i64 
-  %23 = inttoptr i64 %22 to i8* 
-  %24 = inttoptr i64 %3 to i8* 
-  %25 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %23, i8*  %24, i32  %25, i32  8, i1  0)  
-  %26 = inttoptr i64 %22 to i64* 
-  %27 = getelementptr  i64, i64* %26, i64 0 
-  store  i64 11, i64* %27 
-  %29 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc2.28, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %29)  
+  %24 = trunc i64 16 to i32  
+  %25 = tail call ccc  i8*  @wybe_malloc(i32  %24)  
+  %26 = ptrtoint i8* %25 to i64 
+  %27 = inttoptr i64 %26 to i8* 
+  %28 = inttoptr i64 %3 to i8* 
+  %29 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %27, i8*  %28, i32  %29, i32  8, i1  0)  
+  %30 = inttoptr i64 %26 to i64* 
+  %31 = getelementptr  i64, i64* %30, i64 0 
+  store  i64 11, i64* %31 
+  %34 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.33, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %34)  
   tail call ccc  void  @putchar(i8  10)  
-  %31 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc2.30, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %31)  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %22)  
-  %33 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc2.32, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %33)  
+  %37 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.36, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %37)  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %26)  
+  %40 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.39, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %40)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %10)  
-  %35 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc2.34, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %35)  
+  %43 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.42, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %43)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %11)  
   ret void 
 }
@@ -174,40 +201,40 @@ define external fastcc  {i64, i64} @"alias_multifunc2.replicate1<0>"(i64  %"p1##
 entry:
   %"1#p2##0" = tail call fastcc  i64  @"alias_multifunc2.replicate2<0>"(i64  %"p1##0")  
   %"1#p3##0" = tail call fastcc  i64  @"alias_multifunc2.replicate2<0>"(i64  %"1#p2##0")  
-  %36 = trunc i64 16 to i32  
-  %37 = tail call ccc  i8*  @wybe_malloc(i32  %36)  
-  %38 = ptrtoint i8* %37 to i64 
-  %39 = inttoptr i64 %38 to i8* 
-  %40 = inttoptr i64 %"1#p2##0" to i8* 
-  %41 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %39, i8*  %40, i32  %41, i32  8, i1  0)  
-  %42 = inttoptr i64 %38 to i64* 
-  %43 = getelementptr  i64, i64* %42, i64 0 
-  store  i64 22, i64* %43 
-  %44 = insertvalue {i64, i64} undef, i64 %38, 0 
-  %45 = insertvalue {i64, i64} %44, i64 %"1#p3##0", 1 
-  ret {i64, i64} %45 
+  %44 = trunc i64 16 to i32  
+  %45 = tail call ccc  i8*  @wybe_malloc(i32  %44)  
+  %46 = ptrtoint i8* %45 to i64 
+  %47 = inttoptr i64 %46 to i8* 
+  %48 = inttoptr i64 %"1#p2##0" to i8* 
+  %49 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %47, i8*  %48, i32  %49, i32  8, i1  0)  
+  %50 = inttoptr i64 %46 to i64* 
+  %51 = getelementptr  i64, i64* %50, i64 0 
+  store  i64 22, i64* %51 
+  %52 = insertvalue {i64, i64} undef, i64 %46, 0 
+  %53 = insertvalue {i64, i64} %52, i64 %"1#p3##0", 1 
+  ret {i64, i64} %53 
 }
 
 
 define external fastcc  i64 @"alias_multifunc2.replicate2<0>"(i64  %"p1##0")    {
 entry:
-  %46 = trunc i64 16 to i32  
-  %47 = tail call ccc  i8*  @wybe_malloc(i32  %46)  
-  %48 = ptrtoint i8* %47 to i64 
-  %49 = inttoptr i64 %48 to i64* 
-  %50 = getelementptr  i64, i64* %49, i64 0 
-  store  i64 0, i64* %50 
-  %51 = add   i64 %48, 8 
-  %52 = inttoptr i64 %51 to i64* 
-  %53 = getelementptr  i64, i64* %52, i64 0 
-  store  i64 0, i64* %53 
-  %55 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @alias_multifunc2.54, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %55)  
-  %56 = inttoptr i64 %48 to i64* 
-  %57 = getelementptr  i64, i64* %56, i64 0 
-  %58 = load  i64, i64* %57 
-  tail call ccc  void  @print_int(i64  %58)  
+  %54 = trunc i64 16 to i32  
+  %55 = tail call ccc  i8*  @wybe_malloc(i32  %54)  
+  %56 = ptrtoint i8* %55 to i64 
+  %57 = inttoptr i64 %56 to i64* 
+  %58 = getelementptr  i64, i64* %57, i64 0 
+  store  i64 0, i64* %58 
+  %59 = add   i64 %56, 8 
+  %60 = inttoptr i64 %59 to i64* 
+  %61 = getelementptr  i64, i64* %60, i64 0 
+  store  i64 0, i64* %61 
+  %64 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.63, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %64)  
+  %65 = inttoptr i64 %56 to i64* 
+  %66 = getelementptr  i64, i64* %65, i64 0 
+  %67 = load  i64, i64* %66 
+  tail call ccc  void  @print_int(i64  %67)  
   tail call ccc  void  @putchar(i8  10)  
   ret i64 %"p1##0" 
 }
@@ -236,13 +263,13 @@ printPosition > public (0 calls)
 printPosition(pos##0:position.position, io##0:wybe.phantom, ?io##5:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string(" (":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(" (":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #7 @io:nn:nn
     foreign lpvm access(pos##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int)
     foreign c print_int(~tmp#0##0:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-    foreign c print_string(",":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(",":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #8 @io:nn:nn
     foreign lpvm access(~pos##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int)
     foreign c print_int(~tmp#1##0:wybe.int, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
-    foreign c print_string(")":wybe.string, ~#io##4:wybe.phantom, ?tmp#14##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(")":wybe.string, ~#io##4:wybe.phantom, ?tmp#14##0:wybe.phantom) #9 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#14##0:wybe.phantom, ?#io##5:wybe.phantom) @io:nn:nn
 
   LLVM code       :
@@ -256,16 +283,25 @@ printPosition(pos##0:position.position, io##0:wybe.phantom, ?io##5:wybe.phantom)
 declare external ccc  void @putchar(i8)    
 
 
-declare external ccc  void @print_string(i64)    
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  void @print_int(i64)    
 
 
-@position.12 =    constant [?? x i8] c")\00"
+@position.15 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.14 to i64) }
 
 
-@position.6 =    constant [?? x i8] c",\00"
+@position.14 =    constant [?? x i8] c")\00"
+
+
+@position.8 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.7 to i64) }
+
+
+@position.7 =    constant [?? x i8] c",\00"
+
+
+@position.2 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @position.1 to i64) }
 
 
 @position.1 =    constant [?? x i8] c" (\00"
@@ -279,21 +315,21 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"position.printPosition<0>"(i64  %"pos##0")    {
 entry:
-  %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @position.1, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %2)  
-  %3 = inttoptr i64 %"pos##0" to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  %5 = load  i64, i64* %4 
-  tail call ccc  void  @print_int(i64  %5)  
-  %7 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @position.6, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %7)  
-  %8 = add   i64 %"pos##0", 8 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  tail call ccc  void  @print_int(i64  %11)  
-  %13 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @position.12, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %13)  
+  %3 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position.2, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %3)  
+  %4 = inttoptr i64 %"pos##0" to i64* 
+  %5 = getelementptr  i64, i64* %4, i64 0 
+  %6 = load  i64, i64* %5 
+  tail call ccc  void  @print_int(i64  %6)  
+  %9 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position.8, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %9)  
+  %10 = add   i64 %"pos##0", 8 
+  %11 = inttoptr i64 %10 to i64* 
+  %12 = getelementptr  i64, i64* %11, i64 0 
+  %13 = load  i64, i64* %12 
+  tail call ccc  void  @print_int(i64  %13)  
+  %16 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position.15, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %16)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
