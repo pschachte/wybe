@@ -49,6 +49,8 @@ import Control.Monad
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
 import Control.Monad.Trans (lift,liftIO)
+import Distribution.Simple.Test.Log (TestSuiteLog(logFile))
+import Data.Type.Equality (inner)
 
 
 ----------------------------------------------------------------
@@ -180,6 +182,8 @@ flushPostponed = do
     modify (\s -> s  {flattened = reverse currPostponed ++ flattened s,
                       postponed = []})
 
+-- | Record a variable definition.  Report an error if it was already defined in
+-- the same statement.
 noteVarDef :: VarName -> Flattener ()
 noteVarDef var = do
     redef <- gets (Set.member var . stmtDefs)
@@ -194,9 +198,17 @@ noteVarDef var = do
     modify (\s -> s { stmtDefs = Set.insert var $ stmtDefs s })
 
 
+-- | Note a variable mention; if it is an output mode, record the definition.
 noteVarMention :: VarName -> FlowDirection -> Flattener ()
 noteVarMention name dir = do
     when (flowsOut dir) $ noteVarDef name
+
+
+-- | Note that the specified variable has been introduced, so it is a known
+-- variable.  It's not an error if it was previously defined or introduced.
+noteVarIntro :: VarName -> Flattener ()
+noteVarIntro name =
+    modify (\s -> s {defdVars = Set.insert name $ defdVars s})
 
 ----------------------------------------------------------------
 --                      Flattening Statements
@@ -222,17 +234,17 @@ flattenStmt stmt pos detism = do
 -- |Flatten the specified statement
 flattenStmt' :: Stmt -> OptPos -> Determinism -> Flattener ()
 flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos detism = do
-    let arg1content = content arg1
-    let arg2content = content arg2
+    let arg1content = innerExp $ content arg1
+    let arg2content = innerExp $ content arg2
     let arg1Vars = expOutputs arg1content
     let arg2Vars = expOutputs arg2content
     logFlatten $ "Flattening assignment with outputs " ++ show arg1Vars
                  ++ " and " ++ show arg2Vars
     case (arg1content, arg2content) of
-      (Var var flow1 Ordinary, _) | flowsOut flow1 && Set.null arg2Vars -> do
+      (Var var flow1 _, _) | flowsOut flow1 && Set.null arg2Vars -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
         flattenAssignment var arg1 arg2 pos
-      (_, Var var flow2 Ordinary) | flowsOut flow2 && Set.null arg1Vars -> do
+      (_, Var var flow2 _) | flowsOut flow2 && Set.null arg1Vars -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
         flattenAssignment var arg2 arg1 pos
       (Fncall mod name args, _)
@@ -250,6 +262,7 @@ flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos detism = do
         flushPostponed
       _ -> do
         -- Must be a mode error:  both sides want to bind variables
+        logFlatten $ "Error: out=out assignment " ++ show stmt
         lift $ message Error "Cannot generate bindings on both sides of '='" pos
 flattenStmt' stmt@(ProcCall [] "fail" _ _ _ []) pos _ =
     emit pos Fail
@@ -395,9 +408,12 @@ flattenStmt' for@(For generators body) pos detism = do
     logFlatten $ "Generated for: " ++ showStmt 4 generated
     -- emit pos generated
     flattenStmt' generated pos detism
-flattenStmt' (UseResources res body) pos detism = do
+flattenStmt' (UseResources res old body) pos detism = do
+    oldVars <- gets defdVars
+    mapM_ (noteVarIntro . resourceName) res
     body' <- flattenInner False True detism (flattenStmts body detism)
-    emit pos $ UseResources res body'
+    modify $ \s -> s { defdVars = oldVars}
+    emit pos $ UseResources res old body'
 flattenStmt' Nop pos _ = emit pos Nop
 flattenStmt' Fail pos _ = emit pos Fail
 flattenStmt' Break pos _ = emit pos Break
@@ -412,6 +428,12 @@ flattenAssignment var varArg value pos = do
     noteVarDef var
     emit pos instr
     flushPostponed
+
+
+-- | Extract the inner expression (removing any Typed wrapper)
+innerExp :: Exp -> Exp
+innerExp (Typed exp _ _) = innerExp exp
+innerExp exp = exp
 ----------------------------------------------------------------
 --                      Flattening Expressions
 ----------------------------------------------------------------

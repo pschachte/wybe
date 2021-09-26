@@ -1193,6 +1193,8 @@ as a local variable, or inside a [scoped](#scoping) resource use.
 
 A resource may have its value scoped to a number of statements and the
 procedures called by those statements, and so on recursively.
+This creates a scope in which the resource is known, allowing a procedure that
+is not declared to use a resource to call a procedure that does.
 A scope introducing one or more resources may be specified with a statement of
 the form:
 

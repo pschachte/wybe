@@ -11,10 +11,10 @@ module Snippets (castFromTo, castTo, withType, intType, intCast,
                  boolType, boolCast, boolTrue, boolFalse, boolBool,
                  boolVarSet, boolVarGet, intVarSet, intVarGet,
                  lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, primMove,
-                 boolNegate, comparison, succeedTest, failTest, testVar,
-                 succeedIfSemiDet) where
+                 boolNegate, comparison, succeedTest, failTest, testVar, succeedIfSemiDet) where
 
 import AST
+import Data.String (String)
 
 -- |An expression to cast a value to the specified type
 castFromTo :: TypeSpec -> TypeSpec -> Exp -> Exp
