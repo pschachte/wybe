@@ -209,9 +209,9 @@ print_t(x##0:dead_cell_size.t, io##0:wybe.phantom, ?io##8:wybe.phantom):
 
                     1:
                         foreign lpvm access(~x##0:dead_cell_size.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?a##2:wybe.int)
-                        foreign c print_string("td(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+                        wybe.string.print_string<0>("td(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #24 @io:nn:nn
                         foreign c print_int(~a##2:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-                        foreign c print_string(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
+                        wybe.string.print_string<0>(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #25 @io:nn:nn
                         foreign c putchar('\n':wybe.char, ~#io##3:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
 
 
@@ -219,27 +219,27 @@ print_t(x##0:dead_cell_size.t, io##0:wybe.phantom, ?io##8:wybe.phantom):
                     foreign lpvm access(x##0:dead_cell_size.t, -1:wybe.int, 24:wybe.int, 1:wybe.int, ?a##1:wybe.int)
                     foreign lpvm access(x##0:dead_cell_size.t, 7:wybe.int, 24:wybe.int, 1:wybe.int, ?b##0:wybe.int)
                     foreign lpvm access(~x##0:dead_cell_size.t, 15:wybe.int, 24:wybe.int, 1:wybe.int, ?c##0:wybe.int)
-                    foreign c print_string("tc(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+                    wybe.string.print_string<0>("tc(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #26 @io:nn:nn
                     foreign c print_int(~a##1:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-                    foreign c print_string(",":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
+                    wybe.string.print_string<0>(",":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #27 @io:nn:nn
                     foreign c print_int(~b##0:wybe.int, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
-                    foreign c print_string(",":wybe.string, ~#io##4:wybe.phantom, ?#io##5:wybe.phantom) @io:nn:nn
+                    wybe.string.print_string<0>(",":wybe.string, ~#io##4:wybe.phantom, ?#io##5:wybe.phantom) #28 @io:nn:nn
                     foreign c print_int(~c##0:wybe.int, ~#io##5:wybe.phantom, ?#io##6:wybe.phantom) @io:nn:nn
-                    foreign c print_string(")":wybe.string, ~#io##6:wybe.phantom, ?#io##7:wybe.phantom) @io:nn:nn
+                    wybe.string.print_string<0>(")":wybe.string, ~#io##6:wybe.phantom, ?#io##7:wybe.phantom) #29 @io:nn:nn
                     foreign c putchar('\n':wybe.char, ~#io##7:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
 
 
             1:
                 foreign lpvm access(~x##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int)
-                foreign c print_string("tb(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+                wybe.string.print_string<0>("tb(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #30 @io:nn:nn
                 foreign c print_int(~a##0:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-                foreign c print_string(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
+                wybe.string.print_string<0>(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #31 @io:nn:nn
                 foreign c putchar('\n':wybe.char, ~#io##3:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
 
 
 
     1:
-        foreign c print_string("ta":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+        wybe.string.print_string<0>("ta":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #32 @io:nn:nn
         foreign c putchar('\n':wybe.char, ~#io##1:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
 
 
@@ -259,14 +259,14 @@ print_t2(x##0:dead_cell_size.t2, io##0:wybe.phantom, ?io##4:wybe.phantom):
 
         1:
             foreign lpvm access(~x##0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int)
-            foreign c print_string("t2b(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+            wybe.string.print_string<0>("t2b(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #10 @io:nn:nn
             foreign c print_int(~a##0:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-            foreign c print_string(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
+            wybe.string.print_string<0>(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #11 @io:nn:nn
             foreign c putchar('\n':wybe.char, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
 
 
     1:
-        foreign c print_string("t2a":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+        wybe.string.print_string<0>("t2a":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #12 @io:nn:nn
         foreign c putchar('\n':wybe.char, ~#io##1:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
 
 
@@ -281,46 +281,82 @@ print_t2(x##0:dead_cell_size.t2, io##0:wybe.phantom, ?io##4:wybe.phantom):
 declare external ccc  void @putchar(i8)    
 
 
-declare external ccc  void @print_string(i64)    
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  void @print_int(i64)    
 
 
-@dead_cell_size.101 =    constant [?? x i8] c")\00"
+@dead_cell_size.110 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @dead_cell_size.109 to i64) }
 
 
-@dead_cell_size.99 =    constant [?? x i8] c"td(\00"
+@dead_cell_size.109 =    constant [?? x i8] c")\00"
 
 
-@dead_cell_size.93 =    constant [?? x i8] c")\00"
+@dead_cell_size.107 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @dead_cell_size.106 to i64) }
 
 
-@dead_cell_size.91 =    constant [?? x i8] c",\00"
+@dead_cell_size.106 =    constant [?? x i8] c"td(\00"
 
 
-@dead_cell_size.89 =    constant [?? x i8] c",\00"
+@dead_cell_size.100 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @dead_cell_size.99 to i64) }
 
 
-@dead_cell_size.87 =    constant [?? x i8] c"tc(\00"
+@dead_cell_size.99 =    constant [?? x i8] c")\00"
 
 
-@dead_cell_size.73 =    constant [?? x i8] c")\00"
+@dead_cell_size.97 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @dead_cell_size.96 to i64) }
 
 
-@dead_cell_size.71 =    constant [?? x i8] c"tb(\00"
+@dead_cell_size.96 =    constant [?? x i8] c",\00"
+
+
+@dead_cell_size.94 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @dead_cell_size.93 to i64) }
+
+
+@dead_cell_size.93 =    constant [?? x i8] c",\00"
+
+
+@dead_cell_size.91 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @dead_cell_size.90 to i64) }
+
+
+@dead_cell_size.90 =    constant [?? x i8] c"tc(\00"
+
+
+@dead_cell_size.76 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @dead_cell_size.75 to i64) }
+
+
+@dead_cell_size.75 =    constant [?? x i8] c")\00"
+
+
+@dead_cell_size.73 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @dead_cell_size.72 to i64) }
+
+
+@dead_cell_size.72 =    constant [?? x i8] c"tb(\00"
+
+
+@dead_cell_size.67 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @dead_cell_size.66 to i64) }
 
 
 @dead_cell_size.66 =    constant [?? x i8] c"ta\00"
 
 
-@dead_cell_size.110 =    constant [?? x i8] c")\00"
+@dead_cell_size.122 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @dead_cell_size.121 to i64) }
 
 
-@dead_cell_size.108 =    constant [?? x i8] c"t2b(\00"
+@dead_cell_size.121 =    constant [?? x i8] c")\00"
 
 
-@dead_cell_size.103 =    constant [?? x i8] c"t2a\00"
+@dead_cell_size.119 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @dead_cell_size.118 to i64) }
+
+
+@dead_cell_size.118 =    constant [?? x i8] c"t2b(\00"
+
+
+@dead_cell_size.113 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @dead_cell_size.112 to i64) }
+
+
+@dead_cell_size.112 =    constant [?? x i8] c"t2a\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -511,8 +547,8 @@ entry:
   %"1#tmp#4##0" = tail call fastcc  i1  @"dead_cell_size.t.=<0>"(i64  0, i64  %"x##0")  
   br i1 %"1#tmp#4##0", label %if.then, label %if.else 
 if.then:
-  %67 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @dead_cell_size.66, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %67)  
+  %68 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.67, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %68)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else:
@@ -526,58 +562,58 @@ if.else1:
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.then2:
-  %68 = inttoptr i64 %"x##0" to i64* 
-  %69 = getelementptr  i64, i64* %68, i64 0 
-  %70 = load  i64, i64* %69 
-  %72 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @dead_cell_size.71, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %72)  
-  tail call ccc  void  @print_int(i64  %70)  
-  %74 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @dead_cell_size.73, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %74)  
+  %69 = inttoptr i64 %"x##0" to i64* 
+  %70 = getelementptr  i64, i64* %69, i64 0 
+  %71 = load  i64, i64* %70 
+  %74 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.73, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %74)  
+  tail call ccc  void  @print_int(i64  %71)  
+  %77 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.76, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %77)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else2:
   %"7#tmp#12##0" = icmp eq i64 %"4#tmp#7##0", 1 
   br i1 %"7#tmp#12##0", label %if.then3, label %if.else3 
 if.then3:
-  %75 = add   i64 %"x##0", -1 
-  %76 = inttoptr i64 %75 to i64* 
-  %77 = getelementptr  i64, i64* %76, i64 0 
-  %78 = load  i64, i64* %77 
-  %79 = add   i64 %"x##0", 7 
-  %80 = inttoptr i64 %79 to i64* 
-  %81 = getelementptr  i64, i64* %80, i64 0 
-  %82 = load  i64, i64* %81 
-  %83 = add   i64 %"x##0", 15 
-  %84 = inttoptr i64 %83 to i64* 
-  %85 = getelementptr  i64, i64* %84, i64 0 
-  %86 = load  i64, i64* %85 
-  %88 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @dead_cell_size.87, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %88)  
-  tail call ccc  void  @print_int(i64  %78)  
-  %90 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @dead_cell_size.89, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %90)  
-  tail call ccc  void  @print_int(i64  %82)  
-  %92 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @dead_cell_size.91, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %92)  
-  tail call ccc  void  @print_int(i64  %86)  
-  %94 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @dead_cell_size.93, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %94)  
+  %78 = add   i64 %"x##0", -1 
+  %79 = inttoptr i64 %78 to i64* 
+  %80 = getelementptr  i64, i64* %79, i64 0 
+  %81 = load  i64, i64* %80 
+  %82 = add   i64 %"x##0", 7 
+  %83 = inttoptr i64 %82 to i64* 
+  %84 = getelementptr  i64, i64* %83, i64 0 
+  %85 = load  i64, i64* %84 
+  %86 = add   i64 %"x##0", 15 
+  %87 = inttoptr i64 %86 to i64* 
+  %88 = getelementptr  i64, i64* %87, i64 0 
+  %89 = load  i64, i64* %88 
+  %92 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.91, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %92)  
+  tail call ccc  void  @print_int(i64  %81)  
+  %95 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.94, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %95)  
+  tail call ccc  void  @print_int(i64  %85)  
+  %98 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.97, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %98)  
+  tail call ccc  void  @print_int(i64  %89)  
+  %101 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.100, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %101)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else3:
   %"9#tmp#16##0" = icmp eq i64 %"4#tmp#7##0", 2 
   br i1 %"9#tmp#16##0", label %if.then4, label %if.else4 
 if.then4:
-  %95 = add   i64 %"x##0", -2 
-  %96 = inttoptr i64 %95 to i64* 
-  %97 = getelementptr  i64, i64* %96, i64 0 
-  %98 = load  i64, i64* %97 
-  %100 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @dead_cell_size.99, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %100)  
-  tail call ccc  void  @print_int(i64  %98)  
-  %102 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @dead_cell_size.101, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %102)  
+  %102 = add   i64 %"x##0", -2 
+  %103 = inttoptr i64 %102 to i64* 
+  %104 = getelementptr  i64, i64* %103, i64 0 
+  %105 = load  i64, i64* %104 
+  %108 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.107, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %108)  
+  tail call ccc  void  @print_int(i64  %105)  
+  %111 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.110, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %111)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else4:
@@ -591,22 +627,22 @@ entry:
   %"1#tmp#2##0" = tail call fastcc  i1  @"dead_cell_size.t2.=<0>"(i64  0, i64  %"x##0")  
   br i1 %"1#tmp#2##0", label %if.then, label %if.else 
 if.then:
-  %104 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @dead_cell_size.103, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %104)  
+  %114 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.113, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %114)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else:
   %"3#tmp#4##0" = icmp ne i64 %"x##0", 0 
   br i1 %"3#tmp#4##0", label %if.then1, label %if.else1 
 if.then1:
-  %105 = inttoptr i64 %"x##0" to i64* 
-  %106 = getelementptr  i64, i64* %105, i64 0 
-  %107 = load  i64, i64* %106 
-  %109 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @dead_cell_size.108, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %109)  
-  tail call ccc  void  @print_int(i64  %107)  
-  %111 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @dead_cell_size.110, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %111)  
+  %115 = inttoptr i64 %"x##0" to i64* 
+  %116 = getelementptr  i64, i64* %115, i64 0 
+  %117 = load  i64, i64* %116 
+  %120 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.119, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %120)  
+  tail call ccc  void  @print_int(i64  %117)  
+  %123 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.122, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %123)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else1:

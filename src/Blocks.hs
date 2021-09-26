@@ -18,6 +18,7 @@ import           BinaryFactory                   ()
 import           Codegen
 import           Config                          (wordSize, wordSizeBytes)
 import           Util                            (maybeNth, zipWith3M_)
+import           Snippets 
 import           Control.Monad
 import           Control.Monad.Trans             (lift, liftIO)
 import           Control.Monad.Trans.Class
@@ -968,8 +969,6 @@ openPrimArg a = shouldnt $ "Can't Open!: "
 -- it a global declaration 'addGlobalConstant' creates a G.Global Value for
 -- it, generating a UnName name for it.
 cgenArg :: PrimArg -> Codegen LLVMAST.Operand
--- cgenArg ArgVar{argVarName=nm, argVarCoerce=False} = fst <$> getVar (show nm)
--- cgenArg ArgVar{argVarName=nm, argVarCoerce=True, argVarType=ty} = do
 cgenArg ArgVar{argVarName=nm, argVarType=ty} = do
     lift $ logBlocks $ "Coercing var " ++ show nm ++ " to " ++ show ty
     toTy <- lift $ llvmType ty
@@ -986,17 +985,20 @@ cgenArg (ArgFloat val ty) = do
     case toTy of
       FloatingPointType DoubleFP -> return $ cons $ C.Float $ F.Double val
       _ -> doCast (cons $ C.Float $ F.Double val) float_t toTy
-cgenArg (ArgString s _) = do 
-    let conStr = makeStringConstant s
-    let len = length s + 1
-    let conType = array_t (fromIntegral len) char_t
-    conName <- addGlobalConstant conType conStr
-    let conPtr = C.GlobalReference (ptr_t conType) conName
-    let conElem = C.GetElementPtr True conPtr [C.Int 32 0, C.Int 32 0]
-    -- return $ cons conElem
-    -- ptrtoint (cons conElem) $ ptr_t (int_c 8)
-    -- We return integer address for strings
-    ptrtoint (cons conElem) address_t
+cgenArg (ArgString s WybeString ty) = do
+    conPtr <- addStringConstant s
+    let strType = struct_t [address_t, address_t]
+    let strStruct = C.Struct Nothing False 
+                     [ C.Int (fromIntegral wordSize) (fromIntegral $ length s)
+                     , C.PtrToInt conPtr address_t ]
+    strName <- addGlobalConstant strType strStruct
+    let strPtr = C.GlobalReference (ptr_t strType) strName
+    let strElem = C.GetElementPtr True strPtr [C.Int 32 0, C.Int 32 0]
+    ptrtoint (cons strElem) address_t
+cgenArg (ArgString s CString _) = do
+    conPtr <- addStringConstant s
+    let rawElem = C.GetElementPtr True conPtr [C.Int 32 0, C.Int 32 0]
+    ptrtoint (cons rawElem) address_t
 cgenArg (ArgChar c ty) = do 
     let val = integerOrd c
     toTy <- lift $ llvmType ty
@@ -1012,6 +1014,13 @@ cgenArg (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
 cgenArg (ArgUndef ty) = do
     llty <- lift $ llvmType ty
     return $ cons $ C.Undef llty
+
+
+addStringConstant :: String -> Codegen C.Constant
+addStringConstant s = do
+    let strCon = makeStringConstant s
+    let conType = array_t (fromIntegral $ length s + 1) char_t
+    C.GlobalReference (ptr_t conType) <$> addGlobalConstant conType strCon
 
 
 getBits :: LLVMAST.Type -> Word32

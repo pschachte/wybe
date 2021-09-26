@@ -1,0 +1,30 @@
+TESTING CONSTRUCTION
+
+a
+abc
+abcabc
+a
+beh
+eh
+
+TESTING CONVERSION TO c_string
+abcdf abcdf
+
+TESTING LOOPS
+abc
+kjihgfedcb
+
+TESTING INDEXING
+a
+b
+z
+b
+c
+a
+a
+OUT OF RANGE
+OUT OF RANGE
+OUT OF RANGE
+OUT OF RANGE
+c
+b

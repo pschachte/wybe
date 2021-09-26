@@ -28,3 +28,4 @@ pub def incr(!x:_) { ?x = x + 1 }
 pub def decr(!x:_) { ?x = x - 1 }
 pub def min(x:_, y:_):_ = if {x<=y:: x | else:: y}
 pub def max(x:_, y:_):_ = if {x>=y:: x | else:: y}
+pub def signum(x:_):_ = foreign c signum(x)

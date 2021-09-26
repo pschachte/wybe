@@ -52,14 +52,14 @@ find_test(modulus##0:wybe.int, io##0:wybe.phantom, ?io##4:wybe.phantom):
     test_loop.gen#1<0>[6dacb8fd25](modulus##0:wybe.int, ~tmp#8##0:test_loop.int_seq, ?i##0:wybe.int, ?tmp#1##0:wybe.bool) #8 @test_loop:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
-        foreign c print_string("Couldn't find even number divisible by ":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+        wybe.string.print_string<0>("Couldn't find even number divisible by ":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #9 @io:nn:nn
         foreign c print_int(~modulus##0:wybe.int, ~#io##1:wybe.phantom, ?tmp#15##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#15##0:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
 
     1:
-        foreign c print_string("First even number divisible by ":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+        wybe.string.print_string<0>("First even number divisible by ":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #10 @io:nn:nn
         foreign c print_int(~modulus##0:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-        foreign c print_string(" is ":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
+        wybe.string.print_string<0>(" is ":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #11 @io:nn:nn
         foreign c print_int(~i##0:wybe.int, ~#io##3:wybe.phantom, ?tmp#19##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
 
@@ -123,13 +123,22 @@ declare external ccc  void @putchar(i8)
 declare external ccc  void @print_int(i64)    
 
 
-declare external ccc  void @print_string(i64)    
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
-@test_loop.24 =    constant [?? x i8] c"Couldn't find even number divisible by \00"
+@test_loop.27 =    constant {i64, i64} { i64 39, i64 ptrtoint ([?? x i8]* @test_loop.26 to i64) }
 
 
-@test_loop.22 =    constant [?? x i8] c" is \00"
+@test_loop.26 =    constant [?? x i8] c"Couldn't find even number divisible by \00"
+
+
+@test_loop.24 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @test_loop.23 to i64) }
+
+
+@test_loop.23 =    constant [?? x i8] c" is \00"
+
+
+@test_loop.21 =    constant {i64, i64} { i64 31, i64 ptrtoint ([?? x i8]* @test_loop.20 to i64) }
 
 
 @test_loop.20 =    constant [?? x i8] c"First even number divisible by \00"
@@ -181,17 +190,17 @@ entry:
   %19 = extractvalue {i64, i1} %17, 1 
   br i1 %19, label %if.then, label %if.else 
 if.then:
-  %21 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @test_loop.20, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %21)  
+  %22 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @test_loop.21, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %22)  
   tail call ccc  void  @print_int(i64  %"modulus##0")  
-  %23 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @test_loop.22, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %23)  
+  %25 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @test_loop.24, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %25)  
   tail call ccc  void  @print_int(i64  %18)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else:
-  %25 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @test_loop.24, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %25)  
+  %28 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @test_loop.27, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %28)  
   tail call ccc  void  @print_int(i64  %"modulus##0")  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
@@ -200,59 +209,59 @@ if.else:
 
 define external fastcc  {i64, i1} @"test_loop.gen#1<0>"(i64  %"modulus##0", i64  %"seq##0")    {
 entry:
-  %26 = tail call fastcc  {i64, i64, i1}  @"test_loop.int_seq.seq_next<0>"(i64  %"seq##0")  
-  %27 = extractvalue {i64, i64, i1} %26, 0 
-  %28 = extractvalue {i64, i64, i1} %26, 1 
-  %29 = extractvalue {i64, i64, i1} %26, 2 
-  br i1 %29, label %if.then, label %if.else 
+  %29 = tail call fastcc  {i64, i64, i1}  @"test_loop.int_seq.seq_next<0>"(i64  %"seq##0")  
+  %30 = extractvalue {i64, i64, i1} %29, 0 
+  %31 = extractvalue {i64, i64, i1} %29, 1 
+  %32 = extractvalue {i64, i64, i1} %29, 2 
+  br i1 %32, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#0##0" = srem i64 %28, %"modulus##0" 
+  %"2#tmp#0##0" = srem i64 %31, %"modulus##0" 
   %"2#tmp#2##0" = icmp eq i64 %"2#tmp#0##0", 0 
   br i1 %"2#tmp#2##0", label %if.then1, label %if.else1 
 if.else:
-  %37 = insertvalue {i64, i1} undef, i64 %28, 0 
-  %38 = insertvalue {i64, i1} %37, i1 0, 1 
-  ret {i64, i1} %38 
+  %40 = insertvalue {i64, i1} undef, i64 %31, 0 
+  %41 = insertvalue {i64, i1} %40, i1 0, 1 
+  ret {i64, i1} %41 
 if.then1:
-  %30 = insertvalue {i64, i1} undef, i64 %28, 0 
-  %31 = insertvalue {i64, i1} %30, i1 1, 1 
-  ret {i64, i1} %31 
+  %33 = insertvalue {i64, i1} undef, i64 %31, 0 
+  %34 = insertvalue {i64, i1} %33, i1 1, 1 
+  ret {i64, i1} %34 
 if.else1:
-  %32 = tail call fastcc  {i64, i1}  @"test_loop.gen#1<0>"(i64  %"modulus##0", i64  %27)  
-  %33 = extractvalue {i64, i1} %32, 0 
-  %34 = extractvalue {i64, i1} %32, 1 
-  %35 = insertvalue {i64, i1} undef, i64 %33, 0 
-  %36 = insertvalue {i64, i1} %35, i1 %34, 1 
-  ret {i64, i1} %36 
+  %35 = tail call fastcc  {i64, i1}  @"test_loop.gen#1<0>"(i64  %"modulus##0", i64  %30)  
+  %36 = extractvalue {i64, i1} %35, 0 
+  %37 = extractvalue {i64, i1} %35, 1 
+  %38 = insertvalue {i64, i1} undef, i64 %36, 0 
+  %39 = insertvalue {i64, i1} %38, i1 %37, 1 
+  ret {i64, i1} %39 
 }
 
 
 define external fastcc  {i64, i1} @"test_loop.gen#1<0>[6dacb8fd25]"(i64  %"modulus##0", i64  %"seq##0")    {
 entry:
-  %39 = tail call fastcc  {i64, i64, i1}  @"test_loop.int_seq.seq_next<0>[410bae77d3]"(i64  %"seq##0")  
-  %40 = extractvalue {i64, i64, i1} %39, 0 
-  %41 = extractvalue {i64, i64, i1} %39, 1 
-  %42 = extractvalue {i64, i64, i1} %39, 2 
-  br i1 %42, label %if.then, label %if.else 
+  %42 = tail call fastcc  {i64, i64, i1}  @"test_loop.int_seq.seq_next<0>[410bae77d3]"(i64  %"seq##0")  
+  %43 = extractvalue {i64, i64, i1} %42, 0 
+  %44 = extractvalue {i64, i64, i1} %42, 1 
+  %45 = extractvalue {i64, i64, i1} %42, 2 
+  br i1 %45, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#0##0" = srem i64 %41, %"modulus##0" 
+  %"2#tmp#0##0" = srem i64 %44, %"modulus##0" 
   %"2#tmp#2##0" = icmp eq i64 %"2#tmp#0##0", 0 
   br i1 %"2#tmp#2##0", label %if.then1, label %if.else1 
 if.else:
-  %50 = insertvalue {i64, i1} undef, i64 %41, 0 
-  %51 = insertvalue {i64, i1} %50, i1 0, 1 
-  ret {i64, i1} %51 
+  %53 = insertvalue {i64, i1} undef, i64 %44, 0 
+  %54 = insertvalue {i64, i1} %53, i1 0, 1 
+  ret {i64, i1} %54 
 if.then1:
-  %43 = insertvalue {i64, i1} undef, i64 %41, 0 
-  %44 = insertvalue {i64, i1} %43, i1 1, 1 
-  ret {i64, i1} %44 
+  %46 = insertvalue {i64, i1} undef, i64 %44, 0 
+  %47 = insertvalue {i64, i1} %46, i1 1, 1 
+  ret {i64, i1} %47 
 if.else1:
-  %45 = tail call fastcc  {i64, i1}  @"test_loop.gen#1<0>[6dacb8fd25]"(i64  %"modulus##0", i64  %40)  
-  %46 = extractvalue {i64, i1} %45, 0 
-  %47 = extractvalue {i64, i1} %45, 1 
-  %48 = insertvalue {i64, i1} undef, i64 %46, 0 
-  %49 = insertvalue {i64, i1} %48, i1 %47, 1 
-  ret {i64, i1} %49 
+  %48 = tail call fastcc  {i64, i1}  @"test_loop.gen#1<0>[6dacb8fd25]"(i64  %"modulus##0", i64  %43)  
+  %49 = extractvalue {i64, i1} %48, 0 
+  %50 = extractvalue {i64, i1} %48, 1 
+  %51 = insertvalue {i64, i1} undef, i64 %49, 0 
+  %52 = insertvalue {i64, i1} %51, i1 %50, 1 
+  ret {i64, i1} %52 
 }
 --------------------------------------------------
  Module test_loop.int_seq

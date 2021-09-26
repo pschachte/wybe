@@ -1,0 +1,16 @@
+pub constructors less | equal | greater
+
+pub def (a:_ < b:_):bool = a ~= greater
+                        && (a ~= equal || b = greater)
+                        && a ~= b
+                        && b ~= less
+pub def (a:_ <= b:_):bool = a = less
+                         || a = b
+                         || a = equal && b = greater
+pub def (a:_ > b:_):bool = b ~= greater
+                        && (b ~= equal || a = greater)
+                        && b ~= a
+                        && a ~= less
+pub def (a:_ >= b:_):bool = b = less
+                         || b = a
+                         || b = equal && a = greater

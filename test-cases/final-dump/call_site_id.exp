@@ -60,13 +60,13 @@ foo > public (1 calls)
 foo(x##0:wybe.int, io##0:wybe.phantom, ?io##8:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_string(" ":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-    foreign c print_string(" ":wybe.string, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-    foreign c print_string(" ":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
-    foreign c print_string(" ":wybe.string, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
-    foreign c print_string(" ":wybe.string, ~#io##4:wybe.phantom, ?#io##5:wybe.phantom) @io:nn:nn
-    foreign c print_string(" ":wybe.string, ~#io##5:wybe.phantom, ?#io##6:wybe.phantom) @io:nn:nn
-    foreign c print_string(" ":wybe.string, ~#io##6:wybe.phantom, ?#io##7:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(" ":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #10 @io:nn:nn
+    wybe.string.print_string<0>(" ":wybe.string, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #11 @io:nn:nn
+    wybe.string.print_string<0>(" ":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #12 @io:nn:nn
+    wybe.string.print_string<0>(" ":wybe.string, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) #13 @io:nn:nn
+    wybe.string.print_string<0>(" ":wybe.string, ~#io##4:wybe.phantom, ?#io##5:wybe.phantom) #14 @io:nn:nn
+    wybe.string.print_string<0>(" ":wybe.string, ~#io##5:wybe.phantom, ?#io##6:wybe.phantom) #15 @io:nn:nn
+    wybe.string.print_string<0>(" ":wybe.string, ~#io##6:wybe.phantom, ?#io##7:wybe.phantom) #16 @io:nn:nn
     foreign llvm mul(~x##0:wybe.int, 5:wybe.int, ?tmp#1##0:wybe.int) @int:nn:nn
     foreign llvm add(~tmp#1##0:wybe.int, 10:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
     foreign c print_int(~tmp#0##0:wybe.int, ~#io##7:wybe.phantom, ?tmp#22##0:wybe.phantom) @io:nn:nn
@@ -89,25 +89,46 @@ declare external ccc  void @putchar(i8)
 declare external ccc  void @print_int(i64)    
 
 
-declare external ccc  void @print_string(i64)    
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+
+
+@call_site_id.20 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @call_site_id.19 to i64) }
+
+
+@call_site_id.19 =    constant [?? x i8] c" \00"
+
+
+@call_site_id.17 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @call_site_id.16 to i64) }
+
+
+@call_site_id.16 =    constant [?? x i8] c" \00"
+
+
+@call_site_id.14 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @call_site_id.13 to i64) }
 
 
 @call_site_id.13 =    constant [?? x i8] c" \00"
 
 
-@call_site_id.11 =    constant [?? x i8] c" \00"
+@call_site_id.11 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @call_site_id.10 to i64) }
 
 
-@call_site_id.9 =    constant [?? x i8] c" \00"
+@call_site_id.10 =    constant [?? x i8] c" \00"
+
+
+@call_site_id.8 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @call_site_id.7 to i64) }
 
 
 @call_site_id.7 =    constant [?? x i8] c" \00"
 
 
-@call_site_id.5 =    constant [?? x i8] c" \00"
+@call_site_id.5 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @call_site_id.4 to i64) }
 
 
-@call_site_id.3 =    constant [?? x i8] c" \00"
+@call_site_id.4 =    constant [?? x i8] c" \00"
+
+
+@call_site_id.2 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @call_site_id.1 to i64) }
 
 
 @call_site_id.1 =    constant [?? x i8] c" \00"
@@ -160,20 +181,20 @@ entry:
 
 define external fastcc  void @"call_site_id.foo<0>"(i64  %"x##0")    {
 entry:
-  %2 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @call_site_id.1, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %2)  
-  %4 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @call_site_id.3, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %4)  
-  %6 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @call_site_id.5, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %6)  
-  %8 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @call_site_id.7, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %8)  
-  %10 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @call_site_id.9, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %10)  
-  %12 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @call_site_id.11, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %12)  
-  %14 = ptrtoint i8* getelementptr inbounds ([?? x i8], [?? x i8]* @call_site_id.13, i32 0, i32 0) to i64 
-  tail call ccc  void  @print_string(i64  %14)  
+  %3 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.2, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %3)  
+  %6 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.5, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %6)  
+  %9 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.8, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %9)  
+  %12 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.11, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %12)  
+  %15 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.14, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %15)  
+  %18 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.17, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %18)  
+  %21 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.20, i32 0, i32 0) to i64 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %21)  
   %"1#tmp#1##0" = mul   i64 %"x##0", 5 
   %"1#tmp#0##0" = add   i64 %"1#tmp#1##0", 10 
   tail call ccc  void  @print_int(i64  %"1#tmp#0##0")  

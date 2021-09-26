@@ -6,15 +6,15 @@
 --           : LICENSE in the root directory of this project.
 
 module Snippets (castFromTo, castTo, withType, intType, intCast,
-                 tagType, tagCast, phantomType, stringType,
+                 tagType, tagCast, phantomType, stringType, cStringType,
                  varSet, varGet, varGetSet,
                  boolType, boolCast, boolTrue, boolFalse, boolBool,
                  boolVarSet, boolVarGet, intVarSet, intVarGet,
                  lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, primMove,
-                 boolNegate, comparison, succeedTest, failTest, testVar,
-                 succeedIfSemiDet) where
+                 boolNegate, comparison, succeedTest, failTest, testVar, succeedIfSemiDet) where
 
 import AST
+import Data.String (String)
 
 -- |An expression to cast a value to the specified type
 castFromTo :: TypeSpec -> TypeSpec -> Exp -> Exp
@@ -71,6 +71,10 @@ phantomType = TypeSpec ["wybe"] "phantom" []
 -- | The string type
 stringType :: TypeSpec
 stringType = TypeSpec ["wybe"] "string" []
+
+-- | The c_string type, a C string
+cStringType :: TypeSpec
+cStringType = TypeSpec ["wybe"] "c_string" []
 
 -- |An output variable reference (lvalue)
 varSet :: Ident -> Exp

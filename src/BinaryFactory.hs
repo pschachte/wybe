@@ -33,6 +33,7 @@ instance Binary PrimFlow
 instance Binary TypeSpec
 instance Binary TypeFlow
 instance Binary Exp
+instance Binary StringVariant
 instance Binary Generator
 instance Binary Stmt
 instance Binary ParamInfo

@@ -22,7 +22,6 @@ import           Options                   (LogSelection (Resources))
 import           Snippets
 import           Util
 
-import           Debug.Trace
 
 ------------------------- Checking resource decls -------------------------
 
@@ -46,8 +45,8 @@ checkResourceDef :: Ident -> ResourceDef ->
                     Compiler (Bool,[(String,OptPos)],(Ident,ResourceDef))
 checkResourceDef name def = do
     (chg,errs,m) <-
-        fmap unzip3 $ mapM (uncurry checkOneResource) $ Map.toList $ content def
-    return (or chg, concat errs, (name,rePlace (Map.fromList m) def))
+        fmap unzip3 $ mapM (uncurry checkOneResource) $ Map.toList def
+    return (or chg, concat errs, (name,Map.fromList m))
 
 
 checkOneResource :: ResourceSpec -> ResourceImpln ->
@@ -117,7 +116,8 @@ transformProcResources pd _ = do
     resFlows <- concat <$> mapM (simpleResourceFlows pos)
                            (Set.elems resourceFlows)
     logResources $ "Declared resources: " ++ show resFlows
-    (body',tmp') <- transformBody tmp body
+    let resources = Set.fromList $ resourceFlowRes . fst <$> resFlows
+    (body',tmp') <- transformBody tmp resources body
     resParams <- concat <$> mapM (resourceParams pos) resFlows
     let proto' = proto { procProtoParams = params ++ resParams}
     let pd' = pd { procProto = proto', procTmpCount = tmp',
@@ -133,19 +133,20 @@ resourceParams pos (ResourceFlowSpec res flow, typ) = do
     let outParam = [Param varName typ ParamOut (Resource res) | flowsOut flow]
     return $ inParam ++ outParam
 
-
-transformBody :: Int -> [Placed Stmt] -> Compiler ([Placed Stmt],Int)
-transformBody tmp [] = return ([],tmp)
-transformBody tmp (stmt:stmts) = do
-    (stmts1,tmp') <- placedApply (transformStmt tmp) stmt
-    (stmts2,tmp'') <- transformBody tmp' stmts
+-- | Transform a statement sequence, turning resources into arguments.
+transformBody :: Int -> Set ResourceSpec -> [Placed Stmt]
+              -> Compiler ([Placed Stmt],Int)
+transformBody tmp _ [] = return ([],tmp)
+transformBody tmp resources (stmt:stmts) = do
+    (stmts1,tmp') <- placedApply (transformStmt tmp resources) stmt
+    (stmts2,tmp'') <- transformBody tmp' resources stmts
     return (stmts1 ++ stmts2, tmp'')
 
 
--- XXX Must add variables set by a statement, at least the ones that are
---     resource names, to the returned set of defined resources
-transformStmt :: Int -> Stmt -> OptPos -> Compiler ([Placed Stmt], Int)
-transformStmt tmp stmt@(ProcCall m n id detism resourceful args) pos = do
+-- | Transform a single statement, turning resources into arguments.
+transformStmt :: Int -> Set ResourceSpec -> Stmt -> OptPos
+              -> Compiler ([Placed Stmt], Int)
+transformStmt tmp res stmt@(ProcCall m n id detism resourceful args) pos = do
     let procID = trustFromJust "transformStmt" id
     callResources <-
         procProtoResources . procProto <$> getProcDef
@@ -159,48 +160,50 @@ transformStmt tmp stmt@(ProcCall m n id detism resourceful args) pos = do
     resArgs <- concat <$> mapM (resourceArgs pos) (Set.elems callResources)
     return ([maybePlace
             (ProcCall m n (Just procID) detism False (args++resArgs)) pos], tmp)
-transformStmt tmp stmt@(HigherCall _ _) pos = return $ ([maybePlace stmt pos],tmp)
-transformStmt tmp (ForeignCall lang name flags args) pos =
+transformStmt tmp res stmt@(HigherCall _ _) pos = return $ ([maybePlace stmt pos],tmp)
+transformStmt tmp res (ForeignCall lang name flags args) pos =
     return ([maybePlace (ForeignCall lang name flags args) pos], tmp)
-transformStmt tmp stmt@(TestBool var) pos =
+transformStmt tmp res stmt@(TestBool var) pos =
     return ([maybePlace stmt pos], tmp)
-transformStmt tmp (And stmts) pos = do
-    (stmts',tmp') <- transformBody tmp stmts
+transformStmt tmp res (And stmts) pos = do
+    (stmts',tmp') <- transformBody tmp res stmts
     return ([maybePlace (And stmts') pos], tmp')
-transformStmt tmp (Or [] _) pos =
+transformStmt tmp res (Or [] _) pos =
     return ([failTest], tmp)
-transformStmt tmp (Or [stmt] _) pos = do
-    placedApplyM (transformStmt tmp) stmt
-transformStmt tmp (Or (stmt:stmts) vars) pos = do
-    (stmt',tmp')  <- placedApplyM (transformStmt tmp) stmt
-    (stmt'',tmp'') <- transformStmt tmp' (Or stmts vars) pos
-    return ([maybePlace (Or [(makeSingleStmt stmt'),(makeSingleStmt stmt'')] vars)
+transformStmt tmp res (Or [stmt] _) pos = do
+    placedApplyM (transformStmt tmp res) stmt
+transformStmt tmp res (Or (stmt:stmts) vars) pos = do
+    (stmt',tmp')  <- placedApplyM (transformStmt tmp res) stmt
+    (stmt'',tmp'') <- transformStmt tmp' res (Or stmts vars) pos
+    return ([maybePlace (Or [makeSingleStmt stmt',makeSingleStmt stmt''] vars)
               pos], tmp'')
-transformStmt tmp (Not stmt) pos = do
-    (stmt',tmp') <- placedApplyM (transformStmt tmp) stmt
+transformStmt tmp res (Not stmt) pos = do
+    (stmt',tmp') <- placedApplyM (transformStmt tmp res) stmt
     return ([maybePlace (Not $ makeSingleStmt stmt') pos], tmp')
-transformStmt tmp Nop _ =
+transformStmt tmp res Nop _ =
     return ([], tmp)
-transformStmt tmp Fail pos =
+transformStmt tmp res Fail pos =
     return ([maybePlace Fail pos], tmp)
-transformStmt tmp (Cond test thn els condVars defVars) pos = do
-    (test',tmp1) <- placedApplyM (transformStmt tmp) test
-    (thn',tmp2) <- transformBody tmp1 thn
-    (els',tmp3) <- transformBody tmp2 els
+transformStmt tmp res (Cond test thn els condVars defVars) pos = do
+    (test',tmp1) <- placedApplyM (transformStmt tmp res) test
+    (thn',tmp2) <- transformBody tmp1 res thn
+    (els',tmp3) <- transformBody tmp2 res els
     return ([maybePlace
              (Cond (Unplaced $ And test') thn' els' condVars defVars) pos],
             tmp3)
-transformStmt tmp (Loop body defVars) pos = do
-    (body',tmp') <- transformBody tmp body
+transformStmt tmp res (Loop body defVars) pos = do
+    (body',tmp') <- transformBody tmp res body
     return ([maybePlace (Loop body' defVars) pos], tmp')
-transformStmt tmp (For generators body) pos = do
-    (body', tmp') <- transformBody tmp body
+transformStmt tmp res (For generators body) pos = do
+    (body', tmp') <- transformBody tmp res body
     return ([maybePlace (For generators body') pos], tmp')
-transformStmt tmp (UseResources res body) pos = do
-    resTypes <- List.filter (isJust . snd)
-                <$> mapM (canonicaliseResourceSpec pos "use statement") res
-    -- XXX what about resources with same name and different modules?
-    let toSave = resourceName . fst <$> resTypes
+transformStmt tmp res (UseResources allRes oldRes body) pos = do
+    let resVars = trustFromJust "use stmt without var list after type check"
+                  oldRes
+    resTypes <- List.filter ((`elem` resVars) . resourceName . fst)
+                <$> mapM (canonicaliseResourceSpec pos "use statement") allRes
+                    -- (trustFromJust "un-typechecked use stmt" oldRes)
+    toSave <- mapM (resourceVar . fst) resTypes
     let types = fromJust . snd <$> resTypes
     let resCount = length toSave
     let tmp' = tmp + resCount
@@ -209,13 +212,13 @@ transformStmt tmp (UseResources res body) pos = do
     let set v ty = varSet v `withType` ty
     let saves = (\(r,t,ty) -> move (get r ty) (set t ty)) <$> ress
     let restores = (\(r,t,ty) -> move (get t ty) (set r ty)) <$> ress
-    (body',tmp'') <- transformBody tmp' body
+    (body',tmp'') <- transformBody tmp' res body
     return (saves ++ body' ++ restores, tmp'')
--- transformStmt tmp (For itr gen) pos =
+-- transformStmt tmp res (For itr gen) pos =
 --     return ([maybePlace (For itr gen) pos], tmp)
-transformStmt tmp Break pos =
+transformStmt tmp res Break pos =
     return ([maybePlace Break pos], tmp)
-transformStmt tmp Next pos =
+transformStmt tmp res Next pos =
     return ([maybePlace Next pos], tmp)
 
 
@@ -258,13 +261,19 @@ canonicaliseResourceSpec :: OptPos -> String -> ResourceSpec
                          -> Compiler (ResourceSpec, Maybe TypeSpec)
 canonicaliseResourceSpec pos context spec = do
     logResources $ "canonicalising resource " ++ show spec
-    resType <- maybe (spec,Nothing) (\(res,iface) -> (res,Map.lookup res iface))
-               <$> lookupResource spec pos
-    when (isNothing $ snd resType)
-         $ errmsg pos $ "Unknown resource " ++ show (fst resType)
-                        ++ " in " ++ context
-    logResources $ "    to --> " ++ show resType
-    return resType
+    resDef <- lookupResource spec
+    case resDef of
+        Nothing -> do
+            errmsg pos $ "Unknown resource " ++ show spec ++ " in " ++ context
+            return (spec,Nothing)
+        Just def ->
+            case Map.assocs def of
+                [(spec,impln)] -> do
+                    let resType = resourceType impln
+                    logResources $ "    to --> " ++ show resType
+                    return (spec,Just resType)
+                [] -> shouldnt $ "Empty resource " ++ show spec
+                _ -> nyi $ "compound resource " ++ show spec
 
 
 -- |Get a list of all the SimpleResources, and their types, referred
@@ -273,15 +282,19 @@ canonicaliseResourceSpec pos context spec = do
 simpleResourceFlows :: OptPos -> ResourceFlowSpec ->
                        Compiler [(ResourceFlowSpec,TypeSpec)]
 simpleResourceFlows pos (ResourceFlowSpec spec flow) = do
-    maybeIFace <- lookupResource spec pos
-    case maybeIFace of
-        Nothing -> return []
-        Just (_,iface) ->
-            return [(ResourceFlowSpec sp flow,ty) |
-                    (sp,ty) <- Map.toList iface]
+    resDef <- lookupResource spec
+    case resDef of
+        Nothing -> do
+            errmsg pos $ "Unknown resource " ++ show spec
+                         ++ " in called proc"
+            return []
+        Just def ->
+            return [(ResourceFlowSpec spec flow,resourceType impln)
+                    | (spec,impln) <- Map.toList def]
 
-
-resourceVar :: ResourceSpec -> Compiler String
+-- | The local variable name to use for a resource.  This assumes the resource
+-- spec has already been canonicalised (fully module qualified).
+resourceVar :: ResourceSpec -> Compiler Ident
 resourceVar (ResourceSpec [] name) = return name
 resourceVar (ResourceSpec mod name) = do
     -- Always use resource name as variable name, regardless of module

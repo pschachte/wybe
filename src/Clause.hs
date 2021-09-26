@@ -314,7 +314,7 @@ compileArg exp pos = shouldnt $ "Compiling untyped argument " ++ show exp
 compileArg' :: TypeSpec -> Exp -> OptPos -> ClauseComp [PrimArg]
 compileArg' typ (IntValue int) _ = return [ArgInt int typ]
 compileArg' typ (FloatValue float) _ = return [ArgFloat float typ]
-compileArg' typ (StringValue string) _ = return [ArgString string typ]
+compileArg' typ (StringValue string v) _ = return [ArgString string v typ]
 compileArg' typ (CharValue char) _ = return [ArgChar char typ]
 compileArg' typ (ProcRef ms) _ = return [ArgProcRef ms typ]
 compileArg' typ var@(Var name flow flowType) pos = do

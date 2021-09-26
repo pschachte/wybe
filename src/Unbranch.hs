@@ -443,7 +443,7 @@ unbranchStmt detism (Loop body exitVars) pos stmts alt sense = do
     logUnbranch $ "Generated next " ++ showStmt 4 (content next)
     logUnbranch "Finished handling loop"
     return [next]
-unbranchStmt _ (UseResources _ _) _ _ _ _ =
+unbranchStmt _ (UseResources _ _ _) _ _ _ _ =
     shouldnt "resource handling should have removed use ... in statements"
 unbranchStmt _ (For _ body) _ _ _ _ =
     shouldnt "flattening should have removed For statements"

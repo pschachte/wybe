@@ -132,7 +132,6 @@ normaliseSubmodule name vis pos items = do
       else enterModule parentOrigin subModSpec (Just parentModSpec)
     -- submodule always imports parent module
     updateImplementation $ \i -> i { modNestedIn = Just parentModSpec }
-    -- XXX This shouldn't be needed
     addImport parentModSpec (importSpec Nothing Private)
     normalise items
     if alreadyExists
@@ -407,36 +406,28 @@ normaliseModMain = do
     modSpec <- getModuleSpec
     logNormalise $ "Completing main normalisation of module "
                    ++ showModSpec modSpec
-    (resources,inits) <- initResources
-    let initBody = inits ++ List.reverse stmts
+    resources <- initResources
+    let initBody = List.reverse stmts
     logNormalise $ "Top-level statements = " ++ show initBody
-    -- unless (List.null stmts && List.null inits)
-    --   $ normaliseItem $ ProcDecl Public detModifiers (ProcProto "" [] resources)
-    --                              initBody Nothing
-    unless (List.null stmts && List.null inits)
-      $ normaliseItem $ ProcDecl Public (setImpurity Impure detModifiers)
+    unless (List.null stmts)
+      $ normaliseItem $ ProcDecl Public (setImpurity Impure defaultProcModifiers)
                         (ProcProto "" [] resources) initBody Nothing
 
 
 -- |The resources available at the top level of this module, plus the
 -- initialisations to be performed before executing any code that uses this
 -- module.
-initResources :: Compiler (Set ResourceFlowSpec, [Placed Stmt])
+initResources :: Compiler (Set ResourceFlowSpec)
 initResources = do
     thisMod <- getModule modSpec
     mods <- getModuleImplementationField (Map.keys . modImports)
-    mods' <- ((mods ++) . concat) <$> mapM descendentModules mods
+    mods' <- (mods ++) . concat <$> mapM descendentModules mods
     logNormalise $ "in initResources, mods = " ++ showModSpecs mods'
     importedMods <- catMaybes <$> mapM getLoadingModule mods'
     let importImplns = catMaybes (modImplementation <$> importedMods)
-    let importedResources = (Map.assocs . content . snd) <$>
-                     (concat $ (Map.assocs . modResources) <$> importImplns)
-    impln <- getModuleImplementationField id
-    let localResources = (Map.assocs . content) <$>
-                         (Map.elems $ modResources impln)
-    let initialised = List.filter (isJust . resourceInit . snd) . concat
-    let initialisedImports = initialised importedResources
-    let initialisedLocal = initialised localResources
+    initialisedImports <- Set.toList . Set.unions . (Map.keysSet <$>)
+                          <$> mapM (initialisedResources `inModule`) mods'
+    initialisedLocal <- Set.toList . Map.keysSet <$> initialisedResources
     -- Direct tie-in to command_line library module:  for the command_line
     -- module, or any module that imports it, we add argc and argv as resources.
     -- This is necessary because argc and argv are effectively initialised by
@@ -451,21 +442,19 @@ initResources = do
                     ,ResourceFlowSpec (cmdline "argv") ParamInOut]
             else []
     let resources = cmdlineResources
-                    ++ ((\spec -> ResourceFlowSpec (fst spec) ParamInOut)
-                        <$> initialisedImports)
-                    ++ ((\spec -> ResourceFlowSpec (fst spec) ParamOut)
-                        <$> initialisedLocal)
-    let inits = [Unplaced $ ForeignCall "llvm" "move" []
-                            [maybePlace ((content initExp) `withType` resType)
-                             (place initExp)
-                            ,Unplaced (varSet $ resourceName resSpec)]
-                | (resSpec, resImpln) <- initialisedLocal
-                , let initExp = trustFromJust "initResources"
-                                $ resourceInit resImpln
-                , let resType = resourceType resImpln]
+                    ++ ((`ResourceFlowSpec` ParamInOut) <$> initialisedImports)
+                    ++ ((`ResourceFlowSpec` ParamOut) <$> initialisedLocal)
+    -- let inits = [Unplaced $ ForeignCall "llvm" "move" []
+    --                         [maybePlace ((content initExp) `withType` resType)
+    --                          (place initExp)
+    --                         ,Unplaced (varSet $ resourceName resSpec)]
+    --             | (resSpec, resImpln) <- initialisedLocal
+    --             , let initExp = trustFromJust "initResources"
+    --                             $ resourceInit resImpln
+    --             , let resType = resourceType resImpln]
     logNormalise $ "In initResources, resources = " ++ show resources
-    logNormalise $ "In initResources, initialisations =" ++ showBody 4 inits
-    return (Set.fromList resources, inits)
+    -- logNormalise $ "In initResources, initialisations =" ++ showBody 4 inits
+    return (Set.fromList resources)
 
 
 
@@ -956,7 +945,7 @@ implicitEquality typespec consts nonconsts rep = do
                                    Param rightName typespec ParamIn Ordinary]
                     Set.empty
       let (body,inline) = equalityBody consts nonconsts rep
-      return [ProcDecl Public (setInline inline $ setDetism SemiDet detModifiers)
+      return [ProcDecl Public (setInline inline $ setDetism SemiDet defaultProcModifiers)
                    eqProto body Nothing]
 
 
@@ -1092,11 +1081,11 @@ equalityField param =
 
 
 inlineModifier :: Determinism -> ProcModifiers
-inlineModifier detism = setInline Inline $ setDetism detism detModifiers
+inlineModifier detism = setInline Inline $ setDetism detism defaultProcModifiers
 
 
 inlineDetModifiers :: ProcModifiers
-inlineDetModifiers = setInline Inline detModifiers
+inlineDetModifiers = setInline Inline defaultProcModifiers
 
 
 inlineSemiDetModifiers :: ProcModifiers
