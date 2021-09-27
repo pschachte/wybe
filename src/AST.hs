@@ -76,7 +76,7 @@ module AST (
   updateModInterface, updateAllProcs, updateModSubmods, updateModProcs,
   getModuleSpec, moduleIsType, option,
   getOrigin, getSource, getDirectory,
-  optionallyPutStr, message, errmsg, (<!>), Message(..), queueMessage,
+  optionallyPutStr, message, errmsg, (<!>), prettyPos, Message(..), queueMessage,
   genProcName, addImport, doImport, importFromSupermodule, lookupType,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   initialisedResources,
@@ -861,7 +861,10 @@ lookupType _ _ AnyType = return AnyType
 lookupType _ _ InvalidType = return InvalidType
 lookupType _ _ ty@TypeVariable{} = return ty
 lookupType _ _ ty@Representation{} = return ty
-lookupType _ _ ty@HigherOrderType{} = return ty
+lookupType context pos ty@HigherOrderType{higherTypeParams=params} = do
+    types <- mapM (lookupType context pos) $ typeFlowType <$> params
+    let flows = typeFlowMode <$> params 
+    return $ HigherOrderType $ zipWith TypeFlow types flows
 lookupType context pos ty@(TypeSpec [] typename args)
   | typename == currentTypeAlias = do
     currMod <- getModuleSpec
@@ -885,7 +888,7 @@ lookupType context pos ty@(TypeSpec mod name args) = do
             else if length params == length args
             then do
                 args' <- mapM (lookupType context pos) args
-                let matchingType = TypeSpec (init mspec) (last mspec) args'::TypeSpec
+                let matchingType = TypeSpec (init mspec) (last mspec) args'
                 logAST $ "Matching type = " ++ show matchingType
                 return matchingType
             else do
@@ -1143,8 +1146,8 @@ getDetism pspec =
 
 
 getProcDef :: ProcSpec -> Compiler ProcDef
-getProcDef (ProcSpec modSpec procName procID _) = do
-    mod <- trustFromJustM ("no such module " ++ showModSpec modSpec) $
+getProcDef ps@(ProcSpec modSpec procName procID _) = do
+    mod <- trustFromJustM ("no such module " ++ showModSpec modSpec ++ show ps) $
            getLoadingModule modSpec
     let impl = trustFromJust ("unimplemented module " ++ showModSpec modSpec) $
                modImplementation mod
@@ -2522,12 +2525,12 @@ data Exp
       | StringValue String StringVariant
       | Var VarName FlowDirection ArgFlowType
       | ProcRef ProcSpec
-      | Lambda [Placed Stmt]
       | Typed Exp TypeSpec (Maybe TypeSpec)
                -- ^explicitly typed expr giving the type of the expression, and,
                -- if it is a cast, the type of the Exp argument.  If not a cast,
                -- these two must be the same.
       -- The following are eliminated during flattening
+      | Lambda [Placed Stmt]
       | Where [Placed Stmt] (Placed Exp)
       | CondExp (Placed Stmt) (Placed Exp) (Placed Exp)
       | Fncall ModSpec ProcName [Placed Exp]
@@ -3492,13 +3495,19 @@ lvl <!> msg = message lvl msg Nothing
 infix 0 <!>
 
 
+prettyPos :: OptPos -> IO String
+prettyPos Nothing = return ""
+prettyPos (Just pos) = do
+    relFile <- makeRelativeToCurrentDirectory $ sourceName pos
+    return $ relFile ++ ":" ++ show (sourceLine pos)
+             ++ ":" ++ show (sourceColumn pos)
+
 -- |Construct a message string from the specified text and location.
 makeMessage :: OptPos -> String -> IO String
 makeMessage Nothing msg    = return msg
-makeMessage (Just pos) msg = do
-    relFile <- makeRelativeToCurrentDirectory $ sourceName pos
-    return $ relFile ++ ":" ++ show (sourceLine pos)
-             ++ ":" ++ show (sourceColumn pos) ++ ": " ++ msg
+makeMessage pos@(Just _) msg = do
+    posStr <- prettyPos pos
+    return $ posStr ++ ": " ++ msg
 
 
 -- |Prettify and show compiler messages. Only Error messages are shown always,

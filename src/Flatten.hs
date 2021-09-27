@@ -440,7 +440,10 @@ flattenStmt' Next pos _ = emit pos Next
 flattenAssignment :: Ident -> Placed Exp -> Placed Exp -> OptPos -> Flattener ()
 flattenAssignment var varArg value pos = do
     [valueArg] <- flattenStmtArgs [value] pos
-    let instr = ForeignCall "llvm" "move" [] [valueArg, varArg]
+    varArg' <- case content varArg of
+        Var _ _ Hole -> flattenPExp varArg
+        _ -> return varArg
+    let instr = ForeignCall "llvm" "move" [] [valueArg, varArg']
     logFlatten $ "  transformed to " ++ showStmt 4 instr
     noteVarDef var
     emit pos instr
@@ -496,32 +499,32 @@ flattenExp expr@(CharValue _) ty castFrom pos =
 flattenExp expr@(Var "_" ParamIn _) ty castFrom pos = do
     dummyName <- tempVar
     return $ typeAndPlace (Var dummyName ParamOut Ordinary) AnyType castFrom pos
-flattenExp expr@(Var name dir flowType) ty castFrom pos = do
+flattenExp expr@(Var holeNm dir Hole) ty castFrom pos = do
+    logFlatten $ "checking hole " ++ show expr
+    hs <- gets holes
+    case Map.lookup holeNm hs of
+        Nothing -> do
+            varNm <- tempVar
+            let param = Param varNm AnyType dir Hole
+            noteVarDef varNm
+            modify (\s -> s{holes=Map.insert holeNm param hs})
+            return $ typeAndPlace (Var varNm dir Hole) ty castFrom pos
+        Just param@(Param pNm _ pFlow _) -> do
+            return $ typeAndPlace (Var pNm dir Hole) ty castFrom pos
+flattenExp expr@(Var name dir _) ty castFrom pos = do
     logFlatten $ "  Flattening arg " ++ show expr
     defd <- gets (Set.member name . defdVars)
-    case flowType of
-        Hole -> do
-            hs <- gets holes
-            case Map.lookup name hs of
-                Nothing -> do
-                    varNm <- tempVar
-                    let param = Param varNm AnyType dir Hole
-                    modify (\s -> s{holes=Map.insert name param hs})
-                    return $ typeAndPlace (Var varNm dir flowType) ty castFrom pos
-                Just param@(Param pNm _ pFlow _) -> do
-                    return $ typeAndPlace (Var pNm dir flowType) ty castFrom pos
-        _ -> 
-            if dir == ParamIn && not defd
-            then do -- Reference to an undefined variable: assume it's meant to be
-                    -- a niladic function instead of a variable reference
-                logFlatten $ "  Unknown variable '" ++ show name
-                    ++ "' flattened to niladic function call"
-                flattenCall (ProcCall [] name Nothing Det False) False ty castFrom pos []
-            else do
-                noteVarMention name dir
-                let expr' = typeAndPlace expr ty castFrom pos
-                logFlatten $ "  Arg flattened to " ++ show expr'
-                return expr'
+    if dir == ParamIn && not defd
+    then do -- Reference to an undefined variable: assume it's meant to be
+            -- a niladic function instead of a variable reference
+        logFlatten $ "  Unknown variable '" ++ show name
+            ++ "' flattened to niladic function call"
+        flattenCall (ProcCall [] name Nothing Det False) False ty castFrom pos []
+    else do
+        noteVarMention name dir
+        let expr' = typeAndPlace expr ty castFrom pos
+        logFlatten $ "  Arg flattened to " ++ show expr'
+        return expr'
 flattenExp expr@(ProcRef _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos
 flattenExp (Where stmts pexp) _ _ _ = do
@@ -550,17 +553,20 @@ flattenExp (CondExp cond thn els) ty castFrom pos = do
 --         Fncall m nm' []   -> return (m, nm')
 --         _ -> shouldnt "flattenExp @"
 --     flattenExp (ProcRef (ProcSpec m nm 0 generalVersion)) ty castFrom pos
-flattenExp (Lambda pstmts) ty castFrom pos = do
+flattenExp expr@(Lambda pstmts) ty castFrom pos = do
     state <- get
     modify (\s -> s{flattened=[], postponed=[], holes=Map.empty})
     flattenStmts pstmts Det
     flushPostponed
     pstmts' <- gets (reverse . flattened)
     params <- gets (Map.elems . Map.mapKeys (read :: String -> Int) . holes)
-    let proto = ProcProto "foo" params Set.empty
+    name <- specialName2 "lambda" <$> liftIO (prettyPos pos)
+    let proto = ProcProto name params Set.empty
     let decl = ProcDecl Private defaultProcModifiers proto pstmts' pos
+    logFlatten $ "  New proc decl " ++ show decl
     put state{procs = decl:procs state}
-    return $ typeAndPlace (ProcRef (ProcSpec [] "foo" 0 generalVersion)) ty castFrom pos
+    currMod <- lift getModuleSpec
+    return $ typeAndPlace (ProcRef (ProcSpec currMod name 0 generalVersion)) ty castFrom pos
 flattenExp (Fncall mod name exps) ty castFrom pos = do
     flattenCall (ProcCall mod name Nothing Det False) False ty castFrom pos exps
 flattenExp (ForeignFn lang name flags exps) ty castFrom pos = do

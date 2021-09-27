@@ -600,8 +600,10 @@ applyPrefixOp tok stmtExpr = do
         ("~", Foreign{}) -> return $ call1 pos "~" stmtExpr
         ("~", _) -> fail $ "cannot negate " ++ show stmtExpr
         ("?", Call{callArguments=[]}) -> return $ setCallFlow ParamOut stmtExpr'
-        ("?", _) -> fail $ "unexpected " ++ show stmtExpr'++ " following '?'"
         ("!", Call{}) -> return $ setCallFlow ParamInOut stmtExpr'
+        (flow, Call{callName="@", callModule=[], callArguments=[arg@IntConst{}]})
+          | flow `elem` ["?", "!"] -> return $ setCallFlow ParamOut stmtExpr'
+        ("?", _) -> fail $ "unexpected " ++ show stmtExpr'++ " following '?'"
         ("!", _) -> fail $ "unexpected " ++ show stmtExpr' ++ " following '!'"
         ("@", arg@IntConst{}) -> return $ Call pos [] "@" ParamIn [arg]
         ("@", _) -> fail $ "unexpected " ++ show stmtExpr' ++ " following '@'"

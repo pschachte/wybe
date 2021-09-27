@@ -10,6 +10,7 @@ module Types (validateModExportTypes, typeCheckModSCC) where
 
 
 import           AST
+import           Debug.Trace
 import           Control.Monad
 import           Control.Monad.State
 import           Data.Graph
@@ -606,15 +607,15 @@ unifyTypes' reason ty1@(TypeSpec m1 n1 ps1) ty2@(TypeSpec m2 n2 ps2)
           | m2 `isSuffixOf` m1 = (True,  m1)
           | otherwise          = (False, [])
 unifyTypes' reason (HigherOrderType ps1) (HigherOrderType ps2)
-    | length ps1 == length ps2 && and (zipWith (==) ps2Flows ps2Flows) =
+    | length ps1 == length ps2 && and (zipWith (==) ps1Flows ps2Flows) = do
         HigherOrderType . zipWith (flip TypeFlow) ps1Flows <$> 
             zipWithM (unifyTypes reason) ps1Types ps2Types
     | otherwise = typeError reason >> return InvalidType 
     where 
-        ps1Flows = List.map typeFlowMode ps1
-        ps2Flows = List.map typeFlowMode ps2
-        ps1Types = List.map typeFlowType ps1
-        ps2Types = List.map typeFlowType ps2
+        ps1Flows = typeFlowMode <$> ps1
+        ps2Flows = typeFlowMode <$> ps2
+        ps1Types = typeFlowType <$> ps1
+        ps2Types = typeFlowType <$> ps2
 unifyTypes' reason _ _ = return InvalidType
 
 
