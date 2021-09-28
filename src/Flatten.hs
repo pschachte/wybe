@@ -285,7 +285,7 @@ flattenStmt' stmt@(ProcCall [] name _ _ _ []) pos _ = do
         else emit pos stmt
 flattenStmt' (ProcCall mod name procID detism res args) pos d = do
     defined <- gets defdVars
-    if name `elem` defined
+    if name `elem` defined && List.null mod
     then do
         unless (isNothing procID && detism == Det && not res)
           $ shouldnt "bad higher call"
@@ -545,17 +545,9 @@ flattenExp (CondExp cond thn els) ty castFrom pos = do
                 Nothing Nothing)
         pos Det
     return $ maybePlace (Var resultName ParamIn flowType) pos
--- flattenExp (Fncall [] "@" [arg]) ty castFrom pos = do
---     currMod <- lift getModuleSpec
---     (m, nm) <- case content arg of
---         Var nm ParamIn _ -> return (currMod, nm)
---         Fncall ["_"] nm' []   -> return (currMod, nm')
---         Fncall m nm' []   -> return (m, nm')
---         _ -> shouldnt "flattenExp @"
---     flattenExp (ProcRef (ProcSpec m nm 0 generalVersion)) ty castFrom pos
 flattenExp expr@(Lambda pstmts) ty castFrom pos = do
     state <- get
-    modify (\s -> s{flattened=[], postponed=[], holes=Map.empty})
+    modify (\s -> s{defdVars=Set.empty, flattened=[], postponed=[], holes=Map.empty})
     flattenStmts pstmts Det
     flushPostponed
     pstmts' <- gets (reverse . flattened)
@@ -568,22 +560,17 @@ flattenExp expr@(Lambda pstmts) ty castFrom pos = do
     currMod <- lift getModuleSpec
     return $ typeAndPlace (ProcRef (ProcSpec currMod name 0 generalVersion)) ty castFrom pos
 flattenExp (Fncall mod name exps) ty castFrom pos = do
-    flattenCall (ProcCall mod name Nothing Det False) False ty castFrom pos exps
+    defd <- gets (Set.member name . defdVars)
+    let stmtBuilder = if defd && List.null mod
+                      then HigherCall (maybePlace (Var name ParamIn Ordinary) pos)
+                      else ProcCall mod name Nothing Det False
+    flattenCall stmtBuilder False ty castFrom pos exps
 flattenExp (ForeignFn lang name flags exps) ty castFrom pos = do
     flattenCall (ForeignCall lang name flags) True ty castFrom pos exps
 flattenExp (Typed exp AnyType _) ty castFrom pos = do
     flattenExp exp ty castFrom pos
 flattenExp (Typed exp ty castFrom) _ _ pos = do
     flattenExp exp ty castFrom pos
-
-
--- fillHoles :: [Placed Stmt] -> Flattener ([Param])
--- fillHoles pstmts = do
---     flushPostponed
---     pstmts' <- gets (reverse . flattened)
---     return []
-    
-
 
 
 -- |Flatten a Wybe or foreign *function* call, returning a simple expression for

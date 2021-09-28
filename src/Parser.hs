@@ -350,7 +350,7 @@ limitedStmtExpr precedence = stmtExprFirst >>= stmtExprRest precedence
 stmtExprFirst :: Parser StmtExpr
 stmtExprFirst = (do
              op <- prefixOp
-             primaryStmtExpr >>= stmtExprSuffix >>= applyPrefixOp op)
+             stmtExprFirst >>= applyPrefixOp op)
          <|> (primaryStmtExpr >>= stmtExprSuffix)
 
 
@@ -588,8 +588,7 @@ prefixOp = choice $ List.map symbol ["-", "~", "?", "!", "@"]
 applyPrefixOp :: Token -> StmtExpr -> Parser StmtExpr
 applyPrefixOp tok stmtExpr = do
     let pos = tokenPosition tok
-    let stmtExpr' = stmtExpr
-    case (tokenName tok, stmtExpr') of
+    case (tokenName tok, stmtExpr) of
         ("-", IntConst _ num) -> return $ IntConst pos (-num)
         ("-", FloatConst _ num) -> return $ FloatConst pos (-num)
         ("-", Call{}) -> return $ call1 pos "-" stmtExpr
@@ -599,14 +598,15 @@ applyPrefixOp tok stmtExpr = do
         ("~", Call{}) -> return $ call1 pos "~" stmtExpr
         ("~", Foreign{}) -> return $ call1 pos "~" stmtExpr
         ("~", _) -> fail $ "cannot negate " ++ show stmtExpr
-        ("?", Call{callArguments=[]}) -> return $ setCallFlow ParamOut stmtExpr'
-        ("!", Call{}) -> return $ setCallFlow ParamInOut stmtExpr'
-        (flow, Call{callName="@", callModule=[], callArguments=[arg@IntConst{}]})
-          | flow `elem` ["?", "!"] -> return $ setCallFlow ParamOut stmtExpr'
-        ("?", _) -> fail $ "unexpected " ++ show stmtExpr'++ " following '?'"
-        ("!", _) -> fail $ "unexpected " ++ show stmtExpr' ++ " following '!'"
+        ("?", Call{callVariableFlow=ParamIn, callName="@", callModule=[], 
+                   callArguments=[IntConst{}]})
+          -> return $ setCallFlow ParamOut stmtExpr
+        ("?", Call{callVariableFlow=ParamIn}) -> return $ setCallFlow ParamOut stmtExpr
+        ("?", _) -> fail $ "unexpected " ++ show stmtExpr ++ " following '?'"
+        ("!", Call{callVariableFlow=ParamIn}) -> return $ setCallFlow ParamInOut stmtExpr
+        ("!", _) -> fail $ "unexpected " ++ show stmtExpr ++ " following '!'"
         ("@", arg@IntConst{}) -> return $ Call pos [] "@" ParamIn [arg]
-        ("@", _) -> fail $ "unexpected " ++ show stmtExpr' ++ " following '@'"
+        ("@", _) -> fail $ "unexpected " ++ show stmtExpr ++ " following '@'"
         (_,_) -> shouldnt $ "Unknown prefix operator " ++ show tok
                             ++ " in applyPrefixOp"
 
@@ -1067,11 +1067,10 @@ stmtExprToTypeSpec call@(Call pos mod name ParamIn params) = do
     if not (List.null params) && all isHigherOrder specs && name == "_"
     then return $ HigherOrderType $ concatMap higherTypeParams specs
     else if any isHigherOrder specs
-    then Left (pos, "invaid type specification")
+    then syntaxError pos "invaid type specification"
     else return $ TypeSpec mod name specs
 stmtExprToTypeSpec other =
-    syntaxError (stmtExprPos other)
-        $ "invalid type specification " ++ show other
+    syntaxError (stmtExprPos other) $ "invalid type specification " ++ show other
 
 
 -- | Translate a StmtExpr to a proc or func prototype (with empty resource list)

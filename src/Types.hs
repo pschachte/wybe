@@ -465,6 +465,10 @@ ultimateType ty@TypeVariable{typeVariableName=tvar} = do
 ultimateType (TypeSpec mod name args) = do
     args' <- mapM ultimateType args
     return $ TypeSpec mod name args'
+ultimateType HigherOrderType{higherTypeParams=params} = do
+    types <- mapM ultimateType $ typeFlowType <$> params
+    let flows = typeFlowMode <$> params 
+    return $ HigherOrderType $ zipWith TypeFlow types flows
 ultimateType ty = return ty
 
 
@@ -622,26 +626,22 @@ unifyTypes' reason _ _ = return InvalidType
 -- | Checks if two types' are cyclic. 
 -- That is if one type variable is contained in the other
 occursCheck :: TypeSpec -> TypeSpec -> Bool
+occursCheck TypeVariable{} TypeVariable{} = False
 occursCheck ty1@TypeVariable{typeVariableName=nm} ty2
-  = containstypeVar nm ty2
+  = containsTypeVar nm ty2
 occursCheck ty1 ty2@TypeVariable{typeVariableName=nm}
-  = containstypeVar nm ty1
+  = containsTypeVar nm ty1
 occursCheck _ _ = False
 
 
 -- | Checks if the given TypeVarName is contained within the TypeSpec.
 -- Does not hold for a TypeVariable
-containstypeVar :: TypeVarName -> TypeSpec -> Bool
-containstypeVar nm TypeSpec{typeParams=tys} = any (containstypeVar' nm) tys
-containstypeVar _ _ = False
-
-
--- | Checks if the given TypeVarName is contained within the TypeSpec.
--- Holds for a TypeVariable
-containstypeVar' :: TypeVarName -> TypeSpec -> Bool
-containstypeVar' nm TypeVariable{typeVariableName=nm'} = nm == nm'
-containstypeVar' nm TypeSpec{typeParams=tys} = any (containstypeVar' nm) tys
-containstypeVar' _ _ = False
+containsTypeVar :: TypeVarName -> TypeSpec -> Bool
+containsTypeVar nm TypeVariable{typeVariableName=nm'} = nm == nm'
+containsTypeVar nm TypeSpec{typeParams=tys} = any (containsTypeVar nm) tys
+containsTypeVar nm HigherOrderType{higherTypeParams=params} 
+  = any (containsTypeVar nm . typeFlowType) params
+containsTypeVar _ _ = False
 
 
 -- |Generate a unique fresh type variable.
@@ -693,7 +693,11 @@ expType' (StringValue _ CString) _    = return $ TypeSpec ["wybe"] "c_string" []
 expType' (CharValue _) _              = return $ TypeSpec ["wybe"] "char" []
 expType' (ProcRef modSpec) _     = do 
     params <- procProtoParams . procProto <$> lift (getProcDef modSpec)
-    return $ HigherOrderType $ (\(Param _ t f _) -> TypeFlow t f) <$> params
+    let typeFlows = paramTypeFlow <$> params
+    let types = typeFlowType <$> typeFlows
+    let flows = typeFlowMode <$> typeFlows
+    types' <- refreshTypes types
+    return $ HigherOrderType $ zipWith TypeFlow types' flows
 expType' (Var name _ _) _             = ultimateVarType name
 expType' (Typed _ typ _) pos          =
     lift (lookupType "typed expression" pos typ) >>= ultimateType
@@ -1306,6 +1310,10 @@ refreshTypeVar ty@TypeVariable{typeVariableName=nm} = do
 refreshTypeVar ty@TypeSpec{typeParams=tys} = do
     tys' <- refreshTypeVars tys
     return ty{typeParams=tys'}
+refreshTypeVar ty@HigherOrderType{higherTypeParams=params} = do
+    types <- refreshTypeVars $ typeFlowType <$> params
+    let flows = typeFlowMode <$> params 
+    return $ HigherOrderType $ zipWith TypeFlow types flows
 refreshTypeVar ty = return ty
 
 
