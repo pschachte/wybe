@@ -701,9 +701,7 @@ expandArg arg@ArgVar{argVarName=var, argVarFlow=FlowIn} = do
     let ty = argVarType arg
     let var'' = setArgType ty <$> var' 
     logBuild $ "Expanded " ++ show var ++ " to " ++ show var''
-    if Just arg == var''
-    then return $ trustFromJust "expandArg" var''
-    else maybe (return arg) expandArg var''
+    maybe (return arg) expandArg var''
 expandArg arg@ArgVar{argVarName=var, argVarFlow=FlowOut} = do
     var' <- gets (Map.findWithDefault var var . outSubst)
     when (var /= var')

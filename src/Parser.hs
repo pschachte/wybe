@@ -608,7 +608,6 @@ applyPrefixOp tok stmtExpr = do
         ("@", arg@IntConst{}) -> return $ Call pos [] "@" ParamIn [arg]
         ("@", _) -> fail $ "unexpected " ++ show stmtExpr ++ " following '@'"
         (":", _) -> return $ Call pos [] ":" ParamIn [stmtExpr]
-        -- ("@", _) -> fail $ "unexpected " ++ show stmtExpr ++ " following '@'"
         (_,_) -> shouldnt $ "Unknown prefix operator " ++ show tok
                             ++ " in applyPrefixOp"
 
