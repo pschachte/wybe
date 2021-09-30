@@ -580,7 +580,7 @@ prototypePrecedence = 10
 
 -- |Prefix operator symbols; these all bind very tightly
 prefixOp :: Parser Token
-prefixOp = choice $ List.map symbol ["-", "~", "?", "!", "@"]
+prefixOp = choice $ List.map symbol ["-", "~", "?", "!", "@", ":"]
 
 
 -- |Apply the specified prefix op to the specified stmtExpr.  Fail if it should
@@ -607,6 +607,8 @@ applyPrefixOp tok stmtExpr = do
         ("!", _) -> fail $ "unexpected " ++ show stmtExpr ++ " following '!'"
         ("@", arg@IntConst{}) -> return $ Call pos [] "@" ParamIn [arg]
         ("@", _) -> fail $ "unexpected " ++ show stmtExpr ++ " following '@'"
+        (":", _) -> return $ Call pos [] ":" ParamIn [stmtExpr]
+        -- ("@", _) -> fail $ "unexpected " ++ show stmtExpr ++ " following '@'"
         (_,_) -> shouldnt $ "Unknown prefix operator " ++ show tok
                             ++ " in applyPrefixOp"
 
@@ -1055,10 +1057,10 @@ translateConditionalExp' stmtExpr =
 
 -- |Convert a StmtExpr to a TypeSpec, or produce an error
 stmtExprToTypeSpec :: TranslateTo TypeSpec
--- stmtExprToTypeSpec (Call _ [] ":" flow [Call _ [] nm ParamOut []]) = 
---     return $ HigherOrderType [TypeFlow (TypeVariable nm) flow]
--- stmtExprToTypeSpec (Call _ [] ":" flow [Call _ m nm ParamIn args]) = 
---     HigherOrderType . ((:[]) . flip TypeFlow flow) . TypeSpec m nm <$> mapM stmtExprToTypeSpec args
+stmtExprToTypeSpec (Call _ [] ":" flow [Call _ [] nm ParamOut []]) = 
+    return $ HigherOrderType [TypeFlow (TypeVariable nm) flow]
+stmtExprToTypeSpec (Call _ [] ":" flow [Call _ m nm ParamIn args]) = 
+    HigherOrderType . ((:[]) . flip TypeFlow flow) . TypeSpec m nm <$> mapM stmtExprToTypeSpec args
 stmtExprToTypeSpec (Call _ [] ":" _ [Call _ [] "_" flow [],arg]) = 
     HigherOrderType . ((:[]) . flip TypeFlow flow) <$> stmtExprToTypeSpec arg
 stmtExprToTypeSpec (Call _ [] name ParamOut []) = Right $ TypeVariable name

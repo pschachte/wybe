@@ -499,18 +499,26 @@ flattenExp expr@(CharValue _) ty castFrom pos =
 flattenExp expr@(Var "_" ParamIn _) ty castFrom pos = do
     dummyName <- tempVar
     return $ typeAndPlace (Var dummyName ParamOut Ordinary) AnyType castFrom pos
-flattenExp expr@(Var holeNm dir Hole) ty castFrom pos = do
+flattenExp expr@(Var holeNm vDir Hole) ty castFrom pos = do
     logFlatten $ "checking hole " ++ show expr
     hs <- gets holes
     case Map.lookup holeNm hs of
         Nothing -> do
             varNm <- tempVar
-            let param = Param varNm AnyType dir Hole
+            let param = Param varNm AnyType vDir Hole
             noteVarDef varNm
             modify (\s -> s{holes=Map.insert holeNm param hs})
-            return $ typeAndPlace (Var varNm dir Hole) ty castFrom pos
-        Just param@(Param pNm _ pFlow _) -> do
-            return $ typeAndPlace (Var pNm dir Hole) ty castFrom pos
+            return $ typeAndPlace (Var varNm vDir Hole) ty castFrom pos
+        Just param@(Param pNm _ pDir _) -> do
+            let pDir' = case (pDir,vDir) of
+                            (ParamInOut, _) -> ParamInOut
+                            (ParamIn, ParamIn) -> ParamIn
+                            (ParamIn, _) -> ParamInOut
+                            (ParamOut, ParamOut) -> ParamOut
+                            (ParamOut, _) -> vDir
+            let param = Param pNm AnyType pDir' Hole   
+            modify (\s -> s{holes=Map.insert holeNm param hs})
+            return $ typeAndPlace (Var pNm vDir Hole) ty castFrom pos
 flattenExp expr@(Var name dir _) ty castFrom pos = do
     logFlatten $ "  Flattening arg " ++ show expr
     defd <- gets (Set.member name . defdVars)

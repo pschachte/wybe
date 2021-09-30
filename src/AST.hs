@@ -3170,7 +3170,7 @@ instance Show TypeSpec where
   show (TypeSpec optmod ident args) =
       maybeModPrefix optmod ++ ident ++ showArguments args
   show (HigherOrderType params) =
-      "_(" ++ intercalate ", " (List.map (\(TypeFlow t f) -> flowPrefix f ++ "_" ++ ":" ++ show t) params) ++ ")"
+      "_(" ++ intercalate ", " ((\(TypeFlow t f) -> flowPrefix f ++ ":" ++ show t) <$> params) ++ ")"
 
 
 -- |Show the use declaration for a set of resources, if it's non-empty.
