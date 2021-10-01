@@ -1193,8 +1193,7 @@ declaration of the procedure must be consulted to see which values they are.
 
 Most commonly, a procedure that uses a resource is called in the
 definition of another procedure that uses that resource.
-However, it may also be called from a procedure where the resource name is used
-as a local variable, or inside a [scoped](#scoping) resource use.
+However, it may also be called inside a [scoped](#scoping) resource use.
 
 ### <a name="scoping"></a>Scoping a resource use
 
