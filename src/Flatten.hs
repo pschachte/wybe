@@ -58,7 +58,7 @@ import Data.Type.Equality (inner)
 --                        Exported Functions
 ----------------------------------------------------------------
 
-flattenProcDecl :: Item -> Compiler ([Item],Int)
+flattenProcDecl :: Item -> Compiler (Item,Int)
 flattenProcDecl (ProcDecl vis mods proto stmts pos) = do
     let params = procProtoParams proto
     logMsg Flatten $ "** Flattening "
@@ -72,9 +72,9 @@ flattenProcDecl (ProcDecl vis mods proto stmts pos) = do
     let inResources = Set.map (resourceName . resourceFlowRes) $
                    Set.filter (flowsIn . resourceFlowFlow) $
                    procProtoResources proto
-    (stmts',items,tmpCtr) <- flattenBody stmts (inParams `Set.union` inResources)
+    (stmts',tmpCtr) <- flattenBody stmts (inParams `Set.union` inResources)
                        (modifierDetism mods)
-    return (ProcDecl vis mods proto stmts' pos:items,tmpCtr)
+    return (ProcDecl vis mods proto stmts' pos,tmpCtr)
 flattenProcDecl _ =
     shouldnt "flattening a non-proc item"
 
@@ -82,7 +82,7 @@ flattenProcDecl _ =
 -- |Flatten the specified statement sequence given a set of input parameter
 -- and resource names.
 flattenBody :: [Placed Stmt] -> Set VarName -> Determinism
-            -> Compiler ([Placed Stmt],[Item],Int)
+            -> Compiler ([Placed Stmt],Int)
 flattenBody stmts varSet detism = do
     logMsg Flatten $ "Flattening body" ++ showBody 4 stmts
     logMsg Flatten $ "Flattening with parameters = " ++ show varSet
@@ -90,8 +90,7 @@ flattenBody stmts varSet detism = do
     logMsg Flatten $ "Flattening with all vars = " ++ show varSet'
     finalState <- execStateT (flattenStmts stmts detism)
                   $ initFlattenerState varSet'
-    unless (Map.null (holes finalState)) $ shouldnt "bad holes"
-    return (List.reverse (flattened finalState), procs finalState, tempCtr finalState)
+    return (List.reverse (flattened finalState), tempCtr finalState)
 
 
 -- | Insert the expression var name if it's an output variable; otherwise leave
@@ -111,22 +110,20 @@ type Flattener = StateT FlattenerState Compiler
 
 
 data FlattenerState = Flattener {
-    flattened   :: [Placed Stmt],   -- ^Flattened code generated, reversed
-    postponed   :: [Placed Stmt],   -- ^Flattened code to come after
-    procs       :: [Item],          -- ^Flattened anonymous procs
-    holes       :: Map.Map VarName Param,       
-                                    -- ^Map of encountered holes,
-                                    -- should be empty
-    tempCtr     :: Int,             -- ^Temp variable counter
-    currPos     :: OptPos,          -- ^Position of current statement
-    stmtDefs    :: Set VarName,     -- ^Variables defined by this statement
-    defdVars    :: Set VarName      -- ^Variables defined somewhere in this
-                                    -- proc body
+    flattened     :: [Placed Stmt], -- ^Flattened code generated, reversed
+    postponed     :: [Placed Stmt], -- ^Flattened code to come after
+    totalLambdas  :: Int,           -- ^Total number of lambdas encountered
+    currentLambda :: Int,           -- ^Current lambda number
+    tempCtr       :: Int,           -- ^Temp variable counter
+    currPos       :: OptPos,        -- ^Position of current statement
+    stmtDefs      :: Set VarName,   -- ^Variables defined by this statement
+    defdVars      :: Set VarName    -- ^Variables defined somewhere in this
+                                   -- proc body
     }
 
 
 initFlattenerState :: Set VarName -> FlattenerState
-initFlattenerState = Flattener [] [] [] Map.empty 0 Nothing Set.empty
+initFlattenerState = Flattener [] [] 0 0 0 Nothing Set.empty
 
 
 emit :: OptPos -> Stmt -> Flattener ()
@@ -289,7 +286,8 @@ flattenStmt' (ProcCall mod name procID detism res args) pos d = do
     then do
         unless (isNothing procID && detism == Det && not res)
           $ shouldnt "bad higher call"
-        flattenStmt' (HigherCall (Unplaced (Var name ParamIn Ordinary)) args) pos d
+        flattenStmt' (HigherCall (maybePlace (Var name ParamIn Ordinary) pos) args) 
+                     pos d
     else do
         logFlatten "   call is Det"
         args' <- flattenStmtArgs args pos
@@ -446,6 +444,7 @@ flattenAssignment var varArg value pos = do
     let instr = ForeignCall "llvm" "move" [] [valueArg, varArg']
     logFlatten $ "  transformed to " ++ showStmt 4 instr
     noteVarDef var
+    noteVarIntro var
     emit pos instr
     flushPostponed
 
@@ -499,26 +498,22 @@ flattenExp expr@(CharValue _) ty castFrom pos =
 flattenExp expr@(Var "_" ParamIn _) ty castFrom pos = do
     dummyName <- tempVar
     return $ typeAndPlace (Var dummyName ParamOut Ordinary) AnyType castFrom pos
-flattenExp expr@(Var holeNm vDir Hole) ty castFrom pos = do
-    logFlatten $ "checking hole " ++ show expr
-    hs <- gets holes
-    case Map.lookup holeNm hs of
-        Nothing -> do
-            varNm <- tempVar
-            let param = Param varNm AnyType vDir Hole
-            noteVarDef varNm
-            modify (\s -> s{holes=Map.insert holeNm param hs})
-            return $ typeAndPlace (Var varNm vDir Hole) ty castFrom pos
-        Just param@(Param pNm _ pDir _) -> do
-            let pDir' = case (pDir,vDir) of
-                            (ParamInOut, _) -> ParamInOut
-                            (ParamIn, ParamIn) -> ParamIn
-                            (ParamIn, _) -> ParamInOut
-                            (ParamOut, ParamOut) -> ParamOut
-                            (ParamOut, _) -> vDir
-            let param = Param pNm AnyType pDir' Hole   
-            modify (\s -> s{holes=Map.insert holeNm param hs})
-            return $ typeAndPlace (Var pNm vDir Hole) ty castFrom pos
+flattenExp expr@(Var name dir Hole) ty castFrom pos = do
+    logFlatten $ "  Flattening hole " ++ show expr
+    lambdas <- gets currentLambda
+    if lambdas == 0
+    then do
+        lift $ message Error
+              ("Hole @" ++ name ++ " outside of lambda expression")
+              pos
+        return $ typeAndPlace (Var name dir Hole) ty castFrom pos 
+    else do
+        let name' = specialName2 (show lambdas) name 
+        noteVarIntro name'
+        noteVarMention name' dir
+        let expr' = typeAndPlace (Var name' dir Hole) ty castFrom pos
+        logFlatten $ "  Hole flattened to " ++ show expr'
+        return expr'
 flattenExp expr@(Var name dir _) ty castFrom pos = do
     logFlatten $ "  Flattening arg " ++ show expr
     defd <- gets (Set.member name . defdVars)
@@ -529,6 +524,7 @@ flattenExp expr@(Var name dir _) ty castFrom pos = do
             ++ "' flattened to niladic function call"
         flattenCall (ProcCall [] name Nothing Det False) False ty castFrom pos []
     else do
+        when (flowsOut dir) $ noteVarIntro name
         noteVarMention name dir
         let expr' = typeAndPlace expr ty castFrom pos
         logFlatten $ "  Arg flattened to " ++ show expr'
@@ -555,18 +551,14 @@ flattenExp (CondExp cond thn els) ty castFrom pos = do
     return $ maybePlace (Var resultName ParamIn flowType) pos
 flattenExp expr@(Lambda pstmts) ty castFrom pos = do
     state <- get
-    modify (\s -> s{defdVars=Set.empty, flattened=[], postponed=[], holes=Map.empty})
+    let lambdaNum = totalLambdas state + 1
+    modify (\s -> s{flattened=[], postponed=[], 
+                    currentLambda=lambdaNum, totalLambdas=lambdaNum})
     flattenStmts pstmts Det
     flushPostponed
-    pstmts' <- gets (reverse . flattened)
-    params <- gets (Map.elems . Map.mapKeys (read :: String -> Int) . holes)
-    name <- specialName2 "lambda" <$> liftIO (prettyPos pos)
-    let proto = ProcProto name params Set.empty
-    let decl = ProcDecl Private defaultProcModifiers proto pstmts' pos
-    logFlatten $ "  New proc decl " ++ show decl
-    put state{procs = decl:procs state}
-    currMod <- lift getModuleSpec
-    return $ typeAndPlace (ProcRef (ProcSpec currMod name 0 generalVersion)) ty castFrom pos
+    state' <- get
+    put state{totalLambdas=totalLambdas state', tempCtr=tempCtr state'}
+    return $ typeAndPlace (Lambda (reverse $ flattened state')) ty castFrom pos
 flattenExp (Fncall mod name exps) ty castFrom pos = do
     defd <- gets (Set.member name . defdVars)
     let stmtBuilder = if defd && List.null mod

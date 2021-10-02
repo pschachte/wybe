@@ -56,7 +56,7 @@ module AST (
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, ResourceDef(..), FlowDirection(..),
   argFlowDirection, argType, setArgType, argDescription, flowsIn, flowsOut,
-  foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
+  foldStmts, foldStmtsLambda, foldExps, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, procCallToExp, expOutputs, 
   pexpListOutputs, setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
@@ -84,6 +84,7 @@ module AST (
   ProcModifiers(..), defaultProcModifiers, setDetism, setInline, setImpurity,
   showProcModifiers, Inlining(..), Impurity(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
+  expHoles,
   specialChar, specialName, specialName2, outputVariableName, outputStatusName,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
   showModSpecs, showResources, showOptPos, showProcDefs, showUse,
@@ -1106,11 +1107,12 @@ addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0
                   Map.empty vis detism inlining impurity $ initSuperprocSpec vis
     addProcDef procDef
+    return ()
 addProc _ item =
     shouldnt $ "addProc given non-Proc item " ++ show item
 
 
-addProcDef :: ProcDef -> Compiler ()
+addProcDef :: ProcDef -> Compiler ProcSpec
 addProcDef procDef = do
     let name = procName procDef
     let vis = procVis procDef
@@ -1130,7 +1132,7 @@ addProcDef procDef = do
         ) name))
     logAST $ "Adding definition of " ++ show spec ++ ":" ++
       showProcDef 4 procDef
-    return ()
+    return spec
 
 
 getParams :: ProcSpec -> Compiler [Param]
@@ -2122,9 +2124,20 @@ defaultBlock =  LLBlock { llInstrs = [], llTerm = TermNop }
 
 -- |Fold over a list of statements in a pre-order left-to-right traversal.
 -- Takes two folding functions, one for statements and one for expressions.
+-- This *does not* fold over nested statements inside a lambda expression
 foldStmts :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> [Placed Stmt] -> a
 foldStmts sfn efn val stmts =
     List.foldl (\val pstmt -> foldStmt sfn efn val $ content pstmt) val stmts
+
+
+-- |Fold over a list of statements in a pre-order left-to-right traversal.
+-- Takes two folding functions, one for statements and one for expressions.
+-- This *does* fold over nested statements inside a lambda expression
+foldStmtsLambda :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> [Placed Stmt] -> a
+foldStmtsLambda sfn efn val stmts = foldStmts sfn efn' val stmts
+    where 
+        efn' val exp@(Lambda ss) = foldStmts sfn efn' (efn val exp) ss 
+        efn' val exp             = efn val exp
 
 
 -- |Fold over the specified statement and all the statements nested within it,
@@ -2191,7 +2204,7 @@ foldExp' _   _    val FloatValue{}   = val
 foldExp' _   _    val StringValue{}  = val
 foldExp' _   _    val CharValue{}    = val
 foldExp' _   _    val Var{}          = val
-foldExp' sfn efn  val (Lambda ss)    = foldStmts sfn efn val ss
+foldExp' _   _    val Lambda{}       = val
 foldExp' _   _    val ProcRef{}      = val
 foldExp' sfn efn val (Typed exp _ _) = foldExp sfn efn val exp
 foldExp' sfn efn val (Where stmts exp) =
@@ -2524,13 +2537,13 @@ data Exp
       | CharValue Char
       | StringValue String StringVariant
       | Var VarName FlowDirection ArgFlowType
+      | Lambda [Placed Stmt]
       | ProcRef ProcSpec
       | Typed Exp TypeSpec (Maybe TypeSpec)
                -- ^explicitly typed expr giving the type of the expression, and,
                -- if it is a cast, the type of the Exp argument.  If not a cast,
                -- these two must be the same.
       -- The following are eliminated during flattening
-      | Lambda [Placed Stmt]
       | Where [Placed Stmt] (Placed Exp)
       | CondExp (Placed Stmt) (Placed Exp) (Placed Exp)
       | Fncall ModSpec ProcName [Placed Exp]
@@ -2548,6 +2561,7 @@ flattenedExpFlow (IntValue _)      = ParamIn
 flattenedExpFlow (FloatValue _)    = ParamIn
 flattenedExpFlow (CharValue _)     = ParamIn
 flattenedExpFlow (StringValue _ _) = ParamIn
+flattenedExpFlow (Lambda _)        = ParamIn
 flattenedExpFlow (ProcRef _)       = ParamIn
 flattenedExpFlow (Var _ flow _)    = flow
 flattenedExpFlow (Typed exp _ _)   = flattenedExpFlow exp
@@ -2912,6 +2926,21 @@ varsInPrimArg _ (ArgProcRef _ _)  = Set.empty
 varsInPrimArg _ (ArgUnneeded _ _) = Set.empty
 varsInPrimArg _ (ArgUndef _)      = Set.empty
 
+-- | Add a hole to a map of hole names to respective params
+expHoles :: Map.Map String Param -> Exp -> Map.Map String Param
+expHoles holes (Var nm vFlow Hole) = 
+    case Map.lookup nm holes of
+        Nothing -> Map.insert nm (Param nm AnyType vFlow Hole) holes
+        Just (Param _ _ pFlow _) -> 
+            let vFlow' = case (pFlow, vFlow) of
+                            (ParamInOut, _) -> ParamInOut
+                            (ParamIn, ParamIn) -> ParamIn
+                            (ParamIn, _) -> ParamInOut
+                            (ParamOut, ParamOut) -> ParamOut
+                            (ParamOut, _) -> vFlow
+            in Map.insert nm (Param nm AnyType vFlow' Hole) holes
+expHoles holes _ = holes
+
 
 ----------------------------------------------------------------
 --                       Generating Symbols
@@ -3053,7 +3082,7 @@ instance Show TypeRepresentation where
   show (Signed bits) = show bits ++ " bit signed"
   show (Floating bits) = show bits ++ " bit float"
   show (Func ins outs) = 
-      "funtion {" ++ intercalate ", " (List.map show outs) ++ "}"
+      "function {" ++ intercalate ", " (List.map show outs) ++ "}"
       ++ "(" ++ intercalate ", " (List.map show ins) ++ ")"
 
 

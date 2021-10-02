@@ -67,6 +67,7 @@
 module Unbranch (unbranchProc) where
 
 import AST
+import Debug.Trace
 import Snippets
 import Control.Monad
 import Control.Monad.Trans (lift)
@@ -344,9 +345,9 @@ unbranchStmts detism (stmt:stmts) alt sense = do
 --
 unbranchStmt :: Determinism -> Stmt -> OptPos -> [Placed Stmt] -> [Placed Stmt]
              -> Bool -> Unbrancher [Placed Stmt]
--- XXX this may not be correct
-unbranchStmt detism stmt@(HigherCall _ _) pos stmts alt sense 
-   = leaveStmtAsIs detism stmt pos stmts alt sense
+unbranchStmt detism stmt@(HigherCall _ args) pos stmts alt sense = do
+    defArgs args
+    leaveStmtAsIs detism stmt pos stmts alt sense
 unbranchStmt _ stmt@(ProcCall _ _ _ _ True args) _ _ _ _ =
     shouldnt $ "Resources should have been handled before unbranching: "
                ++ showStmt 4 stmt
@@ -360,6 +361,7 @@ unbranchStmt SemiDet stmt@(ProcCall md name procID SemiDet _ args) pos
     testResultVar <- tempVar
     let args' = args ++ [Unplaced (boolVarSet testResultVar)]
     defArgs args'
+    args'' <- hoistLambdas args'
     condVars <- gets brVars
     stmts' <- unbranchStmts SemiDet stmts alt sense
     let val = boolVarGet testResultVar
@@ -367,24 +369,28 @@ unbranchStmt SemiDet stmt@(ProcCall md name procID SemiDet _ args) pos
     logUnbranch $ "mkCond " ++ show sense ++ " " ++ show val
                   ++ showBody 4 stmts' ++ "\nelse"
                   ++ showBody 4 alt
-    let result = maybePlace (ProcCall md name procID Det False args') pos
+    let result = maybePlace (ProcCall md name procID Det False args'') pos
                  : mkCond sense val pos stmts' alt condVars vars
     logUnbranch $ "#Converted SemiDet proc call" ++ show stmt
     logUnbranch $ "#To: " ++ showBody 4 result
     return result
-unbranchStmt detism stmt@(ProcCall _ _ _ calldetism _ args) pos stmts alt
+unbranchStmt detism stmt@(ProcCall m nm pId calldetism r args) pos stmts alt
              sense = do
     logUnbranch $ "Unbranching call " ++ showStmt 4 stmt
     defArgs args
+    args' <- hoistLambdas args
+    let stmt' = ProcCall m nm pId calldetism r args'
     case calldetism of
-      Terminal -> return [maybePlace stmt pos] -- no execution after Terminal
-      Failure  -> return [maybePlace stmt pos] -- no execution after Failure
-      Det      -> leaveStmtAsIs detism stmt pos stmts alt sense
+      Terminal -> return [maybePlace stmt' pos] -- no execution after Terminal
+      Failure  -> return [maybePlace stmt' pos] -- no execution after Failure
+      Det      -> leaveStmtAsIs detism stmt' pos stmts alt sense
       SemiDet  -> shouldnt "SemiDet case already covered!"
-unbranchStmt detism stmt@(ForeignCall _ _ _ args) pos stmts alt sense = do
+unbranchStmt detism stmt@(ForeignCall l nm fs args) pos stmts alt sense = do
     logUnbranch $ "Unbranching foreign call " ++ showStmt 4 stmt
     defArgs args
-    leaveStmtAsIs detism stmt pos stmts alt sense
+    args' <- hoistLambdas args
+    let stmt' = ForeignCall l nm fs args'
+    leaveStmtAsIs detism stmt' pos stmts alt sense
 unbranchStmt detism stmt@(TestBool val) pos stmts alt sense = do
     ifSemiDet detism (showStmt 4 stmt ++ " in a Det context")
     $ do
@@ -464,6 +470,30 @@ unbranchStmt _ Next _ _ _ _ = do
     logUnbranch $ "Current next proc = " ++ showStmt 4 (content nxt)
     return [nxt]
 
+
+hoistLambdas :: [Placed Exp] -> Unbrancher [Placed Exp]
+hoistLambdas pexps = mapM (placedApply hoistLambda) pexps
+
+
+hoistLambda :: Exp -> OptPos -> Unbrancher (Placed Exp)
+hoistLambda (Typed exp ty cast) pos = do
+    exp' <- content <$> hoistLambda exp Nothing
+    return $ maybePlace (Typed exp' ty cast) pos
+hoistLambda exp@(Lambda pstmts) pos = do
+    logUnbranch $ "Creating procref for " ++ show exp
+    name <- newProcName 
+    let holeMap = foldStmts const expHoles Map.empty pstmts
+    let holeParams = Map.elems holeMap
+    logUnbranch $ "  With params " ++ show holeParams
+    let procProto = ProcProto name holeParams Set.empty
+    tmpCtr <- gets brTempCtr
+    let pDef = ProcDef name procProto (ProcDefSrc pstmts) Nothing tmpCtr 0
+               Map.empty Private Det MayInline Pure NoSuperproc
+    pDef' <- lift $ unbranchProc pDef tmpCtr 
+    logUnbranch $ "  Resultant proc: " ++ show procProto
+    procSpec <- lift (addProcDef pDef')
+    return $ maybePlace (ProcRef procSpec) pos
+hoistLambda exp pos = return $ maybePlace exp pos
 
 -- |Emit the supplied statement, and process the remaining statements.
 leaveStmtAsIs :: Determinism -> Stmt -> OptPos
@@ -574,7 +604,7 @@ ifIsVarDef' :: (VarName -> TypeSpec -> t) -> t -> Exp -> TypeSpec -> t
 ifIsVarDef' f v (Typed expr ty _) _ = ifIsVarDef' f v expr ty
 ifIsVarDef' f v (Var name dir _) ty =
     if flowsOut dir then f name ty else v
-ifIsVarDef' _ v _ _ = v
+ifIsVarDef' _ v t ty = v
 
 
 outputVars :: VarDict -> [Placed Exp] -> VarDict

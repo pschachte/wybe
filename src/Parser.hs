@@ -1060,7 +1060,7 @@ stmtExprToTypeSpec (Call _ [] ":" flow [Call _ [] nm ParamOut []]) =
     return $ HigherOrderType [TypeFlow (TypeVariable nm) flow]
 stmtExprToTypeSpec (Call _ [] ":" flow [Call _ m nm ParamIn args]) = 
     HigherOrderType . ((:[]) . flip TypeFlow flow) . TypeSpec m nm <$> mapM stmtExprToTypeSpec args
-stmtExprToTypeSpec (Call _ [] ":" _ [Call _ [] "_" flow [],arg]) = 
+stmtExprToTypeSpec (Call _ [] ":" _ [Call _ [] _ flow [],arg]) = 
     HigherOrderType . ((:[]) . flip TypeFlow flow) <$> stmtExprToTypeSpec arg
 stmtExprToTypeSpec (Call _ [] name ParamOut []) = Right $ TypeVariable name
 stmtExprToTypeSpec call@(Call pos mod name ParamIn params) = do

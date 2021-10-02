@@ -104,10 +104,9 @@ normaliseItem (FuncDecl vis mods (ProcProto name params resources)
               pos]
         pos)
 normaliseItem item@(ProcDecl _ _ _ _ _) = do
-    (items@(item':extra),tmpCtr) <- flattenProcDecl item
+    (item',tmpCtr) <- flattenProcDecl item
     logNormalise $ "Normalised proc:" ++ show item'
-    logNormalise $ "Additonal lambdas:" ++ show extra
-    mapM_ (addProc tmpCtr) items
+    addProc tmpCtr item'
 normaliseItem (StmtDecl stmt pos) = do
     logNormalise $ "Normalising statement decl " ++ show stmt
     updateModule (\s -> s { stmtDecls = maybePlace stmt pos : stmtDecls s})
