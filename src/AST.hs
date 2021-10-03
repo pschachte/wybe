@@ -26,7 +26,8 @@ module AST (
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
-  Exp(..), StringVariant(..), Generator(..), Stmt(..), flattenedExpFlow, expIsConstant,
+  Exp(..), StringVariant(..), Generator(..), Stmt(..), 
+  flattenedExpFlow, expIsConstant, expVar, expVar',
   TypeRepresentation(..), TypeFamily(..), typeFamily,
   defaultTypeRepresentation, typeRepSize, integerTypeRep,
   lookupTypeRepresentation, lookupModuleRepresentation,
@@ -84,7 +85,7 @@ module AST (
   ProcModifiers(..), defaultProcModifiers, setDetism, setInline, setImpurity,
   showProcModifiers, Inlining(..), Impurity(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
-  expHoles,
+  expHoles, orderedHoles, 
   specialChar, specialName, specialName2, outputVariableName, outputStatusName,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
   showModSpecs, showResources, showOptPos, showProcDefs, showUse,
@@ -115,6 +116,8 @@ import           Data.Maybe
 import           Data.Set as Set
 import Data.Tuple.HT ( mapSnd )
 import           Data.Word (Word8)
+import           Data.List.Extra (splitOn)
+import           Text.Read (readMaybe)
 import           Flow             ((|>))
 import           Numeric          (showHex)
 import           Options
@@ -2199,14 +2202,16 @@ foldExp sfn efn val exp = foldExp' sfn efn (efn val exp) exp
 -- |Fold over all the subexpressions of the given expression, but not the
 -- expression itself, in a pre-order left-to-right traversal.
 -- Takes two folding functions, one for statements and one for expressions.
-foldExp' _   _    val IntValue{}     = val
-foldExp' _   _    val FloatValue{}   = val
-foldExp' _   _    val StringValue{}  = val
-foldExp' _   _    val CharValue{}    = val
-foldExp' _   _    val Var{}          = val
-foldExp' _   _    val Lambda{}       = val
-foldExp' _   _    val ProcRef{}      = val
+foldExp' :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> Exp -> a
+foldExp' _   _   val IntValue{}     = val
+foldExp' _   _   val FloatValue{}   = val
+foldExp' _   _   val StringValue{}  = val
+foldExp' _   _   val CharValue{}    = val
+foldExp' _   _   val Var{}          = val
+foldExp' _   _   val Lambda{}       = val
+foldExp' _   _   val ProcRef{}      = val
 foldExp' sfn efn val (Typed exp _ _) = foldExp sfn efn val exp
+foldExp' _   _   val HoleVar{}      = val
 foldExp' sfn efn val (Where stmts exp) =
     let val1 = foldStmts sfn efn val stmts
     in  foldExp sfn efn val1 $content exp
@@ -2544,6 +2549,7 @@ data Exp
                -- if it is a cast, the type of the Exp argument.  If not a cast,
                -- these two must be the same.
       -- The following are eliminated during flattening
+      | HoleVar (Maybe Integer) FlowDirection
       | Where [Placed Stmt] (Placed Exp)
       | CondExp (Placed Stmt) (Placed Exp) (Placed Exp)
       | Fncall ModSpec ProcName [Placed Exp]
@@ -2578,6 +2584,21 @@ expIsConstant exp@CharValue{}    = Just exp
 expIsConstant exp@StringValue{}  = Just exp
 expIsConstant (Typed exp _ _)    = expIsConstant exp
 expIsConstant _                  = Nothing
+
+
+-- |Return the variable name of the supplied expr.  In this context,
+--  the expr will always be a variable.
+expVar :: Exp -> VarName
+expVar expr = fromMaybe
+              (shouldnt $ "expVar of non-variable expr " ++ show expr)
+              $ expVar' expr
+
+
+-- |Return the variable name of the supplied expr, if there is one.
+expVar' :: Exp -> Maybe VarName
+expVar' (Typed expr _ _) = expVar' expr
+expVar' (Var name _ _) = Just name
+expVar' _expr = Nothing
 
 
 -- |Is it unnecessary to actually pass an argument (in or out) for this param?
@@ -2857,6 +2878,7 @@ expOutputs (Var name flow _) =
 expOutputs (Lambda _) = Set.empty 
 expOutputs (ProcRef _) = Set.empty 
 expOutputs (Typed expr _ _) = expOutputs expr
+expOutputs (HoleVar _ _) = Set.empty 
 expOutputs (Where _ pexp) = expOutputs $ content pexp
 expOutputs (CondExp _ pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
 expOutputs (Fncall _ _ args) = pexpListOutputs args
@@ -2940,6 +2962,14 @@ expHoles holes (Var nm vFlow Hole) =
                             (ParamOut, _) -> vFlow
             in Map.insert nm (Param nm AnyType vFlow' Hole) holes
 expHoles holes _ = holes
+
+-- | Convert a map of holes to a list of variable names and params, 
+-- with correct parameter order
+orderedHoles :: Map.Map String Param -> [(VarName, Param)]
+orderedHoles holeMap = 
+    sortOn (trustFromJust "orderedHoles" . (readMaybe::String -> Maybe Int)
+                . last . splitOn [specialChar] . fst) 
+    $ Map.toList holeMap
 
 
 ----------------------------------------------------------------
@@ -3395,9 +3425,10 @@ instance Show Exp where
   show (FloatValue f) = show f
   show (StringValue s v) = show v ++ show s
   show (CharValue c) = show c
-  show (ProcRef ps) = "@" ++ show ps
   show (Var name dir flowtype) = show flowtype ++ flowPrefix dir ++ name
   show (Lambda ss) = "{" ++ intercalate "\n" (showStmt 0 . content <$> ss) ++ "}" 
+  show (ProcRef ps) = "@" ++ show ps
+  show (HoleVar num dir) = flowPrefix dir ++ "@" ++ maybe "" show num
   show (Where stmts exp) = show exp ++ " where" ++ showBody 8 stmts
   show (CondExp cond thn els) =
     "if\n" ++ show cond ++ " then " ++ show thn ++ " else " ++ show els

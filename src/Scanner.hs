@@ -253,6 +253,7 @@ tokenise pos str@(c:cs)
                     '}' -> singleCharTok c cs pos $ TokRBracket Brace pos
                     '?' -> singleCharTok c cs pos $ TokSymbol "?" pos
                     '!' -> singleCharTok c cs pos $ TokSymbol "!" pos
+                    '@' -> singleCharTok c cs pos $ TokSymbol "@" pos
                     '\'' -> tokeniseChar pos cs
                     '\"' -> tokeniseString DoubleQuote pos cs
                     -- backquote makes anything an identifier

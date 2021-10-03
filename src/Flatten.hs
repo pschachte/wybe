@@ -112,8 +112,10 @@ type Flattener = StateT FlattenerState Compiler
 data FlattenerState = Flattener {
     flattened     :: [Placed Stmt], -- ^Flattened code generated, reversed
     postponed     :: [Placed Stmt], -- ^Flattened code to come after
-    totalLambdas  :: Int,           -- ^Total number of lambdas encountered
-    currentLambda :: Int,           -- ^Current lambda number
+    totalLambdas  :: Integer,       -- ^Total number of lambdas encountered
+    currentLambda :: Integer,       -- ^Current lambda number
+    holeCount     :: Maybe Integer, -- ^Number of holes encountered in current
+                                    -- lambda. Nothing if we have numbered holes
     tempCtr       :: Int,           -- ^Temp variable counter
     currPos       :: OptPos,        -- ^Position of current statement
     stmtDefs      :: Set VarName,   -- ^Variables defined by this statement
@@ -123,7 +125,7 @@ data FlattenerState = Flattener {
 
 
 initFlattenerState :: Set VarName -> FlattenerState
-initFlattenerState = Flattener [] [] 0 0 0 Nothing Set.empty
+initFlattenerState = Flattener [] [] 0 0 (Just 0) 0 Nothing Set.empty
 
 
 emit :: OptPos -> Stmt -> Flattener ()
@@ -244,18 +246,19 @@ flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos detism = do
     logFlatten $ "Flattening assignment with outputs " ++ show arg1Vars
                  ++ " and " ++ show arg2Vars
     case (arg1content, arg2content) of
-      (Var var flow1 _, _) | flowsOut flow1 && Set.null arg2Vars -> do
+      (Var _ flow1 _, _) | flowsOut flow1 && Set.null arg2Vars -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
-        flattenAssignment var arg1 arg2 pos
-      (_, Var var flow2 _) | flowsOut flow2 && Set.null arg1Vars -> do
+        flattenAssignment True arg1 arg2 pos
+      (_, Var _ flow2 _) | flowsOut flow2 && Set.null arg1Vars -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
-        flattenAssignment var arg2 arg1 pos
+        flattenAssignment False arg2 arg1 pos
       (Fncall mod name args, _)
         | not (Set.null arg1Vars) && Set.null arg2Vars -> do
         let stmt' = ProcCall mod name Nothing Det False (args++[arg2])
         flattenStmt stmt' pos detism
       (_, Fncall mod name args)
         | not (Set.null arg2Vars) && Set.null arg1Vars -> do
+        -- XXX this may cause unnumbered holes to be reordered
         let stmt' = ProcCall mod name Nothing Det False (args++[arg1])
         flattenStmt stmt' pos detism
       (_,_) | Set.null arg1Vars && Set.null arg2Vars -> do
@@ -286,14 +289,14 @@ flattenStmt' (ProcCall mod name procID detism res args) pos d = do
     then do
         unless (isNothing procID && detism == Det && not res)
           $ shouldnt "bad higher call"
-        flattenStmt' (HigherCall (maybePlace (Var name ParamIn Ordinary) pos) args) 
+        flattenStmt' (HigherCall (maybePlace (Var name ParamIn Ordinary) pos) args)
                      pos d
     else do
         logFlatten "   call is Det"
         args' <- flattenStmtArgs args pos
         emit pos $ ProcCall mod name procID detism res args'
         flushPostponed
-flattenStmt' (HigherCall nm args) pos _ = do 
+flattenStmt' (HigherCall nm args) pos _ = do
     args' <- flattenStmtArgs args pos
     emit pos $ HigherCall nm args'
     flushPostponed
@@ -435,15 +438,13 @@ flattenStmt' Break pos _ = emit pos Break
 flattenStmt' Next pos _ = emit pos Next
 
 
-flattenAssignment :: Ident -> Placed Exp -> Placed Exp -> OptPos -> Flattener ()
-flattenAssignment var varArg value pos = do
-    [valueArg] <- flattenStmtArgs [value] pos
-    varArg' <- case content varArg of
-        Var _ _ Hole -> flattenPExp varArg
-        _ -> return varArg
-    let instr = ForeignCall "llvm" "move" [] [valueArg, varArg']
+flattenAssignment :: Bool -> Placed Exp -> Placed Exp -> OptPos -> Flattener ()
+flattenAssignment flipped varArg valArg pos = do
+    let reverser = if flipped then reverse else id
+    [valArg', varArg'] <- reverser <$> flattenStmtArgs (reverser [valArg, varArg]) pos
+    let instr = ForeignCall "llvm" "move" [] [valArg', varArg']
     logFlatten $ "  transformed to " ++ showStmt 4 instr
-    noteVarDef var
+    let var = content $ expVar <$> varArg'
     noteVarIntro var
     emit pos instr
     flushPostponed
@@ -498,26 +499,10 @@ flattenExp expr@(CharValue _) ty castFrom pos =
 flattenExp expr@(Var "_" ParamIn _) ty castFrom pos = do
     dummyName <- tempVar
     return $ typeAndPlace (Var dummyName ParamOut Ordinary) AnyType castFrom pos
-flattenExp expr@(Var name dir Hole) ty castFrom pos = do
-    logFlatten $ "  Flattening hole " ++ show expr
-    lambdas <- gets currentLambda
-    if lambdas == 0
-    then do
-        lift $ message Error
-              ("Hole @" ++ name ++ " outside of lambda expression")
-              pos
-        return $ typeAndPlace (Var name dir Hole) ty castFrom pos 
-    else do
-        let name' = specialName2 (show lambdas) name 
-        noteVarIntro name'
-        noteVarMention name' dir
-        let expr' = typeAndPlace (Var name' dir Hole) ty castFrom pos
-        logFlatten $ "  Hole flattened to " ++ show expr'
-        return expr'
-flattenExp expr@(Var name dir _) ty castFrom pos = do
+flattenExp expr@(Var name dir argFlow) ty castFrom pos = do
     logFlatten $ "  Flattening arg " ++ show expr
     defd <- gets (Set.member name . defdVars)
-    if dir == ParamIn && not defd
+    if dir == ParamIn && not defd && argFlow /= Hole
     then do -- Reference to an undefined variable: assume it's meant to be
             -- a niladic function instead of a variable reference
         logFlatten $ "  Unknown variable '" ++ show name
@@ -528,6 +513,36 @@ flattenExp expr@(Var name dir _) ty castFrom pos = do
         noteVarMention name dir
         let expr' = typeAndPlace expr ty castFrom pos
         logFlatten $ "  Arg flattened to " ++ show expr'
+        return expr'
+flattenExp expr@(HoleVar mbNum dir) ty castFrom pos = do
+    logFlatten $ "  Flattening hole " ++ show expr
+    holes <- gets holeCount
+    lambdas <- gets currentLambda
+    num <- case (mbNum, holes) of
+        (Nothing, Just n) -> do
+            let n' = n + 1                    
+            modify (\s -> s{holeCount=Just n'})
+            return n'
+        (Just n, _) | fromMaybe 0 holes == 0 -> do
+            modify (\s -> s{holeCount=Nothing})
+            return n
+        _ -> do 
+            lift $ message Error 
+                    "Mixed use of numbered and un-numbered holes" pos
+            return (-1)
+    let name = specialName2 (show lambdas) (show num)
+    let var = Var name dir Hole
+    if lambdas == 0
+    then do
+        lift $ message Error
+               ("Hole @" ++ maybe "" show mbNum
+                ++ " outside of lambda expression")
+               pos
+        flattenExp var ty castFrom pos
+    else do
+        noteVarIntro name
+        expr' <- flattenExp var ty castFrom pos
+        logFlatten $ "  Hole flattened to " ++ show var ++ " -> " ++ show expr'
         return expr'
 flattenExp expr@(ProcRef _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos
@@ -552,8 +567,9 @@ flattenExp (CondExp cond thn els) ty castFrom pos = do
 flattenExp expr@(Lambda pstmts) ty castFrom pos = do
     state <- get
     let lambdaNum = totalLambdas state + 1
-    modify (\s -> s{flattened=[], postponed=[], 
-                    currentLambda=lambdaNum, totalLambdas=lambdaNum})
+    modify (\s -> s{flattened=[], postponed=[],
+                    currentLambda=lambdaNum, totalLambdas=lambdaNum,
+                    holeCount=Just 0})
     flattenStmts pstmts Det
     flushPostponed
     state' <- get
@@ -593,7 +609,7 @@ flattenCall stmtBuilder isForeign ty castFrom pos exps = do
     --       then (ParamOut,ParamIn)
     --       else (FlowUnknown,FlowUnknown)
     let outFlows = Set.fromList
-                        $ List.filter (/= ParamIn) 
+                        $ List.filter (/= ParamIn)
                         $ List.map (flattenedExpFlow . content) exps'
     logFlatten $ "-- set of out flows:  " ++ show outFlows
     varflow <- if Set.null outFlows

@@ -10,7 +10,6 @@ module Parser where
 
 
 import AST hiding (option)
-import Debug.Trace
 import Data.Set as Set
 import Data.List as List
 import Data.Bits
@@ -21,6 +20,7 @@ import Config
 import Text.Parsec
 import Text.Parsec.Pos
 import Data.Functor
+import Data.Maybe
 -- import qualified Parser as OldParser
 -- import           Data.Algorithm.Diff       (getGroupedDiff)
 -- import           Data.Algorithm.DiffOutput (ppDiff)
@@ -437,6 +437,7 @@ primaryStmtExpr =
     <|> foreignCall
     <|> forLoop
     <|> varOrCall
+    <|> hole
     <|> intConst
     <|> floatConst
     <|> charConst
@@ -456,6 +457,13 @@ varOrCall = do
     pos <- getPosition
     modVar <- moduleSpec
     return $ Call pos (init modVar) (last modVar) ParamIn []
+
+
+hole :: Parser StmtExpr 
+hole = do
+    pos <- tokenPosition <$> symbol "@"
+    holeNum <- optionMaybe intConst
+    return $ Call pos [] "@" ParamIn $ maybeToList holeNum
 
 
 -- | Parse a sequence of StmtExprs enclosed in braces.
@@ -580,7 +588,7 @@ prototypePrecedence = 10
 
 -- |Prefix operator symbols; these all bind very tightly
 prefixOp :: Parser Token
-prefixOp = choice $ List.map symbol ["-", "~", "?", "!", "@", ":"]
+prefixOp = choice $ List.map symbol ["-", "~", "?", "!", ":"]
 
 
 -- |Apply the specified prefix op to the specified stmtExpr.  Fail if it should
@@ -598,15 +606,12 @@ applyPrefixOp tok stmtExpr = do
         ("~", Call{}) -> return $ call1 pos "~" stmtExpr
         ("~", Foreign{}) -> return $ call1 pos "~" stmtExpr
         ("~", _) -> fail $ "cannot negate " ++ show stmtExpr
-        ("?", Call{callVariableFlow=ParamIn, callName="@", callModule=[], 
-                   callArguments=[IntConst{}]})
-          -> return $ setCallFlow ParamOut stmtExpr
         ("?", Call{callVariableFlow=ParamIn}) -> return $ setCallFlow ParamOut stmtExpr
         ("?", _) -> fail $ "unexpected " ++ show stmtExpr ++ " following '?'"
         ("!", Call{callVariableFlow=ParamIn}) -> return $ setCallFlow ParamInOut stmtExpr
         ("!", _) -> fail $ "unexpected " ++ show stmtExpr ++ " following '!'"
-        ("@", arg@IntConst{}) -> return $ Call pos [] "@" ParamIn [arg]
-        ("@", _) -> fail $ "unexpected " ++ show stmtExpr ++ " following '@'"
+        -- ("@", arg@IntConst{}) -> return $ Call pos [] "@" ParamIn [arg]
+        -- ("@", _) -> fail $ "unexpected " ++ show stmtExpr ++ " following '@'"
         (":", _) -> return $ Call pos [] ":" ParamIn [stmtExpr]
         (_,_) -> shouldnt $ "Unknown prefix operator " ++ show tok
                             ++ " in applyPrefixOp"
@@ -1003,16 +1008,17 @@ stmtExprToExp (Call pos [] "^" ParamIn [exp,op]) = do
         Placed (Var var ParamIn Ordinary) _
             -> return $ Placed (Fncall [] var [exp']) pos
         _ -> syntaxError pos "invalid second argument to '^'"
-stmtExprToExp (Call pos [] "@" flow [exp]) = do
-    exp' <- stmtExprToExp exp
-    case content exp' of
-        IntValue i | i > 0 -> return $ Placed (Var (show i) flow Hole) pos
-        _ -> syntaxError pos "invalid expression following @"
+stmtExprToExp (Call pos [] "@" flow exps) = do
+    exps' <- mapM stmtExprToExp exps
+    case content <$> exps' of
+        [] -> return $ Placed (HoleVar Nothing flow) pos
+        [IntValue i] | i > 0 -> return $ Placed (HoleVar (Just i) flow) pos
+        _ -> syntaxError pos "invalid hole expression"
 stmtExprToExp (Call pos [] "if" ParamIn [conditional]) =
     translateConditionalExp conditional
 stmtExprToExp call@(Call pos [] "{}" ParamIn statements) = do
     statements' <- stmtExprToBody call
-    return $ Placed (Lambda statements') pos    
+    return $ Placed (Lambda statements') pos
 stmtExprToExp (Call pos [] sep ParamIn [])
   | separatorName sep =
     syntaxError pos "invalid separated expression"
@@ -1056,11 +1062,11 @@ translateConditionalExp' stmtExpr =
 
 -- |Convert a StmtExpr to a TypeSpec, or produce an error
 stmtExprToTypeSpec :: TranslateTo TypeSpec
-stmtExprToTypeSpec (Call _ [] ":" flow [Call _ [] nm ParamOut []]) = 
+stmtExprToTypeSpec (Call _ [] ":" flow [Call _ [] nm ParamOut []]) =
     return $ HigherOrderType [TypeFlow (TypeVariable nm) flow]
-stmtExprToTypeSpec (Call _ [] ":" flow [Call _ m nm ParamIn args]) = 
+stmtExprToTypeSpec (Call _ [] ":" flow [Call _ m nm ParamIn args]) =
     HigherOrderType . ((:[]) . flip TypeFlow flow) . TypeSpec m nm <$> mapM stmtExprToTypeSpec args
-stmtExprToTypeSpec (Call _ [] ":" _ [Call _ [] _ flow [],arg]) = 
+stmtExprToTypeSpec (Call _ [] ":" _ [Call _ [] _ flow [],arg]) =
     HigherOrderType . ((:[]) . flip TypeFlow flow) <$> stmtExprToTypeSpec arg
 stmtExprToTypeSpec (Call _ [] name ParamOut []) = Right $ TypeVariable name
 stmtExprToTypeSpec call@(Call pos mod name ParamIn params) = do
@@ -1156,9 +1162,9 @@ data StmtExpr
     | CharConst{charPos::SourcePos, charConstValue::Char}
     -- |a string literal
     | StringConst{
-        stringPos::SourcePos, 
-        stringConstValue::String, 
-        stringConstantDelim::StringDelim 
+        stringPos::SourcePos,
+        stringConstValue::String,
+        stringConstantDelim::StringDelim
     }
 
 

@@ -482,8 +482,7 @@ hoistLambda (Typed exp ty cast) pos = do
 hoistLambda exp@(Lambda pstmts) pos = do
     logUnbranch $ "Creating procref for " ++ show exp
     name <- newProcName 
-    let holeMap = foldStmts const expHoles Map.empty pstmts
-    let holeParams = Map.elems holeMap
+    let holeParams = snd <$> orderedHoles (foldStmts const expHoles Map.empty pstmts)
     logUnbranch $ "  With params " ++ show holeParams
     let procProto = ProcProto name holeParams Set.empty
     tmpCtr <- gets brTempCtr

@@ -713,12 +713,11 @@ expType' (StringValue _ WybeString) _ = return $ TypeSpec ["wybe"] "string" []
 expType' (StringValue _ CString) _    = return $ TypeSpec ["wybe"] "c_string" []
 expType' (CharValue _) _              = return $ TypeSpec ["wybe"] "char" []
 expType' (Lambda pstmts) _            = do
-    let holeMap = foldStmts const expHoles Map.empty pstmts
-    let holeParams = Map.elems holeMap
-    let holeNames = Map.keys holeMap
-    mapM_ ultimateVarType holeNames
-    holeParams' <- updateParamTypes holeParams
-    return $ HigherOrderType $ paramTypeFlow <$> holeParams'
+    let (names, params) = unzip <$> orderedHoles    
+                                 $ foldStmts const expHoles Map.empty pstmts
+    mapM_ ultimateVarType names
+    params' <- updateParamTypes params
+    return $ HigherOrderType $ paramTypeFlow <$> params'
 expType' (ProcRef modSpec) _     = do 
     params <- procProtoParams . procProto <$> lift (getProcDef modSpec)
     let typeFlows = paramTypeFlow <$> params
@@ -1182,21 +1181,6 @@ callProcInfos pstmt =
         stmt ->
           shouldnt $ "callProcInfos with non-call statement "
                      ++ showStmt 4 stmt
-
-
--- |Return the variable name of the supplied expr.  In this context,
---  the expr will always be a variable.
-expVar :: Exp -> VarName
-expVar expr = fromMaybe
-              (shouldnt $ "expVar of non-variable expr " ++ show expr)
-              $ expVar' expr
-
-
--- |Return the variable name of the supplied expr, if there is one.
-expVar' :: Exp -> Maybe VarName
-expVar' (Typed expr _ _) = expVar' expr
-expVar' (Var name _ _) = Just name
-expVar' _expr = Nothing
 
 
 -- |Return the "primitive" expr of the specified expr.  This unwraps Typed
