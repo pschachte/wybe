@@ -467,8 +467,12 @@ argExpandedPrim call@(PrimCall id pspec args) = do
     return $ PrimCall id pspec args''
 argExpandedPrim call@(PrimHigherCall id fn args) = do
     fn' <- expandArg fn
-    args' <- mapM expandArg args
-    return $ PrimHigherCall id (fn') args'
+    case fn' of
+        ArgProcRef pspec as _ -> 
+            argExpandedPrim $ PrimCall id pspec (as ++ args)
+        _ -> do
+            args' <- mapM expandArg args
+            return $ PrimHigherCall id fn' args'
 argExpandedPrim (PrimForeign lang nm flags args) = do
     args' <- mapM expandArg args
     return $ simplifyForeign lang nm flags args'
@@ -644,11 +648,12 @@ canonicalisePrim (PrimForeign lang op flags args) =
 canonicaliseArg :: PrimArg -> PrimArg
 canonicaliseArg ArgVar{argVarName=nm, argVarFlow=fl} =
     ArgVar nm AnyType fl Ordinary False
+canonicaliseArg (ArgProcRef ms as _) = 
+  ArgProcRef ms (canonicaliseArg <$> as) AnyType
 canonicaliseArg (ArgInt v _)        = ArgInt v AnyType
 canonicaliseArg (ArgFloat v _)      = ArgFloat v AnyType
 canonicaliseArg (ArgString v r _)   = ArgString v r AnyType
 canonicaliseArg (ArgChar v _)       = ArgChar v AnyType
-canonicaliseArg (ArgProcRef ms _)   = ArgProcRef ms AnyType
 canonicaliseArg (ArgUnneeded dir _) = ArgUnneeded dir AnyType
 canonicaliseArg (ArgUndef _)        = ArgUndef AnyType
 
@@ -666,7 +671,7 @@ validateArg instr (ArgInt    _ ty)      = validateType ty instr
 validateArg instr (ArgFloat  _ ty)      = validateType ty instr
 validateArg instr (ArgString _ _ ty)    = validateType ty instr
 validateArg instr (ArgChar   _ ty)      = validateType ty instr
-validateArg instr (ArgProcRef _ ty)     = validateType ty instr
+validateArg instr (ArgProcRef _ _ ty)   = validateType ty instr
 validateArg instr (ArgUnneeded _ ty)    = validateType ty instr
 validateArg instr (ArgUndef ty)         = validateType ty instr
 
@@ -1153,7 +1158,7 @@ bkwdBuildStmt defs prim pos = do
             modify (\s -> s { bkwdRenaming = Map.insert fromVar toVar
                                             $ bkwdRenaming s })
       _ -> do
-        let (ins, outs) = splitArgsByMode $ List.filter argIsVar args'
+        let (ins, outs) = splitArgsByMode $ List.filter argIsVar $ flattenArgs args'
         -- Filter out pure instructions that produce no needed outputs
         purity <- lift $ primImpurity prim
         when ( purity > Pure 
@@ -1174,7 +1179,17 @@ renameArg :: PrimArg -> BkwdBuilder PrimArg
 renameArg arg@ArgVar{argVarName=name} = do
     name' <- gets (Map.findWithDefault name name . bkwdRenaming)
     return $ arg {argVarName=name'}
+renameArg (ArgProcRef ps args ts) = do
+    args' <- mapM renameArg args
+    return $ ArgProcRef ps args ts
 renameArg arg = return arg
+
+flattenArgs :: [PrimArg] -> [PrimArg]
+flattenArgs = concatMap flattenArg
+
+flattenArg :: PrimArg -> [PrimArg]
+flattenArg arg@(ArgProcRef _ as ts) = arg:flattenArgs as 
+flattenArg arg = [arg]
 
 
 markIfLastUse :: Set PrimVarName -> PrimArg -> PrimArg

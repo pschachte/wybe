@@ -316,7 +316,11 @@ compileArg' typ (IntValue int) _ = return [ArgInt int typ]
 compileArg' typ (FloatValue float) _ = return [ArgFloat float typ]
 compileArg' typ (StringValue string v) _ = return [ArgString string v typ]
 compileArg' typ (CharValue char) _ = return [ArgChar char typ]
-compileArg' typ (ProcRef ms) _ = return [ArgProcRef ms typ]
+compileArg' typ (ProcRef ms es) _ = do
+    as <- concat <$> mapM (`compileArg` Nothing) es
+    unless (sameLength es as)
+           $ shouldnt "compileArg' procRef with in/out args"
+    return [ArgProcRef ms as typ]
 compileArg' typ var@(Var name flow flowType) pos = do
     let flowType' = if flow == ParamInOut then HalfUpdate else flowType
     inArg <- if flowsIn flow

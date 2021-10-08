@@ -32,7 +32,9 @@ module Codegen (
   icmp, fcmp, lOr, lAnd, lXor, shl, lshr, ashr,
   constInttoptr,
   -- * Structure instructions
-  insertvalue, extractvalue
+  insertvalue, extractvalue,
+  -- * GetElementPtr
+  getElementPtrInstr
 
   -- * Testing
 
@@ -71,6 +73,7 @@ import           LLVM.Module
 import           Options                         (LogSelection (Blocks,Codegen))
 import           Config                          (wordSize, functionDefSection)
 import           Unsafe.Coerce
+import LLVM.Internal.FFI.Constant (constantGetElementPtr)
 
 ----------------------------------------------------------------------------
 -- Types                                                                  --
@@ -651,6 +654,12 @@ insertvalue st op i = InsertValue st op [i] []
 
 extractvalue :: Operand -> Word32 -> Instruction
 extractvalue st i = ExtractValue st [i] []
+
+
+-- * GetElementPtr helper
+getElementPtrInstr :: Operand -> [Integer] -> LLVMAST.Instruction
+getElementPtrInstr op idxs = 
+  LLVMAST.GetElementPtr False op (cons . C.Int (fromIntegral wordSize) <$> idxs) []
 
 
 -- * Control Flow operations

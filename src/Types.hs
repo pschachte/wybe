@@ -718,9 +718,8 @@ expType' (Lambda pstmts) _            = do
     mapM_ ultimateVarType names
     params' <- updateParamTypes params
     return $ HigherOrderType $ paramTypeFlow <$> params'
-expType' (ProcRef modSpec) _     = do 
-    params <- procProtoParams . procProto <$> lift (getProcDef modSpec)
-    let typeFlows = paramTypeFlow <$> params
+expType' (ProcRef pspec _) _     = do 
+    typeFlows <- lift $ lookupProcSpecTypeFlows pspec
     let types = typeFlowType <$> typeFlows
     let flows = typeFlowMode <$> typeFlows
     types' <- refreshTypes types
@@ -744,7 +743,7 @@ expMode' _ (IntValue _) = (ParamIn, True, Nothing)
 expMode' _ (FloatValue _) = (ParamIn, True, Nothing)
 expMode' _ (StringValue _ _) = (ParamIn, True, Nothing)
 expMode' _ (CharValue _) = (ParamIn, True, Nothing)
-expMode' _ (ProcRef _) = (ParamIn, True, Nothing)
+expMode' _ (ProcRef _ _) = (ParamIn, True, Nothing)
 expMode' _ (Lambda _) = (ParamIn, True, Nothing)
 expMode' assigned (Var name flow _) =
     (flow, name `assignedIn` assigned, Nothing)

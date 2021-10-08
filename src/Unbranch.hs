@@ -69,6 +69,7 @@ module Unbranch (unbranchProc) where
 import AST
 import Debug.Trace
 import Snippets
+import Config
 import Control.Monad
 import Control.Monad.Trans (lift)
 import Control.Monad.Trans.Class
@@ -345,9 +346,10 @@ unbranchStmts detism (stmt:stmts) alt sense = do
 --
 unbranchStmt :: Determinism -> Stmt -> OptPos -> [Placed Stmt] -> [Placed Stmt]
              -> Bool -> Unbrancher [Placed Stmt]
-unbranchStmt detism stmt@(HigherCall _ args) pos stmts alt sense = do
+unbranchStmt detism stmt@(HigherCall exp args) pos stmts alt sense = do
     defArgs args
-    leaveStmtAsIs detism stmt pos stmts alt sense
+    (exp':args') <- hoistLambdas (exp:args)
+    leaveStmtAsIs detism (HigherCall exp' args') pos stmts alt sense
 unbranchStmt _ stmt@(ProcCall _ _ _ _ True args) _ _ _ _ =
     shouldnt $ "Resources should have been handled before unbranching: "
                ++ showStmt 4 stmt
@@ -484,15 +486,44 @@ hoistLambda exp@(Lambda pstmts) pos = do
     name <- newProcName 
     let holeParams = snd <$> orderedHoles (foldStmts const expHoles Map.empty pstmts)
     logUnbranch $ "  With params " ++ show holeParams
-    let procProto = ProcProto name holeParams Set.empty
+    let stmtVars = foldStmtsLambda const ((. expInputs) . Set.union) Set.empty pstmts
+    defd <- gets (Map.foldrWithKey (\k v d -> if k `Set.member` stmtVars then (k,v):d else d) [] . brVars)
+    let closedParams = (\(n, t) -> Param n t ParamIn Closed) <$> defd
+    let closedVars = (\(n, t) -> Typed (Var n ParamIn Closed) t Nothing) <$> defd
+    logUnbranch $ "  With closed variables " ++ show closedVars
+
     tmpCtr <- gets brTempCtr
-    let pDef = ProcDef name procProto (ProcDefSrc pstmts) Nothing tmpCtr 0
-               Map.empty Private Det MayInline Pure NoSuperproc
-    pDef' <- lift $ unbranchProc pDef tmpCtr 
-    logUnbranch $ "  Resultant proc: " ++ show procProto
-    procSpec <- lift (addProcDef pDef')
-    return $ maybePlace (ProcRef procSpec) pos
+    let procProtoRegular = ProcProto name (closedParams ++ holeParams) Set.empty
+    let pDefRegular = ProcDef name procProtoRegular 
+                      (ProcDefSrc pstmts) 
+                      Nothing tmpCtr 0
+                      Map.empty Private Det MayInline Pure NoSuperproc
+    pDefRegular' <- lift $ unbranchProc pDefRegular tmpCtr 
+    let procProtoClosure = ProcProto name (envParam:holeParams) Set.empty
+    let pDefClosure = ProcDef name procProtoClosure 
+                      (ProcDefSrc $ envUnpacker closedParams ++ pstmts) 
+                      Nothing tmpCtr 0
+                      Map.empty Private Det MayInline Pure NoSuperproc
+    pDefClosure' <- lift $ unbranchProc pDefClosure tmpCtr 
+    logUnbranch $ "  Resultant regular proc: " ++ show procProtoRegular
+    procSpec <- lift (addProcDef pDefRegular')
+    void $ lift (addProcDef pDefClosure')
+    return $ maybePlace (ProcRef procSpec closedVars) pos
 hoistLambda exp pos = return $ maybePlace exp pos
+
+envUnpacker :: [Param] -> [Placed Stmt]
+envUnpacker = 
+    zipWith (\idx (Param name ty _ _) -> 
+        Unplaced $ ForeignCall "lpvm" "access" []
+                    [Unplaced $ Var envParamName ParamIn Closed `castTo` intType,
+                     Unplaced $ iVal (idx * wordSizeBytes) `castTo` intType,
+                     Unplaced $ iVal wordSizeBytes `castTo` intType,
+                     Unplaced $ iVal 0 `castTo` intType,
+                     Unplaced $ Var name ParamOut Closed `castTo` ty]) [1..]
+
+
+envParam :: Param
+envParam = Param envParamName intType ParamIn Closed
 
 -- |Emit the supplied statement, and process the remaining statements.
 leaveStmtAsIs :: Determinism -> Stmt -> OptPos

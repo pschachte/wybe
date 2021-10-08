@@ -26,6 +26,7 @@ import Data.Maybe
 -- import           Data.Algorithm.DiffOutput (ppDiff)
 -- import           Text.Parsec.Expr
 import Control.Monad
+import Debug.Trace
 
 
 -----------------------------------------------------------------------------
@@ -451,7 +452,6 @@ parenthesisedExp = do
     pos <- tokenPosition <$> leftBracket Paren
     setStmtExprPos pos <$> stmtExpr <* rightBracket Paren
 
-
 varOrCall :: Parser StmtExpr
 varOrCall = do
     pos <- getPosition
@@ -610,8 +610,6 @@ applyPrefixOp tok stmtExpr = do
         ("?", _) -> fail $ "unexpected " ++ show stmtExpr ++ " following '?'"
         ("!", Call{callVariableFlow=ParamIn}) -> return $ setCallFlow ParamInOut stmtExpr
         ("!", _) -> fail $ "unexpected " ++ show stmtExpr ++ " following '!'"
-        -- ("@", arg@IntConst{}) -> return $ Call pos [] "@" ParamIn [arg]
-        -- ("@", _) -> fail $ "unexpected " ++ show stmtExpr ++ " following '@'"
         (":", _) -> return $ Call pos [] ":" ParamIn [stmtExpr]
         (_,_) -> shouldnt $ "Unknown prefix operator " ++ show tok
                             ++ " in applyPrefixOp"
@@ -847,6 +845,8 @@ reportFailure (pos, message) = setPosition pos >> parserFail message
 
 -- |Type alias for a translation function
 type TranslateTo ty = StmtExpr -> Either (SourcePos,String) ty
+-- |Type alias for a translation function
+type TranslateListTo ty = [StmtExpr] -> Either (SourcePos,String) ty
 
 
 -- |Convert a StmtExpr to a proc/func prototype and a return type (AnyType for a
@@ -977,7 +977,7 @@ stmtExprToExp (Call pos [] ":" ParamIn [exp,ty]) = do
         Typed exp'' ty'' (Just AnyType) -> -- already cast, but not typed
             return $ Placed (Typed exp'' ty'' $ Just ty') pos
         Typed exp'' _ _ -> -- already typed, whether casted or not
-            syntaxError (stmtExprPos ty) $ "repeated type constraint" ++ show ty
+            syntaxError pos $ "repeated type constraint" ++ show ty
         _ -> -- no cast, no type
             return $ Placed (Typed exp'  ty' Nothing) pos
 stmtExprToExp (Call pos [] ":!" ParamIn [exp,ty]) = do
@@ -1062,22 +1062,21 @@ translateConditionalExp' stmtExpr =
 
 -- |Convert a StmtExpr to a TypeSpec, or produce an error
 stmtExprToTypeSpec :: TranslateTo TypeSpec
-stmtExprToTypeSpec (Call _ [] ":" flow [Call _ [] nm ParamOut []]) =
-    return $ HigherOrderType [TypeFlow (TypeVariable nm) flow]
-stmtExprToTypeSpec (Call _ [] ":" flow [Call _ m nm ParamIn args]) =
-    HigherOrderType . ((:[]) . flip TypeFlow flow) . TypeSpec m nm <$> mapM stmtExprToTypeSpec args
-stmtExprToTypeSpec (Call _ [] ":" _ [Call _ [] _ flow [],arg]) =
-    HigherOrderType . ((:[]) . flip TypeFlow flow) <$> stmtExprToTypeSpec arg
 stmtExprToTypeSpec (Call _ [] name ParamOut []) = Right $ TypeVariable name
-stmtExprToTypeSpec call@(Call pos mod name ParamIn params) = do
-    specs <- mapM stmtExprToTypeSpec params
-    if not (List.null params) && all isHigherOrder specs && name == "_"
-    then return $ HigherOrderType $ concatMap higherTypeParams specs
-    else if any isHigherOrder specs
-    then syntaxError pos "invaid type specification"
-    else return $ TypeSpec mod name specs
+stmtExprToTypeSpec (Call pos [] "@" ParamIn args) =  
+    HigherOrderType <$> mapM stmtExprToTypeFlow args
+stmtExprToTypeSpec call@(Call pos mod name ParamIn args) = 
+    TypeSpec mod name <$> mapM stmtExprToTypeSpec args
 stmtExprToTypeSpec other =
     syntaxError (stmtExprPos other) $ "invalid type specification " ++ show other
+
+stmtExprToTypeFlow :: TranslateTo TypeFlow
+stmtExprToTypeFlow (Call _ [] ":" flow [ty]) = 
+    (`TypeFlow` flow) <$> stmtExprToTypeSpec ty
+stmtExprToTypeFlow ty@Call{} = 
+    (`TypeFlow` ParamIn) <$> stmtExprToTypeSpec ty
+stmtExprToTypeFlow other =
+    syntaxError (stmtExprPos other) $ "invalid higher order type arguemnt " ++ show other
 
 
 -- | Translate a StmtExpr to a proc or func prototype (with empty resource list)

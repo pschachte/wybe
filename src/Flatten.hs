@@ -544,8 +544,9 @@ flattenExp expr@(HoleVar mbNum dir) ty castFrom pos = do
         expr' <- flattenExp var ty castFrom pos
         logFlatten $ "  Hole flattened to " ++ show var ++ " -> " ++ show expr'
         return expr'
-flattenExp expr@(ProcRef _) ty castFrom pos =
-    return $ typeAndPlace expr ty castFrom pos
+flattenExp expr@(ProcRef ms es) ty castFrom pos = do
+    es' <- mapM (flattenPExp . Unplaced) es
+    return $ typeAndPlace (ProcRef ms (content <$> es')) ty castFrom pos
 flattenExp (Where stmts pexp) _ _ _ = do
     flattenStmts stmts Det
     flattenPExp pexp

@@ -42,7 +42,7 @@ procExpansion pspec def = do
     let proto' = proto {primProtoParams = markParamNeededness used ins
                                           <$> primProtoParams proto}
     let impln' = impln{ procImplnProto = proto', procImplnBody = body' }
-    let def' = def { procImpln = impln', 
+    let def' = def { procImpln = impln',
                      procTmpCount = tmp',
                      procCallSiteCount = nextCallSiteID st' }
     if def /= def'
@@ -63,13 +63,17 @@ procExpansion pspec def = do
 markParamNeededness :: Set PrimVarName -> Set PrimVarName -> PrimParam
                     -> PrimParam
 markParamNeededness used _ param@PrimParam{primParamName=nm,
-                                           primParamFlow=FlowIn} =
+                                           primParamFlow=FlowIn,
+                                          primParamFlowType=fTy} =
     param {primParamInfo = (primParamInfo param) {paramInfoUnneeded =
-                                                  Set.notMember nm used}}
+                                                  Set.notMember nm used 
+                                                  && notElem fTy [Closed, Hole]}}
 markParamNeededness _ ins param@PrimParam{primParamName=nm,
-                                          primParamFlow=FlowOut} =
+                                          primParamFlow=FlowOut,
+                                          primParamFlowType=fTy} =
     param {primParamInfo = (primParamInfo param) {paramInfoUnneeded =
-                                                  Set.member nm ins}}
+                                                  Set.member nm ins 
+                                                  && notElem fTy [Closed, Hole]}}
 
 -- |Type to remember the variable renamings.
 type Renaming = Map PrimVarName PrimArg
@@ -141,7 +145,7 @@ addInstr prim pos = do
                 callSiteID <- gets nextCallSiteID
                 modify (\st -> st {nextCallSiteID = callSiteID + 1})
                 return $ PrimCall callSiteID pspec args
-            else 
+            else
                 return prim
         _ -> return prim
     lift $ instr prim' pos
@@ -238,11 +242,15 @@ expandPrim (PrimCall id pspec args) pos = do
                   else do
                     logExpansion "  Not inlinable"
                     addInstr call' pos
-expandPrim (PrimHigherCall id fn args) pos = do
+expandPrim call@(PrimHigherCall id fn args) pos = do
+    logExpansion $ "  Expand higher call " ++ show call
     fn' <- expandArg fn
     case fn' of
-        ArgProcRef ps _ -> expandPrim (PrimCall id ps args) pos
-        _ -> do    
+        ArgProcRef ps as _ -> do
+            logExpansion "  To call"
+            expandPrim (PrimCall id ps $ as ++ args) pos
+        _ -> do
+            logExpansion "  As higher call"
             args' <- mapM expandArg args
             addInstr (PrimHigherCall id fn' args') pos
 expandPrim (PrimForeign lang nm flags args) pos = do

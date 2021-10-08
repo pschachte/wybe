@@ -533,14 +533,20 @@ cgen prim@(PrimCall callSiteID pspec args) = do
     logCodegen $ "Translated ins = " ++ show ins
     addInstruction ins outArgs
 
-cgen prim@(PrimHigherCall callSiteId var@ArgVar{argVarName=nm'} args) = do
+cgen prim@(PrimHigherCall callSiteId var@ArgVar{argVarName=nm', argVarType=ty} args) = do
+    logCodegen $ "Compiling " ++ show prim
     let (inArgs, outArgs) = partitionArgs args
-    inops <- mapM cgenArg inArgs
-    fn <- cgenArg var
-    let callIns = callWybe fn inops
+    callInOps@(env:inOps) <- mapM cgenArg (var:inArgs)
+    logCodegen $ "In args = " ++ show callInOps
+    fnTy <- lift $ llvmClosureType ty
+    envPtr <- inttoptr env (ptr_t fnTy)
+    accessPtr <- instr (ptr_t address_t) $ getElementPtrInstr envPtr [0]
+    fnPtr <- doLoad (ptr_t fnTy) accessPtr
+    let callIns = callWybe fnPtr callInOps
     addInstruction callIns outArgs
-cgen prim@(PrimHigherCall callSiteId (ArgProcRef pspec ty) args) = 
-    cgen $ PrimCall callSiteId pspec args
+cgen prim@(PrimHigherCall callSiteId (ArgProcRef pspec as ty) args) = do
+    logCodegen $ "Compiling " ++ show prim ++ " as regular call"
+    cgen $ PrimCall callSiteId pspec (as ++ args)
 cgen prim@(PrimHigherCall _ _ _) = do
     shouldnt $ "dont know how to cgen higher call " ++ show prim
 cgen prim@(PrimForeign "llvm" name flags args) = do
@@ -930,10 +936,13 @@ partitionArgs = List.partition goesIn
 -- | Get the LLVM 'Type' of the given primitive output argument
 -- list. If there is no output arg, return void_t.
 primReturnType :: [PrimArg] -> Compiler Type
-primReturnType [] = return void_t
-primReturnType [output] = llvmType $ argType output
-primReturnType outputs = struct_t <$> mapM (llvmType . argType) outputs
+primReturnType outputs = mapM (llvmType . argType) outputs >>= primReturnLLVMType
 
+
+primReturnLLVMType :: [Type] -> Compiler Type
+primReturnLLVMType []   = return void_t
+primReturnLLVMType [ty] = return ty
+primReturnLLVMType tys  = return $ struct_t tys
 
 goesIn :: PrimArg -> Bool
 goesIn p = argFlowDirection p == FlowIn
@@ -1005,11 +1014,22 @@ cgenArg (ArgChar c ty) = do
     case toTy of
       IntegerType bs -> return $ cons $ C.Int bs val
       _ -> doCast (cons $ C.Int (fromIntegral wordSize) val) int_t toTy
-cgenArg (ArgProcRef ps ty) = do
-    let fName = LLVMAST.Name $ fromString $ show ps
-    toTy <- lift (llvmType ty)
-    let conFn = C.GlobalReference toTy fName
-    return $ cons conFn
+cgenArg (ArgProcRef ps args ty) = do
+    let ps' = ps{procSpecID=1}
+    let fName = LLVMAST.Name $ fromString $ show ps'
+    psType <- lift $ HigherOrderType <$> lookupProcSpecTypeFlows ps'
+    psTy <- lift $ llvmFuncType psType
+    let conFn = C.GlobalReference psTy fName
+    fn <- doCast (cons conFn) psTy address_t
+    envArgs <- mapM cgenArg args
+    mem <- gcAllocate (toInteger (wordSizeBytes * (length args + 1)) `ArgInt` intType) address_t 
+    memPtr <- inttoptr mem (ptr_t address_t)
+    mapM_ (\(idx,arg) -> do
+        let getEltPtr = getElementPtrInstr memPtr [idx]
+        accessPtr <- instr (ptr_t address_t) getEltPtr
+        store accessPtr arg
+        ) $ zip [0..] (fn:envArgs)
+    return mem
 cgenArg (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
 cgenArg (ArgUndef ty) = do
     llty <- lift $ llvmType ty
@@ -1119,6 +1139,24 @@ llvmMapUnop =
 llvmType :: TypeSpec -> Compiler LLVMAST.Type
 llvmType ty = repLLVMType <$> typeRep ty
 
+llvmFuncType :: TypeSpec -> Compiler LLVMAST.Type
+llvmFuncType ty = do 
+    tyRep <- typeRep ty 
+    case tyRep of 
+        Func ins outs -> do
+            let inTys = repLLVMType <$> ins
+            let outTys = repLLVMType <$> outs
+            outTy <- primReturnLLVMType outTys
+            return $ ptr_t $ FunctionType outTy inTys False
+        _ -> shouldnt $ "llvmFuncType of " ++ show ty
+
+
+llvmClosureType :: TypeSpec -> Compiler LLVMAST.Type
+llvmClosureType (HigherOrderType tys) 
+    = llvmFuncType (HigherOrderType $ TypeFlow intType ParamIn:tys)
+llvmClosureType ty = shouldnt $ "llvmClosureType on " ++ show ty
+
+
 
 typeRep :: TypeSpec -> Compiler TypeRepresentation
 typeRep ty =
@@ -1136,30 +1174,26 @@ moduleLLVMType mspec =
 
 
 repLLVMType :: TypeRepresentation -> LLVMAST.Type
-repLLVMType Address         = address_t
-repLLVMType (Bits bits) 
-  | bits == 0               = void_t
-  | bits >  0               = int_c $ fromIntegral bits
-  | otherwise               = shouldnt $ "unsigned type with non-positive width "
-                                         ++ show bits
+repLLVMType Address        = address_t
+repLLVMType (Bits bits)   
+  | bits == 0              = void_t
+  | bits >  0              = int_c $ fromIntegral bits
+  | otherwise              = shouldnt $ "unsigned type with non-positive width "
+                                        ++ show bits
 repLLVMType (Signed bits) 
-  | bits > 0                = int_c $ fromIntegral bits
-  | otherwise               = shouldnt $ "signed type with non-positive width "
-                                         ++ show bits
-repLLVMType (Floating 16)   = FloatingPointType HalfFP
-repLLVMType (Floating 32)   = FloatingPointType FloatFP
-repLLVMType (Floating 64)   = FloatingPointType DoubleFP
-repLLVMType (Floating 80)   = FloatingPointType X86_FP80FP
-repLLVMType (Floating 128)  = FloatingPointType FP128FP
-repLLVMType (Floating b)    = shouldnt $ "unknown floating point width "
-                                         ++ show b
-repLLVMType fn@(Func ins outs) = 
-    ptr_t $ case outs of
-        [] -> shouldnt $ show fn ++ " has no return type"
-        [out] -> FunctionType (repLLVMType out) inTypes False
-        _ -> FunctionType (struct_t $ repLLVMType <$> outs) inTypes False
-  where 
-    inTypes = repLLVMType <$> ins
+  | bits > 0               = int_c $ fromIntegral bits
+  | otherwise              = shouldnt $ "signed type with non-positive width "
+                                        ++ show bits
+repLLVMType (Floating 16)  = FloatingPointType HalfFP
+repLLVMType (Floating 32)  = FloatingPointType FloatFP
+repLLVMType (Floating 64)  = FloatingPointType DoubleFP
+repLLVMType (Floating 80)  = FloatingPointType X86_FP80FP
+repLLVMType (Floating 128) = FloatingPointType FP128FP
+repLLVMType (Floating b)   = shouldnt $ "unknown floating point width "
+                                        ++ show b
+repLLVMType (Func _ _)     = address_t
+
+
 
 ------------------------------------------------------------------------------
 -- -- Creating LLVM AST module from global definitions                    --
@@ -1399,8 +1433,7 @@ gcAccess ptr outTy = do
     logCodegen $ "inttoptr " ++ show ptr ++ " " ++ show (ptr_t outTy)
     logCodegen $ "inttoptr produced " ++ show ptr'
 
-    let indices = [cons $ C.Int (fromIntegral wordSize) 0]
-    let getel = LLVMAST.GetElementPtr False ptr' indices []
+    let getel = getElementPtrInstr ptr' [0]
     logCodegen $ "getel = " ++ show getel
     accessPtr <- instr ptrTy getel
     logCodegen $ "accessPtr = " ++ show accessPtr
@@ -1431,8 +1464,8 @@ gcMutate baseAddr offsetArg valArg = do
     ptr' <- inttoptr finalAddr ptrTy
     logCodegen $ "inttoptr " ++ show finalAddr ++ " " ++ show ptrTy
     logCodegen $ "inttoptr produced " ++ show ptr'
-    let indices = [cons $ C.Int (fromIntegral wordSize) 0]
-    let getel = LLVMAST.GetElementPtr False ptr' indices []
+    
+    let getel = getElementPtrInstr ptr' [0]
     logCodegen $ "getel = " ++ show getel
     accessPtr <- instr ptrTy getel
     logCodegen $ "accessPtr = " ++ show accessPtr
