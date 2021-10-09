@@ -1,0 +1,6 @@
+Error detected during type checking of module(s) current_module_alias_fail
+[91mfinal-dump/current_module_alias_fail.wybe:5:2: Uninitialised argument in call to println, argument 1
+[0m[91mfinal-dump/current_module_alias_fail.wybe:5:10: Ambiguous overloading: call could refer to:
+    math.temperature.toCelsius<0>
+    current_module_alias_fail.toCelsius<0>
+[0m

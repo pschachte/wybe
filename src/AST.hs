@@ -97,7 +97,7 @@ module AST (
   ) where
 
 import           Config (magicVersion, wordSize, objectExtension,
-                         sourceExtension, currentTypeAlias)
+                         sourceExtension, currentTypeAlias, currentModuleAlias)
 import           Control.Monad
 import           Control.Monad.Extra
 import           Control.Monad.Trans (lift,liftIO)
@@ -1332,7 +1332,11 @@ refersTo :: Ord b => ModSpec -> Ident ->
             (b -> ModSpec) -> Compiler (Set b)
 refersTo modspec name implMapFn specModFn = do
     currMod <- getModuleSpec
-    logAST $ "Finding visible symbol " ++ maybeModPrefix modspec ++
+    let modspec' = if not (List.null modspec) 
+                        && head modspec == currentModuleAlias
+                   then currMod ++ tail modspec
+                   else modspec
+    logAST $ "Finding visible symbol " ++ maybeModPrefix modspec' ++
       name ++ " from module " ++ showModSpec currMod
     defined <- getModuleImplementationField
                (Map.findWithDefault Set.empty name . implMapFn)
@@ -1341,7 +1345,7 @@ refersTo modspec name implMapFn specModFn = do
     -- let visible = defined `Set.union` imported
     logAST $ "*** ALL matching visible modules: "
         ++ showModSpecs (Set.toList (Set.map specModFn defined))
-    return $ Set.filter ((modspec `isSuffixOf`) . specModFn) defined
+    return $ Set.filter ((modspec' `isSuffixOf`) . specModFn) defined
 
 
 -- |Returns a list of the potential targets of a proc call.

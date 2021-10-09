@@ -1591,16 +1591,24 @@ modecheckStmt m name defPos assigned detism tmpCount final
                     = List.filter (exactModeMatch actualModes) modeMatches
             logTyped $ "Exact mode matches: " ++ show exactMatches
             case (exactMatches,modeMatches) of
-                (match:_, _)  ->
+                ([match], _)  ->
                     finaliseCall m name assigned detism resourceful tmpCount
                                  final pos args match stmt
-                ([], match:_) ->
+                ([], [match]) ->
                     finaliseCall m name assigned detism resourceful tmpCount
                                  final pos args match stmt
-                ([], []) -> do
-                        logTyped $ "Mode errors in call:  " ++ show flowErrs
-                        typeError $ ReasonUndefinedFlow cname pos
-                        return ([],assigned,tmpCount)
+                (_:_,_) -> do
+                    logTyped $ "Overload errors in call:  " ++ show flowErrs
+                    typeError $ ReasonOverload (procInfoProc <$> exactMatches) pos
+                    return ([],assigned,tmpCount)
+                ([],_:_) -> do
+                    logTyped $ "Overload mode errors in call:  " ++ show flowErrs
+                    typeError $ ReasonOverload (procInfoProc <$> modeMatches) pos
+                    return ([],assigned,tmpCount)
+                (_,_) -> do
+                    logTyped $ "Mode errors in call:  " ++ show flowErrs
+                    typeError $ ReasonUndefinedFlow cname pos
+                    return ([],assigned,tmpCount)
 modecheckStmt m name defPos assigned detism tmpCount final
     stmt@(ForeignCall lang cname flags args) pos = do
     logTyped $ "Mode checking foreign call " ++ show stmt
