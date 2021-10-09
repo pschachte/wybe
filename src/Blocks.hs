@@ -17,7 +17,7 @@ import           ASTShow
 import           BinaryFactory                   ()
 import           Codegen
 import           Config                          (wordSize, wordSizeBytes)
-import           Util                            (maybeNth, zipWith3M_)
+import           Util                            (maybeNth, zipWith3M_, (&&&))
 import           Snippets 
 import           Control.Monad
 import           Control.Monad.Trans             (lift, liftIO)
@@ -207,10 +207,11 @@ translateProc modProtos proc = do
     count <- getCount
     let proto = procImplnProto $ procImpln proc
     let body = procImplnBody $ procImpln proc
+    let isClosure = procIsClosure proc
     let speczBodies = procImplnSpeczBodies $ procImpln proc
     -- translate the standard version
     (block, count') <- 
-            lift $ _translateProcImpl modProtos proto body count
+            lift $ _translateProcImpl modProtos proto isClosure body count
     -- translate the specialized versions
     let speczBodies' = speczBodies
                         |> Map.toList
@@ -233,7 +234,7 @@ translateProc modProtos proc = do
                     -- codegen
                     (currBlock, currCount') <- 
                             lift $ _translateProcImpl modProtos 
-                                        proto' currBody currCount
+                                        proto' isClosure currBody currCount
                     return (currBlock:currBlocks, currCount') 
             ) ([], count') speczBodies'
     let blocks' = block:blocks
@@ -243,28 +244,53 @@ translateProc modProtos proc = do
 
 -- Helper for `translateProc`. Translate the given `ProcBody` 
 -- (A specialized version of a procedure).
-_translateProcImpl :: [PrimProto] -> PrimProto -> ProcBody -> Word 
-                                -> Compiler (ProcDefBlock, Word)
-_translateProcImpl modProtos proto body startCount = do
+_translateProcImpl :: [PrimProto] -> PrimProto -> Bool -> ProcBody
+                   -> Word -> Compiler (ProcDefBlock, Word)
+_translateProcImpl modProtos proto isClosure body startCount = do
+    let (proto', body') = if isClosure 
+                          then closeProtoBody proto body
+                          else (proto,body)
     modspec <- getModuleSpec
     logBlocks $ "\n" ++ replicate 70 '=' ++ "\n"
     logBlocks $ "In Module: " ++ showModSpec modspec
                 ++ ", creating definition of: "
-    logBlocks $ "proto: " ++ show proto 
-                ++ "body: " ++ show body
+    logBlocks $ "proto: " ++ show proto'
+                ++ "body: " ++ show body'
                 ++ "\n" ++ replicate 50 '-' ++ "\n"
     -- Codegen
-    codestate <- execCodegen startCount modProtos (doCodegenBody proto body)
+    codestate <- execCodegen startCount modProtos (doCodegenBody proto' body')
     let pname = primProtoName proto
     logBlocks $ show $ externs codestate
     exs <- mapM declareExtern $ externs codestate
     let globals = List.map LLVMAST.GlobalDefinition $ globalVars codestate
     let body' = createBlocks codestate
-    lldef <- makeGlobalDefinition pname proto body'
+    lldef <- makeGlobalDefinition pname proto' body'
     logBlocks $ show lldef
     let block = ProcDefBlock proto lldef (exs ++ globals)
     let endCount = Codegen.count codestate
     return (block, endCount)
+
+-- | Updates a PrimProto and ProcBody as though the Closed Params are accessed
+-- via the closure environment 
+closeProtoBody :: PrimProto -> ProcBody -> (PrimProto, ProcBody)
+closeProtoBody proto@PrimProto{primProtoParams=params} 
+               body@ProcBody{bodyPrims=prims} 
+    = (proto', body')
+  where
+    envName = PrimVarName envParamName 0
+    params' = PrimParam envName intType FlowIn Closed 
+                (ParamInfo False) : List.filter ((==Hole) . primParamFlowType) params
+    proto' = proto{primProtoParams=params'}
+    closureParams = List.filter (((==Closed) . primParamFlowType)
+                             &&& (not . paramInfoUnneeded . primParamInfo)) params
+    unwrapper = Unplaced 
+             <$> [primAccess (ArgVar envName intType FlowIn Closed False)
+                             (ArgInt (i * toInteger wordSize) intType)
+                             (ArgInt (toInteger wordSize) intType)
+                             (ArgInt 0 intType)
+                             (ArgVar nm ty FlowIn Closed False)
+                 | (i,PrimParam nm ty _ _ _) <- zip [1..] closureParams]
+    body' = body{bodyPrims=unwrapper++prims}
 
 
 -- | Create LLVM's module level Function Definition from the LPVM procedure
@@ -1017,19 +1043,31 @@ cgenArg (ArgChar c ty) = do
 cgenArg (ArgProcRef ps args ty) = do
     let ps' = ps{procSpecID=1}
     let fName = LLVMAST.Name $ fromString $ show ps'
-    psType <- lift $ HigherOrderType <$> lookupProcSpecTypeFlows ps'
+    psType <- lift $ HigherOrderType <$> lookupPrimTypeFlows ps'
     psTy <- lift $ llvmFuncType psType
     let conFn = C.GlobalReference psTy fName
-    fn <- doCast (cons conFn) psTy address_t
-    envArgs <- mapM cgenArg args
-    mem <- gcAllocate (toInteger (wordSizeBytes * (length args + 1)) `ArgInt` intType) address_t 
-    memPtr <- inttoptr mem (ptr_t address_t)
-    mapM_ (\(idx,arg) -> do
-        let getEltPtr = getElementPtrInstr memPtr [idx]
-        accessPtr <- instr (ptr_t address_t) getEltPtr
-        store accessPtr arg
-        ) $ zip [0..] (fn:envArgs)
-    return mem
+    args' <- lift $ lookupPrimNeededClosedArgs ps' args
+    if List.null args'
+    then do
+        let fnConst = C.BitCast conFn address_t
+        let arrTy = array_t 1 address_t
+        let arr = C.Array address_t [fnConst]
+        conArrPtr <- C.GlobalReference (ptr_t arrTy) <$> addGlobalConstant arrTy arr
+        let rawElem = C.GetElementPtr True conArrPtr [C.Int 32 0, C.Int 32 0]
+        ptrtoint (cons rawElem) address_t
+    else do
+        
+        fnOp <- doCast (cons conFn) psTy address_t
+        envArgs <- mapM cgenArg args'
+        mem <- gcAllocate (toInteger (wordSizeBytes * (length args + 1)) 
+                                      `ArgInt` intType) address_t 
+        memPtr <- inttoptr mem (ptr_t address_t)
+        mapM_ (\(idx,arg) -> do
+            let getEltPtr = getElementPtrInstr memPtr [idx]
+            accessPtr <- instr (ptr_t address_t) getEltPtr
+            store accessPtr arg
+            ) $ zip [0..] (fnOp:envArgs)
+        return mem
 cgenArg (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
 cgenArg (ArgUndef ty) = do
     llty <- lift $ llvmType ty
@@ -1153,7 +1191,7 @@ llvmFuncType ty = do
 
 llvmClosureType :: TypeSpec -> Compiler LLVMAST.Type
 llvmClosureType (HigherOrderType tys) 
-    = llvmFuncType (HigherOrderType $ TypeFlow intType ParamIn:tys)
+    = llvmFuncType (HigherOrderType $ tail tys)
 llvmClosureType ty = shouldnt $ "llvmClosureType on " ++ show ty
 
 

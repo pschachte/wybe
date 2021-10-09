@@ -66,14 +66,14 @@ markParamNeededness used _ param@PrimParam{primParamName=nm,
                                            primParamFlow=FlowIn,
                                           primParamFlowType=fTy} =
     param {primParamInfo = (primParamInfo param) {paramInfoUnneeded =
-                                                  Set.notMember nm used 
-                                                  && notElem fTy [Closed, Hole]}}
+                                                    Set.notMember nm used 
+                                                    && fTy /= Hole}}
 markParamNeededness _ ins param@PrimParam{primParamName=nm,
                                           primParamFlow=FlowOut,
                                           primParamFlowType=fTy} =
     param {primParamInfo = (primParamInfo param) {paramInfoUnneeded =
-                                                  Set.member nm ins 
-                                                  && notElem fTy [Closed, Hole]}}
+                                                    Set.member nm ins 
+                                                    && fTy /= Hole}}
 
 -- |Type to remember the variable renamings.
 type Renaming = Map PrimVarName PrimArg

@@ -235,7 +235,7 @@ genProc proto detism stmts = do
     tmpCtr <- gets brTempCtr
     -- call site count will be refilled later
     let procDef = ProcDef name proto (ProcDefSrc stmts) Nothing tmpCtr 0
-                  Map.empty Private detism MayInline Pure NoSuperproc
+                  Map.empty Private detism MayInline Pure False NoSuperproc
     logUnbranch $ "Generating fresh " ++ show detism ++ " proc:"
                   ++ showProcDef 8 procDef
     logUnbranch $ "Unbranched generated " ++ show detism ++ " proc:"
@@ -485,28 +485,32 @@ hoistLambda exp@(Lambda pstmts) pos = do
     logUnbranch $ "Creating procref for " ++ show exp
     name <- newProcName 
     let holeParams = snd <$> orderedHoles (foldStmts const expHoles Map.empty pstmts)
-    logUnbranch $ "  With params " ++ show holeParams
+    let holeVars = (\(Param n t f _) -> Unplaced $ Typed (Var n f Hole) t Nothing) <$> holeParams
+    logUnbranch $ "  With params " ++ show holeVars
     let stmtVars = foldStmtsLambda const ((. expInputs) . Set.union) Set.empty pstmts
     defd <- gets (Map.foldrWithKey (\k v d -> if k `Set.member` stmtVars then (k,v):d else d) [] . brVars)
     let closedParams = (\(n, t) -> Param n t ParamIn Closed) <$> defd
     let closedVars = (\(n, t) -> Typed (Var n ParamIn Closed) t Nothing) <$> defd
+    let env = Just closedParams
     logUnbranch $ "  With closed variables " ++ show closedVars
 
     tmpCtr <- gets brTempCtr
-    let procProtoRegular = ProcProto name (closedParams ++ holeParams) Set.empty
-    let pDefRegular = ProcDef name procProtoRegular 
+    let procProto = ProcProto name (closedParams ++ holeParams) Set.empty
+    let pDefRegular = ProcDef name procProto 
                       (ProcDefSrc pstmts) 
                       Nothing tmpCtr 0
-                      Map.empty Private Det MayInline Pure NoSuperproc
+                      Map.empty Private Det MayInline Pure False NoSuperproc
     pDefRegular' <- lift $ unbranchProc pDefRegular tmpCtr 
-    let procProtoClosure = ProcProto name (envParam:holeParams) Set.empty
-    let pDefClosure = ProcDef name procProtoClosure 
-                      (ProcDefSrc $ envUnpacker closedParams ++ pstmts) 
-                      Nothing tmpCtr 0
-                      Map.empty Private Det MayInline Pure NoSuperproc
+    logUnbranch $ "  Resultant regular proc: " ++ show procProto
+    procSpec@ProcSpec{procSpecMod=mod,procSpecName=nm,procSpecID=procId} 
+        <- lift (addProcDef pDefRegular')
+    let pDefClosure = 
+          ProcDef name procProto 
+              (ProcDefSrc [Unplaced $ ProcCall mod nm (Just procId) Det False 
+                                    $ List.map Unplaced closedVars ++ holeVars]) 
+              Nothing tmpCtr 0
+              Map.empty Private Det MayInline Pure True NoSuperproc
     pDefClosure' <- lift $ unbranchProc pDefClosure tmpCtr 
-    logUnbranch $ "  Resultant regular proc: " ++ show procProtoRegular
-    procSpec <- lift (addProcDef pDefRegular')
     void $ lift (addProcDef pDefClosure')
     return $ maybePlace (ProcRef procSpec closedVars) pos
 hoistLambda exp pos = return $ maybePlace exp pos

@@ -79,7 +79,8 @@ module AST (
   getModuleSpec, moduleIsType, option,
   getOrigin, getSource, getDirectory,
   optionallyPutStr, message, errmsg, (<!>), prettyPos, Message(..), queueMessage,
-  genProcName, addImport, doImport, importFromSupermodule, lookupType, lookupProcSpecTypeFlows,
+  genProcName, addImport, doImport, importFromSupermodule, lookupType, 
+  lookupProcSpecTypeFlows, lookupPrimTypeFlows, lookupPrimNeededClosedArgs,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   initialisedResources,
   addSimpleResource, lookupResource, specialResources, publicResource,
@@ -909,10 +910,24 @@ lookupType context pos ty@(TypeSpec mod name args) = do
                         " could refer to: " ++ showModSpecs (Set.toList mspecs)
             return InvalidType
 
-lookupProcSpecTypeFlows :: ProcSpec -> StateT CompilerState IO [TypeFlow]
-lookupProcSpecTypeFlows pspec= do
+lookupProcSpecTypeFlows :: ProcSpec -> Compiler [TypeFlow]
+lookupProcSpecTypeFlows pspec = do
     params <- procProtoParams . procProto <$> getProcDef pspec
     return $ paramTypeFlow <$> params
+
+lookupPrimTypeFlows :: ProcSpec -> Compiler [TypeFlow]
+lookupPrimTypeFlows pspec = do
+    primProto <- procImplnProto . procImpln <$> getProcDef pspec
+    primParams <- protoRealParams primProto
+    return $ (\p -> TypeFlow (primParamType p) 
+                             (primFlowToFlowDirection $ primParamFlow p)) 
+          <$> primParams
+
+lookupPrimNeededClosedArgs :: ProcSpec -> [PrimArg] -> Compiler [PrimArg]
+lookupPrimNeededClosedArgs pspec args = do
+    params <- List.filter ((==Closed) . primParamFlowType) . primProtoParams 
+              . procImplnProto . procImpln <$> getProcDef pspec
+    List.map snd <$> filterM (paramIsReal . fst) (zip params args)
 
 -- |Add the specified resource to the current module.
 addSimpleResource :: ResourceName -> ResourceImpln -> Visibility -> Compiler ()
@@ -1114,8 +1129,8 @@ addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
                  ++ name)
                  pos)
            conflict
-    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0
-                  Map.empty vis detism inlining impurity (initSuperprocSpec vis)
+    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 Map.empty 
+                  vis detism inlining impurity False (initSuperprocSpec vis)
     addProcDef procDef
     return ()
 addProc _ item =
@@ -1798,6 +1813,7 @@ data ProcDef = ProcDef {
     procDetism :: Determinism,  -- ^can this proc fail?
     procInlining :: Inlining,   -- ^should we inline calls to this proc?
     procImpurity :: Impurity,   -- ^ Is this proc pure?
+    procIsClosure :: Bool,   -- 
     procSuperproc :: SuperprocSpec
                                 -- ^the proc this should be part of, if any
 }
@@ -2459,6 +2475,9 @@ data FlowDirection = ParamIn | ParamOut | ParamInOut
 data PrimFlow = FlowIn | FlowOut
                    deriving (Show,Eq,Ord,Generic)
 
+primFlowToFlowDirection :: PrimFlow -> FlowDirection
+primFlowToFlowDirection FlowIn  = ParamIn
+primFlowToFlowDirection FlowOut = ParamOut
 
 -- |Does the specified flow direction flow in?
 flowsIn :: FlowDirection -> Bool
@@ -2987,14 +3006,17 @@ expHoles :: Map.Map String Param -> Exp -> Map.Map String Param
 expHoles holes (Var nm vFlow Hole) = 
     case Map.lookup nm holes of
         Nothing -> Map.insert nm (Param nm AnyType vFlow Hole) holes
-        Just (Param _ _ pFlow _) -> 
+        Just (Param _ t pFlow _) -> 
             let vFlow' = case (pFlow, vFlow) of
                             (ParamInOut, _) -> ParamInOut
                             (ParamIn, ParamIn) -> ParamIn
                             (ParamIn, _) -> ParamInOut
                             (ParamOut, ParamOut) -> ParamOut
                             (ParamOut, _) -> vFlow
-            in Map.insert nm (Param nm AnyType vFlow' Hole) holes
+            in Map.insert nm (Param nm t vFlow' Hole) holes
+expHoles holes (Typed exp ty _) = 
+    maybe holes' (flip (Map.adjust (\p -> p{paramType=ty})) holes') $ expVar' exp
+  where holes' = expHoles holes exp
 expHoles holes _ = holes
 
 -- | Convert a map of holes to a list of variable names and params, 
@@ -3243,13 +3265,15 @@ showProcDefs firstID (def:defs) =
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
 showProcDef thisID
-        procdef@(ProcDef n proto def pos _ _ _ vis detism inline impurity sub) =
+        procdef@(ProcDef n proto def pos _ _ _ vis 
+                    detism inline impurity isClosure sub) =
     "\n"
     ++ (if n == "" then "*main*" else n) ++ " > "
     ++ visibilityPrefix vis
     ++ showProcModifiers (ProcModifiers detism inline impurity [] [])
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
     ++ showSuperProc sub
+    ++ if isClosure then " (closure)" else ""
     ++ "\n"
     ++ show thisID ++ ": "
     ++ (if isCompiled def then "" else show proto ++ ":")
@@ -3265,7 +3289,7 @@ instance Show TypeSpec where
   show (TypeSpec optmod ident args) =
       maybeModPrefix optmod ++ ident ++ showArguments args
   show (HigherOrderType params) =
-      "@(" ++ intercalate ", " ((\(TypeFlow t f) -> flowPrefix f ++ ":" ++ show t) <$> params) ++ ")"
+      "@(" ++ intercalate ", " (show <$> params) ++ ")"
 
 
 -- |Show the use declaration for a set of resources, if it's non-empty.
