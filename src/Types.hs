@@ -237,6 +237,9 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Call argument flow does not match any definition
                | ReasonOverload [ProcSpec] OptPos
                    -- ^Multiple procs with same types/flows
+               | ReasonWarnMultipleMatches ProcInfo [ProcInfo] OptPos
+                   -- ^Warn multiple procs with same types/flows
+                   -- XXX remove when handling multiple matches is better defined
                | ReasonAmbig ProcName OptPos [(VarName,[TypeSpec])]
                    -- ^Proc defn has ambiguous types
                | ReasonArity ProcName ProcName OptPos Int Int
@@ -325,6 +328,12 @@ typeErrorMessage (ReasonOverload pspecs pos) =
     Message Error pos $
         "Ambiguous overloading: call could refer to:" ++
         List.concatMap (("\n    "++) . show) (reverse pspecs)
+typeErrorMessage (ReasonWarnMultipleMatches match rest pos) =
+    Message Warning pos $
+        "Multiple procedures match this call's types and/or flows:" ++
+        List.concatMap (("\n    "++) . show) 
+                       (procInfoProc <$> (match:rest))
+        ++ "\nDefaulting to: " ++ show (procInfoProc match)
 typeErrorMessage (ReasonAmbig procName pos varAmbigs) =
     Message Error pos $
         "Type ambiguity in defn of " ++ procName ++ ":" ++
@@ -804,7 +813,7 @@ data ProcInfo = ProcInfo {
   procInfoImpurity:: Impurity,
   procInfoInRes   :: Set ResourceName,
   procInfoOutRes  :: Set ResourceName
-  } deriving (Eq)
+  } deriving (Eq, Ord)
 
 instance Show ProcInfo where
     show (ProcInfo procSpec args detism impurity inRes outRes) =
@@ -1591,21 +1600,17 @@ modecheckStmt m name defPos assigned detism tmpCount final
                     = List.filter (exactModeMatch actualModes) modeMatches
             logTyped $ "Exact mode matches: " ++ show exactMatches
             case (exactMatches,modeMatches) of
-                ([match], _)  ->
+                (match:rest, _)  -> do
+                    unless (List.null rest) $ 
+                        typeError $ ReasonWarnMultipleMatches match rest pos 
                     finaliseCall m name assigned detism resourceful tmpCount
                                  final pos args match stmt
-                ([], [match]) ->
+                ([], match:rest) -> do
+                    unless (List.null rest) $ 
+                        typeError $ ReasonWarnMultipleMatches match rest pos 
                     finaliseCall m name assigned detism resourceful tmpCount
                                  final pos args match stmt
-                (_:_,_) -> do
-                    logTyped $ "Overload errors in call:  " ++ show flowErrs
-                    typeError $ ReasonOverload (procInfoProc <$> exactMatches) pos
-                    return ([],assigned,tmpCount)
-                ([],_:_) -> do
-                    logTyped $ "Overload mode errors in call:  " ++ show flowErrs
-                    typeError $ ReasonOverload (procInfoProc <$> modeMatches) pos
-                    return ([],assigned,tmpCount)
-                (_,_) -> do
+                ([],[]) -> do
                     logTyped $ "Mode errors in call:  " ++ show flowErrs
                     typeError $ ReasonUndefinedFlow cname pos
                     return ([],assigned,tmpCount)

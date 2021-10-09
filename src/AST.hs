@@ -2363,7 +2363,7 @@ data Param = Param {
 data TypeFlow = TypeFlow {
   typeFlowType :: TypeSpec,
   typeFlowMode :: FlowDirection
-  } deriving (Eq)
+  } deriving (Eq, Ord)
 
 instance Show TypeFlow where
     show (TypeFlow ty fl) = flowPrefix fl ++ show ty
