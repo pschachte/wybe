@@ -171,106 +171,106 @@ declare external ccc  void @print_float(double)
 declare external ccc  void @print_int(i64)    
 
 
-@multictr2.92 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.91 to i64) }
+@multictr2.75 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.74 to i64) }
 
 
-@multictr2.91 =    constant [?? x i8] c")\00"
+@multictr2.74 =    constant [?? x i8] c")\00"
 
 
-@multictr2.89 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @multictr2.88 to i64) }
+@multictr2.73 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @multictr2.72 to i64) }
 
 
-@multictr2.88 =    constant [?? x i8] c", \00"
+@multictr2.72 =    constant [?? x i8] c", \00"
 
 
-@multictr2.86 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @multictr2.85 to i64) }
+@multictr2.71 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @multictr2.70 to i64) }
 
 
-@multictr2.85 =    constant [?? x i8] c", \00"
+@multictr2.70 =    constant [?? x i8] c", \00"
 
 
-@multictr2.83 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.82 to i64) }
+@multictr2.69 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.68 to i64) }
 
 
-@multictr2.82 =    constant [?? x i8] c"c08(\00"
+@multictr2.68 =    constant [?? x i8] c"c08(\00"
 
 
-@multictr2.68 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.67 to i64) }
+@multictr2.55 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.54 to i64) }
 
 
-@multictr2.67 =    constant [?? x i8] c")\00"
+@multictr2.54 =    constant [?? x i8] c")\00"
 
 
-@multictr2.65 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.64 to i64) }
+@multictr2.53 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.52 to i64) }
 
 
-@multictr2.64 =    constant [?? x i8] c"c07(\00"
+@multictr2.52 =    constant [?? x i8] c"c07(\00"
 
 
-@multictr2.58 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.57 to i64) }
+@multictr2.47 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.46 to i64) }
 
 
-@multictr2.57 =    constant [?? x i8] c")\00"
-
-
-@multictr2.55 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.54 to i64) }
-
-
-@multictr2.54 =    constant [?? x i8] c"c06(\00"
-
-
-@multictr2.48 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.47 to i64) }
-
-
-@multictr2.47 =    constant [?? x i8] c")\00"
+@multictr2.46 =    constant [?? x i8] c")\00"
 
 
 @multictr2.45 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.44 to i64) }
 
 
-@multictr2.44 =    constant [?? x i8] c"c05(\00"
+@multictr2.44 =    constant [?? x i8] c"c06(\00"
 
 
-@multictr2.38 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.37 to i64) }
+@multictr2.39 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.38 to i64) }
 
 
-@multictr2.37 =    constant [?? x i8] c")\00"
+@multictr2.38 =    constant [?? x i8] c")\00"
 
 
-@multictr2.35 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.34 to i64) }
+@multictr2.37 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.36 to i64) }
 
 
-@multictr2.34 =    constant [?? x i8] c"c04(\00"
+@multictr2.36 =    constant [?? x i8] c"c05(\00"
 
 
-@multictr2.28 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.27 to i64) }
+@multictr2.31 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.30 to i64) }
 
 
-@multictr2.27 =    constant [?? x i8] c")\00"
+@multictr2.30 =    constant [?? x i8] c")\00"
 
 
-@multictr2.25 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.24 to i64) }
+@multictr2.29 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.28 to i64) }
 
 
-@multictr2.24 =    constant [?? x i8] c"c03(\00"
+@multictr2.28 =    constant [?? x i8] c"c04(\00"
 
 
-@multictr2.18 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.17 to i64) }
+@multictr2.23 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.22 to i64) }
 
 
-@multictr2.17 =    constant [?? x i8] c")\00"
+@multictr2.22 =    constant [?? x i8] c")\00"
 
 
-@multictr2.15 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.14 to i64) }
+@multictr2.21 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.20 to i64) }
 
 
-@multictr2.14 =    constant [?? x i8] c"c03(\00"
+@multictr2.20 =    constant [?? x i8] c"c03(\00"
 
 
-@multictr2.8 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.7 to i64) }
+@multictr2.15 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.14 to i64) }
 
 
-@multictr2.7 =    constant [?? x i8] c")\00"
+@multictr2.14 =    constant [?? x i8] c")\00"
+
+
+@multictr2.13 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.12 to i64) }
+
+
+@multictr2.12 =    constant [?? x i8] c"c03(\00"
+
+
+@multictr2.7 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.6 to i64) }
+
+
+@multictr2.6 =    constant [?? x i8] c")\00"
 
 
 @multictr2.5 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.4 to i64) }
@@ -294,130 +294,112 @@ if.then:
   %1 = inttoptr i64 %"x##0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   %3 = load  i64, i64* %2 
-  %6 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.5, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %6)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.5, i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %3)  
-  %9 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.8, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %9)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.7, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else:
   %"3#tmp#13##0" = icmp eq i64 %"1#tmp#9##0", 1 
   br i1 %"3#tmp#13##0", label %if.then1, label %if.else1 
 if.then1:
-  %10 = add   i64 %"x##0", -1 
-  %11 = inttoptr i64 %10 to i64* 
-  %12 = getelementptr  i64, i64* %11, i64 0 
-  %13 = load  i64, i64* %12 
-  %16 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.15, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %16)  
-  tail call ccc  void  @print_int(i64  %13)  
-  %19 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.18, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %19)  
+  %8 = add   i64 %"x##0", -1 
+  %9 = inttoptr i64 %8 to i64* 
+  %10 = getelementptr  i64, i64* %9, i64 0 
+  %11 = load  i64, i64* %10 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.13, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %11)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.15, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else1:
   %"5#tmp#16##0" = icmp eq i64 %"1#tmp#9##0", 2 
   br i1 %"5#tmp#16##0", label %if.then2, label %if.else2 
 if.then2:
-  %20 = add   i64 %"x##0", -2 
-  %21 = inttoptr i64 %20 to i64* 
-  %22 = getelementptr  i64, i64* %21, i64 0 
-  %23 = load  i64, i64* %22 
-  %26 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.25, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %26)  
-  tail call ccc  void  @print_int(i64  %23)  
-  %29 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.28, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %29)  
+  %16 = add   i64 %"x##0", -2 
+  %17 = inttoptr i64 %16 to i64* 
+  %18 = getelementptr  i64, i64* %17, i64 0 
+  %19 = load  i64, i64* %18 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.21, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %19)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.23, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else2:
   %"7#tmp#19##0" = icmp eq i64 %"1#tmp#9##0", 3 
   br i1 %"7#tmp#19##0", label %if.then3, label %if.else3 
 if.then3:
-  %30 = add   i64 %"x##0", -3 
-  %31 = inttoptr i64 %30 to i64* 
-  %32 = getelementptr  i64, i64* %31, i64 0 
-  %33 = load  i64, i64* %32 
-  %36 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.35, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %36)  
-  tail call ccc  void  @print_int(i64  %33)  
-  %39 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.38, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %39)  
+  %24 = add   i64 %"x##0", -3 
+  %25 = inttoptr i64 %24 to i64* 
+  %26 = getelementptr  i64, i64* %25, i64 0 
+  %27 = load  i64, i64* %26 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.29, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %27)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.31, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else3:
   %"9#tmp#22##0" = icmp eq i64 %"1#tmp#9##0", 4 
   br i1 %"9#tmp#22##0", label %if.then4, label %if.else4 
 if.then4:
-  %40 = add   i64 %"x##0", -4 
-  %41 = inttoptr i64 %40 to i64* 
-  %42 = getelementptr  i64, i64* %41, i64 0 
-  %43 = load  i64, i64* %42 
-  %46 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.45, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %46)  
-  tail call ccc  void  @print_int(i64  %43)  
-  %49 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.48, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %49)  
+  %32 = add   i64 %"x##0", -4 
+  %33 = inttoptr i64 %32 to i64* 
+  %34 = getelementptr  i64, i64* %33, i64 0 
+  %35 = load  i64, i64* %34 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.37, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %35)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.39, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else4:
   %"11#tmp#25##0" = icmp eq i64 %"1#tmp#9##0", 5 
   br i1 %"11#tmp#25##0", label %if.then5, label %if.else5 
 if.then5:
-  %50 = add   i64 %"x##0", -5 
-  %51 = inttoptr i64 %50 to i64* 
-  %52 = getelementptr  i64, i64* %51, i64 0 
-  %53 = load  i64, i64* %52 
-  %56 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.55, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %56)  
-  tail call ccc  void  @print_int(i64  %53)  
-  %59 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.58, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %59)  
+  %40 = add   i64 %"x##0", -5 
+  %41 = inttoptr i64 %40 to i64* 
+  %42 = getelementptr  i64, i64* %41, i64 0 
+  %43 = load  i64, i64* %42 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.45, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %43)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.47, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else5:
   %"13#tmp#28##0" = icmp eq i64 %"1#tmp#9##0", 6 
   br i1 %"13#tmp#28##0", label %if.then6, label %if.else6 
 if.then6:
-  %60 = add   i64 %"x##0", -6 
-  %61 = inttoptr i64 %60 to i64* 
-  %62 = getelementptr  i64, i64* %61, i64 0 
-  %63 = load  i64, i64* %62 
-  %66 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.65, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %66)  
-  tail call ccc  void  @print_int(i64  %63)  
-  %69 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.68, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %69)  
+  %48 = add   i64 %"x##0", -6 
+  %49 = inttoptr i64 %48 to i64* 
+  %50 = getelementptr  i64, i64* %49, i64 0 
+  %51 = load  i64, i64* %50 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.53, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %51)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.55, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else6:
   %"15#tmp#31##0" = icmp eq i64 %"1#tmp#9##0", 7 
   br i1 %"15#tmp#31##0", label %if.then7, label %if.else7 
 if.then7:
-  %70 = add   i64 %"x##0", -7 
-  %71 = inttoptr i64 %70 to i64* 
-  %72 = getelementptr  i64, i64* %71, i64 0 
-  %73 = load  i64, i64* %72 
-  %74 = add   i64 %"x##0", 1 
-  %75 = inttoptr i64 %74 to i64* 
-  %76 = getelementptr  i64, i64* %75, i64 0 
-  %77 = load  i64, i64* %76 
-  %78 = add   i64 %"x##0", 9 
-  %79 = inttoptr i64 %78 to double* 
-  %80 = getelementptr  double, double* %79, i64 0 
-  %81 = load  double, double* %80 
-  %84 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.83, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %84)  
-  tail call ccc  void  @print_int(i64  %73)  
-  %87 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.86, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %87)  
-  tail call ccc  void  @print_int(i64  %77)  
-  %90 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.89, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %90)  
-  tail call ccc  void  @print_float(double  %81)  
-  %93 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.92, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %93)  
+  %56 = add   i64 %"x##0", -7 
+  %57 = inttoptr i64 %56 to i64* 
+  %58 = getelementptr  i64, i64* %57, i64 0 
+  %59 = load  i64, i64* %58 
+  %60 = add   i64 %"x##0", 1 
+  %61 = inttoptr i64 %60 to i64* 
+  %62 = getelementptr  i64, i64* %61, i64 0 
+  %63 = load  i64, i64* %62 
+  %64 = add   i64 %"x##0", 9 
+  %65 = inttoptr i64 %64 to double* 
+  %66 = getelementptr  double, double* %65, i64 0 
+  %67 = load  double, double* %66 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.69, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %59)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.71, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %63)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.73, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_float(double  %67)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.75, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else7:

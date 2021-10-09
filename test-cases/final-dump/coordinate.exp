@@ -65,10 +65,10 @@ declare external ccc  void @print_int(i64)
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
-@coordinate.23 =    constant {i64, i64} { i64 20, i64 ptrtoint ([?? x i8]* @coordinate.22 to i64) }
+@coordinate.22 =    constant {i64, i64} { i64 20, i64 ptrtoint ([?? x i8]* @coordinate.21 to i64) }
 
 
-@coordinate.22 =    constant [?? x i8] c"expect crd2^z=1000: \00"
+@coordinate.21 =    constant [?? x i8] c"expect crd2^z=1000: \00"
 
 
 @coordinate.16 =    constant {i64, i64} { i64 20, i64 ptrtoint ([?? x i8]* @coordinate.15 to i64) }
@@ -103,16 +103,14 @@ entry:
   %13 = inttoptr i64 %12 to i64* 
   %14 = getelementptr  i64, i64* %13, i64 0 
   store  i64 8000, i64* %14 
-  %17 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @coordinate.16, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %17)  
-  %18 = add   i64 %3, 16 
-  %19 = inttoptr i64 %18 to i64* 
-  %20 = getelementptr  i64, i64* %19, i64 0 
-  %21 = load  i64, i64* %20 
-  tail call ccc  void  @print_int(i64  %21)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @coordinate.16, i32 0, i32 0) to i64))  
+  %17 = add   i64 %3, 16 
+  %18 = inttoptr i64 %17 to i64* 
+  %19 = getelementptr  i64, i64* %18, i64 0 
+  %20 = load  i64, i64* %19 
+  tail call ccc  void  @print_int(i64  %20)  
   tail call ccc  void  @putchar(i8  10)  
-  %24 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @coordinate.23, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %24)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @coordinate.22, i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  1000)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
