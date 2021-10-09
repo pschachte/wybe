@@ -235,7 +235,7 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Conditional expression not bool
                | ReasonArgFlow ProcName Int OptPos
                    -- ^Input param with undefined argument variable
-               | ReasonHigherFlow OptPos Int FlowDirection FlowDirection 
+               | ReasonHigherFlow OptPos Int FlowDirection FlowDirection
                    -- ^Hole with wrong flow
                | ReasonUndefinedFlow ProcName OptPos
                    -- ^Call argument flow does not match any definition
@@ -328,7 +328,7 @@ typeErrorMessage (ReasonArgFlow name num pos) =
         ++ ", argument " ++ show num
 typeErrorMessage (ReasonHigherFlow pos num flow expected) =
     Message Error pos $
-        "Lambda argument " ++ show num ++ " has flow " ++ show flow 
+        "Lambda argument " ++ show num ++ " has flow " ++ show flow
         ++ " but expects " ++ show expected
 typeErrorMessage (ReasonUndefinedFlow name pos) =
     Message Error pos $
@@ -370,7 +370,7 @@ typeErrorMessage (ReasonEqual exp1 exp2 pos) =
     "Type of " ++ show exp2 ++ " incompatible with " ++ show exp1
 typeErrorMessage (ReasonHigher procName exp pos) =
     Message Error pos $
-    "Higher order call to " ++ show exp ++ " in " 
+    "Higher order call to " ++ show exp ++ " in "
     ++ (if procName == ""
             then "top-level statement"
             else "'" ++ procName ++ "'") ++ " is invalid."
@@ -487,7 +487,7 @@ ultimateType (TypeSpec mod name args) = do
     return $ TypeSpec mod name args'
 ultimateType HigherOrderType{higherTypeParams=params} = do
     types <- mapM ultimateType $ typeFlowType <$> params
-    let flows = typeFlowMode <$> params 
+    let flows = typeFlowMode <$> params
     return $ HigherOrderType $ zipWith TypeFlow types flows
 ultimateType ty = return ty
 
@@ -631,17 +631,17 @@ unifyTypes' reason ty1@(TypeSpec m1 n1 ps1) ty2@(TypeSpec m2 n2 ps2)
           | m2 `isSuffixOf` m1 = (True,  m1)
           | otherwise          = (False, [])
 unifyTypes' reason (HigherOrderType ps1) (HigherOrderType ps2)
-    | sameLength ps1 ps2 && and (zipWith (==) ps1Flows ps2Flows) = 
-        HigherOrderType . zipWith (flip TypeFlow) ps1Flows <$> 
+    | sameLength ps1 ps2 && and (zipWith (==) ps1Flows ps2Flows) =
+        HigherOrderType . zipWith (flip TypeFlow) ps1Flows <$>
             zipWithM (unifyTypes reason) ps1Types ps2Types
-    | otherwise = 
-        typeError reason >> return InvalidType 
-    where 
+    | otherwise =
+        typeError reason >> return InvalidType
+    where
         ps1Flows = typeFlowMode <$> ps1
         ps2Flows = typeFlowMode <$> ps2
         ps1Types = typeFlowType <$> ps1
         ps2Types = typeFlowType <$> ps2
-unifyTypes' reason _ _ = return InvalidType
+unifyTypes' reason _ _ = typeError reason >> return InvalidType
 
 
 -- | Checks if two types' are cyclic. 
@@ -660,7 +660,7 @@ occursCheck _ _ = False
 containsTypeVar :: TypeVarName -> TypeSpec -> Bool
 containsTypeVar nm TypeVariable{typeVariableName=nm'} = nm == nm'
 containsTypeVar nm TypeSpec{typeParams=tys} = any (containsTypeVar nm) tys
-containsTypeVar nm HigherOrderType{higherTypeParams=params} 
+containsTypeVar nm HigherOrderType{higherTypeParams=params}
   = any (containsTypeVar nm . typeFlowType) params
 containsTypeVar _ _ = False
 
@@ -713,12 +713,12 @@ expType' (StringValue _ WybeString) _ = return $ TypeSpec ["wybe"] "string" []
 expType' (StringValue _ CString) _    = return $ TypeSpec ["wybe"] "c_string" []
 expType' (CharValue _) _              = return $ TypeSpec ["wybe"] "char" []
 expType' (Lambda pstmts) _            = do
-    let (names, params) = unzip <$> orderedHoles    
+    let (names, params) = unzip <$> orderedHoles
                                  $ foldStmts const expHoles Map.empty pstmts
     mapM_ ultimateVarType names
     params' <- updateParamTypes params
     return $ HigherOrderType $ paramTypeFlow <$> params'
-expType' (ProcRef pspec _) _     = do 
+expType' (ProcRef pspec _) _     = do
     typeFlows <- lift $ lookupProcSpecTypeFlows pspec
     let types = typeFlowType <$> typeFlows
     let flows = typeFlowMode <$> typeFlows
@@ -845,14 +845,14 @@ typecheckProcDecl (RoughProc m name) = do
 
 
 -- |An individual proc, its formal parameter types and modes, and determinism
-data ProcInfo 
+data ProcInfo
     = ProcInfo {
         procInfoProc    :: ProcSpec,
         procInfoArgs    :: [TypeFlow],
         procInfoDetism  :: Determinism,
         procInfoImpurity:: Impurity,
         procInfoInRes   :: Set ResourceName,
-        procInfoOutRes  :: Set ResourceName             
+        procInfoOutRes  :: Set ResourceName
     }
    deriving (Eq)
 
@@ -967,7 +967,7 @@ typecheckProcDecl' m pdef = do
                           Set.map (resourceName . resourceFlowRes)
                           $ Set.filter (flowsIn . resourceFlowFlow) resources
                     let bound = addBindings (inParams `Set.union` inResources)
-                                $ initBindingState pdef 
+                                $ initBindingState pdef
                                   $ Set.map resourceFlowRes resources
                     logTyped $ "bound vars: " ++ show bound
                     (def',assigned,tmpCount') <-
@@ -1270,7 +1270,7 @@ typecheckCalls m name pos (stmtTyping@(HigherTypings pstmt detism):calls)
     higherCallCheck name callFn (place pstmt) actualTypeFlows detism
     logTyping "Resulting typing = "
     valid <- validTyping
-    if valid 
+    if valid
     then typecheckCalls m name pos calls residue True
     else do
         logTyped "Type error: no valid types for higher call"
@@ -1332,24 +1332,26 @@ higherCallCheck :: Ident -> Placed Exp -> OptPos -> [TypeFlow] -> Determinism ->
 higherCallCheck caller callFn pos typeFlows detism = do
     callFnTy <- expType callFn >>= ultimateType
     let higherArgTy = HigherOrderType typeFlows
-    logTyped $ "Matching higher order types " ++ show higherArgTy ++ " with " 
+    logTyped $ "Matching higher order types " ++ show higherArgTy ++ " with "
                 ++ show callFnTy
-    let unifier = void $ unifyTypes (ReasonHigher caller (content callFn) pos) 
-                         callFnTy higherArgTy
-    case callFnTy of
+    void $ case callFnTy of
         HigherOrderType calleeTypeFlows ->
             let calleeFlows = typeFlowMode <$> calleeTypeFlows
                 callerFlows = typeFlowMode <$> typeFlows
             in if not $ sameLength calleeTypeFlows typeFlows
-            then typeError $ ReasonHigherArity (content callFn) pos 
+            then typeError $ ReasonHigherArity (content callFn) pos
                              (length calleeTypeFlows) (length typeFlows)
-            else if or (zipWith (/=) calleeFlows callerFlows)
-            then typeErrors $ [ ReasonHigherFlow pos i flow expected 
-                              | (i, flow, expected) <- zip3 [1..] calleeFlows 
-                                                                  callerFlows
-                              , flow /= expected ]
-            else unifier
-        _ -> unifier
+            else when (or (zipWith (/=) calleeFlows callerFlows)) 
+                 $ typeErrors $ [ ReasonHigherFlow pos i flow expected
+                                | (i, flow, expected) <- zip3 [1..] calleeFlows
+                                                                    callerFlows
+                                , flow /= expected ]
+        _ -> return ()
+
+    let reason = ReasonHigher caller (content callFn) pos
+    ty <- unifyTypes reason callFnTy higherArgTy
+    unless (ty /= InvalidType) $ typeError reason
+
 
 
 -- | Refresh all type variables in a list of TypeSpecs.
@@ -1384,7 +1386,7 @@ refreshTypeVar ty@TypeSpec{typeParams=tys} = do
     return ty{typeParams=tys'}
 refreshTypeVar ty@HigherOrderType{higherTypeParams=params} = do
     types <- refreshTypeVars $ typeFlowType <$> params
-    let flows = typeFlowMode <$> params 
+    let flows = typeFlowMode <$> params
     return $ HigherOrderType $ zipWith TypeFlow types flows
 refreshTypeVar ty = return ty
 
@@ -1662,7 +1664,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
     logTyped $ "    with assigned    : " ++ show assigned
     callInfos <- lift $ callProcInfos $ maybePlace stmt pos
     -- Find arg types and expand type variables
-    args' <- mapM (placedApply (modeCheckExp m name defPos assigned 
+    args' <- mapM (placedApply (modeCheckExp m name defPos assigned
                                              detism tmpCount final)) args
     actualTypes <- mapM (expType >=> ultimateType) args'
     logTyped $ "    actual types     : " ++ show actualTypes
@@ -1710,7 +1712,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
                         return ([],assigned,tmpCount)
 modecheckStmt m name defPos assigned detism tmpCount final
   stmt@(HigherCall fn args) pos = do
-    fnArgs' <- mapM (placedApply (modeCheckExp m name defPos assigned 
+    fnArgs' <- mapM (placedApply (modeCheckExp m name defPos assigned
                                                detism tmpCount final)) (fn:args)
     actualTypes <- mapM (expType >=> ultimateType) fnArgs'
     let actualModes = List.map (expMode assigned) fnArgs'
@@ -1734,7 +1736,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
     stmt@(ForeignCall lang cname flags args) pos = do
     logTyped $ "Mode checking foreign call " ++ show stmt
     logTyped $ "    with assigned " ++ show assigned
-    args' <- mapM (placedApply (modeCheckExp m name defPos assigned 
+    args' <- mapM (placedApply (modeCheckExp m name defPos assigned
                                              detism tmpCount final)) args
     actualTypes <- mapM (expType >=> ultimateType) args'
     let actualModes = List.map (expMode assigned) args'
@@ -1879,25 +1881,25 @@ modecheckStmt m name defPos assigned detism tmpCount final
     return ([maybePlace Next pos],bindingStateAfterNext assigned, tmpCount)
 
 -- |Mode check stmts inside a lambda expression
-modeCheckExp :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism 
+modeCheckExp :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism
              -> Int -> Bool -> Exp -> OptPos -> StateT Typing Compiler (Placed Exp)
-modeCheckExp m name defPos assigned detism tmpCount final 
+modeCheckExp m name defPos assigned detism tmpCount final
     (Lambda ss) pos = do
     let inArgs = foldStmts const collectInHoles Set.empty ss
-    ss' <- sel1 <$> modecheckStmts m name defPos (addBindings inArgs assigned) 
-                                   detism tmpCount final ss 
+    ss' <- sel1 <$> modecheckStmts m name defPos (addBindings inArgs assigned)
+                                   detism tmpCount final ss
     return $ maybePlace (Lambda ss') pos
-modeCheckExp m name defPos assigned detism tmpCount final 
+modeCheckExp m name defPos assigned detism tmpCount final
     (Typed exp ty cast) pos = do
-    exp' <- content <$> modeCheckExp m name defPos assigned 
+    exp' <- content <$> modeCheckExp m name defPos assigned
                                      detism tmpCount final exp pos
     return $ maybePlace (Typed exp' ty cast) pos
-modeCheckExp m name defPos assigned detism tmpCount final exp pos = 
+modeCheckExp m name defPos assigned detism tmpCount final exp pos =
     return $ maybePlace exp pos
-    
+
 -- |Add in-flowing hole to a set of varnames
 collectInHoles :: Set.Set VarName -> Exp -> Set.Set VarName
-collectInHoles s (Var n flow Hole) 
+collectInHoles s (Var n flow Hole)
     | flowsIn flow = Set.insert n s
 collectInHoles s _ = s
 

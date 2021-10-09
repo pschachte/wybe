@@ -4,8 +4,8 @@ pub type tree { pub empty | node(left:tree, key:int, right:tree) }
 
 pub def lookup(key:int, tree:tree, ?result:bool) {
     if { tree = empty:: ?result = false
-       |  key = tree^key:: ?result = true
-       |  key < tree^key:: lookup(key, tree^left, ?result) # mode error
+       |  key = tree^tree.key:: ?result = true
+       |  key < tree^tree.key:: lookup(key, tree^left, ?result) # mode error
        |  otherwise:: lookup(key, tree^right, ?result)          # mode error
     }
 }
