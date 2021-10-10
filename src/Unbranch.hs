@@ -503,15 +503,17 @@ hoistLambda exp@(Lambda pstmts) pos = do
     -- let adder = do
     procSpec@ProcSpec{procSpecMod=mod,procSpecName=nm,procSpecID=procId} 
         <- lift (addProcDef pDefRegular')
-    let closureName = makeClosureName name
-    let pDefClosure = 
-            ProcDef closureName procProto{procProtoName=closureName} 
-            (ProcDefSrc [Unplaced $ ProcCall mod nm (Just procId) Det False 
-                                    $ List.map Unplaced closedVars ++ holeVars]) 
-            Nothing tmpCtr 0
-            Map.empty Private Det Inline Pure True NoSuperproc
-    pDefClosure' <- lift $ unbranchProc pDefClosure tmpCtr 
-    void $ lift (addProcDef pDefClosure')
+    unless (List.null closedParams) $
+      do
+        let closureName = makeClosureName name
+        let pDefClosure = 
+                ProcDef closureName procProto{procProtoName=closureName} 
+                (ProcDefSrc [Unplaced $ ProcCall mod nm (Just procId) Det False 
+                                        $ List.map Unplaced closedVars ++ holeVars]) 
+                Nothing tmpCtr 0
+                Map.empty Private Det Inline Pure True NoSuperproc
+        pDefClosure' <- lift $ unbranchProc pDefClosure tmpCtr 
+        void $ lift (addProcDef pDefClosure')
     return $ maybePlace (ProcRef procSpec closedVars) pos
     -- case procImpln pDefRegular' of 
     --     ProcDefSrc [pstmt] | List.null closedParams -> 

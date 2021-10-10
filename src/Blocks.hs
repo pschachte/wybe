@@ -566,10 +566,13 @@ cgen prim@(PrimHigherCall callSiteId var@ArgVar{argVarName=nm', argVarType=ty} a
     inOps <- mapM cgenArg inArgs
     let callInOps = inOps ++ [env] 
     logCodegen $ "In args = " ++ show callInOps
-    fnPtrTy <- lift $ ptr_t <$> llvmClosureType ty
-    envPtr <- inttoptr env fnPtrTy
-    accessPtr <- instr fnPtrTy $ getElementPtrInstr envPtr [0]
-    fnPtr <- doLoad fnPtrTy accessPtr
+    fnPtrTy <- lift $ llvmClosureType ty
+    let addrPtrTy = ptr_t address_t
+    envPtr <- inttoptr env addrPtrTy
+    eltPtr <- doLoad address_t envPtr
+    fnPtr <- doCast eltPtr address_t fnPtrTy
+    -- accessPtr <- instr fnPtrTy $ getElementPtrInstr envPtr [0]
+    -- fnPtr <- doLoad fnPtrTy accessPtr
     let callIns = callWybe fnPtr callInOps
     addInstruction callIns outArgs
 cgen prim@(PrimHigherCall callSiteId (ArgProcRef pspec as ty) args) = do
@@ -1029,12 +1032,12 @@ cgenArg (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
 cgenArg arg@(ArgProcRef ps args ty) = do
     logCodegen $ "cgenArg of " ++ show arg
     let psClosure = ps{procSpecName=makeClosureName $ procSpecName ps}
-    hasClosure <- lift $ isJust <$> maybeGetProcDef psClosure
-    let ps' = if hasClosure then psClosure else ps 
+    isClosure <- lift $ isJust <$> maybeGetProcDef psClosure
+    let ps' = if isClosure then psClosure else ps 
     logCodegen $ "  as " ++ show ps'
     let fName = LLVMAST.Name $ fromString $ show ps'
-    psType <- lift $ HigherOrderType <$> lookupPrimTypeFlows ps'
-    psTy <- traceShow psType lift $ llvmFuncType psType
+    psType <- lift $ HigherOrderType <$> lookupPrimTypeFlows isClosure ps'
+    psTy <- lift $ llvmFuncType psType
     let conFn = C.GlobalReference psTy fName
     let fnConst = C.BitCast conFn address_t
     args' <- lift $ lookupPrimNeededClosedArgs ps' args

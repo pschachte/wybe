@@ -915,11 +915,11 @@ lookupProcSpecTypeFlows pspec = do
     params <- procProtoParams . procProto <$> getProcDef pspec
     return $ paramTypeFlow <$> params
 
-lookupPrimTypeFlows :: ProcSpec -> Compiler [TypeFlow]
-lookupPrimTypeFlows pspec = do
+lookupPrimTypeFlows :: Bool -> ProcSpec -> Compiler [TypeFlow]
+lookupPrimTypeFlows isClosure pspec = do
     primProto <- procImplnProto . procImpln <$> getProcDef pspec
     primParams <- protoRealParams primProto
-    return $ (++ [TypeFlow AnyType ParamIn])
+    return $ (++ [TypeFlow AnyType ParamIn | isClosure])
            $ (\p -> TypeFlow (primParamType p)
                              (primFlowToFlowDirection $ primParamFlow p))
           <$> List.filter ((/= Closed) . primParamFlowType) primParams
