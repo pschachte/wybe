@@ -21,12 +21,12 @@ module AST (
   determinismSeq, determinismProceding, determinismName,
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
-  TypeProto(..), TypeSpec(..), typeVarSet, TypeVarName, 
+  TypeProto(..), TypeSpec(..), typeVarSet, TypeVarName,
   genericType, higherOrderType, isHigherOrder, typeModule,
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
-  Exp(..), StringVariant(..), Generator(..), Stmt(..), 
+  Exp(..), StringVariant(..), Generator(..), Stmt(..),
   flattenedExpFlow, expIsConstant, expVar, expVar',
   TypeRepresentation(..), TypeFamily(..), typeFamily,
   defaultTypeRepresentation, typeRepSize, integerTypeRep,
@@ -42,10 +42,10 @@ module AST (
   Module(..), isRootModule, ModuleInterface(..), ModuleImplementation(..), InterfaceHash, PubProcInfo(..),
   ImportSpec(..), importSpec, Pragma(..), addPragma,
   descendentModules, sameOriginModules, -- XXX not needed? differentOriginModules,
-  refersTo, 
+  refersTo,
   enterModule, reenterModule, exitModule, reexitModule, inModule,
   emptyInterface, emptyImplementation,
-  getParams, getDetism, getProcDef, getProcPrimProto,
+  getParams, getDetism, getProcDef, maybeGetProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, maybeModPrefix, ProcImpln(..), ProcDef(..), procInline, procCallCount,
   primImpurity, flagsImpurity, flagsDetism,
@@ -58,8 +58,8 @@ module AST (
   ProcName, ResourceDef(..), FlowDirection(..),
   argFlowDirection, argType, setArgType, argDescription, flowsIn, flowsOut,
   foldStmts, foldStmtsLambda, foldExps, foldBodyPrims, foldBodyDistrib,
-  expToStmt, seqToStmt, procCallToExp, 
-  expOutputs, pexpListOutputs, expInputs, pexpListInputs, 
+  expToStmt, seqToStmt, procCallToExp,
+  expOutputs, pexpListOutputs, expInputs, pexpListInputs,
   setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
@@ -79,7 +79,7 @@ module AST (
   getModuleSpec, moduleIsType, option,
   getOrigin, getSource, getDirectory,
   optionallyPutStr, message, errmsg, (<!>), prettyPos, Message(..), queueMessage,
-  genProcName, addImport, doImport, importFromSupermodule, lookupType, 
+  genProcName, addImport, doImport, importFromSupermodule, lookupType,
   lookupProcSpecTypeFlows, lookupPrimTypeFlows, lookupPrimNeededClosedArgs,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   initialisedResources,
@@ -87,9 +87,9 @@ module AST (
   ProcModifiers(..), defaultProcModifiers, setDetism, setInline, setImpurity,
   showProcModifiers, Inlining(..), Impurity(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
-  expHoles, orderedHoles, 
+  expHoles, orderedHoles,
   specialChar, specialName, specialName2, outputVariableName, outputStatusName,
-  envParamName,
+  envParamName, makeClosureName,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
   showModSpecs, showResources, showOptPos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
@@ -870,7 +870,7 @@ lookupType _ _ ty@TypeVariable{} = return ty
 lookupType _ _ ty@Representation{} = return ty
 lookupType context pos ty@HigherOrderType{higherTypeParams=params} = do
     types <- mapM (lookupType context pos) $ typeFlowType <$> params
-    let flows = typeFlowMode <$> params 
+    let flows = typeFlowMode <$> params
     return $ HigherOrderType $ zipWith TypeFlow types flows
 lookupType context pos ty@(TypeSpec [] typename args)
   | typename == currentTypeAlias = do
@@ -919,13 +919,14 @@ lookupPrimTypeFlows :: ProcSpec -> Compiler [TypeFlow]
 lookupPrimTypeFlows pspec = do
     primProto <- procImplnProto . procImpln <$> getProcDef pspec
     primParams <- protoRealParams primProto
-    return $ (\p -> TypeFlow (primParamType p) 
-                             (primFlowToFlowDirection $ primParamFlow p)) 
-          <$> primParams
+    return $ (++ [TypeFlow AnyType ParamIn])
+           $ (\p -> TypeFlow (primParamType p)
+                             (primFlowToFlowDirection $ primParamFlow p))
+          <$> List.filter ((/= Closed) . primParamFlowType) primParams
 
 lookupPrimNeededClosedArgs :: ProcSpec -> [PrimArg] -> Compiler [PrimArg]
 lookupPrimNeededClosedArgs pspec args = do
-    params <- List.filter ((==Closed) . primParamFlowType) . primProtoParams 
+    params <- List.filter ((==Closed) . primParamFlowType) . primProtoParams
               . procImplnProto . procImpln <$> getProcDef pspec
     List.map snd <$> filterM (paramIsReal . fst) (zip params args)
 
@@ -982,12 +983,12 @@ specialResources =
 
 callFileName :: Placed Stmt -> Exp
 callFileName pstmt =
-    (`StringValue` CString) 
+    (`StringValue` CString)
     $ maybe "Unknown file" (takeBaseName . sourceName) (place pstmt)
 
 callFileFullName :: Placed Stmt -> Exp
 callFileFullName pstmt =
-    (`StringValue` CString) 
+    (`StringValue` CString)
     $ maybe "Unknown file" sourceName (place pstmt)
 
 callLineNumber :: Placed Stmt -> Exp
@@ -1000,7 +1001,7 @@ callColumnNumber pstmt =
 
 callSourceLocation :: Bool -> Placed Stmt -> Exp
 callSourceLocation full pstmt =
-    (`StringValue` CString) 
+    (`StringValue` CString)
     $ maybe "unknown location" (showSourcePos full) (place pstmt)
 
 
@@ -1129,7 +1130,7 @@ addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
                  ++ name)
                  pos)
            conflict
-    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 Map.empty 
+    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 Map.empty
                   vis detism inlining impurity False (initSuperprocSpec vis)
     addProcDef procDef
     return ()
@@ -1173,15 +1174,18 @@ getDetism pspec =
 
 
 getProcDef :: ProcSpec -> Compiler ProcDef
-getProcDef ps@(ProcSpec modSpec procName procID _) = do
+getProcDef ps@(ProcSpec modSpec procName procID _) =
+    trustFromJustM "getProcDef" $ maybeGetProcDef ps
+
+maybeGetProcDef :: ProcSpec -> Compiler (Maybe ProcDef)
+maybeGetProcDef ps@(ProcSpec modSpec procName procID _) = do
     mod <- trustFromJustM ("no such module " ++ showModSpec modSpec ++ show ps) $
            getLoadingModule modSpec
     let impl = trustFromJust ("unimplemented module " ++ showModSpec modSpec) $
                modImplementation mod
     logAST $ "Looking up proc '" ++ procName ++ "' ID " ++ show procID
-    let proc = (modProcs impl ! procName) !! procID
-    logAST $ "  proc = " ++ showProcDef 9 proc
-    return proc
+    let procs = Map.lookup procName $ modProcs impl
+    return $ (maybeNth procID) =<< procs
 
 
 getProcPrimProto :: ProcSpec -> Compiler PrimProto
@@ -1576,12 +1580,12 @@ lookupTypeRepresentation (HigherOrderType tfs) = do
     mbInReps <- sequenceRepFlowTypes ins
     mbOutReps <- sequenceRepFlowTypes outs
     return $ Func <$> mbInReps <*> mbOutReps
-  where 
+  where
     ins = List.filter (flowsIn . typeFlowMode) tfs
     outs = List.filter (flowsOut . typeFlowMode) tfs
-    sequenceRepFlowTypes = (sequence <$>) . mapM lookupTypeRepresentation 
+    sequenceRepFlowTypes = (sequence <$>) . mapM lookupTypeRepresentation
                                           . (typeFlowType <$>)
-                                          
+
 
 -- |Given a module spec, find its representation, if it is a type.
 lookupModuleRepresentation :: ModSpec -> Compiler (Maybe TypeRepresentation)
@@ -2161,8 +2165,8 @@ foldStmts sfn efn val stmts =
 -- This *does* fold over nested statements inside a lambda expression
 foldStmtsLambda :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> [Placed Stmt] -> a
 foldStmtsLambda sfn efn val stmts = foldStmts sfn efn' val stmts
-    where 
-        efn' val exp@(Lambda ss) = foldStmts sfn efn' (efn val exp) ss 
+    where
+        efn' val exp@(Lambda ss) = foldStmts sfn efn' (efn val exp) ss
         efn' val exp             = efn val exp
 
 
@@ -2349,7 +2353,7 @@ typeVarSet InvalidType = Set.empty
 
 genericType :: TypeSpec -> Bool
 genericType TypeSpec{typeParams=params} = any genericType params
-genericType HigherOrderType{higherTypeParams=params} 
+genericType HigherOrderType{higherTypeParams=params}
     = any (genericType . typeFlowType) params
 genericType TypeVariable{}   = True
 genericType Representation{} = False
@@ -2756,10 +2760,10 @@ primArgs prim@(PrimForeign _ _ _ args) = args
 
 -- |Replace a Prim's args with a list of args
 replacePrimArgs :: Prim -> [PrimArg] -> Prim
-replacePrimArgs (PrimCall id pspec old) new 
+replacePrimArgs (PrimCall id pspec old) new
     = PrimCall id pspec new
 replacePrimArgs (PrimHigherCall id oldFn old) new
-    = case new of 
+    = case new of
         [] -> shouldnt "replacePrimArgs of higher call with not enough args"
         (fn:args) -> PrimHigherCall id fn args
 replacePrimArgs (PrimForeign lang nm flags old) new =
@@ -2777,7 +2781,7 @@ argIsConst ArgInt{} = True
 argIsConst ArgFloat{} = True
 argIsConst ArgString{} = True
 argIsConst ArgChar{} = True
-argIsConst ArgProcRef{} = True
+argIsConst (ArgProcRef _ as _) = all argIsConst as
 argIsConst ArgUnneeded{} = False
 argIsConst ArgUndef{} = False
 
@@ -2860,8 +2864,8 @@ argDescription (ArgInt val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgFloat val _) = "constant argument '" ++ show val ++ "'"
 argDescription arg@ArgString{} = "constant argument " ++ show arg
 argDescription (ArgChar val _) = "constant argument '" ++ show val ++ "'"
-argDescription (ArgProcRef ms as _) 
-    = "constant procedure ref '" ++ show ms ++ "' with <" 
+argDescription (ArgProcRef ms as _)
+    = "constant procedure ref '" ++ show ms ++ "' with <"
     ++ intercalate ", " (argDescription <$> as) ++ ">"
 argDescription (ArgUnneeded flow _) = "unneeded " ++ argFlowDescription flow
 argDescription (ArgUndef _) = "undefined argument"
@@ -2907,10 +2911,10 @@ expOutputs (StringValue _ _) = Set.empty
 expOutputs (CharValue _) = Set.empty
 expOutputs (Var name flow _) =
     if flowsOut flow then Set.singleton name else Set.empty
-expOutputs (Lambda _) = Set.empty 
-expOutputs (ProcRef _ _) = Set.empty 
+expOutputs (Lambda _) = Set.empty
+expOutputs (ProcRef _ _) = Set.empty
 expOutputs (Typed expr _ _) = expOutputs expr
-expOutputs (HoleVar _ _) = Set.empty 
+expOutputs (HoleVar _ _) = Set.empty
 expOutputs (Where _ pexp) = expOutputs $ content pexp
 expOutputs (CondExp _ pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
 expOutputs (Fncall _ _ args) = pexpListOutputs args
@@ -2930,10 +2934,10 @@ expInputs (StringValue _ _) = Set.empty
 expInputs (CharValue _) = Set.empty
 expInputs (Var name flow _) =
    if flowsIn flow then Set.singleton name else Set.empty
-expInputs (Lambda _) = Set.empty 
-expInputs (ProcRef _ _) = Set.empty 
+expInputs (Lambda _) = Set.empty
+expInputs (ProcRef _ _) = Set.empty
 expInputs (Typed expr _ _) = expInputs expr
-expInputs (HoleVar _ _) = Set.empty 
+expInputs (HoleVar _ _) = Set.empty
 expInputs (Where _ pexp) = expInputs $ content pexp
 expInputs (CondExp _ pexp1 pexp2) = pexpListInputs [pexp1,pexp2]
 expInputs (Fncall _ _ args) = pexpListInputs args
@@ -3003,10 +3007,10 @@ varsInPrimArg _ (ArgUndef _)      = Set.empty
 
 -- | Add a hole to a map of hole names to respective params
 expHoles :: Map.Map String Param -> Exp -> Map.Map String Param
-expHoles holes (Var nm vFlow Hole) = 
+expHoles holes (Var nm vFlow Hole) =
     case Map.lookup nm holes of
         Nothing -> Map.insert nm (Param nm AnyType vFlow Hole) holes
-        Just (Param _ t pFlow _) -> 
+        Just (Param _ t pFlow _) ->
             let vFlow' = case (pFlow, vFlow) of
                             (ParamInOut, _) -> ParamInOut
                             (ParamIn, ParamIn) -> ParamIn
@@ -3014,7 +3018,7 @@ expHoles holes (Var nm vFlow Hole) =
                             (ParamOut, ParamOut) -> ParamOut
                             (ParamOut, _) -> vFlow
             in Map.insert nm (Param nm t vFlow' Hole) holes
-expHoles holes (Typed exp ty _) = 
+expHoles holes (Typed exp ty _) =
     maybe holes' (flip (Map.adjust (\p -> p{paramType=ty})) holes') $ expVar' exp
   where holes' = expHoles holes exp
 expHoles holes _ = holes
@@ -3022,9 +3026,9 @@ expHoles holes _ = holes
 -- | Convert a map of holes to a list of variable names and params, 
 -- with correct parameter order
 orderedHoles :: Map.Map String Param -> [(VarName, Param)]
-orderedHoles holeMap = 
+orderedHoles holeMap =
     sortOn (trustFromJust "orderedHoles" . (readMaybe::String -> Maybe Int)
-                . last . splitOn [specialChar] . fst) 
+                . last . splitOn [specialChar] . fst)
     $ Map.toList holeMap
 
 
@@ -3065,9 +3069,13 @@ outputStatusName :: Ident
 outputStatusName = specialName "success"
 
 
-envParamName :: VarName 
+envParamName :: VarName
 envParamName = specialName "env"
 
+
+makeClosureName :: Ident -> Ident
+makeClosureName = specialName2 "closure"
+ 
 
 ----------------------------------------------------------------
 --                      Showing Compiler State
@@ -3169,7 +3177,7 @@ instance Show TypeRepresentation where
   show (Bits bits) = show bits ++ " bit unsigned"
   show (Signed bits) = show bits ++ " bit signed"
   show (Floating bits) = show bits ++ " bit float"
-  show (Func ins outs) = 
+  show (Func ins outs) =
       "function {" ++ intercalate ", " (List.map show outs) ++ "}"
       ++ "(" ++ intercalate ", " (List.map show ins) ++ ")"
 
@@ -3265,7 +3273,7 @@ showProcDefs firstID (def:defs) =
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
 showProcDef thisID
-        procdef@(ProcDef n proto def pos _ _ _ vis 
+        procdef@(ProcDef n proto def pos _ _ _ vis
                     detism inline impurity isClosure sub) =
     "\n"
     ++ (if n == "" then "*main*" else n) ++ " > "
@@ -3473,7 +3481,7 @@ instance Show PrimArg where
   show (ArgFloat f typ)  = show f ++ showTypeSuffix typ Nothing
   show (ArgString s v typ) = show v ++ show s ++ showTypeSuffix typ Nothing
   show (ArgChar c typ)   = show c ++ showTypeSuffix typ Nothing
-  show (ArgProcRef ms as typ)  = show ms ++ "<" ++ intercalate ", " (show <$> as) 
+  show (ArgProcRef ms as typ)  = show ms ++ "<" ++ intercalate ", " (show <$> as)
                               ++ ">" ++ showTypeSuffix typ Nothing
   show (ArgUnneeded dir typ) =
       primFlowPrefix dir ++ "_" ++ showTypeSuffix typ Nothing
@@ -3487,7 +3495,7 @@ instance Show Exp where
   show (StringValue s v) = show v ++ show s
   show (CharValue c) = show c
   show (Var name dir flowtype) = show flowtype ++ flowPrefix dir ++ name
-  show (Lambda ss) = "{" ++ intercalate "\n" (showStmt 0 . content <$> ss) ++ "}" 
+  show (Lambda ss) = "{" ++ intercalate "\n" (showStmt 0 . content <$> ss) ++ "}"
   show (ProcRef ps es) = "@" ++ show ps ++ "<" ++ intercalate ", " (show <$> es) ++ ">"
   show (HoleVar num dir) = flowPrefix dir ++ "@" ++ maybe "" show num
   show (Where stmts exp) = show exp ++ " where" ++ showBody 8 stmts

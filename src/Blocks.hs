@@ -31,7 +31,7 @@ import           Data.Map                        as Map
 import qualified Data.Set                        as Set
 import           Data.String
 import           Data.Word                       (Word32)
-import           Data.Maybe                      (fromMaybe)
+import           Data.Maybe                      (fromMaybe, isJust)
 import           Flow                            ((|>))
 import qualified LLVM.AST                        as LLVMAST
 import qualified LLVM.AST.Constant               as C
@@ -278,8 +278,8 @@ closeProtoBody proto@PrimProto{primProtoParams=params}
     = (proto', body')
   where
     envName = PrimVarName envParamName 0
-    params' = PrimParam envName intType FlowIn Closed 
-                (ParamInfo False) : List.filter ((==Hole) . primParamFlowType) params
+    params' = List.filter ((==Hole) . primParamFlowType) params
+           ++ [PrimParam envName intType FlowIn Closed (ParamInfo False)]
     proto' = proto{primProtoParams=params'}
     closureParams = List.filter (((==Closed) . primParamFlowType)
                              &&& (not . paramInfoUnneeded . primParamInfo)) params
@@ -562,12 +562,14 @@ cgen prim@(PrimCall callSiteID pspec args) = do
 cgen prim@(PrimHigherCall callSiteId var@ArgVar{argVarName=nm', argVarType=ty} args) = do
     logCodegen $ "Compiling " ++ show prim
     let (inArgs, outArgs) = partitionArgs args
-    callInOps@(env:inOps) <- mapM cgenArg (var:inArgs)
+    env <- cgenArg var
+    inOps <- mapM cgenArg inArgs
+    let callInOps = inOps ++ [env] 
     logCodegen $ "In args = " ++ show callInOps
-    fnTy <- lift $ llvmClosureType ty
-    envPtr <- inttoptr env (ptr_t fnTy)
-    accessPtr <- instr (ptr_t address_t) $ getElementPtrInstr envPtr [0]
-    fnPtr <- doLoad (ptr_t fnTy) accessPtr
+    fnPtrTy <- lift $ ptr_t <$> llvmClosureType ty
+    envPtr <- inttoptr env fnPtrTy
+    accessPtr <- instr fnPtrTy $ getElementPtrInstr envPtr [0]
+    fnPtr <- doLoad fnPtrTy accessPtr
     let callIns = callWybe fnPtr callInOps
     addInstruction callIns outArgs
 cgen prim@(PrimHigherCall callSiteId (ArgProcRef pspec as ty) args) = do
@@ -857,41 +859,54 @@ isPtr _                 = False
 
 doCast :: Operand -> LLVMAST.Type -> LLVMAST.Type -> Codegen Operand
 doCast op ty1 ty2 = do
-    (op,caseStr) <- doCast' op ty1 ty2
+    (op,caseStr) <- castHelper bitcast zext trunc inttoptr ptrtoint op ty1 ty2
     logCodegen $ "doCast from " ++ show op ++ " to " ++ show ty2
                  ++ ":  " ++ caseStr
     return op
 
 
-doCast' :: Operand -> LLVMAST.Type -> LLVMAST.Type -> Codegen (Operand,String)
-doCast' op fromTy toTy
+
+consCast :: C.Constant -> LLVMAST.Type -> LLVMAST.Type -> Codegen C.Constant
+consCast c ty1 ty2 = do
+    (c',caseStr) <- castHelper cbitcast czext ctrunc cinttoptr cptrtoint c ty1 ty2
+    logCodegen $ "doCast from " ++ show c ++ " to " ++ show ty2
+                 ++ ":  " ++ caseStr
+    return c'
+
+castHelper :: (a -> LLVMAST.Type -> Codegen a) -- bitcast
+           -> (a -> LLVMAST.Type -> Codegen a) -- zext
+           -> (a -> LLVMAST.Type -> Codegen a) -- trunc
+           -> (a -> LLVMAST.Type -> Codegen a) -- inttoptr
+           -> (a -> LLVMAST.Type -> Codegen a) -- ptrtoin
+           -> a -> LLVMAST.Type -> LLVMAST.Type -> Codegen (a,String)
+castHelper _ _ _ _ _ op fromTy toTy
     | fromTy == toTy = return (op, "identity cast")
-doCast' op (IntegerType _) ty2@(PointerType _ _) =
-    (,"inttoptr") <$> inttoptr op ty2
-doCast' op (PointerType _ _) ty2@(IntegerType _) =
-    (,"ptrtoint") <$> ptrtoint op ty2
-doCast' op (IntegerType bs1) ty2@(IntegerType bs2)
-    | bs1 == bs2 = (,"bitcast no-op") <$> bitcast op ty2
-    | bs2 > bs1 = (,"zext") <$> zext op ty2
-    | bs1 > bs2 = (,"trunc") <$> trunc op ty2
-doCast' op ty1@(FloatingPointType fp) ty2@(IntegerType bs2)
-    | bs1 == bs2 = caseStr <$> bitcast op ty2 
-    | bs2 > bs1 = caseStr <$> (bitcast op ty' >>= flip zext ty2)
-    | bs1 > bs2 = caseStr <$> (bitcast op ty' >>= flip trunc ty2)
+castHelper _ _ _ c _ op (IntegerType _) ty2@(PointerType _ _) =
+    (,"inttoptr") <$> c op ty2
+castHelper _ _ _ _ c op (PointerType _ _) ty2@(IntegerType _) =
+    (,"ptrtoint") <$> c op ty2
+castHelper b z t _ _ op (IntegerType bs1) ty2@(IntegerType bs2)
+    | bs1 == bs2 = (,"bitcast no-op") <$> b op ty2
+    | bs2 > bs1 = (,"zext") <$> z op ty2
+    | bs1 > bs2 = (,"trunc") <$> t op ty2
+castHelper b z t _ _ op ty1@(FloatingPointType fp) ty2@(IntegerType bs2)
+    | bs1 == bs2 = caseStr <$> b op ty2 
+    | bs2 > bs1 = caseStr <$> (b op ty' >>= flip z ty2)
+    | bs1 > bs2 = caseStr <$> (b op ty' >>= flip t ty2)
   where 
     bs1 = getBits ty1
     ty' = IntegerType bs1
     caseStr = (,"fp" ++ show bs1 ++ "-int" ++ show bs2)
-doCast' op ty1@(IntegerType bs1) ty2@(FloatingPointType fp)
-    | bs2 == bs1 = caseStr <$> bitcast op ty2 
-    | bs2 > bs1 = caseStr <$> (zext op ty' >>= flip bitcast ty2)
-    | bs1 > bs2 = caseStr <$> (trunc op ty' >>= flip bitcast ty2) 
+castHelper b z t _ _ op ty1@(IntegerType bs1) ty2@(FloatingPointType fp)
+    | bs2 == bs1 = caseStr <$> b op ty2 
+    | bs2 > bs1 = caseStr <$> (z op ty' >>= flip b ty2)
+    | bs1 > bs2 = caseStr <$> (t op ty' >>= flip b ty2) 
   where 
-    bs2 = getBits ty1
+    bs2 = getBits ty2
     ty' = IntegerType bs2
     caseStr = (,"int" ++ show bs1 ++ "-fp" ++ show bs2)
-doCast' op ty1 ty2 =
-    (,"bitcast from " ++ show ty1 ++ " case") <$> bitcast op ty2
+castHelper b _ _ _ _ op ty1 ty2 =
+    (,"bitcast from " ++ show ty1 ++ " case") <$> b op ty2
 
 
 -- | Predicate to check if an operand is a constant
@@ -1010,56 +1025,31 @@ cgenArg ArgVar{argVarName=nm, argVarType=ty} = do
     (varOp,rep) <- getVar (show nm)
     let fromTy = repLLVMType rep
     doCast varOp fromTy toTy
-cgenArg (ArgInt val ty) = do
-    toTy <- lift $ llvmType ty
-    case toTy of
-      IntegerType bs -> return $ cons $ C.Int bs val
-      _ -> doCast (cons $ C.Int (fromIntegral wordSize) val) int_t toTy 
-cgenArg (ArgFloat val ty) = do
-    toTy <- lift $ llvmType ty
-    case toTy of
-      FloatingPointType DoubleFP -> return $ cons $ C.Float $ F.Double val
-      _ -> doCast (cons $ C.Float $ F.Double val) float_t toTy
-cgenArg (ArgString s WybeString ty) = do
-    conPtr <- addStringConstant s
-    let strType = struct_t [address_t, address_t]
-    let strStruct = C.Struct Nothing False 
-                     [ C.Int (fromIntegral wordSize) (fromIntegral $ length s)
-                     , C.PtrToInt conPtr address_t ]
-    strName <- addGlobalConstant strType strStruct
-    let strPtr = C.GlobalReference (ptr_t strType) strName
-    let strElem = C.GetElementPtr True strPtr [C.Int 32 0, C.Int 32 0]
-    ptrtoint (cons strElem) address_t
-cgenArg (ArgString s CString _) = do
-    conPtr <- addStringConstant s
-    let rawElem = C.GetElementPtr True conPtr [C.Int 32 0, C.Int 32 0]
-    ptrtoint (cons rawElem) address_t
-cgenArg (ArgChar c ty) = do 
-    let val = integerOrd c
-    toTy <- lift $ llvmType ty
-    case toTy of
-      IntegerType bs -> return $ cons $ C.Int bs val
-      _ -> doCast (cons $ C.Int (fromIntegral wordSize) val) int_t toTy
-cgenArg (ArgProcRef ps args ty) = do
-    let ps' = ps{procSpecID=1}
+cgenArg (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
+cgenArg arg@(ArgProcRef ps args ty) = do
+    logCodegen $ "cgenArg of " ++ show arg
+    let psClosure = ps{procSpecName=makeClosureName $ procSpecName ps}
+    hasClosure <- lift $ isJust <$> maybeGetProcDef psClosure
+    let ps' = if hasClosure then psClosure else ps 
+    logCodegen $ "  as " ++ show ps'
     let fName = LLVMAST.Name $ fromString $ show ps'
     psType <- lift $ HigherOrderType <$> lookupPrimTypeFlows ps'
-    psTy <- lift $ llvmFuncType psType
+    psTy <- traceShow psType lift $ llvmFuncType psType
     let conFn = C.GlobalReference psTy fName
+    let fnConst = C.BitCast conFn address_t
     args' <- lift $ lookupPrimNeededClosedArgs ps' args
-    if List.null args'
+    if all argIsConst args'
     then do
-        let fnConst = C.BitCast conFn address_t
-        let arrTy = array_t 1 address_t
-        let arr = C.Array address_t [fnConst]
+        constArgs <- mapM cgenArgConst args'
+        let arrTy = array_t (1 + fromIntegral (length args)) address_t
+        let arr = C.Array address_t (fnConst:constArgs)
         conArrPtr <- C.GlobalReference (ptr_t arrTy) <$> addGlobalConstant arrTy arr
         let rawElem = C.GetElementPtr True conArrPtr [C.Int 32 0, C.Int 32 0]
         ptrtoint (cons rawElem) address_t
     else do
-        
-        fnOp <- doCast (cons conFn) psTy address_t
+        let fnOp = cons fnConst
         envArgs <- mapM cgenArg args'
-        mem <- gcAllocate (toInteger (wordSizeBytes * (length args + 1)) 
+        mem <- gcAllocate (toInteger (wordSizeBytes * (1 + length args)) 
                                       `ArgInt` intType) address_t 
         memPtr <- inttoptr mem (ptr_t address_t)
         mapM_ (\(idx,arg) -> do
@@ -1068,17 +1058,54 @@ cgenArg (ArgProcRef ps args ty) = do
             store accessPtr arg
             ) $ zip [0..] (fnOp:envArgs)
         return mem
-cgenArg (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
-cgenArg (ArgUndef ty) = do
+cgenArg arg = do
+    cons <$> cgenArgConst arg
+
+
+cgenArgConst :: PrimArg -> Codegen C.Constant
+cgenArgConst (ArgInt val ty) = do
+    toTy <- lift $ llvmType ty
+    case toTy of
+      IntegerType bs -> return $ C.Int bs val
+      _ -> consCast (C.Int (fromIntegral wordSize) val) address_t toTy 
+cgenArgConst (ArgFloat val ty) = do
+    toTy <- lift $ llvmType ty
+    case toTy of
+      FloatingPointType DoubleFP -> return $ C.Float $ F.Double val
+      _ -> consCast (C.Float $ F.Double val) float_t toTy
+cgenArgConst (ArgString s WybeString ty) = do
+    (_,conPtr) <- addStringConstant s
+    let strType = struct_t [address_t, address_t]
+    let strStruct = C.Struct Nothing False 
+                     [ C.Int (fromIntegral wordSize) (fromIntegral $ length s)
+                     , C.PtrToInt conPtr address_t ]
+    strName <- addGlobalConstant strType strStruct
+    let strPtr = C.GlobalReference (ptr_t strType) strName
+    let strElem = C.GetElementPtr True strPtr [C.Int 32 0, C.Int 32 0]
+    consCast strElem (ptr_t strType) address_t
+cgenArgConst (ArgString s CString _) = do
+    (conPtrTy, conPtr) <- addStringConstant s
+    let strElem = C.GetElementPtr True conPtr [C.Int 32 0, C.Int 32 0]
+    consCast strElem conPtrTy address_t
+cgenArgConst (ArgChar c ty) = do 
+    let val = integerOrd c
+    toTy <- lift $ llvmType ty
+    case toTy of
+      IntegerType bs -> return $ C.Int bs val
+      _ -> consCast (C.Int (fromIntegral wordSize) val) address_t toTy      
+cgenArgConst (ArgUndef ty) = do
     llty <- lift $ llvmType ty
-    return $ cons $ C.Undef llty
+    return $ C.Undef llty
+cgenArgConst arg = shouldnt $ "cgenArgConst of " ++ show arg
 
 
-addStringConstant :: String -> Codegen C.Constant
+addStringConstant :: String -> Codegen (LLVMAST.Type, C.Constant)
 addStringConstant s = do
     let strCon = makeStringConstant s
     let conType = array_t (fromIntegral $ length s + 1) char_t
-    C.GlobalReference (ptr_t conType) <$> addGlobalConstant conType strCon
+    globalConst <- addGlobalConstant conType strCon
+    let ptrTy = ptr_t conType
+    return (ptrTy, C.GlobalReference ptrTy globalConst)
 
 
 getBits :: LLVMAST.Type -> Word32
@@ -1191,7 +1218,7 @@ llvmFuncType ty = do
 
 llvmClosureType :: TypeSpec -> Compiler LLVMAST.Type
 llvmClosureType (HigherOrderType tys) 
-    = llvmFuncType (HigherOrderType $ tail tys)
+    = llvmFuncType (HigherOrderType $ tys ++ [TypeFlow AnyType ParamIn])
 llvmClosureType ty = shouldnt $ "llvmClosureType on " ++ show ty
 
 

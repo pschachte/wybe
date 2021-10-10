@@ -496,34 +496,33 @@ hoistLambda exp@(Lambda pstmts) pos = do
 
     tmpCtr <- gets brTempCtr
     let procProto = ProcProto name (closedParams ++ holeParams) Set.empty
-    let pDefRegular = ProcDef name procProto 
-                      (ProcDefSrc pstmts) 
-                      Nothing tmpCtr 0
-                      Map.empty Private Det MayInline Pure False NoSuperproc
+    let pDefRegular = ProcDef name procProto (ProcDefSrc pstmts) Nothing tmpCtr 0
+                      Map.empty Private Det Inline Pure False NoSuperproc
     pDefRegular' <- lift $ unbranchProc pDefRegular tmpCtr 
     logUnbranch $ "  Resultant regular proc: " ++ show procProto
+    -- let adder = do
     procSpec@ProcSpec{procSpecMod=mod,procSpecName=nm,procSpecID=procId} 
         <- lift (addProcDef pDefRegular')
+    let closureName = makeClosureName name
     let pDefClosure = 
-          ProcDef name procProto 
-              (ProcDefSrc [Unplaced $ ProcCall mod nm (Just procId) Det False 
+            ProcDef closureName procProto{procProtoName=closureName} 
+            (ProcDefSrc [Unplaced $ ProcCall mod nm (Just procId) Det False 
                                     $ List.map Unplaced closedVars ++ holeVars]) 
-              Nothing tmpCtr 0
-              Map.empty Private Det MayInline Pure True NoSuperproc
+            Nothing tmpCtr 0
+            Map.empty Private Det Inline Pure True NoSuperproc
     pDefClosure' <- lift $ unbranchProc pDefClosure tmpCtr 
     void $ lift (addProcDef pDefClosure')
     return $ maybePlace (ProcRef procSpec closedVars) pos
+    -- case procImpln pDefRegular' of 
+    --     ProcDefSrc [pstmt] | List.null closedParams -> 
+    --         case content pstmt of
+    --             ProcCall cMod cName (Just cID) Det _ exps 
+    --                     | (content <$> exps) == (content <$> holeVars) ->
+    --                 let procSpec = ProcSpec cMod cName cID generalVersion
+    --                 in return $ maybePlace (ProcRef procSpec []) pos
+    --             _ -> adder
+    --     _ -> adder
 hoistLambda exp pos = return $ maybePlace exp pos
-
-envUnpacker :: [Param] -> [Placed Stmt]
-envUnpacker = 
-    zipWith (\idx (Param name ty _ _) -> 
-        Unplaced $ ForeignCall "lpvm" "access" []
-                    [Unplaced $ Var envParamName ParamIn Closed `castTo` intType,
-                     Unplaced $ iVal (idx * wordSizeBytes) `castTo` intType,
-                     Unplaced $ iVal wordSizeBytes `castTo` intType,
-                     Unplaced $ iVal 0 `castTo` intType,
-                     Unplaced $ Var name ParamOut Closed `castTo` ty]) [1..]
 
 
 envParam :: Param

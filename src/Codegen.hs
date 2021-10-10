@@ -18,8 +18,9 @@ module Codegen (
   phi, br, cbr, getBlock, retNothing, fresh,
   -- * Symbol storage
   alloca, store, local, assign, load, getVar, localVar, preservingSymtab,
-  operandType, doAlloca, doLoad, bitcast, inttoptr, ptrtoint,
-  trunc, zext, sext,
+  operandType, doAlloca, doLoad, 
+  bitcast, cbitcast, inttoptr, cinttoptr, ptrtoint, cptrtoint,
+  trunc, ctrunc, zext, czext, csext, sext,
   -- * Types
   int_t, phantom_t, float_t, char_t, ptr_t, void_t, string_t, array_t,
   struct_t, address_t, byte_ptr_t,
@@ -612,11 +613,20 @@ load ptr = Load False ptr Nothing 0 []
 bitcast :: Operand -> LLVMAST.Type -> Codegen Operand
 bitcast op ty = instr ty $ BitCast op ty []
 
+cbitcast :: C.Constant -> LLVMAST.Type -> Codegen C.Constant
+cbitcast op ty = return $ C.BitCast op ty
+
 inttoptr :: Operand -> LLVMAST.Type -> Codegen Operand
 inttoptr op ty = instr ty $ IntToPtr op ty []
 
+cinttoptr :: C.Constant -> LLVMAST.Type -> Codegen C.Constant
+cinttoptr op ty = return $ C.IntToPtr op ty
+
 ptrtoint :: Operand -> LLVMAST.Type -> Codegen Operand
 ptrtoint op ty = instr ty $ PtrToInt op ty []
+
+cptrtoint :: C.Constant -> LLVMAST.Type -> Codegen C.Constant
+cptrtoint op ty = return $ C.PtrToInt op ty
 
 -- constBitcast :: Operand -> LLVMAST.Type -> Operand
 -- constBitcast (ConstantOperand c) ty =  cons $ C.BitCast c ty
@@ -630,12 +640,20 @@ constInttoptr c ty = cons $ C.IntToPtr c ty
 trunc :: Operand -> LLVMAST.Type -> Codegen Operand
 trunc op ty = instr ty $ Trunc op ty []
 
+ctrunc :: C.Constant -> LLVMAST.Type -> Codegen C.Constant
+ctrunc op ty = return $ C.Trunc op ty
+
 zext :: Operand -> LLVMAST.Type -> Codegen Operand
 zext op ty = instr ty $ ZExt op ty []
+
+czext :: C.Constant -> LLVMAST.Type -> Codegen C.Constant
+czext op ty = return $ C.ZExt op ty
 
 sext :: Operand -> LLVMAST.Type -> Codegen Operand
 sext op ty = instr ty $ SExt op ty []
 
+csext :: C.Constant -> LLVMAST.Type -> Codegen C.Constant
+csext op ty = return $ C.SExt op ty
 
 
 
