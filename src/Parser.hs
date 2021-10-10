@@ -42,6 +42,10 @@ syntaxError :: SourcePos -> String -> Either (SourcePos,String) a
 syntaxError pos msg = Left (pos,msg)
 
 
+sourcePos :: Monad m => ParsecT s u m SourcePos
+sourcePos = statePos `fmap` getParserState
+
+
 -- | Parse a Wybe module.
 parseWybe :: [Token] -> FilePath -> Either ParseError [Item]
 parseWybe toks file = parse (items <* eof) file toks
@@ -449,10 +453,9 @@ primaryStmtExpr =
 
 parenthesisedExp :: Parser StmtExpr
 parenthesisedExp = do
+    pos <- sourcePos
     exps <- argumentList Paren
-    case exps of
-        (fstExp:_) -> return $ Call (stmtExprPos fstExp) [] "()" ParamIn exps
-        _ -> fail "empty parenthesisedExp"
+    return $ Call pos [] "()" ParamIn exps
 
 varOrCall :: Parser StmtExpr
 varOrCall = do
@@ -461,7 +464,7 @@ varOrCall = do
     return $ Call pos (init modVar) (last modVar) ParamIn []
 
 
-hole :: Parser StmtExpr 
+hole :: Parser StmtExpr
 hole = do
     pos <- tokenPosition <$> symbol "@"
     holeNum <- optionMaybe intConst
@@ -1070,17 +1073,17 @@ translateConditionalExp' stmtExpr =
 -- |Convert a StmtExpr to a TypeSpec, or produce an error
 stmtExprToTypeSpec :: TranslateTo TypeSpec
 stmtExprToTypeSpec (Call _ [] name ParamOut []) = Right $ TypeVariable name
-stmtExprToTypeSpec (Call _ [] "()" ParamIn args) =  
+stmtExprToTypeSpec (Call _ [] "()" ParamIn args) =
     HigherOrderType <$> mapM stmtExprToTypeFlow args
-stmtExprToTypeSpec call@(Call _ mod name ParamIn args) = 
+stmtExprToTypeSpec call@(Call _ mod name ParamIn args) =
     TypeSpec mod name <$> mapM stmtExprToTypeSpec args
 stmtExprToTypeSpec other =
     syntaxError (stmtExprPos other) $ "invalid type specification " ++ show other
 
 stmtExprToTypeFlow :: TranslateTo TypeFlow
-stmtExprToTypeFlow (Call _ [] ":" flow [ty]) = 
+stmtExprToTypeFlow (Call _ [] ":" flow [ty]) =
     (`TypeFlow` flow) <$> stmtExprToTypeSpec ty
-stmtExprToTypeFlow ty@Call{} = 
+stmtExprToTypeFlow ty@Call{} =
     (`TypeFlow` ParamIn) <$> stmtExprToTypeSpec ty
 stmtExprToTypeFlow other =
     syntaxError (stmtExprPos other) $ "invalid higher order type arguemnt " ++ show other
