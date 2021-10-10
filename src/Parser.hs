@@ -449,8 +449,10 @@ primaryStmtExpr =
 
 parenthesisedExp :: Parser StmtExpr
 parenthesisedExp = do
-    pos <- tokenPosition <$> leftBracket Paren
-    setStmtExprPos pos <$> stmtExpr <* rightBracket Paren
+    exps <- argumentList Paren
+    case exps of
+        (fstExp:_) -> return $ Call (stmtExprPos fstExp) [] "()" ParamIn exps
+        _ -> fail "empty parenthesisedExp"
 
 varOrCall :: Parser StmtExpr
 varOrCall = do
@@ -845,9 +847,11 @@ reportFailure (pos, message) = setPosition pos >> parserFail message
 
 -- |Type alias for a translation function
 type TranslateTo ty = StmtExpr -> Either (SourcePos,String) ty
--- |Type alias for a translation function
-type TranslateListTo ty = [StmtExpr] -> Either (SourcePos,String) ty
 
+
+parensToStmtExpr :: [StmtExpr] -> [StmtExpr]
+parensToStmtExpr [Call _ [] "()" ParamIn parensed] = parensed
+parensToStmtExpr ses = ses
 
 -- |Convert a StmtExpr to a proc/func prototype and a return type (AnyType for a
 -- proc declaration or a function with no return type specified).
@@ -856,10 +860,11 @@ stmtExprToPrototype (Call _ [] ":" ParamIn [rawProto,rawTy]) = do
     returnType <- stmtExprToTypeSpec rawTy
     (proto,_)  <- stmtExprToPrototype rawProto
     return (proto,returnType)
+stmtExprToPrototype (Call _ [] "()" ParamIn [proto]) = stmtExprToPrototype proto
 stmtExprToPrototype (Call pos mod name ParamIn rawParams) =
     if List.null mod
     then do
-        params <- mapM stmtExprToParam rawParams
+        params <- mapM stmtExprToParam $ parensToStmtExpr rawParams
         return (ProcProto name params Set.empty,AnyType)
     else Left (pos, "module not permitted in proc declaration " ++ show mod)
 stmtExprToPrototype other =
@@ -883,6 +888,7 @@ stmtExprToBody other = (:[]) <$> stmtExprToStmt other
 stmtExprToStmt :: TranslateTo (Placed Stmt)
 -- stmtExprToStmt (Call pos [] "if" ParamIn [conditional]) =
 --     translateConditionalStmt conditional
+stmtExprToStmt (Call pos [] "()" ParamIn [body]) = stmtExprToStmt body
 stmtExprToStmt (Call pos [] "{}" ParamIn [body]) =
     stmtExprToStmt body
 stmtExprToStmt (Call pos [] "if" ParamIn [conditional]) =
@@ -970,6 +976,7 @@ stmtExprToGenerators other =
 
 -- |Convert a StmtExpr to an Exp, if possible, or give a syntax error if not.
 stmtExprToExp :: TranslateTo (Placed Exp)
+stmtExprToExp (Call _ [] "()" ParamIn [exp]) = stmtExprToExp exp
 stmtExprToExp (Call pos [] ":" ParamIn [exp,ty]) = do
     exp' <- content <$> stmtExprToExp exp
     ty' <- stmtExprToTypeSpec ty
@@ -1063,9 +1070,9 @@ translateConditionalExp' stmtExpr =
 -- |Convert a StmtExpr to a TypeSpec, or produce an error
 stmtExprToTypeSpec :: TranslateTo TypeSpec
 stmtExprToTypeSpec (Call _ [] name ParamOut []) = Right $ TypeVariable name
-stmtExprToTypeSpec (Call pos [] "@" ParamIn args) =  
+stmtExprToTypeSpec (Call _ [] "()" ParamIn args) =  
     HigherOrderType <$> mapM stmtExprToTypeFlow args
-stmtExprToTypeSpec call@(Call pos mod name ParamIn args) = 
+stmtExprToTypeSpec call@(Call _ mod name ParamIn args) = 
     TypeSpec mod name <$> mapM stmtExprToTypeSpec args
 stmtExprToTypeSpec other =
     syntaxError (stmtExprPos other) $ "invalid type specification " ++ show other

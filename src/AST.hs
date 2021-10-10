@@ -3297,7 +3297,7 @@ instance Show TypeSpec where
   show (TypeSpec optmod ident args) =
       maybeModPrefix optmod ++ ident ++ showArguments args
   show (HigherOrderType params) =
-      "@(" ++ intercalate ", " (show <$> params) ++ ")"
+      "(" ++ intercalate ", " (show <$> params) ++ ")"
 
 
 -- |Show the use declaration for a set of resources, if it's non-empty.
