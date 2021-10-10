@@ -330,7 +330,7 @@ typeErrorMessage (ReasonOverload pspecs pos) =
         List.concatMap (("\n    "++) . show) (reverse pspecs)
 typeErrorMessage (ReasonWarnMultipleMatches match rest pos) =
     Message Warning pos $
-        "Multiple procedures match this call's types and/or flows:" ++
+        "Multiple procedures match this call's types and flows:" ++
         List.concatMap (("\n    "++) . show) 
                        (procInfoProc <$> (match:rest))
         ++ "\nDefaulting to: " ++ show (procInfoProc match)

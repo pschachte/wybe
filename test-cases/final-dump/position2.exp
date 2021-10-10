@@ -50,16 +50,16 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 declare external ccc  void @print_int(i64)    
 
 
-@position.15 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.14 to i64) }
+@position.13 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.12 to i64) }
 
 
-@position.14 =    constant [?? x i8] c")\00"
+@position.12 =    constant [?? x i8] c")\00"
 
 
-@position.8 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.7 to i64) }
+@position.7 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.6 to i64) }
 
 
-@position.7 =    constant [?? x i8] c",\00"
+@position.6 =    constant [?? x i8] c",\00"
 
 
 @position.2 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @position.1 to i64) }
@@ -76,21 +76,18 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"position.printPosition<0>"(i64  %"pos##0")    {
 entry:
-  %3 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position.2, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %3)  
-  %4 = inttoptr i64 %"pos##0" to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  tail call ccc  void  @print_int(i64  %6)  
-  %9 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position.8, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %9)  
-  %10 = add   i64 %"pos##0", 8 
-  %11 = inttoptr i64 %10 to i64* 
-  %12 = getelementptr  i64, i64* %11, i64 0 
-  %13 = load  i64, i64* %12 
-  tail call ccc  void  @print_int(i64  %13)  
-  %16 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position.15, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %16)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position.2, i32 0, i32 0) to i64))  
+  %3 = inttoptr i64 %"pos##0" to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  %5 = load  i64, i64* %4 
+  tail call ccc  void  @print_int(i64  %5)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position.7, i32 0, i32 0) to i64))  
+  %8 = add   i64 %"pos##0", 8 
+  %9 = inttoptr i64 %8 to i64* 
+  %10 = getelementptr  i64, i64* %9, i64 0 
+  %11 = load  i64, i64* %10 
+  tail call ccc  void  @print_int(i64  %11)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position.13, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
@@ -389,16 +386,16 @@ declare external fastcc  void @"position.printPosition<0>"(i64)
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
-@position2.27 =    constant {i64, i64} { i64 21, i64 ptrtoint ([?? x i8]* @position2.26 to i64) }
+@position2.25 =    constant {i64, i64} { i64 21, i64 ptrtoint ([?? x i8]* @position2.24 to i64) }
 
 
-@position2.26 =    constant [?? x i8] c"expect posB(333,222):\00"
+@position2.24 =    constant [?? x i8] c"expect posB(333,222):\00"
 
 
-@position2.24 =    constant {i64, i64} { i64 23, i64 ptrtoint ([?? x i8]* @position2.23 to i64) }
+@position2.23 =    constant {i64, i64} { i64 23, i64 ptrtoint ([?? x i8]* @position2.22 to i64) }
 
 
-@position2.23 =    constant [?? x i8] c"expect posA(111,20000):\00"
+@position2.22 =    constant [?? x i8] c"expect posA(111,20000):\00"
 
 
 @position2.18 =    constant {i64, i64} { i64 21, i64 ptrtoint ([?? x i8]* @position2.17 to i64) }
@@ -435,18 +432,15 @@ entry:
   %15 = inttoptr i64 %14 to i64* 
   %16 = getelementptr  i64, i64* %15, i64 0 
   store  i64 222, i64* %16 
-  %19 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position2.18, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %19)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position2.18, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %3)  
-  %20 = add   i64 %3, 8 
-  %21 = inttoptr i64 %20 to i64* 
-  %22 = getelementptr  i64, i64* %21, i64 0 
-  store  i64 20000, i64* %22 
-  %25 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position2.24, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %25)  
+  %19 = add   i64 %3, 8 
+  %20 = inttoptr i64 %19 to i64* 
+  %21 = getelementptr  i64, i64* %20, i64 0 
+  store  i64 20000, i64* %21 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position2.23, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %3)  
-  %28 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position2.27, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %28)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position2.25, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %11)  
   ret void 
 }

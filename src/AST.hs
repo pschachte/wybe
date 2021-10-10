@@ -97,7 +97,7 @@ module AST (
   ) where
 
 import           Config (magicVersion, wordSize, objectExtension,
-                         sourceExtension, currentTypeAlias, currentModuleAlias)
+                         sourceExtension, currentModuleAlias)
 import           Control.Monad
 import           Control.Monad.Extra
 import           Control.Monad.Trans (lift,liftIO)
@@ -858,7 +858,7 @@ lookupType _ _ InvalidType = return InvalidType
 lookupType _ _ ty@TypeVariable{} = return ty
 lookupType _ _ ty@Representation{} = return ty
 lookupType context pos ty@(TypeSpec [] typename args)
-  | typename == currentTypeAlias = do
+  | typename == currentModuleAlias = do
     currMod <- getModuleSpec
     return $ TypeSpec (init currMod) (last currMod) args
 lookupType context pos ty@(TypeSpec mod name args) = do

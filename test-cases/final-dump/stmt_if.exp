@@ -107,10 +107,10 @@ declare external ccc  void @putchar(i8)
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
-@stmt_if.16 =    constant {i64, i64} { i64 35, i64 ptrtoint ([?? x i8]* @stmt_if.15 to i64) }
+@stmt_if.15 =    constant {i64, i64} { i64 35, i64 ptrtoint ([?? x i8]* @stmt_if.14 to i64) }
 
 
-@stmt_if.15 =    constant [?? x i8] c"lookup fails when it should succeed\00"
+@stmt_if.14 =    constant [?? x i8] c"lookup fails when it should succeed\00"
 
 
 @stmt_if.13 =    constant {i64, i64} { i64 30, i64 ptrtoint ([?? x i8]* @stmt_if.12 to i64) }
@@ -119,16 +119,16 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 @stmt_if.12 =    constant [?? x i8] c"lookup succeeds when it should\00"
 
 
-@stmt_if.22 =    constant {i64, i64} { i64 35, i64 ptrtoint ([?? x i8]* @stmt_if.21 to i64) }
+@stmt_if.19 =    constant {i64, i64} { i64 35, i64 ptrtoint ([?? x i8]* @stmt_if.18 to i64) }
 
 
-@stmt_if.21 =    constant [?? x i8] c"lookup succeeds when it should fail\00"
+@stmt_if.18 =    constant [?? x i8] c"lookup succeeds when it should fail\00"
 
 
-@stmt_if.19 =    constant {i64, i64} { i64 27, i64 ptrtoint ([?? x i8]* @stmt_if.18 to i64) }
+@stmt_if.17 =    constant {i64, i64} { i64 27, i64 ptrtoint ([?? x i8]* @stmt_if.16 to i64) }
 
 
-@stmt_if.18 =    constant [?? x i8] c"lookup fails when it should\00"
+@stmt_if.16 =    constant [?? x i8] c"lookup fails when it should\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -156,14 +156,12 @@ entry:
   %"1#tmp#4##0" = tail call fastcc  i1  @"stmt_if.lookup<0>"(i64  1, i64  %3)  
   br i1 %"1#tmp#4##0", label %if.then, label %if.else 
 if.then:
-  %14 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_if.13, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %14)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_if.13, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"stmt_if.gen#1<0>"(i64  %3)  
   ret void 
 if.else:
-  %17 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_if.16, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %17)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_if.15, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"stmt_if.gen#1<0>"(i64  %3)  
   ret void 
@@ -175,13 +173,11 @@ entry:
   %"1#tmp#3##0" = tail call fastcc  i1  @"stmt_if.lookup<0>"(i64  3, i64  %"tr##0")  
   br i1 %"1#tmp#3##0", label %if.then, label %if.else 
 if.then:
-  %20 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_if.19, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %20)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_if.17, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else:
-  %23 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_if.22, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %23)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_if.19, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
@@ -192,31 +188,31 @@ entry:
   %"1#tmp#6##0" = icmp ne i64 %"tree##0", 0 
   br i1 %"1#tmp#6##0", label %if.then, label %if.else 
 if.then:
-  %24 = inttoptr i64 %"tree##0" to i64* 
+  %20 = inttoptr i64 %"tree##0" to i64* 
+  %21 = getelementptr  i64, i64* %20, i64 0 
+  %22 = load  i64, i64* %21 
+  %23 = add   i64 %"tree##0", 8 
+  %24 = inttoptr i64 %23 to i64* 
   %25 = getelementptr  i64, i64* %24, i64 0 
   %26 = load  i64, i64* %25 
-  %27 = add   i64 %"tree##0", 8 
+  %27 = add   i64 %"tree##0", 16 
   %28 = inttoptr i64 %27 to i64* 
   %29 = getelementptr  i64, i64* %28, i64 0 
   %30 = load  i64, i64* %29 
-  %31 = add   i64 %"tree##0", 16 
-  %32 = inttoptr i64 %31 to i64* 
-  %33 = getelementptr  i64, i64* %32, i64 0 
-  %34 = load  i64, i64* %33 
-  %"2#tmp#3##0" = icmp eq i64 %"key##0", %30 
+  %"2#tmp#3##0" = icmp eq i64 %"key##0", %26 
   br i1 %"2#tmp#3##0", label %if.then1, label %if.else1 
 if.else:
   ret i1 0 
 if.then1:
   ret i1 1 
 if.else1:
-  %"5#tmp#2##0" = icmp slt i64 %"key##0", %30 
+  %"5#tmp#2##0" = icmp slt i64 %"key##0", %26 
   br i1 %"5#tmp#2##0", label %if.then2, label %if.else2 
 if.then2:
-  %"6#result##0" = tail call fastcc  i1  @"stmt_if.lookup<0>"(i64  %"key##0", i64  %26)  
+  %"6#result##0" = tail call fastcc  i1  @"stmt_if.lookup<0>"(i64  %"key##0", i64  %22)  
   ret i1 %"6#result##0" 
 if.else2:
-  %"7#result##0" = tail call fastcc  i1  @"stmt_if.lookup<0>"(i64  %"key##0", i64  %34)  
+  %"7#result##0" = tail call fastcc  i1  @"stmt_if.lookup<0>"(i64  %"key##0", i64  %30)  
   ret i1 %"7#result##0" 
 }
 --------------------------------------------------

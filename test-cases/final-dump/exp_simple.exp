@@ -75,8 +75,7 @@ entry:
   tail call ccc  void  @putchar(i8  10)  
   tail call ccc  void  @putchar(i8  104)  
   tail call ccc  void  @putchar(i8  10)  
-  %3 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @exp_simple.2, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %3)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @exp_simple.2, i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  3)  
   tail call ccc  void  @putchar(i8  10)  
   tail call ccc  void  @print_int(i64  1001)  
