@@ -179,6 +179,14 @@ where *name* is the name of the procedure to call,
 and each *arg* is an expression specifying an input or output
 to that procedure.
 
+Sometimes you may wish to specify which module the procedure *name* exists in. 
+You can further specify which module the procedure *name* is from by preceding
+*name* with a `.` separated module specification, such as *parent*`.`*mod*`.`*name*.
+
+As a convenience, if the first module name in a module specification is `_`, the 
+`_` is equivalent to the current module. For example in a module named `foo`, 
+`_.`*name* is equivalent to `foo.`*name*
+
 A procedure call must be preceded by an exclamation point (`!`) if it uses any
 resources, as described in the section on
 [calling a resourceful procedure](#calling-resourceful).
@@ -1193,8 +1201,7 @@ declaration of the procedure must be consulted to see which values they are.
 
 Most commonly, a procedure that uses a resource is called in the
 definition of another procedure that uses that resource.
-However, it may also be called from a procedure where the resource name is used
-as a local variable, or inside a [scoped](#scoping) resource use.
+However, it may also be called inside a [scoped](#scoping) resource use.
 
 ### <a name="scoping"></a>Scoping a resource use
 

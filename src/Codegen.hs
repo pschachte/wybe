@@ -20,7 +20,7 @@ module Codegen (
   alloca, store, local, assign, load, getVar, localVar, preservingSymtab,
   operandType, doAlloca, doLoad, 
   bitcast, cbitcast, inttoptr, cinttoptr, ptrtoint, cptrtoint,
-  trunc, ctrunc, zext, czext, csext, sext,
+  trunc, ctrunc, zext, czext, sext, csext,
   -- * Types
   int_t, phantom_t, float_t, char_t, ptr_t, void_t, string_t, array_t,
   struct_t, address_t, byte_ptr_t,
@@ -654,7 +654,6 @@ sext op ty = instr ty $ SExt op ty []
 
 csext :: C.Constant -> LLVMAST.Type -> Codegen C.Constant
 csext op ty = return $ C.SExt op ty
-
 
 
 -- Helpers for allocating, storing, loading

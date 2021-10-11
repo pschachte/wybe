@@ -846,10 +846,6 @@ offsetAddr baseAddr offsetFn offset = do
           instr address_t (offsetFn baseAddr offsetArg)
 
 
-
-
-
-
 isNullCons :: C.Constant -> Bool
 isNullCons (C.Int _ val) = val == 0
 isNullCons _             = False
@@ -862,11 +858,10 @@ isPtr _                 = False
 
 doCast :: Operand -> LLVMAST.Type -> LLVMAST.Type -> Codegen Operand
 doCast op ty1 ty2 = do
-    (op,caseStr) <- castHelper bitcast zext trunc inttoptr ptrtoint op ty1 ty2
-    logCodegen $ "doCast from " ++ show op ++ " to " ++ show ty2
+    (op',caseStr) <- castHelper bitcast zext trunc inttoptr ptrtoint op ty1 ty2
+    logCodegen $ "doCast from " ++ show op' ++ " to " ++ show ty2
                  ++ ":  " ++ caseStr
-    return op
-
+    return op'
 
 
 consCast :: C.Constant -> LLVMAST.Type -> LLVMAST.Type -> Codegen C.Constant
@@ -876,18 +871,19 @@ consCast c ty1 ty2 = do
                  ++ ":  " ++ caseStr
     return c'
 
+
 castHelper :: (a -> LLVMAST.Type -> Codegen a) -- bitcast
            -> (a -> LLVMAST.Type -> Codegen a) -- zext
            -> (a -> LLVMAST.Type -> Codegen a) -- trunc
            -> (a -> LLVMAST.Type -> Codegen a) -- inttoptr
-           -> (a -> LLVMAST.Type -> Codegen a) -- ptrtoin
+           -> (a -> LLVMAST.Type -> Codegen a) -- ptrtoint
            -> a -> LLVMAST.Type -> LLVMAST.Type -> Codegen (a,String)
 castHelper _ _ _ _ _ op fromTy toTy
     | fromTy == toTy = return (op, "identity cast")
-castHelper _ _ _ c _ op (IntegerType _) ty2@(PointerType _ _) =
-    (,"inttoptr") <$> c op ty2
-castHelper _ _ _ _ c op (PointerType _ _) ty2@(IntegerType _) =
-    (,"ptrtoint") <$> c op ty2
+castHelper _ _ _ i _ op (IntegerType _) ty2@(PointerType _ _) =
+    (,"inttoptr") <$> i op ty2
+castHelper _ _ _ _ p op (PointerType _ _) ty2@(IntegerType _) =
+    (,"ptrtoint") <$> p op ty2
 castHelper b z t _ _ op (IntegerType bs1) ty2@(IntegerType bs2)
     | bs1 == bs2 = (,"bitcast no-op") <$> b op ty2
     | bs2 > bs1 = (,"zext") <$> z op ty2
@@ -1013,14 +1009,9 @@ openPrimArg a = shouldnt $ "Can't Open!: "
                 ++ (show $ argFlowDirection a)
 
 
--- | 'cgenArg' makes an Operand of the input argument. The argument may be:
--- o input variable - lookup the symbol table to get its Operand value.
--- o Constant - Make a constant Operand according to the type: o String
--- constants: A string constant is an constant Array Type of [N x i8].  This
--- will have to be declared as a global constant to get implicit memory
--- allocation and then be referenced with a pointer (GetElementPtr). To make
--- it a global declaration 'addGlobalConstant' creates a G.Global Value for
--- it, generating a UnName name for it.
+-- | 'cgenArg' makes an Operand of the input argument. 
+-- * Variables return a casted version of their respective symbol table operand
+-- * Constants are generated with cgenArgConst, then wrapped in `cons`
 cgenArg :: PrimArg -> Codegen LLVMAST.Operand
 cgenArg ArgVar{argVarName=nm, argVarType=ty} = do
     lift $ logBlocks $ "Coercing var " ++ show nm ++ " to " ++ show ty
@@ -1065,6 +1056,13 @@ cgenArg arg = do
     cons <$> cgenArgConst arg
 
 
+-- Generates a constant for a constant PrimArg, casted to the respective type
+-- * Ints, Floats, Chars, Undefs are of respective LLVMTypes
+-- * Strings are handled based on string variant
+--   * CString    - ptr to global constant of [N x i8]
+--   * WybeString - ptr to global constant of { i64, i64 } with the second 
+--                  element being as though it were a CString. This representation 
+--                  is to comply with the stdlib string implementation
 cgenArgConst :: PrimArg -> Codegen C.Constant
 cgenArgConst (ArgInt val ty) = do
     toTy <- lift $ llvmType ty
@@ -1106,9 +1104,9 @@ addStringConstant :: String -> Codegen (LLVMAST.Type, C.Constant)
 addStringConstant s = do
     let strCon = makeStringConstant s
     let conType = array_t (fromIntegral $ length s + 1) char_t
+    let ptrConType = ptr_t conType
     globalConst <- addGlobalConstant conType strCon
-    let ptrTy = ptr_t conType
-    return (ptrTy, C.GlobalReference ptrTy globalConst)
+    return (ptrConType, C.GlobalReference ptrConType globalConst)
 
 
 getBits :: LLVMAST.Type -> Word32
