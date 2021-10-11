@@ -117,10 +117,10 @@ declare external ccc  void @print_int(i64)
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
-@list_loop.43 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @list_loop.42 to i64) }
+@list_loop.42 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @list_loop.41 to i64) }
 
 
-@list_loop.42 =    constant [?? x i8] c" \00"
+@list_loop.41 =    constant [?? x i8] c" \00"
 
 
 @list_loop.40 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @list_loop.39 to i64) }
@@ -129,16 +129,16 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 @list_loop.39 =    constant [?? x i8] c"    \00"
 
 
-@list_loop.49 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @list_loop.48 to i64) }
+@list_loop.46 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @list_loop.45 to i64) }
 
 
-@list_loop.48 =    constant [?? x i8] c" \00"
+@list_loop.45 =    constant [?? x i8] c" \00"
 
 
-@list_loop.46 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @list_loop.45 to i64) }
+@list_loop.44 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @list_loop.43 to i64) }
 
 
-@list_loop.45 =    constant [?? x i8] c"    \00"
+@list_loop.43 =    constant [?? x i8] c"    \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -226,11 +226,9 @@ if.then:
   %36 = inttoptr i64 %35 to i64* 
   %37 = getelementptr  i64, i64* %36, i64 0 
   %38 = load  i64, i64* %37 
-  %41 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @list_loop.40, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %41)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @list_loop.40, i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %"h##0")  
-  %44 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @list_loop.43, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %44)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @list_loop.42, i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %34)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"list_loop.gen#3<0>"(i64  %"h##0", i64  %"l##0", i64  %38, i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"x##0")  
@@ -243,11 +241,9 @@ if.else:
 
 define external fastcc  void @"list_loop.gen#4<0>"(i64  %"h##0", i64  %"h2##0", i64  %"l##0", i64  %"l2##0", i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"x##0")    {
 entry:
-  %47 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @list_loop.46, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %47)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @list_loop.44, i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %"h##0")  
-  %50 = ptrtoint i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @list_loop.49, i32 0, i32 0) to i64 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %50)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @list_loop.46, i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %"h2##0")  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"list_loop.gen#3<0>"(i64  %"h##0", i64  %"l##0", i64  %"l2##0", i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"x##0")  
