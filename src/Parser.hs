@@ -540,6 +540,7 @@ data Associativity = LeftAssociative | NonAssociative | RightAssociative
 -- operator symbols.
 -- TODO decide how to handle: @ $ \ :
 operatorAssociativity :: String -> (Int,Associativity)
+operatorAssociativity "@"  = (12, RightAssociative)
 operatorAssociativity ":"  = (11, LeftAssociative)
 operatorAssociativity ":!" = (11, LeftAssociative)
 operatorAssociativity ","  = ( 0, RightAssociative)
@@ -980,6 +981,13 @@ stmtExprToGenerators other =
 -- |Convert a StmtExpr to an Exp, if possible, or give a syntax error if not.
 stmtExprToExp :: TranslateTo (Placed Exp)
 stmtExprToExp (Call _ [] "()" ParamIn [exp]) = stmtExprToExp exp
+stmtExprToExp call@(Call pos [] "@" ParamIn [mods@(Call _ [] "{}" ParamIn _),
+                                             body@(Call _ [] "{}" ParamIn _)]) = do
+    procMods <- translateToProcModifiers mods
+    lambda <- content <$> stmtExprToExp body
+    case lambda of
+        Lambda _ ps body -> return $ Placed (Lambda procMods ps body) pos
+        _ -> syntaxError pos $ "malformed lambda " ++ show call
 stmtExprToExp (Call pos [] ":" ParamIn [exp,ty]) = do
     exp' <- content <$> stmtExprToExp exp
     ty' <- stmtExprToTypeSpec ty
@@ -1008,7 +1016,7 @@ stmtExprToExp (Call pos [] "let" ParamIn [Call _ [] "in" ParamIn [body,exp]]) =
   do
     exp' <- stmtExprToExp exp
     body' <- stmtExprToBody body
-    return $ Placed (Where body' exp') pos
+    return $ Placed (Where body' exp') pos 
 stmtExprToExp (Call pos [] "^" ParamIn [exp,op]) = do
     exp' <- stmtExprToExp exp
     op'  <- stmtExprToExp op
@@ -1028,7 +1036,7 @@ stmtExprToExp (Call pos [] "if" ParamIn [conditional]) =
     translateConditionalExp conditional
 stmtExprToExp call@(Call pos [] "{}" ParamIn statements) = do
     statements' <- stmtExprToBody call
-    return $ Placed (Lambda statements') pos
+    return $ Placed (Lambda defaultProcModifiers [] statements') pos
 stmtExprToExp (Call pos [] sep ParamIn [])
   | separatorName sep =
     syntaxError pos "invalid separated expression"
@@ -1046,7 +1054,20 @@ stmtExprToExp (StringConst pos str DoubleQuote)
 stmtExprToExp (StringConst pos str (IdentQuote "c" DoubleQuote))
     = return $ Placed (StringValue str CString) pos
 stmtExprToExp str@StringConst{stringPos=pos}
-    = Left (pos, "invalid string literal " ++ show str)
+    = syntaxError pos $ "invalid string literal " ++ show str
+
+
+translateToIdent :: TranslateTo Ident
+translateToIdent (Call _ [] ident ParamIn []) = return ident
+translateToIdent other 
+    = syntaxError (stmtExprPos other) $ "invalid ident " ++ show other
+
+translateToProcModifiers :: TranslateTo ProcModifiers 
+translateToProcModifiers (Call _ [] "{}" ParamIn mods) = 
+    processProcModifiers <$> mapM translateToIdent mods
+translateToProcModifiers other
+    = syntaxError (stmtExprPos other) $ "invalid modifiers " ++ show other
+
 
 
 -- |Translate an `if` expression into a Placed conditional Exp
@@ -1073,10 +1094,18 @@ translateConditionalExp' stmtExpr =
 -- |Convert a StmtExpr to a TypeSpec, or produce an error
 stmtExprToTypeSpec :: TranslateTo TypeSpec
 stmtExprToTypeSpec (Call _ [] name ParamOut []) = Right $ TypeVariable name
+stmtExprToTypeSpec call@(Call pos [] "@" ParamIn [mods@(Call _ [] "{}" ParamIn _),
+                                                  ty@(Call _ [] "()" ParamIn _)]) = do
+    procMods <- translateToProcModifiers mods
+    ty' <- stmtExprToTypeSpec ty
+    case ty' of
+        HigherOrderType _ params -> return $ HigherOrderType procMods params
+        _ -> syntaxError pos $ "invalid type spec " ++ show call 
 stmtExprToTypeSpec (Call _ [] "()" ParamIn args) =
-    HigherOrderType <$> mapM stmtExprToTypeFlow args
-stmtExprToTypeSpec call@(Call _ mod name ParamIn args) =
-    TypeSpec mod name <$> mapM stmtExprToTypeSpec args
+    HigherOrderType defaultProcModifiers <$> mapM stmtExprToTypeFlow args
+stmtExprToTypeSpec call@(Call _ mod name ParamIn args)
+    | name /= "{}"
+    = TypeSpec mod name <$> mapM stmtExprToTypeSpec args
 stmtExprToTypeSpec other =
     syntaxError (stmtExprPos other) $ "invalid type specification " ++ show other
 

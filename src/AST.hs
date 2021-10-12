@@ -22,7 +22,7 @@ module AST (
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
   TypeProto(..), TypeSpec(..), typeVarSet, TypeVarName,
-  genericType, higherOrderType, isHigherOrder, typeModule,
+  genericType, higherOrderType, isHigherOrder, updateHigherOrderTypesM, typeModule,
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
@@ -57,7 +57,7 @@ module AST (
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, ResourceDef(..), FlowDirection(..),
   argFlowDirection, argType, setArgType, argDescription, flowsIn, flowsOut,
-  foldStmts, foldStmtsLambda, foldExps, foldBodyPrims, foldBodyDistrib,
+  foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, procCallToExp,
   expOutputs, pexpListOutputs, expInputs, pexpListInputs,
   setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
@@ -89,7 +89,7 @@ module AST (
   addProc, addProcDef, lookupProc, publicProc, callTargets,
   expHoles, orderedHoles,
   specialChar, specialName, specialName2, outputVariableName, outputStatusName,
-  envParamName, makeClosureName,
+  envParamName, envPrimParam, makeClosureName,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
   showModSpecs, showResources, showOptPos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
@@ -867,10 +867,8 @@ lookupType _ _ AnyType = return AnyType
 lookupType _ _ InvalidType = return InvalidType
 lookupType _ _ ty@TypeVariable{} = return ty
 lookupType _ _ ty@Representation{} = return ty
-lookupType context pos ty@HigherOrderType{higherTypeParams=params} = do
-    types <- mapM (lookupType context pos) $ typeFlowType <$> params
-    let flows = typeFlowMode <$> params
-    return $ HigherOrderType $ zipWith TypeFlow types flows
+lookupType context pos ty@HigherOrderType{} = 
+    updateHigherOrderTypesM (lookupType context pos) ty
 lookupType context pos ty@(TypeSpec [] typename args)
   | typename == currentModuleAlias = do
     currMod <- getModuleSpec
@@ -1034,7 +1032,7 @@ data ProcModifiers = ProcModifiers {
     modifierImpurity::Impurity,    -- ^ Don't assume purity when optimising
     modifierUnknown::[String],     -- ^ Unknown modifiers specified
     modifierConflict::[String]     -- ^ Modifiers that conflict with others
-} deriving (Eq, Generic)
+} deriving (Eq, Ord, Generic)
 
 
 data Inlining = Inline | MayInline | NoInline
@@ -1579,10 +1577,10 @@ lookupTypeRepresentation Representation{typeSpecRepresentation=rep} =
     return $ Just rep
 lookupTypeRepresentation (TypeSpec modSpec name _) =
     lookupModuleRepresentation $ modSpec ++ [name]
-lookupTypeRepresentation (HigherOrderType tfs) = do
+lookupTypeRepresentation (HigherOrderType ProcModifiers{modifierDetism=detism} tfs) = do
     mbInReps <- sequenceRepFlowTypes ins
     mbOutReps <- sequenceRepFlowTypes outs
-    return $ Func <$> mbInReps <*> mbOutReps
+    return $ Func <$> mbInReps <*> ((++ [Bits 1 | detism == SemiDet]) <$> mbOutReps)
   where
     ins = List.filter (flowsIn . typeFlowMode) tfs
     outs = List.filter (flowsOut . typeFlowMode) tfs
@@ -2157,20 +2155,9 @@ defaultBlock =  LLBlock { llInstrs = [], llTerm = TermNop }
 
 -- |Fold over a list of statements in a pre-order left-to-right traversal.
 -- Takes two folding functions, one for statements and one for expressions.
--- This *does not* fold over nested statements inside a lambda expression
 foldStmts :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> [Placed Stmt] -> a
 foldStmts sfn efn val stmts =
     List.foldl (\val pstmt -> foldStmt sfn efn val $ content pstmt) val stmts
-
-
--- |Fold over a list of statements in a pre-order left-to-right traversal.
--- Takes two folding functions, one for statements and one for expressions.
--- This *does* fold over nested statements inside a lambda expression
-foldStmtsLambda :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> [Placed Stmt] -> a
-foldStmtsLambda sfn efn val stmts = foldStmts sfn efn' val stmts
-    where
-        efn' val exp@(Lambda ss) = foldStmts sfn efn' (efn val exp) ss
-        efn' val exp             = efn val exp
 
 
 -- |Fold over the specified statement and all the statements nested within it,
@@ -2191,8 +2178,8 @@ foldStmt' :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> Stmt -> a
 --   = error "Woops!"
 foldStmt' sfn efn val (ProcCall _ _ _ _ _ args) =
     foldExps sfn efn val args
-foldStmt' sfn efn val (HigherCall _ args) =
-    foldExps sfn efn val args
+foldStmt' sfn efn val (HigherCall _ fn args) =
+    foldExps sfn efn val $ fn:args
 foldStmt' sfn efn val (ForeignCall _ _ _ args) =
     foldExps sfn efn val args
 foldStmt' sfn efn val (Cond tst thn els _ _) = val4
@@ -2238,8 +2225,8 @@ foldExp' _   _   val FloatValue{}   = val
 foldExp' _   _   val StringValue{}  = val
 foldExp' _   _   val CharValue{}    = val
 foldExp' _   _   val Var{}          = val
-foldExp' _   _   val Lambda{}       = val
 foldExp' _   _   val ProcRef{}      = val
+foldExp' sfn efn val (Lambda _ _ pstmts) = foldStmts sfn efn val pstmts
 foldExp' sfn efn val (Typed exp _ _) = foldExp sfn efn val exp
 foldExp' _   _   val HoleVar{}      = val
 foldExp' sfn efn val (Where stmts exp) =
@@ -2336,6 +2323,7 @@ data TypeSpec = TypeSpec {
     typeParams::[TypeSpec]
     }
     | HigherOrderType {
+        higherTypeDetism::ProcModifiers,
         higherTypeParams::[TypeFlow]
     }
     | TypeVariable { typeVariableName :: TypeVarName }
@@ -2374,6 +2362,13 @@ higherOrderType InvalidType      = False
 isHigherOrder :: TypeSpec -> Bool
 isHigherOrder HigherOrderType{} = True
 isHigherOrder _                 = False
+
+updateHigherOrderTypesM :: Monad m => (TypeSpec -> m TypeSpec) -> TypeSpec -> m TypeSpec
+updateHigherOrderTypesM trans ty@HigherOrderType{higherTypeParams=typeFlows} = do
+    types <- mapM trans $ typeFlowType <$> typeFlows
+    return $ ty{higherTypeParams=zipWith TypeFlow types (typeFlowMode <$> typeFlows)}
+updateHigherOrderTypesM _ ty = 
+    shouldnt $ "updateHigherOrderTypesM on " ++ show ty
 
 
 -- | Return the module of the specified type, if it has one.
@@ -2442,7 +2437,7 @@ data Param = Param {
     paramType::TypeSpec,
     paramFlow::FlowDirection,
     paramFlowType::ArgFlowType
-    } deriving (Eq, Generic)
+    } deriving (Eq, Ord, Generic)
 
 
 -- |The type and mode (flow) of a single argument or parameter
@@ -2505,7 +2500,7 @@ data Stmt
      --   and args.  We assume every call is Det until type checking.
      --   The Bool flag indicates that the proc is allowed to use resources.
      = ProcCall ModSpec ProcName (Maybe Int) Determinism Bool [Placed Exp]
-     | HigherCall (Placed Exp) [Placed Exp]
+     | HigherCall Determinism (Placed Exp) [Placed Exp]
      -- |A foreign call, with language, foreign name, tags, and args
      | ForeignCall Ident ProcName [Ident] [Placed Exp]
      -- |Do nothing (and succeed)
@@ -2575,7 +2570,7 @@ data Exp
       | CharValue Char
       | StringValue String StringVariant
       | Var VarName FlowDirection ArgFlowType
-      | Lambda [Placed Stmt]
+      | Lambda ProcModifiers [Param] [Placed Stmt]
       | ProcRef ProcSpec [Exp]
       | Typed Exp TypeSpec (Maybe TypeSpec)
                -- ^explicitly typed expr giving the type of the expression, and,
@@ -2600,7 +2595,7 @@ flattenedExpFlow (IntValue _)      = ParamIn
 flattenedExpFlow (FloatValue _)    = ParamIn
 flattenedExpFlow (CharValue _)     = ParamIn
 flattenedExpFlow (StringValue _ _) = ParamIn
-flattenedExpFlow (Lambda _)        = ParamIn
+flattenedExpFlow (Lambda _ _ _)      = ParamIn
 flattenedExpFlow (ProcRef _ _)     = ParamIn
 flattenedExpFlow (Var _ flow _)    = flow
 flattenedExpFlow (Typed exp _ _)   = flattenedExpFlow exp
@@ -2914,7 +2909,7 @@ expOutputs (StringValue _ _) = Set.empty
 expOutputs (CharValue _) = Set.empty
 expOutputs (Var name flow _) =
     if flowsOut flow then Set.singleton name else Set.empty
-expOutputs (Lambda _) = Set.empty
+expOutputs (Lambda _ _ _) = Set.empty
 expOutputs (ProcRef _ _) = Set.empty
 expOutputs (Typed expr _ _) = expOutputs expr
 expOutputs (HoleVar _ _) = Set.empty
@@ -2937,7 +2932,7 @@ expInputs (StringValue _ _) = Set.empty
 expInputs (CharValue _) = Set.empty
 expInputs (Var name flow _) =
    if flowsIn flow then Set.singleton name else Set.empty
-expInputs (Lambda _) = Set.empty
+expInputs (Lambda _ _ _) = Set.empty
 expInputs (ProcRef _ _) = Set.empty
 expInputs (Typed expr _ _) = expInputs expr
 expInputs (HoleVar _ _) = Set.empty
@@ -3072,8 +3067,12 @@ outputStatusName :: Ident
 outputStatusName = specialName "success"
 
 
-envParamName :: VarName
-envParamName = specialName "env"
+envParamName :: PrimVarName
+envParamName = PrimVarName (specialName "env") 0
+
+
+envPrimParam :: PrimParam
+envPrimParam = PrimParam envParamName AnyType FlowIn Closed (ParamInfo False)
 
 
 makeClosureName :: Ident -> Ident
@@ -3299,8 +3298,9 @@ instance Show TypeSpec where
   show (Representation rep) = show rep
   show (TypeSpec optmod ident args) =
       maybeModPrefix optmod ++ ident ++ showArguments args
-  show (HigherOrderType params) =
-      "(" ++ intercalate ", " (show <$> params) ++ ")"
+  show (HigherOrderType mods params) =
+      showProcModifiers mods
+      ++ "(" ++ intercalate ", " (show <$> params) ++ ")"
 
 
 -- |Show the use declaration for a set of resources, if it's non-empty.
@@ -3417,7 +3417,7 @@ showStmt _ (ProcCall maybeMod name procID detism resourceful args) =
     ++ maybeModPrefix maybeMod
     ++ maybe "" (\n -> "<" ++ show n ++ ">") procID ++
     name ++ showArguments args
-showStmt _ (HigherCall fn args) =
+showStmt _ (HigherCall _ fn args) =
     show fn ++ showArguments args
 showStmt _ (ForeignCall lang name flags args) =
     "foreign " ++ lang ++ " " ++ showFlags flags ++ name ++
@@ -3498,7 +3498,10 @@ instance Show Exp where
   show (StringValue s v) = show v ++ show s
   show (CharValue c) = show c
   show (Var name dir flowtype) = show flowtype ++ flowPrefix dir ++ name
-  show (Lambda ss) = "{" ++ intercalate "\n" (showStmt 0 . content <$> ss) ++ "}"
+  show (Lambda mods _ ss) = 
+      let modFlags = showProcModifiers mods
+      in modFlags ++ (if modFlags == "" then "" else "@") 
+         ++ "{" ++ intercalate "\n" (showStmt 0 . content <$> ss) ++ "}"
   show (ProcRef ps es) = "@" ++ show ps ++ "<" ++ intercalate ", " (show <$> es) ++ ">"
   show (HoleVar num dir) = flowPrefix dir ++ "@" ++ maybe "" show num
   show (Where stmts exp) = show exp ++ " where" ++ showBody 8 stmts

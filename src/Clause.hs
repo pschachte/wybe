@@ -284,7 +284,7 @@ compileSimpleStmt' call@(ProcCall maybeMod name procID _ _ args) = do
                        ("compileSimpleStmt' for " ++ showStmt 4 call)
                        procID) generalVersion)
         args'
-compileSimpleStmt' call@(HigherCall fn args) = do
+compileSimpleStmt' call@(HigherCall _ fn args) = do
     callSiteID <- gets nextCallSiteID
     fn' <- head <$> placedApply compileArg fn
     args' <- concat <$> mapM (placedApply compileArg) args

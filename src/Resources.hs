@@ -160,7 +160,7 @@ transformStmt tmp res stmt@(ProcCall m n id detism resourceful args) pos = do
     resArgs <- concat <$> mapM (resourceArgs pos) (Set.elems callResources)
     return ([maybePlace
             (ProcCall m n (Just procID) detism False (args++resArgs)) pos], tmp)
-transformStmt tmp res stmt@(HigherCall _ _) pos = return $ ([maybePlace stmt pos],tmp)
+transformStmt tmp res stmt@(HigherCall _ _ _) pos = return $ ([maybePlace stmt pos],tmp)
 transformStmt tmp res (ForeignCall lang name flags args) pos =
     return ([maybePlace (ForeignCall lang name flags args) pos], tmp)
 transformStmt tmp res stmt@(TestBool var) pos =

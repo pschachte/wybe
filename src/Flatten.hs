@@ -112,20 +112,40 @@ type Flattener = StateT FlattenerState Compiler
 data FlattenerState = Flattener {
     flattened     :: [Placed Stmt], -- ^Flattened code generated, reversed
     postponed     :: [Placed Stmt], -- ^Flattened code to come after
-    totalLambdas  :: Integer,       -- ^Total number of lambdas encountered
-    currentLambda :: Integer,       -- ^Current lambda number
-    holeCount     :: Maybe Integer, -- ^Number of holes encountered in current
-                                    -- lambda. Nothing if we have numbered holes
+    holeState     :: HoleState,     -- ^Information we know about holes
     tempCtr       :: Int,           -- ^Temp variable counter
     currPos       :: OptPos,        -- ^Position of current statement
     stmtDefs      :: Set VarName,   -- ^Variables defined by this statement
     defdVars      :: Set VarName    -- ^Variables defined somewhere in this
-                                   -- proc body
+                                    -- proc body
+    }
+
+data HoleState = HoleState {
+    totalLambdas  :: Integer,   -- ^Total number of lambdas encountered
+    currentLambda :: Integer,   -- ^Current lambda number
+    holeCount :: Maybe Integer, -- ^Number of holes encountered in current
+                                -- lambda. Nothing if we have numbered holes
+    params :: Map Integer Param -- ^Processed list of holes as params
     }
 
 
 initFlattenerState :: Set VarName -> FlattenerState
-initFlattenerState = Flattener [] [] 0 0 (Just 0) 0 Nothing Set.empty
+initFlattenerState = Flattener [] [] initHoleState 0 Nothing Set.empty
+
+
+initHoleState :: HoleState
+initHoleState = HoleState 0 0 (Just 0) Map.empty
+
+pushHoleState :: HoleState -> HoleState
+pushHoleState (HoleState t _ _ _) = 
+    let t' = t + 1
+    in initHoleState{totalLambdas=t', currentLambda=t'}
+
+popHoleState :: HoleState -> HoleState -> HoleState
+popHoleState old@HoleState{} (HoleState t _ _ _) = old{totalLambdas=t}
+
+holeStateParams :: Map Integer Param -> [Param]
+holeStateParams = Map.elems
 
 
 emit :: OptPos -> Stmt -> Flattener ()
@@ -287,18 +307,18 @@ flattenStmt' (ProcCall mod name procID detism res args) pos d = do
     defined <- gets defdVars
     if name `elem` defined && List.null mod
     then do
-        unless (isNothing procID && detism == Det && not res)
+        unless (isNothing procID && not res)
           $ shouldnt "bad higher call"
-        flattenStmt' (HigherCall (maybePlace (Var name ParamIn Ordinary) pos) args)
+        flattenStmt' (HigherCall d (maybePlace (Var name ParamIn Ordinary) pos) args)
                      pos d
     else do
         logFlatten "   call is Det"
         args' <- flattenStmtArgs args pos
         emit pos $ ProcCall mod name procID detism res args'
         flushPostponed
-flattenStmt' (HigherCall nm args) pos _ = do
+flattenStmt' (HigherCall detism nm args) pos _ = do
     args' <- flattenStmtArgs args pos
-    emit pos $ HigherCall nm args'
+    emit pos $ HigherCall detism nm args'
     flushPostponed
 flattenStmt' (ForeignCall lang name flags args) pos _ = do
     args' <- flattenStmtArgs args pos
@@ -516,22 +536,27 @@ flattenExp expr@(Var name dir argFlow) ty castFrom pos = do
         return expr'
 flattenExp expr@(HoleVar mbNum dir) ty castFrom pos = do
     logFlatten $ "  Flattening hole " ++ show expr
-    holes <- gets holeCount
-    lambdas <- gets currentLambda
-    num <- case (mbNum, holes) of
+    holes <- gets holeState
+    let HoleState _ lambdas count params = holes
+    (num, count') <- case (mbNum, count) of
         (Nothing, Just n) -> do
-            let n' = n + 1                    
-            modify (\s -> s{holeCount=Just n'})
-            return n'
-        (Just n, _) | fromMaybe 0 holes == 0 -> do
-            modify (\s -> s{holeCount=Nothing})
-            return n
+            let n' = n + 1
+            return (n', Just n')
+        (Just n, _) | fromMaybe 0 count == 0 -> do
+            return (n, Nothing)
         _ -> do 
             lift $ message Error 
                     "Mixed use of numbered and un-numbered holes" pos
-            return (-1)
+            return (-1, count)
     let name = specialName2 (show lambdas) (show num)
     let var = Var name dir Hole
+    let paramDir = paramFlow <$> Map.lookup num params
+    let paramDir' = if fromMaybe dir paramDir == dir 
+                    then dir 
+                    else ParamInOut
+    let param = Param name AnyType paramDir' Hole
+    modify (\s -> s{holeState=holes{holeCount=count',
+                                    params=Map.insert num param params}})
     if lambdas == 0
     then do
         lift $ message Error
@@ -565,21 +590,23 @@ flattenExp (CondExp cond thn els) ty castFrom pos = do
                 Nothing Nothing)
         pos Det
     return $ maybePlace (Var resultName ParamIn flowType) pos
-flattenExp expr@(Lambda pstmts) ty castFrom pos = do
+flattenExp expr@(Lambda mods _ pstmts) ty castFrom pos = do
     state <- get
-    let lambdaNum = totalLambdas state + 1
-    modify (\s -> s{flattened=[], postponed=[],
-                    currentLambda=lambdaNum, totalLambdas=lambdaNum,
-                    holeCount=Just 0})
-    flattenStmts pstmts Det
+    let holes = holeState state
+    modify (\s -> s{flattened=[], postponed=[], holeState=pushHoleState holes})
+    flattenStmts pstmts $ modifierDetism mods
     flushPostponed
     state' <- get
-    put state{totalLambdas=totalLambdas state', tempCtr=tempCtr state'}
-    return $ typeAndPlace (Lambda (reverse $ flattened state')) ty castFrom pos
+    let holes' = holeState state'
+    put state{holeState=popHoleState holes holes', 
+              tempCtr=tempCtr state'}
+    let holeParams = holeStateParams $ params holes'
+    return $ typeAndPlace (Lambda mods holeParams (reverse $ flattened state')) 
+                          ty castFrom pos
 flattenExp (Fncall mod name exps) ty castFrom pos = do
     defd <- gets (Set.member name . defdVars)
     let stmtBuilder = if defd && List.null mod
-                      then HigherCall (maybePlace (Var name ParamIn Ordinary) pos)
+                      then HigherCall Det (maybePlace (Var name ParamIn Ordinary) pos)
                       else ProcCall mod name Nothing Det False
     flattenCall stmtBuilder False ty castFrom pos exps
 flattenExp (ForeignFn lang name flags exps) ty castFrom pos = do

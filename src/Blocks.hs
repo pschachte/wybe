@@ -277,20 +277,17 @@ closeProtoBody proto@PrimProto{primProtoParams=params}
                body@ProcBody{bodyPrims=prims} 
     = (proto', body')
   where
-    envName = PrimVarName envParamName 0
-    params' = List.filter ((==Hole) . primParamFlowType) params
-           ++ [PrimParam envName intType FlowIn Closed (ParamInfo False)]
-    proto' = proto{primProtoParams=params'}
-    closureParams = List.filter (((==Closed) . primParamFlowType)
-                             &&& (not . paramInfoUnneeded . primParamInfo)) params
+    (closed, actualParams) = List.partition ((==Closed) . primParamFlowType) params
+    proto' = proto{primProtoParams=actualParams ++ [envPrimParam]}
+    neededClosed = List.filter (not . paramInfoUnneeded . primParamInfo) closed
     unwrapper = Unplaced 
-             <$> [primAccess (ArgVar envName intType FlowIn Closed False)
-                             (ArgInt (i * toInteger wordSize) intType)
+             <$> [primAccess (ArgVar envParamName intType FlowIn Closed False)
+                             (ArgInt (i * 8) intType)
                              (ArgInt (toInteger wordSize) intType)
                              (ArgInt 0 intType)
                              (ArgVar nm ty FlowIn Closed False)
-                 | (i,PrimParam nm ty _ _ _) <- zip [1..] closureParams]
-    body' = body{bodyPrims=unwrapper++prims}
+                 | (i,PrimParam nm ty _ _ _) <- zip [1..] neededClosed]
+    body' = body{bodyPrims=unwrapper ++ prims}
 
 
 -- | Create LLVM's module level Function Definition from the LPVM procedure
@@ -1024,11 +1021,13 @@ cgenArg arg@(ArgProcRef ps args ty) = do
     logCodegen $ "cgenArg of " ++ show arg
     let psClosure = ps{procSpecName=makeClosureName $ procSpecName ps}
     isClosure <- lift $ isJust <$> maybeGetProcDef psClosure
-    let ps' = if isClosure then psClosure else ps 
+    let ps' = if isClosure then psClosure else ps
     logCodegen $ "  as " ++ show ps'
+    detism <- lift $ procDetism <$> getProcDef ps'
     let fName = LLVMAST.Name $ fromString $ show ps'
-    psType <- lift $ HigherOrderType <$> lookupPrimTypeFlows isClosure ps'
+    psType <- lift $ HigherOrderType defaultProcModifiers <$> lookupPrimTypeFlows isClosure ps'
     psTy <- lift $ llvmFuncType psType
+    logCodegen $ traceShowId $ "  with type " ++ show psType
     let conFn = C.GlobalReference psTy fName
     let fnConst = C.BitCast conFn address_t
     args' <- lift $ lookupPrimNeededClosedArgs ps' args
@@ -1218,8 +1217,8 @@ llvmFuncType ty = do
 
 
 llvmClosureType :: TypeSpec -> Compiler LLVMAST.Type
-llvmClosureType (HigherOrderType tys) 
-    = llvmFuncType (HigherOrderType $ tys ++ [TypeFlow AnyType ParamIn])
+llvmClosureType (HigherOrderType detism tys) 
+    = llvmFuncType (HigherOrderType detism $ tys ++ [TypeFlow AnyType ParamIn])
 llvmClosureType ty = shouldnt $ "llvmClosureType on " ++ show ty
 
 
