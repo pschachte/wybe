@@ -1729,10 +1729,15 @@ modecheckStmt m name defPos assigned detism tmpCount final
                     typeError $ ReasonUndefinedFlow cname pos
                     return ([],assigned,tmpCount')
 modecheckStmt m name defPos assigned detism tmpCount final
-  stmt@(HigherCall d fn args) pos = do
+  stmt@(HigherCall _ fn args) pos = do
+    logTyped $ "Mode checking higher : " ++ show stmt
+    logTyped $ "    with assigned    : " ++ show assigned
     (fnArgs',tmpCount') <- modeCheckExps m name defPos assigned detism tmpCount (fn:args)
     actualTypes <- mapM (expType >=> ultimateType) fnArgs'
+    logTyped $ "    actual types     : " ++ show actualTypes
     let actualModes = List.map (expMode assigned) fnArgs'
+    logTyped $ "    actual modes     : " ++ show actualModes
+
     let flowErrs = [ReasonArgFlow (show fn) num pos
                    | ((mode,avail,_),num) <- zip actualModes [0..]
                    , not avail && (mode == ParamIn || mode == ParamInOut)]
@@ -1745,10 +1750,12 @@ modecheckStmt m name defPos assigned detism tmpCount final
         let typeflows = List.zipWith TypeFlow actualTypes
                             $ sel1 <$> actualModes
         let (fn':args') = List.zipWith setPExpTypeFlow typeflows fnArgs'
-        let stmt' = HigherCall d fn' args'
+        
+        let assigned' = bindingStateSeq detism Pure
+                            (pexpListOutputs (fn':args')) assigned
+        let stmt' = HigherCall (bindingDetism assigned') fn' args'
         return ([maybePlace stmt' pos],
-                assigned{bindingVars=(pexpListOutputs args' `Set.union`) <$> bindingVars assigned},
-                tmpCount')
+                assigned',tmpCount')
 modecheckStmt m name defPos assigned detism tmpCount final
     stmt@(ForeignCall lang cname flags args) pos = do
     logTyped $ "Mode checking foreign call " ++ show stmt
