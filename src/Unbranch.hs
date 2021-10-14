@@ -410,7 +410,7 @@ unbranchStmt detism stmt@(HigherCall calldetism exp args) pos stmts alt
     logUnbranch $ "Unbranching call " ++ showStmt 4 stmt
     defArgs (exp:args)
     exp':args' <- hoistLambdas (exp:args)
-    let stmt' = HigherCall Det exp' args'
+    let stmt' = HigherCall calldetism exp' args'
     case calldetism of
       Terminal -> return [maybePlace stmt' pos] -- no execution after Terminal
       Failure  -> return [maybePlace stmt' pos] -- no execution after Failure
@@ -530,7 +530,6 @@ hoistLambda exp@(Lambda mods params pstmts) pos = do
                       Map.empty Private detism Inline Pure False NoSuperproc
     pDefRegular' <- lift $ unbranchProc pDefRegular tmpCtr 
     logUnbranch $ "  Resultant regular proc: " ++ show procProto
-    -- let adder = do
     procSpec@ProcSpec{procSpecMod=mod,procSpecName=nm,procSpecID=procId} 
         <- lift (addProcDef pDefRegular')
     unless (List.null closedParams) $
@@ -545,15 +544,6 @@ hoistLambda exp@(Lambda mods params pstmts) pos = do
         pDefClosure' <- lift $ unbranchProc pDefClosure tmpCtr 
         void $ lift (addProcDef pDefClosure')
     return $ maybePlace (ProcRef procSpec closedVars) pos
-    -- case procImpln pDefRegular' of 
-    --     ProcDefSrc [pstmt] | List.null closedParams -> 
-    --         case content pstmt of
-    --             ProcCall cMod cName (Just cID) Det _ exps 
-    --                     | (content <$> exps) == (content <$> holeVars) ->
-    --                 let procSpec = ProcSpec cMod cName cID generalVersion
-    --                 in return $ maybePlace (ProcRef procSpec []) pos
-    --             _ -> adder
-    --     _ -> adder
 hoistLambda exp pos = return $ maybePlace exp pos
 
 
