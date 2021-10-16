@@ -106,10 +106,11 @@ import           Crypto.Hash
 import qualified Data.Binary
 import qualified Data.ByteString.Lazy as BL
 import           Data.List as List
+import           Data.List.Extra (nubOrd)         
 import           Data.Map as Map
 import           Data.Maybe
 import           Data.Set as Set
-import Data.Tuple.HT ( mapSnd )
+import           Data.Tuple.HT ( mapSnd )
 import           Data.Word (Word8)
 import           Flow             ((|>))
 import           Numeric          (showHex)
@@ -3391,7 +3392,7 @@ data Message = Message {
     messageLevel :: MessageLevel,  -- ^The inportance of the message
     messagePlace :: OptPos,        -- ^The source location the message refers to
     messageText  :: String         -- ^The text of the message
-}
+} deriving (Eq, Ord)
 
 -- Not for displaying error messages, just for debugging printouts.
 instance Show Message where
@@ -3438,12 +3439,12 @@ makeMessage (Just pos) msg = do
 showMessages :: Compiler ()
 showMessages = do
     verbose <- optVerbose <$> gets options
-    messages <- reverse <$> gets msgs -- messages are collected in reverse order
+    messages <- reverse <$> gets msgs
     let filtered =
             if verbose
             then messages
             else List.filter ((>=Warning) . messageLevel) messages
-    liftIO $ mapM_ showMessage $ sortOn messagePlace filtered
+    liftIO $ mapM_ showMessage $ nubOrd $ sortOn messagePlace filtered
 
 
 -- |Prettify and show one compiler message.
