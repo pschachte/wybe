@@ -3439,7 +3439,7 @@ makeMessage (Just pos) msg = do
 showMessages :: Compiler ()
 showMessages = do
     verbose <- optVerbose <$> gets options
-    messages <- reverse <$> gets msgs
+    messages <- reverse <$> gets msgs -- messages are collected in reverse order
     let filtered =
             if verbose
             then messages
