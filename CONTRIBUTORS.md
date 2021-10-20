@@ -8,3 +8,4 @@ The following have contributed code to the Wybe project:
 * Zijun (Zed) Chen
 * Rudolph Almeida
 * Marco Ho
+* James Barnes
