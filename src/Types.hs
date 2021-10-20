@@ -638,24 +638,26 @@ unifyTypes' reason ty1@(TypeSpec m1 n1 ps1) ty2@(TypeSpec m2 n2 ps2)
           | m2 `isSuffixOf` m1 = (True,  m1)
           | otherwise          = (False, [])
 unifyTypes' reason (HigherOrderType mods1 ps1) (HigherOrderType mods2 ps2)
-    | (determinismLEQ detism1 detism2 || determinismLEQ detism2 detism1) 
-            && sameLength ps1 ps2 
-            && and (zipWith (==) ps1Flows ps2Flows) =
+    | modsCheck && sameLength ps1Types ps2Types 
+                && and (zipWith (==) ps1Flows ps2Flows) =
         HigherOrderType mods' . zipWith (flip TypeFlow) ps1Flows <$>
             zipWithM (unifyTypes reason) ps1Types ps2Types
     | otherwise =
         typeError reason >> return InvalidType
     where
-        ProcModifiers detism1 _ _ _ _ = mods1
-        ProcModifiers detism2 _ _ _ _ = mods2
-        detism' = if determinismLEQ detism1 detism2 then detism1 else detism2
+        detism1 = modifierDetism mods1
+        detism2 = modifierDetism mods2
+        detism' = determinismMeet detism1 detism2
         mods' = mods1{modifierDetism=detism'}
+        modsCheck = mods' == mods2{modifierDetism=detism'}
+                 && (detism1 `determinismLEQ` detism2
+                  || detism2 `determinismLEQ` detism1)
         ps1' = ps1 ++ [TypeFlow boolType ParamOut | detism1 == SemiDet]
-        ps2' = ps2 ++ [TypeFlow boolType ParamOut | detism1 == SemiDet]
-        ps1Flows = typeFlowMode <$> ps1
-        ps2Flows = typeFlowMode <$> ps2
-        ps1Types = typeFlowType <$> ps1
-        ps2Types = typeFlowType <$> ps2
+        ps2' = ps2 ++ [TypeFlow boolType ParamOut | detism2 == SemiDet]
+        ps1Flows = typeFlowMode <$> ps1'
+        ps2Flows = typeFlowMode <$> ps2'
+        ps1Types = typeFlowType <$> ps1'
+        ps2Types = typeFlowType <$> ps2'
 unifyTypes' reason _ _ = typeError reason >> return InvalidType
 
 
@@ -1345,28 +1347,58 @@ matchTypeList' callee pos callArgTypes calleeInfo = do
     else return $ Err [ReasonArgType callee n pos | n <- mismatches]
 
 higherCallCheck :: Ident -> Placed Exp -> OptPos -> [TypeFlow] -> Determinism -> Typed ()
-higherCallCheck caller callFn pos typeFlows detism = do
+higherCallCheck caller callFn pos callerTypeFlows detism = do
     callFnTy <- expType callFn >>= ultimateType
-    let higherArgTy = HigherOrderType defaultProcModifiers{modifierDetism=detism} typeFlows
-    logTyped $ "Matching higher order types " ++ show higherArgTy ++ " with "
-                ++ show callFnTy
-    void $ case callFnTy of
-        HigherOrderType detism' calleeTypeFlows ->
-            let calleeFlows = typeFlowMode <$> calleeTypeFlows
-                callerFlows = typeFlowMode <$> typeFlows
-            in if not $ sameLength calleeTypeFlows typeFlows
-            then typeError $ ReasonHigherArity (content callFn) pos
-                             (length calleeTypeFlows) (length typeFlows)
-            else when (or (zipWith (/=) calleeFlows callerFlows)) 
-                 $ typeErrors $ [ ReasonHigherFlow pos i flow expected
-                                | (i, flow, expected) <- zip3 [1..] calleeFlows
-                                                                    callerFlows
-                                , flow /= expected ]
-        _ -> return ()
-
+    let higherArgTy = HigherOrderType defaultProcModifiers{modifierDetism=detism} 
+                                      callerTypeFlows
     let reason = ReasonHigher caller (content callFn) pos
-    ty <- unifyTypes reason callFnTy higherArgTy
-    unless (ty /= InvalidType) $ typeError reason
+    void $ case callFnTy of
+            HigherOrderType calleeMods calleeTypeFlows
+                | sameLength calleeTypeFlows callerTypeFlows
+                -> unifyTypes reason callFnTy higherArgTy{higherTypeDetism=calleeMods}
+                | modifierDetism calleeMods == SemiDet 
+                && length calleeTypeFlows == length callerTypeFlows + 1 
+                && not (List.null callerTypeFlows)
+                && last callerTypeFlows == TypeFlow boolType ParamOut
+                -> unifyTypes reason callFnTy semiDetTy
+                | modifierDetism calleeMods == Det
+                && length calleeTypeFlows == length callerTypeFlows - 1
+                -> unifyTypes reason callFnTy detTy
+              where
+                detTy = HigherOrderType calleeMods{modifierDetism=Det} 
+                            $ callerTypeFlows ++ [TypeFlow boolType ParamOut]
+                semiDetTy = HigherOrderType calleeMods{modifierDetism=SemiDet} 
+                            $ init callerTypeFlows
+            TypeVariable{}
+                -> unifyTypes reason callFnTy higherArgTy
+            AnyType 
+                -> unifyTypes reason callFnTy higherArgTy
+            _ -> return InvalidType
+    -- unless (ty /= InvalidType) $ typeError reason
+            
+    -- let detism' = case callFnTy of
+    --                  HigherOrderType ProcModifiers{modifierDetism=d} _ -> d
+    --                  _ -> detism
+    -- let higherArgTy = HigherOrderType defaultProcModifiers{modifierDetism=detism'} 
+    --                                   typeFlows
+    -- logTyped $ "Matching higher order types " ++ show higherArgTy ++ " with "
+    --             ++ show callFnTy
+    -- -- void $ case callFnTy of
+    -- --     HigherOrderType detism' calleeTypeFlows ->
+    -- --         let calleeFlows = typeFlowMode <$> calleeTypeFlows
+    -- --             callerFlows = typeFlowMode <$> typeFlows
+    -- --         in if not $ sameLength calleeTypeFlows typeFlows
+    -- --         then typeError $ ReasonHigherArity (content callFn) pos
+    -- --                          (length calleeTypeFlows) (length typeFlows)
+    -- --         else when (or (zipWith (/=) calleeFlows callerFlows)) 
+    -- --              $ typeErrors $ [ ReasonHigherFlow pos i flow expected
+    -- --                             | (i, flow, expected) <- zip3 [1..] calleeFlows
+    -- --                                                                 callerFlows
+    -- --                             , flow /= expected ]
+    -- --     _ -> return ()
+
+    -- ty <- unifyTypes reason callFnTy higherArgTy
+    -- unless (ty /= InvalidType) $ typeError reason
 
 
 
@@ -1729,11 +1761,11 @@ modecheckStmt m name defPos assigned detism tmpCount final
                     typeError $ ReasonUndefinedFlow cname pos
                     return ([],assigned,tmpCount')
 modecheckStmt m name defPos assigned detism tmpCount final
-  stmt@(HigherCall _ fn args) pos = do
+  stmt@(HigherCall d fn args) pos = do
     logTyped $ "Mode checking higher : " ++ show stmt
     logTyped $ "    with assigned    : " ++ show assigned
     (fnArgs',tmpCount') <- modeCheckExps m name defPos assigned detism tmpCount (fn:args)
-    actualTypes <- mapM (expType >=> ultimateType) fnArgs'
+    actualTypes@(fnTy:_) <- mapM (expType >=> ultimateType) fnArgs'
     logTyped $ "    actual types     : " ++ show actualTypes
     let actualModes = List.map (expMode assigned) fnArgs'
     logTyped $ "    actual modes     : " ++ show actualModes
@@ -1750,10 +1782,15 @@ modecheckStmt m name defPos assigned detism tmpCount final
         let typeflows = List.zipWith TypeFlow actualTypes
                             $ sel1 <$> actualModes
         let (fn':args') = List.zipWith setPExpTypeFlow typeflows fnArgs'
-        
+
         let assigned' = bindingStateSeq detism Pure
                             (pexpListOutputs (fn':args')) assigned
-        let stmt' = HigherCall (bindingDetism assigned') fn' args'
+        let stmt' = case fnTy of
+                    HigherOrderType mods fnTyFlows 
+                        -> HigherCall (if sameLength fnTyFlows args
+                                       then modifierDetism mods else detism)
+                            fn' args'
+                    _ -> shouldnt $ "modecheckStmt" ++ show stmt
         return ([maybePlace stmt' pos],
                 assigned',tmpCount')
 modecheckStmt m name defPos assigned detism tmpCount final

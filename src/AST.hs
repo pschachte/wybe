@@ -16,7 +16,7 @@
 module AST (
   -- *Types just for parsing
   Item(..), Visibility(..), isPublic,
-  Determinism(..), determinismLEQ, determinismJoin,
+  Determinism(..), determinismLEQ, determinismJoin, determinismMeet,
   determinismFail, determinismSucceed,
   determinismSeq, determinismProceding, determinismName,
   impurityName, impuritySeq, expectedImpurity,
@@ -181,11 +181,11 @@ determinismLEQ Failure Det = False
 determinismLEQ det1 det2 = det1 <= det2
 
 
--- -- |Lattice meet for Determinism.  Probably not needed
--- determinismMeet :: Determinism -> Determinism -> Determinism
--- determinismMeet Failure Det = Terminal
--- determinismMeet Det Failure = Terminal
--- determinismMeet det1 det2 = min det1 det2
+-- |Lattice meet for Determinism.  Probably not needed
+determinismMeet :: Determinism -> Determinism -> Determinism
+determinismMeet Failure Det = Terminal
+determinismMeet Det Failure = Terminal
+determinismMeet det1 det2 = min det1 det2
 
 
 -- |Force the specified determinism to succeed, if it is reachable.
@@ -2365,9 +2365,16 @@ isHigherOrder HigherOrderType{} = True
 isHigherOrder _                 = False
 
 updateHigherOrderTypesM :: Monad m => (TypeSpec -> m TypeSpec) -> TypeSpec -> m TypeSpec
-updateHigherOrderTypesM trans ty@HigherOrderType{higherTypeParams=typeFlows} = do
-    types <- mapM trans $ typeFlowType <$> typeFlows
-    return $ ty{higherTypeParams=zipWith TypeFlow types (typeFlowMode <$> typeFlows)}
+updateHigherOrderTypesM trans ty@HigherOrderType{higherTypeDetism=mods,
+                                                 higherTypeParams=typeFlows} = do
+    let detism = modifierDetism mods
+    let isSemiDet = detism == SemiDet
+    let typeFlows' = typeFlows ++ [TypeFlow (TypeSpec ["wybe"] "bool" []) ParamOut 
+                                  | isSemiDet]
+    let mods' = mods{modifierDetism=if isSemiDet then Det else detism}
+    types <- mapM trans $ typeFlowType <$> typeFlows'
+    return $ ty{higherTypeDetism=mods',
+                higherTypeParams=zipWith TypeFlow types (typeFlowMode <$> typeFlows')}
 updateHigherOrderTypesM _ ty = 
     shouldnt $ "updateHigherOrderTypesM on " ++ show ty
 
