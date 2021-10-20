@@ -179,7 +179,7 @@ useItemParser :: Visibility -> Parser Item
 useItemParser v = do
     pos <- Just . tokenPosition <$> ident "use"
     ident "foreign" *> foreignFileOrLib v pos
-      <|> ImportMods v <$> (moduleSpec `sepBy` comma) <*> return pos
+      <|> (moduleSpec `sepBy` comma >>= useBody v pos)
 
 
 foreignFileOrLib :: Visibility -> OptPos -> Parser Item
@@ -188,6 +188,23 @@ foreignFileOrLib v pos =
         <$> (ident "library" *> identString `sepBy` comma) <*> return pos
     <|> ImportForeign
             <$> (ident "object" *> identString `sepBy` comma) <*> return pos
+
+
+useBody :: Visibility -> OptPos -> [ModSpec] -> Parser Item
+useBody v pos mods =
+    ident "in" *> topLevelUseStmt pos mods -- XXX should check v == Private
+    <|> return (ImportMods v mods pos)
+
+
+topLevelUseStmt :: OptPos -> [ModSpec] -> Parser Item
+topLevelUseStmt pos mods = do
+    body <- stmtSeq
+    let ress = modSpecToResourceSpec <$> mods
+    return $ StmtDecl (UseResources ress Nothing body) pos
+
+
+modSpecToResourceSpec :: ModSpec -> ResourceSpec
+modSpecToResourceSpec modspec = ResourceSpec (init modspec) (last modspec)
 
 
 fromUseItemParser :: Visibility -> Parser Item
