@@ -898,15 +898,21 @@ lookupType context pos ty@(TypeSpec mod name args) = do
 
 -- |Add the specified resource to the current module.
 addSimpleResource :: ResourceName -> ResourceImpln -> Visibility -> Compiler ()
-addSimpleResource name impln vis = do
+addSimpleResource name impln@(SimpleResource ty _ pos) vis = do
     currMod <- getModuleSpec
     let rspec = ResourceSpec currMod name
     let rdef = Map.singleton rspec impln
-    updateImplementation
-      (\imp -> imp { modResources = Map.insert name rdef $ modResources imp,
-                     modKnownResources = setMapInsert name rspec $
-                                         modKnownResources imp })
-    updateInterface vis $ updatePubResources $ Map.insert name rspec
+    modRess <- getModuleImplementationField modResources
+    if name `Map.member` modRess 
+    then errmsg pos $ "Duplicate declaration of resource '" ++ name ++ "'" 
+    else if genericType ty
+    then errmsg pos $ "Resources cannot be declaration with a generic type: " ++ show ty
+    else do
+        updateImplementation
+            (\imp -> imp { modResources = Map.insert name rdef $ modResources imp,
+                           modKnownResources = setMapInsert name rspec 
+                                             $ modKnownResources imp })
+        updateInterface vis $ updatePubResources $ Map.insert name rspec
 
 
 -- |Find the definition of the specified resource visible in the current module.
