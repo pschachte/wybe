@@ -906,7 +906,7 @@ addSimpleResource name impln@(SimpleResource ty _ pos) vis = do
     if name `Map.member` modRess 
     then errmsg pos $ "Duplicate declaration of resource '" ++ name ++ "'" 
     else if genericType ty
-    then errmsg pos $ "Resources cannot be declaration with a generic type: " ++ show ty
+    then errmsg pos $ "Resource type cannot contain type variables: " ++ show ty
     else do
         updateImplementation
             (\imp -> imp { modResources = Map.insert name rdef $ modResources imp,
