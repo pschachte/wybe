@@ -294,6 +294,9 @@ expandArg arg@(ArgVar var ty flow _ _) = do
             -- (shouldnt $ "inlining: reference to unassigned variable "
             --  ++ show var)
     else return arg
+expandArg arg@(ArgProcRef ps as ty) = do 
+    as' <- mapM expandArg as
+    return $ ArgProcRef ps as' ty
 expandArg arg = return arg
 
 

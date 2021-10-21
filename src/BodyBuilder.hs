@@ -713,6 +713,9 @@ expandArg arg@ArgVar{argVarName=var, argVarFlow=FlowOut} = do
       $ logBuild $ "Replaced output variable " ++ show var
                    ++ " with " ++ show var'
     return arg{argVarName=var'}
+expandArg arg@(ArgProcRef ps as ty) = do 
+    as' <- mapM expandArg as
+    return $ ArgProcRef ps as' ty
 expandArg arg = return arg
 
 
