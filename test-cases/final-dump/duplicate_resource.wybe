@@ -1,0 +1,3 @@
+resource foo:float
+resource foo:int
+resource foo:int
