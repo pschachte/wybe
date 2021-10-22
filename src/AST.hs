@@ -58,7 +58,8 @@ module AST (
   ProcAnalysis(..), emptyProcAnalysis,
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, ResourceDef(..), FlowDirection(..),
-  argFlowDirection, argType, setArgType, argDescription, flowsIn, flowsOut,
+  argFlowDirection, argType, setArgType, argDescription, 
+  flowsIn, flowsOut, primFlowToFlowDir,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, procCallToExp,
   expOutputs, pexpListOutputs, expInputs, pexpListInputs,
@@ -66,7 +67,7 @@ module AST (
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
-  maybeClosureOf, maybeGetClosureOf,
+  maybeClosureOf, maybeGetClosureOf, isClosureProc,
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
@@ -83,7 +84,6 @@ module AST (
   getOrigin, getSource, getDirectory,
   optionallyPutStr, message, errmsg, (<!>), prettyPos, Message(..), queueMessage,
   genProcName, addImport, doImport, importFromSupermodule, lookupType,
-  lookupProcSpecTypeFlows, lookupPrimTypeFlows, lookupPrimNeededClosedArgs,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   initialisedResources,
   addSimpleResource, lookupResource, specialResources, publicResource,
@@ -911,25 +911,6 @@ lookupType context pos ty@(TypeSpec mod name args) = do
                         " could refer to: " ++ showModSpecs (Set.toList mspecs)
             return InvalidType
 
-lookupProcSpecTypeFlows :: ProcSpec -> Compiler [TypeFlow]
-lookupProcSpecTypeFlows pspec = do
-    params <- procProtoParams . procProto <$> getProcDef pspec
-    return $ paramTypeFlow <$> params
-
-lookupPrimTypeFlows :: Bool -> ProcSpec -> Compiler [TypeFlow]
-lookupPrimTypeFlows isClosure pspec = do
-    primProto <- procImplnProto . procImpln <$> getProcDef pspec
-    primParams <- protoRealParams primProto
-    return $ (++ [TypeFlow AnyType ParamIn | isClosure])
-           $ (\p -> TypeFlow (primParamType p)
-                             (primFlowToFlowDirection $ primParamFlow p))
-          <$> List.filter ((/= Closed) . primParamFlowType) primParams
-
-lookupPrimNeededClosedArgs :: ProcSpec -> [PrimArg] -> Compiler [PrimArg]
-lookupPrimNeededClosedArgs pspec args = do
-    params <- List.filter ((==Closed) . primParamFlowType) . primProtoParams
-              . procImplnProto . procImpln <$> getProcDef pspec
-    List.map snd <$> filterM (paramIsReal . fst) (zip params args)
 
 -- |Add the specified resource to the current module.
 addSimpleResource :: ResourceName -> ResourceImpln -> Visibility -> Compiler ()
@@ -1922,13 +1903,23 @@ showSuperProc AnySuperproc = ""
 showSuperProc (SuperprocIs super) = " (subproc of " ++ show super ++ ")"
 showSuperProc (ClosureOf pspec) = " (closure of " ++ show pspec ++ ")"
 
+-- |Maybe get the ProcSpec of a ClosureOf SuperprocSpec
 maybeClosureOf :: SuperprocSpec -> Maybe ProcSpec
 maybeClosureOf (ClosureOf ps) = Just ps
 maybeClosureOf _              = Nothing 
 
+-- |Maybe get the ProcSpec of a ClosureOf Proc via a ProcSpec
 maybeGetClosureOf :: ProcSpec -> Compiler (Maybe ProcSpec)
 maybeGetClosureOf pspec =
     maybeClosureOf . procSuperproc <$> getProcDef pspec
+
+-- |Check if a ProcSpec refers to a closure proc
+isClosureProc :: ProcSpec -> Compiler Bool 
+isClosureProc pspec = do
+    super <- procSuperproc <$> getProcDef pspec
+    case super of 
+        ClosureOf _ -> return True
+        _           -> return False
 
 
 -- |A procedure defintion body.  Initially, this is in a form similar
@@ -2518,9 +2509,6 @@ data FlowDirection = ParamIn | ParamOut | ParamInOut
 data PrimFlow = FlowIn | FlowOut
                    deriving (Show,Eq,Ord,Generic)
 
-primFlowToFlowDirection :: PrimFlow -> FlowDirection
-primFlowToFlowDirection FlowIn  = ParamIn
-primFlowToFlowDirection FlowOut = ParamOut
 
 -- |Does the specified flow direction flow in?
 flowsIn :: FlowDirection -> Bool
@@ -2533,6 +2521,11 @@ flowsOut :: FlowDirection -> Bool
 flowsOut ParamIn = False
 flowsOut ParamOut = True
 flowsOut ParamInOut = True
+
+
+primFlowToFlowDir :: PrimFlow -> FlowDirection
+primFlowToFlowDir FlowIn  = ParamIn
+primFlowToFlowDir FlowOut = ParamOut
 
 
 -- |Source program statements.  These will be normalised into Prims.

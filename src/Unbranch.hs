@@ -358,8 +358,7 @@ unbranchStmt SemiDet stmt@(ProcCall func SemiDet _ args) pos
     logUnbranch $ "converting SemiDet proc call" ++ show stmt
     testResultVar <- tempVar
     let args' = args ++ [Unplaced (boolVarSet testResultVar)]
-    defArgs args'
-    args'' <- hoistLambdas args'
+    args'' <- defArgsHoistClosures args'
     condVars <- gets brVars
     stmts' <- unbranchStmts SemiDet stmts alt sense
     let val = boolVarGet testResultVar
@@ -368,10 +367,9 @@ unbranchStmt SemiDet stmt@(ProcCall func SemiDet _ args) pos
                   ++ showBody 4 stmts' ++ "\nelse"
                   ++ showBody 4 alt
     func' <- case func of
-                First _ _ _ -> return func
+                First{} -> return func
                 Higher fn -> do
-                    defArgs [fn]
-                    [fn'] <- hoistLambdas [fn]
+                    [fn'] <- defArgsHoistClosures [fn]
                     return $ Higher fn' 
     let result = maybePlace (ProcCall func' Det False args'') pos
                  : mkCond sense val pos stmts' alt condVars vars
@@ -381,12 +379,11 @@ unbranchStmt SemiDet stmt@(ProcCall func SemiDet _ args) pos
 unbranchStmt detism stmt@(ProcCall func calldetism r args) pos stmts alt
              sense = do
     logUnbranch $ "Unbranching call " ++ showStmt 4 stmt
-    defArgs args
-    args' <- hoistLambdas args
+    args' <- defArgsHoistClosures args
     func' <- case func of 
                 First m n pId -> return func
                 Higher fn -> do
-                    [fn'] <- hoistLambdas [fn]
+                    [fn'] <- defArgsHoistClosures [fn]
                     return $ Higher fn'
     let stmt' = ProcCall func' calldetism r args'
     case calldetism of
@@ -396,8 +393,7 @@ unbranchStmt detism stmt@(ProcCall func calldetism r args) pos stmts alt
       SemiDet  -> shouldnt "SemiDet case already covered!"
 unbranchStmt detism stmt@(ForeignCall l nm fs args) pos stmts alt sense = do
     logUnbranch $ "Unbranching foreign call " ++ showStmt 4 stmt
-    defArgs args
-    args' <- hoistLambdas args
+    args' <- defArgsHoistClosures args
     let stmt' = ForeignCall l nm fs args'
     leaveStmtAsIs detism stmt' pos stmts alt sense
 unbranchStmt detism stmt@(TestBool val) pos stmts alt sense = do
@@ -478,52 +474,6 @@ unbranchStmt _ Next _ _ _ _ = do
     nxt <- getLoopNext
     logUnbranch $ "Current next proc = " ++ showStmt 4 (content nxt)
     return [nxt]
-
-
-hoistLambdas :: [Placed Exp] -> Unbrancher [Placed Exp]
-hoistLambdas = mapM (placedApply hoistLambda)
-
-
-hoistLambda :: Exp -> OptPos -> Unbrancher (Placed Exp)
-hoistLambda (Typed exp ty cast) pos = do
-    exp' <- content <$> hoistLambda exp Nothing
-    return $ maybePlace (Typed exp' ty cast) pos
-hoistLambda exp@(Lambda mods params pstmts) pos = do
-    logUnbranch $ "Creating procref for " ++ show exp
-    let ProcModifiers{modifierDetism=detism} = mods 
-    name <- newProcName 
-    let holeVars = paramToHoleVar <$> params
-    logUnbranch $ "  With params " ++ show holeVars
-    let stmtVars = foldStmts const ((. expInputs) . Set.union) Set.empty pstmts
-    defd <- gets (Set.toList . Set.filter (flip Set.member stmtVars . fst) 
-                             . Set.fromList . Map.toList . brVars)
-    let (closedParams, closedVars) = unzip $ uncurry closedParamVar <$> defd
-    let env = Just closedParams
-    logUnbranch $ "  With closed variables " ++ show closedVars
-
-    tmpCtr <- gets brTempCtr
-    let procProto = ProcProto name (closedParams ++ params) Set.empty
-    let pDefRegular = ProcDef name procProto (ProcDefSrc pstmts) Nothing tmpCtr 0
-                      Map.empty Private detism Inline Pure NoSuperproc
-    pDefRegular' <- lift $ unbranchProc pDefRegular tmpCtr 
-    logUnbranch $ "  Resultant regular proc: " ++ show procProto
-    procSpec@ProcSpec{procSpecMod=mod,procSpecName=nm,procSpecID=procId} 
-        <- lift (addProcDef pDefRegular')
-    if List.null closedParams
-    then return $ maybePlace (ProcRef procSpec closedVars) pos
-    else do
-        let pDefClosure = 
-                ProcDef name procProto
-                (ProcDefSrc [Unplaced $ ProcCall (First mod nm (Just procId)) detism False 
-                                        $ List.map Unplaced closedVars ++ holeVars]) 
-                Nothing tmpCtr 0
-                Map.empty Private detism Inline Pure (ClosureOf procSpec)
-        pDefClosure' <- lift $ unbranchProc pDefClosure tmpCtr 
-        closureProcSpec <- lift (addProcDef pDefClosure')
-        return $ maybePlace (ProcRef closureProcSpec closedVars) pos
-    
-hoistLambda exp pos = return $ maybePlace exp pos
-
 
 -- |Emit the supplied statement, and process the remaining statements.
 leaveStmtAsIs :: Determinism -> Stmt -> OptPos
@@ -613,16 +563,61 @@ inputParams params =
 
 
 -- |Add all output arguments of a param list to the symbol table
-defArgs :: [Placed Exp] -> Unbrancher ()
-defArgs = mapM_ (defArg . content)
+--  and hoist all closures
+defArgsHoistClosures :: [Placed Exp] -> Unbrancher [Placed Exp]
+defArgsHoistClosures args = do 
+    mapM_ (defArg . content) args
+    mapM (placedApply hoistClosure) args
 
 
 -- |Add the output variables defined by the expression to the symbol
---  table. Since the expression is already flattened, it will only be a
---  constant, in which case it doesn't define any variables, or a variable,
---  in which case it might.
+--  table. Since the expression is already flattened (excluding lambdas), 
+--  it will only be a constant, in which case it doesn't define any variables, 
+--  or a variable, in which case it might.
 defArg :: Exp -> Unbrancher ()
 defArg = ifIsVarDef defVar (return ())
+
+
+hoistClosure :: Exp -> OptPos -> Unbrancher (Placed Exp)
+hoistClosure (Typed exp ty cast) pos = do
+    exp' <- content <$> hoistClosure exp Nothing
+    return $ maybePlace (Typed exp' ty cast) pos
+hoistClosure exp@(Lambda mods params pstmts) pos = do
+    logUnbranch $ "Creating procref for " ++ show exp
+    let ProcModifiers{modifierDetism=detism} = mods 
+    name <- newProcName 
+    let holeVars = paramToHoleVar <$> params
+    logUnbranch $ "  With params " ++ show holeVars
+    let stmtVars = foldStmts const ((. expInputs) . Set.union) Set.empty pstmts
+    defd <- gets (Set.toList . Set.filter (flip Set.member stmtVars . fst) 
+                             . Set.fromList . Map.toList . brVars)
+    let (closedParams, closedVars) = unzip $ uncurry closedParamVar <$> defd
+    let env = Just closedParams
+    logUnbranch $ "  With closed variables " ++ show closedVars
+
+    tmpCtr <- gets brTempCtr
+    let procProto = ProcProto name (closedParams ++ params) Set.empty
+    let pDefRegular = ProcDef name procProto (ProcDefSrc pstmts) Nothing tmpCtr 0
+                      Map.empty Private detism Inline Pure NoSuperproc
+    pDefRegular' <- lift $ unbranchProc pDefRegular tmpCtr 
+    logUnbranch $ "  Resultant regular proc: " ++ show procProto
+    procSpec@ProcSpec{procSpecMod=mod,procSpecName=nm,procSpecID=procId} 
+        <- lift (addProcDef pDefRegular')
+    if List.null closedParams
+    then return $ maybePlace (ProcRef procSpec closedVars) pos
+    else do
+        let pDefClosure = 
+                ProcDef name procProto
+                (ProcDefSrc [Unplaced $ ProcCall (First mod nm (Just procId)) detism False 
+                                        $ List.map Unplaced closedVars ++ holeVars]) 
+                Nothing tmpCtr 0
+                Map.empty Private detism Inline Pure (ClosureOf procSpec)
+        pDefClosure' <- lift $ unbranchProc pDefClosure tmpCtr 
+        closureProcSpec <- lift (addProcDef pDefClosure')
+        return $ maybePlace (ProcRef closureProcSpec closedVars) pos
+    
+hoistClosure exp pos = return $ maybePlace exp pos
+
 
 
 -- |Apply the function if the expression is a variable assignment,

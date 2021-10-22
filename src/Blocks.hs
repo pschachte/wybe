@@ -556,7 +556,7 @@ cgen prim@(PrimCall callSiteID pspec args) = do
     logCodegen $ "Translated ins = " ++ show ins
     addInstruction ins outArgs
 
-cgen prim@(PrimHigherCall callSiteId var@ArgVar{argVarName=nm', argVarType=ty} args) = do
+cgen prim@(PrimHigherCall callSiteId var@ArgVar{argVarType=ty} args) = do
     logCodegen $ "Compiling " ++ show prim
     let (inArgs, outArgs) = partitionArgs args
     env <- cgenArg var
@@ -1020,27 +1020,12 @@ cgenArg ArgVar{argVarName=nm, argVarType=ty} = do
 cgenArg (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
 cgenArg arg@(ArgProcRef ps args ty) = do
     logCodegen $ "cgenArg of " ++ show arg
-    logCodegen $ "  as " ++ show ps
-    detism <- lift $ procDetism <$> getProcDef ps
-    let fName = LLVMAST.Name $ fromString $ show ps
-    isClosure <- lift $ isJust <$> maybeGetClosureOf ps
-    psType <- lift $ HigherOrderType defaultProcModifiers 
-                  <$> lookupPrimTypeFlows isClosure ps
-    psTy <- lift $ llvmFuncType psType
-    logCodegen $ traceShowId $ "  with type " ++ show psType
-    let conFn = C.GlobalReference psTy fName
-    let fnConst = C.BitCast conFn address_t
-    args' <- lift $ lookupPrimNeededClosedArgs ps args
+    args' <- neededClosedArgs ps args
     if all argIsConst args'
     then do
-        constArgs <- mapM cgenArgConst args'
-        let arrTy = array_t (1 + fromIntegral (length args)) address_t
-        let arr = C.Array address_t (fnConst:constArgs)
-        conArrPtr <- C.GlobalReference (ptr_t arrTy) <$> addGlobalConstant arrTy arr
-        let rawElem = C.GetElementPtr True conArrPtr [C.Int 32 0, C.Int 32 0]
-        ptrtoint (cons rawElem) address_t
+        cons <$> cgenArgConst arg
     else do
-        let fnOp = cons fnConst
+        fnOp <- cons <$> cgenFuncRef ps
         envArgs <- mapM cgenArg args'
         mem <- gcAllocate (toInteger (wordSizeBytes * (1 + length args)) 
                                       `ArgInt` intType) address_t 
@@ -1096,7 +1081,45 @@ cgenArgConst (ArgChar c ty) = do
 cgenArgConst (ArgUndef ty) = do
     llty <- lift $ llvmType ty
     return $ C.Undef llty
+cgenArgConst (ArgProcRef ps args ty) = do
+    fnRef <- cgenFuncRef ps
+    args' <- neededClosedArgs ps args
+    constArgs <- mapM cgenArgConst args'
+    let arrElems = fnRef:constArgs
+    let arrTy = array_t (fromIntegral $ length arrElems) address_t
+    let arr = C.Array address_t arrElems
+    conArrPtr <- C.GlobalReference (ptr_t arrTy) <$> addGlobalConstant arrTy arr
+    let rawElem = C.GetElementPtr True conArrPtr [C.Int 32 0, C.Int 32 0]
+    consCast rawElem (ptr_t arrTy) address_t
 cgenArgConst arg = shouldnt $ "cgenArgConst of " ++ show arg
+
+
+cgenFuncRef :: ProcSpec -> Codegen C.Constant 
+cgenFuncRef ps = do
+    let fName = LLVMAST.Name $ fromString $ show ps
+    psType <- HigherOrderType defaultProcModifiers <$> primTypeFlows ps
+    psTy <- lift $ llvmFuncType psType
+    logCodegen $ traceShowId $ "  with type " ++ show psType
+    let conFn = C.GlobalReference psTy fName
+    return $ C.BitCast conFn address_t
+
+
+primTypeFlows :: ProcSpec -> Codegen [TypeFlow]
+primTypeFlows pspec = lift $ do
+    isClosure <- isClosureProc pspec
+    primProto <- procImplnProto . procImpln <$> getProcDef pspec
+    primParams <- protoRealParams primProto
+    return $ (++ [TypeFlow AnyType ParamIn | isClosure])
+           $ (\p -> TypeFlow (primParamType p)
+                             (primFlowToFlowDir $ primParamFlow p))
+          <$> List.filter ((/= Closed) . primParamFlowType) primParams
+
+
+neededClosedArgs :: ProcSpec -> [PrimArg] -> Codegen [PrimArg]
+neededClosedArgs pspec args = lift $ do
+    params <- List.filter ((==Closed) . primParamFlowType) . primProtoParams
+              . procImplnProto . procImpln <$> getProcDef pspec
+    List.map snd <$> filterM (paramIsReal . fst) (zip params args)
 
 
 addStringConstant :: String -> Codegen (LLVMAST.Type, C.Constant)
@@ -1118,6 +1141,7 @@ getBits (FloatingPointType FP128FP)     = 128
 getBits (FloatingPointType X86_FP80FP)  = 80
 getBits (FloatingPointType PPC_FP128FP) = 128
 getBits ty                              = fromIntegral wordSize
+
 
 -- | Convert a string into a constant array of constant integers.
 makeStringConstant :: String ->  C.Constant
@@ -1217,8 +1241,8 @@ llvmFuncType ty = do
 
 
 llvmClosureType :: TypeSpec -> Compiler LLVMAST.Type
-llvmClosureType (HigherOrderType detism tys) 
-    = llvmFuncType (HigherOrderType detism $ tys ++ [TypeFlow AnyType ParamIn])
+llvmClosureType (HigherOrderType mods tys) 
+    = llvmFuncType (HigherOrderType mods $ tys ++ [TypeFlow AnyType ParamIn])
 llvmClosureType ty = shouldnt $ "llvmClosureType on " ++ show ty
 
 

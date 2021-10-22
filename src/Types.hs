@@ -735,7 +735,8 @@ expType' (Lambda mods params pstmts) _            = do
     params' <- updateParamTypes params
     return $ HigherOrderType mods $ paramTypeFlow <$> params'
 expType' (ProcRef pspec _) _     = do
-    typeFlows <- lift $ lookupProcSpecTypeFlows pspec
+    typeFlows <- lift $ (paramTypeFlow <$>) . procProtoParams . procProto 
+                     <$> getProcDef pspec
     let types = typeFlowType <$> typeFlows
     let flows = typeFlowMode <$> typeFlows
     types' <- refreshTypes types
@@ -768,6 +769,7 @@ expMode' assigned (Var name flow _) =
 expMode' assigned (Typed expr _ _) = expMode' assigned expr
 expMode' _ expr =
     shouldnt $ "Expression '" ++ show expr ++ "' left after flattening"
+
 
 
 ----------------------------------------------------------------
