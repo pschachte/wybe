@@ -207,7 +207,7 @@ translateProc modProtos proc = do
     count <- getCount
     let proto = procImplnProto $ procImpln proc
     let body = procImplnBody $ procImpln proc
-    let isClosure = procIsClosure proc
+    let isClosure = isJust $ maybeClosureOf $ procSuperproc proc
     let speczBodies = procImplnSpeczBodies $ procImpln proc
     -- translate the standard version
     (block, count') <- 
@@ -572,9 +572,10 @@ cgen prim@(PrimHigherCall callSiteId var@ArgVar{argVarName=nm', argVarType=ty} a
     -- fnPtr <- doLoad fnPtrTy accessPtr
     let callIns = callWybe fnPtr callInOps
     addInstruction callIns outArgs
-cgen prim@(PrimHigherCall callSiteId (ArgProcRef pspec as ty) args) = do
-    logCodegen $ "Compiling " ++ show prim ++ " as regular call"
-    cgen $ PrimCall callSiteId pspec (as ++ args)
+cgen prim@(PrimHigherCall callSiteId (ArgProcRef ps as ty) args) = do
+    ps' <- lift $ fromMaybe ps <$> maybeGetClosureOf ps
+    logCodegen $ "Compiling " ++ show prim ++ " as regular call to " ++ show ps'
+    cgen $ PrimCall callSiteId ps' (as ++ args)
 cgen prim@(PrimHigherCall _ _ _) = do
     shouldnt $ "dont know how to cgen higher call " ++ show prim
 cgen prim@(PrimForeign "llvm" name flags args) = do
@@ -1019,18 +1020,17 @@ cgenArg ArgVar{argVarName=nm, argVarType=ty} = do
 cgenArg (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
 cgenArg arg@(ArgProcRef ps args ty) = do
     logCodegen $ "cgenArg of " ++ show arg
-    let psClosure = ps{procSpecName=makeClosureName $ procSpecName ps}
-    isClosure <- lift $ isJust <$> maybeGetProcDef psClosure
-    let ps' = if isClosure then psClosure else ps
-    logCodegen $ "  as " ++ show ps'
-    detism <- lift $ procDetism <$> getProcDef ps'
-    let fName = LLVMAST.Name $ fromString $ show ps'
-    psType <- lift $ HigherOrderType defaultProcModifiers <$> lookupPrimTypeFlows isClosure ps'
+    logCodegen $ "  as " ++ show ps
+    detism <- lift $ procDetism <$> getProcDef ps
+    let fName = LLVMAST.Name $ fromString $ show ps
+    isClosure <- lift $ isJust <$> maybeGetClosureOf ps
+    psType <- lift $ HigherOrderType defaultProcModifiers 
+                  <$> lookupPrimTypeFlows isClosure ps
     psTy <- lift $ llvmFuncType psType
     logCodegen $ traceShowId $ "  with type " ++ show psType
     let conFn = C.GlobalReference psTy fName
     let fnConst = C.BitCast conFn address_t
-    args' <- lift $ lookupPrimNeededClosedArgs ps' args
+    args' <- lift $ lookupPrimNeededClosedArgs ps args
     if all argIsConst args'
     then do
         constArgs <- mapM cgenArgConst args'

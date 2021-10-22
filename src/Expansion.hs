@@ -22,6 +22,7 @@ import           Control.Monad.Trans.State
 import           Data.List                 as List
 import           Data.Map                  as Map
 import           Data.Set                  as Set
+import           Data.Maybe                as Maybe
 import           Options                   (LogSelection (Expansion))
 
 
@@ -247,8 +248,9 @@ expandPrim call@(PrimHigherCall id fn args) pos = do
     fn' <- expandArg fn
     case fn' of
         ArgProcRef ps as _ -> do
-            logExpansion "  To call"
-            expandPrim (PrimCall id ps $ as ++ args) pos
+            ps' <- lift $ lift $ fromMaybe ps <$> maybeGetClosureOf ps
+            logExpansion $ "  To call of " ++ show ps'
+            expandPrim (PrimCall id ps' $ as ++ args) pos
         _ -> do
             logExpansion "  As higher call"
             args' <- mapM expandArg args

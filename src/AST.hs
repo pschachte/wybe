@@ -24,7 +24,8 @@ module AST (
   TypeProto(..), TypeSpec(..), typeVarSet, TypeVarName,
   genericType, higherOrderType, isHigherOrder, updateHigherOrderTypesM, typeModule,
   VarDict, TypeImpln(..),
-  ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
+  ProcProto(..), Param(..), TypeFlow(..), 
+  paramTypeFlow, paramToHoleVar, closedParamVar,
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), StringVariant(..), Generator(..), Stmt(..), ProcFunctor(..),
   regularProc, regularModProc,
@@ -46,7 +47,7 @@ module AST (
   refersTo,
   enterModule, reenterModule, exitModule, reexitModule, inModule,
   emptyInterface, emptyImplementation,
-  getParams, getDetism, getProcDef, maybeGetProcDef, getProcPrimProto,
+  getParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, maybeModPrefix, ProcImpln(..), ProcDef(..), procInline, procCallCount,
   primImpurity, flagsImpurity, flagsDetism,
@@ -65,6 +66,7 @@ module AST (
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
+  maybeClosureOf, maybeGetClosureOf,
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
@@ -1149,7 +1151,7 @@ addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
            $ errmsg pos ("Proc modifier '" ++ resourcefulName resourceful 
                          ++ "' is not allowed for a procedure declaration")
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 Map.empty
-                  vis detism inlining impurity False (initSuperprocSpec vis)
+                  vis detism inlining impurity (initSuperprocSpec vis)
     addProcDef procDef
     return ()
 addProc _ item =
@@ -1192,18 +1194,15 @@ getDetism pspec =
 
 
 getProcDef :: ProcSpec -> Compiler ProcDef
-getProcDef ps@(ProcSpec modSpec procName procID _) =
-    trustFromJustM "getProcDef" $ maybeGetProcDef ps
-
-maybeGetProcDef :: ProcSpec -> Compiler (Maybe ProcDef)
-maybeGetProcDef ps@(ProcSpec modSpec procName procID _) = do
-    mod <- trustFromJustM ("no such module " ++ showModSpec modSpec ++ show ps) $
+getProcDef (ProcSpec modSpec procName procID _) = do
+    mod <- trustFromJustM ("no such module " ++ showModSpec modSpec) $
            getLoadingModule modSpec
     let impl = trustFromJust ("unimplemented module " ++ showModSpec modSpec) $
                modImplementation mod
     logAST $ "Looking up proc '" ++ procName ++ "' ID " ++ show procID
-    let procs = Map.lookup procName $ modProcs impl
-    return $ (maybeNth procID) =<< procs
+    let proc = (modProcs impl ! procName) !! procID
+    logAST $ "  proc = " ++ showProcDef 9 proc
+    return proc
 
 
 getProcPrimProto :: ProcSpec -> Compiler PrimProto
@@ -1839,7 +1838,6 @@ data ProcDef = ProcDef {
     procDetism :: Determinism,  -- ^can this proc fail?
     procInlining :: Inlining,   -- ^should we inline calls to this proc?
     procImpurity :: Impurity,   -- ^ Is this proc pure?
-    procIsClosure :: Bool,   -- 
     procSuperproc :: SuperprocSpec
                                 -- ^the proc this should be part of, if any
 }
@@ -1908,6 +1906,7 @@ data SuperprocSpec
     = NoSuperproc             -- ^Cannot be a subproc
     | AnySuperproc            -- ^Could be a subproc of any proc
     | SuperprocIs ProcSpec    -- ^May only be a subproc of specified proc
+    | ClosureOf ProcSpec      -- ^Unwrapped closure form of this proc
     deriving (Eq, Show, Generic)
 
 
@@ -1920,8 +1919,16 @@ initSuperprocSpec vis = if isPublic vis then NoSuperproc else AnySuperproc
 showSuperProc :: SuperprocSpec -> String
 showSuperProc NoSuperproc = ""
 showSuperProc AnySuperproc = ""
-showSuperProc (SuperprocIs super) =
-  "(subproc of " ++ show super ++ ")"
+showSuperProc (SuperprocIs super) = " (subproc of " ++ show super ++ ")"
+showSuperProc (ClosureOf pspec) = " (closure of " ++ show pspec ++ ")"
+
+maybeClosureOf :: SuperprocSpec -> Maybe ProcSpec
+maybeClosureOf (ClosureOf ps) = Just ps
+maybeClosureOf _              = Nothing 
+
+maybeGetClosureOf :: ProcSpec -> Compiler (Maybe ProcSpec)
+maybeGetClosureOf pspec =
+    maybeClosureOf . procSuperproc <$> getProcDef pspec
 
 
 -- |A procedure defintion body.  Initially, this is in a form similar
@@ -2481,6 +2488,12 @@ instance Show TypeFlow where
 -- |Return the TypeSpec and FlowDirection of a Param
 paramTypeFlow :: Param -> TypeFlow
 paramTypeFlow (Param{paramType=ty, paramFlow=fl}) = TypeFlow ty fl
+
+paramToHoleVar :: Param -> Placed Exp
+paramToHoleVar (Param n t f _) = Unplaced $ Typed (Var n f Hole) t Nothing
+
+closedParamVar :: VarName -> TypeSpec -> (Param, Exp)
+closedParamVar n t = (Param n t ParamIn Closed, Typed (Var n ParamIn Closed) t Nothing)
 
 -- |A formal parameter, including name, type, and flow direction.
 data PrimParam = PrimParam {
@@ -3322,14 +3335,13 @@ showProcDefs firstID (def:defs) =
 showProcDef :: Int -> ProcDef -> String
 showProcDef thisID
         procdef@(ProcDef n proto def pos _ _ _ vis
-                    detism inline impurity isClosure sub) =
+                    detism inline impurity sub) =
     "\n"
     ++ (if n == "" then "*main*" else n) ++ " > "
     ++ visibilityPrefix vis
     ++ showProcModifiers (ProcModifiers detism inline impurity Resourceless [] [])
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
     ++ showSuperProc sub
-    ++ if isClosure then " (closure)" else ""
     ++ "\n"
     ++ show thisID ++ ": "
     ++ (if isCompiled def then "" else show proto ++ ":")

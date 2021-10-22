@@ -468,8 +468,9 @@ argExpandedPrim call@(PrimCall id pspec args) = do
 argExpandedPrim call@(PrimHigherCall id fn args) = do
     fn' <- expandArg fn
     case fn' of
-        ArgProcRef pspec as _ -> 
-            argExpandedPrim $ PrimCall id pspec (as ++ args)
+        ArgProcRef ps as _ -> do
+            ps' <- lift $ fromMaybe ps <$> maybeGetClosureOf ps
+            argExpandedPrim $ PrimCall id ps' (as ++ args)
         _ -> do
             args' <- mapM expandArg args
             return $ PrimHigherCall id fn' args'
