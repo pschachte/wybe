@@ -1120,7 +1120,7 @@ buildMain mainImports = do
           [ Unplaced $
             UseResources res Nothing $
             -- Construct argumentless resourceful calls to all main procs
-              [Unplaced $ ProcCall m "" Nothing Det True []
+              [Unplaced $ ProcCall (First m "" Nothing) Det True []
               | m <- mainImports]
               ++ [Unplaced $ ForeignCall "c" "exit" ["semipure","terminal"]
                              [Unplaced $ intVarGet "exit_code"]]]

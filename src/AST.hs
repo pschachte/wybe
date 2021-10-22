@@ -26,8 +26,9 @@ module AST (
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
-  Exp(..), StringVariant(..), Generator(..), Stmt(..),
-  flattenedExpFlow, expIsConstant, expVar, expVar',
+  Exp(..), StringVariant(..), Generator(..), Stmt(..), ProcFunctor(..),
+  regularProc, regularModProc,
+  flattenedExpFlow, expIsConstant, expVar, expVar', innerExp,
   TypeRepresentation(..), TypeFamily(..), typeFamily,
   defaultTypeRepresentation, typeRepSize, integerTypeRep,
   lookupTypeRepresentation, lookupModuleRepresentation,
@@ -85,7 +86,7 @@ module AST (
   initialisedResources,
   addSimpleResource, lookupResource, specialResources, publicResource,
   ProcModifiers(..), defaultProcModifiers, setDetism, setInline, setImpurity,
-  showProcModifiers, Inlining(..), Impurity(..),
+  showProcModifiers, Inlining(..), Impurity(..), Resourcefulness(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
   expHoles, orderedHoles,
   specialChar, specialName, specialName2, outputVariableName, outputStatusName,
@@ -1028,11 +1029,12 @@ addImport modspec imports = do
 -- XXX the list of unknown and conflicting modifiers shouldn't be needed,
 -- but to get rid of them, the parser needs to be able to report errors.
 data ProcModifiers = ProcModifiers {
-    modifierDetism::Determinism,   -- ^ The proc determinism
-    modifierInline::Inlining,      -- ^ Aggresively inline this proc?
-    modifierImpurity::Impurity,    -- ^ Don't assume purity when optimising
-    modifierUnknown::[String],     -- ^ Unknown modifiers specified
-    modifierConflict::[String]     -- ^ Modifiers that conflict with others
+    modifierDetism::Determinism,          -- ^ The proc determinism
+    modifierInline::Inlining,             -- ^ Aggresively inline this proc?
+    modifierImpurity::Impurity,           -- ^ Don't assume purity when optimising
+    modifierResourceful::Resourcefulness, -- ^ Can this procedure use resources?
+    modifierUnknown::[String],            -- ^ Unknown modifiers specified
+    modifierConflict::[String]            -- ^ Modifiers that conflict with others
 } deriving (Eq, Ord, Generic)
 
 
@@ -1076,9 +1078,22 @@ expectedImpurity Pure = Semipure        -- Semipure is OK for pure procs
 expectedImpurity _ = Impure             -- Otherwise, OK for defn to be impure
 
 
+data Resourcefulness = Resourceless
+                     | Resourceful (Maybe (Set ResourceSpec, Set ResourceSpec))   
+    deriving (Eq, Ord, Generic)
+
+resourcefulName :: Resourcefulness -> String
+resourcefulName Resourceless = ""
+resourcefulName (Resourceful rs) = "resourceful" ++ maybe "" showResourceSets rs
+
+showResourceSets :: (Set ResourceSpec, Set ResourceSpec) -> String
+showResourceSets (ins, outs) = "{" ++ showSet ins ++ ";" ++ showSet outs ++ "}"
+  where showSet = intercalate "," . List.map show . Set.toList
+
+
 -- | The default Det, non-inlined, pure ProcModifiers.
 defaultProcModifiers :: ProcModifiers
-defaultProcModifiers = ProcModifiers Det MayInline Pure [] []
+defaultProcModifiers = ProcModifiers Det MayInline Pure Resourceless [] []
 
 
 -- | Set the modifierDetism attribute of a ProcModifiers.
@@ -1096,13 +1111,15 @@ setImpurity :: Impurity -> ProcModifiers -> ProcModifiers
 setImpurity impurity mods = mods {modifierImpurity=impurity}
 
 
+
 -- | How to display ProcModifiers
 showProcModifiers :: ProcModifiers -> String
-showProcModifiers (ProcModifiers detism inlining impurity _ _) =
-    showFlags $ List.filter (not . List.null) [d,i,p]
+showProcModifiers (ProcModifiers detism inlining impurity res _ _) =
+    showFlags $ List.filter (not . List.null) [d,i,p,r]
     where d = determinismName detism
           i = inliningName inlining
           p = impurityName impurity
+          r = resourcefulName res
 
 
 -- | Display a list of strings separated by commas and surrounded with braces
@@ -1116,7 +1133,7 @@ showFlags flags = "{" ++ intercalate "," flags ++ "} "
 addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
     let name = procProtoName proto
-    let ProcModifiers detism inlining impurity unknown conflict = mods
+    let ProcModifiers detism inlining impurity resourceful unknown conflict = mods
     mapM_ (\m -> message Error
                 ("Unknown proc modifier '" ++ m
                  ++ "' in declaration of " ++ name)
@@ -1128,6 +1145,9 @@ addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
                  ++ name)
                  pos)
            conflict
+    unless (resourceful == Resourceless)
+           $ errmsg pos ("Proc modifier '" ++ resourcefulName resourceful 
+                         ++ "' is not allowed for a procedure declaration")
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 Map.empty
                   vis detism inlining impurity False (initSuperprocSpec vis)
     addProcDef procDef
@@ -2177,10 +2197,10 @@ foldStmt' :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> Stmt -> a
 --       putStrLn $ "#### foldStmt' " ++ showStmt 4 stmt
 --       return False
 --   = error "Woops!"
-foldStmt' sfn efn val (ProcCall _ _ _ _ _ args) =
+foldStmt' sfn efn val (ProcCall (First _ _ _) _ _ args) =
     foldExps sfn efn val args
-foldStmt' sfn efn val (HigherCall _ fn args) =
-    foldExps sfn efn val $ fn:args
+foldStmt' sfn efn val (ProcCall (Higher fn) _ _ args) =
+    foldExps sfn efn val (fn:args)
 foldStmt' sfn efn val (ForeignCall _ _ _ args) =
     foldExps sfn efn val args
 foldStmt' sfn efn val (Cond tst thn els _ _) = val4
@@ -2507,8 +2527,7 @@ data Stmt
      -- |A Wybe procedure call, with module, proc name, proc ID, determinism,
      --   and args.  We assume every call is Det until type checking.
      --   The Bool flag indicates that the proc is allowed to use resources.
-     = ProcCall ModSpec ProcName (Maybe Int) Determinism Bool [Placed Exp]
-     | HigherCall Determinism (Placed Exp) [Placed Exp]
+     = ProcCall ProcFunctor Determinism Bool [Placed Exp]
      -- |A foreign call, with language, foreign name, tags, and args
      | ForeignCall Ident ProcName [Ident] [Placed Exp]
      -- |Do nothing (and succeed)
@@ -2570,6 +2589,20 @@ seqToStmt [] = Unplaced $ TestBool
 seqToStmt [stmt] = stmt
 seqToStmt stmts = Unplaced $ And stmts
 
+
+data ProcFunctor 
+    = First ModSpec ProcName (Maybe Int)
+       -- ^ A first-order procedure 
+    | Higher (Placed Exp)
+       -- ^ A higher-order procedure
+    deriving (Eq, Ord, Generic)       
+
+
+regularProc :: ProcName -> ProcFunctor
+regularProc name = First [] name Nothing
+
+regularModProc :: ModSpec -> ProcName -> ProcFunctor
+regularModProc mod name = First mod name Nothing
 
 -- |An expression.  These are all normalised into statements.
 data Exp
@@ -2635,6 +2668,11 @@ expVar' :: Exp -> Maybe VarName
 expVar' (Typed expr _ _) = expVar' expr
 expVar' (Var name _ _) = Just name
 expVar' _expr = Nothing
+
+-- | Extract the inner expression (removing any Typed wrapper)
+innerExp :: Exp -> Exp
+innerExp (Typed exp _ _) = innerExp exp
+innerExp exp = exp
 
 
 -- |Is it unnecessary to actually pass an argument (in or out) for this param?
@@ -2891,16 +2929,16 @@ expToStmt (Fncall [] "||"  args) = Or (List.map (fmap expToStmt) args) Nothing
 expToStmt (Fncall [] "~" [arg]) = Not $ fmap expToStmt arg
 expToStmt (Fncall [] "~" args) = shouldnt $ "non-unary 'not' " ++ show args
 expToStmt (Fncall maybeMod name args) =
-    ProcCall maybeMod name Nothing Det False args
+    ProcCall (First maybeMod name Nothing) Det False args
 expToStmt (ForeignFn lang name flags args) =
     ForeignCall lang name flags args
-expToStmt (Var name ParamIn _) = ProcCall [] name Nothing Det False []
-expToStmt (Var name ParamInOut _) = ProcCall [] name Nothing Det True []
+expToStmt (Var name ParamIn _) = ProcCall (First [] name Nothing) Det False []
+expToStmt (Var name ParamInOut _) = ProcCall (First [] name Nothing) Det True []
 expToStmt expr = shouldnt $ "non-Fncall expr " ++ show expr
 
 
 procCallToExp :: Stmt -> Exp
-procCallToExp (ProcCall maybeMod name Nothing _ _ args) =
+procCallToExp (ProcCall (First maybeMod name Nothing) _ _ args) =
     Fncall maybeMod name args
 procCallToExp stmt =
     shouldnt $ "converting non-proccall to expr " ++ showStmt 4 stmt
@@ -3288,7 +3326,7 @@ showProcDef thisID
     "\n"
     ++ (if n == "" then "*main*" else n) ++ " > "
     ++ visibilityPrefix vis
-    ++ showProcModifiers (ProcModifiers detism inline impurity [] [])
+    ++ showProcModifiers (ProcModifiers detism inline impurity Resourceless [] [])
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
     ++ showSuperProc sub
     ++ if isClosure then " (closure)" else ""
@@ -3420,13 +3458,9 @@ instance Show PrimVarName where
 
 -- |Show a single statement.
 showStmt :: Int -> Stmt -> String
-showStmt _ (ProcCall maybeMod name procID detism resourceful args) =
+showStmt _ (ProcCall func detism resourceful args) =
     (if resourceful then "!" else "")
-    ++ maybeModPrefix maybeMod
-    ++ maybe "" (\n -> "<" ++ show n ++ ">") procID ++
-    name ++ showArguments args
-showStmt _ (HigherCall _ fn args) =
-    show fn ++ showArguments args
+    ++ show func ++ showArguments args
 showStmt _ (ForeignCall lang name flags args) =
     "foreign " ++ lang ++ " " ++ showFlags flags ++ name ++
     showArguments args
@@ -3473,6 +3507,13 @@ showStmt indent (For generators body) =
     ++ "\n}"
 showStmt _ Break = "break"
 showStmt _ Next = "next"
+
+instance Show ProcFunctor where
+    show (First maybeMod name procID) =
+        maybeModPrefix maybeMod 
+        ++ maybe "" (\n -> "<" ++ show n ++ ">") procID
+        ++ name
+    show (Higher fn) = show fn
 
 
 -- |Show a proc body, with the specified indent.

@@ -258,7 +258,7 @@ flattenStmt stmt pos detism = do
 
 -- |Flatten the specified statement
 flattenStmt' :: Stmt -> OptPos -> Determinism -> Flattener ()
-flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos detism = do
+flattenStmt' stmt@(ProcCall (First [] "=" id) Det res [arg1,arg2]) pos detism = do
     let arg1content = innerExp $ content arg1
     let arg2content = innerExp $ content arg2
     let arg1Vars = expOutputs arg1content
@@ -274,51 +274,39 @@ flattenStmt' stmt@(ProcCall [] "=" id Det res [arg1,arg2]) pos detism = do
         flattenAssignment False arg2 arg1 pos
       (Fncall mod name args, _)
         | not (Set.null arg1Vars) && Set.null arg2Vars -> do
-        let stmt' = ProcCall mod name Nothing Det False (args++[arg2])
+        let stmt' = ProcCall (First mod name Nothing) Det False (args++[arg2])
         flattenStmt stmt' pos detism
       (_, Fncall mod name args)
         | not (Set.null arg2Vars) && Set.null arg1Vars -> do
         -- XXX this may cause unnumbered holes to be reordered
-        let stmt' = ProcCall mod name Nothing Det False (args++[arg1])
+        let stmt' = ProcCall  (First mod name Nothing) Det False (args++[arg1])
         flattenStmt stmt' pos detism
       (_,_) | Set.null arg1Vars && Set.null arg2Vars -> do
         logFlatten $ "Leaving equality test alone: " ++ showStmt 4 stmt
         args' <- flattenStmtArgs [arg1,arg2] pos
-        emit pos $ ProcCall [] "=" id Det res args'
+        emit pos $ ProcCall  (First [] "=" id) Det res args'
         flushPostponed
       _ -> do
         -- Must be a mode error:  both sides want to bind variables
         logFlatten $ "Error: out=out assignment " ++ show stmt
         lift $ message Error "Cannot generate bindings on both sides of '='" pos
-flattenStmt' stmt@(ProcCall [] "fail" _ _ _ []) pos _ =
+flattenStmt' stmt@(ProcCall (First [] "fail" _) _ _ []) pos _ =
     emit pos Fail
-flattenStmt' stmt@(ProcCall [] "break" _ _ _ []) pos _ =
+flattenStmt' stmt@(ProcCall (First [] "break" _) _ _ []) pos _ =
     emit pos Break
-flattenStmt' stmt@(ProcCall [] "next" _ _ _ []) pos _ =
+flattenStmt' stmt@(ProcCall (First [] "next" _) _ _ []) pos _ =
     emit pos Next
-flattenStmt' stmt@(ProcCall [] name _ _ _ []) pos _ = do
+flattenStmt' stmt@(ProcCall (First [] name _) _ _ []) pos _ = do
     defined <- gets defdVars
     -- Convert call to no-arg proc to a bool variable test if there's a
     -- local variable with that name
     if name `elem` defined
         then emit pos $ TestBool $ Var name ParamIn Ordinary
         else emit pos stmt
-flattenStmt' (ProcCall mod name procID detism res args) pos d = do
-    defined <- gets defdVars
-    if name `elem` defined && List.null mod
-    then do
-        unless (isNothing procID && not res)
-          $ shouldnt "bad higher call"
-        flattenStmt' (HigherCall d (maybePlace (Var name ParamIn Ordinary) pos) args)
-                     pos d
-    else do
-        logFlatten "   call is Det"
-        args' <- flattenStmtArgs args pos
-        emit pos $ ProcCall mod name procID detism res args'
-        flushPostponed
-flattenStmt' (HigherCall detism nm args) pos _ = do
+flattenStmt' (ProcCall func detism res args) pos d = do
+    logFlatten "   call is Det"
     args' <- flattenStmtArgs args pos
-    emit pos $ HigherCall detism nm args'
+    emit pos $ ProcCall func detism res args'
     flushPostponed
 flattenStmt' (ForeignCall lang name flags args) pos _ = do
     args' <- flattenStmtArgs args pos
@@ -414,9 +402,7 @@ flattenStmt' for@(For generators body) pos detism = do
                 ( \generator tempNextGen tempGen ->
                     [ Unplaced $
                         ProcCall
-                        []
-                        "[|]"
-                        Nothing
+                        (regularProc "[|]")
                         Det
                         False
                         [ loopVar generator,
@@ -469,11 +455,6 @@ flattenAssignment flipped varArg valArg pos = do
     emit pos instr
     flushPostponed
 
-
--- | Extract the inner expression (removing any Typed wrapper)
-innerExp :: Exp -> Exp
-innerExp (Typed exp _ _) = innerExp exp
-innerExp exp = exp
 ----------------------------------------------------------------
 --                      Flattening Expressions
 ----------------------------------------------------------------
@@ -527,7 +508,7 @@ flattenExp expr@(Var name dir argFlow) ty castFrom pos = do
             -- a niladic function instead of a variable reference
         logFlatten $ "  Unknown variable '" ++ show name
             ++ "' flattened to niladic function call"
-        flattenCall (ProcCall [] name Nothing Det False) False ty castFrom pos []
+        flattenCall (ProcCall (regularProc name) Det False) False ty castFrom pos []
     else do
         when (flowsOut dir) $ noteVarIntro name
         noteVarMention name dir
@@ -604,10 +585,7 @@ flattenExp expr@(Lambda mods _ pstmts) ty castFrom pos = do
     return $ typeAndPlace (Lambda mods holeParams (reverse $ flattened state')) 
                           ty castFrom pos
 flattenExp (Fncall mod name exps) ty castFrom pos = do
-    defd <- gets (Set.member name . defdVars)
-    let stmtBuilder = if defd && List.null mod
-                      then HigherCall Det (maybePlace (Var name ParamIn Ordinary) pos)
-                      else ProcCall mod name Nothing Det False
+    let stmtBuilder = ProcCall (First mod name Nothing) Det False
     flattenCall stmtBuilder False ty castFrom pos exps
 flattenExp (ForeignFn lang name flags exps) ty castFrom pos = do
     flattenCall (ForeignCall lang name flags) True ty castFrom pos exps

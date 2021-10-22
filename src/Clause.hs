@@ -195,23 +195,31 @@ compileBody stmts params detism = do
                 shouldnt $ "CompileBody of Cond with non-simple test:\n"
                            ++ show tstStmt
         -- XXX There shouldn't be any semidet code here any more
-        call@(ProcCall maybeMod name procID SemiDet _ args)
+        call@(ProcCall func SemiDet _ args)
           | detism == SemiDet -> do
           logClause $ "Compiling SemiDet tail call " ++ showStmt 4 call
           args' <- concat <$> mapM (placedApply compileArg) args
           front <- mapM compileSimpleStmt $ init stmts
           callSiteID <- gets nextCallSiteID
-          let final' = Unplaced
-                       $ PrimCall callSiteID
-                         (ProcSpec maybeMod name
-                                   (trustFromJust
-                                    ("compileBody for " ++ showStmt 4 call)
-                                     procID) generalVersion)
-                         (args' ++
-                          [ArgVar (PrimVarName outputStatusName 0) boolType FlowOut
-                           (Implicit Nothing) False])
+          final' <- case func of
+                First maybeMod name procID -> 
+                    return $ Unplaced
+                           $ PrimCall callSiteID
+                             (ProcSpec maybeMod name
+                                       (trustFromJust
+                                        ("compileBody for " ++ showStmt 4 call)
+                                         procID) generalVersion)
+                             (args' ++
+                              [ArgVar (PrimVarName outputStatusName 0) boolType FlowOut
+                               (Implicit Nothing) False])
+                Higher fn -> do
+                    fn' <- compileHigherFunc fn
+                    return $ Unplaced
+                           $ PrimHigherCall callSiteID fn'
+                             (args' ++
+                              [ArgVar (PrimVarName outputStatusName 0) boolType FlowOut
+                               (Implicit Nothing) False])
           return $ ProcBody (front++[final']) NoFork
-
         _ -> do
           prims <- mapM compileSimpleStmt stmts
           end <- closingStmts detism params
@@ -274,21 +282,21 @@ compileSimpleStmt stmt = do
     return $ maybePlace stmt' (place stmt)
 
 compileSimpleStmt' :: Stmt -> ClauseComp Prim
-compileSimpleStmt' call@(ProcCall maybeMod name procID _ _ args) = do
+compileSimpleStmt' call@(ProcCall func _ _ args) = do
     logClause $ "Compiling call " ++ showStmt 4 call
     callSiteID <- gets nextCallSiteID
     modify (\st -> st {nextCallSiteID = callSiteID + 1})
     args' <- concat <$> mapM (placedApply compileArg) args
-    return $ PrimCall callSiteID (ProcSpec maybeMod name
-                       (trustFromJust
-                       ("compileSimpleStmt' for " ++ showStmt 4 call)
-                       procID) generalVersion)
-        args'
-compileSimpleStmt' call@(HigherCall _ fn args) = do
-    callSiteID <- gets nextCallSiteID
-    fn' <- head <$> placedApply compileArg fn
-    args' <- concat <$> mapM (placedApply compileArg) args
-    return $ PrimHigherCall callSiteID fn' args'
+    case func of
+        First maybeMod name procID -> 
+            return $ PrimCall callSiteID 
+                        (ProcSpec maybeMod name
+                            (trustFromJust ("compileSimpleStmt' for " ++ showStmt 4 call)
+                            procID) generalVersion)
+                        args'
+        Higher fn -> do
+            fn' <- compileHigherFunc fn
+            return $ PrimHigherCall callSiteID fn' args'
 compileSimpleStmt' (ForeignCall lang name flags args) = do
     args' <- concat <$> mapM (placedApply compileArg) args
     return $ PrimForeign lang name flags args'
@@ -338,6 +346,13 @@ compileArg' _ (Typed exp _ _) pos =
     shouldnt $ "Compiling multi-typed expression " ++ show exp
 compileArg' typ arg _ =
     shouldnt $ "Normalisation left complex argument: " ++ show arg
+
+compileHigherFunc :: Placed Exp -> ClauseComp PrimArg
+compileHigherFunc pexp = do
+    pexps' <- placedApply compileArg pexp
+    case pexps' of 
+        [arg] -> return arg
+        _ -> shouldnt $ "compileHigherFunc of " ++ show pexp
 
 
 reconcilingAssignments :: Numbering -> Numbering

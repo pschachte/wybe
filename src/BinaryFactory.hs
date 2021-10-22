@@ -36,6 +36,7 @@ instance Binary Exp
 instance Binary StringVariant
 instance Binary Generator
 instance Binary Stmt
+instance Binary ProcFunctor
 instance Binary ParamInfo
 instance Binary Prim
 instance Binary PrimVarName
@@ -70,6 +71,7 @@ instance Binary Pragma
 instance Binary ProcModifiers
 instance Binary Inlining
 instance Binary Impurity
+instance Binary Resourcefulness 
 instance Binary Item
 instance Binary TypeProto
 instance Binary TypeImpln

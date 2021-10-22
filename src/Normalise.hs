@@ -78,7 +78,7 @@ normaliseItem (ResourceDecl vis name typ init pos) = do
   addSimpleResource name (SimpleResource typ init pos) vis
   case init of
     Nothing  -> return ()
-    Just val -> normaliseItem (StmtDecl (ProcCall [] "=" Nothing Det False
+    Just val -> normaliseItem (StmtDecl (ProcCall (regularProc "=") Det False
                                          [Unplaced $ varSet name, val]) pos)
 normaliseItem (FuncDecl vis mods (ProcProto name params resources) resulttype
     (Placed (Where body (Placed (Var var ParamOut rflow) _)) _) pos) =
@@ -960,7 +960,7 @@ implicitDisequality typespec consts nonconsts _ = do
                                      Param rightName typespec ParamIn Ordinary]
                     Set.empty
       let neBody = [Unplaced $ Not $ Unplaced $
-                    ProcCall [] "=" Nothing SemiDet False
+                    ProcCall (First [] "=" Nothing) SemiDet False
                     [Unplaced $ varGet leftName, Unplaced $ varGet rightName]]
       return [ProcDecl Public inlineSemiDetModifiers neProto neBody Nothing]
 
@@ -1063,7 +1063,7 @@ equalityMultiNonconsts (ProcProto name params _:ctrs) =
 -- |Return code to deconstruct
 deconstructCall :: Ident -> Ident -> [Param] -> Determinism -> Placed Stmt
 deconstructCall ctor arg params detism =
-    Unplaced $ ProcCall [] ctor Nothing detism False
+    Unplaced $ ProcCall (regularProc ctor) detism False
      $ List.map (\p -> Unplaced $ varSet $ specialName2 arg $ paramName p) params
         ++ [Unplaced $ varGet arg]
 
@@ -1075,7 +1075,7 @@ equalityField param =
     let field = paramName param
         leftField = specialName2 leftName field
         rightField = specialName2 rightName field
-    in  [Unplaced $ ProcCall [] "=" Nothing SemiDet False
+    in  [Unplaced $ ProcCall (regularProc "=") SemiDet False
             [Unplaced $ varGet leftField,
              Unplaced $ varGet rightField]]
 

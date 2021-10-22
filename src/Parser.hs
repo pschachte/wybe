@@ -266,19 +266,20 @@ flowDirection =
 -- location of the list of modifiers.
 processProcModifiers :: [String] -> ProcModifiers
 processProcModifiers = List.foldl (flip processProcModifier)
-                        $ ProcModifiers Det MayInline Pure [] []
+                        $ ProcModifiers Det MayInline Pure Resourceless [] []
 
 -- |Update 
 processProcModifier :: String -> ProcModifiers -> ProcModifiers
-processProcModifier "test"     = updateModsDetism   "test" SemiDet
-processProcModifier "partial"  = updateModsDetism   "partial" SemiDet
-processProcModifier "failing"  = updateModsDetism   "failing" Failure
-processProcModifier "terminal" = updateModsDetism   "terminal" Terminal
-processProcModifier "inline"   = updateModsInlining "inline" Inline
-processProcModifier "noinline" = updateModsInlining "noinline" NoInline
-processProcModifier "pure"     = updateModsImpurity "pure" PromisedPure
-processProcModifier "semipure" = updateModsImpurity "semipure" Semipure
-processProcModifier "impure"   = updateModsImpurity "impure" Impure
+processProcModifier "test"        = updateModsDetism   "test" SemiDet
+processProcModifier "partial"     = updateModsDetism   "partial" SemiDet
+processProcModifier "failing"     = updateModsDetism   "failing" Failure
+processProcModifier "terminal"    = updateModsDetism   "terminal" Terminal
+processProcModifier "inline"      = updateModsInlining "inline" Inline
+processProcModifier "noinline"    = updateModsInlining "noinline" NoInline
+processProcModifier "pure"        = updateModsImpurity "pure" PromisedPure
+processProcModifier "semipure"    = updateModsImpurity "semipure" Semipure
+processProcModifier "impure"      = updateModsImpurity "impure" Impure
+processProcModifier "resourceful" = updateModsResource "resourceful" (Resourceful Nothing)
 processProcModifier modName    =
     \ms -> ms {modifierUnknown=modName:modifierUnknown ms}
 
@@ -313,6 +314,12 @@ updateModsImpurity :: String -> Impurity -> ProcModifiers -> ProcModifiers
 updateModsImpurity _ impurity mods@ProcModifiers{modifierImpurity=Pure} =
     mods {modifierImpurity=impurity}
 updateModsImpurity modName _ mods =
+    mods {modifierConflict=modName:modifierConflict mods}
+
+updateModsResource :: String -> Resourcefulness -> ProcModifiers -> ProcModifiers
+updateModsResource _ resful mods@ProcModifiers{modifierResourceful=Resourceless} =
+    mods {modifierResourceful=resful}
+updateModsResource modName _ mods =
     mods {modifierConflict=modName:modifierConflict mods}
 
 
@@ -968,10 +975,10 @@ stmtExprToStmt (Call _ [] fn ParamIn [first,rest])
     rest'  <- stmtExprToStmt rest
     return $ Unplaced $ And [first',rest']
 stmtExprToStmt (Call pos mod fn ParamIn args)
-    = (`Placed` pos) . ProcCall mod fn Nothing Det False
+    = (`Placed` pos) . ProcCall (regularModProc mod fn) Det False
         <$> mapM stmtExprToExp args
 stmtExprToStmt (Call pos mod fn ParamInOut args)
-    = (`Placed` pos) . ProcCall mod fn Nothing Det True
+    = (`Placed` pos) . ProcCall (regularModProc mod fn) Det True
         <$> mapM stmtExprToExp args
 stmtExprToStmt (Call pos mod fn flow args) =
     syntaxError pos $ "invalid statement prefix: " ++ flowPrefix flow

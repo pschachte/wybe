@@ -146,7 +146,7 @@ transformBody tmp resources (stmt:stmts) = do
 -- | Transform a single statement, turning resources into arguments.
 transformStmt :: Int -> Set ResourceSpec -> Stmt -> OptPos
               -> Compiler ([Placed Stmt], Int)
-transformStmt tmp res stmt@(ProcCall m n id detism resourceful args) pos = do
+transformStmt tmp res stmt@(ProcCall (First m n id) detism resourceful args) pos = do
     let procID = trustFromJust "transformStmt" id
     callResources <-
         procProtoResources . procProto <$> getProcDef
@@ -159,8 +159,9 @@ transformStmt tmp res stmt@(ProcCall m n id detism resourceful args) pos = do
     logResources $ "Checking call to " ++ n ++ " using " ++ show callResources
     resArgs <- concat <$> mapM (resourceArgs pos) (Set.elems callResources)
     return ([maybePlace
-            (ProcCall m n (Just procID) detism False (args++resArgs)) pos], tmp)
-transformStmt tmp res stmt@(HigherCall _ _ _) pos = return $ ([maybePlace stmt pos],tmp)
+            (ProcCall (First m n (Just procID)) detism False (args++resArgs)) pos], tmp)
+transformStmt tmp res stmt@(ProcCall (Higher _) _ _ _) pos = 
+    return ([maybePlace stmt pos],tmp)
 transformStmt tmp res (ForeignCall lang name flags args) pos =
     return ([maybePlace (ForeignCall lang name flags args) pos], tmp)
 transformStmt tmp res stmt@(TestBool var) pos =

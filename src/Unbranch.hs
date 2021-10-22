@@ -346,14 +346,14 @@ unbranchStmts detism (stmt:stmts) alt sense = do
 --
 unbranchStmt :: Determinism -> Stmt -> OptPos -> [Placed Stmt] -> [Placed Stmt]
              -> Bool -> Unbrancher [Placed Stmt]
-unbranchStmt _ stmt@(ProcCall _ _ _ _ True args) _ _ _ _ =
+unbranchStmt _ stmt@(ProcCall _ _ True args) _ _ _ _ =
     shouldnt $ "Resources should have been handled before unbranching: "
                ++ showStmt 4 stmt
-unbranchStmt context stmt@(ProcCall _ _ _ SemiDet _ _) _ _ _ _
+unbranchStmt context stmt@(ProcCall _ SemiDet _ _) _ _ _ _
   | context < SemiDet
   = shouldnt $ "SemiDet proc call " ++ show stmt
                ++ " in a " ++ show context ++ " context"
-unbranchStmt SemiDet stmt@(ProcCall md name procID SemiDet _ args) pos
+unbranchStmt SemiDet stmt@(ProcCall func SemiDet _ args) pos
              stmts alt sense = do
     logUnbranch $ "converting SemiDet proc call" ++ show stmt
     testResultVar <- tempVar
@@ -367,50 +367,28 @@ unbranchStmt SemiDet stmt@(ProcCall md name procID SemiDet _ args) pos
     logUnbranch $ "mkCond " ++ show sense ++ " " ++ show val
                   ++ showBody 4 stmts' ++ "\nelse"
                   ++ showBody 4 alt
-    let result = maybePlace (ProcCall md name procID Det False args'') pos
+    func' <- case func of
+                First _ _ _ -> return func
+                Higher fn -> do
+                    defArgs [fn]
+                    [fn'] <- hoistLambdas [fn]
+                    return $ Higher fn' 
+    let result = maybePlace (ProcCall func' Det False args'') pos
                  : mkCond sense val pos stmts' alt condVars vars
     logUnbranch $ "#Converted SemiDet proc call" ++ show stmt
     logUnbranch $ "#To: " ++ showBody 4 result
     return result
-unbranchStmt detism stmt@(ProcCall m nm pId calldetism r args) pos stmts alt
+unbranchStmt detism stmt@(ProcCall func calldetism r args) pos stmts alt
              sense = do
     logUnbranch $ "Unbranching call " ++ showStmt 4 stmt
     defArgs args
     args' <- hoistLambdas args
-    let stmt' = ProcCall m nm pId calldetism r args'
-    case calldetism of
-      Terminal -> return [maybePlace stmt' pos] -- no execution after Terminal
-      Failure  -> return [maybePlace stmt' pos] -- no execution after Failure
-      Det      -> leaveStmtAsIs detism stmt' pos stmts alt sense
-      SemiDet  -> shouldnt "SemiDet case already covered!"
-unbranchStmt context stmt@(HigherCall SemiDet exp args) pos stmts alt sense
-    | context < SemiDet 
-    = shouldnt $ "SemiDet higher call " ++ show stmt
-               ++ " in a " ++ show context ++ " context" 
-unbranchStmt SemiDet stmt@(HigherCall SemiDet exp args) pos stmts alt sense = do
-    logUnbranch $ "converting SemiDet higher call" ++ show stmt
-    testResultVar <- tempVar
-    let args' = args ++ [Unplaced (boolVarSet testResultVar)]
-    defArgs (exp:args')
-    exp':args'' <- hoistLambdas (exp:args')
-    condVars <- gets brVars
-    stmts' <- unbranchStmts SemiDet stmts alt sense
-    let val = boolVarGet testResultVar
-    vars <- gets brVars
-    logUnbranch $ "mkCond " ++ show sense ++ " " ++ show val
-                  ++ showBody 4 stmts' ++ "\nelse"
-                  ++ showBody 4 alt
-    let result = maybePlace (HigherCall Det exp' args'') pos
-                 : mkCond sense val pos stmts' alt condVars vars
-    logUnbranch $ "#Converted SemiDet higher call" ++ show stmt
-    logUnbranch $ "#To: " ++ showBody 4 result
-    return result
-unbranchStmt detism stmt@(HigherCall calldetism exp args) pos stmts alt
-             sense = do
-    logUnbranch $ "Unbranching call " ++ showStmt 4 stmt
-    defArgs (exp:args)
-    exp':args' <- hoistLambdas (exp:args)
-    let stmt' = HigherCall calldetism exp' args'
+    func' <- case func of 
+                First m n pId -> return func
+                Higher fn -> do
+                    [fn'] <- hoistLambdas [fn]
+                    return $ Higher fn'
+    let stmt' = ProcCall func' calldetism r args'
     case calldetism of
       Terminal -> return [maybePlace stmt' pos] -- no execution after Terminal
       Failure  -> return [maybePlace stmt' pos] -- no execution after Failure
@@ -537,7 +515,7 @@ hoistLambda exp@(Lambda mods params pstmts) pos = do
         let closureName = makeClosureName name
         let pDefClosure = 
                 ProcDef closureName procProto{procProtoName=closureName} 
-                (ProcDefSrc [Unplaced $ ProcCall mod nm (Just procId) detism False 
+                (ProcDefSrc [Unplaced $ ProcCall (First mod nm (Just procId)) detism False 
                                         $ List.map Unplaced closedVars ++ holeVars]) 
                 Nothing tmpCtr 0
                 Map.empty Private detism Inline Pure True NoSuperproc
@@ -714,7 +692,7 @@ newProcCall name inVars pos detism = do
     let inArgs  = List.map (uncurry $ varExp ParamIn) $ Map.toList inVars
     outArgs <- gets brOutArgs
     currMod <- lift getModuleSpec
-    let call = ProcCall currMod name (Just 0) detism False (inArgs ++ outArgs)
+    let call = ProcCall (First currMod name (Just 0)) detism False (inArgs ++ outArgs)
     logUnbranch $ "Generating call: " ++ showStmt 4 call
     return $ maybePlace call pos
 
