@@ -10,7 +10,8 @@ module Snippets (castFromTo, castTo, withType, intType, intCast,
                  varSet, varGet, varGetSet,
                  boolType, boolCast, boolTrue, boolFalse, boolBool,
                  boolVarSet, boolVarGet, intVarSet, intVarGet,
-                 lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, primMove, primAccess,
+                 lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, 
+                 primMove, primAccess, primCast,
                  boolNegate, comparison, succeedTest, failTest, testVar, succeedIfSemiDet) where
 
 import AST
@@ -154,6 +155,11 @@ primMove src dest =
 primAccess :: PrimArg -> PrimArg -> PrimArg -> PrimArg -> PrimArg -> Prim
 primAccess struct offset size startOffset val =
   PrimForeign "lpvm" "access" [] [struct, offset, size, startOffset, val]
+
+-- |A primitive access instruction
+primCast :: PrimArg -> PrimArg -> Prim
+primCast to from =
+  PrimForeign "lpvm" "cast" [] [from, to]
 
 -- |An unplaced instruction to compare two integer values
 comparison :: Ident -> Exp -> Exp -> Placed Stmt

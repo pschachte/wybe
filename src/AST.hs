@@ -59,6 +59,7 @@ module AST (
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, ResourceDef(..), FlowDirection(..),
   argFlowDirection, argType, setArgType, argDescription, 
+  setParamType, setPrimParamType, setTypeFlowType,
   flowsIn, flowsOut, primFlowToFlowDir,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, procCallToExp,
@@ -2480,11 +2481,21 @@ instance Show TypeFlow where
 paramTypeFlow :: Param -> TypeFlow
 paramTypeFlow (Param{paramType=ty, paramFlow=fl}) = TypeFlow ty fl
 
+
+-- |Convert a Param to a Hole Var
 paramToHoleVar :: Param -> Placed Exp
 paramToHoleVar (Param n t f _) = Unplaced $ Typed (Var n f Hole) t Nothing
 
+
+-- |Get Closed Param and Typed Var for the given VarName and TypeSpec 
 closedParamVar :: VarName -> TypeSpec -> (Param, Exp)
 closedParamVar n t = (Param n t ParamIn Closed, Typed (Var n ParamIn Closed) t Nothing)
+
+
+-- |Set the TypeSpec of a given TypeFlow
+setTypeFlowType :: TypeSpec -> TypeFlow -> TypeFlow
+setTypeFlowType t tf = tf{typeFlowType=t}
+
 
 -- |A formal parameter, including name, type, and flow direction.
 data PrimParam = PrimParam {
@@ -2510,11 +2521,22 @@ data PrimFlow = FlowIn | FlowOut
                    deriving (Show,Eq,Ord,Generic)
 
 
+-- |Set the type of the given Param
+setParamType :: TypeSpec -> Param -> Param
+setParamType t p = p{paramType=t}
+
+
+-- |Set the type of the given PrimParam
+setPrimParamType :: TypeSpec -> PrimParam -> PrimParam
+setPrimParamType t p = p{primParamType=t}
+
+
 -- |Does the specified flow direction flow in?
 flowsIn :: FlowDirection -> Bool
 flowsIn ParamIn    = True
 flowsIn ParamOut   = False
 flowsIn ParamInOut = True
+
 
 -- |Does the specified flow direction flow out?
 flowsOut :: FlowDirection -> Bool
@@ -2523,6 +2545,7 @@ flowsOut ParamOut = True
 flowsOut ParamInOut = True
 
 
+-- |Translate a PrimFlow to a corresponding FlowDirection
 primFlowToFlowDir :: PrimFlow -> FlowDirection
 primFlowToFlowDir FlowIn  = ParamIn
 primFlowToFlowDir FlowOut = ParamOut

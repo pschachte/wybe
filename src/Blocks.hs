@@ -280,13 +280,13 @@ closeProtoBody proto@PrimProto{primProtoParams=params}
     (closed, actualParams) = List.partition ((==Closed) . primParamFlowType) params
     proto' = proto{primProtoParams=actualParams ++ [envPrimParam]}
     neededClosed = List.filter (not . paramInfoUnneeded . primParamInfo) closed
-    unwrapper = Unplaced 
-             <$> [primAccess (ArgVar envParamName intType FlowIn Closed False)
-                             (ArgInt (i * 8) intType)
+    unwrapper = Unplaced <$>
+                [ primAccess (ArgVar envParamName intType FlowIn Closed False)
+                             (ArgInt (i * toInteger wordSizeBytes) intType)
                              (ArgInt (toInteger wordSize) intType)
                              (ArgInt 0 intType)
-                             (ArgVar nm ty FlowIn Closed False)
-                 | (i,PrimParam nm ty _ _ _) <- zip [1..] neededClosed]
+                             (ArgVar nm ty FlowOut Closed False)
+                | (i,PrimParam nm ty _ _ _) <- zip [1..] neededClosed ]
     body' = body{bodyPrims=unwrapper ++ prims}
 
 
@@ -558,7 +558,7 @@ cgen prim@(PrimCall callSiteID pspec args) = do
 
 cgen prim@(PrimHigherCall callSiteId var@ArgVar{argVarType=ty} args) = do
     logCodegen $ "Compiling " ++ show prim
-    let (inArgs, outArgs) = partitionArgs args
+    let (inArgs, outArgs) = partitionArgs $ setArgType intType <$> args
     env <- cgenArg var
     inOps <- mapM cgenArg inArgs
     let callInOps = inOps ++ [env] 
@@ -1026,7 +1026,7 @@ cgenArg arg@(ArgProcRef ps args ty) = do
         cons <$> cgenArgConst arg
     else do
         fnOp <- cons <$> cgenFuncRef ps
-        envArgs <- mapM cgenArg args'
+        envArgs <- mapM cgenArg (setArgType intType <$> args')
         mem <- gcAllocate (toInteger (wordSizeBytes * (1 + length args)) 
                                       `ArgInt` intType) address_t 
         memPtr <- inttoptr mem (ptr_t address_t)
@@ -1084,7 +1084,7 @@ cgenArgConst (ArgUndef ty) = do
 cgenArgConst (ArgProcRef ps args ty) = do
     fnRef <- cgenFuncRef ps
     args' <- neededClosedArgs ps args
-    constArgs <- mapM cgenArgConst args'
+    constArgs <- mapM cgenArgConst (setArgType intType <$> args')
     let arrElems = fnRef:constArgs
     let arrTy = array_t (fromIntegral $ length arrElems) address_t
     let arr = C.Array address_t arrElems
@@ -1242,7 +1242,9 @@ llvmFuncType ty = do
 
 llvmClosureType :: TypeSpec -> Compiler LLVMAST.Type
 llvmClosureType (HigherOrderType mods tys) 
-    = llvmFuncType (HigherOrderType mods $ tys ++ [TypeFlow AnyType ParamIn])
+    = llvmFuncType 
+        $ HigherOrderType mods 
+        $ setTypeFlowType intType <$> tys ++ [TypeFlow intType ParamIn]
 llvmClosureType ty = shouldnt $ "llvmClosureType on " ++ show ty
 
 
