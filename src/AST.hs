@@ -1573,8 +1573,8 @@ type ResourceName = Ident
 
 -- |A type variable name.
 data TypeVarName 
-    = RealTypeVar Ident
-    | FauxTypeVar Integer
+    = FauxTypeVar Integer
+    | RealTypeVar Ident
   deriving (Eq, Ord, Generic)
 
 instance Show TypeVarName where

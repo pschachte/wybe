@@ -588,16 +588,15 @@ unifyTypes' reason InvalidType _ = return InvalidType
 unifyTypes' reason _ InvalidType = return InvalidType
 unifyTypes' reason AnyType ty    = return ty
 unifyTypes' reason ty AnyType    = return ty
-unifyTypes' reason (TypeVariable FauxTypeVar{}) ty = return ty
-unifyTypes' reason ty (TypeVariable FauxTypeVar{}) = return ty
-unifyTypes' reason t1@TypeVariable{} t2@TypeVariable{}
-    | t1 == t2  = return t1
-    | otherwise = invalidTypeError reason
+unifyTypes' reason ty1@(TypeVariable RealTypeVar{}) ty2@(TypeVariable RealTypeVar{})
+    | ty1 == ty2 = return ty1
+    | otherwise  = invalidTypeError reason
+unifyTypes' reason ty1@TypeVariable{} ty2@TypeVariable{} = return $ max ty1 ty2
 unifyTypes' reason TypeVariable{} ty = return ty
 unifyTypes' reason ty TypeVariable{} = return ty
-unifyTypes' reason t1@Representation{} t2@Representation{}
-    | t1 == t2  = return t1
-    | otherwise = invalidTypeError reason
+unifyTypes' reason ty1@Representation{} ty2@Representation{}
+    | ty1 == ty2 = return ty1
+    | otherwise  = invalidTypeError reason
 unifyTypes' reason ty1@(Representation rep1) ty2@TypeSpec{} = do
     rep2 <- lift $ lookupTypeRepresentation ty2
     if Just rep1 == rep2
