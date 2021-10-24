@@ -1058,7 +1058,8 @@ translateConditionalExp' stmtExpr =
 
 -- |Convert a StmtExpr to a TypeSpec, or produce an error
 stmtExprToTypeSpec :: TranslateTo TypeSpec
-stmtExprToTypeSpec (Call _ [] name ParamOut []) = Right $ TypeVariable name
+stmtExprToTypeSpec (Call _ [] name ParamOut []) = 
+    return $ TypeVariable $ RealTypeVar name
 stmtExprToTypeSpec (Call _ mod name ParamIn params) =
     TypeSpec mod name <$> mapM stmtExprToTypeSpec params
 stmtExprToTypeSpec other =

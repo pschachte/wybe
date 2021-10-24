@@ -448,14 +448,14 @@ type Typed = StateT Typing Compiler
 data Typing = Typing {
                   typingDict::VarDict,                  -- ^variable types
                   tvarDict::Map TypeVarName TypeSpec,   -- ^type variable types
-                  typeVarCounter::Int,                  -- for renumbering tvars
+                  typeVarCounter::Integer,              -- for renumbering tvars
                   typingErrs::[TypeError]               -- type errors seen
                   } deriving (Eq,Ord)
 
 
 instance Show Typing where
   show (Typing dict tvardict _ errs) =
-    "Typing " ++ showVarMap dict ++ "; " ++ showVarMap tvardict
+    "Typing " ++ showVarMap dict ++ "; " -- ++ showVarMap (Map.map tvardict)
     ++ if List.null errs
        then " (with no errors)"
        else " with errors: " ++ show errs
@@ -465,7 +465,7 @@ instance Show Typing where
 ultimateType  :: TypeSpec -> Typed TypeSpec
 ultimateType ty@TypeVariable{typeVariableName=tvar} = do
     mbval <- gets $ Map.lookup tvar . tvarDict
-    logTyped $ "Type variable ?" ++ tvar ++ " is bound to " ++ show mbval
+    logTyped $ "Type variable ?" ++ show tvar ++ " is bound to " ++ show mbval
     case mbval of
         Nothing -> return ty
         Just ty' -> ultimateType ty'
@@ -583,36 +583,43 @@ unifyTypes reason t1 t2 = do
 -- will do that.
 unifyTypes' :: TypeError -> TypeSpec -> TypeSpec -> Typed TypeSpec
 unifyTypes' reason ty1 ty2
-  | occursCheck ty1 ty2 = typeError reason >> return InvalidType
+  | occursCheck ty1 ty2 = invalidTypeError reason
 unifyTypes' reason InvalidType _ = return InvalidType
 unifyTypes' reason _ InvalidType = return InvalidType
 unifyTypes' reason AnyType ty    = return ty
 unifyTypes' reason ty AnyType    = return ty
-unifyTypes' reason t1@TypeVariable{} t2@TypeVariable{} = return $ max t1 t2
+unifyTypes' reason (TypeVariable FauxTypeVar{}) ty = return ty
+unifyTypes' reason ty (TypeVariable FauxTypeVar{}) = return ty
+unifyTypes' reason t1@TypeVariable{} t2@TypeVariable{}
+    | t1 == t2  = return t1
+    | otherwise = invalidTypeError reason
 unifyTypes' reason TypeVariable{} ty = return ty
 unifyTypes' reason ty TypeVariable{} = return ty
 unifyTypes' reason t1@Representation{} t2@Representation{}
     | t1 == t2  = return t1
-    | otherwise = typeError reason >> return InvalidType
+    | otherwise = invalidTypeError reason
 unifyTypes' reason ty1@(Representation rep1) ty2@TypeSpec{} = do
     rep2 <- lift $ lookupTypeRepresentation ty2
     if Just rep1 == rep2
         then return ty2
-        else typeError reason >> return InvalidType
+        else invalidTypeError reason
 unifyTypes' reason ty1@TypeSpec{} ty2@(Representation rep2) = do
     rep1 <- lift $ lookupTypeRepresentation ty1
     if rep1 == Just rep2
         then return ty1
-        else typeError reason >> return InvalidType
+        else invalidTypeError reason
 unifyTypes' reason ty1@(TypeSpec m1 n1 ps1) ty2@(TypeSpec m2 n2 ps2)
     | n1 == n2 && modsMatch && length ps1 == length ps2 = do
         ps <- zipWithM (unifyTypes reason) ps1 ps2
         return $ TypeSpec m n1 ps
-    | otherwise = typeError reason >> return InvalidType
+    | otherwise = invalidTypeError reason
   where (modsMatch, m)
           | m1 `isSuffixOf` m2 = (True,  m2)
           | m2 `isSuffixOf` m1 = (True,  m1)
           | otherwise          = (False, [])
+
+invalidTypeError :: TypeError -> Typed TypeSpec
+invalidTypeError reason = typeError reason >> return InvalidType
 
 
 -- | Checks if two types' are cyclic. 
@@ -645,7 +652,7 @@ freshTypeVar :: Typed TypeSpec
 freshTypeVar = do
     next <- gets typeVarCounter
     modify $ \st -> st { typeVarCounter = next+1 }
-    return $ TypeVariable $ show next
+    return $ TypeVariable $ FauxTypeVar next
 
 
 -- |Record a type error in the current typing.

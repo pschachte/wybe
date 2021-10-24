@@ -21,7 +21,7 @@ module AST (
   determinismSeq, determinismProceding, determinismName,
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
-  TypeProto(..), TypeSpec(..), typeVarSet, TypeVarName, genericType, typeModule,
+  TypeProto(..), TypeSpec(..), typeVarSet, TypeVarName(..), genericType, typeModule,
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
@@ -771,11 +771,14 @@ addParameters params pos = do
     currParams <- getModule modParams
     if nub params /= params
       then errmsg pos
-           $ "duplicated type/module parameter in: " ++ intercalate ", " params
+           $ "duplicated type/module parameter in: " 
+           ++ intercalate ", " (show <$> params)
       else if List.null currParams
       then updateModule (\m -> m { modParams = params })
       else errmsg pos
-           $ "repeated parameter declaration: " ++ intercalate ", " params
+           $ "repeated parameter declaration: " 
+           ++ intercalate ", " (show <$> params)
+
 
 -- |Add the specified type representation to the current module.  This makes the
 -- module a type.  Checks that the type doesn't already have a representation or
@@ -836,7 +839,7 @@ addConstructor vis pctor = do
                 errmsg pos
                 $ "Constructors for type " ++ showModSpec currMod
                   ++ " use unbound type variable(s) "
-                  ++ intercalate ", " (("?"++) <$> Set.toList missingParams)
+                  ++ intercalate ", " (("?"++) . show <$> Set.toList missingParams)
 
 
 -- |Record that the specified type is known in the current module.
@@ -1569,7 +1572,14 @@ type ProcName = Ident
 type ResourceName = Ident
 
 -- |A type variable name.
-type TypeVarName = Ident
+data TypeVarName 
+    = RealTypeVar Ident
+    | FauxTypeVar Integer
+  deriving (Eq, Ord, Generic)
+
+instance Show TypeVarName where
+    show (RealTypeVar v) = v
+    show (FauxTypeVar i) = show i
 
 -- |A module specification, as a list of module names; module a.b.c would
 --  be represented as ["a","b","c"].
@@ -3110,7 +3120,7 @@ showProcDef thisID
 instance Show TypeSpec where
   show AnyType              = "any"
   show InvalidType          = "XXX"
-  show (TypeVariable name)  = "?" ++ name
+  show (TypeVariable name)  = "?" ++ show name
   show (Representation rep) = show rep
   show (TypeSpec optmod ident args) =
       maybeModPrefix optmod ++ ident ++ showArguments args
