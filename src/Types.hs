@@ -455,7 +455,7 @@ data Typing = Typing {
 
 instance Show Typing where
   show (Typing dict tvardict _ errs) =
-    "Typing " ++ showVarMap dict ++ "; " -- ++ showVarMap (Map.map tvardict)
+    "Typing " ++ showVarMap dict ++ "; " ++ showVarMap (Map.mapKeys show tvardict)
     ++ if List.null errs
        then " (with no errors)"
        else " with errors: " ++ show errs
