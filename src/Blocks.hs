@@ -30,6 +30,7 @@ import           Data.List                       as List
 import           Data.Map                        as Map
 import qualified Data.Set                        as Set
 import           Data.String
+import           Data.Functor                    ((<&>))
 import           Data.Word                       (Word32)
 import           Data.Maybe                      (fromMaybe, isJust)
 import           Flow                            ((|>))
@@ -573,9 +574,8 @@ cgen prim@(PrimHigherCall callSiteId var@ArgVar{argVarType=ty} args) = do
     let callIns = callWybe fnPtr callInOps
     addInstruction callIns outArgs
 cgen prim@(PrimHigherCall callSiteId (ArgProcRef ps as ty) args) = do
-    ps' <- lift $ fromMaybe ps <$> maybeGetClosureOf ps
-    logCodegen $ "Compiling " ++ show prim ++ " as regular call to " ++ show ps'
-    cgen $ PrimCall callSiteId ps' (as ++ args)
+    logCodegen $ "Compiling " ++ show prim ++ " as regular call"
+    translateFromClosure Nothing prim (const cgen)
 cgen prim@(PrimHigherCall _ _ _) = do
     shouldnt $ "dont know how to cgen higher call " ++ show prim
 cgen prim@(PrimForeign "llvm" name flags args) = do
@@ -1024,7 +1024,7 @@ cgenArg arg@(ArgProcRef ps args ty) = do
     if all argIsConst args'
     then do
         cons <$> cgenArgConst arg
-    else do
+    else do 
         fnOp <- cons <$> cgenFuncRef ps
         envArgs <- mapM cgenArg (setArgType intType <$> args')
         mem <- gcAllocate (toInteger (wordSizeBytes * (1 + length args)) 
@@ -1096,23 +1096,22 @@ cgenArgConst arg = shouldnt $ "cgenArgConst of " ++ show arg
 
 cgenFuncRef :: ProcSpec -> Codegen C.Constant 
 cgenFuncRef ps = do
+    addExternProcRef ps
     let fName = LLVMAST.Name $ fromString $ show ps
-    psType <- HigherOrderType defaultProcModifiers <$> primTypeFlows ps
+    psType <- HigherOrderType defaultProcModifiers . (primParamTypeFlow <$>) 
+          <$> primActualParams ps
     psTy <- lift $ llvmFuncType psType
-    logCodegen $ traceShowId $ "  with type " ++ show psType
+    logCodegen $ "  with type " ++ show psType
     let conFn = C.GlobalReference psTy fName
     return $ C.BitCast conFn address_t
 
 
-primTypeFlows :: ProcSpec -> Codegen [TypeFlow]
-primTypeFlows pspec = lift $ do
+primActualParams :: ProcSpec -> Codegen [PrimParam]
+primActualParams pspec = lift $ do
     isClosure <- isClosureProc pspec
     primProto <- procImplnProto . procImpln <$> getProcDef pspec
-    primParams <- protoRealParams primProto
-    return $ (++ [TypeFlow AnyType ParamIn | isClosure])
-           $ (\p -> TypeFlow (primParamType p)
-                             (primFlowToFlowDir $ primParamFlow p))
-          <$> List.filter ((/= Closed) . primParamFlowType) primParams
+    primParams <- protoRealParams primProto <&> (++ [envPrimParam | isClosure]) 
+    return $ List.filter ((/= Closed) . primParamFlowType) primParams
 
 
 neededClosedArgs :: ProcSpec -> [PrimArg] -> Codegen [PrimArg]
@@ -1120,6 +1119,14 @@ neededClosedArgs pspec args = lift $ do
     params <- List.filter ((==Closed) . primParamFlowType) . primProtoParams
               . procImplnProto . procImpln <$> getProcDef pspec
     List.map snd <$> filterM (paramIsReal . fst) (zip params args)
+
+addExternProcRef :: ProcSpec -> Codegen ()
+addExternProcRef ps@(ProcSpec mod _ _ _) = do
+    args <- (primParamToArg <$>) <$> primActualParams ps
+    thisMod <- lift getModuleSpec
+    fileMod <- lift $ getModule modRootModSpec
+    unless (thisMod == mod || maybe False (`List.isPrefixOf` mod) fileMod)
+        (addExtern $ PrimCall 0 ps args)
 
 
 addStringConstant :: String -> Codegen (LLVMAST.Type, C.Constant)
@@ -1244,7 +1251,7 @@ llvmClosureType :: TypeSpec -> Compiler LLVMAST.Type
 llvmClosureType (HigherOrderType mods tys) 
     = llvmFuncType 
         $ HigherOrderType mods 
-        $ setTypeFlowType intType <$> tys ++ [TypeFlow intType ParamIn]
+        $ {-setTypeFlowType intType <$>-} tys ++ [TypeFlow AnyType ParamIn]
 llvmClosureType ty = shouldnt $ "llvmClosureType on " ++ show ty
 
 

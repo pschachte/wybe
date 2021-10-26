@@ -25,7 +25,8 @@ module AST (
   genericType, higherOrderType, isHigherOrder, updateHigherOrderTypesM, typeModule,
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), 
-  paramTypeFlow, paramToHoleVar, closedParamVar,
+  paramTypeFlow, primParamTypeFlow, setParamArgFlowType, 
+  paramToHoleVar, primParamToArg, closedParamVar, unzipTypeFlow, unzipTypeFlows,
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), StringVariant(..), Generator(..), Stmt(..), ProcFunctor(..),
   regularProc, regularModProc,
@@ -68,7 +69,7 @@ module AST (
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
-  maybeClosureOf, maybeGetClosureOf, isClosureProc,
+  maybeClosureOf, maybeGetClosureOf, translateFromClosure, isClosureProc,
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
@@ -93,7 +94,7 @@ module AST (
   addProc, addProcDef, lookupProc, publicProc, callTargets,
   expHoles, orderedHoles,
   specialChar, specialName, specialName2, outputVariableName, outputStatusName,
-  envParamName, envPrimParam, makeClosureName,
+  envParamName, envPrimParam,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
   showModSpecs, showResources, showOptPos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
@@ -1582,7 +1583,7 @@ lookupTypeRepresentation (TypeSpec modSpec name _) =
 lookupTypeRepresentation (HigherOrderType ProcModifiers{modifierDetism=detism} tfs) = do
     mbInReps <- sequenceRepFlowTypes ins
     mbOutReps <- sequenceRepFlowTypes outs
-    return $ Func <$> mbInReps <*> ((++ [Bits 1 | detism == SemiDet]) <$> mbOutReps)
+    return $ Func <$> mbInReps <*> ((++ [defaultTypeRepresentation | detism == SemiDet]) <$> mbOutReps)
   where
     ins = List.filter (flowsIn . typeFlowMode) tfs
     outs = List.filter (flowsOut . typeFlowMode) tfs
@@ -1913,6 +1914,15 @@ maybeClosureOf _              = Nothing
 maybeGetClosureOf :: ProcSpec -> Compiler (Maybe ProcSpec)
 maybeGetClosureOf pspec =
     maybeClosureOf . procSuperproc <$> getProcDef pspec
+
+translateFromClosure :: OptPos -> Prim 
+                     -> (OptPos -> Prim -> StateT s Compiler a) 
+                     -> StateT s Compiler a
+translateFromClosure pos (PrimHigherCall csID (ArgProcRef ps as ty) args) trans = do
+    ps' <- lift $ fromMaybe ps <$> maybeGetClosureOf ps
+    tys <- (paramType <$>) <$> lift (getParams ps') 
+    trans pos (PrimCall csID ps' $ as ++ zipWith setArgType tys args)
+translateFromClosure _ prim _ = shouldnt $ "translateFromClosure of " ++ show prim
 
 -- |Check if a ProcSpec refers to a closure proc
 isClosureProc :: ProcSpec -> Compiler Bool 
@@ -2386,14 +2396,8 @@ isHigherOrder _                 = False
 updateHigherOrderTypesM :: Monad m => (TypeSpec -> m TypeSpec) -> TypeSpec -> m TypeSpec
 updateHigherOrderTypesM trans ty@HigherOrderType{higherTypeDetism=mods,
                                                  higherTypeParams=typeFlows} = do
-    let detism = modifierDetism mods
-    let isSemiDet = detism == SemiDet
-    let typeFlows' = typeFlows ++ [TypeFlow (TypeSpec ["wybe"] "bool" []) ParamOut 
-                                  | isSemiDet]
-    let mods' = mods{modifierDetism=if isSemiDet then Det else detism}
-    types <- mapM trans $ typeFlowType <$> typeFlows'
-    return $ ty{higherTypeDetism=mods',
-                higherTypeParams=zipWith TypeFlow types (typeFlowMode <$> typeFlows')}
+    types <- mapM trans $ typeFlowType <$> typeFlows
+    return $ ty{higherTypeParams=zipWith TypeFlow types (typeFlowMode <$> typeFlows)}
 updateHigherOrderTypesM _ ty = 
     shouldnt $ "updateHigherOrderTypesM on " ++ show ty
 
@@ -2477,25 +2481,6 @@ instance Show TypeFlow where
     show (TypeFlow ty fl) = flowPrefix fl ++ ":" ++ show ty
 
 
--- |Return the TypeSpec and FlowDirection of a Param
-paramTypeFlow :: Param -> TypeFlow
-paramTypeFlow (Param{paramType=ty, paramFlow=fl}) = TypeFlow ty fl
-
-
--- |Convert a Param to a Hole Var
-paramToHoleVar :: Param -> Placed Exp
-paramToHoleVar (Param n t f _) = Unplaced $ Typed (Var n f Hole) t Nothing
-
-
--- |Get Closed Param and Typed Var for the given VarName and TypeSpec 
-closedParamVar :: VarName -> TypeSpec -> (Param, Exp)
-closedParamVar n t = (Param n t ParamIn Closed, Typed (Var n ParamIn Closed) t Nothing)
-
-
--- |Set the TypeSpec of a given TypeFlow
-setTypeFlowType :: TypeSpec -> TypeFlow -> TypeFlow
-setTypeFlowType t tf = tf{typeFlowType=t}
-
 
 -- |A formal parameter, including name, type, and flow direction.
 data PrimParam = PrimParam {
@@ -2529,6 +2514,51 @@ setParamType t p = p{paramType=t}
 -- |Set the type of the given PrimParam
 setPrimParamType :: TypeSpec -> PrimParam -> PrimParam
 setPrimParamType t p = p{primParamType=t}
+
+
+-- |Return the TypeSpec and FlowDirection of a Param
+paramTypeFlow :: Param -> TypeFlow
+paramTypeFlow Param{paramType=ty, paramFlow=fl} = TypeFlow ty fl
+
+
+-- |Return the TypeSpec and FlowDirection of a PrimParam
+primParamTypeFlow :: PrimParam -> TypeFlow
+primParamTypeFlow PrimParam{primParamType=ty, primParamFlow=fl} 
+    = TypeFlow ty $ primFlowToFlowDir fl
+
+
+-- |Set the ArgFlowType of the given Param
+setParamArgFlowType :: ArgFlowType -> Param -> Param
+setParamArgFlowType ft p = p{paramFlowType=ft}
+
+
+-- |Convert a Param to a Hole Var
+paramToHoleVar :: Param -> Placed Exp
+paramToHoleVar (Param n t f _) = Unplaced $ Typed (Var n f Hole) t Nothing
+
+
+-- |Convert a PrimParam to a PrimArg
+primParamToArg :: PrimParam -> PrimArg
+primParamToArg (PrimParam nm ty fl ft _) = ArgVar nm ty fl ft False
+
+
+-- |Get Closed Param and Typed Var for the given VarName and TypeSpec 
+closedParamVar :: VarName -> TypeSpec -> (Param, Exp)
+closedParamVar n t = (Param n t ParamIn Closed, Typed (Var n ParamIn Closed) t Nothing)
+
+
+-- |Set the TypeSpec of a given TypeFlow
+setTypeFlowType :: TypeSpec -> TypeFlow -> TypeFlow
+setTypeFlowType t tf = tf{typeFlowType=t}
+
+-- |Return the TypeSpec and FlowDirection of a TypeFlow
+unzipTypeFlow :: TypeFlow -> (TypeSpec, FlowDirection)
+unzipTypeFlow (TypeFlow ty flow) = (ty, flow)
+
+
+-- |Return the TypeSpecs and FlowDirections of a list of TypeFlows
+unzipTypeFlows :: [TypeFlow] -> ([TypeSpec], [FlowDirection])
+unzipTypeFlows = unzip . (unzipTypeFlow <$>)
 
 
 -- |Does the specified flow direction flow in?
@@ -2665,12 +2695,13 @@ flattenedExpFlow (IntValue _)      = ParamIn
 flattenedExpFlow (FloatValue _)    = ParamIn
 flattenedExpFlow (CharValue _)     = ParamIn
 flattenedExpFlow (StringValue _ _) = ParamIn
-flattenedExpFlow (Lambda _ _ _)      = ParamIn
+flattenedExpFlow (Lambda _ _ _)    = ParamIn
 flattenedExpFlow (ProcRef _ _)     = ParamIn
 flattenedExpFlow (Var _ flow _)    = flow
 flattenedExpFlow (Typed exp _ _)   = flattenedExpFlow exp
 flattenedExpFlow otherExp =
     shouldnt $ "Getting flow direction of unflattened exp " ++ show otherExp
+
 
 
 -- | If the input is a constant value, return it (with any Typed wrapper
@@ -3147,12 +3178,8 @@ envParamName = PrimVarName (specialName "env") 0
 
 
 envPrimParam :: PrimParam
-envPrimParam = PrimParam envParamName AnyType FlowIn Closed (ParamInfo False)
+envPrimParam = PrimParam envParamName AnyType FlowIn Hole (ParamInfo False)
 
-
-makeClosureName :: Ident -> Ident
-makeClosureName = specialName2 "closure"
- 
 
 ----------------------------------------------------------------
 --                      Showing Compiler State

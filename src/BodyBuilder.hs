@@ -469,8 +469,7 @@ argExpandedPrim call@(PrimHigherCall id fn args) = do
     fn' <- expandArg fn
     case fn' of
         ArgProcRef ps as _ -> do
-            ps' <- lift $ fromMaybe ps <$> maybeGetClosureOf ps
-            argExpandedPrim $ PrimCall id ps' (as ++ args)
+            translateFromClosure Nothing (PrimHigherCall id fn' args) (const argExpandedPrim)
         _ -> do
             args' <- mapM expandArg args
             return $ PrimHigherCall id fn' args'
@@ -1185,7 +1184,7 @@ renameArg arg@ArgVar{argVarName=name} = do
     return $ arg {argVarName=name'}
 renameArg (ArgProcRef ps args ts) = do
     args' <- mapM renameArg args
-    return $ ArgProcRef ps args ts
+    return $ ArgProcRef ps args' ts
 renameArg arg = return arg
 
 flattenArgs :: [PrimArg] -> [PrimArg]

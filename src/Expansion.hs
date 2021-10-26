@@ -67,13 +67,13 @@ markParamNeededness used _ param@PrimParam{primParamName=nm,
                                            primParamFlow=FlowIn,
                                           primParamFlowType=fTy} =
     param {primParamInfo = (primParamInfo param) {paramInfoUnneeded =
-                                                    Set.notMember nm used 
+                                                    Set.notMember nm used
                                                     && fTy /= Hole}}
 markParamNeededness _ ins param@PrimParam{primParamName=nm,
                                           primParamFlow=FlowOut,
                                           primParamFlowType=fTy} =
     param {primParamInfo = (primParamInfo param) {paramInfoUnneeded =
-                                                    Set.member nm ins 
+                                                    Set.member nm ins
                                                     && fTy /= Hole}}
 
 -- |Type to remember the variable renamings.
@@ -228,7 +228,7 @@ expandPrim (PrimCall id pspec args) pos = do
         def <- lift $ lift $ getProcDef pspec
         case procImpln def of
           ProcDefSrc _ -> shouldnt $ "uncompiled proc: " ++ show pspec
-          ProcDefPrim{procImplnProto = proto, procImplnBody = body}->
+          ProcDefPrim{procImplnProto = proto, procImplnBody = body} ->
             if procInline def
               then inlineCall proto args' body pos
               else do
@@ -248,9 +248,9 @@ expandPrim call@(PrimHigherCall id fn args) pos = do
     fn' <- expandArg fn
     case fn' of
         ArgProcRef ps as _ -> do
-            ps' <- lift $ lift $ fromMaybe ps <$> maybeGetClosureOf ps
-            logExpansion $ "  To call of " ++ show ps'
-            expandPrim (PrimCall id ps' $ as ++ args) pos
+            let expander = flip . (execStateT .) . flip expandPrim
+            st <- get
+            put =<< lift (translateFromClosure Nothing call (`expander` st)) 
         _ -> do
             logExpansion "  As higher call"
             args' <- mapM expandArg args
@@ -264,6 +264,7 @@ expandPrim (PrimForeign lang nm flags args) pos = do
     addInstr (PrimForeign lang nm flags args')  pos
     st' <- get
     logExpansion $ "    renaming = " ++ show (renaming st')
+
 
 
 inlineCall :: PrimProto -> [PrimArg] -> ProcBody -> OptPos -> Expander ()
@@ -296,7 +297,7 @@ expandArg arg@(ArgVar var ty flow _ _) = do
             -- (shouldnt $ "inlining: reference to unassigned variable "
             --  ++ show var)
     else return arg
-expandArg arg@(ArgProcRef ps as ty) = do 
+expandArg arg@(ArgProcRef ps as ty) = do
     as' <- mapM expandArg as
     return $ ArgProcRef ps as' ty
 expandArg arg = return arg

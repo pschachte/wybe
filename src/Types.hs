@@ -639,26 +639,15 @@ unifyTypes' reason ty1@(TypeSpec m1 n1 ps1) ty2@(TypeSpec m2 n2 ps2)
           | m2 `isSuffixOf` m1 = (True,  m1)
           | otherwise          = (False, [])
 unifyTypes' reason (HigherOrderType mods1 ps1) (HigherOrderType mods2 ps2)
-    | modsCheck && sameLength ps1Types ps2Types 
-                && and (zipWith (==) ps1Flows ps2Flows) =
-        HigherOrderType mods' . zipWith (flip TypeFlow) ps1Flows <$>
-            zipWithM (unifyTypes reason) ps1Types ps2Types
+    | sameLength ps1Tys ps2Tys && mods1' == mods2' && and (zipWith (==) ps1Fls ps2Fls) = do
+        logTyped $ "unifying higher types " ++ show ps1Tys ++ "; " ++ show ps2Tys
+        HigherOrderType mods1' . zipWith (flip TypeFlow) ps1Fls <$>
+            zipWithM (unifyTypes reason) ps1Tys ps2Tys
     | otherwise =
         typeError reason >> return InvalidType
     where
-        detism1 = modifierDetism mods1
-        detism2 = modifierDetism mods2
-        detism' = determinismMeet detism1 detism2
-        mods' = mods1{modifierDetism=detism'}
-        modsCheck = mods' == mods2{modifierDetism=detism'}
-                 && (detism1 `determinismLEQ` detism2
-                  || detism2 `determinismLEQ` detism1)
-        ps1' = ps1 ++ [TypeFlow boolType ParamOut | detism1 == SemiDet]
-        ps2' = ps2 ++ [TypeFlow boolType ParamOut | detism2 == SemiDet]
-        ps1Flows = typeFlowMode <$> ps1'
-        ps2Flows = typeFlowMode <$> ps2'
-        ps1Types = typeFlowType <$> ps1'
-        ps2Types = typeFlowType <$> ps2'
+        (mods1', (ps1Tys, ps1Fls)) = typeFlowsToSemiDet mods1 ps1 ps2
+        (mods2', (ps2Tys, ps2Fls)) = typeFlowsToSemiDet mods2 ps2 ps1
 unifyTypes' reason _ _ = typeError reason >> return InvalidType
 
 
@@ -769,6 +758,18 @@ expMode' assigned (Var name flow _) =
 expMode' assigned (Typed expr _ _) = expMode' assigned expr
 expMode' _ expr =
     shouldnt $ "Expression '" ++ show expr ++ "' left after flattening"
+
+
+typeFlowsToSemiDet :: ProcModifiers -> [TypeFlow] -> [TypeFlow] 
+                   -> (ProcModifiers, ([TypeSpec], [FlowDirection]))
+typeFlowsToSemiDet mods@ProcModifiers{modifierDetism=Det} tfs@(_:_) others 
+    | test == TypeFlow boolType ParamOut 
+      && sameLength others semiTFs = (mods{modifierDetism=SemiDet}, unzipTypeFlows semiTFs)
+    | otherwise = (mods, unzipTypeFlows tfs)
+  where 
+    semiTFs = init tfs
+    test = last tfs
+typeFlowsToSemiDet mods tfs _ = (mods, unzipTypeFlows tfs)
 
 
 
@@ -914,14 +915,22 @@ testToBoolFn _ = Nothing
 --  the call appears and a list of all the possible different parameter
 --  list types (a list of types). This type is used to narrow down the
 --  possible call typings.
-data StmtTypings = StmtTypings {
-                    typingStmt::Placed Stmt,
-                    typingDetism::Determinism,
-                    typingArgsTypes::[ProcInfo]}
-                 | HigherTypings {
-                    typingStmt::Placed Stmt,
-                    typingDetism::Determinism
-                 }
+data StmtTypings 
+    = StmtTypings {
+            typingStmt::Placed Stmt,
+            typingDetism::Determinism,
+            typingArgsTypes::[ProcInfo]
+        }
+    | ProcRefTypings {
+            typingStmt::Placed Stmt,
+            typingDetism::Determinism,
+            typingArgTypes::[ProcInfo],
+            typingErrors::[MaybeErr (ProcInfo, Typing)]
+        }
+    | HigherTypings {
+            typingStmt::Placed Stmt,
+            typingDetism::Determinism
+        }
     deriving (Eq,Show)
 
 
@@ -1279,18 +1288,23 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt detism typs):calls)
     logTyped $ "Valid types = " ++ show (snd <$> validTypes)
     logTyped $ "Converted types = " ++ show (boolFnToTest <$> typs)
     case validTypes of
-        [] -> do
-          logTyped "Type error: no valid types for call"
-          typeErrors (concatMap errList matches)
+        [] ->
+            if length pexps == 1 
+            then -- XXXJ try again as though we have a higher call
+                typecheckCalls m name pos calls 
+                    (ProcRefTypings pstmt detism typs matches:residue) True
+            else do 
+                logTyped "Type error: no valid types for call"
+                typeErrors (concatMap errList matches)
         [(match,typing)] -> do
-          put typing
-          logTyping "Resulting typing = "
-          typecheckCalls m name pos calls residue True
+            put typing
+            logTyping "Resulting typing = "
+            typecheckCalls m name pos calls residue True
         _ -> do
-          let matchProcInfos = fst <$> validMatches
-          let stmtTyping' = stmtTyping {typingArgsTypes = matchProcInfos}
-          typecheckCalls m name pos calls (stmtTyping':residue)
-              $ chg || matchProcInfos /= typs
+            let matchProcInfos = fst <$> validMatches
+            let stmtTyping' = stmtTyping {typingArgsTypes = matchProcInfos}
+            typecheckCalls m name pos calls (stmtTyping':residue)
+                $ chg || matchProcInfos /= typs
 typecheckCalls m name pos (stmtTyping@(HigherTypings pstmt detism):calls)
         residue chg = do
     logTyped $ "Type checking higher call " ++ show pstmt
@@ -1312,7 +1326,38 @@ typecheckCalls m name pos (stmtTyping@(HigherTypings pstmt detism):calls)
     then typecheckCalls m name pos calls residue True
     else do
         logTyped "Type error: no valid types for higher call"
-
+typecheckCalls m name pos (stmtTyping@(ProcRefTypings pstmt detism typs elseErrs):calls)
+        residue chg = do
+    logTyped $ "Type checking as proc ref " ++ show pstmt
+    logTyped $ "Type checking call " ++ show pstmt
+    logTyped $ "Calling context is " ++ show detism
+    logTyped $ "Candidate types:\n    " ++ intercalate "\n    " (show <$> typs)
+    let (callee,pexps) = case content pstmt of
+                             ProcCall (First _ callee' _) _ _ pexps' -> (callee',pexps')
+                             noncall -> shouldnt
+                                        $ "typecheckCalls with non-call stmt"
+                                          ++ show noncall
+    actualTypes <- mapM expType pexps
+    logTyped $ "Actual types: " ++ show actualTypes
+    matches <- mapM
+               (matchProcRefTypeList name callee (place pstmt) actualTypes detism)
+               typs
+    let validMatches = catOKs matches
+    let validTypes = nubBy ((==) `on` (procInfoTypes . fst)) validMatches
+    logTyped $ "Valid types = " ++ show (snd <$> validTypes)
+    case validTypes of 
+        [] -> do
+            logTyped "Type error: no valid types for call"
+            typeErrors (concatMap errList matches)
+        [(match,typing)] -> do
+            put typing
+            logTyping "Resulting typing = "
+            typecheckCalls m name pos calls residue True
+        _ -> do
+            let matchProcInfos = fst <$> validMatches
+            let stmtTyping' = stmtTyping {typingArgsTypes = matchProcInfos}
+            typecheckCalls m name pos calls (stmtTyping':residue)
+                $ chg || matchProcInfos /= typs
 
 
 -- |Match up the argument types of a call with the parameter types of the
@@ -1362,7 +1407,6 @@ matchTypeList' callee pos callArgTypes calleeInfo = do
         -- XXX this throws away the types of the callee
         --   {procInfoArgs = List.zipWith TypeFlow matches calleeFlows},
           {procInfoArgs = List.zipWith TypeFlow calleeTypes calleeFlows},
-
           typing)
     else return $ Err [ReasonArgType callee n pos | n <- mismatches]
 
@@ -1371,55 +1415,25 @@ higherCallCheck caller callFn pos callerTypeFlows detism = do
     callFnTy <- expType callFn >>= ultimateType
     let higherArgTy = HigherOrderType defaultProcModifiers{modifierDetism=detism} 
                                       callerTypeFlows
-    let reason = ReasonHigher caller (content callFn) pos
-    void $ case callFnTy of
-            HigherOrderType calleeMods calleeTypeFlows
-                | sameLength calleeTypeFlows callerTypeFlows
-                -> unifyTypes reason callFnTy higherArgTy{higherTypeDetism=calleeMods}
-                | modifierDetism calleeMods == SemiDet 
-                && length calleeTypeFlows == length callerTypeFlows + 1 
-                && not (List.null callerTypeFlows)
-                && last callerTypeFlows == TypeFlow boolType ParamOut
-                -> unifyTypes reason callFnTy semiDetTy
-                | modifierDetism calleeMods == Det
-                && length calleeTypeFlows == length callerTypeFlows - 1
-                -> unifyTypes reason callFnTy detTy
-              where
-                detTy = HigherOrderType calleeMods{modifierDetism=Det} 
-                            $ callerTypeFlows ++ [TypeFlow boolType ParamOut]
-                semiDetTy = HigherOrderType calleeMods{modifierDetism=SemiDet} 
-                            $ init callerTypeFlows
-            TypeVariable{}
-                -> unifyTypes reason callFnTy higherArgTy
-            AnyType 
-                -> unifyTypes reason callFnTy higherArgTy
-            _ -> return InvalidType
-    -- unless (ty /= InvalidType) $ typeError reason
-            
-    -- let detism' = case callFnTy of
-    --                  HigherOrderType ProcModifiers{modifierDetism=d} _ -> d
-    --                  _ -> detism
-    -- let higherArgTy = HigherOrderType defaultProcModifiers{modifierDetism=detism'} 
-    --                                   typeFlows
-    -- logTyped $ "Matching higher order types " ++ show higherArgTy ++ " with "
-    --             ++ show callFnTy
-    -- -- void $ case callFnTy of
-    -- --     HigherOrderType detism' calleeTypeFlows ->
-    -- --         let calleeFlows = typeFlowMode <$> calleeTypeFlows
-    -- --             callerFlows = typeFlowMode <$> typeFlows
-    -- --         in if not $ sameLength calleeTypeFlows typeFlows
-    -- --         then typeError $ ReasonHigherArity (content callFn) pos
-    -- --                          (length calleeTypeFlows) (length typeFlows)
-    -- --         else when (or (zipWith (/=) calleeFlows callerFlows)) 
-    -- --              $ typeErrors $ [ ReasonHigherFlow pos i flow expected
-    -- --                             | (i, flow, expected) <- zip3 [1..] calleeFlows
-    -- --                                                                 callerFlows
-    -- --                             , flow /= expected ]
-    -- --     _ -> return ()
+    void $ unifyTypes (ReasonHigher caller (content callFn) pos) callFnTy higherArgTy
 
-    -- ty <- unifyTypes reason callFnTy higherArgTy
-    -- unless (ty /= InvalidType) $ typeError reason
+matchProcRefTypeList :: Ident -> Ident -> OptPos -> [TypeSpec] -> Determinism
+                     -> ProcInfo -> Typed (MaybeErr (ProcInfo,Typing))
+matchProcRefTypeList caller callee pos [argTy] detismContext calleeInfo = do
+    typing0 <- get
+    let args = procInfoArgs calleeInfo
+    procTy <- expType (Unplaced $ ProcRef (procInfoProc calleeInfo) []) >>= ultimateType
+    -- XXXJ
+    unifyTypes (undefined) procTy argTy
+    typing <- get
+    valid <- validTyping
+    put typing0
+    return $ if valid 
+             then OK (calleeInfo, typing)
+             else Err []
 
+matchProcRefTypeList caller callee pos _ _ _ = do
+    return $ Err []
 
 
 -- | Refresh all type variables in a list of TypeSpecs.
@@ -1657,7 +1671,7 @@ overloadErr :: StmtTypings -> TypeError
 overloadErr StmtTypings{typingStmt=call,typingArgsTypes=candidates} =
     -- XXX Need to give list of matching procs
     ReasonOverload (procInfoProc <$> candidates) $ place call
-overloadErr HigherTypings{} = shouldnt "overloadErr on higher"
+overloadErr typs = shouldnt $ "overloadErr on " ++ show typs
 
 
 -- |Given type assignments to variables, resolve modes in a proc body, building
@@ -1728,17 +1742,17 @@ modecheckStmt m name defPos assigned detism tmpCount final
     stmt@(ProcCall (First cmod cname pid) d resourceful args) pos = do
     logTyped $ "Mode checking call   : " ++ show stmt
     logTyped $ "    with assigned    : " ++ show assigned
-
+    
     let callVar = Var cname ParamIn Ordinary
     callVarType <- expType (Unplaced callVar) >>= ultimateType
-    -- XXXXXX
+    -- check Stmt is actually a higher order call 
     if isHigherOrder callVarType && List.null cmod && isNothing pid
     then modecheckStmt m name defPos assigned detism tmpCount final
             (ProcCall (Higher (maybePlace (Typed callVar callVarType Nothing) pos))
                 d resourceful args) pos
     else do 
         callInfos <- lift $ callProcInfos Set.empty (maybePlace stmt pos) detism
-                         <&> typingArgsTypes
+                            <&> typingArgsTypes
         -- Find arg types and expand type variables
         (args', tmpCount') <- modeCheckExps m name defPos assigned detism tmpCount args
         let stmt' = ProcCall (First cmod cname pid) d resourceful args'
@@ -1746,15 +1760,8 @@ modecheckStmt m name defPos assigned detism tmpCount final
         logTyped $ "    actual types     : " ++ show actualTypes
         let actualModes = List.map (expMode assigned) args'
         logTyped $ "    actual modes     : " ++ show actualModes
-        let flowErrs = [ReasonArgFlow cname num pos
-                    | ((mode,avail,_),num) <- zip actualModes [1..]
-                    , not avail && flowsIn mode]
-        if not $ List.null flowErrs -- Using undefined var as input?
-            then do
-                logTyped $ "Unpreventable mode errors: " ++ show flowErrs
-                typeErrors flowErrs
-                return ([],assigned,tmpCount')
-            else case (cmod, cname, actualModes, args') of
+        checkFlowErrors False False cname pos actualModes ([],assigned,tmpCount')
+          $ case (cmod, cname, actualModes, args') of
             -- Special cases to handle = as assignment when one argument is
             -- known to be defined and the other is an output or unknown.
             ([], "=", [(ParamIn,True,_),(ParamOut,_,_)],[arg1,arg2]) ->
@@ -1787,9 +1794,9 @@ modecheckStmt m name defPos assigned detism tmpCount final
                         finaliseCall m name assigned detism resourceful tmpCount'
                                     final pos args' match stmt'
                     ([],[]) -> do
-                        logTyped $ "Mode errors in call:  " ++ show flowErrs
-                        typeError $ ReasonUndefinedFlow cname pos
-                        return ([],assigned,tmpCount')
+                        let stmt' = ProcCall (First cmod cname pid) d resourceful args'
+                        tryFinaliseProcRef m name defPos assigned detism 
+                            tmpCount' final stmt' pos callInfos
 modecheckStmt m name defPos assigned detism tmpCount final
   stmt@(ProcCall (Higher fn) d resourceful args) pos = do 
     logTyped $ "Mode checking higher : " ++ show stmt
@@ -1802,12 +1809,9 @@ modecheckStmt m name defPos assigned detism tmpCount final
     let flowErrs = [ReasonArgFlow (show $ innerExp $ content fn) num pos
                    | ((mode,avail,_),num) <- zip actualModes [0..]
                    , not avail && flowsIn mode]
-    if not $ List.null flowErrs -- Using undefined var as input?
-    then do
-        logTyped $ "Unpreventable mode errors: " ++ show flowErrs
-        typeErrors flowErrs
-        return ([],assigned,tmpCount')
-    else do
+    checkFlowErrors False True (show $ innerExp $ content fn) 
+                    pos actualModes ([],assigned,tmpCount')
+      $ do
         let typeflows = List.zipWith TypeFlow actualTypes
                             $ sel1 <$> actualModes
         let (fn':args') = List.zipWith setPExpTypeFlow typeflows fnArgs'
@@ -1826,15 +1830,9 @@ modecheckStmt m name defPos assigned detism tmpCount final
     (args',tmpCount') <- modeCheckExps m name defPos assigned detism tmpCount args
     actualTypes <- mapM (expType >=> ultimateType) args'
     let actualModes = List.map (expMode assigned) args'
-    let flowErrs = [ReasonArgFlow ("foreign " ++ lang ++ " " ++ cname) num pos
-                   | ((mode,avail,_yy),num) <- zip actualModes [1..]
-                   , not avail && mode == ParamIn]
-    if not $ List.null flowErrs -- Using undefined var as input?
-        then do
-            logTyped "mode error in foreign call"
-            typeErrors flowErrs
-            return ([],assigned,tmpCount')
-        else do
+    checkFlowErrors True False ("foreign " ++ lang ++ " " ++ cname) 
+                    pos actualModes ([],assigned,tmpCount')
+      $ do
             let typeflows = List.zipWith TypeFlow actualTypes
                             $ sel1 <$> actualModes
             logTyped $ "    types and modes = " ++ show typeflows
@@ -1966,7 +1964,6 @@ modecheckStmt m name defPos assigned detism tmpCount final
     logTyped $ "Mode checking continue with assigned=" ++ show assigned
     return ([maybePlace Next pos],bindingStateAfterNext assigned, tmpCount)
 
-
 modeCheckExps :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism
              -> Int -> [Placed Exp] -> Typed ([Placed Exp],Int)
 modeCheckExps _ _ _ _ _ tmpCount [] = return ([], tmpCount)
@@ -1975,6 +1972,7 @@ modeCheckExps m name pos assigned detism tmpCount (pexp:pexps) = do
     (pexp',tmpCount') <-
         placedApply (modeCheckExp m name pos assigned detism tmpCount)
             pexp
+    logTyped $ "Mode check exp resulted in " ++ show (content pexp')
     (pexps',tmpCount'')
         <- modeCheckExps m name pos assigned detism tmpCount pexps
     return (pexp':pexps',max tmpCount' tmpCount'')
@@ -1982,21 +1980,79 @@ modeCheckExps m name pos assigned detism tmpCount (pexp:pexps) = do
 -- |Mode check stmts inside a lambda expression
 modeCheckExp :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism
              -> Int -> Exp -> OptPos -> Typed (Placed Exp,Int)
-modeCheckExp m name defPos assigned detism tmpCount
-        (Lambda mods@ProcModifiers{modifierDetism=detism'} params ss) pos = do
+modeCheckExp m name defPos assigned _ tmpCount
+        exp@(Lambda mods@ProcModifiers{modifierDetism=detism} params ss) pos = do
+    logTyped $ "Mode checking lambda " ++ show exp
     let inArgs = List.foldl collectInParams Set.empty params
-    (ss',_,tmpCounts) <- modecheckStmts m name defPos (addBindings inArgs assigned)
-                                    detism' tmpCount True ss
+    (ss',_,tmpCount') <- modecheckStmts m name defPos (addBindings inArgs assigned)
+                             detism tmpCount True ss
     params' <- updateParamTypes params
-    return (maybePlace (Lambda mods params' ss') pos, tmpCount)
+    return (maybePlace (Lambda mods params' ss') pos, tmpCount')
 modeCheckExp m name defPos assigned detism tmpCount
         (Typed exp ty cast) pos = do
     (exp', tmpCount') <- modeCheckExp m name defPos assigned
                              detism tmpCount exp pos
-    return $ (maybePlace (Typed (content exp') ty cast) pos, tmpCount')
+    return (maybePlace (Typed (content exp') ty cast) pos, tmpCount')
 modeCheckExp m name defPos assigned detism tmpCount exp pos =
-    return $ (maybePlace exp pos, tmpCount)
+    return (maybePlace exp pos, tmpCount)
 
+
+checkFlowErrors :: Bool -> Bool -> String -> OptPos -> [(FlowDirection, Bool, Maybe VarName)] 
+                -> a -> Typed a -> Typed a
+checkFlowErrors isForeign isHigherOrder name pos flows thn doEls = do
+    let numbering = [if isHigherOrder then 0 else 1 ..]
+    let flowErrs = [ReasonArgFlow name num pos
+                   | ((mode,avail,_),num) <- zip flows numbering
+                   , not avail && (if isForeign
+                                   then mode == ParamIn
+                                   else flowsIn mode)]
+    if List.null flowErrs
+    then doEls
+    else do 
+        logTyped "mode error in foreign call"
+        typeErrors flowErrs
+        return thn
+
+
+tryFinaliseProcRef :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism 
+                   -> Int -> Bool -> Stmt -> OptPos -> [ProcInfo]
+                   -> Typed ([Placed Stmt],BindingState,Int)
+tryFinaliseProcRef m name defPos assigned detism tmpCount final
+    stmt@(ProcCall (First cmod cname pid) d resourceful args) pos callInfos = do
+    actualTypes <- mapM (expType >=> ultimateType) args
+    correctProcs <- matchProcType actualTypes callInfos 
+    case (correctProcs, unPlace <$> args, actualTypes) of
+        ([procSpec], [(arg@(Var varName ParamOut argFlow),argPos)], [ty]) 
+          | isHigherOrder ty -> do
+            let procRef = ProcRef procSpec []
+            procTy <- expType (Unplaced procRef) >>= ultimateType
+            let procRefArg = Unplaced $ Typed procRef procTy Nothing
+            let tmpVar = maybePlace (Var varName ParamOut argFlow) argPos 
+            modecheckStmt m name defPos assigned detism tmpCount final 
+                (ForeignCall "llvm" "move" [] [procRefArg, tmpVar]) pos
+        (_:_, [(Var _ ParamOut _,_)], _) -> do
+            typeError $ ReasonOverload correctProcs pos
+            return ([],assigned,tmpCount)
+        _ -> do 
+            logTyped "Mode errors in call"
+            typeError $ ReasonUndefinedFlow cname pos
+            return ([],assigned,tmpCount)
+tryFinaliseProcRef _ _ _ _ _ _ _ stmt _ _ 
+    = shouldnt $ "tryFinaliseProcRef on " ++ show stmt
+
+
+matchProcType :: [TypeSpec] -> [ProcInfo] -> Typed [ProcSpec]
+matchProcType [ty] infos = catMaybes <$> mapM (matchProcType' ty) infos
+matchProcType _ _ = return []
+
+
+matchProcType' :: TypeSpec -> ProcInfo -> Typed (Maybe ProcSpec)
+matchProcType' ty procInfo = do 
+    mbErr <- matchProcRefTypeList "" "" Nothing [ty] Det procInfo
+    return $ case mbErr of
+        OK _ -> Just $ procInfoProc procInfo
+        Err _ -> Nothing
+    
 
 
 -- |Add in-flowing hole to a set of varnames
