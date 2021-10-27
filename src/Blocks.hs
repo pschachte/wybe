@@ -528,9 +528,6 @@ codegenForkBody var _ _ =
 cgen :: Prim -> Codegen ()
 cgen prim@(PrimCall callSiteID pspec args) = do
     logCodegen $ "Compiling " ++ show prim
-    thisMod <- lift getModuleSpec
-    fileMod <- lift $ getModule modRootModSpec
-    let (ProcSpec mod name _ _) = pspec
     let nm = LLVMAST.Name $ toSBString $ show pspec
     -- Find the prototype of the pspec being called
     -- and match it's parameters with the args here
@@ -541,8 +538,7 @@ cgen prim@(PrimCall callSiteID pspec args) = do
     logCodegen $ "Filtered args = " ++ show filteredArgs
 
     -- if the call is to an external module, declare it
-    unless (thisMod == mod || maybe False (`List.isPrefixOf` mod) fileMod)
-        (addExtern $ PrimCall callSiteID pspec filteredArgs)
+    addExternProcRef pspec
 
     let (inArgs,outArgs) = partitionArgs filteredArgs
     logCodegen $ "In args = " ++ show inArgs
