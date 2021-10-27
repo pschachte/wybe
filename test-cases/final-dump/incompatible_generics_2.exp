@@ -1,0 +1,5 @@
+Error detected during type checking of module(s) incompatible_generics_2
+[91mfinal-dump/incompatible_generics_2.wybe:1:29: Type error in call to +, argument 1
+[0m[91mfinal-dump/incompatible_generics_2.wybe:1:29: Type error in call to +, argument 2
+[0m[91mfinal-dump/incompatible_generics_2.wybe:1:29: Type error in call to +, argument 3
+[0m

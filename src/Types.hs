@@ -592,25 +592,26 @@ unifyTypes' reason ty1@(TypeVariable RealTypeVar{}) ty2@(TypeVariable RealTypeVa
     | ty1 == ty2 = return ty1
     | otherwise  = invalidTypeError reason
 unifyTypes' reason ty1@TypeVariable{} ty2@TypeVariable{} = return $ max ty1 ty2
-unifyTypes' reason TypeVariable{} ty = return ty
-unifyTypes' reason ty TypeVariable{} = return ty
+unifyTypes' reason (TypeVariable RealTypeVar{}) _  = invalidTypeError reason
+unifyTypes' reason (TypeVariable FauxTypeVar{}) ty = return ty
+unifyTypes' reason _  (TypeVariable RealTypeVar{}) = invalidTypeError reason
+unifyTypes' reason ty (TypeVariable FauxTypeVar{}) = return ty
 unifyTypes' reason ty1@Representation{} ty2@Representation{}
     | ty1 == ty2 = return ty1
     | otherwise  = invalidTypeError reason
 unifyTypes' reason ty1@(Representation rep1) ty2@TypeSpec{} = do
     rep2 <- lift $ lookupTypeRepresentation ty2
     if Just rep1 == rep2
-        then return ty2
-        else invalidTypeError reason
+    then return ty2
+    else invalidTypeError reason
 unifyTypes' reason ty1@TypeSpec{} ty2@(Representation rep2) = do
     rep1 <- lift $ lookupTypeRepresentation ty1
     if rep1 == Just rep2
-        then return ty1
-        else invalidTypeError reason
+    then return ty1
+    else invalidTypeError reason
 unifyTypes' reason ty1@(TypeSpec m1 n1 ps1) ty2@(TypeSpec m2 n2 ps2)
-    | n1 == n2 && modsMatch && length ps1 == length ps2 = do
-        ps <- zipWithM (unifyTypes reason) ps1 ps2
-        return $ TypeSpec m n1 ps
+    | n1 == n2 && modsMatch && sameLength ps1 ps2 = 
+        TypeSpec m n1 <$> zipWithM (unifyTypes reason) ps1 ps2
     | otherwise = invalidTypeError reason
   where (modsMatch, m)
           | m1 `isSuffixOf` m2 = (True,  m2)
