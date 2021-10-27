@@ -266,20 +266,22 @@ flattenStmt' stmt@(ProcCall (First [] "=" id) Det res [arg1,arg2]) pos detism = 
     logFlatten $ "Flattening assignment with outputs " ++ show arg1Vars
                  ++ " and " ++ show arg2Vars
     case (arg1content, arg2content) of
-      (Var _ flow1 _, _) | flowsOut flow1 && Set.null arg2Vars -> do
+      (Var var flow1 _, _) | flowsOut flow1 && Set.null arg2Vars -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
-        flattenAssignment True arg1 arg2 pos
-      (_, Var _ flow2 _) | flowsOut flow2 && Set.null arg1Vars -> do
+        arg1' <- flattenHole (content arg1) AnyType Nothing (place arg1)
+        flattenAssignment (expVar $ content arg1') arg1' arg2 pos
+      (_, Var var flow2 _) | flowsOut flow2 && Set.null arg1Vars -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
-        flattenAssignment False arg2 arg1 pos
+        arg1' <- flattenHole (content arg1) AnyType Nothing (place arg1)
+        flattenAssignment var arg2 arg1' pos
       (Fncall mod name args, _)
         | not (Set.null arg1Vars) && Set.null arg2Vars -> do
         let stmt' = ProcCall (First mod name Nothing) Det False (args++[arg2])
         flattenStmt stmt' pos detism
       (_, Fncall mod name args)
         | not (Set.null arg2Vars) && Set.null arg1Vars -> do
-        -- XXX this may cause unnumbered holes to be reordered
-        let stmt' = ProcCall  (First mod name Nothing) Det False (args++[arg1])
+        arg1' <- flattenHole (content arg1) AnyType Nothing (place arg1)
+        let stmt' = ProcCall  (First mod name Nothing) Det False (args++[arg1'])
         flattenStmt stmt' pos detism
       (_,_) | Set.null arg1Vars && Set.null arg2Vars -> do
         logFlatten $ "Leaving equality test alone: " ++ showStmt 4 stmt
@@ -444,14 +446,12 @@ flattenStmt' Break pos _ = emit pos Break
 flattenStmt' Next pos _ = emit pos Next
 
 
-flattenAssignment :: Bool -> Placed Exp -> Placed Exp -> OptPos -> Flattener ()
-flattenAssignment flipped varArg valArg pos = do
-    let reverser = if flipped then reverse else id
-    [valArg', varArg'] <- reverser <$> flattenStmtArgs (reverser [valArg, varArg]) pos
-    let instr = ForeignCall "llvm" "move" [] [valArg', varArg']
+flattenAssignment :: Ident -> Placed Exp -> Placed Exp -> OptPos -> Flattener ()
+flattenAssignment var varArg value pos = do
+    [valueArg] <- flattenStmtArgs [value] pos
+    let instr = ForeignCall "llvm" "move" [] [valueArg, varArg]
     logFlatten $ "  transformed to " ++ showStmt 4 instr
-    let var = content $ expVar <$> varArg'
-    noteVarIntro var
+    noteVarDef var
     emit pos instr
     flushPostponed
 
@@ -515,41 +515,8 @@ flattenExp expr@(Var name dir argFlow) ty castFrom pos = do
         let expr' = typeAndPlace expr ty castFrom pos
         logFlatten $ "  Arg flattened to " ++ show expr'
         return expr'
-flattenExp expr@(HoleVar mbNum dir) ty castFrom pos = do
-    logFlatten $ "  Flattening hole " ++ show expr
-    holes <- gets holeState
-    let HoleState _ lambdas count params = holes
-    (num, count') <- case (mbNum, count) of
-        (Nothing, Just n) -> do
-            let n' = n + 1
-            return (n', Just n')
-        (Just n, _) | fromMaybe 0 count == 0 -> do
-            return (n, Nothing)
-        _ -> do 
-            lift $ message Error 
-                    "Mixed use of numbered and un-numbered holes" pos
-            return (-1, count)
-    let name = specialName2 (show lambdas) (show num)
-    let var = Var name dir Hole
-    let paramDir = paramFlow <$> Map.lookup num params
-    let paramDir' = if fromMaybe dir paramDir == dir 
-                    then dir 
-                    else ParamInOut
-    let param = Param name AnyType paramDir' Hole
-    modify (\s -> s{holeState=holes{holeCount=count',
-                                    params=Map.insert num param params}})
-    if lambdas == 0
-    then do
-        lift $ message Error
-               ("Hole @" ++ maybe "" show mbNum
-                ++ " outside of lambda expression")
-               pos
-        flattenExp var ty castFrom pos
-    else do
-        noteVarIntro name
-        expr' <- flattenExp var ty castFrom pos
-        logFlatten $ "  Hole flattened to " ++ show var ++ " -> " ++ show expr'
-        return expr'
+flattenExp expr@(HoleVar _ _) ty castFrom pos = 
+    flattenHole expr ty castFrom pos
 flattenExp expr@(ProcRef ms es) ty castFrom pos = do
     es' <- mapM (flattenPExp . Unplaced) es
     return $ typeAndPlace (ProcRef ms (content <$> es')) ty castFrom pos
@@ -638,6 +605,44 @@ flattenCall stmtBuilder isForeign ty castFrom pos exps = do
                      ty castFrom pos]
     return $ Unplaced $ maybeType (Var resultName varflow $ Implicit pos)
                        ty castFrom
+
+flattenHole :: Exp -> TypeSpec -> Maybe TypeSpec -> OptPos
+            -> Flattener (Placed Exp)
+flattenHole expr@(HoleVar mbNum dir) ty castFrom pos = do
+    logFlatten $ "  Flattening hole " ++ show expr
+    holes <- gets holeState
+    let HoleState _ lambdas count params = holes
+    (num, count') <- case (mbNum, count) of
+        (Nothing, Just n) -> 
+            let n' = n + 1
+            in return (n', Just n')
+        (Just n, _) | fromMaybe 0 count == 0 -> do
+            return (n, Nothing)
+        _ -> do 
+            lift $ message Error "Mixed use of numbered and un-numbered holes" pos
+            return (-1, count)
+    let name = specialName2 (show lambdas) (show num)
+    let var = Var name dir Hole
+    let paramDir = paramFlow <$> Map.lookup num params
+    let paramDir' = if fromMaybe dir paramDir == dir 
+                    then dir 
+                    else ParamInOut
+    let param = Param name AnyType paramDir' Hole
+    modify (\s -> s{holeState=holes{holeCount=count',
+                                    params=Map.insert num param params}})
+    if lambdas == 0
+    then do
+        lift $ message Error
+               ("Hole @" ++ maybe "" show mbNum ++ " outside of lambda expression")
+               pos
+        flattenExp var ty castFrom pos
+    else do
+        noteVarIntro name
+        expr' <- flattenExp var ty castFrom pos
+        logFlatten $ "  Hole flattened " ++ show var ++ " -> " ++ show expr'
+        return expr'
+flattenHole expr _ _ pos = return $ maybePlace expr pos
+
 
 
 typeAndPlace :: Exp -> TypeSpec -> Maybe TypeSpec -> OptPos -> Placed Exp
