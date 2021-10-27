@@ -584,7 +584,9 @@ hoistClosure isRef (Typed exp ty cast) pos = do
     return $ maybePlace (Typed exp' ty cast) pos
 hoistClosure isRef exp@(Lambda mods params pstmts) pos = do
     logUnbranch $ "Creating procref for " ++ show exp
-    let ProcModifiers{modifierDetism=detism} = mods
+    let ProcModifiers detism inlining impurity resourceful unknown conflict = mods
+    lift $ checkConflictingMods "anonymous procedure" pos unknown
+    lift $ checkUnknownMods "anonymous procedure" pos conflict
     name <- newProcName
     let holeVars = paramToHoleVar <$> params
     logUnbranch $ "  With params " ++ show holeVars

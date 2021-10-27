@@ -92,6 +92,7 @@ module AST (
   ProcModifiers(..), defaultProcModifiers, setDetism, setInline, setImpurity,
   showProcModifiers, Inlining(..), Impurity(..), Resourcefulness(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
+  checkConflictingMods, checkUnknownMods,
   expHoles, orderedHoles,
   specialChar, specialName, specialName2, outputVariableName, outputStatusName,
   envParamName, envPrimParam,
@@ -1119,17 +1120,8 @@ addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
     let name = procProtoName proto
     let ProcModifiers detism inlining impurity resourceful unknown conflict = mods
-    mapM_ (\m -> message Error
-                ("Unknown proc modifier '" ++ m
-                 ++ "' in declaration of " ++ name)
-                 pos)
-           unknown
-    mapM_ (\m -> message Error
-                ("Proc modifier '" ++ m
-                 ++ "' conflicts with earlier modifier in declaration of "
-                 ++ name)
-                 pos)
-           conflict
+    checkUnknownMods name pos unknown
+    checkConflictingMods name pos conflict
     unless (resourceful == Resourceless)
            $ errmsg pos ("Proc modifier '" ++ resourcefulName resourceful 
                          ++ "' is not allowed for a procedure declaration")
@@ -1162,6 +1154,18 @@ addProcDef procDef = do
     logAST $ "Adding definition of " ++ show spec ++ ":" ++
       showProcDef 4 procDef
     return spec
+
+
+checkUnknownMods :: ProcName -> OptPos -> [String] -> Compiler ()
+checkUnknownMods name pos = 
+    mapM_ (\m -> message Error ("Unknown proc modifier '" ++ m 
+                                ++ "' in declaration of " ++ name) pos)
+           
+checkConflictingMods :: ProcName -> OptPos -> [String] -> Compiler ()
+checkConflictingMods name pos = 
+    mapM_ (\m -> message Error ("Proc modifier '" ++ m
+                                ++ "' conflicts with earlier modifier in declaration of "
+                                ++ name) pos)
 
 
 getParams :: ProcSpec -> Compiler [Param]
