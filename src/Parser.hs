@@ -1098,12 +1098,14 @@ stmtExprToCtorDecl other =
 
 -- | Translate a StmtExpr to a ctor field
 stmtExprToCtorField :: TranslateTo Param
-stmtExprToCtorField (Call _ [] ":" ParamIn [Call _ [] name flow [],ty]) = do
+stmtExprToCtorField (Call _ [] ":" ParamIn [Call _ [] name ParamIn [],ty]) = do
     ty' <- stmtExprToTypeSpec ty
-    return $ Param name ty' flow Ordinary
-stmtExprToCtorField (Call pos mod name flow params) = do
+    return $ Param name ty' ParamIn Ordinary
+stmtExprToCtorField (Call pos [] name ParamOut []) = do
+    return $ Param "" (TypeVariable name) ParamIn Ordinary
+stmtExprToCtorField (Call pos mod name ParamIn params) = do
     tyParams <- mapM stmtExprToTypeSpec params
-    return $ Param "" (TypeSpec mod name tyParams) flow Ordinary
+    return $ Param "" (TypeSpec mod name tyParams) ParamIn Ordinary
 stmtExprToCtorField other =
     syntaxError (stmtExprPos other) $ "invalid constructor field " ++ show other
 
