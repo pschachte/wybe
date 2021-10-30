@@ -22,7 +22,9 @@ module AST (
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
   TypeProto(..), TypeSpec(..), typeVarSet, TypeVarName,
-  genericType, higherOrderType, isHigherOrder, updateHigherOrderTypesM, typeModule,
+  genericType, higherOrderType, isHigherOrder, 
+  isResourcefulHigherOrder, 
+  updateHigherOrderTypesM, typeModule,
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), 
   paramTypeFlow, primParamTypeFlow, setParamArgFlowType, 
@@ -59,8 +61,8 @@ module AST (
   ProcAnalysis(..), emptyProcAnalysis,
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, ResourceDef(..), FlowDirection(..),
-  argFlowDirection, argType, setArgType, argDescription, 
-  setParamType, setPrimParamType, setTypeFlowType,
+  argFlowTypeIsResource, argFlowDirection, argType, setArgType, argDescription, 
+  setParamType, paramIsResourceful, isResourcePrimParam, setPrimParamType, setTypeFlowType,
   flowsIn, flowsOut, primFlowToFlowDir,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, procCallToExp,
@@ -1065,12 +1067,13 @@ expectedImpurity _ = Impure             -- Otherwise, OK for defn to be impure
 
 
 data Resourcefulness = Resourceless
-                     | Resourceful (Maybe (Set ResourceSpec, Set ResourceSpec))   
+                     | Resourceful
     deriving (Eq, Ord, Generic)
 
 resourcefulName :: Resourcefulness -> String
 resourcefulName Resourceless = ""
-resourcefulName (Resourceful rs) = "resourceful" ++ maybe "" showResourceSets rs
+resourcefulName Resourceful  = "resourceful"
+
 
 showResourceSets :: (Set ResourceSpec, Set ResourceSpec) -> String
 showResourceSets (ins, outs) = "{" ++ showSet ins ++ ";" ++ showSet outs ++ "}"
@@ -1845,10 +1848,14 @@ procCallCount proc = Map.foldr (+) 0 $ procCallers proc
 
 -- | What is the Impurity of the given Prim?
 primImpurity :: Prim -> Compiler Impurity
-primImpurity (PrimCall _ pspec _) = do
-    def <- getProcDef pspec
-    return $ procImpurity def
-primImpurity (PrimHigherCall _ _ _) = return Pure
+primImpurity (PrimCall _ pspec _) = procImpurity <$> getProcDef pspec
+primImpurity (PrimHigherCall _ fn _) 
+    = case fn of 
+        ArgProcRef pspec _ _ -> procImpurity <$> getProcDef pspec 
+        ArgVar _ (HigherOrderType ProcModifiers{modifierResourceful=resful,
+                                                modifierImpurity=purity} _) _ _ _
+            -> return $ max purity $ if resful == Resourceful then Impure else Pure
+        _ -> return Pure
 primImpurity (PrimForeign _ _ flags _) =
     return $ flagsImpurity flags
 
@@ -2397,6 +2404,13 @@ isHigherOrder :: TypeSpec -> Bool
 isHigherOrder HigherOrderType{} = True
 isHigherOrder _                 = False
 
+isResourcefulHigherOrder :: TypeSpec -> Bool
+isResourcefulHigherOrder (HigherOrderType ProcModifiers{modifierResourceful=res} tfs) = 
+    res == Resourceful || any isResourcefulHigherOrder (typeFlowType <$> tfs)
+isResourcefulHigherOrder (TypeSpec _ _ tys) = 
+    any isResourcefulHigherOrder tys
+isResourcefulHigherOrder _ = False
+
 updateHigherOrderTypesM :: Monad m => (TypeSpec -> m TypeSpec) -> TypeSpec -> m TypeSpec
 updateHigherOrderTypesM trans ty@HigherOrderType{higherTypeDetism=mods,
                                                  higherTypeParams=typeFlows} = do
@@ -2514,6 +2528,12 @@ data PrimFlow = FlowIn | FlowOut
 setParamType :: TypeSpec -> Param -> Param
 setParamType t p = p{paramType=t}
 
+paramIsResourceful :: Param -> Bool
+paramIsResourceful (Param _ ty _ _) = isResourcefulHigherOrder ty
+
+isResourcePrimParam :: PrimParam -> Bool
+isResourcePrimParam (PrimParam _ _ _ ft _) = argFlowTypeIsResource ft
+
 
 -- |Set the type of the given PrimParam
 setPrimParamType :: TypeSpec -> PrimParam -> PrimParam
@@ -2538,6 +2558,7 @@ setParamArgFlowType ft p = p{paramFlowType=ft}
 
 -- |Convert a Param to a Hole Var
 paramToHoleVar :: Param -> Placed Exp
+paramToHoleVar (Param n t f res@(Resource _)) = Unplaced $ Typed (Var n f res) t Nothing
 paramToHoleVar (Param n t f _) = Unplaced $ Typed (Var n f Hole) t Nothing
 
 
@@ -2917,6 +2938,10 @@ instance Show ArgFlowType where
     show (Resource _) = "#"
     show Hole = "@"
     show Closed = "^"
+
+argFlowTypeIsResource :: ArgFlowType -> Bool 
+argFlowTypeIsResource (Resource _) = True
+argFlowTypeIsResource _            = False
 
 
 -- |The dataflow direction of an actual argument.

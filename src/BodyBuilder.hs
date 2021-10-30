@@ -467,12 +467,22 @@ argExpandedPrim call@(PrimCall id pspec args) = do
     return $ PrimCall id pspec args''
 argExpandedPrim call@(PrimHigherCall id fn args) = do
     fn' <- expandArg fn
-    case fn' of
-        ArgProcRef ps as _ -> do
-            translateFromClosure Nothing (PrimHigherCall id fn' args) (const argExpandedPrim)
-        _ -> do
+    let expandAsHigher = do
             args' <- mapM expandArg args
             return $ PrimHigherCall id fn' args'
+    case fn' of
+        ArgProcRef ps as _-> do        
+            params <- lift $ primProtoParams <$> getProcPrimProto ps 
+            if any isResourcePrimParam params
+            -- then expandAsHigher
+            then do
+                args' <- mapM expandArg args
+                return $ PrimHigherCall id fn args'
+            else
+                translateFromClosure Nothing (PrimHigherCall id fn' args) 
+                                            (const argExpandedPrim)
+                    >>= argExpandedPrim
+        _ -> expandAsHigher
 argExpandedPrim (PrimForeign lang nm flags args) = do
     args' <- mapM expandArg args
     return $ simplifyForeign lang nm flags args'
@@ -1165,7 +1175,8 @@ bkwdBuildStmt defs prim pos = do
         -- Filter out pure instructions that produce no needed outputs
         purity <- lift $ primImpurity prim
         when ( purity > Pure 
-             || any (`Set.member` usedLater) (argVarName <$> outs)) $ do
+             || any (`Set.member` usedLater) (argVarName <$> outs)
+             || any (isResourcefulHigherOrder . argType) args') $ do
           -- XXX Careful:  probably shouldn't mark last use of variable passed
           -- as input argument more than once in the call
           let prim' = replacePrimArgs prim $ markIfLastUse usedLater <$> args'

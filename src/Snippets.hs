@@ -10,10 +10,12 @@ module Snippets (castFromTo, castTo, withType, intType, intCast,
                  varSet, varGet, varGetSet,
                  boolType, boolCast, boolTrue, boolFalse, boolBool,
                  boolVarSet, boolVarGet, intVarSet, intVarGet,
-                 lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, 
+                 lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, 
+                 move, access, mutate, access0, mutate0, 
                  primMove, primAccess, primCast,
                  boolNegate, comparison, succeedTest, failTest, testVar, succeedIfSemiDet) where
 
+import Config
 import AST
 import Data.String (String)
 
@@ -130,6 +132,42 @@ iVal v = IntValue $ fromIntegral v
 move :: Exp -> Exp -> Placed Stmt
 move src dest =
     Unplaced $ ForeignCall "llvm" "move" [] [Unplaced src, Unplaced dest]
+
+    
+-- |An instruction to access a value from some address
+access :: Exp -> Exp -> Exp -> Exp -> Exp -> Placed Stmt
+access addr offset size startOffset val =
+    Unplaced $ ForeignCall "lpvm" "acesss" [] 
+             $ Unplaced <$> [addr, offset, size, startOffset, val]
+
+             
+-- |An instruction to access a value from some address
+access0 :: Exp -> Exp -> Placed Stmt
+access0 addr val =
+    access addr (IntValue 0 `castTo` intType)
+                (IntValue (toInteger wordSizeBytes) `castTo` intType) 
+                (IntValue 0 `castTo` intType)
+                val
+
+             
+-- |An instruction to mutate a value from some address
+mutate :: Exp -> Exp -> Exp -> Exp -> Exp -> Exp -> Exp -> Placed Stmt
+mutate addr0 addr1 offset destructive size startOffset val =
+    Unplaced $ ForeignCall "lpvm" "mutate" [] 
+             $ Unplaced <$> [addr0, addr1, offset, destructive, 
+                             size, startOffset, val]
+
+            
+mutate0 :: Exp -> Exp -> Placed Stmt
+mutate0 addr val =
+    mutate addr addr (IntValue 0 `castTo` intType)
+                     (IntValue 1 `castTo` intType)
+                     (IntValue (toInteger wordSizeBytes) `castTo` intType)
+                     (IntValue 0 `castTo` intType) 
+                     val
+
+-- access0 :: Exp -> Exp -> Placed Stmt
+-- access0 :: Exp -> Exp -> Placed Stmt
 
 -- |An instruction to negate a bool value to a variable.  We optimise negation
 -- of constant values.

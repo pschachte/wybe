@@ -18,6 +18,7 @@ import           Data.List                 as List
 import           Data.Map                  as Map
 import           Data.Maybe
 import           Data.Set                  as Set
+import           Data.Tuple.HT             (mapFst)
 import           Options                   (LogSelection (Resources))
 import           Snippets
 import           Util
@@ -116,8 +117,7 @@ transformProcResources pd _ = do
     resFlows <- concat <$> mapM (simpleResourceFlows pos)
                            (Set.elems resourceFlows)
     logResources $ "Declared resources: " ++ show resFlows
-    let resources = Set.fromList $ resourceFlowRes . fst <$> resFlows
-    (body',tmp') <- transformBody tmp resources body
+    (body',tmp') <- transformBody tmp resFlows body
     resParams <- concat <$> mapM (resourceParams pos) resFlows
     let proto' = proto { procProtoParams = params ++ resParams}
     let pd' = pd { procProto = proto', procTmpCount = tmp',
@@ -134,7 +134,7 @@ resourceParams pos (ResourceFlowSpec res flow, typ) = do
     return $ inParam ++ outParam
 
 -- | Transform a statement sequence, turning resources into arguments.
-transformBody :: Int -> Set ResourceSpec -> [Placed Stmt]
+transformBody :: Int -> [(ResourceFlowSpec, TypeSpec)] -> [Placed Stmt]
               -> Compiler ([Placed Stmt],Int)
 transformBody tmp _ [] = return ([],tmp)
 transformBody tmp resources (stmt:stmts) = do
@@ -144,9 +144,9 @@ transformBody tmp resources (stmt:stmts) = do
 
 
 -- | Transform a single statement, turning resources into arguments.
-transformStmt :: Int -> Set ResourceSpec -> Stmt -> OptPos
+transformStmt :: Int -> [(ResourceFlowSpec, TypeSpec)] -> Stmt -> OptPos
               -> Compiler ([Placed Stmt], Int)
-transformStmt tmp res stmt@(ProcCall (First m n id) detism resourceful args) pos = do
+transformStmt tmp res stmt@(ProcCall func@(First m n id) detism resourceful args) pos = do
     let procID = trustFromJust "transformStmt" id
     callResources <-
         procProtoResources . procProto <$> getProcDef
@@ -158,14 +158,27 @@ transformStmt tmp res stmt@(ProcCall (First m n id) detism resourceful args) pos
         pos
     logResources $ "Checking call to " ++ n ++ " using " ++ show callResources
     resArgs <- concat <$> mapM (resourceArgs pos) (Set.elems callResources)
+    (args', tmp') <- transformExps tmp res args 
     return ([maybePlace
-            (ProcCall (First m n (Just procID)) detism False (args++resArgs)) pos], tmp)
-transformStmt tmp res stmt@(ProcCall (Higher _) _ _ _) pos = 
-    return ([maybePlace stmt pos],tmp)
-transformStmt tmp res (ForeignCall lang name flags args) pos =
-    return ([maybePlace (ForeignCall lang name flags args) pos], tmp)
-transformStmt tmp res stmt@(TestBool var) pos =
-    return ([maybePlace stmt pos], tmp)
+            (ProcCall func detism False (args'++resArgs)) pos], tmp')
+transformStmt tmp res stmt@(ProcCall (Higher func) detism resourceful args) pos = 
+    case content func of
+        Typed _ (HigherOrderType ProcModifiers{modifierResourceful=resfulMod} _) _ -> do
+            unless (resourceful || resfulMod == Resourceless)
+                $ message Error
+                    ("Higher order call to resourceful proc without ! resource marker: "
+                    ++ showStmt 4 stmt)
+                    pos
+                    
+            (args', tmp') <- transformExps tmp res args 
+            return ([maybePlace (ProcCall (Higher func) detism False args') pos], tmp')
+        _ -> shouldnt $ "bad resoruce higher call type" ++ show stmt 
+transformStmt tmp res (ForeignCall lang name flags args) pos = do
+    (args', tmp') <- transformExps tmp res args
+    return ([maybePlace (ForeignCall lang name flags args') pos], tmp')
+transformStmt tmp res (TestBool var) pos = do
+    (var', tmp') <- transformExp tmp res var Nothing
+    return ([maybePlace (TestBool $ content var') pos], tmp)
 transformStmt tmp res (And stmts) pos = do
     (stmts',tmp') <- transformBody tmp res stmts
     return ([maybePlace (And stmts') pos], tmp')
@@ -201,9 +214,8 @@ transformStmt tmp res (For generators body) pos = do
 transformStmt tmp res (UseResources allRes oldRes body) pos = do
     let resVars = trustFromJust "use stmt without var list after type check"
                   oldRes
-    resTypes <- List.filter ((`elem` resVars) . resourceName . fst)
-                <$> mapM (canonicaliseResourceSpec pos "use statement") allRes
-                    -- (trustFromJust "un-typechecked use stmt" oldRes)
+    canonAllRes <- mapM (canonicaliseResourceSpec pos "use statement") allRes
+    let resTypes = List.filter ((`elem` resVars) . resourceName . fst) canonAllRes
     toSave <- mapM (resourceVar . fst) resTypes
     let types = fromJust . snd <$> resTypes
     let resCount = length toSave
@@ -213,7 +225,9 @@ transformStmt tmp res (UseResources allRes oldRes body) pos = do
     let set v ty = varSet v `withType` ty
     let saves = (\(r,t,ty) -> move (get r ty) (set t ty)) <$> ress
     let restores = (\(r,t,ty) -> move (get t ty) (set r ty)) <$> ress
-    (body',tmp'') <- transformBody tmp' res body
+    resFlows <- concat <$> mapM (simpleResourceFlows pos) 
+                                ((`ResourceFlowSpec` ParamInOut). fst <$> canonAllRes)
+    (body',tmp'') <- transformBody tmp' (List.nub $ res ++ resFlows) body
     return (saves ++ body' ++ restores, tmp'')
 -- transformStmt tmp res (For itr gen) pos =
 --     return ([maybePlace (For itr gen) pos], tmp)
@@ -221,6 +235,27 @@ transformStmt tmp res Break pos =
     return ([maybePlace Break pos], tmp)
 transformStmt tmp res Next pos =
     return ([maybePlace Next pos], tmp)
+
+transformExps :: Int -> [(ResourceFlowSpec, TypeSpec)] -> [Placed Exp]
+              -> Compiler ([Placed Exp],Int)
+transformExps tmp _ [] = return ([],tmp)
+transformExps tmp resources (exp:exps) = do
+    (exp,tmp') <- placedApply (transformExp tmp resources) exp
+    (exps,tmp'') <- transformExps tmp' resources exps
+    return (exp:exps, tmp'')
+
+transformExp :: Int -> [(ResourceFlowSpec, TypeSpec)] -> Exp -> OptPos 
+             -> Compiler (Placed Exp, Int)
+transformExp tmp res (Typed exp ty cast) pos = do
+    (pexp', tmp') <- transformExp tmp res exp Nothing
+    return (maybePlace (Typed (content pexp') ty cast) pos, tmp')
+transformExp tmp res (Lambda mods@ProcModifiers{modifierResourceful=Resourceful} params body) pos = do
+    (body',tmp') <- transformBody tmp res body
+    resParams <- concat <$> mapM (resourceParams pos) 
+                                 (mapFst (\r -> r{resourceFlowFlow=ParamInOut}) <$> res)
+    return (maybePlace (Lambda mods{modifierResourceful=Resourceless}
+                               (params ++ resParams) body') pos, tmp')
+transformExp tmp _ exp pos = return (maybePlace exp pos, tmp)
 
 
 makeSingleStmt :: [Placed Stmt] -> Placed Stmt

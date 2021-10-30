@@ -298,11 +298,11 @@ flattenStmt' stmt@(ProcCall (First [] "break" _) _ _ []) pos _ =
     emit pos Break
 flattenStmt' stmt@(ProcCall (First [] "next" _) _ _ []) pos _ =
     emit pos Next
-flattenStmt' stmt@(ProcCall (First [] name _) _ _ []) pos _ = do
+flattenStmt' stmt@(ProcCall (First [] name _) _ banged []) pos _ = do
     defined <- gets defdVars
     -- Convert call to no-arg proc to a bool variable test if there's a
     -- local variable with that name
-    if name `elem` defined
+    if name `elem` defined && not banged
         then emit pos $ TestBool $ Var name ParamIn Ordinary
         else emit pos stmt
 flattenStmt' (ProcCall func detism res args) pos d = do

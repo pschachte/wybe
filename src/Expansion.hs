@@ -246,15 +246,21 @@ expandPrim (PrimCall id pspec args) pos = do
 expandPrim call@(PrimHigherCall id fn args) pos = do
     logExpansion $ "  Expand higher call " ++ show call
     fn' <- expandArg fn
-    case fn' of
-        ArgProcRef ps as _ -> do
-            let expander = flip . (execStateT .) . flip expandPrim
-            st <- get
-            put =<< lift (translateFromClosure Nothing call (`expander` st)) 
-        _ -> do
+    let expandAsHigher = do
             logExpansion "  As higher call"
             args' <- mapM expandArg args
-            addInstr (PrimHigherCall id fn' args') pos
+            addInstr (PrimHigherCall id fn' args') pos 
+    case fn' of
+        ArgProcRef ps as _-> do        
+            params <- lift $ lift $ primProtoParams <$> getProcPrimProto ps 
+            if any isResourcePrimParam params
+            -- then expandAsHigher
+            then return ()
+            else do
+                let expander = flip . (execStateT .) . flip expandPrim
+                st <- get
+                put =<< lift (translateFromClosure Nothing call (`expander` st)) 
+        _ -> expandAsHigher
 expandPrim (PrimForeign lang nm flags args) pos = do
     st <- get
     logExpansion $ "  Expanding " ++ show (PrimForeign lang nm flags args)

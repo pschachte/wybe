@@ -279,7 +279,7 @@ processProcModifier "noinline"    = updateModsInlining "noinline" NoInline
 processProcModifier "pure"        = updateModsImpurity "pure" PromisedPure
 processProcModifier "semipure"    = updateModsImpurity "semipure" Semipure
 processProcModifier "impure"      = updateModsImpurity "impure" Impure
-processProcModifier "resourceful" = updateModsResource "resourceful" (Resourceful Nothing)
+processProcModifier "resourceful" = updateModsResource "resourceful" Resourceful
 processProcModifier modName    =
     \ms -> ms {modifierUnknown=modName:modifierUnknown ms}
 
