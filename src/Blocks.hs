@@ -16,6 +16,7 @@ import           Debug.Trace
 import           ASTShow
 import           BinaryFactory                   ()
 import           Codegen
+import           Resources
 import           Config                          (wordSize, wordSizeBytes)
 import           Util                            (maybeNth, zipWith3M_, (&&&))
 import           Snippets 
@@ -248,9 +249,7 @@ translateProc modProtos proc = do
 _translateProcImpl :: [PrimProto] -> PrimProto -> Bool -> ProcBody
                    -> Word -> Compiler (ProcDefBlock, Word)
 _translateProcImpl modProtos proto isClosure body startCount = do
-    let (proto', body') = if isClosure 
-                          then closeProtoBody proto body
-                          else (proto,body)
+    (resRefs, proto', body') <- closeProtoBody isClosure proto body
     modspec <- getModuleSpec
     logBlocks $ "\n" ++ replicate 70 '=' ++ "\n"
     logBlocks $ "In Module: " ++ showModSpec modspec
@@ -259,11 +258,12 @@ _translateProcImpl modProtos proto isClosure body startCount = do
                 ++ "body: " ++ show body'
                 ++ "\n" ++ replicate 50 '-' ++ "\n"
     -- Codegen
-    codestate <- execCodegen startCount modProtos (doCodegenBody proto' body')
+    codestate <- execCodegen startCount resRefs modProtos (doCodegenBody proto' body')
     let pname = primProtoName proto
     logBlocks $ show $ externs codestate
     exs <- mapM declareExtern $ externs codestate
-    let globals = List.map LLVMAST.GlobalDefinition $ globalVars codestate
+    let globals = List.map LLVMAST.GlobalDefinition 
+                    (globalVars codestate ++ Map.elems (resources codestate))
     let body' = createBlocks codestate
     lldef <- makeGlobalDefinition pname proto' body'
     logBlocks $ show lldef
@@ -273,13 +273,18 @@ _translateProcImpl modProtos proto isClosure body startCount = do
 
 -- | Updates a PrimProto and ProcBody as though the Closed Params are accessed
 -- via the closure environment 
-closeProtoBody :: PrimProto -> ProcBody -> (PrimProto, ProcBody)
-closeProtoBody proto@PrimProto{primProtoParams=params} 
-               body@ProcBody{bodyPrims=prims} 
-    = (proto', body')
+closeProtoBody :: Bool -> PrimProto -> ProcBody 
+               -> Compiler (Bool, PrimProto, ProcBody)
+closeProtoBody isClosure
+               proto@PrimProto{primProtoParams=params} 
+               body@ProcBody{bodyPrims=prims} = do
+    if isClosure || any (isResourcefulHigherOrder . primParamType) params
+    then return (True, proto', body')
+    else return (False, proto, body)
   where
-    (closed, actualParams) = List.partition ((==Closed) . primParamFlowType) params
-    proto' = proto{primProtoParams=actualParams ++ [envPrimParam]}
+    (closed, trueParams) = List.partition ((==Closed) . primParamFlowType) params
+    actualParams = List.filter (not . isResourcePrimParam) trueParams
+    proto' = proto{primProtoParams=actualParams ++ [envPrimParam | isClosure]}
     neededClosed = List.filter (not . paramInfoUnneeded . primParamInfo) closed
     unwrapper = Unplaced <$>
                 [ primAccess (ArgVar envParamName intType FlowIn Closed False)
@@ -288,7 +293,7 @@ closeProtoBody proto@PrimProto{primProtoParams=params}
                              (ArgInt 0 intType)
                              (ArgVar nm ty FlowOut Closed False)
                 | (i,PrimParam nm ty _ _ _) <- zip [1..] neededClosed ]
-    body' = body{bodyPrims=unwrapper ++ prims}
+    body' = body{bodyPrims=(if isClosure then (unwrapper ++) else id) prims}
 
 
 -- | Create LLVM's module level Function Definition from the LPVM procedure
@@ -386,15 +391,22 @@ doCodegenBody proto body =
 -- | Convert a PrimParam to an Operand value and reference this value by the
 -- param's name on the symbol table. Don't assign if phantom.
 assignParam :: PrimParam -> Codegen ()
-assignParam p = do
+assignParam p@PrimParam{primParamFlowType=ft} = do
     let ty = primParamType p
     trep <- lift $ typeRep ty
+            
     logCodegen $ "Maybe generating parameter " ++ show p
                  ++ " (" ++ show trep ++ ")"
     unless (repIsPhantom trep || paramInfoUnneeded (primParamInfo p))
-      $ do let nm = show (primParamName p)
-           let llty = repLLVMType trep
-           assign nm (localVar llty nm) trep
+      $ do 
+            resRefs <- gets resourceRefs
+            case (resRefs,ft) of
+                (True,Resource _) ->
+                    return () -- resource should already be assigned
+                _ -> do
+                    let nm = show (primParamName p)
+                    let llty = repLLVMType trep
+                    assign nm (localVar llty nm) trep
 
 
 -- | Convert a PrimParam to an Operand value and reference this value by the
@@ -533,19 +545,25 @@ cgen prim@(PrimCall callSiteID pspec args) = do
     -- and match it's parameters with the args here
     -- and remove the unneeded ones.
     proto <- lift $ getProcPrimProto pspec
+    let params = primProtoParams proto
     logCodegen $ "Proto = " ++ show proto
+    
     filteredArgs <- filterUnneededArgs proto args
     logCodegen $ "Filtered args = " ++ show filteredArgs
 
     -- if the call is to an external module, declare it
     addExternProcRef pspec
 
-    let (inArgs,outArgs) = partitionArgs filteredArgs
+    -- XXX need to handle pushing/popping refs to/from globals
+    let ((inArgs,outArgs),(inRefs,outRefs)) = partitionRefArgs filteredArgs
     logCodegen $ "In args = " ++ show inArgs
+
     outTy <- lift $ primReturnType outArgs
-    logCodegen $ "Out Type = " ++ show outTy
+
     inops <- mapM cgenArg inArgs
     logCodegen $ "Translated inputs = " ++ show inops
+    
+    logCodegen $ "Out Type = " ++ show outTy
     let ins =
           callWybe
           (externf (ptr_t (FunctionType outTy (typeOf <$> inops) False)) nm)
@@ -693,10 +711,10 @@ findProto (ProcSpec _ nm i _) = do
 -- | Match PrimArgs with the paramaters in the given prototype. If a PrimArg's
 -- counterpart in the prototype is unneeded, filtered out. Positional matching
 -- is used for this.
-filterUnneededArgs :: PrimProto -> [PrimArg] -> Codegen [PrimArg]
+filterUnneededArgs :: PrimProto -> [PrimArg] -> Codegen [(PrimArg, Bool)]
 filterUnneededArgs proto args = argsNeeded args (primProtoParams proto)
 
-argsNeeded :: [PrimArg] -> [PrimParam] -> Codegen [PrimArg]
+argsNeeded :: [PrimArg] -> [PrimParam] -> Codegen [(PrimArg, Bool)]
 argsNeeded [] []    = return []
 argsNeeded [] (_:_) = shouldnt "more parameters than arguments"
 argsNeeded (_:_) [] = shouldnt "more arguments than parameters"
@@ -705,8 +723,9 @@ argsNeeded (ArgUnneeded _ _:as) (p:ps)
     | otherwise     = argsNeeded as ps
 argsNeeded (a:as) (p:ps) = do
     real <- lift $ paramIsReal p
+    let asRef = paramInfoReference $ primParamInfo p
     rest <- argsNeeded as ps
-    return $ if real then a:rest else rest
+    return $ if real then (a,asRef):rest else rest
 
 
 filterPhantomArgs :: [PrimArg] -> Codegen [PrimArg]
@@ -944,7 +963,20 @@ addInstruction ins outArgs = do
             let outNames = List.map pullName outArgs
             -- lift $ logBlocks $ "-=-=-=-= Structure names:" ++ show outNames
             zipWith3M_ assign outNames fields treps
+    
+assignFromGlobal :: G.Global -> PrimArg -> Codegen ()
+assignFromGlobal global outArg = do
+    outRep <- lift $ typeRep (argType outArg)
+    globalOp <- doLoad (G.type' global) (cons $ C.GlobalReference 
+                                                    (G.type' global) 
+                                                    (G.name global))
+    assign (pullName outArg) globalOp outRep  
 
+storeInGlobal :: G.Global -> PrimArg -> Codegen ()
+storeInGlobal global inArg = do
+    inOp <- cgenArg inArg
+    store (cons $ C.GlobalReference (G.type' global) (G.name global)) inOp
+    return ()
 
 pullName ArgVar{argVarName=var} = show var
 pullName _                    = shouldnt $ "Expected variable as output."
@@ -957,6 +989,8 @@ withFlags p [] = p
 withFlags p f  = unwords (p:f)
 
 
+
+
 ----------------------------------------------------------------------------
 -- Helpers for primitive arguments                                        --
 ----------------------------------------------------------------------------
@@ -965,6 +999,13 @@ withFlags p f  = unwords (p:f)
 -- | Partition the argument list into inputs and outputs
 partitionArgs :: [PrimArg] -> ([PrimArg],[PrimArg])
 partitionArgs = List.partition goesIn
+
+
+partitionRefArgs :: [(PrimArg, Bool)]
+                 -> (([PrimArg], [PrimArg]), ([PrimArg], [PrimArg]))
+partitionRefArgs argRefs = 
+    let (refs, args) = List.partition snd argRefs
+    in (partitionArgs $ fst <$> args, partitionArgs $ fst <$> refs)
 
 
 -- | Get the LLVM 'Type' of the given primitive output argument
@@ -1007,9 +1048,9 @@ openPrimArg a = shouldnt $ "Can't Open!: "
 -- * Variables return a casted version of their respective symbol table operand
 -- * Constants are generated with cgenArgConst, then wrapped in `cons`
 cgenArg :: PrimArg -> Codegen LLVMAST.Operand
-cgenArg ArgVar{argVarName=nm, argVarType=ty} = do
-    lift $ logBlocks $ "Coercing var " ++ show nm ++ " to " ++ show ty
+cgenArg ArgVar{argVarName=nm, argVarType=ty, argVarFlowType=ft} = do
     toTy <- lift $ llvmType ty
+    lift $ logBlocks $ "Coercing var " ++ show nm ++ " to " ++ show ty
     (varOp,rep) <- getVar (show nm)
     let fromTy = repLLVMType rep
     doCast varOp fromTy toTy
@@ -1107,7 +1148,10 @@ primActualParams pspec = lift $ do
     isClosure <- isClosureProc pspec
     primProto <- procImplnProto . procImpln <$> getProcDef pspec
     primParams <- protoRealParams primProto <&> (++ [envPrimParam | isClosure]) 
-    return $ List.filter ((/= Closed) . primParamFlowType) primParams
+    let resFilter = if any (isResourcefulHigherOrder . primParamType) primParams 
+                    then not . isResourcePrimParam
+                    else const True
+    return $ List.filter ((/= Closed) . primParamFlowType &&& resFilter) primParams
 
 
 neededClosedArgs :: ProcSpec -> [PrimArg] -> Codegen [PrimArg]
@@ -1333,12 +1377,13 @@ declareExtern (PrimForeign otherlang name _ _) =
     shouldnt $ "Don't know how to declare extern foreign function " ++ name
       ++ " in language " ++ otherlang
 
-      
 declareExtern (PrimHigherCall _ var _) =
     shouldnt $ "Don't know how to declare extern function var " ++ show var
 
 declareExtern (PrimCall _ pspec@(ProcSpec m n _ _) args) = do
-    let (inArgs,outArgs) = partitionArgs args
+    asRef <- (paramInfoReference . primParamInfo <$>) . primProtoParams 
+           . procImplnProto . procImpln <$> getProcDef pspec
+    let ((inArgs,outArgs),_) = partitionRefArgs $ zip args asRef
     retty <- primReturnType outArgs
     fnargs <- mapM makeExArg $ zip [1..] inArgs
     return $ externalWybe retty (show pspec) fnargs
@@ -1467,7 +1512,7 @@ addUniqueDefinitions (LLVMAST.Module n fn l t ds) defs =
 -- XXX What will be the type of 'size' we pass to extern C's malloc?
 callWybeMalloc :: PrimArg -> Codegen Operand
 callWybeMalloc size = do
-    let outTy = (ptr_t (int_c 8))
+    let outTy = ptr_t (int_c 8)
     let fnName = LLVMAST.Name $ toSBString "wybe_malloc"
     sizeOp <- cgenArg size
     sizeTy <- lift $ llvmType $ argType size

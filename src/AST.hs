@@ -32,7 +32,7 @@ module AST (
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), StringVariant(..), Generator(..), Stmt(..), ProcFunctor(..),
   regularProc, regularModProc,
-  flattenedExpFlow, expIsConstant, expVar, expVar', innerExp,
+  flattenedExpFlow, expIsConstant, expVar, expVar', maybeExpType, innerExp,
   TypeRepresentation(..), TypeFamily(..), typeFamily,
   defaultTypeRepresentation, typeRepSize, integerTypeRep,
   lookupTypeRepresentation, lookupModuleRepresentation,
@@ -125,7 +125,7 @@ import           Data.List.Extra (nubOrd)
 import           Data.Map as Map
 import           Data.Maybe
 import           Data.Set as Set
-import           Data.Tuple.HT ( mapSnd )
+import           Data.Tuple.HT ( mapSnd, mapFst )
 import           Data.Word (Word8)
 import           Data.List.Extra (splitOn)
 import           Text.Read (readMaybe)
@@ -1129,7 +1129,7 @@ addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
            $ errmsg pos ("Proc modifier '" ++ resourcefulName resourceful 
                          ++ "' is not allowed for a procedure declaration")
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 Map.empty
-                  vis detism inlining impurity (initSuperprocSpec vis)
+                  False vis detism inlining impurity (initSuperprocSpec vis)
     addProcDef procDef
     return ()
 addProc _ item =
@@ -1824,6 +1824,8 @@ data ProcDef = ProcDef {
                                 -- XXX We never actually use this map, we just
                                 -- add up the call counts, so we might as well
                                 -- keep just a count
+    procResourceRefs::Bool,     -- Does this procedure expect resources as
+                                -- global references?
     procVis :: Visibility,      -- ^what modules should be able to see this?
     procDetism :: Determinism,  -- ^can this proc fail?
     procInlining :: Inlining,   -- ^should we inline calls to this proc?
@@ -2512,7 +2514,8 @@ data PrimParam = PrimParam {
 
 -- |Info inferred about a single proc parameter
 data ParamInfo = ParamInfo {
-        paramInfoUnneeded::Bool       -- ^Can this parameter be eliminated?
+        paramInfoUnneeded::Bool,       -- ^Can this parameter be eliminated?
+        paramInfoReference::Bool
     } deriving (Eq,Generic)
 
 -- |A dataflow direction:  in, out, both, or neither.
@@ -2558,8 +2561,10 @@ setParamArgFlowType ft p = p{paramFlowType=ft}
 
 -- |Convert a Param to a Hole Var
 paramToHoleVar :: Param -> Placed Exp
-paramToHoleVar (Param n t f res@(Resource _)) = Unplaced $ Typed (Var n f res) t Nothing
-paramToHoleVar (Param n t f _) = Unplaced $ Typed (Var n f Hole) t Nothing
+paramToHoleVar (Param n t f res@(Resource _)) 
+    = Unplaced $ Typed (Var n f res) t Nothing
+paramToHoleVar (Param n t f _) 
+    = Unplaced $ Typed (Var n f Hole) t Nothing
 
 
 -- |Convert a PrimParam to a PrimArg
@@ -2728,7 +2733,6 @@ flattenedExpFlow otherExp =
     shouldnt $ "Getting flow direction of unflattened exp " ++ show otherExp
 
 
-
 -- | If the input is a constant value, return it (with any Typed wrapper
 -- removed).  Return Nothing if it's not a constant.
 expIsConstant :: Exp -> Maybe Exp
@@ -2753,6 +2757,10 @@ expVar' :: Exp -> Maybe VarName
 expVar' (Typed expr _ _) = expVar' expr
 expVar' (Var name _ _) = Just name
 expVar' _expr = Nothing
+
+maybeExpType :: Exp -> Maybe TypeSpec 
+maybeExpType (Typed _ ty _) = Just ty
+maybeExpType _              = Nothing
 
 -- | Extract the inner expression (removing any Typed wrapper)
 innerExp :: Exp -> Exp
@@ -2808,8 +2816,7 @@ realParams = filterM paramIsReal
 -- |The param actually needs to be passed; ie, it is needed and not phantom.
 paramIsReal :: PrimParam -> Compiler Bool
 paramIsReal param =
-    ((not $ paramInfoUnneeded $ primParamInfo param) &&) . not
-      <$> paramIsPhantom param
+    (((not . paramInfoUnneeded) $ primParamInfo param) &&) . not <$> paramIsPhantom param
 
 
 -- |Get names of proto input params
@@ -3207,7 +3214,7 @@ envParamName = PrimVarName (specialName "env") 0
 
 
 envPrimParam :: PrimParam
-envPrimParam = PrimParam envParamName AnyType FlowIn Hole (ParamInfo False)
+envPrimParam = PrimParam envParamName AnyType FlowIn Hole (ParamInfo False False)
 
 
 ----------------------------------------------------------------
@@ -3406,7 +3413,7 @@ showProcDefs firstID (def:defs) =
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
 showProcDef thisID
-        procdef@(ProcDef n proto def pos _ _ _ vis
+        procdef@(ProcDef n proto def pos _ _ _ _ vis
                     detism inline impurity sub) =
     "\n"
     ++ (if n == "" then "*main*" else n) ++ " > "
@@ -3454,8 +3461,9 @@ instance Show Param where
 
 -- |How to show a formal parameter.
 instance Show PrimParam where
-  show (PrimParam name typ dir _ (ParamInfo unneeded)) =
-      let (pre,post) = if unneeded then ("[","]") else ("","")
+  show (PrimParam name typ dir _ (ParamInfo unneeded reference)) =
+      let (pre,post) = mapFst (if reference then ("*"++) else id)
+                       (if unneeded then ("[","]") else ("",""))
       in  pre ++ primFlowPrefix dir ++ show name ++ showTypeSuffix typ Nothing
           ++ post
 

@@ -10,7 +10,7 @@
 
 module Codegen (
   Codegen(..), CodegenState(..), BlockState(..), Translation,
-  emptyModule, evalCodegen, addExtern, addGlobalConstant,
+  emptyModule, evalCodegen, addExtern, addGlobalConstant, addGlobalResource,
   execCodegen, emptyCodegen, evalTranslation, getCount, putCount,
   -- * Blocks
   createBlocks, setBlock, addBlock, entryBlockName,
@@ -65,7 +65,7 @@ import qualified LLVM.AST.FloatingPointPredicate as FP
 import qualified LLVM.AST.IntegerPredicate       as IP
 
 import           AST                             (Compiler, Prim, PrimProto,
-                                                  TypeRepresentation,
+                                                  TypeRepresentation, ResourceSpec(..),
                                                   getModuleSpec, logMsg,
                                                   shouldnt, specialName2,
                                                   showModSpec)
@@ -142,14 +142,21 @@ type Names = Map.Map String Int
 data CodegenState
     = CodegenState {
         currentBlock :: Name     -- ^ Name of the active block to append to
-      , blocks       :: Map.Map Name BlockState -- ^ Blocks for function
-      , symtab       :: SymbolTable -- ^ Local symbol table of a function
+      , blocks       :: Map.Map Name BlockState 
+                                 -- ^ Blocks for function
+      , symtab       :: SymbolTable 
+                                 -- ^ Local symbol table of a function
       , blockCount   :: Int      -- ^ Incrementing count of basic blocks
       , count        :: Word     -- ^ Count for temporary operands
       , names        :: Names    -- ^ Name supply
       , externs      :: [Prim]   -- ^ Primitives which need to be declared
       , globalVars   :: [Global] -- ^ Needed global variables/constants
-      , modProtos    :: [PrimProto] -- ^ Module procedures prototypes
+      , resources    :: Map.Map ResourceSpec Global
+                                 -- ^ Needed global variables for resources
+      , resourceRefs :: Bool     -- ^ Are we treating resources as 
+                                 -- global references?
+      , modProtos    :: [PrimProto] 
+                                 -- ^ Module procedures prototypes
       } deriving Show
 
 -- | 'BlockState' will generate the code for basic blocks inside of
@@ -172,12 +179,12 @@ data BlockState
 
 type Codegen = StateT CodegenState Compiler
 
-execCodegen :: Word -> [PrimProto] -> Codegen a -> Compiler CodegenState
-execCodegen startCount protos codegen =
-  execStateT codegen (emptyCodegen startCount protos)
+execCodegen :: Word -> Bool -> [PrimProto] -> Codegen a -> Compiler CodegenState
+execCodegen startCount resRefs protos codegen =
+    execStateT codegen (emptyCodegen startCount resRefs protos)
 
 evalCodegen :: [PrimProto] -> Codegen t -> Compiler t
-evalCodegen protos codegen = evalStateT codegen (emptyCodegen 0 protos)
+evalCodegen protos codegen = evalStateT codegen (emptyCodegen 0 undefined protos)
 
 type Translation = StateT Word Compiler
 
@@ -221,6 +228,21 @@ addGlobalConstant ty con =
                                          , initializer = Just con }
        modify $ \s -> s { globalVars = gvar : gs }
        return ref
+
+
+addGlobalResource :: ResourceSpec -> Type -> Codegen Name
+addGlobalResource spec@(ResourceSpec mod nm) ty = do
+    ress <- gets resources
+    case Map.lookup spec ress of
+        Nothing -> do
+            let ref = Name $ fromString $ show spec
+            let global =  globalVariableDefaults { name = ref
+                                                 , isConstant = False
+                                                 , G.type' = ty }
+            modify $ \s -> s { resources = Map.insert spec global ress }
+            return ref
+        Just ref -> return $ G.name ref
+
 
 -- | Create an empty LLVMAST.Module which would be converted into
 -- LLVM IR once the moduleDefinitions field is filled.
@@ -287,7 +309,7 @@ emptyBlock :: Int -> BlockState
 emptyBlock i = BlockState i [] Nothing
 
 -- | Initialize an empty CodegenState for a new Definition.
-emptyCodegen :: Word -> [PrimProto] -> CodegenState
+emptyCodegen :: Word -> Bool -> [PrimProto] -> CodegenState
 emptyCodegen startCount =
   CodegenState
     (Name $ fromString entryBlockName)
@@ -298,6 +320,7 @@ emptyCodegen startCount =
     Map.empty
     []
     []
+    Map.empty
 
 -- | 'addBlock' creates and adds a new block to the current blocks
 addBlock :: String -> Codegen Name
@@ -381,14 +404,18 @@ uniqueName nm ns =
 
 -- | Create an extern referencing Operand
 externf :: Type -> Name -> Operand
-externf ty = ConstantOperand . (C.GlobalReference ty)
+externf ty = ConstantOperand . C.GlobalReference ty
 
 -- | Create a new Local Operand (prefixed with % in LLVM)
 localVar :: Type -> String -> Operand
-localVar t s =  (LocalReference t ) $ LLVMAST.Name $ fromString s
+localVar t s = LocalReference t $ LLVMAST.Name $ fromString s
+
 
 local :: Type -> LLVMAST.Name -> Operand
 local ty nm = LocalReference ty nm
+
+globalVar :: Type -> String -> C.Constant
+globalVar t s = C.GlobalReference t $ LLVMAST.Name $ fromString s
 
 ----------------------------------------------------------------------------
 -- Symbol Table                                                           --

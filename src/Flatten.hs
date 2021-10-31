@@ -661,6 +661,7 @@ isInExp _ = True
 
 -- | Return the input-only version of an Exp that is known to be either in or
 -- in-out.
+inputOnlyExp :: Exp -> Exp
 inputOnlyExp (Var name ParamInOut flowType) = Var name ParamIn flowType
 inputOnlyExp (Var name ParamOut flowType) =
     shouldnt $ "Making input-only version of output variable " ++ name

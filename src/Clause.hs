@@ -380,13 +380,13 @@ reconcileOne caseVars jointVars (Param name ty flow ftype) =
 
 compileParam :: Numbering -> Numbering -> ProcName -> Param -> [PrimParam]
 compileParam startVars endVars procName param@(Param name ty flow ftype) =
-    [PrimParam (PrimVarName name num) ty FlowIn ftype (ParamInfo False)
+    [PrimParam (PrimVarName name num) ty FlowIn ftype (ParamInfo False False)
     | flowsIn flow
     , let num = Map.findWithDefault 
                 (shouldnt ("compileParam for input param " ++ show param
                             ++ " of proc " ++ show procName))
                 name startVars]
-    ++ [PrimParam (PrimVarName name num) ty FlowOut ftype (ParamInfo False)
+    ++ [PrimParam (PrimVarName name num) ty FlowOut ftype (ParamInfo False False)
     | flowsOut flow
     , let num = Map.findWithDefault 
                 (shouldnt ("compileParam for output param " ++ show param

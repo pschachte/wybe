@@ -731,7 +731,7 @@ expType' (ProcRef pspec _) _     = do
     let types = typeFlowType <$> typeFlows
     let flows = typeFlowMode <$> typeFlows
     types' <- refreshTypes types
-    ProcDef _ ProcProto{procProtoResources=ress} _ _ _ _ _ _ detism inlining impurity _ 
+    ProcDef _ ProcProto{procProtoResources=ress} _ _ _ _ _ _ _ detism inlining impurity _ 
         <- lift $ getProcDef pspec
     let resful = if Set.null ress then Resourceless else Resourceful 
     return $ HigherOrderType 

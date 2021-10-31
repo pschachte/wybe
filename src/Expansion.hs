@@ -15,6 +15,7 @@
 module Expansion (procExpansion) where
 
 import           AST
+import           Util
 import           BodyBuilder
 import           Control.Monad
 import           Control.Monad.Trans       (lift)
@@ -40,12 +41,20 @@ procExpansion pspec def = do
     let st = initExpanderState $ procCallSiteCount def
     (st', tmp', used, body') <- buildBody tmp (Map.fromSet id outs) $
                         execStateT (expandBody body) st
-    let proto' = proto {primProtoParams = markParamNeededness used ins
-                                          <$> primProtoParams proto}
+    isClosure <- isClosureProc pspec
+    let params = primProtoParams proto
+    let needsRefs = isClosure || any (isResourcefulHigherOrder . primParamType) params
+    let params' = markParamReference needsRefs
+                . markParamNeededness used ins
+               <$> params
+    let reallyNeedsRefs = any (((not . paramInfoUnneeded) &&& paramInfoReference) 
+                                . primParamInfo) params' 
+    let proto' = proto {primProtoParams = params'}
     let impln' = impln{ procImplnProto = proto', procImplnBody = body' }
     let def' = def { procImpln = impln',
                      procTmpCount = tmp',
-                     procCallSiteCount = nextCallSiteID st' }
+                     procCallSiteCount = nextCallSiteID st',
+                     procResourceRefs = procResourceRefs def || reallyNeedsRefs }
     if def /= def'
         then
         logMsg Expansion
@@ -65,7 +74,7 @@ markParamNeededness :: Set PrimVarName -> Set PrimVarName -> PrimParam
                     -> PrimParam
 markParamNeededness used _ param@PrimParam{primParamName=nm,
                                            primParamFlow=FlowIn,
-                                          primParamFlowType=fTy} =
+                                           primParamFlowType=fTy} =
     param {primParamInfo = (primParamInfo param) {paramInfoUnneeded =
                                                     Set.notMember nm used
                                                     && fTy /= Hole}}
@@ -75,6 +84,13 @@ markParamNeededness _ ins param@PrimParam{primParamName=nm,
     param {primParamInfo = (primParamInfo param) {paramInfoUnneeded =
                                                     Set.member nm ins
                                                     && fTy /= Hole}}
+
+markParamReference :: Bool -> PrimParam -> PrimParam
+markParamReference asRef param@PrimParam{primParamFlowType=Resource _} =
+    param {primParamInfo = (primParamInfo param) {paramInfoReference = asRef}}
+markParamReference _ param =
+    param {primParamInfo = (primParamInfo param) {paramInfoReference = False}}
+    
 
 -- |Type to remember the variable renamings.
 type Renaming = Map PrimVarName PrimArg
@@ -246,21 +262,21 @@ expandPrim (PrimCall id pspec args) pos = do
 expandPrim call@(PrimHigherCall id fn args) pos = do
     logExpansion $ "  Expand higher call " ++ show call
     fn' <- expandArg fn
-    let expandAsHigher = do
+    let expandAsHigher fn' = do
             logExpansion "  As higher call"
             args' <- mapM expandArg args
             addInstr (PrimHigherCall id fn' args') pos 
     case fn' of
-        ArgProcRef ps as _-> do        
-            params <- lift $ lift $ primProtoParams <$> getProcPrimProto ps 
-            if any isResourcePrimParam params
-            -- then expandAsHigher
-            then return ()
+        ArgProcRef ps as _-> do              
+            needsRefs <- lift $ lift $ procResourceRefs <$> getProcDef ps
+            if needsRefs
+            then expandAsHigher fn'
+            -- then return ()
             else do
                 let expander = flip . (execStateT .) . flip expandPrim
                 st <- get
                 put =<< lift (translateFromClosure Nothing call (`expander` st)) 
-        _ -> expandAsHigher
+        _ -> expandAsHigher fn'
 expandPrim (PrimForeign lang nm flags args) pos = do
     st <- get
     logExpansion $ "  Expanding " ++ show (PrimForeign lang nm flags args)

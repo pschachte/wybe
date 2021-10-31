@@ -6,7 +6,7 @@
 --           : LICENSE in the root directory of this project.
 
 
-module Resources (resourceCheckMod, canonicaliseProcResources,
+module Resources (resourceCheckMod, canonicaliseProcResources, canonicaliseResourceSpec,
                   transformProcResources, specialResourcesSet) where
 
 import           AST
@@ -151,7 +151,9 @@ transformStmt tmp res stmt@(ProcCall func@(First m n id) detism resourceful args
     callResources <-
         procProtoResources . procProto <$> getProcDef
                 (ProcSpec m n procID generalVersion)
-    unless (resourceful || Set.null callResources)
+    let argTys = fromMaybe AnyType . maybeExpType . content <$> args
+    unless (resourceful || (Set.null callResources 
+                            && not (any isResourcefulHigherOrder argTys) ))
       $ message Error
         ("Call to resourceful proc without ! resource marker: "
          ++ showStmt 4 stmt)
@@ -166,7 +168,7 @@ transformStmt tmp res stmt@(ProcCall (Higher func) detism resourceful args) pos 
         Typed _ (HigherOrderType ProcModifiers{modifierResourceful=resfulMod} _) _ -> do
             unless (resourceful || resfulMod == Resourceless)
                 $ message Error
-                    ("Higher order call to resourceful proc without ! resource marker: "
+                    ("Resourceful higher order call without ! resource marker: "
                     ++ showStmt 4 stmt)
                     pos
                     

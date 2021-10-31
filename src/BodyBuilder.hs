@@ -467,22 +467,19 @@ argExpandedPrim call@(PrimCall id pspec args) = do
     return $ PrimCall id pspec args''
 argExpandedPrim call@(PrimHigherCall id fn args) = do
     fn' <- expandArg fn
-    let expandAsHigher = do
+    let expandAsHigher fn' = do
             args' <- mapM expandArg args
             return $ PrimHigherCall id fn' args'
     case fn' of
         ArgProcRef ps as _-> do        
-            params <- lift $ primProtoParams <$> getProcPrimProto ps 
-            if any isResourcePrimParam params
-            -- then expandAsHigher
-            then do
-                args' <- mapM expandArg args
-                return $ PrimHigherCall id fn args'
+            needsRefs <- lift $ procResourceRefs <$> getProcDef ps
+            if needsRefs
+            then expandAsHigher fn'
             else
                 translateFromClosure Nothing (PrimHigherCall id fn' args) 
                                             (const argExpandedPrim)
                     >>= argExpandedPrim
-        _ -> expandAsHigher
+        _ -> expandAsHigher fn'
 argExpandedPrim (PrimForeign lang nm flags args) = do
     args' <- mapM expandArg args
     return $ simplifyForeign lang nm flags args'

@@ -236,7 +236,7 @@ genProc proto detism stmts = do
     tmpCtr <- gets brTempCtr
     -- call site count will be refilled later
     let procDef = ProcDef name proto (ProcDefSrc stmts) Nothing tmpCtr 0
-                  Map.empty Private detism MayInline Pure NoSuperproc
+                  Map.empty False Private detism MayInline Pure NoSuperproc
     logUnbranch $ "Generating fresh " ++ show detism ++ " proc:"
                   ++ showProcDef 8 procDef
     logUnbranch $ "Unbranched generated " ++ show detism ++ " proc:"
@@ -597,30 +597,43 @@ hoistClosure exp@(Lambda mods params pstmts) pos = do
     defd <- gets (Set.toList . Set.filter (flip Set.member stmtVars . fst)
                              . Set.fromList . Map.toList . brVars)
     let (closedParams, closedVars) = unzip $ uncurry closedParamVar <$> defd
-    let env = Just closedParams
     logUnbranch $ "  With closed variables " ++ show closedVars
 
     tmpCtr <- gets brTempCtr
     let procProto = ProcProto name (closedParams ++ realParams) Set.empty
     let pDefRegular = ProcDef name procProto (ProcDefSrc pstmts) Nothing tmpCtr 0
-                      Map.empty Private detism Inline Pure NoSuperproc
+                      Map.empty False Private detism Inline Pure NoSuperproc
     pDefRegular' <- lift $ unbranchProc pDefRegular tmpCtr
-    logUnbranch $ "  Resultant regular proc: " ++ show procProto
+    logUnbranch $ "  Resultant hoisted proc: " ++ show procProto
     procSpec@ProcSpec{procSpecMod=mod,procSpecName=nm,procSpecID=procId}
-        <- lift (addProcDef pDefRegular')
+        <- lift $ addProcDef pDefRegular'
+    addClosure name procSpec closedVars pos
+hoistClosure (ProcRef ps@(ProcSpec m nm pID _) []) pos = do
+    name <- newProcName
+    addClosure name ps [] pos
+hoistClosure exp@(ProcRef ps _) pos = shouldnt $ "hoist closure of " ++ show exp
+hoistClosure exp pos = return $ maybePlace exp pos
+
+
+-- addClosure :: Unbrancher (Placed Exp)
+addClosure :: String -> ProcSpec -> [Exp] -> OptPos -> Unbrancher (Placed Exp)
+addClosure name regularProcSpec@(ProcSpec mod nm pID _) closedVars pos = do
+    logUnbranch $ "Creating closure for " ++ show regularProcSpec
+    ProcDef{procDetism=detism, procInlining=inlining, procImpurity=impurity,
+            procProto=procProto@ProcProto{procProtoParams=params}}
+        <- lift $ getProcDef regularProcSpec
+    let (closedParams, realParams) = List.partition ((== Closed) . paramFlowType) params
+    let params' = setClosureTypeOfHole 
+               <$> (realParams ++ [testOutParam{paramFlowType=Hole} | detism == SemiDet])
     let detism' = selectDetism detism Det detism
-    let foo p = case p of
-                    Param _ _ _ Hole -> setParamType intType p
-                    _ -> p
-    let params' = foo <$> realParams
-                    ++ [testOutParam{paramType=intType, paramFlowType=Hole}
-                       | detism == SemiDet]
+    let holeVars = paramToHoleVar <$> params
     let holeVars' = paramToHoleVar <$> params'
+    let closureProto = ProcProto name (closedParams ++ params') Set.empty
     let pDefClosure =
-            ProcDef name procProto{procProtoParams=closedParams ++ params'}
+            ProcDef name closureProto
             (ProcDefSrc
                 $ Unplaced <$>
-                    ProcCall (First mod nm (Just procId)) detism' False
+                    ProcCall (First mod nm $ Just pID) detism' False
                         ((Unplaced <$> closedVars) ++ holeVars')
                     :[ ForeignCall "lpvm" "cast" []
                          [var ParamIn ty, var ParamOut intType]
@@ -628,26 +641,17 @@ hoistClosure exp@(Lambda mods params pstmts) pos = do
                                                   ++ [testInExp | detism == SemiDet]
                     , flowsOut fl && ty /= intType && a == Hole
                     , let var f t = Unplaced $ Typed (Var nm f a) t cast])
-            Nothing tmpCtr 0
-            Map.empty Private detism' Inline Pure (ClosureOf procSpec)
-    pDefClosure' <- lift $ unbranchProc pDefClosure tmpCtr
-    closureProcSpec <- lift (addProcDef pDefClosure')
+            Nothing 0 0
+            Map.empty True Private detism' Inline impurity (ClosureOf regularProcSpec)
+    pDefClosure' <- lift $ unbranchProc pDefClosure 0
+    logUnbranch $ "  Resultant closure proc: " ++ show procProto
+    closureProcSpec <- lift $ addProcDef pDefClosure'
     return $ maybePlace (ProcRef closureProcSpec closedVars) pos
-hoistClosure (ProcRef ps@(ProcSpec m nm pID _) []) pos = do
-    ProcDef{procDetism=detism, procInlining=inlining, procImpurity=impurity,
-            procProto=ProcProto{procProtoParams=params,procProtoResources=ress}}
-        <- lift $ getProcDef ps
-    let resful = if Set.null ress then Resourceless else Resourceful
-    let mods = ProcModifiers detism inlining impurity resful [] []
-    -- XXXJ this is wrong
-    hoistClosure (Lambda mods params
-                            [Unplaced $ ProcCall (First m nm $ Just pID) detism False
-                                      $ paramToHoleVar <$> params]) pos
-hoistClosure exp@(ProcRef ps _) pos = shouldnt $ "hoist closure of " ++ show exp
-hoistClosure exp pos = return $ maybePlace exp pos
 
+setClosureTypeOfHole :: Param -> Param
+setClosureTypeOfHole p@(Param _ _ _ Hole) = setParamType intType p
+setClosureTypeOfHole p                    = p
 
--- addClosure :: 
 
 
 -- |Apply the function if the expression is a variable assignment,

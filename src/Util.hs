@@ -254,7 +254,7 @@ zipWith3M f (a:as) (b:bs) (c:cs) = do
     return $ d:ds
 
 
--- |zipWithM version for 3 lists.
+-- |zipWithM_ version for 3 lists.
 zipWith3M_ :: Monad m => (a -> b -> c -> m d) -> [a] -> [b] -> [c] -> m ()
 zipWith3M_ f as bs cs = zipWith3M f as bs cs >> return ()
 
