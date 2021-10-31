@@ -589,14 +589,14 @@ hoistClosure exp@(Lambda mods params pstmts) pos = do
     lift $ checkConflictingMods "anonymous procedure" pos unknown
     lift $ checkUnknownMods "anonymous procedure" pos conflict
     name <- newProcName
-    let holeVars = paramToHoleVar <$> params
-    logUnbranch $ "  With params " ++ show holeVars
-    let varsIn = foldStmts const ((. expInputs) . Set.union) Set.empty pstmts
-    let stmtVars = varsIn `Set.difference` Set.fromList (expVar . content <$> holeVars)
-    let realParams = List.filter ((`Set.member` varsIn) . paramName) params
-    defd <- gets (Set.toList . Set.filter (flip Set.member stmtVars . fst)
+    let holeVars = expVar . content . paramToHoleVar <$> params
+    let vars = mentionedVars pstmts
+    let toClose = vars `Set.difference` Set.fromList holeVars
+    let realParams = List.filter ((`Set.member` vars) . paramName) params
+    defd <- gets (Set.toList . Set.filter (flip Set.member toClose . fst)
                              . Set.fromList . Map.toList . brVars)
     let (closedParams, closedVars) = unzip $ uncurry closedParamVar <$> defd
+    logUnbranch $ "  With params " ++ show realParams
     logUnbranch $ "  With closed variables " ++ show closedVars
 
     tmpCtr <- gets brTempCtr
@@ -614,6 +614,10 @@ hoistClosure (ProcRef ps@(ProcSpec m nm pID _) []) pos = do
 hoistClosure exp@(ProcRef ps _) pos = shouldnt $ "hoist closure of " ++ show exp
 hoistClosure exp pos = return $ maybePlace exp pos
 
+mentionedVars :: [Placed Stmt] -> Set VarName
+mentionedVars pstmts = foldStmts const addInsOuts Set.empty pstmts
+  where
+    addInsOuts vars e = vars `Set.union` expInputs e `Set.union` expOutputs e
 
 -- addClosure :: Unbrancher (Placed Exp)
 addClosure :: String -> ProcSpec -> [Exp] -> OptPos -> Unbrancher (Placed Exp)
