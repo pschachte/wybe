@@ -61,10 +61,10 @@ normaliseItem (TypeDecl vis (TypeProto name params) (TypeCtors ctorVis ctors)
 normaliseItem (ModuleDecl vis name items pos) =
     normaliseSubmodule name vis pos items
 normaliseItem (RepresentationDecl params rep pos) = do
-    addParameters params pos
+    addParameters (RealTypeVar <$> params) pos
     addTypeRep rep pos
 normaliseItem (ConstructorDecl ctorVis params ctors pos) = do
-    addParameters params pos
+    addParameters (RealTypeVar <$> params) pos
     mapM_ (addConstructor ctorVis) ctors
 normaliseItem (ImportMods vis modspecs pos) =
     mapM_ (\spec -> addImport spec (importSpec Nothing vis)) modspecs
