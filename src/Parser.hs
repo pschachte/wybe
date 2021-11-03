@@ -466,7 +466,7 @@ primaryStmtExpr =
     <|> foreignCall
     <|> forLoop
     <|> varOrCall
-    <|> hole
+    <|> anonParamVar
     <|> intConst
     <|> floatConst
     <|> charConst
@@ -488,11 +488,11 @@ varOrCall = do
     return $ Call pos (init modVar) (last modVar) ParamIn []
 
 
-hole :: Parser StmtExpr
-hole = do
+anonParamVar :: Parser StmtExpr
+anonParamVar = do
     pos <- tokenPosition <$> symbol "@"
-    holeNum <- optionMaybe intConst
-    return $ Call pos [] "@" ParamIn $ maybeToList holeNum
+    num <- optionMaybe intConst
+    return $ Call pos [] "@" ParamIn $ maybeToList num
 
 
 -- | Parse a sequence of StmtExprs enclosed in braces.
@@ -1053,9 +1053,9 @@ stmtExprToExp (Call pos [] "^" ParamIn [exp,op]) = do
 stmtExprToExp (Call pos [] "@" flow exps) = do
     exps' <- mapM stmtExprToExp exps
     case content <$> exps' of
-        [] -> return $ Placed (HoleVar Nothing flow) pos
-        [IntValue i] | i > 0 -> return $ Placed (HoleVar (Just i) flow) pos
-        _ -> syntaxError pos "invalid hole expression"
+        [] -> return $ Placed (AnonParamVar Nothing flow) pos
+        [IntValue i] | i > 0 -> return $ Placed (AnonParamVar (Just i) flow) pos
+        _ -> syntaxError pos "invalid anonymous parameter expression"
 stmtExprToExp (Call pos [] "if" ParamIn [conditional]) =
     translateConditionalExp conditional
 stmtExprToExp call@(Call pos [] "{}" ParamIn statements) = do

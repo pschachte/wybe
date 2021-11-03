@@ -112,7 +112,7 @@ type Flattener = StateT FlattenerState Compiler
 data FlattenerState = Flattener {
     flattened     :: [Placed Stmt], -- ^Flattened code generated, reversed
     postponed     :: [Placed Stmt], -- ^Flattened code to come after
-    holeState     :: HoleState,     -- ^Information we know about holes
+    anonProcState :: AnonProcState, -- ^Information we know about anon procs
     tempCtr       :: Int,           -- ^Temp variable counter
     currPos       :: OptPos,        -- ^Position of current statement
     stmtDefs      :: Set VarName,   -- ^Variables defined by this statement
@@ -120,32 +120,50 @@ data FlattenerState = Flattener {
                                     -- proc body
     }
 
-data HoleState = HoleState {
-    totalLambdas  :: Integer,   -- ^Total number of lambdas encountered
-    currentLambda :: Integer,   -- ^Current lambda number
-    holeCount :: Maybe Integer, -- ^Number of holes encountered in current
-                                -- lambda. Nothing if we have numbered holes
-    params :: Map Integer Param -- ^Processed list of holes as params
+data AnonProcState = AnonProcState {
+    totalAnons  :: Integer,      -- ^Total number of anon proc encountered
+    currentAnon :: Integer,      -- ^Current anon proc number
+    paramCount :: Maybe Integer, -- ^Number of params encountered in current
+                                 -- lambda. Nothing if we have numbered params
+    params :: Map Integer Param  -- ^Unrocessed params
     }
 
 
 initFlattenerState :: Set VarName -> FlattenerState
-initFlattenerState = Flattener [] [] initHoleState 0 Nothing Set.empty
+initFlattenerState = Flattener [] [] initAnonProcState 0 Nothing Set.empty
 
 
-initHoleState :: HoleState
-initHoleState = HoleState 0 0 (Just 0) Map.empty
+initAnonProcState :: AnonProcState
+initAnonProcState = AnonProcState 0 0 (Just 0) Map.empty
 
-pushHoleState :: HoleState -> HoleState
-pushHoleState (HoleState t _ _ _) = 
+
+pushAnonProcState :: AnonProcState -> AnonProcState
+pushAnonProcState (AnonProcState t _ _ _) = 
     let t' = t + 1
-    in initHoleState{totalLambdas=t', currentLambda=t'}
+    in initAnonProcState{totalAnons=t', currentAnon=t'}
 
-popHoleState :: HoleState -> HoleState -> HoleState
-popHoleState old@HoleState{} (HoleState t _ _ _) = old{totalLambdas=t}
 
-holeStateParams :: Map Integer Param -> [Param]
-holeStateParams = Map.elems
+popAnonProcState :: AnonProcState -> AnonProcState -> AnonProcState
+popAnonProcState old@AnonProcState{} (AnonProcState t _ _ _) = old{totalAnons=t}
+
+
+processAnonProcParams :: AnonProcState -> [Param]
+processAnonProcParams AnonProcState{params=paramMap, currentAnon=current} 
+    | Map.null paramMap = []
+    | otherwise = List.map 
+                    (\i -> Map.findWithDefault 
+                            (makeAnonParam (makeAnonParamName current i) ParamIn)
+                            i paramMap) 
+                    [1 .. Set.findMax (Map.keysSet paramMap)]
+
+
+makeAnonParamName :: Integer -> Integer -> VarName 
+makeAnonParamName lambda num = specialName2 (show lambda) (show num)
+
+
+makeAnonParam :: VarName -> FlowDirection -> Param 
+makeAnonParam name flow = Param name AnyType flow Ordinary 
+
 
 
 emit :: OptPos -> Stmt -> Flattener ()
@@ -268,11 +286,11 @@ flattenStmt' stmt@(ProcCall (First [] "=" id) Det res [arg1,arg2]) pos detism = 
     case (arg1content, arg2content) of
       (Var var flow1 _, _) | flowsOut flow1 && Set.null arg2Vars -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
-        arg1' <- flattenHole (content arg1) AnyType Nothing (place arg1)
+        arg1' <- flattenAnonParam (content arg1) AnyType Nothing (place arg1)
         flattenAssignment (expVar $ content arg1') arg1' arg2 pos
       (_, Var var flow2 _) | flowsOut flow2 && Set.null arg1Vars -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
-        arg1' <- flattenHole (content arg1) AnyType Nothing (place arg1)
+        arg1' <- flattenAnonParam (content arg1) AnyType Nothing (place arg1)
         flattenAssignment var arg2 arg1' pos
       (Fncall mod name args, _)
         | not (Set.null arg1Vars) && Set.null arg2Vars -> do
@@ -280,7 +298,7 @@ flattenStmt' stmt@(ProcCall (First [] "=" id) Det res [arg1,arg2]) pos detism = 
         flattenStmt stmt' pos detism
       (_, Fncall mod name args)
         | not (Set.null arg2Vars) && Set.null arg1Vars -> do
-        arg1' <- flattenHole (content arg1) AnyType Nothing (place arg1)
+        arg1' <- flattenAnonParam (content arg1) AnyType Nothing (place arg1)
         let stmt' = ProcCall  (First mod name Nothing) Det False (args++[arg1'])
         flattenStmt stmt' pos detism
       (_,_) | Set.null arg1Vars && Set.null arg2Vars -> do
@@ -500,10 +518,10 @@ flattenExp expr@(CharValue _) ty castFrom pos =
 flattenExp expr@(Var "_" ParamIn _) ty castFrom pos = do
     dummyName <- tempVar
     return $ typeAndPlace (Var dummyName ParamOut Ordinary) AnyType castFrom pos
-flattenExp expr@(Var name dir argFlow) ty castFrom pos = do
+flattenExp expr@(Var name dir _) ty castFrom pos = do
     logFlatten $ "  Flattening arg " ++ show expr
     defd <- gets (Set.member name . defdVars)
-    if dir == ParamIn && not defd && argFlow /= Hole
+    if dir == ParamIn && not defd
     then do -- Reference to an undefined variable: assume it's meant to be
             -- a niladic function instead of a variable reference
         logFlatten $ "  Unknown variable '" ++ show name
@@ -515,8 +533,8 @@ flattenExp expr@(Var name dir argFlow) ty castFrom pos = do
         let expr' = typeAndPlace expr ty castFrom pos
         logFlatten $ "  Arg flattened to " ++ show expr'
         return expr'
-flattenExp expr@(HoleVar _ _) ty castFrom pos = 
-    flattenHole expr ty castFrom pos
+flattenExp expr@(AnonParamVar _ _) ty castFrom pos = 
+    flattenAnonParam expr ty castFrom pos
 flattenExp expr@(ProcRef ms es) ty castFrom pos = do
     es' <- mapM (flattenPExp . Unplaced) es
     return $ typeAndPlace (ProcRef ms (content <$> es')) ty castFrom pos
@@ -540,16 +558,17 @@ flattenExp (CondExp cond thn els) ty castFrom pos = do
     return $ maybePlace (Var resultName ParamIn flowType) pos
 flattenExp expr@(Lambda mods _ pstmts) ty castFrom pos = do
     state <- get
-    let holes = holeState state
-    modify (\s -> s{flattened=[], postponed=[], holeState=pushHoleState holes})
+    let anonState = anonProcState state
+    modify (\s -> s{flattened=[], postponed=[], 
+                    anonProcState=pushAnonProcState anonState})
     flattenStmts pstmts $ modifierDetism mods
     flushPostponed
     state' <- get
-    let holes' = holeState state'
-    put state{holeState=popHoleState holes holes', 
+    let anonState' = anonProcState state'
+    put state{anonProcState=popAnonProcState anonState anonState', 
               tempCtr=tempCtr state'}
-    let holeParams = holeStateParams $ params holes'
-    return $ typeAndPlace (Lambda mods holeParams (reverse $ flattened state')) 
+    let lambdaParams = processAnonProcParams anonState'
+    return $ typeAndPlace (Lambda mods lambdaParams (reverse $ flattened state')) 
                           ty castFrom pos
 flattenExp (Fncall mod name exps) ty castFrom pos = do
     let stmtBuilder = ProcCall (First mod name Nothing) Det False
@@ -606,12 +625,12 @@ flattenCall stmtBuilder isForeign ty castFrom pos exps = do
     return $ Unplaced $ maybeType (Var resultName varflow $ Implicit pos)
                        ty castFrom
 
-flattenHole :: Exp -> TypeSpec -> Maybe TypeSpec -> OptPos
+flattenAnonParam :: Exp -> TypeSpec -> Maybe TypeSpec -> OptPos
             -> Flattener (Placed Exp)
-flattenHole expr@(HoleVar mbNum dir) ty castFrom pos = do
-    logFlatten $ "  Flattening hole " ++ show expr
-    holes <- gets holeState
-    let HoleState _ lambdas count params = holes
+flattenAnonParam expr@(AnonParamVar mbNum dir) ty castFrom pos = do
+    logFlatten $ "  Flattening anon param " ++ show expr
+    anonState <- gets anonProcState
+    let AnonProcState _ lambdas count params = anonState
     (num, count') <- case (mbNum, count) of
         (Nothing, Just n) -> 
             let n' = n + 1
@@ -619,29 +638,31 @@ flattenHole expr@(HoleVar mbNum dir) ty castFrom pos = do
         (Just n, _) | fromMaybe 0 count == 0 -> do
             return (n, Nothing)
         _ -> do 
-            lift $ message Error "Mixed use of numbered and un-numbered holes" pos
+            lift $ message Error 
+                    "Mixed use of numbered and un-numbered anonymous parameters" pos
             return (-1, count)
-    let name = specialName2 (show lambdas) (show num)
-    let var = Var name dir Hole
+    let name = makeAnonParamName lambdas num
+    let var = Var name dir Ordinary 
     let paramDir = paramFlow <$> Map.lookup num params
     let paramDir' = if fromMaybe dir paramDir == dir 
                     then dir 
                     else ParamInOut
-    let param = Param name AnyType paramDir' Hole
-    modify (\s -> s{holeState=holes{holeCount=count',
-                                    params=Map.insert num param params}})
+    let param = makeAnonParam name paramDir'
+    modify (\s -> s{anonProcState=anonState{paramCount=count',
+                                            params=Map.insert num param params}})
     if lambdas == 0
     then do
         lift $ message Error
-               ("Hole @" ++ maybe "" show mbNum ++ " outside of lambda expression")
+               ("Anonymous parameter @" ++ maybe "" show mbNum 
+                ++ " outside of lambda expression")
                pos
         flattenExp var ty castFrom pos
     else do
         noteVarIntro name
         expr' <- flattenExp var ty castFrom pos
-        logFlatten $ "  Hole flattened " ++ show var ++ " -> " ++ show expr'
+        logFlatten $ "  Anon param flattened " ++ show var ++ " -> " ++ show expr'
         return expr'
-flattenHole expr _ _ pos = return $ maybePlace expr pos
+flattenAnonParam expr _ _ pos = return $ maybePlace expr pos
 
 
 

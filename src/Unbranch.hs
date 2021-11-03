@@ -589,10 +589,10 @@ hoistClosure exp@(Lambda mods params pstmts) pos = do
     lift $ checkConflictingMods "anonymous procedure" pos unknown
     lift $ checkUnknownMods "anonymous procedure" pos conflict
     name <- newProcName
-    let holeVars = expVar . content . paramToHoleVar <$> params
+    let paramVars = expVar . content . paramToVar <$> params
     let vars = mentionedVars pstmts
-    let toClose = vars `Set.difference` Set.fromList holeVars
-    let realParams = List.filter ((`Set.member` vars) . paramName) params
+    let toClose = vars `Set.difference` Set.fromList paramVars
+    let realParams = List.filter (isUsedParam vars) params
     defd <- gets (Set.toList . Set.filter (flip Set.member toClose . fst)
                              . Set.fromList . Map.toList . brVars)
     let (closedParams, closedVars) = unzip $ uncurry closedParamVar <$> defd
@@ -614,10 +614,17 @@ hoistClosure (ProcRef ps@(ProcSpec m nm pID _) []) pos = do
 hoistClosure exp@(ProcRef ps _) pos = shouldnt $ "hoist closure of " ++ show exp
 hoistClosure exp pos = return $ maybePlace exp pos
 
+
 mentionedVars :: [Placed Stmt] -> Set VarName
 mentionedVars pstmts = foldStmts const addInsOuts Set.empty pstmts
   where
     addInsOuts vars e = vars `Set.union` expInputs e `Set.union` expOutputs e
+
+
+isUsedParam :: Set VarName -> Param -> Bool
+isUsedParam vars (Param nm _ _ (Resource _)) = nm `Set.member` vars
+isUsedParam _    _                           = True
+
 
 -- addClosure :: Unbrancher (Placed Exp)
 addClosure :: String -> ProcSpec -> [Exp] -> OptPos -> Unbrancher (Placed Exp)
@@ -627,23 +634,23 @@ addClosure name regularProcSpec@(ProcSpec mod nm pID _) closedVars pos = do
             procProto=procProto@ProcProto{procProtoParams=params}}
         <- lift $ getProcDef regularProcSpec
     let (closedParams, realParams) = List.partition ((== Closed) . paramFlowType) params
-    let params' = setClosureTypeOfHole 
-               <$> (realParams ++ [testOutParam{paramFlowType=Hole} | detism == SemiDet])
+    let params' = setClosureType 
+               <$> (realParams ++ [testOutParam | detism == SemiDet])
     let detism' = selectDetism detism Det detism
-    let holeVars = paramToHoleVar <$> params
-    let holeVars' = paramToHoleVar <$> params'
+    let paramVars = paramToVar <$> params
+    let paramVars' = paramToVar <$> params'
     let closureProto = ProcProto name (closedParams ++ params') Set.empty
     let pDefClosure =
             ProcDef name closureProto
             (ProcDefSrc
                 $ Unplaced <$>
                     ProcCall (First mod nm $ Just pID) detism' False
-                        ((Unplaced <$> closedVars) ++ holeVars')
+                        ((Unplaced <$> closedVars) ++ paramVars')
                     :[ ForeignCall "lpvm" "cast" []
                          [var ParamIn ty, var ParamOut intType]
-                    | Typed (Var nm fl a) ty cast <- (content <$> holeVars)
+                    | Typed (Var nm fl a) ty cast <- (content <$> paramVars)
                                                   ++ [testInExp | detism == SemiDet]
-                    , flowsOut fl && ty /= intType && a == Hole
+                    , flowsOut fl && ty /= intType && not (argFlowTypeIsResource a)
                     , let var f t = Unplaced $ Typed (Var nm f a) t cast])
             Nothing 0 0
             Map.empty True Private detism' Inline impurity (ClosureOf regularProcSpec)
@@ -652,9 +659,9 @@ addClosure name regularProcSpec@(ProcSpec mod nm pID _) closedVars pos = do
     closureProcSpec <- lift $ addProcDef pDefClosure'
     return $ maybePlace (ProcRef closureProcSpec closedVars) pos
 
-setClosureTypeOfHole :: Param -> Param
-setClosureTypeOfHole p@(Param _ _ _ Hole) = setParamType intType p
-setClosureTypeOfHole p                    = p
+setClosureType :: Param -> Param
+setClosureType p@(Param _ _ _ (Resource _)) = p
+setClosureType p                            = setParamType intType p
 
 
 

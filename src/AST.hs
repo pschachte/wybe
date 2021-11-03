@@ -28,7 +28,7 @@ module AST (
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), 
   paramTypeFlow, primParamTypeFlow, setParamArgFlowType, 
-  paramToHoleVar, primParamToArg, closedParamVar, unzipTypeFlow, unzipTypeFlows,
+  paramToVar, primParamToArg, closedParamVar, unzipTypeFlow, unzipTypeFlows,
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), StringVariant(..), Generator(..), Stmt(..), ProcFunctor(..),
   regularProc, regularModProc,
@@ -95,7 +95,6 @@ module AST (
   showProcModifiers, Inlining(..), Impurity(..), Resourcefulness(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
   checkConflictingMods, checkUnknownMods,
-  expHoles, orderedHoles,
   specialChar, specialName, specialName2, outputVariableName, outputStatusName,
   envParamName, envPrimParam,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
@@ -2271,7 +2270,7 @@ foldExp' _   _   val Var{}          = val
 foldExp' _   _   val ProcRef{}      = val
 foldExp' sfn efn val (Lambda _ _ pstmts) = foldStmts sfn efn val pstmts
 foldExp' sfn efn val (Typed exp _ _) = foldExp sfn efn val exp
-foldExp' _   _   val HoleVar{}      = val
+foldExp' _   _   val AnonParamVar{}      = val
 foldExp' sfn efn val (Where stmts exp) =
     let val1 = foldStmts sfn efn val stmts
     in  foldExp sfn efn val1 $content exp
@@ -2507,7 +2506,7 @@ data PrimParam = PrimParam {
     primParamName::PrimVarName,
     primParamType::TypeSpec,
     primParamFlow::PrimFlow,
-    primParamFlowType::ArgFlowType, -- XXX Not sure this is still needed
+    primParamFlowType::ArgFlowType,
     primParamInfo::ParamInfo        -- ^What we've inferred about this param
     } deriving (Eq, Generic)
 
@@ -2559,12 +2558,10 @@ setParamArgFlowType :: ArgFlowType -> Param -> Param
 setParamArgFlowType ft p = p{paramFlowType=ft}
 
 
--- |Convert a Param to a Hole Var
-paramToHoleVar :: Param -> Placed Exp
-paramToHoleVar (Param n t f res@(Resource _)) 
-    = Unplaced $ Typed (Var n f res) t Nothing
-paramToHoleVar (Param n t f _) 
-    = Unplaced $ Typed (Var n f Hole) t Nothing
+-- |Convert a Param to a Var
+paramToVar :: Param -> Placed Exp
+paramToVar (Param n t f ft) 
+    = Unplaced $ Typed (Var n f ft) t Nothing
 
 
 -- |Convert a PrimParam to a PrimArg
@@ -2707,7 +2704,7 @@ data Exp
                -- if it is a cast, the type of the Exp argument.  If not a cast,
                -- these two must be the same.
       -- The following are eliminated during flattening
-      | HoleVar (Maybe Integer) FlowDirection
+      | AnonParamVar (Maybe Integer) FlowDirection
       | Where [Placed Stmt] (Placed Exp)
       | CondExp (Placed Stmt) (Placed Exp) (Placed Exp)
       | Fncall ModSpec ProcName [Placed Exp]
@@ -2933,9 +2930,10 @@ argIntegerValue _              = Nothing
 data ArgFlowType = Ordinary        -- ^An argument/parameter as written by user
                  | HalfUpdate      -- ^One half of a variable update (!var)
                  | Implicit OptPos -- ^Temp var for expression at that position
-                 | Resource ResourceSpec -- ^An argument to pass a resource
-                 | Hole
-                 | Closed
+                 | Resource ResourceSpec 
+                                   -- ^An argument to pass a resource
+                 | Closed          -- ^An argument to be passed in the closure 
+                                   -- environment
      deriving (Eq,Ord,Generic)
 
 instance Show ArgFlowType where
@@ -2943,7 +2941,6 @@ instance Show ArgFlowType where
     show HalfUpdate = "%"
     show (Implicit _) = ""
     show (Resource _) = "#"
-    show Hole = "@"
     show Closed = "^"
 
 argFlowTypeIsResource :: ArgFlowType -> Bool 
@@ -2998,7 +2995,6 @@ argDescription (ArgVar var _ flow ftype _) =
           HalfUpdate     -> " update of variable " ++ primVarName var
           Implicit pos   -> " expression" ++ showOptPos pos
           Resource rspec -> " resource " ++ show rspec
-          Hole           -> " hole"
           Closed         -> " closure argument")
 argDescription (ArgInt val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgFloat val _) = "constant argument '" ++ show val ++ "'"
@@ -3054,7 +3050,7 @@ expOutputs (Var name flow _) =
 expOutputs (Lambda _ _ _) = Set.empty
 expOutputs (ProcRef _ _) = Set.empty
 expOutputs (Typed expr _ _) = expOutputs expr
-expOutputs (HoleVar _ _) = Set.empty
+expOutputs (AnonParamVar _ _) = Set.empty
 expOutputs (Where _ pexp) = expOutputs $ content pexp
 expOutputs (CondExp _ pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
 expOutputs (Fncall _ _ args) = pexpListOutputs args
@@ -3077,7 +3073,7 @@ expInputs (Var name flow _) =
 expInputs (Lambda _ _ _) = Set.empty
 expInputs (ProcRef _ _) = Set.empty
 expInputs (Typed expr _ _) = expInputs expr
-expInputs (HoleVar _ _) = Set.empty
+expInputs (AnonParamVar _ _) = Set.empty
 expInputs (Where _ pexp) = expInputs $ content pexp
 expInputs (CondExp _ pexp1 pexp2) = pexpListInputs [pexp1,pexp2]
 expInputs (Fncall _ _ args) = pexpListInputs args
@@ -3145,33 +3141,6 @@ varsInPrimArg _ (ArgChar _ _)     = Set.empty
 varsInPrimArg _ (ArgUnneeded _ _) = Set.empty
 varsInPrimArg _ (ArgUndef _)      = Set.empty
 
--- | Add a hole to a map of hole names to respective params
-expHoles :: Map.Map String Param -> Exp -> Map.Map String Param
-expHoles holes (Var nm vFlow Hole) =
-    case Map.lookup nm holes of
-        Nothing -> Map.insert nm (Param nm AnyType vFlow Hole) holes
-        Just (Param _ t pFlow _) ->
-            let vFlow' = case (pFlow, vFlow) of
-                            (ParamInOut, _) -> ParamInOut
-                            (ParamIn, ParamIn) -> ParamIn
-                            (ParamIn, _) -> ParamInOut
-                            (ParamOut, ParamOut) -> ParamOut
-                            (ParamOut, _) -> vFlow
-            in Map.insert nm (Param nm t vFlow' Hole) holes
-expHoles holes (Typed exp ty _) =
-    maybe holes' (flip (Map.adjust (\p -> p{paramType=ty})) holes') $ expVar' exp
-  where holes' = expHoles holes exp
-expHoles holes _ = holes
-
--- | Convert a map of holes to a list of variable names and params, 
--- with correct parameter order
-orderedHoles :: Map.Map String Param -> [(VarName, Param)]
-orderedHoles holeMap =
-    sortOn (trustFromJust "orderedHoles" . (readMaybe::String -> Maybe Int)
-                . last . splitOn [specialChar] . fst)
-    $ Map.toList holeMap
-
-
 ----------------------------------------------------------------
 --                       Generating Symbols
 
@@ -3214,7 +3183,7 @@ envParamName = PrimVarName (specialName "env") 0
 
 
 envPrimParam :: PrimParam
-envPrimParam = PrimParam envParamName AnyType FlowIn Hole (ParamInfo False False)
+envPrimParam = PrimParam envParamName AnyType FlowIn Ordinary (ParamInfo False False)
 
 
 ----------------------------------------------------------------
@@ -3461,11 +3430,11 @@ instance Show Param where
 
 -- |How to show a formal parameter.
 instance Show PrimParam where
-  show (PrimParam name typ dir _ (ParamInfo unneeded reference)) =
-      let (pre,post) = mapFst (if reference then ("*"++) else id)
+  show (PrimParam name typ dir ft (ParamInfo unneeded reference)) =
+      let (pre,post) = mapFst (if reference then (++"*") else id)
                        (if unneeded then ("[","]") else ("",""))
-      in  pre ++ primFlowPrefix dir ++ show name ++ showTypeSuffix typ Nothing
-          ++ post
+      in  pre ++ show ft ++ primFlowPrefix dir ++ show name 
+          ++ showTypeSuffix typ Nothing ++ post
 
 
 -- |Show the type of an expression, if it's known.
@@ -3639,12 +3608,12 @@ instance Show Exp where
   show (StringValue s v) = show v ++ show s
   show (CharValue c) = show c
   show (Var name dir flowtype) = show flowtype ++ flowPrefix dir ++ name
-  show (Lambda mods _ ss) = 
+  show (Lambda mods params ss) = 
       let modFlags = showProcModifiers mods
       in modFlags ++ (if modFlags == "" then "" else "@") 
-         ++ "{" ++ intercalate "\n" (showStmt 0 . content <$> ss) ++ "}"
+         ++ "((" ++ show params ++ ")){" ++ intercalate "\n" (showStmt 0 . content <$> ss) ++ "}"
   show (ProcRef ps es) = "@" ++ show ps ++ "<" ++ intercalate ", " (show <$> es) ++ ">"
-  show (HoleVar num dir) = flowPrefix dir ++ "@" ++ maybe "" show num
+  show (AnonParamVar num dir) = flowPrefix dir ++ "@" ++ maybe "" show num
   show (Where stmts exp) = show exp ++ " where" ++ showBody 8 stmts
   show (CondExp cond thn els) =
     "if\n" ++ show cond ++ " then " ++ show thn ++ " else " ++ show els

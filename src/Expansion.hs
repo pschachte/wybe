@@ -45,7 +45,7 @@ procExpansion pspec def = do
     let params = primProtoParams proto
     let needsRefs = isClosure || any (isResourcefulHigherOrder . primParamType) params
     let params' = markParamReference needsRefs
-                . markParamNeededness used ins
+                . markParamNeededness isClosure used ins
                <$> params
     let reallyNeedsRefs = any (((not . paramInfoUnneeded) &&& paramInfoReference) 
                                 . primParamInfo) params' 
@@ -70,26 +70,28 @@ procExpansion pspec def = do
 -- |Update the param to indicate whether the param is actually needed based
 -- on the set of variables used in the prod body and the set of input var
 -- names.  We consider outputs to be unneeded if they're identical to inputs.
-markParamNeededness :: Set PrimVarName -> Set PrimVarName -> PrimParam
-                    -> PrimParam
-markParamNeededness used _ param@PrimParam{primParamName=nm,
-                                           primParamFlow=FlowIn,
-                                           primParamFlowType=fTy} =
-    param {primParamInfo = (primParamInfo param) {paramInfoUnneeded =
-                                                    Set.notMember nm used
-                                                    && fTy /= Hole}}
-markParamNeededness _ ins param@PrimParam{primParamName=nm,
-                                          primParamFlow=FlowOut,
-                                          primParamFlowType=fTy} =
-    param {primParamInfo = (primParamInfo param) {paramInfoUnneeded =
-                                                    Set.member nm ins
-                                                    && fTy /= Hole}}
+markParamNeededness :: Bool -> Set PrimVarName -> Set PrimVarName
+                    -> PrimParam -> PrimParam
+markParamNeededness isClosure used _ param@PrimParam{primParamName=nm,
+                                                     primParamFlow=FlowIn,
+                                                     primParamFlowType=ft,
+                                                     primParamInfo=info} =
+    param {primParamInfo=info{paramInfoUnneeded=Set.notMember nm used
+                                                && (not isClosure 
+                                                    || argFlowTypeIsResource ft)}}
+markParamNeededness isClosure _ ins param@PrimParam{primParamName=nm,
+                                                    primParamFlow=FlowOut,
+                                                    primParamFlowType=ft,
+                                                    primParamInfo=info} =
+    param {primParamInfo=info{paramInfoUnneeded=Set.member nm ins
+                                                && (not isClosure 
+                                                    || argFlowTypeIsResource ft)}}
 
 markParamReference :: Bool -> PrimParam -> PrimParam
 markParamReference asRef param@PrimParam{primParamFlowType=Resource _} =
-    param {primParamInfo = (primParamInfo param) {paramInfoReference = asRef}}
+    param {primParamInfo=(primParamInfo param) {paramInfoReference = asRef}}
 markParamReference _ param =
-    param {primParamInfo = (primParamInfo param) {paramInfoReference = False}}
+    param {primParamInfo=(primParamInfo param) {paramInfoReference = False}}
     
 
 -- |Type to remember the variable renamings.

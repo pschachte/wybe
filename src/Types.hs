@@ -1394,8 +1394,14 @@ higherCallCheck caller callFn pos callerTypeFlows detism = do
     callFnTy <- expType callFn >>= ultimateType
     let higherArgTy 
             = case callFnTy of
-                HigherOrderType mods tfs -> HigherOrderType mods callerTypeFlows
+                HigherOrderType mods tfs -> 
+                    if length callerTypeFlows == length tfs - 1
+                     && last tfs == TypeFlow boolType ParamOut
+                    then HigherOrderType mods (callerTypeFlows ++ [TypeFlow boolType ParamOut])
+                    else HigherOrderType mods callerTypeFlows
                 _ -> HigherOrderType defaultProcModifiers callerTypeFlows
+    logTyped $ "Checking call " ++ show callFn ++ ":" ++ show callFnTy
+            ++ " with type " ++ show higherArgTy
     void $ unifyTypes (ReasonHigher caller (content callFn) pos) callFnTy higherArgTy
 
 matchProcRefTypeList :: Ident -> Ident -> OptPos -> [TypeSpec] -> Determinism
@@ -1405,7 +1411,6 @@ matchProcRefTypeList caller callee pos [argTy] detismContext calleeInfo = do
     let args = procInfoArgs calleeInfo
     let pspec = procInfoProc calleeInfo
     procTy <- expType (Unplaced $ ProcRef pspec []) >>= ultimateType
-    -- XXXJ
     unifyTypes (ReasonProcRef caller pspec pos) procTy argTy
     typing <- get
     valid <- validTyping
@@ -1788,9 +1793,6 @@ modecheckStmt m name defPos assigned detism tmpCount final
     logTyped $ "    actual types     : " ++ show actualTypes
     let actualModes = List.map (expMode assigned) fnArgs'
     logTyped $ "    actual modes     : " ++ show actualModes
-    let flowErrs = [ReasonArgFlow (show $ innerExp $ content fn) num pos
-                   | ((mode,avail,_),num) <- zip actualModes [0..]
-                   , not avail && flowsIn mode]
     checkFlowErrors False True (show $ innerExp $ content fn)
                     pos actualModes ([],assigned,tmpCount')
       $ do
@@ -1800,8 +1802,11 @@ modecheckStmt m name defPos assigned detism tmpCount final
         let assigned' = bindingStateSeq detism Pure
                             (pexpListOutputs (fn':args')) assigned
         let stmt' = case fnTy of
-                    HigherOrderType mods fnTyFlows
-                        -> ProcCall (Higher fn') (modifierDetism mods) resourceful args'
+                    HigherOrderType mods fnTyFlows ->
+                        let detism' = if sameLength args fnTyFlows
+                                      then modifierDetism mods
+                                      else SemiDet       
+                        in ProcCall (Higher fn') detism' resourceful args'
                     _ -> shouldnt $ "modecheckStmt" ++ show stmt
         return ([maybePlace stmt' pos],
                 assigned',tmpCount')
@@ -2037,8 +2042,7 @@ matchProcType' ty procInfo = do
         Err _ -> Nothing
 
 
-
--- |Add in-flowing hole to a set of varnames
+-- |Add in-flowing params to a set of varnames
 collectInParams :: Set.Set VarName -> Param -> Set.Set VarName
 collectInParams s (Param n _ flow _)
     | flowsIn flow = Set.insert n s
