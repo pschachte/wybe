@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 
 *main* > public {inline,impure} (0 calls)
 0: alias5.<0>
-(io##0:wybe.phantom, ?io##1:wybe.phantom):
+(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     alias5.bar<0>(~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @alias5:28:2
@@ -21,7 +21,7 @@ AFTER EVERYTHING:
 
 bar > public (1 calls)
 0: alias5.bar<0>
-bar(io##0:wybe.phantom, ?io##10:wybe.phantom):
+bar(#io##0:wybe.phantom, #?io##10:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     alias5.replicate1<0>(100:wybe.int, ?p2##0:wybe.int, 800:wybe.int, ?p4##0:wybe.int, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @alias5:14:4
@@ -42,7 +42,7 @@ bar(io##0:wybe.phantom, ?io##10:wybe.phantom):
 
 replicate1 > public (2 calls)
 0: alias5.replicate1<0>
-replicate1(v1##0:wybe.int, ?v2##0:wybe.int, v3##0:wybe.int, ?v4##1:wybe.int, io##0:wybe.phantom, ?io##2:wybe.phantom):
+replicate1(v1##0:wybe.int, ?v2##0:wybe.int, v3##0:wybe.int, ?v4##1:wybe.int, #io##0:wybe.phantom, #?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.print_string<0>("random replicate1":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #5 @io:nn:nn

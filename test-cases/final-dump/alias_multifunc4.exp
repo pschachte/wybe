@@ -15,7 +15,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: alias_multifunc4.<0>
-(io##0:wybe.phantom, ?io##18:wybe.phantom):
+(#io##0:wybe.phantom, #?io##18:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#3##0:position.position)
@@ -46,7 +46,7 @@ AFTER EVERYTHING:
 
 replicate1 > public (1 calls)
 0: alias_multifunc4.replicate1<0>
-replicate1(pa##0:position.position, ?pb##1:position.position, ?pc##0:position.position, io##0:wybe.phantom, [?io##0:wybe.phantom]):
+replicate1(pa##0:position.position, ?pb##1:position.position, ?pc##0:position.position, #io##0:wybe.phantom, [#?io##0:wybe.phantom]):
  AliasPairs: [(pa##0,pc##0)]
  InterestingCallProperties: []
     foreign llvm move(pa##0:position.position, ?pc##0:position.position) @alias_multifunc4:8:6
@@ -59,7 +59,7 @@ replicate1(pa##0:position.position, ?pb##1:position.position, ?pc##0:position.po
 
 replicate21 > public (1 calls)
 0: alias_multifunc4.replicate21<0>
-replicate21(?pb##0:position.position, io##0:wybe.phantom, ?io##2:wybe.phantom):
+replicate21(?pb##0:position.position, #io##0:wybe.phantom, #?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#3##0:position.position)
@@ -73,7 +73,7 @@ replicate21(?pb##0:position.position, io##0:wybe.phantom, ?io##2:wybe.phantom):
 
 replicate22 > public (1 calls)
 0: alias_multifunc4.replicate22<0>
-replicate22(?pb##0:position.position, ?pc##1:position.position, io##0:wybe.phantom, ?io##4:wybe.phantom):
+replicate22(?pb##0:position.position, ?pc##1:position.position, #io##0:wybe.phantom, #?io##4:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#3##0:position.position)
@@ -333,7 +333,7 @@ entry:
 
 printPosition > public (0 calls)
 0: position.printPosition<0>
-printPosition(pos##0:position.position, io##0:wybe.phantom, ?io##5:wybe.phantom):
+printPosition(pos##0:position.position, #io##0:wybe.phantom, #?io##5:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.print_string<0>(" (":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #7 @io:nn:nn

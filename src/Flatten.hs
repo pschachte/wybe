@@ -536,8 +536,8 @@ flattenExp expr@(Var name dir _) ty castFrom pos = do
 flattenExp expr@(AnonParamVar _ _) ty castFrom pos = 
     flattenAnonParam expr ty castFrom pos
 flattenExp expr@(ProcRef ms es) ty castFrom pos = do
-    es' <- mapM (flattenPExp . Unplaced) es
-    return $ typeAndPlace (ProcRef ms (content <$> es')) ty castFrom pos
+    es' <- (content <$>) <$> mapM (flattenPExp . Unplaced) es
+    return $ typeAndPlace (ProcRef ms es') ty castFrom pos
 flattenExp (Where stmts pexp) _ _ _ = do
     flattenStmts stmts Det
     flattenPExp pexp

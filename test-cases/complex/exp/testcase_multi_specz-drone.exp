@@ -52,7 +52,7 @@ AFTER BUILDING MAIN:
 
 *main* > {terminal,inline,impure} (0 calls)
 0: .<0>
-(argc##0:wybe.int, argv##0:wybe.array.raw_array(wybe.c_string), ?exit_code##0:wybe.int, ?io##2:wybe.phantom):
+(#argc##0:wybe.int, #argv##0:wybe.array.raw_array(wybe.c_string), #?exit_code##0:wybe.int, #?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c {impure} gc_init @memory_management:nn:nn
@@ -77,7 +77,7 @@ LLVM code       : None
 
 *main* > public {impure} (0 calls)
 0: drone.<0>
-(io##0:wybe.phantom, ?io##3:wybe.phantom):
+(#io##0:wybe.phantom, #?io##3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
  MultiSpeczDepInfo: [(4,(drone.loop<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -236,7 +236,7 @@ gen#3([ch##0:wybe.char], d##0:drone.drone_info, io##0:wybe.phantom, ?io##2:wybe.
 
 loop > (2 calls)
 0: drone.loop<0>
-loop(d##0:drone.drone_info, ch##0:wybe.char, io##0:wybe.phantom, ?io##2:wybe.phantom):
+loop(d##0:drone.drone_info, ch##0:wybe.char, #io##0:wybe.phantom, #?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(5,(drone.gen#3<0>,fromList [NonAliasedParamCond 1 [0]])),(6,(drone.do_action<0>,fromList [NonAliasedParamCond 0 [0]])),(10,(drone.gen#3<0>,fromList [NonAliasedParamCond 1 [0]])),(11,(drone.gen#3<0>,fromList [NonAliasedParamCond 1 [0]])),(12,(drone.gen#3<0>,fromList [NonAliasedParamCond 1 [0]]))]
@@ -284,7 +284,7 @@ loop(d##0:drone.drone_info, ch##0:wybe.char, io##0:wybe.phantom, ?io##2:wybe.pha
 
 print_info > {inline} (1 calls)
 0: drone.print_info<0>
-print_info(d##0:drone.drone_info, io##0:wybe.phantom, ?io##9:wybe.phantom):
+print_info(d##0:drone.drone_info, #io##0:wybe.phantom, #?io##9:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.print_string<0>("(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #13 @io:nn:nn
@@ -512,7 +512,7 @@ AFTER EVERYTHING:
 
 *main* > {terminal,inline,impure} (0 calls)
 0: .<0>
-(argc##0:wybe.int, argv##0:wybe.array.raw_array(wybe.c_string), ?exit_code##0:wybe.int, ?io##2:wybe.phantom):
+(#argc##0:wybe.int, #argv##0:wybe.array.raw_array(wybe.c_string), #?exit_code##0:wybe.int, #?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c {impure} gc_init @memory_management:nn:nn
@@ -572,7 +572,7 @@ entry:
 
 *main* > public {impure} (0 calls)
 0: drone.<0>
-(io##0:wybe.phantom, ?io##3:wybe.phantom):
+(#io##0:wybe.phantom, #?io##3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
  MultiSpeczDepInfo: [(4,(drone.loop<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -821,7 +821,7 @@ gen#3([ch##0:wybe.char], d##0:drone.drone_info, io##0:wybe.phantom, ?io##2:wybe.
 
 loop > (2 calls)
 0: drone.loop<0>[410bae77d3]
-loop(d##0:drone.drone_info, ch##0:wybe.char, io##0:wybe.phantom, ?io##2:wybe.phantom):
+loop(d##0:drone.drone_info, ch##0:wybe.char, #io##0:wybe.phantom, #?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(5,(drone.gen#3<0>,fromList [NonAliasedParamCond 1 [0]])),(6,(drone.do_action<0>,fromList [NonAliasedParamCond 0 [0]])),(10,(drone.gen#3<0>,fromList [NonAliasedParamCond 1 [0]])),(11,(drone.gen#3<0>,fromList [NonAliasedParamCond 1 [0]])),(12,(drone.gen#3<0>,fromList [NonAliasedParamCond 1 [0]]))]
@@ -910,7 +910,7 @@ loop(d##0:drone.drone_info, ch##0:wybe.char, io##0:wybe.phantom, ?io##2:wybe.pha
 
 print_info > {inline} (1 calls)
 0: drone.print_info<0>
-print_info(d##0:drone.drone_info, io##0:wybe.phantom, ?io##9:wybe.phantom):
+print_info(d##0:drone.drone_info, #io##0:wybe.phantom, #?io##9:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.print_string<0>("(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #13 @io:nn:nn

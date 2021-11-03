@@ -14,7 +14,7 @@ AFTER EVERYTHING:
 
 *main* > public {inline,impure} (0 calls)
 0: alias_data.<0>
-(io##0:wybe.phantom, ?io##1:wybe.phantom):
+(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     alias_data.bar<0>(~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @alias_data:nn:nn
@@ -22,7 +22,7 @@ AFTER EVERYTHING:
 
 backup > public {inline} (1 calls)
 0: alias_data.backup<0>
-backup(student1##0:student.student, ?student2##0:student.student, io##0:wybe.phantom, [?io##0:wybe.phantom]):
+backup(student1##0:student.student, ?student2##0:student.student, #io##0:wybe.phantom, [#?io##0:wybe.phantom]):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(~student1##0:student.student, ?student2##0:student.student) @alias_data:nn:nn
@@ -30,7 +30,7 @@ backup(student1##0:student.student, ?student2##0:student.student, io##0:wybe.pha
 
 bar > public (1 calls)
 0: alias_data.bar<0>
-bar(io##0:wybe.phantom, ?io##5:wybe.phantom):
+bar(#io##0:wybe.phantom, #?io##5:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#4##0:student.course)
@@ -163,7 +163,7 @@ entry:
 
 *main* > public {impure} (0 calls)
 0: student.<0>
-(io##0:wybe.phantom, ?io##1:wybe.phantom):
+(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#4##0:student.course)
@@ -177,7 +177,7 @@ entry:
 
 printStudent > public (1 calls)
 0: student.printStudent<0>
-printStudent(stu##0:student.student, io##0:wybe.phantom, ?io##6:wybe.phantom):
+printStudent(stu##0:student.student, #io##0:wybe.phantom, #?io##6:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.print_string<0>("student id: ":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #10 @io:nn:nn

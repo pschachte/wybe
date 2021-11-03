@@ -2697,9 +2697,9 @@ data Exp
       | CharValue Char
       | StringValue String StringVariant
       | Var VarName FlowDirection ArgFlowType
-      | Lambda ProcModifiers [Param] [Placed Stmt]
       | ProcRef ProcSpec [Exp]
       | Typed Exp TypeSpec (Maybe TypeSpec)
+      | Lambda ProcModifiers [Param] [Placed Stmt] -- removed in unbranching
                -- ^explicitly typed expr giving the type of the expression, and,
                -- if it is a cast, the type of the Exp argument.  If not a cast,
                -- these two must be the same.

@@ -40,7 +40,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: stmt_for.<0>
-(io##0:wybe.phantom, ?io##26:wybe.phantom):
+(#io##0:wybe.phantom, #?io##26:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.print_string<0>("single_generator:":wybe.string, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) #26 @io:nn:nn
@@ -534,7 +534,7 @@ irange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_
 
 multiple_generator > public (1 calls)
 0: stmt_for.multiple_generator<0>
-multiple_generator(io##0:wybe.phantom, ?io##1:wybe.phantom):
+multiple_generator(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#15##0:wybe.list(?T))
@@ -560,7 +560,7 @@ multiple_generator(io##0:wybe.phantom, ?io##1:wybe.phantom):
 
 semi_det_for_loop > public (0 calls)
 0: stmt_for.semi_det_for_loop<0>
-semi_det_for_loop(io##0:wybe.phantom, ?io##1:wybe.phantom, ?#success##0:wybe.bool):
+semi_det_for_loop(#io##0:wybe.phantom, #?io##1:wybe.phantom, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     stmt_for.xrange<0>(0:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#3##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
@@ -569,7 +569,7 @@ semi_det_for_loop(io##0:wybe.phantom, ?io##1:wybe.phantom, ?#success##0:wybe.boo
 
 shortest_generator_termination > public (1 calls)
 0: stmt_for.shortest_generator_termination<0>
-shortest_generator_termination(io##0:wybe.phantom, ?io##1:wybe.phantom):
+shortest_generator_termination(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#15##0:wybe.list(?T))
@@ -595,7 +595,7 @@ shortest_generator_termination(io##0:wybe.phantom, ?io##1:wybe.phantom):
 
 single_generator > public (1 calls)
 0: stmt_for.single_generator<0>
-single_generator(io##0:wybe.phantom, ?io##1:wybe.phantom):
+single_generator(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.list(?T))
@@ -612,7 +612,7 @@ single_generator(io##0:wybe.phantom, ?io##1:wybe.phantom):
 
 using_break > public (1 calls)
 0: stmt_for.using_break<0>
-using_break(io##0:wybe.phantom, ?io##1:wybe.phantom):
+using_break(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#11##0:wybe.list(?T))
@@ -632,7 +632,7 @@ using_break(io##0:wybe.phantom, ?io##1:wybe.phantom):
 
 using_irange > public (1 calls)
 0: stmt_for.using_irange<0>
-using_irange(io##0:wybe.phantom, ?io##1:wybe.phantom):
+using_irange(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     stmt_for.irange<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#3##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
@@ -641,7 +641,7 @@ using_irange(io##0:wybe.phantom, ?io##1:wybe.phantom):
 
 using_irange_reverse > public (1 calls)
 0: stmt_for.using_irange_reverse<0>
-using_irange_reverse(io##0:wybe.phantom, ?io##1:wybe.phantom):
+using_irange_reverse(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     stmt_for.irange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp#3##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
@@ -650,7 +650,7 @@ using_irange_reverse(io##0:wybe.phantom, ?io##1:wybe.phantom):
 
 using_next > public (1 calls)
 0: stmt_for.using_next<0>
-using_next(io##0:wybe.phantom, ?io##1:wybe.phantom):
+using_next(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#11##0:wybe.list(?T))
@@ -670,7 +670,7 @@ using_next(io##0:wybe.phantom, ?io##1:wybe.phantom):
 
 using_unless > public (1 calls)
 0: stmt_for.using_unless<0>
-using_unless(io##0:wybe.phantom, ?io##1:wybe.phantom):
+using_unless(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#11##0:wybe.list(?T))
@@ -690,7 +690,7 @@ using_unless(io##0:wybe.phantom, ?io##1:wybe.phantom):
 
 using_until > public (1 calls)
 0: stmt_for.using_until<0>
-using_until(io##0:wybe.phantom, ?io##1:wybe.phantom):
+using_until(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#11##0:wybe.list(?T))
@@ -710,7 +710,7 @@ using_until(io##0:wybe.phantom, ?io##1:wybe.phantom):
 
 using_when > public (1 calls)
 0: stmt_for.using_when<0>
-using_when(io##0:wybe.phantom, ?io##1:wybe.phantom):
+using_when(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#11##0:wybe.list(?T))
@@ -730,7 +730,7 @@ using_when(io##0:wybe.phantom, ?io##1:wybe.phantom):
 
 using_while > public (1 calls)
 0: stmt_for.using_while<0>
-using_while(io##0:wybe.phantom, ?io##1:wybe.phantom):
+using_while(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#11##0:wybe.list(?T))
@@ -750,7 +750,7 @@ using_while(io##0:wybe.phantom, ?io##1:wybe.phantom):
 
 using_xrange > public (1 calls)
 0: stmt_for.using_xrange<0>
-using_xrange(io##0:wybe.phantom, ?io##1:wybe.phantom):
+using_xrange(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     stmt_for.xrange<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#3##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
@@ -759,7 +759,7 @@ using_xrange(io##0:wybe.phantom, ?io##1:wybe.phantom):
 
 using_xrange_reverse > public (1 calls)
 0: stmt_for.using_xrange_reverse<0>
-using_xrange_reverse(io##0:wybe.phantom, ?io##1:wybe.phantom):
+using_xrange_reverse(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     stmt_for.xrange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp#3##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn

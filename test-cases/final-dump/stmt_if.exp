@@ -24,7 +24,7 @@ AFTER EVERYTHING:
 
 foobar > (0 calls)
 0: stmt_if.foobar<0>
-foobar(io##0:wybe.phantom, ?io##2:wybe.phantom):
+foobar(#io##0:wybe.phantom, #?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?tmp#8##0:stmt_if.tree)

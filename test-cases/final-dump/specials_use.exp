@@ -16,7 +16,7 @@ AFTER EVERYTHING:
 
 show_column > public {inline} (0 calls)
 0: specials.show_column<0>
-show_column(call_source_column_number##0:wybe.int, io##0:wybe.phantom, ?io##1:wybe.phantom):
+show_column(#call_source_column_number##0:wybe.int, #io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_int(~call_source_column_number##0:wybe.int, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
@@ -25,7 +25,7 @@ show_column(call_source_column_number##0:wybe.int, io##0:wybe.phantom, ?io##1:wy
 
 show_file > public {inline} (0 calls)
 0: specials.show_file<0>
-show_file(call_source_file_name##0:wybe.c_string, io##0:wybe.phantom, ?io##1:wybe.phantom):
+show_file(#call_source_file_name##0:wybe.c_string, #io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_string(~call_source_file_name##0:wybe.c_string, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
@@ -34,7 +34,7 @@ show_file(call_source_file_name##0:wybe.c_string, io##0:wybe.phantom, ?io##1:wyb
 
 show_full_file > public {inline} (0 calls)
 0: specials.show_full_file<0>
-show_full_file(call_source_file_full_name##0:wybe.c_string, io##0:wybe.phantom, ?io##1:wybe.phantom):
+show_full_file(#call_source_file_full_name##0:wybe.c_string, #io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_string(~call_source_file_full_name##0:wybe.c_string, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
@@ -43,7 +43,7 @@ show_full_file(call_source_file_full_name##0:wybe.c_string, io##0:wybe.phantom, 
 
 show_full_location > public {inline} (0 calls)
 0: specials.show_full_location<0>
-show_full_location(call_source_full_location##0:wybe.c_string, io##0:wybe.phantom, ?io##1:wybe.phantom):
+show_full_location(#call_source_full_location##0:wybe.c_string, #io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_string(~call_source_full_location##0:wybe.c_string, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
@@ -52,7 +52,7 @@ show_full_location(call_source_full_location##0:wybe.c_string, io##0:wybe.phanto
 
 show_line > public {inline} (0 calls)
 0: specials.show_line<0>
-show_line(call_source_line_number##0:wybe.int, io##0:wybe.phantom, ?io##1:wybe.phantom):
+show_line(#call_source_line_number##0:wybe.int, #io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_int(~call_source_line_number##0:wybe.int, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
@@ -61,7 +61,7 @@ show_line(call_source_line_number##0:wybe.int, io##0:wybe.phantom, ?io##1:wybe.p
 
 show_location > public {inline} (0 calls)
 0: specials.show_location<0>
-show_location(call_source_location##0:wybe.c_string, io##0:wybe.phantom, ?io##1:wybe.phantom):
+show_location(#call_source_location##0:wybe.c_string, #io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_string(~call_source_location##0:wybe.c_string, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
@@ -149,7 +149,7 @@ entry:
 
 *main* > public {impure} (0 calls)
 0: specials_use.<0>
-(io##0:wybe.phantom, ?io##6:wybe.phantom):
+(#io##0:wybe.phantom, #?io##6:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_string(c"specials_use":wybe.c_string, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn

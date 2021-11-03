@@ -14,7 +14,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: current_module_alias_warning.<0>
-(io##0:wybe.phantom, ?io##1:wybe.phantom):
+(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     current_module_alias_warning.toCelsius<0>(1.0:wybe.float, ?tmp#0##0:wybe.float) #0 @current_module_alias_warning:nn:nn

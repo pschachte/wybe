@@ -22,7 +22,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: list_loop.<0>
-(io##0:wybe.phantom, ?io##1:wybe.phantom):
+(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#8##0:list_loop.intlist)

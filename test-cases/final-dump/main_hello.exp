@@ -12,7 +12,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: main_hello.<0>
-(arguments##0:wybe.array(wybe.c_string), [?arguments##0:wybe.array(wybe.c_string)], command##0:wybe.c_string, [?command##0:wybe.c_string], [exit_code##0:wybe.int], ?exit_code##1:wybe.int, io##0:wybe.phantom, ?io##3:wybe.phantom):
+(#arguments##0:wybe.array(wybe.c_string), [#?arguments##0:wybe.array(wybe.c_string)], #command##0:wybe.c_string, [#?command##0:wybe.c_string], [#exit_code##0:wybe.int], #?exit_code##1:wybe.int, #io##0:wybe.phantom, #?io##3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm move(42:wybe.int, ?#exit_code##1:wybe.int) @command_line:nn:nn

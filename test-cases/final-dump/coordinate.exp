@@ -24,7 +24,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: coordinate.<0>
-(io##0:wybe.phantom, ?io##4:wybe.phantom):
+(#io##0:wybe.phantom, #?io##4:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?tmp#7##0:coordinate.Coordinate)

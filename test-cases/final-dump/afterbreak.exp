@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 *main* > public {inline,impure} (0 calls)
 0: afterbreak.<0>
-(io##0:wybe.phantom, ?io##1:wybe.phantom):
+(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     afterbreak.gen#1<0>(~io##0:wybe.phantom, 1:wybe.int, ?io##1:wybe.phantom) #0 @afterbreak:nn:nn

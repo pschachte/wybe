@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: block_comment.<0>
-(io##0:wybe.phantom, ?io##6:wybe.phantom):
+(#io##0:wybe.phantom, #?io##6:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.print_string<0>("print(x:string) creates a newline already":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #6 @io:nn:nn

@@ -121,7 +121,7 @@ AFTER BUILDING MAIN:
 
 *main* > {terminal,inline,impure} (0 calls)
 0: .<0>
-(argc##0:wybe.int, argv##0:wybe.array.raw_array(wybe.c_string), ?exit_code##0:wybe.int, ?io##2:wybe.phantom):
+(#argc##0:wybe.int, #argv##0:wybe.array.raw_array(wybe.c_string), #?exit_code##0:wybe.int, #?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c {impure} gc_init @memory_management:nn:nn
@@ -413,7 +413,7 @@ pop(lst##0:int_list.int_list, idx##0:wybe.int, ?#result##0:int_list.int_list):
 
 print > public (2 calls)
 0: int_list.print<0>
-print(x##0:int_list.int_list, io##0:wybe.phantom, ?io##3:wybe.phantom):
+print(x##0:int_list.int_list, #io##0:wybe.phantom, #?io##3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool)
@@ -432,7 +432,7 @@ print(x##0:int_list.int_list, io##0:wybe.phantom, ?io##3:wybe.phantom):
 
 println > public {inline} (0 calls)
 0: int_list.println<0>
-println(x##0:int_list.int_list, io##0:wybe.phantom, ?io##2:wybe.phantom):
+println(x##0:int_list.int_list, #io##0:wybe.phantom, #?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     int_list.print<0>(~x##0:int_list.int_list, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @int_list:nn:nn
@@ -705,7 +705,7 @@ LLVM code       : None
 
 *main* > public {impure} (0 calls)
 0: int_list_test.<0>
-(io##0:wybe.phantom, ?io##22:wybe.phantom):
+(#io##0:wybe.phantom, #?io##22:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
  MultiSpeczDepInfo: [(24,(int_list_test.test_int_list<0>,fromList [NonAliasedParamCond 0 [],NonAliasedParamCond 1 [],NonAliasedParamCond 2 []])),(34,(int_list.gen#2<0>,fromList [NonAliasedParamCond 0 []])),(35,(int_list.gen#2<0>,fromList [NonAliasedParamCond 0 []])),(36,(int_list.gen#2<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -764,7 +764,7 @@ LLVM code       : None
 
 test_int_list > (2 calls)
 0: int_list_test.test_int_list<0>
-test_int_list(x##0:int_list.int_list, y##0:int_list.int_list, z##0:int_list.int_list, io##0:wybe.phantom, ?io##10:wybe.phantom):
+test_int_list(x##0:int_list.int_list, y##0:int_list.int_list, z##0:int_list.int_list, #io##0:wybe.phantom, #?io##10:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1,InterestingUnaliased 2]
  MultiSpeczDepInfo: [(2,(int_list.append<0>,fromList [NonAliasedParamCond 0 [1]])),(7,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []])),(8,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []])),(11,(int_list.insert<0>,fromList [NonAliasedParamCond 0 []])),(12,(int_list.pop<0>,fromList [NonAliasedParamCond 0 []])),(13,(int_list.remove<0>,fromList [NonAliasedParamCond 0 []])),(16,(int_list.sort<0>,fromList [NonAliasedParamCond 0 []])),(19,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [0]])),(20,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [2]]))]
@@ -832,7 +832,7 @@ AFTER EVERYTHING:
 
 *main* > {terminal,inline,impure} (0 calls)
 0: .<0>
-(argc##0:wybe.int, argv##0:wybe.array.raw_array(wybe.c_string), ?exit_code##0:wybe.int, ?io##2:wybe.phantom):
+(#argc##0:wybe.int, #argv##0:wybe.array.raw_array(wybe.c_string), #?exit_code##0:wybe.int, #?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c {impure} gc_init @memory_management:nn:nn
@@ -1248,7 +1248,7 @@ pop(lst##0:int_list.int_list, idx##0:wybe.int, ?#result##0:int_list.int_list):
 
 print > public (2 calls)
 0: int_list.print<0>
-print(x##0:int_list.int_list, io##0:wybe.phantom, ?io##3:wybe.phantom):
+print(x##0:int_list.int_list, #io##0:wybe.phantom, #?io##3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool)
@@ -1267,7 +1267,7 @@ print(x##0:int_list.int_list, io##0:wybe.phantom, ?io##3:wybe.phantom):
 
 println > public {inline} (0 calls)
 0: int_list.println<0>
-println(x##0:int_list.int_list, io##0:wybe.phantom, ?io##2:wybe.phantom):
+println(x##0:int_list.int_list, #io##0:wybe.phantom, #?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     int_list.print<0>(~x##0:int_list.int_list, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @int_list:nn:nn
@@ -2463,7 +2463,7 @@ entry:
 
 *main* > public {impure} (0 calls)
 0: int_list_test.<0>
-(io##0:wybe.phantom, ?io##22:wybe.phantom):
+(#io##0:wybe.phantom, #?io##22:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
  MultiSpeczDepInfo: [(24,(int_list_test.test_int_list<0>,fromList [NonAliasedParamCond 0 [],NonAliasedParamCond 1 [],NonAliasedParamCond 2 []])),(34,(int_list.gen#2<0>,fromList [NonAliasedParamCond 0 []])),(35,(int_list.gen#2<0>,fromList [NonAliasedParamCond 0 []])),(36,(int_list.gen#2<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -2522,7 +2522,7 @@ entry:
 
 test_int_list > (2 calls)
 0: int_list_test.test_int_list<0>[9e35cb823b]
-test_int_list(x##0:int_list.int_list, y##0:int_list.int_list, z##0:int_list.int_list, io##0:wybe.phantom, ?io##10:wybe.phantom):
+test_int_list(x##0:int_list.int_list, y##0:int_list.int_list, z##0:int_list.int_list, #io##0:wybe.phantom, #?io##10:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1,InterestingUnaliased 2]
  MultiSpeczDepInfo: [(2,(int_list.append<0>,fromList [NonAliasedParamCond 0 [1]])),(7,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []])),(8,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []])),(11,(int_list.insert<0>,fromList [NonAliasedParamCond 0 []])),(12,(int_list.pop<0>,fromList [NonAliasedParamCond 0 []])),(13,(int_list.remove<0>,fromList [NonAliasedParamCond 0 []])),(16,(int_list.sort<0>,fromList [NonAliasedParamCond 0 []])),(19,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [0]])),(20,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [2]]))]

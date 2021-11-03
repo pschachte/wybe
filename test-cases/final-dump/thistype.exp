@@ -22,7 +22,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: thistype.<0>
-(io##0:wybe.phantom, ?io##1:wybe.phantom):
+(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
  MultiSpeczDepInfo: [(7,(thistype.concat<0>,fromList [NonAliasedParamCond 0 []]))]

@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 *main* > public {inline,impure} (0 calls)
 0: alloc_args.<0>
-(io##0:wybe.phantom, ?io##1:wybe.phantom):
+(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     alloc_args.foo<0>(1:wybe.int, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @alloc_args:nn:nn
@@ -19,7 +19,7 @@ AFTER EVERYTHING:
 
 foo > {noinline} (1 calls)
 0: alloc_args.foo<0>
-foo(size##0:wybe.int, io##0:wybe.phantom, ?io##1:wybe.phantom):
+foo(size##0:wybe.int, #io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(~size##0:wybe.int, ?str##0:wybe.string) @alloc_args:nn:nn

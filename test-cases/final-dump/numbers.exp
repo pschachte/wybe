@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 
 *main* > public {inline,impure} (0 calls)
 0: numbers.<0>
-(io##0:wybe.phantom, ?io##1:wybe.phantom):
+(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.print_string<0>("Numbers has been initialised.":wybe.string, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) #1 @io:nn:nn

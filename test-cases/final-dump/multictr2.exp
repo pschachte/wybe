@@ -51,7 +51,7 @@ AFTER EVERYTHING:
 
 print_t > public (0 calls)
 0: multictr2.print_t<0>
-print_t(x##0:multictr2.t, io##0:wybe.phantom, ?io##8:wybe.phantom):
+print_t(x##0:multictr2.t, #io##0:wybe.phantom, #?io##8:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm and(x##0:wybe.int, 7:wybe.int, ?tmp#9##0:wybe.int)

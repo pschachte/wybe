@@ -21,7 +21,7 @@ AFTER EVERYTHING:
 
 *main* > public {inline,impure} (0 calls)
 0: person5.<0>
-(io##0:wybe.phantom, ?io##3:wybe.phantom):
+(#io##0:wybe.phantom, #?io##3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.print_string<0>("Amy":wybe.string, ~#io##0:wybe.phantom, ?#io##2:wybe.phantom) #6 @io:nn:nn
@@ -30,7 +30,7 @@ AFTER EVERYTHING:
 
 update_both > {inline} (1 calls)
 0: person5.update_both<0>
-update_both(p1##0:person5.person, ?p1##1:person5.person, p2##0:person5.person, ?p2##1:person5.person, io##0:wybe.phantom, [?io##0:wybe.phantom]):
+update_both(p1##0:person5.person, ?p1##1:person5.person, p2##0:person5.person, ?p2##1:person5.person, #io##0:wybe.phantom, [#?io##0:wybe.phantom]):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm mutate(~%p1##0:person5.person, ?%p1##1:person5.person, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, "Amy":wybe.string)

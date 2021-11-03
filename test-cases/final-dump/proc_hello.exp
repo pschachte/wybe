@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 print2 > public {inline} (0 calls)
 0: proc_hello.print2<0>
-print2([x##0:wybe.int], [y##0:wybe.int], io##0:wybe.phantom, ?io##1:wybe.phantom):
+print2([x##0:wybe.int], [y##0:wybe.int], #io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.print_string<0>("hello, world":wybe.string, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) #1 @io:nn:nn

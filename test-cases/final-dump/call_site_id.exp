@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: call_site_id.<0>
-(io##0:wybe.phantom, ?io##4:wybe.phantom):
+(#io##0:wybe.phantom, #?io##4:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c read_int(?x##0:wybe.int, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
@@ -49,7 +49,7 @@ AFTER EVERYTHING:
 
 bar > public {inline} (9 calls)
 0: call_site_id.bar<0>
-bar(x##0:wybe.int, io##0:wybe.phantom, ?io##1:wybe.phantom):
+bar(x##0:wybe.int, #io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     call_site_id.foo<0>(~x##0:wybe.int, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @call_site_id:nn:nn
@@ -57,7 +57,7 @@ bar(x##0:wybe.int, io##0:wybe.phantom, ?io##1:wybe.phantom):
 
 foo > public (1 calls)
 0: call_site_id.foo<0>
-foo(x##0:wybe.int, io##0:wybe.phantom, ?io##8:wybe.phantom):
+foo(x##0:wybe.int, #io##0:wybe.phantom, #?io##8:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.print_string<0>(" ":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #10 @io:nn:nn

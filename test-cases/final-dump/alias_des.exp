@@ -14,7 +14,7 @@ AFTER EVERYTHING:
 
 *main* > public {inline,impure} (0 calls)
 0: alias_des.<0>
-(io##0:wybe.phantom, ?io##1:wybe.phantom):
+(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     alias_des.foo<0>(~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @alias_des:nn:nn
@@ -22,7 +22,7 @@ AFTER EVERYTHING:
 
 foo > public (1 calls)
 0: alias_des.foo<0>
-foo(io##0:wybe.phantom, ?io##3:wybe.phantom):
+foo(#io##0:wybe.phantom, #?io##3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     alias_des.replicate<0>(?p2##0:position.position, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @alias_des:nn:nn
@@ -33,7 +33,7 @@ foo(io##0:wybe.phantom, ?io##3:wybe.phantom):
 
 replicate > public (1 calls)
 0: alias_des.replicate<0>
-replicate(?p2##1:position.position, io##0:wybe.phantom, ?io##4:wybe.phantom):
+replicate(?p2##1:position.position, #io##0:wybe.phantom, #?io##4:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#8##0:position.position)
@@ -174,7 +174,7 @@ entry:
 
 printPosition > public (0 calls)
 0: position.printPosition<0>
-printPosition(pos##0:position.position, io##0:wybe.phantom, ?io##5:wybe.phantom):
+printPosition(pos##0:position.position, #io##0:wybe.phantom, #?io##5:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.print_string<0>(" (":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #7 @io:nn:nn

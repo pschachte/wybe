@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: type_generics.<0>
-(io##0:wybe.phantom, ?io##6:wybe.phantom):
+(#io##0:wybe.phantom, #?io##6:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     type_generics.foo<0>(1:?t, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @type_generics:nn:nn
@@ -32,7 +32,7 @@ AFTER EVERYTHING:
 
 foo > (12 calls)
 0: type_generics.foo<0>
-foo(x##0:?t, io##0:wybe.phantom, ?io##1:wybe.phantom):
+foo(x##0:?t, #io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#5##0:wybe.list(?T))

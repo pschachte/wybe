@@ -12,7 +12,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: alias_des2.<0>
-(io##0:wybe.phantom, ?io##2:wybe.phantom):
+(#io##0:wybe.phantom, #?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#3##0:position.position)
@@ -89,7 +89,7 @@ entry:
 
 printPosition > public (0 calls)
 0: position.printPosition<0>
-printPosition(pos##0:position.position, io##0:wybe.phantom, ?io##5:wybe.phantom):
+printPosition(pos##0:position.position, #io##0:wybe.phantom, #?io##5:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.print_string<0>(" (":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #7 @io:nn:nn

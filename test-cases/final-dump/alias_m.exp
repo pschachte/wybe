@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: alias_m.<0>
-(io##0:wybe.phantom, ?io##7:wybe.phantom):
+(#io##0:wybe.phantom, #?io##7:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#3##0:position.position)
@@ -105,7 +105,7 @@ entry:
 
 bar > public (0 calls)
 0: alias_mbar.bar<0>[410bae77d3]
-bar(p1##0:position.position, ?p3##1:position.position, io##0:wybe.phantom, ?io##1:wybe.phantom):
+bar(p1##0:position.position, ?p3##1:position.position, #io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: [(p1##0,p3##1)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(5,(alias_mfoo.foo<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -217,7 +217,7 @@ if.else:
 
 foo > public (0 calls)
 0: alias_mfoo.foo<0>[410bae77d3]
-foo(p1##0:position.position, ?p2##0:position.position, ?p3##0:position.position, io##0:wybe.phantom, ?io##2:wybe.phantom):
+foo(p1##0:position.position, ?p2##0:position.position, ?p3##0:position.position, #io##0:wybe.phantom, #?io##2:wybe.phantom):
  AliasPairs: [(p1##0,p2##0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(8,(alias_mbar.bar<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -415,7 +415,7 @@ if.else:
 
 printPosition > public (0 calls)
 0: position.printPosition<0>
-printPosition(pos##0:position.position, io##0:wybe.phantom, ?io##5:wybe.phantom):
+printPosition(pos##0:position.position, #io##0:wybe.phantom, #?io##5:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.print_string<0>(" (":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #7 @io:nn:nn

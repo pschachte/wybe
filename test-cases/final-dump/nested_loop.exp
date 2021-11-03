@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: nested_loop.<0>
-(io##0:wybe.phantom, ?io##1:wybe.phantom):
+(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.print_string<0>("Outer":wybe.string, ~io##0:wybe.phantom, ?tmp#1##0:wybe.phantom) #1 @io:nn:nn

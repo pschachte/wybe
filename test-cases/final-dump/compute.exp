@@ -12,7 +12,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: compute.<0>
-(io##0:wybe.phantom, ?io##2:wybe.phantom):
+(#io##0:wybe.phantom, #?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     math.utils.factorial<0>(4:wybe.int, ?tmp#0##0:wybe.int) #0 @compute:nn:nn
@@ -136,7 +136,7 @@ entry:
 
 *main* > public {inline,impure} (0 calls)
 0: math.utils.<0>
-(io##0:wybe.phantom, ?io##1:wybe.phantom):
+(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.print_string<0>("Utils has been initialised.":wybe.string, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) #1 @io:nn:nn

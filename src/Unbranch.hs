@@ -584,11 +584,11 @@ hoistClosure (Typed exp ty cast) pos = do
     exp' <- content <$> hoistClosure exp Nothing
     return $ maybePlace (Typed exp' ty cast) pos
 hoistClosure exp@(Lambda mods params pstmts) pos = do
-    logUnbranch $ "Creating procref for " ++ show exp
+    name <- newProcName
+    logUnbranch $ "Creating procref for " ++ show exp ++ " under " ++ name
     let ProcModifiers detism inlining impurity resourceful unknown conflict = mods
     lift $ checkConflictingMods "anonymous procedure" pos unknown
     lift $ checkUnknownMods "anonymous procedure" pos conflict
-    name <- newProcName
     let paramVars = expVar . content . paramToVar <$> params
     let vars = mentionedVars pstmts
     let toClose = vars `Set.difference` Set.fromList paramVars
@@ -601,17 +601,17 @@ hoistClosure exp@(Lambda mods params pstmts) pos = do
 
     tmpCtr <- gets brTempCtr
     let procProto = ProcProto name (closedParams ++ realParams) Set.empty
-    let pDefRegular = ProcDef name procProto (ProcDefSrc pstmts) Nothing tmpCtr 0
-                      Map.empty False Private detism Inline Pure NoSuperproc
-    pDefRegular' <- lift $ unbranchProc pDefRegular tmpCtr
+    let procDef = ProcDef name procProto (ProcDefSrc pstmts) Nothing tmpCtr 0
+                    Map.empty False Private detism Inline Pure NoSuperproc
+    procDef' <- lift $ unbranchProc procDef tmpCtr
     logUnbranch $ "  Resultant hoisted proc: " ++ show procProto
-    procSpec@ProcSpec{procSpecMod=mod,procSpecName=nm,procSpecID=procId}
-        <- lift $ addProcDef pDefRegular'
-    addClosure name procSpec closedVars pos
-hoistClosure (ProcRef ps@(ProcSpec m nm pID _) []) pos = do
-    name <- newProcName
-    addClosure name ps [] pos
-hoistClosure exp@(ProcRef ps _) pos = shouldnt $ "hoist closure of " ++ show exp
+    procSpec <- lift $ addProcDef procDef'
+    addClosure procSpec closedVars pos name 
+hoistClosure exp@(ProcRef ps closed) pos = do
+    isClosure <- lift $ isClosureProc ps
+    if isClosure
+    then return $ maybePlace exp pos
+    else newProcName >>= addClosure ps closed pos
 hoistClosure exp pos = return $ maybePlace exp pos
 
 
@@ -627,8 +627,8 @@ isUsedParam _    _                           = True
 
 
 -- addClosure :: Unbrancher (Placed Exp)
-addClosure :: String -> ProcSpec -> [Exp] -> OptPos -> Unbrancher (Placed Exp)
-addClosure name regularProcSpec@(ProcSpec mod nm pID _) closedVars pos = do
+addClosure :: ProcSpec -> [Exp] -> OptPos -> String -> Unbrancher (Placed Exp)
+addClosure regularProcSpec@(ProcSpec mod nm pID _) closedVars pos name = do
     logUnbranch $ "Creating closure for " ++ show regularProcSpec
     ProcDef{procDetism=detism, procInlining=inlining, procImpurity=impurity,
             procProto=procProto@ProcProto{procProtoParams=params}}

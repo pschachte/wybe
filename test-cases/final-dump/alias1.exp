@@ -16,7 +16,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: alias1.<0>
-(io##0:wybe.phantom, ?io##6:wybe.phantom):
+(#io##0:wybe.phantom, #?io##6:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.print_string<0>("-------------- Calling foo: ":wybe.string, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) #6 @io:nn:nn
@@ -32,7 +32,7 @@ AFTER EVERYTHING:
 
 bar > public (1 calls)
 0: alias1.bar<0>
-bar(io##0:wybe.phantom, ?io##11:wybe.phantom):
+bar(#io##0:wybe.phantom, #?io##11:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#3##0:position.position)
@@ -56,7 +56,7 @@ bar(io##0:wybe.phantom, ?io##11:wybe.phantom):
 
 baz > public (1 calls)
 0: alias1.baz<0>
-baz(io##0:wybe.phantom, ?io##15:wybe.phantom):
+baz(#io##0:wybe.phantom, #?io##15:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#5##0:position.position)
@@ -88,7 +88,7 @@ baz(io##0:wybe.phantom, ?io##15:wybe.phantom):
 
 foo > public (1 calls)
 0: alias1.foo<0>
-foo(io##0:wybe.phantom, ?io##11:wybe.phantom):
+foo(#io##0:wybe.phantom, #?io##11:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#3##0:position.position)
@@ -112,7 +112,7 @@ foo(io##0:wybe.phantom, ?io##11:wybe.phantom):
 
 replicate > public (3 calls)
 0: alias1.replicate<0>
-replicate(p1##0:position.position, ?p2##0:position.position, io##0:wybe.phantom, ?io##2:wybe.phantom):
+replicate(p1##0:position.position, ?p2##0:position.position, #io##0:wybe.phantom, #?io##2:wybe.phantom):
  AliasPairs: [(p1##0,p2##0)]
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#4##0:position.position)
@@ -486,7 +486,7 @@ entry:
 
 printPosition > public (0 calls)
 0: position.printPosition<0>
-printPosition(pos##0:position.position, io##0:wybe.phantom, ?io##5:wybe.phantom):
+printPosition(pos##0:position.position, #io##0:wybe.phantom, #?io##5:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.print_string<0>(" (":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #7 @io:nn:nn

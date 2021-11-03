@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 *main* > public {inline,impure} (0 calls)
 0: top_level_use.<0>
-(?res##2:wybe.int, io##0:wybe.phantom, ?io##1:wybe.phantom):
+(#?res##2:wybe.int, #io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_int(0:wybe.int, ~#io##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @io:nn:nn

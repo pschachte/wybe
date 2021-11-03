@@ -15,7 +15,7 @@ AFTER EVERYTHING:
 
 *main* > public {inline,impure} (0 calls)
 0: alias_cyclic.<0>
-(io##0:wybe.phantom, ?io##1:wybe.phantom):
+(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     alias_cyclic.bar<0>(~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @alias_cyclic:nn:nn
@@ -23,7 +23,7 @@ AFTER EVERYTHING:
 
 bar > public (1 calls)
 0: alias_cyclic.bar<0>
-bar(io##0:wybe.phantom, ?io##5:wybe.phantom):
+bar(#io##0:wybe.phantom, #?io##5:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#3##0:position.position)
@@ -38,7 +38,7 @@ bar(io##0:wybe.phantom, ?io##5:wybe.phantom):
 
 updateX > public (2 calls)
 0: alias_cyclic.updateX<0>[410bae77d3]
-updateX(p1##0:position.position, ?p2##0:position.position, io##0:wybe.phantom, ?io##1:wybe.phantom):
+updateX(p1##0:position.position, ?p2##0:position.position, #io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: [(p1##0,p2##0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(5,(alias_cyclic.updateY<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -71,7 +71,7 @@ updateX(p1##0:position.position, ?p2##0:position.position, io##0:wybe.phantom, ?
 
 updateY > public (1 calls)
 0: alias_cyclic.updateY<0>[410bae77d3]
-updateY(p1##0:position.position, ?p2##0:position.position, io##0:wybe.phantom, ?io##1:wybe.phantom):
+updateY(p1##0:position.position, ?p2##0:position.position, #io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: [(p1##0,p2##0)]
  InterestingCallProperties: [InterestingUnaliased 0]
  MultiSpeczDepInfo: [(5,(alias_cyclic.updateX<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -275,7 +275,7 @@ if.else:
 
 printPosition > public (0 calls)
 0: position.printPosition<0>
-printPosition(pos##0:position.position, io##0:wybe.phantom, ?io##5:wybe.phantom):
+printPosition(pos##0:position.position, #io##0:wybe.phantom, #?io##5:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.print_string<0>(" (":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #7 @io:nn:nn

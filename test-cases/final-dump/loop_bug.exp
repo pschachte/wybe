@@ -51,7 +51,7 @@ gen#2(h##0:wybe.int, io##0:wybe.phantom, lst##0:loop_bug.int_list, t##0:loop_bug
 
 print > public (0 calls)
 0: loop_bug.print<0>
-print(lst##0:loop_bug.int_list, io##0:wybe.phantom, ?io##3:wybe.phantom):
+print(lst##0:loop_bug.int_list, #io##0:wybe.phantom, #?io##3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c putchar('[':wybe.char, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn

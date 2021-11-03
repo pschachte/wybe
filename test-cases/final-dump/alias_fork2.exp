@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: alias_fork2.<0>
-(io##0:wybe.phantom, ?io##4:wybe.phantom):
+(#io##0:wybe.phantom, #?io##4:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?tmp#9##0:mytree.tree)
@@ -279,7 +279,7 @@ entry:
 
 printTree > public {inline} (0 calls)
 0: mytree.printTree<0>
-printTree(t##0:mytree.tree, io##0:wybe.phantom, ?io##2:wybe.phantom):
+printTree(t##0:mytree.tree, #io##0:wybe.phantom, #?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     mytree.printTree1<0>(~t##0:mytree.tree, "{":wybe.string, ?%prefix##1:wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @mytree:nn:nn
@@ -288,7 +288,7 @@ printTree(t##0:mytree.tree, io##0:wybe.phantom, ?io##2:wybe.phantom):
 
 printTree1 > public (3 calls)
 0: mytree.printTree1<0>
-printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string, io##0:wybe.phantom, ?io##4:wybe.phantom):
+printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string, #io##0:wybe.phantom, #?io##4:wybe.phantom):
  AliasPairs: [(prefix##0,prefix##3)]
  InterestingCallProperties: []
     foreign llvm icmp_ne(t##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool)

@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 foo > public {inline} (0 calls)
 0: import_in_sub_mod_lib.foo<0>
-foo(v##0:wybe.int, io##0:wybe.phantom, ?io##1:wybe.phantom):
+foo(v##0:wybe.int, #io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_int(~v##0:wybe.int, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
@@ -57,7 +57,7 @@ entry:
 
 *main* > public {inline,impure} (0 calls)
 0: import_in_sub_mod_main.<0>
-(io##0:wybe.phantom, ?io##1:wybe.phantom):
+(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_int(10:wybe.int, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
@@ -103,7 +103,7 @@ entry:
 
 bar > public {inline} (0 calls)
 0: import_in_sub_mod_main.sub.bar<0>
-bar(v##0:wybe.int, io##0:wybe.phantom, ?io##1:wybe.phantom):
+bar(v##0:wybe.int, #io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_int(~v##0:wybe.int, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn

@@ -12,7 +12,7 @@ AFTER EVERYTHING:
 
 *main* > public {inline,impure} (0 calls)
 0: stmt_when.<0>
-(io##0:wybe.phantom, ?io##1:wybe.phantom):
+(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     stmt_when.gen#1<0>(~io##0:wybe.phantom, 10:wybe.int, ?io##1:wybe.phantom) #0 @stmt_when:nn:nn

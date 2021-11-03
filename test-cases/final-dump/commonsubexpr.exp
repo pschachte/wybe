@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: commonsubexpr.<0>
-(io##0:wybe.phantom, ?io##1:wybe.phantom):
+(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_int(198:wybe.int, ~#io##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
@@ -24,7 +24,7 @@ AFTER EVERYTHING:
 
 common_subexpr > {inline} (1 calls)
 0: commonsubexpr.common_subexpr<0>
-common_subexpr(x##0:wybe.int, io##0:wybe.phantom, ?io##3:wybe.phantom):
+common_subexpr(x##0:wybe.int, #io##0:wybe.phantom, #?io##3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm add(x##0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int) @int:nn:nn

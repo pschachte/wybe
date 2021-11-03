@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: string.<0>
-(io##0:wybe.phantom, ?io##29:wybe.phantom):
+(#io##0:wybe.phantom, #?io##29:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_string(c"TESTING CONSTRUCTION":wybe.c_string, ~#io##0:wybe.phantom, ?tmp#35##0:wybe.phantom) @io:nn:nn
@@ -123,7 +123,7 @@ gen#1(io##0:wybe.phantom, s##0:wybe.string, tmp#0##0:wybe.string, ?io##2:wybe.ph
 
 print_loop > {inline} (2 calls)
 0: string.print_loop<0>
-print_loop(s##0:wybe.string, io##0:wybe.phantom, ?io##1:wybe.phantom):
+print_loop(s##0:wybe.string, #io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     string.gen#1<0>(~io##0:wybe.phantom, ~s##0:wybe.string, ~s##0:wybe.string, ?io##1:wybe.phantom) #0 @string:nn:nn
@@ -131,7 +131,7 @@ print_loop(s##0:wybe.string, io##0:wybe.phantom, ?io##1:wybe.phantom):
 
 test_index > (13 calls)
 0: string.test_index<0>
-test_index(s##0:wybe.string, i##0:wybe.int, io##0:wybe.phantom, ?io##1:wybe.phantom):
+test_index(s##0:wybe.string, i##0:wybe.int, #io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.[]<0>(~s##0:wybe.string, ~i##0:wybe.int, ?tmp#0##0:wybe.char, ?tmp#1##0:wybe.bool) #0 @string:nn:nn

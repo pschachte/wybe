@@ -24,7 +24,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: int_list.<0>
-(io##0:wybe.phantom, ?io##1:wybe.phantom):
+(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#6##0:int_list.int_list)
@@ -42,7 +42,7 @@ AFTER EVERYTHING:
 
 print > public (2 calls)
 0: int_list.print<0>
-print(x##0:int_list.int_list, io##0:wybe.phantom, ?io##3:wybe.phantom):
+print(x##0:int_list.int_list, #io##0:wybe.phantom, #?io##3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool)
@@ -61,7 +61,7 @@ print(x##0:int_list.int_list, io##0:wybe.phantom, ?io##3:wybe.phantom):
 
 println > public {inline} (1 calls)
 0: int_list.println<0>
-println(x##0:int_list.int_list, io##0:wybe.phantom, ?io##2:wybe.phantom):
+println(x##0:int_list.int_list, #io##0:wybe.phantom, #?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     int_list.print<0>(~x##0:int_list.int_list, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @int_list:nn:nn

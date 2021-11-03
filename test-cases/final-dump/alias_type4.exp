@@ -32,7 +32,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: alias_type4.<0>
-(io##0:wybe.phantom, ?io##1:wybe.phantom):
+(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
  MultiSpeczDepInfo: [(2,(alias_type4.foo<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -47,7 +47,7 @@ AFTER EVERYTHING:
 
 foo > public (1 calls)
 0: alias_type4.foo<0>[410bae77d3]
-foo(r1##0:alias_type4.posrec, io##0:wybe.phantom, ?io##1:wybe.phantom):
+foo(r1##0:alias_type4.posrec, #io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 0]
     foreign lpvm access(~r1##0:alias_type4.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:alias_type4.position)

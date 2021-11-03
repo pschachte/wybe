@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 *main* > public {inline,impure} (0 calls)
 0: backwards_assign.<0>
-(io##0:wybe.phantom, ?io##1:wybe.phantom):
+(#io##0:wybe.phantom, #?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     backwards_assign.gen#1<0>(0:wybe.int, ~io##0:wybe.phantom, ?io##1:wybe.phantom) #0 @backwards_assign:nn:nn

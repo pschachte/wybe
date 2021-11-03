@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: exp_simple.<0>
-(io##0:wybe.phantom, ?io##7:wybe.phantom):
+(#io##0:wybe.phantom, #?io##7:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign c print_int(3:wybe.int, ~#io##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn

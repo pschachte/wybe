@@ -210,10 +210,11 @@ translateProc modProtos proc = do
     let proto = procImplnProto $ procImpln proc
     let body = procImplnBody $ procImpln proc
     let isClosure = isJust $ maybeClosureOf $ procSuperproc proc
+    let resAsRefs = procResourceRefs proc
     let speczBodies = procImplnSpeczBodies $ procImpln proc
     -- translate the standard version
-    (block, count') <- 
-            lift $ _translateProcImpl modProtos proto isClosure body count
+    (block, count') <- lift $ _translateProcImpl modProtos proto 
+                                isClosure resAsRefs body count
     -- translate the specialized versions
     let speczBodies' = speczBodies
                         |> Map.toList
@@ -223,20 +224,19 @@ translateProc modProtos proc = do
                             (speczVersionToId ver, trustFromJust msg body))
     -- Make sure there aren't collision in specz version id. If such thing
     -- happened, we may consider increasing the length of id (more in AST.hs).
-    let hasDuplicates l = List.length l /= ((Set.size . Set.fromList) l)
+    let hasDuplicates l = List.length l /= (Set.size . Set.fromList) l
     when (hasDuplicates (List.map fst speczBodies'))
             $ shouldnt $ "Specz version id conflicts" 
                 ++ show (List.map fst speczBodies')
     (blocks, count'') <-
             foldlM (\(currBlocks, currCount) (id, currBody) -> do
                     -- rename this version of proc
-                    let pname = (primProtoName proto) 
-                                ++ "[" ++ id ++ "]"
+                    let pname = primProtoName proto ++ "[" ++ id ++ "]"
                     let proto' = proto {primProtoName = pname}
                     -- codegen
                     (currBlock, currCount') <- 
                             lift $ _translateProcImpl modProtos 
-                                        proto' isClosure currBody currCount
+                                        proto' isClosure resAsRefs currBody currCount
                     return (currBlock:currBlocks, currCount') 
             ) ([], count') speczBodies'
     let blocks' = block:blocks
@@ -246,10 +246,10 @@ translateProc modProtos proc = do
 
 -- Helper for `translateProc`. Translate the given `ProcBody` 
 -- (A specialized version of a procedure).
-_translateProcImpl :: [PrimProto] -> PrimProto -> Bool -> ProcBody
+_translateProcImpl :: [PrimProto] -> PrimProto -> Bool -> Bool -> ProcBody
                    -> Word -> Compiler (ProcDefBlock, Word)
-_translateProcImpl modProtos proto isClosure body startCount = do
-    (resRefs, proto', body') <- closeProtoBody isClosure proto body
+_translateProcImpl modProtos proto isClosure resAsRefs body startCount = do
+    let (proto', body') = closeProtoBody isClosure resAsRefs proto body
     modspec <- getModuleSpec
     logBlocks $ "\n" ++ replicate 70 '=' ++ "\n"
     logBlocks $ "In Module: " ++ showModSpec modspec
@@ -258,7 +258,7 @@ _translateProcImpl modProtos proto isClosure body startCount = do
                 ++ "body: " ++ show body'
                 ++ "\n" ++ replicate 50 '-' ++ "\n"
     -- Codegen
-    codestate <- execCodegen startCount resRefs modProtos (doCodegenBody proto' body')
+    codestate <- execCodegen startCount resAsRefs modProtos (doCodegenBody proto' body')
     let pname = primProtoName proto
     logBlocks $ show $ externs codestate
     exs <- mapM declareExtern $ externs codestate
@@ -273,16 +273,17 @@ _translateProcImpl modProtos proto isClosure body startCount = do
 
 -- | Updates a PrimProto and ProcBody as though the Closed Params are accessed
 -- via the closure environment 
-closeProtoBody :: Bool -> PrimProto -> ProcBody 
-               -> Compiler (Bool, PrimProto, ProcBody)
-closeProtoBody isClosure
+closeProtoBody :: Bool -> Bool -> PrimProto -> ProcBody 
+               -> (PrimProto, ProcBody)
+closeProtoBody isClosure resAsRefs
                proto@PrimProto{primProtoParams=params} 
                body@ProcBody{bodyPrims=prims} = do
-    if isClosure || any (isResourcefulHigherOrder . primParamType) params
-    then return (True, proto', body')
-    else return (False, proto, body)
+    if isClosure || resAsRefs
+    then (proto', body')
+    else (proto, body)
   where
-    (closed, trueParams) = List.partition ((==Closed) . primParamFlowType) params
+    (closed, trueParams) = List.partition ((==Closed) . primParamFlowType 
+                                            &&& const isClosure) params
     actualParams = List.filter (not . isResourcePrimParam) trueParams
     proto' = proto{primProtoParams=actualParams ++ [envPrimParam | isClosure]}
     neededClosed = List.filter (not . paramInfoUnneeded . primParamInfo) closed
