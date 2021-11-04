@@ -1117,7 +1117,6 @@ translateConditionalExp' stmtExpr =
 
 -- |Convert a StmtExpr to a TypeSpec, or produce an error
 stmtExprToTypeSpec :: TranslateTo TypeSpec
-stmtExprToTypeSpec (Call _ [] name ParamOut []) = Right $ TypeVariable name
 stmtExprToTypeSpec call@(Call pos [] "@" ParamIn [mods@(Call _ [] "{}" ParamIn _),
                                                   ty@(Call _ [] "()" ParamIn _)]) = do
     procMods <- translateToProcModifiers mods
@@ -1130,6 +1129,8 @@ stmtExprToTypeSpec (Call _ [] "()" ParamIn args) =
 stmtExprToTypeSpec call@(Call _ mod name ParamIn args)
     | name /= "{}"
     = TypeSpec mod name <$> mapM stmtExprToTypeSpec args
+stmtExprToTypeSpec (Call _ [] name ParamOut []) = 
+    return $ TypeVariable $ RealTypeVar name
 stmtExprToTypeSpec other =
     syntaxError (stmtExprPos other) $ "invalid type specification " ++ show other
 
@@ -1174,12 +1175,14 @@ stmtExprToCtorDecl other =
 
 -- | Translate a StmtExpr to a ctor field
 stmtExprToCtorField :: TranslateTo Param
-stmtExprToCtorField (Call _ [] ":" ParamIn [Call _ [] name flow [],ty]) = do
+stmtExprToCtorField (Call _ [] ":" ParamIn [Call _ [] name ParamIn [],ty]) = do
     ty' <- stmtExprToTypeSpec ty
-    return $ Param name ty' flow Ordinary
-stmtExprToCtorField (Call pos mod name flow params) = do
+    return $ Param name ty' ParamIn Ordinary
+stmtExprToCtorField (Call pos [] name ParamOut []) = do
+    return $ Param "" (TypeVariable $ RealTypeVar name) ParamIn Ordinary
+stmtExprToCtorField (Call pos mod name ParamIn params) = do
     tyParams <- mapM stmtExprToTypeSpec params
-    return $ Param "" (TypeSpec mod name tyParams) flow Ordinary
+    return $ Param "" (TypeSpec mod name tyParams) ParamIn Ordinary
 stmtExprToCtorField other =
     syntaxError (stmtExprPos other) $ "invalid constructor field " ++ show other
 

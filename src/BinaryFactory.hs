@@ -30,6 +30,7 @@ instance Binary ArgFlowType
 instance Binary ResourceSpec
 instance Binary FlowDirection
 instance Binary PrimFlow
+instance Binary TypeVarName
 instance Binary TypeSpec
 instance Binary TypeFlow
 instance Binary Exp
