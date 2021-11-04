@@ -8,7 +8,7 @@
 
 module Scanner (Token(..), tokenPosition, floatValue, intValue, stringValue,
                 charValue, identName, symbolName, tokenName, showPosition,
-                StringDelim(..), BracketStyle(..), fileTokens, tokenise,
+                StringDelim(..), BracketStyle(..), bracketString, fileTokens, tokenise,
                 inputTokens, stringTokens, delimitString) where
 
 import AST

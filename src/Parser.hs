@@ -27,6 +27,7 @@ import Data.Maybe
 -- import           Text.Parsec.Expr
 import Control.Monad
 import Debug.Trace
+import GHC.IO.Unsafe (unsafePerformIO)
 
 
 -----------------------------------------------------------------------------
@@ -42,8 +43,9 @@ syntaxError :: SourcePos -> String -> Either (SourcePos,String) a
 syntaxError pos msg = Left (pos,msg)
 
 
-sourcePos :: Monad m => ParsecT s u m SourcePos
-sourcePos = statePos `fmap` getParserState
+-- | Get the currnt SourcePos of the Parser
+sourcePos :: Parser SourcePos
+sourcePos = statePos <$> getParserState
 
 
 -- | Parse a Wybe module.
@@ -53,13 +55,15 @@ parseWybe toks file = parse (items <* eof) file toks
 
 -- | Parser entry for a Wybe program.
 items :: Parser [Item]
-items = singleItem `sepBy` separator
+items = item `sepBy` separator
 
 
-singleItem :: Parser Item
-singleItem = visibilityItem <|> privateItem <|> topLevelStmtItem
+-- | Parse a single item
+item :: Parser Item
+item = visibilityItem <|> privateItem <|> topLevelStmtItem
 
 
+-- | Parse a top-level statement
 topLevelStmtItem :: Parser Item
 topLevelStmtItem = do
     st <- stmt <?> "top-level statement"
@@ -84,6 +88,7 @@ privateItem :: Parser Item
 privateItem = typeRepItem <|> pragmaItem
 
 
+-- | Parse a pragma item
 pragmaItem :: Parser Item
 pragmaItem = ident "pragma" *> (PragmaDecl <$> parsePragma)
 
@@ -106,8 +111,7 @@ moduleItem v = do
 typeItem :: Visibility -> Parser Item
 typeItem v = do
     pos <- tokenPosition <$> ident "type"
-    proto <- TypeProto <$> identString <*>
-             option [] (betweenB Paren (typeVarName `sepBy` comma))
+    proto <- TypeProto <$> identString <*> typeVarNames
     (imp,items) <- typeImpln <|> typeCtors
     return $ TypeDecl v proto imp items (Just pos)
 
@@ -116,7 +120,7 @@ typeItem v = do
 typeRepItem :: Parser Item
 typeRepItem = do
     keypos <- tokenPosition <$> ident "representation"
-    params <- option [] $ betweenB Paren (typeVarName `sepBy` comma)
+    params <- typeVarNames
     ident "is"
     rep <- typeRep
     return $ RepresentationDecl params rep $ Just keypos
@@ -126,12 +130,13 @@ typeRepItem = do
 dataCtorItemParser :: Visibility -> Parser Item
 dataCtorItemParser v = do
     pos <- tokenPosition <$> (ident "constructor" <|> ident "constructors")
-    params <- option [] $ betweenB Paren (typeVarName `sepBy` comma)
+    params <- typeVarNames
     ctors <- ctorDecl `sepBy1` symbol "|"
     return $ ConstructorDecl v params ctors $ Just pos
 
 
 -- | Type declaration body where representation and items are given
+typeImpln :: Parser (TypeImpln, [Item])
 typeImpln = do
     impln <- TypeRepresentation <$> (ident "is" *> typeRep)
     items <- betweenB Brace items
@@ -139,7 +144,7 @@ typeImpln = do
 
 
 -- | Type declaration body where representation and items are given
-typeRep :: ParsecT [Token] () Identity TypeRepresentation
+typeRep :: Parser TypeRepresentation
 typeRep = do
     ident "address" $> Address
     <|> do bits <- option wordSize
@@ -158,10 +163,12 @@ typeCtors = betweenB Brace $ do
     return (TypeCtors vis ctors,items)
 
 
+-- | Parse a Procedure of Function prototype
 procFuncProto :: Parser (Placed ProcProto)
 procFuncProto = stmtExpr >>= parseWith stmtExprToProto
 
 
+-- | Parse a constructor declaration
 ctorDecl :: Parser (Placed ProcProto)
 ctorDecl = stmtExpr >>= parseWith stmtExprToCtorDecl
 
@@ -270,16 +277,16 @@ processProcModifiers = List.foldl (flip processProcModifier)
 
 -- |Update 
 processProcModifier :: String -> ProcModifiers -> ProcModifiers
-processProcModifier "test"        = updateModsDetism   "test" SemiDet
-processProcModifier "partial"     = updateModsDetism   "partial" SemiDet
-processProcModifier "failing"     = updateModsDetism   "failing" Failure
-processProcModifier "terminal"    = updateModsDetism   "terminal" Terminal
-processProcModifier "inline"      = updateModsInlining "inline" Inline
-processProcModifier "noinline"    = updateModsInlining "noinline" NoInline
-processProcModifier "pure"        = updateModsImpurity "pure" PromisedPure
-processProcModifier "semipure"    = updateModsImpurity "semipure" Semipure
-processProcModifier "impure"      = updateModsImpurity "impure" Impure
-processProcModifier "resourceful" = updateModsResource "resourceful" Resourceful
+processProcModifier "test"     = updateModsDetism   "test" SemiDet
+processProcModifier "partial"  = updateModsDetism   "partial" SemiDet
+processProcModifier "failing"  = updateModsDetism   "failing" Failure
+processProcModifier "terminal" = updateModsDetism   "terminal" Terminal
+processProcModifier "inline"   = updateModsInlining "inline" Inline
+processProcModifier "noinline" = updateModsInlining "noinline" NoInline
+processProcModifier "pure"     = updateModsImpurity "pure" PromisedPure
+processProcModifier "semipure" = updateModsImpurity "semipure" Semipure
+processProcModifier "impure"   = updateModsImpurity "impure" Impure
+processProcModifier "resource" = updateModsResource "resource" Resourceful
 processProcModifier modName    =
     \ms -> ms {modifierUnknown=modName:modifierUnknown ms}
 
@@ -396,6 +403,7 @@ stmtExprSuffix left =
 stmtExprSuffix' :: StmtExpr -> Parser StmtExpr
 stmtExprSuffix' left =
     (argumentList Paren >>= applyArguments left)
+    <|> try (embracedStmtExp >>= applyEmbraced left)
     <|> (Call (stmtExprPos left) [] "[]" ParamIn . (left:)
          <$> argumentList Bracket)
 
@@ -413,8 +421,15 @@ applyArguments stmtOrExpr args =
     case stmtOrExpr of
         call@Call{} ->
             return $ call {callArguments = callArguments call ++ args}
+        embraced@Embraced{embracedArg=Nothing, embracedPos=pos} -> 
+            return $ embraced{embracedArg=Just $ Embraced pos Paren args Nothing}
         other -> fail $ "unexpected argument list following expression "
                         ++ show other
+
+applyEmbraced :: StmtExpr -> StmtExpr -> Parser StmtExpr
+applyEmbraced expr@(Embraced _ Brace _ Nothing) arg = 
+    return expr{embracedArg=Just arg}
+applyEmbraced expr _ = fail $ "unexpected embraced expression following " ++ show expr
 
 
 -- |Complete parsing an stmtExpr of precedence no looser than specified, given
@@ -479,7 +494,7 @@ parenthesisedExp :: Parser StmtExpr
 parenthesisedExp = do
     pos <- sourcePos
     exps <- argumentList Paren
-    return $ Call pos [] "()" ParamIn exps
+    return $ Embraced pos Paren exps Nothing
 
 varOrCall :: Parser StmtExpr
 varOrCall = do
@@ -499,9 +514,10 @@ anonParamVar = do
 embracedStmtExp :: Parser StmtExpr
 embracedStmtExp = do
     pos <- tokenPosition <$> leftBracket Brace
-    Call pos [] "{}" ParamIn
+    embraced <- Embraced pos Brace
         <$> limitedStmtExpr lowestStmtSeqPrecedence `sepBy` comma
         <* rightBracket Brace
+    return $ embraced Nothing
 
 
 -- | Parse all expressions beginning with the terminal "[".
@@ -631,16 +647,20 @@ applyPrefixOp tok stmtExpr = do
         ("-", FloatConst _ num) -> return $ FloatConst pos (-num)
         ("-", Call{}) -> return $ call1 pos "-" stmtExpr
         ("-", Foreign{}) -> return $ call1 pos "-" stmtExpr
+        ("-", Embraced{embracedStyle=Paren,embraced=[expr]}) 
+            -> return $ call1 pos "-" expr
         ("-", _) -> fail $ "cannot negate " ++ show stmtExpr
         ("~", IntConst _ num) -> return $ IntConst pos (complement num)
         ("~", Call{}) -> return $ call1 pos "~" stmtExpr
         ("~", Foreign{}) -> return $ call1 pos "~" stmtExpr
+        ("~", Embraced{embracedStyle=Paren,embraced=[expr]}) 
+            -> return $ call1 pos "~" expr
         ("~", _) -> fail $ "cannot negate " ++ show stmtExpr
         ("?", Call{callVariableFlow=ParamIn}) -> return $ setCallFlow ParamOut stmtExpr
         ("?", _) -> fail $ "unexpected " ++ show stmtExpr ++ " following '?'"
         ("!", Call{callVariableFlow=ParamIn}) -> return $ setCallFlow ParamInOut stmtExpr
         ("!", _) -> fail $ "unexpected " ++ show stmtExpr ++ " following '!'"
-        (":", _) -> return $ Call pos [] ":" ParamIn [stmtExpr]
+        (":", _) -> return $ call1 pos ":" stmtExpr
         (_,_) -> shouldnt $ "Unknown prefix operator " ++ show tok
                             ++ " in applyPrefixOp"
 
@@ -752,6 +772,7 @@ identifier = takeToken test
     test _ = Nothing
 
 
+-- | Parse an identifier as a String
 identString :: Parser String
 identString = takeToken test
   where
@@ -762,6 +783,11 @@ identString = takeToken test
 -- | Parse a type variable name
 typeVarName :: Parser Ident
 typeVarName = symbol "?" *> identString
+
+
+-- | Parse a comma-separated list of TypeVarNames between Parens
+typeVarNames :: Parser [Ident]
+typeVarNames = option [] $ betweenB Paren (typeVarName `sepBy` comma)
 
 
 -- | Parse an ident token if its string value is not in the list 'avoid'.
@@ -839,8 +865,8 @@ rightBracket :: BracketStyle -> Parser Token
 rightBracket bs = takeToken test
   where
     test tok@(TokRBracket sty _) = if bs == sty
-                                  then Just tok
-                                  else Nothing
+                                   then Just tok
+                                   else Nothing
     test _ = Nothing
 
 
@@ -878,7 +904,7 @@ type TranslateTo ty = StmtExpr -> Either (SourcePos,String) ty
 
 
 parensToStmtExpr :: [StmtExpr] -> [StmtExpr]
-parensToStmtExpr [Call _ [] "()" ParamIn parensed] = parensed
+parensToStmtExpr [Embraced _ Paren parensed Nothing] = parensed
 parensToStmtExpr ses = ses
 
 -- |Convert a StmtExpr to a proc/func prototype and a return type (AnyType for a
@@ -888,7 +914,7 @@ stmtExprToPrototype (Call _ [] ":" ParamIn [rawProto,rawTy]) = do
     returnType <- stmtExprToTypeSpec rawTy
     (proto,_)  <- stmtExprToPrototype rawProto
     return (proto,returnType)
-stmtExprToPrototype (Call _ [] "()" ParamIn [proto]) = stmtExprToPrototype proto
+stmtExprToPrototype (Embraced _ Paren [proto] Nothing) = stmtExprToPrototype proto
 stmtExprToPrototype (Call pos mod name ParamIn rawParams) =
     if List.null mod
     then do
@@ -907,7 +933,7 @@ stmtExprToBody (Call pos [] sep ParamIn [left,right])
     left' <- stmtExprToBody left
     right' <- stmtExprToBody right
     return $ left' ++ right'
-stmtExprToBody (Call pos [] "{}" ParamIn [body]) =
+stmtExprToBody (Embraced pos Brace [body] Nothing) =
     stmtExprToBody body
 stmtExprToBody other = (:[]) <$> stmtExprToStmt other
 
@@ -916,9 +942,8 @@ stmtExprToBody other = (:[]) <$> stmtExprToStmt other
 stmtExprToStmt :: TranslateTo (Placed Stmt)
 -- stmtExprToStmt (Call pos [] "if" ParamIn [conditional]) =
 --     translateConditionalStmt conditional
-stmtExprToStmt (Call pos [] "()" ParamIn [body]) = stmtExprToStmt body
-stmtExprToStmt (Call pos [] "{}" ParamIn [body]) =
-    stmtExprToStmt body
+stmtExprToStmt (Embraced _ Paren [body] Nothing) = stmtExprToStmt body
+stmtExprToStmt (Embraced _ Brace [body] Nothing) = stmtExprToStmt body
 stmtExprToStmt (Call pos [] "if" ParamIn [conditional]) =
     stmtExprToStmt conditional
 stmtExprToStmt (Call pos [] "do" ParamIn [body]) =
@@ -1004,14 +1029,15 @@ stmtExprToGenerators other =
 
 -- |Convert a StmtExpr to an Exp, if possible, or give a syntax error if not.
 stmtExprToExp :: TranslateTo (Placed Exp)
-stmtExprToExp (Call _ [] "()" ParamIn [exp]) = stmtExprToExp exp
-stmtExprToExp call@(Call pos [] "@" ParamIn [mods@(Call _ [] "{}" ParamIn _),
-                                             body@(Call _ [] "{}" ParamIn _)]) = do
+stmtExprToExp (Embraced _ Paren [exp] Nothing) = stmtExprToExp exp
+stmtExprToExp mods@(Embraced pos Brace _ (Just body@(Embraced _ Brace _ Nothing))) = do
+-- stmtExprToExp call@(Call pos [] "@" ParamIn [mods@(Call _ [] "{}" ParamIn _),
+--                                              body@(Call _ [] "{}" ParamIn _)]) = do
     procMods <- translateToProcModifiers mods
     lambda <- content <$> stmtExprToExp body
     case lambda of
         Lambda _ ps body -> return $ Placed (Lambda procMods ps body) pos
-        _ -> syntaxError pos $ "malformed lambda " ++ show call
+        _ -> syntaxError pos $ traceShowId $ "malformed lambda " ++ show mods
 stmtExprToExp (Call pos [] ":" ParamIn [exp,ty]) = do
     exp' <- content <$> stmtExprToExp exp
     ty' <- stmtExprToTypeSpec ty
@@ -1058,9 +1084,9 @@ stmtExprToExp (Call pos [] "@" flow exps) = do
         _ -> syntaxError pos "invalid anonymous parameter expression"
 stmtExprToExp (Call pos [] "if" ParamIn [conditional]) =
     translateConditionalExp conditional
-stmtExprToExp call@(Call pos [] "{}" ParamIn statements) = do
-    statements' <- stmtExprToBody call
-    return $ Placed (Lambda defaultProcModifiers [] statements') pos
+stmtExprToExp body@(Embraced pos Brace _ Nothing) = do
+    body' <- stmtExprToBody body
+    return $ Placed (Lambda defaultProcModifiers [] body') pos
 stmtExprToExp (Call pos [] sep ParamIn [])
   | separatorName sep =
     syntaxError pos "invalid separated expression"
@@ -1079,6 +1105,7 @@ stmtExprToExp (StringConst pos str (IdentQuote "c" DoubleQuote))
     = return $ Placed (StringValue str CString) pos
 stmtExprToExp str@StringConst{stringPos=pos}
     = syntaxError pos $ "invalid string literal " ++ show str
+stmtExprToExp exp = shouldnt $ show exp
 
 
 translateToIdent :: TranslateTo Ident
@@ -1087,7 +1114,7 @@ translateToIdent other
     = syntaxError (stmtExprPos other) $ "invalid ident " ++ show other
 
 translateToProcModifiers :: TranslateTo ProcModifiers 
-translateToProcModifiers (Call _ [] "{}" ParamIn mods) = 
+translateToProcModifiers (Embraced _ Brace mods _) = 
     processProcModifiers <$> mapM translateToIdent mods
 translateToProcModifiers other
     = syntaxError (stmtExprPos other) $ "invalid modifiers " ++ show other
@@ -1096,7 +1123,7 @@ translateToProcModifiers other
 
 -- |Translate an `if` expression into a Placed conditional Exp
 translateConditionalExp :: TranslateTo (Placed Exp)
-translateConditionalExp (Call _ [] "{}" ParamIn [body]) =
+translateConditionalExp (Embraced _ Brace [body] Nothing) =
     translateConditionalExp' body
 translateConditionalExp stmtExpr =
     syntaxError (stmtExprPos stmtExpr) "expecting '{'"
@@ -1117,17 +1144,15 @@ translateConditionalExp' stmtExpr =
 
 -- |Convert a StmtExpr to a TypeSpec, or produce an error
 stmtExprToTypeSpec :: TranslateTo TypeSpec
-stmtExprToTypeSpec call@(Call pos [] "@" ParamIn [mods@(Call _ [] "{}" ParamIn _),
-                                                  ty@(Call _ [] "()" ParamIn _)]) = do
+stmtExprToTypeSpec mods@(Embraced pos Brace _ (Just ty@(Embraced _ Paren _ Nothing))) = do
     procMods <- translateToProcModifiers mods
     ty' <- stmtExprToTypeSpec ty
     case ty' of
         HigherOrderType _ params -> return $ HigherOrderType procMods params
-        _ -> syntaxError pos $ "invalid type spec " ++ show call 
-stmtExprToTypeSpec (Call _ [] "()" ParamIn args) =
+        _ -> syntaxError pos $ "invalid type spec " ++ show mods 
+stmtExprToTypeSpec (Embraced _ Paren args Nothing) =
     HigherOrderType defaultProcModifiers <$> mapM stmtExprToTypeFlow args
 stmtExprToTypeSpec call@(Call _ mod name ParamIn args)
-    | name /= "{}"
     = TypeSpec mod name <$> mapM stmtExprToTypeSpec args
 stmtExprToTypeSpec (Call _ [] name ParamOut []) = 
     return $ TypeVariable $ RealTypeVar name
@@ -1137,10 +1162,12 @@ stmtExprToTypeSpec other =
 stmtExprToTypeFlow :: TranslateTo TypeFlow
 stmtExprToTypeFlow (Call _ [] ":" flow [ty]) =
     (`TypeFlow` flow) <$> stmtExprToTypeSpec ty
+stmtExprToTypeFlow (Call _ [] ":" _ [Call _ [] _ flow [],ty]) =
+    (`TypeFlow` flow) <$> stmtExprToTypeSpec ty
 stmtExprToTypeFlow ty@Call{} =
     (`TypeFlow` ParamIn) <$> stmtExprToTypeSpec ty
 stmtExprToTypeFlow other =
-    syntaxError (stmtExprPos other) $ "invalid higher order type arguemnt " ++ show other
+    syntaxError (stmtExprPos other) $ "invalid higher order type argument " ++ show other
 
 
 -- | Translate a StmtExpr to a proc or func prototype (with empty resource list)
@@ -1189,7 +1216,7 @@ stmtExprToCtorField other =
 
 -- | Extract a list of resource names from a StmtExpr (from a "use" statement).
 translateResourceList :: TranslateTo [ResourceSpec]
-translateResourceList (Call _ [] "{}" ParamIn args) =
+translateResourceList (Embraced _ Brace args Nothing) =
     concat <$> mapM translateResourceList args
 translateResourceList (Call _ mod name ParamIn []) =
     return [ResourceSpec mod name]
@@ -1219,6 +1246,12 @@ data StmtExpr
         foreignFlags::[Ident],         -- ^the specified modifiers
         foreignArguments::[StmtExpr]   -- ^the specified arguments
     }
+    | Embraced { 
+        embracedPos::SourcePos,
+        embracedStyle::BracketStyle,
+        embraced::[StmtExpr],
+        embracedArg::Maybe StmtExpr
+    }
     -- |an integer manifest constant
     | IntConst {intPos::SourcePos, intConstValue::Integer}
     -- |a floating point manifest constant
@@ -1239,6 +1272,10 @@ instance Show StmtExpr where
     show (Foreign _ lang instr flags args) =
         "foreign " ++ lang ++ " " ++ showFlags flags ++ instr
         ++ showArguments args
+    show (Embraced _ style embraced arg) =
+        bracketString True style ++ intercalate "," (show <$> embraced) 
+                                 ++ bracketString True style
+                                 ++ maybe "" show arg
     show (IntConst _ int) = show int
     show (FloatConst _ float) = show float
     show (CharConst _ char) = show char
@@ -1249,6 +1286,7 @@ instance Show StmtExpr where
 stmtExprPos :: StmtExpr -> SourcePos
 stmtExprPos Call{callPos=pos}            = pos
 stmtExprPos Foreign{foreignPos=pos}      = pos
+stmtExprPos Embraced{embracedPos=pos}    = pos
 stmtExprPos IntConst{intPos=pos}         = pos
 stmtExprPos FloatConst{floatPos=pos}     = pos
 stmtExprPos CharConst{charPos=pos}       = pos
@@ -1259,6 +1297,7 @@ stmtExprPos StringConst{stringPos=pos}   = pos
 setStmtExprPos :: SourcePos -> StmtExpr -> StmtExpr
 setStmtExprPos pos term@Call{} = term {callPos = pos}
 setStmtExprPos pos term@Foreign{} = term {foreignPos = pos}
+setStmtExprPos pos term@Embraced{} = term {embracedPos = pos}
 setStmtExprPos pos term@IntConst{} = term {intPos = pos}
 setStmtExprPos pos term@FloatConst{} = term {floatPos = pos}
 setStmtExprPos pos term@CharConst{} = term {charPos = pos}

@@ -1080,7 +1080,7 @@ data Resourcefulness = Resourceless
 
 resourcefulName :: Resourcefulness -> String
 resourcefulName Resourceless = ""
-resourcefulName Resourceful  = "resourceful"
+resourcefulName Resourceful  = "resource"
 
 
 showResourceSets :: (Set ResourceSpec, Set ResourceSpec) -> String
