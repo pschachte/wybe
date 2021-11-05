@@ -15,6 +15,7 @@ import Data.Bits
 import Control.Monad.Identity (Identity)
 import Scanner
 import Util
+import Snippets
 import Config
 import Text.Parsec
 import Text.Parsec.Pos
@@ -90,7 +91,7 @@ parsePragma = ident "no_standard_library" $> NoStd
 moduleItem :: Visibility -> Parser Item
 moduleItem v = do
     pos <- tokenPosition <$> ident "module"
-    modName <- identString
+    modName <- moduleName
     body <- betweenB Brace items
     return $ ModuleDecl v modName body (Just pos)
 
@@ -99,7 +100,7 @@ moduleItem v = do
 typeItem :: Visibility -> Parser Item
 typeItem v = do
     pos <- tokenPosition <$> ident "type"
-    proto <- TypeProto <$> identString <*>
+    proto <- TypeProto <$> moduleName <*>
              option [] (betweenB Paren (typeVarName `sepBy` comma))
     (imp,items) <- typeImpln <|> typeCtors
     return $ TypeDecl v proto imp items (Just pos)
@@ -738,7 +739,17 @@ identString = takeToken test
 
 -- | Parse a type variable name
 typeVarName :: Parser Ident
-typeVarName = symbol "?" *> identString
+typeVarName = takeToken test
+ where 
+    test (TokIdent s _) | isTypeVar s = Just s
+    test _                            = Nothing
+
+-- | Parse a module name, any ident that is not a TypeVarName
+moduleName :: Parser Ident 
+moduleName = takeToken test
+ where 
+    test (TokIdent s _) | not $ isTypeVar s = Just s
+    test _                                  = Nothing
 
 
 -- | Parse an ident token if its string value is not in the list 'avoid'.
@@ -1058,9 +1069,11 @@ translateConditionalExp' stmtExpr =
 
 -- |Convert a StmtExpr to a TypeSpec, or produce an error
 stmtExprToTypeSpec :: TranslateTo TypeSpec
-stmtExprToTypeSpec (Call _ [] name ParamOut []) = 
+stmtExprToTypeSpec (Call _ [] name ParamIn []) 
+  | isTypeVar name = 
     return $ TypeVariable $ RealTypeVar name
-stmtExprToTypeSpec (Call _ mod name ParamIn params) =
+stmtExprToTypeSpec (Call _ mod name ParamIn params) 
+  | not $ isTypeVar name =
     TypeSpec mod name <$> mapM stmtExprToTypeSpec params
 stmtExprToTypeSpec other =
     syntaxError (stmtExprPos other)
@@ -1102,9 +1115,11 @@ stmtExprToCtorField :: TranslateTo Param
 stmtExprToCtorField (Call _ [] ":" ParamIn [Call _ [] name ParamIn [],ty]) = do
     ty' <- stmtExprToTypeSpec ty
     return $ Param name ty' ParamIn Ordinary
-stmtExprToCtorField (Call pos [] name ParamOut []) = do
+stmtExprToCtorField (Call pos [] name ParamIn []) 
+  | isTypeVar name = do
     return $ Param "" (TypeVariable $ RealTypeVar name) ParamIn Ordinary
-stmtExprToCtorField (Call pos mod name ParamIn params) = do
+stmtExprToCtorField (Call pos mod name ParamIn params) 
+  | not $ isTypeVar name = do
     tyParams <- mapM stmtExprToTypeSpec params
     return $ Param "" (TypeSpec mod name tyParams) ParamIn Ordinary
 stmtExprToCtorField other =

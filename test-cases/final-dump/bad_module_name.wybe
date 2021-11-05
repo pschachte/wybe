@@ -1,0 +1,3 @@
+# this tests bad module names, that is, module names that look like type variables
+
+module T0 { }

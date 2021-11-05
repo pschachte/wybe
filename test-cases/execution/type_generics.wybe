@@ -1,4 +1,4 @@
-def foo(x:?t) use !io {
+def foo(x:T) use !io {
     ?l = [x]
     !println(length(l))
 }
@@ -8,7 +8,7 @@ def foo(x:?t) use !io {
 !foo(1.0)
 ?x = 1.0; !foo(x) 
 
-def {test} foo2(x:?T, ?y:?T) {
+def {test} foo2(x:T0, ?y:T0) {
     ?l = [x]
     [?y|_] = l
 }
