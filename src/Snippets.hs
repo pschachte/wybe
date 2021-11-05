@@ -7,7 +7,7 @@
 
 module Snippets (castFromTo, castTo, withType, intType, intCast,
                  tagType, tagCast, phantomType, stringType, cStringType,
-                 varSet, varGet, varGetSet,
+                 isTypeVar, varSet, varGet, varGetSet,
                  boolType, boolCast, boolTrue, boolFalse, boolBool,
                  boolVarSet, boolVarGet, intVarSet, intVarGet,
                  lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, primMove,
@@ -15,6 +15,7 @@ module Snippets (castFromTo, castTo, withType, intType, intCast,
 
 import AST
 import Data.String (String)
+import Data.Char (isUpper, isDigit)
 
 -- |An expression to cast a value to the specified type
 castFromTo :: TypeSpec -> TypeSpec -> Exp -> Exp
@@ -75,6 +76,11 @@ stringType = TypeSpec ["wybe"] "string" []
 -- | The c_string type, a C string
 cStringType :: TypeSpec
 cStringType = TypeSpec ["wybe"] "c_string" []
+
+-- | Is the given string a type variable name
+isTypeVar :: String -> Bool
+isTypeVar (alpha:digits) | isUpper alpha && all isDigit digits = True
+isTypeVar _                                                    = False
 
 -- |An output variable reference (lvalue)
 varSet :: Ident -> Exp

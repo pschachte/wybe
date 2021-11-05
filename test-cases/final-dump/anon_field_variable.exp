@@ -18,8 +18,8 @@ AFTER EVERYTHING:
 (io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?tmp#4##0:anon_field_variable(?T))
-    foreign lpvm mutate(~tmp#4##0:anon_field_variable(?T), ?tmp#0##0:anon_field_variable(?T), 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 0:?T)
+    foreign lpvm alloc(8:wybe.int, ?tmp#4##0:anon_field_variable(T))
+    foreign lpvm mutate(~tmp#4##0:anon_field_variable(T), ?tmp#0##0:anon_field_variable(T), 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 0:T)
     foreign llvm and(~tmp#0##0:wybe.int, 1:wybe.int, ?tmp#6##0:wybe.int)
     foreign llvm icmp_eq(~tmp#6##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool)
     case ~tmp#7##0:wybe.bool of
@@ -34,17 +34,17 @@ AFTER EVERYTHING:
 
 bar > public {inline} (0 calls)
 0: anon_field_variable.bar<0>
-bar(bar#1##0:wybe.int, field##0:?T, bar#3##0:?T, ?#result##0:anon_field_variable(?T)):
+bar(bar#1##0:wybe.int, field##0:T, bar#3##0:T, ?#result##0:anon_field_variable(T)):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(24:wybe.int, ?#rec##0:anon_field_variable(?T))
-    foreign lpvm mutate(~#rec##0:anon_field_variable(?T), ?#rec##1:anon_field_variable(?T), 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~bar#1##0:wybe.int)
-    foreign lpvm mutate(~#rec##1:anon_field_variable(?T), ?#rec##2:anon_field_variable(?T), 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~field##0:?T)
-    foreign lpvm mutate(~#rec##2:anon_field_variable(?T), ?#rec##3:anon_field_variable(?T), 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~bar#3##0:?T)
-    foreign llvm or(~#rec##3:anon_field_variable(?T), 1:wybe.int, ?#result##0:anon_field_variable(?T))
+    foreign lpvm alloc(24:wybe.int, ?#rec##0:anon_field_variable(T))
+    foreign lpvm mutate(~#rec##0:anon_field_variable(T), ?#rec##1:anon_field_variable(T), 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~bar#1##0:wybe.int)
+    foreign lpvm mutate(~#rec##1:anon_field_variable(T), ?#rec##2:anon_field_variable(T), 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~field##0:T)
+    foreign lpvm mutate(~#rec##2:anon_field_variable(T), ?#rec##3:anon_field_variable(T), 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~bar#3##0:T)
+    foreign llvm or(~#rec##3:anon_field_variable(T), 1:wybe.int, ?#result##0:anon_field_variable(T))
 bar > public {inline} (0 calls)
 1: anon_field_variable.bar<1>
-bar(?bar#1##0:wybe.int, ?field##0:?T, ?bar#3##0:?T, #result##0:anon_field_variable(?T), ?#success##0:wybe.bool):
+bar(?bar#1##0:wybe.int, ?field##0:T, ?bar#3##0:T, #result##0:anon_field_variable(T), ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
@@ -53,20 +53,20 @@ bar(?bar#1##0:wybe.int, ?field##0:?T, ?bar#3##0:?T, #result##0:anon_field_variab
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
         foreign llvm move(undef:wybe.int, ?bar#1##0:wybe.int)
-        foreign llvm move(undef:?T, ?field##0:?T)
-        foreign llvm move(undef:?T, ?bar#3##0:?T)
+        foreign llvm move(undef:T, ?field##0:T)
+        foreign llvm move(undef:T, ?bar#3##0:T)
 
     1:
-        foreign lpvm access(#result##0:anon_field_variable(?T), -1:wybe.int, 24:wybe.int, 1:wybe.int, ?bar#1##0:wybe.int)
-        foreign lpvm access(#result##0:anon_field_variable(?T), 7:wybe.int, 24:wybe.int, 1:wybe.int, ?field##0:?T)
-        foreign lpvm access(~#result##0:anon_field_variable(?T), 15:wybe.int, 24:wybe.int, 1:wybe.int, ?bar#3##0:?T)
+        foreign lpvm access(#result##0:anon_field_variable(T), -1:wybe.int, 24:wybe.int, 1:wybe.int, ?bar#1##0:wybe.int)
+        foreign lpvm access(#result##0:anon_field_variable(T), 7:wybe.int, 24:wybe.int, 1:wybe.int, ?field##0:T)
+        foreign lpvm access(~#result##0:anon_field_variable(T), 15:wybe.int, 24:wybe.int, 1:wybe.int, ?bar#3##0:T)
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 
 field > {inline} (0 calls)
 0: anon_field_variable.field<0>
-field(#rec##0:anon_field_variable(?T), ?#result##0:?T, ?#success##0:wybe.bool):
+field(#rec##0:anon_field_variable(T), ?#result##0:T, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
@@ -74,15 +74,15 @@ field(#rec##0:anon_field_variable(?T), ?#result##0:?T, ?#success##0:wybe.bool):
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
-        foreign llvm move(undef:?T, ?#result##0:?T)
+        foreign llvm move(undef:T, ?#result##0:T)
 
     1:
-        foreign lpvm access(~#rec##0:anon_field_variable(?T), 7:wybe.int, 24:wybe.int, 1:wybe.int, ?#result##0:?T)
+        foreign lpvm access(~#rec##0:anon_field_variable(T), 7:wybe.int, 24:wybe.int, 1:wybe.int, ?#result##0:T)
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 field > {inline} (0 calls)
 1: anon_field_variable.field<1>
-field(#rec##0:anon_field_variable(?T), ?#rec##1:anon_field_variable(?T), #field##0:?T, ?#success##0:wybe.bool):
+field(#rec##0:anon_field_variable(T), ?#rec##1:anon_field_variable(T), #field##0:T, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
@@ -90,24 +90,24 @@ field(#rec##0:anon_field_variable(?T), ?#rec##1:anon_field_variable(?T), #field#
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
-        foreign llvm move(~#rec##0:anon_field_variable(?T), ?#rec##1:anon_field_variable(?T))
+        foreign llvm move(~#rec##0:anon_field_variable(T), ?#rec##1:anon_field_variable(T))
 
     1:
-        foreign lpvm {noalias} mutate(~#rec##0:anon_field_variable(?T), ?#rec##1:anon_field_variable(?T), 7:wybe.int, 0:wybe.int, 24:wybe.int, 1:wybe.int, ~#field##0:?T)
+        foreign lpvm {noalias} mutate(~#rec##0:anon_field_variable(T), ?#rec##1:anon_field_variable(T), 7:wybe.int, 0:wybe.int, 24:wybe.int, 1:wybe.int, ~#field##0:T)
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 
 foo > public {inline} (3 calls)
 0: anon_field_variable.foo<0>
-foo(foo#1##0:?T, ?#result##0:anon_field_variable(?T)):
+foo(foo#1##0:T, ?#result##0:anon_field_variable(T)):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?#rec##0:anon_field_variable(?T))
-    foreign lpvm mutate(~#rec##0:anon_field_variable(?T), ?#result##0:anon_field_variable(?T), 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~foo#1##0:?T)
+    foreign lpvm alloc(8:wybe.int, ?#rec##0:anon_field_variable(T))
+    foreign lpvm mutate(~#rec##0:anon_field_variable(T), ?#result##0:anon_field_variable(T), 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~foo#1##0:T)
 foo > public {inline} (3 calls)
 1: anon_field_variable.foo<1>
-foo(?foo#1##0:?T, #result##0:anon_field_variable(?T), ?#success##0:wybe.bool):
+foo(?foo#1##0:T, #result##0:anon_field_variable(T), ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
@@ -115,10 +115,10 @@ foo(?foo#1##0:?T, #result##0:anon_field_variable(?T), ?#success##0:wybe.bool):
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
-        foreign llvm move(undef:?T, ?foo#1##0:?T)
+        foreign llvm move(undef:T, ?foo#1##0:T)
 
     1:
-        foreign lpvm access(~#result##0:anon_field_variable(?T), 0:wybe.int, 8:wybe.int, 0:wybe.int, ?foo#1##0:?T)
+        foreign lpvm access(~#result##0:anon_field_variable(T), 0:wybe.int, 8:wybe.int, 0:wybe.int, ?foo#1##0:T)
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 

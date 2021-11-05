@@ -23,10 +23,10 @@ AFTER EVERYTHING:
 (argc##0:wybe.int, [?argc##0:wybe.int], ?arguments##1:wybe.array(wybe.c_string), argv##0:wybe.array.raw_array(wybe.c_string), [?argv##0:wybe.array.raw_array(wybe.c_string)], ?command##1:wybe.c_string, ?exit_code##0:wybe.int, io##0:wybe.phantom, [?io##0:wybe.phantom]):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#4##0:wybe.array(?T))
-    foreign lpvm mutate(~tmp#4##0:wybe.array(?T), ?tmp#5##0:wybe.array(?T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argc##0:wybe.int)
-    foreign lpvm mutate(~tmp#5##0:wybe.array(?T), ?tmp#0##0:wybe.array(?T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argv##0:wybe.array.raw_array(?T))
-    wybe.array.[|]<0>(?command##1:?T, ?arguments##1:wybe.array(?T), ~tmp#0##0:wybe.array(?T), ?tmp#1##0:wybe.bool) #1 @command_line:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#4##0:wybe.array(T))
+    foreign lpvm mutate(~tmp#4##0:wybe.array(T), ?tmp#5##0:wybe.array(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argc##0:wybe.int)
+    foreign lpvm mutate(~tmp#5##0:wybe.array(T), ?tmp#0##0:wybe.array(T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, argv##0:wybe.array.raw_array(T))
+    wybe.array.[|]<0>(?command##1:T, ?arguments##1:wybe.array(T), ~tmp#0##0:wybe.array(T), ?tmp#1##0:wybe.bool) #1 @command_line:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
         foreign c {terminal,semipure} error_exit(c"command_line:17:6":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @control:nn:nn
@@ -124,7 +124,7 @@ entry:
     foreign llvm move(42:wybe.int, ?#exit_code##1:wybe.int) @command_line:nn:nn
     wybe.string.print_string<0>("hello, world!":wybe.string, ~#io##0:wybe.phantom, ?tmp#5##0:wybe.phantom) #5 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-    foreign lpvm access(arguments##0:wybe.array(?T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int)
+    foreign lpvm access(arguments##0:wybe.array(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int)
     foreign c print_int(~tmp#0##0:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
     wybe.string.print_string<0>(" command line argument(s)":wybe.string, ~#io##2:wybe.phantom, ?tmp#11##0:wybe.phantom) #6 @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn

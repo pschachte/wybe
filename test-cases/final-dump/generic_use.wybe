@@ -5,15 +5,15 @@ pub def fromto(lo:int, hi:int) : generic_list(int) = fromto1(lo, hi, nil)
 def fromto1(lo:int, hi:int, sofar:generic_list(int)) : generic_list(int) =
     if {lo <= hi:: fromto1(lo, hi-1, cons(hi,sofar)) |else:: sofar}
 
-pub def concat(l1:generic_list(?t), l2:generic_list(?t)):generic_list(?t) =
+pub def concat(l1:generic_list(T), l2:generic_list(T)):generic_list(T) =
     if {l1 = cons(?h , ?t):: cons(h,concat(t,l2)) |else:: l2}
 
-pub def nrev(lst:generic_list(?t)) : generic_list(?t) =
+pub def nrev(lst:generic_list(T)) : generic_list(T) =
     if {lst = cons(?h , ?t):: concat(nrev(t), cons(h,nil)) |else:: nil}
 
-pub def reverse(lst:generic_list(?t)) : generic_list(?t) = reverse1(lst, nil)
-pub def reverse1(lst:generic_list(?t), suffix:generic_list(?t))
-        : generic_list(?t) =
+pub def reverse(lst:generic_list(T)) : generic_list(T) = reverse1(lst, nil)
+pub def reverse1(lst:generic_list(T), suffix:generic_list(T))
+        : generic_list(T) =
     if {lst = cons(?h , ?t):: reverse1(t,cons(h,suffix)) |else:: suffix}
 
 
