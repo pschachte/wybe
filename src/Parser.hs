@@ -11,6 +11,7 @@ module Parser where
 import AST hiding (option)
 import Data.Set as Set
 import Data.List as List
+import Data.Maybe as Maybe
 import Data.Bits
 import Control.Monad.Identity (Identity)
 import Scanner
@@ -42,7 +43,14 @@ syntaxError pos msg = Left (pos,msg)
 
 -- | Parse a Wybe module.
 parseWybe :: [Token] -> FilePath -> Either ParseError [Item]
-parseWybe toks file = parse (items <* eof) file toks
+parseWybe toks file = parse (maybeSetPosition toks items <* eof) file toks
+
+
+-- | Set the Parser position to the position of the head Token, if it exists
+maybeSetPosition :: [Token] -> Parser a -> Parser a
+maybeSetPosition toks parser = do
+    maybe (return ()) (setPosition . tokenPosition) $ listToMaybe toks
+    parser
 
 
 -- | Parser entry for a Wybe program.
@@ -1225,9 +1233,11 @@ testFile file = do
 
 test :: Int -> String -> StmtExpr
 test prec input = do
-    case parse (limitedStmtExpr prec <* eof) "<string>" (stringTokens input) of
+    let toks = stringTokens input
+    case parse (maybeSetPosition toks (limitedStmtExpr prec) <* eof) "<string>" toks of
         Left err -> StringConst (errorPos err) (show err) DoubleQuote
         Right is -> is
 
 testParser :: Parser a -> String -> Either ParseError a
-testParser parser input = parse (parser <* eof) "<string>" (stringTokens input)
+testParser parser input = parse (maybeSetPosition toks parser <* eof) "<string>" toks
+  where toks = stringTokens input
