@@ -59,7 +59,8 @@ pub def {test} `[|]`(?head:char, ?tail:_, s:_) {
             if { [?head | ?t] = left :: ?tail = concat(t, right)
                | else :: [?head | ?tail] = right
             }
-       | s = slice(?base, ?range) :: 
+       | s = slice(?base, ?range) ::
+            ?head = nullbyte; ?tail = empty
             do { # this could be faster
                 [?idx | ?range] = range
                 if { ?head = base[idx] :: ?tail = slice(base, range); break }

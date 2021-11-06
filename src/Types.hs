@@ -1671,10 +1671,6 @@ modecheckStmt m name defPos assigned detism tmpCount final
         (modecheckStmt m name defPos assigned SemiDet tmpCount False)
         tstStmt
     logTyped $ "Assigned by test: " ++ show assigned1
-    let condVars = maybe [] Set.toAscList $ bindingVars assigned1
-    condTypes <- mapM ultimateVarType condVars
-    let condBindings = Map.fromAscList $ zip condVars condTypes
-    logTyped $ "Assigned by test: " ++ show assigned1
     (thnStmts', assigned2, tmpCount2) <-
         modecheckStmts m name defPos (forceDet assigned1) detism tmpCount1
                        final thnStmts
@@ -1693,16 +1689,11 @@ modecheckStmt m name defPos assigned detism tmpCount final
       else do
         let finalAssigned = assigned2 `joinState` assigned3
         logTyped $ "Assigned by conditional: " ++ show finalAssigned
-        let vars = maybe [] Set.toAscList $ bindingVars finalAssigned
-        types <- mapM ultimateVarType vars
-        let bindings = Map.fromAscList $ zip vars types
-        return -- XXX Fix Nothing to be set of variables assigned by condition
-          ([maybePlace (Cond (seqToStmt tstStmt') thnStmts' elsStmts'
-                        (Just condBindings)
-                        (if isJust (bindingVars finalAssigned)
-                         then Just bindings else Nothing)
-          )
-            pos], finalAssigned,tmpCount)
+        condBindings <- bindingVarsVarDict assigned1
+        finalBindings <- bindingVarsVarDict finalAssigned
+        return ([maybePlace (Cond (seqToStmt tstStmt') thnStmts' elsStmts'
+                             (Just condBindings) (Just finalBindings)
+                            ) pos], finalAssigned, tmpCount3)
 modecheckStmt m name defPos assigned detism tmpCount final
     stmt@(TestBool exp) pos = do
     logTyped $ "Mode checking test " ++ show exp
@@ -1719,10 +1710,13 @@ modecheckStmt m name defPos assigned detism tmpCount final
     -- XXX `final` is wrong:  checking for a terminal loop is not this easy
     (stmts', assigned', tmpCount') <-
       modecheckStmts m name defPos assigned detism tmpCount final stmts
+    let breakAssigned = bindingStateAfterBreak assigned'
     logTyped $ "Assigned by loop: " ++ show assigned'
-    vars <- typeMapFromSet $ bindingBreakVars assigned'
+    vars <- typeMapFromSet $ bindingBreakVars breakAssigned
     logTyped $ "Loop exit vars: " ++ show vars
-    return ([maybePlace (Loop stmts' vars) pos], assigned',tmpCount')
+    return ([maybePlace (Loop stmts' vars) pos], 
+             addBindings (fromMaybe Set.empty $ bindingBreakVars breakAssigned) 
+             assigned,tmpCount')
 modecheckStmt m name defPos assigned detism tmpCount final
     stmt@(UseResources resources _ stmts) pos = do
     logTyped $ "Mode checking use ... in stmt " ++ show stmt
@@ -1766,6 +1760,15 @@ modecheckStmt m name defPos assigned detism tmpCount final
     Next pos = do
     logTyped $ "Mode checking continue with assigned=" ++ show assigned
     return ([maybePlace Next pos],bindingStateAfterNext assigned, tmpCount)
+
+
+-- |Produce a VarDict (wrapped in Just) for the variables bound in the
+-- given BindingState
+bindingVarsVarDict :: BindingState -> Typed VarDict
+bindingVarsVarDict assigned = do
+    let vars = maybe [] Set.toAscList $ bindingVars assigned
+    types <- mapM ultimateVarType vars
+    return $ Map.fromAscList $ zip vars types
 
 
 -- |Produce a typed statement sequence, the binding state, and final temp count
