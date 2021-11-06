@@ -2164,10 +2164,10 @@ foldStmt' _   _   val Nop = val
 foldStmt' _   _   val Fail = val
 foldStmt' sfn efn val (Loop body _) = foldStmts sfn efn val body
 foldStmt' sfn efn val (UseResources _ _ body) = foldStmts sfn efn val body
-foldStmt' sfn efn val (For generators body) = foldStmts sfn efn
-                                                (foldExps sfn efn
-                                                  (foldExps sfn efn val $ List.map loopVar generators)
-                                                  $ List.map genExp generators) body
+foldStmt' sfn efn val (For generators body) = val3
+    where val1 = foldExps sfn efn val $ loopVar . content <$> generators
+          val2 = foldExps sfn efn val1 $ genExp . content <$> generators
+          val3 = foldStmts sfn efn val2 body
 foldStmt' _ _ val Break = val
 foldStmt' _   _   val Next = val
 
@@ -2477,7 +2477,7 @@ data Stmt
      | Loop [Placed Stmt] (Maybe VarDict)
      -- |A for loop has multiple generators, which is a variable-iterator pair
      -- and a list of statements in the body
-     | For [Generator] [Placed Stmt]
+     | For [Placed Generator] [Placed Stmt]
      -- |Immediately exit the enclosing loop; only valid in a loop
      | Break  -- holds the variable versions before the break
      -- |Immediately jump to the top of the enclosing loop; only valid in a loop
@@ -3280,7 +3280,8 @@ showStmt _ Fail = "fail"
 showStmt _ Nop = "pass"
 showStmt indent (For generators body) =
   "for "
-    ++ intercalate ", " [show var ++ " in " ++ show gen | (In var gen) <- generators]
+    ++ intercalate ", " [show var ++ " in " ++ show gen 
+                        | (In var gen) <- content <$> generators]
     ++ "{\n"
     ++ showBody (indent + 4) body
     ++ "\n}"

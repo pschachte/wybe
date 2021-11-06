@@ -112,7 +112,7 @@ gen#1(io##0:wybe.phantom, tmp#0##0:int_sequence, tmp#1##0:int_sequence, ?io##2:w
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 1]
  MultiSpeczDepInfo: [(0,(int_sequence.[|]<0>,fromList [NonAliasedParamCond 2 [1]])),(2,(int_sequence.gen#1<0>,fromList [NonAliasedParamCond 1 []]))]
-    int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:int_sequence, ~tmp#0##0:int_sequence, ?tmp#2##0:wybe.bool) #0
+    int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:int_sequence, ~tmp#0##0:int_sequence, ?tmp#2##0:wybe.bool) #0 @int_sequence:nn:nn
     case ~tmp#2##0:wybe.bool of
     0:
         foreign llvm move(~io##0:wybe.phantom, ?io##2:wybe.phantom)
@@ -123,7 +123,7 @@ gen#1(io##0:wybe.phantom, tmp#0##0:int_sequence, tmp#1##0:int_sequence, ?io##2:w
         int_sequence.gen#1<0>[6dacb8fd25](~io##1:wybe.phantom, ~tmp#0##1:int_sequence, ~tmp#1##0:int_sequence, ?io##2:wybe.phantom) #2 @int_sequence:nn:nn
 
  [6dacb8fd25] [NonAliasedParam 1] :
-    int_sequence.[|]<0>[785a827a1b](?i##0:wybe.int, ?tmp#0##1:int_sequence, ~tmp#0##0:int_sequence, ?tmp#2##0:wybe.bool) #0
+    int_sequence.[|]<0>[785a827a1b](?i##0:wybe.int, ?tmp#0##1:int_sequence, ~tmp#0##0:int_sequence, ?tmp#2##0:wybe.bool) #0 @int_sequence:nn:nn
     case ~tmp#2##0:wybe.bool of
     0:
         foreign llvm move(~io##0:wybe.phantom, ?io##2:wybe.phantom)

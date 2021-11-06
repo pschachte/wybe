@@ -978,7 +978,7 @@ stmtExprToStmt other =
     syntaxError (stmtExprPos other) $ "invalid statement " ++ show other
 
 
-stmtExprToGenerators :: TranslateTo [Generator]
+stmtExprToGenerators :: TranslateTo [Placed Generator]
 stmtExprToGenerators (Call pos [] sep ParamIn [left,right])
   | separatorName sep = do
     left' <- stmtExprToGenerators left
@@ -987,7 +987,7 @@ stmtExprToGenerators (Call pos [] sep ParamIn [left,right])
 stmtExprToGenerators (Call pos [] "in" ParamIn [var,exp]) = do
     var' <- stmtExprToExp var
     exp' <- stmtExprToExp exp
-    return [In var' exp']
+    return [Placed (In var' exp') pos]
 stmtExprToGenerators other =
     syntaxError (stmtExprPos other) $ "invalid generator " ++ show other
 

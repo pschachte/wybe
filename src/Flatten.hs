@@ -324,7 +324,7 @@ flattenStmt' (Loop body defVars) pos detism = do
     body' <- flattenInner True False detism
              (flattenStmts (body ++ [Unplaced Next]) detism)
     emit pos $ Loop body' defVars
-flattenStmt' for@(For generators body) pos detism = do
+flattenStmt' for@(For pgens body) pos detism = do
     -- For loops are transformed into `do` loops
     -- E.g. for i in x, j in y {
     --          <stmts>
@@ -342,9 +342,10 @@ flattenStmt' for@(For generators body) pos detism = do
     --     }
     -- }
     logFlatten $ "Generating for " ++ showStmt 4 for
-    temps <- mapM (const tempVar) generators
+    let (gens, poss) = unzip $ unPlace <$> pgens
+    temps <- mapM (const tempVar) gens
     -- XXX Should check for input only    
-    origs <- mapM (flattenPExp . genExp) generators
+    origs <- mapM (flattenPExp . genExp) gens
     let instrs = zipWith (\orig temp ->
                             ForeignCall "llvm" "move" [] 
                                 [orig, Unplaced $ varSet temp])
@@ -352,14 +353,15 @@ flattenStmt' for@(For generators body) pos detism = do
     mapM_ (emit pos) instrs
     modify (\s -> s {defdVars = Set.union (Set.fromList temps) $ defdVars s})
     let loop = List.foldr 
-                (\(var, gen) loop -> 
-                    [Unplaced $ Cond (Unplaced $ ProcCall [] "[|]" Nothing SemiDet False 
+                (\(var, gen, pos') loop -> 
+                    [Unplaced $ Cond (ProcCall [] "[|]" Nothing SemiDet False 
                                         [var,
                                          Unplaced $ Var gen ParamOut Ordinary,
-                                         Unplaced $ Var gen ParamIn Ordinary]) 
+                                         Unplaced $ Var gen ParamIn Ordinary]
+                                      `maybePlace` pos') 
                                 loop [Unplaced Break]
                       Nothing Nothing]
-                    ) body $ zip (loopVar <$> generators) temps
+                ) body $ zip3 (loopVar <$> gens) temps poss
     let generated = Loop loop Nothing
     logFlatten $ "Generated for: " ++ showStmt 4 generated
     flattenStmt' generated pos detism
