@@ -92,7 +92,7 @@ module AST (
   initialisedResources,
   addSimpleResource, lookupResource, specialResources, publicResource,
   ProcModifiers(..), defaultProcModifiers, setDetism, setInline, setImpurity,
-  showProcModifiers, Inlining(..), Impurity(..), Resourcefulness(..),
+  Inlining(..), Impurity(..), Resourcefulness(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
   checkConflictingMods, checkUnknownMods,
   specialChar, specialName, specialName2, outputVariableName, outputStatusName,
@@ -100,7 +100,7 @@ module AST (
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
   showModSpecs, showResources, showOptPos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
-  flowPrefix, showFlags,
+  flowPrefix, showProcModifiers, showProcModifiers', showFlags, showFlags',
   showMap, showVarMap, simpleShowMap, simpleShowSet, bracketList,
   maybeShow, showMessages, stopOnError,
   logMsg, whenLogging2, whenLogging,
@@ -1108,7 +1108,6 @@ setImpurity :: Impurity -> ProcModifiers -> ProcModifiers
 setImpurity impurity mods = mods {modifierImpurity=impurity}
 
 
-
 -- | How to display ProcModifiers
 showProcModifiers :: ProcModifiers -> String
 showProcModifiers (ProcModifiers detism inlining impurity res _ _) =
@@ -1119,11 +1118,23 @@ showProcModifiers (ProcModifiers detism inlining impurity res _ _) =
           r = resourcefulName res
 
 
--- | Display a list of strings separated by commas and surrounded with braces
--- and followed by a space, or nothing if the list is empty.
+-- | How to display ProcModifiers, with a space
+showProcModifiers' :: ProcModifiers -> String
+showProcModifiers' mods = mods' ++ if List.null mods' then "" else " "
+  where mods' = showProcModifiers mods
+
+
+-- | Display a list of strings separated by commas and surrounded with braces,
+-- or nothing if the list is empty.
 showFlags :: [String] -> String
 showFlags [] = ""
-showFlags flags = "{" ++ intercalate "," flags ++ "} "
+showFlags flags = "{" ++ intercalate "," flags ++ "}"
+
+
+-- | Display a list of strings separated by commas and surrounded with braces
+-- and followed by a space, or nothing if the list is empty.
+showFlags' :: [String] -> String
+showFlags' flags = showFlags flags ++ if List.null flags then "" else " " 
 
 
 -- |Add the specified proc definition to the current module.
@@ -3279,14 +3290,14 @@ instance Show Item where
   show (FuncDecl vis modifiers proto typ exp pos) =
     visibilityPrefix vis
     ++ "def "
-    ++ showProcModifiers modifiers
+    ++ showProcModifiers' modifiers
     ++ show proto ++ ":" ++ show typ
     ++ showOptPos pos
     ++ " = " ++ show exp
   show (ProcDecl vis modifiers proto stmts pos) =
     visibilityPrefix vis
     ++ "def "
-    ++ showProcModifiers modifiers
+    ++ showProcModifiers' modifiers
     ++ show proto
     ++ showOptPos pos
     ++ " {"
@@ -3405,7 +3416,7 @@ showProcDef thisID
     "\n"
     ++ (if n == "" then "*main*" else n) ++ " > "
     ++ visibilityPrefix vis
-    ++ showProcModifiers (ProcModifiers detism inline impurity Resourceless [] [])
+    ++ showProcModifiers' (ProcModifiers detism inline impurity Resourceless [] [])
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
     ++ showSuperProc sub
     ++ "\n"
@@ -3526,8 +3537,8 @@ showPrim _ (PrimCall id pspec args) =
 showPrim _ (PrimHigherCall id var args) =
     show var ++ showArguments args ++ " #" ++ show id
 showPrim _ (PrimForeign lang name flags args) =
-    "foreign " ++ lang ++ " " ++ showFlags flags ++ name ++
-    showArguments args
+    "foreign " ++ lang ++ " " ++ showFlags' flags
+    ++ name ++ showArguments args
 
 
 -- |Show a variable, with its suffix.
@@ -3541,8 +3552,8 @@ showStmt _ (ProcCall func detism resourceful args) =
     (if resourceful then "!" else "")
     ++ show func ++ showArguments args
 showStmt _ (ForeignCall lang name flags args) =
-    "foreign " ++ lang ++ " " ++ showFlags flags ++ name ++
-    showArguments args
+    "foreign " ++ lang ++ " " ++ showFlags' flags
+    ++ name ++ showArguments args
 showStmt _ (TestBool test) =
     "testbool " ++ show test
 showStmt indent (And stmts) =
@@ -3627,10 +3638,9 @@ instance Show Exp where
   show (CharValue c) = show c
   show (Var name dir flowtype) = show flowtype ++ flowPrefix dir ++ name
   show (Lambda mods params ss) = 
-      let modFlags = showProcModifiers mods
-      in modFlags ++ (if modFlags == "" then "" else "@") 
-         ++ "((" ++ show params ++ ")){" ++ intercalate "\n" (showStmt 0 . content <$> ss) ++ "}"
-  show (ProcRef ps es) = "@" ++ show ps ++ "<" ++ intercalate ", " (show <$> es) ++ ">"
+      showProcModifiers mods
+      ++ "{" ++ intercalate "\n" (showStmt 0 . content <$> ss) ++ "}"
+  show (ProcRef ps es) = show ps ++ "<" ++ intercalate ", " (show <$> es) ++ ">"
   show (AnonParamVar num dir) = flowPrefix dir ++ "@" ++ maybe "" show num
   show (Where stmts exp) = show exp ++ " where" ++ showBody 8 stmts
   show (CondExp cond thn els) =

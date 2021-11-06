@@ -62,8 +62,7 @@ flattenProcDecl :: Item -> Compiler (Item,Int)
 flattenProcDecl (ProcDecl vis mods proto stmts pos) = do
     let params = procProtoParams proto
     logMsg Flatten $ "** Flattening "
-           ++ "def "
-           ++ showProcModifiers mods
+           ++ "def " ++ showProcModifiers' mods
            ++ show proto ++ " {" ++ showBody 4 stmts ++ "}"
     let inParams = Set.fromList $
                    List.map paramName $

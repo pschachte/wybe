@@ -891,7 +891,7 @@ data ProcInfo
 
 instance Show ProcInfo where
     show (ProcInfo procSpec args detism impurity inRes outRes) =
-        showProcModifiers (ProcModifiers detism MayInline impurity Resourceless [] [])
+        showProcModifiers' (ProcModifiers detism MayInline impurity Resourceless [] [])
         ++ show procSpec ++ "(" ++ intercalate "," (show <$> args) ++ ")"
         ++ if Set.null inRes && Set.null outRes
             then ""

@@ -1270,7 +1270,7 @@ instance Show StmtExpr where
     show (Call _ mod name flow args) =
         flowPrefix flow ++ maybeModPrefix mod ++ name ++ showArguments args
     show (Foreign _ lang instr flags args) =
-        "foreign " ++ lang ++ " " ++ showFlags flags ++ instr
+        "foreign " ++ lang ++ " " ++ showFlags' flags ++ instr
         ++ showArguments args
     show (Embraced _ style embraced arg) =
         bracketString True style ++ intercalate "," (show <$> embraced) 
