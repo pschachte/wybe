@@ -100,24 +100,24 @@ gen#1(io##0:wybe.phantom, s##0:wybe.string, tmp#0##0:wybe.string, ?io##2:wybe.ph
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 2]
  MultiSpeczDepInfo: [(0,(wybe.string.[|]<0>,fromList [NonAliasedParamCond 2 [2]])),(2,(string.gen#1<0>,fromList [NonAliasedParamCond 2 []]))]
-    wybe.string.[|]<0>(?c##0:wybe.char, ?tmp#1##0:wybe.string, ~tmp#0##0:wybe.string, ?tmp#2##0:wybe.bool) #0
-    case ~tmp#2##0:wybe.bool of
+    wybe.string.[|]<0>(?c##0:wybe.char, ?tmp#0##1:wybe.string, ~tmp#0##0:wybe.string, ?tmp#1##0:wybe.bool) #0
+    case ~tmp#1##0:wybe.bool of
     0:
         foreign c putchar('\n':wybe.char, ~#io##0:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
 
     1:
         foreign c putchar(~c##0:wybe.char, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-        string.gen#1<0>[785a827a1b](~io##1:wybe.phantom, ~s##0:wybe.string, ~tmp#1##0:wybe.string, ?io##2:wybe.phantom) #2 @string:nn:nn
+        string.gen#1<0>[785a827a1b](~io##1:wybe.phantom, ~s##0:wybe.string, ~tmp#0##1:wybe.string, ?io##2:wybe.phantom) #2 @string:nn:nn
 
  [785a827a1b] [NonAliasedParam 2] :
-    wybe.string.[|]<0>[785a827a1b](?c##0:wybe.char, ?tmp#1##0:wybe.string, ~tmp#0##0:wybe.string, ?tmp#2##0:wybe.bool) #0
-    case ~tmp#2##0:wybe.bool of
+    wybe.string.[|]<0>[785a827a1b](?c##0:wybe.char, ?tmp#0##1:wybe.string, ~tmp#0##0:wybe.string, ?tmp#1##0:wybe.bool) #0
+    case ~tmp#1##0:wybe.bool of
     0:
         foreign c putchar('\n':wybe.char, ~#io##0:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
 
     1:
         foreign c putchar(~c##0:wybe.char, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-        string.gen#1<0>[785a827a1b](~io##1:wybe.phantom, ~s##0:wybe.string, ~tmp#1##0:wybe.string, ?io##2:wybe.phantom) #2 @string:nn:nn
+        string.gen#1<0>[785a827a1b](~io##1:wybe.phantom, ~s##0:wybe.string, ~tmp#0##1:wybe.string, ?io##2:wybe.phantom) #2 @string:nn:nn
 
 
 
