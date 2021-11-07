@@ -324,89 +324,46 @@ flattenStmt' (Loop body defVars) pos detism = do
     body' <- flattenInner True False detism
              (flattenStmts (body ++ [Unplaced Next]) detism)
     emit pos $ Loop body' defVars
-flattenStmt' for@(For generators body) pos detism = do
+flattenStmt' for@(For pgens body) pos detism = do
     -- For loops are transformed into `do` loops
     -- E.g. for i in x, j in y {
     --          <stmts>
     --      }
     -- will be transformed into
-    -- ?tempGen1 = x
-    -- ?tempGen2 = y
+    -- ?temp1 = x
+    -- ?temp2 = y
     -- do {
-    --     `[|]`(?i, ?tempGen3, tempGen1, ?tempHasNextGen)
-    --      if {
-    --          tempHasNextGen :: ?tempGen1 = tempGen3
-    --          otherwise      :: break
-    --      }
-    --      `[|]`(?j, ?tempGen4, tempGen2, ?tempHasNextGen)
-    --      if {
-    --          tempHasNextGen :: ?tempGen2 = tempGen4
-    --          otherwise      :: break
-    --      }
-    --      
-    --      <stmts>
+    --     if { `[|]`(?i, ?temp1, temp1) :: 
+    --          if { `[|]`(?j, ?temp2, temp2) ::
+    --              <stmts>
+    --          | otherwise :: break
+    --          }
+    --     | otherwise :: break
+    --     }
     -- }
-    -- OR
-    -- ?tempGen1 = x
-    -- ?tempGen2
-    tempGens <- mapM (const tempVar) generators
-    tempNextGens <- mapM (const tempVar) generators
-    tempHasNextGen <- tempVar
     logFlatten $ "Generating for " ++ showStmt 4 for
-    -- XXX Should check for input only
-    generators' <- mapM (flattenPExp . genExp) generators
-    let instrs =
-            zipWith
-            ( \g' g ->
-                ForeignCall
-                    "llvm"
-                    "move"
-                    []
-                    [g', Unplaced $ varSet g]
-            )
-            generators'
-            tempGens
+    let (gens, poss) = unzip $ unPlace <$> pgens
+    temps <- mapM (const tempVar) gens
+    -- XXX Should check for input only    
+    origs <- mapM (flattenPExp . genExp) gens
+    let instrs = zipWith (\orig temp ->
+                            ForeignCall "llvm" "move" [] 
+                                [orig, Unplaced $ varSet temp])
+                    origs temps
     mapM_ (emit pos) instrs
-    modify (\s -> s {defdVars = Set.union (Set.fromList tempGens) $ defdVars s})
-    modify (\s -> s {defdVars = Set.union (Set.fromList tempNextGens) $ defdVars s})
-    modify (\s -> s {defdVars = Set.insert tempHasNextGen $ defdVars s})
-    let nextVals =
-            concat $
-            zipWith3
-                ( \generator tempNextGen tempGen ->
-                    [ Unplaced $
-                        ProcCall
-                        []
-                        "[|]"
-                        Nothing
-                        Det
-                        False
-                        [ loopVar generator,
-                          Unplaced $ Var tempNextGen ParamOut Ordinary,
-                          Unplaced $ Var tempGen ParamIn Ordinary,
-                          Unplaced $ Var tempHasNextGen ParamOut Ordinary
-                        ]
-                    , Unplaced $
-                            Cond
-                            (Unplaced $ TestBool $ varGet tempHasNextGen)
-                            [ Unplaced $
-                                ForeignCall
-                                    "llvm"
-                                    "move"
-                                    []
-                                    [Unplaced $ varGet tempNextGen, Unplaced $ varSet tempGen]
-                            ]
-                            [Unplaced Break]
-                            Nothing -- TODO: Check if we need to replace Nothing with actual
-                            Nothing
-                    ]
-                )
-                generators
-                tempNextGens
-                tempGens
-    let generated = Loop (nextVals ++ body) Nothing -- TODO: Replace Nothing
+    modify (\s -> s {defdVars = Set.union (Set.fromList temps) $ defdVars s})
+    let loop = List.foldr 
+                (\(var, gen, pos') loop -> 
+                    [Unplaced $ Cond (ProcCall [] "[|]" Nothing SemiDet False 
+                                        [var,
+                                         Unplaced $ Var gen ParamOut Ordinary,
+                                         Unplaced $ Var gen ParamIn Ordinary]
+                                      `maybePlace` pos') 
+                                loop [Unplaced Break]
+                      Nothing Nothing]
+                ) body $ zip3 (loopVar <$> gens) temps poss
+    let generated = Loop loop Nothing
     logFlatten $ "Generated for: " ++ showStmt 4 generated
-    -- emit pos generated
     flattenStmt' generated pos detism
 flattenStmt' (UseResources res old body) pos detism = do
     oldVars <- gets defdVars
