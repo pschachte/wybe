@@ -26,7 +26,6 @@ import           Util
 import           Snippets
 import           Blocks              (llvmMapBinop, llvmMapUnop)
 import Data.Function (on)
--- import qualified Data.List.Extra as Set
 
 
 ----------------------------------------------------------------
@@ -1389,6 +1388,29 @@ initBindingState pdef resources =
     where impurity = expectedImpurity $ procImpurity pdef
 
 
+-- | BindingState at the top of a loop, based on state before the loop.
+-- Variables can't disappear during a loop, so the variables at the loop head
+-- will always be exactly those defined before the loop.  The variables
+-- available at the loop exit will be the intersection of the sets of variables
+-- defined at all loop breaks, so we initialise the set of break variables to
+-- the universal set.
+loopEntryBindingState :: BindingState -> BindingState
+loopEntryBindingState before =
+    before {bindingBreakVars = Nothing}
+
+
+-- | BindingState after a loop, based on the state before loop entry and the
+-- binding state at the end of processing the loop.  The determinism after the
+-- loop will be the same as before; the bound variables will the intersection of
+-- the variables defined at all breaks.  If this is a nested loop, then we
+-- restore the set of variables from before entering the inner loop.
+postLoopBindingState :: BindingState -> BindingState -> BindingState
+postLoopBindingState before loop =
+    loop {bindingDetism = bindingDetism before
+         ,bindingVars = bindingBreakVars loop
+         ,bindingBreakVars = bindingBreakVars before}
+
+
 -- | The intersection of two Maybe (Set a), where Nothing denotes the universal
 -- set.
 intersectMaybeSets :: Ord a => Maybe (Set a) -> Maybe (Set a) -> Maybe (Set a)
@@ -1718,11 +1740,13 @@ modecheckStmt m name defPos assigned detism tmpCount final
     logTyped $ "Mode checking loop " ++ show stmt
     -- XXX `final` is wrong:  checking for a terminal loop is not this easy
     (stmts', assigned', tmpCount') <-
-      modecheckStmts m name defPos assigned detism tmpCount final stmts
+      modecheckStmts m name defPos (loopEntryBindingState assigned) detism
+                     tmpCount final stmts
     logTyped $ "Assigned by loop: " ++ show assigned'
     vars <- typeMapFromSet $ bindingBreakVars assigned'
     logTyped $ "Loop exit vars: " ++ show vars
-    return ([maybePlace (Loop stmts' vars) pos], assigned',tmpCount')
+    return ([maybePlace (Loop stmts' vars) pos]
+           ,postLoopBindingState assigned assigned',tmpCount')
 modecheckStmt m name defPos assigned detism tmpCount final
     stmt@(UseResources resources _ stmts) pos = do
     logTyped $ "Mode checking use ... in stmt " ++ show stmt
