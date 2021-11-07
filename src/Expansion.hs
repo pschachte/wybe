@@ -43,19 +43,22 @@ procExpansion pspec def = do
                         execStateT (expandBody body) st
     isClosure <- isClosureProc pspec
     let params = primProtoParams proto
-    let needsRefs = isClosure || any (isResourcefulHigherOrder . primParamType) params
-    let params' = markParamReference needsRefs
+    -- we may need to use global resources if we have resourceful higher order parameters
+    let needsGlobalRess = isClosure || any (isResourcefulHigherOrder . primParamType) params
+    let params' = markGlobalResource needsGlobalRess
                 . markParamNeededness isClosure used ins
                <$> params
-    let reallyNeedsRefs = any (((not . paramInfoUnneeded) &&& paramInfoReference) 
-                                . primParamInfo) params' || isClosure
-    let params'' = markParamReference reallyNeedsRefs <$> params'
+    -- if we never use a resourceful higher order parameter, we dont need globals
+    -- unless we have a closure
+    let needsGlobalRess' = any (((not . paramInfoUnneeded) &&& paramInfoGlobalResource) 
+                                  . primParamInfo) params' || isClosure
+    let params'' = markGlobalResource needsGlobalRess' <$> params'
     let proto' = proto {primProtoParams = params''}
     let impln' = impln{ procImplnProto = proto', procImplnBody = body' }
     let def' = def { procImpln = impln',
                      procTmpCount = tmp',
                      procCallSiteCount = nextCallSiteID st',
-                     procResourceRefs = reallyNeedsRefs }
+                     procResourceRefs = needsGlobalRess' }
     if def /= def'
         then
         logMsg Expansion
@@ -88,11 +91,11 @@ markParamNeededness isClosure _ ins param@PrimParam{primParamName=nm,
                                                 && (not isClosure 
                                                     || ft /= Ordinary)}}
 
-markParamReference :: Bool -> PrimParam -> PrimParam
-markParamReference asRef param@PrimParam{primParamFlowType=Resource _} =
-    param {primParamInfo=(primParamInfo param) {paramInfoReference = asRef}}
-markParamReference _ param =
-    param {primParamInfo=(primParamInfo param) {paramInfoReference = False}}
+markGlobalResource :: Bool -> PrimParam -> PrimParam
+markGlobalResource asGlobal param@PrimParam{primParamFlowType=Resource _} =
+    param {primParamInfo=(primParamInfo param) {paramInfoGlobalResource = asGlobal}}
+markGlobalResource _ param =
+    param {primParamInfo=(primParamInfo param) {paramInfoGlobalResource = False}}
     
 
 -- |Type to remember the variable renamings.
@@ -271,8 +274,8 @@ expandPrim call@(PrimHigherCall id fn args) pos = do
             addInstr (PrimHigherCall id fn' args') pos 
     case fn' of
         ArgProcRef ps as _-> do              
-            needsRefs <- lift $ lift $ procResourceRefs <$> getProcDef ps
-            if needsRefs
+            needsGlobalRess <- lift $ lift $ procResourceRefs <$> getProcDef ps
+            if needsGlobalRess
             then expandAsHigher fn'
             -- then return ()
             else do
@@ -364,21 +367,11 @@ addOutputNaming _ _ = return ()
 -- the argument has already been renamed as appropriate for the calling
 -- context.
 addInputAssign :: OptPos -> (PrimParam,PrimArg) -> Expander ()
-addInputAssign pos (param@(PrimParam name ty flow ft _),v) = do
-    -- XXX AnyType is now a valid type, treated as a word type
-    -- when (AnyType == ty) $
-    --   shouldnt $ "Danger: untyped param: " ++ show param
-    -- when (AnyType == argType v) $
-    --   shouldnt $ "Danger: untyped argument: " ++ show v
-    addInputAssign' pos name ty flow v ft
-
-addInputAssign' :: OptPos -> PrimVarName -> TypeSpec -> PrimFlow -> PrimArg
-                -> ArgFlowType -> Expander ()
-addInputAssign' pos name ty FlowIn v ft = do
+addInputAssign pos (param@(PrimParam name ty FlowIn ft _),v) = do
     newVar <- freshVar name ty ft
     addInstr (PrimForeign "llvm" "move" [] [v,newVar]) pos
-addInputAssign' _ _ _ FlowOut _ ft = do
-    return ()
+addInputAssign _ _ = return ()
+
 
 
 -- renameParam :: Renaming -> PrimParam -> PrimParam

@@ -58,6 +58,9 @@ checkOneResource rspec impln@(SimpleResource ty init pos) = do
            " with implementation " ++ show impln
     ty' <- lookupType "resource declaration" pos ty
     logResources $ "Actual type is " ++ show ty'
+    -- let errs = [("Higher-order resource cannot have '" 
+    --              ++ resourcefulName Resourceful++ "' modifier", pos)
+    --            | isResourcefulHigherOrder ty']
     return (ty' /= ty,[],(rspec,SimpleResource ty' init pos))
 -- checkOneResource rspec Nothing = do
 --     -- XXX don't currently handle compound resources
@@ -223,10 +226,10 @@ transformStmt tmp res (UseResources allRes oldRes body) pos = do
     let resCount = length toSave
     let tmp' = tmp + resCount
     let ress = zip4 toSave (mkTempName <$> [tmp..]) types (fst <$> resTypes)
-    let get v ty rs = varGet v `withType` ty `setExpFlowType` Resource rs 
-    let set v ty rs = varSet v `withType` ty `setExpFlowType` Resource rs
-    let saves = (\(r,t,ty,rs) -> move (get r ty rs) (set t ty rs)) <$> ress
-    let restores = (\(r,t,ty,rs) -> move (get t ty rs) (set r ty rs)) <$> ress
+    let get v ty rs = varGet v `withType` ty
+    let set v ty rs = varSet v `withType` ty
+    let saves = (\(r,t,ty,rs) -> move (get r ty rs `setExpFlowType` Resource rs ) (set t ty rs `setExpFlowType` Ordinary )) <$> ress
+    let restores = (\(r,t,ty,rs) -> move (get t ty rs `setExpFlowType` Ordinary ) (set r ty rs `setExpFlowType` Resource rs )) <$> ress
     resFlows <- concat <$> mapM (simpleResourceFlows pos) 
                                 ((`ResourceFlowSpec` ParamInOut). fst <$> canonAllRes)
     (body',tmp'') <- transformBody tmp' (List.nub $ res ++ resFlows) body
@@ -296,6 +299,7 @@ resourceArgs pos rflow = do
          simpleSpecs
 
 
+specialResourcesSet :: Set VarName
 specialResourcesSet = keysSet specialResources
 
 

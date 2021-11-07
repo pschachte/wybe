@@ -2406,9 +2406,12 @@ procDefSrc ProcDefPrim{} = shouldnt "procDefSrc applied to ProcDefPrim"
 
 
 checkParamTyped :: ProcName -> OptPos -> (Int,Param) -> Compiler ()
-checkParamTyped name pos (num,param) =
-    when (AnyType == paramType param) $
-      reportUntyped name pos (" parameter " ++ show num)
+checkParamTyped name pos (num,Param{paramName=pName,paramType=ty,paramFlow=flow}) = do
+    when (AnyType == ty) $
+        reportUntyped name pos (" parameter " ++ show num)
+    when (isResourcefulHigherOrder ty && flowsOut flow)
+        $ errmsg pos $ "Out-flowing parameter '" ++ pName ++ "' of '" ++ name 
+                    ++ "' cannot have type " ++ show ty
 
 
 checkStmtTyped :: ProcName -> OptPos -> Stmt -> OptPos -> Compiler ()

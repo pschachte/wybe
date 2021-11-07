@@ -92,7 +92,7 @@ module AST (
   genProcName, addImport, doImport, importFromSupermodule, lookupType,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   initialisedResources,
-  addSimpleResource, lookupResource, specialResources, publicResource,
+  addSimpleResource, lookupResource, specialResources, publicResource, resourcefulName,
   ProcModifiers(..), defaultProcModifiers, setDetism, setInline, setImpurity,
   Inlining(..), Impurity(..), Resourcefulness(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
@@ -2545,8 +2545,8 @@ data PrimParam = PrimParam {
 
 -- |Info inferred about a single proc parameter
 data ParamInfo = ParamInfo {
-        paramInfoUnneeded::Bool,       -- ^Can this parameter be eliminated?
-        paramInfoReference::Bool
+        paramInfoUnneeded::Bool, -- ^Can this parameter be eliminated?
+        paramInfoGlobalResource::Bool -- ^Should we pass this parameter as a global
     } deriving (Eq,Generic)
 
 -- |A dataflow direction:  in, out, both, or neither.
@@ -2851,7 +2851,8 @@ realParams = filterM paramIsReal
 -- |The param actually needs to be passed; ie, it is needed and not phantom.
 paramIsReal :: PrimParam -> Compiler Bool
 paramIsReal param =
-    (((not . paramInfoUnneeded &&& not . paramInfoReference) $ primParamInfo param) &&) . not <$> paramIsPhantom param
+    (((not . paramInfoUnneeded &&& not . paramInfoGlobalResource) 
+        $ primParamInfo param) &&) . not <$> paramIsPhantom param
 
 
 -- |Get names of proto input params

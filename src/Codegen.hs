@@ -10,7 +10,7 @@
 
 module Codegen (
   Codegen(..), CodegenState(..), BlockState(..), Translation,
-  emptyModule, evalCodegen, addExtern, addGlobalConstant, addGlobalResource,
+  emptyModule, evalCodegen, addExtern, addGlobalConstant, getGlobalResource,
   execCodegen, emptyCodegen, evalTranslation, getCount, putCount,
   -- * Blocks
   createBlocks, setBlock, addBlock, entryBlockName,
@@ -18,6 +18,7 @@ module Codegen (
   phi, br, cbr, getBlock, retNothing, fresh,
   -- * Symbol storage
   alloca, store, local, assign, load, getVar, localVar, preservingSymtab,
+  assignGlobalResourceParam,
   operandType, doAlloca, doLoad, 
   bitcast, cbitcast, inttoptr, cinttoptr, ptrtoint, cptrtoint,
   trunc, ctrunc, zext, czext, sext, csext,
@@ -64,21 +65,20 @@ import qualified LLVM.AST.Constant               as C
 import qualified LLVM.AST.FloatingPointPredicate as FP
 import qualified LLVM.AST.IntegerPredicate       as IP
 
-import           AST                             (Compiler, Prim, PrimProto, 
+import           AST                             (Compiler, Prim, PrimProto,
                                                   PrimArg(..), ArgFlowType(..),
                                                   TypeRepresentation, ResourceSpec(..),
                                                   getModuleSpec, logMsg,
                                                   shouldnt, specialName2,
                                                   makeGlobalResourceName,
                                                   makeGlobalConstantName,
-                                                  showModSpec)
+                                                  showModSpec, PrimParam(..), primParamToArg, setPrimArgFlowType)
 import           LLVM.Context
 import           LLVM.Module
 import           Options                         (LogSelection (Blocks,Codegen))
 import           Config                          (wordSize, functionDefSection)
 import           Unsafe.Coerce
 import           Debug.Trace
-import LLVM.Internal.FFI.Constant (constantGetElementPtr)
 
 ----------------------------------------------------------------------------
 -- Types                                                                  --
@@ -160,7 +160,7 @@ data CodegenState
       , resourceOps  :: Map.Map ResourceSpec (Operand,Type) 
                                  -- ^ Record of the latest reference to a
                                  -- we have seen
-      , resourceRefs :: Bool     -- ^ Are we treating resources as 
+      , globalResources :: Bool     -- ^ Are we treating resources as 
                                  -- global references?
       , modProtos    :: [PrimProto] 
                                  -- ^ Module procedures prototypes
@@ -187,8 +187,8 @@ data BlockState
 type Codegen = StateT CodegenState Compiler
 
 execCodegen :: Word -> Bool -> [PrimProto] -> Codegen a -> Compiler CodegenState
-execCodegen startCount resRefs protos codegen =
-    execStateT codegen (emptyCodegen startCount resRefs protos)
+execCodegen startCount globalRess protos codegen =
+    execStateT codegen (emptyCodegen startCount globalRess protos)
 
 evalCodegen :: [PrimProto] -> Codegen t -> Compiler t
 evalCodegen protos codegen = evalStateT codegen (emptyCodegen 0 undefined protos)
@@ -237,19 +237,20 @@ addGlobalConstant ty con =
        return ref
 
 
-addGlobalResource :: ResourceSpec -> Type -> Codegen Name
-addGlobalResource spec@(ResourceSpec mod nm) ty = do
+getGlobalResource :: ResourceSpec -> Type -> Codegen Operand
+getGlobalResource spec@(ResourceSpec mod nm) ty = do
     ress <- gets resources
-    case Map.lookup spec ress of
-        Nothing -> do
-            let ref = Name $ fromString $ makeGlobalResourceName $ show spec 
-            let global =  globalVariableDefaults { name = ref
-                                                 , isConstant = False
-                                                 , G.type' = ty
-                                                 , initializer = Just $ C.Undef ty }
-            modify $ \s -> s { resources = Map.insert spec global ress }
-            return ref
-        Just ref -> return $ G.name ref
+    nm <- case Map.lookup spec ress of
+            Nothing -> do
+                let ref = Name $ fromString $ makeGlobalResourceName $ show spec 
+                let global =  globalVariableDefaults { name = ref
+                                                     , isConstant = False
+                                                     , G.type' = ty
+                                                     , initializer = Just $ C.Undef ty }
+                modify $ \s -> s { resources = Map.insert spec global ress }
+                return ref
+            Just ref -> return $ G.name ref
+    return $ ConstantOperand $ C.GlobalReference (ptr_t ty) nm
 
 
 -- | Create an empty LLVMAST.Module which would be converted into
@@ -436,14 +437,15 @@ assign var op trep arg ty = do
     logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show op ++ ":" ++ show trep
     
     let regular = modify $ \s -> s { symtab = Map.insert var (op,trep) $ symtab s }
-    resRefs <- gets resourceRefs
-    case (arg,resRefs) of
+    globalRess <- gets globalResources
+    case (arg,globalRess) of
         (ArgVar _ _ _ (Resource res) _,True) -> do
-            when resRefs 
+            when globalRess 
              $ do
-                nm <- addGlobalResource res ty
-                store (cons $ C.GlobalReference (ptr_t ty) nm) op 
-            modify $ \s -> s{resourceOps=Map.insert res (op,ty) $ resourceOps s}
+                global <- getGlobalResource res ty
+                store global op 
+                modify $ \s -> s{resourceOps=Map.insert res (op,ty) $ resourceOps s}
+            regular
         _ -> regular
     -- recordResource arg op ty
 
@@ -457,8 +459,20 @@ assignGlobalResource res = do
     case Map.lookup res resOps of
         Nothing -> return () -- shouldnt $ "assignGlobalResource of " ++ show res
         Just (op, ty) -> do
-            nm <- addGlobalResource res ty
-            store op (cons $ C.GlobalReference (ptr_t ty) nm)
+            global <- getGlobalResource res ty
+            store global op
+
+
+assignGlobalResourceParam :: PrimParam -> Codegen ()
+assignGlobalResourceParam param@(PrimParam _ _ _ (Resource res) _) = do 
+    resOps <- gets resourceOps
+    case Map.lookup res resOps of
+        Nothing -> return () -- shouldnt $ "assignGlobalResource of " ++ show res
+        Just (_, ty) -> do
+            global <- getGlobalResource res ty
+            (op, _) <- getVar (show $ argVarName $ primParamToArg param) Nothing
+            store global op
+assignGlobalResourceParam _ = return ()
 
 -- | Find and return the local operand by its given name from the symbol
 -- table. Only the first find will be returned so new names can shadow
@@ -467,11 +481,11 @@ getVar :: String -> Maybe (PrimArg,Type,TypeRepresentation)
        -> Codegen (Operand,TypeRepresentation)
 getVar var mbArg = do
     let err = shouldnt $ "Local variable not in scope: " ++ show var
-    resRefs <- gets resourceRefs
-    case (mbArg,resRefs) of
+    globalRess <- gets globalResources
+    case (mbArg,globalRess) of
         (Just (ArgVar _ _ _ (Resource res) _, ty, trep),True) -> do 
-            nm <- addGlobalResource res ty
-            op <- doLoad ty (cons $ C.GlobalReference (ptr_t ty) nm) 
+            global <- getGlobalResource res ty
+            op <- doLoad ty global
             return (op, trep) 
         _ -> do
             lcls <- gets symtab

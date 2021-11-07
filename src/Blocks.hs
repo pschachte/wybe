@@ -210,11 +210,11 @@ translateProc modProtos proc = do
     let proto = procImplnProto $ procImpln proc
     let body = procImplnBody $ procImpln proc
     let isClosure = isJust $ maybeClosureOf $ procSuperproc proc
-    let resAsRefs = procResourceRefs proc
+    let globalRess = procResourceRefs proc
     let speczBodies = procImplnSpeczBodies $ procImpln proc
     -- translate the standard version
     (block, count') <- lift $ _translateProcImpl modProtos proto 
-                                isClosure resAsRefs body count
+                                isClosure globalRess body count
     -- translate the specialized versions
     let speczBodies' = speczBodies
                         |> Map.toList
@@ -236,7 +236,7 @@ translateProc modProtos proc = do
                     -- codegen
                     (currBlock, currCount') <- 
                             lift $ _translateProcImpl modProtos 
-                                        proto' isClosure resAsRefs currBody currCount
+                                        proto' isClosure globalRess currBody currCount
                     return (currBlock:currBlocks, currCount') 
             ) ([], count') speczBodies'
     let blocks' = block:blocks
@@ -248,10 +248,8 @@ translateProc modProtos proc = do
 -- (A specialized version of a procedure).
 _translateProcImpl :: [PrimProto] -> PrimProto -> Bool -> Bool -> ProcBody
                    -> Word -> Compiler (ProcDefBlock, Word)
-_translateProcImpl modProtos proto isClosure resAsRefs body startCount = do
-    let (proto', body') = if isClosure 
-                          then closeProtoBody proto body 
-                          else (proto,body)
+_translateProcImpl modProtos proto isClosure globalRess body startCount = do
+    let (proto', body', globals) = closeProtoBody isClosure proto body 
     modspec <- getModuleSpec
     logBlocks $ "\n" ++ replicate 70 '=' ++ "\n"
     logBlocks $ "In Module: " ++ showModSpec modspec
@@ -260,7 +258,7 @@ _translateProcImpl modProtos proto isClosure resAsRefs body startCount = do
                 ++ "body: " ++ show body'
                 ++ "\n" ++ replicate 50 '-' ++ "\n"
     -- Codegen
-    codestate <- execCodegen startCount resAsRefs modProtos (doCodegenBody proto' body')
+    codestate <- execCodegen startCount globalRess modProtos (doCodegenBody proto' body' globals)
     let pname = primProtoName proto
     logBlocks $ show $ externs codestate
     exs <- mapM declareExtern $ externs codestate
@@ -275,14 +273,18 @@ _translateProcImpl modProtos proto isClosure resAsRefs body startCount = do
 
 -- | Updates a PrimProto and ProcBody as though the Closed Params are accessed
 -- via the closure environment 
-closeProtoBody :: PrimProto -> ProcBody -> (PrimProto, ProcBody)
-closeProtoBody proto@PrimProto{primProtoParams=params} 
+closeProtoBody :: Bool -> PrimProto -> ProcBody -> (PrimProto, ProcBody,[PrimParam])
+closeProtoBody isClosure
+               proto@PrimProto{primProtoParams=params} 
                body@ProcBody{bodyPrims=prims} = do
-    (proto', body')
+    if isClosure 
+    then (proto', body',globals') 
+    else (proto',body,globals')
   where
     (free, trueParams) = List.partition ((==Free) . primParamFlowType) params
-    actualParams = List.filter (not . paramInfoReference . primParamInfo) trueParams
-    proto' = proto{primProtoParams=actualParams ++ [envPrimParam]}
+    (globals,actualParams) = List.partition (paramInfoGlobalResource . primParamInfo) trueParams
+    proto' = proto{primProtoParams=actualParams ++ [envPrimParam | isClosure]}
+    globals' = [global | global <- globals, FlowOut == primParamFlow global]
     neededFree = List.filter (not . paramInfoUnneeded . primParamInfo) free
     unwrapper = Unplaced <$>
                 [ primAccess (ArgVar envParamName intType FlowIn Free False)
@@ -362,8 +364,8 @@ paramNeeded = not . paramInfoUnneeded . primParamInfo
 -- need some module level extern declarations and global constants which are
 -- pulled and recorded, to be defined later when the whole module is built.
 -- | Generate LLVM instructions for a procedure.
-doCodegenBody :: PrimProto -> ProcBody -> Codegen ()
-doCodegenBody proto body =
+doCodegenBody :: PrimProto -> ProcBody -> [PrimParam] -> Codegen ()
+doCodegenBody proto body outGlobals =
     do entry <- addBlock entryBlockName
        -- Start with creation of blocks and adding instructions to it
        setBlock entry
@@ -371,7 +373,7 @@ doCodegenBody proto body =
        let (ins,outs) = List.partition ((== FlowIn) . primParamFlow) params
        mapM_ assignParam ins
        mapM_ preassignOutput outs
-       codegenBody proto body   -- Codegen on body prims
+       codegenBody proto body outGlobals  -- Codegen on body prims
 
 
 -- XXX not using
@@ -396,7 +398,7 @@ assignParam p@PrimParam{primParamType=ty} = do
     logCodegen $ "Maybe generating parameter " ++ show p
                  ++ " (" ++ show trep ++ ")"
     let info = primParamInfo p
-    unless (repIsPhantom trep || paramInfoUnneeded info || paramInfoReference info)
+    unless (repIsPhantom trep || paramInfoUnneeded info || paramInfoGlobalResource info)
       $ do 
             let nm = show (primParamName p)
             let llty = repLLVMType trep
@@ -474,17 +476,19 @@ structUnPack st tys = do
 
 -- | Generate basic blocks for a procedure body. The first block is named
 -- 'entry' by default. All parameters go on the symbol table (output too).
-codegenBody :: PrimProto -> ProcBody -> Codegen ()
-codegenBody proto body =
-    do let ps = List.map content (bodyPrims body)
-       -- Filter out prims which contain only phantom arguments
-       mapM_ cgen ps
-       let params = primProtoParams proto
-       case bodyFork body of
-         NoFork -> do retOp <- buildOutputOp params
-                      ret retOp
-                      return ()
-         (PrimFork var ty _ fbody) -> codegenForkBody var fbody proto
+codegenBody :: PrimProto -> ProcBody -> [PrimParam] -> Codegen ()
+codegenBody proto body outGlobals = do 
+    let ps = List.map content (bodyPrims body)
+    -- Filter out prims which contain only phantom arguments
+    mapM_ cgen ps
+    let params = primProtoParams proto
+    case bodyFork body of
+        NoFork -> do 
+            retOp <- buildOutputOp params
+            mapM_ assignGlobalResourceParam outGlobals 
+            ret retOp
+            return ()
+        (PrimFork var ty _ fbody) -> codegenForkBody var fbody proto outGlobals
 
 
 -- | Predicate to check whether a Prim is a phantom prim i.e Contains only
@@ -499,10 +503,10 @@ codegenBody proto body =
 -- | Code generation for a conditional branch. Currently a binary split
 -- is handled, which each branch returning the left value of their last
 -- instruction.
-codegenForkBody :: PrimVarName -> [ProcBody] -> PrimProto -> Codegen ()
+codegenForkBody :: PrimVarName -> [ProcBody] -> PrimProto -> [PrimParam] -> Codegen ()
 -- XXX Revise this to handle forks with more than two branches using
 --     computed gotos
-codegenForkBody var (b1:b2:[]) proto =
+codegenForkBody var (b1:b2:[]) proto outGlobals =
     do ifthen <- addBlock "if.then"
        ifelse <- addBlock "if.else"
        testop <- fst <$> getVar (show var) Nothing
@@ -512,17 +516,17 @@ codegenForkBody var (b1:b2:[]) proto =
        -- if.then
        preservingSymtab $ do
            setBlock ifthen
-           codegenBody proto b2
+           codegenBody proto b2 outGlobals
 
        -- if.else
        preservingSymtab $ do
            setBlock ifelse
-           codegenBody proto b1
+           codegenBody proto b1 outGlobals
 
        -- -- if.exit
        -- setBlock ifexit
        -- phi int_t [(trueval, ifthen), (falseval, ifelse)]
-codegenForkBody var _ _ =
+codegenForkBody var _ _ _ =
     nyi $ "Fork on non-Boolean variable " ++ show var
 
 
@@ -711,11 +715,11 @@ findProto (ProcSpec _ nm i _) = do
 filterUnneededArgs :: PrimProto -> [PrimArg] -> Codegen ([PrimArg], [PrimArg])
 filterUnneededArgs proto args = do
     needed <- argsNeeded realArgs params
-    return (needed, refArgs)
+    return (needed, globalsArgs)
   where
-    (refs, params) = List.partition (paramInfoReference . primParamInfo)
+    (globals, params) = List.partition (paramInfoGlobalResource . primParamInfo)
                         (primProtoParams proto)
-    (realArgs, refArgs) = List.splitAt (length params) args
+    (realArgs, globalsArgs) = List.splitAt (length params) args
 
 argsNeeded :: [PrimArg] -> [PrimParam] -> Codegen [PrimArg]
 argsNeeded [] []       = return []
@@ -1000,11 +1004,11 @@ partitionArgs :: [PrimArg] -> ([PrimArg],[PrimArg])
 partitionArgs = List.partition goesIn
 
 
-partitionRefArgs :: [(PrimArg, Bool)]
+partitionGlobalArgs :: [(PrimArg, Bool)]
                  -> (([PrimArg], [PrimArg]), ([PrimArg], [PrimArg]))
-partitionRefArgs argRefs = 
-    let (refs, args) = List.partition snd argRefs
-    in (partitionArgs $ fst <$> args, partitionArgs $ fst <$> refs)
+partitionGlobalArgs argGlobals = 
+    let (globals, args) = List.partition snd argGlobals
+    in (partitionArgs $ fst <$> args, partitionArgs $ fst <$> globals)
 
 
 -- | Get the LLVM 'Type' of the given primitive output argument
@@ -1378,9 +1382,9 @@ declareExtern (PrimHigherCall _ var _) =
     shouldnt $ "Don't know how to declare extern function var " ++ show var
 
 declareExtern (PrimCall _ pspec@(ProcSpec m n _ _) args) = do
-    asRef <- (paramInfoReference . primParamInfo <$>) . primProtoParams 
+    globals <- (paramInfoGlobalResource . primParamInfo <$>) . primProtoParams 
            . procImplnProto . procImpln <$> getProcDef pspec
-    let ((inArgs,outArgs),_) = partitionRefArgs $ zip args asRef
+    let ((inArgs,outArgs),_) = partitionGlobalArgs $ zip args globals
     retty <- primReturnType outArgs
     fnargs <- mapM makeExArg $ zip [1..] inArgs
     return $ externalWybe retty (show pspec) fnargs
