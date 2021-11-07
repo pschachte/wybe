@@ -48,13 +48,14 @@ procExpansion pspec def = do
                 . markParamNeededness isClosure used ins
                <$> params
     let reallyNeedsRefs = any (((not . paramInfoUnneeded) &&& paramInfoReference) 
-                                . primParamInfo) params' 
-    let proto' = proto {primProtoParams = params'}
+                                . primParamInfo) params' || isClosure
+    let params'' = markParamReference reallyNeedsRefs <$> params
+    let proto' = proto {primProtoParams = params''}
     let impln' = impln{ procImplnProto = proto', procImplnBody = body' }
     let def' = def { procImpln = impln',
                      procTmpCount = tmp',
                      procCallSiteCount = nextCallSiteID st',
-                     procResourceRefs = procResourceRefs def || reallyNeedsRefs }
+                     procResourceRefs = reallyNeedsRefs }
     if def /= def'
         then
         logMsg Expansion
@@ -78,14 +79,14 @@ markParamNeededness isClosure used _ param@PrimParam{primParamName=nm,
                                                      primParamInfo=info} =
     param {primParamInfo=info{paramInfoUnneeded=Set.notMember nm used
                                                 && (not isClosure 
-                                                    || argFlowTypeIsResource ft)}}
+                                                    || ft /= Ordinary)}}
 markParamNeededness isClosure _ ins param@PrimParam{primParamName=nm,
                                                     primParamFlow=FlowOut,
                                                     primParamFlowType=ft,
                                                     primParamInfo=info} =
     param {primParamInfo=info{paramInfoUnneeded=Set.member nm ins
                                                 && (not isClosure 
-                                                    || argFlowTypeIsResource ft)}}
+                                                    || ft /= Ordinary)}}
 
 markParamReference :: Bool -> PrimParam -> PrimParam
 markParamReference asRef param@PrimParam{primParamFlowType=Resource _} =

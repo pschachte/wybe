@@ -2017,7 +2017,7 @@ tryFinaliseProcRef m name defPos assigned detism tmpCount final
     correctProcs <- matchProcType actualTypes callInfos
     let argsPlace = unPlace <$> args
     case (correctProcs, argsPlace, innerExp . fst <$> argsPlace, actualTypes) of
-        ([procSpec], [(arg,argPos)], [Var varName ParamOut argFlow], [ty])
+        ([procSpec], [(arg,argPos)], [Var _ ParamOut _], [ty])
           | isHigherOrder ty -> do
             let procRef = ProcRef procSpec []
             procTy <- expType (Unplaced procRef) >>= ultimateType

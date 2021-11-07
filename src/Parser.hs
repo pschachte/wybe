@@ -1037,7 +1037,7 @@ stmtExprToExp mods@(Embraced pos Brace _ (Just body@(Embraced _ Brace _ Nothing)
     lambda <- content <$> stmtExprToExp body
     case lambda of
         Lambda _ ps body -> return $ Placed (Lambda procMods ps body) pos
-        _ -> syntaxError pos $ traceShowId $ "malformed lambda " ++ show mods
+        _ -> syntaxError pos $ "malformed lambda " ++ show lambda
 stmtExprToExp (Call pos [] ":" ParamIn [exp,ty]) = do
     exp' <- content <$> stmtExprToExp exp
     ty' <- stmtExprToTypeSpec ty

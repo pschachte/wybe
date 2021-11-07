@@ -64,16 +64,20 @@ import qualified LLVM.AST.Constant               as C
 import qualified LLVM.AST.FloatingPointPredicate as FP
 import qualified LLVM.AST.IntegerPredicate       as IP
 
-import           AST                             (Compiler, Prim, PrimProto,
+import           AST                             (Compiler, Prim, PrimProto, 
+                                                  PrimArg(..), ArgFlowType(..),
                                                   TypeRepresentation, ResourceSpec(..),
                                                   getModuleSpec, logMsg,
                                                   shouldnt, specialName2,
+                                                  makeGlobalResourceName,
+                                                  makeGlobalConstantName,
                                                   showModSpec)
 import           LLVM.Context
 import           LLVM.Module
 import           Options                         (LogSelection (Blocks,Codegen))
 import           Config                          (wordSize, functionDefSection)
 import           Unsafe.Coerce
+import           Debug.Trace
 import LLVM.Internal.FFI.Constant (constantGetElementPtr)
 
 ----------------------------------------------------------------------------
@@ -153,6 +157,9 @@ data CodegenState
       , globalVars   :: [Global] -- ^ Needed global variables/constants
       , resources    :: Map.Map ResourceSpec Global
                                  -- ^ Needed global variables for resources
+      , resourceOps  :: Map.Map ResourceSpec (Operand,Type) 
+                                 -- ^ Record of the latest reference to a
+                                 -- we have seen
       , resourceRefs :: Bool     -- ^ Are we treating resources as 
                                  -- global references?
       , modProtos    :: [PrimProto] 
@@ -221,7 +228,7 @@ addGlobalConstant ty con =
     do modName <- lift $ fmap showModSpec getModuleSpec
        gs <- gets globalVars
        n <- fresh
-       let ref = Name $ fromString $ modName ++ "." ++ show n
+       let ref = Name $ fromString $ makeGlobalConstantName $ modName ++ "." ++ show n
        let gvar = globalVariableDefaults { name = ref
                                          , isConstant = True
                                          , G.type' = ty
@@ -235,10 +242,11 @@ addGlobalResource spec@(ResourceSpec mod nm) ty = do
     ress <- gets resources
     case Map.lookup spec ress of
         Nothing -> do
-            let ref = Name $ fromString $ show spec
+            let ref = Name $ fromString $ makeGlobalResourceName $ show spec 
             let global =  globalVariableDefaults { name = ref
                                                  , isConstant = False
-                                                 , G.type' = ty }
+                                                 , G.type' = ty
+                                                 , initializer = Just $ C.Undef ty }
             modify $ \s -> s { resources = Map.insert spec global ress }
             return ref
         Just ref -> return $ G.name ref
@@ -320,6 +328,7 @@ emptyCodegen startCount =
     Map.empty
     []
     []
+    Map.empty
     Map.empty
 
 -- | 'addBlock' creates and adds a new block to the current blocks
@@ -422,20 +431,51 @@ globalVar t s = C.GlobalReference t $ LLVMAST.Name $ fromString s
 ----------------------------------------------------------------------------
 
 -- | Store a local variable on the front of the symbol table.
-assign :: String -> Operand -> TypeRepresentation -> Codegen ()
-assign var opd trep = do
-    logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show opd ++ ":" ++ show trep
-    modify $ \s -> s { symtab = Map.insert var (opd,trep) $ symtab s }
+assign :: String -> Operand -> TypeRepresentation -> PrimArg -> Type -> Codegen ()
+assign var op trep arg ty = do
+    logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show op ++ ":" ++ show trep
+    
+    let regular = modify $ \s -> s { symtab = Map.insert var (op,trep) $ symtab s }
+    resRefs <- gets resourceRefs
+    case (arg,resRefs) of
+        (ArgVar _ _ _ (Resource res) _,True) -> do
+            when resRefs 
+             $ do
+                nm <- addGlobalResource res ty
+                store (cons $ C.GlobalReference (ptr_t ty) nm) op 
+            modify $ \s -> s{resourceOps=Map.insert res (op,ty) $ resourceOps s}
+        _ -> regular
+    -- recordResource arg op ty
 
+-- recordResource :: PrimArg -> Operand -> Type -> Codegen ()
+-- recordResource arg op ty = do
+
+    
+assignGlobalResource :: ResourceSpec -> Codegen ()
+assignGlobalResource res = do
+    resOps <- gets resourceOps
+    case Map.lookup res resOps of
+        Nothing -> return () -- shouldnt $ "assignGlobalResource of " ++ show res
+        Just (op, ty) -> do
+            nm <- addGlobalResource res ty
+            store op (cons $ C.GlobalReference (ptr_t ty) nm)
 
 -- | Find and return the local operand by its given name from the symbol
 -- table. Only the first find will be returned so new names can shadow
 -- the same older names.
-getVar :: String -> Codegen (Operand,TypeRepresentation)
-getVar var = do
-  let err = shouldnt $ "Local variable not in scope: " ++ show var
-  lcls <- gets symtab
-  return $ fromMaybe err $ Map.lookup var lcls
+getVar :: String -> Maybe (PrimArg,Type,TypeRepresentation) 
+       -> Codegen (Operand,TypeRepresentation)
+getVar var mbArg = do
+    let err = shouldnt $ "Local variable not in scope: " ++ show var
+    resRefs <- gets resourceRefs
+    case (mbArg,resRefs) of
+        (Just (ArgVar _ _ _ (Resource res) _, ty, trep),True) -> do 
+            nm <- addGlobalResource res ty
+            op <- doLoad ty (cons $ C.GlobalReference (ptr_t ty) nm) 
+            return (op, trep) 
+        _ -> do
+            lcls <- gets symtab
+            return $ fromMaybe err $ Map.lookup var lcls
 
 
 -- | Evaluate nested code generating code, and reset the symtab to its original
@@ -445,8 +485,9 @@ getVar var = do
 preservingSymtab :: Codegen a -> Codegen a
 preservingSymtab code = do
     oldSymtab <- gets symtab
+    resOps <- gets resourceOps
     result <- code
-    modify $ \s -> s { symtab = oldSymtab }
+    modify $ \s -> s { symtab = oldSymtab, resourceOps = resOps }
     return result
 
 
@@ -627,10 +668,8 @@ alloca :: Type -> Instruction
 alloca ty = Alloca ty Nothing 0 []
 
 -- | The 'store' instruction is used to write to write to memory. yields void.
-store :: Operand -> Operand -> Codegen Operand
-store ptr val = do
-  voidInstr $ Store False ptr val Nothing 0 []
-  return ptr
+store :: Operand -> Operand -> Codegen ()
+store ptr val = voidInstr $ Store False ptr val Nothing 0 []
 
 -- | The 'load' function wraps LLVM's load instruction with defaults.
 load :: Operand -> Instruction

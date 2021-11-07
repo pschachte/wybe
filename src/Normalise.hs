@@ -91,16 +91,15 @@ normaliseItem (FuncDecl vis mods (ProcProto name params resources) resulttype
         pos)
 normaliseItem (FuncDecl vis mods (ProcProto name params resources)
                         resulttype result pos) =
-  let flowType = Implicit pos
-  in  normaliseItem
+    normaliseItem
         (ProcDecl vis mods
-            (ProcProto name (params ++ [Param outputVariableName resulttype ParamOut flowType])
+            (ProcProto name (params ++ [Param outputVariableName resulttype ParamOut Ordinary])
                        resources)
              [maybePlace (ForeignCall "llvm" "move" []
                  [maybePlace (Typed (content result) resulttype Nothing)
                   $ place result,
                   Unplaced
-                  $ Typed (Var outputVariableName ParamOut flowType) resulttype Nothing])
+                  $ Typed (Var outputVariableName ParamOut Ordinary) resulttype Nothing])
               pos]
         pos)
 normaliseItem item@(ProcDecl _ _ _ _ _) = do
@@ -594,48 +593,47 @@ constructorItems :: ProcName -> TypeSpec -> [Param]
                  -> [(VarName,Bool,TypeSpec,TypeRepresentation,Int)]
                  -> Int -> Int -> Int -> OptPos -> [Item]
 constructorItems ctorName typeSpec params fields size tag tagLimit pos =
-    let flowType = Implicit pos
-    in [ProcDecl Public inlineDetModifiers
-        (ProcProto ctorName
-            (((\p -> p {paramFlow=ParamIn, paramFlowType=Ordinary}) <$> params)
-             ++ [Param outputVariableName typeSpec ParamOut Ordinary])
-            Set.empty)
-        -- Code to allocate memory for the value
-        ([Unplaced $ ForeignCall "lpvm" "alloc" []
-          [Unplaced $ iVal size,
-           Unplaced $ varSet recName `withType` typeSpec]]
-         ++
-         -- fill in the secondary tag, if necessary
-         (if tag > tagLimit
-          then [Unplaced $ ForeignCall "lpvm" "mutate" []
-                 [Unplaced $ Typed (varGet recName) typeSpec Nothing,
-                  Unplaced $ Typed (varSet recName) typeSpec Nothing,
-                  Unplaced $ iVal 0,
-                  Unplaced $ iVal 1,
-                  Unplaced $ iVal size,
-                  Unplaced $ iVal 0,
-                  Unplaced $ iVal tag]]
-          else [])
-         ++
-         -- Code to fill all the fields
-         (List.map
-          (\(var,_,ty,_,offset) ->
-               (Unplaced $ ForeignCall "lpvm" "mutate" []
-                 [Unplaced $ Typed (varGet recName) typeSpec Nothing,
-                  Unplaced $ Typed (varSet recName) typeSpec Nothing,
-                  Unplaced $ iVal offset,
-                  Unplaced $ iVal 1,
-                  Unplaced $ iVal size,
-                  Unplaced $ iVal 0,
-                  Unplaced $ Typed (Var var ParamIn flowType) ty Nothing]))
-          fields)
-         ++
-         -- Finally, code to tag the reference
-         [Unplaced $ ForeignCall "llvm" "or" []
-          [Unplaced $ varGet recName,
-           Unplaced $ iVal (if tag > tagLimit then tagLimit+1 else tag),
-           Unplaced $ varSet outputVariableName]])
-        pos]
+    [ProcDecl Public inlineDetModifiers
+    (ProcProto ctorName
+        (((\p -> p {paramFlow=ParamIn, paramFlowType=Ordinary}) <$> params)
+         ++ [Param outputVariableName typeSpec ParamOut Ordinary])
+        Set.empty)
+    -- Code to allocate memory for the value
+    ([Unplaced $ ForeignCall "lpvm" "alloc" []
+      [Unplaced $ iVal size,
+       Unplaced $ varSet recName `withType` typeSpec]]
+     ++
+     -- fill in the secondary tag, if necessary
+     (if tag > tagLimit
+      then [Unplaced $ ForeignCall "lpvm" "mutate" []
+             [Unplaced $ Typed (varGet recName) typeSpec Nothing,
+              Unplaced $ Typed (varSet recName) typeSpec Nothing,
+              Unplaced $ iVal 0,
+              Unplaced $ iVal 1,
+              Unplaced $ iVal size,
+              Unplaced $ iVal 0,
+              Unplaced $ iVal tag]]
+      else [])
+     ++
+     -- Code to fill all the fields
+     (List.map
+      (\(var,_,ty,_,offset) ->
+           (Unplaced $ ForeignCall "lpvm" "mutate" []
+             [Unplaced $ Typed (varGet recName) typeSpec Nothing,
+              Unplaced $ Typed (varSet recName) typeSpec Nothing,
+              Unplaced $ iVal offset,
+              Unplaced $ iVal 1,
+              Unplaced $ iVal size,
+              Unplaced $ iVal 0,
+              Unplaced $ Typed (Var var ParamIn Ordinary) ty Nothing]))
+      fields)
+     ++
+     -- Finally, code to tag the reference
+     [Unplaced $ ForeignCall "llvm" "or" []
+      [Unplaced $ varGet recName,
+       Unplaced $ iVal (if tag > tagLimit then tagLimit+1 else tag),
+       Unplaced $ varSet outputVariableName]])
+    pos]
 
 
 -- |Generate deconstructor code for a non-const constructor
@@ -645,7 +643,6 @@ deconstructorItems :: Ident -> TypeSpec -> [Param] -> Int -> Int -> Int -> Int
 deconstructorItems ctorName typeSpec params numConsts numNonConsts tag tagBits
                    tagLimit pos fields size =
     let startOffset = (if tag > tagLimit then tagLimit+1 else tag)
-        flowType = Implicit pos
         detism = deconstructorDetism numConsts numNonConsts
     in [ProcDecl Public (inlineModifier detism)
         (ProcProto ctorName
@@ -657,11 +654,11 @@ deconstructorItems ctorName typeSpec params numConsts numNonConsts tag tagBits
          -- Code to fetch all the fields
          ++ List.map (\(var,_,_,_,aligned) ->
                               (Unplaced $ ForeignCall "lpvm" "access" []
-                               [Unplaced $ Var outputVariableName ParamIn flowType,
+                               [Unplaced $ Var outputVariableName ParamIn Ordinary,
                                 Unplaced $ iVal (aligned - startOffset),
                                 Unplaced $ iVal size,
                                 Unplaced $ iVal startOffset,
-                                Unplaced $ Var var ParamOut flowType]))
+                                Unplaced $ Var var ParamOut Ordinary]))
             fields)
         pos]
 
@@ -770,8 +767,7 @@ unboxedConstructorItems :: Visibility -> ProcName -> TypeSpec -> Int
                         -> Maybe Int -> [(VarName,Bool,TypeSpec,Int,Int)]
                         -> OptPos -> [Item]
 unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
-    let flowType = Implicit pos
-        proto = ProcProto ctorName
+    let proto = ProcProto ctorName
                 ([Param name paramType ParamIn Ordinary
                  | (name,_,paramType,_,_) <- fields]
                   ++ [Param outputVariableName typeSpec ParamOut Ordinary])
@@ -818,8 +814,7 @@ unboxedDeconstructorItems :: Visibility -> ProcName -> TypeSpec -> Int -> Int
                           -> [(VarName,Bool,TypeSpec,Int,Int)] -> [Item]
 unboxedDeconstructorItems vis ctorName recType numConsts numNonConsts tag
                           tagBits pos fields =
-    let flowType = Implicit pos
-        detism = deconstructorDetism numConsts numNonConsts
+    let detism = deconstructorDetism numConsts numNonConsts
     in [ProcDecl vis (inlineModifier detism)
         (ProcProto ctorName
          (List.map (\(n,_,fieldType,_,_) -> Param n fieldType ParamOut Ordinary)
@@ -827,7 +822,8 @@ unboxedDeconstructorItems vis ctorName recType numConsts numNonConsts tag
           ++ [Param outputVariableName recType ParamIn Ordinary])
          Set.empty)
          -- Code to check we have the right constructor
-        ([tagCheck numConsts numNonConsts tag tagBits (wordSizeBytes-1) Nothing outputVariableName]
+        ([tagCheck numConsts numNonConsts tag tagBits 
+            (wordSizeBytes-1) Nothing outputVariableName]
          -- Code to fetch all the fields
          ++ List.concatMap
             (\(var,_,fieldType,shift,sz) ->

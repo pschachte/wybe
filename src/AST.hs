@@ -28,11 +28,12 @@ module AST (
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), 
   paramTypeFlow, primParamTypeFlow, setParamArgFlowType, 
-  paramToVar, primParamToArg, closedParamVar, unzipTypeFlow, unzipTypeFlows,
+  paramToVar, primParamToArg, freeParamVar, unzipTypeFlow, unzipTypeFlows,
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), StringVariant(..), Generator(..), Stmt(..), ProcFunctor(..),
   regularProc, regularModProc,
   flattenedExpFlow, expIsConstant, expVar, expVar', maybeExpType, innerExp,
+  setExpFlowType,
   TypeRepresentation(..), TypeFamily(..), typeFamily,
   defaultTypeRepresentation, typeRepSize, integerTypeRep,
   lookupTypeRepresentation, lookupModuleRepresentation,
@@ -67,7 +68,7 @@ module AST (
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, procCallToExp,
   expOutputs, pexpListOutputs, expInputs, pexpListInputs,
-  setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
+  setExpTypeFlow, setPExpTypeFlow, 
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
@@ -97,6 +98,7 @@ module AST (
   checkConflictingMods, checkUnknownMods,
   specialChar, specialName, specialName2, outputVariableName, outputStatusName,
   envParamName, envPrimParam,
+  makeGlobalConstantName, makeGlobalResourceName,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
   showModSpecs, showResources, showOptPos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
@@ -2598,9 +2600,9 @@ primParamToArg :: PrimParam -> PrimArg
 primParamToArg (PrimParam nm ty fl ft _) = ArgVar nm ty fl ft False
 
 
--- |Get Closed Param and Typed Var for the given VarName and TypeSpec 
-closedParamVar :: VarName -> TypeSpec -> (Param, Exp)
-closedParamVar n t = (Param n t ParamIn Closed, Typed (Var n ParamIn Closed) t Nothing)
+-- |Get Free Param and Typed Var for the given VarName and TypeSpec 
+freeParamVar :: VarName -> TypeSpec -> (Param, Exp)
+freeParamVar n t = (Param n t ParamIn Free, Typed (Var n ParamIn Free) t Nothing)
 
 
 -- |Set the TypeSpec of a given TypeFlow
@@ -2794,6 +2796,12 @@ innerExp (Typed exp _ _) = innerExp exp
 innerExp exp = exp
 
 
+setExpFlowType :: Exp -> ArgFlowType -> Exp
+setExpFlowType (Typed exp ty cast) ft = Typed (setExpFlowType exp ft) ty cast
+setExpFlowType (Var name dir _)    ft = Var name dir ft
+setExpFlowType exp                 _  = exp
+
+
 -- |Is it unnecessary to actually pass an argument (in or out) for this param?
 paramIsPhantom :: PrimParam -> Compiler Bool
 paramIsPhantom param = typeIsPhantom (primParamType param)
@@ -2842,7 +2850,7 @@ realParams = filterM paramIsReal
 -- |The param actually needs to be passed; ie, it is needed and not phantom.
 paramIsReal :: PrimParam -> Compiler Bool
 paramIsReal param =
-    (((not . paramInfoUnneeded) $ primParamInfo param) &&) . not <$> paramIsPhantom param
+    (((not . paramInfoUnneeded &&& not . paramInfoReference) $ primParamInfo param) &&) . not <$> paramIsPhantom param
 
 
 -- |Get names of proto input params
@@ -2957,20 +2965,16 @@ argIntegerValue _              = Nothing
 
 -- |Relates a primitive argument to the corresponding source argument
 data ArgFlowType = Ordinary        -- ^An argument/parameter as written by user
-                 | HalfUpdate      -- ^One half of a variable update (!var)
-                 | Implicit OptPos -- ^Temp var for expression at that position
                  | Resource ResourceSpec 
                                    -- ^An argument to pass a resource
-                 | Closed          -- ^An argument to be passed in the closure 
+                 | Free            -- ^An argument to be passed in the closure 
                                    -- environment
      deriving (Eq,Ord,Generic)
 
 instance Show ArgFlowType where
     show Ordinary = ""
-    show HalfUpdate = "%"
-    show (Implicit _) = ""
-    show (Resource _) = "#"
-    show Closed = "^"
+    show (Resource _) = "%"
+    show Free = "^"
 
 argFlowTypeIsResource :: ArgFlowType -> Bool 
 argFlowTypeIsResource (Resource _) = True
@@ -3021,10 +3025,8 @@ argDescription (ArgVar var _ flow ftype _) =
     argFlowDescription flow
     ++ (case ftype of
           Ordinary       -> " variable " ++ primVarName var
-          HalfUpdate     -> " update of variable " ++ primVarName var
-          Implicit pos   -> " expression" ++ showOptPos pos
           Resource rspec -> " resource " ++ show rspec
-          Closed         -> " closure argument")
+          Free           -> " closure argument")
 argDescription (ArgInt val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgFloat val _) = "constant argument '" ++ show val ++ "'"
 argDescription arg@ArgString{} = "constant argument " ++ show arg
@@ -3133,11 +3135,6 @@ setPExpTypeFlow :: TypeFlow -> Placed Exp -> Placed Exp
 setPExpTypeFlow typeflow pexpr = setExpTypeFlow typeflow <$> pexpr
 
 
-isHalfUpdate :: FlowDirection -> Exp -> Bool
-isHalfUpdate flow (Typed expr _ _) = isHalfUpdate flow expr
-isHalfUpdate flow (Var _ flow' HalfUpdate) = flow == flow'
-isHalfUpdate _ _ = False
-
 ----------------------------------------------------------------
 --                      Variables (Uses and Defs)
 --
@@ -3214,6 +3211,12 @@ envParamName = PrimVarName (specialName "env") 0
 envPrimParam :: PrimParam
 envPrimParam = PrimParam envParamName AnyType FlowIn Ordinary (ParamInfo False False)
 
+
+makeGlobalConstantName :: String -> String
+makeGlobalConstantName name = specialName2 "constant" name
+
+makeGlobalResourceName :: String -> String
+makeGlobalResourceName name = specialName2 "resource" name
 
 ----------------------------------------------------------------
 --                      Showing Compiler State

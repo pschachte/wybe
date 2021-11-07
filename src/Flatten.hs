@@ -542,19 +542,18 @@ flattenExp (Where stmts pexp) _ _ _ = do
     flattenPExp pexp
 flattenExp (CondExp cond thn els) ty castFrom pos = do
     resultName <- tempVar
-    let flowType = Implicit pos
     flattenStmt (Cond cond
                  [maybePlace (ForeignCall "llvm" "move" []
                               [typeAndPlace (content thn) ty castFrom (place thn),
-                               Unplaced $ Var resultName ParamOut flowType])
+                               Unplaced $ Var resultName ParamOut Ordinary])
                   pos]
                  [maybePlace (ForeignCall "llvm" "move" []
                               [typeAndPlace (content els) ty castFrom (place els),
-                               Unplaced $ Var resultName ParamOut flowType])
+                               Unplaced $ Var resultName ParamOut Ordinary])
                   pos]
                 Nothing Nothing)
         pos Det
-    return $ maybePlace (Var resultName ParamIn flowType) pos
+    return $ maybePlace (Var resultName ParamIn Ordinary) pos
 flattenExp expr@(Lambda mods _ pstmts) ty castFrom pos = do
     state <- get
     let anonState = anonProcState state
@@ -595,10 +594,6 @@ flattenCall stmtBuilder isForeign ty castFrom pos exps = do
     modify (\s -> s { stmtDefs = defs `Set.union` defs',
                       currPos = oldPos})
     logFlatten $ "-- defines:  " ++ show defs'
-    -- let (argflow,varflow) =
-    --       if isForeign -- implicit arg of foreign function calls is always out
-    --       then (ParamOut,ParamIn)
-    --       else (FlowUnknown,FlowUnknown)
     let outFlows = Set.fromList
                         $ List.filter (/= ParamIn)
                         $ List.map (flattenedExpFlow . content) exps'
@@ -615,14 +610,11 @@ flattenCall stmtBuilder isForeign ty castFrom pos exps = do
     when (flowsIn varflow)
         $ emit pos $ stmtBuilder
         $ ((inputOnlyExp <$>) <$> exps')
-          ++ [typeAndPlace (Var resultName ParamOut $ Implicit pos)
-                            ty castFrom pos]
+          ++ [typeAndPlace (Var resultName ParamOut Ordinary) ty castFrom pos]
     when (flowsOut varflow)
         $ postpone pos $ stmtBuilder
-        $ exps' ++ [typeAndPlace (Var resultName ParamIn $ Implicit pos)
-                     ty castFrom pos]
-    return $ Unplaced $ maybeType (Var resultName varflow $ Implicit pos)
-                       ty castFrom
+        $ exps' ++ [typeAndPlace (Var resultName ParamIn Ordinary) ty castFrom pos]
+    return $ Unplaced $ maybeType (Var resultName varflow Ordinary) ty castFrom
 
 flattenAnonParam :: Exp -> TypeSpec -> Maybe TypeSpec -> OptPos
             -> Flattener (Placed Exp)
@@ -686,15 +678,6 @@ inputOnlyExp (Var name ParamInOut flowType) = Var name ParamIn flowType
 inputOnlyExp (Var name ParamOut flowType) =
     shouldnt $ "Making input-only version of output variable " ++ name
 inputOnlyExp exp = exp
-
-
-flattenParam :: Param -> [Param]
-flattenParam (Param name typ dir flowType) =
-    let isIn  = flowsIn dir
-        isOut = flowsOut dir
-        flowType' = if isIn && isOut then HalfUpdate else flowType
-    in  (if isIn then [Param name typ ParamIn flowType'] else []) ++
-        (if isOut then [Param name typ ParamOut flowType'] else [])
 
 
 -- |Log a message, if we are logging flattening activity.

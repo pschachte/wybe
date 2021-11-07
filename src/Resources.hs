@@ -222,11 +222,11 @@ transformStmt tmp res (UseResources allRes oldRes body) pos = do
     let types = fromJust . snd <$> resTypes
     let resCount = length toSave
     let tmp' = tmp + resCount
-    let ress = zip3 toSave (mkTempName <$> [tmp..]) types
-    let get v ty = varGet v `withType` ty
-    let set v ty = varSet v `withType` ty
-    let saves = (\(r,t,ty) -> move (get r ty) (set t ty)) <$> ress
-    let restores = (\(r,t,ty) -> move (get t ty) (set r ty)) <$> ress
+    let ress = zip4 toSave (mkTempName <$> [tmp..]) types (fst <$> resTypes)
+    let get v ty rs = varGet v `withType` ty `setExpFlowType` Resource rs 
+    let set v ty rs = varSet v `withType` ty `setExpFlowType` Resource rs
+    let saves = (\(r,t,ty,rs) -> move (get r ty rs) (set t ty rs)) <$> ress
+    let restores = (\(r,t,ty,rs) -> move (get t ty rs) (set r ty rs)) <$> ress
     resFlows <- concat <$> mapM (simpleResourceFlows pos) 
                                 ((`ResourceFlowSpec` ParamInOut). fst <$> canonAllRes)
     (body',tmp'') <- transformBody tmp' (List.nub $ res ++ resFlows) body
@@ -257,6 +257,15 @@ transformExp tmp res (Lambda mods@ProcModifiers{modifierResourceful=Resourceful}
                                  (mapFst (\r -> r{resourceFlowFlow=ParamInOut}) <$> res)
     return (maybePlace (Lambda mods{modifierResourceful=Resourceless}
                                (params ++ resParams) body') pos, tmp')
+transformExp tmp _ (Lambda mods params body) pos = do
+    (body', tmp') <- transformBody tmp [] body
+    return (maybePlace (Lambda mods params body') pos, tmp')
+transformExp tmp res exp@(Var name _ _) pos = do
+    resNames <- mapM (resourceVar . resourceFlowRes . fst) res
+    let resMap = Map.fromList $ zip resNames (resourceFlowRes . fst <$> res)
+    case Map.lookup name resMap of
+        Just spec -> return (maybePlace (setExpFlowType exp (Resource spec)) pos, tmp)
+        Nothing -> return (maybePlace exp pos, tmp)
 transformExp tmp _ exp pos = return (maybePlace exp pos, tmp)
 
 

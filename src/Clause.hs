@@ -211,14 +211,14 @@ compileBody stmts params detism = do
                                          procID) generalVersion)
                              (args' ++
                               [ArgVar (PrimVarName outputStatusName 0) boolType FlowOut
-                               (Implicit Nothing) False])
+                               Ordinary False])
                 Higher fn -> do
                     fn' <- compileHigherFunc fn
                     return $ Unplaced
                            $ PrimHigherCall callSiteID fn'
                              (args' ++
                               [ArgVar (PrimVarName outputStatusName 0) boolType FlowOut
-                               (Implicit Nothing) False])
+                               Ordinary False])
           return $ ProcBody (front++[final']) NoFork
         _ -> do
           prims <- mapM compileSimpleStmt stmts
@@ -330,16 +330,15 @@ compileArg' typ (ProcRef ms es) _ = do
            $ shouldnt "compileArg' procRef with in/out args"
     return [ArgProcRef ms as typ]
 compileArg' typ var@(Var name flow flowType) pos = do
-    let flowType' = if flow == ParamInOut then HalfUpdate else flowType
     inArg <- if flowsIn flow
         then do
             currName <- currVar name pos
-            return [ArgVar currName typ FlowIn flowType' False]
+            return [ArgVar currName typ FlowIn flowType False]
         else return []
     outArg <- if flowsOut flow
         then do
             nextName <- nextVar name
-            return [ArgVar nextName typ FlowOut flowType' False]
+            return [ArgVar nextName typ FlowOut flowType False]
         else return []
     return $ inArg ++ outArg
 compileArg' _ (Typed exp _ _) pos =
@@ -371,9 +370,9 @@ reconcileOne caseVars jointVars (Param name ty flow ftype) =
          then Just $ Unplaced $
               PrimForeign "llvm" "move" []
               [ArgVar (PrimVarName name caseNum) ty FlowIn
-                      Ordinary False,
+                      ftype False,
                ArgVar (PrimVarName name jointNum) ty FlowOut
-                      Ordinary False]
+                      ftype False]
          else Nothing
        _ -> Nothing
 
@@ -396,7 +395,7 @@ compileParam startVars endVars procName param@(Param name ty flow ftype) =
 
 -- |A synthetic output parameter carrying the test result
 testOutParam :: Param
-testOutParam = Param outputStatusName boolType ParamOut $ Implicit Nothing
+testOutParam = Param outputStatusName boolType ParamOut Ordinary
 
 
 -- |Log a message, if we are logging clause generation.
