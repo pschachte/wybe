@@ -21,10 +21,10 @@ AFTER EVERYTHING:
 
 *main* > public {inline,impure} (0 calls)
 0: person1.<0>
-(#io##0:wybe.phantom, #?io##1:wybe.phantom):
+(%io##0:wybe.phantom, %?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    wybe.string.print_string<0>("Wang":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #4 @io:nn:nn
+    wybe.string.print_string<0>("Wang":wybe.string, ~%io##0:wybe.phantom, ?%io##1:wybe.phantom) #4 @io:nn:nn
 
   LLVM code       :
 
@@ -37,10 +37,10 @@ AFTER EVERYTHING:
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
-@person1.2 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @person1.1 to i64) }
+@"constant#person1.2" =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @"constant#person1.1" to i64) }
 
 
-@person1.1 =    constant [?? x i8] c"Wang\00"
+@"constant#person1.1" =    constant [?? x i8] c"Wang\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -51,7 +51,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"person1.<0>"()    {
 entry:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @person1.2, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#person1.2", i32 0, i32 0) to i64))  
   ret void 
 }
 --------------------------------------------------

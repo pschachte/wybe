@@ -49,7 +49,7 @@ procExpansion pspec def = do
                <$> params
     let reallyNeedsRefs = any (((not . paramInfoUnneeded) &&& paramInfoReference) 
                                 . primParamInfo) params' || isClosure
-    let params'' = markParamReference reallyNeedsRefs <$> params
+    let params'' = markParamReference reallyNeedsRefs <$> params'
     let proto' = proto {primProtoParams = params''}
     let impln' = impln{ procImplnProto = proto', procImplnBody = body' }
     let def' = def { procImpln = impln',
@@ -129,8 +129,8 @@ type Expander = StateT ExpanderState BodyBuilder
 
 -- |Substitute a fresh temp variable for the specified variable, unless
 -- we've already recorded the mapping for that name in writeNaming
-freshVar :: PrimVarName -> TypeSpec -> Expander PrimArg
-freshVar oldVar typ = do
+freshVar :: PrimVarName -> TypeSpec -> ArgFlowType  -> Expander PrimArg
+freshVar oldVar typ ft = do
     logExpansion $ "Making fresh name for variable " ++ show oldVar
     maybeName <- gets (Map.lookup oldVar . writeNaming)
     case maybeName of
@@ -138,7 +138,7 @@ freshVar oldVar typ = do
             newVar <- lift freshVarName
             logExpansion $ "    Generated fresh name " ++ show newVar
             addRenaming oldVar $ ArgVar newVar typ FlowIn Ordinary False
-            return $ ArgVar newVar typ FlowOut Ordinary False
+            return $ ArgVar newVar typ FlowOut ft False
         Just newArg -> do
             logExpansion $ "    Already named it " ++ show newArg
             return newArg
@@ -312,13 +312,14 @@ inlineCall proto args body pos = do
 
 
 expandArg :: PrimArg -> Expander PrimArg
-expandArg arg@(ArgVar var ty flow _ _) = do
+expandArg arg@(ArgVar var ty flow ft _) = do
     renameAll <- gets inlining
     if renameAll
     then case flow of
-        FlowOut -> freshVar var ty
+        FlowOut -> freshVar var ty ft
         FlowIn ->
-            setArgType ty <$> gets (Map.findWithDefault arg var . renaming)
+            setArgType ty . (`setPrimArgFlowType` ft) 
+            <$> gets (Map.findWithDefault arg var . renaming)
             -- (shouldnt $ "inlining: reference to unassigned variable "
             --  ++ show var)
     else return arg
@@ -363,20 +364,20 @@ addOutputNaming _ _ = return ()
 -- the argument has already been renamed as appropriate for the calling
 -- context.
 addInputAssign :: OptPos -> (PrimParam,PrimArg) -> Expander ()
-addInputAssign pos (param@(PrimParam name ty flow _ _),v) = do
+addInputAssign pos (param@(PrimParam name ty flow ft _),v) = do
     -- XXX AnyType is now a valid type, treated as a word type
     -- when (AnyType == ty) $
     --   shouldnt $ "Danger: untyped param: " ++ show param
     -- when (AnyType == argType v) $
     --   shouldnt $ "Danger: untyped argument: " ++ show v
-    addInputAssign' pos name ty flow v
+    addInputAssign' pos name ty flow v ft
 
 addInputAssign' :: OptPos -> PrimVarName -> TypeSpec -> PrimFlow -> PrimArg
-                         -> Expander ()
-addInputAssign' pos name ty FlowIn v = do
-    newVar <- freshVar name ty
+                -> ArgFlowType -> Expander ()
+addInputAssign' pos name ty FlowIn v ft = do
+    newVar <- freshVar name ty ft
     addInstr (PrimForeign "llvm" "move" [] [v,newVar]) pos
-addInputAssign' _ _ _ FlowOut _ = do
+addInputAssign' _ _ _ FlowOut _ ft = do
     return ()
 
 

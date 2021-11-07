@@ -12,10 +12,12 @@ module Parser where
 import AST hiding (option)
 import Data.Set as Set
 import Data.List as List
+import Data.Maybe as Maybe
 import Data.Bits
 import Control.Monad.Identity (Identity)
 import Scanner
 import Util
+import Snippets
 import Config
 import Text.Parsec
 import Text.Parsec.Pos
@@ -50,7 +52,14 @@ sourcePos = statePos <$> getParserState
 
 -- | Parse a Wybe module.
 parseWybe :: [Token] -> FilePath -> Either ParseError [Item]
-parseWybe toks file = parse (items <* eof) file toks
+parseWybe toks file = parse (maybeSetPosition toks items <* eof) file toks
+
+
+-- | Set the Parser position to the position of the head Token, if it exists
+maybeSetPosition :: [Token] -> Parser a -> Parser a
+maybeSetPosition toks parser = do
+    maybe (return ()) (setPosition . tokenPosition) $ listToMaybe toks
+    parser
 
 
 -- | Parser entry for a Wybe program.
@@ -102,7 +111,7 @@ parsePragma = ident "no_standard_library" $> NoStd
 moduleItem :: Visibility -> Parser Item
 moduleItem v = do
     pos <- tokenPosition <$> ident "module"
-    modName <- identString
+    modName <- moduleName
     body <- betweenB Brace items
     return $ ModuleDecl v modName body (Just pos)
 
@@ -111,7 +120,7 @@ moduleItem v = do
 typeItem :: Visibility -> Parser Item
 typeItem v = do
     pos <- tokenPosition <$> ident "type"
-    proto <- TypeProto <$> identString <*> typeVarNames
+    proto <- TypeProto <$> moduleName <*> typeVarNames
     (imp,items) <- typeImpln <|> typeCtors
     return $ TypeDecl v proto imp items (Just pos)
 
@@ -782,7 +791,17 @@ identString = takeToken test
 
 -- | Parse a type variable name
 typeVarName :: Parser Ident
-typeVarName = symbol "?" *> identString
+typeVarName = takeToken test
+ where 
+    test (TokIdent s _) | isTypeVar s = Just s
+    test _                            = Nothing
+
+-- | Parse a module name, any ident that is not a TypeVarName
+moduleName :: Parser Ident 
+moduleName = takeToken test
+ where 
+    test (TokIdent s _) | not $ isTypeVar s = Just s
+    test _                                  = Nothing
 
 
 -- | Parse a comma-separated list of TypeVarNames between Parens
@@ -1013,7 +1032,7 @@ stmtExprToStmt other =
     syntaxError (stmtExprPos other) $ "invalid statement " ++ show other
 
 
-stmtExprToGenerators :: TranslateTo [Generator]
+stmtExprToGenerators :: TranslateTo [Placed Generator]
 stmtExprToGenerators (Call pos [] sep ParamIn [left,right])
   | separatorName sep = do
     left' <- stmtExprToGenerators left
@@ -1022,7 +1041,7 @@ stmtExprToGenerators (Call pos [] sep ParamIn [left,right])
 stmtExprToGenerators (Call pos [] "in" ParamIn [var,exp]) = do
     var' <- stmtExprToExp var
     exp' <- stmtExprToExp exp
-    return [In var' exp']
+    return [Placed (In var' exp') pos]
 stmtExprToGenerators other =
     syntaxError (stmtExprPos other) $ "invalid generator " ++ show other
 
@@ -1152,10 +1171,12 @@ stmtExprToTypeSpec mods@(Embraced pos Brace _ (Just ty@(Embraced _ Paren _ Nothi
         _ -> syntaxError pos $ "invalid type spec " ++ show mods 
 stmtExprToTypeSpec (Embraced _ Paren args Nothing) =
     HigherOrderType defaultProcModifiers <$> mapM stmtExprToTypeFlow args
-stmtExprToTypeSpec call@(Call _ mod name ParamIn args)
-    = TypeSpec mod name <$> mapM stmtExprToTypeSpec args
-stmtExprToTypeSpec (Call _ [] name ParamOut []) = 
+stmtExprToTypeSpec (Call _ [] name ParamIn []) 
+  | isTypeVar name = 
     return $ TypeVariable $ RealTypeVar name
+stmtExprToTypeSpec (Call _ mod name ParamIn params) 
+  | not $ isTypeVar name =
+    TypeSpec mod name <$> mapM stmtExprToTypeSpec params
 stmtExprToTypeSpec other =
     syntaxError (stmtExprPos other) $ "invalid type specification " ++ show other
 
@@ -1205,9 +1226,11 @@ stmtExprToCtorField :: TranslateTo Param
 stmtExprToCtorField (Call _ [] ":" ParamIn [Call _ [] name ParamIn [],ty]) = do
     ty' <- stmtExprToTypeSpec ty
     return $ Param name ty' ParamIn Ordinary
-stmtExprToCtorField (Call pos [] name ParamOut []) = do
+stmtExprToCtorField (Call pos [] name ParamIn []) 
+  | isTypeVar name = do
     return $ Param "" (TypeVariable $ RealTypeVar name) ParamIn Ordinary
-stmtExprToCtorField (Call pos mod name ParamIn params) = do
+stmtExprToCtorField (Call pos mod name ParamIn params) 
+  | not $ isTypeVar name = do
     tyParams <- mapM stmtExprToTypeSpec params
     return $ Param "" (TypeSpec mod name tyParams) ParamIn Ordinary
 stmtExprToCtorField other =
@@ -1325,9 +1348,11 @@ testFile file = do
 
 test :: Int -> String -> StmtExpr
 test prec input = do
-    case parse (limitedStmtExpr prec <* eof) "<string>" (stringTokens input) of
+    let toks = stringTokens input
+    case parse (maybeSetPosition toks (limitedStmtExpr prec) <* eof) "<string>" toks of
         Left err -> StringConst (errorPos err) (show err) DoubleQuote
         Right is -> is
 
 testParser :: Parser a -> String -> Either ParseError a
-testParser parser input = parse (parser <* eof) "<string>" (stringTokens input)
+testParser parser input = parse (maybeSetPosition toks parser <* eof) "<string>" toks
+  where toks = stringTokens input

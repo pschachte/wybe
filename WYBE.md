@@ -1039,10 +1039,10 @@ be placed in a Wybe source file to define a linked list type with whatever name
 is deemed suitable.
 
 ```
-constructors(?T) null | cons(head:?T, tail:_(?T))
+constructors(T) null | cons(head:T, tail:_(T))
 
 
-def concat(a:_(?T), b:_(?T)):_(?T) =
+def concat(a:_(T), b:_(T)):_(T) =
     if cons(?h, ?t) = a then cons(h, concat(t,b)) else b
 ```
 
@@ -1083,11 +1083,10 @@ element type, without the need to separately define different kinds of lists, or
 the operations on them.
 
 The basis of generic types is the *type variable*, which stands for a type we
-don't know yet, and thus is a variable in the type system.  A type variable
-follows the same naming convention as normal program variables, except they are
-always preceded with a question mark.  Since we rarely have more than one or two
-type variables in any given context, we conventionally use a single upper case
-letter for a type variable.
+don't know yet, and thus is a variable in the type system.  A type variable is
+denoted by an uppercase letter followed by zero or more numbers.  Since we 
+rarely have more than one or two type variables in any given context, we 
+conventionally use a single upper case letter for a type variable.
 
 Generic types are defined in the same way as described above, except that:
 
@@ -1099,13 +1098,13 @@ Generic types are defined in the same way as described above, except that:
 For example, a generic list type can be defined as:
 
 ```
-constructors(?T) null | cons(head:?T, tail:_(?T))
+constructors(T) null | cons(head:T, tail:_(T))
 ```
 
 If specified with a `type` declaration, this would be written:
 
 ```
-type list(?T) {null | cons(head:?T, tail:_(?T)) ... }
+type list(T) {null | cons(head:T, tail:_(T)) ... }
 ```
 
 All type variables appearing in the definition of any constructor must appear in
@@ -1116,7 +1115,7 @@ variables.  Each occurrence of the same type variable must signify the same
 type.  For example, you can define list concatenation:
 
 ```
-def concat(a:list(?T), b:list(?T)):list(?T) =
+def concat(a:list(T), b:list(T)):list(T) =
     if { cons(?h, ?t) = a:: cons(h, concat(t,b)) | else:: b }
 ```
 

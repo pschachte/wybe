@@ -11,11 +11,11 @@ AFTER EVERYTHING:
 
 foo > public {inline} (0 calls)
 0: import_in_sub_mod_lib.foo<0>
-foo(v##0:wybe.int, #io##0:wybe.phantom, #?io##1:wybe.phantom):
+foo(v##0:wybe.int, %io##0:wybe.phantom, %?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_int(~v##0:wybe.int, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#2##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+    foreign c print_int(~v##0:wybe.int, ~%io##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~%tmp#2##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 

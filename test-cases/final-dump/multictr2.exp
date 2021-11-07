@@ -51,7 +51,7 @@ AFTER EVERYTHING:
 
 print_t > public (0 calls)
 0: multictr2.print_t<0>
-print_t(x##0:multictr2.t, #io##0:wybe.phantom, #?io##8:wybe.phantom):
+print_t(x##0:multictr2.t, %io##0:wybe.phantom, %?io##8:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm and(x##0:wybe.int, 7:wybe.int, ?tmp#9##0:wybe.int)
@@ -79,76 +79,76 @@ print_t(x##0:multictr2.t, #io##0:wybe.phantom, #?io##8:wybe.phantom):
                                 foreign llvm icmp_eq(~tmp#9##0:wybe.int, 7:wybe.int, ?tmp#31##0:wybe.bool)
                                 case ~tmp#31##0:wybe.bool of
                                 0:
-                                    foreign c putchar('\n':wybe.char, ~#io##0:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
+                                    foreign c putchar('\n':wybe.char, ~%io##0:wybe.phantom, ?%io##8:wybe.phantom) @io:nn:nn
 
                                 1:
                                     foreign lpvm access(x##0:multictr2.t, -7:wybe.int, 24:wybe.int, 7:wybe.int, ?a##7:wybe.int)
                                     foreign lpvm access(x##0:multictr2.t, 1:wybe.int, 24:wybe.int, 7:wybe.int, ?b##0:wybe.int)
                                     foreign lpvm access(~x##0:multictr2.t, 9:wybe.int, 24:wybe.int, 7:wybe.int, ?c##0:wybe.float)
-                                    wybe.string.print_string<0>("c08(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #45 @io:nn:nn
-                                    foreign c print_int(~a##7:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-                                    wybe.string.print_string<0>(", ":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #46 @io:nn:nn
-                                    foreign c print_int(~b##0:wybe.int, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
-                                    wybe.string.print_string<0>(", ":wybe.string, ~#io##4:wybe.phantom, ?#io##5:wybe.phantom) #47 @io:nn:nn
-                                    foreign c print_float(~c##0:wybe.float, ~#io##5:wybe.phantom, ?#io##6:wybe.phantom) @io:nn:nn
-                                    wybe.string.print_string<0>(")":wybe.string, ~#io##6:wybe.phantom, ?#io##7:wybe.phantom) #48 @io:nn:nn
-                                    foreign c putchar('\n':wybe.char, ~#io##7:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
+                                    wybe.string.print_string<0>("c08(":wybe.string, ~%io##0:wybe.phantom, ?%io##1:wybe.phantom) #45 @io:nn:nn
+                                    foreign c print_int(~a##7:wybe.int, ~%io##1:wybe.phantom, ?%io##2:wybe.phantom) @io:nn:nn
+                                    wybe.string.print_string<0>(", ":wybe.string, ~%io##2:wybe.phantom, ?%io##3:wybe.phantom) #46 @io:nn:nn
+                                    foreign c print_int(~b##0:wybe.int, ~%io##3:wybe.phantom, ?%io##4:wybe.phantom) @io:nn:nn
+                                    wybe.string.print_string<0>(", ":wybe.string, ~%io##4:wybe.phantom, ?%io##5:wybe.phantom) #47 @io:nn:nn
+                                    foreign c print_float(~c##0:wybe.float, ~%io##5:wybe.phantom, ?%io##6:wybe.phantom) @io:nn:nn
+                                    wybe.string.print_string<0>(")":wybe.string, ~%io##6:wybe.phantom, ?%io##7:wybe.phantom) #48 @io:nn:nn
+                                    foreign c putchar('\n':wybe.char, ~%io##7:wybe.phantom, ?%io##8:wybe.phantom) @io:nn:nn
 
 
                             1:
                                 foreign lpvm access(~x##0:multictr2.t, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?a##6:wybe.int)
-                                wybe.string.print_string<0>("c07(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #49 @io:nn:nn
-                                foreign c print_int(~a##6:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-                                wybe.string.print_string<0>(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #50 @io:nn:nn
-                                foreign c putchar('\n':wybe.char, ~#io##3:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
+                                wybe.string.print_string<0>("c07(":wybe.string, ~%io##0:wybe.phantom, ?%io##1:wybe.phantom) #49 @io:nn:nn
+                                foreign c print_int(~a##6:wybe.int, ~%io##1:wybe.phantom, ?%io##2:wybe.phantom) @io:nn:nn
+                                wybe.string.print_string<0>(")":wybe.string, ~%io##2:wybe.phantom, ?%io##3:wybe.phantom) #50 @io:nn:nn
+                                foreign c putchar('\n':wybe.char, ~%io##3:wybe.phantom, ?%io##8:wybe.phantom) @io:nn:nn
 
 
                         1:
                             foreign lpvm access(~x##0:multictr2.t, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?a##5:wybe.int)
-                            wybe.string.print_string<0>("c06(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #51 @io:nn:nn
-                            foreign c print_int(~a##5:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-                            wybe.string.print_string<0>(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #52 @io:nn:nn
-                            foreign c putchar('\n':wybe.char, ~#io##3:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
+                            wybe.string.print_string<0>("c06(":wybe.string, ~%io##0:wybe.phantom, ?%io##1:wybe.phantom) #51 @io:nn:nn
+                            foreign c print_int(~a##5:wybe.int, ~%io##1:wybe.phantom, ?%io##2:wybe.phantom) @io:nn:nn
+                            wybe.string.print_string<0>(")":wybe.string, ~%io##2:wybe.phantom, ?%io##3:wybe.phantom) #52 @io:nn:nn
+                            foreign c putchar('\n':wybe.char, ~%io##3:wybe.phantom, ?%io##8:wybe.phantom) @io:nn:nn
 
 
                     1:
                         foreign lpvm access(~x##0:multictr2.t, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?a##4:wybe.int)
-                        wybe.string.print_string<0>("c05(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #53 @io:nn:nn
-                        foreign c print_int(~a##4:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-                        wybe.string.print_string<0>(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #54 @io:nn:nn
-                        foreign c putchar('\n':wybe.char, ~#io##3:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
+                        wybe.string.print_string<0>("c05(":wybe.string, ~%io##0:wybe.phantom, ?%io##1:wybe.phantom) #53 @io:nn:nn
+                        foreign c print_int(~a##4:wybe.int, ~%io##1:wybe.phantom, ?%io##2:wybe.phantom) @io:nn:nn
+                        wybe.string.print_string<0>(")":wybe.string, ~%io##2:wybe.phantom, ?%io##3:wybe.phantom) #54 @io:nn:nn
+                        foreign c putchar('\n':wybe.char, ~%io##3:wybe.phantom, ?%io##8:wybe.phantom) @io:nn:nn
 
 
                 1:
                     foreign lpvm access(~x##0:multictr2.t, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?a##3:wybe.int)
-                    wybe.string.print_string<0>("c04(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #55 @io:nn:nn
-                    foreign c print_int(~a##3:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-                    wybe.string.print_string<0>(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #56 @io:nn:nn
-                    foreign c putchar('\n':wybe.char, ~#io##3:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
+                    wybe.string.print_string<0>("c04(":wybe.string, ~%io##0:wybe.phantom, ?%io##1:wybe.phantom) #55 @io:nn:nn
+                    foreign c print_int(~a##3:wybe.int, ~%io##1:wybe.phantom, ?%io##2:wybe.phantom) @io:nn:nn
+                    wybe.string.print_string<0>(")":wybe.string, ~%io##2:wybe.phantom, ?%io##3:wybe.phantom) #56 @io:nn:nn
+                    foreign c putchar('\n':wybe.char, ~%io##3:wybe.phantom, ?%io##8:wybe.phantom) @io:nn:nn
 
 
             1:
                 foreign lpvm access(~x##0:multictr2.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?a##2:wybe.int)
-                wybe.string.print_string<0>("c03(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #57 @io:nn:nn
-                foreign c print_int(~a##2:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-                wybe.string.print_string<0>(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #58 @io:nn:nn
-                foreign c putchar('\n':wybe.char, ~#io##3:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
+                wybe.string.print_string<0>("c03(":wybe.string, ~%io##0:wybe.phantom, ?%io##1:wybe.phantom) #57 @io:nn:nn
+                foreign c print_int(~a##2:wybe.int, ~%io##1:wybe.phantom, ?%io##2:wybe.phantom) @io:nn:nn
+                wybe.string.print_string<0>(")":wybe.string, ~%io##2:wybe.phantom, ?%io##3:wybe.phantom) #58 @io:nn:nn
+                foreign c putchar('\n':wybe.char, ~%io##3:wybe.phantom, ?%io##8:wybe.phantom) @io:nn:nn
 
 
         1:
             foreign lpvm access(~x##0:multictr2.t, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?a##1:wybe.int)
-            wybe.string.print_string<0>("c03(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #59 @io:nn:nn
-            foreign c print_int(~a##1:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-            wybe.string.print_string<0>(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #60 @io:nn:nn
-            foreign c putchar('\n':wybe.char, ~#io##3:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
+            wybe.string.print_string<0>("c03(":wybe.string, ~%io##0:wybe.phantom, ?%io##1:wybe.phantom) #59 @io:nn:nn
+            foreign c print_int(~a##1:wybe.int, ~%io##1:wybe.phantom, ?%io##2:wybe.phantom) @io:nn:nn
+            wybe.string.print_string<0>(")":wybe.string, ~%io##2:wybe.phantom, ?%io##3:wybe.phantom) #60 @io:nn:nn
+            foreign c putchar('\n':wybe.char, ~%io##3:wybe.phantom, ?%io##8:wybe.phantom) @io:nn:nn
 
 
     1:
         foreign lpvm access(~x##0:multictr2.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int)
-        wybe.string.print_string<0>("c01(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #61 @io:nn:nn
-        foreign c print_int(~a##0:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-        wybe.string.print_string<0>(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #62 @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~#io##3:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
+        wybe.string.print_string<0>("c01(":wybe.string, ~%io##0:wybe.phantom, ?%io##1:wybe.phantom) #61 @io:nn:nn
+        foreign c print_int(~a##0:wybe.int, ~%io##1:wybe.phantom, ?%io##2:wybe.phantom) @io:nn:nn
+        wybe.string.print_string<0>(")":wybe.string, ~%io##2:wybe.phantom, ?%io##3:wybe.phantom) #62 @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~%io##3:wybe.phantom, ?%io##8:wybe.phantom) @io:nn:nn
 
 
   LLVM code       :
@@ -171,112 +171,112 @@ declare external ccc  void @print_float(double)
 declare external ccc  void @print_int(i64)    
 
 
-@multictr2.75 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.74 to i64) }
+@"constant#multictr2.75" =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @"constant#multictr2.74" to i64) }
 
 
-@multictr2.74 =    constant [?? x i8] c")\00"
+@"constant#multictr2.74" =    constant [?? x i8] c")\00"
 
 
-@multictr2.73 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @multictr2.72 to i64) }
+@"constant#multictr2.73" =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @"constant#multictr2.72" to i64) }
 
 
-@multictr2.72 =    constant [?? x i8] c", \00"
+@"constant#multictr2.72" =    constant [?? x i8] c", \00"
 
 
-@multictr2.71 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @multictr2.70 to i64) }
+@"constant#multictr2.71" =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @"constant#multictr2.70" to i64) }
 
 
-@multictr2.70 =    constant [?? x i8] c", \00"
+@"constant#multictr2.70" =    constant [?? x i8] c", \00"
 
 
-@multictr2.69 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.68 to i64) }
+@"constant#multictr2.69" =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @"constant#multictr2.68" to i64) }
 
 
-@multictr2.68 =    constant [?? x i8] c"c08(\00"
+@"constant#multictr2.68" =    constant [?? x i8] c"c08(\00"
 
 
-@multictr2.55 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.54 to i64) }
+@"constant#multictr2.55" =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @"constant#multictr2.54" to i64) }
 
 
-@multictr2.54 =    constant [?? x i8] c")\00"
+@"constant#multictr2.54" =    constant [?? x i8] c")\00"
 
 
-@multictr2.53 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.52 to i64) }
+@"constant#multictr2.53" =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @"constant#multictr2.52" to i64) }
 
 
-@multictr2.52 =    constant [?? x i8] c"c07(\00"
+@"constant#multictr2.52" =    constant [?? x i8] c"c07(\00"
 
 
-@multictr2.47 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.46 to i64) }
+@"constant#multictr2.47" =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @"constant#multictr2.46" to i64) }
 
 
-@multictr2.46 =    constant [?? x i8] c")\00"
+@"constant#multictr2.46" =    constant [?? x i8] c")\00"
 
 
-@multictr2.45 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.44 to i64) }
+@"constant#multictr2.45" =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @"constant#multictr2.44" to i64) }
 
 
-@multictr2.44 =    constant [?? x i8] c"c06(\00"
+@"constant#multictr2.44" =    constant [?? x i8] c"c06(\00"
 
 
-@multictr2.39 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.38 to i64) }
+@"constant#multictr2.39" =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @"constant#multictr2.38" to i64) }
 
 
-@multictr2.38 =    constant [?? x i8] c")\00"
+@"constant#multictr2.38" =    constant [?? x i8] c")\00"
 
 
-@multictr2.37 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.36 to i64) }
+@"constant#multictr2.37" =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @"constant#multictr2.36" to i64) }
 
 
-@multictr2.36 =    constant [?? x i8] c"c05(\00"
+@"constant#multictr2.36" =    constant [?? x i8] c"c05(\00"
 
 
-@multictr2.31 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.30 to i64) }
+@"constant#multictr2.31" =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @"constant#multictr2.30" to i64) }
 
 
-@multictr2.30 =    constant [?? x i8] c")\00"
+@"constant#multictr2.30" =    constant [?? x i8] c")\00"
 
 
-@multictr2.29 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.28 to i64) }
+@"constant#multictr2.29" =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @"constant#multictr2.28" to i64) }
 
 
-@multictr2.28 =    constant [?? x i8] c"c04(\00"
+@"constant#multictr2.28" =    constant [?? x i8] c"c04(\00"
 
 
-@multictr2.23 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.22 to i64) }
+@"constant#multictr2.23" =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @"constant#multictr2.22" to i64) }
 
 
-@multictr2.22 =    constant [?? x i8] c")\00"
+@"constant#multictr2.22" =    constant [?? x i8] c")\00"
 
 
-@multictr2.21 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.20 to i64) }
+@"constant#multictr2.21" =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @"constant#multictr2.20" to i64) }
 
 
-@multictr2.20 =    constant [?? x i8] c"c03(\00"
+@"constant#multictr2.20" =    constant [?? x i8] c"c03(\00"
 
 
-@multictr2.15 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.14 to i64) }
+@"constant#multictr2.15" =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @"constant#multictr2.14" to i64) }
 
 
-@multictr2.14 =    constant [?? x i8] c")\00"
+@"constant#multictr2.14" =    constant [?? x i8] c")\00"
 
 
-@multictr2.13 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.12 to i64) }
+@"constant#multictr2.13" =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @"constant#multictr2.12" to i64) }
 
 
-@multictr2.12 =    constant [?? x i8] c"c03(\00"
+@"constant#multictr2.12" =    constant [?? x i8] c"c03(\00"
 
 
-@multictr2.7 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.6 to i64) }
+@"constant#multictr2.7" =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @"constant#multictr2.6" to i64) }
 
 
-@multictr2.6 =    constant [?? x i8] c")\00"
+@"constant#multictr2.6" =    constant [?? x i8] c")\00"
 
 
-@multictr2.5 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @multictr2.4 to i64) }
+@"constant#multictr2.5" =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @"constant#multictr2.4" to i64) }
 
 
-@multictr2.4 =    constant [?? x i8] c"c01(\00"
+@"constant#multictr2.4" =    constant [?? x i8] c"c01(\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -294,9 +294,9 @@ if.then:
   %1 = inttoptr i64 %"x##0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   %3 = load  i64, i64* %2 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.5, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#multictr2.5", i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %3)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.7, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#multictr2.7", i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else:
@@ -307,9 +307,9 @@ if.then1:
   %9 = inttoptr i64 %8 to i64* 
   %10 = getelementptr  i64, i64* %9, i64 0 
   %11 = load  i64, i64* %10 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.13, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#multictr2.13", i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %11)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.15, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#multictr2.15", i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else1:
@@ -320,9 +320,9 @@ if.then2:
   %17 = inttoptr i64 %16 to i64* 
   %18 = getelementptr  i64, i64* %17, i64 0 
   %19 = load  i64, i64* %18 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.21, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#multictr2.21", i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %19)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.23, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#multictr2.23", i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else2:
@@ -333,9 +333,9 @@ if.then3:
   %25 = inttoptr i64 %24 to i64* 
   %26 = getelementptr  i64, i64* %25, i64 0 
   %27 = load  i64, i64* %26 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.29, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#multictr2.29", i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %27)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.31, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#multictr2.31", i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else3:
@@ -346,9 +346,9 @@ if.then4:
   %33 = inttoptr i64 %32 to i64* 
   %34 = getelementptr  i64, i64* %33, i64 0 
   %35 = load  i64, i64* %34 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.37, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#multictr2.37", i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %35)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.39, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#multictr2.39", i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else4:
@@ -359,9 +359,9 @@ if.then5:
   %41 = inttoptr i64 %40 to i64* 
   %42 = getelementptr  i64, i64* %41, i64 0 
   %43 = load  i64, i64* %42 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.45, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#multictr2.45", i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %43)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.47, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#multictr2.47", i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else5:
@@ -372,9 +372,9 @@ if.then6:
   %49 = inttoptr i64 %48 to i64* 
   %50 = getelementptr  i64, i64* %49, i64 0 
   %51 = load  i64, i64* %50 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.53, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#multictr2.53", i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %51)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.55, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#multictr2.55", i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else6:
@@ -393,13 +393,13 @@ if.then7:
   %65 = inttoptr i64 %64 to double* 
   %66 = getelementptr  double, double* %65, i64 0 
   %67 = load  double, double* %66 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.69, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#multictr2.69", i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %59)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.71, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#multictr2.71", i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %63)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.73, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#multictr2.73", i32 0, i32 0) to i64))  
   tail call ccc  void  @print_float(double  %67)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multictr2.75, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#multictr2.75", i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else7:

@@ -1,0 +1,5 @@
+?ls = []
+do {
+    while [?i | ?ls] = ls
+}
+!println(i:int)

@@ -259,17 +259,25 @@ logUnbranch s = do
 
 
 -- |Return the current loop break statement(s)
-getLoopBreak :: Unbrancher [Placed Stmt]
-getLoopBreak = do
-    inf <- gets brLoopInfo
-    return $ maybe (shouldnt "break outside a loop") loopBreak inf
+getLoopBreak :: OptPos -> Unbrancher [Placed Stmt]
+getLoopBreak pos = do
+    mbInfo <- gets brLoopInfo
+    case mbInfo of
+        Just info -> return $ loopBreak info
+        Nothing   -> do
+            lift $ errmsg pos "Break outside of a loop"
+            return []
 
 
 -- |Return the current loop continuation (next) statement
-getLoopNext :: Unbrancher (Placed Stmt)
-getLoopNext = do
-    inf <- gets brLoopInfo
-    return $ maybe (shouldnt "next outside a loop") loopNext inf
+getLoopNext :: OptPos -> Unbrancher (Placed Stmt)
+getLoopNext pos = do
+    mbInfo <- gets brLoopInfo
+    case mbInfo of
+        Just info -> return $ loopNext info
+        Nothing   -> do
+            lift $ errmsg pos "Next outside of a loop"
+            return $ Unplaced Nop
 
 
 ----------------------------------------------------------------
@@ -465,14 +473,14 @@ unbranchStmt detism Nop _ stmts alt sense = do
 unbranchStmt detism Fail pos stmts alt sense = do
     logUnbranch "Unbranching a Fail"
     return [maybePlace Fail pos] -- no execution after Fail
-unbranchStmt _ Break _ _ _ _ = do
+unbranchStmt _ Break pos _ _ _ = do
     logUnbranch "Unbranching a Break"
-    brk <- getLoopBreak
+    brk <- getLoopBreak pos
     logUnbranch $ "Current break = " ++ showBody 4 brk
     return brk
-unbranchStmt _ Next _ _ _ _ = do
+unbranchStmt _ Next pos _ _ _ = do
     logUnbranch "Unbranching a Next"
-    nxt <- getLoopNext
+    nxt <- getLoopNext pos
     logUnbranch $ "Current next proc = " ++ showStmt 4 (content nxt)
     return [nxt]
 

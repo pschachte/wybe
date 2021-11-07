@@ -1,11 +1,11 @@
-pub constructors(?T) nil | cons(car: ?T, cdr:generic_list(?T))
+pub constructors(T) nil | cons(car: T, cdr:generic_list(T))
 
-pub def append(x:generic_list(?T), y:generic_list(?T)):generic_list(?T) =
+pub def append(x:generic_list(T), y:generic_list(T)):generic_list(T) =
     if {x = cons(?h, ?t):: cons(h, append(t,y))
        | else:: y
     }
 
-pub def length(x:generic_list(?T)) : int = length1(x, 0)
+pub def length(x:generic_list(T)) : int = length1(x, 0)
 
-def length1(x:generic_list(?T), acc:int) : int =
+def length1(x:generic_list(T), acc:int) : int =
     if {x = cons(?h, ?t):: length1(t, acc+1) | else:: acc}

@@ -62,8 +62,9 @@ module AST (
   ProcAnalysis(..), emptyProcAnalysis,
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, ResourceDef(..), FlowDirection(..),
-  argFlowTypeIsResource, argFlowDirection, argType, setArgType, argDescription, 
-  setParamType, paramIsResourceful, isResourcePrimParam, setPrimParamType, setTypeFlowType,
+  argFlowTypeIsResource, argFlowDirection, argType, setArgType, setPrimArgFlowType, 
+  argDescription, setParamType, paramIsResourceful, isResourcePrimParam, 
+  setPrimParamType, setTypeFlowType,
   flowsIn, flowsOut, primFlowToFlowDir,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, procCallToExp,
@@ -2267,10 +2268,10 @@ foldStmt' _   _   val Nop = val
 foldStmt' _   _   val Fail = val
 foldStmt' sfn efn val (Loop body _) = foldStmts sfn efn val body
 foldStmt' sfn efn val (UseResources _ _ body) = foldStmts sfn efn val body
-foldStmt' sfn efn val (For generators body) = foldStmts sfn efn
-                                                (foldExps sfn efn
-                                                  (foldExps sfn efn val $ List.map loopVar generators)
-                                                  $ List.map genExp generators) body
+foldStmt' sfn efn val (For generators body) = val3
+    where val1 = foldExps sfn efn val $ loopVar . content <$> generators
+          val2 = foldExps sfn efn val1 $ genExp . content <$> generators
+          val3 = foldStmts sfn efn val2 body
 foldStmt' _ _ val Break = val
 foldStmt' _   _   val Next = val
 
@@ -2687,7 +2688,7 @@ data Stmt
      | Loop [Placed Stmt] (Maybe VarDict)
      -- |A for loop has multiple generators, which is a variable-iterator pair
      -- and a list of statements in the body
-     | For [Generator] [Placed Stmt]
+     | For [Placed Generator] [Placed Stmt]
      -- |Immediately exit the enclosing loop; only valid in a loop
      | Break  -- holds the variable versions before the break
      -- |Immediately jump to the top of the enclosing loop; only valid in a loop
@@ -3017,16 +3018,19 @@ setArgType typ (ArgUnneeded u _) = ArgUnneeded u typ
 setArgType typ (ArgUndef _) = ArgUndef typ
 
 
+setPrimArgFlowType :: PrimArg -> ArgFlowType -> PrimArg
+setPrimArgFlowType arg@ArgVar{} ft = arg{argVarFlowType=ft}
+setPrimArgFlowType arg          _  = arg
+
+
+
 argDescription :: PrimArg -> String
 argDescription (ArgVar var _ flow ftype _) =
-    (case flow of
-          FlowIn -> "input "
-          FlowOut -> "output ") ++
     argFlowDescription flow
     ++ (case ftype of
           Ordinary       -> " variable " ++ primVarName var
           Resource rspec -> " resource " ++ show rspec
-          Free           -> " closure argument")
+          Free           -> " closure argument ")
 argDescription (ArgInt val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgFloat val _) = "constant argument '" ++ show val ++ "'"
 argDescription arg@ArgString{} = "constant argument " ++ show arg
@@ -3432,7 +3436,7 @@ showProcDef thisID
 instance Show TypeSpec where
   show AnyType              = "any"
   show InvalidType          = "XXX"
-  show (TypeVariable name)  = "?" ++ show name
+  show (TypeVariable name)  = show name
   show (Representation rep) = show rep
   show (TypeSpec optmod ident args) =
       maybeModPrefix optmod ++ ident ++ showArguments args
@@ -3594,7 +3598,8 @@ showStmt _ Fail = "fail"
 showStmt _ Nop = "pass"
 showStmt indent (For generators body) =
   "for "
-    ++ intercalate ", " [show var ++ " in " ++ show gen | (In var gen) <- generators]
+    ++ intercalate ", " [show var ++ " in " ++ show gen 
+                        | (In var gen) <- content <$> generators]
     ++ "{\n"
     ++ showBody (indent + 4) body
     ++ "\n}"

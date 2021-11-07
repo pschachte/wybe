@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls)
 0: alias_recursion1.<0>
-(#io##0:wybe.phantom, #?io##18:wybe.phantom):
+(%io##0:wybe.phantom, %?io##18:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#4##0:position.position)
@@ -22,30 +22,30 @@ AFTER EVERYTHING:
     foreign lpvm alloc(16:wybe.int, ?tmp#8##0:position.position)
     foreign lpvm mutate(~tmp#8##0:position.position, ?tmp#9##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, -200:wybe.int)
     foreign lpvm mutate(~tmp#9##0:position.position, ?tmp#1##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, -201:wybe.int)
-    wybe.string.print_string<0>("--- before proc call: ":wybe.string, ~#io##0:wybe.phantom, ?tmp#12##0:wybe.phantom) #22 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#12##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>("expect pa(100,101):":wybe.string, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #23 @io:nn:nn
-    position.printPosition<0>(tmp#0##0:position.position, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #4 @alias_recursion1:20:2
-    wybe.string.print_string<0>("expect pb(-200,-201):":wybe.string, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) #24 @io:nn:nn
-    position.printPosition<0>(tmp#1##0:position.position, ~#io##4:wybe.phantom, ?#io##5:wybe.phantom) #6 @alias_recursion1:22:2
+    wybe.string.print_string<0>("--- before proc call: ":wybe.string, ~%io##0:wybe.phantom, ?%tmp#12##0:wybe.phantom) #22 @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~%tmp#12##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("expect pa(100,101):":wybe.string, ~%io##1:wybe.phantom, ?%io##2:wybe.phantom) #23 @io:nn:nn
+    position.printPosition<0>(tmp#0##0:position.position, ~%io##2:wybe.phantom, ?%io##3:wybe.phantom) #4 @alias_recursion1:20:2
+    wybe.string.print_string<0>("expect pb(-200,-201):":wybe.string, ~%io##3:wybe.phantom, ?%io##4:wybe.phantom) #24 @io:nn:nn
+    position.printPosition<0>(tmp#1##0:position.position, ~%io##4:wybe.phantom, ?%io##5:wybe.phantom) #6 @alias_recursion1:22:2
     alias_recursion1.if_test<0>(tmp#0##0:position.position, tmp#1##0:position.position, ?r##0:position.position) #7 @alias_recursion1:24:1
-    wybe.string.print_string<0>("--- after calling if_test, pa and pb should be the same: ":wybe.string, ~#io##5:wybe.phantom, ?tmp#19##0:wybe.phantom) #25 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?#io##6:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>("expect pa(100,101):":wybe.string, ~#io##6:wybe.phantom, ?#io##7:wybe.phantom) #26 @io:nn:nn
-    position.printPosition<0>(tmp#0##0:position.position, ~#io##7:wybe.phantom, ?#io##8:wybe.phantom) #10 @alias_recursion1:28:2
-    wybe.string.print_string<0>("expect pb(-200,-201):":wybe.string, ~#io##8:wybe.phantom, ?#io##9:wybe.phantom) #27 @io:nn:nn
-    position.printPosition<0>(~tmp#1##0:position.position, ~#io##9:wybe.phantom, ?#io##10:wybe.phantom) #12 @alias_recursion1:30:2
-    wybe.string.print_string<0>("--- expected result to be same as pb: ":wybe.string, ~#io##10:wybe.phantom, ?tmp#26##0:wybe.phantom) #28 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#26##0:wybe.phantom, ?#io##11:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>("expect r(-200,-201):":wybe.string, ~#io##11:wybe.phantom, ?#io##12:wybe.phantom) #29 @io:nn:nn
-    position.printPosition<0>(r##0:position.position, ~#io##12:wybe.phantom, ?#io##13:wybe.phantom) #15 @alias_recursion1:34:2
-    wybe.string.print_string<0>("--- modify pa^x: ":wybe.string, ~#io##13:wybe.phantom, ?tmp#31##0:wybe.phantom) #30 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#31##0:wybe.phantom, ?#io##14:wybe.phantom) @io:nn:nn
-    foreign lpvm {noalias} mutate(~tmp#0##0:position.position, ?%pa##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, -1000:wybe.int)
-    wybe.string.print_string<0>("expect pa(-1000,101):":wybe.string, ~#io##14:wybe.phantom, ?#io##15:wybe.phantom) #31 @io:nn:nn
-    position.printPosition<0>(~pa##1:position.position, ~#io##15:wybe.phantom, ?#io##16:wybe.phantom) #19 @alias_recursion1:39:2
-    wybe.string.print_string<0>("expect r still (-200,-201):":wybe.string, ~#io##16:wybe.phantom, ?#io##17:wybe.phantom) #32 @io:nn:nn
-    position.printPosition<0>(~r##0:position.position, ~#io##17:wybe.phantom, ?#io##18:wybe.phantom) #21 @alias_recursion1:42:2
+    wybe.string.print_string<0>("--- after calling if_test, pa and pb should be the same: ":wybe.string, ~%io##5:wybe.phantom, ?%tmp#19##0:wybe.phantom) #25 @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~%tmp#19##0:wybe.phantom, ?%io##6:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("expect pa(100,101):":wybe.string, ~%io##6:wybe.phantom, ?%io##7:wybe.phantom) #26 @io:nn:nn
+    position.printPosition<0>(tmp#0##0:position.position, ~%io##7:wybe.phantom, ?%io##8:wybe.phantom) #10 @alias_recursion1:28:2
+    wybe.string.print_string<0>("expect pb(-200,-201):":wybe.string, ~%io##8:wybe.phantom, ?%io##9:wybe.phantom) #27 @io:nn:nn
+    position.printPosition<0>(~tmp#1##0:position.position, ~%io##9:wybe.phantom, ?%io##10:wybe.phantom) #12 @alias_recursion1:30:2
+    wybe.string.print_string<0>("--- expected result to be same as pb: ":wybe.string, ~%io##10:wybe.phantom, ?%tmp#26##0:wybe.phantom) #28 @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~%tmp#26##0:wybe.phantom, ?%io##11:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("expect r(-200,-201):":wybe.string, ~%io##11:wybe.phantom, ?%io##12:wybe.phantom) #29 @io:nn:nn
+    position.printPosition<0>(r##0:position.position, ~%io##12:wybe.phantom, ?%io##13:wybe.phantom) #15 @alias_recursion1:34:2
+    wybe.string.print_string<0>("--- modify pa^x: ":wybe.string, ~%io##13:wybe.phantom, ?%tmp#31##0:wybe.phantom) #30 @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~%tmp#31##0:wybe.phantom, ?%io##14:wybe.phantom) @io:nn:nn
+    foreign lpvm {noalias} mutate(~tmp#0##0:position.position, ?pa##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, -1000:wybe.int)
+    wybe.string.print_string<0>("expect pa(-1000,101):":wybe.string, ~%io##14:wybe.phantom, ?%io##15:wybe.phantom) #31 @io:nn:nn
+    position.printPosition<0>(~pa##1:position.position, ~%io##15:wybe.phantom, ?%io##16:wybe.phantom) #19 @alias_recursion1:39:2
+    wybe.string.print_string<0>("expect r still (-200,-201):":wybe.string, ~%io##16:wybe.phantom, ?%io##17:wybe.phantom) #32 @io:nn:nn
+    position.printPosition<0>(~r##0:position.position, ~%io##17:wybe.phantom, ?%io##18:wybe.phantom) #21 @alias_recursion1:42:2
 
 
 if_test > public (2 calls)
@@ -80,70 +80,70 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 declare external ccc  void @putchar(i8)    
 
 
-@alias_recursion1.46 =    constant {i64, i64} { i64 27, i64 ptrtoint ([?? x i8]* @alias_recursion1.45 to i64) }
+@"constant#alias_recursion1.46" =    constant {i64, i64} { i64 27, i64 ptrtoint ([?? x i8]* @"constant#alias_recursion1.45" to i64) }
 
 
-@alias_recursion1.45 =    constant [?? x i8] c"expect r still (-200,-201):\00"
+@"constant#alias_recursion1.45" =    constant [?? x i8] c"expect r still (-200,-201):\00"
 
 
-@alias_recursion1.44 =    constant {i64, i64} { i64 21, i64 ptrtoint ([?? x i8]* @alias_recursion1.43 to i64) }
+@"constant#alias_recursion1.44" =    constant {i64, i64} { i64 21, i64 ptrtoint ([?? x i8]* @"constant#alias_recursion1.43" to i64) }
 
 
-@alias_recursion1.43 =    constant [?? x i8] c"expect pa(-1000,101):\00"
+@"constant#alias_recursion1.43" =    constant [?? x i8] c"expect pa(-1000,101):\00"
 
 
-@alias_recursion1.34 =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @alias_recursion1.33 to i64) }
+@"constant#alias_recursion1.34" =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @"constant#alias_recursion1.33" to i64) }
 
 
-@alias_recursion1.33 =    constant [?? x i8] c"--- modify pa^x: \00"
+@"constant#alias_recursion1.33" =    constant [?? x i8] c"--- modify pa^x: \00"
 
 
-@alias_recursion1.32 =    constant {i64, i64} { i64 20, i64 ptrtoint ([?? x i8]* @alias_recursion1.31 to i64) }
+@"constant#alias_recursion1.32" =    constant {i64, i64} { i64 20, i64 ptrtoint ([?? x i8]* @"constant#alias_recursion1.31" to i64) }
 
 
-@alias_recursion1.31 =    constant [?? x i8] c"expect r(-200,-201):\00"
+@"constant#alias_recursion1.31" =    constant [?? x i8] c"expect r(-200,-201):\00"
 
 
-@alias_recursion1.30 =    constant {i64, i64} { i64 38, i64 ptrtoint ([?? x i8]* @alias_recursion1.29 to i64) }
+@"constant#alias_recursion1.30" =    constant {i64, i64} { i64 38, i64 ptrtoint ([?? x i8]* @"constant#alias_recursion1.29" to i64) }
 
 
-@alias_recursion1.29 =    constant [?? x i8] c"--- expected result to be same as pb: \00"
+@"constant#alias_recursion1.29" =    constant [?? x i8] c"--- expected result to be same as pb: \00"
 
 
-@alias_recursion1.28 =    constant {i64, i64} { i64 21, i64 ptrtoint ([?? x i8]* @alias_recursion1.27 to i64) }
+@"constant#alias_recursion1.28" =    constant {i64, i64} { i64 21, i64 ptrtoint ([?? x i8]* @"constant#alias_recursion1.27" to i64) }
 
 
-@alias_recursion1.27 =    constant [?? x i8] c"expect pb(-200,-201):\00"
+@"constant#alias_recursion1.27" =    constant [?? x i8] c"expect pb(-200,-201):\00"
 
 
-@alias_recursion1.26 =    constant {i64, i64} { i64 19, i64 ptrtoint ([?? x i8]* @alias_recursion1.25 to i64) }
+@"constant#alias_recursion1.26" =    constant {i64, i64} { i64 19, i64 ptrtoint ([?? x i8]* @"constant#alias_recursion1.25" to i64) }
 
 
-@alias_recursion1.25 =    constant [?? x i8] c"expect pa(100,101):\00"
+@"constant#alias_recursion1.25" =    constant [?? x i8] c"expect pa(100,101):\00"
 
 
-@alias_recursion1.24 =    constant {i64, i64} { i64 57, i64 ptrtoint ([?? x i8]* @alias_recursion1.23 to i64) }
+@"constant#alias_recursion1.24" =    constant {i64, i64} { i64 57, i64 ptrtoint ([?? x i8]* @"constant#alias_recursion1.23" to i64) }
 
 
-@alias_recursion1.23 =    constant [?? x i8] c"--- after calling if_test, pa and pb should be the same: \00"
+@"constant#alias_recursion1.23" =    constant [?? x i8] c"--- after calling if_test, pa and pb should be the same: \00"
 
 
-@alias_recursion1.22 =    constant {i64, i64} { i64 21, i64 ptrtoint ([?? x i8]* @alias_recursion1.21 to i64) }
+@"constant#alias_recursion1.22" =    constant {i64, i64} { i64 21, i64 ptrtoint ([?? x i8]* @"constant#alias_recursion1.21" to i64) }
 
 
-@alias_recursion1.21 =    constant [?? x i8] c"expect pb(-200,-201):\00"
+@"constant#alias_recursion1.21" =    constant [?? x i8] c"expect pb(-200,-201):\00"
 
 
-@alias_recursion1.20 =    constant {i64, i64} { i64 19, i64 ptrtoint ([?? x i8]* @alias_recursion1.19 to i64) }
+@"constant#alias_recursion1.20" =    constant {i64, i64} { i64 19, i64 ptrtoint ([?? x i8]* @"constant#alias_recursion1.19" to i64) }
 
 
-@alias_recursion1.19 =    constant [?? x i8] c"expect pa(100,101):\00"
+@"constant#alias_recursion1.19" =    constant [?? x i8] c"expect pa(100,101):\00"
 
 
-@alias_recursion1.18 =    constant {i64, i64} { i64 22, i64 ptrtoint ([?? x i8]* @alias_recursion1.17 to i64) }
+@"constant#alias_recursion1.18" =    constant {i64, i64} { i64 22, i64 ptrtoint ([?? x i8]* @"constant#alias_recursion1.17" to i64) }
 
 
-@alias_recursion1.17 =    constant [?? x i8] c"--- before proc call: \00"
+@"constant#alias_recursion1.17" =    constant [?? x i8] c"--- before proc call: \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -174,24 +174,24 @@ entry:
   %15 = inttoptr i64 %14 to i64* 
   %16 = getelementptr  i64, i64* %15, i64 0 
   store  i64 -201, i64* %16 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_recursion1.18, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#alias_recursion1.18", i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_recursion1.20, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#alias_recursion1.20", i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %3)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_recursion1.22, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#alias_recursion1.22", i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %11)  
   %"1#r##0" = tail call fastcc  i64  @"alias_recursion1.if_test<0>"(i64  %3, i64  %11)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_recursion1.24, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#alias_recursion1.24", i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_recursion1.26, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#alias_recursion1.26", i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %3)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_recursion1.28, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#alias_recursion1.28", i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %11)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_recursion1.30, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#alias_recursion1.30", i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_recursion1.32, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#alias_recursion1.32", i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %"1#r##0")  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_recursion1.34, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#alias_recursion1.34", i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   %35 = trunc i64 16 to i32  
   %36 = tail call ccc  i8*  @wybe_malloc(i32  %35)  
@@ -203,9 +203,9 @@ entry:
   %41 = inttoptr i64 %37 to i64* 
   %42 = getelementptr  i64, i64* %41, i64 0 
   store  i64 -1000, i64* %42 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_recursion1.44, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#alias_recursion1.44", i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %37)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_recursion1.46, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#alias_recursion1.46", i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %"1#r##0")  
   ret void 
 }
@@ -246,17 +246,17 @@ if.else:
 
 printPosition > public (0 calls)
 0: position.printPosition<0>
-printPosition(pos##0:position.position, #io##0:wybe.phantom, #?io##5:wybe.phantom):
+printPosition(pos##0:position.position, %io##0:wybe.phantom, %?io##5:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    wybe.string.print_string<0>(" (":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #7 @io:nn:nn
+    wybe.string.print_string<0>(" (":wybe.string, ~%io##0:wybe.phantom, ?%io##1:wybe.phantom) #7 @io:nn:nn
     foreign lpvm access(pos##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int)
-    foreign c print_int(~tmp#0##0:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>(",":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #8 @io:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~%io##1:wybe.phantom, ?%io##2:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(",":wybe.string, ~%io##2:wybe.phantom, ?%io##3:wybe.phantom) #8 @io:nn:nn
     foreign lpvm access(~pos##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int)
-    foreign c print_int(~tmp#1##0:wybe.int, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>(")":wybe.string, ~#io##4:wybe.phantom, ?tmp#14##0:wybe.phantom) #9 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#14##0:wybe.phantom, ?#io##5:wybe.phantom) @io:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~%io##3:wybe.phantom, ?%io##4:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(")":wybe.string, ~%io##4:wybe.phantom, ?%tmp#14##0:wybe.phantom) #9 @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~%tmp#14##0:wybe.phantom, ?%io##5:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 
@@ -275,22 +275,22 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 declare external ccc  void @print_int(i64)    
 
 
-@position.13 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.12 to i64) }
+@"constant#position.13" =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @"constant#position.12" to i64) }
 
 
-@position.12 =    constant [?? x i8] c")\00"
+@"constant#position.12" =    constant [?? x i8] c")\00"
 
 
-@position.7 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.6 to i64) }
+@"constant#position.7" =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @"constant#position.6" to i64) }
 
 
-@position.6 =    constant [?? x i8] c",\00"
+@"constant#position.6" =    constant [?? x i8] c",\00"
 
 
-@position.2 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @position.1 to i64) }
+@"constant#position.2" =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @"constant#position.1" to i64) }
 
 
-@position.1 =    constant [?? x i8] c" (\00"
+@"constant#position.1" =    constant [?? x i8] c" (\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -301,18 +301,18 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"position.printPosition<0>"(i64  %"pos##0")    {
 entry:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position.2, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#position.2", i32 0, i32 0) to i64))  
   %3 = inttoptr i64 %"pos##0" to i64* 
   %4 = getelementptr  i64, i64* %3, i64 0 
   %5 = load  i64, i64* %4 
   tail call ccc  void  @print_int(i64  %5)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position.7, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#position.7", i32 0, i32 0) to i64))  
   %8 = add   i64 %"pos##0", 8 
   %9 = inttoptr i64 %8 to i64* 
   %10 = getelementptr  i64, i64* %9, i64 0 
   %11 = load  i64, i64* %10 
   tail call ccc  void  @print_int(i64  %11)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position.13, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#position.13", i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }

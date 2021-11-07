@@ -25,32 +25,32 @@ AFTER EVERYTHING:
 
 printTree > public {inline} (0 calls)
 0: mytree.printTree<0>
-printTree(t##0:mytree.tree, #io##0:wybe.phantom, #?io##2:wybe.phantom):
+printTree(t##0:mytree.tree, %io##0:wybe.phantom, %?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    mytree.printTree1<0>(~t##0:mytree.tree, "{":wybe.string, ?%prefix##1:wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @mytree:nn:nn
-    wybe.string.print_string<0>("}":wybe.string, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #2 @io:nn:nn
+    mytree.printTree1<0>(~t##0:mytree.tree, "{":wybe.string, ?prefix##1:wybe.string, ~%io##0:wybe.phantom, ?%io##1:wybe.phantom) #0 @mytree:nn:nn
+    wybe.string.print_string<0>("}":wybe.string, ~%io##1:wybe.phantom, ?%io##2:wybe.phantom) #2 @io:nn:nn
 
 
 printTree1 > public (3 calls)
 0: mytree.printTree1<0>
-printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string, #io##0:wybe.phantom, #?io##4:wybe.phantom):
+printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string, %io##0:wybe.phantom, %?io##4:wybe.phantom):
  AliasPairs: [(prefix##0,prefix##3)]
  InterestingCallProperties: []
     foreign llvm icmp_ne(t##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool)
     case ~tmp#2##0:wybe.bool of
     0:
         foreign llvm move(~prefix##0:wybe.string, ?prefix##3:wybe.string)
-        foreign llvm move(~io##0:wybe.phantom, ?io##4:wybe.phantom)
+        foreign llvm move(~%io##0:wybe.phantom, ?%io##4:wybe.phantom)
 
     1:
         foreign lpvm access(t##0:mytree.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?l##0:mytree.tree)
         foreign lpvm access(t##0:mytree.tree, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?k##0:wybe.int)
         foreign lpvm access(~t##0:mytree.tree, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?r##0:mytree.tree)
-        mytree.printTree1<0>(~l##0:mytree.tree, ~%prefix##0:wybe.string, ?%prefix##1:wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #1 @mytree:nn:nn
-        wybe.string.print_string<0>(~prefix##1:wybe.string, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #5 @io:nn:nn
-        foreign c print_int(~k##0:wybe.int, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
-        mytree.printTree1<0>(~r##0:mytree.tree, ", ":wybe.string, ?%prefix##3:wybe.string, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) #4 @mytree:nn:nn
+        mytree.printTree1<0>(~l##0:mytree.tree, ~prefix##0:wybe.string, ?prefix##1:wybe.string, ~%io##0:wybe.phantom, ?%io##1:wybe.phantom) #1 @mytree:nn:nn
+        wybe.string.print_string<0>(~prefix##1:wybe.string, ~%io##1:wybe.phantom, ?%io##2:wybe.phantom) #5 @io:nn:nn
+        foreign c print_int(~k##0:wybe.int, ~%io##2:wybe.phantom, ?%io##3:wybe.phantom) @io:nn:nn
+        mytree.printTree1<0>(~r##0:mytree.tree, ", ":wybe.string, ?prefix##3:wybe.string, ~%io##3:wybe.phantom, ?%io##4:wybe.phantom) #4 @mytree:nn:nn
 
 
   LLVM code       :
@@ -64,25 +64,25 @@ printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string, #io#
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
-@mytree.4 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @mytree.3 to i64) }
+@"constant#mytree.4" =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @"constant#mytree.3" to i64) }
 
 
-@mytree.3 =    constant [?? x i8] c"}\00"
+@"constant#mytree.3" =    constant [?? x i8] c"}\00"
 
 
-@mytree.2 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @mytree.1 to i64) }
+@"constant#mytree.2" =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @"constant#mytree.1" to i64) }
 
 
-@mytree.1 =    constant [?? x i8] c"{\00"
+@"constant#mytree.1" =    constant [?? x i8] c"{\00"
 
 
 declare external ccc  void @print_int(i64)    
 
 
-@mytree.17 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @mytree.16 to i64) }
+@"constant#mytree.17" =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @"constant#mytree.16" to i64) }
 
 
-@mytree.16 =    constant [?? x i8] c", \00"
+@"constant#mytree.16" =    constant [?? x i8] c", \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -93,8 +93,8 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"mytree.printTree<0>"(i64  %"t##0")    {
 entry:
-  %"1#prefix##1" = tail call fastcc  i64  @"mytree.printTree1<0>"(i64  %"t##0", i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @mytree.2, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @mytree.4, i32 0, i32 0) to i64))  
+  %"1#prefix##1" = tail call fastcc  i64  @"mytree.printTree1<0>"(i64  %"t##0", i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#mytree.2", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#mytree.4", i32 0, i32 0) to i64))  
   ret void 
 }
 
@@ -118,7 +118,7 @@ if.then:
   %"2#prefix##1" = tail call fastcc  i64  @"mytree.printTree1<0>"(i64  %7, i64  %"prefix##0")  
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %"2#prefix##1")  
   tail call ccc  void  @print_int(i64  %11)  
-  %"2#prefix##3" = tail call fastcc  i64  @"mytree.printTree1<0>"(i64  %15, i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @mytree.17, i32 0, i32 0) to i64))  
+  %"2#prefix##3" = tail call fastcc  i64  @"mytree.printTree1<0>"(i64  %15, i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#mytree.17", i32 0, i32 0) to i64))  
   ret i64 %"2#prefix##3" 
 if.else:
   ret i64 %"prefix##0" 
