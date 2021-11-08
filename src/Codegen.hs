@@ -18,7 +18,6 @@ module Codegen (
   phi, br, cbr, getBlock, retNothing, fresh,
   -- * Symbol storage
   alloca, store, local, assign, load, getVar, localVar, preservingSymtab,
-  assignGlobalResourceParam,
   operandType, doAlloca, doLoad, 
   bitcast, cbitcast, inttoptr, cinttoptr, ptrtoint, cptrtoint,
   trunc, ctrunc, zext, czext, sext, csext,
@@ -462,17 +461,6 @@ assignGlobalResource res = do
             global <- getGlobalResource res ty
             store global op
 
-
-assignGlobalResourceParam :: PrimParam -> Codegen ()
-assignGlobalResourceParam param@(PrimParam _ _ _ (Resource res) _) = do 
-    resOps <- gets resourceOps
-    case Map.lookup res resOps of
-        Nothing -> return () -- shouldnt $ "assignGlobalResource of " ++ show res
-        Just (_, ty) -> do
-            global <- getGlobalResource res ty
-            (op, _) <- getVar (show $ argVarName $ primParamToArg param) Nothing
-            store global op
-assignGlobalResourceParam _ = return ()
 
 -- | Find and return the local operand by its given name from the symbol
 -- table. Only the first find will be returned so new names can shadow

@@ -210,7 +210,7 @@ translateProc modProtos proc = do
     let proto = procImplnProto $ procImpln proc
     let body = procImplnBody $ procImpln proc
     let isClosure = isJust $ maybeClosureOf $ procSuperproc proc
-    let globalRess = procResourceRefs proc
+    let globalRess = procGlobalResources proc
     let speczBodies = procImplnSpeczBodies $ procImpln proc
     -- translate the standard version
     (block, count') <- lift $ _translateProcImpl modProtos proto 
@@ -249,7 +249,8 @@ translateProc modProtos proc = do
 _translateProcImpl :: [PrimProto] -> PrimProto -> Bool -> Bool -> ProcBody
                    -> Word -> Compiler (ProcDefBlock, Word)
 _translateProcImpl modProtos proto isClosure globalRess body startCount = do
-    let (proto', body', globals) = closeProtoBody isClosure proto body 
+    let (proto', body') = if isClosure then closeClosure proto body
+                                       else (proto,body) 
     modspec <- getModuleSpec
     logBlocks $ "\n" ++ replicate 70 '=' ++ "\n"
     logBlocks $ "In Module: " ++ showModSpec modspec
@@ -258,7 +259,8 @@ _translateProcImpl modProtos proto isClosure globalRess body startCount = do
                 ++ "body: " ++ show body'
                 ++ "\n" ++ replicate 50 '-' ++ "\n"
     -- Codegen
-    codestate <- execCodegen startCount globalRess modProtos (doCodegenBody proto' body' globals)
+    codestate <- execCodegen startCount globalRess modProtos 
+                    (doCodegenBody proto' body')
     let pname = primProtoName proto
     logBlocks $ show $ externs codestate
     exs <- mapM declareExtern $ externs codestate
@@ -271,21 +273,19 @@ _translateProcImpl modProtos proto isClosure globalRess body startCount = do
     let endCount = Codegen.count codestate
     return (block, endCount)
 
--- | Updates a PrimProto and ProcBody as though the Closed Params are accessed
+-- | Updates a PrimProto and ProcBody as though the Free Params are accessed
 -- via the closure environment 
-closeProtoBody :: Bool -> PrimProto -> ProcBody -> (PrimProto, ProcBody,[PrimParam])
-closeProtoBody isClosure
-               proto@PrimProto{primProtoParams=params} 
+closeClosure :: PrimProto -> ProcBody -> (PrimProto, ProcBody)
+closeClosure proto@PrimProto{primProtoParams=params} 
                body@ProcBody{bodyPrims=prims} = do
-    if isClosure 
-    then (proto', body',globals') 
-    else (proto',body,globals')
+    (proto',body)
   where
     (free, trueParams) = List.partition ((==Free) . primParamFlowType) params
-    (globals,actualParams) = List.partition (paramInfoGlobalResource . primParamInfo) trueParams
-    proto' = proto{primProtoParams=actualParams ++ [envPrimParam | isClosure]}
-    globals' = [global | global <- globals, FlowOut == primParamFlow global]
-    neededFree = List.filter (not . paramInfoUnneeded . primParamInfo) free
+    actualParams = List.filter (not . paramInfoGlobalResource 
+                                    . primParamInfo) trueParams
+    proto' = proto{primProtoParams=actualParams ++ [envPrimParam]}
+    neededFree = List.filter (not . paramInfoUnneeded 
+                                  . primParamInfo) free
     unwrapper = Unplaced <$>
                 [ primAccess (ArgVar envParamName intType FlowIn Free False)
                              (ArgInt (i * toInteger wordSizeBytes) intType)
@@ -364,8 +364,8 @@ paramNeeded = not . paramInfoUnneeded . primParamInfo
 -- need some module level extern declarations and global constants which are
 -- pulled and recorded, to be defined later when the whole module is built.
 -- | Generate LLVM instructions for a procedure.
-doCodegenBody :: PrimProto -> ProcBody -> [PrimParam] -> Codegen ()
-doCodegenBody proto body outGlobals =
+doCodegenBody :: PrimProto -> ProcBody -> Codegen ()
+doCodegenBody proto body =
     do entry <- addBlock entryBlockName
        -- Start with creation of blocks and adding instructions to it
        setBlock entry
@@ -373,7 +373,7 @@ doCodegenBody proto body outGlobals =
        let (ins,outs) = List.partition ((== FlowIn) . primParamFlow) params
        mapM_ assignParam ins
        mapM_ preassignOutput outs
-       codegenBody proto body outGlobals  -- Codegen on body prims
+       codegenBody proto body  -- Codegen on body prims
 
 
 -- XXX not using
@@ -476,8 +476,8 @@ structUnPack st tys = do
 
 -- | Generate basic blocks for a procedure body. The first block is named
 -- 'entry' by default. All parameters go on the symbol table (output too).
-codegenBody :: PrimProto -> ProcBody -> [PrimParam] -> Codegen ()
-codegenBody proto body outGlobals = do 
+codegenBody :: PrimProto -> ProcBody -> Codegen ()
+codegenBody proto body = do 
     let ps = List.map content (bodyPrims body)
     -- Filter out prims which contain only phantom arguments
     mapM_ cgen ps
@@ -485,10 +485,9 @@ codegenBody proto body outGlobals = do
     case bodyFork body of
         NoFork -> do 
             retOp <- buildOutputOp params
-            mapM_ assignGlobalResourceParam outGlobals 
             ret retOp
             return ()
-        (PrimFork var ty _ fbody) -> codegenForkBody var fbody proto outGlobals
+        (PrimFork var ty _ fbody) -> codegenForkBody var fbody proto
 
 
 -- | Predicate to check whether a Prim is a phantom prim i.e Contains only
@@ -503,10 +502,10 @@ codegenBody proto body outGlobals = do
 -- | Code generation for a conditional branch. Currently a binary split
 -- is handled, which each branch returning the left value of their last
 -- instruction.
-codegenForkBody :: PrimVarName -> [ProcBody] -> PrimProto -> [PrimParam] -> Codegen ()
+codegenForkBody :: PrimVarName -> [ProcBody] -> PrimProto -> Codegen ()
 -- XXX Revise this to handle forks with more than two branches using
 --     computed gotos
-codegenForkBody var (b1:b2:[]) proto outGlobals =
+codegenForkBody var (b1:b2:[]) proto =
     do ifthen <- addBlock "if.then"
        ifelse <- addBlock "if.else"
        testop <- fst <$> getVar (show var) Nothing
@@ -516,17 +515,17 @@ codegenForkBody var (b1:b2:[]) proto outGlobals =
        -- if.then
        preservingSymtab $ do
            setBlock ifthen
-           codegenBody proto b2 outGlobals
+           codegenBody proto b2
 
        -- if.else
        preservingSymtab $ do
            setBlock ifelse
-           codegenBody proto b1 outGlobals
+           codegenBody proto b1
 
        -- -- if.exit
        -- setBlock ifexit
        -- phi int_t [(trueval, ifthen), (falseval, ifelse)]
-codegenForkBody var _ _ _ =
+codegenForkBody var _ _ =
     nyi $ "Fork on non-Boolean variable " ++ show var
 
 

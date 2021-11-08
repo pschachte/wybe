@@ -472,7 +472,7 @@ argExpandedPrim call@(PrimHigherCall id fn args) = do
             return $ PrimHigherCall id fn' args'
     case fn' of
         ArgProcRef ps as _-> do        
-            needsGlobalRess <- lift $ procResourceRefs <$> getProcDef ps
+            needsGlobalRess <- lift $ procGlobalResources <$> getProcDef ps
             if needsGlobalRess
             then expandAsHigher fn'
             else

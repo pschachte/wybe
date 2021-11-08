@@ -1855,8 +1855,8 @@ data ProcDef = ProcDef {
                                 -- XXX We never actually use this map, we just
                                 -- add up the call counts, so we might as well
                                 -- keep just a count
-    procResourceRefs::Bool,     -- Does this procedure expect resources as
-                                -- global references?
+    procGlobalResources::Bool,  -- Does this procedure expect resources as
+                                -- global variables?
     procVis :: Visibility,      -- ^what modules should be able to see this?
     procDetism :: Determinism,  -- ^can this proc fail?
     procInlining :: Inlining,   -- ^should we inline calls to this proc?

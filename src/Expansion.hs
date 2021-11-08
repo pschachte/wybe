@@ -38,27 +38,23 @@ procExpansion pspec def = do
     logMsg Expansion $ "    initial body: " ++ show (procImpln def)
     let tmp = procTmpCount def
     let (ins,outs) = inputOutputParams proto
-    let st = initExpanderState $ procCallSiteCount def
-    (st', tmp', used, body') <- buildBody tmp (Map.fromSet id outs) $
-                        execStateT (expandBody body) st
     isClosure <- isClosureProc pspec
     let params = primProtoParams proto
-    -- we may need to use global resources if we have resourceful higher order parameters
-    let needsGlobalRess = isClosure || any (isResourcefulHigherOrder . primParamType) params
+    let needsGlobalRess = needsGlobalResources isClosure params
+    let st = initExpanderState (procCallSiteCount def) needsGlobalRess
+    (st', tmp', used, body') <- buildBody tmp (Map.fromSet id outs)
+                                  $ execStateT (expandBody body) st
     let params' = markGlobalResource needsGlobalRess
                 . markParamNeededness isClosure used ins
                <$> params
-    -- if we never use a resourceful higher order parameter, we dont need globals
-    -- unless we have a closure
-    let needsGlobalRess' = any (((not . paramInfoUnneeded) &&& paramInfoGlobalResource) 
-                                  . primParamInfo) params' || isClosure
+    let needsGlobalRess' = needsGlobalResources isClosure params'
     let params'' = markGlobalResource needsGlobalRess' <$> params'
     let proto' = proto {primProtoParams = params''}
     let impln' = impln{ procImplnProto = proto', procImplnBody = body' }
     let def' = def { procImpln = impln',
                      procTmpCount = tmp',
                      procCallSiteCount = nextCallSiteID st',
-                     procResourceRefs = needsGlobalRess' }
+                     procGlobalResources = needsGlobalRess' }
     if def /= def'
         then
         logMsg Expansion
@@ -71,6 +67,20 @@ procExpansion pspec def = do
     return def'
 
 
+-- | Do we need global resources, given we may have a closure and these params?
+needsGlobalResources :: Bool -> [PrimParam] -> Bool
+needsGlobalResources isClosure params = 
+    let neededParams = List.filter (not . paramInfoUnneeded . primParamInfo) params
+        -- need globals if we have a *needed* resourceful higher-order parameter
+        hasResfulHigherOrder = 
+          any (isResourcefulHigherOrder . primParamType) neededParams
+        -- only need global resources if we have any resources to begin with
+        hasResource = 
+          any (argFlowTypeIsResource . primParamFlowType) neededParams
+        -- closures always need global resources, if we have resources 
+    in (isClosure || hasResfulHigherOrder) && hasResource 
+
+
 -- |Update the param to indicate whether the param is actually needed based
 -- on the set of variables used in the prod body and the set of input var
 -- names.  We consider outputs to be unneeded if they're identical to inputs.
@@ -81,14 +91,14 @@ markParamNeededness isClosure used _ param@PrimParam{primParamName=nm,
                                                      primParamFlowType=ft,
                                                      primParamInfo=info} =
     param {primParamInfo=info{paramInfoUnneeded=Set.notMember nm used
-                                                && (not isClosure 
+                                                && (not isClosure
                                                     || ft /= Ordinary)}}
 markParamNeededness isClosure _ ins param@PrimParam{primParamName=nm,
                                                     primParamFlow=FlowOut,
                                                     primParamFlowType=ft,
                                                     primParamInfo=info} =
     param {primParamInfo=info{paramInfoUnneeded=Set.member nm ins
-                                                && (not isClosure 
+                                                && (not isClosure
                                                     || ft /= Ordinary)}}
 
 markGlobalResource :: Bool -> PrimParam -> PrimParam
@@ -96,7 +106,7 @@ markGlobalResource asGlobal param@PrimParam{primParamFlowType=Resource _} =
     param {primParamInfo=(primParamInfo param) {paramInfoGlobalResource = asGlobal}}
 markGlobalResource _ param =
     param {primParamInfo=(primParamInfo param) {paramInfoGlobalResource = False}}
-    
+
 
 -- |Type to remember the variable renamings.
 type Renaming = Map PrimVarName PrimArg
@@ -119,12 +129,13 @@ identityRenaming = Map.empty
 ----------------------------------------------------------------
 
 data ExpanderState = Expander {
-    inlining       :: Bool,      -- ^Whether we are currently inlining (and
-                                 --  therefore should not inline calls)
-    renaming       :: Renaming,  -- ^The current variable renaming
-    writeNaming    :: Renaming,  -- ^Renaming for new assignments
-    noFork         :: Bool,      -- ^There's no fork at the end of this body
-    nextCallSiteID :: CallSiteID -- ^The next callSiteID to use
+    inlining        :: Bool,       -- ^Whether we are currently inlining (and
+                                   --  therefore should not inline calls)
+    renaming        :: Renaming,   -- ^The current variable renaming
+    writeNaming     :: Renaming,   -- ^Renaming for new assignments
+    noFork          :: Bool,       -- ^There's no fork at the end of this body
+    nextCallSiteID  :: CallSiteID, -- ^The next callSiteID to use
+    globalResources :: Bool
     }
 
 
@@ -175,9 +186,9 @@ addInstr prim pos = do
 
 
 -- init a expander state based on the given call site count
-initExpanderState :: CallSiteID -> ExpanderState
-initExpanderState callSiteCount =
-    Expander False identityRenaming identityRenaming True callSiteCount
+initExpanderState :: CallSiteID -> Bool -> ExpanderState
+initExpanderState callSiteCount globalRess =
+    Expander False identityRenaming identityRenaming True callSiteCount globalRess
 
 
 ----------------------------------------------------------------
@@ -243,45 +254,46 @@ expandPrim (PrimCall id pspec args) pos = do
     logExpansion $ "  Expand call " ++ show call'
     inliningNow <- gets inlining
     if inliningNow
-      then do
-        logExpansion $ "  Cannot inline:  already inlining"
+    then do
+        logExpansion "  Cannot inline:  already inlining"
         addInstr call' pos
-      else do
+    else do
         def <- lift $ lift $ getProcDef pspec
+        globalCheck <- gets ((procGlobalResources def ==) . globalResources)
         case procImpln def of
-          ProcDefSrc _ -> shouldnt $ "uncompiled proc: " ++ show pspec
-          ProcDefPrim{procImplnProto = proto, procImplnBody = body} ->
-            if procInline def
-              then inlineCall proto args' body pos
-              else do
-                -- inlinableLast <- gets (((final && singleCaller def
-                --                          && procVis def == Private) &&)
-                --                        . noFork)
-                let inlinableLast = False
-                if inlinableLast
-                  then do
-                    logExpansion "  Inlining tail call to branching proc"
-                    inlineCall proto args' body pos
-                  else do
-                    logExpansion "  Not inlinable"
-                    addInstr call' pos
+            ProcDefSrc _ -> shouldnt $ "uncompiled proc: " ++ show pspec
+            ProcDefPrim{procImplnProto = proto, procImplnBody = body} ->
+                if procInline def && globalCheck
+                then inlineCall proto args' body pos
+                else do
+                    -- inlinableLast <- gets (((final && singleCaller def
+                    --                          && procVis def == Private) &&)
+                    --                        . noFork)
+                    let inlinableLast = False
+                    if inlinableLast && globalCheck
+                    then do
+                        logExpansion "  Inlining tail call to branching proc"
+                        inlineCall proto args' body pos
+                    else do
+                        logExpansion "  Not inlinable"
+                        addInstr call' pos
 expandPrim call@(PrimHigherCall id fn args) pos = do
     logExpansion $ "  Expand higher call " ++ show call
     fn' <- expandArg fn
     let expandAsHigher fn' = do
             logExpansion "  As higher call"
             args' <- mapM expandArg args
-            addInstr (PrimHigherCall id fn' args') pos 
+            addInstr (PrimHigherCall id fn' args') pos
     case fn' of
-        ArgProcRef ps as _-> do              
-            needsGlobalRess <- lift $ lift $ procResourceRefs <$> getProcDef ps
+        ArgProcRef ps as _-> do
+            needsGlobalRess <- lift $ lift $ procGlobalResources <$> getProcDef ps
             if needsGlobalRess
             then expandAsHigher fn'
             -- then return ()
             else do
                 let expander = flip . (execStateT .) . flip expandPrim
                 st <- get
-                put =<< lift (translateFromClosure Nothing call (`expander` st)) 
+                put =<< lift (translateFromClosure Nothing call (`expander` st))
         _ -> expandAsHigher fn'
 expandPrim (PrimForeign lang nm flags args) pos = do
     st <- get
@@ -321,7 +333,7 @@ expandArg arg@(ArgVar var ty flow ft _) = do
     then case flow of
         FlowOut -> freshVar var ty ft
         FlowIn ->
-            setArgType ty . (`setPrimArgFlowType` ft) 
+            setArgType ty . (`setPrimArgFlowType` ft)
             <$> gets (Map.findWithDefault arg var . renaming)
             -- (shouldnt $ "inlining: reference to unassigned variable "
             --  ++ show var)
