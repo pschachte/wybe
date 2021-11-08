@@ -45,6 +45,7 @@ import qualified LLVM.AST.IntegerPredicate       as IP
 import           LLVM.AST.Operand                hiding (PointerType)
 import           LLVM.AST.Type
 import           LLVM.AST.Typed
+import           LLVM.Pretty                     (ppllvm)
 
 import qualified Data.ByteString                 as BS
 import qualified Data.ByteString.Char8           as B8
@@ -551,7 +552,7 @@ cgen prim@(PrimCall callSiteID pspec args) = do
     let params = primProtoParams proto
     logCodegen $ "Proto = " ++ show proto
     
-    (filteredArgs,asRef) <- filterUnneededArgs proto args
+    (filteredArgs,globals) <- filterUnneededArgs proto args
     logCodegen $ "Filtered args = " ++ show filteredArgs
 
     -- if the call is to an external module, declare it
@@ -565,6 +566,13 @@ cgen prim@(PrimCall callSiteID pspec args) = do
 
     inops <- mapM cgenArg inArgs
     logCodegen $ "Translated inputs = " ++ show inops
+
+    let (inGlobals, outGlobals) = Set.partition (flowsIn . resourceFlowFlow) globals
+    mapM_ (assignGlobalResource . resourceFlowRes) inGlobals
+    let outRes = Set.map resourceFlowRes outGlobals
+    let inRes = Set.map resourceFlowRes inGlobals
+
+    let outGlobals' = outRes `Set.union` Set.filter (`Set.notMember` outRes) inRes
     
     logCodegen $ "Out Type = " ++ show outTy
     let ins =
@@ -573,6 +581,7 @@ cgen prim@(PrimCall callSiteID pspec args) = do
           inops
     logCodegen $ "Translated ins = " ++ show ins
     addInstruction ins outArgs
+    mapM_ assignFromGlobalResource outGlobals'
 
 cgen prim@(PrimHigherCall callSiteId var args) = do
     logCodegen $ "Compiling " ++ show prim
@@ -711,14 +720,24 @@ findProto (ProcSpec _ nm i _) = do
 -- | Match PrimArgs with the paramaters in the given prototype. If a PrimArg's
 -- counterpart in the prototype is unneeded, filtered out. Positional matching
 -- is used for this.
-filterUnneededArgs :: PrimProto -> [PrimArg] -> Codegen ([PrimArg], [PrimArg])
+filterUnneededArgs :: PrimProto -> [PrimArg] 
+                   -> Codegen ([PrimArg], Set.Set ResourceFlowSpec)
 filterUnneededArgs proto args = do
     needed <- argsNeeded realArgs params
-    return (needed, globalsArgs)
+    let neededGlobals = List.filter (isNeeded . snd)
+                      $ zip (List.drop nReal allParams) globalsArgs 
+    realGlobals <- filterM (lift . paramIsReal . fst) neededGlobals
+    let resFlows = (\(PrimParam _ _ fl (Resource res) _,_) -> ResourceFlowSpec res $ primFlowToFlowDir fl)
+               <$> realGlobals
+    return (needed, Set.fromList resFlows)
   where
+    allParams = primProtoParams proto
     (globals, params) = List.partition (paramInfoGlobalResource . primParamInfo)
-                        (primProtoParams proto)
-    (realArgs, globalsArgs) = List.splitAt (length params) args
+                        allParams
+    nReal = length params
+    (realArgs, globalsArgs) = List.splitAt nReal args
+    isNeeded (ArgUnneeded _ _) = False
+    isNeeded _                 = True
 
 argsNeeded :: [PrimArg] -> [PrimParam] -> Codegen [PrimArg]
 argsNeeded [] []       = return []
@@ -1160,12 +1179,12 @@ neededFreeArgs pspec args = lift $ do
               . procImplnProto . procImpln <$> getProcDef pspec
     List.map snd <$> filterM (paramIsReal . fst) (zip params args)
 
+
 addExternProcRef :: ProcSpec -> Codegen ()
 addExternProcRef ps@(ProcSpec mod _ _ _) = do
     args <- (primParamToArg <$>) <$> primActualParams ps
-    thisMod <- lift getModuleSpec
-    fileMod <- lift $ getModule modRootModSpec
-    unless (thisMod == mod || maybe False (`List.isPrefixOf` mod) fileMod)
+    ifCurrentModuleElse mod 
+        (return ())
         (addExtern $ PrimCall 0 ps args)
 
 

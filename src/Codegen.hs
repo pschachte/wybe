@@ -18,6 +18,7 @@ module Codegen (
   phi, br, cbr, getBlock, retNothing, fresh,
   -- * Symbol storage
   alloca, store, local, assign, load, getVar, localVar, preservingSymtab,
+  assignGlobalResource, assignFromGlobalResource,
   operandType, doAlloca, doLoad, 
   bitcast, cbitcast, inttoptr, cinttoptr, ptrtoint, cptrtoint,
   trunc, ctrunc, zext, czext, sext, csext,
@@ -50,6 +51,7 @@ import           Data.Word
 
 import           Control.Applicative
 import           Control.Monad.Except
+import           Control.Monad.Extra             (whenM)
 import           Control.Monad.State
 
 import           LLVM.AST
@@ -64,14 +66,7 @@ import qualified LLVM.AST.Constant               as C
 import qualified LLVM.AST.FloatingPointPredicate as FP
 import qualified LLVM.AST.IntegerPredicate       as IP
 
-import           AST                             (Compiler, Prim, PrimProto,
-                                                  PrimArg(..), ArgFlowType(..),
-                                                  TypeRepresentation, ResourceSpec(..),
-                                                  getModuleSpec, logMsg,
-                                                  shouldnt, specialName2,
-                                                  makeGlobalResourceName,
-                                                  makeGlobalConstantName,
-                                                  showModSpec, PrimParam(..), primParamToArg, setPrimArgFlowType)
+import           AST                             hiding (Stmt(..))
 import           LLVM.Context
 import           LLVM.Module
 import           Options                         (LogSelection (Blocks,Codegen))
@@ -134,7 +129,11 @@ float_c n   = error $ "Invalid floating point width " ++ show n
 ----------------------------------------------------------------------------
 -- | 'SymbolTable' is a simple mapping of scope variable names and their
 -- representation as an LLVM.AST.Operand.Operand.
-type SymbolTable = Map.Map String (Operand,TypeRepresentation)
+data SymbolTable = SymbolTable {
+                     ordinary :: Map.Map String (Operand,TypeRepresentation),
+                     resource :: Map.Map ResourceSpec (Operand,Type,String,TypeRepresentation)
+                   }
+    deriving (Eq, Ord, Show)
 
 
 -- | A Map of all the assigned names to assist in supplying new unique names.
@@ -156,9 +155,6 @@ data CodegenState
       , globalVars   :: [Global] -- ^ Needed global variables/constants
       , resources    :: Map.Map ResourceSpec Global
                                  -- ^ Needed global variables for resources
-      , resourceOps  :: Map.Map ResourceSpec (Operand,Type) 
-                                 -- ^ Record of the latest reference to a
-                                 -- we have seen
       , globalResources :: Bool     -- ^ Are we treating resources as 
                                  -- global references?
       , modProtos    :: [PrimProto] 
@@ -241,11 +237,15 @@ getGlobalResource spec@(ResourceSpec mod nm) ty = do
     ress <- gets resources
     nm <- case Map.lookup spec ress of
             Nothing -> do
+                init <- ifCurrentModuleElse mod 
+                            (return $ Just $ C.Undef ty)
+                            (return Nothing)
                 let ref = Name $ fromString $ makeGlobalResourceName $ show spec 
                 let global =  globalVariableDefaults { name = ref
                                                      , isConstant = False
                                                      , G.type' = ty
-                                                     , initializer = Just $ C.Undef ty }
+                                                     , initializer = init
+                                                     }
                 modify $ \s -> s { resources = Map.insert spec global ress }
                 return ref
             Just ref -> return $ G.name ref
@@ -273,15 +273,15 @@ globalDefine isForeign rettype label argtypes body
                                False)
                , returnType = rettype
                , basicBlocks = body
-               , section = fmap fromString $ functionDefSection label
+               , section = fromString <$> functionDefSection label
                }
 
 
 -- | create a global declaration of an external function for the specified
 -- calling convention
-external :: CC.CallingConvention -> Type -> String -> [(Type, Name)]
-         -> Definition
-external cconv rettype label argtypes
+externalFunction :: CC.CallingConvention -> Type -> String -> [(Type, Name)]
+                 -> Definition
+externalFunction cconv rettype label argtypes
     = GlobalDefinition $ functionDefaults {
         G.callingConvention = cconv
       , name = Name $ fromString label
@@ -293,12 +293,12 @@ external cconv rettype label argtypes
 
 -- | 'externalC' creates a global declaration of an external C function
 externalC :: Type -> String -> [(Type, Name)] -> Definition
-externalC = external CC.C
+externalC = externalFunction CC.C
 
 
 -- | 'externalC' creates a global declaration of an external C function
 externalWybe :: Type -> String -> [(Type, Name)] -> Definition
-externalWybe = external CC.Fast
+externalWybe = externalFunction CC.Fast
 
 
 ----------------------------------------------------------------------------
@@ -322,13 +322,12 @@ emptyCodegen startCount =
   CodegenState
     (Name $ fromString entryBlockName)
     Map.empty
-    Map.empty
+    (SymbolTable Map.empty Map.empty)
     1
     startCount
     Map.empty
     []
     []
-    Map.empty
     Map.empty
 
 -- | 'addBlock' creates and adds a new block to the current blocks
@@ -434,32 +433,44 @@ globalVar t s = C.GlobalReference t $ LLVMAST.Name $ fromString s
 assign :: String -> Operand -> TypeRepresentation -> PrimArg -> Type -> Codegen ()
 assign var op trep arg ty = do
     logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show op ++ ":" ++ show trep
-    
-    let regular = modify $ \s -> s { symtab = Map.insert var (op,trep) $ symtab s }
-    globalRess <- gets globalResources
-    case (arg,globalRess) of
-        (ArgVar _ _ _ (Resource res) _,True) -> do
-            when globalRess 
-             $ do
-                global <- getGlobalResource res ty
-                store global op 
-                modify $ \s -> s{resourceOps=Map.insert res (op,ty) $ resourceOps s}
-            regular
-        _ -> regular
-    -- recordResource arg op ty
+    case arg of
+        ArgVar _ _ _ (Resource res) _ -> do
+            updateSymbolTable var op trep $ Just (res,ty)
+            whenM (gets globalResources) $ assignGlobalResource res
+        _ -> updateSymbolTable var op trep Nothing
 
--- recordResource :: PrimArg -> Operand -> Type -> Codegen ()
--- recordResource arg op ty = do
 
-    
+updateSymbolTable :: String -> Operand -> TypeRepresentation 
+                  -> Maybe (ResourceSpec, Type) -> Codegen ()
+updateSymbolTable var op trep mbResTy = do
+    st@SymbolTable{ordinary=ord, resource=ress} <- gets symtab 
+    let ress' = 
+          case mbResTy of
+              Just (res, ty) -> Map.insert res (op, ty, var, trep) ress
+              Nothing -> ress
+    modify $ \s -> s { symtab = st{ordinary = Map.insert var (op,trep) ord,
+                                   resource = ress' } }
+
+  
 assignGlobalResource :: ResourceSpec -> Codegen ()
 assignGlobalResource res = do
-    resOps <- gets resourceOps
+    resOps <- gets (resource . symtab)
     case Map.lookup res resOps of
-        Nothing -> return () -- shouldnt $ "assignGlobalResource of " ++ show res
-        Just (op, ty) -> do
+        Nothing -> return ()
+        Just (op, ty, _, _) -> do
             global <- getGlobalResource res ty
             store global op
+
+assignFromGlobalResource :: ResourceSpec -> Codegen ()
+assignFromGlobalResource res = do
+    resOps <- gets (resource . symtab)
+    case Map.lookup res resOps of
+        Nothing -> return ()
+        Just (op, ty, nm, trep) -> do
+            global <- getGlobalResource res ty
+            store global op
+            op' <- doLoad ty global
+            assign nm op' trep (ArgUndef AnyType) ty 
 
 
 -- | Find and return the local operand by its given name from the symbol
@@ -475,8 +486,16 @@ getVar var mbArg = do
             global <- getGlobalResource res ty
             op <- doLoad ty global
             return (op, trep) 
+        (Just (ArgVar _ _ _ (Resource res) _, ty, trep),_) -> do
+            lcls <- gets (ordinary . symtab)
+            case Map.lookup var lcls of
+                Just ret -> return ret
+                Nothing -> do
+                    global <- getGlobalResource res ty
+                    op <- doLoad ty global
+                    return (op, trep)
         _ -> do
-            lcls <- gets symtab
+            lcls <- gets (ordinary . symtab)
             return $ fromMaybe err $ Map.lookup var lcls
 
 
@@ -487,9 +506,8 @@ getVar var mbArg = do
 preservingSymtab :: Codegen a -> Codegen a
 preservingSymtab code = do
     oldSymtab <- gets symtab
-    resOps <- gets resourceOps
     result <- code
-    modify $ \s -> s { symtab = oldSymtab, resourceOps = resOps }
+    modify $ \s -> s { symtab = oldSymtab }
     return result
 
 
