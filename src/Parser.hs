@@ -1165,7 +1165,7 @@ data Term
         callName::ProcName,               -- ^the called proc or variable name
         callVariableFlow::FlowDirection,  -- ^variable flow direction or
                                           --  call resourcefulness
-        callArguments::[Term]         -- ^the specified arguments
+        callArguments::[Term]             -- ^the specified arguments
     }
     -- |a foreign call, either as an expression or statement.
     | Foreign {
@@ -1173,7 +1173,7 @@ data Term
         foreignLanguage::Ident,        -- ^the specified foreign language
         foreignInstruction::ProcName,  -- ^the specified instruction
         foreignFlags::[Ident],         -- ^the specified modifiers
-        foreignArguments::[Term]   -- ^the specified arguments
+        foreignArguments::[Term]       -- ^the specified arguments
     }
     -- |an integer manifest constant
     | IntConst {intPos::SourcePos, intConstValue::Integer}
