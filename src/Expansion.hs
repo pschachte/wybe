@@ -18,6 +18,7 @@ import           AST
 import           Util
 import           BodyBuilder
 import           Control.Monad
+import           Control.Monad.Extra       (ifM)
 import           Control.Monad.Trans       (lift)
 import           Control.Monad.Trans.State
 import           Data.List                 as List
@@ -40,21 +41,27 @@ procExpansion pspec def = do
     let (ins,outs) = inputOutputParams proto
     isClosure <- isClosureProc pspec
     let params = primProtoParams proto
-    let needsGlobalRess = needsGlobalResources isClosure params
-    let st = initExpanderState (procCallSiteCount def) needsGlobalRess
+    let resourceLevel = inferResourceLevelBody body
+    let st = initExpanderState (procCallSiteCount def) resourceLevel
     (st', tmp', used, body') <- buildBody tmp (Map.fromSet id outs)
                                   $ execStateT (expandBody body) st
+    let needsGlobalRess = needsGlobalResources isClosure params
     let params' = markGlobalResource needsGlobalRess
                 . markParamNeededness isClosure used ins
                <$> params
     let needsGlobalRess' = needsGlobalResources isClosure params'
+    let resourceLevel' = max resourceLevel
+                       $ if needsGlobalRess' 
+                         then GlobalResources 
+                         else FlattenedResources
+                             
     let params'' = markGlobalResource needsGlobalRess' <$> params'
     let proto' = proto {primProtoParams = params''}
     let impln' = impln{ procImplnProto = proto', procImplnBody = body' }
     let def' = def { procImpln = impln',
                      procTmpCount = tmp',
                      procCallSiteCount = nextCallSiteID st',
-                     procGlobalResources = needsGlobalRess' }
+                     procResourceLevel = resourceLevel' }
     if def /= def'
         then
         logMsg Expansion
@@ -69,16 +76,16 @@ procExpansion pspec def = do
 
 -- | Do we need global resources, given we may have a closure and these params?
 needsGlobalResources :: Bool -> [PrimParam] -> Bool
-needsGlobalResources isClosure params = 
+needsGlobalResources isClosure params =
     let neededParams = List.filter (not . paramInfoUnneeded . primParamInfo) params
         -- need globals if we have a *needed* resourceful higher-order parameter
-        hasResfulHigherOrder = 
+        hasResfulHigherOrder =
           any (isResourcefulHigherOrder . primParamType) neededParams
         -- only need global resources if we have any resources to begin with
-        hasResource = 
+        hasResource =
           any (argFlowTypeIsResource . primParamFlowType) neededParams
         -- closures always need global resources, if we have resources 
-    in (isClosure || hasResfulHigherOrder) && hasResource 
+    in (isClosure || hasResfulHigherOrder) && hasResource
 
 
 -- |Update the param to indicate whether the param is actually needed based
@@ -117,6 +124,23 @@ identityRenaming :: Renaming
 identityRenaming = Map.empty
 
 
+inferResourceLevelBody :: ProcBody -> ResourceLevel
+inferResourceLevelBody (ProcBody [] fork) = inferResourceLevelFork fork
+inferResourceLevelBody (ProcBody prims fork)
+    = max (maximum $ inferResourceLevelPrim . content <$> prims)
+          (inferResourceLevelFork fork)
+
+inferResourceLevelFork :: PrimFork -> ResourceLevel
+inferResourceLevelFork (PrimFork _ _ _ body@(_:_)) 
+    = maximum $ inferResourceLevelBody <$> body
+inferResourceLevelFork _                   = FlattenedResources
+
+inferResourceLevelPrim :: Prim -> ResourceLevel
+inferResourceLevelPrim (PrimHigherCall _ call _)
+    | isResourcefulHigherOrder $ argType call = ParameterResources
+inferResourceLevelPrim _                      = FlattenedResources
+
+
 ----------------------------------------------------------------
 --                       The Expander Monad
 --
@@ -129,13 +153,13 @@ identityRenaming = Map.empty
 ----------------------------------------------------------------
 
 data ExpanderState = Expander {
-    inlining        :: Bool,       -- ^Whether we are currently inlining (and
-                                   --  therefore should not inline calls)
-    renaming        :: Renaming,   -- ^The current variable renaming
-    writeNaming     :: Renaming,   -- ^Renaming for new assignments
-    noFork          :: Bool,       -- ^There's no fork at the end of this body
-    nextCallSiteID  :: CallSiteID, -- ^The next callSiteID to use
-    globalResources :: Bool
+    inlining       :: Bool,       -- ^Whether we are currently inlining (and
+                                  --  therefore should not inline calls)
+    renaming       :: Renaming,   -- ^The current variable renaming
+    writeNaming    :: Renaming,   -- ^Renaming for new assignments
+    noFork         :: Bool,       -- ^There's no fork at the end of this body
+    nextCallSiteID :: CallSiteID, -- ^The next callSiteID to use
+    resourceLevel  :: ResourceLevel
     }
 
 
@@ -186,9 +210,8 @@ addInstr prim pos = do
 
 
 -- init a expander state based on the given call site count
-initExpanderState :: CallSiteID -> Bool -> ExpanderState
-initExpanderState callSiteCount globalRess =
-    Expander False identityRenaming identityRenaming True callSiteCount globalRess
+initExpanderState :: CallSiteID -> ResourceLevel -> ExpanderState
+initExpanderState = Expander False identityRenaming identityRenaming True
 
 
 ----------------------------------------------------------------
@@ -259,7 +282,7 @@ expandPrim (PrimCall id pspec args) pos = do
         addInstr call' pos
     else do
         def <- lift $ lift $ getProcDef pspec
-        globalCheck <- gets ((procGlobalResources def ==) . globalResources)
+        let globalCheck = procResourceLevel def == FlattenedResources
         case procImpln def of
             ProcDefSrc _ -> shouldnt $ "uncompiled proc: " ++ show pspec
             ProcDefPrim{procImplnProto = proto, procImplnBody = body} ->
@@ -280,21 +303,20 @@ expandPrim (PrimCall id pspec args) pos = do
 expandPrim call@(PrimHigherCall id fn args) pos = do
     logExpansion $ "  Expand higher call " ++ show call
     fn' <- expandArg fn
-    let expandAsHigher fn' = do
+    let expandAsHigher = do
             logExpansion "  As higher call"
             args' <- mapM expandArg args
             addInstr (PrimHigherCall id fn' args') pos
     case fn' of
         ArgProcRef ps as _-> do
-            needsGlobalRess <- lift $ lift $ procGlobalResources <$> getProcDef ps
-            if needsGlobalRess
-            then expandAsHigher fn'
-            -- then return ()
+            resLevel <- lift $ lift $ procResourceLevel <$> getProcDef ps
+            if resLevel >= ParameterResources
+            then expandAsHigher
             else do
                 let expander = flip . (execStateT .) . flip expandPrim
                 st <- get
                 put =<< lift (translateFromClosure Nothing call (`expander` st))
-        _ -> expandAsHigher fn'
+        _ -> expandAsHigher
 expandPrim (PrimForeign lang nm flags args) pos = do
     st <- get
     logExpansion $ "  Expanding " ++ show (PrimForeign lang nm flags args)
@@ -332,11 +354,9 @@ expandArg arg@(ArgVar var ty flow ft _) = do
     if renameAll
     then case flow of
         FlowOut -> freshVar var ty ft
-        FlowIn ->
+        FlowIn -> 
             setArgType ty . (`setPrimArgFlowType` ft)
             <$> gets (Map.findWithDefault arg var . renaming)
-            -- (shouldnt $ "inlining: reference to unassigned variable "
-            --  ++ show var)
     else return arg
 expandArg arg@(ArgProcRef ps as ty) = do
     as' <- mapM expandArg as

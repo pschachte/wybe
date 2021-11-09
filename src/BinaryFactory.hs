@@ -55,6 +55,7 @@ instance Binary ProcBody
 instance Binary PrimFork
 instance Binary SuperprocSpec
 instance Binary ProcDef
+instance Binary ResourceLevel
 instance Binary ProcProto
 instance Binary Param
 instance Binary ResourceFlowSpec

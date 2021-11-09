@@ -236,7 +236,8 @@ genProc proto detism stmts = do
     tmpCtr <- gets brTempCtr
     -- call site count will be refilled later
     let procDef = ProcDef name proto (ProcDefSrc stmts) Nothing tmpCtr 0
-                  Map.empty False Private detism MayInline Pure NoSuperproc
+                  Map.empty FlattenedResources Private detism MayInline Pure 
+                  NoSuperproc
     logUnbranch $ "Generating fresh " ++ show detism ++ " proc:"
                   ++ showProcDef 8 procDef
     logUnbranch $ "Unbranched generated " ++ show detism ++ " proc:"
@@ -610,7 +611,8 @@ hoistClosure exp@(Lambda mods params pstmts) pos = do
     tmpCtr <- gets brTempCtr
     let procProto = ProcProto name (freeParams ++ realParams) Set.empty
     let procDef = ProcDef name procProto (ProcDefSrc pstmts) Nothing tmpCtr 0
-                    Map.empty False Private detism Inline Pure NoSuperproc
+                    Map.empty FlattenedResources  Private detism Inline Pure 
+                    NoSuperproc
     procDef' <- lift $ unbranchProc procDef tmpCtr
     logUnbranch $ "  Resultant hoisted proc: " ++ show procProto
     procSpec <- lift $ addProcDef procDef'
@@ -661,7 +663,8 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) freeVars pos name = do
                     , flowsOut fl && ty /= intType && not (argFlowTypeIsResource a)
                     , let var f t = Unplaced $ Typed (Var nm f a) t cast])
             Nothing 0 0
-            Map.empty True Private detism' Inline impurity (ClosureOf regularProcSpec)
+            Map.empty FlattenedResources Private detism' Inline impurity 
+            (ClosureOf regularProcSpec)
     pDefClosure' <- lift $ unbranchProc pDefClosure 0
     logUnbranch $ "  Resultant closure proc: " ++ show procProto
     closureProcSpec <- lift $ addProcDef pDefClosure'

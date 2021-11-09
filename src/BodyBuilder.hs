@@ -466,20 +466,23 @@ argExpandedPrim call@(PrimCall id pspec args) = do
     args'' <- zipWithM (transformUnneededArg $ zip params args) params args'
     return $ PrimCall id pspec args''
 argExpandedPrim call@(PrimHigherCall id fn args) = do
+    logBuild $ "Expanding Higher call " ++ show call       
     fn' <- expandArg fn
-    let expandAsHigher fn' = do
+    let expandAsHigher = do
+            logBuild "Leaving as higher call"       
             args' <- mapM expandArg args
             return $ PrimHigherCall id fn' args'
     case fn' of
-        ArgProcRef ps as _-> do        
-            needsGlobalRess <- lift $ procGlobalResources <$> getProcDef ps
-            if needsGlobalRess
-            then expandAsHigher fn'
-            else
+        ArgProcRef ps as _-> do 
+            resLevel <- lift $ procResourceLevel <$> getProcDef ps
+            if resLevel >= FlattenedResources
+            then expandAsHigher
+            else do
+                logBuild "Converting to first order call"       
                 translateFromClosure Nothing (PrimHigherCall id fn' args) 
                                             (const argExpandedPrim)
                     >>= argExpandedPrim
-        _ -> expandAsHigher fn'
+        _ -> expandAsHigher
 argExpandedPrim (PrimForeign lang nm flags args) = do
     args' <- mapM expandArg args
     return $ simplifyForeign lang nm flags args'

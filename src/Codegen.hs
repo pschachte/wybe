@@ -144,22 +144,23 @@ type Names = Map.Map String Int
 -- | 'CodegenState' will hold a global Definition level code.
 data CodegenState
     = CodegenState {
-        currentBlock :: Name     -- ^ Name of the active block to append to
-      , blocks       :: Map.Map Name BlockState 
-                                 -- ^ Blocks for function
-      , symtab       :: SymbolTable 
-                                 -- ^ Local symbol table of a function
-      , blockCount   :: Int      -- ^ Incrementing count of basic blocks
-      , count        :: Word     -- ^ Count for temporary operands
-      , names        :: Names    -- ^ Name supply
-      , externs      :: [Prim]   -- ^ Primitives which need to be declared
-      , globalVars   :: [Global] -- ^ Needed global variables/constants
-      , resources    :: Map.Map ResourceSpec Global
-                                 -- ^ Needed global variables for resources
-      , globalResources :: Bool     -- ^ Are we treating resources as 
-                                 -- global references?
-      , modProtos    :: [PrimProto] 
-                                 -- ^ Module procedures prototypes
+        currentBlock  :: Name     -- ^ Name of the active block to append to
+      , blocks        :: Map.Map Name BlockState 
+                                  -- ^ Blocks for function
+      , symtab        :: SymbolTable 
+                                  -- ^ Local symbol table of a function
+      , blockCount    :: Int      -- ^ Incrementing count of basic blocks
+      , count         :: Word     -- ^ Count for temporary operands
+      , names         :: Names    -- ^ Name supply
+      , externs       :: [Prim]   -- ^ Primitives which need to be declared
+      , globalVars    :: [Global] -- ^ Needed global variables/constants
+      , resources     :: Map.Map ResourceSpec Global
+                                  -- ^ Needed global variables for resources
+      , resourceLevel :: ResourceLevel      
+                                  -- ^ How are we expecting resources to be 
+                                  -- passed?
+      , modProtos     :: [PrimProto] 
+                                  -- ^ Module procedures prototypes
       } deriving Show
 
 -- | 'BlockState' will generate the code for basic blocks inside of
@@ -182,9 +183,10 @@ data BlockState
 
 type Codegen = StateT CodegenState Compiler
 
-execCodegen :: Word -> Bool -> [PrimProto] -> Codegen a -> Compiler CodegenState
-execCodegen startCount globalRess protos codegen =
-    execStateT codegen (emptyCodegen startCount globalRess protos)
+execCodegen :: Word -> ResourceLevel -> [PrimProto] -> Codegen a 
+            -> Compiler CodegenState
+execCodegen startCount resourceLevel protos codegen =
+    execStateT codegen (emptyCodegen startCount resourceLevel protos)
 
 evalCodegen :: [PrimProto] -> Codegen t -> Compiler t
 evalCodegen protos codegen = evalStateT codegen (emptyCodegen 0 undefined protos)
@@ -326,7 +328,7 @@ emptyBlock :: Int -> BlockState
 emptyBlock i = BlockState i [] Nothing
 
 -- | Initialize an empty CodegenState for a new Definition.
-emptyCodegen :: Word -> Bool -> [PrimProto] -> CodegenState
+emptyCodegen :: Word -> ResourceLevel -> [PrimProto] -> CodegenState
 emptyCodegen startCount =
   CodegenState
     (Name $ fromString entryBlockName)
@@ -445,7 +447,8 @@ assign var op trep arg ty = do
     case arg of
         ArgVar _ _ _ (Resource res) _ -> do
             updateSymbolTable var op trep $ Just (res,ty)
-            whenM (gets globalResources) $ assignGlobalResource res
+            whenM (gets ((>=ParameterResources) . resourceLevel)) 
+                $ assignGlobalResource res
         _ -> updateSymbolTable var op trep Nothing
 
 
@@ -489,20 +492,16 @@ getVar :: String -> Maybe (PrimArg,Type,TypeRepresentation)
        -> Codegen (Operand,TypeRepresentation)
 getVar var mbArg = do
     let err = shouldnt $ "Local variable not in scope: " ++ show var
-    globalRess <- gets globalResources
-    case (mbArg,globalRess) of
+    resLevel <- gets resourceLevel
+    case (mbArg, resLevel >= ParameterResources) of
         (Just (ArgVar _ _ _ (Resource res) _, ty, trep),True) -> do 
             global <- getGlobalResource res ty
             op <- doLoad ty global
-            return (op, trep) 
-        (Just (ArgVar _ _ _ (Resource res) _, ty, trep),_) -> do
-            lcls <- gets (ordinary . symtab)
-            case Map.lookup var lcls of
-                Just ret -> return ret
-                Nothing -> do
-                    global <- getGlobalResource res ty
-                    op <- doLoad ty global
-                    return (op, trep)
+            return (op, trep)
+            -- lcls <- gets (ordinary . symtab)
+            -- case Map.lookup var lcls of
+            --     Just ret -> return ret
+            --     Nothing -> do
         _ -> do
             lcls <- gets (ordinary . symtab)
             return $ fromMaybe err $ Map.lookup var lcls

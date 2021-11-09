@@ -215,11 +215,11 @@ translateProc modProtos proc = do
     let proto = procImplnProto $ procImpln proc
     let body = procImplnBody $ procImpln proc
     let isClosure = isJust $ maybeClosureOf $ procSuperproc proc
-    let globalRess = procGlobalResources proc
+    let resourceLevel = procResourceLevel proc
     let speczBodies = procImplnSpeczBodies $ procImpln proc
     -- translate the standard version
     (block, count') <- lift $ _translateProcImpl modProtos proto
-                                isClosure globalRess body count
+                                isClosure resourceLevel body count
     -- translate the specialized versions
     let speczBodies' = speczBodies
                         |> Map.toList
@@ -241,7 +241,8 @@ translateProc modProtos proc = do
                     -- codegen
                     (currBlock, currCount') <-
                             lift $ _translateProcImpl modProtos
-                                        proto' isClosure globalRess currBody currCount
+                                        proto' isClosure resourceLevel 
+                                        currBody currCount
                     return (currBlock:currBlocks, currCount')
             ) ([], count') speczBodies'
     let blocks' = block:blocks
@@ -251,9 +252,9 @@ translateProc modProtos proc = do
 
 -- Helper for `translateProc`. Translate the given `ProcBody` 
 -- (A specialized version of a procedure).
-_translateProcImpl :: [PrimProto] -> PrimProto -> Bool -> Bool -> ProcBody
+_translateProcImpl :: [PrimProto] -> PrimProto -> Bool -> ResourceLevel -> ProcBody
                    -> Word -> Compiler (ProcDefBlock, Word)
-_translateProcImpl modProtos proto isClosure globalRess body startCount = do
+_translateProcImpl modProtos proto isClosure resourceLevel body startCount = do
     let (proto', body') = if isClosure then closeClosure proto body
                                        else (proto,body)
     modspec <- getModuleSpec
@@ -264,7 +265,7 @@ _translateProcImpl modProtos proto isClosure globalRess body startCount = do
                 ++ "body: " ++ show body'
                 ++ "\n" ++ replicate 50 '-' ++ "\n"
     -- Codegen
-    codestate <- execCodegen startCount globalRess modProtos
+    codestate <- execCodegen startCount resourceLevel modProtos
                     (doCodegenBody proto' body')
     let pname = primProtoName proto
     logBlocks $ show $ externs codestate

@@ -54,7 +54,7 @@ module AST (
   getParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, maybeModPrefix, ProcImpln(..), ProcDef(..), procInline, procCallCount,
-  primImpurity, flagsImpurity, flagsDetism,
+  ResourceLevel(..), primImpurity, flagsImpurity, flagsDetism,
   AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
   parameterVarNameToID, SpeczVersion, CallProperty(..), generalVersion,
   speczVersionToId, SpeczProcBodies,
@@ -1163,7 +1163,7 @@ addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
            $ errmsg pos ("Proc modifier '" ++ resourcefulName resourceful 
                          ++ "' is not allowed for a procedure declaration")
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 Map.empty
-                  False vis detism inlining impurity (initSuperprocSpec vis)
+                  FlattenedResources vis detism inlining impurity (initSuperprocSpec vis)
     addProcDef procDef
     return ()
 addProc _ item =
@@ -1867,8 +1867,9 @@ data ProcDef = ProcDef {
                                 -- XXX We never actually use this map, we just
                                 -- add up the call counts, so we might as well
                                 -- keep just a count
-    procGlobalResources::Bool,  -- Does this procedure expect resources as
-                                -- global variables?
+    procResourceLevel::ResourceLevel,  
+                                -- ^How does this procedure expect resources to
+                                -- be handled 
     procVis :: Visibility,      -- ^what modules should be able to see this?
     procDetism :: Determinism,  -- ^can this proc fail?
     procInlining :: Inlining,   -- ^should we inline calls to this proc?
@@ -1889,6 +1890,10 @@ procInline = (==Inline) . procInlining
 -- won't be correct for public procs.
 procCallCount :: ProcDef -> Int
 procCallCount proc = Map.foldr (+) 0 $ procCallers proc
+
+-- | How a procedure can expect to recieve/return and use resources
+data ResourceLevel = FlattenedResources | ParameterResources | GlobalResources
+  deriving (Eq, Ord, Show, Generic)
 
 
 -- | What is the Impurity of the given Prim?
@@ -3431,18 +3436,23 @@ showProcDefs firstID (def:defs) =
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
 showProcDef thisID
-        procdef@(ProcDef n proto def pos _ _ _ _ vis
+        procdef@(ProcDef n proto def pos _ _ _ resLevel vis
                     detism inline impurity sub) =
     "\n"
     ++ (if n == "" then "*main*" else n) ++ " > "
     ++ visibilityPrefix vis
     ++ showProcModifiers' (ProcModifiers detism inline impurity Resourceless [] [])
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
-    ++ showSuperProc sub
+    ++ showSuperProc sub ++ showResourceLevel resLevel
     ++ "\n"
     ++ show thisID ++ ": "
     ++ (if isCompiled def then "" else show proto ++ ":")
     ++ show def
+
+
+showResourceLevel :: ResourceLevel -> String
+showResourceLevel FlattenedResources = ""
+showResourceLevel level              = " resource-level: " ++ show level
 
 
 -- |How to show a type specification.
