@@ -32,6 +32,9 @@ declare external ccc  void @putchar(i8)
 declare external ccc  void @print_int(i64)    
 
 
+@"resource#top_level_use.res" =    global i64 undef
+
+
 declare external ccc  i8* @wybe_malloc(i32)    
 
 

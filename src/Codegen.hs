@@ -18,7 +18,7 @@ module Codegen (
   phi, br, cbr, getBlock, retNothing, fresh,
   -- * Symbol storage
   alloca, store, local, assign, load, getVar, localVar, preservingSymtab,
-  assignGlobalResource, assignFromGlobalResource,
+  assignGlobalResource, assignFromGlobalResource, makeGlobalResourceVariable,
   operandType, doAlloca, doLoad, 
   bitcast, cbitcast, inttoptr, cinttoptr, ptrtoint, cptrtoint,
   trunc, ctrunc, zext, czext, sext, csext,
@@ -73,6 +73,7 @@ import           Options                         (LogSelection (Blocks,Codegen))
 import           Config                          (wordSize, functionDefSection)
 import           Unsafe.Coerce
 import           Debug.Trace
+import LLVM.AST.Linkage (Linkage(ExternWeak, External))
 
 ----------------------------------------------------------------------------
 -- Types                                                                  --
@@ -237,20 +238,28 @@ getGlobalResource spec@(ResourceSpec mod nm) ty = do
     ress <- gets resources
     nm <- case Map.lookup spec ress of
             Nothing -> do
-                init <- ifCurrentModuleElse mod 
-                            (return $ Just $ C.Undef ty)
-                            (return Nothing)
-                let ref = Name $ fromString $ makeGlobalResourceName $ show spec 
-                let global =  globalVariableDefaults { name = ref
-                                                     , isConstant = False
-                                                     , G.type' = ty
-                                                     , initializer = init
-                                                     }
+                global <- lift $ makeGlobalResourceVariable spec ty
                 modify $ \s -> s { resources = Map.insert spec global ress }
-                return ref
+                return $ G.name global
             Just ref -> return $ G.name ref
     return $ ConstantOperand $ C.GlobalReference (ptr_t ty) nm
 
+
+makeGlobalResourceVariable :: ResourceSpec -> Type -> Compiler Global
+makeGlobalResourceVariable spec@(ResourceSpec mod nm) ty = do
+    unless (ty /= VoidType) 
+        $ shouldnt $ "global resource " ++ show spec ++ " cant have voidtype"
+    let ref = Name $ fromString $ makeGlobalResourceName $ show spec 
+    thisMod <- getModuleSpec 
+    let (linkage, init) = if thisMod == mod
+                          then (External, Just $ C.Undef ty)
+                          else (ExternWeak, Nothing)
+    return globalVariableDefaults { name = ref
+                                  , isConstant = False
+                                  , G.type' = ty
+                                  , G.linkage = linkage
+                                  , initializer = init
+                                  }
 
 -- | Create an empty LLVMAST.Module which would be converted into
 -- LLVM IR once the moduleDefinitions field is filled.

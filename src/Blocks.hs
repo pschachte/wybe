@@ -14,13 +14,14 @@ module Blocks (concatLLVMASTModules, blockTransformModule,
 import           AST
 import           Debug.Trace
 import           ASTShow
-import           BinaryFactory                   ()
+import           BinaryFactory
 import           Codegen
 import           Resources
 import           Config                          (wordSize, wordSizeBytes)
 import           Util                            (maybeNth, zipWith3M_, (|||), (&&&))
 import           Snippets 
 import           Control.Monad
+import           Control.Monad.Extra             (ifM)
 import           Control.Monad.Trans             (lift, liftIO)
 import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.Except
@@ -33,7 +34,7 @@ import qualified Data.Set                        as Set
 import           Data.String
 import           Data.Functor                    ((<&>))
 import           Data.Word                       (Word32)
-import           Data.Maybe                      (fromMaybe, isJust)
+import           Data.Maybe                      (fromMaybe, isJust, catMaybes)
 import           Flow                            ((|>))
 import qualified LLVM.AST                        as LLVMAST
 import qualified LLVM.AST.Constant               as C
@@ -99,7 +100,7 @@ blockTransformModule thisMod =
        -- typeList :: [(TypeSpec, LLVMAST.Type)]
        let typeList = zip knownTypes trs
        -- log the assoc list typeList
-       logWrapWith '.' $ "Known Types:\n" ++ (intercalate "\n" $
+       logWrapWith '.' $ "Known Types:\n" ++ intercalate "\n" (
            List.map (\(a,b) -> show a ++ ": " ++ show b) typeList)
 
        --------------------------------------------------
@@ -112,8 +113,11 @@ blockTransformModule thisMod =
          mapM (translateProc allProtos) mangledProcs
        let procBlocks' = List.concat procBlocks
        --------------------------------------------------
-       -- Init LLVM Module and fill it
-       let llmod = newLLVMModule (showModSpec thisMod) modFile procBlocks'
+
+       let resDefs = modResources $ trustFromJust "blockTransformModule"
+                                  $ modImplementation modRec
+       let ress = concat $ Map.keys <$> Map.elems resDefs
+       llmod <- newLLVMModule (showModSpec thisMod) modFile procBlocks' ress
        updateImplementation (\imp -> imp { modLLVM = Just llmod })
        logBlocks $ "*** Translated Module: " ++ showModSpec thisMod
        modRec' <- getModule id
@@ -133,7 +137,7 @@ mangleProc def i =
         s = primProtoName proto
         pname = s ++ "<" ++ show i ++ ">"
         newProto = proto {primProtoName = pname}
-    in 
+    in
     def {procImpln = (procImpln def){procImplnProto = newProto}}
 
 
@@ -214,7 +218,7 @@ translateProc modProtos proc = do
     let globalRess = procGlobalResources proc
     let speczBodies = procImplnSpeczBodies $ procImpln proc
     -- translate the standard version
-    (block, count') <- lift $ _translateProcImpl modProtos proto 
+    (block, count') <- lift $ _translateProcImpl modProtos proto
                                 isClosure globalRess body count
     -- translate the specialized versions
     let speczBodies' = speczBodies
@@ -227,7 +231,7 @@ translateProc modProtos proc = do
     -- happened, we may consider increasing the length of id (more in AST.hs).
     let hasDuplicates l = List.length l /= (Set.size . Set.fromList) l
     when (hasDuplicates (List.map fst speczBodies'))
-            $ shouldnt $ "Specz version id conflicts" 
+            $ shouldnt $ "Specz version id conflicts"
                 ++ show (List.map fst speczBodies')
     (blocks, count'') <-
             foldlM (\(currBlocks, currCount) (id, currBody) -> do
@@ -235,10 +239,10 @@ translateProc modProtos proc = do
                     let pname = primProtoName proto ++ "[" ++ id ++ "]"
                     let proto' = proto {primProtoName = pname}
                     -- codegen
-                    (currBlock, currCount') <- 
-                            lift $ _translateProcImpl modProtos 
+                    (currBlock, currCount') <-
+                            lift $ _translateProcImpl modProtos
                                         proto' isClosure globalRess currBody currCount
-                    return (currBlock:currBlocks, currCount') 
+                    return (currBlock:currBlocks, currCount')
             ) ([], count') speczBodies'
     let blocks' = block:blocks
     putCount count''
@@ -251,7 +255,7 @@ _translateProcImpl :: [PrimProto] -> PrimProto -> Bool -> Bool -> ProcBody
                    -> Word -> Compiler (ProcDefBlock, Word)
 _translateProcImpl modProtos proto isClosure globalRess body startCount = do
     let (proto', body') = if isClosure then closeClosure proto body
-                                       else (proto,body) 
+                                       else (proto,body)
     modspec <- getModuleSpec
     logBlocks $ "\n" ++ replicate 70 '=' ++ "\n"
     logBlocks $ "In Module: " ++ showModSpec modspec
@@ -260,12 +264,12 @@ _translateProcImpl modProtos proto isClosure globalRess body startCount = do
                 ++ "body: " ++ show body'
                 ++ "\n" ++ replicate 50 '-' ++ "\n"
     -- Codegen
-    codestate <- execCodegen startCount globalRess modProtos 
+    codestate <- execCodegen startCount globalRess modProtos
                     (doCodegenBody proto' body')
     let pname = primProtoName proto
     logBlocks $ show $ externs codestate
     exs <- mapM declareExtern $ externs codestate
-    let globals = List.map LLVMAST.GlobalDefinition 
+    let globals = List.map LLVMAST.GlobalDefinition
                     (globalVars codestate ++ Map.elems (resources codestate))
     let body' = createBlocks codestate
     lldef <- makeGlobalDefinition pname proto' body'
@@ -277,15 +281,15 @@ _translateProcImpl modProtos proto isClosure globalRess body startCount = do
 -- | Updates a PrimProto and ProcBody as though the Free Params are accessed
 -- via the closure environment 
 closeClosure :: PrimProto -> ProcBody -> (PrimProto, ProcBody)
-closeClosure proto@PrimProto{primProtoParams=params} 
+closeClosure proto@PrimProto{primProtoParams=params}
                body@ProcBody{bodyPrims=prims} = do
     (proto',body)
   where
     (free, trueParams) = List.partition ((==Free) . primParamFlowType) params
-    actualParams = List.filter (not . paramInfoGlobalResource 
+    actualParams = List.filter (not . paramInfoGlobalResource
                                     . primParamInfo) trueParams
     proto' = proto{primProtoParams=actualParams ++ [envPrimParam]}
-    neededFree = List.filter (not . paramInfoUnneeded 
+    neededFree = List.filter (not . paramInfoUnneeded
                                   . primParamInfo) free
     unwrapper = Unplaced <$>
                 [ primAccess (ArgVar envParamName intType FlowIn Free False)
@@ -395,12 +399,12 @@ assignParam :: PrimParam -> Codegen ()
 assignParam p@PrimParam{primParamType=ty} = do
     trep <- lift $ typeRep ty
     ty' <- lift $ llvmType ty
-            
+
     logCodegen $ "Maybe generating parameter " ++ show p
                  ++ " (" ++ show trep ++ ")"
     let info = primParamInfo p
     unless (repIsPhantom trep || paramInfoUnneeded info || paramInfoGlobalResource info)
-      $ do 
+      $ do
             let nm = show (primParamName p)
             let llty = repLLVMType trep
             assign nm (localVar llty nm) trep (primParamToArg p) ty'
@@ -409,11 +413,11 @@ assignParam p@PrimParam{primParamType=ty} = do
 -- | Convert a PrimParam to an Operand value and reference this value by the
 -- param's name on the symbol table. Don't assign if phantom.
 preassignOutput :: PrimParam -> Codegen ()
-preassignOutput p = do 
+preassignOutput p = do
     let ty = primParamType p
     let nm = show (primParamName p)
     trep <- lift $ typeRep ty
-    ty' <- lift $ llvmType ty       
+    ty' <- lift $ llvmType ty
     let llty = repLLVMType trep
     assign nm (cons $ C.Undef llty) trep (primParamToArg p) ty'
 
@@ -478,13 +482,13 @@ structUnPack st tys = do
 -- | Generate basic blocks for a procedure body. The first block is named
 -- 'entry' by default. All parameters go on the symbol table (output too).
 codegenBody :: PrimProto -> ProcBody -> Codegen ()
-codegenBody proto body = do 
+codegenBody proto body = do
     let ps = List.map content (bodyPrims body)
     -- Filter out prims which contain only phantom arguments
     mapM_ cgen ps
     let params = primProtoParams proto
     case bodyFork body of
-        NoFork -> do 
+        NoFork -> do
             retOp <- buildOutputOp params
             ret retOp
             return ()
@@ -551,7 +555,7 @@ cgen prim@(PrimCall callSiteID pspec args) = do
     proto <- lift $ getProcPrimProto pspec
     let params = primProtoParams proto
     logCodegen $ "Proto = " ++ show proto
-    
+
     (filteredArgs,globals) <- filterUnneededArgs proto args
     logCodegen $ "Filtered args = " ++ show filteredArgs
 
@@ -573,7 +577,7 @@ cgen prim@(PrimCall callSiteID pspec args) = do
     let inRes = Set.map resourceFlowRes inGlobals
 
     let outGlobals' = outRes `Set.union` Set.filter (`Set.notMember` outRes) inRes
-    
+
     logCodegen $ "Out Type = " ++ show outTy
     let ins =
           callWybe
@@ -588,7 +592,7 @@ cgen prim@(PrimHigherCall callSiteId var args) = do
     let (inArgs, outArgs) = partitionArgs $ setArgType intType <$> args
     env <- cgenArg var
     inOps <- mapM cgenArg inArgs
-    let callInOps = inOps ++ [env] 
+    let callInOps = inOps ++ [env]
     logCodegen $ "In args = " ++ show callInOps
     fnPtrTy <- lift $ llvmClosureType (argType var)
     let addrPtrTy = ptr_t address_t
@@ -720,12 +724,12 @@ findProto (ProcSpec _ nm i _) = do
 -- | Match PrimArgs with the paramaters in the given prototype. If a PrimArg's
 -- counterpart in the prototype is unneeded, filtered out. Positional matching
 -- is used for this.
-filterUnneededArgs :: PrimProto -> [PrimArg] 
+filterUnneededArgs :: PrimProto -> [PrimArg]
                    -> Codegen ([PrimArg], Set.Set ResourceFlowSpec)
 filterUnneededArgs proto args = do
     needed <- argsNeeded realArgs params
     let neededGlobals = List.filter (isNeeded . snd)
-                      $ zip (List.drop nReal allParams) globalsArgs 
+                      $ zip (List.drop nReal allParams) globalsArgs
     realGlobals <- filterM (lift . paramIsReal . fst) neededGlobals
     let resFlows = (\(PrimParam _ _ fl (Resource res) _,_) -> ResourceFlowSpec res $ primFlowToFlowDir fl)
                <$> realGlobals
@@ -826,7 +830,7 @@ cgenLPVM "mutate" _
           gcMutate baseAddr offsetArg valArg
           outRep <- lift $ typeRep $ argType addrArg
           let outTy = repLLVMType outRep
-          assign (pullName outArg) baseAddr Address addrArg outTy 
+          assign (pullName outArg) baseAddr Address addrArg outTy
 
 cgenLPVM "mutate" _ [_, _, _, destructiveArg, _, _, _] =
       nyi "lpvm mutate instruction with non-constant destructive flag"
@@ -936,18 +940,18 @@ castHelper b z t _ _ op (IntegerType bs1) ty2@(IntegerType bs2)
     | bs2 > bs1 = (,"zext") <$> z op ty2
     | bs1 > bs2 = (,"trunc") <$> t op ty2
 castHelper b z t _ _ op ty1@(FloatingPointType fp) ty2@(IntegerType bs2)
-    | bs1 == bs2 = caseStr <$> b op ty2 
+    | bs1 == bs2 = caseStr <$> b op ty2
     | bs2 > bs1 = caseStr <$> (b op ty' >>= flip z ty2)
     | bs1 > bs2 = caseStr <$> (b op ty' >>= flip t ty2)
-  where 
+  where
     bs1 = getBits ty1
     ty' = IntegerType bs1
     caseStr = (,"fp" ++ show bs1 ++ "-int" ++ show bs2)
 castHelper b z t _ _ op ty1@(IntegerType bs1) ty2@(FloatingPointType fp)
-    | bs2 == bs1 = caseStr <$> b op ty2 
+    | bs2 == bs1 = caseStr <$> b op ty2
     | bs2 > bs1 = caseStr <$> (z op ty' >>= flip b ty2)
-    | bs1 > bs2 = caseStr <$> (t op ty' >>= flip b ty2) 
-  where 
+    | bs1 > bs2 = caseStr <$> (t op ty' >>= flip b ty2)
+  where
     bs2 = getBits ty2
     ty' = IntegerType bs2
     caseStr = (,"int" ++ show bs1 ++ "-fp" ++ show bs2)
@@ -998,7 +1002,7 @@ addInstruction ins outArgs = do
             let outNames = List.map pullName outArgs
             -- lift $ logBlocks $ "-=-=-=-= Structure names:" ++ show outNames
             mapM_ (\(a, b, c, d, e) -> assign a b c d e) $ zip5 outNames fields treps outArgs outTys
-  
+
 pullName ArgVar{argVarName=var} = show var
 pullName _                    = shouldnt $ "Expected variable as output."
 
@@ -1024,7 +1028,7 @@ partitionArgs = List.partition goesIn
 
 partitionGlobalArgs :: [(PrimArg, Bool)]
                  -> (([PrimArg], [PrimArg]), ([PrimArg], [PrimArg]))
-partitionGlobalArgs argGlobals = 
+partitionGlobalArgs argGlobals =
     let (globals, args) = List.partition snd argGlobals
     in (partitionArgs $ fst <$> args, partitionArgs $ fst <$> globals)
 
@@ -1083,11 +1087,11 @@ cgenArg arg@(ArgProcRef ps args ty) = do
     if all argIsConst args'
     then do
         cons <$> cgenArgConst arg
-    else do 
+    else do
         fnOp <- cons <$> cgenFuncRef ps
         envArgs <- mapM cgenArg (setArgType intType <$> args')
-        mem <- gcAllocate (toInteger (wordSizeBytes * (1 + length args)) 
-                                      `ArgInt` intType) address_t 
+        mem <- gcAllocate (toInteger (wordSizeBytes * (1 + length args))
+                                      `ArgInt` intType) address_t
         memPtr <- inttoptr mem (ptr_t address_t)
         mapM_ (\(idx,arg) -> do
             let getEltPtr = getElementPtrInstr memPtr [idx]
@@ -1111,7 +1115,7 @@ cgenArgConst (ArgInt val ty) = do
     toTy <- lift $ llvmType ty
     case toTy of
       IntegerType bs -> return $ C.Int bs val
-      _ -> consCast (C.Int (fromIntegral wordSize) val) address_t toTy 
+      _ -> consCast (C.Int (fromIntegral wordSize) val) address_t toTy
 cgenArgConst (ArgFloat val ty) = do
     toTy <- lift $ llvmType ty
     case toTy of
@@ -1120,7 +1124,7 @@ cgenArgConst (ArgFloat val ty) = do
 cgenArgConst (ArgString s WybeString ty) = do
     (_,conPtr) <- addStringConstant s
     let strType = struct_t [address_t, address_t]
-    let strStruct = C.Struct Nothing False 
+    let strStruct = C.Struct Nothing False
                      [ C.Int (fromIntegral wordSize) (fromIntegral $ length s)
                      , C.PtrToInt conPtr address_t ]
     strName <- addGlobalConstant strType strStruct
@@ -1131,12 +1135,12 @@ cgenArgConst (ArgString s CString _) = do
     (conPtrTy, conPtr) <- addStringConstant s
     let strElem = C.GetElementPtr True conPtr [C.Int 32 0, C.Int 32 0]
     consCast strElem conPtrTy address_t
-cgenArgConst (ArgChar c ty) = do 
+cgenArgConst (ArgChar c ty) = do
     let val = integerOrd c
     toTy <- lift $ llvmType ty
     case toTy of
       IntegerType bs -> return $ C.Int bs val
-      _ -> consCast (C.Int (fromIntegral wordSize) val) address_t toTy      
+      _ -> consCast (C.Int (fromIntegral wordSize) val) address_t toTy
 cgenArgConst (ArgUndef ty) = do
     llty <- lift $ llvmType ty
     return $ C.Undef llty
@@ -1153,11 +1157,11 @@ cgenArgConst (ArgProcRef ps args ty) = do
 cgenArgConst arg = shouldnt $ "cgenArgConst of " ++ show arg
 
 
-cgenFuncRef :: ProcSpec -> Codegen C.Constant 
+cgenFuncRef :: ProcSpec -> Codegen C.Constant
 cgenFuncRef ps = do
     addExternProcRef ps
     let fName = LLVMAST.Name $ fromString $ show ps
-    psType <- HigherOrderType defaultProcModifiers . (primParamTypeFlow <$>) 
+    psType <- HigherOrderType defaultProcModifiers . (primParamTypeFlow <$>)
           <$> primActualParams ps
     psTy <- lift $ llvmFuncType $ psType
     logCodegen $ "  with type " ++ show psType
@@ -1169,7 +1173,7 @@ primActualParams :: ProcSpec -> Codegen [PrimParam]
 primActualParams pspec = lift $ do
     isClosure <- isClosureProc pspec
     primProto <- procImplnProto . procImpln <$> getProcDef pspec
-    primParams <- protoRealParams primProto <&> (++ [envPrimParam | isClosure]) 
+    primParams <- protoRealParams primProto <&> (++ [envPrimParam | isClosure])
     return $ List.filter ((/= Free) . primParamFlowType) primParams
 
 
@@ -1183,7 +1187,7 @@ neededFreeArgs pspec args = lift $ do
 addExternProcRef :: ProcSpec -> Codegen ()
 addExternProcRef ps@(ProcSpec mod _ _ _) = do
     args <- (primParamToArg <$>) <$> primActualParams ps
-    ifCurrentModuleElse mod 
+    ifCurrentModuleElse mod
         (return ())
         (addExtern $ PrimCall 0 ps args)
 
@@ -1295,9 +1299,9 @@ llvmType :: TypeSpec -> Compiler LLVMAST.Type
 llvmType ty = repLLVMType <$> typeRep ty
 
 llvmFuncType :: TypeSpec -> Compiler LLVMAST.Type
-llvmFuncType ty = do 
-    tyRep <- typeRep ty 
-    case tyRep of 
+llvmFuncType ty = do
+    tyRep <- typeRep ty
+    case tyRep of
         Func ins outs -> do
             let inTys = repLLVMType <$> ins
             let outTys = repLLVMType <$> outs
@@ -1307,10 +1311,10 @@ llvmFuncType ty = do
 
 
 llvmClosureType :: TypeSpec -> Compiler LLVMAST.Type
-llvmClosureType (HigherOrderType mods tys) 
-    = llvmFuncType 
-        $ HigherOrderType mods 
-        $ {-setTypeFlowType intType <$>-} tys ++ [TypeFlow AnyType ParamIn]
+llvmClosureType (HigherOrderType mods tys)
+    = llvmFuncType
+        $ HigherOrderType mods
+        $ tys ++ [TypeFlow AnyType ParamIn]
 llvmClosureType ty = shouldnt $ "llvmClosureType on " ++ show ty
 
 
@@ -1332,12 +1336,12 @@ moduleLLVMType mspec =
 
 repLLVMType :: TypeRepresentation -> LLVMAST.Type
 repLLVMType Address        = address_t
-repLLVMType (Bits bits)   
+repLLVMType (Bits bits)
   | bits == 0              = void_t
   | bits >  0              = int_c $ fromIntegral bits
   | otherwise              = shouldnt $ "unsigned type with non-positive width "
                                         ++ show bits
-repLLVMType (Signed bits) 
+repLLVMType (Signed bits)
   | bits > 0               = int_c $ fromIntegral bits
   | otherwise              = shouldnt $ "signed type with non-positive width "
                                         ++ show bits
@@ -1359,12 +1363,29 @@ repLLVMType (Func _ _)     = address_t
 -- | Initialize and fill a new LLVMAST.Module with the translated
 -- global definitions (extern declarations and defined functions)
 -- of LPVM procedures in a module.
-newLLVMModule :: String -> String -> [ProcDefBlock] -> LLVMAST.Module
-newLLVMModule name fname blocks
-    = let defs = List.map blockDef blocks
-          exs  = concat $ List.map blockExterns blocks
-          exs' = uniqueExterns exs ++ [mallocExtern] ++ intrinsicExterns
-      in modWithDefinitions name fname $ exs' ++ defs
+newLLVMModule :: String -> String -> [ProcDefBlock] -> [ResourceSpec]
+              -> Compiler LLVMAST.Module
+newLLVMModule name fname blocks ress = do
+    let defs = List.map blockDef blocks
+        exs  = concatMap blockExterns blocks
+    resExs <- mapM globalResourceExtern ress
+    let exs' = uniqueExterns (exs ++ catMaybes resExs) ++ [mallocExtern] 
+                                                       ++ intrinsicExterns
+    return $ modWithDefinitions name fname $ exs' ++ defs
+
+
+globalResourceExtern :: ResourceSpec -> Compiler (Maybe LLVMAST.Definition)
+globalResourceExtern res = do
+    resMbTy <- canonicaliseResourceSpec Nothing "newLLVMModule" res
+    case resMbTy of
+        (res', Just ty) ->
+            ifM (typeIsPhantom ty)
+                (return Nothing)
+                (llvmType ty >>= makeGlobalResourceVariable res'
+                    <&> Just . LLVMAST.GlobalDefinition)
+        _ -> shouldnt $ "globalResourceExtern " ++ show res
+
+
 
 
 -- | Filter out non-unique externs
@@ -1400,7 +1421,7 @@ declareExtern (PrimHigherCall _ var _) =
     shouldnt $ "Don't know how to declare extern function var " ++ show var
 
 declareExtern (PrimCall _ pspec@(ProcSpec m n _ _) args) = do
-    globals <- (paramInfoGlobalResource . primParamInfo <$>) . primProtoParams 
+    globals <- (paramInfoGlobalResource . primParamInfo <$>) . primProtoParams
            . procImplnProto . procImpln <$> getProcDef pspec
     let ((inArgs,outArgs),_) = partitionGlobalArgs $ zip args globals
     retty <- primReturnType outArgs
@@ -1622,7 +1643,7 @@ gcMutate baseAddr offsetArg valArg = do
     ptr' <- inttoptr finalAddr ptrTy
     logCodegen $ "inttoptr " ++ show finalAddr ++ " " ++ show ptrTy
     logCodegen $ "inttoptr produced " ++ show ptr'
-    
+
     let getel = getElementPtrInstr ptr' [0]
     logCodegen $ "getel = " ++ show getel
     accessPtr <- instr ptrTy getel

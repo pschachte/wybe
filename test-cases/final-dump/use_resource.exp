@@ -89,6 +89,9 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 @"constant#use_resource.5" =    constant [?? x i8] c"Inner count (4): \00"
 
 
+@"resource#use_resource.count" =    global i64 undef
+
+
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
