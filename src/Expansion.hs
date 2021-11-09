@@ -41,18 +41,22 @@ procExpansion pspec def = do
     let (ins,outs) = inputOutputParams proto
     isClosure <- isClosureProc pspec
     let params = primProtoParams proto
-    let resourceLevel = inferResourceLevelBody body
+    let needsGlobalRess = needsGlobalResources isClosure params
+    inferredResourceLevel <- inferResourceLevelBody body
+    let resourceLevel = max inferredResourceLevel
+                      $ if needsGlobalRess
+                        then ParameterResources  
+                        else FlattenedResources 
     let st = initExpanderState (procCallSiteCount def) resourceLevel
     (st', tmp', used, body') <- buildBody tmp (Map.fromSet id outs)
                                   $ execStateT (expandBody body) st
-    let needsGlobalRess = needsGlobalResources isClosure params
     let params' = markGlobalResource needsGlobalRess
                 . markParamNeededness isClosure used ins
                <$> params
     let needsGlobalRess' = needsGlobalResources isClosure params'
     let resourceLevel' = max resourceLevel
                        $ if needsGlobalRess' 
-                         then GlobalResources 
+                         then GlobalResources  
                          else FlattenedResources
                              
     let params'' = markGlobalResource needsGlobalRess' <$> params'
@@ -124,21 +128,25 @@ identityRenaming :: Renaming
 identityRenaming = Map.empty
 
 
-inferResourceLevelBody :: ProcBody -> ResourceLevel
+inferResourceLevelBody :: ProcBody -> Compiler ResourceLevel
 inferResourceLevelBody (ProcBody [] fork) = inferResourceLevelFork fork
-inferResourceLevelBody (ProcBody prims fork)
-    = max (maximum $ inferResourceLevelPrim . content <$> prims)
-          (inferResourceLevelFork fork)
+inferResourceLevelBody (ProcBody body fork) = do
+    bodyLevels <- mapM inferResourceLevelPrim (content <$> body)
+    forkLevel <- inferResourceLevelFork fork
+    return $ max (maximum bodyLevels) forkLevel
 
-inferResourceLevelFork :: PrimFork -> ResourceLevel
-inferResourceLevelFork (PrimFork _ _ _ body@(_:_)) 
-    = maximum $ inferResourceLevelBody <$> body
-inferResourceLevelFork _                   = FlattenedResources
+inferResourceLevelFork :: PrimFork -> Compiler ResourceLevel
+inferResourceLevelFork (PrimFork _ _ _ bodies@(_:_)) 
+    = maximum <$> mapM inferResourceLevelBody bodies
+inferResourceLevelFork _ = return FlattenedResources
 
-inferResourceLevelPrim :: Prim -> ResourceLevel
+inferResourceLevelPrim :: Prim -> Compiler ResourceLevel
 inferResourceLevelPrim (PrimHigherCall _ call _)
-    | isResourcefulHigherOrder $ argType call = ParameterResources
-inferResourceLevelPrim _                      = FlattenedResources
+    | isResourcefulHigherOrder $ argType call = return ParameterResources
+inferResourceLevelPrim (PrimCall _ ps _)      = do
+    resLevel <- procResourceLevel <$> getProcDef ps 
+    return $ min resLevel ParameterResources 
+inferResourceLevelPrim _ = return FlattenedResources 
 
 
 ----------------------------------------------------------------
