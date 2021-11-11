@@ -1,0 +1,10 @@
+# Test case for case statement
+
+# ?lst = [1,2,3]
+
+def len(lst:list(T)):int = length where {
+    case lst in {
+        [_|?t]   :: ?length = 1 + len(t)
+      | otherwise:: ?length = 0
+    }
+}

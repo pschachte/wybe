@@ -911,6 +911,12 @@ stmtExprToStmt (Call pos [] "{}" ParamIn [body]) =
     stmtExprToStmt body
 stmtExprToStmt (Call pos [] "if" ParamIn [conditional]) =
     stmtExprToStmt conditional
+stmtExprToStmt (Call pos [] "case" ParamIn 
+                [Call _ [] "in" ParamIn 
+                      [exp,Call _ [] "{}" ParamIn [body]]]) = do
+    expr' <- stmtExprToExp exp
+    (cases,deflt) <- stmtExprToCases stmtExprToBody body
+    return $ Placed (Case expr' cases deflt) pos
 stmtExprToStmt (Call pos [] "do" ParamIn [body]) =
     (`Placed` pos) . flip Loop Nothing <$> stmtExprToBody body
 stmtExprToStmt (Call pos [] "for" ParamIn [gen,body]) = do
@@ -990,6 +996,28 @@ stmtExprToGenerators (Call pos [] "in" ParamIn [var,exp]) = do
     return [Placed (In var' exp') pos]
 stmtExprToGenerators other =
     syntaxError (stmtExprPos other) $ "invalid generator " ++ show other
+
+-- |Convert a StmtExpr to the body of a case statement or expression.  The
+-- supplied translator is used to translate the bodies of the cases, which will
+-- be expressions in a case expression, and statement sequences in a case
+-- statement.
+stmtExprToCases :: TranslateTo a -> TranslateTo ([(Placed Exp,a)], Maybe a)
+stmtExprToCases caseTrans
+      (Call pos [] "|" ParamIn [Call _ [] "::" ParamIn [val,thn], rest]) = do
+    val' <- stmtExprToExp val
+    thn' <- caseTrans thn
+    (rest',deflt) <- stmtExprToCases caseTrans rest
+    return ((val',thn') : rest', deflt)
+stmtExprToCases caseTrans (Call _ [] "::" ParamIn [Call _ [] g ParamIn [],thn])
+  | defaultGuard g = do
+    thn' <- caseTrans thn
+    return ([], Just thn')
+stmtExprToCases caseTrans (Call _ [] "::" ParamIn [val,thn]) = do
+    val' <- stmtExprToExp val
+    thn' <- caseTrans thn
+    return ([(val',thn')], Nothing)
+stmtExprToCases _ other =
+    syntaxError (stmtExprPos other) $ "invalid case body " ++ show other
 
 
 -- |Convert a StmtExpr to an Exp, if possible, or give a syntax error if not.
