@@ -1009,23 +1009,23 @@ termToGenerators other =
 -- supplied translator is used to translate the bodies of the cases, which will
 -- be expressions in a case expression, and statement sequences in a case
 -- statement.
-stmtExprToCases :: TranslateTo a -> TranslateTo ([(Placed Exp,a)], Maybe a)
-stmtExprToCases caseTrans
+termToCases :: TranslateTo a -> TranslateTo ([(Placed Exp,a)], Maybe a)
+termToCases caseTrans
       (Call pos [] "|" ParamIn [Call _ [] "::" ParamIn [val,thn], rest]) = do
-    val' <- stmtExprToExp val
+    val' <- termToExp val
     thn' <- caseTrans thn
-    (rest',deflt) <- stmtExprToCases caseTrans rest
+    (rest',deflt) <- termToCases caseTrans rest
     return ((val',thn') : rest', deflt)
-stmtExprToCases caseTrans (Call _ [] "::" ParamIn [Call _ [] g ParamIn [],thn])
+termToCases caseTrans (Call _ [] "::" ParamIn [Call _ [] g ParamIn [],thn])
   | defaultGuard g = do
     thn' <- caseTrans thn
     return ([], Just thn')
-stmtExprToCases caseTrans (Call _ [] "::" ParamIn [val,thn]) = do
-    val' <- stmtExprToExp val
+termToCases caseTrans (Call _ [] "::" ParamIn [val,thn]) = do
+    val' <- termToExp val
     thn' <- caseTrans thn
     return ([(val',thn')], Nothing)
-stmtExprToCases _ other =
-    syntaxError (stmtExprPos other) $ "invalid case body " ++ show other
+termToCases _ other =
+    syntaxError (termPos other) $ "invalid case body " ++ show other
 
 
 -- |Convert a Term to an Exp, if possible, or give a syntax error if not.
