@@ -54,7 +54,7 @@ module AST (
   getParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, maybeModPrefix, ProcImpln(..), ProcDef(..), procInline, procCallCount,
-  ResourceLevel(..), primImpurity, flagsImpurity, flagsDetism,
+  primImpurity, flagsImpurity, flagsDetism,
   AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
   parameterVarNameToID, SpeczVersion, CallProperty(..), generalVersion,
   speczVersionToId, SpeczProcBodies,
@@ -63,7 +63,7 @@ module AST (
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, ResourceDef(..), FlowDirection(..),
   argFlowTypeIsResource, argFlowDirection, argType, setArgType, setPrimArgFlowType, 
-  argDescription, setParamType, paramIsResourceful, isResourcePrimParam, 
+  argDescription, setParamType, paramIsResourceful, maybeParamResource, isResourcePrimParam, 
   setPrimParamType, setTypeFlowType,
   flowsIn, flowsOut, primFlowToFlowDir,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
@@ -1163,7 +1163,7 @@ addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
            $ errmsg pos ("Proc modifier '" ++ resourcefulName resourceful 
                          ++ "' is not allowed for a procedure declaration")
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 Map.empty
-                  FlattenedResources vis detism inlining impurity (initSuperprocSpec vis)
+                  vis detism inlining impurity (initSuperprocSpec vis)
     addProcDef procDef
     return ()
 addProc _ item =
@@ -1867,9 +1867,6 @@ data ProcDef = ProcDef {
                                 -- XXX We never actually use this map, we just
                                 -- add up the call counts, so we might as well
                                 -- keep just a count
-    procResourceLevel::ResourceLevel,  
-                                -- ^How does this procedure expect resources to
-                                -- be handled 
     procVis :: Visibility,      -- ^what modules should be able to see this?
     procDetism :: Determinism,  -- ^can this proc fail?
     procInlining :: Inlining,   -- ^should we inline calls to this proc?
@@ -1890,10 +1887,6 @@ procInline = (==Inline) . procInlining
 -- won't be correct for public procs.
 procCallCount :: ProcDef -> Int
 procCallCount proc = Map.foldr (+) 0 $ procCallers proc
-
--- | How a procedure can expect to recieve/return and use resources
-data ResourceLevel = FlattenedResources | ParameterResources | GlobalResources
-  deriving (Eq, Ord, Show, Generic)
 
 
 -- | What is the Impurity of the given Prim?
@@ -1976,14 +1969,21 @@ maybeGetClosureOf :: ProcSpec -> Compiler (Maybe ProcSpec)
 maybeGetClosureOf pspec =
     maybeClosureOf . procSuperproc <$> getProcDef pspec
 
-translateFromClosure :: OptPos -> Prim 
+translateFromClosure :: a -> OptPos -> Prim 
                      -> (OptPos -> Prim -> StateT s Compiler a) 
                      -> StateT s Compiler a
-translateFromClosure pos (PrimHigherCall csID (ArgProcRef ps as ty) args) trans = do
-    ps' <- lift $ fromMaybe ps <$> maybeGetClosureOf ps
-    tys <- (paramType <$>) <$> lift (getParams ps') 
-    trans pos (PrimCall csID ps' $ as ++ zipWith setArgType tys args)
-translateFromClosure _ prim _ = shouldnt $ "translateFromClosure of " ++ show prim
+translateFromClosure els pos prim@(PrimHigherCall csID (ArgProcRef ps as ty) args) trans = do
+    mbPs' <- lift $ maybeGetClosureOf ps
+    case mbPs' of
+        Nothing -> return els
+        Just ps' -> do 
+            params' <- lift (getParams ps') 
+            if sameLength params' args
+            then do
+                tys <- (paramType <$>) <$> lift (getParams ps') 
+                trans pos (PrimCall csID ps' $ as ++ zipWith setArgType tys args)
+            else return els
+translateFromClosure _ _ prim _ = shouldnt $ "translateFromClosure of " ++ show prim
 
 -- |Check if a ProcSpec refers to a closure proc
 isClosureProc :: ProcSpec -> Compiler Bool 
@@ -2317,7 +2317,7 @@ foldExp' _   _   val StringValue{}  = val
 foldExp' _   _   val CharValue{}    = val
 foldExp' _   _   val Var{}          = val
 foldExp' _   _   val ProcRef{}      = val
-foldExp' sfn efn val (Lambda _ _ pstmts) = foldStmts sfn efn val pstmts
+foldExp' sfn efn val (AnonProc _ _ pstmts) = foldStmts sfn efn val pstmts
 foldExp' sfn efn val (Typed exp _ _) = foldExp sfn efn val exp
 foldExp' _   _   val AnonParamVar{}      = val
 foldExp' sfn efn val (Where stmts exp) =
@@ -2562,8 +2562,7 @@ data PrimParam = PrimParam {
 
 -- |Info inferred about a single proc parameter
 data ParamInfo = ParamInfo {
-        paramInfoUnneeded::Bool, -- ^Can this parameter be eliminated?
-        paramInfoGlobalResource::Bool -- ^Should we pass this parameter as a global
+        paramInfoUnneeded::Bool -- ^Can this parameter be eliminated?
     } deriving (Eq,Generic)
 
 -- |A dataflow direction:  in, out, both, or neither.
@@ -2581,6 +2580,12 @@ setParamType t p = p{paramType=t}
 
 paramIsResourceful :: Param -> Bool
 paramIsResourceful (Param _ ty _ _) = isResourcefulHigherOrder ty
+
+
+maybeParamResource :: Param -> Maybe (ResourceFlowSpec, TypeSpec)
+maybeParamResource (Param _ ty fl (Resource res)) = Just ((ResourceFlowSpec res fl), ty)
+maybeParamResource _                             = Nothing
+
 
 isResourcePrimParam :: PrimParam -> Bool
 isResourcePrimParam (PrimParam _ _ _ ft _) = argFlowTypeIsResource ft
@@ -2748,11 +2753,11 @@ data Exp
       | Var VarName FlowDirection ArgFlowType
       | ProcRef ProcSpec [Exp]
       | Typed Exp TypeSpec (Maybe TypeSpec)
-      | Lambda ProcModifiers [Param] [Placed Stmt] -- removed in unbranching
                -- ^explicitly typed expr giving the type of the expression, and,
                -- if it is a cast, the type of the Exp argument.  If not a cast,
                -- these two must be the same.
       -- The following are eliminated during flattening
+      | AnonProc ProcModifiers [Param] [Placed Stmt] -- removed in unbranching
       | AnonParamVar (Maybe Integer) FlowDirection
       | Where [Placed Stmt] (Placed Exp)
       | CondExp (Placed Stmt) (Placed Exp) (Placed Exp)
@@ -2771,7 +2776,7 @@ flattenedExpFlow (IntValue _)      = ParamIn
 flattenedExpFlow (FloatValue _)    = ParamIn
 flattenedExpFlow (CharValue _)     = ParamIn
 flattenedExpFlow (StringValue _ _) = ParamIn
-flattenedExpFlow (Lambda _ _ _)    = ParamIn
+flattenedExpFlow (AnonProc _ _ _)  = ParamIn
 flattenedExpFlow (ProcRef _ _)     = ParamIn
 flattenedExpFlow (Var _ flow _)    = flow
 flattenedExpFlow (Typed exp _ _)   = flattenedExpFlow exp
@@ -2868,7 +2873,7 @@ realParams = filterM paramIsReal
 -- |The param actually needs to be passed; ie, it is needed and not phantom.
 paramIsReal :: PrimParam -> Compiler Bool
 paramIsReal param =
-    (((not . paramInfoUnneeded &&& not . paramInfoGlobalResource) 
+    (((not . paramInfoUnneeded) 
         $ primParamInfo param) &&) . not <$> paramIsPhantom param
 
 
@@ -3100,7 +3105,7 @@ expOutputs (StringValue _ _) = Set.empty
 expOutputs (CharValue _) = Set.empty
 expOutputs (Var name flow _) =
     if flowsOut flow then Set.singleton name else Set.empty
-expOutputs (Lambda _ _ _) = Set.empty
+expOutputs (AnonProc _ _ _) = Set.empty
 expOutputs (ProcRef _ _) = Set.empty
 expOutputs (Typed expr _ _) = expOutputs expr
 expOutputs (AnonParamVar _ _) = Set.empty
@@ -3123,7 +3128,7 @@ expInputs (StringValue _ _) = Set.empty
 expInputs (CharValue _) = Set.empty
 expInputs (Var name flow _) =
    if flowsIn flow then Set.singleton name else Set.empty
-expInputs (Lambda _ _ _) = Set.empty
+expInputs (AnonProc _ _ _) = Set.empty
 expInputs (ProcRef _ _) = Set.empty
 expInputs (Typed expr _ _) = expInputs expr
 expInputs (AnonParamVar _ _) = Set.empty
@@ -3231,14 +3236,14 @@ envParamName = PrimVarName (specialName "env") 0
 
 
 envPrimParam :: PrimParam
-envPrimParam = PrimParam envParamName AnyType FlowIn Ordinary (ParamInfo False False)
+envPrimParam = PrimParam envParamName AnyType FlowIn Ordinary (ParamInfo False)
 
 
 makeGlobalConstantName :: String -> String
 makeGlobalConstantName name = specialName2 "constant" name
 
-makeGlobalResourceName :: String -> String
-makeGlobalResourceName name = specialName2 "resource" name
+makeGlobalResourceName :: ResourceSpec -> String
+makeGlobalResourceName spec = specialName2 "resource" $ show spec
 
 ----------------------------------------------------------------
 --                      Showing Compiler State
@@ -3436,23 +3441,17 @@ showProcDefs firstID (def:defs) =
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
 showProcDef thisID
-        procdef@(ProcDef n proto def pos _ _ _ resLevel vis
+        procdef@(ProcDef n proto def pos _ _ _ vis
                     detism inline impurity sub) =
     "\n"
     ++ (if n == "" then "*main*" else n) ++ " > "
     ++ visibilityPrefix vis
     ++ showProcModifiers' (ProcModifiers detism inline impurity Resourceless [] [])
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
-    ++ showSuperProc sub ++ showResourceLevel resLevel
     ++ "\n"
     ++ show thisID ++ ": "
     ++ (if isCompiled def then "" else show proto ++ ":")
     ++ show def
-
-
-showResourceLevel :: ResourceLevel -> String
-showResourceLevel FlattenedResources = ""
-showResourceLevel level              = " resource-level: " ++ show level
 
 
 -- |How to show a type specification.
@@ -3489,9 +3488,8 @@ instance Show Param where
 
 -- |How to show a formal parameter.
 instance Show PrimParam where
-  show (PrimParam name typ dir ft (ParamInfo unneeded reference)) =
-      let (pre,post) = mapFst (if reference then (++"*") else id)
-                       (if unneeded then ("[","]") else ("",""))
+  show (PrimParam name typ dir ft (ParamInfo unneeded)) =
+      let (pre,post) = if unneeded then ("[","]") else ("","")
       in  pre ++ show ft ++ primFlowPrefix dir ++ show name 
           ++ showTypeSuffix typ Nothing ++ post
 
@@ -3668,7 +3666,7 @@ instance Show Exp where
   show (StringValue s v) = show v ++ show s
   show (CharValue c) = show c
   show (Var name dir flowtype) = show flowtype ++ flowPrefix dir ++ name
-  show (Lambda mods params ss) = 
+  show (AnonProc mods params ss) = 
       showProcModifiers mods
       ++ "{" ++ intercalate "\n" (showStmt 0 . content <$> ss) ++ "}"
   show (ProcRef ps es) = show ps ++ "<" ++ intercalate ", " (show <$> es) ++ ">"

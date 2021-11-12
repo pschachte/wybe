@@ -11,7 +11,7 @@ module Snippets (castFromTo, castTo, withType, intType, intCast,
                  boolType, boolCast, boolTrue, boolFalse, boolBool,
                  boolVarSet, boolVarGet, intVarSet, intVarGet,
                  lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, 
-                 move, access, mutate, access0, mutate0, 
+                 move, globalStore, globalLoad, access, mutate, access0, mutate0, 
                  primMove, primAccess, primCast,
                  boolNegate, comparison, succeedTest, failTest, testVar, succeedIfSemiDet) where
 
@@ -138,6 +138,15 @@ iVal v = IntValue $ fromIntegral v
 move :: Exp -> Exp -> Placed Stmt
 move src dest =
     Unplaced $ ForeignCall "llvm" "move" [] [Unplaced src, Unplaced dest]
+
+
+globalStore :: Exp -> Exp -> Placed Stmt
+globalStore src dest =
+    Unplaced $ ForeignCall "lpvm" "store" ["semipure", "global"] [Unplaced src, Unplaced dest]
+
+globalLoad :: Exp -> Exp -> Placed Stmt
+globalLoad src dest =
+    Unplaced $ ForeignCall "lpvm" "load" ["semipure", "global"] [Unplaced src, Unplaced dest]
 
     
 -- |An instruction to access a value from some address

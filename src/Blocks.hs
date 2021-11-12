@@ -215,11 +215,10 @@ translateProc modProtos proc = do
     let proto = procImplnProto $ procImpln proc
     let body = procImplnBody $ procImpln proc
     let isClosure = isJust $ maybeClosureOf $ procSuperproc proc
-    let resourceLevel = procResourceLevel proc
     let speczBodies = procImplnSpeczBodies $ procImpln proc
     -- translate the standard version
     (block, count') <- lift $ _translateProcImpl modProtos proto
-                                isClosure resourceLevel body count
+                                isClosure body count
     -- translate the specialized versions
     let speczBodies' = speczBodies
                         |> Map.toList
@@ -241,7 +240,7 @@ translateProc modProtos proc = do
                     -- codegen
                     (currBlock, currCount') <-
                             lift $ _translateProcImpl modProtos
-                                        proto' isClosure resourceLevel 
+                                        proto' isClosure 
                                         currBody currCount
                     return (currBlock:currBlocks, currCount')
             ) ([], count') speczBodies'
@@ -252,9 +251,9 @@ translateProc modProtos proc = do
 
 -- Helper for `translateProc`. Translate the given `ProcBody` 
 -- (A specialized version of a procedure).
-_translateProcImpl :: [PrimProto] -> PrimProto -> Bool -> ResourceLevel -> ProcBody
+_translateProcImpl :: [PrimProto] -> PrimProto -> Bool -> ProcBody
                    -> Word -> Compiler (ProcDefBlock, Word)
-_translateProcImpl modProtos proto isClosure resourceLevel body startCount = do
+_translateProcImpl modProtos proto isClosure body startCount = do
     let (proto', body') = if isClosure then closeClosure proto body
                                        else (proto,body)
     modspec <- getModuleSpec
@@ -265,7 +264,7 @@ _translateProcImpl modProtos proto isClosure resourceLevel body startCount = do
                 ++ "body: " ++ show body'
                 ++ "\n" ++ replicate 50 '-' ++ "\n"
     -- Codegen
-    codestate <- execCodegen startCount resourceLevel modProtos
+    codestate <- execCodegen startCount modProtos
                     (doCodegenBody proto' body')
     let pname = primProtoName proto
     logBlocks $ show $ externs codestate
@@ -286,9 +285,7 @@ closeClosure proto@PrimProto{primProtoParams=params}
                body@ProcBody{bodyPrims=prims} = do
     (proto',body)
   where
-    (free, trueParams) = List.partition ((==Free) . primParamFlowType) params
-    actualParams = List.filter (not . paramInfoGlobalResource
-                                    . primParamInfo) trueParams
+    (free, actualParams) = List.partition ((==Free) . primParamFlowType) params
     proto' = proto{primProtoParams=actualParams ++ [envPrimParam]}
     neededFree = List.filter (not . paramInfoUnneeded
                                   . primParamInfo) free
@@ -403,12 +400,11 @@ assignParam p@PrimParam{primParamType=ty} = do
 
     logCodegen $ "Maybe generating parameter " ++ show p
                  ++ " (" ++ show trep ++ ")"
-    let info = primParamInfo p
-    unless (repIsPhantom trep || paramInfoUnneeded info || paramInfoGlobalResource info)
+    unless (repIsPhantom trep || paramInfoUnneeded (primParamInfo p))
       $ do
             let nm = show (primParamName p)
             let llty = repLLVMType trep
-            assign nm (localVar llty nm) trep (primParamToArg p) ty'
+            assign nm (localVar llty nm) trep 
 
 
 -- | Convert a PrimParam to an Operand value and reference this value by the
@@ -420,7 +416,7 @@ preassignOutput p = do
     trep <- lift $ typeRep ty
     ty' <- lift $ llvmType ty
     let llty = repLLVMType trep
-    assign nm (cons $ C.Undef llty) trep (primParamToArg p) ty'
+    assign nm (cons $ C.Undef llty) trep
 
 
 -- | Retrive or build the output operand from the given parameters.
@@ -448,7 +444,7 @@ buildOutputOp params = do
     helper param@(PrimParam nm ty _ _ _) = do
         trep <- lift $ typeRep ty
         ty' <- lift $ llvmType ty
-        getVar (show nm) (Just (primParamToArg param,ty',trep))
+        getVar (show nm)
 
 -- | Pack operands into a structure through a sequence of insertvalue
 -- instructions.
@@ -514,7 +510,7 @@ codegenForkBody :: PrimVarName -> [ProcBody] -> PrimProto -> Codegen ()
 codegenForkBody var (b1:b2:[]) proto =
     do ifthen <- addBlock "if.then"
        ifelse <- addBlock "if.else"
-       testop <- fst <$> getVar (show var) Nothing
+       testop <- fst <$> getVar (show var)
        cbr testop ifthen ifelse
        let params = primProtoParams proto
 
@@ -557,13 +553,12 @@ cgen prim@(PrimCall callSiteID pspec args) = do
     let params = primProtoParams proto
     logCodegen $ "Proto = " ++ show proto
 
-    (filteredArgs,globals) <- filterUnneededArgs proto args
+    filteredArgs <- filterUnneededArgs proto args
     logCodegen $ "Filtered args = " ++ show filteredArgs
 
     -- if the call is to an external module, declare it
     addExternProcRef pspec
 
-    -- XXX need to handle pushing/popping refs to/from globals
     let (inArgs,outArgs) = partitionArgs filteredArgs
     logCodegen $ "In args = " ++ show inArgs
 
@@ -571,14 +566,6 @@ cgen prim@(PrimCall callSiteID pspec args) = do
 
     inops <- mapM cgenArg inArgs
     logCodegen $ "Translated inputs = " ++ show inops
-
-    let (inGlobals, outGlobals) = Set.partition (flowsIn . resourceFlowFlow) globals
-    mapM_ (assignGlobalResource . resourceFlowRes) inGlobals
-    let outRes = Set.map resourceFlowRes outGlobals
-    let inRes = Set.map resourceFlowRes inGlobals
-
-    let outGlobals' = outRes `Set.union` Set.filter (`Set.notMember` outRes) inRes
-
     logCodegen $ "Out Type = " ++ show outTy
     let ins =
           callWybe
@@ -586,7 +573,6 @@ cgen prim@(PrimCall callSiteID pspec args) = do
           inops
     logCodegen $ "Translated ins = " ++ show ins
     addInstruction ins outArgs
-    mapM_ assignFromGlobalResource outGlobals'
 
 cgen prim@(PrimHigherCall callSiteId var args) = do
     logCodegen $ "Compiling " ++ show prim
@@ -619,7 +605,7 @@ cgen prim@(PrimForeign "llvm" name flags args) = do
 cgen prim@(PrimForeign "lpvm" name flags args) = do
     logCodegen $ "Compiling " ++ show prim
     args' <- filterPhantomArgs args
-    if List.null args' && name == "cast"
+    if List.null args' && (name == "cast" || "global" `List.elem` flags)
       then return ()
       else cgenLPVM name flags args'
 
@@ -692,10 +678,9 @@ cgenLLVMUnop "move" flags args =
       ([input],[output]) -> do
            inRep <- lift $ typeRep $ argType input
            outRep <- lift $ typeRep $ argType output
-           ty <- lift $ llvmType $ argType output
            (outTy, outNm) <- openPrimArg output
            inop <- cgenArg input
-           assign outNm inop outRep output ty
+           assign outNm inop outRep
       _ ->
            shouldnt "llvm move instruction with wrong arity"
 
@@ -725,24 +710,8 @@ findProto (ProcSpec _ nm i _) = do
 -- | Match PrimArgs with the paramaters in the given prototype. If a PrimArg's
 -- counterpart in the prototype is unneeded, filtered out. Positional matching
 -- is used for this.
-filterUnneededArgs :: PrimProto -> [PrimArg]
-                   -> Codegen ([PrimArg], Set.Set ResourceFlowSpec)
-filterUnneededArgs proto args = do
-    needed <- argsNeeded realArgs params
-    let neededGlobals = List.filter (isNeeded . snd)
-                      $ zip (List.drop nReal allParams) globalsArgs
-    realGlobals <- filterM (lift . paramIsReal . fst) neededGlobals
-    let resFlows = (\(PrimParam _ _ fl (Resource res) _,_) -> ResourceFlowSpec res $ primFlowToFlowDir fl)
-               <$> realGlobals
-    return (needed, Set.fromList resFlows)
-  where
-    allParams = primProtoParams proto
-    (globals, params) = List.partition (paramInfoGlobalResource . primParamInfo)
-                        allParams
-    nReal = length params
-    (realArgs, globalsArgs) = List.splitAt nReal args
-    isNeeded (ArgUnneeded _ _) = False
-    isNeeded _                 = True
+filterUnneededArgs :: PrimProto -> [PrimArg] -> Codegen [PrimArg]
+filterUnneededArgs proto args = argsNeeded args $ primProtoParams proto
 
 argsNeeded :: [PrimArg] -> [PrimParam] -> Codegen [PrimArg]
 argsNeeded [] []       = return []
@@ -778,7 +747,7 @@ cgenLPVM "alloc" [] args@[sizeArg,addrArg] = do
                 outRep <- lift $ typeRep $ argType addrArg
                 let outTy = repLLVMType outRep
                 op <- gcAllocate sizeArg outTy
-                assign (pullName addrArg) op outRep addrArg outTy
+                assign (pullName addrArg) op outRep
             _ ->
               shouldnt $ "alloc instruction with " ++ show (length inputs)
                          ++ " inputs"
@@ -792,7 +761,7 @@ cgenLPVM "access" [] args@[addrArg,offsetArg,_,_,val] = do
           let outTy = repLLVMType outRep
           logCodegen $ "outTy = " ++ show outTy
           op <- gcAccess finalAddr outTy
-          assign (pullName val) op outRep val outTy
+          assign (pullName val) op outRep
 
 cgenLPVM "mutate" flags
     [addrArg, outArg, offsetArg, ArgInt 0 intTy, sizeArg, startOffsetArg,
@@ -809,7 +778,7 @@ cgenLPVM "mutate" flags
           let outTy = repLLVMType outRep
           allocAddr <- gcAllocate sizeArg outTy
           outAddr <- offsetAddr allocAddr iadd startOffsetArg
-          assign (pullName outArg) outAddr outRep addrArg outTy
+          assign (pullName outArg) outAddr outRep
           taggedAddr <- cgenArg addrArg
           baseAddr <- offsetAddr taggedAddr isub startOffsetArg
           callMemCpy allocAddr baseAddr sizeArg
@@ -818,7 +787,7 @@ cgenLPVM "mutate" flags
             [outArg, outArg, offsetArg, ArgInt 1 intTy, sizeArg, startOffsetArg,
              valArg]
 cgenLPVM "mutate" _
-    [addrArg, outArg, offsetArg, (ArgInt 1 _), sizeArg, startOffsetArg,
+    [addrArg, outArg, offsetArg, ArgInt 1 _, sizeArg, startOffsetArg,
         valArg] = do
          -- Destructive case:  just mutate
           logCodegen $ "lpvm mutate " ++ show addrArg
@@ -830,8 +799,7 @@ cgenLPVM "mutate" _
           baseAddr <- cgenArg addrArg
           gcMutate baseAddr offsetArg valArg
           outRep <- lift $ typeRep $ argType addrArg
-          let outTy = repLLVMType outRep
-          assign (pullName outArg) baseAddr Address addrArg outTy
+          assign (pullName outArg) baseAddr Address
 
 cgenLPVM "mutate" _ [_, _, _, destructiveArg, _, _, _] =
       nyi "lpvm mutate instruction with non-constant destructive flag"
@@ -862,7 +830,7 @@ cgenLPVM "cast" [] args@[inArg,outArg] =
                         doCast loaded consTy outTy
                 _ -> doCast inOp inTy outTy
 
-            assign (pullName outArg) castOp outRep outArg outTy
+            assign (pullName outArg) castOp outRep 
 
         -- A cast with no outputs:  do nothing
         (_, []) -> return ()
@@ -870,6 +838,30 @@ cgenLPVM "cast" [] args@[inArg,outArg] =
             shouldnt $ "cast instruction with " ++ show (length inputs)
                        ++ " inputs and " ++ show (length outputs)
                        ++ " outputs"
+
+cgenLPVM "store" _ args@[_,_] = do
+    case partitionArgs args of
+      ([input], [output@(ArgVar nm ty _ (Resource res) _)]) -> do
+            logCodegen $ "lpvm store " ++ show input ++ " " ++ show output
+            ty' <- lift $ llvmType ty
+            global <- getGlobalResource res ty'        
+            op <- cgenArg input   
+            store global op
+      _ ->
+           shouldnt "llvm store instruction with wrong arity"
+           
+cgenLPVM "load" _ args@[_,_] = do
+    case partitionArgs args of
+        ([input@(ArgVar _ ty _ (Resource res) _)], 
+         [output@(ArgVar nm _ _ _ _)]) -> do
+            logCodegen $ "lpvm load " ++ show input ++ " " ++ show output
+            ty' <- lift $ llvmType ty
+            trep <- lift $ typeRep ty
+            global <- getGlobalResource res ty' 
+            op' <- doLoad ty' global
+            assign (show nm) op' trep
+        _ ->
+           shouldnt "llvm load instruction with wrong arity"
 
 
 cgenLPVM pname flags args = do
@@ -993,7 +985,7 @@ addInstruction ins outArgs = do
             logCodegen $ "outRep = " ++ show outRep
             let outName = pullName outArg
             outop <- namedInstr outTy outName ins
-            assign outName outop outRep outArg outTy
+            assign outName outop outRep
           _ -> do
             outOp <- instr outTy ins
             let outTySpecs = argType <$> outArgs
@@ -1002,7 +994,7 @@ addInstruction ins outArgs = do
             fields <- structUnPack outOp outTys
             let outNames = List.map pullName outArgs
             -- lift $ logBlocks $ "-=-=-=-= Structure names:" ++ show outNames
-            mapM_ (\(a, b, c, d, e) -> assign a b c d e) $ zip5 outNames fields treps outArgs outTys
+            mapM_ (\(a, b, c) -> assign a b c) $ zip3 outNames fields treps
 
 pullName ArgVar{argVarName=var} = show var
 pullName _                    = shouldnt $ "Expected variable as output."
@@ -1025,13 +1017,6 @@ withFlags p f  = unwords (p:f)
 -- | Partition the argument list into inputs and outputs
 partitionArgs :: [PrimArg] -> ([PrimArg],[PrimArg])
 partitionArgs = List.partition goesIn
-
-
-partitionGlobalArgs :: [(PrimArg, Bool)]
-                 -> (([PrimArg], [PrimArg]), ([PrimArg], [PrimArg]))
-partitionGlobalArgs argGlobals =
-    let (globals, args) = List.partition snd argGlobals
-    in (partitionArgs $ fst <$> args, partitionArgs $ fst <$> globals)
 
 
 -- | Get the LLVM 'Type' of the given primitive output argument
@@ -1078,7 +1063,7 @@ cgenArg var@ArgVar{argVarName=nm, argVarType=ty} = do
     toTyRep <- lift $ typeRep ty
     toTy <- lift $ llvmType ty
     lift $ logBlocks $ "Coercing var " ++ show nm ++ " to " ++ show ty
-    (varOp,rep) <- getVar (show nm) (Just (var,toTy,toTyRep))
+    (varOp,rep) <- getVar (show nm)
     let fromTy = repLLVMType rep
     doCast varOp fromTy toTy
 cgenArg (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
@@ -1422,9 +1407,7 @@ declareExtern (PrimHigherCall _ var _) =
     shouldnt $ "Don't know how to declare extern function var " ++ show var
 
 declareExtern (PrimCall _ pspec@(ProcSpec m n _ _) args) = do
-    globals <- (paramInfoGlobalResource . primParamInfo <$>) . primProtoParams
-           . procImplnProto . procImpln <$> getProcDef pspec
-    let ((inArgs,outArgs),_) = partitionGlobalArgs $ zip args globals
+    let (inArgs,outArgs) = partitionArgs args
     retty <- primReturnType outArgs
     fnargs <- mapM makeExArg $ zip [1..] inArgs
     return $ externalWybe retty (show pspec) fnargs

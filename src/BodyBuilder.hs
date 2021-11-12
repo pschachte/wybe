@@ -473,15 +473,16 @@ argExpandedPrim call@(PrimHigherCall id fn args) = do
             args' <- mapM expandArg args
             return $ PrimHigherCall id fn' args'
     case fn' of
-        ArgProcRef ps as _-> do 
-            resLevel <- lift $ procResourceLevel <$> getProcDef ps
-            if resLevel >= FlattenedResources
-            then expandAsHigher
-            else do
-                logBuild "Converting to first order call"       
-                translateFromClosure Nothing (PrimHigherCall id fn' args) 
-                                            (const argExpandedPrim)
-                    >>= argExpandedPrim
+        ArgProcRef ps as _ -> do 
+            mbPs' <- lift $ maybeGetClosureOf ps
+            case mbPs' of
+                Nothing -> expandAsHigher
+                Just ps' -> do 
+                    params' <- lift (getParams ps') 
+                    if sameLength params' args
+                    then
+                        argExpandedPrim (PrimCall id ps' $ as ++ zipWith setArgType (paramType <$> params') args)
+                    else expandAsHigher
         _ -> expandAsHigher
 argExpandedPrim (PrimForeign lang nm flags args) = do
     args' <- mapM expandArg args

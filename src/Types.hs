@@ -724,7 +724,7 @@ expType' (FloatValue _) _             = return $ TypeSpec ["wybe"] "float" []
 expType' (StringValue _ WybeString) _ = return $ TypeSpec ["wybe"] "string" []
 expType' (StringValue _ CString) _    = return $ TypeSpec ["wybe"] "c_string" []
 expType' (CharValue _) _              = return $ TypeSpec ["wybe"] "char" []
-expType' (Lambda mods params pstmts) _            = do
+expType' (AnonProc mods params pstmts) _ = do
     mapM_ ultimateVarType $ paramName <$> params
     params' <- updateParamTypes params
     return $ HigherOrderType mods $ paramTypeFlow <$> params'
@@ -737,7 +737,8 @@ expType' (ProcRef pspec _) _     = do
     let types = typeFlowType <$> typeFlows
     let flows = typeFlowMode <$> typeFlows
     types' <- refreshTypes types
-    ProcDef _ ProcProto{procProtoResources=ress} _ _ _ _ _ _ _ detism inlining impurity _ 
+    ProcDef _ ProcProto{procProtoResources=ress} _ _ _ _ _ _ 
+            detism inlining impurity _ 
         <- lift $ getProcDef pspec
     let resful = if Set.null ress then Resourceless else Resourceful 
     return $ HigherOrderType 
@@ -763,7 +764,7 @@ expMode' _ (FloatValue _) = (ParamIn, True, Nothing)
 expMode' _ (StringValue _ _) = (ParamIn, True, Nothing)
 expMode' _ (CharValue _) = (ParamIn, True, Nothing)
 expMode' _ (ProcRef _ _) = (ParamIn, True, Nothing)
-expMode' _ (Lambda _ _ _) = (ParamIn, True, Nothing)
+expMode' _ (AnonProc _ _ _) = (ParamIn, True, Nothing)
 expMode' assigned (Var name flow _) =
     (flow, name `assignedIn` assigned, Nothing)
 expMode' assigned (Typed expr _ _) = expMode' assigned expr
@@ -1164,7 +1165,7 @@ bodyCalls (pstmt:pstmts) detism = do
 
 
 expStmts :: [([Placed Stmt], Determinism)] -> Exp -> [([Placed Stmt], Determinism)]
-expStmts ss (Lambda ProcModifiers{modifierDetism=detism} _ ls)
+expStmts ss (AnonProc ProcModifiers{modifierDetism=detism} _ ls)
     = ss ++ [(ls,detism)]
 expStmts ss _ = ss
 
@@ -1995,17 +1996,17 @@ modeCheckExps m name pos assigned detism tmpCount (pexp:pexps) = do
         <- modeCheckExps m name pos assigned detism tmpCount pexps
     return (pexp':pexps',max tmpCount' tmpCount'')
 
--- |Mode check stmts inside a lambda expression
+-- |Mode check stmts inside an AnonProc expression
 modeCheckExp :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism
              -> Int -> Exp -> OptPos -> Typed (Placed Exp,Int)
 modeCheckExp m name defPos assigned _ tmpCount
-        exp@(Lambda mods@ProcModifiers{modifierDetism=detism} params ss) pos = do
-    logTyped $ "Mode checking lambda " ++ show exp
+        exp@(AnonProc mods@ProcModifiers{modifierDetism=detism} params ss) pos = do
+    logTyped $ "Mode checking AnonProc " ++ show exp
     let inArgs = List.foldl collectInParams Set.empty params
     (ss',_,tmpCount') <- modecheckStmts m name defPos (addBindings inArgs assigned)
                              detism tmpCount True ss
     params' <- updateParamTypes params
-    return (maybePlace (Lambda mods params' ss') pos, tmpCount')
+    return (maybePlace (AnonProc mods params' ss') pos, tmpCount')
 modeCheckExp m name defPos assigned detism tmpCount
         (Typed exp ty cast) pos = do
     (exp', tmpCount') <- modeCheckExp m name defPos assigned

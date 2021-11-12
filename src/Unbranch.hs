@@ -68,6 +68,7 @@
 module Unbranch (unbranchProc) where
 
 import AST
+import Resources
 import Debug.Trace
 import Snippets
 import Config
@@ -80,6 +81,7 @@ import Data.Set as Set
 import Data.Map as Map
 import Data.Maybe
 import Options (LogSelection(Unbranch))
+import Data.Tuple.HT (mapFst)
 
 
 -- |Transform away all loops, and all conditionals other than as the
@@ -236,7 +238,7 @@ genProc proto detism stmts = do
     tmpCtr <- gets brTempCtr
     -- call site count will be refilled later
     let procDef = ProcDef name proto (ProcDefSrc stmts) Nothing tmpCtr 0
-                  Map.empty FlattenedResources Private detism MayInline Pure 
+                  Map.empty Private detism MayInline Pure 
                   NoSuperproc
     logUnbranch $ "Generating fresh " ++ show detism ++ " proc:"
                   ++ showProcDef 8 procDef
@@ -581,7 +583,7 @@ defArgsHoistClosures args = do
 
 
 -- |Add the output variables defined by the expression to the symbol
---  table. Since the expression is already flattened (excluding lambdas), 
+--  table. Since the expression is already flattened (excluding AnonProcs), 
 --  it will only be a constant, in which case it doesn't define any variables, 
 --  or a variable, in which case it might.
 defArg :: Exp -> Unbrancher ()
@@ -592,7 +594,7 @@ hoistClosure :: Exp -> OptPos -> Unbrancher (Placed Exp)
 hoistClosure (Typed exp ty cast) pos = do
     exp' <- content <$> hoistClosure exp Nothing
     return $ maybePlace (Typed exp' ty cast) pos
-hoistClosure exp@(Lambda mods params pstmts) pos = do
+hoistClosure exp@(AnonProc mods params pstmts) pos = do
     name <- newProcName
     logUnbranch $ "Creating procref for " ++ show exp ++ " under " ++ name
     let ProcModifiers detism inlining impurity resourceful unknown conflict = mods
@@ -611,7 +613,7 @@ hoistClosure exp@(Lambda mods params pstmts) pos = do
     tmpCtr <- gets brTempCtr
     let procProto = ProcProto name (freeParams ++ realParams) Set.empty
     let procDef = ProcDef name procProto (ProcDefSrc pstmts) Nothing tmpCtr 0
-                    Map.empty FlattenedResources  Private detism Inline Pure 
+                    Map.empty Private detism NoInline Pure -- XXXJ should be able to mayinline
                     NoSuperproc
     procDef' <- lift $ unbranchProc procDef tmpCtr
     logUnbranch $ "  Resultant hoisted proc: " ++ show procProto
@@ -639,21 +641,29 @@ isUsedParam _    _                                 = True
 -- addClosure :: Unbrancher (Placed Exp)
 addClosure :: ProcSpec -> [Exp] -> OptPos -> String -> Unbrancher (Placed Exp)
 addClosure regularProcSpec@(ProcSpec mod nm pID _) freeVars pos name = do
-    logUnbranch $ "Creating closure for " ++ show regularProcSpec
     ProcDef{procDetism=detism, procInlining=inlining, procImpurity=impurity,
             procProto=procProto@ProcProto{procProtoParams=params}}
         <- lift $ getProcDef regularProcSpec
     let (freeParams, realParams) = List.partition ((== Free) . paramFlowType) params
-    let params' = setClosureType 
-               <$> (realParams ++ [testOutParam | detism == SemiDet])
+    let params' = setClosureType <$> (params ++ [testOutParam | detism == SemiDet])
+    let resTys = catMaybes $ maybeParamResource <$> realParams
+    let toLoad = mapFst resourceFlowRes 
+              <$> List.filter (flowsIn . resourceFlowFlow . fst) resTys
+    let toStore = mapFst resourceFlowRes 
+              <$> List.filter (flowsOut . resourceFlowFlow . fst) resTys
+    let loads = loadResource <$> toLoad
+    let stores = storeResource <$> toStore
     let detism' = selectDetism detism Det detism
     let paramVars = paramToVar <$> params
     let paramVars' = paramToVar <$> params'
-    let closureProto = ProcProto name (freeParams ++ params') Set.empty
+    let closureProto = ProcProto name 
+                        (freeParams ++ List.filter (not . argFlowTypeIsResource 
+                                                        . paramFlowType) params') Set.empty
     let pDefClosure =
             ProcDef name closureProto
             (ProcDefSrc
-                $ Unplaced <$>
+                $ loads
+                ++ (Unplaced <$>
                     ProcCall (First mod nm $ Just pID) detism' False
                         ((Unplaced <$> freeVars) ++ paramVars')
                     :[ ForeignCall "lpvm" "cast" []
@@ -662,9 +672,11 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) freeVars pos name = do
                                                   ++ [testInExp | detism == SemiDet]
                     , flowsOut fl && ty /= intType && not (argFlowTypeIsResource a)
                     , let var f t = Unplaced $ Typed (Var nm f a) t cast])
+                ++ stores)
             Nothing 0 0
-            Map.empty FlattenedResources Private detism' Inline impurity 
+            Map.empty Private detism' Inline impurity 
             (ClosureOf regularProcSpec)
+    logUnbranch $ "Creating closure for " ++ show regularProcSpec
     pDefClosure' <- lift $ unbranchProc pDefClosure 0
     logUnbranch $ "  Resultant closure proc: " ++ show procProto
     closureProcSpec <- lift $ addProcDef pDefClosure'
@@ -673,7 +685,6 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) freeVars pos name = do
 setClosureType :: Param -> Param
 setClosureType p@(Param _ _ _ (Resource _)) = p
 setClosureType p                            = setParamType intType p
-
 
 
 -- |Apply the function if the expression is a variable assignment,

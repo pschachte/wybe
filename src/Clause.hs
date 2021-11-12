@@ -71,10 +71,14 @@ currVar name pos = do
     dict <- gets currVars
     case Map.lookup name dict of
         Nothing -> do
-            logClause $ "Found uninitialised variable " ++ name
-            lift $ message Error
-                     ("Uninitialised variable '" ++ name ++ "'") pos
-            return $ PrimVarName name (-1)
+            -- XXXj a hack
+            if "resource#" `List.isPrefixOf` name
+            then nextVar name
+            else do
+                logClause $ "Found uninitialised variable " ++ name
+                lift $ message Error
+                        ("Uninitialised variable '" ++ name ++ "'") pos
+                return $ PrimVarName name (-1)
         Just n -> return $ PrimVarName name n
 
 
@@ -379,13 +383,13 @@ reconcileOne caseVars jointVars (Param name ty flow ftype) =
 
 compileParam :: Numbering -> Numbering -> ProcName -> Param -> [PrimParam]
 compileParam startVars endVars procName param@(Param name ty flow ftype) =
-    [PrimParam (PrimVarName name num) ty FlowIn ftype (ParamInfo False False)
+    [PrimParam (PrimVarName name num) ty FlowIn ftype (ParamInfo False)
     | flowsIn flow
     , let num = Map.findWithDefault 
                 (shouldnt ("compileParam for input param " ++ show param
                             ++ " of proc " ++ show procName))
                 name startVars]
-    ++ [PrimParam (PrimVarName name num) ty FlowOut ftype (ParamInfo False False)
+    ++ [PrimParam (PrimVarName name num) ty FlowOut ftype (ParamInfo False)
     | flowsOut flow
     , let num = Map.findWithDefault 
                 (shouldnt ("compileParam for output param " ++ show param

@@ -1053,10 +1053,10 @@ stmtExprToExp mods@(Embraced pos Brace _ (Just body@(Embraced _ Brace _ Nothing)
 -- stmtExprToExp call@(Call pos [] "@" ParamIn [mods@(Call _ [] "{}" ParamIn _),
 --                                              body@(Call _ [] "{}" ParamIn _)]) = do
     procMods <- translateToProcModifiers mods
-    lambda <- content <$> stmtExprToExp body
-    case lambda of
-        Lambda _ ps body -> return $ Placed (Lambda procMods ps body) pos
-        _ -> syntaxError pos $ "malformed lambda " ++ show lambda
+    anonProc <- content <$> stmtExprToExp body
+    case anonProc of
+        AnonProc _ ps body -> return $ Placed (AnonProc procMods ps body) pos
+        _ -> syntaxError pos $ "malformed anonymous procedure " ++ show anonProc
 stmtExprToExp (Call pos [] ":" ParamIn [exp,ty]) = do
     exp' <- content <$> stmtExprToExp exp
     ty' <- stmtExprToTypeSpec ty
@@ -1105,7 +1105,7 @@ stmtExprToExp (Call pos [] "if" ParamIn [conditional]) =
     translateConditionalExp conditional
 stmtExprToExp body@(Embraced pos Brace _ Nothing) = do
     body' <- stmtExprToBody body
-    return $ Placed (Lambda defaultProcModifiers [] body') pos
+    return $ Placed (AnonProc defaultProcModifiers [] body') pos
 stmtExprToExp (Call pos [] sep ParamIn [])
   | separatorName sep =
     syntaxError pos "invalid separated expression"

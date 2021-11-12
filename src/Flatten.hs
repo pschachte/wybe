@@ -123,7 +123,7 @@ data AnonProcState = AnonProcState {
     totalAnons  :: Integer,      -- ^Total number of anon proc encountered
     currentAnon :: Integer,      -- ^Current anon proc number
     paramCount :: Maybe Integer, -- ^Number of params encountered in current
-                                 -- lambda. Nothing if we have numbered params
+                                 -- anonProc. Nothing if we have numbered params
     params :: Map Integer Param  -- ^Unrocessed params
     }
 
@@ -157,7 +157,7 @@ processAnonProcParams AnonProcState{params=paramMap, currentAnon=current}
 
 
 makeAnonParamName :: Integer -> Integer -> VarName 
-makeAnonParamName lambda num = specialName2 (show lambda) (show num)
+makeAnonParamName procNum num = specialName2 (show procNum) (show num)
 
 
 makeAnonParam :: VarName -> FlowDirection -> Param 
@@ -513,7 +513,7 @@ flattenExp (CondExp cond thn els) ty castFrom pos = do
                 Nothing Nothing)
         pos Det
     return $ maybePlace (Var resultName ParamIn Ordinary) pos
-flattenExp expr@(Lambda mods _ pstmts) ty castFrom pos = do
+flattenExp expr@(AnonProc mods _ pstmts) ty castFrom pos = do
     state <- get
     let anonState = anonProcState state
     modify (\s -> s{flattened=[], postponed=[], 
@@ -524,8 +524,8 @@ flattenExp expr@(Lambda mods _ pstmts) ty castFrom pos = do
     let anonState' = anonProcState state'
     put state{anonProcState=popAnonProcState anonState anonState', 
               tempCtr=tempCtr state'}
-    let lambdaParams = processAnonProcParams anonState'
-    return $ typeAndPlace (Lambda mods lambdaParams (reverse $ flattened state')) 
+    let anonParams = processAnonProcParams anonState'
+    return $ typeAndPlace (AnonProc mods anonParams (reverse $ flattened state')) 
                           ty castFrom pos
 flattenExp (Fncall mod name exps) ty castFrom pos = do
     let stmtBuilder = ProcCall (First mod name Nothing) Det False
@@ -580,7 +580,7 @@ flattenAnonParam :: Exp -> TypeSpec -> Maybe TypeSpec -> OptPos
 flattenAnonParam expr@(AnonParamVar mbNum dir) ty castFrom pos = do
     logFlatten $ "  Flattening anon param " ++ show expr
     anonState <- gets anonProcState
-    let AnonProcState _ lambdas count params = anonState
+    let AnonProcState _ currentAnon count params = anonState
     (num, count') <- case (mbNum, count) of
         (Nothing, Just n) -> 
             let n' = n + 1
@@ -591,7 +591,7 @@ flattenAnonParam expr@(AnonParamVar mbNum dir) ty castFrom pos = do
             lift $ message Error 
                     "Mixed use of numbered and un-numbered anonymous parameters" pos
             return (-1, count)
-    let name = makeAnonParamName lambdas num
+    let name = makeAnonParamName currentAnon num
     let var = Var name dir Ordinary 
     let paramDir = paramFlow <$> Map.lookup num params
     let paramDir' = if fromMaybe dir paramDir == dir 
@@ -600,11 +600,11 @@ flattenAnonParam expr@(AnonParamVar mbNum dir) ty castFrom pos = do
     let param = makeAnonParam name paramDir'
     modify (\s -> s{anonProcState=anonState{paramCount=count',
                                             params=Map.insert num param params}})
-    if lambdas == 0
+    if currentAnon == 0
     then do
         lift $ message Error
                ("Anonymous parameter @" ++ maybe "" show mbNum 
-                ++ " outside of lambda expression")
+                ++ " outside of anonymous procedure expression")
                pos
         flattenExp var ty castFrom pos
     else do

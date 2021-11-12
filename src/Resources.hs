@@ -6,8 +6,10 @@
 --           : LICENSE in the root directory of this project.
 
 
-module Resources (resourceCheckMod, canonicaliseProcResources, canonicaliseResourceSpec,
-                  transformProcResources, specialResourcesSet) where
+module Resources (resourceCheckMod, canonicaliseProcResources, 
+                  canonicaliseResourceSpec, transformProcResources, 
+                  storeResource, loadResource, 
+                  specialResourcesSet) where
 
 import           AST
 import           Control.Monad
@@ -18,10 +20,11 @@ import           Data.List                 as List
 import           Data.Map                  as Map
 import           Data.Maybe
 import           Data.Set                  as Set
-import           Data.Tuple.HT             (mapFst)
+import           Data.Tuple.HT             (mapFst, mapSnd)
 import           Options                   (LogSelection (Resources))
 import           Snippets
 import           Util
+import Debug.Trace (traceShowId)
 
 
 ------------------------- Checking resource decls -------------------------
@@ -151,33 +154,49 @@ transformStmt :: Int -> [(ResourceFlowSpec, TypeSpec)] -> Stmt -> OptPos
               -> Compiler ([Placed Stmt], Int)
 transformStmt tmp res stmt@(ProcCall func@(First m n id) detism resourceful args) pos = do
     let procID = trustFromJust "transformStmt" id
-    callResources <-
+    callResFlows <-
         procProtoResources . procProto <$> getProcDef
                 (ProcSpec m n procID generalVersion)
     let argTys = fromMaybe AnyType . maybeExpType . content <$> args
-    unless (resourceful || (Set.null callResources 
-                            && not (any isResourcefulHigherOrder argTys) ))
+    let hasResfulHigherArgs = any isResourcefulHigherOrder argTys
+    unless (resourceful || (Set.null callResFlows && not hasResfulHigherArgs))
       $ message Error
         ("Call to resourceful proc without ! resource marker: "
          ++ showStmt 4 stmt)
         pos
-    logResources $ "Checking call to " ++ n ++ " using " ++ show callResources
-    resArgs <- concat <$> mapM (resourceArgs pos) (Set.elems callResources)
+    logResources $ "Checking call to " ++ n ++ " using " ++ show callResFlows
+    resArgs <- concat <$> mapM (resourceArgs pos) (Set.elems callResFlows)
     (args', tmp') <- transformExps tmp res args 
-    return ([maybePlace
-            (ProcCall func detism False (args'++resArgs)) pos], tmp')
-transformStmt tmp res stmt@(ProcCall (Higher func) detism resourceful args) pos = 
-    case content func of
-        Typed _ (HigherOrderType ProcModifiers{modifierResourceful=resfulMod} _) _ -> do
-            unless (resourceful || resfulMod == Resourceless)
+    let stmt' = [maybePlace (ProcCall func detism False (args' ++ resArgs)) pos]
+    if hasResfulHigherArgs
+    then 
+        let callRess = Set.map resourceFlowRes callResFlows
+            inRess = Set.map resourceFlowRes
+                   $ Set.filter (flowsIn . resourceFlowFlow) callResFlows
+            toStore = List.filter ((`Set.notMember` inRess) . resourceFlowRes . fst) res
+            stores = storeResource . mapFst resourceFlowRes <$> toStore 
+            toLoad = List.filter ((`Set.notMember` callRess) . resourceFlowRes . fst) res
+            loads = loadResource . mapFst resourceFlowRes <$> toLoad
+        in return (loads ++ stmt' ++ stores, tmp')
+    else return (stmt', tmp')
+transformStmt tmp res stmt@(ProcCall (Higher func) detism resourceful args) pos = do
+    (func', tmp') <- placedApply (transformExp tmp res) func
+    (args', tmp'') <- transformExps tmp' res args 
+    let stmt' = [maybePlace (ProcCall (Higher func') detism False args') pos]
+    case content func' of
+        Typed _ (HigherOrderType ProcModifiers{modifierResourceful=Resourceful} _) _ -> do
+            unless resourceful
                 $ message Error
                     ("Resourceful higher order call without ! resource marker: "
                     ++ showStmt 4 stmt)
                     pos
-                    
-            (args', tmp') <- transformExps tmp res args 
-            return ([maybePlace (ProcCall (Higher func) detism False args') pos], tmp')
-        _ -> shouldnt $ "bad resoruce higher call type" ++ show stmt 
+            let resTys = mapFst resourceFlowRes <$> res
+                stores = storeResource <$> resTys 
+                loads = loadResource <$> resTys
+            return (stores ++ stmt' ++ loads, tmp'')
+        Typed _ (HigherOrderType _ _) _ ->
+            return (stmt', tmp'')
+        _ -> shouldnt $ "bad resource higher call type" ++ show stmt 
 transformStmt tmp res (ForeignCall lang name flags args) pos = do
     (args', tmp') <- transformExps tmp res args
     return ([maybePlace (ForeignCall lang name flags args') pos], tmp')
@@ -219,27 +238,59 @@ transformStmt tmp res (For generators body) pos = do
 transformStmt tmp res (UseResources allRes oldRes body) pos = do
     let resVars = trustFromJust "use stmt without var list after type check"
                   oldRes
-    canonAllRes <- mapM (canonicaliseResourceSpec pos "use statement") allRes
-    let resTypes = List.filter ((`elem` resVars) . resourceName . fst) canonAllRes
+    canonAllRes <- mapM ((mapSnd fromJust <$>) 
+                         <$> canonicaliseResourceSpec pos "use statement") allRes
+    let (resTypes,gResTypes) = List.partition ((`elem` resVars) . resourceName . fst) 
+                                canonAllRes
     toSave <- mapM (resourceVar . fst) resTypes
-    let types = fromJust . snd <$> resTypes
-    let resCount = length toSave
-    let tmp' = tmp + resCount
-    let ress = zip4 toSave (mkTempName <$> [tmp..]) types (fst <$> resTypes)
-    let get v ty rs = varGet v `withType` ty
-    let set v ty rs = varSet v `withType` ty
-    let saves = (\(r,t,ty,rs) -> move (get r ty rs `setExpFlowType` Resource rs ) (set t ty rs `setExpFlowType` Ordinary )) <$> ress
-    let restores = (\(r,t,ty,rs) -> move (get t ty rs `setExpFlowType` Ordinary ) (set r ty rs `setExpFlowType` Resource rs )) <$> ress
+    let (saves, restores, tmp') = saveRestoreResourcesTmp False tmp toSave resTypes
     resFlows <- concat <$> mapM (simpleResourceFlows pos) 
                                 ((`ResourceFlowSpec` ParamInOut). fst <$> canonAllRes)
     (body',tmp'') <- transformBody tmp' (List.nub $ res ++ resFlows) body
-    return (saves ++ body' ++ restores, tmp'')
--- transformStmt tmp res (For itr gen) pos =
---     return ([maybePlace (For itr gen) pos], tmp)
+    if foldStmts const ((. expIsResourceful) . (||)) False body
+    then 
+        let gToSave = makeGlobalResourceName . fst <$> gResTypes
+            (gSaves, gRestores, tmp''') = saveRestoreResourcesTmp True tmp'' gToSave gResTypes
+        in return (saves ++ gSaves ++ body' ++ restores ++ gRestores, tmp''')
+    else return (saves ++ body' ++ restores, tmp'')
 transformStmt tmp res Break pos =
     return ([maybePlace Break pos], tmp)
 transformStmt tmp res Next pos =
     return ([maybePlace Next pos], tmp)
+
+expIsResourceful :: Exp -> Bool
+expIsResourceful = isResourcefulHigherOrder . fromMaybe AnyType . maybeExpType
+
+getResource :: Ident -> (ResourceSpec, TypeSpec) -> Exp
+getResource nm (rs, ty) = varGet nm `withType` ty `setExpFlowType` Resource rs
+
+setResource :: Ident -> (ResourceSpec, TypeSpec) -> Exp
+setResource nm (rs, ty) = varSet nm `withType` ty `setExpFlowType` Resource rs
+
+saveRestoreResourcesTmp :: Bool -> Int -> [Ident] -> [(ResourceSpec, TypeSpec)] 
+                     -> ([Placed Stmt], [Placed Stmt], Int)
+saveRestoreResourcesTmp _ _ names resTys
+  | not $ sameLength names resTys = shouldnt "saveRestoreResourcesTmp"
+saveRestoreResourcesTmp global tmp names resTys =
+    let ress = zip3 names (mkTempName <$> [tmp..]) resTys
+        (saver,restorer) = if global
+                           then (globalLoad, globalStore) 
+                           else (move,move)
+        saves = (\(nm,t,ty) -> saver (getResource nm ty) 
+                                     (setResource t ty)) <$> ress
+        restores = (\(nm,t,ty) -> restorer (getResource t ty)
+                                           (setResource nm ty)) <$> ress
+    in (saves, restores, tmp + length names)
+
+storeResource :: (ResourceSpec, TypeSpec) -> Placed Stmt
+storeResource rsTy@(rs,_) = 
+    globalStore (setResource (makeGlobalResourceName rs) rsTy) 
+                (getResource (resourceName rs) rsTy)
+
+loadResource :: (ResourceSpec, TypeSpec) -> Placed Stmt
+loadResource rsTy@(rs,_) = 
+    globalLoad (setResource (resourceName rs) rsTy) 
+               (getResource (makeGlobalResourceName rs) rsTy)
 
 transformExps :: Int -> [(ResourceFlowSpec, TypeSpec)] -> [Placed Exp]
               -> Compiler ([Placed Exp],Int)
@@ -254,15 +305,15 @@ transformExp :: Int -> [(ResourceFlowSpec, TypeSpec)] -> Exp -> OptPos
 transformExp tmp res (Typed exp ty cast) pos = do
     (pexp', tmp') <- transformExp tmp res exp Nothing
     return (maybePlace (Typed (content pexp') ty cast) pos, tmp')
-transformExp tmp res (Lambda mods@ProcModifiers{modifierResourceful=Resourceful} params body) pos = do
+transformExp tmp res (AnonProc mods@ProcModifiers{modifierResourceful=Resourceful} params body) pos = do
     (body',tmp') <- transformBody tmp res body
     resParams <- concat <$> mapM (resourceParams pos) 
                                  (mapFst (\r -> r{resourceFlowFlow=ParamInOut}) <$> res)
-    return (maybePlace (Lambda mods{modifierResourceful=Resourceless}
+    return (maybePlace (AnonProc mods{modifierResourceful=Resourceless}
                                (params ++ resParams) body') pos, tmp')
-transformExp tmp _ (Lambda mods params body) pos = do
+transformExp tmp _ (AnonProc mods params body) pos = do
     (body', tmp') <- transformBody tmp [] body
-    return (maybePlace (Lambda mods params body') pos, tmp')
+    return (maybePlace (AnonProc mods params body') pos, tmp')
 transformExp tmp res exp@(Var name _ _) pos = do
     resNames <- mapM (resourceVar . resourceFlowRes . fst) res
     let resMap = Map.fromList $ zip resNames (resourceFlowRes . fst <$> res)
