@@ -21,10 +21,6 @@ import Config
 import Text.Parsec
 import Text.Parsec.Pos
 import Data.Functor
--- import qualified Parser as OldParser
--- import           Data.Algorithm.Diff       (getGroupedDiff)
--- import           Data.Algorithm.DiffOutput (ppDiff)
--- import           Text.Parsec.Expr
 import Control.Monad
 
 
@@ -53,15 +49,17 @@ maybeSetPosition toks parser = do
     parser
 
 
--- | Parser entry for a Wybe program.
+-- | Parser entry for a Wybe program, items separated by some separator.
 items :: Parser [Item]
 items = singleItem `sepBy` separator
 
 
+-- | Parse a single items
 singleItem :: Parser Item
 singleItem = visibilityItem <|> privateItem <|> topLevelStmtItem
 
 
+-- | Parse a top-level statement itme
 topLevelStmtItem :: Parser Item
 topLevelStmtItem = do
     st <- stmt <?> "top-level statement"
@@ -86,11 +84,13 @@ privateItem :: Parser Item
 privateItem = typeRepItem <|> pragmaItem
 
 
+-- | Parse a pragma item
 pragmaItem :: Parser Item
 pragmaItem = ident "pragma" *> (PragmaDecl <$> parsePragma)
 
 
--- TODO:  Should use the StmtExpr parser to parse the declaration body.
+-- TODO:  Should use the Term parser to parse the declaration body.
+-- | Parse a Pragma, currently only "no_standard_library"
 parsePragma :: Parser Pragma
 parsePragma = ident "no_standard_library" $> NoStd
 
@@ -108,8 +108,8 @@ moduleItem v = do
 typeItem :: Visibility -> Parser Item
 typeItem v = do
     pos <- tokenPosition <$> ident "type"
-    proto <- TypeProto <$> moduleName <*>
-             option [] (betweenB Paren (typeVarName `sepBy` comma))
+    proto <- TypeProto <$> moduleName <*> typeVarNames
+             
     (imp,items) <- typeImpln <|> typeCtors
     return $ TypeDecl v proto imp items (Just pos)
 
@@ -118,7 +118,7 @@ typeItem v = do
 typeRepItem :: Parser Item
 typeRepItem = do
     keypos <- tokenPosition <$> ident "representation"
-    params <- option [] $ betweenB Paren (typeVarName `sepBy` comma)
+    params <- typeVarNames
     ident "is"
     rep <- typeRep
     return $ RepresentationDecl params rep $ Just keypos
@@ -128,12 +128,13 @@ typeRepItem = do
 dataCtorItemParser :: Visibility -> Parser Item
 dataCtorItemParser v = do
     pos <- tokenPosition <$> (ident "constructor" <|> ident "constructors")
-    params <- option [] $ betweenB Paren (typeVarName `sepBy` comma)
-    ctors <- ctorDecl `sepBy1` symbol "|"
+    params <- typeVarNames
+    ctors <- ctorDecls
     return $ ConstructorDecl v params ctors $ Just pos
 
 
 -- | Type declaration body where representation and items are given
+typeImpln :: Parser (TypeImpln, [Item])
 typeImpln = do
     impln <- TypeRepresentation <$> (ident "is" *> typeRep)
     items <- betweenB Brace items
@@ -155,17 +156,14 @@ typeRep = do
 typeCtors :: Parser (TypeImpln,[Item])
 typeCtors = betweenB Brace $ do
     vis <- visibility
-    ctors <- procFuncProto `sepBy1` symbol "|"
+    ctors <- ctorDecls 
     items <- option [] (separator *> items)
     return (TypeCtors vis ctors,items)
 
 
-procFuncProto :: Parser (Placed ProcProto)
-procFuncProto = stmtExpr >>= parseWith stmtExprToProto
-
-
-ctorDecl :: Parser (Placed ProcProto)
-ctorDecl = stmtExpr >>= parseWith stmtExprToCtorDecl
+-- | Parse a collection of Constructor declarations, separated by `|`s
+ctorDecls :: Parser [Placed ProcProto]
+ctorDecls = (term >>= parseWith termToCtorDecl) `sepBy1` symbol "|"
 
 
 -- | Resource declaration parser.
@@ -177,13 +175,14 @@ resourceItem v = do
         <*> typeSpec <*> optInit <*> return (Just pos)
 
 
+-- | Parse a "use" item. Either an import statement or a use-block
 useItemParser :: Visibility -> Parser Item
 useItemParser v = do
     pos <- Just . tokenPosition <$> ident "use"
     ident "foreign" *> foreignFileOrLib v pos
       <|> (moduleSpec `sepBy` comma >>= useBody v pos)
 
-
+-- | Parse a foreign library or object import
 foreignFileOrLib :: Visibility -> OptPos -> Parser Item
 foreignFileOrLib v pos =
     ImportForeignLib
@@ -191,24 +190,28 @@ foreignFileOrLib v pos =
     <|> ImportForeign
             <$> (ident "object" *> identString `sepBy` comma) <*> return pos
 
-
+-- | Parse a use-block body or an import statement
 useBody :: Visibility -> OptPos -> [ModSpec] -> Parser Item
 useBody v pos mods =
-    ident "in" *> topLevelUseStmt pos mods -- XXX should check v == Private
+    (ident "in" *> do
+        if v == Private
+        then topLevelUseStmt pos (modSpecToResourceSpec <$> mods)
+        else fail "inavlid use-block")
     <|> return (ImportMods v mods pos)
 
-
-topLevelUseStmt :: OptPos -> [ModSpec] -> Parser Item
-topLevelUseStmt pos mods = do
+-- | Parse a top-level use statement with specified 
+topLevelUseStmt :: OptPos -> [ResourceSpec] -> Parser Item
+topLevelUseStmt pos ress = do
     body <- stmtSeq
-    let ress = modSpecToResourceSpec <$> mods
     return $ StmtDecl (UseResources ress Nothing body) pos
 
 
+-- | Convert a ModSpce to a ResourceSpec 
 modSpecToResourceSpec :: ModSpec -> ResourceSpec
 modSpecToResourceSpec modspec = ResourceSpec (init modspec) (last modspec)
 
 
+-- | Parse a from-use item
 fromUseItemParser :: Visibility -> Parser Item
 fromUseItemParser v = do
     pos <- tokenPosition <$> ident "from"
@@ -223,8 +226,8 @@ procOrFuncItem :: Visibility -> Parser Item
 procOrFuncItem vis = do
     pos <- Just . tokenPosition <$> ident "def"
     mods <- processProcModifiers <$> modifierList
-    (proto, returnType) <- limitedStmtExpr prototypePrecedence
-                            >>= parseWith stmtExprToPrototype
+    (proto, returnType) <- limitedTerm prototypePrecedence
+                            >>= parseWith termToPrototype
     do
         body <- symbol "=" *> expr
         return $ FuncDecl vis mods proto returnType body pos
@@ -233,11 +236,9 @@ procOrFuncItem vis = do
           else do
             rs <- option [] (ident "use" *> resourceFlowSpec `sepBy1` comma)
             let proto' = proto { procProtoResources = Set.fromList rs }
-            body <- embracedStmtExp >>= parseWith stmtExprToBody
+            body <- embracedTerm >>= parseWith termToBody
             return $ ProcDecl vis mods proto' body pos
 
-
--- | Parse a proc or function prototype
 
 -- | Parse a specification of a resource and its flow direction.
 resourceFlowSpec :: Parser ResourceFlowSpec
@@ -247,10 +248,9 @@ resourceFlowSpec = do
     return $ ResourceFlowSpec res flow
 
 
+-- | Parse a resource spec
 resourceSpec :: Parser ResourceSpec
-resourceSpec = do
-    m <- moduleSpec
-    return $ ResourceSpec (init m) (last m)
+resourceSpec = moduleSpec <&> modSpecToResourceSpec
 
 
 -- | Optional flow direction symbol prefix.
@@ -270,7 +270,7 @@ processProcModifiers :: [String] -> ProcModifiers
 processProcModifiers = List.foldl (flip processProcModifier)
                         $ ProcModifiers Det MayInline Pure [] []
 
--- |Update 
+-- | Update a collection of ProcModifiers
 processProcModifier :: String -> ProcModifiers -> ProcModifiers
 processProcModifier "test"     = updateModsDetism   "test" SemiDet
 processProcModifier "partial"  = updateModsDetism   "partial" SemiDet
@@ -340,70 +340,71 @@ updateModsImpurity modName _ mods =
 
 -- |Parse a body.
 stmtSeq :: Parser [Placed Stmt]
-stmtSeq = stmtExpr >>= parseWith stmtExprToBody
+stmtSeq = term >>= parseWith termToBody
 
 
 -- |Parse a single Placed Stmt.
 stmt :: Parser (Placed Stmt)
-stmt = limitedStmtExpr lowestStmtPrecedence >>= parseWith stmtExprToStmt
+stmt = limitedTerm lowestStmtPrecedence >>= parseWith termToStmt
 
 
 -- |Parse a placed Exp
 expr :: Parser (Placed Exp)
-expr = stmtExpr >>= parseWith stmtExprToExp
+expr = term >>= parseWith termToExp
 
 
+-- | Parse a TypeSpec
 typeSpec :: Parser TypeSpec
-typeSpec = limitedStmtExpr prototypePrecedence >>= parseWith stmtExprToTypeSpec
+typeSpec = limitedTerm prototypePrecedence >>= parseWith termToTypeSpec
 
 
--- |Parse a stmtExpr.
-stmtExpr :: Parser StmtExpr
-stmtExpr = limitedStmtExpr lowestExprPrecedence
+-- |Parse a term.
+term :: Parser Term
+term = limitedTerm lowestTermPrecedence
 
 
--- |A stmtExpr with an operator precedence of limited looseness.
-limitedStmtExpr :: Int -> Parser StmtExpr
-limitedStmtExpr precedence = stmtExprFirst >>= stmtExprRest precedence
+-- |A term with an operator precedence of limited looseness.
+limitedTerm :: Int -> Parser Term
+limitedTerm precedence = termFirst >>= termRest precedence
 
 
--- |The left argument to an infix operator.  This is a primaryStmtExpr,
--- possibly preceded by a prefix operator or followed by an stmtExprSuffix.
+-- |The left argument to an infix operator.  This is a primaryTerm,
+-- possibly preceded by a prefix operator or followed by an termSuffix.
 -- Valid suffixes include parenthesised argument lists or square bracketed
 -- indices.  If both prefix and suffix are present, the suffix binds tighter.
-stmtExprFirst :: Parser StmtExpr
-stmtExprFirst = (do
+termFirst :: Parser Term
+termFirst = (do
              op <- prefixOp
-             primaryStmtExpr >>= stmtExprSuffix >>= applyPrefixOp op)
-         <|> (primaryStmtExpr >>= stmtExprSuffix)
+             primaryTerm >>= termSuffix >>= applyPrefixOp op)
+         <|> (primaryTerm >>= termSuffix)
 
 
 -- |Apply zero or more parenthesised or square bracketed suffixes to the
--- specified stmtExpr. If multiple suffixes are present, they associate to the
+-- specified term. If multiple suffixes are present, they associate to the
 -- left.
-stmtExprSuffix :: StmtExpr -> Parser StmtExpr
-stmtExprSuffix left =
-    (try (stmtExprSuffix' left) >>= stmtExprSuffix) <|> return left
+termSuffix :: Term -> Parser Term
+termSuffix left =
+    (try (termSuffix' left) >>= termSuffix) <|> return left
 
 
 -- |Apply one parenthesised or square bracketed suffixes to the specified
--- stmtExpr.
-stmtExprSuffix' :: StmtExpr -> Parser StmtExpr
-stmtExprSuffix' left =
+-- term.
+termSuffix' :: Term -> Parser Term
+termSuffix' left =
     (argumentList Paren >>= applyArguments left)
-    <|> (Call (stmtExprPos left) [] "[]" ParamIn . (left:)
+    <|> (Call (termPos left) [] "[]" ParamIn . (left:)
          <$> argumentList Bracket)
 
 
 -- |Comma-separated, non-empty argument list, surrounded by the specified
 -- bracket type.
-argumentList :: BracketStyle -> Parser [StmtExpr]
+argumentList :: BracketStyle -> Parser [Term]
 argumentList Brace = shouldnt "brace-enclosed argument list"
-argumentList bracket = betweenB bracket (stmtExpr `sepBy` comma)
+argumentList bracket = betweenB bracket (term `sepBy` comma)
 
 
 -- |Supply arguments to function call we thought was something else.
-applyArguments :: StmtExpr -> [StmtExpr] -> Parser StmtExpr
+applyArguments :: Term -> [Term] -> Parser Term
 applyArguments stmtOrExpr args =
     case stmtOrExpr of
         call@Call{} ->
@@ -412,29 +413,29 @@ applyArguments stmtOrExpr args =
                         ++ show other
 
 
--- |Complete parsing an stmtExpr of precedence no looser than specified, given
--- that we have already parsed the specified stmtExpr on the left.
+-- |Complete parsing an term of precedence no looser than specified, given
+-- that we have already parsed the specified term on the left.
 -- XXX this doesn't handle non-associative operators correctly; it treats them
 -- as right associative.
-stmtExprRest :: Int -> StmtExpr -> Parser StmtExpr
-stmtExprRest minPrec left =
+termRest :: Int -> Term -> Parser Term
+termRest minPrec left =
     do -- A functional Pratt operator precedence parser
          -- parse an infix operator of at least the specified precedence
         (op,rightPrec) <- infixOp minPrec
         -- parse expression of high enough precedence to be the right argument
-        right <- limitedStmtExpr rightPrec
-        let pos = stmtExprPos left
+        right <- limitedTerm rightPrec
+        let pos = termPos left
         -- construct a call of the op with the left and right arguments, and
         -- treat that as the left argument of the rest of the expr
-        stmtExprRest minPrec $ Call pos [] op ParamIn [left,right]
+        termRest minPrec $ Call pos [] op ParamIn [left,right]
     <|> -- Otherwise try to parse a call with 1 un-parenthesised argument;
         -- failing that, the left context is the whole expression.
         case left of
             Call _ m n _ [] | minPrec <= lowestStmtPrecedence
                             || List.null m && prefixKeyword n ->
-                (limitedStmtExpr lowestExprPrecedence
+                (limitedTerm lowestTermPrecedence
                     >>= applyArguments left . (:[])
-                    >>= stmtExprRest minPrec)
+                    >>= termRest minPrec)
                 <|> return left
             _ -> return left
 
@@ -453,11 +454,11 @@ infixOp minPrec = takeToken test
               rPrec = prec - if assoc /= RightAssociative then 0 else 1
 
 
--- |Parse a simple, StmtExpr, not involving any operators.
-primaryStmtExpr :: Parser StmtExpr
-primaryStmtExpr =
-    parenthesisedExp
-    <|> embracedStmtExp
+-- |Parse a simple, Term, not involving any operators.
+primaryTerm :: Parser Term
+primaryTerm =
+    parenthesisedTerm
+    <|> embracedTerm
     <|> foreignCall
     <|> forLoop
     <|> varOrCall
@@ -465,62 +466,62 @@ primaryStmtExpr =
     <|> floatConst
     <|> charConst
     <|> stringConst
-    <|> listExp
+    <|> listTerm
     <?> "simple expression"
 
 
-parenthesisedExp :: Parser StmtExpr
-parenthesisedExp = do
+parenthesisedTerm :: Parser Term
+parenthesisedTerm = do
     pos <- tokenPosition <$> leftBracket Paren
-    setStmtExprPos pos <$> stmtExpr <* rightBracket Paren
+    setTermPos pos <$> term <* rightBracket Paren
 
 
-varOrCall :: Parser StmtExpr
+varOrCall :: Parser Term
 varOrCall = do
     pos <- getPosition
     modVar <- moduleSpec
     return $ Call pos (init modVar) (last modVar) ParamIn []
 
 
--- | Parse a sequence of StmtExprs enclosed in braces.
-embracedStmtExp :: Parser StmtExpr
-embracedStmtExp = do
+-- | Parse a sequence of Terms enclosed in braces.
+embracedTerm :: Parser Term
+embracedTerm = do
     pos <- tokenPosition <$> leftBracket Brace
     Call pos [] "{}" ParamIn
-        <$> limitedStmtExpr lowestStmtSeqPrecedence `sepBy` comma
+        <$> limitedTerm lowestStmtSeqPrecedence `sepBy` comma
         <* rightBracket Brace
 
 
 -- | Parse all expressions beginning with the terminal "[".
--- List -> '[' StmtExpr ListTail
+-- List -> '[' Term ListTail
 -- Empty List -> '[' ']'
 -- List Cons -> '[' '|' ']'
-listExp :: Parser StmtExpr
-listExp = do
+listTerm :: Parser Term
+listTerm = do
     pos <- (tokenPosition <$> leftBracket Bracket) <?> "list"
     rightBracket Bracket $> Call pos [] "[]" ParamIn []
         <|> do
-            head <- stmtExpr
+            head <- term
             tail <- listTail
             return $ Call pos [] "[|]" ParamIn [head,tail]
 
 
 -- | Parse the tail of a list.
--- ListTail -> ']' | ',' StmtExpr ListTail
-listTail :: Parser StmtExpr
+-- ListTail -> ']' | ',' Term ListTail
+listTail :: Parser Term
 listTail = do
         pos <- tokenPosition <$> rightBracket Bracket
         return $ Call pos [] "[]" ParamIn []
     <|> do
         pos <- tokenPosition <$> comma
-        head <- stmtExpr
+        head <- term
         tail <- listTail
         return $ Call pos [] "[|]" ParamIn [head, tail]
-    <|> symbol "|" *> stmtExpr <* rightBracket Bracket
+    <|> symbol "|" *> term <* rightBracket Bracket
 
 
 -- |A foreign function or procedure call.
-foreignCall :: Parser StmtExpr
+foreignCall :: Parser Term
 foreignCall = do
     pos <- tokenPosition <$> ident "foreign"
     language <- identString
@@ -530,11 +531,11 @@ foreignCall = do
 
 
 -- |A for loop.
-forLoop :: Parser StmtExpr
+forLoop :: Parser Term
 forLoop = do
     pos <- tokenPosition <$> ident "for"
-    gen <- limitedStmtExpr lowestStmtSeqPrecedence
-    body <- embracedStmtExp
+    gen <- limitedTerm lowestStmtSeqPrecedence
+    body <- embracedTerm
     return $ Call pos [] "for" ParamIn [gen,body]
 
 
@@ -583,8 +584,8 @@ operatorAssociativity str
 
 
 -- |Lowest (loosest) operator precedence number
-lowestExprPrecedence :: Int
-lowestExprPrecedence = 1
+lowestTermPrecedence :: Int
+lowestTermPrecedence = 1
 
 
 -- |Lowest (loosest) operator precedence of an individual statement
@@ -607,33 +608,33 @@ prefixOp :: Parser Token
 prefixOp = symbol "-" <|> symbol "~" <|> symbol "?" <|> symbol "!"
 
 
--- |Apply the specified prefix op to the specified stmtExpr.  Fail if it should
+-- |Apply the specified prefix op to the specified term.  Fail if it should
 -- be a syntax error.
-applyPrefixOp :: Token -> StmtExpr -> Parser StmtExpr
-applyPrefixOp tok stmtExpr = do
+applyPrefixOp :: Token -> Term -> Parser Term
+applyPrefixOp tok term = do
     let pos = tokenPosition tok
-    let stmtExpr' = stmtExpr
-    case (tokenName tok, stmtExpr') of
+    let term' = term
+    case (tokenName tok, term') of
         ("-", IntConst _ num) -> return $ IntConst pos (-num)
         ("-", FloatConst _ num) -> return $ FloatConst pos (-num)
-        ("-", Call{}) -> return $ call1 pos "-" stmtExpr
-        ("-", Foreign{}) -> return $ call1 pos "-" stmtExpr
-        ("-", _) -> fail $ "cannot negate " ++ show stmtExpr
+        ("-", Call{}) -> return $ call1 pos "-" term
+        ("-", Foreign{}) -> return $ call1 pos "-" term
+        ("-", _) -> fail $ "cannot negate " ++ show term
         ("~", IntConst _ num) -> return $ IntConst pos (complement num)
-        ("~", Call{}) -> return $ call1 pos "~" stmtExpr
-        ("~", Foreign{}) -> return $ call1 pos "~" stmtExpr
-        ("~", _) -> fail $ "cannot negate " ++ show stmtExpr
-        ("?", Call{callArguments=[]}) -> return $ setCallFlow ParamOut stmtExpr'
-        ("?", _) -> fail $ "unexpected " ++ show stmtExpr'++ " following '?'"
-        ("!", Call{}) -> return $ setCallFlow ParamInOut stmtExpr'
-        ("!", _) -> fail $ "unexpected " ++ show stmtExpr' ++ " following '!'"
+        ("~", Call{}) -> return $ call1 pos "~" term
+        ("~", Foreign{}) -> return $ call1 pos "~" term
+        ("~", _) -> fail $ "cannot negate " ++ show term
+        ("?", Call{callArguments=[]}) -> return $ setCallFlow ParamOut term'
+        ("?", _) -> fail $ "unexpected " ++ show term'++ " following '?'"
+        ("!", Call{}) -> return $ setCallFlow ParamInOut term'
+        ("!", _) -> fail $ "unexpected " ++ show term' ++ " following '!'"
         (_,_) -> shouldnt $ "Unknown prefix operator " ++ show tok
                             ++ " in applyPrefixOp"
 
 
 -- |Unary call to the specified proc name with the specified argument.  The
 -- default (empty) module and default (ParamIn) variable flow are used.
-call1 :: SourcePos -> ProcName -> StmtExpr -> StmtExpr
+call1 :: SourcePos -> ProcName -> Term -> Term
 call1 pos name arg = Call pos [] name ParamIn [arg]
 
 
@@ -661,6 +662,7 @@ prefixKeyword _     = False
 
 
 -- | Test if operator name is for a separator operator.
+separatorName :: [Char] -> Bool
 separatorName ";"  = True
 separatorName "\n" = True
 separatorName _    = False
@@ -683,7 +685,7 @@ takeToken = token show tokenPosition
 
 
 -- | Parse a float literal token.
-floatConst :: Parser StmtExpr
+floatConst :: Parser Term
 floatConst = takeToken test
     where
       test (TokFloat f p) = Just $ FloatConst p f
@@ -691,7 +693,7 @@ floatConst = takeToken test
 
 
 -- | Parse an integer literal token.
-intConst :: Parser StmtExpr
+intConst :: Parser Term
 intConst = takeToken test
   where
     test (TokInt i p) = Just $ IntConst p i
@@ -707,7 +709,7 @@ intLiteral = takeToken test
 
 
 -- | Parse a character literal token.
-charConst :: Parser StmtExpr
+charConst :: Parser Term
 charConst = takeToken test
     where
       test (TokChar c p) = Just $ CharConst p c
@@ -715,7 +717,7 @@ charConst = takeToken test
 
 
 -- | Parse a string literal token.
-stringConst :: Parser StmtExpr
+stringConst :: Parser Term
 stringConst = takeToken test
   where
     test (TokString d s p) = Just $ StringConst p s d
@@ -731,13 +733,13 @@ ident key = takeToken test
 
 
 -- | Parse an identifier token.
-identifier :: Parser StmtExpr
+identifier :: Parser Term
 identifier = takeToken test
   where
     test (TokIdent s p) = Just $ Call p [] s ParamIn []
     test _ = Nothing
 
-
+-- Parse an identifier as a string
 identString :: Parser String
 identString = takeToken test
   where
@@ -751,6 +753,12 @@ typeVarName = takeToken test
  where 
     test (TokIdent s _) | isTypeVar s = Just s
     test _                            = Nothing
+
+
+-- | Parse a list of comma-separated TypeVarNames, between parentheses
+typeVarNames :: Parser [Ident] 
+typeVarNames = option [] (betweenB Paren $ typeVarName `sepBy` comma)
+
 
 -- | Parse a module name, any ident that is not a TypeVarName
 moduleName :: Parser Ident 
@@ -853,9 +861,11 @@ visibility = option Private (ident "pub" $> Public)
 -- | Terminal for determinism.
 determinism :: Parser Determinism
 determinism = option Det (ident "test" $> SemiDet
+                          <|> ident "partial" $> SemiDet
+                          <|> ident "failing" $> Failure
                           <|> ident "terminal" $> Terminal)
 
-
+-- | Translate the output of a parser to something else
 parseWith :: (a -> Either (SourcePos,String) b) -> a -> Parser b
 parseWith translator = either reportFailure return . translator
 
@@ -866,317 +876,316 @@ reportFailure (pos, message) = setPosition pos >> parserFail message
 
 
 -----------------------------------------------------------------------------
--- Translating StmtExpr to the correct output types                        --
+-- Translating Term to the correct output types                        --
 -----------------------------------------------------------------------------
 
 -- |Type alias for a translation function
-type TranslateTo ty = StmtExpr -> Either (SourcePos,String) ty
+type TranslateTo t = Term -> Either (SourcePos,String) t
 
 
--- |Convert a StmtExpr to a proc/func prototype and a return type (AnyType for a
+-- |Convert a Term to a proc/func prototype and a return type (AnyType for a
 -- proc declaration or a function with no return type specified).
-stmtExprToPrototype :: TranslateTo (ProcProto, TypeSpec)
-stmtExprToPrototype (Call _ [] ":" ParamIn [rawProto,rawTy]) = do
-    returnType <- stmtExprToTypeSpec rawTy
-    (proto,_)  <- stmtExprToPrototype rawProto
+termToPrototype :: TranslateTo (ProcProto, TypeSpec)
+termToPrototype (Call _ [] ":" ParamIn [rawProto,rawTy]) = do
+    returnType <- termToTypeSpec rawTy
+    (proto,_)  <- termToPrototype rawProto
     return (proto,returnType)
-stmtExprToPrototype (Call pos mod name ParamIn rawParams) =
+termToPrototype (Call pos mod name ParamIn rawParams) =
     if List.null mod
     then do
-        params <- mapM stmtExprToParam rawParams
+        params <- mapM termToParam rawParams
         return (ProcProto name params Set.empty,AnyType)
     else Left (pos, "module not permitted in proc declaration " ++ show mod)
-stmtExprToPrototype other =
-    syntaxError (stmtExprPos other)
+termToPrototype other =
+    syntaxError (termPos other)
                 $ "invalid proc/func prototype " ++ show other
 
 
--- |Convert a StmtExpr to a body, if possible, or give a syntax error if not.
-stmtExprToBody :: TranslateTo [Placed Stmt]
-stmtExprToBody (Call pos [] sep ParamIn [left,right])
+-- |Convert a Term to a body, if possible, or give a syntax error if not.
+termToBody :: TranslateTo [Placed Stmt]
+termToBody (Call pos [] sep ParamIn [left,right])
   | separatorName sep = do
-    left' <- stmtExprToBody left
-    right' <- stmtExprToBody right
+    left' <- termToBody left
+    right' <- termToBody right
     return $ left' ++ right'
-stmtExprToBody (Call pos [] "{}" ParamIn [body]) =
-    stmtExprToBody body
-stmtExprToBody other = (:[]) <$> stmtExprToStmt other
+termToBody (Call pos [] "{}" ParamIn [body]) =
+    termToBody body
+termToBody other = (:[]) <$> termToStmt other
 
 
--- |Convert a StmtExpr to a Stmt, if possible, or give a syntax error if not.
-stmtExprToStmt :: TranslateTo (Placed Stmt)
--- stmtExprToStmt (Call pos [] "if" ParamIn [conditional]) =
---     translateConditionalStmt conditional
-stmtExprToStmt (Call pos [] "{}" ParamIn [body]) =
-    stmtExprToStmt body
-stmtExprToStmt (Call pos [] "if" ParamIn [conditional]) =
-    stmtExprToStmt conditional
-stmtExprToStmt (Call pos [] "case" ParamIn 
+-- |Convert a Term to a Stmt, if possible, or give a syntax error if not.
+termToStmt :: TranslateTo (Placed Stmt)
+termToStmt (Call pos [] "{}" ParamIn [body]) =
+    termToStmt body
+termToStmt (Call pos [] "if" ParamIn [conditional]) =
+    termToStmt conditional
+termToStmt (Call pos [] "case" ParamIn 
                 [Call _ [] "in" ParamIn 
                       [exp,Call _ [] "{}" ParamIn [body]]]) = do
-    expr' <- stmtExprToExp exp
-    (cases,deflt) <- stmtExprToCases stmtExprToBody body
+    expr' <- termToExp exp
+    (cases,deflt) <- termToCases termToBody body
     return $ Placed (Case expr' cases deflt) pos
-stmtExprToStmt (Call pos [] "do" ParamIn [body]) =
-    (`Placed` pos) . flip Loop Nothing <$> stmtExprToBody body
-stmtExprToStmt (Call pos [] "for" ParamIn [gen,body]) = do
-    genStmts <- stmtExprToGenerators gen
-    (`Placed` pos) . For genStmts <$> stmtExprToBody body
-stmtExprToStmt (Call pos [] "use" ParamIn
+termToStmt (Call pos [] "do" ParamIn [body]) =
+    (`Placed` pos) . flip Loop Nothing <$> termToBody body
+termToStmt (Call pos [] "for" ParamIn [gen,body]) = do
+    genStmts <- termToGenerators gen
+    (`Placed` pos) . For genStmts <$> termToBody body
+termToStmt (Call pos [] "use" ParamIn
                     [Call _ [] "in" ParamIn [ress,body]]) = do
-    ress' <- translateResourceList ress
-    body' <- stmtExprToBody body
+    ress' <- termToResourceList ress
+    body' <- termToBody body
     return $ Placed (UseResources ress' Nothing body') pos
-stmtExprToStmt (Call pos [] "while" ParamIn [test]) = do
-    t <- stmtExprToStmt test
+termToStmt (Call pos [] "while" ParamIn [test]) = do
+    t <- termToStmt test
     return $ Placed (Cond t [Unplaced Nop] [Unplaced Break] Nothing Nothing) pos
-stmtExprToStmt (Call pos [] "until" ParamIn [test]) = do
-    t <- stmtExprToStmt test
+termToStmt (Call pos [] "until" ParamIn [test]) = do
+    t <- termToStmt test
     return $ Placed (Cond t [Unplaced Break] [Unplaced Nop] Nothing Nothing) pos
-stmtExprToStmt (Call pos [] "when" ParamIn [test]) = do
-    t <- stmtExprToStmt test
+termToStmt (Call pos [] "when" ParamIn [test]) = do
+    t <- termToStmt test
     return $ Placed (Cond t [Unplaced Nop] [Unplaced Next] Nothing Nothing) pos
-stmtExprToStmt (Call pos [] "unless" ParamIn [test]) = do
-    t <- stmtExprToStmt test
+termToStmt (Call pos [] "unless" ParamIn [test]) = do
+    t <- termToStmt test
     return $ Placed (Cond t [Unplaced Next] [Unplaced Nop] Nothing Nothing) pos
-stmtExprToStmt (Call pos [] "pass" ParamIn []) = do
+termToStmt (Call pos [] "pass" ParamIn []) = do
     return $ Placed Nop pos
-stmtExprToStmt
-        (Call pos [] "|" ParamIn
-         [Call _ [] "::" ParamIn [test1,thn],
-          Call _ [] "::" ParamIn [Call _ [] test2 ParamIn [],els]])
+termToStmt (Call pos [] "|" ParamIn
+             [Call _ [] "::" ParamIn [test1,thn],
+              Call _ [] "::" ParamIn [Call _ [] test2 ParamIn [],els]])
   | defaultGuard test2 = do
-    test1' <- stmtExprToStmt test1
-    thn' <- stmtExprToBody thn
-    els' <- stmtExprToBody els
+    test1' <- termToStmt test1
+    thn' <- termToBody thn
+    els' <- termToBody els
     return $ Placed (Cond test1' thn' els' Nothing Nothing) pos
-stmtExprToStmt
+termToStmt
         (Call _ [] "|" ParamIn [Call pos [] "::" ParamIn [test,body],rest]) = do
-    test' <- stmtExprToStmt test
-    body' <- stmtExprToBody body
-    rest' <- stmtExprToBody rest
+    test' <- termToStmt test
+    body' <- termToBody body
+    rest' <- termToBody rest
     return $ Placed (Cond test' body' rest' Nothing Nothing) pos
-stmtExprToStmt (Call pos [] "|" ParamIn disjs) = do
-    flip Placed pos . flip Or Nothing <$> mapM stmtExprToStmt disjs
-stmtExprToStmt (Call pos [] "::" ParamIn [Call _ [] guard ParamIn [],body])
+termToStmt (Call pos [] "|" ParamIn disjs) = do
+    (`Placed` pos) . (`Or` Nothing) <$> mapM termToStmt disjs
+termToStmt (Call pos [] "::" ParamIn [Call _ [] guard ParamIn [],body])
   | defaultGuard guard = do
     syntaxError pos  "'else' or 'otherwise' outside an 'if'"
-stmtExprToStmt (Call pos [] "::" ParamIn [test,body]) = do
-    test' <- stmtExprToStmt test
-    body' <- stmtExprToBody body
+termToStmt (Call pos [] "::" ParamIn [test,body]) = do
+    test' <- termToStmt test
+    body' <- termToBody body
     return $ Placed (Cond test' body' [Unplaced Nop] Nothing Nothing) pos
-stmtExprToStmt (Call _ [] fn ParamIn [first,rest])
+termToStmt (Call _ [] fn ParamIn [first,rest])
   | separatorName fn = do
-    first' <- stmtExprToStmt first
-    rest'  <- stmtExprToStmt rest
+    first' <- termToStmt first
+    rest'  <- termToStmt rest
     return $ Unplaced $ And [first',rest']
-stmtExprToStmt (Call pos mod fn ParamIn args)
+termToStmt (Call pos mod fn ParamIn args)
     = (`Placed` pos) . ProcCall mod fn Nothing Det False
-        <$> mapM stmtExprToExp args
-stmtExprToStmt (Call pos mod fn ParamInOut args)
+        <$> mapM termToExp args
+termToStmt (Call pos mod fn ParamInOut args)
     = (`Placed` pos) . ProcCall mod fn Nothing Det True
-        <$> mapM stmtExprToExp args
-stmtExprToStmt (Call pos mod fn flow args) =
+        <$> mapM termToExp args
+termToStmt (Call pos mod fn flow args) =
     syntaxError pos $ "invalid statement prefix: " ++ flowPrefix flow
-stmtExprToStmt (Foreign pos lang inst flags args) =
-    (`Placed` pos) . ForeignCall lang inst flags <$> mapM stmtExprToExp args
-stmtExprToStmt other =
-    syntaxError (stmtExprPos other) $ "invalid statement " ++ show other
+termToStmt (Foreign pos lang inst flags args) =
+    (`Placed` pos) . ForeignCall lang inst flags <$> mapM termToExp args
+termToStmt other =
+    syntaxError (termPos other) $ "invalid statement " ++ show other
 
 
-stmtExprToGenerators :: TranslateTo [Placed Generator]
-stmtExprToGenerators (Call pos [] sep ParamIn [left,right])
+--  Convert a term to a list of generators, of the form `i in is; j in js; ...`
+termToGenerators :: TranslateTo [Placed Generator]
+termToGenerators (Call pos [] sep ParamIn [left,right])
   | separatorName sep = do
-    left' <- stmtExprToGenerators left
-    right' <- stmtExprToGenerators right
+    left' <- termToGenerators left
+    right' <- termToGenerators right
     return $ left' ++ right'
-stmtExprToGenerators (Call pos [] "in" ParamIn [var,exp]) = do
-    var' <- stmtExprToExp var
-    exp' <- stmtExprToExp exp
+termToGenerators (Call pos [] "in" ParamIn [var,exp]) = do
+    var' <- termToExp var
+    exp' <- termToExp exp
     return [Placed (In var' exp') pos]
-stmtExprToGenerators other =
-    syntaxError (stmtExprPos other) $ "invalid generator " ++ show other
+termToGenerators other =
+    syntaxError (termPos other) $ "invalid generator " ++ show other
 
 -- |Convert a StmtExpr to the body of a case statement or expression.  The
 -- supplied translator is used to translate the bodies of the cases, which will
 -- be expressions in a case expression, and statement sequences in a case
 -- statement.
-stmtExprToCases :: TranslateTo a -> TranslateTo ([(Placed Exp,a)], Maybe a)
-stmtExprToCases caseTrans
+termToCases :: TranslateTo a -> TranslateTo ([(Placed Exp,a)], Maybe a)
+termToCases caseTrans
       (Call pos [] "|" ParamIn [Call _ [] "::" ParamIn [val,thn], rest]) = do
-    val' <- stmtExprToExp val
+    val' <- termToExp val
     thn' <- caseTrans thn
-    (rest',deflt) <- stmtExprToCases caseTrans rest
+    (rest',deflt) <- termToCases caseTrans rest
     return ((val',thn') : rest', deflt)
-stmtExprToCases caseTrans (Call _ [] "::" ParamIn [Call _ [] g ParamIn [],thn])
+termToCases caseTrans (Call _ [] "::" ParamIn [Call _ [] g ParamIn [],thn])
   | defaultGuard g = do
     thn' <- caseTrans thn
     return ([], Just thn')
-stmtExprToCases caseTrans (Call _ [] "::" ParamIn [val,thn]) = do
-    val' <- stmtExprToExp val
+termToCases caseTrans (Call _ [] "::" ParamIn [val,thn]) = do
+    val' <- termToExp val
     thn' <- caseTrans thn
     return ([(val',thn')], Nothing)
-stmtExprToCases _ other =
-    syntaxError (stmtExprPos other) $ "invalid case body " ++ show other
+termToCases _ other =
+    syntaxError (termPos other) $ "invalid case body " ++ show other
 
 
--- |Convert a StmtExpr to an Exp, if possible, or give a syntax error if not.
-stmtExprToExp :: TranslateTo (Placed Exp)
-stmtExprToExp (Call pos [] ":" ParamIn [exp,ty]) = do
-    exp' <- content <$> stmtExprToExp exp
-    ty' <- stmtExprToTypeSpec ty
+-- |Convert a Term to an Exp, if possible, or give a syntax error if not.
+termToExp :: TranslateTo (Placed Exp)
+termToExp (Call pos [] ":" ParamIn [exp,ty]) = do
+    exp' <- content <$> termToExp exp
+    ty' <- termToTypeSpec ty
     case exp' of
         Typed exp'' ty'' (Just AnyType) -> -- already cast, but not typed
             return $ Placed (Typed exp'' ty'' $ Just ty') pos
         Typed exp'' _ _ -> -- already typed, whether casted or not
-            syntaxError (stmtExprPos ty) $ "repeated type constraint" ++ show ty
+            syntaxError (termPos ty) $ "repeated type constraint" ++ show ty
         _ -> -- no cast, no type
             return $ Placed (Typed exp'  ty' Nothing) pos
-stmtExprToExp (Call pos [] ":!" ParamIn [exp,ty]) = do
-    exp' <- content <$> stmtExprToExp exp
-    ty' <- stmtExprToTypeSpec ty
+termToExp (Call pos [] ":!" ParamIn [exp,ty]) = do
+    exp' <- content <$> termToExp exp
+    ty' <- termToTypeSpec ty
     case exp' of
         Typed exp'' inner Just{} ->
-            syntaxError (stmtExprPos ty) $ "repeated cast " ++ show ty
+            syntaxError (termPos ty) $ "repeated cast " ++ show ty
         Typed exp'' inner Nothing ->
             return $ Placed (Typed exp'' ty' $ Just inner) pos
         _  ->
             return $ Placed (Typed exp'  ty' $ Just AnyType) pos
-stmtExprToExp (Call pos [] "where" ParamIn [exp,body]) = do
-    exp' <- stmtExprToExp exp
-    body' <- stmtExprToBody body
+termToExp (Call pos [] "where" ParamIn [exp,body]) = do
+    exp' <- termToExp exp
+    body' <- termToBody body
     return $ Placed (Where body' exp') pos
-stmtExprToExp (Call pos [] "let" ParamIn [Call _ [] "in" ParamIn [body,exp]]) =
+termToExp (Call pos [] "let" ParamIn [Call _ [] "in" ParamIn [body,exp]]) =
   do
-    exp' <- stmtExprToExp exp
-    body' <- stmtExprToBody body
+    exp' <- termToExp exp
+    body' <- termToBody body
     return $ Placed (Where body' exp') pos
-stmtExprToExp (Call pos [] "^" ParamIn [exp,op]) = do
-    exp' <- stmtExprToExp exp
-    op'  <- stmtExprToExp op
+termToExp (Call pos [] "^" ParamIn [exp,op]) = do
+    exp' <- termToExp exp
+    op'  <- termToExp op
     case op' of
         Placed (Fncall mod fn args) _
             -> return $ Placed (Fncall mod fn (exp':args)) pos
         Placed (Var var ParamIn Ordinary) _
             -> return $ Placed (Fncall [] var [exp']) pos
         _ -> syntaxError pos "invalid second argument to '^'"
-stmtExprToExp (Call pos [] "if" ParamIn [conditional]) =
-    translateConditionalExp conditional
-stmtExprToExp (Call pos [] sep ParamIn [])
+termToExp (Call pos [] "if" ParamIn [conditional]) =
+    termToConditionalExp conditional
+termToExp (Call pos [] sep ParamIn [])
   | separatorName sep =
     syntaxError pos "invalid separated expression"
-stmtExprToExp (Call pos [] var flow []) = -- looks like a var; assume it is
+termToExp (Call pos [] var flow []) = -- looks like a var; assume it is
     return $ Placed (Var var flow Ordinary) pos
-stmtExprToExp (Call pos mod fn flow args) =
-    (`Placed` pos) . Fncall mod fn <$> mapM stmtExprToExp args
-stmtExprToExp (Foreign pos lang inst flags args) =
-    (`Placed` pos) . ForeignFn lang inst flags <$> mapM stmtExprToExp args
-stmtExprToExp (IntConst pos num) = Right $ Placed (IntValue num) pos
-stmtExprToExp (FloatConst pos num) = Right $ Placed (FloatValue num) pos
-stmtExprToExp (CharConst pos char) = Right $ Placed (CharValue char) pos
-stmtExprToExp (StringConst pos str DoubleQuote)
+termToExp (Call pos mod fn flow args) =
+    (`Placed` pos) . Fncall mod fn <$> mapM termToExp args
+termToExp (Foreign pos lang inst flags args) =
+    (`Placed` pos) . ForeignFn lang inst flags <$> mapM termToExp args
+termToExp (IntConst pos num) = Right $ Placed (IntValue num) pos
+termToExp (FloatConst pos num) = Right $ Placed (FloatValue num) pos
+termToExp (CharConst pos char) = Right $ Placed (CharValue char) pos
+termToExp (StringConst pos str DoubleQuote)
     = return $ Placed (StringValue str WybeString) pos
-stmtExprToExp (StringConst pos str (IdentQuote "c" DoubleQuote))
+termToExp (StringConst pos str (IdentQuote "c" DoubleQuote))
     = return $ Placed (StringValue str CString) pos
-stmtExprToExp str@StringConst{stringPos=pos}
+termToExp str@StringConst{stringPos=pos}
     = Left (pos, "invalid string literal " ++ show str)
 
 
 -- |Translate an `if` expression into a Placed conditional Exp
-translateConditionalExp :: TranslateTo (Placed Exp)
-translateConditionalExp (Call _ [] "{}" ParamIn [body]) =
-    translateConditionalExp' body
-translateConditionalExp stmtExpr =
-    syntaxError (stmtExprPos stmtExpr) "expecting '{'"
+termToConditionalExp :: TranslateTo (Placed Exp)
+termToConditionalExp (Call _ [] "{}" ParamIn [body]) =
+    termToConditionalExp' body
+termToConditionalExp term =
+    syntaxError (termPos term) "expecting '{'"
 
-translateConditionalExp'
+termToConditionalExp' :: TranslateTo (Placed Exp)
+termToConditionalExp'
         (Call _ [] "|" ParamIn [Call pos [] "::" ParamIn [test,body],rest]) = do
-    test' <- stmtExprToStmt test
-    body' <- stmtExprToExp body
-    rest' <- translateConditionalExp' rest
+    test' <- termToStmt test
+    body' <- termToExp body
+    rest' <- termToConditionalExp' rest
     return $ Placed (CondExp test' body' rest') pos
-translateConditionalExp'
+termToConditionalExp'
         (Call pos [] "::" ParamIn [Call _ [] guard ParamIn [],body])
-    | defaultGuard guard = stmtExprToExp body
-translateConditionalExp' stmtExpr =
-    syntaxError (stmtExprPos stmtExpr)
-          $ "missing 'else::' in if expression: " ++ show stmtExpr
+    | defaultGuard guard = termToExp body
+termToConditionalExp' term =
+    syntaxError (termPos term)
+          $ "missing 'else ::' in if expression: " ++ show term
 
 
--- |Convert a StmtExpr to a TypeSpec, or produce an error
-stmtExprToTypeSpec :: TranslateTo TypeSpec
-stmtExprToTypeSpec (Call _ [] name ParamIn []) 
+-- |Convert a Term to a TypeSpec, or produce an error
+termToTypeSpec :: TranslateTo TypeSpec
+termToTypeSpec (Call _ [] name ParamIn []) 
   | isTypeVar name = 
     return $ TypeVariable $ RealTypeVar name
-stmtExprToTypeSpec (Call _ mod name ParamIn params) 
+termToTypeSpec (Call _ mod name ParamIn params) 
   | not $ isTypeVar name =
-    TypeSpec mod name <$> mapM stmtExprToTypeSpec params
-stmtExprToTypeSpec other =
-    syntaxError (stmtExprPos other)
+    TypeSpec mod name <$> mapM termToTypeSpec params
+termToTypeSpec other =
+    syntaxError (termPos other)
         $ "invalid type specification " ++ show other
 
 
--- | Translate a StmtExpr to a proc or func prototype (with empty resource list)
-stmtExprToProto :: TranslateTo (Placed ProcProto)
-stmtExprToProto (Call pos [] name ParamIn params) = do
-    params' <- mapM stmtExprToParam params
+-- | Translate a Term to a proc or func prototype (with empty resource list)
+termToProto :: TranslateTo (Placed ProcProto)
+termToProto (Call pos [] name ParamIn params) = do
+    params' <- mapM termToParam params
     return $ Placed (ProcProto name params' Set.empty) pos
-stmtExprToProto other =
-    syntaxError (stmtExprPos other) $ "invalid prototype " ++ show other
+termToProto other =
+    syntaxError (termPos other) $ "invalid prototype " ++ show other
 
 
--- | Translate a StmtExpr to a proc or func parameter
-stmtExprToParam :: TranslateTo Param
-stmtExprToParam (Call _ [] ":" ParamIn [Call _ [] name flow [],ty]) = do
-    ty' <- stmtExprToTypeSpec ty
+-- | Translate a Term to a proc or func parameter
+termToParam :: TranslateTo Param
+termToParam (Call _ [] ":" ParamIn [Call _ [] name flow [],ty]) = do
+    ty' <- termToTypeSpec ty
     return $ Param name ty' flow Ordinary
-stmtExprToParam (Call pos [] name flow []) =
+termToParam (Call pos [] name flow []) =
     return $ Param name AnyType flow Ordinary
-stmtExprToParam other =
-    syntaxError (stmtExprPos other) $ "invalid parameter " ++ show other
+termToParam other =
+    syntaxError (termPos other) $ "invalid parameter " ++ show other
 
 
--- | Translate a StmtExpr to a ctor declaration
-stmtExprToCtorDecl :: TranslateTo (Placed ProcProto)
-stmtExprToCtorDecl (Call pos [] name ParamIn fields) = do
-    fields' <- mapM stmtExprToCtorField fields
+-- | Translate a Term to a ctor declaration
+termToCtorDecl :: TranslateTo (Placed ProcProto)
+termToCtorDecl (Call pos [] name ParamIn fields) = do
+    fields' <- mapM termToCtorField fields
     return $ Placed (ProcProto name fields' Set.empty) pos
-stmtExprToCtorDecl other =
-    syntaxError (stmtExprPos other)
+termToCtorDecl other =
+    syntaxError (termPos other)
         $ "invalid constructor declaration " ++ show other
 
 
--- | Translate a StmtExpr to a ctor field
-stmtExprToCtorField :: TranslateTo Param
-stmtExprToCtorField (Call _ [] ":" ParamIn [Call _ [] name ParamIn [],ty]) = do
-    ty' <- stmtExprToTypeSpec ty
+-- | Translate a Term to a ctor field
+termToCtorField :: TranslateTo Param
+termToCtorField (Call _ [] ":" ParamIn [Call _ [] name ParamIn [],ty]) = do
+    ty' <- termToTypeSpec ty
     return $ Param name ty' ParamIn Ordinary
-stmtExprToCtorField (Call pos [] name ParamIn []) 
+termToCtorField (Call pos [] name ParamIn []) 
   | isTypeVar name = do
     return $ Param "" (TypeVariable $ RealTypeVar name) ParamIn Ordinary
-stmtExprToCtorField (Call pos mod name ParamIn params) 
+termToCtorField (Call pos mod name ParamIn params) 
   | not $ isTypeVar name = do
-    tyParams <- mapM stmtExprToTypeSpec params
+    tyParams <- mapM termToTypeSpec params
     return $ Param "" (TypeSpec mod name tyParams) ParamIn Ordinary
-stmtExprToCtorField other =
-    syntaxError (stmtExprPos other) $ "invalid constructor field " ++ show other
+termToCtorField other =
+    syntaxError (termPos other) $ "invalid constructor field " ++ show other
 
 
--- | Extract a list of resource names from a StmtExpr (from a "use" statement).
-translateResourceList :: TranslateTo [ResourceSpec]
-translateResourceList (Call _ [] "{}" ParamIn args) =
-    concat <$> mapM translateResourceList args
-translateResourceList (Call _ mod name ParamIn []) =
+-- | Extract a list of resource names from a Term (from a "use" statement).
+termToResourceList :: TranslateTo [ResourceSpec]
+termToResourceList (Call _ [] "{}" ParamIn args) =
+    concat <$> mapM termToResourceList args
+termToResourceList (Call _ mod name ParamIn []) =
     return [ResourceSpec mod name]
-translateResourceList other =
-    syntaxError (stmtExprPos other) "expected resource spec"
+termToResourceList other =
+    syntaxError (termPos other) "expected resource spec"
 
 -----------------------------------------------------------------------------
 -- Data structures                                                         --
 -----------------------------------------------------------------------------
 
 -- |Representation of expressions and statements.
-data StmtExpr
+data Term
     -- |a proc or function call, or a variable reference.
     = Call {
         callPos::SourcePos,               -- ^Where the call appears
@@ -1184,7 +1193,7 @@ data StmtExpr
         callName::ProcName,               -- ^the called proc or variable name
         callVariableFlow::FlowDirection,  -- ^variable flow direction or
                                           --  call resourcefulness
-        callArguments::[StmtExpr]         -- ^the specified arguments
+        callArguments::[Term]             -- ^the specified arguments
     }
     -- |a foreign call, either as an expression or statement.
     | Foreign {
@@ -1192,7 +1201,7 @@ data StmtExpr
         foreignLanguage::Ident,        -- ^the specified foreign language
         foreignInstruction::ProcName,  -- ^the specified instruction
         foreignFlags::[Ident],         -- ^the specified modifiers
-        foreignArguments::[StmtExpr]   -- ^the specified arguments
+        foreignArguments::[Term]       -- ^the specified arguments
     }
     -- |an integer manifest constant
     | IntConst {intPos::SourcePos, intConstValue::Integer}
@@ -1208,7 +1217,7 @@ data StmtExpr
     }
 
 
-instance Show StmtExpr where
+instance Show Term where
     show (Call _ mod name flow args) =
         flowPrefix flow ++ maybeModPrefix mod ++ name ++ showArguments args
     show (Foreign _ lang instr flags args) =
@@ -1220,31 +1229,32 @@ instance Show StmtExpr where
     show (StringConst _ string delim) = delimitString delim string
 
 
--- |The SourcePos of a StmtExpr.
-stmtExprPos :: StmtExpr -> SourcePos
-stmtExprPos Call{callPos=pos}            = pos
-stmtExprPos Foreign{foreignPos=pos}      = pos
-stmtExprPos IntConst{intPos=pos}         = pos
-stmtExprPos FloatConst{floatPos=pos}     = pos
-stmtExprPos CharConst{charPos=pos}       = pos
-stmtExprPos StringConst{stringPos=pos}   = pos
+-- |The SourcePos of a Term.
+termPos :: Term -> SourcePos
+termPos Call{callPos=pos}            = pos
+termPos Foreign{foreignPos=pos}      = pos
+termPos IntConst{intPos=pos}         = pos
+termPos FloatConst{floatPos=pos}     = pos
+termPos CharConst{charPos=pos}       = pos
+termPos StringConst{stringPos=pos}   = pos
 
 
--- |Return the specified StmtExpr with its position replaced.
-setStmtExprPos :: SourcePos -> StmtExpr -> StmtExpr
-setStmtExprPos pos term@Call{} = term {callPos = pos}
-setStmtExprPos pos term@Foreign{} = term {foreignPos = pos}
-setStmtExprPos pos term@IntConst{} = term {intPos = pos}
-setStmtExprPos pos term@FloatConst{} = term {floatPos = pos}
-setStmtExprPos pos term@CharConst{} = term {charPos = pos}
-setStmtExprPos pos term@StringConst{} = term {stringPos = pos}
+-- |Return the specified Term with its position replaced.
+setTermPos :: SourcePos -> Term -> Term
+setTermPos pos term@Call{} = term {callPos = pos}
+setTermPos pos term@Foreign{} = term {foreignPos = pos}
+setTermPos pos term@IntConst{} = term {intPos = pos}
+setTermPos pos term@FloatConst{} = term {floatPos = pos}
+setTermPos pos term@CharConst{} = term {charPos = pos}
+setTermPos pos term@StringConst{} = term {stringPos = pos}
 
 
-setCallFlow :: FlowDirection -> StmtExpr -> StmtExpr
-setCallFlow flow stmtExpr =
-    case stmtExpr of
-        Call{} -> stmtExpr {callVariableFlow = flow}
-        _ -> shouldnt $ "setCallFlow of non-Call " ++ show stmtExpr
+-- |Set the flow of a call
+setCallFlow :: FlowDirection -> Term -> Term
+setCallFlow flow term =
+    case term of
+        Call{} -> term {callVariableFlow = flow}
+        _ -> shouldnt $ "setCallFlow of non-Call " ++ show term
 
 
 -----------------------------------------------------------------------------
@@ -1259,10 +1269,10 @@ testFile file = do
         Left err -> print err
         Right is -> mapM_ print is
 
-test :: Int -> String -> StmtExpr
+test :: Int -> String -> Term
 test prec input = do
     let toks = stringTokens input
-    case parse (maybeSetPosition toks (limitedStmtExpr prec) <* eof) "<string>" toks of
+    case parse (maybeSetPosition toks (limitedTerm prec) <* eof) "<string>" toks of
         Left err -> StringConst (errorPos err) (show err) DoubleQuote
         Right is -> is
 
