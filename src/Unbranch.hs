@@ -645,7 +645,7 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) freeVars pos name = do
             procProto=procProto@ProcProto{procProtoParams=params}}
         <- lift $ getProcDef regularProcSpec
     let (freeParams, realParams) = List.partition ((== Free) . paramFlowType) params
-    let params' = setClosureType <$> (params ++ [testOutParam | detism == SemiDet])
+    let params' = realParams ++ [testOutParam | detism == SemiDet]
     let resTys = catMaybes $ maybeParamResource <$> realParams
     let toLoad = mapFst resourceFlowRes 
               <$> List.filter (flowsIn . resourceFlowFlow . fst) resTys
@@ -656,16 +656,18 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) freeVars pos name = do
     let detism' = selectDetism detism Det detism
     let paramVars = paramToVar <$> params
     let paramVars' = paramToVar <$> params'
-    let closureProto = ProcProto name 
-                        (freeParams ++ List.filter (not . argFlowTypeIsResource 
-                                                        . paramFlowType) params') Set.empty
+    let closureParams = freeParams 
+                     ++ List.filter (not . argFlowTypeIsResource 
+                                         . paramFlowType) 
+                        (setParamType intType <$> params')
+    let closureProto = ProcProto name closureParams Set.empty
     let pDefClosure =
             ProcDef name closureProto
             (ProcDefSrc
                 $ loads
                 ++ (Unplaced <$>
                     ProcCall (First mod nm $ Just pID) detism' False
-                        ((Unplaced <$> freeVars) ++ paramVars')
+                        ((Unplaced <$> freeVars) ++ traceShowId paramVars')
                     :[ ForeignCall "lpvm" "cast" []
                          [var ParamIn ty, var ParamOut intType]
                     | Typed (Var nm fl a) ty cast <- (content <$> paramVars)
@@ -681,10 +683,6 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) freeVars pos name = do
     logUnbranch $ "  Resultant closure proc: " ++ show procProto
     closureProcSpec <- lift $ addProcDef pDefClosure'
     return $ maybePlace (ProcRef closureProcSpec freeVars) pos
-
-setClosureType :: Param -> Param
-setClosureType p@(Param _ _ _ (Resource _)) = p
-setClosureType p                            = setParamType intType p
 
 
 -- |Apply the function if the expression is a variable assignment,

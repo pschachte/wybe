@@ -255,28 +255,6 @@ expandPrim call@(PrimHigherCall id fn args) pos = do
     fn' <- expandArg fn
     args' <- mapM expandArg args
     addInstr (PrimHigherCall id fn' args') pos
-    -- let expandAsHigher = do
-    --         logExpansion "  As higher call"
-    -- case fn' of
-    --     ArgProcRef ps as _-> do
-    --         mbPs' <- lift $ lift $ maybeGetClosureOf ps
-    --         case mbPs' of
-    --             Nothing -> expandAsHigher
-    --             Just ps' -> do
-    --                 params' <- lift $ lift (getParams ps') 
-    --                 if sameLength params' args
-    --                 then do
-    --                     tys <- lift $ lift ((paramType <$>) <$> getParams ps') 
-    --                     expandPrim (PrimCall id ps' $ as ++ zipWith setArgType tys args) pos
-    --                 else expandAsHigher
-    --         -- params <- lift $ lift $ procProtoParams . procProto <$> getProcDef ps
-    --         -- if sameLength args params
-    --         -- then do
-    --         -- let expander = flip . (execStateT .) . flip expandPrim
-    --         -- st <- get
-    --         -- put =<< lift (translateFromClosure st Nothing call (`expander` st))
-    --         -- else expandAsHigher
-    --     _ -> expandAsHigher
 expandPrim (PrimForeign lang nm flags args) pos = do
     st <- get
     logExpansion $ "  Expanding " ++ show (PrimForeign lang nm flags args)

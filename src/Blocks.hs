@@ -282,8 +282,8 @@ _translateProcImpl modProtos proto isClosure body startCount = do
 -- via the closure environment 
 closeClosure :: PrimProto -> ProcBody -> (PrimProto, ProcBody)
 closeClosure proto@PrimProto{primProtoParams=params}
-               body@ProcBody{bodyPrims=prims} = do
-    (proto',body)
+             body@ProcBody{bodyPrims=prims} = do
+    (proto',body')
   where
     (free, actualParams) = List.partition ((==Free) . primParamFlowType) params
     proto' = proto{primProtoParams=actualParams ++ [envPrimParam]}
@@ -550,7 +550,6 @@ cgen prim@(PrimCall callSiteID pspec args) = do
     -- and match it's parameters with the args here
     -- and remove the unneeded ones.
     proto <- lift $ getProcPrimProto pspec
-    let params = primProtoParams proto
     logCodegen $ "Proto = " ++ show proto
 
     filteredArgs <- filterUnneededArgs proto args
