@@ -752,8 +752,8 @@ Wybe's conditional construct has the form:
 
 > `if` `{` *cases* `}`
 
-where *cases* is one more more cases, separated by vertical bar characters (`|`).
-Each case takes the form:
+where *cases* is one more more cases, separated by vertical bar characters
+(`|`). Each case takes the form:
 
 > *test* `::` *statements*
 
@@ -777,10 +777,66 @@ if { x < 0 :: !println("negative")
 ```
 
 
-
 ## <a name="cases"></a>Case statements
 
-Wybe's conditional construct has the form:
+Wybe's `case` construct has the form:
+
+> `case` *expression `in {` *cases* `}`
+
+where *expression* is used to select the code to execute, and *cases* is one
+more more cases, separated by vertical bar characters (`|`). Each case takes the
+form:
+
+> *case_expr* `::` *statements*
+
+where *case_expr* is an expression and *statements* is one or more statements
+separated by semicolons (`;`) or newlines.  Each *case_expr* is matched in turn
+with the initial *expression*; when a match is found, the corresponding
+*statements* are executed, and all others are ignored.  If the final *case_expr*
+is the `else` keyword, and no earlier *case_expr* matched, then the *statements*
+corresponding to the `else` *case_expr* will be executed.  If no *case_expr*
+matches and there is no `else` case, then no *statements* will be executed.  In
+any case, execution then continues after the `case` statement.
+
+A *case_expr* can be a backward mode expression to select cases based on
+[pattern matching](#pattern-matching).  A `case` statement is semantically
+equivalent to an `if` statement where each *test* is of the form *case_expr* `=`
+*expression*, although the *expression* will only be evaluated once.
+
+For example:
+```
+case coord in {
+    cartesian(?x,?y) :: println(sqrt(x**2 + y**2))
+|   polar(?r,_)      :: println(r)
+}
+```
+
+## <a name="conditional-expressions"></a>Conditional and case expressions
+
+Wybe's conditional and case constructs can also be used as expressions.  Both
+have the same form as their statement versions, except that instead of each case
+providing one or more statements, they provide a single expression.
+
+Note that in both case, the `else` case is required.
+
+For example:
+```
+!println(
+    if { x < 0 :: "negative"
+       | x = 0 :: "zero"
+       | else  :: "positive"
+    })
+```
+and
+```
+println(
+    case coord in {
+      cartesian(?x,?y) :: sqrt(x**2 + y**2)
+    | polar(?r,_)      :: r
+    | else             :: error("should not be possible")
+})
+```
+
 
 ## `terminal` and `failing` procedures
 A procedure is considered to be *terminal* if a call to it will never return (it
@@ -1438,14 +1494,16 @@ pub def {terminal,semipure} exit(code:int) {
 
 #### Using LLVM instructions
 
-The lowest-level interface is to raw LLVM instructions.  These have a functional style, although you use the procedural style if you prefer.  For example, instead of
+The lowest-level interface is to raw LLVM instructions.  These have a functional
+style, although you can use the procedural style if you prefer.  For example,
+instead of
 
 ```
 ?x2 = foreign llvm add(x, 1)
 ```
+you can write
 ```
 foreign llvm add(x, 1, ?x2)
-you can write
 ```
 
 For more detail on the behaviour of these operations, please consult the
