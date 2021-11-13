@@ -669,7 +669,7 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) freeVars pos name = do
                 $ loads
                 ++ (Unplaced <$>
                     ProcCall (First mod nm $ Just pID) detism' False
-                        ((Unplaced <$> freeVars) ++ traceShowId paramVars')
+                        ((Unplaced <$> freeVars) ++ paramVars')
                     :[ ForeignCall "lpvm" "cast" []
                          [var ParamIn ty, var ParamOut intType]
                     | Typed (Var nm fl a) ty cast <- (content <$> paramVars)

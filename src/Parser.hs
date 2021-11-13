@@ -1075,7 +1075,7 @@ termToCases _ other =
 termToExp :: TranslateTo (Placed Exp)
 termToExp (Call pos [] ":" ParamIn [exp,ty]) = do
     exp' <- content <$> termToExp exp
-    ty' <- termToTypeSpec $  ty
+    ty' <- termToTypeSpec ty
     case exp' of
         Typed exp'' ty'' (Just AnyType) -> -- already cast, but not typed
             return $ Placed (Typed exp'' ty'' $ Just ty') pos
@@ -1123,6 +1123,16 @@ termToExp (Embraced _ Paren [exp] Nothing) = termToExp exp
 termToExp body@(Embraced pos Brace _ Nothing) = do
     body' <- termToBody body
     return $ Placed (AnonProc defaultProcModifiers [] body') pos
+termToExp mods@(Embraced pos Brace _ 
+                    (Just body@(Embraced _ Brace _ _))) = do
+    procMods <- termToProcModifiers mods
+    anonProc <- content <$> termToExp body
+    case anonProc of
+        AnonProc oldMods ps body | oldMods == defaultProcModifiers
+            -> return $ Placed (AnonProc procMods ps body) pos
+        _ -> syntaxError pos $ "malformed anonymous procedure " ++ show anonProc
+termToExp embraced@(Embraced pos _ _ _) = 
+    syntaxError pos $ "malformed anonymous procedure " ++ show embraced
 termToExp (Call pos [] "case" ParamIn 
             [Call _ [] "in" ParamIn [exp,Embraced _ Brace [body] Nothing]]) = do
     expr' <- termToExp exp
@@ -1146,7 +1156,6 @@ termToExp (StringConst pos str (IdentQuote "c" DoubleQuote))
     = return $ Placed (StringValue str CString) pos
 termToExp str@StringConst{stringPos=pos}
     = syntaxError pos $ "invalid string literal " ++ show str
-termToExp exp = shouldnt $ show exp
 
 
 termToIdent :: TranslateTo Ident

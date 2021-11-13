@@ -25,7 +25,7 @@ import           Data.Tuple.HT             (mapFst, mapSnd)
 import           Options                   (LogSelection (Resources))
 import           Snippets
 import           Util
-import Debug.Trace (traceShowId)
+import Debug.Trace
 
 
 ------------------------- Checking resource decls -------------------------
