@@ -448,12 +448,12 @@ unbranchStmt detism (Loop body exitVars) pos stmts alt sense = do
     logUnbranch $ "Generated next " ++ showStmt 4 (content next)
     logUnbranch "Finished handling loop"
     return [next]
-unbranchStmt _ (UseResources _ _ _) _ _ _ _ =
+unbranchStmt _ UseResources{} _ _ _ _ =
     shouldnt "resource handling should have removed use ... in statements"
 unbranchStmt _ For{} _ _ _ _ =
     shouldnt "flattening should have removed For statements"
 unbranchStmt _ Case{} _ _ _ _ =
-    shouldnt "flattening should have removed For statements"
+    shouldnt "flattening should have removed Case statements"
 unbranchStmt detism Nop _ stmts alt sense = do
     logUnbranch "Unbranching a Nop"
     unbranchStmts detism stmts alt sense     -- might as well filter out Nops

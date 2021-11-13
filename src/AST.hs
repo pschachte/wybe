@@ -1555,8 +1555,8 @@ lookupTypeRepresentation (TypeSpec modSpec name _) =
 
 -- |Given a module spec, find its representation, if it is a type.
 lookupModuleRepresentation :: ModSpec -> Compiler (Maybe TypeRepresentation)
-lookupModuleRepresentation mspec =
-    getSpecModule "lookupModuleRepresentation" modTypeRep mspec
+lookupModuleRepresentation =
+    getSpecModule "lookupModuleRepresentation" modTypeRep
 
 
 -- |An identifier.
@@ -1592,8 +1592,8 @@ type ModSpec = [Ident]
 --  then the privates.  Each is either Nothing, meaning all exported
 --  names are imported, or Just a set of the specific names to import.
 data ImportSpec = ImportSpec {
-    importPublic::(Maybe (Set Ident)),
-    importPrivate::(Maybe (Set Ident))
+    importPublic::Maybe (Set Ident),
+    importPrivate::Maybe (Set Ident)
     } deriving (Show, Generic)
 
 
@@ -2207,13 +2207,23 @@ foldExp' sfn efn val (CondExp stmt e1 e2) =
     in         foldExp sfn efn val2 $ content e2
 foldExp' sfn efn val (Fncall _ _ exps) = foldExps sfn efn val exps
 foldExp' sfn efn val (ForeignFn _ _ _ exps) = foldExps sfn efn val exps
+foldExp' sfn efn val (CaseExp exp cases deflt) =
+    let val1 = foldExp sfn efn val $ content exp
+        val2 = List.foldl (foldCaseExp sfn efn) val1 cases
+    in maybe val2 (foldExp sfn efn val2 . content) deflt
 
-
+-- | Fold over the cases in a case statement
 foldCase :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a
          -> (Placed Exp,[Placed Stmt]) -> a
 foldCase sfn efn val (pexp, body) =
     foldStmts sfn efn (foldExp sfn efn val (content pexp)) body
 
+
+-- | Fold over the cases in a case expression
+foldCaseExp :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a
+         -> (Placed Exp,Placed Exp) -> a
+foldCaseExp sfn efn val (pexp, pval) =
+    foldExp sfn efn (foldExp sfn efn val (content pexp)) $ content pval
 
 -- |Fold over a ProcBody applying the primFn to each Prim, and
 -- combining the results for a sequence of Prims with the abConj
@@ -2526,6 +2536,12 @@ data Exp
       | CondExp (Placed Stmt) (Placed Exp) (Placed Exp)
       | Fncall ModSpec ProcName [Placed Exp]
       | ForeignFn Ident ProcName [Ident] [Placed Exp]
+      --- | An expression that matches the first expression against each of the
+      --  fst expressions in the list, returning the value of the snd expression
+      --  corresponding to the first match; if no match, return the value of
+      --  last expr, if there is one, otherwise fail (if no default provided,
+      --  the expression is partial)
+      | CaseExp (Placed Exp) [(Placed Exp,Placed Exp)] (Maybe (Placed Exp))
      deriving (Eq,Ord,Generic)
 
 -- | Represents which variant a string literal is
@@ -2805,15 +2821,15 @@ procCallToExp stmt =
     shouldnt $ "converting non-proccall to expr " ++ showStmt 4 stmt
 
 
--- |Return the set of variables that will definitely be freshly assigned by
--- the specified expr.  Treats FlowUnknown exprs as *not* assigning anything,
--- and ParamInOut exprs as not assigning anything, because it does not
--- *freshly* assign a variable (ie, it's already assigned).
+-- |Return the set of variables that might be freshly assigned by the
+-- specified expr.  Treats ParamInOut exprs as not assigning anything, because
+-- it does not *freshly* assign a variable (ie, it's already assigned).
 expOutputs :: Exp -> Set VarName
 expOutputs (IntValue _) = Set.empty
 expOutputs (FloatValue _) = Set.empty
 expOutputs (StringValue _ _) = Set.empty
 expOutputs (CharValue _) = Set.empty
+expOutputs (Var "_" ParamIn _) = Set.singleton "_" -- special _ variable is out
 expOutputs (Var name flow _) =
     if flowsOut flow then Set.singleton name else Set.empty
 expOutputs (Typed expr _ _) = expOutputs expr
@@ -2821,6 +2837,8 @@ expOutputs (Where _ pexp) = expOutputs $ content pexp
 expOutputs (CondExp _ pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
 expOutputs (Fncall _ _ args) = pexpListOutputs args
 expOutputs (ForeignFn _ _ _ args) = pexpListOutputs args
+expOutputs (CaseExp _ cases deflt) =
+    pexpListOutputs $ maybe id (:) deflt (snd <$> cases)
 
 
 -- |Return the set of variables that will definitely be freshly assigned by
@@ -3283,7 +3301,7 @@ showStmt indent (Cond condstmt thn els condVars genVars) =
 showStmt indent (Case val cases deflt) =
     "case " ++ show val ++ " in {" ++ startLine indent
     ++ concatMap
-       (\(exp,body) -> "  " ++ show exp ++ "::" ++ showBody (indent+4) body)
+       (\(exp,body) -> "| " ++ show exp ++ "::" ++ showBody (indent+4) body)
        cases
     ++ maybe "" (("  otherwise::" ++) . showBody (indent+4)) deflt
     ++ startLine indent ++ "}"
@@ -3340,7 +3358,7 @@ instance Show Exp where
   show (Var name dir flowtype) = show flowtype ++ flowPrefix dir ++ name
   show (Where stmts exp) = show exp ++ " where" ++ showBody 8 stmts
   show (CondExp cond thn els) =
-    "if\n" ++ show cond ++ " then " ++ show thn ++ " else " ++ show els
+    "if {" ++ show cond ++ ":: " ++ show thn ++ " | " ++ show els ++ "}"
   show (Fncall maybeMod fn args) =
     maybeModPrefix maybeMod ++ fn ++ showArguments args
   show (ForeignFn lang fn flags args) =
@@ -3349,6 +3367,11 @@ instance Show Exp where
     ++ showArguments args
   show (Typed exp typ cast) =
       show exp ++ showTypeSuffix typ cast
+  show (CaseExp exp cases deflt) =
+      "case " ++ show exp ++ " in {"
+      ++ intercalate " | "
+         (List.map (\(e,v) -> show e ++ ":: " ++ show v) cases)
+      ++ maybe "" (("| " ++) . show) deflt
 
 -- |Show a string variant prefix
 instance Show StringVariant where

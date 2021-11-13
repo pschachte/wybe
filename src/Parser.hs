@@ -432,7 +432,7 @@ stmtExprRest minPrec left =
         case left of
             Call _ m n _ [] | minPrec <= lowestStmtPrecedence
                             || List.null m && prefixKeyword n ->
-                (limitedStmtExpr lowestExprPrecedence
+                (stmtExpr
                     >>= applyArguments left . (:[])
                     >>= stmtExprRest minPrec)
                 <|> return left
@@ -657,6 +657,7 @@ prefixKeyword :: String -> Bool
 prefixKeyword "if"  = True
 prefixKeyword "let"  = True
 prefixKeyword "use"  = True
+prefixKeyword "case" = True
 prefixKeyword _     = False
 
 
@@ -1062,6 +1063,12 @@ stmtExprToExp (Call pos [] "^" ParamIn [exp,op]) = do
         _ -> syntaxError pos "invalid second argument to '^'"
 stmtExprToExp (Call pos [] "if" ParamIn [conditional]) =
     translateConditionalExp conditional
+stmtExprToExp (Call pos [] "case" ParamIn 
+                [Call _ [] "in" ParamIn 
+                      [exp,Call _ [] "{}" ParamIn [body]]]) = do
+    expr' <- stmtExprToExp exp
+    (cases,deflt) <- stmtExprToCases stmtExprToExp body
+    return $ Placed (CaseExp expr' cases deflt) pos
 stmtExprToExp (Call pos [] sep ParamIn [])
   | separatorName sep =
     syntaxError pos "invalid separated expression"
