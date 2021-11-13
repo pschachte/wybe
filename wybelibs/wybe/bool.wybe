@@ -7,5 +7,4 @@ pub def (p:_ || q:_):_ = foreign llvm or(p,q)
 pub def ~(p:_):_       = foreign llvm xor(p,true)
 pub def (x:_ = y:_):_    = foreign llvm icmp_eq(x,y)
 pub def (x:_ ~= y:_):_    = foreign llvm icmp_ne(x,y)
-pub def otherwise { pass } # not a test, empty body, so always true
 pub def succeed { pass } # always succeed

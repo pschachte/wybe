@@ -15,6 +15,7 @@ import           AST
 import           Control.Monad
 import           Control.Monad.Trans
 import           Control.Monad.Trans.State
+import           Data.Tuple.HT (mapFst)
 import           Data.Graph
 import           Data.List                 as List
 import           Data.Map                  as Map
@@ -229,6 +230,14 @@ transformStmt tmp res (Cond test thn els condVars defVars) pos = do
     return ([maybePlace
              (Cond (Unplaced $ And test') thn' els' condVars defVars) pos],
             tmp3)
+transformStmt tmp res (Case expr cases deflt) pos = do
+    (cases',tmp1) <- transformCases tmp res cases
+    (deflt',tmp2) <- case deflt of
+        Nothing -> return (Nothing, tmp1)
+        Just def -> mapFst Just <$> transformBody tmp1 res def
+    return ([maybePlace
+             (Case expr cases' deflt') pos],
+            tmp2)
 transformStmt tmp res (Loop body defVars) pos = do
     (body',tmp') <- transformBody tmp res body
     return ([maybePlace (Loop body' defVars) pos], tmp')
@@ -321,6 +330,15 @@ transformExp tmp res exp@(Var name _ _) pos = do
         Just spec -> return (maybePlace (setExpFlowType exp (Resource spec)) pos, tmp)
         Nothing -> return (maybePlace exp pos, tmp)
 transformExp tmp _ exp pos = return (maybePlace exp pos, tmp)
+
+
+transformCases :: Int -> [(ResourceFlowSpec,TypeSpec)] -> [(Placed Exp,[Placed Stmt])]
+              -> Compiler ([(Placed Exp, [Placed Stmt])], Int)
+transformCases tmp res [] = return ([], tmp)
+transformCases tmp res ((guard,body):rest) = do
+    (body1,tmp1) <- transformBody tmp res body
+    (rest1,tmp2) <- transformCases tmp1 res rest
+    return $ ((guard,body1):rest1, tmp2)
 
 
 makeSingleStmt :: [Placed Stmt] -> Placed Stmt

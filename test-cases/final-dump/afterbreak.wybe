@@ -5,7 +5,7 @@
 do {
     if {
       x > 10    :: break
-    | otherwise :: ?y = x + 1
+    | else      :: ?y = x + 1
     }
     ?x = y
     !println(x)

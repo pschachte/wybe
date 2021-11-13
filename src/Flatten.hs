@@ -275,7 +275,7 @@ flattenStmt stmt pos detism = do
 
 -- |Flatten the specified statement
 flattenStmt' :: Stmt -> OptPos -> Determinism -> Flattener ()
-flattenStmt' stmt@(ProcCall (First [] "=" id) Det res [arg1,arg2]) pos detism = do
+flattenStmt' stmt@(ProcCall (First [] "=" id) callDetism res [arg1,arg2]) pos detism = do
     let arg1content = innerExp $ content arg1
     let arg2content = innerExp $ content arg2
     let arg1Vars = expOutputs arg1content
@@ -283,11 +283,13 @@ flattenStmt' stmt@(ProcCall (First [] "=" id) Det res [arg1,arg2]) pos detism = 
     logFlatten $ "Flattening assignment with outputs " ++ show arg1Vars
                  ++ " and " ++ show arg2Vars
     case (arg1content, arg2content) of
-      (Var var flow1 _, _) | flowsOut flow1 && Set.null arg2Vars -> do
+      (Var var flow1 _, _)
+        | callDetism == Det && flowsOut flow1 && Set.null arg2Vars -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
         arg1' <- flattenAnonParam (content arg1) AnyType Nothing (place arg1)
         flattenAssignment (expVar $ content arg1') arg1' arg2 pos
-      (_, Var var flow2 _) | flowsOut flow2 && Set.null arg1Vars -> do
+      (_, Var var flow2 _)
+        | callDetism == Det && flowsOut flow2 && Set.null arg1Vars -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
         arg1' <- flattenAnonParam (content arg1) AnyType Nothing (place arg1)
         flattenAssignment var arg2 arg1' pos
@@ -303,7 +305,7 @@ flattenStmt' stmt@(ProcCall (First [] "=" id) Det res [arg1,arg2]) pos detism = 
       (_,_) | Set.null arg1Vars && Set.null arg2Vars -> do
         logFlatten $ "Leaving equality test alone: " ++ showStmt 4 stmt
         args' <- flattenStmtArgs [arg1,arg2] pos
-        emit pos $ ProcCall  (First [] "=" id) Det res args'
+        emit pos $ ProcCall (First [] "=" id) Det res args'
         flushPostponed
       _ -> do
         -- Must be a mode error:  both sides want to bind variables
@@ -341,6 +343,9 @@ flattenStmt' (Cond tstStmt thn els condVars defVars) pos detism = do
     thn' <- flattenInner False False detism (flattenStmts thn detism)
     els' <- flattenInner False False detism (flattenStmts els detism)
     emit pos $ Cond tstStmt' thn' els' condVars defVars
+flattenStmt' (Case pexpr cases deflt) pos detism = do
+    pexpr' <- flattenPExp pexpr
+    flattenStmts (translateCases pexpr' pos cases deflt) detism
 flattenStmt' (TestBool expr) pos SemiDet = do
     pexpr' <- flattenPExp $ Unplaced expr
     case pexpr' of
@@ -381,9 +386,9 @@ flattenStmt' for@(For pgens body) pos detism = do
     --     if { `[|]`(?i, ?temp1, temp1) :: 
     --          if { `[|]`(?j, ?temp2, temp2) ::
     --              <stmts>
-    --          | otherwise :: break
+    --          | else :: break
     --          }
-    --     | otherwise :: break
+    --     | else :: break
     --     }
     -- }
     logFlatten $ "Generating for " ++ showStmt 4 for
@@ -392,7 +397,7 @@ flattenStmt' for@(For pgens body) pos detism = do
     -- XXX Should check for input only    
     origs <- mapM (flattenPExp . genExp) gens
     let instrs = zipWith (\orig temp ->
-                            ForeignCall "llvm" "move" [] 
+                            ForeignCall "llvm" "move" []
                                 [orig, Unplaced $ varSet temp])
                     origs temps
     mapM_ (emit pos) instrs
@@ -403,7 +408,7 @@ flattenStmt' for@(For pgens body) pos detism = do
                                         [var,
                                          Unplaced $ Var gen ParamOut Ordinary,
                                          Unplaced $ Var gen ParamIn Ordinary]
-                                      `maybePlace` pos') 
+                                      `maybePlace` pos')
                                 loop [Unplaced Break]
                       Nothing Nothing]
                 ) body $ zip3 (loopVar <$> gens) temps poss
@@ -430,6 +435,22 @@ flattenAssignment var varArg value pos = do
     noteVarDef var
     emit pos instr
     flushPostponed
+
+
+translateCases :: Placed Exp -> OptPos -> [(Placed Exp,[Placed Stmt])]
+               -> Maybe [Placed Stmt] -> [Placed Stmt]
+translateCases val pos [] Nothing = [Unplaced Fail]
+translateCases val pos [] (Just deflt) = deflt
+translateCases val pos ((key,body):rest) deflt =
+    [maybePlace
+     (Cond (maybePlace (ProcCall (First [] "=" Nothing) SemiDet False [key,val])
+                       (place key))
+           body
+           (translateCases val pos rest deflt)
+           Nothing Nothing)
+     pos]
+     where testPos = place key
+
 
 ----------------------------------------------------------------
 --                      Flattening Expressions
@@ -463,6 +484,7 @@ flattenPExp pexp = do
 --  after the call to store the result appropriately.
 --  The first part of the output (a Placed Exp) will always be a list
 --  of only atomic Exps and Var references (in any direction).
+-- XXX Does this need to support SemiDet (partial) expressions?
 flattenExp :: Exp -> TypeSpec -> Maybe TypeSpec -> OptPos
            -> Flattener (Placed Exp)
 flattenExp expr@(IntValue _) ty castFrom pos =
@@ -527,6 +549,11 @@ flattenExp expr@(AnonProc mods _ pstmts) ty castFrom pos = do
     let anonParams = processAnonProcParams anonState'
     return $ typeAndPlace (AnonProc mods anonParams (reverse $ flattened state')) 
                           ty castFrom pos
+flattenExp (CaseExp pexpr cases deflt) ty castFrom pos = do
+    resultName <- tempVar
+    pexpr' <- flattenPExp pexpr
+    flattenStmt (translateExpCases pexpr' resultName cases deflt) pos Det
+    return $ maybePlace (Var resultName ParamIn Ordinary) pos
 flattenExp (Fncall mod name exps) ty castFrom pos = do
     let stmtBuilder = ProcCall (First mod name Nothing) Det False
     flattenCall stmtBuilder False ty castFrom pos exps
@@ -615,7 +642,26 @@ flattenAnonParam expr@(AnonParamVar mbNum dir) ty castFrom pos = do
 flattenAnonParam expr _ _ pos = return $ maybePlace expr pos
 
 
+-- | Translate a case expression into a conditional expression, for subsequent
+-- flattening.  First argument is a variable expression holding the value being
+-- switched on, second is the variable in which to store the value of the
+-- conditional expr, third are all the cases, and last is the Maybe default
+-- value.
+translateExpCases :: Placed Exp -> String -> [(Placed Exp, Placed Exp)]
+                  -> Maybe (Placed Exp) -> Stmt
+translateExpCases pexp varName [] Nothing = Fail
+translateExpCases pexp varName [] (Just deflt) =
+    ForeignCall "llvm" "move" [] [deflt, Unplaced $ varSet varName]
+translateExpCases pexp varName ((pat,val):rest) deflt =
+    Cond (maybePlace (ProcCall (First [] "=" Nothing) SemiDet False [pat,pexp])
+                     (place pat))
+        [Unplaced $ ForeignCall "llvm" "move" []
+                    [val, Unplaced $ varSet varName]]
+        [Unplaced (translateExpCases pexp varName rest deflt)] Nothing Nothing
 
+
+-- | Attach a type, source position, and possibly a type to cast from, to a
+-- given expression.
 typeAndPlace :: Exp -> TypeSpec -> Maybe TypeSpec -> OptPos -> Placed Exp
 typeAndPlace exp ty castFrom = maybePlace (maybeType exp ty castFrom)
 

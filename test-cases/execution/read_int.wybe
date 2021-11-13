@@ -7,7 +7,7 @@ def test_read_int() use !io{
     !print("a - b = ") ; !println(a-b)
     if { a > b ::
         !println("a > b")
-    | otherwise ::
+    | else      ::
         !println("a <= b")
     }
 }

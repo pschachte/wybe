@@ -286,7 +286,7 @@ def do_action(!d:drone_info, action:char, ?success:bool) {
         z(!d, z(d)+1)
     | action = 'd' ::
         z(!d, z(d)-1)
-    | otherwise ::
+    | else      ::
         ?success = false
     }
     if { success ::
@@ -298,7 +298,7 @@ def loop(d:drone_info, ch:char) use !io {
     if { ch ~= ' ' && ch ~= '\n' ::
         if { ch = 'p' ::
             !print_info(d)
-        | otherwise ::
+        | else      ::
             do_action(!d, ch, ?success)
             if { success = false ::
                 !println("invalid action!")
@@ -328,7 +328,7 @@ if { ch ~= eof ::
 #     if { ch ~= ' ' && ch ~= '\n' ::
 #         if { ch = 'p' ::
 #             !print_info(d)
-#         | otherwise ::
+#         | else      ::
 #             do_action(!d, ch, ?success)
 #             if { success = false ::
 #                 !println("invalid action!")

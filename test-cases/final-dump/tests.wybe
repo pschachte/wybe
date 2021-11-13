@@ -21,7 +21,7 @@ pub type map { pub empty | node(left:map, key:int, value:int, right:map) }
 pub def {test} lookup(key:int, map:map, ?result:int) {
     if{ key = map^map.key:: ?result = map^value
     |   key < map^map.key:: lookup(key, map^left, ?result)
-    |   otherwise        :: lookup(key, map^right, ?result)
+    |   else             :: lookup(key, map^right, ?result)
     }
 }
 

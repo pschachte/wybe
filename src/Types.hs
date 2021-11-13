@@ -1159,9 +1159,10 @@ bodyCalls (pstmt:pstmts) detism = do
         UseResources _ _ nested -> do
           nested' <- bodyCalls nested detism
           return $ nested' ++ rest
-        For _ nested -> shouldnt "bodyCalls: flattening left For stmt"
-        Break -> return rest
-        Next ->  return rest
+        For{}  -> shouldnt "bodyCalls: flattening left For stmt"
+        Case{} -> shouldnt "bodyCalls: flattening left Case stmt"
+        Break  -> return rest
+        Next   -> return rest
 
 
 expStmts :: [([Placed Stmt], Determinism)] -> Exp -> [([Placed Stmt], Determinism)]
@@ -1974,6 +1975,8 @@ modecheckStmt m name defPos assigned detism tmpCount final
     return ([maybePlace (Not (seqToStmt stmt')) pos], assigned, tmpCount')
 modecheckStmt _ _ _ _ _ _ final stmt@For{} pos =
     shouldnt $ "For statement left by unbranching: " ++ show stmt
+modecheckStmt _ _ _ _ _ _ final stmt@Case{} pos =
+    shouldnt $ "Case statement left by unbranching: " ++ show stmt
 modecheckStmt m name defPos assigned detism tmpCount final
     Break pos = do
     logTyped $ "Mode checking break with assigned=" ++ show assigned
@@ -2454,8 +2457,10 @@ checkStmtTyped name pos stmt@(Loop stmts exitVars) _ppos = do
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
 checkStmtTyped name pos (UseResources _ _ stmts) _ppos =
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
-checkStmtTyped name pos For {} ppos =
-    shouldnt "For should not exist here"
+checkStmtTyped name pos For{} ppos =
+    shouldnt "For statement left by flattening"
+checkStmtTyped name pos Case{} ppos =
+    shouldnt "Case statement left by flattening"
 checkStmtTyped _ _ Nop _ = return ()
 checkStmtTyped _ _ Fail _ = return ()
 checkStmtTyped _ _ Break _ = return ()

@@ -25,12 +25,12 @@
 --  Similarly Break a b would be transformed to just break1, where
 --  break1 is the break procedure for that loop.  Inside a loop, a
 --  conditional must be handled specially, to support breaking out of
---  the loop.  Inside a loop, if {a:: b | otherwise:: c} d e would be
+--  the loop.  Inside a loop, if {a:: b | else:: c} d e would be
 --  transformed to a call to gen1, where gen2 is defined as def gen2
---  {d e}, and gen1 is defined as def gen1 {a:: b gen2 | otherwise::
+--  {d e}, and gen1 is defined as def gen1 {a:: b gen2 | else::
 --  c gen2}.  So for example do {a if {b:: Break} c} d e would be
 --  transformed into next1, which is defined as def next1 {a gen1},
---  gen1 is defined as def gen1 {b:: break1 | otherwise:: gen2},
+--  gen1 is defined as def gen1 {b:: break1 | else:: gen2},
 --  gen2 is defined as def gen2 {c next1}, and break1 is defined as def
 --  break1 {d e}.
 --
@@ -466,10 +466,12 @@ unbranchStmt detism (Loop body exitVars) pos stmts alt sense = do
     logUnbranch $ "Generated next " ++ showStmt 4 (content next)
     logUnbranch "Finished handling loop"
     return [next]
-unbranchStmt _ (UseResources _ _ _) _ _ _ _ =
+unbranchStmt _ UseResources{} _ _ _ _ =
     shouldnt "resource handling should have removed use ... in statements"
-unbranchStmt _ (For _ body) _ _ _ _ =
+unbranchStmt _ For{} _ _ _ _ =
     shouldnt "flattening should have removed For statements"
+unbranchStmt _ Case{} _ _ _ _ =
+    shouldnt "flattening should have removed Case statements"
 unbranchStmt detism Nop _ stmts alt sense = do
     logUnbranch "Unbranching a Nop"
     unbranchStmts detism stmts alt sense     -- might as well filter out Nops

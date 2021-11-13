@@ -93,7 +93,7 @@ pub type int_sequence {
 
         if {
             st < 0 :: (s > en)
-            | otherwise :: (s < en)
+            | else      :: (s < en)
         }
 
         ?value = s
