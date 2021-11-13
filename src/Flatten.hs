@@ -341,9 +341,9 @@ flattenStmt' for@(For pgens body) pos detism = do
     --     if { `[|]`(?i, ?temp1, temp1) :: 
     --          if { `[|]`(?j, ?temp2, temp2) ::
     --              <stmts>
-    --          | otherwise :: break
+    --          | else :: break
     --          }
-    --     | otherwise :: break
+    --     | else :: break
     --     }
     -- }
     logFlatten $ "Generating for " ++ showStmt 4 for

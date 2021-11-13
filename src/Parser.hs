@@ -446,7 +446,7 @@ infixOp minPrec = takeToken test
   where
     test tok
       | lPrec > minPrec && isInfixOp tok = Just (name, prec)
-      | otherwise                           = Nothing
+      | otherwise                        = Nothing
         where name = tokenName tok
               (prec,assoc) = operatorAssociativity name
               lPrec = prec + if assoc == LeftAssociative  then 0 else 1
@@ -669,9 +669,7 @@ separatorName _    = False
 
 -- |Special default test for conditionals.
 defaultGuard :: String -> Bool
-defaultGuard "else"      = True
-defaultGuard "otherwise" = True
-defaultGuard _           = False
+defaultGuard = (=="else")
 
 
 -----------------------------------------------------------------------------
@@ -961,7 +959,7 @@ stmtExprToStmt (Call pos [] "|" ParamIn disjs) = do
     flip Placed pos . flip Or Nothing <$> mapM stmtExprToStmt disjs
 stmtExprToStmt (Call pos [] "::" ParamIn [Call _ [] guard ParamIn [],body])
   | defaultGuard guard = do
-    syntaxError pos  "'else' or 'otherwise' outside an 'if'"
+    syntaxError pos  "'else' outside an 'if'"
 stmtExprToStmt (Call pos [] "::" ParamIn [test,body]) = do
     test' <- stmtExprToStmt test
     body' <- stmtExprToBody body

@@ -21,7 +21,5 @@ pub def {terminal,semipure} error(message:c_string) use call_source_location {
 
 
 pub def {semipure} assert(condition:bool) use call_source_location {
-    if {condition:: pass
-    |   otherwise:: !error(c"assertion failed")
-    }
+    if { ~condition :: !error(c"assertion failed") }
 }

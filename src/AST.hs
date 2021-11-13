@@ -3303,7 +3303,7 @@ showStmt indent (Case val cases deflt) =
     ++ concatMap
        (\(exp,body) -> "| " ++ show exp ++ "::" ++ showBody (indent+4) body)
        cases
-    ++ maybe "" (("  otherwise::" ++) . showBody (indent+4)) deflt
+    ++ maybe "" (("  else::" ++) . showBody (indent+4)) deflt
     ++ startLine indent ++ "}"
 showStmt indent (Loop lstmts genVars) =
     "do {" ++  showBody (indent + 4) lstmts

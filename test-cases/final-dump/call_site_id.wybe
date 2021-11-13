@@ -7,14 +7,14 @@ if { x > 0 ::
     !bar(x)
     if { y > 0 ::
         !bar(y)
-    | otherwise ::
+    | else      ::
         !bar(-y)
     }
-| otherwise :: 
+| else      :: 
     !bar(-x)
     if { y > 0 ::
         !bar(y)
-    | otherwise ::
+    | else      ::
         !bar(-y)
     }
 }

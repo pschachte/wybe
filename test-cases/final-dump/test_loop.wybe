@@ -26,7 +26,7 @@ def find_test(modulus:int) use !io {
            !print(modulus)
            !print(" is ")
            !println(i)
-      | otherwise ::
+      | else      ::
            !print("Couldn't find even number divisible by ")
            !println(modulus)
     }

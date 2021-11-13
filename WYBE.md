@@ -547,8 +547,8 @@ otherwise indicated, they are infix operators.
 | `?`         | Output variable annotation (prefix)                             |
 | `!`         | Input/Output variable annotation (prefix)                       |
 | `if`        | If statement/expression (`if {` ... `::` ... `}`)               |
-| `else`      | Final default case in `if` statement/expression                 |
-| `otherwise` | Final default case in `if` statement/expression                 |
+| `case`      | Case statement/expression (`case expr in {` ... `::` ... `}`)   |
+| `else`      | Final default case in `if` and `case` statements/expressions    |
 | `let`       | Local variable definition (`let` ... `in` ...)                  |
 | `where`     | Local variable definition (... `where` ... )                    |
 | `use`       | Local resource binding (`use {`...`} in {`...`}`)               |
@@ -766,18 +766,21 @@ the second *test* is tried.
 If this test succeeds, its corresponding *statements* are executed, and so on.
 At most one *statements* sequence is executed, but if none of the specified
 *test*s succeed, none of the *statements* are executed.
-The predefined `otherwise` test always succeeds, so it may be used as the final
-test to provide code to execute if none of the preceding tests succeeds.
+The last test may optionally be the keyword `else`, which always succeeds, so it may be used to provide code to execute if none of the preceding tests succeeds.
 
 For example:
 ```
-if { x < 0     :: !println("negative")
-   | x = 0     :: !println("zero")
-   | otherwise :: !println("positive")
+if { x < 0 :: !println("negative")
+   | x = 0 :: !println("zero")
+   | else  :: !println("positive")
 }
 ```
 
 
+
+## <a name="cases"></a>Case statements
+
+Wybe's conditional construct has the form:
 
 ## `terminal` and `failing` procedures
 A procedure is considered to be *terminal* if a call to it will never return (it
@@ -1022,9 +1025,9 @@ def {test} member(elt:int, tree:_) {
     if { node(?left, ?value, ?right) = tree ::
             if { elt = value:: succeed
                | elt < value:: member(elt, left)
-               | otherwise  :: member(elt, right)
+               | else       :: member(elt, right)
             }
-       | otherwise:: fail
+       | else:: fail
     }
 }
 ```

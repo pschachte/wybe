@@ -373,12 +373,12 @@ to just next1, where next1 is the next procedure for that loop.
 Similarly Break a b would be transformed to just break1, where
 break1 is the break procedure for that loop.  Inside a loop, a
 conditional must be handled specially, to support breaking out of
-the loop.  Inside a loop, if {a:: b | otherwise:: c} d e would be
+the loop.  Inside a loop, if {a:: b | else:: c} d e would be
 transformed to a call to gen1, where gen2 is defined as def gen2
-{d e}, and gen1 is defined as def gen1 {a:: b gen2 | otherwise::
+{d e}, and gen1 is defined as def gen1 {a:: b gen2 | else::
 c gen2}.  So for example do {a if {b:: Break} c} d e would be
 transformed into next1, which is defined as def next1 {a gen1},
-gen1 is defined as def gen1 {b:: break1 | otherwise:: gen2},
+gen1 is defined as def gen1 {b:: break1 | else:: gen2},
 gen2 is defined as def gen2 {c next1}, and break1 is defined as def
 break1 {d e}.
 

@@ -92,7 +92,7 @@ pub def foo1(x1:position, x2:position, n:int) use !io {
     if { n < 0 :: 
             !modifyAndPrint(x1, 111)
             !modifyAndPrint(x2, 222)
-        | otherwise ::
+        | else      ::
             !foo2(x2, x1, n)
     }
 }
@@ -107,7 +107,7 @@ pub def foo2(x1:position, x2:position, n:int) use !io {
     if { n < 0 :: 
             !modifyAndPrint(x1, 111)
             !modifyAndPrint(x2, 222)
-        | otherwise ::
+        | else      ::
             !foo1(x2, x1, n)
     }
 }

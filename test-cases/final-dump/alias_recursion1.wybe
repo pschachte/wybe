@@ -8,7 +8,7 @@ pub def if_test(a:position, b:position, ?r:position) {
             ?b = a
             ?a = tmp
             if_test(a, b, ?r)
-       | otherwise ::
+       | else      ::
             ?r = a
     }
 }

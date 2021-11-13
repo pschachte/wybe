@@ -3,7 +3,7 @@
 def len(lst:list(T)):int = length where {
     case lst in {
         [_|?t]   :: ?length = 1 + len(t)
-      | otherwise:: ?length = 0
+      | else:: ?length = 0
     }
 }
 
@@ -12,7 +12,7 @@ def len(lst:list(T)):int = length where {
 def len2(lst:list(T)):int =
     case lst in {
         [_|?t]   :: 1 + len2(t)
-      | otherwise:: 0
+      | else:: 0
     }
 
 # Tests for multi-way case
