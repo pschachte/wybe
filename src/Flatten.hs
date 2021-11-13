@@ -51,6 +51,7 @@ import Control.Monad.Trans.State
 import Control.Monad.Trans (lift,liftIO)
 import Distribution.Simple.Test.Log (TestSuiteLog(logFile))
 import Data.Type.Equality (inner)
+import AST (maybePlace)
 
 
 ----------------------------------------------------------------
@@ -296,6 +297,9 @@ flattenStmt' (Cond tstStmt thn els condVars defVars) pos detism = do
     thn' <- flattenInner False False detism (flattenStmts thn detism)
     els' <- flattenInner False False detism (flattenStmts els detism)
     emit pos $ Cond tstStmt' thn' els' condVars defVars
+flattenStmt' (Case pexpr cases deflt) pos detism = do
+    pexpr' <- flattenPExp pexpr
+    flattenStmts (translateCases pexpr' pos cases deflt) detism
 flattenStmt' (TestBool expr) pos SemiDet = do
     pexpr' <- flattenPExp $ Unplaced expr
     case pexpr' of
@@ -347,18 +351,18 @@ flattenStmt' for@(For pgens body) pos detism = do
     -- XXX Should check for input only    
     origs <- mapM (flattenPExp . genExp) gens
     let instrs = zipWith (\orig temp ->
-                            ForeignCall "llvm" "move" [] 
+                            ForeignCall "llvm" "move" []
                                 [orig, Unplaced $ varSet temp])
                     origs temps
     mapM_ (emit pos) instrs
     modify (\s -> s {defdVars = Set.union (Set.fromList temps) $ defdVars s})
-    let loop = List.foldr 
-                (\(var, gen, pos') loop -> 
-                    [Unplaced $ Cond (ProcCall [] "[|]" Nothing SemiDet False 
+    let loop = List.foldr
+                (\(var, gen, pos') loop ->
+                    [Unplaced $ Cond (ProcCall [] "[|]" Nothing SemiDet False
                                         [var,
                                          Unplaced $ Var gen ParamOut Ordinary,
                                          Unplaced $ Var gen ParamIn Ordinary]
-                                      `maybePlace` pos') 
+                                      `maybePlace` pos')
                                 loop [Unplaced Break]
                       Nothing Nothing]
                 ) body $ zip3 (loopVar <$> gens) temps poss
@@ -385,6 +389,18 @@ flattenAssignment var varArg value pos = do
     noteVarDef var
     emit pos instr
     flushPostponed
+
+
+translateCases :: Placed Exp -> OptPos -> [(Placed Exp,[Placed Stmt])] 
+               -> Maybe [Placed Stmt] -> [Placed Stmt]
+translateCases val pos [] Nothing = [Unplaced Fail]
+translateCases val pos [] (Just deflt) = deflt
+translateCases val pos ((key,body):rest) deflt =
+    [maybePlace 
+     (Cond (maybePlace (ForeignCall "llvm" "move" [] [val, key]) testPos)
+         body (translateCases val pos rest deflt) Nothing Nothing)
+     pos]
+     where testPos = place key
 
 
 -- | Extract the inner expression (removing any Typed wrapper)
@@ -497,7 +513,7 @@ flattenCall stmtBuilder isForeign ty castFrom pos exps = do
     --       then (ParamOut,ParamIn)
     --       else (FlowUnknown,FlowUnknown)
     let outFlows = Set.fromList
-                        $ List.filter (/= ParamIn) 
+                        $ List.filter (/= ParamIn)
                         $ List.map (flattenedExpFlow . content) exps'
     logFlatten $ "-- set of out flows:  " ++ show outFlows
     varflow <- if Set.null outFlows

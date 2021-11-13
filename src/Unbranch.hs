@@ -450,7 +450,9 @@ unbranchStmt detism (Loop body exitVars) pos stmts alt sense = do
     return [next]
 unbranchStmt _ (UseResources _ _ _) _ _ _ _ =
     shouldnt "resource handling should have removed use ... in statements"
-unbranchStmt _ (For _ body) _ _ _ _ =
+unbranchStmt _ For{} _ _ _ _ =
+    shouldnt "flattening should have removed For statements"
+unbranchStmt _ Case{} _ _ _ _ =
     shouldnt "flattening should have removed For statements"
 unbranchStmt detism Nop _ stmts alt sense = do
     logUnbranch "Unbranching a Nop"
