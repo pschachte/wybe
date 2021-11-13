@@ -42,7 +42,7 @@
 #     if {cp = gen2_choice2::
 #             ?parity = 1
 #             ?cp = gen2_nomore
-#        |otherwise:: fail
+#        |else:: fail
 #     }
 # }
 
@@ -68,16 +68,16 @@
 #     |   cp = gen1_choice3(?start, ?end)::
 #             if {int_seq_first(start + 2, end, ?val, ?innercp)::
 #                     ?cp = gen1_choice3_rest(innercp)
-#                |otherwise::
+#                |else::
 #                    fail
 #                }
 #     |   cp = gen1_choice3_rest(?innercp)::
 #             if {int_seq_rest(?val, !innercp)::
 #                     ?cp = gen1_choice3_rest(innercp)
-#                |otherwise::
+#                |else::
 #                     fail
 #                }
-#     |   otherwise:: fail
+#     |   else:: fail
 #     }
 # }
 
@@ -116,7 +116,7 @@
 #             int_seq_cont2(start, end, val, parity, ?val, gen1_cp, gen2_cp, ?cp)
 #        |gen1_rest(?val, !gen1_cp)::
 #             int_seq_cont1(start, end, val, gen1_cp, ?val, ?cp)
-#        |otherwise::
+#        |else::
 #             fail
 #        }
 # }
@@ -154,7 +154,7 @@
 #     |   cp = gen2_choice2::
 #         ?parity = 1
 #         ?cp = gen2_nomore
-#     |   otherwise:: fail
+#     |   else:: fail
 #     }
 # }
 
@@ -177,9 +177,9 @@
 #     |   cp = gen1_choice3(?innercp)::
 #         if {int_seq(start + 2, end, ?val, !innercp)::
 #             ?cp = gen1_choice3(innercp)
-#         |   otherwise:: fail
+#         |   else:: fail
 #         }
-#     |   otherwise:: fail
+#     |   else:: fail
 #     }
 # }
 
@@ -197,7 +197,7 @@
 #         int_seq_cont1(start, end, ?val, gen1_choice1, !cp)
 #     |   cp = int_seq_retry(?cp1, ?cp2, ?val)::
 #         int_seq_cont2(start, end, val, ?val, cp1, cp2, !cp)
-#     |   otherwise:: fail
+#     |   else:: fail
 #     }
 # }
 
@@ -214,7 +214,7 @@
 #     if {gen2_next(?parity, !cp2)::
 #         ?val = val0 + parity + 1
 #         ?cp = int_seq_retry(cp1, cp2, val0)
-#     |   otherwise::
+#     |   else::
 #         int_seq_cont1(start, end, ?val, cp1, !cp)
 #     }
 # }
@@ -252,7 +252,7 @@ def {test} gen2_next(?parity:int, !cp:int) {
     |   cp = 1::
         ?parity = 1
         ?cp = 2
-    |   otherwise:: fail
+    |   else:: fail
     }
 }
 
@@ -275,9 +275,9 @@ def {test} gen1_next(start:int, end:int, ?val:int, !cp:machine_word) {
         foreign lpvm access(cp, 0, 8, 0, ?innercp)
         if {int_seq(start + 2, end, ?val, !innercp)::
             foreign lpvm mutate(cp, ?cp, 0, 1, 8, 0, innercp)
-        |   otherwise:: fail
+        |   else:: fail
         }
-    |   otherwise:: fail
+    |   else:: fail
     }
 }
 
@@ -290,7 +290,7 @@ def {test} int_seq(start:int, end:int, ?val:int, !cp:machine_word) {
         foreign lpvm access(cp,  8, 8, 0, ?cp2)
         foreign lpvm access(cp, 16, 8, 0, ?val)
         int_seq_cont2(start, end, val, ?val, cp1, cp2, !cp)
-    |   otherwise:: fail
+    |   else:: fail
     }
 }
 
@@ -310,7 +310,7 @@ def {test} int_seq_cont2(start:int, end:int, val0:int, ?val:int,
         foreign lpvm mutate(cp, ?cp,  0, 1, 8, 0, cp1)
         foreign lpvm mutate(cp, ?cp,  8, 1, 8, 0, cp2)
         foreign lpvm mutate(cp, ?cp, 16, 1, 8, 0, val0)
-    |   otherwise::
+    |   else::
         int_seq_cont1(start, end, ?val, cp1, !cp)
     }
 }

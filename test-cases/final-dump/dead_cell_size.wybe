@@ -52,7 +52,7 @@ pub def bar(x:t, ?x:t) {
 pub def diff_type(x:t, ?y:t2) {
     if { tb(?a) = x ::
         ?y = t2b(a)
-    | otherwise ::
+    | else      ::
         ?y = t2b(-1)
     }
 }

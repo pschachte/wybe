@@ -7,7 +7,7 @@ pub def foo2(x1:position, x2:position, x3:position, x4:position, n:int) use !io 
             !modifyAndPrint(x2, 222)
             !modifyAndPrint(x3, 333)
             !modifyAndPrint(x4, 444)
-        | otherwise ::
+        | else      ::
             !foo1(x2, x3, x4, x1, n)
     }
 }

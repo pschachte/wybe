@@ -433,7 +433,7 @@ termRest minPrec left =
         case left of
             Call _ m n _ [] | minPrec <= lowestStmtPrecedence
                             || List.null m && prefixKeyword n ->
-                (limitedTerm lowestTermPrecedence
+                (term
                     >>= applyArguments left . (:[])
                     >>= termRest minPrec)
                 <|> return left
@@ -447,7 +447,7 @@ infixOp minPrec = takeToken test
   where
     test tok
       | lPrec > minPrec && isInfixOp tok = Just (name, prec)
-      | otherwise                           = Nothing
+      | otherwise                        = Nothing
         where name = tokenName tok
               (prec,assoc) = operatorAssociativity name
               lPrec = prec + if assoc == LeftAssociative  then 0 else 1
@@ -658,6 +658,7 @@ prefixKeyword :: String -> Bool
 prefixKeyword "if"  = True
 prefixKeyword "let"  = True
 prefixKeyword "use"  = True
+prefixKeyword "case" = True
 prefixKeyword _     = False
 
 
@@ -670,9 +671,7 @@ separatorName _    = False
 
 -- |Special default test for conditionals.
 defaultGuard :: String -> Bool
-defaultGuard "else"      = True
-defaultGuard "otherwise" = True
-defaultGuard _           = False
+defaultGuard = (=="else")
 
 
 -----------------------------------------------------------------------------
@@ -967,7 +966,7 @@ termToStmt (Call pos [] "|" ParamIn disjs) = do
     (`Placed` pos) . (`Or` Nothing) <$> mapM termToStmt disjs
 termToStmt (Call pos [] "::" ParamIn [Call _ [] guard ParamIn [],body])
   | defaultGuard guard = do
-    syntaxError pos  "'else' or 'otherwise' outside an 'if'"
+    syntaxError pos  "'else' outside an 'if'"
 termToStmt (Call pos [] "::" ParamIn [test,body]) = do
     test' <- termToStmt test
     body' <- termToBody body
@@ -1070,6 +1069,12 @@ termToExp (Call pos [] "^" ParamIn [exp,op]) = do
         _ -> syntaxError pos "invalid second argument to '^'"
 termToExp (Call pos [] "if" ParamIn [conditional]) =
     termToConditionalExp conditional
+termToExp (Call pos [] "case" ParamIn 
+                [Call _ [] "in" ParamIn 
+                      [exp,Call _ [] "{}" ParamIn [body]]]) = do
+    expr' <- termToExp exp
+    (cases,deflt) <- termToCases termToExp body
+    return $ Placed (CaseExp expr' cases deflt) pos
 termToExp (Call pos [] sep ParamIn [])
   | separatorName sep =
     syntaxError pos "invalid separated expression"
