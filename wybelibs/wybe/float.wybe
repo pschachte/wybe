@@ -2,8 +2,12 @@ pragma no_standard_library  # Standard library can't depend on itself!
 
 use foreign library m
 use wybe.bool
+use wybe.int
 
 representation is 64 bit float
+
+pub def pi:float = 3.14159265358979323846264338327950288
+pub def e:float = 2.71828182845904523536028747135266250
 
 pub def (x:_ + y:_):_ = foreign llvm fadd(x,y)
 pub def (?x:_ + y:_):_ = ?z where { ?x = foreign llvm fsub(z,y) }
@@ -21,7 +25,21 @@ pub def (x:_ <= y:_):bool = foreign llvm fcmp_sle(x,y)
 pub def (x:_ > y:_):bool = foreign llvm fcmp_sgt(x,y)
 pub def (x:_ >= y:_):bool = foreign llvm fcmp_sge(x,y)
 pub def (x:_ = y:_):bool = foreign llvm fcmp_eq(x,y)
-pub def sqrt(x:_):_ = foreign c sqrt(x)
-pub def power(x:_,y:_):_ = foreign c pow(x,y)
-pub def min(x:_, y:_):_ = if {x<=y:: x | else:: y}
-pub def max(x:_, y:_):_ = if {x>=y:: x | else:: y}
+pub def square(x:_):_ = foreign llvm fmul(x,x)
+pub def abs(x:_):_ = foreign c `llvm.fabs.f64`(x)
+pub def sqrt(x:_):_ = foreign c `llvm.sqrt.f64`(x)
+pub def power(x:_,y:_):_ = foreign c `llvm.pow.f64`(x,y)
+pub def (x:_ ** y:_):_ = foreign c `llvm.pow.f64`(x,y)
+pub def min(x:_, y:_):_ = foreign c `llvm.minnum.f64`(x,y)
+pub def max(x:_, y:_):_ = foreign c `llvm.maxnum.f64`(x,y)
+pub def floor(x:_):_ = foreign c `llvm.floor.f64`(x)
+pub def ceil(x:_):_ = foreign c `llvm.ceil.f64`(x)
+pub def sin(x:_):_ = foreign c `llvm.sin.f64`(x)
+pub def cos(x:_):_ = foreign c `llvm.cos.f64`(x)
+pub def tan(x:_):_ = foreign c `llvm.sin.f64`(x) / foreign c `llvm.cos.f64`(x)
+pub def exp(x:_):_ = foreign c `llvm.exp.f64`(x)
+pub def log(x:_):_ = foreign c `llvm.log.f64`(x)
+pub def log10(x:_):_ = foreign c `llvm.log10.f64`(x)
+pub def log2(x:_):_ = foreign c `llvm.log2.f64`(x)
+pub def round(x:_):_ = foreign c `llvm.round.f64`(x)
+pub def iround(x:_):int = foreign c `llvm.llrint.i64.f64`(x)

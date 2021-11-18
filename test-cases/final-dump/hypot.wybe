@@ -1,0 +1,24 @@
+# Compute hypotenuse; demo of LLVM intrinsic version of sqrt
+
+def hypot(s1:float, s2:float):float = sqrt(square(s1) + square(s2))
+def area(r:float):float = pi * square(r)
+
+!print("hypot(3,4) = ")
+!println(hypot(3.0,4.0))
+
+!print("area(5) = ")
+!println(area(5.0))
+
+!print("e = ")
+!print(e)
+!print(" = ")
+!println(exp(1.0))
+
+!print("sin(30) = ")
+!println(sin(30.0))
+
+!print("cos(30) = ")
+!println(cos(30.0))
+
+!print("ln(e) = ")
+!println(log(e))
