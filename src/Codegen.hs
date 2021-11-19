@@ -557,6 +557,7 @@ icmp p a b = ICmp p a b []
 
 -- * Unary
 
+-- XXX These are not right:  they assume the output bitwidth
 uitofp :: Operand -> Instruction
 uitofp a = UIToFP a float_t []
 

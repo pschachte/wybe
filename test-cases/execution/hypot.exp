@@ -1,0 +1,14 @@
+hypot(3,4) = 5.000000
+area(5) = 78.539816
+e = 2.718282 = 2.718282
+sin(30) = -0.988032
+cos(30) = 0.154251
+sin(30 degrees) = 0.500000
+cos(30 degrees) = 0.866025
+ln(e) = 1.000000
+common log(e) = 0.434294
+base 2 log(e) = 1.442695
+floor(pi) = 3.000000
+ceil(pi) = 4.000000
+round(pi) = 3.000000
+iround(pi) = 3
