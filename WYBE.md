@@ -1591,6 +1591,9 @@ Floating point (signed) greater or equal
 
 #####  <a name="conversion"></a>Integer/floating point conversion
 
+These operations convert between floating point and integer representations.
+They work for any bitwith float and integer types.
+
 - `foreign llvm uitofp(`arg1:int`)`:float  
 Convert unsigned integer to float
 - `foreign llvm sitofp(`arg1:int`)`:float  
