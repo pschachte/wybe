@@ -88,7 +88,7 @@ pub def iceil(x:_):int = foreign llvm fptosi(ceil(x))
 pub def ifloor(x:_):int = foreign llvm fptosi(floor(x))
 
 
-## Transendental functions
+## Transcendental functions
 
 # Square root.
 pub def sqrt(x:_):_ = foreign c `llvm.sqrt.f64`(x)
