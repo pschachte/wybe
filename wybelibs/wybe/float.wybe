@@ -79,7 +79,9 @@ pub def floor(x:_):_ = foreign c `llvm.floor.f64`(x)
 pub def round(x:_):_ = foreign c `llvm.round.f64`(x)
 
 # The closest whole number to the input, as an int.
-pub def iround(x:_):int = foreign c `llvm.llrint.i64.f64`(x)
+#pub def iround(x:_):int = foreign c `llvm.llrint.i64.f64`(x)
+pub def iround(x:_):int =
+    foreign llvm fptosi(foreign c `llvm.round.f64`(x):float)
 
 
 ## Transendental functions

@@ -65,12 +65,12 @@ AFTER EVERYTHING:
     foreign c putchar('\n':wybe.char, ~tmp#116##0:wybe.phantom, ?#io##26:wybe.phantom) @io:nn:nn
     wybe.string.print_string<0>("round(pi) = ":wybe.string, ~#io##26:wybe.phantom, ?#io##27:wybe.phantom) #71 @io:nn:nn
     foreign c llvm.round.f64(3.141592653589793:wybe.float, ?tmp#24##0:wybe.float) @float:nn:nn
-    foreign c print_float(~tmp#24##0:wybe.float, ~#io##27:wybe.phantom, ?tmp#122##0:wybe.phantom) @io:nn:nn
+    foreign c print_float(tmp#24##0:wybe.float, ~#io##27:wybe.phantom, ?tmp#122##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#122##0:wybe.phantom, ?#io##28:wybe.phantom) @io:nn:nn
     wybe.string.print_string<0>("iround(pi) = ":wybe.string, ~#io##28:wybe.phantom, ?#io##29:wybe.phantom) #72 @io:nn:nn
-    foreign c llvm.llrint.i64.f64(3.141592653589793:wybe.float, ?tmp#26##0:wybe.int) @float:nn:nn
-    foreign c print_int(~tmp#26##0:wybe.int, ~#io##29:wybe.phantom, ?tmp#128##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#128##0:wybe.phantom, ?#io##30:wybe.phantom) @io:nn:nn
+    foreign llvm fptosi(~tmp#24##0:wybe.float, ?tmp#26##0:wybe.int) @float:nn:nn
+    foreign c print_int(~tmp#26##0:wybe.int, ~#io##29:wybe.phantom, ?tmp#129##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#129##0:wybe.phantom, ?#io##30:wybe.phantom) @io:nn:nn
 
 
 area > {inline} (1 calls)
@@ -104,9 +104,6 @@ declare external ccc  void @putchar(i8)
 
 
 declare external ccc  void @print_int(i64)    
-
-
-declare external ccc  i64 @llvm.llrint.i64.f64(double)    
 
 
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
@@ -297,7 +294,7 @@ entry:
   tail call ccc  void  @print_float(double  %"1#tmp#24##0")  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @hypot.30, i32 0, i32 0) to i64))  
-  %"1#tmp#26##0" = tail call ccc  i64  @llvm.llrint.i64.f64(double  3.141593e0)  
+  %"1#tmp#26##0" = fptosi double %"1#tmp#24##0" to i64 
   tail call ccc  void  @print_int(i64  %"1#tmp#26##0")  
   tail call ccc  void  @putchar(i8  10)  
   ret void 

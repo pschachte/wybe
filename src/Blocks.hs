@@ -625,15 +625,16 @@ cgenLLVMUnop "move" flags args =
            shouldnt "llvm move instruction with wrong arity"
 
 cgenLLVMUnop name flags args =
-    do let (inArgs,outArgs) = partitionArgs args
-       inOps <- mapM cgenArg inArgs
-       case (Map.lookup name llvmMapUnop,inOps) of
-         (Just (f,_,_),[inOp]) -> addInstruction (f inOp) outArgs
-         (Just _,_)            -> shouldnt $ "unary LLVM Instruction " ++ name
-                                  ++ " with " ++ show (length inArgs)
-                                  ++ " inputs"
-         (Nothing,_)           -> shouldnt $ "LLVM Instruction not found : "
-                                  ++ name
+    case (Map.lookup name llvmMapUnop,partitionArgs args) of
+        (Just (f,_,_),([inArg],[outArg])) -> do
+            inOp <- cgenArg inArg
+            outRep <- lift $ typeRep $ argType outArg
+            addInstruction (f inOp (repLLVMType outRep)) [outArg]
+        (Just _,(inArgs,outArgs)) ->
+            shouldnt $ "unary LLVM Instruction " ++ name ++ " with "
+                        ++ show (length inArgs) ++ " input(s) and "
+                        ++ show (length outArgs) ++ " output(s)"
+        (Nothing,_) -> shouldnt $ "Unknown unary LLVM Instruction " ++ name
 
 
 -- | Look inside the Prototype list stored in the CodegenState monad and
@@ -1102,7 +1103,8 @@ llvmMapBinop =
            ]
 
 -- | A map of unary llvm operations wrapped in the 'Codegen' module.
-llvmMapUnop :: Map String (Operand -> Instruction, TypeFamily, TypeFamily)
+llvmMapUnop :: Map String 
+               (Operand -> Type -> Instruction, TypeFamily, TypeFamily)
 llvmMapUnop =
     Map.fromList [
             ("uitofp", (uitofp, IntFamily, FloatFamily)),
