@@ -511,14 +511,14 @@ cgen prim@(PrimCall callSiteID pspec args) = do
     -- and remove the unneeded ones.
     proto <- lift $ getProcPrimProto pspec
     logCodegen $ "Proto = " ++ show proto
-    filteredArgs <- filterUnneededArgs proto args
-    logCodegen $ "Filtered args = " ++ show filteredArgs
+    args' <- prepareArgs proto args
+    logCodegen $ "Prepared args = " ++ show args'
 
     -- if the call is to an external module, declare it
     unless (thisMod == mod || maybe False (`List.isPrefixOf` mod) fileMod)
-        (addExtern $ PrimCall callSiteID pspec filteredArgs)
+        (addExtern $ PrimCall callSiteID pspec args')
 
-    let (inArgs,outArgs) = partitionArgs filteredArgs
+    let (inArgs,outArgs) = partitionArgs args'
     logCodegen $ "In args = " ++ show inArgs
     outTy <- lift $ primReturnType outArgs
     logCodegen $ "Out Type = " ++ show outTy
@@ -649,22 +649,23 @@ findProto (ProcSpec _ nm i _) = do
 
 
 -- | Match PrimArgs with the paramaters in the given prototype. If a PrimArg's
--- counterpart in the prototype is unneeded, filtered out. Positional matching
--- is used for this.
-filterUnneededArgs :: PrimProto -> [PrimArg] -> Codegen [PrimArg]
-filterUnneededArgs proto args = argsNeeded args (primProtoParams proto)
+-- counterpart in the prototype is unneeded, filtered out. Arguments 
+-- are matched positionally, and are coerced to the type of corresponding 
+-- parameters.
+prepareArgs :: PrimProto -> [PrimArg] -> Codegen [PrimArg]
+prepareArgs proto args = prepareArgs' args (primProtoParams proto)
 
-argsNeeded :: [PrimArg] -> [PrimParam] -> Codegen [PrimArg]
-argsNeeded [] []    = return []
-argsNeeded [] (_:_) = shouldnt "more parameters than arguments"
-argsNeeded (_:_) [] = shouldnt "more arguments than parameters"
-argsNeeded (ArgUnneeded _ _:as) (p:ps)
+prepareArgs' :: [PrimArg] -> [PrimParam] -> Codegen [PrimArg]
+prepareArgs' [] []    = return []
+prepareArgs' [] (_:_) = shouldnt "more parameters than arguments"
+prepareArgs' (_:_) [] = shouldnt "more arguments than parameters"
+prepareArgs' (ArgUnneeded _ _:as) (p:ps)
     | paramNeeded p = shouldnt $ "unneeded arg for needed param " ++ show p
-    | otherwise     = argsNeeded as ps
-argsNeeded (a:as) (p:ps) = do
+    | otherwise     = prepareArgs' as ps
+prepareArgs' (a:as) (p@PrimParam{primParamType=ty}:ps) = do
     real <- lift $ paramIsReal p
-    rest <- argsNeeded as ps
-    return $ if real then a:rest else rest
+    rest <- prepareArgs' as ps
+    return $ if real then setArgType ty a:rest else rest
 
 
 filterPhantomArgs :: [PrimArg] -> Codegen [PrimArg]
