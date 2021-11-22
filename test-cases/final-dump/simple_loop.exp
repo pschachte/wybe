@@ -9,28 +9,32 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public {inline,impure} (0 calls)
+*main* > public {inline,impure} (0 calls) 
 0: simple_loop.<0>
-(%io##0:wybe.phantom, %?io##1:wybe.phantom):
+(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    simple_loop.gen#1<0>(~io##0:wybe.phantom, ?io##1:wybe.phantom) #0 @simple_loop:nn:nn
+    simple_loop.gen#1<0>(~#globals##0:wybe.phantom, ?#globals##1:wybe.phantom) #0 @simple_loop:nn:nn
 
 
-gen#1 > (2 calls)
+gen#1 > (2 calls) 
 0: simple_loop.gen#1<0>
-gen#1(io##0:wybe.phantom, ?io##3:wybe.phantom):
+gen#1(#globals##0:wybe.phantom, ?#globals##3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c read_char(?c##0:wybe.char, ~%io##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom, *#globals##0:wybe.phantom)
+    foreign c read_char(?c##0:wybe.char, ~%tmp#2##0:wybe.phantom, ?%tmp#3##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#3##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
     foreign llvm icmp_ne(c##0:wybe.char, 'a':wybe.char, ?tmp#0##0:wybe.bool) @char:nn:nn
     case ~tmp#0##0:wybe.bool of
     0:
-        foreign llvm move(~io##1:wybe.phantom, ?io##3:wybe.phantom)
+        foreign llvm move(~#globals##1:wybe.phantom, ?#globals##3:wybe.phantom)
 
     1:
-        foreign c putchar(~c##0:wybe.char, ~%io##1:wybe.phantom, ?%io##2:wybe.phantom) @io:nn:nn
-        simple_loop.gen#1<0>(~io##2:wybe.phantom, ?io##3:wybe.phantom) #3 @simple_loop:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom, *#globals##1:wybe.phantom)
+        foreign c putchar(~c##0:wybe.char, ~%tmp#8##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#9##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom)
+        simple_loop.gen#1<0>(~#globals##2:wybe.phantom, ?#globals##3:wybe.phantom) #3 @simple_loop:nn:nn
 
 
   LLVM code       :

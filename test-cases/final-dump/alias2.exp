@@ -12,24 +12,28 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public {impure} (0 calls)
+*main* > public {impure} (0 calls) 
 0: alias2.<0>
-(%io##0:wybe.phantom, %?io##5:wybe.phantom):
+(*#globals##0:wybe.phantom, *?#globals##5:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    wybe.string.print_string<0>("copy a position":wybe.string, ~%io##0:wybe.phantom, ?%tmp#3##0:wybe.phantom) #6 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#3##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#6##0:position.position)
-    foreign lpvm mutate(~tmp#6##0:position.position, ?tmp#7##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int)
-    foreign lpvm mutate(~tmp#7##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 20:wybe.int)
-    alias2.pcopy<0>(~tmp#0##0:position.position, ?r##0:position.position, ~%io##1:wybe.phantom, ?%io##2:wybe.phantom) #2 @alias2:20:2
-    wybe.string.print_string<0>("--- After calling pcopy: ":wybe.string, ~%io##2:wybe.phantom, ?%tmp#10##0:wybe.phantom) #7 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#10##0:wybe.phantom, ?%io##3:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>("expect r(0,20):":wybe.string, ~%io##3:wybe.phantom, ?%io##4:wybe.phantom) #8 @io:nn:nn
-    position.printPosition<0>(~r##0:position.position, ~%io##4:wybe.phantom, ?%io##5:wybe.phantom) #5 @alias2:23:2
+    wybe.string.print_string<0>("copy a position":wybe.string, ~*#globals##0:wybe.phantom, ?*tmp#3##0:wybe.phantom) #6 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom, *tmp#3##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#4##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#5##0:wybe.phantom, ~*tmp#3##0:wybe.phantom, ?*#globals##1:wybe.phantom)
+    foreign lpvm alloc(16:wybe.int, ?tmp#8##0:position.position)
+    foreign lpvm mutate(~tmp#8##0:position.position, ?tmp#9##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int)
+    foreign lpvm mutate(~tmp#9##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 20:wybe.int)
+    alias2.pcopy<0>(~tmp#0##0:position.position, ?r##0:position.position, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #2 @alias2:20:2
+    wybe.string.print_string<0>("--- After calling pcopy: ":wybe.string, ~*#globals##2:wybe.phantom, ?*tmp#12##0:wybe.phantom) #7 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom, *tmp#12##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#13##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#14##0:wybe.phantom, ~*tmp#12##0:wybe.phantom, ?*#globals##3:wybe.phantom)
+    wybe.string.print_string<0>("expect r(0,20):":wybe.string, ~*#globals##3:wybe.phantom, ?*#globals##4:wybe.phantom) #8 @io:nn:nn
+    position.printPosition<0>(~r##0:position.position, ~*#globals##4:wybe.phantom, ?*#globals##5:wybe.phantom) #5 @alias2:23:2
 
 
-fcopy > public (0 calls)
+fcopy > public (0 calls) 
 0: alias2.fcopy<0>
 fcopy(p1##0:position.position, ?#result##0:position.position):
  AliasPairs: []
@@ -43,9 +47,9 @@ fcopy(p1##0:position.position, ?#result##0:position.position):
     foreign lpvm {noalias} mutate(~p2##1:position.position, ?#result##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.int)
 
 
-pcopy > public (1 calls)
+pcopy > public (1 calls) 
 0: alias2.pcopy<0>
-pcopy(p1##0:position.position, ?p2##2:position.position, %io##0:wybe.phantom, %?io##3:wybe.phantom):
+pcopy(p1##0:position.position, ?p2##2:position.position, *#globals##0:wybe.phantom, *?#globals##3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#5##0:position.position)
@@ -55,10 +59,12 @@ pcopy(p1##0:position.position, ?p2##2:position.position, %io##0:wybe.phantom, %?
     foreign lpvm {noalias} mutate(~tmp#0##0:position.position, ?p2##1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.int)
     foreign lpvm access(~p1##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int)
     foreign lpvm {noalias} mutate(~p2##1:position.position, ?p2##2:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.int)
-    wybe.string.print_string<0>("--- Inside pcopy: ":wybe.string, ~%io##0:wybe.phantom, ?%tmp#15##0:wybe.phantom) #8 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#15##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>("expect p2(0,20):":wybe.string, ~%io##1:wybe.phantom, ?%io##2:wybe.phantom) #9 @io:nn:nn
-    position.printPosition<0>(p2##2:position.position, ~%io##2:wybe.phantom, ?%io##3:wybe.phantom) #7 @alias2:11:4
+    wybe.string.print_string<0>("--- Inside pcopy: ":wybe.string, ~*#globals##0:wybe.phantom, ?*tmp#15##0:wybe.phantom) #8 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom, *tmp#15##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#16##0:wybe.phantom, ?%tmp#17##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#17##0:wybe.phantom, ~*tmp#15##0:wybe.phantom, ?*#globals##1:wybe.phantom)
+    wybe.string.print_string<0>("expect p2(0,20):":wybe.string, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #9 @io:nn:nn
+    position.printPosition<0>(p2##2:position.position, ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom) #7 @alias2:11:4
 
   LLVM code       :
 
@@ -77,34 +83,34 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 declare external ccc  void @putchar(i8)    
 
 
-@"constant#alias2.14" =    constant {i64, i64} { i64 15, i64 ptrtoint ([?? x i8]* @"constant#alias2.13" to i64) }
+@alias2.14 =    constant {i64, i64} { i64 15, i64 ptrtoint ([?? x i8]* @alias2.13 to i64) }
 
 
-@"constant#alias2.13" =    constant [?? x i8] c"expect r(0,20):\00"
+@alias2.13 =    constant [?? x i8] c"expect r(0,20):\00"
 
 
-@"constant#alias2.12" =    constant {i64, i64} { i64 25, i64 ptrtoint ([?? x i8]* @"constant#alias2.11" to i64) }
+@alias2.12 =    constant {i64, i64} { i64 25, i64 ptrtoint ([?? x i8]* @alias2.11 to i64) }
 
 
-@"constant#alias2.11" =    constant [?? x i8] c"--- After calling pcopy: \00"
+@alias2.11 =    constant [?? x i8] c"--- After calling pcopy: \00"
 
 
-@"constant#alias2.2" =    constant {i64, i64} { i64 15, i64 ptrtoint ([?? x i8]* @"constant#alias2.1" to i64) }
+@alias2.2 =    constant {i64, i64} { i64 15, i64 ptrtoint ([?? x i8]* @alias2.1 to i64) }
 
 
-@"constant#alias2.1" =    constant [?? x i8] c"copy a position\00"
+@alias2.1 =    constant [?? x i8] c"copy a position\00"
 
 
-@"constant#alias2.58" =    constant {i64, i64} { i64 16, i64 ptrtoint ([?? x i8]* @"constant#alias2.57" to i64) }
+@alias2.58 =    constant {i64, i64} { i64 16, i64 ptrtoint ([?? x i8]* @alias2.57 to i64) }
 
 
-@"constant#alias2.57" =    constant [?? x i8] c"expect p2(0,20):\00"
+@alias2.57 =    constant [?? x i8] c"expect p2(0,20):\00"
 
 
-@"constant#alias2.56" =    constant {i64, i64} { i64 18, i64 ptrtoint ([?? x i8]* @"constant#alias2.55" to i64) }
+@alias2.56 =    constant {i64, i64} { i64 18, i64 ptrtoint ([?? x i8]* @alias2.55 to i64) }
 
 
-@"constant#alias2.55" =    constant [?? x i8] c"--- Inside pcopy: \00"
+@alias2.55 =    constant [?? x i8] c"--- Inside pcopy: \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -115,7 +121,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"alias2.<0>"()    {
 entry:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#alias2.2", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias2.2, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   %3 = trunc i64 16 to i32  
   %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
@@ -128,9 +134,9 @@ entry:
   %10 = getelementptr  i64, i64* %9, i64 0 
   store  i64 20, i64* %10 
   %"1#r##0" = tail call fastcc  i64  @"alias2.pcopy<0>"(i64  %5)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#alias2.12", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias2.12, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#alias2.14", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias2.14, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %"1#r##0")  
   ret void 
 }
@@ -192,9 +198,9 @@ entry:
   %53 = inttoptr i64 %52 to i64* 
   %54 = getelementptr  i64, i64* %53, i64 0 
   store  i64 %51, i64* %54 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#alias2.56", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias2.56, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#alias2.58", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias2.58, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %37)  
   ret i64 %37 
 }
@@ -218,19 +224,25 @@ entry:
   submodules      : position.position
   procs           : 
 
-printPosition > public (0 calls)
+printPosition > public (0 calls) 
 0: position.printPosition<0>
-printPosition(pos##0:position.position, %io##0:wybe.phantom, %?io##5:wybe.phantom):
+printPosition(pos##0:position.position, *#globals##0:wybe.phantom, *?#globals##5:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    wybe.string.print_string<0>(" (":wybe.string, ~%io##0:wybe.phantom, ?%io##1:wybe.phantom) #7 @io:nn:nn
+    wybe.string.print_string<0>(" (":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #7 @io:nn:nn
     foreign lpvm access(pos##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int)
-    foreign c print_int(~tmp#0##0:wybe.int, ~%io##1:wybe.phantom, ?%io##2:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>(",":wybe.string, ~%io##2:wybe.phantom, ?%io##3:wybe.phantom) #8 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom, *#globals##1:wybe.phantom)
+    foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#7##0:wybe.phantom, ?%tmp#8##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#8##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom)
+    wybe.string.print_string<0>(",":wybe.string, ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom) #8 @io:nn:nn
     foreign lpvm access(~pos##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int)
-    foreign c print_int(~tmp#1##0:wybe.int, ~%io##3:wybe.phantom, ?%io##4:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>(")":wybe.string, ~%io##4:wybe.phantom, ?%tmp#14##0:wybe.phantom) #9 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#14##0:wybe.phantom, ?%io##5:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom, *#globals##3:wybe.phantom)
+    foreign c print_int(~tmp#1##0:wybe.int, ~%tmp#14##0:wybe.phantom, ?%tmp#15##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#15##0:wybe.phantom, ~*#globals##3:wybe.phantom, ?*#globals##4:wybe.phantom)
+    wybe.string.print_string<0>(")":wybe.string, ~*#globals##4:wybe.phantom, ?*tmp#18##0:wybe.phantom) #9 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom, *tmp#18##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#19##0:wybe.phantom, ?%tmp#20##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#20##0:wybe.phantom, ~*tmp#18##0:wybe.phantom, ?*#globals##5:wybe.phantom)
 
   LLVM code       :
 
@@ -249,22 +261,22 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 declare external ccc  void @print_int(i64)    
 
 
-@"constant#position.13" =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @"constant#position.12" to i64) }
+@position.13 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.12 to i64) }
 
 
-@"constant#position.12" =    constant [?? x i8] c")\00"
+@position.12 =    constant [?? x i8] c")\00"
 
 
-@"constant#position.7" =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @"constant#position.6" to i64) }
+@position.7 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.6 to i64) }
 
 
-@"constant#position.6" =    constant [?? x i8] c",\00"
+@position.6 =    constant [?? x i8] c",\00"
 
 
-@"constant#position.2" =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @"constant#position.1" to i64) }
+@position.2 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @position.1 to i64) }
 
 
-@"constant#position.1" =    constant [?? x i8] c" (\00"
+@position.1 =    constant [?? x i8] c" (\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -275,18 +287,18 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"position.printPosition<0>"(i64  %"pos##0")    {
 entry:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#position.2", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position.2, i32 0, i32 0) to i64))  
   %3 = inttoptr i64 %"pos##0" to i64* 
   %4 = getelementptr  i64, i64* %3, i64 0 
   %5 = load  i64, i64* %4 
   tail call ccc  void  @print_int(i64  %5)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#position.7", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position.7, i32 0, i32 0) to i64))  
   %8 = add   i64 %"pos##0", 8 
   %9 = inttoptr i64 %8 to i64* 
   %10 = getelementptr  i64, i64* %9, i64 0 
   %11 = load  i64, i64* %10 
   tail call ccc  void  @print_int(i64  %11)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#position.13", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position.13, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
@@ -308,7 +320,7 @@ entry:
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls)
+= > public {inline} (1 calls) 
 0: position.position.=<0>
 =(#left##0:position.position, #right##0:position.position, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -327,7 +339,7 @@ entry:
 
 
 
-position > public {inline} (0 calls)
+position > public {inline} (0 calls) 
 0: position.position.position<0>
 position(x##0:wybe.int, y##0:wybe.int, ?#result##0:position.position):
  AliasPairs: []
@@ -335,7 +347,7 @@ position(x##0:wybe.int, y##0:wybe.int, ?#result##0:position.position):
     foreign lpvm alloc(16:wybe.int, ?#rec##0:position.position)
     foreign lpvm mutate(~#rec##0:position.position, ?#rec##1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:wybe.int)
     foreign lpvm mutate(~#rec##1:position.position, ?#result##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y##0:wybe.int)
-position > public {inline} (6 calls)
+position > public {inline} (6 calls) 
 1: position.position.position<1>
 position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:position.position):
  AliasPairs: []
@@ -344,13 +356,13 @@ position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:position.position):
     foreign lpvm access(~#result##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:wybe.int)
 
 
-x > public {inline} (0 calls)
+x > public {inline} (0 calls) 
 0: position.position.x<0>
 x(#rec##0:position.position, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~#rec##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
-x > public {inline} (0 calls)
+x > public {inline} (0 calls) 
 1: position.position.x<1>
 x(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
  AliasPairs: []
@@ -358,13 +370,13 @@ x(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
     foreign lpvm {noalias} mutate(~#rec##0:position.position, ?#rec##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
-y > public {inline} (0 calls)
+y > public {inline} (0 calls) 
 0: position.position.y<0>
 y(#rec##0:position.position, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~#rec##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
-y > public {inline} (0 calls)
+y > public {inline} (0 calls) 
 1: position.position.y<1>
 y(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
  AliasPairs: []
@@ -372,7 +384,7 @@ y(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
     foreign lpvm {noalias} mutate(~#rec##0:position.position, ?#rec##1:position.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
-~= > public {inline} (0 calls)
+~= > public {inline} (0 calls) 
 0: position.position.~=<0>
 ~=(#left##0:position.position, #right##0:position.position, ?#success##0:wybe.bool):
  AliasPairs: []

@@ -22,9 +22,9 @@ AFTER EVERYTHING:
   submodules      : type_list.intlist
   procs           : 
 
-*main* > public {impure} (0 calls)
+*main* > public {impure} (0 calls) 
 0: type_list.<0>
-(%io##0:wybe.phantom, %?io##1:wybe.phantom):
+(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
  MultiSpeczDepInfo: [(7,(type_list.,,<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -45,10 +45,12 @@ AFTER EVERYTHING:
     foreign lpvm mutate(~tmp#32##0:type_list.intlist, ?tmp#33##0:type_list.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#28##0:type_list.intlist)
     type_list.,,<0>[410bae77d3](~tmp#23##0:type_list.intlist, ~tmp#33##0:type_list.intlist, ?tmp#8##0:type_list.intlist) #7 @type_list:nn:nn
     type_list.length<0>(~tmp#8##0:type_list.intlist, ?tmp#7##0:wybe.int) #8 @type_list:nn:nn
-    foreign c print_int(~tmp#7##0:wybe.int, ~%io##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#36##0:wybe.phantom, *#globals##0:wybe.phantom)
+    foreign c print_int(~tmp#7##0:wybe.int, ~%tmp#36##0:wybe.phantom, ?%tmp#37##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#37##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
 
 
-,, > public (2 calls)
+,, > public (2 calls) 
 0: type_list.,,<0>[410bae77d3]
 ,,(x##0:type_list.intlist, y##0:type_list.intlist, ?#result##0:type_list.intlist):
  AliasPairs: [(#result##0,y##0)]
@@ -80,7 +82,7 @@ AFTER EVERYTHING:
 
 
 
-length > public (2 calls)
+length > public (2 calls) 
 0: type_list.length<0>
 length(x##0:type_list.intlist, ?#result##0:wybe.int):
  AliasPairs: []
@@ -255,7 +257,7 @@ if.else:
   resources       : 
   procs           : 
 
-= > public (2 calls)
+= > public (2 calls) 
 0: type_list.intlist.=<0>
 =(#left##0:type_list.intlist, #right##0:type_list.intlist, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -288,7 +290,7 @@ if.else:
 
 
 
-cons > public {inline} (0 calls)
+cons > public {inline} (0 calls) 
 0: type_list.intlist.cons<0>
 cons(head##0:wybe.int, tail##0:type_list.intlist, ?#result##0:type_list.intlist):
  AliasPairs: []
@@ -296,7 +298,7 @@ cons(head##0:wybe.int, tail##0:type_list.intlist, ?#result##0:type_list.intlist)
     foreign lpvm alloc(16:wybe.int, ?#rec##0:type_list.intlist)
     foreign lpvm mutate(~#rec##0:type_list.intlist, ?#rec##1:type_list.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head##0:wybe.int)
     foreign lpvm mutate(~#rec##1:type_list.intlist, ?#result##0:type_list.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail##0:type_list.intlist)
-cons > public {inline} (12 calls)
+cons > public {inline} (12 calls) 
 1: type_list.intlist.cons<1>
 cons(?head##0:wybe.int, ?tail##0:type_list.intlist, #result##0:type_list.intlist, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -315,7 +317,7 @@ cons(?head##0:wybe.int, ?tail##0:type_list.intlist, #result##0:type_list.intlist
 
 
 
-head > public {inline} (0 calls)
+head > public {inline} (0 calls) 
 0: type_list.intlist.head<0>
 head(#rec##0:type_list.intlist, ?#result##0:wybe.int, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -330,7 +332,7 @@ head(#rec##0:type_list.intlist, ?#result##0:wybe.int, ?#success##0:wybe.bool):
         foreign lpvm access(~#rec##0:type_list.intlist, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-head > public {inline} (0 calls)
+head > public {inline} (0 calls) 
 1: type_list.intlist.head<1>
 head(#rec##0:type_list.intlist, ?#rec##1:type_list.intlist, #field##0:wybe.int, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -347,7 +349,7 @@ head(#rec##0:type_list.intlist, ?#rec##1:type_list.intlist, #field##0:wybe.int, 
 
 
 
-nil > public {inline} (0 calls)
+nil > public {inline} (0 calls) 
 0: type_list.intlist.nil<0>
 nil(?#result##0:type_list.intlist):
  AliasPairs: []
@@ -355,7 +357,7 @@ nil(?#result##0:type_list.intlist):
     foreign llvm move(0:type_list.intlist, ?#result##0:type_list.intlist)
 
 
-tail > public {inline} (0 calls)
+tail > public {inline} (0 calls) 
 0: type_list.intlist.tail<0>
 tail(#rec##0:type_list.intlist, ?#result##0:type_list.intlist, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -370,7 +372,7 @@ tail(#rec##0:type_list.intlist, ?#result##0:type_list.intlist, ?#success##0:wybe
         foreign lpvm access(~#rec##0:type_list.intlist, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:type_list.intlist)
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-tail > public {inline} (0 calls)
+tail > public {inline} (0 calls) 
 1: type_list.intlist.tail<1>
 tail(#rec##0:type_list.intlist, ?#rec##1:type_list.intlist, #field##0:type_list.intlist, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -387,7 +389,7 @@ tail(#rec##0:type_list.intlist, ?#rec##1:type_list.intlist, #field##0:type_list.
 
 
 
-~= > public {inline} (0 calls)
+~= > public {inline} (0 calls) 
 0: type_list.intlist.~=<0>
 ~=(#left##0:type_list.intlist, #right##0:type_list.intlist, ?#success##0:wybe.bool):
  AliasPairs: []

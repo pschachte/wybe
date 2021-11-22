@@ -10,15 +10,17 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public {inline,impure} (0 calls)
+*main* > public {inline,impure} (0 calls) 
 0: func_let.<0>
-(%io##0:wybe.phantom, %?io##1:wybe.phantom):
+(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_int(40:wybe.int, ~%io##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom, *#globals##0:wybe.phantom)
+    foreign c print_int(40:wybe.int, ~%tmp#5##0:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#6##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
 
 
-quad > public {inline} (1 calls)
+quad > public {inline} (1 calls) 
 0: func_let.quad<0>
 quad(x##0:wybe.int, ?#result##0:wybe.int):
  AliasPairs: []

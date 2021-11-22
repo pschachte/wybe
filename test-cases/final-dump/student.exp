@@ -30,9 +30,9 @@ AFTER EVERYTHING:
   submodules      : student.course, student.student
   procs           : 
 
-*main* > public {impure} (0 calls)
+*main* > public {impure} (0 calls) 
 0: student.<0>
-(%io##0:wybe.phantom, %?io##1:wybe.phantom):
+(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#4##0:student.course)
@@ -41,27 +41,27 @@ AFTER EVERYTHING:
     foreign lpvm alloc(16:wybe.int, ?tmp#9##0:student.student)
     foreign lpvm mutate(~tmp#9##0:student.student, ?tmp#10##0:student.student, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 12345:wybe.int)
     foreign lpvm mutate(~tmp#10##0:student.student, ?tmp#11##0:student.student, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#6##0:student.course)
-    student.printStudent<0>(~tmp#11##0:student.student, ~%io##0:wybe.phantom, ?%io##1:wybe.phantom) #2 @student:nn:nn
+    student.printStudent<0>(~tmp#11##0:student.student, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #2 @student:nn:nn
 
 
-printStudent > public (1 calls)
+printStudent > public (1 calls) 
 0: student.printStudent<0>
-printStudent(stu##0:student.student, %io##0:wybe.phantom, %?io##6:wybe.phantom):
+printStudent(stu##0:student.student, *#globals##0:wybe.phantom, *?#globals##6:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    wybe.string.print_string<0>("student id: ":wybe.string, ~%io##0:wybe.phantom, ?%io##1:wybe.phantom) #10 @io:nn:nn
+    wybe.string.print_string<0>("student id: ":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #10 @io:nn:nn
     foreign lpvm access(stu##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int)
-    foreign c print_int(~tmp#0##0:wybe.int, ~%io##1:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#9##0:wybe.phantom, ?%io##2:wybe.phantom) @io:nn:nn
+    wybe.io.println<0>(~tmp#0##0:wybe.int, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #2 @student:nn:nn
     foreign lpvm access(~stu##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:student.course)
-    wybe.string.print_string<0>("course code: ":wybe.string, ~%io##2:wybe.phantom, ?%io##3:wybe.phantom) #11 @io:nn:nn
+    wybe.string.print_string<0>("course code: ":wybe.string, ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom) #11 @io:nn:nn
     foreign lpvm access(tmp#1##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int)
-    foreign c print_int(~tmp#2##0:wybe.int, ~%io##3:wybe.phantom, ?%tmp#16##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#16##0:wybe.phantom, ?%io##4:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>("course name: ":wybe.string, ~%io##4:wybe.phantom, ?%io##5:wybe.phantom) #12 @io:nn:nn
+    wybe.io.println<0>(~tmp#2##0:wybe.int, ~*#globals##3:wybe.phantom, ?*#globals##4:wybe.phantom) #6 @student:nn:nn
+    wybe.string.print_string<0>("course name: ":wybe.string, ~*#globals##4:wybe.phantom, ?*#globals##5:wybe.phantom) #12 @io:nn:nn
     foreign lpvm access(~tmp#1##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.string)
-    wybe.string.print_string<0>(~tmp#3##0:wybe.string, ~%io##5:wybe.phantom, ?%tmp#22##0:wybe.phantom) #13 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#22##0:wybe.phantom, ?%io##6:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(~tmp#3##0:wybe.string, ~*#globals##5:wybe.phantom, ?*tmp#16##0:wybe.phantom) #13 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom, *tmp#16##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#17##0:wybe.phantom, ?%tmp#18##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#18##0:wybe.phantom, ~*tmp#16##0:wybe.phantom, ?*#globals##6:wybe.phantom)
 
   LLVM code       :
 
@@ -71,10 +71,10 @@ printStudent(stu##0:student.student, %io##0:wybe.phantom, %?io##6:wybe.phantom):
  
 
 
-@"constant#student.10" =    constant {i64, i64} { i64 23, i64 ptrtoint ([?? x i8]* @"constant#student.9" to i64) }
+@student.10 =    constant {i64, i64} { i64 23, i64 ptrtoint ([?? x i8]* @student.9 to i64) }
 
 
-@"constant#student.9" =    constant [?? x i8] c"Declarative Programming\00"
+@student.9 =    constant [?? x i8] c"Declarative Programming\00"
 
 
 declare external ccc  void @putchar(i8)    
@@ -83,25 +83,25 @@ declare external ccc  void @putchar(i8)
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
-declare external ccc  void @print_int(i64)    
+declare external fastcc  void @"wybe.io.println<0>"(i64)    
 
 
-@"constant#student.34" =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @"constant#student.33" to i64) }
+@student.34 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @student.33 to i64) }
 
 
-@"constant#student.33" =    constant [?? x i8] c"course name: \00"
+@student.33 =    constant [?? x i8] c"course name: \00"
 
 
-@"constant#student.29" =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @"constant#student.28" to i64) }
+@student.29 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @student.28 to i64) }
 
 
-@"constant#student.28" =    constant [?? x i8] c"course code: \00"
+@student.28 =    constant [?? x i8] c"course code: \00"
 
 
-@"constant#student.20" =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @"constant#student.19" to i64) }
+@student.20 =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @student.19 to i64) }
 
 
-@"constant#student.19" =    constant [?? x i8] c"student id: \00"
+@student.19 =    constant [?? x i8] c"student id: \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -121,7 +121,7 @@ entry:
   %6 = add   i64 %3, 8 
   %7 = inttoptr i64 %6 to i64* 
   %8 = getelementptr  i64, i64* %7, i64 0 
-  store  i64 ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#student.10", i32 0, i32 0) to i64), i64* %8 
+  store  i64 ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @student.10, i32 0, i32 0) to i64), i64* %8 
   %11 = trunc i64 16 to i32  
   %12 = tail call ccc  i8*  @wybe_malloc(i32  %11)  
   %13 = ptrtoint i8* %12 to i64 
@@ -139,23 +139,21 @@ entry:
 
 define external fastcc  void @"student.printStudent<0>"(i64  %"stu##0")    {
 entry:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#student.20", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @student.20, i32 0, i32 0) to i64))  
   %21 = inttoptr i64 %"stu##0" to i64* 
   %22 = getelementptr  i64, i64* %21, i64 0 
   %23 = load  i64, i64* %22 
-  tail call ccc  void  @print_int(i64  %23)  
-  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"wybe.io.println<0>"(i64  %23)  
   %24 = add   i64 %"stu##0", 8 
   %25 = inttoptr i64 %24 to i64* 
   %26 = getelementptr  i64, i64* %25, i64 0 
   %27 = load  i64, i64* %26 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#student.29", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @student.29, i32 0, i32 0) to i64))  
   %30 = inttoptr i64 %27 to i64* 
   %31 = getelementptr  i64, i64* %30, i64 0 
   %32 = load  i64, i64* %31 
-  tail call ccc  void  @print_int(i64  %32)  
-  tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#student.34", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.io.println<0>"(i64  %32)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @student.34, i32 0, i32 0) to i64))  
   %35 = add   i64 %27, 8 
   %36 = inttoptr i64 %35 to i64* 
   %37 = getelementptr  i64, i64* %36, i64 0 
@@ -182,7 +180,7 @@ entry:
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls)
+= > public {inline} (1 calls) 
 0: student.course.=<0>
 =(#left##0:student.course, #right##0:student.course, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -201,13 +199,13 @@ entry:
 
 
 
-code > public {inline} (0 calls)
+code > public {inline} (0 calls) 
 0: student.course.code<0>
 code(#rec##0:student.course, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~#rec##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
-code > public {inline} (0 calls)
+code > public {inline} (0 calls) 
 1: student.course.code<1>
 code(#rec##0:student.course, ?#rec##1:student.course, #field##0:wybe.int):
  AliasPairs: []
@@ -215,7 +213,7 @@ code(#rec##0:student.course, ?#rec##1:student.course, #field##0:wybe.int):
     foreign lpvm mutate(~#rec##0:student.course, ?#rec##1:student.course, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
-course > public {inline} (0 calls)
+course > public {inline} (0 calls) 
 0: student.course.course<0>
 course(code##0:wybe.int, name##0:wybe.string, ?#result##0:student.course):
  AliasPairs: []
@@ -223,7 +221,7 @@ course(code##0:wybe.int, name##0:wybe.string, ?#result##0:student.course):
     foreign lpvm alloc(16:wybe.int, ?#rec##0:student.course)
     foreign lpvm mutate(~#rec##0:student.course, ?#rec##1:student.course, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~code##0:wybe.int)
     foreign lpvm mutate(~#rec##1:student.course, ?#result##0:student.course, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~name##0:wybe.string)
-course > public {inline} (6 calls)
+course > public {inline} (6 calls) 
 1: student.course.course<1>
 course(?code##0:wybe.int, ?name##0:wybe.string, #result##0:student.course):
  AliasPairs: []
@@ -232,13 +230,13 @@ course(?code##0:wybe.int, ?name##0:wybe.string, #result##0:student.course):
     foreign lpvm access(~#result##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?name##0:wybe.string)
 
 
-name > public {inline} (0 calls)
+name > public {inline} (0 calls) 
 0: student.course.name<0>
 name(#rec##0:student.course, ?#result##0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~#rec##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string)
-name > public {inline} (0 calls)
+name > public {inline} (0 calls) 
 1: student.course.name<1>
 name(#rec##0:student.course, ?#rec##1:student.course, #field##0:wybe.string):
  AliasPairs: []
@@ -246,7 +244,7 @@ name(#rec##0:student.course, ?#rec##1:student.course, #field##0:wybe.string):
     foreign lpvm {noalias} mutate(~#rec##0:student.course, ?#rec##1:student.course, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string)
 
 
-~= > public {inline} (0 calls)
+~= > public {inline} (0 calls) 
 0: student.course.~=<0>
 ~=(#left##0:student.course, #right##0:student.course, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -436,7 +434,7 @@ if.else:
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls)
+= > public {inline} (1 calls) 
 0: student.student.=<0>
 =(#left##0:student.student, #right##0:student.student, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -466,13 +464,13 @@ if.else:
 
 
 
-id > public {inline} (0 calls)
+id > public {inline} (0 calls) 
 0: student.student.id<0>
 id(#rec##0:student.student, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~#rec##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
-id > public {inline} (0 calls)
+id > public {inline} (0 calls) 
 1: student.student.id<1>
 id(#rec##0:student.student, ?#rec##1:student.student, #field##0:wybe.int):
  AliasPairs: []
@@ -480,13 +478,13 @@ id(#rec##0:student.student, ?#rec##1:student.student, #field##0:wybe.int):
     foreign lpvm mutate(~#rec##0:student.student, ?#rec##1:student.student, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
-major > public {inline} (0 calls)
+major > public {inline} (0 calls) 
 0: student.student.major<0>
 major(#rec##0:student.student, ?#result##0:student.course):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~#rec##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:student.course)
-major > public {inline} (0 calls)
+major > public {inline} (0 calls) 
 1: student.student.major<1>
 major(#rec##0:student.student, ?#rec##1:student.student, #field##0:student.course):
  AliasPairs: []
@@ -494,7 +492,7 @@ major(#rec##0:student.student, ?#rec##1:student.student, #field##0:student.cours
     foreign lpvm {noalias} mutate(~#rec##0:student.student, ?#rec##1:student.student, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:student.course)
 
 
-student > public {inline} (0 calls)
+student > public {inline} (0 calls) 
 0: student.student.student<0>
 student(id##0:wybe.int, major##0:student.course, ?#result##0:student.student):
  AliasPairs: []
@@ -502,7 +500,7 @@ student(id##0:wybe.int, major##0:student.course, ?#result##0:student.student):
     foreign lpvm alloc(16:wybe.int, ?#rec##0:student.student)
     foreign lpvm mutate(~#rec##0:student.student, ?#rec##1:student.student, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~id##0:wybe.int)
     foreign lpvm mutate(~#rec##1:student.student, ?#result##0:student.student, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~major##0:student.course)
-student > public {inline} (6 calls)
+student > public {inline} (6 calls) 
 1: student.student.student<1>
 student(?id##0:wybe.int, ?major##0:student.course, #result##0:student.student):
  AliasPairs: []
@@ -511,7 +509,7 @@ student(?id##0:wybe.int, ?major##0:student.course, #result##0:student.student):
     foreign lpvm access(~#result##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?major##0:student.course)
 
 
-~= > public {inline} (0 calls)
+~= > public {inline} (0 calls) 
 0: student.student.~=<0>
 ~=(#left##0:student.student, #right##0:student.student, ?#success##0:wybe.bool):
  AliasPairs: []

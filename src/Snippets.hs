@@ -11,7 +11,8 @@ module Snippets (castFromTo, castTo, withType, intType, intCast,
                  boolType, boolCast, boolTrue, boolFalse, boolBool,
                  boolVarSet, boolVarGet, intVarSet, intVarGet,
                  lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, 
-                 move, globalStore, globalLoad, access, mutate, access0, mutate0, 
+                 move, access, mutate, 
+                 globalStore, globalLoad, globalsGetSet, globalsParam,
                  primMove, primAccess, primCast,
                  boolNegate, comparison, succeedTest, failTest, testVar, succeedIfSemiDet) where
 
@@ -139,30 +140,12 @@ move :: Exp -> Exp -> Placed Stmt
 move src dest =
     Unplaced $ ForeignCall "llvm" "move" [] [Unplaced src, Unplaced dest]
 
-
-globalStore :: Exp -> Exp -> Placed Stmt
-globalStore src dest =
-    Unplaced $ ForeignCall "lpvm" "store" ["semipure", "global"] [Unplaced src, Unplaced dest]
-
-globalLoad :: Exp -> Exp -> Placed Stmt
-globalLoad src dest =
-    Unplaced $ ForeignCall "lpvm" "load" ["semipure", "global"] [Unplaced src, Unplaced dest]
-
     
 -- |An instruction to access a value from some address
 access :: Exp -> Exp -> Exp -> Exp -> Exp -> Placed Stmt
 access addr offset size startOffset val =
     Unplaced $ ForeignCall "lpvm" "acesss" [] 
              $ Unplaced <$> [addr, offset, size, startOffset, val]
-
-             
--- |An instruction to access a value from some address
-access0 :: Exp -> Exp -> Placed Stmt
-access0 addr val =
-    access addr (IntValue 0 `castTo` intType)
-                (IntValue (toInteger wordSizeBytes) `castTo` intType) 
-                (IntValue 0 `castTo` intType)
-                val
 
              
 -- |An instruction to mutate a value from some address
@@ -172,17 +155,32 @@ mutate addr0 addr1 offset destructive size startOffset val =
              $ Unplaced <$> [addr0, addr1, offset, destructive, 
                              size, startOffset, val]
 
-            
-mutate0 :: Exp -> Exp -> Placed Stmt
-mutate0 addr val =
-    mutate addr addr (IntValue 0 `castTo` intType)
-                     (IntValue 1 `castTo` intType)
-                     (IntValue (toInteger wordSizeBytes) `castTo` intType)
-                     (IntValue 0 `castTo` intType) 
-                     val
 
--- access0 :: Exp -> Exp -> Placed Stmt
--- access0 :: Exp -> Exp -> Placed Stmt
+globalStore :: ResourceSpec -> TypeSpec -> Exp -> Placed Stmt
+globalStore rs ty src =
+    Unplaced $ ForeignCall "lpvm" "store" [] 
+      $ [Unplaced $ Typed (Global $ GlobalResource rs) ty Nothing, 
+         Unplaced src]
+        ++ globalsGetSet
+
+globalLoad :: ResourceSpec -> TypeSpec -> Exp -> Placed Stmt
+globalLoad rs ty dest =
+    Unplaced $ ForeignCall "lpvm" "load" [] 
+      $ [Unplaced $ Typed (Global $ GlobalResource rs) ty Nothing, 
+         Unplaced dest]
+        ++ globalsGet
+
+globalsGetSet :: [Placed Exp]
+globalsGetSet = [Unplaced $ Typed (varGetSet globalsName GlobalArg) 
+                    phantomType Nothing]
+
+globalsGet :: [Placed Exp]
+globalsGet = [Unplaced $ Typed (Var globalsName ParamIn GlobalArg) 
+                phantomType Nothing]
+
+globalsParam :: Param
+globalsParam = Param globalsName phantomType ParamInOut GlobalArg
+
 
 -- |An instruction to negate a bool value to a variable.  We optimise negation
 -- of constant values.

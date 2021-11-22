@@ -729,18 +729,16 @@ expType' (AnonProc mods params pstmts) _ = do
     params' <- updateParamTypes params
     return $ HigherOrderType mods $ paramTypeFlow <$> params'
 expType' (ProcRef pspec _) _     = do
-    typeFlows <- lift $ (paramTypeFlow <$>) 
-                      . List.filter (not . argFlowTypeIsResource . paramFlowType)
-                      . procProtoParams 
-                      . procProto
-                     <$> getProcDef pspec
+    (params, resParams) 
+        <- lift $ List.partition ((==Ordinary) . paramFlowType)
+                . procProtoParams . procProto <$> getProcDef pspec
+    let typeFlows = paramTypeFlow <$> params
     let types = typeFlowType <$> typeFlows
     let flows = typeFlowMode <$> typeFlows
     types' <- refreshTypes types
-    ProcDef _ ProcProto{procProtoResources=ress} _ _ _ _ _ _ 
-            detism inlining impurity _ 
+    ProcDef _ _ _ _ _ _ _ _ detism inlining impurity _ _
         <- lift $ getProcDef pspec
-    let resful = if Set.null ress then Resourceless else Resourceful 
+    let resful = if List.null resParams then Resourceless else Resourceful 
     return $ HigherOrderType 
                 (ProcModifiers detism inlining impurity resful [] [])
            $ zipWith TypeFlow types' flows
@@ -1215,7 +1213,7 @@ callProcInfos vars pstmt detism =
                             , let proto = procProto def
                             , let params = procProtoParams proto
                             , let resources = Set.elems $ procProtoResources proto
-                            , let realParams = List.filter (not . resourceParam) params
+                            , let realParams = List.filter ((==Ordinary) . paramFlowType) params
                             , let typflow = paramTypeFlow <$> realParams
                             , let inResources = Set.fromList
                                     $ resourceName . resourceFlowRes <$>
@@ -2222,12 +2220,6 @@ unifyExprTypes pos a1 a2 = do
                 constrainVarType
                          (ReasonEqual a1Content a2Content (place a2))
                          toVar ty
-
-
--- |Does this parameter correspond to a manifest argument?
-resourceParam :: Param -> Bool
-resourceParam (Param _ _ _ (Resource _)) = True
-resourceParam _ = False
 
 
 ----------------------------------------------------------------

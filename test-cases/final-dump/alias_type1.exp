@@ -29,9 +29,9 @@ AFTER EVERYTHING:
   submodules      : alias_type1.position, alias_type1.posrec
   procs           : 
 
-*main* > public {impure} (0 calls)
+*main* > public {impure} (0 calls) 
 0: alias_type1.<0>
-(%io##0:wybe.phantom, %?io##2:wybe.phantom):
+(*#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#6##0:alias_type1.position)
@@ -42,11 +42,9 @@ AFTER EVERYTHING:
     foreign lpvm mutate(~tmp#12##0:alias_type1.posrec, ?tmp#13##0:alias_type1.posrec, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp#8##0:alias_type1.position)
     foreign lpvm {noalias} mutate(~tmp#8##0:alias_type1.position, ?pos##1:alias_type1.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 200:wybe.int)
     foreign lpvm access(~pos##1:alias_type1.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int)
-    foreign c print_int(~tmp#2##0:wybe.int, ~%io##0:wybe.phantom, ?%tmp#19##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#19##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
+    wybe.io.println<0>(~tmp#2##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #4 @alias_type1:14:2
     foreign lpvm access(~tmp#13##0:alias_type1.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int)
-    foreign c print_int(~tmp#3##0:wybe.int, ~%io##1:wybe.phantom, ?%tmp#23##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#23##0:wybe.phantom, ?%io##2:wybe.phantom) @io:nn:nn
+    wybe.io.println<0>(~tmp#3##0:wybe.int, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #6 @alias_type1:15:2
 
   LLVM code       :
 
@@ -56,10 +54,7 @@ AFTER EVERYTHING:
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external ccc  void @print_int(i64)    
+declare external fastcc  void @"wybe.io.println<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -103,13 +98,11 @@ entry:
   %25 = inttoptr i64 %19 to i64* 
   %26 = getelementptr  i64, i64* %25, i64 0 
   %27 = load  i64, i64* %26 
-  tail call ccc  void  @print_int(i64  %27)  
-  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"wybe.io.println<0>"(i64  %27)  
   %28 = inttoptr i64 %11 to i64* 
   %29 = getelementptr  i64, i64* %28, i64 0 
   %30 = load  i64, i64* %29 
-  tail call ccc  void  @print_int(i64  %30)  
-  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"wybe.io.println<0>"(i64  %30)  
   ret void 
 }
 --------------------------------------------------
@@ -130,7 +123,7 @@ entry:
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls)
+= > public {inline} (1 calls) 
 0: alias_type1.position.=<0>
 =(#left##0:alias_type1.position, #right##0:alias_type1.position, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -149,7 +142,7 @@ entry:
 
 
 
-position > public {inline} (0 calls)
+position > public {inline} (0 calls) 
 0: alias_type1.position.position<0>
 position(x##0:wybe.int, y##0:wybe.int, ?#result##0:alias_type1.position):
  AliasPairs: []
@@ -157,7 +150,7 @@ position(x##0:wybe.int, y##0:wybe.int, ?#result##0:alias_type1.position):
     foreign lpvm alloc(16:wybe.int, ?#rec##0:alias_type1.position)
     foreign lpvm mutate(~#rec##0:alias_type1.position, ?#rec##1:alias_type1.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:wybe.int)
     foreign lpvm mutate(~#rec##1:alias_type1.position, ?#result##0:alias_type1.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y##0:wybe.int)
-position > public {inline} (6 calls)
+position > public {inline} (6 calls) 
 1: alias_type1.position.position<1>
 position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:alias_type1.position):
  AliasPairs: []
@@ -166,13 +159,13 @@ position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:alias_type1.position):
     foreign lpvm access(~#result##0:alias_type1.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:wybe.int)
 
 
-x > public {inline} (0 calls)
+x > public {inline} (0 calls) 
 0: alias_type1.position.x<0>
 x(#rec##0:alias_type1.position, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~#rec##0:alias_type1.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
-x > public {inline} (0 calls)
+x > public {inline} (0 calls) 
 1: alias_type1.position.x<1>
 x(#rec##0:alias_type1.position, ?#rec##1:alias_type1.position, #field##0:wybe.int):
  AliasPairs: []
@@ -180,13 +173,13 @@ x(#rec##0:alias_type1.position, ?#rec##1:alias_type1.position, #field##0:wybe.in
     foreign lpvm {noalias} mutate(~#rec##0:alias_type1.position, ?#rec##1:alias_type1.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
-y > public {inline} (0 calls)
+y > public {inline} (0 calls) 
 0: alias_type1.position.y<0>
 y(#rec##0:alias_type1.position, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~#rec##0:alias_type1.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
-y > public {inline} (0 calls)
+y > public {inline} (0 calls) 
 1: alias_type1.position.y<1>
 y(#rec##0:alias_type1.position, ?#rec##1:alias_type1.position, #field##0:wybe.int):
  AliasPairs: []
@@ -194,7 +187,7 @@ y(#rec##0:alias_type1.position, ?#rec##1:alias_type1.position, #field##0:wybe.in
     foreign lpvm {noalias} mutate(~#rec##0:alias_type1.position, ?#rec##1:alias_type1.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
-~= > public {inline} (0 calls)
+~= > public {inline} (0 calls) 
 0: alias_type1.position.~=<0>
 ~=(#left##0:alias_type1.position, #right##0:alias_type1.position, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -381,7 +374,7 @@ if.else:
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls)
+= > public {inline} (1 calls) 
 0: alias_type1.posrec.=<0>
 =(#left##0:alias_type1.posrec, #right##0:alias_type1.posrec, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -411,13 +404,13 @@ if.else:
 
 
 
-a > public {inline} (0 calls)
+a > public {inline} (0 calls) 
 0: alias_type1.posrec.a<0>
 a(#rec##0:alias_type1.posrec, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~#rec##0:alias_type1.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
-a > public {inline} (0 calls)
+a > public {inline} (0 calls) 
 1: alias_type1.posrec.a<1>
 a(#rec##0:alias_type1.posrec, ?#rec##1:alias_type1.posrec, #field##0:wybe.int):
  AliasPairs: []
@@ -425,13 +418,13 @@ a(#rec##0:alias_type1.posrec, ?#rec##1:alias_type1.posrec, #field##0:wybe.int):
     foreign lpvm mutate(~#rec##0:alias_type1.posrec, ?#rec##1:alias_type1.posrec, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
-p > public {inline} (0 calls)
+p > public {inline} (0 calls) 
 0: alias_type1.posrec.p<0>
 p(#rec##0:alias_type1.posrec, ?#result##0:alias_type1.position):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~#rec##0:alias_type1.posrec, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:alias_type1.position)
-p > public {inline} (0 calls)
+p > public {inline} (0 calls) 
 1: alias_type1.posrec.p<1>
 p(#rec##0:alias_type1.posrec, ?#rec##1:alias_type1.posrec, #field##0:alias_type1.position):
  AliasPairs: []
@@ -439,7 +432,7 @@ p(#rec##0:alias_type1.posrec, ?#rec##1:alias_type1.posrec, #field##0:alias_type1
     foreign lpvm {noalias} mutate(~#rec##0:alias_type1.posrec, ?#rec##1:alias_type1.posrec, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:alias_type1.position)
 
 
-posrec > public {inline} (0 calls)
+posrec > public {inline} (0 calls) 
 0: alias_type1.posrec.posrec<0>
 posrec(a##0:wybe.int, p##0:alias_type1.position, ?#result##0:alias_type1.posrec):
  AliasPairs: []
@@ -447,7 +440,7 @@ posrec(a##0:wybe.int, p##0:alias_type1.position, ?#result##0:alias_type1.posrec)
     foreign lpvm alloc(16:wybe.int, ?#rec##0:alias_type1.posrec)
     foreign lpvm mutate(~#rec##0:alias_type1.posrec, ?#rec##1:alias_type1.posrec, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~a##0:wybe.int)
     foreign lpvm mutate(~#rec##1:alias_type1.posrec, ?#result##0:alias_type1.posrec, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~p##0:alias_type1.position)
-posrec > public {inline} (6 calls)
+posrec > public {inline} (6 calls) 
 1: alias_type1.posrec.posrec<1>
 posrec(?a##0:wybe.int, ?p##0:alias_type1.position, #result##0:alias_type1.posrec):
  AliasPairs: []
@@ -456,7 +449,7 @@ posrec(?a##0:wybe.int, ?p##0:alias_type1.position, #result##0:alias_type1.posrec
     foreign lpvm access(~#result##0:alias_type1.posrec, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?p##0:alias_type1.position)
 
 
-~= > public {inline} (0 calls)
+~= > public {inline} (0 calls) 
 0: alias_type1.posrec.~=<0>
 ~=(#left##0:alias_type1.posrec, #right##0:alias_type1.posrec, ?#success##0:wybe.bool):
  AliasPairs: []

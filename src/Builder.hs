@@ -1112,10 +1112,7 @@ buildMain mainImports = do
     let proto = ProcProto "" []
                 $ Set.fromList [cmdResource "argc" ParamIn,
                                  cmdResource "argv" ParamIn,
-                                 cmdResource "exit_code" ParamOut,
-                                 ResourceFlowSpec
-                                     (ResourceSpec ["wybe","io"] "io")
-                                     ParamOut]
+                                 cmdResource "exit_code" ParamOut]
     let mainBody =
           [ Unplaced $
             UseResources res Nothing $

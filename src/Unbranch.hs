@@ -239,7 +239,7 @@ genProc proto detism stmts = do
     -- call site count will be refilled later
     let procDef = ProcDef name proto (ProcDefSrc stmts) Nothing tmpCtr 0
                   Map.empty Private detism MayInline Pure 
-                  NoSuperproc
+                  NoSuperproc Nothing
     logUnbranch $ "Generating fresh " ++ show detism ++ " proc:"
                   ++ showProcDef 8 procDef
     logUnbranch $ "Unbranched generated " ++ show detism ++ " proc:"
@@ -615,8 +615,8 @@ hoistClosure exp@(AnonProc mods params pstmts) pos = do
     tmpCtr <- gets brTempCtr
     let procProto = ProcProto name (freeParams ++ realParams) Set.empty
     let procDef = ProcDef name procProto (ProcDefSrc pstmts) Nothing tmpCtr 0
-                    Map.empty Private detism NoInline Pure -- XXXJ should be able to mayinline
-                    NoSuperproc
+                    Map.empty Private detism MayInline Pure -- XXXJ should be able to mayinline
+                    NoSuperproc Nothing
     procDef' <- lift $ unbranchProc procDef tmpCtr
     logUnbranch $ "  Resultant hoisted proc: " ++ show procProto
     procSpec <- lift $ addProcDef procDef'
@@ -648,43 +648,35 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) freeVars pos name = do
         <- lift $ getProcDef regularProcSpec
     let (freeParams, realParams) = List.partition ((== Free) . paramFlowType) params
     let params' = realParams ++ [testOutParam | detism == SemiDet]
-    let resTys = catMaybes $ maybeParamResource <$> realParams
-    let toLoad = mapFst resourceFlowRes 
-              <$> List.filter (flowsIn . resourceFlowFlow . fst) resTys
-    let toStore = mapFst resourceFlowRes 
-              <$> List.filter (flowsOut . resourceFlowFlow . fst) resTys
-    let loads = loadResource <$> toLoad
-    let stores = storeResource <$> toStore
     let detism' = selectDetism detism Det detism
     let paramVars = paramToVar <$> params
     let paramVars' = paramToVar <$> params'
-    let closureParams = freeParams 
-                     ++ List.filter (not . argFlowTypeIsResource 
-                                         . paramFlowType) 
-                        (setParamType intType <$> params')
+    let closureParams = freeParams ++ (setClosureType <$> params')
     let closureProto = ProcProto name closureParams Set.empty
     let pDefClosure =
             ProcDef name closureProto
             (ProcDefSrc
-                $ loads
-                ++ (Unplaced <$>
+                $ Unplaced <$>
                     ProcCall (First mod nm $ Just pID) detism' False
                         ((Unplaced <$> freeVars) ++ paramVars')
                     :[ ForeignCall "lpvm" "cast" []
                          [var ParamIn ty, var ParamOut intType]
                     | Typed (Var nm fl a) ty cast <- (content <$> paramVars)
                                                   ++ [testInExp | detism == SemiDet]
-                    , flowsOut fl && ty /= intType && not (argFlowTypeIsResource a)
+                    , flowsOut fl && ty /= intType && a == Ordinary
                     , let var f t = Unplaced $ Typed (Var nm f a) t cast])
-                ++ stores)
             Nothing 0 0
             Map.empty Private detism' Inline impurity 
-            (ClosureOf regularProcSpec)
+            NoSuperproc (Just regularProcSpec)
     logUnbranch $ "Creating closure for " ++ show regularProcSpec
     pDefClosure' <- lift $ unbranchProc pDefClosure 0
     logUnbranch $ "  Resultant closure proc: " ++ show procProto
     closureProcSpec <- lift $ addProcDef pDefClosure'
     return $ maybePlace (ProcRef closureProcSpec freeVars) pos
+
+setClosureType :: Param -> Param
+setClosureType p@(Param _ _ _ Ordinary) = p{paramType=intType}
+setClosureType p                        = p
 
 
 -- |Apply the function if the expression is a variable assignment,

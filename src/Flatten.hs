@@ -518,6 +518,7 @@ flattenExp expr@(AnonParamVar _ _) ty castFrom pos =
 flattenExp expr@(ProcRef ms es) ty castFrom pos = do
     es' <- (content <$>) <$> mapM (flattenPExp . Unplaced) es
     return $ typeAndPlace (ProcRef ms es') ty castFrom pos
+flattenExp global@(Global _) _ _ pos = return $ maybePlace global pos
 flattenExp (Where stmts pexp) _ _ _ = do
     flattenStmts stmts Det
     flattenPExp pexp

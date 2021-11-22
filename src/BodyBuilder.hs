@@ -451,8 +451,8 @@ mkInput arg@ArgFloat{} = arg
 mkInput arg@ArgString{} = arg
 mkInput arg@ArgChar{} = arg
 mkInput arg@ArgProcRef{} = arg
-mkInput (ArgUnneeded FlowOut ty) = ArgUnneeded FlowIn ty
-mkInput arg@ArgUnneeded{} = arg
+mkInput (ArgUnneeded _ ty) = ArgUnneeded FlowIn ty
+mkInput arg@ArgGlobal{} = arg
 mkInput arg@ArgUndef{} = arg
 
 
@@ -468,22 +468,17 @@ argExpandedPrim call@(PrimCall id pspec args) = do
 argExpandedPrim call@(PrimHigherCall id fn args) = do
     logBuild $ "Expanding Higher call " ++ show call       
     fn' <- expandArg fn
-    let expandAsHigher = do
-            logBuild "Leaving as higher call"       
-            args' <- mapM expandArg args
-            return $ PrimHigherCall id fn' args'
     case fn' of
         ArgProcRef ps as _ -> do 
-            mbPs' <- lift $ maybeGetClosureOf ps
-            case mbPs' of
-                Nothing -> expandAsHigher
-                Just ps' -> do 
-                    params' <- lift (getParams ps') 
-                    if sameLength params' args
-                    then
-                        argExpandedPrim (PrimCall id ps' $ as ++ zipWith setArgType (paramType <$> params') args)
-                    else expandAsHigher
-        _ -> expandAsHigher
+            ps' <- fromMaybe ps <$> lift (maybeGetClosureOf ps)
+            logBuild $ "As first-order call to " ++ show ps'
+            tys <- (primParamType <$>) <$> lift (getPrimParams ps') 
+            let args' = zipWith setArgType tys args
+            argExpandedPrim (PrimCall id ps' $ as ++ args')
+        _ -> do
+            logBuild $ "Leaving as higher call to " ++ show fn'       
+            args' <- mapM expandArg args
+            return $ PrimHigherCall id fn' args'
 argExpandedPrim (PrimForeign lang nm flags args) = do
     args' <- mapM expandArg args
     return $ simplifyForeign lang nm flags args'
@@ -665,6 +660,7 @@ canonicaliseArg (ArgInt v _)        = ArgInt v AnyType
 canonicaliseArg (ArgFloat v _)      = ArgFloat v AnyType
 canonicaliseArg (ArgString v r _)   = ArgString v r AnyType
 canonicaliseArg (ArgChar v _)       = ArgChar v AnyType
+canonicaliseArg (ArgGlobal info _)  = ArgGlobal info AnyType
 canonicaliseArg (ArgUnneeded dir _) = ArgUnneeded dir AnyType
 canonicaliseArg (ArgUndef _)        = ArgUndef AnyType
 
@@ -683,6 +679,7 @@ validateArg instr (ArgFloat  _ ty)      = validateType ty instr
 validateArg instr (ArgString _ _ ty)    = validateType ty instr
 validateArg instr (ArgChar   _ ty)      = validateType ty instr
 validateArg instr (ArgProcRef _ _ ty)   = validateType ty instr
+validateArg instr (ArgGlobal _ ty)      = validateType ty instr
 validateArg instr (ArgUnneeded _ ty)    = validateType ty instr
 validateArg instr (ArgUndef ty)         = validateType ty instr
 

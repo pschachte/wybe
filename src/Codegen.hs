@@ -218,7 +218,7 @@ addGlobalConstant ty con =
     do modName <- lift $ fmap showModSpec getModuleSpec
        gs <- gets globalVars
        n <- fresh
-       let ref = Name $ fromString $ makeGlobalConstantName $ modName ++ "." ++ show n
+       let ref = Name $ fromString $ modName ++ "." ++ show n
        let gvar = globalVariableDefaults { name = ref
                                          , isConstant = True
                                          , G.type' = ty
@@ -247,7 +247,7 @@ makeGlobalResourceVariable spec@(ResourceSpec mod nm) ty = do
     thisMod <- getModuleSpec 
     let (linkage, init) = if thisMod == mod
                           then (External, Just $ C.Undef ty)
-                          else (ExternWeak, Nothing)
+                          else (External, Nothing)
     return globalVariableDefaults { name = ref
                                   , isConstant = False
                                   , G.type' = ty

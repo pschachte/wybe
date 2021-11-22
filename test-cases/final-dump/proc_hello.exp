@@ -9,13 +9,15 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-print2 > public {inline} (0 calls)
+print2 > public {inline} (0 calls) 
 0: proc_hello.print2<0>
-print2([x##0:wybe.int], [y##0:wybe.int], %io##0:wybe.phantom, %?io##1:wybe.phantom):
+print2([x##0:wybe.int], [y##0:wybe.int], *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    wybe.string.print_string<0>("hello, world":wybe.string, ~%io##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) #1 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#2##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("hello, world":wybe.string, ~*#globals##0:wybe.phantom, ?*tmp#2##0:wybe.phantom) #1 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom, *tmp#2##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#3##0:wybe.phantom, ?%tmp#4##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#4##0:wybe.phantom, ~*tmp#2##0:wybe.phantom, ?*#globals##1:wybe.phantom)
 
   LLVM code       :
 
@@ -31,10 +33,10 @@ declare external ccc  void @putchar(i8)
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
-@"constant#proc_hello.2" =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @"constant#proc_hello.1" to i64) }
+@proc_hello.2 =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @proc_hello.1 to i64) }
 
 
-@"constant#proc_hello.1" =    constant [?? x i8] c"hello, world\00"
+@proc_hello.1 =    constant [?? x i8] c"hello, world\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -45,7 +47,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"proc_hello.print2<0>"()    {
 entry:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#proc_hello.2", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @proc_hello.2, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }

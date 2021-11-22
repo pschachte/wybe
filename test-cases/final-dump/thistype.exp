@@ -20,9 +20,9 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public {impure} (0 calls)
+*main* > public {impure} (0 calls) 
 0: thistype.<0>
-(%io##0:wybe.phantom, %?io##1:wybe.phantom):
+(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
  MultiSpeczDepInfo: [(7,(thistype.concat<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -43,11 +43,10 @@ AFTER EVERYTHING:
     foreign lpvm mutate(~tmp#28##0:thistype, ?tmp#4##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#5##0:thistype)
     thistype.concat<0>[410bae77d3](~tmp#0##0:thistype, ~tmp#4##0:thistype, ?tmp#8##0:thistype) #7 @thistype:nn:nn
     thistype.length<0>(~tmp#8##0:thistype, ?tmp#7##0:wybe.int) #8 @thistype:nn:nn
-    foreign c print_int(~tmp#7##0:wybe.int, ~%io##0:wybe.phantom, ?%tmp#31##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#31##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
+    wybe.io.println<0>(~tmp#7##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #9 @thistype:nn:nn
 
 
-= > public (2 calls)
+= > public (2 calls) 
 0: thistype.=<0>
 =(#left##0:thistype, #right##0:thistype, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -80,7 +79,7 @@ AFTER EVERYTHING:
 
 
 
-concat > public (2 calls)
+concat > public (2 calls) 
 0: thistype.concat<0>[410bae77d3]
 concat(x##0:thistype, y##0:thistype, ?#result##0:thistype):
  AliasPairs: [(#result##0,y##0)]
@@ -112,7 +111,7 @@ concat(x##0:thistype, y##0:thistype, ?#result##0:thistype):
 
 
 
-cons > public {inline} (6 calls)
+cons > public {inline} (6 calls) 
 0: thistype.cons<0>
 cons(head##0:wybe.int, tail##0:thistype, ?#result##0:thistype):
  AliasPairs: []
@@ -120,7 +119,7 @@ cons(head##0:wybe.int, tail##0:thistype, ?#result##0:thistype):
     foreign lpvm alloc(16:wybe.int, ?#rec##0:thistype)
     foreign lpvm mutate(~#rec##0:thistype, ?#rec##1:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head##0:wybe.int)
     foreign lpvm mutate(~#rec##1:thistype, ?#result##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail##0:thistype)
-cons > public {inline} (18 calls)
+cons > public {inline} (18 calls) 
 1: thistype.cons<1>
 cons(?head##0:wybe.int, ?tail##0:thistype, #result##0:thistype, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -139,7 +138,7 @@ cons(?head##0:wybe.int, ?tail##0:thistype, #result##0:thistype, ?#success##0:wyb
 
 
 
-head > public {inline} (0 calls)
+head > public {inline} (0 calls) 
 0: thistype.head<0>
 head(#rec##0:thistype, ?#result##0:wybe.int, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -154,7 +153,7 @@ head(#rec##0:thistype, ?#result##0:wybe.int, ?#success##0:wybe.bool):
         foreign lpvm access(~#rec##0:thistype, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-head > public {inline} (0 calls)
+head > public {inline} (0 calls) 
 1: thistype.head<1>
 head(#rec##0:thistype, ?#rec##1:thistype, #field##0:wybe.int, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -171,7 +170,7 @@ head(#rec##0:thistype, ?#rec##1:thistype, #field##0:wybe.int, ?#success##0:wybe.
 
 
 
-length > public (2 calls)
+length > public (2 calls) 
 0: thistype.length<0>
 length(x##0:thistype, ?#result##0:wybe.int):
  AliasPairs: []
@@ -188,7 +187,7 @@ length(x##0:thistype, ?#result##0:wybe.int):
 
 
 
-nil > public {inline} (2 calls)
+nil > public {inline} (2 calls) 
 0: thistype.nil<0>
 nil(?#result##0:thistype):
  AliasPairs: []
@@ -196,7 +195,7 @@ nil(?#result##0:thistype):
     foreign llvm move(0:thistype, ?#result##0:thistype)
 
 
-tail > public {inline} (0 calls)
+tail > public {inline} (0 calls) 
 0: thistype.tail<0>
 tail(#rec##0:thistype, ?#result##0:thistype, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -211,7 +210,7 @@ tail(#rec##0:thistype, ?#result##0:thistype, ?#success##0:wybe.bool):
         foreign lpvm access(~#rec##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:thistype)
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-tail > public {inline} (0 calls)
+tail > public {inline} (0 calls) 
 1: thistype.tail<1>
 tail(#rec##0:thistype, ?#rec##1:thistype, #field##0:thistype, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -228,7 +227,7 @@ tail(#rec##0:thistype, ?#rec##1:thistype, #field##0:thistype, ?#success##0:wybe.
 
 
 
-~= > public {inline} (0 calls)
+~= > public {inline} (0 calls) 
 0: thistype.~=<0>
 ~=(#left##0:thistype, #right##0:thistype, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -244,10 +243,7 @@ tail(#rec##0:thistype, ?#rec##1:thistype, #field##0:thistype, ?#success##0:wybe.
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external ccc  void @print_int(i64)    
+declare external fastcc  void @"wybe.io.println<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -310,8 +306,7 @@ entry:
   store  i64 %27, i64* %40 
   %"1#tmp#8##0" = tail call fastcc  i64  @"thistype.concat<0>[410bae77d3]"(i64  %19, i64  %35)  
   %"1#tmp#7##0" = tail call fastcc  i64  @"thistype.length<0>"(i64  %"1#tmp#8##0")  
-  tail call ccc  void  @print_int(i64  %"1#tmp#7##0")  
-  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"wybe.io.println<0>"(i64  %"1#tmp#7##0")  
   ret void 
 }
 

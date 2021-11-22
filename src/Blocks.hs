@@ -214,7 +214,7 @@ translateProc modProtos proc = do
     count <- getCount
     let proto = procImplnProto $ procImpln proc
     let body = procImplnBody $ procImpln proc
-    let isClosure = isJust $ maybeClosureOf $ procSuperproc proc
+    let isClosure = isJust $ procClosureOf proc
     let speczBodies = procImplnSpeczBodies $ procImpln proc
     -- translate the standard version
     (block, count') <- lift $ _translateProcImpl modProtos proto
@@ -315,7 +315,7 @@ makeGlobalDefinition pname proto bls = do
     let (label,isForeign)  = if isMain then ("main",True) else (label0,False)
     let inputs = List.filter isInputParam params
     fnargs <- mapM makeFnArg inputs
-    retty <- if isMain then return int_t else primOutputType params
+    retty <- primOutputType params
     return $ globalDefine isForeign retty label fnargs bls
 
 
@@ -575,7 +575,10 @@ cgen prim@(PrimCall callSiteID pspec args) = do
 
 cgen prim@(PrimHigherCall callSiteId var args) = do
     logCodegen $ "Compiling " ++ show prim
-    let (inArgs, outArgs) = partitionArgs $ setArgType intType <$> args
+    let args' = List.filter ((/=GlobalArg) . fromMaybe Ordinary 
+                                           . maybePrimArgFlowType)
+                            args
+    let (inArgs, outArgs) = partitionArgs $ setArgType intType <$> args'
     env <- cgenArg var
     inOps <- mapM cgenArg inArgs
     let callInOps = inOps ++ [env]
@@ -604,9 +607,7 @@ cgen prim@(PrimForeign "llvm" name flags args) = do
 cgen prim@(PrimForeign "lpvm" name flags args) = do
     logCodegen $ "Compiling " ++ show prim
     args' <- filterPhantomArgs args
-    if List.null args' && (name == "cast" || "global" `List.elem` flags)
-      then return ()
-      else cgenLPVM name flags args'
+    cgenLPVM name flags args'
 
 cgen prim@(PrimForeign lang name flags args) = do
     logCodegen $ "Compiling " ++ show prim
@@ -838,20 +839,22 @@ cgenLPVM "cast" [] args@[inArg,outArg] =
                        ++ " inputs and " ++ show (length outputs)
                        ++ " outputs"
 
-cgenLPVM "store" _ args@[_,_] = do
+cgenLPVM "store" _ args = do
     case partitionArgs args of
-      ([input], [output@(ArgVar nm ty _ (Resource res) _)]) -> do
-            logCodegen $ "lpvm store " ++ show input ++ " " ++ show output
+        ([global@(ArgGlobal (GlobalResource res) ty), input], []) -> do
+            logCodegen $ "lpvm store " ++ show input ++ " " ++ show global
             ty' <- lift $ llvmType ty
             global <- getGlobalResource res ty'        
             op <- cgenArg input   
             store global op
-      _ ->
-           shouldnt "llvm store instruction with wrong arity"
+        ([],[]) ->
+            return ()
+        _ ->
+           shouldnt "lpvm store instruction with wrong arity"
            
-cgenLPVM "load" _ args@[_,_] = do
+cgenLPVM "load" _ args = do
     case partitionArgs args of
-        ([input@(ArgVar _ ty _ (Resource res) _)], 
+        ([input@(ArgGlobal (GlobalResource res) ty)], 
          [output@(ArgVar nm _ _ _ _)]) -> do
             logCodegen $ "lpvm load " ++ show input ++ " " ++ show output
             ty' <- lift $ llvmType ty
@@ -859,8 +862,10 @@ cgenLPVM "load" _ args@[_,_] = do
             global <- getGlobalResource res ty' 
             op' <- doLoad ty' global
             assign (show nm) op' trep
-        _ ->
-           shouldnt "llvm load instruction with wrong arity"
+        ([],[]) ->
+            return ()
+        _ -> 
+            shouldnt $ "lpvm load instruction with wrong arity " ++ show args
 
 
 cgenLPVM pname flags args = do
@@ -1353,9 +1358,9 @@ newLLVMModule :: String -> String -> [ProcDefBlock] -> [ResourceSpec]
 newLLVMModule name fname blocks ress = do
     let defs = List.map blockDef blocks
         exs  = concatMap blockExterns blocks
-    resExs <- mapM globalResourceExtern ress
-    let exs' = uniqueExterns (exs ++ catMaybes resExs) ++ [mallocExtern] 
-                                                       ++ intrinsicExterns
+    resExs <- catMaybes <$> mapM globalResourceExtern ress
+    let exs' = uniqueExterns (exs ++ resExs) ++ [mallocExtern] 
+                                             ++ intrinsicExterns
     return $ modWithDefinitions name fname $ exs' ++ defs
 
 

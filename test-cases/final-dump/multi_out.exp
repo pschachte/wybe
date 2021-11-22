@@ -10,14 +10,14 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public {inline,impure} (0 calls)
+*main* > public {inline,impure} (0 calls) 
 0: multi_out.<0>
-(%io##0:wybe.phantom, [%?io##0:wybe.phantom]):
+(*#globals##0:wybe.phantom, [*?#globals##0:wybe.phantom]):
  AliasPairs: []
  InterestingCallProperties: []
 
 
-onetwothree > public {inline} (1 calls)
+onetwothree > public {inline} (1 calls) 
 0: multi_out.onetwothree<0>
 onetwothree(?x##0:wybe.int, ?y##0:wybe.int, ?z##0:wybe.int):
  AliasPairs: []

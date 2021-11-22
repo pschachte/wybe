@@ -19,12 +19,12 @@ AFTER EVERYTHING:
   submodules      : person1.person
   procs           : 
 
-*main* > public {inline,impure} (0 calls)
+*main* > public {inline,impure} (0 calls) 
 0: person1.<0>
-(%io##0:wybe.phantom, %?io##1:wybe.phantom):
+(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    wybe.string.print_string<0>("Wang":wybe.string, ~%io##0:wybe.phantom, ?%io##1:wybe.phantom) #4 @io:nn:nn
+    wybe.string.print_string<0>("Wang":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #4 @io:nn:nn
 
   LLVM code       :
 
@@ -37,10 +37,10 @@ AFTER EVERYTHING:
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
-@"constant#person1.2" =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @"constant#person1.1" to i64) }
+@person1.2 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @person1.1 to i64) }
 
 
-@"constant#person1.1" =    constant [?? x i8] c"Wang\00"
+@person1.1 =    constant [?? x i8] c"Wang\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -51,7 +51,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"person1.<0>"()    {
 entry:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#person1.2", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @person1.2, i32 0, i32 0) to i64))  
   ret void 
 }
 --------------------------------------------------
@@ -72,7 +72,7 @@ entry:
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls)
+= > public {inline} (1 calls) 
 0: person1.person.=<0>
 =(#left##0:person1.person, #right##0:person1.person, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -91,13 +91,13 @@ entry:
 
 
 
-firstname > public {inline} (0 calls)
+firstname > public {inline} (0 calls) 
 0: person1.person.firstname<0>
 firstname(#rec##0:person1.person, ?#result##0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~#rec##0:person1.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string)
-firstname > public {inline} (0 calls)
+firstname > public {inline} (0 calls) 
 1: person1.person.firstname<1>
 firstname(#rec##0:person1.person, ?#rec##1:person1.person, #field##0:wybe.string):
  AliasPairs: []
@@ -105,13 +105,13 @@ firstname(#rec##0:person1.person, ?#rec##1:person1.person, #field##0:wybe.string
     foreign lpvm mutate(~#rec##0:person1.person, ?#rec##1:person1.person, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string)
 
 
-lastname > public {inline} (0 calls)
+lastname > public {inline} (0 calls) 
 0: person1.person.lastname<0>
 lastname(#rec##0:person1.person, ?#result##0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~#rec##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string)
-lastname > public {inline} (0 calls)
+lastname > public {inline} (0 calls) 
 1: person1.person.lastname<1>
 lastname(#rec##0:person1.person, ?#rec##1:person1.person, #field##0:wybe.string):
  AliasPairs: []
@@ -119,7 +119,7 @@ lastname(#rec##0:person1.person, ?#rec##1:person1.person, #field##0:wybe.string)
     foreign lpvm mutate(~#rec##0:person1.person, ?#rec##1:person1.person, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string)
 
 
-person > public {inline} (0 calls)
+person > public {inline} (0 calls) 
 0: person1.person.person<0>
 person(firstname##0:wybe.string, lastname##0:wybe.string, ?#result##0:person1.person):
  AliasPairs: []
@@ -127,7 +127,7 @@ person(firstname##0:wybe.string, lastname##0:wybe.string, ?#result##0:person1.pe
     foreign lpvm alloc(16:wybe.int, ?#rec##0:person1.person)
     foreign lpvm mutate(~#rec##0:person1.person, ?#rec##1:person1.person, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~firstname##0:wybe.string)
     foreign lpvm mutate(~#rec##1:person1.person, ?#result##0:person1.person, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~lastname##0:wybe.string)
-person > public {inline} (6 calls)
+person > public {inline} (6 calls) 
 1: person1.person.person<1>
 person(?firstname##0:wybe.string, ?lastname##0:wybe.string, #result##0:person1.person):
  AliasPairs: []
@@ -136,7 +136,7 @@ person(?firstname##0:wybe.string, ?lastname##0:wybe.string, #result##0:person1.p
     foreign lpvm access(~#result##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?lastname##0:wybe.string)
 
 
-~= > public {inline} (0 calls)
+~= > public {inline} (0 calls) 
 0: person1.person.~=<0>
 ~=(#left##0:person1.person, #right##0:person1.person, ?#success##0:wybe.bool):
  AliasPairs: []

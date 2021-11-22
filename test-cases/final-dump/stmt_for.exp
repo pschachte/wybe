@@ -38,61 +38,87 @@ AFTER EVERYTHING:
   submodules      : stmt_for.int_sequence
   procs           : 
 
-*main* > public {impure} (0 calls)
+*main* > public {impure} (0 calls) 
 0: stmt_for.<0>
-(%io##0:wybe.phantom, %?io##26:wybe.phantom):
+(*#globals##0:wybe.phantom, *?#globals##26:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    wybe.string.print_string<0>("single_generator:":wybe.string, ~%io##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) #26 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#2##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
-    stmt_for.single_generator<0>(~%io##1:wybe.phantom, ?%io##2:wybe.phantom) #1 @stmt_for:nn:nn
-    wybe.string.print_string<0>("\nmultiple_generator":wybe.string, ~%io##2:wybe.phantom, ?%tmp#5##0:wybe.phantom) #27 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#5##0:wybe.phantom, ?%io##3:wybe.phantom) @io:nn:nn
-    stmt_for.multiple_generator<0>(~%io##3:wybe.phantom, ?%io##4:wybe.phantom) #3 @stmt_for:nn:nn
-    wybe.string.print_string<0>("\nshortest_generator_termination":wybe.string, ~%io##4:wybe.phantom, ?%tmp#8##0:wybe.phantom) #28 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#8##0:wybe.phantom, ?%io##5:wybe.phantom) @io:nn:nn
-    stmt_for.shortest_generator_termination<0>(~%io##5:wybe.phantom, ?%io##6:wybe.phantom) #5 @stmt_for:nn:nn
-    wybe.string.print_string<0>("\nusing_break":wybe.string, ~%io##6:wybe.phantom, ?%tmp#11##0:wybe.phantom) #29 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#11##0:wybe.phantom, ?%io##7:wybe.phantom) @io:nn:nn
-    stmt_for.using_break<0>(~%io##7:wybe.phantom, ?%io##8:wybe.phantom) #7 @stmt_for:nn:nn
-    wybe.string.print_string<0>("\nusing_next":wybe.string, ~%io##8:wybe.phantom, ?%tmp#14##0:wybe.phantom) #30 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#14##0:wybe.phantom, ?%io##9:wybe.phantom) @io:nn:nn
-    stmt_for.using_next<0>(~%io##9:wybe.phantom, ?%io##10:wybe.phantom) #9 @stmt_for:nn:nn
-    wybe.string.print_string<0>("\nusing_while":wybe.string, ~%io##10:wybe.phantom, ?%tmp#17##0:wybe.phantom) #31 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#17##0:wybe.phantom, ?%io##11:wybe.phantom) @io:nn:nn
-    stmt_for.using_while<0>(~%io##11:wybe.phantom, ?%io##12:wybe.phantom) #11 @stmt_for:nn:nn
-    wybe.string.print_string<0>("\nusing_until":wybe.string, ~%io##12:wybe.phantom, ?%tmp#20##0:wybe.phantom) #32 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#20##0:wybe.phantom, ?%io##13:wybe.phantom) @io:nn:nn
-    stmt_for.using_until<0>(~%io##13:wybe.phantom, ?%io##14:wybe.phantom) #13 @stmt_for:nn:nn
-    wybe.string.print_string<0>("\nusing_when":wybe.string, ~%io##14:wybe.phantom, ?%tmp#23##0:wybe.phantom) #33 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#23##0:wybe.phantom, ?%io##15:wybe.phantom) @io:nn:nn
-    stmt_for.using_when<0>(~%io##15:wybe.phantom, ?%io##16:wybe.phantom) #15 @stmt_for:nn:nn
-    wybe.string.print_string<0>("\nusing_unless":wybe.string, ~%io##16:wybe.phantom, ?%tmp#26##0:wybe.phantom) #34 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#26##0:wybe.phantom, ?%io##17:wybe.phantom) @io:nn:nn
-    stmt_for.using_unless<0>(~%io##17:wybe.phantom, ?%io##18:wybe.phantom) #17 @stmt_for:nn:nn
-    wybe.string.print_string<0>("\nusing_xrange":wybe.string, ~%io##18:wybe.phantom, ?%tmp#29##0:wybe.phantom) #35 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#29##0:wybe.phantom, ?%io##19:wybe.phantom) @io:nn:nn
-    stmt_for.using_xrange<0>(~%io##19:wybe.phantom, ?%io##20:wybe.phantom) #19 @stmt_for:nn:nn
-    wybe.string.print_string<0>("\nusing_xrange_reverse":wybe.string, ~%io##20:wybe.phantom, ?%tmp#32##0:wybe.phantom) #36 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#32##0:wybe.phantom, ?%io##21:wybe.phantom) @io:nn:nn
-    stmt_for.using_xrange_reverse<0>(~%io##21:wybe.phantom, ?%io##22:wybe.phantom) #21 @stmt_for:nn:nn
-    wybe.string.print_string<0>("\nusing_irange":wybe.string, ~%io##22:wybe.phantom, ?%tmp#35##0:wybe.phantom) #37 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#35##0:wybe.phantom, ?%io##23:wybe.phantom) @io:nn:nn
-    stmt_for.using_irange<0>(~%io##23:wybe.phantom, ?%io##24:wybe.phantom) #23 @stmt_for:nn:nn
-    wybe.string.print_string<0>("\nusing_irange_reverse":wybe.string, ~%io##24:wybe.phantom, ?%tmp#38##0:wybe.phantom) #38 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#38##0:wybe.phantom, ?%io##25:wybe.phantom) @io:nn:nn
-    stmt_for.using_irange_reverse<0>(~%io##25:wybe.phantom, ?%io##26:wybe.phantom) #25 @stmt_for:nn:nn
+    wybe.string.print_string<0>("single_generator:":wybe.string, ~*#globals##0:wybe.phantom, ?*tmp#2##0:wybe.phantom) #26 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom, *tmp#2##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#3##0:wybe.phantom, ?%tmp#4##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#4##0:wybe.phantom, ~*tmp#2##0:wybe.phantom, ?*#globals##1:wybe.phantom)
+    stmt_for.single_generator<0>(~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #1 @stmt_for:nn:nn
+    wybe.string.print_string<0>("\nmultiple_generator":wybe.string, ~*#globals##2:wybe.phantom, ?*tmp#7##0:wybe.phantom) #27 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom, *tmp#7##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#8##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#9##0:wybe.phantom, ~*tmp#7##0:wybe.phantom, ?*#globals##3:wybe.phantom)
+    stmt_for.multiple_generator<0>(~*#globals##3:wybe.phantom, ?*#globals##4:wybe.phantom) #3 @stmt_for:nn:nn
+    wybe.string.print_string<0>("\nshortest_generator_termination":wybe.string, ~*#globals##4:wybe.phantom, ?*tmp#12##0:wybe.phantom) #28 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom, *tmp#12##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#13##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#14##0:wybe.phantom, ~*tmp#12##0:wybe.phantom, ?*#globals##5:wybe.phantom)
+    stmt_for.shortest_generator_termination<0>(~*#globals##5:wybe.phantom, ?*#globals##6:wybe.phantom) #5 @stmt_for:nn:nn
+    wybe.string.print_string<0>("\nusing_break":wybe.string, ~*#globals##6:wybe.phantom, ?*tmp#17##0:wybe.phantom) #29 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom, *tmp#17##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#18##0:wybe.phantom, ?%tmp#19##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#19##0:wybe.phantom, ~*tmp#17##0:wybe.phantom, ?*#globals##7:wybe.phantom)
+    stmt_for.using_break<0>(~*#globals##7:wybe.phantom, ?*#globals##8:wybe.phantom) #7 @stmt_for:nn:nn
+    wybe.string.print_string<0>("\nusing_next":wybe.string, ~*#globals##8:wybe.phantom, ?*tmp#22##0:wybe.phantom) #30 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#23##0:wybe.phantom, *tmp#22##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#23##0:wybe.phantom, ?%tmp#24##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#24##0:wybe.phantom, ~*tmp#22##0:wybe.phantom, ?*#globals##9:wybe.phantom)
+    stmt_for.using_next<0>(~*#globals##9:wybe.phantom, ?*#globals##10:wybe.phantom) #9 @stmt_for:nn:nn
+    wybe.string.print_string<0>("\nusing_while":wybe.string, ~*#globals##10:wybe.phantom, ?*tmp#27##0:wybe.phantom) #31 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#28##0:wybe.phantom, *tmp#27##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#28##0:wybe.phantom, ?%tmp#29##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#29##0:wybe.phantom, ~*tmp#27##0:wybe.phantom, ?*#globals##11:wybe.phantom)
+    stmt_for.using_while<0>(~*#globals##11:wybe.phantom, ?*#globals##12:wybe.phantom) #11 @stmt_for:nn:nn
+    wybe.string.print_string<0>("\nusing_until":wybe.string, ~*#globals##12:wybe.phantom, ?*tmp#32##0:wybe.phantom) #32 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#33##0:wybe.phantom, *tmp#32##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#33##0:wybe.phantom, ?%tmp#34##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#34##0:wybe.phantom, ~*tmp#32##0:wybe.phantom, ?*#globals##13:wybe.phantom)
+    stmt_for.using_until<0>(~*#globals##13:wybe.phantom, ?*#globals##14:wybe.phantom) #13 @stmt_for:nn:nn
+    wybe.string.print_string<0>("\nusing_when":wybe.string, ~*#globals##14:wybe.phantom, ?*tmp#37##0:wybe.phantom) #33 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#38##0:wybe.phantom, *tmp#37##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#38##0:wybe.phantom, ?%tmp#39##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#39##0:wybe.phantom, ~*tmp#37##0:wybe.phantom, ?*#globals##15:wybe.phantom)
+    stmt_for.using_when<0>(~*#globals##15:wybe.phantom, ?*#globals##16:wybe.phantom) #15 @stmt_for:nn:nn
+    wybe.string.print_string<0>("\nusing_unless":wybe.string, ~*#globals##16:wybe.phantom, ?*tmp#42##0:wybe.phantom) #34 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#43##0:wybe.phantom, *tmp#42##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#43##0:wybe.phantom, ?%tmp#44##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#44##0:wybe.phantom, ~*tmp#42##0:wybe.phantom, ?*#globals##17:wybe.phantom)
+    stmt_for.using_unless<0>(~*#globals##17:wybe.phantom, ?*#globals##18:wybe.phantom) #17 @stmt_for:nn:nn
+    wybe.string.print_string<0>("\nusing_xrange":wybe.string, ~*#globals##18:wybe.phantom, ?*tmp#47##0:wybe.phantom) #35 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#48##0:wybe.phantom, *tmp#47##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#48##0:wybe.phantom, ?%tmp#49##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#49##0:wybe.phantom, ~*tmp#47##0:wybe.phantom, ?*#globals##19:wybe.phantom)
+    stmt_for.using_xrange<0>(~*#globals##19:wybe.phantom, ?*#globals##20:wybe.phantom) #19 @stmt_for:nn:nn
+    wybe.string.print_string<0>("\nusing_xrange_reverse":wybe.string, ~*#globals##20:wybe.phantom, ?*tmp#52##0:wybe.phantom) #36 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#53##0:wybe.phantom, *tmp#52##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#53##0:wybe.phantom, ?%tmp#54##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#54##0:wybe.phantom, ~*tmp#52##0:wybe.phantom, ?*#globals##21:wybe.phantom)
+    stmt_for.using_xrange_reverse<0>(~*#globals##21:wybe.phantom, ?*#globals##22:wybe.phantom) #21 @stmt_for:nn:nn
+    wybe.string.print_string<0>("\nusing_irange":wybe.string, ~*#globals##22:wybe.phantom, ?*tmp#57##0:wybe.phantom) #37 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#58##0:wybe.phantom, *tmp#57##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#58##0:wybe.phantom, ?%tmp#59##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#59##0:wybe.phantom, ~*tmp#57##0:wybe.phantom, ?*#globals##23:wybe.phantom)
+    stmt_for.using_irange<0>(~*#globals##23:wybe.phantom, ?*#globals##24:wybe.phantom) #23 @stmt_for:nn:nn
+    wybe.string.print_string<0>("\nusing_irange_reverse":wybe.string, ~*#globals##24:wybe.phantom, ?*tmp#62##0:wybe.phantom) #38 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#63##0:wybe.phantom, *tmp#62##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#63##0:wybe.phantom, ?%tmp#64##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#64##0:wybe.phantom, ~*tmp#62##0:wybe.phantom, ?*#globals##25:wybe.phantom)
+    stmt_for.using_irange_reverse<0>(~*#globals##25:wybe.phantom, ?*#globals##26:wybe.phantom) #25 @stmt_for:nn:nn
 
 
-gen#1 > (2 calls)
+gen#1 > (2 calls) 
 0: stmt_for.gen#1<0>
-gen#1(io##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(T), tmp#6##0:wybe.list(T), tmp#7##0:wybe.list(T), tmp#8##0:wybe.list(wybe.int), tmp#9##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), y##0:wybe.list(wybe.int), ?io##3:wybe.phantom):
+gen#1(#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(T), tmp#6##0:wybe.list(T), tmp#7##0:wybe.list(T), tmp#8##0:wybe.list(wybe.int), tmp#9##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), y##0:wybe.list(wybe.int), ?#globals##3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#8##0:wybe.int, 0:wybe.int, ?tmp#13##0:wybe.bool)
     case ~tmp#13##0:wybe.bool of
     0:
-        foreign llvm move(~io##0:wybe.phantom, ?io##3:wybe.phantom)
+        foreign llvm move(~#globals##0:wybe.phantom, ?#globals##3:wybe.phantom)
 
     1:
         foreign lpvm access(tmp#8##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:T)
@@ -100,29 +126,27 @@ gen#1(io##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0
         foreign llvm icmp_ne(tmp#9##0:wybe.int, 0:wybe.int, ?tmp#15##0:wybe.bool)
         case ~tmp#15##0:wybe.bool of
         0:
-            foreign llvm move(~io##0:wybe.phantom, ?io##3:wybe.phantom)
+            foreign llvm move(~#globals##0:wybe.phantom, ?#globals##3:wybe.phantom)
 
         1:
             foreign lpvm access(tmp#9##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?j##0:T)
             foreign lpvm access(~tmp#9##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#9##1:wybe.list(T))
-            foreign c print_int(~i##0:wybe.int, ~%io##0:wybe.phantom, ?%tmp#18##0:wybe.phantom) @io:nn:nn
-            foreign c putchar('\n':wybe.char, ~%tmp#18##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
-            foreign c print_int(~j##0:wybe.int, ~%io##1:wybe.phantom, ?%tmp#21##0:wybe.phantom) @io:nn:nn
-            foreign c putchar('\n':wybe.char, ~%tmp#21##0:wybe.phantom, ?%io##2:wybe.phantom) @io:nn:nn
-            stmt_for.gen#1<0>(~io##2:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##0:wybe.list(T), ~tmp#6##0:wybe.list(T), ~tmp#7##0:wybe.list(T), ~tmp#8##1:wybe.list(wybe.int), ~tmp#9##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ~y##0:wybe.list(wybe.int), ?io##3:wybe.phantom) #4 @stmt_for:nn:nn
+            wybe.io.println<0>(~i##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #2 @stmt_for:nn:nn
+            wybe.io.println<0>(~j##0:wybe.int, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #3 @stmt_for:nn:nn
+            stmt_for.gen#1<0>(~#globals##2:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##0:wybe.list(T), ~tmp#6##0:wybe.list(T), ~tmp#7##0:wybe.list(T), ~tmp#8##1:wybe.list(wybe.int), ~tmp#9##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ~y##0:wybe.list(wybe.int), ?#globals##3:wybe.phantom) #4 @stmt_for:nn:nn
 
 
 
 
-gen#10 > (2 calls)
+gen#10 > (2 calls) 
 0: stmt_for.gen#10<0>
-gen#10(io##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), ?io##2:wybe.phantom):
+gen#10(#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
     case ~tmp#9##0:wybe.bool of
     0:
-        foreign llvm move(~io##0:wybe.phantom, ?io##2:wybe.phantom)
+        foreign llvm move(~#globals##0:wybe.phantom, ?#globals##2:wybe.phantom)
 
     1:
         foreign lpvm access(tmp#5##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:T)
@@ -130,25 +154,24 @@ gen#10(io##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##
         foreign llvm icmp_eq(i##0:wybe.int, 3:wybe.int, ?tmp#6##0:wybe.bool) @int:nn:nn
         case ~tmp#6##0:wybe.bool of
         0:
-            foreign c print_int(~i##0:wybe.int, ~%io##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @io:nn:nn
-            foreign c putchar('\n':wybe.char, ~%tmp#14##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
-            stmt_for.gen#10<0>(~io##1:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ?io##2:wybe.phantom) #3 @stmt_for:nn:nn
+            wybe.io.println<0>(~i##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #2 @stmt_for:nn:nn
+            stmt_for.gen#10<0>(~#globals##1:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom) #3 @stmt_for:nn:nn
 
         1:
-            foreign llvm move(~io##0:wybe.phantom, ?io##2:wybe.phantom)
+            foreign llvm move(~#globals##0:wybe.phantom, ?#globals##2:wybe.phantom)
 
 
 
 
-gen#11 > (3 calls)
+gen#11 > (3 calls) 
 0: stmt_for.gen#11<0>
-gen#11(io##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), ?io##2:wybe.phantom):
+gen#11(#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
     case ~tmp#9##0:wybe.bool of
     0:
-        foreign llvm move(~io##0:wybe.phantom, ?io##2:wybe.phantom)
+        foreign llvm move(~#globals##0:wybe.phantom, ?#globals##2:wybe.phantom)
 
     1:
         foreign lpvm access(tmp#5##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:T)
@@ -156,25 +179,24 @@ gen#11(io##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##
         foreign llvm icmp_slt(i##0:wybe.int, 3:wybe.int, ?tmp#6##0:wybe.bool) @int:nn:nn
         case ~tmp#6##0:wybe.bool of
         0:
-            stmt_for.gen#11<0>(~io##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ?io##2:wybe.phantom) #4 @stmt_for:nn:nn
+            stmt_for.gen#11<0>(~#globals##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom) #4 @stmt_for:nn:nn
 
         1:
-            foreign c print_int(~i##0:wybe.int, ~%io##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @io:nn:nn
-            foreign c putchar('\n':wybe.char, ~%tmp#14##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
-            stmt_for.gen#11<0>(~io##1:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ?io##2:wybe.phantom) #3 @stmt_for:nn:nn
+            wybe.io.println<0>(~i##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #2 @stmt_for:nn:nn
+            stmt_for.gen#11<0>(~#globals##1:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom) #3 @stmt_for:nn:nn
 
 
 
 
-gen#12 > (2 calls)
+gen#12 > (2 calls) 
 0: stmt_for.gen#12<0>
-gen#12(io##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), ?io##2:wybe.phantom):
+gen#12(#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
     case ~tmp#9##0:wybe.bool of
     0:
-        foreign llvm move(~io##0:wybe.phantom, ?io##2:wybe.phantom)
+        foreign llvm move(~#globals##0:wybe.phantom, ?#globals##2:wybe.phantom)
 
     1:
         foreign lpvm access(tmp#5##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:T)
@@ -182,85 +204,81 @@ gen#12(io##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##
         foreign llvm icmp_slt(i##0:wybe.int, 3:wybe.int, ?tmp#6##0:wybe.bool) @int:nn:nn
         case ~tmp#6##0:wybe.bool of
         0:
-            foreign llvm move(~io##0:wybe.phantom, ?io##2:wybe.phantom)
+            foreign llvm move(~#globals##0:wybe.phantom, ?#globals##2:wybe.phantom)
 
         1:
-            foreign c print_int(~i##0:wybe.int, ~%io##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @io:nn:nn
-            foreign c putchar('\n':wybe.char, ~%tmp#14##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
-            stmt_for.gen#12<0>(~io##1:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ?io##2:wybe.phantom) #3 @stmt_for:nn:nn
+            wybe.io.println<0>(~i##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #2 @stmt_for:nn:nn
+            stmt_for.gen#12<0>(~#globals##1:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom) #3 @stmt_for:nn:nn
 
 
 
 
-gen#13 > (2 calls)
+gen#13 > (2 calls) 
 0: stmt_for.gen#13<0>
-gen#13(io##0:wybe.phantom, tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence, ?io##2:wybe.phantom):
+gen#13(#globals##0:wybe.phantom, tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence, ?#globals##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     stmt_for.int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:stmt_for.int_sequence, ~tmp#0##0:stmt_for.int_sequence, ?tmp#2##0:wybe.bool) #0 @stmt_for:nn:nn
     case ~tmp#2##0:wybe.bool of
     0:
-        foreign llvm move(~io##0:wybe.phantom, ?io##2:wybe.phantom)
+        foreign llvm move(~#globals##0:wybe.phantom, ?#globals##2:wybe.phantom)
 
     1:
-        foreign c print_int(~i##0:wybe.int, ~%io##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~%tmp#5##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
-        stmt_for.gen#13<0>(~io##1:wybe.phantom, ~tmp#0##1:stmt_for.int_sequence, ~tmp#1##0:stmt_for.int_sequence, ?io##2:wybe.phantom) #2 @stmt_for:nn:nn
+        wybe.io.println<0>(~i##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #1 @stmt_for:nn:nn
+        stmt_for.gen#13<0>(~#globals##1:wybe.phantom, ~tmp#0##1:stmt_for.int_sequence, ~tmp#1##0:stmt_for.int_sequence, ?#globals##2:wybe.phantom) #2 @stmt_for:nn:nn
 
 
 
-gen#14 > (2 calls)
+gen#14 > (2 calls) 
 0: stmt_for.gen#14<0>
-gen#14(io##0:wybe.phantom, tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence, ?io##2:wybe.phantom):
+gen#14(#globals##0:wybe.phantom, tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence, ?#globals##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     stmt_for.int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:stmt_for.int_sequence, ~tmp#0##0:stmt_for.int_sequence, ?tmp#2##0:wybe.bool) #0 @stmt_for:nn:nn
     case ~tmp#2##0:wybe.bool of
     0:
-        foreign llvm move(~io##0:wybe.phantom, ?io##2:wybe.phantom)
+        foreign llvm move(~#globals##0:wybe.phantom, ?#globals##2:wybe.phantom)
 
     1:
-        foreign c print_int(~i##0:wybe.int, ~%io##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~%tmp#5##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
-        stmt_for.gen#14<0>(~io##1:wybe.phantom, ~tmp#0##1:stmt_for.int_sequence, ~tmp#1##0:stmt_for.int_sequence, ?io##2:wybe.phantom) #2 @stmt_for:nn:nn
+        wybe.io.println<0>(~i##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #1 @stmt_for:nn:nn
+        stmt_for.gen#14<0>(~#globals##1:wybe.phantom, ~tmp#0##1:stmt_for.int_sequence, ~tmp#1##0:stmt_for.int_sequence, ?#globals##2:wybe.phantom) #2 @stmt_for:nn:nn
 
 
 
-gen#2 > (2 calls)
+gen#2 > (2 calls) 
 0: stmt_for.gen#2<0>
-gen#2(io##0:wybe.phantom, tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence, ?io##2:wybe.phantom, ?#success##0:wybe.bool):
+gen#2(#globals##0:wybe.phantom, tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence, ?#globals##2:wybe.phantom, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     stmt_for.int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:stmt_for.int_sequence, ~tmp#0##0:stmt_for.int_sequence, ?tmp#3##0:wybe.bool) #0 @stmt_for:nn:nn
     case ~tmp#3##0:wybe.bool of
     0:
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
-        foreign llvm move(~io##0:wybe.phantom, ?io##2:wybe.phantom)
+        foreign llvm move(~#globals##0:wybe.phantom, ?#globals##2:wybe.phantom)
 
     1:
         foreign llvm icmp_slt(i##0:wybe.int, 5:wybe.int, ?tmp#2##0:wybe.bool) @int:nn:nn
         case ~tmp#2##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
-            foreign llvm move(~io##0:wybe.phantom, ?io##2:wybe.phantom)
+            foreign llvm move(~#globals##0:wybe.phantom, ?#globals##2:wybe.phantom)
 
         1:
-            foreign c print_int(~i##0:wybe.int, ~%io##0:wybe.phantom, ?%tmp#8##0:wybe.phantom) @io:nn:nn
-            foreign c putchar('\n':wybe.char, ~%tmp#8##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
-            stmt_for.gen#2<0>(~io##1:wybe.phantom, ~tmp#0##1:stmt_for.int_sequence, ~tmp#1##0:stmt_for.int_sequence, ?io##2:wybe.phantom, ?#success##0:wybe.bool) #3 @stmt_for:nn:nn
+            wybe.io.println<0>(~i##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #2 @stmt_for:nn:nn
+            stmt_for.gen#2<0>(~#globals##1:wybe.phantom, ~tmp#0##1:stmt_for.int_sequence, ~tmp#1##0:stmt_for.int_sequence, ?#globals##2:wybe.phantom, ?#success##0:wybe.bool) #3 @stmt_for:nn:nn
 
 
 
 
-gen#3 > (2 calls)
+gen#3 > (2 calls) 
 0: stmt_for.gen#3<0>
-gen#3(io##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(T), tmp#6##0:wybe.list(T), tmp#7##0:wybe.list(T), tmp#8##0:wybe.list(wybe.int), tmp#9##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), y##0:wybe.list(wybe.int), ?io##3:wybe.phantom):
+gen#3(#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(T), tmp#6##0:wybe.list(T), tmp#7##0:wybe.list(T), tmp#8##0:wybe.list(wybe.int), tmp#9##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), y##0:wybe.list(wybe.int), ?#globals##3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#8##0:wybe.int, 0:wybe.int, ?tmp#13##0:wybe.bool)
     case ~tmp#13##0:wybe.bool of
     0:
-        foreign llvm move(~io##0:wybe.phantom, ?io##3:wybe.phantom)
+        foreign llvm move(~#globals##0:wybe.phantom, ?#globals##3:wybe.phantom)
 
     1:
         foreign lpvm access(tmp#8##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:T)
@@ -268,48 +286,45 @@ gen#3(io##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0
         foreign llvm icmp_ne(tmp#9##0:wybe.int, 0:wybe.int, ?tmp#15##0:wybe.bool)
         case ~tmp#15##0:wybe.bool of
         0:
-            foreign llvm move(~io##0:wybe.phantom, ?io##3:wybe.phantom)
+            foreign llvm move(~#globals##0:wybe.phantom, ?#globals##3:wybe.phantom)
 
         1:
             foreign lpvm access(tmp#9##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?j##0:T)
             foreign lpvm access(~tmp#9##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#9##1:wybe.list(T))
-            foreign c print_int(~i##0:wybe.int, ~%io##0:wybe.phantom, ?%tmp#18##0:wybe.phantom) @io:nn:nn
-            foreign c putchar('\n':wybe.char, ~%tmp#18##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
-            foreign c print_int(~j##0:wybe.int, ~%io##1:wybe.phantom, ?%tmp#21##0:wybe.phantom) @io:nn:nn
-            foreign c putchar('\n':wybe.char, ~%tmp#21##0:wybe.phantom, ?%io##2:wybe.phantom) @io:nn:nn
-            stmt_for.gen#3<0>(~io##2:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##0:wybe.list(T), ~tmp#6##0:wybe.list(T), ~tmp#7##0:wybe.list(T), ~tmp#8##1:wybe.list(wybe.int), ~tmp#9##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ~y##0:wybe.list(wybe.int), ?io##3:wybe.phantom) #4 @stmt_for:nn:nn
+            wybe.io.println<0>(~i##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #2 @stmt_for:nn:nn
+            wybe.io.println<0>(~j##0:wybe.int, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #3 @stmt_for:nn:nn
+            stmt_for.gen#3<0>(~#globals##2:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##0:wybe.list(T), ~tmp#6##0:wybe.list(T), ~tmp#7##0:wybe.list(T), ~tmp#8##1:wybe.list(wybe.int), ~tmp#9##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ~y##0:wybe.list(wybe.int), ?#globals##3:wybe.phantom) #4 @stmt_for:nn:nn
 
 
 
 
-gen#4 > (2 calls)
+gen#4 > (2 calls) 
 0: stmt_for.gen#4<0>
-gen#4(io##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), ?io##2:wybe.phantom):
+gen#4(#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#4##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool)
     case ~tmp#7##0:wybe.bool of
     0:
-        foreign llvm move(~io##0:wybe.phantom, ?io##2:wybe.phantom)
+        foreign llvm move(~#globals##0:wybe.phantom, ?#globals##2:wybe.phantom)
 
     1:
         foreign lpvm access(tmp#4##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:T)
         foreign lpvm access(~tmp#4##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##1:wybe.list(T))
-        foreign c print_int(~i##0:wybe.int, ~%io##0:wybe.phantom, ?%tmp#10##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~%tmp#10##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
-        stmt_for.gen#4<0>(~io##1:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ?io##2:wybe.phantom) #2 @stmt_for:nn:nn
+        wybe.io.println<0>(~i##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #1 @stmt_for:nn:nn
+        stmt_for.gen#4<0>(~#globals##1:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom) #2 @stmt_for:nn:nn
 
 
 
-gen#5 > (2 calls)
+gen#5 > (2 calls) 
 0: stmt_for.gen#5<0>
-gen#5(io##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), ?io##2:wybe.phantom):
+gen#5(#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
     case ~tmp#9##0:wybe.bool of
     0:
-        foreign llvm move(~io##0:wybe.phantom, ?io##2:wybe.phantom)
+        foreign llvm move(~#globals##0:wybe.phantom, ?#globals##2:wybe.phantom)
 
     1:
         foreign lpvm access(tmp#5##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:T)
@@ -317,59 +332,56 @@ gen#5(io##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0
         foreign llvm icmp_eq(i##0:wybe.int, 3:wybe.int, ?tmp#6##0:wybe.bool) @int:nn:nn
         case ~tmp#6##0:wybe.bool of
         0:
-            foreign c print_int(~i##0:wybe.int, ~%io##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @io:nn:nn
-            foreign c putchar('\n':wybe.char, ~%tmp#14##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
-            stmt_for.gen#5<0>(~io##1:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ?io##2:wybe.phantom) #3 @stmt_for:nn:nn
+            wybe.io.println<0>(~i##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #2 @stmt_for:nn:nn
+            stmt_for.gen#5<0>(~#globals##1:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom) #3 @stmt_for:nn:nn
 
         1:
-            foreign llvm move(~io##0:wybe.phantom, ?io##2:wybe.phantom)
+            foreign llvm move(~#globals##0:wybe.phantom, ?#globals##2:wybe.phantom)
 
 
 
 
-gen#6 > (2 calls)
+gen#6 > (2 calls) 
 0: stmt_for.gen#6<0>
-gen#6(io##0:wybe.phantom, tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence, ?io##2:wybe.phantom):
+gen#6(#globals##0:wybe.phantom, tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence, ?#globals##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     stmt_for.int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:stmt_for.int_sequence, ~tmp#0##0:stmt_for.int_sequence, ?tmp#2##0:wybe.bool) #0 @stmt_for:nn:nn
     case ~tmp#2##0:wybe.bool of
     0:
-        foreign llvm move(~io##0:wybe.phantom, ?io##2:wybe.phantom)
+        foreign llvm move(~#globals##0:wybe.phantom, ?#globals##2:wybe.phantom)
 
     1:
-        foreign c print_int(~i##0:wybe.int, ~%io##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~%tmp#5##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
-        stmt_for.gen#6<0>(~io##1:wybe.phantom, ~tmp#0##1:stmt_for.int_sequence, ~tmp#1##0:stmt_for.int_sequence, ?io##2:wybe.phantom) #2 @stmt_for:nn:nn
+        wybe.io.println<0>(~i##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #1 @stmt_for:nn:nn
+        stmt_for.gen#6<0>(~#globals##1:wybe.phantom, ~tmp#0##1:stmt_for.int_sequence, ~tmp#1##0:stmt_for.int_sequence, ?#globals##2:wybe.phantom) #2 @stmt_for:nn:nn
 
 
 
-gen#7 > (2 calls)
+gen#7 > (2 calls) 
 0: stmt_for.gen#7<0>
-gen#7(io##0:wybe.phantom, tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence, ?io##2:wybe.phantom):
+gen#7(#globals##0:wybe.phantom, tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence, ?#globals##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     stmt_for.int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:stmt_for.int_sequence, ~tmp#0##0:stmt_for.int_sequence, ?tmp#2##0:wybe.bool) #0 @stmt_for:nn:nn
     case ~tmp#2##0:wybe.bool of
     0:
-        foreign llvm move(~io##0:wybe.phantom, ?io##2:wybe.phantom)
+        foreign llvm move(~#globals##0:wybe.phantom, ?#globals##2:wybe.phantom)
 
     1:
-        foreign c print_int(~i##0:wybe.int, ~%io##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~%tmp#5##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
-        stmt_for.gen#7<0>(~io##1:wybe.phantom, ~tmp#0##1:stmt_for.int_sequence, ~tmp#1##0:stmt_for.int_sequence, ?io##2:wybe.phantom) #2 @stmt_for:nn:nn
+        wybe.io.println<0>(~i##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #1 @stmt_for:nn:nn
+        stmt_for.gen#7<0>(~#globals##1:wybe.phantom, ~tmp#0##1:stmt_for.int_sequence, ~tmp#1##0:stmt_for.int_sequence, ?#globals##2:wybe.phantom) #2 @stmt_for:nn:nn
 
 
 
-gen#8 > (3 calls)
+gen#8 > (3 calls) 
 0: stmt_for.gen#8<0>
-gen#8(io##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), ?io##2:wybe.phantom):
+gen#8(#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
     case ~tmp#9##0:wybe.bool of
     0:
-        foreign llvm move(~io##0:wybe.phantom, ?io##2:wybe.phantom)
+        foreign llvm move(~#globals##0:wybe.phantom, ?#globals##2:wybe.phantom)
 
     1:
         foreign lpvm access(tmp#5##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:T)
@@ -377,25 +389,24 @@ gen#8(io##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0
         foreign llvm icmp_eq(i##0:wybe.int, 3:wybe.int, ?tmp#6##0:wybe.bool) @int:nn:nn
         case ~tmp#6##0:wybe.bool of
         0:
-            foreign c print_int(~i##0:wybe.int, ~%io##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @io:nn:nn
-            foreign c putchar('\n':wybe.char, ~%tmp#14##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
-            stmt_for.gen#8<0>(~io##1:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ?io##2:wybe.phantom) #4 @stmt_for:nn:nn
+            wybe.io.println<0>(~i##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #3 @stmt_for:nn:nn
+            stmt_for.gen#8<0>(~#globals##1:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom) #4 @stmt_for:nn:nn
 
         1:
-            stmt_for.gen#8<0>(~io##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ?io##2:wybe.phantom) #2 @stmt_for:nn:nn
+            stmt_for.gen#8<0>(~#globals##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom) #2 @stmt_for:nn:nn
 
 
 
 
-gen#9 > (3 calls)
+gen#9 > (3 calls) 
 0: stmt_for.gen#9<0>
-gen#9(io##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), ?io##2:wybe.phantom):
+gen#9(#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
     case ~tmp#9##0:wybe.bool of
     0:
-        foreign llvm move(~io##0:wybe.phantom, ?io##2:wybe.phantom)
+        foreign llvm move(~#globals##0:wybe.phantom, ?#globals##2:wybe.phantom)
 
     1:
         foreign lpvm access(tmp#5##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?i##0:T)
@@ -403,17 +414,16 @@ gen#9(io##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0
         foreign llvm icmp_slt(i##0:wybe.int, 3:wybe.int, ?tmp#6##0:wybe.bool) @int:nn:nn
         case ~tmp#6##0:wybe.bool of
         0:
-            foreign c print_int(~i##0:wybe.int, ~%io##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @io:nn:nn
-            foreign c putchar('\n':wybe.char, ~%tmp#14##0:wybe.phantom, ?%io##1:wybe.phantom) @io:nn:nn
-            stmt_for.gen#9<0>(~io##1:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ?io##2:wybe.phantom) #4 @stmt_for:nn:nn
+            wybe.io.println<0>(~i##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #3 @stmt_for:nn:nn
+            stmt_for.gen#9<0>(~#globals##1:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom) #4 @stmt_for:nn:nn
 
         1:
-            stmt_for.gen#9<0>(~io##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ?io##2:wybe.phantom) #2 @stmt_for:nn:nn
+            stmt_for.gen#9<0>(~#globals##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##1:wybe.list(wybe.int), ~x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom) #2 @stmt_for:nn:nn
 
 
 
 
-irange > public (2 calls)
+irange > public (2 calls) 
 0: stmt_for.irange<0>
 irange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_for.int_sequence):
  AliasPairs: []
@@ -436,9 +446,9 @@ irange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_
 
 
 
-multiple_generator > public (1 calls)
+multiple_generator > public (1 calls) 
 0: stmt_for.multiple_generator<0>
-multiple_generator(%io##0:wybe.phantom, %?io##1:wybe.phantom):
+multiple_generator(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#14##0:wybe.list(T))
@@ -459,21 +469,21 @@ multiple_generator(%io##0:wybe.phantom, %?io##1:wybe.phantom):
     foreign lpvm alloc(16:wybe.int, ?tmp#34##0:wybe.list(T))
     foreign lpvm mutate(~tmp#34##0:wybe.list(T), ?tmp#35##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:T)
     foreign lpvm mutate(~tmp#35##0:wybe.list(T), ?tmp#4##0:wybe.list(T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp#5##0:wybe.list(T))
-    stmt_for.gen#1<0>(~io##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), 0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##0:wybe.list(T), ~tmp#6##0:wybe.list(T), 0:wybe.list(T), ~tmp#0##0:wybe.list(wybe.int), ~tmp#4##0:wybe.list(wybe.int), ~tmp#0##0:wybe.list(wybe.int), ~tmp#4##0:wybe.list(wybe.int), ?io##1:wybe.phantom) #8 @stmt_for:nn:nn
+    stmt_for.gen#1<0>(~#globals##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), 0:wybe.list(T), ~tmp#4##0:wybe.list(T), ~tmp#5##0:wybe.list(T), ~tmp#6##0:wybe.list(T), 0:wybe.list(T), ~tmp#0##0:wybe.list(wybe.int), ~tmp#4##0:wybe.list(wybe.int), ~tmp#0##0:wybe.list(wybe.int), ~tmp#4##0:wybe.list(wybe.int), ?#globals##1:wybe.phantom) #8 @stmt_for:nn:nn
 
 
-semi_det_for_loop > public (0 calls)
+semi_det_for_loop > public (0 calls) 
 0: stmt_for.semi_det_for_loop<0>
-semi_det_for_loop(%io##0:wybe.phantom, %?io##1:wybe.phantom, ?#success##0:wybe.bool):
+semi_det_for_loop(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
     stmt_for.xrange<0>(0:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#1##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
-    stmt_for.gen#2<0>(~io##0:wybe.phantom, ~tmp#1##0:stmt_for.int_sequence, ~tmp#1##0:stmt_for.int_sequence, ?io##1:wybe.phantom, ?#success##0:wybe.bool) #1 @stmt_for:nn:nn
+    stmt_for.gen#2<0>(~#globals##0:wybe.phantom, ~tmp#1##0:stmt_for.int_sequence, ~tmp#1##0:stmt_for.int_sequence, ?#globals##1:wybe.phantom, ?#success##0:wybe.bool) #1 @stmt_for:nn:nn
 
 
-shortest_generator_termination > public (1 calls)
+shortest_generator_termination > public (1 calls) 
 0: stmt_for.shortest_generator_termination<0>
-shortest_generator_termination(%io##0:wybe.phantom, %?io##1:wybe.phantom):
+shortest_generator_termination(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#14##0:wybe.list(T))
@@ -494,12 +504,12 @@ shortest_generator_termination(%io##0:wybe.phantom, %?io##1:wybe.phantom):
     foreign lpvm alloc(16:wybe.int, ?tmp#34##0:wybe.list(T))
     foreign lpvm mutate(~tmp#34##0:wybe.list(T), ?tmp#35##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:T)
     foreign lpvm mutate(~tmp#35##0:wybe.list(T), ?tmp#5##0:wybe.list(T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp#6##0:wybe.list(T))
-    stmt_for.gen#3<0>(~io##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), 0:wybe.list(T), ~tmp#5##0:wybe.list(T), ~tmp#6##0:wybe.list(T), 0:wybe.list(T), ~tmp#0##0:wybe.list(wybe.int), ~tmp#5##0:wybe.list(wybe.int), ~tmp#0##0:wybe.list(wybe.int), ~tmp#5##0:wybe.list(wybe.int), ?io##1:wybe.phantom) #8 @stmt_for:nn:nn
+    stmt_for.gen#3<0>(~#globals##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), 0:wybe.list(T), ~tmp#5##0:wybe.list(T), ~tmp#6##0:wybe.list(T), 0:wybe.list(T), ~tmp#0##0:wybe.list(wybe.int), ~tmp#5##0:wybe.list(wybe.int), ~tmp#0##0:wybe.list(wybe.int), ~tmp#5##0:wybe.list(wybe.int), ?#globals##1:wybe.phantom) #8 @stmt_for:nn:nn
 
 
-single_generator > public (1 calls)
+single_generator > public (1 calls) 
 0: stmt_for.single_generator<0>
-single_generator(%io##0:wybe.phantom, %?io##1:wybe.phantom):
+single_generator(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#8##0:wybe.list(T))
@@ -511,12 +521,12 @@ single_generator(%io##0:wybe.phantom, %?io##1:wybe.phantom):
     foreign lpvm alloc(16:wybe.int, ?tmp#16##0:wybe.list(T))
     foreign lpvm mutate(~tmp#16##0:wybe.list(T), ?tmp#17##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T)
     foreign lpvm mutate(~tmp#17##0:wybe.list(T), ?tmp#0##0:wybe.list(T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp#1##0:wybe.list(T))
-    stmt_for.gen#4<0>(~io##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), 0:wybe.list(T), ~tmp#0##0:wybe.list(wybe.int), ~tmp#0##0:wybe.list(wybe.int), ?io##1:wybe.phantom) #4 @stmt_for:nn:nn
+    stmt_for.gen#4<0>(~#globals##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), 0:wybe.list(T), ~tmp#0##0:wybe.list(wybe.int), ~tmp#0##0:wybe.list(wybe.int), ?#globals##1:wybe.phantom) #4 @stmt_for:nn:nn
 
 
-using_break > public (1 calls)
+using_break > public (1 calls) 
 0: stmt_for.using_break<0>
-using_break(%io##0:wybe.phantom, %?io##1:wybe.phantom):
+using_break(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T))
@@ -531,30 +541,30 @@ using_break(%io##0:wybe.phantom, %?io##1:wybe.phantom):
     foreign lpvm alloc(16:wybe.int, ?tmp#22##0:wybe.list(T))
     foreign lpvm mutate(~tmp#22##0:wybe.list(T), ?tmp#23##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T)
     foreign lpvm mutate(~tmp#23##0:wybe.list(T), ?tmp#0##0:wybe.list(T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp#1##0:wybe.list(T))
-    stmt_for.gen#5<0>(~io##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), 0:wybe.list(T), ~tmp#0##0:wybe.list(wybe.int), ~tmp#0##0:wybe.list(wybe.int), ?io##1:wybe.phantom) #5 @stmt_for:nn:nn
+    stmt_for.gen#5<0>(~#globals##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), 0:wybe.list(T), ~tmp#0##0:wybe.list(wybe.int), ~tmp#0##0:wybe.list(wybe.int), ?#globals##1:wybe.phantom) #5 @stmt_for:nn:nn
 
 
-using_irange > public (1 calls)
+using_irange > public (1 calls) 
 0: stmt_for.using_irange<0>
-using_irange(%io##0:wybe.phantom, %?io##1:wybe.phantom):
+using_irange(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     stmt_for.irange<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#1##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
-    stmt_for.gen#6<0>(~io##0:wybe.phantom, ~tmp#1##0:stmt_for.int_sequence, ~tmp#1##0:stmt_for.int_sequence, ?io##1:wybe.phantom) #1 @stmt_for:nn:nn
+    stmt_for.gen#6<0>(~#globals##0:wybe.phantom, ~tmp#1##0:stmt_for.int_sequence, ~tmp#1##0:stmt_for.int_sequence, ?#globals##1:wybe.phantom) #1 @stmt_for:nn:nn
 
 
-using_irange_reverse > public (1 calls)
+using_irange_reverse > public (1 calls) 
 0: stmt_for.using_irange_reverse<0>
-using_irange_reverse(%io##0:wybe.phantom, %?io##1:wybe.phantom):
+using_irange_reverse(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     stmt_for.irange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp#1##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
-    stmt_for.gen#7<0>(~io##0:wybe.phantom, ~tmp#1##0:stmt_for.int_sequence, ~tmp#1##0:stmt_for.int_sequence, ?io##1:wybe.phantom) #1 @stmt_for:nn:nn
+    stmt_for.gen#7<0>(~#globals##0:wybe.phantom, ~tmp#1##0:stmt_for.int_sequence, ~tmp#1##0:stmt_for.int_sequence, ?#globals##1:wybe.phantom) #1 @stmt_for:nn:nn
 
 
-using_next > public (1 calls)
+using_next > public (1 calls) 
 0: stmt_for.using_next<0>
-using_next(%io##0:wybe.phantom, %?io##1:wybe.phantom):
+using_next(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T))
@@ -569,12 +579,12 @@ using_next(%io##0:wybe.phantom, %?io##1:wybe.phantom):
     foreign lpvm alloc(16:wybe.int, ?tmp#22##0:wybe.list(T))
     foreign lpvm mutate(~tmp#22##0:wybe.list(T), ?tmp#23##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T)
     foreign lpvm mutate(~tmp#23##0:wybe.list(T), ?tmp#0##0:wybe.list(T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp#1##0:wybe.list(T))
-    stmt_for.gen#8<0>(~io##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), 0:wybe.list(T), ~tmp#0##0:wybe.list(wybe.int), ~tmp#0##0:wybe.list(wybe.int), ?io##1:wybe.phantom) #5 @stmt_for:nn:nn
+    stmt_for.gen#8<0>(~#globals##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), 0:wybe.list(T), ~tmp#0##0:wybe.list(wybe.int), ~tmp#0##0:wybe.list(wybe.int), ?#globals##1:wybe.phantom) #5 @stmt_for:nn:nn
 
 
-using_unless > public (1 calls)
+using_unless > public (1 calls) 
 0: stmt_for.using_unless<0>
-using_unless(%io##0:wybe.phantom, %?io##1:wybe.phantom):
+using_unless(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T))
@@ -589,12 +599,12 @@ using_unless(%io##0:wybe.phantom, %?io##1:wybe.phantom):
     foreign lpvm alloc(16:wybe.int, ?tmp#22##0:wybe.list(T))
     foreign lpvm mutate(~tmp#22##0:wybe.list(T), ?tmp#23##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T)
     foreign lpvm mutate(~tmp#23##0:wybe.list(T), ?tmp#0##0:wybe.list(T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp#1##0:wybe.list(T))
-    stmt_for.gen#9<0>(~io##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), 0:wybe.list(T), ~tmp#0##0:wybe.list(wybe.int), ~tmp#0##0:wybe.list(wybe.int), ?io##1:wybe.phantom) #5 @stmt_for:nn:nn
+    stmt_for.gen#9<0>(~#globals##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), 0:wybe.list(T), ~tmp#0##0:wybe.list(wybe.int), ~tmp#0##0:wybe.list(wybe.int), ?#globals##1:wybe.phantom) #5 @stmt_for:nn:nn
 
 
-using_until > public (1 calls)
+using_until > public (1 calls) 
 0: stmt_for.using_until<0>
-using_until(%io##0:wybe.phantom, %?io##1:wybe.phantom):
+using_until(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T))
@@ -609,12 +619,12 @@ using_until(%io##0:wybe.phantom, %?io##1:wybe.phantom):
     foreign lpvm alloc(16:wybe.int, ?tmp#22##0:wybe.list(T))
     foreign lpvm mutate(~tmp#22##0:wybe.list(T), ?tmp#23##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T)
     foreign lpvm mutate(~tmp#23##0:wybe.list(T), ?tmp#0##0:wybe.list(T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp#1##0:wybe.list(T))
-    stmt_for.gen#10<0>(~io##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), 0:wybe.list(T), ~tmp#0##0:wybe.list(wybe.int), ~tmp#0##0:wybe.list(wybe.int), ?io##1:wybe.phantom) #5 @stmt_for:nn:nn
+    stmt_for.gen#10<0>(~#globals##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), 0:wybe.list(T), ~tmp#0##0:wybe.list(wybe.int), ~tmp#0##0:wybe.list(wybe.int), ?#globals##1:wybe.phantom) #5 @stmt_for:nn:nn
 
 
-using_when > public (1 calls)
+using_when > public (1 calls) 
 0: stmt_for.using_when<0>
-using_when(%io##0:wybe.phantom, %?io##1:wybe.phantom):
+using_when(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T))
@@ -629,12 +639,12 @@ using_when(%io##0:wybe.phantom, %?io##1:wybe.phantom):
     foreign lpvm alloc(16:wybe.int, ?tmp#22##0:wybe.list(T))
     foreign lpvm mutate(~tmp#22##0:wybe.list(T), ?tmp#23##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T)
     foreign lpvm mutate(~tmp#23##0:wybe.list(T), ?tmp#0##0:wybe.list(T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp#1##0:wybe.list(T))
-    stmt_for.gen#11<0>(~io##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), 0:wybe.list(T), ~tmp#0##0:wybe.list(wybe.int), ~tmp#0##0:wybe.list(wybe.int), ?io##1:wybe.phantom) #5 @stmt_for:nn:nn
+    stmt_for.gen#11<0>(~#globals##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), 0:wybe.list(T), ~tmp#0##0:wybe.list(wybe.int), ~tmp#0##0:wybe.list(wybe.int), ?#globals##1:wybe.phantom) #5 @stmt_for:nn:nn
 
 
-using_while > public (1 calls)
+using_while > public (1 calls) 
 0: stmt_for.using_while<0>
-using_while(%io##0:wybe.phantom, %?io##1:wybe.phantom):
+using_while(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T))
@@ -649,28 +659,28 @@ using_while(%io##0:wybe.phantom, %?io##1:wybe.phantom):
     foreign lpvm alloc(16:wybe.int, ?tmp#22##0:wybe.list(T))
     foreign lpvm mutate(~tmp#22##0:wybe.list(T), ?tmp#23##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:T)
     foreign lpvm mutate(~tmp#23##0:wybe.list(T), ?tmp#0##0:wybe.list(T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp#1##0:wybe.list(T))
-    stmt_for.gen#12<0>(~io##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), 0:wybe.list(T), ~tmp#0##0:wybe.list(wybe.int), ~tmp#0##0:wybe.list(wybe.int), ?io##1:wybe.phantom) #5 @stmt_for:nn:nn
+    stmt_for.gen#12<0>(~#globals##0:wybe.phantom, ~tmp#0##0:wybe.list(T), ~tmp#1##0:wybe.list(T), ~tmp#2##0:wybe.list(T), ~tmp#3##0:wybe.list(T), 0:wybe.list(T), ~tmp#0##0:wybe.list(wybe.int), ~tmp#0##0:wybe.list(wybe.int), ?#globals##1:wybe.phantom) #5 @stmt_for:nn:nn
 
 
-using_xrange > public (1 calls)
+using_xrange > public (1 calls) 
 0: stmt_for.using_xrange<0>
-using_xrange(%io##0:wybe.phantom, %?io##1:wybe.phantom):
+using_xrange(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     stmt_for.xrange<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#1##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
-    stmt_for.gen#13<0>(~io##0:wybe.phantom, ~tmp#1##0:stmt_for.int_sequence, ~tmp#1##0:stmt_for.int_sequence, ?io##1:wybe.phantom) #1 @stmt_for:nn:nn
+    stmt_for.gen#13<0>(~#globals##0:wybe.phantom, ~tmp#1##0:stmt_for.int_sequence, ~tmp#1##0:stmt_for.int_sequence, ?#globals##1:wybe.phantom) #1 @stmt_for:nn:nn
 
 
-using_xrange_reverse > public (1 calls)
+using_xrange_reverse > public (1 calls) 
 0: stmt_for.using_xrange_reverse<0>
-using_xrange_reverse(%io##0:wybe.phantom, %?io##1:wybe.phantom):
+using_xrange_reverse(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     stmt_for.xrange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp#1##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
-    stmt_for.gen#14<0>(~io##0:wybe.phantom, ~tmp#1##0:stmt_for.int_sequence, ~tmp#1##0:stmt_for.int_sequence, ?io##1:wybe.phantom) #1 @stmt_for:nn:nn
+    stmt_for.gen#14<0>(~#globals##0:wybe.phantom, ~tmp#1##0:stmt_for.int_sequence, ~tmp#1##0:stmt_for.int_sequence, ?#globals##1:wybe.phantom) #1 @stmt_for:nn:nn
 
 
-xrange > public (3 calls)
+xrange > public (3 calls) 
 0: stmt_for.xrange<0>
 xrange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_for.int_sequence):
  AliasPairs: []
@@ -694,85 +704,85 @@ declare external ccc  void @putchar(i8)
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
-@"constant#stmt_for.26" =    constant {i64, i64} { i64 21, i64 ptrtoint ([?? x i8]* @"constant#stmt_for.25" to i64) }
+@stmt_for.26 =    constant {i64, i64} { i64 21, i64 ptrtoint ([?? x i8]* @stmt_for.25 to i64) }
 
 
-@"constant#stmt_for.25" =    constant [?? x i8] c"\0ausing_irange_reverse\00"
+@stmt_for.25 =    constant [?? x i8] c"\0ausing_irange_reverse\00"
 
 
-@"constant#stmt_for.24" =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @"constant#stmt_for.23" to i64) }
+@stmt_for.24 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @stmt_for.23 to i64) }
 
 
-@"constant#stmt_for.23" =    constant [?? x i8] c"\0ausing_irange\00"
+@stmt_for.23 =    constant [?? x i8] c"\0ausing_irange\00"
 
 
-@"constant#stmt_for.22" =    constant {i64, i64} { i64 21, i64 ptrtoint ([?? x i8]* @"constant#stmt_for.21" to i64) }
+@stmt_for.22 =    constant {i64, i64} { i64 21, i64 ptrtoint ([?? x i8]* @stmt_for.21 to i64) }
 
 
-@"constant#stmt_for.21" =    constant [?? x i8] c"\0ausing_xrange_reverse\00"
+@stmt_for.21 =    constant [?? x i8] c"\0ausing_xrange_reverse\00"
 
 
-@"constant#stmt_for.20" =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @"constant#stmt_for.19" to i64) }
+@stmt_for.20 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @stmt_for.19 to i64) }
 
 
-@"constant#stmt_for.19" =    constant [?? x i8] c"\0ausing_xrange\00"
+@stmt_for.19 =    constant [?? x i8] c"\0ausing_xrange\00"
 
 
-@"constant#stmt_for.18" =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @"constant#stmt_for.17" to i64) }
+@stmt_for.18 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @stmt_for.17 to i64) }
 
 
-@"constant#stmt_for.17" =    constant [?? x i8] c"\0ausing_unless\00"
+@stmt_for.17 =    constant [?? x i8] c"\0ausing_unless\00"
 
 
-@"constant#stmt_for.16" =    constant {i64, i64} { i64 11, i64 ptrtoint ([?? x i8]* @"constant#stmt_for.15" to i64) }
+@stmt_for.16 =    constant {i64, i64} { i64 11, i64 ptrtoint ([?? x i8]* @stmt_for.15 to i64) }
 
 
-@"constant#stmt_for.15" =    constant [?? x i8] c"\0ausing_when\00"
+@stmt_for.15 =    constant [?? x i8] c"\0ausing_when\00"
 
 
-@"constant#stmt_for.14" =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @"constant#stmt_for.13" to i64) }
+@stmt_for.14 =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @stmt_for.13 to i64) }
 
 
-@"constant#stmt_for.13" =    constant [?? x i8] c"\0ausing_until\00"
+@stmt_for.13 =    constant [?? x i8] c"\0ausing_until\00"
 
 
-@"constant#stmt_for.12" =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @"constant#stmt_for.11" to i64) }
+@stmt_for.12 =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @stmt_for.11 to i64) }
 
 
-@"constant#stmt_for.11" =    constant [?? x i8] c"\0ausing_while\00"
+@stmt_for.11 =    constant [?? x i8] c"\0ausing_while\00"
 
 
-@"constant#stmt_for.10" =    constant {i64, i64} { i64 11, i64 ptrtoint ([?? x i8]* @"constant#stmt_for.9" to i64) }
+@stmt_for.10 =    constant {i64, i64} { i64 11, i64 ptrtoint ([?? x i8]* @stmt_for.9 to i64) }
 
 
-@"constant#stmt_for.9" =    constant [?? x i8] c"\0ausing_next\00"
+@stmt_for.9 =    constant [?? x i8] c"\0ausing_next\00"
 
 
-@"constant#stmt_for.8" =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @"constant#stmt_for.7" to i64) }
+@stmt_for.8 =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @stmt_for.7 to i64) }
 
 
-@"constant#stmt_for.7" =    constant [?? x i8] c"\0ausing_break\00"
+@stmt_for.7 =    constant [?? x i8] c"\0ausing_break\00"
 
 
-@"constant#stmt_for.6" =    constant {i64, i64} { i64 31, i64 ptrtoint ([?? x i8]* @"constant#stmt_for.5" to i64) }
+@stmt_for.6 =    constant {i64, i64} { i64 31, i64 ptrtoint ([?? x i8]* @stmt_for.5 to i64) }
 
 
-@"constant#stmt_for.5" =    constant [?? x i8] c"\0ashortest_generator_termination\00"
+@stmt_for.5 =    constant [?? x i8] c"\0ashortest_generator_termination\00"
 
 
-@"constant#stmt_for.4" =    constant {i64, i64} { i64 19, i64 ptrtoint ([?? x i8]* @"constant#stmt_for.3" to i64) }
+@stmt_for.4 =    constant {i64, i64} { i64 19, i64 ptrtoint ([?? x i8]* @stmt_for.3 to i64) }
 
 
-@"constant#stmt_for.3" =    constant [?? x i8] c"\0amultiple_generator\00"
+@stmt_for.3 =    constant [?? x i8] c"\0amultiple_generator\00"
 
 
-@"constant#stmt_for.2" =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @"constant#stmt_for.1" to i64) }
+@stmt_for.2 =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @stmt_for.1 to i64) }
 
 
-@"constant#stmt_for.1" =    constant [?? x i8] c"single_generator:\00"
+@stmt_for.1 =    constant [?? x i8] c"single_generator:\00"
 
 
-declare external ccc  void @print_int(i64)    
+declare external fastcc  void @"wybe.io.println<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -783,43 +793,43 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"stmt_for.<0>"()    {
 entry:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#stmt_for.2", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_for.2, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"stmt_for.single_generator<0>"()  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#stmt_for.4", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_for.4, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"stmt_for.multiple_generator<0>"()  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#stmt_for.6", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_for.6, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"stmt_for.shortest_generator_termination<0>"()  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#stmt_for.8", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_for.8, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"stmt_for.using_break<0>"()  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#stmt_for.10", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_for.10, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"stmt_for.using_next<0>"()  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#stmt_for.12", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_for.12, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"stmt_for.using_while<0>"()  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#stmt_for.14", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_for.14, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"stmt_for.using_until<0>"()  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#stmt_for.16", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_for.16, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"stmt_for.using_when<0>"()  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#stmt_for.18", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_for.18, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"stmt_for.using_unless<0>"()  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#stmt_for.20", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_for.20, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"stmt_for.using_xrange<0>"()  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#stmt_for.22", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_for.22, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"stmt_for.using_xrange_reverse<0>"()  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#stmt_for.24", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_for.24, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"stmt_for.using_irange<0>"()  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @"constant#stmt_for.26", i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_for.26, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"stmt_for.using_irange_reverse<0>"()  
   ret void 
@@ -850,10 +860,8 @@ if.then1:
   %38 = inttoptr i64 %37 to i64* 
   %39 = getelementptr  i64, i64* %38, i64 0 
   %40 = load  i64, i64* %39 
-  tail call ccc  void  @print_int(i64  %29)  
-  tail call ccc  void  @putchar(i8  10)  
-  tail call ccc  void  @print_int(i64  %36)  
-  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"wybe.io.println<0>"(i64  %29)  
+  tail call fastcc  void  @"wybe.io.println<0>"(i64  %36)  
   tail call fastcc  void  @"stmt_for.gen#1<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %"tmp#5##0", i64  %"tmp#6##0", i64  %"tmp#7##0", i64  %33, i64  %40, i64  %"x##0", i64  %"y##0")  
   ret void 
 if.else1:
@@ -880,8 +888,7 @@ if.else:
 if.then1:
   ret void 
 if.else1:
-  tail call ccc  void  @print_int(i64  %43)  
-  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"wybe.io.println<0>"(i64  %43)  
   tail call fastcc  void  @"stmt_for.gen#10<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %47, i64  %"x##0")  
   ret void 
 }
@@ -904,8 +911,7 @@ if.then:
 if.else:
   ret void 
 if.then1:
-  tail call ccc  void  @print_int(i64  %50)  
-  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"wybe.io.println<0>"(i64  %50)  
   tail call fastcc  void  @"stmt_for.gen#11<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %54, i64  %"x##0")  
   ret void 
 if.else1:
@@ -931,8 +937,7 @@ if.then:
 if.else:
   ret void 
 if.then1:
-  tail call ccc  void  @print_int(i64  %57)  
-  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"wybe.io.println<0>"(i64  %57)  
   tail call fastcc  void  @"stmt_for.gen#12<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %61, i64  %"x##0")  
   ret void 
 if.else1:
@@ -948,8 +953,7 @@ entry:
   %65 = extractvalue {i64, i64, i1} %62, 2 
   br i1 %65, label %if.then, label %if.else 
 if.then:
-  tail call ccc  void  @print_int(i64  %63)  
-  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"wybe.io.println<0>"(i64  %63)  
   tail call fastcc  void  @"stmt_for.gen#13<0>"(i64  %64, i64  %"tmp#1##0")  
   ret void 
 if.else:
@@ -965,8 +969,7 @@ entry:
   %69 = extractvalue {i64, i64, i1} %66, 2 
   br i1 %69, label %if.then, label %if.else 
 if.then:
-  tail call ccc  void  @print_int(i64  %67)  
-  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"wybe.io.println<0>"(i64  %67)  
   tail call fastcc  void  @"stmt_for.gen#14<0>"(i64  %68, i64  %"tmp#1##0")  
   ret void 
 if.else:
@@ -987,8 +990,7 @@ if.then:
 if.else:
   ret i1 1 
 if.then1:
-  tail call ccc  void  @print_int(i64  %71)  
-  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"wybe.io.println<0>"(i64  %71)  
   %"4##success##0" = tail call fastcc  i1  @"stmt_for.gen#2<0>"(i64  %72, i64  %"tmp#1##0")  
   ret i1 %"4##success##0" 
 if.else1:
@@ -1020,10 +1022,8 @@ if.then1:
   %85 = inttoptr i64 %84 to i64* 
   %86 = getelementptr  i64, i64* %85, i64 0 
   %87 = load  i64, i64* %86 
-  tail call ccc  void  @print_int(i64  %76)  
-  tail call ccc  void  @putchar(i8  10)  
-  tail call ccc  void  @print_int(i64  %83)  
-  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"wybe.io.println<0>"(i64  %76)  
+  tail call fastcc  void  @"wybe.io.println<0>"(i64  %83)  
   tail call fastcc  void  @"stmt_for.gen#3<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %"tmp#5##0", i64  %"tmp#6##0", i64  %"tmp#7##0", i64  %80, i64  %87, i64  %"x##0", i64  %"y##0")  
   ret void 
 if.else1:
@@ -1043,8 +1043,7 @@ if.then:
   %92 = inttoptr i64 %91 to i64* 
   %93 = getelementptr  i64, i64* %92, i64 0 
   %94 = load  i64, i64* %93 
-  tail call ccc  void  @print_int(i64  %90)  
-  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"wybe.io.println<0>"(i64  %90)  
   tail call fastcc  void  @"stmt_for.gen#4<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %94, i64  %"x##0")  
   ret void 
 if.else:
@@ -1071,8 +1070,7 @@ if.else:
 if.then1:
   ret void 
 if.else1:
-  tail call ccc  void  @print_int(i64  %97)  
-  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"wybe.io.println<0>"(i64  %97)  
   tail call fastcc  void  @"stmt_for.gen#5<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %101, i64  %"x##0")  
   ret void 
 }
@@ -1086,8 +1084,7 @@ entry:
   %105 = extractvalue {i64, i64, i1} %102, 2 
   br i1 %105, label %if.then, label %if.else 
 if.then:
-  tail call ccc  void  @print_int(i64  %103)  
-  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"wybe.io.println<0>"(i64  %103)  
   tail call fastcc  void  @"stmt_for.gen#6<0>"(i64  %104, i64  %"tmp#1##0")  
   ret void 
 if.else:
@@ -1103,8 +1100,7 @@ entry:
   %109 = extractvalue {i64, i64, i1} %106, 2 
   br i1 %109, label %if.then, label %if.else 
 if.then:
-  tail call ccc  void  @print_int(i64  %107)  
-  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"wybe.io.println<0>"(i64  %107)  
   tail call fastcc  void  @"stmt_for.gen#7<0>"(i64  %108, i64  %"tmp#1##0")  
   ret void 
 if.else:
@@ -1132,8 +1128,7 @@ if.then1:
   tail call fastcc  void  @"stmt_for.gen#8<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %116, i64  %"x##0")  
   ret void 
 if.else1:
-  tail call ccc  void  @print_int(i64  %112)  
-  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"wybe.io.println<0>"(i64  %112)  
   tail call fastcc  void  @"stmt_for.gen#8<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %116, i64  %"x##0")  
   ret void 
 }
@@ -1159,8 +1154,7 @@ if.then1:
   tail call fastcc  void  @"stmt_for.gen#9<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %123, i64  %"x##0")  
   ret void 
 if.else1:
-  tail call ccc  void  @print_int(i64  %119)  
-  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"wybe.io.println<0>"(i64  %119)  
   tail call fastcc  void  @"stmt_for.gen#9<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %123, i64  %"x##0")  
   ret void 
 }
@@ -1739,7 +1733,7 @@ entry:
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls)
+= > public {inline} (1 calls) 
 0: stmt_for.int_sequence.=<0>
 =(#left##0:stmt_for.int_sequence, #right##0:stmt_for.int_sequence, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -1767,7 +1761,7 @@ entry:
 
 
 
-[|] > public (0 calls)
+[|] > public (0 calls) 
 0: stmt_for.int_sequence.[|]<0>
 [|](?value##0:wybe.int, ?rest##0:stmt_for.int_sequence, current##0:stmt_for.int_sequence, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -1803,13 +1797,13 @@ entry:
 
 
 
-end > public {inline} (0 calls)
+end > public {inline} (0 calls) 
 0: stmt_for.int_sequence.end<0>
 end(#rec##0:stmt_for.int_sequence, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~#rec##0:stmt_for.int_sequence, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
-end > public {inline} (0 calls)
+end > public {inline} (0 calls) 
 1: stmt_for.int_sequence.end<1>
 end(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:wybe.int):
  AliasPairs: []
@@ -1817,7 +1811,7 @@ end(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:wyb
     foreign lpvm {noalias} mutate(~#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
-gen#1 > (2 calls)
+gen#1 > (2 calls) 
 0: stmt_for.int_sequence.gen#1<0>
 gen#1([current##0:stmt_for.int_sequence], en##0:wybe.int, s##0:wybe.int, st##0:wybe.int, ?value##0:wybe.int, ?rest##0:stmt_for.int_sequence, ?#success##0:wybe.bool):
  AliasPairs: []
@@ -1831,7 +1825,7 @@ gen#1([current##0:stmt_for.int_sequence], en##0:wybe.int, s##0:wybe.int, st##0:w
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
-int_sequence > public {inline} (1 calls)
+int_sequence > public {inline} (1 calls) 
 0: stmt_for.int_sequence.int_sequence<0>
 int_sequence(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_for.int_sequence):
  AliasPairs: []
@@ -1840,7 +1834,7 @@ int_sequence(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0
     foreign lpvm mutate(~#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~start##0:wybe.int)
     foreign lpvm mutate(~#rec##1:stmt_for.int_sequence, ?#rec##2:stmt_for.int_sequence, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~stride##0:wybe.int)
     foreign lpvm mutate(~#rec##2:stmt_for.int_sequence, ?#result##0:stmt_for.int_sequence, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~end##0:wybe.int)
-int_sequence > public {inline} (16 calls)
+int_sequence > public {inline} (16 calls) 
 1: stmt_for.int_sequence.int_sequence<1>
 int_sequence(?start##0:wybe.int, ?stride##0:wybe.int, ?end##0:wybe.int, #result##0:stmt_for.int_sequence):
  AliasPairs: []
@@ -1850,13 +1844,13 @@ int_sequence(?start##0:wybe.int, ?stride##0:wybe.int, ?end##0:wybe.int, #result#
     foreign lpvm access(~#result##0:stmt_for.int_sequence, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?end##0:wybe.int)
 
 
-start > public {inline} (0 calls)
+start > public {inline} (0 calls) 
 0: stmt_for.int_sequence.start<0>
 start(#rec##0:stmt_for.int_sequence, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~#rec##0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
-start > public {inline} (0 calls)
+start > public {inline} (0 calls) 
 1: stmt_for.int_sequence.start<1>
 start(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:wybe.int):
  AliasPairs: []
@@ -1864,13 +1858,13 @@ start(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:w
     foreign lpvm {noalias} mutate(~#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
-stride > public {inline} (0 calls)
+stride > public {inline} (0 calls) 
 0: stmt_for.int_sequence.stride<0>
 stride(#rec##0:stmt_for.int_sequence, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm access(~#rec##0:stmt_for.int_sequence, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
-stride > public {inline} (0 calls)
+stride > public {inline} (0 calls) 
 1: stmt_for.int_sequence.stride<1>
 stride(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:wybe.int):
  AliasPairs: []
@@ -1878,7 +1872,7 @@ stride(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:
     foreign lpvm {noalias} mutate(~#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
-~= > public {inline} (0 calls)
+~= > public {inline} (0 calls) 
 0: stmt_for.int_sequence.~=<0>
 ~=(#left##0:stmt_for.int_sequence, #right##0:stmt_for.int_sequence, ?#success##0:wybe.bool):
  AliasPairs: []

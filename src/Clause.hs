@@ -71,14 +71,10 @@ currVar name pos = do
     dict <- gets currVars
     case Map.lookup name dict of
         Nothing -> do
-            -- XXXj a hack
-            if "resource#" `List.isPrefixOf` name
-            then nextVar name
-            else do
-                logClause $ "Found uninitialised variable " ++ name
-                lift $ message Error
-                        ("Uninitialised variable '" ++ name ++ "'") pos
-                return $ PrimVarName name (-1)
+            logClause $ "Found uninitialised variable " ++ name
+            lift $ message Error
+                    ("Uninitialised variable '" ++ name ++ "'") pos
+            return $ PrimVarName name (-1)
         Just n -> return $ PrimVarName name n
 
 
@@ -328,6 +324,7 @@ compileArg' typ (IntValue int) _ = return [ArgInt int typ]
 compileArg' typ (FloatValue float) _ = return [ArgFloat float typ]
 compileArg' typ (StringValue string v) _ = return [ArgString string v typ]
 compileArg' typ (CharValue char) _ = return [ArgChar char typ]
+compileArg' typ (Global info) _ = return [ArgGlobal info typ]
 compileArg' typ (ProcRef ms es) _ = do
     as <- concat <$> mapM (`compileArg` Nothing) es
     unless (sameLength es as)

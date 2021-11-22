@@ -32,6 +32,7 @@ import           LLVM.Module                as Mod
 import           LLVM.PassManager
 import           LLVM.Pretty                (ppllvm)
 import           LLVM.Target
+import           LLVM.Analysis              (verify)
 import           ObjectInterface
 import           Options                    (LogSelection (Blocks,Builder,Emit))
 import           System.Exit                (ExitCode (..))
@@ -173,6 +174,7 @@ withOptimisedModule llmod action =
     withContext $ \context ->
         withModuleFromAST context llmod $ \m ->
             withPassManager passes $ \pm -> do
+                -- verify m
                 success <- runPassManager pm m
                 if success
                     then action m
