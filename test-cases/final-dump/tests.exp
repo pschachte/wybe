@@ -102,7 +102,7 @@ lt3(x##0:wybe.int, y##0:wybe.int, ?#success##0:wybe.bool):
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  {i64, i1} @"tests.lookup<0>"(i64  %"key##0", i64  %"map##0")    {
@@ -440,7 +440,7 @@ value(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:wybe.int, ?#success##0:wy
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  i1 @"tests.map.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
@@ -542,7 +542,7 @@ if.then:
   %42 = inttoptr i64 %41 to i8* 
   %43 = inttoptr i64 %"#rec##0" to i8* 
   %44 = trunc i64 32 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %42, i8*  %43, i32  %44, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %42, i8*  %43, i32  %44, i1  0)  
   %45 = add   i64 %41, 8 
   %46 = inttoptr i64 %45 to i64* 
   %47 = getelementptr  i64, i64* %46, i64 0 
@@ -586,7 +586,7 @@ if.then:
   %62 = inttoptr i64 %61 to i8* 
   %63 = inttoptr i64 %"#rec##0" to i8* 
   %64 = trunc i64 32 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %62, i8*  %63, i32  %64, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %62, i8*  %63, i32  %64, i1  0)  
   %65 = inttoptr i64 %61 to i64* 
   %66 = getelementptr  i64, i64* %65, i64 0 
   store  i64 %"#field##0", i64* %66 
@@ -690,7 +690,7 @@ if.then:
   %121 = inttoptr i64 %120 to i8* 
   %122 = inttoptr i64 %"#rec##0" to i8* 
   %123 = trunc i64 32 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %121, i8*  %122, i32  %123, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %121, i8*  %122, i32  %123, i1  0)  
   %124 = add   i64 %120, 24 
   %125 = inttoptr i64 %124 to i64* 
   %126 = getelementptr  i64, i64* %125, i64 0 
@@ -735,7 +735,7 @@ if.then:
   %142 = inttoptr i64 %141 to i8* 
   %143 = inttoptr i64 %"#rec##0" to i8* 
   %144 = trunc i64 32 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %142, i8*  %143, i32  %144, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %142, i8*  %143, i32  %144, i1  0)  
   %145 = add   i64 %141, 16 
   %146 = inttoptr i64 %145 to i64* 
   %147 = getelementptr  i64, i64* %146, i64 0 
