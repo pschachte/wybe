@@ -125,7 +125,7 @@ data AnonProcState = AnonProcState {
     paramCount :: Maybe Integer, -- ^Number of params encountered in current
                                  -- anonProc. Nothing if we have numbered params
     params :: Map Integer Param  -- ^Unrocessed params
-    }
+    } deriving Show
 
 
 initFlattenerState :: Set VarName -> FlattenerState
@@ -157,7 +157,8 @@ processAnonProcParams AnonProcState{params=paramMap, currentAnon=current}
 
 
 makeAnonParamName :: Integer -> Integer -> VarName 
-makeAnonParamName procNum num = specialName2 (show procNum) (show num)
+makeAnonParamName procNum num = specialName2 "anon"
+                              $ specialName2 (show procNum) (show num)
 
 
 makeAnonParam :: VarName -> FlowDirection -> Param 
@@ -197,15 +198,18 @@ flattenInner isLoop transparent detism inner = do
     (_,innerState) <-
         lift (runStateT inner
               (initFlattenerState (defdVars oldState)) {
-                    tempCtr = tempCtr oldState})
+                    tempCtr = tempCtr oldState,
+                    anonProcState = anonProcState oldState})
     logFlatten $ "-- Flattened:" ++ showBody 4 (List.reverse
                                                 $ flattened innerState)
     -- logFlatten $ "-- Postponed:\n" ++ 
     --   showBody 4 (postponed innerState)
     if transparent
       then put $ oldState { tempCtr = tempCtr innerState,
-                            defdVars = defdVars innerState }
-      else put $ oldState { tempCtr = tempCtr innerState }
+                            defdVars = defdVars innerState,
+                            anonProcState = anonProcState innerState }
+      else put $ oldState { tempCtr = tempCtr innerState,
+                            anonProcState = anonProcState innerState }
     return $ List.reverse $ flattened innerState
 
 
@@ -537,19 +541,16 @@ flattenExp (CondExp cond thn els) ty castFrom pos = do
         pos Det
     return $ maybePlace (Var resultName ParamIn Ordinary) pos
 flattenExp expr@(AnonProc mods _ pstmts) ty castFrom pos = do
-    state <- get
-    let anonState = anonProcState state
-    modify (\s -> s{flattened=[], postponed=[], 
-                    anonProcState=pushAnonProcState anonState})
-    flattenStmts pstmts $ modifierDetism mods
-    flushPostponed
-    state' <- get
-    let anonState' = anonProcState state'
-    put state{anonProcState=popAnonProcState anonState anonState', 
-              tempCtr=tempCtr state'}
+    anonState <- gets anonProcState
+    let newAnonState = pushAnonProcState anonState
+    logFlatten $ "Flattening new anon proc with state " ++ show newAnonState
+    modify $ \s -> s{anonProcState=newAnonState}
+    let detism = modifierDetism mods
+    pstmts' <- flattenInner False True detism $ flattenStmts pstmts detism
+    anonState' <- gets anonProcState
+    modify $ \s -> s{anonProcState=popAnonProcState anonState anonState'}
     let anonParams = processAnonProcParams anonState'
-    return $ typeAndPlace (AnonProc mods anonParams (reverse $ flattened state')) 
-                          ty castFrom pos
+    return $ typeAndPlace (AnonProc mods anonParams pstmts') ty castFrom pos
 flattenExp (CaseExp pexpr cases deflt) ty castFrom pos = do
     resultName <- tempVar
     pexpr' <- flattenPExp pexpr
