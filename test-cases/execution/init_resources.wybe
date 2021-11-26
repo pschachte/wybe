@@ -1,0 +1,6 @@
+pub resource r:int = 1
+
+pub def {noinline} foo(?j:int) use !r { ?j = r + 1}
+
+!foo(?j)
+!println(j)

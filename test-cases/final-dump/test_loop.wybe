@@ -3,7 +3,7 @@
 pub type int_seq {
     pub int_seq(low:int, step:int, high:int)
 
-    pub def {partial} seq_next(!seq:int_seq):int = elt where {
+    pub def {partial} seq_next(!seq:int_seq, ?elt:int) {
         int_seq(?elt, ?step, ?limit, seq)
         (elt <= limit)
         low(!seq, elt+step)
@@ -13,7 +13,7 @@ pub type int_seq {
 
 def {test} find_modulo(seq:int_seq, modulus:int, ?i:int) {
     do {
-        ?i = seq_next(!seq)
+        seq_next(!seq, ?i)
         until (i % modulus = 0)
     }
 }
@@ -26,7 +26,7 @@ def find_test(modulus:int) use !io {
            !print(modulus)
            !print(" is ")
            !println(i)
-      | otherwise ::
+      | else      ::
            !print("Couldn't find even number divisible by ")
            !println(modulus)
     }

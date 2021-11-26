@@ -443,8 +443,8 @@ ordinaryInstr prim pos = do
 
 -- | Invert an output arg to be an input arg.
 mkInput :: PrimArg -> PrimArg
-mkInput (ArgVar name ty coerce _ ftype lst) =
-    ArgVar name ty coerce FlowIn Ordinary False
+mkInput (ArgVar name ty _ _ lst) =
+    ArgVar name ty FlowIn Ordinary False
 mkInput arg@ArgInt{} = arg
 mkInput arg@ArgFloat{} = arg
 mkInput arg@ArgString{} = arg
@@ -635,13 +635,13 @@ canonicalisePrim (PrimForeign lang op flags args) =
 --  other arg with the same content.
 canonicaliseArg :: PrimArg -> PrimArg
 canonicaliseArg ArgVar{argVarName=nm, argVarFlow=fl} =
-    ArgVar nm AnyType False fl Ordinary False
-canonicaliseArg (ArgInt v _)         = ArgInt v AnyType
-canonicaliseArg (ArgFloat v _)       = ArgFloat v AnyType
-canonicaliseArg (ArgString v _)      = ArgString v AnyType
-canonicaliseArg (ArgChar v _)        = ArgChar v AnyType
-canonicaliseArg (ArgUnneeded dir _)  = ArgUnneeded dir AnyType
-canonicaliseArg (ArgUndef _)         = ArgUndef AnyType
+    ArgVar nm AnyType fl Ordinary False
+canonicaliseArg (ArgInt v _)        = ArgInt v AnyType
+canonicaliseArg (ArgFloat v _)      = ArgFloat v AnyType
+canonicaliseArg (ArgString v r _)   = ArgString v r AnyType
+canonicaliseArg (ArgChar v _)       = ArgChar v AnyType
+canonicaliseArg (ArgUnneeded dir _) = ArgUnneeded dir AnyType
+canonicaliseArg (ArgUndef _)        = ArgUndef AnyType
 
 
 validateInstr :: Prim -> BodyBuilder ()
@@ -651,12 +651,12 @@ validateInstr i@(PrimForeign _ _ _ args) = mapM_ (validateArg i) args
 
 validateArg :: Prim -> PrimArg -> BodyBuilder ()
 validateArg instr ArgVar{argVarType=ty} = validateType ty instr
-validateArg instr (ArgInt    _ ty)    = validateType ty instr
-validateArg instr (ArgFloat  _ ty)    = validateType ty instr
-validateArg instr (ArgString _ ty)    = validateType ty instr
-validateArg instr (ArgChar   _ ty)    = validateType ty instr
-validateArg instr (ArgUnneeded _ ty)  = validateType ty instr
-validateArg instr (ArgUndef ty)       = validateType ty instr
+validateArg instr (ArgInt    _ ty)   = validateType ty instr
+validateArg instr (ArgFloat  _ ty)   = validateType ty instr
+validateArg instr (ArgString _ _ ty) = validateType ty instr
+validateArg instr (ArgChar   _ ty)   = validateType ty instr
+validateArg instr (ArgUnneeded _ ty) = validateType ty instr
+validateArg instr (ArgUndef ty)      = validateType ty instr
 
 
 validateType :: TypeSpec -> Prim -> BodyBuilder ()
@@ -679,21 +679,23 @@ addInstrToState ins st@BodyState{buildState=bld@Forked{complete=True,
 
 -- |Return the current ultimate value of the specified variable name and type
 expandVar :: PrimVarName -> TypeSpec -> BodyBuilder PrimArg
-expandVar var ty = expandArg $ ArgVar var ty False FlowIn Ordinary False
+expandVar var ty = expandArg $ ArgVar var ty FlowIn Ordinary False
 
 
 -- |Return the current ultimate value of the input argument.
 expandArg :: PrimArg -> BodyBuilder PrimArg
 expandArg arg@ArgVar{argVarName=var, argVarFlow=FlowIn} = do
     var' <- gets (Map.lookup var . currSubst)
-    logBuild $ "Expanded " ++ show var ++ " to " ++ show var'
-    maybe (return arg) expandArg var'
-expandArg (ArgVar var typ coerce FlowOut ftype lst) = do
+    let ty = argVarType arg
+    let var'' = setArgType ty <$> var' 
+    logBuild $ "Expanded " ++ show var ++ " to " ++ show var''
+    maybe (return arg) expandArg var''
+expandArg arg@ArgVar{argVarName=var, argVarFlow=FlowOut} = do
     var' <- gets (Map.findWithDefault var var . outSubst)
     when (var /= var')
       $ logBuild $ "Replaced output variable " ++ show var
                    ++ " with " ++ show var'
-    return $ ArgVar var' typ coerce FlowOut ftype lst
+    return arg{argVarName=var'}
 expandArg arg = return arg
 
 

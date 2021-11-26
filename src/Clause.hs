@@ -71,6 +71,7 @@ currVar name pos = do
     dict <- gets currVars
     case Map.lookup name dict of
         Nothing -> do
+            logClause $ "Found uninitialised variable " ++ name
             lift $ message Error
                      ("Uninitialised variable '" ++ name ++ "'") pos
             return $ PrimVarName name (-1)
@@ -109,9 +110,9 @@ closingStmts detism params = do
     assigns <- mapM (\Param{paramName=nm,paramType=ty}
                     -> assign nm ty (ArgUndef ty))
                     undefs
-    tested <- Map.member "$$" <$> getCurrNumbering
+    tested <- Map.member outputStatusName <$> getCurrNumbering
     end <- if detism == SemiDet && not tested
-               then (:assigns) <$> assign "$$" boolType (ArgInt 1 boolType)
+               then (:assigns) <$> assign outputStatusName boolType (ArgInt 1 boolType)
                else return assigns
     logClause $ "Adding ending instructions: " ++ showPlacedPrims 4 end
     return end
@@ -122,7 +123,7 @@ assign :: String -> TypeSpec -> PrimArg -> ClauseComp (Placed Prim)
 assign name typ val = do
     primVar <- nextVar name
     return $ Unplaced $ primMove val
-           $ ArgVar primVar typ False FlowOut Ordinary False
+           $ ArgVar primVar typ FlowOut Ordinary False
 
 
 -- |Run a clause compiler function from the Compiler monad to compile
@@ -134,8 +135,8 @@ evalClauseComp clcomp =
 
 -- |Compile a ProcDefSrc to a ProcDefPrim, ie, compile a proc
 --  definition in source form to one in clausal form.
-compileProc :: ProcDef -> Compiler ProcDef
-compileProc proc =
+compileProc :: ProcDef -> Int -> Compiler ProcDef
+compileProc proc procID = 
     evalClauseComp $ do
         let ProcDefSrc body = procImpln proc
         let proto = procProto proc
@@ -152,11 +153,13 @@ compileProc proc =
         logClause $ "  startVars: " ++ show startVars
         logClause $ "  endVars  : " ++ show endVars
         logClause $ "  params   : " ++ show params
-        let params' = List.map (compileParam startVars endVars procName) params
+        let params' = concatMap (compileParam startVars endVars procName) params
         let proto' = PrimProto (procProtoName proto) params'
         logClause $ "  comparams: " ++ show params'
         callSiteCount <- gets nextCallSiteID
-        return $ proc { procImpln = ProcDefPrim proto' compiled
+        mSpec <- lift $ getModule modSpec
+        let pSpec = ProcSpec mSpec procName procID Set.empty
+        return $ proc { procImpln = ProcDefPrim pSpec proto' compiled
                                         emptyProcAnalysis Map.empty,
                         procCallSiteCount = callSiteCount}
 
@@ -195,7 +198,7 @@ compileBody stmts params detism = do
         call@(ProcCall maybeMod name procID SemiDet _ args)
           | detism == SemiDet -> do
           logClause $ "Compiling SemiDet tail call " ++ showStmt 4 call
-          args' <- mapM (placedApply compileArg) args
+          args' <- concat <$> mapM (placedApply compileArg) args
           front <- mapM compileSimpleStmt $ init stmts
           callSiteID <- gets nextCallSiteID
           let final' = Unplaced
@@ -205,7 +208,7 @@ compileBody stmts params detism = do
                                     ("compileBody for " ++ showStmt 4 call)
                                      procID) generalVersion)
                          (args' ++
-                          [ArgVar (PrimVarName "$$" 0) boolType False FlowOut
+                          [ArgVar (PrimVarName outputStatusName 0) boolType FlowOut
                            (Implicit Nothing) False])
           return $ ProcBody (front++[final']) NoFork
 
@@ -275,48 +278,55 @@ compileSimpleStmt' call@(ProcCall maybeMod name procID _ _ args) = do
     logClause $ "Compiling call " ++ showStmt 4 call
     callSiteID <- gets nextCallSiteID
     modify (\st -> st {nextCallSiteID = callSiteID + 1})
-    args' <- mapM (placedApply compileArg) args
+    args' <- concat <$> mapM (placedApply compileArg) args
     return $ PrimCall callSiteID (ProcSpec maybeMod name
                        (trustFromJust
                        ("compileSimpleStmt' for " ++ showStmt 4 call)
                        procID) generalVersion)
         args'
 compileSimpleStmt' (ForeignCall lang name flags args) = do
-    args' <- mapM (placedApply compileArg) args
+    args' <- concat <$> mapM (placedApply compileArg) args
     return $ PrimForeign lang name flags args'
 compileSimpleStmt' (TestBool expr) =
     -- Only for handling a TestBool other than as the condition of a Cond:
-    compileSimpleStmt' $ content $ move (boolCast expr) (boolVarSet "$$")
+    compileSimpleStmt' $ content $ move (boolCast expr) (boolVarSet outputStatusName)
 compileSimpleStmt' Nop = 
-    compileSimpleStmt' $ content $ move boolTrue (boolVarSet "$$")
+    compileSimpleStmt' $ content $ move boolTrue (boolVarSet outputStatusName)
 compileSimpleStmt' Fail =
-    compileSimpleStmt' $ content $ move boolFalse (boolVarSet "$$")
+    compileSimpleStmt' $ content $ move boolFalse (boolVarSet outputStatusName)
 compileSimpleStmt' stmt =
     shouldnt $ "Normalisation left complex statement:\n" ++ showStmt 4 stmt
 
 
-compileArg :: Exp -> OptPos -> ClauseComp PrimArg
+compileArg :: Exp -> OptPos -> ClauseComp [PrimArg]
 compileArg (Typed exp typ coerce) pos = do
     logClause $ "Compiling expression " ++ show exp
-    arg <- compileArg' typ (isJust coerce) exp pos
-    logClause $ "Expression compiled to " ++ show arg
-    return arg
+    args <- compileArg' typ exp pos
+    logClause $ "Expression compiled to " ++ show args
+    return args
 compileArg exp pos = shouldnt $ "Compiling untyped argument " ++ show exp
 
-compileArg' :: TypeSpec -> Bool -> Exp -> OptPos -> ClauseComp PrimArg
-compileArg' typ _ (IntValue int) _ = return $ ArgInt int typ
-compileArg' typ _ (FloatValue float) _ = return $ ArgFloat float typ
-compileArg' typ _ (StringValue string) _ = return $ ArgString string typ
-compileArg' typ _ (CharValue char) _ = return $ ArgChar char typ
-compileArg' typ coerce (Var name ParamIn flowType) pos = do
-    name' <- currVar name pos
-    return $ ArgVar name' typ coerce FlowIn flowType False
-compileArg' typ coerce (Var name ParamOut flowType) _ = do
-    name' <- nextVar name
-    return $ ArgVar name' typ coerce FlowOut flowType False
-compileArg' _   _ (Typed exp typ coerce) pos =
+compileArg' :: TypeSpec -> Exp -> OptPos -> ClauseComp [PrimArg]
+compileArg' typ (IntValue int) _ = return [ArgInt int typ]
+compileArg' typ (FloatValue float) _ = return [ArgFloat float typ]
+compileArg' typ (StringValue string v) _ = return [ArgString string v typ]
+compileArg' typ (CharValue char) _ = return [ArgChar char typ]
+compileArg' typ var@(Var name flow flowType) pos = do
+    let flowType' = if flow == ParamInOut then HalfUpdate else flowType
+    inArg <- if flowsIn flow
+        then do
+            currName <- currVar name pos
+            return [ArgVar currName typ FlowIn flowType' False]
+        else return []
+    outArg <- if flowsOut flow
+        then do
+            nextName <- nextVar name
+            return [ArgVar nextName typ FlowOut flowType' False]
+        else return []
+    return $ inArg ++ outArg
+compileArg' _ (Typed exp _ _) pos =
     shouldnt $ "Compiling multi-typed expression " ++ show exp
-compileArg' _   _ arg _ =
+compileArg' _ arg _ =
     shouldnt $ "Normalisation left complex argument: " ++ show arg
 
 
@@ -335,38 +345,33 @@ reconcileOne caseVars jointVars (Param name ty flow ftype) =
          if caseNum /= jointNum && elem flow [ParamOut, ParamInOut]
          then Just $ Unplaced $
               PrimForeign "llvm" "move" []
-              [ArgVar (PrimVarName name caseNum) ty False FlowIn
+              [ArgVar (PrimVarName name caseNum) ty FlowIn
                       Ordinary False,
-               ArgVar (PrimVarName name jointNum) ty False FlowOut
+               ArgVar (PrimVarName name jointNum) ty FlowOut
                       Ordinary False]
          else Nothing
        _ -> Nothing
 
 
-compileParam :: Numbering -> Numbering -> ProcName -> Param -> PrimParam
+compileParam :: Numbering -> Numbering -> ProcName -> Param -> [PrimParam]
 compileParam startVars endVars procName param@(Param name ty flow ftype) =
-    let (pflow,num) =
-            case flow of
-                -- ParamIn -> (FlowIn, Map.findWithDefault 0 name startVars)
-                ParamIn -> (FlowIn,
-                             trustFromJust
-                             ("compileParam for input param " ++ show param
-                              ++ " of proc " ++ show procName)
-                             $ Map.lookup name startVars)
-                -- ParamOut -> (FlowOut, Map.findWithDefault 0 name endVars)
-                ParamOut -> (FlowOut,
-                             trustFromJust
-                             ("compileParam for output param " ++ show param
-                              ++ " of proc " ++ show procName)
-                             $ Map.lookup name endVars)
-                _ -> shouldnt "non-simple parameter flow in compileParam"
-    in PrimParam (PrimVarName name num)
-       ty pflow ftype (ParamInfo False)
+    [PrimParam (PrimVarName name num) ty FlowIn ftype (ParamInfo False)
+    | flowsIn flow
+    , let num = Map.findWithDefault 
+                (shouldnt ("compileParam for input param " ++ show param
+                            ++ " of proc " ++ show procName))
+                name startVars]
+    ++ [PrimParam (PrimVarName name num) ty FlowOut ftype (ParamInfo False)
+    | flowsOut flow
+    , let num = Map.findWithDefault 
+                (shouldnt ("compileParam for output param " ++ show param
+                            ++ " of proc " ++ show procName))
+                name endVars]
 
 
 -- |A synthetic output parameter carrying the test result
 testOutParam :: Param
-testOutParam = Param "$$" boolType ParamOut $ Implicit Nothing
+testOutParam = Param outputStatusName boolType ParamOut $ Implicit Nothing
 
 
 -- |Log a message, if we are logging clause generation.

@@ -29,7 +29,7 @@ instance Show Module where
         let int  = modInterface mod
             maybeimpl = modImplementation mod
         in " Module " ++ showModSpec (modSpec mod) ++
-           bracketList "(" ", " ")" (modParams mod) ++
+           bracketList "(" ", " ")" (show <$> modParams mod) ++
            (if tmUniqueness (typeModifiers int)
                then "\n  modifiers       : {unique}"
                else "") ++
@@ -79,7 +79,7 @@ showSetMapItems setMap =
 
 -- |How to show a map to source positions, one line per item.
 showMapPoses :: Map Ident OptPos -> String
-showMapPoses = showMap "" ", " "" id showMaybeSourcePos
+showMapPoses = showMap "" ", " "" id showOptPos
 
 
 -- |Dump the content of the specified module and all submodules if either

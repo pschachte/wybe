@@ -1,0 +1,14 @@
+# Regression test for multiple specialisation bug #134. Also a test of for
+# loops, pipeline function application syntax, and infix .. operator.
+
+pub constructor lower:int .. upper:int
+
+pub def {test} [?head:int | ?tail:_]:_ = ?seq where {
+    seq^lower <= seq^upper
+    ?head = seq^lower
+    ?tail = (seq^lower+1)..seq^upper
+}
+
+for ?i in (1..10):_ {
+    !println(i)
+}

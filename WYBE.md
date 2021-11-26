@@ -12,24 +12,26 @@ immutable, but *variables* may be reassigned.  This means that values
 may be passed around at will without worrying that they may be modified.
 
 
-## Hello, World!
+## <a name="hello-world"></a>Hello, World!
 
-Code appearing at the top level of a module is executed when the program
+Code appearing at the top level of a module (that is, not inside a procedure
+or function definition) is executed when the program
 is run, so Hello, World! in Wybe is quite simple:
 ```
 # Print a friendly greeting
 !println("Hello, World!")
 ```
 
-Wybe comments begin with a hash (`#`) character and continue to the end
-of the line.
+Wybe comments begin with a hash (`#`) character and continue to the end of the
+line.  Block comments are written beginning with `#|` and continuing until the
+following `|#` sequence.
 
 The leading exclamation point is needed on statements that perform input/output,
 and in a few other contexts that will be explained in the
-[Resources](#resources) section.
+[Resources](#resource-declarations) section.
 
 
-## Building
+## Compiling Wybe code
 
 Use `wybemk` to build object and executable files.  If the above program
 is put in a file named `hello.wybe`, then an executable program can be
@@ -39,7 +41,7 @@ built with the command:
 % wybemk hello
 ```
 
-where '%' is your operating system prompt. This will print error messages if
+where `%` is your operating system prompt. This will print error messages if
 there are errors in your code; otherwise it completes without printing anything,
 and produces an executable program, which you can run as usual for your
 operating system.
@@ -54,26 +56,33 @@ file you want it to build, and it figures out what files it needs
 to compile.
 
 
-## Module items
+# Wybe Source files
 
 Every Wybe source file is a module.
 It may contain the following sorts of items:
-statements,
-function definitions,
-procedure definitions,
-constructor declarations,
-type declarations,
-resource declarations, and
-module declarations.
+
+  * [module imports](#importing),
+  * [(top level) statements](#hello-world),
+  * [function definitions](#function-definitions),
+  * [procedure definitions](#procedure-definitions),
+  * [constructor declarations](#constructor-declarations),
+  * [type declarations](#type-declarations),
+  * [resource declarations](#resource-declarations), and
+  * [module declarations](#submodules).
+
 Each of these will be described in due course.
 
+Each module item should begin on a new line, or they should be separated by
+semicolon (`;`) characters.  See the section on [code layout](#code-layout) for
+more details on how newlines are treated.
+
 These items are all private by default, meaning that even if the enclosing
-module is imported, they will not be visible.
+module is imported, they will not be visible in any importing modules.
 However, each of these sorts of items can be made public by preceding them with
 the keyword `pub`, meaning that by importing the module that defines them,
 you gain access to them.
 
-###  <a name="importing"></a>Importing modules
+### <a name="importing"></a>Importing modules
 To import a module into your own module, you need only include a declaration of
 the form:
 
@@ -90,16 +99,18 @@ In effect, this re-exports everything imported from the named module(s).
 
 Wybe has the usual complement of primitive types:
 
-| Type       | Meaning                                    |
-| ---------- | ------------------------------------------ |
-| `int`      | Fixed precision integer (32 or 64 bits)    |
-| `float`    | Double precision floating point number     |
-| `bool`     | Boolean; either `true` or `false`          |
-| `string`   | Character string (double quotes)           |
-| `char`     | Individual ascii character (single quotes) |
+| Type       | Meaning                                          |
+| ---------- | ------------------------------------------------ |
+| `int`      | Fixed precision integer (32 or 64 bits)          |
+| `float`    | Double precision floating point number           |
+| `count`    | Fixed precision unsigned integer (32 or 64 bits) |
+| `bool`     | Boolean; either `true` or `false`                |
+| `string`   | Character string (double quotes)                 |
+| `c_string` | C-style character string (double quotes)         |
+| `char`     | Individual ascii character (single quotes)       |
 
 These are all defined in the `wybe` module, which is automatically imported into
-every module; there is no need to explicitly import them.
+every module, so there is no need to explicitly import them.
 
 
 ## Constants
@@ -128,27 +139,32 @@ omitted.
 The only Boolean constants are `true` and `false`.
 
 String constants are written as any number of characters between double quote
-(`"`) characters.
+(`"`) characters.  Character constants are written as a single character between
+single quote (`'`) characters. 
 
-Character constants are written as a single character between single quote (`'`)
-characters.
-If the first character following the opening quote is a backslash (`\`), then
-the following character is considered part of the character constant, and is
-interpreted as follows:
+To denote a a C-style (null-terminated) string, a `c` precedes the first `"`. 
+This is provided for interoperability with external libraries.
 
-| Character  | Meaning                                    |
-| ---------- | ------------------------------------------ |
-| `a`        | Alert or bell (ASCII code 0x07)            |
-| `b`        | Backspace (ASCII code 0x08)                |
-| `f`        | Formfeed (ASCII code 0x0c)                 |
-| `n`        | Newline or Line feed (ASCII code 0x0a)     |
-| `r`        | Carriage return (ASCII code 0x0d)          |
-| `t`        | Horizontal tab (ASCII code 0x09)           |
-| `v`        | Vertical tab (ASCII code 0x0b)             |
+In both strings and character constants, the backslash (`\`) character is special, 
+altering the way the following character is interpreted.  The backslash and the 
+following character together are interpreted as a single character, according to 
+the following character:
 
-Any other character following a backslash is interpreted as itself.
-In particular, `'\\'` specifies a backslash character and `'\''`
-specifies a single quote character.
+| Character | Meaning                                 |
+| --------- | --------------------------------------- |
+| `a`       | Alert or bell (ASCII code 0x07)         |
+| `b`       | Backspace (ASCII code 0x08)             |
+| `f`       | Formfeed (ASCII code 0x0c)              |
+| `n`       | Newline or Line feed (ASCII code 0x0a)  |
+| `r`       | Carriage return (ASCII code 0x0d)       |
+| `t`       | Horizontal tab (ASCII code 0x09)        |
+| `v`       | Vertical tab (ASCII code 0x0b)          |
+
+Any other character following a backslash is interpreted as itself. In
+particular, `'\''` specifies a single quote character, within a string, `\"`
+specifies one double-quote character without terminating the string, and as a
+character constant or included within a string, `\\` specifies a single
+backslash character.
 
 
 ## Procedure calls
@@ -163,19 +179,17 @@ where *name* is the name of the procedure to call,
 and each *arg* is an expression specifying an input or output
 to that procedure.
 
+Sometimes you may wish to specify which module the procedure *name* exists in. 
+You can further specify which module the procedure *name* is from by preceding
+*name* with a `.` separated module specification, such as *parent*`.`*mod*`.`*name*.
+
+As a convenience, if the first module name in a module specification is `_`, the 
+`_` is equivalent to the current module. For example in a module named `foo`, 
+`_.`*name* is equivalent to `foo.`*name*
+
 A procedure call must be preceded by an exclamation point (`!`) if it uses any
 resources, as described in the section on
-[calling a resourceful procedure](#calling resourceful).
-
-A procedure whose name consists of any number of the operator characters
-```
-~ @ $ % ^ & * - + = \ < > /
-```
-may use the alternative infix syntax:
-
-> *arg* *op* *arg*,
-
-where *op* is the procedure name (there must be exactly two arguments).
+[calling a resourceful procedure](#calling-resourceful).
 
 
 ## <a name="variables"></a>Variables
@@ -218,7 +232,7 @@ code reads a single character, storing it in the variable `ch`:
 ```
 
 
-## Function calls
+## <a name="function-calls"></a>Function calls
 
 A second kind of expression is a function call.
 In general, these have the syntax:
@@ -228,18 +242,38 @@ In general, these have the syntax:
 (that is, the same as procedure calls).
 Again, each *arg* is an expression.
 
-A function whose name consists of any number of the operator characters
-```
-~ @ $ % ^ & * - + = \ < > /
-```
-may use the alternative infix syntax:
+A function name may consist of any number of upper and lower case letters,
+digits, and underscore (`_`) characters, as long as it does not begin with a
+digit.  Also see the [operator syntax](#operator-syntax) section for special
+infix and prefix operator syntax.
 
-> *arg* *op* *arg*,
+Function calls may have one of the following forms:
+  - A call with all arguments inputs.  This is the conventional form, where all
+    arguments are evaluated and then the function is called, producing the
+    function value.  This form of expression is considered to be an input to
+    whatever statement or expression it occurs in.
 
-where *op* is the function name (there must be exactly two arguments).
+  - A call where one or more arguments are outputs (prefixed with `?`), and all
+    others, if any, are inputs.  This form of expression is considered to be an
+    output.  In this case, the function is run "backwards", working from the
+    result to determine the output arguments.  So the value of the function must
+    be supplied by the context in which it is called, and then the function is
+    called to produce the values for the outputs.
+
+  - A call where one or more arguments are input/outputs (prefixed with `!`),
+    and all others, if any, are inputs.  This form of expression is itself
+    considered to be an input/output.  In this form, the expression is first
+    treated as an input, producing the initial value of the expression, then the
+    enclosing operation is performed to update the expression value, and finally
+    the expression is treated as an update operation.
+
+Expressions containing both output and input/output arguments are not permitted.
 
 
-##  <a name="type constraints"></a>Type constraints
+
+
+## <a name="type constraints"></a>Type constraints
+
 In most cases, the compiler can determine the types of expressions used in your
 code.  However, occasionally the compiler needs some help in resolving
 overloading.  For example, a procedure `read(?value)` may be overloaded such
@@ -257,8 +291,28 @@ For example,
 read(?value:int)
 ```
 
+## <a name="code-layout"></a>Code layout
 
-## Function definitions
+In general, declarations in a module and statements in a procedure body must be
+separated by semicolon (`;`)
+characters.  However, as a convenience, and to improve the appearance of the
+code, the semicolons can be omitted when declarations or statements are on
+separate lines.  It is generally recommended to lay your code out this way.
+
+The Wybe compiler tries to distinguish line breaks that appear in the middle of
+a statement from ones that separate statements by considering adjacent
+characters.  If what preceeded the line break was an operator symbol, a comma,
+semicolon, left parenthesis, bracket, or brace, or one of the keywords `in`, `is`, `where`, `pub`, `def`, `type`, `constructor`, or `constructors`,
+then the line break is not considered to be a separator.  Likewise, if what
+follows is an operator symbol other than `?`, `!`, or `~`, a comma, semicolon, a
+right parenthesis, bracket, or brace, or one of the keywords
+`in`, `is`, or `where`, then the line break is not considered to be a separator.
+Otherwise, the line break is treated as a separator, as if you had written an
+explicit semicolon.
+
+
+
+## <a name="function-definitions"></a>Function definitions
 
 Functions are defined with the syntax:
 
@@ -269,8 +323,6 @@ corresponding *type* is its type, the final *type* is the function
 result type, and *expr* is an expression giving the function value.
 Each `:`*type* is optional; if omitted, the compiler will infer the
 type.  If there are no parameters, the parentheses are also omitted.
-If the function name comprises operator characters, it should be surrounded with
-backquote characters (`` ` ``).
 
 This syntax declares a private (not exported) function.  To export the
 function, the definition should be preceded by the `pub` keyword.
@@ -283,23 +335,23 @@ pub def toCelsius(f:float):float = (f - 32.0) / 1.8
 ```
 
 
-## Procedure definitions
+## <a name="procedure-definitions"></a>Procedure definitions
 
 Procedures are defined with the syntax:
 
 > `def` *name*`(`*dir* *param*`:`*type*, ... *dir* *param*`:`*type*`) {` *body* `}`
 
 Again *name* is the procedure name, each *param* is a parameter name, the
-corresponding *type* is its type, and *body* is a sequence of statements
-making up the body of the procedure.  Each *dir* is a dataflow
+corresponding *type* is its type, and *body* is a sequence of statements making
+up the body of the procedure.  The statements in *body* should be placed on
+separate lines, or should be separated with semicolon (`;`) characters.  Each
+*dir* is a dataflow
 direction annotation, either nothing to indicate an input, `?` for an
 output, or `!` to indicate both an input and an output.
 Procedures may have any number of input, output, and input/output
 arguments in any order.
 Again each `:`*type* is optional, with types inferred if omitted,
 and parentheses omitted for niladic procedures.
-If the procedure name comprises operator characters, it should be surrounded
-with backquote characters (`` ` ``).
 
 The procedure is private unless preceded by the `pub` keyword.
 All types must be included in public procedure definitions.
@@ -345,6 +397,162 @@ is always equivalent to
 ```
 f(x, ?y)
 ```
+
+
+##  <a name="operator-syntax"></a>Operator syntax
+
+A procedure, function, or constructor whose name entirely consists of one or
+more of the operator characters
+```
+    @ $ % ^ ~ & | + - * / = < > \ , ; . :
+```
+as well as the special operator name `in`, may use the alternative infix syntax:
+
+> *arg1* *op* *arg2*,
+
+where *op* is the procedure or function name (there must be exactly two
+arguments).  This is *exactly* equivalent to `` `op`(``*arg1*,*arg2*`)`.
+
+There is no need to explicitly declare operators.  Aside from the
+few reserved operator symbols documented in the
+[reserved words](#reserved-words) section, every sequence of operator characters
+is a valid infix operator name.
+
+The precedence and associativity of infix operator symbols is determined by the
+last character in the operator, as follows:
+
+| Last character | Precedence    | Associativity   |
+| -------------- | ------------- | --------------- |
+| `^`            | 10 (Highest)  | Left            |
+| `* / %`        | 9             | Left            |
+| `+ -`          | 8             | Left            |
+| `, .`          | 7             | Right           |
+| `< >`          | 6             | Not associative |
+| `;`            | 5             | Right           |
+| `: =`          | 5             | Not associative |
+| `~`            | 5             | Left            |
+| `&`            | 4             | Right           |
+| `\|`           | 3 (Lowest)    | Right           |
+
+Additionally, `in` is a non-associative infix operator of precedence 5.
+
+Wybe also has two prefix operators:  `-` and `~`.  These have precedence 11, so
+they bind tighter than any infix operator.
+
+Wybe has no postfix operators, however it does support following an expression
+with a sequence of zero or more expressions enclosed within square brackets, the
+conventional syntax for array indexing.  This has precedence 12, so it binds
+tighter than any infix or prefix operator.
+
+As in most programming languages, parentheses may be used to override operator
+precedence and associativity.
+
+Wybe also supports an alternative syntax for invoking procedures, functions, or
+constructors that puts the (first) argument first, and the procedure, function,
+or constructor name, with its other arguments, if any, second:
+
+> *arg*`^`*operation*(*other args*)
+
+and in the special case of operations taking only one argument:
+
+> *arg*`^`*operation*
+
+This syntax is akin to the common object-oriented *object.method* syntax.  There
+is no semantic difference between this syntax and the standard
+*operation*`(`*arg*,*other args*`)` or *operation*`(`*arg*`)` syntax.
+Because the `^` associates to the left, this syntax can be chained to apply a
+"pipeline" of operations to an initial input, so the expression:
+
+```
+    ob^foo^bar^baz
+```
+
+is equivalent to
+
+```
+    baz(bar(foo(ob)))
+```
+
+Finally, as a convenience, for procedures (but not functions) with only one
+argument, Wybe allows the parentheses surrounding the argument to be omitted.
+For example, Wybe allows you to write
+```
+    !print 3+4
+```
+
+as an alternative to
+
+```
+    !print(3+4)
+```
+
+Wybe supports a special syntax for lists.  For example, a list of the first 3
+counting numbers would be written `[1,2,3]`.  The syntax `[h|t]` denotes a list
+whose head is `h` and whose tail is `t`, and `[e1,e2|es]` is a list whose first
+two elements are `e1` and `e2`, and the rest of which is `es`.  Note that what
+appears before the `|` symbol are individual list elements, separated by commas,
+and what appears after it is another list.  The empty list is denoted `[]`. The
+list constructor is named `[|]`, so the list `[e1,e2|es]` can also be written ``
+`[|]`(e1,`[|]`(e2,es))`` and the list `[1,2,3]` can be written 
+`` `[|]`(1,`[|]`(2,`[|]`(3,[])))``.
+
+## Declaring operator functions and procedures
+
+Procedures and functions whose names are operators should be declared using
+their operator syntax, but with the function name and arguments enclosed in
+parentheses.  For example, the `+` function should be declared using the
+following syntax:
+
+```
+def (a:int + b:int):int = ...
+```
+
+Alternatively, the "operatorness" of a name can be overriden, making the
+compiler treat it as an ordinary identifier, by surrounding it with backquote
+characters (`` ` ``).  So the `+` function could also be defined with the
+syntax:
+```
+def `+`(a:int, b:int):int = ...
+```
+These two definitions are equivalent:  whichever is used, the `+` function name
+can be used as an infix operator.
+
+Backquotes can also be used in function calls, so `` `+`(3,4)`` is semantically
+identical to `3 + 4`, regardless of which syntax was used to define the `+`
+function.
+
+Backquotes can also be used to make almost any sequence of characters act as a
+symbol.  The only characters that cannot appear between backquotes are newlines,
+other control characters (such as tabs and escape characters), the hash (#)
+character, and the backquote character itself.
+
+
+##  <a name="reserved-words"></a>Reserved operators
+
+The following special operators are predefined by the Wybe language. These may
+not be defined as procedure, function, or constructor names.  Except where
+otherwise indicated, they are infix operators.
+
+| Reserved names | Meaning
+| ----------- | --------------------------------------------------------------- |
+| `,`         | Function, procedure, and list argument separator                |
+| `.`         | Module prefix separator                                         |
+| `^`         | Procedure/function pipeline application                         |
+| `;`         | Statement separator                                             |
+| `:`         | Type specification                                              |
+| `:!`        | Type cast specification (in [foreign code](#foreign-interface)) |
+| `::`        | Condition/case separator                                        |
+| `\|`        | Disjunction                                                     |
+| `&`         | Conjunction                                                     |
+| `?`         | Output variable annotation (prefix)                             |
+| `!`         | Input/Output variable annotation (prefix)                       |
+| `if`        | If statement/expression (`if {` ... `::` ... `}`)               |
+| `case`      | Case statement/expression (`case expr in {` ... `::` ... `}`)   |
+| `else`      | Final default case in `if` and `case` statements/expressions    |
+| `let`       | Local variable definition (`let` ... `in` ...)                  |
+| `where`     | Local variable definition (... `where` ... )                    |
+| `use`       | Local resource binding (`use {`...`} in {`...`}`)               |
+
 
 
 ## Modes
@@ -418,18 +626,139 @@ xy = add(x, y)
 ```
 
 
+## <a name="pattern matching"></a>Pattern matching
+
+Like procedures, some Wybe functions can be "run backwards", where the function
+result is supplied as input and some or all of its arguments are produced as
+outputs.  You can explicitly define such a "reverse mode" of a function, by
+preceding output arguments with a `?`, and by making the value of the function
+an expression of the form
+
+> `?`*var* `where {` *body* `}`
+
+and defining *body* to compute the values of the output arguments treating *var*
+as an input.
+
+This can serve the role filled by *pattern matching* in other programming
+languages.  Indeed, when constructors are defined in Wybe (see the section on
+[constructor declarations](#constructor-declarations)), the compiler
+automatically generates a backward mode function for each construcor function.
+For example, if you define a type `position` with a constructor `position(x:int,
+y:int)`, the compiler automatically generates a backward mode function
+`position(?x:int,?y:int)`.  Thus a new position can be created with the
+statement
+```
+?pos = position(x, y)
+```
+and an existing position can be deconstructed to extract its `x` and `y`
+components with the statement
+```
+pos = position(?x, ?y)
+```
+
+For types with multiple constructors, backwards construction can fail.  For
+example, if the type `position` is defined with two constructors
+```
+constructors cartesian(x:float, y:float) | polar(r:float, theta:float)
+```
+then exactly one of the statements
+```
+pos = cartesian(?x, ?y)
+```
+or
+```
+pos = polar(?r, ?theta)
+```
+will succeed, and the other will fail.  Therefore, these statements are tests,
+and can only appear where test statements are allowed, such as in a [conditional
+statement](#conditionals).  Note that variables assigned by such a test cannot
+be used outside of the context in which that test has succeeded.
+
+Patterns can also be nested.  For example, with the type `region` definined by:
+```
+constructor region(bottom_left:position, top_right:position)
+```
+the statement
+```
+region(cartesian(?x1,?y1),cartesian(?x2,?y2)) = reg
+```
+will deconstruct a region `reg` expressed as two cartesian coordinates.
+
+It is also possible to include input values where outputs are expected, as long
+as the type supports an equality test.  This is equivalent to providing an
+output variable, and then comparing the value produced for that output to the
+specified value.  This is called an *implied mode* for that argument.
+
+As a convenience, you can specify the special "don't care" value `_` as an
+output.  This matches any value that may be produced.
+
+For
+example, you could define a test that the lower left corner of a region sits at
+the origin as follows:
+```
+def {test} at_origin(reg:region) {
+    reg = region(cartesian(0.0,0.0), _) | reg = region(polar(0.0,_),_)
+}
+```
+Equivalently, it could be written:
+```
+def {test} at_origin(reg:region) {
+    reg^bottom_left = cartesian(0.0,0.0) | reg^bottom_left^r = 0.0
+}
+```
+
+
+## <a name="structure-update"></a>Structure update
+
+Wybe semantics does not allow data structures to be destructively modified.
+
+However, variables can be reassigned, and new data structures can be created
+that differ from existing ones only in one field, and Wybe provides a convenient
+way to combine these two things to support data structure update.  For example,
+if you define a type `position` with a constructor `position(x:int, y:int)`, the
+compiler not only generates a constructor and deconstructor function, and
+accessor functions `x` and `y` that map from a `position` to an `int`, it also
+generates backward mode structure update functions `x` and `y`.  Using the
+convenient infix `^` [operator syntax](#operator-syntax), a statement
+```
+!pos^x = 0
+```
+would set `pos` to a position with the same `y` component as the previous
+version of `pos`, but with 0 for the `x` component.  Effectively, this just sets
+the `x` component of `pos` to 0 without changing its `y` component.  However,
+this does not affect any variable other than `pos`.  Similarly,
+```
+incr(!pos^y)
+```
+would increment the `y` component of `pos`.
+
+For types with multiple constructors, structure updates become tests, and therefore can only be used in test contexts.  For example,
+```
+!lst^head = 42
+```
+might appear in a [conditional statement](#conditionals), which would also
+specify what to do if `lst` is empty.  These can all be combined to replace the
+`y` component of the second element of `lst` with 0:
+```
+!lst^tail^head^y = 0
+```
+This will fail if either the list is empty or its tail is empty, therefore,
+again, this must appear in a test context, such as a conditional.
+
+
 ## <a name="conditionals"></a>Conditional statements
 
 Wybe's conditional construct has the form:
 
 > `if` `{` *cases* `}`
 
-where *cases* is one more more cases, separated by vertical bar characters (`|`).
-Each case takes the form:
+where *cases* is one more more cases, separated by vertical bar characters
+(`|`). Each case takes the form:
 
 > *test* `::` *statements*
 
-where *test* is a test statement and *statements* is one or more statements.
+where *test* is a test statement and *statements* is one or more statements
+separated by semicolons (`;`) or newlines.
 Execution proceeds by executing the first *test*, and if it succeeds, executing
 the corresponding *statements*, thereby completing the `if` statement.
 If the first *test* fails, its corresponding *statements* are skipped and
@@ -437,17 +766,76 @@ the second *test* is tried.
 If this test succeeds, its corresponding *statements* are executed, and so on.
 At most one *statements* sequence is executed, but if none of the specified
 *test*s succeed, none of the *statements* are executed.
-The predefined `otherwise` test always succeeds, so it may be used as the final
-test to provide code to execute if none of the preceding tests succeeds.
+The last test may optionally be the keyword `else`, which always succeeds, so it may be used to provide code to execute if none of the preceding tests succeeds.
 
 For example:
 ```
-if { x < 0     :: !println("negative")
-   | x = 0     :: !println("zero")
-   | otherwise :: !println("positive")
+if { x < 0 :: !println("negative")
+   | x = 0 :: !println("zero")
+   | else  :: !println("positive")
 }
 ```
 
+
+## <a name="cases"></a>Case statements
+
+Wybe's `case` construct has the form:
+
+> `case` *expression `in {` *cases* `}`
+
+where *expression* is used to select the code to execute, and *cases* is one
+more more cases, separated by vertical bar characters (`|`). Each case takes the
+form:
+
+> *case_expr* `::` *statements*
+
+where *case_expr* is an expression and *statements* is one or more statements
+separated by semicolons (`;`) or newlines.  Each *case_expr* is matched in turn
+with the initial *expression*; when a match is found, the corresponding
+*statements* are executed, and all others are ignored.  If the final *case_expr*
+is the `else` keyword, and no earlier *case_expr* matched, then the *statements*
+corresponding to the `else` *case_expr* will be executed.  If no *case_expr*
+matches and there is no `else` case, then no *statements* will be executed.  In
+any case, execution then continues after the `case` statement.
+
+A *case_expr* can be a backward mode expression to select cases based on
+[pattern matching](#pattern-matching).  A `case` statement is semantically
+equivalent to an `if` statement where each *test* is of the form *case_expr* `=`
+*expression*, although the *expression* will only be evaluated once.
+
+For example:
+```
+case coord in {
+    cartesian(?x,?y) :: println(sqrt(x**2 + y**2))
+|   polar(?r,_)      :: println(r)
+}
+```
+
+## <a name="conditional-expressions"></a>Conditional and case expressions
+
+Wybe's conditional and case constructs can also be used as expressions.  Both
+have the same form as their statement versions, except that instead of each case
+providing one or more statements, they provide a single expression.
+
+Note that in both case, the `else` case is required.
+
+For example:
+```
+!println(
+    if { x < 0 :: "negative"
+       | x = 0 :: "zero"
+       | else  :: "positive"
+    })
+```
+and
+```
+println(
+    case coord in {
+      cartesian(?x,?y) :: sqrt(x**2 + y**2)
+    | polar(?r,_)      :: r
+    | else             :: error("should not be possible")
+})
+```
 
 
 ## `terminal` and `failing` procedures
@@ -465,33 +853,55 @@ may fail or never return.  Wybe has a single built-in failing proc, named
 
 ## Iteration statements
 
-Iteration is specified with the `do` statement, of the form:
-> `do` `{` *statements* `}`
-This executes the enclosed *statements* repeatedly, until a termination
-condition is reached.
+Iteration is specified with the `do` and `for` statements, of the form:
 
-The enclosed *statements* may include any ordinary Wybe statements, plus any of
-the following:
+> `do` `{` *statements* `}`
+
+or
+
+> `for` *generator* `{` *statements* `}`
+
+where a *generator* is one or more expressions of the form
+
+> `?`*var1*  `in` *sequence*
+
+separated by semicolons or newlines. Each *generator* is a value of any
+type that implements the backwards mode of the cons operator (`[|]`),
+where the list is input and the head and tail are outputs. Presently
+`array` and `list` in the standard library implement this operator.
+
+The enclosed *statements* in both `do` and `for` loops may include any ordinary
+Wybe statements, plus any of the following:
+
+> `break`
+
+Exit the loop immediately, continuing execution with the code following the
+loop.  For a `for` loop, this may mean some values of the generators will never
+be generated.
+
+> `next`
+
+Immediately return to the top of the loop without completing the current
+iteration.  For a `for` loop, move on to the next value(s) of the generator(s).
 
 > `while` *test*
 
-If *test* fails, exit the loop immediately, otherwise continue
+If *test* fails, exit the loop immediately, otherwise continue.
 
 > `until` *test*
 
-If *test* succeeds, exit the loop immediately, otherwise continue
+If *test* succeeds, exit the loop immediately, otherwise continue.
 
 > `when` *test*
 
-If *test* fails, restart the loop immediately, otherwise continue
+If *test* fails, restart the loop immediately, otherwise continue.
 
 > `unless` *test*
 
-If *test* succeeds, restart the loop immediately, otherwise continue
+If *test* succeeds, restart the loop immediately, otherwise continue.
 
-These special loop control statements may be used anywhere inside a `do`
-statement.
-For example:
+These special loop control statements may be used anywhere inside a `for` or
+`do` statement. For example:
 
 ```
 do {!print(prompt)
@@ -502,7 +912,7 @@ do {!print(prompt)
 ```
 
 
-## (sub)modules
+## <a name="submodules"></a>(sub)modules
 
 A Wybe module may contain submodules.
 Each submodule of a module has access to everything in the containing module,
@@ -516,10 +926,12 @@ A submodule is declared as follows:
 
 > `module` *name* `{` *items* `}`
 
-where *name* is the module name and *items* are the contents of the submodule.
+where *name* is the module name and *items* are the contents of the submodule,
+separated by newlines or semicolons.
 
 
-## <a name="constructors"></a>Constructor declarations
+## <a name="defining-types"></a>Defining Types
+### <a name="constructor-declarations"></a>Constructor declarations
 
 Wybe supports abstract algebraic data types. Every Wybe type is a module, and
 each type's primitive operations are the operations of that module. A module
@@ -532,21 +944,36 @@ where *ctors* is one or more constructor declarations, separated by vertical bar
 characters (`|`).  Each constructor declaration takes the same form as the
 prototype part of a function declaration:
 
-> *name*`(`*param*`:`*type*, ... *param*`:`*type*`)`
+> *ctor*`(`*param*`:`*type*, ... *param*`:`*type*`)`
 
-This declaration defines a constructor function that takes parameters of the
-specified types and returns a value of the type being defined (namely, the
+In contrast to regular procedure prototypes, the parameter names are optional, 
+and can be removed, along with the accompanying `:`.
+
+If *name* is an infix operator symbol, you must surround it with backquotes, or
+declare the constructor with infix syntax, much like defining a function
+whose name is an operator, again with optional parameter names:
+
+> `(`*param*`:`*type* *ctor* *param*`:`*type*`)`
+
+This declaration defines a constructor function *ctor* that takes parameters of
+the specified types and returns a value of the type being defined (namely, the
 current module) holding all the provided data.  Constructor functions can also
-be used "backwards", with the constructed value provided and the arguments taken
-as outputs, to extract the data stored in the constructed value.
+be used ["backwards"](function-calls), with the constructed value provided and
+the arguments taken as outputs, to extract the data stored in the constructed
+value.  Note that, unlike object oriented languages, a constructor in Wybe
+cannot specify a body, it simply creates a value of the specified type
+containing the specified data.  If you wish to carry out some computation to
+determine what values to store, you may write a function or procedure that calls
+the constructor.  Since Wybe does not require any special syntax to call a
+constructor (such as `new` in many object oriented languages), they are ordinary
+functions, aside from the fact that they are automatically generated. 
 
 The form of declaration above keeps the constructors of a type private; they may
 be used within the current module, but not outside.  To make the constructors
 public, simply precede the `constructor` keyword with `pub`.
 
 Note that, unlike most Object Oriented languages, making constructors public
-does not commit you to any particular representation of the type, because
-constructors are not special; they are simply automatically generated functions.
+does not commit you to any particular representation of the type.
 You may define your own public functions to act as constructors, and they will
 be indistinguishable from the actual constructors by users of the type.
 
@@ -571,8 +998,8 @@ And this statement will unpack a coordinate `pos` into variables `x` and `y`:
 coordinate(?x,?y) = pos
 ```
 
-Additionally, two procedures are automatically generated for each *member*:
-one to access the member, and one to mutate it.
+Additionally, two procedures are automatically generated for each named 
+*member*: one to access the member, and one to mutate it.
 The first has the prototype:
 
 > *member*`(structure:`*type*`,` `?value:`*memtype*`)`
@@ -588,6 +1015,14 @@ These are more conveniently used as functions, for example:
 x(!pos) = x(pos) + 1  # shift position to the right
 ```
 
+Even more conveniently, for the first of these, you can use the infix `^`
+function call syntax.  In the example above, the second line could instead be
+written:
+
+```
+!println(pos^x)
+```
+
 It is important to note that "mutating" a value does not actually modify it in
 place; it creates a fresh value of that type that is identical except for the
 member being changed.
@@ -596,15 +1031,16 @@ Wybe does not have the concept of
 nor the concepts of pointers or references.
 You can safely have multiple variables refer to the same data without worrying
 that modifying the data through one of them will change the values of the
-others.
+others.  Thus Wybe implements a
+[copy-on-write](https://en.wikipedia.org/wiki/Copy-on-write) semantics.
 For example
 ```
 ?pos = coordinate(7,4)
-!println(x(pos))
+!println(pos^x)
 ?oldpos = pos
-x(!pos) = x(pos) + 1  # shift position to the right
-!println(x(pos))
-!println(x(oldpos))
+incr(!pos^x) # shift pos to the right; doesn't affect oldpos
+!println(pos^x)
+!println(oldpos^x)
 ```
 will print
 ```
@@ -618,41 +1054,59 @@ can safely do so.
 For example, the compiler will optimise this code
 ```
 ?pos = coordinate(7,4)
-!println(x(pos))
-x(!pos) = x(pos) + 1  # shift position to the right
-!println(x(pos))
+!println(pos^x)
+incr(!pos^x)  # shift pos to the right
+!println(pos^x)
 ```
 so that it does in fact mutate the coordinate object in place,
-saving an unnecessary object creation.  Thus Wybe implements a
-[copy-on-write](https://en.wikipedia.org/wiki/Copy-on-write) semantics.
+saving an unnecessary object creation.
 
 The `constructors` declaration must specify the forms of all the possible values
 of that type.  Wybe does not support a special *null* or *nil* value.  For
 example, you could define a binary tree type as follows:
 ```
-constructors empty | node(left:tree, value:int, right:tree)
+constructors empty | node(left:_, value:int, right:_)
 ```
-This would be written in a module named `tree`.
+(Note that the type `_` is an
+[alias for the type defined in the current module](#_-type).)
 
 Deconstructing a value of a type with multiple constructors,
 or accessing or altering any of its members, is a test, since the
 value may not have the intended constructor.
 This ensures that it is not possible to mistake a value created with one
 constructor for one made with a different constructor.
-In the `tree` type example, you might write:
+In the tree type example, you might write:
 ```
-def {test} member(elt:int, tree:tree) {
+def {test} member(elt:int, tree:_) {
     if { node(?left, ?value, ?right) = tree ::
             if { elt = value:: succeed
                | elt < value:: member(elt, left)
-               | otherwise  :: member(elt, right)
+               | else       :: member(elt, right)
             }
-       | otherwise:: fail
+       | else:: fail
     }
 }
 ```
 
-## Type declarations
+## <a name="_-type"></a>The `_` type
+
+As a special case, the type `_` is treated as an alias for whatever type is
+defined by the module in which it appears.  That provides a shorter
+name for the type being defined, and also allows the type to be renamed simply
+by renaming the file it is defined in.  For example, the following code could
+be placed in a Wybe source file to define a linked list type with whatever name
+is deemed suitable.
+
+```
+constructors(T) null | cons(head:T, tail:_(T))
+
+
+def concat(a:_(T), b:_(T)):_(T) =
+    if cons(?h, ?t) = a then cons(h, concat(t,b)) else b
+```
+
+
+## <a name="type-declarations"></a>Type declarations
 
 In some cases, a module may wish to define multiple types.  This can be done by
 declaring separate submodules within the module, and declaring constructors in
@@ -677,7 +1131,7 @@ constructors of the type, whether or not they are public.
 
 ## <a name="generics"></a>Generic types
 
-Wybe supports *generic* types, sometimes called *parametric polymorphism*. A
+Wybe supports *generic* types, a feature called *parametric polymorphism*. A
 generic type is one that takes other types as parameters, specified by following
 the type name with the desired parameters, separated by commas and enclosed in
 parentheses. For example, the elements of a list must all be the same type, but
@@ -688,29 +1142,28 @@ element type, without the need to separately define different kinds of lists, or
 the operations on them.
 
 The basis of generic types is the *type variable*, which stands for a type we
-don't know yet, and thus is a variable in the type system.  A type variable
-follows the same naming convention as normal program variables, except they are
-always preceded with a question mark.  Since we rarely have more than one or two
-type variables in any given context, we conventionally use a single upper case
-letter for a type variable.
+don't know yet, and thus is a variable in the type system.  A type variable is
+denoted by an uppercase letter followed by zero or more numbers.  Since we 
+rarely have more than one or two type variables in any given context, we 
+conventionally use a single upper case letter for a type variable.
 
 Generic types are defined in the same way as described above, except that:
 
-    * the keyword `constructor` or `constructors` is followed by a list of type
-      variables separated by commas and enclosed in parentheses; and
-    * these type variables may be used as types in the definitions of the
-      constructors of the type.
+  * the keyword `constructor` or `constructors` is followed by a list of type
+    variables separated by commas and enclosed in parentheses; and
+  * these type variables may be used as types in the definitions of the
+    constructors of the type.
 
-For example, a generic list type can be defined in module `list` as:
+For example, a generic list type can be defined as:
 
 ```
-constructors(?T) null | cons(head:?T, tail:list(?T))
+constructors(T) null | cons(head:T, tail:_(T))
 ```
 
 If specified with a `type` declaration, this would be written:
 
 ```
-type list(?T) {null | cons(head:?T, tail:list(?T)) ... }
+type list(T) {null | cons(head:T, tail:_(T)) ... }
 ```
 
 All type variables appearing in the definition of any constructor must appear in
@@ -721,8 +1174,8 @@ variables.  Each occurrence of the same type variable must signify the same
 type.  For example, you can define list concatenation:
 
 ```
-def concat(a:list(?T), b:list(?T)):list(?T) =
-    if cons(?h, ?t) = a then cons(h, concat(t,b)) else b
+def concat(a:list(T), b:list(T)):list(T) =
+    if { cons(?h, ?t) = a:: cons(h, concat(t,b)) | else:: b }
 ```
 
 This will concatenate lists of any type, but the types of the elements of the
@@ -730,25 +1183,7 @@ two input lists must be the same, and the result will be a list of the same
 type.
 
 
-## `_` type
-
-As a special case, the type `_` is treated as an alias for whatever type is
-defined by the module in which it appears.  That provides a (possibly) shorter
-name for the type being defined, and also allows the type to be renamed simply
-by renaming the file it is defined in.  For example, if the following code could
-be placed in an Wybe source file to define a linked list type with whatever name
-is deemed suitable.
-
-```
-constructors(?T) null | cons(head:?T, tail:_(?T))
-
-
-def concat(a:_(?T), b:_(?T)):_(?T) =
-    if cons(?h, ?t) = a then cons(h, concat(t,b)) else b
-```
-
-
-## Resources
+## <a name="resources"></a>Resources
 
 Resources provide an alternative argument passing mechanism,
 based on name rather than argument position.
@@ -759,17 +1194,18 @@ For example, the command line parameters of an application may used in many
 parts of the code, but explicitly passing that throughout the application
 may be a nuisance.
 An application may build up logging message throughout, but explicitly threading
-the log through the entire application can become painful.
+the log through the entire application can become tiresome, and can make code
+maintenance more difficult.
 Resources are often useful where an imperative application would use a global or
 static variable, or where an object oriented application would use a class
 variable.
 
-### Declaring a resource
+### <a name="resource-declarations"></a>Declaring a resource
 
 The benefit of resources is that they are lightweight,
 because they do not need to be explicitly passed between procedures
 and their type only needs to be specified once,
-Where it is declared.
+where it is declared.
 Passing a value as a resource
 also ensures that it is named and used consistently
 throughout the module that declares it, and any modules that import it.
@@ -791,24 +1227,27 @@ preceding the `resource` declaration with the `pub` keyword.
 Any procedure may declare that it uses any number of resources,
 providing the named resources are visible in the enclosing module
 (i.e., defined in that module or any imported module),
-by adding a `use` clause to the procedure declaration
+by adding a `use` clause to the procedure declaration,
 between the procedure header and body:
 
-> `def` *name*`(`*params*`)` `use` *dir* *resource<sub>1</sub>*, ... *dir* *resource<sub>n</sub>* `{` *body* `}`
+> `def` *name*`(`*params*`)` `use`
+> *dir<sub>1</sub>* *resource<sub>1</sub>*, ...
+> *dir<sub>n</sub>* *resource<sub>n</sub>* `{` *body* `}`
 
-Each *dir* indicates the direction of information flow for the indicated
-resource; as for parameters, no flow prefix indicates that the resource is only
-an input, a question mark (`?`) indicates only an output, and an exclamation
-point (`!`) indicates that the resource is both input and output.
-The order in which the resources is listed is not significant, and any number of
-resources may be specified.
+Each *dir<sub>i</sub>* indicates the direction of information flow for the
+corresponding resource; as for parameters, no flow prefix indicates that the
+resource is only an input, a question mark (`?`) indicates it is only an output,
+and an exclamation point (`!`) indicates that the resource is both input and
+output.
+The order in which the resources are listed is not significant, and any number
+of resources may be specified.
 This allows the resource name to be used as a local variable in the procedure
 body, just as if it were an ordinary parameter.
 
 Importantly, resources available in a procedure become available in any
 procedures it calls that also declare that they `use` that resource.
 
-### <a name="calling resourceful"></a>Calling a resourceful procedure
+### <a name="calling-resourceful"></a>Calling a resourceful procedure
 
 A procedure may only be called in a context in which all the resources it uses
 are defined, and a call to a resourceful procedure must be preceded by an
@@ -820,23 +1259,22 @@ declaration of the procedure must be consulted to see which values they are.
 
 Most commonly, a procedure that uses a resource is called in the
 definition of another procedure that uses that resource.
-However, it may also be called from a procedure where the resource name is used
-as a local variable, or inside a scoped resource use (see [below](#scoping)).
+However, it may also be called inside a [scoped](#scoping) resource use.
 
 ### <a name="scoping"></a>Scoping a resource use
 
 A resource may have its value scoped to a number of statements and the
 procedures called by those statements, and so on recursively.
-This creates a scope in which the resource is defined;
-on leaving that scope, the resource ceases to exist.
-
+This creates a scope in which the resource is known, allowing a procedure that
+is not declared to use a resource to call a procedure that does.
 A scope introducing one or more resources may be specified with a statement of
 the form:
 
 > `use` *resource<sub>1</sub>*`,` ... *resource<sub>n</sub>* `in` `{` *body* `}`
 
-In this case, at the start of the *body*, the resource will be undefined,
-as it will at the completion of *body*.
+If the resource was undefined prior to entering the `use` statement,
+it will still be undefined at the start of the *body*, and it will again
+be undefined after the `use` statement completes.
 If the resource is already defined outside the scope of the `use` statement,
 the value at the start of *body* will be the same as the value before the `use`
 statement, and the value at the completion of the *body* will again be the same
@@ -858,14 +1296,44 @@ that performs I/O) must be preceded with an `!` to indicate that it modifies a
 resource.
 
 The `io` resource is implicitly defined at the top level of a Wybe program.
-There is also a predefined `argc` and `argv` resource holding the number of
-command line arguments and an array of the arguments themselves. Finally, the
-`exit_code` resource is initialised to 0 at the start of execution, and may be
-changed to any integer during the computation to set the exit condition that
-will be returned to the operating system at the termination of the program.  To
-use the `argc`, `argv`, or `exit_code` resources, a module must `use` the
-`command_line` module.  This is part of the Wybe library, but is not
-automatially imported.
+There are also predefined `argc` and `argv` resources holding the number of
+command line arguments and an array of the arguments themselves.  The `command`
+resource holds the name by which the current executable was executed, as a
+string, and the `arguments` resource holds the command line arguments supplied
+when the program was run, as an array of strings.  Finally, the `exit_code`
+resource is initialised to 0 at the start of execution, and may be changed to
+any integer during the computation to set the exit condition that will be
+returned to the operating system at the termination of the program.  To use the
+`argc`, `argv`, `command`, `arguments`, or `exit_code` resources, a module must
+`use` the `command_line` module.  This is part of the Wybe library, but is not
+automatically imported.
+
+### Special resources
+
+Wybe defines a few "special" resources, which do not actually reflect the state
+of the computation, but instead provide access to information about the
+program's source code.  Special resources are built into Wybe, and thus do not
+need to be imported.
+
+Because they do not depend the program source code,
+which is always available, special resources can be used anywhere.  If a
+procedure that uses a special resource is called in the context of a procedure
+that does not `use` that resource, the value supplied for the resource reflects
+the location of the source code of the call to that procedure.  If called in the
+context of a procedure that does `use` that resource, the value of the resource
+in that context is used.
+
+The special resources supported by Wybe are:
+
+| Resource Name                | Type       | Meaning                                            |
+| ---------------------------- | ---------- | -------------------------------------------------- |
+| `call_source_file_name`      | `c_string` | the name of the file in which the call appears     |
+| `call_source_file_full_name` | `c_string` | the name and directory in which the call appears   |
+| `call_source_line_number`    | `int`      | the line number on which the call appears          |
+| `call_source_column_number`  | `int`      | the column number of the start of the call         |
+| `call_source_location`       | `c_string` | the file name, line, and column number of the call |
+| `call_source_full_location`  | `c_string` | the call directory, file name, line, and column    |
+
 
 ## Packages
 
@@ -884,7 +1352,7 @@ For example, given a directory hierarchy:
     /a/b/c/d/g/h.wybe
     /a/b/c/d/g/i.wybe
 
-In this case, the name of the module defined in `e.wybe` is `d.e`, because the
+the name of the module defined in `e.wybe` is `d.e`, because the
 file `/a/b/c/d/_.wybe` makes `d` a module.  Likewise, `h.wybe` is the module
 `d.g.h`.
 
@@ -904,9 +1372,9 @@ may import any modules in any of the Wybe library directories.  These are
 configured when Wybe is installed, but can be overridden with the `--libdir` or
 `-L` command line options, or by setting the `$WYBELIBS` shell variable.
 
-## Low-level features (foreign interface)
+## <a name="foreign-interface"></a>Low-level features (foreign interface)
 
-### Purity
+### <a name="purity"></a>Purity
 
 Wybe code is mostly purely logical, and the Wybe compiler takes advantage of
 this.  For example, if none of the outputs of a proc call are actually used, the compiler will eliminate the call.  A proc call may also be omitted if a proc call has previously been made with the same inputs, with the compiler assuming the output(s) will be identical.  The compiler may also reorder calls however it likes, as long as all the inputs to a proc are available when the proc is called.  As long as your code is purely logical, all of these optimisations and more are perfectly safe.
@@ -962,7 +1430,39 @@ prevent inlining of calls to this proc
 
 If you wish to include other modifiers along with one of these, include them all between the braces, in any order, separated by commas.
 
-### Foreign interface
+### Foreign language interface
+
+The foreign language interface allows Wybe to call functions written in other
+languages.  In particular, Wybe is built on the LLVM infrastructure, so Wybe
+allows LLVM instructions to be used as low level operations.  Wybe also permits
+C code to be called.  It should be noted that the Wybe compiler does minimal
+checking of arguments to these instructions, and cannot ensure that these
+operations are pure, so it is quite possible to cause type errors or purity
+errors through the foreign language interface.  Therefore, it is recommended to
+define a Wybe procedure or function as an interface to each foreign operation to
+be used, and to code that function paying close attention to argument types and
+purity.  After that, the Wybe type and purity system will ensure the correctness
+of calls to these interface functions or procedures.
+
+
+#### Linking foreign code
+
+A Wybe module my specify a dependency on a foreign object file using a variant
+of the `use` declaration:
+
+> `use foreign object` *filebasename*
+
+where *filebasename* is the base name of the foreign file, omitting any file
+extension.  This will ensure that when an executable is built, the specified
+file will be linked in.
+
+A dependency on a foreign library file may be specified with the following declaration:
+
+> `use foreign library` *libarybasename*
+
+where *librarybasename* is the base name of the foreign library, omitting any
+file extension.  When an executable is built, the specified library will be
+linked in with a `-l`*librarybasename* switch.
 
 
 #### Calling C code
@@ -994,7 +1494,9 @@ pub def {terminal,semipure} exit(code:int) {
 
 #### Using LLVM instructions
 
-The lowest-level interface is to raw LLVM instructions.  These have a functional style, although you use the procedural style if you prefer.  For example, instead of
+The lowest-level interface is to raw LLVM instructions.  These have a functional
+style, although you can use the procedural style if you prefer.  For example,
+instead of
 
 ```
 ?x2 = foreign llvm add(x, 1)
@@ -1089,6 +1591,9 @@ Floating point (signed) greater or equal
 
 #####  <a name="conversion"></a>Integer/floating point conversion
 
+These operations convert between floating point and integer representations.
+They work for any bitwith float and integer types.
+
 - `foreign llvm uitofp(`arg1:int`)`:float  
 Convert unsigned integer to float
 - `foreign llvm sitofp(`arg1:int`)`:float  
@@ -1101,7 +1606,7 @@ Convert float to signed integer
 
 #### Foreign types
 
-In addition to the [`constructor`](#constructors) declaration, it is possible to
+In addition to the [`constructor`](#constructor-declarations) declaration, it is possible to
 declare a low-level type by specifying its representation.  This declaration has
 the form:
 
@@ -1171,6 +1676,12 @@ it will not change the bits of the value.  If you wish to convert between
 floating point and integer representations, see the [integer/floating point
 conversion](#conversion) instructions.
 
+A type cast may be combined with a type constraint to specify both the type of the expression *and* the type of the value:
+
+> *var* `:!` *type*`:`*type2*
+
+This specifies that the type of the variable *var* is *type2*, but that the type of the whole *var* `:!` *type*`:`*type2* expression is *type*.
+
 
 #### Wybe low-level memory management primitives
 
@@ -1208,3 +1719,42 @@ this instruction is permitted to perform the operation destructively, making
 converting its type from *type1* to *type2*, without changing the
 representation. This just allows getting around LLVM strong typing; it does not
 actually require any instructions.
+
+
+#### Handling impurity
+
+Impure operations, such as input/output operations, can present a challenge in
+Wybe.  The Wybe compiler is entitled to, and does, eliminate operations that do
+not produce needed values.  Likewise, it can and does reorder operations in
+function and procedure definitions, as long as it ensures that the inputs to an
+operation are all computed before executing that operation.  However, the
+compiler respects (purity declarations)[#purity]:  if a procedure is declared
+`impure` or `semipure`, calls to it will not be eliminated or reordered.
+
+Additionally, the Wybe library defines a type `phantom`, whose representation
+has zero bits (it is a type with one constructor with no arguments).  The
+compiler automatically removes any input or output arguments whose types have
+zero bits when LLVM code is being generated, including calls to foreign code.
+The type of the `io` resource is `phantom`, thus the `io` resource can be passed
+into or out of any foreign call without anything actually being passed to the
+foreign function or LLVM instruction.  Yet the phantom value is threaded through
+the code, ensuring that the compiler respects the ordering of operations.
+
+This gives two ways of managing impurity in Wybe:
+
+ * An operation can `use` the `!io` resource or another resource or value of
+   type `phantom`; or
+ * It can be declared `impure` or `semipure`.
+
+If impurity is managed through a `phantom` (or other zero-bit type) resource or
+value, that resource or value will need to be threaded through the entire
+application.  In most cases, this is the prefered approach:  it gives the
+compiler more scope for optimisation, and provides documentation to the user of
+how operations impact the state of the computation.
+
+Managing impurity through the purity system allows low-level Wybe code to
+circumvent the purity of the language, but then to present a pure interface to
+that code.  For example, the `logging` library module allows the programmer to
+insert "debugging printfs" in their code.  Such operations are not meant to be
+used in a released application, but can be very useful for the programmer to
+understand the behaviour of their code.

@@ -30,7 +30,9 @@ procExpansion :: ProcSpec -> ProcDef -> Compiler ProcDef
 procExpansion pspec def = do
     logMsg Expansion $ replicate 50 '='
     logMsg Expansion $ "*** Try to expand proc " ++ show pspec
-    let ProcDefPrim proto body analysis speczBodies = procImpln def
+    let impln = procImpln def
+    let proto = procImplnProto impln
+    let body = procImplnBody impln
     logMsg Expansion $ "    initial body: " ++ show (procImpln def)
     let tmp = procTmpCount def
     let (ins,outs) = inputOutputParams proto
@@ -39,7 +41,8 @@ procExpansion pspec def = do
                         execStateT (expandBody body) st
     let proto' = proto {primProtoParams = markParamNeededness used ins
                                           <$> primProtoParams proto}
-    let def' = def { procImpln = ProcDefPrim proto' body' analysis speczBodies,
+    let impln' = impln{ procImplnProto = proto', procImplnBody = body' }
+    let def' = def { procImpln = impln', 
                      procTmpCount = tmp',
                      procCallSiteCount = nextCallSiteID st' }
     if def /= def'
@@ -110,8 +113,8 @@ freshVar oldVar typ = do
         Nothing -> do
             newVar <- lift freshVarName
             logExpansion $ "    Generated fresh name " ++ show newVar
-            addRenaming oldVar $ ArgVar newVar typ False FlowIn Ordinary False
-            return $ ArgVar newVar typ False FlowOut Ordinary False
+            addRenaming oldVar $ ArgVar newVar typ FlowIn Ordinary False
+            return $ ArgVar newVar typ FlowOut Ordinary False
         Just newArg -> do
             logExpansion $ "    Already named it " ++ show newArg
             return newArg
@@ -220,7 +223,7 @@ expandPrim (PrimCall id pspec args) pos = do
         def <- lift $ lift $ getProcDef pspec
         case procImpln def of
           ProcDefSrc _ -> shouldnt $ "uncompiled proc: " ++ show pspec
-          ProcDefPrim proto body _ _ ->
+          ProcDefPrim{procImplnProto = proto, procImplnBody = body}->
             if procInline def
               then inlineCall proto args' body pos
               else do
@@ -266,18 +269,16 @@ inlineCall proto args body pos = do
 
 
 expandArg :: PrimArg -> Expander PrimArg
-expandArg arg@(ArgVar var typ _ flow _ _) = do
+expandArg arg@(ArgVar var ty flow _ _) = do
     renameAll <- gets inlining
     if renameAll
-      then case flow of
-      FlowOut -> freshVar var typ
-      FlowIn ->
-        gets (Map.findWithDefault
-              -- (shouldnt $ "inlining: reference to unassigned variable "
-              --  ++ show var)
-              arg
-              var . renaming)
-      else return arg
+    then case flow of
+        FlowOut -> freshVar var ty
+        FlowIn ->
+            setArgType ty <$> gets (Map.findWithDefault arg var . renaming)
+            -- (shouldnt $ "inlining: reference to unassigned variable "
+            --  ++ show var)
+    else return arg
 expandArg arg = return arg
 
 

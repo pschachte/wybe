@@ -12,14 +12,14 @@ pub def printMyNode(nd:mynode) use !io {
 pub def reverseList(head:mynode, ?result1:mynode) {
     if { head = mynode(?data1, ?next1) ::
             if { next1 = empty :: ?result1 = head
-               | otherwise ::
+               | else      ::
                    reverseList(next1, ?result2)
                    ?t1 = next1
                    next(!t1, head)
                    next(!head, empty)
                    ?result1 = result2
                }
-    | otherwise :: ?result1 = head
+    | else      :: ?result1 = head
     }
 }
 

@@ -10,6 +10,6 @@ pub type posrec { pub posrec(p:position, a:int) }
 p(!rec, pos2)
 x(!pos, 200) # Destructive
 
-!println(pos.x) # expect 200
-?rp = rec.p
-!println(rp.x) # expect 2
+!println(pos^x) # expect 200
+?rp = rec^p
+!println(rp^x) # expect 2

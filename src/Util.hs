@@ -5,7 +5,7 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
-module Util (sameLength, maybeNth, setMapInsert,
+module Util (sameLength, maybeNth, setMapInsert, showArguments,
              fillLines, nop, sccElts, DisjointSet,
              emptyDS, addOneToDS, unionTwoInDS,
              combineTwoDS, removeSingletonFromDS,
@@ -13,17 +13,28 @@ module Util (sameLength, maybeNth, setMapInsert,
              removeFromDS, connectedItemsInDS,
              mapDS, filterDS, dsToTransitivePairs,
              intersectMapIdentity, orElse,
-             apply2way, (&&&), zipWith3M, zipWith3M_) where
+             apply2way, (&&&), (|||), zipWith3M, zipWith3M_,
+             useLocalCacheFileIfPossible, createLocalCacheFile
+             ) where
 
 
+import           Config ( localCacheLibDir )
+import           Control.Monad ( when, unless )
+import           Crypto.Hash ( hashWith, hashlazy, SHA1(..), Digest )
+import qualified Data.ByteString.Char8 as B8
+import qualified Data.ByteString.Lazy  as BL
 import           Data.Graph
 import           Data.List    as List
 import           Data.Map     as Map
 import           Data.Map.Merge.Lazy (merge,dropMissing,zipWithMaybeMatched)
-import           Data.Set     as Set
 import           Data.Maybe   (isJust)
+import           Data.Set     as Set
+import qualified Data.Text.Internal.Builder as BS
+import qualified Data.Text.Internal.Builder as BS.UTF8
 import           GHC.Generics (Generic)
 import           Flow         ((|>))
+import           System.FilePath ( (<.>), (</>) )
+import           System.Directory ( doesFileExist, removeFile, createDirectoryIfMissing )
 
 
 -- |Do the the two lists have the same length?
@@ -53,6 +64,11 @@ setMapInsert key item dict =
     key dict
 
 
+-- |Show an argument list; shows nothing for an empty list, otherwise shows all
+-- the list elements, separated by commas, surrounded with parentheses.
+showArguments :: Show a => [a] -> String
+showArguments [] = ""
+showArguments args = "(" ++ intercalate ", " (show <$> args) ++ ")"
 
 -- |fillLines marginText currColumn lineLength text
 --  Fill lines with text.  marginText is the string to start each
@@ -216,9 +232,15 @@ apply2way :: (a->b->c) -> (d->a) -> (d->b) -> d -> c
 apply2way combine f1 f2 input = combine (f1 input) (f2 input)
 
 -- | conjoin two functions
-infix 4 &&&
+infixl 4 &&&
 (&&&) :: (a->Bool) -> (a->Bool) -> a -> Bool
 (&&&) = apply2way (&&)
+
+
+-- | disjoin two functions
+infixl 4 |||
+(|||) :: (a->Bool) -> (a->Bool) -> a -> Bool
+(|||) = apply2way (||)
 
 
 -- |zipWithM version for 3 lists.
@@ -235,3 +257,78 @@ zipWith3M f (a:as) (b:bs) (c:cs) = do
 -- |zipWithM version for 3 lists.
 zipWith3M_ :: Monad m => (a -> b -> c -> m d) -> [a] -> [b] -> [c] -> m ()
 zipWith3M_ f as bs cs = zipWith3M f as bs cs >> return ()
+
+
+----------------------------------------------------------------
+--
+-- Wybe local cache file
+--
+----------------------------------------------------------------
+-- Helper functions for handling a cache version of a file
+-- Currently, we use this for Multiple Specialization on std libs
+-- when their object files are read-only. Cache file will become invalid
+-- if the original file has changed.
+-- The cache files are stored in "localCacheLibDir". The name of each
+-- cache file is the sha1 of the full path of the original file. There
+-- will also be a ".meta" file next to each cache file and it contains
+-- the sha1 hash of the original file (or empty if the original file
+-- does not exist) so we can invalidate the cache when needed.
+
+_localCachePathOfFile :: FilePath -> IO (FilePath, FilePath)
+_localCachePathOfFile file = do
+    localCacheLibDir <- localCacheLibDir 
+    let cacheFilename = show (hashWith SHA1 (B8.pack file))
+    let cacheFilePath = localCacheLibDir </> cacheFilename
+    let cacheFileMeta = cacheFilePath <.> "meta"
+    return (cacheFilePath, cacheFileMeta)
+
+
+_removeFileIfExists :: FilePath -> IO ()
+_removeFileIfExists file = do
+    fileExists <- doesFileExist file
+    when fileExists (removeFile file)
+
+
+_getFileHash :: FilePath -> IO String
+_getFileHash file = do
+    exist <- doesFileExist file
+    if exist
+    then do 
+        content <- BL.readFile file
+        return $ show (hashlazy content :: Digest SHA1)
+    else return ""
+
+
+-- | Given a file path and return the actual file that should be used.
+-- It can the original file or a local cache file.
+useLocalCacheFileIfPossible :: FilePath -> IO FilePath 
+useLocalCacheFileIfPossible file = do
+    (cacheFile, meta) <- _localCachePathOfFile file
+    cacheFileExist <- doesFileExist cacheFile
+    metaExist <- doesFileExist meta
+    valid <-
+        if cacheFileExist && metaExist
+        then do 
+            srcFileHash <- _getFileHash file
+            hashInMeta <- readFile meta
+            return (srcFileHash == hashInMeta)
+        else return False
+    if valid
+    then return cacheFile
+    else do
+        _removeFileIfExists cacheFile
+        _removeFileIfExists meta
+        return file
+
+
+-- | Given a file path and return the file path to the local cache
+-- file of the actual file.
+createLocalCacheFile :: FilePath -> IO FilePath 
+createLocalCacheFile file = do 
+    localCacheLibDir  <- localCacheLibDir 
+    createDirectoryIfMissing True localCacheLibDir
+    (cacheFile, meta) <- _localCachePathOfFile file
+    srcFileHash <- _getFileHash file
+    writeFile meta srcFileHash
+    return cacheFile
+

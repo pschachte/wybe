@@ -23,11 +23,11 @@ def int_list(ctx: Context) -> None:
 WYBE_INT_LIST = r"""
 # contains the def of a int list and some helper functions
 # (similar to the python list)
-pub type int_list { pub [] | [|](head:int, tail:int_list) }
+pub type int_list { pub nil | cons(head:int, tail:int_list) }
 
 
 pub def print(x:int_list) use !io {
-    if { x = [ ?h | ?t] :: 
+    if { x = cons(?h, ?t) ::
         !print(h)
         !print(' ')
         !print(t)
@@ -44,125 +44,122 @@ pub def println(x:int_list) use !io {
 # Returns an `int_list`, starting from `start`, and increments by `step`,
 # and stops before `stop`
 pub def range(start:int, stop:int, step:int, ?result:int_list) {
-    ?result = []
+    ?result = nil
     do {
         while start < stop
-        ?result = [start | result]
+        ?result = cons(start, result)
         ?start = start + step
     }
-    reverse(!result)
+    reverse(result, ?result)
 }
 
 # Add an item to the end of the list.
-pub def append(lst:int_list, v: int):int_list = extend(lst, [v])
+pub def append(lst:int_list, v: int):int_list = extend(lst, cons(v,nil))
 
 
 # Extend the first list by appending all the items from the second list.
 pub def extend(lst1:int_list, lst2:int_list):int_list = 
-    if lst1 = [?h | ?t] then [h | extend(t, lst2)] else lst2
+    if {lst1 = cons(?h, ?t):: cons(h, extend(t, lst2)) | else:: lst2 }
 
 
 # Insert an item at a given position.
 pub def insert(lst:int_list, idx:int, v:int):int_list = 
-    if idx = 0
-    then
-        [v | lst]
-    else
-        if lst = [?h | ?t]
-        then
-            [h | insert(t, idx-1, v)]
-        else
+    if {idx = 0::
+        cons(v, lst)
+    | else::
+        if {lst = cons(?h, ?t)::
+            cons(h, insert(t, idx-1, v))
+        | else::
             # list not long enough
             insert(lst, idx-1, v)
+        }
+    }
 
 
 # Remove the first item from the list whose value is equal to v.
 pub def remove(lst:int_list, v:int):int_list =
-    if lst = [?h | ?t]
-    then
-        if h = v
-        then
+    if {lst = cons(?h, ?t)::
+        if { h = v::
             t
-        else
-            [h | remove(t, v)]
-    else
-        []
-
+        | else::
+            cons(h, remove(t, v))
+        }
+    | else::
+        nil
+    }
 
 # Remove the item at the given position in the list
 pub def pop(lst:int_list, idx:int):int_list = 
-    if lst = [?h | ?t]
-    then
-        if idx = 0
-        then
+    if {lst = cons(?h, ?t)::
+        if {idx = 0::
             t
-        else
-            [h | pop(t, idx-1)]
-    else
-        []
-
+        | else::
+            cons(h, pop(t, idx-1))
+        }
+    | else::
+        nil
+    }
 
 
 # Return the number of times x appears in the list.
 pub def count(lst:int_list, x:int):int =
-    if lst = [?h | ?t]
-    then
-        count(t, x) + if h = x then 1 else 0
-    else
+    if {lst = cons(?h, ?t)::
+        count(t, x) + if {h = x:: 1 | else:: 0}
+    | else::
         0
-
+    }
 
 # Return zero-based index in the list of the first item whose value is equal to x.
 pub def index(lst:int_list, x:int):int = index_helper(lst, 0, x)
 
 def index_helper(lst:int_list, idx:int, x:int):int = 
-    if lst = [?h | ?t]
-    then
-        if h = x
-        then
+    if {lst = cons(?h, ?t)::
+        if {h = x::
             idx
-        else
+        | else::
             index_helper(t, idx+1, x)
-    else
+        }
+    | else::
         -1
+    }
 
 
 # Sort the items of the list
 pub def sort(lst:int_list):int_list =
-    if lst = [?h | ?t]
-    then
-        extend(sort(lesser(t, h)), [h | sort(greater(t, h))])
-    else
-        []
+    if {lst = cons(?h, ?t)::
+        extend(sort(lesser(t, h)), cons(h, sort(greater(t, h))))
+    | else::
+        nil
+    }
 
 def lesser(lst:int_list, v:int):int_list =
-    if lst = [?h | ?t]
-    then
-        if h < v
-        then
-            [h | lesser(t, v)]
-        else
+    if {lst = cons(?h, ?t)::
+        if {h < v::
+            cons(h, lesser(t, v))
+        | else::
             lesser(t, v)
-    else
-        []
+        }
+    | else::
+        nil
+    }
 
 def greater(lst:int_list, v:int):int_list =
-    if lst = [?h | ?t]
-    then
-        if h >= v
-        then
-            [h | greater(t, v)]
-        else
+    if {lst = cons(?h, ?t)::
+        if {h >= v::
+            cons(h, greater(t, v))
+        | else::
             greater(t, v)
-    else
-        []
+        }
+    | else::
+        nil
+    }
 
 
 # Reverse the elements of the list.
-pub def reverse(lst:int_list):int_list = reverse_helper(lst, [])
+pub def reverse(lst:int_list):int_list = reverse_helper(lst, nil)
 
 def reverse_helper(lst:int_list, acc:int_list):int_list =
-    if lst = [?h | ?t] then reverse_helper(t, [h|acc]) else acc
+    if {lst = cons(?h, ?t):: reverse_helper(t, cons(h,acc)) | else:: acc}
 """
 
 WYBE_INT_LIST_TEST = """
@@ -170,8 +167,8 @@ use int_list
 
 
 def test_int_list(x:int_list, y:int_list, z:int_list) use !io {
-    reverse(!x)
-    reverse(!z)
+    reverse(x, ?x)
+    reverse(z, ?z)
     ?y = append(y, 99)
     !println("-")
     !println(x)
@@ -189,7 +186,7 @@ def test_int_list(x:int_list, y:int_list, z:int_list) use !io {
     !println("-")
     !println(l)
 
-    sort(!l)
+    sort(l, ?l)
     !println("-")
     !println(l)
 }
@@ -289,7 +286,7 @@ def do_action(!d:drone_info, action:char, ?success:bool) {
         z(!d, z(d)+1)
     | action = 'd' ::
         z(!d, z(d)-1)
-    | otherwise ::
+    | else      ::
         ?success = false
     }
     if { success ::
@@ -298,10 +295,10 @@ def do_action(!d:drone_info, action:char, ?success:bool) {
 }
 
 def loop(d:drone_info, ch:char) use !io {
-    if { ch /= ' ' && ch /= '\n' ::
+    if { ch ~= ' ' && ch ~= '\n' ::
         if { ch = 'p' ::
             !print_info(d)
-        | otherwise ::
+        | else      ::
             do_action(!d, ch, ?success)
             if { success = false ::
                 !println("invalid action!")
@@ -309,14 +306,14 @@ def loop(d:drone_info, ch:char) use !io {
         }
     }
     !read(?ch:char)
-    if { ch /= eof ::
+    if { ch ~= eof ::
         !loop(d, ch)
     }
 }
 
 ?d = drone_init()
 !read(?ch:char)
-if { ch /= eof ::
+if { ch ~= eof ::
     !loop(d, ch)
 }
 !malloc_count(?mc)
@@ -328,10 +325,10 @@ if { ch /= eof ::
 # do {
 #     !read(?ch:char)
 #     until ch = eof
-#     if { ch /= ' ' && ch /= '\n' ::
+#     if { ch ~= ' ' && ch ~= '\n' ::
 #         if { ch = 'p' ::
 #             !print_info(d)
-#         | otherwise ::
+#         | else      ::
 #             do_action(!d, ch, ?success)
 #             if { success = false ::
 #                 !println("invalid action!")

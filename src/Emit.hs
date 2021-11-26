@@ -36,8 +36,21 @@ import           ObjectInterface
 import           Options                    (LogSelection (Blocks,Builder,Emit))
 import           System.Exit                (ExitCode (..))
 import           System.Process
-import           System.FilePath
+import           System.FilePath            ( (-<.>) )
+import           System.Directory           (getPermissions, writable, doesFileExist)
+import           Util                       ( createLocalCacheFile )
 
+
+-- This does not check the permission if the file does not exists.
+-- It is fine for our current usage, but we should improve it.
+_haveWritePermission :: FilePath -> IO Bool 
+_haveWritePermission file = do
+    exists <- doesFileExist file
+    if exists
+    then do
+        permission <- getPermissions file
+        return $ writable permission
+    else return True
 
 
 -- | With the LLVM AST representation of a LPVM Module, create a
@@ -54,6 +67,14 @@ emitObjectFile m f = do
               ++ showModSpec m ++ "*."
     modBS <- encodeModule m
     llmod <- descendentModuleLLVM m
+    filename <- do
+        writable <- liftIO $ _haveWritePermission filename
+        if writable
+        then return filename
+        else do
+            logEmit $ "Do not have write permission on file " ++ filename
+                ++ ", use local cache file instead"
+            liftIO $ createLocalCacheFile filename
     logEmit $ "===> Writing object file " ++ filename
     makeWrappedObjFile filename llmod modBS
 
@@ -169,43 +190,14 @@ withModule llmod action =
 -- Target Emitters                                                        --
 ----------------------------------------------------------------------------
 
--- | Drop an LLVMAST.Module (haskell) into a LLVM Module.Module (C++),
--- and write it as an object file.
-makeObjFile :: FilePath -> LLVMAST.Module -> IO ()
-makeObjFile file llmod =
-    withHostTargetMachineDefault $ \tm ->
-        withOptimisedModule llmod $ \m ->
-            writeObjectToFile tm (File file) m
-
--- | Drop an LLVMAST.Module (haskell) intop a Mod.Module (C++)
--- represenation and write is a bitcode file.
-makeBCFile :: FilePath -> LLVMAST.Module -> IO ()
-makeBCFile file llmod =
-    withContext $ \context ->
-        withModuleFromAST context llmod $ \m ->
-            writeBitcodeToFile (File file) m
-
-
 -- | Use the bitcode wrapper structure to wrap both the AST.Module
 -- (serialised) and the bitcode generated for the Module
 makeWrappedBCFile :: FilePath -> LLVMAST.Module -> BL.ByteString -> IO ()
 makeWrappedBCFile file llmod modBS =
-    withContext $ \context ->
-        withModuleFromAST context llmod $ \m ->
-            do bc <- moduleBitcode m
-               let wrapped = getWrappedBitcode (BL.fromStrict bc) modBS
-               BL.writeFile file wrapped
-
-
--- | Drop an LLVMAST.Module (haskell) into a Module.Module (C++),
--- and write it as an object file.
-makeAssemblyFile :: FilePath -> LLVMAST.Module -> IO ()
-makeAssemblyFile file llmod =
-    withContext $ \context ->
-        withModuleFromAST context llmod $ \m ->
-            withHostTargetMachineDefault $ \_ ->
-                writeLLVMAssemblyToFile (File file) m
-
+    withOptimisedModule llmod $ \m -> do
+        bc <- moduleBitcode m
+        let wrapped = getWrappedBitcode (BL.fromStrict bc) modBS
+        BL.writeFile file wrapped
 
 -- | Create a Macho-O object file and embed a 'AST.Module' bytestring
 -- representation into the '__lpvm' section in it.

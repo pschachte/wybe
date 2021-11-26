@@ -10,11 +10,12 @@
 --  OSes.
 module Config (sourceExtension, objectExtension, executableExtension,
                bitcodeExtension, assemblyExtension, archiveExtension, 
-               moduleDirectoryBasename, currentTypeAlias,
+               moduleDirectoryBasename, currentModuleAlias,
                wordSize, wordSizeBytes,
                availableTagBits, tagMask, smallestAllocatedAddress,
                magicVersion,
-               linkerDeadStripArgs, functionDefSection, removeLPVMSection)
+               linkerDeadStripArgs, functionDefSection, removeLPVMSection,
+               localCacheLibDir)
     where
 
 import Data.Word
@@ -24,6 +25,7 @@ import Foreign.Storable
 import System.Exit (ExitCode (..))
 import System.Process
 import System.FilePath
+import System.Directory.Extra (getHomeDirectory)
 
 -- |The file extension for source files.
 sourceExtension :: String
@@ -61,9 +63,9 @@ moduleDirectoryBasename :: String
 moduleDirectoryBasename = "_"
 
 
--- |The special name given to the type defined by the current module.
-currentTypeAlias :: String
-currentTypeAlias = "_"
+-- |The special name given to the current module.
+currentModuleAlias :: String
+currentModuleAlias = "_"
 
 
 -- |Determining word size of the machine in bits
@@ -101,6 +103,12 @@ smallestAllocatedAddress = 65536 -- this is a pretty safe guess
 -- |Foreign shared library directory name
 sharedLibDirName :: String
 sharedLibDirName = "lib/"
+
+
+localCacheLibDir :: IO FilePath 
+localCacheLibDir = do 
+    homeDir <- getHomeDirectory
+    return $ homeDir </> ".wybe/cache"
 
 
 -- | Magic version number for the current iteration of LPVM.

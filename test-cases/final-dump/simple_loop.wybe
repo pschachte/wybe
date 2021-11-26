@@ -1,5 +1,5 @@
 do {
     !read(?c:char)
-    while (c /= 'a')
+    while (c ~= 'a')
     !print(c)
 }

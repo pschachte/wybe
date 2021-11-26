@@ -9,4 +9,4 @@ pub def {semipure} malloc_count(?x:int) {
     foreign c {impure} malloc_count(?x)
 }
 
-foreign c {semipure} gc_init()
+foreign c {impure} gc_init()

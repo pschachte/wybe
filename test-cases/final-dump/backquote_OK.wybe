@@ -1,0 +1,3 @@
+# Test case for use of backticks
+
+def `OK backquote use!` = 1

@@ -1,0 +1,5 @@
+# Test for assert and error from control library
+
+!assert false
+
+!error(c"we should never get here")

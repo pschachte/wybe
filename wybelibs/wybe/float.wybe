@@ -1,25 +1,115 @@
+# purpose: Standard Floating Point Library
+# since  : 0.1
+
+
 pragma no_standard_library  # Standard library can't depend on itself!
 
-use foreign library m
 use wybe.bool
+use wybe.int
 
 representation is 64 bit float
 
-pub def +(x:float,y:float):float = foreign llvm fadd(x,y)
-pub def +(?x:float,y:float,z:float) { ?x = foreign llvm fsub(z,y) }
-pub def +(x:float,?y:float,z:float) { ?y = foreign llvm fsub(z,x) }
-pub def -(x:float,y:float):float = foreign llvm fsub(x,y)
-pub def -(?x:float,y:float,z:float) { ?x = foreign llvm fadd(z,y) }
-pub def -(x:float,?y:float,z:float) { ?y = foreign llvm fsub(z,x) }
-pub def -(x:float):float = foreign llvm fsub(0.0,x)
-pub def -(?x:float,y:float) { ?x = foreign llvm fsub(0.0,y) }
-pub def *(x:float,y:float):float = foreign llvm fmul(x,y)
-pub def /(x:float,y:float):float = foreign llvm fdiv(x,y)
-pub def /=(x:float,y:float):bool = foreign llvm fcmp_ne(x,y)
-pub def <(x:float,y:float):bool = foreign llvm fcmp_slt(x,y)
-pub def <=(x:float,y:float):bool = foreign llvm fcmp_sle(x,y)
-pub def >(x:float,y:float):bool = foreign llvm fcmp_sgt(x,y)
-pub def >=(x:float,y:float):bool = foreign llvm fcmp_sge(x,y)
-pub def =(x:float, y:float):bool = foreign llvm fcmp_eq(x,y)
-pub def sqrt(x:float):float = foreign c sqrt(x)
-pub def power(x:float,y:float):float = foreign c pow(x,y)
+
+## Constants
+
+# The ratio of a circle's circumference to its diameter.
+pub def pi:float = 3.14159265358979323846264338327950288
+
+# The base of natural logarithms.  e = exp(1.0).
+pub def e:float = 2.71828182845904523536028747135266250
+
+
+## Common floating point operations
+
+# Addition.  This operation is reversible:  you can compute either argument from
+# the other argument and the valu.
+pub def (x:_ + y:_):_ = foreign llvm fadd(x,y)
+pub def (?x:_ + y:_):_ = ?z where { ?x = foreign llvm fsub(z,y) }
+pub def (x:_ + ?y:_):_ = ?z where { ?y = foreign llvm fsub(z,x) }
+
+# Subtraction.  This operation is reversible:  you can compute either argument
+# from the other argument and the value.
+pub def (x:_ - y:_):_ = foreign llvm fsub(x,y)
+pub def (?x:_ - y:_):_  = ?z where { ?x = foreign llvm fadd(z,y) }
+pub def (x:_ - ?y:_):_  = ?z where { ?y = foreign llvm fsub(z,x) }
+
+# Unary negation.  This operation is reversible:  you can compute the argument from the valu.
+pub def -(x:_):_ = foreign llvm fsub(0.0,x)
+pub def -(?x:_):_ = ?y where { ?x = foreign llvm fsub(0.0,y) }
+
+# Multiplication.
+pub def (x:_ * y:_):_ = foreign llvm fmul(x,y)
+
+# Division.
+pub def (x:_ / y:_):_ = foreign llvm fdiv(x,y)
+
+# Raise to the second power.
+pub def square(x:_):_ = foreign llvm fmul(x,x)
+
+# Absolute value.
+pub def abs(x:_):_ = foreign c `llvm.fabs.f64`(x)
+
+
+## Comparisons
+
+# Equality and disequality.
+pub def (x:_ = y:_):bool = foreign llvm fcmp_eq(x,y)
+pub def (x:_ ~= y:_):bool = foreign llvm fcmp_ne(x,y)
+
+# Inequalities.
+pub def (x:_ < y:_):bool = foreign llvm fcmp_slt(x,y)
+pub def (x:_ <= y:_):bool = foreign llvm fcmp_sle(x,y)
+pub def (x:_ > y:_):bool = foreign llvm fcmp_sgt(x,y)
+pub def (x:_ >= y:_):bool = foreign llvm fcmp_sge(x,y)
+
+# Minimum and maximum of two floats.
+pub def min(x:_, y:_):_ = foreign c `llvm.minnum.f64`(x,y)
+pub def max(x:_, y:_):_ = foreign c `llvm.maxnum.f64`(x,y)
+
+
+## Conversions
+
+# The smallest whole number greater than or equal to the input, as a float.
+pub def ceil(x:_):_ = foreign c `llvm.ceil.f64`(x)
+
+# The largest whole number less than or equal to the input, as a float.
+pub def floor(x:_):_ = foreign c `llvm.floor.f64`(x)
+
+# The whole number closest to the input, as a float.
+pub def round(x:_):_ = foreign c `llvm.round.f64`(x)
+
+# The closest whole number to the input, as an int.
+pub def iround(x:_):int = foreign llvm fptosi(round(x))
+
+# The smallest whole number greater than or equal to the input, as an int.
+pub def iceil(x:_):int = foreign llvm fptosi(ceil(x))
+
+# The largest whole number less than or equal to the input, as an int.
+pub def ifloor(x:_):int = foreign llvm fptosi(floor(x))
+
+
+## Transcendental functions
+
+# Square root.
+pub def sqrt(x:_):_ = foreign c `llvm.sqrt.f64`(x)
+
+# Raise `x` to the `n` power.  These two functions 
+pub def power(x:_,n:_):_ = foreign c `llvm.pow.f64`(x,n)
+pub def (x:_ ** n:_):_ = foreign c `llvm.pow.f64`(x,n)
+
+# Trigonometric functions.
+pub def sin(x:_):_ = foreign c `llvm.sin.f64`(x)
+pub def cos(x:_):_ = foreign c `llvm.cos.f64`(x)
+pub def tan(x:_):_ = foreign c `llvm.sin.f64`(x) / foreign c `llvm.cos.f64`(x)
+
+# Exponential:  `e` to the `x` power.
+pub def exp(x:_):_ = foreign c `llvm.exp.f64`(x)
+
+# Natural (base `e`) logarithm
+pub def log(x:_):_ = foreign c `llvm.log.f64`(x)
+
+# Common (base 10) logarithm
+pub def log10(x:_):_ = foreign c `llvm.log10.f64`(x)
+
+# Base 2 logarithm.
+pub def log2(x:_):_ = foreign c `llvm.log2.f64`(x)

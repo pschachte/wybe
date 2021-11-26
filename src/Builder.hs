@@ -52,13 +52,13 @@
 --  from the code itself.  Such analyses are best performed top-down.
 --  For example, if we can determine that a structure will not be
 --  referenced after the call to a procedure, that procedure may be
---  compiled to destructive modify or reuse that structure.  Our
+--  compiled to destructively modify or reuse that structure.  Our
 --  approach to this is to apply multiple specialisation:  we compile
---  different versions of this code for for calls that may reference
+--  different versions of this code for calls that may reference
 --  that argument again and calls that cannot.  Our approach is to
 --  to have the bottom-up analysis produce "requests", which indicate
 --  what top-down analysis results would allow more efficient
---  specialisations of the code.  This information os produced bottom-
+--  specialisations of the code.  This information is produced bottom-
 --  up.  Then, when generating the final executable, when all the code
 --  is available, we determine how beneficial each specialisation would
 --  be, and select the most useful specialisations to actually produce,
@@ -122,7 +122,7 @@
 --  dependencies by initially reading a module to be compiled and
 --  handling contents as follows:
 --
---  * Types:  create and enter the submodule, note that parent
+--  * Types:  create and enter the submodule, note that the parent
 --  imports it, and process its constructors and other contents.
 --
 --  * Submodules:  create and enter the submodule, note that parent
@@ -208,16 +208,17 @@ import           Data.List                 as List
 import           Data.Map                  as Map
 import           Data.Set                  as Set
 import           Data.Maybe
+import           Data.Foldable
 import           Emit
 import           Flow                      ((|>))
-import           Normalise                 (normalise, completeNormalisation)
+import           Normalise                 (normalise, completeNormalisation, normaliseItem)
 import           ObjectInterface
 
 import           Optimise                  (optimiseMod)
 import           Options                   (LogSelection (..), Options,
                                             optForce, optForceAll, optLibDirs,
                                             optNoMultiSpecz)
-import           NewParser                 (parseWybe)
+import           Parser                    (parseWybe)
 import           Resources                 (resourceCheckMod,
                                             transformProcResources,
                                             canonicaliseProcResources)
@@ -232,8 +233,9 @@ import           Transform                 (transformProc,
 import           Types                     (typeCheckModSCC,
                                             validateModExportTypes)
 import           Unbranch                  (unbranchProc)
-import           Util                      (sccElts)
+import           Util                      (sccElts, useLocalCacheFileIfPossible)
 import           Snippets
+import           Text.Parsec.Error
 import           BinaryFactory
 import qualified Data.ByteString.Char8 as BS
 import qualified LLVM.AST              as LLVMAST
@@ -312,7 +314,7 @@ buildTarget target = do
                                     ++ " to file " ++ f -<.> ext
                             fn m f
                     case tType of
-                        ObjectFile -> mapM_ 
+                        ObjectFile -> mapM_
                             (emitMod emitObjectFile objectExtension) targets
                         BitcodeFile -> mapM_
                             (emitMod emitBitcodeFile bitcodeExtension) targets
@@ -447,11 +449,13 @@ loadModuleFromSrcFile mspec srcfile maybeDir = do
                       ++ " from " ++ srcfile
     tokens <- (liftIO . fileTokens) srcfile
     let parseTree = parseWybe tokens srcfile
-    mods <- either (\er -> do
-               liftIO $ putStrLn $ "Syntax Error: " ++ show er
-               liftIO exitFailure)
-           (compileParseTree srcfile mspec)
-           parseTree
+    mods <- either
+            (\er -> errmsg
+                    (Just $ errorPos er)
+                    ("Syntax error: " ++ tail (dropWhile (/='\n') $ show er))
+                     >> return [])
+            (compileParseTree srcfile mspec)
+            parseTree
     -- If we just loaded a _.wybe file, now import sources in the directory
     case maybeDir of
       Nothing -> return ()
@@ -522,7 +526,7 @@ loadDirectoryModule force dir dirmod isLib = do
                 -- only source file for library exists
                 Error <!> "No compiled version of library module "
                           ++ showModSpec dirmod ++ " exists"
-                return []  
+                return []
 
             ModuleSource (Just srcfile) (Just objfile) Nothing Nothing isLib' ->
                 -- both source and object files exist:  rebuild if necessary
@@ -614,7 +618,10 @@ loadModuleFromObjFile required objfile = do
 loadLPVMFromObjFile :: FilePath -> [ModSpec] -> Compiler [Module]
 loadLPVMFromObjFile objFile required = do
     tmpDir <- gets tmpDir
-    result <- liftIO $ extractLPVMData tmpDir objFile
+    objFile' <- liftIO $ useLocalCacheFileIfPossible objFile
+    unless (objFile == objFile')
+        (logBuild $ "find local cache file, use it instead: " ++ objFile')
+    result <- liftIO $ extractLPVMData tmpDir objFile'
     case result of
         Left err -> do
             logMsg Builder err
@@ -785,12 +792,12 @@ compileModSCC mspecs = do
     -- Fixed point needed because eventually resources can bundle
     -- resources from other modules
     fixpointProcessSCC resourceCheckMod mspecs
+    mapM_ (transformModuleProcs canonicaliseProcResources)  mspecs
     stopOnError $ "processing resources for module(s) " ++ showModSpecs mspecs
     typeCheckModSCC mspecs
     stopOnError $ "type checking of module(s) "
                   ++ showModSpecs mspecs
     logDump Types Unbranch "TYPE CHECK"
-    mapM_ (transformModuleProcs canonicaliseProcResources)  mspecs
     mapM_ (transformModuleProcs transformProcResources)  mspecs
     stopOnError $ "resource checking of module(s) "
                   ++ showModSpecs mspecs
@@ -859,7 +866,9 @@ updateInterfaceHash mspec = do
             if mod == mspec
             then
                 let p = (modProcs impl ! procName) !! procID in
-                let ProcDefPrim proto body analysis _ = procImpln p in
+                let proto = procImplnProto $ procImpln p in
+                let body = procImplnBody $ procImpln p in
+                let analysis = procImplnAnalysis $ procImpln p in
                 if procInline p
                 then InlineProc proto body
                 else NormalProc proto analysis
@@ -926,7 +935,7 @@ fixpointProcessSCC processor scc = do        -- must find fixpoint
 
 
 
-transformModuleProcs :: (ProcDef -> Compiler ProcDef) -> ModSpec ->
+transformModuleProcs :: (ProcDef -> Int -> Compiler ProcDef) -> ModSpec ->
                         Compiler ()
 transformModuleProcs trans thisMod = do
     logBuild $ "**** Reentering module " ++ showModSpec thisMod
@@ -935,7 +944,7 @@ transformModuleProcs trans thisMod = do
     (names,procs) <- unzip <$>
                      getModuleImplementationField (Map.toList . modProcs)
     -- for each name we have a list of procdefs, so we must double map
-    procs' <- mapM (mapM trans) procs
+    procs' <- mapM (zipWithM (flip trans) [0..]) procs
     updateImplementation
         (\imp -> imp { modProcs = Map.union
                                   (Map.fromList $ zip names procs')
@@ -1003,16 +1012,17 @@ buildExecutable orderedSCCs targetMod target = do
             -- We need to insert 
             logBuild $ "o Modules with 'main': " ++ showModSpecs mainImports
 
-            let mainProc = buildMain mainImports
-            logBuild $ "Main proc:" ++ showProcDefs 0 [mainProc]
-
             let mainMod = []
             enterModule target mainMod Nothing
             addImport ["wybe"] privateImport
             addImport ["command_line"] privateImport
-            mapM_ (\m -> addImport m $ importSpec (Just [""]) Private)
-                  mainImports
-            addProcDef mainProc
+            -- Import all dependencies of the target mod
+            mapM_ (\m -> addImport m $ importSpec Nothing Private)
+                  (fst <$> depends)
+            importFromSupermodule targetMod
+            mainProc <- buildMain mainImports
+            logBuild $ "Main proc:" ++ show mainProc
+            normaliseItem mainProc
             exitModule
             compileModSCC [mainMod]
             logDump FinalDump FinalDump "BUILDING MAIN"
@@ -1066,7 +1076,9 @@ emitObjectFilesIfNeeded depends = do
             logBuild $ "unchanged, skip it: " ++ objFile
         reexitModule
 
-        return objFile
+        -- we might use the local cache file instead of the actual file
+        -- check and overwrite the file name
+        liftIO $ useLocalCacheFileIfPossible objFile
         ) depends
 
 
@@ -1087,32 +1099,33 @@ foreignDependencies mods =
 
 -- |Generate a main function by piecing together calls to the main procs of all
 -- the module dependencies that have them.
-buildMain :: [ModSpec] -> ProcDef
-buildMain mainImports =
+buildMain :: [ModSpec] -> Compiler Item
+buildMain mainImports = do
+    logBuild "Generating main executable code"
     let cmdResource name = ResourceFlowSpec (ResourceSpec ["command_line"] name)
-        -- Construct argumentless resourceful calls to all main procs
-        bodyInner = [Unplaced $ ProcCall m "" Nothing Det True []
-                    | m <- mainImports]
-        -- If someone is using command_line module, exit with exit_code
-        -- bodyCode = if List.elem ["command_line"] mainImports
-        --            then bodyInner ++ [Unplaced
-        --                     $ ForeignCall "c" "exit" ["semipure","terminal"]
-        --                                   [Unplaced $ intVarGet "exit_code"]]
-        --            else bodyInner
-        bodyCode = bodyInner ++ [Unplaced
-                            $ ForeignCall "c" "exit" ["semipure","terminal"]
-                                          [Unplaced $ intVarGet "exit_code"]]
-        mainBody = ProcDefSrc bodyCode
-        -- Program main has argc, argv, and exit_code as resources
-        proto = ProcProto "" []
+    res <- Set.toList . Set.unions . (keysSet<$>)
+           <$> mapM (initialisedResources `inModule`) mainImports
+    let detism = setDetism Terminal
+                 $ setImpurity Impure defaultProcModifiers
+    -- Program main has argc, argv, and exit_code as resources
+    let proto = ProcProto "" []
                 $ Set.fromList [cmdResource "argc" ParamIn,
                                  cmdResource "argv" ParamIn,
                                  cmdResource "exit_code" ParamOut,
                                  ResourceFlowSpec
                                      (ResourceSpec ["wybe","io"] "io")
                                      ParamOut]
-    in ProcDef "" proto mainBody Nothing 0 0 Map.empty
-       Private Det MayInline Pure NoSuperproc
+    let mainBody =
+          [ Unplaced $
+            UseResources res Nothing $
+            -- Construct argumentless resourceful calls to all main procs
+              [Unplaced $ ProcCall m "" Nothing Det True []
+              | m <- mainImports]
+              ++ [Unplaced $ ForeignCall "c" "exit" ["semipure","terminal"]
+                             [Unplaced $ intVarGet "exit_code"]]]
+    -- return $ ProcDef "" proto mainBody Nothing 0 0 Map.empty
+    --          Private Det MayInline Pure NoSuperproc
+    return $ ProcDecl Private detism proto mainBody Nothing
 
 
 -- | Traverse and collect a depth first dependency list from the given initial
@@ -1311,7 +1324,7 @@ wybeSourcesInDir dir =
 -- |Is the specified file path a Wybe module directory?
 isModuleDirectory :: FilePath -> IO Bool
 isModuleDirectory path = do
-    let dirFileBase = path </> moduleDirectoryBasename 
+    let dirFileBase = path </> moduleDirectoryBasename
     isDirModSrc <- doesFileExist $ dirFileBase <.> sourceExtension
     isDirModObj <- doesFileExist $ dirFileBase <.> objectExtension
     return $ isDirModSrc || isDirModObj
@@ -1320,7 +1333,7 @@ isModuleDirectory path = do
 -- |The different sorts of files that could be specified on the
 --  command line.
 data TargetType = ObjectFile | BitcodeFile | AssemblyFile
-                | ArchiveFile | ExecutableFile | UnknownFile 
+                | ArchiveFile | ExecutableFile | UnknownFile
                 deriving (Show,Eq)
 
 

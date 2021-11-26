@@ -10,10 +10,11 @@ AFTER EVERYTHING:
   procs           : 
 
 chain > {inline} (0 calls)
-0: chain(?z#0:wybe.int):
+0: chain_assign.chain<0>
+chain(?z##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm move(1:wybe.int, ?z#0:wybe.int) @chain_assign:nn:nn
+    foreign llvm move(1:wybe.int, ?z##0:wybe.int) @chain_assign:nn:nn
 
   LLVM code       :
 

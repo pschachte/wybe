@@ -6,3 +6,6 @@ The following have contributed code to the Wybe project:
 * Ashutosh Rishi Ranjan
 * Ting Lu
 * Zijun (Zed) Chen
+* Rudolph Almeida
+* Marco Ho
+* James Barnes

@@ -7,7 +7,7 @@ end
 public proc replicate1(p1:position, ?p2:position) use !io
     replicate2(p1, ?p2)
     x(p2, ?p3, 2)
-    !println(p3.x)
+    !println(p3^x)
 end
 
 ?p1 = position(1,1)

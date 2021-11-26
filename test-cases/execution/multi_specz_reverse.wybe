@@ -1,19 +1,19 @@
-pub type intlist { pub [] | [|](head:int, tail:intlist) }
+pub type intlist { pub nil | cons(head:int, tail:intlist) }
 
 pub def list_print(x:intlist) use !io {
-    if { x = [ ?h | ?t] :: 
+    if { x = cons(?h, ?t) ::
         !print(h)
         !print(" ")
         !list_print(t)
     }
 }
 
-pub def list_reverse(lst:intlist):intlist = list_reverse_helper(lst, [])
+pub def list_reverse(!lst:intlist) { ?lst = list_reverse_helper(lst, nil) }
 
 pub def list_reverse_helper(lst:intlist, acc:intlist):intlist =
-    if lst = [?h | ?t] then list_reverse_helper(t, [h|acc]) else acc
+    if{ lst = cons(?h, ?t):: list_reverse_helper(t, cons(h,acc)) | else:: acc }
 
-?foo = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+?foo = cons(1, cons( 2, cons( 3, cons( 4, cons( 5, cons( 6, cons( 7, cons( 8, cons( 9, cons(10, nil))))))))))
 list_reverse(!foo)
 !list_print(foo)
 !nl

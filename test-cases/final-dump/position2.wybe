@@ -2,7 +2,7 @@ use position
 
 # posB copy posA's y value
 ?posA = position(111, 222)
-?posB = position(333, posA.y)
+?posB = position(333, posA^y)
 !print("expect posA(111,222):")
 !printPosition(posA)
 

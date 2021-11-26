@@ -1,27 +1,145 @@
-pragma no_standard_library  # Standard library can't depend on itself!
+pragma no_standard_library
 
-use wybe.bool
-use wybe.int
-use wybe.char
+use wybe.int, wybe.c_string, wybe.range
+use wybe.int, wybe.char, wybe.bool
+use wybe.io, wybe.float, wybe.count
+use wybe.comparison, wybe.phantom
 
-representation is address
+constructor empty
+          | buffer(len:int, raw:c_string) # must be first non-const ctor
+          | concat(left:_, right:_)
+          | slice(base:_, range:range)
+          | singleton(c:char)
 
-# this whole implementation is completely wrong, but will do for now
-
-pub def =(x:_, y:_):bool  = foreign c strcmp(x,y):int = 0
-pub def /=(x:_,y:_):bool  = foreign c strcmp(x,y):int /= 0
-pub def <(x:_, y:_):bool  = foreign c strcmp(x,y):int < 0
-pub def <=(x:_, y:_):bool = foreign c strcmp(x,y):int <= 0
-pub def >(x:_, y:_):bool  = foreign c strcmp(x,y):int > 0
-pub def >=(x:_, y:_):bool = foreign c strcmp(x,y):int >= 0
-
-pub def length(str:string):int = foreign c strlen(str)
-
-pub def {test} `[|]`(?head:char, ?tail:string, str:string) {
-    foreign lpvm access(str, 0, 0, 0, ?head)
-    foreign llvm icmp_ne(head:!int, 0:int, ?not_done:bool)
-    (not_done = true)
-    foreign llvm add(str, 1, ?tail)
+pub def string(str:c_string, ?s:_) {
+    ?len = length(str)
+    if { len = 0 :: ?s = empty 
+       | len = 1 :: foreign lpvm access(str, 0, 1, 0, ?c); ?s = singleton(c) 
+       | else :: ?s = buffer(len, str)
+    }
+}
+pub def string(c:char):_ = singleton(c)
+pub def c_string(s:_, ?str:c_string) {
+    if { s = buffer(_, ?c_string) :: ?str = c_string
+       | else :: 
+            ?len = length(s)
+            foreign lpvm alloc(len + 1, ?str)
+            foreign lpvm mutate(str, ?str, len + 1, true, 1, 0, nullbyte)
+            ?offset = 0
+            pack(s, !str, !offset)
+    }
 }
 
-#wrong: pub def ,,(x:_, y:_):_ = foreign c strcat(x,y)
+pub def length(s:_):int = 
+    if { s = buffer(?len, _) :: len
+       | s = concat(?left, ?right) :: length(left) + length(right)
+       | s = slice(?base, ?range) :: fixed_range_size(length(base), range)
+       | s = singleton(_) :: 1
+       | else :: 0
+    }
+pub def (x:_ ,, y:_):_ =
+    if { x = empty :: y 
+       | y = empty :: x
+       | else :: concat(x, y)
+    }
+
+
+pub def (x:_ = y:_):bool  = cmp(x, y) = equal
+pub def (x:_ ~= y:_):bool = cmp(x, y) ~= equal
+pub def (x:_ < y:_):bool  = cmp(x, y) < equal
+pub def (x:_ <= y:_):bool = cmp(x, y) <= equal
+pub def (x:_ > y:_):bool  = cmp(x, y) > equal
+pub def (x:_ >= y:_):bool = cmp(x, y) >= equal
+
+pub def {test} `[|]`(?head:char, ?tail:_, s:_) {
+    if { s = buffer(?len, ?str) :: 
+            [?head | ?str] = str
+            ?tail = if { len = 1 :: empty | else :: buffer(len - 1, str) }
+       | s = concat(?left, ?right) :: 
+            if { [?head | ?t] = left :: ?tail = concat(t, right)
+               | else :: [?head | ?tail] = right
+            }
+       | s = slice(?base, ?range) :: 
+            do { # this could be faster
+                [?idx | ?range] = range
+                if { ?head = base[idx] :: ?tail = slice(base, range); break }
+            }
+       | s = singleton(?head) :: ?tail = empty
+       | else :: fail
+    }
+}
+
+pub def empty_string:_ = empty
+# pub def []:_ = empty
+pub def {test} [](s:_, idx:int, ?c:char) {
+    if { s = buffer(?len, ?str) :: 
+            (0 <= idx)
+            (idx < len)
+            unsafe_c_string_index(str, idx, ?c)
+       | s = concat(?left, ?right) :: 
+            ?left_len = length(left)
+            if { idx < left_len :: ?c = left[idx]
+               | else :: ?c = right[idx - left_len]
+            }
+       | s = slice(?base, ?range) :: ?c = base[range[idx]]
+       | s = singleton(?c) :: (idx = 0)
+       | else :: fail
+    }
+}
+pub def [](s:_, r:range):_ = slice(s, r)
+
+pub def print_string(s:_) use !io {
+    if { s = buffer(_, ?str) :: !print(str)
+       | s = concat(?left, ?right) :: !print(left); !print(right)
+       | s = slice(_, _) :: for ?c in s { !print(c:char) }
+       | s = singleton(?c) :: !print(c)
+    }
+}
+
+def pack(s:_, !mem:c_string, !offset:int) {
+    if { s = buffer(_, ?str) :: 
+            for ?c in str {
+                foreign lpvm mutate(mem, ?mem, offset, true, 1, 0, c)
+                incr(!offset)
+            }
+       | s = concat(?left, ?right) :: 
+            pack(left, !mem, !offset)
+            pack(right, !mem, !offset)
+            incr(!offset)
+       | s = slice(_, _) :: 
+            for ?c in s {
+                foreign lpvm mutate(mem, ?mem, offset, true, 1, 0, c)
+                incr(!offset)
+            }
+       | s = singleton(?c) ::
+            foreign lpvm mutate(mem, ?mem, offset, true, 1, 0, c)
+            incr(!offset)
+    }
+}
+
+def cmp(x:_, y:_):comparison = c where {
+    ?c = equal
+    for ?cx in x; ?cy in y {
+        if { cx < cy :: ?c = less; break
+           | cx > cy :: ?c = greater; break 
+        }
+    }
+    if { c = equal :: 
+        ?lx = length(x)
+        ?ly = length(y)
+        if { lx < ly :: ?c = less | lx > ly :: ?c = greater } 
+    }
+}
+
+def fixed_range_size(hi:int, r:range, ?sz:int) {
+    r = range(?start, ?stride, ?end)
+    if { 0 <= stride :: 
+            ?lo = max(start, start + -start / stride * stride); 
+            ?hi = min(hi, end)
+       | else :: 
+            ?lo = max(-1, end); 
+            ?hi = min(start, hi + stride + (start - hi - 1) % -stride + 1) 
+            ?stride = -stride  
+       }
+    ?sz = if { hi <= lo :: 0 | else :: (hi - lo - 1) / stride + 1 }
+}

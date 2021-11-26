@@ -1,0 +1,41 @@
+!println(c"\nTESTING EQUALITY")
+!println("a"  =  "a") # expect true
+!println("a"  =  "b") # expect false
+!println("aa" =  "a") # expect false
+!println("b"  =  "a") # expect false 
+!println("b"  =  "")  # expect false
+
+!println(c"\nTESTING INEQUALITY")
+!println("a"  ~= "a") # expect false
+!println("a"  ~= "b") # expect true
+!println("aa" ~= "a") # expect true
+!println("b"  ~= "a") # expect true 
+!println("b"  ~= "")  # expect true
+
+!println(c"\nTESTING LESS")
+!println("a"  <  "a") # expect false
+!println("a"  <  "b") # expect true
+!println("aa" <  "a") # expect false
+!println("b"  <  "a") # expect false 
+!println("b"  <  "")  # expect false
+
+!println(c"\nTESTING LESSEQ")
+!println("a"  <= "a") # expect true
+!println("a"  <= "b") # expect true
+!println("aa" <= "a") # expect false
+!println("b"  <= "a") # expect false 
+!println("b"  <= "")  # expect false
+
+!println(c"\nTESTING GREATER")
+!println("a"  >  "a") # expect false
+!println("a"  >  "b") # expect false
+!println("aa" >  "a") # expect true
+!println("b"  >  "a") # expect true 
+!println("b"  >  "")  # expect true
+
+!println(c"\nTESTING GREATEREQ")
+!println("a"  >= "a") # expect true
+!println("a"  >= "b") # expect false
+!println("aa" >= "a") # expect true
+!println("b"  >= "a") # expect true 
+!println("b"  >= "")  # expect true

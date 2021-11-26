@@ -13,17 +13,19 @@ AFTER EVERYTHING:
   procs           : 
 
 baz > {inline} (0 calls)
-0: baz(i#0:wybe.int, ?j#0:wybe.int):
+0: sister_module.baz<0>
+baz(i##0:wybe.int, ?j##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    sister_module.m1.foo<0>(~i#0:wybe.int, ?j#0:wybe.int) #0 @sister_module:nn:nn
+    sister_module.m1.foo<0>(~i##0:wybe.int, ?j##0:wybe.int) #0 @sister_module:nn:nn
 
 
 buzz > {inline} (0 calls)
-0: buzz(i#0:wybe.int, ?j#0:wybe.int):
+0: sister_module.buzz<0>
+buzz(i##0:wybe.int, ?j##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    sister_module.m2.bar<0>(~i#0:wybe.int, ?j#0:wybe.int) #0 @sister_module:nn:nn
+    sister_module.m2.bar<0>(~i##0:wybe.int, ?j##0:wybe.int) #0 @sister_module:nn:nn
 
   LLVM code       :
 
@@ -39,17 +41,17 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external fastcc  i64 @"sister_module.baz<0>"(i64  %"i#0")    {
+define external fastcc  i64 @"sister_module.baz<0>"(i64  %"i##0")    {
 entry:
-  %"1$j#0" = tail call fastcc  i64  @"sister_module.m1.foo<0>"(i64  %"i#0")  
-  ret i64 %"1$j#0" 
+  %"1#j##0" = tail call fastcc  i64  @"sister_module.m1.foo<0>"(i64  %"i##0")  
+  ret i64 %"1#j##0" 
 }
 
 
-define external fastcc  i64 @"sister_module.buzz<0>"(i64  %"i#0")    {
+define external fastcc  i64 @"sister_module.buzz<0>"(i64  %"i##0")    {
 entry:
-  %"1$j#0" = tail call fastcc  i64  @"sister_module.m2.bar<0>"(i64  %"i#0")  
-  ret i64 %"1$j#0" 
+  %"1#j##0" = tail call fastcc  i64  @"sister_module.m2.bar<0>"(i64  %"i##0")  
+  ret i64 %"1#j##0" 
 }
 --------------------------------------------------
  Module sister_module.m1
@@ -63,10 +65,11 @@ entry:
   procs           : 
 
 foo > public {inline} (0 calls)
-0: foo(i#0:wybe.int, ?j#0:wybe.int):
+0: sister_module.m1.foo<0>
+foo(i##0:wybe.int, ?j##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm add(~i#0:wybe.int, 1:wybe.int, ?j#0:wybe.int) @int:nn:nn
+    foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?j##0:wybe.int) @int:nn:nn
 
   LLVM code       :
 
@@ -82,10 +85,10 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external fastcc  i64 @"sister_module.m1.foo<0>"(i64  %"i#0")    {
+define external fastcc  i64 @"sister_module.m1.foo<0>"(i64  %"i##0")    {
 entry:
-  %"1$j#0" = add   i64 %"i#0", 1 
-  ret i64 %"1$j#0" 
+  %"1#j##0" = add   i64 %"i##0", 1 
+  ret i64 %"1#j##0" 
 }
 --------------------------------------------------
  Module sister_module.m2
@@ -99,11 +102,12 @@ entry:
   procs           : 
 
 bar > public {inline} (0 calls)
-0: bar(i#0:wybe.int, ?j#0:wybe.int):
+0: sister_module.m2.bar<0>
+bar(i##0:wybe.int, ?j##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm add(~i#0:wybe.int, 1:wybe.int, ?k#0:wybe.int) @int:nn:nn
-    sister_module.m1.foo<0>(~k#0:wybe.int, ?j#0:wybe.int) #2 @sister_module:nn:nn
+    foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?k##0:wybe.int) @int:nn:nn
+    sister_module.m1.foo<0>(~k##0:wybe.int, ?j##0:wybe.int) #2 @sister_module:nn:nn
 
   LLVM code       :
 
@@ -119,9 +123,9 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external fastcc  i64 @"sister_module.m2.bar<0>"(i64  %"i#0")    {
+define external fastcc  i64 @"sister_module.m2.bar<0>"(i64  %"i##0")    {
 entry:
-  %"1$k#0" = add   i64 %"i#0", 1 
-  %"1$j#0" = tail call fastcc  i64  @"sister_module.m1.foo<0>"(i64  %"1$k#0")  
-  ret i64 %"1$j#0" 
+  %"1#k##0" = add   i64 %"i##0", 1 
+  %"1#j##0" = tail call fastcc  i64  @"sister_module.m1.foo<0>"(i64  %"1#k##0")  
+  ret i64 %"1#j##0" 
 }

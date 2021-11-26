@@ -4,9 +4,9 @@ pub type position { pub position(x:int, y:int) }
 
 pub def printPosition(pos:position) use !io {
     !print(" (")
-    !print(pos.x)
+    !print(pos^x)
     !print(",")
-    !print(pos.y)
+    !print(pos^y)
     !println(")")
 }
 
@@ -22,7 +22,7 @@ pub def foo1(x1:position, x2:position, x3:position, x4:position, n:int) use !io 
             !modifyAndPrint(x2, 222)
             !modifyAndPrint(x3, 333)
             !modifyAndPrint(x4, 444)
-        | otherwise ::
+        | else      ::
             !foo2(x2, x3, x4, x1, n)
     }
 }

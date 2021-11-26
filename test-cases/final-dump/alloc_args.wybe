@@ -1,0 +1,7 @@
+def {noinline} foo(size:int) use !io {
+    foreign lpvm alloc(size, ?str:string)
+    foreign lpvm mutate(str, ?str, 0, true, 1, 0, 0)
+    !println(str)
+}
+
+!foo(1)

@@ -6,8 +6,8 @@ use position
 pub def replicate1(p1:position, ?p2:position) use !io {
   ?pp = position(0,0)
   !println("random replicate1")
-  !println(pp.x)
-  ?p2 = position(p1.x, 200)
+  !println(pp^x)
+  ?p2 = position(p1^x, 200)
 }
 
 pub def bar use !io {

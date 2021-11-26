@@ -12,7 +12,9 @@ INSTALLLIB=/usr/local/lib/wybe
 VERSION = 0.1
 SRCDIR = src
 LIBDIR = wybelibs
-LIBS = wybe.o command_line.o logging.o wybe/cbits.o
+WYBELIBS = wybe.o command_line.o logging.o
+CLIBS = wybe/cbits.o
+LIBS = $(WYBELIBS) $(CLIBS)
 SHELL := /bin/bash
 
 
@@ -34,9 +36,8 @@ install:	wybemk
 	cp wybemk "$(INSTALLBIN)"
 	rm -rf "$(INSTALLLIB)"
 	mkdir -p "$(INSTALLLIB)"
-	cp -r "$(LIBDIR)/*" "$(INSTALLLIB)"
-	"$(INSTALLBIN)"/wybemk --force-all "$(INSTALLLIB)"/wybe
-	"$(INSTALLBIN)"/wybemk --force-all $(patsubst %.wybe,%.o,"$(INSTALLLIB)/*.wybe")
+	cp -r "$(LIBDIR)/." "$(INSTALLLIB)"
+	"$(INSTALLBIN)/wybemk" --force-all $(addsuffix ", $(addprefix "$(INSTALLLIB)/,$(WYBELIBS)))
 
 
 wybemk:	$(SRCDIR)/*.hs $(SRCDIR)/Version.lhs
@@ -66,6 +67,9 @@ $(SRCDIR)/Version.lhs:	$(addprefix $(SRCDIR)/,*.hs)
 	@printf "> buildDate :: String\n> buildDate = \"%s\"\n\n" "`date`" >> "$@"
 	@printf "> libDir :: String\n> libDir = \"%s\"\n\n" "$(INSTALLLIB)" >> "$@"
 
+.PHONY:	doc
+doc:	src/README.md
+
 
 # Assemble README markdown source file automatically
 src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro
@@ -87,9 +91,8 @@ src/README.md: src/*.hs Makefile src/README.md.intro src/README.md.outro
 
 	for f in src/*.hs ; do \
       m=`basename $$f .hs` ; \
-	    printf "\n## %s\n" $$m ; \
 	    echo -e ; \
-	    sed -E -e '/^-- *Purpose *:/{s/^-- *Purpose *:/**Purpose**:/; G; p;}' -e '/BEGIN MAJOR DOC/,/END MAJOR DOC/{//d ; s/^-- ? ?//p;}' -e 'd' <$$f ; \
+	    sed -E -e '/^-- *Purpose *:/{s/^-- *Purpose *:/## '"$$m -- "'/; G; p;}' -e '/BEGIN MAJOR DOC/,/END MAJOR DOC/{//d ; s/^-- ? ?//p;}' -e 'd' <$$f ; \
 	done >> "$@"
 
 	printf "\n\n" >> "$@"

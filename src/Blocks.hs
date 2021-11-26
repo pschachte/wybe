@@ -17,6 +17,7 @@ import           BinaryFactory                   ()
 import           Codegen
 import           Config                          (wordSize, wordSizeBytes)
 import           Util                            (maybeNth, zipWith3M_)
+import           Snippets 
 import           Control.Monad
 import           Control.Monad.Trans             (lift, liftIO)
 import           Control.Monad.Trans.Class
@@ -123,13 +124,12 @@ mangleProcs ps = zipWith mangleProc ps [0..]
 
 mangleProc :: ProcDef -> Int -> ProcDef
 mangleProc def i =
-    let (ProcDefPrim proto body analysis speczBodies) = 
-                procImpln def
+    let proto = procImplnProto $ procImpln def
         s = primProtoName proto
         pname = s ++ "<" ++ show i ++ ">"
         newProto = proto {primProtoName = pname}
     in 
-    def {procImpln = ProcDefPrim newProto body analysis speczBodies}
+    def {procImpln = (procImpln def){procImplnProto = newProto}}
 
 
 
@@ -171,7 +171,7 @@ mangleProc def i =
 extractLPVMProto :: ProcDef -> PrimProto
 extractLPVMProto procdef =
     case procImpln procdef of
-       (ProcDefPrim proto _ _ _) -> proto
+       ProcDefPrim{procImplnProto = proto} -> proto
        uncompiled ->
          shouldnt $ "Proc reached backend uncompiled: " ++ show uncompiled
 
@@ -203,7 +203,9 @@ isStdLib (m:_) = m == "wybe"
 translateProc :: [PrimProto] -> ProcDef -> Translation [ProcDefBlock]
 translateProc modProtos proc = do
     count <- getCount
-    let ProcDefPrim proto body _ speczBodies = procImpln proc
+    let proto = procImplnProto $ procImpln proc
+    let body = procImplnBody $ procImpln proc
+    let speczBodies = procImplnSpeczBodies $ procImpln proc
     -- translate the standard version
     (block, count') <- 
             lift $ _translateProcImpl modProtos proto body count
@@ -438,7 +440,7 @@ codegenBody :: PrimProto -> ProcBody -> Codegen ()
 codegenBody proto body =
     do let ps = List.map content (bodyPrims body)
        -- Filter out prims which contain only phantom arguments
-       ops <- mapM cgen ps
+       mapM_ cgen ps
        let params = primProtoParams proto
        case bodyFork body of
          NoFork -> do retOp <- buildOutputOp params
@@ -497,7 +499,7 @@ codegenForkBody var _ _ =
 -- in the current module and imported modules. All primitive calls' arguments
 -- are position checked with the respective prototype, eliminating arguments
 -- which do not eventually appear in the prototype.
-cgen :: Prim -> Codegen (Maybe Operand)
+cgen :: Prim -> Codegen ()
 cgen prim@(PrimCall callSiteID pspec args) = do
     logCodegen $ "Compiling " ++ show prim
     thisMod <- lift getModuleSpec
@@ -509,14 +511,14 @@ cgen prim@(PrimCall callSiteID pspec args) = do
     -- and remove the unneeded ones.
     proto <- lift $ getProcPrimProto pspec
     logCodegen $ "Proto = " ++ show proto
-    filteredArgs <- filterUnneededArgs proto args
-    logCodegen $ "Filtered args = " ++ show filteredArgs
+    args' <- prepareArgs proto args
+    logCodegen $ "Prepared args = " ++ show args'
 
     -- if the call is to an external module, declare it
     unless (thisMod == mod || maybe False (`List.isPrefixOf` mod) fileMod)
-        (addExtern $ PrimCall callSiteID pspec filteredArgs)
+        (addExtern $ PrimCall callSiteID pspec args')
 
-    let (inArgs,outArgs) = partitionArgs filteredArgs
+    let (inArgs,outArgs) = partitionArgs args'
     logCodegen $ "In args = " ++ show inArgs
     outTy <- lift $ primReturnType outArgs
     logCodegen $ "Out Type = " ++ show outTy
@@ -534,14 +536,18 @@ cgen prim@(PrimForeign "llvm" name flags args) = do
     args' <- filterPhantomArgs args
     case length args' of
       -- XXX deconstruct args' in these calls
-       0 | name == "move" -> return Nothing -- move phantom to phantom
+       0 | name == "move" -> return () -- move phantom to phantom
        2 -> cgenLLVMUnop name flags args'
        3 -> cgenLLVMBinop name flags args'
-       _ -> shouldnt $ "LLVM instruction " ++ name ++ " with wrong arity!"
+       _ -> shouldnt $ "LLVM instruction " ++ name
+                       ++ " with wrong arity (" ++ show (length args') ++ ")!"
 
 cgen prim@(PrimForeign "lpvm" name flags args) = do
     logCodegen $ "Compiling " ++ show prim
-    filterPhantomArgs args >>= cgenLPVM name flags
+    args' <- filterPhantomArgs args
+    if List.null args' && name == "cast"
+      then return ()
+      else cgenLPVM name flags args'
 
 cgen prim@(PrimForeign lang name flags args) = do
     logCodegen $ "Compiling " ++ show prim
@@ -589,7 +595,7 @@ isIntOp _                                          = False
 -- arguments are split into inputs and outputs (according to their flow
 -- type). The output argument is used to name and reference the resulting
 -- Operand of the instruction.
-cgenLLVMBinop :: ProcName -> [Ident] -> [PrimArg] -> Codegen (Maybe Operand)
+cgenLLVMBinop :: ProcName -> [Ident] -> [PrimArg] -> Codegen ()
 cgenLLVMBinop name flags args =
     do let (inArgs,outArgs) = partitionArgs args
        inOps <- mapM cgenArg inArgs
@@ -606,7 +612,7 @@ cgenLLVMBinop name flags args =
 -- input operant at the front of the symbol table. The next time the output
 -- name is referenced, the symbol table will return the latest assignment to
 -- it.
-cgenLLVMUnop :: ProcName -> [Ident] -> [PrimArg] -> Codegen (Maybe Operand)
+cgenLLVMUnop :: ProcName -> [Ident] -> [PrimArg] -> Codegen ()
 cgenLLVMUnop "move" flags args =
     case partitionArgs args of
       ([input],[output]) -> do
@@ -615,20 +621,20 @@ cgenLLVMUnop "move" flags args =
            (outTy, outNm) <- openPrimArg output
            inop <- cgenArg input
            assign outNm inop outRep
-           return $ Just inop
       _ ->
            shouldnt "llvm move instruction with wrong arity"
 
 cgenLLVMUnop name flags args =
-    do let (inArgs,outArgs) = partitionArgs args
-       inOps <- mapM cgenArg inArgs
-       case (Map.lookup name llvmMapUnop,inOps) of
-         (Just (f,_,_),[inOp]) -> addInstruction (f inOp) outArgs
-         (Just _,_)            -> shouldnt $ "unary LLVM Instruction " ++ name
-                                  ++ " with " ++ show (length inArgs)
-                                  ++ " inputs"
-         (Nothing,_)           -> shouldnt $ "LLVM Instruction not found : "
-                                  ++ name
+    case (Map.lookup name llvmMapUnop,partitionArgs args) of
+        (Just (f,_,_),([inArg],[outArg])) -> do
+            inOp <- cgenArg inArg
+            outRep <- lift $ typeRep $ argType outArg
+            addInstruction (f inOp (repLLVMType outRep)) [outArg]
+        (Just _,(inArgs,outArgs)) ->
+            shouldnt $ "unary LLVM Instruction " ++ name ++ " with "
+                        ++ show (length inArgs) ++ " input(s) and "
+                        ++ show (length outArgs) ++ " output(s)"
+        (Nothing,_) -> shouldnt $ "Unknown unary LLVM Instruction " ++ name
 
 
 -- | Look inside the Prototype list stored in the CodegenState monad and
@@ -643,22 +649,23 @@ findProto (ProcSpec _ nm i _) = do
 
 
 -- | Match PrimArgs with the paramaters in the given prototype. If a PrimArg's
--- counterpart in the prototype is unneeded, filtered out. Positional matching
--- is used for this.
-filterUnneededArgs :: PrimProto -> [PrimArg] -> Codegen [PrimArg]
-filterUnneededArgs proto args = argsNeeded args (primProtoParams proto)
+-- counterpart in the prototype is unneeded, filtered out. Arguments 
+-- are matched positionally, and are coerced to the type of corresponding 
+-- parameters.
+prepareArgs :: PrimProto -> [PrimArg] -> Codegen [PrimArg]
+prepareArgs proto args = prepareArgs' args (primProtoParams proto)
 
-argsNeeded :: [PrimArg] -> [PrimParam] -> Codegen [PrimArg]
-argsNeeded [] []    = return []
-argsNeeded [] (_:_) = shouldnt "more parameters than arguments"
-argsNeeded (_:_) [] = shouldnt "more arguments than parameters"
-argsNeeded (ArgUnneeded _ _:as) (p:ps)
+prepareArgs' :: [PrimArg] -> [PrimParam] -> Codegen [PrimArg]
+prepareArgs' [] []    = return []
+prepareArgs' [] (_:_) = shouldnt "more parameters than arguments"
+prepareArgs' (_:_) [] = shouldnt "more arguments than parameters"
+prepareArgs' (ArgUnneeded _ _:as) (p:ps)
     | paramNeeded p = shouldnt $ "unneeded arg for needed param " ++ show p
-    | otherwise     = argsNeeded as ps
-argsNeeded (a:as) (p:ps) = do
+    | otherwise     = prepareArgs' as ps
+prepareArgs' (a:as) (p@PrimParam{primParamType=ty}:ps) = do
     real <- lift $ paramIsReal p
-    rest <- argsNeeded as ps
-    return $ if real then a:rest else rest
+    rest <- prepareArgs' as ps
+    return $ if real then setArgType ty a:rest else rest
 
 
 filterPhantomArgs :: [PrimArg] -> Codegen [PrimArg]
@@ -673,7 +680,7 @@ trustArgInt arg = trustFromJust
 
 
 -- | Code generation for LPVM instructions.
-cgenLPVM :: ProcName -> [Ident] -> [PrimArg] -> Codegen (Maybe Operand)
+cgenLPVM :: ProcName -> [Ident] -> [PrimArg] -> Codegen ()
 cgenLPVM "alloc" [] args@[sizeArg,addrArg] = do
           logCodegen $ "lpvm alloc " ++ show sizeArg ++ " " ++ show addrArg
           let (inputs,outputs) = partitionArgs args
@@ -683,7 +690,6 @@ cgenLPVM "alloc" [] args@[sizeArg,addrArg] = do
                 let outTy = repLLVMType outRep
                 op <- gcAllocate sizeArg outTy
                 assign (pullName addrArg) op outRep
-                return $ Just op
             _ ->
               shouldnt $ "alloc instruction with " ++ show (length inputs)
                          ++ " inputs"
@@ -698,7 +704,6 @@ cgenLPVM "access" [] args@[addrArg,offsetArg,_,_,val] = do
           logCodegen $ "outTy = " ++ show outTy
           op <- gcAccess finalAddr outTy
           assign (pullName val) op outRep
-          return $ Just op
 
 cgenLPVM "mutate" flags
     [addrArg, outArg, offsetArg, ArgInt 0 intTy, sizeArg, startOffsetArg,
@@ -736,7 +741,6 @@ cgenLPVM "mutate" _
           baseAddr <- cgenArg addrArg
           gcMutate baseAddr offsetArg valArg
           assign (pullName outArg) baseAddr Address
-          return $ Just baseAddr
 
 cgenLPVM "mutate" _ [_, _, _, destructiveArg, _, _, _] =
       nyi "lpvm mutate instruction with non-constant destructive flag"
@@ -768,10 +772,9 @@ cgenLPVM "cast" [] args@[inArg,outArg] =
                 _ -> doCast inOp inTy outTy
 
             assign (pullName outArg) castOp outRep
-            return $ Just castOp
 
         -- A cast with no outputs:  do nothing
-        (_, []) -> return Nothing
+        (_, []) -> return ()
         (inputs,outputs) ->
             shouldnt $ "cast instruction with " ++ show (length inputs)
                        ++ " inputs and " ++ show (length outputs)
@@ -779,7 +782,8 @@ cgenLPVM "cast" [] args@[inArg,outArg] =
 
 
 cgenLPVM pname flags args = do
-    shouldnt $ "Instruction " ++ pname ++ " not imlemented."
+    shouldnt $ "Instruction " ++ pname ++ " arity " ++ show (length args)
+               ++ " not implemented."
 
 
 -- | Generate code to add an offset to an address
@@ -795,10 +799,6 @@ offsetAddr baseAddr offsetFn offset = do
           instr address_t (offsetFn baseAddr offsetArg)
 
 
-
-
-
-
 isNullCons :: C.Constant -> Bool
 isNullCons (C.Int _ val) = val == 0
 isNullCons _             = False
@@ -811,26 +811,54 @@ isPtr _                 = False
 
 doCast :: Operand -> LLVMAST.Type -> LLVMAST.Type -> Codegen Operand
 doCast op ty1 ty2 = do
-    (op,caseStr) <- doCast' op ty1 ty2
-    logCodegen $ "doCast from " ++ show op ++ " to " ++ show ty2
+    (op',caseStr) <- castHelper bitcast zext trunc inttoptr ptrtoint op ty1 ty2
+    logCodegen $ "doCast from " ++ show op' ++ " to " ++ show ty2
                  ++ ":  " ++ caseStr
-    return op
+    return op'
 
 
-doCast' :: Operand -> LLVMAST.Type -> LLVMAST.Type -> Codegen (Operand,String)
-doCast' op fromTy toTy
+consCast :: C.Constant -> LLVMAST.Type -> LLVMAST.Type -> Codegen C.Constant
+consCast c ty1 ty2 = do
+    (c',caseStr) <- castHelper cbitcast czext ctrunc cinttoptr cptrtoint c ty1 ty2
+    logCodegen $ "doCast from " ++ show c ++ " to " ++ show ty2
+                 ++ ":  " ++ caseStr
+    return c'
+
+
+castHelper :: (a -> LLVMAST.Type -> Codegen a) -- bitcast
+           -> (a -> LLVMAST.Type -> Codegen a) -- zext
+           -> (a -> LLVMAST.Type -> Codegen a) -- trunc
+           -> (a -> LLVMAST.Type -> Codegen a) -- inttoptr
+           -> (a -> LLVMAST.Type -> Codegen a) -- ptrtoint
+           -> a -> LLVMAST.Type -> LLVMAST.Type -> Codegen (a,String)
+castHelper _ _ _ _ _ op fromTy toTy
     | fromTy == toTy = return (op, "identity cast")
-doCast' op (IntegerType _) ty2@(PointerType _ _) =
-    (,"inttoptr") <$> inttoptr op ty2
-doCast' op (PointerType _ _) ty2@(IntegerType _) =
-    (,"ptrtoint") <$> ptrtoint op ty2
-doCast' op (IntegerType bs1) ty2@(IntegerType bs2)
-    | bs1 == bs2 = (,"bitcast no-op") <$> bitcast op ty2
-    | bs2 > bs1 = (,"zext") <$> zext op ty2
-    | bs1 > bs2 = (,"trunc") <$> trunc op ty2
-doCast' op ty1 ty2 =
-    (,"bitcast from " ++ show ty1 ++ " case") <$> bitcast op ty2
-
+castHelper _ _ _ i _ op (IntegerType _) ty2@(PointerType _ _) =
+    (,"inttoptr") <$> i op ty2
+castHelper _ _ _ _ p op (PointerType _ _) ty2@(IntegerType _) =
+    (,"ptrtoint") <$> p op ty2
+castHelper b z t _ _ op (IntegerType bs1) ty2@(IntegerType bs2)
+    | bs1 == bs2 = (,"bitcast no-op") <$> b op ty2
+    | bs2 > bs1 = (,"zext") <$> z op ty2
+    | bs1 > bs2 = (,"trunc") <$> t op ty2
+castHelper b z t _ _ op ty1@(FloatingPointType fp) ty2@(IntegerType bs2)
+    | bs1 == bs2 = caseStr <$> b op ty2 
+    | bs2 > bs1 = caseStr <$> (b op ty' >>= flip z ty2)
+    | bs1 > bs2 = caseStr <$> (b op ty' >>= flip t ty2)
+  where 
+    bs1 = getBits ty1
+    ty' = IntegerType bs1
+    caseStr = (,"fp" ++ show bs1 ++ "-int" ++ show bs2)
+castHelper b z t _ _ op ty1@(IntegerType bs1) ty2@(FloatingPointType fp)
+    | bs2 == bs1 = caseStr <$> b op ty2 
+    | bs2 > bs1 = caseStr <$> (z op ty' >>= flip b ty2)
+    | bs1 > bs2 = caseStr <$> (t op ty' >>= flip b ty2) 
+  where 
+    bs2 = getBits ty2
+    ty' = IntegerType bs2
+    caseStr = (,"int" ++ show bs1 ++ "-fp" ++ show bs2)
+castHelper b _ _ _ _ op ty1 ty2 =
+    (,"bitcast from " ++ show ty1 ++ " case") <$> b op ty2
 
 
 -- | Predicate to check if an operand is a constant
@@ -851,22 +879,21 @@ constantType _            = shouldnt "Cannot determine constant type."
 -- The return type of the operand value generated by the instruction call is
 -- inferred depending on the output arguments. The name is inferred from
 -- the output argument's name (LPVM is in SSA form).
-addInstruction :: Instruction -> [PrimArg] -> Codegen (Maybe Operand)
+addInstruction :: Instruction -> [PrimArg] -> Codegen ()
 addInstruction ins outArgs = do
     logCodegen $ "addInstruction " ++ show outArgs ++ " = " ++ show ins
     outTy <- lift $ primReturnType outArgs
     logCodegen $ "outTy = " ++ show outTy
     case outArgs of
           [] -> case outTy of
-            VoidType -> voidInstr ins >> return Nothing
-            _        -> Just <$> instr outTy ins
+            VoidType -> voidInstr ins
+            _        -> instr outTy ins >> return ()
           [outArg] -> do
             outRep <- lift $ typeRep $ argType outArg
             logCodegen $ "outRep = " ++ show outRep
             let outName = pullName outArg
             outop <- namedInstr outTy outName ins
             assign outName outop outRep
-            return (Just outop)
           _ -> do
             outOp <- instr outTy ins
             let outTySpecs = argType <$> outArgs
@@ -876,7 +903,6 @@ addInstruction ins outArgs = do
             let outNames = List.map pullName outArgs
             -- lift $ logBlocks $ "-=-=-=-= Structure names:" ++ show outNames
             zipWith3M_ assign outNames fields treps
-            return $ Just $ last fields -- XXX this looks bogus!
 
 
 pullName ArgVar{argVarName=var} = show var
@@ -933,50 +959,72 @@ openPrimArg a = shouldnt $ "Can't Open!: "
                 ++ (show $ argFlowDirection a)
 
 
--- | 'cgenArg' makes an Operand of the input argument. The argument may be:
--- o input variable - lookup the symbol table to get its Operand value.
--- o Constant - Make a constant Operand according to the type: o String
--- constants: A string constant is an constant Array Type of [N x i8].  This
--- will have to be declared as a global constant to get implicit memory
--- allocation and then be referenced with a pointer (GetElementPtr). To make
--- it a global declaration 'addGlobalConstant' creates a G.Global Value for
--- it, generating a UnName name for it.
+-- | 'cgenArg' makes an Operand of the input argument. 
+-- * Variables return a casted version of their respective symbol table operand
+-- * Constants are generated with cgenArgConst, then wrapped in `cons`
 cgenArg :: PrimArg -> Codegen LLVMAST.Operand
--- cgenArg ArgVar{argVarName=nm, argVarCoerce=False} = fst <$> getVar (show nm)
--- cgenArg ArgVar{argVarName=nm, argVarCoerce=True, argVarType=ty} = do
 cgenArg ArgVar{argVarName=nm, argVarType=ty} = do
     lift $ logBlocks $ "Coercing var " ++ show nm ++ " to " ++ show ty
     toTy <- lift $ llvmType ty
     (varOp,rep) <- getVar (show nm)
     let fromTy = repLLVMType rep
     doCast varOp fromTy toTy
-cgenArg (ArgInt val ty) = do
-    reprTy <- lift $ llvmType ty
-    lift $ logBlocks $ show val ++ " :: " ++ show ty
-        ++ " -> " ++ show reprTy
-    let bs = getBits reprTy
-    let intCons = cons $ C.Int bs val
-    return intCons
-cgenArg (ArgFloat val ty) = return $ cons $ C.Float (F.Double val)
-cgenArg (ArgString s _) =
-    do let conStr = makeStringConstant s
-       let len = length s + 1
-       let conType = array_t (fromIntegral len) char_t
-       conName <- addGlobalConstant conType conStr
-       let conPtr = C.GlobalReference (ptr_t conType) conName
-       let conElem = C.GetElementPtr True conPtr [C.Int 32 0, C.Int 32 0]
-       -- return $ cons conElem
-       -- ptrtoint (cons conElem) $ ptr_t (int_c 8)
-       -- We return integer address for strings
-       ptrtoint (cons conElem) address_t
-cgenArg (ArgChar c ty) = do t <- lift $ llvmType ty
-                            let bs = getBits t
-                            return $ cons $ C.Int bs $ integerOrd c
 cgenArg (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
-cgenArg (ArgUndef ty) = do
+cgenArg arg = do
+    cons <$> cgenArgConst arg
+
+
+-- Generates a constant for a constant PrimArg, casted to the respective type
+-- * Ints, Floats, Chars, Undefs are of respective LLVMTypes
+-- * Strings are handled based on string variant
+--   * CString    - ptr to global constant of [N x i8]
+--   * WybeString - ptr to global constant of { i64, i64 } with the second 
+--                  element being as though it were a CString. This representation 
+--                  is to comply with the stdlib string implementation
+cgenArgConst :: PrimArg -> Codegen C.Constant
+cgenArgConst (ArgInt val ty) = do
+    toTy <- lift $ llvmType ty
+    case toTy of
+      IntegerType bs -> return $ C.Int bs val
+      _ -> consCast (C.Int (fromIntegral wordSize) val) address_t toTy 
+cgenArgConst (ArgFloat val ty) = do
+    toTy <- lift $ llvmType ty
+    case toTy of
+      FloatingPointType DoubleFP -> return $ C.Float $ F.Double val
+      _ -> consCast (C.Float $ F.Double val) float_t toTy
+cgenArgConst (ArgString s WybeString ty) = do
+    (_,conPtr) <- addStringConstant s
+    let strType = struct_t [address_t, address_t]
+    let strStruct = C.Struct Nothing False 
+                     [ C.Int (fromIntegral wordSize) (fromIntegral $ length s)
+                     , C.PtrToInt conPtr address_t ]
+    strName <- addGlobalConstant strType strStruct
+    let strPtr = C.GlobalReference (ptr_t strType) strName
+    let strElem = C.GetElementPtr True strPtr [C.Int 32 0, C.Int 32 0]
+    consCast strElem (ptr_t strType) address_t
+cgenArgConst (ArgString s CString _) = do
+    (conPtrTy, conPtr) <- addStringConstant s
+    let strElem = C.GetElementPtr True conPtr [C.Int 32 0, C.Int 32 0]
+    consCast strElem conPtrTy address_t
+cgenArgConst (ArgChar c ty) = do 
+    let val = integerOrd c
+    toTy <- lift $ llvmType ty
+    case toTy of
+      IntegerType bs -> return $ C.Int bs val
+      _ -> consCast (C.Int (fromIntegral wordSize) val) address_t toTy      
+cgenArgConst (ArgUndef ty) = do
     llty <- lift $ llvmType ty
-    return $ cons $ C.Undef llty
-    
+    return $ C.Undef llty
+cgenArgConst arg = shouldnt $ "cgenArgConst of " ++ show arg
+
+
+addStringConstant :: String -> Codegen (LLVMAST.Type,C.Constant)
+addStringConstant s = do
+    let strCon = makeStringConstant s
+    let conType = array_t (fromIntegral $ length s + 1) char_t
+    let ptrConType = ptr_t conType
+    globalConst <- addGlobalConstant conType strCon
+    return (ptrConType, C.GlobalReference ptrConType globalConst)
 
 
 getBits :: LLVMAST.Type -> Word32
@@ -1056,7 +1104,8 @@ llvmMapBinop =
            ]
 
 -- | A map of unary llvm operations wrapped in the 'Codegen' module.
-llvmMapUnop :: Map String (Operand -> Instruction, TypeFamily, TypeFamily)
+llvmMapUnop :: Map String 
+               (Operand -> Type -> Instruction, TypeFamily, TypeFamily)
 llvmMapUnop =
     Map.fromList [
             ("uitofp", (uitofp, IntFamily, FloatFamily)),

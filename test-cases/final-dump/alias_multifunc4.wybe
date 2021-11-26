@@ -8,7 +8,7 @@ pub def replicate1(pa:position, ?pb:position, ?pc:position) use !io {
     ?pc = pa
 
     ?pp = position(99,99)
-    x(!pb, pp.x)
+    x(!pb, pp^x)
 }
 
 pub def replicate21(?pb:position) use !io {
@@ -49,7 +49,7 @@ pub def replicate22(?pb:position, ?pc:position) use !io {
 !print("expect p4(99999,99999):")
 !printPosition(p4)
 
-#!println(p5.x)
+#!println(p5^x)
 !replicate22(?p6, ?p7)
 !println("--- After calling replicate22:")
 !print("expect p6(99999,99999):")

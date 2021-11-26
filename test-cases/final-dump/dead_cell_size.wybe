@@ -36,14 +36,14 @@ pub def print_t2(x: t2) use !io {
 }
 
 # x shouldn't be interesting
-pub def foo(!x:t) {
+pub def foo(x:t, ?x:t) {
     if { tb(?a) = x ::
         ?x = tc(a, 2, 3)
     }
 }
 
 # x should be interesting
-pub def bar(!x:t) {
+pub def bar(x:t, ?x:t) {
     if { tb(?a) = x ::
         ?x = td(a)
     }
@@ -52,7 +52,7 @@ pub def bar(!x:t) {
 pub def diff_type(x:t, ?y:t2) {
     if { tb(?a) = x ::
         ?y = t2b(a)
-    | otherwise ::
+    | else      ::
         ?y = t2b(-1)
     }
 }

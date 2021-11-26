@@ -6,14 +6,16 @@
 --           : LICENSE in the root directory of this project.
 
 module Snippets (castFromTo, castTo, withType, intType, intCast,
-                 tagType, tagCast, phantomType, varSet, varGet, varGetSet,
+                 tagType, tagCast, phantomType, stringType, cStringType,
+                 isTypeVar, varSet, varGet, varGetSet,
                  boolType, boolCast, boolTrue, boolFalse, boolBool,
                  boolVarSet, boolVarGet, intVarSet, intVarGet,
                  lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, primMove,
-                 boolNegate, comparison, succeedTest, failTest, testVar,
-                 succeedIfSemiDet) where
+                 boolNegate, comparison, succeedTest, failTest, testVar, succeedIfSemiDet) where
 
 import AST
+import Data.String (String)
+import Data.Char (isUpper, isDigit)
 
 -- |An expression to cast a value to the specified type
 castFromTo :: TypeSpec -> TypeSpec -> Exp -> Exp
@@ -66,6 +68,19 @@ boolBool bool = iVal (if bool then 1 else 0) `withType` boolType
 -- | The phantom type
 phantomType :: TypeSpec
 phantomType = TypeSpec ["wybe"] "phantom" []
+
+-- | The string type
+stringType :: TypeSpec
+stringType = TypeSpec ["wybe"] "string" []
+
+-- | The c_string type, a C string
+cStringType :: TypeSpec
+cStringType = TypeSpec ["wybe"] "c_string" []
+
+-- | Is the given string a type variable name
+isTypeVar :: String -> Bool
+isTypeVar (alpha:digits) | isUpper alpha && all isDigit digits = True
+isTypeVar _                                                    = False
 
 -- |An output variable reference (lvalue)
 varSet :: Ident -> Exp

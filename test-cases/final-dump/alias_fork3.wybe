@@ -7,8 +7,9 @@ use mytree
 
 # return the left tree node
 pub def simpleSlice(tr:tree):tree =
-  if tr = node(?l, ?k, ?r) then l
-  else node(empty, -1, empty)
+  if {tr = node(?l, ?k, ?r):: l
+     |else:: node(empty, -1, empty)
+  }
 
 ?t1 = node(node(empty, 100, empty), 200, empty)
 ?t = simpleSlice(t1)

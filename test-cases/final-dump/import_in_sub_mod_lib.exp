@@ -10,11 +10,12 @@ AFTER EVERYTHING:
   procs           : 
 
 foo > public {inline} (0 calls)
-0: foo(v#0:wybe.int, io#0:wybe.phantom, ?io#1:wybe.phantom):
+0: import_in_sub_mod_lib.foo<0>
+foo(v##0:wybe.int, io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_int(~v#0:wybe.int, ~#io#0:wybe.phantom, ?tmp$2#0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp$2#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign c print_int(~v##0:wybe.int, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#2##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 
@@ -36,9 +37,9 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
 
 
-define external fastcc  void @"import_in_sub_mod_lib.foo<0>"(i64  %"v#0")    {
+define external fastcc  void @"import_in_sub_mod_lib.foo<0>"(i64  %"v##0")    {
 entry:
-  tail call ccc  void  @print_int(i64  %"v#0")  
+  tail call ccc  void  @print_int(i64  %"v##0")  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }

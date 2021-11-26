@@ -13,39 +13,23 @@
 
 unsigned long long g_malloc_count = 0;
 
-int64_t print_int(int64_t x) {
-    return (int64_t)printf("%"PRId64, x);
-}
+int64_t print_int(int64_t x) { return (int64_t)printf("%"PRId64, x); }
 
-int64_t print_float(double x) {
-    return (int64_t)printf("%f", x);
-}
+int64_t print_count(int64_t x) { return (int64_t)printf("%"PRIu64, x); }
 
-int64_t print_string(const char *s) {
-    return (int64_t)printf("%s", s);
-}
+int64_t print_float(double x) { return (int64_t)printf("%f", x); }
 
-int64_t log_int(int64_t x) {
-  return (int64_t)fprintf(stderr, "%"PRId64, x);
-}
+int64_t print_string(const char *s) { return (int64_t)printf("%s", s); }
 
-int64_t log_float(double x) {
-  return (int64_t)fprintf(stderr, "%f", x);
-}
+int64_t log_int(int64_t x) { return (int64_t)fprintf(stderr, "%"PRId64, x); }
 
-int64_t log_string(const char *s) {
-  return (int64_t)fprintf(stderr, "%s", s);
-}
+int64_t log_count(int64_t x) { return (int64_t)fprintf(stderr, "%"PRIu64, x); }
 
-int64_t log_char(const char c) {
-  return (int64_t)fprintf(stderr, "%c", c);
-}
+int64_t log_float(double x) { return (int64_t)fprintf(stderr, "%f", x); }
 
-int64_t read_char() {
-    int64_t ch;
-    ch = (int64_t)getchar();
-    return ch;
-}
+int64_t log_char(const char c) { return (int64_t)fprintf(stderr, "%c", c); }
+
+int64_t log_string(const char *s) { return (int64_t)fprintf(stderr, "%s", s); }
 
 int64_t read_int() {
     int64_t x;
@@ -53,10 +37,22 @@ int64_t read_int() {
     return x;
 }
 
+uint64_t read_count() {
+    uint64_t x;
+    scanf("%"PRIu64, &x);
+    return x;
+}
+
 double read_float() {
     double x;
     scanf("%lf", &x);
     return x;
+}
+
+int64_t read_char() { 
+    int64_t c;
+    c = (int64_t)getchar();
+    return c;
 }
 
 char *read_line() {
@@ -116,7 +112,7 @@ int64_t malloc_count() {
 }
 
 
-void error_exit(char *message) {
-    fprintf( stderr, "%s\n", message);
+void error_exit(char* location, char *message) {
+    fprintf( stderr, "%s: %s\n", location, message);
     exit(1);
 }

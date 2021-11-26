@@ -1,0 +1,6 @@
+
+constructors (T) foo(T) | bar(int, field:T, T) 
+
+?t = foo(false)
+if { t = foo(?_) :: !println("foo") }
+ 

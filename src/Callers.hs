@@ -42,7 +42,7 @@ noteImplnCallers :: ModSpec -> ProcSpec -> ProcImpln ->
                     Map Ident [ProcDef] -> Map Ident [ProcDef]
 noteImplnCallers _ _ (ProcDefSrc _) _ =
   shouldnt "scanning unprocessed code for calls"
-noteImplnCallers mod caller (ProcDefPrim _ body _ _) procs =
+noteImplnCallers mod caller ProcDefPrim{procImplnBody = body} procs =
   let callers = foldBodyDistrib (noteCall mod caller)
                 Map.empty mergeCallers mergeCallers
                 body
@@ -92,6 +92,8 @@ adjustNth fn n (e:es)
 ----------------------------------------------------------------
 --                     Handling the call graph
 ----------------------------------------------------------------
+-- Note: We do not consider Multiple Specialization in the call graph.
+
 getSccProcs :: ModSpec -> Compiler [SCC ProcSpec]
 getSccProcs thisMod = do
   procs <- getModuleImplementationField (Map.toList . modProcs)
@@ -109,7 +111,7 @@ procBody :: ProcDef -> ProcBody
 procBody def =
   case procImpln def of
       ProcDefSrc _         -> shouldnt "Analysing un-compiled code"
-      ProcDefPrim _ body _ _-> body
+      ProcDefPrim{procImplnBody = body} -> body
 
 
 -- |Finding all procs called by a given proc body
@@ -120,5 +122,8 @@ localBodyCallees modspec body =
 
 
 localCallees :: ModSpec -> Prim -> [ProcSpec]
-localCallees modspec (PrimCall _ pspec _) = [pspec]
+localCallees modspec (PrimCall _ pspec _) =
+  -- turn it back to the general version
+  let ProcSpec thisMod name n _ = pspec in
+  [ProcSpec thisMod name n generalVersion]
 localCallees _ _                        = []

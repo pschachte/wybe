@@ -10,19 +10,21 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public {inline} (0 calls)
-0: (io#0:wybe.phantom, ?io#1:wybe.phantom):
+*main* > public {inline,impure} (0 calls)
+0: func_let.<0>
+(io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign c print_int(40:wybe.int, ~#io#0:wybe.phantom, ?#io#1:wybe.phantom) @io:nn:nn
+    foreign c print_int(40:wybe.int, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
 
 
 quad > public {inline} (1 calls)
-0: quad(x#0:wybe.int, ?$#0:wybe.int):
+0: func_let.quad<0>
+quad(x##0:wybe.int, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm add(~x#0:wybe.int, ~x#0:wybe.int, ?tmp$0#0:wybe.int) @int:nn:nn
-    foreign llvm add(~tmp$0#0:wybe.int, ~tmp$0#0:wybe.int, ?$#0:wybe.int) @int:nn:nn
+    foreign llvm add(~x##0:wybe.int, ~x##0:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
+    foreign llvm add(~tmp#0##0:wybe.int, ~tmp#0##0:wybe.int, ?#result##0:wybe.int) @int:nn:nn
 
   LLVM code       :
 
@@ -48,9 +50,9 @@ entry:
 }
 
 
-define external fastcc  i64 @"func_let.quad<0>"(i64  %"x#0")    {
+define external fastcc  i64 @"func_let.quad<0>"(i64  %"x##0")    {
 entry:
-  %"1$tmp$0#0" = add   i64 %"x#0", %"x#0" 
-  %"1$$#0" = add   i64 %"1$tmp$0#0", %"1$tmp$0#0" 
-  ret i64 %"1$$#0" 
+  %"1#tmp#0##0" = add   i64 %"x##0", %"x##0" 
+  %"1##result##0" = add   i64 %"1#tmp#0##0", %"1#tmp#0##0" 
+  ret i64 %"1##result##0" 
 }
