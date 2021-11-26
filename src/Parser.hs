@@ -10,21 +10,23 @@
 -- grammar of the old happy based parser, but it evolved since then.
 
 
-module NewParser where
+module Parser where
 
 
 import AST hiding (option)
 import Data.Set as Set
 import Data.List as List
+import Data.Maybe as Maybe
+import Data.Bits
 import Control.Monad.Identity (Identity)
 import Scanner
+import Util
+import Snippets
 import Config
 import Text.Parsec
+import Text.Parsec.Pos
 import Data.Functor
--- import qualified Parser as OldParser
--- import           Data.Algorithm.Diff       (getGroupedDiff)
--- import           Data.Algorithm.DiffOutput (ppDiff)
-import           Text.Parsec.Expr
+import Control.Monad
 
 
 
@@ -138,7 +140,10 @@ typeItemParser v = do
 -- | Process type modifiers.
 processTypeModifiers :: [Ident] -> TypeModifiers
 processTypeModifiers ["unique"] = TypeModifiers True
-processTypeModifiers _          = defaultTypeModifiers
+processProcModifiers []         = defaultTypeModifiers
+processTypeModifiers _          = do  -- errors to be reported
+    errmsg Nothing "Unknown or invalid type modifiers"
+    return defaultTypeModifiers
 
 
 -- -- | Module parameter declaration

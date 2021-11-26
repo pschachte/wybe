@@ -3173,7 +3173,7 @@ instance Show t => Show (Placed t) where
 -- | How to show a type modifier
 instance Show TypeModifiers where
     show (TypeModifiers True)  = "{unique} "
-    show (TypeModifiers False) = ""
+    show (TypeModifiers False) = "{}"
 
 -- |How to show an optional source position
 showOptPos :: OptPos -> String

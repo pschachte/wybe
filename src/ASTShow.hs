@@ -30,9 +30,7 @@ instance Show Module where
             maybeimpl = modImplementation mod
         in " Module " ++ showModSpec (modSpec mod) ++
            bracketList "(" ", " ")" (show <$> modParams mod) ++
-           (if tmUniqueness (typeModifiers int)
-               then "\n  modifiers       : {unique}"
-               else "") ++
+           "\n modifiers       : " ++ (show $ typeModifiers int)
            "\n  representation  : " ++
            (if modIsType mod
             then maybe "(not yet known)" show (modTypeRep mod)
