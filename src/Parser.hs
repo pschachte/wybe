@@ -1,68 +1,85 @@
---  File     : Parser.hs
---  Author   : Peter Schachte <schachte@unimelb.edu.au>
+--  File     : NewParser.hs
+--  Author   : Ashutosh Rishi Ranjan <ashutoshrishi92@gmail.com>
 --  Purpose  : Parser for the Wybe language using Parsec.
---  Copyright: (c) 2021 Peter Schachte
+--  Copyright: (c) Ashutosh Rishi Ranjan, 2016
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
+--
+-- This module defines the new Wybe language parser written using the Haskell
+-- parser combinator library, "Parsec". The grammar here originally follow the
+-- grammar of the old happy based parser, but it evolved since then.
 
-module Parser where
+
+module NewParser where
 
 
 import AST hiding (option)
 import Data.Set as Set
 import Data.List as List
-import Data.Maybe as Maybe
-import Data.Bits
 import Control.Monad.Identity (Identity)
 import Scanner
-import Util
-import Snippets
 import Config
 import Text.Parsec
-import Text.Parsec.Pos
 import Data.Functor
-import Control.Monad
+-- import qualified Parser as OldParser
+-- import           Data.Algorithm.Diff       (getGroupedDiff)
+-- import           Data.Algorithm.DiffOutput (ppDiff)
+import           Text.Parsec.Expr
 
 
------------------------------------------------------------------------------
--- Top level of the parser:  parsing Items                                 --
------------------------------------------------------------------------------
 
--- | The parser monad.
+-- | Alias for our 'Parsec s u'.
 type Parser a = Parsec [Token] () a
 
+-- | Alias for Wybe operator token pareser
+type WybeOperator a = Operator [Token] () Identity a
 
--- | Report a syntax error
-syntaxError :: SourcePos -> String -> Either (SourcePos,String) a
-syntaxError pos msg = Left (pos,msg)
+-- | Tabulates the precedence and associativeness of 'WybeOperator's.
+type WybeOperatorTable a = [[ WybeOperator a ]]
 
+
+
+main :: IO ()
+main = do
+    let file = "test-cases/tests.wybe"
+    stream <- fileTokens file
+    -- print stream
+    -- putStrLn "--------------------"
+    case parseWybe stream file of
+        Left err -> print err
+        Right is -> printItems is
 
 -- | Parse a Wybe module.
 parseWybe :: [Token] -> FilePath -> Either ParseError [Item]
-parseWybe toks file = parse (maybeSetPosition toks items <* eof) file toks
+parseWybe toks file = parse (itemParser <* eof) file toks
 
 
--- | Set the Parser position to the position of the head Token, if it exists
-maybeSetPosition :: [Token] -> Parser a -> Parser a
-maybeSetPosition toks parser = do
-    maybe (return ()) (setPosition . tokenPosition) $ listToMaybe toks
-    parser
+------------- Some testing helpers --------------------
+
+printItems :: [Item] -> IO ()
+printItems =  mapM_ (putStrLn . (++ "\n-------") . show)
+
+writeItems :: FilePath -> FilePath -> IO ()
+writeItems file to = do
+    stream <- fileTokens file
+    case parseWybe stream file of
+        Left err -> print err
+        Right is -> writeFile to (show is)
 
 
--- | Parser entry for a Wybe program, items separated by some separator.
-items :: Parser [Item]
-items = singleItem `sepBy` separator
+-----------------------------------------------------------------------------
+-- Grammar                                                                 --
+-----------------------------------------------------------------------------
+
+-- | Parser entry for a Wybe program.
+itemParser :: Parser [Item]
+itemParser =
+    many (pragmaItem <|> visibilityItem <|> privateItem <|> topLevelStmtItem)
 
 
--- | Parse a single items
-singleItem :: Parser Item
-singleItem = visibilityItem <|> privateItem <|> topLevelStmtItem
-
-
--- | Parse a top-level statement itme
 topLevelStmtItem :: Parser Item
 topLevelStmtItem = do
-    st <- stmt <?> "top-level statement"
+    st <- stmtParser
     return $ StmtDecl (content st) (place st)
 
 
@@ -70,74 +87,93 @@ topLevelStmtItem = do
 visibilityItem :: Parser Item
 visibilityItem = do
     v <- visibility
-    procOrFuncItem v
-        <|> moduleItem v
-        <|> typeItem v
+    procOrFuncItemParser v
+        <|> moduleItemParser v
+        <|> typeItemParser v
         <|> dataCtorItemParser v
-        <|> resourceItem v
+        <|> resourceItemParser v
         <|> useItemParser v
         <|> fromUseItemParser v
 
 
 -- | Parse module-local items (with no visibility prefix).
 privateItem :: Parser Item
-privateItem = typeRepItem <|> pragmaItem
+privateItem = typeRepItemParser
 
-
--- | Parse a pragma item
 pragmaItem :: Parser Item
-pragmaItem = ident "pragma" *> (PragmaDecl <$> parsePragma)
+pragmaItem = do
+    ident "pragma"
+    prag <- parsePragma
+    return $ PragmaDecl prag
 
-
--- TODO:  Should use the Term parser to parse the declaration body.
--- | Parse a Pragma, currently only "no_standard_library"
 parsePragma :: Parser Pragma
-parsePragma = ident "no_standard_library" $> NoStd
+parsePragma = do
+    ident "no_standard_library"
+    return NoStd
 
+
+-----------------------------------------------------------------------------
+-- Top Level Items                                                         --
+-----------------------------------------------------------------------------
 
 -- | Module item parser.
-moduleItem :: Visibility -> Parser Item
-moduleItem v = do
+moduleItemParser :: Visibility -> Parser Item
+moduleItemParser v = do
     pos <- tokenPosition <$> ident "module"
-    modName <- moduleName
-    body <- betweenB Brace items
+    modName <- identString
+    body <- betweenB Brace itemParser
     return $ ModuleDecl v modName body (Just pos)
 
 
 -- | Type declaration item parser.
-typeItem :: Visibility -> Parser Item
-typeItem v = do
+typeItemParser :: Visibility -> Parser Item
+typeItemParser v = do
     pos <- tokenPosition <$> ident "type"
-    proto <- TypeProto <$> moduleName <*> typeVarNames
-             
+    modifiers <- processTypeModifiers <$> modifierList
+    proto <- TypeProto <$> identString <*>
+             option [] (betweenB Paren (typeVarName `sepBy` comma))
     (imp,items) <- typeImpln <|> typeCtors
-    return $ TypeDecl v proto imp items (Just pos)
+    return $ TypeDecl v proto modifiers imp items (Just pos)
+
+-- | Process type modifiers.
+processTypeModifiers :: [Ident] -> TypeModifiers
+processTypeModifiers ["unique"] = TypeModifiers True
+processTypeModifiers _          = defaultTypeModifiers
+
+
+-- -- | Module parameter declaration
+-- moduleParamItemParser :: Parser Item
+-- moduleParamItemParser = do
+--     keypos <- tokenPosition <$> (ident "parameter" <|> ident "parameters")
+--     params <- (symbol "?" *> identString) `sepBy1` comma
+--     return $ ModuleParamsDecl params $ Just keypos
 
 
 -- | Module type representation declaration
-typeRepItem :: Parser Item
-typeRepItem = do
+typeRepItemParser :: Parser Item
+typeRepItemParser = do
     keypos <- tokenPosition <$> ident "representation"
-    params <- typeVarNames
+    params <- option [] $ betweenB Paren (typeVarName `sepBy` comma)
     ident "is"
+    modifiers <- processTypeModifiers <$> modifierList
     rep <- typeRep
-    return $ RepresentationDecl params rep $ Just keypos
+    return $ RepresentationDecl params modifiers rep $ Just keypos
 
 
 -- | Module type representation declaration
 dataCtorItemParser :: Visibility -> Parser Item
 dataCtorItemParser v = do
     pos <- tokenPosition <$> (ident "constructor" <|> ident "constructors")
-    params <- typeVarNames
-    ctors <- ctorDecls
-    return $ ConstructorDecl v params ctors $ Just pos
+    params <- option [] $ betweenB Paren (typeVarName `sepBy` comma)
+    modifiers <- processTypeModifiers <$> modifierList
+    ctors <- funcProtoParser `sepBy` symbol "|"
+    return $ ConstructorDecl v params modifiers ctors $ Just pos
 
 
 -- | Type declaration body where representation and items are given
-typeImpln :: Parser (TypeImpln, [Item])
 typeImpln = do
     impln <- TypeRepresentation <$> (ident "is" *> typeRep)
-    items <- betweenB Brace items
+    items <- betweenB Brace itemParser
     return (impln,items)
 
 
@@ -146,7 +182,7 @@ typeRep :: ParsecT [Token] () Identity TypeRepresentation
 typeRep = do
     ident "address" $> Address
     <|> do bits <- option wordSize
-                   (fromIntegral . content <$> intLiteral <* ident "bit")
+                   (fromIntegral <$> content <$> intLiteral <* ident "bit")
            ident "unsigned" $> Bits bits
             <|> ident "signed" $> Signed bits
             <|> ident "float" $> Floating bits
@@ -156,33 +192,28 @@ typeRep = do
 typeCtors :: Parser (TypeImpln,[Item])
 typeCtors = betweenB Brace $ do
     vis <- visibility
-    ctors <- ctorDecls 
-    items <- option [] (separator *> items)
-    return (TypeCtors vis ctors,items)
-
-
--- | Parse a collection of Constructor declarations, separated by `|`s
-ctorDecls :: Parser [Placed ProcProto]
-ctorDecls = (term >>= parseWith termToCtorDecl) `sepBy1` symbol "|"
+    ctors <- funcProtoParser `sepBy` symbol "|"
+    items <- itemParser
+    return $ (TypeCtors vis ctors,items)
 
 
 -- | Resource declaration parser.
-resourceItem :: Visibility -> Parser Item
-resourceItem v = do
+resourceItemParser :: Visibility -> Parser Item
+resourceItemParser v = do
+    -- XXX might be better to use the position of the resource name as pos
     pos <- tokenPosition <$> ident "resource"
-    let optInit = optionMaybe (symbol "=" *> expr)
-    ResourceDecl v <$> identString <* symbol ":"
-        <*> typeSpec <*> optInit <*> return (Just pos)
+    let optInit = optionMaybe (symbol "=" *> expParser)
+    ResourceDecl v <$> identString
+        <*> optType <*> optInit <*> return (Just pos)
 
 
--- | Parse a "use" item. Either an import statement or a use-block
 useItemParser :: Visibility -> Parser Item
 useItemParser v = do
     pos <- Just . tokenPosition <$> ident "use"
-    ident "foreign" *> foreignFileOrLib v pos
-      <|> (moduleSpec `sepBy` comma >>= useBody v pos)
+    ( ident "foreign" *> foreignFileOrLib v pos
+      <|> ImportMods v <$> (modSpecParser `sepBy` comma) <*> return pos)
 
--- | Parse a foreign library or object import
+
 foreignFileOrLib :: Visibility -> OptPos -> Parser Item
 foreignFileOrLib v pos =
     ImportForeignLib
@@ -190,109 +221,103 @@ foreignFileOrLib v pos =
     <|> ImportForeign
             <$> (ident "object" *> identString `sepBy` comma) <*> return pos
 
--- | Parse a use-block body or an import statement
-useBody :: Visibility -> OptPos -> [ModSpec] -> Parser Item
-useBody v pos mods =
-    (ident "in" *> do
-        if v == Private
-        then topLevelUseStmt pos (modSpecToResourceSpec <$> mods)
-        else fail "inavlid use-block")
-    <|> return (ImportMods v mods pos)
 
--- | Parse a top-level use statement with specified 
-topLevelUseStmt :: OptPos -> [ResourceSpec] -> Parser Item
-topLevelUseStmt pos ress = do
-    body <- stmtSeq
-    return $ StmtDecl (UseResources ress Nothing body) pos
-
-
--- | Convert a ModSpce to a ResourceSpec 
-modSpecToResourceSpec :: ModSpec -> ResourceSpec
-modSpecToResourceSpec modspec = ResourceSpec (init modspec) (last modspec)
-
-
--- | Parse a from-use item
 fromUseItemParser :: Visibility -> Parser Item
 fromUseItemParser v = do
     pos <- tokenPosition <$> ident "from"
-    m <- moduleSpec <* ident "use"
+    m <- modSpecParser <* ident "use"
     ids <- identString `sepBy` comma
     return $ ImportItems v m ids (Just pos)
 
 
 -- | Parse a procedure or function, since both items share the same prefix of
 -- 'visibility' 'determinism'.
-procOrFuncItem :: Visibility -> Parser Item
-procOrFuncItem vis = do
-    pos <- Just . tokenPosition <$> ident "def"
-    mods <- processProcModifiers <$> modifierList
-    (proto, returnType) <- limitedTerm prototypePrecedence
-                            >>= parseWith termToPrototype
-    do
-        body <- symbol "=" *> expr
-        return $ FuncDecl vis mods proto returnType body pos
-      <|> if returnType /= AnyType
-          then fail "unexpected return type in proc declaration"
-          else do
-            rs <- option [] (ident "use" *> resourceFlowSpec `sepBy1` comma)
-            let proto' = proto { procProtoResources = Set.fromList rs }
-            body <- embracedTerm >>= parseWith termToBody
-            return $ ProcDecl vis mods proto' body pos
+procOrFuncItemParser :: Visibility -> Parser Item
+procOrFuncItemParser vis = do
+    pos <- tokenPosition <$> ident "def"
+    modifiers <- modifierList
+    -- det <- determinism
+    name <- funcNamePlaced <?> "no keywords"
+    params <- option [] $ betweenB Paren (procParamParser `sepBy` comma)
+    ty <- optType
+    -- Resources
+    rs <- option [] (ident "use" *> sepBy resourceFlowSpec comma)
+    let proto = ProcProto (content name) params $ fromList rs
+    funcBody vis modifiers proto ty pos <|> procBody vis modifiers proto ty pos
 
 
--- | Parse a specification of a resource and its flow direction.
-resourceFlowSpec :: Parser ResourceFlowSpec
-resourceFlowSpec = do
+funcBody :: Visibility -> [String] -> ProcProto -> TypeSpec -> SourcePos
+         -> Parser Item
+funcBody vis modifiers proto ty pos = do
+    body <- symbol "=" *> expParser
+    return
+     $ FuncDecl vis (processProcModifiers modifiers) proto ty body (Just pos)
+
+
+procBody :: Visibility -> [String] -> ProcProto -> TypeSpec -> SourcePos
+         -> Parser Item
+procBody vis modifiers proto ty pos = do
+    body <- betweenB Brace $ many stmtParser
+    -- XXX must test that ty is AnyType, otherwise syntax error
+    return $ ProcDecl vis (processProcModifiers modifiers) proto body (Just pos)
+
+
+-- | A procedure param parser.
+-- ProcParam -> FlowDirection ident OptType
+procParamParser :: Parser Param
+procParamParser = do
     flow <- flowDirection
-    res <- resourceSpec
-    return $ ResourceFlowSpec res flow
+    name <- identString
+    ty <- optType
+    return $ Param name ty flow Ordinary
 
 
--- | Parse a resource spec
-resourceSpec :: Parser ResourceSpec
-resourceSpec = moduleSpec <&> modSpecToResourceSpec
+-- | Function prototype parser : ProcProto
+funcProtoParser :: Parser (Placed ProcProto)
+funcProtoParser = do
+    pName <- funcNamePlaced <?> "no keywords"
+    params <- option [] $ betweenB Paren (paramParser `sepBy` comma)
+    -- Resource flow specs, optional
+    rs <- option [] (ident "use" *> sepBy resourceFlowSpec comma)
+    return $ maybePlace (ProcProto (content pName) params $fromList rs)
+             (place pName)
 
 
--- | Optional flow direction symbol prefix.
-flowDirection :: Parser FlowDirection
-flowDirection =
-    option ParamIn $ symbol "?" $> ParamOut <|> symbol "!" $> ParamInOut
+-- |Parse an optional list of identifiers enclosed in braces
+modifierList :: Parser [Ident]
+modifierList = option [] $ betweenB Brace (identString `sepBy` comma)
 
-
------------------------------------------------------------------------------
--- Handling proc modifiers                                                 --
------------------------------------------------------------------------------
 
 -- | Extract a ProcModifiers from a list of identifiers.  If the Bool is False,
 -- then don't report any errors in the modifiers.  The position is the source
 -- location of the list of modifiers.
 processProcModifiers :: [String] -> ProcModifiers
-processProcModifiers = List.foldl (flip processProcModifier)
-                        $ ProcModifiers Det MayInline Pure [] []
+processProcModifiers =
+    List.foldl processProcModifier $ ProcModifiers Det MayInline Pure [] []
 
--- | Update a collection of ProcModifiers
-processProcModifier :: String -> ProcModifiers -> ProcModifiers
-processProcModifier "test"     = updateModsDetism   "test" SemiDet
-processProcModifier "partial"  = updateModsDetism   "partial" SemiDet
-processProcModifier "failing"  = updateModsDetism   "failing" Failure
-processProcModifier "terminal" = updateModsDetism   "terminal" Terminal
-processProcModifier "inline"   = updateModsInlining "inline" Inline
-processProcModifier "noinline" = updateModsInlining "noinline" NoInline
-processProcModifier "pure"     = updateModsImpurity "pure" PromisedPure
-processProcModifier "semipure" = updateModsImpurity "semipure" Semipure
-processProcModifier "impure"   = updateModsImpurity "impure" Impure
-processProcModifier modName    =
-    \ms -> ms {modifierUnknown=modName:modifierUnknown ms}
 
+processProcModifier :: ProcModifiers -> String -> ProcModifiers
+processProcModifier ms "test"     = updateModsDetism   ms "test" SemiDet
+processProcModifier ms "partial"  = updateModsDetism   ms "partial" SemiDet
+processProcModifier ms "failing"  = updateModsDetism   ms "failing" Failure
+processProcModifier ms "terminal" = updateModsDetism   ms "terminal" Terminal
+processProcModifier ms "inline"   = updateModsInlining ms "inline" Inline
+processProcModifier ms "noinline" = updateModsInlining ms "noinline" NoInline
+processProcModifier ms "pure"     = updateModsImpurity   ms "pure" PromisedPure
+processProcModifier ms "semipure" = updateModsImpurity   ms "semipure" Semipure
+processProcModifier ms "impure"   = updateModsImpurity   ms "impure" Impure
+processProcModifier ms modName    =
+    ms {modifierUnknown=modName:modifierUnknown ms}
+    
 
 
 -- | Update the ProcModifiers to specify the given determinism, which was
 -- specified with the given identifier.  Since Det is the default, and can't be
 -- explicitly specified, it's alway OK to change from Det to something else.
-updateModsDetism :: String -> Determinism -> ProcModifiers -> ProcModifiers
-updateModsDetism _ detism mods@ProcModifiers{modifierDetism=Det} =
+updateModsDetism :: ProcModifiers -> String -> Determinism -> ProcModifiers
+updateModsDetism mods@ProcModifiers{modifierDetism=Det} _ detism =
     mods {modifierDetism=detism}
-updateModsDetism modName detism mods =
+updateModsDetism mods modName detism =
     mods {modifierConflict=modName:modifierConflict mods}
 
 
@@ -300,10 +325,10 @@ updateModsDetism modName detism mods =
 -- with the given identifier.  Since MayInline is the default, and can't be
 -- explicitly specified, it's alway OK to change from MayInline to something
 -- else.
-updateModsInlining :: String -> Inlining -> ProcModifiers -> ProcModifiers
-updateModsInlining _ inlining mods@ProcModifiers{modifierInline=MayInline} =
+updateModsInlining :: ProcModifiers -> String -> Inlining -> ProcModifiers
+updateModsInlining mods@ProcModifiers{modifierInline=MayInline} _ inlining =
     mods {modifierInline=inlining}
-updateModsInlining modName inlining mods =
+updateModsInlining mods modName inlining =
     mods {modifierConflict=modName:modifierConflict mods}
 
 
@@ -311,367 +336,473 @@ updateModsInlining modName inlining mods =
 -- with the given identifier.  Since Pure is the default, and can't be
 -- explicitly specified, it's alway OK to change from Pure to something
 -- else.
-updateModsImpurity :: String -> Impurity -> ProcModifiers -> ProcModifiers
-updateModsImpurity _ impurity mods@ProcModifiers{modifierImpurity=Pure} =
+updateModsImpurity :: ProcModifiers -> String -> Impurity -> ProcModifiers
+updateModsImpurity mods@ProcModifiers{modifierImpurity=Pure} _ impurity =
     mods {modifierImpurity=impurity}
-updateModsImpurity modName _ mods =
+updateModsImpurity mods modName _ =
     mods {modifierConflict=modName:modifierConflict mods}
 
 
+-- | Parser for a function 'Param'. The flow is implicitly 'ParamIn' unlike for
+-- procedures.
+-- Param -> ident OptType
+paramParser :: Parser Param
+paramParser = do
+    name <- identString
+    ty <- optType
+    return $ Param name ty ParamIn Ordinary
+
+
+-- | ResourceFlowSpecs -> FlowDirection modIdent
+resourceFlowSpec :: Parser ResourceFlowSpec
+resourceFlowSpec = do
+    flow <- flowDirection
+    res <- resourceSpec
+    return $ ResourceFlowSpec res flow
+
+
+resourceSpec :: Parser ResourceSpec
+resourceSpec = do
+    m <- modSpecParser
+    return $ ResourceSpec (init m) (last m)
+
+
+-- | Optional flow direction symbol prefix.
+flowDirection :: Parser FlowDirection
+flowDirection =
+    option ParamIn $ (ParamOut <$ symbol "?") <|> (ParamInOut <$ symbol "!")
+
+
+-- | Module name, period separated
+modSpecParser :: Parser ModSpec
+modSpecParser = modSpecComponent `sepBy` symbol "."
+
+
+modSpecComponent :: Parser String
+modSpecComponent = (symbol "^" >> return "^") <|> identString
+
+
+-- | Parser for an optional type.
+optType :: Parser TypeSpec
+optType = option AnyType (symbol ":" *> typeParser)
+
+
+-- | Parser a type.
+-- Type -> ident OptTypeList
+typeParser :: Parser TypeSpec
+typeParser =
+    TypeVariable <$> typeVarName
+    <|> do
+        name <- identString
+        optTypeList <- option [] $ betweenB Paren (typeParser `sepBy` comma)
+        case name of
+            "any"     -> return AnyType
+            "invalid" -> return InvalidType
+            _         -> return $ TypeSpec [] name optTypeList
+
+
+-- | Parse a type variable name
+typeVarName :: Parser Ident
+typeVarName = symbol "?" *> identString
+
 -----------------------------------------------------------------------------
--- Combined statement and expression parsing                               --
---
--- While parsing statements, sometimes it is not clear whether the part just
--- read will turn out to be a statement or expression.  For example, if the
--- first thing you see when trying to parse a statement is
---
---    foo(a,b)
---
--- the parser does not know whether this is the end of the statment, meaning
--- foo(a,b) is a statement, or whether it will be followed by
---
---    = bar
---
--- meaning the foo(a,b) part is an expression.  Therefore, we define a type that
--- does not distinguish between expression and statement to be used until the
--- whole statement has been read.  After that, its parts will be converted to
--- expressions and statements as appropriate.
+-- Statement Parsing                                                       --
 -----------------------------------------------------------------------------
 
--- |Parse a body.
-stmtSeq :: Parser [Placed Stmt]
-stmtSeq = term >>= parseWith termToBody
+stmtParser :: Parser (Placed Stmt)
+stmtParser =
+          doStmt
+          -- <|> forStmt
+          <|> nopStmt
+          <|> whileStmt
+          <|> untilStmt
+          <|> unlessStmt
+          <|> whenStmt
+          <|> ifStmtParser
+          <|> useStmt
+          <|> simpleStmt
+
+nopStmt :: Parser (Placed Stmt)
+nopStmt = do
+    pos <- tokenPosition <$> ident "pass"
+    return $ Placed Nop pos
 
 
--- |Parse a single Placed Stmt.
-stmt :: Parser (Placed Stmt)
-stmt = limitedTerm lowestStmtPrecedence >>= parseWith termToStmt
+simpleStmt :: Parser (Placed Stmt)
+simpleStmt = try procCallParser
+          <|> try expStmtParser
+          <|> relStmtParser
 
 
--- |Parse a placed Exp
-expr :: Parser (Placed Exp)
-expr = term >>= parseWith termToExp
+testStmt :: Parser (Placed Stmt)
+testStmt =
+          fmap expToStmt <$> simpleExpParser
+          -- XXX Need to handle and, or, and not
+          -- (   do pos <- tokenPosition <$> ident "and"
+          --        rest <- testStmt
+          --        return maybePlace (And [stmt1,rest]) pos
+          -- <|> do pos <- tokenPosition <$> ident "or"
+          --        rest <- testStmt
+          --        return maybePlace (And [stmt1,rest]) pos
+          -- <|> return [stmt1]
+          -- )
 
 
--- | Parse a TypeSpec
-typeSpec :: Parser TypeSpec
-typeSpec = limitedTerm prototypePrecedence >>= parseWith termToTypeSpec
+-- | A simple proc call stmt.
+procCallParser :: Parser (Placed Stmt)
+procCallParser = do
+    resourceful <- option False (symbol "!" >> return True)
+    p <- identButNot keywords
+    args <- option [] argListParser
+    return $ maybePlace (ProcCall [] (content p) Nothing Det resourceful args)
+      (place p)
 
 
--- |Parse a term.
-term :: Parser Term
-term = limitedTerm lowestTermPrecedence
+doStmt :: Parser (Placed Stmt)
+doStmt = do
+    pos <- tokenPosition <$> ident "do"
+    body <- betweenB Brace $ many1 stmtParser
+    return $ Placed (Loop body Nothing) pos
 
 
--- |A term with an operator precedence of limited looseness.
-limitedTerm :: Int -> Parser Term
-limitedTerm precedence = termFirst >>= termRest precedence
+-- forStmt :: Parser (Placed Stmt)
+-- forStmt = do
+--     pos <- tokenPosition <$> ident "for"
+--     cond <- expParser <* ident "in"
+--     body <- expParser
+--     return $ Placed (For cond body) pos
 
 
--- |The left argument to an infix operator.  This is a primaryTerm,
--- possibly preceded by a prefix operator or followed by an termSuffix.
--- Valid suffixes include parenthesised argument lists or square bracketed
--- indices.  If both prefix and suffix are present, the suffix binds tighter.
-termFirst :: Parser Term
-termFirst = (do
-             op <- prefixOp
-             primaryTerm >>= termSuffix >>= applyPrefixOp op)
-         <|> (primaryTerm >>= termSuffix)
+whileStmt :: Parser (Placed Stmt)
+whileStmt = do
+    pos <- tokenPosition <$> ident "while"
+    cond <- testStmt
+    return $ Placed
+             (Cond cond [Unplaced Nop] [Unplaced Break] Nothing Nothing) pos
 
 
--- |Apply zero or more parenthesised or square bracketed suffixes to the
--- specified term. If multiple suffixes are present, they associate to the
--- left.
-termSuffix :: Term -> Parser Term
-termSuffix left =
-    (try (termSuffix' left) >>= termSuffix) <|> return left
+untilStmt :: Parser (Placed Stmt)
+untilStmt = do
+    pos <- tokenPosition <$> ident "until"
+    e <- testStmt
+    return $ Placed (Cond e [Unplaced Break] [Unplaced Nop] Nothing Nothing) pos
 
 
--- |Apply one parenthesised or square bracketed suffixes to the specified
--- term.
-termSuffix' :: Term -> Parser Term
-termSuffix' left =
-    (argumentList Paren >>= applyArguments left)
-    <|> (Call (termPos left) [] "[]" ParamIn . (left:)
-         <$> argumentList Bracket)
+unlessStmt :: Parser (Placed Stmt)
+unlessStmt = do
+    pos <- tokenPosition <$> ident "unless"
+    e <- testStmt
+    return $ Placed (Cond e [Unplaced Next] [Unplaced Nop] Nothing Nothing) pos
+
+whenStmt :: Parser (Placed Stmt)
+whenStmt = do
+    pos <- tokenPosition <$> ident "when"
+    e <- testStmt
+    return $ Placed (Cond e [Unplaced Nop] [Unplaced Next] Nothing Nothing) pos
 
 
--- |Comma-separated, non-empty argument list, surrounded by the specified
--- bracket type.
-argumentList :: BracketStyle -> Parser [Term]
-argumentList Brace = shouldnt "brace-enclosed argument list"
-argumentList bracket = betweenB bracket (term `sepBy` comma)
+-- | If statement parser.
+ifStmtParser :: Parser (Placed Stmt)
+ifStmtParser = do
+    pos <- tokenPosition <$> ident "if"
+    cases <- betweenB Brace $ ifCaseParser `sepBy` symbol "|"
+    let final = List.foldr (\(cond, body) rest ->
+                           [Unplaced (Cond cond body rest Nothing Nothing)]) []
+                           cases
+    case final of
+      []     -> unexpected "if cases statement structure."
+      (hd:_) -> return $ Placed (content hd) pos
 
 
--- |Supply arguments to function call we thought was something else.
-applyArguments :: Term -> [Term] -> Parser Term
-applyArguments stmtOrExpr args =
-    case stmtOrExpr of
-        call@Call{} ->
-            return $ call {callArguments = callArguments call ++ args}
-        other -> fail $ "unexpected argument list following expression "
-                        ++ show other
+ifCaseParser :: Parser (Placed Stmt, [Placed Stmt])
+ifCaseParser = do
+    cond <- testStmt <* symbol "::"
+    body <- many stmtParser
+    return (cond, body)
 
 
--- |Complete parsing an term of precedence no looser than specified, given
--- that we have already parsed the specified term on the left.
--- XXX this doesn't handle non-associative operators correctly; it treats them
--- as right associative.
-termRest :: Int -> Term -> Parser Term
-termRest minPrec left =
-    do -- A functional Pratt operator precedence parser
-         -- parse an infix operator of at least the specified precedence
-        (op,rightPrec) <- infixOp minPrec
-        -- parse expression of high enough precedence to be the right argument
-        right <- limitedTerm rightPrec
-        let pos = termPos left
-        -- construct a call of the op with the left and right arguments, and
-        -- treat that as the left argument of the rest of the expr
-        termRest minPrec $ Call pos [] op ParamIn [left,right]
-    <|> -- Otherwise try to parse a call with 1 un-parenthesised argument;
-        -- failing that, the left context is the whole expression.
-        case left of
-            Call _ m n _ [] | minPrec <= lowestStmtPrecedence
-                            || List.null m && prefixKeyword n ->
-                (term
-                    >>= applyArguments left . (:[])
-                    >>= termRest minPrec)
-                <|> return left
-            _ -> return left
+useStmt :: Parser (Placed Stmt)
+useStmt = do
+    pos <- tokenPosition <$> ident "use"
+    resources <- resourceSpec `sepBy` comma <* ident "in"
+    body <- betweenB Brace $ many1 stmtParser
+    return $ Placed (UseResources resources body) pos
 
 
--- |Scan an infix operator of at least the specified left precedence, returning
--- the operator and its right precedence.
-infixOp :: Int -> Parser (String,Int)
-infixOp minPrec = takeToken test
-  where
-    test tok
-      | lPrec > minPrec && isInfixOp tok = Just (name, prec)
-      | otherwise                        = Nothing
-        where name = tokenName tok
-              (prec,assoc) = operatorAssociativity name
-              lPrec = prec + if assoc == LeftAssociative  then 0 else 1
-              rPrec = prec - if assoc /= RightAssociative then 0 else 1
+-- | Parse expression statement.
+expStmtParser :: Parser (Placed Stmt)
+expStmtParser = try foreignCallStmt
+             <|> try assignmentParser
 
 
--- |Parse a simple, Term, not involving any operators.
-primaryTerm :: Parser Term
-primaryTerm =
-    parenthesisedTerm
-    <|> embracedTerm
-    <|> foreignCall
-    <|> forLoop
-    <|> varOrCall
-    <|> intConst
-    <|> floatConst
-    <|> charConst
-    <|> stringConst
-    <|> listTerm
-    <?> "simple expression"
+foreignCallStmt :: Parser (Placed Stmt)
+foreignCallStmt = do
+    Placed (ForeignFn a b c d) pos <- foreignExp
+    return $ Placed (ForeignCall a b c d) pos
 
 
-parenthesisedTerm :: Parser Term
-parenthesisedTerm = do
+-- | Introduces ambiguity on the token '=', as it is also a binary infix
+-- operator in a simple express
+assignmentParser :: Parser (Placed Stmt)
+assignmentParser = do
+    x <- simpleExpTerms <* symbol "="
+    y <- expParser
+    return $ maybePlace (ProcCall [] "=" Nothing Det False [x,y]) (place x)
+
+
+-----------------------------------------------------------------------------
+-- Expression Parsing                                                      --
+-----------------------------------------------------------------------------
+
+-- | Parse expressions.
+expParser :: Parser (Placed Exp)
+expParser =  buildExpressionParser completeOperatorTable expTerms
+         <?> "expresions"
+
+
+-- | Parse simple expressions.
+simpleExpParser :: Parser (Placed Exp)
+simpleExpParser =  buildExpressionParser completeOperatorTable simpleExpTerms
+               <?> "simple expressions"
+
+-- | Parser for test statements built over the relational operators table and
+-- simple expression terms.
+relStmtParser :: Parser (Placed Stmt)
+relStmtParser = do
+    exp <- buildExpressionParser relOperatorTable simpleExpTerms
+           <?> "relational expressions"
+    return (expToStmt <$> exp)
+
+
+-- | Exp -> 'if' Exp 'then' Exp 'else' Exp
+ifExpParser :: Parser (Placed Exp)
+ifExpParser = do
+    pos <- tokenPosition <$> ident "if"
+    cond <- testStmt
+    thenBody <- ident "then" *> expParser
+    elseBody <- ident "else" *> expParser
+    return $ Placed (CondExp cond thenBody elseBody) pos
+
+
+letExpParser :: Parser (Placed Exp)
+letExpParser = do
+    pos <- tokenPosition <$> ident "let"
+    body <- many stmtParser <* ident "in"
+    e <- expParser
+    return $ Placed (Where body e) pos
+
+
+
+expTerms :: Parser (Placed Exp)
+expTerms =  ifExpParser
+        <|> letExpParser
+        <|> simpleExpTerms
+
+
+simpleExpTerms :: Parser (Placed Exp)
+simpleExpTerms =  parenExp
+              <|> intExp
+              <|> floatExp
+              <|> charExp
+              <|> stringExp
+              <|> outParam
+              <|> inoutParam
+              <|> listExpParser
+              -- ident ArgList
+              <|> try funcCallParser
+              -- ident
+              <|> identifier
+              <|> try (emptyBrackets Brace)
+              <|> foreignExp
+              <?> "simple expression terms"
+
+
+
+-- | Parenthesised expressions.
+parenExp :: Parser (Placed Exp)
+parenExp = do
     pos <- tokenPosition <$> leftBracket Paren
-    setTermPos pos <$> term <* rightBracket Paren
+    e <- content <$> expParser <* rightBracket Paren
+    return $ Placed e pos
 
 
-varOrCall :: Parser Term
-varOrCall = do
-    pos <- getPosition
-    modVar <- moduleSpec
-    return $ Call pos (init modVar) (last modVar) ParamIn []
+-- | Table defining operator precedence and associativeness, helps parsec to
+-- deal with expression parsing without ambiguity.
+completeOperatorTable :: WybeOperatorTable (Placed Exp)
+completeOperatorTable =
+    [ [ Postfix funcAppExp ]
+    , [ Postfix typedExp ]
+    , [ prefix "-" ]
+    , [ binary "^" AssocLeft ]
+    , [ binary "*"   AssocLeft
+      , binary "/"   AssocLeft
+      , binary "%"   AssocLeft
+      ]
+    , [ binary "+" AssocLeft
+      , binary "-" AssocLeft
+      ]
+    , [ binary ",," AssocRight
+      , binary "++" AssocRight
+      ]
+    , [ binary' ".." AssocNone [ Unplaced (IntValue 1) ] ]
+    , [ binary ">"  AssocNone
+      , binary "<"  AssocNone
+      , binary "<=" AssocNone
+      , binary ">=" AssocNone
+      ]
+    , [ binary "/=" AssocNone
+      , binary "="  AssocNone
+      ]
+    , [ prefix "~" ]
+    , [ binary "&&" AssocLeft ]
+    , [ binary "||"  AssocLeft ]
+    , [ Postfix whereBodyParser]
+    ]
+
+-- | Wybe relational operators table, separated out for test statements.
+relOperatorTable :: WybeOperatorTable (Placed Exp)
+relOperatorTable =
+    [ [ binary ">"  AssocNone
+      , binary "<"  AssocNone
+      , binary "<=" AssocNone
+      , binary ">=" AssocNone
+      ]
+    , [ binary "/=" AssocNone
+      , binary "="  AssocNone
+      ]
+    ]
 
 
--- | Parse a sequence of Terms enclosed in braces.
-embracedTerm :: Parser Term
-embracedTerm = do
-    pos <- tokenPosition <$> leftBracket Brace
-    Call pos [] "{}" ParamIn
-        <$> limitedTerm lowestStmtSeqPrecedence `sepBy` comma
-        <* rightBracket Brace
+-- | Helper to make a placed function call expression out of n number of
+-- arguments.
+makeFnCall :: String -> [Placed Exp] -> Placed Exp
+makeFnCall sym args@(x:_) = maybePlace (Fncall [] sym args) (place x)
+makeFnCall sym []         = Unplaced (Fncall [] sym [])
+
+
+-- | Helper to create a binary operator expression parser.
+binary :: String -> Assoc -> WybeOperator (Placed Exp)
+binary sym = Infix (symOrIdent sym *> return (binFn sym))
+  where
+    binFn s a b = makeFnCall s [a, b]
+
+
+-- | Same as 'binary', but takes a list of extra expression arguments to be
+-- given to the combined function call expression.
+binary' :: String -> Assoc -> [Placed Exp] -> WybeOperator (Placed Exp)
+binary' sym assoc exArgs =
+    Infix (symOrIdent sym *> return (binFnEx sym)) assoc
+  where
+    binFnEx s a b = makeFnCall s ([a, b] ++ exArgs)
+
+
+-- | Helper to create an unary prefix operator expression parser.
+prefix :: String -> WybeOperator (Placed Exp)
+prefix sym = Prefix (symOrIdent sym *> return (unFn sym))
+  where
+    unFn s a = makeFnCall s [a]
+
+
+-- | Helper to parse a symbol or an identifier as the same semantic token.
+symOrIdent :: String -> Parser Token
+symOrIdent s = choice [ symbol s, ident s]
+
+
+-- | Postfix '.' operator. There are two variants of the postfix
+-- . operator. They are:
+-- . ident
+-- . ident ( ArgList )
+funcAppExp :: Parser (Placed Exp -> Placed Exp)
+funcAppExp = do
+    nm <- content <$> (symbol "." *> identButNot keywords)
+    optargs <- option [] argListParser
+    return $ \a ->
+        maybePlace (Fncall [] nm (a:optargs)) (place a)
+
+
+typedExp :: Parser (Placed Exp -> Placed Exp)
+typedExp = do
+    cast <- symbol ":!" $> True <|> symbol ":" $> False
+    ty <- typeParser
+    return $ placedApply $ specifyType ty cast
+
+
+-- |Either cast or apply a type constraint
+specifyType :: TypeSpec -> Bool -> Exp -> OptPos -> Placed Exp
+specifyType ty False (Typed exp _ Nothing) pos =
+    maybePlace (Typed exp ty Nothing) pos -- replace type constraint
+specifyType ty False (Typed exp outer (Just _)) pos = -- was cast to outer
+    maybePlace (Typed exp outer (Just ty)) pos  -- now cast from ty to outer
+specifyType ty True (Typed exp ty' _) pos = -- was constrained to ty'
+    maybePlace (Typed exp ty (Just ty')) pos -- now cast from ty' to ty
+specifyType ty False exp pos =
+    maybePlace (Typed exp ty Nothing) pos -- just add type constraint
+specifyType ty True exp pos =
+    maybePlace (Typed exp ty (Just AnyType)) pos -- cast from AnyType to ty
+
+
+whereBodyParser :: Parser (Placed Exp -> Placed Exp)
+whereBodyParser = do
+    ident "where"
+    body <- betweenB Brace $ many1 stmtParser
+    return $ \e -> maybePlace (Where body e) (place e)
 
 
 -- | Parse all expressions beginning with the terminal "[".
--- List -> '[' Term ListTail
+-- List -> '[' Exp ListTail
 -- Empty List -> '[' ']'
 -- List Cons -> '[' '|' ']'
-listTerm :: Parser Term
-listTerm = do
+listExpParser :: Parser (Placed Exp)
+listExpParser = do
     pos <- (tokenPosition <$> leftBracket Bracket) <?> "list"
-    rightBracket Bracket $> Call pos [] "[]" ParamIn []
-        <|> do
-            head <- term
-            tail <- listTail
-            return $ Call pos [] "[|]" ParamIn [head,tail]
+    rightBracket Bracket *> return (Placed (Fncall [] "[]" []) pos)
+        <|> listHeadParser pos
+
+
+listHeadParser :: SourcePos -> Parser (Placed Exp)
+listHeadParser pos = do
+    hd <- expParser
+    tl <- listTailParser
+    return $ Placed (Fncall [] "[|]" [hd, tl]) pos
 
 
 -- | Parse the tail of a list.
--- ListTail -> ']' | ',' Term ListTail
-listTail :: Parser Term
-listTail = do
-        pos <- tokenPosition <$> rightBracket Bracket
-        return $ Call pos [] "[]" ParamIn []
-    <|> do
-        pos <- tokenPosition <$> comma
-        head <- term
-        tail <- listTail
-        return $ Call pos [] "[|]" ParamIn [head, tail]
-    <|> symbol "|" *> term <* rightBracket Bracket
+-- ListTail -> ']' | ',' Exp ListTail
+listTailParser :: Parser (Placed Exp)
+listTailParser =
+        rightBracket Bracket *> return (Unplaced (Fncall [] "[]" []))
+    <|> comma *>
+        do hd <- expParser
+           tl <- listTailParser
+           return $ Unplaced (Fncall [] "[|]" [hd, tl])
+    <|> symbol "|" *> expParser <* rightBracket Bracket
 
 
--- |A foreign function or procedure call.
-foreignCall :: Parser Term
-foreignCall = do
+-- | Parse a function call.
+-- Exp -> ident ArgList
+-- ArgList -> '(' ExpList ')'
+funcCallParser :: Parser (Placed Exp)
+funcCallParser = do
+    pName <- identButNot keywords
+    args <- argListParser
+    let pos = place pName
+    return $ maybePlace (Fncall [] (content pName) args) pos
+
+
+argListParser :: Parser [Placed Exp]
+argListParser = betweenB Paren (expParser `sepBy` comma)
+
+
+
+foreignExp :: Parser (Placed Exp)
+foreignExp = do
     pos <- tokenPosition <$> ident "foreign"
-    language <- identString
+    group <- identString
     flags <- modifierList
-    fname <- identString
-    Foreign pos language fname flags <$> argumentList Paren
+    fname <- content <$> funcNamePlaced
+    args <- argListParser
+    return $ Placed (ForeignFn group fname flags args) pos
 
-
--- |A for loop.
-forLoop :: Parser Term
-forLoop = do
-    pos <- tokenPosition <$> ident "for"
-    gen <- limitedTerm lowestStmtSeqPrecedence
-    body <- embracedTerm
-    return $ Call pos [] "for" ParamIn [gen,body]
-
-
------------------------------------------------------------------------------
--- Operators                                                               --
------------------------------------------------------------------------------
-
--- |Allowable operator associativities.
-data Associativity = LeftAssociative | NonAssociative | RightAssociative
-    deriving (Eq,Show)
-
-
--- |The precedence and associativity of the specified operator.  Covers all
--- operator symbols.
--- TODO decide how to handle: @ $ \ :
-operatorAssociativity :: String -> (Int,Associativity)
-operatorAssociativity ":"  = (11, LeftAssociative)
-operatorAssociativity ":!" = (11, LeftAssociative)
-operatorAssociativity ","  = ( 0, RightAssociative)
-operatorAssociativity ";"  = (-1, RightAssociative)
-operatorAssociativity "\n" = (-1, RightAssociative)
-operatorAssociativity "::" = (-2, NonAssociative)
-operatorAssociativity "|"  = (-3, RightAssociative)
-operatorAssociativity str
-  | infixKeyword str = ( 5, NonAssociative)
-  | otherwise =
-    case last str of
-        '^' -> (10, LeftAssociative)
-        '*' -> ( 9, LeftAssociative)
-        '/' -> ( 9, LeftAssociative)
-        '%' -> ( 9, LeftAssociative)
-        '+' -> ( 8, LeftAssociative)
-        '-' -> ( 8, LeftAssociative)
-        ',' -> ( 7, RightAssociative) -- other than a lone ","
-        '.' -> ( 7, RightAssociative) -- other than a lone "."
-        '<' -> ( 6, NonAssociative)
-        '>' -> ( 6, NonAssociative)
-        ';' -> ( 5, RightAssociative) -- other than a lone ";"
-        ':' -> ( 5, NonAssociative)  -- other than a lone ":" or "::"
-        '=' -> ( 5, NonAssociative)
-        '~' -> ( 5, LeftAssociative) -- ~ as last char of an *infix* operator
-        -- lower precedence than a single proc call
-        '&' -> ( 4, RightAssociative)
-        '|' -> ( 3, RightAssociative) -- other than a lone "|"
-        _   -> ( 5, NonAssociative)
-
-
--- |Lowest (loosest) operator precedence number
-lowestTermPrecedence :: Int
-lowestTermPrecedence = 1
-
-
--- |Lowest (loosest) operator precedence of an individual statement
-lowestStmtPrecedence :: Int
-lowestStmtPrecedence = 0
-
-
--- |Lowest (loosest) operator precedence of a proc body
-lowestStmtSeqPrecedence :: Int
-lowestStmtSeqPrecedence = -4
-
-
--- |Lowest (loosest) operator precedence of a proc/function prototype
-prototypePrecedence :: Int
-prototypePrecedence = 10
-
-
--- |Prefix operator symbols; these all bind very tightly
-prefixOp :: Parser Token
-prefixOp = symbol "-" <|> symbol "~" <|> symbol "?" <|> symbol "!"
-
-
--- |Apply the specified prefix op to the specified term.  Fail if it should
--- be a syntax error.
-applyPrefixOp :: Token -> Term -> Parser Term
-applyPrefixOp tok term = do
-    let pos = tokenPosition tok
-    let term' = term
-    case (tokenName tok, term') of
-        ("-", IntConst _ num) -> return $ IntConst pos (-num)
-        ("-", FloatConst _ num) -> return $ FloatConst pos (-num)
-        ("-", Call{}) -> return $ call1 pos "-" term
-        ("-", Foreign{}) -> return $ call1 pos "-" term
-        ("-", _) -> fail $ "cannot negate " ++ show term
-        ("~", IntConst _ num) -> return $ IntConst pos (complement num)
-        ("~", Call{}) -> return $ call1 pos "~" term
-        ("~", Foreign{}) -> return $ call1 pos "~" term
-        ("~", _) -> fail $ "cannot negate " ++ show term
-        ("?", Call{callArguments=[]}) -> return $ setCallFlow ParamOut term'
-        ("?", _) -> fail $ "unexpected " ++ show term'++ " following '?'"
-        ("!", Call{}) -> return $ setCallFlow ParamInOut term'
-        ("!", _) -> fail $ "unexpected " ++ show term' ++ " following '!'"
-        (_,_) -> shouldnt $ "Unknown prefix operator " ++ show tok
-                            ++ " in applyPrefixOp"
-
-
--- |Unary call to the specified proc name with the specified argument.  The
--- default (empty) module and default (ParamIn) variable flow are used.
-call1 :: SourcePos -> ProcName -> Term -> Term
-call1 pos name arg = Call pos [] name ParamIn [arg]
-
-
--- |Is the specified token an infix operator?
-isInfixOp :: Token -> Bool
-isInfixOp (TokSymbol _ _)    = True
-isInfixOp (TokIdent name _)  = infixKeyword name
-isInfixOp (TokSeparator _ _) = True  --  but very low precedence
-isInfixOp _                  = False
-
-
--- |Infix keyword (ie, alphabetic) operators.
-infixKeyword :: String -> Bool
-infixKeyword "in"    = True
-infixKeyword "where" = True
-infixKeyword _       = False
-
-
--- |Prefix keyword (ie, alphabetic) operators.
-prefixKeyword :: String -> Bool
-prefixKeyword "if"  = True
-prefixKeyword "let"  = True
-prefixKeyword "use"  = True
-prefixKeyword "case" = True
-prefixKeyword _     = False
-
-
--- | Test if operator name is for a separator operator.
-separatorName :: [Char] -> Bool
-separatorName ";"  = True
-separatorName "\n" = True
-separatorName _    = False
-
-
--- |Special default test for conditionals.
-defaultGuard :: String -> Bool
-defaultGuard = (=="else")
 
 
 -----------------------------------------------------------------------------
@@ -684,43 +815,50 @@ takeToken = token show tokenPosition
 
 
 -- | Parse a float literal token.
-floatConst :: Parser Term
-floatConst = takeToken test
+floatExp :: Parser (Placed Exp)
+floatExp = takeToken test
     where
-      test (TokFloat f p) = Just $ FloatConst p f
+      test (TokFloat f p) = Just $ Placed (FloatValue f) p
       test _              = Nothing
 
 
 -- | Parse an integer literal token.
-intConst :: Parser Term
-intConst = takeToken test
-  where
-    test (TokInt i p) = Just $ IntConst p i
-    test _            = Nothing
+intExp :: Parser (Placed Exp)
+intExp = (IntValue <$>) <$> intLiteral
 
 
--- |Parse an integer constant
-intLiteral :: Parser (Placed Integer)
 intLiteral = takeToken test
   where
     test (TokInt i p) = Just $ Placed i p
     test _            = Nothing
 
 
--- | Parse a character literal token.
-charConst :: Parser Term
-charConst = takeToken test
+charExp :: Parser (Placed Exp)
+charExp = takeToken test
     where
-      test (TokChar c p) = Just $ CharConst p c
+      test (TokChar c p) = Just $ Placed (CharValue c) p
       test _             = Nothing
 
 
 -- | Parse a string literal token.
-stringConst :: Parser Term
-stringConst = takeToken test
+stringExp :: Parser (Placed Exp)
+stringExp = takeToken test
   where
-    test (TokString d s p) = Just $ StringConst p s d
+    test (TokString _ s p) = Just $ Placed (StringValue s) p
     test _                 = Nothing
+
+
+outParam :: Parser (Placed Exp)
+outParam = do
+    pos <- tokenPosition <$> symbol "?"
+    s <- content <$> identButNot keywords
+    return $ Placed (Var s ParamOut Ordinary) pos
+
+inoutParam :: Parser (Placed Exp)
+inoutParam = do
+    pos <- tokenPosition <$> symbol "!"
+    s <- content <$> identButNot keywords
+    return $ Placed (Var s ParamInOut Ordinary) pos
 
 
 -- | Parse the keyword terminal 'key', in the form of identifier tokens.
@@ -732,39 +870,23 @@ ident key = takeToken test
 
 
 -- | Parse an identifier token.
-identifier :: Parser Term
+identifier :: Parser (Placed Exp)
 identifier = takeToken test
   where
-    test (TokIdent s p) = Just $ Call p [] s ParamIn []
+    test (TokIdent s p) =
+        if s `elem` keywords
+        then Nothing
+        else Just $ Placed (Var s ParamIn Ordinary) p
     test _ = Nothing
 
--- Parse an identifier as a string
+
+
 identString :: Parser String
 identString = takeToken test
   where
     test (TokIdent s _) = Just s
     test _              = Nothing
 
-
--- | Parse a type variable name
-typeVarName :: Parser Ident
-typeVarName = takeToken test
- where 
-    test (TokIdent s _) | isTypeVar s = Just s
-    test _                            = Nothing
-
-
--- | Parse a list of comma-separated TypeVarNames, between parentheses
-typeVarNames :: Parser [Ident] 
-typeVarNames = option [] (betweenB Paren $ typeVarName `sepBy` comma)
-
-
--- | Parse a module name, any ident that is not a TypeVarName
-moduleName :: Parser Ident 
-moduleName = takeToken test
- where 
-    test (TokIdent s _) | not $ isTypeVar s = Just s
-    test _                                  = Nothing
 
 
 -- | Parse an ident token if its string value is not in the list 'avoid'.
@@ -792,6 +914,40 @@ symbol sym = takeToken test
     test _                   = Nothing
 
 
+
+-- | Parses a function or procedure name.
+funcNamePlaced :: Parser (Placed String)
+funcNamePlaced = choice [ identButNot keywords
+                        , funcSymbolPlaced
+                        ]
+
+
+-- | Symbol function names.
+funcSymbolPlaced :: Parser (Placed String)
+funcSymbolPlaced =
+    let placeToken (TokIdent s p) = Placed s p
+        placeToken (TokSymbol s p) = Placed s p
+        placeToken _ = error "Only ident and symbol token expected."
+    in choice [ placeToken <$> symbolAny
+              , placeToken <$> ident "&&"
+              , placeToken <$> ident "||"
+              , placeToken <$> ident "~"
+
+              -- [] or [|]
+              , do p <- tokenPosition <$> leftBracket Bracket
+                   rightBracket Bracket *> return (Placed "[]" p)
+                       <|> symbol "|"
+                       *>  rightBracket Bracket
+                       *>  return (Placed "[|]" p)
+
+              -- {}
+              , tokenPosition <$> leftBracket Brace
+                  >>= \p -> return (Placed "{}" p)
+                  <*  rightBracket Brace
+              ]
+
+
+
 -- | Parse a comma token.
 comma :: Parser Token
 comma = takeToken test
@@ -800,40 +956,14 @@ comma = takeToken test
     test _              = Nothing
 
 
--- | Parse a period token.
-period :: Parser Token
-period = takeToken test
-  where
-    test tok@TokPeriod{} = Just tok
-    test _               = Nothing
-
-
--- | Parse a statement separator token.
-separator :: Parser Token
-separator = takeToken test
-  where
-    test tok@TokSeparator{} = Just tok
-    test _                  = Nothing
-
-
--- | Module name, period separated.  This is greedy, so m1.m2.name will take the
--- whole thing to be a module spec.  If you want a moduleSpec followed by a
--- name, just use moduleSpec, and take init and last of it to get the module
--- spec and name.
-moduleSpec :: Parser ModSpec
-moduleSpec = identString `sepBy1` period
-
-
--- |Parse an optional list of identifiers enclosed in braces
-modifierList :: Parser [Ident]
-modifierList = option [] $ betweenB Brace (identString `sepBy` comma)
-
 
 -- | Parse a left bracket of style 'bs'.
 leftBracket :: BracketStyle -> Parser Token
 leftBracket bs = takeToken test
   where
-    test tok@(TokLBracket sty _) | bs == sty = Just tok
+    test tok@(TokLBracket sty _) = if bs == sty
+                                   then Just tok
+                                   else Nothing
     test _ = Nothing
 
 
@@ -847,6 +977,17 @@ rightBracket bs = takeToken test
     test _ = Nothing
 
 
+-- | Parses each of "()", "[]", "{}".
+emptyBrackets :: BracketStyle -> Parser (Placed Exp)
+emptyBrackets bs = do
+    pos <- tokenPosition <$> leftBracket bs <* rightBracket bs
+    let fnname = case bs of
+            Paren   -> "()"
+            Bracket -> "[]"
+            Brace   -> "{}"
+    return $ Placed (Fncall [] fnname []) pos
+
+
 -- | Helper to run a parser between enclosing brackets of the given style.
 betweenB :: BracketStyle -> Parser a -> Parser a
 betweenB bs = between (leftBracket bs) (rightBracket bs)
@@ -854,433 +995,21 @@ betweenB bs = between (leftBracket bs) (rightBracket bs)
 
 -- | Terminal "public" / "private".
 visibility :: Parser Visibility
-visibility = option Private (ident "pub" $> Public)
+visibility = option Private (ident "pub" *> return Public)
 
 
 -- | Terminal for determinism.
 determinism :: Parser Determinism
-determinism = option Det (ident "test" $> SemiDet
-                          <|> ident "partial" $> SemiDet
-                          <|> ident "failing" $> Failure
-                          <|> ident "terminal" $> Terminal)
-
--- | Translate the output of a parser to something else
-parseWith :: (a -> Either (SourcePos,String) b) -> a -> Parser b
-parseWith translator = either reportFailure return . translator
+determinism = option Det (ident "test" *> return SemiDet
+                          <|> ident "terminal" *> return Terminal)
 
 
--- |Fail the parser with the provided error message and associated SourcePos
-reportFailure :: (SourcePos,String) -> Parser a
-reportFailure (pos, message) = setPosition pos >> parserFail message
-
-
------------------------------------------------------------------------------
--- Translating Term to the correct output types                        --
------------------------------------------------------------------------------
-
--- |Type alias for a translation function
-type TranslateTo t = Term -> Either (SourcePos,String) t
-
-
--- |Convert a Term to a proc/func prototype and a return type (AnyType for a
--- proc declaration or a function with no return type specified).
-termToPrototype :: TranslateTo (ProcProto, TypeSpec)
-termToPrototype (Call _ [] ":" ParamIn [rawProto,rawTy]) = do
-    returnType <- termToTypeSpec rawTy
-    (proto,_)  <- termToPrototype rawProto
-    return (proto,returnType)
-termToPrototype (Call pos mod name ParamIn rawParams) =
-    if List.null mod
-    then do
-        params <- mapM termToParam rawParams
-        return (ProcProto name params Set.empty,AnyType)
-    else Left (pos, "module not permitted in proc declaration " ++ show mod)
-termToPrototype other =
-    syntaxError (termPos other)
-                $ "invalid proc/func prototype " ++ show other
-
-
--- |Convert a Term to a body, if possible, or give a syntax error if not.
-termToBody :: TranslateTo [Placed Stmt]
-termToBody (Call pos [] sep ParamIn [left,right])
-  | separatorName sep = do
-    left' <- termToBody left
-    right' <- termToBody right
-    return $ left' ++ right'
-termToBody (Call pos [] "{}" ParamIn [body]) =
-    termToBody body
-termToBody other = (:[]) <$> termToStmt other
-
-
--- |Convert a Term to a Stmt, if possible, or give a syntax error if not.
-termToStmt :: TranslateTo (Placed Stmt)
-termToStmt (Call pos [] "{}" ParamIn [body]) =
-    termToStmt body
-termToStmt (Call pos [] "if" ParamIn [conditional]) =
-    termToStmt conditional
-termToStmt (Call pos [] "case" ParamIn 
-                [Call _ [] "in" ParamIn 
-                      [exp,Call _ [] "{}" ParamIn [body]]]) = do
-    expr' <- termToExp exp
-    (cases,deflt) <- termToCases termToBody body
-    return $ Placed (Case expr' cases deflt) pos
-termToStmt (Call pos [] "do" ParamIn [body]) =
-    (`Placed` pos) . flip Loop Nothing <$> termToBody body
-termToStmt (Call pos [] "for" ParamIn [gen,body]) = do
-    genStmts <- termToGenerators gen
-    (`Placed` pos) . For genStmts <$> termToBody body
-termToStmt (Call pos [] "use" ParamIn
-                    [Call _ [] "in" ParamIn [ress,body]]) = do
-    ress' <- termToResourceList ress
-    body' <- termToBody body
-    return $ Placed (UseResources ress' Nothing body') pos
-termToStmt (Call pos [] "while" ParamIn [test]) = do
-    t <- termToStmt test
-    return $ Placed (Cond t [Unplaced Nop] [Unplaced Break] Nothing Nothing) pos
-termToStmt (Call pos [] "until" ParamIn [test]) = do
-    t <- termToStmt test
-    return $ Placed (Cond t [Unplaced Break] [Unplaced Nop] Nothing Nothing) pos
-termToStmt (Call pos [] "when" ParamIn [test]) = do
-    t <- termToStmt test
-    return $ Placed (Cond t [Unplaced Nop] [Unplaced Next] Nothing Nothing) pos
-termToStmt (Call pos [] "unless" ParamIn [test]) = do
-    t <- termToStmt test
-    return $ Placed (Cond t [Unplaced Next] [Unplaced Nop] Nothing Nothing) pos
-termToStmt (Call pos [] "pass" ParamIn []) = do
-    return $ Placed Nop pos
-termToStmt (Call pos [] "|" ParamIn
-             [Call _ [] "::" ParamIn [test1,thn],
-              Call _ [] "::" ParamIn [Call _ [] test2 ParamIn [],els]])
-  | defaultGuard test2 = do
-    test1' <- termToStmt test1
-    thn' <- termToBody thn
-    els' <- termToBody els
-    return $ Placed (Cond test1' thn' els' Nothing Nothing) pos
-termToStmt
-        (Call _ [] "|" ParamIn [Call pos [] "::" ParamIn [test,body],rest]) = do
-    test' <- termToStmt test
-    body' <- termToBody body
-    rest' <- termToBody rest
-    return $ Placed (Cond test' body' rest' Nothing Nothing) pos
-termToStmt (Call pos [] "|" ParamIn disjs) = do
-    (`Placed` pos) . (`Or` Nothing) <$> mapM termToStmt disjs
-termToStmt (Call pos [] "::" ParamIn [Call _ [] guard ParamIn [],body])
-  | defaultGuard guard = do
-    syntaxError pos  "'else' outside an 'if'"
-termToStmt (Call pos [] "::" ParamIn [test,body]) = do
-    test' <- termToStmt test
-    body' <- termToBody body
-    return $ Placed (Cond test' body' [Unplaced Nop] Nothing Nothing) pos
-termToStmt (Call _ [] fn ParamIn [first,rest])
-  | separatorName fn = do
-    first' <- termToStmt first
-    rest'  <- termToStmt rest
-    return $ Unplaced $ And [first',rest']
-termToStmt (Call pos mod fn ParamIn args)
-    = (`Placed` pos) . ProcCall mod fn Nothing Det False
-        <$> mapM termToExp args
-termToStmt (Call pos mod fn ParamInOut args)
-    = (`Placed` pos) . ProcCall mod fn Nothing Det True
-        <$> mapM termToExp args
-termToStmt (Call pos mod fn flow args) =
-    syntaxError pos $ "invalid statement prefix: " ++ flowPrefix flow
-termToStmt (Foreign pos lang inst flags args) =
-    (`Placed` pos) . ForeignCall lang inst flags <$> mapM termToExp args
-termToStmt other =
-    syntaxError (termPos other) $ "invalid statement " ++ show other
-
-
---  Convert a term to a list of generators, of the form `i in is; j in js; ...`
-termToGenerators :: TranslateTo [Placed Generator]
-termToGenerators (Call pos [] sep ParamIn [left,right])
-  | separatorName sep = do
-    left' <- termToGenerators left
-    right' <- termToGenerators right
-    return $ left' ++ right'
-termToGenerators (Call pos [] "in" ParamIn [var,exp]) = do
-    var' <- termToExp var
-    exp' <- termToExp exp
-    return [Placed (In var' exp') pos]
-termToGenerators other =
-    syntaxError (termPos other) $ "invalid generator " ++ show other
-
--- |Convert a StmtExpr to the body of a case statement or expression.  The
--- supplied translator is used to translate the bodies of the cases, which will
--- be expressions in a case expression, and statement sequences in a case
--- statement.
-termToCases :: TranslateTo a -> TranslateTo ([(Placed Exp,a)], Maybe a)
-termToCases caseTrans
-      (Call pos [] "|" ParamIn [Call _ [] "::" ParamIn [val,thn], rest]) = do
-    val' <- termToExp val
-    thn' <- caseTrans thn
-    (rest',deflt) <- termToCases caseTrans rest
-    return ((val',thn') : rest', deflt)
-termToCases caseTrans (Call _ [] "::" ParamIn [Call _ [] g ParamIn [],thn])
-  | defaultGuard g = do
-    thn' <- caseTrans thn
-    return ([], Just thn')
-termToCases caseTrans (Call _ [] "::" ParamIn [val,thn]) = do
-    val' <- termToExp val
-    thn' <- caseTrans thn
-    return ([(val',thn')], Nothing)
-termToCases _ other =
-    syntaxError (termPos other) $ "invalid case body " ++ show other
-
-
--- |Convert a Term to an Exp, if possible, or give a syntax error if not.
-termToExp :: TranslateTo (Placed Exp)
-termToExp (Call pos [] ":" ParamIn [exp,ty]) = do
-    exp' <- content <$> termToExp exp
-    ty' <- termToTypeSpec ty
-    case exp' of
-        Typed exp'' ty'' (Just AnyType) -> -- already cast, but not typed
-            return $ Placed (Typed exp'' ty'' $ Just ty') pos
-        Typed exp'' _ _ -> -- already typed, whether casted or not
-            syntaxError (termPos ty) $ "repeated type constraint" ++ show ty
-        _ -> -- no cast, no type
-            return $ Placed (Typed exp'  ty' Nothing) pos
-termToExp (Call pos [] ":!" ParamIn [exp,ty]) = do
-    exp' <- content <$> termToExp exp
-    ty' <- termToTypeSpec ty
-    case exp' of
-        Typed exp'' inner Just{} ->
-            syntaxError (termPos ty) $ "repeated cast " ++ show ty
-        Typed exp'' inner Nothing ->
-            return $ Placed (Typed exp'' ty' $ Just inner) pos
-        _  ->
-            return $ Placed (Typed exp'  ty' $ Just AnyType) pos
-termToExp (Call pos [] "where" ParamIn [exp,body]) = do
-    exp' <- termToExp exp
-    body' <- termToBody body
-    return $ Placed (Where body' exp') pos
-termToExp (Call pos [] "let" ParamIn [Call _ [] "in" ParamIn [body,exp]]) =
-  do
-    exp' <- termToExp exp
-    body' <- termToBody body
-    return $ Placed (Where body' exp') pos
-termToExp (Call pos [] "^" ParamIn [exp,op]) = do
-    exp' <- termToExp exp
-    op'  <- termToExp op
-    case op' of
-        Placed (Fncall mod fn args) _
-            -> return $ Placed (Fncall mod fn (exp':args)) pos
-        Placed (Var var ParamIn Ordinary) _
-            -> return $ Placed (Fncall [] var [exp']) pos
-        _ -> syntaxError pos "invalid second argument to '^'"
-termToExp (Call pos [] "if" ParamIn [conditional]) =
-    termToConditionalExp conditional
-termToExp (Call pos [] "case" ParamIn 
-                [Call _ [] "in" ParamIn 
-                      [exp,Call _ [] "{}" ParamIn [body]]]) = do
-    expr' <- termToExp exp
-    (cases,deflt) <- termToCases termToExp body
-    return $ Placed (CaseExp expr' cases deflt) pos
-termToExp (Call pos [] sep ParamIn [])
-  | separatorName sep =
-    syntaxError pos "invalid separated expression"
-termToExp (Call pos [] var flow []) = -- looks like a var; assume it is
-    return $ Placed (Var var flow Ordinary) pos
-termToExp (Call pos mod fn flow args) =
-    (`Placed` pos) . Fncall mod fn <$> mapM termToExp args
-termToExp (Foreign pos lang inst flags args) =
-    (`Placed` pos) . ForeignFn lang inst flags <$> mapM termToExp args
-termToExp (IntConst pos num) = Right $ Placed (IntValue num) pos
-termToExp (FloatConst pos num) = Right $ Placed (FloatValue num) pos
-termToExp (CharConst pos char) = Right $ Placed (CharValue char) pos
-termToExp (StringConst pos str DoubleQuote)
-    = return $ Placed (StringValue str WybeString) pos
-termToExp (StringConst pos str (IdentQuote "c" DoubleQuote))
-    = return $ Placed (StringValue str CString) pos
-termToExp str@StringConst{stringPos=pos}
-    = Left (pos, "invalid string literal " ++ show str)
-
-
--- |Translate an `if` expression into a Placed conditional Exp
-termToConditionalExp :: TranslateTo (Placed Exp)
-termToConditionalExp (Call _ [] "{}" ParamIn [body]) =
-    termToConditionalExp' body
-termToConditionalExp term =
-    syntaxError (termPos term) "expecting '{'"
-
-termToConditionalExp' :: TranslateTo (Placed Exp)
-termToConditionalExp'
-        (Call _ [] "|" ParamIn [Call pos [] "::" ParamIn [test,body],rest]) = do
-    test' <- termToStmt test
-    body' <- termToExp body
-    rest' <- termToConditionalExp' rest
-    return $ Placed (CondExp test' body' rest') pos
-termToConditionalExp'
-        (Call pos [] "::" ParamIn [Call _ [] guard ParamIn [],body])
-    | defaultGuard guard = termToExp body
-termToConditionalExp' term =
-    syntaxError (termPos term)
-          $ "missing 'else ::' in if expression: " ++ show term
-
-
--- |Convert a Term to a TypeSpec, or produce an error
-termToTypeSpec :: TranslateTo TypeSpec
-termToTypeSpec (Call _ [] name ParamIn []) 
-  | isTypeVar name = 
-    return $ TypeVariable $ RealTypeVar name
-termToTypeSpec (Call _ mod name ParamIn params) 
-  | not $ isTypeVar name =
-    TypeSpec mod name <$> mapM termToTypeSpec params
-termToTypeSpec other =
-    syntaxError (termPos other)
-        $ "invalid type specification " ++ show other
-
-
--- | Translate a Term to a proc or func prototype (with empty resource list)
-termToProto :: TranslateTo (Placed ProcProto)
-termToProto (Call pos [] name ParamIn params) = do
-    params' <- mapM termToParam params
-    return $ Placed (ProcProto name params' Set.empty) pos
-termToProto other =
-    syntaxError (termPos other) $ "invalid prototype " ++ show other
-
-
--- | Translate a Term to a proc or func parameter
-termToParam :: TranslateTo Param
-termToParam (Call _ [] ":" ParamIn [Call _ [] name flow [],ty]) = do
-    ty' <- termToTypeSpec ty
-    return $ Param name ty' flow Ordinary
-termToParam (Call pos [] name flow []) =
-    return $ Param name AnyType flow Ordinary
-termToParam other =
-    syntaxError (termPos other) $ "invalid parameter " ++ show other
-
-
--- | Translate a Term to a ctor declaration
-termToCtorDecl :: TranslateTo (Placed ProcProto)
-termToCtorDecl (Call pos [] name ParamIn fields) = do
-    fields' <- mapM termToCtorField fields
-    return $ Placed (ProcProto name fields' Set.empty) pos
-termToCtorDecl other =
-    syntaxError (termPos other)
-        $ "invalid constructor declaration " ++ show other
-
-
--- | Translate a Term to a ctor field
-termToCtorField :: TranslateTo Param
-termToCtorField (Call _ [] ":" ParamIn [Call _ [] name ParamIn [],ty]) = do
-    ty' <- termToTypeSpec ty
-    return $ Param name ty' ParamIn Ordinary
-termToCtorField (Call pos [] name ParamIn []) 
-  | isTypeVar name = do
-    return $ Param "" (TypeVariable $ RealTypeVar name) ParamIn Ordinary
-termToCtorField (Call pos mod name ParamIn params) 
-  | not $ isTypeVar name = do
-    tyParams <- mapM termToTypeSpec params
-    return $ Param "" (TypeSpec mod name tyParams) ParamIn Ordinary
-termToCtorField other =
-    syntaxError (termPos other) $ "invalid constructor field " ++ show other
-
-
--- | Extract a list of resource names from a Term (from a "use" statement).
-termToResourceList :: TranslateTo [ResourceSpec]
-termToResourceList (Call _ [] "{}" ParamIn args) =
-    concat <$> mapM termToResourceList args
-termToResourceList (Call _ mod name ParamIn []) =
-    return [ResourceSpec mod name]
-termToResourceList other =
-    syntaxError (termPos other) "expected resource spec"
-
------------------------------------------------------------------------------
--- Data structures                                                         --
------------------------------------------------------------------------------
-
--- |Representation of expressions and statements.
-data Term
-    -- |a proc or function call, or a variable reference.
-    = Call {
-        callPos::SourcePos,               -- ^Where the call appears
-        callModule::ModSpec,              -- ^the specified module, or empty
-        callName::ProcName,               -- ^the called proc or variable name
-        callVariableFlow::FlowDirection,  -- ^variable flow direction or
-                                          --  call resourcefulness
-        callArguments::[Term]             -- ^the specified arguments
-    }
-    -- |a foreign call, either as an expression or statement.
-    | Foreign {
-        foreignPos::SourcePos,         -- ^Where the foreign call appears
-        foreignLanguage::Ident,        -- ^the specified foreign language
-        foreignInstruction::ProcName,  -- ^the specified instruction
-        foreignFlags::[Ident],         -- ^the specified modifiers
-        foreignArguments::[Term]       -- ^the specified arguments
-    }
-    -- |an integer manifest constant
-    | IntConst {intPos::SourcePos, intConstValue::Integer}
-    -- |a floating point manifest constant
-    | FloatConst{floatPos::SourcePos, floatConstValue::Double}
-    -- |a character literal
-    | CharConst{charPos::SourcePos, charConstValue::Char}
-    -- |a string literal
-    | StringConst{
-        stringPos::SourcePos, 
-        stringConstValue::String, 
-        stringConstantDelim::StringDelim 
-    }
-
-
-instance Show Term where
-    show (Call _ mod name flow args) =
-        flowPrefix flow ++ maybeModPrefix mod ++ name ++ showArguments args
-    show (Foreign _ lang instr flags args) =
-        "foreign " ++ lang ++ " " ++ showFlags flags ++ instr
-        ++ showArguments args
-    show (IntConst _ int) = show int
-    show (FloatConst _ float) = show float
-    show (CharConst _ char) = show char
-    show (StringConst _ string delim) = delimitString delim string
-
-
--- |The SourcePos of a Term.
-termPos :: Term -> SourcePos
-termPos Call{callPos=pos}            = pos
-termPos Foreign{foreignPos=pos}      = pos
-termPos IntConst{intPos=pos}         = pos
-termPos FloatConst{floatPos=pos}     = pos
-termPos CharConst{charPos=pos}       = pos
-termPos StringConst{stringPos=pos}   = pos
-
-
--- |Return the specified Term with its position replaced.
-setTermPos :: SourcePos -> Term -> Term
-setTermPos pos term@Call{} = term {callPos = pos}
-setTermPos pos term@Foreign{} = term {foreignPos = pos}
-setTermPos pos term@IntConst{} = term {intPos = pos}
-setTermPos pos term@FloatConst{} = term {floatPos = pos}
-setTermPos pos term@CharConst{} = term {charPos = pos}
-setTermPos pos term@StringConst{} = term {stringPos = pos}
-
-
--- |Set the flow of a call
-setCallFlow :: FlowDirection -> Term -> Term
-setCallFlow flow term =
-    case term of
-        Call{} -> term {callVariableFlow = flow}
-        _ -> shouldnt $ "setCallFlow of non-Call " ++ show term
-
-
------------------------------------------------------------------------------
--- Parser testing                                                          --
------------------------------------------------------------------------------
-
-testFile :: String -> IO ()
-testFile file = do
-    stream <- fileTokens file
-    putStrLn "--------------------"
-    case parseWybe stream file of
-        Left err -> print err
-        Right is -> mapM_ print is
-
-test :: Int -> String -> Term
-test prec input = do
-    let toks = stringTokens input
-    case parse (maybeSetPosition toks (limitedTerm prec) <* eof) "<string>" toks of
-        Left err -> StringConst (errorPos err) (show err) DoubleQuote
-        Right is -> is
-
-testParser :: Parser a -> String -> Either ParseError a
-testParser parser input = parse (maybeSetPosition toks parser <* eof) "<string>" toks
-  where toks = stringTokens input
+-- | Wybe keywords to exclude from identitfier tokens conditionally.
+-- XXX revisit this list; replace and with &&, or with ||, not with ~,
+-- maybe remove 'import', and probably need to add others.
+keywords :: [String]
+keywords =
+    [ "if", "then", "else", "def", "use"
+    , "do",  "until", "unless", "test", "import"
+    , "while", "foreign", "in", "when"
+    ]
