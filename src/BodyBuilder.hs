@@ -655,7 +655,7 @@ canonicaliseArg :: PrimArg -> PrimArg
 canonicaliseArg ArgVar{argVarName=nm, argVarFlow=fl} =
     ArgVar nm AnyType fl Ordinary False
 canonicaliseArg (ArgProcRef ms as _) = 
-  ArgProcRef ms (canonicaliseArg <$> as) AnyType
+    ArgProcRef ms (canonicaliseArg <$> as) AnyType
 canonicaliseArg (ArgInt v _)        = ArgInt v AnyType
 canonicaliseArg (ArgFloat v _)      = ArgFloat v AnyType
 canonicaliseArg (ArgString v r _)   = ArgString v r AnyType

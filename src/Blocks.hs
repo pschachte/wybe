@@ -1104,19 +1104,19 @@ cgenArgConst :: PrimArg -> Codegen C.Constant
 cgenArgConst (ArgInt val ty) = do
     toTy <- lift $ llvmType ty
     case toTy of
-      IntegerType bs -> return $ C.Int bs val
-      _ -> consCast (C.Int (fromIntegral wordSize) val) address_t toTy
+        IntegerType bs -> return $ C.Int bs val
+        _ -> consCast (C.Int (fromIntegral wordSize) val) address_t toTy
 cgenArgConst (ArgFloat val ty) = do
     toTy <- lift $ llvmType ty
     case toTy of
-      FloatingPointType DoubleFP -> return $ C.Float $ F.Double val
-      _ -> consCast (C.Float $ F.Double val) float_t toTy
+        FloatingPointType DoubleFP -> return $ C.Float $ F.Double val
+        _ -> consCast (C.Float $ F.Double val) float_t toTy
 cgenArgConst (ArgString s WybeString ty) = do
-    (_,conPtr) <- addStringConstant s
+    conPtr <- snd <$> addStringConstant s
     let strType = struct_t [address_t, address_t]
     let strStruct = C.Struct Nothing False
-                     [ C.Int (fromIntegral wordSize) (fromIntegral $ length s)
-                     , C.PtrToInt conPtr address_t ]
+                  [ C.Int (fromIntegral wordSize) (fromIntegral $ length s)
+                  , C.PtrToInt conPtr address_t ]
     strName <- addGlobalConstant strType strStruct
     let strPtr = C.GlobalReference (ptr_t strType) strName
     let strElem = C.GetElementPtr True strPtr [C.Int 32 0, C.Int 32 0]
@@ -1129,8 +1129,8 @@ cgenArgConst (ArgChar c ty) = do
     let val = integerOrd c
     toTy <- lift $ llvmType ty
     case toTy of
-      IntegerType bs -> return $ C.Int bs val
-      _ -> consCast (C.Int (fromIntegral wordSize) val) address_t toTy
+        IntegerType bs -> return $ C.Int bs val
+        _ -> consCast (C.Int (fromIntegral wordSize) val) address_t toTy
 cgenArgConst (ArgUndef ty) = do
     llty <- lift $ llvmType ty
     return $ C.Undef llty
@@ -1153,10 +1153,10 @@ cgenFuncRef ps = do
     let fName = LLVMAST.Name $ fromString $ show ps
     psType <- HigherOrderType defaultProcModifiers . (primParamTypeFlow <$>)
           <$> primActualParams ps
-    psTy <- lift $ llvmFuncType $ psType
+    psTy <- lift $ llvmFuncType psType
     logCodegen $ "  with type " ++ show psType
     let conFn = C.GlobalReference psTy fName
-    return $ C.BitCast conFn address_t
+    return $ C.PtrToInt conFn address_t
 
 
 primActualParams :: ProcSpec -> Codegen [PrimParam]
