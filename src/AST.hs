@@ -66,6 +66,7 @@ module AST (
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
   updateModules, updateImplementations, updateImplementation,
+  updateTypeModifiers,
   addParameters, addTypeRep, setTypeRep, addConstructor,
   getModuleImplementationField, getModuleImplementation,
   getLoadedModule, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
@@ -135,8 +136,9 @@ import qualified LLVM.AST as LLVMAST
 data Item
      = TypeDecl Visibility TypeProto TypeModifiers TypeImpln [Item] OptPos
      | ModuleDecl Visibility Ident [Item] OptPos
-     | RepresentationDecl [Ident] TypeRepresentation OptPos
-     | ConstructorDecl Visibility [Ident] [Placed ProcProto] OptPos
+     | RepresentationDecl [Ident] TypeModifiers TypeRepresentation OptPos
+     | ConstructorDecl Visibility [Ident] TypeModifiers [Placed ProcProto]
+                       OptPos
      | ImportMods Visibility [ModSpec] OptPos
      | ImportItems Visibility ModSpec [Ident] OptPos
      | ImportForeign [FilePath] OptPos
@@ -770,8 +772,9 @@ updateImplementation implOp = do
             updateModule (\mod -> mod { modImplementation = Just $ implOp impl })
 
 -- | Apply the given type modifiers to the current module interface
-updateTypeModifiers :: TypeModifiers -> ModuleInterface -> ModuleInterface
-updateTypeModifiers typeMods int = int {typeModifiers = typeMods}
+updateTypeModifiers :: TypeModifiers -> Compiler ()
+updateTypeModifiers typeMods =
+    updateModInterface $ \int -> int {typeModifiers = typeMods}
 
 -- |Add the specified type/module parameters to the current module.
 addParameters :: [TypeVarName] -> OptPos -> Compiler ()
@@ -808,6 +811,7 @@ addTypeRep repn pos = do
 setTypeRep :: TypeRepresentation -> Compiler ()
 setTypeRep repn = updateModule (\m -> m { modTypeRep = Just repn
                                         , modIsType  = True })
+
 
 -- |Add the specified data constructor to the current module.  This makes the
 -- module a type.  Also verify that all mentioned type variables are parameters
@@ -858,13 +862,7 @@ addKnownType mspec = do
     newSet <- Set.insert mspec . Map.findWithDefault Set.empty name
               <$> getModuleImplementationField modKnownTypes
     updateImplementation
-      (\imp ->
-        let set = Set.singleton spec
-        in imp { modTypes = Map.insert name def $ modTypes imp,
-                 modKnownTypes = Map.insert name set $ modKnownTypes imp })
-    updateInterface vis (updatePubTypes (Map.insert name (spec,rep)))
-    updateInterface Public (updateTypeModifiers typeMods)
-    return spec
+      (\imp -> imp {modKnownTypes = Map.insert name newSet (modKnownTypes imp)})
 
 
 
@@ -1380,7 +1378,7 @@ data ModuleInterface = ModuleInterface {
     pubProcs :: ProcDictionary,
                                      -- ^The procs this module exports
     pubSubmods   :: Map Ident ModSpec, -- ^The submodules this module exports
-    dependencies :: Set ModSpec      -- ^The other modules that must be linked
+    dependencies :: Set ModSpec,      -- ^The other modules that must be linked
     typeModifiers :: TypeModifiers   -- ^The extra information of the type
     }                               --  in by modules that depend on this one
     deriving (Eq, Generic)
@@ -2865,13 +2863,15 @@ instance Show Item where
     ++ intercalate "\n  | " (List.map show ctors) ++ "\n  "
     ++ intercalate "\n  " (List.map show items)
     ++ "\n}\n"
-  show (RepresentationDecl params repn pos) =
+  show (RepresentationDecl params typeModifiers repn pos) =
     "representation"
     ++ bracketList "(" ")" ", " (("?"++) <$> params)
+    ++ show typeModifiers
     ++ " " ++ show repn ++ showMaybeSourcePos pos ++ "\n"
-  show (ConstructorDecl vis params ctors pos) =
+  show (ConstructorDecl vis params typeModifiers ctors pos) =
     visibilityPrefix vis ++ "constructors"
     ++ bracketList "(" ")" ", " (("?"++) <$> params)
+    ++ show typeModifiers
     ++ " " ++ show ctors ++ showMaybeSourcePos pos ++ "\n"
   show (ImportMods vis mods pos) =
       visibilityPrefix vis ++ "use " ++

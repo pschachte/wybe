@@ -61,7 +61,7 @@ defaultOptions     = Options
 data LogSelection =
   All | AST | BodyBuilder | Builder | Clause | Expansion | FinalDump
   | Flatten | Normalise | Optimise | Resources | Types
-  | Unbranch | Codegen | Blocks | Emit | Analysis | Transform
+  | Unbranch | Codegen | Blocks | Emit | Analysis | Transform | Uniqueness
   deriving (Eq, Ord, Bounded, Enum, Show, Read)
 
 
@@ -97,11 +97,13 @@ logSelectionDescription Codegen
 logSelectionDescription Blocks
     = "Log translation of LPVM procedures into LLVM"
 logSelectionDescription Emit
-    = "Log emission of LLVM IR from the definitions created."
+    = "Log emission of LLVM IR from the definitions created"
 logSelectionDescription Analysis
-    = "Log analysis of LPVM IR."
+    = "Log analysis of LPVM IR"
 logSelectionDescription Transform
-    = "Log transform of mutate instructions."
+    = "Log transform of mutate instructions"
+logSelectionDescription Uniqueness
+    = "Log uniqueness checking"
 
 -- |Command line option parser and help text
 options :: [OptDescr (Options -> Options)]

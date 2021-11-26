@@ -49,21 +49,24 @@ normalise items = do
 
 -- |Normalise a single file item, storing the result in the current module.
 normaliseItem :: Item -> Compiler ()
-normaliseItem (TypeDecl vis (TypeProto name params) mods rep items pos)
-  = do
-    -- let (rep', ctorVis, consts, nonconsts) = normaliseTypeImpln rep
-    let (rep', ctorVis, ctors) = normaliseTypeImpln rep
-    _ <- addType name (TypeDef vis params rep' ctors ctorVis mods pos items)
-    normaliseSubmodule name Nothing vis pos items
-    return ()
+normaliseItem (TypeDecl vis (TypeProto name params) mods
+              (TypeRepresentation rep) items pos) = do
+    let items' = RepresentationDecl params mods rep pos : items
+    normaliseSubmodule name vis pos items'
+normaliseItem (TypeDecl vis (TypeProto name params) mods
+              (TypeCtors ctorVis ctors) items pos) = do
+    let items' = ConstructorDecl ctorVis params mods ctors pos : items
+    normaliseSubmodule name vis pos items'
 normaliseItem (ModuleDecl vis name items pos) =
     normaliseSubmodule name vis pos items
-normaliseItem (RepresentationDecl params rep pos) = do
+normaliseItem (RepresentationDecl params mods rep pos) = do
     addParameters params pos
     addTypeRep rep pos
-normaliseItem (ConstructorDecl ctorVis params ctors pos) = do
+    updateTypeModifiers mods
+normaliseItem (ConstructorDecl ctorVis params mods ctors pos) = do
     addParameters params pos
     mapM_ (addConstructor ctorVis) ctors
+    updateTypeModifiers mods
 normaliseItem (ImportMods vis modspecs pos) =
     mapM_ (\spec -> addImport spec (importSpec Nothing vis)) modspecs
 normaliseItem (ImportItems vis modspec imports pos) =
@@ -294,52 +297,49 @@ data CtorInfo = CtorInfo {
 --     * elif numConsts == 0 && max ctorSize <= wordSizeBytes:
 --          rep = integer with max ctorSize bits
 --     * else: rep = integer with wordSizeBytes bits
-completeType :: TypeKey -> TypeDef -> Compiler ()
-completeType (name,modspec)
-             typedef@(TypeDef vis params rep ctors ctorVis _ pos items) = do
-    logNormalise $ "Completing type " ++ showModSpec modspec ++ "." ++ name
-    let rep0  = trustFromJust "completeType with equiv type decl" rep
-    if List.null ctors
-      then return () -- we should have already determined the representation
-      else do
-      reenterModule modspec
-      let (constCtors,nonConstCtors) =
-            List.partition (List.null . procProtoParams . content) ctors
-      let numConsts = length constCtors
-      let numNonConsts = length nonConstCtors
-      let (tagBits,tagLimit) =
-            if numNonConsts > wordSizeBytes
-            then -- must set aside one tag to indicate secondary tag
-              (availableTagBits, wordSizeBytes - 2)
-            else if numNonConsts == 0
-            then (0, 0)
-            else (ceiling $ logBase 2 (fromIntegral numNonConsts),
-                  wordSizeBytes - 1)
-      logNormalise $ "Complete " ++ showModSpec modspec ++ "." ++ name
-                     ++ " with " ++ show tagBits ++ " tag bits and "
-                     ++ show tagLimit ++ " tag limit"
-      when (numConsts >= fromIntegral smallestAllocatedAddress)
-        $ nyi $ "Type '" ++ name ++ "' has too many constant constructors"
-      let typespec = TypeSpec modspec name []
-      let constItems =
-            concatMap (constCtorItems ctorVis typespec) $ zip constCtors [0..]
-      infos <- zipWithM nonConstCtorInfo nonConstCtors [0..]
-      (reps,nonconstItemsList) <-
-           unzip <$> mapM
-           (nonConstCtorItems ctorVis typespec numConsts numNonConsts
-            tagBits tagLimit)
-           infos
-      let rep = typeRepresentation reps numConsts
-      let extraItems =
-            implicitItems typespec constCtors nonConstCtors rep items
-      logNormalise $ "Representation of type "
-                     ++ showModSpec modspec ++ "." ++ name
-                     ++ " is " ++ show rep
-      addType name (typedef {typeDefRepresentation = Just rep } )
-      normaliseSubmodule name (Just params) vis pos
-        $ constItems ++ concat nonconstItemsList ++ extraItems
-      reexitModule
-      return ()
+completeType :: ModSpec -> TypeDef -> Compiler ()
+completeType modspec (TypeDef params ctors ctorVis) = do
+    logNormalise $ "Completing type " ++ showModSpec modspec
+    when (List.null ctors)
+      $ shouldnt $ "completeType with no constructors: " ++ show modspec
+    reenterModule modspec
+    let (constCtors,nonConstCtors) =
+            List.partition (List.null . procProtoParams . content) $ ctors
+    let numConsts = length constCtors
+    let numNonConsts = length nonConstCtors
+    let (tagBits,tagLimit) =
+          if numNonConsts > wordSizeBytes
+          then -- must set aside one tag to indicate secondary tag
+            (availableTagBits, wordSizeBytes - 2)
+          else if numNonConsts == 0
+          then (0, 0)
+          else (ceiling $ logBase 2 (fromIntegral numNonConsts),
+                wordSizeBytes - 1)
+    logNormalise $ "Complete " ++ showModSpec modspec
+                   ++ " with " ++ show tagBits ++ " tag bits and "
+                   ++ show tagLimit ++ " tag limit"
+    -- XXX if numNonConsts == 0, then we could handle more consts.
+    when (numConsts >= fromIntegral smallestAllocatedAddress)
+      $ nyi $ "Type '" ++ show modspec ++ "' has too many constant constructors"
+    -- XXX remove name from TypeSpec, and add type variable as an alternative ctor
+    let typespec = TypeSpec (init modspec) (last modspec)
+                   $ List.map TypeVariable params
+    let constItems =
+          concatMap (constCtorItems ctorVis typespec) $ zip constCtors [0..]
+    infos <- zipWithM nonConstCtorInfo nonConstCtors [0..]
+    (reps,nonconstItemsList) <-
+         unzip <$> mapM
+         (nonConstCtorItems ctorVis typespec numConsts numNonConsts
+          tagBits tagLimit)
+         infos
+    let rep = typeRepresentation reps numConsts
+    extraItems <- implicitItems typespec constCtors nonConstCtors rep
+    logNormalise $ "Representation of type " ++ showModSpec modspec
+                   ++ " is " ++ show rep
+    setTypeRep rep
+    normalise $ constItems ++ concat nonconstItemsList ++ extraItems
+    reexitModule
+    return ()
 
 
 -- | Analyse the representation of a single constructor, determining the

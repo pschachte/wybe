@@ -129,12 +129,11 @@ moduleItemParser v = do
 typeItemParser :: Visibility -> Parser Item
 typeItemParser v = do
     pos <- tokenPosition <$> ident "type"
-    modifiers <- modifierList
+    modifiers <- processTypeModifiers <$> modifierList
     proto <- TypeProto <$> identString <*>
              option [] (betweenB Paren (typeVarName `sepBy` comma))
     (imp,items) <- typeImpln <|> typeCtors
-    return $ TypeDecl v proto (processTypeModifiers modifiers) imp items
-            (Just pos)
+    return $ TypeDecl v proto modifiers imp items (Just pos)
 
 -- | Process type modifiers.
 processTypeModifiers :: [Ident] -> TypeModifiers
@@ -156,8 +155,9 @@ typeRepItemParser = do
     keypos <- tokenPosition <$> ident "representation"
     params <- option [] $ betweenB Paren (typeVarName `sepBy` comma)
     ident "is"
+    modifiers <- processTypeModifiers <$> modifierList
     rep <- typeRep
-    return $ RepresentationDecl params rep $ Just keypos
+    return $ RepresentationDecl params modifiers rep $ Just keypos
 
 
 -- | Module type representation declaration
@@ -165,8 +165,9 @@ dataCtorItemParser :: Visibility -> Parser Item
 dataCtorItemParser v = do
     pos <- tokenPosition <$> (ident "constructor" <|> ident "constructors")
     params <- option [] $ betweenB Paren (typeVarName `sepBy` comma)
+    modifiers <- processTypeModifiers <$> modifierList
     ctors <- funcProtoParser `sepBy` symbol "|"
-    return $ ConstructorDecl v params ctors $ Just pos
+    return $ ConstructorDecl v params modifiers ctors $ Just pos
 
 
 -- | Type declaration body where representation and items are given
@@ -350,7 +351,6 @@ paramParser = do
     name <- identString
     ty <- optType
     return $ Param name ty ParamIn Ordinary
-
 
 
 -- | ResourceFlowSpecs -> FlowDirection modIdent

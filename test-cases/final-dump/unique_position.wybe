@@ -1,9 +1,14 @@
-pub type {unique} unique_position { pub unique_position(x:int, y:int) }
+pub type unique_position { pub unique_position(x:int, y:int) }
 
-pub def printPosition(pos:unique_position) use !io {
+pub def printPosition(pos:unique_position, !p:phantom) use io {
     !print(" (")
     !print(pos.x)
     !print(",")
     !print(pos.y)
     !println(")")
 }
+
+(?p = phantom)
+!printPosition(unique_position(3, 4), p, ?p2)
+
+if {(p2 = phantom) :: !println("OK")}

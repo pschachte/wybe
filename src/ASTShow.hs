@@ -29,13 +29,10 @@ instance Show Module where
         let int  = modInterface mod
             maybeimpl = modImplementation mod
         in " Module " ++ showModSpec (modSpec mod) ++
-           maybeShow "(" (modParams mod) ")" ++
-           (if maybe False tmUniqueness (typeModifiers int)
+           bracketList "(" ", " ")" (modParams mod) ++
+           (if tmUniqueness (typeModifiers int)
                then "\n  modifiers       : {unique}"
                else "") ++
-           "\n  public submods  : " ++ showMapPoses (pubDependencies int) ++
-           "\n  public types    : " ++ showMapLines (pubTypes int) ++
-           bracketList "(" ", " ")" (modParams mod) ++
            "\n  representation  : " ++
            (if modIsType mod
             then maybe "(not yet known)" show (modTypeRep mod)

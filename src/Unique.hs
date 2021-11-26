@@ -1,12 +1,16 @@
--- BEGIN MAJOR DOC
+--  File     : Unique.hs
+--  Purpose  : The unique typing system for Wybe
+--  Copyright: (c) 
+--  License  : Licensed under terms of the MIT license.  See the file
+--           : LICENSE in the root directory of this project.
+--
+-- This module defines the unique typing system for Wybe.
 
--- END MAJOR DOC
-----------------------------------------------------------------
 
-module Unique where
+module Unique (uniquenessCheckProc) where
 
 import AST
-import Snippets
+import Options
 import Control.Monad
 import Control.Monad.Trans (lift)
 import Control.Monad.Trans.Class
@@ -17,22 +21,62 @@ import Data.Map as Map
 import Data.Maybe
 
 
-type Uniqueness
-
-data UniquenessState = Uniqueness {
-    uniqueUsedSet :: [VarName]  -- QUESTION: type
+-- | Uniqueness error with specs of the variable
+data UniquenessError = UniquenessError {
+    errVarName  :: VarName,
+    errTypeSpec :: TypeSpec
 }
 
-initUniquenessState :: UniquenessState
-initUniquenessState = Uniqueness []
+-- | Set used to check correctness of uniqueness of the program
+data UniquenessState = UniquenessState {
+    uniquenessUsedMap :: Map VarName TypeSpec,
+    uniquenessErrors  :: [UniquenessError]
+}
 
-uniquenessCheckProcDef :: ProcName -> Compiler (UniquenessState)
-uniquenesscheckStmt :: ModSpec -> ProcName -> OptPos -> Typing
-                    -> [(Set VarName,Placed Stmt)] -> BindingState -> Determinism
-                    -> Stmt -> OptPos
-                    -> Compiler ([Placed Stmt], [(Set VarName,Placed Stmt)],
-                              BindingState, [TypeError])
-uniquenesscheckStmts :: ModSpec -> ProcName -> OptPos -> Typing
-                     -> [(Set VarName,Placed Stmt)] -> BindingState -> Determinism
-                     -> [Placed Stmt]
-                     -> Compiler ([Placed Stmt], BindingState, [TypeError])
+
+-- | Return an initial state for uniqueness checker
+initUniquenessState :: UniquenessState
+initUniquenessState = UniquenessState Map.empty []
+
+
+-- | Check correctness of uniqueness for a procedure
+uniquenessCheckProc :: [Placed Stmt] -> Compiler ()
+uniquenessCheckProc body = do
+    logUniqueness $ "Uniqueness checking body: " ++ showBody 4 body
+    let state = foldStmts const uniquenessCheckExp initUniquenessState body
+    errs <- filterM (typeIsUnique . errTypeSpec) (uniquenessErrors state)
+    mapM_ reportUniquenessError errs
+
+
+-- | Check correctness of uniqueness for an expression
+uniquenessCheckExp :: UniquenessState -> Exp -> UniquenessState
+uniquenessCheckExp state (Typed (Var name ParamIn _) ty _) =
+    let (UniquenessState usedMap errs) = state
+    in if Map.member name usedMap
+    then state {uniquenessErrors = UniquenessError name ty : errs}
+    else state {uniquenessUsedMap = Map.insert name ty usedMap}
+
+uniquenessCheckExp state (Typed (Var name ParamOut _) ty _) =
+    state {uniquenessUsedMap = Map.delete name (uniquenessUsedMap state)}
+
+uniquenessCheckExp state _ = state
+
+
+-- | Check if a type is unique
+typeIsUnique :: TypeSpec -> Compiler Bool
+typeIsUnique TypeSpec { typeMod = mod, typeName = name } = do
+    let mod' = mod ++ [name]
+    getSpecModule "typeIsUnique" (tmUniqueness . typeModifiers . modInterface)
+                  mod'
+typeIsUnique _ = return False
+ 
+
+-- | Report an error when a unique typed variable is being reused
+reportUniquenessError :: UniquenessError -> Compiler ()
+reportUniquenessError (UniquenessError name ty) = do
+    errmsg Nothing $ "Reuse of unique variable " ++ name ++ ":" ++ show ty
+
+
+-- | Log a message, if we are logging type checker activity.
+logUniqueness :: String -> Compiler ()
+logUniqueness = logMsg Uniqueness

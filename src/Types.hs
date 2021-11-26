@@ -24,6 +24,7 @@ import           Options             (LogSelection (Types))
 import           Util
 import           Snippets
 import           Blocks              (llvmMapBinop, llvmMapUnop)
+import           Unique
 import Data.Function (on)
 
 -- import           Debug.Trace
@@ -871,6 +872,7 @@ typecheckProcDecl' m pdef = do
                           | param <- Set.toList
                                      $ missingBindings outParams assigned]
                     typeErrors modeErrs
+                    lift $ uniquenessCheckProc def'
                     params' <- updateParamTypes params
                     let proto' = proto { procProtoParams = params' }
                     let pdef' = pdef { procProto = proto',
