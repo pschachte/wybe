@@ -145,12 +145,9 @@ tempVar = do
 
 -- |Run a flattener, ignoring its state changes except for the temp variable
 --  counter.  If transparent is True, also keep changes to the set of defined
---  variables.  If isLoop is True, then flatten any loop initialisations
---  accumulated while processing the body so they are executed before entering
---  the loop; otherwise, just preserve the accumulated initialisations.
-flattenInner :: Bool -> Bool -> Determinism
-             -> Flattener t -> Flattener [Placed Stmt]
-flattenInner isLoop transparent detism inner = do
+--  variables.
+flattenInner :: Bool -> Determinism -> Flattener t -> Flattener [Placed Stmt]
+flattenInner transparent detism inner = do
     oldState <- get
     (_,innerState) <-
         lift (runStateT inner
@@ -290,13 +287,12 @@ flattenStmt' (ForeignCall lang name flags args) pos _ = do
     flushPostponed
 -- XXX must handle Flattener state more carefully.  Defined variables need
 --     to be retained between condition and then branch, but forgotten for
---     the else branch.  Also note that 'transparent' arg to flattenInner is
---     always False
+--     the else branch.
 flattenStmt' (Cond tstStmt thn els condVars defVars) pos detism = do
-    tstStmt' <- seqToStmt <$> flattenInner False True SemiDet
+    tstStmt' <- seqToStmt <$> flattenInner True SemiDet
                 (placedApply flattenStmt tstStmt SemiDet)
-    thn' <- flattenInner False False detism (flattenStmts thn detism)
-    els' <- flattenInner False False detism (flattenStmts els detism)
+    thn' <- flattenInner False detism (flattenStmts thn detism)
+    els' <- flattenInner False detism (flattenStmts els detism)
     emit pos $ Cond tstStmt' thn' els' condVars defVars
 flattenStmt' (Case pexpr cases deflt) pos detism = do
     pexpr' <- flattenPExp pexpr
@@ -310,23 +306,23 @@ flattenStmt' (TestBool expr) pos SemiDet = do
 flattenStmt' (TestBool expr) _pos detism =
     shouldnt $ "TestBool " ++ show expr ++ " in " ++ show detism ++ " context"
 flattenStmt' (And tsts) pos SemiDet = do
-    tsts' <- flattenInner False True SemiDet (flattenStmts tsts SemiDet)
+    tsts' <- flattenInner True SemiDet (flattenStmts tsts SemiDet)
     emit pos $ And tsts'
 flattenStmt' stmt@And{} _pos detism =
     shouldnt $ "And in a " ++ show detism ++ " context"
 flattenStmt' (Or tsts vars) pos SemiDet = do
-    tsts' <- flattenInner False True SemiDet (flattenStmts tsts SemiDet)
+    tsts' <- flattenInner True SemiDet (flattenStmts tsts SemiDet)
     emit pos $ Or tsts' vars
 flattenStmt' (Or tstStmts _) _pos detism =
     shouldnt $ "Or in a " ++ show detism ++ " context"
 flattenStmt' (Not tstStmt) pos SemiDet = do
-    tstStmt' <- seqToStmt <$> flattenInner False True SemiDet
+    tstStmt' <- seqToStmt <$> flattenInner True SemiDet
                 (placedApply flattenStmt tstStmt SemiDet)
     emit pos $ Not tstStmt'
 flattenStmt' (Not tstStmt) _pos detism =
     shouldnt $ "negation in a " ++ show detism ++ " context"
 flattenStmt' (Loop body defVars) pos detism = do
-    body' <- flattenInner True False detism
+    body' <- flattenInner False detism
              (flattenStmts (body ++ [Unplaced Next]) detism)
     emit pos $ Loop body' defVars
 flattenStmt' for@(For pgens body) pos detism = do
@@ -373,7 +369,7 @@ flattenStmt' for@(For pgens body) pos detism = do
 flattenStmt' (UseResources res old body) pos detism = do
     oldVars <- gets defdVars
     mapM_ (noteVarIntro . resourceName) res
-    body' <- flattenInner False True detism (flattenStmts body detism)
+    body' <- flattenInner True detism (flattenStmts body detism)
     modify $ \s -> s { defdVars = oldVars}
     emit pos $ UseResources res old body'
 flattenStmt' Nop pos _ = emit pos Nop
