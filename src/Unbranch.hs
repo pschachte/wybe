@@ -615,7 +615,7 @@ hoistClosure exp@(AnonProc mods params pstmts) pos = do
     tmpCtr <- gets brTempCtr
     let procProto = ProcProto name (freeParams ++ realParams) Set.empty
     let procDef = ProcDef name procProto (ProcDefSrc pstmts) Nothing tmpCtr 0
-                    Map.empty Private detism MayInline Pure -- XXXJ should be able to mayinline
+                    Map.empty Private detism MayInline Pure
                     NoSuperproc Nothing
     procDef' <- lift $ unbranchProc procDef tmpCtr
     logUnbranch $ "  Resultant hoisted proc: " ++ show procProto
@@ -753,7 +753,8 @@ newProcCall name inVars pos detism = do
 
 newProcProto :: ProcName -> VarDict -> Unbrancher ProcProto
 newProcProto name inVars = do
-    let inParams  = [Param v ty ParamIn Ordinary
+    let inParams  = [Param v ty ParamIn 
+                        (if v == globalsName then GlobalArg else Ordinary)
                     | (v,ty) <- Map.toList inVars]
     outParams <- gets brOutParams
     return $ ProcProto name (inParams ++ outParams) Set.empty

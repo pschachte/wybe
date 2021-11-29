@@ -127,7 +127,8 @@ data BodyState = BodyState {
       failed      :: Bool,            -- ^True if this body always fails
       tmpCount    :: Int,             -- ^The next temp variable number to use
       buildState  :: BuildState,      -- ^The fork at the bottom of this node
-      parent      :: Maybe BodyState  -- ^What comes before/above this
+      parent      :: Maybe BodyState,  -- ^What comes before/above this
+      globalState :: GlobalState
       } deriving (Eq,Show)
 
 
@@ -146,18 +147,39 @@ data BuildState
     deriving (Eq,Show)
 
 
+data GlobalState = GlobalState {
+      latestValues :: Map GlobalInfo PrimArg,
+      latestGlobal :: Maybe PrimVarName
+      } deriving (Eq, Show)
+
+
 -- | A fresh BodyState with specified temp counter and output var substitution
-initState :: Int -> VarSubstitution -> BodyState
+initState :: Int -> VarSubstitution -> Maybe PrimVarName -> BodyState
 initState tmp oSubst =
     BodyState [] Map.empty Set.empty Set.empty oSubst Map.empty False tmp
-              Unforked Nothing
+              Unforked Nothing . initGlobalState
+
+
+initGlobalState :: Maybe PrimVarName -> GlobalState
+initGlobalState = GlobalState Map.empty 
+
+
+findInGlobalParam :: [PrimParam] -> Maybe PrimVarName
+findInGlobalParam params = 
+    let inGlobals = List.map primParamName
+                  $ List.filter ((FlowIn==) . primParamFlow
+                                 &&& (GlobalArg==) . primParamFlowType) params
+    in case inGlobals of
+        (_:_:_) -> shouldnt $ "too many in global params" ++ show inGlobals
+        _ -> listToMaybe inGlobals
+
 
 
 -- | Set up a BodyState as a new child of the specified BodyState
 childState :: BodyState -> BuildState -> BodyState
 childState st@BodyState{currSubst=iSubst,outSubst=oSubst,subExprs=subs,
-                        tmpCount=tmp, forkConsts=consts} bld =
-    BodyState [] iSubst Set.empty consts oSubst subs False tmp bld $ Just st
+                        tmpCount=tmp, forkConsts=consts, globalState=globals} bld =
+    BodyState [] iSubst Set.empty consts oSubst subs False tmp bld (Just st) globals
 
 
 -- | A mapping from variables to definite values, in service to constant
@@ -191,11 +213,12 @@ freshVarName = do
 
 -- |Run a BodyBuilder monad and extract the final proc body, along with the
 -- final temp variable count and the set of variables used in the body.
-buildBody :: Int -> VarSubstitution -> BodyBuilder a
-          -> Compiler (a, Int, Set PrimVarName, ProcBody)
-buildBody tmp oSubst builder = do
+buildBody :: Int -> VarSubstitution -> [PrimParam] 
+          -> BodyBuilder a -> Compiler (a, Int, Set PrimVarName, ProcBody)
+buildBody tmp oSubst params builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
-    (a, st) <- runStateT builder $ initState tmp oSubst
+    let mbGlobalName = findInGlobalParam params
+    (a, st) <- runStateT builder $ initState tmp oSubst mbGlobalName
     logMsg BodyBuilder ">>>> Finished building a proc body"
     logMsg BodyBuilder "     Final state:"
     logMsg BodyBuilder $ fst $ showState 8 st
@@ -404,14 +427,32 @@ instr' prim@(PrimForeign "lpvm" "alloc" [] [_,argvar]) pos = do
     recordVarSet argvar
 -- XXX can we get rid of this pseudo-instruction?
 instr' prim@(PrimForeign "lpvm" "cast" []
-             [from, to@ArgVar{argVarName=var, argVarFlow=flow}]) pos
-  = do
+             [from, to@ArgVar{argVarName=var, argVarFlow=flow}]) pos = do
     logBuild $ "  Expanding cast(" ++ show from ++ ", " ++ show to ++ ")"
     unless (argFlowDirection from == FlowIn && flow == FlowOut) $
         shouldnt "cast instruction with wrong flow"
     if argType from == argType to
       then instr' (PrimForeign "llvm" "move" [] [from, to]) pos
       else ordinaryInstr prim pos
+instr' prim@(PrimForeign "lpvm" "load" [] 
+              [ArgGlobal info _, var, ArgVar nm _ _ _ _]) pos = do
+    globals@GlobalState{latestGlobal=nm',latestValues=latest} 
+        <- gets globalState
+    unless (Just nm == nm')
+        $ shouldnt $ "bad load " ++ show (maybePlace prim pos)
+    case Map.lookup info latest of
+        Just val -> do
+             instr' (PrimForeign "llvm" "move" [] [val, var]) pos
+        Nothing -> ordinaryInstr prim pos
+instr' prim@(PrimForeign "lpvm" "store" [] 
+              [ArgGlobal info _, var, 
+               ArgVar nm _ _ _ _, ArgVar newNm _ _ _ _]) pos = do
+    globals@GlobalState{latestGlobal=nm',latestValues=latest} 
+        <- gets globalState
+    unless (Just nm == nm')
+        $ shouldnt $ "bad store " ++ show (maybePlace prim pos) 
+    modify $ \s -> s{globalState=globals{latestValues=Map.insert info var latest}}
+    ordinaryInstr prim pos
 instr' prim pos = ordinaryInstr prim pos
 
 
@@ -568,7 +609,7 @@ recordEntailedPrims prim = do
 --  XXX Doesn't yet handle multiple modes for PrimCalls
 instrConsequences :: Prim -> Compiler [(Prim,[PrimArg])]
 instrConsequences prim =
-   List.map (\(p,os) -> (canonicalisePrim p, os)) <$> instrConsequences' prim
+   List.map (mapFst canonicalisePrim) <$> instrConsequences' prim
 
 instrConsequences' :: Prim -> Compiler [(Prim,[PrimArg])]
 instrConsequences' (PrimForeign "lpvm" "cast" flags [a1,a2]) =
@@ -585,6 +626,8 @@ instrConsequences'
             [struct,offset,ArgInt 1 intType,size,startOffset, val], [struct]),
             (PrimForeign "lpvm" "mutate" []
             [struct,offset,ArgInt 0 intType,size,startOffset, val], [struct])]
+-- instrConsequences' (PrimForeign "lpvm" "load" flags [gRes, val, globals]) = 
+--     return [(PrimForeign "lpvm" "load" flags [gRes, val, globals], [val])]
 instrConsequences' (PrimForeign "llvm" "add" flags [a1,a2,a3]) =
     return [(PrimForeign "llvm" "sub" flags [a3,a2], [a1]),
             (PrimForeign "llvm" "sub" flags [a3,a1], [a2]),
@@ -632,6 +675,7 @@ rawInstr :: Prim -> OptPos -> BodyBuilder ()
 rawInstr prim pos = do
     logBuild $ "---- adding instruction " ++ show prim
     validateInstr prim
+    updateGlobalState prim pos
     modify $ addInstrToState (maybePlace prim pos)
 
 
@@ -727,6 +771,28 @@ expandArg arg@(ArgProcRef ps as ty) = do
 expandArg arg = return arg
 
 
+updateGlobalState :: Prim -> OptPos -> BodyBuilder ()
+updateGlobalState prim pos = do
+    let outs = snd $ splitPrimOutputs prim
+    let outGlobals = List.filter ((Just GlobalArg==) . maybeArgFlowType) outs
+    -- There should only ever be a single global flowing out of any procedure
+    when (length outGlobals > 1) 
+        $ shouldnt $ "updateGlobalState on " ++ show prim
+    substOutGlobals <- mapM (expandArg . setArgFlow FlowIn) outGlobals
+    let globalVar = listToMaybe substOutGlobals
+    when (isJust globalVar) $ do
+        globals <- gets globalState
+        let globals' = globals{latestGlobal=argVarName <$> globalVar}
+        modify $ \s -> s{globalState=globals'}
+        case prim of
+            PrimForeign "lpvm" "load"  _ _ -> return ()
+            PrimForeign "lpvm" "store" _ _ -> return ()
+            PrimForeign "llvm" "move"  _ _
+                | isJust $ latestGlobal globals -> return ()
+            _ -> modify $ \s -> s{globalState=globals'{latestValues=Map.empty}}
+        globals'' <- gets globalState
+        logBuild $ "Globals: " ++ show globals ++ " -> " ++ show globals'' 
+                    
 
 ----------------------------------------------------------------
 --                              Constant Folding
@@ -1173,8 +1239,7 @@ bkwdBuildStmt defs prim pos = do
         -- Filter out pure instructions that produce no needed outputs
         purity <- lift $ primImpurity prim
         when ( purity > Pure 
-             || any (`Set.member` usedLater) (argVarName <$> outs)
-             || any (isResourcefulHigherOrder . argType) args') $ do
+             || any (`Set.member` usedLater) (argVarName <$> outs)) $ do
           -- XXX Careful:  probably shouldn't mark last use of variable passed
           -- as input argument more than once in the call
           let prim' = replacePrimArgs prim $ markIfLastUse usedLater <$> args'
@@ -1237,12 +1302,17 @@ logState = do
 showState :: Int -> BodyState -> (String,Int)
 showState indent BodyState{parent=par, currBuild=revPrims, buildState=bld,
                            blockDefs=defs, forkConsts=consts,
-                           currSubst=substs} =
+                           currSubst=substs, globalState=globals} =
     let (str  ,indent')   = maybe ("",indent)
                             (mapFst (++ (startLine indent ++ "----------")) 
                             . showState indent) par
         substStr          = startLine indent
                             ++ "# Substs: " ++ simpleShowMap substs
+        globalStr         = case latestGlobal globals of
+                              Nothing -> ""
+                              Just _ -> 
+                                startLine indent
+                                ++ showGlobalState globals
         str'              = showPlacedPrims indent' (reverse revPrims)
         sets              = if List.null revPrims
                             then ""
@@ -1254,8 +1324,9 @@ showState indent BodyState{parent=par, currBuild=revPrims, buildState=bld,
                                 startLine indent
                                 ++ "# Fusion consts: " ++ show consts
                               _ -> ""
+        
         (str'',indent'') = showBuildState indent' bld
-    in  (str ++ str' ++ substStr ++ sets ++ str'' ++ suffix, indent'')
+    in  (str ++ str' ++ substStr ++ sets ++ globalStr ++ str'' ++ suffix, indent'')
 
 
 -- | Show the current part of a build state.
@@ -1292,6 +1363,11 @@ showSwitch indent var ty val fused =
     ++ (if fused then " (fused)" else " (not fused)")
     ++ maybe "" (\v-> " (=" ++ show v ++ ")") val
     ++ " of"
+
+
+showGlobalState :: GlobalState -> String
+showGlobalState GlobalState{latestGlobal=mbNm, latestValues=vs} 
+  = "# Globals: latest=" ++ show mbNm ++ ", values=" ++ show vs
 
 
 -- | Start a new line with the specified indent.

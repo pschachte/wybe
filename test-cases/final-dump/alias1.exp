@@ -138,7 +138,11 @@ replicate(p1##0:position.position, ?p2##0:position.position, *#globals##0:wybe.p
     foreign lpvm mutate(~tmp#5##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int)
     wybe.string.print_string<0>("random print":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #4 @io:nn:nn
     foreign lpvm access(~tmp#0##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int)
-    wybe.io.println<0>(~tmp#1##0:wybe.int, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #3 @alias1:6:4
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom, *#globals##1:wybe.phantom)
+    foreign c print_int(~tmp#1##0:wybe.int, ~%tmp#11##0:wybe.phantom, ?%tmp#12##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#12##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*tmp#13##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#12##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#14##0:wybe.phantom, ~*tmp#13##0:wybe.phantom, ?*#globals##2:wybe.phantom)
     foreign llvm move(~p1##0:position.position, ?p2##0:position.position) @alias1:7:4
 
   LLVM code       :
@@ -296,7 +300,7 @@ declare external fastcc  void @"position.printPosition<0>"(i64)
 @alias1.87 =    constant [?? x i8] c"--- Inside foo: \00"
 
 
-declare external fastcc  void @"wybe.io.println<0>"(i64)    
+declare external ccc  void @print_int(i64)    
 
 
 @alias1.116 =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @alias1.115 to i64) }
@@ -477,7 +481,8 @@ entry:
   %117 = inttoptr i64 %109 to i64* 
   %118 = getelementptr  i64, i64* %117, i64 0 
   %119 = load  i64, i64* %118 
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  %119)  
+  tail call ccc  void  @print_int(i64  %119)  
+  tail call ccc  void  @putchar(i8  10)  
   ret i64 %"p1##0" 
 }
 --------------------------------------------------

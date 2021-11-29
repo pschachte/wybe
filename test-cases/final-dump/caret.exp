@@ -30,7 +30,11 @@ AFTER EVERYTHING:
     foreign lpvm mutate(~tmp#22##0:caret.region, ?tmp#23##0:caret.region, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp#2##0:position.position)
     foreign lpvm access(~tmp#2##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?ten##0:wybe.int)
     wybe.string.print_string<0>("ten = ":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #11 @io:nn:nn
-    wybe.io.println<0>(~ten##0:wybe.int, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #7 @caret:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#32##0:wybe.phantom, *#globals##1:wybe.phantom)
+    foreign c print_int(~ten##0:wybe.int, ~%tmp#32##0:wybe.phantom, ?%tmp#33##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#33##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*tmp#34##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#33##0:wybe.phantom, ?%tmp#35##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#35##0:wybe.phantom, ~*tmp#34##0:wybe.phantom, ?*#globals##2:wybe.phantom)
     caret.gen#1<0>[6dacb8fd25](~#globals##2:wybe.phantom, ~tmp#23##0:caret.region, _:caret.region, _:position.position, _:position.position, ?#globals##3:wybe.phantom) #8
 
 
@@ -63,7 +67,7 @@ expand_region(reg##0:caret.region, ?reg##4:caret.region, point##0:position.posit
 
 gen#1 > (2 calls) 
 0: caret.gen#1<0>[6dacb8fd25]
-gen#1(#globals##0:wybe.phantom, reg##0:caret.region, [tmp#0##0:caret.region], [tmp#1##0:position.position], [tmp#2##0:position.position], ?#globals##2:wybe.phantom):
+gen#1(*#globals##0:wybe.phantom, reg##0:caret.region, [tmp#0##0:caret.region], [tmp#1##0:position.position], [tmp#2##0:position.position], ?#globals##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 1]
     foreign lpvm access(~reg##0:caret.region, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:position.position)
@@ -72,7 +76,11 @@ gen#1(#globals##0:wybe.phantom, reg##0:caret.region, [tmp#0##0:caret.region], [t
     foreign lpvm {noalias} mutate(~tmp#6##0:position.position, ?tmp#6##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#5##1:wybe.int)
     foreign lpvm access(~tmp#6##1:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?ten##0:wybe.int)
     wybe.string.print_string<0>("now ten = ":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #9 @io:nn:nn
-    wybe.io.println<0>(~ten##0:wybe.int, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #8 @caret:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#23##0:wybe.phantom, *#globals##1:wybe.phantom)
+    foreign c print_int(~ten##0:wybe.int, ~%tmp#23##0:wybe.phantom, ?%tmp#24##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#24##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*tmp#25##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#24##0:wybe.phantom, ?%tmp#26##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#26##0:wybe.phantom, ~*tmp#25##0:wybe.phantom, ?*#globals##2:wybe.phantom)
  [6dacb8fd25] [NonAliasedParam 1] :
     foreign lpvm access(~reg##0:caret.region, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:position.position)
     foreign lpvm access(tmp#6##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.int)
@@ -80,7 +88,11 @@ gen#1(#globals##0:wybe.phantom, reg##0:caret.region, [tmp#0##0:caret.region], [t
     foreign lpvm {noalias} mutate(~tmp#6##0:position.position, ?tmp#6##1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#5##1:wybe.int)
     foreign lpvm access(~tmp#6##1:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?ten##0:wybe.int)
     wybe.string.print_string<0>("now ten = ":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #9 @io:nn:nn
-    wybe.io.println<0>(~ten##0:wybe.int, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #8 @caret:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#23##0:wybe.phantom, *#globals##1:wybe.phantom)
+    foreign c print_int(~ten##0:wybe.int, ~%tmp#23##0:wybe.phantom, ?%tmp#24##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#24##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*tmp#25##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#24##0:wybe.phantom, ?%tmp#26##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#26##0:wybe.phantom, ~*tmp#25##0:wybe.phantom, ?*#globals##2:wybe.phantom)
 
   LLVM code       :
 
@@ -90,7 +102,10 @@ gen#1(#globals##0:wybe.phantom, reg##0:caret.region, [tmp#0##0:caret.region], [t
  
 
 
-declare external fastcc  void @"wybe.io.println<0>"(i64)    
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_int(i64)    
 
 
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
@@ -162,7 +177,8 @@ entry:
   %26 = getelementptr  i64, i64* %25, i64 0 
   %27 = load  i64, i64* %26 
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @caret.29, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  %27)  
+  tail call ccc  void  @print_int(i64  %27)  
+  tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"caret.gen#1<0>[6dacb8fd25]"(i64  %19)  
   ret void 
 }
@@ -314,7 +330,8 @@ entry:
   %142 = getelementptr  i64, i64* %141, i64 0 
   %143 = load  i64, i64* %142 
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @caret.145, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  %143)  
+  tail call ccc  void  @print_int(i64  %143)  
+  tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
 
@@ -336,7 +353,8 @@ entry:
   %156 = getelementptr  i64, i64* %155, i64 0 
   %157 = load  i64, i64* %156 
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @caret.159, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  %157)  
+  tail call ccc  void  @print_int(i64  %157)  
+  tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
 --------------------------------------------------

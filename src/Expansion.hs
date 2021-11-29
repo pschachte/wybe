@@ -42,7 +42,7 @@ procExpansion pspec def = do
     isClosure <- isClosureProc pspec
     let params = primProtoParams proto
     let st = initExpanderState (procCallSiteCount def)
-    (st', tmp', used, body') <- buildBody tmp (Map.fromSet id outs)
+    (st', tmp', used, body') <- buildBody tmp (Map.fromSet id outs) params
                                 $ execStateT (expandBody body) st
     let params' = markParamNeededness isClosure used ins
                <$> params
@@ -253,8 +253,14 @@ expandPrim (PrimCall id pspec args) pos = do
 expandPrim call@(PrimHigherCall id fn args) pos = do
     logExpansion $ "  Expand higher call " ++ show call
     fn' <- expandArg fn
-    args' <- mapM expandArg args
-    addInstr (PrimHigherCall id fn' args') pos
+    case fn' of
+        ArgProcRef pspec closed _ -> do
+            pspec' <- fromMaybe pspec <$> lift (lift (maybeGetClosureOf pspec))
+            logExpansion $ "  As first order call to " ++ show pspec'
+            expandPrim (PrimCall id pspec' $ closed ++ args) pos
+        _ -> do
+            args' <- mapM expandArg args
+            addInstr (PrimHigherCall id fn' args') pos
 expandPrim (PrimForeign lang nm flags args) pos = do
     st <- get
     logExpansion $ "  Expanding " ++ show (PrimForeign lang nm flags args)
@@ -293,7 +299,7 @@ expandArg arg@(ArgVar var ty flow ft _) = do
     then case flow of
         FlowOut -> freshVar var ty ft
         FlowIn -> 
-            setArgType ty . (`setPrimArgFlowType` ft)
+            setArgType ty . setArgFlowType ft
             <$> gets (Map.findWithDefault arg var . renaming)
     else return arg
 expandArg arg@(ArgProcRef ps as ty) = do

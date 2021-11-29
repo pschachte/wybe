@@ -24,7 +24,7 @@ AFTER EVERYTHING:
 
 gen#1 > (2 calls) 
 0: proc_yorn.gen#1<0>
-gen#1(#globals##0:wybe.phantom, prompt##0:wybe.string, ?result##1:wybe.bool, ?#globals##5:wybe.phantom):
+gen#1(*#globals##0:wybe.phantom, prompt##0:wybe.string, ?result##1:wybe.bool, ?#globals##5:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.print_string<0>(prompt##0:wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #7 @io:nn:nn

@@ -108,7 +108,7 @@ AFTER EVERYTHING:
 
 gen#1 > (2 calls) 
 0: int_sequence.gen#1<0>[6dacb8fd25]
-gen#1(#globals##0:wybe.phantom, tmp#0##0:int_sequence, tmp#1##0:int_sequence, ?#globals##2:wybe.phantom):
+gen#1(*#globals##0:wybe.phantom, tmp#0##0:int_sequence, tmp#1##0:int_sequence, ?#globals##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: [InterestingUnaliased 1]
  MultiSpeczDepInfo: [(0,(int_sequence.[|]<0>,fromList [NonAliasedParamCond 2 [1]])),(2,(int_sequence.gen#1<0>,fromList [NonAliasedParamCond 1 []]))]
@@ -118,7 +118,11 @@ gen#1(#globals##0:wybe.phantom, tmp#0##0:int_sequence, tmp#1##0:int_sequence, ?#
         foreign llvm move(~#globals##0:wybe.phantom, ?#globals##2:wybe.phantom)
 
     1:
-        wybe.io.println<0>(~i##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #1 @int_sequence:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom, *#globals##0:wybe.phantom)
+        foreign c print_int(~i##0:wybe.int, ~%tmp#5##0:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#6##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#7##0:wybe.phantom)
+        foreign c putchar('\n':wybe.char, ~%tmp#6##0:wybe.phantom, ?%tmp#8##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#8##0:wybe.phantom, ~*tmp#7##0:wybe.phantom, ?*#globals##1:wybe.phantom)
         int_sequence.gen#1<0>[6dacb8fd25](~#globals##1:wybe.phantom, ~tmp#0##1:int_sequence, ~tmp#1##0:int_sequence, ?#globals##2:wybe.phantom) #2 @int_sequence:nn:nn
 
  [6dacb8fd25] [NonAliasedParam 1] :
@@ -128,7 +132,11 @@ gen#1(#globals##0:wybe.phantom, tmp#0##0:int_sequence, tmp#1##0:int_sequence, ?#
         foreign llvm move(~#globals##0:wybe.phantom, ?#globals##2:wybe.phantom)
 
     1:
-        wybe.io.println<0>(~i##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #1 @int_sequence:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom, *#globals##0:wybe.phantom)
+        foreign c print_int(~i##0:wybe.int, ~%tmp#5##0:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#6##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#7##0:wybe.phantom)
+        foreign c putchar('\n':wybe.char, ~%tmp#6##0:wybe.phantom, ?%tmp#8##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#8##0:wybe.phantom, ~*tmp#7##0:wybe.phantom, ?*#globals##1:wybe.phantom)
         int_sequence.gen#1<0>[6dacb8fd25](~#globals##1:wybe.phantom, ~tmp#0##1:int_sequence, ~tmp#1##0:int_sequence, ?#globals##2:wybe.phantom) #2 @int_sequence:nn:nn
 
 
@@ -189,7 +197,10 @@ upper(#rec##0:int_sequence, ?#rec##1:int_sequence, #field##0:wybe.int):
  
 
 
-declare external fastcc  void @"wybe.io.println<0>"(i64)    
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_int(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -347,7 +358,8 @@ entry:
   %82 = extractvalue {i64, i64, i1} %79, 2 
   br i1 %82, label %if.then, label %if.else 
 if.then:
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  %80)  
+  tail call ccc  void  @print_int(i64  %80)  
+  tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"int_sequence.gen#1<0>[6dacb8fd25]"(i64  %81, i64  %"tmp#1##0")  
   ret void 
 if.else:
@@ -363,7 +375,8 @@ entry:
   %86 = extractvalue {i64, i64, i1} %83, 2 
   br i1 %86, label %if.then, label %if.else 
 if.then:
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  %84)  
+  tail call ccc  void  @print_int(i64  %84)  
+  tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"int_sequence.gen#1<0>[6dacb8fd25]"(i64  %85, i64  %"tmp#1##0")  
   ret void 
 if.else:

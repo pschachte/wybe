@@ -336,9 +336,7 @@ loadStoreResources inRes outRes stmts =
 resourcelessVarDict :: Set VarName -> VarDict -> VarDict
 resourcelessVarDict resVars vDict = 
     Map.filterWithKey (const . (not . (`Set.member` resVars))) vDict
-    `Map.union` (if Set.null resVars
-                 then Map.empty
-                 else Map.singleton globalsName phantomType)
+    `Map.union` (Map.fromList [(globalsName,phantomType) | not $ Set.null resVars])
 
 -- | Transform a list of expressions, collecting sets of in-flowing and out-flowing 
 -- resource variables.

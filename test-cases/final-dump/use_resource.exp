@@ -22,11 +22,19 @@ AFTER EVERYTHING:
     use_resource.inc_count<0>(~*tmp#4##0:wybe.phantom, ?*tmp#5##0:wybe.phantom) #4 @use_resource:nn:nn
     wybe.string.print_string<0>("Inner count (4): ":wybe.string, ~*tmp#5##0:wybe.phantom, ?*tmp#6##0:wybe.phantom) #5 @io:nn:nn
     foreign lpvm load(<<use_resource.count>>:wybe.int, ?%tmp#7##0:wybe.int, *tmp#6##0:wybe.phantom)
-    wybe.io.println<0>(~%tmp#7##0:wybe.int, ~*tmp#6##0:wybe.phantom, ?*tmp#8##0:wybe.phantom) #6 @use_resource:nn:nn
-    foreign lpvm store(<<use_resource.count>>:wybe.int, ~%tmp#2##0:wybe.int, ~*tmp#8##0:wybe.phantom, ?*tmp#9##0:wybe.phantom)
-    wybe.string.print_string<0>("Outer count (1): ":wybe.string, ~*tmp#9##0:wybe.phantom, ?*tmp#10##0:wybe.phantom) #7 @io:nn:nn
-    foreign lpvm load(<<use_resource.count>>:wybe.int, ?%tmp#11##0:wybe.int, *tmp#10##0:wybe.phantom)
-    wybe.io.println<0>(~%tmp#11##0:wybe.int, ~*tmp#10##0:wybe.phantom, ?*#globals##2:wybe.phantom) #8 @use_resource:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom, *tmp#6##0:wybe.phantom)
+    foreign c print_int(~%tmp#7##0:wybe.int, ~%tmp#8##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#9##0:wybe.phantom, ~*tmp#6##0:wybe.phantom, ?*tmp#10##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#9##0:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#11##0:wybe.phantom, ~*tmp#10##0:wybe.phantom, ?*tmp#12##0:wybe.phantom)
+    foreign lpvm store(<<use_resource.count>>:wybe.int, ~%tmp#2##0:wybe.int, ~*tmp#12##0:wybe.phantom, ?*tmp#13##0:wybe.phantom)
+    wybe.string.print_string<0>("Outer count (1): ":wybe.string, ~*tmp#13##0:wybe.phantom, ?*tmp#14##0:wybe.phantom) #6 @io:nn:nn
+    foreign lpvm load(<<use_resource.count>>:wybe.int, ?%tmp#15##0:wybe.int, *tmp#14##0:wybe.phantom)
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom, *tmp#14##0:wybe.phantom)
+    foreign c print_int(~%tmp#15##0:wybe.int, ~%tmp#16##0:wybe.phantom, ?%tmp#17##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#17##0:wybe.phantom, ~*tmp#14##0:wybe.phantom, ?*tmp#18##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#17##0:wybe.phantom, ?%tmp#19##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#19##0:wybe.phantom, ~*tmp#18##0:wybe.phantom, ?*#globals##2:wybe.phantom)
 
 
 inc_count > (4 calls) 
@@ -51,11 +59,19 @@ use_test(*#globals##0:wybe.phantom, *?#globals##9:wybe.phantom):
     use_resource.inc_count<0>(~*#globals##3:wybe.phantom, ?*#globals##4:wybe.phantom) #3 @use_resource:nn:nn
     wybe.string.print_string<0>("Inner count (4): ":wybe.string, ~*#globals##4:wybe.phantom, ?*#globals##5:wybe.phantom) #8 @io:nn:nn
     foreign lpvm load(<<use_resource.count>>:wybe.int, ?%count##0:wybe.int, *#globals##5:wybe.phantom)
-    wybe.io.println<0>(~%count##0:wybe.int, ~*#globals##5:wybe.phantom, ?*#globals##6:wybe.phantom) #5 @use_resource:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom, *#globals##5:wybe.phantom)
+    foreign c print_int(~%count##0:wybe.int, ~%tmp#5##0:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#6##0:wybe.phantom, ~*#globals##5:wybe.phantom, ?*tmp#7##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#6##0:wybe.phantom, ?%tmp#8##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#8##0:wybe.phantom, ~*tmp#7##0:wybe.phantom, ?*#globals##6:wybe.phantom)
     foreign lpvm store(<<use_resource.count>>:wybe.int, ~%tmp#0##0:wybe.int, ~*#globals##6:wybe.phantom, ?*#globals##7:wybe.phantom)
     wybe.string.print_string<0>("Outer count (1): ":wybe.string, ~*#globals##7:wybe.phantom, ?*#globals##8:wybe.phantom) #9 @io:nn:nn
     foreign lpvm load(<<use_resource.count>>:wybe.int, ?%count##1:wybe.int, *#globals##8:wybe.phantom)
-    wybe.io.println<0>(~%count##1:wybe.int, ~*#globals##8:wybe.phantom, ?*#globals##9:wybe.phantom) #7 @use_resource:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom, *#globals##8:wybe.phantom)
+    foreign c print_int(~%count##1:wybe.int, ~%tmp#13##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#14##0:wybe.phantom, ~*#globals##8:wybe.phantom, ?*tmp#15##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#14##0:wybe.phantom, ?%tmp#16##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#16##0:wybe.phantom, ~*tmp#15##0:wybe.phantom, ?*#globals##9:wybe.phantom)
 
   LLVM code       :
 
@@ -65,7 +81,10 @@ use_test(*#globals##0:wybe.phantom, *?#globals##9:wybe.phantom):
  
 
 
-declare external fastcc  void @"wybe.io.println<0>"(i64)    
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_int(i64)    
 
 
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
@@ -114,11 +133,13 @@ entry:
   tail call fastcc  void  @"use_resource.inc_count<0>"()  
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @use_resource.3, i32 0, i32 0) to i64))  
   %4 = load  i64, i64* @"resource#use_resource.count" 
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  %4)  
+  tail call ccc  void  @print_int(i64  %4)  
+  tail call ccc  void  @putchar(i8  10)  
   store  i64 %1, i64* @"resource#use_resource.count" 
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @use_resource.6, i32 0, i32 0) to i64))  
   %7 = load  i64, i64* @"resource#use_resource.count" 
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  %7)  
+  tail call ccc  void  @print_int(i64  %7)  
+  tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
 
@@ -141,10 +162,12 @@ entry:
   tail call fastcc  void  @"use_resource.inc_count<0>"()  
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @use_resource.11, i32 0, i32 0) to i64))  
   %12 = load  i64, i64* @"resource#use_resource.count" 
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  %12)  
+  tail call ccc  void  @print_int(i64  %12)  
+  tail call ccc  void  @putchar(i8  10)  
   store  i64 %9, i64* @"resource#use_resource.count" 
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @use_resource.14, i32 0, i32 0) to i64))  
   %15 = load  i64, i64* @"resource#use_resource.count" 
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  %15)  
+  tail call ccc  void  @print_int(i64  %15)  
+  tail call ccc  void  @putchar(i8  10)  
   ret void 
 }

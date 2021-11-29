@@ -573,11 +573,15 @@ cgen prim@(PrimCall callSiteID pspec args) = do
     logCodegen $ "Translated ins = " ++ show ins
     addInstruction ins outArgs
 
-cgen prim@(PrimHigherCall callSiteId var args) = do
+cgen prim@(PrimHigherCall cId (ArgProcRef pspec closed _) args) = do
+    logCodegen $ "Compiling " ++ show prim 
+              ++ " as first order call to " ++ show pspec
+              ++ " closed over " ++ show closed
+    cgen $ PrimCall cId pspec $ closed ++ args
+
+cgen prim@(PrimHigherCall callSiteId var@ArgVar{} args) = do
     logCodegen $ "Compiling " ++ show prim
-    let args' = List.filter ((/=GlobalArg) . fromMaybe Ordinary 
-                                           . maybePrimArgFlowType)
-                            args
+    let args' = List.filter ((Just GlobalArg/=) . maybeArgFlowType) args
     let (inArgs, outArgs) = partitionArgs $ setArgType intType <$> args'
     env <- cgenArg var
     inOps <- mapM cgenArg inArgs
@@ -590,9 +594,10 @@ cgen prim@(PrimHigherCall callSiteId var args) = do
     fnPtr <- doCast eltPtr address_t fnPtrTy
     let callIns = callWybe fnPtr callInOps
     addInstruction callIns outArgs
--- cgen prim@(PrimHigherCall callSiteId (ArgProcRef ps as ty) args) = do
---     logCodegen $ "Compiling " ++ show prim ++ " as regular call"
---     translateFromClosure Nothing prim (const cgen)
+
+cgen prim@(PrimHigherCall _ fn _) = 
+    shouldnt $ "cgen higher call to " ++ show fn
+
 cgen prim@(PrimForeign "llvm" name flags args) = do
     logCodegen $ "Compiling " ++ show prim
     args' <- filterPhantomArgs args
@@ -804,7 +809,6 @@ cgenLPVM "mutate" _
 cgenLPVM "mutate" _ [_, _, _, destructiveArg, _, _, _] =
       nyi "lpvm mutate instruction with non-constant destructive flag"
 
-
 cgenLPVM "cast" [] args@[inArg,outArg] =
     case partitionArgs args of
         ([inArg],[outArg]) -> do
@@ -866,7 +870,6 @@ cgenLPVM "load" _ args = do
             return ()
         _ -> 
             shouldnt $ "lpvm load instruction with wrong arity " ++ show args
-
 
 cgenLPVM pname flags args = do
     shouldnt $ "Instruction " ++ pname ++ " arity " ++ show (length args)

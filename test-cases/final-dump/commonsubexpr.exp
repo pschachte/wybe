@@ -14,9 +14,19 @@ AFTER EVERYTHING:
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    wybe.io.println<0>(198:wybe.int, ~*#globals##0:wybe.phantom, ?*tmp#6##0:wybe.phantom) #1 @commonsubexpr:nn:nn
-    wybe.io.println<0>(198:wybe.int, ~*tmp#6##0:wybe.phantom, ?*tmp#7##0:wybe.phantom) #2 @commonsubexpr:nn:nn
-    wybe.io.println<0>(11:wybe.int, ~*tmp#7##0:wybe.phantom, ?*#globals##1:wybe.phantom) #3 @commonsubexpr:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom, *#globals##0:wybe.phantom)
+    foreign c print_int(198:wybe.int, ~%tmp#6##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#7##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#8##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#7##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#9##0:wybe.phantom, ~*tmp#8##0:wybe.phantom, ?*tmp#10##0:wybe.phantom)
+    foreign c print_int(198:wybe.int, ~%tmp#9##0:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#11##0:wybe.phantom, ~*tmp#10##0:wybe.phantom, ?*tmp#12##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#11##0:wybe.phantom, ?%tmp#13##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#13##0:wybe.phantom, ~*tmp#12##0:wybe.phantom, ?*tmp#14##0:wybe.phantom)
+    foreign c print_int(11:wybe.int, ~%tmp#13##0:wybe.phantom, ?%tmp#15##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#15##0:wybe.phantom, ~*tmp#14##0:wybe.phantom, ?*tmp#16##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#15##0:wybe.phantom, ?%tmp#17##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#17##0:wybe.phantom, ~*tmp#16##0:wybe.phantom, ?*#globals##1:wybe.phantom)
 
 
 common_subexpr > {inline} (1 calls) 
@@ -25,12 +35,22 @@ common_subexpr(x##0:wybe.int, *#globals##0:wybe.phantom, *?#globals##3:wybe.phan
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm add(x##0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int) @int:nn:nn
-    foreign llvm sub(~x##0:wybe.int, 1:wybe.int, ?tmp#56##0:wybe.int) @int:nn:nn
-    foreign llvm mul(tmp#2##0:wybe.int, ~tmp#56##0:wybe.int, ?tmp#46##0:wybe.int) @int:nn:nn
-    foreign llvm add(~tmp#46##0:wybe.int, ~tmp#46##0:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
-    wybe.io.println<0>(tmp#0##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #7 @commonsubexpr:nn:nn
-    wybe.io.println<0>(~tmp#0##0:wybe.int, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #15 @commonsubexpr:nn:nn
-    wybe.io.println<0>(~tmp#2##0:wybe.int, ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom) #21 @commonsubexpr:nn:nn
+    foreign llvm sub(~x##0:wybe.int, 1:wybe.int, ?tmp#68##0:wybe.int) @int:nn:nn
+    foreign llvm mul(tmp#2##0:wybe.int, ~tmp#68##0:wybe.int, ?tmp#52##0:wybe.int) @int:nn:nn
+    foreign llvm add(~tmp#52##0:wybe.int, ~tmp#52##0:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#35##0:wybe.phantom, *#globals##0:wybe.phantom)
+    foreign c print_int(tmp#0##0:wybe.int, ~%tmp#35##0:wybe.phantom, ?%tmp#36##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#36##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#37##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#36##0:wybe.phantom, ?%tmp#38##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#38##0:wybe.phantom, ~*tmp#37##0:wybe.phantom, ?*#globals##1:wybe.phantom)
+    foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#38##0:wybe.phantom, ?%tmp#56##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#56##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*tmp#57##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#56##0:wybe.phantom, ?%tmp#58##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#58##0:wybe.phantom, ~*tmp#57##0:wybe.phantom, ?*#globals##2:wybe.phantom)
+    foreign c print_int(~tmp#2##0:wybe.int, ~%tmp#58##0:wybe.phantom, ?%tmp#72##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#72##0:wybe.phantom, ~*#globals##2:wybe.phantom, ?*tmp#73##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#72##0:wybe.phantom, ?%tmp#74##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#74##0:wybe.phantom, ~*tmp#73##0:wybe.phantom, ?*#globals##3:wybe.phantom)
 
   LLVM code       :
 
@@ -40,7 +60,10 @@ common_subexpr(x##0:wybe.int, *#globals##0:wybe.phantom, *?#globals##3:wybe.phan
  
 
 
-declare external fastcc  void @"wybe.io.println<0>"(i64)    
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_int(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -51,9 +74,12 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 
 define external fastcc  void @"commonsubexpr.<0>"()    {
 entry:
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  198)  
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  198)  
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  11)  
+  tail call ccc  void  @print_int(i64  198)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call ccc  void  @print_int(i64  198)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call ccc  void  @print_int(i64  11)  
+  tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
 
@@ -61,11 +87,14 @@ entry:
 define external fastcc  void @"commonsubexpr.common_subexpr<0>"(i64  %"x##0")    {
 entry:
   %"1#tmp#2##0" = add   i64 %"x##0", 1 
-  %"1#tmp#56##0" = sub   i64 %"x##0", 1 
-  %"1#tmp#46##0" = mul   i64 %"1#tmp#2##0", %"1#tmp#56##0" 
-  %"1#tmp#0##0" = add   i64 %"1#tmp#46##0", %"1#tmp#46##0" 
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  %"1#tmp#0##0")  
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  %"1#tmp#0##0")  
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  %"1#tmp#2##0")  
+  %"1#tmp#68##0" = sub   i64 %"x##0", 1 
+  %"1#tmp#52##0" = mul   i64 %"1#tmp#2##0", %"1#tmp#68##0" 
+  %"1#tmp#0##0" = add   i64 %"1#tmp#52##0", %"1#tmp#52##0" 
+  tail call ccc  void  @print_int(i64  %"1#tmp#0##0")  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call ccc  void  @print_int(i64  %"1#tmp#0##0")  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call ccc  void  @print_int(i64  %"1#tmp#2##0")  
+  tail call ccc  void  @putchar(i8  10)  
   ret void 
 }

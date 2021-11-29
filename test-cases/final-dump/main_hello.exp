@@ -19,11 +19,10 @@ AFTER EVERYTHING:
     wybe.string.print_string<0>("hello, world!":wybe.string, ~*#globals##1:wybe.phantom, ?*tmp#5##0:wybe.phantom) #5 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom, *tmp#5##0:wybe.phantom)
     foreign c putchar('\n':wybe.char, ~%tmp#6##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#7##0:wybe.phantom, ~*tmp#5##0:wybe.phantom, ?*#globals##2:wybe.phantom)
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#7##0:wybe.phantom, ~*tmp#5##0:wybe.phantom, ?*#globals##2:wybe.phantom)
     foreign lpvm load(<<command_line.arguments>>:wybe.array(T), ?%arguments##0:wybe.array(T), *#globals##2:wybe.phantom)
     foreign lpvm access(~%arguments##0:wybe.array(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int)
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom, *#globals##2:wybe.phantom)
-    foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#11##0:wybe.phantom, ?%tmp#12##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#7##0:wybe.phantom, ?%tmp#12##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#12##0:wybe.phantom, ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom)
     wybe.string.print_string<0>(" command line argument(s)":wybe.string, ~*#globals##3:wybe.phantom, ?*tmp#15##0:wybe.phantom) #6 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom, *tmp#15##0:wybe.phantom)

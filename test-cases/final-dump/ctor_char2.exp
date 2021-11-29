@@ -23,7 +23,11 @@ AFTER EVERYTHING:
     foreign llvm shl('a':ctor_char2, 2:ctor_char2, ?tmp#3##0:ctor_char2)
     foreign llvm or(~tmp#3##0:ctor_char2, 1024:ctor_char2, ?tmp#1##0:ctor_char2)
     ctor_char2.foo<0>(~tmp#1##0:ctor_char2, ?tmp#0##0:wybe.char) #1 @ctor_char2:5:10
-    wybe.io.println<3>(~tmp#0##0:wybe.char, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #2 @ctor_char2:5:2
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom, *#globals##0:wybe.phantom)
+    foreign c putchar(~tmp#0##0:wybe.char, ~%tmp#6##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#7##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#8##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#7##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#9##0:wybe.phantom, ~*tmp#8##0:wybe.phantom, ?*#globals##1:wybe.phantom)
 
 
 = > public (3 calls) 
@@ -324,7 +328,7 @@ other_ctor(?other_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:wybe
  
 
 
-declare external fastcc  void @"wybe.io.println<3>"(i8)    
+declare external ccc  void @putchar(i8)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -338,7 +342,8 @@ entry:
   %"1#tmp#3##0" = shl   i64 97, 2 
   %"1#tmp#1##0" = or i64 %"1#tmp#3##0", 1024 
   %"1#tmp#0##0" = tail call fastcc  i8  @"ctor_char2.foo<0>"(i64  %"1#tmp#1##0")  
-  tail call fastcc  void  @"wybe.io.println<3>"(i8  %"1#tmp#0##0")  
+  tail call ccc  void  @putchar(i8  %"1#tmp#0##0")  
+  tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
 

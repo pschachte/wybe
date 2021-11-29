@@ -53,12 +53,20 @@ foo(r1##0:alias_type4.posrec, *#globals##0:wybe.phantom, *?#globals##1:wybe.phan
     foreign lpvm access(~r1##0:alias_type4.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:alias_type4.position)
     foreign lpvm {noalias} mutate(~tmp#0##0:alias_type4.position, ?pos1##1:alias_type4.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 1111:wybe.int)
     foreign lpvm access(~pos1##1:alias_type4.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int)
-    wybe.io.println<0>(~tmp#1##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #3 @alias_type4:9:6
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom, *#globals##0:wybe.phantom)
+    foreign c print_int(~tmp#1##0:wybe.int, ~%tmp#8##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#9##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#10##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#9##0:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#11##0:wybe.phantom, ~*tmp#10##0:wybe.phantom, ?*#globals##1:wybe.phantom)
  [410bae77d3] [NonAliasedParam 0] :
     foreign lpvm access(~r1##0:alias_type4.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:alias_type4.position)
     foreign lpvm {noalias} mutate(~tmp#0##0:alias_type4.position, ?pos1##1:alias_type4.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1111:wybe.int)
     foreign lpvm access(~pos1##1:alias_type4.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int)
-    wybe.io.println<0>(~tmp#1##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #3 @alias_type4:9:6
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom, *#globals##0:wybe.phantom)
+    foreign c print_int(~tmp#1##0:wybe.int, ~%tmp#8##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#9##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#10##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#9##0:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#11##0:wybe.phantom, ~*tmp#10##0:wybe.phantom, ?*#globals##1:wybe.phantom)
 
   LLVM code       :
 
@@ -68,7 +76,10 @@ foo(r1##0:alias_type4.posrec, *#globals##0:wybe.phantom, *?#globals##1:wybe.phan
  
 
 
-declare external fastcc  void @"wybe.io.println<0>"(i64)    
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_int(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -122,7 +133,8 @@ entry:
   %28 = inttoptr i64 %22 to i64* 
   %29 = getelementptr  i64, i64* %28, i64 0 
   %30 = load  i64, i64* %29 
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  %30)  
+  tail call ccc  void  @print_int(i64  %30)  
+  tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
 
@@ -138,7 +150,8 @@ entry:
   %36 = inttoptr i64 %33 to i64* 
   %37 = getelementptr  i64, i64* %36, i64 0 
   %38 = load  i64, i64* %37 
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  %38)  
+  tail call ccc  void  @print_int(i64  %38)  
+  tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
 --------------------------------------------------

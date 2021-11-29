@@ -28,7 +28,7 @@ beer99(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
 
 gen#1 > (2 calls) 
 0: proc_beer.gen#1<0>
-gen#1(#globals##0:wybe.phantom, count##0:wybe.int, ?#globals##1:wybe.phantom):
+gen#1(*#globals##0:wybe.phantom, count##0:wybe.int, ?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_sge(count##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool) @int:nn:nn
@@ -51,7 +51,7 @@ gen#1(#globals##0:wybe.phantom, count##0:wybe.int, ?#globals##1:wybe.phantom):
 
 gen#2 > {inline} (1 calls) 
 0: proc_beer.gen#2<0>
-gen#2(#globals##0:wybe.phantom, count##0:wybe.int, ?#globals##3:wybe.phantom):
+gen#2(*#globals##0:wybe.phantom, count##0:wybe.int, ?#globals##3:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom, *#globals##0:wybe.phantom)

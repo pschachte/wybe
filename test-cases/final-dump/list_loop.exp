@@ -39,7 +39,7 @@ AFTER EVERYTHING:
 
 gen#1 > (2 calls) 
 0: list_loop.gen#1<0>
-gen#1(#globals##0:wybe.phantom, l##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##0:list_loop.intlist, tmp#2##0:list_loop.intlist, tmp#3##0:list_loop.intlist, x##0:list_loop.intlist, ?#globals##1:wybe.phantom):
+gen#1(*#globals##0:wybe.phantom, l##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##0:list_loop.intlist, tmp#2##0:list_loop.intlist, tmp#3##0:list_loop.intlist, x##0:list_loop.intlist, ?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(l##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool)
@@ -50,23 +50,31 @@ gen#1(#globals##0:wybe.phantom, l##0:list_loop.intlist, tmp#0##0:list_loop.intli
     1:
         foreign lpvm access(l##0:list_loop.intlist, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int)
         foreign lpvm access(~l##0:list_loop.intlist, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?l##1:list_loop.intlist)
-        wybe.io.println<0>(h##0:wybe.int, ~#globals##0:wybe.phantom, ?*tmp#16##0:wybe.phantom) #2 @list_loop:nn:nn
-        list_loop.gen#3<0>(~tmp#16##0:wybe.phantom, ~h##0:wybe.int, ~l##1:list_loop.intlist, ~x##0:list_loop.intlist, ~tmp#0##0:list_loop.intlist, ~tmp#1##0:list_loop.intlist, ~tmp#2##0:list_loop.intlist, ~tmp#3##0:list_loop.intlist, ~x##0:list_loop.intlist, ?#globals##1:wybe.phantom) #3 @list_loop:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom, #globals##0:wybe.phantom)
+        foreign c print_int(h##0:wybe.int, ~%tmp#16##0:wybe.phantom, ?%tmp#17##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#17##0:wybe.phantom, ~#globals##0:wybe.phantom, ?*tmp#18##0:wybe.phantom)
+        foreign c putchar('\n':wybe.char, ~%tmp#17##0:wybe.phantom, ?%tmp#19##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#19##0:wybe.phantom, ~*tmp#18##0:wybe.phantom, ?*tmp#20##0:wybe.phantom)
+        list_loop.gen#3<0>(~tmp#20##0:wybe.phantom, ~h##0:wybe.int, ~l##1:list_loop.intlist, ~x##0:list_loop.intlist, ~tmp#0##0:list_loop.intlist, ~tmp#1##0:list_loop.intlist, ~tmp#2##0:list_loop.intlist, ~tmp#3##0:list_loop.intlist, ~x##0:list_loop.intlist, ?#globals##1:wybe.phantom) #2 @list_loop:nn:nn
 
 
 
 gen#2 > {inline} (1 calls) 
 0: list_loop.gen#2<0>
-gen#2(#globals##0:wybe.phantom, h##0:wybe.int, l##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##0:list_loop.intlist, tmp#2##0:list_loop.intlist, tmp#3##0:list_loop.intlist, x##0:list_loop.intlist, ?#globals##2:wybe.phantom):
+gen#2(*#globals##0:wybe.phantom, h##0:wybe.int, l##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##0:list_loop.intlist, tmp#2##0:list_loop.intlist, tmp#3##0:list_loop.intlist, x##0:list_loop.intlist, ?#globals##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    wybe.io.println<0>(h##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #0 @list_loop:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom, *#globals##0:wybe.phantom)
+    foreign c print_int(h##0:wybe.int, ~%tmp#7##0:wybe.phantom, ?%tmp#8##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#8##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#9##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#8##0:wybe.phantom, ?%tmp#10##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#10##0:wybe.phantom, ~*tmp#9##0:wybe.phantom, ?*#globals##1:wybe.phantom)
     list_loop.gen#3<0>(~#globals##1:wybe.phantom, ~h##0:wybe.int, ~l##0:list_loop.intlist, ~x##0:list_loop.intlist, ~tmp#0##0:list_loop.intlist, ~tmp#1##0:list_loop.intlist, ~tmp#2##0:list_loop.intlist, ~tmp#3##0:list_loop.intlist, ~x##0:list_loop.intlist, ?#globals##2:wybe.phantom) #1 @list_loop:nn:nn
 
 
 gen#3 > (2 calls) 
 0: list_loop.gen#3<0>
-gen#3(#globals##0:wybe.phantom, h##0:wybe.int, l##0:list_loop.intlist, l2##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##0:list_loop.intlist, tmp#2##0:list_loop.intlist, tmp#3##0:list_loop.intlist, x##0:list_loop.intlist, ?#globals##1:wybe.phantom):
+gen#3(*#globals##0:wybe.phantom, h##0:wybe.int, l##0:list_loop.intlist, l2##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##0:list_loop.intlist, tmp#2##0:list_loop.intlist, tmp#3##0:list_loop.intlist, x##0:list_loop.intlist, ?#globals##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     foreign llvm icmp_ne(l2##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool)
@@ -82,14 +90,18 @@ gen#3(#globals##0:wybe.phantom, h##0:wybe.int, l##0:list_loop.intlist, l2##0:lis
         foreign c print_int(h##0:wybe.int, ~%tmp#18##0:wybe.phantom, ?%tmp#19##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#19##0:wybe.phantom, ~*tmp#17##0:wybe.phantom, ?*tmp#20##0:wybe.phantom)
         wybe.string.print_string<0>(" ":wybe.string, ~*tmp#20##0:wybe.phantom, ?*tmp#21##0:wybe.phantom) #4 @io:nn:nn
-        wybe.io.println<0>(~h2##0:wybe.int, ~*tmp#21##0:wybe.phantom, ?*tmp#22##0:wybe.phantom) #5 @list_loop:nn:nn
-        list_loop.gen#3<0>(~tmp#22##0:wybe.phantom, ~h##0:wybe.int, ~l##0:list_loop.intlist, ~l2##1:list_loop.intlist, ~tmp#0##0:list_loop.intlist, ~tmp#1##0:list_loop.intlist, ~tmp#2##0:list_loop.intlist, ~tmp#3##0:list_loop.intlist, ~x##0:list_loop.intlist, ?#globals##1:wybe.phantom) #6 @list_loop:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#22##0:wybe.phantom, *tmp#21##0:wybe.phantom)
+        foreign c print_int(~h2##0:wybe.int, ~%tmp#22##0:wybe.phantom, ?%tmp#23##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#23##0:wybe.phantom, ~*tmp#21##0:wybe.phantom, ?*tmp#24##0:wybe.phantom)
+        foreign c putchar('\n':wybe.char, ~%tmp#23##0:wybe.phantom, ?%tmp#25##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#25##0:wybe.phantom, ~*tmp#24##0:wybe.phantom, ?*tmp#26##0:wybe.phantom)
+        list_loop.gen#3<0>(~tmp#26##0:wybe.phantom, ~h##0:wybe.int, ~l##0:list_loop.intlist, ~l2##1:list_loop.intlist, ~tmp#0##0:list_loop.intlist, ~tmp#1##0:list_loop.intlist, ~tmp#2##0:list_loop.intlist, ~tmp#3##0:list_loop.intlist, ~x##0:list_loop.intlist, ?#globals##1:wybe.phantom) #5 @list_loop:nn:nn
 
 
 
 gen#4 > {inline} (1 calls) 
 0: list_loop.gen#4<0>
-gen#4(#globals##0:wybe.phantom, h##0:wybe.int, h2##0:wybe.int, l##0:list_loop.intlist, l2##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##0:list_loop.intlist, tmp#2##0:list_loop.intlist, tmp#3##0:list_loop.intlist, x##0:list_loop.intlist, ?#globals##5:wybe.phantom):
+gen#4(*#globals##0:wybe.phantom, h##0:wybe.int, h2##0:wybe.int, l##0:list_loop.intlist, l2##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##0:list_loop.intlist, tmp#2##0:list_loop.intlist, tmp#3##0:list_loop.intlist, x##0:list_loop.intlist, ?#globals##5:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
     wybe.string.print_string<0>("    ":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #5 @io:nn:nn
@@ -97,7 +109,11 @@ gen#4(#globals##0:wybe.phantom, h##0:wybe.int, h2##0:wybe.int, l##0:list_loop.in
     foreign c print_int(h##0:wybe.int, ~%tmp#8##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#9##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom)
     wybe.string.print_string<0>(" ":wybe.string, ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom) #6 @io:nn:nn
-    wybe.io.println<0>(~h2##0:wybe.int, ~*#globals##3:wybe.phantom, ?*#globals##4:wybe.phantom) #3 @list_loop:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom, *#globals##3:wybe.phantom)
+    foreign c print_int(~h2##0:wybe.int, ~%tmp#14##0:wybe.phantom, ?%tmp#15##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#15##0:wybe.phantom, ~*#globals##3:wybe.phantom, ?*tmp#16##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#15##0:wybe.phantom, ?%tmp#17##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#17##0:wybe.phantom, ~*tmp#16##0:wybe.phantom, ?*#globals##4:wybe.phantom)
     list_loop.gen#3<0>(~#globals##4:wybe.phantom, ~h##0:wybe.int, ~l##0:list_loop.intlist, ~l2##0:list_loop.intlist, ~tmp#0##0:list_loop.intlist, ~tmp#1##0:list_loop.intlist, ~tmp#2##0:list_loop.intlist, ~tmp#3##0:list_loop.intlist, ~x##0:list_loop.intlist, ?#globals##5:wybe.phantom) #4 @list_loop:nn:nn
 
   LLVM code       :
@@ -108,13 +124,13 @@ gen#4(#globals##0:wybe.phantom, h##0:wybe.int, h2##0:wybe.int, l##0:list_loop.in
  
 
 
-declare external fastcc  void @"wybe.io.println<0>"(i64)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+declare external ccc  void @putchar(i8)    
 
 
 declare external ccc  void @print_int(i64)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 @list_loop.42 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @list_loop.41 to i64) }
@@ -196,7 +212,8 @@ if.then:
   %29 = inttoptr i64 %28 to i64* 
   %30 = getelementptr  i64, i64* %29, i64 0 
   %31 = load  i64, i64* %30 
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  %27)  
+  tail call ccc  void  @print_int(i64  %27)  
+  tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"list_loop.gen#3<0>"(i64  %27, i64  %31, i64  %"x##0", i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"x##0")  
   ret void 
 if.else:
@@ -206,7 +223,8 @@ if.else:
 
 define external fastcc  void @"list_loop.gen#2<0>"(i64  %"h##0", i64  %"l##0", i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"x##0")    {
 entry:
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  %"h##0")  
+  tail call ccc  void  @print_int(i64  %"h##0")  
+  tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"list_loop.gen#3<0>"(i64  %"h##0", i64  %"l##0", i64  %"x##0", i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"x##0")  
   ret void 
 }
@@ -227,7 +245,8 @@ if.then:
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @list_loop.40, i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %"h##0")  
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @list_loop.42, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  %34)  
+  tail call ccc  void  @print_int(i64  %34)  
+  tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"list_loop.gen#3<0>"(i64  %"h##0", i64  %"l##0", i64  %38, i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"x##0")  
   ret void 
 if.else:
@@ -241,7 +260,8 @@ entry:
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @list_loop.44, i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %"h##0")  
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @list_loop.46, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"wybe.io.println<0>"(i64  %"h2##0")  
+  tail call ccc  void  @print_int(i64  %"h2##0")  
+  tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"list_loop.gen#3<0>"(i64  %"h##0", i64  %"l##0", i64  %"l2##0", i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"x##0")  
   ret void 
 }

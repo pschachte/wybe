@@ -62,7 +62,7 @@ module AST (
   ProcAnalysis(..), emptyProcAnalysis,
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, ResourceDef(..), FlowDirection(..),
-  argFlowDirection, argType, setArgType, setPrimArgFlowType, maybePrimArgFlowType,
+  argFlowDirection, argType, setArgType, setArgFlow, setArgFlowType, maybeArgFlowType,
   argDescription, setParamType, paramIsResourceful, 
   setPrimParamType, setTypeFlowType,
   flowsIn, flowsOut, primFlowToFlowDir,
@@ -73,7 +73,7 @@ module AST (
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
-  maybeGetClosureOf, translateFromClosure, isClosureProc,
+  maybeGetClosureOf, isClosureProc,
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
@@ -1974,24 +1974,6 @@ maybeGetClosureOf pspec =
     procClosureOf <$> getProcDef pspec
 
 
-translateFromClosure :: a -> OptPos -> Prim 
-                     -> (OptPos -> Prim -> StateT s Compiler a) 
-                     -> StateT s Compiler a
-translateFromClosure els pos prim@(PrimHigherCall csID (ArgProcRef ps as ty) args) 
-        trans = do
-    mbPs' <- lift $ maybeGetClosureOf ps
-    case mbPs' of
-        Nothing -> return els
-        Just ps' -> do 
-            params' <- lift (getParams ps') 
-            if sameLength params' args
-            then do
-                tys <- (paramType <$>) <$> lift (getParams ps') 
-                trans pos (PrimCall csID ps' $ as ++ zipWith setArgType tys args)
-            else return els
-translateFromClosure _ _ prim _ = shouldnt $ "translateFromClosure of " ++ show prim
-
-
 -- |Check if a ProcSpec refers to a closure proc
 isClosureProc :: ProcSpec -> Compiler Bool 
 isClosureProc pspec = isJust . procClosureOf <$> getProcDef pspec
@@ -3072,13 +3054,18 @@ setArgType typ (ArgUnneeded u _) = ArgUnneeded u typ
 setArgType typ (ArgUndef _) = ArgUndef typ
 
 
-setPrimArgFlowType :: PrimArg -> ArgFlowType -> PrimArg
-setPrimArgFlowType arg@ArgVar{} ft = arg{argVarFlowType=ft}
-setPrimArgFlowType arg          _  = arg
+setArgFlow :: PrimFlow -> PrimArg -> PrimArg
+setArgFlow f arg@ArgVar{} = arg{argVarFlow=f}
+setArgFlow _ arg          = arg
 
-maybePrimArgFlowType :: PrimArg -> Maybe ArgFlowType
-maybePrimArgFlowType arg@ArgVar{} = Just $ argVarFlowType arg
-maybePrimArgFlowType arg          = Nothing
+
+setArgFlowType :: ArgFlowType -> PrimArg -> PrimArg
+setArgFlowType ft arg@ArgVar{} = arg{argVarFlowType=ft}
+setArgFlowType _  arg          = arg
+
+maybeArgFlowType :: PrimArg -> Maybe ArgFlowType
+maybeArgFlowType ArgVar{argVarFlowType=ft} = Just ft
+maybeArgFlowType arg                       = Nothing
 
 
 argDescription :: PrimArg -> String
