@@ -210,23 +210,26 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)
 = > public {inline} (1 calls) 
 0: multictr.card.=<0>
 =(#left##0:multictr.card, #right##0:multictr.card, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:multictr.card, ~#right##0:multictr.card, ?#success##0:wybe.bool)
 
 
 card > public {inline} (0 calls) 
 0: multictr.card.card<0>
 card(suit##0:multictr.suit, rank##0:multictr.rank, ?#result##3:multictr.card):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm shl(~rank##0:multictr.card, 2:multictr.card, ?#temp##1:multictr.card)
     foreign llvm or(~#temp##1:multictr.card, ~suit##0:multictr.card, ?#result##3:multictr.card)
 card > public {inline} (0 calls) 
 1: multictr.card.card<1>
 card(?suit##0:multictr.suit, ?rank##0:multictr.rank, #result##0:multictr.card):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm and(#result##0:multictr.card, 3:multictr.card, ?#temp2##0:multictr.card)
     foreign lpvm cast(~#temp2##0:multictr.card, ?suit##0:multictr.suit)
     foreign llvm lshr(~#result##0:multictr.card, 2:multictr.card, ?#temp##1:multictr.card)
@@ -237,16 +240,18 @@ card(?suit##0:multictr.suit, ?rank##0:multictr.rank, #result##0:multictr.card):
 rank > public {inline} (0 calls) 
 0: multictr.card.rank<0>
 rank(#rec##0:multictr.card, ?#result##0:multictr.rank):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm lshr(~#rec##0:multictr.card, 2:multictr.card, ?#rec##1:multictr.card)
     foreign llvm and(~#rec##1:multictr.card, 15:multictr.card, ?#field##0:multictr.card)
     foreign lpvm cast(~#field##0:multictr.card, ?#result##0:multictr.rank)
 rank > public {inline} (0 calls) 
 1: multictr.card.rank<1>
 rank(#rec##0:multictr.card, ?#rec##2:multictr.card, #field##0:multictr.rank):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm and(~#rec##0:multictr.card, -61:multictr.card, ?#rec##1:multictr.card)
     foreign llvm shl(~#field##0:multictr.card, 2:multictr.card, ?#temp##0:multictr.card)
     foreign llvm or(~#rec##1:multictr.card, ~#temp##0:multictr.card, ?#rec##2:multictr.card)
@@ -255,15 +260,17 @@ rank(#rec##0:multictr.card, ?#rec##2:multictr.card, #field##0:multictr.rank):
 suit > public {inline} (0 calls) 
 0: multictr.card.suit<0>
 suit(#rec##0:multictr.card, ?#result##0:multictr.suit):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm and(~#rec##0:multictr.card, 3:multictr.card, ?#field##0:multictr.card)
     foreign lpvm cast(~#field##0:multictr.card, ?#result##0:multictr.suit)
 suit > public {inline} (0 calls) 
 1: multictr.card.suit<1>
 suit(#rec##0:multictr.card, ?#rec##2:multictr.card, #field##0:multictr.suit):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm and(~#rec##0:multictr.card, -4:multictr.card, ?#rec##1:multictr.card)
     foreign llvm or(~#field##0:multictr.card, ~#rec##1:multictr.card, ?#rec##2:multictr.card)
 
@@ -271,8 +278,9 @@ suit(#rec##0:multictr.card, ?#rec##2:multictr.card, #field##0:multictr.suit):
 ~= > public {inline} (0 calls) 
 0: multictr.card.~=<0>
 ~=(#left##0:multictr.card, #right##0:multictr.card, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:multictr.card, ~#right##0:multictr.card, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
@@ -449,8 +457,9 @@ entry:
 = > public (1 calls) 
 0: multictr.complicated.=<0>
 =(#left##0:multictr.complicated, #right##0:multictr.complicated, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#left##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -961,23 +970,26 @@ entry:
 autumn > public {inline} (0 calls) 
 0: multictr.complicated.autumn<0>
 autumn(?#result##0:multictr.complicated):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(3:multictr.complicated, ?#result##0:multictr.complicated)
 
 
 c01 > public {inline} (0 calls) 
 0: multictr.complicated.c01<0>
 c01(f01##0:wybe.int, ?#result##0:multictr.complicated):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#result##0:multictr.complicated, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f01##0:wybe.int)
 c01 > public {inline} (40 calls) 
 1: multictr.complicated.c01<1>
 c01(?f01##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1002,16 +1014,18 @@ c01(?f01##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
 c02 > public {inline} (0 calls) 
 0: multictr.complicated.c02<0>
 c02(f02##0:wybe.int, ?#result##0:multictr.complicated):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f02##0:wybe.int)
     foreign llvm or(~#rec##1:multictr.complicated, 1:wybe.int, ?#result##0:multictr.complicated)
 c02 > public {inline} (35 calls) 
 1: multictr.complicated.c02<1>
 c02(?f02##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1036,16 +1050,18 @@ c02(?f02##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
 c03 > public {inline} (0 calls) 
 0: multictr.complicated.c03<0>
 c03(f03##0:wybe.int, ?#result##0:multictr.complicated):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f03##0:wybe.int)
     foreign llvm or(~#rec##1:multictr.complicated, 2:wybe.int, ?#result##0:multictr.complicated)
 c03 > public {inline} (33 calls) 
 1: multictr.complicated.c03<1>
 c03(?f03##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1070,16 +1086,18 @@ c03(?f03##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
 c04 > public {inline} (0 calls) 
 0: multictr.complicated.c04<0>
 c04(f04##0:wybe.int, ?#result##0:multictr.complicated):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f04##0:wybe.int)
     foreign llvm or(~#rec##1:multictr.complicated, 3:wybe.int, ?#result##0:multictr.complicated)
 c04 > public {inline} (31 calls) 
 1: multictr.complicated.c04<1>
 c04(?f04##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1104,16 +1122,18 @@ c04(?f04##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
 c05 > public {inline} (0 calls) 
 0: multictr.complicated.c05<0>
 c05(f05##0:wybe.int, ?#result##0:multictr.complicated):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f05##0:wybe.int)
     foreign llvm or(~#rec##1:multictr.complicated, 4:wybe.int, ?#result##0:multictr.complicated)
 c05 > public {inline} (29 calls) 
 1: multictr.complicated.c05<1>
 c05(?f05##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1138,16 +1158,18 @@ c05(?f05##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
 c06 > public {inline} (0 calls) 
 0: multictr.complicated.c06<0>
 c06(f06##0:wybe.int, ?#result##0:multictr.complicated):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f06##0:wybe.int)
     foreign llvm or(~#rec##1:multictr.complicated, 5:wybe.int, ?#result##0:multictr.complicated)
 c06 > public {inline} (27 calls) 
 1: multictr.complicated.c06<1>
 c06(?f06##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1172,16 +1194,18 @@ c06(?f06##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
 c07 > public {inline} (0 calls) 
 0: multictr.complicated.c07<0>
 c07(f07##0:wybe.int, ?#result##0:multictr.complicated):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f07##0:wybe.int)
     foreign llvm or(~#rec##1:multictr.complicated, 6:wybe.int, ?#result##0:multictr.complicated)
 c07 > public {inline} (25 calls) 
 1: multictr.complicated.c07<1>
 c07(?f07##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1206,8 +1230,9 @@ c07(?f07##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
 c08 > public {inline} (0 calls) 
 0: multictr.complicated.c08<0>
 c08(f08##0:wybe.int, ?#result##0:multictr.complicated):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 7:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.complicated, ?#rec##2:multictr.complicated, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~f08##0:wybe.int)
@@ -1215,8 +1240,9 @@ c08(f08##0:wybe.int, ?#result##0:multictr.complicated):
 c08 > public {inline} (23 calls) 
 1: multictr.complicated.c08<1>
 c08(?f08##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1250,8 +1276,9 @@ c08(?f08##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
 c09 > public {inline} (0 calls) 
 0: multictr.complicated.c09<0>
 c09(f09##0:wybe.int, ?#result##0:multictr.complicated):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 8:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.complicated, ?#rec##2:multictr.complicated, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~f09##0:wybe.int)
@@ -1259,8 +1286,9 @@ c09(f09##0:wybe.int, ?#result##0:multictr.complicated):
 c09 > public {inline} (21 calls) 
 1: multictr.complicated.c09<1>
 c09(?f09##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1294,8 +1322,9 @@ c09(?f09##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
 c10 > public {inline} (0 calls) 
 0: multictr.complicated.c10<0>
 c10(f10##0:wybe.int, ?#result##0:multictr.complicated):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 9:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.complicated, ?#rec##2:multictr.complicated, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~f10##0:wybe.int)
@@ -1303,8 +1332,9 @@ c10(f10##0:wybe.int, ?#result##0:multictr.complicated):
 c10 > public {inline} (19 calls) 
 1: multictr.complicated.c10<1>
 c10(?f10##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1338,8 +1368,9 @@ c10(?f10##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
 c11 > public {inline} (0 calls) 
 0: multictr.complicated.c11<0>
 c11(f11##0:wybe.int, ?#result##0:multictr.complicated):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.complicated, ?#rec##2:multictr.complicated, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~f11##0:wybe.int)
@@ -1347,8 +1378,9 @@ c11(f11##0:wybe.int, ?#result##0:multictr.complicated):
 c11 > public {inline} (17 calls) 
 1: multictr.complicated.c11<1>
 c11(?f11##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1382,8 +1414,9 @@ c11(?f11##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
 c12 > public {inline} (0 calls) 
 0: multictr.complicated.c12<0>
 c12(f12##0:wybe.int, ?#result##0:multictr.complicated):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 11:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.complicated, ?#rec##2:multictr.complicated, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~f12##0:wybe.int)
@@ -1391,8 +1424,9 @@ c12(f12##0:wybe.int, ?#result##0:multictr.complicated):
 c12 > public {inline} (15 calls) 
 1: multictr.complicated.c12<1>
 c12(?f12##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1426,8 +1460,9 @@ c12(?f12##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
 c13 > public {inline} (0 calls) 
 0: multictr.complicated.c13<0>
 c13(f13##0:wybe.int, ?#result##0:multictr.complicated):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 12:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.complicated, ?#rec##2:multictr.complicated, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~f13##0:wybe.int)
@@ -1435,8 +1470,9 @@ c13(f13##0:wybe.int, ?#result##0:multictr.complicated):
 c13 > public {inline} (13 calls) 
 1: multictr.complicated.c13<1>
 c13(?f13##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1470,8 +1506,9 @@ c13(?f13##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
 c14 > public {inline} (0 calls) 
 0: multictr.complicated.c14<0>
 c14(f14##0:wybe.int, ?#result##0:multictr.complicated):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 13:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.complicated, ?#rec##2:multictr.complicated, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~f14##0:wybe.int)
@@ -1479,8 +1516,9 @@ c14(f14##0:wybe.int, ?#result##0:multictr.complicated):
 c14 > public {inline} (11 calls) 
 1: multictr.complicated.c14<1>
 c14(?f14##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1514,8 +1552,9 @@ c14(?f14##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
 c15 > public {inline} (0 calls) 
 0: multictr.complicated.c15<0>
 c15(f15##0:wybe.int, ?#result##0:multictr.complicated):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 14:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.complicated, ?#rec##2:multictr.complicated, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~f15##0:wybe.int)
@@ -1523,8 +1562,9 @@ c15(f15##0:wybe.int, ?#result##0:multictr.complicated):
 c15 > public {inline} (9 calls) 
 1: multictr.complicated.c15<1>
 c15(?f15##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1558,8 +1598,9 @@ c15(?f15##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
 c16 > public {inline} (0 calls) 
 0: multictr.complicated.c16<0>
 c16(f16##0:wybe.int, ?#result##0:multictr.complicated):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 15:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.complicated, ?#rec##2:multictr.complicated, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~f16##0:wybe.int)
@@ -1567,8 +1608,9 @@ c16(f16##0:wybe.int, ?#result##0:multictr.complicated):
 c16 > public {inline} (7 calls) 
 1: multictr.complicated.c16<1>
 c16(?f16##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1602,8 +1644,9 @@ c16(?f16##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
 c17 > public {inline} (0 calls) 
 0: multictr.complicated.c17<0>
 c17(f17##0:wybe.int, ?#result##0:multictr.complicated):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.complicated)
     foreign lpvm mutate(~#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 16:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.complicated, ?#rec##2:multictr.complicated, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~f17##0:wybe.int)
@@ -1611,8 +1654,9 @@ c17(f17##0:wybe.int, ?#result##0:multictr.complicated):
 c17 > public {inline} (5 calls) 
 1: multictr.complicated.c17<1>
 c17(?f17##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#result##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1646,8 +1690,9 @@ c17(?f17##0:wybe.int, #result##0:multictr.complicated, ?#success##0:wybe.bool):
 f01 > public {inline} (0 calls) 
 0: multictr.complicated.f01<0>
 f01(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1670,8 +1715,9 @@ f01(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 f01 > public {inline} (0 calls) 
 1: multictr.complicated.f01<1>
 f01(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1696,8 +1742,9 @@ f01(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 f02 > public {inline} (0 calls) 
 0: multictr.complicated.f02<0>
 f02(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1720,8 +1767,9 @@ f02(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 f02 > public {inline} (0 calls) 
 1: multictr.complicated.f02<1>
 f02(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1746,8 +1794,9 @@ f02(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 f03 > public {inline} (0 calls) 
 0: multictr.complicated.f03<0>
 f03(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1770,8 +1819,9 @@ f03(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 f03 > public {inline} (0 calls) 
 1: multictr.complicated.f03<1>
 f03(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1796,8 +1846,9 @@ f03(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 f04 > public {inline} (0 calls) 
 0: multictr.complicated.f04<0>
 f04(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1820,8 +1871,9 @@ f04(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 f04 > public {inline} (0 calls) 
 1: multictr.complicated.f04<1>
 f04(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1846,8 +1898,9 @@ f04(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 f05 > public {inline} (0 calls) 
 0: multictr.complicated.f05<0>
 f05(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1870,8 +1923,9 @@ f05(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 f05 > public {inline} (0 calls) 
 1: multictr.complicated.f05<1>
 f05(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1896,8 +1950,9 @@ f05(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 f06 > public {inline} (0 calls) 
 0: multictr.complicated.f06<0>
 f06(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1920,8 +1975,9 @@ f06(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 f06 > public {inline} (0 calls) 
 1: multictr.complicated.f06<1>
 f06(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1946,8 +2002,9 @@ f06(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 f07 > public {inline} (0 calls) 
 0: multictr.complicated.f07<0>
 f07(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1970,8 +2027,9 @@ f07(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 f07 > public {inline} (0 calls) 
 1: multictr.complicated.f07<1>
 f07(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -1996,8 +2054,9 @@ f07(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 f08 > public {inline} (0 calls) 
 0: multictr.complicated.f08<0>
 f08(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -2029,8 +2088,9 @@ f08(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 f08 > public {inline} (0 calls) 
 1: multictr.complicated.f08<1>
 f08(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -2064,8 +2124,9 @@ f08(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 f09 > public {inline} (0 calls) 
 0: multictr.complicated.f09<0>
 f09(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -2097,8 +2158,9 @@ f09(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 f09 > public {inline} (0 calls) 
 1: multictr.complicated.f09<1>
 f09(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -2132,8 +2194,9 @@ f09(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 f10 > public {inline} (0 calls) 
 0: multictr.complicated.f10<0>
 f10(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -2165,8 +2228,9 @@ f10(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 f10 > public {inline} (0 calls) 
 1: multictr.complicated.f10<1>
 f10(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -2200,8 +2264,9 @@ f10(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 f11 > public {inline} (0 calls) 
 0: multictr.complicated.f11<0>
 f11(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -2233,8 +2298,9 @@ f11(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 f11 > public {inline} (0 calls) 
 1: multictr.complicated.f11<1>
 f11(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -2268,8 +2334,9 @@ f11(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 f12 > public {inline} (0 calls) 
 0: multictr.complicated.f12<0>
 f12(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -2301,8 +2368,9 @@ f12(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 f12 > public {inline} (0 calls) 
 1: multictr.complicated.f12<1>
 f12(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -2336,8 +2404,9 @@ f12(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 f13 > public {inline} (0 calls) 
 0: multictr.complicated.f13<0>
 f13(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -2369,8 +2438,9 @@ f13(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 f13 > public {inline} (0 calls) 
 1: multictr.complicated.f13<1>
 f13(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -2404,8 +2474,9 @@ f13(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 f14 > public {inline} (0 calls) 
 0: multictr.complicated.f14<0>
 f14(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -2437,8 +2508,9 @@ f14(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 f14 > public {inline} (0 calls) 
 1: multictr.complicated.f14<1>
 f14(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -2472,8 +2544,9 @@ f14(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 f15 > public {inline} (0 calls) 
 0: multictr.complicated.f15<0>
 f15(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -2505,8 +2578,9 @@ f15(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 f15 > public {inline} (0 calls) 
 1: multictr.complicated.f15<1>
 f15(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -2540,8 +2614,9 @@ f15(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 f16 > public {inline} (0 calls) 
 0: multictr.complicated.f16<0>
 f16(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -2573,8 +2648,9 @@ f16(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 f16 > public {inline} (0 calls) 
 1: multictr.complicated.f16<1>
 f16(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -2608,8 +2684,9 @@ f16(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 f17 > public {inline} (0 calls) 
 0: multictr.complicated.f17<0>
 f17(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -2641,8 +2718,9 @@ f17(#rec##0:multictr.complicated, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 f17 > public {inline} (0 calls) 
 1: multictr.complicated.f17<1>
 f17(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_uge(#rec##0:wybe.int, 4:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -2676,32 +2754,36 @@ f17(#rec##0:multictr.complicated, ?#rec##1:multictr.complicated, #field##0:wybe.
 spring > public {inline} (0 calls) 
 0: multictr.complicated.spring<0>
 spring(?#result##0:multictr.complicated):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(1:multictr.complicated, ?#result##0:multictr.complicated)
 
 
 summer > public {inline} (0 calls) 
 0: multictr.complicated.summer<0>
 summer(?#result##0:multictr.complicated):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(2:multictr.complicated, ?#result##0:multictr.complicated)
 
 
 winter > public {inline} (0 calls) 
 0: multictr.complicated.winter<0>
 winter(?#result##0:multictr.complicated):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(0:multictr.complicated, ?#result##0:multictr.complicated)
 
 
 ~= > public {inline} (0 calls) 
 0: multictr.complicated.~=<0>
 ~=(#left##0:multictr.complicated, #right##0:multictr.complicated, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     multictr.complicated.=<0>(~#left##0:multictr.complicated, ~#right##0:multictr.complicated, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
@@ -5418,44 +5500,50 @@ entry:
 = > public {inline} (1 calls) 
 0: multictr.length.=<0>
 =(#left##0:multictr.length, #right##0:multictr.length, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:multictr.length, ~#right##0:multictr.length, ?#success##0:wybe.bool)
 
 
 metres > public {inline} (0 calls) 
 0: multictr.length.metres<0>
 metres(value##0:wybe.float, ?#result##2:multictr.length):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(~value##0:multictr.length, ?#result##2:multictr.length)
 metres > public {inline} (0 calls) 
 1: multictr.length.metres<1>
 metres(?value##0:wybe.float, #result##0:multictr.length):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm cast(~#result##0:multictr.length, ?value##0:wybe.float)
 
 
 value > public {inline} (0 calls) 
 0: multictr.length.value<0>
 value(#rec##0:multictr.length, ?#result##0:wybe.float):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm cast(~#rec##0:multictr.length, ?#result##0:wybe.float)
 value > public {inline} (0 calls) 
 1: multictr.length.value<1>
 value([#rec##0:multictr.length], ?#rec##2:multictr.length, #field##0:wybe.float):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(~#field##0:multictr.length, ?#rec##2:multictr.length)
 
 
 ~= > public {inline} (0 calls) 
 0: multictr.length.~=<0>
 ~=(#left##0:multictr.length, #right##0:multictr.length, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:multictr.length, ~#right##0:multictr.length, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
@@ -5534,8 +5622,9 @@ entry:
 = > public (1 calls) 
 0: multictr.maybe_int.=<0>
 =(#left##0:multictr.maybe_int, #right##0:multictr.maybe_int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -5558,15 +5647,17 @@ entry:
 just > public {inline} (0 calls) 
 0: multictr.maybe_int.just<0>
 just(value##0:wybe.int, ?#result##0:multictr.maybe_int):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.maybe_int)
     foreign lpvm mutate(~#rec##0:multictr.maybe_int, ?#result##0:multictr.maybe_int, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~value##0:wybe.int)
 just > public {inline} (8 calls) 
 1: multictr.maybe_int.just<1>
 just(?value##0:wybe.int, #result##0:multictr.maybe_int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -5582,16 +5673,18 @@ just(?value##0:wybe.int, #result##0:multictr.maybe_int, ?#success##0:wybe.bool):
 nothing > public {inline} (0 calls) 
 0: multictr.maybe_int.nothing<0>
 nothing(?#result##0:multictr.maybe_int):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(0:multictr.maybe_int, ?#result##0:multictr.maybe_int)
 
 
 value > public {inline} (0 calls) 
 0: multictr.maybe_int.value<0>
 value(#rec##0:multictr.maybe_int, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -5605,8 +5698,9 @@ value(#rec##0:multictr.maybe_int, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 value > public {inline} (0 calls) 
 1: multictr.maybe_int.value<1>
 value(#rec##0:multictr.maybe_int, ?#rec##1:multictr.maybe_int, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -5622,8 +5716,9 @@ value(#rec##0:multictr.maybe_int, ?#rec##1:multictr.maybe_int, #field##0:wybe.in
 ~= > public {inline} (0 calls) 
 0: multictr.maybe_int.~=<0>
 ~=(#left##0:multictr.maybe_int, #right##0:multictr.maybe_int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     multictr.maybe_int.=<0>(~#left##0:multictr.maybe_int, ~#right##0:multictr.maybe_int, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
@@ -5773,8 +5868,9 @@ entry:
 = > public (1 calls) 
 0: multictr.number.=<0>
 =(#left##0:multictr.number, #right##0:multictr.number, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm and(#left##0:wybe.int, 1:wybe.int, ?tmp#8##0:wybe.int)
     foreign llvm icmp_eq(tmp#8##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
     case ~tmp#9##0:wybe.bool of
@@ -5816,16 +5912,18 @@ entry:
 float > public {inline} (0 calls) 
 0: multictr.number.float<0>
 float(float_value##0:wybe.float, ?#result##0:multictr.number):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.number)
     foreign lpvm mutate(~#rec##0:multictr.number, ?#rec##1:multictr.number, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~float_value##0:wybe.float)
     foreign llvm or(~#rec##1:multictr.number, 1:wybe.int, ?#result##0:multictr.number)
 float > public {inline} (5 calls) 
 1: multictr.number.float<1>
 float(?float_value##0:wybe.float, #result##0:multictr.number, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
     foreign llvm icmp_eq(~tmp#1##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -5842,8 +5940,9 @@ float(?float_value##0:wybe.float, #result##0:multictr.number, ?#success##0:wybe.
 float_value > public {inline} (0 calls) 
 0: multictr.number.float_value<0>
 float_value(#rec##0:multictr.number, ?#result##0:wybe.float, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
     foreign llvm icmp_eq(~tmp#1##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -5858,8 +5957,9 @@ float_value(#rec##0:multictr.number, ?#result##0:wybe.float, ?#success##0:wybe.b
 float_value > public {inline} (0 calls) 
 1: multictr.number.float_value<1>
 float_value(#rec##0:multictr.number, ?#rec##1:multictr.number, #field##0:wybe.float, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
     foreign llvm icmp_eq(~tmp#1##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -5876,15 +5976,17 @@ float_value(#rec##0:multictr.number, ?#rec##1:multictr.number, #field##0:wybe.fl
 int > public {inline} (0 calls) 
 0: multictr.number.int<0>
 int(int_value##0:wybe.int, ?#result##0:multictr.number):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.number)
     foreign lpvm mutate(~#rec##0:multictr.number, ?#result##0:multictr.number, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~int_value##0:wybe.int)
 int > public {inline} (10 calls) 
 1: multictr.number.int<1>
 int(?int_value##0:wybe.int, #result##0:multictr.number, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
     foreign llvm icmp_eq(~tmp#1##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -5901,8 +6003,9 @@ int(?int_value##0:wybe.int, #result##0:multictr.number, ?#success##0:wybe.bool):
 int_value > public {inline} (0 calls) 
 0: multictr.number.int_value<0>
 int_value(#rec##0:multictr.number, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
     foreign llvm icmp_eq(~tmp#1##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -5917,8 +6020,9 @@ int_value(#rec##0:multictr.number, ?#result##0:wybe.int, ?#success##0:wybe.bool)
 int_value > public {inline} (0 calls) 
 1: multictr.number.int_value<1>
 int_value(#rec##0:multictr.number, ?#rec##1:multictr.number, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
     foreign llvm icmp_eq(~tmp#1##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -5935,8 +6039,9 @@ int_value(#rec##0:multictr.number, ?#rec##1:multictr.number, #field##0:wybe.int,
 ~= > public {inline} (0 calls) 
 0: multictr.number.~=<0>
 ~=(#left##0:multictr.number, #right##0:multictr.number, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     multictr.number.=<0>(~#left##0:multictr.number, ~#right##0:multictr.number, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
@@ -6182,44 +6287,50 @@ entry:
 = > public {inline} (1 calls) 
 0: multictr.perhaps.=<0>
 =(#left##0:multictr.perhaps, #right##0:multictr.perhaps, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:multictr.perhaps, ~#right##0:multictr.perhaps, ?#success##0:wybe.bool)
 
 
 content > public {inline} (0 calls) 
 0: multictr.perhaps.content<0>
 content(#rec##0:multictr.perhaps, ?#result##0:multictr.maybe_int):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm cast(~#rec##0:multictr.perhaps, ?#result##0:multictr.maybe_int)
 content > public {inline} (0 calls) 
 1: multictr.perhaps.content<1>
 content([#rec##0:multictr.perhaps], ?#rec##2:multictr.perhaps, #field##0:multictr.maybe_int):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(~#field##0:multictr.perhaps, ?#rec##2:multictr.perhaps)
 
 
 perhaps > public {inline} (0 calls) 
 0: multictr.perhaps.perhaps<0>
 perhaps(content##0:multictr.maybe_int, ?#result##2:multictr.perhaps):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(~content##0:multictr.perhaps, ?#result##2:multictr.perhaps)
 perhaps > public {inline} (0 calls) 
 1: multictr.perhaps.perhaps<1>
 perhaps(?content##0:multictr.maybe_int, #result##0:multictr.perhaps):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm cast(~#result##0:multictr.perhaps, ?content##0:multictr.maybe_int)
 
 
 ~= > public {inline} (0 calls) 
 0: multictr.perhaps.~=<0>
 ~=(#left##0:multictr.perhaps, #right##0:multictr.perhaps, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:multictr.perhaps, ~#right##0:multictr.perhaps, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
@@ -6302,120 +6413,135 @@ entry:
 = > public {inline} (1 calls) 
 0: multictr.rank.=<0>
 =(#left##0:multictr.rank, #right##0:multictr.rank, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:multictr.rank, ~#right##0:multictr.rank, ?#success##0:wybe.bool)
 
 
 ace > public {inline} (0 calls) 
 0: multictr.rank.ace<0>
 ace(?#result##0:multictr.rank):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(12:multictr.rank, ?#result##0:multictr.rank)
 
 
 jack > public {inline} (0 calls) 
 0: multictr.rank.jack<0>
 jack(?#result##0:multictr.rank):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(9:multictr.rank, ?#result##0:multictr.rank)
 
 
 king > public {inline} (0 calls) 
 0: multictr.rank.king<0>
 king(?#result##0:multictr.rank):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(11:multictr.rank, ?#result##0:multictr.rank)
 
 
 queen > public {inline} (0 calls) 
 0: multictr.rank.queen<0>
 queen(?#result##0:multictr.rank):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(10:multictr.rank, ?#result##0:multictr.rank)
 
 
 r10 > public {inline} (0 calls) 
 0: multictr.rank.r10<0>
 r10(?#result##0:multictr.rank):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(8:multictr.rank, ?#result##0:multictr.rank)
 
 
 r2 > public {inline} (0 calls) 
 0: multictr.rank.r2<0>
 r2(?#result##0:multictr.rank):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(0:multictr.rank, ?#result##0:multictr.rank)
 
 
 r3 > public {inline} (0 calls) 
 0: multictr.rank.r3<0>
 r3(?#result##0:multictr.rank):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(1:multictr.rank, ?#result##0:multictr.rank)
 
 
 r4 > public {inline} (0 calls) 
 0: multictr.rank.r4<0>
 r4(?#result##0:multictr.rank):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(2:multictr.rank, ?#result##0:multictr.rank)
 
 
 r5 > public {inline} (0 calls) 
 0: multictr.rank.r5<0>
 r5(?#result##0:multictr.rank):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(3:multictr.rank, ?#result##0:multictr.rank)
 
 
 r6 > public {inline} (0 calls) 
 0: multictr.rank.r6<0>
 r6(?#result##0:multictr.rank):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(4:multictr.rank, ?#result##0:multictr.rank)
 
 
 r7 > public {inline} (0 calls) 
 0: multictr.rank.r7<0>
 r7(?#result##0:multictr.rank):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(5:multictr.rank, ?#result##0:multictr.rank)
 
 
 r8 > public {inline} (0 calls) 
 0: multictr.rank.r8<0>
 r8(?#result##0:multictr.rank):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(6:multictr.rank, ?#result##0:multictr.rank)
 
 
 r9 > public {inline} (0 calls) 
 0: multictr.rank.r9<0>
 r9(?#result##0:multictr.rank):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(7:multictr.rank, ?#result##0:multictr.rank)
 
 
 ~= > public {inline} (0 calls) 
 0: multictr.rank.~=<0>
 ~=(#left##0:multictr.rank, #right##0:multictr.rank, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:multictr.rank, ~#right##0:multictr.rank, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
@@ -6550,8 +6676,9 @@ entry:
 = > public (1 calls) 
 0: multictr.simple.=<0>
 =(#left##0:multictr.simple, #right##0:multictr.simple, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -6623,15 +6750,17 @@ entry:
 one > public {inline} (0 calls) 
 0: multictr.simple.one<0>
 one(one_field##0:wybe.int, ?#result##0:multictr.simple):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr.simple)
     foreign lpvm mutate(~#rec##0:multictr.simple, ?#result##0:multictr.simple, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~one_field##0:wybe.int)
 one > public {inline} (11 calls) 
 1: multictr.simple.one<1>
 one(?one_field##0:wybe.int, #result##0:multictr.simple, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -6656,8 +6785,9 @@ one(?one_field##0:wybe.int, #result##0:multictr.simple, ?#success##0:wybe.bool):
 one_field > public {inline} (0 calls) 
 0: multictr.simple.one_field<0>
 one_field(#rec##0:multictr.simple, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -6680,8 +6810,9 @@ one_field(#rec##0:multictr.simple, ?#result##0:wybe.int, ?#success##0:wybe.bool)
 one_field > public {inline} (0 calls) 
 1: multictr.simple.one_field<1>
 one_field(#rec##0:multictr.simple, ?#rec##1:multictr.simple, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -6706,8 +6837,9 @@ one_field(#rec##0:multictr.simple, ?#rec##1:multictr.simple, #field##0:wybe.int,
 two > public {inline} (0 calls) 
 0: multictr.simple.two<0>
 two(two_field1##0:wybe.int, two_field2##0:wybe.int, ?#result##0:multictr.simple):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multictr.simple)
     foreign lpvm mutate(~#rec##0:multictr.simple, ?#rec##1:multictr.simple, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~two_field1##0:wybe.int)
     foreign lpvm mutate(~#rec##1:multictr.simple, ?#rec##2:multictr.simple, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~two_field2##0:wybe.int)
@@ -6715,8 +6847,9 @@ two(two_field1##0:wybe.int, two_field2##0:wybe.int, ?#result##0:multictr.simple)
 two > public {inline} (7 calls) 
 1: multictr.simple.two<1>
 two(?two_field1##0:wybe.int, ?two_field2##0:wybe.int, #result##0:multictr.simple, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -6744,8 +6877,9 @@ two(?two_field1##0:wybe.int, ?two_field2##0:wybe.int, #result##0:multictr.simple
 two_field1 > public {inline} (0 calls) 
 0: multictr.simple.two_field1<0>
 two_field1(#rec##0:multictr.simple, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -6768,8 +6902,9 @@ two_field1(#rec##0:multictr.simple, ?#result##0:wybe.int, ?#success##0:wybe.bool
 two_field1 > public {inline} (0 calls) 
 1: multictr.simple.two_field1<1>
 two_field1(#rec##0:multictr.simple, ?#rec##1:multictr.simple, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -6794,8 +6929,9 @@ two_field1(#rec##0:multictr.simple, ?#rec##1:multictr.simple, #field##0:wybe.int
 two_field2 > public {inline} (0 calls) 
 0: multictr.simple.two_field2<0>
 two_field2(#rec##0:multictr.simple, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -6818,8 +6954,9 @@ two_field2(#rec##0:multictr.simple, ?#result##0:wybe.int, ?#success##0:wybe.bool
 two_field2 > public {inline} (0 calls) 
 1: multictr.simple.two_field2<1>
 two_field2(#rec##0:multictr.simple, ?#rec##1:multictr.simple, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -6844,16 +6981,18 @@ two_field2(#rec##0:multictr.simple, ?#rec##1:multictr.simple, #field##0:wybe.int
 zero > public {inline} (0 calls) 
 0: multictr.simple.zero<0>
 zero(?#result##0:multictr.simple):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(0:multictr.simple, ?#result##0:multictr.simple)
 
 
 ~= > public {inline} (0 calls) 
 0: multictr.simple.~=<0>
 ~=(#left##0:multictr.simple, #right##0:multictr.simple, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     multictr.simple.=<0>(~#left##0:multictr.simple, ~#right##0:multictr.simple, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
@@ -7250,48 +7389,54 @@ entry:
 = > public {inline} (1 calls) 
 0: multictr.suit.=<0>
 =(#left##0:multictr.suit, #right##0:multictr.suit, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:multictr.suit, ~#right##0:multictr.suit, ?#success##0:wybe.bool)
 
 
 clubs > public {inline} (0 calls) 
 0: multictr.suit.clubs<0>
 clubs(?#result##0:multictr.suit):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(0:multictr.suit, ?#result##0:multictr.suit)
 
 
 diamonds > public {inline} (0 calls) 
 0: multictr.suit.diamonds<0>
 diamonds(?#result##0:multictr.suit):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(1:multictr.suit, ?#result##0:multictr.suit)
 
 
 hearts > public {inline} (0 calls) 
 0: multictr.suit.hearts<0>
 hearts(?#result##0:multictr.suit):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(2:multictr.suit, ?#result##0:multictr.suit)
 
 
 spades > public {inline} (0 calls) 
 0: multictr.suit.spades<0>
 spades(?#result##0:multictr.suit):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(3:multictr.suit, ?#result##0:multictr.suit)
 
 
 ~= > public {inline} (0 calls) 
 0: multictr.suit.~=<0>
 ~=(#left##0:multictr.suit, #right##0:multictr.suit, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:multictr.suit, ~#right##0:multictr.suit, ?tmp#0##0:wybe.bool)
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
@@ -7362,24 +7507,27 @@ entry:
 = > public {inline} (1 calls) 
 0: multictr.unit.=<0>
 =([#left##0:multictr.unit], [#right##0:multictr.unit], ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 unit > public {inline} (0 calls) 
 0: multictr.unit.unit<0>
 unit(?#result##0:multictr.unit):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(0:multictr.unit, ?#result##0:multictr.unit)
 
 
 ~= > public {inline} (0 calls) 
 0: multictr.unit.~=<0>
 ~=([#left##0:multictr.unit], [#right##0:multictr.unit], ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
   LLVM code       :

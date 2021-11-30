@@ -13,8 +13,9 @@ AFTER EVERYTHING:
 *main* > public {inline,impure} (0 calls) 
 0: func_let.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom, *#globals##0:wybe.phantom)
     foreign c print_int(40:wybe.int, ~%tmp#5##0:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#6##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
@@ -23,8 +24,9 @@ AFTER EVERYTHING:
 quad > public {inline} (1 calls) 
 0: func_let.quad<0>
 quad(x##0:wybe.int, ?#result##0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm add(~x##0:wybe.int, ~x##0:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
     foreign llvm add(~tmp#0##0:wybe.int, ~tmp#0##0:wybe.int, ?#result##0:wybe.int) @int:nn:nn
 

@@ -14,41 +14,32 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: inline_decl.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom, *#globals##0:wybe.phantom)
     foreign c putchar('h':wybe.char, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#2##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#3##0:wybe.phantom)
     foreign c putchar('e':wybe.char, ~%tmp#2##0:wybe.phantom, ?%tmp#4##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#4##0:wybe.phantom, ~*tmp#3##0:wybe.phantom, ?*tmp#5##0:wybe.phantom)
-    foreign c putchar('l':wybe.char, ~%tmp#4##0:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#6##0:wybe.phantom, ~*tmp#5##0:wybe.phantom, ?*tmp#7##0:wybe.phantom)
-    foreign c putchar('l':wybe.char, ~%tmp#6##0:wybe.phantom, ?%tmp#8##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#8##0:wybe.phantom, ~*tmp#7##0:wybe.phantom, ?*tmp#9##0:wybe.phantom)
-    foreign c putchar('o':wybe.char, ~%tmp#8##0:wybe.phantom, ?%tmp#10##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#10##0:wybe.phantom, ~*tmp#9##0:wybe.phantom, ?*tmp#11##0:wybe.phantom)
-    foreign c putchar(' ':wybe.char, ~%tmp#10##0:wybe.phantom, ?%tmp#12##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#12##0:wybe.phantom, ~*tmp#11##0:wybe.phantom, ?*tmp#13##0:wybe.phantom)
-    foreign c putchar('w':wybe.char, ~%tmp#12##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#14##0:wybe.phantom, ~*tmp#13##0:wybe.phantom, ?*tmp#15##0:wybe.phantom)
-    foreign c putchar('o':wybe.char, ~%tmp#14##0:wybe.phantom, ?%tmp#16##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#16##0:wybe.phantom, ~*tmp#15##0:wybe.phantom, ?*tmp#17##0:wybe.phantom)
-    foreign c putchar('r':wybe.char, ~%tmp#16##0:wybe.phantom, ?%tmp#18##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#18##0:wybe.phantom, ~*tmp#17##0:wybe.phantom, ?*tmp#19##0:wybe.phantom)
-    foreign c putchar('l':wybe.char, ~%tmp#18##0:wybe.phantom, ?%tmp#20##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#20##0:wybe.phantom, ~*tmp#19##0:wybe.phantom, ?*tmp#21##0:wybe.phantom)
-    foreign c putchar('d':wybe.char, ~%tmp#20##0:wybe.phantom, ?%tmp#22##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#22##0:wybe.phantom, ~*tmp#21##0:wybe.phantom, ?*tmp#23##0:wybe.phantom)
-    foreign c putchar('!':wybe.char, ~%tmp#22##0:wybe.phantom, ?%tmp#24##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#24##0:wybe.phantom, ~*tmp#23##0:wybe.phantom, ?*tmp#25##0:wybe.phantom)
-    inline_decl.finish<0>(~*tmp#25##0:wybe.phantom, ?*#globals##1:wybe.phantom) #1 @inline_decl:nn:nn
+    foreign c putchar('l':wybe.char, ~%tmp#4##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('l':wybe.char, ~%tmp#5##0:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('o':wybe.char, ~%tmp#6##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @io:nn:nn
+    foreign c putchar(' ':wybe.char, ~%tmp#7##0:wybe.phantom, ?%tmp#8##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('w':wybe.char, ~%tmp#8##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('o':wybe.char, ~%tmp#9##0:wybe.phantom, ?%tmp#10##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('r':wybe.char, ~%tmp#10##0:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('l':wybe.char, ~%tmp#11##0:wybe.phantom, ?%tmp#12##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('d':wybe.char, ~%tmp#12##0:wybe.phantom, ?%tmp#13##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('!':wybe.char, ~%tmp#13##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#14##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#15##0:wybe.phantom)
+    inline_decl.finish<0>(~*tmp#15##0:wybe.phantom, ?*#globals##1:wybe.phantom) #1 @inline_decl:nn:nn
 
 
 finish > public {noinline} (1 calls) 
 0: inline_decl.finish<0>
 finish(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom, *#globals##0:wybe.phantom)
     foreign c putchar('\n':wybe.char, ~%tmp#1##0:wybe.phantom, ?%tmp#2##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#2##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
@@ -57,31 +48,22 @@ finish(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
 long > public {inline} (1 calls) 
 0: inline_decl.long<0>
 long(*#globals##0:wybe.phantom, *?#globals##13:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom, *#globals##0:wybe.phantom)
     foreign c putchar('h':wybe.char, ~%tmp#2##0:wybe.phantom, ?%tmp#3##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#3##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
+    foreign llvm move(~*#globals##0:wybe.phantom, ?*#globals##11:wybe.phantom)
     foreign c putchar('e':wybe.char, ~%tmp#3##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#7##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom)
     foreign c putchar('l':wybe.char, ~%tmp#7##0:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#11##0:wybe.phantom, ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom)
     foreign c putchar('l':wybe.char, ~%tmp#11##0:wybe.phantom, ?%tmp#15##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#15##0:wybe.phantom, ~*#globals##3:wybe.phantom, ?*#globals##4:wybe.phantom)
     foreign c putchar('o':wybe.char, ~%tmp#15##0:wybe.phantom, ?%tmp#19##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#19##0:wybe.phantom, ~*#globals##4:wybe.phantom, ?*#globals##5:wybe.phantom)
     foreign c putchar(' ':wybe.char, ~%tmp#19##0:wybe.phantom, ?%tmp#23##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#23##0:wybe.phantom, ~*#globals##5:wybe.phantom, ?*#globals##6:wybe.phantom)
     foreign c putchar('w':wybe.char, ~%tmp#23##0:wybe.phantom, ?%tmp#27##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#27##0:wybe.phantom, ~*#globals##6:wybe.phantom, ?*#globals##7:wybe.phantom)
     foreign c putchar('o':wybe.char, ~%tmp#27##0:wybe.phantom, ?%tmp#31##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#31##0:wybe.phantom, ~*#globals##7:wybe.phantom, ?*#globals##8:wybe.phantom)
     foreign c putchar('r':wybe.char, ~%tmp#31##0:wybe.phantom, ?%tmp#35##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#35##0:wybe.phantom, ~*#globals##8:wybe.phantom, ?*#globals##9:wybe.phantom)
     foreign c putchar('l':wybe.char, ~%tmp#35##0:wybe.phantom, ?%tmp#39##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#39##0:wybe.phantom, ~*#globals##9:wybe.phantom, ?*#globals##10:wybe.phantom)
     foreign c putchar('d':wybe.char, ~%tmp#39##0:wybe.phantom, ?%tmp#43##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#43##0:wybe.phantom, ~*#globals##10:wybe.phantom, ?*#globals##11:wybe.phantom)
     foreign c putchar('!':wybe.char, ~%tmp#43##0:wybe.phantom, ?%tmp#47##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#47##0:wybe.phantom, ~*#globals##11:wybe.phantom, ?*#globals##12:wybe.phantom)
     inline_decl.finish<0>(~*#globals##12:wybe.phantom, ?*#globals##13:wybe.phantom) #12 @inline_decl:nn:nn

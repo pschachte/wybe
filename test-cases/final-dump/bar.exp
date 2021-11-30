@@ -13,18 +13,16 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: bar.<0>
 (*#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: everything 
+  AliasPairs: []
+  InterestingCallProperties: []
     numbers.factorial<0>(4:wybe.int, ?tmp#0##0:wybe.int) #0 @bar:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom, *#globals##0:wybe.phantom)
     foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#4##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#5##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#6##0:wybe.phantom)
     foreign c putchar('\n':wybe.char, ~%tmp#5##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#7##0:wybe.phantom, ~*tmp#6##0:wybe.phantom, ?*#globals##1:wybe.phantom)
     foreign c print_float(35.0:wybe.float, ~%tmp#7##0:wybe.phantom, ?%tmp#13##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#13##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*tmp#14##0:wybe.phantom)
     foreign c putchar('\n':wybe.char, ~%tmp#13##0:wybe.phantom, ?%tmp#15##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#15##0:wybe.phantom, ~*tmp#14##0:wybe.phantom, ?*#globals##2:wybe.phantom)
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#15##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##2:wybe.phantom)
 
   LLVM code       :
 
@@ -76,8 +74,9 @@ entry:
 *main* > public {impure} (0 calls) 
 0: numbers.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: everything 
+  AliasPairs: []
+  InterestingCallProperties: []
     wybe.string.print_string<0>("Numbers has been initialised.":wybe.string, ~*#globals##0:wybe.phantom, ?*tmp#2##0:wybe.phantom) #1 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom, *tmp#2##0:wybe.phantom)
     foreign c putchar('\n':wybe.char, ~%tmp#3##0:wybe.phantom, ?%tmp#4##0:wybe.phantom) @io:nn:nn
@@ -87,8 +86,9 @@ entry:
 factorial > public (1 calls) 
 0: numbers.factorial<0>
 factorial(n##0:wybe.int, ?#result##0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: everything 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_sle(n##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @int:nn:nn
     case ~tmp#4##0:wybe.bool of
     0:
@@ -104,8 +104,9 @@ factorial(n##0:wybe.int, ?#result##0:wybe.int):
 toCelsius > public {inline} (0 calls) 
 0: numbers.toCelsius<0>
 toCelsius(f##0:wybe.float, ?#result##0:wybe.float):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm fsub(~f##0:wybe.float, 32.0:wybe.float, ?tmp#1##0:wybe.float) @float:nn:nn
     foreign llvm fdiv(~tmp#1##0:wybe.float, 1.8:wybe.float, ?#result##0:wybe.float) @float:nn:nn
 

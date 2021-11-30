@@ -12,8 +12,9 @@ AFTER EVERYTHING:
 gen#1 > (2 calls) 
 0: proc_yorn2.gen#1<0>
 gen#1(*#globals##0:wybe.phantom, prompt##0:wybe.string, ?result##1:wybe.bool, ?#globals##5:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: everything 
+  AliasPairs: []
+  InterestingCallProperties: []
     wybe.string.print_string<0>(prompt##0:wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #8 @io:nn:nn
     wybe.string.print_string<0>(" (y/n) ":wybe.string, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #9 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom, *#globals##2:wybe.phantom)
@@ -39,8 +40,9 @@ gen#1(*#globals##0:wybe.phantom, prompt##0:wybe.string, ?result##1:wybe.bool, ?#
 yorn > public {inline} (0 calls) 
 0: proc_yorn2.yorn<0>
 yorn(prompt##0:wybe.string, ?result##0:wybe.bool, *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: everything 
+  AliasPairs: []
+  InterestingCallProperties: []
     proc_yorn2.gen#1<0>(~#globals##0:wybe.phantom, ~prompt##0:wybe.string, ?result##0:wybe.bool, ?#globals##1:wybe.phantom) #0 @proc_yorn2:2:5
 
   LLVM code       :

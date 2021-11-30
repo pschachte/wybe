@@ -1307,7 +1307,7 @@ llvmClosureType :: TypeSpec -> Compiler LLVMAST.Type
 llvmClosureType (HigherOrderType mods tys)
     = llvmFuncType
         $ HigherOrderType mods
-        $ tys ++ [TypeFlow AnyType ParamIn]
+        $ setTypeFlowType AnyType <$> tys ++ [TypeFlow AnyType ParamIn]
 llvmClosureType ty = shouldnt $ "llvmClosureType on " ++ show ty
 
 

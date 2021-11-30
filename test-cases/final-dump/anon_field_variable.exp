@@ -16,8 +16,9 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: anon_field_variable.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: everything 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?tmp#4##0:anon_field_variable(T))
     foreign lpvm mutate(~tmp#4##0:anon_field_variable(T), ?tmp#0##0:anon_field_variable(T), 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 0:T)
     foreign llvm and(~tmp#0##0:wybe.int, 1:wybe.int, ?tmp#6##0:wybe.int)
@@ -37,8 +38,9 @@ AFTER EVERYTHING:
 bar > public {inline} (0 calls) 
 0: anon_field_variable.bar<0>
 bar(bar#1##0:wybe.int, field##0:T, bar#3##0:T, ?#result##0:anon_field_variable(T)):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:anon_field_variable(T))
     foreign lpvm mutate(~#rec##0:anon_field_variable(T), ?#rec##1:anon_field_variable(T), 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~bar#1##0:wybe.int)
     foreign lpvm mutate(~#rec##1:anon_field_variable(T), ?#rec##2:anon_field_variable(T), 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~field##0:T)
@@ -47,8 +49,9 @@ bar(bar#1##0:wybe.int, field##0:T, bar#3##0:T, ?#result##0:anon_field_variable(T
 bar > public {inline} (0 calls) 
 1: anon_field_variable.bar<1>
 bar(?bar#1##0:wybe.int, ?field##0:T, ?bar#3##0:T, #result##0:anon_field_variable(T), ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
     foreign llvm icmp_eq(~tmp#1##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -69,8 +72,9 @@ bar(?bar#1##0:wybe.int, ?field##0:T, ?bar#3##0:T, #result##0:anon_field_variable
 field > {inline} (0 calls) 
 0: anon_field_variable.field<0>
 field(#rec##0:anon_field_variable(T), ?#result##0:T, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
     foreign llvm icmp_eq(~tmp#1##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -85,8 +89,9 @@ field(#rec##0:anon_field_variable(T), ?#result##0:T, ?#success##0:wybe.bool):
 field > {inline} (0 calls) 
 1: anon_field_variable.field<1>
 field(#rec##0:anon_field_variable(T), ?#rec##1:anon_field_variable(T), #field##0:T, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
     foreign llvm icmp_eq(~tmp#1##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
@@ -103,15 +108,17 @@ field(#rec##0:anon_field_variable(T), ?#rec##1:anon_field_variable(T), #field##0
 foo > public {inline} (3 calls) 
 0: anon_field_variable.foo<0>
 foo(foo#1##0:T, ?#result##0:anon_field_variable(T)):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:anon_field_variable(T))
     foreign lpvm mutate(~#rec##0:anon_field_variable(T), ?#result##0:anon_field_variable(T), 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~foo#1##0:T)
 foo > public {inline} (3 calls) 
 1: anon_field_variable.foo<1>
 foo(?foo#1##0:T, #result##0:anon_field_variable(T), ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
     foreign llvm icmp_eq(~tmp#1##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of

@@ -12,16 +12,18 @@ AFTER EVERYTHING:
 *main* > public {inline,impure} (0 calls) 
 0: terminal_ok.<0>
 (*#globals##0:wybe.phantom, [*?#globals##0:wybe.phantom]):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     terminal_ok.exit_bool<0>(0:wybe.bool) #1 @terminal_ok:nn:nn
 
 
 exit_bool > {terminal,semipure} (1 calls) 
 0: terminal_ok.exit_bool<0>
 exit_bool(b##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     case ~b##0:wybe.bool of
     0:
         foreign c {terminal,impure} exit(0:wybe.int) @terminal_ok:nn:nn

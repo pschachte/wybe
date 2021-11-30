@@ -16,23 +16,24 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: ctor_char.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm shl('a':ctor_char, 1:ctor_char, ?tmp#3##0:ctor_char)
     foreign llvm or(~tmp#3##0:ctor_char, 512:ctor_char, ?tmp#1##0:ctor_char)
     ctor_char.foo<0>(~tmp#1##0:ctor_char, ?tmp#0##0:wybe.char) #1 @ctor_char:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom, *#globals##0:wybe.phantom)
     foreign c putchar(~tmp#0##0:wybe.char, ~%tmp#6##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#7##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#8##0:wybe.phantom)
     foreign c putchar('\n':wybe.char, ~%tmp#7##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#9##0:wybe.phantom, ~*tmp#8##0:wybe.phantom, ?*#globals##1:wybe.phantom)
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#9##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
 
 
 = > public (2 calls) 
 0: ctor_char.=<0>
 =(#left##0:ctor_char, #right##0:ctor_char, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: everything 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -99,8 +100,9 @@ AFTER EVERYTHING:
 c > {inline} (0 calls) 
 0: ctor_char.c<0>
 c(#rec##0:ctor_char, ?#result##0:wybe.char, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -125,8 +127,9 @@ c(#rec##0:ctor_char, ?#result##0:wybe.char, ?#success##0:wybe.bool):
 c > {inline} (0 calls) 
 1: ctor_char.c<1>
 c(#rec##0:ctor_char, ?#rec##2:ctor_char, #field##0:wybe.char, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -153,23 +156,26 @@ c(#rec##0:ctor_char, ?#rec##2:ctor_char, #field##0:wybe.char, ?#success##0:wybe.
 const > {inline} (0 calls) 
 0: ctor_char.const<0>
 const(?#result##0:ctor_char):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(0:ctor_char, ?#result##0:ctor_char)
 
 
 ctor > {inline} (1 calls) 
 0: ctor_char.ctor<0>
 ctor(c##0:wybe.char, ?#result##3:ctor_char):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm shl(~c##0:ctor_char, 1:ctor_char, ?#temp##0:ctor_char)
     foreign llvm or(~#temp##0:ctor_char, 512:ctor_char, ?#result##3:ctor_char)
 ctor > {inline} (13 calls) 
 1: ctor_char.ctor<1>
 ctor(?c##0:wybe.char, #result##0:ctor_char, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -196,8 +202,9 @@ ctor(?c##0:wybe.char, #result##0:ctor_char, ?#success##0:wybe.bool):
 foo > (1 calls) 
 0: ctor_char.foo<0>
 foo(this##0:ctor_char, ?#result##0:wybe.char):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(this##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool)
     case ~tmp#3##0:wybe.bool of
     0:
@@ -221,16 +228,18 @@ foo(this##0:ctor_char, ?#result##0:wybe.char):
 other_ctor > public {inline} (0 calls) 
 0: ctor_char.other_ctor<0>
 other_ctor(other_ctor#1##0:ctor_char, ?#result##0:ctor_char):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_char)
     foreign lpvm mutate(~#rec##0:ctor_char, ?#rec##1:ctor_char, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~other_ctor#1##0:ctor_char)
     foreign llvm or(~#rec##1:ctor_char, 1:wybe.int, ?#result##0:ctor_char)
 other_ctor > public {inline} (5 calls) 
 1: ctor_char.other_ctor<1>
 other_ctor(?other_ctor#1##0:ctor_char, #result##0:ctor_char, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -255,8 +264,9 @@ other_ctor(?other_ctor#1##0:ctor_char, #result##0:ctor_char, ?#success##0:wybe.b
 ~= > public {inline} (0 calls) 
 0: ctor_char.~=<0>
 ~=(#left##0:ctor_char, #right##0:ctor_char, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: everything 
+  AliasPairs: []
+  InterestingCallProperties: []
     ctor_char.=<0>(~#left##0:ctor_char, ~#right##0:ctor_char, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 

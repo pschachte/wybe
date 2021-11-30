@@ -12,16 +12,18 @@ AFTER EVERYTHING:
 *main* > public {inline,impure} (0 calls) 
 0: det_for.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: everything 
+  AliasPairs: []
+  InterestingCallProperties: []
     det_for.gen#1<0>(~#globals##0:wybe.phantom, 0:wybe.int, ?#globals##1:wybe.phantom) #0 @det_for:nn:nn
 
 
 [|] > {inline} (1 calls) 
 0: det_for.[|]<0>
 [|](?value##0:wybe.int, ?next##0:wybe.int, current##0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(current##0:wybe.int, ?value##0:wybe.int) @det_for:nn:nn
     foreign llvm add(~current##0:wybe.int, 1:wybe.int, ?next##0:wybe.int) @int:nn:nn
 
@@ -29,14 +31,14 @@ AFTER EVERYTHING:
 gen#1 > (2 calls) 
 0: det_for.gen#1<0>
 gen#1(*#globals##0:wybe.phantom, tmp#0##0:wybe.int, ?#globals##2:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: everything 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm add(tmp#0##0:wybe.int, 1:wybe.int, ?tmp#0##1:wybe.int) @int:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom, *#globals##0:wybe.phantom)
     foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#4##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#5##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#6##0:wybe.phantom)
     foreign c putchar('\n':wybe.char, ~%tmp#5##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#7##0:wybe.phantom, ~*tmp#6##0:wybe.phantom, ?*#globals##1:wybe.phantom)
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#7##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
     det_for.gen#1<0>(~#globals##1:wybe.phantom, ~tmp#0##1:wybe.int, ?#globals##2:wybe.phantom) #2 @det_for:nn:nn
 
   LLVM code       :

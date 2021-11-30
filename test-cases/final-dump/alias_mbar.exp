@@ -14,9 +14,10 @@ AFTER EVERYTHING:
 bar > public (0 calls) 
 0: alias_mbar.bar<0>[410bae77d3]
 bar(p1##0:position.position, ?p3##1:position.position, *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
- AliasPairs: [(p1##0,p3##1)]
- InterestingCallProperties: [InterestingUnaliased 0]
- MultiSpeczDepInfo: [(5,(alias_mfoo.foo<0>,fromList [NonAliasedParamCond 0 []]))]
+  GlobalFlows: everything 
+  AliasPairs: [(p1##0,p3##1)]
+  InterestingCallProperties: [InterestingUnaliased 0]
+  MultiSpeczDepInfo: [(5,(alias_mfoo.foo<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm access(p1##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int)
     foreign llvm icmp_sgt(tmp#0##0:wybe.int, 1:wybe.int, ?tmp#3##0:wybe.bool) @int:nn:nn
     case ~tmp#3##0:wybe.bool of
@@ -126,9 +127,10 @@ if.else:
 foo > public (0 calls) 
 0: alias_mfoo.foo<0>[410bae77d3]
 foo(p1##0:position.position, ?p2##0:position.position, ?p3##0:position.position, *#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
- AliasPairs: [(p1##0,p2##0)]
- InterestingCallProperties: [InterestingUnaliased 0]
- MultiSpeczDepInfo: [(8,(alias_mbar.bar<0>,fromList [NonAliasedParamCond 0 []]))]
+  GlobalFlows: everything 
+  AliasPairs: [(p1##0,p2##0)]
+  InterestingCallProperties: [InterestingUnaliased 0]
+  MultiSpeczDepInfo: [(8,(alias_mbar.bar<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm access(p1##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int)
     foreign llvm icmp_sgt(tmp#0##0:wybe.int, 1:wybe.int, ?tmp#5##0:wybe.bool) @int:nn:nn
     case ~tmp#5##0:wybe.bool of
@@ -324,8 +326,9 @@ if.else:
 printPosition > public (0 calls) 
 0: position.printPosition<0>
 printPosition(pos##0:position.position, *#globals##0:wybe.phantom, *?#globals##5:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: everything 
+  AliasPairs: []
+  InterestingCallProperties: []
     wybe.string.print_string<0>(" (":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #7 @io:nn:nn
     foreign lpvm access(pos##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int)
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom, *#globals##1:wybe.phantom)
@@ -420,8 +423,9 @@ entry:
 = > public {inline} (1 calls) 
 0: position.position.=<0>
 =(#left##0:position.position, #right##0:position.position, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm access(#left##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#x##0:wybe.int)
     foreign lpvm access(~#left##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#y##0:wybe.int)
     foreign lpvm access(#right##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#x##0:wybe.int)
@@ -439,16 +443,18 @@ entry:
 position > public {inline} (0 calls) 
 0: position.position.position<0>
 position(x##0:wybe.int, y##0:wybe.int, ?#result##0:position.position):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:position.position)
     foreign lpvm mutate(~#rec##0:position.position, ?#rec##1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:wybe.int)
     foreign lpvm mutate(~#rec##1:position.position, ?#result##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y##0:wybe.int)
 position > public {inline} (6 calls) 
 1: position.position.position<1>
 position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:position.position):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm access(#result##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:wybe.int)
     foreign lpvm access(~#result##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:wybe.int)
 
@@ -456,36 +462,41 @@ position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:position.position):
 x > public {inline} (0 calls) 
 0: position.position.x<0>
 x(#rec##0:position.position, ?#result##0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm access(~#rec##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 x > public {inline} (0 calls) 
 1: position.position.x<1>
 x(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:position.position, ?#rec##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
 y > public {inline} (0 calls) 
 0: position.position.y<0>
 y(#rec##0:position.position, ?#result##0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm access(~#rec##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
 y > public {inline} (0 calls) 
 1: position.position.y<1>
 y(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:position.position, ?#rec##1:position.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
 
 
 ~= > public {inline} (0 calls) 
 0: position.position.~=<0>
 ~=(#left##0:position.position, #right##0:position.position, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm access(#left##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int)
     foreign lpvm access(~#left##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int)
     foreign lpvm access(#right##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.int)

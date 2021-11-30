@@ -159,7 +159,7 @@ compileProc proc procID =
         callSiteCount <- gets nextCallSiteID
         mSpec <- lift $ getModule modSpec
         let pSpec = ProcSpec mSpec procName procID Set.empty
-        return $ proc { procImpln = ProcDefPrim pSpec proto' compiled
+        return $ proc { procImpln = ProcDefPrim pSpec proto' compiled Nothing
                                         emptyProcAnalysis Map.empty,
                         procCallSiteCount = callSiteCount}
 

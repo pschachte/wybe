@@ -12,8 +12,9 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: main_hello2.<0>
 (*#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: everything 
+  AliasPairs: []
+  InterestingCallProperties: []
     wybe.string.print_string<0>("hello, ":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #2 @io:nn:nn
     wybe.string.print_string<0>("world!":wybe.string, ~*#globals##1:wybe.phantom, ?*tmp#4##0:wybe.phantom) #3 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom, *tmp#4##0:wybe.phantom)

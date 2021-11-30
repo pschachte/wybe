@@ -13,8 +13,9 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: proc_yorn.<0>
 (*#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: everything 
+  AliasPairs: []
+  InterestingCallProperties: []
     proc_yorn.gen#1<0>(~*#globals##0:wybe.phantom, "Well, yes or no?":wybe.string, ?r##0:wybe.bool, ?*#globals##1:wybe.phantom) #2 @proc_yorn:nn:nn
     wybe.io.print<5>(~r##0:wybe.bool, ~*#globals##1:wybe.phantom, ?*tmp#4##0:wybe.phantom) #3 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom, *tmp#4##0:wybe.phantom)
@@ -25,8 +26,9 @@ AFTER EVERYTHING:
 gen#1 > (2 calls) 
 0: proc_yorn.gen#1<0>
 gen#1(*#globals##0:wybe.phantom, prompt##0:wybe.string, ?result##1:wybe.bool, ?#globals##5:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: everything 
+  AliasPairs: []
+  InterestingCallProperties: []
     wybe.string.print_string<0>(prompt##0:wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #7 @io:nn:nn
     wybe.string.print_string<0>(" (y/n) ":wybe.string, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #8 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom, *#globals##2:wybe.phantom)
@@ -54,8 +56,9 @@ gen#1(*#globals##0:wybe.phantom, prompt##0:wybe.string, ?result##1:wybe.bool, ?#
 is_yes > {inline} (4 calls) 
 0: proc_yorn.is_yes<0>
 is_yes(ch##0:wybe.char, ?#result##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(ch##0:wybe.char, 'y':wybe.char, ?tmp#2##0:wybe.bool) @char:nn:nn
     foreign llvm icmp_ne(~ch##0:wybe.char, 'Y':wybe.char, ?tmp#3##0:wybe.bool) @char:nn:nn
     foreign llvm and(~tmp#2##0:wybe.bool, ~tmp#3##0:wybe.bool, ?tmp#1##0:wybe.bool) @bool:nn:nn
@@ -65,8 +68,9 @@ is_yes(ch##0:wybe.char, ?#result##0:wybe.bool):
 is_yes_or_no > (3 calls) 
 0: proc_yorn.is_yes_or_no<0>
 is_yes_or_no(ch##0:wybe.char, ?#result##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(ch##0:wybe.char, 'y':wybe.char, ?tmp#6##0:wybe.bool) @char:nn:nn
     foreign llvm icmp_ne(ch##0:wybe.char, 'Y':wybe.char, ?tmp#7##0:wybe.bool) @char:nn:nn
     foreign llvm and(~tmp#6##0:wybe.bool, ~tmp#7##0:wybe.bool, ?tmp#8##0:wybe.bool) @bool:nn:nn
@@ -80,8 +84,9 @@ is_yes_or_no(ch##0:wybe.char, ?#result##0:wybe.bool):
 yorn > public {inline} (1 calls) 
 0: proc_yorn.yorn<0>
 yorn(prompt##0:wybe.string, ?result##0:wybe.bool, *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: everything 
+  AliasPairs: []
+  InterestingCallProperties: []
     proc_yorn.gen#1<0>(~#globals##0:wybe.phantom, ~prompt##0:wybe.string, ?result##0:wybe.bool, ?#globals##1:wybe.phantom) #0 @proc_yorn:nn:nn
 
   LLVM code       :

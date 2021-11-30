@@ -36,8 +36,6 @@ optimiseMod _ thisMod = do
     -- mapM_ (mapM_ optimiseProcTopDown .  sccElts) $ reverse orderedProcs
 
     mapM_ optimiseSccBottomUp orderedProcs
-    -- XXXJ discuss
-    -- mapM_ optimiseSccBottomUp orderedProcs
 
     reexitModule
     return (False,[])

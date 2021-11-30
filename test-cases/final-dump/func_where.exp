@@ -12,8 +12,9 @@ AFTER EVERYTHING:
 quad > public {inline} (0 calls) 
 0: func_where.quad<0>
 quad(x##0:wybe.int, ?#result##0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm add(~x##0:wybe.int, ~x##0:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
     foreign llvm add(~tmp#0##0:wybe.int, ~tmp#0##0:wybe.int, ?#result##0:wybe.int) @int:nn:nn
 

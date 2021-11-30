@@ -148,8 +148,8 @@ data BuildState
 
 
 data GlobalState = GlobalState {
-      latestValues :: Map GlobalInfo PrimArg,
-      latestGlobal :: Maybe PrimVarName
+      globalValues :: Map GlobalInfo PrimArg,
+      globalRef    :: Maybe PrimVarName
       } deriving (Eq, Show)
 
 
@@ -214,7 +214,8 @@ freshVarName = do
 -- |Run a BodyBuilder monad and extract the final proc body, along with the
 -- final temp variable count and the set of variables used in the body.
 buildBody :: Int -> VarSubstitution -> [PrimParam] 
-          -> BodyBuilder a -> Compiler (a, Int, Set PrimVarName, ProcBody)
+          -> BodyBuilder a 
+          -> Compiler (a, Int, Set PrimVarName, GlobalFlows, ProcBody)
 buildBody tmp oSubst params builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
     let mbGlobalName = findInGlobalParam params
@@ -223,8 +224,8 @@ buildBody tmp oSubst params builder = do
     logMsg BodyBuilder "     Final state:"
     logMsg BodyBuilder $ fst $ showState 8 st
     st' <- fuseBodies st
-    (tmp', used, body) <- currBody (ProcBody [] NoFork) st'
-    return (a, tmp', used, body)
+    (tmp', used, gFlows, body) <- currBody (ProcBody [] NoFork) st'
+    return (a, tmp', used, gFlows, body)
 
 
 -- |Start a new fork on var of type ty
@@ -284,7 +285,7 @@ completeFork = do
         logBuild $ "     definite variables in all branches: " ++ show consts
         -- Prepare for any instructions coming after the fork
         let parent = st {buildState = Forked var ty val fused bods True,
-                         tmpCount = maximum $ tmpCount <$> bods}
+                         tmpCount = maximum $ tmpCount <$> bods }
         let child = childState parent Unforked
         put $ child { forkConsts = consts,
                       currSubst = Map.union extraSubsts $ currSubst child}
@@ -436,7 +437,7 @@ instr' prim@(PrimForeign "lpvm" "cast" []
       else ordinaryInstr prim pos
 instr' prim@(PrimForeign "lpvm" "load" [] 
               [ArgGlobal info _, var, ArgVar nm _ _ _ _]) pos = do
-    globals@GlobalState{latestGlobal=nm',latestValues=latest} 
+    globals@GlobalState{globalRef=nm',globalValues=latest} 
         <- gets globalState
     unless (Just nm == nm')
         $ shouldnt $ "bad load " ++ show (maybePlace prim pos)
@@ -447,11 +448,11 @@ instr' prim@(PrimForeign "lpvm" "load" []
 instr' prim@(PrimForeign "lpvm" "store" [] 
               [ArgGlobal info _, var, 
                ArgVar nm _ _ _ _, ArgVar newNm _ _ _ _]) pos = do
-    globals@GlobalState{latestGlobal=nm',latestValues=latest} 
+    globals@GlobalState{globalRef=nm',globalValues=latest} 
         <- gets globalState
     unless (Just nm == nm')
         $ shouldnt $ "bad store " ++ show (maybePlace prim pos) 
-    modify $ \s -> s{globalState=globals{latestValues=Map.insert info var latest}}
+    modify $ \s -> s{globalState=globals{globalValues=Map.insert info var latest}}
     ordinaryInstr prim pos
 instr' prim pos = ordinaryInstr prim pos
 
@@ -782,16 +783,29 @@ updateGlobalState prim pos = do
     let globalVar = listToMaybe substOutGlobals
     when (isJust globalVar) $ do
         globals <- gets globalState
-        let globals' = globals{latestGlobal=argVarName <$> globalVar}
-        modify $ \s -> s{globalState=globals'}
-        case prim of
-            PrimForeign "lpvm" "load"  _ _ -> return ()
-            PrimForeign "lpvm" "store" _ _ -> return ()
-            PrimForeign "llvm" "move"  _ _
-                | isJust $ latestGlobal globals -> return ()
-            _ -> modify $ \s -> s{globalState=globals'{latestValues=Map.empty}}
-        globals'' <- gets globalState
-        logBuild $ "Globals: " ++ show globals ++ " -> " ++ show globals'' 
+        modify $ \s -> s{globalState=globals{globalRef=argVarName <$> globalVar}}
+        updateGlobalValues prim
+        globals' <- gets globalState
+        logBuild $ "Globals: " ++ show globals ++ " -> " ++ show globals' 
+
+
+updateGlobalValues :: Prim -> BodyBuilder ()
+updateGlobalValues prim = do
+    globals@(GlobalState values _) <- gets globalState
+    case prim of
+        PrimForeign "lpvm" "load"  _ _ -> nop
+        PrimForeign "lpvm" "store" _ _ -> nop
+        PrimForeign "llvm" "move"  _ _
+            | isJust $ globalRef globals -> nop
+        PrimHigherCall _ fn _
+            | not . isResourcefulHigherOrder $ argType fn -> nop
+        PrimCall _ pspec _ -> do
+            callGFlows <- procImplnGlobalFlows . procImpln 
+                      <$> lift (getProcDef pspec)
+            let filter info _ = not $ hasGlobalFlow callGFlows FlowOut info
+            let values' = Map.filterWithKey filter values
+            modify $ \s -> s {globalState=globals{globalValues=values'}}
+        _ -> modify $ \s -> s{globalState=globals{globalValues=Map.empty}}
                     
 
 ----------------------------------------------------------------
@@ -1119,17 +1133,21 @@ selectedBranch subst Forked{knownVal=known, forkingVar=var} =
 -- parameters.
 ----------------------------------------------------------------
 
-currBody :: ProcBody -> BodyState -> Compiler (Int,Set PrimVarName,ProcBody)
-currBody body st = do
+currBody :: ProcBody -> BodyState 
+         -> Compiler (Int,Set PrimVarName,GlobalFlows,ProcBody)
+currBody body st@BodyState{tmpCount=tmp} = do
     logMsg BodyBuilder $ "Now reconstructing body with usedLater = "
       ++ intercalate ", " (show <$> Map.keys (outSubst st))
     st' <- execStateT (rebuildBody st)
            $ BkwdBuilderState (Map.keysSet $ outSubst st) Nothing Map.empty
-                              0 body
+                              0 (Just Map.empty) Set.empty body
+    let BkwdBuilderState{bkwdUsedLater=usedLater,
+                         bkwdFollowing=following,
+                         bkwdGlobalFlows=gFlows} = st'
     logMsg BodyBuilder ">>>> Finished rebuilding a proc body"
     logMsg BodyBuilder "     Final state:"
-    logMsg BodyBuilder $ showBlock 5 $ bkwdFollowing st'
-    return (tmpCount st, bkwdUsedLater st', bkwdFollowing st')
+    logMsg BodyBuilder $ showBlock 5 $ following
+    return (tmp, usedLater, gFlows, following)
 
 
 -- |Another monad, this one for rebuilding a proc body bottom-up.
@@ -1140,14 +1158,18 @@ type BkwdBuilder = StateT BkwdBuilderState Compiler
 -- forwards.  Because construction runs backwards, the state mostly holds
 -- information about the following code.
 data BkwdBuilderState = BkwdBuilderState {
-      bkwdUsedLater :: Set PrimVarName,  -- ^Variables used later in computation
+      bkwdUsedLater    :: Set PrimVarName, -- ^Variables used later in computation
       bkwdBranchesUsedLater :: Maybe [Set PrimVarName],
-                                         -- ^The usedLater set for each
-                                         -- following branch, used for fused
-                                         -- branches.
-      bkwdRenaming  :: VarSubstitution,  -- ^Variable substitution to apply
-      bkwdTmpCount  :: Int,              -- ^Highest temporary variable number
-      bkwdFollowing :: ProcBody          -- ^Code to come later
+                                           -- ^The usedLater set for each
+                                           -- following branch, used for fused
+                                           -- branches.
+      bkwdRenaming     :: VarSubstitution, -- ^Variable substitution to apply
+      bkwdTmpCount     :: Int,             -- ^Highest temporary variable number
+      bkwdGlobalFlows  :: GlobalFlows,     -- ^The set of global flows we have
+                                           -- encountered
+      bkwdGlobalStored :: Set GlobalInfo,  -- ^The set of globals we have 
+                                           -- recently stored
+      bkwdFollowing    :: ProcBody         -- ^Code to come later
       } deriving (Eq,Show)
 
 
@@ -1188,8 +1210,10 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
             let usedLater''' = Set.insert var usedLater''
             let tmp = maximum $ List.map bkwdTmpCount sts
             let followingBranches = List.map bkwdFollowing sts
+            let gFlows = List.foldr1 globalFlowsUnion (bkwdGlobalFlows <$> sts)
+            let gStored = List.foldr1 Set.intersection (bkwdGlobalStored <$> sts)
             put $ BkwdBuilderState usedLater''' branchesUsedLater
-                  Map.empty tmp
+                  Map.empty tmp gFlows gStored
                   $ ProcBody [] $ PrimFork var ty lastUse followingBranches
     mapM_ (placedApply (bkwdBuildStmt defs)) prims
     finalUsedLater <- gets bkwdUsedLater
@@ -1221,35 +1245,68 @@ bkwdBuildStmt :: Set PrimVarName -> Prim -> OptPos -> BkwdBuilder ()
 bkwdBuildStmt defs prim pos = do
     usedLater <- gets bkwdUsedLater
     renaming <- gets bkwdRenaming
+    gFlows <- gets bkwdGlobalFlows
+    gStored <- gets bkwdGlobalStored
     logBkwd $ "  Rebuilding prim: " ++ show prim
               ++ "\n    with usedLater   = " ++ show usedLater
               ++ "\n    and bkwdRenaming = " ++ simpleShowMap renaming
               ++ "\n    and defs         = " ++ simpleShowSet defs
-    let args = primArgs prim
-    args' <- mapM renameArg args
+              ++ "\n    and globalFlows  = " ++ showGlobalFlows gFlows
+              ++ "\n    and globalStored = " ++ simpleShowSet gStored
+    args' <- mapM renameArg $ primArgs prim
     logBkwd $ "    renamed args = " ++ show args'
     case (prim,args') of
       (PrimForeign "llvm" "move" [] _, [ArgVar{argVarName=fromVar},
                                         ArgVar{argVarName=toVar}])
-        | Set.notMember fromVar usedLater && Set.member fromVar defs ->
-            modify (\s -> s { bkwdRenaming = Map.insert fromVar toVar
-                                            $ bkwdRenaming s })
-      _ -> do
-        let (ins, outs) = splitArgsByMode $ List.filter argIsVar $ flattenArgs args'
-        -- Filter out pure instructions that produce no needed outputs
-        purity <- lift $ primImpurity prim
-        when ( purity > Pure 
-             || any (`Set.member` usedLater) (argVarName <$> outs)) $ do
-          -- XXX Careful:  probably shouldn't mark last use of variable passed
-          -- as input argument more than once in the call
-          let prim' = replacePrimArgs prim $ markIfLastUse usedLater <$> args'
-          logBkwd $ "    updated prim = " ++ show prim'
-          let inVars = argVarName <$> ins
-          let usedLater' = List.foldr Set.insert usedLater inVars
-          st@BkwdBuilderState{bkwdFollowing=bd@ProcBody{bodyPrims=prims}} <- get
-          put $ st { bkwdFollowing =
-                       bd { bodyPrims     = maybePlace prim' pos:prims },
-                            bkwdUsedLater = usedLater' }
+          | Set.notMember fromVar usedLater && Set.member fromVar defs ->
+              modify $ \s -> s { bkwdRenaming = Map.insert fromVar toVar
+                                              $ bkwdRenaming s }
+      (PrimForeign "lpvm" "store" [] _, [ArgGlobal info _,
+                                         _, globalIn, globalOut]) 
+          | info `Set.member` gStored -> 
+              bkwdBuildStmt defs (primMove globalIn globalOut) pos
+          | otherwise -> do
+              modify $ \s -> s { bkwdGlobalStored = Set.insert info gStored,
+                                 bkwdGlobalFlows = addGlobalFlow info FlowOut gFlows }
+              bkwdBuildStmt' args' prim pos
+      (PrimForeign "lpvm" "load" _ _, [ArgGlobal info _, _, _]) -> do
+          modify $ \s -> s { bkwdGlobalStored = Set.delete info gStored,
+                             bkwdGlobalFlows = addGlobalFlow info FlowIn gFlows }
+          bkwdBuildStmt' args' prim pos
+      (PrimHigherCall _ fn _, _)
+          | isResourcefulHigherOrder $ argType fn -> do
+              modify $ \s -> s { bkwdGlobalStored = Set.empty,
+                                 bkwdGlobalFlows = Nothing }
+              bkwdBuildStmt' args' prim pos
+      (PrimCall _ pspec _, _) -> do 
+          callGFlows <- procImplnGlobalFlows . procImpln 
+                    <$> lift (getProcDef pspec)
+          let gStored' = Set.filter (hasGlobalFlow callGFlows FlowOut) gStored
+          let gFlows' = globalFlowsUnion gFlows callGFlows
+          modify $ \s -> s { bkwdGlobalStored = gStored',
+                             bkwdGlobalFlows = gFlows' }
+          bkwdBuildStmt' args' prim pos
+      _ -> bkwdBuildStmt' args' prim pos
+
+
+bkwdBuildStmt' :: [PrimArg] -> Prim -> OptPos -> BkwdBuilder ()
+bkwdBuildStmt' args prim pos = do
+    usedLater <- gets bkwdUsedLater
+    let (ins, outs) = splitArgsByMode $ List.filter argIsVar $ flattenArgs args
+    -- Filter out pure instructions that produce no needed outputs
+    purity <- lift $ primImpurity prim
+    when ( purity > Pure 
+          || any (`Set.member` usedLater) (argVarName <$> outs)) $ do
+      -- XXX Careful:  probably shouldn't mark last use of variable passed
+      -- as input argument more than once in the call
+      let prim' = replacePrimArgs prim $ markIfLastUse usedLater <$> args
+      logBkwd $ "    updated prim = " ++ show prim'
+      let inVars = argVarName <$> ins
+      let usedLater' = List.foldr Set.insert usedLater inVars
+      st@BkwdBuilderState{bkwdFollowing=bd@ProcBody{bodyPrims=prims}} <- get
+      put $ st { bkwdFollowing =
+                    bd { bodyPrims     = maybePlace prim' pos:prims },
+                         bkwdUsedLater = usedLater' }
 
 
 renameArg :: PrimArg -> BkwdBuilder PrimArg
@@ -1308,7 +1365,7 @@ showState indent BodyState{parent=par, currBuild=revPrims, buildState=bld,
                             . showState indent) par
         substStr          = startLine indent
                             ++ "# Substs: " ++ simpleShowMap substs
-        globalStr         = case latestGlobal globals of
+        globalStr         = case globalRef globals of
                               Nothing -> ""
                               Just _ -> 
                                 startLine indent
@@ -1366,8 +1423,8 @@ showSwitch indent var ty val fused =
 
 
 showGlobalState :: GlobalState -> String
-showGlobalState GlobalState{latestGlobal=mbNm, latestValues=vs} 
-  = "# Globals: latest=" ++ show mbNm ++ ", values=" ++ show vs
+showGlobalState (GlobalState mbNm vs) 
+  = "# Globals: ref=" ++ show mbNm ++ ", values=" ++ show vs
 
 
 -- | Start a new line with the specified indent.

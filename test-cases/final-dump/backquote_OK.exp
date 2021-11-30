@@ -12,8 +12,9 @@ AFTER EVERYTHING:
 OK backquote use! > {inline} (0 calls) 
 0: backquote_OK.OK backquote use!<0>
 OK backquote use!(?#result##0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(1:wybe.int, ?#result##0:wybe.int) @backquote_OK:3:1
 
   LLVM code       :

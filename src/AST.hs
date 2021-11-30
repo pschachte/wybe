@@ -22,12 +22,12 @@ module AST (
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
   TypeProto(..), TypeSpec(..), typeVarSet, TypeVarName(..),
-  genericType, higherOrderType, isHigherOrder, 
-  isResourcefulHigherOrder, 
+  genericType, higherOrderType, isHigherOrder,
+  isResourcefulHigherOrder,
   updateHigherOrderTypesM, typeModule,
   VarDict, TypeImpln(..),
-  ProcProto(..), Param(..), TypeFlow(..), 
-  paramTypeFlow, primParamTypeFlow, setParamArgFlowType, 
+  ProcProto(..), Param(..), TypeFlow(..),
+  paramTypeFlow, primParamTypeFlow, setParamArgFlowType,
   paramToVar, primParamToArg, freeParamVar, unzipTypeFlow, unzipTypeFlows,
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), StringVariant(..), GlobalInfo(..), Generator(..), Stmt(..), ProcFunctor(..),
@@ -63,17 +63,18 @@ module AST (
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, ResourceDef(..), FlowDirection(..),
   argFlowDirection, argType, setArgType, setArgFlow, setArgFlowType, maybeArgFlowType,
-  argDescription, setParamType, paramIsResourceful, 
+  argDescription, setParamType, paramIsResourceful,
   setPrimParamType, setTypeFlowType,
   flowsIn, flowsOut, primFlowToFlowDir,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, procCallToExp,
   expOutputs, pexpListOutputs, expInputs, pexpListInputs,
-  setExpTypeFlow, setPExpTypeFlow, 
+  setExpTypeFlow, setPExpTypeFlow,
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
   maybeGetClosureOf, isClosureProc,
+  GlobalFlows, showGlobalFlows, addGlobalFlow, globalFlowsUnion, hasGlobalFlow,
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
@@ -97,10 +98,9 @@ module AST (
   Inlining(..), Impurity(..), Resourcefulness(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
   checkConflictingMods, checkUnknownMods,
-  specialChar, specialName, specialName2, 
+  specialChar, specialName, specialName2,
   outputVariableName, outputStatusName, globalsName,
-  envParamName, envPrimParam,
-  makeGlobalConstantName, makeGlobalResourceName,
+  envParamName, envPrimParam, makeGlobalResourceName,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
   showModSpecs, showResources, showOptPos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
@@ -124,13 +124,12 @@ import           Crypto.Hash
 import qualified Data.Binary
 import qualified Data.ByteString.Lazy as BL
 import           Data.List as List
-import           Data.List.Extra (nubOrd)
+import           Data.List.Extra (nubOrd,splitOn)
 import           Data.Map as Map
 import           Data.Maybe
 import           Data.Set as Set
 import           Data.Tuple.HT ( mapSnd, mapFst )
 import           Data.Word (Word8)
-import           Data.List.Extra (splitOn)
 import           Text.Read (readMaybe)
 import           Flow             ((|>))
 import           Numeric          (showHex)
@@ -483,7 +482,7 @@ getLoadedModule modspec = do
 
 
 -- | Perform an action if in the current module, else perform another
-ifCurrentModuleElse :: ModSpec -> StateT s Compiler a -> StateT s Compiler a 
+ifCurrentModuleElse :: ModSpec -> StateT s Compiler a -> StateT s Compiler a
                     -> StateT s Compiler a
 ifCurrentModuleElse mod current other = do
     thisMod <- lift $ getModuleSpec
@@ -894,7 +893,7 @@ lookupType _ _ AnyType = return AnyType
 lookupType _ _ InvalidType = return InvalidType
 lookupType _ _ ty@TypeVariable{} = return ty
 lookupType _ _ ty@Representation{} = return ty
-lookupType context pos ty@HigherOrderType{} = 
+lookupType context pos ty@HigherOrderType{} =
     updateHigherOrderTypesM (lookupType context pos) ty
 lookupType context pos ty@(TypeSpec [] typename args)
   | typename == currentModuleAlias = do
@@ -1150,7 +1149,7 @@ showFlags flags = "{" ++ intercalate "," flags ++ "}"
 -- | Display a list of strings separated by commas and surrounded with braces
 -- and followed by a space, or nothing if the list is empty.
 showFlags' :: [String] -> String
-showFlags' flags = showFlags flags ++ if List.null flags then "" else " " 
+showFlags' flags = showFlags flags ++ if List.null flags then "" else " "
 
 
 -- |Add the specified proc definition to the current module.
@@ -1161,7 +1160,7 @@ addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
     checkUnknownMods name pos unknown
     checkConflictingMods name pos conflict
     unless (resourceful == Resourceless)
-           $ errmsg pos ("Proc modifier '" ++ resourcefulName resourceful 
+           $ errmsg pos ("Proc modifier '" ++ resourcefulName resourceful
                          ++ "' is not allowed for a procedure declaration")
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 Map.empty
                   vis detism inlining impurity (initSuperprocSpec vis) Nothing
@@ -1195,12 +1194,13 @@ addProcDef procDef = do
 
 
 checkUnknownMods :: ProcName -> OptPos -> [String] -> Compiler ()
-checkUnknownMods name pos = 
-    mapM_ (\m -> message Error ("Unknown proc modifier '" ++ m 
+checkUnknownMods name pos =
+    mapM_ (\m -> message Error ("Unknown proc modifier '" ++ m
                                 ++ "' in declaration of " ++ name) pos)
-           
+
+
 checkConflictingMods :: ProcName -> OptPos -> [String] -> Compiler ()
-checkConflictingMods name pos = 
+checkConflictingMods name pos =
     mapM_ (\m -> message Error ("Proc modifier '" ++ m
                                 ++ "' conflicts with earlier modifier in declaration of "
                                 ++ name) pos)
@@ -1211,9 +1211,9 @@ getParams pspec =
     -- XXX shouldn't have to grovel in implementation to find prototype
     procProtoParams . procProto <$> getProcDef pspec
 
-    
+
 getPrimParams :: ProcSpec -> Compiler [PrimParam]
-getPrimParams pspec = 
+getPrimParams pspec =
     primProtoParams . procImplnProto . procImpln <$> getProcDef pspec
 
 
@@ -1859,7 +1859,7 @@ initialisedResources = do
 --  normalised to a list of primitives, and an optional source
 --  position.
 data ProcDef = ProcDef {
-    procName :: ProcName,          -- ^the proc's name
+    procName :: ProcName,       -- ^the proc's name
     procProto :: ProcProto,     -- ^the proc's prototype
     procImpln :: ProcImpln,     -- ^the actual implementation
     procPos :: OptPos,          -- ^where this proc is defined
@@ -1879,7 +1879,7 @@ data ProcDef = ProcDef {
     procImpurity :: Impurity,   -- ^ Is this proc pure?
     procSuperproc :: SuperprocSpec,
                                 -- ^the proc this should be part of, if any
-    procClosureOf :: Maybe ProcSpec 
+    procClosureOf :: Maybe ProcSpec
                                 -- ^the proc this proc is a closure of, if any
 }
              deriving (Eq, Generic)
@@ -1900,9 +1900,9 @@ procCallCount proc = Map.foldr (+) 0 $ procCallers proc
 -- | What is the Impurity of the given Prim?
 primImpurity :: Prim -> Compiler Impurity
 primImpurity (PrimCall _ pspec _) = procImpurity <$> getProcDef pspec
-primImpurity (PrimHigherCall _ fn _) 
-    = case fn of 
-        ArgProcRef pspec _ _ -> procImpurity <$> getProcDef pspec 
+primImpurity (PrimHigherCall _ fn _)
+    = case fn of
+        ArgProcRef pspec _ _ -> procImpurity <$> getProcDef pspec
         ArgVar _ (HigherOrderType ProcModifiers{modifierResourceful=resful,
                                                 modifierImpurity=purity} _) _ _ _
             -> return $ max purity $ if resful == Resourceful then Impure else Pure
@@ -1966,8 +1966,6 @@ showSuperProc AnySuperproc = ""
 showSuperProc (SuperprocIs super) = " (subproc of " ++ show super ++ ")"
 
 
-
-
 -- |Maybe get the ProcSpec of a ClosureOf Proc via a ProcSpec
 maybeGetClosureOf :: ProcSpec -> Compiler (Maybe ProcSpec)
 maybeGetClosureOf pspec =
@@ -1975,7 +1973,7 @@ maybeGetClosureOf pspec =
 
 
 -- |Check if a ProcSpec refers to a closure proc
-isClosureProc :: ProcSpec -> Compiler Bool 
+isClosureProc :: ProcSpec -> Compiler Bool
 isClosureProc pspec = isJust . procClosureOf <$> getProcDef pspec
 
 
@@ -1990,11 +1988,46 @@ data ProcImpln
         procImplnProcSpec :: ProcSpec,
         procImplnProto :: PrimProto,
         procImplnBody :: ProcBody,       -- ^defn in LPVM (clausal) form
+        
+        procImplnGlobalFlows :: GlobalFlows,
         procImplnAnalysis :: ProcAnalysis,
         procImplnSpeczBodies :: SpeczProcBodies
     }
     -- defn in SSA (LLVM) form along with any needed extern definitions
     deriving (Eq,Generic)
+
+-- |This type represents a set of globals and corresponding flows.
+-- Nothing represents the universal set    
+type GlobalFlows = Maybe (Map GlobalInfo (Set PrimFlow))
+
+
+-- |How to show GlobalFlows
+showGlobalFlows :: GlobalFlows -> String
+showGlobalFlows Nothing
+    = "everything "
+showGlobalFlows (Just gFlows)
+    = showMap "{" ", " "} " ((++"::") . show) simpleShowSet gFlows
+
+
+-- | Add a flow to a given global. If the global does not exist in the set
+-- it is added
+addGlobalFlow :: GlobalInfo -> PrimFlow -> GlobalFlows -> GlobalFlows
+addGlobalFlow info flow gFlows 
+    = Map.insertWith Set.union info (Set.singleton flow) <$> gFlows
+
+
+-- | Take the union of two global flow sets
+globalFlowsUnion :: GlobalFlows -> GlobalFlows -> GlobalFlows
+globalFlowsUnion Nothing     _           = Nothing
+globalFlowsUnion _           Nothing     = Nothing
+globalFlowsUnion (Just gfs1) (Just gfs2) = Just $ Map.unionWith Set.union gfs1 gfs2
+
+
+-- | Test if the given flow of a a global exists in the global flow set
+hasGlobalFlow :: GlobalFlows -> PrimFlow -> GlobalInfo -> Bool
+hasGlobalFlow Nothing       _    _    = True
+hasGlobalFlow (Just gFlows) flow info  
+    = maybe False (Set.member flow) $ Map.lookup info gFlows
 
 
 -- |An ID for a parameter of a proc
@@ -2132,7 +2165,7 @@ isCompiled (ProcDefSrc _) = False
 
 instance Show ProcImpln where
     show (ProcDefSrc stmts) = showBody 4 stmts
-    show (ProcDefPrim pSpec proto body analysis speczVersions) =
+    show (ProcDefPrim pSpec proto body gFlows analysis speczVersions) =
         let speczBodies = Map.toList speczVersions
                 |> List.map (\(ver, body) ->
                         "\n [" ++ speczVersionToId ver ++ "] "
@@ -2141,8 +2174,9 @@ instance Show ProcImpln where
                             Nothing -> " Missing"
                             Just body -> showBlock 4 body)
                 |> intercalate "\n"
-        in
-            show pSpec ++ "\n" ++ show proto ++ ":" ++ show analysis
+        in  show pSpec ++ "\n" ++ show proto ++ ":" 
+                    ++ "\n  GlobalFlows: " ++ showGlobalFlows gFlows
+                    ++ show analysis
                     ++ showBlock 4 body ++ speczBodies
 
 
@@ -2151,12 +2185,12 @@ instance Show ProcAnalysis where
         let multiSpeczDepInfo' = Map.toList multiSpeczDepInfo
                 |> List.filter (not . List.null . snd)
         in
-        "\n AliasPairs: " ++ showAliasMap aliasMap
-        ++ "\n InterestingCallProperties: "
+        "\n  AliasPairs: " ++ showAliasMap aliasMap
+        ++ "\n  InterestingCallProperties: "
         ++ show (Set.toAscList interestingCallProperties)
         ++ if List.null multiSpeczDepInfo'
             then ""
-            else "\n MultiSpeczDepInfo: " ++ show multiSpeczDepInfo'
+            else "\n  MultiSpeczDepInfo: " ++ show multiSpeczDepInfo'
 
 
 
@@ -2460,9 +2494,9 @@ isHigherOrder HigherOrderType{} = True
 isHigherOrder _                 = False
 
 isResourcefulHigherOrder :: TypeSpec -> Bool
-isResourcefulHigherOrder (HigherOrderType ProcModifiers{modifierResourceful=res} tfs) = 
+isResourcefulHigherOrder (HigherOrderType ProcModifiers{modifierResourceful=res} tfs) =
     res == Resourceful || any isResourcefulHigherOrder (typeFlowType <$> tfs)
-isResourcefulHigherOrder (TypeSpec _ _ tys) = 
+isResourcefulHigherOrder (TypeSpec _ _ tys) =
     any isResourcefulHigherOrder tys
 isResourcefulHigherOrder _ = False
 
@@ -2471,7 +2505,7 @@ updateHigherOrderTypesM trans ty@HigherOrderType{higherTypeDetism=mods,
                                                  higherTypeParams=typeFlows} = do
     types <- mapM trans $ typeFlowType <$> typeFlows
     return $ ty{higherTypeParams=zipWith TypeFlow types (typeFlowMode <$> typeFlows)}
-updateHigherOrderTypesM _ ty = 
+updateHigherOrderTypesM _ ty =
     shouldnt $ "updateHigherOrderTypesM on " ++ show ty
 
 
@@ -2599,7 +2633,7 @@ paramTypeFlow Param{paramType=ty, paramFlow=fl} = TypeFlow ty fl
 
 -- |Return the TypeSpec and FlowDirection of a PrimParam
 primParamTypeFlow :: PrimParam -> TypeFlow
-primParamTypeFlow PrimParam{primParamType=ty, primParamFlow=fl} 
+primParamTypeFlow PrimParam{primParamType=ty, primParamFlow=fl}
     = TypeFlow ty $ primFlowToFlowDir fl
 
 
@@ -2610,7 +2644,7 @@ setParamArgFlowType ft p = p{paramFlowType=ft}
 
 -- |Convert a Param to a Var
 paramToVar :: Param -> Placed Exp
-paramToVar (Param n t f ft) 
+paramToVar (Param n t f ft)
     = Unplaced $ Typed (Var n f ft) t Nothing
 
 
@@ -2730,12 +2764,12 @@ seqToStmt [stmt] = stmt
 seqToStmt stmts = Unplaced $ And stmts
 
 
-data ProcFunctor 
+data ProcFunctor
     = First ModSpec ProcName (Maybe Int)
        -- ^ A first-order procedure 
     | Higher (Placed Exp)
        -- ^ A higher-order procedure
-    deriving (Eq, Ord, Generic)       
+    deriving (Eq, Ord, Generic)
 
 
 regularProc :: ProcName -> ProcFunctor
@@ -2819,7 +2853,7 @@ expVar' (Typed expr _ _) = expVar' expr
 expVar' (Var name _ _) = Just name
 expVar' _expr = Nothing
 
-maybeExpType :: Exp -> Maybe TypeSpec 
+maybeExpType :: Exp -> Maybe TypeSpec
 maybeExpType (Typed _ ty _) = Just ty
 maybeExpType _              = Nothing
 
@@ -2883,7 +2917,7 @@ realParams = filterM paramIsReal
 -- |The param actually needs to be passed; ie, it is needed and not phantom.
 paramIsReal :: PrimParam -> Compiler Bool
 paramIsReal param =
-    (((not . paramInfoUnneeded) 
+    (((not . paramInfoUnneeded)
         $ primParamInfo param) &&) . not <$> paramIsPhantom param
 
 
@@ -3001,7 +3035,7 @@ argIntegerValue _              = Nothing
 
 -- |Relates a primitive argument to the corresponding source argument
 data ArgFlowType = Ordinary        -- ^An argument/parameter as written by user
-                 | Resource ResourceSpec 
+                 | Resource ResourceSpec
                                    -- ^An argument to pass a resource
                  | GlobalArg       -- ^An arguemtn to pass globals
                  | Free            -- ^An argument to be passed in the closure 
@@ -3054,15 +3088,19 @@ setArgType typ (ArgUnneeded u _) = ArgUnneeded u typ
 setArgType typ (ArgUndef _) = ArgUndef typ
 
 
+-- | Set the flow of a prim arg. This is a nop for a non-ArgVar value
 setArgFlow :: PrimFlow -> PrimArg -> PrimArg
 setArgFlow f arg@ArgVar{} = arg{argVarFlow=f}
 setArgFlow _ arg          = arg
 
 
+-- | Set the flow type of a prim arg. This is a nop for a non-ArgVar value
 setArgFlowType :: ArgFlowType -> PrimArg -> PrimArg
 setArgFlowType ft arg@ArgVar{} = arg{argVarFlowType=ft}
 setArgFlowType _  arg          = arg
 
+
+-- | Get the flow of a prim arg. Returns Nothing for a non-ArgVar value
 maybeArgFlowType :: PrimArg -> Maybe ArgFlowType
 maybeArgFlowType ArgVar{argVarFlowType=ft} = Just ft
 maybeArgFlowType arg                       = Nothing
@@ -3164,7 +3202,7 @@ expInputs (CondExp _ pexp1 pexp2) = pexpListInputs [pexp1,pexp2]
 expInputs (Fncall _ _ args) = pexpListInputs args
 expInputs (ForeignFn _ _ _ args) = pexpListInputs args
 expInputs (CaseExp exp cases deflt) =
-    expInputs (content exp) 
+    expInputs (content exp)
     `Set.union` pexpListInputs (maybe id (:) deflt (snd <$> cases))
     `Set.union` pexpListInputs (fst <$> cases)
 
@@ -3264,7 +3302,7 @@ outputStatusName :: Ident
 outputStatusName = specialName "success"
 
 
-globalsName :: Ident 
+globalsName :: Ident
 globalsName = specialName "globals"
 
 
@@ -3274,10 +3312,6 @@ envParamName = PrimVarName (specialName "env") 0
 
 envPrimParam :: PrimParam
 envPrimParam = PrimParam envParamName AnyType FlowIn Ordinary (ParamInfo False)
-
-
-makeGlobalConstantName :: String -> String
-makeGlobalConstantName name = specialName2 "constant" name
 
 
 makeGlobalResourceName :: ResourceSpec -> String
@@ -3487,7 +3521,7 @@ showProcDef thisID
     ++ showProcModifiers' (ProcModifiers detism inline impurity Resourceless [] [])
     ++ "(" ++ show (procCallCount procdef) ++ " calls) "
     ++ showSuperProc sub
-    ++ maybe "" (\cls -> "(closure of " ++ show cls ++ ")") mbCls
+    ++ maybe "" (("closure-of: " ++) . show) mbCls
     ++ "\n"
     ++ show thisID ++ ": "
     ++ (if isCompiled def then "" else show proto ++ ":")
@@ -3530,7 +3564,7 @@ instance Show Param where
 instance Show PrimParam where
   show (PrimParam name typ dir ft (ParamInfo unneeded)) =
       let (pre,post) = if unneeded then ("[","]") else ("","")
-      in  pre ++ show ft ++ primFlowPrefix dir ++ show name 
+      in  pre ++ show ft ++ primFlowPrefix dir ++ show name
           ++ showTypeSuffix typ Nothing ++ post
 
 
@@ -3676,7 +3710,7 @@ showStmt _ Next = "next"
 
 instance Show ProcFunctor where
     show (First maybeMod name procID) =
-        maybeModPrefix maybeMod 
+        maybeModPrefix maybeMod
         ++ maybe "" (\n -> "<" ++ show n ++ ">") procID
         ++ name
     show (Higher fn) = show fn
@@ -3715,7 +3749,7 @@ instance Show Exp where
   show (CharValue c) = show c
   show (Var name dir flowtype) = show flowtype ++ flowPrefix dir ++ name
   show (Global info) = show info
-  show (AnonProc mods params ss) = 
+  show (AnonProc mods params ss) =
       showProcModifiers mods
       ++ "{" ++ intercalate "\n" (showStmt 0 . content <$> ss) ++ "}"
   show (ProcRef ps es) = show ps ++ "<" ++ intercalate ", " (show <$> es) ++ ">"
