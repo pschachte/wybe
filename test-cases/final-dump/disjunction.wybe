@@ -10,3 +10,6 @@ pub def saturating_tail(lst:list(T), ?tl:list(T)) {
     ?tl = tail(lst) 
   | ?tl = []
 }
+
+# a deterministic disjunctive expression.
+pub def saturating_tail2(lst:list(T)):list(T) = (tail(lst) | [])

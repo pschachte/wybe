@@ -473,7 +473,8 @@ primaryTerm =
 parenthesisedTerm :: Parser Term
 parenthesisedTerm = do
     pos <- tokenPosition <$> leftBracket Paren
-    setTermPos pos <$> term <* rightBracket Paren
+    setTermPos pos <$> limitedTerm lowestParenthesisedPrecedence
+                       <* rightBracket Paren
 
 
 varOrCall :: Parser Term
@@ -591,6 +592,11 @@ lowestTermPrecedence = 1
 -- |Lowest (loosest) operator precedence of an individual statement
 lowestStmtPrecedence :: Int
 lowestStmtPrecedence = 0
+
+
+-- |Lowest (loosest) operator precedence of a proc body
+lowestParenthesisedPrecedence :: Int
+lowestParenthesisedPrecedence = -3
 
 
 -- |Lowest (loosest) operator precedence of a proc body
@@ -1069,6 +1075,10 @@ termToExp (Call pos [] "^" ParamIn [exp,op]) = do
         Placed (Var var ParamIn Ordinary) _
             -> return $ Placed (Fncall [] var [exp']) pos
         _ -> syntaxError pos "invalid second argument to '^'"
+termToExp (Call pos [] "|" ParamIn [exp1,exp2]) = do
+    exp1' <- termToExp exp1
+    exp2' <- termToExp exp2
+    return $ Placed (DisjExp exp1' exp2') pos
 termToExp (Call pos [] "if" ParamIn [conditional]) =
     termToConditionalExp conditional
 termToExp (Call pos [] "case" ParamIn 

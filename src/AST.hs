@@ -2201,6 +2201,8 @@ foldExp' sfn efn val (Typed exp _ _) = foldExp sfn efn val exp
 foldExp' sfn efn val (Where stmts exp) =
     let val1 = foldStmts sfn efn val stmts
     in  foldExp sfn efn val1 $content exp
+foldExp' sfn efn val (DisjExp e1 e2) =
+    foldExp sfn efn (foldExp sfn efn val (content e1)) (content e2)
 foldExp' sfn efn val (CondExp stmt e1 e2) =
     let val1 = foldStmt sfn efn val $ content stmt
         val2 = foldExp sfn efn val1 $ content e1
@@ -2533,6 +2535,7 @@ data Exp
                -- these two must be the same.
       -- The following are eliminated during flattening
       | Where [Placed Stmt] (Placed Exp)
+      | DisjExp (Placed Exp) (Placed Exp)
       | CondExp (Placed Stmt) (Placed Exp) (Placed Exp)
       | Fncall ModSpec ProcName [Placed Exp]
       | ForeignFn Ident ProcName [Ident] [Placed Exp]
@@ -2834,6 +2837,7 @@ expOutputs (Var name flow _) =
     if flowsOut flow then Set.singleton name else Set.empty
 expOutputs (Typed expr _ _) = expOutputs expr
 expOutputs (Where _ pexp) = expOutputs $ content pexp
+expOutputs (DisjExp pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
 expOutputs (CondExp _ pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
 expOutputs (Fncall _ _ args) = pexpListOutputs args
 expOutputs (ForeignFn _ _ _ args) = pexpListOutputs args
@@ -3357,6 +3361,8 @@ instance Show Exp where
   show (CharValue c) = show c
   show (Var name dir flowtype) = show flowtype ++ flowPrefix dir ++ name
   show (Where stmts exp) = show exp ++ " where" ++ showBody 8 stmts
+  show (DisjExp e1 e2) =
+    "(" ++ show e1 ++ " | " ++ show e2 ++ ")"
   show (CondExp cond thn els) =
     "if {" ++ show cond ++ ":: " ++ show thn ++ " | " ++ show els ++ "}"
   show (Fncall maybeMod fn args) =

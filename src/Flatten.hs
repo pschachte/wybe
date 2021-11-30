@@ -479,6 +479,21 @@ flattenExp expr@(Var name dir flowType) ty castFrom pos = do
 flattenExp (Where stmts pexp) _ _ _ = do
     flattenStmts stmts Det
     flattenPExp pexp
+flattenExp (DisjExp thn els) ty castFrom pos = do
+    resultName <- tempVar
+    let flowType = Implicit pos
+    flattenStmt (Or
+                 [maybePlace (ForeignCall "llvm" "move" []
+                              [typeAndPlace (content thn) ty castFrom (place thn),
+                               Unplaced $ Var resultName ParamOut flowType])
+                  pos,
+                  maybePlace (ForeignCall "llvm" "move" []
+                              [typeAndPlace (content els) ty castFrom (place els),
+                               Unplaced $ Var resultName ParamOut flowType])
+                  pos]
+                Nothing)
+        pos Det
+    return $ maybePlace (Var resultName ParamIn flowType) pos
 flattenExp (CondExp cond thn els) ty castFrom pos = do
     resultName <- tempVar
     let flowType = Implicit pos
