@@ -305,16 +305,12 @@ flattenStmt' (TestBool expr) pos SemiDet = do
                         ++ " produced " ++ show pexpr'
 flattenStmt' (TestBool expr) _pos detism =
     shouldnt $ "TestBool " ++ show expr ++ " in " ++ show detism ++ " context"
-flattenStmt' (And tsts) pos SemiDet = do
-    tsts' <- flattenInner True SemiDet (flattenStmts tsts SemiDet)
+flattenStmt' (And tsts) pos detism = do
+    tsts' <- flattenInner True detism (flattenStmts tsts SemiDet)
     emit pos $ And tsts'
-flattenStmt' stmt@And{} _pos detism =
-    shouldnt $ "And in a " ++ show detism ++ " context"
-flattenStmt' (Or tsts vars) pos SemiDet = do
-    tsts' <- flattenInner True SemiDet (flattenStmts tsts SemiDet)
+flattenStmt' (Or tsts vars) pos detism = do
+    tsts' <- flattenDisj detism tsts
     emit pos $ Or tsts' vars
-flattenStmt' (Or tstStmts _) _pos detism =
-    shouldnt $ "Or in a " ++ show detism ++ " context"
 flattenStmt' (Not tstStmt) pos SemiDet = do
     tstStmt' <- seqToStmt <$> flattenInner True SemiDet
                 (placedApply flattenStmt tstStmt SemiDet)
@@ -378,6 +374,19 @@ flattenStmt' Break pos _ = emit pos Break
 flattenStmt' Next pos _ = emit pos Next
 
 
+-- | Flatten a disjunction of statements.  Unbranching will turn disjunctions
+-- into conditionals, but here we just flatten each of the disjuncts.
+flattenDisj :: Determinism -> [Placed Stmt] -> Flattener [Placed Stmt]
+flattenDisj _ [] = return []
+flattenDisj detism (disj:disjs) = do
+    disj' <- seqToStmt <$> flattenInner True detism (placedApply flattenStmt disj detism)
+    disjs' <- flattenDisj detism disjs
+    return $ disj' : disjs'
+
+
+-- | Flatten an assignment of the specified expression (`value`) to the
+-- specified variable, which is specified both as a name and as an output
+-- expression.
 flattenAssignment :: Ident -> Placed Exp -> Placed Exp -> OptPos -> Flattener ()
 flattenAssignment var varArg value pos = do
     [valueArg] <- flattenStmtArgs [value] pos

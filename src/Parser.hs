@@ -971,6 +971,8 @@ termToStmt (Call pos [] "::" ParamIn [test,body]) = do
     test' <- termToStmt test
     body' <- termToBody body
     return $ Placed (Cond test' body' [Unplaced Nop] Nothing Nothing) pos
+termToStmt (Call pos [] "&" ParamIn conjs) = do
+    (`Placed` pos) . And <$> mapM termToStmt conjs
 termToStmt (Call _ [] fn ParamIn [first,rest])
   | separatorName fn = do
     first' <- termToStmt first

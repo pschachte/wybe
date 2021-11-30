@@ -1634,7 +1634,7 @@ doImport mod (imports, _) = do
       " into " ++
       let modStr = showModSpec currMod
       in modStr ++ ":  " ++ showUse (27 + length modStr) mod imports
-    fromIFace <- (modInterface . trustFromJust "doImport")
+    fromIFace <- modInterface . trustFromJust "doImport"
                  <$> getLoadingModule mod
     let pubImports = importPublic imports
     let allImports = combineImportPart pubImports $ importPrivate imports
@@ -2801,8 +2801,8 @@ argFlowDescription FlowOut = "output"
 
 -- |Convert a statement read as an expression to a Stmt.
 expToStmt :: Exp -> Stmt
-expToStmt (Fncall [] "&&" args) = And $ List.map (fmap expToStmt) args
-expToStmt (Fncall [] "||"  args) = Or (List.map (fmap expToStmt) args) Nothing
+expToStmt (Fncall [] "&" args) = And $ List.map (fmap expToStmt) args
+expToStmt (Fncall [] "|"  args) = Or (List.map (fmap expToStmt) args) Nothing
 expToStmt (Fncall [] "~" [arg]) = Not $ fmap expToStmt arg
 expToStmt (Fncall [] "~" args) = shouldnt $ "non-unary 'not' " ++ show args
 expToStmt (Fncall maybeMod name args) =
@@ -3277,13 +3277,13 @@ showStmt _ (ForeignCall lang name flags args) =
 showStmt _ (TestBool test) =
     "testbool " ++ show test
 showStmt indent (And stmts) =
-    intercalate ("\n" ++ replicate indent ' ' ++ "&& ")
+    intercalate ("\n" ++ replicate indent ' ' ++ "& ")
     (List.map (showStmt indent' . content) stmts) ++
     ")"
     where indent' = indent + 4
 showStmt indent (Or stmts genVars) =
     "(   " ++
-    intercalate ("\n" ++ replicate indent ' ' ++ "|| ")
+    intercalate ("\n" ++ replicate indent ' ' ++ "| ")
         (List.map (showStmt indent' . content) stmts) ++
     ")" ++ maybe "" ((" -> "++) . showVarMap) genVars
     where indent' = indent + 4

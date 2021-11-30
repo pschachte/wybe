@@ -404,22 +404,27 @@ unbranchStmt detism stmt@(TestBool val) pos stmts alt sense = do
       logUnbranch $ "#Unbranched non-final primitive test " ++ show stmt
       logUnbranch $ "#To: " ++ showBody 4 result
       return result
-unbranchStmt detism stmt@(And conj) pos stmts alt sense =
-    ifSemiDet detism ("Conjunction in a Det context: " ++ show stmt)
-    $ do
-      logUnbranch $ "Unbranching conjunction " ++ show stmt
-      unbranchStmts SemiDet (conj ++ stmts) alt sense
-unbranchStmt detism stmt@(Or disjs exitVars) _ stmts alt sense = do
-    ifSemiDet detism ("Disjunction in a Det context: " ++ show stmt)
-    $ do
-      let exitVars' = trustFromJust "unbranching Disjunction without exitVars"
-                      exitVars
-      logUnbranch $ "Unbranching disjunction " ++ show stmt
-      logUnbranch $ "Following disjunction: " ++ showBody 4 stmts
-      logUnbranch $ "Disjunction alternative: " ++ showBody 4 alt
-      stmts' <- maybeFactorContinuation SemiDet exitVars' stmts alt sense
-      logUnbranch $ "Disjunction successor: " ++ showBody 4 stmts'
-      unbranchStmts SemiDet (disjs ++ alt) stmts' (not sense)
+unbranchStmt detism stmt@(And conj) pos stmts alt sense = do
+    logUnbranch $ "Unbranching conjunction " ++ show stmt
+    unbranchStmts SemiDet (conj ++ stmts) alt sense
+unbranchStmt detism stmt@(Or [] exitVars) pos stmts alt sense =
+    ifSemiDet detism "Empty disjunction in a Det context"
+    $ unbranchStmt SemiDet (TestBool boolFalse) pos stmts alt sense
+unbranchStmt detism stmt@(Or [disj] exitVars) _ stmts alt sense =
+    placedApply (unbranchStmt SemiDet) disj stmts alt sense
+unbranchStmt detism stmt@(Or (disj:disjs) exitVars) pos stmts alt sense = do
+    let exitVars' = trustFromJust "unbranching Disjunction without exitVars"
+                    exitVars
+    logUnbranch $ "Unbranching disjunction " ++ show stmt
+    logUnbranch $ "Following disjunction: " ++ showBody 4 stmts
+    logUnbranch $ "Disjunction alternative: " ++ showBody 4 alt
+    stmts' <- maybeFactorContinuation detism exitVars' stmts alt sense
+    logUnbranch $ "Disjunction successor: " ++ showBody 4 stmts'
+    beforeDisjVars <- gets brVars
+    disjs' <- unbranchStmt detism (Or disjs exitVars) pos stmts' alt sense
+    -- Update known vars back to state before condition (must have failed)
+    modify $ \s -> s { brVars = beforeDisjVars }
+    placedApply (unbranchStmt detism) disj stmts' disjs' sense
 unbranchStmt detism stmt@(Not tst) pos stmts alt sense =
     ifSemiDet detism ("Negation in a Det context: " ++ show stmt)
     $ do
