@@ -2003,10 +2003,8 @@ type GlobalFlows = Maybe (Map GlobalInfo (Set PrimFlow))
 
 -- |How to show GlobalFlows
 showGlobalFlows :: GlobalFlows -> String
-showGlobalFlows Nothing
-    = "everything "
-showGlobalFlows (Just gFlows)
-    = showMap "{" ", " "} " ((++"::") . show) simpleShowSet gFlows
+showGlobalFlows
+    = maybe "everything " $ showMap "{" ", " "} " ((++"::") . show) simpleShowSet
 
 
 -- | Add a flow to a given global. If the global does not exist in the set
@@ -2018,16 +2016,13 @@ addGlobalFlow info flow gFlows
 
 -- | Take the union of two global flow sets
 globalFlowsUnion :: GlobalFlows -> GlobalFlows -> GlobalFlows
-globalFlowsUnion Nothing     _           = Nothing
-globalFlowsUnion _           Nothing     = Nothing
-globalFlowsUnion (Just gfs1) (Just gfs2) = Just $ Map.unionWith Set.union gfs1 gfs2
+globalFlowsUnion = liftM2 $ Map.unionWith Set.union
 
 
 -- | Test if the given flow of a a global exists in the global flow set
 hasGlobalFlow :: GlobalFlows -> PrimFlow -> GlobalInfo -> Bool
-hasGlobalFlow Nothing       _    _    = True
-hasGlobalFlow (Just gFlows) flow info  
-    = maybe False (Set.member flow) $ Map.lookup info gFlows
+hasGlobalFlow gFlows flow info  
+    = maybe True (maybe False (Set.member flow) . Map.lookup info) gFlows
 
 
 -- |An ID for a parameter of a proc
