@@ -200,7 +200,7 @@ declare external ccc  void @print_int(i64)
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  void @"int_sequence.<0>"()    {
@@ -395,7 +395,7 @@ entry:
   %93 = inttoptr i64 %92 to i8* 
   %94 = inttoptr i64 %"#rec##0" to i8* 
   %95 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %93, i8*  %94, i32  %95, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %93, i8*  %94, i32  %95, i1  0)  
   %96 = inttoptr i64 %92 to i64* 
   %97 = getelementptr  i64, i64* %96, i64 0 
   store  i64 %"#field##0", i64* %97 
@@ -421,7 +421,7 @@ entry:
   %105 = inttoptr i64 %104 to i8* 
   %106 = inttoptr i64 %"#rec##0" to i8* 
   %107 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %105, i8*  %106, i32  %107, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %105, i8*  %106, i32  %107, i1  0)  
   %108 = add   i64 %104, 8 
   %109 = inttoptr i64 %108 to i64* 
   %110 = getelementptr  i64, i64* %109, i64 0 

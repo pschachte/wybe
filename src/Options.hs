@@ -44,6 +44,7 @@ data Options = Options{
     , optDumpLib      :: Bool     -- ^Also dump wybe.* modules when dumping
     , optVerbose      :: Bool     -- ^Be verbose in compiler output
     , optNoFont       :: Bool     -- ^Disable ISO font change codes in messages
+    , optNoVerifyLLVM :: Bool     -- ^Don't run LLVM verification
     } deriving Show
 
 
@@ -63,6 +64,7 @@ defaultOptions     = Options
  , optDumpLib      = False
  , optVerbose      = False
  , optNoFont       = False
+ , optNoVerifyLLVM = False
  }
 
 -- |All compiler features we may want to log
@@ -153,6 +155,9 @@ options =
  , Option ['n'] ["no-fonts"]
      (NoArg (\opts -> opts { optNoFont = True }))
      "disable font highlighting in messages"
+ , Option [] ["no-verify-llvm"]
+     (NoArg (\opts -> opts { optNoVerifyLLVM = True }))
+     "disable verification of generated LLVM code"
  ]
 
 

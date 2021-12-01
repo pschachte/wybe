@@ -56,6 +56,6 @@ jobs:
     - name: Build
       run: make
     - name: Run tests
-      run: make test
+      run: make test || (echo "ERRS:" ; cat ERRS ; error "Testing failed")
     - name: Install
       run: sudo make install

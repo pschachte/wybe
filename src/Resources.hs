@@ -96,8 +96,8 @@ canonicaliseResourceFlow pos spec = do
 
 -- | Data type to store the necessary data for adding resources to a proc
 data ResourceState = ResourceState {
-    resTmpCtr    :: Int,
-    resTmpVars   :: Map VarName TypeSpec
+    resTmpCtr  :: Int,
+    resTmpVars :: VarDict
 }
 
 
