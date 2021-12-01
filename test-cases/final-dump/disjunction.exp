@@ -1,0 +1,181 @@
+======================================================================
+AFTER EVERYTHING:
+ Module disjunction
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : disjunction.in<0>
+                    disjunction.member<0>
+                    disjunction.saturating_tail<0>
+                    disjunction.saturating_tail2<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+in > public (2 calls)
+0: disjunction.in<0>
+in(e##0:wybe.int, lst##0:wybe.list(wybe.int), ?#success##0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool)
+    case ~tmp#6##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+    1:
+        foreign lpvm access(lst##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int)
+        foreign llvm icmp_eq(e##0:wybe.int, ~h##0:wybe.int, ?tmp#4##0:wybe.bool) @int:nn:nn
+        case ~tmp#4##0:wybe.bool of
+        0:
+            foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.list(wybe.int))
+            disjunction.in<0>(~e##0:wybe.int, ~tmp#0##0:wybe.list(wybe.int), ?#success##0:wybe.bool) #3 @disjunction:nn:nn
+
+        1:
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+
+member > public (1 calls)
+0: disjunction.member<0>
+member(e##0:wybe.int, lst##0:wybe.list(wybe.int), ?#success##0:wybe.bool):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool)
+    case ~tmp#4##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+    1:
+        foreign lpvm access(lst##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int)
+        foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:wybe.list(wybe.int))
+        foreign llvm icmp_eq(e##0:wybe.int, ~h##0:wybe.int, ?tmp#2##0:wybe.bool) @int:nn:nn
+        case ~tmp#2##0:wybe.bool of
+        0:
+            disjunction.member<0>(~e##0:wybe.int, ~t##0:wybe.list(wybe.int), ?#success##0:wybe.bool) #2 @disjunction:nn:nn
+
+        1:
+            foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+
+saturating_tail > public (0 calls)
+0: disjunction.saturating_tail<0>
+saturating_tail(lst##0:wybe.list(T), ?tl##0:wybe.list(T)):
+ AliasPairs: [(lst##0,tl##0)]
+ InterestingCallProperties: []
+    foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool)
+    case ~tmp#4##0:wybe.bool of
+    0:
+        foreign llvm move(0:2, ?tl##0:wybe.list(T)) @disjunction:nn:nn
+
+    1:
+        foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tl##0:wybe.list(T))
+
+
+
+saturating_tail2 > public (0 calls)
+0: disjunction.saturating_tail2<0>
+saturating_tail2(lst##0:wybe.list(T), ?#result##0:wybe.list(T)):
+ AliasPairs: [(#result##0,lst##0)]
+ InterestingCallProperties: []
+    foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
+    case ~tmp#5##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.list(T), ?#result##0:wybe.list(T)) @disjunction:nn:nn
+
+    1:
+        foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.list(T))
+
+
+  LLVM code       :
+
+; ModuleID = 'disjunction'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  i1 @"disjunction.in<0>"(i64  %"e##0", i64  %"lst##0")    {
+entry:
+  %"1#tmp#6##0" = icmp ne i64 %"lst##0", 0 
+  br i1 %"1#tmp#6##0", label %if.then, label %if.else 
+if.then:
+  %1 = inttoptr i64 %"lst##0" to i64* 
+  %2 = getelementptr  i64, i64* %1, i64 0 
+  %3 = load  i64, i64* %2 
+  %"2#tmp#4##0" = icmp eq i64 %"e##0", %3 
+  br i1 %"2#tmp#4##0", label %if.then1, label %if.else1 
+if.else:
+  ret i1 0 
+if.then1:
+  ret i1 1 
+if.else1:
+  %4 = add   i64 %"lst##0", 8 
+  %5 = inttoptr i64 %4 to i64* 
+  %6 = getelementptr  i64, i64* %5, i64 0 
+  %7 = load  i64, i64* %6 
+  %"5##success##0" = tail call fastcc  i1  @"disjunction.in<0>"(i64  %"e##0", i64  %7)  
+  ret i1 %"5##success##0" 
+}
+
+
+define external fastcc  i1 @"disjunction.member<0>"(i64  %"e##0", i64  %"lst##0")    {
+entry:
+  %"1#tmp#4##0" = icmp ne i64 %"lst##0", 0 
+  br i1 %"1#tmp#4##0", label %if.then, label %if.else 
+if.then:
+  %8 = inttoptr i64 %"lst##0" to i64* 
+  %9 = getelementptr  i64, i64* %8, i64 0 
+  %10 = load  i64, i64* %9 
+  %11 = add   i64 %"lst##0", 8 
+  %12 = inttoptr i64 %11 to i64* 
+  %13 = getelementptr  i64, i64* %12, i64 0 
+  %14 = load  i64, i64* %13 
+  %"2#tmp#2##0" = icmp eq i64 %"e##0", %10 
+  br i1 %"2#tmp#2##0", label %if.then1, label %if.else1 
+if.else:
+  ret i1 0 
+if.then1:
+  ret i1 1 
+if.else1:
+  %"5##success##0" = tail call fastcc  i1  @"disjunction.member<0>"(i64  %"e##0", i64  %14)  
+  ret i1 %"5##success##0" 
+}
+
+
+define external fastcc  i64 @"disjunction.saturating_tail<0>"(i64  %"lst##0")    {
+entry:
+  %"1#tmp#4##0" = icmp ne i64 %"lst##0", 0 
+  br i1 %"1#tmp#4##0", label %if.then, label %if.else 
+if.then:
+  %15 = add   i64 %"lst##0", 8 
+  %16 = inttoptr i64 %15 to i64* 
+  %17 = getelementptr  i64, i64* %16, i64 0 
+  %18 = load  i64, i64* %17 
+  ret i64 %18 
+if.else:
+  ret i64 0 
+}
+
+
+define external fastcc  i64 @"disjunction.saturating_tail2<0>"(i64  %"lst##0")    {
+entry:
+  %"1#tmp#5##0" = icmp ne i64 %"lst##0", 0 
+  br i1 %"1#tmp#5##0", label %if.then, label %if.else 
+if.then:
+  %19 = add   i64 %"lst##0", 8 
+  %20 = inttoptr i64 %19 to i64* 
+  %21 = getelementptr  i64, i64* %20, i64 0 
+  %22 = load  i64, i64* %21 
+  ret i64 %22 
+if.else:
+  ret i64 0 
+}
