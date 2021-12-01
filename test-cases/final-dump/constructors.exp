@@ -129,7 +129,7 @@ value(#rec##0:constructors, ?#rec##1:constructors, #field##0:wybe.int, ?#success
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  i1 @"constructors.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
@@ -221,7 +221,7 @@ if.then:
   %29 = inttoptr i64 %28 to i8* 
   %30 = inttoptr i64 %"#rec##0" to i8* 
   %31 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %29, i8*  %30, i32  %31, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %29, i8*  %30, i32  %31, i1  0)  
   %32 = inttoptr i64 %28 to i64* 
   %33 = getelementptr  i64, i64* %32, i64 0 
   store  i64 %"#field##0", i64* %33 

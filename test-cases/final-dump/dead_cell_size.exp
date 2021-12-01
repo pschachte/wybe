@@ -398,7 +398,7 @@ declare external ccc  void @print_int(i64)
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  void @"dead_cell_size.<0>"()    {
@@ -1213,7 +1213,7 @@ td1(#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, #field##0:wybe.int, ?#s
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  i1 @"dead_cell_size.t.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
@@ -1417,7 +1417,7 @@ if.then1:
   %65 = inttoptr i64 %64 to i8* 
   %66 = inttoptr i64 %"#rec##0" to i8* 
   %67 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %65, i8*  %66, i32  %67, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %65, i8*  %66, i32  %67, i1  0)  
   %68 = inttoptr i64 %64 to i64* 
   %69 = getelementptr  i64, i64* %68, i64 0 
   store  i64 %"#field##0", i64* %69 
@@ -1541,7 +1541,7 @@ if.then1:
   %126 = inttoptr i64 %123 to i8* 
   %127 = inttoptr i64 %125 to i8* 
   %128 = trunc i64 24 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %126, i8*  %127, i32  %128, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %126, i8*  %127, i32  %128, i1  0)  
   %129 = add   i64 %124, -1 
   %130 = inttoptr i64 %129 to i64* 
   %131 = getelementptr  i64, i64* %130, i64 0 
@@ -1604,7 +1604,7 @@ if.then1:
   %153 = inttoptr i64 %150 to i8* 
   %154 = inttoptr i64 %152 to i8* 
   %155 = trunc i64 24 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %153, i8*  %154, i32  %155, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %153, i8*  %154, i32  %155, i1  0)  
   %156 = add   i64 %151, 7 
   %157 = inttoptr i64 %156 to i64* 
   %158 = getelementptr  i64, i64* %157, i64 0 
@@ -1667,7 +1667,7 @@ if.then1:
   %180 = inttoptr i64 %177 to i8* 
   %181 = inttoptr i64 %179 to i8* 
   %182 = trunc i64 24 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %180, i8*  %181, i32  %182, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %180, i8*  %181, i32  %182, i1  0)  
   %183 = add   i64 %178, 15 
   %184 = inttoptr i64 %183 to i64* 
   %185 = getelementptr  i64, i64* %184, i64 0 
@@ -1770,7 +1770,7 @@ if.then1:
   %222 = inttoptr i64 %219 to i8* 
   %223 = inttoptr i64 %221 to i8* 
   %224 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %222, i8*  %223, i32  %224, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %222, i8*  %223, i32  %224, i1  0)  
   %225 = add   i64 %220, -2 
   %226 = inttoptr i64 %225 to i64* 
   %227 = getelementptr  i64, i64* %226, i64 0 
@@ -1922,7 +1922,7 @@ t2b(?a##0:wybe.int, #result##0:dead_cell_size.t2, ?#success##0:wybe.bool):
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  i1 @"dead_cell_size.t2.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
@@ -1978,7 +1978,7 @@ if.then:
   %17 = inttoptr i64 %16 to i8* 
   %18 = inttoptr i64 %"#rec##0" to i8* 
   %19 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %17, i8*  %18, i32  %19, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %17, i8*  %18, i32  %19, i1  0)  
   %20 = inttoptr i64 %16 to i64* 
   %21 = getelementptr  i64, i64* %20, i64 0 
   store  i64 %"#field##0", i64* %21 

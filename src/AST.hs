@@ -1719,7 +1719,7 @@ doImport mod (imports, _) = do
       " into " ++
       let modStr = showModSpec currMod
       in modStr ++ ":  " ++ showUse (27 + length modStr) mod imports
-    fromIFace <- (modInterface . trustFromJust "doImport")
+    fromIFace <- modInterface . trustFromJust "doImport"
                  <$> getLoadingModule mod
     let pubImports = importPublic imports
     let allImports = combineImportPart pubImports $ importPrivate imports
@@ -2347,6 +2347,8 @@ foldExp' _   _   val AnonParamVar{}      = val
 foldExp' sfn efn val (Where stmts exp) =
     let val1 = foldStmts sfn efn val stmts
     in  foldExp sfn efn val1 $content exp
+foldExp' sfn efn val (DisjExp e1 e2) =
+    foldExp sfn efn (foldExp sfn efn val (content e1)) (content e2)
 foldExp' sfn efn val (CondExp stmt e1 e2) =
     let val1 = foldStmt sfn efn val $ content stmt
         val2 = foldExp sfn efn val1 $ content e1
@@ -2796,6 +2798,7 @@ data Exp
       | AnonProc ProcModifiers [Param] [Placed Stmt] -- removed in unbranching
       | AnonParamVar (Maybe Integer) FlowDirection
       | Where [Placed Stmt] (Placed Exp)
+      | DisjExp (Placed Exp) (Placed Exp)
       | CondExp (Placed Stmt) (Placed Exp) (Placed Exp)
       | Fncall ModSpec ProcName [Placed Exp]
       | ForeignFn Ident ProcName [Ident] [Placed Exp]
@@ -3136,8 +3139,8 @@ argFlowDescription FlowOut = "output"
 
 -- |Convert a statement read as an expression to a Stmt.
 expToStmt :: Exp -> Stmt
-expToStmt (Fncall [] "&&" args) = And $ List.map (fmap expToStmt) args
-expToStmt (Fncall [] "||"  args) = Or (List.map (fmap expToStmt) args) Nothing
+expToStmt (Fncall [] "&" args) = And $ List.map (fmap expToStmt) args
+expToStmt (Fncall [] "|"  args) = Or (List.map (fmap expToStmt) args) Nothing
 expToStmt (Fncall [] "~" [arg]) = Not $ fmap expToStmt arg
 expToStmt (Fncall [] "~" args) = shouldnt $ "non-unary 'not' " ++ show args
 expToStmt (Fncall maybeMod name args) =
@@ -3172,6 +3175,7 @@ expOutputs (AnonProc _ _ _) = Set.empty
 expOutputs (ProcRef _ _) = Set.empty
 expOutputs (Typed expr _ _) = expOutputs expr
 expOutputs (AnonParamVar _ _) = Set.empty
+expOutputs (DisjExp pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
 expOutputs (Where _ pexp) = expOutputs $ content pexp
 expOutputs (CondExp _ pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
 expOutputs (Fncall _ _ args) = pexpListOutputs args
@@ -3199,6 +3203,7 @@ expInputs (ProcRef _ _) = Set.empty
 expInputs (Typed expr _ _) = expInputs expr
 expInputs (AnonParamVar _ _) = Set.empty
 expInputs (Where _ pexp) = expInputs $ content pexp
+expInputs (DisjExp pexp1 pexp2) = pexpListInputs [pexp1,pexp2]
 expInputs (CondExp _ pexp1 pexp2) = pexpListInputs [pexp1,pexp2]
 expInputs (Fncall _ _ args) = pexpListInputs args
 expInputs (ForeignFn _ _ _ args) = pexpListInputs args
@@ -3660,13 +3665,13 @@ showStmt _ (ForeignCall lang name flags args) =
 showStmt _ (TestBool test) =
     "testbool " ++ show test
 showStmt indent (And stmts) =
-    intercalate ("\n" ++ replicate indent ' ' ++ "&& ")
+    intercalate ("\n" ++ replicate indent ' ' ++ "& ")
     (List.map (showStmt indent' . content) stmts) ++
     ")"
     where indent' = indent + 4
 showStmt indent (Or stmts genVars) =
     "(   " ++
-    intercalate ("\n" ++ replicate indent ' ' ++ "|| ")
+    intercalate ("\n" ++ replicate indent ' ' ++ "| ")
         (List.map (showStmt indent' . content) stmts) ++
     ")" ++ maybe "" ((" -> "++) . showVarMap) genVars
     where indent' = indent + 4
@@ -3756,6 +3761,8 @@ instance Show Exp where
   show (ProcRef ps es) = show ps ++ "<" ++ intercalate ", " (show <$> es) ++ ">"
   show (AnonParamVar num dir) = flowPrefix dir ++ "@" ++ maybe "" show num
   show (Where stmts exp) = show exp ++ " where" ++ showBody 8 stmts
+  show (DisjExp e1 e2) =
+    "(" ++ show e1 ++ " | " ++ show e2 ++ ")"
   show (CondExp cond thn els) =
     "if {" ++ show cond ++ ":: " ++ show thn ++ " | " ++ show els ++ "}"
   show (Fncall maybeMod fn args) =

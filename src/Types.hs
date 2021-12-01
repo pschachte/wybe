@@ -1389,10 +1389,8 @@ matchTypeList' callee pos callArgTypes calleeInfo = do
     if List.null mismatches
     then return $ OK
          (calleeInfo
-        -- XXX this throws away the types of the callee
-        --   {procInfoArgs = List.zipWith TypeFlow matches calleeFlows},
-          {procInfoArgs = List.zipWith TypeFlow calleeTypes calleeFlows},
-          typing)
+          {procInfoArgs=List.zipWith TypeFlow matches calleeFlows},
+           typing)
     else return $ Err [ReasonArgType callee n pos | n <- mismatches]
 
 higherCallCheck :: Ident -> Placed Exp -> OptPos -> [TypeFlow] -> Determinism -> Typed ()
@@ -1550,6 +1548,13 @@ initBindingState :: ProcDef -> Set ResourceSpec -> BindingState
 initBindingState pdef resources =
     BindingState Det impurity resources (Just Set.empty) Nothing
     where impurity = expectedImpurity $ procImpurity pdef
+
+
+-- | BindingState for a failing computation (every possible variable is bound if
+-- this succeeds, but it won't succeed).
+failingBindingState :: BindingState
+failingBindingState  =
+    BindingState Failure Pure Set.empty Nothing Nothing
 
 
 -- | BindingState at the top of a loop, based on state before the loop.
@@ -1726,30 +1731,28 @@ modecheckStmts m name pos assigned detism tmpCount final (pstmt:pstmts) = do
     return (pstmt'++pstmts',assigned'',tmpCount'')
 
 
--- |Mode check a single statement, returning a list of moded statements,
---  plus a set of variables bound by this
---  statement, and a list of errors.  When this is called, all variable
---  and type variable types have already been established in the Typed monad.
+-- |Mode check a single statement, returning a list of moded statements, plus a
+--  set of variables bound by this statement, and a list of errors.  When this
+--  is called, all variable and type variable types have already been
+--  established in the Typed monad.
 --
 --  We select a mode as follows:
 --    0.  If some input arguments are not assigned, report an uninitialised
 --        variable error.
---    1.  If there is an exact match for the current instantiation state
---        (treating any FlowUnknown args as ParamIn), select it.
+--    1.  If there is an exact match for the current instantiation state, select
+--        it.
 --    2.  If this is a test context and there is a match for the current
---        instantiation state (treating any FlowUnknown args as ParamIn
---        and allowing ParamIn arguments where the parameter is ParamOut),
---        select it, and transform by replacing each non-identical flow
---        ParamIn argument with a fresh ParamOut variable, and adding a
---        = test call to test the fresh variable against the actual ParamIn
+--        instantiation state (allowing ParamIn arguments where the parameter is
+--        ParamOut), select it, and transform by replacing each non-identical
+--        flow ParamIn argument with a fresh ParamOut variable, and adding an =
+--        test call to test the fresh variable against the actual ParamIn
 --        argument.
---    3.  If there is a match (possibly with some ParamIn args where
---        ParamOut is expected) treating any FlowUnknown args as ParamOut,
---        then select that mode but delay the call.
+--    3.  If there is a match (possibly with some ParamIn args where ParamOut is
+--        expected), then select that mode but delay the call.
 --    4.  Otherwise report a mode error.
 --
---    In case there are multiple modes that match one of those criteria,
---    select the first that matches.
+--    In case there are multiple modes that match one of those criteria, select
+--    the first that matches.
 
 modecheckStmt :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism
               -> Int -> Bool -> Stmt -> OptPos
@@ -1884,9 +1887,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
         (modecheckStmt m name defPos assigned SemiDet tmpCount False)
         tstStmt
     logTyped $ "Assigned by test: " ++ show assigned1
-    let condVars = maybe [] Set.toAscList $ bindingVars assigned1
-    condTypes <- mapM ultimateVarType condVars
-    let condBindings = Map.fromAscList $ zip condVars condTypes
+    condBindings <- bindingVarDict assigned1
     logTyped $ "Assigned by test: " ++ show assigned1
     (thnStmts', assigned2, tmpCount2) <-
         modecheckStmts m name defPos (forceDet assigned1) detism tmpCount1
@@ -1958,18 +1959,20 @@ modecheckStmt m name defPos assigned detism tmpCount final
         then return (stmts', assigned',tmpCount')
         else return ([maybePlace (And stmts') pos], assigned',tmpCount')
 modecheckStmt m name defPos assigned detism tmpCount final
-    stmt@(Or stmts _) pos = do
+    stmt@(Or disj _) pos = do
     logTyped $ "Mode checking disjunction " ++ show stmt
-    -- XXX must mode check individually and join the resulting states
-    (stmts', assigned', tmpCount')
-        <- modecheckStmts m name defPos assigned detism tmpCount final stmts
-    vars <- typeMapFromSet $ bindingVars assigned'
-    return ([maybePlace (Or stmts' vars) pos], assigned',tmpCount')
+    (disj',assigned',tmpCount') <-
+        modecheckDisj m name defPos assigned detism tmpCount final
+                      failingBindingState disj
+    varDict <- bindingVarDict assigned'
+    return ([maybePlace (Or disj' (Just varDict)) pos],assigned',tmpCount')
 modecheckStmt m name defPos assigned detism tmpCount final
     (Not stmt) pos = do
     logTyped $ "Mode checking negation " ++ show stmt
     (stmt', _, tmpCount') <-
-        placedApplyM (modecheckStmt m name defPos assigned detism tmpCount final) stmt
+        placedApplyM
+        (modecheckStmt m name defPos assigned detism tmpCount final)
+        stmt
     return ([maybePlace (Not (seqToStmt stmt')) pos], assigned, tmpCount')
 modecheckStmt _ _ _ _ _ _ final stmt@For{} pos =
     shouldnt $ "For statement left by unbranching: " ++ show stmt
@@ -2082,8 +2085,41 @@ collectInParams s (Param n _ flow _)
 collectInParams s _ = s
 
 
+-- |Produce a VarDict from the set of definitely bound variables in the supplied
+-- BindingState, taking the types from the Typed monad.
+bindingVarDict :: BindingState -> Typed VarDict
+bindingVarDict assigned = do
+    let condVars = maybe [] Set.toAscList $ bindingVars assigned
+    condTypes <- mapM ultimateVarType condVars
+    return $ Map.fromAscList $ zip condVars condTypes
+
+
+modecheckDisj :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism
+              -> Int -> Bool -> BindingState -> [Placed Stmt]
+              -> Typed ([Placed Stmt],BindingState,Int)
+modecheckDisj m name defPos assigned detism tmpCount final disjAssigned [] =
+    return ([],disjAssigned,tmpCount)
+modecheckDisj m name defPos assigned detism tmpCount final disjAssigned     
+        (stmt:stmts) = do
+    -- The last disjunct in a disjunction must have the same determinism
+    -- required of the whole disjunction; others can be SemiDet.
+    let detism1 = if List.null stmts then detism else SemiDet
+    (disj1,assigned1,tmpCount1) <-
+        placedApply
+        (modecheckStmt m name defPos assigned detism1 tmpCount final)
+        stmt
+    let disjAssigned' = joinState disjAssigned assigned1
+    (disjs,disjAssigned'',tmpCounts) <-
+            modecheckDisj m name defPos assigned detism tmpCount1 final 
+                          disjAssigned' stmts
+    let disj1' = seqToStmt disj1
+    return (disj1':disjs, disjAssigned'', tmpCounts)
+
+    
+
 -- |Produce a typed statement sequence, the binding state, and final temp count
 -- from a single proc call.
+
 finaliseCall :: ModSpec -> ProcName -> BindingState -> Determinism -> Bool
              -> Int -> Bool -> OptPos -> [Placed Exp] -> ProcInfo -> Stmt
              -> Typed ([Placed Stmt],BindingState,Int)

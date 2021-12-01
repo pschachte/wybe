@@ -593,7 +593,7 @@ actually replace the second statement with
 ?z = a
 ```
 
-## Tests and partial functions
+## <a name="tests"></a>Tests and partial functions
 
 Some procedure and function calls are *tests*.  This means that instead
 of returning whatever outputs they ordinarily produce, they can *fail*,
@@ -623,6 +623,59 @@ latter):
 ```
 add(x, y, xy)
 xy = add(x, y)
+```
+
+
+## <a name="disjunction"></a>Disjunction
+
+Statements and sequences of statements can be disjoined using the `|` operator.
+For example,
+
+>   *statement1* `;` *statement2* `|` *statement3* `;` *statement4*
+
+Note that `|` binds looser than `;` (or newline), so in this example,
+*statement1* `;` *statement2* is the first disjunct, and  *statement3* `;`
+*statement4* is the second.  Each disjunct can have one or more statements, and
+there can be more than two disjuncts by repeating the `|` operator.
+
+If the first disjunct completes without a failure, the second and subsequent
+disjuncts are ignored.  However, if any [test or partial function call](#tests)
+in the first disjunct fails, Wybe will begin executing the first statement of
+the next disjunct, as if the first disjunct were never executed.  This means
+that any assignments that were made by that disjunct will not be available as
+execution of the next disjunct begins.  In general, if any disjunct fails, the
+next disjunct is attempted, and if one disjunct completes without failing, all
+following disjuncts are ignored.  If all disjuncts fail, then the whole
+disjunction fails.
+
+Braces may be used for grouping, so that code before or after the disjunction
+will always be executed, regardless of which disjunct succeeds.  Variables bound
+before the start of the disjunction will be available at the start of every
+disjunct, and variables that are bound by *every* disjunct will be available in
+following code, and are consideredd to be bound by the enclosing procedure.
+
+Disjunction can be used in a test procedure, in which case the test succeeds if
+any disjunct succeeds.  It can also be used in an ordinary (deterministic)
+procedure, in which case the final disjunct must not be a test, to ensure that
+the disjunction always succeeds.
+
+Disjunction can also be used in expressions using a similar syntax:
+
+> `(` *expression1* `|` *expression2* `)`
+
+where each expression can involve partial function calls.  Note that the
+parentheses are required because of the precedence of the `|` operator.  The
+value of this expression will be the value of *expression1* if no failure occurs
+during its evaluation, or *expression2* otherwise.  Each expression can involve
+any number of partial function calls, and will be considered to succeed if and
+only if all of the partial function calls succeed.  As with disjunctive
+statements, a disjunctive expression can have two or more disjuncts, and is
+partial (a test) if and only if the last disjunct is partial.  For example, we
+can define a function to return the tail of a list, or return the empty list if
+the input list is empty:
+
+```
+pub def saturating_tail(lst:list(T)):list(T) = (tail(lst) | [])
 ```
 
 
@@ -1590,6 +1643,9 @@ Floating point (signed) strictly greater
 Floating point (signed) greater or equal
 
 #####  <a name="conversion"></a>Integer/floating point conversion
+
+These operations convert between floating point and integer representations.
+They work for any bitwith float and integer types.
 
 - `foreign llvm uitofp(`arg1:int`)`:float  
 Convert unsigned integer to float

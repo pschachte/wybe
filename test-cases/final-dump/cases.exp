@@ -55,7 +55,7 @@ len2(lst##0:wybe.list(T), ?#result##0:wybe.int):
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  i64 @"cases.len<0>"(i64  %"lst##0")    {

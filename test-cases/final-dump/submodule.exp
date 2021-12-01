@@ -24,7 +24,7 @@ AFTER EVERYTHING:
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 --------------------------------------------------
  Module submodule.privatetest
   representation  : (not a type)
@@ -79,7 +79,7 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  void @"submodule.privatetest.hidden<0>"()    {
@@ -148,7 +148,7 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  void @"submodule.publictest.semi_visible<0>"()    {

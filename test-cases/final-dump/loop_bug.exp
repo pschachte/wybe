@@ -111,7 +111,7 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  void @"loop_bug.gen#1<0>"(i64  %"lst##0", i64  %"t##0")    {
@@ -344,7 +344,7 @@ tail(#rec##0:loop_bug.int_list, ?#rec##1:loop_bug.int_list, #field##0:loop_bug.i
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  i1 @"loop_bug.int_list.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
@@ -453,7 +453,7 @@ if.then:
   %46 = inttoptr i64 %45 to i8* 
   %47 = inttoptr i64 %"#rec##0" to i8* 
   %48 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %46, i8*  %47, i32  %48, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %46, i8*  %47, i32  %48, i1  0)  
   %49 = inttoptr i64 %45 to i64* 
   %50 = getelementptr  i64, i64* %49, i64 0 
   store  i64 %"#field##0", i64* %50 
@@ -503,7 +503,7 @@ if.then:
   %66 = inttoptr i64 %65 to i8* 
   %67 = inttoptr i64 %"#rec##0" to i8* 
   %68 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %66, i8*  %67, i32  %68, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %66, i8*  %67, i32  %68, i1  0)  
   %69 = add   i64 %65, 8 
   %70 = inttoptr i64 %69 to i64* 
   %71 = getelementptr  i64, i64* %70, i64 0 

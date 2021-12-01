@@ -188,7 +188,7 @@ AFTER EVERYTHING:
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 --------------------------------------------------
  Module multictr.card
   representation  : 6 bit unsigned
@@ -295,7 +295,7 @@ suit(#rec##0:multictr.card, ?#rec##2:multictr.card, #field##0:multictr.suit):
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  i1 @"multictr.card.=<0>"(i6  %"#left##0", i6  %"#right##0")    {
@@ -2798,7 +2798,7 @@ winter(?#result##0:multictr.complicated):
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  i1 @"multictr.complicated.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
@@ -4215,7 +4215,7 @@ if.then1:
   %535 = inttoptr i64 %534 to i8* 
   %536 = inttoptr i64 %"#rec##0" to i8* 
   %537 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %535, i8*  %536, i32  %537, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %535, i8*  %536, i32  %537, i1  0)  
   %538 = inttoptr i64 %534 to i64* 
   %539 = getelementptr  i64, i64* %538, i64 0 
   store  i64 %"#field##0", i64* %539 
@@ -4277,7 +4277,7 @@ if.then1:
   %561 = inttoptr i64 %558 to i8* 
   %562 = inttoptr i64 %560 to i8* 
   %563 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %561, i8*  %562, i32  %563, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %561, i8*  %562, i32  %563, i1  0)  
   %564 = add   i64 %559, -1 
   %565 = inttoptr i64 %564 to i64* 
   %566 = getelementptr  i64, i64* %565, i64 0 
@@ -4340,7 +4340,7 @@ if.then1:
   %588 = inttoptr i64 %585 to i8* 
   %589 = inttoptr i64 %587 to i8* 
   %590 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %588, i8*  %589, i32  %590, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %588, i8*  %589, i32  %590, i1  0)  
   %591 = add   i64 %586, -2 
   %592 = inttoptr i64 %591 to i64* 
   %593 = getelementptr  i64, i64* %592, i64 0 
@@ -4403,7 +4403,7 @@ if.then1:
   %615 = inttoptr i64 %612 to i8* 
   %616 = inttoptr i64 %614 to i8* 
   %617 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %615, i8*  %616, i32  %617, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %615, i8*  %616, i32  %617, i1  0)  
   %618 = add   i64 %613, -3 
   %619 = inttoptr i64 %618 to i64* 
   %620 = getelementptr  i64, i64* %619, i64 0 
@@ -4466,7 +4466,7 @@ if.then1:
   %642 = inttoptr i64 %639 to i8* 
   %643 = inttoptr i64 %641 to i8* 
   %644 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %642, i8*  %643, i32  %644, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %642, i8*  %643, i32  %644, i1  0)  
   %645 = add   i64 %640, -4 
   %646 = inttoptr i64 %645 to i64* 
   %647 = getelementptr  i64, i64* %646, i64 0 
@@ -4529,7 +4529,7 @@ if.then1:
   %669 = inttoptr i64 %666 to i8* 
   %670 = inttoptr i64 %668 to i8* 
   %671 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %669, i8*  %670, i32  %671, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %669, i8*  %670, i32  %671, i1  0)  
   %672 = add   i64 %667, -5 
   %673 = inttoptr i64 %672 to i64* 
   %674 = getelementptr  i64, i64* %673, i64 0 
@@ -4592,7 +4592,7 @@ if.then1:
   %696 = inttoptr i64 %693 to i8* 
   %697 = inttoptr i64 %695 to i8* 
   %698 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %696, i8*  %697, i32  %698, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %696, i8*  %697, i32  %698, i1  0)  
   %699 = add   i64 %694, -6 
   %700 = inttoptr i64 %699 to i64* 
   %701 = getelementptr  i64, i64* %700, i64 0 
@@ -4677,7 +4677,7 @@ if.then2:
   %733 = inttoptr i64 %730 to i8* 
   %734 = inttoptr i64 %732 to i8* 
   %735 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %733, i8*  %734, i32  %735, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %733, i8*  %734, i32  %735, i1  0)  
   %736 = add   i64 %731, 1 
   %737 = inttoptr i64 %736 to i64* 
   %738 = getelementptr  i64, i64* %737, i64 0 
@@ -4762,7 +4762,7 @@ if.then2:
   %772 = inttoptr i64 %769 to i8* 
   %773 = inttoptr i64 %771 to i8* 
   %774 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %772, i8*  %773, i32  %774, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %772, i8*  %773, i32  %774, i1  0)  
   %775 = add   i64 %770, 1 
   %776 = inttoptr i64 %775 to i64* 
   %777 = getelementptr  i64, i64* %776, i64 0 
@@ -4847,7 +4847,7 @@ if.then2:
   %811 = inttoptr i64 %808 to i8* 
   %812 = inttoptr i64 %810 to i8* 
   %813 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %811, i8*  %812, i32  %813, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %811, i8*  %812, i32  %813, i1  0)  
   %814 = add   i64 %809, 1 
   %815 = inttoptr i64 %814 to i64* 
   %816 = getelementptr  i64, i64* %815, i64 0 
@@ -4932,7 +4932,7 @@ if.then2:
   %850 = inttoptr i64 %847 to i8* 
   %851 = inttoptr i64 %849 to i8* 
   %852 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %850, i8*  %851, i32  %852, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %850, i8*  %851, i32  %852, i1  0)  
   %853 = add   i64 %848, 1 
   %854 = inttoptr i64 %853 to i64* 
   %855 = getelementptr  i64, i64* %854, i64 0 
@@ -5017,7 +5017,7 @@ if.then2:
   %889 = inttoptr i64 %886 to i8* 
   %890 = inttoptr i64 %888 to i8* 
   %891 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %889, i8*  %890, i32  %891, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %889, i8*  %890, i32  %891, i1  0)  
   %892 = add   i64 %887, 1 
   %893 = inttoptr i64 %892 to i64* 
   %894 = getelementptr  i64, i64* %893, i64 0 
@@ -5102,7 +5102,7 @@ if.then2:
   %928 = inttoptr i64 %925 to i8* 
   %929 = inttoptr i64 %927 to i8* 
   %930 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %928, i8*  %929, i32  %930, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %928, i8*  %929, i32  %930, i1  0)  
   %931 = add   i64 %926, 1 
   %932 = inttoptr i64 %931 to i64* 
   %933 = getelementptr  i64, i64* %932, i64 0 
@@ -5187,7 +5187,7 @@ if.then2:
   %967 = inttoptr i64 %964 to i8* 
   %968 = inttoptr i64 %966 to i8* 
   %969 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %967, i8*  %968, i32  %969, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %967, i8*  %968, i32  %969, i1  0)  
   %970 = add   i64 %965, 1 
   %971 = inttoptr i64 %970 to i64* 
   %972 = getelementptr  i64, i64* %971, i64 0 
@@ -5272,7 +5272,7 @@ if.then2:
   %1006 = inttoptr i64 %1003 to i8* 
   %1007 = inttoptr i64 %1005 to i8* 
   %1008 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %1006, i8*  %1007, i32  %1008, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %1006, i8*  %1007, i32  %1008, i1  0)  
   %1009 = add   i64 %1004, 1 
   %1010 = inttoptr i64 %1009 to i64* 
   %1011 = getelementptr  i64, i64* %1010, i64 0 
@@ -5357,7 +5357,7 @@ if.then2:
   %1045 = inttoptr i64 %1042 to i8* 
   %1046 = inttoptr i64 %1044 to i8* 
   %1047 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %1045, i8*  %1046, i32  %1047, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %1045, i8*  %1046, i32  %1047, i1  0)  
   %1048 = add   i64 %1043, 1 
   %1049 = inttoptr i64 %1048 to i64* 
   %1050 = getelementptr  i64, i64* %1049, i64 0 
@@ -5442,7 +5442,7 @@ if.then2:
   %1084 = inttoptr i64 %1081 to i8* 
   %1085 = inttoptr i64 %1083 to i8* 
   %1086 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %1084, i8*  %1085, i32  %1086, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %1084, i8*  %1085, i32  %1086, i1  0)  
   %1087 = add   i64 %1082, 1 
   %1088 = inttoptr i64 %1087 to i64* 
   %1089 = getelementptr  i64, i64* %1088, i64 0 
@@ -5558,7 +5558,7 @@ value([#rec##0:multictr.length], ?#rec##2:multictr.length, #field##0:wybe.float)
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  i1 @"multictr.length.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
@@ -5733,7 +5733,7 @@ value(#rec##0:multictr.maybe_int, ?#rec##1:multictr.maybe_int, #field##0:wybe.in
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  i1 @"multictr.maybe_int.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
@@ -5825,7 +5825,7 @@ if.then:
   %29 = inttoptr i64 %28 to i8* 
   %30 = inttoptr i64 %"#rec##0" to i8* 
   %31 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %29, i8*  %30, i32  %31, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %29, i8*  %30, i32  %31, i1  0)  
   %32 = inttoptr i64 %28 to i64* 
   %33 = getelementptr  i64, i64* %32, i64 0 
   store  i64 %"#field##0", i64* %33 
@@ -6056,7 +6056,7 @@ int_value(#rec##0:multictr.number, ?#rec##1:multictr.number, #field##0:wybe.int,
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  i1 @"multictr.number.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
@@ -6171,7 +6171,7 @@ if.then:
   %41 = inttoptr i64 %38 to i8* 
   %42 = inttoptr i64 %40 to i8* 
   %43 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %41, i8*  %42, i32  %43, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %41, i8*  %42, i32  %43, i1  0)  
   %44 = add   i64 %39, -1 
   %45 = inttoptr i64 %44 to double* 
   %46 = getelementptr  double, double* %45, i64 0 
@@ -6248,7 +6248,7 @@ if.then:
   %73 = inttoptr i64 %72 to i8* 
   %74 = inttoptr i64 %"#rec##0" to i8* 
   %75 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %73, i8*  %74, i32  %75, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %73, i8*  %74, i32  %75, i1  0)  
   %76 = inttoptr i64 %72 to i64* 
   %77 = getelementptr  i64, i64* %76, i64 0 
   store  i64 %"#field##0", i64* %77 
@@ -6345,7 +6345,7 @@ perhaps(?content##0:multictr.maybe_int, #result##0:multictr.perhaps):
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  i1 @"multictr.perhaps.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
@@ -6556,7 +6556,7 @@ r9(?#result##0:multictr.rank):
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  i1 @"multictr.rank.=<0>"(i4  %"#left##0", i4  %"#right##0")    {
@@ -7007,7 +7007,7 @@ zero(?#result##0:multictr.simple):
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  i1 @"multictr.simple.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
@@ -7167,7 +7167,7 @@ if.then1:
   %49 = inttoptr i64 %48 to i8* 
   %50 = inttoptr i64 %"#rec##0" to i8* 
   %51 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %49, i8*  %50, i32  %51, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %49, i8*  %50, i32  %51, i1  0)  
   %52 = inttoptr i64 %48 to i64* 
   %53 = getelementptr  i64, i64* %52, i64 0 
   store  i64 %"#field##0", i64* %53 
@@ -7280,7 +7280,7 @@ if.then1:
   %100 = inttoptr i64 %97 to i8* 
   %101 = inttoptr i64 %99 to i8* 
   %102 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %100, i8*  %101, i32  %102, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %100, i8*  %101, i32  %102, i1  0)  
   %103 = add   i64 %98, -1 
   %104 = inttoptr i64 %103 to i64* 
   %105 = getelementptr  i64, i64* %104, i64 0 
@@ -7343,7 +7343,7 @@ if.then1:
   %127 = inttoptr i64 %124 to i8* 
   %128 = inttoptr i64 %126 to i8* 
   %129 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %127, i8*  %128, i32  %129, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %127, i8*  %128, i32  %129, i1  0)  
   %130 = add   i64 %125, 7 
   %131 = inttoptr i64 %130 to i64* 
   %132 = getelementptr  i64, i64* %131, i64 0 
@@ -7451,7 +7451,7 @@ spades(?#result##0:multictr.suit):
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  i1 @"multictr.suit.=<0>"(i2  %"#left##0", i2  %"#right##0")    {
@@ -7541,7 +7541,7 @@ unit(?#result##0:multictr.unit):
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  i1 @"multictr.unit.=<0>"()    {

@@ -598,17 +598,17 @@ icmp p a b = ICmp p a b []
 
 -- * Unary
 
-uitofp :: Operand -> Instruction
-uitofp a = UIToFP a float_t []
+uitofp :: Operand -> Type -> Instruction
+uitofp a ty = UIToFP a ty []
 
-sitofp :: Operand -> Instruction
-sitofp a = SIToFP a float_t []
+sitofp :: Operand -> Type -> Instruction
+sitofp a ty = SIToFP a ty []
 
-fptoui :: Operand -> Instruction
-fptoui a = FPToUI a int_t []
+fptoui :: Operand -> Type -> Instruction
+fptoui a ty = FPToUI a ty []
 
-fptosi :: Operand -> Instruction
-fptosi a = FPToSI a int_t []
+fptosi :: Operand -> Type -> Instruction
+fptosi a ty = FPToSI a ty []
 
 -- | Create a constant operand (function parameters).
 cons :: C.Constant -> Operand

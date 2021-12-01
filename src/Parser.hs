@@ -496,8 +496,12 @@ primaryTerm =
 parenthesisedTerm :: Parser Term
 parenthesisedTerm = do
     pos <- sourcePos
-    exps <- argumentList Paren
+    exps <- betweenB Paren (limitedTerm lowestParenthesisedPrecedence 
+                            `sepBy` comma)
     return $ Embraced pos Paren exps Nothing
+    -- pos <- tokenPosition <$> leftBracket Paren
+    -- setTermPos pos <$> limitedTerm lowestParenthesisedPrecedence
+    --                    <* rightBracket Paren
 
 
 varOrCall :: Parser Term
@@ -623,6 +627,11 @@ lowestTermPrecedence = 1
 -- |Lowest (loosest) operator precedence of an individual statement
 lowestStmtPrecedence :: Int
 lowestStmtPrecedence = 0
+
+
+-- |Lowest (loosest) operator precedence of a proc body
+lowestParenthesisedPrecedence :: Int
+lowestParenthesisedPrecedence = -3
 
 
 -- |Lowest (loosest) operator precedence of a proc body
@@ -1014,6 +1023,8 @@ termToStmt (Call pos [] "::" ParamIn [test,body]) = do
     test' <- termToStmt test
     body' <- termToBody body
     return $ Placed (Cond test' body' [Unplaced Nop] Nothing Nothing) pos
+termToStmt (Call pos [] "&" ParamIn conjs) = do
+    (`Placed` pos) . And <$> mapM termToStmt conjs
 termToStmt (Call _ [] fn ParamIn [first,rest])
   | separatorName fn = do
     first' <- termToStmt first
@@ -1117,6 +1128,10 @@ termToExp (Call pos [] "@" flow exps) = do
         [] -> return $ Placed (AnonParamVar Nothing flow) pos
         [IntValue i] | i > 0 -> return $ Placed (AnonParamVar (Just i) flow) pos
         _ -> syntaxError pos "invalid anonymous parameter expression"
+termToExp (Call pos [] "|" ParamIn [exp1,exp2]) = do
+    exp1' <- termToExp exp1
+    exp2' <- termToExp exp2
+    return $ Placed (DisjExp exp1' exp2') pos
 termToExp (Call pos [] "if" ParamIn [conditional]) =
     termToConditionalExp conditional
 termToExp (Embraced _ Paren [exp] Nothing) = termToExp exp

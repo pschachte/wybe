@@ -14,10 +14,9 @@ pub def {inline} print(x:int) use !io { foreign c print_int(x, !io) }
 pub def {inline} println(x:int) use !io { !print(x); !nl }
 pub def {inline} read(?x:int) use !io { foreign c read_int(?x, !io) }
 
-# XXX these won't handle counts with the top bit set.
-pub def {inline} print(x:count) use !io { foreign c print_int(x, !io) }
+pub def {inline} print(x:count) use !io { foreign c print_count(x, !io) }
 pub def {inline} println(x:count) use !io { !print(x); !nl }
-pub def {inline} read(?x:count) use !io { foreign c read_int(?x, !io) }
+pub def {inline} read(?x:count) use !io { foreign c read_count(?x, !io) }
 
 pub def {inline} print(x:float) use !io { foreign c print_float(x, !io) }
 pub def {inline} println(x:float) use !io { !print(x); !nl }
@@ -31,9 +30,7 @@ pub def {inline} print(x:c_string) use !io { foreign c print_string(x, !io) }
 pub def {inline} println(x:c_string) use !io { !print(x); !nl }
 pub def {inline} read(?x:c_string) use !io { foreign c read_line(?x, !io) }
 
-pub def print(x:bool) use !io {
-   !print(if {x:: c"true" | else:: c"false"})
-}
+pub def print(x:bool) use !io { !print(if {x:: c"true" | else:: c"false"}) }
 pub def {inline} println(x:bool) use !io { !print(x); !nl }
 
 pub def {inline} print(x:string) use !io { !print_string(x) }
