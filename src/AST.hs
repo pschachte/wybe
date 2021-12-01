@@ -298,13 +298,14 @@ data TypeProto = TypeProto Ident [Ident]
 
 -- | A type modifier consists of a boolean indicating its uniqueness.
 data TypeModifiers = TypeModifiers {
-    tmUniqueness :: Bool
+    tmUniqueness :: Bool,     -- ^ Is the type required to be unique?
+    tmUnknown :: [String]     -- ^ Unknown type modifiers specified
 } deriving (Generic, Eq)
 
 
 -- | A default boolean value for Uniqueness (false)
 defaultTypeModifiers :: TypeModifiers
-defaultTypeModifiers = TypeModifiers False
+defaultTypeModifiers = TypeModifiers False []
 
 ----------------------------------------------------------------
 --                    Handling Source Positions
@@ -1769,7 +1770,6 @@ addPragma prag = do
         (\imp -> imp { modPragmas = Set.insert prag $ modPragmas imp })
 
 
-<<<<<<< HEAD
 -- |A type definition, including the number of type parameters and an
 --  optional source position.
 data TypeDef = TypeDef {
@@ -1793,12 +1793,9 @@ type ResourceIFace = Map ResourceSpec TypeSpec
 
 
 resourceDefToIFace :: ResourceDef -> ResourceIFace
-resourceDefToIFace def =
-    Map.map resourceType $ content def
+resourceDefToIFace = Map.map resourceType
 
 
-=======
->>>>>>> upstream/master
 -- |A resource definition.  Since a resource may be defined as a
 --  collection of other resources, this is a set of resources (for
 --  simple resources, this will be a singleton), each with type and
@@ -3029,16 +3026,10 @@ outputStatusName = specialName "success"
 instance Show Item where
   show (TypeDecl vis name typeModifiers (TypeRepresentation repn) items pos) = 
     visibilityPrefix vis ++ "type " ++ show name
-<<<<<<< HEAD
     ++ show typeModifiers
     ++ " is" ++ show repn
-    ++ showMaybeSourcePos pos ++ "\n  "
+    ++ showOptPos pos ++ " {\n  "
     ++ intercalate "\n  " (List.map show items)
-=======
-    ++ " is " ++ show repn
-    ++ showOptPos pos ++ " {"
-    ++ concatMap (("\n  "++) . show) items
->>>>>>> upstream/master
     ++ "\n}\n"
   show (TypeDecl vis name typeModifiers (TypeCtors ctorvis ctors) items pos) =
     visibilityPrefix vis ++ "type " ++ show name
@@ -3050,24 +3041,14 @@ instance Show Item where
     ++ "\n}\n"
   show (RepresentationDecl params typeModifiers repn pos) =
     "representation"
-<<<<<<< HEAD
-    ++ bracketList "(" ")" ", " (("?"++) <$> params)
-    ++ show typeModifiers
-    ++ " " ++ show repn ++ showMaybeSourcePos pos ++ "\n"
+    ++ bracketList "(" ", " ")" (("?"++) <$> params)
+    ++ " is " ++ show typeModifiers ++ show repn ++ showOptPos pos ++ "\n"
   show (ConstructorDecl vis params typeModifiers ctors pos) =
     visibilityPrefix vis ++ "constructors"
-    ++ bracketList "(" ")" ", " (("?"++) <$> params)
-    ++ show typeModifiers
-    ++ " " ++ show ctors ++ showMaybeSourcePos pos ++ "\n"
-=======
-    ++ bracketList "(" ", " ")" (("?"++) <$> params)
-    ++ " is " ++ show repn ++ showOptPos pos ++ "\n"
-  show (ConstructorDecl vis params ctors pos) =
-    visibilityPrefix vis ++ "constructors"
     ++ bracketList "(" ", " ")" (("?"++) <$> params) ++ " "
+    ++ show typeModifiers
     ++ intercalate " | " (show <$> ctors)
     ++ showOptPos pos ++ "\n"
->>>>>>> upstream/master
   show (ImportMods vis mods pos) =
       visibilityPrefix vis ++ "use " ++
       showModSpecs mods ++ showOptPos pos ++ "\n  "
@@ -3176,8 +3157,8 @@ instance Show t => Show (Placed t) where
 
 -- | How to show a type modifier
 instance Show TypeModifiers where
-    show (TypeModifiers True)  = "{unique} "
-    show (TypeModifiers False) = "{}"
+    show (TypeModifiers True _)  = "{unique} "
+    show (TypeModifiers False _) = "{}"
 
 -- |How to show an optional source position
 showOptPos :: OptPos -> String
@@ -3210,7 +3191,7 @@ instance Show TypeDef where
     ++ " "
     ++ intercalate "\n  " (show <$> items)
     ++ " } "
-    ++ showMaybeSourcePos pos
+    ++ showOptPos pos
 
 
 -- |How to show a resource definition.

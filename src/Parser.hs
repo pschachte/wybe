@@ -109,7 +109,8 @@ moduleItem v = do
 typeItem :: Visibility -> Parser Item
 typeItem v = do
     pos <- tokenPosition <$> ident "type"
-    modifiers <- processTypeModifiers <$> modifierList
+    modifiers <- List.foldl processTypeModifier defaultTypeModifiers
+                 <$> modifierList 
     proto <- TypeProto <$> moduleName <*> typeVarNames
     (imp,items) <- typeImpln <|> typeCtors
     return $ TypeDecl v proto modifiers imp items (Just pos)
@@ -121,7 +122,8 @@ typeRepItem = do
     keypos <- tokenPosition <$> ident "representation"
     params <- typeVarNames
     ident "is"
-    modifiers <- processTypeModifiers <$> modifierList
+    modifiers <- List.foldl processTypeModifier defaultTypeModifiers
+                 <$> modifierList 
     rep <- typeRep
     return $ RepresentationDecl params modifiers rep $ Just keypos
 
@@ -131,7 +133,8 @@ dataCtorItemParser :: Visibility -> Parser Item
 dataCtorItemParser v = do
     pos <- tokenPosition <$> (ident "constructor" <|> ident "constructors")
     params <- typeVarNames
-    modifiers <- processTypeModifiers <$> modifierList 
+    modifiers <- List.foldl processTypeModifier defaultTypeModifiers
+                 <$> modifierList 
     ctors <- ctorDecls
     return $ ConstructorDecl v params modifiers ctors $ Just pos
 
@@ -265,15 +268,10 @@ flowDirection =
 -----------------------------------------------------------------------------
 -- Handling type modifiers                                                 --
 -----------------------------------------------------------------------------
--- QUESTION: Should this be changed so it's like how
---           ProcModifiers are processed?
--- | Extract TypeModifiers from a list of identifiers.
-processTypeModifiers :: [Ident] -> TypeModifiers
-processTypeModifiers ["unique"] = TypeModfiers True
-processTypeModifiers []         = defaultTypeModifiers
-processTypeModifiers _          = do  -- errors to be reported
-    errmsg Nothing "Unknown or invalid type modifiers"
-    return defaultTypeModifiers
+-- | Add a type modifier by name to a TypeModifiers.
+processTypeModifier :: TypeModifiers -> Ident -> TypeModifiers
+processTypeModifier tms "unique" = tms {tmUniqueness = True}
+processTypeModifier tms unknown  = tms {tmUnknown = tmUnknown tms ++ [unknown]}
 
 
 -----------------------------------------------------------------------------
