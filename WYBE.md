@@ -679,8 +679,6 @@ pub def saturating_tail(lst:list(T)):list(T) = (tail(lst) | [])
 ```
 
 
-
-
 ## <a name="pattern matching"></a>Pattern matching
 
 Like procedures, some Wybe functions can be "run backwards", where the function
