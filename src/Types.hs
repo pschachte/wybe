@@ -1260,11 +1260,9 @@ matchTypeList' callee pos callArgTypes calleeInfo = do
     if List.null mismatches
     then return $ OK
          (calleeInfo
-        -- XXX this throws away the types of the callee
-        --   {procInfoArgs = List.zipWith TypeFlow matches calleeFlows},
-          {procInfoArgs = List.zipWith TypeFlow calleeTypes calleeFlows},
-
-          typing)
+          {procInfoArgs=List.zipWith TypeFlow matches calleeFlows},
+        
+           typing)
     else return $ Err [ReasonArgType callee n pos | n <- mismatches]
 
 

@@ -14,11 +14,11 @@ AFTER EVERYTHING:
 (io##0:wybe.phantom, ?io##6:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    type_generics.foo<0>(1:T, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @type_generics:nn:nn
-    type_generics.foo<0>(1:T, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #2 @type_generics:nn:nn
-    type_generics.foo<0>(1.0:T, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #3 @type_generics:nn:nn
-    type_generics.foo<0>(1.0:T, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) #4 @type_generics:nn:nn
-    type_generics.foo2<0>(1:T0, ?y##0:T0, ?tmp#7##0:wybe.bool) #5 @type_generics:nn:nn
+    type_generics.foo<0>(1:wybe.int, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @type_generics:nn:nn
+    type_generics.foo<0>(1:wybe.bool, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #2 @type_generics:nn:nn
+    type_generics.foo<0>(1.0:wybe.float, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #3 @type_generics:nn:nn
+    type_generics.foo<0>(1.0:wybe.float, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) #4 @type_generics:nn:nn
+    type_generics.foo2<0>(1:wybe.int, ?y##0:wybe.int, ?tmp#7##0:wybe.bool) #5 @type_generics:nn:nn
     case ~tmp#7##0:wybe.bool of
     0:
         type_generics.gen#1<0>(~io##4:wybe.phantom, _:wybe.bool, _:wybe.float, ?io##6:wybe.phantom) #8
@@ -50,15 +50,15 @@ foo2(x##0:T0, ?y##0:T0, ?#success##0:wybe.bool):
  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#6##0:wybe.list(T))
     foreign lpvm mutate(~tmp#6##0:wybe.list(T), ?tmp#7##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:T)
-    foreign lpvm mutate(~tmp#7##0:wybe.list(T), ?tmp#0##0:wybe.list(T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T))
+    foreign lpvm mutate(~tmp#7##0:wybe.list(T), ?tmp#0##0:wybe.list(T0), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T))
     foreign llvm icmp_ne(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
     case ~tmp#9##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
-        foreign llvm move(undef:T, ?y##0:T)
+        foreign llvm move(undef:T, ?y##0:T0)
 
     1:
-        foreign lpvm access(~tmp#0##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:T)
+        foreign lpvm access(~tmp#0##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:T0)
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -68,7 +68,7 @@ gen#1 > (2 calls)
 gen#1(io##0:wybe.phantom, [tmp#0##0:wybe.bool], [x##0:wybe.float], ?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    type_generics.foo2<0>(1:T0, ?y##0:T0, ?tmp#6##0:wybe.bool) #0 @type_generics:nn:nn
+    type_generics.foo2<0>(1:wybe.int, ?y##0:wybe.int, ?tmp#6##0:wybe.bool) #0 @type_generics:nn:nn
     case ~tmp#6##0:wybe.bool of
     0:
         type_generics.gen#2<0>(_:wybe.int, ~io##0:wybe.phantom, _:wybe.bool, _:wybe.float, ?io##2:wybe.phantom) #3
@@ -85,7 +85,7 @@ gen#2 > (2 calls)
 gen#2([i##0:wybe.int], io##0:wybe.phantom, [tmp#0##0:wybe.bool], [x##0:wybe.float], ?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    type_generics.foo2<0>(1.0:T0, ?fx##0:T0, ?tmp#5##0:wybe.bool) #0 @type_generics:nn:nn
+    type_generics.foo2<0>(1.0:wybe.float, ?fx##0:wybe.float, ?tmp#5##0:wybe.bool) #0 @type_generics:nn:nn
     case ~tmp#5##0:wybe.bool of
     0:
         type_generics.gen#3<0>(_:wybe.float, _:wybe.int, ~io##0:wybe.phantom, _:wybe.bool, _:wybe.float, ?io##2:wybe.phantom) #3
@@ -102,7 +102,7 @@ gen#3 > (2 calls)
 gen#3([f##0:wybe.float], [i##0:wybe.int], io##0:wybe.phantom, [tmp#0##0:wybe.bool], [x##0:wybe.float], ?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    type_generics.foo2<0>(1.0:T0, ?x##1:T0, ?tmp#4##0:wybe.bool) #0 @type_generics:nn:nn
+    type_generics.foo2<0>(1.0:wybe.float, ?x##1:wybe.float, ?tmp#4##0:wybe.bool) #0 @type_generics:nn:nn
     case ~tmp#4##0:wybe.bool of
     0:
         type_generics.gen#4<0>(_:wybe.float, _:wybe.int, ~io##0:wybe.phantom, _:wybe.bool, _:wybe.float, ?io##2:wybe.phantom) #3
@@ -119,7 +119,7 @@ gen#4 > (2 calls)
 gen#4([f##0:wybe.float], [i##0:wybe.int], io##0:wybe.phantom, [tmp#0##0:wybe.bool], [x##0:wybe.float], ?io##2:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    type_generics.foo2<0>('a':T0, ?z##0:T0, ?tmp#3##0:wybe.bool) #0 @type_generics:nn:nn
+    type_generics.foo2<0>('a':wybe.char, ?z##0:wybe.char, ?tmp#3##0:wybe.bool) #0 @type_generics:nn:nn
     case ~tmp#3##0:wybe.bool of
     0:
         type_generics.gen#5<0>(_:wybe.float, _:wybe.int, ~io##0:wybe.phantom, _:wybe.bool, _:wybe.float, ?io##2:wybe.phantom) #3
@@ -136,7 +136,7 @@ gen#5 > (2 calls)
 gen#5([f##0:wybe.float], [i##0:wybe.int], io##0:wybe.phantom, [tmp#0##0:wybe.bool], [x##0:wybe.float], ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    type_generics.foo2<0>(0:T0, ?b##0:T0, ?tmp#2##0:wybe.bool) #1 @type_generics:nn:nn
+    type_generics.foo2<0>(0:wybe.bool, ?b##0:wybe.bool, ?tmp#2##0:wybe.bool) #1 @type_generics:nn:nn
     case ~tmp#2##0:wybe.bool of
     0:
         foreign llvm move(~io##0:wybe.phantom, ?io##1:wybe.phantom)
@@ -172,7 +172,7 @@ declare external fastcc  void @"wybe.io.print<5>"(i1)
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  void @"type_generics.<0>"()    {
