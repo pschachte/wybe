@@ -402,7 +402,7 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  void @"anon_field.<0>"()    {
@@ -632,7 +632,7 @@ if.then:
   %96 = inttoptr i64 %93 to i8* 
   %97 = inttoptr i64 %95 to i8* 
   %98 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %96, i8*  %97, i32  %98, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %96, i8*  %97, i32  %98, i1  0)  
   %99 = add   i64 %94, -2 
   %100 = inttoptr i64 %99 to i64* 
   %101 = getelementptr  i64, i64* %100, i64 0 
@@ -833,7 +833,7 @@ if.then:
   %195 = inttoptr i64 %194 to i8* 
   %196 = inttoptr i64 %"#rec##0" to i8* 
   %197 = trunc i64 24 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %195, i8*  %196, i32  %197, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %195, i8*  %196, i32  %197, i1  0)  
   %198 = add   i64 %194, 16 
   %199 = inttoptr i64 %198 to i64* 
   %200 = getelementptr  i64, i64* %199, i64 0 
@@ -951,7 +951,7 @@ quuz(?quuz#1##0:wybe.int, ?j##0:wybe.int, #result##0:anon_field.quux):
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  i1 @"anon_field.quux.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
@@ -998,7 +998,7 @@ entry:
   %22 = inttoptr i64 %21 to i8* 
   %23 = inttoptr i64 %"#rec##0" to i8* 
   %24 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %22, i8*  %23, i32  %24, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %22, i8*  %23, i32  %24, i1  0)  
   %25 = add   i64 %21, 8 
   %26 = inttoptr i64 %25 to i64* 
   %27 = getelementptr  i64, i64* %26, i64 0 

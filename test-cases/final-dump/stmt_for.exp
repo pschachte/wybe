@@ -778,7 +778,7 @@ declare external ccc  void @print_int(i64)
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  void @"stmt_for.<0>"()    {
@@ -1919,7 +1919,7 @@ stride(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
-declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i32, i1)    
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
 define external fastcc  i1 @"stmt_for.int_sequence.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
@@ -2031,7 +2031,7 @@ entry:
   %61 = inttoptr i64 %60 to i8* 
   %62 = inttoptr i64 %"#rec##0" to i8* 
   %63 = trunc i64 24 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %61, i8*  %62, i32  %63, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %61, i8*  %62, i32  %63, i1  0)  
   %64 = add   i64 %60, 16 
   %65 = inttoptr i64 %64 to i64* 
   %66 = getelementptr  i64, i64* %65, i64 0 
@@ -2121,7 +2121,7 @@ entry:
   %112 = inttoptr i64 %111 to i8* 
   %113 = inttoptr i64 %"#rec##0" to i8* 
   %114 = trunc i64 24 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %112, i8*  %113, i32  %114, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %112, i8*  %113, i32  %114, i1  0)  
   %115 = inttoptr i64 %111 to i64* 
   %116 = getelementptr  i64, i64* %115, i64 0 
   store  i64 %"#field##0", i64* %116 
@@ -2147,7 +2147,7 @@ entry:
   %124 = inttoptr i64 %123 to i8* 
   %125 = inttoptr i64 %"#rec##0" to i8* 
   %126 = trunc i64 24 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %124, i8*  %125, i32  %126, i32  8, i1  0)  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %124, i8*  %125, i32  %126, i1  0)  
   %127 = add   i64 %123, 8 
   %128 = inttoptr i64 %127 to i64* 
   %129 = getelementptr  i64, i64* %128, i64 0 
