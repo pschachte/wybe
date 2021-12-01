@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: main_hello.<0>
 (*#globals##0:wybe.phantom, *?#globals##4:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<command_line.arguments>>::{FlowIn}, <<command_line.exit_code>>::{FlowOut}, <<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm store(<<command_line.exit_code>>:wybe.int, 42:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)

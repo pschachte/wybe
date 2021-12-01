@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: exp_if.<0>
 (*#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("expect larger: ":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #3 @io:nn:nn

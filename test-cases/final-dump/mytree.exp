@@ -26,7 +26,7 @@ AFTER EVERYTHING:
 printTree > public {inline} (0 calls) 
 0: mytree.printTree<0>
 printTree(t##0:mytree.tree, *#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     mytree.printTree1<0>(~t##0:mytree.tree, "{":wybe.string, ?prefix##1:wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #0 @mytree:nn:nn
@@ -36,7 +36,7 @@ printTree(t##0:mytree.tree, *#globals##0:wybe.phantom, *?#globals##2:wybe.phanto
 printTree1 > public (3 calls) 
 0: mytree.printTree1<0>
 printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string, *#globals##0:wybe.phantom, *?#globals##4:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: [(prefix##0,prefix##3)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(t##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool)
@@ -151,7 +151,7 @@ if.else:
 = > public (7 calls) 
 0: mytree.tree.=<0>
 =(#left##0:mytree.tree, #right##0:mytree.tree, ?#success##0:wybe.bool):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -337,7 +337,7 @@ right(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:mytree.tree, ?#succes
 ~= > public {inline} (0 calls) 
 0: mytree.tree.~=<0>
 ~=(#left##0:mytree.tree, #right##0:mytree.tree, ?#success##0:wybe.bool):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     mytree.tree.=<0>(~#left##0:mytree.tree, ~#right##0:mytree.tree, ?tmp#0##0:wybe.bool) #0

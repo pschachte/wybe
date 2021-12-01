@@ -22,7 +22,7 @@ AFTER EVERYTHING:
 *main* > public {inline,impure} (0 calls) 
 0: person5.<0>
 (*#globals##0:wybe.phantom, *?#globals##3:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("Amy":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##2:wybe.phantom) #6 @io:nn:nn
@@ -134,7 +134,7 @@ entry:
 = > public {inline} (1 calls) 
 0: person5.person.=<0>
 =(#left##0:person5.person, #right##0:person5.person, ?#success##0:wybe.bool):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:person5.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#firstname##0:wybe.string)
@@ -205,7 +205,7 @@ person(?firstname##0:wybe.string, ?lastname##0:wybe.string, #result##0:person5.p
 ~= > public {inline} (0 calls) 
 0: person5.person.~=<0>
 ~=(#left##0:person5.person, #right##0:person5.person, ?#success##0:wybe.bool):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:person5.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.string)

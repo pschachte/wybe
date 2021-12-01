@@ -28,7 +28,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: anon_field.<0>
 (*#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?tmp#21##0:anon_field)
@@ -259,7 +259,7 @@ foo(?foo#1##0:wybe.int, ?foo#2##0:wybe.bool, ?i##0:wybe.int, #result##0:anon_fie
 gen#1 > (2 calls) 
 0: anon_field.gen#1<0>
 gen#1(*#globals##0:wybe.phantom, ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?tmp#20##0:anon_field)
@@ -284,7 +284,7 @@ gen#1(*#globals##0:wybe.phantom, ?#globals##2:wybe.phantom):
 gen#2 > (3 calls) 
 0: anon_field.gen#2<0>
 gen#2(*#globals##0:wybe.phantom, ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?tmp#18##0:anon_field)
@@ -312,7 +312,7 @@ gen#2(*#globals##0:wybe.phantom, ?#globals##2:wybe.phantom):
 gen#3 > (2 calls) 
 0: anon_field.gen#3<0>
 gen#3(*#globals##0:wybe.phantom, ?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?tmp#15##0:anon_field)

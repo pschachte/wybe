@@ -15,7 +15,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: alias_multifunc1.<0>
 (*#globals##0:wybe.phantom, *?#globals##16:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#3##0:position.position)
@@ -53,7 +53,7 @@ AFTER EVERYTHING:
 replicate1 > public (1 calls) 
 0: alias_multifunc1.replicate1<0>
 replicate1(p1##0:position.position, ?p2##1:position.position, ?p3##0:position.position, *#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: [(p1##0,p3##0)]
   InterestingCallProperties: []
     alias_multifunc1.replicate2<0>(~p1##0:position.position, ?p2##0:position.position, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #0 @alias_multifunc1:13:6
@@ -64,7 +64,7 @@ replicate1(p1##0:position.position, ?p2##1:position.position, ?p3##0:position.po
 replicate2 > public (2 calls) 
 0: alias_multifunc1.replicate2<0>
 replicate2(p1##0:position.position, ?p2##0:position.position, *#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: [(p1##0,p2##0)]
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#4##0:position.position)
@@ -277,7 +277,7 @@ entry:
 printPosition > public (0 calls) 
 0: position.printPosition<0>
 printPosition(pos##0:position.position, *#globals##0:wybe.phantom, *?#globals##5:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>(" (":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #7 @io:nn:nn

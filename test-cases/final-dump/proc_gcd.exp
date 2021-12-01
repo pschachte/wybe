@@ -14,7 +14,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: proc_gcd.<0>
 (*#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     proc_gcd.gen#1<0>(~*#globals##0:wybe.phantom, 18:wybe.int, 24:wybe.int, _:wybe.int, 18:wybe.int, 24:wybe.int, ?r##0:wybe.int, ?*#globals##1:wybe.phantom) #2 @proc_gcd:nn:nn
@@ -26,7 +26,7 @@ AFTER EVERYTHING:
 gcd > public {inline} (1 calls) 
 0: proc_gcd.gcd<0>
 gcd(a##0:wybe.int, b##0:wybe.int, ?r##0:wybe.int, *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     proc_gcd.gen#1<0>(~#globals##0:wybe.phantom, ~a##0:wybe.int, ~b##0:wybe.int, _:wybe.int, ~a##0:wybe.int, ~b##0:wybe.int, ?r##0:wybe.int, ?#globals##1:wybe.phantom) #0 @proc_gcd:nn:nn
@@ -35,7 +35,7 @@ gcd(a##0:wybe.int, b##0:wybe.int, ?r##0:wybe.int, *#globals##0:wybe.phantom, *?#
 gen#1 > (2 calls) 
 0: proc_gcd.gen#1<0>
 gen#1(*#globals##0:wybe.phantom, a##0:wybe.int, b##0:wybe.int, [t##0:wybe.int], x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int, ?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(y##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool) @int:nn:nn
@@ -53,7 +53,7 @@ gen#1(*#globals##0:wybe.phantom, a##0:wybe.int, b##0:wybe.int, [t##0:wybe.int], 
 gen#2 > {inline} (1 calls) 
 0: proc_gcd.gen#2<0>
 gen#2(*#globals##0:wybe.phantom, a##0:wybe.int, b##0:wybe.int, [t##0:wybe.int], x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int, ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     proc_gcd.mod<0>(~x##0:wybe.int, y##0:wybe.int, ?y##1:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #0 @proc_gcd:nn:nn

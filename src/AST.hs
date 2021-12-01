@@ -74,7 +74,7 @@ module AST (
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
   maybeGetClosureOf, isClosureProc,
-  GlobalFlows, showGlobalFlows, addGlobalFlow, globalFlowsUnion, hasGlobalFlow,
+  GlobalFlows, emptyGlobalFlows, showGlobalFlows, addGlobalFlow, globalFlowsUnion, hasGlobalFlow,
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
@@ -2001,10 +2001,16 @@ data ProcImpln
 type GlobalFlows = Maybe (Map GlobalInfo (Set PrimFlow))
 
 
--- |How to show GlobalFlows
+-- | An empty set of GlobalFlows
+emptyGlobalFlows :: GlobalFlows
+emptyGlobalFlows = Just Map.empty
+
+
+-- | How to show GlobalFlows
 showGlobalFlows :: GlobalFlows -> String
 showGlobalFlows
-    = maybe "everything " $ showMap "{" ", " "} " ((++"::") . show) simpleShowSet
+    = maybe "everything " 
+    $ showMap "{" ", " "} " ((++"::") . show) simpleShowSet
 
 
 -- | Add a flow to a given global. If the global does not exist in the set

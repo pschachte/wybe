@@ -15,7 +15,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: alias2.<0>
 (*#globals##0:wybe.phantom, *?#globals##5:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("copy a position":wybe.string, ~*#globals##0:wybe.phantom, ?*tmp#3##0:wybe.phantom) #6 @io:nn:nn
@@ -52,7 +52,7 @@ fcopy(p1##0:position.position, ?#result##0:position.position):
 pcopy > public (1 calls) 
 0: alias2.pcopy<0>
 pcopy(p1##0:position.position, ?p2##2:position.position, *#globals##0:wybe.phantom, *?#globals##3:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#5##0:position.position)
@@ -230,7 +230,7 @@ entry:
 printPosition > public (0 calls) 
 0: position.printPosition<0>
 printPosition(pos##0:position.position, *#globals##0:wybe.phantom, *?#globals##5:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>(" (":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #7 @io:nn:nn

@@ -14,7 +14,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: alias_recursion1.<0>
 (*#globals##0:wybe.phantom, *?#globals##18:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#4##0:position.position)
@@ -60,7 +60,7 @@ AFTER EVERYTHING:
 if_test > public (2 calls) 
 0: alias_recursion1.if_test<0>
 if_test(a##0:position.position, b##0:position.position, ?r##0:position.position):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: [(a##0,b##0),(a##0,r##0),(b##0,r##0)]
   InterestingCallProperties: []
     foreign lpvm access(a##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int)
@@ -257,7 +257,7 @@ if.else:
 printPosition > public (0 calls) 
 0: position.printPosition<0>
 printPosition(pos##0:position.position, *#globals##0:wybe.phantom, *?#globals##5:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>(" (":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #7 @io:nn:nn

@@ -23,7 +23,7 @@ AFTER EVERYTHING:
 gen#1 > (2 calls) 
 0: loop_bug.gen#1<0>
 gen#1(*#globals##0:wybe.phantom, [h##0:wybe.int], lst##0:loop_bug.int_list, t##0:loop_bug.int_list, ?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(t##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool)
@@ -47,7 +47,7 @@ gen#1(*#globals##0:wybe.phantom, [h##0:wybe.int], lst##0:loop_bug.int_list, t##0
 gen#2 > {inline} (1 calls) 
 0: loop_bug.gen#2<0>
 gen#2(*#globals##0:wybe.phantom, h##0:wybe.int, lst##0:loop_bug.int_list, t##0:loop_bug.int_list, ?#globals##3:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>(", ":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #3 @io:nn:nn
@@ -60,7 +60,7 @@ gen#2(*#globals##0:wybe.phantom, h##0:wybe.int, lst##0:loop_bug.int_list, t##0:l
 print > public (0 calls) 
 0: loop_bug.print<0>
 print(lst##0:loop_bug.int_list, *#globals##0:wybe.phantom, *?#globals##3:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom, *#globals##0:wybe.phantom)
@@ -187,7 +187,7 @@ if.else:
 = > public (2 calls) 
 0: loop_bug.int_list.=<0>
 =(#left##0:loop_bug.int_list, #right##0:loop_bug.int_list, ?#success##0:wybe.bool):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -327,7 +327,7 @@ tail(#rec##0:loop_bug.int_list, ?#rec##1:loop_bug.int_list, #field##0:loop_bug.i
 ~= > public {inline} (0 calls) 
 0: loop_bug.int_list.~=<0>
 ~=(#left##0:loop_bug.int_list, #right##0:loop_bug.int_list, ?#success##0:wybe.bool):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     loop_bug.int_list.=<0>(~#left##0:loop_bug.int_list, ~#right##0:loop_bug.int_list, ?tmp#0##0:wybe.bool) #0

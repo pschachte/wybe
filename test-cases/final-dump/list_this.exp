@@ -20,7 +20,7 @@ AFTER EVERYTHING:
 append > public (1 calls) 
 0: list_this.append<0>
 append(x##0:list_this(T), y##0:list_this(T), ?#result##0:list_this(T)):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: [(#result##0,y##0)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(1,(list_this.append<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -139,7 +139,7 @@ cons(?car##0:T, ?cdr##0:list_this(T), #result##0:list_this(T), ?#success##0:wybe
 length > public {inline} (0 calls) 
 0: list_this.length<0>
 length(x##0:list_this(T), ?#result##0:wybe.int):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     list_this.length1<0>(~x##0:list_this(T), 0:wybe.int, ?#result##0:wybe.int) #0 @list_this:nn:nn
@@ -148,7 +148,7 @@ length(x##0:list_this(T), ?#result##0:wybe.int):
 length1 > (2 calls) 
 0: list_this.length1<0>
 length1(x##0:list_this(T), acc##0:wybe.int, ?#result##0:wybe.int):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)

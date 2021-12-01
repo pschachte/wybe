@@ -118,17 +118,19 @@ type BodyBuilder = StateT BodyState Compiler
 
 -- Holds the content of a ProcBody while we're building it.
 data BodyState = BodyState {
-      currBuild   :: [Placed Prim],   -- ^The body we're building, reversed
-      currSubst   :: Substitution,    -- ^variable substitutions to propagate
-      blockDefs   :: Set PrimVarName, -- ^All variables defined in this block
-      forkConsts  :: Set PrimVarName, -- ^Consts in some branches of prev fork
-      outSubst    :: VarSubstitution, -- ^Substitutions for var assignments
-      subExprs    :: ComputedCalls,   -- ^Previously computed calls to reuse
-      failed      :: Bool,            -- ^True if this body always fails
-      tmpCount    :: Int,             -- ^The next temp variable number to use
-      buildState  :: BuildState,      -- ^The fork at the bottom of this node
-      parent      :: Maybe BodyState,  -- ^What comes before/above this
-      globalState :: GlobalState
+      currBuild     :: [Placed Prim],   -- ^The body we're building, reversed
+      currSubst     :: Substitution,    -- ^variable substitutions to propagate
+      blockDefs     :: Set PrimVarName, -- ^All variables defined in this block
+      forkConsts    :: Set PrimVarName, -- ^Consts in some branches of prev fork
+      outSubst      :: VarSubstitution, -- ^Substitutions for var assignments
+      subExprs      :: ComputedCalls,   -- ^Previously computed calls to reuse
+      failed        :: Bool,            -- ^True if this body always fails
+      tmpCount      :: Int,             -- ^The next temp variable number to use
+      buildState    :: BuildState,      -- ^The fork at the bottom of this node
+      parent        :: Maybe BodyState, -- ^What comes before/above this
+      globalsLoaded :: Map GlobalInfo PrimArg
+                                        -- ^The set of globals that we currently 
+                                        -- know the value of
       } deriving (Eq,Show)
 
 
@@ -147,39 +149,19 @@ data BuildState
     deriving (Eq,Show)
 
 
-data GlobalState = GlobalState {
-      globalValues :: Map GlobalInfo PrimArg,
-      globalRef    :: Maybe PrimVarName
-      } deriving (Eq, Show)
-
 
 -- | A fresh BodyState with specified temp counter and output var substitution
-initState :: Int -> VarSubstitution -> Maybe PrimVarName -> BodyState
+initState :: Int -> VarSubstitution -> BodyState
 initState tmp oSubst =
     BodyState [] Map.empty Set.empty Set.empty oSubst Map.empty False tmp
-              Unforked Nothing . initGlobalState
-
-
-initGlobalState :: Maybe PrimVarName -> GlobalState
-initGlobalState = GlobalState Map.empty 
-
-
-findInGlobalParam :: [PrimParam] -> Maybe PrimVarName
-findInGlobalParam params = 
-    let inGlobals = List.map primParamName
-                  $ List.filter ((FlowIn==) . primParamFlow
-                                 &&& (GlobalArg==) . primParamFlowType) params
-    in case inGlobals of
-        (_:_:_) -> shouldnt $ "too many in global params" ++ show inGlobals
-        _ -> listToMaybe inGlobals
-
+              Unforked Nothing Map.empty
 
 
 -- | Set up a BodyState as a new child of the specified BodyState
 childState :: BodyState -> BuildState -> BodyState
 childState st@BodyState{currSubst=iSubst,outSubst=oSubst,subExprs=subs,
-                        tmpCount=tmp, forkConsts=consts, globalState=globals} bld =
-    BodyState [] iSubst Set.empty consts oSubst subs False tmp bld (Just st) globals
+                        tmpCount=tmp, forkConsts=consts, globalsLoaded=loaded} bld =
+    BodyState [] iSubst Set.empty consts oSubst subs False tmp bld (Just st) loaded
 
 
 -- | A mapping from variables to definite values, in service to constant
@@ -213,19 +195,17 @@ freshVarName = do
 
 -- |Run a BodyBuilder monad and extract the final proc body, along with the
 -- final temp variable count and the set of variables used in the body.
-buildBody :: Int -> VarSubstitution -> [PrimParam] 
-          -> BodyBuilder a 
-          -> Compiler (a, Int, Set PrimVarName, GlobalFlows, ProcBody)
-buildBody tmp oSubst params builder = do
+buildBody :: Int -> VarSubstitution 
+          -> BodyBuilder a -> Compiler (a, Int, Set PrimVarName, ProcBody)
+buildBody tmp oSubst builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
-    let mbGlobalName = findInGlobalParam params
-    (a, st) <- runStateT builder $ initState tmp oSubst mbGlobalName
+    (a, st) <- runStateT builder $ initState tmp oSubst
     logMsg BodyBuilder ">>>> Finished building a proc body"
     logMsg BodyBuilder "     Final state:"
     logMsg BodyBuilder $ fst $ showState 8 st
     st' <- fuseBodies st
-    (tmp', used, gFlows, body) <- currBody (ProcBody [] NoFork) st'
-    return (a, tmp', used, gFlows, body)
+    (tmp', used, body) <- currBody (ProcBody [] NoFork) st'
+    return (a, tmp', used, body)
 
 
 -- |Start a new fork on var of type ty
@@ -435,25 +415,11 @@ instr' prim@(PrimForeign "lpvm" "cast" []
     if argType from == argType to
       then instr' (PrimForeign "llvm" "move" [] [from, to]) pos
       else ordinaryInstr prim pos
-instr' prim@(PrimForeign "lpvm" "load" [] 
-              [ArgGlobal info _, var, ArgVar nm _ _ _ _]) pos = do
-    globals@GlobalState{globalRef=nm',globalValues=latest} 
-        <- gets globalState
-    unless (Just nm == nm')
-        $ shouldnt $ "bad load " ++ show (maybePlace prim pos)
-    case Map.lookup info latest of
-        Just val -> do
-             instr' (PrimForeign "llvm" "move" [] [val, var]) pos
+instr' prim@(PrimForeign "lpvm" "load" [] [ArgGlobal info _, var, _]) pos = do
+    loaded <- gets globalsLoaded
+    case Map.lookup info loaded of
+        Just val -> instr' (PrimForeign "llvm" "move" [] [val, var]) pos
         Nothing -> ordinaryInstr prim pos
-instr' prim@(PrimForeign "lpvm" "store" [] 
-              [ArgGlobal info _, var, 
-               ArgVar nm _ _ _ _, ArgVar newNm _ _ _ _]) pos = do
-    globals@GlobalState{globalRef=nm',globalValues=latest} 
-        <- gets globalState
-    unless (Just nm == nm')
-        $ shouldnt $ "bad store " ++ show (maybePlace prim pos) 
-    modify $ \s -> s{globalState=globals{globalValues=Map.insert info var latest}}
-    ordinaryInstr prim pos
 instr' prim pos = ordinaryInstr prim pos
 
 
@@ -782,30 +748,27 @@ updateGlobalState prim pos = do
     substOutGlobals <- mapM (expandArg . setArgFlow FlowIn) outGlobals
     let globalVar = listToMaybe substOutGlobals
     when (isJust globalVar) $ do
-        globals <- gets globalState
-        modify $ \s -> s{globalState=globals{globalRef=argVarName <$> globalVar}}
+        loaded <- gets globalsLoaded
         updateGlobalValues prim
-        globals' <- gets globalState
-        logBuild $ "Globals: " ++ show globals ++ " -> " ++ show globals' 
+        loaded' <- gets globalsLoaded
+        logBuild $ "Globals Loaded: " ++ show loaded ++ " -> " ++ show loaded' 
 
 
 updateGlobalValues :: Prim -> BodyBuilder ()
 updateGlobalValues prim = do
-    globals@(GlobalState values _) <- gets globalState
+    loaded <- gets globalsLoaded
     case prim of
-        PrimForeign "lpvm" "load"  _ _ -> nop
-        PrimForeign "lpvm" "store" _ _ -> nop
-        PrimForeign "llvm" "move"  _ _
-            | isJust $ globalRef globals -> nop
+        PrimForeign "lpvm" "store" _ [ArgGlobal info _, var, _, _] -> 
+            modify $ \s -> s{globalsLoaded=Map.insert info var loaded}
         PrimHigherCall _ fn _
-            | not . isResourcefulHigherOrder $ argType fn -> nop
+            | isResourcefulHigherOrder $ argType fn ->
+                modify $ \s -> s{globalsLoaded=Map.empty}
         PrimCall _ pspec _ -> do
             callGFlows <- procImplnGlobalFlows . procImpln 
                       <$> lift (getProcDef pspec)
             let filter info _ = not $ hasGlobalFlow callGFlows FlowOut info
-            let values' = Map.filterWithKey filter values
-            modify $ \s -> s {globalState=globals{globalValues=values'}}
-        _ -> modify $ \s -> s{globalState=globals{globalValues=Map.empty}}
+            modify $ \s -> s {globalsLoaded=Map.filterWithKey filter loaded}
+        _ -> nop
                     
 
 ----------------------------------------------------------------
@@ -1134,20 +1097,19 @@ selectedBranch subst Forked{knownVal=known, forkingVar=var} =
 ----------------------------------------------------------------
 
 currBody :: ProcBody -> BodyState 
-         -> Compiler (Int,Set PrimVarName,GlobalFlows,ProcBody)
+         -> Compiler (Int,Set PrimVarName,ProcBody)
 currBody body st@BodyState{tmpCount=tmp} = do
     logMsg BodyBuilder $ "Now reconstructing body with usedLater = "
       ++ intercalate ", " (show <$> Map.keys (outSubst st))
     st' <- execStateT (rebuildBody st)
            $ BkwdBuilderState (Map.keysSet $ outSubst st) Nothing Map.empty
-                              0 (Just Map.empty) Set.empty body
+                              0 Set.empty body
     let BkwdBuilderState{bkwdUsedLater=usedLater,
-                         bkwdFollowing=following,
-                         bkwdGlobalFlows=gFlows} = st'
+                         bkwdFollowing=following} = st'
     logMsg BodyBuilder ">>>> Finished rebuilding a proc body"
     logMsg BodyBuilder "     Final state:"
     logMsg BodyBuilder $ showBlock 5 $ following
-    return (tmp, usedLater, gFlows, following)
+    return (tmp, usedLater, following)
 
 
 -- |Another monad, this one for rebuilding a proc body bottom-up.
@@ -1165,8 +1127,6 @@ data BkwdBuilderState = BkwdBuilderState {
                                            -- branches.
       bkwdRenaming     :: VarSubstitution, -- ^Variable substitution to apply
       bkwdTmpCount     :: Int,             -- ^Highest temporary variable number
-      bkwdGlobalFlows  :: GlobalFlows,     -- ^The set of global flows we have
-                                           -- encountered
       bkwdGlobalStored :: Set GlobalInfo,  -- ^The set of globals we have 
                                            -- recently stored
       bkwdFollowing    :: ProcBody         -- ^Code to come later
@@ -1210,10 +1170,9 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
             let usedLater''' = Set.insert var usedLater''
             let tmp = maximum $ List.map bkwdTmpCount sts
             let followingBranches = List.map bkwdFollowing sts
-            let gFlows = List.foldr1 globalFlowsUnion (bkwdGlobalFlows <$> sts)
             let gStored = List.foldr1 Set.intersection (bkwdGlobalStored <$> sts)
             put $ BkwdBuilderState usedLater''' branchesUsedLater
-                  Map.empty tmp gFlows gStored
+                  Map.empty tmp gStored
                   $ ProcBody [] $ PrimFork var ty lastUse followingBranches
     mapM_ (placedApply (bkwdBuildStmt defs)) prims
     finalUsedLater <- gets bkwdUsedLater
@@ -1245,13 +1204,11 @@ bkwdBuildStmt :: Set PrimVarName -> Prim -> OptPos -> BkwdBuilder ()
 bkwdBuildStmt defs prim pos = do
     usedLater <- gets bkwdUsedLater
     renaming <- gets bkwdRenaming
-    gFlows <- gets bkwdGlobalFlows
     gStored <- gets bkwdGlobalStored
     logBkwd $ "  Rebuilding prim: " ++ show prim
               ++ "\n    with usedLater   = " ++ show usedLater
               ++ "\n    and bkwdRenaming = " ++ simpleShowMap renaming
               ++ "\n    and defs         = " ++ simpleShowSet defs
-              ++ "\n    and globalFlows  = " ++ showGlobalFlows gFlows
               ++ "\n    and globalStored = " ++ simpleShowSet gStored
     args' <- mapM renameArg $ primArgs prim
     logBkwd $ "    renamed args = " ++ show args'
@@ -1266,25 +1223,20 @@ bkwdBuildStmt defs prim pos = do
           | info `Set.member` gStored -> 
               bkwdBuildStmt defs (primMove globalIn globalOut) pos
           | otherwise -> do
-              modify $ \s -> s { bkwdGlobalStored = Set.insert info gStored,
-                                 bkwdGlobalFlows = addGlobalFlow info FlowOut gFlows }
+              modify $ \s -> s { bkwdGlobalStored = Set.insert info gStored }
               bkwdBuildStmt' args' prim pos
       (PrimForeign "lpvm" "load" _ _, [ArgGlobal info _, _, _]) -> do
-          modify $ \s -> s { bkwdGlobalStored = Set.delete info gStored,
-                             bkwdGlobalFlows = addGlobalFlow info FlowIn gFlows }
+          modify $ \s -> s { bkwdGlobalStored = Set.delete info gStored }
           bkwdBuildStmt' args' prim pos
       (PrimHigherCall _ fn _, _)
           | isResourcefulHigherOrder $ argType fn -> do
-              modify $ \s -> s { bkwdGlobalStored = Set.empty,
-                                 bkwdGlobalFlows = Nothing }
+              modify $ \s -> s { bkwdGlobalStored = Set.empty }
               bkwdBuildStmt' args' prim pos
       (PrimCall _ pspec _, _) -> do 
           callGFlows <- procImplnGlobalFlows . procImpln 
                     <$> lift (getProcDef pspec)
-          let gStored' = Set.filter (hasGlobalFlow callGFlows FlowOut) gStored
-          let gFlows' = globalFlowsUnion gFlows callGFlows
-          modify $ \s -> s { bkwdGlobalStored = gStored',
-                             bkwdGlobalFlows = gFlows' }
+          let gStored' = Set.filter (hasGlobalFlow callGFlows FlowIn) gStored
+          modify $ \s -> s { bkwdGlobalStored = gStored' }
           bkwdBuildStmt' args' prim pos
       _ -> bkwdBuildStmt' args' prim pos
 
@@ -1359,17 +1311,13 @@ logState = do
 showState :: Int -> BodyState -> (String,Int)
 showState indent BodyState{parent=par, currBuild=revPrims, buildState=bld,
                            blockDefs=defs, forkConsts=consts,
-                           currSubst=substs, globalState=globals} =
+                           currSubst=substs, globalsLoaded=loaded} =
     let (str  ,indent')   = maybe ("",indent)
                             (mapFst (++ (startLine indent ++ "----------")) 
                             . showState indent) par
         substStr          = startLine indent
                             ++ "# Substs: " ++ simpleShowMap substs
-        globalStr         = case globalRef globals of
-                              Nothing -> ""
-                              Just _ -> 
-                                startLine indent
-                                ++ showGlobalState globals
+        globalStr         = "# Loaded globals: " ++ simpleShowMap loaded
         str'              = showPlacedPrims indent' (reverse revPrims)
         sets              = if List.null revPrims
                             then ""
@@ -1420,11 +1368,6 @@ showSwitch indent var ty val fused =
     ++ (if fused then " (fused)" else " (not fused)")
     ++ maybe "" (\v-> " (=" ++ show v ++ ")") val
     ++ " of"
-
-
-showGlobalState :: GlobalState -> String
-showGlobalState (GlobalState mbNm vs) 
-  = "# Globals: ref=" ++ show mbNm ++ ", values=" ++ show vs
 
 
 -- | Start a new line with the specified indent.

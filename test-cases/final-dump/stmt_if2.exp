@@ -26,7 +26,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: stmt_if2.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?tmp#7##0:stmt_if2.tree)
@@ -55,7 +55,7 @@ gen#1([k##0:wybe.int], [key##0:wybe.int], [l##0:stmt_if2.tree], [r##0:stmt_if2.t
 lookup > public (5 calls) 
 0: stmt_if2.lookup<0>
 lookup(key##0:wybe.int, tree##0:stmt_if2.tree, ?#result##0:wybe.bool):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     stmt_if2.tree.=<0>(tree##0:stmt_if2.tree, 0:stmt_if2.tree, ?tmp#13##0:wybe.bool) #1 @stmt_if2:6:9
@@ -207,7 +207,7 @@ if.else3:
 = > public (7 calls) 
 0: stmt_if2.tree.=<0>
 =(#left##0:stmt_if2.tree, #right##0:stmt_if2.tree, ?#success##0:wybe.bool):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -393,7 +393,7 @@ right(#rec##0:stmt_if2.tree, ?#rec##1:stmt_if2.tree, #field##0:stmt_if2.tree, ?#
 ~= > public {inline} (0 calls) 
 0: stmt_if2.tree.~=<0>
 ~=(#left##0:stmt_if2.tree, #right##0:stmt_if2.tree, ?#success##0:wybe.bool):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     stmt_if2.tree.=<0>(~#left##0:stmt_if2.tree, ~#right##0:stmt_if2.tree, ?tmp#0##0:wybe.bool) #0

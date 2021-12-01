@@ -30,7 +30,7 @@ AFTER EVERYTHING:
 lookup > public (6 calls) 
 0: tests.lookup<0>
 lookup(key##0:wybe.int, map##0:tests.map, ?result##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(map##0:wybe.int, 0:wybe.int, ?tmp#15##0:wybe.bool)
@@ -208,7 +208,7 @@ entry:
 = > public (9 calls) 
 0: tests.map.=<0>
 =(#left##0:tests.map, #right##0:tests.map, ?#success##0:wybe.bool):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -440,7 +440,7 @@ value(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:wybe.int, ?#success##0:wy
 ~= > public {inline} (0 calls) 
 0: tests.map.~=<0>
 ~=(#left##0:tests.map, #right##0:tests.map, ?#success##0:wybe.bool):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     tests.map.=<0>(~#left##0:tests.map, ~#right##0:tests.map, ?tmp#0##0:wybe.bool) #0

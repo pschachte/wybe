@@ -12,7 +12,7 @@ AFTER EVERYTHING:
 *main* > public {inline,impure} (0 calls) 
 0: purity_warning.<0>
 (*#globals##0:wybe.phantom, [*?#globals##0:wybe.phantom]):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
 

@@ -74,7 +74,6 @@ transformProcBody procDef speczVersion = do
 
     let proto = procImplnProto $ procImpln procDef
     let body = procImplnBody $ procImpln procDef
-    let params = primProtoParams proto 
     let analysis = procImplnAnalysis $ procImpln procDef
     logTransform $ replicate 60 '~'
     logTransform $ show proto
@@ -92,7 +91,7 @@ transformProcBody procDef speczVersion = do
                     |> List.map primParamName |> List.map (\x -> (x,x))
                     |> Map.fromList
     let tmp = procTmpCount procDef
-    (_, tmp', _, _, body') <- buildBody tmp outVarSubs params $
+    (_, tmp', _, body') <- buildBody tmp outVarSubs $
                 transformBody proto body (aliasMap, Map.empty) callSiteMap
     unless (tmp==tmp') $ shouldnt "tmp count changed in transform"
     return body'

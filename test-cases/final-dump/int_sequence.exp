@@ -21,7 +21,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: int_sequence.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#5##0:int_sequence)
@@ -114,7 +114,7 @@ AFTER EVERYTHING:
 gen#1 > (2 calls) 
 0: int_sequence.gen#1<0>[6dacb8fd25]
 gen#1(*#globals##0:wybe.phantom, tmp#0##0:int_sequence, tmp#1##0:int_sequence, ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 1]
   MultiSpeczDepInfo: [(0,(int_sequence.[|]<0>,fromList [NonAliasedParamCond 2 [1]])),(2,(int_sequence.gen#1<0>,fromList [NonAliasedParamCond 1 []]))]

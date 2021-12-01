@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: proc_yorn.<0>
 (*#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     proc_yorn.gen#1<0>(~*#globals##0:wybe.phantom, "Well, yes or no?":wybe.string, ?r##0:wybe.bool, ?*#globals##1:wybe.phantom) #2 @proc_yorn:nn:nn
@@ -26,7 +26,7 @@ AFTER EVERYTHING:
 gen#1 > (2 calls) 
 0: proc_yorn.gen#1<0>
 gen#1(*#globals##0:wybe.phantom, prompt##0:wybe.string, ?result##1:wybe.bool, ?#globals##5:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>(prompt##0:wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #7 @io:nn:nn
@@ -84,7 +84,7 @@ is_yes_or_no(ch##0:wybe.char, ?#result##0:wybe.bool):
 yorn > public {inline} (1 calls) 
 0: proc_yorn.yorn<0>
 yorn(prompt##0:wybe.string, ?result##0:wybe.bool, *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     proc_yorn.gen#1<0>(~#globals##0:wybe.phantom, ~prompt##0:wybe.string, ?result##0:wybe.bool, ?#globals##1:wybe.phantom) #0 @proc_yorn:nn:nn

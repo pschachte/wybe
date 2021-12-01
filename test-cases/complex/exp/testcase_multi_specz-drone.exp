@@ -53,7 +53,7 @@ AFTER BUILDING MAIN:
 *main* > {terminal,inline,impure} (0 calls) 
 0: .<0>
 (%argc##0:wybe.int, %argv##0:wybe.array.raw_array(wybe.c_string), %?exit_code##0:wybe.int, *#globals##0:wybe.phantom, *?#globals##5:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<command_line.argc>>::{FlowIn, FlowOut}, <<command_line.arguments>>::{FlowOut}, <<command_line.argv>>::{FlowIn, FlowOut}, <<command_line.command>>::{FlowOut}, <<command_line.exit_code>>::{FlowIn, FlowOut}, <<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm store(<<command_line.argc>>:wybe.int, ~%argc##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
@@ -83,7 +83,7 @@ LLVM code       : None
 *main* > public {impure} (0 calls) 
 0: drone.<0>
 (*#globals##0:wybe.phantom, *?#globals##3:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(4,(drone.loop<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -196,7 +196,7 @@ drone_init(?#result##0:drone.drone_info):
 gen#1 > (2 calls) 
 0: drone.gen#1<0>
 gen#1(*#globals##0:wybe.phantom, [ch##0:wybe.char], [d##0:drone.drone_info], [tmp#0##0:drone.drone_info], ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign c {impure} malloc_count(?mc##0:wybe.int) @memory_management:nn:nn
@@ -227,7 +227,7 @@ gen#2([action##0:wybe.char], d##0:drone.drone_info, success##0:wybe.bool, [tmp#0
 gen#3 > (4 calls) 
 0: drone.gen#3<0>
 gen#3(*#globals##0:wybe.phantom, [ch##0:wybe.char], d##0:drone.drone_info, ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 2]
   MultiSpeczDepInfo: [(3,(drone.loop<0>,fromList [NonAliasedParamCond 0 [2]]))]
@@ -248,7 +248,7 @@ gen#3(*#globals##0:wybe.phantom, [ch##0:wybe.char], d##0:drone.drone_info, ?#glo
 loop > (2 calls) 
 0: drone.loop<0>
 loop(d##0:drone.drone_info, ch##0:wybe.char, *#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(5,(drone.gen#3<0>,fromList [NonAliasedParamCond 2 [0]])),(6,(drone.do_action<0>,fromList [NonAliasedParamCond 0 [0]])),(10,(drone.gen#3<0>,fromList [NonAliasedParamCond 2 [0]])),(11,(drone.gen#3<0>,fromList [NonAliasedParamCond 2 [0]])),(12,(drone.gen#3<0>,fromList [NonAliasedParamCond 2 [0]]))]
@@ -307,7 +307,7 @@ loop(d##0:drone.drone_info, ch##0:wybe.char, *#globals##0:wybe.phantom, *?#globa
 print_info > {inline} (1 calls) 
 0: drone.print_info<0>
 print_info(d##0:drone.drone_info, *#globals##0:wybe.phantom, *?#globals##9:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("(":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #13 @io:nn:nn
@@ -556,7 +556,7 @@ AFTER EVERYTHING:
 *main* > {terminal,inline,impure} (0 calls) 
 0: .<0>
 (%argc##0:wybe.int, %argv##0:wybe.array.raw_array(wybe.c_string), %?exit_code##0:wybe.int, *#globals##0:wybe.phantom, *?#globals##5:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<command_line.argc>>::{FlowIn, FlowOut}, <<command_line.arguments>>::{FlowOut}, <<command_line.argv>>::{FlowIn, FlowOut}, <<command_line.command>>::{FlowOut}, <<command_line.exit_code>>::{FlowIn, FlowOut}, <<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm store(<<command_line.argc>>:wybe.int, ~%argc##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
@@ -630,7 +630,7 @@ entry:
 *main* > public {impure} (0 calls) 
 0: drone.<0>
 (*#globals##0:wybe.phantom, *?#globals##3:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(4,(drone.loop<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -812,7 +812,7 @@ drone_init(?#result##0:drone.drone_info):
 gen#1 > (2 calls) 
 0: drone.gen#1<0>
 gen#1(*#globals##0:wybe.phantom, [ch##0:wybe.char], [d##0:drone.drone_info], [tmp#0##0:drone.drone_info], ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign c {impure} malloc_count(?mc##0:wybe.int) @memory_management:nn:nn
@@ -853,7 +853,7 @@ gen#2([action##0:wybe.char], d##0:drone.drone_info, success##0:wybe.bool, [tmp#0
 gen#3 > (4 calls) 
 0: drone.gen#3<0>[785a827a1b]
 gen#3(*#globals##0:wybe.phantom, [ch##0:wybe.char], d##0:drone.drone_info, ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 2]
   MultiSpeczDepInfo: [(3,(drone.loop<0>,fromList [NonAliasedParamCond 0 [2]]))]
@@ -887,7 +887,7 @@ gen#3(*#globals##0:wybe.phantom, [ch##0:wybe.char], d##0:drone.drone_info, ?#glo
 loop > (2 calls) 
 0: drone.loop<0>[410bae77d3]
 loop(d##0:drone.drone_info, ch##0:wybe.char, *#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(5,(drone.gen#3<0>,fromList [NonAliasedParamCond 2 [0]])),(6,(drone.do_action<0>,fromList [NonAliasedParamCond 0 [0]])),(10,(drone.gen#3<0>,fromList [NonAliasedParamCond 2 [0]])),(11,(drone.gen#3<0>,fromList [NonAliasedParamCond 2 [0]])),(12,(drone.gen#3<0>,fromList [NonAliasedParamCond 2 [0]]))]
@@ -997,7 +997,7 @@ loop(d##0:drone.drone_info, ch##0:wybe.char, *#globals##0:wybe.phantom, *?#globa
 print_info > {inline} (1 calls) 
 0: drone.print_info<0>
 print_info(d##0:drone.drone_info, *#globals##0:wybe.phantom, *?#globals##9:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("(":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #13 @io:nn:nn

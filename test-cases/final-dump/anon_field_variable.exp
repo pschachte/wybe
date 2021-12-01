@@ -16,7 +16,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: anon_field_variable.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?tmp#4##0:anon_field_variable(T))

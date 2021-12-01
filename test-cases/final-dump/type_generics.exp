@@ -12,7 +12,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: type_generics.<0>
 (*#globals##0:wybe.phantom, *?#globals##6:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     type_generics.foo<0>(1:T, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #0 @type_generics:nn:nn
@@ -36,7 +36,7 @@ AFTER EVERYTHING:
 foo > (12 calls) 
 0: type_generics.foo<0>
 foo(x##0:T, *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#5##0:wybe.list(T))

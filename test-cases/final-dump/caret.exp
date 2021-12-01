@@ -16,7 +16,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: caret.<0>
 (*#globals##0:wybe.phantom, *?#globals##3:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(8,(caret.gen#1<0>,fromList [NonAliasedParamCond 1 []]))]
@@ -69,7 +69,7 @@ expand_region(reg##0:caret.region, ?reg##4:caret.region, point##0:position.posit
 gen#1 > (2 calls) 
 0: caret.gen#1<0>[6dacb8fd25]
 gen#1(*#globals##0:wybe.phantom, reg##0:caret.region, [tmp#0##0:caret.region], [tmp#1##0:position.position], [tmp#2##0:position.position], ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 1]
     foreign lpvm access(~reg##0:caret.region, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:position.position)
@@ -763,7 +763,7 @@ if.else2:
 printPosition > public (0 calls) 
 0: position.printPosition<0>
 printPosition(pos##0:position.position, *#globals##0:wybe.phantom, *?#globals##5:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>(" (":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #7 @io:nn:nn

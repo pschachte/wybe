@@ -14,7 +14,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: aaa.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("AAA: Init":wybe.string, ~*#globals##0:wybe.phantom, ?*tmp#2##0:wybe.phantom) #1 @io:nn:nn
@@ -68,7 +68,7 @@ entry:
 *main* > public {impure} (0 calls) 
 0: bbb.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("BBB: Init":wybe.string, ~*#globals##0:wybe.phantom, ?*tmp#2##0:wybe.phantom) #1 @io:nn:nn
@@ -122,7 +122,7 @@ entry:
 *main* > public {impure} (0 calls) 
 0: ccc.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("CCC: Init":wybe.string, ~*#globals##0:wybe.phantom, ?*tmp#2##0:wybe.phantom) #1 @io:nn:nn
@@ -175,7 +175,7 @@ entry:
 *main* > public {impure} (0 calls) 
 0: ddd.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("DDD: Init":wybe.string, ~*#globals##0:wybe.phantom, ?*tmp#2##0:wybe.phantom) #1 @io:nn:nn

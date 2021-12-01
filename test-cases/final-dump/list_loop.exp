@@ -23,7 +23,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: list_loop.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#8##0:list_loop.intlist)
@@ -41,7 +41,7 @@ AFTER EVERYTHING:
 gen#1 > (2 calls) 
 0: list_loop.gen#1<0>
 gen#1(*#globals##0:wybe.phantom, l##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##0:list_loop.intlist, tmp#2##0:list_loop.intlist, tmp#3##0:list_loop.intlist, x##0:list_loop.intlist, ?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(l##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool)
@@ -63,7 +63,7 @@ gen#1(*#globals##0:wybe.phantom, l##0:list_loop.intlist, tmp#0##0:list_loop.intl
 gen#2 > {inline} (1 calls) 
 0: list_loop.gen#2<0>
 gen#2(*#globals##0:wybe.phantom, h##0:wybe.int, l##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##0:list_loop.intlist, tmp#2##0:list_loop.intlist, tmp#3##0:list_loop.intlist, x##0:list_loop.intlist, ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom, *#globals##0:wybe.phantom)
@@ -76,7 +76,7 @@ gen#2(*#globals##0:wybe.phantom, h##0:wybe.int, l##0:list_loop.intlist, tmp#0##0
 gen#3 > (2 calls) 
 0: list_loop.gen#3<0>
 gen#3(*#globals##0:wybe.phantom, h##0:wybe.int, l##0:list_loop.intlist, l2##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##0:list_loop.intlist, tmp#2##0:list_loop.intlist, tmp#3##0:list_loop.intlist, x##0:list_loop.intlist, ?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(l2##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool)
@@ -103,7 +103,7 @@ gen#3(*#globals##0:wybe.phantom, h##0:wybe.int, l##0:list_loop.intlist, l2##0:li
 gen#4 > {inline} (1 calls) 
 0: list_loop.gen#4<0>
 gen#4(*#globals##0:wybe.phantom, h##0:wybe.int, h2##0:wybe.int, l##0:list_loop.intlist, l2##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##0:list_loop.intlist, tmp#2##0:list_loop.intlist, tmp#3##0:list_loop.intlist, x##0:list_loop.intlist, ?#globals##5:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("    ":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #5 @io:nn:nn
@@ -288,7 +288,7 @@ entry:
 = > public (2 calls) 
 0: list_loop.intlist.=<0>
 =(#left##0:list_loop.intlist, #right##0:list_loop.intlist, ?#success##0:wybe.bool):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -428,7 +428,7 @@ tail(#rec##0:list_loop.intlist, ?#rec##1:list_loop.intlist, #field##0:list_loop.
 ~= > public {inline} (0 calls) 
 0: list_loop.intlist.~=<0>
 ~=(#left##0:list_loop.intlist, #right##0:list_loop.intlist, ?#success##0:wybe.bool):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     list_loop.intlist.=<0>(~#left##0:list_loop.intlist, ~#right##0:list_loop.intlist, ?tmp#0##0:wybe.bool) #0

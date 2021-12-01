@@ -33,7 +33,7 @@ AFTER EVERYTHING:
 = > public (3 calls) 
 0: ctor_char2.=<0>
 =(#left##0:ctor_char2, #right##0:ctor_char2, ?#success##0:wybe.bool):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -326,7 +326,7 @@ other_ctor(?other_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:wybe
 ~= > public {inline} (0 calls) 
 0: ctor_char2.~=<0>
 ~=(#left##0:ctor_char2, #right##0:ctor_char2, ?#success##0:wybe.bool):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     ctor_char2.=<0>(~#left##0:ctor_char2, ~#right##0:ctor_char2, ?tmp#0##0:wybe.bool) #0

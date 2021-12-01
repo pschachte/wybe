@@ -47,7 +47,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: dead_cell_size.<0>
 (*#globals##0:wybe.phantom, *?#globals##3:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(4,(dead_cell_size.bar<0>,fromList [NonAliasedParamCond 0 []])),(7,(dead_cell_size.diff_type<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -188,7 +188,7 @@ foo(x##0:dead_cell_size.t, ?x##1:dead_cell_size.t):
 print_t > public (2 calls) 
 0: dead_cell_size.print_t<0>
 print_t(x##0:dead_cell_size.t, *#globals##0:wybe.phantom, *?#globals##8:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     dead_cell_size.t.=<0>(0:dead_cell_size.t, x##0:dead_cell_size.t, ?tmp#4##0:wybe.bool) #1 @dead_cell_size:nn:nn
@@ -274,7 +274,7 @@ print_t(x##0:dead_cell_size.t, *#globals##0:wybe.phantom, *?#globals##8:wybe.pha
 print_t2 > public (1 calls) 
 0: dead_cell_size.print_t2<0>
 print_t2(x##0:dead_cell_size.t2, *#globals##0:wybe.phantom, *?#globals##4:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     dead_cell_size.t2.=<0>(0:dead_cell_size.t2, x##0:dead_cell_size.t2, ?tmp#2##0:wybe.bool) #1 @dead_cell_size:nn:nn

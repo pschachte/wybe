@@ -41,7 +41,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: stmt_for.<0>
 (*#globals##0:wybe.phantom, *?#globals##26:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("single_generator:":wybe.string, ~*#globals##0:wybe.phantom, ?*tmp#2##0:wybe.phantom) #26 @io:nn:nn
@@ -114,7 +114,7 @@ AFTER EVERYTHING:
 gen#1 > (2 calls) 
 0: stmt_for.gen#1<0>
 gen#1(*#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(T), tmp#6##0:wybe.list(T), tmp#7##0:wybe.list(T), tmp#8##0:wybe.list(wybe.int), tmp#9##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), y##0:wybe.list(wybe.int), ?#globals##3:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#8##0:wybe.int, 0:wybe.int, ?tmp#13##0:wybe.bool)
@@ -147,7 +147,7 @@ gen#1(*#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), t
 gen#10 > (2 calls) 
 0: stmt_for.gen#10<0>
 gen#10(*#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
@@ -176,7 +176,7 @@ gen#10(*#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), 
 gen#11 > (3 calls) 
 0: stmt_for.gen#11<0>
 gen#11(*#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
@@ -205,7 +205,7 @@ gen#11(*#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), 
 gen#12 > (2 calls) 
 0: stmt_for.gen#12<0>
 gen#12(*#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
@@ -234,7 +234,7 @@ gen#12(*#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), 
 gen#13 > (2 calls) 
 0: stmt_for.gen#13<0>
 gen#13(*#globals##0:wybe.phantom, tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence, ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     stmt_for.int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:stmt_for.int_sequence, ~tmp#0##0:stmt_for.int_sequence, ?tmp#2##0:wybe.bool) #0 @stmt_for:nn:nn
@@ -254,7 +254,7 @@ gen#13(*#globals##0:wybe.phantom, tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_
 gen#14 > (2 calls) 
 0: stmt_for.gen#14<0>
 gen#14(*#globals##0:wybe.phantom, tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence, ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     stmt_for.int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:stmt_for.int_sequence, ~tmp#0##0:stmt_for.int_sequence, ?tmp#2##0:wybe.bool) #0 @stmt_for:nn:nn
@@ -274,7 +274,7 @@ gen#14(*#globals##0:wybe.phantom, tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_
 gen#2 > (2 calls) 
 0: stmt_for.gen#2<0>
 gen#2(*#globals##0:wybe.phantom, tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence, ?#globals##2:wybe.phantom, ?#success##0:wybe.bool):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     stmt_for.int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:stmt_for.int_sequence, ~tmp#0##0:stmt_for.int_sequence, ?tmp#3##0:wybe.bool) #0 @stmt_for:nn:nn
@@ -303,7 +303,7 @@ gen#2(*#globals##0:wybe.phantom, tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_f
 gen#3 > (2 calls) 
 0: stmt_for.gen#3<0>
 gen#3(*#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(T), tmp#6##0:wybe.list(T), tmp#7##0:wybe.list(T), tmp#8##0:wybe.list(wybe.int), tmp#9##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), y##0:wybe.list(wybe.int), ?#globals##3:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#8##0:wybe.int, 0:wybe.int, ?tmp#13##0:wybe.bool)
@@ -336,7 +336,7 @@ gen#3(*#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), t
 gen#4 > (2 calls) 
 0: stmt_for.gen#4<0>
 gen#4(*#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#4##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool)
@@ -358,7 +358,7 @@ gen#4(*#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), t
 gen#5 > (2 calls) 
 0: stmt_for.gen#5<0>
 gen#5(*#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
@@ -387,7 +387,7 @@ gen#5(*#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), t
 gen#6 > (2 calls) 
 0: stmt_for.gen#6<0>
 gen#6(*#globals##0:wybe.phantom, tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence, ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     stmt_for.int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:stmt_for.int_sequence, ~tmp#0##0:stmt_for.int_sequence, ?tmp#2##0:wybe.bool) #0 @stmt_for:nn:nn
@@ -407,7 +407,7 @@ gen#6(*#globals##0:wybe.phantom, tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_f
 gen#7 > (2 calls) 
 0: stmt_for.gen#7<0>
 gen#7(*#globals##0:wybe.phantom, tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence, ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     stmt_for.int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:stmt_for.int_sequence, ~tmp#0##0:stmt_for.int_sequence, ?tmp#2##0:wybe.bool) #0 @stmt_for:nn:nn
@@ -427,7 +427,7 @@ gen#7(*#globals##0:wybe.phantom, tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_f
 gen#8 > (3 calls) 
 0: stmt_for.gen#8<0>
 gen#8(*#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
@@ -456,7 +456,7 @@ gen#8(*#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), t
 gen#9 > (3 calls) 
 0: stmt_for.gen#9<0>
 gen#9(*#globals##0:wybe.phantom, tmp#0##0:wybe.list(T), tmp#1##0:wybe.list(T), tmp#2##0:wybe.list(T), tmp#3##0:wybe.list(T), tmp#4##0:wybe.list(T), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
@@ -509,7 +509,7 @@ irange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_
 multiple_generator > public (1 calls) 
 0: stmt_for.multiple_generator<0>
 multiple_generator(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#14##0:wybe.list(T))
@@ -536,7 +536,7 @@ multiple_generator(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
 semi_det_for_loop > public (0 calls) 
 0: stmt_for.semi_det_for_loop<0>
 semi_det_for_loop(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom, ?#success##0:wybe.bool):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     stmt_for.xrange<0>(0:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#1##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
@@ -546,7 +546,7 @@ semi_det_for_loop(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom, ?#succe
 shortest_generator_termination > public (1 calls) 
 0: stmt_for.shortest_generator_termination<0>
 shortest_generator_termination(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#14##0:wybe.list(T))
@@ -573,7 +573,7 @@ shortest_generator_termination(*#globals##0:wybe.phantom, *?#globals##1:wybe.pha
 single_generator > public (1 calls) 
 0: stmt_for.single_generator<0>
 single_generator(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#8##0:wybe.list(T))
@@ -591,7 +591,7 @@ single_generator(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
 using_break > public (1 calls) 
 0: stmt_for.using_break<0>
 using_break(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T))
@@ -612,7 +612,7 @@ using_break(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
 using_irange > public (1 calls) 
 0: stmt_for.using_irange<0>
 using_irange(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     stmt_for.irange<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#1##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
@@ -622,7 +622,7 @@ using_irange(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
 using_irange_reverse > public (1 calls) 
 0: stmt_for.using_irange_reverse<0>
 using_irange_reverse(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     stmt_for.irange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp#1##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
@@ -632,7 +632,7 @@ using_irange_reverse(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
 using_next > public (1 calls) 
 0: stmt_for.using_next<0>
 using_next(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T))
@@ -653,7 +653,7 @@ using_next(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
 using_unless > public (1 calls) 
 0: stmt_for.using_unless<0>
 using_unless(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T))
@@ -674,7 +674,7 @@ using_unless(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
 using_until > public (1 calls) 
 0: stmt_for.using_until<0>
 using_until(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T))
@@ -695,7 +695,7 @@ using_until(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
 using_when > public (1 calls) 
 0: stmt_for.using_when<0>
 using_when(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T))
@@ -716,7 +716,7 @@ using_when(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
 using_while > public (1 calls) 
 0: stmt_for.using_while<0>
 using_while(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T))
@@ -737,7 +737,7 @@ using_while(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
 using_xrange > public (1 calls) 
 0: stmt_for.using_xrange<0>
 using_xrange(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     stmt_for.xrange<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#1##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
@@ -747,7 +747,7 @@ using_xrange(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
 using_xrange_reverse > public (1 calls) 
 0: stmt_for.using_xrange_reverse<0>
 using_xrange_reverse(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     stmt_for.xrange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp#1##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn

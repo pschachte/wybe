@@ -20,6 +20,7 @@ import           Expansion
 import           Options                   (LogSelection (Optimise))
 import           Types
 import           Util
+import           Debug.Trace
 
 
 -- optimiseMod :: ModSpec -> Compiler (Bool,[(String,OptPos)])
@@ -53,14 +54,18 @@ optimiseMod _ thisMod = do
 --   repeated to a fixed point, but I'm not confident that optimisation
 --   is monotone and I don't want an infinite loop.
 optimiseSccBottomUp :: SCC ProcSpec -> Compiler ()
-optimiseSccBottomUp (AcyclicSCC single) =
-    optimiseProcBottomUp single >> return ()
+optimiseSccBottomUp (AcyclicSCC single) = do
+    void $ optimiseProcBottomUp single
+    inferGlobalFlows [single]
 optimiseSccBottomUp (CyclicSCC procs) = do
     inlines <- mapM optimiseProcBottomUp procs
     -- If any but first in SCC were marked for inlining, repeat to inline
     -- in earlier procs in the SCC.
-    when (or $ tail inlines) $ do
+    if or $ tail inlines
+    then do
+        inferGlobalFlows procs
         mapM_ optimiseProcBottomUp procs
+    else inferGlobalFlows procs
 
 
 optimiseProcTopDown :: ProcSpec -> Compiler ()
@@ -93,7 +98,58 @@ optimiseProcDefBU pspec def = do
       " after optimisation:" ++ showProcDef 4 def' ++ "\n"
     return def'
 
+----------------------------------------------------------------
+--                       Infering how global flow in procs
+----------------------------------------------------------------
 
+
+-- | Update the given ProcDef to the given GlobalFlows
+updateGlobalFlows :: GlobalFlows -> ProcDef -> ProcDef
+updateGlobalFlows _ ProcDef{procImpln=ProcDefSrc{}}
+    = shouldnt "updateGlobalFlows on uncompiled proc" 
+updateGlobalFlows gFlows pDef@ProcDef{procImpln=impln@ProcDefPrim{}} 
+    = pDef{procImpln=impln{procImplnGlobalFlows=gFlows}}
+
+
+-- | Infer all global flows across the given procedures, 
+-- updating their associated GlobalFlows
+inferGlobalFlows :: [ProcSpec] -> Compiler ()
+inferGlobalFlows procs = do
+    gFlows <- foldM collectGlobalFlows emptyGlobalFlows procs
+    mapM_ (updateProcDef $ updateGlobalFlows gFlows) procs
+
+
+-- | Add all Global Flows from a given procedure to a set of GlobalFlows
+collectGlobalFlows :: GlobalFlows -> ProcSpec -> Compiler GlobalFlows
+collectGlobalFlows gFlows pspec = do
+    body <- procImplnBody . procImpln <$> getProcDef pspec
+    foldBodyPrims 
+        (const collectPrimGlobalFlows) 
+        (return gFlows) 
+        (liftM2 globalFlowsUnion) 
+        body
+
+
+-- | Add all Global Flows from a given Prim to a set of GlobalFlows
+-- * LPVM load instructions add a FlowIn for the respective Global
+-- * LPVM store instructions add a FlowOut for the respective Global
+-- * First order calls add their respective GlobalFlows into the set
+-- * Resourceful higher order calls set the GlobalFlows to the universal set
+collectPrimGlobalFlows :: Prim -> Compiler GlobalFlows -> Compiler GlobalFlows
+collectPrimGlobalFlows 
+        (PrimForeign "lpvm" "load" _ [ArgGlobal info _, _, _]) gFlows
+    = addGlobalFlow info FlowIn <$> gFlows
+collectPrimGlobalFlows 
+        (PrimForeign "lpvm" "store" _ [ArgGlobal info _, _, _, _]) gFlows
+    = addGlobalFlow info FlowOut <$> gFlows
+collectPrimGlobalFlows (PrimCall _ pspec _) gFlows =
+    liftM2 globalFlowsUnion 
+        (procImplnGlobalFlows . procImpln <$> getProcDef pspec) gFlows
+collectPrimGlobalFlows (PrimHigherCall _ fn _) gFlows
+    | isResourcefulHigherOrder $ argType fn = return Nothing
+collectPrimGlobalFlows _ gFlows = gFlows
+
+    
 ----------------------------------------------------------------
 --                       Deciding what to inline
 ----------------------------------------------------------------

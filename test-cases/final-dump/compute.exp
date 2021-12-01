@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: compute.<0>
 (*#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     math.utils.factorial<0>(4:wybe.int, ?tmp#0##0:wybe.int) #0 @compute:nn:nn
@@ -141,7 +141,7 @@ entry:
 *main* > public {impure} (0 calls) 
 0: math.utils.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("Utils has been initialised.":wybe.string, ~*#globals##0:wybe.phantom, ?*tmp#2##0:wybe.phantom) #1 @io:nn:nn
@@ -153,7 +153,7 @@ entry:
 factorial > public (1 calls) 
 0: math.utils.factorial<0>
 factorial(n##0:wybe.int, ?#result##0:wybe.int):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_sle(n##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @int:nn:nn

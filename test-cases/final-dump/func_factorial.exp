@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: func_factorial.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     func_factorial.factorial<0>(5:wybe.int, ?tmp#0##0:wybe.int) #0 @func_factorial:nn:nn
@@ -26,7 +26,7 @@ AFTER EVERYTHING:
 factorial > public (2 calls) 
 0: func_factorial.factorial<0>
 factorial(n##0:wybe.int, ?#result##0:wybe.int):
-  GlobalFlows: everything 
+  GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_sle(n##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @int:nn:nn

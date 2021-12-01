@@ -12,7 +12,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: main_hello2.<0>
 (*#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("hello, ":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #2 @io:nn:nn

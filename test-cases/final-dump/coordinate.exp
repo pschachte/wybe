@@ -25,7 +25,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: coordinate.<0>
 (*#globals##0:wybe.phantom, *?#globals##4:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?tmp#7##0:coordinate.Coordinate)

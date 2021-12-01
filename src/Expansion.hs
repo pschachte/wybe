@@ -42,14 +42,12 @@ procExpansion pspec def = do
     isClosure <- isClosureProc pspec
     let params = primProtoParams proto
     let st = initExpanderState (procCallSiteCount def)
-    (st', tmp', used, gFlows, body') <- buildBody tmp (Map.fromSet id outs) params
+    (st', tmp', used, body') <- buildBody tmp (Map.fromSet id outs)
                                 $ execStateT (expandBody body) st
-    let params' = markParamNeededness isClosure used ins
-               <$> params
+    let params' = markParamNeededness isClosure used ins <$> params
     let proto' = proto {primProtoParams = params'}
     let impln' = impln{ procImplnProto = proto', 
-                        procImplnBody = body',
-                        procImplnGlobalFlows = gFlows }
+                        procImplnBody = body' }
     let def' = def { procImpln = impln',
                      procTmpCount = tmp',
                      procCallSiteCount = nextCallSiteID st' }

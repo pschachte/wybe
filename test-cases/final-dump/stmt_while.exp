@@ -12,7 +12,7 @@ AFTER EVERYTHING:
 *main* > public {inline,impure} (0 calls) 
 0: stmt_while.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     stmt_while.gen#1<0>(~#globals##0:wybe.phantom, 10:wybe.int, ?#globals##1:wybe.phantom) #0 @stmt_while:nn:nn
@@ -21,7 +21,7 @@ AFTER EVERYTHING:
 gen#1 > (2 calls) 
 0: stmt_while.gen#1<0>
 gen#1(*#globals##0:wybe.phantom, n##0:wybe.int, ?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_sgt(n##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
@@ -42,7 +42,7 @@ gen#1(*#globals##0:wybe.phantom, n##0:wybe.int, ?#globals##1:wybe.phantom):
 gen#2 > {inline} (1 calls) 
 0: stmt_while.gen#2<0>
 gen#2(*#globals##0:wybe.phantom, n##0:wybe.int, ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn

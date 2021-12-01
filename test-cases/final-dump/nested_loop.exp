@@ -12,7 +12,7 @@ AFTER EVERYTHING:
 *main* > public {impure} (0 calls) 
 0: nested_loop.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("Outer":wybe.string, ~#globals##0:wybe.phantom, ?*tmp#1##0:wybe.phantom) #1 @io:nn:nn
@@ -25,7 +25,7 @@ AFTER EVERYTHING:
 gen#1 > {inline} (1 calls) 
 0: nested_loop.gen#1<0>
 gen#1(*#globals##0:wybe.phantom, ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("Outer":wybe.string, ~*#globals##0:wybe.phantom, ?*tmp#2##0:wybe.phantom) #2 @io:nn:nn
@@ -38,7 +38,7 @@ gen#1(*#globals##0:wybe.phantom, ?#globals##2:wybe.phantom):
 gen#2 > (2 calls) 
 0: nested_loop.gen#2<0>
 gen#2(*#globals##0:wybe.phantom, ?#globals##2:wybe.phantom):
-  GlobalFlows: everything 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("Inner":wybe.string, ~*#globals##0:wybe.phantom, ?*tmp#2##0:wybe.phantom) #2 @io:nn:nn
