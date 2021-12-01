@@ -279,9 +279,10 @@ makeGlobalDefinition pname proto bls = do
     -- For the top-level main program
     let isMain = label0 == ".<0>"
     let (label,isForeign)  = if isMain then ("main",True) else (label0,False)
-    let inputs = List.filter isInputParam params
+    params' <- filterM ((not <$>) . paramIsPhantom) params
+    let inputs = List.filter isInputParam params'
     fnargs <- mapM makeFnArg inputs
-    retty <- if isMain then return int_t else primOutputType params
+    retty <- primOutputType params
     return $ globalDefine isForeign retty label fnargs bls
 
 
@@ -1233,9 +1234,8 @@ intrinsicExterns =
     [externalC void_t "llvm.memcpy.p0i8.p0i8.i32" [
         (ptr_t (int_c 8), LLVMAST.Name $ toSBString "dest"),
         (ptr_t (int_c 8), LLVMAST.Name $ toSBString "src"),
-        (LLVMAST.IntegerType 32, LLVMAST.Name $ toSBString "len"),
-        (LLVMAST.IntegerType 32, LLVMAST.Name $ toSBString "alignment"),
-        (LLVMAST.IntegerType 1, LLVMAST.Name $ toSBString "isvolatile")]
+        (int_t, LLVMAST.Name $ toSBString "len"),
+        (int_c 1, LLVMAST.Name $ toSBString "isvolatile")]
     ]
 
 
@@ -1363,7 +1363,6 @@ callMemCpy dst src bytes = do
     -- bytesOp <- cgenArg bytes
     -- bytesCast <- instr int_t   $ LLVMAST.BitCast bytesOp int_t []
     let inops = [dstCast, srcCast, bytesCast,
-                 cons (C.Int 32 $ fromIntegral wordSizeBytes),
                  cons (C.Int 1 0)]
     let ins =
           callC
