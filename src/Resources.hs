@@ -33,7 +33,7 @@ resourceCheckMod _ thisMod = do
     reenterModule thisMod
     resources <- getModuleImplementationField (Map.toAscList . modResources)
     (chg,errs,resources') <-
-        fmap unzip3 $ mapM (uncurry checkResourceDef) resources
+        unzip3 <$> mapM (uncurry checkResourceDef) resources
     updateModImplementation (\imp -> imp { modResources =
                                               Map.fromAscList resources'})
     reexitModule
@@ -42,20 +42,20 @@ resourceCheckMod _ thisMod = do
     return (or chg,concat errs)
 
 
-checkResourceDef :: Ident -> ResourceDef ->
-                    Compiler (Bool,[(String,OptPos)],(Ident,ResourceDef))
+checkResourceDef :: Ident -> ResourceDef 
+                 -> Compiler (Bool,[(String,OptPos)],(Ident,ResourceDef))
 checkResourceDef name def = do
     (chg,errs,m) <-
-        fmap unzip3 $ mapM (uncurry checkOneResource) $ Map.toList def
+        unzip3 <$> mapM (uncurry checkOneResource) (Map.toList def)
     return (or chg, concat errs, (name,Map.fromList m))
 
 
-checkOneResource :: ResourceSpec -> ResourceImpln ->
-                    Compiler (Bool,[(String,OptPos)],
+checkOneResource :: ResourceSpec -> ResourceImpln 
+                 -> Compiler (Bool,[(String,OptPos)],
                               (ResourceSpec,ResourceImpln))
 checkOneResource rspec impln@(SimpleResource ty init pos) = do
-    logResources $ "Check resource " ++ show rspec ++
-           " with implementation " ++ show impln
+    logResources $ "Check resource " ++ show rspec
+                 ++ " with implementation " ++ show impln
     ty' <- lookupType "resource declaration" pos ty
     logResources $ "Actual type is " ++ show ty'
     return (ty' /= ty,[],(rspec,SimpleResource ty' init pos))
@@ -73,14 +73,14 @@ canonicaliseProcResources pd _ = do
     logResources $ "Canonicalising resources used by proc " ++ procName pd
     let proto = procProto pd
     let pos = procPos pd
-    let lst = Set.elems $ procProtoResources proto
-    resourceFlows <- Set.fromList <$>
-                     mapM (canonicaliseResourceFlow pos) lst
+    let resources = Set.elems $ procProtoResources proto
+    resourceFlows <- Set.fromList 
+                 <$> mapM (canonicaliseResourceFlow pos) resources
     logResources $ "Available resources: " ++ show resourceFlows
     let proto' = proto {procProtoResources = resourceFlows}
     let pd' = pd {procProto = proto'}
     logResources $ "Canonicalising resources results in:"
-                   ++ showProcDef 4 pd'
+                    ++ showProcDef 4 pd'
     return pd'
 
 
@@ -89,10 +89,26 @@ canonicaliseResourceFlow :: OptPos -> ResourceFlowSpec
 canonicaliseResourceFlow pos spec = do
     resTy <- canonicaliseResourceSpec pos "proc declaration"
              $ resourceFlowRes spec
-    return $ spec { resourceFlowRes = fst resTy}
+    return $ spec { resourceFlowRes = fst resTy }
 
 
 --------- Transform resources into variables and parameters ---------
+
+-- | Data type to store the necessary data for adding resources to a proc
+data ResourceState = ResourceState {
+    resTmpCtr  :: Int,
+    resTmpVars :: VarDict
+}
+
+
+-- | Initial ResourceState given a tmpCtr
+initResourceState :: Int -> ResourceState
+initResourceState tmp = ResourceState tmp Map.empty
+
+
+-- | State transformer using a ResourceState
+type Resourcer = StateT ResourceState Compiler
+
 
 -- |Transform resources into ordinary variables in a single procedure
 --  definition.  Also check that calls to procs that use resources are
@@ -106,20 +122,17 @@ canonicaliseResourceFlow pos spec = do
 -- proc is type checked.
 transformProcResources :: ProcDef -> Int -> Compiler ProcDef
 transformProcResources pd _ = do
-    logResources $ "--------------------------------------\n"
+    logResources "--------------------------------------\n"
     logResources $ "Adding resources to:" ++ showProcDef 4 pd
     let proto = procProto pd
     let pos = procPos pd
     let tmp = procTmpCount pd
-    let resourceFlows = procProtoResources proto
+    let resFlows = procProtoResources proto
     let params = procProtoParams proto
     let (ProcDefSrc body) = procImpln pd
-    resFlows <- concat <$> mapM (simpleResourceFlows pos)
-                           (Set.elems resourceFlows)
-    logResources $ "Declared resources: " ++ show resFlows
-    let resources = Set.fromList $ resourceFlowRes . fst <$> resFlows
-    (body',tmp') <- transformBody tmp resources body
-    resParams <- concat <$> mapM (resourceParams pos) resFlows
+    (body', resParams, tmp')
+        <- evalStateT (transformProc resFlows body pos)
+            $ initResourceState tmp
     let proto' = proto { procProtoParams = params ++ resParams}
     let pd' = pd { procProto = proto', procTmpCount = tmp',
                    procImpln = ProcDefSrc body' }
@@ -127,126 +140,148 @@ transformProcResources pd _ = do
     return pd'
 
 
-resourceParams :: OptPos -> (ResourceFlowSpec,TypeSpec) -> Compiler [Param]
+-- | Transform a given procedure's body and resources, producing the body with
+-- resources transformed into arguments, the additional parameters for resources
+-- and the new tmpCtr 
+transformProc :: Set ResourceFlowSpec -> [Placed Stmt] -> OptPos
+              -> Resourcer ([Placed Stmt], [Param], Int)
+transformProc resourceFlows body pos = do
+    resFlows <- concat <$> mapM (simpleResourceFlows pos)
+                           (Set.elems resourceFlows)
+    lift $ logResources 
+         $ "Declared resources: " ++ show resFlows
+    body' <- transformStmts body
+    resParams <- concat <$> mapM (resourceParams pos) resFlows
+    tmp' <- gets resTmpCtr
+    return (body', resParams, tmp')
+
+
+-- | Transform a ResourceFlowSpec with a type into a Param
+resourceParams :: OptPos -> (ResourceFlowSpec,TypeSpec) -> Resourcer [Param]
 resourceParams pos (ResourceFlowSpec res flow, typ) = do
     varName <- resourceVar res
     let inParam  = [Param varName typ ParamIn (Resource res) | flowsIn flow]
     let outParam = [Param varName typ ParamOut (Resource res) | flowsOut flow]
     return $ inParam ++ outParam
 
+
 -- | Transform a statement sequence, turning resources into arguments.
-transformBody :: Int -> Set ResourceSpec -> [Placed Stmt]
-              -> Compiler ([Placed Stmt],Int)
-transformBody tmp _ [] = return ([],tmp)
-transformBody tmp resources (stmt:stmts) = do
-    (stmts1,tmp') <- placedApply (transformStmt tmp resources) stmt
-    (stmts2,tmp'') <- transformBody tmp' resources stmts
-    return (stmts1 ++ stmts2, tmp'')
+transformStmts :: [Placed Stmt] -> Resourcer [Placed Stmt]
+transformStmts stmts = concat <$> mapM (placedApply transformStmt) stmts
 
 
 -- | Transform a single statement, turning resources into arguments.
-transformStmt :: Int -> Set ResourceSpec -> Stmt -> OptPos
-              -> Compiler ([Placed Stmt], Int)
-transformStmt tmp res stmt@(ProcCall m n id detism resourceful args) pos = do
+transformStmt :: Stmt -> OptPos -> Resourcer [Placed Stmt]
+transformStmt stmt@(ProcCall m n id detism resourceful args) pos = do
     let procID = trustFromJust "transformStmt" id
-    callResources <-
-        procProtoResources . procProto <$> getProcDef
-                (ProcSpec m n procID generalVersion)
+    callResources <- procProtoResources . procProto
+                 <$> lift (getProcDef $ ProcSpec m n procID generalVersion)
     unless (resourceful || Set.null callResources)
-      $ message Error
-        ("Call to resourceful proc without ! resource marker: "
-         ++ showStmt 4 stmt)
-        pos
-    logResources $ "Checking call to " ++ n ++ " using " ++ show callResources
+        $ lift $ errmsg pos
+               $ "Call to resourceful proc without ! resource marker: "
+                    ++ showStmt 4 stmt
+    lift $ logResources 
+         $ "Checking call to " ++ n ++ " using " ++ show callResources
     resArgs <- concat <$> mapM (resourceArgs pos) (Set.elems callResources)
-    return ([maybePlace
-            (ProcCall m n (Just procID) detism False (args++resArgs)) pos], tmp)
-transformStmt tmp res (ForeignCall lang name flags args) pos =
-    return ([maybePlace (ForeignCall lang name flags args) pos], tmp)
-transformStmt tmp res stmt@(TestBool var) pos =
-    return ([maybePlace stmt pos], tmp)
-transformStmt tmp res (And stmts) pos = do
-    (stmts',tmp') <- transformBody tmp res stmts
-    return ([maybePlace (And stmts') pos], tmp')
-transformStmt tmp res (Or [] _) pos =
-    return ([failTest], tmp)
-transformStmt tmp res (Or [stmt] _) pos = do
-    placedApplyM (transformStmt tmp res) stmt
-transformStmt tmp res (Or (stmt:stmts) vars) pos = do
-    (stmt',tmp')  <- placedApplyM (transformStmt tmp res) stmt
-    (stmt'',tmp'') <- transformStmt tmp' res (Or stmts vars) pos
-    return ([maybePlace (Or [makeSingleStmt stmt',makeSingleStmt stmt''] vars)
-              pos], tmp'')
-transformStmt tmp res (Not stmt) pos = do
-    (stmt',tmp') <- placedApplyM (transformStmt tmp res) stmt
-    return ([maybePlace (Not $ makeSingleStmt stmt') pos], tmp')
-transformStmt tmp res Nop _ =
-    return ([], tmp)
-transformStmt tmp res Fail pos =
-    return ([maybePlace Fail pos], tmp)
-transformStmt tmp res (Cond test thn els condVars defVars) pos = do
-    (test',tmp1) <- placedApplyM (transformStmt tmp res) test
-    (thn',tmp2) <- transformBody tmp1 res thn
-    (els',tmp3) <- transformBody tmp2 res els
-    return ([maybePlace
-             (Cond (Unplaced $ And test') thn' els' condVars defVars) pos],
-            tmp3)
-transformStmt tmp res (Case expr cases deflt) pos = do
-    (cases',tmp1) <- transformCases tmp res cases
-    (deflt',tmp2) <- case deflt of
-        Nothing -> return (Nothing, tmp1)
-        Just def -> mapFst Just <$> transformBody tmp1 res def
-    return ([maybePlace
-             (Case expr cases' deflt') pos],
-            tmp2)
-transformStmt tmp res (Loop body defVars) pos = do
-    (body',tmp') <- transformBody tmp res body
-    return ([maybePlace (Loop body' defVars) pos], tmp')
-transformStmt tmp res (For generators body) pos = do
-    (body', tmp') <- transformBody tmp res body
-    return ([maybePlace (For generators body') pos], tmp')
-transformStmt tmp res (UseResources allRes oldRes body) pos = do
+    return [maybePlace
+            (ProcCall m n (Just procID) detism False (args++resArgs)) pos]
+transformStmt (ForeignCall lang name flags args) pos =
+    return [maybePlace (ForeignCall lang name flags args) pos]
+transformStmt stmt@(TestBool var) pos =
+    return [maybePlace stmt pos]
+transformStmt (And stmts) pos = do
+    stmts' <- transformStmts stmts
+    return [maybePlace (And stmts') pos]
+transformStmt (Or [] _) pos =
+    return [failTest]
+transformStmt (Or [stmt] _) pos = do
+    placedApplyM transformStmt stmt
+transformStmt (Or (stmt:stmts) vars) pos = do
+    stmt'  <- placedApplyM transformStmt stmt
+    stmt'' <- transformStmt (Or stmts vars) pos
+    tmpVars <- gets resTmpVars
+    let vars' = Map.union tmpVars <$> vars
+    return [maybePlace (Or [seqToStmt stmt', seqToStmt stmt''] vars') pos]
+transformStmt (Not stmt) pos = do
+    stmt' <- placedApplyM transformStmt stmt
+    return [maybePlace (Not $ seqToStmt stmt') pos]
+transformStmt Nop _ =
+    return []
+transformStmt Fail pos =
+    return [maybePlace Fail pos]
+transformStmt (Cond test thn els condVars defVars) pos = do
+    test' <- placedApplyM transformStmt test
+    thn'  <- transformStmts thn
+    els'  <- transformStmts els
+    tmpVars <- gets resTmpVars
+    let condVars' = Map.union tmpVars <$> condVars
+    let defVars'  = Map.union tmpVars <$> defVars
+    return [maybePlace (Cond (Unplaced $ And test') thn' els'
+                        condVars' defVars') pos]
+transformStmt (Case expr cases deflt) pos = do
+    cases' <- transformCases cases
+    deflt' <- forM deflt transformStmts
+    return [maybePlace (Case expr cases' deflt') pos]
+transformStmt (Loop body defVars) pos = do
+    body' <- transformStmts body
+    tmpVars <- gets resTmpVars
+    let defVars' = Map.union tmpVars <$> defVars
+    return [maybePlace (Loop body' defVars') pos]
+transformStmt (For generators body) pos = do
+    body' <- transformStmts body
+    return [maybePlace (For generators body') pos]
+transformStmt (UseResources allRes oldRes body) pos = do
     let resVars = trustFromJust "use stmt without var list after type check"
                   oldRes
     resTypes <- List.filter ((`elem` resVars) . resourceName . fst)
-                <$> mapM (canonicaliseResourceSpec pos "use statement") allRes
-                    -- (trustFromJust "un-typechecked use stmt" oldRes)
+            <$> lift (mapM (canonicaliseResourceSpec pos "use statement") allRes)
     toSave <- mapM (resourceVar . fst) resTypes
+    tmp <- gets resTmpCtr
     let types = fromJust . snd <$> resTypes
-    let resCount = length toSave
-    let tmp' = tmp + resCount
-    let ress = zip3 toSave (mkTempName <$> [tmp..]) types
+    let tmpNames = mkTempName <$> [tmp..]
+    let ress = zip3 toSave tmpNames types
     let get v ty = varGet v `withType` ty
     let set v ty = varSet v `withType` ty
     let saves = (\(r,t,ty) -> move (get r ty) (set t ty)) <$> ress
     let restores = (\(r,t,ty) -> move (get t ty) (set r ty)) <$> ress
-    (body',tmp'') <- transformBody tmp' res body
-    return (saves ++ body' ++ restores, tmp'')
-transformStmt tmp res Break pos =
-    return ([maybePlace Break pos], tmp)
-transformStmt tmp res Next pos =
-    return ([maybePlace Next pos], tmp)
+    let tmpVars = Map.fromList $ zip tmpNames types
+    body' <- transformWithTmpVars (tmp + length toSave) tmpVars
+           $ transformStmts body
+    return $ saves ++ body' ++ restores
+transformStmt Break pos =
+    return [maybePlace Break pos]
+transformStmt Next pos =
+    return [maybePlace Next pos]
 
 
-transformCases :: Int -> Set ResourceSpec -> [(Placed Exp,[Placed Stmt])]
-              -> Compiler ([(Placed Exp, [Placed Stmt])], Int)
-transformCases tmp res [] = return ([], tmp)
-transformCases tmp res ((guard,body):rest) = do
-    (body1,tmp1) <- transformBody tmp res body
-    (rest1,tmp2) <- transformCases tmp1 res rest
-    return $ ((guard,body1):rest1, tmp2)
+-- | Perform some action with additional tmp vars for resources.
+-- This modifies the tmpCtr, but leaves the old tmp vars in tact. 
+transformWithTmpVars :: Int -> Map VarName TypeSpec 
+                     -> Resourcer a -> Resourcer a
+transformWithTmpVars tmp newVars action = do
+    oldVars <- gets resTmpVars
+    modify $ \s -> s{ resTmpCtr = tmp,
+                      resTmpVars = Map.union newVars oldVars }
+    result <- action
+    modify $ \s -> s{ resTmpVars = oldVars }
+    return result
 
 
-makeSingleStmt :: [Placed Stmt] -> Placed Stmt
-makeSingleStmt []       = succeedTest
-makeSingleStmt [single] = single
-makeSingleStmt stmts    = Unplaced $ And stmts
+-- Transform a list of cases, transforming resources into arguments
+transformCases :: [(Placed Exp,[Placed Stmt])]
+               -> Resourcer [(Placed Exp, [Placed Stmt])]
+transformCases [] = return []
+transformCases ((guard,body):rest) = do
+    body' <- transformStmts body
+    rest' <- transformCases rest
+    return $ (guard,body'):rest'
+
 
 -- |Returns the list of args corresponding to the specified resource
 -- flow spec.  This produces up to two arguments for each simple
 -- resource, multiplied by all the simple resources a single resource
 -- flow spec might refer to.
-resourceArgs ::  OptPos -> ResourceFlowSpec -> Compiler [Placed Exp]
+resourceArgs :: OptPos -> ResourceFlowSpec -> Resourcer [Placed Exp]
 resourceArgs pos rflow = do
     simpleSpecs <- simpleResourceFlows pos rflow
     -- XXX make separate exps for each direction
@@ -264,6 +299,8 @@ resourceArgs pos rflow = do
          simpleSpecs
 
 
+-- | The set of VarNames that correspond to sepcial resources
+specialResourcesSet :: Set VarName
 specialResourcesSet = keysSet specialResources
 
 
@@ -295,21 +332,22 @@ canonicaliseResourceSpec pos context spec = do
 -- to by a ResourceFlowSpec.  This is necessary because a resource spec
 -- may refer to a compound resource.
 simpleResourceFlows :: OptPos -> ResourceFlowSpec ->
-                       Compiler [(ResourceFlowSpec,TypeSpec)]
+                       Resourcer [(ResourceFlowSpec,TypeSpec)]
 simpleResourceFlows pos (ResourceFlowSpec spec flow) = do
-    resDef <- lookupResource spec
+    resDef <- lift $ lookupResource spec
     case resDef of
         Nothing -> do
-            errmsg pos $ "Unknown resource " ++ show spec
-                         ++ " in called proc"
+            lift $ errmsg pos $ "Unknown resource " ++ show spec
+                             ++ " in called proc"
             return []
         Just def ->
             return [(ResourceFlowSpec spec flow,resourceType impln)
                     | (spec,impln) <- Map.toList def]
 
+
 -- | The local variable name to use for a resource.  This assumes the resource
 -- spec has already been canonicalised (fully module qualified).
-resourceVar :: ResourceSpec -> Compiler Ident
+resourceVar :: ResourceSpec -> Resourcer Ident
 resourceVar (ResourceSpec [] name) = return name
 resourceVar (ResourceSpec mod name) = do
     -- Always use resource name as variable name, regardless of module
