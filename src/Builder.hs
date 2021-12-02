@@ -1115,7 +1115,7 @@ buildMain mainImports = do
                                  cmdResource "exit_code" ParamOut]
     let mainBody =
           [ Unplaced $
-            UseResources res Nothing $
+            UseResources res $
             -- Construct argumentless resourceful calls to all main procs
               [Unplaced $ ProcCall (First m "" Nothing) Det True []
               | m <- mainImports]

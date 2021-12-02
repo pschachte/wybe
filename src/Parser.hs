@@ -210,7 +210,7 @@ useBody v pos mods =
 topLevelUseStmt :: OptPos -> [ResourceSpec] -> Parser Item
 topLevelUseStmt pos ress = do
     body <- stmtSeq
-    return $ StmtDecl (UseResources ress Nothing body) pos
+    return $ StmtDecl (UseResources ress body) pos
 
 
 -- | Convert a ModSpce to a ResourceSpec 
@@ -985,7 +985,7 @@ termToStmt (Call pos [] "use" ParamIn
                     [Call _ [] "in" ParamIn [ress,body]]) = do
     ress' <- termToResourceList ress
     body' <- termToBody body
-    return $ Placed (UseResources ress' Nothing body') pos
+    return $ Placed (UseResources ress' body') pos
 termToStmt (Call pos [] "while" ParamIn [test]) = do
     t <- termToStmt test
     return $ Placed (Cond t [Unplaced Nop] [Unplaced Break] Nothing Nothing) pos

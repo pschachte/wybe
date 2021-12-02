@@ -1154,7 +1154,7 @@ bodyCalls (pstmt:pstmts) detism = do
         Loop nested _ -> do
           nested' <- bodyCalls nested detism
           return $ nested' ++ rest
-        UseResources _ _ nested -> do
+        UseResources _ nested -> do
           nested' <- bodyCalls nested detism
           return $ nested' ++ rest
         For{}  -> shouldnt "bodyCalls: flattening left For stmt"
@@ -1940,15 +1940,11 @@ modecheckStmt m name defPos assigned detism tmpCount final
     return ([maybePlace (Loop stmts' vars) pos]
            ,postLoopBindingState assigned assigned',tmpCount')
 modecheckStmt m name defPos assigned detism tmpCount final
-    stmt@(UseResources resources _ stmts) pos = do
+    stmt@(UseResources resources stmts) pos = do
     logTyped $ "Mode checking use ... in stmt " ++ show stmt
     (stmts', assigned', tmpCount')
         <- modecheckStmts m name defPos assigned detism tmpCount final stmts
-    let boundRes = intersectMaybeSets (bindingVars assigned)
-                   $ (Just . Set.fromList) $ resourceName <$> resources
-    return
-        ([maybePlace (UseResources resources (Set.toList <$> boundRes) stmts')
-          pos],assigned',tmpCount')
+    return ([maybePlace (UseResources resources stmts') pos],assigned',tmpCount')
 -- XXX Need to implement these correctly:
 modecheckStmt m name defPos assigned detism tmpCount final
     stmt@(And stmts) pos = do
@@ -2483,7 +2479,7 @@ checkStmtTyped name pos stmt@(Loop stmts exitVars) _ppos = do
     -- when (isNothing exitVars) $
     --      shouldnt $ "exit vars of loop undetermined: " ++ showStmt 4 stmt
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
-checkStmtTyped name pos (UseResources _ _ stmts) _ppos =
+checkStmtTyped name pos (UseResources _ stmts) _ppos =
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
 checkStmtTyped name pos For{} ppos =
     shouldnt "For statement left by flattening"

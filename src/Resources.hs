@@ -301,17 +301,47 @@ transformStmt (Loop body vars) pos = do
 transformStmt (For generators body) pos = do
     body' <- transformStmts body
     return [maybePlace (For generators body') pos]
-transformStmt (UseResources allRes oldRes body) pos = do
-    resMbTypes <- lift (mapM (canonicaliseResourceSpec pos "use statement") allRes)
-    let resTypes = mapSnd (trustFromJust "transformStmt UseResources")
+transformStmt (UseResources res body) pos = do
+    resMbTypes <- lift $ mapM (canonicaliseResourceSpec pos "use statement") 
+                              res
+    let usingRes = mapSnd (trustFromJust "transformStmt UseResources")
                <$> resMbTypes 
-    (saves, restores, tmpVars) <- saveRestoreResourcesTmp resTypes
-    body' <- transformWithTmpVars tmpVars $ transformStmts body
-    return $ saves ++ body' ++ restores
+    (saves, restores, tmpVars) <- saveRestoreResourcesTmp usingRes
+    s@ResourceState {resTypes=oldResTypes, 
+                     resTmpVars=oldTmp, 
+                     resIsResourceful=isResful} <- get
+    put s{ resTmpVars = Map.union tmpVars oldTmp,
+           resTypes = oldResTypes `Set.union` Set.fromList usingRes,
+           resIsResourceful = True }
+    body' <- transformStmts body
+    modify $ \s -> s{ resTmpVars = oldTmp, resIsResourceful = isResful }
+    return $ [move (IntValue 0 `withType` phantomType) 
+                   (varSet globalsName `withType` phantomType) 
+             | not isResful] 
+          ++ saves ++ body' ++ restores
+          ++ [lpvmVoid [Unplaced $ varGet globalsName `withType` phantomType] 
+             | not isResful]
 transformStmt Break pos =
     return [maybePlace Break pos]
 transformStmt Next pos =
     return [maybePlace Next pos]
+
+    
+-- | Perform some action with additional tmp vars for resources.
+-- This modifies the tmpCtr, but leaves the old tmp vars in tact. 
+transformInner :: [ResType] -> Map VarName TypeSpec 
+               -> Resourcer a -> Resourcer a
+transformInner newResources newVars action = do
+    oldVars <- gets resTmpVars
+    oldRes <- gets resTypes
+    oldResful <- gets resIsResourceful
+    modify $ \s -> s{ resTmpVars = Map.union newVars oldVars,
+                      resTypes = oldRes `Set.union` Set.fromList newResources,
+                      resIsResourceful = True }
+    result <- action
+    modify $ \s -> s{ resTmpVars = oldVars,
+                      resIsResourceful = oldResful }
+    return result
 
 
 -- | Get a var as a resource of the given type
@@ -409,18 +439,6 @@ transformExp ty exp@(Var name flow _) pos = do
                        inRes, outRes)
         Nothing -> return (maybePlace exp pos, Set.empty, Set.empty)
 transformExp _ exp pos = return (maybePlace exp pos, Set.empty, Set.empty)
-
-
--- | Perform some action with additional tmp vars for resources.
--- This modifies the tmpCtr, but leaves the old tmp vars in tact. 
-transformWithTmpVars :: Map VarName TypeSpec 
-                     -> Resourcer a -> Resourcer a
-transformWithTmpVars newVars action = do
-    oldVars <- gets resTmpVars
-    modify $ \s -> s{ resTmpVars = Map.union newVars oldVars }
-    result <- action
-    modify $ \s -> s{ resTmpVars = oldVars }
-    return result
 
 
 -- Transform a list of cases, transforming resources into arguments
