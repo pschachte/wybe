@@ -24,7 +24,8 @@ import Data.Maybe
 -- | Uniqueness error with specs of the variable
 data UniquenessError = UniquenessError {
     errVarName  :: VarName,
-    errTypeSpec :: TypeSpec
+    errTypeSpec :: TypeSpec,
+    errPos      :: OptPos
 }
 
 -- | Set used to check correctness of uniqueness of the program
@@ -43,23 +44,23 @@ initUniquenessState = UniquenessState Map.empty []
 uniquenessCheckProc :: [Placed Stmt] -> Compiler ()
 uniquenessCheckProc body = do
     logUniqueness $ "Uniqueness checking body: " ++ showBody 4 body
-    let state = foldStmts const uniquenessCheckExp initUniquenessState body
+    let state = foldStmts (const . const) uniquenessCheckExp initUniquenessState body
     errs <- filterM (typeIsUnique . errTypeSpec) (uniquenessErrors state)
     mapM_ reportUniquenessError errs
 
 
 -- | Check correctness of uniqueness for an expression
-uniquenessCheckExp :: UniquenessState -> Exp -> UniquenessState
-uniquenessCheckExp state (Typed (Var name ParamIn _) ty _) =
+uniquenessCheckExp :: UniquenessState -> Exp -> OptPos -> UniquenessState
+uniquenessCheckExp state (Typed (Var name ParamIn _) ty _) pos =
     let (UniquenessState usedMap errs) = state
     in if Map.member name usedMap
-    then state {uniquenessErrors = UniquenessError name ty : errs}
+    then state {uniquenessErrors = UniquenessError name ty pos : errs}
     else state {uniquenessUsedMap = Map.insert name ty usedMap}
 
-uniquenessCheckExp state (Typed (Var name ParamOut _) ty _) =
+uniquenessCheckExp state (Typed (Var name ParamOut _) ty _) _ =
     state {uniquenessUsedMap = Map.delete name (uniquenessUsedMap state)}
 
-uniquenessCheckExp state _ = state
+uniquenessCheckExp state _ _ = state
 
 
 -- | Check if a type is unique
@@ -73,8 +74,8 @@ typeIsUnique _ = return False
 
 -- | Report an error when a unique typed variable is being reused
 reportUniquenessError :: UniquenessError -> Compiler ()
-reportUniquenessError (UniquenessError name ty) = do
-    errmsg Nothing $ "Reuse of unique variable " ++ name ++ ":" ++ show ty
+reportUniquenessError (UniquenessError name ty pos) = do
+    errmsg pos $ "Reuse of unique variable " ++ name ++ ":" ++ show ty
 
 
 -- | Log a message, if we are logging type checker activity.

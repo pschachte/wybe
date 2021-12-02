@@ -561,15 +561,15 @@ updateLoadedModuleImplnM updater =
 
 -- |Apply some transformation to the map of compiled modules.
 updateModules :: (Map ModSpec Module -> Map ModSpec Module) -> Compiler ()
-updateModules updater = do
+updateModules updater =
     modify (\bs -> bs { modules = updater $ modules bs })
 
 -- |Apply some transformation to the map of compiled modules.
 updateImplementations :: (ModuleImplementation -> ModuleImplementation) ->
                          Compiler ()
-updateImplementations updater = do
+updateImplementations updater =
     updateModules (Map.map (\m -> m { modImplementation =
-                                           updater <$> modImplementation m }))
+                                       updater <$> modImplementation m }))
 
 -- |Return the module currently being compiled.  The argument says where
 -- this function is called from for error-reporting purposes.
@@ -955,7 +955,7 @@ lookupResource res@(ResourceSpec mod name) = do
             let rspec = Set.findMin rspecs
             maybeMod <- getLoadingModule $ resourceMod rspec
             let maybeDef = maybeMod >>= modImplementation >>=
-                        (Map.lookup (resourceName rspec) . modResources)
+                        Map.lookup (resourceName rspec) . modResources
             logAST $ "Found resource:  " ++ show maybeDef
             let rdef = trustFromJust "lookupResource" maybeDef
             logAST $ "  with definition:  " ++ show rdef
@@ -1176,7 +1176,7 @@ getProcDef (ProcSpec modSpec procName procID _) = do
     let impl = trustFromJust ("unimplemented module " ++ showModSpec modSpec) $
                modImplementation mod
     logAST $ "Looking up proc '" ++ procName ++ "' ID " ++ show procID
-    let proc = (modProcs impl ! procName) !! procID
+    let proc = modProcs impl ! procName !! procID
     logAST $ "  proc = " ++ showProcDef 9 proc
     return proc
 
@@ -1765,9 +1765,9 @@ instance Show Pragma where
 
 -- |Specify a pragma for the current module
 addPragma :: Pragma -> Compiler ()
-addPragma prag = do
+addPragma prag =
     updateModImplementation
-        (\imp -> imp { modPragmas = Set.insert prag $ modPragmas imp })
+    (\imp -> imp { modPragmas = Set.insert prag $ modPragmas imp })
 
 
 -- |A type definition, including the number of type parameters and an
@@ -2176,43 +2176,40 @@ defaultBlock =  LLBlock { llInstrs = [], llTerm = TermNop }
 
 -- |Fold over a list of statements in a pre-order left-to-right traversal.
 -- Takes two folding functions, one for statements and one for expressions.
-foldStmts :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> [Placed Stmt] -> a
-foldStmts sfn efn val stmts =
-    List.foldl (\val pstmt -> foldStmt sfn efn val $ content pstmt) val stmts
+foldStmts :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> a
+          -> [Placed Stmt] -> a
+foldStmts sfn efn = List.foldl (placedApply . foldStmt sfn efn)
 
 
 -- |Fold over the specified statement and all the statements nested within it,
 -- in a pre-order left-to-right traversal. Takes two folding functions, one for
 -- statements and one for expressions.
-foldStmt :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> Stmt -> a
-foldStmt sfn efn val stmt = foldStmt' sfn efn (sfn val stmt) stmt
+foldStmt :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> a
+         -> Stmt -> OptPos -> a
+foldStmt sfn efn val stmt pos = foldStmt' sfn efn (sfn val stmt pos) stmt
 
 
 -- |Fold over all the statements nested within the given statement,
 -- but not the statement itself, in a pre-order left-to-right traversal.
 -- Takes two folding functions, one for statements and one for expressions.
-foldStmt' :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> Stmt -> a
--- foldStmt' _ _ _ stmt
---   | unsafePerformIO $ do
---       putStrLn $ "#### foldStmt' " ++ showStmt 4 stmt
---       return False
---   = error "Woops!"
+foldStmt' :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> a
+          -> Stmt -> a
 foldStmt' sfn efn val (ProcCall _ _ _ _ _ args) =
     foldExps sfn efn val args
 foldStmt' sfn efn val (ForeignCall _ _ _ args) =
     foldExps sfn efn val args
 foldStmt' sfn efn val (Cond tst thn els _ _) = val4
-    where val2 = foldStmt sfn efn val $ content tst
+    where val2 = placedApply (foldStmt sfn efn val) tst
           val3 = foldStmts sfn efn val2 thn
           val4 = foldStmts sfn efn val3 els
 foldStmt' sfn efn val (Case exp cases deflt) = val4
-    where val2 = foldExp sfn efn val $ content exp
+    where val2 = placedApply (foldExp sfn efn val) exp
           val3 = List.foldl (foldCase sfn efn) val2 cases
           val4 = maybe val3 (foldStmts sfn efn val3) deflt
 foldStmt' sfn efn val (And stmts) = foldStmts sfn efn val stmts
 foldStmt' sfn efn val (Or stmts _) = foldStmts sfn efn val stmts
-foldStmt' sfn efn val (Not negated) = foldStmt sfn efn val $ content negated
-foldStmt' sfn efn val (TestBool exp) = foldExp sfn efn val exp
+foldStmt' sfn efn val (Not negated) = placedApply (foldStmt sfn efn val) negated
+foldStmt' sfn efn val (TestBool exp) = foldExp sfn efn val exp Nothing
 foldStmt' _   _   val Nop = val
 foldStmt' _   _   val Fail = val
 foldStmt' sfn efn val (Loop body _) = foldStmts sfn efn val body
@@ -2227,15 +2224,18 @@ foldStmt' _   _   val Next = val
 
 -- |Fold over a list of expressions in a pre-order left-to-right traversal.
 -- Takes two folding functions, one for statements and one for expressions.
-foldExps :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> [Placed Exp] -> a
-foldExps sfn efn = List.foldl (\val pexp -> foldExp sfn efn val $ content pexp)
+foldExps :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> a
+         -> [Placed Exp] -> a
+foldExps sfn efn =
+    List.foldl (placedApply . foldExp sfn efn)
 
 
 -- |Fold over an expression and all its subexpressions, in a pre-order
 -- left-to-right traversal.  Takes two folding functions, one for statements and
 -- one for expressions.
-foldExp :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> Exp -> a
-foldExp sfn efn val exp = foldExp' sfn efn (efn val exp) exp
+foldExp :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> a
+        -> Exp -> OptPos -> a
+foldExp sfn efn val exp pos = foldExp' sfn efn (efn val exp pos) exp
 
 
 -- |Fold over all the subexpressions of the given expression, but not the
@@ -2246,35 +2246,35 @@ foldExp' _   _    val FloatValue{}   = val
 foldExp' _   _    val StringValue{}  = val
 foldExp' _   _    val CharValue{}    = val
 foldExp' _   _    val Var{}          = val
-foldExp' sfn efn val (Typed exp _ _) = foldExp sfn efn val exp
+foldExp' sfn efn val (Typed exp _ _) = foldExp sfn efn val exp Nothing
 foldExp' sfn efn val (Where stmts exp) =
     let val1 = foldStmts sfn efn val stmts
-    in  foldExp sfn efn val1 $content exp
+    in  placedApply (foldExp sfn efn val1) exp
 foldExp' sfn efn val (DisjExp e1 e2) =
-    foldExp sfn efn (foldExp sfn efn val (content e1)) (content e2)
+    placedApply (foldExp sfn efn (placedApply (foldExp sfn efn val) e1)) e2
 foldExp' sfn efn val (CondExp stmt e1 e2) =
-    let val1 = foldStmt sfn efn val $ content stmt
-        val2 = foldExp sfn efn val1 $ content e1
-    in         foldExp sfn efn val2 $ content e2
+    let val1 = placedApply (foldStmt sfn efn val) stmt
+        val2 = placedApply (foldExp sfn efn val1) e1
+    in         placedApply (foldExp sfn efn val2) e2
 foldExp' sfn efn val (Fncall _ _ exps) = foldExps sfn efn val exps
 foldExp' sfn efn val (ForeignFn _ _ _ exps) = foldExps sfn efn val exps
 foldExp' sfn efn val (CaseExp exp cases deflt) =
-    let val1 = foldExp sfn efn val $ content exp
+    let val1 = placedApply (foldExp sfn efn val) exp
         val2 = List.foldl (foldCaseExp sfn efn) val1 cases
-    in maybe val2 (foldExp sfn efn val2 . content) deflt
+    in maybe val2 (placedApply (foldExp sfn efn val2)) deflt
 
 -- | Fold over the cases in a case statement
-foldCase :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a
+foldCase :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> a
          -> (Placed Exp,[Placed Stmt]) -> a
 foldCase sfn efn val (pexp, body) =
-    foldStmts sfn efn (foldExp sfn efn val (content pexp)) body
+    foldStmts sfn efn (placedApply (foldExp sfn efn val) pexp) body
 
 
 -- | Fold over the cases in a case expression
-foldCaseExp :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a
-         -> (Placed Exp,Placed Exp) -> a
+foldCaseExp :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a)
+            -> a -> (Placed Exp,Placed Exp) -> a
 foldCaseExp sfn efn val (pexp, pval) =
-    foldExp sfn efn (foldExp sfn efn val (content pexp)) $ content pval
+    placedApply (foldExp sfn efn (placedApply (foldExp sfn efn val) pexp)) pval
 
 -- |Fold over a ProcBody applying the primFn to each Prim, and
 -- combining the results for a sequence of Prims with the abConj
@@ -2460,7 +2460,7 @@ instance Show TypeFlow where
 
 -- |Return the TypeSpec and FlowDirection of a Param
 paramTypeFlow :: Param -> TypeFlow
-paramTypeFlow (Param{paramType=ty, paramFlow=fl}) = TypeFlow ty fl
+paramTypeFlow Param{paramType=ty, paramFlow=fl} = TypeFlow ty fl
 
 -- |A formal parameter, including name, type, and flow direction.
 data PrimParam = PrimParam {
@@ -2951,7 +2951,7 @@ varsInPrimArg dir ArgVar{argVarName=var,argVarFlow=dir'} =
   if dir == dir' then Set.singleton var else Set.empty
 varsInPrimArg _ (ArgInt _ _)            = Set.empty
 varsInPrimArg _ (ArgFloat _ _)          = Set.empty
-varsInPrimArg _ (ArgString _ _ _)       = Set.empty
+varsInPrimArg _ (ArgString {})       = Set.empty
 varsInPrimArg _ (ArgChar _ _)           = Set.empty
 varsInPrimArg _ (ArgUnneeded _ _)       = Set.empty
 varsInPrimArg _ (ArgUndef _)            = Set.empty
@@ -3024,7 +3024,7 @@ outputStatusName = specialName "success"
 
 -- | How to show an Item.
 instance Show Item where
-  show (TypeDecl vis name typeModifiers (TypeRepresentation repn) items pos) = 
+  show (TypeDecl vis name typeModifiers (TypeRepresentation repn) items pos) =
     visibilityPrefix vis ++ "type " ++ show name
     ++ show typeModifiers
     ++ " is" ++ show repn
@@ -3244,13 +3244,13 @@ showResources resources
 -- |How to show a proc prototype.
 instance Show ProcProto where
   show (ProcProto name params resources) =
-    name ++ "(" ++ (intercalate ", " $ List.map show params) ++ ")" ++
+    name ++ "(" ++ intercalate ", " (List.map show params) ++ ")" ++
     showResources resources
 
 -- |How to show a formal parameter.
 instance Show Param where
   show (Param name typ dir flowType) =
-    (show flowType) ++ flowPrefix dir ++ name ++ showTypeSuffix typ Nothing
+    show flowType ++ flowPrefix dir ++ name ++ showTypeSuffix typ Nothing
 
 -- |How to show a formal parameter.
 instance Show PrimParam where
@@ -3305,7 +3305,7 @@ showFork ind (PrimFork var ty last bodies) =
 -- |Show a list of placed prims.
 -- XXX the first argument is unused; can we get rid of it?
 showPlacedPrims :: Int -> [Placed Prim] -> String
-showPlacedPrims ind stmts = List.concatMap (showPlacedPrim ind) stmts
+showPlacedPrims ind = List.concatMap (showPlacedPrim ind)
 
 
 -- |Show a single primitive statement with the specified indent.
@@ -3403,8 +3403,7 @@ showStmt _ Next = "next"
 
 -- |Show a proc body, with the specified indent.
 showBody :: Int -> [Placed Stmt] -> String
-showBody indent stmts =
-  List.concatMap (\s -> startLine indent ++ showStmt indent (content s)) stmts
+showBody indent = List.concatMap (\s -> startLine indent ++ showStmt indent (content s))
 
 
 -- |Show a primitive argument.
@@ -3514,16 +3513,15 @@ checkValue tst msg val = if tst val then val else shouldnt msg
 
 
 -- |Like fromJust, but with its own error message.
-trustFromJust :: String -> (Maybe t) -> t
+trustFromJust :: String -> Maybe t -> t
 trustFromJust msg Nothing = shouldnt $ "trustFromJust in " ++ msg
 trustFromJust _ (Just val) = val
 
 
 -- |Monadic version of trustFromJust.
-trustFromJustM :: Monad m => String -> (m (Maybe t)) -> m t
+trustFromJustM :: Monad m => String -> m (Maybe t) -> m t
 trustFromJustM msg computation = do
-    maybe <- computation
-    return $ trustFromJust msg maybe
+    trustFromJust msg <$> computation
 
 
 data Message = Message {
@@ -3615,7 +3613,7 @@ stopOnError incident = do
 
 -- |Log a message, if we are logging AST manipulation.
 logAST :: String -> Compiler ()
-logAST s = logMsg AST s
+logAST = logMsg AST
 
 
 -- | Execute the specified Compiler action if the specified compiler phase is
