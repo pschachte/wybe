@@ -11,8 +11,8 @@ pub resource arguments:array(c_string) = array(argc, argv)
 # absolute file name.
 pub resource command:c_string = c""
 
-if {[?command | ?arguments] = arguments :: pass
-|   else :: !error(c"Erroneous program argument vector")
+if { [?command | ?arguments] = arguments :: pass
+   | else :: !error(c"Erroneous program argument vector")
 }
 
 # The exit code to return to the invoking shell.  This is initialised to

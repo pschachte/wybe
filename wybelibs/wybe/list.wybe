@@ -10,9 +10,19 @@ pub def (x:_(T) ,, y:_(T)):_(T) =
 pub def length(x:_(T)) : int = length1(x, 0)
 
 def length1(x:_(T), acc:int) : int =
-    if { x = [?h|?t]:: length1(t, acc+1) | else:: acc }
+    if { x = [?h|?t] :: length1(t, acc+1) | else :: acc }
 
 pub def reverse(x:_(T)):_(T) = reverse1(x, [])
 
 def reverse1(x:_(T), tail:_(T)):_(T) =
-    if { x = [?h|?t]:: reverse1(t, [h|tail]) | else:: tail }
+    if { x = [?h|?t] :: reverse1(t, [h|tail]) | else :: tail }
+
+pub def {test} `[]`(xs:_(T), idx:int):T = x where {
+    idx >= 0 # we dont want to check this every time
+    ?x = index(xs, idx)
+}
+
+def {test} index(xs:_(T), idx:int):T = x where {
+    [?x | ?xs] = xs
+    (idx = 0 | index(xs, idx - 1, ?x))
+}
