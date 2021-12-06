@@ -1823,7 +1823,7 @@ initialisedResources = do
 --  normalised to a list of primitives, and an optional source
 --  position.
 data ProcDef = ProcDef {
-    procName :: ProcName,          -- ^the proc's name
+    procName :: ProcName,       -- ^the proc's name
     procProto :: ProcProto,     -- ^the proc's prototype
     procImpln :: ProcImpln,     -- ^the actual implementation
     procPos :: OptPos,          -- ^where this proc is defined

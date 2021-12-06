@@ -19,6 +19,7 @@ import Data.List as List
 import Data.Set as Set
 import Data.Map as Map
 import Data.Maybe
+import GHC.TypeNats (Mod)
 
 
 -- | Uniqueness error with specs of the variable
@@ -30,7 +31,7 @@ data UniquenessError = UniquenessError {
 
 -- | Set used to check correctness of uniqueness of the program
 data UniquenessState = UniquenessState {
-    uniquenessUsedMap :: Map VarName TypeSpec,
+    uniquenessUsedMap :: VarDict,
     uniquenessErrors  :: [UniquenessError]
 }
 
@@ -41,12 +42,18 @@ initUniquenessState = UniquenessState Map.empty []
 
 
 -- | Check correctness of uniqueness for a procedure
-uniquenessCheckProc :: [Placed Stmt] -> Compiler ()
-uniquenessCheckProc body = do
-    logUniqueness $ "Uniqueness checking body: " ++ showBody 4 body
-    let state = foldStmts (const . const) uniquenessCheckExp initUniquenessState body
-    errs <- filterM (typeIsUnique . errTypeSpec) (uniquenessErrors state)
-    mapM_ reportUniquenessError errs
+uniquenessCheckProc :: ProcDef -> Int -> Compiler ProcDef
+uniquenessCheckProc def _ = do
+    logUniqueness $ "Uniqueness checking proc: " ++ show (procName def)
+    case procImpln def of
+        ProcDefSrc body -> do
+            let state = foldStmts (const . const) uniquenessCheckExp
+                        initUniquenessState body
+            errs <- filterM (typeIsUnique . errTypeSpec) (uniquenessErrors state)
+            mapM_ reportUniquenessError errs
+            return def
+        _ -> shouldnt $ "Uniqueness check of non-source proc def "
+                        ++ show (procName def)
 
 
 -- | Check correctness of uniqueness for an expression
@@ -70,7 +77,7 @@ typeIsUnique TypeSpec { typeMod = mod, typeName = name } = do
     getSpecModule "typeIsUnique" (tmUniqueness . typeModifiers . modInterface)
                   mod'
 typeIsUnique _ = return False
- 
+
 
 -- | Report an error when a unique typed variable is being reused
 reportUniquenessError :: UniquenessError -> Compiler ()

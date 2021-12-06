@@ -928,7 +928,8 @@ typecheckProcDecl' m pdef = do
                     let outResources =
                           Set.map (resourceName . resourceFlowRes)
                           $ Set.filter (flowsIn . resourceFlowFlow) resources
-                    let bound = addBindings (inParams `Set.union` inResources)
+                    let inVars = inParams `Set.union` inResources
+                    let bound = addBindings inVars
                                 $ initBindingState pdef 
                                   $ Set.map resourceFlowRes resources
                     logTyped $ "bound vars: " ++ show bound
@@ -949,7 +950,6 @@ typecheckProcDecl' m pdef = do
                           | param <- Set.toList
                                      $ missingBindings outParams assigned]
                     typeErrors modeErrs
-                    lift $ uniquenessCheckProc def'
                     params' <- updateParamTypes params
                     let proto' = proto { procProtoParams = params' }
                     let pdef' = pdef { procProto = proto',
