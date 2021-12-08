@@ -4,11 +4,11 @@ def test_index(s:string, i:int) use !io {
 }
 
 !println(c"TESTING CONSTRUCTION")
-!println(empty_string)                         # expect 
+!println("")                                   # expect 
 !println("a")                                  # expect a
 !println("abc")                                # expect abc
 !println("abc",,"abc")                         # expect abcabc
-!println(string('a'))                              # expect a
+!println(string('a'))                          # expect a
 !println("abcdefghi"[xrange(1, 3, 100)])       # expect beh
 !println("abcdefghi"[xrange(1, 3, 100)][1..3]) # expect eh
 
@@ -25,16 +25,16 @@ def print_loop(s:string) use !io {
 !print_loop("abcdefghijkl"[irange(10, -1, 1)]) # expect kjihgfedcb
 
 !println(c"\nTESTING INDEXING")
-!test_index("abc", 0)                             # expect a
-!test_index("abc", 1)                             # expect b
-!test_index("abcdefghijklmnopqrstuvwxyz", 25)     # expect z
-!test_index("ab",,"cd", 1)                        # expect b
-!test_index("ab",,"cd", 2)                        # expect c
-!test_index(string('a'), 0)                           # expect a
-!test_index("abcdefgh"[xrange(0,2,10)], 0)        # expect a
-!test_index("abc", 3)                             # expect OUT OF RANGE
-!test_index(string('a'), 3)                           # expect OUT OF RANGE
-!test_index("abc", -3)                            # expect OUT OF RANGE
-!test_index("abc"[xrange(0,2,10)], 2)             # expect OUT OF RANGE
-!test_index("abc",,string('a'), 2)                    # expect c
+!test_index("abc", 0)                                         # expect a
+!test_index("abc", 1)                                         # expect b
+!test_index("abcdefghijklmnopqrstuvwxyz", 25)                 # expect z
+!test_index("ab",,"cd", 1)                                    # expect b
+!test_index("ab",,"cd", 2)                                    # expect c
+!test_index(string('a'), 0)                                   # expect a
+!test_index("abcdefgh"[xrange(0,2,10)], 0)                    # expect a
+!test_index("abc", 3)                                         # expect OUT OF RANGE
+!test_index(string('a'), 3)                                   # expect OUT OF RANGE
+!test_index("abc", -3)                                        # expect OUT OF RANGE
+!test_index("abc"[xrange(0,2,10)], 2)                         # expect OUT OF RANGE
+!test_index("abc",,string('a'), 2)                            # expect c
 !test_index((string('a'),,string('b'),,string('c'))[0..2], 1) # expect b

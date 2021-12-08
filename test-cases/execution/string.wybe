@@ -4,7 +4,7 @@ def test_index(s:string, i:int) use !io {
 }
 
 !println(c"TESTING CONSTRUCTION")
-!println(empty_string)                         # expect 
+!println("")                                   # expect 
 !println("a")                                  # expect a
 !println("abc")                                # expect abc
 !println("abc",,"abc")                         # expect abcabc

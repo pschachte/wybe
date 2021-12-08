@@ -4,8 +4,6 @@ use wybe.bool, wybe.int, wybe.char
 
 representation is address
 
-# this whole implementation is completely wrong, but will do for now
-
 pub def (x:_ = y:_):bool  = foreign c strcmp(x,y):int = 0
 pub def (x:_ ~= y:_):bool = foreign c strcmp(x,y):int ~= 0
 pub def (x:_ < y:_):bool  = foreign c strcmp(x,y):int < 0
@@ -17,12 +15,12 @@ pub def length(str:_):int = foreign c strlen(str)
 
 pub def {test} `[|]`(?head:char, ?tail:_, str:_) {
     foreign lpvm access(str, 0, 0, 0, ?head)
-    foreign llvm icmp_ne(head:!int, 0:int, ?not_done:bool)
+    foreign llvm icmp_ne(head, 0:char, ?not_done)
     (not_done = true)
     foreign llvm add(str, 1, ?tail)
 }
 
-pub def {test} [](str:_, idx:int, ?c:char) {
+pub def {test} [](str:_, idx:int):char = c where {
     (0 <= idx)
     (idx < length(str))
     ?c = unsafe_c_string_index(str, idx)

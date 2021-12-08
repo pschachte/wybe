@@ -29,7 +29,7 @@ AFTER EVERYTHING:
     wybe.array.[|]<0>(?command##1:wybe.c_string, ?arguments##1:wybe.array(wybe.c_string), ~tmp#0##0:wybe.array(wybe.c_string), ?tmp#1##0:wybe.bool) #1 @command_line:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
-        foreign c {terminal,semipure} error_exit(c"command_line:15:14":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @control:nn:nn
+        foreign c {terminal,semipure} error_exit(c"command_line:15:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @control:nn:nn
         foreign llvm move(undef:wybe.int, ?exit_code##0:wybe.int)
 
     1:
@@ -61,7 +61,7 @@ declare external fastcc  {i64, i64, i1} @"wybe.array.[|]<0>"(i64)
 @command_line.17 =    constant [?? x i8] c"Erroneous program argument vector\00"
 
 
-@command_line.16 =    constant [?? x i8] c"command_line:15:14\00"
+@command_line.16 =    constant [?? x i8] c"command_line:15:15\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
