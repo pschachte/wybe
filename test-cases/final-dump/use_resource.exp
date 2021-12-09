@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : count: fromList [(use_resource.count,wybe.int = 0 @use_resource:nn:nn @use_resource:nn:nn)]
   procs           : 
 
-*main* > public {impure} (0 calls)
+module top-level code > public {impure} (0 calls)
 0: use_resource.<0>
 (?count##1:wybe.int, io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []

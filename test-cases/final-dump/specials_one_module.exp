@@ -14,7 +14,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public {impure} (0 calls)
+module top-level code > public {impure} (0 calls)
 0: specials_one_module.<0>
 (io##0:wybe.phantom, ?io##4:wybe.phantom):
  AliasPairs: []

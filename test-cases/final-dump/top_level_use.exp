@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : res: fromList [(top_level_use.res,wybe.int = 0 @top_level_use:nn:nn @top_level_use:nn:nn)]
   procs           : 
 
-*main* > public {inline,impure} (0 calls)
+module top-level code > public {inline,impure} (0 calls)
 0: top_level_use.<0>
 (?res##2:wybe.int, io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []

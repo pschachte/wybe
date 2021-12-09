@@ -50,7 +50,7 @@ AFTER BUILDING MAIN:
   resources       : 
   procs           : 
 
-*main* > {terminal,inline,impure} (0 calls)
+module top-level code > {terminal,inline,impure} (0 calls)
 0: .<0>
 (argc##0:wybe.int, argv##0:wybe.array.raw_array(wybe.c_string), ?exit_code##0:wybe.int, ?io##2:wybe.phantom):
  AliasPairs: []
@@ -81,7 +81,7 @@ LLVM code       : None
                     exit_code: fromList [(command_line.exit_code,wybe.int = 0 @command_line:nn:nn @command_line:nn:nn)]
   procs           : 
 
-*main* > public {impure} (0 calls)
+module top-level code > public {impure} (0 calls)
 0: command_line.<0>
 (argc##0:wybe.int, [?argc##0:wybe.int], ?arguments##1:wybe.array(wybe.c_string), argv##0:wybe.array.raw_array(wybe.c_string), [?argv##0:wybe.array.raw_array(wybe.c_string)], ?command##1:wybe.c_string, ?exit_code##0:wybe.int, io##0:wybe.phantom, [?io##0:wybe.phantom]):
  AliasPairs: []
@@ -181,7 +181,7 @@ entry:
   submodules      : drone.drone_info
   procs           : 
 
-*main* > public {impure} (0 calls)
+module top-level code > public {impure} (0 calls)
 0: drone.<0>
 (io##0:wybe.phantom, ?io##3:wybe.phantom):
  AliasPairs: []
@@ -616,7 +616,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > {terminal,inline,impure} (0 calls)
+module top-level code > {terminal,inline,impure} (0 calls)
 0: .<0>
 (argc##0:wybe.int, argv##0:wybe.array.raw_array(wybe.c_string), ?exit_code##0:wybe.int, ?io##2:wybe.phantom):
  AliasPairs: []
@@ -682,7 +682,7 @@ entry:
                     exit_code: fromList [(command_line.exit_code,wybe.int = 0 @command_line:nn:nn @command_line:nn:nn)]
   procs           : 
 
-*main* > public {impure} (0 calls)
+module top-level code > public {impure} (0 calls)
 0: command_line.<0>
 (argc##0:wybe.int, [?argc##0:wybe.int], ?arguments##1:wybe.array(wybe.c_string), argv##0:wybe.array.raw_array(wybe.c_string), [?argv##0:wybe.array.raw_array(wybe.c_string)], ?command##1:wybe.c_string, ?exit_code##0:wybe.int, io##0:wybe.phantom, [?io##0:wybe.phantom]):
  AliasPairs: []
@@ -782,7 +782,7 @@ entry:
   submodules      : drone.drone_info
   procs           : 
 
-*main* > public {impure} (0 calls)
+module top-level code > public {impure} (0 calls)
 0: drone.<0>
 (io##0:wybe.phantom, ?io##3:wybe.phantom):
  AliasPairs: []

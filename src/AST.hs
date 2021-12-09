@@ -37,7 +37,7 @@ module AST (
   protoInputParamNames, isProcProtoArg,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace, unPlace,
-  placedApply, placedApply1, placedApplyM, contentApply, updatePlacedM,
+  placedApply, defaultPlacedApply, placedApplyM, contentApply, updatePlacedM,
   -- *AST types
   Module(..), isRootModule, ModuleInterface(..), ModuleImplementation(..), InterfaceHash, PubProcInfo(..),
   ImportSpec(..), importSpec, Pragma(..), addPragma,
@@ -86,8 +86,8 @@ module AST (
   showProcModifiers, Inlining(..), Impurity(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
   specialChar, specialName, specialName2, outputVariableName, outputStatusName,
-  showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
-  showModSpecs, showResources, showOptPos, showProcDefs, showUse,
+  showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showProcName,
+  showModSpec, showModSpecs, showResources, showOptPos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
   flowPrefix, showFlags,
   showMap, showVarMap, simpleShowMap, simpleShowSet, bracketList,
@@ -360,10 +360,11 @@ placedApply :: (a -> OptPos -> b) -> Placed a -> b
 placedApply f placed = f (content placed) (place placed)
 
 
--- |Apply a function that takes a thing and an optional place to a
---  placed thing.
-placedApply1 :: (c -> a -> OptPos -> b) -> c -> Placed a -> b
-placedApply1 f x placed = f x (content placed) (place placed)
+-- |Apply a function that takes a thing and an optional place to a placed thing.
+--  Use the place attached to the placed thing, if there is one, otherwise use
+--  the supplied default place.
+defaultPlacedApply :: (a -> OptPos -> b) -> OptPos -> Placed a -> b
+defaultPlacedApply f pos placed = f (content placed) (betterPlace pos placed)
 
 
 -- |Apply a function that takes a thing and an optional place to a
@@ -2186,48 +2187,51 @@ foldStmts sfn efn = List.foldl (placedApply . foldStmt sfn efn)
 -- statements and one for expressions.
 foldStmt :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> a
          -> Stmt -> OptPos -> a
-foldStmt sfn efn val stmt pos = foldStmt' sfn efn (sfn val stmt pos) stmt
+foldStmt sfn efn val stmt pos = foldStmt' sfn efn (sfn val stmt pos) stmt pos
 
 
 -- |Fold over all the statements nested within the given statement,
 -- but not the statement itself, in a pre-order left-to-right traversal.
 -- Takes two folding functions, one for statements and one for expressions.
 foldStmt' :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> a
-          -> Stmt -> a
-foldStmt' sfn efn val (ProcCall _ _ _ _ _ args) =
-    foldExps sfn efn val args
-foldStmt' sfn efn val (ForeignCall _ _ _ args) =
-    foldExps sfn efn val args
-foldStmt' sfn efn val (Cond tst thn els _ _) = val4
-    where val2 = placedApply (foldStmt sfn efn val) tst
+          -> Stmt -> OptPos -> a
+foldStmt' sfn efn val (ProcCall _ _ _ _ _ args) pos =
+    foldExps sfn efn pos val args
+foldStmt' sfn efn val (ForeignCall _ _ _ args) pos =
+    foldExps sfn efn pos val args
+foldStmt' sfn efn val (Cond tst thn els _ _) pos = val4
+    where val2 = defaultPlacedApply (foldStmt sfn efn val) pos tst
           val3 = foldStmts sfn efn val2 thn
           val4 = foldStmts sfn efn val3 els
-foldStmt' sfn efn val (Case exp cases deflt) = val4
-    where val2 = placedApply (foldExp sfn efn val) exp
+foldStmt' sfn efn val (Case exp cases deflt) pos = val4
+    where val2 = defaultPlacedApply (foldExp sfn efn val) pos exp
           val3 = List.foldl (foldCase sfn efn) val2 cases
           val4 = maybe val3 (foldStmts sfn efn val3) deflt
-foldStmt' sfn efn val (And stmts) = foldStmts sfn efn val stmts
-foldStmt' sfn efn val (Or stmts _) = foldStmts sfn efn val stmts
-foldStmt' sfn efn val (Not negated) = placedApply (foldStmt sfn efn val) negated
-foldStmt' sfn efn val (TestBool exp) = foldExp sfn efn val exp Nothing
-foldStmt' _   _   val Nop = val
-foldStmt' _   _   val Fail = val
-foldStmt' sfn efn val (Loop body _) = foldStmts sfn efn val body
-foldStmt' sfn efn val (UseResources _ _ body) = foldStmts sfn efn val body
-foldStmt' sfn efn val (For generators body) = val3
-    where val1 = foldExps sfn efn val $ loopVar . content <$> generators
-          val2 = foldExps sfn efn val1 $ genExp . content <$> generators
+foldStmt' sfn efn val (And stmts) pos = foldStmts sfn efn val stmts
+foldStmt' sfn efn val (Or stmts _) pos = foldStmts sfn efn val stmts
+foldStmt' sfn efn val (Not negated) pos =
+    defaultPlacedApply (foldStmt sfn efn val) pos negated
+foldStmt' sfn efn val (TestBool exp) pos = foldExp sfn efn val exp Nothing
+foldStmt' _   _   val Nop pos = val
+foldStmt' _   _   val Fail pos = val
+foldStmt' sfn efn val (Loop body _) pos = foldStmts sfn efn val body
+foldStmt' sfn efn val (UseResources _ _ body) pos = foldStmts sfn efn val body
+foldStmt' sfn efn val (For generators body) pos = val3
+    where val1 = foldExps sfn efn pos val  $ loopVar . content <$> generators
+          val2 = foldExps sfn efn pos val1 $ genExp  . content <$> generators
           val3 = foldStmts sfn efn val2 body
-foldStmt' _ _ val Break = val
-foldStmt' _   _   val Next = val
+foldStmt' _ _ val Break pos = val
+foldStmt' _   _   val Next pos = val
 
 
 -- |Fold over a list of expressions in a pre-order left-to-right traversal.
--- Takes two folding functions, one for statements and one for expressions.
-foldExps :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> a
-         -> [Placed Exp] -> a
-foldExps sfn efn =
-    List.foldl (placedApply . foldExp sfn efn)
+-- Takes two folding functions, one for statements and one for expressions, plus
+-- the position of the outer expression, to be used if the inner expression
+-- doesn't have a position.
+foldExps :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> OptPos
+         -> a -> [Placed Exp] -> a
+foldExps sfn efn pos =
+    List.foldl (\acc pexp -> defaultPlacedApply (foldExp sfn efn acc) pos pexp)
 
 
 -- |Fold over an expression and all its subexpressions, in a pre-order
@@ -2235,33 +2239,35 @@ foldExps sfn efn =
 -- one for expressions.
 foldExp :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> a
         -> Exp -> OptPos -> a
-foldExp sfn efn val exp pos = foldExp' sfn efn (efn val exp pos) exp
+foldExp sfn efn val exp pos = foldExp' sfn efn (efn val exp pos) exp pos
 
 
 -- |Fold over all the subexpressions of the given expression, but not the
 -- expression itself, in a pre-order left-to-right traversal.
 -- Takes two folding functions, one for statements and one for expressions.
-foldExp' _   _    val IntValue{}     = val
-foldExp' _   _    val FloatValue{}   = val
-foldExp' _   _    val StringValue{}  = val
-foldExp' _   _    val CharValue{}    = val
-foldExp' _   _    val Var{}          = val
-foldExp' sfn efn val (Typed exp _ _) = foldExp sfn efn val exp Nothing
-foldExp' sfn efn val (Where stmts exp) =
+foldExp' :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> a
+         -> Exp -> OptPos -> a
+foldExp' _   _    val IntValue{}     _ = val
+foldExp' _   _    val FloatValue{}   _ = val
+foldExp' _   _    val StringValue{}  _ = val
+foldExp' _   _    val CharValue{}    _ = val
+foldExp' _   _    val Var{}          _ = val
+foldExp' sfn efn val (Typed exp _ _) pos = foldExp sfn efn val exp pos
+foldExp' sfn efn val (Where stmts exp) pos =
     let val1 = foldStmts sfn efn val stmts
-    in  placedApply (foldExp sfn efn val1) exp
-foldExp' sfn efn val (DisjExp e1 e2) =
-    placedApply (foldExp sfn efn (placedApply (foldExp sfn efn val) e1)) e2
-foldExp' sfn efn val (CondExp stmt e1 e2) =
-    let val1 = placedApply (foldStmt sfn efn val) stmt
+    in  defaultPlacedApply (foldExp sfn efn val1) pos exp
+foldExp' sfn efn val (DisjExp e1 e2) pos =
+    defaultPlacedApply (foldExp sfn efn (defaultPlacedApply (foldExp sfn efn val) pos e1)) pos e2
+foldExp' sfn efn val (CondExp stmt e1 e2) pos =
+    let val1 = defaultPlacedApply (foldStmt sfn efn val) pos stmt
         val2 = placedApply (foldExp sfn efn val1) e1
-    in         placedApply (foldExp sfn efn val2) e2
-foldExp' sfn efn val (Fncall _ _ exps) = foldExps sfn efn val exps
-foldExp' sfn efn val (ForeignFn _ _ _ exps) = foldExps sfn efn val exps
-foldExp' sfn efn val (CaseExp exp cases deflt) =
-    let val1 = placedApply (foldExp sfn efn val) exp
+    in         defaultPlacedApply (foldExp sfn efn val2) pos e2
+foldExp' sfn efn val (Fncall _ _ exps) pos = foldExps sfn efn pos val exps
+foldExp' sfn efn val (ForeignFn _ _ _ exps) pos = foldExps sfn efn pos val exps
+foldExp' sfn efn val (CaseExp exp cases deflt) pos =
+    let val1 = defaultPlacedApply (foldExp sfn efn val) pos exp
         val2 = List.foldl (foldCaseExp sfn efn) val1 cases
-    in maybe val2 (placedApply (foldExp sfn efn val2)) deflt
+    in maybe val2 (defaultPlacedApply (foldExp sfn efn val2) pos) deflt
 
 -- | Fold over the cases in a case statement
 foldCase :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> a
@@ -3212,7 +3218,7 @@ showProcDef :: Int -> ProcDef -> String
 showProcDef thisID
         procdef@(ProcDef n proto def pos _ _ _ vis detism inline impurity sub) =
     "\n"
-    ++ (if n == "" then "*main*" else n) ++ " > "
+    ++ showProcName n ++ " > "
     ++ visibilityPrefix vis
     ++ showProcModifiers (ProcModifiers detism inline impurity [] [])
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
@@ -3221,6 +3227,12 @@ showProcDef thisID
     ++ show thisID ++ ": "
     ++ (if isCompiled def then "" else show proto ++ ":")
     ++ show def
+
+
+-- | A printable version of a proc name; handles special empty proc name.
+showProcName :: ProcName -> String
+showProcName "" = "module top-level code"
+showProcName name = name
 
 
 -- |How to show a type specification.
