@@ -459,9 +459,12 @@ flattenExp expr@(StringValue _ _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos
 flattenExp expr@(CharValue _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos
-flattenExp expr@(Var "_" ParamIn _) ty castFrom pos = do
+flattenExp expr@(Var "_" flow _) ty castFrom pos = do
+    when (flow == ParamInOut)
+        $ lift $ errmsg pos $ "A \"don't care\" value (_) cannot be used with " 
+                              ++ flowPrefix flow ++ " mode prefix"
     dummyName <- tempVar
-    return $ typeAndPlace (Var dummyName ParamOut Ordinary) AnyType castFrom pos
+    return $ typeAndPlace (Var dummyName ParamOut Ordinary) ty castFrom pos
 flattenExp expr@(Var name dir flowType) ty castFrom pos = do
     logFlatten $ "  Flattening arg " ++ show expr
     defd <- gets (Set.member name . defdVars)
