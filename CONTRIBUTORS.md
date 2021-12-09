@@ -10,4 +10,3 @@ The following have contributed code to the Wybe project:
 * Marco Ho
 * James Barnes
 * Leyan (Terry) Lin
-* 

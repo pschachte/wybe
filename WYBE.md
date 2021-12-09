@@ -1362,22 +1362,25 @@ returned to the operating system at the termination of the program.  To use the
 `use` the `command_line` module.  This is part of the Wybe library, but is not
 automatically imported.
 
-### Special resources
+### Implicit resources
 
-Wybe defines a few "special" resources, which do not actually reflect the state
+Wybe defines a few "implicit" resources, which do not actually reflect the state
 of the computation, but instead provide access to information about the
-program's source code.  Special resources are built into Wybe, and thus do not
+program's source code.  Implicit resources are built into Wybe, and thus do not
 need to be imported.
 
-Because they do not depend the program source code,
-which is always available, special resources can be used anywhere.  If a
-procedure that uses a special resource is called in the context of a procedure
+Because they only depend on the program source code,
+which is always available, implicit resources can be used anywhere.  If a
+procedure that uses an implicit resource is called in the context of a procedure
 that does not `use` that resource, the value supplied for the resource reflects
 the location of the source code of the call to that procedure.  If called in the
 context of a procedure that does `use` that resource, the value of the resource
-in that context is used.
+in that context is used.  Thus a procedure can obtain information about the
+context in which it is called simply by using the appropriate resources.
+However, if that procedure is called from another procedure that uses that
+resource, the caller's caller's calling context will be used instead.
 
-The special resources supported by Wybe are:
+The implicit resources supported by Wybe are:
 
 | Resource Name                | Type       | Meaning                                            |
 | ---------------------------- | ---------- | -------------------------------------------------- |
