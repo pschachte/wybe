@@ -50,22 +50,24 @@ normalise items = do
 
 -- |Normalise a single file item, storing the result in the current module.
 normaliseItem :: Item -> Compiler ()
-normaliseItem (TypeDecl vis (TypeProto name params) (TypeRepresentation rep)
-              items pos) = do
-    let items' = RepresentationDecl params rep pos : items
+normaliseItem (TypeDecl vis (TypeProto name params) mods
+              (TypeRepresentation rep) items pos) = do
+    let items' = RepresentationDecl params mods rep pos : items
     normaliseSubmodule name vis pos items'
-normaliseItem (TypeDecl vis (TypeProto name params) (TypeCtors ctorVis ctors)
-              items pos) = do
-    let items' = ConstructorDecl ctorVis params ctors pos : items
+normaliseItem (TypeDecl vis (TypeProto name params) mods
+              (TypeCtors ctorVis ctors) items pos) = do
+    let items' = ConstructorDecl ctorVis params mods ctors pos : items
     normaliseSubmodule name vis pos items'
 normaliseItem (ModuleDecl vis name items pos) =
     normaliseSubmodule name vis pos items
-normaliseItem (RepresentationDecl params rep pos) = do
+normaliseItem (RepresentationDecl params mods rep pos) = do
     addParameters (RealTypeVar <$> params) pos
     addTypeRep rep pos
-normaliseItem (ConstructorDecl ctorVis params ctors pos) = do
+    updateTypeModifiers mods
+normaliseItem (ConstructorDecl ctorVis params mods ctors pos) = do
     addParameters (RealTypeVar <$> params) pos
     mapM_ (addConstructor ctorVis) ctors
+    updateTypeModifiers mods
 normaliseItem (ImportMods vis modspecs pos) =
     mapM_ (\spec -> addImport spec (importSpec Nothing vis)) modspecs
 normaliseItem (ImportItems vis modspec imports pos) =

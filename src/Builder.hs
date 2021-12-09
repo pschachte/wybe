@@ -222,6 +222,7 @@ import           Parser                    (parseWybe)
 import           Resources                 (resourceCheckMod,
                                             transformProcResources,
                                             canonicaliseProcResources)
+import           Unique                    ( uniquenessCheckProc )
 import           Scanner                   (fileTokens)
 import           System.Directory
 import           System.FilePath
@@ -800,6 +801,9 @@ compileModSCC mspecs = do
     logDump Types Unbranch "TYPE CHECK"
     mapM_ (transformModuleProcs transformProcResources)  mspecs
     stopOnError $ "resource checking of module(s) "
+                  ++ showModSpecs mspecs
+    mapM_ (transformModuleProcs uniquenessCheckProc)  mspecs
+    stopOnError $ "uniqueness checking of module(s) "
                   ++ showModSpecs mspecs
     ----------------------------------
     -- UNBRANCHING

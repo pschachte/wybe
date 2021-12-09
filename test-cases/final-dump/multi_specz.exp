@@ -14,7 +14,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public {inline,impure} (0 calls)
+module top-level code > public {inline,impure} (0 calls)
 0: multi_specz.<0>
 (io##0:wybe.phantom, ?io##2:wybe.phantom):
  AliasPairs: []

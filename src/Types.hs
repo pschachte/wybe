@@ -25,6 +25,7 @@ import           Resources
 import           Util
 import           Snippets
 import           Blocks              (llvmMapBinop, llvmMapUnop)
+import           Unique
 import Data.Function (on)
 
 
@@ -668,14 +669,14 @@ typeErrors errs = do
 
 localBodyProcs :: ProcImpln -> Set RoughProcSpec
 localBodyProcs (ProcDefSrc body) =
-    foldStmts localCalls const Set.empty body
+    foldStmts localCalls (const . const) Set.empty body
 localBodyProcs ProcDefPrim{} =
     shouldnt "Type checking compiled code"
 
-localCalls :: Set RoughProcSpec -> Stmt -> Set RoughProcSpec
-localCalls idents (ProcCall m name _ _ _ _)
+localCalls :: Set RoughProcSpec -> Stmt -> OptPos -> Set RoughProcSpec
+localCalls idents (ProcCall m name _ _ _ _) _
   = Set.insert (RoughProc m name) idents
-localCalls idents _ = idents
+localCalls idents _ _ = idents
 
 
 -- |Return the ultimate type of an expression. 
@@ -927,7 +928,8 @@ typecheckProcDecl' m pdef = do
                     let outResources =
                           Set.map (resourceName . resourceFlowRes)
                           $ Set.filter (flowsIn . resourceFlowFlow) resources
-                    let bound = addBindings (inParams `Set.union` inResources)
+                    let inVars = inParams `Set.union` inResources
+                    let bound = addBindings inVars
                                 $ initBindingState pdef 
                                   $ Set.map resourceFlowRes resources
                     logTyped $ "bound vars: " ++ show bound

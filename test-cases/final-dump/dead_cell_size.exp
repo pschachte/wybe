@@ -44,7 +44,7 @@ AFTER EVERYTHING:
   submodules      : dead_cell_size.t, dead_cell_size.t2
   procs           : 
 
-*main* > public {impure} (0 calls)
+module top-level code > public {impure} (0 calls)
 0: dead_cell_size.<0>
 (io##0:wybe.phantom, ?io##3:wybe.phantom):
  AliasPairs: []

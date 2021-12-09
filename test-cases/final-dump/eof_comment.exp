@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public {inline,impure} (0 calls)
+module top-level code > public {inline,impure} (0 calls)
 0: eof_comment.<0>
 (io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []

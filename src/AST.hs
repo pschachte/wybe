@@ -21,13 +21,15 @@ module AST (
   determinismSeq, determinismProceding, determinismName,
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
-  TypeProto(..), TypeSpec(..), typeVarSet, TypeVarName(..), genericType, typeModule,
+  TypeProto(..), TypeModifiers(..), TypeSpec(..), typeVarSet, TypeVarName(..),
+  genericType, typeModule,
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), StringVariant(..), Generator(..), Stmt(..), flattenedExpFlow, expIsConstant,
   TypeRepresentation(..), TypeFamily(..), typeFamily,
   defaultTypeRepresentation, typeRepSize, integerTypeRep,
+  defaultTypeModifiers,
   lookupTypeRepresentation, lookupModuleRepresentation,
   paramIsPhantom, argIsPhantom, typeIsPhantom, repIsPhantom,
   primProtoParamNames,
@@ -35,7 +37,7 @@ module AST (
   protoInputParamNames, isProcProtoArg,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace, unPlace,
-  placedApply, placedApply1, placedApplyM, contentApply, updatePlacedM,
+  placedApply, defaultPlacedApply, placedApplyM, contentApply, updatePlacedM,
   -- *AST types
   Module(..), isRootModule, ModuleInterface(..), ModuleImplementation(..), InterfaceHash, PubProcInfo(..),
   ImportSpec(..), importSpec, Pragma(..), addPragma,
@@ -64,6 +66,7 @@ module AST (
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
   updateModules, updateImplementations, updateImplementation,
+  updateTypeModifiers,
   addParameters, addTypeRep, setTypeRep, addConstructor,
   getModuleImplementationField, getModuleImplementation,
   getLoadedModule, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
@@ -83,8 +86,8 @@ module AST (
   showProcModifiers, Inlining(..), Impurity(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
   specialChar, specialName, specialName2, outputVariableName, outputStatusName,
-  showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showModSpec,
-  showModSpecs, showResources, showOptPos, showProcDefs, showUse,
+  showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showProcName,
+  showModSpec, showModSpecs, showResources, showOptPos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
   flowPrefix, showFlags,
   showMap, showVarMap, simpleShowMap, simpleShowSet, bracketList,
@@ -135,10 +138,11 @@ import qualified LLVM.AST as LLVMAST
 
 -- |An item appearing at the top level of a source file.
 data Item
-     = TypeDecl Visibility TypeProto TypeImpln [Item] OptPos
+     = TypeDecl Visibility TypeProto TypeModifiers TypeImpln [Item] OptPos
      | ModuleDecl Visibility Ident [Item] OptPos
-     | RepresentationDecl [Ident] TypeRepresentation OptPos
-     | ConstructorDecl Visibility [Ident] [Placed ProcProto] OptPos
+     | RepresentationDecl [Ident] TypeModifiers TypeRepresentation OptPos
+     | ConstructorDecl Visibility [Ident] TypeModifiers [Placed ProcProto]
+                       OptPos
      | ImportMods Visibility [ModSpec] OptPos
      | ImportItems Visibility ModSpec [Ident] OptPos
      | ImportForeign [FilePath] OptPos
@@ -292,6 +296,17 @@ data TypeProto = TypeProto Ident [Ident]
                  deriving (Generic, Eq)
 
 
+-- | A type modifier consists of a boolean indicating its uniqueness.
+data TypeModifiers = TypeModifiers {
+    tmUniqueness :: Bool,     -- ^ Is the type required to be unique?
+    tmUnknown :: [String]     -- ^ Unknown type modifiers specified
+} deriving (Generic, Eq)
+
+
+-- | A default boolean value for Uniqueness (false)
+defaultTypeModifiers :: TypeModifiers
+defaultTypeModifiers = TypeModifiers False []
+
 ----------------------------------------------------------------
 --                    Handling Source Positions
 ----------------------------------------------------------------
@@ -345,10 +360,11 @@ placedApply :: (a -> OptPos -> b) -> Placed a -> b
 placedApply f placed = f (content placed) (place placed)
 
 
--- |Apply a function that takes a thing and an optional place to a
---  placed thing.
-placedApply1 :: (c -> a -> OptPos -> b) -> c -> Placed a -> b
-placedApply1 f x placed = f x (content placed) (place placed)
+-- |Apply a function that takes a thing and an optional place to a placed thing.
+--  Use the place attached to the placed thing, if there is one, otherwise use
+--  the supplied default place.
+defaultPlacedApply :: (a -> OptPos -> b) -> OptPos -> Placed a -> b
+defaultPlacedApply f pos placed = f (content placed) (betterPlace pos placed)
 
 
 -- |Apply a function that takes a thing and an optional place to a
@@ -546,15 +562,15 @@ updateLoadedModuleImplnM updater =
 
 -- |Apply some transformation to the map of compiled modules.
 updateModules :: (Map ModSpec Module -> Map ModSpec Module) -> Compiler ()
-updateModules updater = do
+updateModules updater =
     modify (\bs -> bs { modules = updater $ modules bs })
 
 -- |Apply some transformation to the map of compiled modules.
 updateImplementations :: (ModuleImplementation -> ModuleImplementation) ->
                          Compiler ()
-updateImplementations updater = do
+updateImplementations updater =
     updateModules (Map.map (\m -> m { modImplementation =
-                                           updater <$> modImplementation m }))
+                                       updater <$> modImplementation m }))
 
 -- |Return the module currently being compiled.  The argument says where
 -- this function is called from for error-reporting purposes.
@@ -764,6 +780,11 @@ updateImplementation implOp = do
         Just impl ->
             updateModule (\mod -> mod { modImplementation = Just $ implOp impl })
 
+-- | Apply the given type modifiers to the current module interface
+updateTypeModifiers :: TypeModifiers -> Compiler ()
+updateTypeModifiers typeMods =
+    updateModInterface $ \int -> int {typeModifiers = typeMods}
+
 -- |Add the specified type/module parameters to the current module.
 addParameters :: [TypeVarName] -> OptPos -> Compiler ()
 addParameters params pos = do
@@ -802,6 +823,7 @@ addTypeRep repn pos = do
 setTypeRep :: TypeRepresentation -> Compiler ()
 setTypeRep repn = updateModule (\m -> m { modTypeRep = Just repn
                                         , modIsType  = True })
+
 
 -- |Add the specified data constructor to the current module.  This makes the
 -- module a type.  Also verify that all mentioned type variables are parameters
@@ -853,6 +875,7 @@ addKnownType mspec = do
               <$> getModuleImplementationField modKnownTypes
     updateImplementation
       (\imp -> imp {modKnownTypes = Map.insert name newSet (modKnownTypes imp)})
+
 
 
 -- |Find the definition of the specified type visible from the current module.
@@ -933,7 +956,7 @@ lookupResource res@(ResourceSpec mod name) = do
             let rspec = Set.findMin rspecs
             maybeMod <- getLoadingModule $ resourceMod rspec
             let maybeDef = maybeMod >>= modImplementation >>=
-                        (Map.lookup (resourceName rspec) . modResources)
+                        Map.lookup (resourceName rspec) . modResources
             logAST $ "Found resource:  " ++ show maybeDef
             let rdef = trustFromJust "lookupResource" maybeDef
             logAST $ "  with definition:  " ++ show rdef
@@ -1154,7 +1177,7 @@ getProcDef (ProcSpec modSpec procName procID _) = do
     let impl = trustFromJust ("unimplemented module " ++ showModSpec modSpec) $
                modImplementation mod
     logAST $ "Looking up proc '" ++ procName ++ "' ID " ++ show procID
-    let proc = (modProcs impl ! procName) !! procID
+    let proc = modProcs impl ! procName !! procID
     logAST $ "  proc = " ++ showProcDef 9 proc
     return proc
 
@@ -1411,13 +1434,14 @@ data ModuleInterface = ModuleInterface {
     pubProcs :: ProcDictionary,
                                      -- ^The procs this module exports
     pubSubmods   :: Map Ident ModSpec, -- ^The submodules this module exports
-    dependencies :: Set ModSpec      -- ^The other modules that must be linked
+    dependencies :: Set ModSpec,      -- ^The other modules that must be linked
+    typeModifiers :: TypeModifiers   -- ^The extra information of the type
     }                               --  in by modules that depend on this one
     deriving (Eq, Generic)
 
 emptyInterface :: ModuleInterface
 emptyInterface =
-    ModuleInterface Map.empty Map.empty Map.empty Set.empty
+    ModuleInterface Map.empty Map.empty Map.empty Set.empty defaultTypeModifiers
 
 
 -- |Holds information describing public procedures of a module.
@@ -1742,9 +1766,35 @@ instance Show Pragma where
 
 -- |Specify a pragma for the current module
 addPragma :: Pragma -> Compiler ()
-addPragma prag = do
+addPragma prag =
     updateModImplementation
-        (\imp -> imp { modPragmas = Set.insert prag $ modPragmas imp })
+    (\imp -> imp { modPragmas = Set.insert prag $ modPragmas imp })
+
+
+-- |A type definition, including the number of type parameters and an
+--  optional source position.
+data TypeDef = TypeDef {
+    typeDefVis    :: Visibility,                  -- type visibility
+    typeDefParams :: [Ident],                     -- the type parameters
+    typeDefRepresentation :: Maybe TypeRepresentation,
+                                                  -- low level representation
+    typeDefMembers :: [Placed ProcProto],         -- high level representation
+    typeDefMemberVis :: Visibility,               -- are members public?
+    typeDefModifiers :: TypeModifiers,            -- type modifiers
+    typeDefOptPos :: OptPos,                      -- source position of decl
+    typeDefItems  :: [Item]                       -- other items in decl
+    } deriving (Eq, Generic)
+
+
+-- |A resource interface: everything a module needs to know to use
+--  this resource.  Since a resource may be compound (composed of
+--  other resources), this is basically a set of resource specs, each
+--  with an associated type.
+type ResourceIFace = Map ResourceSpec TypeSpec
+
+
+resourceDefToIFace :: ResourceDef -> ResourceIFace
+resourceDefToIFace = Map.map resourceType
 
 
 -- |A resource definition.  Since a resource may be defined as a
@@ -1774,7 +1824,7 @@ initialisedResources = do
 --  normalised to a list of primitives, and an optional source
 --  position.
 data ProcDef = ProcDef {
-    procName :: ProcName,          -- ^the proc's name
+    procName :: ProcName,       -- ^the proc's name
     procProto :: ProcProto,     -- ^the proc's prototype
     procImpln :: ProcImpln,     -- ^the actual implementation
     procPos :: OptPos,          -- ^where this proc is defined
@@ -2127,105 +2177,110 @@ defaultBlock =  LLBlock { llInstrs = [], llTerm = TermNop }
 
 -- |Fold over a list of statements in a pre-order left-to-right traversal.
 -- Takes two folding functions, one for statements and one for expressions.
-foldStmts :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> [Placed Stmt] -> a
-foldStmts sfn efn val stmts =
-    List.foldl (\val pstmt -> foldStmt sfn efn val $ content pstmt) val stmts
+foldStmts :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> a
+          -> [Placed Stmt] -> a
+foldStmts sfn efn = List.foldl (placedApply . foldStmt sfn efn)
 
 
 -- |Fold over the specified statement and all the statements nested within it,
 -- in a pre-order left-to-right traversal. Takes two folding functions, one for
 -- statements and one for expressions.
-foldStmt :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> Stmt -> a
-foldStmt sfn efn val stmt = foldStmt' sfn efn (sfn val stmt) stmt
+foldStmt :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> a
+         -> Stmt -> OptPos -> a
+foldStmt sfn efn val stmt pos = foldStmt' sfn efn (sfn val stmt pos) stmt pos
 
 
 -- |Fold over all the statements nested within the given statement,
 -- but not the statement itself, in a pre-order left-to-right traversal.
 -- Takes two folding functions, one for statements and one for expressions.
-foldStmt' :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> Stmt -> a
--- foldStmt' _ _ _ stmt
---   | unsafePerformIO $ do
---       putStrLn $ "#### foldStmt' " ++ showStmt 4 stmt
---       return False
---   = error "Woops!"
-foldStmt' sfn efn val (ProcCall _ _ _ _ _ args) =
-    foldExps sfn efn val args
-foldStmt' sfn efn val (ForeignCall _ _ _ args) =
-    foldExps sfn efn val args
-foldStmt' sfn efn val (Cond tst thn els _ _) = val4
-    where val2 = foldStmt sfn efn val $ content tst
+foldStmt' :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> a
+          -> Stmt -> OptPos -> a
+foldStmt' sfn efn val (ProcCall _ _ _ _ _ args) pos =
+    foldExps sfn efn pos val args
+foldStmt' sfn efn val (ForeignCall _ _ _ args) pos =
+    foldExps sfn efn pos val args
+foldStmt' sfn efn val (Cond tst thn els _ _) pos = val4
+    where val2 = defaultPlacedApply (foldStmt sfn efn val) pos tst
           val3 = foldStmts sfn efn val2 thn
           val4 = foldStmts sfn efn val3 els
-foldStmt' sfn efn val (Case exp cases deflt) = val4
-    where val2 = foldExp sfn efn val $ content exp
+foldStmt' sfn efn val (Case exp cases deflt) pos = val4
+    where val2 = defaultPlacedApply (foldExp sfn efn val) pos exp
           val3 = List.foldl (foldCase sfn efn) val2 cases
           val4 = maybe val3 (foldStmts sfn efn val3) deflt
-foldStmt' sfn efn val (And stmts) = foldStmts sfn efn val stmts
-foldStmt' sfn efn val (Or stmts _) = foldStmts sfn efn val stmts
-foldStmt' sfn efn val (Not negated) = foldStmt sfn efn val $ content negated
-foldStmt' sfn efn val (TestBool exp) = foldExp sfn efn val exp
-foldStmt' _   _   val Nop = val
-foldStmt' _   _   val Fail = val
-foldStmt' sfn efn val (Loop body _) = foldStmts sfn efn val body
-foldStmt' sfn efn val (UseResources _ _ body) = foldStmts sfn efn val body
-foldStmt' sfn efn val (For generators body) = val3
-    where val1 = foldExps sfn efn val $ loopVar . content <$> generators
-          val2 = foldExps sfn efn val1 $ genExp . content <$> generators
+foldStmt' sfn efn val (And stmts) pos = foldStmts sfn efn val stmts
+foldStmt' sfn efn val (Or stmts _) pos = foldStmts sfn efn val stmts
+foldStmt' sfn efn val (Not negated) pos =
+    defaultPlacedApply (foldStmt sfn efn val) pos negated
+foldStmt' sfn efn val (TestBool exp) pos = foldExp sfn efn val exp Nothing
+foldStmt' _   _   val Nop pos = val
+foldStmt' _   _   val Fail pos = val
+foldStmt' sfn efn val (Loop body _) pos = foldStmts sfn efn val body
+foldStmt' sfn efn val (UseResources _ _ body) pos = foldStmts sfn efn val body
+foldStmt' sfn efn val (For generators body) pos = val3
+    where val1 = foldExps sfn efn pos val  $ loopVar . content <$> generators
+          val2 = foldExps sfn efn pos val1 $ genExp  . content <$> generators
           val3 = foldStmts sfn efn val2 body
-foldStmt' _ _ val Break = val
-foldStmt' _   _   val Next = val
+foldStmt' _ _ val Break pos = val
+foldStmt' _   _   val Next pos = val
 
 
 -- |Fold over a list of expressions in a pre-order left-to-right traversal.
--- Takes two folding functions, one for statements and one for expressions.
-foldExps :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> [Placed Exp] -> a
-foldExps sfn efn = List.foldl (\val pexp -> foldExp sfn efn val $ content pexp)
+-- Takes two folding functions, one for statements and one for expressions, plus
+-- the position of the outer expression, to be used if the inner expression
+-- doesn't have a position.
+foldExps :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> OptPos
+         -> a -> [Placed Exp] -> a
+foldExps sfn efn pos =
+    List.foldl (\acc pexp -> defaultPlacedApply (foldExp sfn efn acc) pos pexp)
 
 
 -- |Fold over an expression and all its subexpressions, in a pre-order
 -- left-to-right traversal.  Takes two folding functions, one for statements and
 -- one for expressions.
-foldExp :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a -> Exp -> a
-foldExp sfn efn val exp = foldExp' sfn efn (efn val exp) exp
+foldExp :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> a
+        -> Exp -> OptPos -> a
+foldExp sfn efn val exp pos = foldExp' sfn efn (efn val exp pos) exp pos
 
 
 -- |Fold over all the subexpressions of the given expression, but not the
 -- expression itself, in a pre-order left-to-right traversal.
 -- Takes two folding functions, one for statements and one for expressions.
-foldExp' _   _    val IntValue{}     = val
-foldExp' _   _    val FloatValue{}   = val
-foldExp' _   _    val StringValue{}  = val
-foldExp' _   _    val CharValue{}    = val
-foldExp' _   _    val Var{}          = val
-foldExp' sfn efn val (Typed exp _ _) = foldExp sfn efn val exp
-foldExp' sfn efn val (Where stmts exp) =
+foldExp' :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> a
+         -> Exp -> OptPos -> a
+foldExp' _   _    val IntValue{}     _ = val
+foldExp' _   _    val FloatValue{}   _ = val
+foldExp' _   _    val StringValue{}  _ = val
+foldExp' _   _    val CharValue{}    _ = val
+foldExp' _   _    val Var{}          _ = val
+foldExp' sfn efn val (Typed exp _ _) pos = foldExp sfn efn val exp pos
+foldExp' sfn efn val (Where stmts exp) pos =
     let val1 = foldStmts sfn efn val stmts
-    in  foldExp sfn efn val1 $content exp
-foldExp' sfn efn val (DisjExp e1 e2) =
-    foldExp sfn efn (foldExp sfn efn val (content e1)) (content e2)
-foldExp' sfn efn val (CondExp stmt e1 e2) =
-    let val1 = foldStmt sfn efn val $ content stmt
-        val2 = foldExp sfn efn val1 $ content e1
-    in         foldExp sfn efn val2 $ content e2
-foldExp' sfn efn val (Fncall _ _ exps) = foldExps sfn efn val exps
-foldExp' sfn efn val (ForeignFn _ _ _ exps) = foldExps sfn efn val exps
-foldExp' sfn efn val (CaseExp exp cases deflt) =
-    let val1 = foldExp sfn efn val $ content exp
+    in  defaultPlacedApply (foldExp sfn efn val1) pos exp
+foldExp' sfn efn val (DisjExp e1 e2) pos =
+    defaultPlacedApply (foldExp sfn efn (defaultPlacedApply (foldExp sfn efn val) pos e1)) pos e2
+foldExp' sfn efn val (CondExp stmt e1 e2) pos =
+    let val1 = defaultPlacedApply (foldStmt sfn efn val) pos stmt
+        val2 = placedApply (foldExp sfn efn val1) e1
+    in         defaultPlacedApply (foldExp sfn efn val2) pos e2
+foldExp' sfn efn val (Fncall _ _ exps) pos = foldExps sfn efn pos val exps
+foldExp' sfn efn val (ForeignFn _ _ _ exps) pos = foldExps sfn efn pos val exps
+foldExp' sfn efn val (CaseExp exp cases deflt) pos =
+    let val1 = defaultPlacedApply (foldExp sfn efn val) pos exp
         val2 = List.foldl (foldCaseExp sfn efn) val1 cases
-    in maybe val2 (foldExp sfn efn val2 . content) deflt
+    in maybe val2 (defaultPlacedApply (foldExp sfn efn val2) pos) deflt
 
 -- | Fold over the cases in a case statement
-foldCase :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a
+foldCase :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> a
          -> (Placed Exp,[Placed Stmt]) -> a
 foldCase sfn efn val (pexp, body) =
-    foldStmts sfn efn (foldExp sfn efn val (content pexp)) body
+    foldStmts sfn efn (placedApply (foldExp sfn efn val) pexp) body
 
 
 -- | Fold over the cases in a case expression
-foldCaseExp :: (a -> Stmt -> a) -> (a -> Exp -> a) -> a
-         -> (Placed Exp,Placed Exp) -> a
+foldCaseExp :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a)
+            -> a -> (Placed Exp,Placed Exp) -> a
 foldCaseExp sfn efn val (pexp, pval) =
-    foldExp sfn efn (foldExp sfn efn val (content pexp)) $ content pval
+    placedApply (foldExp sfn efn (placedApply (foldExp sfn efn val) pexp)) pval
 
 -- |Fold over a ProcBody applying the primFn to each Prim, and
 -- combining the results for a sequence of Prims with the abConj
@@ -2411,7 +2466,7 @@ instance Show TypeFlow where
 
 -- |Return the TypeSpec and FlowDirection of a Param
 paramTypeFlow :: Param -> TypeFlow
-paramTypeFlow (Param{paramType=ty, paramFlow=fl}) = TypeFlow ty fl
+paramTypeFlow Param{paramType=ty, paramFlow=fl} = TypeFlow ty fl
 
 -- |A formal parameter, including name, type, and flow direction.
 data PrimParam = PrimParam {
@@ -2902,7 +2957,7 @@ varsInPrimArg dir ArgVar{argVarName=var,argVarFlow=dir'} =
   if dir == dir' then Set.singleton var else Set.empty
 varsInPrimArg _ (ArgInt _ _)            = Set.empty
 varsInPrimArg _ (ArgFloat _ _)          = Set.empty
-varsInPrimArg _ (ArgString _ _ _)       = Set.empty
+varsInPrimArg _ (ArgString {})       = Set.empty
 varsInPrimArg _ (ArgChar _ _)           = Set.empty
 varsInPrimArg _ (ArgUnneeded _ _)       = Set.empty
 varsInPrimArg _ (ArgUndef _)            = Set.empty
@@ -2973,28 +3028,31 @@ outputStatusName = specialName "success"
 
 ----------------------------------------------------------------
 
--- |How to show an Item.
+-- | How to show an Item.
 instance Show Item where
-  show (TypeDecl vis name (TypeRepresentation repn) items pos) =
+  show (TypeDecl vis name typeModifiers (TypeRepresentation repn) items pos) =
     visibilityPrefix vis ++ "type " ++ show name
-    ++ " is " ++ show repn
-    ++ showOptPos pos ++ " {"
-    ++ concatMap (("\n  "++) . show) items
+    ++ show typeModifiers
+    ++ " is" ++ show repn
+    ++ showOptPos pos ++ " {\n  "
+    ++ intercalate "\n  " (List.map show items)
     ++ "\n}\n"
-  show (TypeDecl vis name (TypeCtors ctorvis ctors) items pos) =
+  show (TypeDecl vis name typeModifiers (TypeCtors ctorvis ctors) items pos) =
     visibilityPrefix vis ++ "type " ++ show name
+    ++ show typeModifiers
     ++ " " ++ visibilityPrefix ctorvis
     ++ showOptPos pos ++ "\n    "
     ++ intercalate "\n  | " (List.map show ctors)
     ++ concatMap (("\n  "++) . show) items
     ++ "\n}\n"
-  show (RepresentationDecl params repn pos) =
+  show (RepresentationDecl params typeModifiers repn pos) =
     "representation"
     ++ bracketList "(" ", " ")" (("?"++) <$> params)
-    ++ " is " ++ show repn ++ showOptPos pos ++ "\n"
-  show (ConstructorDecl vis params ctors pos) =
+    ++ " is " ++ show typeModifiers ++ show repn ++ showOptPos pos ++ "\n"
+  show (ConstructorDecl vis params typeModifiers ctors pos) =
     visibilityPrefix vis ++ "constructors"
     ++ bracketList "(" ", " ")" (("?"++) <$> params) ++ " "
+    ++ show typeModifiers
     ++ intercalate " | " (show <$> ctors)
     ++ showOptPos pos ++ "\n"
   show (ImportMods vis mods pos) =
@@ -3103,6 +3161,10 @@ instance Show t => Show (Placed t) where
     show (Placed t pos) = show t ++ showOptPos (Just pos)
     show (Unplaced t) =   show t
 
+-- | How to show a type modifier
+instance Show TypeModifiers where
+    show (TypeModifiers True _)  = "{unique} "
+    show (TypeModifiers False _) = "{}"
 
 -- |How to show an optional source position
 showOptPos :: OptPos -> String
@@ -3123,6 +3185,20 @@ showSourcePos full pos =
 showIdSet :: Set Ident -> String
 showIdSet set = intercalate ", " $ Set.elems set
 
+-- |How to show a type definition.
+instance Show TypeDef where
+  show (TypeDef vis params rep members _ typeMods pos items) =
+    visibilityPrefix vis
+    ++ (if List.null params then "" else "(" ++ intercalate "," params ++ ")")
+    ++ show typeMods
+    ++ maybe "" (" is " ++) (show <$> rep)
+    ++ " { "
+    ++ intercalate " | " (show <$> members)
+    ++ " "
+    ++ intercalate "\n  " (show <$> items)
+    ++ " } "
+    ++ showOptPos pos
+
 
 -- |How to show a resource definition.
 instance Show ResourceImpln where
@@ -3142,7 +3218,7 @@ showProcDef :: Int -> ProcDef -> String
 showProcDef thisID
         procdef@(ProcDef n proto def pos _ _ _ vis detism inline impurity sub) =
     "\n"
-    ++ (if n == "" then "*main*" else n) ++ " > "
+    ++ showProcName n ++ " > "
     ++ visibilityPrefix vis
     ++ showProcModifiers (ProcModifiers detism inline impurity [] [])
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
@@ -3151,6 +3227,12 @@ showProcDef thisID
     ++ show thisID ++ ": "
     ++ (if isCompiled def then "" else show proto ++ ":")
     ++ show def
+
+
+-- | A printable version of a proc name; handles special empty proc name.
+showProcName :: ProcName -> String
+showProcName "" = "module top-level code"
+showProcName name = name
 
 
 -- |How to show a type specification.
@@ -3174,13 +3256,13 @@ showResources resources
 -- |How to show a proc prototype.
 instance Show ProcProto where
   show (ProcProto name params resources) =
-    name ++ "(" ++ (intercalate ", " $ List.map show params) ++ ")" ++
+    name ++ "(" ++ intercalate ", " (List.map show params) ++ ")" ++
     showResources resources
 
 -- |How to show a formal parameter.
 instance Show Param where
   show (Param name typ dir flowType) =
-    (show flowType) ++ flowPrefix dir ++ name ++ showTypeSuffix typ Nothing
+    show flowType ++ flowPrefix dir ++ name ++ showTypeSuffix typ Nothing
 
 -- |How to show a formal parameter.
 instance Show PrimParam where
@@ -3235,7 +3317,7 @@ showFork ind (PrimFork var ty last bodies) =
 -- |Show a list of placed prims.
 -- XXX the first argument is unused; can we get rid of it?
 showPlacedPrims :: Int -> [Placed Prim] -> String
-showPlacedPrims ind stmts = List.concatMap (showPlacedPrim ind) stmts
+showPlacedPrims ind = List.concatMap (showPlacedPrim ind)
 
 
 -- |Show a single primitive statement with the specified indent.
@@ -3333,8 +3415,7 @@ showStmt _ Next = "next"
 
 -- |Show a proc body, with the specified indent.
 showBody :: Int -> [Placed Stmt] -> String
-showBody indent stmts =
-  List.concatMap (\s -> startLine indent ++ showStmt indent (content s)) stmts
+showBody indent = List.concatMap (\s -> startLine indent ++ showStmt indent (content s))
 
 
 -- |Show a primitive argument.
@@ -3444,16 +3525,15 @@ checkValue tst msg val = if tst val then val else shouldnt msg
 
 
 -- |Like fromJust, but with its own error message.
-trustFromJust :: String -> (Maybe t) -> t
+trustFromJust :: String -> Maybe t -> t
 trustFromJust msg Nothing = shouldnt $ "trustFromJust in " ++ msg
 trustFromJust _ (Just val) = val
 
 
 -- |Monadic version of trustFromJust.
-trustFromJustM :: Monad m => String -> (m (Maybe t)) -> m t
+trustFromJustM :: Monad m => String -> m (Maybe t) -> m t
 trustFromJustM msg computation = do
-    maybe <- computation
-    return $ trustFromJust msg maybe
+    trustFromJust msg <$> computation
 
 
 data Message = Message {
@@ -3545,7 +3625,7 @@ stopOnError incident = do
 
 -- |Log a message, if we are logging AST manipulation.
 logAST :: String -> Compiler ()
-logAST s = logMsg AST s
+logAST = logMsg AST
 
 
 -- | Execute the specified Compiler action if the specified compiler phase is

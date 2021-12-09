@@ -25,7 +25,7 @@ AFTER EVERYTHING:
   submodules      : anon_field.quux
   procs           : 
 
-*main* > public {impure} (0 calls)
+module top-level code > public {impure} (0 calls)
 0: anon_field.<0>
 (io##0:wybe.phantom, ?io##2:wybe.phantom):
  AliasPairs: []

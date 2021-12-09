@@ -27,9 +27,13 @@ import qualified Data.Text.Lazy as TL
 instance Show Module where
     show mod =
         let int  = modInterface mod
+            typeMods = typeModifiers int
             maybeimpl = modImplementation mod
         in " Module " ++ showModSpec (modSpec mod) ++
            bracketList "(" ", " ")" (show <$> modParams mod) ++
+           (if typeMods == defaultTypeModifiers
+               then ""
+               else "\n modifiers       : " ++ (show $ typeModifiers int)) ++
            "\n  representation  : " ++
            (if modIsType mod
             then maybe "(not yet known)" show (modTypeRep mod)

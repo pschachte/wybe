@@ -256,8 +256,7 @@ transformStmt Next pos =
 
 -- | Perform some action with additional tmp vars for resources.
 -- This modifies the tmpCtr, but leaves the old tmp vars in tact. 
-transformWithTmpVars :: Int -> Map VarName TypeSpec 
-                     -> Resourcer a -> Resourcer a
+transformWithTmpVars :: Int -> VarDict -> Resourcer a -> Resourcer a
 transformWithTmpVars tmp newVars action = do
     oldVars <- gets resTmpVars
     modify $ \s -> s{ resTmpCtr = tmp,

@@ -38,7 +38,7 @@ AFTER EVERYTHING:
   submodules      : stmt_for.int_sequence
   procs           : 
 
-*main* > public {impure} (0 calls)
+module top-level code > public {impure} (0 calls)
 0: stmt_for.<0>
 (io##0:wybe.phantom, ?io##26:wybe.phantom):
  AliasPairs: []

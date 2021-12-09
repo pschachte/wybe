@@ -41,7 +41,7 @@ executable wybemk
                  Macho, Parser, Normalise, ObjectInterface, Optimise,
                  Analysis, AliasAnalysis, Transform,
                  Options, Resources, Scanner, Snippets, Types, Unbranch, Util,
-                 Version, ASTShow
+                 Version, ASTShow, Unique
   extra-libraries: gc
 
 
@@ -71,4 +71,4 @@ test-suite wybe-test
                  Macho, Parser, Normalise, ObjectInterface, Optimise,
                  Analysis, AliasAnalysis, Transform,
                  Options, Resources, Scanner, Snippets, Types, Unbranch, Util,
-                 Version, ASTShow
+                 Version, ASTShow, Unique

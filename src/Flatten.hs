@@ -85,7 +85,7 @@ flattenBody :: [Placed Stmt] -> Set VarName -> Determinism
 flattenBody stmts varSet detism = do
     logMsg Flatten $ "Flattening body" ++ showBody 4 stmts
     logMsg Flatten $ "Flattening with parameters = " ++ show varSet
-    let varSet' = foldStmts const insertOutVar varSet stmts
+    let varSet' = foldStmts (const . const) insertOutVar varSet stmts
     logMsg Flatten $ "Flattening with all vars = " ++ show varSet'
     finalState <- execStateT (flattenStmts stmts detism)
                   $ initFlattenerState varSet'
@@ -94,9 +94,9 @@ flattenBody stmts varSet detism = do
 
 -- | Insert the expression var name if it's an output variable; otherwise leave
 -- the variable set alone.
-insertOutVar :: Set VarName -> Exp -> Set VarName
-insertOutVar varSet (Var name ParamOut _) = Set.insert name varSet
-insertOutVar varSet expr = varSet
+insertOutVar :: Set VarName -> Exp -> OptPos -> Set VarName
+insertOutVar varSet (Var name ParamOut _) _ = Set.insert name varSet
+insertOutVar varSet expr _ = varSet
 
 
 ----------------------------------------------------------------

@@ -1335,6 +1335,7 @@ as the value before entering the `use` statement.
 Thus a `use` statement will not alter the existence or the values of the
 resources it names.
 
+
 ### Predefined resources
 
 Wybe uses predefined resources for a few key language features.
@@ -1424,6 +1425,60 @@ In addition to modules nested under a module's topmost ancestor module, modules
 may import any modules in any of the Wybe library directories.  These are
 configured when Wybe is installed, but can be overridden with the `--libdir` or
 `-L` command line options, or by setting the `$WYBELIBS` shell variable.
+
+## <a name="uniqueness"></a>Unique types
+
+*Unique* types are types that are only permitted to have a single reference
+during program execution.  This ensures that values of this type are threaded
+linearly through program execution.  If a value of a unique type is passed as an
+argument to a procedure or function, then it cannot be passed as an argument to
+any other procedure or function (or as two or more different arguments to a
+single procedure or function).  In practice, that means that a unique value is
+generally passed both into and out of a procedure or function using the
+`!`*variable* syntax (see [variables](#variables)).  The `wybe.phantom` type,
+which is the type of the `io` resource, is declared to be unique.  This
+prohibits any code that would make a copy of the `io` resource.  For example,
+both of these code samples are **illegal** in Wybe:
+
+```
+def bad1 use !io {
+    ?mustnt = io
+}
+
+def bad2 use !io {
+    if {
+        !read('x':char) ::
+            !println("Read an x")
+    |   else ::
+            !read(_:char)
+            !println("Read something else")                    
+    }
+}
+```
+
+The first one is an error because both `mustnt` and the `io` resource hold the
+same phantom.  The second one is erroneous because
+the value of the same value of the`io` resource is used for the `read` statement
+and for the second `println` statement (remember, the values of all variables at
+the start of an else branch are the same as at the start of the condition).  The
+second example could instead be written as:
+
+```
+def ok2 use !io {
+    read(?ch:char)
+    case ch in {
+        'x' :: !println("Read an x")
+    |   else:: !println("Read something else")                    
+    }
+}
+```
+
+This also means that the `io` resource must be passed both into an out of a
+procedure that may perform input/output; therefore, a calling a procedure
+declared to `use io`, instead of `use !io` will cause an error, because after
+the call to that procedure, the `io` resource would be returned to the value it
+held prior to the call.
+
 
 ## <a name="foreign-interface"></a>Low-level features (foreign interface)
 
