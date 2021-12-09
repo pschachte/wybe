@@ -18,17 +18,17 @@ AFTER EVERYTHING:
 (io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?tmp#4##0:anon_field_variable(T))
-    foreign lpvm mutate(~tmp#4##0:anon_field_variable(T), ?tmp#0##0:anon_field_variable(wybe.bool), 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 0:T)
-    foreign llvm and(~tmp#0##0:wybe.int, 1:wybe.int, ?tmp#6##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#6##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool)
-    case ~tmp#7##0:wybe.bool of
+    foreign lpvm alloc(8:wybe.int, ?tmp#5##0:anon_field_variable(T))
+    foreign lpvm mutate(~tmp#5##0:anon_field_variable(T), ?tmp#0##0:anon_field_variable(wybe.bool), 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 0:T)
+    foreign llvm and(~tmp#0##0:wybe.int, 1:wybe.int, ?tmp#7##0:wybe.int)
+    foreign llvm icmp_eq(~tmp#7##0:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.bool)
+    case ~tmp#8##0:wybe.bool of
     0:
         foreign llvm move(~io##0:wybe.phantom, ?io##1:wybe.phantom)
 
     1:
-        wybe.string.print_string<0>("foo":wybe.string, ~#io##0:wybe.phantom, ?tmp#10##0:wybe.phantom) #4 @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+        wybe.string.print_string<0>("foo":wybe.string, ~#io##0:wybe.phantom, ?tmp#11##0:wybe.phantom) #4 @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
 
 
 
@@ -156,9 +156,9 @@ entry:
   %4 = inttoptr i64 %3 to i64* 
   %5 = getelementptr  i64, i64* %4, i64 0 
   store  i64 0, i64* %5 
-  %"1#tmp#6##0" = and i64 %3, 1 
-  %"1#tmp#7##0" = icmp eq i64 %"1#tmp#6##0", 0 
-  br i1 %"1#tmp#7##0", label %if.then, label %if.else 
+  %"1#tmp#7##0" = and i64 %3, 1 
+  %"1#tmp#8##0" = icmp eq i64 %"1#tmp#7##0", 0 
+  br i1 %"1#tmp#8##0", label %if.then, label %if.else 
 if.then:
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @anon_field_variable.7, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
