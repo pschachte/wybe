@@ -13,18 +13,19 @@ constructor empty
 
 pub def string(str:c_string, ?s:_) {
     ?len = length(str)
-    if { len = 0 :: ?s = empty 
-       | len = 1 :: foreign lpvm access(str, 0, 1, 0, ?c); ?s = singleton(c) 
-       | else :: ?s = buffer(len, str)
-    }
+    ?s = if { len = 0 :: empty 
+            | len = 1 :: singleton(foreign lpvm access(str, 0, 1, 0)) 
+            | else    :: buffer(len, str)
+            }
 }
+
 pub def string(c:char):_ = singleton(c)
 pub def c_string(s:_, ?str:c_string) {
     if { s = buffer(_, ?c_string) :: ?str = c_string
        | else :: 
-            ?len = length(s)
-            foreign lpvm alloc(len + 1, ?str)
-            foreign lpvm mutate(str, ?str, len + 1, true, 1, 0, nullbyte)
+            ?len = length(s) + 1
+            foreign lpvm alloc(len, ?str)
+            foreign lpvm mutate(str, ?str, len, true, 1, 0, nullbyte)
             ?offset = 0
             pack(s, !str, !offset)
     }
@@ -36,13 +37,13 @@ pub def length(s:_):int =
        | s = slice(?base, ?range) :: fixed_range_size(length(base), range)
        | s = singleton(_) :: 1
        | else :: 0
-    }
+       }
+
 pub def (x:_ ,, y:_):_ =
     if { x = empty :: y 
        | y = empty :: x
        | else :: concat(x, y)
-    }
-
+       }
 
 pub def (x:_ = y:_):bool  = cmp(x, y) = equal
 pub def (x:_ ~= y:_):bool = cmp(x, y) ~= equal
@@ -69,8 +70,6 @@ pub def {test} `[|]`(?head:char, ?tail:_, s:_) {
     }
 }
 
-pub def empty_string:_ = empty
-# pub def []:_ = empty
 pub def {test} [](s:_, idx:int, ?c:char) {
     if { s = buffer(?len, ?str) :: 
             (0 <= idx)
@@ -91,7 +90,7 @@ pub def [](s:_, r:range):_ = slice(s, r)
 pub def print_string(s:_) use !io {
     if { s = buffer(_, ?str) :: !print(str)
        | s = concat(?left, ?right) :: !print(left); !print(right)
-       | s = slice(_, _) :: for ?c in s { !print(c:char) }
+       | s = slice(_, _) :: for ?c in s { !print(c) }
        | s = singleton(?c) :: !print(c)
     }
 }

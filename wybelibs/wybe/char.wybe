@@ -11,4 +11,11 @@ pub def (x:_ <= y:_):bool = foreign llvm icmp_ule(x, y)
 pub def (x:_ > y:_):bool = foreign llvm icmp_ugt(x, y)
 pub def (x:_ >= y:_):bool = foreign llvm icmp_uge(x, y)
 
-pub def nullbyte:_ = foreign lpvm cast(0:int)
+pub def nullbyte:_ = 0:char
+
+pub def ord(c:_):int = foreign lpvm cast(c)
+pub def {test} chr(i:int):_ = c where {
+    0 <= i
+    i <= 255
+    foreign lpvm cast(i, ?c)
+}

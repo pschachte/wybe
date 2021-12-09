@@ -7,9 +7,16 @@ pub constructor (T) array(length:int,raw_data:raw_array(T))
 pub type raw_array(T) is address {}
 
 pub def {test} `[|]`(?head:T, ?tail:array(T), a:array(T)) {
-    (array(?length,?data) = a)
+    array(?length,?data) = a
     (length > 0)
-    foreign lpvm access(data,0,0,0,?head)
+    foreign lpvm access(data, 0, 0, 0, ?head)
     foreign llvm add(data, 8, ?data)
-    ?tail = array(length-1, data)
+    ?tail = array(length - 1, data)
+}
+
+pub def {test} `[]`(a:array(T), idx:int):T = x where {
+    (0 <= idx)
+    array(?length, ?data) = a
+    (idx < length)
+    foreign lpvm access(data, idx, 0, 8, ?x)
 }
