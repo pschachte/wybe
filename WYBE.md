@@ -1461,7 +1461,7 @@ def bad2 use !io {
 
 The first one is an error because both `mustnt` and the `io` resource hold the
 same phantom.  The second one is erroneous because
-the value of the same value of the`io` resource is used for the `read` statement
+the same value of the `io` resource is used for the `read` statement
 and for the second `println` statement (remember, the values of all variables at
 the start of an else branch are the same as at the start of the condition).  The
 second example could instead be written as:
