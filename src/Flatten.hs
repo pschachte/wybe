@@ -277,8 +277,10 @@ flattenStmt stmt pos detism = do
 -- |Flatten the specified statement
 flattenStmt' :: Stmt -> OptPos -> Determinism -> Flattener ()
 flattenStmt' stmt@(ProcCall (First [] "=" id) callDetism res [arg1,arg2]) pos detism = do
-    let arg1content = innerExp $ content arg1
-    let arg2content = innerExp $ content arg2
+    arg1' <- flattenAnonParam (content arg1) AnyType Nothing (place arg1)
+    arg2' <- flattenAnonParam (content arg2) AnyType Nothing (place arg2)
+    let arg1content = innerExp $ content arg1'
+    let arg2content = innerExp $ content arg2'
     let arg1Vars = expOutputs arg1content
     let arg2Vars = expOutputs arg2content
     logFlatten $ "Flattening assignment with outputs " ++ show arg1Vars
@@ -287,26 +289,23 @@ flattenStmt' stmt@(ProcCall (First [] "=" id) callDetism res [arg1,arg2]) pos de
       (Var var flow1 _, _)
         | callDetism == Det && flowsOut flow1 && Set.null arg2Vars -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
-        arg1' <- flattenAnonParam (content arg1) AnyType Nothing (place arg1)
-        flattenAssignment (expVar $ content arg1') arg1' arg2 pos
+        flattenAssignment (expVar $ content arg1') arg1' arg2' pos
       (_, Var var flow2 _)
         | callDetism == Det && flowsOut flow2 && Set.null arg1Vars -> do
         logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
-        arg1' <- flattenAnonParam (content arg1) AnyType Nothing (place arg1)
-        flattenAssignment var arg2 arg1' pos
+        flattenAssignment var arg2' arg1' pos
       (Fncall mod name args, _)
         | not (Set.null arg1Vars) && Set.null arg2Vars -> do
-        let stmt' = ProcCall (First mod name Nothing) Det False (args++[arg2])
+        let stmt' = ProcCall (First mod name Nothing) Det False (args++[arg2'])
         flattenStmt stmt' pos detism
       (_, Fncall mod name args)
         | not (Set.null arg2Vars) && Set.null arg1Vars -> do
-        arg1' <- flattenAnonParam (content arg1) AnyType Nothing (place arg1)
         let stmt' = ProcCall  (First mod name Nothing) Det False (args++[arg1'])
         flattenStmt stmt' pos detism
       (_,_) | Set.null arg1Vars && Set.null arg2Vars -> do
         logFlatten $ "Leaving equality test alone: " ++ showStmt 4 stmt
-        args' <- flattenStmtArgs [arg1,arg2] pos
-        emit pos $ ProcCall (First [] "=" id) Det res args'
+        args' <- flattenStmtArgs [arg1',arg2'] pos
+        emit pos $ ProcCall (regularProc "=") Det res args'
         flushPostponed
       _ -> do
         -- Must be a mode error:  both sides want to bind variables
@@ -325,8 +324,8 @@ flattenStmt' stmt@(ProcCall (First [] name _) _ banged []) pos _ = do
     if name `elem` defined && not banged
         then emit pos $ TestBool $ Var name ParamIn Ordinary
         else emit pos stmt
-flattenStmt' (ProcCall func detism res args) pos d = do
-    logFlatten "   call is Det"
+flattenStmt' stmt@(ProcCall func detism res args) pos d = do
+    logFlatten $ " Flattening call " ++ show stmt
     args' <- flattenStmtArgs args pos
     emit pos $ ProcCall func detism res args'
     flushPostponed
@@ -400,7 +399,7 @@ flattenStmt' for@(For pgens body) pos detism = do
     modify (\s -> s {defdVars = Set.union (Set.fromList temps) $ defdVars s})
     let loop = List.foldr 
                 (\(var, gen, pos') loop -> 
-                    [Unplaced $ Cond (ProcCall (First [] "[|]" Nothing) SemiDet False 
+                    [Unplaced $ Cond (ProcCall (regularProc "[|]") SemiDet False 
                                         [var,
                                          Unplaced $ Var gen ParamOut Ordinary,
                                          Unplaced $ Var gen ParamIn Ordinary]
@@ -452,7 +451,7 @@ translateCases val pos [] Nothing = [Unplaced Fail]
 translateCases val pos [] (Just deflt) = deflt
 translateCases val pos ((key,body):rest) deflt =
     [maybePlace
-     (Cond (maybePlace (ProcCall (First [] "=" Nothing) SemiDet False [key,val])
+     (Cond (maybePlace (ProcCall (regularProc "=") SemiDet False [key,val])
                        (place key))
            body
            (translateCases val pos rest deflt)
@@ -525,7 +524,7 @@ flattenExp expr@(Var name dir _) ty castFrom pos = do
 flattenExp expr@(AnonParamVar _ _) ty castFrom pos = 
     flattenAnonParam expr ty castFrom pos
 flattenExp expr@(ProcRef ms es) ty castFrom pos = do
-    es' <- (content <$>) <$> mapM (flattenPExp . Unplaced) es
+    es' <- mapM flattenPExp es
     return $ typeAndPlace (ProcRef ms es') ty castFrom pos
 flattenExp global@(Global _) _ _ pos = return $ maybePlace global pos
 flattenExp (Where stmts pexp) _ _ _ = do
@@ -674,7 +673,7 @@ translateExpCases pexp varName [] Nothing = Fail
 translateExpCases pexp varName [] (Just deflt) =
     ForeignCall "llvm" "move" [] [deflt, Unplaced $ varSet varName]
 translateExpCases pexp varName ((pat,val):rest) deflt =
-    Cond (maybePlace (ProcCall (First [] "=" Nothing) SemiDet False [pat,pexp])
+    Cond (maybePlace (ProcCall (regularProc "=") SemiDet False [pat,pexp])
                      (place pat))
         [Unplaced $ ForeignCall "llvm" "move" []
                     [val, Unplaced $ varSet varName]]

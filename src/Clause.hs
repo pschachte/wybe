@@ -327,7 +327,7 @@ compileArg' typ (StringValue string v) _ = return [ArgString string v typ]
 compileArg' typ (CharValue char) _ = return [ArgChar char typ]
 compileArg' typ (Global info) _ = return [ArgGlobal info typ]
 compileArg' typ (ProcRef ms es) _ = do
-    as <- concat <$> mapM (`compileArg` Nothing) es
+    as <- concat <$> mapM (placedApply compileArg) es
     unless (sameLength es as)
            $ shouldnt "compileArg' procRef with in/out args"
     return [ArgProcRef ms as typ]
@@ -349,11 +349,11 @@ compileArg' typ arg _ =
     shouldnt $ "Normalisation left complex argument: " ++ show arg
 
 compileHigherFunc :: Placed Exp -> ClauseComp PrimArg
-compileHigherFunc pexp = do
-    pexps' <- placedApply compileArg pexp
-    case pexps' of 
+compileHigherFunc exp = do
+    exps' <- placedApply compileArg exp
+    case exps' of 
         [arg] -> return arg
-        _ -> shouldnt $ "compileHigherFunc of " ++ show pexp
+        _ -> shouldnt $ "compileHigherFunc of " ++ show exp
 
 
 reconcilingAssignments :: Numbering -> Numbering

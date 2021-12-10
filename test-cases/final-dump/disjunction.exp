@@ -71,7 +71,7 @@ saturating_tail(lst##0:wybe.list(T), ?tl##0:wybe.list(T)):
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool)
     case ~tmp#4##0:wybe.bool of
     0:
-        foreign llvm move(0:2, ?tl##0:wybe.list(T)) @disjunction:nn:nn
+        foreign llvm move(0:wybe.list(T), ?tl##0:wybe.list(T)) @disjunction:nn:nn
 
     1:
         foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tl##0:wybe.list(T))

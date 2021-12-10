@@ -385,7 +385,7 @@ instr' prim@(PrimForeign "llvm" "move" []
   = do
     logBuild $ "  Expanding move(" ++ show val ++ ", " ++ show argvar ++ ")"
     unless (flow == FlowOut && argFlowDirection val == FlowIn) $
-      shouldnt "move instruction with wrong flow"
+      shouldnt $ "move instruction with wrong flow" ++ show prim
     outVar <- gets (Map.findWithDefault var var . outSubst)
     addSubst outVar val
     -- XXX since we're recording the subst, so this instr will be removed later,

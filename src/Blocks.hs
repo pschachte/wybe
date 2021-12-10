@@ -878,7 +878,7 @@ cgenLPVM "void" _ args = do
         (_, []) -> 
             return ()
         _ -> 
-            shouldnt $ "lpvm consume instruction with wrong bad arguments " ++ show args
+            shouldnt $ "lpvm void instruction with wrong bad arguments " ++ show args
 
 
 cgenLPVM pname flags args = do
