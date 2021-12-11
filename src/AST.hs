@@ -1630,7 +1630,9 @@ lookupTypeRepresentation (TypeSpec modSpec name _) =
 lookupTypeRepresentation (HigherOrderType ProcModifiers{modifierDetism=detism} tfs) = do
     mbInReps <- sequenceRepFlowTypes ins
     mbOutReps <- sequenceRepFlowTypes outs
-    return $ Func <$> mbInReps <*> ((++ [Signed 1 | detism == SemiDet]) <$> mbOutReps)
+    return $ Func <$> mbInReps 
+                  <*> ((++ [Signed 1 | detism == SemiDet]) 
+                  <$> mbOutReps)
   where
     ins = List.filter (flowsIn . typeFlowMode) tfs
     outs = List.filter (flowsOut . typeFlowMode) tfs

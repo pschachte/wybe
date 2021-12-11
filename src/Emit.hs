@@ -173,16 +173,14 @@ passes = defaultCuratedPassSetSpec { optLevel = Just 3 }
 -- a set of curated passes.
 withOptimisedModule :: Bool -> LLVMAST.Module -> (Mod.Module -> IO a) -> IO a
 withOptimisedModule noVerify llmod action =
-    withContext $ \context ->
+    withContext $ \context -> 
         withModuleFromAST context llmod $ \m -> do
             unless noVerify $ verify m
             withPassManager passes $ \pm -> do
-                -- verify m
                 success <- runPassManager pm m
                 if success
                     then action m
                     else error "Running of optimisation passes not successful"
-
 
 -- | Bracket pattern to run an [action] on the [LLVMAST.Module].
 withModule :: Bool -> LLVMAST.Module -> (Mod.Module -> IO a) -> IO a

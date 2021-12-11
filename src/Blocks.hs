@@ -20,7 +20,7 @@ import           Resources
 import           Config                          (wordSize, wordSizeBytes)
 import           Util                            (maybeNth, zipWith3M_, (|||), (&&&))
 import           Snippets 
-import           Control.Monad
+import           Control.Monad                   as M
 import           Control.Monad.Extra             (ifM)
 import           Control.Monad.Trans             (lift, liftIO)
 import           Control.Monad.Trans.Class
@@ -431,7 +431,7 @@ buildOutputOp params = do
     -- outputsMaybe <- mapM (getVarMaybe . show . primParamName) outParams
     -- let outputs = catMaybes outputsMaybe
     logCodegen $ "OutParams: " ++ show outParams
-    outputs <- (fst <$>) <$> mapM helper outParams
+    outputs <- mapM helper outParams
     logCodegen $ "Built outputs from symbol table: " ++ show outputs
 
     case outputs of
@@ -442,10 +442,7 @@ buildOutputOp params = do
         -- multiple output case
         _        -> Just <$> structPack outputs
   where
-    helper param@(PrimParam nm ty _ _ _) = do
-        trep <- lift $ typeRep ty
-        ty' <- lift $ llvmType ty
-        getVar (show nm)
+    helper param@(PrimParam nm ty _ _ _) = castVar nm ty
 
 -- | Pack operands into a structure through a sequence of insertvalue
 -- instructions.
@@ -508,26 +505,27 @@ codegenBody proto body = do
 codegenForkBody :: PrimVarName -> [ProcBody] -> PrimProto -> Codegen ()
 -- XXX Revise this to handle forks with more than two branches using
 --     computed gotos
-codegenForkBody var (b1:b2:[]) proto =
-    do ifthen <- addBlock "if.then"
-       ifelse <- addBlock "if.else"
-       testop <- fst <$> getVar (show var)
-       cbr testop ifthen ifelse
-       let params = primProtoParams proto
+codegenForkBody var (b1:b2:[]) proto = do 
+    ifthen <- addBlock "if.then"
+    ifelse <- addBlock "if.else"
 
-       -- if.then
-       preservingSymtab $ do
-           setBlock ifthen
-           codegenBody proto b2
+    testop <- castVar var boolType 
+    cbr testop ifthen ifelse
 
-       -- if.else
-       preservingSymtab $ do
-           setBlock ifelse
-           codegenBody proto b1
+    -- if.then
+    preservingSymtab $ do
+        setBlock ifthen
+        codegenBody proto b2
 
-       -- -- if.exit
-       -- setBlock ifexit
-       -- phi int_t [(trueval, ifthen), (falseval, ifelse)]
+    -- if.else
+    preservingSymtab $ do
+        setBlock ifelse
+        codegenBody proto b1
+
+    -- -- if.exit
+    -- setBlock ifexit
+    -- phi int_t [(trueval, ifthen), (falseval, ifelse)]
+
 codegenForkBody var _ _ =
     nyi $ "Fork on non-Boolean variable " ++ show var
 
@@ -824,6 +822,7 @@ cgenLPVM "cast" [] args@[inArg,outArg] =
             lift $ logBlocks $ " CAST IN OP " ++ show inOp
             lift $ logBlocks $ "CAST OUT : " ++ show outArg ++ " -> "
                                 ++ show (argType outArg)
+            
             castOp <- case inOp of
                 (ConstantOperand c) ->
                     if isPtr outTy
@@ -835,6 +834,7 @@ cgenLPVM "cast" [] args@[inArg,outArg] =
                         loaded <- doLoad consTy ptr
                         doCast loaded consTy outTy
                 _ -> doCast inOp inTy outTy
+            -- castOp <- doCast inOp inTy outTy
 
             assign (pullName outArg) castOp outRep 
 
@@ -993,28 +993,29 @@ addInstruction ins outArgs = do
     outTy <- lift $ primReturnType outArgs
     logCodegen $ "outTy = " ++ show outTy
     case outArgs of
-          [] -> case outTy of
+        [] -> case outTy of
             VoidType -> voidInstr ins
-            _        -> instr outTy ins >> return ()
-          [outArg] -> do
+            _        -> shouldnt "empty outArgs cant assign values"
+        [outArg] -> do
             outRep <- lift $ typeRep $ argType outArg
             outTy <- lift $ llvmType $ argType outArg
             logCodegen $ "outRep = " ++ show outRep
             let outName = pullName outArg
             outop <- namedInstr outTy outName ins
             assign outName outop outRep
-          _ -> do
+        _ -> do
             outOp <- instr outTy ins
             let outTySpecs = argType <$> outArgs
             outTys <- lift $ mapM llvmType outTySpecs
             treps <- lift $ mapM typeRep outTySpecs
             fields <- structUnPack outOp outTys
             let outNames = List.map pullName outArgs
-            -- lift $ logBlocks $ "-=-=-=-= Structure names:" ++ show outNames
-            mapM_ (\(a, b, c) -> assign a b c) $ zip3 outNames fields treps
+            zipWith3M_ assign outNames fields treps
+            
 
+pullName :: PrimArg -> String
 pullName ArgVar{argVarName=var} = show var
-pullName _                    = shouldnt $ "Expected variable as output."
+pullName _                      = shouldnt $ "Expected variable as output."
 
 -- | Generate an expanding instruction name using the passed flags. This is
 -- useful to augment a simple instruction. (Ex: compare instructions can have
@@ -1069,20 +1070,14 @@ openPrimArg ArgVar{argVarName=nm,argVarType=ty} = do
     return (lltype, show nm)
 openPrimArg a = shouldnt $ "Can't Open!: "
                 ++ argDescription a
-                ++ (show $ argFlowDirection a)
+                ++ show (argFlowDirection a)
 
 
 -- | 'cgenArg' makes an Operand of the input argument. 
 -- * Variables return a casted version of their respective symbol table operand
 -- * Constants are generated with cgenArgConst, then wrapped in `cons`
 cgenArg :: PrimArg -> Codegen LLVMAST.Operand
-cgenArg var@ArgVar{argVarName=nm, argVarType=ty} = do
-    toTyRep <- lift $ typeRep ty
-    toTy <- lift $ llvmType ty
-    lift $ logBlocks $ "Coercing var " ++ show nm ++ " to " ++ show ty
-    (varOp,rep) <- getVar (show nm)
-    let fromTy = repLLVMType rep
-    doCast varOp fromTy toTy
+cgenArg var@ArgVar{argVarName=nm, argVarType=ty} = castVar nm ty
 cgenArg (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
 cgenArg arg@(ArgProcRef ps args ty) = do
     logCodegen $ "cgenArg of " ++ show arg
@@ -1170,6 +1165,15 @@ cgenFuncRef ps = do
     logCodegen $ "  with type " ++ show psType
     let conFn = C.GlobalReference psTy fName
     return $ C.PtrToInt conFn address_t
+
+castVar :: PrimVarName -> TypeSpec -> Codegen Operand
+castVar nm ty = do
+    toTyRep <- lift $ typeRep ty
+    toTy <- lift $ llvmType ty
+    lift $ logBlocks $ "Coercing var " ++ show nm ++ " to " ++ show ty
+    (varOp,rep) <- getVar (show nm)
+    let fromTy = repLLVMType rep
+    doCast varOp fromTy toTy
 
 
 primActualParams :: ProcSpec -> Codegen [PrimParam]
@@ -1315,10 +1319,12 @@ llvmFuncType ty = do
 
 
 llvmClosureType :: TypeSpec -> Compiler LLVMAST.Type
-llvmClosureType (HigherOrderType mods tys)
+llvmClosureType (HigherOrderType mods@ProcModifiers{modifierDetism=detism} tys)
     = llvmFuncType
-        $ HigherOrderType mods
-        $ setTypeFlowType AnyType <$> tys ++ [TypeFlow AnyType ParamIn]
+        $ HigherOrderType mods{modifierDetism=Det}
+        $ setTypeFlowType AnyType 
+       <$> tys ++ [TypeFlow AnyType ParamOut | detism == SemiDet]
+               ++ [TypeFlow AnyType ParamIn]
 llvmClosureType ty = shouldnt $ "llvmClosureType on " ++ show ty
 
 
