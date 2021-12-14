@@ -1056,8 +1056,9 @@ recordCast isForeign caller callee pexp argNum =
 recordCast' :: Bool -> ProcName -> Ident -> Int -> TypeSpec -> Exp -> OptPos -> Typed ()
 recordCast' _ caller callee argNum ty (Var name _ _) pos
     = constrainVarType (ReasonArgType callee argNum pos) name ty
-recordCast' True _ _ _ _ _ _ 
-    = return () -- ignore all non-variable casts in foreigns
+recordCast' True _ callee _ _ _ _ 
+    -- ignore all non-variable casts in foreigns, except for moves
+    | callee /= "move" = return () 
 recordCast' _ caller callee argNum ty exp@(IntValue _) pos
     = constrainType (ReasonBadConstraint caller callee argNum exp pos) 
          integerTypeRep ty
