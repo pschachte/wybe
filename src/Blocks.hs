@@ -750,27 +750,24 @@ cgenLPVM "mutate" _ [_, _, _, destructiveArg, _, _, _] =
 cgenLPVM "cast" [] args@[inArg,outArg] =
     case partitionArgs args of
         ([inArg],[outArg]) -> do
+            inRep <- lift $ typeRep $ argType inArg
             outRep <- lift $ typeRep $ argType outArg
+            let inTy = repLLVMType inRep
             let outTy = repLLVMType outRep
-            inOp <- cgenArg inArg
-            let inTy = operandType inOp
+            
+            castOp <- if argIsConst inArg 
+                      then do
+                          inOp <- cgenArgConst inArg
+                          cons <$> consCast inOp inTy outTy
+                      else do
+                          inOp <- cgenArg inArg
+                          doCast inOp inTy outTy
 
-            lift $ logBlocks $ "CAST IN : " ++ show inArg ++ " -> "
+            logCodegen $ "CAST IN  : " ++ show inArg ++ " -> "
                                 ++ show (argType inArg)
-            lift $ logBlocks $ " CAST IN OP " ++ show inOp
-            lift $ logBlocks $ "CAST OUT : " ++ show outArg ++ " -> "
+            logCodegen $ "CAST OUT : " ++ show outArg ++ " -> "
                                 ++ show (argType outArg)
-            castOp <- case inOp of
-                (ConstantOperand c) ->
-                    if isPtr outTy
-                    then return $ constInttoptr c outTy
-                    else do
-                        let consTy = constantType c
-                        ptr <- doAlloca consTy
-                        store ptr inOp
-                        loaded <- doLoad consTy ptr
-                        doCast loaded consTy outTy
-                _ -> doCast inOp inTy outTy
+            logCodegen $ " CAST OP  : " ++ show castOp
 
             assign (pullName outArg) castOp outRep
 
