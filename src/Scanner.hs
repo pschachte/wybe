@@ -389,6 +389,7 @@ delimChar _ = shouldnt "not a delimiter character"
 -- |Recognise an escaped character constant.
 -- XXX doesn't currently support unicode escapes
 escapedChar :: Char -> Char
+escapedChar '0' = '\0'
 escapedChar 'a' = '\a'
 escapedChar 'b' = '\b'
 escapedChar 'f' = '\f'

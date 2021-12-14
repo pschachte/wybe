@@ -789,7 +789,7 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
           (\(var,_,ty,shift,sz) ->
                [Unplaced $ ForeignCall "llvm" "shl" []
                  [Unplaced $ castFromTo ty typeSpec $ varGet var,
-                  Unplaced $ lpvmCastExp (iVal shift) typeSpec,
+                  Unplaced $ iVal shift `castTo` typeSpec,
                   Unplaced $ varSet tmpName1 `withType` typeSpec],
                 Unplaced $ ForeignCall "llvm" "or" []
                  [Unplaced $ varGet tmpName1 `withType` typeSpec,
@@ -804,12 +804,12 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
             Just shift ->
               [Unplaced $ ForeignCall "llvm" "or" []
                [Unplaced $ Typed (varGet outputVariableName) typeSpec Nothing,
-                Unplaced $ lpvmCastExp (iVal (bit shift::Int)) typeSpec,
+                Unplaced $ Typed (iVal (bit shift::Int)) typeSpec Nothing,
                 Unplaced $ Typed (varSet outputVariableName) typeSpec Nothing]])
          -- Or in the tag value
           ++ [Unplaced $ ForeignCall "llvm" "or" []
                [Unplaced $ Typed (varGet outputVariableName) typeSpec Nothing,
-                Unplaced $ lpvmCastExp (iVal tag) typeSpec,
+                Unplaced $ Typed (iVal tag) typeSpec Nothing,
                 Unplaced $ Typed (varSet outputVariableName) typeSpec Nothing]]
         ) pos]
 
@@ -836,11 +836,11 @@ unboxedDeconstructorItems vis ctorName recType numConsts numNonConsts tag
                -- Code to access the selected field
                [Unplaced $ ForeignCall "llvm" "lshr" []
                  [Unplaced $ Typed (varGet outputVariableName) recType Nothing,
-                  Unplaced $ lpvmCastExp (iVal shift) recType,
+                  Unplaced $ Typed (iVal shift) recType Nothing,
                   Unplaced $ Typed (varSet tmpName1) recType Nothing],
                 Unplaced $ ForeignCall "llvm" "and" []
                  [Unplaced $ Typed (varGet tmpName1) recType Nothing,
-                  Unplaced $ lpvmCastExp (iVal $ (bit sz::Int) - 1) recType,
+                  Unplaced $ Typed (iVal $ (bit sz::Int) - 1) recType Nothing,
                   Unplaced $ Typed (varSet tmpName2) recType Nothing],
                 Unplaced $ ForeignCall "lpvm" "cast" []
                  [Unplaced $ Typed (varGet tmpName2) recType Nothing,

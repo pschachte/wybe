@@ -25,7 +25,7 @@ pub def c_string(s:_, ?str:c_string) {
        | else :: 
             ?len = length(s) + 1
             foreign lpvm alloc(len, ?str)
-            foreign lpvm mutate(str, ?str, len, true, 1, 0, nullbyte)
+            foreign lpvm mutate(str, ?str, len, true, 1, 0, '\0')
             ?offset = 0
             pack(s, !str, !offset)
     }

@@ -193,7 +193,7 @@ module Builder (buildTargets) where
 
 import           Analysis
 import           AST
-import           ASTShow                   (logDump)
+import           ASTShow                   (logDump, logDumpWith)
 import           Blocks                    (blockTransformModule,
                                             concatLLVMASTModules)
 import           Callers                   (collectCallers)
@@ -215,7 +215,7 @@ import           Normalise                 (normalise, completeNormalisation, no
 import           ObjectInterface
 
 import           Optimise                  (optimiseMod)
-import           Options                   (LogSelection (..), Options,
+import           Options                   (LogSelection (..), Options (..),
                                             optForce, optForceAll, optLibDirs,
                                             optNoMultiSpecz)
 import           Parser                    (parseWybe)
@@ -249,7 +249,11 @@ buildTargets targets = do
     mapM_ buildTarget targets
     showMessages
     stopOnError "building outputs"
-    logDump FinalDump FinalDump "EVERYTHING"
+    dumpOpt <- option optDumpOptLLVM
+    let dumper = if dumpOpt then logDumpWith ((Just <$>) . extractLLVM) 
+                            else logDump
+    dumper FinalDump FinalDump "EVERYTHING"
+
 
 
 -- |Build a single top-level target

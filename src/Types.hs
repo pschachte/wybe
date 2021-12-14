@@ -424,7 +424,7 @@ typeErrorMessage (ReasonBadConstraint caller callee argNum exp pos) =
         "Type constraint (:) in call from "
         ++ prettyName "top-level" id caller
         ++ " to " ++ callee ++ ", argument " ++ show argNum
-        ++ ", is incompatible with expression " ++ show exp ++"."
+        ++ ", is incompatible with expression " ++ show exp
 typeErrorMessage ReasonShouldnt =
     Message Error Nothing "Mysterious typing error"
 typeErrorMessage (ReasonActuallyPure name impurity pos) =
@@ -554,6 +554,7 @@ constrainVarType reason var ty = do
     ty'' <- unifyTypes reason ty ty'
     logTyped $ "Variable " ++ var ++ " type constrained to " ++ show ty''
     setVarType var ty''
+
 
 constrainType :: TypeError -> (TypeRepresentation -> Bool) -> TypeSpec -> Typed ()
 constrainType reason constraint ty = do
@@ -1046,28 +1047,29 @@ recordCast isForeign caller callee pexp argNum =
         (Typed _ _ (Just _)) | not isForeign
             -> typeError $ ReasonBadCast caller callee argNum pos
         (Typed exp ty Nothing)
-            -> recordCast' caller callee argNum ty exp pos
+            -> recordCast' isForeign caller callee argNum ty exp pos
         (Typed exp _ (Just ty))
-            -> recordCast' caller callee argNum ty exp pos
+            -> recordCast' isForeign caller callee argNum ty exp pos
         _   -> return ()
     where pos = place pexp
 
-recordCast' :: ProcName -> Ident -> Int -> TypeSpec -> Exp -> OptPos -> Typed ()
-recordCast' caller callee argNum ty (Var name _ _) pos
+recordCast' :: Bool -> ProcName -> Ident -> Int -> TypeSpec -> Exp -> OptPos -> Typed ()
+recordCast' _ caller callee argNum ty (Var name _ _) pos
     = constrainVarType (ReasonArgType callee argNum pos) name ty
-recordCast' caller callee argNum ty exp@(IntValue _) pos
+recordCast' True _ _ _ _ _ _ 
+    = return () -- ignore all non-variable casts in foreigns
+recordCast' _ caller callee argNum ty exp@(IntValue _) pos
     = constrainType (ReasonBadConstraint caller callee argNum exp pos) 
          integerTypeRep ty
-recordCast' caller callee argNum ty exp@(CharValue _) pos
+recordCast' _ caller callee argNum ty exp@(CharValue _) pos
     = constrainType (ReasonBadConstraint caller callee argNum exp pos) 
          integerTypeRep ty
-recordCast' caller callee argNum ty exp@(StringValue _ v) pos
-    = void $ unifyTypes (ReasonBadConstraint caller callee argNum exp pos) 
-                (if v == CString then cStringType else stringType) ty
-recordCast' caller callee argNum ty exp@(FloatValue _) pos
+recordCast' _ caller callee argNum ty exp@(FloatValue _) pos
     = constrainType (ReasonBadConstraint caller callee argNum exp pos) 
         ((==FloatFamily) . typeFamily) ty
-recordCast' _ _ _ _ _ _ = return ()
+recordCast' _ caller callee argNum ty exp pos = do
+    ty' <- expType (exp `maybePlace` pos)
+    void $ unifyTypes (ReasonBadConstraint caller callee argNum exp pos) ty' ty
 
 
 updateParamTypes :: [Param] -> Typed [Param]

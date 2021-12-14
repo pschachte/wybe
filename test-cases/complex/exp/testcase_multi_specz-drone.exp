@@ -189,7 +189,8 @@ module top-level code > public {impure} (0 calls)
  MultiSpeczDepInfo: [(4,(drone.loop<0>,fromList [NonAliasedParamCond 0 []]))]
     drone.drone_init<0>(?tmp#0##0:drone.drone_info) #0 @drone:nn:nn
     foreign c read_char(?ch##0:wybe.char, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-    foreign llvm icmp_ne(ch##0:wybe.char, -1:wybe.char, ?tmp#2##0:wybe.bool) @char:nn:nn
+    foreign lpvm cast(-1:wybe.int, ?tmp#1##0:wybe.char) @io:nn:nn
+    foreign llvm icmp_ne(ch##0:wybe.char, ~tmp#1##0:wybe.char, ?tmp#2##0:wybe.bool) @char:nn:nn
     case ~tmp#2##0:wybe.bool of
     0:
         foreign c {impure} malloc_count(?tmp#10##0:wybe.int) @memory_management:nn:nn
@@ -328,7 +329,8 @@ gen#3([ch##0:wybe.char], d##0:drone.drone_info, io##0:wybe.phantom, ?io##2:wybe.
  InterestingCallProperties: [InterestingUnaliased 1]
  MultiSpeczDepInfo: [(3,(drone.loop<0>,fromList [NonAliasedParamCond 0 [1]]))]
     foreign c read_char(?ch##1:wybe.char, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-    foreign llvm icmp_ne(ch##1:wybe.char, -1:wybe.char, ?tmp#4##0:wybe.bool) @char:nn:nn
+    foreign lpvm cast(-1:wybe.int, ?tmp#3##0:wybe.char) @io:nn:nn
+    foreign llvm icmp_ne(ch##1:wybe.char, ~tmp#3##0:wybe.char, ?tmp#4##0:wybe.bool) @char:nn:nn
     case ~tmp#4##0:wybe.bool of
     0:
         foreign llvm move(~io##1:wybe.phantom, ?io##2:wybe.phantom)
@@ -788,7 +790,8 @@ module top-level code > public {impure} (0 calls)
  MultiSpeczDepInfo: [(4,(drone.loop<0>,fromList [NonAliasedParamCond 0 []]))]
     drone.drone_init<0>(?tmp#0##0:drone.drone_info) #0 @drone:nn:nn
     foreign c read_char(?ch##0:wybe.char, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-    foreign llvm icmp_ne(ch##0:wybe.char, -1:wybe.char, ?tmp#2##0:wybe.bool) @char:nn:nn
+    foreign lpvm cast(-1:wybe.int, ?tmp#1##0:wybe.char) @io:nn:nn
+    foreign llvm icmp_ne(ch##0:wybe.char, ~tmp#1##0:wybe.char, ?tmp#2##0:wybe.bool) @char:nn:nn
     case ~tmp#2##0:wybe.bool of
     0:
         foreign c {impure} malloc_count(?tmp#10##0:wybe.int) @memory_management:nn:nn
@@ -1006,7 +1009,8 @@ gen#3([ch##0:wybe.char], d##0:drone.drone_info, io##0:wybe.phantom, ?io##2:wybe.
  InterestingCallProperties: [InterestingUnaliased 1]
  MultiSpeczDepInfo: [(3,(drone.loop<0>,fromList [NonAliasedParamCond 0 [1]]))]
     foreign c read_char(?ch##1:wybe.char, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-    foreign llvm icmp_ne(ch##1:wybe.char, -1:wybe.char, ?tmp#4##0:wybe.bool) @char:nn:nn
+    foreign lpvm cast(-1:wybe.int, ?tmp#3##0:wybe.char) @io:nn:nn
+    foreign llvm icmp_ne(ch##1:wybe.char, ~tmp#3##0:wybe.char, ?tmp#4##0:wybe.bool) @char:nn:nn
     case ~tmp#4##0:wybe.bool of
     0:
         foreign llvm move(~io##1:wybe.phantom, ?io##2:wybe.phantom)
@@ -1016,7 +1020,8 @@ gen#3([ch##0:wybe.char], d##0:drone.drone_info, io##0:wybe.phantom, ?io##2:wybe.
 
  [6dacb8fd25] [NonAliasedParam 1] :
     foreign c read_char(?ch##1:wybe.char, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-    foreign llvm icmp_ne(ch##1:wybe.char, -1:wybe.char, ?tmp#4##0:wybe.bool) @char:nn:nn
+    foreign lpvm cast(-1:wybe.int, ?tmp#3##0:wybe.char) @io:nn:nn
+    foreign llvm icmp_ne(ch##1:wybe.char, ~tmp#3##0:wybe.char, ?tmp#4##0:wybe.bool) @char:nn:nn
     case ~tmp#4##0:wybe.bool of
     0:
         foreign llvm move(~io##1:wybe.phantom, ?io##2:wybe.phantom)
@@ -1269,7 +1274,7 @@ define external fastcc  void @"drone.<0>"()    {
 entry:
   %"1#tmp#0##0" = tail call fastcc  i64  @"drone.drone_init<0>"()  
   %"1#ch##0" = tail call ccc  i8  @read_char()  
-  %"1#tmp#2##0" = icmp ne i8 %"1#ch##0", -1 
+  %"1#tmp#2##0" = icmp ne i8 %"1#ch##0", trunc i64 -1 to i8 
   br i1 %"1#tmp#2##0", label %if.then, label %if.else 
 if.then:
   tail call fastcc  void  @"drone.loop<0>[410bae77d3]"(i64  %"1#tmp#0##0", i8  %"1#ch##0")  
@@ -1625,7 +1630,7 @@ if.else:
 define external fastcc  void @"drone.gen#3<0>"(i64  %"d##0")    {
 entry:
   %"1#ch##1" = tail call ccc  i8  @read_char()  
-  %"1#tmp#4##0" = icmp ne i8 %"1#ch##1", -1 
+  %"1#tmp#4##0" = icmp ne i8 %"1#ch##1", trunc i64 -1 to i8 
   br i1 %"1#tmp#4##0", label %if.then, label %if.else 
 if.then:
   tail call fastcc  void  @"drone.loop<0>"(i64  %"d##0", i8  %"1#ch##1")  
@@ -1638,7 +1643,7 @@ if.else:
 define external fastcc  void @"drone.gen#3<0>[6dacb8fd25]"(i64  %"d##0")    {
 entry:
   %"1#ch##1" = tail call ccc  i8  @read_char()  
-  %"1#tmp#4##0" = icmp ne i8 %"1#ch##1", -1 
+  %"1#tmp#4##0" = icmp ne i8 %"1#ch##1", trunc i64 -1 to i8 
   br i1 %"1#tmp#4##0", label %if.then, label %if.else 
 if.then:
   tail call fastcc  void  @"drone.loop<0>[410bae77d3]"(i64  %"d##0", i8  %"1#ch##1")  
