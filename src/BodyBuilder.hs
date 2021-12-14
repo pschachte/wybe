@@ -708,6 +708,8 @@ expandArg arg = return arg
 --  performing the operation at compile-time.
 simplifyForeign ::  String -> ProcName -> [Ident] -> [PrimArg] -> Prim
 simplifyForeign "llvm" op flags args = simplifyOp op flags args
+simplifyForeign "lpvm" "cast" [] [ArgInt i _, out] = 
+    primMove (ArgInt i $ argType out) out
 simplifyForeign lang op flags args = PrimForeign lang op flags args
 
 

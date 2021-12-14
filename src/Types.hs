@@ -283,6 +283,8 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Foreign call with wrong argument type
                | ReasonBadCast Ident Ident Int OptPos
                    -- ^Cast operation appearing in non-foreign call argument
+               | ReasonBadConstraint Ident Ident Int Exp OptPos
+                   -- ^Cast type constraint on constrained type expr
                | ReasonShouldnt
                    -- ^This error should never happen
                | ReasonActuallyPure ProcName Impurity OptPos
@@ -306,7 +308,7 @@ typeErrorMessage (ReasonParam name num pos) =
         ", parameter " ++ show num
 typeErrorMessage (ReasonOutputUndef proc param pos) =
     Message Error pos $
-    "Output parameter " ++ param ++ " not defined by proc " ++ show proc
+        "Output parameter " ++ param ++ " not defined by proc " ++ show proc
 typeErrorMessage (ReasonResource name resName pos) =
     Message Error pos $
         "Type/flow error in definition of " ++ name ++
@@ -343,95 +345,103 @@ typeErrorMessage (ReasonAmbig procName pos varAmbigs) =
 typeErrorMessage (ReasonUndef callFrom callTo pos) =
     Message Error pos $
         "'" ++ callTo ++ "' unknown in "
-        ++ if callFrom == ""
-            then "top-level statement"
-            else "'" ++ callFrom ++ "'"
+        ++ prettyName "top-level statement" (("'"++) . (++"'")) callFrom
 typeErrorMessage (ReasonArity callFrom callTo pos callArity procArity) =
     Message Error pos $
-        (if callFrom == ""
-            then "Toplevel call"
-            else "Call from " ++ callFrom) ++
-        " to " ++ callTo ++ " with " ++
+        prettyName "Top-level call" ("Call from "++) callFrom
+        ++ " to " ++ callTo ++ " with " ++
         (if callArity == procArity
             then "unsupported argument flow"
             else show callArity ++ " argument(s), expected " ++ show procArity)
 typeErrorMessage (ReasonUndeclared name pos) =
     Message Error pos $
-    "Public definition of '" ++ name ++ "' with some undeclared types."
+        "Public definition of '" ++ name ++ "' with some undeclared types."
 typeErrorMessage (ReasonEqual exp1 exp2 pos) =
     Message Error pos $
-    "Type of " ++ show exp2 ++ " incompatible with " ++ show exp1
+        "Type of " ++ show exp2 ++ " incompatible with " ++ show exp1
 typeErrorMessage (ReasonDeterminism name stmtDetism contextDetism pos) =
     Message Error pos $
-    "Calling " ++ determinismFullName stmtDetism ++ " " ++ name
-    ++ " in a " ++ determinismFullName contextDetism ++ " context"
+        "Calling " ++ determinismFullName stmtDetism ++ " " ++ name
+        ++ " in a " ++ determinismFullName contextDetism ++ " context"
 typeErrorMessage (ReasonWeakDetism name actualDetism expectedDetism pos) =
-    Message Error pos $ name ++ " has " ++ determinismFullName actualDetism
-    ++ " determinism, but declared " ++ determinismFullName expectedDetism
+    Message Error pos $ 
+        name ++ " has " ++ determinismFullName actualDetism
+        ++ " determinism, but declared " ++ determinismFullName expectedDetism
 typeErrorMessage (ReasonPurity descrip stmtPurity contextPurity pos) =
     Message Error pos $
-    "Calling " ++ impurityFullName stmtPurity ++ " " ++ descrip
-    ++ ", expecting at least " ++ impurityFullName contextPurity
+        "Calling " ++ impurityFullName stmtPurity ++ " " ++ descrip
+        ++ ", expecting at least " ++ impurityFullName contextPurity
 typeErrorMessage (ReasonLooksPure name impurity pos) =
     Message Error pos $
-    "Calling " ++ impurityFullName impurity ++ " proc " ++ name
-    ++ " without ! non-purity marker"
+        "Calling " ++ impurityFullName impurity ++ " proc " ++ name
+        ++ " without ! non-purity marker"
 typeErrorMessage (ReasonForeignLanguage lang instr pos) =
     Message Error pos $
-    "Foreign call '" ++ instr ++ "' with unknown language '" ++ lang ++ "'"
+        "Foreign call '" ++ instr ++ "' with unknown language '" ++ lang ++ "'"
 typeErrorMessage (ReasonForeignArgType instr argNum pos) =
     Message Error pos $
-    "Foreign call '" ++ instr ++ "' with unknown type in argument "
-    ++ show argNum
+        "Foreign call '" ++ instr ++ "' with unknown type in argument "
+        ++ show argNum
 typeErrorMessage (ReasonForeignArity instr actualArity expectedArity pos) =
     Message Error pos $
-    "Foreign call '" ++ instr ++ "' with arity " ++ show actualArity
-    ++ "; should be " ++ show expectedArity
+        "Foreign call '" ++ instr ++ "' with arity " ++ show actualArity
+        ++ "; should be " ++ show expectedArity
 typeErrorMessage (ReasonBadForeign lang instr pos) =
     Message Error pos $
-    "Unknown " ++ lang ++ " instruction '" ++ instr ++ "'"
+        "Unknown " ++ lang ++ " instruction '" ++ instr ++ "'"
 typeErrorMessage (ReasonBadMove dest pos) =
     Message Error pos $
-    "Instruction moves result to non-variable expression " ++ show dest
+        "Instruction moves result to non-variable expression " ++ show dest
 typeErrorMessage (ReasonResourceUndef proc res pos) =
     Message Error pos $
-    "Output resource " ++ res ++ " not defined by proc " ++ proc
+        "Output resource " ++ res ++ " not defined by proc " ++ proc
 typeErrorMessage (ReasonResourceUnavail proc res pos) =
     Message Error pos $
-    "Input resource " ++ res ++ " not available at call to proc " ++ proc
+        "Input resource " ++ res ++ " not available at call to proc " ++ proc
 typeErrorMessage (ReasonWrongFamily instr argNum fam pos) =
     Message Error pos $
-    "LLVM instruction '" ++ instr ++ "' argument " ++ show argNum
-    ++ ": expected " ++ show fam ++ " argument"
+        "LLVM instruction '" ++ instr ++ "' argument " ++ show argNum
+        ++ ": expected " ++ show fam ++ " argument"
 typeErrorMessage (ReasonIncompatible instr rep1 rep2 pos) =
     Message Error pos $
-    "LLVM instruction '" ++ instr ++ "' inconsistent arguments "
-    ++ show rep1 ++ " and " ++ show rep2
+        "LLVM instruction '" ++ instr ++ "' inconsistent arguments "
+        ++ show rep1 ++ " and " ++ show rep2
 typeErrorMessage (ReasonWrongOutput instr wrongRep rightRep pos) =
     Message Error pos $
-    "LLVM instruction '" ++ instr ++ "' wrong output "
-    ++ show wrongRep ++ ", should be " ++ show rightRep
+        "LLVM instruction '" ++ instr ++ "' wrong output "
+        ++ show wrongRep ++ ", should be " ++ show rightRep
 typeErrorMessage (ReasonForeignArgRep instr argNum wrongRep rightDesc pos) =
     Message Error pos $
-    "LLVM instruction '" ++ instr ++ "' argument " ++ show argNum
-    ++ " is " ++ show wrongRep ++ ", should be " ++ rightDesc
+        "LLVM instruction '" ++ instr ++ "' argument " ++ show argNum
+        ++ " is " ++ show wrongRep ++ ", should be " ++ rightDesc
 typeErrorMessage (ReasonBadCast caller callee argNum pos) =
     Message Error pos $
-    "Type cast (:!) in call from " ++ caller
-    ++ " to non-foreign " ++ callee ++ ", argument " ++ show argNum
+        "Type cast (:!) in call from " 
+        ++ prettyName "top-level" id caller
+        ++ " to non-foreign " ++ callee ++ ", argument " ++ show argNum
+typeErrorMessage (ReasonBadConstraint caller callee argNum exp pos) =
+    Message Error pos $
+        "Type constraint (:) in call from "
+        ++ prettyName "top-level" id caller
+        ++ " to " ++ callee ++ ", argument " ++ show argNum
+        ++ ", is incompatible with expression " ++ show exp ++"."
 typeErrorMessage ReasonShouldnt =
     Message Error Nothing "Mysterious typing error"
 typeErrorMessage (ReasonActuallyPure name impurity pos) =
     Message Warning pos $
-    "Calling proc " ++ name ++ " with unneeded ! marker"
+        "Calling proc " ++ name ++ " with unneeded ! marker"
 -- XXX These won't work until we better infer terminalness 
 -- typeErrorMessage (ReasonUndeclaredTerminal name pos) =
 --     Message Warning pos $
---     "Proc " ++ name ++ " should be declared terminal"
+--         "Proc " ++ name ++ " should be declared terminal"
 -- typeErrorMessage (ReasonUnnreachable name pos) =
 --     Message Warning pos $
---     "In proc " ++ name ++ ", this statement is unreachable"
+--         "In proc " ++ name ++ ", this statement is unreachable"
 
+
+prettyName :: String -> (ProcName -> String) -> ProcName -> String
+prettyName deflt _ "" = deflt
+prettyName _ trans nm = trans nm
 
 ----------------------------------------------------------------
 --                       The Typed Monad
@@ -544,6 +554,13 @@ constrainVarType reason var ty = do
     ty'' <- unifyTypes reason ty ty'
     logTyped $ "Variable " ++ var ++ " type constrained to " ++ show ty''
     setVarType var ty''
+
+constrainType :: TypeError -> (TypeRepresentation -> Bool) -> TypeSpec -> Typed ()
+constrainType reason constraint ty = do
+    ty' <- lift (lookupType "type constraint" Nothing ty) >>= ultimateType
+    typeRep <- trustFromJust "constrainType" 
+           <$> lift (lookupTypeRepresentation ty')
+    reportErrorUnless reason (constraint typeRep)
 
 
 -- |Unify the types of two variables; ie, constrain them to have the same types.
@@ -1028,13 +1045,29 @@ recordCast isForeign caller callee pexp argNum =
     case content pexp of
         (Typed _ _ (Just _)) | not isForeign
             -> typeError $ ReasonBadCast caller callee argNum pos
-        (Typed (Var name flow _) typ Nothing)
-            -> constrainVarType (ReasonArgType callee argNum pos) name typ
-        (Typed (Var name flow _) _ (Just typ))
-            -> constrainVarType (ReasonArgType callee argNum pos) name typ
-        -- XXX should check casts/constraints on manifest constants
+        (Typed exp ty Nothing)
+            -> recordCast' caller callee argNum ty exp pos
+        (Typed exp _ (Just ty))
+            -> recordCast' caller callee argNum ty exp pos
         _   -> return ()
     where pos = place pexp
+
+recordCast' :: ProcName -> Ident -> Int -> TypeSpec -> Exp -> OptPos -> Typed ()
+recordCast' caller callee argNum ty (Var name _ _) pos
+    = constrainVarType (ReasonArgType callee argNum pos) name ty
+recordCast' caller callee argNum ty exp@(IntValue _) pos
+    = constrainType (ReasonBadConstraint caller callee argNum exp pos) 
+         integerTypeRep ty
+recordCast' caller callee argNum ty exp@(CharValue _) pos
+    = constrainType (ReasonBadConstraint caller callee argNum exp pos) 
+         integerTypeRep ty
+recordCast' caller callee argNum ty exp@(StringValue _ v) pos
+    = void $ unifyTypes (ReasonBadConstraint caller callee argNum exp pos) 
+                (if v == CString then cStringType else stringType) ty
+recordCast' caller callee argNum ty exp@(FloatValue _) pos
+    = constrainType (ReasonBadConstraint caller callee argNum exp pos) 
+        ((==FloatFamily) . typeFamily) ty
+recordCast' _ _ _ _ _ _ = return ()
 
 
 updateParamTypes :: [Param] -> Typed [Param]
