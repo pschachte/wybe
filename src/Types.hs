@@ -1020,19 +1020,19 @@ addResourceType procname pos rfspec = do
 recordCasts :: ProcName -> Stmt -> OptPos -> Typed ()
 recordCasts caller instr@(ForeignCall "llvm" "move" _ [v1,v2]) pos = do
     logTyped $ "Recording casts in " ++ show instr
-    recordCast True caller "move" v1 1
-    recordCast True caller "move" v2 2
+    recordCast (Just "llvm") caller "move" v1 1
+    recordCast (Just "llvm") caller "move" v2 2
     logTyped $ "Unifying move argument types " ++ show v1 ++ " and " ++ show v2
     t1 <- expType v1
     t2 <- expType v2
     void $ unifyTypes (ReasonEqual (content v1) (content v2) pos)
            t1 t2
-recordCasts caller instr@(ForeignCall _ callee _ args) pos = do
+recordCasts caller instr@(ForeignCall lang callee _ args) pos = do
     logTyped $ "Recording casts in " ++ show instr
-    mapM_ (uncurry $ recordCast True caller callee) $ zip args [1..]
+    mapM_ (uncurry $ recordCast (Just lang) caller callee) $ zip args [1..]
 recordCasts caller instr@(ProcCall _ callee _ _ _ args) pos = do
     logTyped $ "Recording casts in " ++ show instr
-    mapM_ (uncurry $ recordCast False caller callee) $ zip args [1..]
+    mapM_ (uncurry $ recordCast Nothing caller callee) $ zip args [1..]
 recordCasts caller stmt _ =
     shouldnt $ "recordCasts of non-call statement " ++ show stmt
 
@@ -1041,24 +1041,24 @@ recordCasts caller stmt _ =
 -- cast.  Note that the Typed wrapper gives the type of the expression itself,
 -- so this only needs to record the type of the variable inside the Typed
 -- constructor.
-recordCast :: Bool -> ProcName -> Ident -> Placed Exp -> Int -> Typed ()
-recordCast isForeign caller callee pexp argNum =
+recordCast :: Maybe Ident -> ProcName -> Ident -> Placed Exp -> Int -> Typed ()
+recordCast mbLang caller callee pexp argNum =
     case content pexp of
-        (Typed _ _ (Just _)) | not isForeign
+        (Typed _ _ (Just _)) | isNothing mbLang
             -> typeError $ ReasonBadCast caller callee argNum pos
         (Typed exp ty Nothing)
-            -> recordCast' isForeign caller callee argNum ty exp pos
+            -> recordCast' mbLang caller callee argNum ty exp pos
         (Typed exp _ (Just ty))
-            -> recordCast' isForeign caller callee argNum ty exp pos
+            -> recordCast' mbLang caller callee argNum ty exp pos
         _   -> return ()
     where pos = place pexp
 
-recordCast' :: Bool -> ProcName -> Ident -> Int -> TypeSpec -> Exp -> OptPos -> Typed ()
+recordCast' :: Maybe Ident -> ProcName -> Ident -> Int -> TypeSpec -> Exp -> OptPos -> Typed ()
 recordCast' _ caller callee argNum ty (Var name _ _) pos
     = constrainVarType (ReasonArgType callee argNum pos) name ty
-recordCast' True _ callee _ _ _ _ 
-    -- ignore all non-variable casts in foreigns, except for moves
-    | callee /= "move" = return () 
+-- ignore all non-variable casts in foreigns, except for llvm moves
+recordCast' (Just lang) _ callee _ _ _ _ 
+    | not (lang == "llvm" && callee == "move") = return () 
 recordCast' _ caller callee argNum ty exp@(IntValue _) pos
     = constrainType (ReasonBadConstraint caller callee argNum exp pos) 
          integerTypeRep ty
