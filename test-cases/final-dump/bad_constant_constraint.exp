@@ -1,0 +1,5 @@
+Error detected during type checking of module(s) bad_constant_constraint
+[91mfinal-dump/bad_constant_constraint.wybe:1:6: Type constraint (:) in call from module top-level code to move, argument 1, is incompatible with expression "s"
+[0m[91mfinal-dump/bad_constant_constraint.wybe:2:6: Type constraint (:) in call from module top-level code to move, argument 1, is incompatible with expression 1
+[0m[91mfinal-dump/bad_constant_constraint.wybe:3:6: Type constraint (:) in call from module top-level code to move, argument 1, is incompatible with expression "1.0"
+[0m

@@ -344,11 +344,10 @@ typeErrorMessage (ReasonAmbig procName pos varAmbigs) =
                 | (v,typs) <- varAmbigs]
 typeErrorMessage (ReasonUndef callFrom callTo pos) =
     Message Error pos $
-        "'" ++ callTo ++ "' unknown in "
-        ++ prettyName "top-level statement" (("'"++) . (++"'")) callFrom
+        "'" ++ callTo ++ "' unknown in " ++ showProcName callFrom
 typeErrorMessage (ReasonArity callFrom callTo pos callArity procArity) =
     Message Error pos $
-        prettyName "Top-level call" ("Call from "++) callFrom
+        "Call from " ++ showProcName callFrom
         ++ " to " ++ callTo ++ " with " ++
         (if callArity == procArity
             then "unsupported argument flow"
@@ -416,13 +415,11 @@ typeErrorMessage (ReasonForeignArgRep instr argNum wrongRep rightDesc pos) =
         ++ " is " ++ show wrongRep ++ ", should be " ++ rightDesc
 typeErrorMessage (ReasonBadCast caller callee argNum pos) =
     Message Error pos $
-        "Type cast (:!) in call from " 
-        ++ prettyName "top-level" id caller
+        "Type cast (:!) in call from " ++ showProcName caller
         ++ " to non-foreign " ++ callee ++ ", argument " ++ show argNum
 typeErrorMessage (ReasonBadConstraint caller callee argNum exp pos) =
     Message Error pos $
-        "Type constraint (:) in call from "
-        ++ prettyName "top-level" id caller
+        "Type constraint (:) in call from " ++ showProcName caller
         ++ " to " ++ callee ++ ", argument " ++ show argNum
         ++ ", is incompatible with expression " ++ show exp
 typeErrorMessage ReasonShouldnt =
@@ -438,10 +435,6 @@ typeErrorMessage (ReasonActuallyPure name impurity pos) =
 --     Message Warning pos $
 --         "In proc " ++ name ++ ", this statement is unreachable"
 
-
-prettyName :: String -> (ProcName -> String) -> ProcName -> String
-prettyName deflt _ "" = deflt
-prettyName _ trans nm = trans nm
 
 ----------------------------------------------------------------
 --                       The Typed Monad
