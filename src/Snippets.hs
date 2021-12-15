@@ -174,17 +174,12 @@ globalLoad rs ty dest =
     Unplaced $ ForeignCall "lpvm" "load" [] 
       $ [Unplaced $ Typed (Global $ GlobalResource rs) ty Nothing, 
          Unplaced dest]
-        ++ globalsGet
+        ++ globalsGetSet
 
 
 globalsGetSet :: [Placed Exp]
 globalsGetSet = [Unplaced $ Typed (varGetSet globalsName GlobalArg) 
                     phantomType Nothing]
-
-
-globalsGet :: [Placed Exp]
-globalsGet = [Unplaced $ Typed (Var globalsName ParamIn GlobalArg) 
-                phantomType Nothing]
 
 
 globalsParam :: Param

@@ -137,7 +137,7 @@ collectGlobalFlows gFlows pspec = do
 -- * Resourceful higher order calls set the GlobalFlows to the universal set
 collectPrimGlobalFlows :: Prim -> Compiler GlobalFlows -> Compiler GlobalFlows
 collectPrimGlobalFlows 
-        (PrimForeign "lpvm" "load" _ [ArgGlobal info _, _, _]) gFlows
+        (PrimForeign "lpvm" "load" _ [ArgGlobal info _, _, _, _]) gFlows
     = addGlobalFlow info FlowIn <$> gFlows
 collectPrimGlobalFlows 
         (PrimForeign "lpvm" "store" _ [ArgGlobal info _, _, _, _]) gFlows

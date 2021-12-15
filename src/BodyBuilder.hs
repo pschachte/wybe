@@ -413,12 +413,14 @@ instr' prim@(PrimForeign "lpvm" "cast" []
     unless (argFlowDirection from == FlowIn && flow == FlowOut) $
         shouldnt "cast instruction with wrong flow"
     if argType from == argType to
-      then instr' (PrimForeign "llvm" "move" [] [from, to]) pos
-      else ordinaryInstr prim pos
-instr' prim@(PrimForeign "lpvm" "load" [] [ArgGlobal info _, var, _]) pos = do
+    then instr' (PrimForeign "llvm" "move" [] [from, to]) pos
+    else ordinaryInstr prim pos
+instr' prim@(PrimForeign "lpvm" "load" [] [ArgGlobal info _, var, gIn, gOut]) pos = do
     loaded <- gets globalsLoaded
     case Map.lookup info loaded of
-        Just val -> instr' (PrimForeign "llvm" "move" [] [val, var]) pos
+        Just val -> do
+            instr' (PrimForeign "llvm" "move" [] [val, var]) pos
+            instr' (PrimForeign "llvm" "move" [] [gIn, gOut]) pos
         Nothing -> ordinaryInstr prim pos
 instr' prim pos = ordinaryInstr prim pos
 
@@ -593,8 +595,6 @@ instrConsequences'
             [struct,offset,ArgInt 1 intType,size,startOffset, val], [struct]),
             (PrimForeign "lpvm" "mutate" []
             [struct,offset,ArgInt 0 intType,size,startOffset, val], [struct])]
--- instrConsequences' (PrimForeign "lpvm" "load" flags [gRes, val, globals]) = 
---     return [(PrimForeign "lpvm" "load" flags [gRes, val, globals], [val])]
 instrConsequences' (PrimForeign "llvm" "add" flags [a1,a2,a3]) =
     return [(PrimForeign "llvm" "sub" flags [a3,a2], [a1]),
             (PrimForeign "llvm" "sub" flags [a3,a1], [a2]),
@@ -758,7 +758,8 @@ updateGlobalValues :: Prim -> BodyBuilder ()
 updateGlobalValues prim = do
     loaded <- gets globalsLoaded
     case prim of
-        PrimForeign "lpvm" "store" _ [ArgGlobal info _, var, _, _] -> 
+        PrimForeign "lpvm" name _ [ArgGlobal info _, var, _, _] 
+              | name == "store" || name == "load" -> 
             modify $ \s -> s{globalsLoaded=Map.insert info var loaded}
         PrimHigherCall _ fn _
             | isResourcefulHigherOrder $ argType fn ->
@@ -1225,7 +1226,7 @@ bkwdBuildStmt defs prim pos = do
           | otherwise -> do
               modify $ \s -> s { bkwdGlobalStored = Set.insert info gStored }
               bkwdBuildStmt' args' prim pos
-      (PrimForeign "lpvm" "load" _ _, [ArgGlobal info _, _, _]) -> do
+      (PrimForeign "lpvm" "load" _ _, [ArgGlobal info _, _, _, _]) -> do
           modify $ \s -> s { bkwdGlobalStored = Set.delete info gStored }
           bkwdBuildStmt' args' prim pos
       (PrimHigherCall _ fn _, _)
