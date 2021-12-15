@@ -44,10 +44,10 @@ AFTER EVERYTHING:
     foreign lpvm mutate(~tmp#28##0:thistype, ?tmp#4##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#5##0:thistype)
     thistype.concat<0>[410bae77d3](~tmp#0##0:thistype, ~tmp#4##0:thistype, ?tmp#8##0:thistype) #7 @thistype:nn:nn
     thistype.length<0>(~tmp#8##0:thistype, ?tmp#7##0:wybe.int) #8 @thistype:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#31##0:wybe.phantom, *#globals##0:wybe.phantom)
-    foreign c print_int(~tmp#7##0:wybe.int, ~%tmp#31##0:wybe.phantom, ?%tmp#32##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#32##0:wybe.phantom, ?%tmp#34##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#34##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#31##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#32##0:wybe.phantom)
+    foreign c print_int(~tmp#7##0:wybe.int, ~%tmp#31##0:wybe.phantom, ?%tmp#33##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~%tmp#33##0:wybe.phantom, ?%tmp#34##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#34##0:wybe.phantom, ~*tmp#32##0:wybe.phantom, ?*#globals##1:wybe.phantom)
 
 
 = > public (2 calls) 

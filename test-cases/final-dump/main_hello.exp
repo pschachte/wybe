@@ -12,22 +12,22 @@ AFTER EVERYTHING:
 
 *main* > public {impure} (0 calls) 
 0: main_hello.<0>
-(*#globals##0:wybe.phantom, *?#globals##4:wybe.phantom):
+(*#globals##0:wybe.phantom, *?#globals##5:wybe.phantom):
   GlobalFlows: {<<command_line.arguments>>::{FlowIn}, <<command_line.exit_code>>::{FlowOut}, <<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm store(<<command_line.exit_code>>:wybe.int, 42:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
-    wybe.string.print_string<0>("hello, world!":wybe.string, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #5 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom, *#globals##2:wybe.phantom)
-    foreign c putchar('\n':wybe.char, ~%tmp#6##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @io:nn:nn
-    foreign lpvm load(<<command_line.arguments>>:wybe.array(wybe.c_string), ?%arguments##0:wybe.array(wybe.c_string), *#globals##2:wybe.phantom)
+    wybe.string.print_string<0>("hello, world!":wybe.string, ~*#globals##1:wybe.phantom, ?*tmp#5##0:wybe.phantom) #5 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom, ~*tmp#5##0:wybe.phantom, ?*#globals##2:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#6##0:wybe.phantom, ?%tmp#8##0:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<command_line.arguments>>:wybe.array(wybe.c_string), ?%arguments##0:wybe.array(wybe.c_string), ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom)
     foreign lpvm access(~%arguments##0:wybe.array(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int)
-    foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#7##0:wybe.phantom, ?%tmp#12##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#12##0:wybe.phantom, ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom)
-    wybe.string.print_string<0>(" command line argument(s)":wybe.string, ~*#globals##3:wybe.phantom, ?*tmp#15##0:wybe.phantom) #6 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom, *tmp#15##0:wybe.phantom)
-    foreign c putchar('\n':wybe.char, ~%tmp#16##0:wybe.phantom, ?%tmp#17##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#17##0:wybe.phantom, ~*tmp#15##0:wybe.phantom, ?*#globals##4:wybe.phantom)
+    foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#8##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#14##0:wybe.phantom, ~*#globals##3:wybe.phantom, ?*#globals##4:wybe.phantom)
+    wybe.string.print_string<0>(" command line argument(s)":wybe.string, ~*#globals##4:wybe.phantom, ?*tmp#17##0:wybe.phantom) #6 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom, ~*tmp#17##0:wybe.phantom, ?*tmp#19##0:wybe.phantom)
+    foreign c putchar('\n':wybe.char, ~%tmp#18##0:wybe.phantom, ?%tmp#20##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#20##0:wybe.phantom, ~*tmp#19##0:wybe.phantom, ?*#globals##5:wybe.phantom)
 
   LLVM code       :
 

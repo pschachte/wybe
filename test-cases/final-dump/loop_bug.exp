@@ -29,18 +29,18 @@ gen#1(*#globals##0:wybe.phantom, [h##0:wybe.int], lst##0:loop_bug.int_list, t##0
     foreign llvm icmp_ne(t##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool)
     case ~tmp#2##0:wybe.bool of
     0:
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom, *#globals##0:wybe.phantom)
-        foreign c putchar(']':wybe.char, ~%tmp#5##0:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#6##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#6##0:wybe.phantom)
+        foreign c putchar(']':wybe.char, ~%tmp#5##0:wybe.phantom, ?%tmp#7##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#7##0:wybe.phantom, ~*tmp#6##0:wybe.phantom, ?*#globals##1:wybe.phantom)
 
     1:
         foreign lpvm access(t##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##1:wybe.int)
         foreign lpvm access(~t##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##1:loop_bug.int_list)
         wybe.string.print_string<0>(", ":wybe.string, ~#globals##0:wybe.phantom, ?*tmp#7##0:wybe.phantom) #3 @io:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom, *tmp#7##0:wybe.phantom)
-        foreign c print_int(~h##1:wybe.int, ~%tmp#8##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#9##0:wybe.phantom, ~*tmp#7##0:wybe.phantom, ?*tmp#10##0:wybe.phantom)
-        loop_bug.gen#1<0>(~tmp#10##0:wybe.phantom, _:wybe.int, ~lst##0:loop_bug.int_list, ~t##1:loop_bug.int_list, ?#globals##1:wybe.phantom) #4 @loop_bug:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom, ~*tmp#7##0:wybe.phantom, ?*tmp#9##0:wybe.phantom)
+        foreign c print_int(~h##1:wybe.int, ~%tmp#8##0:wybe.phantom, ?%tmp#10##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#10##0:wybe.phantom, ~*tmp#9##0:wybe.phantom, ?*tmp#11##0:wybe.phantom)
+        loop_bug.gen#1<0>(~tmp#11##0:wybe.phantom, _:wybe.int, ~lst##0:loop_bug.int_list, ~t##1:loop_bug.int_list, ?#globals##1:wybe.phantom) #4 @loop_bug:nn:nn
 
 
 
@@ -51,9 +51,9 @@ gen#2(*#globals##0:wybe.phantom, h##0:wybe.int, lst##0:loop_bug.int_list, t##0:l
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>(", ":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #3 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom, *#globals##1:wybe.phantom)
-    foreign c print_int(~h##0:wybe.int, ~%tmp#4##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#5##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom)
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*tmp#5##0:wybe.phantom)
+    foreign c print_int(~h##0:wybe.int, ~%tmp#4##0:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#6##0:wybe.phantom, ~*tmp#5##0:wybe.phantom, ?*#globals##2:wybe.phantom)
     loop_bug.gen#1<0>(~#globals##2:wybe.phantom, _:wybe.int, ~lst##0:loop_bug.int_list, ~t##0:loop_bug.int_list, ?#globals##3:wybe.phantom) #2 @loop_bug:nn:nn
 
 
@@ -63,19 +63,19 @@ print(lst##0:loop_bug.int_list, *#globals##0:wybe.phantom, *?#globals##3:wybe.ph
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom, *#globals##0:wybe.phantom)
-    foreign c putchar('[':wybe.char, ~%tmp#4##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
-    foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool)
-    case ~tmp#7##0:wybe.bool of
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
+    foreign c putchar('[':wybe.char, ~%tmp#4##0:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io:nn:nn
+    foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.bool)
+    case ~tmp#8##0:wybe.bool of
     0:
-        foreign c putchar(']':wybe.char, ~%tmp#5##0:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#11##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##3:wybe.phantom)
+        foreign c putchar(']':wybe.char, ~%tmp#6##0:wybe.phantom, ?%tmp#13##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#13##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*#globals##3:wybe.phantom)
 
     1:
         foreign lpvm access(lst##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int)
         foreign lpvm access(lst##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:loop_bug.int_list)
-        foreign c print_int(~h##0:wybe.int, ~%tmp#5##0:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#11##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##2:wybe.phantom)
+        foreign c print_int(~h##0:wybe.int, ~%tmp#6##0:wybe.phantom, ?%tmp#13##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#13##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom)
         loop_bug.gen#1<0>(~#globals##2:wybe.phantom, _:wybe.int, ~lst##0:loop_bug.int_list, ~t##0:loop_bug.int_list, ?#globals##3:wybe.phantom) #3 @loop_bug:nn:nn
 
 
@@ -148,8 +148,8 @@ entry:
 define external fastcc  void @"loop_bug.print<0>"(i64  %"lst##0")    {
 entry:
   tail call ccc  void  @putchar(i8  91)  
-  %"1#tmp#7##0" = icmp ne i64 %"lst##0", 0 
-  br i1 %"1#tmp#7##0", label %if.then, label %if.else 
+  %"1#tmp#8##0" = icmp ne i64 %"lst##0", 0 
+  br i1 %"1#tmp#8##0", label %if.then, label %if.else 
 if.then:
   %12 = inttoptr i64 %"lst##0" to i64* 
   %13 = getelementptr  i64, i64* %12, i64 0 

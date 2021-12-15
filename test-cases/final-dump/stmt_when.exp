@@ -49,10 +49,10 @@ gen#2(*#globals##0:wybe.phantom, n##0:wybe.int, ?#globals##2:wybe.phantom):
         stmt_when.gen#1<0>(~#globals##0:wybe.phantom, ~tmp#0##0:wybe.int, ?#globals##2:wybe.phantom) #5 @stmt_when:nn:nn
 
     1:
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom, *#globals##0:wybe.phantom)
-        foreign c print_int(tmp#0##0:wybe.int, ~%tmp#11##0:wybe.phantom, ?%tmp#12##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~%tmp#12##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#14##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#12##0:wybe.phantom)
+        foreign c print_int(tmp#0##0:wybe.int, ~%tmp#11##0:wybe.phantom, ?%tmp#13##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~%tmp#13##0:wybe.phantom, ?%tmp#14##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#14##0:wybe.phantom, ~*tmp#12##0:wybe.phantom, ?*#globals##1:wybe.phantom)
         stmt_when.gen#1<0>(~#globals##1:wybe.phantom, ~tmp#0##0:wybe.int, ?#globals##2:wybe.phantom) #4 @stmt_when:nn:nn
 
 
