@@ -283,8 +283,8 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Foreign call with wrong argument type
                | ReasonBadCast Ident Ident Int OptPos
                    -- ^Cast operation appearing in non-foreign call argument
-               | ReasonBadConstraint Ident Ident Int Exp OptPos
-                   -- ^Cast type constraint on constrained type expr
+               | ReasonBadConstraint Ident Ident Int Exp TypeSpec OptPos
+                   -- ^Type constraint on exp is invalid
                | ReasonShouldnt
                    -- ^This error should never happen
                | ReasonActuallyPure ProcName Impurity OptPos
@@ -417,9 +417,9 @@ typeErrorMessage (ReasonBadCast caller callee argNum pos) =
     Message Error pos $
         "Type cast (:!) in call from " ++ showProcName caller
         ++ " to non-foreign " ++ callee ++ ", argument " ++ show argNum
-typeErrorMessage (ReasonBadConstraint caller callee argNum exp pos) =
+typeErrorMessage (ReasonBadConstraint caller callee argNum exp ty pos) =
     Message Error pos $
-        "Type constraint (:) in call from " ++ showProcName caller
+        "Type constraint (:" ++ show ty ++ ") in call from " ++ showProcName caller
         ++ " to " ++ callee ++ ", argument " ++ show argNum
         ++ ", is incompatible with expression " ++ show exp
 typeErrorMessage ReasonShouldnt =
@@ -1053,17 +1053,17 @@ recordCast' _ caller callee argNum ty (Var name _ _) pos
 recordCast' (Just lang) _ callee _ _ _ _ 
     | not (lang == "llvm" && callee == "move") = return () 
 recordCast' _ caller callee argNum ty exp@(IntValue _) pos
-    = constrainType (ReasonBadConstraint caller callee argNum exp pos) 
+    = constrainType (ReasonBadConstraint caller callee argNum exp ty pos) 
          integerTypeRep ty
 recordCast' _ caller callee argNum ty exp@(CharValue _) pos
-    = constrainType (ReasonBadConstraint caller callee argNum exp pos) 
+    = constrainType (ReasonBadConstraint caller callee argNum exp ty pos) 
          integerTypeRep ty
 recordCast' _ caller callee argNum ty exp@(FloatValue _) pos
-    = constrainType (ReasonBadConstraint caller callee argNum exp pos) 
+    = constrainType (ReasonBadConstraint caller callee argNum exp ty pos) 
         ((==FloatFamily) . typeFamily) ty
 recordCast' _ caller callee argNum ty exp pos = do
     ty' <- expType (exp `maybePlace` pos)
-    void $ unifyTypes (ReasonBadConstraint caller callee argNum exp pos) ty' ty
+    void $ unifyTypes (ReasonBadConstraint caller callee argNum exp ty pos) ty' ty
 
 
 updateParamTypes :: [Param] -> Typed [Param]
