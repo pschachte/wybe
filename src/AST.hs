@@ -1435,8 +1435,9 @@ data ModuleInterface = ModuleInterface {
                                      -- ^The procs this module exports
     pubSubmods   :: Map Ident ModSpec, -- ^The submodules this module exports
     dependencies :: Set ModSpec,      -- ^The other modules that must be linked
-    typeModifiers :: TypeModifiers   -- ^The extra information of the type
-    }                               --  in by modules that depend on this one
+                                      --  in by modules that depend on this one
+    typeModifiers :: TypeModifiers    -- ^The extra information of the type
+    }
     deriving (Eq, Generic)
 
 emptyInterface :: ModuleInterface

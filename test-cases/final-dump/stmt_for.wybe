@@ -131,12 +131,10 @@ pub def using_irange_reverse use !io {
     }
 }
 
-pub def {test} semi_det_for_loop use !io {
-    for ?i in xrange(0, 1, 10):int_sequence {
-        (i < 5)
-        !println(i)
-    }
+pub def {test} semi_det_for_loop {
+    for ?i in xrange(0, 1, 10):int_sequence { i < 5 }
 }
+
 
 # Testing code
 !println("single_generator:")

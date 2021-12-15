@@ -51,8 +51,16 @@ uniquenessCheckProc def _ = do
     let name = procName def
     let pos = procPos def
     logUniqueness $ "Uniqueness checking proc: " ++ name
+    let detism = procDetism def
     let params = procProtoParams $ procProto def
     logUniqueness $ "with params: " ++ show params
+    someUnique <- elem (Just True) <$>
+                  mapM (((tmUniqueness . typeModifiers . modInterface <$>) <$>)
+                        <$> getLoadingModule)
+                      (catMaybes $ typeModule . paramType <$> params)
+    unless (detism `determinismLEQ` Det || not someUnique)
+           (errmsg (procPos def)
+            $ showProcName name ++ " with unique argument can fail") 
     case procImpln def of
         ProcDefSrc body -> do
             let state = foldStmts (const . const) uniquenessCheckExp
