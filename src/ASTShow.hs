@@ -6,7 +6,7 @@
 --           : LICENSE in the root directory of this project.
 
 module ASTShow (
-  logDump
+  logDump, logDumpWith
   ) where
 
 import AST
@@ -27,9 +27,13 @@ import qualified Data.Text.Lazy as TL
 instance Show Module where
     show mod =
         let int  = modInterface mod
+            typeMods = typeModifiers int
             maybeimpl = modImplementation mod
         in " Module " ++ showModSpec (modSpec mod) ++
            bracketList "(" ", " ")" (show <$> modParams mod) ++
+           (if typeMods == defaultTypeModifiers
+               then ""
+               else "\n modifiers       : " ++ (show $ typeModifiers int)) ++
            "\n  representation  : " ++
            (if modIsType mod
             then maybe "(not yet known)" show (modTypeRep mod)
@@ -83,13 +87,25 @@ showMapPoses = showMap "" ", " "" id showOptPos
 -- of the specified log selectors have been selected for logging.  This
 -- is called between the passes of those two selectors.
 logDump :: LogSelection -> LogSelection -> String -> Compiler ()
-logDump selector1 selector2 pass =
+logDump = logDumpWith (const $ return Nothing)
+
+
+-- |Dump the content of the specified module and all submodules, with the 
+-- result of an optional action applied to each module if either of the 
+-- specified log selectors have been selected for logging.  This is called 
+-- between the passes of those two selectors.
+logDumpWith :: (Module -> Compiler (Maybe String))
+            -> LogSelection -> LogSelection -> String -> Compiler ()
+logDumpWith action selector1 selector2 pass =
     whenLogging2 selector1 selector2 $ do
-      modList <- gets (Map.elems . modules)
-      dumpLib <- gets (optDumpLib . options)
-      let toLog mod = let spec  = modSpec mod
-                      in  List.null spec || dumpLib || not (head spec == "wybe" || head spec == "command_line")
-      liftIO $ hPutStrLn stderr $ replicate 70 '='
-        ++ "\nAFTER " ++ pass ++ ":\n"
-        ++ intercalate ("\n" ++ replicate 50 '-' ++ "\n")
-        (List.map show $ List.filter toLog modList)
+        modList <- gets (Map.elems . modules)
+        dumpLib <- gets (optDumpLib . options)
+        let toLog mod = let spec  = modSpec mod
+                        in  List.null spec || dumpLib || head spec /= "wybe"
+        let logging = List.filter toLog modList
+        mbStrs <- mapM action logging
+        liftIO $ hPutStrLn stderr $ replicate 70 '='
+          ++ "\nAFTER " ++ pass ++ ":\n"
+          ++ intercalate ("\n" ++ replicate 50 '-' ++ "\n")
+          (zipWith (\mod mbStr -> show mod ++ maybe "" ("\n\n" ++) mbStr)
+              logging mbStrs)

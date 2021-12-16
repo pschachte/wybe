@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : res: fromList [(top_level_use.res,wybe.int = 0 @top_level_use:nn:nn @top_level_use:nn:nn)]
   procs           : 
 
-*main* > public {impure} (0 calls) 
+module top-level code > public {impure} (0 calls) 
 0: top_level_use.<0>
 (*#globals##0:wybe.phantom, *?#globals##6:wybe.phantom):
   GlobalFlows: {<<top_level_use.res>>::{FlowOut}, <<wybe.io.io>>::{FlowIn, FlowOut}} 

@@ -24,7 +24,6 @@ import Text.Parsec.Pos
 import Data.Functor
 import Control.Monad
 import Debug.Trace
-import GHC.IO.Unsafe (unsafePerformIO)
 
 
 -----------------------------------------------------------------------------
@@ -116,9 +115,11 @@ moduleItem v = do
 typeItem :: Visibility -> Parser Item
 typeItem v = do
     pos <- tokenPosition <$> ident "type"
+    modifiers <- List.foldl processTypeModifier defaultTypeModifiers
+                 <$> modifierList 
     proto <- TypeProto <$> moduleName <*> typeVarNames
     (imp,items) <- typeImpln <|> typeCtors
-    return $ TypeDecl v proto imp items (Just pos)
+    return $ TypeDecl v proto modifiers imp items (Just pos)
 
 
 -- | Module type representation declaration
@@ -127,8 +128,10 @@ typeRepItem = do
     keypos <- tokenPosition <$> ident "representation"
     params <- typeVarNames
     ident "is"
+    modifiers <- List.foldl processTypeModifier defaultTypeModifiers
+                 <$> modifierList 
     rep <- typeRep
-    return $ RepresentationDecl params rep $ Just keypos
+    return $ RepresentationDecl params modifiers rep $ Just keypos
 
 
 -- | Module type representation declaration
@@ -136,8 +139,10 @@ dataCtorItemParser :: Visibility -> Parser Item
 dataCtorItemParser v = do
     pos <- tokenPosition <$> (ident "constructor" <|> ident "constructors")
     params <- typeVarNames
+    modifiers <- List.foldl processTypeModifier defaultTypeModifiers
+                 <$> modifierList 
     ctors <- ctorDecls
-    return $ ConstructorDecl v params ctors $ Just pos
+    return $ ConstructorDecl v params modifiers ctors $ Just pos
 
 
 -- | Type declaration body where representation and items are given
@@ -264,6 +269,15 @@ resourceSpec = moduleSpec <&> modSpecToResourceSpec
 flowDirection :: Parser FlowDirection
 flowDirection =
     option ParamIn $ symbol "?" $> ParamOut <|> symbol "!" $> ParamInOut
+
+
+-----------------------------------------------------------------------------
+-- Handling type modifiers                                                 --
+-----------------------------------------------------------------------------
+-- | Add a type modifier by name to a TypeModifiers.
+processTypeModifier :: TypeModifiers -> Ident -> TypeModifiers
+processTypeModifier tms "unique" = tms {tmUniqueness = True}
+processTypeModifier tms unknown  = tms {tmUnknown = tmUnknown tms ++ [unknown]}
 
 
 -----------------------------------------------------------------------------

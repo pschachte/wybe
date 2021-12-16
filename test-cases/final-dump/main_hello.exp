@@ -1,5 +1,140 @@
 ======================================================================
 AFTER EVERYTHING:
+ Module command_line
+  representation  : (not a type)
+  public submods  : 
+  public resources: argc: command_line.argc
+                    arguments: command_line.arguments
+                    argv: command_line.argv
+                    command: command_line.command
+                    exit_code: command_line.exit_code
+  public procs    : command_line.<0>
+                    command_line.set_exit_code<0>
+  imports         : use wybe
+  resources       : argc: fromList [(command_line.argc,wybe.int @command_line:nn:nn)]
+                    arguments: fromList [(command_line.arguments,wybe.array(wybe.c_string) = array(argc @command_line:nn:nn, argv @command_line:nn:nn) @command_line:nn:nn @command_line:nn:nn)]
+                    argv: fromList [(command_line.argv,wybe.array.raw_array(wybe.c_string) @command_line:nn:nn)]
+                    command: fromList [(command_line.command,wybe.c_string = c"" @command_line:nn:nn @command_line:nn:nn)]
+                    exit_code: fromList [(command_line.exit_code,wybe.int = 0 @command_line:nn:nn @command_line:nn:nn)]
+  procs           : 
+
+module top-level code > public {impure} (0 calls) 
+0: command_line.<0>
+(*#globals##0:wybe.phantom, *?#globals##8:wybe.phantom):
+  GlobalFlows: {<<command_line.argc>>::{FlowIn}, <<command_line.arguments>>::{FlowOut}, <<command_line.argv>>::{FlowIn}, <<command_line.command>>::{FlowOut}, <<command_line.exit_code>>::{FlowOut}} 
+  AliasPairs: []
+  InterestingCallProperties: []
+  MultiSpeczDepInfo: [(1,(wybe.array.[|]<0>,fromList [NonAliasedParamCond 2 []]))]
+    foreign lpvm load(<<command_line.argc>>:wybe.int, ?%argc##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
+    foreign lpvm load(<<command_line.argv>>:wybe.array.raw_array(wybe.c_string), ?%argv##0:wybe.array.raw_array(wybe.c_string), ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom)
+    foreign lpvm alloc(16:wybe.int, ?tmp#4##0:wybe.array(T))
+    foreign lpvm mutate(~tmp#4##0:wybe.array(T), ?tmp#5##0:wybe.array(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~%argc##0:wybe.int)
+    foreign lpvm mutate(~tmp#5##0:wybe.array(T), ?tmp#0##0:wybe.array(wybe.c_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~%argv##0:wybe.array.raw_array(T))
+    foreign lpvm store(<<command_line.arguments>>:wybe.array(wybe.c_string), tmp#0##0:wybe.array(wybe.c_string), ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom)
+    foreign lpvm store(<<command_line.command>>:wybe.c_string, c"":wybe.c_string, ~*#globals##3:wybe.phantom, ?*#globals##4:wybe.phantom)
+    wybe.array.[|]<0>[785a827a1b](?%command##1:wybe.c_string, ?%arguments##2:wybe.array(wybe.c_string), ~tmp#0##0:wybe.array(wybe.c_string), ?tmp#1##0:wybe.bool) #1 @command_line:nn:nn
+    case ~tmp#1##0:wybe.bool of
+    0:
+        foreign c {terminal,semipure} error_exit(c"command_line:15:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @control:nn:nn
+        foreign llvm move(~*#globals##4:wybe.phantom, ?*#globals##8:wybe.phantom)
+
+    1:
+        foreign lpvm store(<<command_line.arguments>>:wybe.array(wybe.c_string), ~%arguments##2:wybe.array(wybe.c_string), ~*#globals##4:wybe.phantom, ?*#globals##6:wybe.phantom)
+        foreign lpvm store(<<command_line.command>>:wybe.c_string, ~%command##1:wybe.c_string, ~*#globals##6:wybe.phantom, ?*#globals##7:wybe.phantom)
+        foreign lpvm store(<<command_line.exit_code>>:wybe.int, 0:wybe.int, ~*#globals##7:wybe.phantom, ?*#globals##8:wybe.phantom)
+
+
+
+set_exit_code > public {inline} (0 calls) 
+0: command_line.set_exit_code<0>
+set_exit_code(code##0:wybe.int, *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
+  GlobalFlows: {<<command_line.exit_code>>::{FlowOut}} 
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm store(<<command_line.exit_code>>:wybe.int, ~code##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
+
+  LLVM code       :
+
+; ModuleID = 'command_line'
+
+
+ 
+
+
+declare external ccc  void @error_exit(i64, i64)    
+
+
+declare external fastcc  {i64, i64, i1} @"wybe.array.[|]<0>[785a827a1b]"(i64)    
+
+
+@command_line.17 =    constant [?? x i8] c"Erroneous program argument vector\00"
+
+
+@command_line.16 =    constant [?? x i8] c"command_line:15:15\00"
+
+
+@command_line.11 =    constant [?? x i8] c"\00"
+
+
+@"resource#command_line.argc" =    global i64 undef
+
+
+@"resource#command_line.arguments" =    global i64 undef
+
+
+@"resource#command_line.argv" =    global i64 undef
+
+
+@"resource#command_line.command" =    global i64 undef
+
+
+@"resource#command_line.exit_code" =    global i64 undef
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  void @"command_line.<0>"()    {
+entry:
+  %1 = load  i64, i64* @"resource#command_line.argc" 
+  %2 = load  i64, i64* @"resource#command_line.argv" 
+  %3 = trunc i64 16 to i32  
+  %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
+  %5 = ptrtoint i8* %4 to i64 
+  %6 = inttoptr i64 %5 to i64* 
+  %7 = getelementptr  i64, i64* %6, i64 0 
+  store  i64 %1, i64* %7 
+  %8 = add   i64 %5, 8 
+  %9 = inttoptr i64 %8 to i64* 
+  %10 = getelementptr  i64, i64* %9, i64 0 
+  store  i64 %2, i64* %10 
+  store  i64 %5, i64* @"resource#command_line.arguments" 
+  store  i64 ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @command_line.11, i32 0, i32 0) to i64), i64* @"resource#command_line.command" 
+  %12 = tail call fastcc  {i64, i64, i1}  @"wybe.array.[|]<0>[785a827a1b]"(i64  %5)  
+  %13 = extractvalue {i64, i64, i1} %12, 0 
+  %14 = extractvalue {i64, i64, i1} %12, 1 
+  %15 = extractvalue {i64, i64, i1} %12, 2 
+  br i1 %15, label %if.then, label %if.else 
+if.then:
+  store  i64 %14, i64* @"resource#command_line.arguments" 
+  store  i64 %13, i64* @"resource#command_line.command" 
+  store  i64 0, i64* @"resource#command_line.exit_code" 
+  ret void 
+if.else:
+  tail call ccc  void  @error_exit(i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @command_line.16, i32 0, i32 0) to i64), i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @command_line.17, i32 0, i32 0) to i64))  
+  ret void 
+}
+
+
+define external fastcc  void @"command_line.set_exit_code<0>"(i64  %"code##0")    {
+entry:
+  store  i64 %"code##0", i64* @"resource#command_line.exit_code" 
+  ret void 
+}
+--------------------------------------------------
  Module main_hello
   representation  : (not a type)
   public submods  : 
@@ -10,7 +145,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public {impure} (0 calls) 
+module top-level code > public {impure} (0 calls) 
 0: main_hello.<0>
 (*#globals##0:wybe.phantom, *?#globals##5:wybe.phantom):
   GlobalFlows: {<<command_line.arguments>>::{FlowIn}, <<command_line.exit_code>>::{FlowOut}, <<wybe.io.io>>::{FlowIn, FlowOut}} 

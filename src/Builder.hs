@@ -193,8 +193,7 @@ module Builder (buildTargets) where
 
 import           Analysis
 import           AST
-import           Debug.Trace
-import           ASTShow                   (logDump)
+import           ASTShow                   (logDump, logDumpWith)
 import           Blocks                    (blockTransformModule,
                                             concatLLVMASTModules)
 import           Callers                   (collectCallers)
@@ -216,13 +215,14 @@ import           Normalise                 (normalise, completeNormalisation, no
 import           ObjectInterface
 
 import           Optimise                  (optimiseMod)
-import           Options                   (LogSelection (..), Options,
+import           Options                   (LogSelection (..), Options (..),
                                             optForce, optForceAll, optLibDirs,
                                             optNoMultiSpecz)
 import           Parser                    (parseWybe)
 import           Resources                 (resourceCheckMod,
                                             transformProcResources,
                                             canonicaliseProcResources)
+import           Unique                    ( uniquenessCheckProc )
 import           Scanner                   (fileTokens)
 import           System.Directory
 import           System.FilePath
@@ -241,6 +241,8 @@ import           BinaryFactory
 import qualified Data.ByteString.Char8 as BS
 import qualified LLVM.AST              as LLVMAST
 
+import           Debug.Trace
+
 ------------------------ Handling dependencies ------------------------
 
 -- |Build the specified targets with the specified options.
@@ -249,7 +251,11 @@ buildTargets targets = do
     mapM_ buildTarget targets
     showMessages
     stopOnError "building outputs"
-    logDump FinalDump FinalDump "EVERYTHING"
+    dumpOpt <- option optDumpOptLLVM
+    let dumper = if dumpOpt then logDumpWith ((Just <$>) . extractLLVM) 
+                            else logDump
+    dumper FinalDump FinalDump "EVERYTHING"
+
 
 
 -- |Build a single top-level target
@@ -801,6 +807,9 @@ compileModSCC mspecs = do
     logDump Types Unbranch "TYPE CHECK"
     mapM_ (transformModuleProcs transformProcResources)  mspecs
     stopOnError $ "resource checking of module(s) "
+                  ++ showModSpecs mspecs
+    mapM_ (transformModuleProcs uniquenessCheckProc)  mspecs
+    stopOnError $ "uniqueness checking of module(s) "
                   ++ showModSpecs mspecs
     ----------------------------------
     -- UNBRANCHING

@@ -27,8 +27,8 @@ import           System.Directory
 import           System.Console.ANSI
 
 -- |Command line options for the wybe compiler.
-data Options = Options{
-    optForce          :: Bool     -- ^Compile specified files even if up to date
+data Options = Options
+    { optForce        :: Bool     -- ^Compile specified files even if up to date
     , optForceAll     :: Bool     -- ^Compile all files even if up to date
     , optShowVersion  :: Bool     -- ^Print compiler version and exit
     , optHelpLog      :: Bool     -- ^Print log option help and exit
@@ -45,33 +45,35 @@ data Options = Options{
     , optVerbose      :: Bool     -- ^Be verbose in compiler output
     , optNoFont       :: Bool     -- ^Disable ISO font change codes in messages
     , optNoVerifyLLVM :: Bool     -- ^Don't run LLVM verification
+    , optDumpOptLLVM  :: Bool     -- ^Dump optimised LLVM code
     } deriving Show
 
 
 -- |Defaults for all compiler options
 defaultOptions :: Options
-defaultOptions     = Options
- { optForce        = False
- , optForceAll     = False
- , optShowVersion  = False
- , optHelpLog      = False
- , optShowHelp     = False
- , optLibDirs      = []
- , optLogAspects   = Set.empty
- , optLogUnknown   = Set.empty
- , optNoLLVMOpt    = False
- , optNoMultiSpecz = False 
- , optDumpLib      = False
- , optVerbose      = False
- , optNoFont       = False
- , optNoVerifyLLVM = False
- }
+defaultOptions = Options
+  { optForce        = False
+  , optForceAll     = False
+  , optShowVersion  = False
+  , optHelpLog      = False
+  , optShowHelp     = False
+  , optLibDirs      = []
+  , optLogAspects   = Set.empty
+  , optLogUnknown   = Set.empty
+  , optNoLLVMOpt    = False
+  , optNoMultiSpecz = False 
+  , optDumpLib      = False
+  , optVerbose      = False
+  , optNoFont       = False
+  , optNoVerifyLLVM = False
+  , optDumpOptLLVM  = False
+  }
 
 -- |All compiler features we may want to log
 data LogSelection =
   All | AST | BodyBuilder | Builder | Clause | Expansion | FinalDump
   | Flatten | Normalise | Optimise | Resources | Types
-  | Unbranch | Codegen | Blocks | Emit | Analysis | Transform
+  | Unbranch | Codegen | Blocks | Emit | Analysis | Transform | Uniqueness
   deriving (Eq, Ord, Bounded, Enum, Show, Read)
 
 allLogSelections :: [LogSelection]
@@ -110,11 +112,13 @@ logSelectionDescription Codegen
 logSelectionDescription Blocks
     = "Log translation of LPVM procedures into LLVM"
 logSelectionDescription Emit
-    = "Log emission of LLVM IR from the definitions created."
+    = "Log emission of LLVM IR from the definitions created"
 logSelectionDescription Analysis
-    = "Log analysis of LPVM IR."
+    = "Log analysis of LPVM IR"
 logSelectionDescription Transform
-    = "Log transform of mutate instructions."
+    = "Log transform of mutate instructions"
+logSelectionDescription Uniqueness
+    = "Log uniqueness checking"
 
 -- |Command line option parser and help text
 options :: [OptDescr (Options -> Options)]
@@ -158,6 +162,9 @@ options =
  , Option [] ["no-verify-llvm"]
      (NoArg (\opts -> opts { optNoVerifyLLVM = True }))
      "disable verification of generated LLVM code"
+ , Option [] ["dump-opt-llvm"]
+     (NoArg (\opts -> opts { optDumpOptLLVM = True }))
+     "dump optimised LLVM code"
  ]
 
 

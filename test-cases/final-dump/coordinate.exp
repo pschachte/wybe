@@ -22,7 +22,7 @@ AFTER EVERYTHING:
   submodules      : coordinate.Coordinate
   procs           : 
 
-*main* > public {impure} (0 calls) 
+module top-level code > public {impure} (0 calls) 
 0: coordinate.<0>
 (*#globals##0:wybe.phantom, *?#globals##4:wybe.phantom):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 

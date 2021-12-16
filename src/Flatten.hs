@@ -73,6 +73,10 @@ flattenProcDecl (ProcDecl vis mods proto stmts pos) = do
                    procProtoResources proto
     (stmts',tmpCtr) <- flattenBody stmts (inParams `Set.union` inResources)
                        (modifierDetism mods)
+    let resfulMod = modifierResourceful mods
+    unless (resfulMod == Resourceless) 
+        $ modifierError (resourcefulName resfulMod) 
+            "procedure or function declaration" pos
     return (ProcDecl vis mods proto stmts' pos,tmpCtr)
 flattenProcDecl _ =
     shouldnt "flattening a non-proc item"
@@ -85,7 +89,7 @@ flattenBody :: [Placed Stmt] -> Set VarName -> Determinism
 flattenBody stmts varSet detism = do
     logMsg Flatten $ "Flattening body" ++ showBody 4 stmts
     logMsg Flatten $ "Flattening with parameters = " ++ show varSet
-    let varSet' = foldStmts const insertOutVar varSet stmts
+    let varSet' = foldStmts (const . const) insertOutVar varSet stmts
     logMsg Flatten $ "Flattening with all vars = " ++ show varSet'
     finalState <- execStateT (flattenStmts stmts detism)
                   $ initFlattenerState varSet'
@@ -94,9 +98,9 @@ flattenBody stmts varSet detism = do
 
 -- | Insert the expression var name if it's an output variable; otherwise leave
 -- the variable set alone.
-insertOutVar :: Set VarName -> Exp -> Set VarName
-insertOutVar varSet (Var name ParamOut _) = Set.insert name varSet
-insertOutVar varSet expr = varSet
+insertOutVar :: Set VarName -> Exp -> OptPos -> Set VarName
+insertOutVar varSet (Var name ParamOut _) _ = Set.insert name varSet
+insertOutVar varSet expr _ = varSet
 
 
 ----------------------------------------------------------------
@@ -503,10 +507,13 @@ flattenExp expr@(StringValue _ _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos
 flattenExp expr@(CharValue _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos
-flattenExp expr@(Var "_" ParamIn _) ty castFrom pos = do
+flattenExp expr@(Var "_" flow _) ty castFrom pos = do
+    when (flow == ParamInOut)
+        $ lift $ errmsg pos $ "A \"don't care\" value (_) cannot be used with " 
+                              ++ flowPrefix flow ++ " mode prefix"
     dummyName <- tempVar
-    return $ typeAndPlace (Var dummyName ParamOut Ordinary) AnyType castFrom pos
-flattenExp expr@(Var name dir _) ty castFrom pos = do
+    return $ typeAndPlace (Var dummyName ParamOut Ordinary) ty castFrom pos
+flattenExp expr@(Var name dir flowType) ty castFrom pos = do
     logFlatten $ "  Flattening arg " ++ show expr
     defd <- gets (Set.member name . defdVars)
     if dir == ParamIn && not defd
@@ -559,6 +566,10 @@ flattenExp (CondExp cond thn els) ty castFrom pos = do
         pos Det
     return $ maybePlace (Var resultName ParamIn Ordinary) pos
 flattenExp expr@(AnonProc mods _ pstmts) ty castFrom pos = do
+    let inliningMod = modifierInline mods
+    unless (inliningMod == MayInline)
+        $ lift $ modifierError (inliningName inliningMod)
+                    "type constraint" pos
     anonState <- gets anonProcState
     let newAnonState = pushAnonProcState anonState
     logFlatten $ "Flattening new anon proc with state " ++ show newAnonState
@@ -582,6 +593,13 @@ flattenExp (ForeignFn lang name flags exps) ty castFrom pos = do
 flattenExp (Typed exp AnyType _) ty castFrom pos = do
     flattenExp exp ty castFrom pos
 flattenExp (Typed exp ty castFrom) _ _ pos = do
+    case ty of
+        HigherOrderType mods _ ->
+            let inliningMod = modifierInline mods
+            in unless (inliningMod == MayInline)
+                    $ lift $ modifierError (inliningName inliningMod)
+                                "type constraint" pos
+        _ -> return ()
     flattenExp exp ty castFrom pos
 
 
@@ -703,6 +721,15 @@ inputOnlyExp (Var name ParamInOut flowType) = Var name ParamIn flowType
 inputOnlyExp (Var name ParamOut flowType) =
     shouldnt $ "Making input-only version of output variable " ++ name
 inputOnlyExp exp = exp
+
+
+-- | Add an error message to the compiler for the specified modifier in the 
+-- given context 
+modifierError :: String -> String -> OptPos -> Compiler ()
+modifierError modName context =
+    message Error 
+        ("Modifier '" ++ modName ++
+        "' cannot be used in a " ++ context)
 
 
 -- |Log a message, if we are logging flattening activity.

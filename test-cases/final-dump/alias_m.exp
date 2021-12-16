@@ -11,7 +11,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-*main* > public {impure} (0 calls) 
+module top-level code > public {impure} (0 calls) 
 0: alias_m.<0>
 (*#globals##0:wybe.phantom, *?#globals##7:wybe.phantom):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
@@ -107,7 +107,7 @@ entry:
 bar > public (0 calls) 
 0: alias_mbar.bar<0>[410bae77d3]
 bar(p1##0:position.position, ?p3##1:position.position, *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
-  GlobalFlows: {} 
+  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: [(p1##0,p3##1)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(5,(alias_mfoo.foo<0>,fromList [NonAliasedParamCond 0 []]))]

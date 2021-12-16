@@ -1,0 +1,14 @@
+type my_int is 32 bit signed {}
+type my_float is 32 bit float {}
+
+?a = "s":int
+?b = 1:string
+?c = "1.0":float
+?d = "1.0":string
+?e = 1:int
+?f = 1:count
+?g = 1.0:float
+
+?h = 1:my_int
+?i = 1.0:my_int
+?j = 1.0:my_float

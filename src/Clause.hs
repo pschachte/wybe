@@ -21,6 +21,7 @@ import           Options                           (LogSelection (Clause))
 import           Snippets
 import           Text.ParserCombinators.Parsec.Pos
 import           Util
+import           Resources
 
 
 ----------------------------------------------------------------
@@ -159,11 +160,14 @@ compileProc proc procID =
         callSiteCount <- gets nextCallSiteID
         mSpec <- lift $ getModule modSpec
         let pSpec = ProcSpec mSpec procName procID Set.empty
+        let gFlows = if any (isResourcefulHigherOrder . paramType) params
+                     then Nothing
+                     else Set.fold collectResourceFlows emptyGlobalFlows 
+                            $ procProtoResources proto
         return $ proc { procImpln = ProcDefPrim pSpec proto' compiled 
-                                        emptyGlobalFlows emptyProcAnalysis 
+                                        gFlows emptyProcAnalysis 
                                         Map.empty,
                         procCallSiteCount = callSiteCount}
-
 
 
 -- |Compile a proc body to LPVM form. By the time we get here, the form of the
@@ -398,6 +402,16 @@ compileParam startVars endVars procName param@(Param name ty flow ftype) =
 -- |A synthetic output parameter carrying the test result
 testOutParam :: Param
 testOutParam = Param outputStatusName boolType ParamOut Ordinary
+
+
+-- |Add flows associated with a given resource to a set of GlobalFlows
+collectResourceFlows :: ResourceFlowSpec -> GlobalFlows -> GlobalFlows
+collectResourceFlows (ResourceFlowSpec res flow) gFlows 
+    | isSpecialResource res
+    = gFlows
+    | otherwise 
+    = List.foldr (addGlobalFlow (GlobalResource res)) gFlows
+        $ [FlowIn | flowsIn flow] ++ [FlowOut | flowsOut flow]
 
 
 -- |Log a message, if we are logging clause generation.

@@ -8,7 +8,7 @@
 
 module Resources (resourceCheckMod, canonicaliseProcResources, 
                   canonicaliseResourceSpec, transformProcResources,
-                  specialResourcesSet) where
+                  specialResourcesSet, isSpecialResource) where
 
 import           AST
 import           Control.Monad
@@ -164,9 +164,7 @@ transformProcResources pd _ = do
 partitionSpecials :: (a -> ResourceFlowSpec) -> [a] 
                   -> ([a],[a])
 partitionSpecials toResFlowSpec = 
-    List.partition ((List.null . resourceMod 
-                     &&& (`Set.member` specialResourcesSet) . resourceName) 
-                    . resourceFlowRes . toResFlowSpec)
+    List.partition (isSpecialResource . resourceFlowRes . toResFlowSpec)
 
 isGlobalLoad :: Stmt -> Bool
 isGlobalLoad (ForeignCall "lpvm" "load" _ _) = True
@@ -561,6 +559,12 @@ resourceArgs pos rflow = do
 -- | The set of VarNames that correspond to sepcial resources
 specialResourcesSet :: Set VarName
 specialResourcesSet = keysSet specialResources
+
+
+-- | Test if ResourceSpec refers to a special resource
+isSpecialResource :: ResourceSpec -> Bool
+isSpecialResource (ResourceSpec [] nm) = nm `Set.member` specialResourcesSet
+isSpecialResource _                    = False
 
 
 ------------------------- General support code -------------------------

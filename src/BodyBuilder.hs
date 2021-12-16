@@ -767,6 +767,7 @@ updateGlobalValues prim = do
         PrimCall _ pspec _ -> do
             callGFlows <- procImplnGlobalFlows . procImpln 
                       <$> lift (getProcDef pspec)
+            logBuild $ "Call has global flows: " ++ showGlobalFlows callGFlows
             let filter info _ = not $ hasGlobalFlow callGFlows FlowOut info
             modify $ \s -> s {globalsLoaded=Map.filterWithKey filter loaded}
         _ -> nop

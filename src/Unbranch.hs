@@ -112,12 +112,13 @@ unbranchProc' loopinfo proc = do
     let params = procProtoParams $ procProto proc
     let proto = procProto proc
     let params = procProtoParams proto
+    let res = procProtoResources proto
     let params' = (selectDetism id (++ [testOutParam]) detism) params
     let alt = selectDetism [] [move boolFalse testOutExp] detism
     let stmts = selectDetism body (body++[move boolTrue testOutExp]) detism
     let proto' = proto {procProtoParams = params'}
     (body',tmpCtr',newProcs) <-
-        unbranchBody loopinfo tmpCtr params' detism stmts alt
+        unbranchBody loopinfo tmpCtr params' res detism stmts alt
     let proc' = proc { procProto = proto'
                      , procDetism = selectDetism detism Det detism
                      , procImpln = ProcDefSrc body'
@@ -130,11 +131,12 @@ unbranchProc' loopinfo proc = do
 
 -- |Eliminate loops and ensure that Conds only appear as the final
 --  statement of a body.
-unbranchBody :: Maybe LoopInfo -> Int -> [Param] -> Determinism
+unbranchBody :: Maybe LoopInfo -> Int -> [Param] 
+             -> Set ResourceFlowSpec -> Determinism
              -> [Placed Stmt] -> [Placed Stmt]
              -> Compiler ([Placed Stmt],Int,[ProcDef])
-unbranchBody loopinfo tmpCtr params detism body alt = do
-    let unbrancher = initUnbrancherState loopinfo tmpCtr params
+unbranchBody loopinfo tmpCtr params res detism body alt = do
+    let unbrancher = initUnbrancherState loopinfo tmpCtr params res
     let outparams =  brOutParams unbrancher
     let outvars = brOutArgs unbrancher
     let stmts = body
@@ -170,12 +172,15 @@ testInExp = boolVarGet outputStatusName
 type Unbrancher = StateT UnbrancherState Compiler
 
 data UnbrancherState = Unbrancher {
-    brLoopInfo   :: Maybe LoopInfo, -- ^If in a loop, break and continue stmts
+    brLoopInfo   :: Maybe LoopInfo, 
+                                  -- ^If in a loop, break and continue stmts
     brVars       :: VarDict,      -- ^Types of variables defined up to here
     brTempCtr    :: Int,          -- ^Number of next temp variable to make
     brOutParams  :: [Param],      -- ^Output arguments for generated procs
     brOutArgs    :: [Placed Exp], -- ^Output arguments for call to gen procs
-    brNewDefs    :: [ProcDef]     -- ^Generated unbranched auxilliary procedures
+    brNewDefs    :: [ProcDef],    -- ^Generated unbranched auxilliary procedures
+    brResources  :: Set ResourceFlowSpec
+                                  -- ^Resources to be added to new procedures
     }
 
 
@@ -185,8 +190,9 @@ data LoopInfo = LoopInfo {
     } deriving (Eq)
 
 
-initUnbrancherState :: Maybe LoopInfo -> Int -> [Param] -> UnbrancherState
-initUnbrancherState loopinfo tmpCtr params =
+initUnbrancherState :: Maybe LoopInfo -> Int -> [Param]     
+                    -> Set ResourceFlowSpec -> UnbrancherState
+initUnbrancherState loopinfo tmpCtr params res =
     let defined = inputParams params
         outParams = [Param nm ty ParamOut Ordinary
                     | Param nm ty fl _ <- params
@@ -194,7 +200,7 @@ initUnbrancherState loopinfo tmpCtr params =
         outArgs   = [Unplaced $ Typed (varSet nm) ty Nothing
                     | Param nm ty fl _ <- params
                     , flowsOut fl]
-    in Unbrancher loopinfo defined tmpCtr outParams outArgs []
+    in Unbrancher loopinfo defined tmpCtr outParams outArgs [] res
 
 
 -- | Add the specified variable to the symbol table
@@ -636,9 +642,9 @@ hoistClosure exp pos = return $ maybePlace exp pos
 
 
 mentionedVars :: [Placed Stmt] -> Set VarName
-mentionedVars pstmts = foldStmts const addInsOuts Set.empty pstmts
+mentionedVars pstmts = foldStmts (const . const) addInsOuts Set.empty pstmts
   where
-    addInsOuts vars e = vars `Set.union` expInputs e `Set.union` expOutputs e
+    addInsOuts vars e _ = vars `Set.union` expInputs e `Set.union` expOutputs e
 
 
 isUsedParam :: Set VarName -> Param -> Bool
@@ -779,7 +785,8 @@ newProcProto name inVars = do
                         (if v == globalsName then GlobalArg else Ordinary)
                     | (v,ty) <- Map.toList inVars]
     outParams <- gets brOutParams
-    return $ ProcProto name (inParams ++ outParams) Set.empty
+    res <- gets brResources
+    return $ ProcProto name (inParams ++ outParams) res
 
 
 -- |Return the second value when the detism is SemiDet, otherwise the second.

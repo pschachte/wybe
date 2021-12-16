@@ -23,7 +23,7 @@ AFTER EVERYTHING:
   submodules      : multi_specz_reverse.intlist
   procs           : 
 
-*main* > public {impure} (0 calls)
+module top-level code > public {impure} (0 calls)
 0: (argc##0:wybe.int, [?argc##0:wybe.int], argv##0:wybe.int, [?argv##0:wybe.int], exit_code##0:wybe.int, [?exit_code##0:wybe.int], io##0:wybe.phantom, ?io##7:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []

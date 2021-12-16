@@ -62,9 +62,7 @@ optimiseSccBottomUp (CyclicSCC procs) = do
     -- If any but first in SCC were marked for inlining, repeat to inline
     -- in earlier procs in the SCC.
     if or $ tail inlines
-    then do
-        inferGlobalFlows procs
-        mapM_ optimiseProcBottomUp procs
+    then mapM_ optimiseProcBottomUp procs
     else inferGlobalFlows procs
 
 
@@ -106,27 +104,34 @@ optimiseProcDefBU pspec def = do
 -- | Update the given ProcDef to the given GlobalFlows
 updateGlobalFlows :: GlobalFlows -> ProcDef -> ProcDef
 updateGlobalFlows _ ProcDef{procImpln=ProcDefSrc{}}
-    = shouldnt "updateGlobalFlows on uncompiled proc" 
-updateGlobalFlows gFlows pDef@ProcDef{procImpln=impln@ProcDefPrim{}} 
-    = pDef{procImpln=impln{procImplnGlobalFlows=gFlows}}
+    = shouldnt "updateGlobalFlows on uncompiled proc"
+updateGlobalFlows toSave
+        pDef@ProcDef{procImpln=impln@ProcDefPrim{procImplnGlobalFlows=gFlows}}
+    = pDef{procImpln=impln{procImplnGlobalFlows=updateGlobalFlows' toSave gFlows}}
+
+
+updateGlobalFlows' :: GlobalFlows -> GlobalFlows -> GlobalFlows
+updateGlobalFlows' toSave = 
+    maybe toSave (Just . Map.filter (not . Set.null) 
+                       . Map.mapWithKey (Set.filter . flip (hasGlobalFlow toSave)))
 
 
 -- | Infer all global flows across the given procedures, 
 -- updating their associated GlobalFlows
 inferGlobalFlows :: [ProcSpec] -> Compiler ()
 inferGlobalFlows procs = do
-    gFlows <- foldM collectGlobalFlows emptyGlobalFlows procs
+    gFlows <- foldM (collectGlobalFlows $ Set.fromList procs) emptyGlobalFlows procs
     mapM_ (updateProcDef $ updateGlobalFlows gFlows) procs
 
 
 -- | Add all Global Flows from a given procedure to a set of GlobalFlows
-collectGlobalFlows :: GlobalFlows -> ProcSpec -> Compiler GlobalFlows
-collectGlobalFlows gFlows pspec = do
+collectGlobalFlows :: Set ProcSpec -> GlobalFlows -> ProcSpec -> Compiler GlobalFlows
+collectGlobalFlows procs gFlows pspec = do
     body <- procImplnBody . procImpln <$> getProcDef pspec
-    foldBodyPrims 
-        (const collectPrimGlobalFlows) 
-        (return gFlows) 
-        (liftM2 globalFlowsUnion) 
+    foldBodyPrims
+        (const (collectPrimGlobalFlows procs))
+        (return gFlows)
+        (liftM2 globalFlowsUnion)
         body
 
 
@@ -135,21 +140,24 @@ collectGlobalFlows gFlows pspec = do
 -- * LPVM store instructions add a FlowOut for the respective Global
 -- * First order calls add their respective GlobalFlows into the set
 -- * Resourceful higher order calls set the GlobalFlows to the universal set
-collectPrimGlobalFlows :: Prim -> Compiler GlobalFlows -> Compiler GlobalFlows
-collectPrimGlobalFlows 
+collectPrimGlobalFlows :: Set ProcSpec -> Prim -> Compiler GlobalFlows -> Compiler GlobalFlows
+collectPrimGlobalFlows _
         (PrimForeign "lpvm" "load" _ [ArgGlobal info _, _, _, _]) gFlows
     = addGlobalFlow info FlowIn <$> gFlows
-collectPrimGlobalFlows 
+collectPrimGlobalFlows _
         (PrimForeign "lpvm" "store" _ [ArgGlobal info _, _, _, _]) gFlows
     = addGlobalFlow info FlowOut <$> gFlows
-collectPrimGlobalFlows (PrimCall _ pspec _) gFlows =
-    liftM2 globalFlowsUnion 
+collectPrimGlobalFlows procs (PrimCall _ pspec _) gFlows
+    | pspec `Set.member` procs
+    = gFlows 
+    | otherwise 
+    = liftM2 globalFlowsUnion
         (procImplnGlobalFlows . procImpln <$> getProcDef pspec) gFlows
-collectPrimGlobalFlows (PrimHigherCall _ fn _) gFlows
+collectPrimGlobalFlows _ (PrimHigherCall _ fn _) gFlows
     | isResourcefulHigherOrder $ argType fn = return Nothing
-collectPrimGlobalFlows _ gFlows = gFlows
+collectPrimGlobalFlows _ _ gFlows = gFlows
 
-    
+
 ----------------------------------------------------------------
 --                       Deciding what to inline
 ----------------------------------------------------------------
@@ -160,7 +168,7 @@ decideInlining :: ProcDef -> Compiler ProcDef
 decideInlining def
     |  NoFork == bodyFork body && procInlining def == MayInline = do
     logOptimise $ "Considering inline of " ++ procName def
-    benefit <- (4 +) <$> procCost proto -- add 4 for time saving
+    benefit <- (4 +) <$> procCost proto resFlows -- add 4 for time saving
     logOptimise $ "  benefit = " ++ show benefit
     cost <- bodyCost $ bodyPrims body
     logOptimise $ "  cost = " ++ show cost
@@ -169,17 +177,20 @@ decideInlining def
        || procCallCount def <= 1 && procVis def == Private
     then return $ def { procInlining = Inline }
     else return def
-    where proto = procImplnProto $ procImpln def
-          body = procImplnBody $ procImpln def
+    where impln = procImpln def
+          proto = procImplnProto impln
+          body = procImplnBody impln
+          resFlows = procProtoResources $ procProto def
 decideInlining def = return def
 
 
 -- |Estimate the "cost" of a call to a proc; ie, how much space the call will
 --  occupy.
-procCost :: PrimProto -> Compiler Int
-procCost proto = do
+procCost :: PrimProto -> Set ResourceFlowSpec -> Compiler Int
+procCost proto resFlows = do
     nonPhantoms <- filterM ((not <$>) . paramIsPhantom) $ primProtoParams proto
-    return $ 1 + length nonPhantoms
+    let globalCost = 2 * Set.size resFlows
+    return $ 1 + length nonPhantoms + globalCost
 
 
 -- |Estimate the "cost" of a proc body; ie, how much space the code occupies.
@@ -193,7 +204,7 @@ bodyCost pprims = sum <$> mapM (primCost . content) pprims
 primCost :: Prim -> Compiler Int
 primCost (PrimForeign "llvm" _ _ _) = return 1
 primCost (PrimCall _ _ args)        = (1+) . sum <$> mapM argCost args
-primCost (PrimHigherCall _ fn args) = (1+) . sum <$> mapM argCost (fn:args) 
+primCost (PrimHigherCall _ fn args) = (1+) . sum <$> mapM argCost (fn:args)
 primCost (PrimForeign _ _ _ args)   = (1+) . sum <$> mapM argCost args
 
 

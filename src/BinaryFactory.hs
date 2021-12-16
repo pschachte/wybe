@@ -76,6 +76,7 @@ instance Binary Impurity
 instance Binary Resourcefulness 
 instance Binary Item
 instance Binary TypeProto
+instance Binary TypeModifiers
 instance Binary TypeImpln
 -- * Manual Serialisation
 

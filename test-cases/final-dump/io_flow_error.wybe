@@ -1,0 +1,5 @@
+def woops use io {
+    !println("hello world!")
+}
+
+!woops

@@ -4,5 +4,5 @@ pub def {semipure} logmsg(x:float) { foreign c {impure} log_float(x) }
 pub def {semipure} logmsg(x:char) { foreign c {impure} log_char(x) }
 pub def {semipure} logmsg(x:string) { !logmsg(c_string(x)) }
 pub def {semipure} logmsg(x:c_string) { foreign c {impure} log_string(x) }
-pub def {semipure} logmsg(x:bool) { !logmsg(if {x:: c"true" | else:: c"false"}) }
+pub def {semipure} logmsg(x:bool) { !logmsg(if { x :: c"true" | else :: c"false" }) }
 pub def {semipure} lognl { !logmsg('\n') }
