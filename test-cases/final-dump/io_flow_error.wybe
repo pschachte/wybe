@@ -2,4 +2,8 @@ def woops use io {
     !println("hello world!")
 }
 
+use io in {
+    !println("shouldn't be allowed.")
+}
+
 !woops
