@@ -20,18 +20,25 @@ import Data.Set as Set
 import Data.Map as Map
 import Data.Maybe
 import GHC.TypeNats (Mod)
+import System.Posix.Internals (fdType)
 
 
 -- | Uniqueness error with specs of the variable
-data UniquenessError = ReuseUnique {
-    errVarName  :: VarName,       -- ^ Variable with a uniqueness error
-    errTypeSpec :: TypeSpec,      -- ^ Type of the variable
-    errPos      :: OptPos,        -- ^ Source position of the variable or expr
-    errFlowType :: ArgFlowType,   -- ^ The flow type (variable or resource)
-    errContext  :: Maybe ProcName -- ^ The proc involved if the reuse stems from
-                                  --   returning the variable/resource as a 
-                                  --   parameter of a proc
-} deriving Show
+data UniquenessError = UniquenessError {
+    errVarName  :: VarName,         -- ^ Variable with a uniqueness error
+    errTypeSpec :: TypeSpec,        -- ^ Type of the variable
+    errPos      :: OptPos,          -- ^ Source position of the variable or expr
+    errFlowType :: ArgFlowType,     -- ^ The flow type (variable or resource)
+    errKind  :: UniquenessErrorKind -- ^ The kind of error
+    }
+ deriving Show
+
+
+data UniquenessErrorKind =
+    ErrorReuse             -- ^ Reuse of variable without intervening assignment
+    | ErrorReturn ProcName -- ^ Variable returned after being used
+    | ErrorDetism Determinism -- ^ Variable assigned in non-deterministic contxt
+  deriving Show
 
 -- | Set used to check correctness of uniqueness of the program
 data UniquenessState = UniquenessState {
@@ -55,10 +62,10 @@ uniquenessCheckProc :: ProcDef -> Int -> Compiler ProcDef
 uniquenessCheckProc def _ = do
     let name = procName def
     let pos = procPos def
-    logUniqueness $ "Uniqueness checking proc: " ++ name
+    logMsg Uniqueness $ "Uniqueness checking proc: " ++ showProcName name
     let detism = procDetism def
     let params = procProtoParams $ procProto def
-    logUniqueness $ "with params: " ++ show params
+    logMsg Uniqueness $ "with params: " ++ show params
     -- XXX this only considers whether arguments are unique, ignoring direction
     -- of flow.  When users can declare their own unique types, this won't work.
     someUnique <- elem (Just True) <$>
@@ -71,7 +78,7 @@ uniquenessCheckProc def _ = do
     case procImpln def of
         ProcDefSrc body -> do
             state <- uniquenessCheckDef name pos detism body params
-            logUniqueness $ "After checking params: " ++ show state
+            logMsg Uniqueness $ "After checking params: " ++ show state
             mapM_ reportUniquenessError $ reverse $ uniquenessErrors state
             return def
         _ -> shouldnt $ "Uniqueness check of non-source proc def "
@@ -87,6 +94,13 @@ uniquenessCheckProc def _ = do
 type Uniqueness = StateT UniquenessState Compiler
 
 
+-- | Log a message, if we are logging uniqueness checker activity.
+logUniqueness :: String -> Uniqueness ()
+logUniqueness msg = do
+    detism <- gets uniquenessDetism
+    lift $ logMsg Uniqueness $ "(" ++ show detism ++ ") " ++ msg
+
+
 uniquenessCheckDef :: ProcName -> OptPos -> Determinism -> [Placed Stmt]
                    -> [Param] -> Compiler UniquenessState
 uniquenessCheckDef name pos detism body params =
@@ -98,32 +112,43 @@ uniquenessCheckDef name pos detism body params =
 -- | Note a variable use, reporting an error if it has already been used.
 variableUsed :: VarName -> OptPos -> TypeSpec -> ArgFlowType -> Uniqueness ()
 variableUsed name pos ty flowType = do
+    logUniqueness $ "Variable " ++ name ++ " used"
     alreadyUsed <- Map.member name <$> gets uniquenessUsedMap
-    when alreadyUsed $ uniquenessErr $ ReuseUnique name ty pos flowType Nothing
+    when alreadyUsed
+      $ uniquenessErr $ UniquenessError name ty pos flowType ErrorReuse
     isUnique <- lift $ typeIsUnique ty
     when isUnique
-     $ modify $ \st -> st {uniquenessUsedMap = Map.insert name ty
-                                              $ uniquenessUsedMap st }
+      $ modify $ \st -> st {uniquenessUsedMap = Map.insert name ty
+                                                $ uniquenessUsedMap st }
 
 
 -- | Note a variable use, reporting an error if it has already been used.
-variableAssigned :: VarName -> Uniqueness ()
-variableAssigned name =
+variableAssigned :: VarName -> OptPos -> TypeSpec -> ArgFlowType -> Uniqueness ()
+variableAssigned name pos ty fType = do
+    logUniqueness $ "Variable " ++ name ++ " assigned"
     modify $ \st -> st {uniquenessUsedMap = Map.delete name
                                             $ uniquenessUsedMap st }
+    detism <- gets uniquenessDetism
+    isUnique <- lift $ typeIsUnique ty
+    unless (detism `determinismLEQ` Det || not isUnique)
+      $ uniquenessErr $ UniquenessError name ty pos fType $ ErrorDetism detism
 
 
 -- | Report a uniqueness error
 uniquenessErr :: UniquenessError -> Uniqueness ()
 uniquenessErr err = do
+    logUniqueness $ "Recording error: " ++ show err
     modify $ \st -> st { uniquenessErrors = err : uniquenessErrors st }
 
 
+-- | Run a uniqueness checker in a context with the specified determinism.
 withDetism :: Uniqueness a -> Determinism -> Uniqueness a
-withDetism a detism = do
+withDetism checker detism = do
     oldDetism <- gets uniquenessDetism
+    logUniqueness $ "setting detism to " ++ show detism
     modify $ \state -> state { uniquenessDetism = detism }
-    result <- a
+    result <- checker
+    logUniqueness $ "setting detism to " ++ show oldDetism
     modify $ \state -> state { uniquenessDetism = oldDetism }
     return result
 
@@ -152,14 +177,17 @@ uniquenessCheckStmts = mapM_ $ placedApply uniquenessCheckStmt
 
 -- | Uniqueness check a single statement
 uniquenessCheckStmt :: Stmt -> OptPos -> Uniqueness ()
-uniquenessCheckStmt (ProcCall _ _ _ _ _ args) pos =
+uniquenessCheckStmt call@(ProcCall _ _ _ _ _ args) pos = do
+    logUniqueness $ "Uniqueness checking call " ++ show call
     mapM_ (defaultPlacedApply uniquenessCheckExp pos) args
-uniquenessCheckStmt (ForeignCall _ _ _ args) pos =
+uniquenessCheckStmt call@(ForeignCall _ _ _ args) pos = do
+    logUniqueness $ "Uniqueness checking foreign call " ++ show call
     mapM_ (defaultPlacedApply uniquenessCheckExp pos) args
-uniquenessCheckStmt (Cond tst thn els _ _) pos =
+uniquenessCheckStmt stmt@(Cond tst thn els _ _) pos = do
+    logUniqueness $ "Uniqueness checking conditional " ++ show stmt
     (defaultPlacedApply uniquenessCheckStmt pos tst `withDetism` SemiDet
-     >> uniquenessCheckStmts thn)
-    `joinUniqueness` uniquenessCheckStmts els
+       >> uniquenessCheckStmts thn)
+     `joinUniqueness` uniquenessCheckStmts els
 uniquenessCheckStmt (Case exp cases deflt) pos = do
     defaultPlacedApply uniquenessCheckExp pos exp
     uniquenessCheckCases uniquenessCheckStmts cases deflt
@@ -205,11 +233,11 @@ uniquenessCheckCases f ((pexp, body):rest) deflt =
 uniquenessCheckExp :: Exp -> OptPos -> Uniqueness ()
 uniquenessCheckExp (Typed (Var name ParamIn flowType) ty _) pos =
     variableUsed name pos ty flowType
-uniquenessCheckExp (Typed (Var name ParamOut _) ty _) _ =
-    variableAssigned name
+uniquenessCheckExp (Typed (Var name ParamOut flowType) ty _) pos =
+    variableAssigned name pos ty flowType
 uniquenessCheckExp (Typed (Var name ParamInOut flowType) ty _) pos = do
     variableUsed name pos ty flowType
-    variableAssigned name
+    variableAssigned name pos ty flowType
 uniquenessCheckExp (Typed exp _ _) pos = uniquenessCheckExp exp pos
 uniquenessCheckExp IntValue{} _ = return ()
 uniquenessCheckExp FloatValue{} _ = return ()
@@ -248,7 +276,7 @@ uniquenessCheckParam :: ProcName -> OptPos -> Param -> Uniqueness ()
 uniquenessCheckParam name pos (Param p ty flow flowType) = do
     used <- Map.member p <$> gets uniquenessUsedMap
     when  (flowsOut flow && used)
-     $ uniquenessErr $ ReuseUnique p ty pos flowType (Just name)
+     $ uniquenessErr $ UniquenessError p ty pos flowType (ErrorReturn name)
 
 
 -- | Check if a type is unique
@@ -262,19 +290,17 @@ typeIsUnique _ = return False
 
 -- | Report an error when a unique typed variable is being reused
 reportUniquenessError :: UniquenessError -> Compiler ()
-reportUniquenessError (ReuseUnique name ty pos flow Nothing) = do
+reportUniquenessError (UniquenessError name ty pos flow ErrorReuse) = do
     errmsg pos $ "Reuse of unique " ++ flowKind flow name ty
-reportUniquenessError (ReuseUnique name ty pos flow (Just proc)) = do
+reportUniquenessError (UniquenessError name ty pos flow (ErrorReturn proc)) = do
     errmsg pos $ "Unique " ++ flowKind flow name ty ++ " live at end of "
                  ++ showProcName proc
+reportUniquenessError (UniquenessError name ty pos flow (ErrorDetism detism)) = do
+    errmsg pos $ "Unique " ++ flowKind flow name ty ++ " assigned in a "
+                 ++ determinismName detism ++ " context"
 
 
 -- | Give a human-readable description of reused variable (may be a resource).
 flowKind :: ArgFlowType -> VarName -> TypeSpec -> String
 flowKind (Resource res) _ _ = "resource " ++ show res
 flowKind _ name ty          = "variable " ++ name ++ ":" ++ show ty
-
-
--- | Log a message, if we are logging type checker activity.
-logUniqueness :: String -> Compiler ()
-logUniqueness = logMsg Uniqueness
