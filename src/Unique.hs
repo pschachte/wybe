@@ -19,8 +19,6 @@ import Data.List as List
 import Data.Set as Set
 import Data.Map as Map
 import Data.Maybe
-import GHC.TypeNats (Mod)
-import System.Posix.Internals (fdType)
 
 
 -- | Uniqueness error with specs of the variable
