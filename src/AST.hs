@@ -337,15 +337,19 @@ content :: Placed t -> t
 content (Placed content _) = content
 content (Unplaced content) = content
 
+
 -- |Attach a source position to a data value, if one is available.
 maybePlace :: t -> OptPos -> Placed t
 maybePlace t (Just pos) = Placed t pos
 maybePlace t Nothing    = Unplaced t
 
--- |Attach a source position to a data value, if one is available.
-rePlace :: t -> Placed t -> Placed t
-rePlace t (Placed _ pos) = Placed t pos
-rePlace t (Unplaced _)   = Unplaced t
+
+-- |Replace the source position of the Placed value with the given position, if
+-- one is given; otherwise leave the position it already has.
+rePlace :: OptPos -> Placed t -> Placed t
+rePlace Nothing    t            = t
+rePlace (Just pos) (Placed t _) = Placed t pos
+rePlace (Just pos) (Unplaced t) = Placed t pos
 
 
 -- |Extract the place and payload of a Placed value
@@ -1435,8 +1439,9 @@ data ModuleInterface = ModuleInterface {
                                      -- ^The procs this module exports
     pubSubmods   :: Map Ident ModSpec, -- ^The submodules this module exports
     dependencies :: Set ModSpec,      -- ^The other modules that must be linked
-    typeModifiers :: TypeModifiers   -- ^The extra information of the type
-    }                               --  in by modules that depend on this one
+                                      --  in by modules that depend on this one
+    typeModifiers :: TypeModifiers    -- ^The extra information of the type
+    }
     deriving (Eq, Generic)
 
 emptyInterface :: ModuleInterface
@@ -2955,12 +2960,12 @@ isHalfUpdate _ _ = False
 varsInPrimArg :: PrimFlow -> PrimArg -> Set PrimVarName
 varsInPrimArg dir ArgVar{argVarName=var,argVarFlow=dir'} =
   if dir == dir' then Set.singleton var else Set.empty
-varsInPrimArg _ (ArgInt _ _)            = Set.empty
-varsInPrimArg _ (ArgFloat _ _)          = Set.empty
-varsInPrimArg _ (ArgString {})       = Set.empty
-varsInPrimArg _ (ArgChar _ _)           = Set.empty
-varsInPrimArg _ (ArgUnneeded _ _)       = Set.empty
-varsInPrimArg _ (ArgUndef _)            = Set.empty
+varsInPrimArg _ ArgInt{}      = Set.empty
+varsInPrimArg _ ArgFloat{}    = Set.empty
+varsInPrimArg _ ArgString{}   = Set.empty
+varsInPrimArg _ ArgChar{}     = Set.empty
+varsInPrimArg _ ArgUnneeded{} = Set.empty
+varsInPrimArg _ ArgUndef{}    = Set.empty
 
 
 ----------------------------------------------------------------

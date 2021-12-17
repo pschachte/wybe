@@ -17,7 +17,7 @@ module top-level code > public {impure} (0 calls)
     wybe.string.print_string<0>("Inner count (4): ":wybe.string, ~#io##0:wybe.phantom, ?tmp#6##0:wybe.phantom) #1 @io:nn:nn
     foreign c print_int(4:wybe.int, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
-    foreign llvm move(1:wybe.int, ?#count##1:wybe.int)
+    foreign llvm move(1:wybe.int, ?#count##1:wybe.int) @use_resource:nn:nn
     wybe.string.print_string<0>("Outer count (1): ":wybe.string, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) #2 @io:nn:nn
     foreign c print_int(1:wybe.int, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
@@ -43,7 +43,7 @@ use_test(count##0:wybe.int, ?count##5:wybe.int, io##0:wybe.phantom, ?io##4:wybe.
     wybe.string.print_string<0>("Inner count (4): ":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #8 @io:nn:nn
     foreign c print_int(~count##4:wybe.int, ~#io##1:wybe.phantom, ?tmp#9##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#9##0:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-    foreign llvm move(count##1:wybe.int, ?count##5:wybe.int)
+    foreign llvm move(count##1:wybe.int, ?count##5:wybe.int) @use_resource:nn:nn
     wybe.string.print_string<0>("Outer count (1): ":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #9 @io:nn:nn
     foreign c print_int(~count##1:wybe.int, ~#io##3:wybe.phantom, ?tmp#14##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#14##0:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn

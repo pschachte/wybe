@@ -242,8 +242,9 @@ transformStmt (UseResources allRes oldRes body) pos = do
     let ress = zip3 toSave tmpNames types
     let get v ty = varGet v `withType` ty
     let set v ty = varSet v `withType` ty
-    let saves = (\(r,t,ty) -> move (get r ty) (set t ty)) <$> ress
-    let restores = (\(r,t,ty) -> move (get t ty) (set r ty)) <$> ress
+    let saves = (\(r,t,ty) -> rePlace pos (move (get r ty) (set t ty))) <$> ress
+    let restores = (\(r,t,ty) -> rePlace pos (move (get t ty) (set r ty)))
+                   <$> ress
     let tmpVars = Map.fromList $ zip tmpNames types
     body' <- transformWithTmpVars (tmp + length toSave) tmpVars
            $ transformStmts body
