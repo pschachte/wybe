@@ -166,7 +166,7 @@ joinUniqueness first second = do
     let allErrs = uniquenessErrors secondState ++ uniquenessErrors firstState
                   ++ uniquenessErrors initial
     let joinUsed = uniquenessUsedMap firstState 
-                   `Map.intersection` uniquenessUsedMap secondState
+                   `Map.union` uniquenessUsedMap secondState
     put $ UniquenessState joinUsed allErrs $ uniquenessDetism initial
 
 
