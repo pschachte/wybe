@@ -7,7 +7,7 @@
 
 module Emit (emitObjectFile, emitBitcodeFile, emitAssemblyFile,
              makeArchive, makeExec,
-             logLLVMString
+             logLLVMString, extractLLVM
             )
 where
 
@@ -307,12 +307,12 @@ logLLVMString thisMod = do
 
 -- | Pull the LLVMAST representation of the module and generate the LLVM
 -- IR String for it, if it exists.
-extractLLVM :: AST.Module -> Compiler BS.ByteString
+extractLLVM :: AST.Module -> Compiler String
 extractLLVM thisMod = do
     noVerify <- gets $ optNoVerifyLLVM . options
     case modImplementation thisMod >>= modLLVM of
-        Just llmod -> liftIO $ codeemit noVerify llmod
-        Nothing    -> return $ B8.pack "No LLVM IR generated."
+        Just llmod -> liftIO $ B8.unpack <$> codeemit noVerify llmod
+        Nothing    -> return "No LLVM IR generated."
 
 -- | Log the LLVMIR strings for all the modules compiled, except the standard
 -- library.
@@ -324,4 +324,4 @@ logLLVMDump selector1 selector2 pass =
         liftIO $ putStrLn $ showModSpecs $ List.map modSpec noLibMod
         llvmir <- mapM extractLLVM noLibMod
         liftIO $ putStrLn $ replicate 70 '=' ++ "\nAFTER " ++ pass ++ ":\n\n" ++
-            intercalate ("\n" ++ replicate 50 '-' ++ "\n") (B8.unpack <$> llvmir)
+            intercalate ("\n" ++ replicate 50 '-' ++ "\n") llvmir
