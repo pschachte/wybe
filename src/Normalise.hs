@@ -345,7 +345,11 @@ completeType modspec (TypeDef params ctors ctorVis) = do
           tagBits tagLimit)
          infos
     let rep = typeRepresentation reps numConsts
-    extraItems <- implicitItems typespec constCtors nonConstCtors' rep
+    isUnique <- tmUniqueness . typeModifiers <$> getModuleInterface
+    extraItems <-
+        if isUnique
+            then return [] -- No implicit procs for unique types
+            else implicitItems typespec constCtors nonConstCtors' rep
     logNormalise $ "Representation of type " ++ showModSpec modspec
                    ++ " is " ++ show rep
     setTypeRep rep
