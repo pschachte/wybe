@@ -609,40 +609,40 @@ constructorItems ctorName typeSpec params fields size tag tagLimit pos =
              ++ [Param outputVariableName typeSpec ParamOut Ordinary])
             Set.empty)
         -- Code to allocate memory for the value
-        ([Unplaced $ ForeignCall "lpvm" "alloc" []
+        ([maybePlace (ForeignCall "lpvm" "alloc" []
           [Unplaced $ iVal size,
-           Unplaced $ varSet recName `withType` typeSpec]]
+           Unplaced $ varSet recName `withType` typeSpec]) pos]
          ++
          -- fill in the secondary tag, if necessary
          (if tag > tagLimit
-          then [Unplaced $ ForeignCall "lpvm" "mutate" []
+          then [maybePlace (ForeignCall "lpvm" "mutate" []
                  [Unplaced $ Typed (varGet recName) typeSpec Nothing,
                   Unplaced $ Typed (varSet recName) typeSpec Nothing,
                   Unplaced $ iVal 0,
                   Unplaced $ iVal 1,
                   Unplaced $ iVal size,
                   Unplaced $ iVal 0,
-                  Unplaced $ iVal tag]]
+                  Unplaced $ iVal tag]) pos]
           else [])
          ++
          -- Code to fill all the fields
          (List.map
           (\(var,_,ty,_,offset) ->
-               (Unplaced $ ForeignCall "lpvm" "mutate" []
+               (maybePlace (ForeignCall "lpvm" "mutate" []
                  [Unplaced $ Typed (varGet recName) typeSpec Nothing,
                   Unplaced $ Typed (varSet recName) typeSpec Nothing,
                   Unplaced $ iVal offset,
                   Unplaced $ iVal 1,
                   Unplaced $ iVal size,
                   Unplaced $ iVal 0,
-                  Unplaced $ Typed (Var var ParamIn flowType) ty Nothing]))
+                  Unplaced $ Typed (Var var ParamIn flowType) ty Nothing])) pos)
           fields)
          ++
          -- Finally, code to tag the reference
-         [Unplaced $ ForeignCall "llvm" "or" []
+         [maybePlace (ForeignCall "llvm" "or" []
           [Unplaced $ varGet recName,
            Unplaced $ iVal (if tag > tagLimit then tagLimit+1 else tag),
-           Unplaced $ varSet outputVariableName]])
+           Unplaced $ varSet outputVariableName]) pos])
         pos]
 
 
@@ -664,12 +664,12 @@ deconstructorItems ctorName typeSpec params numConsts numNonConsts tag tagBits
         ([tagCheck numConsts numNonConsts tag tagBits tagLimit (Just size) outputVariableName]
          -- Code to fetch all the fields
          ++ List.map (\(var,_,_,_,aligned) ->
-                              (Unplaced $ ForeignCall "lpvm" "access" []
+                              (maybePlace (ForeignCall "lpvm" "access" []
                                [Unplaced $ Var outputVariableName ParamIn flowType,
                                 Unplaced $ iVal (aligned - startOffset),
                                 Unplaced $ iVal size,
                                 Unplaced $ iVal startOffset,
-                                Unplaced $ Var var ParamOut flowType]))
+                                Unplaced $ Var var ParamOut flowType]) pos))
             fields)
         pos]
 
@@ -742,12 +742,12 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
         ([tagCheck numConsts numNonConsts tag tagBits tagLimit (Just size) recName]
          ++
         -- Code to access the selected field
-         [Unplaced $ ForeignCall "lpvm" "access" []
+         [maybePlace (ForeignCall "lpvm" "access" []
           [Unplaced $ varGet recName,
            Unplaced $ iVal (offset - startOffset),
            Unplaced $ iVal size,
            Unplaced $ iVal startOffset,
-           Unplaced $ varSet outputVariableName]])
+           Unplaced $ varSet outputVariableName]) pos])
         pos,
         -- The setter:
         ProcDecl vis (inlineModifier detism)
@@ -757,14 +757,14 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
         ([tagCheck numConsts numNonConsts tag tagBits tagLimit (Just size) recName]
          ++
         -- Code to mutate the selected field
-         [Unplaced $ ForeignCall "lpvm" "mutate" flags
+         [maybePlace (ForeignCall "lpvm" "mutate" flags
           [Unplaced $ Typed (Var recName ParamIn Ordinary) rectype Nothing,
            Unplaced $ Typed (Var recName ParamOut Ordinary) rectype Nothing,
            Unplaced $ iVal (offset - startOffset),
            Unplaced $ iVal 0,    -- May be changed to 1 by CTGC transform
            Unplaced $ iVal size,
            Unplaced $ iVal startOffset,
-           Unplaced $ varGet fieldName]])
+           Unplaced $ varGet fieldName]) pos])
         pos]
 
 
@@ -793,14 +793,15 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
          -- Shift each field into place and or with the result
          List.concatMap
           (\(var,_,ty,shift,sz) ->
-               [Unplaced $ ForeignCall "llvm" "shl" []
+               [maybePlace (ForeignCall "llvm" "shl" []
                  [Unplaced $ castFromTo ty typeSpec $ varGet var,
                   Unplaced $ iVal shift `castTo` typeSpec,
-                  Unplaced $ varSet tmpName1 `withType` typeSpec],
-                Unplaced $ ForeignCall "llvm" "or" []
+                  Unplaced $ varSet tmpName1 `withType` typeSpec]) pos,
+                maybePlace (ForeignCall "llvm" "or" []
                  [Unplaced $ varGet tmpName1 `withType` typeSpec,
                   Unplaced $ varGet outputVariableName `withType` typeSpec,
-                  Unplaced $ varSet outputVariableName `withType` typeSpec]])
+                  Unplaced $ varSet outputVariableName `withType` typeSpec])
+                pos])
           fields
          ++
          -- Or in the bit to ensure the value is greater than the greatest
@@ -808,15 +809,17 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
          (case nonConstBit of
             Nothing -> []
             Just shift ->
-              [Unplaced $ ForeignCall "llvm" "or" []
+              [maybePlace (ForeignCall "llvm" "or" []
                [Unplaced $ Typed (varGet outputVariableName) typeSpec Nothing,
                 Unplaced $ Typed (iVal (bit shift::Int)) typeSpec Nothing,
-                Unplaced $ Typed (varSet outputVariableName) typeSpec Nothing]])
+                Unplaced $ Typed (varSet outputVariableName) typeSpec Nothing])
+               pos])
          -- Or in the tag value
-          ++ [Unplaced $ ForeignCall "llvm" "or" []
+          ++ [maybePlace (ForeignCall "llvm" "or" []
                [Unplaced $ Typed (varGet outputVariableName) typeSpec Nothing,
                 Unplaced $ Typed (iVal tag) typeSpec Nothing,
-                Unplaced $ Typed (varSet outputVariableName) typeSpec Nothing]]
+                Unplaced $ Typed (varSet outputVariableName) typeSpec Nothing])
+              pos]
         ) pos]
 
 
@@ -841,17 +844,17 @@ unboxedDeconstructorItems vis ctorName recType numConsts numNonConsts tag
          ++ List.concatMap
             (\(var,_,fieldType,shift,sz) ->
                -- Code to access the selected field
-               [Unplaced $ ForeignCall "llvm" "lshr" []
+               [maybePlace (ForeignCall "llvm" "lshr" []
                  [Unplaced $ Typed (varGet outputVariableName) recType Nothing,
                   Unplaced $ Typed (iVal shift) recType Nothing,
-                  Unplaced $ Typed (varSet tmpName1) recType Nothing],
-                Unplaced $ ForeignCall "llvm" "and" []
+                  Unplaced $ Typed (varSet tmpName1) recType Nothing]) pos,
+                maybePlace (ForeignCall "llvm" "and" []
                  [Unplaced $ Typed (varGet tmpName1) recType Nothing,
                   Unplaced $ Typed (iVal $ (bit sz::Int) - 1) recType Nothing,
-                  Unplaced $ Typed (varSet tmpName2) recType Nothing],
-                Unplaced $ ForeignCall "lpvm" "cast" []
+                  Unplaced $ Typed (varSet tmpName2) recType Nothing]) pos,
+                maybePlace (ForeignCall "lpvm" "cast" []
                  [Unplaced $ Typed (varGet tmpName2) recType Nothing,
-                  Unplaced $ Typed (varSet var) fieldType Nothing]
+                  Unplaced $ Typed (varSet var) fieldType Nothing]) pos
                ])
             fields)
         pos]
@@ -876,18 +879,18 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag tagBits pos
         ([tagCheck numConsts numNonConsts tag tagBits (wordSizeBytes-1) Nothing recName]
          ++
         -- Code to access the selected field
-         [Unplaced $ ForeignCall "llvm" "lshr" []
+         [maybePlace (ForeignCall "llvm" "lshr" []
            [Unplaced $ Typed (varGet recName) recType Nothing,
             Unplaced $ Typed (iVal shift) recType Nothing,
-            Unplaced $ Typed (varSet recName) recType Nothing],
+            Unplaced $ Typed (varSet recName) recType Nothing]) pos,
           -- XXX Don't need to do this for the most significant field:
-          Unplaced $ ForeignCall "llvm" "and" []
+          maybePlace (ForeignCall "llvm" "and" []
            [Unplaced $ Typed (varGet recName) recType Nothing,
             Unplaced $ Typed (iVal fieldMask) recType Nothing,
-            Unplaced $ Typed (varSet fieldName) recType Nothing],
-          Unplaced $ ForeignCall "lpvm" "cast" []
+            Unplaced $ Typed (varSet fieldName) recType Nothing]) pos,
+          maybePlace (ForeignCall "lpvm" "cast" []
            [Unplaced $ Typed (varGet fieldName) recType Nothing,
-            Unplaced $ Typed (varSet outputVariableName) fieldType Nothing]
+            Unplaced $ Typed (varSet outputVariableName) fieldType Nothing]) pos
          ])
         pos,
         -- The setter:
@@ -899,18 +902,18 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag tagBits pos
          ++
         -- Code to mutate the selected field by masking out the current
         -- value, shifting the new value into place and bitwise or-ing it
-         [Unplaced $ ForeignCall "llvm" "and" []
+         [maybePlace (ForeignCall "llvm" "and" []
            [Unplaced $ Typed (varGet recName) recType Nothing,
             Unplaced $ Typed (iVal shiftedHoleMask) recType Nothing,
-            Unplaced $ Typed (varSet recName) recType Nothing],
-          Unplaced $ ForeignCall "llvm" "shl" []
+            Unplaced $ Typed (varSet recName) recType Nothing]) pos,
+          maybePlace (ForeignCall "llvm" "shl" []
            [Unplaced (castFromTo fieldType recType (varGet fieldName)),
             Unplaced $ iVal shift `castTo` recType,
-            Unplaced $ Typed (varSet tmpName1) recType Nothing],
-          Unplaced $ ForeignCall "llvm" "or" []
+            Unplaced $ Typed (varSet tmpName1) recType Nothing]) pos,
+          maybePlace (ForeignCall "llvm" "or" []
            [Unplaced $ Typed (varGet tmpName1) recType Nothing,
             Unplaced $ Typed (varGet recName) recType Nothing,
-            Unplaced $ Typed (varSet recName) recType Nothing]
+            Unplaced $ Typed (varSet recName) recType Nothing]) pos
          ])
         pos]
 

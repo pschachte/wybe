@@ -26,21 +26,21 @@ module top-level code > public {impure} (0 calls)
  AliasPairs: []
  InterestingCallProperties: []
  MultiSpeczDepInfo: [(7,(thistype.concat<0>,fromList [NonAliasedParamCond 0 []]))]
-    foreign lpvm alloc(16:wybe.int, ?tmp#11##0:thistype)
-    foreign lpvm mutate(~tmp#11##0:thistype, ?tmp#12##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int)
-    foreign lpvm mutate(~tmp#12##0:thistype, ?tmp#2##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:thistype)
-    foreign lpvm alloc(16:wybe.int, ?tmp#15##0:thistype)
-    foreign lpvm mutate(~tmp#15##0:thistype, ?tmp#16##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int)
-    foreign lpvm mutate(~tmp#16##0:thistype, ?tmp#1##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:thistype)
-    foreign lpvm alloc(16:wybe.int, ?tmp#19##0:thistype)
-    foreign lpvm mutate(~tmp#19##0:thistype, ?tmp#20##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int)
-    foreign lpvm mutate(~tmp#20##0:thistype, ?tmp#0##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:thistype)
-    foreign lpvm alloc(16:wybe.int, ?tmp#23##0:thistype)
-    foreign lpvm mutate(~tmp#23##0:thistype, ?tmp#24##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 200:wybe.int)
-    foreign lpvm mutate(~tmp#24##0:thistype, ?tmp#5##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:thistype)
-    foreign lpvm alloc(16:wybe.int, ?tmp#27##0:thistype)
-    foreign lpvm mutate(~tmp#27##0:thistype, ?tmp#28##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 100:wybe.int)
-    foreign lpvm mutate(~tmp#28##0:thistype, ?tmp#4##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#5##0:thistype)
+    foreign lpvm alloc(16:wybe.int, ?tmp#11##0:thistype) @thistype:nn:nn
+    foreign lpvm mutate(~tmp#11##0:thistype, ?tmp#12##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @thistype:nn:nn
+    foreign lpvm mutate(~tmp#12##0:thistype, ?tmp#2##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:thistype) @thistype:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#15##0:thistype) @thistype:nn:nn
+    foreign lpvm mutate(~tmp#15##0:thistype, ?tmp#16##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int) @thistype:nn:nn
+    foreign lpvm mutate(~tmp#16##0:thistype, ?tmp#1##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:thistype) @thistype:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#19##0:thistype) @thistype:nn:nn
+    foreign lpvm mutate(~tmp#19##0:thistype, ?tmp#20##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int) @thistype:nn:nn
+    foreign lpvm mutate(~tmp#20##0:thistype, ?tmp#0##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:thistype) @thistype:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#23##0:thistype) @thistype:nn:nn
+    foreign lpvm mutate(~tmp#23##0:thistype, ?tmp#24##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 200:wybe.int) @thistype:nn:nn
+    foreign lpvm mutate(~tmp#24##0:thistype, ?tmp#5##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:thistype) @thistype:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#27##0:thistype) @thistype:nn:nn
+    foreign lpvm mutate(~tmp#27##0:thistype, ?tmp#28##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 100:wybe.int) @thistype:nn:nn
+    foreign lpvm mutate(~tmp#28##0:thistype, ?tmp#4##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#5##0:thistype) @thistype:nn:nn
     thistype.concat<0>[410bae77d3](~tmp#0##0:thistype, ~tmp#4##0:thistype, ?tmp#8##0:thistype) #7 @thistype:nn:nn
     thistype.length<0>(~tmp#8##0:thistype, ?tmp#7##0:wybe.int) #8 @thistype:nn:nn
     foreign c print_int(~tmp#7##0:wybe.int, ~#io##0:wybe.phantom, ?tmp#31##0:wybe.phantom) @io:nn:nn
@@ -58,16 +58,16 @@ module top-level code > public {impure} (0 calls)
         foreign llvm icmp_eq(~#left##0:thistype, ~#right##0:thistype, ?#success##0:wybe.bool)
 
     1:
-        foreign lpvm access(#left##0:thistype, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#head##0:wybe.int)
-        foreign lpvm access(~#left##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#tail##0:thistype)
+        foreign lpvm access(#left##0:thistype, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#head##0:wybe.int) @thistype:nn:nn
+        foreign lpvm access(~#left##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#tail##0:thistype) @thistype:nn:nn
         foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
         case ~tmp#9##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
         1:
-            foreign lpvm access(#right##0:thistype, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#head##0:wybe.int)
-            foreign lpvm access(~#right##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#tail##0:thistype)
+            foreign lpvm access(#right##0:thistype, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#head##0:wybe.int) @thistype:nn:nn
+            foreign lpvm access(~#right##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#tail##0:thistype) @thistype:nn:nn
             foreign llvm icmp_eq(~#left#head##0:wybe.int, ~#right#head##0:wybe.int, ?tmp#4##0:wybe.bool) @int:nn:nn
             case ~tmp#4##0:wybe.bool of
             0:
@@ -92,12 +92,12 @@ concat(x##0:thistype, y##0:thistype, ?#result##0:thistype):
         foreign llvm move(~y##0:thistype, ?#result##0:thistype) @thistype:nn:nn
 
     1:
-        foreign lpvm access(x##0:thistype, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int)
-        foreign lpvm access(~x##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:thistype)
+        foreign lpvm access(x##0:thistype, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @thistype:nn:nn
+        foreign lpvm access(~x##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:thistype) @thistype:nn:nn
         thistype.concat<0>(~t##0:thistype, ~y##0:thistype, ?tmp#2##0:thistype) #1 @thistype:nn:nn
-        foreign lpvm alloc(16:wybe.int, ?tmp#8##0:thistype)
-        foreign lpvm mutate(~tmp#8##0:thistype, ?tmp#9##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h##0:wybe.int)
-        foreign lpvm mutate(~tmp#9##0:thistype, ?#result##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:thistype)
+        foreign lpvm alloc(16:wybe.int, ?tmp#8##0:thistype) @thistype:nn:nn
+        foreign lpvm mutate(~tmp#8##0:thistype, ?tmp#9##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h##0:wybe.int) @thistype:nn:nn
+        foreign lpvm mutate(~tmp#9##0:thistype, ?#result##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:thistype) @thistype:nn:nn
 
  [410bae77d3] [NonAliasedParam 0] :
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
@@ -106,9 +106,9 @@ concat(x##0:thistype, y##0:thistype, ?#result##0:thistype):
         foreign llvm move(~y##0:thistype, ?#result##0:thistype) @thistype:nn:nn
 
     1:
-        foreign lpvm access(x##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:thistype)
+        foreign lpvm access(x##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:thistype) @thistype:nn:nn
         thistype.concat<0>[410bae77d3](~t##0:thistype, ~y##0:thistype, ?tmp#2##0:thistype) #1 @thistype:nn:nn
-        foreign lpvm mutate(~x##0:thistype, ?#result##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:thistype)
+        foreign lpvm mutate(~x##0:thistype, ?#result##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:thistype) @thistype:nn:nn
 
 
 
@@ -117,9 +117,9 @@ cons > public {inline} (6 calls)
 cons(head##0:wybe.int, tail##0:thistype, ?#result##0:thistype):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?#rec##0:thistype)
-    foreign lpvm mutate(~#rec##0:thistype, ?#rec##1:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head##0:wybe.int)
-    foreign lpvm mutate(~#rec##1:thistype, ?#result##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail##0:thistype)
+    foreign lpvm alloc(16:wybe.int, ?#rec##0:thistype) @thistype:nn:nn
+    foreign lpvm mutate(~#rec##0:thistype, ?#rec##1:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head##0:wybe.int) @thistype:nn:nn
+    foreign lpvm mutate(~#rec##1:thistype, ?#result##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail##0:thistype) @thistype:nn:nn
 cons > public {inline} (18 calls)
 1: thistype.cons<1>
 cons(?head##0:wybe.int, ?tail##0:thistype, #result##0:thistype, ?#success##0:wybe.bool):
@@ -133,8 +133,8 @@ cons(?head##0:wybe.int, ?tail##0:thistype, #result##0:thistype, ?#success##0:wyb
         foreign llvm move(undef:thistype, ?tail##0:thistype)
 
     1:
-        foreign lpvm access(#result##0:thistype, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?head##0:wybe.int)
-        foreign lpvm access(~#result##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tail##0:thistype)
+        foreign lpvm access(#result##0:thistype, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?head##0:wybe.int) @thistype:nn:nn
+        foreign lpvm access(~#result##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tail##0:thistype) @thistype:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -151,7 +151,7 @@ head(#rec##0:thistype, ?#result##0:wybe.int, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:thistype, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
+        foreign lpvm access(~#rec##0:thistype, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @thistype:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 head > public {inline} (0 calls)
@@ -166,7 +166,7 @@ head(#rec##0:thistype, ?#rec##1:thistype, #field##0:wybe.int, ?#success##0:wybe.
         foreign llvm move(~#rec##0:thistype, ?#rec##1:thistype)
 
     1:
-        foreign lpvm mutate(~#rec##0:thistype, ?#rec##1:thistype, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
+        foreign lpvm mutate(~#rec##0:thistype, ?#rec##1:thistype, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @thistype:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -182,7 +182,7 @@ length(x##0:thistype, ?#result##0:wybe.int):
         foreign llvm move(0:wybe.int, ?#result##0:wybe.int) @thistype:nn:nn
 
     1:
-        foreign lpvm access(~x##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:thistype)
+        foreign lpvm access(~x##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:thistype) @thistype:nn:nn
         thistype.length<0>(~t##0:thistype, ?tmp#2##0:wybe.int) #1 @thistype:nn:nn
         foreign llvm add(~tmp#2##0:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @int:nn:nn
 
@@ -208,7 +208,7 @@ tail(#rec##0:thistype, ?#result##0:thistype, ?#success##0:wybe.bool):
         foreign llvm move(undef:thistype, ?#result##0:thistype)
 
     1:
-        foreign lpvm access(~#rec##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:thistype)
+        foreign lpvm access(~#rec##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:thistype) @thistype:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 tail > public {inline} (0 calls)
@@ -223,7 +223,7 @@ tail(#rec##0:thistype, ?#rec##1:thistype, #field##0:thistype, ?#success##0:wybe.
         foreign llvm move(~#rec##0:thistype, ?#rec##1:thistype)
 
     1:
-        foreign lpvm {noalias} mutate(~#rec##0:thistype, ?#rec##1:thistype, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:thistype)
+        foreign lpvm {noalias} mutate(~#rec##0:thistype, ?#rec##1:thistype, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:thistype) @thistype:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 

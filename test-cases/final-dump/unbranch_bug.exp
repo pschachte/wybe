@@ -43,7 +43,7 @@ gen#3(io##0:wybe.phantom, tmp#0##0:wybe.list(4), tmp#1##0:wybe.list(5), ?io##1:w
         foreign llvm move(~io##0:wybe.phantom, ?io##1:wybe.phantom)
 
     1:
-        foreign lpvm access(~tmp#0##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##1:wybe.list(5))
+        foreign lpvm access(~tmp#0##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##1:wybe.list(5)) @list:nn:nn
         unbranch_bug.gen#3<0>(~io##0:wybe.phantom, ~tmp#0##1:wybe.list(4), ~tmp#1##0:wybe.list(5), ?io##1:wybe.phantom) #1 @unbranch_bug:nn:nn
 
 

@@ -20,8 +20,8 @@ module top-level code > public {impure} (0 calls)
 (io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm shl('a':ctor_char2, 2:ctor_char2, ?tmp#3##0:ctor_char2)
-    foreign llvm or(~tmp#3##0:ctor_char2, 1024:ctor_char2, ?tmp#1##0:ctor_char2)
+    foreign llvm shl('a':ctor_char2, 2:ctor_char2, ?tmp#3##0:ctor_char2) @ctor_char2:1:22
+    foreign llvm or(~tmp#3##0:ctor_char2, 1024:ctor_char2, ?tmp#1##0:ctor_char2) @ctor_char2:1:22
     ctor_char2.foo<0>(~tmp#1##0:ctor_char2, ?tmp#0##0:wybe.char) #1 @ctor_char2:5:10
     foreign c putchar(~tmp#0##0:wybe.char, ~#io##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
@@ -51,7 +51,7 @@ module top-level code > public {impure} (0 calls)
                     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                 1:
-                    foreign lpvm access(~#left##0:ctor_char2, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#left#another_ctor#1##0:ctor_char2)
+                    foreign lpvm access(~#left##0:ctor_char2, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#left#another_ctor#1##0:ctor_char2) @ctor_char2:1:53
                     foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#26##0:wybe.bool)
                     case ~tmp#26##0:wybe.bool of
                     0:
@@ -65,14 +65,14 @@ module top-level code > public {impure} (0 calls)
                             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                         1:
-                            foreign lpvm access(~#right##0:ctor_char2, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#right#another_ctor#1##0:ctor_char2)
+                            foreign lpvm access(~#right##0:ctor_char2, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#right#another_ctor#1##0:ctor_char2) @ctor_char2:1:53
                             ctor_char2.=<0>(~#left#another_ctor#1##0:ctor_char2, ~#right#another_ctor#1##0:ctor_char2, ?#success##0:wybe.bool) #8
 
 
 
 
             1:
-                foreign lpvm access(~#left##0:ctor_char2, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?#left#other_ctor#1##0:ctor_char2)
+                foreign lpvm access(~#left##0:ctor_char2, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?#left#other_ctor#1##0:ctor_char2) @ctor_char2:1:37
                 foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#22##0:wybe.bool)
                 case ~tmp#22##0:wybe.bool of
                 0:
@@ -86,16 +86,16 @@ module top-level code > public {impure} (0 calls)
                         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                     1:
-                        foreign lpvm access(~#right##0:ctor_char2, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?#right#other_ctor#1##0:ctor_char2)
+                        foreign lpvm access(~#right##0:ctor_char2, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?#right#other_ctor#1##0:ctor_char2) @ctor_char2:1:37
                         ctor_char2.=<0>(~#left#other_ctor#1##0:ctor_char2, ~#right#other_ctor#1##0:ctor_char2, ?#success##0:wybe.bool) #5
 
 
 
 
         1:
-            foreign llvm lshr(~#left##0:ctor_char2, 2:ctor_char2, ?tmp#15##0:ctor_char2)
-            foreign llvm and(~tmp#15##0:ctor_char2, 255:ctor_char2, ?tmp#16##0:ctor_char2)
-            foreign lpvm cast(~tmp#16##0:ctor_char2, ?#left#c##0:wybe.char)
+            foreign llvm lshr(~#left##0:ctor_char2, 2:ctor_char2, ?tmp#15##0:ctor_char2) @ctor_char2:1:22
+            foreign llvm and(~tmp#15##0:ctor_char2, 255:ctor_char2, ?tmp#16##0:ctor_char2) @ctor_char2:1:22
+            foreign lpvm cast(~tmp#16##0:ctor_char2, ?#left#c##0:wybe.char) @ctor_char2:1:22
             foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#18##0:wybe.bool)
             case ~tmp#18##0:wybe.bool of
             0:
@@ -109,9 +109,9 @@ module top-level code > public {impure} (0 calls)
                     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                 1:
-                    foreign llvm lshr(~#right##0:ctor_char2, 2:ctor_char2, ?tmp#21##0:ctor_char2)
-                    foreign llvm and(~tmp#21##0:ctor_char2, 255:ctor_char2, ?tmp#22##0:ctor_char2)
-                    foreign lpvm cast(~tmp#22##0:ctor_char2, ?#right#c##0:wybe.char)
+                    foreign llvm lshr(~#right##0:ctor_char2, 2:ctor_char2, ?tmp#21##0:ctor_char2) @ctor_char2:1:22
+                    foreign llvm and(~tmp#21##0:ctor_char2, 255:ctor_char2, ?tmp#22##0:ctor_char2) @ctor_char2:1:22
+                    foreign lpvm cast(~tmp#22##0:ctor_char2, ?#right#c##0:wybe.char) @ctor_char2:1:22
                     foreign llvm icmp_eq(~#left#c##0:wybe.char, ~#right#c##0:wybe.char, ?#success##0:wybe.bool) @char:nn:nn
 
 
@@ -124,9 +124,9 @@ another_ctor > public {inline} (0 calls)
 another_ctor(another_ctor#1##0:ctor_char2, ?#result##0:ctor_char2):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_char2)
-    foreign lpvm mutate(~#rec##0:ctor_char2, ?#rec##1:ctor_char2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~another_ctor#1##0:ctor_char2)
-    foreign llvm or(~#rec##1:ctor_char2, 2:wybe.int, ?#result##0:ctor_char2)
+    foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_char2) @ctor_char2:1:53
+    foreign lpvm mutate(~#rec##0:ctor_char2, ?#rec##1:ctor_char2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~another_ctor#1##0:ctor_char2) @ctor_char2:1:53
+    foreign llvm or(~#rec##1:ctor_char2, 2:wybe.int, ?#result##0:ctor_char2) @ctor_char2:1:53
 another_ctor > public {inline} (5 calls)
 1: ctor_char2.another_ctor<1>
 another_ctor(?another_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:wybe.bool):
@@ -147,7 +147,7 @@ another_ctor(?another_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:
             foreign llvm move(undef:ctor_char2, ?another_ctor#1##0:ctor_char2)
 
         1:
-            foreign lpvm access(~#result##0:ctor_char2, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?another_ctor#1##0:ctor_char2)
+            foreign lpvm access(~#result##0:ctor_char2, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?another_ctor#1##0:ctor_char2) @ctor_char2:1:53
             foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -173,9 +173,9 @@ c(#rec##0:ctor_char2, ?#result##0:wybe.char, ?#success##0:wybe.bool):
             foreign llvm move(undef:wybe.char, ?#result##0:wybe.char)
 
         1:
-            foreign llvm lshr(~#rec##0:ctor_char2, 2:ctor_char2, ?#rec##1:ctor_char2)
-            foreign llvm and(~#rec##1:ctor_char2, 255:ctor_char2, ?#field##0:ctor_char2)
-            foreign lpvm cast(~#field##0:ctor_char2, ?#result##0:wybe.char)
+            foreign llvm lshr(~#rec##0:ctor_char2, 2:ctor_char2, ?#rec##1:ctor_char2) @ctor_char2:1:22
+            foreign llvm and(~#rec##1:ctor_char2, 255:ctor_char2, ?#field##0:ctor_char2) @ctor_char2:1:22
+            foreign lpvm cast(~#field##0:ctor_char2, ?#result##0:wybe.char) @ctor_char2:1:22
             foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -199,9 +199,9 @@ c(#rec##0:ctor_char2, ?#rec##2:ctor_char2, #field##0:wybe.char, ?#success##0:wyb
             foreign llvm move(~#rec##0:ctor_char2, ?#rec##2:ctor_char2)
 
         1:
-            foreign llvm and(~#rec##0:ctor_char2, -1021:ctor_char2, ?#rec##1:ctor_char2)
-            foreign llvm shl(~#field##0:ctor_char2, 2:ctor_char2, ?#temp##0:ctor_char2)
-            foreign llvm or(~#rec##1:ctor_char2, ~#temp##0:ctor_char2, ?#rec##2:ctor_char2)
+            foreign llvm and(~#rec##0:ctor_char2, -1021:ctor_char2, ?#rec##1:ctor_char2) @ctor_char2:1:22
+            foreign llvm shl(~#field##0:ctor_char2, 2:ctor_char2, ?#temp##0:ctor_char2) @ctor_char2:1:22
+            foreign llvm or(~#rec##1:ctor_char2, ~#temp##0:ctor_char2, ?#rec##2:ctor_char2) @ctor_char2:1:22
             foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -220,8 +220,8 @@ ctor > {inline} (1 calls)
 ctor(c##0:wybe.char, ?#result##3:ctor_char2):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign llvm shl(~c##0:ctor_char2, 2:ctor_char2, ?#temp##0:ctor_char2)
-    foreign llvm or(~#temp##0:ctor_char2, 1024:ctor_char2, ?#result##3:ctor_char2)
+    foreign llvm shl(~c##0:ctor_char2, 2:ctor_char2, ?#temp##0:ctor_char2) @ctor_char2:1:22
+    foreign llvm or(~#temp##0:ctor_char2, 1024:ctor_char2, ?#result##3:ctor_char2) @ctor_char2:1:22
 ctor > {inline} (15 calls)
 1: ctor_char2.ctor<1>
 ctor(?c##0:wybe.char, #result##0:ctor_char2, ?#success##0:wybe.bool):
@@ -242,9 +242,9 @@ ctor(?c##0:wybe.char, #result##0:ctor_char2, ?#success##0:wybe.bool):
             foreign llvm move(undef:wybe.char, ?c##0:wybe.char)
 
         1:
-            foreign llvm lshr(~#result##0:ctor_char2, 2:ctor_char2, ?#temp##0:ctor_char2)
-            foreign llvm and(~#temp##0:ctor_char2, 255:ctor_char2, ?#temp2##0:ctor_char2)
-            foreign lpvm cast(~#temp2##0:ctor_char2, ?c##0:wybe.char)
+            foreign llvm lshr(~#result##0:ctor_char2, 2:ctor_char2, ?#temp##0:ctor_char2) @ctor_char2:1:22
+            foreign llvm and(~#temp##0:ctor_char2, 255:ctor_char2, ?#temp2##0:ctor_char2) @ctor_char2:1:22
+            foreign lpvm cast(~#temp2##0:ctor_char2, ?c##0:wybe.char) @ctor_char2:1:22
             foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -268,9 +268,9 @@ foo(this##0:ctor_char2, ?#result##0:wybe.char):
             foreign llvm move('0':wybe.char, ?#result##0:wybe.char) @ctor_char2:3:1
 
         1:
-            foreign llvm lshr(~this##0:ctor_char2, 2:ctor_char2, ?tmp#6##0:ctor_char2)
-            foreign llvm and(~tmp#6##0:ctor_char2, 255:ctor_char2, ?tmp#7##0:ctor_char2)
-            foreign lpvm cast(~tmp#7##0:ctor_char2, ?#result##0:wybe.char)
+            foreign llvm lshr(~this##0:ctor_char2, 2:ctor_char2, ?tmp#6##0:ctor_char2) @ctor_char2:1:22
+            foreign llvm and(~tmp#6##0:ctor_char2, 255:ctor_char2, ?tmp#7##0:ctor_char2) @ctor_char2:1:22
+            foreign lpvm cast(~tmp#7##0:ctor_char2, ?#result##0:wybe.char) @ctor_char2:1:22
 
 
 
@@ -280,9 +280,9 @@ other_ctor > public {inline} (0 calls)
 other_ctor(other_ctor#1##0:ctor_char2, ?#result##0:ctor_char2):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_char2)
-    foreign lpvm mutate(~#rec##0:ctor_char2, ?#rec##1:ctor_char2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~other_ctor#1##0:ctor_char2)
-    foreign llvm or(~#rec##1:ctor_char2, 1:wybe.int, ?#result##0:ctor_char2)
+    foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_char2) @ctor_char2:1:37
+    foreign lpvm mutate(~#rec##0:ctor_char2, ?#rec##1:ctor_char2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~other_ctor#1##0:ctor_char2) @ctor_char2:1:37
+    foreign llvm or(~#rec##1:ctor_char2, 1:wybe.int, ?#result##0:ctor_char2) @ctor_char2:1:37
 other_ctor > public {inline} (7 calls)
 1: ctor_char2.other_ctor<1>
 other_ctor(?other_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:wybe.bool):
@@ -303,7 +303,7 @@ other_ctor(?other_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:wybe
             foreign llvm move(undef:ctor_char2, ?other_ctor#1##0:ctor_char2)
 
         1:
-            foreign lpvm access(~#result##0:ctor_char2, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?other_ctor#1##0:ctor_char2)
+            foreign lpvm access(~#result##0:ctor_char2, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?other_ctor#1##0:ctor_char2) @ctor_char2:1:37
             foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 

@@ -82,9 +82,9 @@ print_t(x##0:multictr2.t, io##0:wybe.phantom, ?io##8:wybe.phantom):
                                     foreign c putchar('\n':wybe.char, ~#io##0:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
 
                                 1:
-                                    foreign lpvm access(x##0:multictr2.t, -7:wybe.int, 24:wybe.int, 7:wybe.int, ?a##7:wybe.int)
-                                    foreign lpvm access(x##0:multictr2.t, 1:wybe.int, 24:wybe.int, 7:wybe.int, ?b##0:wybe.int)
-                                    foreign lpvm access(~x##0:multictr2.t, 9:wybe.int, 24:wybe.int, 7:wybe.int, ?c##0:wybe.float)
+                                    foreign lpvm access(x##0:multictr2.t, -7:wybe.int, 24:wybe.int, 7:wybe.int, ?a##7:wybe.int) @multictr2:10:8
+                                    foreign lpvm access(x##0:multictr2.t, 1:wybe.int, 24:wybe.int, 7:wybe.int, ?b##0:wybe.int) @multictr2:10:8
+                                    foreign lpvm access(~x##0:multictr2.t, 9:wybe.int, 24:wybe.int, 7:wybe.int, ?c##0:wybe.float) @multictr2:10:8
                                     wybe.string.print_string<0>("c08(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #45 @io:nn:nn
                                     foreign c print_int(~a##7:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
                                     wybe.string.print_string<0>(", ":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #46 @io:nn:nn
@@ -96,7 +96,7 @@ print_t(x##0:multictr2.t, io##0:wybe.phantom, ?io##8:wybe.phantom):
 
 
                             1:
-                                foreign lpvm access(~x##0:multictr2.t, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?a##6:wybe.int)
+                                foreign lpvm access(~x##0:multictr2.t, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?a##6:wybe.int) @multictr2:9:8
                                 wybe.string.print_string<0>("c07(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #49 @io:nn:nn
                                 foreign c print_int(~a##6:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
                                 wybe.string.print_string<0>(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #50 @io:nn:nn
@@ -104,7 +104,7 @@ print_t(x##0:multictr2.t, io##0:wybe.phantom, ?io##8:wybe.phantom):
 
 
                         1:
-                            foreign lpvm access(~x##0:multictr2.t, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?a##5:wybe.int)
+                            foreign lpvm access(~x##0:multictr2.t, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?a##5:wybe.int) @multictr2:8:8
                             wybe.string.print_string<0>("c06(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #51 @io:nn:nn
                             foreign c print_int(~a##5:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
                             wybe.string.print_string<0>(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #52 @io:nn:nn
@@ -112,7 +112,7 @@ print_t(x##0:multictr2.t, io##0:wybe.phantom, ?io##8:wybe.phantom):
 
 
                     1:
-                        foreign lpvm access(~x##0:multictr2.t, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?a##4:wybe.int)
+                        foreign lpvm access(~x##0:multictr2.t, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?a##4:wybe.int) @multictr2:7:8
                         wybe.string.print_string<0>("c05(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #53 @io:nn:nn
                         foreign c print_int(~a##4:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
                         wybe.string.print_string<0>(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #54 @io:nn:nn
@@ -120,7 +120,7 @@ print_t(x##0:multictr2.t, io##0:wybe.phantom, ?io##8:wybe.phantom):
 
 
                 1:
-                    foreign lpvm access(~x##0:multictr2.t, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?a##3:wybe.int)
+                    foreign lpvm access(~x##0:multictr2.t, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?a##3:wybe.int) @multictr2:6:8
                     wybe.string.print_string<0>("c04(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #55 @io:nn:nn
                     foreign c print_int(~a##3:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
                     wybe.string.print_string<0>(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #56 @io:nn:nn
@@ -128,7 +128,7 @@ print_t(x##0:multictr2.t, io##0:wybe.phantom, ?io##8:wybe.phantom):
 
 
             1:
-                foreign lpvm access(~x##0:multictr2.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?a##2:wybe.int)
+                foreign lpvm access(~x##0:multictr2.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?a##2:wybe.int) @multictr2:5:8
                 wybe.string.print_string<0>("c03(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #57 @io:nn:nn
                 foreign c print_int(~a##2:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
                 wybe.string.print_string<0>(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #58 @io:nn:nn
@@ -136,7 +136,7 @@ print_t(x##0:multictr2.t, io##0:wybe.phantom, ?io##8:wybe.phantom):
 
 
         1:
-            foreign lpvm access(~x##0:multictr2.t, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?a##1:wybe.int)
+            foreign lpvm access(~x##0:multictr2.t, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?a##1:wybe.int) @multictr2:4:8
             wybe.string.print_string<0>("c03(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #59 @io:nn:nn
             foreign c print_int(~a##1:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
             wybe.string.print_string<0>(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #60 @io:nn:nn
@@ -144,7 +144,7 @@ print_t(x##0:multictr2.t, io##0:wybe.phantom, ?io##8:wybe.phantom):
 
 
     1:
-        foreign lpvm access(~x##0:multictr2.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int)
+        foreign lpvm access(~x##0:multictr2.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int) @multictr2:3:8
         wybe.string.print_string<0>("c01(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #61 @io:nn:nn
         foreign c print_int(~a##0:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
         wybe.string.print_string<0>(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #62 @io:nn:nn
@@ -487,9 +487,9 @@ if.else7:
                                     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                                 1:
-                                    foreign lpvm access(#left##0:multictr2.t, -7:wybe.int, 24:wybe.int, 7:wybe.int, ?#left#f08_a##0:wybe.int)
-                                    foreign lpvm access(#left##0:multictr2.t, 1:wybe.int, 24:wybe.int, 7:wybe.int, ?#left#f08_b##0:wybe.int)
-                                    foreign lpvm access(~#left##0:multictr2.t, 9:wybe.int, 24:wybe.int, 7:wybe.int, ?#left#f08_c##0:wybe.float)
+                                    foreign lpvm access(#left##0:multictr2.t, -7:wybe.int, 24:wybe.int, 7:wybe.int, ?#left#f08_a##0:wybe.int) @multictr2:10:8
+                                    foreign lpvm access(#left##0:multictr2.t, 1:wybe.int, 24:wybe.int, 7:wybe.int, ?#left#f08_b##0:wybe.int) @multictr2:10:8
+                                    foreign lpvm access(~#left##0:multictr2.t, 9:wybe.int, 24:wybe.int, 7:wybe.int, ?#left#f08_c##0:wybe.float) @multictr2:10:8
                                     foreign llvm and(#right##0:wybe.int, 7:wybe.int, ?tmp#52##0:wybe.int)
                                     foreign llvm icmp_eq(~tmp#52##0:wybe.int, 7:wybe.int, ?tmp#53##0:wybe.bool)
                                     case ~tmp#53##0:wybe.bool of
@@ -497,9 +497,9 @@ if.else7:
                                         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                                     1:
-                                        foreign lpvm access(#right##0:multictr2.t, -7:wybe.int, 24:wybe.int, 7:wybe.int, ?#right#f08_a##0:wybe.int)
-                                        foreign lpvm access(#right##0:multictr2.t, 1:wybe.int, 24:wybe.int, 7:wybe.int, ?#right#f08_b##0:wybe.int)
-                                        foreign lpvm access(~#right##0:multictr2.t, 9:wybe.int, 24:wybe.int, 7:wybe.int, ?#right#f08_c##0:wybe.float)
+                                        foreign lpvm access(#right##0:multictr2.t, -7:wybe.int, 24:wybe.int, 7:wybe.int, ?#right#f08_a##0:wybe.int) @multictr2:10:8
+                                        foreign lpvm access(#right##0:multictr2.t, 1:wybe.int, 24:wybe.int, 7:wybe.int, ?#right#f08_b##0:wybe.int) @multictr2:10:8
+                                        foreign lpvm access(~#right##0:multictr2.t, 9:wybe.int, 24:wybe.int, 7:wybe.int, ?#right#f08_c##0:wybe.float) @multictr2:10:8
                                         foreign llvm icmp_eq(~#left#f08_a##0:wybe.int, ~#right#f08_a##0:wybe.int, ?tmp#16##0:wybe.bool) @int:nn:nn
                                         case ~tmp#16##0:wybe.bool of
                                         0:
@@ -519,7 +519,7 @@ if.else7:
 
 
                             1:
-                                foreign lpvm access(~#left##0:multictr2.t, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?#left#f07##0:wybe.int)
+                                foreign lpvm access(~#left##0:multictr2.t, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?#left#f07##0:wybe.int) @multictr2:9:8
                                 foreign llvm and(#right##0:wybe.int, 7:wybe.int, ?tmp#49##0:wybe.int)
                                 foreign llvm icmp_eq(~tmp#49##0:wybe.int, 6:wybe.int, ?tmp#50##0:wybe.bool)
                                 case ~tmp#50##0:wybe.bool of
@@ -527,13 +527,13 @@ if.else7:
                                     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                                 1:
-                                    foreign lpvm access(~#right##0:multictr2.t, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?#right#f07##0:wybe.int)
+                                    foreign lpvm access(~#right##0:multictr2.t, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?#right#f07##0:wybe.int) @multictr2:9:8
                                     foreign llvm icmp_eq(~#left#f07##0:wybe.int, ~#right#f07##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
 
                         1:
-                            foreign lpvm access(~#left##0:multictr2.t, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?#left#f06##0:wybe.int)
+                            foreign lpvm access(~#left##0:multictr2.t, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?#left#f06##0:wybe.int) @multictr2:8:8
                             foreign llvm and(#right##0:wybe.int, 7:wybe.int, ?tmp#46##0:wybe.int)
                             foreign llvm icmp_eq(~tmp#46##0:wybe.int, 5:wybe.int, ?tmp#47##0:wybe.bool)
                             case ~tmp#47##0:wybe.bool of
@@ -541,13 +541,13 @@ if.else7:
                                 foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                             1:
-                                foreign lpvm access(~#right##0:multictr2.t, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?#right#f06##0:wybe.int)
+                                foreign lpvm access(~#right##0:multictr2.t, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?#right#f06##0:wybe.int) @multictr2:8:8
                                 foreign llvm icmp_eq(~#left#f06##0:wybe.int, ~#right#f06##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
 
                     1:
-                        foreign lpvm access(~#left##0:multictr2.t, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?#left#f05##0:wybe.int)
+                        foreign lpvm access(~#left##0:multictr2.t, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?#left#f05##0:wybe.int) @multictr2:7:8
                         foreign llvm and(#right##0:wybe.int, 7:wybe.int, ?tmp#43##0:wybe.int)
                         foreign llvm icmp_eq(~tmp#43##0:wybe.int, 4:wybe.int, ?tmp#44##0:wybe.bool)
                         case ~tmp#44##0:wybe.bool of
@@ -555,13 +555,13 @@ if.else7:
                             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                         1:
-                            foreign lpvm access(~#right##0:multictr2.t, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?#right#f05##0:wybe.int)
+                            foreign lpvm access(~#right##0:multictr2.t, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?#right#f05##0:wybe.int) @multictr2:7:8
                             foreign llvm icmp_eq(~#left#f05##0:wybe.int, ~#right#f05##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
 
                 1:
-                    foreign lpvm access(~#left##0:multictr2.t, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?#left#f04##0:wybe.int)
+                    foreign lpvm access(~#left##0:multictr2.t, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?#left#f04##0:wybe.int) @multictr2:6:8
                     foreign llvm and(#right##0:wybe.int, 7:wybe.int, ?tmp#40##0:wybe.int)
                     foreign llvm icmp_eq(~tmp#40##0:wybe.int, 3:wybe.int, ?tmp#41##0:wybe.bool)
                     case ~tmp#41##0:wybe.bool of
@@ -569,13 +569,13 @@ if.else7:
                         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                     1:
-                        foreign lpvm access(~#right##0:multictr2.t, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?#right#f04##0:wybe.int)
+                        foreign lpvm access(~#right##0:multictr2.t, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?#right#f04##0:wybe.int) @multictr2:6:8
                         foreign llvm icmp_eq(~#left#f04##0:wybe.int, ~#right#f04##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
 
             1:
-                foreign lpvm access(~#left##0:multictr2.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#left#f03##0:wybe.int)
+                foreign lpvm access(~#left##0:multictr2.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#left#f03##0:wybe.int) @multictr2:5:8
                 foreign llvm and(#right##0:wybe.int, 7:wybe.int, ?tmp#37##0:wybe.int)
                 foreign llvm icmp_eq(~tmp#37##0:wybe.int, 2:wybe.int, ?tmp#38##0:wybe.bool)
                 case ~tmp#38##0:wybe.bool of
@@ -583,13 +583,13 @@ if.else7:
                     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                 1:
-                    foreign lpvm access(~#right##0:multictr2.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#right#f03##0:wybe.int)
+                    foreign lpvm access(~#right##0:multictr2.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#right#f03##0:wybe.int) @multictr2:5:8
                     foreign llvm icmp_eq(~#left#f03##0:wybe.int, ~#right#f03##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
 
         1:
-            foreign lpvm access(~#left##0:multictr2.t, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?#left#f02##0:wybe.int)
+            foreign lpvm access(~#left##0:multictr2.t, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?#left#f02##0:wybe.int) @multictr2:4:8
             foreign llvm and(#right##0:wybe.int, 7:wybe.int, ?tmp#34##0:wybe.int)
             foreign llvm icmp_eq(~tmp#34##0:wybe.int, 1:wybe.int, ?tmp#35##0:wybe.bool)
             case ~tmp#35##0:wybe.bool of
@@ -597,13 +597,13 @@ if.else7:
                 foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
             1:
-                foreign lpvm access(~#right##0:multictr2.t, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?#right#f02##0:wybe.int)
+                foreign lpvm access(~#right##0:multictr2.t, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?#right#f02##0:wybe.int) @multictr2:4:8
                 foreign llvm icmp_eq(~#left#f02##0:wybe.int, ~#right#f02##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
 
     1:
-        foreign lpvm access(~#left##0:multictr2.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#left#f01##0:wybe.int)
+        foreign lpvm access(~#left##0:multictr2.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#left#f01##0:wybe.int) @multictr2:3:8
         foreign llvm and(#right##0:wybe.int, 7:wybe.int, ?tmp#31##0:wybe.int)
         foreign llvm icmp_eq(~tmp#31##0:wybe.int, 0:wybe.int, ?tmp#32##0:wybe.bool)
         case ~tmp#32##0:wybe.bool of
@@ -611,7 +611,7 @@ if.else7:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
         1:
-            foreign lpvm access(~#right##0:multictr2.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#right#f01##0:wybe.int)
+            foreign lpvm access(~#right##0:multictr2.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#right#f01##0:wybe.int) @multictr2:3:8
             foreign llvm icmp_eq(~#left#f01##0:wybe.int, ~#right#f01##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
@@ -622,8 +622,8 @@ c01 > public {inline} (0 calls)
 c01(f01##0:wybe.int, ?#result##0:multictr2.t):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t)
-    foreign lpvm mutate(~#rec##0:multictr2.t, ?#result##0:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f01##0:wybe.int)
+    foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:3:8
+    foreign lpvm mutate(~#rec##0:multictr2.t, ?#result##0:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f01##0:wybe.int) @multictr2:3:8
 c01 > public {inline} (24 calls)
 1: multictr2.t.c01<1>
 c01(?f01##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
@@ -637,7 +637,7 @@ c01(?f01##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?f01##0:wybe.int)
 
     1:
-        foreign lpvm access(~#result##0:multictr2.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?f01##0:wybe.int)
+        foreign lpvm access(~#result##0:multictr2.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?f01##0:wybe.int) @multictr2:3:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -647,9 +647,9 @@ c02 > public {inline} (0 calls)
 c02(f02##0:wybe.int, ?#result##0:multictr2.t):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t)
-    foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f02##0:wybe.int)
-    foreign llvm or(~#rec##1:multictr2.t, 1:wybe.int, ?#result##0:multictr2.t)
+    foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:4:8
+    foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f02##0:wybe.int) @multictr2:4:8
+    foreign llvm or(~#rec##1:multictr2.t, 1:wybe.int, ?#result##0:multictr2.t) @multictr2:4:8
 c02 > public {inline} (19 calls)
 1: multictr2.t.c02<1>
 c02(?f02##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
@@ -663,7 +663,7 @@ c02(?f02##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?f02##0:wybe.int)
 
     1:
-        foreign lpvm access(~#result##0:multictr2.t, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?f02##0:wybe.int)
+        foreign lpvm access(~#result##0:multictr2.t, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?f02##0:wybe.int) @multictr2:4:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -673,9 +673,9 @@ c03 > public {inline} (0 calls)
 c03(f03##0:wybe.int, ?#result##0:multictr2.t):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t)
-    foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f03##0:wybe.int)
-    foreign llvm or(~#rec##1:multictr2.t, 2:wybe.int, ?#result##0:multictr2.t)
+    foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:5:8
+    foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f03##0:wybe.int) @multictr2:5:8
+    foreign llvm or(~#rec##1:multictr2.t, 2:wybe.int, ?#result##0:multictr2.t) @multictr2:5:8
 c03 > public {inline} (17 calls)
 1: multictr2.t.c03<1>
 c03(?f03##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
@@ -689,7 +689,7 @@ c03(?f03##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?f03##0:wybe.int)
 
     1:
-        foreign lpvm access(~#result##0:multictr2.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?f03##0:wybe.int)
+        foreign lpvm access(~#result##0:multictr2.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?f03##0:wybe.int) @multictr2:5:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -699,9 +699,9 @@ c04 > public {inline} (0 calls)
 c04(f04##0:wybe.int, ?#result##0:multictr2.t):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t)
-    foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f04##0:wybe.int)
-    foreign llvm or(~#rec##1:multictr2.t, 3:wybe.int, ?#result##0:multictr2.t)
+    foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:6:8
+    foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f04##0:wybe.int) @multictr2:6:8
+    foreign llvm or(~#rec##1:multictr2.t, 3:wybe.int, ?#result##0:multictr2.t) @multictr2:6:8
 c04 > public {inline} (15 calls)
 1: multictr2.t.c04<1>
 c04(?f04##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
@@ -715,7 +715,7 @@ c04(?f04##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?f04##0:wybe.int)
 
     1:
-        foreign lpvm access(~#result##0:multictr2.t, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?f04##0:wybe.int)
+        foreign lpvm access(~#result##0:multictr2.t, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?f04##0:wybe.int) @multictr2:6:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -725,9 +725,9 @@ c05 > public {inline} (0 calls)
 c05(f05##0:wybe.int, ?#result##0:multictr2.t):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t)
-    foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f05##0:wybe.int)
-    foreign llvm or(~#rec##1:multictr2.t, 4:wybe.int, ?#result##0:multictr2.t)
+    foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:7:8
+    foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f05##0:wybe.int) @multictr2:7:8
+    foreign llvm or(~#rec##1:multictr2.t, 4:wybe.int, ?#result##0:multictr2.t) @multictr2:7:8
 c05 > public {inline} (13 calls)
 1: multictr2.t.c05<1>
 c05(?f05##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
@@ -741,7 +741,7 @@ c05(?f05##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?f05##0:wybe.int)
 
     1:
-        foreign lpvm access(~#result##0:multictr2.t, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?f05##0:wybe.int)
+        foreign lpvm access(~#result##0:multictr2.t, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?f05##0:wybe.int) @multictr2:7:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -751,9 +751,9 @@ c06 > public {inline} (0 calls)
 c06(f06##0:wybe.int, ?#result##0:multictr2.t):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t)
-    foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f06##0:wybe.int)
-    foreign llvm or(~#rec##1:multictr2.t, 5:wybe.int, ?#result##0:multictr2.t)
+    foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:8:8
+    foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f06##0:wybe.int) @multictr2:8:8
+    foreign llvm or(~#rec##1:multictr2.t, 5:wybe.int, ?#result##0:multictr2.t) @multictr2:8:8
 c06 > public {inline} (11 calls)
 1: multictr2.t.c06<1>
 c06(?f06##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
@@ -767,7 +767,7 @@ c06(?f06##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?f06##0:wybe.int)
 
     1:
-        foreign lpvm access(~#result##0:multictr2.t, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?f06##0:wybe.int)
+        foreign lpvm access(~#result##0:multictr2.t, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?f06##0:wybe.int) @multictr2:8:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -777,9 +777,9 @@ c07 > public {inline} (0 calls)
 c07(f07##0:wybe.int, ?#result##0:multictr2.t):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t)
-    foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f07##0:wybe.int)
-    foreign llvm or(~#rec##1:multictr2.t, 6:wybe.int, ?#result##0:multictr2.t)
+    foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:9:8
+    foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f07##0:wybe.int) @multictr2:9:8
+    foreign llvm or(~#rec##1:multictr2.t, 6:wybe.int, ?#result##0:multictr2.t) @multictr2:9:8
 c07 > public {inline} (9 calls)
 1: multictr2.t.c07<1>
 c07(?f07##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
@@ -793,7 +793,7 @@ c07(?f07##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?f07##0:wybe.int)
 
     1:
-        foreign lpvm access(~#result##0:multictr2.t, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?f07##0:wybe.int)
+        foreign lpvm access(~#result##0:multictr2.t, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?f07##0:wybe.int) @multictr2:9:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -803,11 +803,11 @@ c08 > public {inline} (0 calls)
 c08(f08_a##0:wybe.int, f08_b##0:wybe.int, f08_c##0:wybe.float, ?#result##0:multictr2.t):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(24:wybe.int, ?#rec##0:multictr2.t)
-    foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~f08_a##0:wybe.int)
-    foreign lpvm mutate(~#rec##1:multictr2.t, ?#rec##2:multictr2.t, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~f08_b##0:wybe.int)
-    foreign lpvm mutate(~#rec##2:multictr2.t, ?#rec##3:multictr2.t, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~f08_c##0:wybe.float)
-    foreign llvm or(~#rec##3:multictr2.t, 7:wybe.int, ?#result##0:multictr2.t)
+    foreign lpvm alloc(24:wybe.int, ?#rec##0:multictr2.t) @multictr2:10:8
+    foreign lpvm mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~f08_a##0:wybe.int) @multictr2:10:8
+    foreign lpvm mutate(~#rec##1:multictr2.t, ?#rec##2:multictr2.t, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~f08_b##0:wybe.int) @multictr2:10:8
+    foreign lpvm mutate(~#rec##2:multictr2.t, ?#rec##3:multictr2.t, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~f08_c##0:wybe.float) @multictr2:10:8
+    foreign llvm or(~#rec##3:multictr2.t, 7:wybe.int, ?#result##0:multictr2.t) @multictr2:10:8
 c08 > public {inline} (9 calls)
 1: multictr2.t.c08<1>
 c08(?f08_a##0:wybe.int, ?f08_b##0:wybe.int, ?f08_c##0:wybe.float, #result##0:multictr2.t, ?#success##0:wybe.bool):
@@ -823,9 +823,9 @@ c08(?f08_a##0:wybe.int, ?f08_b##0:wybe.int, ?f08_c##0:wybe.float, #result##0:mul
         foreign llvm move(undef:wybe.float, ?f08_c##0:wybe.float)
 
     1:
-        foreign lpvm access(#result##0:multictr2.t, -7:wybe.int, 24:wybe.int, 7:wybe.int, ?f08_a##0:wybe.int)
-        foreign lpvm access(#result##0:multictr2.t, 1:wybe.int, 24:wybe.int, 7:wybe.int, ?f08_b##0:wybe.int)
-        foreign lpvm access(~#result##0:multictr2.t, 9:wybe.int, 24:wybe.int, 7:wybe.int, ?f08_c##0:wybe.float)
+        foreign lpvm access(#result##0:multictr2.t, -7:wybe.int, 24:wybe.int, 7:wybe.int, ?f08_a##0:wybe.int) @multictr2:10:8
+        foreign lpvm access(#result##0:multictr2.t, 1:wybe.int, 24:wybe.int, 7:wybe.int, ?f08_b##0:wybe.int) @multictr2:10:8
+        foreign lpvm access(~#result##0:multictr2.t, 9:wybe.int, 24:wybe.int, 7:wybe.int, ?f08_c##0:wybe.float) @multictr2:10:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -843,7 +843,7 @@ f01(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:multictr2.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
+        foreign lpvm access(~#rec##0:multictr2.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @multictr2:3:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 f01 > public {inline} (0 calls)
@@ -859,7 +859,7 @@ f01(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:
         foreign llvm move(~#rec##0:multictr2.t, ?#rec##1:multictr2.t)
 
     1:
-        foreign lpvm {noalias} mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
+        foreign lpvm {noalias} mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @multictr2:3:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -877,7 +877,7 @@ f02(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:multictr2.t, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?#result##0:wybe.int)
+        foreign lpvm access(~#rec##0:multictr2.t, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @multictr2:4:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 f02 > public {inline} (0 calls)
@@ -893,7 +893,7 @@ f02(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:
         foreign llvm move(~#rec##0:multictr2.t, ?#rec##1:multictr2.t)
 
     1:
-        foreign lpvm {noalias} mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, -1:wybe.int, 0:wybe.int, 8:wybe.int, 1:wybe.int, ~#field##0:wybe.int)
+        foreign lpvm {noalias} mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, -1:wybe.int, 0:wybe.int, 8:wybe.int, 1:wybe.int, ~#field##0:wybe.int) @multictr2:4:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -911,7 +911,7 @@ f03(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:multictr2.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#result##0:wybe.int)
+        foreign lpvm access(~#rec##0:multictr2.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#result##0:wybe.int) @multictr2:5:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 f03 > public {inline} (0 calls)
@@ -927,7 +927,7 @@ f03(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:
         foreign llvm move(~#rec##0:multictr2.t, ?#rec##1:multictr2.t)
 
     1:
-        foreign lpvm {noalias} mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, -2:wybe.int, 0:wybe.int, 8:wybe.int, 2:wybe.int, ~#field##0:wybe.int)
+        foreign lpvm {noalias} mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, -2:wybe.int, 0:wybe.int, 8:wybe.int, 2:wybe.int, ~#field##0:wybe.int) @multictr2:5:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -945,7 +945,7 @@ f04(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:multictr2.t, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?#result##0:wybe.int)
+        foreign lpvm access(~#rec##0:multictr2.t, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?#result##0:wybe.int) @multictr2:6:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 f04 > public {inline} (0 calls)
@@ -961,7 +961,7 @@ f04(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:
         foreign llvm move(~#rec##0:multictr2.t, ?#rec##1:multictr2.t)
 
     1:
-        foreign lpvm {noalias} mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, -3:wybe.int, 0:wybe.int, 8:wybe.int, 3:wybe.int, ~#field##0:wybe.int)
+        foreign lpvm {noalias} mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, -3:wybe.int, 0:wybe.int, 8:wybe.int, 3:wybe.int, ~#field##0:wybe.int) @multictr2:6:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -979,7 +979,7 @@ f05(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:multictr2.t, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?#result##0:wybe.int)
+        foreign lpvm access(~#rec##0:multictr2.t, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?#result##0:wybe.int) @multictr2:7:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 f05 > public {inline} (0 calls)
@@ -995,7 +995,7 @@ f05(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:
         foreign llvm move(~#rec##0:multictr2.t, ?#rec##1:multictr2.t)
 
     1:
-        foreign lpvm {noalias} mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, -4:wybe.int, 0:wybe.int, 8:wybe.int, 4:wybe.int, ~#field##0:wybe.int)
+        foreign lpvm {noalias} mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, -4:wybe.int, 0:wybe.int, 8:wybe.int, 4:wybe.int, ~#field##0:wybe.int) @multictr2:7:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -1013,7 +1013,7 @@ f06(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:multictr2.t, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?#result##0:wybe.int)
+        foreign lpvm access(~#rec##0:multictr2.t, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?#result##0:wybe.int) @multictr2:8:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 f06 > public {inline} (0 calls)
@@ -1029,7 +1029,7 @@ f06(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:
         foreign llvm move(~#rec##0:multictr2.t, ?#rec##1:multictr2.t)
 
     1:
-        foreign lpvm {noalias} mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, -5:wybe.int, 0:wybe.int, 8:wybe.int, 5:wybe.int, ~#field##0:wybe.int)
+        foreign lpvm {noalias} mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, -5:wybe.int, 0:wybe.int, 8:wybe.int, 5:wybe.int, ~#field##0:wybe.int) @multictr2:8:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -1047,7 +1047,7 @@ f07(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:multictr2.t, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?#result##0:wybe.int)
+        foreign lpvm access(~#rec##0:multictr2.t, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?#result##0:wybe.int) @multictr2:9:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 f07 > public {inline} (0 calls)
@@ -1063,7 +1063,7 @@ f07(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:
         foreign llvm move(~#rec##0:multictr2.t, ?#rec##1:multictr2.t)
 
     1:
-        foreign lpvm {noalias} mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, -6:wybe.int, 0:wybe.int, 8:wybe.int, 6:wybe.int, ~#field##0:wybe.int)
+        foreign lpvm {noalias} mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, -6:wybe.int, 0:wybe.int, 8:wybe.int, 6:wybe.int, ~#field##0:wybe.int) @multictr2:9:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -1081,7 +1081,7 @@ f08_a(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:multictr2.t, -7:wybe.int, 24:wybe.int, 7:wybe.int, ?#result##0:wybe.int)
+        foreign lpvm access(~#rec##0:multictr2.t, -7:wybe.int, 24:wybe.int, 7:wybe.int, ?#result##0:wybe.int) @multictr2:10:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 f08_a > public {inline} (0 calls)
@@ -1097,7 +1097,7 @@ f08_a(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##
         foreign llvm move(~#rec##0:multictr2.t, ?#rec##1:multictr2.t)
 
     1:
-        foreign lpvm {noalias} mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, -7:wybe.int, 0:wybe.int, 24:wybe.int, 7:wybe.int, ~#field##0:wybe.int)
+        foreign lpvm {noalias} mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, -7:wybe.int, 0:wybe.int, 24:wybe.int, 7:wybe.int, ~#field##0:wybe.int) @multictr2:10:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -1115,7 +1115,7 @@ f08_b(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:multictr2.t, 1:wybe.int, 24:wybe.int, 7:wybe.int, ?#result##0:wybe.int)
+        foreign lpvm access(~#rec##0:multictr2.t, 1:wybe.int, 24:wybe.int, 7:wybe.int, ?#result##0:wybe.int) @multictr2:10:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 f08_b > public {inline} (0 calls)
@@ -1131,7 +1131,7 @@ f08_b(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##
         foreign llvm move(~#rec##0:multictr2.t, ?#rec##1:multictr2.t)
 
     1:
-        foreign lpvm {noalias} mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 1:wybe.int, 0:wybe.int, 24:wybe.int, 7:wybe.int, ~#field##0:wybe.int)
+        foreign lpvm {noalias} mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 1:wybe.int, 0:wybe.int, 24:wybe.int, 7:wybe.int, ~#field##0:wybe.int) @multictr2:10:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -1149,7 +1149,7 @@ f08_c(#rec##0:multictr2.t, ?#result##0:wybe.float, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.float, ?#result##0:wybe.float)
 
     1:
-        foreign lpvm access(~#rec##0:multictr2.t, 9:wybe.int, 24:wybe.int, 7:wybe.int, ?#result##0:wybe.float)
+        foreign lpvm access(~#rec##0:multictr2.t, 9:wybe.int, 24:wybe.int, 7:wybe.int, ?#result##0:wybe.float) @multictr2:10:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 f08_c > public {inline} (0 calls)
@@ -1165,7 +1165,7 @@ f08_c(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.float, ?#success
         foreign llvm move(~#rec##0:multictr2.t, ?#rec##1:multictr2.t)
 
     1:
-        foreign lpvm {noalias} mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 9:wybe.int, 0:wybe.int, 24:wybe.int, 7:wybe.int, ~#field##0:wybe.float)
+        foreign lpvm {noalias} mutate(~#rec##0:multictr2.t, ?#rec##1:multictr2.t, 9:wybe.int, 0:wybe.int, 24:wybe.int, 7:wybe.int, ~#field##0:wybe.float) @multictr2:10:8
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 

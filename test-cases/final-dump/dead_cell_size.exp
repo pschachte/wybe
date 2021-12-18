@@ -50,16 +50,16 @@ module top-level code > public {impure} (0 calls)
  AliasPairs: []
  InterestingCallProperties: []
  MultiSpeczDepInfo: [(4,(dead_cell_size.bar<0>,fromList [NonAliasedParamCond 0 []])),(7,(dead_cell_size.diff_type<0>,fromList [NonAliasedParamCond 0 []]))]
-    foreign lpvm alloc(8:wybe.int, ?tmp#7##0:dead_cell_size.t)
-    foreign lpvm mutate(~tmp#7##0:dead_cell_size.t, ?tmp#8##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 9:wybe.int)
+    foreign lpvm alloc(8:wybe.int, ?tmp#7##0:dead_cell_size.t) @dead_cell_size:nn:nn
+    foreign lpvm mutate(~tmp#7##0:dead_cell_size.t, ?tmp#8##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 9:wybe.int) @dead_cell_size:nn:nn
     dead_cell_size.foo<0>(~tmp#8##0:dead_cell_size.t, ?tmp#0##0:dead_cell_size.t) #1 @dead_cell_size:nn:nn
     dead_cell_size.print_t<0>(~tmp#0##0:dead_cell_size.t, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #2 @dead_cell_size:nn:nn
-    foreign lpvm alloc(8:wybe.int, ?tmp#10##0:dead_cell_size.t)
-    foreign lpvm mutate(~tmp#10##0:dead_cell_size.t, ?tmp#11##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 9:wybe.int)
+    foreign lpvm alloc(8:wybe.int, ?tmp#10##0:dead_cell_size.t) @dead_cell_size:nn:nn
+    foreign lpvm mutate(~tmp#10##0:dead_cell_size.t, ?tmp#11##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 9:wybe.int) @dead_cell_size:nn:nn
     dead_cell_size.bar<0>[410bae77d3](~tmp#11##0:dead_cell_size.t, ?tmp#2##0:dead_cell_size.t) #4 @dead_cell_size:nn:nn
     dead_cell_size.print_t<0>(~tmp#2##0:dead_cell_size.t, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #5 @dead_cell_size:nn:nn
-    foreign lpvm alloc(8:wybe.int, ?tmp#13##0:dead_cell_size.t)
-    foreign lpvm mutate(~tmp#13##0:dead_cell_size.t, ?tmp#14##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 9:wybe.int)
+    foreign lpvm alloc(8:wybe.int, ?tmp#13##0:dead_cell_size.t) @dead_cell_size:nn:nn
+    foreign lpvm mutate(~tmp#13##0:dead_cell_size.t, ?tmp#14##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 9:wybe.int) @dead_cell_size:nn:nn
     dead_cell_size.diff_type<0>[410bae77d3](~tmp#14##0:dead_cell_size.t, ?tmp#4##0:dead_cell_size.t2) #7 @dead_cell_size:nn:nn
     dead_cell_size.print_t2<0>(~tmp#4##0:dead_cell_size.t2, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #8 @dead_cell_size:nn:nn
 
@@ -82,10 +82,10 @@ bar(x##0:dead_cell_size.t, ?x##1:dead_cell_size.t):
             foreign llvm move(~x##0:dead_cell_size.t, ?x##1:dead_cell_size.t)
 
         1:
-            foreign lpvm access(~x##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int)
-            foreign lpvm alloc(8:wybe.int, ?tmp#7##0:dead_cell_size.t)
-            foreign lpvm mutate(~tmp#7##0:dead_cell_size.t, ?tmp#8##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~a##0:wybe.int)
-            foreign llvm or(~tmp#8##0:dead_cell_size.t, 2:wybe.int, ?x##1:dead_cell_size.t)
+            foreign lpvm access(~x##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int) @dead_cell_size:nn:nn
+            foreign lpvm alloc(8:wybe.int, ?tmp#7##0:dead_cell_size.t) @dead_cell_size:nn:nn
+            foreign lpvm mutate(~tmp#7##0:dead_cell_size.t, ?tmp#8##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~a##0:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm or(~tmp#8##0:dead_cell_size.t, 2:wybe.int, ?x##1:dead_cell_size.t) @dead_cell_size:nn:nn
 
 
  [410bae77d3] [NonAliasedParam 0] :
@@ -102,7 +102,7 @@ bar(x##0:dead_cell_size.t, ?x##1:dead_cell_size.t):
             foreign llvm move(~x##0:dead_cell_size.t, ?x##1:dead_cell_size.t)
 
         1:
-            foreign llvm or(~x##0:dead_cell_size.t, 2:wybe.int, ?x##1:dead_cell_size.t)
+            foreign llvm or(~x##0:dead_cell_size.t, 2:wybe.int, ?x##1:dead_cell_size.t) @dead_cell_size:nn:nn
 
 
 
@@ -115,37 +115,37 @@ diff_type(x##0:dead_cell_size.t, ?y##0:dead_cell_size.t2):
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool)
     case ~tmp#4##0:wybe.bool of
     0:
-        foreign lpvm alloc(8:wybe.int, ?tmp#8##0:dead_cell_size.t2)
-        foreign lpvm mutate(~tmp#8##0:dead_cell_size.t2, ?y##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, -1:wybe.int)
+        foreign lpvm alloc(8:wybe.int, ?tmp#8##0:dead_cell_size.t2) @dead_cell_size:nn:nn
+        foreign lpvm mutate(~tmp#8##0:dead_cell_size.t2, ?y##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, -1:wybe.int) @dead_cell_size:nn:nn
 
     1:
         foreign llvm and(x##0:wybe.int, 3:wybe.int, ?tmp#5##0:wybe.int)
         foreign llvm icmp_eq(~tmp#5##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool)
         case ~tmp#6##0:wybe.bool of
         0:
-            foreign lpvm alloc(8:wybe.int, ?tmp#8##0:dead_cell_size.t2)
-            foreign lpvm mutate(~tmp#8##0:dead_cell_size.t2, ?y##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, -1:wybe.int)
+            foreign lpvm alloc(8:wybe.int, ?tmp#8##0:dead_cell_size.t2) @dead_cell_size:nn:nn
+            foreign lpvm mutate(~tmp#8##0:dead_cell_size.t2, ?y##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, -1:wybe.int) @dead_cell_size:nn:nn
 
         1:
-            foreign lpvm access(~x##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int)
-            foreign lpvm alloc(8:wybe.int, ?tmp#8##0:dead_cell_size.t2)
-            foreign lpvm mutate(~tmp#8##0:dead_cell_size.t2, ?y##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~a##0:wybe.int)
+            foreign lpvm access(~x##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int) @dead_cell_size:nn:nn
+            foreign lpvm alloc(8:wybe.int, ?tmp#8##0:dead_cell_size.t2) @dead_cell_size:nn:nn
+            foreign lpvm mutate(~tmp#8##0:dead_cell_size.t2, ?y##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~a##0:wybe.int) @dead_cell_size:nn:nn
 
 
  [410bae77d3] [NonAliasedParam 0] :
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool)
     case ~tmp#4##0:wybe.bool of
     0:
-        foreign lpvm alloc(8:wybe.int, ?tmp#8##0:dead_cell_size.t2)
-        foreign lpvm mutate(~tmp#8##0:dead_cell_size.t2, ?y##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, -1:wybe.int)
+        foreign lpvm alloc(8:wybe.int, ?tmp#8##0:dead_cell_size.t2) @dead_cell_size:nn:nn
+        foreign lpvm mutate(~tmp#8##0:dead_cell_size.t2, ?y##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, -1:wybe.int) @dead_cell_size:nn:nn
 
     1:
         foreign llvm and(x##0:wybe.int, 3:wybe.int, ?tmp#5##0:wybe.int)
         foreign llvm icmp_eq(~tmp#5##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool)
         case ~tmp#6##0:wybe.bool of
         0:
-            foreign lpvm alloc(8:wybe.int, ?tmp#8##0:dead_cell_size.t2)
-            foreign lpvm mutate(~tmp#8##0:dead_cell_size.t2, ?y##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, -1:wybe.int)
+            foreign lpvm alloc(8:wybe.int, ?tmp#8##0:dead_cell_size.t2) @dead_cell_size:nn:nn
+            foreign lpvm mutate(~tmp#8##0:dead_cell_size.t2, ?y##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, -1:wybe.int) @dead_cell_size:nn:nn
 
         1:
             foreign llvm move(~x##0:dead_cell_size.t, ?y##0:dead_cell_size.t2)
@@ -171,12 +171,12 @@ foo(x##0:dead_cell_size.t, ?x##1:dead_cell_size.t):
             foreign llvm move(~x##0:dead_cell_size.t, ?x##1:dead_cell_size.t)
 
         1:
-            foreign lpvm access(~x##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int)
-            foreign lpvm alloc(24:wybe.int, ?tmp#9##0:dead_cell_size.t)
-            foreign lpvm mutate(~tmp#9##0:dead_cell_size.t, ?tmp#10##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~a##0:wybe.int)
-            foreign lpvm mutate(~tmp#10##0:dead_cell_size.t, ?tmp#11##0:dead_cell_size.t, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 2:wybe.int)
-            foreign lpvm mutate(~tmp#11##0:dead_cell_size.t, ?tmp#12##0:dead_cell_size.t, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 3:wybe.int)
-            foreign llvm or(~tmp#12##0:dead_cell_size.t, 1:wybe.int, ?x##1:dead_cell_size.t)
+            foreign lpvm access(~x##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int) @dead_cell_size:nn:nn
+            foreign lpvm alloc(24:wybe.int, ?tmp#9##0:dead_cell_size.t) @dead_cell_size:nn:nn
+            foreign lpvm mutate(~tmp#9##0:dead_cell_size.t, ?tmp#10##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~a##0:wybe.int) @dead_cell_size:nn:nn
+            foreign lpvm mutate(~tmp#10##0:dead_cell_size.t, ?tmp#11##0:dead_cell_size.t, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 2:wybe.int) @dead_cell_size:nn:nn
+            foreign lpvm mutate(~tmp#11##0:dead_cell_size.t, ?tmp#12##0:dead_cell_size.t, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 3:wybe.int) @dead_cell_size:nn:nn
+            foreign llvm or(~tmp#12##0:dead_cell_size.t, 1:wybe.int, ?x##1:dead_cell_size.t) @dead_cell_size:nn:nn
 
 
 
@@ -208,7 +208,7 @@ print_t(x##0:dead_cell_size.t, io##0:wybe.phantom, ?io##8:wybe.phantom):
                         foreign c putchar('\n':wybe.char, ~#io##0:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
 
                     1:
-                        foreign lpvm access(~x##0:dead_cell_size.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?a##2:wybe.int)
+                        foreign lpvm access(~x##0:dead_cell_size.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?a##2:wybe.int) @dead_cell_size:nn:nn
                         wybe.string.print_string<0>("td(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #24 @io:nn:nn
                         foreign c print_int(~a##2:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
                         wybe.string.print_string<0>(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #25 @io:nn:nn
@@ -216,9 +216,9 @@ print_t(x##0:dead_cell_size.t, io##0:wybe.phantom, ?io##8:wybe.phantom):
 
 
                 1:
-                    foreign lpvm access(x##0:dead_cell_size.t, -1:wybe.int, 24:wybe.int, 1:wybe.int, ?a##1:wybe.int)
-                    foreign lpvm access(x##0:dead_cell_size.t, 7:wybe.int, 24:wybe.int, 1:wybe.int, ?b##0:wybe.int)
-                    foreign lpvm access(~x##0:dead_cell_size.t, 15:wybe.int, 24:wybe.int, 1:wybe.int, ?c##0:wybe.int)
+                    foreign lpvm access(x##0:dead_cell_size.t, -1:wybe.int, 24:wybe.int, 1:wybe.int, ?a##1:wybe.int) @dead_cell_size:nn:nn
+                    foreign lpvm access(x##0:dead_cell_size.t, 7:wybe.int, 24:wybe.int, 1:wybe.int, ?b##0:wybe.int) @dead_cell_size:nn:nn
+                    foreign lpvm access(~x##0:dead_cell_size.t, 15:wybe.int, 24:wybe.int, 1:wybe.int, ?c##0:wybe.int) @dead_cell_size:nn:nn
                     wybe.string.print_string<0>("tc(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #26 @io:nn:nn
                     foreign c print_int(~a##1:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
                     wybe.string.print_string<0>(",":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #27 @io:nn:nn
@@ -230,7 +230,7 @@ print_t(x##0:dead_cell_size.t, io##0:wybe.phantom, ?io##8:wybe.phantom):
 
 
             1:
-                foreign lpvm access(~x##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int)
+                foreign lpvm access(~x##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int) @dead_cell_size:nn:nn
                 wybe.string.print_string<0>("tb(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #30 @io:nn:nn
                 foreign c print_int(~a##0:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
                 wybe.string.print_string<0>(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #31 @io:nn:nn
@@ -258,7 +258,7 @@ print_t2(x##0:dead_cell_size.t2, io##0:wybe.phantom, ?io##4:wybe.phantom):
             foreign c putchar('\n':wybe.char, ~#io##0:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
 
         1:
-            foreign lpvm access(~x##0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int)
+            foreign lpvm access(~x##0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int) @dead_cell_size:nn:nn
             wybe.string.print_string<0>("t2b(":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #10 @io:nn:nn
             foreign c print_int(~a##0:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
             wybe.string.print_string<0>(")":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #11 @io:nn:nn
@@ -690,7 +690,7 @@ if.else1:
                     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                 1:
-                    foreign lpvm access(~#left##0:dead_cell_size.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#left#td1##0:wybe.int)
+                    foreign lpvm access(~#left##0:dead_cell_size.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#left#td1##0:wybe.int) @dead_cell_size:nn:nn
                     foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#26##0:wybe.bool)
                     case ~tmp#26##0:wybe.bool of
                     0:
@@ -704,16 +704,16 @@ if.else1:
                             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                         1:
-                            foreign lpvm access(~#right##0:dead_cell_size.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#right#td1##0:wybe.int)
+                            foreign lpvm access(~#right##0:dead_cell_size.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#right#td1##0:wybe.int) @dead_cell_size:nn:nn
                             foreign llvm icmp_eq(~#left#td1##0:wybe.int, ~#right#td1##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
 
 
             1:
-                foreign lpvm access(#left##0:dead_cell_size.t, -1:wybe.int, 24:wybe.int, 1:wybe.int, ?#left#tc1##0:wybe.int)
-                foreign lpvm access(#left##0:dead_cell_size.t, 7:wybe.int, 24:wybe.int, 1:wybe.int, ?#left#tc2##0:wybe.int)
-                foreign lpvm access(~#left##0:dead_cell_size.t, 15:wybe.int, 24:wybe.int, 1:wybe.int, ?#left#tc3##0:wybe.int)
+                foreign lpvm access(#left##0:dead_cell_size.t, -1:wybe.int, 24:wybe.int, 1:wybe.int, ?#left#tc1##0:wybe.int) @dead_cell_size:nn:nn
+                foreign lpvm access(#left##0:dead_cell_size.t, 7:wybe.int, 24:wybe.int, 1:wybe.int, ?#left#tc2##0:wybe.int) @dead_cell_size:nn:nn
+                foreign lpvm access(~#left##0:dead_cell_size.t, 15:wybe.int, 24:wybe.int, 1:wybe.int, ?#left#tc3##0:wybe.int) @dead_cell_size:nn:nn
                 foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#22##0:wybe.bool)
                 case ~tmp#22##0:wybe.bool of
                 0:
@@ -727,9 +727,9 @@ if.else1:
                         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                     1:
-                        foreign lpvm access(#right##0:dead_cell_size.t, -1:wybe.int, 24:wybe.int, 1:wybe.int, ?#right#tc1##0:wybe.int)
-                        foreign lpvm access(#right##0:dead_cell_size.t, 7:wybe.int, 24:wybe.int, 1:wybe.int, ?#right#tc2##0:wybe.int)
-                        foreign lpvm access(~#right##0:dead_cell_size.t, 15:wybe.int, 24:wybe.int, 1:wybe.int, ?#right#tc3##0:wybe.int)
+                        foreign lpvm access(#right##0:dead_cell_size.t, -1:wybe.int, 24:wybe.int, 1:wybe.int, ?#right#tc1##0:wybe.int) @dead_cell_size:nn:nn
+                        foreign lpvm access(#right##0:dead_cell_size.t, 7:wybe.int, 24:wybe.int, 1:wybe.int, ?#right#tc2##0:wybe.int) @dead_cell_size:nn:nn
+                        foreign lpvm access(~#right##0:dead_cell_size.t, 15:wybe.int, 24:wybe.int, 1:wybe.int, ?#right#tc3##0:wybe.int) @dead_cell_size:nn:nn
                         foreign llvm icmp_eq(~#left#tc1##0:wybe.int, ~#right#tc1##0:wybe.int, ?tmp#5##0:wybe.bool) @int:nn:nn
                         case ~tmp#5##0:wybe.bool of
                         0:
@@ -750,7 +750,7 @@ if.else1:
 
 
         1:
-            foreign lpvm access(~#left##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#left#tb1##0:wybe.int)
+            foreign lpvm access(~#left##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#left#tb1##0:wybe.int) @dead_cell_size:nn:nn
             foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#18##0:wybe.bool)
             case ~tmp#18##0:wybe.bool of
             0:
@@ -764,7 +764,7 @@ if.else1:
                     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
                 1:
-                    foreign lpvm access(~#right##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#right#tb1##0:wybe.int)
+                    foreign lpvm access(~#right##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#right#tb1##0:wybe.int) @dead_cell_size:nn:nn
                     foreign llvm icmp_eq(~#left#tb1##0:wybe.int, ~#right#tb1##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
@@ -785,8 +785,8 @@ tb > public {inline} (0 calls)
 tb(tb1##0:wybe.int, ?#result##0:dead_cell_size.t):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?#rec##0:dead_cell_size.t)
-    foreign lpvm mutate(~#rec##0:dead_cell_size.t, ?#result##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~tb1##0:wybe.int)
+    foreign lpvm alloc(8:wybe.int, ?#rec##0:dead_cell_size.t) @dead_cell_size:nn:nn
+    foreign lpvm mutate(~#rec##0:dead_cell_size.t, ?#result##0:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~tb1##0:wybe.int) @dead_cell_size:nn:nn
 tb > public {inline} (14 calls)
 1: dead_cell_size.t.tb<1>
 tb(?tb1##0:wybe.int, #result##0:dead_cell_size.t, ?#success##0:wybe.bool):
@@ -807,7 +807,7 @@ tb(?tb1##0:wybe.int, #result##0:dead_cell_size.t, ?#success##0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?tb1##0:wybe.int)
 
         1:
-            foreign lpvm access(~#result##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?tb1##0:wybe.int)
+            foreign lpvm access(~#result##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?tb1##0:wybe.int) @dead_cell_size:nn:nn
             foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -833,7 +833,7 @@ tb1(#rec##0:dead_cell_size.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
-            foreign lpvm access(~#rec##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
+            foreign lpvm access(~#rec##0:dead_cell_size.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @dead_cell_size:nn:nn
             foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -857,7 +857,7 @@ tb1(#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, #field##0:wybe.int, ?#s
             foreign llvm move(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t)
 
         1:
-            foreign lpvm {noalias} mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
+            foreign lpvm {noalias} mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @dead_cell_size:nn:nn
             foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -868,11 +868,11 @@ tc > public {inline} (0 calls)
 tc(tc1##0:wybe.int, tc2##0:wybe.int, tc3##0:wybe.int, ?#result##0:dead_cell_size.t):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(24:wybe.int, ?#rec##0:dead_cell_size.t)
-    foreign lpvm mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tc1##0:wybe.int)
-    foreign lpvm mutate(~#rec##1:dead_cell_size.t, ?#rec##2:dead_cell_size.t, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tc2##0:wybe.int)
-    foreign lpvm mutate(~#rec##2:dead_cell_size.t, ?#rec##3:dead_cell_size.t, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tc3##0:wybe.int)
-    foreign llvm or(~#rec##3:dead_cell_size.t, 1:wybe.int, ?#result##0:dead_cell_size.t)
+    foreign lpvm alloc(24:wybe.int, ?#rec##0:dead_cell_size.t) @dead_cell_size:nn:nn
+    foreign lpvm mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tc1##0:wybe.int) @dead_cell_size:nn:nn
+    foreign lpvm mutate(~#rec##1:dead_cell_size.t, ?#rec##2:dead_cell_size.t, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tc2##0:wybe.int) @dead_cell_size:nn:nn
+    foreign lpvm mutate(~#rec##2:dead_cell_size.t, ?#rec##3:dead_cell_size.t, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tc3##0:wybe.int) @dead_cell_size:nn:nn
+    foreign llvm or(~#rec##3:dead_cell_size.t, 1:wybe.int, ?#result##0:dead_cell_size.t) @dead_cell_size:nn:nn
 tc > public {inline} (11 calls)
 1: dead_cell_size.t.tc<1>
 tc(?tc1##0:wybe.int, ?tc2##0:wybe.int, ?tc3##0:wybe.int, #result##0:dead_cell_size.t, ?#success##0:wybe.bool):
@@ -897,9 +897,9 @@ tc(?tc1##0:wybe.int, ?tc2##0:wybe.int, ?tc3##0:wybe.int, #result##0:dead_cell_si
             foreign llvm move(undef:wybe.int, ?tc3##0:wybe.int)
 
         1:
-            foreign lpvm access(#result##0:dead_cell_size.t, -1:wybe.int, 24:wybe.int, 1:wybe.int, ?tc1##0:wybe.int)
-            foreign lpvm access(#result##0:dead_cell_size.t, 7:wybe.int, 24:wybe.int, 1:wybe.int, ?tc2##0:wybe.int)
-            foreign lpvm access(~#result##0:dead_cell_size.t, 15:wybe.int, 24:wybe.int, 1:wybe.int, ?tc3##0:wybe.int)
+            foreign lpvm access(#result##0:dead_cell_size.t, -1:wybe.int, 24:wybe.int, 1:wybe.int, ?tc1##0:wybe.int) @dead_cell_size:nn:nn
+            foreign lpvm access(#result##0:dead_cell_size.t, 7:wybe.int, 24:wybe.int, 1:wybe.int, ?tc2##0:wybe.int) @dead_cell_size:nn:nn
+            foreign lpvm access(~#result##0:dead_cell_size.t, 15:wybe.int, 24:wybe.int, 1:wybe.int, ?tc3##0:wybe.int) @dead_cell_size:nn:nn
             foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -925,7 +925,7 @@ tc1(#rec##0:dead_cell_size.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
-            foreign lpvm access(~#rec##0:dead_cell_size.t, -1:wybe.int, 24:wybe.int, 1:wybe.int, ?#result##0:wybe.int)
+            foreign lpvm access(~#rec##0:dead_cell_size.t, -1:wybe.int, 24:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @dead_cell_size:nn:nn
             foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -949,7 +949,7 @@ tc1(#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, #field##0:wybe.int, ?#s
             foreign llvm move(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t)
 
         1:
-            foreign lpvm {noalias} mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, -1:wybe.int, 0:wybe.int, 24:wybe.int, 1:wybe.int, ~#field##0:wybe.int)
+            foreign lpvm {noalias} mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, -1:wybe.int, 0:wybe.int, 24:wybe.int, 1:wybe.int, ~#field##0:wybe.int) @dead_cell_size:nn:nn
             foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -975,7 +975,7 @@ tc2(#rec##0:dead_cell_size.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
-            foreign lpvm access(~#rec##0:dead_cell_size.t, 7:wybe.int, 24:wybe.int, 1:wybe.int, ?#result##0:wybe.int)
+            foreign lpvm access(~#rec##0:dead_cell_size.t, 7:wybe.int, 24:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @dead_cell_size:nn:nn
             foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -999,7 +999,7 @@ tc2(#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, #field##0:wybe.int, ?#s
             foreign llvm move(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t)
 
         1:
-            foreign lpvm {noalias} mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, 7:wybe.int, 0:wybe.int, 24:wybe.int, 1:wybe.int, ~#field##0:wybe.int)
+            foreign lpvm {noalias} mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, 7:wybe.int, 0:wybe.int, 24:wybe.int, 1:wybe.int, ~#field##0:wybe.int) @dead_cell_size:nn:nn
             foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -1025,7 +1025,7 @@ tc3(#rec##0:dead_cell_size.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
-            foreign lpvm access(~#rec##0:dead_cell_size.t, 15:wybe.int, 24:wybe.int, 1:wybe.int, ?#result##0:wybe.int)
+            foreign lpvm access(~#rec##0:dead_cell_size.t, 15:wybe.int, 24:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @dead_cell_size:nn:nn
             foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -1049,7 +1049,7 @@ tc3(#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, #field##0:wybe.int, ?#s
             foreign llvm move(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t)
 
         1:
-            foreign lpvm {noalias} mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, 15:wybe.int, 0:wybe.int, 24:wybe.int, 1:wybe.int, ~#field##0:wybe.int)
+            foreign lpvm {noalias} mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, 15:wybe.int, 0:wybe.int, 24:wybe.int, 1:wybe.int, ~#field##0:wybe.int) @dead_cell_size:nn:nn
             foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -1060,9 +1060,9 @@ td > public {inline} (0 calls)
 td(td1##0:wybe.int, ?#result##0:dead_cell_size.t):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?#rec##0:dead_cell_size.t)
-    foreign lpvm mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~td1##0:wybe.int)
-    foreign llvm or(~#rec##1:dead_cell_size.t, 2:wybe.int, ?#result##0:dead_cell_size.t)
+    foreign lpvm alloc(8:wybe.int, ?#rec##0:dead_cell_size.t) @dead_cell_size:nn:nn
+    foreign lpvm mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~td1##0:wybe.int) @dead_cell_size:nn:nn
+    foreign llvm or(~#rec##1:dead_cell_size.t, 2:wybe.int, ?#result##0:dead_cell_size.t) @dead_cell_size:nn:nn
 td > public {inline} (5 calls)
 1: dead_cell_size.t.td<1>
 td(?td1##0:wybe.int, #result##0:dead_cell_size.t, ?#success##0:wybe.bool):
@@ -1083,7 +1083,7 @@ td(?td1##0:wybe.int, #result##0:dead_cell_size.t, ?#success##0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?td1##0:wybe.int)
 
         1:
-            foreign lpvm access(~#result##0:dead_cell_size.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?td1##0:wybe.int)
+            foreign lpvm access(~#result##0:dead_cell_size.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?td1##0:wybe.int) @dead_cell_size:nn:nn
             foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -1109,7 +1109,7 @@ td1(#rec##0:dead_cell_size.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
             foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
         1:
-            foreign lpvm access(~#rec##0:dead_cell_size.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#result##0:wybe.int)
+            foreign lpvm access(~#rec##0:dead_cell_size.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?#result##0:wybe.int) @dead_cell_size:nn:nn
             foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -1133,7 +1133,7 @@ td1(#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, #field##0:wybe.int, ?#s
             foreign llvm move(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t)
 
         1:
-            foreign lpvm {noalias} mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, -2:wybe.int, 0:wybe.int, 8:wybe.int, 2:wybe.int, ~#field##0:wybe.int)
+            foreign lpvm {noalias} mutate(~#rec##0:dead_cell_size.t, ?#rec##1:dead_cell_size.t, -2:wybe.int, 0:wybe.int, 8:wybe.int, 2:wybe.int, ~#field##0:wybe.int) @dead_cell_size:nn:nn
             foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -1764,14 +1764,14 @@ entry:
         foreign llvm icmp_eq(~#left##0:dead_cell_size.t2, ~#right##0:dead_cell_size.t2, ?#success##0:wybe.bool)
 
     1:
-        foreign lpvm access(~#left##0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#left#a##0:wybe.int)
+        foreign lpvm access(~#left##0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#left#a##0:wybe.int) @dead_cell_size:nn:nn
         foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.bool)
         case ~tmp#8##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
         1:
-            foreign lpvm access(~#right##0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#right#a##0:wybe.int)
+            foreign lpvm access(~#right##0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#right#a##0:wybe.int) @dead_cell_size:nn:nn
             foreign llvm icmp_eq(~#left#a##0:wybe.int, ~#right#a##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
@@ -1789,7 +1789,7 @@ a(#rec##0:dead_cell_size.t2, ?#result##0:wybe.int, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
+        foreign lpvm access(~#rec##0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @dead_cell_size:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 a > public {inline} (0 calls)
@@ -1804,7 +1804,7 @@ a(#rec##0:dead_cell_size.t2, ?#rec##1:dead_cell_size.t2, #field##0:wybe.int, ?#s
         foreign llvm move(~#rec##0:dead_cell_size.t2, ?#rec##1:dead_cell_size.t2)
 
     1:
-        foreign lpvm {noalias} mutate(~#rec##0:dead_cell_size.t2, ?#rec##1:dead_cell_size.t2, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
+        foreign lpvm {noalias} mutate(~#rec##0:dead_cell_size.t2, ?#rec##1:dead_cell_size.t2, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @dead_cell_size:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -1822,8 +1822,8 @@ t2b > public {inline} (0 calls)
 t2b(a##0:wybe.int, ?#result##0:dead_cell_size.t2):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?#rec##0:dead_cell_size.t2)
-    foreign lpvm mutate(~#rec##0:dead_cell_size.t2, ?#result##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~a##0:wybe.int)
+    foreign lpvm alloc(8:wybe.int, ?#rec##0:dead_cell_size.t2) @dead_cell_size:nn:nn
+    foreign lpvm mutate(~#rec##0:dead_cell_size.t2, ?#result##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~a##0:wybe.int) @dead_cell_size:nn:nn
 t2b > public {inline} (8 calls)
 1: dead_cell_size.t2.t2b<1>
 t2b(?a##0:wybe.int, #result##0:dead_cell_size.t2, ?#success##0:wybe.bool):
@@ -1836,7 +1836,7 @@ t2b(?a##0:wybe.int, #result##0:dead_cell_size.t2, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?a##0:wybe.int)
 
     1:
-        foreign lpvm access(~#result##0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int)
+        foreign lpvm access(~#result##0:dead_cell_size.t2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int) @dead_cell_size:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
