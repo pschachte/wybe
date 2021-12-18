@@ -72,7 +72,10 @@ uniquenessCheckProc def _ = do
                       (catMaybes $ typeModule . paramType <$> params)
     unless (detism `determinismLEQ` Det || not someUnique)
            (errmsg (procPos def)
-            $ showProcName name ++ " with unique argument can fail") 
+            $ showProcName name ++ " with unique argument can fail")
+    isUnique <- getModule (tmUniqueness . typeModifiers . modInterface)
+    when (procIsCtor def && not isUnique)
+      $ mapM_ (checkNoNestedUnique pos) $ procProtoParams $ procProto def
     case procImpln def of
         ProcDefSrc body -> do
             state <- uniquenessCheckDef name pos detism body params
@@ -83,12 +86,32 @@ uniquenessCheckProc def _ = do
                         ++ show (procName def)
 
 
+-- | Check that the specified parameter is not a unique-typed input.  If it is,
+-- report that a member of a non-unique type is unique.
+checkNoNestedUnique :: OptPos -> Param -> Compiler ()
+checkNoNestedUnique pos member =
+    when (flowsIn $ paramFlow member) $ do
+        let ty = paramType member
+        ty' <- lookupType "ensureNotUnique" pos ty
+        case typeModule ty' of
+            Nothing -> return ()
+            Just mod -> do
+                isUnique <- getSpecModule "ensureNotUnique"
+                            (tmUniqueness . typeModifiers . modInterface) mod
+                when isUnique
+                  $ errmsg pos $ "Unique constructor argument " ++ paramName member
+                                 ++ " of non-unique type"
+
+
+
+
 ----------------------------------------------------------------
 --               The Uniqueness Checker Monad
 ----------------------------------------------------------------
 
 -- |The Uniqueness monad is a state transformer monad carrying the 
 --  uniqueness state over the compiler monad.
+
 type Uniqueness = StateT UniquenessState Compiler
 
 

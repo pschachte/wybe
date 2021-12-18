@@ -61,13 +61,13 @@ normaliseItem (TypeDecl vis (TypeProto name params) mods
 normaliseItem (ModuleDecl vis name items pos) =
     normaliseSubmodule name vis pos items
 normaliseItem (RepresentationDecl params mods rep pos) = do
+    updateTypeModifiers mods
     addParameters (RealTypeVar <$> params) pos
     addTypeRep rep pos
-    updateTypeModifiers mods
 normaliseItem (ConstructorDecl ctorVis params mods ctors pos) = do
+    updateTypeModifiers mods
     addParameters (RealTypeVar <$> params) pos
     mapM_ (addConstructor ctorVis) ctors
-    updateTypeModifiers mods
 normaliseItem (ImportMods vis modspecs pos) =
     mapM_ (\spec -> addImport spec (importSpec Nothing vis)) modspecs
 normaliseItem (ImportItems vis modspec imports pos) =
@@ -96,16 +96,18 @@ normaliseItem (FuncDecl vis mods (ProcProto name params resources)
   let flowType = Implicit pos
   in  normaliseItem
         (ProcDecl vis mods
-            (ProcProto name (params ++ [Param outputVariableName resulttype ParamOut flowType])
+            (ProcProto name (params ++ [Param outputVariableName resulttype
+                                        ParamOut flowType])
                        resources)
              [maybePlace (ForeignCall "llvm" "move" []
                  [maybePlace (Typed (content result) resulttype Nothing)
                   $ place result,
                   Unplaced
-                  $ Typed (Var outputVariableName ParamOut flowType) resulttype Nothing])
+                  $ Typed (Var outputVariableName ParamOut flowType)
+                          resulttype Nothing])
               pos]
         pos)
-normaliseItem item@(ProcDecl _ _ _ _ _) = do
+normaliseItem item@ProcDecl{} = do
     (item',tmpCtr) <- flattenProcDecl item
     logNormalise $ "Normalised proc:" ++ show item'
     addProc tmpCtr item'
@@ -323,7 +325,7 @@ completeType modspec (TypeDef params ctors ctorVis) = do
            (availableTagBits, wordSizeBytes - 2)
          | numNonConsts == 0
          = (0, 0)
-         | otherwise 
+         | otherwise
          = (ceiling $ logBase 2 (fromIntegral numNonConsts), wordSizeBytes - 1)
     logNormalise $ "Complete " ++ showModSpec modspec
                    ++ " with " ++ show tagBits ++ " tag bits and "
@@ -366,7 +368,7 @@ nonConstCtorInfo placedProto tag = do
       $ shouldnt $ "Constructor with resources: " ++ show placedProto
     let name   = procProtoName proto
     let params = procProtoParams proto
-    anonParams <- zipWith (fixAnonFieldName name) [1..] 
+    anonParams <- zipWith (fixAnonFieldName name) [1..]
                   <$> mapM (resolveParamType pos) params
     let params' = fst <$> anonParams
     logNormalise $ "With types resolved: " ++ show placedProto
@@ -377,14 +379,14 @@ nonConstCtorInfo placedProto tag = do
     let bitSizes = typeRepSize <$> reps'
     let bitSize  = sum bitSizes
     let typeReps = zipWith3 (uncurry (,,,)) anonParams reps' bitSizes
-    return (maybePlace proto{procProtoParams=params'} pos, 
+    return (maybePlace proto{procProtoParams=params'} pos,
             CtorInfo name typeReps pos tag bitSize)
 
 
 -- | Replace a field's name with an appropriate replacement if it is anonymous
 -- (empty string). Bool indicates if the name was replaced
 fixAnonFieldName :: ProcName -> Int -> Param -> (Param,Bool)
-fixAnonFieldName name i param@Param{paramName=""} 
+fixAnonFieldName name i param@Param{paramName=""}
   = (param{paramName = specialName2 name $ show i},True)
 fixAnonFieldName _ _ param = (param,False)
 
@@ -481,7 +483,7 @@ constCtorItems :: Visibility -> TypeSpec -> (Placed ProcProto,Integer) -> [Item]
 constCtorItems  vis typeSpec (placedProto,num) =
     let (proto,pos) = unPlace placedProto
         constName = procProtoName proto
-    in [ProcDecl vis inlineDetModifiers
+    in [ProcDecl vis constructorModifiers
         (ProcProto constName [Param outputVariableName typeSpec ParamOut Ordinary] Set.empty)
         [lpvmCastToVar (castTo (iVal num) typeSpec) outputVariableName] pos
        ]
@@ -597,7 +599,7 @@ constructorItems :: ProcName -> TypeSpec -> [Param]
                  -> Int -> Int -> Int -> OptPos -> [Item]
 constructorItems ctorName typeSpec params fields size tag tagLimit pos =
     let flowType = Implicit pos
-    in [ProcDecl Public inlineDetModifiers
+    in [ProcDecl Public constructorModifiers
         (ProcProto ctorName
             (((\p -> p {paramFlow=ParamIn, paramFlowType=Ordinary}) <$> params)
              ++ [Param outputVariableName typeSpec ParamOut Ordinary])
@@ -778,7 +780,7 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
                  | (name,_,paramType,_,_) <- fields]
                   ++ [Param outputVariableName typeSpec ParamOut Ordinary])
                 Set.empty
-    in [ProcDecl vis inlineDetModifiers proto
+    in [ProcDecl vis constructorModifiers proto
          -- Initialise result to 0
         ([Unplaced $ ForeignCall "llvm" "move" []
           [Unplaced $ castFromTo intType typeSpec $ iVal 0,
@@ -829,7 +831,8 @@ unboxedDeconstructorItems vis ctorName recType numConsts numNonConsts tag
           ++ [Param outputVariableName recType ParamIn Ordinary])
          Set.empty)
          -- Code to check we have the right constructor
-        ([tagCheck numConsts numNonConsts tag tagBits (wordSizeBytes-1) Nothing outputVariableName]
+        ([tagCheck numConsts numNonConsts tag tagBits (wordSizeBytes-1) Nothing
+          outputVariableName]
          -- Code to fetch all the fields
          ++ List.concatMap
             (\(var,_,fieldType,shift,sz) ->
@@ -937,7 +940,7 @@ implicitEquality :: TypeSpec -> [Placed ProcProto] -> [Placed ProcProto]
                  -> TypeRepresentation -> Compiler [Item]
 implicitEquality typespec consts nonconsts rep = do
     defs <- lookupProc "="
-    -- XXX should verify that it's an arity 2 test with two inputs of the right type
+    -- XXX verify that it's an arity 2 test with two inputs of the right type
     if isJust defs
     then return [] -- don't generate if user-defined
     else do
@@ -945,7 +948,8 @@ implicitEquality typespec consts nonconsts rep = do
                                    Param rightName typespec ParamIn Ordinary]
                     Set.empty
       let (body,inline) = equalityBody consts nonconsts rep
-      return [ProcDecl Public (setInline inline $ setDetism SemiDet defaultProcModifiers)
+      return [ProcDecl Public (setInline inline
+                               $ setDetism SemiDet defaultProcModifiers)
                    eqProto body Nothing]
 
 
@@ -1084,8 +1088,8 @@ inlineModifier :: Determinism -> ProcModifiers
 inlineModifier detism = setInline Inline $ setDetism detism defaultProcModifiers
 
 
-inlineDetModifiers :: ProcModifiers
-inlineDetModifiers = setInline Inline defaultProcModifiers
+constructorModifiers :: ProcModifiers
+constructorModifiers = setIsCtor $ setInline Inline defaultProcModifiers
 
 
 inlineSemiDetModifiers :: ProcModifiers
