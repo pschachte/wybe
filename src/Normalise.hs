@@ -338,14 +338,14 @@ completeType modspec (TypeDef params ctors ctorVis) = do
                    $ List.map TypeVariable params
     let constItems =
           concatMap (constCtorItems ctorVis typespec) $ zip constCtors [0..]
+    isUnique <- tmUniqueness . typeModifiers <$> getModuleInterface
     (nonConstCtors',infos) <- unzip <$> zipWithM nonConstCtorInfo nonConstCtors [0..]
     (reps,nonconstItemsList) <-
          unzip <$> mapM
-         (nonConstCtorItems ctorVis typespec numConsts numNonConsts
+         (nonConstCtorItems ctorVis isUnique typespec numConsts numNonConsts
           tagBits tagLimit)
          infos
     let rep = typeRepresentation reps numConsts
-    isUnique <- tmUniqueness . typeModifiers <$> getModuleInterface
     extraItems <-
         if isUnique
             then return [] -- No implicit procs for unique types
@@ -494,9 +494,9 @@ constCtorItems  vis typeSpec (placedProto,num) =
 
 
 -- |All items needed to implement a non-const contructor for the specified type.
-nonConstCtorItems :: Visibility -> TypeSpec -> Int -> Int -> Int -> Int
+nonConstCtorItems :: Visibility -> Bool -> TypeSpec -> Int -> Int -> Int -> Int
                   -> CtorInfo -> Compiler (TypeRepresentation,[Item])
-nonConstCtorItems vis typeSpec numConsts numNonConsts tagBits tagLimit
+nonConstCtorItems vis uniq typeSpec numConsts numNonConsts tagBits tagLimit
                   info@(CtorInfo ctorName paramsReps pos tag bits) = do
     -- If we're unboxed and there are const ctors, then we need an extra
     -- bit to make sure the unboxed value is > than any const value
@@ -525,7 +525,7 @@ nonConstCtorItems vis typeSpec numConsts numNonConsts tagBits tagLimit
       return (Bits size,
               unboxedConstructorItems vis ctorName typeSpec tag nonConstBit
                fields pos
-               ++ unboxedDeconstructorItems vis ctorName typeSpec
+               ++ unboxedDeconstructorItems vis uniq ctorName typeSpec
                   numConsts numNonConsts tag tagBits pos fields
                ++ concatMap (unboxedGetterSetterItems vis typeSpec
                              numConsts numNonConsts tag tagBits pos) fields
@@ -542,7 +542,7 @@ nonConstCtorItems vis typeSpec numConsts numNonConsts tagBits tagLimit
       return (Address,
               constructorItems ctorName typeSpec params fields
                   size tag tagLimit pos
-              ++ deconstructorItems ctorName typeSpec params numConsts
+              ++ deconstructorItems uniq ctorName typeSpec params numConsts
                      numNonConsts tag tagBits tagLimit pos fields size
               ++ concatMap
                  (getterSetterItems vis typeSpec pos numConsts numNonConsts
@@ -647,11 +647,12 @@ constructorItems ctorName typeSpec params fields size tag tagLimit pos =
 
 
 -- |Generate deconstructor code for a non-const constructor
-deconstructorItems :: Ident -> TypeSpec -> [Param] -> Int -> Int -> Int -> Int
-                   -> Int -> OptPos -> [(Ident,Bool,TypeSpec,TypeRepresentation,Int)]
+deconstructorItems :: Bool -> Ident -> TypeSpec -> [Param] -> Int -> Int -> Int
+                   -> Int -> Int -> OptPos
+                   -> [(Ident,Bool,TypeSpec,TypeRepresentation,Int)]
                    -> Int -> [Item]
-deconstructorItems ctorName typeSpec params numConsts numNonConsts tag tagBits
-                   tagLimit pos fields size =
+deconstructorItems uniq ctorName typeSpec params numConsts numNonConsts tag
+                   tagBits tagLimit pos fields size =
     let startOffset = (if tag > tagLimit then tagLimit+1 else tag)
         flowType = Implicit pos
         detism = deconstructorDetism numConsts numNonConsts
@@ -664,12 +665,13 @@ deconstructorItems ctorName typeSpec params numConsts numNonConsts tag tagBits
         ([tagCheck numConsts numNonConsts tag tagBits tagLimit (Just size) outputVariableName]
          -- Code to fetch all the fields
          ++ List.map (\(var,_,_,_,aligned) ->
-                              (maybePlace (ForeignCall "lpvm" "access" []
-                               [Unplaced $ Var outputVariableName ParamIn flowType,
-                                Unplaced $ iVal (aligned - startOffset),
-                                Unplaced $ iVal size,
-                                Unplaced $ iVal startOffset,
-                                Unplaced $ Var var ParamOut flowType]) pos))
+                        (maybePlace (ForeignCall "lpvm" "access" 
+                            ["unique" | uniq]
+                            [Unplaced $ Var outputVariableName ParamIn flowType,
+                            Unplaced $ iVal (aligned - startOffset),
+                            Unplaced $ iVal size,
+                            Unplaced $ iVal startOffset,
+                            Unplaced $ Var var ParamOut flowType]) pos))
             fields)
         pos]
 
@@ -824,10 +826,10 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
 
 
 -- |Generate deconstructor code for a unboxed non-const constructor
-unboxedDeconstructorItems :: Visibility -> ProcName -> TypeSpec -> Int -> Int
-                          -> Int -> Int -> OptPos
+unboxedDeconstructorItems :: Visibility -> Bool -> ProcName -> TypeSpec -> Int
+                          -> Int -> Int -> Int -> OptPos
                           -> [(VarName,Bool,TypeSpec,Int,Int)] -> [Item]
-unboxedDeconstructorItems vis ctorName recType numConsts numNonConsts tag
+unboxedDeconstructorItems vis uniq ctorName recType numConsts numNonConsts tag
                           tagBits pos fields =
     let flowType = Implicit pos
         detism = deconstructorDetism numConsts numNonConsts
@@ -844,7 +846,7 @@ unboxedDeconstructorItems vis ctorName recType numConsts numNonConsts tag
          ++ List.concatMap
             (\(var,_,fieldType,shift,sz) ->
                -- Code to access the selected field
-               [maybePlace (ForeignCall "llvm" "lshr" []
+               [maybePlace (ForeignCall "llvm" "lshr" ["unique" | uniq]
                  [Unplaced $ Typed (varGet outputVariableName) recType Nothing,
                   Unplaced $ Typed (iVal shift) recType Nothing,
                   Unplaced $ Typed (varSet tmpName1) recType Nothing]) pos,

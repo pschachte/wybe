@@ -86,6 +86,7 @@ updatefile () {
 }
 
 if [ $# -eq 0 ] ; then
+    make || exit 1
     make test
     for f in test-cases/final-dump/*.wybe ; do
         updatefile "$f"

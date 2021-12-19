@@ -36,7 +36,7 @@ data UniquenessErrorKind =
     ErrorReuse             -- ^ Reuse of variable without intervening assignment
     | ErrorReturn ProcName -- ^ Variable returned after being used
     | ErrorDetism Determinism -- ^ Variable assigned in non-deterministic contxt
-  deriving Show
+  deriving (Eq, Show)
 
 -- | Set used to check correctness of uniqueness of the program
 data UniquenessState = UniquenessState {
@@ -44,15 +44,19 @@ data UniquenessState = UniquenessState {
     uniquenessUsedMap :: VarDict,
     -- |The uniqueness errors seen so far.
     uniquenessErrors  :: [UniquenessError],
+    -- |Whether to excuse (not report as an error) subsequent uses of a unique
+    -- variable.  Uses and assignments are still treated as such, but reuses are
+    -- not reported when this is True.
+    uniquenessForgive :: Bool,
     -- |The maximum determinism allowed in the current scope.  Assignment to
     -- unique variables is not allowed outside a deterministic scope.
     uniquenessDetism  :: Determinism
-} deriving Show
+} deriving (Show)
 
 
 -- | Return an initial state for uniqueness checker
 initUniquenessState :: Determinism -> UniquenessState
-initUniquenessState = UniquenessState Map.empty []
+initUniquenessState = UniquenessState Map.empty [] False
 
 
 -- | Check correctness of uniqueness for a procedure
@@ -158,8 +162,12 @@ variableAssigned name pos ty fType = do
 -- | Report a uniqueness error
 uniquenessErr :: UniquenessError -> Uniqueness ()
 uniquenessErr err = do
-    logUniqueness $ "Recording error: " ++ show err
-    modify $ \st -> st { uniquenessErrors = err : uniquenessErrors st }
+    forgive <- gets uniquenessForgive
+    if forgive && errKind err == ErrorReuse
+        then logUniqueness $ "Forgive error: " ++ show err
+        else do
+            logUniqueness $ "Recording error: " ++ show err
+            modify $ \st -> st { uniquenessErrors = err : uniquenessErrors st }
 
 
 -- | Run a uniqueness checker in a context with the specified determinism.
@@ -174,6 +182,21 @@ withDetism checker detism = do
     return result
 
 
+-- | Run a uniqueness checker without reporting reuse errors.
+forgivingly :: Bool -> Uniqueness a  -> Uniqueness a
+forgivingly forgive checker = do
+    oldForgiving <- gets uniquenessForgive
+    let newForgiving = forgive || oldForgiving
+    logUniqueness $ "begin forgiving (" ++ show newForgiving
+                    ++ ", was " ++ show oldForgiving  ++ ")"
+    modify $ \state -> state { uniquenessForgive =  newForgiving }
+    result <- checker
+    logUniqueness $ "returning forgiving to " ++ show oldForgiving
+    modify $ \state -> state { uniquenessForgive = oldForgiving }
+    return result
+
+
+-- | Combine two uniqueness computations into a uniqueness computation.  The resulting computation includes all the errors from both, and takes the more conservative binding state
 joinUniqueness :: Uniqueness () -> Uniqueness () -> Uniqueness ()
 joinUniqueness first second = do
     initial <- get
@@ -188,7 +211,10 @@ joinUniqueness first second = do
                   ++ uniquenessErrors initial
     let joinUsed = uniquenessUsedMap firstState 
                    `Map.union` uniquenessUsedMap secondState
-    put $ UniquenessState joinUsed allErrs $ uniquenessDetism initial
+    let joinForgiveness = uniquenessForgive firstState
+                          && uniquenessForgive secondState
+    put $ UniquenessState joinUsed allErrs joinForgiveness
+                          $ uniquenessDetism initial
 
 
 -- | Uniqueness check a statement sequence
@@ -201,9 +227,11 @@ uniquenessCheckStmt :: Stmt -> OptPos -> Uniqueness ()
 uniquenessCheckStmt call@(ProcCall _ _ _ _ _ args) pos = do
     logUniqueness $ "Uniqueness checking call " ++ show call
     mapM_ (defaultPlacedApply uniquenessCheckExp pos) args
-uniquenessCheckStmt call@(ForeignCall _ _ _ args) pos = do
+uniquenessCheckStmt call@(ForeignCall _ _ flags args) pos = do
+    let forgiving = "unique" `elem` flags
     logUniqueness $ "Uniqueness checking foreign call " ++ show call
-    mapM_ (defaultPlacedApply uniquenessCheckExp pos) args
+    forgivingly forgiving
+        $ mapM_ (defaultPlacedApply uniquenessCheckExp pos) args
 uniquenessCheckStmt stmt@(Cond tst thn els _ _) pos = do
     logUniqueness $ "Uniqueness checking conditional " ++ show stmt
     (defaultPlacedApply uniquenessCheckStmt pos tst `withDetism` SemiDet
