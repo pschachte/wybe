@@ -61,13 +61,13 @@ normaliseItem (TypeDecl vis (TypeProto name params) mods
 normaliseItem (ModuleDecl vis name items pos) =
     normaliseSubmodule name vis pos items
 normaliseItem (RepresentationDecl params mods rep pos) = do
+    updateTypeModifiers mods
     addParameters (RealTypeVar <$> params) pos
     addTypeRep rep pos
-    updateTypeModifiers mods
 normaliseItem (ConstructorDecl ctorVis params mods ctors pos) = do
+    updateTypeModifiers mods
     addParameters (RealTypeVar <$> params) pos
     mapM_ (addConstructor ctorVis) ctors
-    updateTypeModifiers mods
 normaliseItem (ImportMods vis modspecs pos) =
     mapM_ (\spec -> addImport spec (importSpec Nothing vis)) modspecs
 normaliseItem (ImportItems vis modspec imports pos) =
@@ -96,16 +96,18 @@ normaliseItem (FuncDecl vis mods (ProcProto name params resources)
   let flowType = Implicit pos
   in  normaliseItem
         (ProcDecl vis mods
-            (ProcProto name (params ++ [Param outputVariableName resulttype ParamOut flowType])
+            (ProcProto name (params ++ [Param outputVariableName resulttype
+                                        ParamOut flowType])
                        resources)
              [maybePlace (ForeignCall "llvm" "move" []
                  [maybePlace (Typed (content result) resulttype Nothing)
                   $ place result,
                   Unplaced
-                  $ Typed (Var outputVariableName ParamOut flowType) resulttype Nothing])
+                  $ Typed (Var outputVariableName ParamOut flowType)
+                          resulttype Nothing])
               pos]
         pos)
-normaliseItem item@(ProcDecl _ _ _ _ _) = do
+normaliseItem item@ProcDecl{} = do
     (item',tmpCtr) <- flattenProcDecl item
     logNormalise $ "Normalised proc:" ++ show item'
     addProc tmpCtr item'
@@ -323,7 +325,7 @@ completeType modspec (TypeDef params ctors ctorVis) = do
            (availableTagBits, wordSizeBytes - 2)
          | numNonConsts == 0
          = (0, 0)
-         | otherwise 
+         | otherwise
          = (ceiling $ logBase 2 (fromIntegral numNonConsts), wordSizeBytes - 1)
     logNormalise $ "Complete " ++ showModSpec modspec
                    ++ " with " ++ show tagBits ++ " tag bits and "
@@ -336,14 +338,18 @@ completeType modspec (TypeDef params ctors ctorVis) = do
                    $ List.map TypeVariable params
     let constItems =
           concatMap (constCtorItems ctorVis typespec) $ zip constCtors [0..]
+    isUnique <- tmUniqueness . typeModifiers <$> getModuleInterface
     (nonConstCtors',infos) <- unzip <$> zipWithM nonConstCtorInfo nonConstCtors [0..]
     (reps,nonconstItemsList) <-
          unzip <$> mapM
-         (nonConstCtorItems ctorVis typespec numConsts numNonConsts
+         (nonConstCtorItems ctorVis isUnique typespec numConsts numNonConsts
           tagBits tagLimit)
          infos
     let rep = typeRepresentation reps numConsts
-    extraItems <- implicitItems typespec constCtors nonConstCtors' rep
+    extraItems <-
+        if isUnique
+            then return [] -- No implicit procs for unique types
+            else implicitItems typespec constCtors nonConstCtors' rep
     logNormalise $ "Representation of type " ++ showModSpec modspec
                    ++ " is " ++ show rep
     setTypeRep rep
@@ -366,7 +372,7 @@ nonConstCtorInfo placedProto tag = do
       $ shouldnt $ "Constructor with resources: " ++ show placedProto
     let name   = procProtoName proto
     let params = procProtoParams proto
-    anonParams <- zipWith (fixAnonFieldName name) [1..] 
+    anonParams <- zipWith (fixAnonFieldName name) [1..]
                   <$> mapM (resolveParamType pos) params
     let params' = fst <$> anonParams
     logNormalise $ "With types resolved: " ++ show placedProto
@@ -377,14 +383,14 @@ nonConstCtorInfo placedProto tag = do
     let bitSizes = typeRepSize <$> reps'
     let bitSize  = sum bitSizes
     let typeReps = zipWith3 (uncurry (,,,)) anonParams reps' bitSizes
-    return (maybePlace proto{procProtoParams=params'} pos, 
+    return (maybePlace proto{procProtoParams=params'} pos,
             CtorInfo name typeReps pos tag bitSize)
 
 
 -- | Replace a field's name with an appropriate replacement if it is anonymous
 -- (empty string). Bool indicates if the name was replaced
 fixAnonFieldName :: ProcName -> Int -> Param -> (Param,Bool)
-fixAnonFieldName name i param@Param{paramName=""} 
+fixAnonFieldName name i param@Param{paramName=""}
   = (param{paramName = specialName2 name $ show i},True)
 fixAnonFieldName _ _ param = (param,False)
 
@@ -481,16 +487,16 @@ constCtorItems :: Visibility -> TypeSpec -> (Placed ProcProto,Integer) -> [Item]
 constCtorItems  vis typeSpec (placedProto,num) =
     let (proto,pos) = unPlace placedProto
         constName = procProtoName proto
-    in [ProcDecl vis inlineDetModifiers
+    in [ProcDecl vis constructorModifiers
         (ProcProto constName [Param outputVariableName typeSpec ParamOut Ordinary] Set.empty)
         [lpvmCastToVar (castTo (iVal num) typeSpec) outputVariableName] pos
        ]
 
 
 -- |All items needed to implement a non-const contructor for the specified type.
-nonConstCtorItems :: Visibility -> TypeSpec -> Int -> Int -> Int -> Int
+nonConstCtorItems :: Visibility -> Bool -> TypeSpec -> Int -> Int -> Int -> Int
                   -> CtorInfo -> Compiler (TypeRepresentation,[Item])
-nonConstCtorItems vis typeSpec numConsts numNonConsts tagBits tagLimit
+nonConstCtorItems vis uniq typeSpec numConsts numNonConsts tagBits tagLimit
                   info@(CtorInfo ctorName paramsReps pos tag bits) = do
     -- If we're unboxed and there are const ctors, then we need an extra
     -- bit to make sure the unboxed value is > than any const value
@@ -519,7 +525,7 @@ nonConstCtorItems vis typeSpec numConsts numNonConsts tagBits tagLimit
       return (Bits size,
               unboxedConstructorItems vis ctorName typeSpec tag nonConstBit
                fields pos
-               ++ unboxedDeconstructorItems vis ctorName typeSpec
+               ++ unboxedDeconstructorItems vis uniq ctorName typeSpec
                   numConsts numNonConsts tag tagBits pos fields
                ++ concatMap (unboxedGetterSetterItems vis typeSpec
                              numConsts numNonConsts tag tagBits pos) fields
@@ -536,7 +542,7 @@ nonConstCtorItems vis typeSpec numConsts numNonConsts tagBits tagLimit
       return (Address,
               constructorItems ctorName typeSpec params fields
                   size tag tagLimit pos
-              ++ deconstructorItems ctorName typeSpec params numConsts
+              ++ deconstructorItems uniq ctorName typeSpec params numConsts
                      numNonConsts tag tagBits tagLimit pos fields size
               ++ concatMap
                  (getterSetterItems vis typeSpec pos numConsts numNonConsts
@@ -597,55 +603,56 @@ constructorItems :: ProcName -> TypeSpec -> [Param]
                  -> Int -> Int -> Int -> OptPos -> [Item]
 constructorItems ctorName typeSpec params fields size tag tagLimit pos =
     let flowType = Implicit pos
-    in [ProcDecl Public inlineDetModifiers
+    in [ProcDecl Public constructorModifiers
         (ProcProto ctorName
             (((\p -> p {paramFlow=ParamIn, paramFlowType=Ordinary}) <$> params)
              ++ [Param outputVariableName typeSpec ParamOut Ordinary])
             Set.empty)
         -- Code to allocate memory for the value
-        ([Unplaced $ ForeignCall "lpvm" "alloc" []
+        ([maybePlace (ForeignCall "lpvm" "alloc" []
           [Unplaced $ iVal size,
-           Unplaced $ varSet recName `withType` typeSpec]]
+           Unplaced $ varSet recName `withType` typeSpec]) pos]
          ++
          -- fill in the secondary tag, if necessary
          (if tag > tagLimit
-          then [Unplaced $ ForeignCall "lpvm" "mutate" []
+          then [maybePlace (ForeignCall "lpvm" "mutate" []
                  [Unplaced $ Typed (varGet recName) typeSpec Nothing,
                   Unplaced $ Typed (varSet recName) typeSpec Nothing,
                   Unplaced $ iVal 0,
                   Unplaced $ iVal 1,
                   Unplaced $ iVal size,
                   Unplaced $ iVal 0,
-                  Unplaced $ iVal tag]]
+                  Unplaced $ iVal tag]) pos]
           else [])
          ++
          -- Code to fill all the fields
          (List.map
           (\(var,_,ty,_,offset) ->
-               (Unplaced $ ForeignCall "lpvm" "mutate" []
+               (maybePlace (ForeignCall "lpvm" "mutate" []
                  [Unplaced $ Typed (varGet recName) typeSpec Nothing,
                   Unplaced $ Typed (varSet recName) typeSpec Nothing,
                   Unplaced $ iVal offset,
                   Unplaced $ iVal 1,
                   Unplaced $ iVal size,
                   Unplaced $ iVal 0,
-                  Unplaced $ Typed (Var var ParamIn flowType) ty Nothing]))
+                  Unplaced $ Typed (Var var ParamIn flowType) ty Nothing])) pos)
           fields)
          ++
          -- Finally, code to tag the reference
-         [Unplaced $ ForeignCall "llvm" "or" []
+         [maybePlace (ForeignCall "llvm" "or" []
           [Unplaced $ varGet recName,
            Unplaced $ iVal (if tag > tagLimit then tagLimit+1 else tag),
-           Unplaced $ varSet outputVariableName]])
+           Unplaced $ varSet outputVariableName]) pos])
         pos]
 
 
 -- |Generate deconstructor code for a non-const constructor
-deconstructorItems :: Ident -> TypeSpec -> [Param] -> Int -> Int -> Int -> Int
-                   -> Int -> OptPos -> [(Ident,Bool,TypeSpec,TypeRepresentation,Int)]
+deconstructorItems :: Bool -> Ident -> TypeSpec -> [Param] -> Int -> Int -> Int
+                   -> Int -> Int -> OptPos
+                   -> [(Ident,Bool,TypeSpec,TypeRepresentation,Int)]
                    -> Int -> [Item]
-deconstructorItems ctorName typeSpec params numConsts numNonConsts tag tagBits
-                   tagLimit pos fields size =
+deconstructorItems uniq ctorName typeSpec params numConsts numNonConsts tag
+                   tagBits tagLimit pos fields size =
     let startOffset = (if tag > tagLimit then tagLimit+1 else tag)
         flowType = Implicit pos
         detism = deconstructorDetism numConsts numNonConsts
@@ -658,12 +665,13 @@ deconstructorItems ctorName typeSpec params numConsts numNonConsts tag tagBits
         ([tagCheck numConsts numNonConsts tag tagBits tagLimit (Just size) outputVariableName]
          -- Code to fetch all the fields
          ++ List.map (\(var,_,_,_,aligned) ->
-                              (Unplaced $ ForeignCall "lpvm" "access" []
-                               [Unplaced $ Var outputVariableName ParamIn flowType,
-                                Unplaced $ iVal (aligned - startOffset),
-                                Unplaced $ iVal size,
-                                Unplaced $ iVal startOffset,
-                                Unplaced $ Var var ParamOut flowType]))
+                        (maybePlace (ForeignCall "lpvm" "access" 
+                            ["unique" | uniq]
+                            [Unplaced $ Var outputVariableName ParamIn flowType,
+                            Unplaced $ iVal (aligned - startOffset),
+                            Unplaced $ iVal size,
+                            Unplaced $ iVal startOffset,
+                            Unplaced $ Var var ParamOut flowType]) pos))
             fields)
         pos]
 
@@ -736,12 +744,12 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
         ([tagCheck numConsts numNonConsts tag tagBits tagLimit (Just size) recName]
          ++
         -- Code to access the selected field
-         [Unplaced $ ForeignCall "lpvm" "access" []
+         [maybePlace (ForeignCall "lpvm" "access" []
           [Unplaced $ varGet recName,
            Unplaced $ iVal (offset - startOffset),
            Unplaced $ iVal size,
            Unplaced $ iVal startOffset,
-           Unplaced $ varSet outputVariableName]])
+           Unplaced $ varSet outputVariableName]) pos])
         pos,
         -- The setter:
         ProcDecl vis (inlineModifier detism)
@@ -751,14 +759,14 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
         ([tagCheck numConsts numNonConsts tag tagBits tagLimit (Just size) recName]
          ++
         -- Code to mutate the selected field
-         [Unplaced $ ForeignCall "lpvm" "mutate" flags
+         [maybePlace (ForeignCall "lpvm" "mutate" flags
           [Unplaced $ Typed (Var recName ParamIn Ordinary) rectype Nothing,
            Unplaced $ Typed (Var recName ParamOut Ordinary) rectype Nothing,
            Unplaced $ iVal (offset - startOffset),
            Unplaced $ iVal 0,    -- May be changed to 1 by CTGC transform
            Unplaced $ iVal size,
            Unplaced $ iVal startOffset,
-           Unplaced $ varGet fieldName]])
+           Unplaced $ varGet fieldName]) pos])
         pos]
 
 
@@ -778,7 +786,7 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
                  | (name,_,paramType,_,_) <- fields]
                   ++ [Param outputVariableName typeSpec ParamOut Ordinary])
                 Set.empty
-    in [ProcDecl vis inlineDetModifiers proto
+    in [ProcDecl vis constructorModifiers proto
          -- Initialise result to 0
         ([Unplaced $ ForeignCall "llvm" "move" []
           [Unplaced $ castFromTo intType typeSpec $ iVal 0,
@@ -787,14 +795,15 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
          -- Shift each field into place and or with the result
          List.concatMap
           (\(var,_,ty,shift,sz) ->
-               [Unplaced $ ForeignCall "llvm" "shl" []
+               [maybePlace (ForeignCall "llvm" "shl" []
                  [Unplaced $ castFromTo ty typeSpec $ varGet var,
                   Unplaced $ iVal shift `castTo` typeSpec,
-                  Unplaced $ varSet tmpName1 `withType` typeSpec],
-                Unplaced $ ForeignCall "llvm" "or" []
+                  Unplaced $ varSet tmpName1 `withType` typeSpec]) pos,
+                maybePlace (ForeignCall "llvm" "or" []
                  [Unplaced $ varGet tmpName1 `withType` typeSpec,
                   Unplaced $ varGet outputVariableName `withType` typeSpec,
-                  Unplaced $ varSet outputVariableName `withType` typeSpec]])
+                  Unplaced $ varSet outputVariableName `withType` typeSpec])
+                pos])
           fields
          ++
          -- Or in the bit to ensure the value is greater than the greatest
@@ -802,23 +811,25 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
          (case nonConstBit of
             Nothing -> []
             Just shift ->
-              [Unplaced $ ForeignCall "llvm" "or" []
+              [maybePlace (ForeignCall "llvm" "or" []
                [Unplaced $ Typed (varGet outputVariableName) typeSpec Nothing,
                 Unplaced $ Typed (iVal (bit shift::Int)) typeSpec Nothing,
-                Unplaced $ Typed (varSet outputVariableName) typeSpec Nothing]])
+                Unplaced $ Typed (varSet outputVariableName) typeSpec Nothing])
+               pos])
          -- Or in the tag value
-          ++ [Unplaced $ ForeignCall "llvm" "or" []
+          ++ [maybePlace (ForeignCall "llvm" "or" []
                [Unplaced $ Typed (varGet outputVariableName) typeSpec Nothing,
                 Unplaced $ Typed (iVal tag) typeSpec Nothing,
-                Unplaced $ Typed (varSet outputVariableName) typeSpec Nothing]]
+                Unplaced $ Typed (varSet outputVariableName) typeSpec Nothing])
+              pos]
         ) pos]
 
 
 -- |Generate deconstructor code for a unboxed non-const constructor
-unboxedDeconstructorItems :: Visibility -> ProcName -> TypeSpec -> Int -> Int
-                          -> Int -> Int -> OptPos
+unboxedDeconstructorItems :: Visibility -> Bool -> ProcName -> TypeSpec -> Int
+                          -> Int -> Int -> Int -> OptPos
                           -> [(VarName,Bool,TypeSpec,Int,Int)] -> [Item]
-unboxedDeconstructorItems vis ctorName recType numConsts numNonConsts tag
+unboxedDeconstructorItems vis uniq ctorName recType numConsts numNonConsts tag
                           tagBits pos fields =
     let flowType = Implicit pos
         detism = deconstructorDetism numConsts numNonConsts
@@ -829,22 +840,23 @@ unboxedDeconstructorItems vis ctorName recType numConsts numNonConsts tag
           ++ [Param outputVariableName recType ParamIn Ordinary])
          Set.empty)
          -- Code to check we have the right constructor
-        ([tagCheck numConsts numNonConsts tag tagBits (wordSizeBytes-1) Nothing outputVariableName]
+        ([tagCheck numConsts numNonConsts tag tagBits (wordSizeBytes-1) Nothing
+          outputVariableName]
          -- Code to fetch all the fields
          ++ List.concatMap
             (\(var,_,fieldType,shift,sz) ->
                -- Code to access the selected field
-               [Unplaced $ ForeignCall "llvm" "lshr" []
+               [maybePlace (ForeignCall "llvm" "lshr" ["unique" | uniq]
                  [Unplaced $ Typed (varGet outputVariableName) recType Nothing,
                   Unplaced $ Typed (iVal shift) recType Nothing,
-                  Unplaced $ Typed (varSet tmpName1) recType Nothing],
-                Unplaced $ ForeignCall "llvm" "and" []
+                  Unplaced $ Typed (varSet tmpName1) recType Nothing]) pos,
+                maybePlace (ForeignCall "llvm" "and" []
                  [Unplaced $ Typed (varGet tmpName1) recType Nothing,
                   Unplaced $ Typed (iVal $ (bit sz::Int) - 1) recType Nothing,
-                  Unplaced $ Typed (varSet tmpName2) recType Nothing],
-                Unplaced $ ForeignCall "lpvm" "cast" []
+                  Unplaced $ Typed (varSet tmpName2) recType Nothing]) pos,
+                maybePlace (ForeignCall "lpvm" "cast" []
                  [Unplaced $ Typed (varGet tmpName2) recType Nothing,
-                  Unplaced $ Typed (varSet var) fieldType Nothing]
+                  Unplaced $ Typed (varSet var) fieldType Nothing]) pos
                ])
             fields)
         pos]
@@ -869,18 +881,18 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag tagBits pos
         ([tagCheck numConsts numNonConsts tag tagBits (wordSizeBytes-1) Nothing recName]
          ++
         -- Code to access the selected field
-         [Unplaced $ ForeignCall "llvm" "lshr" []
+         [maybePlace (ForeignCall "llvm" "lshr" []
            [Unplaced $ Typed (varGet recName) recType Nothing,
             Unplaced $ Typed (iVal shift) recType Nothing,
-            Unplaced $ Typed (varSet recName) recType Nothing],
+            Unplaced $ Typed (varSet recName) recType Nothing]) pos,
           -- XXX Don't need to do this for the most significant field:
-          Unplaced $ ForeignCall "llvm" "and" []
+          maybePlace (ForeignCall "llvm" "and" []
            [Unplaced $ Typed (varGet recName) recType Nothing,
             Unplaced $ Typed (iVal fieldMask) recType Nothing,
-            Unplaced $ Typed (varSet fieldName) recType Nothing],
-          Unplaced $ ForeignCall "lpvm" "cast" []
+            Unplaced $ Typed (varSet fieldName) recType Nothing]) pos,
+          maybePlace (ForeignCall "lpvm" "cast" []
            [Unplaced $ Typed (varGet fieldName) recType Nothing,
-            Unplaced $ Typed (varSet outputVariableName) fieldType Nothing]
+            Unplaced $ Typed (varSet outputVariableName) fieldType Nothing]) pos
          ])
         pos,
         -- The setter:
@@ -892,18 +904,18 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag tagBits pos
          ++
         -- Code to mutate the selected field by masking out the current
         -- value, shifting the new value into place and bitwise or-ing it
-         [Unplaced $ ForeignCall "llvm" "and" []
+         [maybePlace (ForeignCall "llvm" "and" []
            [Unplaced $ Typed (varGet recName) recType Nothing,
             Unplaced $ Typed (iVal shiftedHoleMask) recType Nothing,
-            Unplaced $ Typed (varSet recName) recType Nothing],
-          Unplaced $ ForeignCall "llvm" "shl" []
+            Unplaced $ Typed (varSet recName) recType Nothing]) pos,
+          maybePlace (ForeignCall "llvm" "shl" []
            [Unplaced (castFromTo fieldType recType (varGet fieldName)),
             Unplaced $ iVal shift `castTo` recType,
-            Unplaced $ Typed (varSet tmpName1) recType Nothing],
-          Unplaced $ ForeignCall "llvm" "or" []
+            Unplaced $ Typed (varSet tmpName1) recType Nothing]) pos,
+          maybePlace (ForeignCall "llvm" "or" []
            [Unplaced $ Typed (varGet tmpName1) recType Nothing,
             Unplaced $ Typed (varGet recName) recType Nothing,
-            Unplaced $ Typed (varSet recName) recType Nothing]
+            Unplaced $ Typed (varSet recName) recType Nothing]) pos
          ])
         pos]
 
@@ -937,7 +949,7 @@ implicitEquality :: TypeSpec -> [Placed ProcProto] -> [Placed ProcProto]
                  -> TypeRepresentation -> Compiler [Item]
 implicitEquality typespec consts nonconsts rep = do
     defs <- lookupProc "="
-    -- XXX should verify that it's an arity 2 test with two inputs of the right type
+    -- XXX verify that it's an arity 2 test with two inputs of the right type
     if isJust defs
     then return [] -- don't generate if user-defined
     else do
@@ -945,7 +957,8 @@ implicitEquality typespec consts nonconsts rep = do
                                    Param rightName typespec ParamIn Ordinary]
                     Set.empty
       let (body,inline) = equalityBody consts nonconsts rep
-      return [ProcDecl Public (setInline inline $ setDetism SemiDet defaultProcModifiers)
+      return [ProcDecl Public (setInline inline
+                               $ setDetism SemiDet defaultProcModifiers)
                    eqProto body Nothing]
 
 
@@ -1084,8 +1097,8 @@ inlineModifier :: Determinism -> ProcModifiers
 inlineModifier detism = setInline Inline $ setDetism detism defaultProcModifiers
 
 
-inlineDetModifiers :: ProcModifiers
-inlineDetModifiers = setInline Inline defaultProcModifiers
+constructorModifiers :: ProcModifiers
+constructorModifiers = setIsCtor $ setInline Inline defaultProcModifiers
 
 
 inlineSemiDetModifiers :: ProcModifiers

@@ -83,7 +83,7 @@ module AST (
   initialisedResources,
   addSimpleResource, lookupResource, specialResources, publicResource,
   ProcModifiers(..), defaultProcModifiers, setDetism, setInline, setImpurity,
-  showProcModifiers, Inlining(..), Impurity(..),
+  setIsCtor, showProcModifiers, Inlining(..), Impurity(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
   specialChar, specialName, specialName2, outputVariableName, outputStatusName,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showProcName,
@@ -794,15 +794,15 @@ addParameters :: [TypeVarName] -> OptPos -> Compiler ()
 addParameters params pos = do
     currMod <- getModuleSpec
     currParams <- getModule modParams
-    if nub params /= params
-      then errmsg pos
+    when (nub params /= params)
+      $ errmsg pos
            $ "duplicated type/module parameter in: "
            ++ intercalate ", " (show <$> params)
-      else if List.null currParams
-      then updateModule (\m -> m { modParams = params })
-      else errmsg pos
+    unless (List.null currParams)
+      $ errmsg pos
            $ "repeated parameter declaration: "
            ++ intercalate ", " (show <$> params)
+    updateModule (\m -> m { modParams = params })
 
 
 -- |Add the specified type representation to the current module.  This makes the
@@ -838,34 +838,35 @@ addConstructor vis pctor = do
     let ctor = content pctor
     currMod <- getModuleSpec
     hasRepn <- isJust <$> getModule modTypeRep
+    when hasRepn
+      $ errmsg pos
+           $ "Declaring constructor for type " ++ showModSpec currMod
+           ++ " with declared representation"
     pctors <- fromMaybe [] <$> getModuleImplementationField modConstructors
     let redundant =
           any (\c -> procProtoName c == procProtoName ctor
                 && length (procProtoParams c) == length (procProtoParams ctor))
           $ content . snd <$> pctors
-    let typeVars = Set.unions
-                   (typeVarSet . paramType <$> procProtoParams (content pctor))
-    missingParams <- Set.difference typeVars . Set.fromList
-                     <$> getModule modParams
-    if hasRepn
-      then errmsg pos
-           $ "Declaring constructor for type " ++ showModSpec currMod
-           ++ " with declared representation"
-      else if redundant
-      then  errmsg pos
+    when redundant
+      $  errmsg pos
            $ "Declaring constructor for type " ++ showModSpec currMod
            ++ " with repeated name/arity"
-      else if Set.null missingParams
-            then do
-                updateImplementation (\m -> m { modConstructors =
-                                                Just ((vis,pctor):pctors) })
-                updateModule (\m -> m { modIsType  = True })
-                addKnownType currMod
-            else
-                errmsg pos
-                $ "Constructors for type " ++ showModSpec currMod
-                  ++ " use unbound type variable(s) "
-                  ++ intercalate ", " (("?"++) . show <$> Set.toList missingParams)
+    -- isUnique <- getModule (typeModifiers . modInterface)
+    let params = procProtoParams ctor
+    -- unless (tmUniqueness isUnique) -- if not unique, params can't be, either
+    --   $ mapM_ (ensureNotUnique pos) params
+    let typeVars = Set.unions (typeVarSet . paramType <$> params)
+    missingParams <- Set.difference typeVars . Set.fromList
+                     <$> getModule modParams
+    unless (Set.null missingParams)
+      $ errmsg pos
+            $ "Constructors for type " ++ showModSpec currMod
+              ++ " use unbound type variable(s) "
+              ++ intercalate ", " (("?"++) . show <$> Set.toList missingParams)
+    updateImplementation (\m -> m { modConstructors =
+                                    Just ((vis,pctor):pctors) })
+    updateModule (\m -> m { modIsType  = True })
+    addKnownType currMod
 
 
 -- |Record that the specified type is known in the current module.
@@ -1035,6 +1036,7 @@ data ProcModifiers = ProcModifiers {
     modifierDetism::Determinism,   -- ^ The proc determinism
     modifierInline::Inlining,      -- ^ Aggresively inline this proc?
     modifierImpurity::Impurity,    -- ^ Don't assume purity when optimising
+    modifierIsCtor::Bool,          -- ^ Is proc actually a constructor?
     modifierUnknown::[String],     -- ^ Unknown modifiers specified
     modifierConflict::[String]     -- ^ Modifiers that conflict with others
 } deriving (Eq, Generic)
@@ -1082,7 +1084,7 @@ expectedImpurity _ = Impure             -- Otherwise, OK for defn to be impure
 
 -- | The default Det, non-inlined, pure ProcModifiers.
 defaultProcModifiers :: ProcModifiers
-defaultProcModifiers = ProcModifiers Det MayInline Pure [] []
+defaultProcModifiers = ProcModifiers Det MayInline Pure False [] []
 
 
 -- | Set the modifierDetism attribute of a ProcModifiers.
@@ -1100,9 +1102,14 @@ setImpurity :: Impurity -> ProcModifiers -> ProcModifiers
 setImpurity impurity mods = mods {modifierImpurity=impurity}
 
 
+-- | Mark the ProcModifiers to indicate a constructor.
+setIsCtor :: ProcModifiers -> ProcModifiers
+setIsCtor mods = mods { modifierIsCtor = True }
+
+
 -- | How to display ProcModifiers
 showProcModifiers :: ProcModifiers -> String
-showProcModifiers (ProcModifiers detism inlining impurity _ _) =
+showProcModifiers (ProcModifiers detism inlining impurity _ _ _) =
     showFlags $ List.filter (not . List.null) [d,i,p]
     where d = determinismName detism
           i = inliningName inlining
@@ -1120,7 +1127,7 @@ showFlags flags = "{" ++ intercalate "," flags ++ "} "
 addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
     let name = procProtoName proto
-    let ProcModifiers detism inlining impurity unknown conflict = mods
+    let ProcModifiers detism inlining impurity ctor unknown conflict = mods
     mapM_ (\m -> message Error
                 ("Unknown proc modifier '" ++ m
                  ++ "' in declaration of " ++ name)
@@ -1133,7 +1140,8 @@ addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
                  pos)
            conflict
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0
-                  Map.empty vis detism inlining impurity $ initSuperprocSpec vis
+                  Map.empty vis detism inlining impurity ctor
+                  $ initSuperprocSpec vis
     addProcDef procDef
 addProc _ item =
     shouldnt $ "addProc given non-Proc item " ++ show item
@@ -1847,6 +1855,7 @@ data ProcDef = ProcDef {
     procDetism :: Determinism,  -- ^can this proc fail?
     procInlining :: Inlining,   -- ^should we inline calls to this proc?
     procImpurity :: Impurity,   -- ^ Is this proc pure?
+    procIsCtor :: Bool,         -- ^ Is this proc a constructor for its type?
     procSuperproc :: SuperprocSpec
                                 -- ^the proc this should be part of, if any
 }
@@ -3221,11 +3230,11 @@ showProcDefs firstID (def:defs) =
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
 showProcDef thisID
-        procdef@(ProcDef n proto def pos _ _ _ vis detism inline impurity sub) =
+  procdef@(ProcDef n proto def pos _ _ _ vis detism inline impurity ctor sub) =
     "\n"
     ++ showProcName n ++ " > "
     ++ visibilityPrefix vis
-    ++ showProcModifiers (ProcModifiers detism inline impurity [] [])
+    ++ showProcModifiers (ProcModifiers detism inline impurity ctor [] [])
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
     ++ showSuperProc sub
     ++ "\n"

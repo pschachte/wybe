@@ -77,10 +77,10 @@ entry:
 =(#left##0:person1.person, #right##0:person1.person, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(#left##0:person1.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#firstname##0:wybe.string)
-    foreign lpvm access(~#left##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#lastname##0:wybe.string)
-    foreign lpvm access(#right##0:person1.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#firstname##0:wybe.string)
-    foreign lpvm access(~#right##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#lastname##0:wybe.string)
+    foreign lpvm access(#left##0:person1.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#firstname##0:wybe.string) @person1:1:23
+    foreign lpvm access(~#left##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#lastname##0:wybe.string) @person1:1:23
+    foreign lpvm access(#right##0:person1.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#firstname##0:wybe.string) @person1:1:23
+    foreign lpvm access(~#right##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#lastname##0:wybe.string) @person1:1:23
     wybe.string.=<0>(~#left#firstname##0:wybe.string, ~#right#firstname##0:wybe.string, ?tmp#1##0:wybe.bool) #2
     case ~tmp#1##0:wybe.bool of
     0:
@@ -96,13 +96,13 @@ firstname > public {inline} (0 calls)
 firstname(#rec##0:person1.person, ?#result##0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:person1.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string)
+    foreign lpvm access(~#rec##0:person1.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string) @person1:1:23
 firstname > public {inline} (0 calls)
 1: person1.person.firstname<1>
 firstname(#rec##0:person1.person, ?#rec##1:person1.person, #field##0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm mutate(~#rec##0:person1.person, ?#rec##1:person1.person, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string)
+    foreign lpvm mutate(~#rec##0:person1.person, ?#rec##1:person1.person, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string) @person1:1:23
 
 
 lastname > public {inline} (0 calls)
@@ -110,13 +110,13 @@ lastname > public {inline} (0 calls)
 lastname(#rec##0:person1.person, ?#result##0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string)
+    foreign lpvm access(~#rec##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string) @person1:1:23
 lastname > public {inline} (0 calls)
 1: person1.person.lastname<1>
 lastname(#rec##0:person1.person, ?#rec##1:person1.person, #field##0:wybe.string):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm mutate(~#rec##0:person1.person, ?#rec##1:person1.person, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string)
+    foreign lpvm mutate(~#rec##0:person1.person, ?#rec##1:person1.person, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string) @person1:1:23
 
 
 person > public {inline} (0 calls)
@@ -124,16 +124,16 @@ person > public {inline} (0 calls)
 person(firstname##0:wybe.string, lastname##0:wybe.string, ?#result##0:person1.person):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?#rec##0:person1.person)
-    foreign lpvm mutate(~#rec##0:person1.person, ?#rec##1:person1.person, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~firstname##0:wybe.string)
-    foreign lpvm mutate(~#rec##1:person1.person, ?#result##0:person1.person, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~lastname##0:wybe.string)
+    foreign lpvm alloc(16:wybe.int, ?#rec##0:person1.person) @person1:1:23
+    foreign lpvm mutate(~#rec##0:person1.person, ?#rec##1:person1.person, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~firstname##0:wybe.string) @person1:1:23
+    foreign lpvm mutate(~#rec##1:person1.person, ?#result##0:person1.person, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~lastname##0:wybe.string) @person1:1:23
 person > public {inline} (6 calls)
 1: person1.person.person<1>
 person(?firstname##0:wybe.string, ?lastname##0:wybe.string, #result##0:person1.person):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(#result##0:person1.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?firstname##0:wybe.string)
-    foreign lpvm access(~#result##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?lastname##0:wybe.string)
+    foreign lpvm access(#result##0:person1.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?firstname##0:wybe.string) @person1:1:23
+    foreign lpvm access(~#result##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?lastname##0:wybe.string) @person1:1:23
 
 
 ~= > public {inline} (0 calls)
@@ -141,10 +141,10 @@ person(?firstname##0:wybe.string, ?lastname##0:wybe.string, #result##0:person1.p
 ~=(#left##0:person1.person, #right##0:person1.person, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(#left##0:person1.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.string)
-    foreign lpvm access(~#left##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.string)
-    foreign lpvm access(#right##0:person1.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.string)
-    foreign lpvm access(~#right##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.string)
+    foreign lpvm access(#left##0:person1.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.string) @person1:1:23
+    foreign lpvm access(~#left##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.string) @person1:1:23
+    foreign lpvm access(#right##0:person1.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.string) @person1:1:23
+    foreign lpvm access(~#right##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.string) @person1:1:23
     wybe.string.=<0>(~tmp#3##0:wybe.string, ~tmp#5##0:wybe.string, ?tmp#7##0:wybe.bool) #1
     case ~tmp#7##0:wybe.bool of
     0:

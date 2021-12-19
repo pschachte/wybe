@@ -45,10 +45,10 @@ find_test(modulus##0:wybe.int, io##0:wybe.phantom, ?io##4:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
  MultiSpeczDepInfo: [(8,(test_loop.gen#1<0>,fromList [NonAliasedParamCond 1 []]))]
-    foreign lpvm alloc(24:wybe.int, ?tmp#5##0:test_loop.int_seq)
-    foreign lpvm mutate(~tmp#5##0:test_loop.int_seq, ?tmp#6##0:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 2:wybe.int)
-    foreign lpvm mutate(~tmp#6##0:test_loop.int_seq, ?tmp#7##0:test_loop.int_seq, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 2:wybe.int)
-    foreign lpvm mutate(~tmp#7##0:test_loop.int_seq, ?tmp#8##0:test_loop.int_seq, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 10:wybe.int)
+    foreign lpvm alloc(24:wybe.int, ?tmp#5##0:test_loop.int_seq) @test_loop:nn:nn
+    foreign lpvm mutate(~tmp#5##0:test_loop.int_seq, ?tmp#6##0:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 2:wybe.int) @test_loop:nn:nn
+    foreign lpvm mutate(~tmp#6##0:test_loop.int_seq, ?tmp#7##0:test_loop.int_seq, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 2:wybe.int) @test_loop:nn:nn
+    foreign lpvm mutate(~tmp#7##0:test_loop.int_seq, ?tmp#8##0:test_loop.int_seq, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 10:wybe.int) @test_loop:nn:nn
     test_loop.gen#1<0>[6dacb8fd25](modulus##0:wybe.int, ~tmp#8##0:test_loop.int_seq, ?i##0:wybe.int, ?tmp#1##0:wybe.bool) #8 @test_loop:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
@@ -286,12 +286,12 @@ if.else1:
 =(#left##0:test_loop.int_seq, #right##0:test_loop.int_seq, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(#left##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#low##0:wybe.int)
-    foreign lpvm access(#left##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#step##0:wybe.int)
-    foreign lpvm access(~#left##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#high##0:wybe.int)
-    foreign lpvm access(#right##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#right#low##0:wybe.int)
-    foreign lpvm access(#right##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#right#step##0:wybe.int)
-    foreign lpvm access(~#right##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#right#high##0:wybe.int)
+    foreign lpvm access(#left##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#low##0:wybe.int) @test_loop:nn:nn
+    foreign lpvm access(#left##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#step##0:wybe.int) @test_loop:nn:nn
+    foreign lpvm access(~#left##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#high##0:wybe.int) @test_loop:nn:nn
+    foreign lpvm access(#right##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#right#low##0:wybe.int) @test_loop:nn:nn
+    foreign lpvm access(#right##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#right#step##0:wybe.int) @test_loop:nn:nn
+    foreign lpvm access(~#right##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#right#high##0:wybe.int) @test_loop:nn:nn
     foreign llvm icmp_eq(~#left#low##0:wybe.int, ~#right#low##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
@@ -314,13 +314,13 @@ high > public {inline} (0 calls)
 high(#rec##0:test_loop.int_seq, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
+    foreign lpvm access(~#rec##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @test_loop:nn:nn
 high > public {inline} (0 calls)
 1: test_loop.int_seq.high<1>
 high(#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, #field##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
+    foreign lpvm {noalias} mutate(~#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @test_loop:nn:nn
 
 
 int_seq > public {inline} (0 calls)
@@ -328,18 +328,18 @@ int_seq > public {inline} (0 calls)
 int_seq(low##0:wybe.int, step##0:wybe.int, high##0:wybe.int, ?#result##0:test_loop.int_seq):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(24:wybe.int, ?#rec##0:test_loop.int_seq)
-    foreign lpvm mutate(~#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~low##0:wybe.int)
-    foreign lpvm mutate(~#rec##1:test_loop.int_seq, ?#rec##2:test_loop.int_seq, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~step##0:wybe.int)
-    foreign lpvm mutate(~#rec##2:test_loop.int_seq, ?#result##0:test_loop.int_seq, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~high##0:wybe.int)
+    foreign lpvm alloc(24:wybe.int, ?#rec##0:test_loop.int_seq) @test_loop:nn:nn
+    foreign lpvm mutate(~#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~low##0:wybe.int) @test_loop:nn:nn
+    foreign lpvm mutate(~#rec##1:test_loop.int_seq, ?#rec##2:test_loop.int_seq, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~step##0:wybe.int) @test_loop:nn:nn
+    foreign lpvm mutate(~#rec##2:test_loop.int_seq, ?#result##0:test_loop.int_seq, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~high##0:wybe.int) @test_loop:nn:nn
 int_seq > public {inline} (13 calls)
 1: test_loop.int_seq.int_seq<1>
 int_seq(?low##0:wybe.int, ?step##0:wybe.int, ?high##0:wybe.int, #result##0:test_loop.int_seq):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(#result##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?low##0:wybe.int)
-    foreign lpvm access(#result##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?step##0:wybe.int)
-    foreign lpvm access(~#result##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?high##0:wybe.int)
+    foreign lpvm access(#result##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?low##0:wybe.int) @test_loop:nn:nn
+    foreign lpvm access(#result##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?step##0:wybe.int) @test_loop:nn:nn
+    foreign lpvm access(~#result##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?high##0:wybe.int) @test_loop:nn:nn
 
 
 low > public {inline} (0 calls)
@@ -347,13 +347,13 @@ low > public {inline} (0 calls)
 low(#rec##0:test_loop.int_seq, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
+    foreign lpvm access(~#rec##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @test_loop:nn:nn
 low > public {inline} (1 calls)
 1: test_loop.int_seq.low<1>
 low(#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, #field##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
+    foreign lpvm {noalias} mutate(~#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @test_loop:nn:nn
 
 
 seq_next > public (0 calls)
@@ -361,9 +361,9 @@ seq_next > public (0 calls)
 seq_next(seq##0:test_loop.int_seq, ?seq##1:test_loop.int_seq, ?elt##0:wybe.int, ?#success##0:wybe.bool):
  AliasPairs: [(seq##0,seq##1)]
  InterestingCallProperties: [InterestingUnaliased 0]
-    foreign lpvm access(seq##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?elt##0:wybe.int)
-    foreign lpvm access(seq##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?step##0:wybe.int)
-    foreign lpvm access(seq##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?limit##0:wybe.int)
+    foreign lpvm access(seq##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?elt##0:wybe.int) @test_loop:nn:nn
+    foreign lpvm access(seq##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?step##0:wybe.int) @test_loop:nn:nn
+    foreign lpvm access(seq##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?limit##0:wybe.int) @test_loop:nn:nn
     foreign llvm icmp_sle(elt##0:wybe.int, ~limit##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
@@ -372,13 +372,13 @@ seq_next(seq##0:test_loop.int_seq, ?seq##1:test_loop.int_seq, ?elt##0:wybe.int, 
 
     1:
         foreign llvm add(elt##0:wybe.int, ~step##0:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
-        foreign lpvm {noalias} mutate(~%seq##0:test_loop.int_seq, ?%seq##1:test_loop.int_seq, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp#0##0:wybe.int)
+        foreign lpvm {noalias} mutate(~%seq##0:test_loop.int_seq, ?%seq##1:test_loop.int_seq, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp#0##0:wybe.int) @test_loop:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
  [410bae77d3] [NonAliasedParam 0] :
-    foreign lpvm access(seq##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?elt##0:wybe.int)
-    foreign lpvm access(seq##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?step##0:wybe.int)
-    foreign lpvm access(seq##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?limit##0:wybe.int)
+    foreign lpvm access(seq##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?elt##0:wybe.int) @test_loop:nn:nn
+    foreign lpvm access(seq##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?step##0:wybe.int) @test_loop:nn:nn
+    foreign lpvm access(seq##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?limit##0:wybe.int) @test_loop:nn:nn
     foreign llvm icmp_sle(elt##0:wybe.int, ~limit##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
@@ -387,7 +387,7 @@ seq_next(seq##0:test_loop.int_seq, ?seq##1:test_loop.int_seq, ?elt##0:wybe.int, 
 
     1:
         foreign llvm add(elt##0:wybe.int, ~step##0:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
-        foreign lpvm {noalias} mutate(~%seq##0:test_loop.int_seq, ?%seq##1:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp#0##0:wybe.int)
+        foreign lpvm {noalias} mutate(~%seq##0:test_loop.int_seq, ?%seq##1:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp#0##0:wybe.int) @test_loop:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -397,13 +397,13 @@ step > public {inline} (0 calls)
 step(#rec##0:test_loop.int_seq, ?#result##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
+    foreign lpvm access(~#rec##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @test_loop:nn:nn
 step > public {inline} (0 calls)
 1: test_loop.int_seq.step<1>
 step(#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, #field##0:wybe.int):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
+    foreign lpvm {noalias} mutate(~#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @test_loop:nn:nn
 
 
 ~= > public {inline} (0 calls)
@@ -411,12 +411,12 @@ step(#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, #field##0:wybe.int):
 ~=(#left##0:test_loop.int_seq, #right##0:test_loop.int_seq, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm access(#left##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int)
-    foreign lpvm access(#left##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int)
-    foreign lpvm access(~#left##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.int)
-    foreign lpvm access(#right##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.int)
-    foreign lpvm access(#right##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.int)
-    foreign lpvm access(~#right##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.int)
+    foreign lpvm access(#left##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @test_loop:nn:nn
+    foreign lpvm access(#left##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int) @test_loop:nn:nn
+    foreign lpvm access(~#left##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.int) @test_loop:nn:nn
+    foreign lpvm access(#right##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.int) @test_loop:nn:nn
+    foreign lpvm access(#right##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.int) @test_loop:nn:nn
+    foreign lpvm access(~#right##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.int) @test_loop:nn:nn
     foreign llvm icmp_eq(~tmp#3##0:wybe.int, ~tmp#6##0:wybe.int, ?tmp#9##0:wybe.bool) @int:nn:nn
     case ~tmp#9##0:wybe.bool of
     0:

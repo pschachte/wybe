@@ -283,7 +283,7 @@ processTypeModifier tms unknown  = tms {tmUnknown = tmUnknown tms ++ [unknown]}
 -- location of the list of modifiers.
 processProcModifiers :: [String] -> ProcModifiers
 processProcModifiers = List.foldl (flip processProcModifier)
-                        $ ProcModifiers Det MayInline Pure [] []
+                                  defaultProcModifiers 
 
 -- | Update a collection of ProcModifiers
 processProcModifier :: String -> ProcModifiers -> ProcModifiers

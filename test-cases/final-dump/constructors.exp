@@ -26,14 +26,14 @@ AFTER EVERYTHING:
         foreign llvm icmp_eq(~#left##0:constructors, ~#right##0:constructors, ?#success##0:wybe.bool)
 
     1:
-        foreign lpvm access(~#left##0:constructors, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#left#value##0:wybe.int)
+        foreign lpvm access(~#left##0:constructors, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#left#value##0:wybe.int) @constructors:nn:nn
         foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.bool)
         case ~tmp#8##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
         1:
-            foreign lpvm access(~#right##0:constructors, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#right#value##0:wybe.int)
+            foreign lpvm access(~#right##0:constructors, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#right#value##0:wybe.int) @constructors:nn:nn
             foreign llvm icmp_eq(~#left#value##0:wybe.int, ~#right#value##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
@@ -44,8 +44,8 @@ just > public {inline} (0 calls)
 just(value##0:wybe.int, ?#result##0:constructors):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?#rec##0:constructors)
-    foreign lpvm mutate(~#rec##0:constructors, ?#result##0:constructors, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~value##0:wybe.int)
+    foreign lpvm alloc(8:wybe.int, ?#rec##0:constructors) @constructors:nn:nn
+    foreign lpvm mutate(~#rec##0:constructors, ?#result##0:constructors, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~value##0:wybe.int) @constructors:nn:nn
 just > public {inline} (8 calls)
 1: constructors.just<1>
 just(?value##0:wybe.int, #result##0:constructors, ?#success##0:wybe.bool):
@@ -58,7 +58,7 @@ just(?value##0:wybe.int, #result##0:constructors, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?value##0:wybe.int)
 
     1:
-        foreign lpvm access(~#result##0:constructors, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?value##0:wybe.int)
+        foreign lpvm access(~#result##0:constructors, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?value##0:wybe.int) @constructors:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -83,7 +83,7 @@ value(#rec##0:constructors, ?#result##0:wybe.int, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:constructors, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
+        foreign lpvm access(~#rec##0:constructors, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @constructors:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 value > public {inline} (0 calls)
@@ -98,7 +98,7 @@ value(#rec##0:constructors, ?#rec##1:constructors, #field##0:wybe.int, ?#success
         foreign llvm move(~#rec##0:constructors, ?#rec##1:constructors)
 
     1:
-        foreign lpvm {noalias} mutate(~#rec##0:constructors, ?#rec##1:constructors, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
+        foreign lpvm {noalias} mutate(~#rec##0:constructors, ?#rec##1:constructors, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @constructors:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 

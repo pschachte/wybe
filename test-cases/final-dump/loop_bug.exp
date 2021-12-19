@@ -31,8 +31,8 @@ gen#1([h##0:wybe.int], io##0:wybe.phantom, lst##0:loop_bug.int_list, t##0:loop_b
         foreign c putchar(']':wybe.char, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
 
     1:
-        foreign lpvm access(t##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##1:wybe.int)
-        foreign lpvm access(~t##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##1:loop_bug.int_list)
+        foreign lpvm access(t##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##1:wybe.int) @loop_bug:nn:nn
+        foreign lpvm access(~t##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##1:loop_bug.int_list) @loop_bug:nn:nn
         wybe.string.print_string<0>(", ":wybe.string, ~io##0:wybe.phantom, ?tmp#7##0:wybe.phantom) #3 @io:nn:nn
         foreign c print_int(~h##1:wybe.int, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
         loop_bug.gen#1<0>(_:wybe.int, ~tmp#8##0:wybe.phantom, ~lst##0:loop_bug.int_list, ~t##1:loop_bug.int_list, ?io##1:wybe.phantom) #4 @loop_bug:nn:nn
@@ -61,8 +61,8 @@ print(lst##0:loop_bug.int_list, io##0:wybe.phantom, ?io##3:wybe.phantom):
         foreign c putchar(']':wybe.char, ~#io##1:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
 
     1:
-        foreign lpvm access(lst##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int)
-        foreign lpvm access(lst##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:loop_bug.int_list)
+        foreign lpvm access(lst##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @loop_bug:nn:nn
+        foreign lpvm access(lst##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:loop_bug.int_list) @loop_bug:nn:nn
         foreign c print_int(~h##0:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
         loop_bug.gen#1<0>(_:wybe.int, ~io##2:wybe.phantom, ~lst##0:loop_bug.int_list, ~t##0:loop_bug.int_list, ?io##3:wybe.phantom) #3 @loop_bug:nn:nn
 
@@ -183,16 +183,16 @@ if.else:
         foreign llvm icmp_eq(~#left##0:loop_bug.int_list, ~#right##0:loop_bug.int_list, ?#success##0:wybe.bool)
 
     1:
-        foreign lpvm access(#left##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#head##0:wybe.int)
-        foreign lpvm access(~#left##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#tail##0:loop_bug.int_list)
+        foreign lpvm access(#left##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#head##0:wybe.int) @loop_bug:nn:nn
+        foreign lpvm access(~#left##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#tail##0:loop_bug.int_list) @loop_bug:nn:nn
         foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
         case ~tmp#9##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
         1:
-            foreign lpvm access(#right##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#head##0:wybe.int)
-            foreign lpvm access(~#right##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#tail##0:loop_bug.int_list)
+            foreign lpvm access(#right##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#head##0:wybe.int) @loop_bug:nn:nn
+            foreign lpvm access(~#right##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#tail##0:loop_bug.int_list) @loop_bug:nn:nn
             foreign llvm icmp_eq(~#left#head##0:wybe.int, ~#right#head##0:wybe.int, ?tmp#4##0:wybe.bool) @int:nn:nn
             case ~tmp#4##0:wybe.bool of
             0:
@@ -210,9 +210,9 @@ cons > public {inline} (0 calls)
 cons(head##0:wybe.int, tail##0:loop_bug.int_list, ?#result##0:loop_bug.int_list):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?#rec##0:loop_bug.int_list)
-    foreign lpvm mutate(~#rec##0:loop_bug.int_list, ?#rec##1:loop_bug.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head##0:wybe.int)
-    foreign lpvm mutate(~#rec##1:loop_bug.int_list, ?#result##0:loop_bug.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail##0:loop_bug.int_list)
+    foreign lpvm alloc(16:wybe.int, ?#rec##0:loop_bug.int_list) @loop_bug:nn:nn
+    foreign lpvm mutate(~#rec##0:loop_bug.int_list, ?#rec##1:loop_bug.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head##0:wybe.int) @loop_bug:nn:nn
+    foreign lpvm mutate(~#rec##1:loop_bug.int_list, ?#result##0:loop_bug.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail##0:loop_bug.int_list) @loop_bug:nn:nn
 cons > public {inline} (12 calls)
 1: loop_bug.int_list.cons<1>
 cons(?head##0:wybe.int, ?tail##0:loop_bug.int_list, #result##0:loop_bug.int_list, ?#success##0:wybe.bool):
@@ -226,8 +226,8 @@ cons(?head##0:wybe.int, ?tail##0:loop_bug.int_list, #result##0:loop_bug.int_list
         foreign llvm move(undef:loop_bug.int_list, ?tail##0:loop_bug.int_list)
 
     1:
-        foreign lpvm access(#result##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?head##0:wybe.int)
-        foreign lpvm access(~#result##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tail##0:loop_bug.int_list)
+        foreign lpvm access(#result##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?head##0:wybe.int) @loop_bug:nn:nn
+        foreign lpvm access(~#result##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tail##0:loop_bug.int_list) @loop_bug:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -244,7 +244,7 @@ head(#rec##0:loop_bug.int_list, ?#result##0:wybe.int, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
+        foreign lpvm access(~#rec##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @loop_bug:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 head > public {inline} (0 calls)
@@ -259,7 +259,7 @@ head(#rec##0:loop_bug.int_list, ?#rec##1:loop_bug.int_list, #field##0:wybe.int, 
         foreign llvm move(~#rec##0:loop_bug.int_list, ?#rec##1:loop_bug.int_list)
 
     1:
-        foreign lpvm mutate(~#rec##0:loop_bug.int_list, ?#rec##1:loop_bug.int_list, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
+        foreign lpvm mutate(~#rec##0:loop_bug.int_list, ?#rec##1:loop_bug.int_list, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @loop_bug:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -284,7 +284,7 @@ tail(#rec##0:loop_bug.int_list, ?#result##0:loop_bug.int_list, ?#success##0:wybe
         foreign llvm move(undef:loop_bug.int_list, ?#result##0:loop_bug.int_list)
 
     1:
-        foreign lpvm access(~#rec##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:loop_bug.int_list)
+        foreign lpvm access(~#rec##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:loop_bug.int_list) @loop_bug:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 tail > public {inline} (0 calls)
@@ -299,7 +299,7 @@ tail(#rec##0:loop_bug.int_list, ?#rec##1:loop_bug.int_list, #field##0:loop_bug.i
         foreign llvm move(~#rec##0:loop_bug.int_list, ?#rec##1:loop_bug.int_list)
 
     1:
-        foreign lpvm {noalias} mutate(~#rec##0:loop_bug.int_list, ?#rec##1:loop_bug.int_list, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:loop_bug.int_list)
+        foreign lpvm {noalias} mutate(~#rec##0:loop_bug.int_list, ?#rec##1:loop_bug.int_list, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:loop_bug.int_list) @loop_bug:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 

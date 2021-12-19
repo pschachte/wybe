@@ -35,9 +35,9 @@ foo > (12 calls)
 foo(x##0:T, io##0:wybe.phantom, ?io##1:wybe.phantom):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#5##0:wybe.list(T))
-    foreign lpvm mutate(~tmp#5##0:wybe.list(T), ?tmp#6##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:T)
-    foreign lpvm mutate(~tmp#6##0:wybe.list(T), ?tmp#0##0:wybe.list(T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T))
+    foreign lpvm alloc(16:wybe.int, ?tmp#5##0:wybe.list(T)) @list:nn:nn
+    foreign lpvm mutate(~tmp#5##0:wybe.list(T), ?tmp#6##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:T) @list:nn:nn
+    foreign lpvm mutate(~tmp#6##0:wybe.list(T), ?tmp#0##0:wybe.list(T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @list:nn:nn
     wybe.list.length1<0>(~tmp#0##0:wybe.list(T), 0:wybe.int, ?tmp#2##0:wybe.int) #4 @list:nn:nn
     foreign c print_int(~tmp#2##0:wybe.int, ~#io##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
@@ -48,9 +48,9 @@ foo2 > (18 calls)
 foo2(x##0:T0, ?y##0:T0, ?#success##0:wybe.bool):
  AliasPairs: []
  InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#6##0:wybe.list(T))
-    foreign lpvm mutate(~tmp#6##0:wybe.list(T), ?tmp#7##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:T)
-    foreign lpvm mutate(~tmp#7##0:wybe.list(T), ?tmp#0##0:wybe.list(T0), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T))
+    foreign lpvm alloc(16:wybe.int, ?tmp#6##0:wybe.list(T)) @list:nn:nn
+    foreign lpvm mutate(~tmp#6##0:wybe.list(T), ?tmp#7##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:T) @list:nn:nn
+    foreign lpvm mutate(~tmp#7##0:wybe.list(T), ?tmp#0##0:wybe.list(T0), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @list:nn:nn
     foreign llvm icmp_ne(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
     case ~tmp#9##0:wybe.bool of
     0:
@@ -58,7 +58,7 @@ foo2(x##0:T0, ?y##0:T0, ?#success##0:wybe.bool):
         foreign llvm move(undef:T, ?y##0:T0)
 
     1:
-        foreign lpvm access(~tmp#0##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:T0)
+        foreign lpvm access(~tmp#0##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:T0) @list:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
