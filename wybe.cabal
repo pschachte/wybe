@@ -40,7 +40,7 @@ executable wybemk
                  Clause, Codegen, Config, Emit, Expansion, Flatten,
                  Macho, Parser, Normalise, ObjectInterface, Optimise,
                  Analysis, AliasAnalysis, Transform,
-                 Options, Resources, Scanner, Snippets, Types, Unbranch, Util,
+                 Options, Resources, Scanner, Snippets, Types, Unbranch, UnivSet, Util,
                  Version, ASTShow, Unique
   extra-libraries: gc
 
