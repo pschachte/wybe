@@ -140,7 +140,8 @@ collectGlobalFlows procs gFlows pspec = do
 -- * LPVM store instructions add a FlowOut for the respective Global
 -- * First order calls add their respective GlobalFlows into the set
 -- * Resourceful higher order calls set the GlobalFlows to the universal set
-collectPrimGlobalFlows :: Set ProcSpec -> Prim -> Compiler GlobalFlows -> Compiler GlobalFlows
+collectPrimGlobalFlows :: Set ProcSpec -> Prim 
+                       -> Compiler GlobalFlows -> Compiler GlobalFlows
 collectPrimGlobalFlows _
         (PrimForeign "lpvm" "load" _ [ArgGlobal info _, _, _, _]) gFlows
     = addGlobalFlow info FlowIn <$> gFlows
@@ -168,7 +169,7 @@ decideInlining :: ProcDef -> Compiler ProcDef
 decideInlining def
     |  NoFork == bodyFork body && procInlining def == MayInline = do
     logOptimise $ "Considering inline of " ++ procName def
-    benefit <- (4 +) <$> procCost proto resFlows -- add 4 for time saving
+    benefit <- (4 +) <$> procCost proto globalFlows -- add 4 for time saving
     logOptimise $ "  benefit = " ++ show benefit
     cost <- bodyCost $ bodyPrims body
     logOptimise $ "  cost = " ++ show cost
@@ -180,16 +181,16 @@ decideInlining def
     where impln = procImpln def
           proto = procImplnProto impln
           body = procImplnBody impln
-          resFlows = procProtoResources $ procProto def
+          globalFlows = procImplnGlobalFlows impln
 decideInlining def = return def
 
 
 -- |Estimate the "cost" of a call to a proc; ie, how much space the call will
 --  occupy.
-procCost :: PrimProto -> Set ResourceFlowSpec -> Compiler Int
-procCost proto resFlows = do
+procCost :: PrimProto -> GlobalFlows -> Compiler Int
+procCost proto globalFlows = do
     nonPhantoms <- filterM ((not <$>) . paramIsPhantom) $ primProtoParams proto
-    let globalCost = 2 * Set.size resFlows
+    let globalCost = maybe 0 (Map.foldl ((. Set.size) . (+)) 0) globalFlows
     return $ 1 + length nonPhantoms + globalCost
 
 

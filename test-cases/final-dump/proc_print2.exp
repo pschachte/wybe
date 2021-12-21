@@ -16,8 +16,8 @@ print2(x##0:wybe.int, y##0:wybe.int, *#globals##0:wybe.phantom, *?#globals##2:wy
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
-    foreign c print_int(~x##0:wybe.int, ~%tmp#2##0:wybe.phantom, ?%tmp#4##0:wybe.phantom) @io:nn:nn
-    foreign c print_int(~y##0:wybe.int, ~%tmp#4##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(~x##0:wybe.int, ~tmp#2##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(~y##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#9##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom)
 
   LLVM code       :

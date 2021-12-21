@@ -215,7 +215,7 @@ useBody v pos mods =
 topLevelUseStmt :: OptPos -> [ResourceSpec] -> Parser Item
 topLevelUseStmt pos ress = do
     body <- stmtSeq
-    return $ StmtDecl (UseResources ress body) pos
+    return $ StmtDecl (UseResources ress Nothing Nothing body) pos
 
 
 -- | Convert a ModSpce to a ResourceSpec 
@@ -999,7 +999,7 @@ termToStmt (Call pos [] "use" ParamIn
                     [Call _ [] "in" ParamIn [ress,body]]) = do
     ress' <- termToResourceList ress
     body' <- termToBody body
-    return $ Placed (UseResources ress' body') pos
+    return $ Placed (UseResources ress' Nothing Nothing body') pos
 termToStmt (Call pos [] "while" ParamIn [test]) = do
     t <- termToStmt test
     return $ Placed (Cond t [Unplaced Nop] [Unplaced Break] Nothing Nothing) pos
@@ -1151,14 +1151,14 @@ termToExp (Call pos [] "if" ParamIn [conditional]) =
 termToExp (Embraced _ Paren [exp] Nothing) = termToExp exp
 termToExp body@(Embraced pos Brace _ Nothing) = do
     body' <- termToBody body
-    return $ Placed (AnonProc defaultProcModifiers [] body') pos
+    return $ Placed (AnonProc defaultProcModifiers [] body' Nothing Nothing) pos
 termToExp mods@(Embraced pos Brace _ 
                     (Just body@(Embraced _ Brace _ _))) = do
     procMods <- termToProcModifiers mods
     anonProc <- content <$> termToExp body
     case anonProc of
-        AnonProc oldMods ps body | oldMods == defaultProcModifiers
-            -> return $ Placed (AnonProc procMods ps body) pos
+        AnonProc oldMods ps body clsd _ | oldMods == defaultProcModifiers
+            -> return $ Placed (AnonProc procMods ps body clsd Nothing) pos
         _ -> syntaxError pos $ "malformed anonymous procedure " ++ show anonProc
 termToExp embraced@(Embraced pos _ _ _) = 
     syntaxError pos $ "malformed anonymous procedure " ++ show embraced

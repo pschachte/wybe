@@ -17,11 +17,11 @@ module top-level code > public {impure} (0 calls)
   InterestingCallProperties: []
     wybe.string.print_string<0>("Outer":wybe.string, ~#globals##0:wybe.phantom, ?*tmp#1##0:wybe.phantom) #1 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom, ~*tmp#1##0:wybe.phantom, ?*tmp#3##0:wybe.phantom)
-    foreign c putchar('\n':wybe.char, ~%tmp#2##0:wybe.phantom, ?%tmp#4##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#4##0:wybe.phantom, ~*tmp#3##0:wybe.phantom, ?*tmp#5##0:wybe.phantom)
     wybe.string.print_string<0>("Inner":wybe.string, ~tmp#5##0:wybe.phantom, ?*tmp#6##0:wybe.phantom) #2 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom, ~*tmp#6##0:wybe.phantom, ?*tmp#8##0:wybe.phantom)
-    foreign c putchar('\n':wybe.char, ~%tmp#7##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#9##0:wybe.phantom, ~*tmp#8##0:wybe.phantom, ?*tmp#10##0:wybe.phantom)
     nested_loop.gen#2<0>(~tmp#10##0:wybe.phantom, ?#globals##1:wybe.phantom) #3 @nested_loop:nn:nn
 
@@ -34,11 +34,11 @@ gen#1(*#globals##0:wybe.phantom, ?#globals##2:wybe.phantom):
   InterestingCallProperties: []
     wybe.string.print_string<0>("Outer":wybe.string, ~*#globals##0:wybe.phantom, ?*tmp#2##0:wybe.phantom) #2 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom, ~*tmp#2##0:wybe.phantom, ?*tmp#4##0:wybe.phantom)
-    foreign c putchar('\n':wybe.char, ~%tmp#3##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#5##0:wybe.phantom, ~*tmp#4##0:wybe.phantom, ?*#globals##1:wybe.phantom)
     wybe.string.print_string<0>("Inner":wybe.string, ~#globals##1:wybe.phantom, ?*tmp#7##0:wybe.phantom) #3 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom, ~*tmp#7##0:wybe.phantom, ?*tmp#9##0:wybe.phantom)
-    foreign c putchar('\n':wybe.char, ~%tmp#8##0:wybe.phantom, ?%tmp#10##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#8##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#10##0:wybe.phantom, ~*tmp#9##0:wybe.phantom, ?*tmp#11##0:wybe.phantom)
     nested_loop.gen#2<0>(~tmp#11##0:wybe.phantom, ?#globals##2:wybe.phantom) #4 @nested_loop:nn:nn
 
@@ -51,7 +51,7 @@ gen#2(*#globals##0:wybe.phantom, ?#globals##2:wybe.phantom):
   InterestingCallProperties: []
     wybe.string.print_string<0>("Inner":wybe.string, ~*#globals##0:wybe.phantom, ?*tmp#2##0:wybe.phantom) #2 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom, ~*tmp#2##0:wybe.phantom, ?*tmp#4##0:wybe.phantom)
-    foreign c putchar('\n':wybe.char, ~%tmp#3##0:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#5##0:wybe.phantom, ~*tmp#4##0:wybe.phantom, ?*#globals##1:wybe.phantom)
     nested_loop.gen#2<0>(~#globals##1:wybe.phantom, ?#globals##2:wybe.phantom) #1 @nested_loop:nn:nn
 

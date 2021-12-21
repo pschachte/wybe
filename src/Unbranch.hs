@@ -607,24 +607,19 @@ hoistClosure :: Exp -> OptPos -> Unbrancher (Placed Exp)
 hoistClosure (Typed exp ty cast) pos = do
     exp' <- content <$> hoistClosure exp Nothing
     return $ maybePlace (Typed exp' ty cast) pos
-hoistClosure exp@(AnonProc mods params pstmts) pos = do
+hoistClosure exp@(AnonProc mods params pstmts clsd res) pos = do
+    let clsd' = trustFromJust "unbranch annon proc without closed" clsd
+    let res' = trustFromJust "unbranch annon proc without resources" res
     name <- newProcName
     logUnbranch $ "Creating procref for " ++ show exp ++ " under " ++ name
     let ProcModifiers detism inlining impurity resourceful unknown conflict = mods
     lift $ checkConflictingMods "anonymous procedure" pos unknown
     lift $ checkUnknownMods "anonymous procedure" pos conflict
-    let paramVars = expVar . content . paramToVar <$> params
-    let vars = mentionedVars pstmts
-    let toClose = vars `Set.difference` Set.fromList paramVars
-    let realParams = List.filter (isUsedParam vars) params
-    defd <- gets (Set.toList . Set.filter (flip Set.member toClose . fst)
-                             . Set.fromList . Map.toList . brVars)
-    let (freeParams, freeVars) = unzip $ uncurry freeParamVar <$> defd
-    logUnbranch $ "  With params " ++ show realParams
+    let (freeParams, freeVars) = unzip $ uncurry freeParamVar <$> Map.toAscList clsd'
+    logUnbranch $ "  With params " ++ show params
     logUnbranch $ "  With free variables " ++ show freeVars
-
     tmpCtr <- gets brTempCtr
-    let procProto = ProcProto name (freeParams ++ realParams) Set.empty
+    let procProto = ProcProto name (freeParams ++ params) res'
     let procDef = ProcDef name procProto (ProcDefSrc pstmts) Nothing tmpCtr 0
                     Map.empty Private detism MayInline Pure
                     NoSuperproc Nothing
@@ -641,21 +636,12 @@ hoistClosure exp@(ProcRef ps free) pos = do
 hoistClosure exp pos = return $ maybePlace exp pos
 
 
-mentionedVars :: [Placed Stmt] -> Set VarName
-mentionedVars pstmts = foldStmts (const . const) addInsOuts Set.empty pstmts
-  where
-    addInsOuts vars e _ = vars `Set.union` expInputs e `Set.union` expOutputs e
-
-
-isUsedParam :: Set VarName -> Param -> Bool
-isUsedParam vars (Param nm _ _ (Resource _)) = nm `Set.member` vars
-isUsedParam _    _                           = True
-
 
 addClosure :: ProcSpec -> [Placed Exp] -> OptPos -> String -> Unbrancher (Placed Exp)
 addClosure regularProcSpec@(ProcSpec mod nm pID _) freeVars pos name = do
     ProcDef{procDetism=detism, procInlining=inlining, procImpurity=impurity,
-            procProto=procProto@ProcProto{procProtoParams=params}}
+            procProto=procProto@ProcProto{procProtoParams=params,
+                                          procProtoResources=res}}
         <- lift $ getProcDef regularProcSpec
     let (freeParams, realParams) = List.partition ((== Free) . paramFlowType) params
     let (realParams', (freeParams', freeVars')) 
@@ -667,7 +653,7 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) freeVars pos name = do
     let paramVars = paramToVar <$> params
     let paramVars' = paramToVar <$> params'
     let closureParams = freeParams' ++ (setClosureType <$> params')
-    let closureProto = ProcProto name closureParams Set.empty
+    let closureProto = ProcProto name closureParams res
     let pDefClosure =
             ProcDef name closureProto
             (ProcDefSrc

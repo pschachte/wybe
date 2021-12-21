@@ -52,7 +52,7 @@ printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string, *#gl
         mytree.printTree1<0>(~l##0:mytree.tree, ~prefix##0:wybe.string, ?prefix##1:wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #1 @mytree:nn:nn
         wybe.string.print_string<0>(~prefix##1:wybe.string, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #5 @io:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom, ~*#globals##2:wybe.phantom, ?*tmp#8##0:wybe.phantom)
-        foreign c print_int(~k##0:wybe.int, ~%tmp#7##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
+        foreign c print_int(~k##0:wybe.int, ~tmp#7##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#9##0:wybe.phantom, ~*tmp#8##0:wybe.phantom, ?*#globals##3:wybe.phantom)
         mytree.printTree1<0>(~r##0:mytree.tree, ", ":wybe.string, ?prefix##3:wybe.string, ~*#globals##3:wybe.phantom, ?*#globals##4:wybe.phantom) #4 @mytree:nn:nn
 

@@ -416,12 +416,22 @@ instr' prim@(PrimForeign "lpvm" "cast" []
     then instr' (PrimForeign "llvm" "move" [] [from, to]) pos
     else ordinaryInstr prim pos
 instr' prim@(PrimForeign "lpvm" "load" [] [ArgGlobal info _, var, gIn, gOut]) pos = do
+    logBuild $ "  Checking if we know the value of " ++ show info
     loaded <- gets globalsLoaded
     case Map.lookup info loaded of
         Just val -> do
-            instr' (PrimForeign "llvm" "move" [] [val, var]) pos
+            logBuild $ "  ... we do: " ++ show val
+            instr' (PrimForeign "llvm" "move" [] [mkInput val, var]) pos
             instr' (PrimForeign "llvm" "move" [] [gIn, gOut]) pos
-        Nothing -> ordinaryInstr prim pos
+        Nothing -> do
+            logBuild "  ... we don't"
+            ordinaryInstr prim pos
+instr' prim@(PrimForeign "lpvm" "store" [] [ArgGlobal info _, var, gIn, gOut]) pos = do
+    loaded <- gets globalsLoaded
+    case Map.lookup info loaded of
+        Just val | mkInput var == mkInput val -> do
+            instr' (PrimForeign "llvm" "move" [] [gIn, gOut]) pos
+        _ -> ordinaryInstr prim pos
 instr' prim pos = ordinaryInstr prim pos
 
 
@@ -740,17 +750,10 @@ expandArg arg = return arg
 
 updateGlobalState :: Prim -> OptPos -> BodyBuilder ()
 updateGlobalState prim pos = do
-    let outs = snd $ splitPrimOutputs prim
-    let outGlobals = List.filter ((Just GlobalArg==) . maybeArgFlowType) outs
-    -- There should only ever be a single global flowing out of any procedure
-    when (length outGlobals > 1) 
-        $ shouldnt $ "updateGlobalState on " ++ show prim
-    substOutGlobals <- mapM (expandArg . setArgFlow FlowIn) outGlobals
-    let globalVar = listToMaybe substOutGlobals
-    when (isJust globalVar) $ do
-        loaded <- gets globalsLoaded
-        updateGlobalValues prim
-        loaded' <- gets globalsLoaded
+    loaded <- gets globalsLoaded
+    updateGlobalValues prim
+    loaded' <- gets globalsLoaded
+    when (loaded /= loaded') $
         logBuild $ "Globals Loaded: " ++ show loaded ++ " -> " ++ show loaded' 
 
 
@@ -1227,9 +1230,14 @@ bkwdBuildStmt defs prim pos = do
           | otherwise -> do
               modify $ \s -> s { bkwdGlobalStored = Set.insert info gStored }
               bkwdBuildStmt' args' prim pos
-      (PrimForeign "lpvm" "load" _ _, [ArgGlobal info _, _, _, _]) -> do
-          modify $ \s -> s { bkwdGlobalStored = Set.delete info gStored }
-          bkwdBuildStmt' args' prim pos
+      (PrimForeign "lpvm" "load" _ _, [ArgGlobal info _, 
+                                       ArgVar{argVarName=var}, 
+                                       globalIn, globalOut]) 
+          | Set.notMember var usedLater -> 
+              bkwdBuildStmt defs (primMove globalIn globalOut) pos
+          | otherwise -> do
+              modify $ \s -> s { bkwdGlobalStored = Set.delete info gStored }
+              bkwdBuildStmt' args' prim pos
       (PrimHigherCall _ fn _, _)
           | isResourcefulHigherOrder $ argType fn -> do
               modify $ \s -> s { bkwdGlobalStored = Set.empty }
@@ -1237,7 +1245,7 @@ bkwdBuildStmt defs prim pos = do
       (PrimCall _ pspec _, _) -> do 
           callGFlows <- procImplnGlobalFlows . procImpln 
                     <$> lift (getProcDef pspec)
-          let gStored' = Set.filter (hasGlobalFlow callGFlows FlowIn) gStored
+          let gStored' = Set.filter (not . hasGlobalFlow callGFlows FlowIn) gStored
           modify $ \s -> s { bkwdGlobalStored = gStored' }
           bkwdBuildStmt' args' prim pos
       _ -> bkwdBuildStmt' args' prim pos
@@ -1319,7 +1327,8 @@ showState indent BodyState{parent=par, currBuild=revPrims, buildState=bld,
                             . showState indent) par
         substStr          = startLine indent
                             ++ "# Substs: " ++ simpleShowMap substs
-        globalStr         = "# Loaded globals: " ++ simpleShowMap loaded
+        globalStr         = startLine indent
+                            ++ "# Loaded globals: " ++ simpleShowMap loaded
         str'              = showPlacedPrims indent' (reverse revPrims)
         sets              = if List.null revPrims
                             then ""

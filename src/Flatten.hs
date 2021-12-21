@@ -68,10 +68,9 @@ flattenProcDecl (ProcDecl vis mods proto stmts pos) = do
                    List.map paramName $
                    List.filter (flowsIn . paramFlow) $
                    procProtoParams proto
-    let inResources = Set.map (resourceName . resourceFlowRes) $
-                   Set.filter (flowsIn . resourceFlowFlow) $
-                   procProtoResources proto
-    (stmts',tmpCtr) <- flattenBody stmts (inParams `Set.union` inResources)
+    let resources = Set.map (resourceName . resourceFlowRes) 
+                  $ procProtoResources proto
+    (stmts',tmpCtr) <- flattenBody stmts (inParams `Set.union` resources)
                        (modifierDetism mods)
     let resfulMod = modifierResourceful mods
     unless (resfulMod == Resourceless) 
@@ -414,12 +413,12 @@ flattenStmt' for@(For pgens body) pos detism = do
     let generated = Loop loop Nothing
     logFlatten $ "Generated for: " ++ showStmt 4 generated
     flattenStmt' generated pos detism
-flattenStmt' (UseResources res body) pos detism = do
+flattenStmt' (UseResources res beforeVars afterVars body) pos detism = do
     oldVars <- gets defdVars
     mapM_ (noteVarIntro . resourceName) res
     body' <- flattenInner True detism (flattenStmts body detism)
     modify $ \s -> s { defdVars = oldVars}
-    emit pos $ UseResources res body'
+    emit pos $ UseResources res beforeVars afterVars body'
 flattenStmt' Nop pos _ = emit pos Nop
 flattenStmt' Fail pos _ = emit pos Fail
 flattenStmt' Break pos _ = emit pos Break
@@ -565,7 +564,7 @@ flattenExp (CondExp cond thn els) ty castFrom pos = do
                 Nothing Nothing)
         pos Det
     return $ maybePlace (Var resultName ParamIn Ordinary) pos
-flattenExp expr@(AnonProc mods _ pstmts) ty castFrom pos = do
+flattenExp expr@(AnonProc mods _ pstmts clsd res) ty castFrom pos = do
     let inliningMod = modifierInline mods
     unless (inliningMod == MayInline)
         $ lift $ modifierError (inliningName inliningMod)
@@ -579,7 +578,7 @@ flattenExp expr@(AnonProc mods _ pstmts) ty castFrom pos = do
     anonState' <- gets anonProcState
     modify $ \s -> s{anonProcState=popAnonProcState anonState anonState'}
     let anonParams = processAnonProcParams anonState'
-    return $ typeAndPlace (AnonProc mods anonParams pstmts') ty castFrom pos
+    return $ typeAndPlace (AnonProc mods anonParams pstmts' clsd res) ty castFrom pos
 flattenExp (CaseExp pexpr cases deflt) ty castFrom pos = do
     resultName <- tempVar
     pexpr' <- flattenPExp pexpr

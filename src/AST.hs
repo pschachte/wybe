@@ -2353,7 +2353,7 @@ foldStmt' sfn efn val (TestBool exp) pos = foldExp sfn efn val exp Nothing
 foldStmt' _   _   val Nop pos = val
 foldStmt' _   _   val Fail pos = val
 foldStmt' sfn efn val (Loop body _) pos = foldStmts sfn efn val body
-foldStmt' sfn efn val (UseResources _ body) pos = foldStmts sfn efn val body
+foldStmt' sfn efn val (UseResources _ _ _ body) pos = foldStmts sfn efn val body
 foldStmt' sfn efn val (For generators body) pos = val3
     where val1 = foldExps sfn efn pos val  $ loopVar . content <$> generators
           val2 = foldExps sfn efn pos val1 $ genExp  . content <$> generators
@@ -2392,7 +2392,7 @@ foldExp' _   _   val CharValue{} pos = val
 foldExp' _   _   val Var{} pos = val
 foldExp' _   _   val (Global _) pos = val
 foldExp' sfn efn val (ProcRef _ es) pos = foldExps sfn efn pos val es
-foldExp' sfn efn val (AnonProc _ _ pstmts) pos = foldStmts sfn efn val pstmts
+foldExp' sfn efn val (AnonProc _ _ pstmts _ _) pos = foldStmts sfn efn val pstmts
 foldExp' sfn efn val (Typed exp _ _) pos = foldExp sfn efn val exp pos
 foldExp' _   _   val AnonParamVar{} pos = val
 foldExp' sfn efn val (Where stmts exp) pos =
@@ -2770,7 +2770,7 @@ data Stmt
      -- | A scoped construct for resources.  This creates a context in which the
      --   listed resources can be used, and in which those resources do not
      --   change value. This statement is eliminated during resource processing.
-     | UseResources [ResourceSpec] [Placed Stmt]
+     | UseResources [ResourceSpec] (Maybe VarDict) (Maybe VarDict) [Placed Stmt]
 
      -- All the following are eliminated during unbranching.
 
@@ -2841,7 +2841,7 @@ data Exp
                -- these two must be the same.
       | Global GlobalInfo
       -- The following are eliminated during flattening
-      | AnonProc ProcModifiers [Param] [Placed Stmt] -- removed in unbranching
+      | AnonProc ProcModifiers [Param] [Placed Stmt] (Maybe VarDict) (Maybe (Set ResourceFlowSpec))
       | AnonParamVar (Maybe Integer) FlowDirection
       | Where [Placed Stmt] (Placed Exp)
       | DisjExp (Placed Exp) (Placed Exp)
@@ -2866,14 +2866,14 @@ data GlobalInfo = GlobalResource { globalResourceSpec :: ResourceSpec }
 
 -- | Return the FlowDirection of an Exp, assuming it has been flattened.
 flattenedExpFlow :: Exp -> FlowDirection
-flattenedExpFlow (IntValue _)      = ParamIn
-flattenedExpFlow (FloatValue _)    = ParamIn
-flattenedExpFlow (CharValue _)     = ParamIn
-flattenedExpFlow (StringValue _ _) = ParamIn
-flattenedExpFlow (AnonProc _ _ _)  = ParamIn
-flattenedExpFlow (ProcRef _ _)     = ParamIn
-flattenedExpFlow (Var _ flow _)    = flow
-flattenedExpFlow (Typed exp _ _)   = flattenedExpFlow exp
+flattenedExpFlow (IntValue _)       = ParamIn
+flattenedExpFlow (FloatValue _)     = ParamIn
+flattenedExpFlow (CharValue _)      = ParamIn
+flattenedExpFlow (StringValue _ _)  = ParamIn
+flattenedExpFlow (AnonProc{})       = ParamIn
+flattenedExpFlow (ProcRef _ _)      = ParamIn
+flattenedExpFlow (Var _ flow _)     = flow
+flattenedExpFlow (Typed exp _ _)    = flattenedExpFlow exp
 flattenedExpFlow otherExp =
     shouldnt $ "Getting flow direction of unflattened exp " ++ show otherExp
 
@@ -3219,7 +3219,7 @@ expOutputs (Var "_" ParamIn _) = Set.singleton "_" -- special _ variable is out
 expOutputs (Var name flow _) =
     if flowsOut flow then Set.singleton name else Set.empty
 expOutputs (Global _) = Set.empty
-expOutputs (AnonProc _ _ _) = Set.empty
+expOutputs (AnonProc{}) = Set.empty
 expOutputs (ProcRef _ _) = Set.empty
 expOutputs (Typed expr _ _) = expOutputs expr
 expOutputs (AnonParamVar _ _) = Set.empty
@@ -3246,7 +3246,7 @@ expInputs (CharValue _) = Set.empty
 expInputs (Var name flow _) =
    if flowsIn flow then Set.singleton name else Set.empty
 expInputs (Global _) = Set.empty
-expInputs (AnonProc _ _ _) = Set.empty
+expInputs (AnonProc{}) = Set.empty
 expInputs (ProcRef _ _) = Set.empty
 expInputs (Typed expr _ _) = expInputs expr
 expInputs (AnonParamVar _ _) = Set.empty
@@ -3773,10 +3773,12 @@ showStmt indent (Loop lstmts genVars) =
     "do {" ++  showBody (indent + 4) lstmts
     ++ startLine indent ++ "}"
     ++ maybe "" ((" -> "++) . showVarMap) genVars
-showStmt indent (UseResources resources stmts) =
+showStmt indent (UseResources resources beforeVars afterVars stmts) =
     "use " ++ intercalate ", " (List.map show resources)
     ++ " in" ++ showBody (indent + 4) stmts
     ++ startLine indent ++ "}"
+    ++ maybe "" (("\n   before -> "++) . showVarMap) beforeVars
+    ++ maybe "" (("\n   after  -> "++) . showVarMap) afterVars
 showStmt _ Fail = "fail"
 showStmt _ Nop = "pass"
 showStmt indent (For generators body) =
@@ -3829,7 +3831,7 @@ instance Show Exp where
   show (CharValue c) = show c
   show (Var name dir flowtype) = show flowtype ++ flowPrefix dir ++ name
   show (Global info) = show info
-  show (AnonProc mods params ss) =
+  show (AnonProc mods params ss _ _) =
       showProcModifiers mods
       ++ "{" ++ intercalate "\n" (showStmt 0 . content <$> ss) ++ "}"
   show (ProcRef ps es) = show ps ++ "<" ++ intercalate ", " (show <$> es) ++ ">"

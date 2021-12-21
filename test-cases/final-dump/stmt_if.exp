@@ -37,14 +37,14 @@ foobar(*#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
     0:
         wybe.string.print_string<0>("lookup fails when it should succeed":wybe.string, ~*#globals##0:wybe.phantom, ?*tmp#14##0:wybe.phantom) #8 @io:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom, ~*tmp#14##0:wybe.phantom, ?*tmp#16##0:wybe.phantom)
-        foreign c putchar('\n':wybe.char, ~%tmp#15##0:wybe.phantom, ?%tmp#17##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#17##0:wybe.phantom, ~*tmp#16##0:wybe.phantom, ?*#globals##1:wybe.phantom)
         stmt_if.gen#1<0>(~#globals##1:wybe.phantom, _:stmt_if.tree, _:stmt_if.tree, _:stmt_if.tree, ~tmp#11##0:stmt_if.tree, ?#globals##2:wybe.phantom) #7
 
     1:
         wybe.string.print_string<0>("lookup succeeds when it should":wybe.string, ~*#globals##0:wybe.phantom, ?*tmp#14##0:wybe.phantom) #9 @io:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom, ~*tmp#14##0:wybe.phantom, ?*tmp#16##0:wybe.phantom)
-        foreign c putchar('\n':wybe.char, ~%tmp#15##0:wybe.phantom, ?%tmp#17##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#17##0:wybe.phantom, ~*tmp#16##0:wybe.phantom, ?*#globals##1:wybe.phantom)
         stmt_if.gen#1<0>(~#globals##1:wybe.phantom, _:stmt_if.tree, _:stmt_if.tree, _:stmt_if.tree, ~tmp#11##0:stmt_if.tree, ?#globals##2:wybe.phantom) #5
 
@@ -61,13 +61,13 @@ gen#1(*#globals##0:wybe.phantom, [tmp#0##0:stmt_if.tree], [tmp#1##0:stmt_if.tree
     0:
         wybe.string.print_string<0>("lookup succeeds when it should fail":wybe.string, ~*#globals##0:wybe.phantom, ?*tmp#6##0:wybe.phantom) #3 @io:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom, ~*tmp#6##0:wybe.phantom, ?*tmp#8##0:wybe.phantom)
-        foreign c putchar('\n':wybe.char, ~%tmp#7##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#9##0:wybe.phantom, ~*tmp#8##0:wybe.phantom, ?*#globals##1:wybe.phantom)
 
     1:
         wybe.string.print_string<0>("lookup fails when it should":wybe.string, ~*#globals##0:wybe.phantom, ?*tmp#6##0:wybe.phantom) #4 @io:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom, ~*tmp#6##0:wybe.phantom, ?*tmp#8##0:wybe.phantom)
-        foreign c putchar('\n':wybe.char, ~%tmp#7##0:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#9##0:wybe.phantom, ~*tmp#8##0:wybe.phantom, ?*#globals##1:wybe.phantom)
 
 

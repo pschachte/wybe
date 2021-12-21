@@ -221,6 +221,7 @@ import           Options                   (LogSelection (..), Options (..),
 import           Parser                    (parseWybe)
 import           Resources                 (resourceCheckMod,
                                             transformProcResources,
+                                            transformProcGlobals,
                                             canonicaliseProcResources)
 import           Unique                    ( uniquenessCheckProc )
 import           Scanner                   (fileTokens)
@@ -811,6 +812,9 @@ compileModSCC mspecs = do
     mapM_ (transformModuleProcs uniquenessCheckProc)  mspecs
     stopOnError $ "uniqueness checking of module(s) "
                   ++ showModSpecs mspecs
+    mapM_ (transformModuleProcs transformProcGlobals)  mspecs
+    stopOnError $ "globalisation of module(s) "
+                  ++ showModSpecs mspecs
     ----------------------------------
     -- UNBRANCHING
     mapM_ (transformModuleProcs unbranchProc)  mspecs
@@ -1113,18 +1117,19 @@ buildMain :: [ModSpec] -> Compiler Item
 buildMain mainImports = do
     logBuild "Generating main executable code"
     let cmdResource name = ResourceFlowSpec (ResourceSpec ["command_line"] name)
-    res <- Set.toList . Set.unions . (keysSet<$>)
-           <$> mapM (initialisedResources `inModule`) mainImports
+    let mainRes = Set.fromList [cmdResource "argc" ParamIn,
+                                cmdResource "argv" ParamIn,
+                                cmdResource "exit_code" ParamOut]
+    initRes <- Set.filter (`Set.notMember` Set.map resourceFlowRes mainRes) 
+             . Set.unions . (keysSet <$>)
+            <$> mapM (initialisedResources `inModule`) mainImports
     let detism = setDetism Terminal
                  $ setImpurity Impure defaultProcModifiers
     -- Program main has argc, argv, and exit_code as resources
-    let proto = ProcProto "" []
-                $ Set.fromList [cmdResource "argc" ParamIn,
-                                 cmdResource "argv" ParamIn,
-                                 cmdResource "exit_code" ParamOut]
+    let proto = ProcProto "" [] mainRes
     let mainBody =
           [ Unplaced $
-            UseResources res $
+            UseResources (Set.toList initRes) Nothing Nothing $
             -- Construct argumentless resourceful calls to all main procs
               [Unplaced $ ProcCall (First m "" Nothing) Det True []
               | m <- mainImports]

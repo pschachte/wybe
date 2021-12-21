@@ -229,25 +229,25 @@ printit(ob##0:mixed_fields, *#globals##0:wybe.phantom, *?#globals##6:wybe.phanto
   InterestingCallProperties: []
     foreign lpvm access(ob##0:mixed_fields, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int)
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##2:wybe.phantom)
-    foreign c print_int(~tmp#0##0:wybe.int, ~%tmp#9##0:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#11##0:wybe.phantom, ?%tmp#12##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#9##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
     foreign lpvm access(ob##0:mixed_fields, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.char)
-    foreign c putchar(~tmp#1##0:wybe.char, ~%tmp#12##0:wybe.phantom, ?%tmp#18##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#18##0:wybe.phantom, ?%tmp#19##0:wybe.phantom) @io:nn:nn
+    foreign c putchar(~tmp#1##0:wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @io:nn:nn
     foreign lpvm access(ob##0:mixed_fields, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int)
-    foreign c print_int(~tmp#2##0:wybe.int, ~%tmp#19##0:wybe.phantom, ?%tmp#25##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#25##0:wybe.phantom, ?%tmp#26##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(~tmp#2##0:wybe.int, ~tmp#19##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#25##0:wybe.phantom, ?tmp#26##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#26##0:wybe.phantom, ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom)
     foreign lpvm access(ob##0:mixed_fields, 1:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool)
     wybe.io.print<5>(~tmp#3##0:wybe.bool, ~*#globals##3:wybe.phantom, ?*tmp#30##0:wybe.phantom) #12 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#31##0:wybe.phantom, ~*tmp#30##0:wybe.phantom, ?*#globals##5:wybe.phantom)
-    foreign c putchar('\n':wybe.char, ~%tmp#31##0:wybe.phantom, ?%tmp#33##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#31##0:wybe.phantom, ?tmp#33##0:wybe.phantom) @io:nn:nn
     foreign lpvm access(ob##0:mixed_fields, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int)
-    foreign c print_int(~tmp#4##0:wybe.int, ~%tmp#33##0:wybe.phantom, ?%tmp#39##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#39##0:wybe.phantom, ?%tmp#40##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(~tmp#4##0:wybe.int, ~tmp#33##0:wybe.phantom, ?tmp#39##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#39##0:wybe.phantom, ?tmp#40##0:wybe.phantom) @io:nn:nn
     foreign lpvm access(~ob##0:mixed_fields, 2:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.char)
-    foreign c putchar(~tmp#5##0:wybe.char, ~%tmp#40##0:wybe.phantom, ?%tmp#46##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~%tmp#46##0:wybe.phantom, ?%tmp#47##0:wybe.phantom) @io:nn:nn
+    foreign c putchar(~tmp#5##0:wybe.char, ~tmp#40##0:wybe.phantom, ?tmp#46##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#46##0:wybe.phantom, ?tmp#47##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#47##0:wybe.phantom, ~*#globals##5:wybe.phantom, ?*#globals##6:wybe.phantom)
 
 

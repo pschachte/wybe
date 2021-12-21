@@ -740,7 +740,7 @@ expType' (FloatValue _) _             = return $ TypeSpec ["wybe"] "float" []
 expType' (StringValue _ WybeString) _ = return $ TypeSpec ["wybe"] "string" []
 expType' (StringValue _ CString) _    = return $ TypeSpec ["wybe"] "c_string" []
 expType' (CharValue _) _              = return $ TypeSpec ["wybe"] "char" []
-expType' (AnonProc mods params pstmts) _ = do
+expType' (AnonProc mods params pstmts _ _) _ = do
     mapM_ ultimateVarType $ paramName <$> params
     params' <- updateParamTypes params
     return $ HigherOrderType mods $ paramTypeFlow <$> params'
@@ -786,7 +786,7 @@ expMode' _ (FloatValue _) = (ParamIn, True, Nothing)
 expMode' _ (StringValue _ _) = (ParamIn, True, Nothing)
 expMode' _ (CharValue _) = (ParamIn, True, Nothing)
 expMode' _ (ProcRef _ _) = (ParamIn, True, Nothing)
-expMode' _ (AnonProc _ _ _) = (ParamIn, True, Nothing)
+expMode' _ (AnonProc{}) = (ParamIn, True, Nothing)
 expMode' assigned (Var name flow _) =
     (flow, name `assignedIn` assigned, Nothing)
 expMode' assigned (Typed expr _ _) = expMode' assigned expr
@@ -1243,7 +1243,7 @@ bodyCalls'' nested detism (Cond cond thn els _ _) _ =
                     els' = bodyCalls nested detism els
                 in  cond' ++ thn' ++ els'
 bodyCalls'' nested detism (Loop stmts _) _ = bodyCalls nested detism stmts
-bodyCalls'' nested detism (UseResources _ stmts) _ = bodyCalls nested detism stmts
+bodyCalls'' nested detism (UseResources _ _ _ stmts) _ = bodyCalls nested detism stmts
 bodyCalls'' _ _ For{} _ = shouldnt "bodyCalls: flattening left For stmt"
 bodyCalls'' _ _ Case{} _ = shouldnt "bodyCalls: flattening left Case stmt"
 bodyCalls'' _ _ TestBool{} _ = []
@@ -1255,7 +1255,7 @@ bodyCalls'' _ _ Next _ = []
 
 expStmts :: [(Determinism, [Placed Stmt])] -> Exp -> OptPos 
          -> [(Determinism, [Placed Stmt])]
-expStmts ss (AnonProc ProcModifiers{modifierDetism=detism} _ ls) _
+expStmts ss (AnonProc ProcModifiers{modifierDetism=detism} _ ls _ _) _
     = (detism,ls):ss
 expStmts ss _ _ = ss
 
@@ -1868,13 +1868,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
     logTyped $ "Mode checking call   : " ++ show stmt
     logTyped $ "    with assigned    : " ++ show assigned
 
-    -- check Stmt is actually a higher order call 
-    -- if isHigherOrder callVarType && List.null cmod && isNothing pid
-    -- then modecheckStmt m name defPos assigned detism tmpCount final
-    --         (ProcCall (Higher (maybePlace (Typed callVar callVarType Nothing) pos))
-    --             d resourceful args) pos
-    -- else do
-    --     -- Find arg types and expand type variables
+    -- Find arg types and expand type variables
     (args', tmpCount') <- modeCheckExps m name defPos assigned detism tmpCount args
     assignedVars <- gets (Map.keysSet . typingDict)
     callInfos <- callInfos assignedVars (maybePlace stmt pos) detism
@@ -2005,9 +1999,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
       else do
         let finalAssigned = assigned2 `joinState` assigned3
         logTyped $ "Assigned by conditional: " ++ show finalAssigned
-        let vars = maybe [] Set.toAscList $ bindingVars finalAssigned
-        types <- mapM ultimateVarType vars
-        let bindings = Map.fromAscList $ zip vars types
+        bindings <- bindingVarDict finalAssigned
         return -- XXX Fix Nothing to be set of variables assigned by condition
           ([maybePlace (Cond (seqToStmt tstStmt') thnStmts' elsStmts'
                         (Just condBindings)
@@ -2038,11 +2030,14 @@ modecheckStmt m name defPos assigned detism tmpCount final
     return ([maybePlace (Loop stmts' vars) pos]
            ,postLoopBindingState assigned assigned',tmpCount')
 modecheckStmt m name defPos assigned detism tmpCount final
-    stmt@(UseResources resources stmts) pos = do
+    stmt@(UseResources resources _ _ stmts) pos = do
     logTyped $ "Mode checking use ... in stmt " ++ show stmt
+    before <- bindingVarDict assigned
     (stmts', assigned', tmpCount')
         <- modecheckStmts m name defPos assigned detism tmpCount final stmts
-    return ([maybePlace (UseResources resources stmts') pos],assigned',tmpCount')
+    after <- bindingVarDict assigned'
+    return ([maybePlace (UseResources resources (Just before) (Just after) stmts') pos],
+            assigned',tmpCount')
 -- XXX Need to implement these correctly:
 modecheckStmt m name defPos assigned detism tmpCount final
     stmt@(And stmts) pos = do
@@ -2098,20 +2093,34 @@ modeCheckExps m name pos assigned detism tmpCount (pexp:pexps) = do
 modeCheckExp :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism
              -> Int -> Exp -> OptPos -> Typed (Placed Exp,Int)
 modeCheckExp m name defPos assigned _ tmpCount
-        exp@(AnonProc mods@ProcModifiers{modifierDetism=detism} params ss) pos = do
+        exp@(AnonProc mods@ProcModifiers{modifierDetism=detism} params ss _ res) pos = do
     logTyped $ "Mode checking AnonProc " ++ show exp
     let inArgs = List.foldl collectInParams Set.empty params
     (ss',_,tmpCount') <- modecheckStmts m name defPos (addBindings inArgs assigned)
                              detism tmpCount True ss
+    let paramVars = expVar . content . paramToVar <$> params
+    let vars = mentionedVars ss'
+    let toClose = vars `Set.difference` Set.fromList paramVars
+    bindingVars <- bindingVarDict assigned
+    let closed = Map.filterWithKey (const . flip Set.member toClose) bindingVars
     params' <- updateParamTypes params
-    return (maybePlace (AnonProc mods params' ss') pos, tmpCount')
+    return (maybePlace (AnonProc mods params' ss' (Just closed) res) pos, tmpCount')
 modeCheckExp m name defPos assigned detism tmpCount
         (Typed exp ty cast) pos = do
+    ty' <- ultimateType ty
+    cast' <- forM cast ultimateType
     (exp', tmpCount') <- modeCheckExp m name defPos assigned
-                             detism tmpCount exp pos
-    return (maybePlace (Typed (content exp') ty cast) pos, tmpCount')
+                            detism tmpCount exp pos
+    return (maybePlace (Typed (content exp') ty' cast') pos, tmpCount')
 modeCheckExp m name defPos assigned detism tmpCount exp pos =
     return (maybePlace exp pos, tmpCount)
+
+
+mentionedVars :: [Placed Stmt] -> Set VarName
+mentionedVars = foldStmts (const . const) addInsOuts Set.empty
+  where
+    addInsOuts vars e _ = vars `Set.union` expInputs e 
+                               `Set.union` expOutputs e
 
 
 checkFlowErrors :: Bool -> Bool -> String -> OptPos -> [(FlowDirection, Bool, Maybe VarName)]
@@ -2546,7 +2555,7 @@ checkStmtTyped name pos stmt@(Loop stmts exitVars) _ppos = do
     -- when (isNothing exitVars) $
     --      shouldnt $ "exit vars of loop undetermined: " ++ showStmt 4 stmt
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
-checkStmtTyped name pos (UseResources _ stmts) _ppos =
+checkStmtTyped name pos (UseResources _ _ _ stmts) _ppos =
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
 checkStmtTyped name pos For{} ppos =
     shouldnt "For statement left by flattening"

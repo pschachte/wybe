@@ -12,7 +12,7 @@ module Snippets (castFromTo, castTo, withType, intType, intCast,
                  boolVarSet, boolVarGet, intVarSet, intVarGet,
                  lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, 
                  move, access, mutate, 
-                 globalStore, globalLoad, globalsGetSet, globalsParam,
+                 globalStore, globalLoad, isGlobalStore, isGlobalLoad, globalsGetSet, globalsParam,
                  lpvmVoid,
                  primMove, primAccess, primCast,
                  boolNegate, comparison, succeedTest, failTest, testVar, succeedIfSemiDet) where
@@ -175,6 +175,15 @@ globalLoad rs ty dest =
       $ [Unplaced $ Typed (Global $ GlobalResource rs) ty Nothing, 
          Unplaced dest]
         ++ globalsGetSet
+
+
+isGlobalStore :: Stmt -> Bool
+isGlobalStore (ForeignCall "lpvm" "store" _ _) = True
+isGlobalStore _                                = False
+
+isGlobalLoad :: Stmt -> Bool
+isGlobalLoad (ForeignCall "lpvm" "load" _ _) = True
+isGlobalLoad _                               = False
 
 
 globalsGetSet :: [Placed Exp]
