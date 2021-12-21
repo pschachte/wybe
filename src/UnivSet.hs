@@ -107,9 +107,8 @@ showSet showFn set =
 
 
 -- | Produce a map from a UnivSet using a monadic mapping function.
-mapFromUnivSetM :: (Monad m, Ord a) => (a -> m b) -> Map a b -> UnivSet a
+mapFromUnivSetM :: (Monad m, Ord a) => (a -> m b) -> Set a -> UnivSet a
                 -> m (Map a b)
-mapFromUnivSetM f univValue UniversalSet = return univValue
-mapFromUnivSetM f _ (FiniteSet s) = do
-    let keys = S.toAscList s
+mapFromUnivSetM f set uset = do
+    let keys = S.toAscList $ toSet set uset
     M.fromAscList . zip keys <$> mapM f keys

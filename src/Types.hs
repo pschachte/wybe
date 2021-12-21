@@ -292,8 +292,8 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Calling a pure proc with unneeded ! marker
             --    | ReasonUndeclaredTerminal ProcName OptPos
             --        -- ^The proc is terminal but not declared so
-            --    | ReasonUnnreachable ProcName OptPos
-            --        -- ^Statement following a terminal statement
+               | ReasonUnnreachable ProcName OptPos
+                   -- ^Statement following a terminal statement
                deriving (Eq, Ord)
 
 
@@ -432,9 +432,9 @@ typeErrorMessage (ReasonActuallyPure name impurity pos) =
 -- typeErrorMessage (ReasonUndeclaredTerminal name pos) =
 --     Message Warning pos $
 --         "Proc " ++ name ++ " should be declared terminal"
--- typeErrorMessage (ReasonUnnreachable name pos) =
---     Message Warning pos $
---         "In proc " ++ name ++ ", this statement is unreachable"
+typeErrorMessage (ReasonUnnreachable name pos) =
+    Message Warning pos $
+        "In " ++ showProcName name ++ ", this statement is unreachable"
 
 
 ----------------------------------------------------------------
@@ -1564,8 +1564,8 @@ modecheckStmts _ name pos assigned detism tmpCount final [] = do
     return ([],assigned,tmpCount)
 modecheckStmts m name pos assigned detism tmpCount final (pstmt:pstmts) = do
     logTyped $ "Mode check stmt " ++ showStmt 16 (content pstmt)
-    -- when (bindingDetism assigned == Terminal)
-    --     $ typeErrors [ReasonUnnreachable name (place pstmt)]
+    when (bindingDetism assigned == Terminal)
+        $ typeErrors [ReasonUnnreachable name (place pstmt)]
     let final' = final && List.null pstmts
     (pstmt',assigned',tmpCount') <-
         placedApply (modecheckStmt m name pos assigned detism tmpCount final')
@@ -1706,7 +1706,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
         (modecheckStmt m name defPos assigned SemiDet tmpCount False)
         tstStmt
     logTyped $ "Assigned by test: " ++ show assigned1
-    condBindings <- mapFromUnivSetM ultimateVarType Map.empty 
+    condBindings <- mapFromUnivSetM ultimateVarType Set.empty 
                     $ bindingVars assigned1
     logTyped $ "Assigned by test: " ++ show assigned1
     (thnStmts', assigned2, tmpCount2) <-
@@ -1727,7 +1727,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
       else do
         let finalAssigned = assigned2 `joinState` assigned3
         logTyped $ "Assigned by conditional: " ++ show finalAssigned
-        bindings <- mapFromUnivSetM ultimateVarType Map.empty
+        bindings <- mapFromUnivSetM ultimateVarType Set.empty
                     $ bindingVars finalAssigned
         return
           ([maybePlace (Cond (seqToStmt tstStmt') thnStmts' elsStmts'
@@ -1750,8 +1750,9 @@ modecheckStmt m name defPos assigned detism tmpCount final
     (stmts', assigned', tmpCount') <-
       modecheckStmts m name defPos (loopEntryBindingState assigned) detism
                      tmpCount final stmts
+    let startVars = toSet Set.empty $ bindingVars assigned
     logTyped $ "Assigned by loop: " ++ show assigned'
-    vars <- mapFromUnivSetM ultimateVarType Map.empty
+    vars <- mapFromUnivSetM ultimateVarType startVars
                     $ bindingBreakVars assigned'
     logTyped $ "Loop exit vars: " ++ show vars
     return ([maybePlace (Loop stmts' $ Just vars) pos]
@@ -1782,7 +1783,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
     (disj',assigned',tmpCount') <-
         modecheckDisj m name defPos assigned detism tmpCount final
                       failingBindingState disj
-    varDict <- mapFromUnivSetM ultimateVarType Map.empty 
+    varDict <- mapFromUnivSetM ultimateVarType Set.empty 
                 $ bindingVars assigned'
     return ([maybePlace (Or disj' (Just varDict)) pos],assigned',tmpCount')
 modecheckStmt m name defPos assigned detism tmpCount final
