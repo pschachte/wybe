@@ -113,6 +113,7 @@ import           Data.List.Extra (nubOrd)
 import           Data.Map as Map
 import           Data.Maybe
 import           Data.Set as Set
+import           UnivSet as USet
 import           Data.Tuple.HT ( mapSnd )
 import           Data.Word (Word8)
 import           Flow             ((|>))
@@ -1025,7 +1026,7 @@ addImport modspec imports = do
                 Just (imports', hash) ->
                     Just (combineImportSpecs imports' imports, hash)
             ) modspec'))
-    when (isNothing $ importPublic imports) $
+    when (isUniv $ importPublic imports) $
       updateInterface Public (updateDependencies (Set.insert modspec))
 
 
@@ -1629,8 +1630,8 @@ type ModSpec = [Ident]
 --  then the privates.  Each is either Nothing, meaning all exported
 --  names are imported, or Just a set of the specific names to import.
 data ImportSpec = ImportSpec {
-    importPublic::Maybe (Set Ident),
-    importPrivate::Maybe (Set Ident)
+    importPublic::UnivSet Ident,
+    importPrivate::UnivSet Ident
     } deriving (Show, Generic)
 
 
@@ -1639,26 +1640,20 @@ data ImportSpec = ImportSpec {
 --  publicly or privately, as specified by the second argument.
 importSpec :: Maybe [Ident] -> Visibility -> ImportSpec
 importSpec Nothing Public =
-    ImportSpec Nothing (Just Set.empty)
+    ImportSpec UniversalSet  (FiniteSet Set.empty)
 importSpec Nothing Private =
-    ImportSpec (Just Set.empty) Nothing
+    ImportSpec (FiniteSet Set.empty) UniversalSet
 importSpec (Just items) Public =
-    ImportSpec (Just $ Set.fromList items) (Just Set.empty)
+    ImportSpec (FiniteSet $ Set.fromList items) (FiniteSet Set.empty)
 importSpec (Just items) Private =
-    ImportSpec (Just Set.empty) (Just $ Set.fromList items)
+    ImportSpec (FiniteSet Set.empty) (FiniteSet $ Set.fromList items)
 
 
 -- |Merge two import specs to create a single one that imports
 --  exactly what the two together specify.
 combineImportSpecs :: ImportSpec -> ImportSpec -> ImportSpec
 combineImportSpecs (ImportSpec pub1 priv1) (ImportSpec pub2 priv2) =
-    ImportSpec (combineImportPart pub1 pub2) (combineImportPart priv1 priv2)
-
-
-combineImportPart :: Maybe (Set Ident) -> Maybe (Set Ident) -> Maybe (Set Ident)
-combineImportPart Nothing _ = Nothing
-combineImportPart _ Nothing = Nothing
-combineImportPart (Just set1) (Just set2) = Just (set1 `Set.union` set2)
+    ImportSpec (USet.union pub1 pub2) (USet.union priv1 priv2)
 
 
 -- |Actually import into the current module.  The ImportSpec says what
@@ -1674,7 +1669,7 @@ doImport mod (imports, _) = do
     fromIFace <- modInterface . trustFromJust "doImport"
                  <$> getLoadingModule mod
     let pubImports = importPublic imports
-    let allImports = combineImportPart pubImports $ importPrivate imports
+    let allImports = USet.union pubImports $ importPrivate imports
     let importedModsAssoc =
             (last mod,mod):
             Map.toAscList (importsSelected allImports $ pubSubmods fromIFace)
@@ -1761,12 +1756,9 @@ resolveModuleM mod = do
       Just m -> return m
 
 
-
-
-importsSelected :: Maybe (Set Ident) -> Map Ident a -> Map Ident a
-importsSelected Nothing items = items
-importsSelected (Just these) items =
-    Map.filterWithKey (\k _ -> Set.member k these) items
+importsSelected :: UnivSet Ident -> Map Ident a -> Map Ident a
+importsSelected imports items =
+    Map.filterWithKey (\k _ -> USet.member k imports) items
 
 
 -- | Pragmas that can be specified for a module
@@ -3157,8 +3149,8 @@ showUse tab mod (ImportSpec pubs privs) =
     in  if List.null pubstr || List.null privstr
         then pubstr ++ privstr
         else pubstr ++ "\n" ++ replicate tab ' ' ++ privstr
-  where showImports prefix mod Nothing = prefix ++ "use " ++ showModSpec mod
-        showImports prefix mod (Just set) =
+  where showImports prefix mod UniversalSet = prefix ++ "use " ++ showModSpec mod
+        showImports prefix mod (FiniteSet set) =
             if Set.null set
             then ""
             else prefix ++ "from " ++ showModSpec mod ++ " use " ++

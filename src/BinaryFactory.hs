@@ -14,6 +14,7 @@ import           Crypto.Hash
 import           Data.Binary          as B
 -- import qualified Data.ByteString.Char8 as BL
 import           Config               (magicVersion)
+import           UnivSet
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.List            as List
 import qualified LLVM.AST             as LLVMAST
@@ -78,7 +79,7 @@ instance Binary TypeImpln
 
 instance Binary EncodedLPVM
 
-
+instance Binary t => Binary (UnivSet t)
 instance Binary SourcePos where
   put pos = do put $ sourceName pos
                put $ sourceLine pos

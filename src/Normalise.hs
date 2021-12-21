@@ -31,6 +31,7 @@ import Options (LogSelection(Normalise))
 import Snippets
 import Util
 import Distribution.Parsec.FieldLineStream (fieldLineStreamEnd)
+import UnivSet (UnivSet(FiniteSet, UniversalSet))
 
 -- |Normalise a list of file items, storing the results in the current module.
 normalise :: [Item] -> Compiler ()
@@ -38,7 +39,8 @@ normalise items = do
     mapM_ normaliseItem items
     -- import stdlib unless no_standard_library pragma is specified
     useStdLib <- getModuleImplementationField (Set.notMember NoStd . modPragmas)
-    when useStdLib $ addImport ["wybe"] (ImportSpec (Just Set.empty) Nothing)
+    when useStdLib
+      $ addImport ["wybe"] (ImportSpec (FiniteSet Set.empty) UniversalSet )
     return ()
 
 

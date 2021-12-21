@@ -82,3 +82,5 @@ entry:
   tail call ccc  void  @exit(i64  1)  
   ret void 
 }
+[93mfinal-dump/early_error.wybe:3:2: In module top-level code, this statement is unreachable
+[0m
