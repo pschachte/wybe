@@ -1,0 +1,36 @@
+resource maximum:int # = -1000
+
+def take_max(i:int) use !maximum { ?maximum = max(i, maximum) }
+
+def map(f:{resource}(A), as:list(A)) {
+    for ?a in as { !f a }
+}
+
+?matrix = [[1,2,3], [5,1]]
+
+use maximum in {
+    ?maximum = -1000
+    !map({resource}{
+        !take_max(length(@))
+    }, matrix)
+    !println(maximum)
+}
+
+!println("*****")
+
+?matrix = [[1,2,3], [1,2,1,2], [5,1]]
+
+use maximum in {
+    ?maximum = -1000
+    !map({resource}{
+        use maximum in {
+            ?maximum = -1000
+            !map({resource}{
+                !take_max(@)
+            }, @1) 
+            !print("> "); !println(maximum)
+        }
+        !take_max(length(@1))
+    }, matrix)
+    !println(maximum)
+}
