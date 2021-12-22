@@ -19,7 +19,7 @@ AFTER EVERYTHING:
   submodules      : person2.person
   procs           : 
 
-module top-level code > public {inline,impure} (0 calls) 
+module top-level code > public {inline,impure} (0 calls)
 0: person2.<0>
 (*#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
@@ -81,16 +81,16 @@ entry:
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls) 
+= > public {inline} (1 calls)
 0: person2.person.=<0>
 =(#left##0:person2.person, #right##0:person2.person, ?#success##0:wybe.bool):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(#left##0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#firstname##0:wybe.string)
-    foreign lpvm access(~#left##0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#lastname##0:wybe.string)
-    foreign lpvm access(#right##0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#firstname##0:wybe.string)
-    foreign lpvm access(~#right##0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#lastname##0:wybe.string)
+    foreign lpvm access(#left##0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#firstname##0:wybe.string) @person2:1:23
+    foreign lpvm access(~#left##0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#lastname##0:wybe.string) @person2:1:23
+    foreign lpvm access(#right##0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#firstname##0:wybe.string) @person2:1:23
+    foreign lpvm access(~#right##0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#lastname##0:wybe.string) @person2:1:23
     wybe.string.=<0>(~#left#firstname##0:wybe.string, ~#right#firstname##0:wybe.string, ?tmp#1##0:wybe.bool) #2
     case ~tmp#1##0:wybe.bool of
     0:
@@ -101,67 +101,67 @@ entry:
 
 
 
-firstname > public {inline} (0 calls) 
+firstname > public {inline} (0 calls)
 0: person2.person.firstname<0>
 firstname(#rec##0:person2.person, ?#result##0:wybe.string):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string)
-firstname > public {inline} (0 calls) 
+    foreign lpvm access(~#rec##0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string) @person2:1:23
+firstname > public {inline} (0 calls)
 1: person2.person.firstname<1>
 firstname(#rec##0:person2.person, ?#rec##1:person2.person, #field##0:wybe.string):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm mutate(~#rec##0:person2.person, ?#rec##1:person2.person, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string)
+    foreign lpvm mutate(~#rec##0:person2.person, ?#rec##1:person2.person, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string) @person2:1:23
 
 
-lastname > public {inline} (0 calls) 
+lastname > public {inline} (0 calls)
 0: person2.person.lastname<0>
 lastname(#rec##0:person2.person, ?#result##0:wybe.string):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string)
-lastname > public {inline} (0 calls) 
+    foreign lpvm access(~#rec##0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string) @person2:1:23
+lastname > public {inline} (0 calls)
 1: person2.person.lastname<1>
 lastname(#rec##0:person2.person, ?#rec##1:person2.person, #field##0:wybe.string):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm mutate(~#rec##0:person2.person, ?#rec##1:person2.person, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string)
+    foreign lpvm mutate(~#rec##0:person2.person, ?#rec##1:person2.person, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string) @person2:1:23
 
 
-person > public {inline} (0 calls) 
+person > public {inline} (0 calls)
 0: person2.person.person<0>
 person(firstname##0:wybe.string, lastname##0:wybe.string, ?#result##0:person2.person):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?#rec##0:person2.person)
-    foreign lpvm mutate(~#rec##0:person2.person, ?#rec##1:person2.person, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~firstname##0:wybe.string)
-    foreign lpvm mutate(~#rec##1:person2.person, ?#result##0:person2.person, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~lastname##0:wybe.string)
-person > public {inline} (6 calls) 
+    foreign lpvm alloc(16:wybe.int, ?#rec##0:person2.person) @person2:1:23
+    foreign lpvm mutate(~#rec##0:person2.person, ?#rec##1:person2.person, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~firstname##0:wybe.string) @person2:1:23
+    foreign lpvm mutate(~#rec##1:person2.person, ?#result##0:person2.person, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~lastname##0:wybe.string) @person2:1:23
+person > public {inline} (6 calls)
 1: person2.person.person<1>
 person(?firstname##0:wybe.string, ?lastname##0:wybe.string, #result##0:person2.person):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(#result##0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?firstname##0:wybe.string)
-    foreign lpvm access(~#result##0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?lastname##0:wybe.string)
+    foreign lpvm access(#result##0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?firstname##0:wybe.string) @person2:1:23
+    foreign lpvm access(~#result##0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?lastname##0:wybe.string) @person2:1:23
 
 
-~= > public {inline} (0 calls) 
+~= > public {inline} (0 calls)
 0: person2.person.~=<0>
 ~=(#left##0:person2.person, #right##0:person2.person, ?#success##0:wybe.bool):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(#left##0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.string)
-    foreign lpvm access(~#left##0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.string)
-    foreign lpvm access(#right##0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.string)
-    foreign lpvm access(~#right##0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.string)
+    foreign lpvm access(#left##0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.string) @person2:1:23
+    foreign lpvm access(~#left##0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.string) @person2:1:23
+    foreign lpvm access(#right##0:person2.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.string) @person2:1:23
+    foreign lpvm access(~#right##0:person2.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.string) @person2:1:23
     wybe.string.=<0>(~tmp#3##0:wybe.string, ~tmp#5##0:wybe.string, ?tmp#7##0:wybe.bool) #1
     case ~tmp#7##0:wybe.bool of
     0:

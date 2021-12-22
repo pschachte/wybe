@@ -26,40 +26,40 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > public {impure} (0 calls) 
+module top-level code > public {impure} (0 calls)
 0: mixed_fields.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(32:wybe.int, ?tmp#8##0:mixed_fields)
-    foreign lpvm mutate(~tmp#8##0:mixed_fields, ?tmp#9##0:mixed_fields, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 'a':wybe.char)
-    foreign lpvm mutate(~tmp#9##0:mixed_fields, ?tmp#10##0:mixed_fields, 1:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 1:wybe.bool)
-    foreign lpvm mutate(~tmp#10##0:mixed_fields, ?tmp#11##0:mixed_fields, 2:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 'A':wybe.char)
-    foreign lpvm mutate(~tmp#11##0:mixed_fields, ?tmp#12##0:mixed_fields, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 3:wybe.int)
-    foreign lpvm mutate(~tmp#12##0:mixed_fields, ?tmp#13##0:mixed_fields, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 42:wybe.int)
-    foreign lpvm mutate(~tmp#13##0:mixed_fields, ?tmp#0##0:mixed_fields, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 17:wybe.int)
+    foreign lpvm alloc(32:wybe.int, ?tmp#8##0:mixed_fields) @mixed_fields:nn:nn
+    foreign lpvm mutate(~tmp#8##0:mixed_fields, ?tmp#9##0:mixed_fields, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 'a':wybe.char) @mixed_fields:nn:nn
+    foreign lpvm mutate(~tmp#9##0:mixed_fields, ?tmp#10##0:mixed_fields, 1:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 1:wybe.bool) @mixed_fields:nn:nn
+    foreign lpvm mutate(~tmp#10##0:mixed_fields, ?tmp#11##0:mixed_fields, 2:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 'A':wybe.char) @mixed_fields:nn:nn
+    foreign lpvm mutate(~tmp#11##0:mixed_fields, ?tmp#12##0:mixed_fields, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 3:wybe.int) @mixed_fields:nn:nn
+    foreign lpvm mutate(~tmp#12##0:mixed_fields, ?tmp#13##0:mixed_fields, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 42:wybe.int) @mixed_fields:nn:nn
+    foreign lpvm mutate(~tmp#13##0:mixed_fields, ?tmp#0##0:mixed_fields, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 17:wybe.int) @mixed_fields:nn:nn
     mixed_fields.printit<0>(~tmp#0##0:mixed_fields, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #2 @mixed_fields:nn:nn
 
 
-= > public (1 calls) 
+= > public (1 calls)
 0: mixed_fields.=<0>
 =(#left##0:mixed_fields, #right##0:mixed_fields, ?#success##0:wybe.bool):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(#left##0:mixed_fields, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#f2##0:wybe.char)
-    foreign lpvm access(#left##0:mixed_fields, 1:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#f4##0:wybe.bool)
-    foreign lpvm access(#left##0:mixed_fields, 2:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#f6##0:wybe.char)
-    foreign lpvm access(#left##0:mixed_fields, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#f1##0:wybe.int)
-    foreign lpvm access(#left##0:mixed_fields, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#f3##0:wybe.int)
-    foreign lpvm access(~#left##0:mixed_fields, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#f5##0:wybe.int)
-    foreign lpvm access(#right##0:mixed_fields, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?#right#f2##0:wybe.char)
-    foreign lpvm access(#right##0:mixed_fields, 1:wybe.int, 32:wybe.int, 0:wybe.int, ?#right#f4##0:wybe.bool)
-    foreign lpvm access(#right##0:mixed_fields, 2:wybe.int, 32:wybe.int, 0:wybe.int, ?#right#f6##0:wybe.char)
-    foreign lpvm access(#right##0:mixed_fields, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?#right#f1##0:wybe.int)
-    foreign lpvm access(#right##0:mixed_fields, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?#right#f3##0:wybe.int)
-    foreign lpvm access(~#right##0:mixed_fields, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?#right#f5##0:wybe.int)
+    foreign lpvm access(#left##0:mixed_fields, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#f2##0:wybe.char) @mixed_fields:nn:nn
+    foreign lpvm access(#left##0:mixed_fields, 1:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#f4##0:wybe.bool) @mixed_fields:nn:nn
+    foreign lpvm access(#left##0:mixed_fields, 2:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#f6##0:wybe.char) @mixed_fields:nn:nn
+    foreign lpvm access(#left##0:mixed_fields, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#f1##0:wybe.int) @mixed_fields:nn:nn
+    foreign lpvm access(#left##0:mixed_fields, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#f3##0:wybe.int) @mixed_fields:nn:nn
+    foreign lpvm access(~#left##0:mixed_fields, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#f5##0:wybe.int) @mixed_fields:nn:nn
+    foreign lpvm access(#right##0:mixed_fields, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?#right#f2##0:wybe.char) @mixed_fields:nn:nn
+    foreign lpvm access(#right##0:mixed_fields, 1:wybe.int, 32:wybe.int, 0:wybe.int, ?#right#f4##0:wybe.bool) @mixed_fields:nn:nn
+    foreign lpvm access(#right##0:mixed_fields, 2:wybe.int, 32:wybe.int, 0:wybe.int, ?#right#f6##0:wybe.char) @mixed_fields:nn:nn
+    foreign lpvm access(#right##0:mixed_fields, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?#right#f1##0:wybe.int) @mixed_fields:nn:nn
+    foreign lpvm access(#right##0:mixed_fields, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?#right#f3##0:wybe.int) @mixed_fields:nn:nn
+    foreign lpvm access(~#right##0:mixed_fields, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?#right#f5##0:wybe.int) @mixed_fields:nn:nn
     foreign llvm icmp_eq(~#left#f1##0:wybe.int, ~#right#f1##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
@@ -98,160 +98,160 @@ module top-level code > public {impure} (0 calls)
 
 
 
-f1 > public {inline} (1 calls) 
+f1 > public {inline} (1 calls)
 0: mixed_fields.f1<0>
 f1(#rec##0:mixed_fields, ?#result##0:wybe.int):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:mixed_fields, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
-f1 > public {inline} (0 calls) 
+    foreign lpvm access(~#rec##0:mixed_fields, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @mixed_fields:nn:nn
+f1 > public {inline} (0 calls)
 1: mixed_fields.f1<1>
 f1(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.int):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~#rec##0:mixed_fields, ?#rec##1:mixed_fields, 8:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
+    foreign lpvm {noalias} mutate(~#rec##0:mixed_fields, ?#rec##1:mixed_fields, 8:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @mixed_fields:nn:nn
 
 
-f2 > public {inline} (1 calls) 
+f2 > public {inline} (1 calls)
 0: mixed_fields.f2<0>
 f2(#rec##0:mixed_fields, ?#result##0:wybe.char):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:mixed_fields, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.char)
-f2 > public {inline} (0 calls) 
+    foreign lpvm access(~#rec##0:mixed_fields, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.char) @mixed_fields:nn:nn
+f2 > public {inline} (0 calls)
 1: mixed_fields.f2<1>
 f2(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.char):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~#rec##0:mixed_fields, ?#rec##1:mixed_fields, 0:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.char)
+    foreign lpvm {noalias} mutate(~#rec##0:mixed_fields, ?#rec##1:mixed_fields, 0:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.char) @mixed_fields:nn:nn
 
 
-f3 > public {inline} (1 calls) 
+f3 > public {inline} (1 calls)
 0: mixed_fields.f3<0>
 f3(#rec##0:mixed_fields, ?#result##0:wybe.int):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:mixed_fields, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
-f3 > public {inline} (0 calls) 
+    foreign lpvm access(~#rec##0:mixed_fields, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @mixed_fields:nn:nn
+f3 > public {inline} (0 calls)
 1: mixed_fields.f3<1>
 f3(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.int):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~#rec##0:mixed_fields, ?#rec##1:mixed_fields, 16:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
+    foreign lpvm {noalias} mutate(~#rec##0:mixed_fields, ?#rec##1:mixed_fields, 16:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @mixed_fields:nn:nn
 
 
-f4 > public {inline} (1 calls) 
+f4 > public {inline} (1 calls)
 0: mixed_fields.f4<0>
 f4(#rec##0:mixed_fields, ?#result##0:wybe.bool):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:mixed_fields, 1:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.bool)
-f4 > public {inline} (0 calls) 
+    foreign lpvm access(~#rec##0:mixed_fields, 1:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.bool) @mixed_fields:nn:nn
+f4 > public {inline} (0 calls)
 1: mixed_fields.f4<1>
 f4(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.bool):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~#rec##0:mixed_fields, ?#rec##1:mixed_fields, 1:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.bool)
+    foreign lpvm {noalias} mutate(~#rec##0:mixed_fields, ?#rec##1:mixed_fields, 1:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.bool) @mixed_fields:nn:nn
 
 
-f5 > public {inline} (1 calls) 
+f5 > public {inline} (1 calls)
 0: mixed_fields.f5<0>
 f5(#rec##0:mixed_fields, ?#result##0:wybe.int):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:mixed_fields, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
-f5 > public {inline} (0 calls) 
+    foreign lpvm access(~#rec##0:mixed_fields, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @mixed_fields:nn:nn
+f5 > public {inline} (0 calls)
 1: mixed_fields.f5<1>
 f5(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.int):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~#rec##0:mixed_fields, ?#rec##1:mixed_fields, 24:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
+    foreign lpvm {noalias} mutate(~#rec##0:mixed_fields, ?#rec##1:mixed_fields, 24:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @mixed_fields:nn:nn
 
 
-f6 > public {inline} (1 calls) 
+f6 > public {inline} (1 calls)
 0: mixed_fields.f6<0>
 f6(#rec##0:mixed_fields, ?#result##0:wybe.char):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:mixed_fields, 2:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.char)
-f6 > public {inline} (0 calls) 
+    foreign lpvm access(~#rec##0:mixed_fields, 2:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.char) @mixed_fields:nn:nn
+f6 > public {inline} (0 calls)
 1: mixed_fields.f6<1>
 f6(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.char):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~#rec##0:mixed_fields, ?#rec##1:mixed_fields, 2:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.char)
+    foreign lpvm {noalias} mutate(~#rec##0:mixed_fields, ?#rec##1:mixed_fields, 2:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.char) @mixed_fields:nn:nn
 
 
-mixed > public {inline} (1 calls) 
+mixed > public {inline} (1 calls)
 0: mixed_fields.mixed<0>
 mixed(f1##0:wybe.int, f2##0:wybe.char, f3##0:wybe.int, f4##0:wybe.bool, f5##0:wybe.int, f6##0:wybe.char, ?#result##0:mixed_fields):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(32:wybe.int, ?#rec##0:mixed_fields)
-    foreign lpvm mutate(~#rec##0:mixed_fields, ?#rec##1:mixed_fields, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~f2##0:wybe.char)
-    foreign lpvm mutate(~#rec##1:mixed_fields, ?#rec##2:mixed_fields, 1:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~f4##0:wybe.bool)
-    foreign lpvm mutate(~#rec##2:mixed_fields, ?#rec##3:mixed_fields, 2:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~f6##0:wybe.char)
-    foreign lpvm mutate(~#rec##3:mixed_fields, ?#rec##4:mixed_fields, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~f1##0:wybe.int)
-    foreign lpvm mutate(~#rec##4:mixed_fields, ?#rec##5:mixed_fields, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~f3##0:wybe.int)
-    foreign lpvm mutate(~#rec##5:mixed_fields, ?#result##0:mixed_fields, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~f5##0:wybe.int)
-mixed > public {inline} (22 calls) 
+    foreign lpvm alloc(32:wybe.int, ?#rec##0:mixed_fields) @mixed_fields:nn:nn
+    foreign lpvm mutate(~#rec##0:mixed_fields, ?#rec##1:mixed_fields, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~f2##0:wybe.char) @mixed_fields:nn:nn
+    foreign lpvm mutate(~#rec##1:mixed_fields, ?#rec##2:mixed_fields, 1:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~f4##0:wybe.bool) @mixed_fields:nn:nn
+    foreign lpvm mutate(~#rec##2:mixed_fields, ?#rec##3:mixed_fields, 2:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~f6##0:wybe.char) @mixed_fields:nn:nn
+    foreign lpvm mutate(~#rec##3:mixed_fields, ?#rec##4:mixed_fields, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~f1##0:wybe.int) @mixed_fields:nn:nn
+    foreign lpvm mutate(~#rec##4:mixed_fields, ?#rec##5:mixed_fields, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~f3##0:wybe.int) @mixed_fields:nn:nn
+    foreign lpvm mutate(~#rec##5:mixed_fields, ?#result##0:mixed_fields, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~f5##0:wybe.int) @mixed_fields:nn:nn
+mixed > public {inline} (22 calls)
 1: mixed_fields.mixed<1>
 mixed(?f1##0:wybe.int, ?f2##0:wybe.char, ?f3##0:wybe.int, ?f4##0:wybe.bool, ?f5##0:wybe.int, ?f6##0:wybe.char, #result##0:mixed_fields):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(#result##0:mixed_fields, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?f2##0:wybe.char)
-    foreign lpvm access(#result##0:mixed_fields, 1:wybe.int, 32:wybe.int, 0:wybe.int, ?f4##0:wybe.bool)
-    foreign lpvm access(#result##0:mixed_fields, 2:wybe.int, 32:wybe.int, 0:wybe.int, ?f6##0:wybe.char)
-    foreign lpvm access(#result##0:mixed_fields, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?f1##0:wybe.int)
-    foreign lpvm access(#result##0:mixed_fields, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?f3##0:wybe.int)
-    foreign lpvm access(~#result##0:mixed_fields, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?f5##0:wybe.int)
+    foreign lpvm access(#result##0:mixed_fields, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?f2##0:wybe.char) @mixed_fields:nn:nn
+    foreign lpvm access(#result##0:mixed_fields, 1:wybe.int, 32:wybe.int, 0:wybe.int, ?f4##0:wybe.bool) @mixed_fields:nn:nn
+    foreign lpvm access(#result##0:mixed_fields, 2:wybe.int, 32:wybe.int, 0:wybe.int, ?f6##0:wybe.char) @mixed_fields:nn:nn
+    foreign lpvm access(#result##0:mixed_fields, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?f1##0:wybe.int) @mixed_fields:nn:nn
+    foreign lpvm access(#result##0:mixed_fields, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?f3##0:wybe.int) @mixed_fields:nn:nn
+    foreign lpvm access(~#result##0:mixed_fields, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?f5##0:wybe.int) @mixed_fields:nn:nn
 
 
-printit > public (1 calls) 
+printit > public (1 calls)
 0: mixed_fields.printit<0>
 printit(ob##0:mixed_fields, *#globals##0:wybe.phantom, *?#globals##6:wybe.phantom):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(ob##0:mixed_fields, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int)
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##2:wybe.phantom)
+    foreign lpvm access(ob##0:mixed_fields, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @mixed_fields:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##2:wybe.phantom) @io:nn:nn
     foreign c print_int(~tmp#0##0:wybe.int, ~tmp#9##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
-    foreign lpvm access(ob##0:mixed_fields, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.char)
+    foreign lpvm access(ob##0:mixed_fields, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.char) @mixed_fields:nn:nn
     foreign c putchar(~tmp#1##0:wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @io:nn:nn
-    foreign lpvm access(ob##0:mixed_fields, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int)
+    foreign lpvm access(ob##0:mixed_fields, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @mixed_fields:nn:nn
     foreign c print_int(~tmp#2##0:wybe.int, ~tmp#19##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#25##0:wybe.phantom, ?tmp#26##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#26##0:wybe.phantom, ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom)
-    foreign lpvm access(ob##0:mixed_fields, 1:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool)
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#26##0:wybe.phantom, ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom) @io:nn:nn
+    foreign lpvm access(ob##0:mixed_fields, 1:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool) @mixed_fields:nn:nn
     wybe.io.print<5>(~tmp#3##0:wybe.bool, ~*#globals##3:wybe.phantom, ?*tmp#30##0:wybe.phantom) #12 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#31##0:wybe.phantom, ~*tmp#30##0:wybe.phantom, ?*#globals##5:wybe.phantom)
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#31##0:wybe.phantom, ~*tmp#30##0:wybe.phantom, ?*#globals##5:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#31##0:wybe.phantom, ?tmp#33##0:wybe.phantom) @io:nn:nn
-    foreign lpvm access(ob##0:mixed_fields, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int)
+    foreign lpvm access(ob##0:mixed_fields, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int) @mixed_fields:nn:nn
     foreign c print_int(~tmp#4##0:wybe.int, ~tmp#33##0:wybe.phantom, ?tmp#39##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#39##0:wybe.phantom, ?tmp#40##0:wybe.phantom) @io:nn:nn
-    foreign lpvm access(~ob##0:mixed_fields, 2:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.char)
+    foreign lpvm access(~ob##0:mixed_fields, 2:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.char) @mixed_fields:nn:nn
     foreign c putchar(~tmp#5##0:wybe.char, ~tmp#40##0:wybe.phantom, ?tmp#46##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#46##0:wybe.phantom, ?tmp#47##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#47##0:wybe.phantom, ~*#globals##5:wybe.phantom, ?*#globals##6:wybe.phantom)
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#47##0:wybe.phantom, ~*#globals##5:wybe.phantom, ?*#globals##6:wybe.phantom) @io:nn:nn
 
 
-~= > public {inline} (0 calls) 
+~= > public {inline} (0 calls)
 0: mixed_fields.~=<0>
 ~=(#left##0:mixed_fields, #right##0:mixed_fields, ?#success##0:wybe.bool):
   GlobalFlows: {} 

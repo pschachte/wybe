@@ -12,7 +12,7 @@ AFTER EVERYTHING:
   submodules      : sister_module.m1, sister_module.m2
   procs           : 
 
-baz > {inline} (0 calls) 
+baz > {inline} (0 calls)
 0: sister_module.baz<0>
 baz(i##0:wybe.int, ?j##0:wybe.int):
   GlobalFlows: {} 
@@ -21,7 +21,7 @@ baz(i##0:wybe.int, ?j##0:wybe.int):
     sister_module.m1.foo<0>(~i##0:wybe.int, ?j##0:wybe.int) #0 @sister_module:nn:nn
 
 
-buzz > {inline} (0 calls) 
+buzz > {inline} (0 calls)
 0: sister_module.buzz<0>
 buzz(i##0:wybe.int, ?j##0:wybe.int):
   GlobalFlows: {} 
@@ -66,7 +66,7 @@ entry:
   resources       : 
   procs           : 
 
-foo > public {inline} (0 calls) 
+foo > public {inline} (0 calls)
 0: sister_module.m1.foo<0>
 foo(i##0:wybe.int, ?j##0:wybe.int):
   GlobalFlows: {} 
@@ -104,7 +104,7 @@ entry:
   resources       : 
   procs           : 
 
-bar > public {inline} (0 calls) 
+bar > public {inline} (0 calls)
 0: sister_module.m2.bar<0>
 bar(i##0:wybe.int, ?j##0:wybe.int):
   GlobalFlows: {} 

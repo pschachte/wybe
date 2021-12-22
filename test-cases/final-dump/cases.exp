@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-len > (1 calls) 
+len > (1 calls)
 0: cases.len<0>
 len(lst##0:wybe.list(T), ?#result##0:wybe.int):
   GlobalFlows: {} 
@@ -21,13 +21,13 @@ len(lst##0:wybe.list(T), ?#result##0:wybe.int):
         foreign llvm move(0:wybe.int, ?#result##0:wybe.int) @cases:nn:nn
 
     1:
-        foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:wybe.list(T))
+        foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:wybe.list(T)) @list:nn:nn
         cases.len<0>(~t##0:wybe.list(T), ?tmp#2##0:wybe.int) #1 @cases:nn:nn
         foreign llvm add(~tmp#2##0:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @int:nn:nn
 
 
 
-len2 > (1 calls) 
+len2 > (1 calls)
 0: cases.len2<0>
 len2(lst##0:wybe.list(T), ?#result##0:wybe.int):
   GlobalFlows: {} 
@@ -39,7 +39,7 @@ len2(lst##0:wybe.list(T), ?#result##0:wybe.int):
         foreign llvm move(0:wybe.int, ?#result##0:wybe.int) @cases:nn:nn
 
     1:
-        foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:wybe.list(T))
+        foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:wybe.list(T)) @list:nn:nn
         cases.len2<0>(~t##0:wybe.list(T), ?tmp#3##0:wybe.int) #1 @cases:nn:nn
         foreign llvm add(~tmp#3##0:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @int:nn:nn
 

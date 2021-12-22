@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > public {impure} (0 calls) 
+module top-level code > public {impure} (0 calls)
 0: main_hello2.<0>
 (*#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
@@ -17,9 +17,9 @@ module top-level code > public {impure} (0 calls)
   InterestingCallProperties: []
     wybe.string.print_string<0>("hello, ":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #2 @io:nn:nn
     wybe.string.print_string<0>("world!":wybe.string, ~*#globals##1:wybe.phantom, ?*tmp#4##0:wybe.phantom) #3 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom, ~*tmp#4##0:wybe.phantom, ?*tmp#6##0:wybe.phantom)
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom, ~*tmp#4##0:wybe.phantom, ?*tmp#6##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#7##0:wybe.phantom, ~*tmp#6##0:wybe.phantom, ?*#globals##2:wybe.phantom)
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#7##0:wybe.phantom, ~*tmp#6##0:wybe.phantom, ?*#globals##2:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 

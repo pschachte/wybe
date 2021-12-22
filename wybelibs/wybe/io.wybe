@@ -6,7 +6,8 @@ use foreign library gc
 use wybe.bool, wybe.int, wybe.count, wybe.float, wybe.char, wybe.string, wybe.c_string
 use wybe.phantom
 
-pub resource io:phantom = phantom
+# XXX We shouldn't need to initialise a resource (or variable) of a 0-bit type
+pub resource io:phantom = 0:phantom
 
 pub def nl use !io { foreign c putchar('\n', !io) }
 

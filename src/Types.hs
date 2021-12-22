@@ -19,6 +19,7 @@ import           Data.Map            as Map
 import           Data.Maybe          as Maybe
 import           Data.Either         as Either
 import           Data.Set            as Set
+import           UnivSet             as USet
 import           Data.Tuple.Select
 import           Data.Foldable
 import           Data.Bifunctor
@@ -301,8 +302,8 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Calling a pure proc with unneeded ! marker
             --    | ReasonUndeclaredTerminal ProcName OptPos
             --        -- ^The proc is terminal but not declared so
-            --    | ReasonUnnreachable ProcName OptPos
-            --        -- ^Statement following a terminal statement
+               | ReasonUnnreachable ProcName OptPos
+                   -- ^Statement following a terminal statement
                deriving (Eq, Ord)
 
 
@@ -455,9 +456,9 @@ typeErrorMessage (ReasonActuallyPure name impurity pos) =
 -- typeErrorMessage (ReasonUndeclaredTerminal name pos) =
 --     Message Warning pos $
 --         "Proc " ++ name ++ " should be declared terminal"
--- typeErrorMessage (ReasonUnnreachable name pos) =
---     Message Warning pos $
---         "In proc " ++ name ++ ", this statement is unreachable"
+typeErrorMessage (ReasonUnnreachable name pos) =
+    Message Warning pos $
+        "In " ++ showProcName name ++ ", this statement is unreachable"
 
 
 ----------------------------------------------------------------
@@ -544,17 +545,6 @@ ultimateVarType var = do
 --  been imposed on that variable.  Does not follow type variable chains.
 varType :: VarName -> Typed TypeSpec
 varType var = gets $ Map.findWithDefault AnyType var . typingDict
-
-
--- |Maybe make a map of the ultimate types of the given maybe set of variables.
-typeMapFromSet :: Maybe (Set VarName) -> Typed (Maybe VarDict)
-typeMapFromSet vars =
-    case vars of
-        Nothing  -> return Nothing
-        Just set ->
-            let varList = Set.toAscList set
-            in  Just . Map.fromAscList . zip varList
-                <$> mapM ultimateVarType varList
 
 
 -- |Set the type associated with a variable; does not check that the type is
@@ -745,7 +735,7 @@ expType' (AnonProc mods params pstmts _ _) _ = do
     params' <- updateParamTypes params
     return $ HigherOrderType mods $ paramTypeFlow <$> params'
 expType' (ProcRef pspec closed) _ = do
-    ProcDef _ (ProcProto _ params res) _ _ _ _ _ _ detism _ impurity _ _
+    ProcDef _ (ProcProto _ params res) _ _ _ _ _ _ detism _ impurity _ _ _
         <- lift $ getProcDef pspec
     let params' = List.filter ((==Ordinary) . paramFlowType) params
     let typeFlows = paramTypeFlow <$> params'
@@ -761,7 +751,7 @@ expType' (ProcRef pspec closed) _ = do
         freeTypes <- mapM ultimateType (List.drop nClosed pTypes')
         let resful = if Set.null res then Resourceless else Resourceful
         return $ HigherOrderType
-                    (ProcModifiers detism MayInline impurity resful [] [])
+                    (ProcModifiers detism MayInline impurity False resful [] [])
                     $ zipWith TypeFlow freeTypes freeFlows
     else do
         typeError ReasonShouldnt
@@ -927,7 +917,7 @@ data CallInfo
 instance Show CallInfo where
     show (ProcInfo procSpec tys flows detism impurity inRes outRes partial) =
         (if partial then "partial application of " else "")
-        ++ showProcModifiers' (ProcModifiers detism MayInline impurity Resourceless [] [])
+        ++ showProcModifiers' (ProcModifiers detism MayInline impurity False Resourceless [] [])
         ++ show procSpec
         ++ "(" ++ intercalate "," (zipWith ((show .) . TypeFlow) tys flows) ++ ")"
         ++ if Set.null inRes && Set.null outRes
@@ -995,7 +985,7 @@ procToPartial callFlows info@ProcInfo{procInfoPartial=False,
     (closedFls, higherFls) = List.splitAt nClosed flows
     resful = if any isResourcefulHigherOrder tys || not (Set.null inRes || Set.null outRes)
              then Resourceful else Resourceless
-    higherTy = HigherOrderType (ProcModifiers detism MayInline impurity resful [] [])
+    higherTy = HigherOrderType (ProcModifiers detism MayInline impurity False resful [] [])
 procToPartial _ _ = Nothing
 
 
@@ -1592,29 +1582,16 @@ data BindingState = BindingState {
         bindingDetism    :: Determinism,
         bindingImpurity  :: Impurity,
         bindingResources :: Set ResourceSpec,
-        bindingVars      :: Maybe (Set VarName),
-        bindingBreakVars :: Maybe (Set VarName)
+        bindingVars      :: UnivSet VarName,
+        bindingBreakVars :: UnivSet VarName
         }
-
-
--- | Nicely show a set, given the supplied fn to show each element
-showSet :: (a -> String) -> Set a -> String
-showSet showFn set =
-    "{" ++ intercalate ", " (showFn <$> Set.toList set) ++ "}"
-
-
--- | Nicely show a Maybe set, given the supplied fn to show each element.
--- Nothing is treated as signifying the universal set.
-showMaybeSet :: (a -> String) -> Maybe (Set a) -> String
-showMaybeSet f Nothing = "Everything"
-showMaybeSet f (Just set) = showSet f set
 
 
 instance Show BindingState where
     show (BindingState detism impurity resources boundVars breakVars) =
         impurityFullName impurity ++ " " ++ determinismFullName detism
-        ++ " computation binding " ++ showMaybeSet id boundVars
-        ++ ", break set = " ++ showMaybeSet id breakVars
+        ++ " computation binding " ++ showUnivSet id boundVars
+        ++ ", break set = " ++ showUnivSet id breakVars
         ++ ", with resources " ++ showSet show resources
 
 
@@ -1642,7 +1619,7 @@ mustFail = (==Failure) . bindingDetism
 -- | Initial BindingState with nothing bound and no breaks seen
 initBindingState :: ProcDef -> Set ResourceSpec -> BindingState
 initBindingState pdef resources =
-    BindingState Det impurity resources (Just Set.empty) Nothing
+    BindingState Det impurity resources emptyUnivSet UniversalSet
     where impurity = expectedImpurity $ procImpurity pdef
 
 
@@ -1650,7 +1627,7 @@ initBindingState pdef resources =
 -- this succeeds, but it won't succeed).
 failingBindingState :: BindingState
 failingBindingState  =
-    BindingState Failure Pure Set.empty Nothing Nothing
+    BindingState Failure Pure Set.empty UniversalSet UniversalSet
 
 
 -- | BindingState at the top of a loop, based on state before the loop.
@@ -1661,7 +1638,7 @@ failingBindingState  =
 -- the universal set.
 loopEntryBindingState :: BindingState -> BindingState
 loopEntryBindingState before =
-    before {bindingBreakVars = Nothing}
+    before {bindingBreakVars = UniversalSet}
 
 
 -- | BindingState after a loop, based on the state before loop entry and the
@@ -1693,8 +1670,8 @@ joinState (BindingState detism1 impurity1 resources1 boundVars1 breakVars1)
   where detism    = determinismJoin detism1 detism2
         impurity  = max impurity1 impurity2
         resources = Set.intersection resources1 resources2
-        breakVars = breakVars1 `intersectMaybeSets` breakVars2
-        boundVars = boundVars1 `intersectMaybeSets` boundVars2
+        breakVars = breakVars1 `USet.intersection` breakVars2
+        boundVars = boundVars1 `USet.intersection` boundVars2
 
 
 -- | Add some bindings to a BindingState
@@ -1702,9 +1679,9 @@ addBindings :: Set VarName -> BindingState -> BindingState
 addBindings vars st@BindingState{bindingDetism=Terminal} = st
 addBindings vars st@BindingState{bindingDetism=Failure}  = st
 addBindings vars st@BindingState{bindingDetism=Det} =
-    st {bindingVars=(vars `Set.union`) <$> bindingVars st}
+    st {bindingVars=FiniteSet vars `USet.union` bindingVars st}
 addBindings vars st@BindingState{bindingDetism=SemiDet} =
-    st {bindingVars=(vars `Set.union`) <$> bindingVars st}
+    st {bindingVars=FiniteSet vars `USet.union` bindingVars st}
 
 
 -- | Returns the deterministic version of the specified binding state.
@@ -1716,7 +1693,7 @@ forceDet st =
 -- | Returns the definitely failing version of the specified binding state.
 forceFailure :: BindingState -> BindingState
 forceFailure st =
-        st {bindingVars = Nothing,
+        st {bindingVars = UniversalSet,
             bindingDetism = determinismFail $ bindingDetism st}
 
 
@@ -1729,33 +1706,34 @@ bindingStateSeq stmtDetism impurity outputs st =
   where detism' = bindingDetism st `determinismSeq` stmtDetism
         impurity' = bindingImpurity st `impuritySeq` impurity
         vars'   = if determinismProceding detism'
-                  then (outputs `Set.union`) <$> bindingVars st
-                  else Nothing
+                  then FiniteSet outputs `USet.union` bindingVars st
+                  else UniversalSet
 
 
 -- | Returns the binding state after a next statement entered in the specified
 -- binding state.
 bindingStateAfterNext :: BindingState -> BindingState
-bindingStateAfterNext st = st {bindingDetism=Terminal, bindingVars=Nothing}
+bindingStateAfterNext st = st {bindingDetism=Terminal, bindingVars=UniversalSet}
 
 
 -- | Returns the binding state after a break statement entered in the specified
 -- binding state.
 bindingStateAfterBreak :: BindingState -> BindingState
 bindingStateAfterBreak st =
-    st {bindingDetism=Terminal, bindingVars=Nothing, bindingBreakVars=bvars}
-    where bvars = bindingVars st `intersectMaybeSets` bindingBreakVars st
+    st { bindingDetism=Terminal, bindingVars=UniversalSet
+       , bindingBreakVars=bindingVars st `USet.intersection` bindingBreakVars st
+       }
 
 
 -- | which of a set of expected bindings will be unbound if execution reach this
 -- binding state
 missingBindings :: Set VarName -> BindingState -> Set VarName
-missingBindings vars st = maybe Set.empty (vars Set.\\) $ bindingVars st
+missingBindings vars st = vars `subtractUnivSet` bindingVars st
 
 
 -- | Is the specified variable defined in the specified binding state?
 assignedIn :: VarName -> BindingState -> Bool
-assignedIn var bstate = maybe True (var `elem`) $ bindingVars bstate
+assignedIn var bstate = var `USet.member` bindingVars bstate
 
 
 -- |Return a list of (actual,formal) argument mode pairs.
@@ -1825,8 +1803,8 @@ modecheckStmts _ name pos assigned detism tmpCount final [] = do
     return ([],assigned,tmpCount)
 modecheckStmts m name pos assigned detism tmpCount final (pstmt:pstmts) = do
     logTyped $ "Mode check stmt " ++ showStmt 16 (content pstmt)
-    -- when (bindingDetism assigned == Terminal)
-    --     $ typeErrors [ReasonUnnreachable name (place pstmt)]
+    when (bindingDetism assigned == Terminal)
+        $ typeErrors [ReasonUnnreachable name (place pstmt)]
     let final' = final && List.null pstmts
     (pstmt',assigned',tmpCount') <-
         placedApply (modecheckStmt m name pos assigned detism tmpCount final')
@@ -1979,7 +1957,8 @@ modecheckStmt m name defPos assigned detism tmpCount final
         (modecheckStmt m name defPos assigned SemiDet tmpCount False)
         tstStmt
     logTyped $ "Assigned by test: " ++ show assigned1
-    condBindings <- bindingVarDict assigned1
+    condBindings <- mapFromUnivSetM ultimateVarType Set.empty 
+                    $ bindingVars assigned1
     logTyped $ "Assigned by test: " ++ show assigned1
     (thnStmts', assigned2, tmpCount2) <-
         modecheckStmts m name defPos (forceDet assigned1) detism tmpCount1
@@ -1999,13 +1978,11 @@ modecheckStmt m name defPos assigned detism tmpCount final
       else do
         let finalAssigned = assigned2 `joinState` assigned3
         logTyped $ "Assigned by conditional: " ++ show finalAssigned
-        bindings <- bindingVarDict finalAssigned
-        return -- XXX Fix Nothing to be set of variables assigned by condition
+        bindings <- mapFromUnivSetM ultimateVarType Set.empty
+                    $ bindingVars finalAssigned
+        return
           ([maybePlace (Cond (seqToStmt tstStmt') thnStmts' elsStmts'
-                        (Just condBindings)
-                        (if isJust (bindingVars finalAssigned)
-                         then Just bindings else Nothing)
-          )
+                        (Just condBindings) (Just bindings))
             pos], finalAssigned,tmpCount)
 modecheckStmt m name defPos assigned detism tmpCount final
     stmt@(TestBool exp) pos = do
@@ -2024,19 +2001,23 @@ modecheckStmt m name defPos assigned detism tmpCount final
     (stmts', assigned', tmpCount') <-
       modecheckStmts m name defPos (loopEntryBindingState assigned) detism
                      tmpCount final stmts
+    let startVars = toSet Set.empty $ bindingVars assigned
     logTyped $ "Assigned by loop: " ++ show assigned'
-    vars <- typeMapFromSet $ bindingBreakVars assigned'
+    vars <- mapFromUnivSetM ultimateVarType startVars
+                    $ bindingBreakVars assigned'
     logTyped $ "Loop exit vars: " ++ show vars
-    return ([maybePlace (Loop stmts' vars) pos]
+    return ([maybePlace (Loop stmts' $ Just vars) pos]
            ,postLoopBindingState assigned assigned',tmpCount')
 modecheckStmt m name defPos assigned detism tmpCount final
     stmt@(UseResources resources _ _ stmts) pos = do
     logTyped $ "Mode checking use ... in stmt " ++ show stmt
-    before <- bindingVarDict assigned
+    beforeVars <- mapFromUnivSetM ultimateVarType Set.empty
+                    $ bindingVars assigned
     (stmts', assigned', tmpCount')
         <- modecheckStmts m name defPos assigned detism tmpCount final stmts
-    after <- bindingVarDict assigned'
-    return ([maybePlace (UseResources resources (Just before) (Just after) stmts') pos],
+    afterVars <- mapFromUnivSetM ultimateVarType Set.empty
+                    $ bindingVars assigned
+    return ([maybePlace (UseResources resources (Just beforeVars) (Just afterVars) stmts') pos],
             assigned',tmpCount')
 -- XXX Need to implement these correctly:
 modecheckStmt m name defPos assigned detism tmpCount final
@@ -2053,7 +2034,8 @@ modecheckStmt m name defPos assigned detism tmpCount final
     (disj',assigned',tmpCount') <-
         modecheckDisj m name defPos assigned detism tmpCount final
                       failingBindingState disj
-    varDict <- bindingVarDict assigned'
+    varDict <- mapFromUnivSetM ultimateVarType Set.empty 
+                $ bindingVars assigned'
     return ([maybePlace (Or disj' (Just varDict)) pos],assigned',tmpCount')
 modecheckStmt m name defPos assigned detism tmpCount final
     (Not stmt) pos = do
@@ -2101,8 +2083,9 @@ modeCheckExp m name defPos assigned _ tmpCount
     let paramVars = expVar . content . paramToVar <$> params
     let vars = mentionedVars ss'
     let toClose = vars `Set.difference` Set.fromList paramVars
-    bindingVars <- bindingVarDict assigned
-    let closed = Map.filterWithKey (const . flip Set.member toClose) bindingVars
+    varDict <- mapFromUnivSetM ultimateVarType Set.empty 
+                $ bindingVars assigned
+    let closed = Map.filterWithKey (const . flip Set.member toClose) varDict
     params' <- updateParamTypes params
     return (maybePlace (AnonProc mods params' ss' (Just closed) res) pos, tmpCount')
 modeCheckExp m name defPos assigned detism tmpCount
@@ -2145,15 +2128,6 @@ collectInParams :: Set.Set VarName -> Param -> Set.Set VarName
 collectInParams s (Param n _ flow _)
     | flowsIn flow = Set.insert n s
 collectInParams s _ = s
-
-
--- |Produce a VarDict from the set of definitely bound variables in the supplied
--- BindingState, taking the types from the Typed monad.
-bindingVarDict :: BindingState -> Typed VarDict
-bindingVarDict assigned = do
-    let condVars = maybe [] Set.toAscList $ bindingVars assigned
-    condTypes <- mapM ultimateVarType condVars
-    return $ Map.fromAscList $ zip condVars condTypes
 
 
 modecheckDisj :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism
@@ -2219,6 +2193,7 @@ finaliseCall m name defPos assigned detism resourceful tmpCount final pos args
                       $ addBindings specialResourcesSet assigned]
     typeErrors errs
     let specials = inResources `Set.intersection` specialResourcesSet
+-- <<<<<<< HEAD
     if isPartial
     then do
         let result = last args'
@@ -2238,7 +2213,7 @@ finaliseCall m name defPos assigned detism resourceful tmpCount final pos args
         logTyped $ "Finalising call :  " ++ show stmt'
         logTyped $ "Input resources :  " ++ simpleShowSet inResources
         logTyped $ "Output resources:  " ++ simpleShowSet outResources
-        let avail = fromMaybe Set.empty (bindingVars assigned)
+        let avail    = USet.toSet Set.empty $ bindingVars assigned
         logTyped $ "Specials in call:  " ++ simpleShowSet specials
         logTyped $ "Available vars  :  " ++ simpleShowSet avail
         let specialInstrs =
@@ -2254,7 +2229,7 @@ finaliseCall m name defPos assigned detism resourceful tmpCount final pos args
                 bindingStateSeq matchDetism matchImpurity
                 (pexpListOutputs args')
                 (assigned {bindingVars =
-                    Set.union outResources <$> bindingVars assigned })
+                    FiniteSet outResources `USet.union` bindingVars assigned })
         logTyped $ "Generated special stmts = " ++ show specialInstrs
         logTyped $ "New instr = " ++ show stmt'
         logTyped $ "Generated extra stmts = " ++ show stmts
@@ -2267,6 +2242,32 @@ finaliseCall m name defPos assigned detism resourceful tmpCount final pos args
     modecheckStmt m name defPos assigned detism tmpCount final
         (ProcCall (Higher $ fn `maybePlace` pos) detism resourceful args) pos
 
+-- =======
+--     let avail    = USet.toSet Set.empty $ bindingVars assigned
+--     logTyped $ "Specials in call:  " ++ simpleShowSet specials
+--     logTyped $ "Available vars  :  " ++ simpleShowSet avail
+--     let specialInstrs =
+--             [ move (s `withType` ty)
+--                    (varSet r `withType` ty)
+--             | resourceful -- no specials unless resourceful
+--             , r <- Set.elems $ specials Set.\\ avail
+--             , let (f,ty) = fromMaybe (const $ StringValue "Unknown" CString,
+--                                       cStringType)
+--                             $ Map.lookup r specialResources
+--             , let s = f $ maybePlace stmt pos]
+--     let assigned' =
+--             bindingStateSeq matchDetism matchImpurity
+--             (pexpListOutputs args')
+--             (assigned {bindingVars =
+--                 FiniteSet outResources `USet.union` bindingVars assigned })
+--     logTyped $ "Generated special stmts = " ++ show specialInstrs
+--     logTyped $ "New instr = " ++ show stmt'
+--     logTyped $ "Generated extra stmts = " ++ show stmts
+--     (stmts',assigned'',tmpCount'') <-
+--         modecheckStmts m name pos assigned' detism tmpCount' final stmts
+--     return (specialInstrs ++ maybePlace stmt' pos : stmts'
+--            , assigned'', tmpCount'')
+-- >>>>>>> upstream/master
 
 
 matchArguments :: Int -> [TypeFlow] -> [Placed Exp]

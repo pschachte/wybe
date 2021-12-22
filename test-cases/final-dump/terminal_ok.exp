@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > public {inline,impure} (0 calls) 
+module top-level code > public {inline,impure} (0 calls)
 0: terminal_ok.<0>
 (*#globals##0:wybe.phantom, [*?#globals##0:wybe.phantom]):
   GlobalFlows: {} 
@@ -18,7 +18,7 @@ module top-level code > public {inline,impure} (0 calls)
     terminal_ok.exit_bool<0>(0:wybe.bool) #1 @terminal_ok:nn:nn
 
 
-exit_bool > {terminal,semipure} (1 calls) 
+exit_bool > {terminal,semipure} (1 calls)
 0: terminal_ok.exit_bool<0>
 exit_bool(b##0:wybe.bool):
   GlobalFlows: {} 

@@ -15,7 +15,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-= > public (1 calls) 
+= > public (1 calls)
 0: constructors.=<0>
 =(#left##0:constructors, #right##0:constructors, ?#success##0:wybe.bool):
   GlobalFlows: {} 
@@ -27,28 +27,28 @@ AFTER EVERYTHING:
         foreign llvm icmp_eq(~#left##0:constructors, ~#right##0:constructors, ?#success##0:wybe.bool)
 
     1:
-        foreign lpvm access(~#left##0:constructors, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#left#value##0:wybe.int)
+        foreign lpvm access(~#left##0:constructors, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#left#value##0:wybe.int) @constructors:nn:nn
         foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.bool)
         case ~tmp#8##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
         1:
-            foreign lpvm access(~#right##0:constructors, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#right#value##0:wybe.int)
+            foreign lpvm access(~#right##0:constructors, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#right#value##0:wybe.int) @constructors:nn:nn
             foreign llvm icmp_eq(~#left#value##0:wybe.int, ~#right#value##0:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
 
 
-just > public {inline} (0 calls) 
+just > public {inline} (0 calls)
 0: constructors.just<0>
 just(value##0:wybe.int, ?#result##0:constructors):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(8:wybe.int, ?#rec##0:constructors)
-    foreign lpvm mutate(~#rec##0:constructors, ?#result##0:constructors, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~value##0:wybe.int)
-just > public {inline} (8 calls) 
+    foreign lpvm alloc(8:wybe.int, ?#rec##0:constructors) @constructors:nn:nn
+    foreign lpvm mutate(~#rec##0:constructors, ?#result##0:constructors, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~value##0:wybe.int) @constructors:nn:nn
+just > public {inline} (8 calls)
 1: constructors.just<1>
 just(?value##0:wybe.int, #result##0:constructors, ?#success##0:wybe.bool):
   GlobalFlows: {} 
@@ -61,12 +61,12 @@ just(?value##0:wybe.int, #result##0:constructors, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?value##0:wybe.int)
 
     1:
-        foreign lpvm access(~#result##0:constructors, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?value##0:wybe.int)
+        foreign lpvm access(~#result##0:constructors, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?value##0:wybe.int) @constructors:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 
-nothing > public {inline} (0 calls) 
+nothing > public {inline} (0 calls)
 0: constructors.nothing<0>
 nothing(?#result##0:constructors):
   GlobalFlows: {} 
@@ -75,7 +75,7 @@ nothing(?#result##0:constructors):
     foreign llvm move(0:constructors, ?#result##0:constructors)
 
 
-value > public {inline} (0 calls) 
+value > public {inline} (0 calls)
 0: constructors.value<0>
 value(#rec##0:constructors, ?#result##0:wybe.int, ?#success##0:wybe.bool):
   GlobalFlows: {} 
@@ -88,10 +88,10 @@ value(#rec##0:constructors, ?#result##0:wybe.int, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:constructors, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
+        foreign lpvm access(~#rec##0:constructors, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @constructors:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-value > public {inline} (0 calls) 
+value > public {inline} (0 calls)
 1: constructors.value<1>
 value(#rec##0:constructors, ?#rec##1:constructors, #field##0:wybe.int, ?#success##0:wybe.bool):
   GlobalFlows: {} 
@@ -104,12 +104,12 @@ value(#rec##0:constructors, ?#rec##1:constructors, #field##0:wybe.int, ?#success
         foreign llvm move(~#rec##0:constructors, ?#rec##1:constructors)
 
     1:
-        foreign lpvm {noalias} mutate(~#rec##0:constructors, ?#rec##1:constructors, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
+        foreign lpvm {noalias} mutate(~#rec##0:constructors, ?#rec##1:constructors, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @constructors:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 
-~= > public {inline} (0 calls) 
+~= > public {inline} (0 calls)
 0: constructors.~=<0>
 ~=(#left##0:constructors, #right##0:constructors, ?#success##0:wybe.bool):
   GlobalFlows: {} 

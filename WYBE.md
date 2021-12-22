@@ -1392,6 +1392,106 @@ The implicit resources supported by Wybe are:
 | `call_source_full_location`  | `c_string` | the call directory, file name, line, and column    |
 
 
+## <a name="uniqueness"></a>Unique types
+
+*Unique* types are types instances of which are only permitted to have a single
+reference during program execution.  This ensures that values of this type are
+threaded linearly through program execution.  If a value of a unique type is
+passed as an argument to a procedure or function, then it cannot be passed as an
+argument to any other procedure or function (or as two or more different
+arguments in a single procedure or function call).  In practice, that means that
+a unique value is generally passed both into and out of a procedure, typically
+using the `!`*variable* syntax (see [variables](#variables)).  It is often most
+convenient to pass unique values around as resources, without referring to them
+by name.  This ensures that they are threaded linearly.
+
+The `wybe.phantom` type, which is the type of the `io` resource, is defined to
+be unique.  This prohibits any code that would make a copy of the `io` resource.
+For example, both of these code samples are **illegal** in Wybe:
+
+```
+def bad1 use !io {
+    ?mustnt = io
+}
+
+def bad2 use !io {
+    if {
+        !read('x':char) ::
+            !println("Read an x")
+    |   else ::
+            !read(_:char)
+            !println("Read something else")                    
+    }
+}
+```
+
+The first one is an error because both `mustnt` and the `io` resource hold the
+same phantom value.  The second one is erroneous because the same value of the
+`io` resource is used for the `read` statement and for the second `println`
+statement (remember, the values of all variables at the start of an else branch
+are the same as at the start of the condition).  The second example could
+legally be written as:
+
+```
+def ok2 use !io {
+    read(?ch:char)
+    case ch in {
+        'x' :: !println("Read an x")
+    |   else:: !println("Read something else")                    
+    }
+}
+```
+
+This also means that the `io` resource must be passed both into an out of a
+procedure that may perform input/output; therefore, a calling a procedure
+declared to `use io`, instead of `use !io` will cause an error, because after
+the call to that procedure, the `io` resource would be returned to the value it
+held prior to the call.
+
+
+### Declaring unique types
+
+A type may be declared to be unique by including the `{unique}` modifier when
+declaring the type.  For a `constructor` (or `constructors`) declaration, the declaration of a unique type takes this form:
+
+> `constructor` *typevars* `{unique}` *ctors*
+
+where *typevars* is either empty or a parenthesised list type type variables, and *ctors* is [as described above](#constructor-declarations).  For example:
+
+```
+constructor {unique} unique_position(x:int, y:int)
+```
+
+When used in a `type` declaration, it has this form:
+
+> `type` `{unique}` *type* `{` *ctors* *defs* `}`
+
+Note that parameters of constructors must not have unique types, unless the
+constructor is a member of a unique type.  Also accessors for unique types are
+not usually useful, because once you have accessed one member of the type, you
+cannot use the value again, such as to access the other members.  Instead, it is
+usually preferable to use a deconstructor.  This code is illegal, because it
+uses `uniq_pos` twice:
+
+```
+?uniq_pos = unique_position(3,4)
+...
+?radius = sqrt(uniq_pos^x ** 2 + uniq_pos^y ** 2)
+```
+
+However, this equivalent code is legal:
+
+```
+?uniq_pos = unique_position(3,4)
+...
+unique_position(?x, ?y) = uniq_pos
+?radius = sqrt(x ** 2 + y ** 2)
+```
+
+Note that unique types do not have equality and disequality tests (`=` and `~=`)
+automatically generated for them, because they are unlikely to be useful.
+
+
 ## Packages
 
 Each Wybe source file defines a module whose name is the base name of the file.
@@ -1428,59 +1528,6 @@ In addition to modules nested under a module's topmost ancestor module, modules
 may import any modules in any of the Wybe library directories.  These are
 configured when Wybe is installed, but can be overridden with the `--libdir` or
 `-L` command line options, or by setting the `$WYBELIBS` shell variable.
-
-## <a name="uniqueness"></a>Unique types
-
-*Unique* types are types that are only permitted to have a single reference
-during program execution.  This ensures that values of this type are threaded
-linearly through program execution.  If a value of a unique type is passed as an
-argument to a procedure or function, then it cannot be passed as an argument to
-any other procedure or function (or as two or more different arguments to a
-single procedure or function).  In practice, that means that a unique value is
-generally passed both into and out of a procedure or function using the
-`!`*variable* syntax (see [variables](#variables)).  The `wybe.phantom` type,
-which is the type of the `io` resource, is declared to be unique.  This
-prohibits any code that would make a copy of the `io` resource.  For example,
-both of these code samples are **illegal** in Wybe:
-
-```
-def bad1 use !io {
-    ?mustnt = io
-}
-
-def bad2 use !io {
-    if {
-        !read('x':char) ::
-            !println("Read an x")
-    |   else ::
-            !read(_:char)
-            !println("Read something else")                    
-    }
-}
-```
-
-The first one is an error because both `mustnt` and the `io` resource hold the
-same phantom.  The second one is erroneous because
-the same value of the `io` resource is used for the `read` statement
-and for the second `println` statement (remember, the values of all variables at
-the start of an else branch are the same as at the start of the condition).  The
-second example could instead be written as:
-
-```
-def ok2 use !io {
-    read(?ch:char)
-    case ch in {
-        'x' :: !println("Read an x")
-    |   else:: !println("Read something else")                    
-    }
-}
-```
-
-This also means that the `io` resource must be passed both into an out of a
-procedure that may perform input/output; therefore, a calling a procedure
-declared to `use io`, instead of `use !io` will cause an error, because after
-the call to that procedure, the `io` resource would be returned to the value it
-held prior to the call.
 
 
 ## <a name="foreign-interface"></a>Low-level features (foreign interface)
@@ -1576,24 +1623,55 @@ file extension.  When an executable is built, the specified library will be
 linked in with a `-l`*librarybasename* switch.
 
 
-#### Calling C code
+#### Calling foreign code
 
-To call C code from Wybe, use the `foreign` construct.
+To call code written in other languages from Wybe, use the `foreign` construct.
 This is a very low-level interface, and performs no sanity checking, so be careful to get the call right.
 
-The form of a C function call is:
+The form of a foreign call is:
 
-> `foreign c` *function*(*arg*, *arg*, ...)
+> `foreign` *language* *function*(*arg*, *arg*, ...)
 
-Note that, like other Wybe calls, foreign calls are assumed to be pure.  If your foreign call is performing some kind of interaction with the outside world, it should use the `io` resource, to ensure that the call is performed correctly.  This is actually quite simple:  the `io` state is simply eliminated by the compiler when it is passed in a foreign call, so you can simply pass it into and out of a foreign call, and it will vanish as the call happens, and reappear on return from the call.  For example, the `print` proc for the `char` type in the standard library is defined this way:
+where *language* is the name of the foreign language the function is written in,
+*function* is the name of the foreign function to call, and the *arg*s are the
+arguments to be passed.  For functions written in C, *language* is `c`.
+
+Note that, like other Wybe calls, foreign calls are assumed to be pure.  If your
+foreign call is performing some kind of interaction with the outside world, it
+should use the `io` resource, to ensure that the call is performed correctly.
+This is actually quite simple:  the `io` state is simply eliminated by the
+compiler when it is passed in a foreign call, so you can simply pass it into and
+out of a foreign call, and it will vanish as the call happens, and reappear on
+return from the call.  For example, the `print` proc for the `char` type in the
+standard library is defined this way:
 
 ```
 pub def print(x:char) use !io { foreign c putchar(x, !io) }
 ```
 
-To improve the safety of the interface, it is recommended to define a separate Wybe proc to make each foreign call, as shown above.  This will allow the Wybe type checker to ensure the type safety of your calls, as long as your foreign call is type correct.
+To improve the safety of the interface, it is recommended to define a separate
+Wybe proc to make each foreign call, as shown above.  This will allow the Wybe
+type checker to ensure the type safety of your calls, as long as your foreign
+call is type correct.
 
-If your foreign call is not for communication with the outside world, then you may wish to include a purity modifier to prevent the compiler from eliminating it.  For example, the `exit` proc in the standard library is implemented as follows:
+Foreign calls may optionally specify *modifiers* to provide extra information useful to the Wybe compiler.  If modifiers are to be specified, they are written after the *language* name:
+
+> `foreign` *language* `{`*modifiers*`}` *function*(*arg*, *arg*, ...)
+
+where *modifiers* is a comma-separate sequence of identifiers specifying this
+information.  Supported modifiers in foreign calls are:
+
+- **impure**:  the call is [impure](#purity)
+- **semipure**:   the call is [impure](#purity), but does not cause its
+  caller to be impure
+- **terminal**:  the call will not return
+- **unique**:  do not report [uniqueness errors](#unique-types) arising from use
+  of unique arguments to the call (but do note the use or definition of unique
+  arguments)
+
+
+For example, the `exit` proc in the standard library is implemented as
+follows:
 
 ```
 pub def {terminal,semipure} exit(code:int) {
@@ -1601,13 +1679,13 @@ pub def {terminal,semipure} exit(code:int) {
 }
 ```
 
-(`terminal` here means that `exit` will never return to the caller; this improves Wybe's analysis of code that calls `exit`.)
 
 #### Using LLVM instructions
 
-The lowest-level interface is to raw LLVM instructions.  These have a functional
-style, although you can use the procedural style if you prefer.  For example,
-instead of
+The lowest-level interface, to raw LLVM instructions, takes the same form as
+calls to foreign code, where the foreign *language* is `llvm`.  These have a
+functional style, although you can use the procedural style if you prefer.  For
+example, instead of
 
 ```
 ?x2 = foreign llvm add(x, 1)
@@ -1717,9 +1795,9 @@ Convert float to signed integer
 
 #### Foreign types
 
-In addition to the [`constructor`](#constructor-declarations) declaration, it is possible to
-declare a low-level type by specifying its representation.  This declaration has
-the form:
+In addition to the [`constructor`](#constructor-declarations) declaration, it is
+possible to declare a low-level type by specifying its representation.  This
+declaration has the form:
 
 > `representation is` *rep*
 
@@ -1728,7 +1806,8 @@ where *rep* has one of these forms:
 - `address`  
 the type is a machine address, similar to the `void *` type in C.
 - *n* `bit` *numbertype*  
-a primitive number type comprising *n* bits, where *numbertype* is one of:
+a primitive number type comprising *n* bits, where *n* is any non-negative
+integer and *numbertype* is one of:
   - `signed`  
   a signed integer type
   - `unsigned`  
@@ -1748,6 +1827,8 @@ where *rep* is as above, and *defs* specifies other members of the type.
 Note that it is not permitted to specify both constructors and an explicit
 representation for a type.
 
+To make a representation type [unique](#unique-types), follow `is` with
+`{unique}`.
 
 #### Type casting
 In some cases, foreign code may need to cast values of one Wybe type to another,
@@ -1797,8 +1878,8 @@ This specifies that the type of the variable *var* is *type2*, but that the type
 #### Wybe low-level memory management primitives
 
 The LPVM instructions are low-level memory manipulation instructions.  Note
-these are foreign instructions specifying the `lpvm` (rather than `llvm`)
-language. 
+these are foreign instructions specifying the *language* `lpvm` (rather than
+`llvm`). 
 
 
 - `foreign lpvm alloc(`*size:*`int`, `?`*struct:type*`)`  
@@ -1842,8 +1923,8 @@ operation are all computed before executing that operation.  However, the
 compiler respects (purity declarations)[#purity]:  if a procedure is declared
 `impure` or `semipure`, calls to it will not be eliminated or reordered.
 
-Additionally, the Wybe library defines a type `phantom`, whose representation
-has zero bits (it is a type with one constructor with no arguments).  The
+Additionally, the Wybe library defines a unique type `phantom`, whose 
+representation has zero bits.  The
 compiler automatically removes any input or output arguments whose types have
 zero bits when LLVM code is being generated, including calls to foreign code.
 The type of the `io` resource is `phantom`, thus the `io` resource can be passed
@@ -1866,6 +1947,6 @@ how operations impact the state of the computation.
 Managing impurity through the purity system allows low-level Wybe code to
 circumvent the purity of the language, but then to present a pure interface to
 that code.  For example, the `logging` library module allows the programmer to
-insert "debugging printfs" in their code.  Such operations are not meant to be
+insert "debugging printfs" into their code.  Such operations are not meant to be
 used in a released application, but can be very useful for the programmer to
 understand the behaviour of their code.

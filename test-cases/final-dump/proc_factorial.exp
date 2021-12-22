@@ -10,20 +10,20 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > public {impure} (0 calls) 
+module top-level code > public {impure} (0 calls)
 0: proc_factorial.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     proc_factorial.gen#1<0>(5:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) #2 @proc_factorial:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#5##0:wybe.phantom)
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#5##0:wybe.phantom) @io:nn:nn
     foreign c print_int(~tmp#0##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#7##0:wybe.phantom, ~*tmp#5##0:wybe.phantom, ?*#globals##1:wybe.phantom)
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#7##0:wybe.phantom, ~*tmp#5##0:wybe.phantom, ?*#globals##1:wybe.phantom) @io:nn:nn
 
 
-factorial > public {inline} (1 calls) 
+factorial > public {inline} (1 calls)
 0: proc_factorial.factorial<0>
 factorial(n##0:wybe.int, ?result##1:wybe.int):
   GlobalFlows: {} 
@@ -32,7 +32,7 @@ factorial(n##0:wybe.int, ?result##1:wybe.int):
     proc_factorial.gen#1<0>(~n##0:wybe.int, 1:wybe.int, ?result##1:wybe.int) #0 @proc_factorial:nn:nn
 
 
-gen#1 > (2 calls) 
+gen#1 > (2 calls)
 0: proc_factorial.gen#1<0>
 gen#1(n##0:wybe.int, result##0:wybe.int, ?result##1:wybe.int):
   GlobalFlows: {} 
@@ -50,7 +50,7 @@ gen#1(n##0:wybe.int, result##0:wybe.int, ?result##1:wybe.int):
 
 
 
-gen#2 > {inline} (1 calls) 
+gen#2 > {inline} (1 calls)
 0: proc_factorial.gen#2<0>
 gen#2(n##0:wybe.int, result##0:wybe.int, ?result##2:wybe.int):
   GlobalFlows: {} 

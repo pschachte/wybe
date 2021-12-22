@@ -27,7 +27,7 @@ AFTER EVERYTHING:
   submodules      : tests.map
   procs           : 
 
-lookup > public (6 calls) 
+lookup > public (6 calls)
 0: tests.lookup<0>
 lookup(key##0:wybe.int, map##0:tests.map, ?result##0:wybe.int, ?#success##0:wybe.bool):
   GlobalFlows: {} 
@@ -40,29 +40,29 @@ lookup(key##0:wybe.int, map##0:tests.map, ?result##0:wybe.int, ?#success##0:wybe
         foreign llvm move(undef:wybe.int, ?result##0:wybe.int)
 
     1:
-        foreign lpvm access(map##0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int)
+        foreign lpvm access(map##0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @tests:nn:nn
         foreign llvm icmp_eq(key##0:wybe.int, tmp#0##0:wybe.int, ?tmp#13##0:wybe.bool) @int:nn:nn
         case ~tmp#13##0:wybe.bool of
         0:
             foreign llvm icmp_slt(key##0:wybe.int, ~tmp#0##0:wybe.int, ?tmp#11##0:wybe.bool) @int:nn:nn
             case ~tmp#11##0:wybe.bool of
             0:
-                foreign lpvm access(~map##0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#4##0:tests.map)
+                foreign lpvm access(~map##0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#4##0:tests.map) @tests:nn:nn
                 tests.lookup<0>(~key##0:wybe.int, ~tmp#4##0:tests.map, ?result##0:wybe.int, ?#success##0:wybe.bool) #8 @tests:nn:nn
 
             1:
-                foreign lpvm access(~map##0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#3##0:tests.map)
+                foreign lpvm access(~map##0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#3##0:tests.map) @tests:nn:nn
                 tests.lookup<0>(~key##0:wybe.int, ~tmp#3##0:tests.map, ?result##0:wybe.int, ?#success##0:wybe.bool) #6 @tests:nn:nn
 
 
         1:
-            foreign lpvm access(~map##0:tests.map, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?result##0:wybe.int)
+            foreign lpvm access(~map##0:tests.map, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?result##0:wybe.int) @tests:nn:nn
             foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 
 
-lt > public (1 calls) 
+lt > public (1 calls)
 0: tests.lt<0>
 lt(x##0:wybe.int, y##0:wybe.int, ?#success##0:wybe.bool):
   GlobalFlows: {} 
@@ -78,7 +78,7 @@ lt(x##0:wybe.int, y##0:wybe.int, ?#success##0:wybe.bool):
 
 
 
-lt2 > public {inline} (1 calls) 
+lt2 > public {inline} (1 calls)
 0: tests.lt2<0>
 lt2(x##0:wybe.int, y##0:wybe.int, ?res##0:wybe.bool):
   GlobalFlows: {} 
@@ -87,7 +87,7 @@ lt2(x##0:wybe.int, y##0:wybe.int, ?res##0:wybe.bool):
     tests.lt<0>(~x##0:wybe.int, ~y##0:wybe.int, ?res##0:wybe.bool) #0 @tests:nn:nn
 
 
-lt3 > public {inline} (0 calls) 
+lt3 > public {inline} (0 calls)
 0: tests.lt3<0>
 lt3(x##0:wybe.int, y##0:wybe.int, ?#success##0:wybe.bool):
   GlobalFlows: {} 
@@ -205,7 +205,7 @@ entry:
   resources       : 
   procs           : 
 
-= > public (9 calls) 
+= > public (9 calls)
 0: tests.map.=<0>
 =(#left##0:tests.map, #right##0:tests.map, ?#success##0:wybe.bool):
   GlobalFlows: {} 
@@ -217,20 +217,20 @@ entry:
         foreign llvm icmp_eq(~#left##0:tests.map, ~#right##0:tests.map, ?#success##0:wybe.bool)
 
     1:
-        foreign lpvm access(#left##0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#left##0:tests.map)
-        foreign lpvm access(#left##0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#key##0:wybe.int)
-        foreign lpvm access(#left##0:tests.map, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#value##0:wybe.int)
-        foreign lpvm access(~#left##0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#right##0:tests.map)
+        foreign lpvm access(#left##0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#left##0:tests.map) @tests:nn:nn
+        foreign lpvm access(#left##0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#key##0:wybe.int) @tests:nn:nn
+        foreign lpvm access(#left##0:tests.map, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#value##0:wybe.int) @tests:nn:nn
+        foreign lpvm access(~#left##0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#right##0:tests.map) @tests:nn:nn
         foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#11##0:wybe.bool)
         case ~tmp#11##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
         1:
-            foreign lpvm access(#right##0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?#right#left##0:tests.map)
-            foreign lpvm access(#right##0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?#right#key##0:wybe.int)
-            foreign lpvm access(#right##0:tests.map, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?#right#value##0:wybe.int)
-            foreign lpvm access(~#right##0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?#right#right##0:tests.map)
+            foreign lpvm access(#right##0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?#right#left##0:tests.map) @tests:nn:nn
+            foreign lpvm access(#right##0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?#right#key##0:wybe.int) @tests:nn:nn
+            foreign lpvm access(#right##0:tests.map, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?#right#value##0:wybe.int) @tests:nn:nn
+            foreign lpvm access(~#right##0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?#right#right##0:tests.map) @tests:nn:nn
             tests.map.=<0>(~#left#left##0:tests.map, ~#right#left##0:tests.map, ?tmp#4##0:wybe.bool) #2
             case ~tmp#4##0:wybe.bool of
             0:
@@ -257,7 +257,7 @@ entry:
 
 
 
-empty > public {inline} (0 calls) 
+empty > public {inline} (0 calls)
 0: tests.map.empty<0>
 empty(?#result##0:tests.map):
   GlobalFlows: {} 
@@ -266,7 +266,7 @@ empty(?#result##0:tests.map):
     foreign llvm move(0:tests.map, ?#result##0:tests.map)
 
 
-key > public {inline} (0 calls) 
+key > public {inline} (0 calls)
 0: tests.map.key<0>
 key(#rec##0:tests.map, ?#result##0:wybe.int, ?#success##0:wybe.bool):
   GlobalFlows: {} 
@@ -279,10 +279,10 @@ key(#rec##0:tests.map, ?#result##0:wybe.int, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
+        foreign lpvm access(~#rec##0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @tests:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-key > public {inline} (0 calls) 
+key > public {inline} (0 calls)
 1: tests.map.key<1>
 key(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:wybe.int, ?#success##0:wybe.bool):
   GlobalFlows: {} 
@@ -295,12 +295,12 @@ key(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:wybe.int, ?#success##0:wybe
         foreign llvm move(~#rec##0:tests.map, ?#rec##1:tests.map)
 
     1:
-        foreign lpvm mutate(~#rec##0:tests.map, ?#rec##1:tests.map, 8:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
+        foreign lpvm mutate(~#rec##0:tests.map, ?#rec##1:tests.map, 8:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @tests:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 
-left > public {inline} (0 calls) 
+left > public {inline} (0 calls)
 0: tests.map.left<0>
 left(#rec##0:tests.map, ?#result##0:tests.map, ?#success##0:wybe.bool):
   GlobalFlows: {} 
@@ -313,10 +313,10 @@ left(#rec##0:tests.map, ?#result##0:tests.map, ?#success##0:wybe.bool):
         foreign llvm move(undef:tests.map, ?#result##0:tests.map)
 
     1:
-        foreign lpvm access(~#rec##0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:tests.map)
+        foreign lpvm access(~#rec##0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:tests.map) @tests:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-left > public {inline} (0 calls) 
+left > public {inline} (0 calls)
 1: tests.map.left<1>
 left(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:tests.map, ?#success##0:wybe.bool):
   GlobalFlows: {} 
@@ -329,23 +329,23 @@ left(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:tests.map, ?#success##0:wy
         foreign llvm move(~#rec##0:tests.map, ?#rec##1:tests.map)
 
     1:
-        foreign lpvm mutate(~#rec##0:tests.map, ?#rec##1:tests.map, 0:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:tests.map)
+        foreign lpvm mutate(~#rec##0:tests.map, ?#rec##1:tests.map, 0:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:tests.map) @tests:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 
-node > public {inline} (0 calls) 
+node > public {inline} (0 calls)
 0: tests.map.node<0>
 node(left##0:tests.map, key##0:wybe.int, value##0:wybe.int, right##0:tests.map, ?#result##0:tests.map):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(32:wybe.int, ?#rec##0:tests.map)
-    foreign lpvm mutate(~#rec##0:tests.map, ?#rec##1:tests.map, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~left##0:tests.map)
-    foreign lpvm mutate(~#rec##1:tests.map, ?#rec##2:tests.map, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~key##0:wybe.int)
-    foreign lpvm mutate(~#rec##2:tests.map, ?#rec##3:tests.map, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~value##0:wybe.int)
-    foreign lpvm mutate(~#rec##3:tests.map, ?#result##0:tests.map, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~right##0:tests.map)
-node > public {inline} (20 calls) 
+    foreign lpvm alloc(32:wybe.int, ?#rec##0:tests.map) @tests:nn:nn
+    foreign lpvm mutate(~#rec##0:tests.map, ?#rec##1:tests.map, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~left##0:tests.map) @tests:nn:nn
+    foreign lpvm mutate(~#rec##1:tests.map, ?#rec##2:tests.map, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~key##0:wybe.int) @tests:nn:nn
+    foreign lpvm mutate(~#rec##2:tests.map, ?#rec##3:tests.map, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~value##0:wybe.int) @tests:nn:nn
+    foreign lpvm mutate(~#rec##3:tests.map, ?#result##0:tests.map, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~right##0:tests.map) @tests:nn:nn
+node > public {inline} (20 calls)
 1: tests.map.node<1>
 node(?left##0:tests.map, ?key##0:wybe.int, ?value##0:wybe.int, ?right##0:tests.map, #result##0:tests.map, ?#success##0:wybe.bool):
   GlobalFlows: {} 
@@ -361,15 +361,15 @@ node(?left##0:tests.map, ?key##0:wybe.int, ?value##0:wybe.int, ?right##0:tests.m
         foreign llvm move(undef:tests.map, ?right##0:tests.map)
 
     1:
-        foreign lpvm access(#result##0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?left##0:tests.map)
-        foreign lpvm access(#result##0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?key##0:wybe.int)
-        foreign lpvm access(#result##0:tests.map, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?value##0:wybe.int)
-        foreign lpvm access(~#result##0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?right##0:tests.map)
+        foreign lpvm access(#result##0:tests.map, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?left##0:tests.map) @tests:nn:nn
+        foreign lpvm access(#result##0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?key##0:wybe.int) @tests:nn:nn
+        foreign lpvm access(#result##0:tests.map, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?value##0:wybe.int) @tests:nn:nn
+        foreign lpvm access(~#result##0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?right##0:tests.map) @tests:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 
-right > public {inline} (0 calls) 
+right > public {inline} (0 calls)
 0: tests.map.right<0>
 right(#rec##0:tests.map, ?#result##0:tests.map, ?#success##0:wybe.bool):
   GlobalFlows: {} 
@@ -382,10 +382,10 @@ right(#rec##0:tests.map, ?#result##0:tests.map, ?#success##0:wybe.bool):
         foreign llvm move(undef:tests.map, ?#result##0:tests.map)
 
     1:
-        foreign lpvm access(~#rec##0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:tests.map)
+        foreign lpvm access(~#rec##0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:tests.map) @tests:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-right > public {inline} (0 calls) 
+right > public {inline} (0 calls)
 1: tests.map.right<1>
 right(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:tests.map, ?#success##0:wybe.bool):
   GlobalFlows: {} 
@@ -398,12 +398,12 @@ right(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:tests.map, ?#success##0:w
         foreign llvm move(~#rec##0:tests.map, ?#rec##1:tests.map)
 
     1:
-        foreign lpvm mutate(~#rec##0:tests.map, ?#rec##1:tests.map, 24:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:tests.map)
+        foreign lpvm mutate(~#rec##0:tests.map, ?#rec##1:tests.map, 24:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:tests.map) @tests:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 
-value > public {inline} (0 calls) 
+value > public {inline} (0 calls)
 0: tests.map.value<0>
 value(#rec##0:tests.map, ?#result##0:wybe.int, ?#success##0:wybe.bool):
   GlobalFlows: {} 
@@ -416,10 +416,10 @@ value(#rec##0:tests.map, ?#result##0:wybe.int, ?#success##0:wybe.bool):
         foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
     1:
-        foreign lpvm access(~#rec##0:tests.map, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
+        foreign lpvm access(~#rec##0:tests.map, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @tests:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-value > public {inline} (0 calls) 
+value > public {inline} (0 calls)
 1: tests.map.value<1>
 value(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:wybe.int, ?#success##0:wybe.bool):
   GlobalFlows: {} 
@@ -432,12 +432,12 @@ value(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:wybe.int, ?#success##0:wy
         foreign llvm move(~#rec##0:tests.map, ?#rec##1:tests.map)
 
     1:
-        foreign lpvm mutate(~#rec##0:tests.map, ?#rec##1:tests.map, 16:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
+        foreign lpvm mutate(~#rec##0:tests.map, ?#rec##1:tests.map, 16:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @tests:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 
-~= > public {inline} (0 calls) 
+~= > public {inline} (0 calls)
 0: tests.map.~=<0>
 ~=(#left##0:tests.map, #right##0:tests.map, ?#success##0:wybe.bool):
   GlobalFlows: {} 

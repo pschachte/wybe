@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-gen#1 > (2 calls) 
+gen#1 > (2 calls)
 0: proc_yorn2.gen#1<0>
 gen#1(*#globals##0:wybe.phantom, prompt##0:wybe.string, ?result##1:wybe.bool, ?#globals##5:wybe.phantom):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
@@ -17,18 +17,18 @@ gen#1(*#globals##0:wybe.phantom, prompt##0:wybe.string, ?result##1:wybe.bool, ?#
   InterestingCallProperties: []
     wybe.string.print_string<0>(prompt##0:wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #8 @io:nn:nn
     wybe.string.print_string<0>(" (y/n) ":wybe.string, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #9 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom, ~*#globals##2:wybe.phantom, ?*tmp#9##0:wybe.phantom)
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom, ~*#globals##2:wybe.phantom, ?*tmp#9##0:wybe.phantom) @io:nn:nn
     foreign c read_char(?response##0:wybe.char, ~tmp#8##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#10##0:wybe.phantom, ~*tmp#9##0:wybe.phantom, ?*#globals##3:wybe.phantom)
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#10##0:wybe.phantom, ~*tmp#9##0:wybe.phantom, ?*#globals##3:wybe.phantom) @io:nn:nn
     foreign llvm icmp_eq(response##0:wybe.char, 'Y':wybe.char, ?tmp#0##0:wybe.bool) @char:nn:nn
     foreign llvm icmp_eq(~response##0:wybe.char, 'N':wybe.char, ?tmp#1##0:wybe.bool) @char:nn:nn
     foreign llvm or(tmp#0##0:wybe.bool, ~tmp#1##0:wybe.bool, ?tmp#2##0:wybe.bool) @bool:nn:nn
     case ~tmp#2##0:wybe.bool of
     0:
         wybe.string.print_string<0>("Please answer 'yes' or 'no'.":wybe.string, ~*#globals##3:wybe.phantom, ?*tmp#19##0:wybe.phantom) #10 @io:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#20##0:wybe.phantom, ~*tmp#19##0:wybe.phantom, ?*tmp#21##0:wybe.phantom)
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#20##0:wybe.phantom, ~*tmp#19##0:wybe.phantom, ?*tmp#21##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#22##0:wybe.phantom, ~*tmp#21##0:wybe.phantom, ?*#globals##4:wybe.phantom)
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#22##0:wybe.phantom, ~*tmp#21##0:wybe.phantom, ?*#globals##4:wybe.phantom) @io:nn:nn
         proc_yorn2.gen#1<0>(~#globals##4:wybe.phantom, ~prompt##0:wybe.string, ?result##1:wybe.bool, ?#globals##5:wybe.phantom) #7 @proc_yorn2:2:5
 
     1:
@@ -37,7 +37,7 @@ gen#1(*#globals##0:wybe.phantom, prompt##0:wybe.string, ?result##1:wybe.bool, ?#
 
 
 
-yorn > public {inline} (0 calls) 
+yorn > public {inline} (0 calls)
 0: proc_yorn2.yorn<0>
 yorn(prompt##0:wybe.string, ?result##0:wybe.bool, *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 

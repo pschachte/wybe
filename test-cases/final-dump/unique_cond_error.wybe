@@ -1,0 +1,12 @@
+representation is {unique} 32 bit signed
+
+pub def bar(a:_) { pass }
+
+def foo(b:bool, a:_) {
+    if { b ::
+        bar(a)
+    | else ::
+        ?a = 0:_
+    }
+    bar(a)
+}

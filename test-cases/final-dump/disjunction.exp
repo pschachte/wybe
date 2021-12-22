@@ -12,7 +12,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-in > public (2 calls) 
+in > public (2 calls)
 0: disjunction.in<0>
 in(e##0:wybe.int, lst##0:wybe.list(wybe.int), ?#success##0:wybe.bool):
   GlobalFlows: {} 
@@ -24,11 +24,11 @@ in(e##0:wybe.int, lst##0:wybe.list(wybe.int), ?#success##0:wybe.bool):
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
     1:
-        foreign lpvm access(lst##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int)
+        foreign lpvm access(lst##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @list:nn:nn
         foreign llvm icmp_eq(e##0:wybe.int, ~h##0:wybe.int, ?tmp#4##0:wybe.bool) @int:nn:nn
         case ~tmp#4##0:wybe.bool of
         0:
-            foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.list(wybe.int))
+            foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.list(wybe.int)) @list:nn:nn
             disjunction.in<0>(~e##0:wybe.int, ~tmp#0##0:wybe.list(wybe.int), ?#success##0:wybe.bool) #3 @disjunction:nn:nn
 
         1:
@@ -37,7 +37,7 @@ in(e##0:wybe.int, lst##0:wybe.list(wybe.int), ?#success##0:wybe.bool):
 
 
 
-member > public (1 calls) 
+member > public (1 calls)
 0: disjunction.member<0>
 member(e##0:wybe.int, lst##0:wybe.list(wybe.int), ?#success##0:wybe.bool):
   GlobalFlows: {} 
@@ -49,8 +49,8 @@ member(e##0:wybe.int, lst##0:wybe.list(wybe.int), ?#success##0:wybe.bool):
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
     1:
-        foreign lpvm access(lst##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int)
-        foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:wybe.list(wybe.int))
+        foreign lpvm access(lst##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @list:nn:nn
+        foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:wybe.list(wybe.int)) @list:nn:nn
         foreign llvm icmp_eq(e##0:wybe.int, ~h##0:wybe.int, ?tmp#2##0:wybe.bool) @int:nn:nn
         case ~tmp#2##0:wybe.bool of
         0:
@@ -62,7 +62,7 @@ member(e##0:wybe.int, lst##0:wybe.list(wybe.int), ?#success##0:wybe.bool):
 
 
 
-saturating_tail > public (0 calls) 
+saturating_tail > public (0 calls)
 0: disjunction.saturating_tail<0>
 saturating_tail(lst##0:wybe.list(T), ?tl##0:wybe.list(T)):
   GlobalFlows: {} 
@@ -74,11 +74,11 @@ saturating_tail(lst##0:wybe.list(T), ?tl##0:wybe.list(T)):
         foreign llvm move(0:wybe.list(T), ?tl##0:wybe.list(T)) @disjunction:nn:nn
 
     1:
-        foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tl##0:wybe.list(T))
+        foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tl##0:wybe.list(T)) @list:nn:nn
 
 
 
-saturating_tail2 > public (0 calls) 
+saturating_tail2 > public (0 calls)
 0: disjunction.saturating_tail2<0>
 saturating_tail2(lst##0:wybe.list(T), ?#result##0:wybe.list(T)):
   GlobalFlows: {} 
@@ -90,7 +90,7 @@ saturating_tail2(lst##0:wybe.list(T), ?#result##0:wybe.list(T)):
         foreign llvm move(0:wybe.list(T), ?#result##0:wybe.list(T)) @disjunction:nn:nn
 
     1:
-        foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.list(T))
+        foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.list(T)) @list:nn:nn
 
 
   LLVM code       :

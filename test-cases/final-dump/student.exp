@@ -30,46 +30,46 @@ AFTER EVERYTHING:
   submodules      : student.course, student.student
   procs           : 
 
-module top-level code > public {impure} (0 calls) 
+module top-level code > public {impure} (0 calls)
 0: student.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#4##0:student.course)
-    foreign lpvm mutate(~tmp#4##0:student.course, ?tmp#5##0:student.course, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 90048:wybe.int)
-    foreign lpvm mutate(~tmp#5##0:student.course, ?tmp#6##0:student.course, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, "Declarative Programming":wybe.string)
-    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:student.student)
-    foreign lpvm mutate(~tmp#9##0:student.student, ?tmp#10##0:student.student, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 12345:wybe.int)
-    foreign lpvm mutate(~tmp#10##0:student.student, ?tmp#11##0:student.student, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#6##0:student.course)
+    foreign lpvm alloc(16:wybe.int, ?tmp#4##0:student.course) @student:nn:nn
+    foreign lpvm mutate(~tmp#4##0:student.course, ?tmp#5##0:student.course, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 90048:wybe.int) @student:nn:nn
+    foreign lpvm mutate(~tmp#5##0:student.course, ?tmp#6##0:student.course, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, "Declarative Programming":wybe.string) @student:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:student.student) @student:nn:nn
+    foreign lpvm mutate(~tmp#9##0:student.student, ?tmp#10##0:student.student, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 12345:wybe.int) @student:nn:nn
+    foreign lpvm mutate(~tmp#10##0:student.student, ?tmp#11##0:student.student, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#6##0:student.course) @student:nn:nn
     student.printStudent<0>(~tmp#11##0:student.student, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #2 @student:nn:nn
 
 
-printStudent > public (1 calls) 
+printStudent > public (1 calls)
 0: student.printStudent<0>
 printStudent(stu##0:student.student, *#globals##0:wybe.phantom, *?#globals##6:wybe.phantom):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("student id: ":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #10 @io:nn:nn
-    foreign lpvm access(stu##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int)
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*tmp#10##0:wybe.phantom)
+    foreign lpvm access(stu##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @student:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*tmp#10##0:wybe.phantom) @io:nn:nn
     foreign c print_int(~tmp#0##0:wybe.int, ~tmp#9##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#12##0:wybe.phantom, ~*tmp#10##0:wybe.phantom, ?*#globals##2:wybe.phantom)
-    foreign lpvm access(~stu##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:student.course)
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#12##0:wybe.phantom, ~*tmp#10##0:wybe.phantom, ?*#globals##2:wybe.phantom) @io:nn:nn
+    foreign lpvm access(~stu##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:student.course) @student:nn:nn
     wybe.string.print_string<0>("course code: ":wybe.string, ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom) #11 @io:nn:nn
-    foreign lpvm access(tmp#1##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int)
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom, ~*#globals##3:wybe.phantom, ?*tmp#20##0:wybe.phantom)
+    foreign lpvm access(tmp#1##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @student:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom, ~*#globals##3:wybe.phantom, ?*tmp#20##0:wybe.phantom) @io:nn:nn
     foreign c print_int(~tmp#2##0:wybe.int, ~tmp#19##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#22##0:wybe.phantom, ~*tmp#20##0:wybe.phantom, ?*#globals##4:wybe.phantom)
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#22##0:wybe.phantom, ~*tmp#20##0:wybe.phantom, ?*#globals##4:wybe.phantom) @io:nn:nn
     wybe.string.print_string<0>("course name: ":wybe.string, ~*#globals##4:wybe.phantom, ?*#globals##5:wybe.phantom) #12 @io:nn:nn
-    foreign lpvm access(~tmp#1##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.string)
+    foreign lpvm access(~tmp#1##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.string) @student:nn:nn
     wybe.string.print_string<0>(~tmp#3##0:wybe.string, ~*#globals##5:wybe.phantom, ?*tmp#28##0:wybe.phantom) #13 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#29##0:wybe.phantom, ~*tmp#28##0:wybe.phantom, ?*tmp#30##0:wybe.phantom)
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#29##0:wybe.phantom, ~*tmp#28##0:wybe.phantom, ?*tmp#30##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#29##0:wybe.phantom, ?tmp#31##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#31##0:wybe.phantom, ~*tmp#30##0:wybe.phantom, ?*#globals##6:wybe.phantom)
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#31##0:wybe.phantom, ~*tmp#30##0:wybe.phantom, ?*#globals##6:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 
@@ -190,16 +190,16 @@ entry:
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls) 
+= > public {inline} (1 calls)
 0: student.course.=<0>
 =(#left##0:student.course, #right##0:student.course, ?#success##0:wybe.bool):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(#left##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#code##0:wybe.int)
-    foreign lpvm access(~#left##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#name##0:wybe.string)
-    foreign lpvm access(#right##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#code##0:wybe.int)
-    foreign lpvm access(~#right##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#name##0:wybe.string)
+    foreign lpvm access(#left##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#code##0:wybe.int) @student:nn:nn
+    foreign lpvm access(~#left##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#name##0:wybe.string) @student:nn:nn
+    foreign lpvm access(#right##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#code##0:wybe.int) @student:nn:nn
+    foreign lpvm access(~#right##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#name##0:wybe.string) @student:nn:nn
     foreign llvm icmp_eq(~#left#code##0:wybe.int, ~#right#code##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
@@ -210,67 +210,67 @@ entry:
 
 
 
-code > public {inline} (0 calls) 
+code > public {inline} (0 calls)
 0: student.course.code<0>
 code(#rec##0:student.course, ?#result##0:wybe.int):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
-code > public {inline} (0 calls) 
+    foreign lpvm access(~#rec##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @student:nn:nn
+code > public {inline} (0 calls)
 1: student.course.code<1>
 code(#rec##0:student.course, ?#rec##1:student.course, #field##0:wybe.int):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm mutate(~#rec##0:student.course, ?#rec##1:student.course, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
+    foreign lpvm mutate(~#rec##0:student.course, ?#rec##1:student.course, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @student:nn:nn
 
 
-course > public {inline} (0 calls) 
+course > public {inline} (0 calls)
 0: student.course.course<0>
 course(code##0:wybe.int, name##0:wybe.string, ?#result##0:student.course):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?#rec##0:student.course)
-    foreign lpvm mutate(~#rec##0:student.course, ?#rec##1:student.course, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~code##0:wybe.int)
-    foreign lpvm mutate(~#rec##1:student.course, ?#result##0:student.course, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~name##0:wybe.string)
-course > public {inline} (6 calls) 
+    foreign lpvm alloc(16:wybe.int, ?#rec##0:student.course) @student:nn:nn
+    foreign lpvm mutate(~#rec##0:student.course, ?#rec##1:student.course, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~code##0:wybe.int) @student:nn:nn
+    foreign lpvm mutate(~#rec##1:student.course, ?#result##0:student.course, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~name##0:wybe.string) @student:nn:nn
+course > public {inline} (6 calls)
 1: student.course.course<1>
 course(?code##0:wybe.int, ?name##0:wybe.string, #result##0:student.course):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(#result##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?code##0:wybe.int)
-    foreign lpvm access(~#result##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?name##0:wybe.string)
+    foreign lpvm access(#result##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?code##0:wybe.int) @student:nn:nn
+    foreign lpvm access(~#result##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?name##0:wybe.string) @student:nn:nn
 
 
-name > public {inline} (0 calls) 
+name > public {inline} (0 calls)
 0: student.course.name<0>
 name(#rec##0:student.course, ?#result##0:wybe.string):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string)
-name > public {inline} (0 calls) 
+    foreign lpvm access(~#rec##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string) @student:nn:nn
+name > public {inline} (0 calls)
 1: student.course.name<1>
 name(#rec##0:student.course, ?#rec##1:student.course, #field##0:wybe.string):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~#rec##0:student.course, ?#rec##1:student.course, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string)
+    foreign lpvm {noalias} mutate(~#rec##0:student.course, ?#rec##1:student.course, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string) @student:nn:nn
 
 
-~= > public {inline} (0 calls) 
+~= > public {inline} (0 calls)
 0: student.course.~=<0>
 ~=(#left##0:student.course, #right##0:student.course, ?#success##0:wybe.bool):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(#left##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int)
-    foreign lpvm access(~#left##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.string)
-    foreign lpvm access(#right##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.int)
-    foreign lpvm access(~#right##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.string)
+    foreign lpvm access(#left##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @student:nn:nn
+    foreign lpvm access(~#left##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.string) @student:nn:nn
+    foreign lpvm access(#right##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.int) @student:nn:nn
+    foreign lpvm access(~#right##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.string) @student:nn:nn
     foreign llvm icmp_eq(~tmp#3##0:wybe.int, ~tmp#5##0:wybe.int, ?tmp#7##0:wybe.bool) @int:nn:nn
     case ~tmp#7##0:wybe.bool of
     0:
@@ -452,26 +452,26 @@ if.else:
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls) 
+= > public {inline} (1 calls)
 0: student.student.=<0>
 =(#left##0:student.student, #right##0:student.student, ?#success##0:wybe.bool):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(#left##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#id##0:wybe.int)
-    foreign lpvm access(~#left##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#major##0:student.course)
-    foreign lpvm access(#right##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#id##0:wybe.int)
-    foreign lpvm access(~#right##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#major##0:student.course)
+    foreign lpvm access(#left##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#id##0:wybe.int) @student:nn:nn
+    foreign lpvm access(~#left##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#major##0:student.course) @student:nn:nn
+    foreign lpvm access(#right##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#id##0:wybe.int) @student:nn:nn
+    foreign lpvm access(~#right##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#major##0:student.course) @student:nn:nn
     foreign llvm icmp_eq(~#left#id##0:wybe.int, ~#right#id##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
     1:
-        foreign lpvm access(#left#major##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.int)
-        foreign lpvm access(~#left#major##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.string)
-        foreign lpvm access(#right#major##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#11##0:wybe.int)
-        foreign lpvm access(~#right#major##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#12##0:wybe.string)
+        foreign lpvm access(#left#major##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.int) @student:nn:nn
+        foreign lpvm access(~#left#major##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.string) @student:nn:nn
+        foreign lpvm access(#right#major##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#11##0:wybe.int) @student:nn:nn
+        foreign lpvm access(~#right#major##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#12##0:wybe.string) @student:nn:nn
         foreign llvm icmp_eq(~tmp#11##0:wybe.int, ~tmp#9##0:wybe.int, ?tmp#13##0:wybe.bool) @int:nn:nn
         case ~tmp#13##0:wybe.bool of
         0:
@@ -483,67 +483,67 @@ if.else:
 
 
 
-id > public {inline} (0 calls) 
+id > public {inline} (0 calls)
 0: student.student.id<0>
 id(#rec##0:student.student, ?#result##0:wybe.int):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int)
-id > public {inline} (0 calls) 
+    foreign lpvm access(~#rec##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @student:nn:nn
+id > public {inline} (0 calls)
 1: student.student.id<1>
 id(#rec##0:student.student, ?#rec##1:student.student, #field##0:wybe.int):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm mutate(~#rec##0:student.student, ?#rec##1:student.student, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int)
+    foreign lpvm mutate(~#rec##0:student.student, ?#rec##1:student.student, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @student:nn:nn
 
 
-major > public {inline} (0 calls) 
+major > public {inline} (0 calls)
 0: student.student.major<0>
 major(#rec##0:student.student, ?#result##0:student.course):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(~#rec##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:student.course)
-major > public {inline} (0 calls) 
+    foreign lpvm access(~#rec##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:student.course) @student:nn:nn
+major > public {inline} (0 calls)
 1: student.student.major<1>
 major(#rec##0:student.student, ?#rec##1:student.student, #field##0:student.course):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm {noalias} mutate(~#rec##0:student.student, ?#rec##1:student.student, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:student.course)
+    foreign lpvm {noalias} mutate(~#rec##0:student.student, ?#rec##1:student.student, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:student.course) @student:nn:nn
 
 
-student > public {inline} (0 calls) 
+student > public {inline} (0 calls)
 0: student.student.student<0>
 student(id##0:wybe.int, major##0:student.course, ?#result##0:student.student):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?#rec##0:student.student)
-    foreign lpvm mutate(~#rec##0:student.student, ?#rec##1:student.student, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~id##0:wybe.int)
-    foreign lpvm mutate(~#rec##1:student.student, ?#result##0:student.student, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~major##0:student.course)
-student > public {inline} (6 calls) 
+    foreign lpvm alloc(16:wybe.int, ?#rec##0:student.student) @student:nn:nn
+    foreign lpvm mutate(~#rec##0:student.student, ?#rec##1:student.student, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~id##0:wybe.int) @student:nn:nn
+    foreign lpvm mutate(~#rec##1:student.student, ?#result##0:student.student, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~major##0:student.course) @student:nn:nn
+student > public {inline} (6 calls)
 1: student.student.student<1>
 student(?id##0:wybe.int, ?major##0:student.course, #result##0:student.student):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(#result##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?id##0:wybe.int)
-    foreign lpvm access(~#result##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?major##0:student.course)
+    foreign lpvm access(#result##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?id##0:wybe.int) @student:nn:nn
+    foreign lpvm access(~#result##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?major##0:student.course) @student:nn:nn
 
 
-~= > public {inline} (0 calls) 
+~= > public {inline} (0 calls)
 0: student.student.~=<0>
 ~=(#left##0:student.student, #right##0:student.student, ?#success##0:wybe.bool):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm access(#left##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int)
-    foreign lpvm access(~#left##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:student.course)
-    foreign lpvm access(#right##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.int)
-    foreign lpvm access(~#right##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:student.course)
+    foreign lpvm access(#left##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @student:nn:nn
+    foreign lpvm access(~#left##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:student.course) @student:nn:nn
+    foreign lpvm access(#right##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.int) @student:nn:nn
+    foreign lpvm access(~#right##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:student.course) @student:nn:nn
     foreign llvm icmp_eq(~tmp#3##0:wybe.int, ~tmp#5##0:wybe.int, ?tmp#7##0:wybe.bool) @int:nn:nn
     case ~tmp#7##0:wybe.bool of
     0:
@@ -551,10 +551,10 @@ student(?id##0:wybe.int, ?major##0:student.course, #result##0:student.student):
         foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
     1:
-        foreign lpvm access(tmp#4##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.int)
-        foreign lpvm access(~tmp#4##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.string)
-        foreign lpvm access(tmp#6##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.int)
-        foreign lpvm access(~tmp#6##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#11##0:wybe.string)
+        foreign lpvm access(tmp#4##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.int) @student:nn:nn
+        foreign lpvm access(~tmp#4##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.string) @student:nn:nn
+        foreign lpvm access(tmp#6##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.int) @student:nn:nn
+        foreign lpvm access(~tmp#6##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#11##0:wybe.string) @student:nn:nn
         foreign llvm icmp_eq(~tmp#10##0:wybe.int, ~tmp#8##0:wybe.int, ?tmp#12##0:wybe.bool) @int:nn:nn
         case ~tmp#12##0:wybe.bool of
         0:

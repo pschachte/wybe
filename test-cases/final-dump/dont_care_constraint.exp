@@ -9,15 +9,15 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > public {inline,impure} (0 calls) 
+module top-level code > public {inline,impure} (0 calls)
 0: dont_care_constraint.<0>
 (*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#3##0:wybe.phantom)
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#3##0:wybe.phantom) @io:nn:nn
     foreign c read_line(?tmp#4##0:wybe.c_string, ~tmp#2##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#5##0:wybe.phantom, ~*tmp#3##0:wybe.phantom, ?*#globals##1:wybe.phantom)
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#5##0:wybe.phantom, ~*tmp#3##0:wybe.phantom, ?*#globals##1:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 

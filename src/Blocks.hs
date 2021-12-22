@@ -744,7 +744,7 @@ trustArgInt arg = trustFromJust
 
 -- | Code generation for LPVM instructions.
 cgenLPVM :: ProcName -> [Ident] -> [PrimArg] -> Codegen ()
-cgenLPVM "alloc" [] args@[sizeArg,addrArg] = do
+cgenLPVM "alloc" _ args@[sizeArg,addrArg] = do
           logCodegen $ "lpvm alloc " ++ show sizeArg ++ " " ++ show addrArg
           let (inputs,outputs) = partitionArgs args
           case inputs of
@@ -757,7 +757,7 @@ cgenLPVM "alloc" [] args@[sizeArg,addrArg] = do
               shouldnt $ "alloc instruction with " ++ show (length inputs)
                          ++ " inputs"
 
-cgenLPVM "access" [] args@[addrArg,offsetArg,_,_,val] = do
+cgenLPVM "access" _ args@[addrArg,offsetArg,_,_,val] = do
           logCodegen $ "lpvm access " ++ show addrArg ++ " " ++ show offsetArg
                  ++ " " ++ show val
           baseAddr <- cgenArg addrArg
@@ -809,7 +809,8 @@ cgenLPVM "mutate" _
 cgenLPVM "mutate" _ [_, _, _, destructiveArg, _, _, _] =
       nyi "lpvm mutate instruction with non-constant destructive flag"
 
-cgenLPVM "cast" [] args@[inArg,outArg] =
+
+cgenLPVM "cast" _ args@[inArg,outArg] =
     case partitionArgs args of
         ([inArg],[outArg]) -> do
             inRep <- lift $ typeRep $ argType inArg

@@ -96,7 +96,7 @@ module AST (
   initialisedResources,
   addSimpleResource, lookupResource, specialResources, publicResource, resourcefulName,
   ProcModifiers(..), defaultProcModifiers, setDetism, setInline, setImpurity,
-  Inlining(..), Impurity(..), Resourcefulness(..),
+  setIsCtor, Inlining(..), Impurity(..), Resourcefulness(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
   checkConflictingMods, checkUnknownMods,
   specialChar, specialName, specialName2,
@@ -129,6 +129,7 @@ import           Data.List.Extra (nubOrd,splitOn)
 import           Data.Map as Map
 import           Data.Maybe
 import           Data.Set as Set
+import           UnivSet as USet
 import           Data.Tuple.HT ( mapSnd, mapFst )
 import           Data.Word (Word8)
 import           Text.Read (readMaybe)
@@ -355,15 +356,19 @@ content :: Placed t -> t
 content (Placed content _) = content
 content (Unplaced content) = content
 
+
 -- |Attach a source position to a data value, if one is available.
 maybePlace :: t -> OptPos -> Placed t
 maybePlace t (Just pos) = Placed t pos
 maybePlace t Nothing    = Unplaced t
 
--- |Attach a source position to a data value, if one is available.
-rePlace :: t -> Placed t -> Placed t
-rePlace t (Placed _ pos) = Placed t pos
-rePlace t (Unplaced _)   = Unplaced t
+
+-- |Replace the source position of the Placed value with the given position, if
+-- one is given; otherwise leave the position it already has.
+rePlace :: OptPos -> Placed t -> Placed t
+rePlace Nothing    t            = t
+rePlace (Just pos) (Placed t _) = Placed t pos
+rePlace (Just pos) (Unplaced t) = Placed t pos
 
 
 -- |Extract the place and payload of a Placed value
@@ -820,15 +825,15 @@ addParameters :: [TypeVarName] -> OptPos -> Compiler ()
 addParameters params pos = do
     currMod <- getModuleSpec
     currParams <- getModule modParams
-    if nub params /= params
-      then errmsg pos
+    when (nub params /= params)
+      $ errmsg pos
            $ "duplicated type/module parameter in: "
            ++ intercalate ", " (show <$> params)
-      else if List.null currParams
-      then updateModule (\m -> m { modParams = params })
-      else errmsg pos
+    unless (List.null currParams)
+      $ errmsg pos
            $ "repeated parameter declaration: "
            ++ intercalate ", " (show <$> params)
+    updateModule (\m -> m { modParams = params })
 
 
 -- |Add the specified type representation to the current module.  This makes the
@@ -864,34 +869,35 @@ addConstructor vis pctor = do
     let ctor = content pctor
     currMod <- getModuleSpec
     hasRepn <- isJust <$> getModule modTypeRep
+    when hasRepn
+      $ errmsg pos
+           $ "Declaring constructor for type " ++ showModSpec currMod
+           ++ " with declared representation"
     pctors <- fromMaybe [] <$> getModuleImplementationField modConstructors
     let redundant =
           any (\c -> procProtoName c == procProtoName ctor
                 && length (procProtoParams c) == length (procProtoParams ctor))
           $ content . snd <$> pctors
-    let typeVars = Set.unions
-                   (typeVarSet . paramType <$> procProtoParams (content pctor))
-    missingParams <- Set.difference typeVars . Set.fromList
-                     <$> getModule modParams
-    if hasRepn
-      then errmsg pos
-           $ "Declaring constructor for type " ++ showModSpec currMod
-           ++ " with declared representation"
-      else if redundant
-      then  errmsg pos
+    when redundant
+      $  errmsg pos
            $ "Declaring constructor for type " ++ showModSpec currMod
            ++ " with repeated name/arity"
-      else if Set.null missingParams
-            then do
-                updateImplementation (\m -> m { modConstructors =
-                                                Just ((vis,pctor):pctors) })
-                updateModule (\m -> m { modIsType  = True })
-                addKnownType currMod
-            else
-                errmsg pos
-                $ "Constructors for type " ++ showModSpec currMod
-                  ++ " use unbound type variable(s) "
-                  ++ intercalate ", " (("?"++) . show <$> Set.toList missingParams)
+    -- isUnique <- getModule (typeModifiers . modInterface)
+    let params = procProtoParams ctor
+    -- unless (tmUniqueness isUnique) -- if not unique, params can't be, either
+    --   $ mapM_ (ensureNotUnique pos) params
+    let typeVars = Set.unions (typeVarSet . paramType <$> params)
+    missingParams <- Set.difference typeVars . Set.fromList
+                     <$> getModule modParams
+    unless (Set.null missingParams)
+      $ errmsg pos
+            $ "Constructors for type " ++ showModSpec currMod
+              ++ " use unbound type variable(s) "
+              ++ intercalate ", " (("?"++) . show <$> Set.toList missingParams)
+    updateImplementation (\m -> m { modConstructors =
+                                    Just ((vis,pctor):pctors) })
+    updateModule (\m -> m { modIsType  = True })
+    addKnownType currMod
 
 
 -- |Record that the specified type is known in the current module.
@@ -1053,7 +1059,7 @@ addImport modspec imports = do
                 Just (imports', hash) ->
                     Just (combineImportSpecs imports' imports, hash)
             ) modspec'))
-    when (isNothing $ importPublic imports) $
+    when (isUniv $ importPublic imports) $
       updateInterface Public (updateDependencies (Set.insert modspec))
 
 
@@ -1061,12 +1067,13 @@ addImport modspec imports = do
 -- XXX the list of unknown and conflicting modifiers shouldn't be needed,
 -- but to get rid of them, the parser needs to be able to report errors.
 data ProcModifiers = ProcModifiers {
-    modifierDetism::Determinism,          -- ^ The proc determinism
-    modifierInline::Inlining,             -- ^ Aggresively inline this proc?
-    modifierImpurity::Impurity,           -- ^ Don't assume purity when optimising
+    modifierDetism::Determinism,   -- ^ The proc determinism
+    modifierInline::Inlining,      -- ^ Aggresively inline this proc?
+    modifierImpurity::Impurity,    -- ^ Don't assume purity when optimising
+    modifierIsCtor::Bool,          -- ^ Is proc actually a constructor?
     modifierResourceful::Resourcefulness, -- ^ Can this procedure use resources?
-    modifierUnknown::[String],            -- ^ Unknown modifiers specified
-    modifierConflict::[String]            -- ^ Modifiers that conflict with others
+    modifierUnknown::[String],     -- ^ Unknown modifiers specified
+    modifierConflict::[String]     -- ^ Modifiers that conflict with others
 } deriving (Eq, Ord, Generic)
 
 
@@ -1126,7 +1133,7 @@ showResourceSets (ins, outs) = "{" ++ showSet ins ++ ";" ++ showSet outs ++ "}"
 
 -- | The default Det, non-inlined, pure ProcModifiers.
 defaultProcModifiers :: ProcModifiers
-defaultProcModifiers = ProcModifiers Det MayInline Pure Resourceless [] []
+defaultProcModifiers = ProcModifiers Det MayInline Pure False Resourceless [] []
 
 
 -- | Set the modifierDetism attribute of a ProcModifiers.
@@ -1144,10 +1151,15 @@ setImpurity :: Impurity -> ProcModifiers -> ProcModifiers
 setImpurity impurity mods = mods {modifierImpurity=impurity}
 
 
+-- | Mark the ProcModifiers to indicate a constructor.
+setIsCtor :: ProcModifiers -> ProcModifiers
+setIsCtor mods = mods { modifierIsCtor = True }
+
+
 -- | How to display ProcModifiers
 showProcModifiers :: ProcModifiers -> String
-showProcModifiers (ProcModifiers detism inlining impurity res _ _) =
-    showFlags $ List.filter (not . List.null) [d,i,p,r]
+showProcModifiers (ProcModifiers detism inlining impurity _ res _ _) =
+    showFlags' $ List.filter (not . List.null) [d,i,p,r]
     where d = determinismName detism
           i = inliningName inlining
           p = impurityName impurity
@@ -1177,11 +1189,12 @@ showFlags' flags = showFlags flags ++ if List.null flags then "" else " "
 addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
     let name = procProtoName proto
-    let ProcModifiers detism inlining impurity resourceful unknown conflict = mods
+    let ProcModifiers detism inlining impurity ctor 
+                      resourceful unknown conflict = mods
     checkUnknownMods name pos unknown
     checkConflictingMods name pos conflict
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 Map.empty
-                  vis detism inlining impurity (initSuperprocSpec vis) Nothing
+                  vis detism inlining impurity ctor (initSuperprocSpec vis) Nothing
     addProcDef procDef
     return ()
 addProc _ item =
@@ -1506,8 +1519,9 @@ data ModuleInterface = ModuleInterface {
                                      -- ^The procs this module exports
     pubSubmods   :: Map Ident ModSpec, -- ^The submodules this module exports
     dependencies :: Set ModSpec,      -- ^The other modules that must be linked
-    typeModifiers :: TypeModifiers   -- ^The extra information of the type
-    }                               --  in by modules that depend on this one
+                                      --  in by modules that depend on this one
+    typeModifiers :: TypeModifiers    -- ^The extra information of the type
+    }
     deriving (Eq, Generic)
 
 emptyInterface :: ModuleInterface
@@ -1698,8 +1712,8 @@ type ModSpec = [Ident]
 --  then the privates.  Each is either Nothing, meaning all exported
 --  names are imported, or Just a set of the specific names to import.
 data ImportSpec = ImportSpec {
-    importPublic::Maybe (Set Ident),
-    importPrivate::Maybe (Set Ident)
+    importPublic::UnivSet Ident,
+    importPrivate::UnivSet Ident
     } deriving (Show, Generic)
 
 
@@ -1708,26 +1722,20 @@ data ImportSpec = ImportSpec {
 --  publicly or privately, as specified by the second argument.
 importSpec :: Maybe [Ident] -> Visibility -> ImportSpec
 importSpec Nothing Public =
-    ImportSpec Nothing (Just Set.empty)
+    ImportSpec UniversalSet  (FiniteSet Set.empty)
 importSpec Nothing Private =
-    ImportSpec (Just Set.empty) Nothing
+    ImportSpec (FiniteSet Set.empty) UniversalSet
 importSpec (Just items) Public =
-    ImportSpec (Just $ Set.fromList items) (Just Set.empty)
+    ImportSpec (FiniteSet $ Set.fromList items) (FiniteSet Set.empty)
 importSpec (Just items) Private =
-    ImportSpec (Just Set.empty) (Just $ Set.fromList items)
+    ImportSpec (FiniteSet Set.empty) (FiniteSet $ Set.fromList items)
 
 
 -- |Merge two import specs to create a single one that imports
 --  exactly what the two together specify.
 combineImportSpecs :: ImportSpec -> ImportSpec -> ImportSpec
 combineImportSpecs (ImportSpec pub1 priv1) (ImportSpec pub2 priv2) =
-    ImportSpec (combineImportPart pub1 pub2) (combineImportPart priv1 priv2)
-
-
-combineImportPart :: Maybe (Set Ident) -> Maybe (Set Ident) -> Maybe (Set Ident)
-combineImportPart Nothing _ = Nothing
-combineImportPart _ Nothing = Nothing
-combineImportPart (Just set1) (Just set2) = Just (set1 `Set.union` set2)
+    ImportSpec (USet.union pub1 pub2) (USet.union priv1 priv2)
 
 
 -- |Actually import into the current module.  The ImportSpec says what
@@ -1743,7 +1751,7 @@ doImport mod (imports, _) = do
     fromIFace <- modInterface . trustFromJust "doImport"
                  <$> getLoadingModule mod
     let pubImports = importPublic imports
-    let allImports = combineImportPart pubImports $ importPrivate imports
+    let allImports = USet.union pubImports $ importPrivate imports
     let importedModsAssoc =
             (last mod,mod):
             Map.toAscList (importsSelected allImports $ pubSubmods fromIFace)
@@ -1830,12 +1838,9 @@ resolveModuleM mod = do
       Just m -> return m
 
 
-
-
-importsSelected :: Maybe (Set Ident) -> Map Ident a -> Map Ident a
-importsSelected Nothing items = items
-importsSelected (Just these) items =
-    Map.filterWithKey (\k _ -> Set.member k these) items
+importsSelected :: UnivSet Ident -> Map Ident a -> Map Ident a
+importsSelected imports items =
+    Map.filterWithKey (\k _ -> USet.member k imports) items
 
 
 -- | Pragmas that can be specified for a module
@@ -1924,6 +1929,7 @@ data ProcDef = ProcDef {
     procDetism :: Determinism,  -- ^can this proc fail?
     procInlining :: Inlining,   -- ^should we inline calls to this proc?
     procImpurity :: Impurity,   -- ^ Is this proc pure?
+    procIsCtor :: Bool,         -- ^ Is this proc a constructor for its type?
     procSuperproc :: SuperprocSpec,
                                 -- ^the proc this should be part of, if any
     procClosureOf :: Maybe ProcSpec
@@ -3308,17 +3314,17 @@ setPExpTypeFlow typeflow pexpr = setExpTypeFlow typeflow <$> pexpr
 --     List.foldr Set.union Set.empty $ List.map (varsInPrimArg dir) args
 
 varsInPrimArg :: PrimFlow -> PrimArg -> Set PrimVarName
-varsInPrimArg dir ArgVar{argVarName=var,argVarFlow=dir'} =
-    if dir == dir' then Set.singleton var else Set.empty
+varsInPrimArg dir ArgVar{argVarName=var,argVarFlow=dir'}
+    = if dir == dir' then Set.singleton var else Set.empty
 varsInPrimArg dir (ArgProcRef _ as _) 
     = Set.unions $ Set.fromList (varsInPrimArg dir <$> as)
-varsInPrimArg _ (ArgInt _ _)      = Set.empty
-varsInPrimArg _ (ArgFloat _ _)    = Set.empty
-varsInPrimArg _ (ArgString _ _ _) = Set.empty
-varsInPrimArg _ (ArgChar _ _)     = Set.empty
-varsInPrimArg _ (ArgGlobal _ _)   = Set.empty
-varsInPrimArg _ (ArgUnneeded _ _) = Set.empty
-varsInPrimArg _ (ArgUndef _)      = Set.empty
+varsInPrimArg _ ArgInt{}      = Set.empty
+varsInPrimArg _ ArgFloat{}    = Set.empty
+varsInPrimArg _ ArgString{}   = Set.empty
+varsInPrimArg _ ArgChar{}     = Set.empty
+varsInPrimArg _ (ArgGlobal{}) = Set.empty
+varsInPrimArg _ ArgUnneeded{} = Set.empty
+varsInPrimArg _ ArgUndef{}    = Set.empty
 
 ----------------------------------------------------------------
 --                       Generating Symbols
@@ -3516,8 +3522,8 @@ showUse tab mod (ImportSpec pubs privs) =
     in  if List.null pubstr || List.null privstr
         then pubstr ++ privstr
         else pubstr ++ "\n" ++ replicate tab ' ' ++ privstr
-  where showImports prefix mod Nothing = prefix ++ "use " ++ showModSpec mod
-        showImports prefix mod (Just set) =
+  where showImports prefix mod UniversalSet = prefix ++ "use " ++ showModSpec mod
+        showImports prefix mod (FiniteSet set) =
             if Set.null set
             then ""
             else prefix ++ "from " ++ showModSpec mod ++ " use " ++
@@ -3589,13 +3595,12 @@ showProcDefs firstID (def:defs) =
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
 showProcDef thisID
-        procdef@(ProcDef n proto def pos _ _ _ vis
-                    detism inline impurity sub mbCls) =
+  procdef@(ProcDef n proto def pos _ _ _ vis detism inline impurity ctor sub mbCls) =
     "\n"
     ++ showProcName n ++ " > "
     ++ visibilityPrefix vis
-    ++ showProcModifiers' (ProcModifiers detism inline impurity Resourceless [] [])
-    ++ "(" ++ show (procCallCount procdef) ++ " calls) "
+    ++ showProcModifiers (ProcModifiers detism inline impurity ctor Resourceless [] [])
+    ++ "(" ++ show (procCallCount procdef) ++ " calls)"
     ++ showSuperProc sub
     ++ maybe "" (("closure-of: " ++) . show) mbCls
     ++ "\n"

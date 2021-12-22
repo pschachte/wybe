@@ -244,7 +244,7 @@ genProc proto detism stmts = do
     tmpCtr <- gets brTempCtr
     -- call site count will be refilled later
     let procDef = ProcDef name proto (ProcDefSrc stmts) Nothing tmpCtr 0
-                  Map.empty Private detism MayInline Pure 
+                  Map.empty Private detism MayInline Pure False
                   NoSuperproc Nothing
     logUnbranch $ "Generating fresh " ++ show detism ++ " proc:"
                   ++ showProcDef 8 procDef
@@ -612,7 +612,7 @@ hoistClosure exp@(AnonProc mods params pstmts clsd res) pos = do
     let res' = trustFromJust "unbranch annon proc without resources" res
     name <- newProcName
     logUnbranch $ "Creating procref for " ++ show exp ++ " under " ++ name
-    let ProcModifiers detism inlining impurity resourceful unknown conflict = mods
+    let ProcModifiers detism _ impurity _ resourceful unknown conflict = mods
     lift $ checkConflictingMods "anonymous procedure" pos unknown
     lift $ checkUnknownMods "anonymous procedure" pos conflict
     let (freeParams, freeVars) = unzip $ uncurry freeParamVar <$> Map.toAscList clsd'
@@ -621,7 +621,7 @@ hoistClosure exp@(AnonProc mods params pstmts clsd res) pos = do
     tmpCtr <- gets brTempCtr
     let procProto = ProcProto name (freeParams ++ params) res'
     let procDef = ProcDef name procProto (ProcDefSrc pstmts) Nothing tmpCtr 0
-                    Map.empty Private detism MayInline Pure
+                    Map.empty Private detism MayInline Pure False
                     NoSuperproc Nothing
     procDef' <- lift $ unbranchProc procDef tmpCtr
     logUnbranch $ "  Resultant hoisted proc: " ++ show procProto
@@ -667,7 +667,7 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) freeVars pos name = do
                     , flowsOut fl && ty /= intType && a == Ordinary
                     , let var f t = Unplaced $ Typed (Var nm f a) t cast])
             Nothing (length freeVars') 0
-            Map.empty Private detism' Inline impurity 
+            Map.empty Private detism' MayInline impurity False
             NoSuperproc (Just regularProcSpec)
     logUnbranch $ "Creating closure for " ++ show regularProcSpec
     pDefClosure' <- lift $ unbranchProc pDefClosure 0

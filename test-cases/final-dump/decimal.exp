@@ -9,13 +9,13 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > public {impure} (0 calls) 
+module top-level code > public {impure} (0 calls)
 0: decimal.<0>
 (*#globals##0:wybe.phantom, *?#globals##10:wybe.phantom):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##9:wybe.phantom)
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##9:wybe.phantom) @io:nn:nn
     foreign c print_float(1.0e-2:wybe.float, ~tmp#2##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
     foreign c print_int(255:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
@@ -36,7 +36,7 @@ module top-level code > public {impure} (0 calls)
     foreign c putchar('\n':wybe.char, ~tmp#52##0:wybe.phantom, ?tmp#53##0:wybe.phantom) @io:nn:nn
     foreign c print_float(-10.0:wybe.float, ~tmp#53##0:wybe.phantom, ?tmp#58##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#58##0:wybe.phantom, ?tmp#59##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#59##0:wybe.phantom, ~*#globals##9:wybe.phantom, ?*#globals##10:wybe.phantom)
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#59##0:wybe.phantom, ~*#globals##9:wybe.phantom, ?*#globals##10:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 
