@@ -1,0 +1,6 @@
+def foo(?s:string) {
+    ?io = "not a phantom"
+    !read(?s)
+}
+
+!println(foo)
