@@ -300,8 +300,8 @@ resourceArgs pos rflow = do
 
 
 -- | The set of VarNames that correspond to sepcial resources
-specialResourcesSet :: Set ResourceSpec
-specialResourcesSet = Set.map (ResourceSpec []) $ keysSet specialResources
+specialResourcesSet :: Set VarName
+specialResourcesSet = keysSet specialResources
 
 
 ------------------------- General support code -------------------------

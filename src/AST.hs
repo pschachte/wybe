@@ -3121,7 +3121,6 @@ instance Show TypeFamily where
 
 -- |How to show a ModSpec.
 showModSpec :: ModSpec -> String
-showModSpec [] = "main executable code"
 showModSpec spec = intercalate "." $ (\case "" -> "``" ; m -> m) <$> spec
 
 
