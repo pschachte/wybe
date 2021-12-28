@@ -1,4 +1,4 @@
-resource maximum:int # = -1000
+resource maximum:int = 0 # shouldnt need to initialise this
 
 def take_max(i:int) use !maximum { ?maximum = max(i, maximum) }
 

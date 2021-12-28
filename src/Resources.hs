@@ -640,14 +640,13 @@ resourceVar (ResourceSpec mod name) =
 
 
 -- | The set of VarNames that correspond to sepcial resources
-specialResourcesSet :: Set VarName
-specialResourcesSet = keysSet specialResources
+specialResourcesSet :: Set ResourceSpec
+specialResourcesSet = Set.map (ResourceSpec []) $ keysSet specialResources
 
 
 -- | Test if ResourceSpec refers to a special resource
 isSpecialResource :: ResourceSpec -> Bool
-isSpecialResource (ResourceSpec [] nm) = nm `Set.member` specialResourcesSet
-isSpecialResource _                    = False
+isSpecialResource res = res `Set.member` specialResourcesSet
 
 
 -- | Given a ResourceSpec and something, return Right of something if the
