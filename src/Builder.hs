@@ -559,7 +559,6 @@ compileParseTree source modspec items = do
     Normalise.normalise items
     stopOnError $ "preliminary processing of module " ++ showModSpec modspec
     descendents <- descendentModules modspec
-    -- descendents <- Map.elems <$> getModuleImplementationField modSubmods
     exitModule
     logBuild $ "<=== finished normalising parse tree: "
                ++ showModSpecs descendents
