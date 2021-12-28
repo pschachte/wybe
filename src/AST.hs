@@ -72,7 +72,7 @@ module AST (
   getLoadedModule, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
   getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
   getModule, getModuleInterface, updateModule, getSpecModule,
-  updateModImplementation, updateModImplementationM, updateModLLVM,
+  updateModImplementation, updateModImplementationM,
   addForeignImport, addForeignLib,
   updateModInterface, updateAllProcs, updateModSubmods, updateModProcs,
   getModuleSpec, moduleIsType, option,
@@ -529,7 +529,7 @@ updateLoadedModuleM updater modspec = do
 getLoadedModuleImpln :: ModSpec -> Compiler ModuleImplementation
 getLoadedModuleImpln modspec = do
     mod <- trustFromJustM ("unknown module " ++ showModSpec modspec) $
-           getLoadedModule modspec
+           getLoadingModule modspec
     return $ trustFromJust ("unimplemented module " ++ showModSpec modspec) $
            modImplementation mod
 
@@ -1568,14 +1568,6 @@ addForeignLib lib = do
     updateModImplementation
         (\imp ->
            imp { modForeignLibs = Set.insert arg $ modForeignLibs imp })
-
--- | Update the LLVMAST.Module representation of the module
-updateModLLVM :: (Maybe LLVMAST.Module -> Maybe LLVMAST.Module)
-              -> ModuleImplementation
-              -> Compiler ModuleImplementation
-updateModLLVM fn modimp = do
-  let llmod' = fn $ modLLVM modimp
-  return $ modimp { modLLVM = llmod'}
 
 
 -- | Given a type spec, find its internal representation (a string),

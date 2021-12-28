@@ -349,6 +349,8 @@ loadAllNeededModules modspec isTarget possDirs = do
     let force = optForceAll opts || (isTarget && optForce opts)
     mods <- loadModuleIfNeeded force modspec possDirs
     stopOnError $ "loading module: " ++ showModSpec modspec
+    logBuild $ "Loading module " ++ showModSpec modspec
+               ++ " ... got " ++ showModSpecs mods
 
     if List.null mods
     then return []
@@ -543,10 +545,11 @@ loadDirectoryModule force dir dirmod isLib = do
 
 
 -- |Compile a file module given the parsed source file contents.
--- Return a list mod that just compiled
+-- Return a list of all the (sub)modules contained.
 compileParseTree :: FilePath -> ModSpec -> [Item] -> Compiler [ModSpec]
 compileParseTree source modspec items = do
     logBuild $ "===> Compiling module parse tree: " ++ showModSpec modspec
+    logBuild $ "     From file: " ++ source
     enterModule source modspec (Just modspec)
     -- Hash the parse items and store it in the module
     let hashOfItems = hashItems items
@@ -555,11 +558,11 @@ compileParseTree source modspec items = do
     -- verboseMsg 1 $ return (intercalate "\n" $ List.map show items)
     Normalise.normalise items
     stopOnError $ "preliminary processing of module " ++ showModSpec modspec
-    subMods <- Map.elems <$> getModuleImplementationField modSubmods
+    descendents <- descendentModules modspec
     exitModule
-    logBuild $ "<=== finished normalising module parse tree "
-            ++ showModSpec modspec
-    return (modspec:subMods)
+    logBuild $ "<=== finished normalising parse tree: "
+               ++ showModSpecs descendents
+    return (modspec:descendents)
 
 
 -- | Load all serialised modules present in the LPVM section of the object
