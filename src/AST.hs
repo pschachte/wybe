@@ -73,7 +73,7 @@ module AST (
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
-  maybeGetClosureOf, isClosureProc,
+  maybeGetClosureOf, isClosureProc, isClosureVariant,
   GlobalFlows, emptyGlobalFlows, showGlobalFlows, addGlobalFlow, globalFlowsUnion, hasGlobalFlow,
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
@@ -95,8 +95,9 @@ module AST (
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   initialisedResources,
   addSimpleResource, lookupResource, specialResources, publicResource, resourcefulName,
-  ProcModifiers(..), defaultProcModifiers, setDetism, setInline, setImpurity,
-  setIsCtor, Inlining(..), Impurity(..), Resourcefulness(..),
+  ProcModifiers(..), defaultProcModifiers, 
+  setDetism, setInline, setImpurity, setVariant,
+  ProcVariant(..), Inlining(..), Impurity(..), Resourcefulness(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
   checkConflictingMods, checkUnknownMods,
   specialChar, specialName, specialName2,
@@ -1070,8 +1071,9 @@ data ProcModifiers = ProcModifiers {
     modifierDetism::Determinism,   -- ^ The proc determinism
     modifierInline::Inlining,      -- ^ Aggresively inline this proc?
     modifierImpurity::Impurity,    -- ^ Don't assume purity when optimising
-    modifierIsCtor::Bool,          -- ^ Is proc actually a constructor?
-    modifierResourceful::Resourcefulness, -- ^ Can this procedure use resources?
+    modifierVariant::ProcVariant,  -- ^ Is proc actually a constructor?
+    modifierResourceful::Resourcefulness, 
+                                   -- ^ Can this procedure use resources?
     modifierUnknown::[String],     -- ^ Unknown modifiers specified
     modifierConflict::[String]     -- ^ Modifiers that conflict with others
 } deriving (Eq, Ord, Generic)
@@ -1133,7 +1135,7 @@ showResourceSets (ins, outs) = "{" ++ showSet ins ++ ";" ++ showSet outs ++ "}"
 
 -- | The default Det, non-inlined, pure ProcModifiers.
 defaultProcModifiers :: ProcModifiers
-defaultProcModifiers = ProcModifiers Det MayInline Pure False Resourceless [] []
+defaultProcModifiers = ProcModifiers Det MayInline Pure RegularProc Resourceless [] []
 
 
 -- | Set the modifierDetism attribute of a ProcModifiers.
@@ -1152,8 +1154,8 @@ setImpurity impurity mods = mods {modifierImpurity=impurity}
 
 
 -- | Mark the ProcModifiers to indicate a constructor.
-setIsCtor :: ProcModifiers -> ProcModifiers
-setIsCtor mods = mods { modifierIsCtor = True }
+setVariant :: ProcVariant -> ProcModifiers -> ProcModifiers
+setVariant variant mods = mods {modifierVariant=variant}
 
 
 -- | How to display ProcModifiers
@@ -1189,12 +1191,12 @@ showFlags' flags = showFlags flags ++ if List.null flags then "" else " "
 addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
     let name = procProtoName proto
-    let ProcModifiers detism inlining impurity ctor 
+    let ProcModifiers detism inlining impurity variant 
                       resourceful unknown conflict = mods
     checkUnknownMods name pos unknown
     checkConflictingMods name pos conflict
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 Map.empty
-                  vis detism inlining impurity ctor (initSuperprocSpec vis) Nothing
+                  vis detism inlining impurity variant (initSuperprocSpec vis)
     addProcDef procDef
     return ()
 addProc _ item =
@@ -1929,11 +1931,9 @@ data ProcDef = ProcDef {
     procDetism :: Determinism,  -- ^can this proc fail?
     procInlining :: Inlining,   -- ^should we inline calls to this proc?
     procImpurity :: Impurity,   -- ^ Is this proc pure?
-    procIsCtor :: Bool,         -- ^ Is this proc a constructor for its type?
-    procSuperproc :: SuperprocSpec,
+    procVariant :: ProcVariant, -- ^ How is this proc manifested in the source code
+    procSuperproc :: SuperprocSpec
                                 -- ^the proc this should be part of, if any
-    procClosureOf :: Maybe ProcSpec
-                                -- ^the proc this proc is a closure of, if any
 }
              deriving (Eq, Generic)
 
@@ -1990,6 +1990,17 @@ flagDetism _ "det"      = Det
 flagDetism _ "semidet"  = SemiDet
 flagDetism detism _     = detism
 
+data ProcVariant 
+    = RegularProc
+    | ConstructorProc
+    | DeconstructorProc
+    | GetterProc
+    | SetterProc
+    | GeneratedProc
+    | AnonymousProc
+    | ClosureProc ProcSpec
+    deriving (Eq, Ord, Show, Generic)
+
 
 -- |LLVM block structure allows many blocks per procedure, where blocks can
 --  jump to one another in complex ways.  When converting our LPVM format
@@ -2021,13 +2032,21 @@ showSuperProc (SuperprocIs super) = " (subproc of " ++ show super ++ ")"
 
 -- |Maybe get the ProcSpec of a ClosureOf Proc via a ProcSpec
 maybeGetClosureOf :: ProcSpec -> Compiler (Maybe ProcSpec)
-maybeGetClosureOf pspec =
-    procClosureOf <$> getProcDef pspec
+maybeGetClosureOf pspec = do
+    variant <- procVariant <$> getProcDef pspec
+    return $ case variant of
+        ClosureProc cls -> Just cls
+        _ -> Nothing
 
 
 -- |Check if a ProcSpec refers to a closure proc
 isClosureProc :: ProcSpec -> Compiler Bool
-isClosureProc pspec = isJust . procClosureOf <$> getProcDef pspec
+isClosureProc pspec = isClosureVariant . procVariant <$> getProcDef pspec
+
+
+isClosureVariant :: ProcVariant -> Bool
+isClosureVariant (ClosureProc _) = True
+isClosureVariant _               = False
 
 
 -- |A procedure defintion body.  Initially, this is in a form similar
@@ -3595,14 +3614,14 @@ showProcDefs firstID (def:defs) =
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
 showProcDef thisID
-  procdef@(ProcDef n proto def pos _ _ _ vis detism inline impurity ctor sub mbCls) =
+  procdef@(ProcDef n proto def pos _ _ _ vis detism inline impurity ctor sub) =
     "\n"
     ++ showProcName n ++ " > "
     ++ visibilityPrefix vis
     ++ showProcModifiers (ProcModifiers detism inline impurity ctor Resourceless [] [])
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
     ++ showSuperProc sub
-    ++ maybe "" (("closure-of: " ++) . show) mbCls
+    -- ++ maybe "" (("closure-of: " ++) . show) mbCls
     ++ "\n"
     ++ show thisID ++ ": "
     ++ (if isCompiled def then "" else show proto ++ ":")

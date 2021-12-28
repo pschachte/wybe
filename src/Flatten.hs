@@ -568,7 +568,7 @@ flattenExp expr@(AnonProc mods _ pstmts clsd res) ty castFrom pos = do
     let inliningMod = modifierInline mods
     unless (inliningMod == MayInline)
         $ lift $ modifierError (inliningName inliningMod)
-                    "type constraint" pos
+                    "anonymous procedure" pos
     anonState <- gets anonProcState
     let newAnonState = pushAnonProcState anonState
     logFlatten $ "Flattening new anon proc with state " ++ show newAnonState

@@ -54,7 +54,7 @@ gen#1([anon#1#1##0:wybe.int], ?#success##0:wybe.bool):
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
-gen#1 > {inline} (3 calls)closure-of: higher_order_tests.gen#1<0>
+gen#1 > {inline} (3 calls)
 1: higher_order_tests.gen#1<1>
 gen#1(anon#1#1##0:wybe.int, ?#success##1:wybe.int):
   GlobalFlows: {} 
@@ -154,7 +154,7 @@ gen#6(anon#2#1##0:wybe.int, ?#success##0:wybe.bool):
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~anon#2#1##0:wybe.int, 1:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
-gen#6 > {inline} (3 calls)closure-of: higher_order_tests.gen#6<0>
+gen#6 > {inline} (3 calls)
 1: higher_order_tests.gen#6<1>
 gen#6(anon#2#1##0:wybe.int, ?#success##1:wybe.int):
   GlobalFlows: {} 
@@ -328,7 +328,7 @@ entry:
   %5 = inttoptr i64 %"f##0" to i64* 
   %6 = load  i64, i64* %5 
   %7 = inttoptr i64 %6 to i64 (i64, i64)* 
-  %"1##success##0" = tail call fastcc  i64  %7(i64  %"i##0", i64  %"f##0")  
+  %"1##success##0" = tail call fastcc  i64  %7(i64  %"f##0", i64  %"i##0")  
   %8 = trunc i64 %"1##success##0" to i1  
   ret i1 %8 
 }
@@ -339,7 +339,7 @@ entry:
   %9 = inttoptr i64 %"f##0" to i64* 
   %10 = load  i64, i64* %9 
   %11 = inttoptr i64 %10 to i64 (i64, i64)* 
-  %"1##success##0" = tail call fastcc  i64  %11(i64  %"i##0", i64  %"f##0")  
+  %"1##success##0" = tail call fastcc  i64  %11(i64  %"f##0", i64  %"i##0")  
   %12 = trunc i64 %"1##success##0" to i1  
   ret i1 %12 
 }
@@ -351,7 +351,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"higher_order_tests.gen#1<1>"(i64  %"anon#1#1##0", i64  %"#env##0")    {
+define external fastcc  i64 @"higher_order_tests.gen#1<1>"(i64  %"#env##0", i64  %"anon#1#1##0")    {
 entry:
   ret i64 zext i1 1 to i64 
 }
@@ -362,7 +362,7 @@ entry:
   %13 = inttoptr i64 %"t##0" to i64* 
   %14 = load  i64, i64* %13 
   %15 = inttoptr i64 %14 to i64 (i64, i64)* 
-  %"1#tmp#6##0" = tail call fastcc  i64  %15(i64  1, i64  %"t##0")  
+  %"1#tmp#6##0" = tail call fastcc  i64  %15(i64  %"t##0", i64  1)  
   %16 = trunc i64 %"1#tmp#6##0" to i1  
   br i1 %16, label %if.then, label %if.else 
 if.then:
@@ -381,7 +381,7 @@ entry:
   %19 = inttoptr i64 %"t##0" to i64* 
   %20 = load  i64, i64* %19 
   %21 = inttoptr i64 %20 to i64 (i64, i64)* 
-  %"1#tmp#5##0" = tail call fastcc  i64  %21(i64  2, i64  %"t##0")  
+  %"1#tmp#5##0" = tail call fastcc  i64  %21(i64  %"t##0", i64  2)  
   %22 = trunc i64 %"1#tmp#5##0" to i1  
   br i1 %22, label %if.then, label %if.else 
 if.then:
@@ -400,7 +400,7 @@ entry:
   %25 = inttoptr i64 %"t##0" to i64* 
   %26 = load  i64, i64* %25 
   %27 = inttoptr i64 %26 to i64 (i64, i64)* 
-  %"1#tmp#4##0" = tail call fastcc  i64  %27(i64  2, i64  %"t##0")  
+  %"1#tmp#4##0" = tail call fastcc  i64  %27(i64  %"t##0", i64  2)  
   %28 = trunc i64 %"1#tmp#4##0" to i1  
   br i1 %28, label %if.then, label %if.else 
 if.then:
@@ -438,7 +438,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"higher_order_tests.gen#6<1>"(i64  %"anon#2#1##0", i64  %"#env##0")    {
+define external fastcc  i64 @"higher_order_tests.gen#6<1>"(i64  %"#env##0", i64  %"anon#2#1##0")    {
 entry:
   %"1##success##0" = icmp eq i64 %"anon#2#1##0", 1 
   %37 = zext i1 %"1##success##0" to i64  
@@ -451,7 +451,7 @@ entry:
   %38 = inttoptr i64 %"t##0" to i64* 
   %39 = load  i64, i64* %38 
   %40 = inttoptr i64 %39 to i64 (i64, i64)* 
-  %"1#tmp#2##0" = tail call fastcc  i64  %40(i64  1, i64  %"t##0")  
+  %"1#tmp#2##0" = tail call fastcc  i64  %40(i64  %"t##0", i64  1)  
   %41 = trunc i64 %"1#tmp#2##0" to i1  
   br i1 %41, label %if.then, label %if.else 
 if.then:
@@ -470,7 +470,7 @@ entry:
   %44 = inttoptr i64 %"t##0" to i64* 
   %45 = load  i64, i64* %44 
   %46 = inttoptr i64 %45 to i64 (i64, i64)* 
-  %"1#tmp#1##0" = tail call fastcc  i64  %46(i64  2, i64  %"t##0")  
+  %"1#tmp#1##0" = tail call fastcc  i64  %46(i64  %"t##0", i64  2)  
   %47 = trunc i64 %"1#tmp#1##0" to i1  
   br i1 %47, label %if.then, label %if.else 
 if.then:
@@ -489,7 +489,7 @@ entry:
   %50 = inttoptr i64 %"t##0" to i64* 
   %51 = load  i64, i64* %50 
   %52 = inttoptr i64 %51 to i64 (i64, i64)* 
-  %"1#tmp#0##0" = tail call fastcc  i64  %52(i64  2, i64  %"t##0")  
+  %"1#tmp#0##0" = tail call fastcc  i64  %52(i64  %"t##0", i64  2)  
   %53 = trunc i64 %"1#tmp#0##0" to i1  
   br i1 %53, label %if.then, label %if.else 
 if.then:

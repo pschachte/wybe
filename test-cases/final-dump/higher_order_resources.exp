@@ -102,7 +102,7 @@ gen#1(anon#1#1##0:wybe.list(wybe.int), *#globals##0:wybe.phantom, *?#globals##1:
   InterestingCallProperties: []
     wybe.list.length1<0>(~anon#1#1##0:wybe.list(T), 0:wybe.int, ?tmp#10##0:wybe.int) #2 @list:nn:nn
     higher_order_resources.take_max<0>(~tmp#10##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #1 @higher_order_resources:nn:nn
-gen#1 > {inline} (1 calls)closure-of: higher_order_resources.gen#1<0>
+gen#1 > {inline} (1 calls)
 1: higher_order_resources.gen#1<1>
 gen#1(anon#1#1##0:wybe.int, *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
   GlobalFlows: {} 
@@ -130,7 +130,7 @@ gen#2([^maximum##0:wybe.int], anon#2#1##0:wybe.list(wybe.int), *#globals##0:wybe
     foreign lpvm store(<<higher_order_resources.maximum>>:wybe.int, ~%tmp#30##0:wybe.int, ~*#globals##7:wybe.phantom, ?*#globals##9:wybe.phantom) @higher_order_resources:nn:nn
     wybe.list.length1<0>(~anon#2#1##0:wybe.list(T), 0:wybe.int, ?tmp#27##0:wybe.int) #7 @list:nn:nn
     higher_order_resources.take_max<0>(~tmp#27##0:wybe.int, ~*#globals##9:wybe.phantom, ?*#globals##10:wybe.phantom) #4 @higher_order_resources:nn:nn
-gen#2 > {inline} (1 calls)closure-of: higher_order_resources.gen#2<0>
+gen#2 > {inline} (1 calls)
 1: higher_order_resources.gen#2<1>
 gen#2([^maximum##0:wybe.int], anon#2#1##0:wybe.int, *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
@@ -157,7 +157,7 @@ gen#3(anon#3#1##0:wybe.int, *#globals##0:wybe.phantom, *?#globals##1:wybe.phanto
   AliasPairs: []
   InterestingCallProperties: []
     higher_order_resources.take_max<0>(~anon#3#1##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #0 @higher_order_resources:nn:nn
-gen#3 > {inline} (1 calls)closure-of: higher_order_resources.gen#3<0>
+gen#3 > {inline} (1 calls)
 1: higher_order_resources.gen#3<1>
 gen#3(anon#3#1##0:wybe.int, *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
   GlobalFlows: {} 
@@ -484,7 +484,7 @@ entry:
 }
 
 
-define external fastcc  void @"higher_order_resources.gen#1<1>"(i64  %"anon#1#1##0", i64  %"#env##0")    {
+define external fastcc  void @"higher_order_resources.gen#1<1>"(i64  %"#env##0", i64  %"anon#1#1##0")    {
 entry:
   %"1#tmp#2##0" = tail call fastcc  i64  @"wybe.list.length1<0>"(i64  %"anon#1#1##0", i64  0)  
   tail call fastcc  void  @"higher_order_resources.take_max<0>"(i64  %"1#tmp#2##0")  
@@ -508,7 +508,7 @@ entry:
 }
 
 
-define external fastcc  void @"higher_order_resources.gen#2<1>"(i64  %"anon#2#1##0", i64  %"#env##0")    {
+define external fastcc  void @"higher_order_resources.gen#2<1>"(i64  %"#env##0", i64  %"anon#2#1##0")    {
 entry:
   %165 = load  i64, i64* @"resource#higher_order_resources.maximum" 
   store  i64 -1000, i64* @"resource#higher_order_resources.maximum" 
@@ -531,7 +531,7 @@ entry:
 }
 
 
-define external fastcc  void @"higher_order_resources.gen#3<1>"(i64  %"anon#3#1##0", i64  %"#env##0")    {
+define external fastcc  void @"higher_order_resources.gen#3<1>"(i64  %"#env##0", i64  %"anon#3#1##0")    {
 entry:
   tail call fastcc  void  @"higher_order_resources.take_max<0>"(i64  %"anon#3#1##0")  
   ret void 
@@ -553,7 +553,7 @@ if.then:
   %177 = inttoptr i64 %"f##0" to i64* 
   %178 = load  i64, i64* %177 
   %179 = inttoptr i64 %178 to void (i64, i64)* 
-  tail call fastcc  void  %179(i64  %172, i64  %"f##0")  
+  tail call fastcc  void  %179(i64  %"f##0", i64  %172)  
   tail call fastcc  void  @"higher_order_resources.gen#4<0>"(i64  %"as##0", i64  %"f##0", i64  %176)  
   ret void 
 if.else:

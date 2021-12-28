@@ -488,7 +488,7 @@ constCtorItems :: Visibility -> TypeSpec -> (Placed ProcProto,Integer) -> [Item]
 constCtorItems  vis typeSpec (placedProto,num) =
     let (proto,pos) = unPlace placedProto
         constName = procProtoName proto
-    in [ProcDecl vis constructorModifiers
+    in [ProcDecl vis (inlineModifiers ConstructorProc Det)
         (ProcProto constName [Param outputVariableName typeSpec ParamOut Ordinary] Set.empty)
         [lpvmCastToVar (castTo (iVal num) typeSpec) outputVariableName] pos
        ]
@@ -603,7 +603,7 @@ constructorItems :: ProcName -> TypeSpec -> [Param]
                  -> [(VarName,Bool,TypeSpec,TypeRepresentation,Int)]
                  -> Int -> Int -> Int -> OptPos -> [Item]
 constructorItems ctorName typeSpec params fields size tag tagLimit pos =
-    [ProcDecl Public constructorModifiers
+    [ProcDecl Public (inlineModifiers ConstructorProc Det)
         (ProcProto ctorName
             (((\p -> p {paramFlow=ParamIn, paramFlowType=Ordinary}) <$> params)
              ++ [Param outputVariableName typeSpec ParamOut Ordinary])
@@ -655,7 +655,7 @@ deconstructorItems uniq ctorName typeSpec params numConsts numNonConsts tag
                    tagBits tagLimit pos fields size =
     let startOffset = (if tag > tagLimit then tagLimit+1 else tag)
         detism = deconstructorDetism numConsts numNonConsts
-    in [ProcDecl Public (inlineModifier detism)
+    in [ProcDecl Public (inlineModifiers DeconstructorProc detism)
         (ProcProto ctorName
          (((\p -> p {paramFlow=ParamOut, paramFlowType=Ordinary}) <$> params)
           ++ [Param outputVariableName typeSpec ParamIn Ordinary])
@@ -736,7 +736,7 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
         otherPtrCount = if rep == Address then ptrCount-1 else ptrCount
         flags = ["noalias" | otherPtrCount == 0]
     in [-- The getter:
-        ProcDecl vis (inlineModifier detism)
+        ProcDecl vis (inlineModifiers GetterProc detism)
         (ProcProto field [Param recName rectype ParamIn Ordinary,
                           Param outputVariableName fieldtype ParamOut Ordinary] Set.empty)
         -- Code to check we have the right constructor
@@ -751,7 +751,7 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
            Unplaced $ varSet outputVariableName]) pos])
         pos,
         -- The setter:
-        ProcDecl vis (inlineModifier detism)
+        ProcDecl vis (inlineModifiers SetterProc detism)
         (ProcProto field [Param recName rectype ParamInOut Ordinary,
                           Param fieldName fieldtype ParamIn Ordinary] Set.empty)
         -- Code to check we have the right constructor
@@ -784,7 +784,7 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
                  | (name,_,paramType,_,_) <- fields]
                   ++ [Param outputVariableName typeSpec ParamOut Ordinary])
                 Set.empty
-    in [ProcDecl vis constructorModifiers proto
+    in [ProcDecl vis (inlineModifiers ConstructorProc Det) proto
          -- Initialise result to 0
         ([Unplaced $ ForeignCall "llvm" "move" []
           [Unplaced $ castFromTo intType typeSpec $ iVal 0,
@@ -830,7 +830,7 @@ unboxedDeconstructorItems :: Visibility -> Bool -> ProcName -> TypeSpec -> Int
 unboxedDeconstructorItems vis uniq ctorName recType numConsts numNonConsts tag
                           tagBits pos fields =
     let detism = deconstructorDetism numConsts numNonConsts
-    in [ProcDecl vis (inlineModifier detism)
+    in [ProcDecl vis (inlineModifiers DeconstructorProc detism)
         (ProcProto ctorName
          (List.map (\(n,_,fieldType,_,_) -> Param n fieldType ParamOut Ordinary)
           fields
@@ -871,7 +871,7 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag tagBits pos
         fieldMask = (bit sz::Int) - 1
         shiftedHoleMask = complement $ fieldMask `shiftL` shift
     in [-- The getter:
-        ProcDecl vis (inlineModifier detism)
+        ProcDecl vis (inlineModifiers GetterProc detism)
         (ProcProto field [Param recName recType ParamIn Ordinary,
                           Param outputVariableName fieldType ParamOut Ordinary] Set.empty)
         -- Code to check we have the right constructor
@@ -893,7 +893,7 @@ unboxedGetterSetterItems vis recType numConsts numNonConsts tag tagBits pos
          ])
         pos,
         -- The setter:
-        ProcDecl vis (inlineModifier detism)
+        ProcDecl vis (inlineModifiers SetterProc detism)
         (ProcProto field [Param recName recType ParamInOut Ordinary,
                           Param fieldName fieldType ParamIn Ordinary] Set.empty)
         -- Code to check we have the right constructor
@@ -1092,16 +1092,16 @@ equalityField param =
              Unplaced $ varGet rightField]]
 
 
-inlineModifier :: Determinism -> ProcModifiers
-inlineModifier detism = setInline Inline $ setDetism detism defaultProcModifiers
+inlineModifiers :: ProcVariant -> Determinism -> ProcModifiers
+inlineModifiers variant detism 
+    = setInline Inline 
+    $ setVariant variant
+    $ setDetism detism defaultProcModifiers
 
-
-constructorModifiers :: ProcModifiers
-constructorModifiers = setIsCtor $ setInline Inline defaultProcModifiers
 
 
 inlineSemiDetModifiers :: ProcModifiers
-inlineSemiDetModifiers = inlineModifier SemiDet
+inlineSemiDetModifiers = inlineModifiers RegularProc SemiDet
 
 
 -- |The name of the variable holding a record

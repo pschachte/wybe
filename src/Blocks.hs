@@ -214,7 +214,7 @@ translateProc modProtos proc = do
     count <- getCount
     let proto = procImplnProto $ procImpln proc
     let body = procImplnBody $ procImpln proc
-    let isClosure = isJust $ procClosureOf proc
+    let isClosure = isClosureVariant $ procVariant proc
     let speczBodies = procImplnSpeczBodies $ procImpln proc
     -- translate the standard version
     (block, count') <- lift $ _translateProcImpl modProtos proto
@@ -286,7 +286,7 @@ closeClosure proto@PrimProto{primProtoParams=params}
     (proto',body')
   where
     (free, actualParams) = List.partition ((==Free) . primParamFlowType) params
-    proto' = proto{primProtoParams=actualParams ++ [envPrimParam]}
+    proto' = proto{primProtoParams=envPrimParam:actualParams}
     neededFree = List.filter (not . paramInfoUnneeded
                                   . primParamInfo) free
     unwrapper = Unplaced <$>
@@ -378,18 +378,6 @@ doCodegenBody proto body =
        mapM_ assignParam ins
        mapM_ preassignOutput outs
        codegenBody proto body  -- Codegen on body prims
-
-
--- XXX not using
--- | Generate code for returning integer exit code at the end main
--- function.
--- mainReturnCodegen :: Codegen ()
--- mainReturnCodegen = do
---     ptr <- instr (ptr_t int_t) (alloca int_t)
---     let retcons = cons (C.Int 32 0)
---     store ptr retcons
---     ret (Just retcons)
---     return ()
 
 
 -- | Convert a PrimParam to an Operand value and reference this value by the
@@ -577,20 +565,21 @@ cgen prim@(PrimHigherCall cId (ArgProcRef pspec closed _) args) = do
               ++ " closed over " ++ show closed
     cgen $ PrimCall cId pspec $ closed ++ args
 
-cgen prim@(PrimHigherCall callSiteId var@ArgVar{} args) = do
+cgen prim@(PrimHigherCall callSiteId fn@ArgVar{} args) = do
     logCodegen $ "Compiling " ++ show prim
     let args' = List.filter ((Just GlobalArg/=) . maybeArgFlowType) args
-    let (inArgs, outArgs) = partitionArgs $ setArgType intType <$> args'
-    env <- cgenArg var
-    inOps <- mapM cgenArg inArgs
-    let callInOps = inOps ++ [env]
-    logCodegen $ "In args = " ++ show callInOps
-    fnPtrTy <- lift $ llvmClosureType (argType var)
+    -- We must set all arguments to be `AnyType`
+    -- This ensures that we can uniformly pass all parameters to be passed in
+    -- the same registers
+    let (inArgs, outArgs) = partitionArgs $ setArgType AnyType <$> args'
+    inOps@(env:_) <- mapM cgenArg $ fn:inArgs
+    logCodegen $ "In args = " ++ show inOps
+    fnPtrTy <- lift $ llvmClosureType (argType fn)
     let addrPtrTy = ptr_t address_t
     envPtr <- inttoptr env addrPtrTy
     eltPtr <- doLoad address_t envPtr
     fnPtr <- doCast eltPtr address_t fnPtrTy
-    let callIns = callWybe fnPtr callInOps
+    let callIns = callWybe fnPtr inOps
     addInstruction callIns outArgs
 
 cgen prim@(PrimHigherCall _ fn _) = 
@@ -629,27 +618,6 @@ cgen prim@(PrimForeign lang name flags args) = do
           (externf (ptr_t (FunctionType outty (typeOf <$> inops) False)) nm)
           inops
     addInstruction ins outArgs
-
-
-makeCIntOp :: Operand -> Codegen Operand
-makeCIntOp op
-    | isIntOp op = do
-          let opTy = operandType op
-          let inBits = getBits opTy
-          if inBits > 32
-              then trunc op (int_c 32)
-              else if inBits < 32
-                   then sext op (int_c 32)
-                   else return op
-    | otherwise = return op
-
-isIntOp :: Operand -> Bool
-isIntOp (LocalReference (LLVMAST.IntegerType _) _) = True
-isIntOp (ConstantOperand (C.Int _ _))              = True
-isIntOp _                                          = False
-
-
-
 
 
 -- | Translate a Binary primitive procedure into a binary llvm instruction,
@@ -849,8 +817,7 @@ cgenLPVM "store" _ args = do
             global <- getGlobalResource res ty'        
             op <- cgenArg input   
             store global op
-        ([],[]) ->
-            return ()
+        ([],[]) -> return ()
         _ ->
            shouldnt "lpvm store instruction with wrong arity"
            
@@ -871,11 +838,8 @@ cgenLPVM "load" _ args = do
 
 cgenLPVM "void" _ args = do
     case partitionArgs args of
-        (_, []) -> 
-            return ()
-        _ -> 
-            shouldnt $ "lpvm void instruction with wrong bad arguments " ++ show args
-
+        (_, []) -> return ()
+        (_, outs) -> shouldnt $ "lpvm void instruction with outputs " ++ show outs
 
 cgenLPVM pname flags args = do
     shouldnt $ "Instruction " ++ pname ++ " arity " ++ show (length args)
@@ -1011,7 +975,7 @@ addInstruction ins outArgs = do
 
 pullName :: PrimArg -> String
 pullName ArgVar{argVarName=var} = show var
-pullName _                      = shouldnt $ "Expected variable as output."
+pullName _                      = shouldnt "Expected variable as output."
 
 -- | Generate an expanding instruction name using the passed flags. This is
 -- useful to augment a simple instruction. (Ex: compare instructions can have

@@ -65,7 +65,7 @@ noteCalls' mod spec rec
 
 
 mergeCallers :: CallRec -> CallRec -> CallRec
-mergeCallers rec1 rec2 = Map.unionWith (\n1 n2 -> n1+n2) rec1 rec2
+mergeCallers rec1 rec2 = Map.unionWith (+) rec1 rec2
 
 registerCallers :: ProcSpec -> CallRec -> Map Ident [ProcDef]
                    -> Map Ident [ProcDef]
@@ -124,7 +124,7 @@ localBodyCallees modspec body =
   foldBodyDistrib (\_ prim callees -> localCallees modspec prim ++ callees)
   [] (++) (++) body
 
-
+-- | Find all callees in a given prim
 localCallees :: ModSpec -> Prim -> [ProcSpec]
 localCallees modspec (PrimCall _ pspec args) 
   = pspec{procSpeczVersion=generalVersion}:concatMap (argRefs modspec) args
@@ -133,6 +133,7 @@ localCallees modspec (PrimHigherCall _ fn args)
 localCallees modspec (PrimForeign _ _ _ args)  
   = concatMap (argRefs modspec) args
 
+-- | Find all callees in a given PromArg
 argRefs :: ModSpec -> PrimArg -> [ProcSpec]
 argRefs modspec (ArgProcRef pspec closed _)
   = localCallees modspec (PrimCall (shouldnt "argRefs") pspec closed)

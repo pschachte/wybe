@@ -80,7 +80,7 @@ uniquenessCheckProc def _ = do
            (errmsg (procPos def)
             $ showProcName name ++ " with unique argument can fail")
     isUnique <- getModule (tmUniqueness . typeModifiers . modInterface)
-    when (procIsCtor def && not isUnique)
+    when (procVariant def == ConstructorProc && not isUnique)
       $ mapM_ (checkNoNestedUnique pos) $ procProtoParams $ procProto def
     case procImpln def of
         ProcDefSrc body -> do
