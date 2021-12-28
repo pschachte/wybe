@@ -1,0 +1,3 @@
+Error detected during type checking of module(s) bug228
+[91mfinal-dump/bug228.wybe:3:6: Resource wybe.io.io not in scope at call to proc read
+[0m
