@@ -139,20 +139,20 @@ type Names = Map.Map String Int
 -- | 'CodegenState' will hold a global Definition level code.
 data CodegenState
     = CodegenState {
-        currentBlock  :: Name     -- ^ Name of the active block to append to
-      , blocks        :: Map.Map Name BlockState 
-                                  -- ^ Blocks for function
-      , symtab        :: Map.Map String (Operand,TypeRepresentation) 
-                                  -- ^ Local symbol table of a function
-      , blockCount    :: Int      -- ^ Incrementing count of basic blocks
-      , count         :: Word     -- ^ Count for temporary operands
-      , names         :: Names    -- ^ Name supply
-      , externs       :: [Prim]   -- ^ Primitives which need to be declared
-      , globalVars    :: [Global] -- ^ Needed global variables/constants
-      , resources     :: Map.Map ResourceSpec Global
-                                  -- ^ Needed global variables for resources
-      , modProtos     :: [PrimProto] 
-                                  -- ^ Module procedures prototypes
+        currentBlock :: Name     -- ^ Name of the active block to append to
+      , blocks       :: Map.Map Name BlockState 
+                                 -- ^ Blocks for function
+      , symtab       :: Map.Map String (Operand,TypeRepresentation) 
+                                 -- ^ Local symbol table of a function
+      , blockCount   :: Int      -- ^ Incrementing count of basic blocks
+      , count        :: Word     -- ^ Count for temporary operands
+      , names        :: Names    -- ^ Name supply
+      , externs      :: [Prim]   -- ^ Primitives which need to be declared
+      , globalVars   :: [Global] -- ^ Needed global variables/constants
+      , resources    :: Map.Map ResourceSpec Global
+                                 -- ^ Needed global variables for resources
+      , modProtos    :: [PrimProto]
+                                 -- ^ Module procedures prototypes
       } deriving Show
 
 -- | 'BlockState' will generate the code for basic blocks inside of
@@ -175,10 +175,9 @@ data BlockState
 
 type Codegen = StateT CodegenState Compiler
 
-execCodegen :: Word -> [PrimProto] -> Codegen a 
-            -> Compiler CodegenState
-execCodegen startCount protos codegen =
-    execStateT codegen (emptyCodegen startCount protos)
+execCodegen :: Word -> [PrimProto] -> Codegen a -> Compiler CodegenState
+execCodegen startCount protos codegen 
+    = execStateT codegen (emptyCodegen startCount protos)
 
 evalCodegen :: [PrimProto] -> Codegen t -> Compiler t
 evalCodegen protos codegen = evalStateT codegen (emptyCodegen 0 protos)
@@ -201,13 +200,14 @@ fresh = do
   modify $ \s -> s { count = 1 + ix }
   return (ix + 1)
 
+
 -- | Update the list of externs which will be needed. The 'Prim' will be
 -- converted to an extern declaration later.
 addExtern :: Prim -> Codegen ()
-addExtern p =
-    do ex <- gets externs
-       modify $ \s -> s { externs = p : ex }
-       return ()
+addExtern p = do 
+  ex <- gets externs
+  modify $ \s -> s { externs = p : ex }
+
 
 -- | Creates a Global value for a constant, given the type and appends it
 -- to the CodegenState list. This list will be used to convert these Global

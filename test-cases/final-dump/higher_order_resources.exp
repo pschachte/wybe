@@ -103,7 +103,7 @@ gen#1(anon#1#1##0:wybe.list(wybe.int), *#globals##0:wybe.phantom, *?#globals##1:
     higher_order_resources.take_max<0>(~tmp#10##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #1 @higher_order_resources:nn:nn
 gen#1 > {inline} (1 calls)
 1: higher_order_resources.gen#1<1>
-gen#1(anon#1#1##0:wybe.int, *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
+gen#1(anon#1#1##0:wybe.list(wybe.int), *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
   GlobalFlows: {<<higher_order_resources.maximum>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
@@ -131,7 +131,7 @@ gen#2([^maximum##0:wybe.int], anon#2#1##0:wybe.list(wybe.int), *#globals##0:wybe
     higher_order_resources.take_max<0>(~tmp#27##0:wybe.int, ~*#globals##7:wybe.phantom, ?*#globals##8:wybe.phantom) #4 @higher_order_resources:nn:nn
 gen#2 > {inline} (1 calls)
 1: higher_order_resources.gen#2<1>
-gen#2([^maximum##0:wybe.int], anon#2#1##0:wybe.int, *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
+gen#2([^maximum##0:wybe.int], anon#2#1##0:wybe.list(wybe.int), *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
   GlobalFlows: {<<higher_order_resources.maximum>>::{FlowIn, FlowOut}, <<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []

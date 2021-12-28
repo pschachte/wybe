@@ -65,20 +65,20 @@ gen#1(anon#1#1##0:wybe.float, ?anon#1#2##0:wybe.float):
     foreign llvm move(~anon#1#1##0:wybe.float, ?anon#1#2##0:wybe.float) @higher_order_refs:nn:nn
 gen#1 > {inline} (1 calls)
 1: higher_order_refs.gen#1<1>
-gen#1(anon#1#1##0:wybe.int, ?anon#1#2##1:wybe.int):
+gen#1(anon#1#1##0:wybe.float, ?anon#1#2##0:wybe.float):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm cast(~anon#1#1##0:wybe.float, ?anon#1#2##1:wybe.int)
+    foreign llvm move(~anon#1#1##0:wybe.float, ?anon#1#2##0:wybe.float) @higher_order_refs:nn:nn
 
 
 gen#2 > {inline} (1 calls)
 0: higher_order_refs.gen#2<0>
-gen#2(i##0:wybe.int, ?#result##1:wybe.int):
+gen#2(i##0:K, ?#result##0:K):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm cast(~i##0:K, ?#result##1:wybe.int)
+    foreign llvm move(~i##0:K, ?#result##0:K) @higher_order_refs:nn:nn
 
 
 gen#3 > {inline} (1 calls)
