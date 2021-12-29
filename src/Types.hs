@@ -309,9 +309,8 @@ instance Show TypeError where
 
 -- |Produce a Message to be stored from a TypeError.
 typeErrorMessage :: TypeError -> Message
-typeErrorMessage (ReasonParam name num pos) =    
+typeErrorMessage (ReasonParam name num pos) =
     Message Error pos $
-        "Type/flow error in definition of " ++ name ++
         "Type/flow error in definition of " ++ showProcName name ++
         ", parameter " ++ show num
 typeErrorMessage (ReasonOutputUndef proc param pos) =
@@ -915,6 +914,7 @@ typecheckProcDecl' m pdef = do
             $ (, pos) . resourceFlowRes <$> Set.toList resources
         ifOK pdef $ do
             mapM_ (placedApply (recordCasts name) . fst) calls
+            mapM_ (uncurry $ addResourceType ReasonUseType) bodyRes
             let procCalls = List.filter (isRealProcCall . content . fst) calls
             -- let unifs = List.concatMap foreignTypeEquivs
             --             (content . fst <$> calls)
@@ -930,7 +930,6 @@ typecheckProcDecl' m pdef = do
                   ) badCalls
             ifOK pdef $ do
                 typecheckCalls m name pos calls' [] False
-                mapM_ (uncurry $ addResourceType ReasonUseType) bodyRes
                 logTyping "Typing independent of mode: "
                 mapM_ (placedApply validateForeign)
                       (List.filter (isForeign . content)

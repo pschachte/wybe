@@ -1,4 +1,3 @@
 Error detected during type checking of module(s) bug228-type
-[91mfinal-dump/bug228-type.wybe:5:2: Foreign call 'move' with unknown type in argument 2
-[0m[91mfinal-dump/bug228-type.wybe:6:1: Inconsistent type of resource bug228-type.bar in use statement
+[91mfinal-dump/bug228-type.wybe:6:1: Inconsistent type of resource bug228-type.bar in use statement
 [0m
