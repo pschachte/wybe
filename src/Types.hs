@@ -144,7 +144,7 @@ data RoughProcSpec = RoughProc {
 } deriving (Eq,Ord)
 
 instance Show RoughProcSpec where
-    show (RoughProc mod name) = maybeModPrefix mod ++ name
+    show (RoughProc mod name) = maybeModPrefix mod ++ showProcName name
 
 
 -- |Type check a single module dependency SCC.  
@@ -226,6 +226,8 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Output param not defined by proc body
                | ReasonResource ProcName Ident OptPos
                    -- ^Declared resource inconsistent
+               | ReasonUseType Ident OptPos
+                   -- ^Type of resource in use stmt inconsistent with other use
                | ReasonUndef ProcName ProcName OptPos
                    -- ^Call to unknown proc
                | ReasonArgType ProcName Int OptPos
@@ -307,15 +309,18 @@ instance Show TypeError where
 typeErrorMessage :: TypeError -> Message
 typeErrorMessage (ReasonParam name num pos) =
     Message Error pos $
-        "Type/flow error in definition of " ++ name ++
+        "Type/flow error in definition of " ++ showProcName name ++
         ", parameter " ++ show num
 typeErrorMessage (ReasonOutputUndef proc param pos) =
     Message Error pos $
         "Output parameter " ++ param ++ " not defined by proc " ++ show proc
 typeErrorMessage (ReasonResource name resName pos) =
     Message Error pos $
-        "Type/flow error in definition of " ++ name ++
+        "Type/flow error in definition of " ++ showProcName name ++
         ", resource " ++ resName
+typeErrorMessage (ReasonUseType resName pos) =
+    Message Error pos $
+        "Inconsistent type of resource " ++ resName ++ " in use statement "
 typeErrorMessage (ReasonArgType name num pos) =
     Message Error pos $
         "Type error in call to " ++ name ++ ", argument " ++ show num
@@ -570,7 +575,7 @@ unifyVarTypes pos v1 v2 = do
 
 -- |Unify two types, returning a type that describes all instances of both input
 -- types.  If this produces an invalid type, the specified type error describes
--- the error.  Unifying types may have the effect of binding variables.
+-- the error.  Unifying types may have the effect of binding type variables.
 unifyTypes :: TypeError -> TypeSpec -> TypeSpec -> Typed TypeSpec
 unifyTypes reason t1 t2 = do
     logTyped $ "Unifying types " ++ show t1 ++ " and " ++ show t2
@@ -902,7 +907,8 @@ typecheckProcDecl' m pdef = do
         mapM_ (addDeclaredType name pos (length params)) $ zip params [1..]
         logTyped $ "Recording resource types: "
                    ++ intercalate ", " (show <$> Set.toList resources)
-        mapM_ (addResourceType name pos) resources
+        let resErrFn = flip (ReasonResource name) pos
+        mapM_ (addResourceType resErrFn . resourceFlowRes) resources
         ifOK pdef $ do
             mapM_ (placedApply (recordCasts name) . fst) calls
             let procCalls = List.filter (isRealProcCall . content . fst) calls
@@ -993,12 +999,11 @@ addDeclaredType procname pos arity (Param name typ flow _,argNum) = do
 
 
 -- | Record the types of available resources as local variables
-addResourceType :: ProcName -> OptPos -> ResourceFlowSpec -> Typed ()
-addResourceType procname pos rfspec = do
-    let rspec = resourceFlowRes rfspec
+addResourceType :: (ResourceName -> TypeError) -> ResourceSpec -> Typed ()
+addResourceType err rspec = do
     resDef <- lift $ lookupResource rspec
     let (rspecs,implns) = unzip $ maybe [] Map.toList resDef
-    zipWithM_ (\n -> constrainVarType (ReasonResource procname n pos) n)
+    zipWithM_ (\n -> constrainVarType (err n) n)
           (resourceName <$> rspecs) (resourceType <$> implns)
 
 
@@ -1562,8 +1567,9 @@ overloadErr StmtTypings{typingStmt=call,typingArgsTypes=candidates} =
 modecheckStmts :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism
                -> Int -> Bool -> [Placed Stmt]
                -> Typed ([Placed Stmt],BindingState,Int)
-modecheckStmts _ name pos assigned detism tmpCount final [] = do
-    logTyped $ "Mode check end of " ++ show detism ++ " proc '" ++ name ++ "'"
+modecheckStmts m name pos assigned detism tmpCount final [] = do
+    logTyped $ "Mode check end of " ++ show detism ++ " "
+               ++ show (RoughProc m name)
     when final
         $ typeErrors $ detismCheck name pos detism $ bindingDetism assigned
     return ([],assigned,tmpCount)
@@ -1696,7 +1702,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
             let assigned' = assigned {bindingDetism=nextDetism}
             logTyped $ "New instr = " ++ show stmt'
             return ([maybePlace stmt' pos],
-                    bindingStateSeq stmtDetism impurity vars assigned,tmpCount)
+                    bindingStateSeq stmtDetism impurity vars assigned',tmpCount)
 modecheckStmt _ _ _ assigned _ tmpCount final Nop pos = do
     logTyped "Mode checking Nop"
     return ([maybePlace Nop pos], assigned, tmpCount)
@@ -1764,15 +1770,21 @@ modecheckStmt m name defPos assigned detism tmpCount final
            ,postLoopBindingState assigned assigned',tmpCount')
 modecheckStmt m name defPos assigned detism tmpCount final
     stmt@(UseResources resources _ stmts) pos = do
+    resources' <- lift
+                  $ mapM ((fst <$>) . canonicaliseResourceSpec pos "use stmt")
+                    resources
+    -- Odd doing this bit of type checking during mode checking, but it would be
+    -- a bit messy to do this during type checking.
+    mapM_ (addResourceType (flip ReasonUseType pos)) resources'
     logTyped $ "Mode checking use ... in stmt " ++ show stmt
     let assigned' = assigned { bindingResources =
-            List.foldr Set.insert (bindingResources assigned) resources }
+            List.foldr Set.insert (bindingResources assigned) resources' }
     (stmts', assigned'', tmpCount')
         <- modecheckStmts m name defPos assigned' detism tmpCount final stmts
     let boundRes = USet.intersection (bindingVars assigned)
-                   $ USet.fromList $ resourceName <$> resources
+                   $ USet.fromList $ resourceName <$> resources'
     return
-        ([maybePlace (UseResources resources
+        ([maybePlace (UseResources resources'
                      (Just $ USet.toList [] boundRes) stmts')
           pos]
         ,assigned'' { bindingResources = bindingResources assigned }
@@ -1855,14 +1867,15 @@ finaliseCall m name assigned detism resourceful tmpCount final pos args match
     let outResources = procInfoOutRes match
     let inResources = procInfoInRes match
     let allResources = inResources `Set.union` outResources
+    let scopeResources = bindingResources assigned
+                         `Set.union` specialResourcesSet
     let impurity = bindingImpurity assigned
     let (args',stmts,tmpCount') =
             matchArguments tmpCount (procInfoArgs match) args
     let stmt' = ProcCall (procSpecMod matchProc) matchName
                 (Just $ procSpecID matchProc) matchDetism resourceful args'
     let procIdent = "proc " ++ show matchProc
-    let outOfScope = allResources `Set.difference`
-                    (bindingResources assigned `Set.union` specialResourcesSet)
+    let outOfScope = allResources `Set.difference` scopeResources
     let errs =
             -- XXX Should postpone detism errors until we see if we
             -- can work out if the test is certain to succeed.
@@ -1891,6 +1904,7 @@ finaliseCall m name assigned detism resourceful tmpCount final pos args match
     logTyped $ "Finalising call :  " ++ show stmt'
     logTyped $ "Input resources :  " ++ simpleShowSet inResources
     logTyped $ "Output resources:  " ++ simpleShowSet outResources
+    logTyped $ "Scope resources :  " ++ simpleShowSet scopeResources
     let specials = Set.map resourceName
                    $ inResources `Set.intersection` specialResourcesSet
     let avail    = USet.toSet Set.empty $ bindingVars assigned

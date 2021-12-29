@@ -4,3 +4,16 @@ def foo(?s:string) {
 }
 
 !println(foo)
+
+
+resource bar:int
+
+def use_bar use ?bar { ?bar = 1 }
+
+?bar = "1.0"
+use bar in {
+    !use_bar
+    !println(bar)
+}
+
+!println(bar)

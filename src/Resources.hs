@@ -6,8 +6,9 @@
 --           : LICENSE in the root directory of this project.
 
 
-module Resources (resourceCheckMod, canonicaliseProcResources,
-                  transformProcResources, specialResourcesSet) where
+module Resources (resourceCheckMod, canonicaliseProcResources, 
+                  canonicaliseResourceSpec, transformProcResources,
+                  specialResourcesSet) where
 
 import           AST
 import           Control.Monad
@@ -66,7 +67,7 @@ checkOneResource rspec impln@(SimpleResource ty init pos) = do
 
 ------------- Canonicalising resources in proc definitions ---------
 
--- |Make sure all resource for the specified proc are module qualified,
+-- |Make sure all resources for the specified proc are module qualified,
 --  making them canonical.
 canonicaliseProcResources :: ProcDef -> Int -> Compiler ProcDef
 canonicaliseProcResources pd _ = do

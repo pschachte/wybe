@@ -1,0 +1,8 @@
+resource foo:int
+
+def use_foo use !foo { pass }
+
+use foo in {
+    ?foo = 1
+    !use_foo
+}

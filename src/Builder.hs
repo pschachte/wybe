@@ -803,8 +803,7 @@ compileModSCC mspecs = do
     mapM_ (transformModuleProcs canonicaliseProcResources)  mspecs
     stopOnError $ "processing resources for module(s) " ++ showModSpecs mspecs
     typeCheckModSCC mspecs
-    stopOnError $ "type checking of module(s) "
-                  ++ showModSpecs mspecs
+    stopOnError $ "type checking of module(s) " ++ showModSpecs mspecs
     logDump Types Unbranch "TYPE CHECK"
     mapM_ (transformModuleProcs transformProcResources)  mspecs
     stopOnError $ "resource checking of module(s) "

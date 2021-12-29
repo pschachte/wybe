@@ -1,3 +1,6 @@
 Error detected during type checking of module(s) bug228
 [91mfinal-dump/bug228.wybe:3:6: Resource wybe.io.io not in scope at call to proc read
+[0m[91mfinal-dump/bug228.wybe:14:1: Inconsistent type of resource bar in use statement 
+[0m[91mfinal-dump/bug228.wybe:16:6: No matching mode in call to println
+[0m[91mfinal-dump/bug228.wybe:19:2: No matching mode in call to println
 [0m
