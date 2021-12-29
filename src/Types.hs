@@ -897,16 +897,16 @@ typecheckProcDecl' m pdef = do
     ifOK pdef $ do
         logTyping $ "** Type checking " ++ showProcName name ++ ": "
         logTyped $ "   with resources: " ++ show resources
-        calls <- bodyCalls def detism
+        (calls, bodyRes) <- bodyCallsResources def detism
         logTyped $ "   containing calls: " ++ showBody 8 (fst <$> calls)
+        logTyped $ "   inner resources: " ++ showBody 8 (fst <$> calls)
         logTyped $ "Recording parameter types: "
                    ++ intercalate ", " (show <$> params)
         mapM_ (addDeclaredType name pos (length params)) $ zip params [1..]
         logTyped $ "Recording resource types: "
                    ++ intercalate ", " (show <$> Set.toList resources)
         mapM_ (addResourceType name pos . resourceFlowRes) resources
-        let usedRes = foldStmts useBlockResources (const . const) [] def
-        mapM_ (uncurry $ addResourceType name) usedRes
+        mapM_ (uncurry $ addResourceType name) bodyRes
         ifOK pdef $ do
             mapM_ (placedApply (recordCasts name) . fst) calls
             let procCalls = List.filter (isRealProcCall . content . fst) calls
@@ -1006,12 +1006,6 @@ addResourceType procname pos rspec = do
           rspecs (resourceType <$> implns)
 
 
--- | Collect resources used in a use block
-useBlockResources :: [(OptPos, ResourceSpec)] -> Stmt -> OptPos 
-                  -> [(OptPos, ResourceSpec)]
-useBlockResources res (UseResources res' _ _) pos = ((pos,) <$> res') ++ res
-useBlockResources res _ _ = res
-
 
 -- | Register variable types coming from explicit type constraints and type
 -- casts.  Casts are only permitted on foreign call arguments, and only specify
@@ -1082,41 +1076,39 @@ updateParamTypes =
 
 
 -- |Return a list of the proc and foreign calls recursively in a list of
---  statements, paired with all the possible resolutions.
-bodyCalls :: [Placed Stmt] -> Determinism
-          -> Typed [(Placed Stmt, Determinism)]
-bodyCalls [] _ = return []
-bodyCalls (pstmt:pstmts) detism = do
-    rest <- bodyCalls pstmts detism
+-- statements, paired with all the possible resolutions, along with the 
+-- resources that occur within `use` blocks.
+bodyCallsResources :: [Placed Stmt] -> Determinism
+                   -> Typed ([(Placed Stmt, Determinism)], 
+                             [(OptPos, ResourceSpec)])
+bodyCallsResources [] _ = return ([], [])
+bodyCallsResources (pstmt:pstmts) detism = do
+    (calls, res) <- bodyCallsResources pstmts detism
     let stmt = content pstmt
     let pos  = place pstmt
-    case stmt of
-        ProcCall{} -> return $  (pstmt,detism):rest
-        -- need to handle move instructions:
-        ForeignCall{} -> return $ (pstmt,detism):rest
-        TestBool _ -> return rest
-        And stmts -> bodyCalls stmts detism
-        Or stmts _ -> bodyCalls stmts detism
-        Not stmt -> bodyCalls [stmt] detism
-        Nop -> return rest
-        Fail -> return rest
+    (newCalls, newRes) <- case stmt of
+        ProcCall{} -> return ([(pstmt,detism)],[])
+        ForeignCall{} -> return ([(pstmt,detism)],[])
+        And stmts -> bodyCallsResources stmts detism
+        Or stmts _ -> bodyCallsResources stmts detism
+        Not stmt -> bodyCallsResources [stmt] detism
         Cond cond thn els _ _ -> do
-          -- modify $ constrainVarType (ReasonCond pos)
-          --          (expVar $ content expr) boolType
-          cond' <- bodyCalls [cond] SemiDet
-          thn' <- bodyCalls thn detism
-          els' <- bodyCalls els detism
-          return $ cond' ++ thn' ++ els' ++ rest
-        Loop nested _ -> do
-          nested' <- bodyCalls nested detism
-          return $ nested' ++ rest
-        UseResources _ _ nested -> do
-          nested' <- bodyCalls nested detism
-          return $ nested' ++ rest
-        For{}  -> shouldnt "bodyCalls: flattening left For stmt"
-        Case{} -> shouldnt "bodyCalls: flattening left Case stmt"
-        Break  -> return rest
-        Next   -> return rest
+          (cond', condRes) <- bodyCallsResources [cond] SemiDet
+          (thn', thnRes) <- bodyCallsResources thn detism
+          (els', elsRes) <- bodyCallsResources els detism
+          return (cond' ++ thn' ++ els', condRes ++ thnRes ++ elsRes)
+        Loop nested _ -> bodyCallsResources nested detism
+        UseResources res _ nested -> do
+          (nested', nestedRes) <- bodyCallsResources nested detism
+          return (nested', nestedRes ++ ((pos,) <$> res))
+        For{}  -> shouldnt "bodyCallsResources: flattening left For stmt"
+        Case{} -> shouldnt "bodyCallsResources: flattening left Case stmt"
+        TestBool _ -> return ([], [])
+        Break      -> return ([], [])
+        Next       -> return ([], [])
+        Nop        -> return ([], [])
+        Fail       -> return ([], [])
+    return (newCalls ++ calls, newRes ++ res)
 
 
 -- |The statement is a ProcCall
