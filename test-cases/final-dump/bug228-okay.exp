@@ -1,0 +1,80 @@
+======================================================================
+AFTER EVERYTHING:
+ Module bug228-okay
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : bug228-okay.<0>
+  imports         : use wybe
+  resources       : res: fromList [(bug228-okay.res,wybe.int @bug228-okay:1:1)]
+  procs           : 
+
+module top-level code > public {impure} (0 calls)
+0: bug228-okay.<0>
+(io##0:wybe.phantom, ?io##2:wybe.phantom):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign c print_int(1:wybe.int, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#2##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+    foreign c print_int(2:wybe.int, ~#io##1:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
+
+
+bar > {inline} (1 calls)
+0: bug228-okay.bar<0>
+bar(?out1##0:wybe.int, ?out2##0:wybe.int):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm move(2:wybe.int, ?out2##0:wybe.int) @bug228-okay:9:10
+    foreign llvm move(1:wybe.int, ?out1##0:wybe.int) @bug228-okay:11:6
+
+
+init_res > {inline} (1 calls)
+0: bug228-okay.init_res<0>
+init_res([res##0:wybe.int], ?res##1:wybe.int):
+ AliasPairs: []
+ InterestingCallProperties: []
+    foreign llvm move(2:wybe.int, ?res##1:wybe.int) @bug228-okay:3:26
+
+  LLVM code       :
+
+; ModuleID = 'bug228-okay'
+
+
+ 
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_int(i64)    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  void @"bug228-okay.<0>"()    {
+entry:
+  tail call ccc  void  @print_int(i64  1)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call ccc  void  @print_int(i64  2)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+}
+
+
+define external fastcc  {i64, i64} @"bug228-okay.bar<0>"()    {
+entry:
+  %1 = insertvalue {i64, i64} undef, i64 1, 0 
+  %2 = insertvalue {i64, i64} %1, i64 2, 1 
+  ret {i64, i64} %2 
+}
+
+
+define external fastcc  i64 @"bug228-okay.init_res<0>"()    {
+entry:
+  ret i64 2 
+}

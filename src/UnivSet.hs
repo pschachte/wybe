@@ -17,10 +17,9 @@ module UnivSet (
     ) where
 
 
-import Data.Set as S
-import Data.List
-import Data.Map as M
-import qualified GHC.IO.Buffer as S
+import           Data.Set     as S
+import           Data.List
+import           Data.Map     as M
 import           GHC.Generics (Generic)
 import qualified Data.Functor as UnivSet
 

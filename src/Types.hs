@@ -1765,17 +1765,26 @@ modecheckStmt m name defPos assigned detism tmpCount final
 modecheckStmt m name defPos assigned detism tmpCount final
     stmt@(UseResources resources _ stmts) pos = do
     logTyped $ "Mode checking use ... in stmt " ++ show stmt
+    canonRes <- lift (mapM (canonicaliseResourceSpec pos "use block") resources)
+    let resources' = fst <$> canonRes
     let assigned' = assigned { bindingResources =
-            List.foldr Set.insert (bindingResources assigned) resources }
+            List.foldr Set.insert (bindingResources assigned) resources' }
     (stmts', assigned'', tmpCount')
         <- modecheckStmts m name defPos assigned' detism tmpCount final stmts
-    let boundRes = USet.intersection (bindingVars assigned)
-                   $ USet.fromList $ resourceName <$> resources
+    let resVars = USet.fromList $ resourceName <$> resources'
+    let boundRes = bindingVars assigned `USet.intersection` resVars 
+    let newBoundRes = bindingVars assigned'' `USet.intersection` resVars
+    let boundVars = bindingVars assigned''
+    let vars = if USet.isUniv boundVars then boundVars
+               else FiniteSet $ USet.toSet Set.empty boundVars 
+                                Set.\\ (USet.toSet Set.empty newBoundRes 
+                                        `USet.subtractUnivSet` boundRes)
     return
-        ([maybePlace (UseResources resources
+        ([maybePlace (UseResources resources'
                      (Just $ USet.toList [] boundRes) stmts')
           pos]
-        ,assigned'' { bindingResources = bindingResources assigned }
+        ,assigned'' { bindingResources = bindingResources assigned,
+                      bindingVars = vars }
         ,tmpCount')
 -- XXX Need to implement these correctly:
 modecheckStmt m name defPos assigned detism tmpCount final
@@ -1888,14 +1897,15 @@ finaliseCall m name assigned detism resourceful tmpCount final pos args match
                                     Set.\\ outOfScope))
                       assigned]
     typeErrors errs
-    logTyped $ "Finalising call :  " ++ show stmt'
-    logTyped $ "Input resources :  " ++ simpleShowSet inResources
-    logTyped $ "Output resources:  " ++ simpleShowSet outResources
+    logTyped $ "Finalising call    :  " ++ show stmt'
+    logTyped $ "Input resources    :  " ++ simpleShowSet inResources
+    logTyped $ "Output resources   :  " ++ simpleShowSet outResources
     let specials = Set.map resourceName
                    $ inResources `Set.intersection` specialResourcesSet
     let avail    = USet.toSet Set.empty $ bindingVars assigned
-    logTyped $ "Specials in call:  " ++ simpleShowSet specials
-    logTyped $ "Available vars  :  " ++ simpleShowSet avail
+    logTyped $ "Specials in call   :  " ++ simpleShowSet specials
+    logTyped $ "Available vars     :  " ++ simpleShowSet avail
+    logTyped $ "Available resources:  " ++ simpleShowSet (bindingResources assigned)
     let specialInstrs =
             [ move (s `withType` ty) (varSet r `withType` ty)
             | resourceful -- no specials unless resourceful

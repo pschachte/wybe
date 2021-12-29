@@ -6,7 +6,8 @@
 --           : LICENSE in the root directory of this project.
 
 
-module Resources (resourceCheckMod, canonicaliseProcResources,
+module Resources (resourceCheckMod, 
+                  canonicaliseProcResources, canonicaliseResourceSpec,
                   transformProcResources, specialResourcesSet) where
 
 import           AST
