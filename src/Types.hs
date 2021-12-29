@@ -1,3 +1,4 @@
+{-# LANGUAGE TupleSections #-}
 --  File     : Types.hs
 --  Author   : Peter Schachte
 --  Purpose  : Type checker/inferencer for Wybe
@@ -28,6 +29,7 @@ import           Snippets
 import           Blocks              (llvmMapBinop, llvmMapUnop)
 import           Unique
 import Data.Function (on)
+import           Debug.Trace
 
 
 ----------------------------------------------------------------
@@ -224,7 +226,7 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Formal param type/flow inconsistent
                | ReasonOutputUndef ProcName Ident OptPos
                    -- ^Output param not defined by proc body
-               | ReasonResource ProcName Ident OptPos
+               | ReasonResource ProcName ResourceSpec OptPos
                    -- ^Declared resource inconsistent
                | ReasonUndef ProcName ProcName OptPos
                    -- ^Call to unknown proc
@@ -312,10 +314,10 @@ typeErrorMessage (ReasonParam name num pos) =
 typeErrorMessage (ReasonOutputUndef proc param pos) =
     Message Error pos $
         "Output parameter " ++ param ++ " not defined by proc " ++ show proc
-typeErrorMessage (ReasonResource name resName pos) =
+typeErrorMessage (ReasonResource name resource pos) =
     Message Error pos $
         "Type/flow error in definition of " ++ name ++
-        ", resource " ++ resName
+        ", resource " ++ show resource
 typeErrorMessage (ReasonArgType name num pos) =
     Message Error pos $
         "Type error in call to " ++ name ++ ", argument " ++ show num
@@ -902,7 +904,9 @@ typecheckProcDecl' m pdef = do
         mapM_ (addDeclaredType name pos (length params)) $ zip params [1..]
         logTyped $ "Recording resource types: "
                    ++ intercalate ", " (show <$> Set.toList resources)
-        mapM_ (addResourceType name pos) resources
+        mapM_ (addResourceType name pos . resourceFlowRes) resources
+        let usedRes = foldStmts useBlockResources (const . const) [] def
+        mapM_ (uncurry $ addResourceType name) usedRes
         ifOK pdef $ do
             mapM_ (placedApply (recordCasts name) . fst) calls
             let procCalls = List.filter (isRealProcCall . content . fst) calls
@@ -993,13 +997,20 @@ addDeclaredType procname pos arity (Param name typ flow _,argNum) = do
 
 
 -- | Record the types of available resources as local variables
-addResourceType :: ProcName -> OptPos -> ResourceFlowSpec -> Typed ()
-addResourceType procname pos rfspec = do
-    let rspec = resourceFlowRes rfspec
+addResourceType :: ProcName -> OptPos -> ResourceSpec -> Typed ()
+addResourceType procname pos rspec = do
     resDef <- lift $ lookupResource rspec
     let (rspecs,implns) = unzip $ maybe [] Map.toList resDef
-    zipWithM_ (\n -> constrainVarType (ReasonResource procname n pos) n)
-          (resourceName <$> rspecs) (resourceType <$> implns)
+    zipWithM_ (\n -> constrainVarType (ReasonResource procname n pos) 
+                        $ resourceName n)
+          rspecs (resourceType <$> implns)
+
+
+-- | Collect resources used in a use block
+useBlockResources :: [(OptPos, ResourceSpec)] -> Stmt -> OptPos 
+                  -> [(OptPos, ResourceSpec)]
+useBlockResources res (UseResources res' _ _) pos = ((pos,) <$> res') ++ res
+useBlockResources res _ _ = res
 
 
 -- | Register variable types coming from explicit type constraints and type
