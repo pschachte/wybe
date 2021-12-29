@@ -226,8 +226,6 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Formal param type/flow inconsistent
                | ReasonOutputUndef ProcName Ident OptPos
                    -- ^Output param not defined by proc body
-               | ReasonResource ProcName ResourceSpec OptPos
-                   -- ^Declared resource inconsistent
                | ReasonUndef ProcName ProcName OptPos
                    -- ^Call to unknown proc
                | ReasonArgType ProcName Int OptPos
@@ -269,12 +267,16 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Unknown foreign llvm/lpvm instruction
                | ReasonBadMove Exp OptPos
                    -- ^Instruction moves value to a non-variable
+               | ReasonResourceDef ProcName ResourceSpec OptPos
+                   -- ^Declared resource inconsistent
                | ReasonResourceUndef ProcName Ident OptPos
                    -- ^Output resource not defined in proc body
                | ReasonResourceUnavail ProcName Ident OptPos
                    -- ^Input resource not available in proc call
                | ReasonResourceOutOfScope ProcName ResourceSpec OptPos
                    -- ^Resource not in scope in proc call
+               | ReasonUseType ResourceSpec OptPos
+                   -- ^Type of resource in use stmt inconsistent with other use
                | ReasonWrongFamily Ident Int TypeFamily OptPos
                    -- ^LLVM instruction expected different argument family
                | ReasonIncompatible Ident TypeRepresentation
@@ -307,17 +309,14 @@ instance Show TypeError where
 
 -- |Produce a Message to be stored from a TypeError.
 typeErrorMessage :: TypeError -> Message
-typeErrorMessage (ReasonParam name num pos) =
+typeErrorMessage (ReasonParam name num pos) =    
     Message Error pos $
         "Type/flow error in definition of " ++ name ++
+        "Type/flow error in definition of " ++ showProcName name ++
         ", parameter " ++ show num
 typeErrorMessage (ReasonOutputUndef proc param pos) =
     Message Error pos $
         "Output parameter " ++ param ++ " not defined by proc " ++ show proc
-typeErrorMessage (ReasonResource name resource pos) =
-    Message Error pos $
-        "Type/flow error in definition of " ++ name ++
-        ", resource " ++ show resource
 typeErrorMessage (ReasonArgType name num pos) =
     Message Error pos $
         "Type error in call to " ++ name ++ ", argument " ++ show num
@@ -396,6 +395,10 @@ typeErrorMessage (ReasonBadForeign lang instr pos) =
 typeErrorMessage (ReasonBadMove dest pos) =
     Message Error pos $
         "Instruction moves result to non-variable expression " ++ show dest
+typeErrorMessage (ReasonResourceDef name res pos) =
+    Message Error pos $
+        "Type/flow error in definition of " ++ showProcName name ++
+        ", resource " ++ show res
 typeErrorMessage (ReasonResourceUndef proc res pos) =
     Message Error pos $
         "Output resource " ++ res ++ " not defined by proc " ++ proc
@@ -405,6 +408,9 @@ typeErrorMessage (ReasonResourceUnavail proc res pos) =
 typeErrorMessage (ReasonResourceOutOfScope proc res pos) =
     Message Error pos $
         "Resource " ++ show res ++ " not in scope at call to proc " ++ proc
+typeErrorMessage (ReasonUseType res pos) =
+    Message Error pos $
+        "Inconsistent type of resource " ++ show res ++ " in use statement"
 typeErrorMessage (ReasonWrongFamily instr argNum fam pos) =
     Message Error pos $
         "LLVM instruction '" ++ instr ++ "' argument " ++ show argNum
@@ -434,7 +440,7 @@ typeErrorMessage ReasonShouldnt =
     Message Error Nothing "Mysterious typing error"
 typeErrorMessage (ReasonActuallyPure name impurity pos) =
     Message Warning pos $
-        "Calling proc " ++ name ++ " with unneeded ! marker"
+        "Calling proc " ++ showProcName name ++ " with unneeded ! marker"
 -- XXX These won't work until we better infer terminalness 
 -- typeErrorMessage (ReasonUndeclaredTerminal name pos) =
 --     Message Warning pos $
@@ -905,8 +911,8 @@ typecheckProcDecl' m pdef = do
         mapM_ (addDeclaredType name pos (length params)) $ zip params [1..]
         logTyped $ "Recording resource types: "
                    ++ intercalate ", " (show <$> Set.toList resources)
-        mapM_ (addResourceType name pos . resourceFlowRes) resources
-        mapM_ (uncurry $ addResourceType name) bodyRes
+        mapM_ (uncurry $ addResourceType (ReasonResourceDef name)) 
+            $ (, pos) . resourceFlowRes <$> Set.toList resources
         ifOK pdef $ do
             mapM_ (placedApply (recordCasts name) . fst) calls
             let procCalls = List.filter (isRealProcCall . content . fst) calls
@@ -924,6 +930,7 @@ typecheckProcDecl' m pdef = do
                   ) badCalls
             ifOK pdef $ do
                 typecheckCalls m name pos calls' [] False
+                mapM_ (uncurry $ addResourceType ReasonUseType) bodyRes
                 logTyping "Typing independent of mode: "
                 mapM_ (placedApply validateForeign)
                       (List.filter (isForeign . content)
@@ -997,12 +1004,12 @@ addDeclaredType procname pos arity (Param name typ flow _,argNum) = do
 
 
 -- | Record the types of available resources as local variables
-addResourceType :: ProcName -> OptPos -> ResourceSpec -> Typed ()
-addResourceType procname pos rspec = do
+addResourceType :: (ResourceSpec -> OptPos -> TypeError) 
+                -> ResourceSpec -> OptPos  -> Typed ()
+addResourceType errFn rspec pos = do
     resDef <- lift $ lookupResource rspec
     let (rspecs,implns) = unzip $ maybe [] Map.toList resDef
-    zipWithM_ (\n -> constrainVarType (ReasonResource procname n pos) 
-                        $ resourceName n)
+    zipWithM_ (liftM2 constrainVarType (`errFn` pos) resourceName)
           rspecs (resourceType <$> implns)
 
 
@@ -1076,16 +1083,14 @@ updateParamTypes =
 
 
 -- |Return a list of the proc and foreign calls recursively in a list of
--- statements, paired with all the possible resolutions, along with the 
--- resources that occur within `use` blocks.
+-- statements, along with the resources that occur in `use` blocks.
 bodyCallsResources :: [Placed Stmt] -> Determinism
                    -> Typed ([(Placed Stmt, Determinism)], 
-                             [(OptPos, ResourceSpec)])
+                             [(ResourceSpec, OptPos)])
 bodyCallsResources [] _ = return ([], [])
 bodyCallsResources (pstmt:pstmts) detism = do
     (calls, res) <- bodyCallsResources pstmts detism
-    let stmt = content pstmt
-    let pos  = place pstmt
+    let (stmt, pos) = unPlace pstmt
     (newCalls, newRes) <- case stmt of
         ProcCall{} -> return ([(pstmt,detism)],[])
         ForeignCall{} -> return ([(pstmt,detism)],[])
@@ -1093,14 +1098,14 @@ bodyCallsResources (pstmt:pstmts) detism = do
         Or stmts _ -> bodyCallsResources stmts detism
         Not stmt -> bodyCallsResources [stmt] detism
         Cond cond thn els _ _ -> do
-          (cond', condRes) <- bodyCallsResources [cond] SemiDet
-          (thn', thnRes) <- bodyCallsResources thn detism
-          (els', elsRes) <- bodyCallsResources els detism
-          return (cond' ++ thn' ++ els', condRes ++ thnRes ++ elsRes)
+            (cond', condRes) <- bodyCallsResources [cond] SemiDet
+            (thn', thnRes) <- bodyCallsResources thn detism
+            (els', elsRes) <- bodyCallsResources els detism
+            return (cond' ++ thn' ++ els', condRes ++ thnRes ++ elsRes)
         Loop nested _ -> bodyCallsResources nested detism
         UseResources res _ nested -> do
-          (nested', nestedRes) <- bodyCallsResources nested detism
-          return (nested', nestedRes ++ ((pos,) <$> res))
+            (nested', nestedRes) <- bodyCallsResources nested detism
+            return (nested', ((, pos) <$> res) ++ nestedRes)
         For{}  -> shouldnt "bodyCallsResources: flattening left For stmt"
         Case{} -> shouldnt "bodyCallsResources: flattening left Case stmt"
         TestBool _ -> return ([], [])
