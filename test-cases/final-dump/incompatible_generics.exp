@@ -1,3 +1,4 @@
 Error detected during type checking of module(s) incompatible_generics
-[91mfinal-dump/incompatible_generics.wybe:1:23: Type of ?j incompatible with i
+[91mfinal-dump/incompatible_generics.wybe:1:23: Type error in call to =, argument 1
+[0m[91mfinal-dump/incompatible_generics.wybe:1:23: Type error in call to =, argument 2
 [0m

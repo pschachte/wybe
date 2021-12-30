@@ -13,6 +13,7 @@ module Types (validateModExportTypes, typeCheckModSCC) where
 import           AST
 import           Control.Monad
 import           Control.Monad.State
+import           Control.Monad.Extra (ifM)
 import           Data.Graph
 import           Data.List           as List
 import           Data.Map            as Map
@@ -20,6 +21,7 @@ import           Data.Maybe          as Maybe
 import           Data.Set            as Set
 import           UnivSet             as USet
 import           Data.Tuple.Select
+import           Data.Function (on)
 import           Data.Foldable
 import           Data.Bifunctor
 import           Options             (LogSelection (Types))
@@ -28,7 +30,6 @@ import           Util
 import           Snippets
 import           Blocks              (llvmMapBinop, llvmMapUnop)
 import           Unique
-import Data.Function (on)
 import           Debug.Trace
 
 
@@ -315,7 +316,8 @@ typeErrorMessage (ReasonParam name num pos) =
         ", parameter " ++ show num
 typeErrorMessage (ReasonOutputUndef proc param pos) =
     Message Error pos $
-        "Output parameter " ++ param ++ " not defined by proc " ++ show proc
+        "Output parameter " ++ param ++ " not defined by proc " 
+        ++ showProcName proc
 typeErrorMessage (ReasonArgType name num pos) =
     Message Error pos $
         "Type error in call to " ++ name ++ ", argument " ++ show num
@@ -1222,11 +1224,11 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt detism typs):calls)
     logTyped $ "Type checking call " ++ show pstmt
     logTyped $ "Calling context is " ++ show detism
     logTyped $ "Candidate types:\n    " ++ intercalate "\n    " (show <$> typs)
-    let (callee,pexps) = case content pstmt of
-                             ProcCall _ callee' _ _ _ pexps' -> (callee',pexps')
-                             noncall -> shouldnt
-                                        $ "typecheckCalls with non-call stmt"
-                                          ++ show noncall
+    let (mod, callee,pexps) 
+            = case content pstmt of
+                    ProcCall mod callee _ _ _ pexps -> (mod,callee,pexps)
+                    noncall -> shouldnt $ "typecheckCalls with non-call stmt"
+                                            ++ show noncall
     actualTypes <- mapM expType pexps
     logTyped $ "Actual types: " ++ show actualTypes
     matches <- mapM
@@ -1237,9 +1239,17 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt detism typs):calls)
     logTyped $ "Valid types = " ++ show (snd <$> validTypes)
     logTyped $ "Converted types = " ++ show (boolFnToTest <$> typs)
     case validTypes of
-        [] -> do
-          logTyped "Type error: no valid types for call"
-          typeErrors (concatMap errList matches)
+        [] -> case (mod, callee, pexps, actualTypes) of
+            ([], "=", [arg1, arg2], [ty1, ty2]) 
+                -> do
+                    typing <- get
+                    void $ unifyTypes ReasonShouldnt ty1 ty2
+                    ifM validTyping
+                        (typecheckCalls m name pos calls residue True)
+                        (put typing >> typeErrors (concatMap errList matches))
+            _ -> do
+                logTyped "Type error: no valid types for call"
+                typeErrors (concatMap errList matches)
         [(match,typing)] -> do
           put typing
           logTyping "Resulting typing = "
