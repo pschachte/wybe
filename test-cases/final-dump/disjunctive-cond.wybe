@@ -1,0 +1,18 @@
+?a = true; ?b = false
+
+if { (~a | b) :: !println("no good")
+   | (~b | a) :: !println("all good")
+   }
+
+
+if { (a | b) :: !println("also good")
+   | else  :: !println("no good")
+   }
+
+if { (a & b)  :: !println("no good")
+   | (~b & a) :: !println("more good")
+   }
+
+if { (a & b) :: !println("no good")
+   | else :: !println("still good")
+   }

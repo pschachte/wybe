@@ -306,7 +306,7 @@ unbranchStmts detism (stmt:stmts) alt sense = do
 --   considers the sense of the test: if True, execution should go to the
 --   following statements on success and the alternative statements on
 --   failure; if False, then vice-versa. The following statements are
---   represented as a pair of a list of statements that has not yet been
+--   represented as a pair of a list of not yet unbranched statements 
 --   and a list of unbranched alternative statements. The alternative
 --   statements will have been factored out into a call to a fresh
 --   procedure if necessary (ie, if it will be used in more than one case,

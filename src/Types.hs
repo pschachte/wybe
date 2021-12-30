@@ -1359,10 +1359,15 @@ refreshTypeVar ty = return ty
 -- Nothing indicates the universal set.
 
 data BindingState = BindingState {
+        -- | The determinism context in which this stmt appears
         bindingDetism    :: Determinism,
+        -- | The purity context in which this stmt appears
         bindingImpurity  :: Impurity,
+        -- | The resources in scope where this stmt appears
         bindingResources :: Set ResourceSpec,
+        -- | The variables defined when this stmt appears
         bindingVars      :: UnivSet VarName,
+        -- | The variables defined at the current loop exit
         bindingBreakVars :: UnivSet VarName
         }
 
@@ -1405,9 +1410,9 @@ initBindingState pdef resources =
 
 -- | BindingState for a failing computation (every possible variable is bound if
 -- this succeeds, but it won't succeed).
-failingBindingState :: BindingState
-failingBindingState  =
-    BindingState Failure Pure Set.empty UniversalSet UniversalSet
+failingBindingState :: BindingState -> BindingState
+failingBindingState state =
+    BindingState Failure Pure (bindingResources state) UniversalSet UniversalSet
 
 
 -- | BindingState at the top of a loop, based on state before the loop.
@@ -1449,7 +1454,7 @@ joinState (BindingState detism1 impurity1 resources1 boundVars1 breakVars1)
            BindingState detism  impurity  resources  boundVars  breakVars
   where detism    = determinismJoin detism1 detism2
         impurity  = max impurity1 impurity2
-        resources = Set.intersection resources1 resources2
+        resources = resources1 `Set.intersection` resources2
         breakVars = breakVars1 `USet.intersection` breakVars2
         boundVars = boundVars1 `USet.intersection` boundVars2
 
@@ -1803,7 +1808,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
     logTyped $ "Mode checking disjunction " ++ show stmt
     (disj',assigned',tmpCount') <-
         modecheckDisj m name defPos assigned detism tmpCount final
-                      failingBindingState disj
+                      (failingBindingState assigned) disj
     varDict <- mapFromUnivSetM ultimateVarType Set.empty
                 $ bindingVars assigned'
     return ([maybePlace (Or disj' (Just varDict)) pos],assigned',tmpCount')
@@ -1875,7 +1880,16 @@ finaliseCall m name assigned detism resourceful tmpCount final pos args match
     let procIdent = "proc " ++ show matchProc
     let outOfScope = allResources `Set.difference`
                     (bindingResources assigned `Set.union` specialResourcesSet)
-    let errs =
+    logTyped $ "Finalising call    :  " ++ show stmt'
+    logTyped $ "Input resources    :  " ++ simpleShowSet inResources
+    logTyped $ "Output resources   :  " ++ simpleShowSet outResources
+    let specials = Set.map resourceName
+                   $ inResources `Set.intersection` specialResourcesSet
+    let avail    = USet.toSet Set.empty $ bindingVars assigned
+    logTyped $ "Specials in call   :  " ++ simpleShowSet specials
+    logTyped $ "Available vars     :  " ++ simpleShowSet avail
+    logTyped $ "Available resources:  " ++ simpleShowSet (bindingResources assigned)
+    typeErrors $
             -- XXX Should postpone detism errors until we see if we
             -- can work out if the test is certain to succeed.
             -- Perhaps add mutual exclusion inference to the mode
@@ -1899,16 +1913,6 @@ finaliseCall m name assigned detism resourceful tmpCount final pos args match
                        (inResources Set.\\ specialResourcesSet
                                     Set.\\ outOfScope))
                       assigned]
-    typeErrors errs
-    logTyped $ "Finalising call    :  " ++ show stmt'
-    logTyped $ "Input resources    :  " ++ simpleShowSet inResources
-    logTyped $ "Output resources   :  " ++ simpleShowSet outResources
-    let specials = Set.map resourceName
-                   $ inResources `Set.intersection` specialResourcesSet
-    let avail    = USet.toSet Set.empty $ bindingVars assigned
-    logTyped $ "Specials in call   :  " ++ simpleShowSet specials
-    logTyped $ "Available vars     :  " ++ simpleShowSet avail
-    logTyped $ "Available resources:  " ++ simpleShowSet (bindingResources assigned)
     let specialInstrs =
             [ move (s `withType` ty) (varSet r `withType` ty)
             | resourceful -- no specials unless resourceful
