@@ -1,0 +1,23 @@
+# test case for character escapes
+
+def test(ch:char, code:int, name:string) use !io {
+    if { ord(ch) = code ::
+            !print(name) ; !println(" char escapes work")
+       | else ::
+            !print(name) ; !println(" char escapes don't work")
+    }
+}
+
+
+!test('\0', 0x00, "null")
+!test('\a', 0x07, "bell")
+!test('\b', 0x08, "backspace")
+!test('\e', 0x1b, "escape")
+!test('\f', 0x0c, "formfeed")
+!test('\n', 0x0a, "newline")
+!test('\r', 0x0d, "carriage return")
+!test('\t', 0x09, "horizontal tab")
+!test('\v', 0x0b, "vertical tab")
+!test('\x20', 0x20, "hex")
+
+!print("\astring\x20with hex character escapes\x21\n")
