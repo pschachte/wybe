@@ -1224,41 +1224,41 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt detism typs):calls)
     logTyped $ "Type checking call " ++ show pstmt
     logTyped $ "Calling context is " ++ show detism
     logTyped $ "Candidate types:\n    " ++ intercalate "\n    " (show <$> typs)
-    let (mod, callee,pexps) 
-            = case content pstmt of
-                    ProcCall mod callee _ _ _ pexps -> (mod,callee,pexps)
-                    noncall -> shouldnt $ "typecheckCalls with non-call stmt"
-                                            ++ show noncall
+    let (stmt, stmtPos) = unPlace pstmt
+    let (mod, callee, pexps) 
+            = case stmt of
+                ProcCall mod callee _ _ _ pexps -> (mod,callee,pexps)
+                noncall -> shouldnt $ "typecheckCalls with non-call stmt"
+                                        ++ show noncall
     actualTypes <- mapM expType pexps
     logTyped $ "Actual types: " ++ show actualTypes
     matches <- mapM
-               (matchTypeList name callee (place pstmt) actualTypes detism)
+               (matchTypeList name callee stmtPos actualTypes detism)
                typs
     let validMatches = catOKs matches
     let validTypes = nubBy ((==) `on` (procInfoTypes . fst)) validMatches
     logTyped $ "Valid types = " ++ show (snd <$> validTypes)
     logTyped $ "Converted types = " ++ show (boolFnToTest <$> typs)
     case validTypes of
-        [] -> case (mod, callee, pexps, actualTypes) of
-            ([], "=", [arg1, arg2], [ty1, ty2]) 
-                -> do
-                    typing <- get
-                    void $ unifyTypes ReasonShouldnt ty1 ty2
-                    ifM validTyping
-                        (typecheckCalls m name pos calls residue True)
-                        (put typing >> typeErrors (concatMap errList matches))
+        [] -> case (mod, callee, content <$> pexps, actualTypes) of
+            -- special case for assigment
+            ([], "=", [arg1, arg2], [ty1, ty2]) -> do
+                void $ unifyTypes (ReasonEqual arg1 arg2 stmtPos) ty1 ty2
+                ifM validTyping
+                    (typecheckCalls m name pos calls residue True)
+                    (typeErrors (concatMap errList matches))
             _ -> do
                 logTyped "Type error: no valid types for call"
                 typeErrors (concatMap errList matches)
         [(match,typing)] -> do
-          put typing
-          logTyping "Resulting typing = "
-          typecheckCalls m name pos calls residue True
+            put typing
+            logTyping "Resulting typing = "
+            typecheckCalls m name pos calls residue True
         _ -> do
-          let matchProcInfos = fst <$> validMatches
-          let stmtTyping' = stmtTyping {typingArgsTypes = matchProcInfos}
-          typecheckCalls m name pos calls (stmtTyping':residue)
-              $ chg || matchProcInfos /= typs
+            let matchProcInfos = fst <$> validMatches
+            let stmtTyping' = stmtTyping {typingArgsTypes = matchProcInfos}
+            typecheckCalls m name pos calls (stmtTyping':residue)
+                $ chg || matchProcInfos /= typs
 
 
 -- |Match up the argument types of a call with the parameter types of the
@@ -1295,7 +1295,7 @@ matchTypeList' callee pos callArgTypes calleeInfo = do
     let calleeFlows = typeFlowMode <$> args
     typing0 <- get
     calleeTypes' <- refreshTypes calleeTypes
-    matches <- zipWith3M (unifyTypes . flip (ReasonArgType callee) pos)
+    matches <- zipWith3M (unifyTypes . flip (traceShow "here" ReasonArgType callee) pos)
                [1..] callArgTypes calleeTypes'
     logTyping "Matched with typing: "
     typing <- get
@@ -1642,16 +1642,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
             logTyped $ "Unpreventable mode errors: " ++ show flowErrs
             typeErrors flowErrs
             return ([],assigned,tmpCount)
-        else case (cmod, cname, actualModes, args) of
-          -- Special cases to handle = as assignment when one argument is
-          -- known to be defined and the other is an output or unknown.
-          ([], "=", [(ParamIn,True,_),(ParamOut,_,_)],[arg1,arg2]) ->
-                modecheckStmt m name defPos assigned detism tmpCount final
-                    (ForeignCall "llvm" "move" [] [arg1, arg2]) pos
-          ([], "=", [(ParamOut,_,_),(ParamIn,True,_)],[arg1,arg2]) ->
-                modecheckStmt m name defPos assigned detism tmpCount final
-                    (ForeignCall "llvm" "move" [] [arg2, arg1]) pos
-          _ -> do
+        else do
             typeMatches <- (fst <$>) . catOKs <$> mapM
                         (matchTypeList name cname pos actualTypes detism)
                         callInfos
@@ -1674,10 +1665,20 @@ modecheckStmt m name defPos assigned detism tmpCount final
                         typeError $ ReasonWarnMultipleMatches match rest pos
                     finaliseCall m name assigned detism resourceful tmpCount
                                  final pos args match stmt
-                ([],[]) -> do
-                    logTyped $ "Mode errors in call:  " ++ show flowErrs
-                    typeError $ ReasonUndefinedFlow cname pos
-                    return ([],assigned,tmpCount)
+                ([],[]) -> 
+                    case (cmod, cname, actualModes, args) of
+                        -- Special cases to handle = as assignment when one argument is
+                        -- known to be defined and the other is an output or unknown.
+                        ([], "=", [(ParamIn,True,_),(ParamOut,_,_)],[arg1,arg2]) ->
+                            modecheckStmt m name defPos assigned detism tmpCount final
+                                (ForeignCall "llvm" "move" [] [arg1, arg2]) pos
+                        ([], "=", [(ParamOut,_,_),(ParamIn,True,_)],[arg1,arg2]) ->
+                            modecheckStmt m name defPos assigned detism tmpCount final
+                                (ForeignCall "llvm" "move" [] [arg2, arg1]) pos
+                        _ -> do
+                            logTyped $ "Mode errors in call:  " ++ show flowErrs
+                            typeError $ ReasonUndefinedFlow cname pos
+                            return ([],assigned,tmpCount)
 modecheckStmt m name defPos assigned detism tmpCount final
     stmt@(ForeignCall lang cname flags args) pos = do
     logTyped $ "Mode checking foreign call " ++ show stmt
@@ -2003,17 +2004,17 @@ unifyExprTypes pos a1 a2 = do
     case expVar' $ content a2 of
         Nothing -> typeError (ReasonBadMove a2Content pos)
         Just toVar ->
-          case ultimateExp a1Content of
-              Var fromVar _ _ -> do
-                unifyVarTypes pos fromVar toVar
-                logTyping "Resulting typing = "
-              _ -> do
-                ty <- expType $ Unplaced a1Content
-                logTyped $ "constraining var " ++ show toVar
-                           ++ " to type " ++ show ty
-                constrainVarType
-                         (ReasonEqual a1Content a2Content (place a2))
-                         toVar ty
+            case ultimateExp a1Content of
+                Var fromVar _ _ -> do
+                    unifyVarTypes pos fromVar toVar
+                    logTyping "Resulting typing = "
+                _ -> do
+                    ty <- expType $ Unplaced a1Content
+                    logTyped $ "constraining var " ++ show toVar
+                            ++ " to type " ++ show ty
+                    constrainVarType
+                        (ReasonEqual a1Content a2Content (place a2))
+                        toVar ty
 
 
 -- |Does this parameter correspond to a manifest argument?
