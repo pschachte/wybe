@@ -411,7 +411,7 @@ unbranchStmt detism stmt@(Or [] exitVars) pos stmts alt sense =
     ifSemiDet detism "Empty disjunction in a Det context"
     $ unbranchStmt SemiDet (TestBool boolFalse) pos stmts alt sense
 unbranchStmt detism stmt@(Or [disj] exitVars) _ stmts alt sense =
-    placedApply (unbranchStmt SemiDet) disj stmts alt sense
+    placedApply (unbranchStmt detism) disj stmts alt sense
 unbranchStmt detism stmt@(Or (disj:disjs) exitVars) pos stmts alt sense = do
     let exitVars' = trustFromJust "unbranching Disjunction without exitVars"
                     exitVars
@@ -424,7 +424,7 @@ unbranchStmt detism stmt@(Or (disj:disjs) exitVars) pos stmts alt sense = do
     disjs' <- unbranchStmt detism (Or disjs exitVars) pos stmts' alt sense
     -- Update known vars back to state before condition (must have failed)
     modify $ \s -> s { brVars = beforeDisjVars }
-    placedApply (unbranchStmt detism) disj stmts' disjs' sense
+    placedApply (unbranchStmt SemiDet) disj stmts' disjs' sense
 unbranchStmt detism stmt@(Not tst) pos stmts alt sense =
     ifSemiDet detism ("Negation in a Det context: " ++ show stmt)
     $ do
