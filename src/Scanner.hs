@@ -39,8 +39,8 @@ data Token = TokFloat Double SourcePos          -- ^A floating point number
               | TokError String SourcePos       -- ^A lexical error
 
 -- |The different string delimiters.
-data StringDelim = DoubleQuote 
-                 | BackQuote 
+data StringDelim = DoubleQuote
+                 | BackQuote
                  | LongQuote String
                  | IdentQuote String StringDelim
                deriving (Eq, Ord)
@@ -134,7 +134,7 @@ showPosition pos
 
 -- |Wraps a string in delimiters
 delimitString :: StringDelim -> String -> String
-delimitString d s = delimStringStart d ++ tail (init $ show s) 
+delimitString d s = delimStringStart d ++ tail (init $ show s)
                                        ++ delimStringEnd d
 
 
@@ -236,7 +236,7 @@ tokenise pos str@(c:cs)
   | c == '\n' = singleCharTok c cs pos $ TokSeparator False pos
   | isSpace c || isControl c = tokenise (updatePosChar pos c) cs
   | isDigit c = scanNumberToken pos str
-  | isIdentChar c = 
+  | isIdentChar c =
     case span isIdentChar str of
       (v@"c", '\"':cs') -> tokeniseString (IdentQuote "c" DoubleQuote) pos cs'
       (name, rest) -> multiCharTok name rest (TokIdent name pos) pos
@@ -337,13 +337,12 @@ multiCharTok str cs tok pos = tok:tokenise (updatePosString pos str) cs
 
 -- |Handle a character constant token and tokenize the rest of the input.
 tokeniseChar :: SourcePos -> String -> [Token]
-tokeniseChar pos ('\\':c:'\'':rest) =
-  TokChar (escapedChar c) pos :
-  tokenise
-  (updatePosChar
-   (updatePosChar (updatePosChar (updatePosChar pos '\'') c) '\\')
-   '\'')
-  rest
+tokeniseChar pos ('\\':rest) =
+    case scanCharEscape (updatePosChar pos '\\') rest of
+        Just (ch,pos'','\'':cs') ->
+             TokChar ch pos : tokenise pos'' cs'
+        _ -> TokError "invalid character escape" pos
+            : tokenise (updatePosChar pos '\'') rest
 tokeniseChar pos (c:'\'':cs) =
   TokChar c pos:
   tokenise (updatePosChar (updatePosChar (updatePosChar pos '\'') c) '\'') cs
@@ -368,16 +367,43 @@ scanString :: Char -> SourcePos -> String -> Maybe (String,SourcePos,String)
 scanString termchar pos input =
     case break (`elem` [termchar,'\\']) input of
         (_,[]) -> Nothing
-        (front,'\\':c:cs) ->
-            let pos' = updatePosChar
-                       (updatePosChar (updatePosString pos front) '\\')
-                       c
-            in first3 ((front++) . (escapedChar c:))
-               <$> scanString termchar pos' cs
+        (front,'\\':cs) ->
+            let pos' = updatePosChar (updatePosString pos front) '\\'
+            in case scanCharEscape pos' cs of
+                Just (ch,pos'',cs') ->
+                    first3 ((front++) . (ch:)) <$> scanString termchar pos'' cs'
+                Nothing -> Nothing
         (front,t:cs) | t == termchar ->
             let pos' = updatePosChar (updatePosString pos front) t
             in Just (front, pos', cs)
         (front,rest) -> shouldnt "break broke in scanString"
+
+
+-- |Scan a character escape sequence following a backslash character, returning
+-- Maybe a triple of the single escaped character, the position of the following
+-- character, and the remaining characters.  Returns Nothing for a syntax error.
+-- XXX doesn't currently support unicode escapes
+scanCharEscape :: SourcePos -> String -> Maybe (Char,SourcePos,String)
+scanCharEscape pos "" = Nothing
+scanCharEscape pos (ch:rest) =
+    case ch of
+        '0' -> Just ('\x00',nextPos,rest) -- null character
+        'a' -> Just ('\a',nextPos,rest)
+        'b' -> Just ('\b',nextPos,rest)
+        'e' -> Just ('\x1b',nextPos,rest) -- escape character
+        'f' -> Just ('\f',nextPos,rest)
+        'n' -> Just ('\n',nextPos,rest)
+        'r' -> Just ('\r',nextPos,rest)
+        't' -> Just ('\t',nextPos,rest)
+        'v' -> Just ('\v',nextPos,rest)
+        x | x == 'x' || x == 'X' -> case rest of
+            (c1:c2:rest') | isHexDigit c1 && isHexDigit  c2 ->
+                Just (toEnum (16*digitToInt c1 + digitToInt c2),
+                      updatePosChar (updatePosChar nextPos c1) c2,
+                      rest')
+            _ -> Nothing
+        _ -> Just (ch,nextPos,rest)
+    where nextPos = updatePosChar pos ch
 
 
 -- |Is the specified char the expected final delimiter?
