@@ -238,14 +238,6 @@ flattenStmt' stmt@(ProcCall [] "=" id callDetism res [arg1,arg2]) pos detism = d
     logFlatten $ "Flattening assignment with outputs " ++ show arg1Vars
                  ++ " and " ++ show arg2Vars
     case (arg1content, arg2content) of
-      (Var var flow1 _, _)
-        | callDetism == Det && flowsOut flow1 && Set.null arg2Vars -> do
-        logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
-        flattenAssignment var arg1 arg2 pos
-      (_, Var var flow2 _)
-        | callDetism == Det && flowsOut flow2 && Set.null arg1Vars -> do
-        logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
-        flattenAssignment var arg2 arg1 pos
       (Fncall mod name args, _)
         | not (Set.null arg1Vars) && Set.null arg2Vars -> do
         let stmt' = ProcCall mod name Nothing callDetism False (args++[arg2])
@@ -254,8 +246,10 @@ flattenStmt' stmt@(ProcCall [] "=" id callDetism res [arg1,arg2]) pos detism = d
         | not (Set.null arg2Vars) && Set.null arg1Vars -> do
         let stmt' = ProcCall mod name Nothing callDetism False (args++[arg1])
         flattenStmt stmt' pos detism
-      (_,_) | Set.null arg1Vars && Set.null arg2Vars -> do
-        logFlatten $ "Leaving equality test alone: " ++ showStmt 4 stmt
+      (_,_) | callDetism == Det 
+                && (varCheck arg1content arg2Vars || varCheck arg2content arg1Vars)
+                || Set.null arg1Vars && Set.null arg2Vars -> do
+        logFlatten $ "Leaving = call alone: " ++ showStmt 4 stmt
         args' <- flattenStmtArgs [arg1,arg2] pos
         emit pos $ ProcCall [] "=" id callDetism res args'
         flushPostponed
@@ -263,6 +257,9 @@ flattenStmt' stmt@(ProcCall [] "=" id callDetism res [arg1,arg2]) pos detism = d
         -- Must be a mode error:  both sides want to bind variables
         logFlatten $ "Error: out=out assignment " ++ show stmt
         lift $ message Error "Cannot generate bindings on both sides of '='" pos
+  where varCheck argContent argVars 
+            = expIsVar argContent && flowsOut (flattenedExpFlow argContent) 
+                                  && Set.null argVars
 flattenStmt' stmt@(ProcCall [] "fail" _ _ _ []) pos _ =
     emit pos Fail
 flattenStmt' stmt@(ProcCall [] "break" _ _ _ []) pos _ =

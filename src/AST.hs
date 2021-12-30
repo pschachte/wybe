@@ -26,7 +26,8 @@ module AST (
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
   PrimProto(..), PrimParam(..), ParamInfo(..),
-  Exp(..), StringVariant(..), Generator(..), Stmt(..), flattenedExpFlow, expIsConstant,
+  Exp(..), StringVariant(..), Generator(..), Stmt(..), 
+  expIsVar, flattenedExpFlow, expIsConstant,
   TypeRepresentation(..), TypeFamily(..), typeFamily,
   defaultTypeRepresentation, typeRepSize, integerTypeRep,
   defaultTypeModifiers,
@@ -2603,6 +2604,12 @@ data Exp
 -- | Represents which variant a string literal is
 data StringVariant = WybeString | CString
    deriving (Eq,Ord,Generic)
+
+
+-- | Return if the Exp is a Var
+expIsVar :: Exp -> Bool
+expIsVar Var{} = True
+expIsVar _     = False
 
 
 -- | Return the FlowDirection of an Exp, assuming it has been flattened.
