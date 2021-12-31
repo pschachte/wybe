@@ -2300,12 +2300,11 @@ finaliseCall m name defPos assigned detism resourceful tmpCount final pos args
         logTyped $ "Finalising call    :  " ++ show stmt'
         logTyped $ "Input resources    :  " ++ simpleShowSet inResources
         logTyped $ "Output resources   :  " ++ simpleShowSet outResources
-        let avail    = USet.toSet Set.empty $ bindingVars assigned
         logTyped $ "Specials in call   :  " ++ simpleShowSet specials
         logTyped $ "Available vars     :  " ++ simpleShowSet avail
         logTyped $ "Available resources:  " ++ simpleShowSet (bindingResources assigned)
         let specialInstrs =
-                [ move (s `withType` ty) (varSet r `withType` ty)
+                [ move (s `withType` ty) (varSetTyped r ty)
                 | resourceful -- no specials unless resourceful
                 , r <- Set.elems $ specials Set.\\ avail
                 , let (f,ty) = fromMaybe (const $ StringValue "Unknown" CString,

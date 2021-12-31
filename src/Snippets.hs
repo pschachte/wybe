@@ -7,12 +7,14 @@
 
 module Snippets (castFromTo, castTo, withType, intType, intCast,
                  tagType, tagCast, phantomType, stringType, cStringType,
-                 isTypeVar, varSet, varGet, varGetSet,
+                 isTypeVar, 
+                 varSet, varGet, varGetSet,
+                 varSetTyped, varGetTyped, varGetSetTyped,
                  boolType, boolCast, boolTrue, boolFalse, boolBool,
                  boolVarSet, boolVarGet, intVarSet, intVarGet,
                  lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, 
                  move, access, mutate, 
-                 globalStore, globalLoad, isGlobalStore, isGlobalLoad, isMove, globalsGetSet, globalsParam,
+                 globalStore, globalLoad, globalsGetSet, globalsParam,
                  lpvmVoid,
                  primMove, primAccess, primCast,
                  boolNegate, comparison, succeedTest, failTest, testVar, succeedIfSemiDet) where
@@ -99,21 +101,33 @@ varGet name = Var name ParamIn Ordinary
 varGetSet :: Ident -> ArgFlowType -> Exp
 varGetSet name flowType = Var name ParamInOut flowType
 
+-- |An output variable reference (lvalue)
+varSetTyped :: Ident -> TypeSpec -> Exp
+varSetTyped name ty = Var name ParamOut Ordinary `withType` ty
+
+-- |An input variable reference (rvalue)
+varGetTyped :: Ident -> TypeSpec  -> Exp
+varGetTyped name ty = Var name ParamIn Ordinary `withType` ty
+
+-- |An input variable reference (rvalue)
+varGetSetTyped :: Ident -> TypeSpec  -> ArgFlowType -> Exp
+varGetSetTyped name ty flowType = Var name ParamInOut flowType `withType` ty
+
 -- |A Boolean typed output variable reference (lvalue)
 boolVarSet :: Ident -> Exp
-boolVarSet name = varSet name `withType` boolType
+boolVarSet name = varSetTyped name boolType
 
 -- |A Boolean typed input variable reference (rvalue)
 boolVarGet :: Ident -> Exp
-boolVarGet name = varGet name `withType` boolType
+boolVarGet name = varGetTyped name boolType
 
 -- |An integer type output variable reference (lvalue)
 intVarSet :: Ident -> Exp
-intVarSet name = varSet name `withType` intType
+intVarSet name = varSetTyped name intType
 
 -- |An integer type input variable reference (rvalue)
 intVarGet :: Ident -> Exp
-intVarGet name = varGet name `withType` intType
+intVarGet name = varGetTyped name intType
 
 -- |An unplaced statement to cast a value into fresh variable
 lpvmCast :: Exp -> Ident -> TypeSpec -> Placed Stmt
@@ -175,20 +189,6 @@ globalLoad rs ty dest =
       $ [Unplaced $ Typed (Global $ GlobalResource rs) ty Nothing, 
          Unplaced dest]
         ++ globalsGetSet
-
-
-isGlobalStore :: Stmt -> Bool
-isGlobalStore (ForeignCall "lpvm" "store" _ _) = True
-isGlobalStore _                                = False
-
-isGlobalLoad :: Stmt -> Bool
-isGlobalLoad (ForeignCall "lpvm" "load" _ _) = True
-isGlobalLoad _                               = False
-
-
-isMove :: Stmt -> Bool
-isMove (ForeignCall "llvm" "move" _ _) = True
-isMove _                               = False
 
 
 globalsGetSet :: [Placed Exp]

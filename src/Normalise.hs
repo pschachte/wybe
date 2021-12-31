@@ -611,13 +611,13 @@ constructorItems ctorName typeSpec params fields size tag tagLimit pos =
         -- Code to allocate memory for the value
         ([maybePlace (ForeignCall "lpvm" "alloc" []
           [Unplaced $ iVal size,
-           Unplaced $ varSet recName `withType` typeSpec]) pos]
+           Unplaced $ varSetTyped recName typeSpec]) pos]
          ++
          -- fill in the secondary tag, if necessary
          (if tag > tagLimit
           then [maybePlace (ForeignCall "lpvm" "mutate" []
-                 [Unplaced $ Typed (varGet recName) typeSpec Nothing,
-                  Unplaced $ Typed (varSet recName) typeSpec Nothing,
+                 [Unplaced $ varGetTyped recName typeSpec,
+                  Unplaced $ varSetTyped recName typeSpec,
                   Unplaced $ iVal 0,
                   Unplaced $ iVal 1,
                   Unplaced $ iVal size,
@@ -629,20 +629,20 @@ constructorItems ctorName typeSpec params fields size tag tagLimit pos =
          (List.map
           (\(var,_,ty,_,offset) ->
                (maybePlace (ForeignCall "lpvm" "mutate" []
-                 [Unplaced $ Typed (varGet recName) typeSpec Nothing,
-                  Unplaced $ Typed (varSet recName) typeSpec Nothing,
+                 [Unplaced $ varGetTyped recName typeSpec,
+                  Unplaced $ varSetTyped recName typeSpec,
                   Unplaced $ iVal offset,
                   Unplaced $ iVal 1,
                   Unplaced $ iVal size,
                   Unplaced $ iVal 0,
-                  Unplaced $ Typed (Var var ParamIn Ordinary) ty Nothing])) pos)
+                  Unplaced $ varGetTyped var ty])) pos)
           fields)
          ++
          -- Finally, code to tag the reference
          [maybePlace (ForeignCall "llvm" "or" []
-          [Unplaced $ varGet recName,
+          [Unplaced $ varGetTyped recName typeSpec,
            Unplaced $ iVal (if tag > tagLimit then tagLimit+1 else tag),
-           Unplaced $ varSet outputVariableName]) pos])
+           Unplaced $ varSetTyped outputVariableName typeSpec]) pos])
         pos]
 
 
@@ -710,7 +710,7 @@ tagCheck numConsts numNonConsts tag tagBits tagLimit size varName =
                              "unboxed type shouldn't have a secondary tag" size,
                   Unplaced $ iVal startOffset,
                   Unplaced $ tagCast (varSet tagName)],
-                 comparison "icmp_eq" (varGet tagName `withType` tagType)
+                 comparison "icmp_eq" (varGetTyped tagName tagType)
                                       (iVal tag `withType` tagType)]
            else [])
 
@@ -788,7 +788,7 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
          -- Initialise result to 0
         ([Unplaced $ ForeignCall "llvm" "move" []
           [Unplaced $ castFromTo intType typeSpec $ iVal 0,
-           Unplaced $ varSet outputVariableName `withType` typeSpec]]
+           Unplaced $ varSetTyped outputVariableName typeSpec]]
          ++
          -- Shift each field into place and or with the result
          List.concatMap
@@ -796,11 +796,11 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
                [maybePlace (ForeignCall "llvm" "shl" []
                  [Unplaced $ castFromTo ty typeSpec $ varGet var,
                   Unplaced $ iVal shift `castTo` typeSpec,
-                  Unplaced $ varSet tmpName1 `withType` typeSpec]) pos,
+                  Unplaced $ varSetTyped tmpName1 typeSpec]) pos,
                 maybePlace (ForeignCall "llvm" "or" []
-                 [Unplaced $ varGet tmpName1 `withType` typeSpec,
-                  Unplaced $ varGet outputVariableName `withType` typeSpec,
-                  Unplaced $ varSet outputVariableName `withType` typeSpec])
+                 [Unplaced $ varGetTyped tmpName1 typeSpec,
+                  Unplaced $ varGetTyped outputVariableName typeSpec,
+                  Unplaced $ varSetTyped outputVariableName typeSpec])
                 pos])
           fields
          ++

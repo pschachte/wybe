@@ -107,21 +107,33 @@ canonicaliseResourceFlow pos spec = do
 -- | Data type to store the necessary data for adding resources to a proc
 data ResourceState = ResourceState {
     resResources      :: Set (ResourceSpec, TypeSpec),
+    -- ^ The set of resources and their types that are currently in scope
     resTmpVars        :: VarDict,
-    resIn             :: Set (ResourceSpec, TypeSpec),
-    resOut            :: Set (ResourceSpec, TypeSpec),
+    -- ^ Tmp variables that have been generated so far
+    resTmpCtr         :: Int,
+    -- ^ The current tmp variable counter
     resHaveGlobals    :: Maybe Bool,
-    resTmpCtr         :: Int
+    -- ^ Do we currently have a #globals variable? 
+    -- Nothing if we arent globalising
+
+    -- The following are only used when globalising
+    resIn             :: Set (ResourceSpec, TypeSpec),
+    -- ^ The set of resources that flow into the current stmt
+    resOut            :: Set (ResourceSpec, TypeSpec),
+    -- ^ The set of resources that flow out of the current stmt
+    resIsExecMain     :: Bool
+    -- ^ Are we currently globalising the executable main procedure
 }
 
 -- | Initial ResourceState given a tmpCtr
 initResourceState :: Maybe Bool -> Int -> ResourceState
 initResourceState globals tmp = ResourceState{resResources=Set.empty,
                                               resTmpVars=Map.empty,
+                                              resTmpCtr=tmp,
+                                              resHaveGlobals=globals,
                                               resIn=Set.empty,
                                               resOut=Set.empty,
-                                              resHaveGlobals=globals,
-                                              resTmpCtr=tmp}
+                                              resIsExecMain=False}
 
 
 -- | State transformer using a ResourceState
@@ -368,35 +380,36 @@ globaliseProc pos name variant detism params ress body
     let hasHigherResources = any paramIsResourceful params
     let (resFlows, realParams) = partitionEithers $ eitherResourceParam <$> params
     let needsGlobalParam = hasHigherResources || not (List.null resFlows)
+    thisMod <- lift getModuleSpec
+    let isExecMain = List.null thisMod && name == Just ""
     ResourceState{resResources=oldResources,
-                resHaveGlobals=oldHaveGlobals,
-                resTmpVars=oldTmpVars} <- get
+                  resHaveGlobals=oldHaveGlobals,
+                  resTmpVars=oldTmpVars,
+                  resIsExecMain=oldIsExecMain} <- get
     modify $ \s -> s{resResources=oldResources `Set.union`
                                     Set.fromList (mapFst resourceFlowRes <$> resFlows),
-                    resHaveGlobals=Just needsGlobalParam }
-    -- we must save and restore any in-flowing resources, as we cannot be
+                     resHaveGlobals=Just needsGlobalParam,
+                     resIsExecMain=isExecMain}
+    -- we must save and restore any non-out-flowing resources, as we cannot be
     -- sure theyre not mutated
     let ress' = [res | ResourceFlowSpec res flow <- Set.toList ress
                 , not $ flowsOut flow
                 , not $ isSpecialResource res ]
-    body' <- fst <$> globaliseStmts [UseResources ress'
-                                        (Just Map.empty) body `maybePlace` pos]
+    body' <- fst <$> globaliseStmts [UseResources ress' (Just Map.empty) body 
+                                        `maybePlace` pos]
     tmp' <- gets resTmpCtr
     modify $ \s -> s{resResources=oldResources,
                      resHaveGlobals=oldHaveGlobals,
-                     resTmpVars=oldTmpVars}
-    mod <- lift getModuleSpec
-    let (body'', params')
-        -- executable main gets special treatment
-            = if List.null mod && name == Just ""
+                     resTmpVars=oldTmpVars,
+                     resIsExecMain=oldIsExecMain}
+    let (params', body'')
+            -- executable main gets special treatment
+            -- in-flowing resources must be stored, and parameters are unmodified
+            = if isExecMain
               then let inRes = List.filter (flowsIn . resourceFlowFlow . fst) resFlows
-                    -- any initial loads, and subsequent stores are redundant,
-                    -- we remove them here
-                       body'' = (storeResource pos . mapFst resourceFlowRes <$> inRes)
-                                ++ takeWhile (not . isGlobalStore . content)
-                                (dropWhile ((isGlobalLoad ||| isMove) . content) body')
-                in (body'', params)
-              else (body', realParams)
+                       stores = storeResource pos . mapFst resourceFlowRes <$> inRes
+                   in (params, stores ++ body')
+              else (realParams, body')
     return (params' ++ [globalsParam | needsGlobalParam], body'', tmp')
   | otherwise = do
     tmp <- gets resTmpCtr
@@ -482,37 +495,41 @@ globaliseStmt (UseResources [] _ stmts) pos = globaliseStmts stmts
 globaliseStmt (UseResources newRes vars stmts) pos = do
     -- this handles the resources that were previously out-of-scope
     let vars' = trustFromJust "globalise use with no vars" vars
-    newResTypes <- lift $ mapM (canonicaliseResourceSpec pos "use block") newRes
-    let newResTypes' = mapSnd (trustFromJust "globalise use") <$> newResTypes
-    let newResTypesSet = Set.fromList newResTypes'
-    state@ResourceState{resHaveGlobals=haveGlobals,
-                        resResources=resources,
-                        resTmpVars=tmpVars} <- get
+    newResTypes <- (mapSnd (trustFromJust "globalise use") <$>) 
+               <$> lift (mapM (canonicaliseResourceSpec pos "use block") newRes)
+    ResourceState{resHaveGlobals=haveGlobals,
+                  resResources=resources,
+                  resTmpVars=tmpVars,
+                  resIsExecMain=isExecMain} <- get
     let haveGlobals' = trustFromJust "use resources with Nothing" haveGlobals
-    (loads, stores, newVars) <- saveRestoreResourcesTmp pos newResTypes'
+    (loads, stores, newVars) <- saveRestoreResourcesTmp pos newResTypes
     modify $ \s -> s {resHaveGlobals=Just True,
-                      resResources=resources `Set.union` newResTypesSet,
-                      resTmpVars=tmpVars `Map.union` newVars}
+                      resResources=resources `Set.union` Set.fromList newResTypes}
+    unless isExecMain $ modify $ \s -> s {resTmpVars=tmpVars `Map.union` newVars}
     stmts' <- fst <$> globaliseStmts stmts
     modify $ \s -> s {resHaveGlobals=haveGlobals,
                       resResources=resources,
                       resTmpVars=tmpVars}
-    return -- initialise a "new" global variable, if we need to
+    -- no need to load and store resources in executable main
+    if isExecMain
+    then return (stmts', True)
+    else return 
+            -- initialise a "new" global variable, if we need to
             ([move (iVal 0 `withType` phantomType)
-                   (varSet globalsName `withType` phantomType)
+                   (varSetTyped globalsName phantomType)
              | not haveGlobals' ]
             -- load the old values of the resources
           ++ loads
             -- store the values of the new resources, 
             -- if theyve been assigned before the use block
           ++ [storeResource pos (res,ty)
-             | (res, ty) <- newResTypes'
+             | (res, ty) <- newResTypes
              , resourceVar res `Map.member` vars' ]
           ++ stmts'
             -- store the old values of the resources
           ++ stores
             -- ensure the "new" global (if any) cannot get optimised away
-          ++ [lpvmVoid [varGet globalsName `withType` phantomType `maybePlace` pos]
+          ++ [lpvmVoid [varGetTyped globalsName phantomType `maybePlace` pos]
              | not haveGlobals' ],
             True)
 globaliseStmt Nop pos = return ([Nop `maybePlace` pos], False)
@@ -696,12 +713,12 @@ variantNeedsGlobalisation (ClosureProc _)   = True
 
 -- | Get a var as a resource of the given type
 getResource :: Ident -> (ResourceSpec, TypeSpec) -> Exp
-getResource nm (rs, ty) = varGet nm `withType` ty `setExpFlowType` Resource rs
+getResource nm (rs, ty) = varGetTyped nm ty `setExpFlowType` Resource rs
 
 
 -- | Set a var as a resource of the given type
 setResource :: Ident -> (ResourceSpec, TypeSpec) -> Exp
-setResource nm (rs, ty) = varSet nm `withType` ty `setExpFlowType` Resource rs
+setResource nm (rs, ty) = varSetTyped nm ty `setExpFlowType` Resource rs
 
 
 -- | Save and restore the given resources in tmp variables
@@ -734,10 +751,10 @@ saveRestoreLocalsTmp pos varTys = do
     modify $ \s -> s{resTmpCtr=tmp + length varTys}
     let tmpVars = mkTempName <$> [tmp..]
         vars = zip tmpVars varTys
-        save (t,(v,ty)) = move (varGet v `withType` ty)
-                               (varSet t `withType` ty)
-        restore (t,(v,ty)) = move (varGet t `withType` ty)
-                                  (varSet v `withType` ty)
+        save (t,(v,ty)) = move (varGetTyped v ty)
+                               (varSetTyped t ty)
+        restore (t,(v,ty)) = move (varGetTyped t ty)
+                                  (varSetTyped v ty)
     return (rePlace pos . save <$> vars, rePlace pos . restore <$> vars,
             Map.fromList $ zip tmpVars (snd <$> varTys))
 
