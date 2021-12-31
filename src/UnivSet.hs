@@ -13,14 +13,14 @@ module UnivSet (
     UnivSet.member, isEmpty, isUniv, emptyUnivSet,
     UnivSet.fromList, UnivSet.toList, UnivSet.toSet,
     showUnivSet, showSet,
-    mapFromUnivSetM
+    mapFromUnivSetM,
+    whenFinite
     ) where
 
 
-import Data.Set as S
-import Data.List
-import Data.Map as M
-import qualified GHC.IO.Buffer as S
+import           Data.Set     as S
+import           Data.List
+import           Data.Map     as M
 import           GHC.Generics (Generic)
 import qualified Data.Functor as UnivSet
 
@@ -112,3 +112,9 @@ mapFromUnivSetM :: (Monad m, Ord a) => (a -> m b) -> Set a -> UnivSet a
 mapFromUnivSetM f set uset = do
     let keys = S.toAscList $ toSet set uset
     M.fromAscList . zip keys <$> mapM f keys
+
+
+-- | Perform an action on a FiniteSet, maintining UniversalSets
+whenFinite :: Ord a => (Set a -> Set a) -> UnivSet a -> UnivSet a
+whenFinite _  UniversalSet  = UniversalSet
+whenFinite fn (FiniteSet s) = FiniteSet $ fn s

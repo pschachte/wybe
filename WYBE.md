@@ -152,18 +152,24 @@ the following character:
 
 | Character | Meaning                                 |
 | --------- | --------------------------------------- |
+| `0`       | The null character (ASCII code 0x00)    |
 | `a`       | Alert or bell (ASCII code 0x07)         |
 | `b`       | Backspace (ASCII code 0x08)             |
+| `e`       | Escape (ASCII code 0x1b)                |
 | `f`       | Formfeed (ASCII code 0x0c)              |
 | `n`       | Newline or Line feed (ASCII code 0x0a)  |
 | `r`       | Carriage return (ASCII code 0x0d)       |
 | `t`       | Horizontal tab (ASCII code 0x09)        |
 | `v`       | Vertical tab (ASCII code 0x0b)          |
 
+If the character following the backslash is an `x` or `X`, the following two
+characters must be hexidecimal characters, in which case the hexidecimal number
+specifies the character code.  For example `'\x20'` specifies character code 32,
+which is the space character.
+
 Any other character following a backslash is interpreted as itself. In
-particular, `'\''` specifies a single quote character, within a string, `\"`
-specifies one double-quote character without terminating the string, and as a
-character constant or included within a string, `\\` specifies a single
+particular, `\'` specifies a single quote character, `\"`
+specifies one double-quote character, and `\\` specifies a single
 backslash character.
 
 

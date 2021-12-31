@@ -1,0 +1,164 @@
+======================================================================
+AFTER EVERYTHING:
+ Module bug217
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : 
+  imports         : use bug217.foo
+                    use wybe
+  resources       : 
+  submodules      : bug217.foo
+  procs           : 
+
+
+  LLVM code       :
+
+; ModuleID = 'bug217'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+--------------------------------------------------
+ Module bug217.foo
+  representation  : 0 bit unsigned
+  public submods  : 
+  public resources: 
+  public procs    : bug217.foo.=<0>
+                    bug217.foo.~=<0>
+  imports         : use bug217
+                    use bug217.foo.bar
+                    use wybe
+  resources       : 
+  submodules      : bug217.foo.bar
+  procs           : 
+
+= > public {inline} (1 calls)
+0: bug217.foo.=<0>
+=([#left##0:bug217.foo], [#right##0:bug217.foo], ?#success##0:wybe.bool):
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+foo > {inline} (0 calls)
+0: bug217.foo.foo<0>
+foo(?#result##0:bug217.foo):
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(0:bug217.foo, ?#result##0:bug217.foo)
+
+
+~= > public {inline} (0 calls)
+0: bug217.foo.~=<0>
+~=([#left##0:bug217.foo], [#right##0:bug217.foo], ?#success##0:wybe.bool):
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+  LLVM code       :
+
+; ModuleID = 'bug217.foo'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  i1 @"bug217.foo.=<0>"()    {
+entry:
+  ret i1 1 
+}
+
+
+define external fastcc  void @"bug217.foo.foo<0>"()    {
+entry:
+  ret void 
+}
+
+
+define external fastcc  i1 @"bug217.foo.~=<0>"()    {
+entry:
+  ret i1 0 
+}
+--------------------------------------------------
+ Module bug217.foo.bar
+  representation  : 0 bit unsigned
+  public submods  : 
+  public resources: 
+  public procs    : bug217.foo.bar.=<0>
+                    bug217.foo.bar.~=<0>
+  imports         : use bug217.foo
+                    use wybe
+  resources       : 
+  procs           : 
+
+= > public {inline} (1 calls)
+0: bug217.foo.bar.=<0>
+=([#left##0:bug217.foo.bar], [#right##0:bug217.foo.bar], ?#success##0:wybe.bool):
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+bar > {inline} (0 calls)
+0: bug217.foo.bar.bar<0>
+bar(?#result##0:bug217.foo.bar):
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(0:bug217.foo.bar, ?#result##0:bug217.foo.bar)
+
+
+~= > public {inline} (0 calls)
+0: bug217.foo.bar.~=<0>
+~=([#left##0:bug217.foo.bar], [#right##0:bug217.foo.bar], ?#success##0:wybe.bool):
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+  LLVM code       :
+
+; ModuleID = 'bug217.foo.bar'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  i1 @"bug217.foo.bar.=<0>"()    {
+entry:
+  ret i1 1 
+}
+
+
+define external fastcc  void @"bug217.foo.bar.bar<0>"()    {
+entry:
+  ret void 
+}
+
+
+define external fastcc  i1 @"bug217.foo.bar.~=<0>"()    {
+entry:
+  ret i1 0 
+}

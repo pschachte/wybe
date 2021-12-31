@@ -279,7 +279,7 @@ flattenStmt stmt pos detism = do
 
 -- |Flatten the specified statement
 flattenStmt' :: Stmt -> OptPos -> Determinism -> Flattener ()
-flattenStmt' stmt@(ProcCall (First [] "=" id) callDetism res [arg1,arg2]) pos detism = do
+flattenStmt' stmt@(ProcCall fn@(First [] "=" id) callDetism res [arg1,arg2]) pos detism = do
     arg1' <- flattenAnonParam (content arg1) AnyType Nothing (place arg1)
     arg2' <- flattenAnonParam (content arg2) AnyType Nothing (place arg2)
     let arg1content = innerExp $ content arg1'
@@ -289,14 +289,6 @@ flattenStmt' stmt@(ProcCall (First [] "=" id) callDetism res [arg1,arg2]) pos de
     logFlatten $ "Flattening assignment with outputs " ++ show arg1Vars
                  ++ " and " ++ show arg2Vars
     case (arg1content, arg2content) of
-      (Var var flow1 _, _)
-        | callDetism == Det && flowsOut flow1 && Set.null arg2Vars -> do
-        logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
-        flattenAssignment (expVar $ content arg1') arg1' arg2' pos
-      (_, Var var flow2 _)
-        | callDetism == Det && flowsOut flow2 && Set.null arg1Vars -> do
-        logFlatten $ "Transforming assignment " ++ showStmt 4 stmt
-        flattenAssignment var arg2' arg1' pos
       (Fncall mod name args, _)
         | not (Set.null arg1Vars) && Set.null arg2Vars -> do
         let stmt' = ProcCall (First mod name Nothing) Det False (args++[arg2'])
@@ -305,15 +297,20 @@ flattenStmt' stmt@(ProcCall (First [] "=" id) callDetism res [arg1,arg2]) pos de
         | not (Set.null arg2Vars) && Set.null arg1Vars -> do
         let stmt' = ProcCall  (First mod name Nothing) Det False (args++[arg1'])
         flattenStmt stmt' pos detism
-      (_,_) | Set.null arg1Vars && Set.null arg2Vars -> do
-        logFlatten $ "Leaving equality test alone: " ++ showStmt 4 stmt
+      (_,_) | callDetism == Det 
+                && (varCheck arg1content arg2Vars || varCheck arg2content arg1Vars)
+                || Set.null arg1Vars && Set.null arg2Vars -> do
+        logFlatten $ "Leaving = call alone: " ++ showStmt 4 stmt
         args' <- flattenStmtArgs [arg1',arg2'] pos
-        emit pos $ ProcCall (regularProc "=") Det res args'
+        emit pos $ ProcCall fn callDetism res args'
         flushPostponed
       _ -> do
         -- Must be a mode error:  both sides want to bind variables
         logFlatten $ "Error: out=out assignment " ++ show stmt
         lift $ message Error "Cannot generate bindings on both sides of '='" pos
+  where varCheck argContent argVars 
+            = expIsVar argContent && flowsOut (flattenedExpFlow argContent) 
+                                  && Set.null argVars
 flattenStmt' stmt@(ProcCall (First [] "fail" _) _ _ []) pos _ =
     emit pos Fail
 flattenStmt' stmt@(ProcCall (First [] "break" _) _ _ []) pos _ =
@@ -413,12 +410,12 @@ flattenStmt' for@(For pgens body) pos detism = do
     let generated = Loop loop Nothing
     logFlatten $ "Generated for: " ++ showStmt 4 generated
     flattenStmt' generated pos detism
-flattenStmt' (UseResources res beforeVars afterVars body) pos detism = do
+flattenStmt' (UseResources res vars body) pos detism = do
     oldVars <- gets defdVars
     mapM_ (noteVarIntro . resourceName) res
     body' <- flattenInner True detism (flattenStmts body detism)
     modify $ \s -> s { defdVars = oldVars}
-    emit pos $ UseResources res beforeVars afterVars body'
+    emit pos $ UseResources res vars body'
 flattenStmt' Nop pos _ = emit pos Nop
 flattenStmt' Fail pos _ = emit pos Fail
 flattenStmt' Break pos _ = emit pos Break

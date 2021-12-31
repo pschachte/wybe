@@ -5,9 +5,7 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
-
 {-# LANGUAGE TupleSections #-}
-
 
 module Resources (resourceCheckMod, canonicaliseProcResources,
                   canonicaliseResourceSpec,
@@ -257,24 +255,23 @@ transformStmt (Loop body vars) pos = do
 transformStmt (For generators body) pos = do
     body' <- transformStmts body
     return [maybePlace (For generators body') pos]
-transformStmt (UseResources res beforeVars afterVars body) pos = do
+transformStmt (UseResources res vars body) pos = do
+    let vars' = trustFromJust "globalise use with no vars" vars
     resMbTypes <- lift $ mapM (canonicaliseResourceSpec pos "use statement")
                               res
     let resTys = mapSnd (trustFromJust "transformStmt UseResources")
                <$> resMbTypes
+    let vars' = trustFromJust "globalise use with no before" vars
     s@ResourceState{resResources=oldResTypes,
                     resTmpVars=oldTmp} <- get
-    let (saving, postponing) = List.partition (`Set.member` oldResTypes) resTys
-    (saves, restores, tmpVars) <- saveRestoreResourcesTmp pos saving
-    modify $ \s -> s{resTmpVars=Map.union tmpVars oldTmp,
-                     resResources=oldResTypes `Set.union` Set.fromList saving}
+    (saves, restores, tmpVars) <- saveRestoreLocalsTmp pos $ Map.toList vars'
+    modify $ \s -> s{resTmpVars=tmpVars `Map.union` oldTmp,
+                     resResources=oldResTypes `Set.union` Set.fromList resTys}
     body' <- transformStmts body
     modify $ \s -> s{ resTmpVars=oldTmp }
-    let body'' = if List.null postponing
-                 then body'
-                 else [UseResources (fst <$> postponing) beforeVars afterVars body'
-                        `maybePlace` pos]
-    return $ saves ++ body'' ++ restores
+    return $ saves 
+          ++ [UseResources res vars body' `maybePlace` pos] 
+          ++ restores
 transformStmt Nop pos = return [maybePlace Nop pos]
 transformStmt Fail pos = return [maybePlace Fail pos]
 transformStmt Break pos = return [maybePlace Break pos]
@@ -380,10 +377,9 @@ globaliseProc pos name variant detism params ress body
     -- we must save and restore any in-flowing resources, as we cannot be
     -- sure theyre not mutated
     let ress' = [res | ResourceFlowSpec res flow <- Set.toList ress
-                    , not $ flowsOut flow
-                    , not $ isSpecialResource res ]
+                , not $ flowsOut flow
+                , not $ isSpecialResource res ]
     body' <- fst <$> globaliseStmts [UseResources ress'
-                                        (Just Map.empty)
                                         (Just Map.empty) body `maybePlace` pos]
     tmp' <- gets resTmpCtr
     modify $ \s -> s{resResources=oldResources,
@@ -398,7 +394,7 @@ globaliseProc pos name variant detism params ress body
                     -- we remove them here
                        body'' = (storeResource pos . mapFst resourceFlowRes <$> inRes)
                                 ++ takeWhile (not . isGlobalStore . content)
-                                (dropWhile (isGlobalLoad . content) body')
+                                (dropWhile ((isGlobalLoad ||| isMove) . content) body')
                 in (body'', params)
               else (body', realParams)
     return (params' ++ [globalsParam | needsGlobalParam], body'', tmp')
@@ -482,11 +478,10 @@ globaliseStmt (Loop stmts vars) pos = do
     (stmts',usesGlobals) <- globaliseStmts stmts
     vars' <- fixVarDict True vars
     return ([Loop stmts' vars' `maybePlace` pos], usesGlobals)
-globaliseStmt (UseResources [] _ _ stmts) pos = globaliseStmts stmts
-globaliseStmt (UseResources newRes beforeVars afterVars stmts) pos = do
+globaliseStmt (UseResources [] _ stmts) pos = globaliseStmts stmts
+globaliseStmt (UseResources newRes vars stmts) pos = do
     -- this handles the resources that were previously out-of-scope
-    let beforeVars' = trustFromJust "globalise use with no before" beforeVars
-    let afterVars' = trustFromJust "globalise use with no after" afterVars
+    let vars' = trustFromJust "globalise use with no vars" vars
     newResTypes <- lift $ mapM (canonicaliseResourceSpec pos "use block") newRes
     let newResTypes' = mapSnd (trustFromJust "globalise use") <$> newResTypes
     let newResTypesSet = Set.fromList newResTypes'
@@ -512,13 +507,8 @@ globaliseStmt (UseResources newRes beforeVars afterVars stmts) pos = do
             -- if theyve been assigned before the use block
           ++ [storeResource pos (res,ty)
              | (res, ty) <- newResTypes'
-             , resourceVar res `Map.member` beforeVars' ]
+             , resourceVar res `Map.member` vars' ]
           ++ stmts'
-            -- load the new values of the new resources, 
-            -- if theyve been assigned in or before the use block
-          ++ [loadResource pos (res,ty)
-             | (res, ty) <- newResTypes'
-             , resourceVar res `Map.member` afterVars' ]
             -- store the old values of the resources
           ++ stores
             -- ensure the "new" global (if any) cannot get optimised away
@@ -734,6 +724,22 @@ saveRestoreResourcesTmp pos resTys = do
                           else (localSave, localRestore)
     return (rePlace pos . save <$> ress, rePlace pos . restore <$> ress,
             Map.fromList $ zip tmpVars (snd <$> resTys))
+
+
+-- | Save and restore the given local variables in tmp variables
+saveRestoreLocalsTmp :: OptPos -> [(VarName, TypeSpec)]
+                   -> Resourcer ([Placed Stmt], [Placed Stmt], VarDict)
+saveRestoreLocalsTmp pos varTys = do
+    tmp <- gets resTmpCtr
+    modify $ \s -> s{resTmpCtr=tmp + length varTys}
+    let tmpVars = mkTempName <$> [tmp..]
+        vars = zip tmpVars varTys
+        save (t,(v,ty)) = move (varGet v `withType` ty)
+                               (varSet t `withType` ty)
+        restore (t,(v,ty)) = move (varGet t `withType` ty)
+                                  (varSet v `withType` ty)
+    return (rePlace pos . save <$> vars, rePlace pos . restore <$> vars,
+            Map.fromList $ zip tmpVars (snd <$> varTys))
 
 
 -- | Store the given resource in globals

@@ -31,7 +31,7 @@ module AST (
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), StringVariant(..), GlobalInfo(..), Generator(..), Stmt(..), ProcFunctor(..),
   regularProc, regularModProc,
-  flattenedExpFlow, expIsConstant, expVar, expVar', maybeExpType, innerExp,
+  flattenedExpFlow, expIsVar, expIsConstant, expVar, expVar', maybeExpType, innerExp,
   setExpFlowType,
   TypeRepresentation(..), TypeFamily(..), typeFamily,
   defaultTypeRepresentation, typeRepSize, integerTypeRep,
@@ -85,7 +85,7 @@ module AST (
   getLoadedModule, ifCurrentModuleElse, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
   getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
   getModule, getModuleInterface, updateModule, getSpecModule,
-  updateModImplementation, updateModImplementationM, updateModLLVM,
+  updateModImplementation, updateModImplementationM,
   addForeignImport, addForeignLib,
   updateModInterface, updateAllProcs, updateModSubmods, updateModProcs,
   getModuleSpec, moduleIsType, option,
@@ -560,7 +560,7 @@ updateLoadedModuleM updater modspec = do
 getLoadedModuleImpln :: ModSpec -> Compiler ModuleImplementation
 getLoadedModuleImpln modspec = do
     mod <- trustFromJustM ("unknown module " ++ showModSpec modspec) $
-           getLoadedModule modspec
+           getLoadingModule modspec
     return $ trustFromJust ("unimplemented module " ++ showModSpec modspec) $
            modImplementation mod
 
@@ -1642,14 +1642,6 @@ addForeignLib lib = do
         (\imp ->
            imp { modForeignLibs = Set.insert arg $ modForeignLibs imp })
 
--- | Update the LLVMAST.Module representation of the module
-updateModLLVM :: (Maybe LLVMAST.Module -> Maybe LLVMAST.Module)
-              -> ModuleImplementation
-              -> Compiler ModuleImplementation
-updateModLLVM fn modimp = do
-  let llmod' = fn $ modLLVM modimp
-  return $ modimp { modLLVM = llmod'}
-
 
 -- | Given a type spec, find its internal representation (a string),
 --   if possible.
@@ -2378,7 +2370,7 @@ foldStmt' sfn efn val (TestBool exp) pos = foldExp sfn efn val exp Nothing
 foldStmt' _   _   val Nop pos = val
 foldStmt' _   _   val Fail pos = val
 foldStmt' sfn efn val (Loop body _) pos = foldStmts sfn efn val body
-foldStmt' sfn efn val (UseResources _ _ _ body) pos = foldStmts sfn efn val body
+foldStmt' sfn efn val (UseResources _ _ body) pos = foldStmts sfn efn val body
 foldStmt' sfn efn val (For generators body) pos = val3
     where val1 = foldExps sfn efn pos val  $ loopVar . content <$> generators
           val2 = foldExps sfn efn pos val1 $ genExp  . content <$> generators
@@ -2792,13 +2784,13 @@ data Stmt
      | Cond (Placed Stmt) [Placed Stmt] [Placed Stmt]
             (Maybe VarDict) (Maybe VarDict)
 
-     -- | A scoped construct for resources.  This creates a context in which the
-     --   listed resources can be used, and in which those resources do not
-     --   change value. This statement is eliminated during resource processing.
-     | UseResources [ResourceSpec] (Maybe VarDict) (Maybe VarDict) [Placed Stmt]
 
      -- All the following are eliminated during unbranching.
 
+     -- | A scoped construct for resources.  This creates a context in which the
+     --   listed resources can be used, and in which those resources do not
+     --   change value. This statement is eliminated during resource processing.
+     | UseResources [ResourceSpec] (Maybe VarDict) [Placed Stmt]
      -- |A case statement, which selects the statement sequence corresponding to
      -- the first expression that matches the value of the first argument.  This
      -- is transformed to nested Cond statements.
@@ -2887,6 +2879,12 @@ data StringVariant = WybeString | CString
 
 data GlobalInfo = GlobalResource { globalResourceSpec :: ResourceSpec }
     deriving (Eq, Ord, Generic)
+
+
+-- | Return if the Exp is a Var
+expIsVar :: Exp -> Bool
+expIsVar Var{} = True
+expIsVar _     = False
 
 
 -- | Return the FlowDirection of an Exp, assuming it has been flattened.
@@ -3797,12 +3795,11 @@ showStmt indent (Loop lstmts genVars) =
     "do {" ++  showBody (indent + 4) lstmts
     ++ startLine indent ++ "}"
     ++ maybe "" ((" -> "++) . showVarMap) genVars
-showStmt indent (UseResources resources beforeVars afterVars stmts) =
+showStmt indent (UseResources resources vars stmts) =
     "use " ++ intercalate ", " (List.map show resources)
     ++ " in" ++ showBody (indent + 4) stmts
     ++ startLine indent ++ "}"
-    ++ maybe "" (("\n   before -> "++) . showVarMap) beforeVars
-    ++ maybe "" (("\n   after  -> "++) . showVarMap) afterVars
+    ++ maybe "" (("\n   preserving -> "++) . showVarMap) vars
 showStmt _ Fail = "fail"
 showStmt _ Nop = "pass"
 showStmt indent (For generators body) =

@@ -318,7 +318,7 @@ unbranchStmts detism (stmt:stmts) alt sense = do
 --   considers the sense of the test: if True, execution should go to the
 --   following statements on success and the alternative statements on
 --   failure; if False, then vice-versa. The following statements are
---   represented as a pair of a list of statements that has not yet been
+--   represented as a pair of a list of not yet unbranched statements 
 --   and a list of unbranched alternative statements. The alternative
 --   statements will have been factored out into a call to a fresh
 --   procedure if necessary (ie, if it will be used in more than one case,
@@ -435,7 +435,7 @@ unbranchStmt detism stmt@(Or [] exitVars) pos stmts alt sense =
     ifSemiDet detism "Empty disjunction in a Det context"
     $ unbranchStmt SemiDet (TestBool boolFalse) pos stmts alt sense
 unbranchStmt detism stmt@(Or [disj] exitVars) _ stmts alt sense =
-    placedApply (unbranchStmt SemiDet) disj stmts alt sense
+    placedApply (unbranchStmt detism) disj stmts alt sense
 unbranchStmt detism stmt@(Or (disj:disjs) exitVars) pos stmts alt sense = do
     let exitVars' = trustFromJust "unbranching Disjunction without exitVars"
                     exitVars
@@ -448,7 +448,7 @@ unbranchStmt detism stmt@(Or (disj:disjs) exitVars) pos stmts alt sense = do
     disjs' <- unbranchStmt detism (Or disjs exitVars) pos stmts' alt sense
     -- Update known vars back to state before condition (must have failed)
     modify $ \s -> s { brVars = beforeDisjVars }
-    placedApply (unbranchStmt detism) disj stmts' disjs' sense
+    placedApply (unbranchStmt SemiDet) disj stmts' disjs' sense
 unbranchStmt detism stmt@(Not tst) pos stmts alt sense =
     ifSemiDet detism ("Negation in a Det context: " ++ show stmt)
     $ do

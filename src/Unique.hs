@@ -258,7 +258,7 @@ uniquenessCheckStmt (TestBool exp) pos = uniquenessCheckExp exp pos
 uniquenessCheckStmt Nop pos = return ()
 uniquenessCheckStmt Fail pos = return ()
 uniquenessCheckStmt (Loop body _) _ = uniquenessCheckStmts body
-uniquenessCheckStmt (UseResources _ _ _ body) _ = uniquenessCheckStmts body
+uniquenessCheckStmt (UseResources _ _ body) _ = uniquenessCheckStmts body
 uniquenessCheckStmt (For generators body) pos = do
     mapM_ ((\gen -> do
             placedApply uniquenessCheckExp $ genExp gen
