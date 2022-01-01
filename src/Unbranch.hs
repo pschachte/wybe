@@ -62,7 +62,6 @@
 -- END MAJOR DOC
 ----------------------------------------------------------------
 
-{-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE LambdaCase #-}
 
 module Unbranch (unbranchProc) where
@@ -656,16 +655,8 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) freeVars pos name = do
     let closureProto = ProcProto name closureParams res
     let pDefClosure =
             ProcDef name closureProto
-            (ProcDefSrc
-                $ [Unplaced $
-                    ProcCall (First mod nm $ Just pID) detism' False
-                        (freeVars' ++ paramVars')])
-                    -- :[ ForeignCall "lpvm" "cast" []
-                    --      [var ParamIn ty, var ParamOut intType]
-                    -- | Typed (Var nm fl a) ty cast <- (content <$> paramVars)
-                    --                               ++ [testInExp | detism == SemiDet]
-                    -- , flowsOut fl && ty /= intType && a == Ordinary
-                    -- , let var f t = Unplaced $ Typed (Var nm f a) t cast])
+            (ProcDefSrc [Unplaced $ ProcCall (First mod nm $ Just pID) detism' False
+                                        (freeVars' ++ paramVars')])
             Nothing (length freeVars') 0
             Map.empty Private detism' MayInline impurity 
             (ClosureProc regularProcSpec) NoSuperproc
