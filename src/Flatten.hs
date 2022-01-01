@@ -280,37 +280,36 @@ flattenStmt stmt pos detism = do
 -- |Flatten the specified statement
 flattenStmt' :: Stmt -> OptPos -> Determinism -> Flattener ()
 flattenStmt' stmt@(ProcCall fn@(First [] "=" id) callDetism res [arg1,arg2]) pos detism = do
-    arg1' <- flattenAnonParam (content arg1) AnyType Nothing (place arg1)
-    arg2' <- flattenAnonParam (content arg2) AnyType Nothing (place arg2)
-    let arg1content = innerExp $ content arg1'
-    let arg2content = innerExp $ content arg2'
-    let arg1Vars = expOutputs arg1content
-    let arg2Vars = expOutputs arg2content
-    logFlatten $ "Flattening assignment with outputs " ++ show arg1Vars
-                 ++ " and " ++ show arg2Vars
+    let arg1content = innerExp $ content arg1
+    let arg2content = innerExp $ content arg2
+    let arg1outs = Set.null $ expOutputs arg1content
+    let arg2outs = Set.null $ expOutputs arg2content
+    logFlatten $ "Flattening assignment with arg1 outputs? " ++ show arg1outs
+                 ++ " and arg2 outputs? " ++ show arg2outs
     case (arg1content, arg2content) of
       (Fncall mod name args, _)
-        | not (Set.null arg1Vars) && Set.null arg2Vars -> do
-        let stmt' = ProcCall (First mod name Nothing) Det False (args++[arg2'])
+        | not arg1outs && arg2outs -> do
+        let stmt' = ProcCall (First mod name Nothing) Det False (args++[arg2])
         flattenStmt stmt' pos detism
       (_, Fncall mod name args)
-        | not (Set.null arg2Vars) && Set.null arg1Vars -> do
-        let stmt' = ProcCall  (First mod name Nothing) Det False (args++[arg1'])
-        flattenStmt stmt' pos detism
+        | not arg2outs && arg1outs -> do
+        (arg1':args') <- flattenStmtArgs (arg1:args) pos
+        emit pos $ ProcCall (First mod name Nothing) Det False (args'++[arg1'])
+        flushPostponed
       (_,_) | callDetism == Det 
-                && (varCheck arg1content arg2Vars || varCheck arg2content arg1Vars)
-                || Set.null arg1Vars && Set.null arg2Vars -> do
+                && (varCheck arg1content arg2outs || varCheck arg2content arg1outs)
+                || arg1outs && arg2outs -> do
         logFlatten $ "Leaving = call alone: " ++ showStmt 4 stmt
-        args' <- flattenStmtArgs [arg1',arg2'] pos
+        args' <- flattenStmtArgs [arg1,arg2] pos
         emit pos $ ProcCall fn callDetism res args'
         flushPostponed
       _ -> do
         -- Must be a mode error:  both sides want to bind variables
         logFlatten $ "Error: out=out assignment " ++ show stmt
         lift $ message Error "Cannot generate bindings on both sides of '='" pos
-  where varCheck argContent argVars 
+  where varCheck argContent hasOuts 
             = expIsVar argContent && flowsOut (flattenedExpFlow argContent) 
-                                  && Set.null argVars
+                                  && hasOuts
 flattenStmt' stmt@(ProcCall (First [] "fail" _) _ _ []) pos _ =
     emit pos Fail
 flattenStmt' stmt@(ProcCall (First [] "break" _) _ _ []) pos _ =
@@ -524,8 +523,41 @@ flattenExp expr@(Var name dir flowType) ty castFrom pos = do
         let expr' = typeAndPlace expr ty castFrom pos
         logFlatten $ "  Arg flattened to " ++ show expr'
         return expr'
-flattenExp expr@(AnonParamVar _ _) ty castFrom pos = 
-    flattenAnonParam expr ty castFrom pos
+flattenExp expr@(AnonParamVar mbNum dir) ty castFrom pos = do
+    logFlatten $ "  Flattening anon param " ++ show expr
+    anonState <- gets anonProcState
+    let AnonProcState _ currentAnon count params = anonState
+    (num, count') <- case (mbNum, count) of
+        (Nothing, Just n) -> 
+            let n' = n + 1
+            in return (n', Just n')
+        (Just n, _) | fromMaybe 0 count == 0 -> do
+            return (n, Nothing)
+        _ -> do 
+            lift $ message Error 
+                    "Mixed use of numbered and un-numbered anonymous parameters" pos
+            return (-1, count)
+    let name = makeAnonParamName currentAnon num
+    let var = Var name dir Ordinary 
+    let paramDir = paramFlow <$> Map.lookup num params
+    let paramDir' = if fromMaybe dir paramDir == dir 
+                    then dir 
+                    else ParamInOut
+    let param = makeAnonParam name paramDir'
+    modify (\s -> s{anonProcState=anonState{paramCount=count',
+                                            params=Map.insert num param params}})
+    if currentAnon == 0
+    then do
+        lift $ message Error
+               ("Anonymous parameter @" ++ maybe "" show mbNum 
+                ++ " outside of anonymous procedure expression")
+               pos
+        flattenExp var ty castFrom pos
+    else do
+        noteVarIntro name
+        expr' <- flattenExp var ty castFrom pos
+        logFlatten $ "  Anon param flattened " ++ show var ++ " -> " ++ show expr'
+        return expr'
 flattenExp expr@(ProcRef ms es) ty castFrom pos = do
     es' <- mapM flattenPExp es
     return $ typeAndPlace (ProcRef ms es') ty castFrom pos
@@ -635,45 +667,6 @@ flattenCall stmtBuilder isForeign ty castFrom pos exps = do
         $ postpone pos $ stmtBuilder
         $ exps' ++ [typeAndPlace (Var resultName ParamIn Ordinary) ty castFrom pos]
     return $ Unplaced $ maybeType (Var resultName varflow Ordinary) ty castFrom
-
-flattenAnonParam :: Exp -> TypeSpec -> Maybe TypeSpec -> OptPos
-            -> Flattener (Placed Exp)
-flattenAnonParam expr@(AnonParamVar mbNum dir) ty castFrom pos = do
-    logFlatten $ "  Flattening anon param " ++ show expr
-    anonState <- gets anonProcState
-    let AnonProcState _ currentAnon count params = anonState
-    (num, count') <- case (mbNum, count) of
-        (Nothing, Just n) -> 
-            let n' = n + 1
-            in return (n', Just n')
-        (Just n, _) | fromMaybe 0 count == 0 -> do
-            return (n, Nothing)
-        _ -> do 
-            lift $ message Error 
-                    "Mixed use of numbered and un-numbered anonymous parameters" pos
-            return (-1, count)
-    let name = makeAnonParamName currentAnon num
-    let var = Var name dir Ordinary 
-    let paramDir = paramFlow <$> Map.lookup num params
-    let paramDir' = if fromMaybe dir paramDir == dir 
-                    then dir 
-                    else ParamInOut
-    let param = makeAnonParam name paramDir'
-    modify (\s -> s{anonProcState=anonState{paramCount=count',
-                                            params=Map.insert num param params}})
-    if currentAnon == 0
-    then do
-        lift $ message Error
-               ("Anonymous parameter @" ++ maybe "" show mbNum 
-                ++ " outside of anonymous procedure expression")
-               pos
-        flattenExp var ty castFrom pos
-    else do
-        noteVarIntro name
-        expr' <- flattenExp var ty castFrom pos
-        logFlatten $ "  Anon param flattened " ++ show var ++ " -> " ++ show expr'
-        return expr'
-flattenAnonParam expr _ _ pos = return $ maybePlace expr pos
 
 
 -- | Translate a case expression into a conditional expression, for subsequent

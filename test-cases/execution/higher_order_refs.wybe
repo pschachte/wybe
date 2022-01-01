@@ -7,6 +7,11 @@ def {noinline} app(f:(I, ?J), i:I):J = f(i)
 
 !println(app({@=?@}, 1.0))
 
+!println(app({@+0.0=?@}, 1.0)) # checking flattening of @ works well
+
+?y = 0.5
+!println(app({@=?@+y}, 1.0))
+
 ?identity = id
 !println(app(identity, 1.0))
 

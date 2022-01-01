@@ -2157,7 +2157,7 @@ modeCheckExp m name defPos assigned _ tmpCount
     (ss',_,tmpCount') <- modecheckStmts m name defPos (addBindings inArgs assigned)
                              detism tmpCount True ss
     let paramVars = expVar . content . paramToVar <$> params
-    let vars = mentionedVars ss'
+    let vars = foldStmts (const . const) ((const .) . (. expInputs) . Set.union) Set.empty ss'
     let toClose = vars `Set.difference` Set.fromList paramVars
     varDict <- mapFromUnivSetM ultimateVarType Set.empty 
                 $ bindingVars assigned
@@ -2173,13 +2173,6 @@ modeCheckExp m name defPos assigned detism tmpCount
     return (maybePlace (Typed (content exp') ty' cast') pos, tmpCount')
 modeCheckExp m name defPos assigned detism tmpCount exp pos =
     return (maybePlace exp pos, tmpCount)
-
--- | Return the set of VarNames in a given list of stmts
-mentionedVars :: [Placed Stmt] -> Set VarName
-mentionedVars = foldStmts (const . const) addInsOuts Set.empty
-  where
-    addInsOuts vars e _ = vars `Set.union` expInputs e 
-                               `Set.union` expOutputs e
 
 -- | Check for flow errors in the given list of flows
 checkFlowErrors :: Bool -> Bool -> String -> OptPos -> [(FlowDirection, Bool, Maybe VarName)]

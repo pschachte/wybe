@@ -2883,20 +2883,23 @@ data GlobalInfo = GlobalResource { globalResourceSpec :: ResourceSpec }
 
 -- | Return if the Exp is a Var
 expIsVar :: Exp -> Bool
-expIsVar Var{} = True
-expIsVar _     = False
+expIsVar Var{}           = True
+expIsVar AnonParamVar{}  = True
+expIsVar (Typed exp _ _) = expIsVar exp 
+expIsVar _               = False
 
 
 -- | Return the FlowDirection of an Exp, assuming it has been flattened.
 flattenedExpFlow :: Exp -> FlowDirection
-flattenedExpFlow (IntValue _)       = ParamIn
-flattenedExpFlow (FloatValue _)     = ParamIn
-flattenedExpFlow (CharValue _)      = ParamIn
-flattenedExpFlow (StringValue _ _)  = ParamIn
-flattenedExpFlow (AnonProc{})       = ParamIn
-flattenedExpFlow (ProcRef _ _)      = ParamIn
-flattenedExpFlow (Var _ flow _)     = flow
-flattenedExpFlow (Typed exp _ _)    = flattenedExpFlow exp
+flattenedExpFlow (IntValue _)          = ParamIn
+flattenedExpFlow (FloatValue _)        = ParamIn
+flattenedExpFlow (CharValue _)         = ParamIn
+flattenedExpFlow (StringValue _ _)     = ParamIn
+flattenedExpFlow AnonProc{}            = ParamIn
+flattenedExpFlow (ProcRef _ _)         = ParamIn
+flattenedExpFlow (Var _ flow _)        = flow
+flattenedExpFlow (AnonParamVar _ flow) = flow
+flattenedExpFlow (Typed exp _ _)       = flattenedExpFlow exp
 flattenedExpFlow otherExp =
     shouldnt $ "Getting flow direction of unflattened exp " ++ show otherExp
 
@@ -3231,8 +3234,7 @@ procCallToExp stmt =
 
 
 -- |Return the set of variables that might be freshly assigned by the
--- specified expr.  Treats ParamInOut exprs as not assigning anything, because
--- it does not *freshly* assign a variable (ie, it's already assigned).
+-- specified expr.
 expOutputs :: Exp -> Set VarName
 expOutputs (IntValue _) = Set.empty
 expOutputs (FloatValue _) = Set.empty
@@ -3241,11 +3243,12 @@ expOutputs (CharValue _) = Set.empty
 expOutputs (Var "_" ParamIn _) = Set.singleton "_" -- special _ variable is out
 expOutputs (Var name flow _) =
     if flowsOut flow then Set.singleton name else Set.empty
+expOutputs (AnonParamVar mbNum flow) =
+    if flowsOut flow then Set.singleton (show mbNum) else Set.empty
 expOutputs (Global _) = Set.empty
-expOutputs (AnonProc{}) = Set.empty
+expOutputs AnonProc{} = Set.empty
 expOutputs (ProcRef _ _) = Set.empty
 expOutputs (Typed expr _ _) = expOutputs expr
-expOutputs (AnonParamVar _ _) = Set.empty
 expOutputs (DisjExp pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
 expOutputs (Where _ pexp) = expOutputs $ content pexp
 expOutputs (CondExp _ pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
@@ -3261,18 +3264,21 @@ pexpListOutputs :: [Placed Exp] -> Set VarName
 pexpListOutputs = List.foldr (Set.union . expOutputs . content) Set.empty
 
 
+-- |Return the set of variables that are inputs to the given expr.
 expInputs :: Exp -> Set VarName
 expInputs (IntValue _) = Set.empty
 expInputs (FloatValue _) = Set.empty
 expInputs (StringValue _ _) = Set.empty
 expInputs (CharValue _) = Set.empty
+expInputs (Var "_" ParamIn _) = Set.empty
 expInputs (Var name flow _) =
-   if flowsIn flow then Set.singleton name else Set.empty
+    if flowsIn flow then Set.singleton name else Set.empty
+expInputs (AnonParamVar mbNum flow) =
+    if flowsIn flow then Set.singleton (show mbNum) else Set.empty
 expInputs (Global _) = Set.empty
 expInputs (AnonProc{}) = Set.empty
 expInputs (ProcRef _ _) = Set.empty
 expInputs (Typed expr _ _) = expInputs expr
-expInputs (AnonParamVar _ _) = Set.empty
 expInputs (Where _ pexp) = expInputs $ content pexp
 expInputs (DisjExp pexp1 pexp2) = pexpListInputs [pexp1,pexp2]
 expInputs (CondExp _ pexp1 pexp2) = pexpListInputs [pexp1,pexp2]
@@ -3285,6 +3291,8 @@ expInputs (CaseExp exp cases deflt) =
 
 
 
+-- |Return the set of variables that are inputs to the the specified list of 
+-- placed expressions.
 pexpListInputs :: [Placed Exp] -> Set VarName
 pexpListInputs = List.foldr (Set.union . expInputs . content) Set.empty
 

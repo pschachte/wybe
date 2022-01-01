@@ -11,24 +11,30 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: higher_order_refs.<0>
-(*#globals##0:wybe.phantom, *?#globals##4:wybe.phantom):
+(*#globals##0:wybe.phantom, *?#globals##6:wybe.phantom):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     higher_order_refs.app<0>(higher_order_refs.gen#1<1><>:(wybe.float, ?wybe.float), 1.0:wybe.float, ?tmp#0##0:wybe.float) #0 @higher_order_refs:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##3:wybe.phantom) @io:nn:nn
-    foreign c print_float(~tmp#0##0:wybe.float, ~tmp#9##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
-    higher_order_refs.app<0>(higher_order_refs.gen#2<0><>:(wybe.float, ?wybe.float), 1.0:wybe.float, ?tmp#2##0:wybe.float) #2 @higher_order_refs:nn:nn
-    foreign c print_float(~tmp#2##0:wybe.float, ~tmp#12##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @io:nn:nn
-    higher_order_refs.app<0>(higher_order_refs.gen#3<0><>:(wybe.int, ?wybe.int), 1:wybe.int, ?tmp#3##0:wybe.int) #4 @higher_order_refs:nn:nn
-    foreign c print_int(~tmp#3##0:wybe.int, ~tmp#18##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @io:nn:nn
-    higher_order_refs.app<0>(higher_order_refs.gen#4<0><10:wybe.int>:(wybe.int, ?wybe.int), 1:wybe.int, ?tmp#5##0:wybe.int) #6 @higher_order_refs:nn:nn
-    foreign c print_int(~tmp#5##0:wybe.int, ~tmp#24##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#29##0:wybe.phantom, ?tmp#30##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#30##0:wybe.phantom, ~*#globals##3:wybe.phantom, ?*#globals##4:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##5:wybe.phantom) @io:nn:nn
+    foreign c print_float(~tmp#0##0:wybe.float, ~tmp#12##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @io:nn:nn
+    higher_order_refs.app<0>(higher_order_refs.gen#2<1><>:(wybe.float, ?wybe.float), 1.0:wybe.float, ?tmp#1##0:wybe.float) #2 @higher_order_refs:nn:nn
+    foreign c print_float(~tmp#1##0:wybe.float, ~tmp#15##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @io:nn:nn
+    higher_order_refs.app<0>(higher_order_refs.gen#3<1><0.5:wybe.float>:(wybe.float, ?wybe.float), 1.0:wybe.float, ?tmp#3##0:wybe.float) #4 @higher_order_refs:nn:nn
+    foreign c print_float(~tmp#3##0:wybe.float, ~tmp#21##0:wybe.phantom, ?tmp#26##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#26##0:wybe.phantom, ?tmp#27##0:wybe.phantom) @io:nn:nn
+    higher_order_refs.app<0>(higher_order_refs.gen#4<0><>:(wybe.float, ?wybe.float), 1.0:wybe.float, ?tmp#5##0:wybe.float) #6 @higher_order_refs:nn:nn
+    foreign c print_float(~tmp#5##0:wybe.float, ~tmp#27##0:wybe.phantom, ?tmp#32##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#32##0:wybe.phantom, ?tmp#33##0:wybe.phantom) @io:nn:nn
+    higher_order_refs.app<0>(higher_order_refs.gen#5<0><>:(wybe.int, ?wybe.int), 1:wybe.int, ?tmp#6##0:wybe.int) #8 @higher_order_refs:nn:nn
+    foreign c print_int(~tmp#6##0:wybe.int, ~tmp#33##0:wybe.phantom, ?tmp#38##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#38##0:wybe.phantom, ?tmp#39##0:wybe.phantom) @io:nn:nn
+    higher_order_refs.app<0>(higher_order_refs.gen#6<0><10:wybe.int>:(wybe.int, ?wybe.int), 1:wybe.int, ?tmp#8##0:wybe.int) #10 @higher_order_refs:nn:nn
+    foreign c print_int(~tmp#8##0:wybe.int, ~tmp#39##0:wybe.phantom, ?tmp#44##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#44##0:wybe.phantom, ?tmp#45##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#45##0:wybe.phantom, ~*#globals##5:wybe.phantom, ?*#globals##6:wybe.phantom) @io:nn:nn
 
 
 add_one > {inline} (1 calls)
@@ -47,7 +53,7 @@ add_one(f##0:wybe.float, ?#result##0:wybe.float):
     foreign llvm fadd(~f##0:wybe.float, 1.0:wybe.float, ?#result##0:wybe.float) @float:nn:nn
 
 
-app > {noinline} (4 calls)
+app > {noinline} (6 calls)
 0: higher_order_refs.app<0>
 app(f##0:(I, ?J), i##0:I, ?#result##0:J):
   GlobalFlows: {} 
@@ -74,25 +80,57 @@ gen#1(anon#1#1##0:wybe.float, ?anon#1#2##0:wybe.float):
 
 gen#2 > {inline} (1 calls)
 0: higher_order_refs.gen#2<0>
-gen#2(i##0:K, ?#result##0:K):
+gen#2(anon#2#1##0:wybe.float, ?anon#2#2##0:wybe.float):
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(~anon#2#1##0:wybe.float, ?anon#2#2##0:wybe.float) @higher_order_refs:nn:nn
+gen#2 > {inline} (1 calls)
+1: higher_order_refs.gen#2<1>
+gen#2(anon#2#1##0:wybe.float, ?anon#2#2##0:wybe.float):
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(~anon#2#1##0:wybe.float, ?anon#2#2##0:wybe.float) @higher_order_refs:nn:nn
+
+
+gen#3 > {inline} (1 calls)
+0: higher_order_refs.gen#3<0>
+gen#3(^y##0:wybe.float, anon#3#1##0:wybe.float, ?anon#3#2##0:wybe.float):
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm fsub(~anon#3#1##0:wybe.float, ~y##0:wybe.float, ?anon#3#2##0:wybe.float) @float:nn:nn
+gen#3 > {inline} (1 calls)
+1: higher_order_refs.gen#3<1>
+gen#3(^y##0:wybe.float, anon#3#1##0:wybe.float, ?anon#3#2##0:wybe.float):
+  GlobalFlows: {} 
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm fsub(~anon#3#1##0:wybe.float, ~^y##0:wybe.float, ?anon#3#2##0:wybe.float) @float:nn:nn
+
+
+gen#4 > {inline} (1 calls)
+0: higher_order_refs.gen#4<0>
+gen#4(i##0:K, ?#result##0:K):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(~i##0:K, ?#result##0:K) @higher_order_refs:nn:nn
 
 
-gen#3 > {inline} (1 calls)
-0: higher_order_refs.gen#3<0>
-gen#3(i##0:wybe.int, ?#result##0:wybe.int):
+gen#5 > {inline} (1 calls)
+0: higher_order_refs.gen#5<0>
+gen#5(i##0:wybe.int, ?#result##0:wybe.int):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @int:nn:nn
 
 
-gen#4 > {inline} (1 calls)
-0: higher_order_refs.gen#4<0>
-gen#4([^tmp#0##0:wybe.int], y##0:wybe.int, ?#result##0:wybe.int):
+gen#6 > {inline} (1 calls)
+0: higher_order_refs.gen#6<0>
+gen#6([^tmp#0##0:wybe.int], y##0:wybe.int, ?#result##0:wybe.int):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []
@@ -124,13 +162,19 @@ declare external ccc  void @print_int(i64)
 declare external ccc  void @print_float(double)    
 
 
-@higher_order_refs.6 =    constant [1 x i64] [i64 ptrtoint (i64 (i64, i64)* @"higher_order_refs.gen#4<0>" to i64)]
+@higher_order_refs.10 =    constant [1 x i64] [i64 ptrtoint (i64 (i64, i64)* @"higher_order_refs.gen#6<0>" to i64)]
 
 
-@higher_order_refs.5 =    constant [1 x i64] [i64 ptrtoint (i64 (i64, i64)* @"higher_order_refs.gen#3<0>" to i64)]
+@higher_order_refs.9 =    constant [1 x i64] [i64 ptrtoint (i64 (i64, i64)* @"higher_order_refs.gen#5<0>" to i64)]
 
 
-@higher_order_refs.3 =    constant [1 x i64] [i64 ptrtoint (i64 (i64, i64)* @"higher_order_refs.gen#2<0>" to i64)]
+@higher_order_refs.7 =    constant [1 x i64] [i64 ptrtoint (i64 (i64, i64)* @"higher_order_refs.gen#4<0>" to i64)]
+
+
+@higher_order_refs.5 =    constant [2 x i64] [i64 ptrtoint (i64 (i64, i64)* @"higher_order_refs.gen#3<1>" to i64), i64 bitcast (double 5.000000e-1 to i64)]
+
+
+@higher_order_refs.3 =    constant [1 x i64] [i64 ptrtoint (i64 (i64, i64)* @"higher_order_refs.gen#2<1>" to i64)]
 
 
 @higher_order_refs.1 =    constant [1 x i64] [i64 ptrtoint (i64 (i64, i64)* @"higher_order_refs.gen#1<1>" to i64)]
@@ -148,15 +192,23 @@ entry:
   %2 = bitcast i64 %"1#tmp#0##0" to double 
   tail call ccc  void  @print_float(double  %2)  
   tail call ccc  void  @putchar(i8  10)  
-  %"1#tmp#2##0" = tail call fastcc  i64  @"higher_order_refs.app<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_refs.3, i32 0, i32 0) to i64), i64  bitcast (double 1.000000e0 to i64))  
-  %4 = bitcast i64 %"1#tmp#2##0" to double 
+  %"1#tmp#1##0" = tail call fastcc  i64  @"higher_order_refs.app<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_refs.3, i32 0, i32 0) to i64), i64  bitcast (double 1.000000e0 to i64))  
+  %4 = bitcast i64 %"1#tmp#1##0" to double 
   tail call ccc  void  @print_float(double  %4)  
   tail call ccc  void  @putchar(i8  10)  
-  %"1#tmp#3##0" = tail call fastcc  i64  @"higher_order_refs.app<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_refs.5, i32 0, i32 0) to i64), i64  1)  
-  tail call ccc  void  @print_int(i64  %"1#tmp#3##0")  
+  %"1#tmp#3##0" = tail call fastcc  i64  @"higher_order_refs.app<0>"(i64  ptrtoint (i64* getelementptr inbounds ([2 x i64], [2 x i64]* @higher_order_refs.5, i32 0, i32 0) to i64), i64  bitcast (double 1.000000e0 to i64))  
+  %6 = bitcast i64 %"1#tmp#3##0" to double 
+  tail call ccc  void  @print_float(double  %6)  
   tail call ccc  void  @putchar(i8  10)  
-  %"1#tmp#5##0" = tail call fastcc  i64  @"higher_order_refs.app<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_refs.6, i32 0, i32 0) to i64), i64  1)  
-  tail call ccc  void  @print_int(i64  %"1#tmp#5##0")  
+  %"1#tmp#5##0" = tail call fastcc  i64  @"higher_order_refs.app<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_refs.7, i32 0, i32 0) to i64), i64  bitcast (double 1.000000e0 to i64))  
+  %8 = bitcast i64 %"1#tmp#5##0" to double 
+  tail call ccc  void  @print_float(double  %8)  
+  tail call ccc  void  @putchar(i8  10)  
+  %"1#tmp#6##0" = tail call fastcc  i64  @"higher_order_refs.app<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_refs.9, i32 0, i32 0) to i64), i64  1)  
+  tail call ccc  void  @print_int(i64  %"1#tmp#6##0")  
+  tail call ccc  void  @putchar(i8  10)  
+  %"1#tmp#8##0" = tail call fastcc  i64  @"higher_order_refs.app<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_refs.10, i32 0, i32 0) to i64), i64  1)  
+  tail call ccc  void  @print_int(i64  %"1#tmp#8##0")  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
@@ -178,10 +230,10 @@ entry:
 
 define external fastcc  i64 @"higher_order_refs.app<0>"(i64  %"f##0", i64  %"i##0")    {
 entry:
-  %7 = inttoptr i64 %"f##0" to i64* 
-  %8 = load  i64, i64* %7 
-  %9 = inttoptr i64 %8 to i64 (i64, i64)* 
-  %"1##result##0" = tail call fastcc  i64  %9(i64  %"f##0", i64  %"i##0")  
+  %11 = inttoptr i64 %"f##0" to i64* 
+  %12 = load  i64, i64* %11 
+  %13 = inttoptr i64 %12 to i64 (i64, i64)* 
+  %"1##result##0" = tail call fastcc  i64  %13(i64  %"f##0", i64  %"i##0")  
   ret i64 %"1##result##0" 
 }
 
@@ -194,26 +246,60 @@ entry:
 
 define external fastcc  i64 @"higher_order_refs.gen#1<1>"(i64  %"#env##0", i64  %"anon#1#1##0")    {
 entry:
-  %10 = bitcast i64 %"anon#1#1##0" to double 
-  %11 = bitcast double %10 to i64 
-  ret i64 %11 
+  %14 = bitcast i64 %"anon#1#1##0" to double 
+  %15 = bitcast double %14 to i64 
+  ret i64 %15 
 }
 
 
-define external fastcc  i64 @"higher_order_refs.gen#2<0>"(i64  %"#env##0", i64  %"i##0")    {
+define external fastcc  double @"higher_order_refs.gen#2<0>"(double  %"anon#2#1##0")    {
+entry:
+  ret double %"anon#2#1##0" 
+}
+
+
+define external fastcc  i64 @"higher_order_refs.gen#2<1>"(i64  %"#env##0", i64  %"anon#2#1##0")    {
+entry:
+  %16 = bitcast i64 %"anon#2#1##0" to double 
+  %17 = bitcast double %16 to i64 
+  ret i64 %17 
+}
+
+
+define external fastcc  double @"higher_order_refs.gen#3<0>"(double  %"y##0", double  %"anon#3#1##0")    {
+entry:
+  %"1#anon#3#2##0" = fsub double %"anon#3#1##0", %"y##0" 
+  ret double %"1#anon#3#2##0" 
+}
+
+
+define external fastcc  i64 @"higher_order_refs.gen#3<1>"(i64  %"#env##0", i64  %"anon#3#1##0")    {
+entry:
+  %18 = add   i64 %"#env##0", 8 
+  %19 = inttoptr i64 %18 to double* 
+  %20 = getelementptr  double, double* %19, i64 0 
+  %21 = load  double, double* %20 
+  %22 = bitcast i64 %"anon#3#1##0" to double 
+  %"1#anon#3#2##0" = fsub double %22, %21 
+  %23 = bitcast double %"1#anon#3#2##0" to i64 
+  ret i64 %23 
+}
+
+
+define external fastcc  i64 @"higher_order_refs.gen#4<0>"(i64  %"#env##0", i64  %"i##0")    {
 entry:
   ret i64 %"i##0" 
 }
 
 
-define external fastcc  i64 @"higher_order_refs.gen#3<0>"(i64  %"#env##0", i64  %"i##0")    {
+define external fastcc  i64 @"higher_order_refs.gen#5<0>"(i64  %"#env##0", i64  %"i##0")    {
 entry:
   %"1##result##0" = add   i64 %"i##0", 1 
   ret i64 %"1##result##0" 
 }
 
 
-define external fastcc  i64 @"higher_order_refs.gen#4<0>"(i64  %"#env##0", i64  %"y##0")    {
+define external fastcc  i64 @"higher_order_refs.gen#6<0>"(i64  %"#env##0", i64  %"y##0")    {
 entry:
   %"1##result##0" = add   i64 %"y##0", 10 
   ret i64 %"1##result##0" 
