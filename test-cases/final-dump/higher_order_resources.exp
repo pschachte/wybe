@@ -38,7 +38,7 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm mutate(~tmp#59##0:wybe.list(T), ?tmp#0##0:wybe.list(wybe.list(wybe.int)), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#5##0:wybe.list(T)) @list:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%tmp#29##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm store(<<higher_order_resources.maximum>>:wybe.int, -1000:wybe.int, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) @higher_order_resources:nn:nn
-    higher_order_resources.gen#4<0>(~*#globals##2:wybe.phantom, ~tmp#0##0:wybe.list(A), higher_order_resources.gen#1<1><>:{resource} (A), ~tmp#0##0:wybe.list(A), ?*#globals##3:wybe.phantom) #31 @higher_order_resources:nn:nn
+    higher_order_resources.gen#4<0>(~*#globals##2:wybe.phantom, ~tmp#0##0:wybe.list(A), higher_order_resources.gen#1<1><>:{resource}(A), ~tmp#0##0:wybe.list(A), ?*#globals##3:wybe.phantom) #31 @higher_order_resources:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%maximum##1:wybe.int, ~*#globals##3:wybe.phantom, ?*#globals##4:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#65##0:wybe.phantom, ~*#globals##4:wybe.phantom, ?*tmp#66##0:wybe.phantom) @io:nn:nn
     foreign c print_int(~maximum##1:wybe.int, ~tmp#65##0:wybe.phantom, ?tmp#67##0:wybe.phantom) @io:nn:nn
@@ -85,7 +85,7 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm mutate(~tmp#121##0:wybe.list(T), ?tmp#122##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#12##0:T) @list:nn:nn
     foreign lpvm mutate(~tmp#122##0:wybe.list(T), ?tmp#11##0:wybe.list(wybe.list(wybe.int)), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#16##0:wybe.list(T)) @list:nn:nn
     foreign lpvm store(<<higher_order_resources.maximum>>:wybe.int, -1000:wybe.int, ~*#globals##7:wybe.phantom, ?*#globals##9:wybe.phantom) @higher_order_resources:nn:nn
-    higher_order_resources.gen#4<0>(~*#globals##9:wybe.phantom, ~tmp#11##0:wybe.list(A), higher_order_resources.gen#2<1><-1000:wybe.int>:{resource} (A), ~tmp#11##0:wybe.list(A), ?*#globals##10:wybe.phantom) #33 @higher_order_resources:nn:nn
+    higher_order_resources.gen#4<0>(~*#globals##9:wybe.phantom, ~tmp#11##0:wybe.list(A), higher_order_resources.gen#2<1><-1000:wybe.int>:{resource}(A), ~tmp#11##0:wybe.list(A), ?*#globals##10:wybe.phantom) #33 @higher_order_resources:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%maximum##3:wybe.int, ~*#globals##10:wybe.phantom, ?*#globals##11:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#128##0:wybe.phantom, ~*#globals##11:wybe.phantom, ?*tmp#129##0:wybe.phantom) @io:nn:nn
     foreign c print_int(~maximum##3:wybe.int, ~tmp#128##0:wybe.phantom, ?tmp#130##0:wybe.phantom) @io:nn:nn
@@ -120,7 +120,7 @@ gen#2([^maximum##0:wybe.int], anon#2#1##0:wybe.list(wybe.int), *#globals##0:wybe
   InterestingCallProperties: []
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%maximum##4:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm store(<<higher_order_resources.maximum>>:wybe.int, -1000:wybe.int, ~*#globals##1:wybe.phantom, ?*#globals##4:wybe.phantom) @higher_order_resources:nn:nn
-    higher_order_resources.gen#4<0>(~*#globals##4:wybe.phantom, anon#2#1##0:wybe.list(A), higher_order_resources.gen#3<1><>:{resource} (A), anon#2#1##0:wybe.list(A), ?*#globals##5:wybe.phantom) #5 @higher_order_resources:nn:nn
+    higher_order_resources.gen#4<0>(~*#globals##4:wybe.phantom, anon#2#1##0:wybe.list(A), higher_order_resources.gen#3<1><>:{resource}(A), anon#2#1##0:wybe.list(A), ?*#globals##5:wybe.phantom) #5 @higher_order_resources:nn:nn
     wybe.string.print_string<0>("> ":wybe.string, ~*#globals##5:wybe.phantom, ?*#globals##6:wybe.phantom) #6 @io:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%maximum##3:wybe.int, ~*#globals##6:wybe.phantom, ?*#globals##7:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#39##0:wybe.phantom, ~*#globals##7:wybe.phantom, ?*tmp#40##0:wybe.phantom) @io:nn:nn
@@ -138,7 +138,7 @@ gen#2([^maximum##0:wybe.int], anon#2#1##0:wybe.list(wybe.int), *#globals##0:wybe
   InterestingCallProperties: []
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%tmp#4##0:wybe.int, ~*#globals##0:wybe.phantom, ?*tmp#5##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm store(<<higher_order_resources.maximum>>:wybe.int, -1000:wybe.int, ~*tmp#5##0:wybe.phantom, ?*tmp#6##0:wybe.phantom) @higher_order_resources:nn:nn
-    higher_order_resources.gen#4<0>(~*tmp#6##0:wybe.phantom, anon#2#1##0:wybe.list(A), higher_order_resources.gen#3<1><>:{resource} (A), anon#2#1##0:wybe.list(A), ?*tmp#7##0:wybe.phantom) #1 @higher_order_resources:nn:nn
+    higher_order_resources.gen#4<0>(~*tmp#6##0:wybe.phantom, anon#2#1##0:wybe.list(A), higher_order_resources.gen#3<1><>:{resource}(A), anon#2#1##0:wybe.list(A), ?*tmp#7##0:wybe.phantom) #1 @higher_order_resources:nn:nn
     wybe.string.print_string<0>("> ":wybe.string, ~*tmp#7##0:wybe.phantom, ?*tmp#8##0:wybe.phantom) #2 @io:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%tmp#9##0:wybe.int, ~*tmp#8##0:wybe.phantom, ?*tmp#10##0:wybe.phantom) @higher_order_resources:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom, ~*tmp#10##0:wybe.phantom, ?*tmp#12##0:wybe.phantom) @io:nn:nn
@@ -168,7 +168,7 @@ gen#3(anon#3#1##0:wybe.int, *#globals##0:wybe.phantom, *?#globals##1:wybe.phanto
 
 gen#4 > (2 calls)
 0: higher_order_resources.gen#4<0>
-gen#4(*#globals##0:wybe.phantom, as##0:wybe.list(A), f##0:{resource} (A), tmp#0##0:wybe.list(A), ?#globals##2:wybe.phantom):
+gen#4(*#globals##0:wybe.phantom, as##0:wybe.list(A), f##0:{resource}(A), tmp#0##0:wybe.list(A), ?#globals##2:wybe.phantom):
   GlobalFlows: everything 
   AliasPairs: []
   InterestingCallProperties: []
@@ -180,18 +180,18 @@ gen#4(*#globals##0:wybe.phantom, as##0:wybe.list(A), f##0:{resource} (A), tmp#0#
     1:
         foreign lpvm access(tmp#0##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?a##0:A) @list:nn:nn
         foreign lpvm access(~tmp#0##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##1:wybe.list(A)) @list:nn:nn
-        f##0:{resource} (A)(~a##0:A, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #1 @higher_order_resources:nn:nn
-        higher_order_resources.gen#4<0>(~#globals##1:wybe.phantom, ~as##0:wybe.list(A), ~f##0:{resource} (A), ~tmp#0##1:wybe.list(A), ?#globals##2:wybe.phantom) #2 @higher_order_resources:nn:nn
+        f##0:{resource}(A)(~a##0:A, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #1 @higher_order_resources:nn:nn
+        higher_order_resources.gen#4<0>(~#globals##1:wybe.phantom, ~as##0:wybe.list(A), ~f##0:{resource}(A), ~tmp#0##1:wybe.list(A), ?#globals##2:wybe.phantom) #2 @higher_order_resources:nn:nn
 
 
 
 map > {inline} (3 calls)
 0: higher_order_resources.map<0>
-map(f##0:{resource} (A), as##0:wybe.list(A), *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
+map(f##0:{resource}(A), as##0:wybe.list(A), *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
   GlobalFlows: everything 
   AliasPairs: []
   InterestingCallProperties: []
-    higher_order_resources.gen#4<0>(~#globals##0:wybe.phantom, ~as##0:wybe.list(A), ~f##0:{resource} (A), ~as##0:wybe.list(A), ?#globals##1:wybe.phantom) #0 @higher_order_resources:nn:nn
+    higher_order_resources.gen#4<0>(~#globals##0:wybe.phantom, ~as##0:wybe.list(A), ~f##0:{resource}(A), ~as##0:wybe.list(A), ?#globals##1:wybe.phantom) #0 @higher_order_resources:nn:nn
 
 
 take_max > (3 calls)

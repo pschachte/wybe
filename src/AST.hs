@@ -27,7 +27,7 @@ module AST (
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..),
   paramTypeFlow, primParamTypeFlow, setParamArgFlowType,
-  paramToVar, primParamToArg, freeParamVar, unzipTypeFlow, unzipTypeFlows,
+  paramToVar, primParamToArg, unzipTypeFlow, unzipTypeFlows,
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), StringVariant(..), GlobalInfo(..), Generator(..), Stmt(..), ProcFunctor(..),
   regularProc, regularModProc,
@@ -1161,7 +1161,7 @@ setVariant variant mods = mods {modifierVariant=variant}
 -- | How to display ProcModifiers
 showProcModifiers :: ProcModifiers -> String
 showProcModifiers (ProcModifiers detism inlining impurity _ res _ _) =
-    showFlags' $ List.filter (not . List.null) [d,i,p,r]
+    showFlags $ List.filter (not . List.null) [d,i,p,r]
     where d = determinismName detism
           i = inliningName inlining
           p = impurityName impurity
@@ -2723,11 +2723,6 @@ primParamToArg :: PrimParam -> PrimArg
 primParamToArg (PrimParam nm ty fl ft _) = ArgVar nm ty fl ft False
 
 
--- |Get Free Param and Typed Var for the given VarName and TypeSpec 
-freeParamVar :: VarName -> TypeSpec -> (Param, Exp)
-freeParamVar n t = (Param n t ParamIn Free, Typed (Var n ParamIn Free) t Nothing)
-
-
 -- |Set the TypeSpec of a given TypeFlow
 setTypeFlowType :: TypeSpec -> TypeFlow -> TypeFlow
 setTypeFlowType t tf = tf{typeFlowType=t}
@@ -3624,10 +3619,9 @@ showProcDef thisID
     "\n"
     ++ showProcName n ++ " > "
     ++ visibilityPrefix vis
-    ++ showProcModifiers (ProcModifiers detism inline impurity ctor Resourceless [] [])
+    ++ showProcModifiers' (ProcModifiers detism inline impurity ctor Resourceless [] [])
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
     ++ showSuperProc sub
-    -- ++ maybe "" (("closure-of: " ++) . show) mbCls
     ++ "\n"
     ++ show thisID ++ ": "
     ++ (if isCompiled def then "" else show proto ++ ":")
