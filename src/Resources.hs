@@ -106,7 +106,7 @@ canonicaliseResourceFlow pos spec = do
 
 -- | Data type to store the necessary data for adding resources to a proc
 data ResourceState = ResourceState {
-    resResources      :: Set (ResourceSpec, TypeSpec),
+    resResources      :: Map ResourceSpec TypeSpec,
     -- ^ The set of resources and their types that are currently in scope
     resTmpVars        :: VarDict,
     -- ^ Tmp variables that have been generated so far
@@ -117,22 +117,26 @@ data ResourceState = ResourceState {
     -- Nothing if we arent globalising
 
     -- The following are only used when globalising
-    resIn             :: Set (ResourceSpec, TypeSpec),
+    resIn             :: Map ResourceSpec TypeSpec,
     -- ^ The set of resources that flow into the current stmt
-    resOut            :: Set (ResourceSpec, TypeSpec),
+    resOut            :: Map ResourceSpec TypeSpec,
     -- ^ The set of resources that flow out of the current stmt
+    resMentioned      :: Map ResourceSpec TypeSpec,
+    -- ^ The set of resources that have been mentioned anywhere 
+    -- in this procedure
     resIsExecMain     :: Bool
     -- ^ Are we currently globalising the executable main procedure
 }
 
 -- | Initial ResourceState given a tmpCtr
 initResourceState :: Maybe Bool -> Int -> ResourceState
-initResourceState globals tmp = ResourceState{resResources=Set.empty,
+initResourceState globals tmp = ResourceState{resResources=Map.empty,
                                               resTmpVars=Map.empty,
                                               resTmpCtr=tmp,
                                               resHaveGlobals=globals,
-                                              resIn=Set.empty,
-                                              resOut=Set.empty,
+                                              resIn=Map.empty,
+                                              resOut=Map.empty,
+                                              resMentioned=Map.empty,
                                               resIsExecMain=False}
 
 
@@ -184,7 +188,7 @@ transformProc :: Set ResourceFlowSpec -> [Placed Stmt] -> OptPos
 transformProc resourceFlows body pos = do
     resFlows <- concat <$> mapM (simpleResourceFlows pos)
                            (Set.elems resourceFlows)
-    modify $ \s -> s{resResources=Set.fromList $ mapFst resourceFlowRes <$> resFlows}
+    modify $ \s -> s{resResources=Map.fromList $ mapFst resourceFlowRes <$> resFlows}
     logResourcer $ "Declared resources: " ++ show resFlows
     body' <- transformStmts body
     tmp' <- gets resTmpCtr
@@ -278,7 +282,7 @@ transformStmt (UseResources res vars body) pos = do
                     resTmpVars=oldTmp} <- get
     (saves, restores, tmpVars) <- saveRestoreLocalsTmp pos $ Map.toList vars'
     modify $ \s -> s{resTmpVars=tmpVars `Map.union` oldTmp,
-                     resResources=oldResTypes `Set.union` Set.fromList resTys}
+                     resResources=oldResTypes `Map.union` Map.fromList resTys}
     body' <- transformStmts body
     modify $ \s -> s{ resTmpVars=oldTmp }
     return $ saves 
@@ -302,10 +306,10 @@ transformExp (Typed exp ty cast) pos = do
     return $ maybePlace (Typed exp' ty cast) pos
 transformExp (AnonProc mods params body clsd _) pos = do
     body' <- transformStmts body
-    res <- Set.map (mapFst (`ResourceFlowSpec` ParamInOut)) <$> gets resResources
+    res <- (mapFst (`ResourceFlowSpec` ParamInOut) <$>) . Map.toList <$> gets resResources
     let (params', res') = if modifierResourceful mods == Resourceful
-                  then (params ++ (resourceParams <$> Set.toList res),
-                        Set.map fst res)
+                  then (params ++ (resourceParams <$> res),
+                        Set.fromList $ fst <$> res)
                   else (params, Set.empty)
     return $ AnonProc mods params' body' clsd (Just res')
                 `maybePlace` pos
@@ -377,17 +381,20 @@ globaliseProc :: OptPos -> Maybe ProcName -> ProcVariant
               -> [Placed Stmt] -> Resourcer ([Param], [Placed Stmt], Int)
 globaliseProc pos name variant detism params ress body 
   | variantNeedsGlobalisation variant = do
+    logResourcer $ "Globalising proc " ++ fromMaybe "un-named (anon)" name
     let hasHigherResources = any paramIsResourceful params
     let (resFlows, realParams) = partitionEithers $ eitherResourceParam <$> params
     let needsGlobalParam = hasHigherResources || not (List.null resFlows)
     thisMod <- lift getModuleSpec
     let isExecMain = List.null thisMod && name == Just ""
     ResourceState{resResources=oldResources,
+                  resMentioned=oldMentioned,
                   resHaveGlobals=oldHaveGlobals,
                   resTmpVars=oldTmpVars,
                   resIsExecMain=oldIsExecMain} <- get
-    modify $ \s -> s{resResources=oldResources `Set.union`
-                                    Set.fromList (mapFst resourceFlowRes <$> resFlows),
+    let res = Map.fromList $ mapFst resourceFlowRes <$> resFlows
+    modify $ \s -> s{resResources=res,
+                     resMentioned=res,
                      resHaveGlobals=Just needsGlobalParam,
                      resIsExecMain=isExecMain}
     -- we must save and restore any non-out-flowing resources, as we cannot be
@@ -397,20 +404,44 @@ globaliseProc pos name variant detism params ress body
                 , not $ isSpecialResource res ]
     body' <- fst <$> globaliseStmts [UseResources ress' (Just Map.empty) body 
                                         `maybePlace` pos]
-    tmp' <- gets resTmpCtr
+    -- In the case of a proc that may fail, we need to roll back the state of 
+    -- resources we can if we fail. We can do this with the following 
+    -- transformation
+    --  <stmts>
+    -- ... into ...
+    --  <loads>
+    --  if { <stmts> :: <nop> | else :: <stores>; fail }
+    -- Unbranching will then force the stores to be executed in the case of
+    -- failure, ensuring the global variables are unmoddified
+    newMentioned <- gets resMentioned
+    body'' <- if detism /= SemiDet && detism /= Failure 
+                || Map.null newMentioned
+              then return body'
+              else do
+                let (init, void) = initVoidGlobals needsGlobalParam pos 
+                (saves, restores, tmpVars) <- saveRestoreResourcesTmp pos 
+                                            $ Map.toList newMentioned
+                return $ init 
+                      ++ saves
+                      ++ [Unplaced $ Cond (seqToStmt body') 
+                            [] 
+                            (restores ++ void ++ [Unplaced Fail]) 
+                            (Just tmpVars) (Just tmpVars)]
     modify $ \s -> s{resResources=oldResources,
                      resHaveGlobals=oldHaveGlobals,
                      resTmpVars=oldTmpVars,
-                     resIsExecMain=oldIsExecMain}
-    let (params', body'')
+                     resIsExecMain=oldIsExecMain,                   
+                     resMentioned=oldMentioned `Map.union` newMentioned}
+    let (params', body''')
             -- executable main gets special treatment
             -- in-flowing resources must be stored, and parameters are unmodified
             = if isExecMain
               then let inRes = List.filter (flowsIn . resourceFlowFlow . fst) resFlows
                        stores = storeResource pos . mapFst resourceFlowRes <$> inRes
-                   in (params, stores ++ body')
-              else (realParams, body')
-    return (params' ++ [globalsParam | needsGlobalParam], body'', tmp')
+                   in (params, stores ++ body'')
+              else (realParams, body'')
+    tmp' <- gets resTmpCtr
+    return (params' ++ [globalsParam | needsGlobalParam], body''', tmp')
   | otherwise = do
     tmp <- gets resTmpCtr
     return (params, body, tmp)
@@ -438,7 +469,7 @@ globaliseStmt (ProcCall fn@(First m n mbId) d r args) pos = do
     let args''' = if globals then args'' ++ globalsGetSet else args''
     return (loadStoreResources pos ins outs
                 [ProcCall fn d r args''' `maybePlace` pos],
-            globals || not (Set.null outs))
+            globals || not (Map.null outs))
 globaliseStmt (ProcCall (Higher fn) d r args) pos = do
     (fn':args', ins, outs) <- globaliseExps $ fn:args
     let globals = case content fn' of
@@ -453,7 +484,7 @@ globaliseStmt (ForeignCall lang name flags args) pos = do
     (args', ins, outs) <- globaliseExps args
     return (loadStoreResources pos ins outs
                 [ForeignCall lang name flags args' `maybePlace` pos],
-            not $ Set.null outs)
+            not $ Map.null outs)
 globaliseStmt (Cond tst thn els condVars exitVars) pos = do
     (tst', tstGlobals) <- placedApply globaliseStmt tst
     (thn', thnGlobals) <- globaliseStmts thn
@@ -484,7 +515,7 @@ globaliseStmt (Not stmt) pos = do
 globaliseStmt (TestBool exp) pos = do
     ([exp'], ins, outs) <- globaliseExps [exp `maybePlace` pos]
     -- TestBool cannot modify a resource 
-    unless (Set.null outs) $ shouldnt "globalise TestBool with out flowing resource"
+    unless (Map.null outs) $ shouldnt "globalise TestBool with out flowing resource"
     return (loadStoreResources pos ins outs [TestBool (content exp') `maybePlace` pos],
             False)
 globaliseStmt (Loop stmts vars) pos = do
@@ -499,12 +530,15 @@ globaliseStmt (UseResources newRes vars stmts) pos = do
                <$> lift (mapM (canonicaliseResourceSpec pos "use block") newRes)
     ResourceState{resHaveGlobals=haveGlobals,
                   resResources=resources,
+                  resMentioned=mentioned,
                   resTmpVars=tmpVars,
                   resIsExecMain=isExecMain} <- get
+    let resources' = Map.fromList newResTypes
     let haveGlobals' = trustFromJust "use resources with Nothing" haveGlobals
     (loads, stores, newVars) <- saveRestoreResourcesTmp pos newResTypes
     modify $ \s -> s {resHaveGlobals=Just True,
-                      resResources=resources `Set.union` Set.fromList newResTypes}
+                      resResources=resources `Map.union` resources',
+                      resMentioned=mentioned `Map.union` resources'}
     unless isExecMain $ modify $ \s -> s {resTmpVars=tmpVars `Map.union` newVars}
     stmts' <- fst <$> globaliseStmts stmts
     modify $ \s -> s {resHaveGlobals=haveGlobals,
@@ -513,24 +547,22 @@ globaliseStmt (UseResources newRes vars stmts) pos = do
     -- no need to load and store resources in executable main
     if isExecMain
     then return (stmts', True)
-    else return 
+    else let (init, void) = initVoidGlobals haveGlobals' pos
+        in return 
             -- initialise a "new" global variable, if we need to
-            ([move (iVal 0 `withType` phantomType)
-                   (varSetTyped globalsName phantomType)
-             | not haveGlobals' ]
+           (init
             -- load the old values of the resources
           ++ loads
             -- store the values of the new resources, 
             -- if theyve been assigned before the use block
-          ++ [storeResource pos (res,ty)
+          ++ [storeResource pos (res, ty)
              | (res, ty) <- newResTypes
              , resourceVar res `Map.member` vars' ]
           ++ stmts'
             -- store the old values of the resources
           ++ stores
             -- ensure the "new" global (if any) cannot get optimised away
-          ++ [lpvmVoid [varGetTyped globalsName phantomType `maybePlace` pos]
-             | not haveGlobals' ],
+          ++ void,
             True)
 globaliseStmt Nop pos = return ([Nop `maybePlace` pos], False)
 globaliseStmt Fail pos = return ([Fail `maybePlace` pos], False)
@@ -544,11 +576,11 @@ globaliseStmt For{} _ = shouldnt "for in globalise"
 -- This returns a list of inflowing and outflowing resources, and keeps the 
 -- Resourcer monad's in and out resources in tact
 globaliseExps :: [Placed Exp]
-              -> Resourcer ([Placed Exp], Set (ResourceSpec, TypeSpec), 
-                                          Set (ResourceSpec, TypeSpec))
+              -> Resourcer ([Placed Exp], Map ResourceSpec TypeSpec, 
+                                          Map ResourceSpec TypeSpec)
 globaliseExps exps = do
     ResourceState{resIn=oldIn, resOut=oldOut} <- get
-    modify $ \s -> s{resIn=Set.empty, resOut=Set.empty}
+    modify $ \s -> s{resIn=Map.empty, resOut=Map.empty}
     exps' <- globaliseExps' exps
     state' <- get
     modify $ \s -> s{resIn=oldIn, resOut=oldOut}
@@ -583,16 +615,26 @@ globaliseExp _ (AnonProc mods@(ProcModifiers detism _ _ _ resful _ _)
 globaliseExp _ exp pos = return $ exp `maybePlace` pos
 
 
--- Add the specified variable and type to the list of in or out resources if
+-- |Add the specified variable and type to the list of in or out resources if
 -- the variable refers to a resource
 addResourceInOuts :: FlowDirection -> VarName -> TypeSpec -> Resourcer ()
 addResourceInOuts fl nm ty = do
     ress <- resourceNameMap <$> gets resResources
     forM_ (Map.lookup nm ress)
-        $ \res -> modify (\s -> s{resIn=resIn s `Set.union`
-                                            Set.fromList [(res,ty) | flowsIn fl],
-                                  resOut=resOut s `Set.union`
-                                            Set.fromList [(res,ty) | flowsOut fl]})
+        $ \res -> modify (\s -> s{resIn=resIn s `Map.union`
+                                            Map.fromList [(res,ty) | flowsIn fl],
+                                  resOut=resOut s `Map.union`
+                                            Map.fromList [(res,ty) | flowsOut fl]})
+
+-- |If the given flag is False, return stmts to initialise and then void a fresh
+-- "globals" variable, else nops
+initVoidGlobals :: Bool -> OptPos -> ([Placed Stmt], [Placed Stmt])
+initVoidGlobals True _ = ([], [])
+initVoidGlobals False pos = 
+    ([rePlace pos 
+        $ move (iVal 0 `withType` phantomType) (varSetTyped globalsName phantomType)], 
+     [rePlace pos 
+        $ lpvmVoid [varGetTyped globalsName phantomType `maybePlace` pos]])
 
 
 ------------------------- General support code -------------------------
@@ -766,8 +808,8 @@ storeResource pos rsTy@(rs,ty) =
 
 
 -- | Store the given resource in globals
-storeResources :: OptPos -> Set (ResourceSpec, TypeSpec) -> [Placed Stmt]
-storeResources pos = (storeResource pos <$>) . Set.toList
+storeResources :: OptPos -> Map ResourceSpec TypeSpec -> [Placed Stmt]
+storeResources pos = (storeResource pos <$>) . Map.toList
 
 
 -- | Load the given resource from globals
@@ -777,13 +819,14 @@ loadResource pos rsTy@(rs,ty) =
 
 
 -- | Load the given resource from globals
-loadResources :: OptPos -> Set (ResourceSpec, TypeSpec) -> [Placed Stmt]
-loadResources pos = (loadResource pos <$>) . Set.toList
+loadResources :: OptPos -> Map ResourceSpec TypeSpec -> [Placed Stmt]
+loadResources pos = (loadResource pos <$>) . Map.toList
 
 
 -- | Surround a given list of statements with loads/stores to the given 
 -- resources 
-loadStoreResources :: OptPos -> Set (ResourceSpec, TypeSpec) -> Set (ResourceSpec, TypeSpec)
+loadStoreResources :: OptPos 
+                   -> Map ResourceSpec TypeSpec -> Map ResourceSpec TypeSpec
                    -> [Placed Stmt] -> [Placed Stmt]
 loadStoreResources pos inRes outRes stmts =
     loadResources pos inRes ++ stmts ++ storeResources pos outRes
@@ -794,14 +837,14 @@ loadStoreResourcesIf :: OptPos -> Bool -> Resourcer ([Placed Stmt],[Placed Stmt]
 loadStoreResourcesIf pos False = return ([], [])
 loadStoreResourcesIf pos True = do
     res <- gets resResources
-    (saves, restores, _) <- saveRestoreResourcesTmp pos $ Set.toList res
+    (saves, restores, _) <- saveRestoreResourcesTmp pos $ Map.toList res
     return (saves, restores)
 
 
 -- Build a map of resource names to their respective resource specs
-resourceNameMap :: Set (ResourceSpec, TypeSpec) -> Map VarName ResourceSpec
-resourceNameMap = Map.fromList . Set.toList
-                               . Set.map (((,) =<< resourceName) . fst)
+resourceNameMap :: Map ResourceSpec TypeSpec -> Map VarName ResourceSpec
+resourceNameMap = Map.fromList . ((((,) =<< resourceName) . fst) <$>) 
+                               . Map.toList
 
 
 -- |Log a message, if we are logging resource transformation activity.

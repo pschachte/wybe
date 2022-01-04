@@ -15,7 +15,7 @@ module top-level code > public {impure} (0 calls)
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm {semipure} void(0:wybe.phantom)
+    foreign lpvm {semipure} void(0:wybe.phantom) @bug228-okay:7:5
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) @io:nn:nn
     foreign c print_int(1:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
@@ -33,7 +33,7 @@ bar(?out1##0:wybe.int, ?out2##0:wybe.int):
     foreign lpvm load(<<bug228-okay.res>>:wybe.int, ?%tmp#1##0:wybe.int, 0:wybe.phantom, ?*#globals##3:wybe.phantom) @bug228-okay:7:5
     foreign llvm move(2:wybe.int, ?out2##0:wybe.int) @bug228-okay:9:10
     foreign lpvm store(<<bug228-okay.res>>:wybe.int, ~%tmp#1##0:wybe.int, ~*#globals##3:wybe.phantom, ?*#globals##5:wybe.phantom) @bug228-okay:7:5
-    foreign lpvm {semipure} void(~#globals##5:wybe.phantom)
+    foreign lpvm {semipure} void(~#globals##5:wybe.phantom) @bug228-okay:7:5
     foreign llvm move(1:wybe.int, ?out1##0:wybe.int) @bug228-okay:11:6
 
 

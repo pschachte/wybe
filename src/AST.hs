@@ -3856,7 +3856,7 @@ instance Show Exp where
   show (Global info) = show info
   show (AnonProc mods params ss _ _) =
       showProcModifiers mods
-      ++ "{" ++ intercalate "\n" (showStmt 0 . content <$> ss) ++ "}"
+      ++ "{" ++ intercalate "; " (showStmt 0 . content <$> ss) ++ "}"
   show (ProcRef ps es) = show ps ++ "<" ++ intercalate ", " (show <$> es) ++ ">"
   show (AnonParamVar num dir) = flowPrefix dir ++ "@" ++ maybe "" show num
   show (Where stmts exp) = show exp ++ " where" ++ showBody 8 stmts

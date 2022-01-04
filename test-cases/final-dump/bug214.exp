@@ -787,7 +787,7 @@ parse_direction(str##0:wybe.string, ?dir##0:bug214.direction, ?#success##0:wybe.
             wybe.string.=<0>("up":wybe.string, ~str##0:wybe.string, ?tmp#3##0:wybe.bool) #4 @bug214:8:11
             case ~tmp#3##0:wybe.bool of
             0:
-                foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool) @bug214:9:19
+                foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
                 foreign llvm move(undef:bug214.direction, ?dir##0:bug214.direction)
 
             1:

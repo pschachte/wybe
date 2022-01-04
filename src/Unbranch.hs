@@ -519,7 +519,9 @@ unbranchStmt detism Nop _ stmts alt sense = do
     unbranchStmts detism stmts alt sense     -- might as well filter out Nops
 unbranchStmt detism Fail pos stmts alt sense = do
     logUnbranch "Unbranching a Fail"
-    return [maybePlace Fail pos] -- no execution after Fail
+    -- XXX JB we stil have alt stmts to go...
+    -- return [maybePlace Fail pos] -- no execution after Fail
+    return alt
 unbranchStmt _ Break pos _ _ _ = do
     logUnbranch "Unbranching a Break"
     brk <- getLoopBreak pos
