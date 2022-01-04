@@ -95,11 +95,10 @@ module AST (
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   initialisedResources,
   addSimpleResource, lookupResource, specialResources, publicResource, resourcefulName,
-  ProcModifiers(..), defaultProcModifiers, 
+  ProcModifiers(..), defaultProcModifiers, checkProcMods,
   setDetism, setInline, setImpurity, setVariant,
   ProcVariant(..), Inlining(..), Impurity(..), Resourcefulness(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
-  checkConflictingMods, checkUnknownMods,
   specialChar, specialName, specialName2,
   outputVariableName, outputStatusName, globalsName,
   envParamName, envPrimParam, makeGlobalResourceName,
@@ -1191,14 +1190,11 @@ showFlags' flags = showFlags flags ++ if List.null flags then "" else " "
 addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
     let name = procProtoName proto
-    let ProcModifiers detism inlining impurity variant 
-                      resourceful unknown conflict = mods
-    checkUnknownMods name pos unknown
-    checkConflictingMods name pos conflict
+    let ProcModifiers detism inlining impurity variant _ _ _ = mods
+    checkProcMods ("declaratation of " ++ name) pos mods
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 Map.empty
                   vis detism inlining impurity variant (initSuperprocSpec vis)
-    addProcDef procDef
-    return ()
+    void $ addProcDef procDef
 addProc _ item =
     shouldnt $ "addProc given non-Proc item " ++ show item
 
@@ -1226,17 +1222,17 @@ addProcDef procDef = do
     return spec
 
 
-checkUnknownMods :: ProcName -> OptPos -> [String] -> Compiler ()
-checkUnknownMods name pos =
-    mapM_ (\m -> message Error ("Unknown proc modifier '" ++ m
-                                ++ "' in declaration of " ++ name) pos)
-
-
-checkConflictingMods :: ProcName -> OptPos -> [String] -> Compiler ()
-checkConflictingMods name pos =
-    mapM_ (\m -> message Error ("Proc modifier '" ++ m
-                                ++ "' conflicts with earlier modifier in declaration of "
-                                ++ name) pos)
+-- | Check a set of ProcModifiers, providing error messages for unknown and 
+-- conflicting mods
+checkProcMods :: String -> OptPos -> ProcModifiers -> Compiler ()
+checkProcMods context pos ProcModifiers{modifierUnknown=unknown,
+                                        modifierConflict=conflicting} = do
+    mapM_ (errmsg pos . ("Unknown modifier '" ++) 
+                      . (++ "' in " ++ context))
+        unknown
+    mapM_ (errmsg pos . ("Modifier '" ++) 
+                      . (++ "' conflicts with earlier modifier in " ++ context))
+        conflicting
 
 
 getParams :: ProcSpec -> Compiler [Param]

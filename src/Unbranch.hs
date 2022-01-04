@@ -644,9 +644,8 @@ unbranchExp exp@(AnonProc mods params pstmts clsd res) pos = do
     let res' = trustFromJust "unbranch annon proc without resources" res
     name <- newProcName
     logUnbranch $ "Creating procref for " ++ show exp ++ " under " ++ name
-    let ProcModifiers detism _ impurity _ resourceful unknown conflict = mods
-    lift $ checkConflictingMods "anonymous procedure" pos unknown
-    lift $ checkUnknownMods "anonymous procedure" pos conflict
+    let ProcModifiers detism _ impurity _ resourceful _ _ = mods
+    lift $ checkProcMods "anonymous procedure" pos mods
     let (freeParams, freeVars) = unzip $ uncurry freeParamVar <$> Map.toAscList clsd'
     logUnbranch $ "  With params " ++ show params
     logUnbranch $ "  With free variables " ++ show freeVars
