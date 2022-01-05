@@ -438,6 +438,10 @@ instr' prim@(PrimForeign "lpvm" "store" [] [ArgGlobal info _, var, gIn, gOut]) p
         _ -> do
              logBuild " ... it isn't" 
              ordinaryInstr prim pos
+instr' prim@(PrimForeign "lpvm" "void" flags args) pos = do
+    let args' = List.filter (not . argIsConst) args
+    unless (List.null args')
+        $ ordinaryInstr (PrimForeign "lpvm" "void" flags args') pos
 instr' prim pos = ordinaryInstr prim pos
 
 

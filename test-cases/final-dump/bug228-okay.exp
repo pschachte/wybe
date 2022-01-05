@@ -15,7 +15,6 @@ module top-level code > public {impure} (0 calls)
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm {semipure} void(0:wybe.phantom) @bug228-okay:7:5
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) @io:nn:nn
     foreign c print_int(1:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
