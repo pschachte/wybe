@@ -930,7 +930,7 @@ instance Show CallInfo where
     show (ProcInfo procSpec tys flows _ detism impurity inRes outRes partial) =
         (if partial then "partial application of " else "")
         ++ showProcModifiers' (ProcModifiers detism MayInline impurity 
-                                RegularProc True [] [])
+                                RegularProc False [] [])
         ++ show procSpec
         ++ "(" ++ intercalate "," (zipWith ((show .) . TypeFlow) tys flows) ++ ")"
         ++ if Set.null inRes && Set.null outRes
@@ -977,36 +977,41 @@ testToBoolFn _ = Nothing
 
 
 -- |Check if ProcInfo can be transformed into a partial application, given a
--- list of FlowDirections
-procToPartial :: [FlowDirection] -> CallInfo -> Maybe CallInfo
-procToPartial callFlows info@ProcInfo{procInfoPartial=False,
-                                      procInfoTypes=tys,
-                                      procInfoFlows=flows,
-                                      procInfoInRes=inRes,
-                                      procInfoOutRes=outRes,
-                                      procInfoVariant=variant,
-                                      procInfoDetism=detism,
-                                      procInfoImpurity=impurity}
+-- list of FlowDirections. This returns Just if the final FlowDirection is ParamOut
+-- if the call has an arity lower than expected or, in the case of a resourceful 
+-- call where the call does not have a ! prefix, at most 1 more than the expected 
+-- arity. The Bool returned indicates if the call should have a ! or not
+procToPartial :: [FlowDirection] -> Bool -> CallInfo -> (Maybe CallInfo, Bool)
+procToPartial callFlows hasBang info@ProcInfo{procInfoPartial=False,
+                                              procInfoTypes=tys,
+                                              procInfoFlows=flows,
+                                              procInfoInRes=inRes,
+                                              procInfoOutRes=outRes,
+                                              procInfoVariant=variant,
+                                              procInfoDetism=detism,
+                                              procInfoImpurity=impurity}
     | partialable && (length callFlows < length tys
-                        || length callFlows <= length tys && resful)
-        = Just info{procInfoPartial=True,
+                        || length callFlows <= length tys + 1 && resful)
+        = (Just info{procInfoPartial=True,
                     procInfoTypes=closedTys ++ [higherTy $ zipWith TypeFlow higherTys higherFls],
-                    procInfoFlows=closedFls ++ [ParamOut]}
+                    procInfoFlows=closedFls ++ [ParamOut]}, needsBang)
     | partialable && length callFlows == 1 && List.null tys
-        = Just info{procInfoPartial=True,
+        = (Just info{procInfoPartial=True,
                     procInfoTypes=[higherTy []],
-                    procInfoFlows=[ParamOut]}
+                    procInfoFlows=[ParamOut]}, needsBang)
   where
     partialable = not (List.null callFlows) && last callFlows == ParamOut
+                                            && not hasBang
     nClosed = length callFlows - 1
     (closedTys, higherTys) = List.splitAt nClosed tys
     (closedFls, higherFls) = List.splitAt nClosed flows
     resful = (any isResourcefulHigherOrder tys 
                 || not (Set.null inRes || Set.null outRes))
                 && variantNeedsGlobalisation variant
+    needsBang = resful || impurity > Pure
     higherTy = HigherOrderType (ProcModifiers detism MayInline 
                                 impurity RegularProc resful [] [])
-procToPartial _ _ = Nothing
+procToPartial _ _ _ = (Nothing, False)
 
 
 -- |A single call statement together with the determinism context in which
@@ -1395,16 +1400,17 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt typs):calls)
     logTyped $ "Type checking call " ++ show pstmt
     logTyped $ "Candidate types:\n    " ++ intercalate "\n    " (show <$> typs)
     let (stmt, stmtPos) = unPlace pstmt
-    let (mod, callee, pexps) 
-            = case stmt of
-                ProcCall (First mod callee _) _ _ pexps -> (mod,callee,pexps)
-                noncall -> shouldnt $ "typecheckCalls with non-call stmt"
-                                        ++ show noncall
+    let ProcCall (First mod callee _) _ resful pexps = stmt
+    --  (mod,callee,pexps)
+    -- let (mod, callee, pexps) 
+    --         = case stmt of
+    --             noncall -> shouldnt $ "typecheckCalls with non-call stmt"
+    --                                     ++ show noncall
     actualTypes <- mapM expType pexps
     let actualModes = flattenedExpFlow . content <$> pexps
     logTyped $ "Actual types: " ++ show actualTypes
     matches <- mapM
-               (matchTypes name callee stmtPos actualTypes actualModes)
+               (matchTypes name callee stmtPos resful actualTypes actualModes)
                typs
     let canonMatches = ap (,) (fmap (canonicalise 0) . callInfoTypes . fst)
                     <$> catOKs matches
@@ -1458,10 +1464,15 @@ typecheckCallWithInfo m name pos typings rest fs info = do
 -- |Match up the argument types of a call with the parameter types of the
 -- callee, producing a list of the actual types.  If this list contains
 -- InvalidType, then the call would be a type error.
-matchTypes :: Ident -> Ident -> OptPos -> [TypeSpec] -> [FlowDirection]
+matchTypes :: Ident -> Ident -> OptPos -> Bool -> [TypeSpec] -> [FlowDirection]
            -> CallInfo -> Typed (MaybeErr (CallInfo,Typing))
-matchTypes caller callee pos callTypes callFlows
+matchTypes caller callee pos hasBang callTypes callFlows
         calleeInfo@ProcInfo{procInfoTypes=tys}
+    -- Handle case whre call should have a ! but doesnt, and the call 
+    -- can be made partial
+    | not hasBang && needsBang && isJust partialCallInfo
+    = matchTypeList callee pos callTypes calleeInfo'''
+    -- Handle case where call arity is correct
     | sameLength callTypes tys
     = matchTypeList callee pos callTypes calleeInfo
     -- Handle case of SemiDet context call to bool function as a proc call
@@ -1470,17 +1481,19 @@ matchTypes caller callee pos callTypes callFlows
     -- Handle case of reified test call
     | isJust detCallInfo && sameLength callTypes (procInfoTypes calleeInfo'')
     = matchTypeList callee pos callTypes calleeInfo''
+    -- Handle case where the call is partial
     | isJust partialCallInfo
     = matchTypeList callee pos callTypes calleeInfo'''
+    -- Else, we must have an arity error
     | otherwise = return $ Err [ReasonArity caller callee pos
                                 (length callTypes) (length tys)]
     where testInfo = boolFnToTest calleeInfo
           calleeInfo' = fromJust testInfo
           detCallInfo = testToBoolFn calleeInfo
           calleeInfo'' = fromJust detCallInfo
-          partialCallInfo = procToPartial callFlows calleeInfo
+          (partialCallInfo, needsBang) = procToPartial callFlows hasBang calleeInfo
           calleeInfo''' = fromJust partialCallInfo
-matchTypes caller callee pos callTypes callFlows
+matchTypes caller callee pos _ callTypes callFlows
         calleeInfo@(HigherInfo fn) = do
     let callTFs = zipWith TypeFlow callTypes callFlows
     fnTy <- expType (Unplaced fn) >>= ultimateType
@@ -1902,7 +1915,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
     logTyped $ "    actual modes     : " ++ show actualModes
     checkFlowErrors False False cname pos actualModes ([],assigned,tmpCount') $ do
         typeMatches <- catOKs <$> mapM
-                    (matchTypes name cname pos actualTypes (sel1 <$> actualModes))
+                    (matchTypes name cname pos resourceful actualTypes (sel1 <$> actualModes))
                     callInfos
         logTyped $ "Type-correct modes   : " ++ show typeMatches
         -- All the possibly matching modes

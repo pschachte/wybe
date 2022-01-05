@@ -13,9 +13,7 @@ use maximum in {
     !map({resource}{
         use maximum in {
             ?maximum = -1000
-            !map({resource}{
-                !take_max(@)
-            }, @1) 
+            !map(take_max, @1) 
             !print("> "); !println(maximum)
         }
         !take_max(length(@1))
