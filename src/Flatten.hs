@@ -72,9 +72,9 @@ flattenProcDecl (ProcDecl vis mods proto stmts pos) = do
                   $ procProtoResources proto
     (stmts',tmpCtr) <- flattenBody stmts (inParams `Set.union` resources)
                        (modifierDetism mods)
-    let resfulMod = modifierResourceful mods
-    unless (resfulMod == Resourceless) 
-        $ modifierError (resourcefulName resfulMod) 
+    let resful = modifierResourceful mods
+    when resful 
+        $ modifierError (resourcefulName resful) 
             "procedure or function declaration" pos
     return (ProcDecl vis mods proto stmts' pos,tmpCtr)
 flattenProcDecl _ =

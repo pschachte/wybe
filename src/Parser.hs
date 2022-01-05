@@ -302,7 +302,7 @@ processProcModifier "noinline" = updateModsInlining "noinline" NoInline
 processProcModifier "pure"     = updateModsImpurity "pure" PromisedPure
 processProcModifier "semipure" = updateModsImpurity "semipure" Semipure
 processProcModifier "impure"   = updateModsImpurity "impure" Impure
-processProcModifier "resource" = updateModsResource "resource" Resourceful
+processProcModifier "resource" = updateModsResource "resource" True
 processProcModifier modName    =
     \ms -> ms {modifierUnknown=modName:modifierUnknown ms}
 
@@ -339,8 +339,8 @@ updateModsImpurity _ impurity mods@ProcModifiers{modifierImpurity=Pure} =
 updateModsImpurity modName _ mods =
     mods {modifierConflict=modName:modifierConflict mods}
 
-updateModsResource :: String -> Resourcefulness -> ProcModifiers -> ProcModifiers
-updateModsResource _ resful mods@ProcModifiers{modifierResourceful=Resourceless} =
+updateModsResource :: String -> Bool -> ProcModifiers -> ProcModifiers
+updateModsResource _ resful mods@ProcModifiers{modifierResourceful=False} =
     mods {modifierResourceful=resful}
 updateModsResource modName _ mods =
     mods {modifierConflict=modName:modifierConflict mods}

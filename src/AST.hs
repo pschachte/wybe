@@ -97,7 +97,7 @@ module AST (
   addSimpleResource, lookupResource, specialResources, publicResource, resourcefulName,
   ProcModifiers(..), defaultProcModifiers, checkProcMods,
   setDetism, setInline, setImpurity, setVariant,
-  ProcVariant(..), Inlining(..), Impurity(..), Resourcefulness(..),
+  ProcVariant(..), Inlining(..), Impurity(..), 
   addProc, addProcDef, lookupProc, publicProc, callTargets,
   specialChar, specialName, specialName2,
   outputVariableName, outputStatusName, globalsName,
@@ -1071,8 +1071,7 @@ data ProcModifiers = ProcModifiers {
     modifierInline::Inlining,      -- ^ Aggresively inline this proc?
     modifierImpurity::Impurity,    -- ^ Don't assume purity when optimising
     modifierVariant::ProcVariant,  -- ^ Is proc actually a constructor?
-    modifierResourceful::Resourcefulness, 
-                                   -- ^ Can this procedure use resources?
+    modifierResourceful::Bool,     -- ^ Can this procedure use resources?
     modifierUnknown::[String],     -- ^ Unknown modifiers specified
     modifierConflict::[String]     -- ^ Modifiers that conflict with others
 } deriving (Eq, Ord, Generic)
@@ -1118,13 +1117,9 @@ expectedImpurity Pure = Semipure        -- Semipure is OK for pure procs
 expectedImpurity _ = Impure             -- Otherwise, OK for defn to be impure
 
 
-data Resourcefulness = Resourceless
-                     | Resourceful
-    deriving (Eq, Ord, Generic)
-
-resourcefulName :: Resourcefulness -> String
-resourcefulName Resourceless = ""
-resourcefulName Resourceful  = "resource"
+resourcefulName :: Bool -> String
+resourcefulName False = ""
+resourcefulName True  = "resource"
 
 
 showResourceSets :: (Set ResourceSpec, Set ResourceSpec) -> String
@@ -1134,7 +1129,7 @@ showResourceSets (ins, outs) = "{" ++ showSet ins ++ ";" ++ showSet outs ++ "}"
 
 -- | The default Det, non-inlined, pure ProcModifiers.
 defaultProcModifiers :: ProcModifiers
-defaultProcModifiers = ProcModifiers Det MayInline Pure RegularProc Resourceless [] []
+defaultProcModifiers = ProcModifiers Det MayInline Pure RegularProc False [] []
 
 
 -- | Set the modifierDetism attribute of a ProcModifiers.
@@ -1946,7 +1941,7 @@ primImpurity (PrimHigherCall _ fn _)
         ArgProcRef pspec _ _ -> procImpurity <$> getProcDef pspec
         ArgVar _ (HigherOrderType ProcModifiers{modifierResourceful=resful,
                                                 modifierImpurity=purity} _) _ _ _
-            -> return $ max purity $ if resful == Resourceful then Impure else Pure
+            -> return purity 
         _ -> return Pure
 primImpurity (PrimForeign _ _ flags _) =
     return $ flagsImpurity flags
@@ -2561,8 +2556,8 @@ isHigherOrder HigherOrderType{} = True
 isHigherOrder _                 = False
 
 isResourcefulHigherOrder :: TypeSpec -> Bool
-isResourcefulHigherOrder (HigherOrderType ProcModifiers{modifierResourceful=res} tfs) =
-    res == Resourceful || any isResourcefulHigherOrder (typeFlowType <$> tfs)
+isResourcefulHigherOrder (HigherOrderType ProcModifiers{modifierResourceful=resful} tfs) =
+    resful || any isResourcefulHigherOrder (typeFlowType <$> tfs)
 isResourcefulHigherOrder (TypeSpec _ _ tys) =
     any isResourcefulHigherOrder tys
 isResourcefulHigherOrder _ = False
@@ -3615,7 +3610,7 @@ showProcDef thisID
     "\n"
     ++ showProcName n ++ " > "
     ++ visibilityPrefix vis
-    ++ showProcModifiers' (ProcModifiers detism inline impurity ctor Resourceless [] [])
+    ++ showProcModifiers' (ProcModifiers detism inline impurity ctor False [] [])
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
     ++ showSuperProc sub
     ++ "\n"

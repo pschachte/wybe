@@ -765,7 +765,7 @@ expType' (ProcRef pspec closed) _ = do
         closedTypes <- mapM expType closed
         zipWithM_ (unifyTypes ReasonShouldnt) pTypes' closedTypes
         freeTypes <- mapM ultimateType (List.drop nClosed pTypes')
-        let resful = if Set.null res then Resourceless else Resourceful
+        let resful = not $ Set.null res
         return $ HigherOrderType
                     (ProcModifiers detism MayInline impurity RegularProc resful [] [])
                     $ zipWith TypeFlow freeTypes freeFlows
@@ -930,7 +930,7 @@ instance Show CallInfo where
     show (ProcInfo procSpec tys flows _ detism impurity inRes outRes partial) =
         (if partial then "partial application of " else "")
         ++ showProcModifiers' (ProcModifiers detism MayInline impurity 
-                                RegularProc Resourceless [] [])
+                                RegularProc True [] [])
         ++ show procSpec
         ++ "(" ++ intercalate "," (zipWith ((show .) . TypeFlow) tys flows) ++ ")"
         ++ if Set.null inRes && Set.null outRes
@@ -988,7 +988,7 @@ procToPartial callFlows info@ProcInfo{procInfoPartial=False,
                                       procInfoDetism=detism,
                                       procInfoImpurity=impurity}
     | partialable && (length callFlows < length tys
-                        || length callFlows <= length tys && resful == Resourceful)
+                        || length callFlows <= length tys && resful)
         = Just info{procInfoPartial=True,
                     procInfoTypes=closedTys ++ [higherTy $ zipWith TypeFlow higherTys higherFls],
                     procInfoFlows=closedFls ++ [ParamOut]}
@@ -1001,10 +1001,9 @@ procToPartial callFlows info@ProcInfo{procInfoPartial=False,
     nClosed = length callFlows - 1
     (closedTys, higherTys) = List.splitAt nClosed tys
     (closedFls, higherFls) = List.splitAt nClosed flows
-    resful = if (any isResourcefulHigherOrder tys 
+    resful = (any isResourcefulHigherOrder tys 
                 || not (Set.null inRes || Set.null outRes))
                 && variantNeedsGlobalisation variant
-             then Resourceful else Resourceless
     higherTy = HigherOrderType (ProcModifiers detism MayInline 
                                 impurity RegularProc resful [] [])
 procToPartial _ _ = Nothing
@@ -2157,7 +2156,8 @@ modeCheckExp m name defPos assigned _ tmpCount
     (ss',_,tmpCount') <- modecheckStmts m name defPos (addBindings inArgs assigned)
                              detism tmpCount True ss
     let paramVars = expVar . content . paramToVar <$> params
-    let vars = foldStmts (const . const) ((const .) . (. expInputs) . Set.union) Set.empty ss'
+    let vars = foldStmts (const . const) 
+                         ((const .) . (. expInputs) . Set.union) Set.empty ss'
     let toClose = vars `Set.difference` Set.fromList paramVars
     varDict <- mapFromUnivSetM ultimateVarType Set.empty 
                 $ bindingVars assigned
