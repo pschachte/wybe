@@ -126,7 +126,7 @@ freshVar oldVar typ ft = do
         Nothing -> do
             newVar <- lift freshVarName
             logExpansion $ "    Generated fresh name " ++ show newVar
-            addRenaming oldVar $ ArgVar newVar typ FlowIn Ordinary False
+            addRenaming oldVar $ ArgVar newVar typ FlowIn ft False
             return $ ArgVar newVar typ FlowOut ft False
         Just newArg -> do
             logExpansion $ "    Already named it " ++ show newArg
@@ -250,7 +250,7 @@ expandPrim (PrimCall id pspec args) pos = do
                     else do
                         logExpansion "  Not inlinable"
                         addInstr call' pos
-expandPrim call@(PrimHigherCall id fn args) pos = do
+expandPrim call@(PrimHigher id fn args) pos = do
     logExpansion $ "  Expand higher call " ++ show call
     fn' <- expandArg fn
     case fn' of
@@ -260,7 +260,8 @@ expandPrim call@(PrimHigherCall id fn args) pos = do
             expandPrim (PrimCall id pspec' $ closed ++ args) pos
         _ -> do
             args' <- mapM expandArg args
-            addInstr (PrimHigherCall id fn' args') pos
+            logExpansion $ "  As higher call to " ++ show fn'
+            addInstr (PrimHigher id fn' args') pos
 expandPrim (PrimForeign lang nm flags args) pos = do
     st <- get
     logExpansion $ "  Expanding " ++ show (PrimForeign lang nm flags args)

@@ -548,13 +548,13 @@ cgen prim@(PrimCall callSiteID pspec args) = do
     logCodegen $ "Translated ins = " ++ show ins
     addInstruction ins outArgs
 
-cgen prim@(PrimHigherCall cId (ArgProcRef pspec closed _) args) = do
+cgen prim@(PrimHigher cId (ArgProcRef pspec closed _) args) = do
     logCodegen $ "Compiling " ++ show prim
               ++ " as first order call to " ++ show pspec
               ++ " closed over " ++ show closed
     cgen $ PrimCall cId pspec $ closed ++ args
 
-cgen prim@(PrimHigherCall callSiteId fn@ArgVar{} args) = do
+cgen prim@(PrimHigher callSiteId fn@ArgVar{} args) = do
     logCodegen $ "Compiling " ++ show prim
     let args' = List.filter ((Just GlobalArg/=) . maybeArgFlowType) args
     -- We must set all arguments to be `AnyType`
@@ -571,7 +571,7 @@ cgen prim@(PrimHigherCall callSiteId fn@ArgVar{} args) = do
     let callIns = callWybe fnPtr inOps
     addInstruction callIns outArgs
 
-cgen prim@(PrimHigherCall _ fn _) =
+cgen prim@(PrimHigher _ fn _) =
     shouldnt $ "cgen higher call to " ++ show fn
 
 cgen prim@(PrimForeign "llvm" name flags args) = do
@@ -1379,7 +1379,7 @@ declareExtern (PrimForeign otherlang name _ _) =
     shouldnt $ "Don't know how to declare extern foreign function " ++ name
       ++ " in language " ++ otherlang
 
-declareExtern (PrimHigherCall _ var _) =
+declareExtern (PrimHigher _ var _) =
     shouldnt $ "Don't know how to declare extern function var " ++ show var
 
 declareExtern (PrimCall _ pspec@(ProcSpec m n _ _) args) = do

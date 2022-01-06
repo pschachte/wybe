@@ -54,6 +54,7 @@ module AST (
   getParams, getPrimParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, maybeModPrefix, ProcImpln(..), ProcDef(..), procInline, procCallCount,
+  procGlobalFlows, primGlobalFlows, 
   primImpurity, flagsImpurity, flagsDetism,
   AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
   parameterVarNameToID, SpeczVersion, CallProperty(..), generalVersion,
@@ -1927,6 +1928,11 @@ procInline :: ProcDef -> Bool
 procInline = (==Inline) . procInlining
 
 
+-- | What are the GlobalFLows of the given ProcSpec
+procGlobalFlows :: ProcSpec -> Compiler GlobalFlows
+procGlobalFlows pspec = procImplnGlobalFlows . procImpln <$> getProcDef pspec
+
+
 -- | How many static calls to this proc from the same module have we seen?  This
 -- won't be correct for public procs.
 procCallCount :: ProcDef -> Int
@@ -1936,15 +1942,29 @@ procCallCount proc = Map.foldr (+) 0 $ procCallers proc
 -- | What is the Impurity of the given Prim?
 primImpurity :: Prim -> Compiler Impurity
 primImpurity (PrimCall _ pspec _) = procImpurity <$> getProcDef pspec
-primImpurity (PrimHigherCall _ fn _)
+primImpurity (PrimHigher _ fn _)
     = case fn of
         ArgProcRef pspec _ _ -> procImpurity <$> getProcDef pspec
-        ArgVar _ (HigherOrderType ProcModifiers{modifierResourceful=resful,
-                                                modifierImpurity=purity} _) _ _ _
+        ArgVar _ (HigherOrderType ProcModifiers{modifierImpurity=purity} _) _ _ _
             -> return purity 
         _ -> return Pure
 primImpurity (PrimForeign _ _ flags _) =
     return $ flagsImpurity flags
+
+
+-- | What are the GlobalFlows of the given Prim?
+primGlobalFlows :: Prim -> Compiler GlobalFlows
+primGlobalFlows (PrimCall _ pspec _) = procGlobalFlows pspec
+primGlobalFlows (PrimHigher _ (ArgProcRef pspec _ _) _) = procGlobalFlows pspec
+primGlobalFlows (PrimHigher _ arg _) 
+    = return $ if isResourcefulHigherOrder $ argType arg 
+               then Nothing
+               else emptyGlobalFlows
+primGlobalFlows (PrimForeign "lpvm" "load" _ (ArgGlobal info _:_)) 
+    = return $ addGlobalFlow info FlowIn emptyGlobalFlows
+primGlobalFlows (PrimForeign "lpvm" "store" _ (ArgGlobal info _:_)) 
+    = return $ addGlobalFlow info FlowOut emptyGlobalFlows
+primGlobalFlows PrimForeign{} = return emptyGlobalFlows
 
 
 -- | Return the impurity level specified by the given foriegn flags list
@@ -3019,7 +3039,7 @@ data PrimVarName =
 --  loop.
 data Prim
      = PrimCall CallSiteID ProcSpec [PrimArg]
-     | PrimHigherCall CallSiteID PrimArg [PrimArg]
+     | PrimHigher CallSiteID PrimArg [PrimArg]
      | PrimForeign Ident ProcName [Ident] [PrimArg]
      deriving (Eq,Ord,Generic)
 
@@ -3057,7 +3077,7 @@ data PrimArg
 -- |Returns a list of all arguments to a prim
 primArgs :: Prim -> [PrimArg]
 primArgs (PrimCall _ _ args) = args
-primArgs (PrimHigherCall _ fn args) = fn:args
+primArgs (PrimHigher _ fn args) = fn:args
 primArgs prim@(PrimForeign _ _ _ args) = args
 
 
@@ -3065,10 +3085,10 @@ primArgs prim@(PrimForeign _ _ _ args) = args
 replacePrimArgs :: Prim -> [PrimArg] -> Prim
 replacePrimArgs (PrimCall id pspec old) new
     = PrimCall id pspec new
-replacePrimArgs (PrimHigherCall id oldFn old) new
+replacePrimArgs (PrimHigher id oldFn old) new
     = case new of
         [] -> shouldnt "replacePrimArgs of higher call with not enough args"
-        (fn:args) -> PrimHigherCall id fn args
+        (fn:args) -> PrimHigher id fn args
 replacePrimArgs (PrimForeign lang nm flags old) new =
     PrimForeign lang nm flags new
 
@@ -3733,7 +3753,7 @@ showPrim :: Int -> Prim -> String
 showPrim _ (PrimCall id pspec args) =
     show pspec ++ showArguments args
         ++ " #" ++ show id
-showPrim _ (PrimHigherCall id var args) =
+showPrim _ (PrimHigher id var args) =
     show var ++ showArguments args ++ " #" ++ show id
 showPrim _ (PrimForeign lang name flags args) =
     "foreign " ++ lang ++ " " ++ showFlags' flags

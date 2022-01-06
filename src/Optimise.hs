@@ -59,11 +59,11 @@ optimiseSccBottomUp (AcyclicSCC single) = do
     inferGlobalFlows [single]
 optimiseSccBottomUp (CyclicSCC procs) = do
     inlines <- mapM optimiseProcBottomUp procs
+    inferGlobalFlows procs
     -- If any but first in SCC were marked for inlining, repeat to inline
     -- in earlier procs in the SCC.
-    if or $ tail inlines
-    then mapM_ optimiseProcBottomUp procs
-    else inferGlobalFlows procs
+    when (or $ tail inlines)
+        $ mapM_ optimiseProcBottomUp procs
 
 
 optimiseProcTopDown :: ProcSpec -> Compiler ()
@@ -129,34 +129,25 @@ collectGlobalFlows :: Set ProcSpec -> GlobalFlows -> ProcSpec -> Compiler Global
 collectGlobalFlows procs gFlows pspec = do
     body <- procImplnBody . procImpln <$> getProcDef pspec
     foldBodyPrims
-        (const (collectPrimGlobalFlows procs))
+        (const $ addPrimGlobalFlows procs)
         (return gFlows)
         (liftM2 globalFlowsUnion)
         body
 
 
--- | Add all Global Flows from a given Prim to a set of GlobalFlows
+-- | Add all Global Flows from a given Prim to a set of GlobalFlows.
+-- If the call is to a proc in the given set of proc specs, we do not add the
+-- GLobalFlows, else
 -- * LPVM load instructions add a FlowIn for the respective Global
 -- * LPVM store instructions add a FlowOut for the respective Global
 -- * First order calls add their respective GlobalFlows into the set
 -- * Resourceful higher order calls set the GlobalFlows to the universal set
-collectPrimGlobalFlows :: Set ProcSpec -> Prim 
+addPrimGlobalFlows :: Set ProcSpec -> Prim 
                        -> Compiler GlobalFlows -> Compiler GlobalFlows
-collectPrimGlobalFlows _
-        (PrimForeign "lpvm" "load" _ [ArgGlobal info _, _, _, _]) gFlows
-    = addGlobalFlow info FlowIn <$> gFlows
-collectPrimGlobalFlows _
-        (PrimForeign "lpvm" "store" _ [ArgGlobal info _, _, _, _]) gFlows
-    = addGlobalFlow info FlowOut <$> gFlows
-collectPrimGlobalFlows procs (PrimCall _ pspec _) gFlows
-    | pspec `Set.member` procs
-    = gFlows 
-    | otherwise 
-    = liftM2 globalFlowsUnion
-        (procImplnGlobalFlows . procImpln <$> getProcDef pspec) gFlows
-collectPrimGlobalFlows _ (PrimHigherCall _ fn _) gFlows
-    | isResourcefulHigherOrder $ argType fn = return Nothing
-collectPrimGlobalFlows _ _ gFlows = gFlows
+addPrimGlobalFlows procs (PrimCall _ pspec _) gFlows
+    | pspec `Set.member` procs = gFlows 
+addPrimGlobalFlows _ prim gFlows 
+    = liftM2 globalFlowsUnion (primGlobalFlows prim) gFlows
 
 
 ----------------------------------------------------------------
@@ -205,7 +196,7 @@ bodyCost pprims = sum <$> mapM (primCost . content) pprims
 primCost :: Prim -> Compiler Int
 primCost (PrimForeign "llvm" _ _ _) = return 1
 primCost (PrimCall _ _ args)        = (1+) . sum <$> mapM argCost args
-primCost (PrimHigherCall _ fn args) = (1+) . sum <$> mapM argCost (fn:args)
+primCost (PrimHigher _ fn args)     = (1+) . sum <$> mapM argCost (fn:args)
 primCost (PrimForeign _ _ _ args)   = (1+) . sum <$> mapM argCost args
 
 

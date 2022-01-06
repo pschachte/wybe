@@ -220,7 +220,7 @@ compileBody stmts params detism = do
                 Higher fn -> do
                     fn' <- compileHigherFunc fn
                     return $ Unplaced
-                           $ PrimHigherCall callSiteID fn'
+                           $ PrimHigher callSiteID fn'
                              (args' ++
                               [ArgVar (PrimVarName outputStatusName 0) boolType FlowOut
                                Ordinary False])
@@ -301,7 +301,7 @@ compileSimpleStmt' call@(ProcCall func _ _ args) = do
                         args'
         Higher fn -> do
             fn' <- compileHigherFunc fn
-            return $ PrimHigherCall callSiteID fn' args'
+            return $ PrimHigher callSiteID fn' args'
 compileSimpleStmt' (ForeignCall lang name flags args) = do
     args' <- concat <$> mapM (placedApply compileArg) args
     return $ PrimForeign lang name flags args'
