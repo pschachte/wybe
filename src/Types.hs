@@ -990,27 +990,22 @@ procToPartial callFlows hasBang info@ProcInfo{procInfoPartial=False,
                                               procInfoVariant=variant,
                                               procInfoDetism=detism,
                                               procInfoImpurity=impurity}
-    | partialable && (length callFlows < length tys
-                        || length callFlows <= length tys + 1 && resful)
+    | not hasBang  && not (List.null callFlows) && last callFlows == ParamOut
+                   && (length callFlows < length tys
+                       || length callFlows <= length tys + 1 && resful)
         = (Just info{procInfoPartial=True,
-                    procInfoTypes=closedTys ++ [higherTy $ zipWith TypeFlow higherTys higherFls],
-                    procInfoFlows=closedFls ++ [ParamOut]}, needsBang)
-    | partialable && length callFlows == 1 && List.null tys
-        = (Just info{procInfoPartial=True,
-                    procInfoTypes=[higherTy []],
-                    procInfoFlows=[ParamOut]}, needsBang)
+                     procInfoTypes=closedTys ++ [higherTy],
+                     procInfoFlows=closedFls ++ [ParamOut]}, needsBang)
   where
-    partialable = not (List.null callFlows) && last callFlows == ParamOut
-                                            && not hasBang
     nClosed = length callFlows - 1
     (closedTys, higherTys) = List.splitAt nClosed tys
     (closedFls, higherFls) = List.splitAt nClosed flows
-    resful = (any isResourcefulHigherOrder tys 
-                || not (Set.null inRes || Set.null outRes))
-                && variantNeedsGlobalisation variant
+    resful = any isResourcefulHigherOrder tys 
+                || not (Set.null inRes || Set.null outRes)
     needsBang = resful || impurity > Pure
     higherTy = HigherOrderType (ProcModifiers detism MayInline 
                                 impurity RegularProc resful [] [])
+                    $ zipWith TypeFlow higherTys higherFls
 procToPartial _ _ _ = (Nothing, False)
 
 

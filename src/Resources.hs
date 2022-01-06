@@ -10,7 +10,6 @@
 module Resources (resourceCheckMod, canonicaliseProcResources,
                   canonicaliseResourceSpec,
                   transformProcResources, transformProcGlobals,
-                  variantNeedsGlobalisation,
                   specialResourcesSet, isSpecialResource) where
 
 import           AST
@@ -31,6 +30,7 @@ import           Options                   (LogSelection (Resources))
 import           Snippets
 import           Util
 import           Debug.Trace
+import Control.Monad.Extra (unlessM)
 
 
 ------------------------- Checking resource decls -------------------------
@@ -209,8 +209,7 @@ transformStmt stmt@(ProcCall func@(First m n mbId) detism resourceful args) pos 
     let variant = procVariant procDef
     let argTys = fromMaybe AnyType . maybeExpType . content <$> args
     let hasResfulHigherArgs = any isResourcefulHigherOrder argTys
-    let usesResources = (not (List.null callResFlows) || hasResfulHigherArgs)
-                        && variantNeedsGlobalisation variant
+    let usesResources = not (List.null callResFlows) || hasResfulHigherArgs
     unless (resourceful || not usesResources)
         $ lift $ errmsg pos
                $ "Call to resourceful proc without ! resource marker: "
@@ -378,8 +377,7 @@ transformProcGlobals pd _ = do
 globaliseProc :: OptPos -> Maybe ProcName -> ProcVariant
               -> Determinism -> [Param] -> Set ResourceFlowSpec
               -> [Placed Stmt] -> Resourcer ([Param], [Placed Stmt], Int)
-globaliseProc pos name variant detism params ress body 
-  | variantNeedsGlobalisation variant = do
+globaliseProc pos name variant detism params ress body = do
     logResourcer $ "Globalising proc " ++ fromMaybe "un-named (anon)" name
     let hasHigherResources = any paramIsResourceful params
     let (resFlows, realParams) = partitionEithers $ eitherResourceParam <$> params
@@ -439,11 +437,8 @@ globaliseProc pos name variant detism params ress body
                        stores = storeResource pos . mapFst resourceFlowRes <$> inRes
                    in (params, stores ++ body'')
               else (realParams, body'')
-    tmp' <- gets resTmpCtr
-    return (params' ++ [globalsParam | needsGlobalParam], body''', tmp')
-  | otherwise = do
     tmp <- gets resTmpCtr
-    return (params, body, tmp)
+    return (params' ++ [globalsParam | needsGlobalParam], body''', tmp)
 
 
 -- Globalise a list of Stmts, tranforming resources into globals
@@ -458,26 +453,30 @@ globaliseStmts pstmts = (concat *** or) . unzip
 globaliseStmt :: Stmt -> OptPos -> Resourcer ([Placed Stmt], Bool)
 globaliseStmt (ProcCall fn@(First m n mbId) d r args) pos = do
     let procID = trustFromJust "transformStmt" mbId
-    variant <- procVariant <$> lift (getProcDef $ ProcSpec m n procID generalVersion)
     let (res, args') = partitionEithers $ placedApply eitherResourceExp <$> args
     (args'', ins, outs) <- globaliseExps args'
     let argTys = fromMaybe AnyType . maybeExpType . content <$> args''
     let hasResfulHigherArgs = any isResourcefulHigherOrder argTys
-    let globals = (not (List.null res) || hasResfulHigherArgs) 
-               && variantNeedsGlobalisation variant
+    let globals = not (List.null res) || hasResfulHigherArgs 
+    unlessM ((not globals ||) . trustFromJust "globaliseStmt first" 
+                <$> gets resHaveGlobals)
+        $ lift $ errmsg pos $ "Cannot make resourceful call to " ++ showProcName n
+                           ++ " in current context"
     let args''' = if globals then args'' ++ globalsGetSet else args''
     return (loadStoreResources pos ins outs
                 [ProcCall fn d r args''' `maybePlace` pos],
             globals || not (Map.null outs))
 globaliseStmt (ProcCall (Higher fn) d r args) pos = do
-    (fn':args', ins, outs) <- globaliseExps $ fn:args
-    let globals = case content fn' of
-            Typed _ (HigherOrderType mods _) _ ->
-                modifierResourceful mods
-            _ -> shouldnt "globalise untyped higher"
+    (allArgs@(fn':args'), ins, outs) <- globaliseExps $ fn:args
+    let argTys = fromMaybe AnyType . maybeExpType . content <$> allArgs
+    let globals = any isResourcefulHigherOrder argTys
+    unlessM ((not globals ||) . trustFromJust "globaliseStmt higher" 
+                <$> gets resHaveGlobals)
+        $ lift $ errmsg pos $ "Cannot make resourceful call to " ++ show (content fn')
+                           ++ " in current context"
     let args'' = if globals then args' ++ globalsGetSet else args'
     return (loadStoreResources pos ins outs
-                [ProcCall (Higher fn) d r args'' `maybePlace` pos],
+                [ProcCall (Higher fn') d r args'' `maybePlace` pos],
             globals)
 globaliseStmt (ForeignCall lang name flags args) pos = do
     (args', ins, outs) <- globaliseExps args
@@ -744,17 +743,6 @@ fixVarDict (Just vars) = do
                   `Map.union` Map.fromList [ (globalsName, phantomType)
                                            | haveGlobals == Just True ]
     else return $ vars `Map.union` tmpVars
-
--- | Does the given ProcVariant require globalisation
-variantNeedsGlobalisation :: ProcVariant -> Bool
-variantNeedsGlobalisation RegularProc       = True
-variantNeedsGlobalisation ConstructorProc   = False
-variantNeedsGlobalisation DeconstructorProc = False
-variantNeedsGlobalisation SetterProc        = False
-variantNeedsGlobalisation GetterProc        = False
-variantNeedsGlobalisation GeneratedProc     = True
-variantNeedsGlobalisation AnonymousProc     = True
-variantNeedsGlobalisation (ClosureProc _)   = True
 
 
 -- | Get a var as a resource of the given type
