@@ -1019,7 +1019,7 @@ equalityBody consts nonconsts _ =
                          (iVal $ length consts))
                 [equalityNonconsts (content <$> nonconsts) (List.null consts)]
                 [equalityConsts consts]
-                Nothing Nothing],
+                Nothing Nothing Nothing],
      -- Decide to inline if only 1 non-const constructor, no non-const
      -- constructors (so not recursive), and at most 4 fields
      case List.map content nonconsts of
@@ -1070,7 +1070,7 @@ equalityMultiNonconsts (ProcProto name params _:ctrs) =
      $ Cond (deconstructCall name leftName params SemiDet)
         [Unplaced $ And ([deconstructCall name rightName params SemiDet]
                          ++ concatMap equalityField params)]
-        [equalityMultiNonconsts ctrs] Nothing Nothing
+        [equalityMultiNonconsts ctrs] Nothing Nothing Nothing
 
 -- |Return code to deconstruct
 deconstructCall :: Ident -> Ident -> [Param] -> Determinism -> Placed Stmt

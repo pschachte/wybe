@@ -335,12 +335,12 @@ flattenStmt' (ForeignCall lang name flags args) pos _ = do
 -- XXX must handle Flattener state more carefully.  Defined variables need
 --     to be retained between condition and then branch, but forgotten for
 --     the else branch.
-flattenStmt' (Cond tstStmt thn els condVars defVars) pos detism = do
+flattenStmt' (Cond tstStmt thn els condVars defVars res) pos detism = do
     tstStmt' <- seqToStmt <$> flattenInner True SemiDet
                 (placedApply flattenStmt tstStmt SemiDet)
     thn' <- flattenInner False detism (flattenStmts thn detism)
     els' <- flattenInner False detism (flattenStmts els detism)
-    emit pos $ Cond tstStmt' thn' els' condVars defVars
+    emit pos $ Cond tstStmt' thn' els' condVars defVars res
 flattenStmt' (Case pexpr cases deflt) pos detism = do
     pexpr' <- flattenPExp pexpr
     flattenStmts (translateCases pexpr' pos cases deflt) detism
@@ -355,19 +355,19 @@ flattenStmt' (TestBool expr) _pos detism =
 flattenStmt' (And tsts) pos detism = do
     tsts' <- flattenInner True detism (flattenStmts tsts SemiDet)
     emit pos $ And tsts'
-flattenStmt' (Or tsts vars) pos detism = do
+flattenStmt' (Or tsts vars res) pos detism = do
     tsts' <- flattenDisj detism tsts
-    emit pos $ Or tsts' vars
+    emit pos $ Or tsts' vars res
 flattenStmt' (Not tstStmt) pos SemiDet = do
     tstStmt' <- seqToStmt <$> flattenInner True SemiDet
                 (placedApply flattenStmt tstStmt SemiDet)
     emit pos $ Not tstStmt'
 flattenStmt' (Not tstStmt) _pos detism =
     shouldnt $ "negation in a " ++ show detism ++ " context"
-flattenStmt' (Loop body defVars) pos detism = do
+flattenStmt' (Loop body defVars res) pos detism = do
     body' <- flattenInner False detism
              (flattenStmts (body ++ [Unplaced Next]) detism)
-    emit pos $ Loop body' defVars
+    emit pos $ Loop body' defVars res
 flattenStmt' for@(For pgens body) pos detism = do
     -- For loops are transformed into `do` loops
     -- E.g. for i in x, j in y {
@@ -404,9 +404,9 @@ flattenStmt' for@(For pgens body) pos detism = do
                                          Unplaced $ Var gen ParamIn Ordinary]
                                       `maybePlace` pos')
                                 loop [Unplaced Break]
-                      Nothing Nothing]
+                      Nothing Nothing Nothing]
                 ) body $ zip3 (loopVar <$> gens) temps poss
-    let generated = Loop loop Nothing
+    let generated = Loop loop Nothing Nothing
     logFlatten $ "Generated for: " ++ showStmt 4 generated
     flattenStmt' generated pos detism
 flattenStmt' (UseResources res vars body) pos detism = do
@@ -454,7 +454,7 @@ translateCases val pos ((key,body):rest) deflt =
                        (place key))
            body
            (translateCases val pos rest deflt)
-           Nothing Nothing)
+           Nothing Nothing Nothing)
      pos]
      where testPos = place key
 
@@ -576,7 +576,7 @@ flattenExp (DisjExp thn els) ty castFrom pos = do
                               [typeAndPlace (content els) ty castFrom (place els),
                                Unplaced $ Var resultName ParamOut Ordinary])
                   pos]
-                Nothing)
+                Nothing Nothing)
         pos Det
     return $ maybePlace (Var resultName ParamIn Ordinary) pos
 flattenExp (CondExp cond thn els) ty castFrom pos = do
@@ -590,7 +590,7 @@ flattenExp (CondExp cond thn els) ty castFrom pos = do
                               [typeAndPlace (content els) ty castFrom (place els),
                                Unplaced $ Var resultName ParamOut Ordinary])
                   pos]
-                Nothing Nothing)
+                Nothing Nothing Nothing)
         pos Det
     return $ maybePlace (Var resultName ParamIn Ordinary) pos
 flattenExp expr@(AnonProc mods _ pstmts clsd res) ty castFrom pos = do
@@ -686,7 +686,8 @@ translateExpCases pexp varName ((pat,val):rest) deflt =
                      (place pat))
         [Unplaced $ ForeignCall "llvm" "move" []
                     [val, Unplaced $ varSet varName]]
-        [Unplaced (translateExpCases pexp varName rest deflt)] Nothing Nothing
+        [Unplaced (translateExpCases pexp varName rest deflt)] 
+        Nothing Nothing Nothing
 
 
 -- | Attach a type, source position, and possibly a type to cast from, to a

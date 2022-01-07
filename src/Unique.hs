@@ -237,7 +237,7 @@ uniquenessCheckStmt call@(ForeignCall _ _ flags args) pos = do
     logUniqueness $ "Uniqueness checking foreign call " ++ show call
     forgivingly forgiving
         $ mapM_ (defaultPlacedApply uniquenessCheckExp pos) args
-uniquenessCheckStmt stmt@(Cond tst thn els _ _) pos = do
+uniquenessCheckStmt stmt@(Cond tst thn els _ _ _) pos = do
     logUniqueness $ "Uniqueness checking conditional " ++ show stmt
     (defaultPlacedApply uniquenessCheckStmt pos tst `withDetism` SemiDet
        >> uniquenessCheckStmts thn)
@@ -246,18 +246,18 @@ uniquenessCheckStmt (Case exp cases deflt) pos = do
     defaultPlacedApply uniquenessCheckExp pos exp
     uniquenessCheckCases uniquenessCheckStmts cases deflt
 uniquenessCheckStmt (And stmts) _ = uniquenessCheckStmts stmts
-uniquenessCheckStmt (Or [] _) pos = return ()
-uniquenessCheckStmt (Or [stmt] _) pos =
+uniquenessCheckStmt (Or [] _ _) pos = return ()
+uniquenessCheckStmt (Or [stmt] _ _) pos =
     defaultPlacedApply uniquenessCheckStmt pos stmt
-uniquenessCheckStmt (Or (stmt:stmts) x) pos =
+uniquenessCheckStmt (Or (stmt:stmts) vars res) pos =
     (defaultPlacedApply uniquenessCheckStmt pos stmt `withDetism` SemiDet)
-    `joinUniqueness` uniquenessCheckStmt (Or stmts x) pos
+    `joinUniqueness` uniquenessCheckStmt (Or stmts vars res) pos
 uniquenessCheckStmt (Not negated) pos =
     defaultPlacedApply uniquenessCheckStmt pos negated
 uniquenessCheckStmt (TestBool exp) pos = uniquenessCheckExp exp pos
 uniquenessCheckStmt Nop pos = return ()
 uniquenessCheckStmt Fail pos = return ()
-uniquenessCheckStmt (Loop body _) _ = uniquenessCheckStmts body
+uniquenessCheckStmt (Loop body _ _) _ = uniquenessCheckStmts body
 uniquenessCheckStmt (UseResources _ _ body) _ = uniquenessCheckStmts body
 uniquenessCheckStmt (For generators body) pos = do
     mapM_ ((\gen -> do

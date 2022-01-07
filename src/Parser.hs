@@ -991,7 +991,7 @@ termToStmt (Call pos [] "case" ParamIn
     (cases,deflt) <- termToCases termToBody body
     return $ Placed (Case expr' cases deflt) pos
 termToStmt (Call pos [] "do" ParamIn [body]) =
-    (`Placed` pos) . flip Loop Nothing <$> termToBody body
+    (`Placed` pos) . flip (`Loop` Nothing) Nothing <$> termToBody body
 termToStmt (Call pos [] "for" ParamIn [gen,body]) = do
     genStmts <- termToGenerators gen
     (`Placed` pos) . For genStmts <$> termToBody body
@@ -1002,16 +1002,16 @@ termToStmt (Call pos [] "use" ParamIn
     return $ Placed (UseResources ress' Nothing body') pos
 termToStmt (Call pos [] "while" ParamIn [test]) = do
     t <- termToStmt test
-    return $ Placed (Cond t [Unplaced Nop] [Unplaced Break] Nothing Nothing) pos
+    return $ Placed (Cond t [Unplaced Nop] [Unplaced Break] Nothing Nothing Nothing) pos
 termToStmt (Call pos [] "until" ParamIn [test]) = do
     t <- termToStmt test
-    return $ Placed (Cond t [Unplaced Break] [Unplaced Nop] Nothing Nothing) pos
+    return $ Placed (Cond t [Unplaced Break] [Unplaced Nop] Nothing Nothing Nothing) pos
 termToStmt (Call pos [] "when" ParamIn [test]) = do
     t <- termToStmt test
-    return $ Placed (Cond t [Unplaced Nop] [Unplaced Next] Nothing Nothing) pos
+    return $ Placed (Cond t [Unplaced Nop] [Unplaced Next] Nothing Nothing Nothing) pos
 termToStmt (Call pos [] "unless" ParamIn [test]) = do
     t <- termToStmt test
-    return $ Placed (Cond t [Unplaced Next] [Unplaced Nop] Nothing Nothing) pos
+    return $ Placed (Cond t [Unplaced Next] [Unplaced Nop] Nothing Nothing Nothing) pos
 termToStmt (Call pos [] "pass" ParamIn []) = do
     return $ Placed Nop pos
 termToStmt (Call pos [] "|" ParamIn
@@ -1021,22 +1021,22 @@ termToStmt (Call pos [] "|" ParamIn
     test1' <- termToStmt test1
     thn' <- termToBody thn
     els' <- termToBody els
-    return $ Placed (Cond test1' thn' els' Nothing Nothing) pos
+    return $ Placed (Cond test1' thn' els' Nothing Nothing Nothing) pos
 termToStmt
         (Call _ [] "|" ParamIn [Call pos [] "::" ParamIn [test,body],rest]) = do
     test' <- termToStmt test
     body' <- termToBody body
     rest' <- termToBody rest
-    return $ Placed (Cond test' body' rest' Nothing Nothing) pos
+    return $ Placed (Cond test' body' rest' Nothing Nothing Nothing) pos
 termToStmt (Call pos [] "|" ParamIn disjs) = do
-    (`Placed` pos) . (`Or` Nothing) <$> mapM termToStmt disjs
+    (`Placed` pos) . flip (`Or` Nothing) Nothing <$> mapM termToStmt disjs
 termToStmt (Call pos [] "::" ParamIn [Call _ [] guard ParamIn [],body])
   | defaultGuard guard = do
     syntaxError pos  "'else' outside an 'if'"
 termToStmt (Call pos [] "::" ParamIn [test,body]) = do
     test' <- termToStmt test
     body' <- termToBody body
-    return $ Placed (Cond test' body' [Unplaced Nop] Nothing Nothing) pos
+    return $ Placed (Cond test' body' [Unplaced Nop] Nothing Nothing Nothing) pos
 termToStmt (Call pos [] "&" ParamIn conjs) = do
     (`Placed` pos) . And <$> mapM termToStmt conjs
 termToStmt (Call _ [] fn ParamIn [first,rest])

@@ -784,15 +784,11 @@ updateGlobalValues prim = do
         PrimForeign "lpvm" name _ [ArgGlobal info _, var, _, _] 
               | name == "store" || name == "load" -> 
             modify $ \s -> s{globalsLoaded=Map.insert info var loaded}
-        PrimHigher _ fn _
-            | isResourcefulHigherOrder $ argType fn ->
-                modify $ \s -> s{globalsLoaded=Map.empty}
-        PrimCall _ pspec _ -> do
-            callGFlows <- lift $ procGlobalFlows pspec
+        _ -> do
+            callGFlows <- lift $ primGlobalFlows prim
             logBuild $ "Call has global flows: " ++ showGlobalFlows callGFlows
             let filter info _ = not $ hasGlobalFlow callGFlows FlowOut info
             modify $ \s -> s {globalsLoaded=Map.filterWithKey filter loaded}
-        _ -> nop
                     
 
 ----------------------------------------------------------------
@@ -1198,7 +1194,7 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
             put $ BkwdBuilderState usedLater''' branchesUsedLater
                   Map.empty tmp gStored
                   $ ProcBody [] $ PrimFork var ty lastUse followingBranches
-    mapM_ (placedApply (bkwdBuildStmt False defs)) prims
+    mapM_ (placedApply (bkwdBuildStmt defs)) prims
     finalUsedLater <- gets bkwdUsedLater
     logBkwd $ "Finished rebuild with usedLater = " ++ show finalUsedLater
 
@@ -1224,8 +1220,8 @@ rebuildBranch subst bod = do
     lift $ execStateT (rebuildBody bod) bkwdSt
 
 
-bkwdBuildStmt :: Bool -> Set PrimVarName -> Prim -> OptPos -> BkwdBuilder ()
-bkwdBuildStmt repeat defs prim pos = do
+bkwdBuildStmt :: Set PrimVarName -> Prim -> OptPos -> BkwdBuilder ()
+bkwdBuildStmt defs prim pos = do
     usedLater <- gets bkwdUsedLater
     renaming <- gets bkwdRenaming
     gStored <- gets bkwdGlobalStored
@@ -1239,52 +1235,71 @@ bkwdBuildStmt repeat defs prim pos = do
     case (prim,args') of
       (PrimForeign "llvm" "move" [] _, [ArgVar{argVarName=fromVar},
                                         ArgVar{argVarName=toVar}])
-          | Set.notMember fromVar usedLater && Set.member fromVar defs ->
-              modify $ \s -> s { bkwdRenaming = Map.insert fromVar toVar
-                                              $ bkwdRenaming s }
+          -> bkwdBuildMove defs fromVar toVar $ bkwdBuildStmt' defs args' prim pos
       (PrimForeign "lpvm" "store" [] _, [ArgGlobal info _,
                                          _, globalIn, globalOut]) 
           | info `Set.member` gStored -> 
-              bkwdBuildStmt repeat defs (primMove globalIn globalOut) pos
+              bkwdBuildStmt defs (primMove globalIn globalOut) pos
           | otherwise -> do
               modify $ \s -> s { bkwdGlobalStored = Set.insert info gStored }
-              bkwdBuildStmt' repeat defs args' prim pos
+              bkwdBuildStmt' defs args' prim pos
       _ -> do 
           callGFlows <- lift $ primGlobalFlows prim
           modify $ \s -> s { bkwdGlobalStored = 
                               Set.filter (not . hasGlobalFlow callGFlows FlowIn) gStored }
-          bkwdBuildStmt' repeat defs args' prim pos
+          bkwdBuildStmt' defs args' prim pos
 
 
-bkwdBuildStmt' :: Bool -> Set PrimVarName -> [PrimArg] -> Prim -> OptPos -> BkwdBuilder ()
-bkwdBuildStmt' repeat defs args prim pos = do
+bkwdBuildStmt' :: Set PrimVarName -> [PrimArg] -> Prim -> OptPos -> BkwdBuilder ()
+bkwdBuildStmt' defs args prim pos = do
     usedLater <- gets bkwdUsedLater
     let (ins, outs) = splitArgsByMode $ List.filter argIsVar $ flattenArgs args
-    let (outs', mbGlobalOut) = if repeat then (outs, Nothing) else splitArgsByGlobal outs 
+    let (outs', mbGlobalOut) = splitArgsByGlobal outs 
     -- Filter out pure instructions that produce no needed outputs or out flowing
     -- globals
     purity <- lift $ primImpurity prim
     gFlows <- lift $ primGlobalFlows prim
     if purity > Pure || any (`Set.member` usedLater) (argVarName <$> outs')
                      || maybe True (any (Set.member FlowOut) . Map.elems) gFlows 
-    then do
-      -- XXX Careful:  probably shouldn't mark last use of variable passed
-      -- as input argument more than once in the call
-      let prim' = replacePrimArgs prim $ markIfLastUse usedLater <$> args
-      logBkwd $ "    updated prim = " ++ show prim'
-      let inVars = argVarName <$> ins
-      let usedLater' = List.foldr Set.insert usedLater inVars
-      st@BkwdBuilderState{bkwdFollowing=bd@ProcBody{bodyPrims=prims}} <- get
-      put $ st { bkwdFollowing =
-                    bd { bodyPrims     = maybePlace prim' pos:prims },
-                         bkwdUsedLater = usedLater' }
+    then bkwdBuildStmt'' prim args ins pos
     else 
       -- if we have a global output and we are getting filtered out, 
       -- we need to move the global
-      when (isJust mbGlobalOut && not repeat)
-        $ let globalIn = fromMaybe (ArgInt 0 phantomType) 
-                       $ snd $ splitArgsByGlobal ins
-          in bkwdBuildStmt True defs (primMove globalIn (fromJust mbGlobalOut)) pos 
+      when (isJust mbGlobalOut)
+        $ let globalOut  = fromJust mbGlobalOut
+              mbGlobalIn = snd $ splitArgsByGlobal ins
+              globalIn   = fromMaybe (ArgInt 0 phantomType) mbGlobalIn
+              moveGlobal = bkwdBuildStmt'' (primMove globalIn globalOut) 
+                              [globalIn, globalOut] (maybeToList mbGlobalIn) pos
+          in case (globalIn, globalOut) of
+              (_, ArgVar{argVarName=gOut})
+                | gOut `Set.notMember` usedLater -> nop
+              (ArgVar{argVarName=gIn}, ArgVar{argVarName=gOut}) -> 
+                  bkwdBuildMove defs gIn gOut moveGlobal
+              _ -> moveGlobal
+              
+
+bkwdBuildStmt'' :: Prim -> [PrimArg] -> [PrimArg] -> OptPos -> BkwdBuilder ()
+bkwdBuildStmt'' prim args ins pos = do
+    usedLater <- gets bkwdUsedLater
+    -- XXX Careful:  probably shouldn't mark last use of variable passed
+    -- as input argument more than once in the call
+    let prim' = replacePrimArgs prim $ markIfLastUse usedLater <$> args
+    logBkwd $ "    updated prim = " ++ show prim'
+    let inVars = argVarName <$> ins
+    let usedLater' = List.foldr Set.insert usedLater inVars
+    st@BkwdBuilderState{bkwdFollowing=bd@ProcBody{bodyPrims=prims}} <- get
+    put $ st { bkwdFollowing =
+                  bd { bodyPrims     = maybePlace prim' pos:prims },
+                       bkwdUsedLater = usedLater' }
+
+bkwdBuildMove :: Set PrimVarName -> PrimVarName -> PrimVarName 
+              -> BkwdBuilder () -> BkwdBuilder () 
+bkwdBuildMove defs inName outName elsAction = do
+    usedLater <- gets bkwdUsedLater
+    if Set.notMember inName usedLater && Set.member inName defs
+    then modify $ \s -> s { bkwdRenaming = Map.insert inName outName $ bkwdRenaming s }
+    else elsAction
 
 
 renameArg :: PrimArg -> BkwdBuilder PrimArg

@@ -63,7 +63,9 @@ optimiseSccBottomUp (CyclicSCC procs) = do
     -- If any but first in SCC were marked for inlining, repeat to inline
     -- in earlier procs in the SCC.
     when (or $ tail inlines)
-        $ mapM_ optimiseProcBottomUp procs
+        $ do 
+            mapM_ optimiseProcBottomUp procs
+            inferGlobalFlows procs
 
 
 optimiseProcTopDown :: ProcSpec -> Compiler ()
@@ -143,7 +145,7 @@ collectGlobalFlows procs gFlows pspec = do
 -- * First order calls add their respective GlobalFlows into the set
 -- * Resourceful higher order calls set the GlobalFlows to the universal set
 addPrimGlobalFlows :: Set ProcSpec -> Prim 
-                       -> Compiler GlobalFlows -> Compiler GlobalFlows
+                   -> Compiler GlobalFlows -> Compiler GlobalFlows
 addPrimGlobalFlows procs (PrimCall _ pspec _) gFlows
     | pspec `Set.member` procs = gFlows 
 addPrimGlobalFlows _ prim gFlows 

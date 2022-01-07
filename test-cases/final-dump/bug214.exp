@@ -27,7 +27,7 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm alloc(16:wybe.int, ?tmp#17##0:bug214) @bug214:36:13
     foreign lpvm mutate(~tmp#17##0:bug214, ?tmp#18##0:bug214, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp#2##0:bug214.position) @bug214:36:13
     foreign lpvm mutate(~tmp#18##0:bug214, ?tmp#1##0:bug214, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int) @bug214:36:13
-    bug214.gen#2<0>(~#globals##0:wybe.phantom, ~tmp#0##0:bug214.position, ~tmp#1##0:bug214, ~tmp#0##0:bug214.position, ~tmp#1##0:bug214, ~tmp#2##0:bug214.position, ?#globals##1:wybe.phantom) #3 @bug214:51:1
+    bug214.gen#2<0>(~*#globals##0:wybe.phantom, ~tmp#0##0:bug214.position, ~tmp#1##0:bug214, ~tmp#0##0:bug214.position, ~tmp#1##0:bug214, ~tmp#2##0:bug214.position, ?#globals##1:wybe.phantom) #3 @bug214:51:1
 
 
 = > public {inline} (1 calls)
@@ -77,7 +77,7 @@ aim(#rec##0:bug214, ?#rec##1:bug214, #field##0:wybe.int):
 
 gen#1 > {inline} (0 calls)
 0: bug214.gen#1<0>
-gen#1(*#globals##0:wybe.phantom, pos##0:bug214.position, sub##0:bug214, [tmp#0##0:bug214.position], [tmp#1##0:bug214], [tmp#2##0:bug214.position], ?#globals##8:wybe.phantom):
+gen#1(*#globals##0:wybe.phantom, pos##0:bug214.position, sub##0:bug214, [tmp#0##0:bug214.position], [tmp#1##0:bug214], [tmp#2##0:bug214.position], *?#globals##8:wybe.phantom):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
@@ -106,7 +106,7 @@ gen#1(*#globals##0:wybe.phantom, pos##0:bug214.position, sub##0:bug214, [tmp#0##
 
 gen#2 > (3 calls)
 0: bug214.gen#2<0>
-gen#2(*#globals##0:wybe.phantom, pos##0:bug214.position, sub##0:bug214, tmp#0##0:bug214.position, tmp#1##0:bug214, tmp#2##0:bug214.position, ?#globals##4:wybe.phantom):
+gen#2(*#globals##0:wybe.phantom, pos##0:bug214.position, sub##0:bug214, tmp#0##0:bug214.position, tmp#1##0:bug214, tmp#2##0:bug214.position, *?#globals##4:wybe.phantom):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 1,InterestingUnaliased 2]
@@ -118,7 +118,7 @@ gen#2(*#globals##0:wybe.phantom, pos##0:bug214.position, sub##0:bug214, tmp#0##0
     bug214.direction.parse_direction<0>(~dir_str##0:wybe.string, ?tmp#3##0:bug214.direction, ?tmp#14##0:wybe.bool) #1 @bug214:53:10
     case ~tmp#14##0:wybe.bool of
     0:
-        bug214.gen#2<0>(~#globals##1:wybe.phantom, ~pos##0:bug214.position, ~sub##0:bug214, ~tmp#0##0:bug214.position, ~tmp#1##0:bug214, ~tmp#2##0:bug214.position, ?#globals##4:wybe.phantom) #7 @bug214:51:1
+        bug214.gen#2<0>(~*#globals##1:wybe.phantom, ~pos##0:bug214.position, ~sub##0:bug214, ~tmp#0##0:bug214.position, ~tmp#1##0:bug214, ~tmp#2##0:bug214.position, ?#globals##4:wybe.phantom) #7 @bug214:51:1
 
     1:
         foreign c read_int(?units##0:wybe.int, ~tmp#19##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @io:nn:nn
@@ -126,7 +126,7 @@ gen#2(*#globals##0:wybe.phantom, pos##0:bug214.position, sub##0:bug214, tmp#0##0
         foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#28##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*#globals##3:wybe.phantom) @io:nn:nn
         bug214.move<0>(~pos##0:bug214.position, ?pos##1:bug214.position, tmp#3##0:bug214.direction, units##0:wybe.int) #4 @bug214:56:9
         bug214.move<1>(~sub##0:bug214, ?sub##1:bug214, ~tmp#3##0:bug214.direction, ~units##0:wybe.int) #5 @bug214:57:9
-        bug214.gen#2<0>(~#globals##3:wybe.phantom, ~pos##1:bug214.position, ~sub##1:bug214, ~tmp#0##0:bug214.position, ~tmp#1##0:bug214, ~tmp#2##0:bug214.position, ?#globals##4:wybe.phantom) #6 @bug214:51:1
+        bug214.gen#2<0>(~*#globals##3:wybe.phantom, ~pos##1:bug214.position, ~sub##1:bug214, ~tmp#0##0:bug214.position, ~tmp#1##0:bug214, ~tmp#2##0:bug214.position, ?#globals##4:wybe.phantom) #6 @bug214:51:1
 
 
 

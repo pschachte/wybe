@@ -237,35 +237,35 @@ transformStmt (TestBool var) pos = do
 transformStmt (And stmts) pos = do
     stmts' <- transformStmts stmts
     return [maybePlace (And stmts') pos]
-transformStmt (Or [] _) pos =
+transformStmt (Or [] _ _) pos =
     return [failTest]
-transformStmt (Or [stmt] _) pos = do
+transformStmt (Or [stmt] _ _) pos = do
     placedApplyM transformStmt stmt
-transformStmt (Or (stmt:stmts) vars) pos = do
+transformStmt (Or (stmt:stmts) vars res) pos = do
     stmt'  <- placedApplyM transformStmt stmt
-    stmt'' <- transformStmt (Or stmts vars) pos
+    stmt'' <- transformStmt (Or stmts vars res) pos
     vars' <- fixVarDict vars
-    return [maybePlace (Or [seqToStmt stmt',seqToStmt stmt''] vars') pos]
+    return [maybePlace (Or [seqToStmt stmt',seqToStmt stmt''] vars' res) pos]
 transformStmt (Not stmt) pos = do
     stmt' <- placedApplyM transformStmt stmt
     return [maybePlace (Not $ seqToStmt stmt') pos]
-transformStmt (Cond test thn els condVars exitVars) pos = do
+transformStmt (Cond test thn els condVars exitVars res) pos = do
     test' <- placedApplyM transformStmt test
     thn' <- transformStmts thn
     els' <- transformStmts els
     condVars' <- fixVarDict condVars
     exitVars' <- fixVarDict exitVars
     return [maybePlace (Cond (seqToStmt test')
-            thn' els' condVars' exitVars') pos]
+            thn' els' condVars' exitVars' res) pos]
 transformStmt (Case exp cases deflt) pos = do
     exp' <- placedApply transformExp exp
     cases' <- transformCases cases
     deflt' <- forM deflt transformStmts
     return [maybePlace (Case exp' cases' deflt') pos]
-transformStmt (Loop body vars) pos = do
+transformStmt (Loop body vars res) pos = do
     body' <- transformStmts body
     vars' <- fixVarDict vars
-    return [maybePlace (Loop body' vars') pos]
+    return [maybePlace (Loop body' vars' res) pos]
 transformStmt (For generators body) pos = do
     body' <- transformStmts body
     return [maybePlace (For generators body') pos]
@@ -423,7 +423,7 @@ globaliseProc pos name variant detism params ress body = do
                       ++ [Unplaced $ Cond (seqToStmt body') 
                             [] 
                             (restores ++ void ++ [Unplaced Fail]) 
-                            (Just tmpVars) (Just tmpVars)]
+                            (Just tmpVars) (Just tmpVars) (Just Set.empty)]
     modify $ \s -> s{resResources=oldResources,
                      resHaveGlobals=oldHaveGlobals,
                      resTmpVars=oldTmpVars,
@@ -457,19 +457,23 @@ globaliseStmt (ProcCall fn@(First m n mbId) d r args) pos = do
     (args'', ins, outs) <- globaliseExps args'
     let argTys = fromMaybe AnyType . maybeExpType . content <$> args''
     let hasResfulHigherArgs = any isResourcefulHigherOrder argTys
-    let globals = not (List.null res) || hasResfulHigherArgs 
-    unlessM ((not globals ||) . trustFromJust "globaliseStmt first" 
+    let needsGlobals = not (List.null res) || hasResfulHigherArgs 
+    unlessM ((not needsGlobals ||) . trustFromJust "globaliseStmt first" 
                 <$> gets resHaveGlobals)
         $ lift $ errmsg pos $ "Cannot make resourceful call to " ++ showProcName n
-                           ++ " in current context"
+                           ++ " in current context"                   
+    proto <- procProto <$> lift (getProcDef $ ProcSpec m n procID generalVersion)
+    let paramTys = paramType <$> procProtoParams proto
+    let globals = any isResourcefulHigherOrder paramTys || not (List.null res)
     let args''' = if globals then args'' ++ globalsGetSet else args''
     return (loadStoreResources pos ins outs
                 [ProcCall fn d r args''' `maybePlace` pos],
             globals || not (Map.null outs))
 globaliseStmt (ProcCall (Higher fn) d r args) pos = do
-    (allArgs@(fn':args'), ins, outs) <- globaliseExps $ fn:args
-    let argTys = fromMaybe AnyType . maybeExpType . content <$> allArgs
-    let globals = any isResourcefulHigherOrder argTys
+    (fn':args', ins, outs) <- globaliseExps $ fn:args
+    let globals = case maybeExpType $ content fn' of
+                    Just (HigherOrderType mods _) -> modifierResourceful mods 
+                    _ -> shouldnt "glabalise badly typed higher"
     unlessM ((not globals ||) . trustFromJust "globaliseStmt higher" 
                 <$> gets resHaveGlobals)
         $ lift $ errmsg pos $ "Cannot make resourceful call to " ++ show (content fn')
@@ -483,20 +487,22 @@ globaliseStmt (ForeignCall lang name flags args) pos = do
     return (loadStoreResources pos ins outs
                 [ForeignCall lang name flags args' `maybePlace` pos],
             not $ Map.null outs)
-globaliseStmt (Cond tst thn els condVars exitVars) pos = do
+globaliseStmt (Cond tst thn els condVars exitVars _) pos = do
     (tst', tstGlobals) <- placedApply globaliseStmt tst
     (thn', thnGlobals) <- globaliseStmts thn
     (els', elsGlobals) <- globaliseStmts els
     (saves, restores) <- loadStoreResourcesIf pos tstGlobals
     condVars' <- fixVarDict condVars
     exitVars' <- fixVarDict exitVars
+    res <- gets resResources
     return (saves ++ [Cond (seqToStmt tst') thn' (restores ++ els')
-                                    condVars' exitVars' `maybePlace` pos],
+                            condVars' exitVars' (Just $ Map.keysSet res)
+                        `maybePlace` pos],
             thnGlobals || elsGlobals)
 globaliseStmt (And stmts) pos = do
     (stmts', globals) <- globaliseStmts stmts
     return ([And stmts' `maybePlace` pos], globals)
-globaliseStmt (Or disjs vars) pos = do
+globaliseStmt (Or disjs vars _) pos = do
     (disjs', globals) <- unzip <$> mapM (placedApply globaliseStmt) disjs
     -- we only need to save resources, and restore before each disj if 
     -- any of the init use globals
@@ -505,7 +511,8 @@ globaliseStmt (Or disjs vars) pos = do
     let disjs'' = seqToStmt (head disjs')
                 : (seqToStmt . (restores ++) <$> tail disjs')
     vars' <- fixVarDict vars
-    return (saves ++ [Or disjs'' vars' `maybePlace` pos],
+    res <- gets resResources
+    return (saves ++ [Or disjs'' vars' (Just $ Map.keysSet res) `maybePlace` pos],
             or globals)
 globaliseStmt (Not stmt) pos = do
     ([stmt'], globals) <- globaliseStmts [stmt]
@@ -516,10 +523,11 @@ globaliseStmt (TestBool exp) pos = do
     unless (Map.null outs) $ shouldnt "globalise TestBool with out flowing resource"
     return (loadStoreResources pos ins outs [TestBool (content exp') `maybePlace` pos],
             False)
-globaliseStmt (Loop stmts vars) pos = do
+globaliseStmt (Loop stmts vars _) pos = do
     (stmts',usesGlobals) <- globaliseStmts stmts
     vars' <- fixVarDict vars
-    return ([Loop stmts' vars' `maybePlace` pos], usesGlobals)
+    res <- gets resResources
+    return ([Loop stmts' vars' (Just $ Map.keysSet res) `maybePlace` pos], usesGlobals)
 globaliseStmt (UseResources res vars stmts) pos = 
     case List.filter (not . isSpecialResource) res of
         [] -> globaliseStmts stmts

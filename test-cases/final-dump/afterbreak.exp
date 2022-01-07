@@ -15,12 +15,12 @@ module top-level code > public {inline,impure} (0 calls)
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    afterbreak.gen#1<0>(~#globals##0:wybe.phantom, 1:wybe.int, ?#globals##1:wybe.phantom) #0 @afterbreak:nn:nn
+    afterbreak.gen#1<0>(~*#globals##0:wybe.phantom, 1:wybe.int, ?#globals##1:wybe.phantom) #0 @afterbreak:nn:nn
 
 
 gen#1 > (2 calls)
 0: afterbreak.gen#1<0>
-gen#1(*#globals##0:wybe.phantom, x##0:wybe.int, ?#globals##1:wybe.phantom):
+gen#1(*#globals##0:wybe.phantom, x##0:wybe.int, *?#globals##1:wybe.phantom):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
@@ -28,20 +28,20 @@ gen#1(*#globals##0:wybe.phantom, x##0:wybe.int, ?#globals##1:wybe.phantom):
     case ~tmp#1##0:wybe.bool of
     0:
         foreign llvm add(~x##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom, ~#globals##0:wybe.phantom, ?*tmp#11##0:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#11##0:wybe.phantom) @io:nn:nn
         foreign c print_int(tmp#0##0:wybe.int, ~tmp#10##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#13##0:wybe.phantom, ~*tmp#11##0:wybe.phantom, ?*tmp#14##0:wybe.phantom) @io:nn:nn
-        afterbreak.gen#1<0>(~tmp#14##0:wybe.phantom, ~tmp#0##0:wybe.int, ?#globals##1:wybe.phantom) #3 @afterbreak:nn:nn
+        afterbreak.gen#1<0>(~*tmp#14##0:wybe.phantom, ~tmp#0##0:wybe.int, ?#globals##1:wybe.phantom) #3 @afterbreak:nn:nn
 
     1:
-        foreign llvm move(~#globals##0:wybe.phantom, ?#globals##1:wybe.phantom)
+        foreign llvm move(~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
 
 
 
 gen#2 > {inline} (1 calls)
 0: afterbreak.gen#2<0>
-gen#2(*#globals##0:wybe.phantom, [tmp#0##0:wybe.int], [x##0:wybe.int], y##0:wybe.int, ?#globals##2:wybe.phantom):
+gen#2(*#globals##0:wybe.phantom, [tmp#0##0:wybe.int], [x##0:wybe.int], y##0:wybe.int, *?#globals##2:wybe.phantom):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
@@ -49,7 +49,7 @@ gen#2(*#globals##0:wybe.phantom, [tmp#0##0:wybe.int], [x##0:wybe.int], y##0:wybe
     foreign c print_int(y##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#6##0:wybe.phantom, ~*tmp#4##0:wybe.phantom, ?*#globals##1:wybe.phantom) @io:nn:nn
-    afterbreak.gen#1<0>(~#globals##1:wybe.phantom, ~y##0:wybe.int, ?#globals##2:wybe.phantom) #1 @afterbreak:nn:nn
+    afterbreak.gen#1<0>(~*#globals##1:wybe.phantom, ~y##0:wybe.int, ?#globals##2:wybe.phantom) #1 @afterbreak:nn:nn
 
   LLVM code       :
 

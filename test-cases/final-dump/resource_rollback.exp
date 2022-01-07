@@ -32,7 +32,7 @@ module top-level code > public {impure} (0 calls)
         foreign c print_string(~s##0:wybe.c_string, ~tmp#9##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#15##0:wybe.phantom, ~*#globals##8:wybe.phantom, ?*#globals##9:wybe.phantom) @io:nn:nn
-        resource_rollback.gen#1<0>(~#globals##9:wybe.phantom, ?#globals##12:wybe.phantom) #3
+        resource_rollback.gen#1<0>(~*#globals##9:wybe.phantom, ?#globals##12:wybe.phantom) #3
 
 
 
@@ -49,8 +49,8 @@ foo(?s##0:wybe.c_string, ?#success##0:wybe.bool, %call_source_location##0:wybe.c
 
 gen#1 > (2 calls)
 0: resource_rollback.gen#1<0>
-gen#1(*#globals##0:wybe.phantom, ?#globals##4:wybe.phantom):
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+gen#1(*#globals##0:wybe.phantom, *?#globals##4:wybe.phantom):
+  GlobalFlows: {<<resource_rollback.res>>::{FlowIn}, <<resource_rollback.ser>>::{FlowIn}, <<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<resource_rollback.res>>:wybe.int, ?%res##0:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) @resource_rollback:nn:nn

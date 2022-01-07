@@ -1255,14 +1255,14 @@ bodyCalls'' :: Bool -> Stmt -> OptPos
 bodyCalls'' _ stmt@ProcCall{} pos = ([stmt `maybePlace` pos], [])
 bodyCalls'' _ stmt@ForeignCall{} pos = ([stmt `maybePlace` pos], [])
 bodyCalls'' nested (And stmts) _ = bodyCallsResources nested stmts
-bodyCalls'' nested (Or stmts _) _ = bodyCallsResources nested stmts
+bodyCalls'' nested (Or stmts _ _) _ = bodyCallsResources nested stmts
 bodyCalls'' nested (Not stmt) _ = bodyCallsResources nested [stmt]
-bodyCalls'' nested (Cond cond thn els _ _) _ =
+bodyCalls'' nested (Cond cond thn els _ _ _) _ =
     let (cond', condRes) = bodyCallsResources nested [cond]
         (thn', thnRes) = bodyCallsResources nested thn
         (els', elsRes) = bodyCallsResources nested els
     in  (cond' ++ thn' ++ els', condRes ++ thnRes ++ elsRes)
-bodyCalls'' nested (Loop stmts _) _ = bodyCallsResources nested stmts
+bodyCalls'' nested (Loop stmts _ _) _ = bodyCallsResources nested stmts
 bodyCalls'' nested (UseResources res _ stmts) pos = 
     let (calls, res') = bodyCallsResources nested stmts
     in (calls, ((, pos) <$> res) ++ res')
@@ -2011,7 +2011,7 @@ modecheckStmt _ _ _ assigned _ tmpCount final Fail pos = do
     logTyped "Mode checking Fail"
     return ([maybePlace Fail pos], forceFailure assigned, tmpCount)
 modecheckStmt m name defPos assigned detism tmpCount final
-    stmt@(Cond tstStmt thnStmts elsStmts _ _) pos = do
+    stmt@(Cond tstStmt thnStmts elsStmts _ _ res) pos = do
     logTyped $ "Mode checking conditional " ++ show stmt
     (tstStmt', assigned1, tmpCount1) <-
         placedApplyM
@@ -2043,7 +2043,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
                     $ bindingVars finalAssigned
         return
           ([maybePlace (Cond (seqToStmt tstStmt') thnStmts' elsStmts'
-                        (Just condBindings) (Just bindings))
+                        (Just condBindings) (Just bindings) res)
             pos], finalAssigned,tmpCount)
 modecheckStmt m name defPos assigned detism tmpCount final
     stmt@(TestBool exp) pos = do
@@ -2056,7 +2056,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
                                    bindingStateSeq SemiDet Pure Set.empty
                                    assigned,tmpCount)
 modecheckStmt m name defPos assigned detism tmpCount final
-    stmt@(Loop stmts _) pos = do
+    stmt@(Loop stmts _ res) pos = do
     logTyped $ "Mode checking loop " ++ show stmt
     -- XXX `final` is wrong:  checking for a terminal loop is not this easy
     (stmts', assigned', tmpCount') <-
@@ -2067,7 +2067,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
     vars <- mapFromUnivSetM ultimateVarType startVars
                     $ bindingBreakVars assigned'
     logTyped $ "Loop exit vars: " ++ show vars
-    return ([maybePlace (Loop stmts' $ Just vars) pos]
+    return ([maybePlace (Loop stmts' (Just vars) res) pos]
            ,postLoopBindingState assigned assigned',tmpCount')
 modecheckStmt m name defPos assigned detism tmpCount final
     stmt@(UseResources resources _ stmts) pos = do
@@ -2108,14 +2108,14 @@ modecheckStmt m name defPos assigned detism tmpCount final
         then return (stmts', assigned',tmpCount')
         else return ([maybePlace (And stmts') pos], assigned',tmpCount')
 modecheckStmt m name defPos assigned detism tmpCount final
-    stmt@(Or disj _) pos = do
+    stmt@(Or disj _ res) pos = do
     logTyped $ "Mode checking disjunction " ++ show stmt
     (disj',assigned',tmpCount') <-
         modecheckDisj m name defPos assigned detism tmpCount final
                       (failingBindingState assigned) disj
     varDict <- mapFromUnivSetM ultimateVarType Set.empty
                 $ bindingVars assigned'
-    return ([maybePlace (Or disj' (Just varDict)) pos],assigned',tmpCount')
+    return ([maybePlace (Or disj' (Just varDict) res) pos],assigned',tmpCount')
 modecheckStmt m name defPos assigned detism tmpCount final
     (Not stmt) pos = do
     logTyped $ "Mode checking negation " ++ show stmt
@@ -2597,7 +2597,7 @@ checkStmtTyped name pos (ForeignCall _ pname _ args) ppos =
 checkStmtTyped _ _ (TestBool _) _ = return ()
 checkStmtTyped name pos (And stmts) _ppos =
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
-checkStmtTyped name pos stmt@(Or stmts exitVars) _ppos = do
+checkStmtTyped name pos stmt@(Or stmts _ _) _ppos = do
     -- exit vars are Nothing when both disjuncts are infinite loops, so don't report this:
     -- when (isNothing exitVars) $
     --      shouldnt $ "exit vars of disjunction undetermined: " ++ showStmt 4 stmt
@@ -2605,14 +2605,14 @@ checkStmtTyped name pos stmt@(Or stmts exitVars) _ppos = do
 checkStmtTyped name pos (Not stmt) _ppos =
     placedApply (checkStmtTyped name pos) stmt
 checkStmtTyped name pos
-               stmt@(Cond tst thenstmts elsestmts condVars exitVars) _ppos = do
+               stmt@(Cond tst thenstmts elsestmts _ _ _) _ppos = do
     -- exit vars are Nothing when both branches are infinite loops, so don't report this:
     -- when (isNothing exitVars) $
     --      shouldnt $ "exit vars of conditional undetermined: " ++ showStmt 4 stmt
     placedApply (checkStmtTyped name pos) tst
     mapM_ (placedApply (checkStmtTyped name pos)) thenstmts
     mapM_ (placedApply (checkStmtTyped name pos)) elsestmts
-checkStmtTyped name pos stmt@(Loop stmts exitVars) _ppos = do
+checkStmtTyped name pos stmt@(Loop stmts _ _) _ppos = do
     -- exit vars are Nothing for infinite loops, so don't report this:
     -- when (isNothing exitVars) $
     --      shouldnt $ "exit vars of loop undetermined: " ++ showStmt 4 stmt

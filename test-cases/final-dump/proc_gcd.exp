@@ -29,12 +29,12 @@ gcd(a##0:wybe.int, b##0:wybe.int, ?r##0:wybe.int, *#globals##0:wybe.phantom, *?#
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    proc_gcd.gen#1<0>(~#globals##0:wybe.phantom, ~a##0:wybe.int, ~b##0:wybe.int, _:wybe.int, ~a##0:wybe.int, ~b##0:wybe.int, ?r##0:wybe.int, ?#globals##1:wybe.phantom) #0 @proc_gcd:nn:nn
+    proc_gcd.gen#1<0>(~*#globals##0:wybe.phantom, ~a##0:wybe.int, ~b##0:wybe.int, _:wybe.int, ~a##0:wybe.int, ~b##0:wybe.int, ?r##0:wybe.int, ?#globals##1:wybe.phantom) #0 @proc_gcd:nn:nn
 
 
 gen#1 > (2 calls)
 0: proc_gcd.gen#1<0>
-gen#1(*#globals##0:wybe.phantom, a##0:wybe.int, b##0:wybe.int, [t##0:wybe.int], x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int, ?#globals##1:wybe.phantom):
+gen#1(*#globals##0:wybe.phantom, a##0:wybe.int, b##0:wybe.int, [t##0:wybe.int], x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int, *?#globals##1:wybe.phantom):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
@@ -42,22 +42,22 @@ gen#1(*#globals##0:wybe.phantom, a##0:wybe.int, b##0:wybe.int, [t##0:wybe.int], 
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(~x##0:wybe.int, ?r##0:wybe.int) @proc_gcd:nn:nn
-        foreign llvm move(~#globals##0:wybe.phantom, ?#globals##1:wybe.phantom)
+        foreign llvm move(~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
 
     1:
-        proc_gcd.mod<0>(~x##0:wybe.int, y##0:wybe.int, ?tmp#9##0:wybe.int, ~#globals##0:wybe.phantom, ?*tmp#10##0:wybe.phantom) #2 @proc_gcd:nn:nn
-        proc_gcd.gen#1<0>(~tmp#10##0:wybe.phantom, ~a##0:wybe.int, ~b##0:wybe.int, _:wybe.int, ~y##0:wybe.int, ~tmp#9##0:wybe.int, ?r##0:wybe.int, ?#globals##1:wybe.phantom) #3 @proc_gcd:nn:nn
+        proc_gcd.mod<0>(~x##0:wybe.int, y##0:wybe.int, ?tmp#9##0:wybe.int, ~*#globals##0:wybe.phantom, ?*tmp#10##0:wybe.phantom) #2 @proc_gcd:nn:nn
+        proc_gcd.gen#1<0>(~*tmp#10##0:wybe.phantom, ~a##0:wybe.int, ~b##0:wybe.int, _:wybe.int, ~y##0:wybe.int, ~tmp#9##0:wybe.int, ?r##0:wybe.int, ?#globals##1:wybe.phantom) #3 @proc_gcd:nn:nn
 
 
 
 gen#2 > {inline} (1 calls)
 0: proc_gcd.gen#2<0>
-gen#2(*#globals##0:wybe.phantom, a##0:wybe.int, b##0:wybe.int, [t##0:wybe.int], x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int, ?#globals##2:wybe.phantom):
+gen#2(*#globals##0:wybe.phantom, a##0:wybe.int, b##0:wybe.int, [t##0:wybe.int], x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int, *?#globals##2:wybe.phantom):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     proc_gcd.mod<0>(~x##0:wybe.int, y##0:wybe.int, ?y##1:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #0 @proc_gcd:nn:nn
-    proc_gcd.gen#1<0>(~#globals##1:wybe.phantom, ~a##0:wybe.int, ~b##0:wybe.int, _:wybe.int, ~y##0:wybe.int, ~y##1:wybe.int, ?r##0:wybe.int, ?#globals##2:wybe.phantom) #1 @proc_gcd:nn:nn
+    proc_gcd.gen#1<0>(~*#globals##1:wybe.phantom, ~a##0:wybe.int, ~b##0:wybe.int, _:wybe.int, ~y##0:wybe.int, ~y##1:wybe.int, ?r##0:wybe.int, ?#globals##2:wybe.phantom) #1 @proc_gcd:nn:nn
 
 
 mod > public (1 calls)
