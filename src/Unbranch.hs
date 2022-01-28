@@ -815,14 +815,8 @@ factorLoopProc break inVars pos detism res stmts alt sense = do
     return next
 
 varExp :: FlowDirection -> VarName -> TypeSpec -> Placed Exp
-varExp flow var ty = Unplaced 
-                   $ Typed (Var var flow 
-                        -- XXX JB This is admittedly a hack...
-                        -- need some way of keeping track of which variables
-                        -- have which arg flow type, but this is the only one
-                        -- that matters
-                        (if var == globalsName then GlobalArg else Ordinary)) 
-                        (unbranchType ty) Nothing
+varExp flow var ty 
+    = Unplaced $ Typed (Var var flow Ordinary) (unbranchType ty) Nothing
 
 
 newProcCall :: ProcName -> VarDict -> OptPos -> Determinism
@@ -838,9 +832,7 @@ newProcCall name inVars pos detism = do
 
 newProcProto :: ProcName -> VarDict -> Set ResourceSpec -> Unbrancher ProcProto
 newProcProto name inVars res = do
-    let inParams  = [unbranchParam
-                        $ Param v ty ParamIn 
-                            (if v == globalsName then GlobalArg else Ordinary)
+    let inParams  = [unbranchParam $ Param v ty ParamIn Ordinary
                     | (v,ty) <- Map.toList inVars]
     outParams <- gets brOutParams
     return $ ProcProto name (inParams ++ outParams) 

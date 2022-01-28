@@ -21,12 +21,12 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,impure} (0 calls)
 0: person4.<0>
-(*#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
+():
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print_string<0>("Wang":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #7 @io:nn:nn
-    wybe.string.print_string<0>("Smith":wybe.string, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #8 @io:nn:nn
+    wybe.string.print_string<0>("Wang":wybe.string) #7 @io:nn:nn
+    wybe.string.print_string<0>("Smith":wybe.string) #8 @io:nn:nn
 
   LLVM code       :
 

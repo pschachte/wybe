@@ -11,174 +11,174 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: string.<0>
-(*#globals##0:wybe.phantom, *?#globals##29:wybe.phantom):
+():
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#34##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#35##0:wybe.phantom) @io:nn:nn
-    foreign c print_string(c"TESTING CONSTRUCTION":wybe.c_string, ~tmp#34##0:wybe.phantom, ?tmp#36##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#36##0:wybe.phantom, ?tmp#37##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#37##0:wybe.phantom, ~*tmp#35##0:wybe.phantom, ?*#globals##1:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>("":wybe.string, ~*#globals##1:wybe.phantom, ?*tmp#40##0:wybe.phantom) #62 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#41##0:wybe.phantom, ~*tmp#40##0:wybe.phantom, ?*tmp#42##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#41##0:wybe.phantom, ?tmp#43##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#43##0:wybe.phantom, ~*tmp#42##0:wybe.phantom, ?*#globals##2:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>("a":wybe.string, ~*#globals##2:wybe.phantom, ?*tmp#46##0:wybe.phantom) #63 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#47##0:wybe.phantom, ~*tmp#46##0:wybe.phantom, ?*tmp#48##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#47##0:wybe.phantom, ?tmp#49##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#49##0:wybe.phantom, ~*tmp#48##0:wybe.phantom, ?*#globals##3:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>("abc":wybe.string, ~*#globals##3:wybe.phantom, ?*tmp#52##0:wybe.phantom) #64 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#53##0:wybe.phantom, ~*tmp#52##0:wybe.phantom, ?*tmp#54##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#53##0:wybe.phantom, ?tmp#55##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#55##0:wybe.phantom, ~*tmp#54##0:wybe.phantom, ?*#globals##4:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#33##0:wybe.phantom) @io:nn:nn
+    foreign c print_string(c"TESTING CONSTRUCTION":wybe.c_string, ~tmp#33##0:wybe.phantom, ?tmp#34##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#34##0:wybe.phantom, ?tmp#35##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#35##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("":wybe.string) #62 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#37##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#37##0:wybe.phantom, ?tmp#38##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#38##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("a":wybe.string) #63 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#40##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#40##0:wybe.phantom, ?tmp#41##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#41##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("abc":wybe.string) #64 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#43##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#43##0:wybe.phantom, ?tmp#44##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#44##0:wybe.phantom) @io:nn:nn
     wybe.string.,,<0>("abc":wybe.string, "abc":wybe.string, ?tmp#0##0:wybe.string) #4 @string:nn:nn
-    wybe.string.print_string<0>(~tmp#0##0:wybe.string, ~*#globals##4:wybe.phantom, ?*tmp#58##0:wybe.phantom) #65 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#59##0:wybe.phantom, ~*tmp#58##0:wybe.phantom, ?*tmp#60##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#59##0:wybe.phantom, ?tmp#61##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#61##0:wybe.phantom, ~*tmp#60##0:wybe.phantom, ?*#globals##5:wybe.phantom) @io:nn:nn
-    foreign llvm shl('a':wybe.string, 2:wybe.string, ?tmp#143##0:wybe.string) @string:nn:nn
-    foreign llvm or(~tmp#143##0:wybe.string, 1024:wybe.string, ?tmp#144##0:wybe.string) @string:nn:nn
-    foreign llvm or(~tmp#144##0:wybe.string, 3:wybe.string, ?tmp#1##0:wybe.string) @string:nn:nn
-    wybe.string.print_string<0>(tmp#1##0:wybe.string, ~*#globals##5:wybe.phantom, ?*tmp#67##0:wybe.phantom) #66 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#68##0:wybe.phantom, ~*tmp#67##0:wybe.phantom, ?*tmp#69##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#68##0:wybe.phantom, ?tmp#70##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#70##0:wybe.phantom, ~*tmp#69##0:wybe.phantom, ?*#globals##6:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(~tmp#0##0:wybe.string) #65 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#46##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#46##0:wybe.phantom, ?tmp#47##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#47##0:wybe.phantom) @io:nn:nn
+    foreign llvm shl('a':wybe.string, 2:wybe.string, ?tmp#107##0:wybe.string) @string:nn:nn
+    foreign llvm or(~tmp#107##0:wybe.string, 1024:wybe.string, ?tmp#108##0:wybe.string) @string:nn:nn
+    foreign llvm or(~tmp#108##0:wybe.string, 3:wybe.string, ?tmp#1##0:wybe.string) @string:nn:nn
+    wybe.string.print_string<0>(tmp#1##0:wybe.string) #66 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#52##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#52##0:wybe.phantom, ?tmp#53##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#53##0:wybe.phantom) @io:nn:nn
     wybe.range.construct<0>(1:wybe.int, 3:wybe.int, 100:wybe.int, ?tmp#3##0:wybe.range) #67 @range:nn:nn
     wybe.string.[]<1>("abcdefghi":wybe.string, ~tmp#3##0:wybe.range, ?tmp#2##0:wybe.string) #9 @string:nn:nn
-    wybe.string.print_string<0>(~tmp#2##0:wybe.string, ~*#globals##6:wybe.phantom, ?*tmp#76##0:wybe.phantom) #68 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#77##0:wybe.phantom, ~*tmp#76##0:wybe.phantom, ?*tmp#78##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#77##0:wybe.phantom, ?tmp#79##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#79##0:wybe.phantom, ~*tmp#78##0:wybe.phantom, ?*#globals##7:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(~tmp#2##0:wybe.string) #68 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#58##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#58##0:wybe.phantom, ?tmp#59##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#59##0:wybe.phantom) @io:nn:nn
     wybe.range.construct<0>(1:wybe.int, 3:wybe.int, 100:wybe.int, ?tmp#6##0:wybe.range) #69 @range:nn:nn
     wybe.string.[]<1>("abcdefghi":wybe.string, ~tmp#6##0:wybe.range, ?tmp#5##0:wybe.string) #12 @string:nn:nn
     wybe.range...<0>(1:wybe.int, 3:wybe.int, ?tmp#7##0:wybe.range) #13 @string:nn:nn
     wybe.string.[]<1>(~tmp#5##0:wybe.string, ~tmp#7##0:wybe.range, ?tmp#4##0:wybe.string) #14 @string:nn:nn
-    wybe.string.print_string<0>(~tmp#4##0:wybe.string, ~*#globals##7:wybe.phantom, ?*tmp#85##0:wybe.phantom) #70 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#86##0:wybe.phantom, ~*tmp#85##0:wybe.phantom, ?*#globals##8:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#86##0:wybe.phantom, ?tmp#88##0:wybe.phantom) @io:nn:nn
-    foreign c print_string(c"\nTESTING CONVERSION TO c_string":wybe.c_string, ~tmp#88##0:wybe.phantom, ?tmp#93##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#93##0:wybe.phantom, ?tmp#94##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#94##0:wybe.phantom, ~*#globals##8:wybe.phantom, ?*#globals##9:wybe.phantom) @io:nn:nn
-    foreign llvm shl('d':wybe.string, 2:wybe.string, ?tmp#96##0:wybe.string) @string:nn:nn
-    foreign llvm or(~tmp#96##0:wybe.string, 1024:wybe.string, ?tmp#97##0:wybe.string) @string:nn:nn
-    foreign llvm or(~tmp#97##0:wybe.string, 3:wybe.string, ?tmp#10##0:wybe.string) @string:nn:nn
+    wybe.string.print_string<0>(~tmp#4##0:wybe.string) #70 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#64##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#64##0:wybe.phantom, ?tmp#65##0:wybe.phantom) @io:nn:nn
+    foreign c print_string(c"\nTESTING CONVERSION TO c_string":wybe.c_string, ~tmp#65##0:wybe.phantom, ?tmp#68##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#68##0:wybe.phantom, ?tmp#69##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#69##0:wybe.phantom) @io:nn:nn
+    foreign llvm shl('d':wybe.string, 2:wybe.string, ?tmp#71##0:wybe.string) @string:nn:nn
+    foreign llvm or(~tmp#71##0:wybe.string, 1024:wybe.string, ?tmp#72##0:wybe.string) @string:nn:nn
+    foreign llvm or(~tmp#72##0:wybe.string, 3:wybe.string, ?tmp#10##0:wybe.string) @string:nn:nn
     wybe.range...<0>(1:wybe.int, 2:wybe.int, ?tmp#12##0:wybe.range) #18 @string:nn:nn
     wybe.string.[]<1>("efg":wybe.string, ~tmp#12##0:wybe.range, ?tmp#11##0:wybe.string) #19 @string:nn:nn
     wybe.string.,,<0>(~tmp#10##0:wybe.string, ~tmp#11##0:wybe.string, ?tmp#9##0:wybe.string) #20 @string:nn:nn
     wybe.string.,,<0>("abc":wybe.string, ~tmp#9##0:wybe.string, ?tmp#8##0:wybe.string) #21 @string:nn:nn
     wybe.string.c_string<0>(tmp#8##0:wybe.string, ?r##0:wybe.c_string) #22 @string:nn:nn
-    wybe.string.print_string<0>(~tmp#8##0:wybe.string, ~*#globals##9:wybe.phantom, ?*#globals##10:wybe.phantom) #71 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#102##0:wybe.phantom, ~*#globals##10:wybe.phantom, ?*#globals##12:wybe.phantom) @io:nn:nn
-    foreign c putchar(' ':wybe.char, ~tmp#102##0:wybe.phantom, ?tmp#104##0:wybe.phantom) @io:nn:nn
-    foreign c print_string(~r##0:wybe.c_string, ~tmp#104##0:wybe.phantom, ?tmp#109##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#109##0:wybe.phantom, ?tmp#110##0:wybe.phantom) @io:nn:nn
-    foreign c print_string(c"\nTESTING LOOPS":wybe.c_string, ~tmp#110##0:wybe.phantom, ?tmp#115##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#115##0:wybe.phantom, ?tmp#116##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#116##0:wybe.phantom, ~*#globals##12:wybe.phantom, ?*#globals##13:wybe.phantom) @io:nn:nn
-    string.gen#1<0>(~*#globals##13:wybe.phantom, "abc":wybe.string, "abc":wybe.string, ?*#globals##14:wybe.phantom) #72 @string:nn:nn
+    wybe.string.print_string<0>(~tmp#8##0:wybe.string) #71 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#75##0:wybe.phantom) @io:nn:nn
+    foreign c putchar(' ':wybe.char, ~tmp#75##0:wybe.phantom, ?tmp#76##0:wybe.phantom) @io:nn:nn
+    foreign c print_string(~r##0:wybe.c_string, ~tmp#76##0:wybe.phantom, ?tmp#79##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#79##0:wybe.phantom, ?tmp#80##0:wybe.phantom) @io:nn:nn
+    foreign c print_string(c"\nTESTING LOOPS":wybe.c_string, ~tmp#80##0:wybe.phantom, ?tmp#83##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#83##0:wybe.phantom, ?tmp#84##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#84##0:wybe.phantom) @io:nn:nn
+    string.gen#1<0>("abc":wybe.string, "abc":wybe.string) #72 @string:nn:nn
     wybe.range.irange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp#14##0:wybe.range) #28 @string:nn:nn
     wybe.string.[]<1>("abcdefghijkl":wybe.string, ~tmp#14##0:wybe.range, ?tmp#13##0:wybe.string) #29 @string:nn:nn
-    string.gen#1<0>(~*#globals##14:wybe.phantom, ~tmp#13##0:wybe.string, ~tmp#13##0:wybe.string, ?*#globals##15:wybe.phantom) #73 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#123##0:wybe.phantom, ~*#globals##15:wybe.phantom, ?*tmp#124##0:wybe.phantom) @io:nn:nn
-    foreign c print_string(c"\nTESTING INDEXING":wybe.c_string, ~tmp#123##0:wybe.phantom, ?tmp#125##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#125##0:wybe.phantom, ?tmp#126##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#126##0:wybe.phantom, ~*tmp#124##0:wybe.phantom, ?*#globals##16:wybe.phantom) @io:nn:nn
-    string.test_index<0>("abc":wybe.string, 0:wybe.int, ~*#globals##16:wybe.phantom, ?*#globals##17:wybe.phantom) #32 @string:nn:nn
-    string.test_index<0>("abc":wybe.string, 1:wybe.int, ~*#globals##17:wybe.phantom, ?*#globals##18:wybe.phantom) #33 @string:nn:nn
-    string.test_index<0>("abcdefghijklmnopqrstuvwxyz":wybe.string, 25:wybe.int, ~*#globals##18:wybe.phantom, ?*#globals##19:wybe.phantom) #34 @string:nn:nn
+    string.gen#1<0>(~tmp#13##0:wybe.string, ~tmp#13##0:wybe.string) #73 @string:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#88##0:wybe.phantom) @io:nn:nn
+    foreign c print_string(c"\nTESTING INDEXING":wybe.c_string, ~tmp#88##0:wybe.phantom, ?tmp#89##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#89##0:wybe.phantom, ?tmp#90##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#90##0:wybe.phantom) @io:nn:nn
+    string.test_index<0>("abc":wybe.string, 0:wybe.int) #32 @string:nn:nn
+    string.test_index<0>("abc":wybe.string, 1:wybe.int) #33 @string:nn:nn
+    string.test_index<0>("abcdefghijklmnopqrstuvwxyz":wybe.string, 25:wybe.int) #34 @string:nn:nn
     wybe.string.,,<0>("ab":wybe.string, "cd":wybe.string, ?tmp#15##0:wybe.string) #35 @string:nn:nn
-    string.test_index<0>(~tmp#15##0:wybe.string, 1:wybe.int, ~*#globals##19:wybe.phantom, ?*#globals##20:wybe.phantom) #36 @string:nn:nn
+    string.test_index<0>(~tmp#15##0:wybe.string, 1:wybe.int) #36 @string:nn:nn
     wybe.string.,,<0>("ab":wybe.string, "cd":wybe.string, ?tmp#16##0:wybe.string) #37 @string:nn:nn
-    string.test_index<0>(~tmp#16##0:wybe.string, 2:wybe.int, ~*#globals##20:wybe.phantom, ?*#globals##21:wybe.phantom) #38 @string:nn:nn
-    string.test_index<0>(tmp#1##0:wybe.string, 0:wybe.int, ~*#globals##21:wybe.phantom, ?*#globals##22:wybe.phantom) #40 @string:nn:nn
+    string.test_index<0>(~tmp#16##0:wybe.string, 2:wybe.int) #38 @string:nn:nn
+    string.test_index<0>(tmp#1##0:wybe.string, 0:wybe.int) #40 @string:nn:nn
     wybe.range.construct<0>(0:wybe.int, 2:wybe.int, 10:wybe.int, ?tmp#19##0:wybe.range) #74 @range:nn:nn
     wybe.string.[]<1>("abcdefgh":wybe.string, ~tmp#19##0:wybe.range, ?tmp#18##0:wybe.string) #42 @string:nn:nn
-    string.test_index<0>(~tmp#18##0:wybe.string, 0:wybe.int, ~*#globals##22:wybe.phantom, ?*#globals##23:wybe.phantom) #43 @string:nn:nn
-    string.test_index<0>("abc":wybe.string, 3:wybe.int, ~*#globals##23:wybe.phantom, ?*#globals##24:wybe.phantom) #44 @string:nn:nn
-    string.test_index<0>(tmp#1##0:wybe.string, 3:wybe.int, ~*#globals##24:wybe.phantom, ?*#globals##25:wybe.phantom) #46 @string:nn:nn
-    string.test_index<0>("abc":wybe.string, -3:wybe.int, ~*#globals##25:wybe.phantom, ?*#globals##26:wybe.phantom) #47 @string:nn:nn
+    string.test_index<0>(~tmp#18##0:wybe.string, 0:wybe.int) #43 @string:nn:nn
+    string.test_index<0>("abc":wybe.string, 3:wybe.int) #44 @string:nn:nn
+    string.test_index<0>(tmp#1##0:wybe.string, 3:wybe.int) #46 @string:nn:nn
+    string.test_index<0>("abc":wybe.string, -3:wybe.int) #47 @string:nn:nn
     wybe.range.construct<0>(0:wybe.int, 2:wybe.int, 10:wybe.int, ?tmp#22##0:wybe.range) #75 @range:nn:nn
     wybe.string.[]<1>("abc":wybe.string, ~tmp#22##0:wybe.range, ?tmp#21##0:wybe.string) #49 @string:nn:nn
-    string.test_index<0>(~tmp#21##0:wybe.string, 2:wybe.int, ~*#globals##26:wybe.phantom, ?*#globals##27:wybe.phantom) #50 @string:nn:nn
+    string.test_index<0>(~tmp#21##0:wybe.string, 2:wybe.int) #50 @string:nn:nn
     wybe.string.,,<0>("abc":wybe.string, tmp#1##0:wybe.string, ?tmp#23##0:wybe.string) #52 @string:nn:nn
-    string.test_index<0>(~tmp#23##0:wybe.string, 2:wybe.int, ~*#globals##27:wybe.phantom, ?*#globals##28:wybe.phantom) #53 @string:nn:nn
-    foreign llvm shl('b':wybe.string, 2:wybe.string, ?tmp#146##0:wybe.string) @string:nn:nn
-    foreign llvm or(~tmp#146##0:wybe.string, 1024:wybe.string, ?tmp#147##0:wybe.string) @string:nn:nn
-    foreign llvm or(~tmp#147##0:wybe.string, 3:wybe.string, ?tmp#29##0:wybe.string) @string:nn:nn
-    foreign llvm shl('c':wybe.string, 2:wybe.string, ?tmp#149##0:wybe.string) @string:nn:nn
-    foreign llvm or(~tmp#149##0:wybe.string, 1024:wybe.string, ?tmp#150##0:wybe.string) @string:nn:nn
-    foreign llvm or(~tmp#150##0:wybe.string, 3:wybe.string, ?tmp#30##0:wybe.string) @string:nn:nn
+    string.test_index<0>(~tmp#23##0:wybe.string, 2:wybe.int) #53 @string:nn:nn
+    foreign llvm shl('b':wybe.string, 2:wybe.string, ?tmp#110##0:wybe.string) @string:nn:nn
+    foreign llvm or(~tmp#110##0:wybe.string, 1024:wybe.string, ?tmp#111##0:wybe.string) @string:nn:nn
+    foreign llvm or(~tmp#111##0:wybe.string, 3:wybe.string, ?tmp#29##0:wybe.string) @string:nn:nn
+    foreign llvm shl('c':wybe.string, 2:wybe.string, ?tmp#113##0:wybe.string) @string:nn:nn
+    foreign llvm or(~tmp#113##0:wybe.string, 1024:wybe.string, ?tmp#114##0:wybe.string) @string:nn:nn
+    foreign llvm or(~tmp#114##0:wybe.string, 3:wybe.string, ?tmp#30##0:wybe.string) @string:nn:nn
     wybe.string.,,<0>(~tmp#29##0:wybe.string, ~tmp#30##0:wybe.string, ?tmp#28##0:wybe.string) #57 @string:nn:nn
     wybe.string.,,<0>(~tmp#1##0:wybe.string, ~tmp#28##0:wybe.string, ?tmp#26##0:wybe.string) #58 @string:nn:nn
     wybe.range...<0>(0:wybe.int, 2:wybe.int, ?tmp#31##0:wybe.range) #59 @string:nn:nn
     wybe.string.[]<1>(~tmp#26##0:wybe.string, ~tmp#31##0:wybe.range, ?tmp#25##0:wybe.string) #60 @string:nn:nn
-    string.test_index<0>(~tmp#25##0:wybe.string, 1:wybe.int, ~*#globals##28:wybe.phantom, ?*#globals##29:wybe.phantom) #61 @string:nn:nn
+    string.test_index<0>(~tmp#25##0:wybe.string, 1:wybe.int) #61 @string:nn:nn
 
 
 gen#1 > (2 calls)
 0: string.gen#1<0>
-gen#1(*#globals##0:wybe.phantom, s##0:wybe.string, tmp#0##0:wybe.string, *?#globals##2:wybe.phantom):
+gen#1(s##0:wybe.string, tmp#0##0:wybe.string):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
-  InterestingCallProperties: [InterestingUnaliased 2]
-  MultiSpeczDepInfo: [(0,(wybe.string.[|]<0>,fromList [NonAliasedParamCond 2 [2]])),(2,(string.gen#1<0>,fromList [NonAliasedParamCond 2 []]))]
+  InterestingCallProperties: [InterestingUnaliased 1]
+  MultiSpeczDepInfo: [(0,(wybe.string.[|]<0>,fromList [NonAliasedParamCond 2 [1]])),(2,(string.gen#1<0>,fromList [NonAliasedParamCond 1 []]))]
     wybe.string.[|]<0>(?c##0:wybe.char, ?tmp#0##1:wybe.string, ~tmp#0##0:wybe.string, ?tmp#1##0:wybe.bool) #0 @string:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#4##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#5##0:wybe.phantom, ~*tmp#4##0:wybe.phantom, ?*#globals##2:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#3##0:wybe.phantom) @io:nn:nn
 
     1:
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#5##0:wybe.phantom) @io:nn:nn
-        foreign c putchar(~c##0:wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#6##0:wybe.phantom, ~*tmp#5##0:wybe.phantom, ?*#globals##1:wybe.phantom) @io:nn:nn
-        string.gen#1<0>[785a827a1b](~*#globals##1:wybe.phantom, ~s##0:wybe.string, ~tmp#0##1:wybe.string, ?#globals##2:wybe.phantom) #2 @string:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @io:nn:nn
+        foreign c putchar(~c##0:wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#4##0:wybe.phantom) @io:nn:nn
+        string.gen#1<0>[6dacb8fd25](~s##0:wybe.string, ~tmp#0##1:wybe.string) #2 @string:nn:nn
 
- [785a827a1b] [NonAliasedParam 2] :
+ [6dacb8fd25] [NonAliasedParam 1] :
     wybe.string.[|]<0>[785a827a1b](?c##0:wybe.char, ?tmp#0##1:wybe.string, ~tmp#0##0:wybe.string, ?tmp#1##0:wybe.bool) #0 @string:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#4##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#5##0:wybe.phantom, ~*tmp#4##0:wybe.phantom, ?*#globals##2:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#3##0:wybe.phantom) @io:nn:nn
 
     1:
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#5##0:wybe.phantom) @io:nn:nn
-        foreign c putchar(~c##0:wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#6##0:wybe.phantom, ~*tmp#5##0:wybe.phantom, ?*#globals##1:wybe.phantom) @io:nn:nn
-        string.gen#1<0>[785a827a1b](~*#globals##1:wybe.phantom, ~s##0:wybe.string, ~tmp#0##1:wybe.string, ?#globals##2:wybe.phantom) #2 @string:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @io:nn:nn
+        foreign c putchar(~c##0:wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#4##0:wybe.phantom) @io:nn:nn
+        string.gen#1<0>[6dacb8fd25](~s##0:wybe.string, ~tmp#0##1:wybe.string) #2 @string:nn:nn
 
 
 
 print_loop > {inline} (2 calls)
 0: string.print_loop<0>
-print_loop(s##0:wybe.string, *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
+print_loop(s##0:wybe.string):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    string.gen#1<0>(~*#globals##0:wybe.phantom, ~s##0:wybe.string, ~s##0:wybe.string, ?#globals##1:wybe.phantom) #0 @string:nn:nn
+    string.gen#1<0>(~s##0:wybe.string, ~s##0:wybe.string) #0 @string:nn:nn
 
 
 test_index > (13 calls)
 0: string.test_index<0>
-test_index(s##0:wybe.string, i##0:wybe.int, *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
+test_index(s##0:wybe.string, i##0:wybe.int):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.[]<0>(~s##0:wybe.string, ~i##0:wybe.int, ?tmp#0##0:wybe.char, ?tmp#1##0:wybe.bool) #0 @string:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#5##0:wybe.phantom) @io:nn:nn
-        foreign c print_string(c"OUT OF RANGE":wybe.c_string, ~tmp#4##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#7##0:wybe.phantom, ~*tmp#5##0:wybe.phantom, ?*#globals##1:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @io:nn:nn
+        foreign c print_string(c"OUT OF RANGE":wybe.c_string, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#5##0:wybe.phantom) @io:nn:nn
 
     1:
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#5##0:wybe.phantom) @io:nn:nn
-        foreign c putchar(~tmp#0##0:wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#7##0:wybe.phantom, ~*tmp#5##0:wybe.phantom, ?*#globals##1:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @io:nn:nn
+        foreign c putchar(~tmp#0##0:wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#5##0:wybe.phantom) @io:nn:nn
 
 
   LLVM code       :
@@ -403,9 +403,9 @@ entry:
   %"1#tmp#0##0" = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.9, i32 0, i32 0) to i64), i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.11, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %"1#tmp#0##0")  
   tail call ccc  void  @putchar(i8  10)  
-  %"1#tmp#143##0" = shl   i64 97, 2 
-  %"1#tmp#144##0" = or i64 %"1#tmp#143##0", 1024 
-  %"1#tmp#1##0" = or i64 %"1#tmp#144##0", 3 
+  %"1#tmp#107##0" = shl   i64 97, 2 
+  %"1#tmp#108##0" = or i64 %"1#tmp#107##0", 1024 
+  %"1#tmp#1##0" = or i64 %"1#tmp#108##0", 3 
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %"1#tmp#1##0")  
   tail call ccc  void  @putchar(i8  10)  
   %"1#tmp#3##0" = tail call fastcc  i64  @"wybe.range.construct<0>"(i64  1, i64  3, i64  100)  
@@ -420,9 +420,9 @@ entry:
   tail call ccc  void  @putchar(i8  10)  
   tail call ccc  void  @print_string(i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @string.16, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  %"1#tmp#96##0" = shl   i64 100, 2 
-  %"1#tmp#97##0" = or i64 %"1#tmp#96##0", 1024 
-  %"1#tmp#10##0" = or i64 %"1#tmp#97##0", 3 
+  %"1#tmp#71##0" = shl   i64 100, 2 
+  %"1#tmp#72##0" = or i64 %"1#tmp#71##0", 1024 
+  %"1#tmp#10##0" = or i64 %"1#tmp#72##0", 3 
   %"1#tmp#12##0" = tail call fastcc  i64  @"wybe.range...<0>"(i64  1, i64  2)  
   %"1#tmp#11##0" = tail call fastcc  i64  @"wybe.string.[]<1>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.18, i32 0, i32 0) to i64), i64  %"1#tmp#12##0")  
   %"1#tmp#9##0" = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %"1#tmp#10##0", i64  %"1#tmp#11##0")  
@@ -459,12 +459,12 @@ entry:
   tail call fastcc  void  @"string.test_index<0>"(i64  %"1#tmp#21##0", i64  2)  
   %"1#tmp#23##0" = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.52, i32 0, i32 0) to i64), i64  %"1#tmp#1##0")  
   tail call fastcc  void  @"string.test_index<0>"(i64  %"1#tmp#23##0", i64  2)  
-  %"1#tmp#146##0" = shl   i64 98, 2 
-  %"1#tmp#147##0" = or i64 %"1#tmp#146##0", 1024 
-  %"1#tmp#29##0" = or i64 %"1#tmp#147##0", 3 
-  %"1#tmp#149##0" = shl   i64 99, 2 
-  %"1#tmp#150##0" = or i64 %"1#tmp#149##0", 1024 
-  %"1#tmp#30##0" = or i64 %"1#tmp#150##0", 3 
+  %"1#tmp#110##0" = shl   i64 98, 2 
+  %"1#tmp#111##0" = or i64 %"1#tmp#110##0", 1024 
+  %"1#tmp#29##0" = or i64 %"1#tmp#111##0", 3 
+  %"1#tmp#113##0" = shl   i64 99, 2 
+  %"1#tmp#114##0" = or i64 %"1#tmp#113##0", 1024 
+  %"1#tmp#30##0" = or i64 %"1#tmp#114##0", 3 
   %"1#tmp#28##0" = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %"1#tmp#29##0", i64  %"1#tmp#30##0")  
   %"1#tmp#26##0" = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %"1#tmp#1##0", i64  %"1#tmp#28##0")  
   %"1#tmp#31##0" = tail call fastcc  i64  @"wybe.range...<0>"(i64  0, i64  2)  
@@ -483,7 +483,7 @@ entry:
   br i1 %56, label %if.then, label %if.else 
 if.then:
   tail call ccc  void  @putchar(i8  %54)  
-  tail call fastcc  void  @"string.gen#1<0>[785a827a1b]"(i64  %"s##0", i64  %55)  
+  tail call fastcc  void  @"string.gen#1<0>[6dacb8fd25]"(i64  %"s##0", i64  %55)  
   ret void 
 if.else:
   tail call ccc  void  @putchar(i8  10)  
@@ -491,7 +491,7 @@ if.else:
 }
 
 
-define external fastcc  void @"string.gen#1<0>[785a827a1b]"(i64  %"s##0", i64  %"tmp#0##0")    {
+define external fastcc  void @"string.gen#1<0>[6dacb8fd25]"(i64  %"s##0", i64  %"tmp#0##0")    {
 entry:
   %57 = tail call fastcc  {i8, i64, i1}  @"wybe.string.[|]<0>[785a827a1b]"(i64  %"tmp#0##0")  
   %58 = extractvalue {i8, i64, i1} %57, 0 
@@ -500,7 +500,7 @@ entry:
   br i1 %60, label %if.then, label %if.else 
 if.then:
   tail call ccc  void  @putchar(i8  %58)  
-  tail call fastcc  void  @"string.gen#1<0>[785a827a1b]"(i64  %"s##0", i64  %59)  
+  tail call fastcc  void  @"string.gen#1<0>[6dacb8fd25]"(i64  %"s##0", i64  %59)  
   ret void 
 if.else:
   tail call ccc  void  @putchar(i8  10)  

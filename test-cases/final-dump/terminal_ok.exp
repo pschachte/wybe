@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,impure} (0 calls)
 0: terminal_ok.<0>
-(*#globals##0:wybe.phantom, [*?#globals##0:wybe.phantom]):
+():
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []

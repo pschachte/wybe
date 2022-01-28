@@ -25,7 +25,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: stmt_if2.<0>
-(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
+():
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
@@ -36,10 +36,9 @@ module top-level code > public {impure} (0 calls)
     stmt_if2.lookup<0>(1:wybe.int, ~tmp#10##0:stmt_if2.tree, ?tmp#3##0:wybe.bool) #3 @stmt_if2:17:5
     case ~tmp#3##0:wybe.bool of
     0:
-        foreign llvm move(~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
 
     1:
-        wybe.string.print_string<0>("found":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #5 @io:nn:nn
+        wybe.string.print_string<0>("found":wybe.string) #5 @io:nn:nn
 
 
 

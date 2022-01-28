@@ -38,20 +38,20 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 hidden > {inline} (0 calls)
 0: submodule.privatetest.hidden<0>
-hidden(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
+hidden():
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print_string<0>("private proc in a private module":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #1 @io:nn:nn
+    wybe.string.print_string<0>("private proc in a private module":wybe.string) #1 @io:nn:nn
 
 
 semi_hidden > public {inline} (0 calls)
 0: submodule.privatetest.semi_hidden<0>
-semi_hidden(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
+semi_hidden():
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print_string<0>("public proc in a private module":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #1 @io:nn:nn
+    wybe.string.print_string<0>("public proc in a private module":wybe.string) #1 @io:nn:nn
 
   LLVM code       :
 
@@ -107,20 +107,20 @@ entry:
 
 semi_visible > {inline} (0 calls)
 0: submodule.publictest.semi_visible<0>
-semi_visible(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
+semi_visible():
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print_string<0>("private proc in a public module":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #1 @io:nn:nn
+    wybe.string.print_string<0>("private proc in a public module":wybe.string) #1 @io:nn:nn
 
 
 visible > public {inline} (0 calls)
 0: submodule.publictest.visible<0>
-visible(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
+visible():
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print_string<0>("public proc in a public module":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #1 @io:nn:nn
+    wybe.string.print_string<0>("public proc in a public module":wybe.string) #1 @io:nn:nn
 
   LLVM code       :
 

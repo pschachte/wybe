@@ -13,28 +13,28 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: proc_gcd.<0>
-(*#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
+():
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    proc_gcd.gen#1<0>(~*#globals##0:wybe.phantom, 18:wybe.int, 24:wybe.int, _:wybe.int, 18:wybe.int, 24:wybe.int, ?r##0:wybe.int, ?*#globals##1:wybe.phantom) #2 @proc_gcd:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*tmp#6##0:wybe.phantom) @io:nn:nn
-    foreign c print_int(~r##0:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#7##0:wybe.phantom, ~*tmp#6##0:wybe.phantom, ?*#globals##2:wybe.phantom) @io:nn:nn
+    proc_gcd.gen#1<0>(18:wybe.int, 24:wybe.int, _:wybe.int, 18:wybe.int, 24:wybe.int, ?r##0:wybe.int) #2 @proc_gcd:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(~r##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#4##0:wybe.phantom) @io:nn:nn
 
 
 gcd > public {inline} (1 calls)
 0: proc_gcd.gcd<0>
-gcd(a##0:wybe.int, b##0:wybe.int, ?r##0:wybe.int, *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
+gcd(a##0:wybe.int, b##0:wybe.int, ?r##0:wybe.int):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    proc_gcd.gen#1<0>(~*#globals##0:wybe.phantom, ~a##0:wybe.int, ~b##0:wybe.int, _:wybe.int, ~a##0:wybe.int, ~b##0:wybe.int, ?r##0:wybe.int, ?#globals##1:wybe.phantom) #0 @proc_gcd:nn:nn
+    proc_gcd.gen#1<0>(~a##0:wybe.int, ~b##0:wybe.int, _:wybe.int, ~a##0:wybe.int, ~b##0:wybe.int, ?r##0:wybe.int) #0 @proc_gcd:nn:nn
 
 
 gen#1 > (2 calls)
 0: proc_gcd.gen#1<0>
-gen#1(*#globals##0:wybe.phantom, a##0:wybe.int, b##0:wybe.int, [t##0:wybe.int], x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int, *?#globals##1:wybe.phantom):
+gen#1(a##0:wybe.int, b##0:wybe.int, [t##0:wybe.int], x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
@@ -42,38 +42,37 @@ gen#1(*#globals##0:wybe.phantom, a##0:wybe.int, b##0:wybe.int, [t##0:wybe.int], 
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(~x##0:wybe.int, ?r##0:wybe.int) @proc_gcd:nn:nn
-        foreign llvm move(~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom)
 
     1:
-        proc_gcd.mod<0>(~x##0:wybe.int, y##0:wybe.int, ?tmp#9##0:wybe.int, ~*#globals##0:wybe.phantom, ?*tmp#10##0:wybe.phantom) #2 @proc_gcd:nn:nn
-        proc_gcd.gen#1<0>(~*tmp#10##0:wybe.phantom, ~a##0:wybe.int, ~b##0:wybe.int, _:wybe.int, ~y##0:wybe.int, ~tmp#9##0:wybe.int, ?r##0:wybe.int, ?#globals##1:wybe.phantom) #3 @proc_gcd:nn:nn
+        proc_gcd.mod<0>(~x##0:wybe.int, y##0:wybe.int, ?tmp#8##0:wybe.int) #2 @proc_gcd:nn:nn
+        proc_gcd.gen#1<0>(~a##0:wybe.int, ~b##0:wybe.int, _:wybe.int, ~y##0:wybe.int, ~tmp#8##0:wybe.int, ?r##0:wybe.int) #3 @proc_gcd:nn:nn
 
 
 
 gen#2 > {inline} (1 calls)
 0: proc_gcd.gen#2<0>
-gen#2(*#globals##0:wybe.phantom, a##0:wybe.int, b##0:wybe.int, [t##0:wybe.int], x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int, *?#globals##2:wybe.phantom):
+gen#2(a##0:wybe.int, b##0:wybe.int, [t##0:wybe.int], x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    proc_gcd.mod<0>(~x##0:wybe.int, y##0:wybe.int, ?y##1:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #0 @proc_gcd:nn:nn
-    proc_gcd.gen#1<0>(~*#globals##1:wybe.phantom, ~a##0:wybe.int, ~b##0:wybe.int, _:wybe.int, ~y##0:wybe.int, ~y##1:wybe.int, ?r##0:wybe.int, ?#globals##2:wybe.phantom) #1 @proc_gcd:nn:nn
+    proc_gcd.mod<0>(~x##0:wybe.int, y##0:wybe.int, ?y##1:wybe.int) #0 @proc_gcd:nn:nn
+    proc_gcd.gen#1<0>(~a##0:wybe.int, ~b##0:wybe.int, _:wybe.int, ~y##0:wybe.int, ~y##1:wybe.int, ?r##0:wybe.int) #1 @proc_gcd:nn:nn
 
 
 mod > public (1 calls)
 0: proc_gcd.mod<0>
-mod(x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int, *#globals##0:wybe.phantom, *?#globals##5:wybe.phantom):
+mod(x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*#globals##4:wybe.phantom) @io:nn:nn
-    foreign c putchar('x':wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
-    foreign c print_int(x##0:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
-    foreign c putchar(' ':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('y':wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @io:nn:nn
-    foreign c print_int(y##0:wybe.int, ~tmp#20##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#25##0:wybe.phantom, ?tmp#26##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#26##0:wybe.phantom, ~*#globals##4:wybe.phantom, ?*#globals##5:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('x':wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(x##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
+    foreign c putchar(' ':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('y':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(y##0:wybe.int, ~tmp#12##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#16##0:wybe.phantom) @io:nn:nn
     foreign llvm urem(~x##0:wybe.int, ~y##0:wybe.int, ?r##0:wybe.int) @proc_gcd:nn:nn
 
   LLVM code       :
@@ -116,8 +115,8 @@ entry:
   %"1#tmp#0##0" = icmp ne i64 %"y##0", 0 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %"2#tmp#9##0" = tail call fastcc  i64  @"proc_gcd.mod<0>"(i64  %"x##0", i64  %"y##0")  
-  %"2#r##0" = tail call fastcc  i64  @"proc_gcd.gen#1<0>"(i64  %"a##0", i64  %"b##0", i64  %"y##0", i64  %"2#tmp#9##0")  
+  %"2#tmp#8##0" = tail call fastcc  i64  @"proc_gcd.mod<0>"(i64  %"x##0", i64  %"y##0")  
+  %"2#r##0" = tail call fastcc  i64  @"proc_gcd.gen#1<0>"(i64  %"a##0", i64  %"b##0", i64  %"y##0", i64  %"2#tmp#8##0")  
   ret i64 %"2#r##0" 
 if.else:
   ret i64 %"x##0" 

@@ -25,17 +25,17 @@ AFTER EVERYTHING:
 
 printTree > public {inline} (0 calls)
 0: mytree.printTree<0>
-printTree(t##0:mytree.tree, *#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
+printTree(t##0:mytree.tree):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    mytree.printTree1<0>(~t##0:mytree.tree, "{":wybe.string, ?prefix##1:wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #0 @mytree:nn:nn
-    wybe.string.print_string<0>("}":wybe.string, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #2 @io:nn:nn
+    mytree.printTree1<0>(~t##0:mytree.tree, "{":wybe.string, ?prefix##1:wybe.string) #0 @mytree:nn:nn
+    wybe.string.print_string<0>("}":wybe.string) #2 @io:nn:nn
 
 
 printTree1 > public (3 calls)
 0: mytree.printTree1<0>
-printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string, *#globals##0:wybe.phantom, *?#globals##4:wybe.phantom):
+printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: [(prefix##0,prefix##3)]
   InterestingCallProperties: []
@@ -43,18 +43,17 @@ printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string, *#gl
     case ~tmp#2##0:wybe.bool of
     0:
         foreign llvm move(~prefix##0:wybe.string, ?prefix##3:wybe.string)
-        foreign llvm move(~*#globals##0:wybe.phantom, ?*#globals##4:wybe.phantom)
 
     1:
         foreign lpvm access(t##0:mytree.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?l##0:mytree.tree) @mytree:nn:nn
         foreign lpvm access(t##0:mytree.tree, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?k##0:wybe.int) @mytree:nn:nn
         foreign lpvm access(~t##0:mytree.tree, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?r##0:mytree.tree) @mytree:nn:nn
-        mytree.printTree1<0>(~l##0:mytree.tree, ~prefix##0:wybe.string, ?prefix##1:wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #1 @mytree:nn:nn
-        wybe.string.print_string<0>(~prefix##1:wybe.string, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #5 @io:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom, ~*#globals##2:wybe.phantom, ?*tmp#8##0:wybe.phantom) @io:nn:nn
-        foreign c print_int(~k##0:wybe.int, ~tmp#7##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#9##0:wybe.phantom, ~*tmp#8##0:wybe.phantom, ?*#globals##3:wybe.phantom) @io:nn:nn
-        mytree.printTree1<0>(~r##0:mytree.tree, ", ":wybe.string, ?prefix##3:wybe.string, ~*#globals##3:wybe.phantom, ?*#globals##4:wybe.phantom) #4 @mytree:nn:nn
+        mytree.printTree1<0>(~l##0:mytree.tree, ~prefix##0:wybe.string, ?prefix##1:wybe.string) #1 @mytree:nn:nn
+        wybe.string.print_string<0>(~prefix##1:wybe.string) #5 @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
+        foreign c print_int(~k##0:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#6##0:wybe.phantom) @io:nn:nn
+        mytree.printTree1<0>(~r##0:mytree.tree, ", ":wybe.string, ?prefix##3:wybe.string) #4 @mytree:nn:nn
 
 
   LLVM code       :

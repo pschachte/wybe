@@ -24,12 +24,12 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,impure} (0 calls)
 0: test_loop.<0>
-(*#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
+():
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    test_loop.find_test<0>(3:wybe.int, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #0 @test_loop:nn:nn
-    test_loop.find_test<0>(7:wybe.int, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #1 @test_loop:nn:nn
+    test_loop.find_test<0>(3:wybe.int) #0 @test_loop:nn:nn
+    test_loop.find_test<0>(7:wybe.int) #1 @test_loop:nn:nn
 
 
 find_modulo > {inline} (3 calls)
@@ -43,7 +43,7 @@ find_modulo(seq##0:test_loop.int_seq, modulus##0:wybe.int, ?i##0:wybe.int, ?#suc
 
 find_test > (2 calls)
 0: test_loop.find_test<0>
-find_test(modulus##0:wybe.int, *#globals##0:wybe.phantom, *?#globals##4:wybe.phantom):
+find_test(modulus##0:wybe.int):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
@@ -55,22 +55,22 @@ find_test(modulus##0:wybe.int, *#globals##0:wybe.phantom, *?#globals##4:wybe.pha
     test_loop.gen#1<0>[6dacb8fd25](modulus##0:wybe.int, ~tmp#8##0:test_loop.int_seq, ?i##0:wybe.int, ?tmp#1##0:wybe.bool) #8 @test_loop:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
-        wybe.string.print_string<0>("Couldn't find even number divisible by ":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #9 @io:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*tmp#16##0:wybe.phantom) @io:nn:nn
-        foreign c print_int(~modulus##0:wybe.int, ~tmp#15##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#18##0:wybe.phantom, ~*tmp#16##0:wybe.phantom, ?*#globals##4:wybe.phantom) @io:nn:nn
+        wybe.string.print_string<0>("Couldn't find even number divisible by ":wybe.string) #9 @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @io:nn:nn
+        foreign c print_int(~modulus##0:wybe.int, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#15##0:wybe.phantom) @io:nn:nn
 
     1:
-        wybe.string.print_string<0>("First even number divisible by ":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #10 @io:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*tmp#16##0:wybe.phantom) @io:nn:nn
-        foreign c print_int(~modulus##0:wybe.int, ~tmp#15##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#17##0:wybe.phantom, ~*tmp#16##0:wybe.phantom, ?*#globals##2:wybe.phantom) @io:nn:nn
-        wybe.string.print_string<0>(" is ":wybe.string, ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom) #11 @io:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#22##0:wybe.phantom, ~*#globals##3:wybe.phantom, ?*tmp#23##0:wybe.phantom) @io:nn:nn
-        foreign c print_int(~i##0:wybe.int, ~tmp#22##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#24##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#25##0:wybe.phantom, ~*tmp#23##0:wybe.phantom, ?*#globals##4:wybe.phantom) @io:nn:nn
+        wybe.string.print_string<0>("First even number divisible by ":wybe.string) #10 @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @io:nn:nn
+        foreign c print_int(~modulus##0:wybe.int, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#14##0:wybe.phantom) @io:nn:nn
+        wybe.string.print_string<0>(" is ":wybe.string) #11 @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @io:nn:nn
+        foreign c print_int(~i##0:wybe.int, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#19##0:wybe.phantom) @io:nn:nn
 
 
 

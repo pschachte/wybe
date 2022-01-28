@@ -11,18 +11,18 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: inequality.<0>
-(*#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
+():
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.io.print<5>(1:wybe.bool, ~*#globals##0:wybe.phantom, ?*tmp#6##0:wybe.phantom) #4 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom, ~*tmp#6##0:wybe.phantom, ?*tmp#8##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#9##0:wybe.phantom, ~*tmp#8##0:wybe.phantom, ?*#globals##1:wybe.phantom) @io:nn:nn
-    wybe.io.print<5>(0:wybe.bool, ~*#globals##1:wybe.phantom, ?*tmp#14##0:wybe.phantom) #5 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom, ~*tmp#14##0:wybe.phantom, ?*tmp#16##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#17##0:wybe.phantom, ~*tmp#16##0:wybe.phantom, ?*#globals##2:wybe.phantom) @io:nn:nn
+    wybe.io.print<5>(1:wybe.bool) #4 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#6##0:wybe.phantom) @io:nn:nn
+    wybe.io.print<5>(0:wybe.bool) #5 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#11##0:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 

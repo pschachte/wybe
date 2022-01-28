@@ -415,30 +415,26 @@ globaliseProc pos name variant detism params ress body = do
                 || Map.null newMentioned
               then return body'
               else do
-                let (init, void) = initVoidGlobals needsGlobalParam pos 
                 (saves, restores, tmpVars) <- saveRestoreResourcesTmp pos 
                                             $ Map.toList newMentioned
-                return $ init 
-                      ++ saves
+                return $ saves
                       ++ [Unplaced $ Cond (seqToStmt body') 
                             [] 
-                            (restores ++ void ++ [Unplaced Fail]) 
+                            (restores ++ [Unplaced Fail]) 
                             (Just tmpVars) (Just tmpVars) (Just Set.empty)]
     modify $ \s -> s{resResources=oldResources,
                      resHaveGlobals=oldHaveGlobals,
                      resTmpVars=oldTmpVars,
                      resIsExecMain=oldIsExecMain,                   
                      resMentioned=oldMentioned `Map.union` newMentioned}
-    let (params', body''')
-            -- executable main gets special treatment
-            -- in-flowing resources must be stored, and parameters are unmodified
-            = if isExecMain
-              then let inRes = List.filter (flowsIn . resourceFlowFlow . fst) resFlows
-                       stores = storeResource pos . mapFst resourceFlowRes <$> inRes
-                   in (params, stores ++ body'')
-              else (realParams, body'')
     tmp <- gets resTmpCtr
-    return (params' ++ [globalsParam | needsGlobalParam], body''', tmp)
+    -- executable main gets special treatment
+    -- in-flowing resources must be stored, and parameters are unmodified
+    return $ if isExecMain
+    then let inRes = List.filter (flowsIn . resourceFlowFlow . fst) resFlows
+             stores = storeResource pos . mapFst resourceFlowRes <$> inRes
+         in (params, stores ++ body'', tmp)
+    else (realParams, body'', tmp)
 
 
 -- Globalise a list of Stmts, tranforming resources into globals
@@ -465,9 +461,8 @@ globaliseStmt (ProcCall fn@(First m n mbId) d r args) pos = do
     proto <- procProto <$> lift (getProcDef $ ProcSpec m n procID generalVersion)
     let paramTys = paramType <$> procProtoParams proto
     let globals = any isResourcefulHigherOrder paramTys || not (List.null res)
-    let args''' = if globals then args'' ++ globalsGetSet else args''
     return (loadStoreResources pos ins outs
-                [ProcCall fn d r args''' `maybePlace` pos],
+                [ProcCall fn d r args'' `maybePlace` pos],
             globals || not (Map.null outs))
 globaliseStmt (ProcCall (Higher fn) d r args) pos = do
     (fn':args', ins, outs) <- globaliseExps $ fn:args
@@ -478,9 +473,8 @@ globaliseStmt (ProcCall (Higher fn) d r args) pos = do
                 <$> gets resHaveGlobals)
         $ lift $ errmsg pos $ "Cannot make resourceful call to " ++ show (content fn')
                            ++ " in current context"
-    let args'' = if globals then args' ++ globalsGetSet else args'
     return (loadStoreResources pos ins outs
-                [ProcCall (Higher fn') d r args'' `maybePlace` pos],
+                [ProcCall (Higher fn') d r args' `maybePlace` pos],
             globals)
 globaliseStmt (ForeignCall lang name flags args) pos = do
     (args', ins, outs) <- globaliseExps args
@@ -555,12 +549,9 @@ globaliseStmt (UseResources res vars stmts) pos =
             -- no need to load and store resources in executable main
             if isExecMain
             then return (stmts', True)
-            else let (init, void) = initVoidGlobals haveGlobals' pos
-                in return 
-                    -- initialise a "new" global variable, if we need to
-                (init
+            else return 
                     -- load the old values of the resources
-                ++ loads
+                (loads
                     -- store the values of the new resources, 
                     -- if theyve been assigned before the use block
                 ++ [storeResource pos (res, ty)
@@ -568,9 +559,7 @@ globaliseStmt (UseResources res vars stmts) pos =
                    , resourceVar res `Map.member` vars' ]
                 ++ stmts'
                     -- store the old values of the resources
-                ++ stores
-                    -- ensure the "new" global (if any) cannot get optimised away
-                ++ void,
+                ++ stores,
                     True)
 globaliseStmt Nop pos = return ([Nop `maybePlace` pos], False)
 globaliseStmt Fail pos = return ([Fail `maybePlace` pos], False)
@@ -636,17 +625,6 @@ addResourceInOuts fl nm ty = do
                                             Map.fromList [(res,ty) | flowsIn fl],
                                   resOut=resOut s `Map.union`
                                             Map.fromList [(res,ty) | flowsOut fl]})
-
--- |If the given flag is False, return stmts to initialise and then void a fresh
--- "globals" variable, else nops
-initVoidGlobals :: Bool -> OptPos -> ([Placed Stmt], [Placed Stmt])
-initVoidGlobals True _ = ([], [])
-initVoidGlobals False pos = 
-    ([rePlace pos 
-        $ move (iVal 0 `withType` phantomType) (varSetTyped globalsName phantomType)], 
-     [rePlace pos 
-        $ lpvmVoid [varGetTyped globalsName phantomType `maybePlace` pos]])
-
 
 ------------------------- General support code -------------------------
 
@@ -748,8 +726,8 @@ fixVarDict (Just vars) = do
     Just <$> if isJust haveGlobals
     then return $ Map.filterWithKey filter vars
                   `Map.union` tmpVars
-                  `Map.union` Map.fromList [ (globalsName, phantomType)
-                                           | haveGlobals == Just True ]
+                --   `Map.union` Map.fromList [ (globalsName, phantomType)
+                --                            | haveGlobals == Just True ]
     else return $ vars `Map.union` tmpVars
 
 

@@ -101,7 +101,7 @@ module AST (
   ProcVariant(..), Inlining(..), Impurity(..), 
   addProc, addProcDef, lookupProc, publicProc, callTargets,
   specialChar, specialName, specialName2,
-  outputVariableName, outputStatusName, globalsName,
+  outputVariableName, outputStatusName,
   envParamName, envPrimParam, makeGlobalResourceName,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showProcName,
   showModSpec, showModSpecs, showResources, showOptPos, showProcDefs, showUse,
@@ -3121,7 +3121,6 @@ argIntegerValue _              = Nothing
 data ArgFlowType = Ordinary        -- ^An argument/parameter as written by user
                  | Resource ResourceSpec
                                    -- ^An argument to pass a resource
-                 | GlobalArg       -- ^An arguemtn to pass globals
                  | Free            -- ^An argument to be passed in the closure 
                                    -- environment
      deriving (Eq,Ord,Generic)
@@ -3129,7 +3128,6 @@ data ArgFlowType = Ordinary        -- ^An argument/parameter as written by user
 instance Show ArgFlowType where
     show Ordinary = ""
     show (Resource _) = "%"
-    show GlobalArg = "*"
     show Free = "^"
 
 
@@ -3196,7 +3194,6 @@ argDescription (ArgVar var _ flow ftype _) =
     ++ (case ftype of
           Ordinary       -> " variable " ++ primVarName var
           Resource rspec -> " resource " ++ show rspec
-          GlobalArg      -> " globals "
           Free           -> " closure argument ")
 argDescription (ArgInt val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgFloat val _) = "constant argument '" ++ show val ++ "'"
@@ -3392,10 +3389,6 @@ outputVariableName = specialName "result"
 -- | The name to give to the output status variable when converting a test proc to a Det proc.
 outputStatusName :: Ident
 outputStatusName = specialName "success"
-
-
-globalsName :: Ident
-globalsName = specialName "globals"
 
 
 envParamName :: PrimVarName

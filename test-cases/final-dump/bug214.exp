@@ -18,7 +18,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: bug214.<0>
-(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
+():
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
@@ -27,7 +27,7 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm alloc(16:wybe.int, ?tmp#17##0:bug214) @bug214:36:13
     foreign lpvm mutate(~tmp#17##0:bug214, ?tmp#18##0:bug214, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp#2##0:bug214.position) @bug214:36:13
     foreign lpvm mutate(~tmp#18##0:bug214, ?tmp#1##0:bug214, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int) @bug214:36:13
-    bug214.gen#2<0>(~*#globals##0:wybe.phantom, ~tmp#0##0:bug214.position, ~tmp#1##0:bug214, ~tmp#0##0:bug214.position, ~tmp#1##0:bug214, ~tmp#2##0:bug214.position, ?#globals##1:wybe.phantom) #3 @bug214:51:1
+    bug214.gen#2<0>(~tmp#0##0:bug214.position, ~tmp#1##0:bug214, ~tmp#0##0:bug214.position, ~tmp#1##0:bug214, ~tmp#2##0:bug214.position) #3 @bug214:51:1
 
 
 = > public {inline} (1 calls)
@@ -77,56 +77,56 @@ aim(#rec##0:bug214, ?#rec##1:bug214, #field##0:wybe.int):
 
 gen#1 > {inline} (0 calls)
 0: bug214.gen#1<0>
-gen#1(*#globals##0:wybe.phantom, pos##0:bug214.position, sub##0:bug214, [tmp#0##0:bug214.position], [tmp#1##0:bug214], [tmp#2##0:bug214.position], *?#globals##8:wybe.phantom):
+gen#1(pos##0:bug214.position, sub##0:bug214, [tmp#0##0:bug214.position], [tmp#1##0:bug214], [tmp#2##0:bug214.position]):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print_string<0>("Part 1: ":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #17 @io:nn:nn
-    bug214.position.print<0>(pos##0:bug214.position, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #1 @bug214:62:2
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom, ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom) @io:nn:nn
-    foreign c putchar(' ':wybe.char, ~tmp#18##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("Part 1: ":wybe.string) #17 @io:nn:nn
+    bug214.position.print<0>(pos##0:bug214.position) #1 @bug214:62:2
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @io:nn:nn
+    foreign c putchar(' ':wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @io:nn:nn
     foreign lpvm access(pos##0:bug214.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.int) @bug214:15:9
     foreign lpvm access(~pos##0:bug214.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.int) @bug214:15:9
     foreign llvm mul(~tmp#6##0:wybe.int, ~tmp#7##0:wybe.int, ?tmp#5##0:wybe.int) @int:nn:nn
-    foreign c print_int(~tmp#5##0:wybe.int, ~tmp#20##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#29##0:wybe.phantom, ?tmp#30##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#30##0:wybe.phantom, ~*#globals##3:wybe.phantom, ?*#globals##4:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>("Part 2: ":wybe.string, ~*#globals##4:wybe.phantom, ?*#globals##5:wybe.phantom) #18 @io:nn:nn
+    foreign c print_int(~tmp#5##0:wybe.int, ~tmp#17##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#24##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#25##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("Part 2: ":wybe.string) #18 @io:nn:nn
     foreign lpvm access(~sub##0:bug214, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#8##0:bug214.position) @bug214:36:13
-    bug214.position.print<0>(tmp#8##0:bug214.position, ~*#globals##5:wybe.phantom, ?*#globals##6:wybe.phantom) #9 @bug214:65:2
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#36##0:wybe.phantom, ~*#globals##6:wybe.phantom, ?*#globals##7:wybe.phantom) @io:nn:nn
-    foreign c putchar(' ':wybe.char, ~tmp#36##0:wybe.phantom, ?tmp#38##0:wybe.phantom) @io:nn:nn
+    bug214.position.print<0>(tmp#8##0:bug214.position) #9 @bug214:65:2
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#29##0:wybe.phantom) @io:nn:nn
+    foreign c putchar(' ':wybe.char, ~tmp#29##0:wybe.phantom, ?tmp#30##0:wybe.phantom) @io:nn:nn
     foreign lpvm access(tmp#8##0:bug214.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.int) @bug214:15:9
     foreign lpvm access(~tmp#8##0:bug214.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#12##0:wybe.int) @bug214:15:9
     foreign llvm mul(~tmp#10##0:wybe.int, ~tmp#12##0:wybe.int, ?tmp#9##0:wybe.int) @int:nn:nn
-    foreign c print_int(~tmp#9##0:wybe.int, ~tmp#38##0:wybe.phantom, ?tmp#49##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#49##0:wybe.phantom, ?tmp#50##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#50##0:wybe.phantom, ~*#globals##7:wybe.phantom, ?*#globals##8:wybe.phantom) @io:nn:nn
+    foreign c print_int(~tmp#9##0:wybe.int, ~tmp#30##0:wybe.phantom, ?tmp#39##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#39##0:wybe.phantom, ?tmp#40##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#40##0:wybe.phantom) @io:nn:nn
 
 
 gen#2 > (3 calls)
 0: bug214.gen#2<0>
-gen#2(*#globals##0:wybe.phantom, pos##0:bug214.position, sub##0:bug214, tmp#0##0:bug214.position, tmp#1##0:bug214, tmp#2##0:bug214.position, *?#globals##4:wybe.phantom):
+gen#2(pos##0:bug214.position, sub##0:bug214, tmp#0##0:bug214.position, tmp#1##0:bug214, tmp#2##0:bug214.position):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
-  InterestingCallProperties: [InterestingUnaliased 1,InterestingUnaliased 2]
-  MultiSpeczDepInfo: [(4,(bug214.move<0>,fromList [NonAliasedParamCond 0 [1]])),(5,(bug214.move<1>,fromList [NonAliasedParamCond 0 [2]])),(6,(bug214.gen#2<0>,fromList [NonAliasedParamCond 1 [1],NonAliasedParamCond 2 [2]])),(7,(bug214.gen#2<0>,fromList [NonAliasedParamCond 1 [1],NonAliasedParamCond 2 [2]]))]
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#17##0:wybe.phantom) @io:nn:nn
-    foreign c read_line(?tmp#18##0:wybe.c_string, ~tmp#16##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#19##0:wybe.phantom, ~*tmp#17##0:wybe.phantom, ?*#globals##1:wybe.phantom) @io:nn:nn
-    wybe.string.string<0>(~tmp#18##0:wybe.c_string, ?dir_str##0:wybe.string) #8 @io:nn:nn
+  InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1]
+  MultiSpeczDepInfo: [(4,(bug214.move<0>,fromList [NonAliasedParamCond 0 [0]])),(5,(bug214.move<1>,fromList [NonAliasedParamCond 0 [1]])),(6,(bug214.gen#2<0>,fromList [NonAliasedParamCond 0 [0],NonAliasedParamCond 1 [1]])),(7,(bug214.gen#2<0>,fromList [NonAliasedParamCond 0 [0],NonAliasedParamCond 1 [1]]))]
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom) @io:nn:nn
+    foreign c read_line(?tmp#16##0:wybe.c_string, ~tmp#15##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#17##0:wybe.phantom) @io:nn:nn
+    wybe.string.string<0>(~tmp#16##0:wybe.c_string, ?dir_str##0:wybe.string) #8 @io:nn:nn
     bug214.direction.parse_direction<0>(~dir_str##0:wybe.string, ?tmp#3##0:bug214.direction, ?tmp#14##0:wybe.bool) #1 @bug214:53:10
     case ~tmp#14##0:wybe.bool of
     0:
-        bug214.gen#2<0>(~*#globals##1:wybe.phantom, ~pos##0:bug214.position, ~sub##0:bug214, ~tmp#0##0:bug214.position, ~tmp#1##0:bug214, ~tmp#2##0:bug214.position, ?#globals##4:wybe.phantom) #7 @bug214:51:1
+        bug214.gen#2<0>(~pos##0:bug214.position, ~sub##0:bug214, ~tmp#0##0:bug214.position, ~tmp#1##0:bug214, ~tmp#2##0:bug214.position) #7 @bug214:51:1
 
     1:
-        foreign c read_int(?units##0:wybe.int, ~tmp#19##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @io:nn:nn
-        foreign c read_line(?tmp#27##0:wybe.c_string, ~tmp#23##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#28##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*#globals##3:wybe.phantom) @io:nn:nn
+        foreign c read_int(?units##0:wybe.int, ~tmp#17##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @io:nn:nn
+        foreign c read_line(?tmp#21##0:wybe.c_string, ~tmp#19##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#22##0:wybe.phantom) @io:nn:nn
         bug214.move<0>(~pos##0:bug214.position, ?pos##1:bug214.position, tmp#3##0:bug214.direction, units##0:wybe.int) #4 @bug214:56:9
         bug214.move<1>(~sub##0:bug214, ?sub##1:bug214, ~tmp#3##0:bug214.direction, ~units##0:wybe.int) #5 @bug214:57:9
-        bug214.gen#2<0>(~*#globals##3:wybe.phantom, ~pos##1:bug214.position, ~sub##1:bug214, ~tmp#0##0:bug214.position, ~tmp#1##0:bug214, ~tmp#2##0:bug214.position, ?#globals##4:wybe.phantom) #6 @bug214:51:1
+        bug214.gen#2<0>(~pos##1:bug214.position, ~sub##1:bug214, ~tmp#0##0:bug214.position, ~tmp#1##0:bug214, ~tmp#2##0:bug214.position) #6 @bug214:51:1
 
 
 
@@ -442,15 +442,15 @@ entry:
 
 define external fastcc  void @"bug214.gen#2<0>"(i64  %"pos##0", i64  %"sub##0", i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0")    {
 entry:
-  %"1#tmp#18##0" = tail call ccc  i64  @read_line()  
-  %"1#dir_str##0" = tail call fastcc  i64  @"wybe.string.string<0>"(i64  %"1#tmp#18##0")  
+  %"1#tmp#16##0" = tail call ccc  i64  @read_line()  
+  %"1#dir_str##0" = tail call fastcc  i64  @"wybe.string.string<0>"(i64  %"1#tmp#16##0")  
   %63 = tail call fastcc  {i2, i1}  @"bug214.direction.parse_direction<0>"(i64  %"1#dir_str##0")  
   %64 = extractvalue {i2, i1} %63, 0 
   %65 = extractvalue {i2, i1} %63, 1 
   br i1 %65, label %if.then, label %if.else 
 if.then:
   %"2#units##0" = tail call ccc  i64  @read_int()  
-  %"2#tmp#27##0" = tail call ccc  i64  @read_line()  
+  %"2#tmp#21##0" = tail call ccc  i64  @read_line()  
   %"2#pos##1" = tail call fastcc  i64  @"bug214.move<0>"(i64  %"pos##0", i2  %64, i64  %"2#units##0")  
   %"2#sub##1" = tail call fastcc  i64  @"bug214.move<1>"(i64  %"sub##0", i2  %64, i64  %"2#units##0")  
   tail call fastcc  void  @"bug214.gen#2<0>"(i64  %"2#pos##1", i64  %"2#sub##1", i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0")  
@@ -991,21 +991,21 @@ position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:bug214.position):
 
 print > public (0 calls)
 0: bug214.position.print<0>
-print(pos##0:bug214.position, *#globals##0:wybe.phantom, *?#globals##5:wybe.phantom):
+print(pos##0:bug214.position):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print_string<0>("(":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #7 @io:nn:nn
+    wybe.string.print_string<0>("(":wybe.string) #7 @io:nn:nn
     foreign lpvm access(pos##0:bug214.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @bug214:15:9
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*tmp#8##0:wybe.phantom) @io:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#7##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#9##0:wybe.phantom, ~*tmp#8##0:wybe.phantom, ?*#globals##2:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>(",":wybe.string, ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom) #8 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#6##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(",":wybe.string) #8 @io:nn:nn
     foreign lpvm access(~pos##0:bug214.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @bug214:15:9
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom, ~*#globals##3:wybe.phantom, ?*tmp#16##0:wybe.phantom) @io:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#15##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#17##0:wybe.phantom, ~*tmp#16##0:wybe.phantom, ?*#globals##4:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>(")":wybe.string, ~*#globals##4:wybe.phantom, ?*#globals##5:wybe.phantom) #9 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#11##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(")":wybe.string) #9 @io:nn:nn
 
 
 x > public {inline} (1 calls)

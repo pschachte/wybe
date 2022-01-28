@@ -12,44 +12,43 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: proc_yorn.<0>
-(*#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
+():
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    proc_yorn.gen#1<0>(~*#globals##0:wybe.phantom, "Well, yes or no?":wybe.string, ?r##0:wybe.bool, ?*#globals##1:wybe.phantom) #2 @proc_yorn:nn:nn
-    wybe.io.print<5>(~r##0:wybe.bool, ~*#globals##1:wybe.phantom, ?*tmp#4##0:wybe.phantom) #3 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom, ~*tmp#4##0:wybe.phantom, ?*tmp#6##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#7##0:wybe.phantom, ~*tmp#6##0:wybe.phantom, ?*#globals##2:wybe.phantom) @io:nn:nn
+    proc_yorn.gen#1<0>("Well, yes or no?":wybe.string, ?r##0:wybe.bool) #2 @proc_yorn:nn:nn
+    wybe.io.print<5>(~r##0:wybe.bool) #3 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#3##0:wybe.phantom) @io:nn:nn
 
 
 gen#1 > (2 calls)
 0: proc_yorn.gen#1<0>
-gen#1(*#globals##0:wybe.phantom, prompt##0:wybe.string, ?result##1:wybe.bool, *?#globals##5:wybe.phantom):
+gen#1(prompt##0:wybe.string, ?result##1:wybe.bool):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print_string<0>(prompt##0:wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #7 @io:nn:nn
-    wybe.string.print_string<0>(" (y/n) ":wybe.string, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #8 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom, ~*#globals##2:wybe.phantom, ?*tmp#8##0:wybe.phantom) @io:nn:nn
-    foreign c read_char(?response##0:wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#9##0:wybe.phantom, ~*tmp#8##0:wybe.phantom, ?*#globals##3:wybe.phantom) @io:nn:nn
-    foreign llvm icmp_ne(response##0:wybe.char, 'y':wybe.char, ?tmp#11##0:wybe.bool) @char:nn:nn
-    foreign llvm icmp_ne(response##0:wybe.char, 'Y':wybe.char, ?tmp#12##0:wybe.bool) @char:nn:nn
-    foreign llvm and(~tmp#11##0:wybe.bool, ~tmp#12##0:wybe.bool, ?tmp#13##0:wybe.bool) @bool:nn:nn
-    foreign llvm xor(~tmp#13##0:wybe.bool, 1:wybe.bool, ?tmp#0##0:wybe.bool) @bool:nn:nn
+    wybe.string.print_string<0>(prompt##0:wybe.string) #7 @io:nn:nn
+    wybe.string.print_string<0>(" (y/n) ":wybe.string) #8 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @io:nn:nn
+    foreign c read_char(?response##0:wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#5##0:wybe.phantom) @io:nn:nn
+    foreign llvm icmp_ne(response##0:wybe.char, 'y':wybe.char, ?tmp#7##0:wybe.bool) @char:nn:nn
+    foreign llvm icmp_ne(response##0:wybe.char, 'Y':wybe.char, ?tmp#8##0:wybe.bool) @char:nn:nn
+    foreign llvm and(~tmp#7##0:wybe.bool, ~tmp#8##0:wybe.bool, ?tmp#9##0:wybe.bool) @bool:nn:nn
+    foreign llvm xor(~tmp#9##0:wybe.bool, 1:wybe.bool, ?tmp#0##0:wybe.bool) @bool:nn:nn
     proc_yorn.is_yes_or_no<0>(~response##0:wybe.char, ?tmp#1##0:wybe.bool) #4 @proc_yorn:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
-        wybe.string.print_string<0>("Please answer 'yes' or 'no'.":wybe.string, ~*#globals##3:wybe.phantom, ?*tmp#16##0:wybe.phantom) #9 @io:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom, ~*tmp#16##0:wybe.phantom, ?*tmp#18##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#17##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#19##0:wybe.phantom, ~*tmp#18##0:wybe.phantom, ?*#globals##4:wybe.phantom) @io:nn:nn
-        proc_yorn.gen#1<0>(~*#globals##4:wybe.phantom, ~prompt##0:wybe.string, ?result##1:wybe.bool, ?#globals##5:wybe.phantom) #6 @proc_yorn:nn:nn
+        wybe.string.print_string<0>("Please answer 'yes' or 'no'.":wybe.string) #9 @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#12##0:wybe.phantom) @io:nn:nn
+        proc_yorn.gen#1<0>(~prompt##0:wybe.string, ?result##1:wybe.bool) #6 @proc_yorn:nn:nn
 
     1:
         foreign llvm move(~tmp#0##0:wybe.bool, ?result##1:wybe.bool)
-        foreign llvm move(~*#globals##3:wybe.phantom, ?*#globals##5:wybe.phantom)
 
 
 
@@ -83,11 +82,11 @@ is_yes_or_no(ch##0:wybe.char, ?#result##0:wybe.bool):
 
 yorn > public {inline} (1 calls)
 0: proc_yorn.yorn<0>
-yorn(prompt##0:wybe.string, ?result##0:wybe.bool, *#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
+yorn(prompt##0:wybe.string, ?result##0:wybe.bool):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    proc_yorn.gen#1<0>(~*#globals##0:wybe.phantom, ~prompt##0:wybe.string, ?result##0:wybe.bool, ?#globals##1:wybe.phantom) #0 @proc_yorn:nn:nn
+    proc_yorn.gen#1<0>(~prompt##0:wybe.string, ?result##0:wybe.bool) #0 @proc_yorn:nn:nn
 
   LLVM code       :
 
@@ -147,10 +146,10 @@ entry:
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %"prompt##0")  
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @proc_yorn.4, i32 0, i32 0) to i64))  
   %"1#response##0" = tail call ccc  i8  @read_char()  
-  %"1#tmp#11##0" = icmp ne i8 %"1#response##0", 121 
-  %"1#tmp#12##0" = icmp ne i8 %"1#response##0", 89 
-  %"1#tmp#13##0" = and i1 %"1#tmp#11##0", %"1#tmp#12##0" 
-  %"1#tmp#0##0" = xor i1 %"1#tmp#13##0", 1 
+  %"1#tmp#7##0" = icmp ne i8 %"1#response##0", 121 
+  %"1#tmp#8##0" = icmp ne i8 %"1#response##0", 89 
+  %"1#tmp#9##0" = and i1 %"1#tmp#7##0", %"1#tmp#8##0" 
+  %"1#tmp#0##0" = xor i1 %"1#tmp#9##0", 1 
   %"1#tmp#1##0" = tail call fastcc  i1  @"proc_yorn.is_yes_or_no<0>"(i8  %"1#response##0")  
   br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:

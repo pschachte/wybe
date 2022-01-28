@@ -12,13 +12,13 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,impure} (0 calls)
 0: exp_if.<0>
-(*#globals##0:wybe.phantom, *?#globals##2:wybe.phantom):
+():
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print_string<0>("expect larger: ":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #3 @io:nn:nn
+    wybe.string.print_string<0>("expect larger: ":wybe.string) #3 @io:nn:nn
     exp_if.if_test<0>(3:wybe.int, ?tmp#0##0:wybe.string) #1 @exp_if:nn:nn
-    wybe.string.print_string<0>(~tmp#0##0:wybe.string, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #4 @io:nn:nn
+    wybe.string.print_string<0>(~tmp#0##0:wybe.string) #4 @io:nn:nn
 
 
 if_test > public (1 calls)

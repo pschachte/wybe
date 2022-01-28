@@ -283,23 +283,20 @@ _translateProcImpl modProtos proto isClosure body startCount = do
 closeClosure :: PrimProto -> ProcBody -> (PrimProto, ProcBody)
 closeClosure proto@PrimProto{primProtoParams=params}
              body@ProcBody{bodyPrims=prims} = do
-    (proto',body')
+    (proto{primProtoParams=
+            envPrimParam:(setPrimParamType AnyType <$> actualParams)},
+     body{bodyPrims=unpacker ++ prims})
   where
-    (free, params') = List.partition ((==Free) . primParamFlowType) params
-    (globals, actualParams) = List.partition ((==GlobalArg) . primParamFlowType) params'
-    proto' = proto{primProtoParams=
-                    envPrimParam:(setPrimParamType AnyType <$> actualParams)
-                        ++ globals}
+    (free, actualParams) = List.partition ((==Free) . primParamFlowType) params
     neededFree = List.filter (not . paramInfoUnneeded
                                   . primParamInfo) free
-    unwrapper = Unplaced <$>
-                [ primAccess (ArgVar envParamName intType FlowIn Free False)
+    unpacker = Unplaced <$>
+                [ primAccess (ArgVar envParamName AnyType FlowIn Ordinary False)
                              (ArgInt (i * toInteger wordSizeBytes) intType)
                              (ArgInt (toInteger wordSize) intType)
                              (ArgInt 0 intType)
                              (ArgVar nm ty FlowOut Free False)
                 | (i,PrimParam nm ty _ _ _) <- zip [1..] neededFree ]
-    body' = body{bodyPrims=unwrapper ++ prims}
 
 
 -- | Create LLVM's module level Function Definition from the LPVM procedure
@@ -556,11 +553,10 @@ cgen prim@(PrimHigher cId (ArgProcRef pspec closed _) args) = do
 
 cgen prim@(PrimHigher callSiteId fn@ArgVar{} args) = do
     logCodegen $ "Compiling " ++ show prim
-    let args' = List.filter ((Just GlobalArg/=) . maybeArgFlowType) args
     -- We must set all arguments to be `AnyType`
     -- This ensures that we can uniformly pass all parameters to be passed in
     -- the same registers
-    let (inArgs, outArgs) = partitionArgs $ setArgType AnyType <$> args'
+    let (inArgs, outArgs) = partitionArgs $ setArgType AnyType <$> args
     inOps@(env:_) <- mapM cgenArg $ fn:inArgs
     logCodegen $ "In args = " ++ show inOps
     fnPtrTy <- lift $ llvmClosureType (argType fn)
@@ -824,11 +820,6 @@ cgenLPVM "load" _ args = do
             return ()
         _ ->
             shouldnt $ "lpvm load instruction with wrong arity " ++ show args
-
-cgenLPVM "void" _ args = do
-    case partitionArgs args of
-        (_, []) -> return ()
-        (_, outs) -> shouldnt $ "lpvm void instruction with outputs " ++ show outs
 
 cgenLPVM pname flags args = do
     shouldnt $ "Instruction " ++ pname ++ " arity " ++ show (length args)

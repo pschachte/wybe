@@ -21,17 +21,17 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,impure} (0 calls)
 0: person5.<0>
-(*#globals##0:wybe.phantom, *?#globals##3:wybe.phantom):
+():
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print_string<0>("Amy":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##2:wybe.phantom) #6 @io:nn:nn
-    wybe.string.print_string<0>("Bob":wybe.string, ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom) #7 @io:nn:nn
+    wybe.string.print_string<0>("Amy":wybe.string) #6 @io:nn:nn
+    wybe.string.print_string<0>("Bob":wybe.string) #7 @io:nn:nn
 
 
 update_both > {inline} (1 calls)
 0: person5.update_both<0>
-update_both(p1##0:person5.person, ?p1##1:person5.person, p2##0:person5.person, ?p2##1:person5.person, *#globals##0:wybe.phantom, [*?#globals##0:wybe.phantom]):
+update_both(p1##0:person5.person, ?p1##1:person5.person, p2##0:person5.person, ?p2##1:person5.person):
   GlobalFlows: {} 
   AliasPairs: []
   InterestingCallProperties: []

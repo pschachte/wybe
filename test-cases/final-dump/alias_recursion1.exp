@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: alias_recursion1.<0>
-(*#globals##0:wybe.phantom, *?#globals##18:wybe.phantom):
+():
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
@@ -23,38 +23,38 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm alloc(16:wybe.int, ?tmp#8##0:position.position) @position:nn:nn
     foreign lpvm mutate(~tmp#8##0:position.position, ?tmp#9##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, -200:wybe.int) @position:nn:nn
     foreign lpvm mutate(~tmp#9##0:position.position, ?tmp#1##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, -201:wybe.int) @position:nn:nn
-    wybe.string.print_string<0>("--- before proc call: ":wybe.string, ~*#globals##0:wybe.phantom, ?*tmp#12##0:wybe.phantom) #22 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom, ~*tmp#12##0:wybe.phantom, ?*tmp#14##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#15##0:wybe.phantom, ~*tmp#14##0:wybe.phantom, ?*#globals##1:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>("expect pa(100,101):":wybe.string, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #23 @io:nn:nn
-    position.printPosition<0>(tmp#0##0:position.position, ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom) #4 @alias_recursion1:20:2
-    wybe.string.print_string<0>("expect pb(-200,-201):":wybe.string, ~*#globals##3:wybe.phantom, ?*#globals##4:wybe.phantom) #24 @io:nn:nn
-    position.printPosition<0>(tmp#1##0:position.position, ~*#globals##4:wybe.phantom, ?*#globals##5:wybe.phantom) #6 @alias_recursion1:22:2
+    wybe.string.print_string<0>("--- before proc call: ":wybe.string) #22 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#12##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("expect pa(100,101):":wybe.string) #23 @io:nn:nn
+    position.printPosition<0>(tmp#0##0:position.position) #4 @alias_recursion1:20:2
+    wybe.string.print_string<0>("expect pb(-200,-201):":wybe.string) #24 @io:nn:nn
+    position.printPosition<0>(tmp#1##0:position.position) #6 @alias_recursion1:22:2
     alias_recursion1.if_test<0>(tmp#0##0:position.position, tmp#1##0:position.position, ?r##0:position.position) #7 @alias_recursion1:24:1
-    wybe.string.print_string<0>("--- after calling if_test, pa and pb should be the same: ":wybe.string, ~*#globals##5:wybe.phantom, ?*tmp#22##0:wybe.phantom) #25 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#23##0:wybe.phantom, ~*tmp#22##0:wybe.phantom, ?*tmp#24##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#25##0:wybe.phantom, ~*tmp#24##0:wybe.phantom, ?*#globals##6:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>("expect pa(100,101):":wybe.string, ~*#globals##6:wybe.phantom, ?*#globals##7:wybe.phantom) #26 @io:nn:nn
-    position.printPosition<0>(tmp#0##0:position.position, ~*#globals##7:wybe.phantom, ?*#globals##8:wybe.phantom) #10 @alias_recursion1:28:2
-    wybe.string.print_string<0>("expect pb(-200,-201):":wybe.string, ~*#globals##8:wybe.phantom, ?*#globals##9:wybe.phantom) #27 @io:nn:nn
-    position.printPosition<0>(~tmp#1##0:position.position, ~*#globals##9:wybe.phantom, ?*#globals##10:wybe.phantom) #12 @alias_recursion1:30:2
-    wybe.string.print_string<0>("--- expected result to be same as pb: ":wybe.string, ~*#globals##10:wybe.phantom, ?*tmp#32##0:wybe.phantom) #28 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#33##0:wybe.phantom, ~*tmp#32##0:wybe.phantom, ?*tmp#34##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#33##0:wybe.phantom, ?tmp#35##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#35##0:wybe.phantom, ~*tmp#34##0:wybe.phantom, ?*#globals##11:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>("expect r(-200,-201):":wybe.string, ~*#globals##11:wybe.phantom, ?*#globals##12:wybe.phantom) #29 @io:nn:nn
-    position.printPosition<0>(r##0:position.position, ~*#globals##12:wybe.phantom, ?*#globals##13:wybe.phantom) #15 @alias_recursion1:34:2
-    wybe.string.print_string<0>("--- modify pa^x: ":wybe.string, ~*#globals##13:wybe.phantom, ?*tmp#40##0:wybe.phantom) #30 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#41##0:wybe.phantom, ~*tmp#40##0:wybe.phantom, ?*tmp#42##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#41##0:wybe.phantom, ?tmp#43##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#43##0:wybe.phantom, ~*tmp#42##0:wybe.phantom, ?*#globals##14:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("--- after calling if_test, pa and pb should be the same: ":wybe.string) #25 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#17##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("expect pa(100,101):":wybe.string) #26 @io:nn:nn
+    position.printPosition<0>(tmp#0##0:position.position) #10 @alias_recursion1:28:2
+    wybe.string.print_string<0>("expect pb(-200,-201):":wybe.string) #27 @io:nn:nn
+    position.printPosition<0>(~tmp#1##0:position.position) #12 @alias_recursion1:30:2
+    wybe.string.print_string<0>("--- expected result to be same as pb: ":wybe.string) #28 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#22##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("expect r(-200,-201):":wybe.string) #29 @io:nn:nn
+    position.printPosition<0>(r##0:position.position) #15 @alias_recursion1:34:2
+    wybe.string.print_string<0>("--- modify pa^x: ":wybe.string) #30 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#25##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#25##0:wybe.phantom, ?tmp#26##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#26##0:wybe.phantom) @io:nn:nn
     foreign lpvm {noalias} mutate(~tmp#0##0:position.position, ?pa##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, -1000:wybe.int) @position:nn:nn
-    wybe.string.print_string<0>("expect pa(-1000,101):":wybe.string, ~*#globals##14:wybe.phantom, ?*#globals##15:wybe.phantom) #31 @io:nn:nn
-    position.printPosition<0>(~pa##1:position.position, ~*#globals##15:wybe.phantom, ?*#globals##16:wybe.phantom) #19 @alias_recursion1:39:2
-    wybe.string.print_string<0>("expect r still (-200,-201):":wybe.string, ~*#globals##16:wybe.phantom, ?*#globals##17:wybe.phantom) #32 @io:nn:nn
-    position.printPosition<0>(~r##0:position.position, ~*#globals##17:wybe.phantom, ?*#globals##18:wybe.phantom) #21 @alias_recursion1:42:2
+    wybe.string.print_string<0>("expect pa(-1000,101):":wybe.string) #31 @io:nn:nn
+    position.printPosition<0>(~pa##1:position.position) #19 @alias_recursion1:39:2
+    wybe.string.print_string<0>("expect r still (-200,-201):":wybe.string) #32 @io:nn:nn
+    position.printPosition<0>(~r##0:position.position) #21 @alias_recursion1:42:2
 
 
 if_test > public (2 calls)
@@ -256,24 +256,24 @@ if.else:
 
 printPosition > public (0 calls)
 0: position.printPosition<0>
-printPosition(pos##0:position.position, *#globals##0:wybe.phantom, *?#globals##5:wybe.phantom):
+printPosition(pos##0:position.position):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print_string<0>(" (":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #7 @io:nn:nn
+    wybe.string.print_string<0>(" (":wybe.string) #7 @io:nn:nn
     foreign lpvm access(pos##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @position:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*tmp#8##0:wybe.phantom) @io:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#7##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#9##0:wybe.phantom, ~*tmp#8##0:wybe.phantom, ?*#globals##2:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>(",":wybe.string, ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom) #8 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#6##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(",":wybe.string) #8 @io:nn:nn
     foreign lpvm access(~pos##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @position:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom, ~*#globals##3:wybe.phantom, ?*tmp#16##0:wybe.phantom) @io:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#15##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#17##0:wybe.phantom, ~*tmp#16##0:wybe.phantom, ?*#globals##4:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>(")":wybe.string, ~*#globals##4:wybe.phantom, ?*tmp#20##0:wybe.phantom) #9 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom, ~*tmp#20##0:wybe.phantom, ?*tmp#22##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#23##0:wybe.phantom, ~*tmp#22##0:wybe.phantom, ?*#globals##5:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#11##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(")":wybe.string) #9 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#14##0:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 

@@ -14,8 +14,7 @@ module Snippets (castFromTo, castTo, withType, intType, intCast,
                  boolVarSet, boolVarGet, intVarSet, intVarGet,
                  lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, 
                  move, access, mutate, 
-                 globalStore, globalLoad, globalsGetSet, globalsParam,
-                 lpvmVoid,
+                 globalStore, globalLoad,
                  primMove, primAccess, primCast,
                  boolNegate, comparison, succeedTest, failTest, testVar, succeedIfSemiDet) where
 
@@ -171,34 +170,18 @@ mutate addr0 addr1 offset destructive size startOffset val =
                              size, startOffset, val]
 
 
-lpvmVoid :: [Placed Exp] -> Placed Stmt
-lpvmVoid args = Unplaced $ ForeignCall "lpvm" "void" ["semipure"] args
-
-
 globalStore :: ResourceSpec -> TypeSpec -> Exp -> Placed Stmt
 globalStore rs ty src =
     Unplaced $ ForeignCall "lpvm" "store" [] 
-      $ [Unplaced $ Typed (Global $ GlobalResource rs) ty Nothing, 
-         Unplaced src]
-        ++ globalsGetSet
+      [Unplaced $ Typed (Global $ GlobalResource rs) ty Nothing, 
+       Unplaced src]
 
 
 globalLoad :: ResourceSpec -> TypeSpec -> Exp -> Placed Stmt
 globalLoad rs ty dest =
     Unplaced $ ForeignCall "lpvm" "load" [] 
-      $ [Unplaced $ Typed (Global $ GlobalResource rs) ty Nothing, 
-         Unplaced dest]
-        ++ globalsGetSet
-
-
-globalsGetSet :: [Placed Exp]
-globalsGetSet = [Unplaced $ Typed (varGetSet globalsName GlobalArg) 
-                    phantomType Nothing]
-
-
-globalsParam :: Param
-globalsParam = Param globalsName phantomType ParamInOut GlobalArg
-
+      [Unplaced $ Typed (Global $ GlobalResource rs) ty Nothing, 
+       Unplaced dest]
 
 
 -- |An instruction to negate a bool value to a variable.  We optimise negation

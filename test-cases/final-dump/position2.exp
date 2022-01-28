@@ -21,24 +21,24 @@ AFTER EVERYTHING:
 
 printPosition > public (0 calls)
 0: position.printPosition<0>
-printPosition(pos##0:position.position, *#globals##0:wybe.phantom, *?#globals##5:wybe.phantom):
+printPosition(pos##0:position.position):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print_string<0>(" (":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #7 @io:nn:nn
+    wybe.string.print_string<0>(" (":wybe.string) #7 @io:nn:nn
     foreign lpvm access(pos##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @position:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom, ~*#globals##1:wybe.phantom, ?*tmp#8##0:wybe.phantom) @io:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#7##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#9##0:wybe.phantom, ~*tmp#8##0:wybe.phantom, ?*#globals##2:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>(",":wybe.string, ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom) #8 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#6##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(",":wybe.string) #8 @io:nn:nn
     foreign lpvm access(~pos##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @position:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom, ~*#globals##3:wybe.phantom, ?*tmp#16##0:wybe.phantom) @io:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#15##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#17##0:wybe.phantom, ~*tmp#16##0:wybe.phantom, ?*#globals##4:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>(")":wybe.string, ~*#globals##4:wybe.phantom, ?*tmp#20##0:wybe.phantom) #9 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom, ~*tmp#20##0:wybe.phantom, ?*tmp#22##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#23##0:wybe.phantom, ~*tmp#22##0:wybe.phantom, ?*#globals##5:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#11##0:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(")":wybe.string) #9 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#14##0:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 
@@ -370,7 +370,7 @@ if.else:
 
 module top-level code > public {impure} (0 calls)
 0: position2.<0>
-(*#globals##0:wybe.phantom, *?#globals##6:wybe.phantom):
+():
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
@@ -380,13 +380,13 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm alloc(16:wybe.int, ?tmp#10##0:position.position) @position:nn:nn
     foreign lpvm mutate(~tmp#10##0:position.position, ?tmp#11##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 333:wybe.int) @position:nn:nn
     foreign lpvm mutate(~tmp#11##0:position.position, ?tmp#1##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 222:wybe.int) @position:nn:nn
-    wybe.string.print_string<0>("expect posA(111,222):":wybe.string, ~*#globals##0:wybe.phantom, ?*#globals##1:wybe.phantom) #10 @io:nn:nn
-    position.printPosition<0>(tmp#0##0:position.position, ~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom) #4 @position2:7:2
+    wybe.string.print_string<0>("expect posA(111,222):":wybe.string) #10 @io:nn:nn
+    position.printPosition<0>(tmp#0##0:position.position) #4 @position2:7:2
     foreign lpvm {noalias} mutate(~tmp#0##0:position.position, ?posA##1:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 20000:wybe.int) @position:nn:nn
-    wybe.string.print_string<0>("expect posA(111,20000):":wybe.string, ~*#globals##2:wybe.phantom, ?*#globals##3:wybe.phantom) #11 @io:nn:nn
-    position.printPosition<0>(~posA##1:position.position, ~*#globals##3:wybe.phantom, ?*#globals##4:wybe.phantom) #7 @position2:11:2
-    wybe.string.print_string<0>("expect posB(333,222):":wybe.string, ~*#globals##4:wybe.phantom, ?*#globals##5:wybe.phantom) #12 @io:nn:nn
-    position.printPosition<0>(~tmp#1##0:position.position, ~*#globals##5:wybe.phantom, ?*#globals##6:wybe.phantom) #9 @position2:13:2
+    wybe.string.print_string<0>("expect posA(111,20000):":wybe.string) #11 @io:nn:nn
+    position.printPosition<0>(~posA##1:position.position) #7 @position2:11:2
+    wybe.string.print_string<0>("expect posB(333,222):":wybe.string) #12 @io:nn:nn
+    position.printPosition<0>(~tmp#1##0:position.position) #9 @position2:13:2
 
   LLVM code       :
 

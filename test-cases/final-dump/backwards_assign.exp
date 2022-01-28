@@ -11,11 +11,11 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,impure} (0 calls)
 0: backwards_assign.<0>
-(*#globals##0:wybe.phantom, *?#globals##1:wybe.phantom):
+():
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    backwards_assign.gen#1<0>(~*#globals##0:wybe.phantom, 0:wybe.int, ?#globals##1:wybe.phantom) #0 @backwards_assign:nn:nn
+    backwards_assign.gen#1<0>(0:wybe.int) #0 @backwards_assign:nn:nn
 
 
 backwards_assign > {inline} (3 calls)
@@ -29,22 +29,21 @@ backwards_assign(?output##0:wybe.int, input##0:wybe.int):
 
 gen#1 > (2 calls)
 0: backwards_assign.gen#1<0>
-gen#1(*#globals##0:wybe.phantom, i##0:wybe.int, *?#globals##2:wybe.phantom):
+gen#1(i##0:wybe.int):
   GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom, ~*#globals##0:wybe.phantom, ?*tmp#4##0:wybe.phantom) @io:nn:nn
-    foreign c print_int(i##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#6##0:wybe.phantom, ~*tmp#4##0:wybe.phantom, ?*#globals##1:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(i##0:wybe.int, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#4##0:wybe.phantom) @io:nn:nn
     foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?i##1:wybe.int) @int:nn:nn
     foreign llvm icmp_slt(i##1:wybe.int, 10:wybe.int, ?tmp#0##0:wybe.bool) @int:nn:nn
     case ~tmp#0##0:wybe.bool of
     0:
-        foreign llvm move(~*#globals##1:wybe.phantom, ?*#globals##2:wybe.phantom)
 
     1:
-        backwards_assign.gen#1<0>(~*#globals##1:wybe.phantom, ~i##1:wybe.int, ?#globals##2:wybe.phantom) #3 @backwards_assign:nn:nn
+        backwards_assign.gen#1<0>(~i##1:wybe.int) #3 @backwards_assign:nn:nn
 
 
   LLVM code       :
