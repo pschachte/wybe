@@ -84,7 +84,6 @@ module AST (
   addParameters, addTypeRep, setTypeRep, addConstructor,
   getModuleImplementationField, getModuleImplementation,
   getLoadedModule, ifCurrentModuleElse, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
-  
   getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
   getModule, getModuleInterface, updateModule, getSpecModule,
   updateModImplementation, updateModImplementationM,
