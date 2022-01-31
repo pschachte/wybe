@@ -113,6 +113,22 @@ These are all defined in the `wybe` module, which is automatically imported into
 every module, so there is no need to explicitly import them.
 
 
+### <a name="higher-order-types"></a>Higher order types
+
+A higher order type has one of the two following forms
+
+> `(` *flow* *type*`,` ... `)`
+
+> `{` *modifier*`,` ... `}` `(` *flow* *type*`,` ... `)`
+
+Two higher order types are considered compatible if they share the same flows 
+and the type parameters are also compatible.
+
+The list of modifiers specify the modifiers of the higher order type. These modifiers
+can be a purity modifier, a determinism modifier, or `resource`. The special 
+`resource` modifier states that this higher order term uses some resource.
+
+
 ## Constants
 
 Wybe also supports a conventional syntax for various constant types.
@@ -183,7 +199,8 @@ In general, procedure calls have the form:
 
 where *name* is the name of the procedure to call,
 and each *arg* is an expression specifying an input or output
-to that procedure.
+to that procedure. If there is a variable bound with the name *name* that has 
+a higher order type then this is a call to the higher order term.
 
 Sometimes you may wish to specify which module the procedure *name* exists in. 
 You can further specify which module the procedure *name* is from by preceding
@@ -404,6 +421,69 @@ is always equivalent to
 f(x, ?y)
 ```
 
+## Anonymous procedures
+
+Anonymous procedures are procedure definitions that appear inline, lacking a
+declaration (and hence a name) given to a regular procedure definitions.
+
+Anonymous procedures take the following forms:
+
+> `{` *stmts* `}`
+
+> `{` *modifier*`,` ... `}` `{` *stmts* `}`
+
+The parameters to an anonymous procedure take one of the following two forms: 
+numbered and unnumbered. When either form is used, all parameters to the 
+anonymous procedure must have the same form.
+
+> `@` *number*
+
+> `@`
+
+If parameters are unnumbered, then they are exactly equivalent to as if one had
+numbered the parameters from 1, following a left-to-right-top-to-bottom order 
+of the source code. The number of a parameter specifies the parameter's position of the procedure. 
+
+The types of parameters are inferred via their usage and can be annotated if necessary.
+The [mode](#modes) of a parameter is specified by the modes associated with it in the 
+contained statements-- if references to the parameter are either all inputs or 
+all outputs, then the parameter is as referenced, else it is in in/out mode. 
+If using numbered parameters and some number is skipped, this parameter is considered
+an input.
+
+The modifiers here are exactly those found in a [higher order type](#higher-order-types).
+These modifiers act like the modifiers of a procedure or function declaration, stating the 
+purity and determinism of the anonymous procedure. The special `resource` modifier is
+allows all in-scope [resources](#resources) to be used within this anonymous 
+procedure.
+
+Some example anonymous procedures are as follows, with examples as to their use:
+
+```
+?f = { @1 + @2 = ?@3:int }
+f(1, 2, ?three)
+
+?g = {resource}{ !print(@); !print(", "); !println(@) }
+# the same as `{resource}{ !print(@1); !print(", "); !println(@2) }`
+!g(1, 2)
+```
+
+Anonymous procedures can also close over in-scope variables. By referring to an
+in-scope variable by name, the variable is considered closed. Re-assignments of
+closed variables inside the body of an anonymous procedure is *not* reflected
+outside the call, nor in successive calls.
+
+```
+?i = 1
+?f = { @ + i = ?@; ?i = 10 }
+
+f(2, ?j) # j = 3; i = 1
+
+?i = 2
+
+f(3, ?j) # j = 4; i = 2
+```
+
 
 ##  <a name="operator-syntax"></a>Operator syntax
 
@@ -561,7 +641,7 @@ otherwise indicated, they are infix operators.
 
 
 
-## Modes
+## <a name="modes"></a>Modes
 
 It is permitted to define multiple procedures with the same name, as
 long as all of them have the same number and types of arguments in the
@@ -1339,7 +1419,8 @@ the value at the start of *body* will be the same as the value before the `use`
 statement, and the value at the completion of the *body* will again be the same
 as the value before entering the `use` statement.
 Thus a `use` statement will not alter the existence or the values of the
-resources it names.
+resources it names. This also applies to higher order terms that have a 
+`resource` modifier.
 
 
 ### Predefined resources
