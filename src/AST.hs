@@ -84,6 +84,7 @@ module AST (
   addParameters, addTypeRep, setTypeRep, addConstructor,
   getModuleImplementationField, getModuleImplementation,
   getLoadedModule, ifCurrentModuleElse, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
+  
   getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
   getModule, getModuleInterface, updateModule, getSpecModule,
   updateModImplementation, updateModImplementationM,
@@ -278,7 +279,8 @@ typeRepSize :: TypeRepresentation -> Int
 typeRepSize (Bits bits)     = bits
 typeRepSize (Signed bits)   = bits
 typeRepSize (Floating bits) = bits
-typeRepSize _               = wordSize
+typeRepSize (Func _ _)      = wordSize
+typeRepSize Address         = wordSize
 
 
 -- | The type representation is for a (signed or unsigned) integer type
@@ -500,8 +502,8 @@ getLoadedModule modspec = do
     logAST $ if isNothing maybeMod then " got nothing!" else " worked"
     return maybeMod
 
-
--- | Perform an action if in the current module, else perform another
+-- | Perform an action if in the current module or a submodule, 
+-- else perform another
 ifCurrentModuleElse :: ModSpec -> StateT s Compiler a -> StateT s Compiler a
                     -> StateT s Compiler a
 ifCurrentModuleElse mod current other = do
@@ -2071,8 +2073,12 @@ data ProcImpln
     -- defn in SSA (LLVM) form along with any needed extern definitions
     deriving (Eq,Generic)
 
--- |This type represents a set of globals and corresponding flows.
--- Nothing represents the universal set    
+
+-- |This type represents a set of globals and corresponding flows, with Nothing 
+-- representing the universal set.
+-- Global flows are used to annotate which global variables are used by a 
+-- procedure -- a flow in means the value is read, a flow out means the 
+-- value is modified.
 type GlobalFlows = Maybe (Map GlobalInfo (Set PrimFlow))
 
 
@@ -2563,6 +2569,9 @@ genericType Representation{} = False
 genericType AnyType          = False
 genericType InvalidType      = False
 
+
+-- |Return true if the type is a higher order type or a parameter is a higher
+-- order type
 higherOrderType :: TypeSpec -> Bool
 higherOrderType TypeSpec{typeParams=params} = any higherOrderType params
 higherOrderType HigherOrderType{} = True
@@ -2571,10 +2580,14 @@ higherOrderType Representation{} = False
 higherOrderType AnyType          = False
 higherOrderType InvalidType      = False
 
+
+-- |Return true if the given type spec is a HigherOrderType
 isHigherOrder :: TypeSpec -> Bool
 isHigherOrder HigherOrderType{} = True
 isHigherOrder _                 = False
 
+
+-- |Return true if the given type contains a HigherOrderType that is resourceful
 isResourcefulHigherOrder :: TypeSpec -> Bool
 isResourcefulHigherOrder (HigherOrderType ProcModifiers{modifierResourceful=resful} tfs) =
     resful || any isResourcefulHigherOrder (typeFlowType <$> tfs)
@@ -2919,6 +2932,7 @@ expIsConstant exp@CharValue{}        = Just exp
 expIsConstant exp@StringValue{}      = Just exp
 expIsConstant exp@(ProcRef _ closed) 
     | all (isJust . expIsConstant . content) closed = Just exp
+    | otherwise                                     = Nothing
 expIsConstant (Typed exp _ _)        = expIsConstant exp
 expIsConstant _                      = Nothing
 

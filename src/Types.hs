@@ -259,8 +259,6 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^ Expression does not have correct higher type 
                | ReasonPartialFlow ProcName ProcName Int FlowDirection OptPos
                    -- ^ ProcSpec does not have the correct type, in context 
-               | ReasonBadPartial ProcName ProcSpec OptPos
-                   -- ^ ProcSpec does not have the correct type, in context 
                | ReasonDeterminism String Determinism Determinism OptPos
                    -- ^Calling a proc in a more deterministic context
                | ReasonWeakDetism String Determinism Determinism OptPos
@@ -352,8 +350,8 @@ typeErrorMessage (ReasonWarnMultipleMatches match rest pos) =
     Message Warning pos $
         "Multiple procedures match this call's types and flows:" ++
         List.concatMap (("\n    "++) . show)
-                       (procInfoProc <$> (match:rest))
-        ++ "\nDefaulting to: " ++ show (procInfoProc match)
+                       (firstInfoProc <$> (match:rest))
+        ++ "\nDefaulting to: " ++ show (firstInfoProc match)
 typeErrorMessage (ReasonAmbig procName pos varAmbigs) =
     Message Error pos $
         "Type ambiguity in defn of " ++ procName ++ ":" ++
@@ -379,16 +377,12 @@ typeErrorMessage (ReasonEqual exp1 exp2 pos) =
 typeErrorMessage (ReasonHigher callFrom callTo pos) =
     Message Error pos $
         "Higher order call to " ++ show callTo ++ " in "
-        ++ showProcName callFrom ++ " is invalid."
+        ++ showProcName callFrom ++ " has a type/flow error."
 typeErrorMessage (ReasonPartialFlow from to idx flow pos) =
     Message Error pos $
         "Partial application of " ++ to ++ " in "
         ++ showProcName from ++ " has flow " ++ flowPrefix flow
         ++ " but should be an input."
-typeErrorMessage (ReasonBadPartial procName pspec pos) =
-    Message Error pos $
-        "Partial application of " ++ show pspec ++ " in "
-        ++ showProcName procName ++ " is invalid."
 typeErrorMessage (ReasonDeterminism name stmtDetism contextDetism pos) =
     Message Error pos $
         "Calling " ++ determinismFullName stmtDetism ++ " " ++ name
@@ -908,18 +902,18 @@ typecheckProcDecl (RoughProc m name) = do
 -- otherwise we report a type error.
 
 
--- |An individual proc, its formal parameter types and modes, and determinism
+-- |An individual call, and information that is related to this call
 data CallInfo
-    = ProcInfo {
-        procInfoProc     :: ProcSpec,
-        procInfoTypes    :: [TypeSpec],
-        procInfoFlows    :: [FlowDirection],
-        procInfoVariant  :: ProcVariant,
-        procInfoDetism   :: Determinism,
-        procInfoImpurity :: Impurity,
-        procInfoInRes    :: Set ResourceSpec,
-        procInfoOutRes   :: Set ResourceSpec,
-        procInfoPartial  :: Bool
+    = FirstInfo {
+        firstInfoProc     :: ProcSpec,
+        firstInfoTypes    :: [TypeSpec],
+        firstInfoFlows    :: [FlowDirection],
+        firstInfoVariant  :: ProcVariant,
+        firstInfoDetism   :: Determinism,
+        firstInfoImpurity :: Impurity,
+        firstInfoInRes    :: Set ResourceSpec,
+        firstInfoOutRes   :: Set ResourceSpec,
+        firstInfoPartial  :: Bool
     } | HigherInfo {
         higherInfoFunc :: Exp
     }
@@ -927,7 +921,7 @@ data CallInfo
 
 
 instance Show CallInfo where
-    show (ProcInfo procSpec tys flows _ detism impurity inRes outRes partial) =
+    show (FirstInfo procSpec tys flows _ detism impurity inRes outRes partial) =
         (if partial then "partial application of " else "")
         ++ showProcModifiers' (ProcModifiers detism MayInline impurity 
                                 RegularProc False [] [])
@@ -943,22 +937,22 @@ instance Show CallInfo where
 
 
 callInfoTypes :: CallInfo -> Maybe [TypeSpec]
-callInfoTypes ProcInfo{procInfoTypes=tys} = Just tys
+callInfoTypes FirstInfo{firstInfoTypes=tys} = Just tys
 callInfoTypes HigherInfo{} = Nothing
 
 
--- |Check if ProcInfo is for a proc with a single Bool output as last arg,
---  and if so, return Just the ProcInfo for the equivalent test proc
+-- |Check if a FirstInfo is for a proc with a single Bool output as last arg,
+--  and if so, return Just the FirstInfo for the equivalent test proc
 boolFnToTest :: CallInfo -> Maybe CallInfo
-boolFnToTest info@ProcInfo{procInfoDetism=Det,
-                           procInfoPartial=False,
-                           procInfoTypes=tys,
-                           procInfoFlows=flows}
+boolFnToTest info@FirstInfo{firstInfoDetism=Det,
+                            firstInfoPartial=False,
+                            firstInfoTypes=tys,
+                            firstInfoFlows=flows}
     | List.null tys = Nothing
     | last tys == boolType && last flows == ParamOut =
-        Just $ info {procInfoDetism=SemiDet,
-                     procInfoTypes=init tys,
-                     procInfoFlows=init flows}
+        Just $ info {firstInfoDetism=SemiDet,
+                     firstInfoTypes=init tys,
+                     firstInfoFlows=init flows}
     | otherwise = Nothing
 boolFnToTest _ = Nothing
 
@@ -966,13 +960,13 @@ boolFnToTest _ = Nothing
 -- |Check if ProcInfo is for a test proc, and if so, return a ProcInfo for
 --  the Det proc with a single Bool output as last arg
 testToBoolFn :: CallInfo -> Maybe CallInfo
-testToBoolFn info@ProcInfo{procInfoDetism=SemiDet,
-                           procInfoPartial=False,
-                           procInfoTypes=tys,
-                           procInfoFlows=flows}
-    = Just $ info {procInfoDetism=Det,
-                   procInfoTypes=tys ++ [boolType],
-                   procInfoFlows=flows ++ [ParamOut]}
+testToBoolFn info@FirstInfo{firstInfoDetism=SemiDet,
+                            firstInfoPartial=False,
+                            firstInfoTypes=tys,
+                            firstInfoFlows=flows}
+    = Just $ info {firstInfoDetism=Det,
+                   firstInfoTypes=tys ++ [boolType],
+                   firstInfoFlows=flows ++ [ParamOut]}
 testToBoolFn _ = Nothing
 
 
@@ -982,20 +976,20 @@ testToBoolFn _ = Nothing
 -- call where the call does not have a ! prefix, at most 1 more than the expected 
 -- arity. The Bool returned indicates if the call should have a ! or not
 procToPartial :: [FlowDirection] -> Bool -> CallInfo -> (Maybe CallInfo, Bool)
-procToPartial callFlows hasBang info@ProcInfo{procInfoPartial=False,
-                                              procInfoTypes=tys,
-                                              procInfoFlows=flows,
-                                              procInfoInRes=inRes,
-                                              procInfoOutRes=outRes,
-                                              procInfoVariant=variant,
-                                              procInfoDetism=detism,
-                                              procInfoImpurity=impurity}
+procToPartial callFlows hasBang info@FirstInfo{firstInfoPartial=False,
+                                               firstInfoTypes=tys,
+                                               firstInfoFlows=flows,
+                                               firstInfoInRes=inRes,
+                                               firstInfoOutRes=outRes,
+                                               firstInfoVariant=variant,
+                                               firstInfoDetism=detism,
+                                               firstInfoImpurity=impurity}
     | not hasBang  && not (List.null callFlows) && last callFlows == ParamOut
                    && (length callFlows < length tys
                        || length callFlows <= length tys + 1 && resful)
-        = (Just info{procInfoPartial=True,
-                     procInfoTypes=closedTys ++ [higherTy],
-                     procInfoFlows=closedFls ++ [ParamOut]}, needsBang)
+        = (Just info{firstInfoPartial=True,
+                     firstInfoTypes=closedTys ++ [higherTy],
+                     firstInfoFlows=closedFls ++ [ParamOut]}, needsBang)
   where
     nClosed = length callFlows - 1
     (closedTys, higherTys) = List.splitAt nClosed tys
@@ -1321,14 +1315,14 @@ callInfos vars pstmt = do
                     Nothing  -> lift $ callTargets m name
                     Just pid -> return [ProcSpec m name pid generalVersion]
                 defs <- lift $ mapM getProcDef procs
-                procInfos <- zipWithM callInfo defs procs
-                return $ StmtTypings pstmt procInfos
+                firstInfos <- zipWithM firstInfo defs procs
+                return $ StmtTypings pstmt firstInfos
         _ ->
           shouldnt $ "callProcInfos with non-call statement "
                      ++ showStmt 4 stmt
 
-callInfo :: ProcDef -> ProcSpec -> Typed CallInfo
-callInfo def proc = do
+firstInfo :: ProcDef -> ProcSpec -> Typed CallInfo
+firstInfo def proc = do
     let proto = procProto def
         params = procProtoParams proto
         resources = Set.elems $ procProtoResources proto
@@ -1346,7 +1340,7 @@ callInfo def proc = do
         detism = procDetism def
         imp = procImpurity def
     types' <- refreshTypes types
-    return $ ProcInfo proc types' flows variant detism imp inResources outResources False
+    return $ FirstInfo proc types' flows variant detism imp inResources outResources False
 
 
 -- |Return the "primitive" expr of the specified expr.  This unwraps Typed
@@ -1395,12 +1389,12 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt typs):calls)
     logTyped $ "Type checking call " ++ show pstmt
     logTyped $ "Candidate types:\n    " ++ intercalate "\n    " (show <$> typs)
     let (stmt, stmtPos) = unPlace pstmt
-    let ProcCall (First mod callee _) _ resful pexps = stmt
-    --  (mod,callee,pexps)
-    -- let (mod, callee, pexps) 
-    --         = case stmt of
-    --             noncall -> shouldnt $ "typecheckCalls with non-call stmt"
-    --                                     ++ show noncall
+    let (mod, callee, pexps, resful) 
+            = case stmt of
+                ProcCall (First mod callee _) _ resful pexps ->
+                    (mod, callee, pexps, resful)
+                noncall -> shouldnt $ "typecheckCalls with non-call stmt"
+                                        ++ show noncall
     actualTypes <- mapM expType pexps
     let actualModes = flattenedExpFlow . content <$> pexps
     logTyped $ "Actual types: " ++ show actualTypes
@@ -1435,6 +1429,8 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt typs):calls)
                 (chg || matchProcInfos /= typs) foreigns
 
 
+-- | Find the StmtTypings with the least number of possibile typingInfos,
+-- returning the "minimum" StmtTyping and all others
 findMinimumTyping :: [StmtTypings] -> (StmtTypings, [StmtTypings])
 findMinimumTyping [] = shouldnt "findMinimumTyping"
 findMinimumTyping (typing:typings) = findMinimumTyping' typings typing []
@@ -1450,6 +1446,8 @@ findMinimumTyping' (typing:rest) typing' acc
     = findMinimumTyping' rest typing' (typing:acc)
 
 
+-- | Perform type checks replacing the typingInfos of the supplied StmtTypings
+-- with the supplied Info
 typecheckCallWithInfo :: ModSpec -> ProcName -> OptPos -> StmtTypings
                       -> [StmtTypings] -> [Placed Stmt] -> CallInfo -> Typed ()
 typecheckCallWithInfo m name pos typings rest fs info = do
@@ -1462,7 +1460,7 @@ typecheckCallWithInfo m name pos typings rest fs info = do
 matchTypes :: Ident -> Ident -> OptPos -> Bool -> [TypeSpec] -> [FlowDirection]
            -> CallInfo -> Typed (MaybeErr (CallInfo,Typing))
 matchTypes caller callee pos hasBang callTypes callFlows
-        calleeInfo@ProcInfo{procInfoTypes=tys}
+        calleeInfo@FirstInfo{firstInfoTypes=tys}
     -- Handle case whre call should have a ! but doesnt, and the call 
     -- can be made partial
     | not hasBang && needsBang && isJust partialCallInfo
@@ -1471,10 +1469,10 @@ matchTypes caller callee pos hasBang callTypes callFlows
     | sameLength callTypes tys
     = matchTypeList callee pos callTypes calleeInfo
     -- Handle case of SemiDet context call to bool function as a proc call
-    | isJust testInfo && sameLength callTypes (procInfoTypes calleeInfo')
+    | isJust testInfo && sameLength callTypes (firstInfoTypes calleeInfo')
     = matchTypeList callee pos callTypes calleeInfo'
     -- Handle case of reified test call
-    | isJust detCallInfo && sameLength callTypes (procInfoTypes calleeInfo'')
+    | isJust detCallInfo && sameLength callTypes (firstInfoTypes calleeInfo'')
     = matchTypeList callee pos callTypes calleeInfo''
     -- Handle case where the call is partial
     | isJust partialCallInfo
@@ -1522,8 +1520,8 @@ matchTypes caller callee pos _ callTypes callFlows
 matchTypeList :: Ident -> OptPos -> [TypeSpec] -> CallInfo
                -> Typed (MaybeErr (CallInfo,Typing))
 matchTypeList callee pos callTypes
-        calleeInfo@ProcInfo{procInfoPartial=partial,
-                            procInfoTypes=calleeTypes} = do
+        calleeInfo@FirstInfo{firstInfoPartial=partial,
+                             firstInfoTypes=calleeTypes} = do
     logTyped $ "Matching types " ++ show callTypes
                ++ " with " ++ show calleeInfo
     (matches, typing)
@@ -1531,7 +1529,7 @@ matchTypeList callee pos callTypes
     let mismatches = List.map fst $ List.filter (invalidType . snd)
                        $ zip [1..] matches
     return $ if List.null mismatches
-    then OK (calleeInfo{procInfoTypes=matches}, typing)
+    then OK (calleeInfo{firstInfoTypes=matches}, typing)
     else Err [ReasonArgType partial callee n pos | n <- mismatches]
 matchTypeList _ _ _ info = shouldnt $ "matchTypeList on " ++ show info
 
@@ -1791,7 +1789,7 @@ assignedIn var bstate = var `USet.member` bindingVars bstate
 -- |Return a list of (actual,formal) argument mode pairs.
 actualFormalModes :: [(FlowDirection,Bool,Maybe VarName)] -> CallInfo
                   -> [(FlowDirection,FlowDirection)]
-actualFormalModes modes ProcInfo{procInfoFlows=flows} =
+actualFormalModes modes FirstInfo{firstInfoFlows=flows} =
     zip flows (sel1 <$> modes)
 actualFormalModes _ info = shouldnt $ "actualFormalModes on " ++ show info
 
@@ -1801,9 +1799,9 @@ actualFormalModes _ info = shouldnt $ "actualFormalModes on " ++ show info
 -- if the corresponding parameter is an input.
 matchModeList :: [(FlowDirection,Bool,Maybe VarName)]
               -> CallInfo -> Bool
-matchModeList modes procInfo@ProcInfo{procInfoPartial=False}
+matchModeList modes info@FirstInfo{firstInfoPartial=False}
     -- Check that no param is in where actual is out
-    = (ParamIn,ParamOut) `notElem` actualFormalModes modes procInfo
+    = (ParamIn,ParamOut) `notElem` actualFormalModes modes info
 matchModeList _ _ = False
 
 
@@ -1812,12 +1810,12 @@ matchModeList _ _ = False
 -- proc mode.
 exactModeMatch :: [(FlowDirection,Bool,Maybe VarName)]
                -> CallInfo -> Bool
-exactModeMatch modes procInfo@ProcInfo{procInfoPartial=False}
-    = all (uncurry (==)) $ actualFormalModes modes procInfo
-exactModeMatch modes procInfo@ProcInfo{procInfoPartial=True}
+exactModeMatch modes info@FirstInfo{firstInfoPartial=False}
+    = all (uncurry (==)) $ actualFormalModes modes info
+exactModeMatch modes info@FirstInfo{firstInfoPartial=True}
     = all (==(ParamIn,ParamIn)) (init formalModes) 
         && last formalModes == (ParamOut, ParamOut)
-    where formalModes = actualFormalModes modes procInfo
+    where formalModes = actualFormalModes modes info
 exactModeMatch _ _ = True
 
 overloadErr :: StmtTypings -> TypeError
@@ -1826,7 +1824,7 @@ overloadErr StmtTypings{typingStmt=call,typingInfos=candidates} =
     ReasonOverload (infoDescription <$> candidates) $ place call
 
 infoDescription :: CallInfo -> String
-infoDescription ProcInfo{procInfoProc=pspec, procInfoPartial=partial} =
+infoDescription FirstInfo{firstInfoProc=pspec, firstInfoPartial=partial} =
     show pspec  ++ (if partial then " (partial)" else "")
 infoDescription info = show info
 
@@ -2236,19 +2234,19 @@ finaliseCall :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism -> 
              -> Int -> Bool -> OptPos -> [Placed Exp] -> CallInfo -> Stmt
              -> Typed ([Placed Stmt],BindingState,Int)
 finaliseCall m name defPos assigned detism resourceful tmpCount final pos args
-             match@ProcInfo{} stmt = do
-    let matchProc = procInfoProc match
+             match@FirstInfo{} stmt = do
+    let matchProc = firstInfoProc match
     let matchName = procSpecName matchProc
-    let matchDetism = procInfoDetism match
-    let matchImpurity = procInfoImpurity match
-    let outResources = procInfoOutRes match
-    let inResources = procInfoInRes match
+    let matchDetism = firstInfoDetism match
+    let matchImpurity = firstInfoImpurity match
+    let outResources = firstInfoOutRes match
+    let inResources = firstInfoInRes match
     let allResources = inResources `Set.union` outResources
     let impurity = bindingImpurity assigned
-    let isPartial = procInfoPartial match
+    let isPartial = firstInfoPartial match
     tys <- mapM (expType >=> ultimateType) args
     let (args',stmts,tmpCount') = matchArguments tmpCount
-                                    (zipWith TypeFlow tys (procInfoFlows match)) args
+                                    (zipWith TypeFlow tys (firstInfoFlows match)) args
     let procIdent = "proc " ++ show matchProc
     let outOfScope = allResources `Set.difference`
                     (bindingResources assigned `Set.union` specialResourcesSet)

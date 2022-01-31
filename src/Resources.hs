@@ -347,6 +347,8 @@ resourceArgs pos rflow = do
 -- Note that this is the final pass of resource transformation, and must be
 -- performed after uniqueness checking, as the loads/stores cause all resource
 -- usage to appear as though it obeys uniquness checking
+--
+-- XXX this may interfere with uniqueness inference and/or destructive updates
 transformProcGlobals :: ProcDef -> Int -> Compiler ProcDef
 transformProcGlobals pd _ = do
     logResources "--------------------------------------\n"
@@ -825,11 +827,13 @@ resourceNameMap = Map.fromList . ((((,) =<< resourceName) . fst) <$>)
                                . Map.toList
 
 
--- |Log a message, if we are logging resource transformation activity.
+-- |Log a message in the Compiler monad, 
+-- if we are logging resource transformation activity.
 logResources :: String -> Compiler ()
 logResources s = logMsg Resources s
 
 
--- |Log a message, if we are logging resource transformation activity.
+-- |Log a message in the Resourcer monad, 
+-- if we are logging resource transformation activity.
 logResourcer :: String -> Resourcer ()
 logResourcer = lift . logResources

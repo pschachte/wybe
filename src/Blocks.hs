@@ -282,7 +282,7 @@ _translateProcImpl modProtos proto isClosure body startCount = do
 -- via the closure environment 
 closeClosure :: PrimProto -> ProcBody -> (PrimProto, ProcBody)
 closeClosure proto@PrimProto{primProtoParams=params}
-             body@ProcBody{bodyPrims=prims} = do
+             body@ProcBody{bodyPrims=prims} = 
     (proto{primProtoParams=
             envPrimParam:(setPrimParamType AnyType <$> actualParams)},
      body{bodyPrims=unpacker ++ prims})
@@ -401,7 +401,6 @@ preassignOutput p = do
     let ty = primParamType p
     let nm = show (primParamName p)
     trep <- lift $ typeRep ty
-    ty' <- lift $ llvmType ty
     let llty = repLLVMType trep
     assign nm (cons $ C.Undef llty) trep
 

@@ -513,9 +513,6 @@ parenthesisedTerm = do
     exps <- betweenB Paren (limitedTerm lowestParenthesisedPrecedence 
                             `sepBy` comma)
     return $ Embraced pos Paren exps Nothing
-    -- pos <- tokenPosition <$> leftBracket Paren
-    -- setTermPos pos <$> limitedTerm lowestParenthesisedPrecedence
-    --                    <* rightBracket Paren
 
 
 varOrCall :: Parser Term

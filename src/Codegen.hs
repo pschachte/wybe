@@ -241,13 +241,15 @@ getGlobalResource spec@(ResourceSpec mod nm) ty = do
 
 makeGlobalResourceVariable :: ResourceSpec -> Type -> Compiler Global
 makeGlobalResourceVariable spec@(ResourceSpec mod nm) ty = do
-    unless (ty /= VoidType) 
+    when (ty == VoidType) 
         $ shouldnt $ "global resource " ++ show spec ++ " cant have voidtype"
     let ref = Name $ fromString $ makeGlobalResourceName spec 
     thisMod <- getModuleSpec 
-    let (linkage, init) = if thisMod == mod
-                          then (External, Just $ C.Undef ty)
-                          else (External, Nothing)
+    let init = if thisMod == mod
+               then Just $ C.Undef ty
+               else Nothing
+    -- XXX this may be affected by multiprocessing
+    let linkage = External
     return globalVariableDefaults { name = ref
                                   , isConstant = False
                                   , G.type' = ty

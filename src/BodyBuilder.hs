@@ -415,7 +415,7 @@ instr' prim@(PrimForeign "lpvm" "cast" []
     if argType from == argType to
     then instr' (PrimForeign "llvm" "move" [] [from, to]) pos
     else ordinaryInstr prim pos
-instr' prim@(PrimForeign "lpvm" "load" [] [ArgGlobal info _, var]) pos = do
+instr' prim@(PrimForeign "lpvm" "load" _ [ArgGlobal info _, var]) pos = do
     logBuild $ "  Checking if we know the value of " ++ show info
     loaded <- gets globalsLoaded
     case Map.lookup info loaded of
@@ -425,7 +425,7 @@ instr' prim@(PrimForeign "lpvm" "load" [] [ArgGlobal info _, var]) pos = do
         Nothing -> do
             logBuild "  ... we don't"
             ordinaryInstr prim pos
-instr' prim@(PrimForeign "lpvm" "store" [] [ArgGlobal info _, var]) pos = do
+instr' prim@(PrimForeign "lpvm" "store" _ [ArgGlobal info _, var]) pos = do
     logBuild $ "  Checking if we know the value of " ++ show info
             ++ " and it is the same as " ++ show var
     mbVal <- Map.lookup info <$> gets globalsLoaded
