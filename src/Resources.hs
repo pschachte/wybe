@@ -33,6 +33,42 @@ import           Debug.Trace
 import Control.Monad.Extra (unlessM)
 
 
+
+----------------------------------------------------------------
+-- BEGIN MAJOR DOC
+-- ###                 Resource Transformations.
+--
+-- There are three passes related to resources within the Wybe compiler.
+--
+-- The first pass canonicalises the `use` declarations in procedure prototypes.
+-- This resolves the module which each resource refers to.
+--
+-- The second, performed after type checking, transforms resource usage into 
+-- regular parameters/arguments. Here, each procedure is modifed to include
+-- parameters corresponding to each resource and respective flow. 
+-- Each call is also transformed to include the resources as arguments. 
+-- The order of arguments is dictated by the ordering of the `ResourceSpec` 
+-- type, ordering by module then name. `use` blocks are also transformed to 
+-- contain LPVM `move` instructions of respectively used resources, to save 
+-- and subsequently restore the value of each resource variable.
+--
+-- The final pass tranforms resource into global variables. This pass must be 
+-- performed after uniqueness checking, as uniqueness checking assumes only the
+-- second pass has been performed. The additional parameters and arguments 
+-- introduced in the second pass are removed here, as they are now passed in 
+-- global variables. Each reference to an in scope resource by name is 
+-- transformed into a load (input) or a store (output), or both (in/out). 
+-- Finally, `use` blocks are also transformed to save (load) and then restore
+-- (store) each out-of-scope resource.
+--
+-- The final two passes assume that type and mode checking has occured. Type 
+-- checking ensures that resources have the correct types, and mode checking
+-- ensures that resources, where applicable are in scope. 
+--
+-- END MAJOR DOC
+----------------------------------------------------------------
+
+
 ------------------------- Checking resource decls -------------------------
 
 -- |Check a module's resource declarations.

@@ -2076,8 +2076,8 @@ data ProcImpln
 -- |This type represents a set of globals and corresponding flows, with Nothing 
 -- representing the universal set.
 -- Global flows are used to annotate which global variables are used by a 
--- procedure -- a flow in means the value is read, a flow out means the 
--- value is modified.
+-- procedure -- a flow in means the value is `load`ed (read), a flow out means 
+-- the value is `store`d (modified) .
 type GlobalFlows = Maybe (Map GlobalInfo (Set PrimFlow))
 
 

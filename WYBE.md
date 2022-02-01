@@ -293,6 +293,32 @@ Function calls may have one of the following forms:
 Expressions containing both output and input/output arguments are not permitted.
 
 
+## <a name="partial-application"></a>Partial application
+
+If a function call is made with *fewer* arguments than is dictated by the 
+definition of procedure/function, the procedure is considered a partial 
+application. The mode of all arguments must be an input, except for the last 
+which is an output. 
+
+This binds the output name to a "partial application" of the procedure. The type
+of the output variable is a higher order type containing the types and flows of 
+the missing arguments. The higher order type's modifiers are dictated by the 
+modifiers of the partially applied procedure. 
+
+The `resource` modifier is applied if the procedure uses some resource. In this
+special case, the number of arguments may be no greater than the expected number
+of arguments, plus one for the partially applied output.
+
+Examples of partial applications, with accompanying type annotations, are as follows:
+
+```
+`+`(1, ?f:(int, ?int))
+# equivalent to ?f:(int, ?int) = `+`(1)
+f(2, ?three)
+
+?printer = print:{resource}(int)
+!printer(1)
+```
 
 
 ## <a name="type constraints"></a>Type constraints
