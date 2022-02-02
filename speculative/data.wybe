@@ -1,0 +1,50 @@
+# This file is an attempt to develop a way to write code that will work for any
+# algebraic type. It speculates on some built-in procs automatically generated
+# for algebraic types.
+#
+# This code requires an extension to the type system.  First, it must allow
+# abstract types to be defined.  Second, we rely on the followng built-in procs
+# automatically defined for every algebraic type all of whose arguments are
+# members of the data type.
+#
+#   data(?ctr_number:count, ?arity:count, ?args:list(data), datum:data)
+#   constructor_name(datum:data, name:string)
+#
+# Third, this relies on a subtype system.
+
+
+abstract type
+
+pub def {test} (a:_ =  b:_) {
+    data(?ctr_number, ?a_arity, ?a_args) = a
+    data(ctr_number, b_arity, ?b_args) = b
+    for ?a_arg in a_args, ?b_arg in b_args { a_arg = b_arg }
+}
+
+pub def compare(a:_, b:_, cmp:comparison) {
+    data(?a_ctr_number, ?a_arity, ?a_args) = a
+    data(?b_ctr_number, ?b_arity, ?b_args) = b
+    compare(a_ctr_number, b_ctr_number, ?cmp)
+    if {cmp = equal ::
+    for ?a_arg in a_args, ?b_arg in b_args {
+        compare(a_arg, b_arg, ?cmp)
+        while cmp = equal
+    }
+}
+
+# Can't coerce to string, as the intention of coercion is that is intended only
+# to map a value of one type to a value of another type *with the same
+# semantics*.  This code doesn't handle operators.
+
+pub def str(datum:_, str:string) {
+    data(_, ?arity, ?args) = datum
+    ?str = constructor_name(datum)
+    if {arity > 0 ::
+        ?str = str ,, "(" ,, args[0]
+        for ?arg in tail(args) {
+            ?str = str ,, ", " ,, arg
+        }
+        ?str = str ,, ")"
+    }
+}
+
