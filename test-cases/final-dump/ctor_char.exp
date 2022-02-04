@@ -15,8 +15,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: ctor_char.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm shl('a':ctor_char, 1:ctor_char, ?tmp#3##0:ctor_char) @ctor_char:nn:nn
@@ -30,8 +29,7 @@ module top-level code > public {impure} (0 calls)
 
 = > public (2 calls)
 0: ctor_char.=<0>
-=(#left##0:ctor_char, #right##0:ctor_char, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+=(#left##0:ctor_char, #right##0:ctor_char, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -99,8 +97,7 @@ module top-level code > public {impure} (0 calls)
 
 c > {inline} (0 calls)
 0: ctor_char.c<0>
-c(#rec##0:ctor_char, ?#result##0:wybe.char, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+c(#rec##0:ctor_char, ?#result##0:wybe.char, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -126,8 +123,7 @@ c(#rec##0:ctor_char, ?#result##0:wybe.char, ?#success##0:wybe.bool):
 
 c > {inline} (0 calls)
 1: ctor_char.c<1>
-c(#rec##0:ctor_char, ?#rec##2:ctor_char, #field##0:wybe.char, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+c(#rec##0:ctor_char, ?#rec##2:ctor_char, #field##0:wybe.char, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -155,8 +151,7 @@ c(#rec##0:ctor_char, ?#rec##2:ctor_char, #field##0:wybe.char, ?#success##0:wybe.
 
 const > {inline} (0 calls)
 0: ctor_char.const<0>
-const(?#result##0:ctor_char):
-  GlobalFlows: <{}; {}>
+const(?#result##0:ctor_char)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(0:ctor_char, ?#result##0:ctor_char)
@@ -164,16 +159,14 @@ const(?#result##0:ctor_char):
 
 ctor > {inline} (1 calls)
 0: ctor_char.ctor<0>
-ctor(c##0:wybe.char, ?#result##3:ctor_char):
-  GlobalFlows: <{}; {}>
+ctor(c##0:wybe.char, ?#result##3:ctor_char)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm shl(~c##0:ctor_char, 1:ctor_char, ?#temp##0:ctor_char) @ctor_char:nn:nn
     foreign llvm or(~#temp##0:ctor_char, 512:ctor_char, ?#result##3:ctor_char) @ctor_char:nn:nn
 ctor > {inline} (13 calls)
 1: ctor_char.ctor<1>
-ctor(?c##0:wybe.char, #result##0:ctor_char, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+ctor(?c##0:wybe.char, #result##0:ctor_char, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -201,8 +194,7 @@ ctor(?c##0:wybe.char, #result##0:ctor_char, ?#success##0:wybe.bool):
 
 foo > (1 calls)
 0: ctor_char.foo<0>
-foo(this##0:ctor_char, ?#result##0:wybe.char):
-  GlobalFlows: <{}; {}>
+foo(this##0:ctor_char, ?#result##0:wybe.char)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(this##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool)
@@ -227,8 +219,7 @@ foo(this##0:ctor_char, ?#result##0:wybe.char):
 
 other_ctor > public {inline} (0 calls)
 0: ctor_char.other_ctor<0>
-other_ctor(other_ctor#1##0:ctor_char, ?#result##0:ctor_char):
-  GlobalFlows: <{}; {}>
+other_ctor(other_ctor#1##0:ctor_char, ?#result##0:ctor_char)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_char) @ctor_char:nn:nn
@@ -236,8 +227,7 @@ other_ctor(other_ctor#1##0:ctor_char, ?#result##0:ctor_char):
     foreign llvm or(~#rec##1:ctor_char, 1:wybe.int, ?#result##0:ctor_char) @ctor_char:nn:nn
 other_ctor > public {inline} (5 calls)
 1: ctor_char.other_ctor<1>
-other_ctor(?other_ctor#1##0:ctor_char, #result##0:ctor_char, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+other_ctor(?other_ctor#1##0:ctor_char, #result##0:ctor_char, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -263,8 +253,7 @@ other_ctor(?other_ctor#1##0:ctor_char, #result##0:ctor_char, ?#success##0:wybe.b
 
 ~= > public {inline} (0 calls)
 0: ctor_char.~=<0>
-~=(#left##0:ctor_char, #right##0:ctor_char, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+~=(#left##0:ctor_char, #right##0:ctor_char, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     ctor_char.=<0>(~#left##0:ctor_char, ~#right##0:ctor_char, ?tmp#0##0:wybe.bool) #0

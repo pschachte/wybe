@@ -13,8 +13,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: proc_gcd.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     proc_gcd.gen#1<0>(18:wybe.int, 24:wybe.int, _:wybe.int, 18:wybe.int, 24:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @proc_gcd:nn:nn
@@ -25,8 +24,7 @@ module top-level code > public {impure} (0 calls)
 
 gcd > public {inline} (1 calls)
 0: proc_gcd.gcd<0>
-gcd(a##0:wybe.int, b##0:wybe.int, ?r##0:wybe.int):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gcd(a##0:wybe.int, b##0:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     proc_gcd.gen#1<0>(~a##0:wybe.int, ~b##0:wybe.int, _:wybe.int, ~a##0:wybe.int, ~b##0:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @proc_gcd:nn:nn
@@ -34,8 +32,7 @@ gcd(a##0:wybe.int, b##0:wybe.int, ?r##0:wybe.int):
 
 gen#1 > (2 calls)
 0: proc_gcd.gen#1<0>
-gen#1(a##0:wybe.int, b##0:wybe.int, [t##0:wybe.int], x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#1(a##0:wybe.int, b##0:wybe.int, [t##0:wybe.int], x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(y##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool) @int:nn:nn
@@ -51,8 +48,7 @@ gen#1(a##0:wybe.int, b##0:wybe.int, [t##0:wybe.int], x##0:wybe.int, y##0:wybe.in
 
 gen#2 > {inline} (1 calls)
 0: proc_gcd.gen#2<0>
-gen#2(a##0:wybe.int, b##0:wybe.int, [t##0:wybe.int], x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#2(a##0:wybe.int, b##0:wybe.int, [t##0:wybe.int], x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     proc_gcd.mod<0>(~x##0:wybe.int, y##0:wybe.int, ?y##1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @proc_gcd:nn:nn
@@ -61,8 +57,7 @@ gen#2(a##0:wybe.int, b##0:wybe.int, [t##0:wybe.int], x##0:wybe.int, y##0:wybe.in
 
 mod > public (1 calls)
 0: proc_gcd.mod<0>
-mod(x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+mod(x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @io:nn:nn

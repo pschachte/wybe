@@ -13,8 +13,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: inline_decl.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#0##0:wybe.phantom) @io:nn:nn
@@ -36,8 +35,7 @@ module top-level code > public {impure} (0 calls)
 
 finish > public {noinline} (1 calls)
 0: inline_decl.finish<0>
-finish():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+finish()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#0##0:wybe.phantom) @io:nn:nn
@@ -47,8 +45,7 @@ finish():
 
 long > public {inline} (1 calls)
 0: inline_decl.long<0>
-long():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+long()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @io:nn:nn

@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: exp_simple.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @io:nn:nn
@@ -35,8 +34,7 @@ module top-level code > public {impure} (0 calls)
 
 foreign_add > {inline} (1 calls)
 0: exp_simple.foreign_add<0>
-foreign_add(?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+foreign_add(?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(3:wybe.int, ?#result##0:wybe.int) @exp_simple:nn:nn

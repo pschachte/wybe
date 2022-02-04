@@ -38,8 +38,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 hidden > {inline} (0 calls)
 0: submodule.privatetest.hidden<0>
-hidden():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+hidden()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("private proc in a private module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @io:nn:nn
@@ -47,8 +46,7 @@ hidden():
 
 semi_hidden > public {inline} (0 calls)
 0: submodule.privatetest.semi_hidden<0>
-semi_hidden():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+semi_hidden()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("public proc in a private module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @io:nn:nn
@@ -107,8 +105,7 @@ entry:
 
 semi_visible > {inline} (0 calls)
 0: submodule.publictest.semi_visible<0>
-semi_visible():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+semi_visible()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("private proc in a public module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @io:nn:nn
@@ -116,8 +113,7 @@ semi_visible():
 
 visible > public {inline} (0 calls)
 0: submodule.publictest.visible<0>
-visible():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+visible()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("public proc in a public module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @io:nn:nn

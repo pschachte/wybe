@@ -12,8 +12,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: resource_rollback.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<resource_rollback.res>>, <<resource_rollback.ser>>, <<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<resource_rollback.res>>, <<resource_rollback.ser>>, <<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm store(0:wybe.int, <<resource_rollback.res>>:wybe.int) @resource_rollback:nn:nn
@@ -38,8 +37,7 @@ module top-level code > public {impure} (0 calls)
 
 foo > {noinline} (3 calls)
 0: resource_rollback.foo<0>
-foo(?s##0:wybe.c_string, ?#success##0:wybe.bool, %call_source_location##0:wybe.c_string):
-  GlobalFlows: <{<<resource_rollback.res>>}; {<<resource_rollback.res>>}>
+foo(?s##0:wybe.c_string, ?#success##0:wybe.bool, %call_source_location##0:wybe.c_string)<{<<resource_rollback.res>>}; {<<resource_rollback.res>>}>:
   AliasPairs: [(call_source_location##0,s##0)]
   InterestingCallProperties: []
     foreign llvm move(~call_source_location##0:wybe.c_string, ?s##0:wybe.c_string) @resource_rollback:nn:nn
@@ -48,8 +46,7 @@ foo(?s##0:wybe.c_string, ?#success##0:wybe.bool, %call_source_location##0:wybe.c
 
 gen#1 > (2 calls)
 0: resource_rollback.gen#1<0>
-gen#1():
-  GlobalFlows: <{<<resource_rollback.res>>, <<resource_rollback.ser>>, <<wybe.io.io>>}; {<<resource_rollback.res>>, <<resource_rollback.ser>>, <<wybe.io.io>>}>
+gen#1()<{<<resource_rollback.res>>, <<resource_rollback.ser>>, <<wybe.io.io>>}; {<<resource_rollback.res>>, <<resource_rollback.ser>>, <<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<resource_rollback.res>>:wybe.int, ?%res##0:wybe.int) @resource_rollback:nn:nn

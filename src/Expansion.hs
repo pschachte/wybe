@@ -257,7 +257,7 @@ expandPrim call@(PrimHigher id fn args) pos = do
         ArgProcRef pspec closed _ -> do
             pspec' <- fromMaybe pspec <$> lift (lift $ maybeGetClosureOf pspec)
             logExpansion $ "  As first order call to " ++ show pspec'
-            gFlows <- lift $ lift $ procGlobalFlows pspec
+            gFlows <- lift $ lift $ getProcGlobalFlows pspec
             expandPrim (PrimCall id pspec' (closed ++ args) gFlows) pos
         _ -> do
             args' <- mapM expandArg args

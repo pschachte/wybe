@@ -19,8 +19,7 @@ AFTER EVERYTHING:
 
 append > public (1 calls)
 0: list_this.append<0>
-append(x##0:list_this(T), y##0:list_this(T), ?#result##0:list_this(T)):
-  GlobalFlows: <{}; {}>
+append(x##0:list_this(T), y##0:list_this(T), ?#result##0:list_this(T))<{}; {}>:
   AliasPairs: [(#result##0,y##0)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(1,(list_this.append<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -41,8 +40,7 @@ append(x##0:list_this(T), y##0:list_this(T), ?#result##0:list_this(T)):
 
 car > public {inline} (0 calls)
 0: list_this.car<0>
-car(#rec##0:list_this(T), ?#result##0:T, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+car(#rec##0:list_this(T), ?#result##0:T, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -57,8 +55,7 @@ car(#rec##0:list_this(T), ?#result##0:T, ?#success##0:wybe.bool):
 
 car > public {inline} (0 calls)
 1: list_this.car<1>
-car(#rec##0:list_this(T), ?#rec##1:list_this(T), #field##0:T, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+car(#rec##0:list_this(T), ?#rec##1:list_this(T), #field##0:T, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -75,8 +72,7 @@ car(#rec##0:list_this(T), ?#rec##1:list_this(T), #field##0:T, ?#success##0:wybe.
 
 cdr > public {inline} (0 calls)
 0: list_this.cdr<0>
-cdr(#rec##0:list_this(T), ?#result##0:list_this(T), ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+cdr(#rec##0:list_this(T), ?#result##0:list_this(T), ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -91,8 +87,7 @@ cdr(#rec##0:list_this(T), ?#result##0:list_this(T), ?#success##0:wybe.bool):
 
 cdr > public {inline} (0 calls)
 1: list_this.cdr<1>
-cdr(#rec##0:list_this(T), ?#rec##1:list_this(T), #field##0:list_this(T), ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+cdr(#rec##0:list_this(T), ?#rec##1:list_this(T), #field##0:list_this(T), ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -109,8 +104,7 @@ cdr(#rec##0:list_this(T), ?#rec##1:list_this(T), #field##0:list_this(T), ?#succe
 
 cons > public {inline} (1 calls)
 0: list_this.cons<0>
-cons(car##0:T, cdr##0:list_this(T), ?#result##0:list_this(T)):
-  GlobalFlows: <{}; {}>
+cons(car##0:T, cdr##0:list_this(T), ?#result##0:list_this(T))<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:list_this(T)) @list_this:nn:nn
@@ -118,8 +112,7 @@ cons(car##0:T, cdr##0:list_this(T), ?#result##0:list_this(T)):
     foreign lpvm mutate(~#rec##1:list_this(T), ?#result##0:list_this(T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~cdr##0:list_this(T)) @list_this:nn:nn
 cons > public {inline} (6 calls)
 1: list_this.cons<1>
-cons(?car##0:T, ?cdr##0:list_this(T), #result##0:list_this(T), ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+cons(?car##0:T, ?cdr##0:list_this(T), #result##0:list_this(T), ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -138,8 +131,7 @@ cons(?car##0:T, ?cdr##0:list_this(T), #result##0:list_this(T), ?#success##0:wybe
 
 length > public {inline} (0 calls)
 0: list_this.length<0>
-length(x##0:list_this(T), ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+length(x##0:list_this(T), ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     list_this.length1<0>(~x##0:list_this(T), 0:wybe.int, ?#result##0:wybe.int) #0 @list_this:nn:nn
@@ -147,8 +139,7 @@ length(x##0:list_this(T), ?#result##0:wybe.int):
 
 length1 > (2 calls)
 0: list_this.length1<0>
-length1(x##0:list_this(T), acc##0:wybe.int, ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+length1(x##0:list_this(T), acc##0:wybe.int, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
@@ -165,8 +156,7 @@ length1(x##0:list_this(T), acc##0:wybe.int, ?#result##0:wybe.int):
 
 nil > public {inline} (0 calls)
 0: list_this.nil<0>
-nil(?#result##0:list_this(T)):
-  GlobalFlows: <{}; {}>
+nil(?#result##0:list_this(T))<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(0:list_this(T), ?#result##0:list_this(T))

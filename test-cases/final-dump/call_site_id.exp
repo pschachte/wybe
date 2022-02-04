@@ -13,8 +13,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: call_site_id.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io:nn:nn
@@ -52,8 +51,7 @@ module top-level code > public {impure} (0 calls)
 
 bar > public {inline} (9 calls)
 0: call_site_id.bar<0>
-bar(x##0:wybe.int):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+bar(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     call_site_id.foo<0>(~x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @call_site_id:nn:nn
@@ -61,8 +59,7 @@ bar(x##0:wybe.int):
 
 foo > public (1 calls)
 0: call_site_id.foo<0>
-foo(x##0:wybe.int):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+foo(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #10 @io:nn:nn

@@ -18,8 +18,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: bug214.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     bug214.position.origin<0>(?tmp#0##0:bug214.position) #0 @bug214:nn:nn
@@ -32,8 +31,7 @@ module top-level code > public {impure} (0 calls)
 
 = > public {inline} (1 calls)
 0: bug214.=<0>
-=(#left##0:bug214, #right##0:bug214, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+=(#left##0:bug214, #right##0:bug214, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:bug214, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#sub_pos##0:bug214.position) @bug214:nn:nn
@@ -61,15 +59,13 @@ module top-level code > public {impure} (0 calls)
 
 aim > {inline} (3 calls)
 0: bug214.aim<0>
-aim(#rec##0:bug214, ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+aim(#rec##0:bug214, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:bug214, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @bug214:nn:nn
 aim > {inline} (2 calls)
 1: bug214.aim<1>
-aim(#rec##0:bug214, ?#rec##1:bug214, #field##0:wybe.int):
-  GlobalFlows: <{}; {}>
+aim(#rec##0:bug214, ?#rec##1:bug214, #field##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm mutate(~#rec##0:bug214, ?#rec##1:bug214, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @bug214:nn:nn
@@ -77,8 +73,7 @@ aim(#rec##0:bug214, ?#rec##1:bug214, #field##0:wybe.int):
 
 gen#1 > {inline} (0 calls)
 0: bug214.gen#1<0>
-gen#1(pos##0:bug214.position, sub##0:bug214, [tmp#0##0:bug214.position], [tmp#1##0:bug214], [tmp#2##0:bug214.position]):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#1(pos##0:bug214.position, sub##0:bug214, [tmp#0##0:bug214.position], [tmp#1##0:bug214], [tmp#2##0:bug214.position])<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("Part 1: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #17 @io:nn:nn
@@ -106,8 +101,7 @@ gen#1(pos##0:bug214.position, sub##0:bug214, [tmp#0##0:bug214.position], [tmp#1#
 
 gen#2 > (3 calls)
 0: bug214.gen#2<0>
-gen#2(pos##0:bug214.position, sub##0:bug214, tmp#0##0:bug214.position, tmp#1##0:bug214, tmp#2##0:bug214.position):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#2(pos##0:bug214.position, sub##0:bug214, tmp#0##0:bug214.position, tmp#1##0:bug214, tmp#2##0:bug214.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1]
   MultiSpeczDepInfo: [(4,(bug214.move<0>,fromList [NonAliasedParamCond 0 [0]])),(5,(bug214.move<1>,fromList [NonAliasedParamCond 0 [1]])),(6,(bug214.gen#2<0>,fromList [NonAliasedParamCond 0 [0],NonAliasedParamCond 1 [1]])),(7,(bug214.gen#2<0>,fromList [NonAliasedParamCond 0 [0],NonAliasedParamCond 1 [1]]))]
@@ -132,8 +126,7 @@ gen#2(pos##0:bug214.position, sub##0:bug214, tmp#0##0:bug214.position, tmp#1##0:
 
 move > (1 calls)
 0: bug214.move<0>
-move(pos##0:bug214.position, ?pos##1:bug214.position, dir##0:bug214.direction, units##0:wybe.int):
-  GlobalFlows: <{}; {}>
+move(pos##0:bug214.position, ?pos##1:bug214.position, dir##0:bug214.direction, units##0:wybe.int)<{}; {}>:
   AliasPairs: [(pos##0,pos##1)]
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign llvm icmp_eq(dir##0:bug214.direction, 0:bug214.direction, ?tmp#14##0:wybe.bool)
@@ -166,8 +159,7 @@ move(pos##0:bug214.position, ?pos##1:bug214.position, dir##0:bug214.direction, u
 
 move > (1 calls)
 1: bug214.move<1>
-move(sub##0:bug214, ?sub##2:bug214, dir##0:bug214.direction, units##0:wybe.int):
-  GlobalFlows: <{}; {}>
+move(sub##0:bug214, ?sub##2:bug214, dir##0:bug214.direction, units##0:wybe.int)<{}; {}>:
   AliasPairs: [(sub##0,sub##2)]
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign llvm icmp_eq(dir##0:bug214.direction, 0:bug214.direction, ?tmp#22##0:wybe.bool)
@@ -211,15 +203,13 @@ move(sub##0:bug214, ?sub##2:bug214, dir##0:bug214.direction, units##0:wybe.int):
 
 sub_pos > {inline} (7 calls)
 0: bug214.sub_pos<0>
-sub_pos(#rec##0:bug214, ?#result##0:bug214.position):
-  GlobalFlows: <{}; {}>
+sub_pos(#rec##0:bug214, ?#result##0:bug214.position)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:bug214, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:bug214.position) @bug214:nn:nn
 sub_pos > {inline} (2 calls)
 1: bug214.sub_pos<1>
-sub_pos(#rec##0:bug214, ?#rec##1:bug214, #field##0:bug214.position):
-  GlobalFlows: <{}; {}>
+sub_pos(#rec##0:bug214, ?#rec##1:bug214, #field##0:bug214.position)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:bug214, ?#rec##1:bug214, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:bug214.position) @bug214:nn:nn
@@ -227,8 +217,7 @@ sub_pos(#rec##0:bug214, ?#rec##1:bug214, #field##0:bug214.position):
 
 submarine > public {inline} (1 calls)
 0: bug214.submarine<0>
-submarine(sub_pos##0:bug214.position, aim##0:wybe.int, ?#result##0:bug214):
-  GlobalFlows: <{}; {}>
+submarine(sub_pos##0:bug214.position, aim##0:wybe.int, ?#result##0:bug214)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:bug214) @bug214:nn:nn
@@ -236,8 +225,7 @@ submarine(sub_pos##0:bug214.position, aim##0:wybe.int, ?#result##0:bug214):
     foreign lpvm mutate(~#rec##1:bug214, ?#result##0:bug214, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~aim##0:wybe.int) @bug214:nn:nn
 submarine > public {inline} (6 calls)
 1: bug214.submarine<1>
-submarine(?sub_pos##0:bug214.position, ?aim##0:wybe.int, #result##0:bug214):
-  GlobalFlows: <{}; {}>
+submarine(?sub_pos##0:bug214.position, ?aim##0:wybe.int, #result##0:bug214)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:bug214, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?sub_pos##0:bug214.position) @bug214:nn:nn
@@ -246,8 +234,7 @@ submarine(?sub_pos##0:bug214.position, ?aim##0:wybe.int, #result##0:bug214):
 
 ~= > public {inline} (0 calls)
 0: bug214.~=<0>
-~=(#left##0:bug214, #right##0:bug214, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+~=(#left##0:bug214, #right##0:bug214, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:bug214, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:bug214.position) @bug214:nn:nn
@@ -747,8 +734,7 @@ if.else1:
 
 = > public {inline} (1 calls)
 0: bug214.direction.=<0>
-=(#left##0:bug214.direction, #right##0:bug214.direction, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+=(#left##0:bug214.direction, #right##0:bug214.direction, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:bug214.direction, ~#right##0:bug214.direction, ?#success##0:wybe.bool)
@@ -756,8 +742,7 @@ if.else1:
 
 down > public {inline} (1 calls)
 0: bug214.direction.down<0>
-down(?#result##0:bug214.direction):
-  GlobalFlows: <{}; {}>
+down(?#result##0:bug214.direction)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(1:bug214.direction, ?#result##0:bug214.direction)
@@ -765,8 +750,7 @@ down(?#result##0:bug214.direction):
 
 fwd > public {inline} (1 calls)
 0: bug214.direction.fwd<0>
-fwd(?#result##0:bug214.direction):
-  GlobalFlows: <{}; {}>
+fwd(?#result##0:bug214.direction)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(0:bug214.direction, ?#result##0:bug214.direction)
@@ -774,8 +758,7 @@ fwd(?#result##0:bug214.direction):
 
 parse_direction > public (0 calls)
 0: bug214.direction.parse_direction<0>
-parse_direction(str##0:wybe.string, ?dir##0:bug214.direction, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+parse_direction(str##0:wybe.string, ?dir##0:bug214.direction, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.=<0>("forward":wybe.string, str##0:wybe.string, ?tmp#5##0:wybe.bool) #0 @bug214:nn:nn
@@ -808,8 +791,7 @@ parse_direction(str##0:wybe.string, ?dir##0:bug214.direction, ?#success##0:wybe.
 
 up > public {inline} (1 calls)
 0: bug214.direction.up<0>
-up(?#result##0:bug214.direction):
-  GlobalFlows: <{}; {}>
+up(?#result##0:bug214.direction)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(2:bug214.direction, ?#result##0:bug214.direction)
@@ -817,8 +799,7 @@ up(?#result##0:bug214.direction):
 
 ~= > public {inline} (0 calls)
 0: bug214.direction.~=<0>
-~=(#left##0:bug214.direction, #right##0:bug214.direction, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+~=(#left##0:bug214.direction, #right##0:bug214.direction, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~#left##0:bug214.direction, ~#right##0:bug214.direction, ?tmp#0##0:wybe.bool)
@@ -941,8 +922,7 @@ entry:
 
 = > public {inline} (1 calls)
 0: bug214.position.=<0>
-=(#left##0:bug214.position, #right##0:bug214.position, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+=(#left##0:bug214.position, #right##0:bug214.position, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:bug214.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#x##0:wybe.int) @bug214:nn:nn
@@ -961,8 +941,7 @@ entry:
 
 origin > public (0 calls)
 0: bug214.position.origin<0>
-origin(?#result##0:bug214.position):
-  GlobalFlows: <{}; {}>
+origin(?#result##0:bug214.position)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#3##0:bug214.position) @bug214:nn:nn
@@ -972,8 +951,7 @@ origin(?#result##0:bug214.position):
 
 position > public {inline} (1 calls)
 0: bug214.position.position<0>
-position(x##0:wybe.int, y##0:wybe.int, ?#result##0:bug214.position):
-  GlobalFlows: <{}; {}>
+position(x##0:wybe.int, y##0:wybe.int, ?#result##0:bug214.position)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:bug214.position) @bug214:nn:nn
@@ -981,8 +959,7 @@ position(x##0:wybe.int, y##0:wybe.int, ?#result##0:bug214.position):
     foreign lpvm mutate(~#rec##1:bug214.position, ?#result##0:bug214.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y##0:wybe.int) @bug214:nn:nn
 position > public {inline} (6 calls)
 1: bug214.position.position<1>
-position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:bug214.position):
-  GlobalFlows: <{}; {}>
+position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:bug214.position)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:bug214.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:wybe.int) @bug214:nn:nn
@@ -991,8 +968,7 @@ position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:bug214.position):
 
 print > public (0 calls)
 0: bug214.position.print<0>
-print(pos##0:bug214.position):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+print(pos##0:bug214.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7 @io:nn:nn
@@ -1010,15 +986,13 @@ print(pos##0:bug214.position):
 
 x > public {inline} (1 calls)
 0: bug214.position.x<0>
-x(#rec##0:bug214.position, ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+x(#rec##0:bug214.position, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:bug214.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @bug214:nn:nn
 x > public {inline} (0 calls)
 1: bug214.position.x<1>
-x(#rec##0:bug214.position, ?#rec##1:bug214.position, #field##0:wybe.int):
-  GlobalFlows: <{}; {}>
+x(#rec##0:bug214.position, ?#rec##1:bug214.position, #field##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:bug214.position, ?#rec##1:bug214.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @bug214:nn:nn
@@ -1026,15 +1000,13 @@ x(#rec##0:bug214.position, ?#rec##1:bug214.position, #field##0:wybe.int):
 
 y > public {inline} (1 calls)
 0: bug214.position.y<0>
-y(#rec##0:bug214.position, ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+y(#rec##0:bug214.position, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:bug214.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @bug214:nn:nn
 y > public {inline} (0 calls)
 1: bug214.position.y<1>
-y(#rec##0:bug214.position, ?#rec##1:bug214.position, #field##0:wybe.int):
-  GlobalFlows: <{}; {}>
+y(#rec##0:bug214.position, ?#rec##1:bug214.position, #field##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:bug214.position, ?#rec##1:bug214.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @bug214:nn:nn
@@ -1042,8 +1014,7 @@ y(#rec##0:bug214.position, ?#rec##1:bug214.position, #field##0:wybe.int):
 
 ~= > public {inline} (0 calls)
 0: bug214.position.~=<0>
-~=(#left##0:bug214.position, #right##0:bug214.position, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+~=(#left##0:bug214.position, #right##0:bug214.position, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:bug214.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @bug214:nn:nn

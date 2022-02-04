@@ -17,8 +17,7 @@ AFTER EVERYTHING:
 
 = > public (1 calls)
 0: constructors.=<0>
-=(#left##0:constructors, #right##0:constructors, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+=(#left##0:constructors, #right##0:constructors, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -42,16 +41,14 @@ AFTER EVERYTHING:
 
 just > public {inline} (0 calls)
 0: constructors.just<0>
-just(value##0:wybe.int, ?#result##0:constructors):
-  GlobalFlows: <{}; {}>
+just(value##0:wybe.int, ?#result##0:constructors)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:constructors) @constructors:nn:nn
     foreign lpvm mutate(~#rec##0:constructors, ?#result##0:constructors, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~value##0:wybe.int) @constructors:nn:nn
 just > public {inline} (8 calls)
 1: constructors.just<1>
-just(?value##0:wybe.int, #result##0:constructors, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+just(?value##0:wybe.int, #result##0:constructors, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -68,8 +65,7 @@ just(?value##0:wybe.int, #result##0:constructors, ?#success##0:wybe.bool):
 
 nothing > public {inline} (0 calls)
 0: constructors.nothing<0>
-nothing(?#result##0:constructors):
-  GlobalFlows: <{}; {}>
+nothing(?#result##0:constructors)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(0:constructors, ?#result##0:constructors)
@@ -77,8 +73,7 @@ nothing(?#result##0:constructors):
 
 value > public {inline} (0 calls)
 0: constructors.value<0>
-value(#rec##0:constructors, ?#result##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+value(#rec##0:constructors, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -93,8 +88,7 @@ value(#rec##0:constructors, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 
 value > public {inline} (0 calls)
 1: constructors.value<1>
-value(#rec##0:constructors, ?#rec##1:constructors, #field##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+value(#rec##0:constructors, ?#rec##1:constructors, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -111,8 +105,7 @@ value(#rec##0:constructors, ?#rec##1:constructors, #field##0:wybe.int, ?#success
 
 ~= > public {inline} (0 calls)
 0: constructors.~=<0>
-~=(#left##0:constructors, #right##0:constructors, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+~=(#left##0:constructors, #right##0:constructors, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     constructors.=<0>(~#left##0:constructors, ~#right##0:constructors, ?tmp#0##0:wybe.bool) #0

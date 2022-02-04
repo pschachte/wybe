@@ -99,33 +99,6 @@ optimiseProcDefBU pspec def = do
       " after optimisation:" ++ showProcDef 4 def' ++ "\n"
     return def'
 
-----------------------------------------------------------------
---                       Infering how globals flow in procs
-----------------------------------------------------------------
-
-
-updateProcBodyGlobalFlows :: ProcDef -> Compiler ProcDef
-updateProcBodyGlobalFlows ProcDef{procImpln=ProcDefSrc{}}
-    = shouldnt "updateProcBodyGlobalFlows on uncompiled proc"
-updateProcBodyGlobalFlows pDef@ProcDef{procImpln=impln@ProcDefPrim{procImplnBody=body}} = do
-    body' <- updateBodyGlobalFlows body
-    return pDef{procImpln=impln{procImplnBody=body'}}
-
-
-updateBodyGlobalFlows :: ProcBody -> Compiler ProcBody
-updateBodyGlobalFlows (ProcBody prims NoFork)
-    = (`ProcBody` NoFork) <$> mapM (placedApply updatePrimGlobalFlows) prims
-updateBodyGlobalFlows (ProcBody prims fork@PrimFork{forkBodies=bodies}) = do
-    bodies' <- mapM updateBodyGlobalFlows bodies
-    (`ProcBody` fork{forkBodies=bodies'}) 
-        <$> mapM (placedApply updatePrimGlobalFlows) prims
-    
-
-updatePrimGlobalFlows :: Prim -> OptPos -> Compiler (Placed Prim)
-updatePrimGlobalFlows (PrimCall id pspec args _) pos
-    = (`maybePlace` pos) . PrimCall id pspec args <$> procGlobalFlows pspec
-updatePrimGlobalFlows prim pos = return $ prim `maybePlace` pos
-
 
 ----------------------------------------------------------------
 --                       Deciding what to inline
@@ -149,7 +122,7 @@ decideInlining def
     where impln = procImpln def
           proto = procImplnProto impln
           body = procImplnBody impln
-          globalFlows = procImplnGlobalFlows impln
+          globalFlows = primProtoGlobalFlows proto
 decideInlining def = return def
 
 

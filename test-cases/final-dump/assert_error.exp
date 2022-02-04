@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,impure} (0 calls)
 0: assert_error.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.control.assert<0>(0:wybe.bool, c"assert_error:3:2":wybe.c_string) #1 @assert_error:nn:nn

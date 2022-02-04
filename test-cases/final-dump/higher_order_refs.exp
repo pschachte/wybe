@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: higher_order_refs.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     higher_order_refs.app<0>(higher_order_refs.gen#1<1><>:(wybe.float, ?wybe.float), 1.0:wybe.float, ?tmp#0##0:wybe.float) #0 @higher_order_refs:nn:nn
@@ -39,15 +38,13 @@ module top-level code > public {impure} (0 calls)
 
 add_one > {inline} (1 calls)
 0: higher_order_refs.add_one<0>
-add_one(i##0:wybe.int, ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+add_one(i##0:wybe.int, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @int:nn:nn
 add_one > {inline} (0 calls)
 1: higher_order_refs.add_one<1>
-add_one(f##0:wybe.float, ?#result##0:wybe.float):
-  GlobalFlows: <{}; {}>
+add_one(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm fadd(~f##0:wybe.float, 1.0:wybe.float, ?#result##0:wybe.float) @float:nn:nn
@@ -55,8 +52,7 @@ add_one(f##0:wybe.float, ?#result##0:wybe.float):
 
 app > {noinline} (6 calls)
 0: higher_order_refs.app<0>
-app(f##0:(I, ?J), i##0:I, ?#result##0:J):
-  GlobalFlows: <{}; {}>
+app(f##0:(I, ?J), i##0:I, ?#result##0:J)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     ~f##0:(I, ?J)(~i##0:I, ?#result##0:J) #0 @higher_order_refs:nn:nn
@@ -64,15 +60,13 @@ app(f##0:(I, ?J), i##0:I, ?#result##0:J):
 
 gen#1 > {inline} (1 calls)
 0: higher_order_refs.gen#1<0>
-gen#1(anon#1#1##0:wybe.float, ?anon#1#2##0:wybe.float):
-  GlobalFlows: <{}; {}>
+gen#1(anon#1#1##0:wybe.float, ?anon#1#2##0:wybe.float)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(~anon#1#1##0:wybe.float, ?anon#1#2##0:wybe.float) @higher_order_refs:nn:nn
 gen#1 > {inline} (1 calls)
 1: higher_order_refs.gen#1<1>
-gen#1(anon#1#1##0:wybe.float, ?anon#1#2##0:wybe.float):
-  GlobalFlows: <{}; {}>
+gen#1(anon#1#1##0:wybe.float, ?anon#1#2##0:wybe.float)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(~anon#1#1##0:wybe.float, ?anon#1#2##0:wybe.float) @higher_order_refs:nn:nn
@@ -80,15 +74,13 @@ gen#1(anon#1#1##0:wybe.float, ?anon#1#2##0:wybe.float):
 
 gen#2 > {inline} (1 calls)
 0: higher_order_refs.gen#2<0>
-gen#2(anon#2#1##0:wybe.float, ?anon#2#2##0:wybe.float):
-  GlobalFlows: <{}; {}>
+gen#2(anon#2#1##0:wybe.float, ?anon#2#2##0:wybe.float)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(~anon#2#1##0:wybe.float, ?anon#2#2##0:wybe.float) @higher_order_refs:nn:nn
 gen#2 > {inline} (1 calls)
 1: higher_order_refs.gen#2<1>
-gen#2(anon#2#1##0:wybe.float, ?anon#2#2##0:wybe.float):
-  GlobalFlows: <{}; {}>
+gen#2(anon#2#1##0:wybe.float, ?anon#2#2##0:wybe.float)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(~anon#2#1##0:wybe.float, ?anon#2#2##0:wybe.float) @higher_order_refs:nn:nn
@@ -96,15 +88,13 @@ gen#2(anon#2#1##0:wybe.float, ?anon#2#2##0:wybe.float):
 
 gen#3 > {inline} (1 calls)
 0: higher_order_refs.gen#3<0>
-gen#3(^y##0:wybe.float, anon#3#1##0:wybe.float, ?anon#3#2##0:wybe.float):
-  GlobalFlows: <{}; {}>
+gen#3(^y##0:wybe.float, anon#3#1##0:wybe.float, ?anon#3#2##0:wybe.float)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm fsub(~anon#3#1##0:wybe.float, ~y##0:wybe.float, ?anon#3#2##0:wybe.float) @float:nn:nn
 gen#3 > {inline} (1 calls)
 1: higher_order_refs.gen#3<1>
-gen#3(^y##0:wybe.float, anon#3#1##0:wybe.float, ?anon#3#2##0:wybe.float):
-  GlobalFlows: <{}; {}>
+gen#3(^y##0:wybe.float, anon#3#1##0:wybe.float, ?anon#3#2##0:wybe.float)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm fsub(~anon#3#1##0:wybe.float, ~^y##0:wybe.float, ?anon#3#2##0:wybe.float) @float:nn:nn
@@ -112,8 +102,7 @@ gen#3(^y##0:wybe.float, anon#3#1##0:wybe.float, ?anon#3#2##0:wybe.float):
 
 gen#4 > {inline} (1 calls)
 0: higher_order_refs.gen#4<0>
-gen#4(i##0:K, ?#result##0:K):
-  GlobalFlows: <{}; {}>
+gen#4(i##0:K, ?#result##0:K)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(~i##0:K, ?#result##0:K) @higher_order_refs:nn:nn
@@ -121,8 +110,7 @@ gen#4(i##0:K, ?#result##0:K):
 
 gen#5 > {inline} (1 calls)
 0: higher_order_refs.gen#5<0>
-gen#5(i##0:wybe.int, ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+gen#5(i##0:wybe.int, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @int:nn:nn
@@ -130,8 +118,7 @@ gen#5(i##0:wybe.int, ?#result##0:wybe.int):
 
 gen#6 > {inline} (1 calls)
 0: higher_order_refs.gen#6<0>
-gen#6(y##0:wybe.int, ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+gen#6(y##0:wybe.int, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(~y##0:wybe.int, 10:wybe.int, ?#result##0:wybe.int) @int:nn:nn
@@ -139,8 +126,7 @@ gen#6(y##0:wybe.int, ?#result##0:wybe.int):
 
 id > {inline} (1 calls)
 0: higher_order_refs.id<0>
-id(i##0:K, ?#result##0:K):
-  GlobalFlows: <{}; {}>
+id(i##0:K, ?#result##0:K)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(~i##0:K, ?#result##0:K) @higher_order_refs:nn:nn

@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: string.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#33##0:wybe.phantom) @io:nn:nn
@@ -117,8 +116,7 @@ module top-level code > public {impure} (0 calls)
 
 gen#1 > (2 calls)
 0: string.gen#1<0>
-gen#1(s##0:wybe.string, tmp#0##0:wybe.string):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#1(s##0:wybe.string, tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 1]
   MultiSpeczDepInfo: [(0,(wybe.string.[|]<0>,fromList [NonAliasedParamCond 2 [1]])),(2,(string.gen#1<0>,fromList [NonAliasedParamCond 1 []]))]
@@ -153,8 +151,7 @@ gen#1(s##0:wybe.string, tmp#0##0:wybe.string):
 
 print_loop > {inline} (2 calls)
 0: string.print_loop<0>
-print_loop(s##0:wybe.string):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+print_loop(s##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     string.gen#1<0>(~s##0:wybe.string, ~s##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @string:nn:nn
@@ -162,8 +159,7 @@ print_loop(s##0:wybe.string):
 
 test_index > (13 calls)
 0: string.test_index<0>
-test_index(s##0:wybe.string, i##0:wybe.int):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+test_index(s##0:wybe.string, i##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.[]<0>(~s##0:wybe.string, ~i##0:wybe.int, ?tmp#0##0:wybe.char, ?tmp#1##0:wybe.bool) #0 @string:nn:nn

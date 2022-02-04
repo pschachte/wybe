@@ -761,7 +761,9 @@ expType' (ProcRef pspec closed) _ = do
         freeTypes <- mapM ultimateType (List.drop nClosed pTypes')
         let resful = not $ Set.null res
         return $ HigherOrderType
-                    (ProcModifiers detism MayInline impurity RegularProc resful [] [])
+                    (normaliseModifiers 
+                        $ ProcModifiers detism MayInline 
+                            impurity RegularProc resful [] [])
                     $ zipWith TypeFlow freeTypes freeFlows
     else do
         typeError ReasonShouldnt
@@ -801,14 +803,20 @@ typeFlowsToSemiDet :: ProcModifiers -> [TypeFlow] -> [TypeFlow]
                    -> (ProcModifiers, ([TypeSpec], [FlowDirection]))
 typeFlowsToSemiDet mods@ProcModifiers{modifierDetism=Det} tfs@(_:_) others
     | test == TypeFlow boolType ParamOut
-      && sameLength others semiTFs = (mods{modifierDetism=SemiDet,
-                                           modifierInline=MayInline}, unzipTypeFlows semiTFs)
+      && sameLength others semiTFs = (normaliseModifiers mods{modifierDetism=SemiDet}, 
+                                      unzipTypeFlows semiTFs)
   where
     semiTFs = init tfs
     test = last tfs
-typeFlowsToSemiDet mods tfs _ = (mods{modifierInline=MayInline}, unzipTypeFlows tfs)
+typeFlowsToSemiDet mods tfs _ = (normaliseModifiers mods, unzipTypeFlows tfs)
 
-
+normaliseModifiers :: ProcModifiers -> ProcModifiers 
+normaliseModifiers mods@ProcModifiers{modifierImpurity=imp} 
+    = mods{modifierInline=MayInline,
+           modifierImpurity=max imp Pure,
+           modifierUnknown=[],
+           modifierConflict=[],
+           modifierVariant=RegularProc}
 
 ----------------------------------------------------------------
 --                         Type Checking Procs
@@ -908,7 +916,6 @@ data CallInfo
         firstInfoProc     :: ProcSpec,
         firstInfoTypes    :: [TypeSpec],
         firstInfoFlows    :: [FlowDirection],
-        firstInfoVariant  :: ProcVariant,
         firstInfoDetism   :: Determinism,
         firstInfoImpurity :: Impurity,
         firstInfoInRes    :: Set ResourceSpec,
@@ -921,7 +928,7 @@ data CallInfo
 
 
 instance Show CallInfo where
-    show (FirstInfo procSpec tys flows _ detism impurity inRes outRes partial) =
+    show (FirstInfo procSpec tys flows detism impurity inRes outRes partial) =
         (if partial then "partial application of " else "")
         ++ showProcModifiers' (ProcModifiers detism MayInline impurity 
                                 RegularProc False [] [])
@@ -981,7 +988,6 @@ procToPartial callFlows hasBang info@FirstInfo{firstInfoPartial=False,
                                                firstInfoFlows=flows,
                                                firstInfoInRes=inRes,
                                                firstInfoOutRes=outRes,
-                                               firstInfoVariant=variant,
                                                firstInfoDetism=detism,
                                                firstInfoImpurity=impurity}
     | not hasBang  && not (List.null callFlows) && last callFlows == ParamOut
@@ -997,8 +1003,9 @@ procToPartial callFlows hasBang info@FirstInfo{firstInfoPartial=False,
     resful = any isResourcefulHigherOrder tys 
                 || not (Set.null inRes || Set.null outRes)
     needsBang = resful || impurity > Pure
-    higherTy = HigherOrderType (ProcModifiers detism MayInline 
-                                impurity RegularProc resful [] [])
+    higherTy = HigherOrderType (normaliseModifiers 
+                                $ ProcModifiers detism MayInline 
+                                    impurity RegularProc resful [] [])
                     $ zipWith TypeFlow higherTys higherFls
 procToPartial _ _ _ = (Nothing, False)
 
@@ -1275,7 +1282,7 @@ combineBodyCallResources (a, b) (c, d) = (a ++ c, b ++ d)
 
 
 expStmts :: [[Placed Stmt]] -> Exp -> OptPos -> [[Placed Stmt]]
-expStmts ss (AnonProc ProcModifiers{modifierDetism=detism} _ ls _ _) _ = ls:ss
+expStmts ss (AnonProc _ _ ls _ _) _ = ls:ss
 expStmts ss _ _ = ss
 
 
@@ -1336,11 +1343,10 @@ firstInfo def proc = do
         outResources = Set.fromList
                         $ resourceFlowRes <$>
                             List.filter (flowsOut . resourceFlowFlow) resources
-        variant = procVariant def
         detism = procDetism def
         imp = procImpurity def
     types' <- refreshTypes types
-    return $ FirstInfo proc types' flows variant detism imp inResources outResources False
+    return $ FirstInfo proc types' flows detism imp inResources outResources False
 
 
 -- |Return the "primitive" expr of the specified expr.  This unwraps Typed

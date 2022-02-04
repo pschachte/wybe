@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: early_exit2.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("should print this":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @io:nn:nn
@@ -24,8 +23,7 @@ module top-level code > public {impure} (0 calls)
 
 my_exit > {terminal,inline} (1 calls)
 0: early_exit2.my_exit<0>
-my_exit(code##0:wybe.int):
-  GlobalFlows: <{}; {}>
+my_exit(code##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign c {terminal,semipure} exit(~code##0:wybe.int) @early_exit2:nn:nn

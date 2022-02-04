@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: disjunctive-cond.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("all good":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #13 @io:nn:nn
@@ -24,8 +23,7 @@ module top-level code > public {impure} (0 calls)
 
 gen#1 > (5 calls)
 0: disjunctive-cond.gen#1<0>
-gen#1(a##0:wybe.bool, b##0:wybe.bool, [tmp#0##0:wybe.bool], [tmp#1##0:wybe.bool]):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#1(a##0:wybe.bool, b##0:wybe.bool, [tmp#0##0:wybe.bool], [tmp#1##0:wybe.bool])<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     case ~a##0:wybe.bool of
@@ -57,8 +55,7 @@ gen#1(a##0:wybe.bool, b##0:wybe.bool, [tmp#0##0:wybe.bool], [tmp#1##0:wybe.bool]
 
 gen#2 > (3 calls)
 0: disjunctive-cond.gen#2<0>
-gen#2(a##0:wybe.bool, b##0:wybe.bool, [tmp#0##0:wybe.bool], [tmp#1##0:wybe.bool]):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#2(a##0:wybe.bool, b##0:wybe.bool, [tmp#0##0:wybe.bool], [tmp#1##0:wybe.bool])<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     case ~a##0:wybe.bool of
@@ -93,8 +90,7 @@ gen#2(a##0:wybe.bool, b##0:wybe.bool, [tmp#0##0:wybe.bool], [tmp#1##0:wybe.bool]
 
 gen#3 > (7 calls)
 0: disjunctive-cond.gen#3<0>
-gen#3(a##0:wybe.bool, b##0:wybe.bool, [tmp#0##0:wybe.bool], [tmp#1##0:wybe.bool]):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#3(a##0:wybe.bool, b##0:wybe.bool, [tmp#0##0:wybe.bool], [tmp#1##0:wybe.bool])<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     case ~a##0:wybe.bool of

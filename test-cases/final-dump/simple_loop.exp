@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,impure} (0 calls)
 0: simple_loop.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     simple_loop.gen#1<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @simple_loop:nn:nn
@@ -20,8 +19,7 @@ module top-level code > public {inline,impure} (0 calls)
 
 gen#1 > (2 calls)
 0: simple_loop.gen#1<0>
-gen#1():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @io:nn:nn

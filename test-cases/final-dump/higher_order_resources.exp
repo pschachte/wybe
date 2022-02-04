@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: higher_order_resources.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#34##0:wybe.list(T)) @list:nn:nn
@@ -96,16 +95,14 @@ module top-level code > public {impure} (0 calls)
 
 gen#1 > {inline} (1 calls)
 0: higher_order_resources.gen#1<0>
-gen#1(anon#1#1##0:wybe.list(wybe.int)):
-  GlobalFlows: <{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}>
+gen#1(anon#1#1##0:wybe.list(wybe.int))<{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.list.length1<0>(~anon#1#1##0:wybe.list(T), 0:wybe.int, ?tmp#10##0:wybe.int) #2 @list:nn:nn
     higher_order_resources.take_max<0>(~tmp#10##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}> #1 @higher_order_resources:nn:nn
 gen#1 > {inline} (1 calls)
 1: higher_order_resources.gen#1<1>
-gen#1(anon#1#1##0:wybe.list(wybe.int)):
-  GlobalFlows: <{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}>
+gen#1(anon#1#1##0:wybe.list(wybe.int))<{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.list.length1<0>(~anon#1#1##0:wybe.list(T), 0:wybe.int, ?tmp#1##0:wybe.int) #1 @list:nn:nn
@@ -114,8 +111,7 @@ gen#1(anon#1#1##0:wybe.list(wybe.int)):
 
 gen#2 > {inline} (1 calls)
 0: higher_order_resources.gen#2<0>
-gen#2(anon#2#1##0:wybe.list(wybe.int)):
-  GlobalFlows: <{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}>
+gen#2(anon#2#1##0:wybe.list(wybe.int))<{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%maximum##3:wybe.int) @higher_order_resources:nn:nn
@@ -132,8 +128,7 @@ gen#2(anon#2#1##0:wybe.list(wybe.int)):
     higher_order_resources.take_max<0>(~tmp#27##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}> #4 @higher_order_resources:nn:nn
 gen#2 > {inline} (1 calls)
 1: higher_order_resources.gen#2<1>
-gen#2(anon#2#1##0:wybe.list(wybe.int)):
-  GlobalFlows: <{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}>
+gen#2(anon#2#1##0:wybe.list(wybe.int))<{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%tmp#1##0:wybe.int) @higher_order_resources:nn:nn
@@ -152,15 +147,13 @@ gen#2(anon#2#1##0:wybe.list(wybe.int)):
 
 gen#3 > {inline} (1 calls)
 0: higher_order_resources.gen#3<0>
-gen#3(anon#3#1##0:wybe.int):
-  GlobalFlows: <{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}>
+gen#3(anon#3#1##0:wybe.int)<{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     higher_order_resources.take_max<0>(~anon#3#1##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}> #0 @higher_order_resources:nn:nn
 gen#3 > {inline} (1 calls)
 1: higher_order_resources.gen#3<1>
-gen#3(anon#3#1##0:wybe.int):
-  GlobalFlows: <{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}>
+gen#3(anon#3#1##0:wybe.int)<{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     higher_order_resources.take_max<0>(~anon#3#1##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}> #1 @higher_order_resources:nn:nn
@@ -168,8 +161,7 @@ gen#3(anon#3#1##0:wybe.int):
 
 gen#4 > (2 calls)
 0: higher_order_resources.gen#4<0>
-gen#4(as##0:wybe.list(A), f##0:{resource}(A), tmp#0##0:wybe.list(A)):
-  GlobalFlows: <Everything; Everything>
+gen#4(as##0:wybe.list(A), f##0:{resource}(A), tmp#0##0:wybe.list(A))<Everything; Everything>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool)
@@ -186,8 +178,7 @@ gen#4(as##0:wybe.list(A), f##0:{resource}(A), tmp#0##0:wybe.list(A)):
 
 map > {inline} (3 calls)
 0: higher_order_resources.map<0>
-map(f##0:{resource}(A), as##0:wybe.list(A)):
-  GlobalFlows: <Everything; Everything>
+map(f##0:{resource}(A), as##0:wybe.list(A))<Everything; Everything>:
   AliasPairs: []
   InterestingCallProperties: []
     higher_order_resources.gen#4<0>(~as##0:wybe.list(A), ~f##0:{resource}(A), ~as##0:wybe.list(A))<Everything; Everything> #0 @higher_order_resources:nn:nn
@@ -195,8 +186,7 @@ map(f##0:{resource}(A), as##0:wybe.list(A)):
 
 take_max > (3 calls)
 0: higher_order_resources.take_max<0>
-take_max(i##0:wybe.int):
-  GlobalFlows: <{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}>
+take_max(i##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%maximum##0:wybe.int) @higher_order_resources:nn:nn

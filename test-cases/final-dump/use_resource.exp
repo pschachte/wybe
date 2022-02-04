@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: use_resource.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<use_resource.count>>, <<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<use_resource.count>>, <<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("Inner count (4): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @io:nn:nn
@@ -30,8 +29,7 @@ module top-level code > public {impure} (0 calls)
 
 inc_count > {inline} (4 calls)
 0: use_resource.inc_count<0>
-inc_count():
-  GlobalFlows: <{<<use_resource.count>>}; {<<use_resource.count>>}>
+inc_count()<{<<use_resource.count>>}; {<<use_resource.count>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<use_resource.count>>:wybe.int, ?%count##0:wybe.int) @use_resource:nn:nn
@@ -41,8 +39,7 @@ inc_count():
 
 use_test > {inline} (1 calls)
 0: use_resource.use_test<0>
-use_test():
-  GlobalFlows: <{<<use_resource.count>>, <<wybe.io.io>>}; {<<use_resource.count>>, <<wybe.io.io>>}>
+use_test()<{<<use_resource.count>>, <<wybe.io.io>>}; {<<use_resource.count>>, <<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<use_resource.count>>:wybe.int, ?%tmp#2##0:wybe.int) @use_resource:nn:nn

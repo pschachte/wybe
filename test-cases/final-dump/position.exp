@@ -21,8 +21,7 @@ AFTER EVERYTHING:
 
 printPosition > public (0 calls)
 0: position.printPosition<0>
-printPosition(pos##0:position.position):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>(" (":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7 @io:nn:nn
@@ -118,8 +117,7 @@ entry:
 
 = > public {inline} (1 calls)
 0: position.position.=<0>
-=(#left##0:position.position, #right##0:position.position, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+=(#left##0:position.position, #right##0:position.position, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#x##0:wybe.int) @position:nn:nn
@@ -138,8 +136,7 @@ entry:
 
 position > public {inline} (0 calls)
 0: position.position.position<0>
-position(x##0:wybe.int, y##0:wybe.int, ?#result##0:position.position):
-  GlobalFlows: <{}; {}>
+position(x##0:wybe.int, y##0:wybe.int, ?#result##0:position.position)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:position.position) @position:nn:nn
@@ -147,8 +144,7 @@ position(x##0:wybe.int, y##0:wybe.int, ?#result##0:position.position):
     foreign lpvm mutate(~#rec##1:position.position, ?#result##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y##0:wybe.int) @position:nn:nn
 position > public {inline} (6 calls)
 1: position.position.position<1>
-position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:position.position):
-  GlobalFlows: <{}; {}>
+position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:position.position)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:wybe.int) @position:nn:nn
@@ -157,15 +153,13 @@ position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:position.position):
 
 x > public {inline} (0 calls)
 0: position.position.x<0>
-x(#rec##0:position.position, ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+x(#rec##0:position.position, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @position:nn:nn
 x > public {inline} (0 calls)
 1: position.position.x<1>
-x(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
-  GlobalFlows: <{}; {}>
+x(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:position.position, ?#rec##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @position:nn:nn
@@ -173,15 +167,13 @@ x(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
 
 y > public {inline} (0 calls)
 0: position.position.y<0>
-y(#rec##0:position.position, ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+y(#rec##0:position.position, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @position:nn:nn
 y > public {inline} (0 calls)
 1: position.position.y<1>
-y(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
-  GlobalFlows: <{}; {}>
+y(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:position.position, ?#rec##1:position.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @position:nn:nn
@@ -189,8 +181,7 @@ y(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
 
 ~= > public {inline} (0 calls)
 0: position.position.~=<0>
-~=(#left##0:position.position, #right##0:position.position, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+~=(#left##0:position.position, #right##0:position.position, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @position:nn:nn

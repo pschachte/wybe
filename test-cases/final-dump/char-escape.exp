@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: char-escape.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     char-escape.test<0>('\NUL':wybe.char, 0:wybe.int, "null":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @char-escape:12:2
@@ -30,8 +29,7 @@ module top-level code > public {impure} (0 calls)
 
 test > (10 calls)
 0: char-escape.test<0>
-test(ch##0:wybe.char, code##0:wybe.int, name##0:wybe.string):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+test(ch##0:wybe.char, code##0:wybe.int, name##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm cast(~ch##0:wybe.char, ?tmp#0##0:wybe.int) @char:nn:nn

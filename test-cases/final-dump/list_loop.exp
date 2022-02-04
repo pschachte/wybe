@@ -22,8 +22,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: list_loop.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#8##0:list_loop.intlist) @list_loop:nn:nn
@@ -40,8 +39,7 @@ module top-level code > public {impure} (0 calls)
 
 gen#1 > (2 calls)
 0: list_loop.gen#1<0>
-gen#1(l##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##0:list_loop.intlist, tmp#2##0:list_loop.intlist, tmp#3##0:list_loop.intlist, x##0:list_loop.intlist):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#1(l##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##0:list_loop.intlist, tmp#2##0:list_loop.intlist, tmp#3##0:list_loop.intlist, x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(l##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool)
@@ -61,8 +59,7 @@ gen#1(l##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##0:list_loop.int
 
 gen#2 > {inline} (1 calls)
 0: list_loop.gen#2<0>
-gen#2(h##0:wybe.int, l##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##0:list_loop.intlist, tmp#2##0:list_loop.intlist, tmp#3##0:list_loop.intlist, x##0:list_loop.intlist):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#2(h##0:wybe.int, l##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##0:list_loop.intlist, tmp#2##0:list_loop.intlist, tmp#3##0:list_loop.intlist, x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io:nn:nn
@@ -74,8 +71,7 @@ gen#2(h##0:wybe.int, l##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##
 
 gen#3 > (2 calls)
 0: list_loop.gen#3<0>
-gen#3(h##0:wybe.int, l##0:list_loop.intlist, l2##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##0:list_loop.intlist, tmp#2##0:list_loop.intlist, tmp#3##0:list_loop.intlist, x##0:list_loop.intlist):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#3(h##0:wybe.int, l##0:list_loop.intlist, l2##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##0:list_loop.intlist, tmp#2##0:list_loop.intlist, tmp#3##0:list_loop.intlist, x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(l2##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool)
@@ -101,8 +97,7 @@ gen#3(h##0:wybe.int, l##0:list_loop.intlist, l2##0:list_loop.intlist, tmp#0##0:l
 
 gen#4 > {inline} (1 calls)
 0: list_loop.gen#4<0>
-gen#4(h##0:wybe.int, h2##0:wybe.int, l##0:list_loop.intlist, l2##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##0:list_loop.intlist, tmp#2##0:list_loop.intlist, tmp#3##0:list_loop.intlist, x##0:list_loop.intlist):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#4(h##0:wybe.int, h2##0:wybe.int, l##0:list_loop.intlist, l2##0:list_loop.intlist, tmp#0##0:list_loop.intlist, tmp#1##0:list_loop.intlist, tmp#2##0:list_loop.intlist, tmp#3##0:list_loop.intlist, x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("    ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #5 @io:nn:nn
@@ -286,8 +281,7 @@ entry:
 
 = > public (2 calls)
 0: list_loop.intlist.=<0>
-=(#left##0:list_loop.intlist, #right##0:list_loop.intlist, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+=(#left##0:list_loop.intlist, #right##0:list_loop.intlist, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -320,8 +314,7 @@ entry:
 
 cons > public {inline} (0 calls)
 0: list_loop.intlist.cons<0>
-cons(head##0:wybe.int, tail##0:list_loop.intlist, ?#result##0:list_loop.intlist):
-  GlobalFlows: <{}; {}>
+cons(head##0:wybe.int, tail##0:list_loop.intlist, ?#result##0:list_loop.intlist)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:list_loop.intlist) @list_loop:nn:nn
@@ -329,8 +322,7 @@ cons(head##0:wybe.int, tail##0:list_loop.intlist, ?#result##0:list_loop.intlist)
     foreign lpvm mutate(~#rec##1:list_loop.intlist, ?#result##0:list_loop.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail##0:list_loop.intlist) @list_loop:nn:nn
 cons > public {inline} (12 calls)
 1: list_loop.intlist.cons<1>
-cons(?head##0:wybe.int, ?tail##0:list_loop.intlist, #result##0:list_loop.intlist, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+cons(?head##0:wybe.int, ?tail##0:list_loop.intlist, #result##0:list_loop.intlist, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -349,8 +341,7 @@ cons(?head##0:wybe.int, ?tail##0:list_loop.intlist, #result##0:list_loop.intlist
 
 head > public {inline} (0 calls)
 0: list_loop.intlist.head<0>
-head(#rec##0:list_loop.intlist, ?#result##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+head(#rec##0:list_loop.intlist, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -365,8 +356,7 @@ head(#rec##0:list_loop.intlist, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 
 head > public {inline} (0 calls)
 1: list_loop.intlist.head<1>
-head(#rec##0:list_loop.intlist, ?#rec##1:list_loop.intlist, #field##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+head(#rec##0:list_loop.intlist, ?#rec##1:list_loop.intlist, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -383,8 +373,7 @@ head(#rec##0:list_loop.intlist, ?#rec##1:list_loop.intlist, #field##0:wybe.int, 
 
 nil > public {inline} (0 calls)
 0: list_loop.intlist.nil<0>
-nil(?#result##0:list_loop.intlist):
-  GlobalFlows: <{}; {}>
+nil(?#result##0:list_loop.intlist)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(0:list_loop.intlist, ?#result##0:list_loop.intlist)
@@ -392,8 +381,7 @@ nil(?#result##0:list_loop.intlist):
 
 tail > public {inline} (0 calls)
 0: list_loop.intlist.tail<0>
-tail(#rec##0:list_loop.intlist, ?#result##0:list_loop.intlist, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+tail(#rec##0:list_loop.intlist, ?#result##0:list_loop.intlist, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -408,8 +396,7 @@ tail(#rec##0:list_loop.intlist, ?#result##0:list_loop.intlist, ?#success##0:wybe
 
 tail > public {inline} (0 calls)
 1: list_loop.intlist.tail<1>
-tail(#rec##0:list_loop.intlist, ?#rec##1:list_loop.intlist, #field##0:list_loop.intlist, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+tail(#rec##0:list_loop.intlist, ?#rec##1:list_loop.intlist, #field##0:list_loop.intlist, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -426,8 +413,7 @@ tail(#rec##0:list_loop.intlist, ?#rec##1:list_loop.intlist, #field##0:list_loop.
 
 ~= > public {inline} (0 calls)
 0: list_loop.intlist.~=<0>
-~=(#left##0:list_loop.intlist, #right##0:list_loop.intlist, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+~=(#left##0:list_loop.intlist, #right##0:list_loop.intlist, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     list_loop.intlist.=<0>(~#left##0:list_loop.intlist, ~#right##0:list_loop.intlist, ?tmp#0##0:wybe.bool) #0

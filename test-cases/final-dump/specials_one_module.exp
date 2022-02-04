@@ -16,8 +16,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: specials_one_module.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @io:nn:nn
@@ -33,8 +32,7 @@ module top-level code > public {impure} (0 calls)
 
 indirect_call_location > public (1 calls)
 0: specials_one_module.indirect_call_location<0>
-indirect_call_location(%call_source_location##0:wybe.c_string):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+indirect_call_location(%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @io:nn:nn
@@ -48,8 +46,7 @@ indirect_call_location(%call_source_location##0:wybe.c_string):
 
 show_column > public {inline} (1 calls)
 0: specials_one_module.show_column<0>
-show_column(%call_source_column_number##0:wybe.int):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+show_column(%call_source_column_number##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @io:nn:nn
@@ -60,8 +57,7 @@ show_column(%call_source_column_number##0:wybe.int):
 
 show_file > public {inline} (1 calls)
 0: specials_one_module.show_file<0>
-show_file(%call_source_file_name##0:wybe.c_string):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+show_file(%call_source_file_name##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @io:nn:nn
@@ -72,8 +68,7 @@ show_file(%call_source_file_name##0:wybe.c_string):
 
 show_line > public {inline} (1 calls)
 0: specials_one_module.show_line<0>
-show_line(%call_source_line_number##0:wybe.int):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+show_line(%call_source_line_number##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @io:nn:nn
@@ -84,8 +79,7 @@ show_line(%call_source_line_number##0:wybe.int):
 
 show_location > public {inline} (1 calls)
 0: specials_one_module.show_location<0>
-show_location(%call_source_location##0:wybe.c_string):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+show_location(%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     specials_one_module.indirect_call_location<0>(~%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @specials_one_module:nn:nn

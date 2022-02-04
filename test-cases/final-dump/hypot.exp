@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: hypot.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("hypot(3,4) = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #58 @io:nn:nn
@@ -106,8 +105,7 @@ module top-level code > public {impure} (0 calls)
 
 area > {inline} (1 calls)
 0: hypot.area<0>
-area(r##0:wybe.float, ?#result##0:wybe.float):
-  GlobalFlows: <{}; {}>
+area(r##0:wybe.float, ?#result##0:wybe.float)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm fmul(~r##0:wybe.float, ~r##0:wybe.float, ?tmp#2##0:wybe.float) @float:nn:nn
@@ -116,8 +114,7 @@ area(r##0:wybe.float, ?#result##0:wybe.float):
 
 hypot > {inline} (1 calls)
 0: hypot.hypot<0>
-hypot(s1##0:wybe.float, s2##0:wybe.float, ?#result##0:wybe.float):
-  GlobalFlows: <{}; {}>
+hypot(s1##0:wybe.float, s2##0:wybe.float, ?#result##0:wybe.float)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm fmul(~s1##0:wybe.float, ~s1##0:wybe.float, ?tmp#2##0:wybe.float) @float:nn:nn

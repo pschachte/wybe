@@ -51,8 +51,7 @@ AFTER EVERYTHING:
 
 print_t > public (0 calls)
 0: multictr2.print_t<0>
-print_t(x##0:multictr2.t):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+print_t(x##0:multictr2.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(x##0:wybe.int, 7:wybe.int, ?tmp#9##0:wybe.int)
@@ -495,8 +494,7 @@ if.else7:
 
 = > public (1 calls)
 0: multictr2.t.=<0>
-=(#left##0:multictr2.t, #right##0:multictr2.t, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+=(#left##0:multictr2.t, #right##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#left##0:wybe.int, 7:wybe.int, ?tmp#28##0:wybe.int)
@@ -659,16 +657,14 @@ if.else7:
 
 c01 > public {inline} (0 calls)
 0: multictr2.t.c01<0>
-c01(f01##0:wybe.int, ?#result##0:multictr2.t):
-  GlobalFlows: <{}; {}>
+c01(f01##0:wybe.int, ?#result##0:multictr2.t)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
     foreign lpvm mutate(~#rec##0:multictr2.t, ?#result##0:multictr2.t, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~f01##0:wybe.int) @multictr2:nn:nn
 c01 > public {inline} (24 calls)
 1: multictr2.t.c01<1>
-c01(?f01##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+c01(?f01##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -686,8 +682,7 @@ c01(?f01##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
 
 c02 > public {inline} (0 calls)
 0: multictr2.t.c02<0>
-c02(f02##0:wybe.int, ?#result##0:multictr2.t):
-  GlobalFlows: <{}; {}>
+c02(f02##0:wybe.int, ?#result##0:multictr2.t)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
@@ -695,8 +690,7 @@ c02(f02##0:wybe.int, ?#result##0:multictr2.t):
     foreign llvm or(~#rec##1:multictr2.t, 1:wybe.int, ?#result##0:multictr2.t) @multictr2:nn:nn
 c02 > public {inline} (19 calls)
 1: multictr2.t.c02<1>
-c02(?f02##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+c02(?f02##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -714,8 +708,7 @@ c02(?f02##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
 
 c03 > public {inline} (0 calls)
 0: multictr2.t.c03<0>
-c03(f03##0:wybe.int, ?#result##0:multictr2.t):
-  GlobalFlows: <{}; {}>
+c03(f03##0:wybe.int, ?#result##0:multictr2.t)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
@@ -723,8 +716,7 @@ c03(f03##0:wybe.int, ?#result##0:multictr2.t):
     foreign llvm or(~#rec##1:multictr2.t, 2:wybe.int, ?#result##0:multictr2.t) @multictr2:nn:nn
 c03 > public {inline} (17 calls)
 1: multictr2.t.c03<1>
-c03(?f03##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+c03(?f03##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -742,8 +734,7 @@ c03(?f03##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
 
 c04 > public {inline} (0 calls)
 0: multictr2.t.c04<0>
-c04(f04##0:wybe.int, ?#result##0:multictr2.t):
-  GlobalFlows: <{}; {}>
+c04(f04##0:wybe.int, ?#result##0:multictr2.t)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
@@ -751,8 +742,7 @@ c04(f04##0:wybe.int, ?#result##0:multictr2.t):
     foreign llvm or(~#rec##1:multictr2.t, 3:wybe.int, ?#result##0:multictr2.t) @multictr2:nn:nn
 c04 > public {inline} (15 calls)
 1: multictr2.t.c04<1>
-c04(?f04##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+c04(?f04##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -770,8 +760,7 @@ c04(?f04##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
 
 c05 > public {inline} (0 calls)
 0: multictr2.t.c05<0>
-c05(f05##0:wybe.int, ?#result##0:multictr2.t):
-  GlobalFlows: <{}; {}>
+c05(f05##0:wybe.int, ?#result##0:multictr2.t)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
@@ -779,8 +768,7 @@ c05(f05##0:wybe.int, ?#result##0:multictr2.t):
     foreign llvm or(~#rec##1:multictr2.t, 4:wybe.int, ?#result##0:multictr2.t) @multictr2:nn:nn
 c05 > public {inline} (13 calls)
 1: multictr2.t.c05<1>
-c05(?f05##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+c05(?f05##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -798,8 +786,7 @@ c05(?f05##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
 
 c06 > public {inline} (0 calls)
 0: multictr2.t.c06<0>
-c06(f06##0:wybe.int, ?#result##0:multictr2.t):
-  GlobalFlows: <{}; {}>
+c06(f06##0:wybe.int, ?#result##0:multictr2.t)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
@@ -807,8 +794,7 @@ c06(f06##0:wybe.int, ?#result##0:multictr2.t):
     foreign llvm or(~#rec##1:multictr2.t, 5:wybe.int, ?#result##0:multictr2.t) @multictr2:nn:nn
 c06 > public {inline} (11 calls)
 1: multictr2.t.c06<1>
-c06(?f06##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+c06(?f06##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -826,8 +812,7 @@ c06(?f06##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
 
 c07 > public {inline} (0 calls)
 0: multictr2.t.c07<0>
-c07(f07##0:wybe.int, ?#result##0:multictr2.t):
-  GlobalFlows: <{}; {}>
+c07(f07##0:wybe.int, ?#result##0:multictr2.t)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
@@ -835,8 +820,7 @@ c07(f07##0:wybe.int, ?#result##0:multictr2.t):
     foreign llvm or(~#rec##1:multictr2.t, 6:wybe.int, ?#result##0:multictr2.t) @multictr2:nn:nn
 c07 > public {inline} (9 calls)
 1: multictr2.t.c07<1>
-c07(?f07##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+c07(?f07##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -854,8 +838,7 @@ c07(?f07##0:wybe.int, #result##0:multictr2.t, ?#success##0:wybe.bool):
 
 c08 > public {inline} (0 calls)
 0: multictr2.t.c08<0>
-c08(f08_a##0:wybe.int, f08_b##0:wybe.int, f08_c##0:wybe.float, ?#result##0:multictr2.t):
-  GlobalFlows: <{}; {}>
+c08(f08_a##0:wybe.int, f08_b##0:wybe.int, f08_c##0:wybe.float, ?#result##0:multictr2.t)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:multictr2.t) @multictr2:nn:nn
@@ -865,8 +848,7 @@ c08(f08_a##0:wybe.int, f08_b##0:wybe.int, f08_c##0:wybe.float, ?#result##0:multi
     foreign llvm or(~#rec##3:multictr2.t, 7:wybe.int, ?#result##0:multictr2.t) @multictr2:nn:nn
 c08 > public {inline} (9 calls)
 1: multictr2.t.c08<1>
-c08(?f08_a##0:wybe.int, ?f08_b##0:wybe.int, ?f08_c##0:wybe.float, #result##0:multictr2.t, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+c08(?f08_a##0:wybe.int, ?f08_b##0:wybe.int, ?f08_c##0:wybe.float, #result##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -888,8 +870,7 @@ c08(?f08_a##0:wybe.int, ?f08_b##0:wybe.int, ?f08_c##0:wybe.float, #result##0:mul
 
 f01 > public {inline} (0 calls)
 0: multictr2.t.f01<0>
-f01(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+f01(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -905,8 +886,7 @@ f01(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 
 f01 > public {inline} (0 calls)
 1: multictr2.t.f01<1>
-f01(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+f01(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -924,8 +904,7 @@ f01(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:
 
 f02 > public {inline} (0 calls)
 0: multictr2.t.f02<0>
-f02(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+f02(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -941,8 +920,7 @@ f02(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 
 f02 > public {inline} (0 calls)
 1: multictr2.t.f02<1>
-f02(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+f02(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -960,8 +938,7 @@ f02(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:
 
 f03 > public {inline} (0 calls)
 0: multictr2.t.f03<0>
-f03(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+f03(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -977,8 +954,7 @@ f03(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 
 f03 > public {inline} (0 calls)
 1: multictr2.t.f03<1>
-f03(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+f03(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -996,8 +972,7 @@ f03(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:
 
 f04 > public {inline} (0 calls)
 0: multictr2.t.f04<0>
-f04(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+f04(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -1013,8 +988,7 @@ f04(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 
 f04 > public {inline} (0 calls)
 1: multictr2.t.f04<1>
-f04(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+f04(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -1032,8 +1006,7 @@ f04(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:
 
 f05 > public {inline} (0 calls)
 0: multictr2.t.f05<0>
-f05(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+f05(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -1049,8 +1022,7 @@ f05(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 
 f05 > public {inline} (0 calls)
 1: multictr2.t.f05<1>
-f05(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+f05(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -1068,8 +1040,7 @@ f05(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:
 
 f06 > public {inline} (0 calls)
 0: multictr2.t.f06<0>
-f06(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+f06(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -1085,8 +1056,7 @@ f06(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 
 f06 > public {inline} (0 calls)
 1: multictr2.t.f06<1>
-f06(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+f06(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -1104,8 +1074,7 @@ f06(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:
 
 f07 > public {inline} (0 calls)
 0: multictr2.t.f07<0>
-f07(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+f07(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -1121,8 +1090,7 @@ f07(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 
 f07 > public {inline} (0 calls)
 1: multictr2.t.f07<1>
-f07(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+f07(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -1140,8 +1108,7 @@ f07(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:
 
 f08_a > public {inline} (0 calls)
 0: multictr2.t.f08_a<0>
-f08_a(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+f08_a(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -1157,8 +1124,7 @@ f08_a(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 
 f08_a > public {inline} (0 calls)
 1: multictr2.t.f08_a<1>
-f08_a(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+f08_a(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -1176,8 +1142,7 @@ f08_a(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##
 
 f08_b > public {inline} (0 calls)
 0: multictr2.t.f08_b<0>
-f08_b(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+f08_b(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -1193,8 +1158,7 @@ f08_b(#rec##0:multictr2.t, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 
 f08_b > public {inline} (0 calls)
 1: multictr2.t.f08_b<1>
-f08_b(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+f08_b(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -1212,8 +1176,7 @@ f08_b(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.int, ?#success##
 
 f08_c > public {inline} (0 calls)
 0: multictr2.t.f08_c<0>
-f08_c(#rec##0:multictr2.t, ?#result##0:wybe.float, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+f08_c(#rec##0:multictr2.t, ?#result##0:wybe.float, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -1229,8 +1192,7 @@ f08_c(#rec##0:multictr2.t, ?#result##0:wybe.float, ?#success##0:wybe.bool):
 
 f08_c > public {inline} (0 calls)
 1: multictr2.t.f08_c<1>
-f08_c(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.float, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+f08_c(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.float, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 7:wybe.int, ?tmp#1##0:wybe.int)
@@ -1248,8 +1210,7 @@ f08_c(#rec##0:multictr2.t, ?#rec##1:multictr2.t, #field##0:wybe.float, ?#success
 
 ~= > public {inline} (0 calls)
 0: multictr2.t.~=<0>
-~=(#left##0:multictr2.t, #right##0:multictr2.t, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+~=(#left##0:multictr2.t, #right##0:multictr2.t, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     multictr2.t.=<0>(~#left##0:multictr2.t, ~#right##0:multictr2.t, ?tmp#0##0:wybe.bool) #0

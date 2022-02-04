@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,impure} (0 calls)
 0: alloc_args.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     alloc_args.foo<0>(1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @alloc_args:nn:nn
@@ -20,8 +19,7 @@ module top-level code > public {inline,impure} (0 calls)
 
 foo > {noinline} (1 calls)
 0: alloc_args.foo<0>
-foo(size##0:wybe.int):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+foo(size##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(~size##0:wybe.int, ?str##0:wybe.string) @alloc_args:nn:nn

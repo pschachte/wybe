@@ -54,7 +54,7 @@ module AST (
   getParams, getPrimParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, maybeModPrefix, ProcImpln(..), ProcDef(..), procInline, procCallCount,
-  procGlobalFlows, primGlobalFlows, 
+  getProcGlobalFlows, primGlobalFlows, 
   primImpurity, flagsImpurity, flagsDetism,
   AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
   parameterVarNameToID, SpeczVersion, CallProperty(..), generalVersion,
@@ -1944,14 +1944,14 @@ procInline = (==Inline) . procInlining
 
 
 -- | What are the GlobalFLows of the given ProcSpec
-procGlobalFlows :: ProcSpec -> Compiler GlobalFlows
-procGlobalFlows pspec = do
+getProcGlobalFlows :: ProcSpec -> Compiler GlobalFlows
+getProcGlobalFlows pspec = do
     pDef <- getProcDef pspec
     case procImpln pDef of
       ProcDefSrc _ -> 
             let ProcProto _ params resFlows = procProto pDef
             in return $ makeGlobalFlows (paramType <$> params) resFlows
-      ProcDefPrim _ _ _ gFlows _ _ -> return gFlows
+      ProcDefPrim _ (PrimProto _ _ gFlows) _ _ _ -> return gFlows
 
 
 -- | How many static calls to this proc from the same module have we seen?  This
@@ -2085,7 +2085,6 @@ data ProcImpln
         procImplnProcSpec :: ProcSpec,
         procImplnProto :: PrimProto,
         procImplnBody :: ProcBody,       -- ^defn in LPVM (clausal) form
-        procImplnGlobalFlows :: GlobalFlows,
         procImplnAnalysis :: ProcAnalysis,
         procImplnSpeczBodies :: SpeczProcBodies
     }
@@ -2145,7 +2144,7 @@ addGlobalFlow info FlowOut gFlows@GlobalFlows{globalFlowsOut=outs}
     = gFlows{globalFlowsOut=whenFinite (Set.insert info) outs}
 
 
--- | Test if the given flow of a a global exists in the global flow set
+-- | Test if the given flow of a global exists in the global flow set
 hasGlobalFlow :: GlobalFlows -> PrimFlow -> GlobalInfo -> Bool
 hasGlobalFlow gFlows@GlobalFlows{globalFlowsIn=ins} FlowIn info  
     = USet.member info ins
@@ -2300,7 +2299,7 @@ isCompiled (ProcDefSrc _) = False
 
 instance Show ProcImpln where
     show (ProcDefSrc stmts) = showBody 4 stmts
-    show (ProcDefPrim pSpec proto body gFlows analysis speczVersions) =
+    show (ProcDefPrim pSpec proto body analysis speczVersions) =
         let speczBodies = Map.toList speczVersions
                 |> List.map (\(ver, body) ->
                         "\n [" ++ speczVersionToId ver ++ "] "
@@ -2310,7 +2309,6 @@ instance Show ProcImpln where
                             Just body -> showBlock 4 body)
                 |> intercalate "\n"
         in  show pSpec ++ "\n" ++ show proto ++ ":" 
-                    ++ "\n  GlobalFlows: " ++ show gFlows
                     ++ show analysis
                     ++ showBlock 4 body ++ speczBodies
 
@@ -2708,13 +2706,15 @@ data ProcProto = ProcProto {
 -- |A proc prototype, including name and formal parameters.
 data PrimProto = PrimProto {
     primProtoName::ProcName,
-    primProtoParams::[PrimParam]
+    primProtoParams::[PrimParam],
+    primProtoGlobalFlows::GlobalFlows
     } deriving (Eq, Generic)
 
 
 instance Show PrimProto where
-  show (PrimProto name params) =
-    name ++ "(" ++ intercalate ", " (List.map show params) ++ ")"
+    show (PrimProto name params gFlows) =
+        name ++ "(" ++ intercalate ", " (List.map show params) ++ ")"
+             ++ show gFlows
 
 
 -- |A formal parameter, including name, type, and flow direction.

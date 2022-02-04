@@ -121,8 +121,7 @@ AFTER BUILDING MAIN:
 
 module top-level code > {terminal,inline,impure} (0 calls)
 0: .<0>
-(%argc##0:wybe.int, %argv##0:wybe.array.raw_array(wybe.c_string), %?exit_code##0:wybe.int):
-  GlobalFlows: <{<<command_line.argc>>, <<command_line.argv>>}; {<<command_line.exit_code>>}>
+(%argc##0:wybe.int, %argv##0:wybe.array.raw_array(wybe.c_string), %?exit_code##0:wybe.int)<{<<command_line.argc>>, <<command_line.argv>>}; {<<command_line.exit_code>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm store(~%argc##0:wybe.int, <<command_line.argc>>:wybe.int)
@@ -157,8 +156,7 @@ LLVM code       : None
 
 module top-level code > public {impure} (0 calls)
 0: command_line.<0>
-():
-  GlobalFlows: <{<<command_line.argc>>, <<command_line.argv>>, <<wybe.io.io>>}; {<<command_line.argc>>, <<command_line.arguments>>, <<command_line.argv>>, <<command_line.command>>, <<command_line.exit_code>>, <<wybe.io.io>>}>
+()<{<<command_line.argc>>, <<command_line.argv>>, <<wybe.io.io>>}; {<<command_line.argc>>, <<command_line.arguments>>, <<command_line.argv>>, <<command_line.command>>, <<command_line.exit_code>>, <<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(1,(wybe.array.[|]<0>,fromList [NonAliasedParamCond 2 []]))]
@@ -183,8 +181,7 @@ module top-level code > public {impure} (0 calls)
 
 set_exit_code > public {inline} (0 calls)
 0: command_line.set_exit_code<0>
-set_exit_code(code##0:wybe.int):
-  GlobalFlows: <{<<command_line.exit_code>>}; {<<command_line.exit_code>>}>
+set_exit_code(code##0:wybe.int)<{<<command_line.exit_code>>}; {<<command_line.exit_code>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm store(~code##0:wybe.int, <<command_line.exit_code>>:wybe.int) @command_line:nn:nn
@@ -304,8 +301,7 @@ entry:
 
 append > public (0 calls)
 0: int_list.append<0>
-append(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+append(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(2,(int_list.extend<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -317,8 +313,7 @@ append(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list):
 
 count > public (3 calls)
 0: int_list.count<0>
-count(lst##0:int_list.int_list, x##0:wybe.int, ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+count(lst##0:int_list.int_list, x##0:wybe.int, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool)
@@ -343,8 +338,7 @@ count(lst##0:int_list.int_list, x##0:wybe.int, ?#result##0:wybe.int):
 
 extend > public (3 calls)
 0: int_list.extend<0>[410bae77d3]
-extend(lst1##0:int_list.int_list, lst2##0:int_list.int_list, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+extend(lst1##0:int_list.int_list, lst2##0:int_list.int_list, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: [(#result##0,lst2##0)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(1,(int_list.extend<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -365,8 +359,7 @@ extend(lst1##0:int_list.int_list, lst2##0:int_list.int_list, ?#result##0:int_lis
 
 gen#1 > {inline} (2 calls)
 0: int_list.gen#1<0>
-gen#1([h##0:wybe.int], [lst##0:int_list.int_list], [t##0:int_list.int_list], tmp#2##0:wybe.int, tmp#3##0:wybe.int, [x##0:wybe.int], ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+gen#1([h##0:wybe.int], [lst##0:int_list.int_list], [t##0:int_list.int_list], tmp#2##0:wybe.int, tmp#3##0:wybe.int, [x##0:wybe.int], ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(~tmp#2##0:wybe.int, ~tmp#3##0:wybe.int, ?#result##0:wybe.int) @int:nn:nn
@@ -374,8 +367,7 @@ gen#1([h##0:wybe.int], [lst##0:int_list.int_list], [t##0:int_list.int_list], tmp
 
 gen#2 > (2 calls)
 0: int_list.gen#2<0>[410bae77d3]
-gen#2(result##0:int_list.int_list, start##0:wybe.int, step##0:wybe.int, stop##0:wybe.int, tmp#0##0:int_list.int_list, ?result##1:int_list.int_list):
-  GlobalFlows: <{}; {}>
+gen#2(result##0:int_list.int_list, start##0:wybe.int, step##0:wybe.int, stop##0:wybe.int, tmp#0##0:int_list.int_list, ?result##1:int_list.int_list)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(3,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.gen#2<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -395,8 +387,7 @@ gen#2(result##0:int_list.int_list, start##0:wybe.int, step##0:wybe.int, stop##0:
 
 gen#3 > {inline} (1 calls)
 0: int_list.gen#3<0>
-gen#3(result##0:int_list.int_list, start##0:wybe.int, step##0:wybe.int, stop##0:wybe.int, tmp#0##0:int_list.int_list, ?result##2:int_list.int_list):
-  GlobalFlows: <{}; {}>
+gen#3(result##0:int_list.int_list, start##0:wybe.int, step##0:wybe.int, stop##0:wybe.int, tmp#0##0:int_list.int_list, ?result##2:int_list.int_list)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#5##0:int_list.int_list) @int_list:nn:nn
@@ -408,8 +399,7 @@ gen#3(result##0:int_list.int_list, start##0:wybe.int, step##0:wybe.int, stop##0:
 
 greater > (3 calls)
 0: int_list.greater<0>
-greater(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+greater(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(2,(int_list.greater<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.greater<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -437,8 +427,7 @@ greater(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list):
 
 index > public {inline} (0 calls)
 0: int_list.index<0>
-index(lst##0:int_list.int_list, x##0:wybe.int, ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+index(lst##0:int_list.int_list, x##0:wybe.int, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     int_list.index_helper<0>(~lst##0:int_list.int_list, 0:wybe.int, ~x##0:wybe.int, ?#result##0:wybe.int) #0 @int_list:nn:nn
@@ -446,8 +435,7 @@ index(lst##0:int_list.int_list, x##0:wybe.int, ?#result##0:wybe.int):
 
 index_helper > (2 calls)
 0: int_list.index_helper<0>
-index_helper(lst##0:int_list.int_list, idx##0:wybe.int, x##0:wybe.int, ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+index_helper(lst##0:int_list.int_list, idx##0:wybe.int, x##0:wybe.int, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool)
@@ -472,8 +460,7 @@ index_helper(lst##0:int_list.int_list, idx##0:wybe.int, x##0:wybe.int, ?#result#
 
 insert > public (2 calls)
 0: int_list.insert<0>[410bae77d3]
-insert(lst##0:int_list.int_list, idx##0:wybe.int, v##0:wybe.int, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+insert(lst##0:int_list.int_list, idx##0:wybe.int, v##0:wybe.int, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: [(#result##0,lst##0)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(4,(int_list.insert<0>,fromList [NonAliasedParamCond 0 [0]])),(7,(int_list.insert<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -505,8 +492,7 @@ insert(lst##0:int_list.int_list, idx##0:wybe.int, v##0:wybe.int, ?#result##0:int
 
 lesser > (3 calls)
 0: int_list.lesser<0>
-lesser(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+lesser(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(2,(int_list.lesser<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.lesser<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -534,8 +520,7 @@ lesser(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list):
 
 pop > public (1 calls)
 0: int_list.pop<0>[410bae77d3]
-pop(lst##0:int_list.int_list, idx##0:wybe.int, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+pop(lst##0:int_list.int_list, idx##0:wybe.int, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: [(#result##0,lst##0)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(3,(int_list.pop<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -564,8 +549,7 @@ pop(lst##0:int_list.int_list, idx##0:wybe.int, ?#result##0:int_list.int_list):
 
 print > public (2 calls)
 0: int_list.print<0>
-print(x##0:int_list.int_list):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+print(x##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool)
@@ -585,8 +569,7 @@ print(x##0:int_list.int_list):
 
 println > public {inline} (0 calls)
 0: int_list.println<0>
-println(x##0:int_list.int_list):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+println(x##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     int_list.print<0>(~x##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @int_list:nn:nn
@@ -597,8 +580,7 @@ println(x##0:int_list.int_list):
 
 range > public {inline} (0 calls)
 0: int_list.range<0>
-range(start##0:wybe.int, stop##0:wybe.int, step##0:wybe.int, ?result##1:int_list.int_list):
-  GlobalFlows: <{}; {}>
+range(start##0:wybe.int, stop##0:wybe.int, step##0:wybe.int, ?result##1:int_list.int_list)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     int_list.gen#2<0>(0:int_list.int_list, ~start##0:wybe.int, ~step##0:wybe.int, ~stop##0:wybe.int, 0:int_list.int_list, ?result##1:int_list.int_list) #1 @int_list:nn:nn
@@ -606,8 +588,7 @@ range(start##0:wybe.int, stop##0:wybe.int, step##0:wybe.int, ?result##1:int_list
 
 remove > public (1 calls)
 0: int_list.remove<0>[410bae77d3]
-remove(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+remove(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: [(#result##0,lst##0)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(2,(int_list.remove<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -635,8 +616,7 @@ remove(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list):
 
 reverse > public {inline} (1 calls)
 0: int_list.reverse<0>
-reverse(lst##0:int_list.int_list, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+reverse(lst##0:int_list.int_list, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     int_list.reverse_helper<0>(~lst##0:int_list.int_list, 0:int_list.int_list, ?#result##0:int_list.int_list) #1 @int_list:nn:nn
@@ -644,8 +624,7 @@ reverse(lst##0:int_list.int_list, ?#result##0:int_list.int_list):
 
 reverse_helper > (2 calls)
 0: int_list.reverse_helper<0>
-reverse_helper(lst##0:int_list.int_list, acc##0:int_list.int_list, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+reverse_helper(lst##0:int_list.int_list, acc##0:int_list.int_list, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: [(#result##0,acc##0)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(2,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -666,8 +645,7 @@ reverse_helper(lst##0:int_list.int_list, acc##0:int_list.int_list, ?#result##0:i
 
 sort > public (2 calls)
 0: int_list.sort<0>[410bae77d3]
-sort(lst##0:int_list.int_list, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+sort(lst##0:int_list.int_list, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(2,(int_list.sort<0>,fromList [NonAliasedParamCond 0 []])),(3,(int_list.greater<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.sort<0>,fromList [NonAliasedParamCond 0 []])),(6,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -712,8 +690,7 @@ LLVM code       : None
 
 = > public (2 calls)
 0: int_list.int_list.=<0>
-=(#left##0:int_list.int_list, #right##0:int_list.int_list, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+=(#left##0:int_list.int_list, #right##0:int_list.int_list, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -746,8 +723,7 @@ LLVM code       : None
 
 cons > public {inline} (0 calls)
 0: int_list.int_list.cons<0>
-cons(head##0:wybe.int, tail##0:int_list.int_list, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+cons(head##0:wybe.int, tail##0:int_list.int_list, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:int_list.int_list) @int_list:nn:nn
@@ -755,8 +731,7 @@ cons(head##0:wybe.int, tail##0:int_list.int_list, ?#result##0:int_list.int_list)
     foreign lpvm mutate(~#rec##1:int_list.int_list, ?#result##0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail##0:int_list.int_list) @int_list:nn:nn
 cons > public {inline} (12 calls)
 1: int_list.int_list.cons<1>
-cons(?head##0:wybe.int, ?tail##0:int_list.int_list, #result##0:int_list.int_list, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+cons(?head##0:wybe.int, ?tail##0:int_list.int_list, #result##0:int_list.int_list, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -775,8 +750,7 @@ cons(?head##0:wybe.int, ?tail##0:int_list.int_list, #result##0:int_list.int_list
 
 head > public {inline} (0 calls)
 0: int_list.int_list.head<0>
-head(#rec##0:int_list.int_list, ?#result##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+head(#rec##0:int_list.int_list, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -791,8 +765,7 @@ head(#rec##0:int_list.int_list, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 
 head > public {inline} (0 calls)
 1: int_list.int_list.head<1>
-head(#rec##0:int_list.int_list, ?#rec##1:int_list.int_list, #field##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+head(#rec##0:int_list.int_list, ?#rec##1:int_list.int_list, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -809,8 +782,7 @@ head(#rec##0:int_list.int_list, ?#rec##1:int_list.int_list, #field##0:wybe.int, 
 
 nil > public {inline} (0 calls)
 0: int_list.int_list.nil<0>
-nil(?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+nil(?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(0:int_list.int_list, ?#result##0:int_list.int_list)
@@ -818,8 +790,7 @@ nil(?#result##0:int_list.int_list):
 
 tail > public {inline} (0 calls)
 0: int_list.int_list.tail<0>
-tail(#rec##0:int_list.int_list, ?#result##0:int_list.int_list, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+tail(#rec##0:int_list.int_list, ?#result##0:int_list.int_list, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -834,8 +805,7 @@ tail(#rec##0:int_list.int_list, ?#result##0:int_list.int_list, ?#success##0:wybe
 
 tail > public {inline} (0 calls)
 1: int_list.int_list.tail<1>
-tail(#rec##0:int_list.int_list, ?#rec##1:int_list.int_list, #field##0:int_list.int_list, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+tail(#rec##0:int_list.int_list, ?#rec##1:int_list.int_list, #field##0:int_list.int_list, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -852,8 +822,7 @@ tail(#rec##0:int_list.int_list, ?#rec##1:int_list.int_list, #field##0:int_list.i
 
 ~= > public {inline} (0 calls)
 0: int_list.int_list.~=<0>
-~=(#left##0:int_list.int_list, #right##0:int_list.int_list, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+~=(#left##0:int_list.int_list, #right##0:int_list.int_list, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     int_list.int_list.=<0>(~#left##0:int_list.int_list, ~#right##0:int_list.int_list, ?tmp#0##0:wybe.bool) #0
@@ -875,8 +844,7 @@ LLVM code       : None
 
 module top-level code > public {impure} (0 calls)
 0: int_list_test.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(24,(int_list_test.test_int_list<0>,fromList [NonAliasedParamCond 0 [],NonAliasedParamCond 1 [],NonAliasedParamCond 2 []])),(34,(int_list.gen#2<0>,fromList [NonAliasedParamCond 0 []])),(35,(int_list.gen#2<0>,fromList [NonAliasedParamCond 0 []])),(36,(int_list.gen#2<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -969,8 +937,7 @@ module top-level code > public {impure} (0 calls)
 
 test_int_list > (2 calls)
 0: int_list_test.test_int_list<0>
-test_int_list(x##0:int_list.int_list, y##0:int_list.int_list, z##0:int_list.int_list):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+test_int_list(x##0:int_list.int_list, y##0:int_list.int_list, z##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1,InterestingUnaliased 2]
   MultiSpeczDepInfo: [(2,(int_list.append<0>,fromList [NonAliasedParamCond 0 [1]])),(7,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []])),(8,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []])),(11,(int_list.insert<0>,fromList [NonAliasedParamCond 0 []])),(12,(int_list.pop<0>,fromList [NonAliasedParamCond 0 []])),(13,(int_list.remove<0>,fromList [NonAliasedParamCond 0 []])),(16,(int_list.sort<0>,fromList [NonAliasedParamCond 0 []])),(19,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [0]])),(20,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [2]]))]
@@ -1058,8 +1025,7 @@ AFTER EVERYTHING:
 
 module top-level code > {terminal,inline,impure} (0 calls)
 0: .<0>
-(%argc##0:wybe.int, %argv##0:wybe.array.raw_array(wybe.c_string), %?exit_code##0:wybe.int):
-  GlobalFlows: <{<<command_line.argc>>, <<command_line.argv>>}; {<<command_line.exit_code>>}>
+(%argc##0:wybe.int, %argv##0:wybe.array.raw_array(wybe.c_string), %?exit_code##0:wybe.int)<{<<command_line.argc>>, <<command_line.argv>>}; {<<command_line.exit_code>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm store(~%argc##0:wybe.int, <<command_line.argc>>:wybe.int)
@@ -1138,8 +1104,7 @@ entry:
 
 module top-level code > public {impure} (0 calls)
 0: command_line.<0>
-():
-  GlobalFlows: <{<<command_line.argc>>, <<command_line.argv>>, <<wybe.io.io>>}; {<<command_line.argc>>, <<command_line.arguments>>, <<command_line.argv>>, <<command_line.command>>, <<command_line.exit_code>>, <<wybe.io.io>>}>
+()<{<<command_line.argc>>, <<command_line.argv>>, <<wybe.io.io>>}; {<<command_line.argc>>, <<command_line.arguments>>, <<command_line.argv>>, <<command_line.command>>, <<command_line.exit_code>>, <<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(1,(wybe.array.[|]<0>,fromList [NonAliasedParamCond 2 []]))]
@@ -1164,8 +1129,7 @@ module top-level code > public {impure} (0 calls)
 
 set_exit_code > public {inline} (0 calls)
 0: command_line.set_exit_code<0>
-set_exit_code(code##0:wybe.int):
-  GlobalFlows: <{<<command_line.exit_code>>}; {<<command_line.exit_code>>}>
+set_exit_code(code##0:wybe.int)<{<<command_line.exit_code>>}; {<<command_line.exit_code>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm store(~code##0:wybe.int, <<command_line.exit_code>>:wybe.int) @command_line:nn:nn
@@ -1285,8 +1249,7 @@ entry:
 
 append > public (0 calls)
 0: int_list.append<0>[410bae77d3]
-append(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+append(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(2,(int_list.extend<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -1303,8 +1266,7 @@ append(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list):
 
 count > public (3 calls)
 0: int_list.count<0>
-count(lst##0:int_list.int_list, x##0:wybe.int, ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+count(lst##0:int_list.int_list, x##0:wybe.int, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool)
@@ -1329,8 +1291,7 @@ count(lst##0:int_list.int_list, x##0:wybe.int, ?#result##0:wybe.int):
 
 extend > public (3 calls)
 0: int_list.extend<0>[410bae77d3]
-extend(lst1##0:int_list.int_list, lst2##0:int_list.int_list, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+extend(lst1##0:int_list.int_list, lst2##0:int_list.int_list, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: [(#result##0,lst2##0)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(1,(int_list.extend<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -1362,8 +1323,7 @@ extend(lst1##0:int_list.int_list, lst2##0:int_list.int_list, ?#result##0:int_lis
 
 gen#1 > {inline} (2 calls)
 0: int_list.gen#1<0>
-gen#1([h##0:wybe.int], [lst##0:int_list.int_list], [t##0:int_list.int_list], tmp#2##0:wybe.int, tmp#3##0:wybe.int, [x##0:wybe.int], ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+gen#1([h##0:wybe.int], [lst##0:int_list.int_list], [t##0:int_list.int_list], tmp#2##0:wybe.int, tmp#3##0:wybe.int, [x##0:wybe.int], ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(~tmp#2##0:wybe.int, ~tmp#3##0:wybe.int, ?#result##0:wybe.int) @int:nn:nn
@@ -1371,8 +1331,7 @@ gen#1([h##0:wybe.int], [lst##0:int_list.int_list], [t##0:int_list.int_list], tmp
 
 gen#2 > (2 calls)
 0: int_list.gen#2<0>
-gen#2(result##0:int_list.int_list, start##0:wybe.int, step##0:wybe.int, stop##0:wybe.int, tmp#0##0:int_list.int_list, ?result##1:int_list.int_list):
-  GlobalFlows: <{}; {}>
+gen#2(result##0:int_list.int_list, start##0:wybe.int, step##0:wybe.int, stop##0:wybe.int, tmp#0##0:int_list.int_list, ?result##1:int_list.int_list)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(3,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.gen#2<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -1405,8 +1364,7 @@ gen#2(result##0:int_list.int_list, start##0:wybe.int, step##0:wybe.int, stop##0:
 
 gen#3 > {inline} (1 calls)
 0: int_list.gen#3<0>
-gen#3(result##0:int_list.int_list, start##0:wybe.int, step##0:wybe.int, stop##0:wybe.int, tmp#0##0:int_list.int_list, ?result##2:int_list.int_list):
-  GlobalFlows: <{}; {}>
+gen#3(result##0:int_list.int_list, start##0:wybe.int, step##0:wybe.int, stop##0:wybe.int, tmp#0##0:int_list.int_list, ?result##2:int_list.int_list)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#5##0:int_list.int_list) @int_list:nn:nn
@@ -1418,8 +1376,7 @@ gen#3(result##0:int_list.int_list, start##0:wybe.int, step##0:wybe.int, stop##0:
 
 greater > (3 calls)
 0: int_list.greater<0>[410bae77d3]
-greater(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+greater(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(2,(int_list.greater<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.greater<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -1466,8 +1423,7 @@ greater(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list):
 
 index > public {inline} (0 calls)
 0: int_list.index<0>
-index(lst##0:int_list.int_list, x##0:wybe.int, ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+index(lst##0:int_list.int_list, x##0:wybe.int, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     int_list.index_helper<0>(~lst##0:int_list.int_list, 0:wybe.int, ~x##0:wybe.int, ?#result##0:wybe.int) #0 @int_list:nn:nn
@@ -1475,8 +1431,7 @@ index(lst##0:int_list.int_list, x##0:wybe.int, ?#result##0:wybe.int):
 
 index_helper > (2 calls)
 0: int_list.index_helper<0>
-index_helper(lst##0:int_list.int_list, idx##0:wybe.int, x##0:wybe.int, ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+index_helper(lst##0:int_list.int_list, idx##0:wybe.int, x##0:wybe.int, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool)
@@ -1501,8 +1456,7 @@ index_helper(lst##0:int_list.int_list, idx##0:wybe.int, x##0:wybe.int, ?#result#
 
 insert > public (2 calls)
 0: int_list.insert<0>[410bae77d3]
-insert(lst##0:int_list.int_list, idx##0:wybe.int, v##0:wybe.int, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+insert(lst##0:int_list.int_list, idx##0:wybe.int, v##0:wybe.int, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: [(#result##0,lst##0)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(4,(int_list.insert<0>,fromList [NonAliasedParamCond 0 [0]])),(7,(int_list.insert<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -1556,8 +1510,7 @@ insert(lst##0:int_list.int_list, idx##0:wybe.int, v##0:wybe.int, ?#result##0:int
 
 lesser > (3 calls)
 0: int_list.lesser<0>
-lesser(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+lesser(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(2,(int_list.lesser<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.lesser<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -1585,8 +1538,7 @@ lesser(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list):
 
 pop > public (1 calls)
 0: int_list.pop<0>[410bae77d3]
-pop(lst##0:int_list.int_list, idx##0:wybe.int, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+pop(lst##0:int_list.int_list, idx##0:wybe.int, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: [(#result##0,lst##0)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(3,(int_list.pop<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -1634,8 +1586,7 @@ pop(lst##0:int_list.int_list, idx##0:wybe.int, ?#result##0:int_list.int_list):
 
 print > public (2 calls)
 0: int_list.print<0>
-print(x##0:int_list.int_list):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+print(x##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool)
@@ -1655,8 +1606,7 @@ print(x##0:int_list.int_list):
 
 println > public {inline} (0 calls)
 0: int_list.println<0>
-println(x##0:int_list.int_list):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+println(x##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     int_list.print<0>(~x##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @int_list:nn:nn
@@ -1667,8 +1617,7 @@ println(x##0:int_list.int_list):
 
 range > public {inline} (0 calls)
 0: int_list.range<0>
-range(start##0:wybe.int, stop##0:wybe.int, step##0:wybe.int, ?result##1:int_list.int_list):
-  GlobalFlows: <{}; {}>
+range(start##0:wybe.int, stop##0:wybe.int, step##0:wybe.int, ?result##1:int_list.int_list)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     int_list.gen#2<0>(0:int_list.int_list, ~start##0:wybe.int, ~step##0:wybe.int, ~stop##0:wybe.int, 0:int_list.int_list, ?result##1:int_list.int_list) #1 @int_list:nn:nn
@@ -1676,8 +1625,7 @@ range(start##0:wybe.int, stop##0:wybe.int, step##0:wybe.int, ?result##1:int_list
 
 remove > public (1 calls)
 0: int_list.remove<0>[410bae77d3]
-remove(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+remove(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: [(#result##0,lst##0)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(2,(int_list.remove<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -1724,8 +1672,7 @@ remove(lst##0:int_list.int_list, v##0:wybe.int, ?#result##0:int_list.int_list):
 
 reverse > public {inline} (1 calls)
 0: int_list.reverse<0>
-reverse(lst##0:int_list.int_list, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+reverse(lst##0:int_list.int_list, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     int_list.reverse_helper<0>(~lst##0:int_list.int_list, 0:int_list.int_list, ?#result##0:int_list.int_list) #1 @int_list:nn:nn
@@ -1733,8 +1680,7 @@ reverse(lst##0:int_list.int_list, ?#result##0:int_list.int_list):
 
 reverse_helper > (2 calls)
 0: int_list.reverse_helper<0>[410bae77d3]
-reverse_helper(lst##0:int_list.int_list, acc##0:int_list.int_list, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+reverse_helper(lst##0:int_list.int_list, acc##0:int_list.int_list, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: [(#result##0,acc##0)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(2,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -1766,8 +1712,7 @@ reverse_helper(lst##0:int_list.int_list, acc##0:int_list.int_list, ?#result##0:i
 
 sort > public (2 calls)
 0: int_list.sort<0>[410bae77d3]
-sort(lst##0:int_list.int_list, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+sort(lst##0:int_list.int_list, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(2,(int_list.sort<0>,fromList [NonAliasedParamCond 0 []])),(3,(int_list.greater<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(int_list.sort<0>,fromList [NonAliasedParamCond 0 []])),(6,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -2516,8 +2461,7 @@ if.else:
 
 = > public (2 calls)
 0: int_list.int_list.=<0>
-=(#left##0:int_list.int_list, #right##0:int_list.int_list, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+=(#left##0:int_list.int_list, #right##0:int_list.int_list, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -2550,8 +2494,7 @@ if.else:
 
 cons > public {inline} (0 calls)
 0: int_list.int_list.cons<0>
-cons(head##0:wybe.int, tail##0:int_list.int_list, ?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+cons(head##0:wybe.int, tail##0:int_list.int_list, ?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:int_list.int_list) @int_list:nn:nn
@@ -2559,8 +2502,7 @@ cons(head##0:wybe.int, tail##0:int_list.int_list, ?#result##0:int_list.int_list)
     foreign lpvm mutate(~#rec##1:int_list.int_list, ?#result##0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail##0:int_list.int_list) @int_list:nn:nn
 cons > public {inline} (12 calls)
 1: int_list.int_list.cons<1>
-cons(?head##0:wybe.int, ?tail##0:int_list.int_list, #result##0:int_list.int_list, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+cons(?head##0:wybe.int, ?tail##0:int_list.int_list, #result##0:int_list.int_list, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -2579,8 +2521,7 @@ cons(?head##0:wybe.int, ?tail##0:int_list.int_list, #result##0:int_list.int_list
 
 head > public {inline} (0 calls)
 0: int_list.int_list.head<0>
-head(#rec##0:int_list.int_list, ?#result##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+head(#rec##0:int_list.int_list, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -2595,8 +2536,7 @@ head(#rec##0:int_list.int_list, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 
 head > public {inline} (0 calls)
 1: int_list.int_list.head<1>
-head(#rec##0:int_list.int_list, ?#rec##1:int_list.int_list, #field##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+head(#rec##0:int_list.int_list, ?#rec##1:int_list.int_list, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -2613,8 +2553,7 @@ head(#rec##0:int_list.int_list, ?#rec##1:int_list.int_list, #field##0:wybe.int, 
 
 nil > public {inline} (0 calls)
 0: int_list.int_list.nil<0>
-nil(?#result##0:int_list.int_list):
-  GlobalFlows: <{}; {}>
+nil(?#result##0:int_list.int_list)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(0:int_list.int_list, ?#result##0:int_list.int_list)
@@ -2622,8 +2561,7 @@ nil(?#result##0:int_list.int_list):
 
 tail > public {inline} (0 calls)
 0: int_list.int_list.tail<0>
-tail(#rec##0:int_list.int_list, ?#result##0:int_list.int_list, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+tail(#rec##0:int_list.int_list, ?#result##0:int_list.int_list, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -2638,8 +2576,7 @@ tail(#rec##0:int_list.int_list, ?#result##0:int_list.int_list, ?#success##0:wybe
 
 tail > public {inline} (0 calls)
 1: int_list.int_list.tail<1>
-tail(#rec##0:int_list.int_list, ?#rec##1:int_list.int_list, #field##0:int_list.int_list, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+tail(#rec##0:int_list.int_list, ?#rec##1:int_list.int_list, #field##0:int_list.int_list, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -2656,8 +2593,7 @@ tail(#rec##0:int_list.int_list, ?#rec##1:int_list.int_list, #field##0:int_list.i
 
 ~= > public {inline} (0 calls)
 0: int_list.int_list.~=<0>
-~=(#left##0:int_list.int_list, #right##0:int_list.int_list, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+~=(#left##0:int_list.int_list, #right##0:int_list.int_list, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     int_list.int_list.=<0>(~#left##0:int_list.int_list, ~#right##0:int_list.int_list, ?tmp#0##0:wybe.bool) #0
@@ -2868,8 +2804,7 @@ entry:
 
 module top-level code > public {impure} (0 calls)
 0: int_list_test.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(24,(int_list_test.test_int_list<0>,fromList [NonAliasedParamCond 0 [],NonAliasedParamCond 1 [],NonAliasedParamCond 2 []])),(34,(int_list.gen#2<0>,fromList [NonAliasedParamCond 0 []])),(35,(int_list.gen#2<0>,fromList [NonAliasedParamCond 0 []])),(36,(int_list.gen#2<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -2962,8 +2897,7 @@ module top-level code > public {impure} (0 calls)
 
 test_int_list > (2 calls)
 0: int_list_test.test_int_list<0>[9e35cb823b]
-test_int_list(x##0:int_list.int_list, y##0:int_list.int_list, z##0:int_list.int_list):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+test_int_list(x##0:int_list.int_list, y##0:int_list.int_list, z##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1,InterestingUnaliased 2]
   MultiSpeczDepInfo: [(2,(int_list.append<0>,fromList [NonAliasedParamCond 0 [1]])),(7,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []])),(8,(int_list.extend<0>,fromList [NonAliasedParamCond 0 []])),(11,(int_list.insert<0>,fromList [NonAliasedParamCond 0 []])),(12,(int_list.pop<0>,fromList [NonAliasedParamCond 0 []])),(13,(int_list.remove<0>,fromList [NonAliasedParamCond 0 []])),(16,(int_list.sort<0>,fromList [NonAliasedParamCond 0 []])),(19,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [0]])),(20,(int_list.reverse_helper<0>,fromList [NonAliasedParamCond 0 [2]]))]

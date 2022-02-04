@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,impure} (0 calls)
 0: stmt_until.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     stmt_until.gen#1<0>(10:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @stmt_until:nn:nn
@@ -20,8 +19,7 @@ module top-level code > public {inline,impure} (0 calls)
 
 gen#1 > (2 calls)
 0: stmt_until.gen#1<0>
-gen#1(n##0:wybe.int):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#1(n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_slt(n##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
@@ -40,8 +38,7 @@ gen#1(n##0:wybe.int):
 
 gen#2 > {inline} (1 calls)
 0: stmt_until.gen#2<0>
-gen#2(n##0:wybe.int):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#2(n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn

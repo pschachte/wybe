@@ -141,7 +141,7 @@ aliasProcBottomUp pspec = do
 aliasProcDef :: ProcDef -> Compiler ProcDef
 aliasProcDef def
     | not (procInline def) = do
-        let oldImpln@(ProcDefPrim _ caller body _ oldAnalysis speczBodies) = 
+        let oldImpln@(ProcDefPrim _ caller body oldAnalysis speczBodies) = 
              procImpln def
         logAlias $ show caller
 
@@ -272,7 +272,7 @@ updateAliasedByPrim aliasMap prim =
         PrimCall _ spec args _ -> do
             -- Analyse proc calls
             calleeDef <- getProcDef spec
-            let ProcDefPrim _ calleeProto _ _ analysis _ = procImpln calleeDef
+            let ProcDefPrim _ calleeProto _ analysis _ = procImpln calleeDef
             let calleeParamAliases = procArgAliasMap analysis
             logAlias $ "--- call          " ++ show spec ++" (callee): "
             logAlias $ "" ++ show calleeProto
@@ -434,7 +434,7 @@ updateMultiSpeczInfoByPrim proto
     case content prim of
         PrimCall callSiteID spec args _ -> do
             calleeDef <- getProcDef spec
-            let ProcDefPrim _ calleeProto _ _ analysis _ = procImpln calleeDef
+            let ProcDefPrim _ calleeProto _ analysis _ = procImpln calleeDef
             let interestingPrimCallInfo = List.zip args [0..]
                     |> List.filter (\(arg, paramID) -> 
                         -- we only care parameters that are interesting,

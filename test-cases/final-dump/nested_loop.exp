@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: nested_loop.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("Outer":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @io:nn:nn
@@ -28,8 +27,7 @@ module top-level code > public {impure} (0 calls)
 
 gen#1 > {inline} (1 calls)
 0: nested_loop.gen#1<0>
-gen#1():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("Outer":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @io:nn:nn
@@ -45,8 +43,7 @@ gen#1():
 
 gen#2 > {inline} (2 calls)
 0: nested_loop.gen#2<0>
-gen#2():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#2()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("Inner":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @io:nn:nn

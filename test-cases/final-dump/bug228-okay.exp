@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: bug228-okay.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @io:nn:nn
@@ -25,8 +24,7 @@ module top-level code > public {impure} (0 calls)
 
 bar > {inline} (1 calls)
 0: bug228-okay.bar<0>
-bar(?out1##0:wybe.int, ?out2##0:wybe.int):
-  GlobalFlows: <{}; {}>
+bar(?out1##0:wybe.int, ?out2##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<bug228-okay.res>>:wybe.int, ?%tmp#1##0:wybe.int) @bug228-okay:7:5
@@ -37,8 +35,7 @@ bar(?out1##0:wybe.int, ?out2##0:wybe.int):
 
 init_res > {inline} (1 calls)
 0: bug228-okay.init_res<0>
-init_res():
-  GlobalFlows: <{<<bug228-okay.res>>}; {<<bug228-okay.res>>}>
+init_res()<{<<bug228-okay.res>>}; {<<bug228-okay.res>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm store(2:wybe.int, <<bug228-okay.res>>:wybe.int) @bug228-okay:3:26

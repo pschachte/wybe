@@ -502,7 +502,7 @@ argExpandedPrim call@(PrimHigher id fn args) = do
             logBuild $ "As first-order call to " ++ show pspec'
             params <- lift $ getPrimParams pspec'
             let args' = zipWith (setArgType . primParamType) params args
-            gFlows <- lift $ procGlobalFlows pspec
+            gFlows <- lift $ getProcGlobalFlows pspec
             argExpandedPrim $ PrimCall id pspec' (clsd ++ args') gFlows
         _ -> do
             logBuild $ "Leaving as higher call to " ++ show fn'       

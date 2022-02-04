@@ -12,8 +12,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: proc_yorn.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     proc_yorn.gen#1<0>("Well, yes or no?":wybe.string, ?r##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @proc_yorn:nn:nn
@@ -25,8 +24,7 @@ module top-level code > public {impure} (0 calls)
 
 gen#1 > (2 calls)
 0: proc_yorn.gen#1<0>
-gen#1(prompt##0:wybe.string, ?result##1:wybe.bool):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#1(prompt##0:wybe.string, ?result##1:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>(prompt##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7 @io:nn:nn
@@ -54,8 +52,7 @@ gen#1(prompt##0:wybe.string, ?result##1:wybe.bool):
 
 is_yes > {inline} (4 calls)
 0: proc_yorn.is_yes<0>
-is_yes(ch##0:wybe.char, ?#result##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+is_yes(ch##0:wybe.char, ?#result##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(ch##0:wybe.char, 'y':wybe.char, ?tmp#2##0:wybe.bool) @char:nn:nn
@@ -66,8 +63,7 @@ is_yes(ch##0:wybe.char, ?#result##0:wybe.bool):
 
 is_yes_or_no > (3 calls)
 0: proc_yorn.is_yes_or_no<0>
-is_yes_or_no(ch##0:wybe.char, ?#result##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+is_yes_or_no(ch##0:wybe.char, ?#result##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(ch##0:wybe.char, 'y':wybe.char, ?tmp#6##0:wybe.bool) @char:nn:nn
@@ -82,8 +78,7 @@ is_yes_or_no(ch##0:wybe.char, ?#result##0:wybe.bool):
 
 yorn > public {inline} (1 calls)
 0: proc_yorn.yorn<0>
-yorn(prompt##0:wybe.string, ?result##0:wybe.bool):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+yorn(prompt##0:wybe.string, ?result##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     proc_yorn.gen#1<0>(~prompt##0:wybe.string, ?result##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @proc_yorn:nn:nn

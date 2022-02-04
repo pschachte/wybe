@@ -13,8 +13,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: alias_fork2.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?tmp#9##0:mytree.tree) @mytree:nn:nn
@@ -49,8 +48,7 @@ module top-level code > public {impure} (0 calls)
 
 gen#1 > (2 calls)
 0: alias_fork2.gen#1<0>
-gen#1(t##0:mytree.tree, t1##0:mytree.tree, [tmp#0##0:mytree.tree], [tmp#1##0:mytree.tree], [tmp#2##0:mytree.tree], [tmp#3##0:mytree.tree]):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#1(t##0:mytree.tree, t1##0:mytree.tree, [tmp#0##0:mytree.tree], [tmp#1##0:mytree.tree], [tmp#2##0:mytree.tree], [tmp#3##0:mytree.tree])<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("expect t1 - 1000:":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #6 @io:nn:nn
@@ -77,8 +75,7 @@ gen#1(t##0:mytree.tree, t1##0:mytree.tree, [tmp#0##0:mytree.tree], [tmp#1##0:myt
 
 simpleMerge > public (3 calls)
 0: alias_fork2.simpleMerge<0>
-simpleMerge(tl##0:mytree.tree, ?#result##0:mytree.tree):
-  GlobalFlows: <{}; {}>
+simpleMerge(tl##0:mytree.tree, ?#result##0:mytree.tree)<{}; {}>:
   AliasPairs: [(#result##0,tl##0)]
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?tmp#5##0:mytree.tree) @mytree:nn:nn
@@ -294,8 +291,7 @@ entry:
 
 printTree > public {inline} (0 calls)
 0: mytree.printTree<0>
-printTree(t##0:mytree.tree):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+printTree(t##0:mytree.tree)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     mytree.printTree1<0>(~t##0:mytree.tree, "{":wybe.string, ?prefix##1:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @mytree:nn:nn
@@ -304,8 +300,7 @@ printTree(t##0:mytree.tree):
 
 printTree1 > public (3 calls)
 0: mytree.printTree1<0>
-printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: [(prefix##0,prefix##3)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(t##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool)
@@ -418,8 +413,7 @@ if.else:
 
 = > public (7 calls)
 0: mytree.tree.=<0>
-=(#left##0:mytree.tree, #right##0:mytree.tree, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+=(#left##0:mytree.tree, #right##0:mytree.tree, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -461,8 +455,7 @@ if.else:
 
 empty > public {inline} (0 calls)
 0: mytree.tree.empty<0>
-empty(?#result##0:mytree.tree):
-  GlobalFlows: <{}; {}>
+empty(?#result##0:mytree.tree)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(0:mytree.tree, ?#result##0:mytree.tree)
@@ -470,8 +463,7 @@ empty(?#result##0:mytree.tree):
 
 key > public {inline} (0 calls)
 0: mytree.tree.key<0>
-key(#rec##0:mytree.tree, ?#result##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+key(#rec##0:mytree.tree, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -486,8 +478,7 @@ key(#rec##0:mytree.tree, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 
 key > public {inline} (0 calls)
 1: mytree.tree.key<1>
-key(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+key(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -504,8 +495,7 @@ key(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:wybe.int, ?#success##0:
 
 left > public {inline} (0 calls)
 0: mytree.tree.left<0>
-left(#rec##0:mytree.tree, ?#result##0:mytree.tree, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+left(#rec##0:mytree.tree, ?#result##0:mytree.tree, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -520,8 +510,7 @@ left(#rec##0:mytree.tree, ?#result##0:mytree.tree, ?#success##0:wybe.bool):
 
 left > public {inline} (0 calls)
 1: mytree.tree.left<1>
-left(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:mytree.tree, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+left(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:mytree.tree, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -538,8 +527,7 @@ left(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:mytree.tree, ?#success
 
 node > public {inline} (0 calls)
 0: mytree.tree.node<0>
-node(left##0:mytree.tree, key##0:wybe.int, right##0:mytree.tree, ?#result##0:mytree.tree):
-  GlobalFlows: <{}; {}>
+node(left##0:mytree.tree, key##0:wybe.int, right##0:mytree.tree, ?#result##0:mytree.tree)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:mytree.tree) @mytree:nn:nn
@@ -548,8 +536,7 @@ node(left##0:mytree.tree, key##0:wybe.int, right##0:mytree.tree, ?#result##0:myt
     foreign lpvm mutate(~#rec##2:mytree.tree, ?#result##0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~right##0:mytree.tree) @mytree:nn:nn
 node > public {inline} (16 calls)
 1: mytree.tree.node<1>
-node(?left##0:mytree.tree, ?key##0:wybe.int, ?right##0:mytree.tree, #result##0:mytree.tree, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+node(?left##0:mytree.tree, ?key##0:wybe.int, ?right##0:mytree.tree, #result##0:mytree.tree, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -570,8 +557,7 @@ node(?left##0:mytree.tree, ?key##0:wybe.int, ?right##0:mytree.tree, #result##0:m
 
 right > public {inline} (0 calls)
 0: mytree.tree.right<0>
-right(#rec##0:mytree.tree, ?#result##0:mytree.tree, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+right(#rec##0:mytree.tree, ?#result##0:mytree.tree, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -586,8 +572,7 @@ right(#rec##0:mytree.tree, ?#result##0:mytree.tree, ?#success##0:wybe.bool):
 
 right > public {inline} (0 calls)
 1: mytree.tree.right<1>
-right(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:mytree.tree, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+right(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:mytree.tree, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -604,8 +589,7 @@ right(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:mytree.tree, ?#succes
 
 ~= > public {inline} (0 calls)
 0: mytree.tree.~=<0>
-~=(#left##0:mytree.tree, #right##0:mytree.tree, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+~=(#left##0:mytree.tree, #right##0:mytree.tree, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     mytree.tree.=<0>(~#left##0:mytree.tree, ~#right##0:mytree.tree, ?tmp#0##0:wybe.bool) #0

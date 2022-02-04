@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,impure} (0 calls)
 0: unbranch_bug.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     unbranch_bug.gen#3<0>(0:wybe.list(4), 0:wybe.list(4))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @unbranch_bug:nn:nn
@@ -20,24 +19,21 @@ module top-level code > public {inline,impure} (0 calls)
 
 gen#1 > {inline} (1 calls)
 0: unbranch_bug.gen#1<0>
-gen#1([tmp#0##0:wybe.list(4)], [tmp#1##0:wybe.list(4)]):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#1([tmp#0##0:wybe.list(4)], [tmp#1##0:wybe.list(4)])<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
 
 
 gen#2 > {inline} (1 calls)
 0: unbranch_bug.gen#2<0>
-gen#2([tmp#0##0:wybe.list(4)], [tmp#1##0:wybe.list(4)]):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#2([tmp#0##0:wybe.list(4)], [tmp#1##0:wybe.list(4)])<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
 
 
 gen#3 > (2 calls)
 0: unbranch_bug.gen#3<0>
-gen#3(tmp#0##0:wybe.list(4), tmp#1##0:wybe.list(4)):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#3(tmp#0##0:wybe.list(4), tmp#1##0:wybe.list(4))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool)

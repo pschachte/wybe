@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: io_flow_ok.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("hello world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #6 @io:nn:nn
@@ -45,8 +44,7 @@ module top-level code > public {impure} (0 calls)
 
 aok > {inline} (5 calls)
 0: io_flow_ok.aok<0>
-aok():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+aok()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("hello world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @io:nn:nn
@@ -57,8 +55,7 @@ aok():
 
 unknown > {noinline} (3 calls)
 0: io_flow_ok.unknown<0>
-unknown(?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+unknown(?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)

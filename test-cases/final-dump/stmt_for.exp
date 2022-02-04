@@ -40,8 +40,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: stmt_for.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("single_generator:":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #26 @io:nn:nn
@@ -113,8 +112,7 @@ module top-level code > public {impure} (0 calls)
 
 gen#1 > (2 calls)
 0: stmt_for.gen#1<0>
-gen#1(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.list(wybe.int), tmp#3##0:wybe.list(wybe.int), tmp#4##0:wybe.list(wybe.int), tmp#5##0:wybe.list(wybe.int), tmp#6##0:wybe.list(wybe.int), tmp#7##0:wybe.list(wybe.int), tmp#8##0:wybe.list(wybe.int), tmp#9##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), y##0:wybe.list(wybe.int)):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#1(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.list(wybe.int), tmp#3##0:wybe.list(wybe.int), tmp#4##0:wybe.list(wybe.int), tmp#5##0:wybe.list(wybe.int), tmp#6##0:wybe.list(wybe.int), tmp#7##0:wybe.list(wybe.int), tmp#8##0:wybe.list(wybe.int), tmp#9##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), y##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#8##0:wybe.int, 0:wybe.int, ?tmp#13##0:wybe.bool)
@@ -144,8 +142,7 @@ gen#1(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.
 
 gen#10 > (2 calls)
 0: stmt_for.gen#10<0>
-gen#10(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.list(wybe.int), tmp#3##0:wybe.list(wybe.int), tmp#4##0:wybe.list(wybe.int), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int)):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#10(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.list(wybe.int), tmp#3##0:wybe.list(wybe.int), tmp#4##0:wybe.list(wybe.int), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
@@ -171,8 +168,7 @@ gen#10(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe
 
 gen#11 > (3 calls)
 0: stmt_for.gen#11<0>
-gen#11(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.list(wybe.int), tmp#3##0:wybe.list(wybe.int), tmp#4##0:wybe.list(wybe.int), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int)):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#11(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.list(wybe.int), tmp#3##0:wybe.list(wybe.int), tmp#4##0:wybe.list(wybe.int), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
@@ -199,8 +195,7 @@ gen#11(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe
 
 gen#12 > (2 calls)
 0: stmt_for.gen#12<0>
-gen#12(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.list(wybe.int), tmp#3##0:wybe.list(wybe.int), tmp#4##0:wybe.list(wybe.int), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int)):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#12(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.list(wybe.int), tmp#3##0:wybe.list(wybe.int), tmp#4##0:wybe.list(wybe.int), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
@@ -226,8 +221,7 @@ gen#12(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe
 
 gen#13 > (2 calls)
 0: stmt_for.gen#13<0>
-gen#13(tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#13(tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     stmt_for.int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:stmt_for.int_sequence, ~tmp#0##0:stmt_for.int_sequence, ?tmp#2##0:wybe.bool) #0 @stmt_for:nn:nn
@@ -245,8 +239,7 @@ gen#13(tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence):
 
 gen#14 > (2 calls)
 0: stmt_for.gen#14<0>
-gen#14(tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#14(tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     stmt_for.int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:stmt_for.int_sequence, ~tmp#0##0:stmt_for.int_sequence, ?tmp#2##0:wybe.bool) #0 @stmt_for:nn:nn
@@ -264,8 +257,7 @@ gen#14(tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence):
 
 gen#2 > (2 calls)
 0: stmt_for.gen#2<0>
-gen#2(tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+gen#2(tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     stmt_for.int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:stmt_for.int_sequence, ~tmp#0##0:stmt_for.int_sequence, ?tmp#3##0:wybe.bool) #0 @stmt_for:nn:nn
@@ -287,8 +279,7 @@ gen#2(tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence, ?#success#
 
 gen#3 > (2 calls)
 0: stmt_for.gen#3<0>
-gen#3(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.list(wybe.int), tmp#3##0:wybe.list(wybe.int), tmp#4##0:wybe.list(wybe.int), tmp#5##0:wybe.list(wybe.int), tmp#6##0:wybe.list(wybe.int), tmp#7##0:wybe.list(wybe.int), tmp#8##0:wybe.list(wybe.int), tmp#9##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), y##0:wybe.list(wybe.int)):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#3(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.list(wybe.int), tmp#3##0:wybe.list(wybe.int), tmp#4##0:wybe.list(wybe.int), tmp#5##0:wybe.list(wybe.int), tmp#6##0:wybe.list(wybe.int), tmp#7##0:wybe.list(wybe.int), tmp#8##0:wybe.list(wybe.int), tmp#9##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int), y##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#8##0:wybe.int, 0:wybe.int, ?tmp#13##0:wybe.bool)
@@ -318,8 +309,7 @@ gen#3(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.
 
 gen#4 > (2 calls)
 0: stmt_for.gen#4<0>
-gen#4(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.list(wybe.int), tmp#3##0:wybe.list(wybe.int), tmp#4##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int)):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#4(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.list(wybe.int), tmp#3##0:wybe.list(wybe.int), tmp#4##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#4##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool)
@@ -339,8 +329,7 @@ gen#4(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.
 
 gen#5 > (2 calls)
 0: stmt_for.gen#5<0>
-gen#5(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.list(wybe.int), tmp#3##0:wybe.list(wybe.int), tmp#4##0:wybe.list(wybe.int), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int)):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#5(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.list(wybe.int), tmp#3##0:wybe.list(wybe.int), tmp#4##0:wybe.list(wybe.int), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
@@ -366,8 +355,7 @@ gen#5(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.
 
 gen#6 > (2 calls)
 0: stmt_for.gen#6<0>
-gen#6(tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#6(tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     stmt_for.int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:stmt_for.int_sequence, ~tmp#0##0:stmt_for.int_sequence, ?tmp#2##0:wybe.bool) #0 @stmt_for:nn:nn
@@ -385,8 +373,7 @@ gen#6(tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence):
 
 gen#7 > (2 calls)
 0: stmt_for.gen#7<0>
-gen#7(tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#7(tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     stmt_for.int_sequence.[|]<0>(?i##0:wybe.int, ?tmp#0##1:stmt_for.int_sequence, ~tmp#0##0:stmt_for.int_sequence, ?tmp#2##0:wybe.bool) #0 @stmt_for:nn:nn
@@ -404,8 +391,7 @@ gen#7(tmp#0##0:stmt_for.int_sequence, tmp#1##0:stmt_for.int_sequence):
 
 gen#8 > (3 calls)
 0: stmt_for.gen#8<0>
-gen#8(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.list(wybe.int), tmp#3##0:wybe.list(wybe.int), tmp#4##0:wybe.list(wybe.int), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int)):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#8(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.list(wybe.int), tmp#3##0:wybe.list(wybe.int), tmp#4##0:wybe.list(wybe.int), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
@@ -432,8 +418,7 @@ gen#8(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.
 
 gen#9 > (3 calls)
 0: stmt_for.gen#9<0>
-gen#9(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.list(wybe.int), tmp#3##0:wybe.list(wybe.int), tmp#4##0:wybe.list(wybe.int), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int)):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#9(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.list(wybe.int), tmp#3##0:wybe.list(wybe.int), tmp#4##0:wybe.list(wybe.int), tmp#5##0:wybe.list(wybe.int), x##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
@@ -460,8 +445,7 @@ gen#9(tmp#0##0:wybe.list(wybe.int), tmp#1##0:wybe.list(wybe.int), tmp#2##0:wybe.
 
 irange > public (2 calls)
 0: stmt_for.irange<0>
-irange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_for.int_sequence):
-  GlobalFlows: <{}; {}>
+irange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_for.int_sequence)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_slt(stride##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @int:nn:nn
@@ -484,8 +468,7 @@ irange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_
 
 multiple_generator > public (1 calls)
 0: stmt_for.multiple_generator<0>
-multiple_generator():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+multiple_generator()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#14##0:wybe.list(T)) @list:nn:nn
@@ -511,8 +494,7 @@ multiple_generator():
 
 semi_det_for_loop > public (0 calls)
 0: stmt_for.semi_det_for_loop<0>
-semi_det_for_loop(?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+semi_det_for_loop(?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     stmt_for.xrange<0>(0:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#1##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
@@ -521,8 +503,7 @@ semi_det_for_loop(?#success##0:wybe.bool):
 
 shortest_generator_termination > public (1 calls)
 0: stmt_for.shortest_generator_termination<0>
-shortest_generator_termination():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+shortest_generator_termination()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#14##0:wybe.list(T)) @list:nn:nn
@@ -548,8 +529,7 @@ shortest_generator_termination():
 
 single_generator > public (1 calls)
 0: stmt_for.single_generator<0>
-single_generator():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+single_generator()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#8##0:wybe.list(T)) @list:nn:nn
@@ -566,8 +546,7 @@ single_generator():
 
 using_break > public (1 calls)
 0: stmt_for.using_break<0>
-using_break():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+using_break()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T)) @list:nn:nn
@@ -587,8 +566,7 @@ using_break():
 
 using_irange > public (1 calls)
 0: stmt_for.using_irange<0>
-using_irange():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+using_irange()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     stmt_for.irange<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#1##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
@@ -597,8 +575,7 @@ using_irange():
 
 using_irange_reverse > public (1 calls)
 0: stmt_for.using_irange_reverse<0>
-using_irange_reverse():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+using_irange_reverse()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     stmt_for.irange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp#1##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
@@ -607,8 +584,7 @@ using_irange_reverse():
 
 using_next > public (1 calls)
 0: stmt_for.using_next<0>
-using_next():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+using_next()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T)) @list:nn:nn
@@ -628,8 +604,7 @@ using_next():
 
 using_unless > public (1 calls)
 0: stmt_for.using_unless<0>
-using_unless():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+using_unless()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T)) @list:nn:nn
@@ -649,8 +624,7 @@ using_unless():
 
 using_until > public (1 calls)
 0: stmt_for.using_until<0>
-using_until():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+using_until()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T)) @list:nn:nn
@@ -670,8 +644,7 @@ using_until():
 
 using_when > public (1 calls)
 0: stmt_for.using_when<0>
-using_when():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+using_when()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T)) @list:nn:nn
@@ -691,8 +664,7 @@ using_when():
 
 using_while > public (1 calls)
 0: stmt_for.using_while<0>
-using_while():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+using_while()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T)) @list:nn:nn
@@ -712,8 +684,7 @@ using_while():
 
 using_xrange > public (1 calls)
 0: stmt_for.using_xrange<0>
-using_xrange():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+using_xrange()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     stmt_for.xrange<0>(1:wybe.int, 1:wybe.int, 10:wybe.int, ?tmp#1##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
@@ -722,8 +693,7 @@ using_xrange():
 
 using_xrange_reverse > public (1 calls)
 0: stmt_for.using_xrange_reverse<0>
-using_xrange_reverse():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+using_xrange_reverse()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     stmt_for.xrange<0>(10:wybe.int, -1:wybe.int, 1:wybe.int, ?tmp#1##0:stmt_for.int_sequence) #0 @stmt_for:nn:nn
@@ -732,8 +702,7 @@ using_xrange_reverse():
 
 xrange > public (3 calls)
 0: stmt_for.xrange<0>
-xrange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_for.int_sequence):
-  GlobalFlows: <{}; {}>
+xrange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_for.int_sequence)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?tmp#4##0:stmt_for.int_sequence) @stmt_for:nn:nn
@@ -1800,8 +1769,7 @@ entry:
 
 = > public {inline} (1 calls)
 0: stmt_for.int_sequence.=<0>
-=(#left##0:stmt_for.int_sequence, #right##0:stmt_for.int_sequence, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+=(#left##0:stmt_for.int_sequence, #right##0:stmt_for.int_sequence, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#start##0:wybe.int) @stmt_for:nn:nn
@@ -1829,8 +1797,7 @@ entry:
 
 [|] > public (0 calls)
 0: stmt_for.int_sequence.[|]<0>
-[|](?value##0:wybe.int, ?rest##0:stmt_for.int_sequence, current##0:stmt_for.int_sequence, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+[|](?value##0:wybe.int, ?rest##0:stmt_for.int_sequence, current##0:stmt_for.int_sequence, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(current##0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?s##0:wybe.int) @stmt_for:nn:nn
@@ -1866,15 +1833,13 @@ entry:
 
 end > public {inline} (0 calls)
 0: stmt_for.int_sequence.end<0>
-end(#rec##0:stmt_for.int_sequence, ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+end(#rec##0:stmt_for.int_sequence, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:stmt_for.int_sequence, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @stmt_for:nn:nn
 end > public {inline} (0 calls)
 1: stmt_for.int_sequence.end<1>
-end(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:wybe.int):
-  GlobalFlows: <{}; {}>
+end(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @stmt_for:nn:nn
@@ -1882,8 +1847,7 @@ end(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:wyb
 
 gen#1 > (2 calls)
 0: stmt_for.int_sequence.gen#1<0>
-gen#1([current##0:stmt_for.int_sequence], en##0:wybe.int, s##0:wybe.int, st##0:wybe.int, ?value##0:wybe.int, ?rest##0:stmt_for.int_sequence, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+gen#1([current##0:stmt_for.int_sequence], en##0:wybe.int, s##0:wybe.int, st##0:wybe.int, ?value##0:wybe.int, ?rest##0:stmt_for.int_sequence, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(s##0:wybe.int, ?value##0:wybe.int) @stmt_for:nn:nn
@@ -1897,8 +1861,7 @@ gen#1([current##0:stmt_for.int_sequence], en##0:wybe.int, s##0:wybe.int, st##0:w
 
 int_sequence > public {inline} (1 calls)
 0: stmt_for.int_sequence.int_sequence<0>
-int_sequence(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_for.int_sequence):
-  GlobalFlows: <{}; {}>
+int_sequence(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_for.int_sequence)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:stmt_for.int_sequence) @stmt_for:nn:nn
@@ -1907,8 +1870,7 @@ int_sequence(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0
     foreign lpvm mutate(~#rec##2:stmt_for.int_sequence, ?#result##0:stmt_for.int_sequence, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~end##0:wybe.int) @stmt_for:nn:nn
 int_sequence > public {inline} (16 calls)
 1: stmt_for.int_sequence.int_sequence<1>
-int_sequence(?start##0:wybe.int, ?stride##0:wybe.int, ?end##0:wybe.int, #result##0:stmt_for.int_sequence):
-  GlobalFlows: <{}; {}>
+int_sequence(?start##0:wybe.int, ?stride##0:wybe.int, ?end##0:wybe.int, #result##0:stmt_for.int_sequence)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?start##0:wybe.int) @stmt_for:nn:nn
@@ -1918,15 +1880,13 @@ int_sequence(?start##0:wybe.int, ?stride##0:wybe.int, ?end##0:wybe.int, #result#
 
 start > public {inline} (0 calls)
 0: stmt_for.int_sequence.start<0>
-start(#rec##0:stmt_for.int_sequence, ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+start(#rec##0:stmt_for.int_sequence, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @stmt_for:nn:nn
 start > public {inline} (0 calls)
 1: stmt_for.int_sequence.start<1>
-start(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:wybe.int):
-  GlobalFlows: <{}; {}>
+start(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @stmt_for:nn:nn
@@ -1934,15 +1894,13 @@ start(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:w
 
 stride > public {inline} (0 calls)
 0: stmt_for.int_sequence.stride<0>
-stride(#rec##0:stmt_for.int_sequence, ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+stride(#rec##0:stmt_for.int_sequence, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:stmt_for.int_sequence, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @stmt_for:nn:nn
 stride > public {inline} (0 calls)
 1: stmt_for.int_sequence.stride<1>
-stride(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:wybe.int):
-  GlobalFlows: <{}; {}>
+stride(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @stmt_for:nn:nn
@@ -1950,8 +1908,7 @@ stride(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:
 
 ~= > public {inline} (0 calls)
 0: stmt_for.int_sequence.~=<0>
-~=(#left##0:stmt_for.int_sequence, #right##0:stmt_for.int_sequence, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+~=(#left##0:stmt_for.int_sequence, #right##0:stmt_for.int_sequence, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @stmt_for:nn:nn

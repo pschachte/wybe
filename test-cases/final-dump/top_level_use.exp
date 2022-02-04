@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: top_level_use.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<top_level_use.res>>, <<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<top_level_use.res>>, <<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm store(0:wybe.int, <<top_level_use.res>>:wybe.int) @top_level_use:nn:nn

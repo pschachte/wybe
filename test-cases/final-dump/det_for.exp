@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,impure} (0 calls)
 0: det_for.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     det_for.gen#1<0>(0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @det_for:nn:nn
@@ -20,8 +19,7 @@ module top-level code > public {inline,impure} (0 calls)
 
 [|] > {inline} (1 calls)
 0: det_for.[|]<0>
-[|](?value##0:wybe.int, ?next##0:wybe.int, current##0:wybe.int):
-  GlobalFlows: <{}; {}>
+[|](?value##0:wybe.int, ?next##0:wybe.int, current##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(current##0:wybe.int, ?value##0:wybe.int) @det_for:nn:nn
@@ -30,8 +28,7 @@ module top-level code > public {inline,impure} (0 calls)
 
 gen#1 > (2 calls)
 0: det_for.gen#1<0>
-gen#1(tmp#0##0:wybe.int):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#1(tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(tmp#0##0:wybe.int, 1:wybe.int, ?tmp#0##1:wybe.int) @int:nn:nn

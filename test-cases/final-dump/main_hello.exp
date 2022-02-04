@@ -20,8 +20,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: command_line.<0>
-():
-  GlobalFlows: <{<<command_line.argc>>, <<command_line.argv>>, <<wybe.io.io>>}; {<<command_line.argc>>, <<command_line.arguments>>, <<command_line.argv>>, <<command_line.command>>, <<command_line.exit_code>>, <<wybe.io.io>>}>
+()<{<<command_line.argc>>, <<command_line.argv>>, <<wybe.io.io>>}; {<<command_line.argc>>, <<command_line.arguments>>, <<command_line.argv>>, <<command_line.command>>, <<command_line.exit_code>>, <<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(1,(wybe.array.[|]<0>,fromList [NonAliasedParamCond 2 []]))]
@@ -46,8 +45,7 @@ module top-level code > public {impure} (0 calls)
 
 set_exit_code > public {inline} (0 calls)
 0: command_line.set_exit_code<0>
-set_exit_code(code##0:wybe.int):
-  GlobalFlows: <{<<command_line.exit_code>>}; {<<command_line.exit_code>>}>
+set_exit_code(code##0:wybe.int)<{<<command_line.exit_code>>}; {<<command_line.exit_code>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm store(~code##0:wybe.int, <<command_line.exit_code>>:wybe.int) @command_line:nn:nn
@@ -146,8 +144,7 @@ entry:
 
 module top-level code > public {impure} (0 calls)
 0: main_hello.<0>
-():
-  GlobalFlows: <{<<command_line.arguments>>, <<command_line.command>>, <<command_line.exit_code>>, <<wybe.io.io>>}; {<<command_line.arguments>>, <<command_line.command>>, <<command_line.exit_code>>, <<wybe.io.io>>}>
+()<{<<command_line.arguments>>, <<command_line.command>>, <<command_line.exit_code>>, <<wybe.io.io>>}; {<<command_line.arguments>>, <<command_line.command>>, <<command_line.exit_code>>, <<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm store(42:wybe.int, <<command_line.exit_code>>:wybe.int) @command_line:nn:nn

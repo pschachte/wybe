@@ -143,28 +143,28 @@ compileProc proc procID =
         let proto = procProto proc
         let procName = procProtoName proto
         let params = procProtoParams proto
-        modify (\st -> st {nextCallSiteID = (procCallSiteCount proc)})
+        modify (\st -> st {nextCallSiteID=procCallSiteCount proc})
         logClause $ "--------------\nCompiling proc " ++ show proto
         mapM_ (nextVar . paramName) $ List.filter (flowsIn . paramFlow) params
         finishStmt
         startVars <- getCurrNumbering
         compiled <- compileBody body params Det
-        logClause $ "Compiled to:"  ++ showBlock 4 compiled
+        logClause $ "Compiled to  :"  ++ showBlock 4 compiled
         endVars <- getCurrNumbering
-        logClause $ "  startVars: " ++ show startVars
-        logClause $ "  endVars  : " ++ show endVars
-        logClause $ "  params   : " ++ show params
+        logClause $ "  startVars  : " ++ show startVars
+        logClause $ "  endVars    : " ++ show endVars
+        logClause $ "  params     : " ++ show params
         let params' = concatMap (compileParam startVars endVars procName) params
-        let proto' = PrimProto (procProtoName proto) params'
-        logClause $ "  comparams: " ++ show params'
+        let gFlows = makeGlobalFlows (paramType <$> params)
+                   $ procProtoResources proto
+        let proto' = PrimProto (procProtoName proto) params' gFlows
+        logClause $ "  comparams  : " ++ show params'
+        logClause $ "  globalFlows: " ++ show gFlows
         callSiteCount <- gets nextCallSiteID
         mSpec <- lift $ getModule modSpec
         let pSpec = ProcSpec mSpec procName procID Set.empty
-        let gFlows = makeGlobalFlows (paramType <$> params)
-                   $ procProtoResources proto
         return $ proc { procImpln = ProcDefPrim pSpec proto' compiled 
-                                        gFlows emptyProcAnalysis 
-                                        Map.empty,
+                                        emptyProcAnalysis Map.empty,
                         procCallSiteCount = callSiteCount}
 
 
@@ -272,7 +272,7 @@ compileSimpleStmt' call@(ProcCall func _ _ args) = do
             let procID' = trustFromJust ("compileSimpleStmt' for " ++ showStmt 4 call)
                             procID
             let pSpec = ProcSpec mod name procID' generalVersion
-            gFlows <- lift $ procGlobalFlows pSpec
+            gFlows <- lift $ getProcGlobalFlows pSpec
             return $ PrimCall callSiteID pSpec args' gFlows 
         Higher fn -> do
             fn' <- compileHigherFunc fn

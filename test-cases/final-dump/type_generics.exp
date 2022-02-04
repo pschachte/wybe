@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: type_generics.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     type_generics.foo<0>(1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @type_generics:nn:nn
@@ -35,8 +34,7 @@ module top-level code > public {impure} (0 calls)
 
 foo > (12 calls)
 0: type_generics.foo<0>
-foo(x##0:T):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+foo(x##0:T)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#5##0:wybe.list(T)) @list:nn:nn
@@ -51,8 +49,7 @@ foo(x##0:T):
 
 foo2 > (18 calls)
 0: type_generics.foo2<0>
-foo2(x##0:T0, ?y##0:T0, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+foo2(x##0:T0, ?y##0:T0, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#6##0:wybe.list(T)) @list:nn:nn
@@ -72,8 +69,7 @@ foo2(x##0:T0, ?y##0:T0, ?#success##0:wybe.bool):
 
 gen#1 > (2 calls)
 0: type_generics.gen#1<0>
-gen#1([tmp#0##0:wybe.bool], [x##0:wybe.float]):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#1([tmp#0##0:wybe.bool], [x##0:wybe.float])<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     type_generics.foo2<0>(1:wybe.int, ?y##0:wybe.int, ?tmp#6##0:wybe.bool) #0 @type_generics:nn:nn
@@ -92,8 +88,7 @@ gen#1([tmp#0##0:wybe.bool], [x##0:wybe.float]):
 
 gen#2 > (2 calls)
 0: type_generics.gen#2<0>
-gen#2([i##0:wybe.int], [tmp#0##0:wybe.bool], [x##0:wybe.float]):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#2([i##0:wybe.int], [tmp#0##0:wybe.bool], [x##0:wybe.float])<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     type_generics.foo2<0>(1.0:wybe.float, ?fx##0:wybe.float, ?tmp#5##0:wybe.bool) #0 @type_generics:nn:nn
@@ -112,8 +107,7 @@ gen#2([i##0:wybe.int], [tmp#0##0:wybe.bool], [x##0:wybe.float]):
 
 gen#3 > (2 calls)
 0: type_generics.gen#3<0>
-gen#3([f##0:wybe.float], [i##0:wybe.int], [tmp#0##0:wybe.bool], [x##0:wybe.float]):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#3([f##0:wybe.float], [i##0:wybe.int], [tmp#0##0:wybe.bool], [x##0:wybe.float])<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     type_generics.foo2<0>(1.0:wybe.float, ?x##1:wybe.float, ?tmp#4##0:wybe.bool) #0 @type_generics:nn:nn
@@ -132,8 +126,7 @@ gen#3([f##0:wybe.float], [i##0:wybe.int], [tmp#0##0:wybe.bool], [x##0:wybe.float
 
 gen#4 > (2 calls)
 0: type_generics.gen#4<0>
-gen#4([f##0:wybe.float], [i##0:wybe.int], [tmp#0##0:wybe.bool], [x##0:wybe.float]):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#4([f##0:wybe.float], [i##0:wybe.int], [tmp#0##0:wybe.bool], [x##0:wybe.float])<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     type_generics.foo2<0>('a':wybe.char, ?z##0:wybe.char, ?tmp#3##0:wybe.bool) #0 @type_generics:nn:nn
@@ -152,8 +145,7 @@ gen#4([f##0:wybe.float], [i##0:wybe.int], [tmp#0##0:wybe.bool], [x##0:wybe.float
 
 gen#5 > (2 calls)
 0: type_generics.gen#5<0>
-gen#5([f##0:wybe.float], [i##0:wybe.int], [tmp#0##0:wybe.bool], [x##0:wybe.float]):
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#5([f##0:wybe.float], [i##0:wybe.int], [tmp#0##0:wybe.bool], [x##0:wybe.float])<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     type_generics.foo2<0>(0:wybe.bool, ?b##0:wybe.bool, ?tmp#2##0:wybe.bool) #1 @type_generics:nn:nn

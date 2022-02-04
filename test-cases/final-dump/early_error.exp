@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: early_error.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print_string<0>("should print this":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @io:nn:nn
@@ -25,8 +24,7 @@ module top-level code > public {impure} (0 calls)
 
 my_error > {terminal,inline,semipure} (1 calls)
 0: early_error.my_error<0>
-my_error(msg##0:wybe.string):
-  GlobalFlows: <{}; {}>
+my_error(msg##0:wybe.string)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign c {impure} puts(~msg##0:wybe.string) @early_error:nn:nn

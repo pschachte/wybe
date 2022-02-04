@@ -27,8 +27,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: anon_field.<0>
-():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?tmp#21##0:anon_field) @anon_field:nn:nn
@@ -54,8 +53,7 @@ module top-level code > public {impure} (0 calls)
 
 = > public (7 calls)
 0: anon_field.=<0>
-=(#left##0:anon_field, #right##0:anon_field, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+=(#left##0:anon_field, #right##0:anon_field, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#left##0:wybe.int, 3:wybe.int, ?tmp#13##0:wybe.int)
@@ -133,8 +131,7 @@ module top-level code > public {impure} (0 calls)
 
 bar > public {inline} (3 calls)
 0: anon_field.bar<0>
-bar(bar#1##0:wybe.int, ?#result##0:anon_field):
-  GlobalFlows: <{}; {}>
+bar(bar#1##0:wybe.int, ?#result##0:anon_field)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:anon_field) @anon_field:nn:nn
@@ -142,8 +139,7 @@ bar(bar#1##0:wybe.int, ?#result##0:anon_field):
     foreign llvm or(~#rec##1:anon_field, 1:wybe.int, ?#result##0:anon_field) @anon_field:nn:nn
 bar > public {inline} (7 calls)
 1: anon_field.bar<1>
-bar(?bar#1##0:wybe.int, #result##0:anon_field, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+bar(?bar#1##0:wybe.int, #result##0:anon_field, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -161,8 +157,7 @@ bar(?bar#1##0:wybe.int, #result##0:anon_field, ?#success##0:wybe.bool):
 
 baz > public {inline} (5 calls)
 0: anon_field.baz<0>
-baz(field##0:wybe.int, ?#result##0:anon_field):
-  GlobalFlows: <{}; {}>
+baz(field##0:wybe.int, ?#result##0:anon_field)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:anon_field) @anon_field:nn:nn
@@ -170,8 +165,7 @@ baz(field##0:wybe.int, ?#result##0:anon_field):
     foreign llvm or(~#rec##1:anon_field, 2:wybe.int, ?#result##0:anon_field) @anon_field:nn:nn
 baz > public {inline} (5 calls)
 1: anon_field.baz<1>
-baz(?field##0:wybe.int, #result##0:anon_field, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+baz(?field##0:wybe.int, #result##0:anon_field, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -189,8 +183,7 @@ baz(?field##0:wybe.int, #result##0:anon_field, ?#success##0:wybe.bool):
 
 field > {inline} (5 calls)
 0: anon_field.field<0>
-field(#rec##0:anon_field, ?#result##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+field(#rec##0:anon_field, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -206,8 +199,7 @@ field(#rec##0:anon_field, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 
 field > {inline} (0 calls)
 1: anon_field.field<1>
-field(#rec##0:anon_field, ?#rec##1:anon_field, #field##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+field(#rec##0:anon_field, ?#rec##1:anon_field, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -225,8 +217,7 @@ field(#rec##0:anon_field, ?#rec##1:anon_field, #field##0:wybe.int, ?#success##0:
 
 foo > public {inline} (14 calls)
 0: anon_field.foo<0>
-foo(foo#1##0:wybe.int, foo#2##0:wybe.bool, i##0:wybe.int, ?#result##0:anon_field):
-  GlobalFlows: <{}; {}>
+foo(foo#1##0:wybe.int, foo#2##0:wybe.bool, i##0:wybe.int, ?#result##0:anon_field)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:anon_field) @anon_field:nn:nn
@@ -235,8 +226,7 @@ foo(foo#1##0:wybe.int, foo#2##0:wybe.bool, i##0:wybe.int, ?#result##0:anon_field
     foreign lpvm mutate(~#rec##2:anon_field, ?#result##0:anon_field, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~i##0:wybe.int) @anon_field:nn:nn
 foo > public {inline} (20 calls)
 1: anon_field.foo<1>
-foo(?foo#1##0:wybe.int, ?foo#2##0:wybe.bool, ?i##0:wybe.int, #result##0:anon_field, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+foo(?foo#1##0:wybe.int, ?foo#2##0:wybe.bool, ?i##0:wybe.int, #result##0:anon_field, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -258,8 +248,7 @@ foo(?foo#1##0:wybe.int, ?foo#2##0:wybe.bool, ?i##0:wybe.int, #result##0:anon_fie
 
 gen#1 > (2 calls)
 0: anon_field.gen#1<0>
-gen#1():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?tmp#20##0:anon_field) @anon_field:nn:nn
@@ -283,8 +272,7 @@ gen#1():
 
 gen#2 > (3 calls)
 0: anon_field.gen#2<0>
-gen#2():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#2()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?tmp#18##0:anon_field) @anon_field:nn:nn
@@ -311,8 +299,7 @@ gen#2():
 
 gen#3 > (2 calls)
 0: anon_field.gen#3<0>
-gen#3():
-  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
+gen#3()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?tmp#15##0:anon_field) @anon_field:nn:nn
@@ -340,8 +327,7 @@ gen#3():
 
 i > {inline} (5 calls)
 0: anon_field.i<0>
-i(#rec##0:anon_field, ?#result##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+i(#rec##0:anon_field, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -357,8 +343,7 @@ i(#rec##0:anon_field, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 
 i > {inline} (0 calls)
 1: anon_field.i<1>
-i(#rec##0:anon_field, ?#rec##1:anon_field, #field##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+i(#rec##0:anon_field, ?#rec##1:anon_field, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -376,8 +361,7 @@ i(#rec##0:anon_field, ?#rec##1:anon_field, #field##0:wybe.int, ?#success##0:wybe
 
 ~= > public {inline} (0 calls)
 0: anon_field.~=<0>
-~=(#left##0:anon_field, #right##0:anon_field, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+~=(#left##0:anon_field, #right##0:anon_field, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     anon_field.=<0>(~#left##0:anon_field, ~#right##0:anon_field, ?tmp#0##0:wybe.bool) #0
@@ -894,8 +878,7 @@ entry:
 
 = > public {inline} (1 calls)
 0: anon_field.quux.=<0>
-=(#left##0:anon_field.quux, #right##0:anon_field.quux, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+=(#left##0:anon_field.quux, #right##0:anon_field.quux, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:anon_field.quux, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#quuz#1##0:wybe.int) @anon_field:nn:nn
@@ -914,15 +897,13 @@ entry:
 
 j > public {inline} (0 calls)
 0: anon_field.quux.j<0>
-j(#rec##0:anon_field.quux, ?#result##0:wybe.int):
-  GlobalFlows: <{}; {}>
+j(#rec##0:anon_field.quux, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:anon_field.quux, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @anon_field:nn:nn
 j > public {inline} (0 calls)
 1: anon_field.quux.j<1>
-j(#rec##0:anon_field.quux, ?#rec##1:anon_field.quux, #field##0:wybe.int):
-  GlobalFlows: <{}; {}>
+j(#rec##0:anon_field.quux, ?#rec##1:anon_field.quux, #field##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:anon_field.quux, ?#rec##1:anon_field.quux, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @anon_field:nn:nn
@@ -930,8 +911,7 @@ j(#rec##0:anon_field.quux, ?#rec##1:anon_field.quux, #field##0:wybe.int):
 
 quuz > public {inline} (0 calls)
 0: anon_field.quux.quuz<0>
-quuz(quuz#1##0:wybe.int, j##0:wybe.int, ?#result##0:anon_field.quux):
-  GlobalFlows: <{}; {}>
+quuz(quuz#1##0:wybe.int, j##0:wybe.int, ?#result##0:anon_field.quux)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:anon_field.quux) @anon_field:nn:nn
@@ -939,8 +919,7 @@ quuz(quuz#1##0:wybe.int, j##0:wybe.int, ?#result##0:anon_field.quux):
     foreign lpvm mutate(~#rec##1:anon_field.quux, ?#result##0:anon_field.quux, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~j##0:wybe.int) @anon_field:nn:nn
 quuz > public {inline} (6 calls)
 1: anon_field.quux.quuz<1>
-quuz(?quuz#1##0:wybe.int, ?j##0:wybe.int, #result##0:anon_field.quux):
-  GlobalFlows: <{}; {}>
+quuz(?quuz#1##0:wybe.int, ?j##0:wybe.int, #result##0:anon_field.quux)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:anon_field.quux, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?quuz#1##0:wybe.int) @anon_field:nn:nn
@@ -949,8 +928,7 @@ quuz(?quuz#1##0:wybe.int, ?j##0:wybe.int, #result##0:anon_field.quux):
 
 ~= > public {inline} (0 calls)
 0: anon_field.quux.~=<0>
-~=(#left##0:anon_field.quux, #right##0:anon_field.quux, ?#success##0:wybe.bool):
-  GlobalFlows: <{}; {}>
+~=(#left##0:anon_field.quux, #right##0:anon_field.quux, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:anon_field.quux, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @anon_field:nn:nn

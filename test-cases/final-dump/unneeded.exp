@@ -11,8 +11,7 @@ AFTER EVERYTHING:
 
 unneeded > {inline} (0 calls)
 0: unneeded.unneeded<0>
-unneeded(x##0:wybe.int, [y##0:wybe.int], ?z##0:wybe.int, q##0:wybe.int, [?q##0:wybe.int]):
-  GlobalFlows: <{}; {}>
+unneeded(x##0:wybe.int, [y##0:wybe.int], ?z##0:wybe.int, q##0:wybe.int, [?q##0:wybe.int])<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(~x##0:wybe.int, 1:wybe.int, ?z##0:wybe.int) @int:nn:nn
