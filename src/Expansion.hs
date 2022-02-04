@@ -147,13 +147,13 @@ addInstr :: Prim -> OptPos -> Expander ()
 addInstr prim pos = do
     -- reassign "CallSiteID" if the given prim is inlined from other proc
     prim' <- case prim of
-        PrimCall _ pspec args -> do
+        PrimCall _ pspec args gFlows -> do
             inliningNow <- gets inlining
             if inliningNow
             then do
                 callSiteID <- gets nextCallSiteID
                 modify (\st -> st {nextCallSiteID = callSiteID + 1})
-                return $ PrimCall callSiteID pspec args
+                return $ PrimCall callSiteID pspec args gFlows
             else
                 return prim
         _ -> return prim
@@ -222,9 +222,9 @@ expandFork var ty bodies = do
 -- fail.
 -- XXX allow this to handle non-primitives with all inputs known by inlining.
 expandPrim :: Prim -> OptPos -> Expander ()
-expandPrim (PrimCall id pspec args) pos = do
+expandPrim (PrimCall id pspec args gFlows) pos = do
     args' <- mapM expandArg args
-    let call' = PrimCall id pspec args'
+    let call' = PrimCall id pspec args' gFlows
     logExpansion $ "  Expand call " ++ show call'
     inliningNow <- gets inlining
     if inliningNow
@@ -255,9 +255,10 @@ expandPrim call@(PrimHigher id fn args) pos = do
     fn' <- expandArg fn
     case fn' of
         ArgProcRef pspec closed _ -> do
-            pspec' <- fromMaybe pspec <$> lift (lift (maybeGetClosureOf pspec))
+            pspec' <- fromMaybe pspec <$> lift (lift $ maybeGetClosureOf pspec)
             logExpansion $ "  As first order call to " ++ show pspec'
-            expandPrim (PrimCall id pspec' $ closed ++ args) pos
+            gFlows <- lift $ lift $ procGlobalFlows pspec
+            expandPrim (PrimCall id pspec' (closed ++ args) gFlows) pos
         _ -> do
             args' <- mapM expandArg args
             logExpansion $ "  As higher call to " ++ show fn'

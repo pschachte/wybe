@@ -25,7 +25,7 @@ AFTER EVERYTHING:
 module top-level code > public {impure} (0 calls)
 0: coordinate.<0>
 ():
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?tmp#7##0:coordinate.Coordinate) @coordinate:nn:nn
@@ -33,23 +33,23 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm mutate(~tmp#8##0:coordinate.Coordinate, ?tmp#9##0:coordinate.Coordinate, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1000:wybe.int) @coordinate:nn:nn
     foreign lpvm mutate(~tmp#9##0:coordinate.Coordinate, ?tmp#21##0:coordinate.Coordinate, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1000:wybe.int) @coordinate:nn:nn
     foreign lpvm {noalias} mutate(~tmp#21##0:coordinate.Coordinate, ?crd1##1:coordinate.Coordinate, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 8000:wybe.int) @coordinate:nn:nn
-    wybe.string.print_string<0>("expect crd1^z=8000: ":wybe.string) #9 @io:nn:nn
+    wybe.string.print_string<0>("expect crd1^z=8000: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #9 @io:nn:nn
     foreign lpvm access(~crd1##1:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @coordinate:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @io:nn:nn
     foreign c print_int(~tmp#2##0:wybe.int, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#19##0:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>("expect crd2^z=1000: ":wybe.string) #10 @io:nn:nn
+    foreign lpvm store(~%tmp#19##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("expect crd2^z=1000: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #10 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#23##0:wybe.phantom) @io:nn:nn
     foreign c print_int(1000:wybe.int, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#24##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#25##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#25##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
 fcopy > public {inline} (1 calls)
 0: coordinate.fcopy<0>
 fcopy(crd1##0:coordinate.Coordinate, ?#result##0:coordinate.Coordinate):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(~crd1##0:coordinate.Coordinate, ?#result##0:coordinate.Coordinate) @coordinate:nn:nn
@@ -150,7 +150,7 @@ entry:
 = > public {inline} (1 calls)
 0: coordinate.Coordinate.=<0>
 =(#left##0:coordinate.Coordinate, #right##0:coordinate.Coordinate, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#x##0:wybe.int) @coordinate:nn:nn
@@ -179,7 +179,7 @@ entry:
 Coordinate > public {inline} (0 calls)
 0: coordinate.Coordinate.Coordinate<0>
 Coordinate(x##0:wybe.int, y##0:wybe.int, z##0:wybe.int, ?#result##0:coordinate.Coordinate):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:coordinate.Coordinate) @coordinate:nn:nn
@@ -189,7 +189,7 @@ Coordinate(x##0:wybe.int, y##0:wybe.int, z##0:wybe.int, ?#result##0:coordinate.C
 Coordinate > public {inline} (10 calls)
 1: coordinate.Coordinate.Coordinate<1>
 Coordinate(?x##0:wybe.int, ?y##0:wybe.int, ?z##0:wybe.int, #result##0:coordinate.Coordinate):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?x##0:wybe.int) @coordinate:nn:nn
@@ -200,14 +200,14 @@ Coordinate(?x##0:wybe.int, ?y##0:wybe.int, ?z##0:wybe.int, #result##0:coordinate
 x > public {inline} (0 calls)
 0: coordinate.Coordinate.x<0>
 x(#rec##0:coordinate.Coordinate, ?#result##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @coordinate:nn:nn
 x > public {inline} (0 calls)
 1: coordinate.Coordinate.x<1>
 x(#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, #field##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @coordinate:nn:nn
@@ -216,14 +216,14 @@ x(#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, #field##0:wybe.
 y > public {inline} (0 calls)
 0: coordinate.Coordinate.y<0>
 y(#rec##0:coordinate.Coordinate, ?#result##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:coordinate.Coordinate, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @coordinate:nn:nn
 y > public {inline} (0 calls)
 1: coordinate.Coordinate.y<1>
 y(#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, #field##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @coordinate:nn:nn
@@ -232,14 +232,14 @@ y(#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, #field##0:wybe.
 z > public {inline} (0 calls)
 0: coordinate.Coordinate.z<0>
 z(#rec##0:coordinate.Coordinate, ?#result##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @coordinate:nn:nn
 z > public {inline} (0 calls)
 1: coordinate.Coordinate.z<1>
 z(#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, #field##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @coordinate:nn:nn
@@ -248,7 +248,7 @@ z(#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, #field##0:wybe.
 ~= > public {inline} (0 calls)
 0: coordinate.Coordinate.~=<0>
 ~=(#left##0:coordinate.Coordinate, #right##0:coordinate.Coordinate, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @coordinate:nn:nn

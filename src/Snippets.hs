@@ -173,8 +173,8 @@ mutate addr0 addr1 offset destructive size startOffset val =
 globalStore :: ResourceSpec -> TypeSpec -> Exp -> Placed Stmt
 globalStore rs ty src =
     Unplaced $ ForeignCall "lpvm" "store" [] 
-      [Unplaced $ Typed (Global $ GlobalResource rs) ty Nothing, 
-       Unplaced src]
+      [Unplaced src,
+       Unplaced $ Typed (Global $ GlobalResource rs) ty Nothing]
 
 
 globalLoad :: ResourceSpec -> TypeSpec -> Exp -> Placed Stmt

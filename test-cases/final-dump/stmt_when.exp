@@ -13,16 +13,16 @@ AFTER EVERYTHING:
 module top-level code > public {inline,impure} (0 calls)
 0: stmt_when.<0>
 ():
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
-    stmt_when.gen#1<0>(10:wybe.int) #0 @stmt_when:nn:nn
+    stmt_when.gen#1<0>(10:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @stmt_when:nn:nn
 
 
 gen#1 > (3 calls)
 0: stmt_when.gen#1<0>
 gen#1(n##0:wybe.int):
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_sgt(n##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool) @int:nn:nn
@@ -30,14 +30,14 @@ gen#1(n##0:wybe.int):
     0:
 
     1:
-        stmt_when.gen#2<0>(~n##0:wybe.int) #1
+        stmt_when.gen#2<0>(~n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1
 
 
 
 gen#2 > (1 calls)
 0: stmt_when.gen#2<0>
 gen#2(n##0:wybe.int):
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
@@ -45,21 +45,21 @@ gen#2(n##0:wybe.int):
     foreign llvm icmp_eq(~tmp#1##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool) @int:nn:nn
     case ~tmp#2##0:wybe.bool of
     0:
-        stmt_when.gen#1<0>(~tmp#0##0:wybe.int) #5 @stmt_when:nn:nn
+        stmt_when.gen#1<0>(~tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #5 @stmt_when:nn:nn
 
     1:
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @io:nn:nn
         foreign c print_int(tmp#0##0:wybe.int, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#12##0:wybe.phantom) @io:nn:nn
-        stmt_when.gen#1<0>(~tmp#0##0:wybe.int) #4 @stmt_when:nn:nn
+        foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        stmt_when.gen#1<0>(~tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @stmt_when:nn:nn
 
 
 
 mod > public {inline} (3 calls)
 0: stmt_when.mod<0>
 mod(x##0:wybe.int, y##0:wybe.int, ?#result##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm urem(~x##0:wybe.int, ~y##0:wybe.int, ?#result##0:wybe.int) @stmt_when:nn:nn

@@ -160,10 +160,8 @@ compileProc proc procID =
         callSiteCount <- gets nextCallSiteID
         mSpec <- lift $ getModule modSpec
         let pSpec = ProcSpec mSpec procName procID Set.empty
-        let gFlows = if any (isResourcefulHigherOrder . paramType) params
-                     then Nothing
-                     else Set.fold collectResourceFlows emptyGlobalFlows 
-                            $ procProtoResources proto
+        let gFlows = makeGlobalFlows (paramType <$> params)
+                   $ procProtoResources proto
         return $ proc { procImpln = ProcDefPrim pSpec proto' compiled 
                                         gFlows emptyProcAnalysis 
                                         Map.empty,
@@ -200,31 +198,8 @@ compileBody stmts params detism = do
                 shouldnt $ "CompileBody of Cond with non-simple test:\n"
                            ++ show tstStmt
         -- XXX There shouldn't be any semidet code here any more
-        call@(ProcCall func SemiDet _ args)
-          | detism == SemiDet -> do
-          logClause $ "Compiling SemiDet tail call " ++ showStmt 4 call
-          args' <- concat <$> mapM (placedApply compileArg) args
-          front <- mapM compileSimpleStmt $ init stmts
-          callSiteID <- gets nextCallSiteID
-          final' <- case func of
-                First maybeMod name procID -> 
-                    return $ Unplaced
-                           $ PrimCall callSiteID
-                             (ProcSpec maybeMod name
-                                       (trustFromJust
-                                        ("compileBody for " ++ showStmt 4 call)
-                                         procID) generalVersion)
-                             (args' ++
-                              [ArgVar (PrimVarName outputStatusName 0) boolType FlowOut
-                               Ordinary False])
-                Higher fn -> do
-                    fn' <- compileHigherFunc fn
-                    return $ Unplaced
-                           $ PrimHigher callSiteID fn'
-                             (args' ++
-                              [ArgVar (PrimVarName outputStatusName 0) boolType FlowOut
-                               Ordinary False])
-          return $ ProcBody (front++[final']) NoFork
+        call@(ProcCall _ SemiDet _ _) -> 
+            shouldnt "compileBody of SemiDet call"
         _ -> do
           prims <- mapM compileSimpleStmt stmts
           end <- closingStmts detism params
@@ -236,41 +211,41 @@ compileCond :: [Placed Prim] -> OptPos -> Exp -> [Placed Stmt]
 compileCond front pos (Typed expr _typ _) thn els params detism =
     compileCond front pos expr thn els params detism
 compileCond front pos expr thn els params detism = do
-          name' <- case expr of
-              Var var ParamIn _ -> Just <$> currVar var Nothing
-              _                 -> return Nothing
-          logClause $ "conditional on " ++ show expr ++ " new name = " ++ show name'
-          beforeTest <- getCurrNumbering
-          thn' <- compileBody thn params detism
-          afterThen <- getCurrNumbering
-          logClause $ "  vars after then: " ++ show afterThen
-          putNumberings beforeTest
-          els' <- compileBody els params detism
-          afterElse <- getCurrNumbering
-          logClause $ "  vars after else: " ++ show afterElse
-          let final = Map.intersectionWith max afterThen afterElse
-          putNumberings final
-          logClause $ "  vars after ite: " ++ show final
-          let thnAssigns = reconcilingAssignments afterThen final params
-          let elsAssigns = reconcilingAssignments afterElse final params
-          case expr of
-              IntValue 0 ->
-                return $ prependToBody front $ appendToBody els' elsAssigns
-              IntValue _ ->
-                return $ prependToBody front $ appendToBody thn' thnAssigns
-              Var _ ParamIn _ ->
-                return $ ProcBody front
-                    $ PrimFork (fromJust name') boolType False
-                    [appendToBody els' elsAssigns, appendToBody thn' thnAssigns]
-              _ ->
-                shouldnt $ "TestBool with invalid argument " ++ show expr
+    name' <- case expr of
+        Var var ParamIn _ -> Just <$> currVar var Nothing
+        _                 -> return Nothing
+    logClause $ "conditional on " ++ show expr ++ " new name = " ++ show name'
+    beforeTest <- getCurrNumbering
+    thn' <- compileBody thn params detism
+    afterThen <- getCurrNumbering
+    logClause $ "  vars after then: " ++ show afterThen
+    putNumberings beforeTest
+    els' <- compileBody els params detism
+    afterElse <- getCurrNumbering
+    logClause $ "  vars after else: " ++ show afterElse
+    let final = Map.intersectionWith max afterThen afterElse
+    putNumberings final
+    logClause $ "  vars after ite: " ++ show final
+    let thnAssigns = reconcilingAssignments afterThen final params
+    let elsAssigns = reconcilingAssignments afterElse final params
+    case expr of
+        IntValue 0 ->
+            return $ prependToBody front $ appendToBody els' elsAssigns
+        IntValue _ ->
+            return $ prependToBody front $ appendToBody thn' thnAssigns
+        Var _ ParamIn _ ->
+            return $ ProcBody front
+                $ PrimFork (fromJust name') boolType False
+                [appendToBody els' elsAssigns, appendToBody thn' thnAssigns]
+        _ ->
+            shouldnt $ "TestBool with invalid argument " ++ show expr
 
 -- |Add the specified statements at the end of the given body
 appendToBody :: ProcBody -> [Placed Prim] -> ProcBody
 appendToBody (ProcBody prims NoFork) after
     = ProcBody (prims++after) NoFork
 appendToBody (ProcBody prims (PrimFork v ty lst bodies)) after
-    = let bodies' = List.map (flip appendToBody after) bodies
+    = let bodies' = List.map (`appendToBody` after) bodies
       in ProcBody prims $ PrimFork v ty lst bodies'
 
 -- |Add the specified statements at the front of the given body
@@ -293,12 +268,12 @@ compileSimpleStmt' call@(ProcCall func _ _ args) = do
     modify (\st -> st {nextCallSiteID = callSiteID + 1})
     args' <- concat <$> mapM (placedApply compileArg) args
     case func of
-        First maybeMod name procID -> 
-            return $ PrimCall callSiteID 
-                        (ProcSpec maybeMod name
-                            (trustFromJust ("compileSimpleStmt' for " ++ showStmt 4 call)
-                            procID) generalVersion)
-                        args'
+        First mod name procID -> do
+            let procID' = trustFromJust ("compileSimpleStmt' for " ++ showStmt 4 call)
+                            procID
+            let pSpec = ProcSpec mod name procID' generalVersion
+            gFlows <- lift $ procGlobalFlows pSpec
+            return $ PrimCall callSiteID pSpec args' gFlows 
         Higher fn -> do
             fn' <- compileHigherFunc fn
             return $ PrimHigher callSiteID fn' args'
@@ -402,16 +377,6 @@ compileParam startVars endVars procName param@(Param name ty flow ftype) =
 -- |A synthetic output parameter carrying the test result
 testOutParam :: Param
 testOutParam = Param outputStatusName boolType ParamOut Ordinary
-
-
--- |Add flows associated with a given resource to a set of GlobalFlows
-collectResourceFlows :: ResourceFlowSpec -> GlobalFlows -> GlobalFlows
-collectResourceFlows (ResourceFlowSpec res flow) gFlows 
-    | isSpecialResource res
-    = gFlows
-    | otherwise 
-    = List.foldr (addGlobalFlow (GlobalResource res)) gFlows
-        $ [FlowIn | flowsIn flow] ++ [FlowOut | flowsOut flow]
 
 
 -- |Log a message, if we are logging clause generation.

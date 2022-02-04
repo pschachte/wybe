@@ -14,19 +14,19 @@ AFTER EVERYTHING:
 module top-level code > public {inline,impure} (0 calls)
 0: numbers.<0>
 ():
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print_string<0>("Numbers has been initialised.":wybe.string) #1 @io:nn:nn
+    wybe.string.print_string<0>("Numbers has been initialised.":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#2##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
 factorial > public (1 calls)
 0: numbers.factorial<0>
 factorial(n##0:wybe.int, ?#result##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_sle(n##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @int:nn:nn
@@ -44,7 +44,7 @@ factorial(n##0:wybe.int, ?#result##0:wybe.int):
 toCelsius > public {inline} (0 calls)
 0: numbers.toCelsius<0>
 toCelsius(f##0:wybe.float, ?#result##0:wybe.float):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm fsub(~f##0:wybe.float, 32.0:wybe.float, ?tmp#1##0:wybe.float) @float:nn:nn

@@ -12,16 +12,16 @@ AFTER EVERYTHING:
 module top-level code > public {inline,impure} (0 calls)
 0: stmt_until.<0>
 ():
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
-    stmt_until.gen#1<0>(10:wybe.int) #0 @stmt_until:nn:nn
+    stmt_until.gen#1<0>(10:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @stmt_until:nn:nn
 
 
 gen#1 > (2 calls)
 0: stmt_until.gen#1<0>
 gen#1(n##0:wybe.int):
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_slt(n##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
@@ -31,8 +31,8 @@ gen#1(n##0:wybe.int):
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io:nn:nn
         foreign c print_int(tmp#5##0:wybe.int, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#8##0:wybe.phantom) @io:nn:nn
-        stmt_until.gen#1<0>(~tmp#5##0:wybe.int) #2 @stmt_until:nn:nn
+        foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        stmt_until.gen#1<0>(~tmp#5##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @stmt_until:nn:nn
 
     1:
 
@@ -41,15 +41,15 @@ gen#1(n##0:wybe.int):
 gen#2 > {inline} (1 calls)
 0: stmt_until.gen#2<0>
 gen#2(n##0:wybe.int):
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @io:nn:nn
     foreign c print_int(tmp#0##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#6##0:wybe.phantom) @io:nn:nn
-    stmt_until.gen#1<0>(~tmp#0##0:wybe.int) #2 @stmt_until:nn:nn
+    foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    stmt_until.gen#1<0>(~tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @stmt_until:nn:nn
 
   LLVM code       :
 

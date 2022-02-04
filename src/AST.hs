@@ -75,7 +75,8 @@ module AST (
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
   maybeGetClosureOf, isClosureProc, isClosureVariant,
-  GlobalFlows, emptyGlobalFlows, showGlobalFlows, addGlobalFlow, globalFlowsUnion, hasGlobalFlow,
+  GlobalFlows(..), emptyGlobalFlows, univGlobalFlows, makeGlobalFlows,
+  addGlobalFlow, hasGlobalFlow, globalFlowsUnion, globalFlowsIntersection, 
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
@@ -95,7 +96,9 @@ module AST (
   genProcName, addImport, doImport, importFromSupermodule, lookupType,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   initialisedResources,
-  addSimpleResource, lookupResource, specialResources, publicResource, resourcefulName,
+  addSimpleResource, lookupResource, 
+  specialResources, specialResourcesSet, isSpecialResource, 
+  publicResource, resourcefulName,
   ProcModifiers(..), defaultProcModifiers, checkProcMods,
   setDetism, setInline, setImpurity, setVariant,
   ProcVariant(..), Inlining(..), Impurity(..), 
@@ -1020,6 +1023,17 @@ specialResources =
         ("call_source_full_location",(callSourceLocation True,cStrType))
         ]
 
+        
+-- | The set of ResourceSpec that correspond to sepcial resources
+specialResourcesSet :: Set ResourceSpec
+specialResourcesSet = Set.map (ResourceSpec []) $ keysSet specialResources
+
+
+-- | Test if ResourceSpec refers to a special resource
+isSpecialResource :: ResourceSpec -> Bool
+isSpecialResource res = res `Set.member` specialResourcesSet
+
+
 callFileName :: Placed Stmt -> Exp
 callFileName pstmt =
     (`StringValue` CString)
@@ -1931,7 +1945,13 @@ procInline = (==Inline) . procInlining
 
 -- | What are the GlobalFLows of the given ProcSpec
 procGlobalFlows :: ProcSpec -> Compiler GlobalFlows
-procGlobalFlows pspec = procImplnGlobalFlows . procImpln <$> getProcDef pspec
+procGlobalFlows pspec = do
+    pDef <- getProcDef pspec
+    case procImpln pDef of
+      ProcDefSrc _ -> 
+            let ProcProto _ params resFlows = procProto pDef
+            in return $ makeGlobalFlows (paramType <$> params) resFlows
+      ProcDefPrim _ _ _ gFlows _ _ -> return gFlows
 
 
 -- | How many static calls to this proc from the same module have we seen?  This
@@ -1942,30 +1962,17 @@ procCallCount proc = Map.foldr (+) 0 $ procCallers proc
 
 -- | What is the Impurity of the given Prim?
 primImpurity :: Prim -> Compiler Impurity
-primImpurity (PrimCall _ pspec _) = procImpurity <$> getProcDef pspec
-primImpurity (PrimHigher _ fn _)
-    = case fn of
-        ArgProcRef pspec _ _ -> procImpurity <$> getProcDef pspec
-        ArgVar _ (HigherOrderType ProcModifiers{modifierImpurity=purity} _) _ _ _
-            -> return purity 
-        _ -> return Pure
-primImpurity (PrimForeign _ _ flags _) =
-    return $ flagsImpurity flags
-
-
--- | What are the GlobalFlows of the given Prim?
-primGlobalFlows :: Prim -> Compiler GlobalFlows
-primGlobalFlows (PrimCall _ pspec _) = procGlobalFlows pspec
-primGlobalFlows (PrimHigher _ (ArgProcRef pspec _ _) _) = procGlobalFlows pspec
-primGlobalFlows (PrimHigher _ arg _) 
-    = return $ if isResourcefulHigherOrder $ argType arg 
-               then Nothing
-               else emptyGlobalFlows
-primGlobalFlows (PrimForeign "lpvm" "load" _ (ArgGlobal info _:_)) 
-    = return $ addGlobalFlow info FlowIn emptyGlobalFlows
-primGlobalFlows (PrimForeign "lpvm" "store" _ (ArgGlobal info _:_)) 
-    = return $ addGlobalFlow info FlowOut emptyGlobalFlows
-primGlobalFlows PrimForeign{} = return emptyGlobalFlows
+primImpurity (PrimCall _ pspec _ _) 
+    = procImpurity <$> getProcDef pspec
+primImpurity (PrimHigher _ (ArgProcRef pspec _ _) _) 
+    = procImpurity <$> getProcDef pspec
+primImpurity (PrimHigher _ ArgVar{argVarType=HigherOrderType 
+                                ProcModifiers{modifierImpurity=purity} _} _)
+    = return purity 
+primImpurity (PrimHigher _ fn _) 
+    = shouldnt $ "primImpurity of" ++ show fn
+primImpurity (PrimForeign _ _ flags _) 
+    = return $ flagsImpurity flags
 
 
 -- | Return the impurity level specified by the given foriegn flags list
@@ -1993,6 +2000,20 @@ flagDetism _ "failing"  = Failure
 flagDetism _ "det"      = Det
 flagDetism _ "semidet"  = SemiDet
 flagDetism detism _     = detism
+
+
+-- | What are the GlobalFlows of the given Prim?
+primGlobalFlows :: Prim -> GlobalFlows
+primGlobalFlows (PrimCall _ _ _ gFlows) = gFlows
+primGlobalFlows (PrimHigher _ arg _) 
+    = if isResourcefulHigherOrder $ argType arg 
+      then univGlobalFlows else emptyGlobalFlows
+primGlobalFlows (PrimForeign "lpvm" "load" _ [ArgGlobal info _, _]) 
+    = addGlobalFlow info FlowIn emptyGlobalFlows
+primGlobalFlows (PrimForeign "lpvm" "store" _ [_, ArgGlobal info _]) 
+    = addGlobalFlow info FlowOut emptyGlobalFlows
+primGlobalFlows PrimForeign{} = emptyGlobalFlows
+
 
 data ProcVariant 
     = RegularProc
@@ -2064,51 +2085,84 @@ data ProcImpln
         procImplnProcSpec :: ProcSpec,
         procImplnProto :: PrimProto,
         procImplnBody :: ProcBody,       -- ^defn in LPVM (clausal) form
-        
         procImplnGlobalFlows :: GlobalFlows,
         procImplnAnalysis :: ProcAnalysis,
         procImplnSpeczBodies :: SpeczProcBodies
     }
-    -- defn in SSA (LLVM) form along with any needed extern definitions
     deriving (Eq,Generic)
 
 
--- |This type represents a set of globals and corresponding flows, with Nothing 
--- representing the universal set.
--- Global flows are used to annotate which global variables are used by a 
--- procedure -- a flow in means the value is `load`ed (read), a flow out means 
--- the value is `store`d (modified) .
-type GlobalFlows = Maybe (Map GlobalInfo (Set PrimFlow))
+-- | Represents a set of globals flowing in and out
+data GlobalFlows 
+    = GlobalFlows {
+        globalFlowsIn :: UnivSet GlobalInfo,
+        -- ^ The set of globals that flow in
+        globalFlowsOut :: UnivSet GlobalInfo
+        -- ^ The set of globals that flow out
+    }
+    deriving (Eq, Ord, Generic)
+
+
+instance Show GlobalFlows where
+    show (GlobalFlows ins outs) =
+        "<" ++ showUnivSet show ins 
+        ++ "; " ++ showUnivSet show outs
+        ++ ">" 
 
 
 -- | An empty set of GlobalFlows
 emptyGlobalFlows :: GlobalFlows
-emptyGlobalFlows = Just Map.empty
+emptyGlobalFlows = GlobalFlows emptyUnivSet emptyUnivSet
 
 
--- | How to show GlobalFlows
-showGlobalFlows :: GlobalFlows -> String
-showGlobalFlows
-    = maybe "everything " 
-    $ showMap "{" ", " "} " ((++"::") . show) simpleShowSet
+-- | The set of all GlobalFlows
+univGlobalFlows :: GlobalFlows 
+univGlobalFlows = GlobalFlows UniversalSet UniversalSet
 
 
--- | Add a flow to a given global. If the global does not exist in the set
--- it is added
+-- | Given a list of Types and a set of ResourceFlowSpecs, make a GlobalFlows.
+-- If any of the TypeSpecs are resourceful higher order, this is the 
+-- univGlobalFlows, otherwise this is derived from the resources and flows
+makeGlobalFlows :: [TypeSpec] -> Set ResourceFlowSpec -> GlobalFlows
+makeGlobalFlows tys resFlows
+    | any isResourcefulHigherOrder tys = univGlobalFlows 
+    | otherwise = Set.fold addGlobalResourceFlows emptyGlobalFlows resFlows
+                
+
+-- |Add flows associated with a given resource to a set of GlobalFlows
+addGlobalResourceFlows :: ResourceFlowSpec -> GlobalFlows -> GlobalFlows
+addGlobalResourceFlows (ResourceFlowSpec res flow) gFlows 
+    | isSpecialResource res = gFlows
+    | otherwise = List.foldr (addGlobalFlow (GlobalResource res)) gFlows
+                $ [FlowIn | flowsIn flow] ++ [FlowOut | flowsOut flow]
+
+
+-- | Add a GlobalInfo to the set of global flows associated with the given flow
 addGlobalFlow :: GlobalInfo -> PrimFlow -> GlobalFlows -> GlobalFlows
-addGlobalFlow info flow gFlows 
-    = Map.insertWith Set.union info (Set.singleton flow) <$> gFlows
-
-
--- | Take the union of two global flow sets
-globalFlowsUnion :: GlobalFlows -> GlobalFlows -> GlobalFlows
-globalFlowsUnion = liftM2 $ Map.unionWith Set.union
+addGlobalFlow info FlowIn gFlows@GlobalFlows{globalFlowsIn=ins} 
+    = gFlows{globalFlowsIn=whenFinite (Set.insert info) ins}
+addGlobalFlow info FlowOut gFlows@GlobalFlows{globalFlowsOut=outs} 
+    = gFlows{globalFlowsOut=whenFinite (Set.insert info) outs}
 
 
 -- | Test if the given flow of a a global exists in the global flow set
 hasGlobalFlow :: GlobalFlows -> PrimFlow -> GlobalInfo -> Bool
-hasGlobalFlow gFlows flow info  
-    = maybe True (maybe False (Set.member flow) . Map.lookup info) gFlows
+hasGlobalFlow gFlows@GlobalFlows{globalFlowsIn=ins} FlowIn info  
+    = USet.member info ins
+hasGlobalFlow gFlows@GlobalFlows{globalFlowsOut=outs} FlowOut info  
+    = USet.member info outs
+
+
+-- | Take the union of the sets of two global flows
+globalFlowsUnion :: GlobalFlows -> GlobalFlows -> GlobalFlows
+globalFlowsUnion (GlobalFlows ins1 outs1) (GlobalFlows ins2 outs2)
+    = GlobalFlows (USet.union ins1 ins2) (USet.union outs1 outs2)
+
+
+-- | Take the intersection of the sets of two global flows
+globalFlowsIntersection :: GlobalFlows -> GlobalFlows -> GlobalFlows
+globalFlowsIntersection (GlobalFlows ins1 outs1) (GlobalFlows ins2 outs2)
+    = GlobalFlows (USet.intersection ins1 ins2) (USet.intersection outs1 outs2)
 
 
 -- |An ID for a parameter of a proc
@@ -2256,7 +2310,7 @@ instance Show ProcImpln where
                             Just body -> showBlock 4 body)
                 |> intercalate "\n"
         in  show pSpec ++ "\n" ++ show proto ++ ":" 
-                    ++ "\n  GlobalFlows: " ++ showGlobalFlows gFlows
+                    ++ "\n  GlobalFlows: " ++ show gFlows
                     ++ show analysis
                     ++ showBlock 4 body ++ speczBodies
 
@@ -3051,7 +3105,7 @@ data PrimVarName =
 -- |A primitive statment, including those that can only appear in a
 --  loop.
 data Prim
-     = PrimCall CallSiteID ProcSpec [PrimArg]
+     = PrimCall CallSiteID ProcSpec [PrimArg] GlobalFlows
      | PrimHigher CallSiteID PrimArg [PrimArg]
      | PrimForeign Ident ProcName [Ident] [PrimArg]
      deriving (Eq,Ord,Generic)
@@ -3089,21 +3143,26 @@ data PrimArg
 
 -- |Returns a list of all arguments to a prim
 primArgs :: Prim -> [PrimArg]
-primArgs (PrimCall _ _ args) = args
+primArgs (PrimCall _ _ args _) = args
 primArgs (PrimHigher _ fn args) = fn:args
 primArgs prim@(PrimForeign _ _ _ args) = args
 
 
 -- |Replace a Prim's args with a list of args
 replacePrimArgs :: Prim -> [PrimArg] -> Prim
-replacePrimArgs (PrimCall id pspec old) new
-    = PrimCall id pspec new
-replacePrimArgs (PrimHigher id oldFn old) new
-    = case new of
-        [] -> shouldnt "replacePrimArgs of higher call with not enough args"
-        (fn:args) -> PrimHigher id fn args
-replacePrimArgs (PrimForeign lang nm flags old) new =
-    PrimForeign lang nm flags new
+replacePrimArgs (PrimCall id pspec _ gFlows) args
+    = PrimCall id pspec args gFlows
+replacePrimArgs (PrimHigher id _ _) []
+    = shouldnt "replacePrimArgs of higher call with not enough args"
+replacePrimArgs (PrimHigher id _ _) (fn:args) 
+    = PrimHigher id fn args
+replacePrimArgs (PrimForeign lang nm flags _) args 
+    = PrimForeign lang nm flags args
+
+-- |Replace a Prim's GlobalFlows with new GlobalFlows
+replaceGlobalFlows :: Prim -> GlobalFlows -> Prim
+replaceGlobalFlows (PrimCall id pspec args _) gFlows = PrimCall id pspec args gFlows
+replaceGlobalFlows prim                       _      = prim
 
 argIsVar :: PrimArg -> Bool
 argIsVar ArgVar{} = True
@@ -3756,8 +3815,9 @@ showPlacedPrim' ind prim pos =
 -- |Show a single primitive statement.
 -- XXX the first argument is unused; can we get rid of it?
 showPrim :: Int -> Prim -> String
-showPrim _ (PrimCall id pspec args) =
+showPrim _ (PrimCall id pspec args globalFlows) =
     show pspec ++ showArguments args
+        ++ (if globalFlows == emptyGlobalFlows then "" else show globalFlows)
         ++ " #" ++ show id
 showPrim _ (PrimHigher id var args) =
     show var ++ showArguments args ++ " #" ++ show id

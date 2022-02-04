@@ -12,7 +12,7 @@ AFTER EVERYTHING:
 module top-level code > public {impure} (0 calls)
 0: exp_simple.<0>
 ():
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @io:nn:nn
@@ -22,21 +22,21 @@ module top-level code > public {impure} (0 calls)
     foreign c putchar('\n':wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @io:nn:nn
     foreign c putchar('h':wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#19##0:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>("hello":wybe.string) #12 @io:nn:nn
+    foreign lpvm store(~%tmp#19##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("hello":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #12 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#24##0:wybe.phantom) @io:nn:nn
     foreign c print_int(3:wybe.int, ~tmp#24##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#25##0:wybe.phantom, ?tmp#26##0:wybe.phantom) @io:nn:nn
     foreign c print_int(1001:wybe.int, ~tmp#26##0:wybe.phantom, ?tmp#30##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#30##0:wybe.phantom, ?tmp#31##0:wybe.phantom) @io:nn:nn
     foreign c print_int(3:wybe.int, ~tmp#31##0:wybe.phantom, ?tmp#34##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#34##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#34##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
 foreign_add > {inline} (1 calls)
 0: exp_simple.foreign_add<0>
 foreign_add(?#result##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(3:wybe.int, ?#result##0:wybe.int) @exp_simple:nn:nn

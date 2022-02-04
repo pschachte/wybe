@@ -12,29 +12,29 @@ AFTER EVERYTHING:
 module top-level code > public {inline,impure} (0 calls)
 0: simple_loop.<0>
 ():
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
-    simple_loop.gen#1<0> #0 @simple_loop:nn:nn
+    simple_loop.gen#1<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @simple_loop:nn:nn
 
 
 gen#1 > (2 calls)
 0: simple_loop.gen#1<0>
 gen#1():
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @io:nn:nn
     foreign c read_char(?c##0:wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, %tmp#2##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
     foreign llvm icmp_ne(c##0:wybe.char, 'a':wybe.char, ?tmp#0##0:wybe.bool) @char:nn:nn
     case ~tmp#0##0:wybe.bool of
     0:
 
     1:
         foreign c putchar(~c##0:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#7##0:wybe.phantom) @io:nn:nn
-        simple_loop.gen#1<0> #3 @simple_loop:nn:nn
+        foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        simple_loop.gen#1<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @simple_loop:nn:nn
 
 
   LLVM code       :

@@ -16,7 +16,7 @@ AFTER EVERYTHING:
 module top-level code > public {impure} (0 calls)
 0: anon_field_variable.<0>
 ():
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?tmp#5##0:anon_field_variable(T)) @anon_field_variable:nn:nn
@@ -27,17 +27,17 @@ module top-level code > public {impure} (0 calls)
     0:
 
     1:
-        wybe.string.print_string<0>("foo":wybe.string) #4 @io:nn:nn
+        wybe.string.print_string<0>("foo":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @io:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#11##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
 
 bar > public {inline} (0 calls)
 0: anon_field_variable.bar<0>
 bar(bar#1##0:wybe.int, field##0:T, bar#3##0:T, ?#result##0:anon_field_variable(T)):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:anon_field_variable(T)) @anon_field_variable:nn:nn
@@ -48,7 +48,7 @@ bar(bar#1##0:wybe.int, field##0:T, bar#3##0:T, ?#result##0:anon_field_variable(T
 bar > public {inline} (0 calls)
 1: anon_field_variable.bar<1>
 bar(?bar#1##0:wybe.int, ?field##0:T, ?bar#3##0:T, #result##0:anon_field_variable(T), ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
@@ -71,7 +71,7 @@ bar(?bar#1##0:wybe.int, ?field##0:T, ?bar#3##0:T, #result##0:anon_field_variable
 field > {inline} (0 calls)
 0: anon_field_variable.field<0>
 field(#rec##0:anon_field_variable(T), ?#result##0:T, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
@@ -88,7 +88,7 @@ field(#rec##0:anon_field_variable(T), ?#result##0:T, ?#success##0:wybe.bool):
 field > {inline} (0 calls)
 1: anon_field_variable.field<1>
 field(#rec##0:anon_field_variable(T), ?#rec##1:anon_field_variable(T), #field##0:T, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
@@ -107,7 +107,7 @@ field(#rec##0:anon_field_variable(T), ?#rec##1:anon_field_variable(T), #field##0
 foo > public {inline} (3 calls)
 0: anon_field_variable.foo<0>
 foo(foo#1##0:T, ?#result##0:anon_field_variable(T)):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:anon_field_variable(T)) @anon_field_variable:nn:nn
@@ -115,7 +115,7 @@ foo(foo#1##0:T, ?#result##0:anon_field_variable(T)):
 foo > public {inline} (3 calls)
 1: anon_field_variable.foo<1>
 foo(?foo#1##0:T, #result##0:anon_field_variable(T), ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)

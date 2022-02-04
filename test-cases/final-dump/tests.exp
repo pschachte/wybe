@@ -30,7 +30,7 @@ AFTER EVERYTHING:
 lookup > public (6 calls)
 0: tests.lookup<0>
 lookup(key##0:wybe.int, map##0:tests.map, ?result##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(map##0:wybe.int, 0:wybe.int, ?tmp#15##0:wybe.bool)
@@ -65,7 +65,7 @@ lookup(key##0:wybe.int, map##0:tests.map, ?result##0:wybe.int, ?#success##0:wybe
 lt > public (1 calls)
 0: tests.lt<0>
 lt(x##0:wybe.int, y##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_slt(~x##0:wybe.int, ~y##0:wybe.int, ?tmp#3##0:wybe.bool) @int:nn:nn
@@ -81,7 +81,7 @@ lt(x##0:wybe.int, y##0:wybe.int, ?#success##0:wybe.bool):
 lt2 > public {inline} (1 calls)
 0: tests.lt2<0>
 lt2(x##0:wybe.int, y##0:wybe.int, ?res##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     tests.lt<0>(~x##0:wybe.int, ~y##0:wybe.int, ?res##0:wybe.bool) #0 @tests:nn:nn
@@ -90,7 +90,7 @@ lt2(x##0:wybe.int, y##0:wybe.int, ?res##0:wybe.bool):
 lt3 > public {inline} (0 calls)
 0: tests.lt3<0>
 lt3(x##0:wybe.int, y##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     tests.lt<0>(~y##0:wybe.int, ~x##0:wybe.int, ?#success##0:wybe.bool) #1 @tests:nn:nn
@@ -208,7 +208,7 @@ entry:
 = > public (9 calls)
 0: tests.map.=<0>
 =(#left##0:tests.map, #right##0:tests.map, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -260,7 +260,7 @@ entry:
 empty > public {inline} (0 calls)
 0: tests.map.empty<0>
 empty(?#result##0:tests.map):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(0:tests.map, ?#result##0:tests.map)
@@ -269,7 +269,7 @@ empty(?#result##0:tests.map):
 key > public {inline} (0 calls)
 0: tests.map.key<0>
 key(#rec##0:tests.map, ?#result##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -285,7 +285,7 @@ key(#rec##0:tests.map, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 key > public {inline} (0 calls)
 1: tests.map.key<1>
 key(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -303,7 +303,7 @@ key(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:wybe.int, ?#success##0:wybe
 left > public {inline} (0 calls)
 0: tests.map.left<0>
 left(#rec##0:tests.map, ?#result##0:tests.map, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -319,7 +319,7 @@ left(#rec##0:tests.map, ?#result##0:tests.map, ?#success##0:wybe.bool):
 left > public {inline} (0 calls)
 1: tests.map.left<1>
 left(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:tests.map, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -337,7 +337,7 @@ left(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:tests.map, ?#success##0:wy
 node > public {inline} (0 calls)
 0: tests.map.node<0>
 node(left##0:tests.map, key##0:wybe.int, value##0:wybe.int, right##0:tests.map, ?#result##0:tests.map):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(32:wybe.int, ?#rec##0:tests.map) @tests:nn:nn
@@ -348,7 +348,7 @@ node(left##0:tests.map, key##0:wybe.int, value##0:wybe.int, right##0:tests.map, 
 node > public {inline} (20 calls)
 1: tests.map.node<1>
 node(?left##0:tests.map, ?key##0:wybe.int, ?value##0:wybe.int, ?right##0:tests.map, #result##0:tests.map, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -372,7 +372,7 @@ node(?left##0:tests.map, ?key##0:wybe.int, ?value##0:wybe.int, ?right##0:tests.m
 right > public {inline} (0 calls)
 0: tests.map.right<0>
 right(#rec##0:tests.map, ?#result##0:tests.map, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -388,7 +388,7 @@ right(#rec##0:tests.map, ?#result##0:tests.map, ?#success##0:wybe.bool):
 right > public {inline} (0 calls)
 1: tests.map.right<1>
 right(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:tests.map, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -406,7 +406,7 @@ right(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:tests.map, ?#success##0:w
 value > public {inline} (0 calls)
 0: tests.map.value<0>
 value(#rec##0:tests.map, ?#result##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -422,7 +422,7 @@ value(#rec##0:tests.map, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 value > public {inline} (0 calls)
 1: tests.map.value<1>
 value(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -440,7 +440,7 @@ value(#rec##0:tests.map, ?#rec##1:tests.map, #field##0:wybe.int, ?#success##0:wy
 ~= > public {inline} (0 calls)
 0: tests.map.~=<0>
 ~=(#left##0:tests.map, #right##0:tests.map, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     tests.map.=<0>(~#left##0:tests.map, ~#right##0:tests.map, ?tmp#0##0:wybe.bool) #0

@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 inc2 > public {inline} (0 calls)
 0: update.inc2<0>
 inc2(x##0:wybe.int, ?#result##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(~x##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int) @int:nn:nn
@@ -21,7 +21,7 @@ inc2(x##0:wybe.int, ?#result##0:wybe.int):
 inc2 > public {inline} (0 calls)
 1: update.inc2<1>
 inc2(?x##0:wybe.int, y##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm sub(~y##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn

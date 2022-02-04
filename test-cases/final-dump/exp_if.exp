@@ -13,18 +13,18 @@ AFTER EVERYTHING:
 module top-level code > public {inline,impure} (0 calls)
 0: exp_if.<0>
 ():
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print_string<0>("expect larger: ":wybe.string) #3 @io:nn:nn
+    wybe.string.print_string<0>("expect larger: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @io:nn:nn
     exp_if.if_test<0>(3:wybe.int, ?tmp#0##0:wybe.string) #1 @exp_if:nn:nn
-    wybe.string.print_string<0>(~tmp#0##0:wybe.string) #4 @io:nn:nn
+    wybe.string.print_string<0>(~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @io:nn:nn
 
 
 if_test > public (1 calls)
 0: exp_if.if_test<0>
 if_test(x##0:wybe.int, ?#result##0:wybe.string):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_sgt(~x##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn

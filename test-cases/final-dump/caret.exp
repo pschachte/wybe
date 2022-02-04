@@ -16,7 +16,7 @@ AFTER EVERYTHING:
 module top-level code > public {impure} (0 calls)
 0: caret.<0>
 ():
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(8,(caret.gen#1<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -30,18 +30,18 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm mutate(~tmp#21##0:caret.region, ?tmp#22##0:caret.region, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:position.position) @caret:nn:nn
     foreign lpvm mutate(~tmp#22##0:caret.region, ?tmp#23##0:caret.region, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp#2##0:position.position) @caret:nn:nn
     foreign lpvm access(~tmp#2##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?ten##0:wybe.int) @position:nn:nn
-    wybe.string.print_string<0>("ten = ":wybe.string) #11 @io:nn:nn
+    wybe.string.print_string<0>("ten = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #11 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#30##0:wybe.phantom) @io:nn:nn
     foreign c print_int(~ten##0:wybe.int, ~tmp#30##0:wybe.phantom, ?tmp#31##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#31##0:wybe.phantom, ?tmp#32##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#32##0:wybe.phantom) @io:nn:nn
-    caret.gen#1<0>[410bae77d3](~tmp#23##0:caret.region, _:caret.region, _:position.position, _:position.position) #8
+    foreign lpvm store(~%tmp#32##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    caret.gen#1<0>[410bae77d3](~tmp#23##0:caret.region, _:caret.region, _:position.position, _:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #8
 
 
 expand_region > public (0 calls)
 0: caret.expand_region<0>
 expand_region(reg##0:caret.region, ?reg##4:caret.region, point##0:position.position):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: [(reg##0,reg##4)]
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign lpvm access(reg##0:caret.region, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:position.position) @caret:nn:nn
@@ -69,7 +69,7 @@ expand_region(reg##0:caret.region, ?reg##4:caret.region, point##0:position.posit
 gen#1 > (2 calls)
 0: caret.gen#1<0>[410bae77d3]
 gen#1(reg##0:caret.region, [tmp#0##0:caret.region], [tmp#1##0:position.position], [tmp#2##0:position.position]):
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign lpvm access(~reg##0:caret.region, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:position.position) @caret:nn:nn
@@ -77,22 +77,22 @@ gen#1(reg##0:caret.region, [tmp#0##0:caret.region], [tmp#1##0:position.position]
     foreign llvm add(~tmp#5##0:wybe.int, 1:wybe.int, ?tmp#5##1:wybe.int) @int:nn:nn
     foreign lpvm {noalias} mutate(~tmp#6##0:position.position, ?tmp#6##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#5##1:wybe.int) @position:nn:nn
     foreign lpvm access(~tmp#6##1:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?ten##0:wybe.int) @position:nn:nn
-    wybe.string.print_string<0>("now ten = ":wybe.string) #9 @io:nn:nn
+    wybe.string.print_string<0>("now ten = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #9 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @io:nn:nn
     foreign c print_int(~ten##0:wybe.int, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#23##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#23##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
  [410bae77d3] [NonAliasedParam 0] :
     foreign lpvm access(~reg##0:caret.region, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:position.position) @caret:nn:nn
     foreign lpvm access(tmp#6##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.int) @position:nn:nn
     foreign llvm add(~tmp#5##0:wybe.int, 1:wybe.int, ?tmp#5##1:wybe.int) @int:nn:nn
     foreign lpvm {noalias} mutate(~tmp#6##0:position.position, ?tmp#6##1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#5##1:wybe.int) @position:nn:nn
     foreign lpvm access(~tmp#6##1:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?ten##0:wybe.int) @position:nn:nn
-    wybe.string.print_string<0>("now ten = ":wybe.string) #9 @io:nn:nn
+    wybe.string.print_string<0>("now ten = ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #9 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @io:nn:nn
     foreign c print_int(~ten##0:wybe.int, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#23##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#23##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 
@@ -378,7 +378,7 @@ entry:
 = > public {inline} (1 calls)
 0: caret.region.=<0>
 =(#left##0:caret.region, #right##0:caret.region, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:caret.region, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#lower_left##0:position.position) @caret:nn:nn
@@ -420,14 +420,14 @@ entry:
 lower_left > public {inline} (0 calls)
 0: caret.region.lower_left<0>
 lower_left(#rec##0:caret.region, ?#result##0:position.position):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:caret.region, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:position.position) @caret:nn:nn
 lower_left > public {inline} (0 calls)
 1: caret.region.lower_left<1>
 lower_left(#rec##0:caret.region, ?#rec##1:caret.region, #field##0:position.position):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm mutate(~#rec##0:caret.region, ?#rec##1:caret.region, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:position.position) @caret:nn:nn
@@ -436,7 +436,7 @@ lower_left(#rec##0:caret.region, ?#rec##1:caret.region, #field##0:position.posit
 region > public {inline} (0 calls)
 0: caret.region.region<0>
 region(lower_left##0:position.position, upper_right##0:position.position, ?#result##0:caret.region):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:caret.region) @caret:nn:nn
@@ -445,7 +445,7 @@ region(lower_left##0:position.position, upper_right##0:position.position, ?#resu
 region > public {inline} (6 calls)
 1: caret.region.region<1>
 region(?lower_left##0:position.position, ?upper_right##0:position.position, #result##0:caret.region):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:caret.region, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?lower_left##0:position.position) @caret:nn:nn
@@ -455,14 +455,14 @@ region(?lower_left##0:position.position, ?upper_right##0:position.position, #res
 upper_right > public {inline} (0 calls)
 0: caret.region.upper_right<0>
 upper_right(#rec##0:caret.region, ?#result##0:position.position):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:caret.region, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:position.position) @caret:nn:nn
 upper_right > public {inline} (0 calls)
 1: caret.region.upper_right<1>
 upper_right(#rec##0:caret.region, ?#rec##1:caret.region, #field##0:position.position):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm mutate(~#rec##0:caret.region, ?#rec##1:caret.region, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:position.position) @caret:nn:nn
@@ -471,7 +471,7 @@ upper_right(#rec##0:caret.region, ?#rec##1:caret.region, #field##0:position.posi
 ~= > public {inline} (0 calls)
 0: caret.region.~=<0>
 ~=(#left##0:caret.region, #right##0:caret.region, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:caret.region, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:position.position) @caret:nn:nn
@@ -763,23 +763,23 @@ if.else2:
 printPosition > public (0 calls)
 0: position.printPosition<0>
 printPosition(pos##0:position.position):
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print_string<0>(" (":wybe.string) #7 @io:nn:nn
+    wybe.string.print_string<0>(" (":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7 @io:nn:nn
     foreign lpvm access(pos##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @position:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
     foreign c print_int(~tmp#0##0:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#6##0:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>(",":wybe.string) #8 @io:nn:nn
+    foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(",":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #8 @io:nn:nn
     foreign lpvm access(~pos##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @position:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @io:nn:nn
     foreign c print_int(~tmp#1##0:wybe.int, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#11##0:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>(")":wybe.string) #9 @io:nn:nn
+    foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #9 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#14##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 
@@ -860,7 +860,7 @@ entry:
 = > public {inline} (1 calls)
 0: position.position.=<0>
 =(#left##0:position.position, #right##0:position.position, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#x##0:wybe.int) @position:nn:nn
@@ -880,7 +880,7 @@ entry:
 position > public {inline} (0 calls)
 0: position.position.position<0>
 position(x##0:wybe.int, y##0:wybe.int, ?#result##0:position.position):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:position.position) @position:nn:nn
@@ -889,7 +889,7 @@ position(x##0:wybe.int, y##0:wybe.int, ?#result##0:position.position):
 position > public {inline} (6 calls)
 1: position.position.position<1>
 position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:position.position):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:wybe.int) @position:nn:nn
@@ -899,14 +899,14 @@ position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:position.position):
 x > public {inline} (0 calls)
 0: position.position.x<0>
 x(#rec##0:position.position, ?#result##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @position:nn:nn
 x > public {inline} (0 calls)
 1: position.position.x<1>
 x(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:position.position, ?#rec##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @position:nn:nn
@@ -915,14 +915,14 @@ x(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
 y > public {inline} (0 calls)
 0: position.position.y<0>
 y(#rec##0:position.position, ?#result##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @position:nn:nn
 y > public {inline} (0 calls)
 1: position.position.y<1>
 y(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:position.position, ?#rec##1:position.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @position:nn:nn
@@ -931,7 +931,7 @@ y(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
 ~= > public {inline} (0 calls)
 0: position.position.~=<0>
 ~=(#left##0:position.position, #right##0:position.position, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @position:nn:nn

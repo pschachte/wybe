@@ -12,13 +12,13 @@ AFTER EVERYTHING:
 module top-level code > public {impure} (0 calls)
 0: early_error.<0>
 ():
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print_string<0>("should print this":wybe.string) #2 @io:nn:nn
+    wybe.string.print_string<0>("should print this":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#2##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
     foreign c {impure} puts("should print this error message":wybe.string) @early_error:nn:nn
     foreign c {terminal,semipure} exit(1:wybe.int) @early_error:nn:nn
 
@@ -26,7 +26,7 @@ module top-level code > public {impure} (0 calls)
 my_error > {terminal,inline,semipure} (1 calls)
 0: early_error.my_error<0>
 my_error(msg##0:wybe.string):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign c {impure} puts(~msg##0:wybe.string) @early_error:nn:nn

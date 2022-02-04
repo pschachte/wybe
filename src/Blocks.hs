@@ -515,7 +515,7 @@ codegenForkBody var _ _ =
 -- are position checked with the respective prototype, eliminating arguments
 -- which do not eventually appear in the prototype.
 cgen :: Prim -> Codegen ()
-cgen prim@(PrimCall callSiteID pspec args) = do
+cgen prim@(PrimCall callSiteID pspec args _) = do
     logCodegen $ "Compiling " ++ show prim
     let nm = LLVMAST.Name $ toSBString $ show pspec
     -- Find the prototype of the pspec being called
@@ -548,7 +548,7 @@ cgen prim@(PrimHigher cId (ArgProcRef pspec closed _) args) = do
     logCodegen $ "Compiling " ++ show prim
               ++ " as first order call to " ++ show pspec
               ++ " closed over " ++ show closed
-    cgen $ PrimCall cId pspec $ closed ++ args
+    cgen $ PrimCall cId pspec (closed ++ args) univGlobalFlows 
 
 cgen prim@(PrimHigher callSiteId fn@ArgVar{} args) = do
     logCodegen $ "Compiling " ++ show prim
@@ -795,7 +795,7 @@ cgenLPVM "cast" _ args@[inArg,outArg] =
 
 cgenLPVM "store" _ args = do
     case partitionArgs args of
-        ([global@(ArgGlobal (GlobalResource res) ty), input], []) -> do
+        ([input, global@(ArgGlobal (GlobalResource res) ty)], []) -> do
             logCodegen $ "lpvm store " ++ show input ++ " " ++ show global
             ty' <- lift $ llvmType ty
             global <- getGlobalResource res ty'
@@ -1134,7 +1134,7 @@ addExternProcRef ps@(ProcSpec mod _ _ _) = do
     args <- (primParamToArg <$>) <$> primActualParams ps
     ifCurrentModuleElse mod
         (return ())
-        (addExtern $ PrimCall 0 ps args)
+        (addExtern $ PrimCall 0 ps args univGlobalFlows)
 
 
 addStringConstant :: String -> Codegen (LLVMAST.Type, C.Constant)
@@ -1372,7 +1372,7 @@ declareExtern (PrimForeign otherlang name _ _) =
 declareExtern (PrimHigher _ var _) =
     shouldnt $ "Don't know how to declare extern function var " ++ show var
 
-declareExtern (PrimCall _ pspec@(ProcSpec m n _ _) args) = do
+declareExtern (PrimCall _ pspec@(ProcSpec m n _ _) args _) = do
     let (inArgs,outArgs) = partitionArgs args
     retty <- primReturnType outArgs
     fnargs <- mapM makeExArg $ zip [1..] inArgs

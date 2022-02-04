@@ -21,7 +21,7 @@ AFTER EVERYTHING:
 module top-level code > public {impure} (0 calls)
 0: command_line.<0>
 ():
-  GlobalFlows: {<<command_line.argc>>::{FlowIn}, <<command_line.arguments>>::{FlowOut}, <<command_line.argv>>::{FlowIn}, <<command_line.command>>::{FlowOut}, <<command_line.exit_code>>::{FlowOut}} 
+  GlobalFlows: <{<<command_line.argc>>, <<command_line.argv>>, <<wybe.io.io>>}; {<<command_line.argc>>, <<command_line.arguments>>, <<command_line.argv>>, <<command_line.command>>, <<command_line.exit_code>>, <<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(1,(wybe.array.[|]<0>,fromList [NonAliasedParamCond 2 []]))]
@@ -30,27 +30,27 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.array(T)) @array:nn:nn
     foreign lpvm mutate(~tmp#10##0:wybe.array(T), ?tmp#11##0:wybe.array(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.int) @array:nn:nn
     foreign lpvm mutate(~tmp#11##0:wybe.array(T), ?tmp#0##0:wybe.array(wybe.c_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.array.raw_array(T)) @array:nn:nn
-    foreign lpvm store(<<command_line.arguments>>:wybe.array(wybe.c_string), tmp#0##0:wybe.array(wybe.c_string)) @command_line:nn:nn
-    foreign lpvm store(<<command_line.command>>:wybe.c_string, c"":wybe.c_string) @command_line:nn:nn
+    foreign lpvm store(tmp#0##0:wybe.array(wybe.c_string), <<command_line.arguments>>:wybe.array(wybe.c_string)) @command_line:nn:nn
+    foreign lpvm store(c"":wybe.c_string, <<command_line.command>>:wybe.c_string) @command_line:nn:nn
     wybe.array.[|]<0>[785a827a1b](?command##1:wybe.c_string, ?arguments##2:wybe.array(wybe.c_string), ~tmp#0##0:wybe.array(wybe.c_string), ?tmp#7##0:wybe.bool) #1 @command_line:nn:nn
     case ~tmp#7##0:wybe.bool of
     0:
         foreign c {terminal,semipure} error_exit(c"command_line:15:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @control:nn:nn
 
     1:
-        foreign lpvm store(<<command_line.arguments>>:wybe.array(wybe.c_string), ~%arguments##2:wybe.array(wybe.c_string)) @command_line:nn:nn
-        foreign lpvm store(<<command_line.command>>:wybe.c_string, ~%command##1:wybe.c_string) @command_line:nn:nn
-        foreign lpvm store(<<command_line.exit_code>>:wybe.int, 0:wybe.int) @command_line:nn:nn
+        foreign lpvm store(~%arguments##2:wybe.array(wybe.c_string), <<command_line.arguments>>:wybe.array(wybe.c_string)) @command_line:nn:nn
+        foreign lpvm store(~%command##1:wybe.c_string, <<command_line.command>>:wybe.c_string) @command_line:nn:nn
+        foreign lpvm store(0:wybe.int, <<command_line.exit_code>>:wybe.int) @command_line:nn:nn
 
 
 
 set_exit_code > public {inline} (0 calls)
 0: command_line.set_exit_code<0>
 set_exit_code(code##0:wybe.int):
-  GlobalFlows: {<<command_line.exit_code>>::{FlowOut}} 
+  GlobalFlows: <{<<command_line.exit_code>>}; {<<command_line.exit_code>>}>
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm store(<<command_line.exit_code>>:wybe.int, ~code##0:wybe.int) @command_line:nn:nn
+    foreign lpvm store(~code##0:wybe.int, <<command_line.exit_code>>:wybe.int) @command_line:nn:nn
 
   LLVM code       :
 
@@ -147,21 +147,21 @@ entry:
 module top-level code > public {impure} (0 calls)
 0: main_hello.<0>
 ():
-  GlobalFlows: {<<command_line.arguments>>::{FlowIn}, <<command_line.exit_code>>::{FlowOut}, <<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<command_line.arguments>>, <<command_line.command>>, <<command_line.exit_code>>, <<wybe.io.io>>}; {<<command_line.arguments>>, <<command_line.command>>, <<command_line.exit_code>>, <<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm store(<<command_line.exit_code>>:wybe.int, 42:wybe.int) @command_line:nn:nn
-    wybe.string.print_string<0>("hello, world!":wybe.string) #5 @io:nn:nn
+    foreign lpvm store(42:wybe.int, <<command_line.exit_code>>:wybe.int) @command_line:nn:nn
+    wybe.string.print_string<0>("hello, world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #5 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @io:nn:nn
     foreign lpvm load(<<command_line.arguments>>:wybe.array(wybe.c_string), ?%arguments##0:wybe.array(wybe.c_string)) @main_hello:nn:nn
     foreign lpvm access(~arguments##0:wybe.array(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @array:nn:nn
     foreign c print_int(~tmp#0##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#8##0:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>(" command line argument(s)":wybe.string) #6 @io:nn:nn
+    foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(" command line argument(s)":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #6 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#11##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 

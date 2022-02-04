@@ -126,7 +126,7 @@ localBodyCallees modspec body =
 
 -- | Find all callees in a given prim
 localCallees :: ModSpec -> Prim -> [ProcSpec]
-localCallees modspec (PrimCall _ pspec args) 
+localCallees modspec (PrimCall _ pspec args _) 
   = pspec{procSpeczVersion=generalVersion}:concatMap (argRefs modspec) args
 localCallees modspec (PrimHigher _ fn args) 
   = concatMap (argRefs modspec) (fn:args)
@@ -136,5 +136,5 @@ localCallees modspec (PrimForeign _ _ _ args)
 -- | Find all callees in a given PromArg
 argRefs :: ModSpec -> PrimArg -> [ProcSpec]
 argRefs modspec (ArgProcRef pspec closed _)
-  = localCallees modspec (PrimCall (shouldnt "argRefs") pspec closed)
+  = localCallees modspec (PrimCall (shouldnt "argRefs") pspec closed univGlobalFlows)
 argRefs _ _ = []

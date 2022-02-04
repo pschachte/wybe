@@ -1,7 +1,7 @@
---  File     : Util.hs
+--  File     : UnivSet.hs
 --  Author   : Peter Schachte
 --  Purpose  : Provide a set type supporting the universal set.
---  Copyright: (c) 2014 Peter Schachte.  All rights reserved.
+--  Copyright: (c) 2022 Peter Schachte.  All rights reserved.
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
@@ -31,7 +31,11 @@ import qualified Data.Functor as UnivSet
 --
 ----------------------------------------------------------------
 
-data UnivSet a = UniversalSet | FiniteSet (Set a) deriving (Show, Generic)
+data UnivSet a 
+    = FiniteSet (Set a)
+    | UniversalSet
+    deriving (Eq, Ord, Show, Generic)
+
 
 
 -- | Take the union of two UnivSets.

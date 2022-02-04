@@ -12,7 +12,7 @@ AFTER EVERYTHING:
 + > public {inline} (0 calls)
 0: representation.+<0>
 +(x##0:representation, y##0:representation, ?#result##0:representation):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(~x##0:representation, ~y##0:representation, ?#result##0:representation) @representation:nn:nn

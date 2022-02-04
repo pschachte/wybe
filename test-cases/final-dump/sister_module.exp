@@ -15,7 +15,7 @@ AFTER EVERYTHING:
 baz > {inline} (0 calls)
 0: sister_module.baz<0>
 baz(i##0:wybe.int, ?j##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     sister_module.m1.foo<0>(~i##0:wybe.int, ?j##0:wybe.int) #0 @sister_module:nn:nn
@@ -24,7 +24,7 @@ baz(i##0:wybe.int, ?j##0:wybe.int):
 buzz > {inline} (0 calls)
 0: sister_module.buzz<0>
 buzz(i##0:wybe.int, ?j##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     sister_module.m2.bar<0>(~i##0:wybe.int, ?j##0:wybe.int) #0 @sister_module:nn:nn
@@ -69,7 +69,7 @@ entry:
 foo > public {inline} (0 calls)
 0: sister_module.m1.foo<0>
 foo(i##0:wybe.int, ?j##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?j##0:wybe.int) @int:nn:nn
@@ -107,7 +107,7 @@ entry:
 bar > public {inline} (0 calls)
 0: sister_module.m2.bar<0>
 bar(i##0:wybe.int, ?j##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?k##0:wybe.int) @int:nn:nn

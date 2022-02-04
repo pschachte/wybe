@@ -20,7 +20,7 @@ AFTER EVERYTHING:
 append > public (1 calls)
 0: generic_list.append<0>
 append(x##0:generic_list(T), y##0:generic_list(T), ?#result##0:generic_list(T)):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: [(#result##0,y##0)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(1,(generic_list.append<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -42,7 +42,7 @@ append(x##0:generic_list(T), y##0:generic_list(T), ?#result##0:generic_list(T)):
 car > public {inline} (0 calls)
 0: generic_list.car<0>
 car(#rec##0:generic_list(T), ?#result##0:T, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -58,7 +58,7 @@ car(#rec##0:generic_list(T), ?#result##0:T, ?#success##0:wybe.bool):
 car > public {inline} (0 calls)
 1: generic_list.car<1>
 car(#rec##0:generic_list(T), ?#rec##1:generic_list(T), #field##0:T, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -76,7 +76,7 @@ car(#rec##0:generic_list(T), ?#rec##1:generic_list(T), #field##0:T, ?#success##0
 cdr > public {inline} (0 calls)
 0: generic_list.cdr<0>
 cdr(#rec##0:generic_list(T), ?#result##0:generic_list(T), ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -92,7 +92,7 @@ cdr(#rec##0:generic_list(T), ?#result##0:generic_list(T), ?#success##0:wybe.bool
 cdr > public {inline} (0 calls)
 1: generic_list.cdr<1>
 cdr(#rec##0:generic_list(T), ?#rec##1:generic_list(T), #field##0:generic_list(T), ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -110,7 +110,7 @@ cdr(#rec##0:generic_list(T), ?#rec##1:generic_list(T), #field##0:generic_list(T)
 cons > public {inline} (1 calls)
 0: generic_list.cons<0>
 cons(car##0:T, cdr##0:generic_list(T), ?#result##0:generic_list(T)):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:generic_list(T)) @generic_list:nn:nn
@@ -119,7 +119,7 @@ cons(car##0:T, cdr##0:generic_list(T), ?#result##0:generic_list(T)):
 cons > public {inline} (6 calls)
 1: generic_list.cons<1>
 cons(?car##0:T, ?cdr##0:generic_list(T), #result##0:generic_list(T), ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -139,7 +139,7 @@ cons(?car##0:T, ?cdr##0:generic_list(T), #result##0:generic_list(T), ?#success##
 length > public {inline} (0 calls)
 0: generic_list.length<0>
 length(x##0:generic_list(T), ?#result##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     generic_list.length1<0>(~x##0:generic_list(T), 0:wybe.int, ?#result##0:wybe.int) #0 @generic_list:nn:nn
@@ -148,7 +148,7 @@ length(x##0:generic_list(T), ?#result##0:wybe.int):
 length1 > (2 calls)
 0: generic_list.length1<0>
 length1(x##0:generic_list(T), acc##0:wybe.int, ?#result##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
@@ -166,7 +166,7 @@ length1(x##0:generic_list(T), acc##0:wybe.int, ?#result##0:wybe.int):
 nil > public {inline} (0 calls)
 0: generic_list.nil<0>
 nil(?#result##0:generic_list(T)):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(0:generic_list(T), ?#result##0:generic_list(T))
@@ -390,41 +390,41 @@ entry:
 module top-level code > public {impure} (0 calls)
 0: generic_use.<0>
 ():
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(8,(generic_use.nrev<0>,fromList [NonAliasedParamCond 0 []])),(15,(generic_use.reverse1<0>,fromList [NonAliasedParamCond 0 []]))]
     generic_use.fromto1<0>(1:wybe.int, 5:wybe.int, 0:generic_list(wybe.int), ?tmp#0##0:generic_list(wybe.int)) #10 @generic_use:nn:nn
     generic_use.fromto1<0>(6:wybe.int, 10:wybe.int, 0:generic_list(wybe.int), ?tmp#1##0:generic_list(wybe.int)) #11 @generic_use:nn:nn
-    generic_use.print<0>(tmp#0##0:generic_list(wybe.int)) #12 @generic_use:nn:nn
+    generic_use.print<0>(tmp#0##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #12 @generic_use:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#10##0:wybe.phantom) @io:nn:nn
-    generic_use.print<0>(tmp#1##0:generic_list(wybe.int)) #13 @generic_use:nn:nn
+    foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    generic_use.print<0>(tmp#1##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #13 @generic_use:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#13##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#13##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
     generic_use.concat<0>(tmp#0##0:generic_list(wybe.int), tmp#1##0:generic_list(wybe.int), ?tmp#2##0:generic_list(wybe.int)) #4 @generic_use:nn:nn
-    generic_use.print<0>(~tmp#2##0:generic_list(wybe.int)) #14 @generic_use:nn:nn
+    generic_use.print<0>(~tmp#2##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #14 @generic_use:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#16##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#16##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
     generic_use.reverse1<0>[410bae77d3](~tmp#0##0:generic_list(T), 0:generic_list(T), ?tmp#3##0:generic_list(wybe.int)) #15 @generic_use:nn:nn
-    generic_use.print<0>(~tmp#3##0:generic_list(wybe.int)) #16 @generic_use:nn:nn
+    generic_use.print<0>(~tmp#3##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #16 @generic_use:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#20##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
     generic_use.nrev<0>[410bae77d3](~tmp#1##0:generic_list(wybe.int), ?tmp#4##0:generic_list(wybe.int)) #8 @generic_use:nn:nn
-    generic_use.print<0>(~tmp#4##0:generic_list(wybe.int)) #17 @generic_use:nn:nn
+    generic_use.print<0>(~tmp#4##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #17 @generic_use:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#22##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#23##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#23##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
 concat > public (3 calls)
 0: generic_use.concat<0>[410bae77d3]
 concat(l1##0:generic_list(T), l2##0:generic_list(T), ?#result##0:generic_list(T)):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: [(#result##0,l2##0)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(1,(generic_use.concat<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -457,7 +457,7 @@ concat(l1##0:generic_list(T), l2##0:generic_list(T), ?#result##0:generic_list(T)
 fromto > public {inline} (2 calls)
 0: generic_use.fromto<0>
 fromto(lo##0:wybe.int, hi##0:wybe.int, ?#result##0:generic_list(wybe.int)):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     generic_use.fromto1<0>(~lo##0:wybe.int, ~hi##0:wybe.int, 0:generic_list(wybe.int), ?#result##0:generic_list(wybe.int)) #1 @generic_use:nn:nn
@@ -466,7 +466,7 @@ fromto(lo##0:wybe.int, hi##0:wybe.int, ?#result##0:generic_list(wybe.int)):
 fromto1 > (2 calls)
 0: generic_use.fromto1<0>
 fromto1(lo##0:wybe.int, hi##0:wybe.int, sofar##0:generic_list(wybe.int), ?#result##0:generic_list(wybe.int)):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: [(#result##0,sofar##0)]
   InterestingCallProperties: []
     foreign llvm icmp_sge(hi##0:wybe.int, lo##0:wybe.int, ?tmp#4##0:wybe.bool) @int:nn:nn
@@ -486,7 +486,7 @@ fromto1(lo##0:wybe.int, hi##0:wybe.int, sofar##0:generic_list(wybe.int), ?#resul
 iota > public {inline} (1 calls)
 0: generic_use.iota<0>
 iota(n##0:wybe.int, ?#result##0:generic_list(wybe.int)):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     generic_use.fromto1<0>(1:wybe.int, ~n##0:wybe.int, 0:generic_list(wybe.int), ?#result##0:generic_list(wybe.int)) #1 @generic_use:nn:nn
@@ -495,7 +495,7 @@ iota(n##0:wybe.int, ?#result##0:generic_list(wybe.int)):
 nrev > public (2 calls)
 0: generic_use.nrev<0>[410bae77d3]
 nrev(lst##0:generic_list(T), ?#result##0:generic_list(T)):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(1,(generic_use.nrev<0>,fromList [NonAliasedParamCond 0 [0]])),(4,(generic_use.concat<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -530,7 +530,7 @@ nrev(lst##0:generic_list(T), ?#result##0:generic_list(T)):
 print > (1 calls)
 0: generic_use.print<0>
 print(lst##0:generic_list(wybe.int)):
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @io:nn:nn
@@ -539,24 +539,24 @@ print(lst##0:generic_list(wybe.int)):
     case ~tmp#5##0:wybe.bool of
     0:
         foreign c putchar(']':wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#8##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
     1:
         foreign lpvm access(lst##0:generic_list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @generic_list:nn:nn
         foreign lpvm access(~lst##0:generic_list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:generic_list(wybe.int)) @generic_list:nn:nn
         foreign c print_int(~h##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#8##0:wybe.phantom) @io:nn:nn
-        generic_use.print_tail<0>(~t##0:generic_list(wybe.int)) #3 @generic_use:nn:nn
+        foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        generic_use.print_tail<0>(~t##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @generic_use:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @io:nn:nn
         foreign c putchar(']':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#11##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
 
 print_tail > (2 calls)
 0: generic_use.print_tail<0>
 print_tail(lst##0:generic_list(wybe.int)):
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool)
@@ -566,30 +566,30 @@ print_tail(lst##0:generic_list(wybe.int)):
     1:
         foreign lpvm access(lst##0:generic_list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @generic_list:nn:nn
         foreign lpvm access(~lst##0:generic_list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:generic_list(wybe.int)) @generic_list:nn:nn
-        wybe.string.print_string<0>(", ":wybe.string) #4 @io:nn:nn
+        wybe.string.print_string<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @io:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
         foreign c print_int(~h##0:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#6##0:wybe.phantom) @io:nn:nn
-        generic_use.print_tail<0>(~t##0:generic_list(wybe.int)) #3 @generic_use:nn:nn
+        foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        generic_use.print_tail<0>(~t##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @generic_use:nn:nn
 
 
 
 println > {inline} (5 calls)
 0: generic_use.println<0>
 println(lst##0:generic_list(wybe.int)):
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
-    generic_use.print<0>(~lst##0:generic_list(wybe.int)) #0 @generic_use:nn:nn
+    generic_use.print<0>(~lst##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @generic_use:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#0##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#0##0:wybe.phantom, ?tmp#1##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#1##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#1##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
 reverse > public {inline} (1 calls)
 0: generic_use.reverse<0>
 reverse(lst##0:generic_list(T), ?#result##0:generic_list(T)):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     generic_use.reverse1<0>(~lst##0:generic_list(T), 0:generic_list(T), ?#result##0:generic_list(T)) #1 @generic_use:nn:nn
@@ -598,7 +598,7 @@ reverse(lst##0:generic_list(T), ?#result##0:generic_list(T)):
 reverse1 > public (2 calls)
 0: generic_use.reverse1<0>[410bae77d3]
 reverse1(lst##0:generic_list(T), suffix##0:generic_list(T), ?#result##0:generic_list(T)):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: [(#result##0,suffix##0)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(2,(generic_use.reverse1<0>,fromList [NonAliasedParamCond 0 [0]]))]

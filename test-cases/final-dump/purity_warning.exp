@@ -12,7 +12,7 @@ AFTER EVERYTHING:
 module top-level code > public {inline,impure} (0 calls)
 0: purity_warning.<0>
 ():
-  GlobalFlows: {} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
 

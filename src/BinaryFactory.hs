@@ -45,6 +45,7 @@ instance Binary Prim
 instance Binary PrimVarName
 instance Binary PrimArg
 instance Binary ProcAnalysis
+instance Binary GlobalFlows
 instance Binary CallSiteProperty
 instance Binary InterestingCallProperty
 

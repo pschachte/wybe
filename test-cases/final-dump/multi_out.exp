@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 module top-level code > public {inline,impure} (0 calls)
 0: multi_out.<0>
 ():
-  GlobalFlows: {} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
 
@@ -21,7 +21,7 @@ module top-level code > public {inline,impure} (0 calls)
 onetwothree > public {inline} (1 calls)
 0: multi_out.onetwothree<0>
 onetwothree(?x##0:wybe.int, ?y##0:wybe.int, ?z##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.int, ?x##0:wybe.int) @multi_out:nn:nn

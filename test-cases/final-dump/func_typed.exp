@@ -12,7 +12,7 @@ AFTER EVERYTHING:
 plus > public {inline} (0 calls)
 0: func_typed.plus<0>
 plus(a##0:wybe.int, b##0:wybe.int, ?#result##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(~a##0:wybe.int, ~b##0:wybe.int, ?#result##0:wybe.int) @int:nn:nn

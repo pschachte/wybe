@@ -269,7 +269,7 @@ completeAliasMap caller aliasMap = do
 updateAliasedByPrim :: AliasMapLocal -> Placed Prim -> Compiler AliasMapLocal
 updateAliasedByPrim aliasMap prim =
     case content prim of
-        PrimCall _ spec args -> do
+        PrimCall _ spec args _ -> do
             -- Analyse proc calls
             calleeDef <- getProcDef spec
             let ProcDefPrim _ calleeProto _ _ analysis _ = procImpln calleeDef
@@ -432,7 +432,7 @@ updateMultiSpeczInfoByPrim :: PrimProto
 updateMultiSpeczInfoByPrim proto 
         (aliasMap, interestingCallProperties, multiSpeczDepInfo) prim =
     case content prim of
-        PrimCall callSiteID spec args -> do
+        PrimCall callSiteID spec args _ -> do
             calleeDef <- getProcDef spec
             let ProcDefPrim _ calleeProto _ _ analysis _ = procImpln calleeDef
             let interestingPrimCallInfo = List.zip args [0..]

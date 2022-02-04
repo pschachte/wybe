@@ -9,8 +9,7 @@
 
 module Resources (resourceCheckMod, canonicaliseProcResources,
                   canonicaliseResourceSpec,
-                  transformProcResources, transformProcGlobals,
-                  specialResourcesSet, isSpecialResource) where
+                  transformProcResources, transformProcGlobals) where
 
 import           AST
 import           Control.Monad
@@ -713,16 +712,6 @@ resourceVar (ResourceSpec mod name) =
     -- Always use resource name as variable name, regardless of module
     -- XXX This could cause collisions!
     name
-
-
--- | The set of VarNames that correspond to sepcial resources
-specialResourcesSet :: Set ResourceSpec
-specialResourcesSet = Set.map (ResourceSpec []) $ keysSet specialResources
-
-
--- | Test if ResourceSpec refers to a special resource
-isSpecialResource :: ResourceSpec -> Bool
-isSpecialResource res = res `Set.member` specialResourcesSet
 
 
 -- | Given a ResourceSpec and something, return Right of something if the

@@ -19,6 +19,7 @@ import Options (LogSelection(BodyBuilder))
 import Data.Map as Map
 import Data.List as List
 import Data.Set as Set
+import UnivSet as USet
 import Data.Maybe
 import Data.Tuple.HT (mapFst)
 import Data.Bits
@@ -425,7 +426,7 @@ instr' prim@(PrimForeign "lpvm" "load" _ [ArgGlobal info _, var]) pos = do
         Nothing -> do
             logBuild "  ... we don't"
             ordinaryInstr prim pos
-instr' prim@(PrimForeign "lpvm" "store" _ [ArgGlobal info _, var]) pos = do
+instr' prim@(PrimForeign "lpvm" "store" _ [var, ArgGlobal info _]) pos = do
     logBuild $ "  Checking if we know the value of " ++ show info
             ++ " and it is the same as " ++ show var
     mbVal <- Map.lookup info <$> gets globalsLoaded
@@ -435,8 +436,8 @@ instr' prim@(PrimForeign "lpvm" "store" _ [ArgGlobal info _, var]) pos = do
           | mkInput (canonicaliseArg var) == mkInput (canonicaliseArg val) -> do
             logBuild " ... it is" 
         _ -> do
-             logBuild " ... it isn't" 
-             ordinaryInstr prim pos
+            logBuild " ... it isn't" 
+            ordinaryInstr prim pos
 instr' prim pos = ordinaryInstr prim pos
 
 
@@ -452,7 +453,7 @@ ordinaryInstr prim pos = do
             -- record prim executed (and other modes), and generate instr
             logBuild "not found"
             impurity <- lift $ primImpurity prim
-            gFlows <- lift $ primGlobalFlows prim
+            let gFlows = primGlobalFlows prim
             when (impurity <= Pure && gFlows == emptyGlobalFlows) 
                 $ recordEntailedPrims prim
             rawInstr prim pos
@@ -484,24 +485,25 @@ mkInput arg@ArgUndef{} = arg
 
 
 argExpandedPrim :: Prim -> BodyBuilder Prim
-argExpandedPrim call@(PrimCall id pspec args) = do
+argExpandedPrim call@(PrimCall id pspec args gFlows) = do
     args' <- mapM expandArg args
     params <- lift $ primProtoParams <$> getProcPrimProto pspec
     unless (sameLength args' params) $
         shouldnt $ "arguments in call " ++ show call
                    ++ " don't match params " ++ show params
     args'' <- zipWithM (transformUnneededArg $ zip params args) params args'
-    return $ PrimCall id pspec args''
+    return $ PrimCall id pspec args'' gFlows
 argExpandedPrim call@(PrimHigher id fn args) = do
     logBuild $ "Expanding Higher call " ++ show call       
     fn' <- expandArg fn
     case fn' of
-        ArgProcRef ps as _ -> do 
-            ps' <- fromMaybe ps <$> lift (maybeGetClosureOf ps)
-            logBuild $ "As first-order call to " ++ show ps'
-            params <- lift (getPrimParams ps') 
+        ArgProcRef pspec clsd _ -> do 
+            pspec' <- fromMaybe pspec <$> lift (maybeGetClosureOf pspec)
+            logBuild $ "As first-order call to " ++ show pspec'
+            params <- lift $ getPrimParams pspec'
             let args' = zipWith (setArgType . primParamType) params args
-            argExpandedPrim (PrimCall id ps' $ as ++ args')
+            gFlows <- lift $ procGlobalFlows pspec
+            argExpandedPrim $ PrimCall id pspec' (clsd ++ args') gFlows
         _ -> do
             logBuild $ "Leaving as higher call to " ++ show fn'       
             args' <- mapM expandArg args
@@ -668,8 +670,8 @@ splitArgsByMode = List.partition ((==FlowIn) . argFlowDirection)
 
 
 canonicalisePrim :: Prim -> Prim
-canonicalisePrim (PrimCall id nm args) =
-    PrimCall id nm $ canonicaliseArg . mkInput <$> args
+canonicalisePrim (PrimCall id nm args gFlows) =
+    PrimCall id nm (canonicaliseArg . mkInput <$> args) gFlows
 canonicalisePrim (PrimHigher id var args) =
     PrimHigher id (canonicaliseArg $ mkInput var) $ canonicaliseArg . mkInput <$> args
 canonicalisePrim (PrimForeign lang op flags args) =
@@ -693,10 +695,9 @@ canonicaliseArg (ArgUndef _)        = ArgUndef AnyType
 
 
 validateInstr :: Prim -> BodyBuilder ()
-validateInstr i@(PrimCall _ _ args)        = mapM_ (validateArg i) args
-validateInstr i@(PrimHigher _ fn args) = 
-  validateArg i fn >> mapM_ (validateArg i) args
-validateInstr i@(PrimForeign _ _ _ args) = mapM_ (validateArg i) args
+validateInstr p@(PrimCall _ _ args _) = mapM_ (validateArg p) args
+validateInstr p@(PrimHigher _ fn args) = mapM_ (validateArg p) $ fn:args
+validateInstr p@(PrimForeign _ _ _ args) = mapM_ (validateArg p) args
 
 
 validateArg :: Prim -> PrimArg -> BodyBuilder ()
@@ -758,13 +759,14 @@ updateGlobalsLoaded :: Prim -> OptPos -> BodyBuilder ()
 updateGlobalsLoaded prim pos = do
     loaded <- gets globalsLoaded
     case prim of
-        PrimForeign "lpvm" name _ [ArgGlobal info _, var] 
-              | name == "store" || name == "load" -> 
+        PrimForeign "lpvm" "load" _ [ArgGlobal info _, var] ->
+            modify $ \s -> s{globalsLoaded=Map.insert info var loaded}
+        PrimForeign "lpvm" "store" _ [var, ArgGlobal info _] ->
             modify $ \s -> s{globalsLoaded=Map.insert info var loaded}
         _ -> do
-            callGFlows <- lift $ primGlobalFlows prim
-            logBuild $ "Call has global flows: " ++ showGlobalFlows callGFlows
-            let filter info _ = not $ hasGlobalFlow callGFlows FlowOut info
+            let gFlows = primGlobalFlows prim
+            logBuild $ "Call has global flows: " ++ show gFlows
+            let filter info _ = not $ hasGlobalFlow gFlows FlowOut info
             modify $ \s -> s {globalsLoaded=Map.filterWithKey filter loaded}
     loaded' <- gets globalsLoaded
     when (loaded /= loaded') $ do
@@ -1109,7 +1111,7 @@ currBody body st@BodyState{tmpCount=tmp} = do
                          bkwdFollowing=following} = st'
     logMsg BodyBuilder ">>>> Finished rebuilding a proc body"
     logMsg BodyBuilder "     Final state:"
-    logMsg BodyBuilder $ showBlock 5 $ following
+    logMsg BodyBuilder $ showBlock 5 following
     return (tmp, usedLater, following)
 
 
@@ -1219,15 +1221,15 @@ bkwdBuildStmt defs prim pos = do
           | Set.notMember fromVar usedLater && Set.member fromVar defs -> 
               modify $ \s -> s { bkwdRenaming = Map.insert fromVar toVar 
                                               $ bkwdRenaming s }
-      (PrimForeign "lpvm" "store" [] _, [ArgGlobal info _, _]) 
+      (PrimForeign "lpvm" "store" [] _, [_, ArgGlobal info _]) 
           | info `Set.member` gStored -> return ()
           | otherwise -> do
               modify $ \s -> s { bkwdGlobalStored = Set.insert info gStored }
               bkwdBuildStmt' defs args' prim pos
       _ -> do 
-          callGFlows <- lift $ primGlobalFlows prim
-          modify $ \s -> s { bkwdGlobalStored = 
-                              Set.filter (not . hasGlobalFlow callGFlows FlowIn) gStored }
+          let gFlows = primGlobalFlows prim
+          let filter info = not $ hasGlobalFlow gFlows FlowIn info
+          modify $ \s -> s { bkwdGlobalStored = Set.filter filter gStored }
           bkwdBuildStmt' defs args' prim pos
 
 
@@ -1238,9 +1240,9 @@ bkwdBuildStmt' defs args prim pos = do
     -- Filter out pure instructions that produce no needed outputs or out flowing
     -- globals
     purity <- lift $ primImpurity prim
-    gFlows <- lift $ primGlobalFlows prim
+    let gFlows = primGlobalFlows prim
     when (purity > Pure || any (`Set.member` usedLater) (argVarName <$> outs)
-                        || maybe True (any (Set.member FlowOut) . Map.elems) gFlows)
+                        || not (USet.isEmpty $ globalFlowsOut gFlows))
       $ do
         -- XXX Careful:  probably shouldn't mark last use of variable passed
         -- as input argument more than once in the call

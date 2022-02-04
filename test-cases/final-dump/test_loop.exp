@@ -25,17 +25,17 @@ AFTER EVERYTHING:
 module top-level code > public {inline,impure} (0 calls)
 0: test_loop.<0>
 ():
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
-    test_loop.find_test<0>(3:wybe.int) #0 @test_loop:nn:nn
-    test_loop.find_test<0>(7:wybe.int) #1 @test_loop:nn:nn
+    test_loop.find_test<0>(3:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @test_loop:nn:nn
+    test_loop.find_test<0>(7:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @test_loop:nn:nn
 
 
 find_modulo > {inline} (3 calls)
 0: test_loop.find_modulo<0>
 find_modulo(seq##0:test_loop.int_seq, modulus##0:wybe.int, ?i##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     test_loop.gen#1<0>(~modulus##0:wybe.int, ~seq##0:test_loop.int_seq, ?i##0:wybe.int, ?#success##0:wybe.bool) #0 @test_loop:nn:nn
@@ -44,7 +44,7 @@ find_modulo(seq##0:test_loop.int_seq, modulus##0:wybe.int, ?i##0:wybe.int, ?#suc
 find_test > (2 calls)
 0: test_loop.find_test<0>
 find_test(modulus##0:wybe.int):
-  GlobalFlows: {<<wybe.io.io>>::{FlowIn, FlowOut}} 
+  GlobalFlows: <{<<wybe.io.io>>}; {<<wybe.io.io>>}>
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(8,(test_loop.gen#1<0>,fromList [NonAliasedParamCond 1 []]))]
@@ -55,29 +55,29 @@ find_test(modulus##0:wybe.int):
     test_loop.gen#1<0>[6dacb8fd25](modulus##0:wybe.int, ~tmp#8##0:test_loop.int_seq, ?i##0:wybe.int, ?tmp#1##0:wybe.bool) #8 @test_loop:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
-        wybe.string.print_string<0>("Couldn't find even number divisible by ":wybe.string) #9 @io:nn:nn
+        wybe.string.print_string<0>("Couldn't find even number divisible by ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #9 @io:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @io:nn:nn
         foreign c print_int(~modulus##0:wybe.int, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#15##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(~%tmp#15##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
     1:
-        wybe.string.print_string<0>("First even number divisible by ":wybe.string) #10 @io:nn:nn
+        wybe.string.print_string<0>("First even number divisible by ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #10 @io:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @io:nn:nn
         foreign c print_int(~modulus##0:wybe.int, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#14##0:wybe.phantom) @io:nn:nn
-        wybe.string.print_string<0>(" is ":wybe.string) #11 @io:nn:nn
+        foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        wybe.string.print_string<0>(" is ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #11 @io:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @io:nn:nn
         foreign c print_int(~i##0:wybe.int, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(<<wybe.io.io>>:wybe.phantom, ~%tmp#19##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(~%tmp#19##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
 
 gen#1 > (2 calls)
 0: test_loop.gen#1<0>[6dacb8fd25]
 gen#1(modulus##0:wybe.int, seq##0:test_loop.int_seq, ?i##1:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 1]
   MultiSpeczDepInfo: [(0,(test_loop.int_seq.seq_next<0>,fromList [NonAliasedParamCond 0 [1]])),(3,(test_loop.gen#1<0>,fromList [NonAliasedParamCond 1 [1]]))]
@@ -294,7 +294,7 @@ if.else1:
 = > public {inline} (1 calls)
 0: test_loop.int_seq.=<0>
 =(#left##0:test_loop.int_seq, #right##0:test_loop.int_seq, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#low##0:wybe.int) @test_loop:nn:nn
@@ -323,14 +323,14 @@ if.else1:
 high > public {inline} (0 calls)
 0: test_loop.int_seq.high<0>
 high(#rec##0:test_loop.int_seq, ?#result##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @test_loop:nn:nn
 high > public {inline} (0 calls)
 1: test_loop.int_seq.high<1>
 high(#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, #field##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @test_loop:nn:nn
@@ -339,7 +339,7 @@ high(#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, #field##0:wybe.int):
 int_seq > public {inline} (0 calls)
 0: test_loop.int_seq.int_seq<0>
 int_seq(low##0:wybe.int, step##0:wybe.int, high##0:wybe.int, ?#result##0:test_loop.int_seq):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:test_loop.int_seq) @test_loop:nn:nn
@@ -349,7 +349,7 @@ int_seq(low##0:wybe.int, step##0:wybe.int, high##0:wybe.int, ?#result##0:test_lo
 int_seq > public {inline} (13 calls)
 1: test_loop.int_seq.int_seq<1>
 int_seq(?low##0:wybe.int, ?step##0:wybe.int, ?high##0:wybe.int, #result##0:test_loop.int_seq):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?low##0:wybe.int) @test_loop:nn:nn
@@ -360,14 +360,14 @@ int_seq(?low##0:wybe.int, ?step##0:wybe.int, ?high##0:wybe.int, #result##0:test_
 low > public {inline} (0 calls)
 0: test_loop.int_seq.low<0>
 low(#rec##0:test_loop.int_seq, ?#result##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @test_loop:nn:nn
 low > public {inline} (1 calls)
 1: test_loop.int_seq.low<1>
 low(#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, #field##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @test_loop:nn:nn
@@ -376,7 +376,7 @@ low(#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, #field##0:wybe.int):
 seq_next > public (0 calls)
 0: test_loop.int_seq.seq_next<0>[410bae77d3]
 seq_next(seq##0:test_loop.int_seq, ?seq##1:test_loop.int_seq, ?elt##0:wybe.int, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: [(seq##0,seq##1)]
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign lpvm access(seq##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?elt##0:wybe.int) @test_loop:nn:nn
@@ -413,14 +413,14 @@ seq_next(seq##0:test_loop.int_seq, ?seq##1:test_loop.int_seq, ?elt##0:wybe.int, 
 step > public {inline} (0 calls)
 0: test_loop.int_seq.step<0>
 step(#rec##0:test_loop.int_seq, ?#result##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @test_loop:nn:nn
 step > public {inline} (0 calls)
 1: test_loop.int_seq.step<1>
 step(#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, #field##0:wybe.int):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @test_loop:nn:nn
@@ -429,7 +429,7 @@ step(#rec##0:test_loop.int_seq, ?#rec##1:test_loop.int_seq, #field##0:wybe.int):
 ~= > public {inline} (0 calls)
 0: test_loop.int_seq.~=<0>
 ~=(#left##0:test_loop.int_seq, #right##0:test_loop.int_seq, ?#success##0:wybe.bool):
-  GlobalFlows: {} 
+  GlobalFlows: <{}; {}>
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @test_loop:nn:nn

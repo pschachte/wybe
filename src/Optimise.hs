@@ -15,6 +15,7 @@ import           Control.Monad.Trans.State
 import           Data.List                 as List
 import           Data.Map                  as Map
 import           Data.Set                  as Set
+import           UnivSet                   as USet
 import           Data.Graph
 import           Expansion
 import           Options                   (LogSelection (Optimise))
@@ -54,18 +55,18 @@ optimiseMod _ thisMod = do
 --   repeated to a fixed point, but I'm not confident that optimisation
 --   is monotone and I don't want an infinite loop.
 optimiseSccBottomUp :: SCC ProcSpec -> Compiler ()
-optimiseSccBottomUp (AcyclicSCC single) = do
-    void $ optimiseProcBottomUp single
-    inferGlobalFlows [single]
-optimiseSccBottomUp (CyclicSCC procs) = do
+optimiseSccBottomUp (AcyclicSCC single) = optimiseSccBottomUp' [single]
+optimiseSccBottomUp (CyclicSCC procs) = optimiseSccBottomUp' procs
+
+
+-- | As with optimiseSccBottomUp, but operates on a list of procs
+optimiseSccBottomUp' :: [ProcSpec] -> Compiler ()
+optimiseSccBottomUp' procs = do
     inlines <- mapM optimiseProcBottomUp procs
-    inferGlobalFlows procs
     -- If any but first in SCC were marked for inlining, repeat to inline
     -- in earlier procs in the SCC.
     when (or $ tail inlines)
-        $ do 
-            mapM_ optimiseProcBottomUp procs
-            inferGlobalFlows procs
+        $ mapM_ optimiseProcBottomUp procs
 
 
 optimiseProcTopDown :: ProcSpec -> Compiler ()
@@ -99,57 +100,31 @@ optimiseProcDefBU pspec def = do
     return def'
 
 ----------------------------------------------------------------
---                       Infering how global flow in procs
+--                       Infering how globals flow in procs
 ----------------------------------------------------------------
 
 
--- | Update the given ProcDef to the given GlobalFlows
-updateGlobalFlows :: GlobalFlows -> ProcDef -> ProcDef
-updateGlobalFlows _ ProcDef{procImpln=ProcDefSrc{}}
-    = shouldnt "updateGlobalFlows on uncompiled proc"
-updateGlobalFlows toSave
-        pDef@ProcDef{procImpln=impln@ProcDefPrim{procImplnGlobalFlows=gFlows}}
-    = pDef{procImpln=impln{procImplnGlobalFlows=updateGlobalFlows' toSave gFlows}}
+updateProcBodyGlobalFlows :: ProcDef -> Compiler ProcDef
+updateProcBodyGlobalFlows ProcDef{procImpln=ProcDefSrc{}}
+    = shouldnt "updateProcBodyGlobalFlows on uncompiled proc"
+updateProcBodyGlobalFlows pDef@ProcDef{procImpln=impln@ProcDefPrim{procImplnBody=body}} = do
+    body' <- updateBodyGlobalFlows body
+    return pDef{procImpln=impln{procImplnBody=body'}}
 
 
-updateGlobalFlows' :: GlobalFlows -> GlobalFlows -> GlobalFlows
-updateGlobalFlows' toSave = 
-    maybe toSave (Just . Map.filter (not . Set.null) 
-                       . Map.mapWithKey (Set.filter . flip (hasGlobalFlow toSave)))
+updateBodyGlobalFlows :: ProcBody -> Compiler ProcBody
+updateBodyGlobalFlows (ProcBody prims NoFork)
+    = (`ProcBody` NoFork) <$> mapM (placedApply updatePrimGlobalFlows) prims
+updateBodyGlobalFlows (ProcBody prims fork@PrimFork{forkBodies=bodies}) = do
+    bodies' <- mapM updateBodyGlobalFlows bodies
+    (`ProcBody` fork{forkBodies=bodies'}) 
+        <$> mapM (placedApply updatePrimGlobalFlows) prims
+    
 
-
--- | Infer all global flows across the given procedures, 
--- updating their associated GlobalFlows
-inferGlobalFlows :: [ProcSpec] -> Compiler ()
-inferGlobalFlows procs = do
-    gFlows <- foldM (collectGlobalFlows $ Set.fromList procs) emptyGlobalFlows procs
-    mapM_ (updateProcDef $ updateGlobalFlows gFlows) procs
-
-
--- | Add all Global Flows from a given procedure to a set of GlobalFlows
-collectGlobalFlows :: Set ProcSpec -> GlobalFlows -> ProcSpec -> Compiler GlobalFlows
-collectGlobalFlows procs gFlows pspec = do
-    body <- procImplnBody . procImpln <$> getProcDef pspec
-    foldBodyPrims
-        (const $ addPrimGlobalFlows procs)
-        (return gFlows)
-        (liftM2 globalFlowsUnion)
-        body
-
-
--- | Add all Global Flows from a given Prim to a set of GlobalFlows.
--- If the call is to a proc in the given set of proc specs, we do not add the
--- GLobalFlows, else
--- * LPVM load instructions add a FlowIn for the respective Global
--- * LPVM store instructions add a FlowOut for the respective Global
--- * First order calls add their respective GlobalFlows into the set
--- * Resourceful higher order calls set the GlobalFlows to the universal set
-addPrimGlobalFlows :: Set ProcSpec -> Prim 
-                   -> Compiler GlobalFlows -> Compiler GlobalFlows
-addPrimGlobalFlows procs (PrimCall _ pspec _) gFlows
-    | pspec `Set.member` procs = gFlows 
-addPrimGlobalFlows _ prim gFlows 
-    = liftM2 globalFlowsUnion (primGlobalFlows prim) gFlows
+updatePrimGlobalFlows :: Prim -> OptPos -> Compiler (Placed Prim)
+updatePrimGlobalFlows (PrimCall id pspec args _) pos
+    = (`maybePlace` pos) . PrimCall id pspec args <$> procGlobalFlows pspec
+updatePrimGlobalFlows prim pos = return $ prim `maybePlace` pos
 
 
 ----------------------------------------------------------------
@@ -181,10 +156,10 @@ decideInlining def = return def
 -- |Estimate the "cost" of a call to a proc; ie, how much space the call will
 --  occupy.
 procCost :: PrimProto -> GlobalFlows -> Compiler Int
-procCost proto globalFlows = do
+procCost proto GlobalFlows{globalFlowsIn=ins, globalFlowsOut=outs} = do
     nonPhantoms <- filterM ((not <$>) . paramIsPhantom) $ primProtoParams proto
-    let globalCost = maybe 0 (Map.foldl ((. Set.size) . (+)) 0) globalFlows
-    return $ 1 + length nonPhantoms + globalCost
+    let globalCost = Set.size . USet.toSet Set.empty
+    return $ 1 + length nonPhantoms + globalCost ins + globalCost outs
 
 
 -- |Estimate the "cost" of a proc body; ie, how much space the code occupies.
@@ -197,7 +172,7 @@ bodyCost pprims = sum <$> mapM (primCost . content) pprims
 --  cost of the arguments, and a test instruction as free.
 primCost :: Prim -> Compiler Int
 primCost (PrimForeign "llvm" _ _ _) = return 1
-primCost (PrimCall _ _ args)        = (1+) . sum <$> mapM argCost args
+primCost (PrimCall _ _ args _)      = (1+) . sum <$> mapM argCost args
 primCost (PrimHigher _ fn args)     = (1+) . sum <$> mapM argCost (fn:args)
 primCost (PrimForeign _ _ _ args)   = (1+) . sum <$> mapM argCost args
 
