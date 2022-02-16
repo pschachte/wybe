@@ -302,6 +302,12 @@ data TypeError = ReasonParam ProcName Int OptPos
                    -- ^Cast operation appearing in non-foreign call argument
                | ReasonBadConstraint Ident Ident Int Exp TypeSpec OptPos
                    -- ^Type constraint on exp is invalid
+               | ReasonGenericUnique TypeSpec TypeSpec OptPos
+                   -- ^The statement supplied the specified unique for the
+                   -- specified generic
+               | ReasonGenericUniqueParam VarName TypeSpec OptPos
+                   -- ^The specified parameter has a generic type with a unique
+                   -- type parameter
                | ReasonShouldnt
                    -- ^This error should never happen
                | ReasonActuallyPure ProcName Impurity OptPos
@@ -457,6 +463,14 @@ typeErrorMessage (ReasonBadConstraint caller callee argNum exp ty pos) =
         "Type constraint (:" ++ show ty ++ ") in call from " ++ showProcName caller
         ++ " to " ++ callee ++ ", argument " ++ show argNum
         ++ ", is incompatible with expression " ++ show exp
+typeErrorMessage (ReasonGenericUnique gType uType pos) =
+    Message Error pos $
+        "Statement binds type variable " ++ show gType
+        ++ " to unique type " ++ show uType
+typeErrorMessage (ReasonGenericUniqueParam param uType pos) =
+    Message Error pos $
+        "Procedure parameter " ++ param
+        ++ " has type with unique type parameter " ++ show uType
 typeErrorMessage ReasonShouldnt =
     Message Error Nothing "Mysterious typing error"
 typeErrorMessage (ReasonActuallyPure name impurity pos) =
@@ -503,7 +517,7 @@ instance Show Typing where
 ultimateType  :: TypeSpec -> Typed TypeSpec
 ultimateType ty@TypeVariable{typeVariableName=tvar} = do
     mbval <- gets $ Map.lookup tvar . tvarDict
-    logTyped $ "Type variable ?" ++ show tvar ++ " is bound to " ++ show mbval
+    logTyped $ "Type variable " ++ show tvar ++ " is bound to " ++ show mbval
     case mbval of
         Nothing -> return ty
         Just ty' -> ultimateType ty'
@@ -604,9 +618,10 @@ unifyVarTypes pos v1 v2 = do
 -- the error.  Unifying types may have the effect of binding variables.
 unifyTypes :: TypeError -> TypeSpec -> TypeSpec -> Typed TypeSpec
 unifyTypes reason t1 t2 = do
-    logTyped $ "Unifying types " ++ show t1 ++ " and " ++ show t2
     t1' <- lift (lookupType "proc declaration" Nothing t1) >>= ultimateType
     t2' <- lift (lookupType "proc declaration" Nothing t2) >>= ultimateType
+    logTyped $ "Unifying types " ++ show t1 ++ " (-> " ++ show t1' 
+               ++ ") and " ++ show t2 ++ " (-> " ++ show t2' ++ ")"
     t <- unifyTypes' reason t1' t2'
     logTyped $ "  Unification yields " ++ show t
     bindTypeVariables t1 t
@@ -1051,6 +1066,7 @@ typecheckProcDecl' m pdef = do
     let inputs = Set.union inParams inResources
     when (vis == Public && any ((==AnyType) . paramType) params)
         $ typeError $ ReasonUndeclared name pos
+    mapM_ (checkGenericsNonUnique pos) params
     ifOK pdef $ do
         logTyping $ "** Type checking " ++ showProcName name ++ ": "
         logTyped $ "   with resources: " ++ show resources
@@ -1132,6 +1148,7 @@ typecheckProcDecl' m pdef = do
 -- | If no type errors have been recorded, execute the enclosed code; otherwise
 -- just return the specified proc definition.  This is probably only useful in
 -- defining typecheckProcDecl'.
+
 ifOK :: ProcDef -> Typed (ProcDef,Bool) -> Typed (ProcDef,Bool)
 ifOK pdef body = do
     allGood <- validTyping
@@ -1587,8 +1604,51 @@ canonicaliseSingle tyMap ctr ty@HigherOrderType{higherTypeParams=tfs} =
 canonicaliseSingle tyMap ctr ty = ((ty, ctr), tyMap)
 
 
+-- |Return either Just a type error for biding a generic type variable to a
+-- unique type, or Nothing.  The first argument is an argument type, and the
+-- second is the parameter type.
+uniqueGenericErr :: OptPos -> TypeSpec -> TypeSpec -> Typed (Maybe TypeError)
+uniqueGenericErr pos callTy@(TypeVariable (RealTypeVar _)) paramTy = do
+    isUniq <- lift $ typeIsUnique paramTy
+    return $ if isUniq
+        then Just $ ReasonGenericUnique callTy paramTy pos
+        else Nothing
+uniqueGenericErr pos callTy paramTy@(TypeVariable (RealTypeVar _)) = do
+    isUniq <- lift $ typeIsUnique callTy
+    return $ if isUniq
+        then Just $ ReasonGenericUnique paramTy callTy pos
+        else Nothing
+uniqueGenericErr _ _ _ = return Nothing
+
+
+-- | Report an error if a parameter's type includes any parameter that is a
+-- unique type.
+checkGenericsNonUnique :: OptPos -> Param -> Typed ()
+checkGenericsNonUnique pos param =
+    checkTypeParamNonUnique pos (paramType param) (paramName param)
+
+
+-- | Report an error if the specified type has a type parameter that is a unique
+-- type.  Mention the specified parameter name in the error message.
+checkTypeParamNonUnique :: OptPos -> TypeSpec -> VarName -> Typed ()
+checkTypeParamNonUnique pos TypeSpec{typeParams=params} name =
+    mapM_ (checkNonUnique pos name) params
+checkTypeParamNonUnique _ _ _ = return ()
+
+
+-- | Check that the specified type is not unique, and doesn't contain any unique
+-- type parameters.
+checkNonUnique :: OptPos -> VarName -> TypeSpec -> Typed ()
+checkNonUnique pos name ty@TypeSpec{typeParams=params} = do
+    isUniq <- lift $ typeIsUnique ty
+    when isUniq $ typeError $ ReasonGenericUniqueParam name ty pos
+    mapM_ (checkNonUnique pos name) params
+checkNonUnique _ _ _ = return ()
+
+
 -- | Refresh all type variables in a list of TypeSpecs.
 -- Does not modify the underlying Typing, excluding the typeVarCounter
+
 refreshTypes :: [TypeSpec] -> Typed [TypeSpec]
 refreshTypes tys = do
     tyVarCount <- gets typeVarCounter

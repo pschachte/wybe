@@ -1,0 +1,6 @@
+Error detected during type checking of module(s) unique_generic, unique_generic.u
+[91mfinal-dump/unique_generic.wybe:7:11: Type error in call to [|], argument 2
+[0m[91mfinal-dump/unique_generic.wybe:7:11: Type error in call to [|], argument 1
+[0m[91mfinal-dump/unique_generic.wybe:7:11: Statement binds type variable T to unique type unique_generic.u
+[0m[91mfinal-dump/unique_generic.wybe:10:1: Procedure parameter lst has type with unique type parameter unique_generic.u
+[0m

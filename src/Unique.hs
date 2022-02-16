@@ -348,14 +348,6 @@ uniquenessCheckClosedVariable (Typed (Var name fl ft) ty _) pos = do
         $ uniquenessErr $ UniquenessError name ty pos ft ErrorClosed
 uniquenessCheckClosedVariable _ _ = return ()
 
--- | Check if a type is unique
-typeIsUnique :: TypeSpec -> Compiler Bool
-typeIsUnique TypeSpec { typeMod = mod, typeName = name } = do
-    let mod' = mod ++ [name]
-    getSpecModule "typeIsUnique" (tmUniqueness . typeModifiers . modInterface)
-                  mod'
-typeIsUnique _ = return False
-
 
 -- | Report an error when a unique typed variable is being reused
 reportUniquenessError :: UniquenessError -> Compiler ()

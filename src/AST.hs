@@ -94,6 +94,7 @@ module AST (
   getOrigin, getSource, getDirectory,
   optionallyPutStr, message, errmsg, (<!>), prettyPos, Message(..), queueMessage,
   genProcName, addImport, doImport, importFromSupermodule, lookupType,
+  typeIsUnique,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   initialisedResources,
   addSimpleResource, lookupResource, 
@@ -964,6 +965,15 @@ lookupType context pos ty@(TypeSpec mod name args) = do
             errmsg pos $ "In " ++ context ++ ", type " ++ show ty ++
                         " could refer to: " ++ showModSpecs (Set.toList mspecs)
             return InvalidType
+
+
+-- | Check if a type is unique
+typeIsUnique :: TypeSpec -> Compiler Bool
+typeIsUnique TypeSpec { typeMod = mod, typeName = name } = do
+    let mod' = mod ++ [name]
+    getSpecModule "typeIsUnique" (tmUniqueness . typeModifiers . modInterface)
+                  mod'
+typeIsUnique _ = return False
 
 
 -- |Add the specified resource to the current module.
