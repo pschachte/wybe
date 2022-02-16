@@ -328,15 +328,6 @@ uniquenessCheckParam name pos (Param p ty flow flowType) = do
      $ uniquenessErr $ UniquenessError p ty pos flowType (ErrorReturn name)
 
 
--- | Check if a type is unique
-typeIsUnique :: TypeSpec -> Compiler Bool
-typeIsUnique TypeSpec { typeMod = mod, typeName = name } = do
-    let mod' = mod ++ [name]
-    getSpecModule "typeIsUnique" (tmUniqueness . typeModifiers . modInterface)
-                  mod'
-typeIsUnique _ = return False
-
-
 -- | Report an error when a unique typed variable is being reused
 reportUniquenessError :: UniquenessError -> Compiler ()
 reportUniquenessError (UniquenessError name ty pos flow ErrorReuse) = do
