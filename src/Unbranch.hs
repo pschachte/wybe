@@ -658,7 +658,7 @@ unbranchExp exp@(AnonProc mods params pstmts clsd res) pos = do
     let res' = trustFromJust "unbranch annon proc without resources" res
     name <- newProcName
     logUnbranch $ "Creating procref for " ++ show exp ++ " under " ++ name
-    let ProcModifiers detism _ impurity _ _ _ _ = mods
+    let ProcModifiers detism inlining impurity _ _ _ _ = mods
     lift $ checkProcMods "anonymous procedure" pos mods
     let (freeParams, freeVars) = unzip $ uncurry freeParamVar <$> Map.toAscList clsd'
     logUnbranch $ "  With params " ++ show params
@@ -666,7 +666,7 @@ unbranchExp exp@(AnonProc mods params pstmts clsd res) pos = do
     tmpCtr <- gets brTempCtr
     let procProto = ProcProto name (freeParams ++ params) res'
     let procDef = ProcDef name procProto (ProcDefSrc pstmts) Nothing tmpCtr 0
-                    Map.empty Private detism MayInline Pure AnonymousProc
+                    Map.empty Private detism inlining Pure AnonymousProc
                     NoSuperproc
     procDef' <- lift $ unbranchProc procDef tmpCtr
     logUnbranch $ "  Resultant hoisted proc: " ++ show procProto
@@ -684,17 +684,17 @@ unbranchExp exp pos = return $ maybePlace exp pos
 -- | Create and add a closure of the given ProcSpec with the given name 
 -- and free variables
 addClosure :: ProcSpec -> [Placed Exp] -> OptPos -> String -> Unbrancher (Placed Exp)
-addClosure regularProcSpec@(ProcSpec mod nm pID _) freeVars pos name = do
+addClosure regularProcSpec@(ProcSpec mod nm pID _) free pos name = do
     ProcDef{procDetism=detism, procInlining=inlining, procImpurity=impurity,
             procProto=procProto@ProcProto{procProtoParams=params,
                                           procProtoResources=res}}
         <- lift $ getProcDef regularProcSpec
-    let (params', args, free) = makeFreeParams params freeVars 
+    let (params', args) = makeFreeParams params free
     let pDefClosure =
             ProcDef name (ProcProto name params' res)
             (ProcDefSrc [Unplaced $ ProcCall (First mod nm $ Just pID) 
                                         detism False args])
-            Nothing 0 0 Map.empty Private detism MayInline impurity 
+            Nothing 0 0 Map.empty Private detism inlining impurity 
             (ClosureProc regularProcSpec) NoSuperproc
     logUnbranch $ "Creating closure for " ++ show regularProcSpec
     logUnbranch $ "  with params: " ++ show params'
@@ -711,25 +711,24 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) freeVars pos name = do
 -- params are the closure's params, the args are the arguments to the inner call,
 -- and the free variables represent the variables that are free to the closure.
 -- This removes params/free variables where the expression is a known constant
-makeFreeParams :: [Param] -> [Placed Exp] -> ([Param], [Placed Exp], [Placed Exp])
+makeFreeParams :: [Param] -> [Placed Exp] -> ([Param], [Placed Exp])
 makeFreeParams params exps = makeFreeParams' params $ unPlace <$> exps
 
 
-makeFreeParams' :: [Param] -> [(Exp, OptPos)] -> ([Param], [Placed Exp], [Placed Exp])
-makeFreeParams' params [] = (freeParamToOrdinary <$> params', paramToVar <$> params', [])
-  where params' = unbranchParam <$> params
+makeFreeParams' :: [Param] -> [(Exp, OptPos)] -> ([Param], [Placed Exp])
+makeFreeParams' params [] = (params', paramToVar <$> params')
+  where params' = freeParamToOrdinary . unbranchParam <$> params
 makeFreeParams' [] _ = shouldnt "too many exps for params"
-makeFreeParams' (param@(Param nm pTy fl _):params) ((Typed exp ty cast,pos):exps) 
-    | flowsOut fl                = shouldnt "out flowing free param"
-    | isJust $ expIsConstant exp = (params',        args', closed')
-    | otherwise                  = (param':params', args', var:closed')
+makeFreeParams' ((Param nm pTy fl _):params) ((Typed exp ty cast,pos):exps) 
+    | flowsOut fl = shouldnt "out flowing free param"
+    | otherwise   = (param':params', exp':exps')
   where 
-    (params', args, closed') = makeFreeParams' params exps
+    (params', exps') = makeFreeParams' params exps
+    param' = Param nm (unbranchType pTy) ParamIn Free
+    exp' = Typed (fromMaybe (Var nm ParamIn Free) $ expIsConstant exp) 
+            ty' cast' `maybePlace` pos
     ty' = unbranchType ty
     cast' = unbranchType <$> cast
-    args' = Typed exp ty' cast' `maybePlace` pos:args
-    var = Typed (Var nm ParamIn Free) ty' cast' `maybePlace` pos
-    param' = Param nm (unbranchType pTy) ParamIn Free
 makeFreeParams' _ _ = shouldnt "untyped free var"
 
 
