@@ -12,3 +12,7 @@ def bla(lst:list(u), ?hd:u) {     # valid, but we can make it an error
     |   ?hd = u0
     }
 }
+
+def foo(a) { pass } # a has an inferred generic type
+
+foo(u0) # cannot bind to an inferred generic type
