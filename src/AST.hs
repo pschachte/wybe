@@ -54,7 +54,7 @@ module AST (
   getParams, getPrimParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, maybeModPrefix, ProcImpln(..), ProcDef(..), procInline, procCallCount,
-  getProcGlobalFlows, primGlobalFlows, 
+  getProcGlobalFlows, 
   primImpurity, flagsImpurity, flagsDetism,
   AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
   parameterVarNameToID, SpeczVersion, CallProperty(..), generalVersion,
@@ -2012,19 +2012,6 @@ flagDetism _ "semidet"  = SemiDet
 flagDetism detism _     = detism
 
 
--- | What are the GlobalFlows of the given Prim?
-primGlobalFlows :: Prim -> GlobalFlows
-primGlobalFlows (PrimCall _ _ _ gFlows) = gFlows
-primGlobalFlows (PrimHigher _ arg _) 
-    = if isResourcefulHigherOrder $ argType arg 
-      then univGlobalFlows else emptyGlobalFlows
-primGlobalFlows (PrimForeign "lpvm" "load" _ [ArgGlobal info _, _]) 
-    = addGlobalFlow info FlowIn emptyGlobalFlows
-primGlobalFlows (PrimForeign "lpvm" "store" _ [_, ArgGlobal info _]) 
-    = addGlobalFlow info FlowOut emptyGlobalFlows
-primGlobalFlows PrimForeign{} = emptyGlobalFlows
-
-
 data ProcVariant 
     = RegularProc
     | ConstructorProc
@@ -2101,7 +2088,7 @@ data ProcImpln
     deriving (Eq,Generic)
 
 
--- | Represents a set of globals flowing in and out
+-- | Represents a set of globals flowing in and out. 
 data GlobalFlows 
     = GlobalFlows {
         globalFlowsIn :: UnivSet GlobalInfo,
@@ -2131,7 +2118,11 @@ univGlobalFlows = GlobalFlows UniversalSet UniversalSet
 
 -- | Given a list of Types and a set of ResourceFlowSpecs, make a GlobalFlows.
 -- If any of the TypeSpecs are resourceful higher order, this is the 
--- univGlobalFlows, otherwise this is derived from the resources and flows
+-- univGlobalFlows, otherwise this is derived from the resources and flows.
+--
+-- In the case we have a higher order resourceful argument, we may not know 
+-- exactly which global variables flow into or out of a procedure, and as such
+-- we take a conservative approach and assume all do.
 makeGlobalFlows :: [TypeSpec] -> Set ResourceFlowSpec -> GlobalFlows
 makeGlobalFlows tys resFlows
     | any isResourcefulHigherOrder tys = univGlobalFlows 
@@ -2959,6 +2950,10 @@ data Exp
 data StringVariant = WybeString | CString
    deriving (Eq,Ord,Generic)
 
+
+-- Information about a global variable. 
+-- A global vairbale is a variable that is available everywhere, 
+-- and can be access via an LPVM load instruction, or written to via an LPVM store
 data GlobalInfo = GlobalResource { globalResourceSpec :: ResourceSpec }
     deriving (Eq, Ord, Generic)
 
@@ -3151,28 +3146,30 @@ data PrimArg
      deriving (Eq,Ord,Generic)
 
 
--- |Returns a list of all arguments to a prim
-primArgs :: Prim -> [PrimArg]
-primArgs (PrimCall _ _ args _) = args
-primArgs (PrimHigher _ fn args) = fn:args
-primArgs prim@(PrimForeign _ _ _ args) = args
+-- |Returns a list of all arguments to a prim, including global flows
+primArgs :: Prim -> ([PrimArg], GlobalFlows)
+primArgs (PrimCall _ _ args gFlows) = (args, gFlows)
+primArgs (PrimHigher _ fn args) 
+    = (fn:args, if isResourcefulHigherOrder $ argType fn 
+                then univGlobalFlows else emptyGlobalFlows)
+primArgs (PrimForeign "lpvm" "load" _ args@[ArgGlobal info _, _]) 
+    = (args, addGlobalFlow info FlowIn emptyGlobalFlows)
+primArgs (PrimForeign "lpvm" "store" _ args@[_, ArgGlobal info _]) 
+    = (args, addGlobalFlow info FlowOut emptyGlobalFlows)
+primArgs prim@(PrimForeign _ _ _ args) = (args, emptyGlobalFlows)
 
 
--- |Replace a Prim's args with a list of args
-replacePrimArgs :: Prim -> [PrimArg] -> Prim
-replacePrimArgs (PrimCall id pspec _ gFlows) args
+-- |Replace a Prim's args and global flows with a list of args and global flows
+replacePrimArgs :: Prim -> [PrimArg] -> GlobalFlows -> Prim
+replacePrimArgs (PrimCall id pspec _ _) args gFlows
     = PrimCall id pspec args gFlows
-replacePrimArgs (PrimHigher id _ _) []
+replacePrimArgs (PrimHigher id _ _) [] _
     = shouldnt "replacePrimArgs of higher call with not enough args"
-replacePrimArgs (PrimHigher id _ _) (fn:args) 
+replacePrimArgs (PrimHigher id _ _) (fn:args) _
     = PrimHigher id fn args
-replacePrimArgs (PrimForeign lang nm flags _) args 
+replacePrimArgs (PrimForeign lang nm flags _) args _
     = PrimForeign lang nm flags args
 
--- |Replace a Prim's GlobalFlows with new GlobalFlows
-replaceGlobalFlows :: Prim -> GlobalFlows -> Prim
-replaceGlobalFlows (PrimCall id pspec args _) gFlows = PrimCall id pspec args gFlows
-replaceGlobalFlows prim                       _      = prim
 
 argIsVar :: PrimArg -> Bool
 argIsVar ArgVar{} = True

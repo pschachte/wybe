@@ -453,7 +453,7 @@ ordinaryInstr prim pos = do
             -- record prim executed (and other modes), and generate instr
             logBuild "not found"
             impurity <- lift $ primImpurity prim
-            let gFlows = primGlobalFlows prim
+            let gFlows = snd $ primArgs prim
             when (impurity <= Pure && gFlows == emptyGlobalFlows) 
                 $ recordEntailedPrims prim
             rawInstr prim pos
@@ -545,14 +545,15 @@ transformUnneededArg _ _ arg = return arg
 -- outputs of the instruction.
 splitPrimOutputs :: Prim -> (Prim, [PrimArg])
 splitPrimOutputs prim =
-    let (inArgs,outArgs) = splitArgsByMode $ primArgs prim
-    in  (replacePrimArgs prim $ canonicaliseArg <$> inArgs, outArgs)
+    let (args, gFlows) = primArgs prim
+        (inArgs,outArgs) = splitArgsByMode args 
+    in  (replacePrimArgs prim (canonicaliseArg <$> inArgs) gFlows, outArgs)
 
 
 -- |Returns a list of all output arguments of the input Prim
 primOutputs :: Prim -> [PrimArg]
 primOutputs prim =
-    List.filter ((==FlowOut) . argFlowDirection) $ primArgs prim
+    List.filter ((==FlowOut) . argFlowDirection) $ fst $ primArgs prim
 
 
 -- |Add a binding for a variable. If that variable is an output for the
@@ -764,7 +765,7 @@ updateGlobalsLoaded prim pos = do
         PrimForeign "lpvm" "store" _ [var, ArgGlobal info _] ->
             modify $ \s -> s{globalsLoaded=Map.insert info var loaded}
         _ -> do
-            let gFlows = primGlobalFlows prim
+            let gFlows = snd $ primArgs prim
             logBuild $ "Call has global flows: " ++ show gFlows
             let filter info _ = not $ hasGlobalFlow gFlows FlowOut info
             modify $ \s -> s {globalsLoaded=Map.filterWithKey filter loaded}
@@ -1213,7 +1214,8 @@ bkwdBuildStmt defs prim pos = do
               ++ "\n    and bkwdRenaming = " ++ simpleShowMap renaming
               ++ "\n    and defs         = " ++ simpleShowSet defs
               ++ "\n    and globalStored = " ++ simpleShowSet gStored
-    args' <- mapM renameArg $ primArgs prim
+    let (args, gFlows) = primArgs prim
+    args' <- mapM renameArg args
     logBkwd $ "    renamed args = " ++ show args'
     case (prim,args') of
       (PrimForeign "llvm" "move" [] _, [ArgVar{argVarName=fromVar},
@@ -1225,28 +1227,26 @@ bkwdBuildStmt defs prim pos = do
           | info `Set.member` gStored -> return ()
           | otherwise -> do
               modify $ \s -> s { bkwdGlobalStored = Set.insert info gStored }
-              bkwdBuildStmt' defs args' prim pos
+              bkwdBuildStmt' defs args' gFlows prim pos
       _ -> do 
-          let gFlows = primGlobalFlows prim
           let filter info = not $ hasGlobalFlow gFlows FlowIn info
           modify $ \s -> s { bkwdGlobalStored = Set.filter filter gStored }
-          bkwdBuildStmt' defs args' prim pos
+          bkwdBuildStmt' defs args' gFlows prim pos
 
 
-bkwdBuildStmt' :: Set PrimVarName -> [PrimArg] -> Prim -> OptPos -> BkwdBuilder ()
-bkwdBuildStmt' defs args prim pos = do
+bkwdBuildStmt' :: Set PrimVarName -> [PrimArg] -> GlobalFlows -> Prim -> OptPos -> BkwdBuilder ()
+bkwdBuildStmt' defs args gFlows prim pos = do
     usedLater <- gets bkwdUsedLater
     let (ins, outs) = splitArgsByMode $ List.filter argIsVar $ flattenArgs args
     -- Filter out pure instructions that produce no needed outputs or out flowing
     -- globals
     purity <- lift $ primImpurity prim
-    let gFlows = primGlobalFlows prim
     when (purity > Pure || any (`Set.member` usedLater) (argVarName <$> outs)
                         || not (USet.isEmpty $ globalFlowsOut gFlows))
       $ do
         -- XXX Careful:  probably shouldn't mark last use of variable passed
         -- as input argument more than once in the call
-        let prim' = replacePrimArgs prim $ markIfLastUse usedLater <$> args
+        let prim' = replacePrimArgs prim (markIfLastUse usedLater <$> args) gFlows
         logBkwd $ "    updated prim = " ++ show prim'
         let inVars = argVarName <$> ins
         let usedLater' = List.foldr Set.insert usedLater inVars

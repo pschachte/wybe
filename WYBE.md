@@ -126,7 +126,7 @@ and the type parameters are also compatible.
 
 The list of modifiers specify the modifiers of the higher order type. These modifiers
 can be a purity modifier, a determinism modifier, or `resource`. The special 
-`resource` modifier states that this higher order term uses some resource.
+`resource` modifier states that this higher order term may use some resource.
 
 
 ## Constants
@@ -200,7 +200,7 @@ In general, procedure calls have the form:
 where *name* is the name of the procedure to call,
 and each *arg* is an expression specifying an input or output
 to that procedure. If there is a variable bound with the name *name* that has 
-a higher order type then this is a call to the higher order term.
+a [higher order type](#higher-order-types) then this is a call to the higher order term.
 
 Sometimes you may wish to specify which module the procedure *name* exists in. 
 You can further specify which module the procedure *name* is from by preceding
@@ -297,23 +297,23 @@ Expressions containing both output and input/output arguments are not permitted.
 
 If a function call is made with *fewer* arguments than is dictated by the 
 definition of procedure/function, the procedure is considered a partial 
-application. The mode of all arguments must be an input, except for the last 
-which is an output. 
+application. The mode of all arguments must be an input (as the procedure is
+not called where used to produce any outputs).
 
 This binds the output name to a "partial application" of the procedure. The type
 of the output variable is a higher order type containing the types and flows of 
 the missing arguments. The higher order type's modifiers are dictated by the 
 modifiers of the partially applied procedure. 
 
-The `resource` modifier is applied if the procedure uses some resource. In this
+The `resource` modifier is applied if the procedure may use some resource. In this
 special case, the number of arguments may be no greater than the expected number
 of arguments, plus one for the partially applied output.
 
 Examples of partial applications, with accompanying type annotations, are as follows:
 
 ```
-`+`(1, ?f:(int, ?int))
-# equivalent to ?f:(int, ?int) = `+`(1)
+?f:(int, ?int) = `+`(1)
+# equivalent to `+`(1, ?f:(int, ?int))
 f(2, ?three)
 
 ?printer = print:{resource}(int)
@@ -450,7 +450,7 @@ f(x, ?y)
 ## Anonymous procedures
 
 Anonymous procedures are procedure definitions that appear inline, lacking a
-declaration (and hence a name) given to a regular procedure definitions.
+declaration (and hence a name) given to a regular procedure definition.
 
 Anonymous procedures take the following forms:
 

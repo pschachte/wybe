@@ -300,11 +300,11 @@ updateAliasedByPrim aliasMap prim =
             let prim' = content prim
             maybeAliasedVariables <- maybeAliasPrimArgs prim'
             aliasedArgsInSimplePrim aliasMap maybeAliasedVariables 
-                                        (primArgs prim')
+                                        (fst $ primArgs prim')
 
 
--- Build up maybe aliased inputs and outputs triggered by move, access, cast
--- instructions.
+-- Build up maybe aliased inputs and outputs triggered by move, access, cast, 
+-- load and store instructions.
 -- Not to compute aliasing from mutate instructions with the assumption that we
 -- always try to do nondestructive update.
 -- Retruns maybeAliasedVariables
@@ -314,6 +314,10 @@ maybeAliasPrimArgs (PrimForeign "lpvm" "access" _ args) =
 maybeAliasPrimArgs (PrimForeign "lpvm" "cast" _ args) =
     _maybeAliasPrimArgs args
 maybeAliasPrimArgs (PrimForeign "llvm" "move" _ args) =
+    _maybeAliasPrimArgs args
+maybeAliasPrimArgs (PrimForeign "llvm" "load" _ args) =
+    _maybeAliasPrimArgs args
+maybeAliasPrimArgs (PrimForeign "llvm" "store" _ args) =
     _maybeAliasPrimArgs args
 maybeAliasPrimArgs prim@(PrimForeign "lpvm" "mutate" flags args) = do
     let [fIn, fOut, _, _, _, _, mem] = args
