@@ -950,6 +950,7 @@ callInfoTypes HigherInfo{} = Nothing
 
 -- |Check if a FirstInfo is for a proc with a single Bool output as last arg,
 --  and if so, return Just the FirstInfo for the equivalent test proc
+-- Higher order reification of bool fns to tests is handled in `matchTypes'
 boolFnToTest :: CallInfo -> Maybe CallInfo
 boolFnToTest info@FirstInfo{firstInfoDetism=Det,
                             firstInfoPartial=False,
@@ -966,6 +967,7 @@ boolFnToTest _ = Nothing
 
 -- |Check if ProcInfo is for a test proc, and if so, return a ProcInfo for
 --  the Det proc with a single Bool output as last arg
+-- Higher order reification of tests bool fns is handled in `matchTypes'
 testToBoolFn :: CallInfo -> Maybe CallInfo
 testToBoolFn info@FirstInfo{firstInfoDetism=SemiDet,
                             firstInfoPartial=False,
@@ -1502,6 +1504,8 @@ matchTypes caller callee pos _ callTypes callFlows
     typing <- 
         case fnTy of
             HigherOrderType mods tfs -> do
+                -- This handles the reification of higher order tests <-> bool fns
+                -- For first order cases, see `boolFnToTest' and `testToBoolFn'
                 let nCallTFs = length callTFs
                     nTFs = length tfs
                     tfs' | nCallTFs == nTFs - 1 
