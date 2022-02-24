@@ -221,6 +221,7 @@ import           Options                   (LogSelection (..), Options (..),
 import           Parser                    (parseWybe)
 import           Resources                 (resourceCheckMod,
                                             transformProcResources,
+                                            transformProcGlobals,
                                             canonicaliseProcResources)
 import           Unique                    ( uniquenessCheckProc )
 import           Scanner                   (fileTokens)
@@ -240,6 +241,8 @@ import           Text.Parsec.Error
 import           BinaryFactory
 import qualified Data.ByteString.Char8 as BS
 import qualified LLVM.AST              as LLVMAST
+
+import           Debug.Trace
 
 ------------------------ Handling dependencies ------------------------
 
@@ -812,6 +815,9 @@ compileModSCC mspecs = do
     mapM_ (transformModuleProcs uniquenessCheckProc)  mspecs
     stopOnError $ "uniqueness checking of module(s) "
                   ++ showModSpecs mspecs
+    mapM_ (transformModuleProcs transformProcGlobals)  mspecs
+    stopOnError $ "globalisation of module(s) "
+                  ++ showModSpecs mspecs
     ----------------------------------
     -- UNBRANCHING
     mapM_ (transformModuleProcs unbranchProc)  mspecs
@@ -1114,23 +1120,21 @@ buildMain :: [ModSpec] -> Compiler Item
 buildMain mainImports = do
     logBuild "Generating main executable code"
     let cmdResource name = ResourceFlowSpec (ResourceSpec ["command_line"] name)
-    res <- Set.toList . Set.unions . (keysSet<$>)
-           <$> mapM (initialisedResources `inModule`) mainImports
+    let mainRes = Set.fromList [cmdResource "argc" ParamIn,
+                                cmdResource "argv" ParamIn,
+                                cmdResource "exit_code" ParamOut]
+    initRes <- Set.filter (`Set.notMember` Set.map resourceFlowRes mainRes) 
+             . Set.unions . (keysSet <$>)
+            <$> mapM (initialisedResources `inModule`) mainImports
     let detism = setDetism Terminal
                  $ setImpurity Impure defaultProcModifiers
     -- Program main has argc, argv, and exit_code as resources
-    let proto = ProcProto "" []
-                $ Set.fromList [cmdResource "argc" ParamIn,
-                                 cmdResource "argv" ParamIn,
-                                 cmdResource "exit_code" ParamOut,
-                                 ResourceFlowSpec
-                                     (ResourceSpec ["wybe","io"] "io")
-                                     ParamOut]
+    let proto = ProcProto "" [] mainRes
     let mainBody =
           [ Unplaced $
-            UseResources res Nothing $
+            UseResources (Set.toList initRes) Nothing $
             -- Construct argumentless resourceful calls to all main procs
-              [Unplaced $ ProcCall m "" Nothing Det True []
+              [Unplaced $ ProcCall (First m "" Nothing) Det True []
               | m <- mainImports]
               ++ [Unplaced $ ForeignCall "c" "exit" ["semipure","terminal"]
                              [Unplaced $ intVarGet "exit_code"]]]

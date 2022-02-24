@@ -10,7 +10,7 @@
 
 module Codegen (
   Codegen(..), CodegenState(..), BlockState(..), Translation,
-  emptyModule, evalCodegen, addExtern, addGlobalConstant,
+  emptyModule, evalCodegen, addExtern, addGlobalConstant, getGlobalResource,
   execCodegen, emptyCodegen, evalTranslation, getCount, putCount,
   -- * Blocks
   createBlocks, setBlock, addBlock, entryBlockName,
@@ -18,6 +18,7 @@ module Codegen (
   phi, br, cbr, getBlock, retNothing, fresh,
   -- * Symbol storage
   alloca, store, local, assign, load, getVar, localVar, preservingSymtab,
+  makeGlobalResourceVariable,
   operandType, doAlloca, doLoad, 
   bitcast, cbitcast, inttoptr, cinttoptr, ptrtoint, cptrtoint,
   trunc, ctrunc, zext, czext, sext, csext,
@@ -33,7 +34,9 @@ module Codegen (
   icmp, fcmp, lOr, lAnd, lXor, shl, lshr, ashr,
   constInttoptr,
   -- * Structure instructions
-  insertvalue, extractvalue
+  insertvalue, extractvalue,
+  -- * GetElementPtr
+  getElementPtrInstr
 
   -- * Testing
 
@@ -48,6 +51,7 @@ import           Data.Word
 
 import           Control.Applicative
 import           Control.Monad.Except
+import           Control.Monad.Extra             (whenM)
 import           Control.Monad.State
 
 import           LLVM.AST
@@ -62,16 +66,14 @@ import qualified LLVM.AST.Constant               as C
 import qualified LLVM.AST.FloatingPointPredicate as FP
 import qualified LLVM.AST.IntegerPredicate       as IP
 
-import           AST                             (Compiler, Prim, PrimProto,
-                                                  TypeRepresentation,
-                                                  getModuleSpec, logMsg,
-                                                  shouldnt, specialName2,
-                                                  showModSpec)
+import           AST                             hiding (Stmt(..))
 import           LLVM.Context
 import           LLVM.Module
 import           Options                         (LogSelection (Blocks,Codegen))
 import           Config                          (wordSize, functionDefSection)
 import           Unsafe.Coerce
+import           Debug.Trace
+import LLVM.AST.Linkage (Linkage(ExternWeak, External))
 
 ----------------------------------------------------------------------------
 -- Types                                                                  --
@@ -128,7 +130,6 @@ float_c n   = error $ "Invalid floating point width " ++ show n
 ----------------------------------------------------------------------------
 -- | 'SymbolTable' is a simple mapping of scope variable names and their
 -- representation as an LLVM.AST.Operand.Operand.
-type SymbolTable = Map.Map String (Operand,TypeRepresentation)
 
 
 -- | A Map of all the assigned names to assist in supplying new unique names.
@@ -139,14 +140,19 @@ type Names = Map.Map String Int
 data CodegenState
     = CodegenState {
         currentBlock :: Name     -- ^ Name of the active block to append to
-      , blocks       :: Map.Map Name BlockState -- ^ Blocks for function
-      , symtab       :: SymbolTable -- ^ Local symbol table of a function
+      , blocks       :: Map.Map Name BlockState 
+                                 -- ^ Blocks for function
+      , symtab       :: Map.Map String (Operand,TypeRepresentation) 
+                                 -- ^ Local symbol table of a function
       , blockCount   :: Int      -- ^ Incrementing count of basic blocks
       , count        :: Word     -- ^ Count for temporary operands
       , names        :: Names    -- ^ Name supply
       , externs      :: [Prim]   -- ^ Primitives which need to be declared
       , globalVars   :: [Global] -- ^ Needed global variables/constants
-      , modProtos    :: [PrimProto] -- ^ Module procedures prototypes
+      , resources    :: Map.Map ResourceSpec Global
+                                 -- ^ Needed global variables for resources
+      , modProtos    :: [PrimProto]
+                                 -- ^ Module procedures prototypes
       } deriving Show
 
 -- | 'BlockState' will generate the code for basic blocks inside of
@@ -170,8 +176,8 @@ data BlockState
 type Codegen = StateT CodegenState Compiler
 
 execCodegen :: Word -> [PrimProto] -> Codegen a -> Compiler CodegenState
-execCodegen startCount protos codegen =
-  execStateT codegen (emptyCodegen startCount protos)
+execCodegen startCount protos codegen 
+    = execStateT codegen (emptyCodegen startCount protos)
 
 evalCodegen :: [PrimProto] -> Codegen t -> Compiler t
 evalCodegen protos codegen = evalStateT codegen (emptyCodegen 0 protos)
@@ -194,13 +200,14 @@ fresh = do
   modify $ \s -> s { count = 1 + ix }
   return (ix + 1)
 
+
 -- | Update the list of externs which will be needed. The 'Prim' will be
 -- converted to an extern declaration later.
 addExtern :: Prim -> Codegen ()
-addExtern p =
-    do ex <- gets externs
-       modify $ \s -> s { externs = p : ex }
-       return ()
+addExtern p = do 
+  ex <- gets externs
+  modify $ \s -> s { externs = p : ex }
+
 
 -- | Creates a Global value for a constant, given the type and appends it
 -- to the CodegenState list. This list will be used to convert these Global
@@ -218,6 +225,37 @@ addGlobalConstant ty con =
                                          , initializer = Just con }
        modify $ \s -> s { globalVars = gvar : gs }
        return ref
+
+
+getGlobalResource :: ResourceSpec -> Type -> Codegen Operand
+getGlobalResource spec@(ResourceSpec mod nm) ty = do
+    ress <- gets resources
+    nm <- case Map.lookup spec ress of
+            Nothing -> do
+                global <- lift $ makeGlobalResourceVariable spec ty
+                modify $ \s -> s { resources = Map.insert spec global ress }
+                return $ G.name global
+            Just ref -> return $ G.name ref
+    return $ ConstantOperand $ C.GlobalReference (ptr_t ty) nm
+
+
+makeGlobalResourceVariable :: ResourceSpec -> Type -> Compiler Global
+makeGlobalResourceVariable spec@(ResourceSpec mod nm) ty = do
+    when (ty == VoidType) 
+        $ shouldnt $ "global resource " ++ show spec ++ " cant have voidtype"
+    let ref = Name $ fromString $ makeGlobalResourceName spec 
+    thisMod <- getModuleSpec 
+    let init = if thisMod == mod
+               then Just $ C.Undef ty
+               else Nothing
+    -- XXX this may be affected by multiprocessing
+    let linkage = External
+    return globalVariableDefaults { name = ref
+                                  , isConstant = False
+                                  , G.type' = ty
+                                  , G.linkage = linkage
+                                  , initializer = init
+                                  }
 
 -- | Create an empty LLVMAST.Module which would be converted into
 -- LLVM IR once the moduleDefinitions field is filled.
@@ -240,15 +278,15 @@ globalDefine isForeign rettype label argtypes body
                                False)
                , returnType = rettype
                , basicBlocks = body
-               , section = fmap fromString $ functionDefSection label
+               , section = fromString <$> functionDefSection label
                }
 
 
 -- | create a global declaration of an external function for the specified
 -- calling convention
-external :: CC.CallingConvention -> Type -> String -> [(Type, Name)]
-         -> Definition
-external cconv rettype label argtypes
+externalFunction :: CC.CallingConvention -> Type -> String -> [(Type, Name)]
+                 -> Definition
+externalFunction cconv rettype label argtypes
     = GlobalDefinition $ functionDefaults {
         G.callingConvention = cconv
       , name = Name $ fromString label
@@ -260,12 +298,12 @@ external cconv rettype label argtypes
 
 -- | 'externalC' creates a global declaration of an external C function
 externalC :: Type -> String -> [(Type, Name)] -> Definition
-externalC = external CC.C
+externalC = externalFunction CC.C
 
 
 -- | 'externalC' creates a global declaration of an external C function
 externalWybe :: Type -> String -> [(Type, Name)] -> Definition
-externalWybe = external CC.Fast
+externalWybe = externalFunction CC.Fast
 
 
 ----------------------------------------------------------------------------
@@ -295,6 +333,7 @@ emptyCodegen startCount =
     Map.empty
     []
     []
+    Map.empty
 
 -- | 'addBlock' creates and adds a new block to the current blocks
 addBlock :: String -> Codegen Name
@@ -378,14 +417,18 @@ uniqueName nm ns =
 
 -- | Create an extern referencing Operand
 externf :: Type -> Name -> Operand
-externf ty = ConstantOperand . (C.GlobalReference ty)
+externf ty = ConstantOperand . C.GlobalReference ty
 
 -- | Create a new Local Operand (prefixed with % in LLVM)
 localVar :: Type -> String -> Operand
-localVar t s =  (LocalReference t ) $ LLVMAST.Name $ fromString s
+localVar t s = LocalReference t $ LLVMAST.Name $ fromString s
+
 
 local :: Type -> LLVMAST.Name -> Operand
 local ty nm = LocalReference ty nm
+
+globalVar :: Type -> String -> C.Constant
+globalVar t s = C.GlobalReference t $ LLVMAST.Name $ fromString s
 
 ----------------------------------------------------------------------------
 -- Symbol Table                                                           --
@@ -393,9 +436,9 @@ local ty nm = LocalReference ty nm
 
 -- | Store a local variable on the front of the symbol table.
 assign :: String -> Operand -> TypeRepresentation -> Codegen ()
-assign var opd trep = do
-    logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show opd ++ ":" ++ show trep
-    modify $ \s -> s { symtab = Map.insert var (opd,trep) $ symtab s }
+assign var op trep = do
+    logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show op ++ ":" ++ show trep
+    modify $ \s -> s { symtab = Map.insert var (op,trep) $ symtab s }
 
 
 -- | Find and return the local operand by its given name from the symbol
@@ -403,9 +446,9 @@ assign var opd trep = do
 -- the same older names.
 getVar :: String -> Codegen (Operand,TypeRepresentation)
 getVar var = do
-  let err = shouldnt $ "Local variable not in scope: " ++ show var
-  lcls <- gets symtab
-  return $ fromMaybe err $ Map.lookup var lcls
+    let err = shouldnt $ "Local variable not in scope: " ++ show var
+    lcls <- gets symtab
+    return $ fromMaybe err $ Map.lookup var lcls
 
 
 -- | Evaluate nested code generating code, and reset the symtab to its original
@@ -432,6 +475,7 @@ operandType (ConstantOperand cons) =
         C.GlobalReference ty _ -> ty
         C.GetElementPtr _ (C.GlobalReference ty _) _ -> ty
         C.IntToPtr _ ty -> ty
+        C.PtrToInt _ ty -> ty
         C.Undef ty -> ty
         _ -> shouldnt $ "Not a recognised constant operand: " ++ show cons
 operandType _ = void_t
@@ -597,10 +641,8 @@ alloca :: Type -> Instruction
 alloca ty = Alloca ty Nothing 0 []
 
 -- | The 'store' instruction is used to write to write to memory. yields void.
-store :: Operand -> Operand -> Codegen Operand
-store ptr val = do
-  voidInstr $ Store False ptr val Nothing 0 []
-  return ptr
+store :: Operand -> Operand -> Codegen ()
+store ptr val = voidInstr $ Store False ptr val Nothing 0 []
 
 -- | The 'load' function wraps LLVM's load instruction with defaults.
 load :: Operand -> Instruction
@@ -668,6 +710,12 @@ insertvalue st op i = InsertValue st op [i] []
 
 extractvalue :: Operand -> Word32 -> Instruction
 extractvalue st i = ExtractValue st [i] []
+
+
+-- * GetElementPtr helper
+getElementPtrInstr :: Operand -> [Integer] -> LLVMAST.Instruction
+getElementPtrInstr op idxs = 
+  LLVMAST.GetElementPtr False op (cons . C.Int (fromIntegral wordSize) <$> idxs) []
 
 
 -- * Control Flow operations

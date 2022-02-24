@@ -32,7 +32,7 @@ import           LLVM.Module                as Mod
 import           LLVM.PassManager
 import           LLVM.Pretty                (ppllvm)
 import           LLVM.Target
-import           LLVM.Internal.Analysis     (verify)
+import           LLVM.Analysis              (verify)
 import           ObjectInterface
 import           Options                    (LogSelection (Blocks,Builder,Emit),
                                              optNoVerifyLLVM)
@@ -173,7 +173,7 @@ passes = defaultCuratedPassSetSpec { optLevel = Just 3 }
 -- a set of curated passes.
 withOptimisedModule :: Bool -> LLVMAST.Module -> (Mod.Module -> IO a) -> IO a
 withOptimisedModule noVerify llmod action =
-    withContext $ \context ->
+    withContext $ \context -> 
         withModuleFromAST context llmod $ \m -> do
             unless noVerify $ verify m
             withPassManager passes $ \pm -> do
@@ -181,7 +181,6 @@ withOptimisedModule noVerify llmod action =
                 if success
                     then action m
                     else error "Running of optimisation passes not successful"
-
 
 -- | Bracket pattern to run an [action] on the [LLVMAST.Module].
 withModule :: Bool -> LLVMAST.Module -> (Mod.Module -> IO a) -> IO a

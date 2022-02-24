@@ -16,18 +16,23 @@
 module AST (
   -- *Types just for parsing
   Item(..), Visibility(..), isPublic,
-  Determinism(..), determinismLEQ, determinismJoin,
+  Determinism(..), determinismLEQ, determinismJoin, determinismMeet,
   determinismFail, determinismSucceed,
   determinismSeq, determinismProceding, determinismName,
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
   TypeProto(..), TypeModifiers(..), TypeSpec(..), typeVarSet, TypeVarName(..),
-  genericType, typeModule,
+  genericType, higherOrderType, isHigherOrder,
+  isResourcefulHigherOrder, updateHigherOrderTypesM, typeModule,
   VarDict, TypeImpln(..),
-  ProcProto(..), Param(..), TypeFlow(..), paramTypeFlow,
+  ProcProto(..), Param(..), TypeFlow(..),
+  paramTypeFlow, primParamTypeFlow, setParamArgFlowType,
+  paramToVar, primParamToArg, unzipTypeFlow, unzipTypeFlows,
   PrimProto(..), PrimParam(..), ParamInfo(..),
-  Exp(..), StringVariant(..), Generator(..), Stmt(..), 
-  expIsVar, flattenedExpFlow, expIsConstant,
+  Exp(..), StringVariant(..), GlobalInfo(..), Generator(..), Stmt(..), ProcFunctor(..),
+  regularProc, regularModProc,
+  flattenedExpFlow, expIsVar, expIsConstant, expVar, expVar', maybeExpType, innerExp,
+  setExpFlowType,
   TypeRepresentation(..), TypeFamily(..), typeFamily,
   defaultTypeRepresentation, typeRepSize, integerTypeRep,
   defaultTypeModifiers,
@@ -43,11 +48,13 @@ module AST (
   Module(..), isRootModule, ModuleInterface(..), ModuleImplementation(..), InterfaceHash, PubProcInfo(..),
   ImportSpec(..), importSpec, Pragma(..), addPragma,
   descendentModules, sameOriginModules, -- XXX not needed? differentOriginModules,
+  refersTo,
   enterModule, reenterModule, exitModule, reexitModule, inModule,
   emptyInterface, emptyImplementation,
-  getParams, getDetism, getProcDef, getProcPrimProto,
+  getParams, getPrimParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, maybeModPrefix, ProcImpln(..), ProcDef(..), procInline, procCallCount,
+  getProcGlobalFlows, 
   primImpurity, flagsImpurity, flagsDetism,
   AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
   parameterVarNameToID, SpeczVersion, CallProperty(..), generalVersion,
@@ -56,13 +63,20 @@ module AST (
   ProcAnalysis(..), emptyProcAnalysis,
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, ResourceDef(..), FlowDirection(..),
-  argFlowDirection, argType, setArgType, argDescription, flowsIn, flowsOut,
+  argFlowDirection, argType, setArgType, setArgFlow, setArgFlowType, maybeArgFlowType,
+  argDescription, setParamType, paramIsResourceful,
+  setPrimParamType, setTypeFlowType,
+  flowsIn, flowsOut, primFlowToFlowDir,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
-  expToStmt, seqToStmt, procCallToExp, expOutputs,
-  pexpListOutputs, setExpTypeFlow, setPExpTypeFlow, isHalfUpdate,
+  expToStmt, seqToStmt, procCallToExp,
+  expOutputs, pexpListOutputs, expInputs, pexpListInputs,
+  setExpTypeFlow, setPExpTypeFlow,
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
+  maybeGetClosureOf, isClosureProc, isClosureVariant,
+  GlobalFlows(..), emptyGlobalFlows, univGlobalFlows, makeGlobalFlows,
+  addGlobalFlow, hasGlobalFlow, globalFlowsUnion, globalFlowsIntersection, 
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
@@ -70,7 +84,7 @@ module AST (
   updateTypeModifiers,
   addParameters, addTypeRep, setTypeRep, addConstructor,
   getModuleImplementationField, getModuleImplementation,
-  getLoadedModule, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
+  getLoadedModule, ifCurrentModuleElse, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
   getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
   getModule, getModuleInterface, updateModule, getSpecModule,
   updateModImplementation, updateModImplementationM,
@@ -78,20 +92,25 @@ module AST (
   updateModInterface, updateAllProcs, updateModSubmods, updateModProcs,
   getModuleSpec, moduleIsType, option,
   getOrigin, getSource, getDirectory,
-  optionallyPutStr, message, errmsg, (<!>), Message(..), queueMessage,
+  optionallyPutStr, message, errmsg, (<!>), prettyPos, Message(..), queueMessage,
   genProcName, addImport, doImport, importFromSupermodule, lookupType,
   typeIsUnique,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   initialisedResources,
-  addSimpleResource, lookupResource, specialResources, publicResource,
-  ProcModifiers(..), defaultProcModifiers, setDetism, setInline, setImpurity,
-  setIsCtor, showProcModifiers, Inlining(..), Impurity(..),
+  addSimpleResource, lookupResource, 
+  specialResources, specialResourcesSet, isSpecialResource, 
+  publicResource, resourcefulName,
+  ProcModifiers(..), defaultProcModifiers, checkProcMods,
+  setDetism, setInline, setImpurity, setVariant,
+  ProcVariant(..), Inlining(..), Impurity(..), 
   addProc, addProcDef, lookupProc, publicProc, callTargets,
-  specialChar, specialName, specialName2, outputVariableName, outputStatusName,
+  specialChar, specialName, specialName2,
+  outputVariableName, outputStatusName,
+  envParamName, envPrimParam, makeGlobalResourceName,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showProcName,
   showModSpec, showModSpecs, showResources, showOptPos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
-  flowPrefix, showFlags,
+  flowPrefix, showProcModifiers, showProcModifiers', showFlags, showFlags',
   showMap, showVarMap, simpleShowMap, simpleShowSet, bracketList,
   maybeShow, showMessages, stopOnError,
   logMsg, whenLogging2, whenLogging,
@@ -111,13 +130,14 @@ import           Crypto.Hash
 import qualified Data.Binary
 import qualified Data.ByteString.Lazy as BL
 import           Data.List as List
-import           Data.List.Extra (nubOrd)
+import           Data.List.Extra (nubOrd,splitOn)
 import           Data.Map as Map
 import           Data.Maybe
 import           Data.Set as Set
 import           UnivSet as USet
-import           Data.Tuple.HT ( mapSnd )
+import           Data.Tuple.HT ( mapSnd, mapFst )
 import           Data.Word (Word8)
+import           Text.Read (readMaybe)
 import           Flow             ((|>))
 import           Numeric          (showHex)
 import           Options
@@ -179,11 +199,11 @@ determinismLEQ Failure Det = False
 determinismLEQ det1 det2 = det1 <= det2
 
 
--- -- |Lattice meet for Determinism.  Probably not needed
--- determinismMeet :: Determinism -> Determinism -> Determinism
--- determinismMeet Failure Det = Terminal
--- determinismMeet Det Failure = Terminal
--- determinismMeet det1 det2 = min det1 det2
+-- |Lattice meet for Determinism.  Probably not needed
+determinismMeet :: Determinism -> Determinism -> Determinism
+determinismMeet Failure Det = Terminal
+determinismMeet Det Failure = Terminal
+determinismMeet det1 det2 = min det1 det2
 
 
 -- |Force the specified determinism to succeed, if it is reachable.
@@ -247,6 +267,8 @@ data TypeRepresentation
     | Bits Int          -- ^ An unsigned integer representation
     | Signed Int        -- ^ A signed integer representation
     | Floating Int      -- ^ A floating point representation
+    | Func [TypeRepresentation] [TypeRepresentation]
+                        -- ^ A function pointer with inputs and outputs
     deriving (Eq, Ord, Generic)
 
 
@@ -257,18 +279,18 @@ defaultTypeRepresentation = Bits wordSize
 
 -- | How many bits a type representation occupies
 typeRepSize :: TypeRepresentation -> Int
-typeRepSize Address         = wordSize
 typeRepSize (Bits bits)     = bits
 typeRepSize (Signed bits)   = bits
 typeRepSize (Floating bits) = bits
+typeRepSize (Func _ _)      = wordSize
+typeRepSize Address         = wordSize
 
 
 -- | The type representation is for a (signed or unsigned) integer type
 integerTypeRep :: TypeRepresentation -> Bool
-integerTypeRep Address         = False
 integerTypeRep (Bits bits)     = True
 integerTypeRep (Signed bits)   = True
-integerTypeRep (Floating bits) = False
+integerTypeRep _               = False
 
 
 -- | Crude division of types useful for categorising primitive operations
@@ -482,6 +504,18 @@ getLoadedModule modspec = do
     maybeMod <- gets (Map.lookup modspec . modules)
     logAST $ if isNothing maybeMod then " got nothing!" else " worked"
     return maybeMod
+
+-- | Perform an action if in the current module or a submodule, 
+-- else perform another
+ifCurrentModuleElse :: ModSpec -> StateT s Compiler a -> StateT s Compiler a
+                    -> StateT s Compiler a
+ifCurrentModuleElse mod current other = do
+    thisMod <- lift $ getModuleSpec
+    fileMod <- lift $ getModule modRootModSpec
+    if thisMod == mod || maybe False (`List.isPrefixOf` mod) fileMod
+    then current
+    else other
+
 
 -- |Apply the given function to the specified module, if it has been loaded;
 -- does nothing if not.  Takes care to handle it if the specified
@@ -892,6 +926,8 @@ lookupType _ _ AnyType = return AnyType
 lookupType _ _ InvalidType = return InvalidType
 lookupType _ _ ty@TypeVariable{} = return ty
 lookupType _ _ ty@Representation{} = return ty
+lookupType context pos ty@HigherOrderType{} =
+    updateHigherOrderTypesM (lookupType context pos) ty
 lookupType context pos ty@(TypeSpec [] typename args)
   | typename == currentModuleAlias = do
     currMod <- getModuleSpec
@@ -915,7 +951,7 @@ lookupType context pos ty@(TypeSpec mod name args) = do
             else if length params == length args
             then do
                 args' <- mapM (lookupType context pos) args
-                let matchingType = TypeSpec (init mspec) (last mspec) args'::TypeSpec
+                let matchingType = TypeSpec (init mspec) (last mspec) args'
                 logAST $ "Matching type = " ++ show matchingType
                 return matchingType
             else do
@@ -997,6 +1033,17 @@ specialResources =
         ("call_source_full_location",(callSourceLocation True,cStrType))
         ]
 
+        
+-- | The set of ResourceSpec that correspond to sepcial resources
+specialResourcesSet :: Set ResourceSpec
+specialResourcesSet = Set.map (ResourceSpec []) $ keysSet specialResources
+
+
+-- | Test if ResourceSpec refers to a special resource
+isSpecialResource :: ResourceSpec -> Bool
+isSpecialResource res = res `Set.member` specialResourcesSet
+
+
 callFileName :: Placed Stmt -> Exp
 callFileName pstmt =
     (`StringValue` CString)
@@ -1049,10 +1096,11 @@ data ProcModifiers = ProcModifiers {
     modifierDetism::Determinism,   -- ^ The proc determinism
     modifierInline::Inlining,      -- ^ Aggresively inline this proc?
     modifierImpurity::Impurity,    -- ^ Don't assume purity when optimising
-    modifierIsCtor::Bool,          -- ^ Is proc actually a constructor?
+    modifierVariant::ProcVariant,  -- ^ Is proc actually a constructor?
+    modifierResourceful::Bool,     -- ^ Can this procedure use resources?
     modifierUnknown::[String],     -- ^ Unknown modifiers specified
     modifierConflict::[String]     -- ^ Modifiers that conflict with others
-} deriving (Eq, Generic)
+} deriving (Eq, Ord, Generic)
 
 
 data Inlining = Inline | MayInline | NoInline
@@ -1095,9 +1143,19 @@ expectedImpurity Pure = Semipure        -- Semipure is OK for pure procs
 expectedImpurity _ = Impure             -- Otherwise, OK for defn to be impure
 
 
+resourcefulName :: Bool -> String
+resourcefulName False = ""
+resourcefulName True  = "resource"
+
+
+showResourceSets :: (Set ResourceSpec, Set ResourceSpec) -> String
+showResourceSets (ins, outs) = "{" ++ showSet ins ++ ";" ++ showSet outs ++ "}"
+  where showSet = intercalate "," . List.map show . Set.toList
+
+
 -- | The default Det, non-inlined, pure ProcModifiers.
 defaultProcModifiers :: ProcModifiers
-defaultProcModifiers = ProcModifiers Det MayInline Pure False [] []
+defaultProcModifiers = ProcModifiers Det MayInline Pure RegularProc False [] []
 
 
 -- | Set the modifierDetism attribute of a ProcModifiers.
@@ -1116,51 +1174,53 @@ setImpurity impurity mods = mods {modifierImpurity=impurity}
 
 
 -- | Mark the ProcModifiers to indicate a constructor.
-setIsCtor :: ProcModifiers -> ProcModifiers
-setIsCtor mods = mods { modifierIsCtor = True }
+setVariant :: ProcVariant -> ProcModifiers -> ProcModifiers
+setVariant variant mods = mods {modifierVariant=variant}
 
 
 -- | How to display ProcModifiers
 showProcModifiers :: ProcModifiers -> String
-showProcModifiers (ProcModifiers detism inlining impurity _ _ _) =
-    showFlags $ List.filter (not . List.null) [d,i,p]
+showProcModifiers (ProcModifiers detism inlining impurity _ res _ _) =
+    showFlags $ List.filter (not . List.null) [d,i,p,r]
     where d = determinismName detism
           i = inliningName inlining
           p = impurityName impurity
+          r = resourcefulName res
+
+
+-- | How to display ProcModifiers, with a space
+showProcModifiers' :: ProcModifiers -> String
+showProcModifiers' mods = mods' ++ if List.null mods' then "" else " "
+  where mods' = showProcModifiers mods
+
+
+-- | Display a list of strings separated by commas and surrounded with braces,
+-- or nothing if the list is empty.
+showFlags :: [String] -> String
+showFlags [] = ""
+showFlags flags = "{" ++ intercalate "," flags ++ "}"
 
 
 -- | Display a list of strings separated by commas and surrounded with braces
 -- and followed by a space, or nothing if the list is empty.
-showFlags :: [String] -> String
-showFlags [] = ""
-showFlags flags = "{" ++ intercalate "," flags ++ "} "
+showFlags' :: [String] -> String
+showFlags' flags = showFlags flags ++ if List.null flags then "" else " "
 
 
 -- |Add the specified proc definition to the current module.
 addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
     let name = procProtoName proto
-    let ProcModifiers detism inlining impurity ctor unknown conflict = mods
-    mapM_ (\m -> message Error
-                ("Unknown proc modifier '" ++ m
-                 ++ "' in declaration of " ++ name)
-                 pos)
-           unknown
-    mapM_ (\m -> message Error
-                ("Proc modifier '" ++ m
-                 ++ "' conflicts with earlier modifier in declaration of "
-                 ++ name)
-                 pos)
-           conflict
-    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0
-                  Map.empty vis detism inlining impurity ctor
-                  $ initSuperprocSpec vis
-    addProcDef procDef
+    let ProcModifiers detism inlining impurity variant _ _ _ = mods
+    checkProcMods ("declaratation of " ++ name) pos mods
+    let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 Map.empty
+                  vis detism inlining impurity variant (initSuperprocSpec vis)
+    void $ addProcDef procDef
 addProc _ item =
     shouldnt $ "addProc given non-Proc item " ++ show item
 
 
-addProcDef :: ProcDef -> Compiler ()
+addProcDef :: ProcDef -> Compiler ProcSpec
 addProcDef procDef = do
     let name = procName procDef
     let vis = procVis procDef
@@ -1180,13 +1240,31 @@ addProcDef procDef = do
         ) name))
     logAST $ "Adding definition of " ++ show spec ++ ":" ++
       showProcDef 4 procDef
-    return ()
+    return spec
+
+
+-- | Check a set of ProcModifiers, providing error messages for unknown and 
+-- conflicting mods
+checkProcMods :: String -> OptPos -> ProcModifiers -> Compiler ()
+checkProcMods context pos ProcModifiers{modifierUnknown=unknown,
+                                        modifierConflict=conflicting} = do
+    mapM_ (errmsg pos . ("Unknown modifier '" ++) 
+                      . (++ "' in " ++ context))
+        unknown
+    mapM_ (errmsg pos . ("Modifier '" ++) 
+                      . (++ "' conflicts with earlier modifier in " ++ context))
+        conflicting
 
 
 getParams :: ProcSpec -> Compiler [Param]
 getParams pspec =
     -- XXX shouldn't have to grovel in implementation to find prototype
     procProtoParams . procProto <$> getProcDef pspec
+
+
+getPrimParams :: ProcSpec -> Compiler [PrimParam]
+getPrimParams pspec =
+    primProtoParams . procImplnProto . procImpln <$> getProcDef pspec
 
 
 getDetism :: ProcSpec -> Compiler Determinism
@@ -1593,6 +1671,17 @@ lookupTypeRepresentation Representation{typeSpecRepresentation=rep} =
     return $ Just rep
 lookupTypeRepresentation (TypeSpec modSpec name _) =
     lookupModuleRepresentation $ modSpec ++ [name]
+lookupTypeRepresentation (HigherOrderType ProcModifiers{modifierDetism=detism} tfs) = do
+    mbInReps <- sequenceRepFlowTypes ins
+    mbOutReps <- sequenceRepFlowTypes outs
+    return $ Func <$> mbInReps 
+                  <*> ((++ [Signed 1 | detism == SemiDet]) 
+                  <$> mbOutReps)
+  where
+    ins = List.filter (flowsIn . typeFlowMode) tfs
+    outs = List.filter (flowsOut . typeFlowMode) tfs
+    sequenceRepFlowTypes = (sequence <$>) . mapM lookupTypeRepresentation
+                                          . (typeFlowType <$>)
 
 
 -- |Given a module spec, find its representation, if it is a type.
@@ -1617,8 +1706,8 @@ type ResourceName = Ident
 -- Real type variables represent type variables specified by the programmer;
 -- faux type variables are generated by the compiler.
 data TypeVarName
-    = FauxTypeVar Int
-    | RealTypeVar Ident
+    = RealTypeVar Ident
+    | FauxTypeVar Int
   deriving (Eq, Ord, Generic)
 
 instance Show TypeVarName where
@@ -1851,7 +1940,7 @@ data ProcDef = ProcDef {
     procDetism :: Determinism,  -- ^can this proc fail?
     procInlining :: Inlining,   -- ^should we inline calls to this proc?
     procImpurity :: Impurity,   -- ^ Is this proc pure?
-    procIsCtor :: Bool,         -- ^ Is this proc a constructor for its type?
+    procVariant :: ProcVariant, -- ^ How is this proc manifested in the source code
     procSuperproc :: SuperprocSpec
                                 -- ^the proc this should be part of, if any
 }
@@ -1864,6 +1953,17 @@ procInline :: ProcDef -> Bool
 procInline = (==Inline) . procInlining
 
 
+-- | What are the GlobalFLows of the given ProcSpec
+getProcGlobalFlows :: ProcSpec -> Compiler GlobalFlows
+getProcGlobalFlows pspec = do
+    pDef <- getProcDef pspec
+    case procImpln pDef of
+      ProcDefSrc _ -> 
+            let ProcProto _ params resFlows = procProto pDef
+            in return $ makeGlobalFlows (paramType <$> params) resFlows
+      ProcDefPrim _ (PrimProto _ _ gFlows) _ _ _ -> return gFlows
+
+
 -- | How many static calls to this proc from the same module have we seen?  This
 -- won't be correct for public procs.
 procCallCount :: ProcDef -> Int
@@ -1872,11 +1972,17 @@ procCallCount proc = Map.foldr (+) 0 $ procCallers proc
 
 -- | What is the Impurity of the given Prim?
 primImpurity :: Prim -> Compiler Impurity
-primImpurity (PrimCall _ pspec _) = do
-    def <- getProcDef pspec
-    return $ procImpurity def
-primImpurity (PrimForeign _ _ flags _) =
-    return $ flagsImpurity flags
+primImpurity (PrimCall _ pspec _ _) 
+    = procImpurity <$> getProcDef pspec
+primImpurity (PrimHigher _ (ArgProcRef pspec _ _) _) 
+    = procImpurity <$> getProcDef pspec
+primImpurity (PrimHigher _ ArgVar{argVarType=HigherOrderType 
+                                ProcModifiers{modifierImpurity=purity} _} _)
+    = return purity 
+primImpurity (PrimHigher _ fn _) 
+    = shouldnt $ "primImpurity of" ++ show fn
+primImpurity (PrimForeign _ _ flags _) 
+    = return $ flagsImpurity flags
 
 
 -- | Return the impurity level specified by the given foriegn flags list
@@ -1906,6 +2012,18 @@ flagDetism _ "semidet"  = SemiDet
 flagDetism detism _     = detism
 
 
+data ProcVariant 
+    = RegularProc
+    | ConstructorProc
+    | DeconstructorProc
+    | GetterProc
+    | SetterProc
+    | GeneratedProc
+    | AnonymousProc
+    | ClosureProc ProcSpec
+    deriving (Eq, Ord, Show, Generic)
+
+
 -- |LLVM block structure allows many blocks per procedure, where blocks can
 --  jump to one another in complex ways.  When converting our LPVM format
 --  to blocks, we want to merge any proc that is only called from one proc,
@@ -1931,8 +2049,26 @@ initSuperprocSpec vis = if isPublic vis then NoSuperproc else AnySuperproc
 showSuperProc :: SuperprocSpec -> String
 showSuperProc NoSuperproc = ""
 showSuperProc AnySuperproc = ""
-showSuperProc (SuperprocIs super) =
-  "(subproc of " ++ show super ++ ")"
+showSuperProc (SuperprocIs super) = " (subproc of " ++ show super ++ ")"
+
+
+-- |Maybe get the ProcSpec of a ClosureOf Proc via a ProcSpec
+maybeGetClosureOf :: ProcSpec -> Compiler (Maybe ProcSpec)
+maybeGetClosureOf pspec = do
+    variant <- procVariant <$> getProcDef pspec
+    return $ case variant of
+        ClosureProc cls -> Just cls
+        _ -> Nothing
+
+
+-- |Check if a ProcSpec refers to a closure proc
+isClosureProc :: ProcSpec -> Compiler Bool
+isClosureProc pspec = isClosureVariant . procVariant <$> getProcDef pspec
+
+
+isClosureVariant :: ProcVariant -> Bool
+isClosureVariant (ClosureProc _) = True
+isClosureVariant _               = False
 
 
 -- |A procedure defintion body.  Initially, this is in a form similar
@@ -1949,8 +2085,84 @@ data ProcImpln
         procImplnAnalysis :: ProcAnalysis,
         procImplnSpeczBodies :: SpeczProcBodies
     }
-    -- defn in SSA (LLVM) form along with any needed extern definitions
     deriving (Eq,Generic)
+
+
+-- | Represents a set of globals flowing in and out. 
+data GlobalFlows 
+    = GlobalFlows {
+        globalFlowsIn :: UnivSet GlobalInfo,
+        -- ^ The set of globals that flow in
+        globalFlowsOut :: UnivSet GlobalInfo
+        -- ^ The set of globals that flow out
+    }
+    deriving (Eq, Ord, Generic)
+
+
+instance Show GlobalFlows where
+    show (GlobalFlows ins outs) =
+        "<" ++ showUnivSet show ins 
+        ++ "; " ++ showUnivSet show outs
+        ++ ">" 
+
+
+-- | An empty set of GlobalFlows
+emptyGlobalFlows :: GlobalFlows
+emptyGlobalFlows = GlobalFlows emptyUnivSet emptyUnivSet
+
+
+-- | The set of all GlobalFlows
+univGlobalFlows :: GlobalFlows 
+univGlobalFlows = GlobalFlows UniversalSet UniversalSet
+
+
+-- | Given a list of Types and a set of ResourceFlowSpecs, make a GlobalFlows.
+-- If any of the TypeSpecs are resourceful higher order, this is the 
+-- univGlobalFlows, otherwise this is derived from the resources and flows.
+--
+-- In the case we have a higher order resourceful argument, we may not know 
+-- exactly which global variables flow into or out of a procedure, and as such
+-- we take a conservative approach and assume all do.
+makeGlobalFlows :: [TypeSpec] -> Set ResourceFlowSpec -> GlobalFlows
+makeGlobalFlows tys resFlows
+    | any isResourcefulHigherOrder tys = univGlobalFlows 
+    | otherwise = Set.fold addGlobalResourceFlows emptyGlobalFlows resFlows
+                
+
+-- |Add flows associated with a given resource to a set of GlobalFlows
+addGlobalResourceFlows :: ResourceFlowSpec -> GlobalFlows -> GlobalFlows
+addGlobalResourceFlows (ResourceFlowSpec res flow) gFlows 
+    | isSpecialResource res = gFlows
+    | otherwise = List.foldr (addGlobalFlow (GlobalResource res)) gFlows
+                $ [FlowIn | flowsIn flow] ++ [FlowOut | flowsOut flow]
+
+
+-- | Add a GlobalInfo to the set of global flows associated with the given flow
+addGlobalFlow :: GlobalInfo -> PrimFlow -> GlobalFlows -> GlobalFlows
+addGlobalFlow info FlowIn gFlows@GlobalFlows{globalFlowsIn=ins} 
+    = gFlows{globalFlowsIn=whenFinite (Set.insert info) ins}
+addGlobalFlow info FlowOut gFlows@GlobalFlows{globalFlowsOut=outs} 
+    = gFlows{globalFlowsOut=whenFinite (Set.insert info) outs}
+
+
+-- | Test if the given flow of a global exists in the global flow set
+hasGlobalFlow :: GlobalFlows -> PrimFlow -> GlobalInfo -> Bool
+hasGlobalFlow gFlows@GlobalFlows{globalFlowsIn=ins} FlowIn info  
+    = USet.member info ins
+hasGlobalFlow gFlows@GlobalFlows{globalFlowsOut=outs} FlowOut info  
+    = USet.member info outs
+
+
+-- | Take the union of the sets of two global flows
+globalFlowsUnion :: GlobalFlows -> GlobalFlows -> GlobalFlows
+globalFlowsUnion (GlobalFlows ins1 outs1) (GlobalFlows ins2 outs2)
+    = GlobalFlows (USet.union ins1 ins2) (USet.union outs1 outs2)
+
+
+-- | Take the intersection of the sets of two global flows
+globalFlowsIntersection :: GlobalFlows -> GlobalFlows -> GlobalFlows
+globalFlowsIntersection (GlobalFlows ins1 outs1) (GlobalFlows ins2 outs2)
+    = GlobalFlows (USet.intersection ins1 ins2) (USet.intersection outs1 outs2)
 
 
 -- |An ID for a parameter of a proc
@@ -2097,8 +2309,8 @@ instance Show ProcImpln where
                             Nothing -> " Missing"
                             Just body -> showBlock 4 body)
                 |> intercalate "\n"
-        in
-            show pSpec ++ "\n" ++ show proto ++ ":" ++ show analysis
+        in  show pSpec ++ "\n" ++ show proto ++ ":" 
+                    ++ show analysis
                     ++ showBlock 4 body ++ speczBodies
 
 
@@ -2107,12 +2319,12 @@ instance Show ProcAnalysis where
         let multiSpeczDepInfo' = Map.toList multiSpeczDepInfo
                 |> List.filter (not . List.null . snd)
         in
-        "\n AliasPairs: " ++ showAliasMap aliasMap
-        ++ "\n InterestingCallProperties: "
+        "\n  AliasPairs: " ++ showAliasMap aliasMap
+        ++ "\n  InterestingCallProperties: "
         ++ show (Set.toAscList interestingCallProperties)
         ++ if List.null multiSpeczDepInfo'
             then ""
-            else "\n MultiSpeczDepInfo: " ++ show multiSpeczDepInfo'
+            else "\n  MultiSpeczDepInfo: " ++ show multiSpeczDepInfo'
 
 
 
@@ -2205,11 +2417,13 @@ foldStmt sfn efn val stmt pos = foldStmt' sfn efn (sfn val stmt pos) stmt pos
 -- Takes two folding functions, one for statements and one for expressions.
 foldStmt' :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> a
           -> Stmt -> OptPos -> a
-foldStmt' sfn efn val (ProcCall _ _ _ _ _ args) pos =
+foldStmt' sfn efn val (ProcCall (First _ _ _) _ _ args) pos =
     foldExps sfn efn pos val args
+foldStmt' sfn efn val (ProcCall (Higher fn) _ _ args) pos =
+    foldExps sfn efn pos val (fn:args)
 foldStmt' sfn efn val (ForeignCall _ _ _ args) pos =
     foldExps sfn efn pos val args
-foldStmt' sfn efn val (Cond tst thn els _ _) pos = val4
+foldStmt' sfn efn val (Cond tst thn els _ _ _) pos = val4
     where val2 = defaultPlacedApply (foldStmt sfn efn val) pos tst
           val3 = foldStmts sfn efn val2 thn
           val4 = foldStmts sfn efn val3 els
@@ -2218,20 +2432,20 @@ foldStmt' sfn efn val (Case exp cases deflt) pos = val4
           val3 = List.foldl (foldCase sfn efn) val2 cases
           val4 = maybe val3 (foldStmts sfn efn val3) deflt
 foldStmt' sfn efn val (And stmts) pos = foldStmts sfn efn val stmts
-foldStmt' sfn efn val (Or stmts _) pos = foldStmts sfn efn val stmts
+foldStmt' sfn efn val (Or stmts _ _) pos = foldStmts sfn efn val stmts
 foldStmt' sfn efn val (Not negated) pos =
     defaultPlacedApply (foldStmt sfn efn val) pos negated
 foldStmt' sfn efn val (TestBool exp) pos = foldExp sfn efn val exp Nothing
 foldStmt' _   _   val Nop pos = val
 foldStmt' _   _   val Fail pos = val
-foldStmt' sfn efn val (Loop body _) pos = foldStmts sfn efn val body
+foldStmt' sfn efn val (Loop body _ _) pos = foldStmts sfn efn val body
 foldStmt' sfn efn val (UseResources _ _ body) pos = foldStmts sfn efn val body
 foldStmt' sfn efn val (For generators body) pos = val3
     where val1 = foldExps sfn efn pos val  $ loopVar . content <$> generators
           val2 = foldExps sfn efn pos val1 $ genExp  . content <$> generators
           val3 = foldStmts sfn efn val2 body
 foldStmt' _ _ val Break pos = val
-foldStmt' _   _   val Next pos = val
+foldStmt' _ _ val Next pos = val
 
 
 -- |Fold over a list of expressions in a pre-order left-to-right traversal.
@@ -2257,12 +2471,16 @@ foldExp sfn efn val exp pos = foldExp' sfn efn (efn val exp pos) exp pos
 -- Takes two folding functions, one for statements and one for expressions.
 foldExp' :: (a -> Stmt -> OptPos -> a) -> (a -> Exp -> OptPos -> a) -> a
          -> Exp -> OptPos -> a
-foldExp' _   _    val IntValue{}     _ = val
-foldExp' _   _    val FloatValue{}   _ = val
-foldExp' _   _    val StringValue{}  _ = val
-foldExp' _   _    val CharValue{}    _ = val
-foldExp' _   _    val Var{}          _ = val
+foldExp' _   _   val IntValue{} pos = val
+foldExp' _   _   val FloatValue{} pos = val
+foldExp' _   _   val StringValue{} pos = val
+foldExp' _   _   val CharValue{} pos = val
+foldExp' _   _   val Var{} pos = val
+foldExp' _   _   val (Global _) pos = val
+foldExp' sfn efn val (ProcRef _ es) pos = foldExps sfn efn pos val es
+foldExp' sfn efn val (AnonProc _ _ pstmts _ _) pos = foldStmts sfn efn val pstmts
 foldExp' sfn efn val (Typed exp _ _) pos = foldExp sfn efn val exp pos
+foldExp' _   _   val AnonParamVar{} pos = val
 foldExp' sfn efn val (Where stmts exp) pos =
     let val1 = foldStmts sfn efn val stmts
     in  defaultPlacedApply (foldExp sfn efn val1) pos exp
@@ -2374,6 +2592,10 @@ data TypeSpec = TypeSpec {
     typeName::Ident,
     typeParams::[TypeSpec]
     }
+    | HigherOrderType {
+        higherTypeDetism::ProcModifiers,
+        higherTypeParams::[TypeFlow]
+    }
     | TypeVariable { typeVariableName :: TypeVarName }
     | Representation { typeSpecRepresentation :: TypeRepresentation }
     | AnyType | InvalidType
@@ -2383,6 +2605,8 @@ data TypeSpec = TypeSpec {
 typeVarSet :: TypeSpec -> Set TypeVarName
 typeVarSet TypeSpec{typeParams=params}
     = List.foldr (Set.union . typeVarSet) Set.empty params
+typeVarSet HigherOrderType{higherTypeParams=params}
+    = List.foldr ((Set.union . typeVarSet) . typeFlowType) Set.empty params
 typeVarSet (TypeVariable v) = Set.singleton v
 typeVarSet Representation{} = Set.empty
 typeVarSet AnyType = Set.empty
@@ -2390,15 +2614,52 @@ typeVarSet InvalidType = Set.empty
 
 genericType :: TypeSpec -> Bool
 genericType TypeSpec{typeParams=params} = any genericType params
+genericType HigherOrderType{higherTypeParams=params}
+    = any (genericType . typeFlowType) params
 genericType TypeVariable{}   = True
 genericType Representation{} = False
 genericType AnyType          = False
 genericType InvalidType      = False
 
 
+-- |Return true if the type is a higher order type or a parameter is a higher
+-- order type
+higherOrderType :: TypeSpec -> Bool
+higherOrderType TypeSpec{typeParams=params} = any higherOrderType params
+higherOrderType HigherOrderType{} = True
+higherOrderType TypeVariable{}   = False
+higherOrderType Representation{} = False
+higherOrderType AnyType          = False
+higherOrderType InvalidType      = False
+
+
+-- |Return true if the given type spec is a HigherOrderType
+isHigherOrder :: TypeSpec -> Bool
+isHigherOrder HigherOrderType{} = True
+isHigherOrder _                 = False
+
+
+-- |Return true if the given type contains a HigherOrderType that is resourceful
+isResourcefulHigherOrder :: TypeSpec -> Bool
+isResourcefulHigherOrder (HigherOrderType ProcModifiers{modifierResourceful=resful} tfs) =
+    resful || any isResourcefulHigherOrder (typeFlowType <$> tfs)
+isResourcefulHigherOrder (TypeSpec _ _ tys) =
+    any isResourcefulHigherOrder tys
+isResourcefulHigherOrder _ = False
+
+updateHigherOrderTypesM :: Monad m => (TypeSpec -> m TypeSpec) -> TypeSpec -> m TypeSpec
+updateHigherOrderTypesM trans ty@HigherOrderType{higherTypeDetism=mods,
+                                                 higherTypeParams=typeFlows} = do
+    types <- mapM trans $ typeFlowType <$> typeFlows
+    return $ ty{higherTypeParams=zipWith TypeFlow types (typeFlowMode <$> typeFlows)}
+updateHigherOrderTypesM _ ty =
+    shouldnt $ "updateHigherOrderTypesM on " ++ show ty
+
+
 -- | Return the module of the specified type, if it has one.
 typeModule :: TypeSpec -> Maybe ModSpec
 typeModule (TypeSpec mod name _) = Just $ mod ++ [name]
+typeModule HigherOrderType{}     = Nothing
 typeModule TypeVariable{}        = Nothing
 typeModule Representation{}      = Nothing
 typeModule AnyType               = Nothing
@@ -2446,13 +2707,15 @@ data ProcProto = ProcProto {
 -- |A proc prototype, including name and formal parameters.
 data PrimProto = PrimProto {
     primProtoName::ProcName,
-    primProtoParams::[PrimParam]
+    primProtoParams::[PrimParam],
+    primProtoGlobalFlows::GlobalFlows
     } deriving (Eq, Generic)
 
 
 instance Show PrimProto where
-  show (PrimProto name params) =
-    name ++ "(" ++ intercalate ", " (List.map show params) ++ ")"
+    show (PrimProto name params gFlows) =
+        name ++ "(" ++ intercalate ", " (List.map show params) ++ ")"
+             ++ show gFlows
 
 
 -- |A formal parameter, including name, type, and flow direction.
@@ -2461,36 +2724,32 @@ data Param = Param {
     paramType::TypeSpec,
     paramFlow::FlowDirection,
     paramFlowType::ArgFlowType
-    } deriving (Eq, Generic)
+    } deriving (Eq, Ord, Generic)
 
 
 -- |The type and mode (flow) of a single argument or parameter
 data TypeFlow = TypeFlow {
   typeFlowType :: TypeSpec,
   typeFlowMode :: FlowDirection
-  } deriving (Eq, Ord)
+  } deriving (Eq, Ord, Generic)
 
 instance Show TypeFlow where
     show (TypeFlow ty fl) = flowPrefix fl ++ show ty
 
-
--- |Return the TypeSpec and FlowDirection of a Param
-paramTypeFlow :: Param -> TypeFlow
-paramTypeFlow Param{paramType=ty, paramFlow=fl} = TypeFlow ty fl
 
 -- |A formal parameter, including name, type, and flow direction.
 data PrimParam = PrimParam {
     primParamName::PrimVarName,
     primParamType::TypeSpec,
     primParamFlow::PrimFlow,
-    primParamFlowType::ArgFlowType, -- XXX Not sure this is still needed
+    primParamFlowType::ArgFlowType,
     primParamInfo::ParamInfo        -- ^What we've inferred about this param
     } deriving (Eq, Generic)
 
 
 -- |Info inferred about a single proc parameter
 data ParamInfo = ParamInfo {
-        paramInfoUnneeded::Bool       -- ^Can this parameter be eliminated?
+        paramInfoUnneeded::Bool -- ^Can this parameter be eliminated?
     } deriving (Eq,Generic)
 
 -- |A dataflow direction:  in, out, both, or neither.
@@ -2502,11 +2761,66 @@ data PrimFlow = FlowIn | FlowOut
                    deriving (Show,Eq,Ord,Generic)
 
 
+-- |Set the type of the given Param
+setParamType :: TypeSpec -> Param -> Param
+setParamType t p = p{paramType=t}
+
+paramIsResourceful :: Param -> Bool
+paramIsResourceful (Param _ ty _ _) = isResourcefulHigherOrder ty
+
+
+-- |Set the type of the given PrimParam
+setPrimParamType :: TypeSpec -> PrimParam -> PrimParam
+setPrimParamType t p = p{primParamType=t}
+
+
+-- |Return the TypeSpec and FlowDirection of a Param
+paramTypeFlow :: Param -> TypeFlow
+paramTypeFlow Param{paramType=ty, paramFlow=fl} = TypeFlow ty fl
+
+
+-- |Return the TypeSpec and FlowDirection of a PrimParam
+primParamTypeFlow :: PrimParam -> TypeFlow
+primParamTypeFlow PrimParam{primParamType=ty, primParamFlow=fl}
+    = TypeFlow ty $ primFlowToFlowDir fl
+
+
+-- |Set the ArgFlowType of the given Param
+setParamArgFlowType :: ArgFlowType -> Param -> Param
+setParamArgFlowType ft p = p{paramFlowType=ft}
+
+
+-- |Convert a Param to a Var
+paramToVar :: Param -> Placed Exp
+paramToVar (Param n t f ft)
+    = Unplaced $ Typed (Var n f ft) t Nothing
+
+
+-- |Convert a PrimParam to a PrimArg
+primParamToArg :: PrimParam -> PrimArg
+primParamToArg (PrimParam nm ty fl ft _) = ArgVar nm ty fl ft False
+
+
+-- |Set the TypeSpec of a given TypeFlow
+setTypeFlowType :: TypeSpec -> TypeFlow -> TypeFlow
+setTypeFlowType t tf = tf{typeFlowType=t}
+
+-- |Return the TypeSpec and FlowDirection of a TypeFlow
+unzipTypeFlow :: TypeFlow -> (TypeSpec, FlowDirection)
+unzipTypeFlow (TypeFlow ty flow) = (ty, flow)
+
+
+-- |Return the TypeSpecs and FlowDirections of a list of TypeFlows
+unzipTypeFlows :: [TypeFlow] -> ([TypeSpec], [FlowDirection])
+unzipTypeFlows = unzip . (unzipTypeFlow <$>)
+
+
 -- |Does the specified flow direction flow in?
 flowsIn :: FlowDirection -> Bool
 flowsIn ParamIn    = True
 flowsIn ParamOut   = False
 flowsIn ParamInOut = True
+
 
 -- |Does the specified flow direction flow out?
 flowsOut :: FlowDirection -> Bool
@@ -2515,12 +2829,18 @@ flowsOut ParamOut = True
 flowsOut ParamInOut = True
 
 
+-- |Translate a PrimFlow to a corresponding FlowDirection
+primFlowToFlowDir :: PrimFlow -> FlowDirection
+primFlowToFlowDir FlowIn  = ParamIn
+primFlowToFlowDir FlowOut = ParamOut
+
+
 -- |Source program statements.  These will be normalised into Prims.
 data Stmt
      -- |A Wybe procedure call, with module, proc name, proc ID, determinism,
      --   and args.  We assume every call is Det until type checking.
      --   The Bool flag indicates that the proc is allowed to use resources.
-     = ProcCall ModSpec ProcName (Maybe Int) Determinism Bool [Placed Exp]
+     = ProcCall ProcFunctor Determinism Bool [Placed Exp]
      -- |A foreign call, with language, foreign name, tags, and args
      | ForeignCall Ident ProcName [Ident] [Placed Exp]
      -- |Do nothing (and succeed)
@@ -2535,19 +2855,15 @@ data Stmt
      --  the variables generated by the condition, and the variables generated
      --  both branches of the conditional, with their types.
      | Cond (Placed Stmt) [Placed Stmt] [Placed Stmt]
-            (Maybe VarDict) (Maybe VarDict)
+            (Maybe VarDict) (Maybe VarDict) (Maybe (Set ResourceSpec))
 
-     -- | A scoped construct for resources.  This creates a context in which the
-     --   listed resources can be used, and in which those resources do not
-     --   change value.  The Maybe list of resources are the ones that are
-     --   assigned before the UseResources statement, and therefore must be
-     --   restored after it; this is initially Nothing, but it defined during
-     --   mode checking.  This statement is eliminated during resource
-     --   processing.
-     | UseResources [ResourceSpec] (Maybe [VarName]) [Placed Stmt]
 
      -- All the following are eliminated during unbranching.
 
+     -- | A scoped construct for resources.  This creates a context in which the
+     --   listed resources can be used, and in which those resources do not
+     --   change value. This statement is eliminated during resource processing.
+     | UseResources [ResourceSpec] (Maybe VarDict) [Placed Stmt]
      -- |A case statement, which selects the statement sequence corresponding to
      -- the first expression that matches the value of the first argument.  This
      -- is transformed to nested Cond statements.
@@ -2558,13 +2874,13 @@ data Stmt
      | And [Placed Stmt]
      -- |A test that succeeds iff any of the enclosed tests succeed; the VarDict
      -- indicates the variables defined after all disjuncts
-     | Or [Placed Stmt] (Maybe VarDict)
+     | Or [Placed Stmt] (Maybe VarDict) (Maybe (Set ResourceSpec))
      -- |A test that succeeds iff the enclosed test fails
      | Not (Placed Stmt)
 
      -- |A loop body; the loop is controlled by Breaks and Nexts.  The VarDict
      -- holds the variables that are generated by the loop and their types.
-     | Loop [Placed Stmt] (Maybe VarDict)
+     | Loop [Placed Stmt] (Maybe VarDict) (Maybe (Set ResourceSpec))
      -- |A for loop has multiple generators, which is a variable-iterator pair
      -- and a list of statements in the body
      | For [Placed Generator] [Placed Stmt]
@@ -2587,6 +2903,20 @@ seqToStmt [stmt] = stmt
 seqToStmt stmts = Unplaced $ And stmts
 
 
+data ProcFunctor
+    = First ModSpec ProcName (Maybe Int)
+       -- ^ A first-order procedure 
+    | Higher (Placed Exp)
+       -- ^ A higher-order procedure
+    deriving (Eq, Ord, Generic)
+
+
+regularProc :: ProcName -> ProcFunctor
+regularProc name = First [] name Nothing
+
+regularModProc :: ModSpec -> ProcName -> ProcFunctor
+regularModProc mod name = First mod name Nothing
+
 -- |An expression.  These are all normalised into statements.
 data Exp
       = IntValue Integer
@@ -2594,11 +2924,15 @@ data Exp
       | CharValue Char
       | StringValue String StringVariant
       | Var VarName FlowDirection ArgFlowType
+      | ProcRef ProcSpec [Placed Exp]
       | Typed Exp TypeSpec (Maybe TypeSpec)
                -- ^explicitly typed expr giving the type of the expression, and,
                -- if it is a cast, the type of the Exp argument.  If not a cast,
                -- these two must be the same.
+      | Global GlobalInfo
       -- The following are eliminated during flattening
+      | AnonProc ProcModifiers [Param] [Placed Stmt] (Maybe VarDict) (Maybe (Set ResourceFlowSpec))
+      | AnonParamVar (Maybe Integer) FlowDirection
       | Where [Placed Stmt] (Placed Exp)
       | DisjExp (Placed Exp) (Placed Exp)
       | CondExp (Placed Stmt) (Placed Exp) (Placed Exp)
@@ -2617,20 +2951,32 @@ data StringVariant = WybeString | CString
    deriving (Eq,Ord,Generic)
 
 
+-- Information about a global variable. 
+-- A global vairbale is a variable that is available everywhere, 
+-- and can be access via an LPVM load instruction, or written to via an LPVM store
+data GlobalInfo = GlobalResource { globalResourceSpec :: ResourceSpec }
+    deriving (Eq, Ord, Generic)
+
+
 -- | Return if the Exp is a Var
 expIsVar :: Exp -> Bool
-expIsVar Var{} = True
-expIsVar _     = False
+expIsVar Var{}           = True
+expIsVar AnonParamVar{}  = True
+expIsVar (Typed exp _ _) = expIsVar exp 
+expIsVar _               = False
 
 
 -- | Return the FlowDirection of an Exp, assuming it has been flattened.
 flattenedExpFlow :: Exp -> FlowDirection
-flattenedExpFlow (IntValue _)      = ParamIn
-flattenedExpFlow (FloatValue _)    = ParamIn
-flattenedExpFlow (CharValue _)     = ParamIn
-flattenedExpFlow (StringValue _ _) = ParamIn
-flattenedExpFlow (Var _ flow _)    = flow
-flattenedExpFlow (Typed exp _ _)   = flattenedExpFlow exp
+flattenedExpFlow (IntValue _)          = ParamIn
+flattenedExpFlow (FloatValue _)        = ParamIn
+flattenedExpFlow (CharValue _)         = ParamIn
+flattenedExpFlow (StringValue _ _)     = ParamIn
+flattenedExpFlow AnonProc{}            = ParamIn
+flattenedExpFlow (ProcRef _ _)         = ParamIn
+flattenedExpFlow (Var _ flow _)        = flow
+flattenedExpFlow (AnonParamVar _ flow) = flow
+flattenedExpFlow (Typed exp _ _)       = flattenedExpFlow exp
 flattenedExpFlow otherExp =
     shouldnt $ "Getting flow direction of unflattened exp " ++ show otherExp
 
@@ -2638,12 +2984,45 @@ flattenedExpFlow otherExp =
 -- | If the input is a constant value, return it (with any Typed wrapper
 -- removed).  Return Nothing if it's not a constant.
 expIsConstant :: Exp -> Maybe Exp
-expIsConstant exp@IntValue{}     = Just exp
-expIsConstant exp@FloatValue{}   = Just exp
-expIsConstant exp@CharValue{}    = Just exp
-expIsConstant exp@StringValue{}  = Just exp
-expIsConstant (Typed exp _ _)    = expIsConstant exp
-expIsConstant _                  = Nothing
+expIsConstant exp@IntValue{}         = Just exp
+expIsConstant exp@FloatValue{}       = Just exp
+expIsConstant exp@CharValue{}        = Just exp
+expIsConstant exp@StringValue{}      = Just exp
+expIsConstant exp@(ProcRef _ closed) 
+    | all (isJust . expIsConstant . content) closed = Just exp
+    | otherwise                                     = Nothing
+expIsConstant (Typed exp _ _)        = expIsConstant exp
+expIsConstant _                      = Nothing
+
+
+-- |Return the variable name of the supplied expr.  In this context,
+--  the expr will always be a variable.
+expVar :: Exp -> VarName
+expVar expr = fromMaybe
+              (shouldnt $ "expVar of non-variable expr " ++ show expr)
+              $ expVar' expr
+
+
+-- |Return the variable name of the supplied expr, if there is one.
+expVar' :: Exp -> Maybe VarName
+expVar' (Typed expr _ _) = expVar' expr
+expVar' (Var name _ _) = Just name
+expVar' _expr = Nothing
+
+maybeExpType :: Exp -> Maybe TypeSpec
+maybeExpType (Typed _ ty _) = Just ty
+maybeExpType _              = Nothing
+
+-- | Extract the inner expression (removing any Typed wrapper)
+innerExp :: Exp -> Exp
+innerExp (Typed exp _ _) = innerExp exp
+innerExp exp = exp
+
+
+setExpFlowType :: Exp -> ArgFlowType -> Exp
+setExpFlowType (Typed exp ty cast) ft = Typed (setExpFlowType exp ft) ty cast
+setExpFlowType (Var name dir _)    ft = Var name dir ft
+setExpFlowType exp                 _  = exp
 
 
 -- |Is it unnecessary to actually pass an argument (in or out) for this param?
@@ -2694,8 +3073,8 @@ realParams = filterM paramIsReal
 -- |The param actually needs to be passed; ie, it is needed and not phantom.
 paramIsReal :: PrimParam -> Compiler Bool
 paramIsReal param =
-    ((not $ paramInfoUnneeded $ primParamInfo param) &&) . not
-      <$> paramIsPhantom param
+    (((not . paramInfoUnneeded)
+        $ primParamInfo param) &&) . not <$> paramIsPhantom param
 
 
 -- |Get names of proto input params
@@ -2731,7 +3110,8 @@ data PrimVarName =
 -- |A primitive statment, including those that can only appear in a
 --  loop.
 data Prim
-     = PrimCall CallSiteID ProcSpec [PrimArg]
+     = PrimCall CallSiteID ProcSpec [PrimArg] GlobalFlows
+     | PrimHigher CallSiteID PrimArg [PrimArg]
      | PrimForeign Ident ProcName [Ident] [PrimArg]
      deriving (Eq,Ord,Generic)
 
@@ -2758,23 +3138,37 @@ data PrimArg
      | ArgFloat Double TypeSpec                -- ^Constant floating point arg
      | ArgString String StringVariant TypeSpec -- ^Constant string arg
      | ArgChar Char TypeSpec                   -- ^Constant character arg
+     | ArgProcRef ProcSpec [PrimArg] TypeSpec  -- ^Constant procedure reference
+     | ArgGlobal GlobalInfo TypeSpec           -- ^Constant global reference
      | ArgUnneeded PrimFlow TypeSpec           -- ^Unneeded input or output
      | ArgUndef TypeSpec                       -- ^Undefined variable, used
                                                --  in failing cases
      deriving (Eq,Ord,Generic)
 
 
--- |Returns a list of all arguments to a prim
-primArgs :: Prim -> [PrimArg]
-primArgs (PrimCall _ _ args) = args
-primArgs (PrimForeign _ _ _ args) = args
+-- |Returns a list of all arguments to a prim, including global flows
+primArgs :: Prim -> ([PrimArg], GlobalFlows)
+primArgs (PrimCall _ _ args gFlows) = (args, gFlows)
+primArgs (PrimHigher _ fn args) 
+    = (fn:args, if isResourcefulHigherOrder $ argType fn 
+                then univGlobalFlows else emptyGlobalFlows)
+primArgs (PrimForeign "lpvm" "load" _ args@[ArgGlobal info _, _]) 
+    = (args, addGlobalFlow info FlowIn emptyGlobalFlows)
+primArgs (PrimForeign "lpvm" "store" _ args@[_, ArgGlobal info _]) 
+    = (args, addGlobalFlow info FlowOut emptyGlobalFlows)
+primArgs prim@(PrimForeign _ _ _ args) = (args, emptyGlobalFlows)
 
 
--- |Returns a list of all arguments to a prim
-replacePrimArgs :: Prim -> [PrimArg] -> Prim
-replacePrimArgs (PrimCall id pspec _) args = PrimCall id pspec args
-replacePrimArgs (PrimForeign lang nm flags _) args =
-    PrimForeign lang nm flags args
+-- |Replace a Prim's args and global flows with a list of args and global flows
+replacePrimArgs :: Prim -> [PrimArg] -> GlobalFlows -> Prim
+replacePrimArgs (PrimCall id pspec _ _) args gFlows
+    = PrimCall id pspec args gFlows
+replacePrimArgs (PrimHigher id _ _) [] _
+    = shouldnt "replacePrimArgs of higher call with not enough args"
+replacePrimArgs (PrimHigher id _ _) (fn:args) _
+    = PrimHigher id fn args
+replacePrimArgs (PrimForeign lang nm flags _) args _
+    = PrimForeign lang nm flags args
 
 
 argIsVar :: PrimArg -> Bool
@@ -2789,6 +3183,8 @@ argIsConst ArgInt{} = True
 argIsConst ArgFloat{} = True
 argIsConst ArgString{} = True
 argIsConst ArgChar{} = True
+argIsConst (ArgProcRef _ as _) = all argIsConst as
+argIsConst ArgGlobal{} = True
 argIsConst ArgUnneeded{} = False
 argIsConst ArgUndef{} = False
 
@@ -2802,16 +3198,16 @@ argIntegerValue _              = Nothing
 
 -- |Relates a primitive argument to the corresponding source argument
 data ArgFlowType = Ordinary        -- ^An argument/parameter as written by user
-                 | HalfUpdate      -- ^One half of a variable update (!var)
-                 | Implicit OptPos -- ^Temp var for expression at that position
-                 | Resource ResourceSpec -- ^An argument to pass a resource
+                 | Resource ResourceSpec
+                                   -- ^An argument to pass a resource
+                 | Free            -- ^An argument to be passed in the closure 
+                                   -- environment
      deriving (Eq,Ord,Generic)
 
 instance Show ArgFlowType where
     show Ordinary = ""
-    show HalfUpdate = "%"
-    show (Implicit _) = ""
-    show (Resource _) = "#"
+    show (Resource _) = "%"
+    show Free = "^"
 
 
 -- |The dataflow direction of an actual argument.
@@ -2821,6 +3217,8 @@ argFlowDirection ArgInt{} = FlowIn
 argFlowDirection ArgFloat{} = FlowIn
 argFlowDirection ArgString{} = FlowIn
 argFlowDirection ArgChar{} = FlowIn
+argFlowDirection ArgProcRef{} = FlowIn
+argFlowDirection ArgGlobal{} = FlowIn
 argFlowDirection (ArgUnneeded flow _) = flow
 argFlowDirection ArgUndef{} = FlowIn
 
@@ -2832,6 +3230,8 @@ argType (ArgInt _ typ) = typ
 argType (ArgFloat _ typ) = typ
 argType (ArgString _ _ typ) = typ
 argType (ArgChar _ typ) = typ
+argType (ArgProcRef _ _ typ) = typ
+argType (ArgGlobal _ typ) = typ
 argType (ArgUnneeded _ typ) = typ
 argType (ArgUndef typ) = typ
 
@@ -2843,25 +3243,45 @@ setArgType typ (ArgInt i _) = ArgInt i typ
 setArgType typ (ArgFloat f _) = ArgFloat f typ
 setArgType typ (ArgString s v ty) = ArgString s v typ
 setArgType typ (ArgChar c _) = ArgChar c typ
+setArgType typ (ArgProcRef ms as _) = ArgProcRef ms as typ
+setArgType typ (ArgGlobal rs _) = ArgGlobal rs typ
 setArgType typ (ArgUnneeded u _) = ArgUnneeded u typ
 setArgType typ (ArgUndef _) = ArgUndef typ
 
 
+-- | Set the flow of a prim arg. This is a nop for a non-ArgVar value
+setArgFlow :: PrimFlow -> PrimArg -> PrimArg
+setArgFlow f arg@ArgVar{} = arg{argVarFlow=f}
+setArgFlow _ arg          = arg
+
+
+-- | Set the flow type of a prim arg. This is a nop for a non-ArgVar value
+setArgFlowType :: ArgFlowType -> PrimArg -> PrimArg
+setArgFlowType ft arg@ArgVar{} = arg{argVarFlowType=ft}
+setArgFlowType _  arg          = arg
+
+
+-- | Get the flow of a prim arg. Returns Nothing for a non-ArgVar value
+maybeArgFlowType :: PrimArg -> Maybe ArgFlowType
+maybeArgFlowType ArgVar{argVarFlowType=ft} = Just ft
+maybeArgFlowType arg                       = Nothing
+
+
 argDescription :: PrimArg -> String
 argDescription (ArgVar var _ flow ftype _) =
-    (case flow of
-          FlowIn -> "input "
-          FlowOut -> "output ") ++
     argFlowDescription flow
     ++ (case ftype of
           Ordinary       -> " variable " ++ primVarName var
-          HalfUpdate     -> " update of variable " ++ primVarName var
-          Implicit pos   -> " expression" ++ showOptPos pos
-          Resource rspec -> " resource " ++ show rspec)
+          Resource rspec -> " resource " ++ show rspec
+          Free           -> " closure argument ")
 argDescription (ArgInt val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgFloat val _) = "constant argument '" ++ show val ++ "'"
 argDescription arg@ArgString{} = "constant argument " ++ show arg
 argDescription (ArgChar val _) = "constant argument '" ++ show val ++ "'"
+argDescription (ArgProcRef ms as _)
+    = "constant procedure ref '" ++ show ms ++ "' with <"
+    ++ intercalate ", " (argDescription <$> as) ++ ">"
+argDescription (ArgGlobal info _) = "global reference to " ++ show info
 argDescription (ArgUnneeded flow _) = "unneeded " ++ argFlowDescription flow
 argDescription (ArgUndef _) = "undefined argument"
 
@@ -2876,28 +3296,27 @@ argFlowDescription FlowOut = "output"
 -- |Convert a statement read as an expression to a Stmt.
 expToStmt :: Exp -> Stmt
 expToStmt (Fncall [] "&" args) = And $ List.map (fmap expToStmt) args
-expToStmt (Fncall [] "|"  args) = Or (List.map (fmap expToStmt) args) Nothing
+expToStmt (Fncall [] "|"  args) = Or (List.map (fmap expToStmt) args) Nothing Nothing
 expToStmt (Fncall [] "~" [arg]) = Not $ fmap expToStmt arg
 expToStmt (Fncall [] "~" args) = shouldnt $ "non-unary 'not' " ++ show args
 expToStmt (Fncall maybeMod name args) =
-    ProcCall maybeMod name Nothing Det False args
+    ProcCall (First maybeMod name Nothing) Det False args
 expToStmt (ForeignFn lang name flags args) =
     ForeignCall lang name flags args
-expToStmt (Var name ParamIn _) = ProcCall [] name Nothing Det False []
-expToStmt (Var name ParamInOut _) = ProcCall [] name Nothing Det True []
+expToStmt (Var name ParamIn _) = ProcCall (First [] name Nothing) Det False []
+expToStmt (Var name ParamInOut _) = ProcCall (First [] name Nothing) Det True []
 expToStmt expr = shouldnt $ "non-Fncall expr " ++ show expr
 
 
 procCallToExp :: Stmt -> Exp
-procCallToExp (ProcCall maybeMod name Nothing _ _ args) =
+procCallToExp (ProcCall (First maybeMod name Nothing) _ _ args) =
     Fncall maybeMod name args
 procCallToExp stmt =
     shouldnt $ "converting non-proccall to expr " ++ showStmt 4 stmt
 
 
 -- |Return the set of variables that might be freshly assigned by the
--- specified expr.  Treats ParamInOut exprs as not assigning anything, because
--- it does not *freshly* assign a variable (ie, it's already assigned).
+-- specified expr.
 expOutputs :: Exp -> Set VarName
 expOutputs (IntValue _) = Set.empty
 expOutputs (FloatValue _) = Set.empty
@@ -2906,9 +3325,14 @@ expOutputs (CharValue _) = Set.empty
 expOutputs (Var "_" ParamIn _) = Set.singleton "_" -- special _ variable is out
 expOutputs (Var name flow _) =
     if flowsOut flow then Set.singleton name else Set.empty
+expOutputs (AnonParamVar mbNum flow) =
+    if flowsOut flow then Set.singleton (show mbNum) else Set.empty
+expOutputs (Global _) = Set.empty
+expOutputs AnonProc{} = Set.empty
+expOutputs (ProcRef _ _) = Set.empty
 expOutputs (Typed expr _ _) = expOutputs expr
-expOutputs (Where _ pexp) = expOutputs $ content pexp
 expOutputs (DisjExp pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
+expOutputs (Where _ pexp) = expOutputs $ content pexp
 expOutputs (CondExp _ pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
 expOutputs (Fncall _ _ args) = pexpListOutputs args
 expOutputs (ForeignFn _ _ _ args) = pexpListOutputs args
@@ -2920,6 +3344,39 @@ expOutputs (CaseExp _ cases deflt) =
 -- the specified list of placed expressions.
 pexpListOutputs :: [Placed Exp] -> Set VarName
 pexpListOutputs = List.foldr (Set.union . expOutputs . content) Set.empty
+
+
+-- |Return the set of variables that are inputs to the given expr.
+expInputs :: Exp -> Set VarName
+expInputs (IntValue _) = Set.empty
+expInputs (FloatValue _) = Set.empty
+expInputs (StringValue _ _) = Set.empty
+expInputs (CharValue _) = Set.empty
+expInputs (Var "_" ParamIn _) = Set.empty
+expInputs (Var name flow _) =
+    if flowsIn flow then Set.singleton name else Set.empty
+expInputs (AnonParamVar mbNum flow) =
+    if flowsIn flow then Set.singleton (show mbNum) else Set.empty
+expInputs (Global _) = Set.empty
+expInputs (AnonProc{}) = Set.empty
+expInputs (ProcRef _ _) = Set.empty
+expInputs (Typed expr _ _) = expInputs expr
+expInputs (Where _ pexp) = expInputs $ content pexp
+expInputs (DisjExp pexp1 pexp2) = pexpListInputs [pexp1,pexp2]
+expInputs (CondExp _ pexp1 pexp2) = pexpListInputs [pexp1,pexp2]
+expInputs (Fncall _ _ args) = pexpListInputs args
+expInputs (ForeignFn _ _ _ args) = pexpListInputs args
+expInputs (CaseExp exp cases deflt) =
+    expInputs (content exp)
+    `Set.union` pexpListInputs (maybe id (:) deflt (snd <$> cases))
+    `Set.union` pexpListInputs (fst <$> cases)
+
+
+
+-- |Return the set of variables that are inputs to the the specified list of 
+-- placed expressions.
+pexpListInputs :: [Placed Exp] -> Set VarName
+pexpListInputs = List.foldr (Set.union . expInputs . content) Set.empty
 
 
 -- | Apply the specified TypeFlow to the given expression, ensuring they're
@@ -2941,11 +3398,6 @@ setExpTypeFlow (TypeFlow ty fl) expr
 setPExpTypeFlow :: TypeFlow -> Placed Exp -> Placed Exp
 setPExpTypeFlow typeflow pexpr = setExpTypeFlow typeflow <$> pexpr
 
-
-isHalfUpdate :: FlowDirection -> Exp -> Bool
-isHalfUpdate flow (Typed expr _ _) = isHalfUpdate flow expr
-isHalfUpdate flow (Var _ flow' HalfUpdate) = flow == flow'
-isHalfUpdate _ _ = False
 
 ----------------------------------------------------------------
 --                      Variables (Uses and Defs)
@@ -2969,15 +3421,17 @@ isHalfUpdate _ _ = False
 --     List.foldr Set.union Set.empty $ List.map (varsInPrimArg dir) args
 
 varsInPrimArg :: PrimFlow -> PrimArg -> Set PrimVarName
-varsInPrimArg dir ArgVar{argVarName=var,argVarFlow=dir'} =
-  if dir == dir' then Set.singleton var else Set.empty
+varsInPrimArg dir ArgVar{argVarName=var,argVarFlow=dir'}
+    = if dir == dir' then Set.singleton var else Set.empty
+varsInPrimArg dir (ArgProcRef _ as _) 
+    = Set.unions $ Set.fromList (varsInPrimArg dir <$> as)
 varsInPrimArg _ ArgInt{}      = Set.empty
 varsInPrimArg _ ArgFloat{}    = Set.empty
 varsInPrimArg _ ArgString{}   = Set.empty
 varsInPrimArg _ ArgChar{}     = Set.empty
+varsInPrimArg _ (ArgGlobal{}) = Set.empty
 varsInPrimArg _ ArgUnneeded{} = Set.empty
 varsInPrimArg _ ArgUndef{}    = Set.empty
-
 
 ----------------------------------------------------------------
 --                       Generating Symbols
@@ -3016,7 +3470,16 @@ outputStatusName :: Ident
 outputStatusName = specialName "success"
 
 
+envParamName :: PrimVarName
+envParamName = PrimVarName (specialName "env") 0
 
+
+envPrimParam :: PrimParam
+envPrimParam = PrimParam envParamName AnyType FlowIn Ordinary (ParamInfo False)
+
+
+makeGlobalResourceName :: ResourceSpec -> String
+makeGlobalResourceName spec = specialName2 "resource" $ show spec
 
 ----------------------------------------------------------------
 --                      Showing Compiler State
@@ -3096,14 +3559,14 @@ instance Show Item where
   show (FuncDecl vis modifiers proto typ exp pos) =
     visibilityPrefix vis
     ++ "def "
-    ++ showProcModifiers modifiers
+    ++ showProcModifiers' modifiers
     ++ show proto ++ ":" ++ show typ
     ++ showOptPos pos
     ++ " = " ++ show exp
   show (ProcDecl vis modifiers proto stmts pos) =
     visibilityPrefix vis
     ++ "def "
-    ++ showProcModifiers modifiers
+    ++ showProcModifiers' modifiers
     ++ show proto
     ++ showOptPos pos
     ++ " {"
@@ -3121,6 +3584,9 @@ instance Show TypeRepresentation where
   show (Bits bits) = show bits ++ " bit unsigned"
   show (Signed bits) = show bits ++ " bit signed"
   show (Floating bits) = show bits ++ " bit float"
+  show (Func ins outs) =
+      "function {" ++ intercalate ", " (List.map show outs) ++ "}"
+      ++ "(" ++ intercalate ", " (List.map show ins) ++ ")"
 
 
 -- |How to show a type family
@@ -3236,7 +3702,7 @@ showProcDef thisID
     "\n"
     ++ showProcName n ++ " > "
     ++ visibilityPrefix vis
-    ++ showProcModifiers (ProcModifiers detism inline impurity ctor [] [])
+    ++ showProcModifiers' (ProcModifiers detism inline impurity ctor False [] [])
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
     ++ showSuperProc sub
     ++ "\n"
@@ -3259,6 +3725,9 @@ instance Show TypeSpec where
   show (Representation rep) = show rep
   show (TypeSpec optmod ident args) =
       maybeModPrefix optmod ++ ident ++ showArguments args
+  show (HigherOrderType mods params) =
+      showProcModifiers mods
+      ++ "(" ++ intercalate ", " (show <$> params) ++ ")"
 
 
 -- |Show the use declaration for a set of resources, if it's non-empty.
@@ -3282,10 +3751,10 @@ instance Show Param where
 
 -- |How to show a formal parameter.
 instance Show PrimParam where
-  show (PrimParam name typ dir _ (ParamInfo unneeded)) =
+  show (PrimParam name typ dir ft (ParamInfo unneeded)) =
       let (pre,post) = if unneeded then ("[","]") else ("","")
-      in  pre ++ primFlowPrefix dir ++ show name ++ showTypeSuffix typ Nothing
-          ++ post
+      in  pre ++ show ft ++ primFlowPrefix dir ++ show name
+          ++ showTypeSuffix typ Nothing ++ post
 
 
 -- |Show the type of an expression, if it's known.
@@ -3293,7 +3762,7 @@ showTypeSuffix :: TypeSpec -> Maybe TypeSpec -> String
 showTypeSuffix AnyType Nothing     = ""
 showTypeSuffix typ Nothing         = ":" ++ show typ
 showTypeSuffix typ (Just AnyType)  = ":!" ++ show typ
-showTypeSuffix typ (Just cast)     = ":" ++ show cast ++ ":!" ++ show typ
+showTypeSuffix typ (Just cast)     = ":" ++ show typ ++ ":!" ++ show cast
 
 
 -- |How to show a dataflow direction.
@@ -3353,12 +3822,15 @@ showPlacedPrim' ind prim pos =
 -- |Show a single primitive statement.
 -- XXX the first argument is unused; can we get rid of it?
 showPrim :: Int -> Prim -> String
-showPrim _ (PrimCall id pspec args) =
-        show pspec ++ showArguments args
-            ++ " #" ++ show id
+showPrim _ (PrimCall id pspec args globalFlows) =
+    show pspec ++ showArguments args
+        ++ (if globalFlows == emptyGlobalFlows then "" else show globalFlows)
+        ++ " #" ++ show id
+showPrim _ (PrimHigher id var args) =
+    show var ++ showArguments args ++ " #" ++ show id
 showPrim _ (PrimForeign lang name flags args) =
-        "foreign " ++ lang ++ " " ++ showFlags flags ++ name ++
-        showArguments args
+    "foreign " ++ lang ++ " " ++ showFlags' flags
+    ++ name ++ showArguments args
 
 
 -- |Show a variable, with its suffix.
@@ -3368,31 +3840,30 @@ instance Show PrimVarName where
 
 -- |Show a single statement.
 showStmt :: Int -> Stmt -> String
-showStmt _ (ProcCall maybeMod name procID detism resourceful args) =
+showStmt _ (ProcCall func detism resourceful args) =
     (if resourceful then "!" else "")
-    ++ maybeModPrefix maybeMod
-    ++ maybe "" (\n -> "<" ++ show n ++ ">") procID ++
-    name ++ showArguments args
+    ++ show func ++ showArguments args
 showStmt _ (ForeignCall lang name flags args) =
-    "foreign " ++ lang ++ " " ++ showFlags flags ++ name ++
-    showArguments args
+    "foreign " ++ lang ++ " " ++ showFlags' flags
+    ++ name ++ showArguments args
 showStmt _ (TestBool test) =
     "testbool " ++ show test
 showStmt indent (And stmts) =
-    intercalate ("\n" ++ replicate indent ' ' ++ "& ")
+    "(   " ++ intercalate ("\n" ++ replicate indent ' ' ++ "& ")
     (List.map (showStmt indent' . content) stmts) ++
     ")"
     where indent' = indent + 4
-showStmt indent (Or stmts genVars) =
+showStmt indent (Or stmts genVars res) =
     "(   " ++
     intercalate ("\n" ++ replicate indent ' ' ++ "| ")
         (List.map (showStmt indent' . content) stmts) ++
-    ")" ++ maybe "" ((" -> "++) . showVarMap) genVars
+    ")" ++ maybe "" ((" vars -> "++) . showVarMap) genVars
+        ++ maybe "" ((" resources -> "++) . simpleShowSet) res
     where indent' = indent + 4
 showStmt indent (Not stmt) =
     "~(" ++ showStmt indent' (content stmt) ++ ")"
     where indent' = indent + 2
-showStmt indent (Cond condstmt thn els condVars genVars) =
+showStmt indent (Cond condstmt thn els condVars genVars res) =
     "if {" ++ showStmt (indent+4) (content condstmt) ++ "::\n"
     ++ showBody (indent+4) thn
     ++ startLine indent ++ "else::"
@@ -3400,6 +3871,7 @@ showStmt indent (Cond condstmt thn els condVars genVars) =
     ++ startLine indent ++ "}"
     ++ maybe "" (("\n   condition -> "++) . showVarMap) condVars
     ++ maybe "" (("\n   then&else -> "++) . showVarMap) genVars
+    ++ maybe "" (("\n   resources -> "++) . simpleShowSet) res
 showStmt indent (Case val cases deflt) =
     "case " ++ show val ++ " in {" ++ startLine indent
     ++ concatMap
@@ -3407,15 +3879,16 @@ showStmt indent (Case val cases deflt) =
        cases
     ++ maybe "" (("  else::" ++) . showBody (indent+4)) deflt
     ++ startLine indent ++ "}"
-showStmt indent (Loop lstmts genVars) =
+showStmt indent (Loop lstmts genVars res) =
     "do {" ++  showBody (indent + 4) lstmts
     ++ startLine indent ++ "}"
-    ++ maybe "" ((" -> "++) . showVarMap) genVars
-showStmt indent (UseResources resources old stmts) =
+    ++ maybe "" ((" vars -> "++) . showVarMap) genVars
+    ++ maybe "" ((" resources -> "++) . simpleShowSet) res
+showStmt indent (UseResources resources vars stmts) =
     "use " ++ intercalate ", " (List.map show resources)
-    ++ maybe "" (("preserving: " ++) . intercalate ", " . List.map show) old
     ++ " in" ++ showBody (indent + 4) stmts
     ++ startLine indent ++ "}"
+    ++ maybe "" (("\n   preserving -> "++) . showVarMap) vars
 showStmt _ Fail = "fail"
 showStmt _ Nop = "pass"
 showStmt indent (For generators body) =
@@ -3427,6 +3900,13 @@ showStmt indent (For generators body) =
     ++ "\n}"
 showStmt _ Break = "break"
 showStmt _ Next = "next"
+
+instance Show ProcFunctor where
+    show (First maybeMod name procID) =
+        maybeModPrefix maybeMod
+        ++ maybe "" (\n -> "<" ++ show n ++ ">") procID
+        ++ name
+    show (Higher fn) = show fn
 
 
 -- |Show a proc body, with the specified indent.
@@ -3445,6 +3925,9 @@ instance Show PrimArg where
   show (ArgFloat f typ)  = show f ++ showTypeSuffix typ Nothing
   show (ArgString s v typ) = show v ++ show s ++ showTypeSuffix typ Nothing
   show (ArgChar c typ)   = show c ++ showTypeSuffix typ Nothing
+  show (ArgProcRef ms as typ) = show ms ++ "<" ++ intercalate ", " (show <$> as)
+                             ++ ">" ++ showTypeSuffix typ Nothing
+  show (ArgGlobal info typ) = show info ++ showTypeSuffix typ Nothing
   show (ArgUnneeded dir typ) =
       primFlowPrefix dir ++ "_" ++ showTypeSuffix typ Nothing
   show (ArgUndef typ)    = "undef" ++ showTypeSuffix typ Nothing
@@ -3457,6 +3940,12 @@ instance Show Exp where
   show (StringValue s v) = show v ++ show s
   show (CharValue c) = show c
   show (Var name dir flowtype) = show flowtype ++ flowPrefix dir ++ name
+  show (Global info) = show info
+  show (AnonProc mods params ss _ _) =
+      showProcModifiers mods
+      ++ "{" ++ intercalate "; " (showStmt 0 . content <$> ss) ++ "}"
+  show (ProcRef ps es) = show ps ++ "<" ++ intercalate ", " (show <$> es) ++ ">"
+  show (AnonParamVar num dir) = flowPrefix dir ++ "@" ++ maybe "" show num
   show (Where stmts exp) = show exp ++ " where" ++ showBody 8 stmts
   show (DisjExp e1 e2) =
     "(" ++ show e1 ++ " | " ++ show e2 ++ ")"
@@ -3480,6 +3969,9 @@ instance Show Exp where
 instance Show StringVariant where
     show WybeString = ""
     show CString = "c"
+
+instance Show GlobalInfo where
+    show (GlobalResource res) = "<<" ++ show res ++ ">>"
 
 
 
@@ -3589,13 +4081,19 @@ lvl <!> msg = message lvl msg Nothing
 infix 0 <!>
 
 
+prettyPos :: OptPos -> IO String
+prettyPos Nothing = return ""
+prettyPos (Just pos) = do
+    relFile <- makeRelativeToCurrentDirectory $ sourceName pos
+    return $ relFile ++ ":" ++ show (sourceLine pos)
+             ++ ":" ++ show (sourceColumn pos)
+
 -- |Construct a message string from the specified text and location.
 makeMessage :: OptPos -> String -> IO String
 makeMessage Nothing msg    = return msg
-makeMessage (Just pos) msg = do
-    relFile <- makeRelativeToCurrentDirectory $ sourceName pos
-    return $ relFile ++ ":" ++ show (sourceLine pos)
-             ++ ":" ++ show (sourceColumn pos) ++ ": " ++ msg
+makeMessage pos@(Just _) msg = do
+    posStr <- prettyPos pos
+    return $ posStr ++ ": " ++ msg
 
 
 -- |Prettify and show compiler messages. Only Error messages are shown always,

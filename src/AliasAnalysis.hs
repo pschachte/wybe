@@ -269,10 +269,10 @@ completeAliasMap caller aliasMap = do
 updateAliasedByPrim :: AliasMapLocal -> Placed Prim -> Compiler AliasMapLocal
 updateAliasedByPrim aliasMap prim =
     case content prim of
-        PrimCall _ spec args -> do
+        PrimCall _ spec args _ -> do
             -- Analyse proc calls
             calleeDef <- getProcDef spec
-            let (ProcDefPrim _ calleeProto _ analysis _) = procImpln calleeDef
+            let ProcDefPrim _ calleeProto _ analysis _ = procImpln calleeDef
             let calleeParamAliases = procArgAliasMap analysis
             logAlias $ "--- call          " ++ show spec ++" (callee): "
             logAlias $ "" ++ show calleeProto
@@ -300,11 +300,11 @@ updateAliasedByPrim aliasMap prim =
             let prim' = content prim
             maybeAliasedVariables <- maybeAliasPrimArgs prim'
             aliasedArgsInSimplePrim aliasMap maybeAliasedVariables 
-                                        (primArgs prim')
+                                        (fst $ primArgs prim')
 
 
--- Build up maybe aliased inputs and outputs triggered by move, access, cast
--- instructions.
+-- Build up maybe aliased inputs and outputs triggered by move, access, cast, 
+-- load and store instructions.
 -- Not to compute aliasing from mutate instructions with the assumption that we
 -- always try to do nondestructive update.
 -- Retruns maybeAliasedVariables
@@ -314,6 +314,10 @@ maybeAliasPrimArgs (PrimForeign "lpvm" "access" _ args) =
 maybeAliasPrimArgs (PrimForeign "lpvm" "cast" _ args) =
     _maybeAliasPrimArgs args
 maybeAliasPrimArgs (PrimForeign "llvm" "move" _ args) =
+    _maybeAliasPrimArgs args
+maybeAliasPrimArgs (PrimForeign "llvm" "load" _ args) =
+    _maybeAliasPrimArgs args
+maybeAliasPrimArgs (PrimForeign "llvm" "store" _ args) =
     _maybeAliasPrimArgs args
 maybeAliasPrimArgs prim@(PrimForeign "lpvm" "mutate" flags args) = do
     let [fIn, fOut, _, _, _, _, mem] = args
@@ -432,9 +436,9 @@ updateMultiSpeczInfoByPrim :: PrimProto
 updateMultiSpeczInfoByPrim proto 
         (aliasMap, interestingCallProperties, multiSpeczDepInfo) prim =
     case content prim of
-        PrimCall callSiteID spec args -> do
+        PrimCall callSiteID spec args _ -> do
             calleeDef <- getProcDef spec
-            let (ProcDefPrim _ calleeProto _ analysis _) = procImpln calleeDef
+            let ProcDefPrim _ calleeProto _ analysis _ = procImpln calleeDef
             let interestingPrimCallInfo = List.zip args [0..]
                     |> List.filter (\(arg, paramID) -> 
                         -- we only care parameters that are interesting,

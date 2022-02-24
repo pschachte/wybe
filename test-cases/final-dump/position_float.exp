@@ -51,9 +51,9 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 = > public {inline} (1 calls)
 0: position_float.position.=<0>
-=(#left##0:position_float.position, #right##0:position_float.position, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+=(#left##0:position_float.position, #right##0:position_float.position, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm access(#left##0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#x##0:wybe.float) @position_float:nn:nn
     foreign lpvm access(~#left##0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#y##0:wybe.float) @position_float:nn:nn
     foreign lpvm access(#right##0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#x##0:wybe.float) @position_float:nn:nn
@@ -70,54 +70,54 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 position > public {inline} (0 calls)
 0: position_float.position.position<0>
-position(x##0:wybe.float, y##0:wybe.float, ?#result##0:position_float.position):
- AliasPairs: []
- InterestingCallProperties: []
+position(x##0:wybe.float, y##0:wybe.float, ?#result##0:position_float.position)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:position_float.position) @position_float:nn:nn
     foreign lpvm mutate(~#rec##0:position_float.position, ?#rec##1:position_float.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:wybe.float) @position_float:nn:nn
     foreign lpvm mutate(~#rec##1:position_float.position, ?#result##0:position_float.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y##0:wybe.float) @position_float:nn:nn
 position > public {inline} (6 calls)
 1: position_float.position.position<1>
-position(?x##0:wybe.float, ?y##0:wybe.float, #result##0:position_float.position):
- AliasPairs: []
- InterestingCallProperties: []
+position(?x##0:wybe.float, ?y##0:wybe.float, #result##0:position_float.position)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm access(#result##0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:wybe.float) @position_float:nn:nn
     foreign lpvm access(~#result##0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:wybe.float) @position_float:nn:nn
 
 
 x > public {inline} (0 calls)
 0: position_float.position.x<0>
-x(#rec##0:position_float.position, ?#result##0:wybe.float):
- AliasPairs: []
- InterestingCallProperties: []
+x(#rec##0:position_float.position, ?#result##0:wybe.float)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm access(~#rec##0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.float) @position_float:nn:nn
 x > public {inline} (0 calls)
 1: position_float.position.x<1>
-x(#rec##0:position_float.position, ?#rec##1:position_float.position, #field##0:wybe.float):
- AliasPairs: []
- InterestingCallProperties: []
+x(#rec##0:position_float.position, ?#rec##1:position_float.position, #field##0:wybe.float)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:position_float.position, ?#rec##1:position_float.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.float) @position_float:nn:nn
 
 
 y > public {inline} (0 calls)
 0: position_float.position.y<0>
-y(#rec##0:position_float.position, ?#result##0:wybe.float):
- AliasPairs: []
- InterestingCallProperties: []
+y(#rec##0:position_float.position, ?#result##0:wybe.float)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm access(~#rec##0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.float) @position_float:nn:nn
 y > public {inline} (0 calls)
 1: position_float.position.y<1>
-y(#rec##0:position_float.position, ?#rec##1:position_float.position, #field##0:wybe.float):
- AliasPairs: []
- InterestingCallProperties: []
+y(#rec##0:position_float.position, ?#rec##1:position_float.position, #field##0:wybe.float)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:position_float.position, ?#rec##1:position_float.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.float) @position_float:nn:nn
 
 
 ~= > public {inline} (0 calls)
 0: position_float.position.~=<0>
-~=(#left##0:position_float.position, #right##0:position_float.position, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+~=(#left##0:position_float.position, #right##0:position_float.position, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm access(#left##0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.float) @position_float:nn:nn
     foreign lpvm access(~#left##0:position_float.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.float) @position_float:nn:nn
     foreign lpvm access(#right##0:position_float.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.float) @position_float:nn:nn

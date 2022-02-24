@@ -40,25 +40,25 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 = > public {inline} (1 calls)
 0: bug217.foo.=<0>
-=([#left##0:bug217.foo], [#right##0:bug217.foo], ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+=([#left##0:bug217.foo], [#right##0:bug217.foo], ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 foo > {inline} (0 calls)
 0: bug217.foo.foo<0>
-foo(?#result##0:bug217.foo):
- AliasPairs: []
- InterestingCallProperties: []
+foo(?#result##0:bug217.foo)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(0:bug217.foo, ?#result##0:bug217.foo)
 
 
 ~= > public {inline} (0 calls)
 0: bug217.foo.~=<0>
-~=([#left##0:bug217.foo], [#right##0:bug217.foo], ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+~=([#left##0:bug217.foo], [#right##0:bug217.foo], ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
   LLVM code       :
@@ -105,25 +105,25 @@ entry:
 
 = > public {inline} (1 calls)
 0: bug217.foo.bar.=<0>
-=([#left##0:bug217.foo.bar], [#right##0:bug217.foo.bar], ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+=([#left##0:bug217.foo.bar], [#right##0:bug217.foo.bar], ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
 bar > {inline} (0 calls)
 0: bug217.foo.bar.bar<0>
-bar(?#result##0:bug217.foo.bar):
- AliasPairs: []
- InterestingCallProperties: []
+bar(?#result##0:bug217.foo.bar)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(0:bug217.foo.bar, ?#result##0:bug217.foo.bar)
 
 
 ~= > public {inline} (0 calls)
 0: bug217.foo.bar.~=<0>
-~=([#left##0:bug217.foo.bar], [#right##0:bug217.foo.bar], ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+~=([#left##0:bug217.foo.bar], [#right##0:bug217.foo.bar], ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
   LLVM code       :

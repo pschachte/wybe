@@ -11,30 +11,34 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: bug228-okay.<0>
-(io##0:wybe.phantom, ?io##2:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
-    foreign c print_int(1:wybe.int, ~#io##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#2##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-    foreign c print_int(2:wybe.int, ~#io##1:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(1:wybe.int, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(2:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
 bar > {inline} (1 calls)
 0: bug228-okay.bar<0>
-bar(?out1##0:wybe.int, ?out2##0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
+bar(?out1##0:wybe.int, ?out2##0:wybe.int)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<bug228-okay.res>>:wybe.int, ?%tmp#1##0:wybe.int) @bug228-okay:7:5
     foreign llvm move(2:wybe.int, ?out2##0:wybe.int) @bug228-okay:9:10
+    foreign lpvm store(~%tmp#1##0:wybe.int, <<bug228-okay.res>>:wybe.int) @bug228-okay:7:5
     foreign llvm move(1:wybe.int, ?out1##0:wybe.int) @bug228-okay:11:6
 
 
 init_res > {inline} (1 calls)
 0: bug228-okay.init_res<0>
-init_res([res##0:wybe.int], ?res##1:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
-    foreign llvm move(2:wybe.int, ?res##1:wybe.int) @bug228-okay:3:26
+init_res()<{<<bug228-okay.res>>}; {<<bug228-okay.res>>}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm store(2:wybe.int, <<bug228-okay.res>>:wybe.int) @bug228-okay:3:26
 
   LLVM code       :
 
@@ -48,6 +52,9 @@ declare external ccc  void @putchar(i8)
 
 
 declare external ccc  void @print_int(i64)    
+
+
+@"resource#bug228-okay.res" =    global i64 undef
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -68,13 +75,16 @@ entry:
 
 define external fastcc  {i64, i64} @"bug228-okay.bar<0>"()    {
 entry:
-  %1 = insertvalue {i64, i64} undef, i64 1, 0 
-  %2 = insertvalue {i64, i64} %1, i64 2, 1 
-  ret {i64, i64} %2 
+  %1 = load  i64, i64* @"resource#bug228-okay.res" 
+  store  i64 %1, i64* @"resource#bug228-okay.res" 
+  %2 = insertvalue {i64, i64} undef, i64 1, 0 
+  %3 = insertvalue {i64, i64} %2, i64 2, 1 
+  ret {i64, i64} %3 
 }
 
 
-define external fastcc  i64 @"bug228-okay.init_res<0>"()    {
+define external fastcc  void @"bug228-okay.init_res<0>"()    {
 entry:
-  ret i64 2 
+  store  i64 2, i64* @"resource#bug228-okay.res" 
+  ret void 
 }

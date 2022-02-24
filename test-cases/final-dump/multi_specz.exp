@@ -16,19 +16,19 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,impure} (0 calls)
 0: multi_specz.<0>
-(io##0:wybe.phantom, ?io##2:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
-    multi_specz.bar1<0>(~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @multi_specz:nn:nn
-    multi_specz.bar2<0>(~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #1 @multi_specz:nn:nn
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    multi_specz.bar1<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @multi_specz:nn:nn
+    multi_specz.bar2<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @multi_specz:nn:nn
 
 
 bar1 > public (1 calls)
 0: multi_specz.bar1<0>
-bar1(io##0:wybe.phantom, ?io##6:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
- MultiSpeczDepInfo: [(5,(multi_specz.foo<0>,fromList [NonAliasedParamCond 0 [],NonAliasedParamCond 1 []]))]
+bar1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+  MultiSpeczDepInfo: [(5,(multi_specz.foo<0>,fromList [NonAliasedParamCond 0 [],NonAliasedParamCond 1 []]))]
     foreign lpvm alloc(16:wybe.int, ?tmp#6##0:position.position) @position:nn:nn
     foreign lpvm mutate(~tmp#6##0:position.position, ?tmp#7##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int) @position:nn:nn
     foreign lpvm mutate(~tmp#7##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int) @position:nn:nn
@@ -41,22 +41,28 @@ bar1(io##0:wybe.phantom, ?io##6:wybe.phantom):
     foreign lpvm alloc(16:wybe.int, ?tmp#18##0:position.position) @position:nn:nn
     foreign lpvm mutate(~tmp#18##0:position.position, ?tmp#19##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int) @position:nn:nn
     foreign lpvm mutate(~tmp#19##0:position.position, ?tmp#3##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:wybe.int) @position:nn:nn
-    wybe.string.print_string<0>("=============":wybe.string, ~#io##0:wybe.phantom, ?tmp#22##0:wybe.phantom) #10 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#22##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-    multi_specz.foo<0>[7477e50a09](~tmp#0##0:position.position, ~tmp#1##0:position.position, tmp#2##0:position.position, tmp#3##0:position.position, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #5 @multi_specz:nn:nn
-    wybe.string.print_string<0>("-------------":wybe.string, ~#io##2:wybe.phantom, ?tmp#25##0:wybe.phantom) #11 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#25##0:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
-    position.printPosition<0>(~tmp#2##0:position.position, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) #7 @multi_specz:nn:nn
-    position.printPosition<0>(~tmp#3##0:position.position, ~#io##4:wybe.phantom, ?#io##5:wybe.phantom) #8 @multi_specz:nn:nn
-    wybe.string.print_string<0>("=============":wybe.string, ~#io##5:wybe.phantom, ?tmp#28##0:wybe.phantom) #12 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#28##0:wybe.phantom, ?#io##6:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("=============":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #10 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#22##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    multi_specz.foo<0>[7477e50a09](~tmp#0##0:position.position, ~tmp#1##0:position.position, tmp#2##0:position.position, tmp#3##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #5 @multi_specz:nn:nn
+    wybe.string.print_string<0>("-------------":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #11 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#24##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#24##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#25##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    position.printPosition<0>(~tmp#2##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7 @multi_specz:nn:nn
+    position.printPosition<0>(~tmp#3##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #8 @multi_specz:nn:nn
+    wybe.string.print_string<0>("=============":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #12 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#27##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#27##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#28##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
 bar2 > public (1 calls)
 0: multi_specz.bar2<0>
-bar2(io##0:wybe.phantom, ?io##8:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
+bar2()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#6##0:position.position) @position:nn:nn
     foreign lpvm mutate(~tmp#6##0:position.position, ?tmp#7##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int) @position:nn:nn
     foreign lpvm mutate(~tmp#7##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int) @position:nn:nn
@@ -69,46 +75,52 @@ bar2(io##0:wybe.phantom, ?io##8:wybe.phantom):
     foreign lpvm alloc(16:wybe.int, ?tmp#18##0:position.position) @position:nn:nn
     foreign lpvm mutate(~tmp#18##0:position.position, ?tmp#19##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int) @position:nn:nn
     foreign lpvm mutate(~tmp#19##0:position.position, ?tmp#3##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:wybe.int) @position:nn:nn
-    wybe.string.print_string<0>("=============":wybe.string, ~#io##0:wybe.phantom, ?tmp#22##0:wybe.phantom) #12 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#22##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-    multi_specz.foo<0>(tmp#0##0:position.position, tmp#1##0:position.position, tmp#2##0:position.position, tmp#3##0:position.position, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #5 @multi_specz:nn:nn
-    wybe.string.print_string<0>("-------------":wybe.string, ~#io##2:wybe.phantom, ?tmp#25##0:wybe.phantom) #13 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#25##0:wybe.phantom, ?#io##3:wybe.phantom) @io:nn:nn
-    position.printPosition<0>(~tmp#0##0:position.position, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) #7 @multi_specz:nn:nn
-    position.printPosition<0>(~tmp#1##0:position.position, ~#io##4:wybe.phantom, ?#io##5:wybe.phantom) #8 @multi_specz:nn:nn
-    position.printPosition<0>(~tmp#2##0:position.position, ~#io##5:wybe.phantom, ?#io##6:wybe.phantom) #9 @multi_specz:nn:nn
-    position.printPosition<0>(~tmp#3##0:position.position, ~#io##6:wybe.phantom, ?#io##7:wybe.phantom) #10 @multi_specz:nn:nn
-    wybe.string.print_string<0>("=============":wybe.string, ~#io##7:wybe.phantom, ?tmp#28##0:wybe.phantom) #14 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#28##0:wybe.phantom, ?#io##8:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>("=============":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #12 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#22##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    multi_specz.foo<0>(tmp#0##0:position.position, tmp#1##0:position.position, tmp#2##0:position.position, tmp#3##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #5 @multi_specz:nn:nn
+    wybe.string.print_string<0>("-------------":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #13 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#24##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#24##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#25##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    position.printPosition<0>(~tmp#0##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7 @multi_specz:nn:nn
+    position.printPosition<0>(~tmp#1##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #8 @multi_specz:nn:nn
+    position.printPosition<0>(~tmp#2##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #9 @multi_specz:nn:nn
+    position.printPosition<0>(~tmp#3##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #10 @multi_specz:nn:nn
+    wybe.string.print_string<0>("=============":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #14 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#27##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#27##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#28##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
 foo > public (2 calls)
 0: multi_specz.foo<0>
-foo(x1##0:position.position, x2##0:position.position, x3##0:position.position, x4##0:position.position, io##0:wybe.phantom, ?io##4:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1,InterestingUnaliased 2,InterestingUnaliased 3]
- MultiSpeczDepInfo: [(0,(multi_specz.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [0]])),(1,(multi_specz.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [1]])),(2,(multi_specz.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [2]])),(3,(multi_specz.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [3]]))]
-    multi_specz.modifyAndPrint<0>(~x1##0:position.position, 111:wybe.int, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @multi_specz:nn:nn
-    multi_specz.modifyAndPrint<0>(~x2##0:position.position, 222:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #1 @multi_specz:nn:nn
-    multi_specz.modifyAndPrint<0>(~x3##0:position.position, 333:wybe.int, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #2 @multi_specz:nn:nn
-    multi_specz.modifyAndPrint<0>(~x4##0:position.position, 444:wybe.int, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) #3 @multi_specz:nn:nn
+foo(x1##0:position.position, x2##0:position.position, x3##0:position.position, x4##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+  AliasPairs: []
+  InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1,InterestingUnaliased 2,InterestingUnaliased 3]
+  MultiSpeczDepInfo: [(0,(multi_specz.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [0]])),(1,(multi_specz.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [1]])),(2,(multi_specz.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [2]])),(3,(multi_specz.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [3]]))]
+    multi_specz.modifyAndPrint<0>(~x1##0:position.position, 111:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @multi_specz:nn:nn
+    multi_specz.modifyAndPrint<0>(~x2##0:position.position, 222:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @multi_specz:nn:nn
+    multi_specz.modifyAndPrint<0>(~x3##0:position.position, 333:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @multi_specz:nn:nn
+    multi_specz.modifyAndPrint<0>(~x4##0:position.position, 444:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @multi_specz:nn:nn
  [7477e50a09] [NonAliasedParam 0,NonAliasedParam 1] :
-    multi_specz.modifyAndPrint<0>[410bae77d3](~x1##0:position.position, 111:wybe.int, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @multi_specz:nn:nn
-    multi_specz.modifyAndPrint<0>[410bae77d3](~x2##0:position.position, 222:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) #1 @multi_specz:nn:nn
-    multi_specz.modifyAndPrint<0>(~x3##0:position.position, 333:wybe.int, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #2 @multi_specz:nn:nn
-    multi_specz.modifyAndPrint<0>(~x4##0:position.position, 444:wybe.int, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) #3 @multi_specz:nn:nn
+    multi_specz.modifyAndPrint<0>[410bae77d3](~x1##0:position.position, 111:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @multi_specz:nn:nn
+    multi_specz.modifyAndPrint<0>[410bae77d3](~x2##0:position.position, 222:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @multi_specz:nn:nn
+    multi_specz.modifyAndPrint<0>(~x3##0:position.position, 333:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @multi_specz:nn:nn
+    multi_specz.modifyAndPrint<0>(~x4##0:position.position, 444:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @multi_specz:nn:nn
 
 
 modifyAndPrint > public (4 calls)
 0: multi_specz.modifyAndPrint<0>
-modifyAndPrint(pos##0:position.position, v##0:wybe.int, io##0:wybe.phantom, ?io##1:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: [InterestingUnaliased 0]
-    foreign lpvm {noalias} mutate(~%pos##0:position.position, ?%pos##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~v##0:wybe.int) @position:nn:nn
-    position.printPosition<0>(~pos##1:position.position, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #1 @multi_specz:nn:nn
+modifyAndPrint(pos##0:position.position, v##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+  AliasPairs: []
+  InterestingCallProperties: [InterestingUnaliased 0]
+    foreign lpvm {noalias} mutate(~pos##0:position.position, ?pos##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~v##0:wybe.int) @position:nn:nn
+    position.printPosition<0>(~pos##1:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @multi_specz:nn:nn
  [410bae77d3] [NonAliasedParam 0] :
-    foreign lpvm {noalias} mutate(~%pos##0:position.position, ?%pos##1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~v##0:wybe.int) @position:nn:nn
-    position.printPosition<0>(~pos##1:position.position, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #1 @multi_specz:nn:nn
+    foreign lpvm {noalias} mutate(~pos##0:position.position, ?pos##1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~v##0:wybe.int) @position:nn:nn
+    position.printPosition<0>(~pos##1:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @multi_specz:nn:nn
 
   LLVM code       :
 
@@ -356,17 +368,23 @@ entry:
 
 printPosition > public (0 calls)
 0: position.printPosition<0>
-printPosition(pos##0:position.position, io##0:wybe.phantom, ?io##5:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
-    wybe.string.print_string<0>(" (":wybe.string, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #7 @io:nn:nn
+printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    wybe.string.print_string<0>(" (":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7 @io:nn:nn
     foreign lpvm access(pos##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @position:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>(",":wybe.string, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #8 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(",":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #8 @io:nn:nn
     foreign lpvm access(~pos##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @position:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~#io##3:wybe.phantom, ?#io##4:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>(")":wybe.string, ~#io##4:wybe.phantom, ?tmp#14##0:wybe.phantom) #9 @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#14##0:wybe.phantom, ?#io##5:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print_string<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #9 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 
@@ -446,9 +464,9 @@ entry:
 
 = > public {inline} (1 calls)
 0: position.position.=<0>
-=(#left##0:position.position, #right##0:position.position, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+=(#left##0:position.position, #right##0:position.position, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm access(#left##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#x##0:wybe.int) @position:nn:nn
     foreign lpvm access(~#left##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#y##0:wybe.int) @position:nn:nn
     foreign lpvm access(#right##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#x##0:wybe.int) @position:nn:nn
@@ -465,54 +483,54 @@ entry:
 
 position > public {inline} (0 calls)
 0: position.position.position<0>
-position(x##0:wybe.int, y##0:wybe.int, ?#result##0:position.position):
- AliasPairs: []
- InterestingCallProperties: []
+position(x##0:wybe.int, y##0:wybe.int, ?#result##0:position.position)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:position.position) @position:nn:nn
     foreign lpvm mutate(~#rec##0:position.position, ?#rec##1:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:wybe.int) @position:nn:nn
     foreign lpvm mutate(~#rec##1:position.position, ?#result##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y##0:wybe.int) @position:nn:nn
 position > public {inline} (6 calls)
 1: position.position.position<1>
-position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:position.position):
- AliasPairs: []
- InterestingCallProperties: []
+position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:position.position)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm access(#result##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:wybe.int) @position:nn:nn
     foreign lpvm access(~#result##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:wybe.int) @position:nn:nn
 
 
 x > public {inline} (0 calls)
 0: position.position.x<0>
-x(#rec##0:position.position, ?#result##0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
+x(#rec##0:position.position, ?#result##0:wybe.int)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm access(~#rec##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @position:nn:nn
 x > public {inline} (0 calls)
 1: position.position.x<1>
-x(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
+x(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:position.position, ?#rec##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @position:nn:nn
 
 
 y > public {inline} (0 calls)
 0: position.position.y<0>
-y(#rec##0:position.position, ?#result##0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
+y(#rec##0:position.position, ?#result##0:wybe.int)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm access(~#rec##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @position:nn:nn
 y > public {inline} (0 calls)
 1: position.position.y<1>
-y(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
+y(#rec##0:position.position, ?#rec##1:position.position, #field##0:wybe.int)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:position.position, ?#rec##1:position.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @position:nn:nn
 
 
 ~= > public {inline} (0 calls)
 0: position.position.~=<0>
-~=(#left##0:position.position, #right##0:position.position, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+~=(#left##0:position.position, #right##0:position.position, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm access(#left##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @position:nn:nn
     foreign lpvm access(~#left##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int) @position:nn:nn
     foreign lpvm access(#right##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.int) @position:nn:nn

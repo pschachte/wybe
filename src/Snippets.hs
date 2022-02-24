@@ -7,12 +7,18 @@
 
 module Snippets (castFromTo, castTo, withType, intType, intCast,
                  tagType, tagCast, phantomType, stringType, cStringType,
-                 isTypeVar, varSet, varGet, varGetSet,
+                 isTypeVar, 
+                 varSet, varGet, varGetSet,
+                 varSetTyped, varGetTyped, varGetSetTyped,
                  boolType, boolCast, boolTrue, boolFalse, boolBool,
                  boolVarSet, boolVarGet, intVarSet, intVarGet,
-                 lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, move, primMove,
+                 lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, 
+                 move, access, mutate, 
+                 globalStore, globalLoad,
+                 primMove, primAccess, primCast,
                  boolNegate, comparison, succeedTest, failTest, testVar, succeedIfSemiDet) where
 
+import Config
 import AST
 import Data.String (String)
 import Data.Char (isUpper, isDigit)
@@ -94,21 +100,33 @@ varGet name = Var name ParamIn Ordinary
 varGetSet :: Ident -> ArgFlowType -> Exp
 varGetSet name flowType = Var name ParamInOut flowType
 
+-- |An output variable reference (lvalue)
+varSetTyped :: Ident -> TypeSpec -> Exp
+varSetTyped name ty = Var name ParamOut Ordinary `withType` ty
+
+-- |An input variable reference (rvalue)
+varGetTyped :: Ident -> TypeSpec  -> Exp
+varGetTyped name ty = Var name ParamIn Ordinary `withType` ty
+
+-- |An input variable reference (rvalue)
+varGetSetTyped :: Ident -> TypeSpec  -> ArgFlowType -> Exp
+varGetSetTyped name ty flowType = Var name ParamInOut flowType `withType` ty
+
 -- |A Boolean typed output variable reference (lvalue)
 boolVarSet :: Ident -> Exp
-boolVarSet name = varSet name `withType` boolType
+boolVarSet name = varSetTyped name boolType
 
 -- |A Boolean typed input variable reference (rvalue)
 boolVarGet :: Ident -> Exp
-boolVarGet name = varGet name `withType` boolType
+boolVarGet name = varGetTyped name boolType
 
 -- |An integer type output variable reference (lvalue)
 intVarSet :: Ident -> Exp
-intVarSet name = varSet name `withType` intType
+intVarSet name = varSetTyped name intType
 
 -- |An integer type input variable reference (rvalue)
 intVarGet :: Ident -> Exp
-intVarGet name = varGet name `withType` intType
+intVarGet name = varGetTyped name intType
 
 -- |An unplaced statement to cast a value into fresh variable
 lpvmCast :: Exp -> Ident -> TypeSpec -> Placed Stmt
@@ -136,6 +154,36 @@ move :: Exp -> Exp -> Placed Stmt
 move src dest =
     Unplaced $ ForeignCall "llvm" "move" [] [Unplaced src, Unplaced dest]
 
+    
+-- |An instruction to access a value from some address
+access :: Exp -> Exp -> Exp -> Exp -> Exp -> Placed Stmt
+access addr offset size startOffset val =
+    Unplaced $ ForeignCall "lpvm" "acesss" [] 
+             $ Unplaced <$> [addr, offset, size, startOffset, val]
+
+             
+-- |An instruction to mutate a value from some address
+mutate :: Exp -> Exp -> Exp -> Exp -> Exp -> Exp -> Exp -> Placed Stmt
+mutate addr0 addr1 offset destructive size startOffset val =
+    Unplaced $ ForeignCall "lpvm" "mutate" [] 
+             $ Unplaced <$> [addr0, addr1, offset, destructive, 
+                             size, startOffset, val]
+
+
+globalStore :: ResourceSpec -> TypeSpec -> Exp -> Placed Stmt
+globalStore rs ty src =
+    Unplaced $ ForeignCall "lpvm" "store" [] 
+      [Unplaced src,
+       Unplaced $ Typed (Global $ GlobalResource rs) ty Nothing]
+
+
+globalLoad :: ResourceSpec -> TypeSpec -> Exp -> Placed Stmt
+globalLoad rs ty dest =
+    Unplaced $ ForeignCall "lpvm" "load" [] 
+      [Unplaced $ Typed (Global $ GlobalResource rs) ty Nothing, 
+       Unplaced dest]
+
+
 -- |An instruction to negate a bool value to a variable.  We optimise negation
 -- of constant values.
 boolNegate :: Exp -> Exp -> Placed Stmt
@@ -154,6 +202,17 @@ boolNegate src dest =
 primMove :: PrimArg -> PrimArg -> Prim
 primMove src dest =
   PrimForeign "llvm" "move" [] [src, dest]
+
+  
+-- |A primitive access instruction
+primAccess :: PrimArg -> PrimArg -> PrimArg -> PrimArg -> PrimArg -> Prim
+primAccess struct offset size startOffset val =
+  PrimForeign "lpvm" "access" [] [struct, offset, size, startOffset, val]
+
+-- |A primitive access instruction
+primCast :: PrimArg -> PrimArg -> Prim
+primCast to from =
+  PrimForeign "lpvm" "cast" [] [from, to]
 
 -- |An unplaced instruction to compare two integer values
 comparison :: Ident -> Exp -> Exp -> Placed Stmt

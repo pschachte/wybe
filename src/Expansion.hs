@@ -15,13 +15,16 @@
 module Expansion (procExpansion) where
 
 import           AST
+import           Util
 import           BodyBuilder
 import           Control.Monad
+import           Control.Monad.Extra       (ifM)
 import           Control.Monad.Trans       (lift)
 import           Control.Monad.Trans.State
 import           Data.List                 as List
 import           Data.Map                  as Map
 import           Data.Set                  as Set
+import           Data.Maybe                as Maybe
 import           Options                   (LogSelection (Expansion))
 
 
@@ -36,13 +39,16 @@ procExpansion pspec def = do
     logMsg Expansion $ "    initial body: " ++ show (procImpln def)
     let tmp = procTmpCount def
     let (ins,outs) = inputOutputParams proto
-    let st = initExpanderState $ procCallSiteCount def
-    (st', tmp', used, body') <- buildBody tmp (Map.fromSet id outs) $
-                        execStateT (expandBody body) st
-    let proto' = proto {primProtoParams = markParamNeededness used ins
-                                          <$> primProtoParams proto}
-    let impln' = impln{ procImplnProto = proto', procImplnBody = body' }
-    let def' = def { procImpln = impln', 
+    isClosure <- isClosureProc pspec
+    let params = primProtoParams proto
+    let st = initExpanderState (procCallSiteCount def)
+    (st', tmp', used, body') <- buildBody tmp (Map.fromSet id outs)
+                                $ execStateT (expandBody body) st
+    let params' = markParamNeededness isClosure used ins <$> params
+    let proto' = proto {primProtoParams = params'}
+    let impln' = impln{ procImplnProto = proto', 
+                        procImplnBody = body' }
+    let def' = def { procImpln = impln',
                      procTmpCount = tmp',
                      procCallSiteCount = nextCallSiteID st' }
     if def /= def'
@@ -60,16 +66,23 @@ procExpansion pspec def = do
 -- |Update the param to indicate whether the param is actually needed based
 -- on the set of variables used in the prod body and the set of input var
 -- names.  We consider outputs to be unneeded if they're identical to inputs.
-markParamNeededness :: Set PrimVarName -> Set PrimVarName -> PrimParam
-                    -> PrimParam
-markParamNeededness used _ param@PrimParam{primParamName=nm,
-                                           primParamFlow=FlowIn} =
-    param {primParamInfo = (primParamInfo param) {paramInfoUnneeded =
-                                                  Set.notMember nm used}}
-markParamNeededness _ ins param@PrimParam{primParamName=nm,
-                                          primParamFlow=FlowOut} =
-    param {primParamInfo = (primParamInfo param) {paramInfoUnneeded =
-                                                  Set.member nm ins}}
+markParamNeededness :: Bool -> Set PrimVarName -> Set PrimVarName
+                    -> PrimParam -> PrimParam
+markParamNeededness isClosure used _ param@PrimParam{primParamName=nm,
+                                                     primParamFlow=FlowIn,
+                                                     primParamFlowType=ft,
+                                                     primParamInfo=info} =
+    param {primParamInfo=info{paramInfoUnneeded=Set.notMember nm used
+                                                && (not isClosure
+                                                    || ft /= Ordinary)}}
+markParamNeededness isClosure _ ins param@PrimParam{primParamName=nm,
+                                                    primParamFlow=FlowOut,
+                                                    primParamFlowType=ft,
+                                                    primParamInfo=info} =
+    param {primParamInfo=info{paramInfoUnneeded=Set.member nm ins
+                                                && (not isClosure
+                                                    || ft /= Ordinary)}}
+
 
 -- |Type to remember the variable renamings.
 type Renaming = Map PrimVarName PrimArg
@@ -105,16 +118,16 @@ type Expander = StateT ExpanderState BodyBuilder
 
 -- |Substitute a fresh temp variable for the specified variable, unless
 -- we've already recorded the mapping for that name in writeNaming
-freshVar :: PrimVarName -> TypeSpec -> Expander PrimArg
-freshVar oldVar typ = do
+freshVar :: PrimVarName -> TypeSpec -> ArgFlowType  -> Expander PrimArg
+freshVar oldVar typ ft = do
     logExpansion $ "Making fresh name for variable " ++ show oldVar
     maybeName <- gets (Map.lookup oldVar . writeNaming)
     case maybeName of
         Nothing -> do
             newVar <- lift freshVarName
             logExpansion $ "    Generated fresh name " ++ show newVar
-            addRenaming oldVar $ ArgVar newVar typ FlowIn Ordinary False
-            return $ ArgVar newVar typ FlowOut Ordinary False
+            addRenaming oldVar $ ArgVar newVar typ FlowIn ft False
+            return $ ArgVar newVar typ FlowOut ft False
         Just newArg -> do
             logExpansion $ "    Already named it " ++ show newArg
             return newArg
@@ -134,14 +147,14 @@ addInstr :: Prim -> OptPos -> Expander ()
 addInstr prim pos = do
     -- reassign "CallSiteID" if the given prim is inlined from other proc
     prim' <- case prim of
-        PrimCall _ pspec args -> do
+        PrimCall _ pspec args gFlows -> do
             inliningNow <- gets inlining
             if inliningNow
             then do
                 callSiteID <- gets nextCallSiteID
                 modify (\st -> st {nextCallSiteID = callSiteID + 1})
-                return $ PrimCall callSiteID pspec args
-            else 
+                return $ PrimCall callSiteID pspec args gFlows
+            else
                 return prim
         _ -> return prim
     lift $ instr prim' pos
@@ -149,8 +162,7 @@ addInstr prim pos = do
 
 -- init a expander state based on the given call site count
 initExpanderState :: CallSiteID -> ExpanderState
-initExpanderState callSiteCount =
-    Expander False identityRenaming identityRenaming True callSiteCount
+initExpanderState = Expander False identityRenaming identityRenaming True
 
 
 ----------------------------------------------------------------
@@ -210,34 +222,47 @@ expandFork var ty bodies = do
 -- fail.
 -- XXX allow this to handle non-primitives with all inputs known by inlining.
 expandPrim :: Prim -> OptPos -> Expander ()
-expandPrim (PrimCall id pspec args) pos = do
+expandPrim (PrimCall id pspec args gFlows) pos = do
     args' <- mapM expandArg args
-    let call' = PrimCall id pspec args'
+    let call' = PrimCall id pspec args' gFlows
     logExpansion $ "  Expand call " ++ show call'
     inliningNow <- gets inlining
     if inliningNow
-      then do
-        logExpansion $ "  Cannot inline:  already inlining"
+    then do
+        logExpansion "  Cannot inline:  already inlining"
         addInstr call' pos
-      else do
+    else do
         def <- lift $ lift $ getProcDef pspec
         case procImpln def of
-          ProcDefSrc _ -> shouldnt $ "uncompiled proc: " ++ show pspec
-          ProcDefPrim{procImplnProto = proto, procImplnBody = body}->
-            if procInline def
-              then inlineCall proto args' body pos
-              else do
-                -- inlinableLast <- gets (((final && singleCaller def
-                --                          && procVis def == Private) &&)
-                --                        . noFork)
-                let inlinableLast = False
-                if inlinableLast
-                  then do
-                    logExpansion "  Inlining tail call to branching proc"
-                    inlineCall proto args' body pos
-                  else do
-                    logExpansion "  Not inlinable"
-                    addInstr call' pos
+            ProcDefSrc _ -> shouldnt $ "uncompiled proc: " ++ show pspec
+            ProcDefPrim{procImplnProto = proto, procImplnBody = body} ->
+                if procInline def
+                then inlineCall proto args' body pos
+                else do
+                    -- inlinableLast <- gets (((final && singleCaller def
+                    --                          && procVis def == Private) &&)
+                    --                        . noFork)
+                    let inlinableLast = False
+                    if inlinableLast
+                    then do
+                        logExpansion "  Inlining tail call to branching proc"
+                        inlineCall proto args' body pos
+                    else do
+                        logExpansion "  Not inlinable"
+                        addInstr call' pos
+expandPrim call@(PrimHigher id fn args) pos = do
+    logExpansion $ "  Expand higher call " ++ show call
+    fn' <- expandArg fn
+    case fn' of
+        ArgProcRef pspec closed _ -> do
+            pspec' <- fromMaybe pspec <$> lift (lift $ maybeGetClosureOf pspec)
+            logExpansion $ "  As first order call to " ++ show pspec'
+            gFlows <- lift $ lift $ getProcGlobalFlows pspec
+            expandPrim (PrimCall id pspec' (closed ++ args) gFlows) pos
+        _ -> do
+            args' <- mapM expandArg args
+            logExpansion $ "  As higher call to " ++ show fn'
+            addInstr (PrimHigher id fn' args') pos
 expandPrim (PrimForeign lang nm flags args) pos = do
     st <- get
     logExpansion $ "  Expanding " ++ show (PrimForeign lang nm flags args)
@@ -247,6 +272,7 @@ expandPrim (PrimForeign lang nm flags args) pos = do
     addInstr (PrimForeign lang nm flags args')  pos
     st' <- get
     logExpansion $ "    renaming = " ++ show (renaming st')
+
 
 
 inlineCall :: PrimProto -> [PrimArg] -> ProcBody -> OptPos -> Expander ()
@@ -269,16 +295,18 @@ inlineCall proto args body pos = do
 
 
 expandArg :: PrimArg -> Expander PrimArg
-expandArg arg@(ArgVar var ty flow _ _) = do
+expandArg arg@(ArgVar var ty flow ft _) = do
     renameAll <- gets inlining
     if renameAll
     then case flow of
-        FlowOut -> freshVar var ty
-        FlowIn ->
-            setArgType ty <$> gets (Map.findWithDefault arg var . renaming)
-            -- (shouldnt $ "inlining: reference to unassigned variable "
-            --  ++ show var)
+        FlowOut -> freshVar var ty ft
+        FlowIn -> 
+            setArgType ty . setArgFlowType ft
+            <$> gets (Map.findWithDefault arg var . renaming)
     else return arg
+expandArg arg@(ArgProcRef ps as ty) = do
+    as' <- mapM expandArg as
+    return $ ArgProcRef ps as' ty
 expandArg arg = return arg
 
 
@@ -317,21 +345,11 @@ addOutputNaming _ _ = return ()
 -- the argument has already been renamed as appropriate for the calling
 -- context.
 addInputAssign :: OptPos -> (PrimParam,PrimArg) -> Expander ()
-addInputAssign pos (param@(PrimParam name ty flow _ _),v) = do
-    -- XXX AnyType is now a valid type, treated as a word type
-    -- when (AnyType == ty) $
-    --   shouldnt $ "Danger: untyped param: " ++ show param
-    -- when (AnyType == argType v) $
-    --   shouldnt $ "Danger: untyped argument: " ++ show v
-    addInputAssign' pos name ty flow v
-
-addInputAssign' :: OptPos -> PrimVarName -> TypeSpec -> PrimFlow -> PrimArg
-                         -> Expander ()
-addInputAssign' pos name ty FlowIn v = do
-    newVar <- freshVar name ty
+addInputAssign pos (param@(PrimParam name ty FlowIn ft _),v) = do
+    newVar <- freshVar name ty ft
     addInstr (PrimForeign "llvm" "move" [] [v,newVar]) pos
-addInputAssign' _ _ _ FlowOut _ = do
-    return ()
+addInputAssign _ _ = return ()
+
 
 
 -- renameParam :: Renaming -> PrimParam -> PrimParam

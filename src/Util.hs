@@ -5,7 +5,8 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
-module Util (sameLength, maybeNth, setMapInsert, showArguments,
+module Util (sameLength, maybeNth, insertAt,
+             setMapInsert, showArguments,
              fillLines, nop, sccElts, DisjointSet,
              emptyDS, addOneToDS, unionTwoInDS,
              combineTwoDS, removeSingletonFromDS,
@@ -51,6 +52,17 @@ maybeNth 0 (e:_ ) = Just e
 maybeNth n (_:es)
  | n > 0          = maybeNth (n - 1) es
  | otherwise      = Nothing
+
+
+-- |Insert the given element in the specified index in the given list.
+-- If the index is out of bounds, this adds the element to the respective
+-- side of the list
+insertAt :: Int -> a -> [a] -> [a]
+insertAt n elt ls | n <= 0 = elt:ls
+insertAt n elt ls = go n ls
+  where go 0 xs     = elt:xs
+        go _ []     = [elt]
+        go n (x:xs) = x:go (n - 1) xs
 
 
 -- |Insert an element into the set mapped to by the specified key in
@@ -254,7 +266,7 @@ zipWith3M f (a:as) (b:bs) (c:cs) = do
     return $ d:ds
 
 
--- |zipWithM version for 3 lists.
+-- |zipWithM_ version for 3 lists.
 zipWith3M_ :: Monad m => (a -> b -> c -> m d) -> [a] -> [b] -> [c] -> m ()
 zipWith3M_ f as bs cs = zipWith3M f as bs cs >> return ()
 

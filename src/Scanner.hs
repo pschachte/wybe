@@ -8,7 +8,7 @@
 
 module Scanner (Token(..), tokenPosition, floatValue, intValue, stringValue,
                 charValue, identName, symbolName, tokenName, showPosition,
-                StringDelim(..), BracketStyle(..), fileTokens, tokenise,
+                StringDelim(..), BracketStyle(..), bracketString, fileTokens, tokenise,
                 inputTokens, stringTokens, delimitString) where
 
 import AST
@@ -209,12 +209,12 @@ pruneSeparators' (tok:rest) _           = tok : pruneSeparators' rest tok
 -- |Test whether an implicit separator following the specified token should be
 -- pruned.
 omitAfter :: Token -> Bool
-omitAfter TokSymbol{}    = True
-omitAfter TokComma{}     = True
-omitAfter TokLBracket{}  = True
-omitAfter TokSeparator{} = True
-omitAfter (TokIdent s _) = nonendingKeyword s
-omitAfter _              = False
+omitAfter (TokSymbol s _) = s /= "@"
+omitAfter TokComma{}      = True
+omitAfter TokLBracket{}   = True
+omitAfter TokSeparator{}  = True
+omitAfter (TokIdent s _)  = nonendingKeyword s
+omitAfter _               = False
 
 
 -- |Test whether an implicit separator preceding the specified list of tokens
@@ -253,6 +253,7 @@ tokenise pos str@(c:cs)
                     '}' -> singleCharTok c cs pos $ TokRBracket Brace pos
                     '?' -> singleCharTok c cs pos $ TokSymbol "?" pos
                     '!' -> singleCharTok c cs pos $ TokSymbol "!" pos
+                    '@' -> singleCharTok c cs pos $ TokSymbol "@" pos
                     '\'' -> tokeniseChar pos cs
                     '\"' -> tokeniseString DoubleQuote pos cs
                     -- backquote makes anything an identifier
@@ -313,7 +314,6 @@ isSymbolContinuation startChar ';' = True
 isSymbolContinuation startChar '.' = True
 isSymbolContinuation startChar ':' = True
 isSymbolContinuation startChar '!' = startChar == ':'
-isSymbolContinuation startChar '@' = True
 isSymbolContinuation startChar '$' = True
 isSymbolContinuation startChar '%' = True
 isSymbolContinuation startChar '^' = True

@@ -11,9 +11,9 @@ AFTER EVERYTHING:
 
 nested_if > public (0 calls)
 0: nested_if.nested_if<0>
-nested_if(i##0:wybe.int, io##0:wybe.phantom, ?io##1:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
+nested_if(i##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_eq(i##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool) @int:nn:nn
     case ~tmp#3##0:wybe.bool of
     0:
@@ -23,22 +23,30 @@ nested_if(i##0:wybe.int, io##0:wybe.phantom, ?io##1:wybe.phantom):
             foreign llvm icmp_eq(~i##0:wybe.int, 2:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
             case ~tmp#1##0:wybe.bool of
             0:
-                wybe.string.print_string<0>("other":wybe.string, ~#io##0:wybe.phantom, ?tmp#12##0:wybe.phantom) #8 @io:nn:nn
-                foreign c putchar('\n':wybe.char, ~tmp#12##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+                wybe.string.print_string<0>("other":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #8 @io:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
+                foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
+                foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
             1:
-                wybe.string.print_string<0>("two":wybe.string, ~#io##0:wybe.phantom, ?tmp#12##0:wybe.phantom) #9 @io:nn:nn
-                foreign c putchar('\n':wybe.char, ~tmp#12##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+                wybe.string.print_string<0>("two":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #9 @io:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
+                foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
+                foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
         1:
-            wybe.string.print_string<0>("one thousand and one":wybe.string, ~#io##0:wybe.phantom, ?tmp#10##0:wybe.phantom) #10 @io:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+            wybe.string.print_string<0>("one thousand and one":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #10 @io:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
+            foreign c putchar('\n':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
+            foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
     1:
-        wybe.string.print_string<0>("zero":wybe.string, ~#io##0:wybe.phantom, ?tmp#8##0:wybe.phantom) #11 @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#8##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+        wybe.string.print_string<0>("zero":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #11 @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
   LLVM code       :

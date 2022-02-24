@@ -54,14 +54,18 @@ type CallRec = Map ProcSpec Int
 
 
 noteCall :: ModSpec -> ProcSpec -> Bool -> Prim -> CallRec -> CallRec
-noteCall mod caller final (PrimCall _ spec _) rec
+noteCall mod caller final prim rec =
+    List.foldr (noteCalls' mod) rec (localCallees mod prim) 
+
+
+noteCalls' :: ModSpec -> ProcSpec -> CallRec -> CallRec
+noteCalls' mod spec rec
   | mod == procSpecMod spec  = Map.alter (Just . maybe 1 (1+)) spec rec
   | otherwise = rec
-noteCall _ caller final (PrimForeign _ _ _ _) rec = rec
 
 
 mergeCallers :: CallRec -> CallRec -> CallRec
-mergeCallers rec1 rec2 = Map.unionWith (\n1 n2 -> n1+n2) rec1 rec2
+mergeCallers rec1 rec2 = Map.unionWith (+) rec1 rec2
 
 registerCallers :: ProcSpec -> CallRec -> Map Ident [ProcDef]
                    -> Map Ident [ProcDef]
@@ -85,8 +89,8 @@ adjustNth :: (a -> a) -> Int -> [a] -> [a]
 adjustNth _ _ [] = error "adjustNth refers beyond list end"
 adjustNth fn 0 (e:es) = fn e:es
 adjustNth fn n (e:es)
-  | n > 0 = e : adjustNth fn (n-1) es
-  | True  = error "adjustNth with negative n"
+  | n > 0     = e : adjustNth fn (n-1) es
+  | otherwise = error "adjustNth with negative n"
 
 
 ----------------------------------------------------------------
@@ -120,10 +124,17 @@ localBodyCallees modspec body =
   foldBodyDistrib (\_ prim callees -> localCallees modspec prim ++ callees)
   [] (++) (++) body
 
-
+-- | Find all callees in a given prim
 localCallees :: ModSpec -> Prim -> [ProcSpec]
-localCallees modspec (PrimCall _ pspec _) =
-  -- turn it back to the general version
-  let ProcSpec thisMod name n _ = pspec in
-  [ProcSpec thisMod name n generalVersion]
-localCallees _ _                        = []
+localCallees modspec (PrimCall _ pspec args _) 
+  = pspec{procSpeczVersion=generalVersion}:concatMap (argRefs modspec) args
+localCallees modspec (PrimHigher _ fn args) 
+  = concatMap (argRefs modspec) (fn:args)
+localCallees modspec (PrimForeign _ _ _ args)  
+  = concatMap (argRefs modspec) args
+
+-- | Find all callees in a given PromArg
+argRefs :: ModSpec -> PrimArg -> [ProcSpec]
+argRefs modspec (ArgProcRef pspec closed _)
+  = localCallees modspec (PrimCall (shouldnt "argRefs") pspec closed univGlobalFlows)
+argRefs _ _ = []

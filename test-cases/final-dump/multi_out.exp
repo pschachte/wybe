@@ -12,16 +12,16 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,impure} (0 calls)
 0: multi_out.<0>
-(io##0:wybe.phantom, [?io##0:wybe.phantom]):
- AliasPairs: []
- InterestingCallProperties: []
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+  AliasPairs: []
+  InterestingCallProperties: []
 
 
 onetwothree > public {inline} (1 calls)
 0: multi_out.onetwothree<0>
-onetwothree(?x##0:wybe.int, ?y##0:wybe.int, ?z##0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
+onetwothree(?x##0:wybe.int, ?y##0:wybe.int, ?z##0:wybe.int)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(1:wybe.int, ?x##0:wybe.int) @multi_out:nn:nn
     foreign llvm move(2:wybe.int, ?y##0:wybe.int) @multi_out:nn:nn
     foreign llvm move(3:wybe.int, ?z##0:wybe.int) @multi_out:nn:nn

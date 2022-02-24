@@ -24,9 +24,9 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: int_list.<0>
-(io##0:wybe.phantom, ?io##1:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#6##0:int_list.int_list) @int_list:nn:nn
     foreign lpvm mutate(~tmp#6##0:int_list.int_list, ?tmp#7##0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @int_list:nn:nn
     foreign lpvm mutate(~tmp#7##0:int_list.int_list, ?tmp#8##0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:int_list.int_list) @int_list:nn:nn
@@ -36,36 +36,41 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm alloc(16:wybe.int, ?tmp#16##0:int_list.int_list) @int_list:nn:nn
     foreign lpvm mutate(~tmp#16##0:int_list.int_list, ?tmp#17##0:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int) @int_list:nn:nn
     foreign lpvm mutate(~tmp#17##0:int_list.int_list, ?tmp#18##0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#13##0:int_list.int_list) @int_list:nn:nn
-    int_list.print<0>(~tmp#18##0:int_list.int_list, ~#io##0:wybe.phantom, ?tmp#21##0:wybe.phantom) #5 @int_list:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#21##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+    int_list.print<0>(~tmp#18##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #5 @int_list:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#20##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#21##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
 print > public (2 calls)
 0: int_list.print<0>
-print(x##0:int_list.int_list, io##0:wybe.phantom, ?io##3:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
+print(x##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool)
     case ~tmp#2##0:wybe.bool of
     0:
-        foreign llvm move(~io##0:wybe.phantom, ?io##3:wybe.phantom)
 
     1:
         foreign lpvm access(x##0:int_list.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @int_list:nn:nn
         foreign lpvm access(~x##0:int_list.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:int_list.int_list) @int_list:nn:nn
-        foreign c print_int(~h##0:wybe.int, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
-        foreign c putchar(' ':wybe.char, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
-        int_list.print<0>(~t##0:int_list.int_list, ~#io##2:wybe.phantom, ?#io##3:wybe.phantom) #3 @int_list:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @io:nn:nn
+        foreign c print_int(~h##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
+        foreign c putchar(' ':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        int_list.print<0>(~t##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @int_list:nn:nn
 
 
 
 println > public {inline} (1 calls)
 0: int_list.println<0>
-println(x##0:int_list.int_list, io##0:wybe.phantom, ?io##2:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
-    int_list.print<0>(~x##0:int_list.int_list, ~#io##0:wybe.phantom, ?#io##1:wybe.phantom) #0 @int_list:nn:nn
-    foreign c putchar('\n':wybe.char, ~#io##1:wybe.phantom, ?#io##2:wybe.phantom) @io:nn:nn
+println(x##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    int_list.print<0>(~x##0:int_list.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @int_list:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#0##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#0##0:wybe.phantom, ?tmp#1##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#1##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 
@@ -173,9 +178,9 @@ entry:
 
 = > public (2 calls)
 0: int_list.int_list.=<0>
-=(#left##0:int_list.int_list, #right##0:int_list.int_list, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+=(#left##0:int_list.int_list, #right##0:int_list.int_list, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -206,17 +211,17 @@ entry:
 
 cons > public {inline} (0 calls)
 0: int_list.int_list.cons<0>
-cons(head##0:wybe.int, tail##0:int_list.int_list, ?#result##0:int_list.int_list):
- AliasPairs: []
- InterestingCallProperties: []
+cons(head##0:wybe.int, tail##0:int_list.int_list, ?#result##0:int_list.int_list)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:int_list.int_list) @int_list:nn:nn
     foreign lpvm mutate(~#rec##0:int_list.int_list, ?#rec##1:int_list.int_list, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head##0:wybe.int) @int_list:nn:nn
     foreign lpvm mutate(~#rec##1:int_list.int_list, ?#result##0:int_list.int_list, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail##0:int_list.int_list) @int_list:nn:nn
 cons > public {inline} (12 calls)
 1: int_list.int_list.cons<1>
-cons(?head##0:wybe.int, ?tail##0:int_list.int_list, #result##0:int_list.int_list, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+cons(?head##0:wybe.int, ?tail##0:int_list.int_list, #result##0:int_list.int_list, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -233,9 +238,9 @@ cons(?head##0:wybe.int, ?tail##0:int_list.int_list, #result##0:int_list.int_list
 
 head > public {inline} (0 calls)
 0: int_list.int_list.head<0>
-head(#rec##0:int_list.int_list, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+head(#rec##0:int_list.int_list, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -248,9 +253,9 @@ head(#rec##0:int_list.int_list, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 
 head > public {inline} (0 calls)
 1: int_list.int_list.head<1>
-head(#rec##0:int_list.int_list, ?#rec##1:int_list.int_list, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+head(#rec##0:int_list.int_list, ?#rec##1:int_list.int_list, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -265,17 +270,17 @@ head(#rec##0:int_list.int_list, ?#rec##1:int_list.int_list, #field##0:wybe.int, 
 
 nil > public {inline} (0 calls)
 0: int_list.int_list.nil<0>
-nil(?#result##0:int_list.int_list):
- AliasPairs: []
- InterestingCallProperties: []
+nil(?#result##0:int_list.int_list)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(0:int_list.int_list, ?#result##0:int_list.int_list)
 
 
 tail > public {inline} (0 calls)
 0: int_list.int_list.tail<0>
-tail(#rec##0:int_list.int_list, ?#result##0:int_list.int_list, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+tail(#rec##0:int_list.int_list, ?#result##0:int_list.int_list, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -288,9 +293,9 @@ tail(#rec##0:int_list.int_list, ?#result##0:int_list.int_list, ?#success##0:wybe
 
 tail > public {inline} (0 calls)
 1: int_list.int_list.tail<1>
-tail(#rec##0:int_list.int_list, ?#rec##1:int_list.int_list, #field##0:int_list.int_list, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+tail(#rec##0:int_list.int_list, ?#rec##1:int_list.int_list, #field##0:int_list.int_list, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -305,9 +310,9 @@ tail(#rec##0:int_list.int_list, ?#rec##1:int_list.int_list, #field##0:int_list.i
 
 ~= > public {inline} (0 calls)
 0: int_list.int_list.~=<0>
-~=(#left##0:int_list.int_list, #right##0:int_list.int_list, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+~=(#left##0:int_list.int_list, #right##0:int_list.int_list, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     int_list.int_list.=<0>(~#left##0:int_list.int_list, ~#right##0:int_list.int_list, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 

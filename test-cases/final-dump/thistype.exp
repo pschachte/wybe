@@ -22,10 +22,10 @@ AFTER EVERYTHING:
 
 module top-level code > public {impure} (0 calls)
 0: thistype.<0>
-(io##0:wybe.phantom, ?io##1:wybe.phantom):
- AliasPairs: []
- InterestingCallProperties: []
- MultiSpeczDepInfo: [(7,(thistype.concat<0>,fromList [NonAliasedParamCond 0 []]))]
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+  MultiSpeczDepInfo: [(7,(thistype.concat<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm alloc(16:wybe.int, ?tmp#11##0:thistype) @thistype:nn:nn
     foreign lpvm mutate(~tmp#11##0:thistype, ?tmp#12##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @thistype:nn:nn
     foreign lpvm mutate(~tmp#12##0:thistype, ?tmp#2##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:thistype) @thistype:nn:nn
@@ -43,15 +43,17 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm mutate(~tmp#28##0:thistype, ?tmp#4##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#5##0:thistype) @thistype:nn:nn
     thistype.concat<0>[410bae77d3](~tmp#0##0:thistype, ~tmp#4##0:thistype, ?tmp#8##0:thistype) #7 @thistype:nn:nn
     thistype.length<0>(~tmp#8##0:thistype, ?tmp#7##0:wybe.int) #8 @thistype:nn:nn
-    foreign c print_int(~tmp#7##0:wybe.int, ~#io##0:wybe.phantom, ?tmp#31##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#31##0:wybe.phantom, ?#io##1:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#30##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(~tmp#7##0:wybe.int, ~tmp#30##0:wybe.phantom, ?tmp#31##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#31##0:wybe.phantom, ?tmp#32##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#32##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
 = > public (2 calls)
 0: thistype.=<0>
-=(#left##0:thistype, #right##0:thistype, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+=(#left##0:thistype, #right##0:thistype, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -82,10 +84,10 @@ module top-level code > public {impure} (0 calls)
 
 concat > public (2 calls)
 0: thistype.concat<0>[410bae77d3]
-concat(x##0:thistype, y##0:thistype, ?#result##0:thistype):
- AliasPairs: [(#result##0,y##0)]
- InterestingCallProperties: [InterestingUnaliased 0]
- MultiSpeczDepInfo: [(1,(thistype.concat<0>,fromList [NonAliasedParamCond 0 [0]]))]
+concat(x##0:thistype, y##0:thistype, ?#result##0:thistype)<{}; {}>:
+  AliasPairs: [(#result##0,y##0)]
+  InterestingCallProperties: [InterestingUnaliased 0]
+  MultiSpeczDepInfo: [(1,(thistype.concat<0>,fromList [NonAliasedParamCond 0 [0]]))]
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
     case ~tmp#5##0:wybe.bool of
     0:
@@ -114,17 +116,17 @@ concat(x##0:thistype, y##0:thistype, ?#result##0:thistype):
 
 cons > public {inline} (6 calls)
 0: thistype.cons<0>
-cons(head##0:wybe.int, tail##0:thistype, ?#result##0:thistype):
- AliasPairs: []
- InterestingCallProperties: []
+cons(head##0:wybe.int, tail##0:thistype, ?#result##0:thistype)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:thistype) @thistype:nn:nn
     foreign lpvm mutate(~#rec##0:thistype, ?#rec##1:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head##0:wybe.int) @thistype:nn:nn
     foreign lpvm mutate(~#rec##1:thistype, ?#result##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail##0:thistype) @thistype:nn:nn
 cons > public {inline} (18 calls)
 1: thistype.cons<1>
-cons(?head##0:wybe.int, ?tail##0:thistype, #result##0:thistype, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+cons(?head##0:wybe.int, ?tail##0:thistype, #result##0:thistype, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -141,9 +143,9 @@ cons(?head##0:wybe.int, ?tail##0:thistype, #result##0:thistype, ?#success##0:wyb
 
 head > public {inline} (0 calls)
 0: thistype.head<0>
-head(#rec##0:thistype, ?#result##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+head(#rec##0:thistype, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -156,9 +158,9 @@ head(#rec##0:thistype, ?#result##0:wybe.int, ?#success##0:wybe.bool):
 
 head > public {inline} (0 calls)
 1: thistype.head<1>
-head(#rec##0:thistype, ?#rec##1:thistype, #field##0:wybe.int, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+head(#rec##0:thistype, ?#rec##1:thistype, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -173,9 +175,9 @@ head(#rec##0:thistype, ?#rec##1:thistype, #field##0:wybe.int, ?#success##0:wybe.
 
 length > public (2 calls)
 0: thistype.length<0>
-length(x##0:thistype, ?#result##0:wybe.int):
- AliasPairs: []
- InterestingCallProperties: []
+length(x##0:thistype, ?#result##0:wybe.int)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
     case ~tmp#5##0:wybe.bool of
     0:
@@ -190,17 +192,17 @@ length(x##0:thistype, ?#result##0:wybe.int):
 
 nil > public {inline} (2 calls)
 0: thistype.nil<0>
-nil(?#result##0:thistype):
- AliasPairs: []
- InterestingCallProperties: []
+nil(?#result##0:thistype)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm move(0:thistype, ?#result##0:thistype)
 
 
 tail > public {inline} (0 calls)
 0: thistype.tail<0>
-tail(#rec##0:thistype, ?#result##0:thistype, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+tail(#rec##0:thistype, ?#result##0:thistype, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -213,9 +215,9 @@ tail(#rec##0:thistype, ?#result##0:thistype, ?#success##0:wybe.bool):
 
 tail > public {inline} (0 calls)
 1: thistype.tail<1>
-tail(#rec##0:thistype, ?#rec##1:thistype, #field##0:thistype, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+tail(#rec##0:thistype, ?#rec##1:thistype, #field##0:thistype, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
@@ -230,9 +232,9 @@ tail(#rec##0:thistype, ?#rec##1:thistype, #field##0:thistype, ?#success##0:wybe.
 
 ~= > public {inline} (0 calls)
 0: thistype.~=<0>
-~=(#left##0:thistype, #right##0:thistype, ?#success##0:wybe.bool):
- AliasPairs: []
- InterestingCallProperties: []
+~=(#left##0:thistype, #right##0:thistype, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
     thistype.=<0>(~#left##0:thistype, ~#right##0:thistype, ?tmp#0##0:wybe.bool) #0
     foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 

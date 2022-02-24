@@ -33,15 +33,19 @@ instance Binary FlowDirection
 instance Binary PrimFlow
 instance Binary TypeVarName
 instance Binary TypeSpec
+instance Binary TypeFlow
 instance Binary Exp
 instance Binary StringVariant
+instance Binary GlobalInfo
 instance Binary Generator
 instance Binary Stmt
+instance Binary ProcFunctor
 instance Binary ParamInfo
 instance Binary Prim
 instance Binary PrimVarName
 instance Binary PrimArg
 instance Binary ProcAnalysis
+instance Binary GlobalFlows
 instance Binary CallSiteProperty
 instance Binary InterestingCallProperty
 
@@ -52,7 +56,8 @@ instance Binary PrimProto
 instance Binary PrimParam
 instance Binary ProcBody
 instance Binary PrimFork
-instance Binary SuperprocSpec
+instance Binary ProcVariant 
+instance Binary SuperprocSpec  
 instance Binary ProcDef
 instance Binary ProcProto
 instance Binary Param

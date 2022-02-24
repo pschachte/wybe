@@ -15,11 +15,13 @@ import           Control.Monad.Trans.State
 import           Data.List                 as List
 import           Data.Map                  as Map
 import           Data.Set                  as Set
+import           UnivSet                   as USet
 import           Data.Graph
 import           Expansion
 import           Options                   (LogSelection (Optimise))
 import           Types
 import           Util
+import           Debug.Trace
 
 
 -- optimiseMod :: ModSpec -> Compiler (Bool,[(String,OptPos)])
@@ -53,14 +55,18 @@ optimiseMod _ thisMod = do
 --   repeated to a fixed point, but I'm not confident that optimisation
 --   is monotone and I don't want an infinite loop.
 optimiseSccBottomUp :: SCC ProcSpec -> Compiler ()
-optimiseSccBottomUp (AcyclicSCC single) =
-    optimiseProcBottomUp single >> return ()
-optimiseSccBottomUp (CyclicSCC procs) = do
+optimiseSccBottomUp (AcyclicSCC single) = optimiseSccBottomUp' [single]
+optimiseSccBottomUp (CyclicSCC procs) = optimiseSccBottomUp' procs
+
+
+-- | As with optimiseSccBottomUp, but operates on a list of procs
+optimiseSccBottomUp' :: [ProcSpec] -> Compiler ()
+optimiseSccBottomUp' procs = do
     inlines <- mapM optimiseProcBottomUp procs
     -- If any but first in SCC were marked for inlining, repeat to inline
     -- in earlier procs in the SCC.
-    when (or $ tail inlines) $ do
-        mapM_ optimiseProcBottomUp procs
+    when (or $ tail inlines)
+        $ mapM_ optimiseProcBottomUp procs
 
 
 optimiseProcTopDown :: ProcSpec -> Compiler ()
@@ -104,7 +110,7 @@ decideInlining :: ProcDef -> Compiler ProcDef
 decideInlining def
     |  NoFork == bodyFork body && procInlining def == MayInline = do
     logOptimise $ "Considering inline of " ++ procName def
-    benefit <- (4 +) <$> procCost proto -- add 4 for time saving
+    benefit <- (4 +) <$> procCost proto globalFlows -- add 4 for time saving
     logOptimise $ "  benefit = " ++ show benefit
     cost <- bodyCost $ bodyPrims body
     logOptimise $ "  cost = " ++ show cost
@@ -113,17 +119,20 @@ decideInlining def
        || procCallCount def <= 1 && procVis def == Private
     then return $ def { procInlining = Inline }
     else return def
-    where proto = procImplnProto $ procImpln def
-          body = procImplnBody $ procImpln def
+    where impln = procImpln def
+          proto = procImplnProto impln
+          body = procImplnBody impln
+          globalFlows = primProtoGlobalFlows proto
 decideInlining def = return def
 
 
 -- |Estimate the "cost" of a call to a proc; ie, how much space the call will
 --  occupy.
-procCost :: PrimProto -> Compiler Int
-procCost proto = do
+procCost :: PrimProto -> GlobalFlows -> Compiler Int
+procCost proto GlobalFlows{globalFlowsIn=ins, globalFlowsOut=outs} = do
     nonPhantoms <- filterM ((not <$>) . paramIsPhantom) $ primProtoParams proto
-    return $ 1 + length nonPhantoms
+    let globalCost = Set.size . USet.toSet Set.empty
+    return $ 1 + length nonPhantoms + globalCost ins + globalCost outs
 
 
 -- |Estimate the "cost" of a proc body; ie, how much space the code occupies.
@@ -136,7 +145,8 @@ bodyCost pprims = sum <$> mapM (primCost . content) pprims
 --  cost of the arguments, and a test instruction as free.
 primCost :: Prim -> Compiler Int
 primCost (PrimForeign "llvm" _ _ _) = return 1
-primCost (PrimCall _ _ args)          = (1+) . sum <$> mapM argCost args
+primCost (PrimCall _ _ args _)      = (1+) . sum <$> mapM argCost args
+primCost (PrimHigher _ fn args)     = (1+) . sum <$> mapM argCost (fn:args)
 primCost (PrimForeign _ _ _ args)   = (1+) . sum <$> mapM argCost args
 
 

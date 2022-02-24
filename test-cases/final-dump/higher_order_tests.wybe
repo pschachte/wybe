@@ -1,0 +1,21 @@
+
+def {test} do_test(f:{test}(I), i:I) { f(i) }
+def {test} do_test2(f:(I, ?bool), i:I) { f(i) }
+
+?t = {test}{
+    @1 = ?_
+}
+
+if { do_test(t, 1) :: !println("*1") }
+if { do_test2(t, 1) :: !println("1") }
+if { do_test(t, 2) :: !println("*2") }
+if { do_test2(t, 2) :: !println("2") }
+
+!println("------")
+
+?t = {test}{ @1 = 1 }
+
+if { do_test(t, 1) :: !println("*1") }
+if { do_test2(t, 1) :: !println("1") }
+if { do_test(t, 2) :: !println("*2") }
+if { do_test2(t, 2) :: !println("2") }
