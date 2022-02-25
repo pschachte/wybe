@@ -1,0 +1,9 @@
+# test case for #250
+
+def {test} foo(?i) {
+    ?i = 0
+    if {fail :: pass | else :: pass}
+    ?i = 1
+}
+
+if { foo(?i) :: !print(i) }

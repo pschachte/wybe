@@ -2044,7 +2044,12 @@ modecheckStmt m name defPos assigned detism tmpCount final
       else if mustFail assigned1 -- is condition guaranteed to fail?
       then do
         logTyped $ "Assigned by failing conditional: " ++ show assigned3
-        return (tstStmt'++elsStmts', assigned3, tmpCount3)
+        bindings <- mapFromUnivSetM ultimateVarType Set.empty
+                    $ bindingVars assigned3
+        -- We still need to have a Cond here. The test may be non-pure
+        return ([maybePlace (Cond (seqToStmt tstStmt') [] elsStmts'
+                        (Just condBindings) (Just bindings) res) pos], 
+                assigned3, tmpCount3)
       else do
         let finalAssigned = assigned2 `joinState` assigned3
         logTyped $ "Assigned by conditional: " ++ show finalAssigned
@@ -2053,7 +2058,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
         return
           ([maybePlace (Cond (seqToStmt tstStmt') thnStmts' elsStmts'
                         (Just condBindings) (Just bindings) res)
-            pos], finalAssigned,tmpCount)
+            pos], finalAssigned,tmpCount3)
 modecheckStmt m name defPos assigned detism tmpCount final
     stmt@(TestBool exp) pos = do
     logTyped $ "Mode checking test " ++ show exp
