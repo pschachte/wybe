@@ -30,7 +30,7 @@ module top-level code > public {inline,impure} (0 calls)
 
 update_both > {inline} (1 calls)
 0: person5.update_both<0>
-update_both(p1##0:person5.person, ?p1##1:person5.person, p2##0:person5.person, ?p2##1:person5.person)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+update_both(p1##0:person5.person, ?p1##1:person5.person, p2##0:person5.person, ?p2##1:person5.person)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm mutate(~p1##0:person5.person, ?p1##1:person5.person, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, "Amy":wybe.string) @person5:nn:nn

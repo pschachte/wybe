@@ -95,14 +95,14 @@ module top-level code > public {impure} (0 calls)
 
 gen#1 > {inline} (1 calls)
 0: higher_order_resources.gen#1<0>
-gen#1(anon#1#1##0:wybe.list(wybe.int))<{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}>:
+gen#1(anon#1#1##0:wybe.list(wybe.int))<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.list.length1<0>(~anon#1#1##0:wybe.list(T), 0:wybe.int, ?tmp#10##0:wybe.int) #2 @list:nn:nn
     higher_order_resources.take_max<0>(~tmp#10##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}> #1 @higher_order_resources:nn:nn
 gen#1 > {inline} (1 calls)
 1: higher_order_resources.gen#1<1>
-gen#1(anon#1#1##0:wybe.list(wybe.int))<{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}>:
+gen#1(anon#1#1##0:wybe.list(wybe.int))<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.list.length1<0>(~anon#1#1##0:wybe.list(T), 0:wybe.int, ?tmp#1##0:wybe.int) #1 @list:nn:nn
@@ -147,13 +147,13 @@ gen#2(anon#2#1##0:wybe.list(wybe.int))<{<<higher_order_resources.maximum>>, <<wy
 
 gen#3 > {inline} (1 calls)
 0: higher_order_resources.gen#3<0>
-gen#3(anon#3#1##0:wybe.int)<{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}>:
+gen#3(anon#3#1##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     higher_order_resources.take_max<0>(~anon#3#1##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}> #0 @higher_order_resources:nn:nn
 gen#3 > {inline} (1 calls)
 1: higher_order_resources.gen#3<1>
-gen#3(anon#3#1##0:wybe.int)<{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}>:
+gen#3(anon#3#1##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     higher_order_resources.take_max<0>(~anon#3#1##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}> #1 @higher_order_resources:nn:nn

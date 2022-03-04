@@ -22,7 +22,7 @@ module top-level code > public {inline,impure} (0 calls)
 
 backup > public {inline} (1 calls)
 0: alias_data.backup<0>
-backup(student1##0:student.student, ?student2##0:student.student)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+backup(student1##0:student.student, ?student2##0:student.student)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(~student1##0:student.student, ?student2##0:student.student) @alias_data:nn:nn
