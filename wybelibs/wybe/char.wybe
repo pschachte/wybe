@@ -1,14 +1,17 @@
+# purpose: Standard Char Type
+# since  : 0.1
+
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.bool, wybe.int
 
 representation is 8 bit unsigned
 
-pub def (x:_ = y:_):bool = foreign llvm icmp_eq(x, y)
+pub def (x:_ =  y:_):bool = foreign llvm icmp_eq(x, y)
 pub def (x:_ ~= y:_):bool = foreign llvm icmp_ne(x, y)
-pub def (x:_ < y:_):bool = foreign llvm icmp_ult(x, y)
+pub def (x:_ <  y:_):bool = foreign llvm icmp_ult(x, y)
 pub def (x:_ <= y:_):bool = foreign llvm icmp_ule(x, y)
-pub def (x:_ > y:_):bool = foreign llvm icmp_ugt(x, y)
+pub def (x:_ >  y:_):bool = foreign llvm icmp_ugt(x, y)
 pub def (x:_ >= y:_):bool = foreign llvm icmp_uge(x, y)
 
 pub def ord(c:_):int = foreign lpvm cast(c)

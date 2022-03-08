@@ -1,3 +1,6 @@
+# purpose: Standard Range Library, an fixed-stride integer range
+# since  : 0.1
+
 pub constructor range(start:int, stride:int, end:int)
 
 pub def {test} `[|]`(?value:int, ?rest:_, current:_) {

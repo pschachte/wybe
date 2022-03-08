@@ -34,7 +34,7 @@ module top-level code > public {impure} (0 calls)
     wybe.array.[|]<0>[785a827a1b](?command##1:wybe.c_string, ?arguments##2:wybe.array(wybe.c_string), ~tmp#0##0:wybe.array(wybe.c_string), ?tmp#7##0:wybe.bool) #1 @command_line:nn:nn
     case ~tmp#7##0:wybe.bool of
     0:
-        foreign c {terminal,semipure} error_exit(c"command_line:15:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @control:nn:nn
+        foreign c {terminal,semipure} error_exit(c"command_line:18:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @control:nn:nn
 
     1:
         foreign lpvm store(~%arguments##2:wybe.array(wybe.c_string), <<command_line.arguments>>:wybe.array(wybe.c_string)) @command_line:nn:nn
@@ -67,7 +67,7 @@ declare external fastcc  {i64, i64, i1} @"wybe.array.[|]<0>[785a827a1b]"(i64)
 @command_line.17 =    constant [?? x i8] c"Erroneous program argument vector\00"
 
 
-@command_line.16 =    constant [?? x i8] c"command_line:15:15\00"
+@command_line.16 =    constant [?? x i8] c"command_line:18:15\00"
 
 
 @command_line.11 =    constant [?? x i8] c"\00"

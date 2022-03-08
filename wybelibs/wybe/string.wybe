@@ -1,3 +1,6 @@
+# purpose: Standard String Type
+# since  : 0.1
+
 pragma no_standard_library
 
 use wybe.int, wybe.c_string, wybe.range
@@ -45,11 +48,11 @@ pub def (x:_ ,, y:_):_ =
        | else :: concat(x, y)
        }
 
-pub def (x:_ = y:_):bool  = cmp(x, y) = equal
+pub def (x:_ =  y:_):bool = cmp(x, y) = equal
 pub def (x:_ ~= y:_):bool = cmp(x, y) ~= equal
-pub def (x:_ < y:_):bool  = cmp(x, y) < equal
+pub def (x:_ <  y:_):bool = cmp(x, y) < equal
 pub def (x:_ <= y:_):bool = cmp(x, y) <= equal
-pub def (x:_ > y:_):bool  = cmp(x, y) > equal
+pub def (x:_ >  y:_):bool = cmp(x, y) > equal
 pub def (x:_ >= y:_):bool = cmp(x, y) >= equal
 
 pub def {test} `[|]`(?head:char, ?tail:_, s:_) {

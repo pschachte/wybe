@@ -1,3 +1,6 @@
+# purpose: Standard Integer Library
+# since  : 0.1
+
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use foreign library m
@@ -5,27 +8,79 @@ use wybe.bool
 
 representation is signed
 
-pub def (x:_ + y:_):_ = foreign llvm add(x,y)
-pub def (?x:_ + y:_):_ = ?z where ?x = foreign llvm sub(z,y)
-pub def (x:_ + ?y:_):_ = ?z where { ?y = foreign llvm sub(z,x) }
-pub def (x:_ - y:_):_ = foreign llvm sub(x,y)
-pub def (?x:_ - y:_):_ = ?z where { ?x = foreign llvm add(z,y) }
-pub def (x:_ - ?y:_):_ = ?z where { ?y = foreign llvm sub(z,x) }
-pub def -(x:_):_ = foreign llvm sub(0,x)
+
+## Common integer operations
+
+# Addition.  This operation is reversible:  you can compute either argument from
+# the other argument and the value.
+pub def (x:_  + y:_):_  = foreign llvm add(x,y)
+pub def (?x:_ + y:_):_  = ?z where ?x = foreign llvm sub(z,y)
+pub def (x:_  + ?y:_):_ = ?z where { ?y = foreign llvm sub(z,x) }
+
+# Addition assignment.
+pub def (!x:_ += y:_) { ?x = x + y }
+
+# Subtraction.  This operation is reversible:  you can compute either argument
+# from the other argument and the value.
+pub def (x:_  - y:_):_  = foreign llvm sub(x,y)
+pub def (?x:_ - y:_):_  = ?z where { ?x = foreign llvm add(z,y) }
+pub def (x:_  - ?y:_):_ = ?z where { ?y = foreign llvm sub(z,x) }
+
+# Unary negation.  This operation is reversible:  you can compute the argument 
+# from the value.
+pub def -(x:_):_  = foreign llvm sub(0,x)
 pub def -(?x:_):_ = ?y where { ?x = foreign llvm sub(0,y) }
+
+# Subtraction assignment.
+pub def (!x:_ -= y:_) { ?x = x - y }
+
+# Multiplication.
 pub def (x:_ * y:_):_ = foreign llvm mul(x,y)
+
+# Multiplication assignment.
+pub def (!x:_ *= y:_) { ?x = x * y }
+
+# Integer division.
 pub def (x:_ / y:_):_ = foreign llvm sdiv(x,y)
+
+# Integer division assignment.
+pub def (!x:_ /= y:_) { ?x = x / y }
+
+# Modulus.
 pub def (x:_ % y:_):_ = foreign llvm srem(x,y)
+
+# Modulus assignment.
+pub def (!x:_ %= y:_) { ?x = x % y }
+
+
+## Comparisons
+
+# Equality and disequality.
 pub def (x:_ ~= y:_):bool = foreign llvm icmp_ne(x,y)
-pub def (x:_ < y:_):bool = foreign llvm icmp_slt(x,y)
+pub def (x:_ =  y:_):bool = foreign llvm icmp_eq(x,y)
+
+# Inequalities.
+pub def (x:_ <  y:_):bool = foreign llvm icmp_slt(x,y)
 pub def (x:_ <= y:_):bool = foreign llvm icmp_sle(x,y)
-pub def (x:_ > y:_):bool = foreign llvm icmp_sgt(x,y)
+pub def (x:_ >  y:_):bool = foreign llvm icmp_sgt(x,y)
 pub def (x:_ >= y:_):bool = foreign llvm icmp_sge(x,y)
-pub def (x:_ = y:_):bool = foreign llvm icmp_eq(x,y)
-pub def sqrt(x:_):_ = foreign c isqrt(x)
-pub def power(x:_,y:_):_ = foreign c ipow(x,y)
-pub def incr(!x:_) { ?x = x + 1 }
-pub def decr(!x:_) { ?x = x - 1 }
+
+# Minimum and maximum of two integers.
 pub def min(x:_, y:_):_ = if {x<=y:: x | else:: y}
 pub def max(x:_, y:_):_ = if {x>=y:: x | else:: y}
+
+
+## Other operations
+
+# Integer square root.
+pub def sqrt(x:_):_ = foreign c isqrt(x)
+
+# Integer exponentiation.
+pub def power(x:_, y:_):_ = foreign c ipow(x,y)
+
+# Increment and Decrement.
+pub def incr(!x:_) { ?x = x + 1 }
+pub def decr(!x:_) { ?x = x - 1 }
+
+# The sign of an integer: +1, -1, or 0
 pub def signum(x:_):_ = foreign c signum(x)

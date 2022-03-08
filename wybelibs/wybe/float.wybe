@@ -1,7 +1,6 @@
 # purpose: Standard Floating Point Library
 # since  : 0.1
 
-
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.bool
@@ -22,26 +21,39 @@ pub def e:float = 2.71828182845904523536028747135266250
 ## Common floating point operations
 
 # Addition.  This operation is reversible:  you can compute either argument from
-# the other argument and the valu.
-pub def (x:_ + y:_):_ = foreign llvm fadd(x,y)
-pub def (?x:_ + y:_):_ = ?z where { ?x = foreign llvm fsub(z,y) }
-pub def (x:_ + ?y:_):_ = ?z where { ?y = foreign llvm fsub(z,x) }
+# the other argument and the value.
+pub def (x:_  + y:_):_  = foreign llvm fadd(x,y)
+pub def (?x:_ + y:_):_  = ?z where { ?x = foreign llvm fsub(z,y) }
+pub def (x:_  + ?y:_):_ = ?z where { ?y = foreign llvm fsub(z,x) }
+
+# Addition assignment.
+pub def (!x:_ += y:_) { ?x = x + y }
 
 # Subtraction.  This operation is reversible:  you can compute either argument
 # from the other argument and the value.
-pub def (x:_ - y:_):_ = foreign llvm fsub(x,y)
+pub def (x:_  - y:_):_  = foreign llvm fsub(x,y)
 pub def (?x:_ - y:_):_  = ?z where { ?x = foreign llvm fadd(z,y) }
-pub def (x:_ - ?y:_):_  = ?z where { ?y = foreign llvm fsub(z,x) }
+pub def (x:_  - ?y:_):_ = ?z where { ?y = foreign llvm fsub(z,x) }
 
-# Unary negation.  This operation is reversible:  you can compute the argument from the valu.
-pub def -(x:_):_ = foreign llvm fsub(0.0,x)
+# Unary negation.  This operation is reversible:  you can compute the argument 
+# from the value.
+pub def -(x:_):_  = foreign llvm fsub(0.0,x)
 pub def -(?x:_):_ = ?y where { ?x = foreign llvm fsub(0.0,y) }
+
+# Subtraction assignment.
+pub def (!x:_ -= y:_) { ?x = x - y }
 
 # Multiplication.
 pub def (x:_ * y:_):_ = foreign llvm fmul(x,y)
 
+# Multiplication assignment.
+pub def (!x:_ *= y:_) { ?x = x * y }
+
 # Division.
 pub def (x:_ / y:_):_ = foreign llvm fdiv(x,y)
+
+# Division assignment.
+pub def (!x:_ /= y:_) { ?x = x / y }
 
 # Raise to the second power.
 pub def square(x:_):_ = foreign llvm fmul(x,x)
@@ -53,13 +65,13 @@ pub def abs(x:_):_ = foreign c `llvm.fabs.f64`(x)
 ## Comparisons
 
 # Equality and disequality.
-pub def (x:_ = y:_):bool = foreign llvm fcmp_eq(x,y)
+pub def (x:_ =  y:_):bool = foreign llvm fcmp_eq(x,y)
 pub def (x:_ ~= y:_):bool = foreign llvm fcmp_ne(x,y)
 
 # Inequalities.
-pub def (x:_ < y:_):bool = foreign llvm fcmp_slt(x,y)
+pub def (x:_ <  y:_):bool = foreign llvm fcmp_slt(x,y)
 pub def (x:_ <= y:_):bool = foreign llvm fcmp_sle(x,y)
-pub def (x:_ > y:_):bool = foreign llvm fcmp_sgt(x,y)
+pub def (x:_ >  y:_):bool = foreign llvm fcmp_sgt(x,y)
 pub def (x:_ >= y:_):bool = foreign llvm fcmp_sge(x,y)
 
 # Minimum and maximum of two floats.

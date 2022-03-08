@@ -1,10 +1,41 @@
+# purpose: Standard Boolean Library
+# since  : 0.1
+
 pragma no_standard_library  # Standard library can't depend on itself!
 
 pub constructors false | true
 
-pub def (p:_ && q:_):_ = foreign llvm and(p,q)
-pub def (p:_ || q:_):_ = foreign llvm or(p,q)
-pub def ~(p:_):_       = foreign llvm xor(p,true)
-pub def (x:_ = y:_):_    = foreign llvm icmp_eq(x,y)
-pub def (x:_ ~= y:_):_    = foreign llvm icmp_ne(x,y)
+## Common Boolean operations
+
+# Logical and
+pub def (p:_ && q:_):_ = foreign llvm and(p, q)
+
+# Logical and assigment
+pub def (!p:_ &= q:_) { ?p = (p && q) }
+
+# Logical or
+pub def (p:_ || q:_):_ = foreign llvm or(p, q)
+
+# Logical or assigment
+pub def (!p:_ |= q:_) { ?p = (q || p) }  
+
+# Logical xor
+pub def (p:_ ^^ q:_):_ = foreign llvm xor(p, q) 
+
+# Logical xor assigment
+pub def (!p:_ ^= q:_) { ?p = q ^^ p }  
+
+# Logical not
+pub def ~(p:_):_ = foreign llvm xor(p, true)
+
+
+## Comparisons
+
+# Equality and disequality.
+pub def (x:_ =  y:_):_ = foreign llvm icmp_eq(x, y)
+pub def (x:_ ~= y:_):_ = foreign llvm icmp_ne(x, y)
+
+
+## Other
+
 pub def succeed { pass } # always succeed
