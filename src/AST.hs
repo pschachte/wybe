@@ -54,7 +54,7 @@ module AST (
   getParams, getPrimParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, maybeModPrefix, ProcImpln(..), ProcDef(..), procInline, procCallCount,
-  getProcGlobalFlows, 
+  getProcGlobalFlows,
   primImpurity, flagsImpurity, flagsDetism,
   AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
   parameterVarNameToID, SpeczVersion, CallProperty(..), generalVersion,
@@ -76,7 +76,7 @@ module AST (
   CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
   maybeGetClosureOf, isClosureProc, isClosureVariant,
   GlobalFlows(..), emptyGlobalFlows, univGlobalFlows, makeGlobalFlows,
-  addGlobalFlow, hasGlobalFlow, globalFlowsUnion, globalFlowsIntersection, 
+  addGlobalFlow, hasGlobalFlow, globalFlowsUnion, globalFlowsIntersection,
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
@@ -97,12 +97,12 @@ module AST (
   typeIsUnique,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   initialisedResources,
-  addSimpleResource, lookupResource, 
-  specialResources, specialResourcesSet, isSpecialResource, 
+  addSimpleResource, lookupResource,
+  specialResources, specialResourcesSet, isSpecialResource,
   publicResource, resourcefulName,
   ProcModifiers(..), defaultProcModifiers, checkProcMods,
   setDetism, setInline, setImpurity, setVariant,
-  ProcVariant(..), Inlining(..), Impurity(..), 
+  ProcVariant(..), Inlining(..), Impurity(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
   specialChar, specialName, specialName2,
   outputVariableName, outputStatusName,
@@ -505,7 +505,7 @@ getLoadedModule modspec = do
     logAST $ if isNothing maybeMod then " got nothing!" else " worked"
     return maybeMod
 
--- | Perform an action if in the current module or a submodule, 
+-- | Perform an action if in the current module or a submodule,
 -- else perform another
 ifCurrentModuleElse :: ModSpec -> StateT s Compiler a -> StateT s Compiler a
                     -> StateT s Compiler a
@@ -1033,7 +1033,7 @@ specialResources =
         ("call_source_full_location",(callSourceLocation True,cStrType))
         ]
 
-        
+
 -- | The set of ResourceSpec that correspond to sepcial resources
 specialResourcesSet :: Set ResourceSpec
 specialResourcesSet = Set.map (ResourceSpec []) $ keysSet specialResources
@@ -1117,7 +1117,7 @@ inliningName NoInline   = "noinline"
 -- | The Wybe impurity system.
 data Impurity = PromisedPure  -- ^The proc is pure despite having impure parts
               | Pure          -- ^The proc is pure, and so are its parts
-              | Semipure      -- ^The proc is not pure, but callers can be pure 
+              | Semipure      -- ^The proc is not pure, but callers can be pure
               | Impure        -- ^The proc is impure and makes its callers so
     deriving (Eq, Ord, Show, Generic)
 
@@ -1243,15 +1243,15 @@ addProcDef procDef = do
     return spec
 
 
--- | Check a set of ProcModifiers, providing error messages for unknown and 
+-- | Check a set of ProcModifiers, providing error messages for unknown and
 -- conflicting mods
 checkProcMods :: String -> OptPos -> ProcModifiers -> Compiler ()
 checkProcMods context pos ProcModifiers{modifierUnknown=unknown,
                                         modifierConflict=conflicting} = do
-    mapM_ (errmsg pos . ("Unknown modifier '" ++) 
+    mapM_ (errmsg pos . ("Unknown modifier '" ++)
                       . (++ "' in " ++ context))
         unknown
-    mapM_ (errmsg pos . ("Modifier '" ++) 
+    mapM_ (errmsg pos . ("Modifier '" ++)
                       . (++ "' conflicts with earlier modifier in " ++ context))
         conflicting
 
@@ -1383,7 +1383,7 @@ data Module = Module {
   modTypeRep :: Maybe TypeRepresentation, -- ^Type representation, when known
   modInterface :: ModuleInterface, -- ^The public face of this module
   modInterfaceHash :: InterfaceHash,
-                                   -- ^Hash of the "modInterface" above 
+                                   -- ^Hash of the "modInterface" above
   modImplementation :: Maybe ModuleImplementation,
                                    -- ^the module's implementation
   procCount :: Int,                -- ^a counter for gensym-ed proc names
@@ -1451,7 +1451,7 @@ sameOriginModules mspec = do
 --                    <$> getLoadedModule m
 --     file <- origin mspec
 --     subMods <- Map.elems . modSubmods <$> getLoadedModuleImpln mspec
---     (same,diff) <- List.partition snd . zip subMods 
+--     (same,diff) <- List.partition snd . zip subMods
 --                    <$> mapM (((== file) <$>) . origin) subMods
 --     ((fst <$> diff) ++) . concat <$> mapM differentOriginModules (fst <$> same)
 
@@ -1527,7 +1527,7 @@ type InterfaceHash = Maybe String
 
 
 -- |Holds everything needed to compile code that uses a module
--- XXX Currently, the data in it is never used (except for computing the 
+-- XXX Currently, the data in it is never used (except for computing the
 --     interface hash). We should revise the design of this, and make the
 --     "compileModSCC" in Builder.hs only gets other modules' data from this
 --     instead of extracting directly form "ModuleImplementation".
@@ -1674,8 +1674,8 @@ lookupTypeRepresentation (TypeSpec modSpec name _) =
 lookupTypeRepresentation (HigherOrderType ProcModifiers{modifierDetism=detism} tfs) = do
     mbInReps <- sequenceRepFlowTypes ins
     mbOutReps <- sequenceRepFlowTypes outs
-    return $ Func <$> mbInReps 
-                  <*> ((++ [Signed 1 | detism == SemiDet]) 
+    return $ Func <$> mbInReps
+                  <*> ((++ [Signed 1 | detism == SemiDet])
                   <$> mbOutReps)
   where
     ins = List.filter (flowsIn . typeFlowMode) tfs
@@ -1958,7 +1958,7 @@ getProcGlobalFlows :: ProcSpec -> Compiler GlobalFlows
 getProcGlobalFlows pspec = do
     pDef <- getProcDef pspec
     case procImpln pDef of
-      ProcDefSrc _ -> 
+      ProcDefSrc _ ->
             let ProcProto _ params resFlows = procProto pDef
             in return $ makeGlobalFlows (paramType <$> params) resFlows
       ProcDefPrim _ (PrimProto _ _ gFlows) _ _ _ -> return gFlows
@@ -1972,16 +1972,16 @@ procCallCount proc = Map.foldr (+) 0 $ procCallers proc
 
 -- | What is the Impurity of the given Prim?
 primImpurity :: Prim -> Compiler Impurity
-primImpurity (PrimCall _ pspec _ _) 
+primImpurity (PrimCall _ pspec _ _)
     = procImpurity <$> getProcDef pspec
-primImpurity (PrimHigher _ (ArgProcRef pspec _ _) _) 
+primImpurity (PrimHigher _ (ArgProcRef pspec _ _) _)
     = procImpurity <$> getProcDef pspec
-primImpurity (PrimHigher _ ArgVar{argVarType=HigherOrderType 
+primImpurity (PrimHigher _ ArgVar{argVarType=HigherOrderType
                                 ProcModifiers{modifierImpurity=purity} _} _)
-    = return purity 
-primImpurity (PrimHigher _ fn _) 
+    = return purity
+primImpurity (PrimHigher _ fn _)
     = shouldnt $ "primImpurity of" ++ show fn
-primImpurity (PrimForeign _ _ flags _) 
+primImpurity (PrimForeign _ _ flags _)
     = return $ flagsImpurity flags
 
 
@@ -2012,7 +2012,7 @@ flagDetism _ "semidet"  = SemiDet
 flagDetism detism _     = detism
 
 
-data ProcVariant 
+data ProcVariant
     = RegularProc
     | ConstructorProc
     | DeconstructorProc
@@ -2088,8 +2088,8 @@ data ProcImpln
     deriving (Eq,Generic)
 
 
--- | Represents a set of globals flowing in and out. 
-data GlobalFlows 
+-- | Represents a set of globals flowing in and out.
+data GlobalFlows
     = GlobalFlows {
         globalFlowsIn :: UnivSet GlobalInfo,
         -- ^ The set of globals that flow in
@@ -2101,9 +2101,9 @@ data GlobalFlows
 
 instance Show GlobalFlows where
     show (GlobalFlows ins outs) =
-        "<" ++ showUnivSet show ins 
+        "<" ++ showUnivSet show ins
         ++ "; " ++ showUnivSet show outs
-        ++ ">" 
+        ++ ">"
 
 
 -- | An empty set of GlobalFlows
@@ -2112,26 +2112,26 @@ emptyGlobalFlows = GlobalFlows emptyUnivSet emptyUnivSet
 
 
 -- | The set of all GlobalFlows
-univGlobalFlows :: GlobalFlows 
+univGlobalFlows :: GlobalFlows
 univGlobalFlows = GlobalFlows UniversalSet UniversalSet
 
 
 -- | Given a list of Types and a set of ResourceFlowSpecs, make a GlobalFlows.
--- If any of the TypeSpecs are resourceful higher order, this is the 
+-- If any of the TypeSpecs are resourceful higher order, this is the
 -- univGlobalFlows, otherwise this is derived from the resources and flows.
 --
--- In the case we have a higher order resourceful argument, we may not know 
+-- In the case we have a higher order resourceful argument, we may not know
 -- exactly which global variables flow into or out of a procedure, and as such
 -- we take a conservative approach and assume all do.
 makeGlobalFlows :: [TypeSpec] -> Set ResourceFlowSpec -> GlobalFlows
 makeGlobalFlows tys resFlows
-    | any isResourcefulHigherOrder tys = univGlobalFlows 
+    | any isResourcefulHigherOrder tys = univGlobalFlows
     | otherwise = Set.fold addGlobalResourceFlows emptyGlobalFlows resFlows
-                
+
 
 -- |Add flows associated with a given resource to a set of GlobalFlows
 addGlobalResourceFlows :: ResourceFlowSpec -> GlobalFlows -> GlobalFlows
-addGlobalResourceFlows (ResourceFlowSpec res flow) gFlows 
+addGlobalResourceFlows (ResourceFlowSpec res flow) gFlows
     | isSpecialResource res = gFlows
     | otherwise = List.foldr (addGlobalFlow (GlobalResource res)) gFlows
                 $ [FlowIn | flowsIn flow] ++ [FlowOut | flowsOut flow]
@@ -2139,17 +2139,17 @@ addGlobalResourceFlows (ResourceFlowSpec res flow) gFlows
 
 -- | Add a GlobalInfo to the set of global flows associated with the given flow
 addGlobalFlow :: GlobalInfo -> PrimFlow -> GlobalFlows -> GlobalFlows
-addGlobalFlow info FlowIn gFlows@GlobalFlows{globalFlowsIn=ins} 
+addGlobalFlow info FlowIn gFlows@GlobalFlows{globalFlowsIn=ins}
     = gFlows{globalFlowsIn=whenFinite (Set.insert info) ins}
-addGlobalFlow info FlowOut gFlows@GlobalFlows{globalFlowsOut=outs} 
+addGlobalFlow info FlowOut gFlows@GlobalFlows{globalFlowsOut=outs}
     = gFlows{globalFlowsOut=whenFinite (Set.insert info) outs}
 
 
 -- | Test if the given flow of a global exists in the global flow set
 hasGlobalFlow :: GlobalFlows -> PrimFlow -> GlobalInfo -> Bool
-hasGlobalFlow gFlows@GlobalFlows{globalFlowsIn=ins} FlowIn info  
+hasGlobalFlow gFlows@GlobalFlows{globalFlowsIn=ins} FlowIn info
     = USet.member info ins
-hasGlobalFlow gFlows@GlobalFlows{globalFlowsOut=outs} FlowOut info  
+hasGlobalFlow gFlows@GlobalFlows{globalFlowsOut=outs} FlowOut info
     = USet.member info outs
 
 
@@ -2201,7 +2201,7 @@ data CallProperty
 -- "NonAliasedParam v1" is used for global CTGC, it means that the argument
 -- passed to parameter v1 is nonaliased.
     = NonAliasedParam ParameterID
-    -- Remove the placeholder below and add more items when adding new 
+    -- Remove the placeholder below and add more items when adding new
     -- specializations. The placeholder is used to avoid overlapping-patterns
     -- warning as well as the suggestion of using newtype instead of data from
     -- linter.
@@ -2224,7 +2224,7 @@ speczVersionToId = List.take 10 . show . sha1 . Data.Binary.encode
 
 
 -- | A map contains different specialization versions.
--- The key is the id of each version and the value is the 
+-- The key is the id of each version and the value is the
 -- actual implementation. A procBody can be "Nothing" when it's required but
 -- haven't been generated. All procBody will be generated before converting to
 -- llvm code.
@@ -2246,8 +2246,8 @@ aliasMapToAliasPairs :: AliasMap -> [(PrimVarName, PrimVarName)]
 aliasMapToAliasPairs aliasMap = Set.toList $ dsToTransitivePairs aliasMap
 
 
--- |Infomation about specialization versions the current proc directly uses. 
--- It's a mapping from call sites to the callee's "ProcSpec" and a set of 
+-- |Infomation about specialization versions the current proc directly uses.
+-- It's a mapping from call sites to the callee's "ProcSpec" and a set of
 -- "CallSiteProperty".
 -- For a given specialization version of the current proc, this info should be
 -- enough to compute all specz versions it required. A sample case is
@@ -2270,7 +2270,7 @@ data CallSiteProperty
 
 
 -- |Describing the interestingness of a proc. if something is interesting, that
--- means if we could provide some information about that thing, then we can 
+-- means if we could provide some information about that thing, then we can
 -- generate more specialized code.
 data InterestingCallProperty
     -- "InterestingUnaliased v" means that if parameter v is known as unaliased,
@@ -2309,7 +2309,7 @@ instance Show ProcImpln where
                             Nothing -> " Missing"
                             Just body -> showBlock 4 body)
                 |> intercalate "\n"
-        in  show pSpec ++ "\n" ++ show proto ++ ":" 
+        in  show pSpec ++ "\n" ++ show proto ++ ":"
                     ++ show analysis
                     ++ showBlock 4 body ++ speczBodies
 
@@ -2905,7 +2905,7 @@ seqToStmt stmts = Unplaced $ And stmts
 
 data ProcFunctor
     = First ModSpec ProcName (Maybe Int)
-       -- ^ A first-order procedure 
+       -- ^ A first-order procedure
     | Higher (Placed Exp)
        -- ^ A higher-order procedure
     deriving (Eq, Ord, Generic)
@@ -2951,8 +2951,8 @@ data StringVariant = WybeString | CString
    deriving (Eq,Ord,Generic)
 
 
--- Information about a global variable. 
--- A global vairbale is a variable that is available everywhere, 
+-- Information about a global variable.
+-- A global vairbale is a variable that is available everywhere,
 -- and can be access via an LPVM load instruction, or written to via an LPVM store
 data GlobalInfo = GlobalResource { globalResourceSpec :: ResourceSpec }
     deriving (Eq, Ord, Generic)
@@ -2962,7 +2962,7 @@ data GlobalInfo = GlobalResource { globalResourceSpec :: ResourceSpec }
 expIsVar :: Exp -> Bool
 expIsVar Var{}           = True
 expIsVar AnonParamVar{}  = True
-expIsVar (Typed exp _ _) = expIsVar exp 
+expIsVar (Typed exp _ _) = expIsVar exp
 expIsVar _               = False
 
 
@@ -2988,7 +2988,7 @@ expIsConstant exp@IntValue{}         = Just exp
 expIsConstant exp@FloatValue{}       = Just exp
 expIsConstant exp@CharValue{}        = Just exp
 expIsConstant exp@StringValue{}      = Just exp
-expIsConstant exp@(ProcRef _ closed) 
+expIsConstant exp@(ProcRef _ closed)
     | all (isJust . expIsConstant . content) closed = Just exp
     | otherwise                                     = Nothing
 expIsConstant (Typed exp _ _)        = expIsConstant exp
@@ -3149,12 +3149,12 @@ data PrimArg
 -- |Returns a list of all arguments to a prim, including global flows
 primArgs :: Prim -> ([PrimArg], GlobalFlows)
 primArgs (PrimCall _ _ args gFlows) = (args, gFlows)
-primArgs (PrimHigher _ fn args) 
-    = (fn:args, if isResourcefulHigherOrder $ argType fn 
+primArgs (PrimHigher _ fn args)
+    = (fn:args, if isResourcefulHigherOrder $ argType fn
                 then univGlobalFlows else emptyGlobalFlows)
-primArgs (PrimForeign "lpvm" "load" _ args@[ArgGlobal info _, _]) 
+primArgs (PrimForeign "lpvm" "load" _ args@[ArgGlobal info _, _])
     = (args, addGlobalFlow info FlowIn emptyGlobalFlows)
-primArgs (PrimForeign "lpvm" "store" _ args@[_, ArgGlobal info _]) 
+primArgs (PrimForeign "lpvm" "store" _ args@[_, ArgGlobal info _])
     = (args, addGlobalFlow info FlowOut emptyGlobalFlows)
 primArgs prim@(PrimForeign _ _ _ args) = (args, emptyGlobalFlows)
 
@@ -3200,7 +3200,7 @@ argIntegerValue _              = Nothing
 data ArgFlowType = Ordinary        -- ^An argument/parameter as written by user
                  | Resource ResourceSpec
                                    -- ^An argument to pass a resource
-                 | Free            -- ^An argument to be passed in the closure 
+                 | Free            -- ^An argument to be passed in the closure
                                    -- environment
      deriving (Eq,Ord,Generic)
 
@@ -3373,7 +3373,7 @@ expInputs (CaseExp exp cases deflt) =
 
 
 
--- |Return the set of variables that are inputs to the the specified list of 
+-- |Return the set of variables that are inputs to the the specified list of
 -- placed expressions.
 pexpListInputs :: [Placed Exp] -> Set VarName
 pexpListInputs = List.foldr (Set.union . expInputs . content) Set.empty
@@ -3423,7 +3423,7 @@ setPExpTypeFlow typeflow pexpr = setExpTypeFlow typeflow <$> pexpr
 varsInPrimArg :: PrimFlow -> PrimArg -> Set PrimVarName
 varsInPrimArg dir ArgVar{argVarName=var,argVarFlow=dir'}
     = if dir == dir' then Set.singleton var else Set.empty
-varsInPrimArg dir (ArgProcRef _ as _) 
+varsInPrimArg dir (ArgProcRef _ as _)
     = Set.unions $ Set.fromList (varsInPrimArg dir <$> as)
 varsInPrimArg _ ArgInt{}      = Set.empty
 varsInPrimArg _ ArgFloat{}    = Set.empty

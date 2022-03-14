@@ -249,7 +249,7 @@ translateProc modProtos proc = do
     return blocks'
 
 
--- Helper for `translateProc`. Translate the given `ProcBody` 
+-- Helper for `translateProc`. Translate the given `ProcBody`
 -- (A specialized version of a procedure).
 _translateProcImpl :: [PrimProto] -> PrimProto -> Bool -> ProcBody
                    -> Word -> Compiler (ProcDefBlock, Word)
@@ -263,6 +263,8 @@ _translateProcImpl modProtos proto isClosure body startCount = do
     logBlocks $ "proto: " ++ show proto'
                 ++ "body: " ++ show body'
                 ++ "\n" ++ replicate 50 '-' ++ "\n"
+    -- Last Call Optimisation
+    body' <- tryMakeTailRecursive body
     -- Codegen
     codestate <- execCodegen startCount modProtos
                     (doCodegenBody proto' body')
@@ -279,10 +281,10 @@ _translateProcImpl modProtos proto isClosure body startCount = do
     return (block, endCount)
 
 -- | Updates a PrimProto and ProcBody as though the Free Params are accessed
--- via the closure environment 
+-- via the closure environment
 closeClosure :: PrimProto -> ProcBody -> (PrimProto, ProcBody)
 closeClosure proto@PrimProto{primProtoParams=params}
-             body@ProcBody{bodyPrims=prims} = 
+             body@ProcBody{bodyPrims=prims} =
     (proto{primProtoParams=
             envPrimParam:(setPrimParamType AnyType <$> actualParams)},
      body{bodyPrims=unpacker ++ prims})
@@ -379,6 +381,43 @@ doCodegenBody proto body = do
     mapM_ preassignOutput outs
     codegenBody proto body  -- Codegen on body prims
 
+tryMakeTailRecursive :: ProcBody -> Compiler ProcBody
+tryMakeTailRecursive = mapProcLeaves movePrimsBeforeLastCall
+
+movePrimsBeforeLastCall :: [ProcBody] -> [Placed Prim] -> Compiler [Placed Prim]
+movePrimsBeforeLastCall prevBlocks lastBlock =
+    do
+        let (beforeLastCall, lastCall, afterLastCall) = partitionLastCall lastBlock
+        logBlocks $ "reversedPrims: " ++ show (reverse lastBlock)
+        logBlocks $ "beforeLastCall: " ++ show beforeLastCall ++ "\nlastCall: " ++ show lastCall ++ "\nafterLastCall: " ++ show afterLastCall
+        return lastBlock
+
+partitionLastCall :: [Placed Prim] -> ([Placed Prim], Maybe (Placed Prim), [Placed Prim])
+partitionLastCall prims = let (before, call, after) = _partitionLastCall $ reverse prims
+    in (reverse before, call, reverse after)
+
+_partitionLastCall :: [Placed Prim] -> ([Placed Prim], Maybe (Placed Prim), [Placed Prim])
+_partitionLastCall [] = ([], Nothing, [])
+_partitionLastCall (x:xs) =
+    case content x of
+        PrimCall {} -> (xs, Just x, [])
+        PrimForeign {} -> let (beforeLastCall, call, afterLastCall) = _partitionLastCall xs
+            in (beforeLastCall, call, x:afterLastCall)
+
+-- Applies a transformation to the leaves of a proc body
+-- TODO: this is almost like a functor fmap?
+mapProcLeaves :: ([ProcBody] -> [Placed Prim] -> Compiler [Placed Prim]) -> ProcBody -> Compiler ProcBody
+mapProcLeaves f = _mapProcLeaves f []
+
+_mapProcLeaves :: ([ProcBody] -> [Placed Prim] -> Compiler [Placed Prim]) -> [ProcBody] -> ProcBody -> Compiler ProcBody
+_mapProcLeaves f prevBlocks leafBlock@ProcBody { bodyPrims = prims, bodyFork = NoFork } =
+    do
+        prims <- f prevBlocks prims
+        return leafBlock { bodyPrims = prims }
+_mapProcLeaves f prevBlocks current@ProcBody { bodyFork = fork@PrimFork{forkBodies = bodies} } =
+    do
+        bodies' <- mapM (_mapProcLeaves f (current:prevBlocks)) bodies
+        return current { bodyFork = fork { forkBodies = bodies' } }
 
 -- | Convert a PrimParam to an Operand value and reference this value by the
 -- param's name on the symbol table. Don't assign if phantom.
@@ -408,7 +447,7 @@ preassignOutput p = do
 -- | Retrive or build the output operand from the given parameters.
 -- For no valid ouputs, return Nothing
 -- For 1 single output, retrieve it's assigned operand from the symbol
--- table, and for multiple ouputs, generate code for creating an valid
+-- table, and for multiple outputs, generate code for creating an valid
 -- structure, pack the operands into it and return it.
 buildOutputOp :: [PrimParam] -> Codegen (Maybe Operand)
 buildOutputOp params = do
@@ -548,7 +587,7 @@ cgen prim@(PrimHigher cId (ArgProcRef pspec closed _) args) = do
     logCodegen $ "Compiling " ++ show prim
               ++ " as first order call to " ++ show pspec
               ++ " closed over " ++ show closed
-    cgen $ PrimCall cId pspec (closed ++ args) univGlobalFlows 
+    cgen $ PrimCall cId pspec (closed ++ args) univGlobalFlows
 
 cgen prim@(PrimHigher callSiteId fn@ArgVar{} args) = do
     logCodegen $ "Compiling " ++ show prim
@@ -664,8 +703,8 @@ findProto (ProcSpec _ nm i _) = do
 
 
 -- | Match PrimArgs with the paramaters in the given prototype. If a PrimArg's
--- counterpart in the prototype is unneeded, filtered out. Arguments 
--- are matched positionally, and are coerced to the type of corresponding 
+-- counterpart in the prototype is unneeded, filtered out. Arguments
+-- are matched positionally, and are coerced to the type of corresponding
 -- parameters.
 prepareArgs :: PrimProto -> [PrimArg] -> Codegen [PrimArg]
 prepareArgs proto args = prepareArgs' args $ primProtoParams proto
@@ -1012,7 +1051,7 @@ openPrimArg a = shouldnt $ "Can't Open!: "
                 ++ show (argFlowDirection a)
 
 
--- | 'cgenArg' makes an Operand of the input argument. 
+-- | 'cgenArg' makes an Operand of the input argument.
 -- * Variables return a casted version of their respective symbol table operand
 -- * Constants are generated with cgenArgConst, then wrapped in `cons`
 cgenArg :: PrimArg -> Codegen LLVMAST.Operand
@@ -1044,8 +1083,8 @@ cgenArg arg = do
 -- * Ints, Floats, Chars, Undefs are of respective LLVMTypes
 -- * Strings are handled based on string variant
 --   * CString    - ptr to global constant of [N x i8]
---   * WybeString - ptr to global constant of { i64, i64 } with the second 
---                  element being as though it were a CString. This representation 
+--   * WybeString - ptr to global constant of { i64, i64 } with the second
+--                  element being as though it were a CString. This representation
 --                  is to comply with the stdlib string implementation
 cgenArgConst :: PrimArg -> Codegen C.Constant
 cgenArgConst (ArgInt val ty) = do
@@ -1117,7 +1156,7 @@ castVar nm ty = do
 
 primActualParams :: ProcSpec -> Codegen [PrimParam]
 primActualParams pspec = lift $ do
-    primParams <- protoRealParams . procImplnProto . procImpln 
+    primParams <- protoRealParams . procImplnProto . procImpln
               =<< getProcDef pspec
     return $ List.filter ((/= Free) . primParamFlowType) primParams
 

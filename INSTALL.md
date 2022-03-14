@@ -59,7 +59,7 @@ Note that this is an experimental support and only has been tested on Ubuntu 18.
 
 ```
     wget -qO- https://get.haskellstack.org/ | sh
-``` 
+```
 
 3.  Install the Boehm Garbage Collector development tools
 
@@ -84,6 +84,10 @@ Note that this is an experimental support and only has been tested on Ubuntu 18.
 ```
     sudo apt-get install dwdiff
 ```
+
+### Linux (Arch Linux)
+
+packages: `llvm90` (AUR) (needs custom patch), `gc`, `dwdiff`, also install haskell tool stack
 
 ## Building
 
