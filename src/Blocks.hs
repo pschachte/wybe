@@ -401,6 +401,7 @@ _partitionLastCall [] = ([], Nothing, [])
 _partitionLastCall (x:xs) =
     case content x of
         PrimCall {} -> (xs, Just x, [])
+        PrimHigher {} -> (xs, Just x, [])
         PrimForeign {} -> let (beforeLastCall, call, afterLastCall) = _partitionLastCall xs
             in (beforeLastCall, call, x:afterLastCall)
 
