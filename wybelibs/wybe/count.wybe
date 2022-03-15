@@ -1,9 +1,9 @@
-# purpose: Standard Count Library, an unsigned integer
+# purpose: Standard Count L/ibrary, an unsigned integer
 # since  : 0.1
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
-use wybe.bool
+use wybe.bool, wybe.comparison
 
 representation is unsigned
 
@@ -57,8 +57,8 @@ pub def (!x:_ %= y:_) { ?x = x % y }
 ## Comparisons
 
 # Equality and disequality.
-pub def (x:_ ~= y:_):bool = foreign llvm icmp_ne(x,y)
 pub def (x:_ =  y:_):bool = foreign llvm icmp_eq(x,y)
+pub def (x:_ ~= y:_):bool = foreign llvm icmp_ne(x,y)
 
 # Inequalities.
 pub def (x:_ <  y:_):bool = foreign llvm icmp_ult(x,y)
@@ -66,7 +66,11 @@ pub def (x:_ <= y:_):bool = foreign llvm icmp_ule(x,y)
 pub def (x:_ >  y:_):bool = foreign llvm icmp_ugt(x,y)
 pub def (x:_ >= y:_):bool = foreign llvm icmp_uge(x,y)
 
-# Minimum and maximum of two integers.
+# Three-way comparison.
+pub def (x:_ <=> y:_):comparison = 
+    if { x < y :: lesser | x = y :: equal | else :: greater }
+
+# Minimum and maximum of two counts.
 pub def min(x:_, y:_):_ = if {x<=y:: x | else:: y}
 pub def max(x:_, y:_):_ = if {x>=y:: x | else:: y}
 

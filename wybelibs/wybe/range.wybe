@@ -3,12 +3,16 @@
 
 pub constructor range(start:int, stride:int, end:int)
 
+# Reverse-mode cons for a range.
+# Take the next value from the range
 pub def {test} `[|]`(?value:int, ?rest:_, current:_) {
     current = range(?value, ?stride, ?end)
     (value ~= end)
     ?rest = range(value + stride, stride, end)
 }
 
+# Range index.
+# Get the `idx'th value in the range
 pub def {test} [](r:_, idx:int, ?value:int) {
     (0 <= idx)
     r = range(?size, ?stride, ?end)
@@ -16,17 +20,21 @@ pub def {test} [](r:_, idx:int, ?value:int) {
     if { 0 <= stride :: (value < end) | else :: (end < value) }
 }
 
+# Construct an eXclusive range
 pub def xrange(start:int, stride:int, end:int):_ =
     construct(start, stride, end)
 
+# Construct an Inclusive range
 pub def irange(start:int, stride:int, end:int):_ =
     construct(start, stride, end + if { stride < 0 :: -1 | else :: 1 })
 
+# Operator to construct a range
 # Good ol' Edsgar
 # https://www.cs.utexas.edu/users/EWD/transcriptions/EWD08xx/EWD831.html
 pub def (start:int .. end:int):_ = 
     construct(start, if { start <= end :: 1 | else :: -1 }, end)
 
+# Size of a range
 pub def size(r:_):int = sz where {
     r = range(?start, ?stride, ?end)
     ?sz = if { signum(stride) ~= signum(end - start) :: 0
@@ -34,6 +42,7 @@ pub def size(r:_):int = sz where {
              | else :: (start - end - 1) / -stride + 1 }
 }
 
+# Helper to construct a range, ensuring the range end is the final value
 def construct(start:int, stride:int, end:int):_ = r where {
     ?diff = (end - start) % stride
     ?final = if { 0 <= stride :: 

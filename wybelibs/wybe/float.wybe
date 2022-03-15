@@ -3,8 +3,7 @@
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
-use wybe.bool
-use wybe.int
+use wybe.bool, wybe.int, wybe.comparison
 
 representation is 64 bit float
 
@@ -73,6 +72,10 @@ pub def (x:_ <  y:_):bool = foreign llvm fcmp_slt(x,y)
 pub def (x:_ <= y:_):bool = foreign llvm fcmp_sle(x,y)
 pub def (x:_ >  y:_):bool = foreign llvm fcmp_sgt(x,y)
 pub def (x:_ >= y:_):bool = foreign llvm fcmp_sge(x,y)
+
+# Three-way comparison.
+pub def (x:_ <=> y:_):comparison = 
+    if { x < y :: lesser | x = y :: equal | else :: greater }
 
 # Minimum and maximum of two floats.
 pub def min(x:_, y:_):_ = foreign c `llvm.minnum.f64`(x,y)

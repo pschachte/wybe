@@ -1,11 +1,11 @@
-# purpose: Standard Comparison Type
+# purpose: Standard Comparison type
 # since  : 0.1
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.bool
 
-pub constructors less | equal | greater
+pub constructors lesser | equal | greater
 
 pub def (x:_ =  y:_):bool = foreign llvm icmp_eq(x, y)
 pub def (x:_ ~= y:_):bool = foreign llvm icmp_ne(x, y)

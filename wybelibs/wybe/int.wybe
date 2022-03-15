@@ -4,7 +4,7 @@
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use foreign library m
-use wybe.bool
+use wybe.bool, wybe.comparison
 
 representation is signed
 
@@ -52,18 +52,40 @@ pub def (x:_ % y:_):_ = foreign llvm srem(x,y)
 # Modulus assignment.
 pub def (!x:_ %= y:_) { ?x = x % y }
 
+# Bit-shift left.
+pub def (x:_ << s:_):_ = foreign llvm shl(x, s)
+
+# Bit-shift left assignment.
+pub def (!x:_ <<= s:_) { ?x = x << s }
+
+# Logical bit-shift right (pad with zeroes).
+pub def (x:_ >> s:_):_ = foreign llvm lshr(x, s)
+
+# Logical bit-shift right (pad with zeroes) assignment.
+pub def (!x:_ >>= s:_) { ?x = x >> s }
+
+# Arithmetic bit-shift right (pad with sign-bit).
+pub def (x:_ ->> s:_):_ = foreign llvm ashr(x, s)
+
+# Arithmetic bit-shift right (pad with sign-bit) assignment.
+pub def (!x:_ ->>= s:_) { ?x = x ->> s }
+
 
 ## Comparisons
 
 # Equality and disequality.
-pub def (x:_ ~= y:_):bool = foreign llvm icmp_ne(x,y)
 pub def (x:_ =  y:_):bool = foreign llvm icmp_eq(x,y)
+pub def (x:_ ~= y:_):bool = foreign llvm icmp_ne(x,y)
 
 # Inequalities.
 pub def (x:_ <  y:_):bool = foreign llvm icmp_slt(x,y)
 pub def (x:_ <= y:_):bool = foreign llvm icmp_sle(x,y)
 pub def (x:_ >  y:_):bool = foreign llvm icmp_sgt(x,y)
 pub def (x:_ >= y:_):bool = foreign llvm icmp_sge(x,y)
+
+# Three-way comparison.
+pub def (x:_ <=> y:_):comparison = 
+    if { x < y :: lesser | x = y :: equal | else :: greater }
 
 # Minimum and maximum of two integers.
 pub def min(x:_, y:_):_ = if {x<=y:: x | else:: y}

@@ -17,7 +17,7 @@ pub def (!p:_ &= q:_) { ?p = (p && q) }
 pub def (p:_ || q:_):_ = foreign llvm or(p, q)
 
 # Logical or assigment
-pub def (!p:_ |= q:_) { ?p = (q || p) }  
+pub def (!p:_ |= q:_) { ?p = (p || q) }  
 
 # Logical xor
 pub def (p:_ ^^ q:_):_ = foreign llvm xor(p, q) 

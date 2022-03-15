@@ -1,18 +1,33 @@
-# purpose: Standard Char Type
+# purpose: Standard Char type
 # since  : 0.1
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
-use wybe.bool, wybe.int
+use wybe.bool, wybe.int, wybe.comparison
 
 representation is 8 bit unsigned
 
+## Comparisons
+
+# Equality and disequality.
 pub def (x:_ =  y:_):bool = foreign llvm icmp_eq(x, y)
 pub def (x:_ ~= y:_):bool = foreign llvm icmp_ne(x, y)
+
+# Inequalities.
 pub def (x:_ <  y:_):bool = foreign llvm icmp_ult(x, y)
 pub def (x:_ <= y:_):bool = foreign llvm icmp_ule(x, y)
 pub def (x:_ >  y:_):bool = foreign llvm icmp_ugt(x, y)
 pub def (x:_ >= y:_):bool = foreign llvm icmp_uge(x, y)
 
+# Three-way comparison.
+pub def (x:_ <=> y:_):comparison = 
+    if { x < y :: lesser | x = y :: equal | else :: greater }
+
+
+## Conversion procedures
+
+# Int ordinal of a char
 pub def ord(c:_):int = foreign lpvm cast(c)
+
+# Char of an integer character code
 pub def {test} chr(i:int):_ = foreign lpvm cast(i) where { 0 <= i ; i <= 255 }

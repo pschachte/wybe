@@ -1,4 +1,4 @@
-# purpose: Standard C String Type, a null-terminated charater array
+# purpose: Standard C String type, a null-terminated charater array
 # since  : 0.1
 
 pragma no_standard_library  # Standard library can't depend on itself!
