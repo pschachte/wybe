@@ -72,6 +72,7 @@ module AST (
   expOutputs, pexpListOutputs, expInputs, pexpListInputs,
   setExpTypeFlow, setPExpTypeFlow,
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
+  varsInPrims, varsInPrim, varsInPrimArgs, varsInPrimArg,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
   maybeGetClosureOf, isClosureProc, isClosureVariant,
@@ -2952,7 +2953,7 @@ data StringVariant = WybeString | CString
 
 
 -- Information about a global variable.
--- A global vairbale is a variable that is available everywhere,
+-- A global variable is a variable that is available everywhere,
 -- and can be access via an LPVM load instruction, or written to via an LPVM store
 data GlobalInfo = GlobalResource { globalResourceSpec :: ResourceSpec }
     deriving (Eq, Ord, Generic)
@@ -3407,18 +3408,16 @@ setPExpTypeFlow typeflow pexpr = setExpTypeFlow typeflow <$> pexpr
 -- or definitions.
 ----------------------------------------------------------------
 
--- varsInPrims :: PrimFlow -> [Prim] -> Set PrimVarName
--- varsInPrims dir prims =
---     List.foldr Set.union Set.empty $ List.map (varsInPrim dir) prims
+varsInPrims :: PrimFlow -> [Prim] -> Set PrimVarName
+varsInPrims dir =
+    List.foldr (Set.union . (varsInPrim dir)) Set.empty
 
--- varsInPrim :: PrimFlow -> Prim     -> Set PrimVarName
--- varsInPrim dir (PrimCall _ args)      = varsInPrimArgs dir args
--- varsInPrim dir (PrimForeign _ _ _ args) = varsInPrimArgs dir args
--- varsInPrim dir (PrimTest arg)         = varsInPrimArgs dir [arg]
+varsInPrim :: PrimFlow -> Prim     -> Set PrimVarName
+varsInPrim dir prim      = let (args, globals) = primArgs prim in varsInPrimArgs dir args
 
--- varsInPrimArgs :: PrimFlow -> [PrimArg] -> Set PrimVarName
--- varsInPrimArgs dir args =
---     List.foldr Set.union Set.empty $ List.map (varsInPrimArg dir) args
+varsInPrimArgs :: PrimFlow -> [PrimArg] -> Set PrimVarName
+varsInPrimArgs dir =
+    List.foldr (Set.union . varsInPrimArg dir) Set.empty
 
 varsInPrimArg :: PrimFlow -> PrimArg -> Set PrimVarName
 varsInPrimArg dir ArgVar{argVarName=var,argVarFlow=dir'}
@@ -3429,7 +3428,7 @@ varsInPrimArg _ ArgInt{}      = Set.empty
 varsInPrimArg _ ArgFloat{}    = Set.empty
 varsInPrimArg _ ArgString{}   = Set.empty
 varsInPrimArg _ ArgChar{}     = Set.empty
-varsInPrimArg _ (ArgGlobal{}) = Set.empty
+varsInPrimArg _ ArgGlobal{} = Set.empty
 varsInPrimArg _ ArgUnneeded{} = Set.empty
 varsInPrimArg _ ArgUndef{}    = Set.empty
 

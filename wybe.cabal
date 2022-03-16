@@ -23,6 +23,7 @@ executable wybemk
                , llvm-hs == 9.0.*
                , llvm-hs-pure == 9.0.*
                , llvm-hs-pretty == 0.9.0.*
+               , list-predicate
                , temporary
                , text
                , mtl

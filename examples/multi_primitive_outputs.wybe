@@ -1,0 +1,16 @@
+use coordinate
+
+def {noinline} bar(x: int, y: int, ?z: int, ?w: int) {
+    ?z = x + y
+    ?w = x - y
+}
+
+def foo(x: int, y: int, ?z: int, ?w: int) {
+    bar(x,y,?z0,?w0)
+    ?z = z0
+    ?w = w0
+}
+
+foo(5,9,?x,?y)
+!println(x)
+!println(y)
