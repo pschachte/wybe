@@ -14,7 +14,7 @@ representation is signed
 # Addition.  This operation is reversible:  you can compute either argument from
 # the other argument and the value.
 pub def (x:_  + y:_):_  = foreign llvm add(x,y)
-pub def (?x:_ + y:_):_  = ?z where ?x = foreign llvm sub(z,y)
+pub def (?x:_ + y:_):_  = ?z where { ?x = foreign llvm sub(z,y) }
 pub def (x:_  + ?y:_):_ = ?z where { ?y = foreign llvm sub(z,x) }
 
 # Addition assignment.
@@ -58,17 +58,23 @@ pub def (x:_ << s:_):_ = foreign llvm shl(x, s)
 # Bit-shift left assignment.
 pub def (!x:_ <<= s:_) { ?x = x << s }
 
-# Logical bit-shift right (pad with zeroes).
-pub def (x:_ >> s:_):_ = foreign llvm lshr(x, s)
-
-# Logical bit-shift right (pad with zeroes) assignment.
-pub def (!x:_ >>= s:_) { ?x = x >> s }
-
 # Arithmetic bit-shift right (pad with sign-bit).
-pub def (x:_ ->> s:_):_ = foreign llvm ashr(x, s)
+# e.g.  3 >> 1 =  1 (00...011 >> 1 = 00...001)
+#      -3 >> 1 = -2 (11...101 >> 1 = 11...110)
+# on a 64-bit machine
+pub def (x:_ >> s:_):_ = foreign llvm ashr(x, s)
 
 # Arithmetic bit-shift right (pad with sign-bit) assignment.
-pub def (!x:_ ->>= s:_) { ?x = x ->> s }
+pub def (!x:_ >>= s:_) { ?x = x >> s }
+
+# Logical bit-shift right (pad with zeroes).
+# e.g.  3 >> 1 = 1                   (00...011 >> 1 = 00...001)
+#      -3 >> 1 = 9223372036854775806 (11...101 >> 1 = 01...110)
+# on a 64-bit machine
+pub def logical_bitshift(x:_, s:_):_ = foreign llvm lshr(x, s)
+
+# Logical bit-shift right (pad with zeroes) assignment.
+pub def logical_bitshift(!x:_, s:_) { ?x = logical_bitshift(x, s) }
 
 
 ## Comparisons
