@@ -1,8 +1,11 @@
+# purpose: Standard Array type, a null-terminated array
+# since  : 0.1
+
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.bool, wybe.int
 
-pub constructor (T) array(length:int,raw_data:raw_array(T))
+pub constructor (T) array(length:int, raw_data:raw_array(T))
 
 pub type raw_array(T) is address {}
 
