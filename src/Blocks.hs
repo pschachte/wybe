@@ -545,10 +545,11 @@ cgen prim@(PrimCall callSiteID pspec args _) = do
     addInstruction ins outArgs
 
 cgen prim@(PrimHigher cId (ArgProcRef pspec closed _) args) = do
+    pspec' <- fromMaybe pspec <$> lift (maybeGetClosureOf pspec)
     logCodegen $ "Compiling " ++ show prim
-              ++ " as first order call to " ++ show pspec
+              ++ " as first order call to " ++ show pspec'
               ++ " closed over " ++ show closed
-    cgen $ PrimCall cId pspec (closed ++ args) univGlobalFlows 
+    cgen $ PrimCall cId pspec' (closed ++ args) univGlobalFlows 
 
 cgen prim@(PrimHigher callSiteId fn@ArgVar{} args) = do
     logCodegen $ "Compiling " ++ show prim
@@ -1100,7 +1101,7 @@ cgenFuncRef ps = do
     let fName = LLVMAST.Name $ fromString $ show ps
     psType <- HigherOrderType defaultProcModifiers . (primParamTypeFlow <$>)
           <$> primActualParams ps
-    psTy <- lift $ llvmClosureType psType
+    psTy <- lift $ llvmFuncType psType
     logCodegen $ "  with type " ++ show psType
     let conFn = C.GlobalReference psTy fName
     return $ C.PtrToInt conFn address_t
@@ -1119,7 +1120,10 @@ primActualParams :: ProcSpec -> Codegen [PrimParam]
 primActualParams pspec = lift $ do
     primParams <- protoRealParams . procImplnProto . procImpln 
               =<< getProcDef pspec
-    return $ List.filter ((/= Free) . primParamFlowType) primParams
+    let nonFreeParams = List.filter ((/= Free) . primParamFlowType) primParams
+    ifM (isClosureProc pspec) 
+        (return $ setPrimParamType AnyType <$> envPrimParam : nonFreeParams)
+        (return nonFreeParams)
 
 
 neededFreeArgs :: ProcSpec -> [PrimArg] -> Codegen [PrimArg]
