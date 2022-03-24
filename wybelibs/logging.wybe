@@ -1,3 +1,6 @@
+# purpose: Standard Logging Library
+# since  : 0.1
+
 pub def {semipure} logmsg(x:int) { foreign c {impure} log_int(x) }
 pub def {semipure} logmsg(x:count) { foreign c {impure} log_count(x) }
 pub def {semipure} logmsg(x:float) { foreign c {impure} log_float(x) }

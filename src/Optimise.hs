@@ -62,23 +62,24 @@ optimiseSccBottomUp (CyclicSCC procs) = optimiseSccBottomUp' procs
 -- | As with optimiseSccBottomUp, but operates on a list of procs
 optimiseSccBottomUp' :: [ProcSpec] -> Compiler ()
 optimiseSccBottomUp' procs = do
-    inlines <- mapM optimiseProcBottomUp procs
+    -- We perform an extra inference here because it is possible
+    -- that the current global flow interface is not strict
+    inferGlobalFlows procs
+    inlines <- optimiseProcsBottomUp procs
     -- If any but first in SCC were marked for inlining, repeat to inline
     -- in earlier procs in the SCC.
     when (or $ tail inlines)
-        $ mapM_ optimiseProcBottomUp procs
+        $ void $ optimiseProcsBottomUp procs
 
 
-optimiseProcTopDown :: ProcSpec -> Compiler ()
-optimiseProcTopDown pspec = do
-    logOptimise $ ">>> Optimise (Top-down) " ++ show pspec
-    updateProcDefM (optimiseProcDefTD pspec) pspec
-    return ()
-
-
-optimiseProcDefTD :: ProcSpec -> ProcDef -> Compiler ProcDef
-optimiseProcDefTD pspec def = do
-    return def
+-- | Do bottom-up optimisations of Procs, returning which to inline
+optimiseProcsBottomUp :: [ProcSpec] -> Compiler [Bool]
+optimiseProcsBottomUp procs = do
+    inlines <- mapM optimiseProcBottomUp procs
+    -- Optimise may have removed some global flows, so we try to restrict the 
+    -- interface
+    inferGlobalFlows procs
+    return inlines
 
 
 -- | Do bottom-up optimisations of a Proc, returning whether to inline it
@@ -98,6 +99,17 @@ optimiseProcDefBU pspec def = do
     logOptimise $ "*** " ++ show pspec ++
       " after optimisation:" ++ showProcDef 4 def' ++ "\n"
     return def'
+
+    
+optimiseProcTopDown :: ProcSpec -> Compiler ()
+optimiseProcTopDown pspec = do
+    logOptimise $ ">>> Optimise (Top-down) " ++ show pspec
+    updateProcDefM (optimiseProcDefTD pspec) pspec
+
+
+optimiseProcDefTD :: ProcSpec -> ProcDef -> Compiler ProcDef
+optimiseProcDefTD pspec def = do
+    return def
 
 
 ----------------------------------------------------------------
@@ -158,6 +170,77 @@ argCost arg = do
     isPhantom <- argIsPhantom arg
     return $ if isPhantom then 0 else 1
 
+
+----------------------------------------------------------------
+--                       Infering Global Flows
+----------------------------------------------------------------
+
+
+-- | Infer all global flows across the given procedures, 
+-- updating their associated GlobalFlows to (possibly) smaller sets, and
+-- ensuring the global flows of all prims are correct
+inferGlobalFlows :: [ProcSpec] -> Compiler ()
+inferGlobalFlows procs = do
+    let procSet = Set.fromList procs
+    gFlows <- foldM (addGlobalFlows procSet) emptyGlobalFlows procs
+    mapM_ (updateProcDefM $ updateProcDefGlobalFlows procSet gFlows) procs
+
+
+-- | Add all Global Flows from a given procedure to a set of GlobalFlows,
+-- ingoring calls to those that are in the Set of ProcSpecs
+addGlobalFlows :: Set ProcSpec -> GlobalFlows -> ProcSpec -> Compiler GlobalFlows
+addGlobalFlows procs gFlows pspec = 
+    foldBodyPrims (const $ globalFlowsUnion . primGlobalFlows' procs)
+                  gFlows globalFlowsUnion
+        . procImplnBody . procImpln <$> getProcDef pspec
+
+
+-- | Add all Global Flows from a given Prim to a set of GlobalFlows.
+-- If the call is to a proc in the given Set of ProcSpecs, we do not add the
+-- GlobalFlows, else we add the global flows associated with the proc
+primGlobalFlows' :: Set ProcSpec -> Prim -> GlobalFlows
+primGlobalFlows' procs (PrimCall _ pspec _ _)
+    | pspec `Set.member` procs = emptyGlobalFlows
+primGlobalFlows' _ prim = snd $ primArgs prim
+
+
+-- | Update the GlobalFlows of Prims of a ProcDef and the prototype with
+-- the given GlobalFlows
+updateProcDefGlobalFlows :: Set ProcSpec -> GlobalFlows -> ProcDef -> Compiler ProcDef
+updateProcDefGlobalFlows _ _ ProcDef{procImpln=ProcDefSrc{}} = 
+    shouldnt "updateProcDefGlobalFlows on un-compiled code"
+updateProcDefGlobalFlows procs newFlows
+        def@ProcDef{procImpln=impln@ProcDefPrim{
+            procImplnBody=body,
+            procImplnProto=proto@PrimProto{primProtoGlobalFlows=oldFlows}}} = do
+    body' <- updateBodyGlobalFlows procs newFlows body
+    return def{procImpln=impln{
+        procImplnBody=body',
+        procImplnProto=proto{
+            primProtoGlobalFlows=globalFlowsIntersection newFlows oldFlows}}}
+
+
+-- | Update the GlobalFlows of Prims of a ProcBody
+updateBodyGlobalFlows :: Set ProcSpec -> GlobalFlows -> ProcBody -> Compiler ProcBody
+updateBodyGlobalFlows procs newFlows (ProcBody body fork) = do
+    body' <- mapM (updatePlacedM $ updatePrimGlobalFlows procs newFlows) body
+    ProcBody body' <$> case fork of
+        NoFork -> return NoFork
+        PrimFork{forkBodies=forks} -> do
+            forks' <- mapM (updateBodyGlobalFlows procs newFlows) forks
+            return fork{forkBodies=forks'}
+
+
+-- | Update the GlobalFlows of a Prim
+-- If the prim is a call to a proc in the Set of ProcSpecs, we update the
+-- GlobalFlows to the intersection of the given GlobalFlows and the current
+updatePrimGlobalFlows :: Set ProcSpec -> GlobalFlows -> Prim -> Compiler Prim
+updatePrimGlobalFlows procs newFlows (PrimCall cID pspec args gFlows) 
+    | pspec `Set.member` procs 
+    = return $ PrimCall cID pspec args $ globalFlowsIntersection newFlows gFlows
+    | otherwise = PrimCall cID pspec args <$> getProcGlobalFlows pspec
+updatePrimGlobalFlows _ _ prim = return prim
+    
 
 -- |Log a message, if we are logging optimisation activity.
 logOptimise :: String -> Compiler ()

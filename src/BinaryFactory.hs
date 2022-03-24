@@ -21,6 +21,8 @@ import qualified LLVM.AST             as LLVMAST
 import           Text.Parsec.Pos      (SourcePos, newPos, sourceColumn,
                                        sourceLine, sourceName)
 import           Util
+import Options (LogSelection(Builder))
+import Data.List
 
 
 -- * Self Deriving instances
@@ -56,8 +58,8 @@ instance Binary PrimProto
 instance Binary PrimParam
 instance Binary ProcBody
 instance Binary PrimFork
-instance Binary ProcVariant 
-instance Binary SuperprocSpec  
+instance Binary ProcVariant
+instance Binary SuperprocSpec
 instance Binary ProcDef
 instance Binary ProcProto
 instance Binary Param
@@ -126,23 +128,28 @@ encodeModule m = do
 -- * Decoding
 
 
-decodeModule :: [ModSpec] -> BL.ByteString -> Compiler [Module]
+decodeModule :: [ModSpec] -> BL.ByteString -> Compiler (Either String [Module])
 decodeModule required bs = do
     let (magic, rest) = BL.splitAt 4 bs
+    logMsg Builder $ "Magic word = " ++ show magic
+                     ++ " ; should = " ++ show (BL.pack magicVersion)
     if magic == BL.pack magicVersion
-        then
-        case B.decodeOrFail rest of
-            Left _ -> do
-                Warning <!> "Error decoding LPVM bytes."
-                return []
-            Right (_, _, lpvm) -> decodeEncodedLPVM required lpvm
+        then do
+          logMsg Builder "Magic word matched"
+          case B.decodeOrFail rest of
+            Left _ -> return $ Left "Error decoding LPVM bytes."
+            Right (_, _, lpvm) -> do
+                logMsg Builder "B.decodeOrFail worked; decoding."
+                Right <$> decodeEncodedLPVM required lpvm
         else do
-        Warning <!> "Extracted LPVM version mismatch."
-        return []
+          logMsg Builder "Magic word mismatched!"
+          return $ Left "Invalid Wybe object code or compiler version mismatch."
 
 
 decodeEncodedLPVM ::  [ModSpec] -> EncodedLPVM -> Compiler [Module]
-decodeEncodedLPVM required (EncodedLPVM ms) =
+decodeEncodedLPVM required (EncodedLPVM ms) = do
+    logMsg Builder $ "Decoded modules:\n"
+                     ++ intercalate ", " (show . modSpec <$> ms)
     if List.all (`elem` specs) required
     then return ms
     else return []

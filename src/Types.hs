@@ -2046,10 +2046,14 @@ modecheckStmt m name defPos assigned detism tmpCount final
         logTyped $ "Assigned by failing conditional: " ++ show assigned3
         bindings <- mapFromUnivSetM ultimateVarType Set.empty
                     $ bindingVars assigned3
-        -- We still need to have a Cond here. The test may be non-pure
-        return ([maybePlace (Cond (seqToStmt tstStmt') [] elsStmts'
-                        (Just condBindings) (Just bindings) res) pos], 
-                assigned3, tmpCount3)
+        impurity <- lift $ stmtsImpurity tstStmt'
+        let stmts' = if impurity > Pure 
+                     -- if the test is non-pure, need to keep the cond around
+                     then [maybePlace (Cond (seqToStmt tstStmt') [] elsStmts'
+                             (Just condBindings) (Just bindings) res) pos]
+                     -- otherwise, the cond must fail and wont bind anything
+                     else elsStmts'
+        return (stmts', assigned3, tmpCount3)
       else do
         let finalAssigned = assigned2 `joinState` assigned3
         logTyped $ "Assigned by conditional: " ++ show finalAssigned

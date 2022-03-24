@@ -59,7 +59,7 @@ module top-level code > {terminal,inline,impure} (0 calls)
     foreign lpvm store(~%argv##0:wybe.array.raw_array(wybe.c_string), <<command_line.argv>>:wybe.array.raw_array(wybe.c_string))
     foreign c {impure} gc_init @memory_management:nn:nn
     foreign lpvm store(0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    command_line.<0><{<<command_line.argc>>, <<command_line.argv>>, <<wybe.io.io>>}; {<<command_line.argc>>, <<command_line.arguments>>, <<command_line.argv>>, <<command_line.command>>, <<command_line.exit_code>>, <<wybe.io.io>>}> #2
+    command_line.<0><{<<command_line.argc>>, <<command_line.argv>>}; {<<command_line.arguments>>, <<command_line.command>>, <<command_line.exit_code>>}> #2
     drone.<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3
     foreign lpvm load(<<command_line.exit_code>>:wybe.int, ?%exit_code##0:wybe.int)
     foreign c {semipure,terminal} exit(exit_code##0:wybe.int)
@@ -87,7 +87,7 @@ LLVM code       : None
 
 module top-level code > public {impure} (0 calls)
 0: command_line.<0>
-()<{<<command_line.argc>>, <<command_line.argv>>, <<wybe.io.io>>}; {<<command_line.argc>>, <<command_line.arguments>>, <<command_line.argv>>, <<command_line.command>>, <<command_line.exit_code>>, <<wybe.io.io>>}>:
+()<{<<command_line.argc>>, <<command_line.argv>>}; {<<command_line.arguments>>, <<command_line.command>>, <<command_line.exit_code>>}>:
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(1,(wybe.array.[|]<0>,fromList [NonAliasedParamCond 2 []]))]
@@ -101,7 +101,7 @@ module top-level code > public {impure} (0 calls)
     wybe.array.[|]<0>[785a827a1b](?command##1:wybe.c_string, ?arguments##2:wybe.array(wybe.c_string), ~tmp#0##0:wybe.array(wybe.c_string), ?tmp#7##0:wybe.bool) #1 @command_line:nn:nn
     case ~tmp#7##0:wybe.bool of
     0:
-        foreign c {terminal,semipure} error_exit(c"command_line:15:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @control:nn:nn
+        foreign c {terminal,semipure} error_exit(c"command_line:18:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @control:nn:nn
 
     1:
         foreign lpvm store(~%arguments##2:wybe.array(wybe.c_string), <<command_line.arguments>>:wybe.array(wybe.c_string)) @command_line:nn:nn
@@ -112,7 +112,7 @@ module top-level code > public {impure} (0 calls)
 
 set_exit_code > public {inline} (0 calls)
 0: command_line.set_exit_code<0>
-set_exit_code(code##0:wybe.int)<{<<command_line.exit_code>>}; {<<command_line.exit_code>>}>:
+set_exit_code(code##0:wybe.int)<{}; {<<command_line.exit_code>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm store(~code##0:wybe.int, <<command_line.exit_code>>:wybe.int) @command_line:nn:nn
@@ -134,7 +134,7 @@ declare external fastcc  {i64, i64, i1} @"wybe.array.[|]<0>[785a827a1b]"(i64)
 @command_line.17 =    constant [?? x i8] c"Erroneous program argument vector\00"
 
 
-@command_line.16 =    constant [?? x i8] c"command_line:15:15\00"
+@command_line.16 =    constant [?? x i8] c"command_line:18:15\00"
 
 
 @command_line.11 =    constant [?? x i8] c"\00"
@@ -682,7 +682,7 @@ module top-level code > {terminal,inline,impure} (0 calls)
     foreign lpvm store(~%argv##0:wybe.array.raw_array(wybe.c_string), <<command_line.argv>>:wybe.array.raw_array(wybe.c_string))
     foreign c {impure} gc_init @memory_management:nn:nn
     foreign lpvm store(0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    command_line.<0><{<<command_line.argc>>, <<command_line.argv>>, <<wybe.io.io>>}; {<<command_line.argc>>, <<command_line.arguments>>, <<command_line.argv>>, <<command_line.command>>, <<command_line.exit_code>>, <<wybe.io.io>>}> #2
+    command_line.<0><{<<command_line.argc>>, <<command_line.argv>>}; {<<command_line.arguments>>, <<command_line.command>>, <<command_line.exit_code>>}> #2
     drone.<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3
     foreign lpvm load(<<command_line.exit_code>>:wybe.int, ?%exit_code##0:wybe.int)
     foreign c {semipure,terminal} exit(exit_code##0:wybe.int)
@@ -754,7 +754,7 @@ entry:
 
 module top-level code > public {impure} (0 calls)
 0: command_line.<0>
-()<{<<command_line.argc>>, <<command_line.argv>>, <<wybe.io.io>>}; {<<command_line.argc>>, <<command_line.arguments>>, <<command_line.argv>>, <<command_line.command>>, <<command_line.exit_code>>, <<wybe.io.io>>}>:
+()<{<<command_line.argc>>, <<command_line.argv>>}; {<<command_line.arguments>>, <<command_line.command>>, <<command_line.exit_code>>}>:
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(1,(wybe.array.[|]<0>,fromList [NonAliasedParamCond 2 []]))]
@@ -768,7 +768,7 @@ module top-level code > public {impure} (0 calls)
     wybe.array.[|]<0>[785a827a1b](?command##1:wybe.c_string, ?arguments##2:wybe.array(wybe.c_string), ~tmp#0##0:wybe.array(wybe.c_string), ?tmp#7##0:wybe.bool) #1 @command_line:nn:nn
     case ~tmp#7##0:wybe.bool of
     0:
-        foreign c {terminal,semipure} error_exit(c"command_line:15:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @control:nn:nn
+        foreign c {terminal,semipure} error_exit(c"command_line:18:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @control:nn:nn
 
     1:
         foreign lpvm store(~%arguments##2:wybe.array(wybe.c_string), <<command_line.arguments>>:wybe.array(wybe.c_string)) @command_line:nn:nn
@@ -779,7 +779,7 @@ module top-level code > public {impure} (0 calls)
 
 set_exit_code > public {inline} (0 calls)
 0: command_line.set_exit_code<0>
-set_exit_code(code##0:wybe.int)<{<<command_line.exit_code>>}; {<<command_line.exit_code>>}>:
+set_exit_code(code##0:wybe.int)<{}; {<<command_line.exit_code>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm store(~code##0:wybe.int, <<command_line.exit_code>>:wybe.int) @command_line:nn:nn
@@ -801,7 +801,7 @@ declare external fastcc  {i64, i64, i1} @"wybe.array.[|]<0>[785a827a1b]"(i64)
 @command_line.17 =    constant [?? x i8] c"Erroneous program argument vector\00"
 
 
-@command_line.16 =    constant [?? x i8] c"command_line:15:15\00"
+@command_line.16 =    constant [?? x i8] c"command_line:18:15\00"
 
 
 @command_line.11 =    constant [?? x i8] c"\00"

@@ -109,10 +109,13 @@ extractLPVMDataMacOS _ objFile = do
             let (_, macho) = parseMacho (BL.toStrict objBS)
             case findLPVMSegment (m_commands macho) of
                 Just seg -> do
-                    let modBS = uncurry (readBytes objBS) (lpvmFileOffset seg)
+                    -- liftIO $ putStr $ "\n\nParsed Mach-O segment:  " ++ show seg
+                    let offset = lpvmFileOffset seg
+                    -- liftIO $ putStr $ "\nLPVM Offset = " ++ show offset
+                    let modBS = uncurry (readBytes objBS) offset
                     return $ Right modBS
                 Nothing ->
-                    return $ Left ("No LPVM Segment found." ++ objFile)
+                    return $ Left ("No LPVM Segment found in " ++ objFile)
 
 
 -- | Actual implementation of [extractLPVMData] for Linux
@@ -235,7 +238,7 @@ lpvmFileOffset seg =
         Just sec -> let off = fromIntegral $ foff + sec_addr sec
                         size = fromIntegral $ sec_size sec
                     in (off, size)
-        Nothing -> error "LPVM Section not found."
+        Nothing -> shouldnt "LPVM Section not found."
 
 
 -- | Read bytestring from 'BL.ByteString' in the given range.

@@ -1,3 +1,6 @@
+# purpose: Standard List type
+# since  : 0.1
+
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.bool, wybe.int
