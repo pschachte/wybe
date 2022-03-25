@@ -2048,9 +2048,8 @@ modecheckStmt m name defPos assigned detism tmpCount final
                     $ bindingVars assigned3
         impurity <- lift $ stmtsImpurity tstStmt'
         let stmts' = if impurity > Pure 
-                     -- if the test is non-pure, need to keep the cond around
-                     then [maybePlace (Cond (seqToStmt tstStmt') [] elsStmts'
-                             (Just condBindings) (Just bindings) res) pos]
+                     -- if the test is non-pure, need to keep the test around
+                     then Not (seqToStmt tstStmt') `maybePlace` pos:elsStmts'
                      -- otherwise, the cond must fail and wont bind anything
                      else elsStmts'
         return (stmts', assigned3, tmpCount3)
