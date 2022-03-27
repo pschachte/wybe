@@ -148,7 +148,7 @@ diff_type(x##0:dead_cell_size.t, ?y##0:dead_cell_size.t2)<{}; {}>:
             foreign lpvm mutate(~tmp#8##0:dead_cell_size.t2, ?y##0:dead_cell_size.t2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, -1:wybe.int) @dead_cell_size:nn:nn
 
         1:
-            foreign llvm move(~x##0:dead_cell_size.t, ?y##0:dead_cell_size.t2)
+            foreign llvm move(~x##0:dead_cell_size.t, ?y##0:dead_cell_size.t2) @dead_cell_size:nn:nn
 
 
 
