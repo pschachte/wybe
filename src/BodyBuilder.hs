@@ -23,6 +23,7 @@ import UnivSet as USet
 import Data.Maybe
 import Data.Tuple.HT (mapFst)
 import Data.Bits
+import Data.Function
 import Control.Monad
 import Control.Monad.Extra (whenJust, whenM)
 import Control.Monad.Trans (lift)
@@ -421,10 +422,10 @@ instr' prim@(PrimForeign "lpvm" "load" _ [ArgGlobal info _, var]) pos = do
     loaded <- gets globalsLoaded
     case Map.lookup info loaded of
         Just val -> do
-            logBuild $ "  ... we do: " ++ show val
+            logBuild $ "  ... we do(" ++ show val ++ "), moving instead"
             instr' (PrimForeign "llvm" "move" [] [mkInput val, var]) pos
         Nothing -> do
-            logBuild "  ... we don't"
+            logBuild "  ... we don't, need to load"
             ordinaryInstr prim pos
 instr' prim@(PrimForeign "lpvm" "store" _ [var, ArgGlobal info _]) pos = do
     logBuild $ "  Checking if we know the value of " ++ show info
@@ -433,10 +434,10 @@ instr' prim@(PrimForeign "lpvm" "store" _ [var, ArgGlobal info _]) pos = do
     logBuild $ " ... found value " ++ show mbVal
     case mbVal of
         Just val 
-          | mkInput (canonicaliseArg var) == mkInput (canonicaliseArg val) -> do
-            logBuild " ... it is" 
+          | on (==) (mkInput . canonicaliseArg) var val -> do
+            logBuild " ... it is, no need to store" 
         _ -> do
-            logBuild " ... it isn't" 
+            logBuild " ... it isn't, we need to store" 
             ordinaryInstr prim pos
 instr' prim pos = ordinaryInstr prim pos
 
@@ -463,9 +464,7 @@ ordinaryInstr prim pos = do
             logBuild $ "found it; substituting "
                         ++ show oldOuts ++ " for " ++ show newOuts
             mapM_ (\(newOut,oldOut) ->
-                    instr' (PrimForeign "llvm" "move" []
-                              [mkInput oldOut, newOut])
-                    Nothing)
+                    primMove (mkInput oldOut) newOut `instr'` pos)
                   $ zip newOuts oldOuts
 
 
@@ -547,7 +546,8 @@ splitPrimOutputs :: Prim -> (Prim, [PrimArg])
 splitPrimOutputs prim =
     let (args, gFlows) = primArgs prim
         (inArgs,outArgs) = splitArgsByMode args 
-    in  (replacePrimArgs prim (canonicaliseArg <$> inArgs) gFlows, outArgs)
+    in  (canonicalisePrim $ replacePrimArgs prim (canonicaliseArg <$> inArgs) gFlows, 
+         outArgs)
 
 
 -- |Returns a list of all output arguments of the input Prim
@@ -671,10 +671,10 @@ splitArgsByMode = List.partition ((==FlowIn) . argFlowDirection)
 
 
 canonicalisePrim :: Prim -> Prim
-canonicalisePrim (PrimCall id nm args gFlows) =
-    PrimCall id nm (canonicaliseArg . mkInput <$> args) gFlows
-canonicalisePrim (PrimHigher id var args) =
-    PrimHigher id (canonicaliseArg $ mkInput var) $ canonicaliseArg . mkInput <$> args
+canonicalisePrim (PrimCall _ nm args gFlows) =
+    PrimCall 0 nm (canonicaliseArg . mkInput <$> args) gFlows
+canonicalisePrim (PrimHigher _ var args) =
+    PrimHigher 0 (canonicaliseArg $ mkInput var) $ canonicaliseArg . mkInput <$> args
 canonicalisePrim (PrimForeign lang op flags args) =
     PrimForeign lang op flags $ List.map (canonicaliseArg . mkInput) args
 

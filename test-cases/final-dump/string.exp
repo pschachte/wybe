@@ -42,16 +42,14 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#52##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#52##0:wybe.phantom, ?tmp#53##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#53##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    wybe.range.construct<0>(1:wybe.int, 3:wybe.int, 100:wybe.int, ?tmp#3##0:wybe.range) #67 @range:nn:nn
-    wybe.string.[]<1>("abcdefghi":wybe.string, ~tmp#3##0:wybe.range, ?tmp#2##0:wybe.string) #9 @string:nn:nn
-    wybe.string.print_string<0>(~tmp#2##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #68 @io:nn:nn
+    wybe.range.construct<0>(1:wybe.int, 3:wybe.int, 100:wybe.int, ?tmp#6##0:wybe.range) #67 @range:nn:nn
+    wybe.string.[]<1>("abcdefghi":wybe.string, ~tmp#6##0:wybe.range, ?tmp#2##0:wybe.string) #9 @string:nn:nn
+    wybe.string.print_string<0>(tmp#2##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #68 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#58##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#58##0:wybe.phantom, ?tmp#59##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#59##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    wybe.range.construct<0>(1:wybe.int, 3:wybe.int, 100:wybe.int, ?tmp#6##0:wybe.range) #69 @range:nn:nn
-    wybe.string.[]<1>("abcdefghi":wybe.string, ~tmp#6##0:wybe.range, ?tmp#5##0:wybe.string) #12 @string:nn:nn
     wybe.range...<0>(1:wybe.int, 3:wybe.int, ?tmp#7##0:wybe.range) #13 @string:nn:nn
-    wybe.string.[]<1>(~tmp#5##0:wybe.string, ~tmp#7##0:wybe.range, ?tmp#4##0:wybe.string) #14 @string:nn:nn
+    wybe.string.[]<1>(~tmp#2##0:wybe.string, ~tmp#7##0:wybe.range, ?tmp#4##0:wybe.string) #14 @string:nn:nn
     wybe.string.print_string<0>(~tmp#4##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #70 @io:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#64##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#64##0:wybe.phantom, ?tmp#65##0:wybe.phantom) @io:nn:nn
@@ -86,18 +84,16 @@ module top-level code > public {impure} (0 calls)
     string.test_index<0>("abc":wybe.string, 1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #33 @string:nn:nn
     string.test_index<0>("abcdefghijklmnopqrstuvwxyz":wybe.string, 25:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #34 @string:nn:nn
     wybe.string.,,<0>("ab":wybe.string, "cd":wybe.string, ?tmp#15##0:wybe.string) #35 @string:nn:nn
-    string.test_index<0>(~tmp#15##0:wybe.string, 1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #36 @string:nn:nn
-    wybe.string.,,<0>("ab":wybe.string, "cd":wybe.string, ?tmp#16##0:wybe.string) #37 @string:nn:nn
-    string.test_index<0>(~tmp#16##0:wybe.string, 2:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #38 @string:nn:nn
+    string.test_index<0>(tmp#15##0:wybe.string, 1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #36 @string:nn:nn
+    string.test_index<0>(~tmp#15##0:wybe.string, 2:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #38 @string:nn:nn
     string.test_index<0>(tmp#1##0:wybe.string, 0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #40 @string:nn:nn
     wybe.range.construct<0>(0:wybe.int, 2:wybe.int, 10:wybe.int, ?tmp#19##0:wybe.range) #74 @range:nn:nn
-    wybe.string.[]<1>("abcdefgh":wybe.string, ~tmp#19##0:wybe.range, ?tmp#18##0:wybe.string) #42 @string:nn:nn
+    wybe.string.[]<1>("abcdefgh":wybe.string, tmp#19##0:wybe.range, ?tmp#18##0:wybe.string) #42 @string:nn:nn
     string.test_index<0>(~tmp#18##0:wybe.string, 0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #43 @string:nn:nn
     string.test_index<0>("abc":wybe.string, 3:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #44 @string:nn:nn
     string.test_index<0>(tmp#1##0:wybe.string, 3:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #46 @string:nn:nn
     string.test_index<0>("abc":wybe.string, -3:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #47 @string:nn:nn
-    wybe.range.construct<0>(0:wybe.int, 2:wybe.int, 10:wybe.int, ?tmp#22##0:wybe.range) #75 @range:nn:nn
-    wybe.string.[]<1>("abc":wybe.string, ~tmp#22##0:wybe.range, ?tmp#21##0:wybe.string) #49 @string:nn:nn
+    wybe.string.[]<1>("abc":wybe.string, ~tmp#19##0:wybe.range, ?tmp#21##0:wybe.string) #49 @string:nn:nn
     string.test_index<0>(~tmp#21##0:wybe.string, 2:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #50 @string:nn:nn
     wybe.string.,,<0>("abc":wybe.string, tmp#1##0:wybe.string, ?tmp#23##0:wybe.string) #52 @string:nn:nn
     string.test_index<0>(~tmp#23##0:wybe.string, 2:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #53 @string:nn:nn
@@ -212,70 +208,52 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 declare external fastcc  i64 @"wybe.string.c_string<0>"(i64)    
 
 
-@string.52 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @string.51 to i64) }
-
-
-@string.51 =    constant [?? x i8] c"abc\00"
-
-
-@string.50 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @string.49 to i64) }
-
-
-@string.49 =    constant [?? x i8] c"abc\00"
-
-
-@string.48 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @string.47 to i64) }
-
-
-@string.47 =    constant [?? x i8] c"abc\00"
-
-
 @string.46 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @string.45 to i64) }
 
 
 @string.45 =    constant [?? x i8] c"abc\00"
 
 
-@string.44 =    constant {i64, i64} { i64 8, i64 ptrtoint ([?? x i8]* @string.43 to i64) }
+@string.44 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @string.43 to i64) }
 
 
-@string.43 =    constant [?? x i8] c"abcdefgh\00"
+@string.43 =    constant [?? x i8] c"abc\00"
 
 
-@string.42 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @string.41 to i64) }
+@string.42 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @string.41 to i64) }
 
 
-@string.41 =    constant [?? x i8] c"cd\00"
+@string.41 =    constant [?? x i8] c"abc\00"
 
 
-@string.40 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @string.39 to i64) }
+@string.40 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @string.39 to i64) }
 
 
-@string.39 =    constant [?? x i8] c"ab\00"
+@string.39 =    constant [?? x i8] c"abc\00"
 
 
-@string.38 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @string.37 to i64) }
+@string.38 =    constant {i64, i64} { i64 8, i64 ptrtoint ([?? x i8]* @string.37 to i64) }
 
 
-@string.37 =    constant [?? x i8] c"cd\00"
+@string.37 =    constant [?? x i8] c"abcdefgh\00"
 
 
 @string.36 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @string.35 to i64) }
 
 
-@string.35 =    constant [?? x i8] c"ab\00"
+@string.35 =    constant [?? x i8] c"cd\00"
 
 
-@string.34 =    constant {i64, i64} { i64 26, i64 ptrtoint ([?? x i8]* @string.33 to i64) }
+@string.34 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @string.33 to i64) }
 
 
-@string.33 =    constant [?? x i8] c"abcdefghijklmnopqrstuvwxyz\00"
+@string.33 =    constant [?? x i8] c"ab\00"
 
 
-@string.32 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @string.31 to i64) }
+@string.32 =    constant {i64, i64} { i64 26, i64 ptrtoint ([?? x i8]* @string.31 to i64) }
 
 
-@string.31 =    constant [?? x i8] c"abc\00"
+@string.31 =    constant [?? x i8] c"abcdefghijklmnopqrstuvwxyz\00"
 
 
 @string.30 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @string.29 to i64) }
@@ -284,19 +262,19 @@ declare external fastcc  i64 @"wybe.string.c_string<0>"(i64)
 @string.29 =    constant [?? x i8] c"abc\00"
 
 
-@string.28 =    constant [?? x i8] c"\0aTESTING INDEXING\00"
+@string.28 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @string.27 to i64) }
 
 
-@string.27 =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @string.26 to i64) }
+@string.27 =    constant [?? x i8] c"abc\00"
 
 
-@string.26 =    constant [?? x i8] c"abcdefghijkl\00"
+@string.26 =    constant [?? x i8] c"\0aTESTING INDEXING\00"
 
 
-@string.25 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @string.24 to i64) }
+@string.25 =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @string.24 to i64) }
 
 
-@string.24 =    constant [?? x i8] c"abc\00"
+@string.24 =    constant [?? x i8] c"abcdefghijkl\00"
 
 
 @string.23 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @string.22 to i64) }
@@ -305,28 +283,28 @@ declare external fastcc  i64 @"wybe.string.c_string<0>"(i64)
 @string.22 =    constant [?? x i8] c"abc\00"
 
 
-@string.21 =    constant [?? x i8] c"\0aTESTING LOOPS\00"
+@string.21 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @string.20 to i64) }
 
 
-@string.20 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @string.19 to i64) }
+@string.20 =    constant [?? x i8] c"abc\00"
 
 
-@string.19 =    constant [?? x i8] c"abc\00"
+@string.19 =    constant [?? x i8] c"\0aTESTING LOOPS\00"
 
 
 @string.18 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @string.17 to i64) }
 
 
-@string.17 =    constant [?? x i8] c"efg\00"
+@string.17 =    constant [?? x i8] c"abc\00"
 
 
-@string.16 =    constant [?? x i8] c"\0aTESTING CONVERSION TO c_string\00"
+@string.16 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @string.15 to i64) }
 
 
-@string.15 =    constant {i64, i64} { i64 9, i64 ptrtoint ([?? x i8]* @string.14 to i64) }
+@string.15 =    constant [?? x i8] c"efg\00"
 
 
-@string.14 =    constant [?? x i8] c"abcdefghi\00"
+@string.14 =    constant [?? x i8] c"\0aTESTING CONVERSION TO c_string\00"
 
 
 @string.13 =    constant {i64, i64} { i64 9, i64 ptrtoint ([?? x i8]* @string.12 to i64) }
@@ -377,7 +355,7 @@ declare external fastcc  {i8, i64, i1} @"wybe.string.[|]<0>[785a827a1b]"(i64)
 declare external fastcc  {i8, i1} @"wybe.string.[]<0>"(i64, i64)    
 
 
-@string.64 =    constant [?? x i8] c"OUT OF RANGE\00"
+@string.58 =    constant [?? x i8] c"OUT OF RANGE\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -404,56 +382,52 @@ entry:
   %"1#tmp#1##0" = or i64 %"1#tmp#108##0", 3 
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %"1#tmp#1##0")  
   tail call ccc  void  @putchar(i8  10)  
-  %"1#tmp#3##0" = tail call fastcc  i64  @"wybe.range.construct<0>"(i64  1, i64  3, i64  100)  
-  %"1#tmp#2##0" = tail call fastcc  i64  @"wybe.string.[]<1>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.13, i32 0, i32 0) to i64), i64  %"1#tmp#3##0")  
+  %"1#tmp#6##0" = tail call fastcc  i64  @"wybe.range.construct<0>"(i64  1, i64  3, i64  100)  
+  %"1#tmp#2##0" = tail call fastcc  i64  @"wybe.string.[]<1>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.13, i32 0, i32 0) to i64), i64  %"1#tmp#6##0")  
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %"1#tmp#2##0")  
   tail call ccc  void  @putchar(i8  10)  
-  %"1#tmp#6##0" = tail call fastcc  i64  @"wybe.range.construct<0>"(i64  1, i64  3, i64  100)  
-  %"1#tmp#5##0" = tail call fastcc  i64  @"wybe.string.[]<1>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.15, i32 0, i32 0) to i64), i64  %"1#tmp#6##0")  
   %"1#tmp#7##0" = tail call fastcc  i64  @"wybe.range...<0>"(i64  1, i64  3)  
-  %"1#tmp#4##0" = tail call fastcc  i64  @"wybe.string.[]<1>"(i64  %"1#tmp#5##0", i64  %"1#tmp#7##0")  
+  %"1#tmp#4##0" = tail call fastcc  i64  @"wybe.string.[]<1>"(i64  %"1#tmp#2##0", i64  %"1#tmp#7##0")  
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %"1#tmp#4##0")  
   tail call ccc  void  @putchar(i8  10)  
-  tail call ccc  void  @print_string(i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @string.16, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_string(i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @string.14, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   %"1#tmp#71##0" = shl   i64 100, 2 
   %"1#tmp#72##0" = or i64 %"1#tmp#71##0", 1024 
   %"1#tmp#10##0" = or i64 %"1#tmp#72##0", 3 
   %"1#tmp#12##0" = tail call fastcc  i64  @"wybe.range...<0>"(i64  1, i64  2)  
-  %"1#tmp#11##0" = tail call fastcc  i64  @"wybe.string.[]<1>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.18, i32 0, i32 0) to i64), i64  %"1#tmp#12##0")  
+  %"1#tmp#11##0" = tail call fastcc  i64  @"wybe.string.[]<1>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.16, i32 0, i32 0) to i64), i64  %"1#tmp#12##0")  
   %"1#tmp#9##0" = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %"1#tmp#10##0", i64  %"1#tmp#11##0")  
-  %"1#tmp#8##0" = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.20, i32 0, i32 0) to i64), i64  %"1#tmp#9##0")  
+  %"1#tmp#8##0" = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.18, i32 0, i32 0) to i64), i64  %"1#tmp#9##0")  
   %"1#r##0" = tail call fastcc  i64  @"wybe.string.c_string<0>"(i64  %"1#tmp#8##0")  
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %"1#tmp#8##0")  
   tail call ccc  void  @putchar(i8  32)  
   tail call ccc  void  @print_string(i64  %"1#r##0")  
   tail call ccc  void  @putchar(i8  10)  
-  tail call ccc  void  @print_string(i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @string.21, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_string(i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @string.19, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"string.gen#1<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.23, i32 0, i32 0) to i64), i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.25, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"string.gen#1<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.21, i32 0, i32 0) to i64), i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.23, i32 0, i32 0) to i64))  
   %"1#tmp#14##0" = tail call fastcc  i64  @"wybe.range.irange<0>"(i64  10, i64  -1, i64  1)  
-  %"1#tmp#13##0" = tail call fastcc  i64  @"wybe.string.[]<1>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.27, i32 0, i32 0) to i64), i64  %"1#tmp#14##0")  
+  %"1#tmp#13##0" = tail call fastcc  i64  @"wybe.string.[]<1>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.25, i32 0, i32 0) to i64), i64  %"1#tmp#14##0")  
   tail call fastcc  void  @"string.gen#1<0>"(i64  %"1#tmp#13##0", i64  %"1#tmp#13##0")  
-  tail call ccc  void  @print_string(i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @string.28, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_string(i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @string.26, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"string.test_index<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.30, i32 0, i32 0) to i64), i64  0)  
-  tail call fastcc  void  @"string.test_index<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.32, i32 0, i32 0) to i64), i64  1)  
-  tail call fastcc  void  @"string.test_index<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.34, i32 0, i32 0) to i64), i64  25)  
-  %"1#tmp#15##0" = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.36, i32 0, i32 0) to i64), i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.38, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"string.test_index<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.28, i32 0, i32 0) to i64), i64  0)  
+  tail call fastcc  void  @"string.test_index<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.30, i32 0, i32 0) to i64), i64  1)  
+  tail call fastcc  void  @"string.test_index<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.32, i32 0, i32 0) to i64), i64  25)  
+  %"1#tmp#15##0" = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.34, i32 0, i32 0) to i64), i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.36, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"string.test_index<0>"(i64  %"1#tmp#15##0", i64  1)  
-  %"1#tmp#16##0" = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.40, i32 0, i32 0) to i64), i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.42, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"string.test_index<0>"(i64  %"1#tmp#16##0", i64  2)  
+  tail call fastcc  void  @"string.test_index<0>"(i64  %"1#tmp#15##0", i64  2)  
   tail call fastcc  void  @"string.test_index<0>"(i64  %"1#tmp#1##0", i64  0)  
   %"1#tmp#19##0" = tail call fastcc  i64  @"wybe.range.construct<0>"(i64  0, i64  2, i64  10)  
-  %"1#tmp#18##0" = tail call fastcc  i64  @"wybe.string.[]<1>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.44, i32 0, i32 0) to i64), i64  %"1#tmp#19##0")  
+  %"1#tmp#18##0" = tail call fastcc  i64  @"wybe.string.[]<1>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.38, i32 0, i32 0) to i64), i64  %"1#tmp#19##0")  
   tail call fastcc  void  @"string.test_index<0>"(i64  %"1#tmp#18##0", i64  0)  
-  tail call fastcc  void  @"string.test_index<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.46, i32 0, i32 0) to i64), i64  3)  
+  tail call fastcc  void  @"string.test_index<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.40, i32 0, i32 0) to i64), i64  3)  
   tail call fastcc  void  @"string.test_index<0>"(i64  %"1#tmp#1##0", i64  3)  
-  tail call fastcc  void  @"string.test_index<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.48, i32 0, i32 0) to i64), i64  -3)  
-  %"1#tmp#22##0" = tail call fastcc  i64  @"wybe.range.construct<0>"(i64  0, i64  2, i64  10)  
-  %"1#tmp#21##0" = tail call fastcc  i64  @"wybe.string.[]<1>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.50, i32 0, i32 0) to i64), i64  %"1#tmp#22##0")  
+  tail call fastcc  void  @"string.test_index<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.42, i32 0, i32 0) to i64), i64  -3)  
+  %"1#tmp#21##0" = tail call fastcc  i64  @"wybe.string.[]<1>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.44, i32 0, i32 0) to i64), i64  %"1#tmp#19##0")  
   tail call fastcc  void  @"string.test_index<0>"(i64  %"1#tmp#21##0", i64  2)  
-  %"1#tmp#23##0" = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.52, i32 0, i32 0) to i64), i64  %"1#tmp#1##0")  
+  %"1#tmp#23##0" = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @string.46, i32 0, i32 0) to i64), i64  %"1#tmp#1##0")  
   tail call fastcc  void  @"string.test_index<0>"(i64  %"1#tmp#23##0", i64  2)  
   %"1#tmp#110##0" = shl   i64 98, 2 
   %"1#tmp#111##0" = or i64 %"1#tmp#110##0", 1024 
@@ -472,14 +446,14 @@ entry:
 
 define external fastcc  void @"string.gen#1<0>"(i64  %"s##0", i64  %"tmp#0##0")    {
 entry:
-  %53 = tail call fastcc  {i8, i64, i1}  @"wybe.string.[|]<0>"(i64  %"tmp#0##0")  
-  %54 = extractvalue {i8, i64, i1} %53, 0 
-  %55 = extractvalue {i8, i64, i1} %53, 1 
-  %56 = extractvalue {i8, i64, i1} %53, 2 
-  br i1 %56, label %if.then, label %if.else 
+  %47 = tail call fastcc  {i8, i64, i1}  @"wybe.string.[|]<0>"(i64  %"tmp#0##0")  
+  %48 = extractvalue {i8, i64, i1} %47, 0 
+  %49 = extractvalue {i8, i64, i1} %47, 1 
+  %50 = extractvalue {i8, i64, i1} %47, 2 
+  br i1 %50, label %if.then, label %if.else 
 if.then:
-  tail call ccc  void  @putchar(i8  %54)  
-  tail call fastcc  void  @"string.gen#1<0>[6dacb8fd25]"(i64  %"s##0", i64  %55)  
+  tail call ccc  void  @putchar(i8  %48)  
+  tail call fastcc  void  @"string.gen#1<0>[6dacb8fd25]"(i64  %"s##0", i64  %49)  
   ret void 
 if.else:
   tail call ccc  void  @putchar(i8  10)  
@@ -489,14 +463,14 @@ if.else:
 
 define external fastcc  void @"string.gen#1<0>[6dacb8fd25]"(i64  %"s##0", i64  %"tmp#0##0")    {
 entry:
-  %57 = tail call fastcc  {i8, i64, i1}  @"wybe.string.[|]<0>[785a827a1b]"(i64  %"tmp#0##0")  
-  %58 = extractvalue {i8, i64, i1} %57, 0 
-  %59 = extractvalue {i8, i64, i1} %57, 1 
-  %60 = extractvalue {i8, i64, i1} %57, 2 
-  br i1 %60, label %if.then, label %if.else 
+  %51 = tail call fastcc  {i8, i64, i1}  @"wybe.string.[|]<0>[785a827a1b]"(i64  %"tmp#0##0")  
+  %52 = extractvalue {i8, i64, i1} %51, 0 
+  %53 = extractvalue {i8, i64, i1} %51, 1 
+  %54 = extractvalue {i8, i64, i1} %51, 2 
+  br i1 %54, label %if.then, label %if.else 
 if.then:
-  tail call ccc  void  @putchar(i8  %58)  
-  tail call fastcc  void  @"string.gen#1<0>[6dacb8fd25]"(i64  %"s##0", i64  %59)  
+  tail call ccc  void  @putchar(i8  %52)  
+  tail call fastcc  void  @"string.gen#1<0>[6dacb8fd25]"(i64  %"s##0", i64  %53)  
   ret void 
 if.else:
   tail call ccc  void  @putchar(i8  10)  
@@ -513,16 +487,16 @@ entry:
 
 define external fastcc  void @"string.test_index<0>"(i64  %"s##0", i64  %"i##0")    {
 entry:
-  %61 = tail call fastcc  {i8, i1}  @"wybe.string.[]<0>"(i64  %"s##0", i64  %"i##0")  
-  %62 = extractvalue {i8, i1} %61, 0 
-  %63 = extractvalue {i8, i1} %61, 1 
-  br i1 %63, label %if.then, label %if.else 
+  %55 = tail call fastcc  {i8, i1}  @"wybe.string.[]<0>"(i64  %"s##0", i64  %"i##0")  
+  %56 = extractvalue {i8, i1} %55, 0 
+  %57 = extractvalue {i8, i1} %55, 1 
+  br i1 %57, label %if.then, label %if.else 
 if.then:
-  tail call ccc  void  @putchar(i8  %62)  
+  tail call ccc  void  @putchar(i8  %56)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else:
-  tail call ccc  void  @print_string(i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @string.64, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_string(i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @string.58, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
