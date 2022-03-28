@@ -19,7 +19,7 @@ module Codegen (
   -- * Symbol storage
   alloca, store, local, assign, load, getVar, localVar, preservingSymtab,
   makeGlobalResourceVariable,
-  operandType, doAlloca, doLoad, 
+  operandType, doAlloca, doLoad,
   bitcast, cbitcast, inttoptr, cinttoptr, ptrtoint, cptrtoint,
   trunc, ctrunc, zext, czext, sext, csext,
   -- * Types
@@ -140,9 +140,9 @@ type Names = Map.Map String Int
 data CodegenState
     = CodegenState {
         currentBlock :: Name     -- ^ Name of the active block to append to
-      , blocks       :: Map.Map Name BlockState 
+      , blocks       :: Map.Map Name BlockState
                                  -- ^ Blocks for function
-      , symtab       :: Map.Map String (Operand,TypeRepresentation) 
+      , symtab       :: Map.Map String (Operand,TypeRepresentation)
                                  -- ^ Local symbol table of a function
       , blockCount   :: Int      -- ^ Incrementing count of basic blocks
       , count        :: Word     -- ^ Count for temporary operands
@@ -176,7 +176,7 @@ data BlockState
 type Codegen = StateT CodegenState Compiler
 
 execCodegen :: Word -> [PrimProto] -> Codegen a -> Compiler CodegenState
-execCodegen startCount protos codegen 
+execCodegen startCount protos codegen
     = execStateT codegen (emptyCodegen startCount protos)
 
 evalCodegen :: [PrimProto] -> Codegen t -> Compiler t
@@ -204,7 +204,7 @@ fresh = do
 -- | Update the list of externs which will be needed. The 'Prim' will be
 -- converted to an extern declaration later.
 addExtern :: Prim -> Codegen ()
-addExtern p = do 
+addExtern p = do
   ex <- gets externs
   modify $ \s -> s { externs = p : ex }
 
@@ -241,10 +241,10 @@ getGlobalResource spec@(ResourceSpec mod nm) ty = do
 
 makeGlobalResourceVariable :: ResourceSpec -> Type -> Compiler Global
 makeGlobalResourceVariable spec@(ResourceSpec mod nm) ty = do
-    when (ty == VoidType) 
+    when (ty == VoidType)
         $ shouldnt $ "global resource " ++ show spec ++ " cant have voidtype"
-    let ref = Name $ fromString $ makeGlobalResourceName spec 
-    thisMod <- getModuleSpec 
+    let ref = Name $ fromString $ makeGlobalResourceName spec
+    thisMod <- getModuleSpec
     let init = if thisMod == mod
                then Just $ C.Undef ty
                else Nothing
@@ -714,7 +714,7 @@ extractvalue st i = ExtractValue st [i] []
 
 -- * GetElementPtr helper
 getElementPtrInstr :: Operand -> [Integer] -> LLVMAST.Instruction
-getElementPtrInstr op idxs = 
+getElementPtrInstr op idxs =
   LLVMAST.GetElementPtr False op (cons . C.Int (fromIntegral wordSize) <$> idxs) []
 
 

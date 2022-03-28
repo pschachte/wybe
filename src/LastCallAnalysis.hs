@@ -16,8 +16,9 @@ import Data.Foldable (foldrM)
 import Data.List.Predicate (allUnique)
 import Callers (getSccProcs)
 import Data.Graph (SCC (AcyclicSCC, CyclicSCC))
-import Control.Monad.State (StateT (runStateT), MonadTrans (lift), execStateT, execState, runState, MonadState (get, put))
+import Control.Monad.State (StateT (runStateT), MonadTrans (lift), execStateT, execState, runState, MonadState (get, put), gets, modify, unless)
 import Control.Monad (liftM)
+import Data.Set (Set)
 
 lastCallAnalyseMod :: ModSpec -> Compiler ()
 lastCallAnalyseMod thisMod = do
@@ -74,34 +75,36 @@ tryMakeTailCall spec proto body = do
     -- We map over the leaves the proc twice. First we identify the leaves
     -- where can move the last call -> tail call.
 
-    -- TODO: lastBlock is not needed at the moment - can we get rid of it?
     (body', finalState) <- runStateT
-            (mapProcLeaves (\prevBlocks lastBlock -> transformLeaf lastBlock) [] body)
+            (mapProcLeaves transformLeaf body)
             LeafTransformState { procSpec = spec, originalProto = proto, transformedProto = Nothing, protoConflict = False }
 
     case (protoConflict finalState, transformedProto finalState) of
-        (False, Just proto') ->
+        (False, Just proto') -> do
             -- Then we map over leaves a second time, inserting
-            -- `foreign lpvm setReference()` calls for all FlowOutByReference
+            -- `foreign lpvm store()` calls for all FlowOutByReference args
+            logLastCallAnalysis "inserting missing store() calls for out-by-reference args"
+            body'' <- mapProcLeaves (assignReferenceOutputs proto proto') body'
 
             -- Return modified result
-            return $ Just (proto', body')
+            return $ Just (proto', body'')
         _ -> return Nothing
 
 transformLeaf :: [Placed Prim] -> LeafTransformer [Placed Prim]
 transformLeaf lastBlock = do
-    state <- get
+    spec <- gets procSpec
     case partitionLastCall lastBlock of
         -- TODO: use multiple specialization to relax the restriction that
         -- the last call is a directly-recursive call...
-        (Just (beforeCall, call), afterLastCall@(_:_)) | isDirectRecursiveCall (content call) (procSpec state) -> do
+        (Just (beforeCall, call), afterLastCall@(_:_)) | isDirectRecursiveCall (content call) spec -> do
             let lastCall = content call
-            logLeaf "identified a directly-recursive last-call: candidate for the transformation"
-            logLeaf  $ "before: " ++ show beforeCall ++ "\ncall: " ++ show lastCall ++ "\after: " ++ show afterLastCall
+            logLeaf $ "identified a directly-recursive last-call: " ++ show call
+            logLeaf $ "before: " ++ show beforeCall ++ "\nafter: " ++ show afterLastCall
             -- First we identify all the prims which can be trivially moved before the last call
             -- i.e.: the prim doesn't depend on any values produced by the last call (or subsequent prims)
+            logLeaf $ "moving prims before last call where possible"
             let MovePrimsResult { remaining = remainingAfterLastCall, succeeded = movedBeforeLastCall } = tryMovePrimsBeforeLastCall lastCall afterLastCall MovePrimsResult { remaining = [], succeeded = [] }
-            logLeaf $ "failed: " ++ show (reverse remainingAfterLastCall) ++ "\nsucceeded: " ++ show (reverse movedBeforeLastCall)
+            logLeaf $ "still remaining after last call: " ++ show (reverse remainingAfterLastCall)
             -- Next, we look at the remaining prims which couldn't be simply moved before the last call,
             -- to see if they are just "filling in the fields" of struct(s) with outputs from the last call.
             case foldrM (analyzePrimAfterLastCall (content call)) [] (reverse (List.map content remainingAfterLastCall)) of
@@ -113,18 +116,20 @@ transformLeaf lastBlock = do
                     -- XXX: take into account size as well as offset when determining aliasing?
                     if all (allUnique . List.map (trustArgInt . offsetArg)) mutateChains
                     then do
-                        proto' <- lift $ modifyProto (originalProto state) mutateChains
-                        case transformedProto state of
-                            Just proto | proto /= proto' -> do
-                                logLeaf $ "conflicting protos" ++ (show proto) ++ "\n" ++ (show proto')
-                                put state { protoConflict = True }
+                        proto <- gets originalProto
+                        proto' <- gets transformedProto
+                        proto'' <- lift $ modifyProto proto mutateChains
+                        case proto' of
+                            Just proto' | proto' /= proto'' -> do
+                                logLeaf $ "conflicting protos" ++ show proto' ++ "\n" ++ show proto''
+                                modify (\state -> state { protoConflict = True })
                                 return lastBlock
                             _ -> do
-                                put state { transformedProto = Just proto' }
-                                logLeaf "remaining prims meet requirements for last call -> tail call transform"
-                                logLeaf $ "modified proto: " ++ show proto'
+                                modify (\state -> state { transformedProto = Just proto'' })
+                                logLeaf $ "remaining prims meet requirements for last call -> tail call transform\nmutate chains: " ++ show mutateChains
+                                logLeaf $ "modified proto: " ++ show proto''
                                 body' <- lift $ buildTailCallLeaf (beforeCall ++ reverse movedBeforeLastCall) call mutateChains
-                                logLeaf $ "modified body: " ++ show body'
+                                logLeaf $ "modified leaf: " ++ show body'
                                 return body'
                     else do
                         logLeaf "mutate instructions alias! aborting"
@@ -135,6 +140,22 @@ transformLeaf lastBlock = do
         _ -> do
             logLeaf "leaf didn't qualify for last-call transformation"
             return lastBlock
+
+paramUnassigned :: Set PrimVarName -> PrimParam -> Bool
+paramUnassigned outputs param =
+    primParamName param `notElem` outputs
+
+
+assignReferenceOutputs :: PrimProto -> PrimProto -> [Placed Prim] -> Compiler [Placed Prim]
+assignReferenceOutputs proto proto' leaf = do
+    let leafPrims = map content leaf
+    let potentialArgs = varsInPrims FlowIn leafPrims
+    let outByRefParams = filter (paramUnassigned potentialArgs) $ filter ((==FlowOutByReference ) . primParamFlow) $ primProtoParams proto'
+    -- find the original param names / types before the transformation
+    let outByRefParams' = map (\param -> (primProtoParams proto !! parameterVarNameToID proto' (primParamName param), param)) outByRefParams
+    logLastCallAnalysis $ "leaf: " ++ show leaf ++ "\nassigning by reference outputs: " ++ show outByRefParams'
+    let inits = map (\(PrimParam name ty _ _ _, _) -> initializeOutput name name ty) outByRefParams'
+    return $ leaf ++ inits
 
 -- Returns true if `prim` uses any of the outputs generated by `otherPrims`
 -- If this is the case, then it is not possible to move `prim` before the last call.
@@ -156,14 +177,14 @@ modifyProto proto (mutateChain:xs) = do
     proto' <- modifyProto proto xs
     let output = outputName (last mutateChain)
     let params = primProtoParams proto'
-    let params' = map (\param -> let name = primParamName param in
-            if primParamName param /= output then
+    let params' = map (\param@PrimParam{primParamName = name, primParamFlow=flow, primParamType=ty} ->
+            if name /= output then
                 param
-            else case primParamFlow param of
+            else case flow of
                 FlowOutByReference -> shouldnt "multiple mutate chains writing to same output"
                 FlowIn -> shouldnt $ "attempting to convert FlowIn -> FlowOutByReference.\nproto: " ++ show proto ++ "\nmutate chain: " ++ show mutateChain
                 -- XXX: change name of param too?
-                FlowOut -> param { primParamFlow = FlowOutByReference, primParamType = Representation Address }
+                FlowOut -> param { primParamName = addSuffix name outByRefSuffix, primParamFlow = FlowOutByReference, primParamType = Pointer ty }
             ) params
     return proto' { primProtoParams = params' }
 
@@ -172,36 +193,35 @@ modifyProto proto (mutateChain:xs) = do
 -- of this block to be in tail-position.
 buildTailCallLeaf :: [Placed Prim] -> Placed Prim -> [MutateChain] -> Compiler [Placed Prim]
 buildTailCallLeaf beforeCall call mutateChains = do
-    let inits = map initializeOutput mutateChains
+    inits <- mapM initializeOutputFromChain mutateChains
     let addresses = computeArgumentAddresses mutateChains
     let call' = modifyCall mutateChains call
     return $ beforeCall ++ inits ++ addresses ++ [call']
 
-initializeOutput :: MutateChain -> Placed Prim
-initializeOutput mutateChain =
-    Unplaced $ PrimForeign "lpvm" "assignOutput" [] [
-        ArgVar {
-            argVarName = outputName $ last mutateChain,
-            argVarType = Representation Address,
-            argVarFlow = FlowIn,
-            argVarFlowType = Ordinary,
-            argVarFinal = True
-        },
-        ArgVar {
-            argVarName = inputName $ head mutateChain,
-            argVarType = inputType $ head mutateChain,
-            argVarFlow = FlowIn,
-            argVarFlowType = Ordinary ,
-            argVarFinal = False
-        }]
+initializeOutputFromChain :: MutateChain -> Compiler (Placed Prim)
+initializeOutputFromChain mutateChain = do
+    let outputTy = outputType $ last mutateChain
+    let inputTy = inputType $ head mutateChain
+    unless (outputTy == inputTy) (logLastCallAnalysis $ "WARNING: types of head and tail of mutate chain differ: " ++ show inputTy ++ " vs. " ++ show outputTy)
+    return $ initializeOutput (inputName $ head mutateChain) (outputName $ last mutateChain) outputTy
+
+initializeOutput :: PrimVarName -> PrimVarName -> TypeSpec -> Placed Prim
+initializeOutput input output ty =
+    Unplaced $ PrimForeign "lpvm" "store" [] [
+        ArgVar input ty FlowIn Ordinary False,
+        ArgVar (addSuffix output outByRefSuffix) (Pointer ty) FlowIn Ordinary True
+    ]
+
+addressSuffix :: [Char]
+addressSuffix = "address"
 
 
-addressVarSuffix :: [Char]
-addressVarSuffix = "#address"
+outByRefSuffix :: [Char]
+outByRefSuffix = "outByRef"
 
 
-addAddressSuffix :: PrimVarName -> PrimVarName
-addAddressSuffix varName = varName { primVarName = primVarName varName ++ addressVarSuffix }
+addSuffix :: PrimVarName -> String -> PrimVarName
+addSuffix varName suffix = varName { primVarName = primVarName varName ++ [specialChar] ++ suffix }
 
 
 computeArgumentAddresses :: [MutateChain] -> [Placed Prim]
@@ -220,8 +240,8 @@ computeArgumentAddresses = concatMap (\mutateChain ->
                 sizeArg mutate,
                 startOffsetArg mutate,
                 ArgVar {
-                    argVarName = addAddressSuffix valueVar,
-                    argVarType = Representation Address,
+                    argVarName = addSuffix valueVar addressSuffix,
+                    argVarType = Pointer $ valueType mutate,
                     argVarFlow = FlowOut,
                     argVarFlowType = Ordinary,
                     argVarFinal = False
@@ -236,8 +256,8 @@ modifyCall mutateChains = contentApply (\call -> case call of
             let mutates = concat mutateChains in
             PrimCall siteId spec (map (\arg ->
                 case arg of
-                    var@ArgVar { argVarName = name } | name `elem` List.map valueName mutates
-                        -> var { argVarName = addAddressSuffix name, argVarType = Representation Address, argVarFlow = FlowOutByReference }
+                    var@ArgVar { argVarName = name, argVarType = ty } | name `elem` List.map valueName mutates
+                        -> var { argVarName = addSuffix name addressSuffix, argVarType = Pointer ty, argVarFlow = FlowOutByReference }
                     _ -> arg
                 ) args) globalFlows
         _ -> call
@@ -255,6 +275,7 @@ data MutateInstr = MutateInstr {
     outputName :: PrimVarName,
     outputType :: TypeSpec,
     valueName :: PrimVarName,
+    valueType :: TypeSpec,
     offsetArg :: PrimArg,
     sizeArg :: PrimArg,
     startOffsetArg :: PrimArg
@@ -278,10 +299,10 @@ analyzePrimAfterLastCall lastCall prim state = case prim of
         ArgInt 1 _,
         sizeArg,
         startOffsetArg,
-        ArgVar { argVarName = valueName, argVarFlow = FlowIn, argVarFinal = final }]
+        ArgVar { argVarName = valueName, argVarFlow = FlowIn, argVarType = valueType, argVarFinal = final }]
       | valueName `elem` varsInPrim FlowOut lastCall -> if not final
           then Left $ show valueName ++ " is used in more than one place"
-          else tryAddToMutateChain lastCall state MutateInstr { inputName = inputName, inputType = inputType, outputName = outputName, outputType = outputType, offsetArg = offsetArg, sizeArg = sizeArg, startOffsetArg = startOffsetArg, valueName = valueName } state
+          else tryAddToMutateChain lastCall state MutateInstr { inputName = inputName, inputType = inputType, outputName = outputName, outputType = outputType, offsetArg = offsetArg, sizeArg = sizeArg, startOffsetArg = startOffsetArg, valueName = valueName, valueType = valueType } state
     prim -> Left $ "not a mutate instr which uses a value from lastCall where destructive=0 and start_offset=0, offset, size const int:\n" ++ show prim
 
 -- Alternative plan?:
@@ -320,14 +341,14 @@ _partitionLastCall (x:xs) =
 
 -- Applies a transformation to the leaves of a proc body
 -- TODO: this is almost like a functor fmap?
-mapProcLeaves :: ([ProcBody] -> [Placed Prim] -> LeafTransformer [Placed Prim]) -> [ProcBody] -> ProcBody -> LeafTransformer ProcBody
-mapProcLeaves f prevBlocks leafBlock@ProcBody { bodyPrims = prims, bodyFork = NoFork } =
+mapProcLeaves :: (Monad t) => ([Placed Prim] -> t [Placed Prim]) -> ProcBody -> t ProcBody
+mapProcLeaves f leafBlock@ProcBody { bodyPrims = prims, bodyFork = NoFork } =
     do
-        prims <- f prevBlocks prims
+        prims <- f prims
         return leafBlock { bodyPrims = prims }
-mapProcLeaves f prevBlocks current@ProcBody { bodyFork = fork@PrimFork{forkBodies = bodies} } =
+mapProcLeaves f current@ProcBody { bodyFork = fork@PrimFork{forkBodies = bodies} } =
     do
-        bodies' <- mapM (mapProcLeaves f (current:prevBlocks)) bodies
+        bodies' <- mapM (mapProcLeaves f) bodies
         return current { bodyFork = fork { forkBodies = bodies' } }
 
 ----------------------------------------------------------------------------

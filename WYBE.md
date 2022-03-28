@@ -121,11 +121,11 @@ A higher order type has one of the two following forms
 
 > `{` *modifier*`,` ... `}` `(` *flow* *type*`,` ... `)`
 
-Two higher order types are considered compatible if they share the same flows 
+Two higher order types are considered compatible if they share the same flows
 and the type parameters are also compatible.
 
 The list of modifiers specify the modifiers of the higher order type. These modifiers
-can be a purity modifier, a determinism modifier, or `resource`. The special 
+can be a purity modifier, a determinism modifier, or `resource`. The special
 `resource` modifier states that this higher order term may use some resource.
 
 
@@ -156,14 +156,14 @@ The only Boolean constants are `true` and `false`.
 
 String constants are written as any number of characters between double quote
 (`"`) characters.  Character constants are written as a single character between
-single quote (`'`) characters. 
+single quote (`'`) characters.
 
-To denote a a C-style (null-terminated) string, a `c` precedes the first `"`. 
+To denote a a C-style (null-terminated) string, a `c` precedes the first `"`.
 This is provided for interoperability with external libraries.
 
-In both strings and character constants, the backslash (`\`) character is special, 
-altering the way the following character is interpreted.  The backslash and the 
-following character together are interpreted as a single character, according to 
+In both strings and character constants, the backslash (`\`) character is special,
+altering the way the following character is interpreted.  The backslash and the
+following character together are interpreted as a single character, according to
 the following character:
 
 | Character | Meaning                                 |
@@ -199,15 +199,15 @@ In general, procedure calls have the form:
 
 where *name* is the name of the procedure to call,
 and each *arg* is an expression specifying an input or output
-to that procedure. If there is a variable bound with the name *name* that has 
+to that procedure. If there is a variable bound with the name *name* that has
 a [higher order type](#higher-order-types) then this is a call to the higher order term.
 
-Sometimes you may wish to specify which module the procedure *name* exists in. 
+Sometimes you may wish to specify which module the procedure *name* exists in.
 You can further specify which module the procedure *name* is from by preceding
 *name* with a `.` separated module specification, such as *parent*`.`*mod*`.`*name*.
 
-As a convenience, if the first module name in a module specification is `_`, the 
-`_` is equivalent to the current module. For example in a module named `foo`, 
+As a convenience, if the first module name in a module specification is `_`, the
+`_` is equivalent to the current module. For example in a module named `foo`,
 `_.`*name* is equivalent to `foo.`*name*
 
 A procedure call must be preceded by an exclamation point (`!`) if it uses any
@@ -295,15 +295,15 @@ Expressions containing both output and input/output arguments are not permitted.
 
 ## <a name="partial-application"></a>Partial application
 
-If a function call is made with *fewer* arguments than is dictated by the 
-definition of procedure/function, the procedure is considered a partial 
+If a function call is made with *fewer* arguments than is dictated by the
+definition of procedure/function, the procedure is considered a partial
 application. The mode of all arguments must be an input (as the procedure is
 not called where used to produce any outputs).
 
 This binds the output name to a "partial application" of the procedure. The type
-of the output variable is a higher order type containing the types and flows of 
-the missing arguments. The higher order type's modifiers are dictated by the 
-modifiers of the partially applied procedure. 
+of the output variable is a higher order type containing the types and flows of
+the missing arguments. The higher order type's modifiers are dictated by the
+modifiers of the partially applied procedure.
 
 The `resource` modifier is applied if the procedure may use some resource. In this
 special case, the number of arguments may be no greater than the expected number
@@ -458,8 +458,8 @@ Anonymous procedures take the following forms:
 
 > `{` *modifier*`,` ... `}` `{` *stmts* `}`
 
-The parameters to an anonymous procedure take one of the following two forms: 
-numbered and unnumbered. When either form is used, all parameters to the 
+The parameters to an anonymous procedure take one of the following two forms:
+numbered and unnumbered. When either form is used, all parameters to the
 anonymous procedure must have the same form.
 
 > `@` *number*
@@ -467,20 +467,20 @@ anonymous procedure must have the same form.
 > `@`
 
 If parameters are unnumbered, then they are exactly equivalent to as if one had
-numbered the parameters from 1, following a left-to-right-top-to-bottom order 
-of the source code. The number of a parameter specifies the parameter's position of the procedure. 
+numbered the parameters from 1, following a left-to-right-top-to-bottom order
+of the source code. The number of a parameter specifies the parameter's position of the procedure.
 
 The types of parameters are inferred via their usage and can be annotated if necessary.
-The [mode](#modes) of a parameter is specified by the modes associated with it in the 
-contained statements-- if references to the parameter are either all inputs or 
-all outputs, then the parameter is as referenced, else it is in in/out mode. 
+The [mode](#modes) of a parameter is specified by the modes associated with it in the
+contained statements-- if references to the parameter are either all inputs or
+all outputs, then the parameter is as referenced, else it is in in/out mode.
 If using numbered parameters and some number is skipped, this parameter is considered
 an input.
 
 The modifiers here are exactly those found in a [higher order type](#higher-order-types).
-These modifiers act like the modifiers of a procedure or function declaration, stating the 
+These modifiers act like the modifiers of a procedure or function declaration, stating the
 purity and determinism of the anonymous procedure. The special `resource` modifier is
-allows all in-scope [resources](#resources) to be used within this anonymous 
+allows all in-scope [resources](#resources) to be used within this anonymous
 procedure.
 
 Some example anonymous procedures are as follows, with examples as to their use:
@@ -605,7 +605,7 @@ two elements are `e1` and `e2`, and the rest of which is `es`.  Note that what
 appears before the `|` symbol are individual list elements, separated by commas,
 and what appears after it is another list.  The empty list is denoted `[]`. The
 list constructor is named `[|]`, so the list `[e1,e2|es]` can also be written ``
-`[|]`(e1,`[|]`(e2,es))`` and the list `[1,2,3]` can be written 
+`[|]`(e1,`[|]`(e2,es))`` and the list `[1,2,3]` can be written
 `` `[|]`(1,`[|]`(2,`[|]`(3,[])))``.
 
 ## Declaring operator functions and procedures
@@ -1111,7 +1111,7 @@ prototype part of a function declaration:
 
 > *ctor*`(`*param*`:`*type*, ... *param*`:`*type*`)`
 
-In contrast to regular procedure prototypes, the parameter names are optional, 
+In contrast to regular procedure prototypes, the parameter names are optional,
 and can be removed, along with the accompanying `:`.
 
 If *name* is an infix operator symbol, you must surround it with backquotes, or
@@ -1131,7 +1131,7 @@ containing the specified data.  If you wish to carry out some computation to
 determine what values to store, you may write a function or procedure that calls
 the constructor.  Since Wybe does not require any special syntax to call a
 constructor (such as `new` in many object oriented languages), they are ordinary
-functions, aside from the fact that they are automatically generated. 
+functions, aside from the fact that they are automatically generated.
 
 The form of declaration above keeps the constructors of a type private; they may
 be used within the current module, but not outside.  To make the constructors
@@ -1163,7 +1163,7 @@ And this statement will unpack a coordinate `pos` into variables `x` and `y`:
 coordinate(?x,?y) = pos
 ```
 
-Additionally, two procedures are automatically generated for each named 
+Additionally, two procedures are automatically generated for each named
 *member*: one to access the member, and one to mutate it.
 The first has the prototype:
 
@@ -1308,8 +1308,8 @@ the operations on them.
 
 The basis of generic types is the *type variable*, which stands for a type we
 don't know yet, and thus is a variable in the type system.  A type variable is
-denoted by an uppercase letter followed by zero or more numbers.  Since we 
-rarely have more than one or two type variables in any given context, we 
+denoted by an uppercase letter followed by zero or more numbers.  Since we
+rarely have more than one or two type variables in any given context, we
 conventionally use a single upper case letter for a type variable.
 
 Generic types are defined in the same way as described above, except that:
@@ -1445,7 +1445,7 @@ the value at the start of *body* will be the same as the value before the `use`
 statement, and the value at the completion of the *body* will again be the same
 as the value before entering the `use` statement.
 Thus a `use` statement will not alter the existence or the values of the
-resources it names. This also applies to higher order terms that have a 
+resources it names. This also applies to higher order terms that have a
 `resource` modifier.
 
 
@@ -1533,7 +1533,7 @@ def bad2 use !io {
             !println("Read an x")
     |   else ::
             !read(_:char)
-            !println("Read something else")                    
+            !println("Read something else")
     }
 }
 ```
@@ -1550,7 +1550,7 @@ def ok2 use !io {
     read(?ch:char)
     case ch in {
         'x' :: !println("Read an x")
-    |   else:: !println("Read something else")                    
+    |   else:: !println("Read something else")
     }
 }
 ```
@@ -1656,26 +1656,26 @@ To support such cases, the Wybe compiler provides a *purity* system, allowing yo
 
 Wybe supports the following three levels of purity:
 
-- *pure*  
+- *pure*
 the default purity level.  An ordinary call, subject to omission or reordering.
 
-- *impure*  
+- *impure*
 an impure call that should not be reordered or omitted.  Impure procs must be declared to be so, and in general, a proc that calls an impure proc must itself be impure.
 
-- *semipure*  
+- *semipure*
 a proc that behaves as impure itself, and will not be reordered or omitted, however its impurity is not "contagious".  It may be called from an ordinary, pure proc without that proc becoming impure.
 
 In the absence of any declaration of impurity, your procedures and functions will be assumed to be pure.  An ordinary pure proc can call a semipure proc, but if it calls an impure proc, the compiler will report an error.  You can specify that your proc is pure despite calling impure procs by explicitly promising that it is pure.
 
 Purity is managed by including one of the following modifiers, between curly braces, in the proc declaration, between the `def` keyword and the procedure or function name:
 
-- `pure`  
+- `pure`
 promise that the proc is pure, despite calling impure procs.
 
-- `semipure`  
+- `semipure`
 specify that the proc is effectively impure, meaning that calls to it are not subject to normal optimisations, but that its callers are not rendered impure by calling it.
 
-- `impure`  
+- `impure`
 the proc is impure, so calls to it are not subject to normal optimisations, and its callers should also be considered impure unless explicitly promised to be pure with a `pure` modifier.
 
 Any call to an `impure` or `semipure` proc must be preceded with the `!` annotation, as if it were a call to a proc that used resources.  This reminds the reader that the call is not pure, and that they must be careful when reading or modifying the code.  For example, to prematurely exit the program, you can insert the following proc call:
@@ -1693,10 +1693,10 @@ The Wybe compiler optimises your code in some situations by replacing a proc cal
 
 If you wish to have finer control, you can do this by placing one of these two modifiers between curly braces between `def` and the procedure or function name:
 
-- `inline`  
+- `inline`
 force inlining of calls to this proc
 
-- `noinline`  
+- `noinline`
 prevent inlining of calls to this proc
 
 If you wish to include other modifiers along with one of these, include them all between the braces, in any order, separated by commas.
@@ -1817,78 +1817,78 @@ For more detail on the behaviour of these operations, please consult the
 In the following, all inputs and outputs listed as `int` can in fact be any integer type:  signed or unsigned, and any number of bits of precision.  However, all `int` inputs and outputs must be the same number of bits of precision.  All `bool` outputs may be any 1-bit integer type.
 
 
-- `foreign llvm add(`arg1:int, arg2:int`)`:int  
+- `foreign llvm add(`arg1:int, arg2:int`)`:int
 Integer addition
-- `foreign llvm sub(`arg1:int, arg2:int`)`:int  
+- `foreign llvm sub(`arg1:int, arg2:int`)`:int
 Integer subtraction
-- `foreign llvm mul(`arg1:int, arg2:int`)`:int   
+- `foreign llvm mul(`arg1:int, arg2:int`)`:int
 Integer multiplication
-- `foreign llvm udiv(`arg1:int, arg2:int`)`:int  
+- `foreign llvm udiv(`arg1:int, arg2:int`)`:int
 unsigned integer division
-- `foreign llvm sdiv(`arg1:int, arg2:int`)`:int  
+- `foreign llvm sdiv(`arg1:int, arg2:int`)`:int
 Signed integer division
-- `foreign llvm urem(`arg1:int, arg2:int`)`:int  
+- `foreign llvm urem(`arg1:int, arg2:int`)`:int
 unsigned integer remainder
-- `foreign llvm srem(`arg1:int, arg2:int`)`:int  
+- `foreign llvm srem(`arg1:int, arg2:int`)`:int
 Signed integer remainder
-- `foreign llvm icmp_eq(`arg1:int, arg2:int`)`:bool  
+- `foreign llvm icmp_eq(`arg1:int, arg2:int`)`:bool
 Integer equality
-- `foreign llvm icmp_ne(`arg1:int, arg2:int`)`:bool  
+- `foreign llvm icmp_ne(`arg1:int, arg2:int`)`:bool
 Integer disequality
-- `foreign llvm icmp_ugt(`arg1:int, arg2:int`)`:bool  
+- `foreign llvm icmp_ugt(`arg1:int, arg2:int`)`:bool
 Integer unsigned strictly greater
-- `foreign llvm icmp_uge(`arg1:int, arg2:int`)`:bool  
+- `foreign llvm icmp_uge(`arg1:int, arg2:int`)`:bool
 Integer unsigned greater or equal
-- `foreign llvm icmp_ult(`arg1:int, arg2:int`)`:bool  
+- `foreign llvm icmp_ult(`arg1:int, arg2:int`)`:bool
 Integer unsigned strictly less
-- `foreign llvm icmp_ule(`arg1:int, arg2:int`)`:bool  
+- `foreign llvm icmp_ule(`arg1:int, arg2:int`)`:bool
 Integer unsigned less or equal
-- `foreign llvm icmp_sgt(`arg1:int, arg2:int`)`:bool  
+- `foreign llvm icmp_sgt(`arg1:int, arg2:int`)`:bool
 Integer unsigned strictly greater
-- `foreign llvm icmp_sge(`arg1:int, arg2:int`)`:bool  
+- `foreign llvm icmp_sge(`arg1:int, arg2:int`)`:bool
 Integer signed greater or equal
-- `foreign llvm icmp_slt(`arg1:int, arg2:int`)`:bool  
+- `foreign llvm icmp_slt(`arg1:int, arg2:int`)`:bool
 Integer signed strictly less
-- `foreign llvm icmp_sle(`arg1:int, arg2:int`)`:bool  
+- `foreign llvm icmp_sle(`arg1:int, arg2:int`)`:bool
 Integer signed less or equal
-- `foreign llvm shl(`arg1:int, arg2:int`)`:int  
+- `foreign llvm shl(`arg1:int, arg2:int`)`:int
 Left shift
-- `foreign llvm lshr(`arg1:int, arg2:int`)`:int  
+- `foreign llvm lshr(`arg1:int, arg2:int`)`:int
 Logical right shift (shift zeros in at right)
-- `foreign llvm ashr(`arg1:int, arg2:int`)`:int  
+- `foreign llvm ashr(`arg1:int, arg2:int`)`:int
 Arithmetic right shift (copy sign bit at right)
-- `foreign llvm or(`arg1:int, arg2:int`)`:int  
+- `foreign llvm or(`arg1:int, arg2:int`)`:int
 Bitwise or
-- `foreign llvm and(`arg1:int, arg2:int`)`:int  
+- `foreign llvm and(`arg1:int, arg2:int`)`:int
 Bitwise and
-- `foreign llvm xor(`arg1:int, arg2:int`)`:int  
+- `foreign llvm xor(`arg1:int, arg2:int`)`:int
 Bitwise exclusive or
 
 ##### Floating point operations
 
 Similar to above, all inputs and outputs listed as `float` can be any legal LLVM floating point type:  16, 32, 64, or 128 bits.  Again, in a single instruction, all the `float` inputs and outputs must be the same bit width.
 
-- `foreign llvm fadd(`arg1:float, arg2:float`)`:float  
+- `foreign llvm fadd(`arg1:float, arg2:float`)`:float
 Floating point addition
-- `foreign llvm fsub(`arg1:float, arg2:float`)`:float  
+- `foreign llvm fsub(`arg1:float, arg2:float`)`:float
 Floating point subtraction
-- `foreign llvm fmul(`arg1:float, arg2:float`)`:float  
+- `foreign llvm fmul(`arg1:float, arg2:float`)`:float
 Floating point multiplication
-- `foreign llvm fdiv(`arg1:float, arg2:float`)`:float  
+- `foreign llvm fdiv(`arg1:float, arg2:float`)`:float
 Floating point division
-- `foreign llvm frem(`arg1:float, arg2:float`)`:float  
+- `foreign llvm frem(`arg1:float, arg2:float`)`:float
 Floating point remainder
-- `foreign llvm fcmp_eq(`arg1:float, arg2:float`)`:bool  
+- `foreign llvm fcmp_eq(`arg1:float, arg2:float`)`:bool
 Floating point equality
-- `foreign llvm fcmp_ne(`arg1:float, arg2:float`)`:bool  
+- `foreign llvm fcmp_ne(`arg1:float, arg2:float`)`:bool
 Floating point disequality
-- `foreign llvm fcmp_slt(`arg1:float, arg2:float`)`:bool  
+- `foreign llvm fcmp_slt(`arg1:float, arg2:float`)`:bool
 Floating point (signed) strictly less
-- `foreign llvm fcmp_sle(`arg1:float, arg2:float`)`:bool  
+- `foreign llvm fcmp_sle(`arg1:float, arg2:float`)`:bool
 Floating point (signed) less or equal
-- `foreign llvm fcmp_sgt(`arg1:float, arg2:float`)`:bool  
+- `foreign llvm fcmp_sgt(`arg1:float, arg2:float`)`:bool
 Floating point (signed) strictly greater
-- `foreign llvm fcmp_sge(`arg1:float, arg2:float`)`:bool  
+- `foreign llvm fcmp_sge(`arg1:float, arg2:float`)`:bool
 Floating point (signed) greater or equal
 
 #####  <a name="conversion"></a>Integer/floating point conversion
@@ -1896,13 +1896,13 @@ Floating point (signed) greater or equal
 These operations convert between floating point and integer representations.
 They work for any bitwith float and integer types.
 
-- `foreign llvm uitofp(`arg1:int`)`:float  
+- `foreign llvm uitofp(`arg1:int`)`:float
 Convert unsigned integer to float
-- `foreign llvm sitofp(`arg1:int`)`:float  
+- `foreign llvm sitofp(`arg1:int`)`:float
 Convert signed integer to float
-- `foreign llvm fptoui(`arg1:float`)`:int  
+- `foreign llvm fptoui(`arg1:float`)`:int
 Convert float to unsigned integer
-- `foreign llvm fptosi(`arg1:float`)`:int  
+- `foreign llvm fptosi(`arg1:float`)`:int
 Convert float to signed integer
 
 
@@ -1916,16 +1916,16 @@ declaration has the form:
 
 where *rep* has one of these forms:
 
-- `address`  
+- `address`
 the type is a machine address, similar to the `void *` type in C.
-- *n* `bit` *numbertype*  
+- *n* `bit` *numbertype*
 a primitive number type comprising *n* bits, where *n* is any non-negative
 integer and *numbertype* is one of:
-  - `signed`  
+  - `signed`
   a signed integer type
-  - `unsigned`  
+  - `unsigned`
   an unsigned integer type
-  - `float`  
+  - `float`
   a floating point number; *n* must be 16, 32, 64, or 128.
 
 Like a `constructor` declaration, a `representation` declaration makes the
@@ -1992,15 +1992,15 @@ This specifies that the type of the variable *var* is *type2*, but that the type
 
 The LPVM instructions are low-level memory manipulation instructions.  Note
 these are foreign instructions specifying the *language* `lpvm` (rather than
-`llvm`). 
+`llvm`).
 
 
-- `foreign lpvm alloc(`*size:*`int`, `?`*struct:type*`)`  
+- `foreign lpvm alloc(`*size:*`int`, `?`*struct:type*`)`
 Allocate (at least) *size* bytes of memory and store the address in *struct*,
 which has its specified type.
 
 - `foreign lpvm access(`*struct:type*, *offset:*`int`, *size*:`int`,
-                        *start_offset*:`int`, `?`*member:type2*`)`  
+                        *start_offset*:`int`, `?`*member:type2*`)`
 Access the field of type *type2* at address *struct* + *offset*. The size of the
 structure is *size* bytes. The intention of the *start_offset* is to handle
 tagged pointers: a tagged pointer will appear to point *start_offset* bytes past
@@ -2009,7 +2009,7 @@ start of the structure to be found, so it can be copied.
 
 - `foreign lpvm mutate(`*struct:type*, `?`*struct2:type*,
                         *offset:*`int`, *destructive*:`bool`,
-                        *size*:`int`, *start_offset*:`int`, *member:type2*`)`  
+                        *size*:`int`, *start_offset*:`int`, *member:type2*`)`
 *struct2* is the same as *struct*, except that it has *member*, with type
 *type2*, at *struct* + *offset*. The start of the structure is actually
 *start_offset* bytes before *struct* in memory, and the size of the structure is
@@ -2025,6 +2025,12 @@ converting its type from *type1* to *type2*, without changing the
 representation. This just allows getting around LLVM strong typing; it does not
 actually require any instructions.
 
+- `foreign lpvm load()` tbc...
+
+- `foreign lpvm store(`*var:type1*, *var2: &type1*`)` tbc...
+
+- `foreign lpvm address(`*struct:type*, *offset:*`int`, *size*:`int`,
+                        *start_offset*:`int`, `?`*member: `&`type2*`)` tbc...
 
 #### Handling impurity
 
@@ -2036,7 +2042,7 @@ operation are all computed before executing that operation.  However, the
 compiler respects (purity declarations)[#purity]:  if a procedure is declared
 `impure` or `semipure`, calls to it will not be eliminated or reordered.
 
-Additionally, the Wybe library defines a unique type `phantom`, whose 
+Additionally, the Wybe library defines a unique type `phantom`, whose
 representation has zero bits.  The
 compiler automatically removes any input or output arguments whose types have
 zero bits when LLVM code is being generated, including calls to foreign code.

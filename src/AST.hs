@@ -264,10 +264,11 @@ determinismName SemiDet  = "test"
 
 -- | Internal representation of data
 data TypeRepresentation
-    = Address           -- ^ A pointer; occupies wordSize bits
-    | Bits Int          -- ^ An unsigned integer representation
-    | Signed Int        -- ^ A signed integer representation
-    | Floating Int      -- ^ A floating point representation
+    = Address                 -- A pointer; occupies wordSize bits
+    | PointerRep TypeRepresentation -- A (non-opaque) pointer to another type rep.
+    | Bits Int                -- An unsigned integer representation
+    | Signed Int              -- A signed integer representation
+    | Floating Int            -- A floating point representation
     | Func [TypeRepresentation] [TypeRepresentation]
                         -- ^ A function pointer with inputs and outputs
     deriving (Eq, Ord, Generic)
@@ -285,6 +286,7 @@ typeRepSize (Signed bits)   = bits
 typeRepSize (Floating bits) = bits
 typeRepSize (Func _ _)      = wordSize
 typeRepSize Address         = wordSize
+typeRepSize (PointerRep _)     = wordSize
 
 
 -- | The type representation is for a (signed or unsigned) integer type
@@ -933,6 +935,9 @@ lookupType context pos ty@(TypeSpec [] typename args)
   | typename == currentModuleAlias = do
     currMod <- getModuleSpec
     return $ TypeSpec (init currMod) (last currMod) args
+lookupType s p (Pointer ty) = do
+    ty' <- lookupType s p ty
+    return $ Pointer ty'
 lookupType context pos ty@(TypeSpec mod name args) = do
     currMod <- getModuleSpec
     logAST $ "In module " ++ showModSpec currMod
@@ -1672,6 +1677,9 @@ lookupTypeRepresentation Representation{typeSpecRepresentation=rep} =
     return $ Just rep
 lookupTypeRepresentation (TypeSpec modSpec name _) =
     lookupModuleRepresentation $ modSpec ++ [name]
+lookupTypeRepresentation (Pointer ty) = do
+    rep <- lookupTypeRepresentation ty
+    return $ fmap (\r -> PointerRep r) rep
 lookupTypeRepresentation (HigherOrderType ProcModifiers{modifierDetism=detism} tfs) = do
     mbInReps <- sequenceRepFlowTypes ins
     mbOutReps <- sequenceRepFlowTypes outs
@@ -2602,6 +2610,9 @@ data TypeSpec = TypeSpec {
     }
     | TypeVariable { typeVariableName :: TypeVarName }
     | Representation { typeSpecRepresentation :: TypeRepresentation }
+    -- only available as part of LPVM-optimisation: used for last-call optimisation
+    | Pointer TypeSpec
+    -- the top or bottom of the type lattice, respectively
     | AnyType | InvalidType
               deriving (Eq,Ord,Generic)
 
@@ -2613,6 +2624,7 @@ typeVarSet HigherOrderType{higherTypeParams=params}
     = List.foldr ((Set.union . typeVarSet) . typeFlowType) Set.empty params
 typeVarSet (TypeVariable v) = Set.singleton v
 typeVarSet Representation{} = Set.empty
+typeVarSet (Pointer ty) = typeVarSet ty
 typeVarSet AnyType = Set.empty
 typeVarSet InvalidType = Set.empty
 
@@ -2622,6 +2634,7 @@ genericType HigherOrderType{higherTypeParams=params}
     = any (genericType . typeFlowType) params
 genericType TypeVariable{}   = True
 genericType Representation{} = False
+genericType (Pointer ty)     = genericType ty
 genericType AnyType          = False
 genericType InvalidType      = False
 
@@ -2633,6 +2646,7 @@ higherOrderType TypeSpec{typeParams=params} = any higherOrderType params
 higherOrderType HigherOrderType{} = True
 higherOrderType TypeVariable{}   = False
 higherOrderType Representation{} = False
+higherOrderType (Pointer ty)     = True
 higherOrderType AnyType          = False
 higherOrderType InvalidType      = False
 
@@ -2666,6 +2680,7 @@ typeModule (TypeSpec mod name _) = Just $ mod ++ [name]
 typeModule HigherOrderType{}     = Nothing
 typeModule TypeVariable{}        = Nothing
 typeModule Representation{}      = Nothing
+typeModule (Pointer ty)          = Nothing
 typeModule AnyType               = Nothing
 typeModule InvalidType           = Nothing
 
@@ -3597,6 +3612,7 @@ instance Show Item where
 -- |How to show a type representation
 instance Show TypeRepresentation where
   show Address = "address"
+  show (PointerRep rep) = "&" ++ show rep
   show (Bits bits) = show bits ++ " bit unsigned"
   show (Signed bits) = show bits ++ " bit signed"
   show (Floating bits) = show bits ++ " bit float"
@@ -3739,6 +3755,7 @@ instance Show TypeSpec where
   show InvalidType          = "XXX"
   show (TypeVariable name)  = show name
   show (Representation rep) = show rep
+  show (Pointer ty) = "&" ++ show ty
   show (TypeSpec optmod ident args) =
       maybeModPrefix optmod ++ ident ++ showArguments args
   show (HigherOrderType mods params) =
