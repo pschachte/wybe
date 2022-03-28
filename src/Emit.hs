@@ -25,7 +25,7 @@ import qualified Data.ByteString.Lazy       as BL
 import           Data.List                  as List
 import           Data.Map                   as Map
 import qualified Data.Text.Lazy             as TL
-import           Distribution.System        (buildOS, OS (..)) 
+import           Distribution.System        (buildOS, OS (..))
 import qualified LLVM.AST                   as LLVMAST
 import           LLVM.Context
 import           LLVM.Module                as Mod
@@ -35,7 +35,7 @@ import           LLVM.Target
 import           LLVM.Analysis              (verify)
 import           ObjectInterface
 import           Options                    (LogSelection (Blocks,Builder,Emit),
-                                             optNoVerifyLLVM)
+                                             optNoVerifyLLVM, Options (optNoLLVMOpt))
 import           System.Exit                (ExitCode (..))
 import           System.Process
 import           System.FilePath            ((-<.>))
@@ -45,7 +45,7 @@ import           Util                       (createLocalCacheFile)
 
 -- This does not check the permission if the file does not exists.
 -- It is fine for our current usage, but we should improve it.
-_haveWritePermission :: FilePath -> IO Bool 
+_haveWritePermission :: FilePath -> IO Bool
 _haveWritePermission file = do
     exists <- doesFileExist file
     if exists
@@ -109,9 +109,16 @@ emitAssemblyFile m f = do
     llmod <- descendentModuleLLVM m
     logEmit $ "===> Writing assembly file " ++ filename
     noVerify <- gets $ optNoVerifyLLVM . options
-    liftIO $ withOptimisedModule noVerify llmod
-        (\mm -> withHostTargetMachineDefault $ \_ ->
-            writeLLVMAssemblyToFile (File filename) mm)
+    noOpt <- gets $ optNoLLVMOpt . options
+    let file = File filename
+    if noOpt then do
+        liftIO $ withContext (\context ->
+                withModuleFromAST context llmod (writeLLVMAssemblyToFile file)
+            )
+    else
+        liftIO $ withOptimisedModule noVerify llmod
+            (\mm -> withHostTargetMachineDefault $ \_ ->
+                writeLLVMAssemblyToFile file mm)
 
 
 -- | Concatenate the LLVMAST.Module implementations of the descendents of
@@ -173,7 +180,7 @@ passes = defaultCuratedPassSetSpec { optLevel = Just 3 }
 -- a set of curated passes.
 withOptimisedModule :: Bool -> LLVMAST.Module -> (Mod.Module -> IO a) -> IO a
 withOptimisedModule noVerify llmod action =
-    withContext $ \context -> 
+    withContext $ \context ->
         withModuleFromAST context llmod $ \m -> do
             unless noVerify $ verify m
             withPassManager passes $ \pm -> do
@@ -291,11 +298,11 @@ logEmit = logMsg Emit
 
 -- | Log LLVM IR representation of the given module.
 logLLVMString :: ModSpec -> Compiler ()
-logLLVMString thisMod = do 
+logLLVMString thisMod = do
     reenterModule thisMod
     maybeLLMod <- getModuleImplementationField modLLVM
     case maybeLLMod of
-        (Just llmod) -> do 
+        (Just llmod) -> do
             let llstr = ppllvm llmod
             logEmit $ replicate 80 '-'
             logEmit $ TL.unpack llstr
@@ -317,7 +324,7 @@ extractLLVM thisMod = do
 -- library.
 logLLVMDump :: LogSelection -> LogSelection -> String -> Compiler ()
 logLLVMDump selector1 selector2 pass =
-    whenLogging2 selector1 selector2 $ do 
+    whenLogging2 selector1 selector2 $ do
         modList <- gets (Map.elems . modules)
         let noLibMod = List.filter ((/="wybe"). List.head . modSpec) modList
         liftIO $ putStrLn $ showModSpecs $ List.map modSpec noLibMod

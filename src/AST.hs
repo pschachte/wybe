@@ -64,7 +64,7 @@ module AST (
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, ResourceDef(..), FlowDirection(..),
   argFlowDirection, argType, setArgType, setArgFlow, setArgFlowType, maybeArgFlowType,
-  argDescription, setParamType, paramIsResourceful,
+  argDescription, argIntVal, trustArgInt, setParamType, paramIsResourceful,
   setPrimParamType, setTypeFlowType,
   flowsIn, flowsOut, primFlowToFlowDir,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
@@ -1323,7 +1323,7 @@ updateProcDefM updater pspec@(ProcSpec modspec procName procID _) =
     (\imp -> do
        let procs = modProcs imp
        case Map.lookup procName procs of
-         Nothing -> return imp
+         Nothing -> shouldnt ("proc not found by name: " ++ show procName)
          Just defs -> do
            let (front,back) = List.splitAt procID defs
            case back of
@@ -2072,7 +2072,7 @@ isClosureVariant (ClosureProc _) = True
 isClosureVariant _               = False
 
 
--- |A procedure defintion body.  Initially, this is in a form similar
+-- |A procedure definition body.  Initially, this is in a form similar
 -- to what is read in from the source file.  As compilation procedes,
 -- this is gradually refined and constrained, until it is converted
 -- into a ProcBody, which is a clausal, logic programming form.
@@ -2144,7 +2144,8 @@ addGlobalFlow info FlowIn gFlows@GlobalFlows{globalFlowsIn=ins}
     = gFlows{globalFlowsIn=whenFinite (Set.insert info) ins}
 addGlobalFlow info FlowOut gFlows@GlobalFlows{globalFlowsOut=outs}
     = gFlows{globalFlowsOut=whenFinite (Set.insert info) outs}
-
+-- global flows don't use this flow type
+addGlobalFlow info FlowOutByReference gFlows = gFlows
 
 -- | Test if the given flow of a global exists in the global flow set
 hasGlobalFlow :: GlobalFlows -> PrimFlow -> GlobalInfo -> Bool
@@ -2152,6 +2153,8 @@ hasGlobalFlow gFlows@GlobalFlows{globalFlowsIn=ins} FlowIn info
     = USet.member info ins
 hasGlobalFlow gFlows@GlobalFlows{globalFlowsOut=outs} FlowOut info
     = USet.member info outs
+-- global flows don't use this flow type
+hasGlobalFlow gFlows FlowOutByReference info = False
 
 
 -- | Take the union of the sets of two global flows
@@ -2758,7 +2761,7 @@ data FlowDirection = ParamIn | ParamOut | ParamInOut
                    deriving (Show,Eq,Ord,Generic)
 
 -- |A primitive dataflow direction:  in or out
-data PrimFlow = FlowIn | FlowOut
+data PrimFlow = FlowIn | FlowOut | FlowOutByReference
                    deriving (Show,Eq,Ord,Generic)
 
 
@@ -2834,6 +2837,7 @@ flowsOut ParamInOut = True
 primFlowToFlowDir :: PrimFlow -> FlowDirection
 primFlowToFlowDir FlowIn  = ParamIn
 primFlowToFlowDir FlowOut = ParamOut
+primFlowToFlowDir FlowOutByReference = ParamOut
 
 
 -- |Source program statements.  These will be normalised into Prims.
@@ -3292,6 +3296,19 @@ argDescription (ArgUndef _) = "undefined argument"
 argFlowDescription :: PrimFlow -> String
 argFlowDescription FlowIn  = "input"
 argFlowDescription FlowOut = "output"
+argFlowDescription FlowOutByReference = "output (by reference)"
+
+
+argIntVal :: PrimArg -> Maybe Integer
+argIntVal (ArgInt val _) = Just val
+argIntVal _              = Nothing
+
+
+-- |Return the integer constant from an argument; error if it's not one
+trustArgInt :: PrimArg -> Integer
+trustArgInt arg = trustFromJust
+                  "LPVM instruction argument must be an integer constant."
+                  $ argIntVal arg
 
 
 -- |Convert a statement read as an expression to a Stmt.
@@ -3774,6 +3791,7 @@ flowPrefix ParamInOut = "!"
 primFlowPrefix :: PrimFlow -> String
 primFlowPrefix FlowIn    = ""
 primFlowPrefix FlowOut   = "?"
+primFlowPrefix FlowOutByReference   = "outByReference "
 
 -- |Start a new line with the specified indent.
 startLine :: Int -> String

@@ -17,7 +17,7 @@ import           Data.List.Extra
 import           Data.Map              as Map
 import           Data.Set              as Set
 import           Data.Either           as Either
-import           Control.Monad 
+import           Control.Monad
 import           System.Console.GetOpt
 import           System.Environment
 import           System.Exit
@@ -36,7 +36,7 @@ data Options = Options
     , optLibDirs      :: [String] -- ^Directories where library files live
     , optLogAspects   :: Set LogSelection
                                   -- ^Which aspects to log
-                                 
+
     , optLogUnknown   :: Set String
                                   -- ^Unknown log aspects
     , optNoLLVMOpt    :: Bool     -- ^Don't run the LLVM optimisation passes
@@ -61,7 +61,7 @@ defaultOptions = Options
   , optLogAspects   = Set.empty
   , optLogUnknown   = Set.empty
   , optNoLLVMOpt    = False
-  , optNoMultiSpecz = False 
+  , optNoMultiSpecz = False
   , optDumpLib      = False
   , optVerbose      = False
   , optNoFont       = False
@@ -74,6 +74,7 @@ data LogSelection =
   All | AST | BodyBuilder | Builder | Clause | Expansion | FinalDump
   | Flatten | Normalise | Optimise | Resources | Types
   | Unbranch | Codegen | Blocks | Emit | Analysis | Transform | Uniqueness
+  | LastCallAnalysis
   deriving (Eq, Ord, Bounded, Enum, Show, Read)
 
 allLogSelections :: [LogSelection]
@@ -119,6 +120,8 @@ logSelectionDescription Transform
     = "Log transform of mutate instructions"
 logSelectionDescription Uniqueness
     = "Log uniqueness checking"
+logSelectionDescription LastCallAnalysis
+    = "Log last call analysis"
 
 -- |Command line option parser and help text
 options :: [OptDescr (Options -> Options)]
@@ -206,7 +209,7 @@ handleCmdline = do
         putStr $ formatMapping logSelectionDescription
         when badLogs $ do
             unless (optNoFont opts) $ setSGR [SetColor Foreground Vivid Red]
-            putStrLn $ "\nError: Unknown log options: " 
+            putStrLn $ "\nError: Unknown log options: "
                                ++ intercalate ", " (Set.toList unknown)
         if badLogs then exitFailure else exitSuccess
     else if optShowVersion opts
@@ -225,13 +228,13 @@ handleCmdline = do
 
 
 addLogAspects :: String -> Options -> Options
-addLogAspects aspectsStr opts@Options{optLogUnknown=unknown0, 
-                                      optLogAspects=aspects0} = 
+addLogAspects aspectsStr opts@Options{optLogUnknown=unknown0,
+                                      optLogAspects=aspects0} =
     let aspectList = separate ',' aspectsStr
-        (unknown', aspects') = partitionEithers $ getLogRequest <$> aspectList 
+        (unknown', aspects') = partitionEithers $ getLogRequest <$> aspectList
         unknown'' = Set.fromList unknown'
         aspects'' = let aspectSet = Set.fromList aspects'
-                    in if Set.member All aspectSet 
+                    in if Set.member All aspectSet
                        then Set.fromList allLogSelections else aspectSet
     in opts{optLogUnknown=unknown0 `Set.union` unknown'',
             optLogAspects=aspects0 `Set.union` aspects''}

@@ -243,6 +243,7 @@ import qualified Data.ByteString.Char8 as BS
 import qualified LLVM.AST              as LLVMAST
 
 import           Debug.Trace
+import LastCallAnalysis (lastCallAnalyseMod, lastCallAnalyseProc)
 
 ------------------------ Handling dependencies ------------------------
 
@@ -253,7 +254,7 @@ buildTargets targets = do
     showMessages
     stopOnError "building outputs"
     dumpOpt <- option optDumpOptLLVM
-    let dumper = if dumpOpt then logDumpWith ((Just <$>) . extractLLVM) 
+    let dumper = if dumpOpt then logDumpWith ((Just <$>) . extractLLVM)
                             else logDump
     dumper FinalDump FinalDump "EVERYTHING"
 
@@ -504,7 +505,7 @@ loadModuleFromSrcOrObj force modspec srcfile objfile maybeDir isLib = do
         -- XXX Currently we don't support fall back to source code.
         -- i.e. "loadModuleFromObjFile" never returns an empty list.
         -- We should consider to rebuild it from source code if
-        -- the "wybe object file version" is too old. 
+        -- the "wybe object file version" is too old.
         when (List.null loaded)
             (Error <!> "Wybe object file " ++ objfile
                        ++ " contained no modules")
@@ -859,6 +860,17 @@ compileModSCC mspecs = do
     mapM_ (transformModuleProcs transformProc)  mspecs
     logDump Transform Transform "TRANSFORM"
 
+    ----------------------------------
+    -- LAST CALL ANALYSIS
+    -- Identify situations in which we can turn a last-call into a tail-call
+    logMsg LastCallAnalysis  $ replicate 70 '='
+    logMsg LastCallAnalysis  "Start LAST CALL ANALYSIS in Builder.hs"
+    logMsg LastCallAnalysis  $ "mspecs: " ++ show mspecs
+    logMsg LastCallAnalysis  $ replicate 70 '='
+    mapM_ lastCallAnalyseMod mspecs
+    -- mapM_ (transformModuleProcs transformProc)  mspecs
+    logDump LastCallAnalysis LastCallAnalysis  "LAST CALL ANALYSIS"
+
     -- mods <- mapM getLoadedModule mods
     -- callgraph <- mapM (\m -> getSpecModule m
     --                        (Map.toAscList . modProcs .
@@ -873,7 +885,7 @@ updateInterfaceHash :: ModSpec -> Compiler ()
 updateInterfaceHash mspec = do
     reenterModule mspec
     -- update the mod interface based on the current implementation
-    -- XXX For now, mod interface is not used during the "compileModSCC", so 
+    -- XXX For now, mod interface is not used during the "compileModSCC", so
     --     we can update it at the end. But that is not desired, plz find
     --     comments of "ModuleInterface" in AST.hs for more details.
     impl <- trustFromJustM ("unimplemented module " ++ showModSpec mspec)
@@ -1026,7 +1038,7 @@ buildExecutable orderedSCCs targetMod target = do
             -- find dependencies (including module itself) that have a main
             logBuild $ "Dependencies: " ++ show depends
             let mainImports = fst <$> List.filter snd depends
-            -- We need to insert 
+            -- We need to insert
             logBuild $ "o Modules with 'main': " ++ showModSpecs mainImports
 
             let mainMod = []
@@ -1123,7 +1135,7 @@ buildMain mainImports = do
     let mainRes = Set.fromList [cmdResource "argc" ParamIn,
                                 cmdResource "argv" ParamIn,
                                 cmdResource "exit_code" ParamOut]
-    initRes <- Set.filter (`Set.notMember` Set.map resourceFlowRes mainRes) 
+    initRes <- Set.filter (`Set.notMember` Set.map resourceFlowRes mainRes)
              . Set.unions . (keysSet <$>)
             <$> mapM (initialisedResources `inModule`) mainImports
     let detism = setDetism Terminal

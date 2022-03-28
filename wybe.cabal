@@ -42,7 +42,7 @@ executable wybemk
                  Macho, Parser, Normalise, ObjectInterface, Optimise,
                  Analysis, AliasAnalysis, Transform,
                  Options, Resources, Scanner, Snippets, Types, Unbranch, UnivSet, Util,
-                 Version, ASTShow, Unique
+                 Version, ASTShow, Unique, LastCallAnalysis
   extra-libraries: gc
 
 
