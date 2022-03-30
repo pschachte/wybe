@@ -172,94 +172,94 @@ declare external ccc  double @llvm.exp.f64(double)
 declare external ccc  double @llvm.sqrt.f64(double)    
 
 
-@hypot.30 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @hypot.29 to i64) }
-
-
-@hypot.29 =    constant [?? x i8] c"iround(pi) = \00"
-
-
-@hypot.28 =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @hypot.27 to i64) }
-
-
-@hypot.27 =    constant [?? x i8] c"round(pi) = \00"
-
-
-@hypot.26 =    constant {i64, i64} { i64 11, i64 ptrtoint ([?? x i8]* @hypot.25 to i64) }
-
-
-@hypot.25 =    constant [?? x i8] c"ceil(pi) = \00"
-
-
-@hypot.24 =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @hypot.23 to i64) }
-
-
-@hypot.23 =    constant [?? x i8] c"floor(pi) = \00"
-
-
-@hypot.22 =    constant {i64, i64} { i64 16, i64 ptrtoint ([?? x i8]* @hypot.21 to i64) }
-
-
-@hypot.21 =    constant [?? x i8] c"base 2 log(e) = \00"
-
-
-@hypot.20 =    constant {i64, i64} { i64 16, i64 ptrtoint ([?? x i8]* @hypot.19 to i64) }
-
-
-@hypot.19 =    constant [?? x i8] c"common log(e) = \00"
-
-
-@hypot.18 =    constant {i64, i64} { i64 8, i64 ptrtoint ([?? x i8]* @hypot.17 to i64) }
-
-
-@hypot.17 =    constant [?? x i8] c"ln(e) = \00"
-
-
-@hypot.16 =    constant {i64, i64} { i64 18, i64 ptrtoint ([?? x i8]* @hypot.15 to i64) }
-
-
-@hypot.15 =    constant [?? x i8] c"cos(30 degrees) = \00"
-
-
-@hypot.14 =    constant {i64, i64} { i64 18, i64 ptrtoint ([?? x i8]* @hypot.13 to i64) }
-
-
-@hypot.13 =    constant [?? x i8] c"sin(30 degrees) = \00"
-
-
-@hypot.12 =    constant {i64, i64} { i64 10, i64 ptrtoint ([?? x i8]* @hypot.11 to i64) }
-
-
-@hypot.11 =    constant [?? x i8] c"cos(30) = \00"
-
-
-@hypot.10 =    constant {i64, i64} { i64 10, i64 ptrtoint ([?? x i8]* @hypot.9 to i64) }
-
-
-@hypot.9 =    constant [?? x i8] c"sin(30) = \00"
-
-
 @hypot.8 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @hypot.7 to i64) }
-
-
-@hypot.7 =    constant [?? x i8] c" = \00"
 
 
 @hypot.6 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @hypot.5 to i64) }
 
 
-@hypot.5 =    constant [?? x i8] c"e = \00"
+@hypot.18 =    constant {i64, i64} { i64 8, i64 ptrtoint ([?? x i8]* @hypot.17 to i64) }
+
+
+@hypot.12 =    constant {i64, i64} { i64 10, i64 ptrtoint ([?? x i8]* @hypot.11 to i64) }
 
 
 @hypot.4 =    constant {i64, i64} { i64 10, i64 ptrtoint ([?? x i8]* @hypot.3 to i64) }
 
 
-@hypot.3 =    constant [?? x i8] c"area(5) = \00"
+@hypot.10 =    constant {i64, i64} { i64 10, i64 ptrtoint ([?? x i8]* @hypot.9 to i64) }
+
+
+@hypot.26 =    constant {i64, i64} { i64 11, i64 ptrtoint ([?? x i8]* @hypot.25 to i64) }
+
+
+@hypot.24 =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @hypot.23 to i64) }
+
+
+@hypot.28 =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @hypot.27 to i64) }
 
 
 @hypot.2 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @hypot.1 to i64) }
 
 
+@hypot.30 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @hypot.29 to i64) }
+
+
+@hypot.20 =    constant {i64, i64} { i64 16, i64 ptrtoint ([?? x i8]* @hypot.19 to i64) }
+
+
+@hypot.22 =    constant {i64, i64} { i64 16, i64 ptrtoint ([?? x i8]* @hypot.21 to i64) }
+
+
+@hypot.14 =    constant {i64, i64} { i64 18, i64 ptrtoint ([?? x i8]* @hypot.13 to i64) }
+
+
+@hypot.16 =    constant {i64, i64} { i64 18, i64 ptrtoint ([?? x i8]* @hypot.15 to i64) }
+
+
+@hypot.7 =    constant [?? x i8] c" = \00"
+
+
+@hypot.3 =    constant [?? x i8] c"area(5) = \00"
+
+
+@hypot.21 =    constant [?? x i8] c"base 2 log(e) = \00"
+
+
+@hypot.25 =    constant [?? x i8] c"ceil(pi) = \00"
+
+
+@hypot.19 =    constant [?? x i8] c"common log(e) = \00"
+
+
+@hypot.15 =    constant [?? x i8] c"cos(30 degrees) = \00"
+
+
+@hypot.11 =    constant [?? x i8] c"cos(30) = \00"
+
+
+@hypot.5 =    constant [?? x i8] c"e = \00"
+
+
+@hypot.23 =    constant [?? x i8] c"floor(pi) = \00"
+
+
 @hypot.1 =    constant [?? x i8] c"hypot(3,4) = \00"
+
+
+@hypot.29 =    constant [?? x i8] c"iround(pi) = \00"
+
+
+@hypot.17 =    constant [?? x i8] c"ln(e) = \00"
+
+
+@hypot.27 =    constant [?? x i8] c"round(pi) = \00"
+
+
+@hypot.13 =    constant [?? x i8] c"sin(30 degrees) = \00"
+
+
+@hypot.9 =    constant [?? x i8] c"sin(30) = \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

@@ -139,10 +139,7 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 declare external fastcc  void @"position.printPosition<0>"(i64)    
 
 
-@multi_specz.38 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @multi_specz.37 to i64) }
-
-
-@multi_specz.37 =    constant [?? x i8] c"=============\00"
+@multi_specz.34 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @multi_specz.33 to i64) }
 
 
 @multi_specz.36 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @multi_specz.35 to i64) }
@@ -151,28 +148,19 @@ declare external fastcc  void @"position.printPosition<0>"(i64)
 @multi_specz.35 =    constant [?? x i8] c"-------------\00"
 
 
-@multi_specz.34 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @multi_specz.33 to i64) }
-
-
 @multi_specz.33 =    constant [?? x i8] c"=============\00"
 
 
-@multi_specz.76 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @multi_specz.75 to i64) }
-
-
-@multi_specz.75 =    constant [?? x i8] c"=============\00"
-
-
-@multi_specz.74 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @multi_specz.73 to i64) }
-
-
-@multi_specz.73 =    constant [?? x i8] c"-------------\00"
+@multi_specz.70 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @multi_specz.69 to i64) }
 
 
 @multi_specz.72 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @multi_specz.71 to i64) }
 
 
-@multi_specz.71 =    constant [?? x i8] c"=============\00"
+@multi_specz.71 =    constant [?? x i8] c"-------------\00"
+
+
+@multi_specz.69 =    constant [?? x i8] c"=============\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -238,7 +226,7 @@ entry:
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %19)  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %27)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multi_specz.38, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multi_specz.34, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
@@ -246,56 +234,56 @@ entry:
 
 define external fastcc  void @"multi_specz.bar2<0>"()    {
 entry:
-  %39 = trunc i64 16 to i32  
-  %40 = tail call ccc  i8*  @wybe_malloc(i32  %39)  
-  %41 = ptrtoint i8* %40 to i64 
-  %42 = inttoptr i64 %41 to i64* 
-  %43 = getelementptr  i64, i64* %42, i64 0 
-  store  i64 0, i64* %43 
-  %44 = add   i64 %41, 8 
-  %45 = inttoptr i64 %44 to i64* 
-  %46 = getelementptr  i64, i64* %45, i64 0 
-  store  i64 1, i64* %46 
-  %47 = trunc i64 16 to i32  
-  %48 = tail call ccc  i8*  @wybe_malloc(i32  %47)  
-  %49 = ptrtoint i8* %48 to i64 
-  %50 = inttoptr i64 %49 to i64* 
-  %51 = getelementptr  i64, i64* %50, i64 0 
-  store  i64 0, i64* %51 
-  %52 = add   i64 %49, 8 
-  %53 = inttoptr i64 %52 to i64* 
-  %54 = getelementptr  i64, i64* %53, i64 0 
-  store  i64 2, i64* %54 
-  %55 = trunc i64 16 to i32  
-  %56 = tail call ccc  i8*  @wybe_malloc(i32  %55)  
-  %57 = ptrtoint i8* %56 to i64 
-  %58 = inttoptr i64 %57 to i64* 
-  %59 = getelementptr  i64, i64* %58, i64 0 
-  store  i64 0, i64* %59 
-  %60 = add   i64 %57, 8 
-  %61 = inttoptr i64 %60 to i64* 
-  %62 = getelementptr  i64, i64* %61, i64 0 
-  store  i64 3, i64* %62 
-  %63 = trunc i64 16 to i32  
-  %64 = tail call ccc  i8*  @wybe_malloc(i32  %63)  
-  %65 = ptrtoint i8* %64 to i64 
-  %66 = inttoptr i64 %65 to i64* 
-  %67 = getelementptr  i64, i64* %66, i64 0 
-  store  i64 0, i64* %67 
-  %68 = add   i64 %65, 8 
-  %69 = inttoptr i64 %68 to i64* 
-  %70 = getelementptr  i64, i64* %69, i64 0 
-  store  i64 4, i64* %70 
+  %37 = trunc i64 16 to i32  
+  %38 = tail call ccc  i8*  @wybe_malloc(i32  %37)  
+  %39 = ptrtoint i8* %38 to i64 
+  %40 = inttoptr i64 %39 to i64* 
+  %41 = getelementptr  i64, i64* %40, i64 0 
+  store  i64 0, i64* %41 
+  %42 = add   i64 %39, 8 
+  %43 = inttoptr i64 %42 to i64* 
+  %44 = getelementptr  i64, i64* %43, i64 0 
+  store  i64 1, i64* %44 
+  %45 = trunc i64 16 to i32  
+  %46 = tail call ccc  i8*  @wybe_malloc(i32  %45)  
+  %47 = ptrtoint i8* %46 to i64 
+  %48 = inttoptr i64 %47 to i64* 
+  %49 = getelementptr  i64, i64* %48, i64 0 
+  store  i64 0, i64* %49 
+  %50 = add   i64 %47, 8 
+  %51 = inttoptr i64 %50 to i64* 
+  %52 = getelementptr  i64, i64* %51, i64 0 
+  store  i64 2, i64* %52 
+  %53 = trunc i64 16 to i32  
+  %54 = tail call ccc  i8*  @wybe_malloc(i32  %53)  
+  %55 = ptrtoint i8* %54 to i64 
+  %56 = inttoptr i64 %55 to i64* 
+  %57 = getelementptr  i64, i64* %56, i64 0 
+  store  i64 0, i64* %57 
+  %58 = add   i64 %55, 8 
+  %59 = inttoptr i64 %58 to i64* 
+  %60 = getelementptr  i64, i64* %59, i64 0 
+  store  i64 3, i64* %60 
+  %61 = trunc i64 16 to i32  
+  %62 = tail call ccc  i8*  @wybe_malloc(i32  %61)  
+  %63 = ptrtoint i8* %62 to i64 
+  %64 = inttoptr i64 %63 to i64* 
+  %65 = getelementptr  i64, i64* %64, i64 0 
+  store  i64 0, i64* %65 
+  %66 = add   i64 %63, 8 
+  %67 = inttoptr i64 %66 to i64* 
+  %68 = getelementptr  i64, i64* %67, i64 0 
+  store  i64 4, i64* %68 
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multi_specz.70, i32 0, i32 0) to i64))  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"multi_specz.foo<0>"(i64  %39, i64  %47, i64  %55, i64  %63)  
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multi_specz.72, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"multi_specz.foo<0>"(i64  %41, i64  %49, i64  %57, i64  %65)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multi_specz.74, i32 0, i32 0) to i64))  
-  tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %41)  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %49)  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %57)  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %65)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multi_specz.76, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %39)  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %47)  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %55)  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %63)  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multi_specz.70, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
@@ -323,26 +311,26 @@ entry:
 
 define external fastcc  void @"multi_specz.modifyAndPrint<0>"(i64  %"pos##0", i64  %"v##0")    {
 entry:
-  %77 = trunc i64 16 to i32  
-  %78 = tail call ccc  i8*  @wybe_malloc(i32  %77)  
-  %79 = ptrtoint i8* %78 to i64 
-  %80 = inttoptr i64 %79 to i8* 
-  %81 = inttoptr i64 %"pos##0" to i8* 
-  %82 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %80, i8*  %81, i32  %82, i1  0)  
-  %83 = inttoptr i64 %79 to i64* 
-  %84 = getelementptr  i64, i64* %83, i64 0 
-  store  i64 %"v##0", i64* %84 
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %79)  
+  %73 = trunc i64 16 to i32  
+  %74 = tail call ccc  i8*  @wybe_malloc(i32  %73)  
+  %75 = ptrtoint i8* %74 to i64 
+  %76 = inttoptr i64 %75 to i8* 
+  %77 = inttoptr i64 %"pos##0" to i8* 
+  %78 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %76, i8*  %77, i32  %78, i1  0)  
+  %79 = inttoptr i64 %75 to i64* 
+  %80 = getelementptr  i64, i64* %79, i64 0 
+  store  i64 %"v##0", i64* %80 
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %75)  
   ret void 
 }
 
 
 define external fastcc  void @"multi_specz.modifyAndPrint<0>[410bae77d3]"(i64  %"pos##0", i64  %"v##0")    {
 entry:
-  %85 = inttoptr i64 %"pos##0" to i64* 
-  %86 = getelementptr  i64, i64* %85, i64 0 
-  store  i64 %"v##0", i64* %86 
+  %81 = inttoptr i64 %"pos##0" to i64* 
+  %82 = getelementptr  i64, i64* %81, i64 0 
+  store  i64 %"v##0", i64* %82 
   tail call fastcc  void  @"position.printPosition<0>"(i64  %"pos##0")  
   ret void 
 }
@@ -406,19 +394,19 @@ declare external ccc  void @print_int(i64)
 @position.13 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.12 to i64) }
 
 
-@position.12 =    constant [?? x i8] c")\00"
-
-
 @position.7 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.6 to i64) }
-
-
-@position.6 =    constant [?? x i8] c",\00"
 
 
 @position.2 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @position.1 to i64) }
 
 
 @position.1 =    constant [?? x i8] c" (\00"
+
+
+@position.12 =    constant [?? x i8] c")\00"
+
+
+@position.6 =    constant [?? x i8] c",\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

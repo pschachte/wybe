@@ -148,9 +148,12 @@ data CodegenState
       , count        :: Word     -- ^ Count for temporary operands
       , names        :: Names    -- ^ Name supply
       , externs      :: [Prim]   -- ^ Primitives which need to be declared
-      , globalVars   :: [Global] -- ^ Needed global variables/constants
+      , globalVars   :: Map.Map (C.Constant, Type) Global 
+                                 -- ^ Needed global variables/constants
       , resources    :: Map.Map ResourceSpec Global
                                  -- ^ Needed global variables for resources
+      , operands     :: Map.Map PrimArg Operand
+                                 -- ^ Previously generated operands
       , modProtos    :: [PrimProto]
                                  -- ^ Module procedures prototypes
       } deriving Show
@@ -214,17 +217,20 @@ addExtern p = do
 -- values into Global module level definitions. A UnName is generated too
 -- for reference.
 addGlobalConstant :: LLVMAST.Type -> C.Constant -> Codegen Name
-addGlobalConstant ty con =
-    do modName <- lift $ fmap showModSpec getModuleSpec
-       gs <- gets globalVars
-       n <- fresh
-       let ref = Name $ fromString $ modName ++ "." ++ show n
-       let gvar = globalVariableDefaults { name = ref
-                                         , isConstant = True
-                                         , G.type' = ty
-                                         , initializer = Just con }
-       modify $ \s -> s { globalVars = gvar : gs }
-       return ref
+addGlobalConstant ty con = do 
+    modName <- lift $ fmap showModSpec getModuleSpec
+    globs <- gets globalVars
+    case Map.lookup (con, ty) globs of
+        Just global -> return $ name global
+        Nothing -> do
+            n <- fresh
+            let ref = Name $ fromString $ modName ++ "." ++ show n
+            let gvar = globalVariableDefaults { name = ref
+                                              , isConstant = True
+                                              , G.type' = ty
+                                              , initializer = Just con }
+            modify $ \s -> s { globalVars = Map.insert (con, ty) gvar globs }
+            return ref
 
 
 getGlobalResource :: ResourceSpec -> Type -> Codegen Operand
@@ -323,7 +329,7 @@ emptyBlock i = BlockState i [] Nothing
 
 -- | Initialize an empty CodegenState for a new Definition.
 emptyCodegen :: Word -> [PrimProto] -> CodegenState
-emptyCodegen startCount =
+emptyCodegen startCount protos =
   CodegenState
     (Name $ fromString entryBlockName)
     Map.empty
@@ -332,8 +338,10 @@ emptyCodegen startCount =
     startCount
     Map.empty
     []
-    []
     Map.empty
+    Map.empty
+    Map.empty
+    protos
 
 -- | 'addBlock' creates and adds a new block to the current blocks
 addBlock :: String -> Codegen Name
@@ -457,9 +465,9 @@ getVar var = do
 -- apply an another branch.
 preservingSymtab :: Codegen a -> Codegen a
 preservingSymtab code = do
-    oldSymtab <- gets symtab
+    CodegenState{symtab=oldSymtab, operands=oldOperands} <- get
     result <- code
-    modify $ \s -> s { symtab = oldSymtab }
+    modify $ \s -> s { symtab=oldSymtab, operands=oldOperands }
     return result
 
 

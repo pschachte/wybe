@@ -73,19 +73,13 @@ declare external fastcc  void @"multi_specz_cyclic_lib.printPosition<0>"(i64)
 declare external fastcc  void @"multi_specz_cyclic_lib.foo1<0>[7477e50a09]"(i64, i64, i64, i64, i64)    
 
 
-@multi_specz_cyclic_exe.38 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @multi_specz_cyclic_exe.37 to i64) }
-
-
-@multi_specz_cyclic_exe.37 =    constant [?? x i8] c"=============\00"
+@multi_specz_cyclic_exe.34 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @multi_specz_cyclic_exe.33 to i64) }
 
 
 @multi_specz_cyclic_exe.36 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @multi_specz_cyclic_exe.35 to i64) }
 
 
 @multi_specz_cyclic_exe.35 =    constant [?? x i8] c"-------------\00"
-
-
-@multi_specz_cyclic_exe.34 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @multi_specz_cyclic_exe.33 to i64) }
 
 
 @multi_specz_cyclic_exe.33 =    constant [?? x i8] c"=============\00"
@@ -153,7 +147,7 @@ entry:
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"multi_specz_cyclic_lib.printPosition<0>"(i64  %19)  
   tail call fastcc  void  @"multi_specz_cyclic_lib.printPosition<0>"(i64  %27)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multi_specz_cyclic_exe.38, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @multi_specz_cyclic_exe.34, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
@@ -285,22 +279,22 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 declare external ccc  void @print_int(i64)    
 
 
-@multi_specz_cyclic_lib.23 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multi_specz_cyclic_lib.22 to i64) }
-
-
-@multi_specz_cyclic_lib.22 =    constant [?? x i8] c")\00"
-
-
 @multi_specz_cyclic_lib.17 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multi_specz_cyclic_lib.16 to i64) }
 
 
-@multi_specz_cyclic_lib.16 =    constant [?? x i8] c",\00"
+@multi_specz_cyclic_lib.23 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multi_specz_cyclic_lib.22 to i64) }
 
 
 @multi_specz_cyclic_lib.12 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @multi_specz_cyclic_lib.11 to i64) }
 
 
 @multi_specz_cyclic_lib.11 =    constant [?? x i8] c" (\00"
+
+
+@multi_specz_cyclic_lib.22 =    constant [?? x i8] c")\00"
+
+
+@multi_specz_cyclic_lib.16 =    constant [?? x i8] c",\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

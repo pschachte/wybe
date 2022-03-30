@@ -136,16 +136,7 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 @disjunctive-cond.1 =    constant [?? x i8] c"all good\00"
 
 
-@disjunctive-cond.8 =    constant {i64, i64} { i64 7, i64 ptrtoint ([?? x i8]* @disjunctive-cond.7 to i64) }
-
-
-@disjunctive-cond.7 =    constant [?? x i8] c"no good\00"
-
-
-@disjunctive-cond.6 =    constant {i64, i64} { i64 9, i64 ptrtoint ([?? x i8]* @disjunctive-cond.5 to i64) }
-
-
-@disjunctive-cond.5 =    constant [?? x i8] c"also good\00"
+@disjunctive-cond.6 =    constant {i64, i64} { i64 7, i64 ptrtoint ([?? x i8]* @disjunctive-cond.5 to i64) }
 
 
 @disjunctive-cond.4 =    constant {i64, i64} { i64 9, i64 ptrtoint ([?? x i8]* @disjunctive-cond.3 to i64) }
@@ -154,34 +145,31 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 @disjunctive-cond.3 =    constant [?? x i8] c"also good\00"
 
 
-@disjunctive-cond.12 =    constant {i64, i64} { i64 9, i64 ptrtoint ([?? x i8]* @disjunctive-cond.11 to i64) }
+@disjunctive-cond.5 =    constant [?? x i8] c"no good\00"
 
 
-@disjunctive-cond.11 =    constant [?? x i8] c"more good\00"
+@disjunctive-cond.8 =    constant {i64, i64} { i64 7, i64 ptrtoint ([?? x i8]* @disjunctive-cond.7 to i64) }
 
 
-@disjunctive-cond.10 =    constant {i64, i64} { i64 7, i64 ptrtoint ([?? x i8]* @disjunctive-cond.9 to i64) }
+@disjunctive-cond.10 =    constant {i64, i64} { i64 9, i64 ptrtoint ([?? x i8]* @disjunctive-cond.9 to i64) }
 
 
-@disjunctive-cond.9 =    constant [?? x i8] c"no good\00"
+@disjunctive-cond.9 =    constant [?? x i8] c"more good\00"
 
 
-@disjunctive-cond.18 =    constant {i64, i64} { i64 10, i64 ptrtoint ([?? x i8]* @disjunctive-cond.17 to i64) }
+@disjunctive-cond.7 =    constant [?? x i8] c"no good\00"
 
 
-@disjunctive-cond.17 =    constant [?? x i8] c"still good\00"
+@disjunctive-cond.12 =    constant {i64, i64} { i64 7, i64 ptrtoint ([?? x i8]* @disjunctive-cond.11 to i64) }
 
 
-@disjunctive-cond.16 =    constant {i64, i64} { i64 10, i64 ptrtoint ([?? x i8]* @disjunctive-cond.15 to i64) }
+@disjunctive-cond.14 =    constant {i64, i64} { i64 10, i64 ptrtoint ([?? x i8]* @disjunctive-cond.13 to i64) }
 
 
-@disjunctive-cond.15 =    constant [?? x i8] c"still good\00"
+@disjunctive-cond.11 =    constant [?? x i8] c"no good\00"
 
 
-@disjunctive-cond.14 =    constant {i64, i64} { i64 7, i64 ptrtoint ([?? x i8]* @disjunctive-cond.13 to i64) }
-
-
-@disjunctive-cond.13 =    constant [?? x i8] c"no good\00"
+@disjunctive-cond.13 =    constant [?? x i8] c"still good\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -210,12 +198,12 @@ if.then:
 if.else:
   br i1 %"b##0", label %if.then1, label %if.else1 
 if.then1:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @disjunctive-cond.6, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @disjunctive-cond.4, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"disjunctive-cond.gen#2<0>"(i1  0, i1  1)  
   ret void 
 if.else1:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @disjunctive-cond.8, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @disjunctive-cond.6, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"disjunctive-cond.gen#2<0>"(i1  0, i1  0)  
   ret void 
@@ -231,12 +219,12 @@ if.else:
   %"3#tmp#2##0" = xor i1 %"b##0", 1 
   br i1 %"3#tmp#2##0", label %if.then2, label %if.else2 
 if.then1:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @disjunctive-cond.10, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @disjunctive-cond.8, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"disjunctive-cond.gen#3<0>"(i1  1, i1  1)  
   ret void 
 if.else1:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @disjunctive-cond.12, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @disjunctive-cond.10, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"disjunctive-cond.gen#3<0>"(i1  1, i1  0)  
   ret void 
@@ -255,15 +243,15 @@ entry:
 if.then:
   br i1 %"b##0", label %if.then1, label %if.else1 
 if.else:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @disjunctive-cond.18, i32 0, i32 0) to i64))  
-  tail call ccc  void  @putchar(i8  10)  
-  ret void 
-if.then1:
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @disjunctive-cond.14, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
+if.then1:
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @disjunctive-cond.12, i32 0, i32 0) to i64))  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
 if.else1:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @disjunctive-cond.16, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @disjunctive-cond.14, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }

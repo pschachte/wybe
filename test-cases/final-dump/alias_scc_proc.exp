@@ -129,28 +129,28 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 declare external ccc  void @putchar(i8)    
 
 
-@alias_scc_proc.19 =    constant {i64, i64} { i64 15, i64 ptrtoint ([?? x i8]* @alias_scc_proc.18 to i64) }
-
-
-@alias_scc_proc.18 =    constant [?? x i8] c"expect p3(3,3):\00"
+@alias_scc_proc.15 =    constant {i64, i64} { i64 15, i64 ptrtoint ([?? x i8]* @alias_scc_proc.14 to i64) }
 
 
 @alias_scc_proc.17 =    constant {i64, i64} { i64 15, i64 ptrtoint ([?? x i8]* @alias_scc_proc.16 to i64) }
 
 
-@alias_scc_proc.16 =    constant [?? x i8] c"expect p2(2,2):\00"
-
-
-@alias_scc_proc.15 =    constant {i64, i64} { i64 15, i64 ptrtoint ([?? x i8]* @alias_scc_proc.14 to i64) }
-
-
-@alias_scc_proc.14 =    constant [?? x i8] c"expect p1(2,2):\00"
+@alias_scc_proc.19 =    constant {i64, i64} { i64 15, i64 ptrtoint ([?? x i8]* @alias_scc_proc.18 to i64) }
 
 
 @alias_scc_proc.13 =    constant {i64, i64} { i64 23, i64 ptrtoint ([?? x i8]* @alias_scc_proc.12 to i64) }
 
 
 @alias_scc_proc.12 =    constant [?? x i8] c"--- After calling foo: \00"
+
+
+@alias_scc_proc.14 =    constant [?? x i8] c"expect p1(2,2):\00"
+
+
+@alias_scc_proc.16 =    constant [?? x i8] c"expect p2(2,2):\00"
+
+
+@alias_scc_proc.18 =    constant [?? x i8] c"expect p3(3,3):\00"
 
 
 @alias_scc_proc.58 =    constant {i64, i64} { i64 31, i64 ptrtoint ([?? x i8]* @alias_scc_proc.57 to i64) }
@@ -406,19 +406,19 @@ declare external ccc  void @print_int(i64)
 @position.13 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.12 to i64) }
 
 
-@position.12 =    constant [?? x i8] c")\00"
-
-
 @position.7 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.6 to i64) }
-
-
-@position.6 =    constant [?? x i8] c",\00"
 
 
 @position.2 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @position.1 to i64) }
 
 
 @position.1 =    constant [?? x i8] c" (\00"
+
+
+@position.12 =    constant [?? x i8] c")\00"
+
+
+@position.6 =    constant [?? x i8] c",\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

@@ -724,79 +724,79 @@ declare external ccc  void @putchar(i8)
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
-@stmt_for.26 =    constant {i64, i64} { i64 21, i64 ptrtoint ([?? x i8]* @stmt_for.25 to i64) }
-
-
-@stmt_for.25 =    constant [?? x i8] c"\0ausing_irange_reverse\00"
-
-
-@stmt_for.24 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @stmt_for.23 to i64) }
-
-
-@stmt_for.23 =    constant [?? x i8] c"\0ausing_irange\00"
-
-
-@stmt_for.22 =    constant {i64, i64} { i64 21, i64 ptrtoint ([?? x i8]* @stmt_for.21 to i64) }
-
-
-@stmt_for.21 =    constant [?? x i8] c"\0ausing_xrange_reverse\00"
-
-
-@stmt_for.20 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @stmt_for.19 to i64) }
-
-
-@stmt_for.19 =    constant [?? x i8] c"\0ausing_xrange\00"
-
-
-@stmt_for.18 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @stmt_for.17 to i64) }
-
-
-@stmt_for.17 =    constant [?? x i8] c"\0ausing_unless\00"
-
-
 @stmt_for.16 =    constant {i64, i64} { i64 11, i64 ptrtoint ([?? x i8]* @stmt_for.15 to i64) }
-
-
-@stmt_for.15 =    constant [?? x i8] c"\0ausing_when\00"
-
-
-@stmt_for.14 =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @stmt_for.13 to i64) }
-
-
-@stmt_for.13 =    constant [?? x i8] c"\0ausing_until\00"
-
-
-@stmt_for.12 =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @stmt_for.11 to i64) }
-
-
-@stmt_for.11 =    constant [?? x i8] c"\0ausing_while\00"
 
 
 @stmt_for.10 =    constant {i64, i64} { i64 11, i64 ptrtoint ([?? x i8]* @stmt_for.9 to i64) }
 
 
-@stmt_for.9 =    constant [?? x i8] c"\0ausing_next\00"
+@stmt_for.12 =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @stmt_for.11 to i64) }
+
+
+@stmt_for.14 =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @stmt_for.13 to i64) }
 
 
 @stmt_for.8 =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @stmt_for.7 to i64) }
 
 
-@stmt_for.7 =    constant [?? x i8] c"\0ausing_break\00"
+@stmt_for.18 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @stmt_for.17 to i64) }
 
 
-@stmt_for.6 =    constant {i64, i64} { i64 31, i64 ptrtoint ([?? x i8]* @stmt_for.5 to i64) }
+@stmt_for.20 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @stmt_for.19 to i64) }
 
 
-@stmt_for.5 =    constant [?? x i8] c"\0ashortest_generator_termination\00"
+@stmt_for.24 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @stmt_for.23 to i64) }
+
+
+@stmt_for.2 =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @stmt_for.1 to i64) }
 
 
 @stmt_for.4 =    constant {i64, i64} { i64 19, i64 ptrtoint ([?? x i8]* @stmt_for.3 to i64) }
 
 
+@stmt_for.22 =    constant {i64, i64} { i64 21, i64 ptrtoint ([?? x i8]* @stmt_for.21 to i64) }
+
+
+@stmt_for.26 =    constant {i64, i64} { i64 21, i64 ptrtoint ([?? x i8]* @stmt_for.25 to i64) }
+
+
+@stmt_for.6 =    constant {i64, i64} { i64 31, i64 ptrtoint ([?? x i8]* @stmt_for.5 to i64) }
+
+
 @stmt_for.3 =    constant [?? x i8] c"\0amultiple_generator\00"
 
 
-@stmt_for.2 =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @stmt_for.1 to i64) }
+@stmt_for.5 =    constant [?? x i8] c"\0ashortest_generator_termination\00"
+
+
+@stmt_for.7 =    constant [?? x i8] c"\0ausing_break\00"
+
+
+@stmt_for.23 =    constant [?? x i8] c"\0ausing_irange\00"
+
+
+@stmt_for.25 =    constant [?? x i8] c"\0ausing_irange_reverse\00"
+
+
+@stmt_for.9 =    constant [?? x i8] c"\0ausing_next\00"
+
+
+@stmt_for.17 =    constant [?? x i8] c"\0ausing_unless\00"
+
+
+@stmt_for.13 =    constant [?? x i8] c"\0ausing_until\00"
+
+
+@stmt_for.15 =    constant [?? x i8] c"\0ausing_when\00"
+
+
+@stmt_for.11 =    constant [?? x i8] c"\0ausing_while\00"
+
+
+@stmt_for.19 =    constant [?? x i8] c"\0ausing_xrange\00"
+
+
+@stmt_for.21 =    constant [?? x i8] c"\0ausing_xrange_reverse\00"
 
 
 @stmt_for.1 =    constant [?? x i8] c"single_generator:\00"

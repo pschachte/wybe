@@ -91,22 +91,22 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 declare external ccc  void @print_int(i64)    
 
 
-@multi_specz_cyclic_lib.21 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multi_specz_cyclic_lib.20 to i64) }
-
-
-@multi_specz_cyclic_lib.20 =    constant [?? x i8] c")\00"
-
-
 @multi_specz_cyclic_lib.15 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multi_specz_cyclic_lib.14 to i64) }
 
 
-@multi_specz_cyclic_lib.14 =    constant [?? x i8] c",\00"
+@multi_specz_cyclic_lib.21 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multi_specz_cyclic_lib.20 to i64) }
 
 
 @multi_specz_cyclic_lib.10 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @multi_specz_cyclic_lib.9 to i64) }
 
 
 @multi_specz_cyclic_lib.9 =    constant [?? x i8] c" (\00"
+
+
+@multi_specz_cyclic_lib.20 =    constant [?? x i8] c")\00"
+
+
+@multi_specz_cyclic_lib.14 =    constant [?? x i8] c",\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

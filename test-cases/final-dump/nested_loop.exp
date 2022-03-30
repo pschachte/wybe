@@ -66,25 +66,25 @@ declare external ccc  void @putchar(i8)
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
+@nested_loop.2 =    constant {i64, i64} { i64 5, i64 ptrtoint ([?? x i8]* @nested_loop.1 to i64) }
+
+
 @nested_loop.4 =    constant {i64, i64} { i64 5, i64 ptrtoint ([?? x i8]* @nested_loop.3 to i64) }
 
 
 @nested_loop.3 =    constant [?? x i8] c"Inner\00"
 
 
-@nested_loop.2 =    constant {i64, i64} { i64 5, i64 ptrtoint ([?? x i8]* @nested_loop.1 to i64) }
-
-
 @nested_loop.1 =    constant [?? x i8] c"Outer\00"
+
+
+@nested_loop.6 =    constant {i64, i64} { i64 5, i64 ptrtoint ([?? x i8]* @nested_loop.5 to i64) }
 
 
 @nested_loop.8 =    constant {i64, i64} { i64 5, i64 ptrtoint ([?? x i8]* @nested_loop.7 to i64) }
 
 
 @nested_loop.7 =    constant [?? x i8] c"Inner\00"
-
-
-@nested_loop.6 =    constant {i64, i64} { i64 5, i64 ptrtoint ([?? x i8]* @nested_loop.5 to i64) }
 
 
 @nested_loop.5 =    constant [?? x i8] c"Outer\00"

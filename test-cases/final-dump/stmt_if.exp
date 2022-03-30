@@ -115,28 +115,28 @@ declare external ccc  void @putchar(i8)
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
+@stmt_if.13 =    constant {i64, i64} { i64 30, i64 ptrtoint ([?? x i8]* @stmt_if.12 to i64) }
+
+
 @stmt_if.15 =    constant {i64, i64} { i64 35, i64 ptrtoint ([?? x i8]* @stmt_if.14 to i64) }
 
 
 @stmt_if.14 =    constant [?? x i8] c"lookup fails when it should succeed\00"
 
 
-@stmt_if.13 =    constant {i64, i64} { i64 30, i64 ptrtoint ([?? x i8]* @stmt_if.12 to i64) }
-
-
 @stmt_if.12 =    constant [?? x i8] c"lookup succeeds when it should\00"
-
-
-@stmt_if.19 =    constant {i64, i64} { i64 35, i64 ptrtoint ([?? x i8]* @stmt_if.18 to i64) }
-
-
-@stmt_if.18 =    constant [?? x i8] c"lookup succeeds when it should fail\00"
 
 
 @stmt_if.17 =    constant {i64, i64} { i64 27, i64 ptrtoint ([?? x i8]* @stmt_if.16 to i64) }
 
 
+@stmt_if.19 =    constant {i64, i64} { i64 35, i64 ptrtoint ([?? x i8]* @stmt_if.18 to i64) }
+
+
 @stmt_if.16 =    constant [?? x i8] c"lookup fails when it should\00"
+
+
+@stmt_if.18 =    constant [?? x i8] c"lookup succeeds when it should fail\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

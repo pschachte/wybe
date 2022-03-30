@@ -47,28 +47,28 @@ update_both(p1##0:person5.person, ?p1##1:person5.person, p2##0:person5.person, ?
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
-@person5.4 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @person5.3 to i64) }
-
-
-@person5.3 =    constant [?? x i8] c"Bob\00"
-
-
 @person5.2 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @person5.1 to i64) }
+
+
+@person5.4 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @person5.3 to i64) }
 
 
 @person5.1 =    constant [?? x i8] c"Amy\00"
 
 
-@person5.24 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @person5.23 to i64) }
-
-
-@person5.23 =    constant [?? x i8] c"Bob\00"
+@person5.3 =    constant [?? x i8] c"Bob\00"
 
 
 @person5.14 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @person5.13 to i64) }
 
 
+@person5.24 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @person5.23 to i64) }
+
+
 @person5.13 =    constant [?? x i8] c"Amy\00"
+
+
+@person5.23 =    constant [?? x i8] c"Bob\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

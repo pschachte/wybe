@@ -38,13 +38,13 @@ module top-level code > public {inline,impure} (0 calls)
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
+@person4.2 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @person4.1 to i64) }
+
+
 @person4.4 =    constant {i64, i64} { i64 5, i64 ptrtoint ([?? x i8]* @person4.3 to i64) }
 
 
 @person4.3 =    constant [?? x i8] c"Smith\00"
-
-
-@person4.2 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @person4.1 to i64) }
 
 
 @person4.1 =    constant [?? x i8] c"Wang\00"

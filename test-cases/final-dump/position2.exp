@@ -59,19 +59,19 @@ declare external ccc  void @print_int(i64)
 @position.13 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.12 to i64) }
 
 
-@position.12 =    constant [?? x i8] c")\00"
-
-
 @position.7 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.6 to i64) }
-
-
-@position.6 =    constant [?? x i8] c",\00"
 
 
 @position.2 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @position.1 to i64) }
 
 
 @position.1 =    constant [?? x i8] c" (\00"
+
+
+@position.12 =    constant [?? x i8] c")\00"
+
+
+@position.6 =    constant [?? x i8] c",\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -392,10 +392,10 @@ declare external fastcc  void @"position.printPosition<0>"(i64)
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
+@position2.18 =    constant {i64, i64} { i64 21, i64 ptrtoint ([?? x i8]* @position2.17 to i64) }
+
+
 @position2.25 =    constant {i64, i64} { i64 21, i64 ptrtoint ([?? x i8]* @position2.24 to i64) }
-
-
-@position2.24 =    constant [?? x i8] c"expect posB(333,222):\00"
 
 
 @position2.23 =    constant {i64, i64} { i64 23, i64 ptrtoint ([?? x i8]* @position2.22 to i64) }
@@ -404,10 +404,10 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 @position2.22 =    constant [?? x i8] c"expect posA(111,20000):\00"
 
 
-@position2.18 =    constant {i64, i64} { i64 21, i64 ptrtoint ([?? x i8]* @position2.17 to i64) }
-
-
 @position2.17 =    constant [?? x i8] c"expect posA(111,222):\00"
+
+
+@position2.24 =    constant [?? x i8] c"expect posB(333,222):\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

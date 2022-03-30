@@ -101,10 +101,10 @@ declare external ccc  void @print_int(i64)
 declare external ccc  void @print_string(i64)    
 
 
-@specials_one_module.2 =    constant [?? x i8] c"specials_one_module:29:2\00"
-
-
 @specials_one_module.1 =    constant [?? x i8] c"specials_one_module\00"
+
+
+@specials_one_module.2 =    constant [?? x i8] c"specials_one_module:29:2\00"
 
 
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    

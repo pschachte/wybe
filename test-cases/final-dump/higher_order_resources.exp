@@ -210,9 +210,6 @@ declare external ccc  void @print_int(i64)
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
-@higher_order_resources.158 =    constant [1 x i64] [i64 ptrtoint (void (i64, i64)* @"higher_order_resources.gen#2<1>" to i64)]
-
-
 @higher_order_resources.61 =    constant {i64, i64} { i64 5, i64 ptrtoint ([?? x i8]* @higher_order_resources.60 to i64) }
 
 
@@ -220,6 +217,9 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 
 
 @higher_order_resources.58 =    constant [1 x i64] [i64 ptrtoint (void (i64, i64)* @"higher_order_resources.gen#1<1>" to i64)]
+
+
+@higher_order_resources.158 =    constant [1 x i64] [i64 ptrtoint (void (i64, i64)* @"higher_order_resources.gen#2<1>" to i64)]
 
 
 @"resource#higher_order_resources.maximum" =    global i64 undef

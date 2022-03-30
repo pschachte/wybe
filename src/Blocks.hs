@@ -43,7 +43,7 @@ import qualified LLVM.AST.FloatingPointPredicate as FP
 import qualified LLVM.AST.Global                 as G
 import           LLVM.AST.Instruction
 import qualified LLVM.AST.IntegerPredicate       as IP
-import           LLVM.AST.Operand                hiding (PointerType)
+import           LLVM.AST.Operand                hiding (PointerType, operands)
 import           LLVM.AST.Type
 import           LLVM.AST.Typed
 import           LLVM.Pretty                     (ppllvm)
@@ -270,7 +270,8 @@ _translateProcImpl modProtos proto isClosure body startCount = do
     logBlocks $ show $ externs codestate
     exs <- mapM declareExtern $ externs codestate
     let globals = List.map LLVMAST.GlobalDefinition
-                    (globalVars codestate ++ Map.elems (resources codestate))
+                    (Map.elems (globalVars codestate) 
+                     ++ Map.elems (resources codestate))
     let body' = createBlocks codestate
     lldef <- makeGlobalDefinition pname proto' body'
     logBlocks $ show lldef
@@ -1017,9 +1018,20 @@ openPrimArg a = shouldnt $ "Can't Open!: "
 -- * Variables return a casted version of their respective symbol table operand
 -- * Constants are generated with cgenArgConst, then wrapped in `cons`
 cgenArg :: PrimArg -> Codegen LLVMAST.Operand
-cgenArg var@ArgVar{argVarName=nm, argVarType=ty} = castVar nm ty
-cgenArg (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
-cgenArg arg@(ArgProcRef ps args ty) = do
+cgenArg arg = do
+    opds <- gets operands
+    case Map.lookup arg opds of
+        Just opd -> return opd
+        Nothing -> do
+            opd <- cgenArg' arg
+            modify $ \s -> s{operands=Map.insert arg opd opds}
+            return opd
+
+
+cgenArg' :: PrimArg -> Codegen LLVMAST.Operand
+cgenArg' var@ArgVar{argVarName=nm, argVarType=ty} = castVar nm ty
+cgenArg' (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
+cgenArg' arg@(ArgProcRef ps args ty) = do
     logCodegen $ "cgenArg of " ++ show arg
     args' <- neededFreeArgs ps args
     if all argIsConst args'
@@ -1037,7 +1049,7 @@ cgenArg arg@(ArgProcRef ps args ty) = do
             store accessPtr arg
             ) $ zip [0..] (fnOp:envArgs)
         return mem
-cgenArg arg = do
+cgenArg' arg = do
     cons <$> cgenArgConst arg
 
 
@@ -1049,17 +1061,28 @@ cgenArg arg = do
 --                  element being as though it were a CString. This representation 
 --                  is to comply with the stdlib string implementation
 cgenArgConst :: PrimArg -> Codegen C.Constant
-cgenArgConst (ArgInt val ty) = do
+cgenArgConst arg = do
+    opds <- gets operands
+    case Map.lookup arg opds of
+        Just (ConstantOperand constant) -> return constant
+        Just other -> shouldnt $ "cgenArgConst with " ++ show other
+        Nothing -> do
+            opd <- cgenArgConst' arg
+            modify $ \s -> s{operands=Map.insert arg (ConstantOperand opd) opds}
+            return opd
+
+cgenArgConst' :: PrimArg -> Codegen C.Constant
+cgenArgConst' (ArgInt val ty) = do
     toTy <- lift $ llvmType ty
     case toTy of
         IntegerType bs -> return $ C.Int bs val
         _ -> consCast (C.Int (fromIntegral wordSize) val) address_t toTy
-cgenArgConst (ArgFloat val ty) = do
+cgenArgConst' (ArgFloat val ty) = do
     toTy <- lift $ llvmType ty
     case toTy of
         FloatingPointType DoubleFP -> return $ C.Float $ F.Double val
         _ -> consCast (C.Float $ F.Double val) float_t toTy
-cgenArgConst (ArgString s WybeString ty) = do
+cgenArgConst' (ArgString s WybeString ty) = do
     conPtr <- snd <$> addStringConstant s
     let strType = struct_t [address_t, address_t]
     let strStruct = C.Struct Nothing False
@@ -1069,20 +1092,20 @@ cgenArgConst (ArgString s WybeString ty) = do
     let strPtr = C.GlobalReference (ptr_t strType) strName
     let strElem = C.GetElementPtr True strPtr [C.Int 32 0, C.Int 32 0]
     consCast strElem (ptr_t strType) address_t
-cgenArgConst (ArgString s CString _) = do
+cgenArgConst' (ArgString s CString _) = do
     (conPtrTy, conPtr) <- addStringConstant s
     let strElem = C.GetElementPtr True conPtr [C.Int 32 0, C.Int 32 0]
     consCast strElem conPtrTy address_t
-cgenArgConst (ArgChar c ty) = do
+cgenArgConst' (ArgChar c ty) = do
     let val = integerOrd c
     toTy <- lift $ llvmType ty
     case toTy of
         IntegerType bs -> return $ C.Int bs val
         _ -> consCast (C.Int (fromIntegral wordSize) val) address_t toTy
-cgenArgConst (ArgUndef ty) = do
+cgenArgConst' (ArgUndef ty) = do
     llty <- lift $ llvmType ty
     return $ C.Undef llty
-cgenArgConst (ArgProcRef ps args ty) = do
+cgenArgConst' (ArgProcRef ps args ty) = do
     fnRef <- cgenFuncRef ps
     args' <- neededFreeArgs ps args
     constArgs <- mapM cgenArgConst (setArgType intType <$> args')
@@ -1092,7 +1115,7 @@ cgenArgConst (ArgProcRef ps args ty) = do
     conArrPtr <- C.GlobalReference (ptr_t arrTy) <$> addGlobalConstant arrTy arr
     let rawElem = C.GetElementPtr True conArrPtr [C.Int 32 0, C.Int 32 0]
     consCast rawElem (ptr_t arrTy) address_t
-cgenArgConst arg = shouldnt $ "cgenArgConst of " ++ show arg
+cgenArgConst' arg = shouldnt $ "cgenArgConst of " ++ show arg
 
 
 cgenFuncRef :: ProcSpec -> Codegen C.Constant
