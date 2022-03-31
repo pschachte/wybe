@@ -35,9 +35,6 @@ module top-level code > public {inline,impure} (0 calls)
  
 
 
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
 @person3.4 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @person3.3 to i64) }
 
 
@@ -48,6 +45,9 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 
 
 @person3.3 =    constant [?? x i8] c"Wang\00"
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

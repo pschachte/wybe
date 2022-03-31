@@ -30,16 +30,16 @@ module top-level code > public {impure} (0 calls)
  
 
 
-declare external fastcc  void @"position.printPosition<0>"(i64)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
 @alias_des2.12 =    constant {i64, i64} { i64 20, i64 ptrtoint ([?? x i8]* @alias_des2.11 to i64) }
 
 
 @alias_des2.11 =    constant [?? x i8] c"expect pos(200,100):\00"
+
+
+declare external fastcc  void @"position.printPosition<0>"(i64)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -115,15 +115,6 @@ printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
-declare external ccc  void @print_int(i64)    
-
-
 @position.13 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.12 to i64) }
 
 
@@ -140,6 +131,15 @@ declare external ccc  void @print_int(i64)
 
 
 @position.6 =    constant [?? x i8] c",\00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+
+
+declare external ccc  void @print_int(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

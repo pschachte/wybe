@@ -75,13 +75,7 @@ replicate1(p1##0:position.position, ?p2##0:position.position)<{<<wybe.io.io>>}; 
  
 
 
-declare external fastcc  void @"position.printPosition<0>"(i64)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
-declare external ccc  void @putchar(i8)    
+@alias4.30 =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @alias4.29 to i64) }
 
 
 @alias4.12 =    constant {i64, i64} { i64 19, i64 ptrtoint ([?? x i8]* @alias4.11 to i64) }
@@ -114,13 +108,19 @@ declare external ccc  void @putchar(i8)
 @alias4.13 =    constant [?? x i8] c"expect p2(100,200):\00"
 
 
+@alias4.29 =    constant [?? x i8] c"random replicate1\00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
 declare external ccc  void @print_int(i64)    
 
 
-@alias4.30 =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @alias4.29 to i64) }
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
-@alias4.29 =    constant [?? x i8] c"random replicate1\00"
+declare external fastcc  void @"position.printPosition<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -247,15 +247,6 @@ printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
-declare external ccc  void @print_int(i64)    
-
-
 @position.13 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.12 to i64) }
 
 
@@ -272,6 +263,15 @@ declare external ccc  void @print_int(i64)
 
 
 @position.6 =    constant [?? x i8] c",\00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+
+
+declare external ccc  void @print_int(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

@@ -232,7 +232,7 @@ expandPrim (PrimCall id pspec args gFlows) pos = do
         logExpansion "  Cannot inline:  already inlining"
         addInstr call' pos
     else do
-        def <- lift $ lift $ getProcDef pspec
+        def <- lift2 $ getProcDef pspec
         case procImpln def of
             ProcDefSrc _ -> shouldnt $ "uncompiled proc: " ++ show pspec
             ProcDefPrim{procImplnProto = proto, procImplnBody = body} ->
@@ -257,7 +257,7 @@ expandPrim call@(PrimHigher id fn args) pos = do
         ArgProcRef pspec closed _ -> do
             pspec' <- fromMaybe pspec <$> lift (lift $ maybeGetClosureOf pspec)
             logExpansion $ "  As first order call to " ++ show pspec'
-            gFlows <- lift $ lift $ getProcGlobalFlows pspec
+            gFlows <- lift2 $ getProcGlobalFlows pspec
             expandPrim (PrimCall id pspec' (closed ++ args) gFlows) pos
         _ -> do
             args' <- mapM expandArg args
@@ -370,4 +370,4 @@ addInputAssign _ _ = return ()
 
 -- |Log a message, if we are logging inlining and code expansion activity.
 logExpansion :: String -> Expander ()
-logExpansion s = lift $ lift $ logMsg Expansion s
+logExpansion s = lift2 $ logMsg Expansion s

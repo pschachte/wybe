@@ -14,13 +14,14 @@ module Util (sameLength, maybeNth, insertAt,
              removeFromDS, connectedItemsInDS,
              mapDS, filterDS, dsToTransitivePairs,
              intersectMapIdentity, orElse,
-             apply2way, (&&&), (|||), zipWith3M, zipWith3M_,
+             apply2way, (&&&), (|||), zipWith3M, zipWith3M_, lift2,
              useLocalCacheFileIfPossible, createLocalCacheFile
              ) where
 
 
 import           Config ( localCacheLibDir )
 import           Control.Monad ( when, unless )
+import           Control.Monad.Trans.Class
 import           Crypto.Hash ( hashWith, hashlazy, SHA1(..), Digest )
 import qualified Data.ByteString.Char8 as B8
 import qualified Data.ByteString.Lazy  as BL
@@ -269,6 +270,11 @@ zipWith3M f (a:as) (b:bs) (c:cs) = do
 -- |zipWithM_ version for 3 lists.
 zipWith3M_ :: Monad m => (a -> b -> c -> m d) -> [a] -> [b] -> [c] -> m ()
 zipWith3M_ f as bs cs = zipWith3M f as bs cs >> return ()
+
+
+-- | lift2 applies lift twice
+lift2 :: (MonadTrans t1, MonadTrans t2, Monad m, Monad (t2 m)) => m a -> t1 (t2 m) a
+lift2 act = lift $ lift act
 
 
 ----------------------------------------------------------------

@@ -29,16 +29,16 @@ module top-level code > public {inline,impure} (0 calls)
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
 @aaa.2 =    constant {i64, i64} { i64 9, i64 ptrtoint ([?? x i8]* @aaa.1 to i64) }
 
 
 @aaa.1 =    constant [?? x i8] c"AAA: Init\00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -82,16 +82,16 @@ module top-level code > public {inline,impure} (0 calls)
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
 @bbb.2 =    constant {i64, i64} { i64 9, i64 ptrtoint ([?? x i8]* @bbb.1 to i64) }
 
 
 @bbb.1 =    constant [?? x i8] c"BBB: Init\00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -135,16 +135,16 @@ module top-level code > public {inline,impure} (0 calls)
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
 @ccc.2 =    constant {i64, i64} { i64 9, i64 ptrtoint ([?? x i8]* @ccc.1 to i64) }
 
 
 @ccc.1 =    constant [?? x i8] c"CCC: Init\00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -187,16 +187,16 @@ module top-level code > public {inline,impure} (0 calls)
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
 @ddd.2 =    constant {i64, i64} { i64 9, i64 ptrtoint ([?? x i8]* @ddd.1 to i64) }
 
 
 @ddd.1 =    constant [?? x i8] c"DDD: Init\00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

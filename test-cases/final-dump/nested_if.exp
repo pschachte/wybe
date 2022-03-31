@@ -57,12 +57,6 @@ nested_if(i##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
 @nested_if.6 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @nested_if.5 to i64) }
 
 
@@ -85,6 +79,12 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 
 
 @nested_if.1 =    constant [?? x i8] c"zero\00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

@@ -181,33 +181,6 @@ test_index(s##0:wybe.string, i##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
  
 
 
-declare external fastcc  i64 @"wybe.string.[]<1>"(i64, i64)    
-
-
-declare external fastcc  i64 @"wybe.range...<0>"(i64, i64)    
-
-
-declare external fastcc  i64 @"wybe.string.,,<0>"(i64, i64)    
-
-
-declare external fastcc  i64 @"wybe.range.construct<0>"(i64, i64, i64)    
-
-
-declare external ccc  void @putchar(i8)    
-
-
-declare external ccc  void @print_string(i64)    
-
-
-declare external fastcc  i64 @"wybe.range.irange<0>"(i64, i64, i64)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
-declare external fastcc  i64 @"wybe.string.c_string<0>"(i64)    
-
-
 @string.3 =    constant {i64, i64} { i64 0, i64 ptrtoint ([?? x i8]* @string.2 to i64) }
 
 
@@ -250,6 +223,9 @@ declare external fastcc  i64 @"wybe.string.c_string<0>"(i64)
 @string.13 =    constant [?? x i8] c"\0aTESTING LOOPS\00"
 
 
+@string.36 =    constant [?? x i8] c"OUT OF RANGE\00"
+
+
 @string.1 =    constant [?? x i8] c"TESTING CONSTRUCTION\00"
 
 
@@ -280,16 +256,40 @@ declare external fastcc  i64 @"wybe.string.c_string<0>"(i64)
 @string.11 =    constant [?? x i8] c"efg\00"
 
 
-declare external fastcc  {i8, i64, i1} @"wybe.string.[|]<0>"(i64)    
+declare external ccc  void @putchar(i8)    
 
 
-declare external fastcc  {i8, i64, i1} @"wybe.string.[|]<0>[785a827a1b]"(i64)    
+declare external ccc  void @print_string(i64)    
 
 
 declare external fastcc  {i8, i1} @"wybe.string.[]<0>"(i64, i64)    
 
 
-@string.36 =    constant [?? x i8] c"OUT OF RANGE\00"
+declare external fastcc  {i8, i64, i1} @"wybe.string.[|]<0>[785a827a1b]"(i64)    
+
+
+declare external fastcc  {i8, i64, i1} @"wybe.string.[|]<0>"(i64)    
+
+
+declare external fastcc  i64 @"wybe.string.[]<1>"(i64, i64)    
+
+
+declare external fastcc  i64 @"wybe.range...<0>"(i64, i64)    
+
+
+declare external fastcc  i64 @"wybe.string.,,<0>"(i64, i64)    
+
+
+declare external fastcc  i64 @"wybe.range.construct<0>"(i64, i64, i64)    
+
+
+declare external fastcc  i64 @"wybe.range.irange<0>"(i64, i64, i64)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+
+
+declare external fastcc  i64 @"wybe.string.c_string<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

@@ -74,31 +74,10 @@ pcopy(p1##0:position.position, ?p2##2:position.position)<{<<wybe.io.io>>}; {<<wy
  
 
 
-declare external fastcc  void @"position.printPosition<0>"(i64)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
-declare external ccc  void @putchar(i8)    
-
-
 @alias2.2 =    constant {i64, i64} { i64 15, i64 ptrtoint ([?? x i8]* @alias2.1 to i64) }
 
 
 @alias2.14 =    constant {i64, i64} { i64 15, i64 ptrtoint ([?? x i8]* @alias2.13 to i64) }
-
-
-@alias2.12 =    constant {i64, i64} { i64 25, i64 ptrtoint ([?? x i8]* @alias2.11 to i64) }
-
-
-@alias2.11 =    constant [?? x i8] c"--- After calling pcopy: \00"
-
-
-@alias2.1 =    constant [?? x i8] c"copy a position\00"
-
-
-@alias2.13 =    constant [?? x i8] c"expect r(0,20):\00"
 
 
 @alias2.58 =    constant {i64, i64} { i64 16, i64 ptrtoint ([?? x i8]* @alias2.57 to i64) }
@@ -107,10 +86,31 @@ declare external ccc  void @putchar(i8)
 @alias2.56 =    constant {i64, i64} { i64 18, i64 ptrtoint ([?? x i8]* @alias2.55 to i64) }
 
 
+@alias2.12 =    constant {i64, i64} { i64 25, i64 ptrtoint ([?? x i8]* @alias2.11 to i64) }
+
+
+@alias2.11 =    constant [?? x i8] c"--- After calling pcopy: \00"
+
+
 @alias2.55 =    constant [?? x i8] c"--- Inside pcopy: \00"
 
 
+@alias2.1 =    constant [?? x i8] c"copy a position\00"
+
+
 @alias2.57 =    constant [?? x i8] c"expect p2(0,20):\00"
+
+
+@alias2.13 =    constant [?? x i8] c"expect r(0,20):\00"
+
+
+declare external fastcc  void @"position.printPosition<0>"(i64)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+
+
+declare external ccc  void @putchar(i8)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -252,15 +252,6 @@ printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
-declare external ccc  void @print_int(i64)    
-
-
 @position.13 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.12 to i64) }
 
 
@@ -277,6 +268,15 @@ declare external ccc  void @print_int(i64)
 
 
 @position.6 =    constant [?? x i8] c",\00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+
+
+declare external ccc  void @print_int(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

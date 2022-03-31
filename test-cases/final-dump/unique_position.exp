@@ -58,15 +58,6 @@ printPosition(pos##0:unique_position.unique_position)<{<<wybe.io.io>>}; {<<wybe.
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
-declare external ccc  void @print_int(i64)    
-
-
 @unique_position.21 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @unique_position.20 to i64) }
 
 
@@ -83,6 +74,15 @@ declare external ccc  void @print_int(i64)
 
 
 @unique_position.20 =    constant [?? x i8] c",\00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+
+
+declare external ccc  void @print_int(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

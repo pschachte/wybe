@@ -130,48 +130,6 @@ hypot(s1##0:wybe.float, s2##0:wybe.float, ?#result##0:wybe.float)<{}; {}>:
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external ccc  void @print_int(i64)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
-declare external ccc  void @print_float(double)    
-
-
-declare external ccc  double @llvm.round.f64(double)    
-
-
-declare external ccc  double @llvm.ceil.f64(double)    
-
-
-declare external ccc  double @llvm.floor.f64(double)    
-
-
-declare external ccc  double @llvm.log2.f64(double)    
-
-
-declare external ccc  double @llvm.log10.f64(double)    
-
-
-declare external ccc  double @llvm.log.f64(double)    
-
-
-declare external ccc  double @llvm.cos.f64(double)    
-
-
-declare external ccc  double @llvm.sin.f64(double)    
-
-
-declare external ccc  double @llvm.exp.f64(double)    
-
-
-declare external ccc  double @llvm.sqrt.f64(double)    
-
-
 @hypot.8 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @hypot.7 to i64) }
 
 
@@ -260,6 +218,48 @@ declare external ccc  double @llvm.sqrt.f64(double)
 
 
 @hypot.9 =    constant [?? x i8] c"sin(30) = \00"
+
+
+declare external ccc  double @llvm.sqrt.f64(double)    
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_int(i64)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+
+
+declare external ccc  void @print_float(double)    
+
+
+declare external ccc  double @llvm.round.f64(double)    
+
+
+declare external ccc  double @llvm.ceil.f64(double)    
+
+
+declare external ccc  double @llvm.floor.f64(double)    
+
+
+declare external ccc  double @llvm.log2.f64(double)    
+
+
+declare external ccc  double @llvm.log10.f64(double)    
+
+
+declare external ccc  double @llvm.log.f64(double)    
+
+
+declare external ccc  double @llvm.cos.f64(double)    
+
+
+declare external ccc  double @llvm.sin.f64(double)    
+
+
+declare external ccc  double @llvm.exp.f64(double)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

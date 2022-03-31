@@ -197,18 +197,6 @@ print_t(x##0:multictr2.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
-declare external ccc  void @print_float(double)    
-
-
-declare external ccc  void @print_int(i64)    
-
-
 @multictr2.7 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @multictr2.6 to i64) }
 
 
@@ -261,6 +249,18 @@ declare external ccc  void @print_int(i64)
 
 
 @multictr2.54 =    constant [?? x i8] c"c08(\00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+
+
+declare external ccc  void @print_float(double)    
+
+
+declare external ccc  void @print_int(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

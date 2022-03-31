@@ -58,9 +58,6 @@ test(ch##0:wybe.char, code##0:wybe.int, name##0:wybe.string)<{<<wybe.io.io>>}; {
  
 
 
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
 @char-escape.20 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @char-escape.19 to i64) }
 
 
@@ -91,10 +88,22 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 @char-escape.14 =    constant {i64, i64} { i64 15, i64 ptrtoint ([?? x i8]* @char-escape.13 to i64) }
 
 
+@char-escape.25 =    constant {i64, i64} { i64 18, i64 ptrtoint ([?? x i8]* @char-escape.24 to i64) }
+
+
+@char-escape.27 =    constant {i64, i64} { i64 24, i64 ptrtoint ([?? x i8]* @char-escape.26 to i64) }
+
+
 @char-escape.22 =    constant {i64, i64} { i64 36, i64 ptrtoint ([?? x i8]* @char-escape.21 to i64) }
 
 
 @char-escape.21 =    constant [?? x i8] c"\07string with hex character escapes!\0a\00"
+
+
+@char-escape.26 =    constant [?? x i8] c" char escapes don't work\00"
+
+
+@char-escape.24 =    constant [?? x i8] c" char escapes work\00"
 
 
 @char-escape.5 =    constant [?? x i8] c"backspace\00"
@@ -130,16 +139,7 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 declare external ccc  void @putchar(i8)    
 
 
-@char-escape.25 =    constant {i64, i64} { i64 18, i64 ptrtoint ([?? x i8]* @char-escape.24 to i64) }
-
-
-@char-escape.27 =    constant {i64, i64} { i64 24, i64 ptrtoint ([?? x i8]* @char-escape.26 to i64) }
-
-
-@char-escape.26 =    constant [?? x i8] c" char escapes don't work\00"
-
-
-@char-escape.24 =    constant [?? x i8] c" char escapes work\00"
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

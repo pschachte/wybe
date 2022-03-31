@@ -37,15 +37,6 @@ module top-level code > public {impure} (0 calls)
  
 
 
-declare external ccc  void @print_int(i64)    
-
-
-declare external ccc  void @putchar(i8)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
 @exp_print.2 =    constant {i64, i64} { i64 41, i64 ptrtoint ([?? x i8]* @exp_print.1 to i64) }
 
 
@@ -56,6 +47,15 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 
 
 @exp_print.3 =    constant [?? x i8] c"println(x:string) generates an extra newline?\00"
+
+
+declare external ccc  void @print_int(i64)    
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

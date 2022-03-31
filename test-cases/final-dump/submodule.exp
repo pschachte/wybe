@@ -59,7 +59,7 @@ semi_hidden()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
  
 
 
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+@submodule.privatetest.4 =    constant {i64, i64} { i64 31, i64 ptrtoint ([?? x i8]* @submodule.privatetest.3 to i64) }
 
 
 @submodule.privatetest.2 =    constant {i64, i64} { i64 32, i64 ptrtoint ([?? x i8]* @submodule.privatetest.1 to i64) }
@@ -68,10 +68,10 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 @submodule.privatetest.1 =    constant [?? x i8] c"private proc in a private module\00"
 
 
-@submodule.privatetest.4 =    constant {i64, i64} { i64 31, i64 ptrtoint ([?? x i8]* @submodule.privatetest.3 to i64) }
-
-
 @submodule.privatetest.3 =    constant [?? x i8] c"public proc in a private module\00"
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -126,7 +126,7 @@ visible()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
  
 
 
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+@submodule.publictest.4 =    constant {i64, i64} { i64 30, i64 ptrtoint ([?? x i8]* @submodule.publictest.3 to i64) }
 
 
 @submodule.publictest.2 =    constant {i64, i64} { i64 31, i64 ptrtoint ([?? x i8]* @submodule.publictest.1 to i64) }
@@ -135,10 +135,10 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 @submodule.publictest.1 =    constant [?? x i8] c"private proc in a public module\00"
 
 
-@submodule.publictest.4 =    constant {i64, i64} { i64 30, i64 ptrtoint ([?? x i8]* @submodule.publictest.3 to i64) }
-
-
 @submodule.publictest.3 =    constant [?? x i8] c"public proc in a public module\00"
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

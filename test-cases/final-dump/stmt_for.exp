@@ -718,12 +718,6 @@ xrange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
 @stmt_for.16 =    constant {i64, i64} { i64 11, i64 ptrtoint ([?? x i8]* @stmt_for.15 to i64) }
 
 
@@ -802,7 +796,13 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 @stmt_for.1 =    constant [?? x i8] c"single_generator:\00"
 
 
+declare external ccc  void @putchar(i8)    
+
+
 declare external ccc  void @print_int(i64)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

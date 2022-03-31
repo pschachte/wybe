@@ -375,34 +375,34 @@ i(#rec##0:anon_field, ?#rec##1:anon_field, #field##0:wybe.int, ?#success##0:wybe
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
-@anon_field.18 =    constant {i64, i64} { i64 5, i64 ptrtoint ([?? x i8]* @anon_field.17 to i64) }
-
-
-@anon_field.17 =    constant [?? x i8] c"uh oh\00"
+@anon_field.172 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @anon_field.171 to i64) }
 
 
 @anon_field.148 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @anon_field.147 to i64) }
 
 
-@anon_field.147 =    constant [?? x i8] c"good\00"
-
-
-@anon_field.172 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @anon_field.171 to i64) }
-
-
-@anon_field.171 =    constant [?? x i8] c"bad\00"
+@anon_field.18 =    constant {i64, i64} { i64 5, i64 ptrtoint ([?? x i8]* @anon_field.17 to i64) }
 
 
 @anon_field.183 =    constant {i64, i64} { i64 5, i64 ptrtoint ([?? x i8]* @anon_field.182 to i64) }
 
 
+@anon_field.171 =    constant [?? x i8] c"bad\00"
+
+
+@anon_field.147 =    constant [?? x i8] c"good\00"
+
+
 @anon_field.182 =    constant [?? x i8] c"maybe\00"
+
+
+@anon_field.17 =    constant [?? x i8] c"uh oh\00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

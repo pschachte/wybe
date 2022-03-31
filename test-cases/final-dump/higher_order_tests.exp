@@ -214,70 +214,46 @@ gen#9(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
-@higher_order_tests.2 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @higher_order_tests.1 to i64) }
-
-
-@higher_order_tests.1 =    constant [?? x i8] c"*1\00"
-
-
-@higher_order_tests.3 =    constant [1 x i64] [i64 ptrtoint (i64 (i64, i64)* @"higher_order_tests.gen#1<1>" to i64)]
-
-
 @higher_order_tests.18 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @higher_order_tests.17 to i64) }
-
-
-@higher_order_tests.17 =    constant [?? x i8] c"1\00"
-
-
-@higher_order_tests.24 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @higher_order_tests.23 to i64) }
-
-
-@higher_order_tests.23 =    constant [?? x i8] c"*2\00"
 
 
 @higher_order_tests.30 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @higher_order_tests.29 to i64) }
 
 
-@higher_order_tests.29 =    constant [?? x i8] c"2\00"
+@higher_order_tests.2 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @higher_order_tests.1 to i64) }
 
 
-@higher_order_tests.34 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @higher_order_tests.33 to i64) }
+@higher_order_tests.24 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @higher_order_tests.23 to i64) }
 
 
 @higher_order_tests.32 =    constant {i64, i64} { i64 6, i64 ptrtoint ([?? x i8]* @higher_order_tests.31 to i64) }
 
 
-@higher_order_tests.33 =    constant [?? x i8] c"*1\00"
+@higher_order_tests.1 =    constant [?? x i8] c"*1\00"
+
+
+@higher_order_tests.23 =    constant [?? x i8] c"*2\00"
 
 
 @higher_order_tests.31 =    constant [?? x i8] c"------\00"
 
 
-@higher_order_tests.35 =    constant [1 x i64] [i64 ptrtoint (i64 (i64, i64)* @"higher_order_tests.gen#6<1>" to i64)]
+@higher_order_tests.17 =    constant [?? x i8] c"1\00"
 
 
-@higher_order_tests.42 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @higher_order_tests.41 to i64) }
+@higher_order_tests.29 =    constant [?? x i8] c"2\00"
 
 
-@higher_order_tests.41 =    constant [?? x i8] c"1\00"
+@higher_order_tests.3 =    constant [1 x i64] [i64 ptrtoint (i64 (i64, i64)* @"higher_order_tests.gen#1<1>" to i64)]
 
 
-@higher_order_tests.48 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @higher_order_tests.47 to i64) }
+@higher_order_tests.33 =    constant [1 x i64] [i64 ptrtoint (i64 (i64, i64)* @"higher_order_tests.gen#6<1>" to i64)]
 
 
-@higher_order_tests.47 =    constant [?? x i8] c"*2\00"
+declare external ccc  void @putchar(i8)    
 
 
-@higher_order_tests.54 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @higher_order_tests.53 to i64) }
-
-
-@higher_order_tests.53 =    constant [?? x i8] c"2\00"
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -400,12 +376,12 @@ entry:
   %"1#tmp#4##0" = tail call fastcc  i1  @"higher_order_tests.gen#6<0>"(i64  1)  
   br i1 %"1#tmp#4##0", label %if.then, label %if.else 
 if.then:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_tests.34, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_tests.2, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"higher_order_tests.gen#7<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_tests.35, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"higher_order_tests.gen#7<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_tests.33, i32 0, i32 0) to i64))  
   ret void 
 if.else:
-  tail call fastcc  void  @"higher_order_tests.gen#7<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_tests.35, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"higher_order_tests.gen#7<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_tests.33, i32 0, i32 0) to i64))  
   ret void 
 }
 
@@ -420,21 +396,21 @@ entry:
 define external fastcc  i64 @"higher_order_tests.gen#6<1>"(i64  %"#env##0", i64  %"anon#2#1##0")    {
 entry:
   %"1##success##0" = icmp eq i64 %"anon#2#1##0", 1 
-  %36 = zext i1 %"1##success##0" to i64  
-  ret i64 %36 
+  %34 = zext i1 %"1##success##0" to i64  
+  ret i64 %34 
 }
 
 
 define external fastcc  void @"higher_order_tests.gen#7<0>"(i64  %"t##0")    {
 entry:
-  %37 = inttoptr i64 %"t##0" to i64* 
-  %38 = load  i64, i64* %37 
-  %39 = inttoptr i64 %38 to i64 (i64, i64)* 
-  %"1#tmp#3##0" = tail call fastcc  i64  %39(i64  %"t##0", i64  1)  
-  %40 = trunc i64 %"1#tmp#3##0" to i1  
-  br i1 %40, label %if.then, label %if.else 
+  %35 = inttoptr i64 %"t##0" to i64* 
+  %36 = load  i64, i64* %35 
+  %37 = inttoptr i64 %36 to i64 (i64, i64)* 
+  %"1#tmp#3##0" = tail call fastcc  i64  %37(i64  %"t##0", i64  1)  
+  %38 = trunc i64 %"1#tmp#3##0" to i1  
+  br i1 %38, label %if.then, label %if.else 
 if.then:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_tests.42, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_tests.18, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"higher_order_tests.gen#8<0>"(i64  %"t##0")  
   ret void 
@@ -446,14 +422,14 @@ if.else:
 
 define external fastcc  void @"higher_order_tests.gen#8<0>"(i64  %"t##0")    {
 entry:
-  %43 = inttoptr i64 %"t##0" to i64* 
-  %44 = load  i64, i64* %43 
-  %45 = inttoptr i64 %44 to i64 (i64, i64)* 
-  %"1#tmp#2##0" = tail call fastcc  i64  %45(i64  %"t##0", i64  2)  
-  %46 = trunc i64 %"1#tmp#2##0" to i1  
-  br i1 %46, label %if.then, label %if.else 
+  %39 = inttoptr i64 %"t##0" to i64* 
+  %40 = load  i64, i64* %39 
+  %41 = inttoptr i64 %40 to i64 (i64, i64)* 
+  %"1#tmp#2##0" = tail call fastcc  i64  %41(i64  %"t##0", i64  2)  
+  %42 = trunc i64 %"1#tmp#2##0" to i1  
+  br i1 %42, label %if.then, label %if.else 
 if.then:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_tests.48, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_tests.24, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"higher_order_tests.gen#9<0>"(i64  %"t##0")  
   ret void 
@@ -465,14 +441,14 @@ if.else:
 
 define external fastcc  void @"higher_order_tests.gen#9<0>"(i64  %"t##0")    {
 entry:
-  %49 = inttoptr i64 %"t##0" to i64* 
-  %50 = load  i64, i64* %49 
-  %51 = inttoptr i64 %50 to i64 (i64, i64)* 
-  %"1#tmp#1##0" = tail call fastcc  i64  %51(i64  %"t##0", i64  2)  
-  %52 = trunc i64 %"1#tmp#1##0" to i1  
-  br i1 %52, label %if.then, label %if.else 
+  %43 = inttoptr i64 %"t##0" to i64* 
+  %44 = load  i64, i64* %43 
+  %45 = inttoptr i64 %44 to i64 (i64, i64)* 
+  %"1#tmp#1##0" = tail call fastcc  i64  %45(i64  %"t##0", i64  2)  
+  %46 = trunc i64 %"1#tmp#1##0" to i1  
+  br i1 %46, label %if.then, label %if.else 
 if.then:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_tests.54, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_tests.30, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else:

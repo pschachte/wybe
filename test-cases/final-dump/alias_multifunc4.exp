@@ -100,15 +100,6 @@ replicate22(?pb##0:position.position, ?pc##1:position.position)<{<<wybe.io.io>>}
  
 
 
-declare external fastcc  void @"position.printPosition<0>"(i64)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
-declare external ccc  void @putchar(i8)    
-
-
 @alias_multifunc4.15 =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @alias_multifunc4.14 to i64) }
 
 
@@ -136,6 +127,15 @@ declare external ccc  void @putchar(i8)
 @alias_multifunc4.28 =    constant {i64, i64} { i64 30, i64 ptrtoint ([?? x i8]* @alias_multifunc4.27 to i64) }
 
 
+@alias_multifunc4.81 =    constant {i64, i64} { i64 47, i64 ptrtoint ([?? x i8]* @alias_multifunc4.80 to i64) }
+
+
+@alias_multifunc4.71 =    constant {i64, i64} { i64 53, i64 ptrtoint ([?? x i8]* @alias_multifunc4.70 to i64) }
+
+
+@alias_multifunc4.91 =    constant {i64, i64} { i64 86, i64 ptrtoint ([?? x i8]* @alias_multifunc4.90 to i64) }
+
+
 @alias_multifunc4.12 =    constant [?? x i8] c"--- After calling replicate1:\00"
 
 
@@ -143,6 +143,15 @@ declare external ccc  void @putchar(i8)
 
 
 @alias_multifunc4.27 =    constant [?? x i8] c"--- After calling replicate22:\00"
+
+
+@alias_multifunc4.70 =    constant [?? x i8] c"--- Inside replicate21, expect pc(1111111111,99999): \00"
+
+
+@alias_multifunc4.90 =    constant [?? x i8] c"--- Inside replicate22, after calling x(!pc,1111111111), expect pc(1111111111,99999): \00"
+
+
+@alias_multifunc4.80 =    constant [?? x i8] c"--- Inside replicate22, expect pc(99999,99999):\00"
 
 
 @alias_multifunc4.14 =    constant [?? x i8] c"expect p1(10,10):\00"
@@ -163,22 +172,13 @@ declare external ccc  void @putchar(i8)
 @alias_multifunc4.31 =    constant [?? x i8] c"expect p7(1111111111,99999):\00"
 
 
-@alias_multifunc4.71 =    constant {i64, i64} { i64 53, i64 ptrtoint ([?? x i8]* @alias_multifunc4.70 to i64) }
+declare external fastcc  void @"position.printPosition<0>"(i64)    
 
 
-@alias_multifunc4.70 =    constant [?? x i8] c"--- Inside replicate21, expect pc(1111111111,99999): \00"
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
-@alias_multifunc4.81 =    constant {i64, i64} { i64 47, i64 ptrtoint ([?? x i8]* @alias_multifunc4.80 to i64) }
-
-
-@alias_multifunc4.91 =    constant {i64, i64} { i64 86, i64 ptrtoint ([?? x i8]* @alias_multifunc4.90 to i64) }
-
-
-@alias_multifunc4.90 =    constant [?? x i8] c"--- Inside replicate22, after calling x(!pc,1111111111), expect pc(1111111111,99999): \00"
-
-
-@alias_multifunc4.80 =    constant [?? x i8] c"--- Inside replicate22, expect pc(99999,99999):\00"
+declare external ccc  void @putchar(i8)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -365,15 +365,6 @@ printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
-declare external ccc  void @print_int(i64)    
-
-
 @position.13 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.12 to i64) }
 
 
@@ -390,6 +381,15 @@ declare external ccc  void @print_int(i64)
 
 
 @position.6 =    constant [?? x i8] c",\00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+
+
+declare external ccc  void @print_int(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

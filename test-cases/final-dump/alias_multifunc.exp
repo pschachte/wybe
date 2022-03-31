@@ -95,13 +95,10 @@ replicate2(p1##0:position.position, ?p2##0:position.position)<{<<wybe.io.io>>}; 
  
 
 
-declare external fastcc  void @"position.printPosition<0>"(i64)    
+@alias_multifunc.41 =    constant {i64, i64} { i64 18, i64 ptrtoint ([?? x i8]* @alias_multifunc.40 to i64) }
 
 
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
-declare external ccc  void @putchar(i8)    
+@alias_multifunc.56 =    constant {i64, i64} { i64 18, i64 ptrtoint ([?? x i8]* @alias_multifunc.55 to i64) }
 
 
 @alias_multifunc.15 =    constant {i64, i64} { i64 19, i64 ptrtoint ([?? x i8]* @alias_multifunc.14 to i64) }
@@ -140,19 +137,22 @@ declare external ccc  void @putchar(i8)
 @alias_multifunc.18 =    constant [?? x i8] c"expect p3(101,102):\00"
 
 
-declare external ccc  void @print_int(i64)    
-
-
-@alias_multifunc.41 =    constant {i64, i64} { i64 18, i64 ptrtoint ([?? x i8]* @alias_multifunc.40 to i64) }
-
-
 @alias_multifunc.40 =    constant [?? x i8] c"random replicate1 \00"
 
 
-@alias_multifunc.56 =    constant {i64, i64} { i64 18, i64 ptrtoint ([?? x i8]* @alias_multifunc.55 to i64) }
-
-
 @alias_multifunc.55 =    constant [?? x i8] c"random replicate2 \00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_int(i64)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+
+
+declare external fastcc  void @"position.printPosition<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -306,15 +306,6 @@ printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
-declare external ccc  void @print_int(i64)    
-
-
 @position.13 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.12 to i64) }
 
 
@@ -331,6 +322,15 @@ declare external ccc  void @print_int(i64)
 
 
 @position.6 =    constant [?? x i8] c",\00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+
+
+declare external ccc  void @print_int(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

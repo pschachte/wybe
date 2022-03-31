@@ -95,13 +95,13 @@ lookup(key##0:wybe.int, tree##0:stmt_if2.tree, ?#result##0:wybe.bool)<{}; {}>:
  
 
 
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
 @stmt_if2.13 =    constant {i64, i64} { i64 5, i64 ptrtoint ([?? x i8]* @stmt_if2.12 to i64) }
 
 
 @stmt_if2.12 =    constant [?? x i8] c"found\00"
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

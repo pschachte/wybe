@@ -139,15 +139,6 @@ id(i##0:K, ?#result##0:K)<{}; {}>:
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external ccc  void @print_int(i64)    
-
-
-declare external ccc  void @print_float(double)    
-
-
 @higher_order_refs.1 =    constant [1 x i64] [i64 ptrtoint (i64 (i64, i64)* @"higher_order_refs.gen#1<1>" to i64)]
 
 
@@ -164,6 +155,15 @@ declare external ccc  void @print_float(double)
 
 
 @higher_order_refs.10 =    constant [1 x i64] [i64 ptrtoint (i64 (i64, i64)* @"higher_order_refs.gen#6<0>" to i64)]
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_int(i64)    
+
+
+declare external ccc  void @print_float(double)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

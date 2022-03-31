@@ -90,10 +90,10 @@ show_location(%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.
 declare external ccc  void @putchar(i8)    
 
 
-declare external ccc  void @print_int(i64)    
-
-
 declare external ccc  void @print_string(i64)    
+
+
+declare external ccc  void @print_int(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -187,15 +187,6 @@ module top-level code > public {impure} (0 calls)
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external ccc  void @print_string(i64)    
-
-
-declare external ccc  void @print_int(i64)    
-
-
 @specials_use.2 =    constant [?? x i8] c"!ROOT!/final-dump/specials_use.wybe\00"
 
 
@@ -206,6 +197,15 @@ declare external ccc  void @print_int(i64)
 
 
 @specials_use.3 =    constant [?? x i8] c"specials_use:7:2\00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_string(i64)    
+
+
+declare external ccc  void @print_int(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
