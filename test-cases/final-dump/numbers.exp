@@ -55,16 +55,16 @@ toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}>:
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
 @numbers.2 =    constant {i64, i64} { i64 29, i64 ptrtoint ([?? x i8]* @numbers.1 to i64) }
 
 
 @numbers.1 =    constant [?? x i8] c"Numbers has been initialised.\00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

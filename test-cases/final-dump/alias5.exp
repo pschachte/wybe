@@ -71,6 +71,36 @@ replicate1(v1##0:wybe.int, ?v2##0:wybe.int, v3##0:wybe.int, ?v4##1:wybe.int)<{<<
  
 
 
+@alias5.12 =    constant {i64, i64} { i64 15, i64 ptrtoint ([?? x i8]* @alias5.11 to i64) }
+
+
+@alias5.8 =    constant {i64, i64} { i64 15, i64 ptrtoint ([?? x i8]* @alias5.7 to i64) }
+
+
+@alias5.10 =    constant {i64, i64} { i64 15, i64 ptrtoint ([?? x i8]* @alias5.9 to i64) }
+
+
+@alias5.14 =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @alias5.13 to i64) }
+
+
+@alias5.16 =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @alias5.15 to i64) }
+
+
+@alias5.7 =    constant [?? x i8] c"expect p1=111: \00"
+
+
+@alias5.9 =    constant [?? x i8] c"expect p2=100: \00"
+
+
+@alias5.11 =    constant [?? x i8] c"expect p3=100: \00"
+
+
+@alias5.13 =    constant [?? x i8] c"expect p4=45000: \00"
+
+
+@alias5.15 =    constant [?? x i8] c"random replicate1\00"
+
+
 declare external ccc  void @putchar(i8)    
 
 
@@ -78,36 +108,6 @@ declare external ccc  void @print_int(i64)
 
 
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
-@alias5.14 =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @alias5.13 to i64) }
-
-
-@alias5.13 =    constant [?? x i8] c"expect p4=45000: \00"
-
-
-@alias5.12 =    constant {i64, i64} { i64 15, i64 ptrtoint ([?? x i8]* @alias5.11 to i64) }
-
-
-@alias5.11 =    constant [?? x i8] c"expect p3=100: \00"
-
-
-@alias5.10 =    constant {i64, i64} { i64 15, i64 ptrtoint ([?? x i8]* @alias5.9 to i64) }
-
-
-@alias5.9 =    constant [?? x i8] c"expect p2=100: \00"
-
-
-@alias5.8 =    constant {i64, i64} { i64 15, i64 ptrtoint ([?? x i8]* @alias5.7 to i64) }
-
-
-@alias5.7 =    constant [?? x i8] c"expect p1=111: \00"
-
-
-@alias5.16 =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @alias5.15 to i64) }
-
-
-@alias5.15 =    constant [?? x i8] c"random replicate1\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

@@ -84,7 +84,7 @@ module AST (
   updateTypeModifiers,
   addParameters, addTypeRep, setTypeRep, addConstructor,
   getModuleImplementationField, getModuleImplementation,
-  getLoadedModule, ifCurrentModuleElse, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
+  getLoadedModule, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
   getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
   getModule, getModuleInterface, updateModule, getSpecModule,
   updateModImplementation, updateModImplementationM,
@@ -504,17 +504,6 @@ getLoadedModule modspec = do
     maybeMod <- gets (Map.lookup modspec . modules)
     logAST $ if isNothing maybeMod then " got nothing!" else " worked"
     return maybeMod
-
--- | Perform an action if in the current module or a submodule, 
--- else perform another
-ifCurrentModuleElse :: ModSpec -> StateT s Compiler a -> StateT s Compiler a
-                    -> StateT s Compiler a
-ifCurrentModuleElse mod current other = do
-    thisMod <- lift $ getModuleSpec
-    fileMod <- lift $ getModule modRootModSpec
-    if thisMod == mod || maybe False (`List.isPrefixOf` mod) fileMod
-    then current
-    else other
 
 
 -- |Apply the given function to the specified module, if it has been loaded;

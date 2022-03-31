@@ -92,6 +92,18 @@ show_location(%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.
  
 
 
+@specials_one_module.4 =    constant {i64, i64} { i64 20, i64 ptrtoint ([?? x i8]* @specials_one_module.3 to i64) }
+
+
+@specials_one_module.3 =    constant [?? x i8] c" (should be line 28)\00"
+
+
+@specials_one_module.1 =    constant [?? x i8] c"specials_one_module\00"
+
+
+@specials_one_module.2 =    constant [?? x i8] c"specials_one_module:29:2\00"
+
+
 declare external ccc  void @putchar(i8)    
 
 
@@ -101,19 +113,7 @@ declare external ccc  void @print_int(i64)
 declare external ccc  void @print_string(i64)    
 
 
-@specials_one_module.2 =    constant [?? x i8] c"specials_one_module:29:2\00"
-
-
-@specials_one_module.1 =    constant [?? x i8] c"specials_one_module\00"
-
-
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
-@specials_one_module.4 =    constant {i64, i64} { i64 20, i64 ptrtoint ([?? x i8]* @specials_one_module.3 to i64) }
-
-
-@specials_one_module.3 =    constant [?? x i8] c" (should be line 28)\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

@@ -71,6 +71,12 @@ gen#2(count##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
  
 
 
+@proc_beer.2 =    constant {i64, i64} { i64 28, i64 ptrtoint ([?? x i8]* @proc_beer.1 to i64) }
+
+
+@proc_beer.1 =    constant [?? x i8] c" bottles of beer on the wall\00"
+
+
 declare external ccc  void @putchar(i8)    
 
 
@@ -78,18 +84,6 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 
 
 declare external ccc  void @print_int(i64)    
-
-
-@proc_beer.2 =    constant {i64, i64} { i64 28, i64 ptrtoint ([?? x i8]* @proc_beer.1 to i64) }
-
-
-@proc_beer.1 =    constant [?? x i8] c" bottles of beer on the wall\00"
-
-
-@proc_beer.4 =    constant {i64, i64} { i64 28, i64 ptrtoint ([?? x i8]* @proc_beer.3 to i64) }
-
-
-@proc_beer.3 =    constant [?? x i8] c" bottles of beer on the wall\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -131,7 +125,7 @@ if.else:
 define external fastcc  void @"proc_beer.gen#2<0>"(i64  %"count##0")    {
 entry:
   tail call ccc  void  @print_int(i64  %"count##0")  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @proc_beer.4, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @proc_beer.2, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   %"1#count##1" = sub   i64 %"count##0", 1 
   tail call fastcc  void  @"proc_beer.gen#1<0>"(i64  %"1#count##1")  

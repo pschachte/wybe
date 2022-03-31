@@ -58,6 +58,24 @@ bar()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
  
 
 
+@alias_data.20 =    constant {i64, i64} { i64 8, i64 ptrtoint ([?? x i8]* @alias_data.19 to i64) }
+
+
+@alias_data.22 =    constant {i64, i64} { i64 8, i64 ptrtoint ([?? x i8]* @alias_data.21 to i64) }
+
+
+@alias_data.10 =    constant {i64, i64} { i64 11, i64 ptrtoint ([?? x i8]* @alias_data.9 to i64) }
+
+
+@alias_data.9 =    constant [?? x i8] c"intro to cs\00"
+
+
+@alias_data.19 =    constant [?? x i8] c"student1\00"
+
+
+@alias_data.21 =    constant [?? x i8] c"student2\00"
+
+
 declare external fastcc  void @"student.printStudent<0>"(i64)    
 
 
@@ -65,24 +83,6 @@ declare external ccc  void @putchar(i8)
 
 
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
-@alias_data.22 =    constant {i64, i64} { i64 8, i64 ptrtoint ([?? x i8]* @alias_data.21 to i64) }
-
-
-@alias_data.21 =    constant [?? x i8] c"student2\00"
-
-
-@alias_data.20 =    constant {i64, i64} { i64 8, i64 ptrtoint ([?? x i8]* @alias_data.19 to i64) }
-
-
-@alias_data.19 =    constant [?? x i8] c"student1\00"
-
-
-@alias_data.10 =    constant {i64, i64} { i64 11, i64 ptrtoint ([?? x i8]* @alias_data.9 to i64) }
-
-
-@alias_data.9 =    constant [?? x i8] c"intro to cs\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -212,10 +212,28 @@ printStudent(stu##0:student.student)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
  
 
 
+@student.20 =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @student.19 to i64) }
+
+
+@student.29 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @student.28 to i64) }
+
+
+@student.34 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @student.33 to i64) }
+
+
 @student.10 =    constant {i64, i64} { i64 23, i64 ptrtoint ([?? x i8]* @student.9 to i64) }
 
 
 @student.9 =    constant [?? x i8] c"Declarative Programming\00"
+
+
+@student.28 =    constant [?? x i8] c"course code: \00"
+
+
+@student.33 =    constant [?? x i8] c"course name: \00"
+
+
+@student.19 =    constant [?? x i8] c"student id: \00"
 
 
 declare external ccc  void @putchar(i8)    
@@ -225,24 +243,6 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 
 
 declare external ccc  void @print_int(i64)    
-
-
-@student.34 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @student.33 to i64) }
-
-
-@student.33 =    constant [?? x i8] c"course name: \00"
-
-
-@student.29 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @student.28 to i64) }
-
-
-@student.28 =    constant [?? x i8] c"course code: \00"
-
-
-@student.20 =    constant {i64, i64} { i64 12, i64 ptrtoint ([?? x i8]* @student.19 to i64) }
-
-
-@student.19 =    constant [?? x i8] c"student id: \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

@@ -44,13 +44,13 @@ gen#1(tmp#0##0:wybe.int, [tmp#1##0:wybe.int])<{<<wybe.io.io>>}; {<<resource_tmp_
  
 
 
+@"resource#resource_tmp_vars.counter" =    global i64 undef
+
+
 declare external ccc  void @putchar(i8)    
 
 
 declare external ccc  void @print_int(i64)    
-
-
-@"resource#resource_tmp_vars.counter" =    global i64 undef
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

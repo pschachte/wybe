@@ -66,22 +66,22 @@ gen#1()<{<<resource_rollback.res>>, <<resource_rollback.ser>>, <<wybe.io.io>>}; 
  
 
 
-declare external ccc  void @putchar(i8)    
+@"resource#resource_rollback.res" =    global i64 undef
 
 
-declare external ccc  void @print_string(i64)    
-
-
-declare external ccc  void @print_int(i64)    
+@"resource#resource_rollback.ser" =    global i64 undef
 
 
 @resource_rollback.1 =    constant [?? x i8] c"resource_rollback:15:7\00"
 
 
-@"resource#resource_rollback.res" =    global i64 undef
+declare external ccc  void @putchar(i8)    
 
 
-@"resource#resource_rollback.ser" =    global i64 undef
+declare external ccc  void @print_int(i64)    
+
+
+declare external ccc  void @print_string(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

@@ -170,16 +170,16 @@ gen#5([f##0:wybe.float], [i##0:wybe.int], [tmp#0##0:wybe.bool], [x##0:wybe.float
 declare external ccc  void @putchar(i8)    
 
 
-declare external ccc  void @print_int(i64)    
-
-
-declare external fastcc  i64 @"wybe.list.length1<0>"(i64, i64)    
+declare external fastcc  void @"wybe.io.print<5>"(i1)    
 
 
 declare external ccc  void @print_float(double)    
 
 
-declare external fastcc  void @"wybe.io.print<5>"(i1)    
+declare external ccc  void @print_int(i64)    
+
+
+declare external fastcc  i64 @"wybe.list.length1<0>"(i64, i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

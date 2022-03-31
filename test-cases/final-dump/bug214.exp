@@ -269,28 +269,19 @@ submarine(?sub_pos##0:bug214.position, ?aim##0:wybe.int, #result##0:bug214)<{}; 
  
 
 
-declare external fastcc  i1 @"wybe.int.=<0>"(i64, i64)    
-
-
-declare external ccc  void @putchar(i8)    
-
-
-declare external ccc  void @print_int(i64)    
-
-
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+@bug214.43 =    constant {i64, i64} { i64 8, i64 ptrtoint ([?? x i8]* @bug214.42 to i64) }
 
 
 @bug214.52 =    constant {i64, i64} { i64 8, i64 ptrtoint ([?? x i8]* @bug214.51 to i64) }
 
 
+@bug214.42 =    constant [?? x i8] c"Part 1: \00"
+
+
 @bug214.51 =    constant [?? x i8] c"Part 2: \00"
 
 
-@bug214.43 =    constant {i64, i64} { i64 8, i64 ptrtoint ([?? x i8]* @bug214.42 to i64) }
-
-
-@bug214.42 =    constant [?? x i8] c"Part 1: \00"
+declare external fastcc  i1 @"wybe.int.=<0>"(i64, i64)    
 
 
 declare external ccc  i64 @read_line()    
@@ -300,6 +291,15 @@ declare external ccc  i64 @read_int()
 
 
 declare external fastcc  i64 @"wybe.string.string<0>"(i64)    
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_int(i64)    
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -811,25 +811,25 @@ up(?#result##0:bug214.direction)<{}; {}>:
  
 
 
-declare external fastcc  i1 @"wybe.string.=<0>"(i64, i64)    
-
-
 @bug214.direction.10 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @bug214.direction.9 to i64) }
-
-
-@bug214.direction.9 =    constant [?? x i8] c"up\00"
 
 
 @bug214.direction.6 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @bug214.direction.5 to i64) }
 
 
-@bug214.direction.5 =    constant [?? x i8] c"down\00"
-
-
 @bug214.direction.2 =    constant {i64, i64} { i64 7, i64 ptrtoint ([?? x i8]* @bug214.direction.1 to i64) }
 
 
+@bug214.direction.5 =    constant [?? x i8] c"down\00"
+
+
 @bug214.direction.1 =    constant [?? x i8] c"forward\00"
+
+
+@bug214.direction.9 =    constant [?? x i8] c"up\00"
+
+
+declare external fastcc  i1 @"wybe.string.=<0>"(i64, i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -1038,28 +1038,28 @@ y(#rec##0:bug214.position, ?#rec##1:bug214.position, #field##0:wybe.int)<{}; {}>
  
 
 
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
-declare external ccc  void @print_int(i64)    
-
-
-@bug214.position.52 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @bug214.position.51 to i64) }
-
-
-@bug214.position.51 =    constant [?? x i8] c")\00"
+@bug214.position.41 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @bug214.position.40 to i64) }
 
 
 @bug214.position.46 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @bug214.position.45 to i64) }
 
 
-@bug214.position.45 =    constant [?? x i8] c",\00"
-
-
-@bug214.position.41 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @bug214.position.40 to i64) }
+@bug214.position.52 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @bug214.position.51 to i64) }
 
 
 @bug214.position.40 =    constant [?? x i8] c"(\00"
+
+
+@bug214.position.51 =    constant [?? x i8] c")\00"
+
+
+@bug214.position.45 =    constant [?? x i8] c",\00"
+
+
+declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+
+
+declare external ccc  void @print_int(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

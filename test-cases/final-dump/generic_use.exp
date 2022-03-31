@@ -614,6 +614,12 @@ reverse1(lst##0:generic_list(T), suffix##0:generic_list(T), ?#result##0:generic_
  
 
 
+@generic_use.68 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @generic_use.67 to i64) }
+
+
+@generic_use.67 =    constant [?? x i8] c", \00"
+
+
 declare external ccc  void @putchar(i8)    
 
 
@@ -621,12 +627,6 @@ declare external ccc  void @print_int(i64)
 
 
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
-@generic_use.68 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @generic_use.67 to i64) }
-
-
-@generic_use.67 =    constant [?? x i8] c", \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

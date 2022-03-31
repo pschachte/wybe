@@ -99,6 +99,18 @@ gen#1(reg##0:caret.region, [tmp#0##0:caret.region], [tmp#1##0:position.position]
  
 
 
+@caret.29 =    constant {i64, i64} { i64 6, i64 ptrtoint ([?? x i8]* @caret.28 to i64) }
+
+
+@caret.145 =    constant {i64, i64} { i64 10, i64 ptrtoint ([?? x i8]* @caret.144 to i64) }
+
+
+@caret.144 =    constant [?? x i8] c"now ten = \00"
+
+
+@caret.28 =    constant [?? x i8] c"ten = \00"
+
+
 declare external ccc  void @putchar(i8)    
 
 
@@ -108,28 +120,10 @@ declare external ccc  void @print_int(i64)
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
 
 
-@caret.29 =    constant {i64, i64} { i64 6, i64 ptrtoint ([?? x i8]* @caret.28 to i64) }
-
-
-@caret.28 =    constant [?? x i8] c"ten = \00"
-
-
 declare external fastcc  i64 @"wybe.int.max<0>"(i64, i64)    
 
 
 declare external fastcc  i64 @"wybe.int.min<0>"(i64, i64)    
-
-
-@caret.145 =    constant {i64, i64} { i64 10, i64 ptrtoint ([?? x i8]* @caret.144 to i64) }
-
-
-@caret.144 =    constant [?? x i8] c"now ten = \00"
-
-
-@caret.159 =    constant {i64, i64} { i64 10, i64 ptrtoint ([?? x i8]* @caret.158 to i64) }
-
-
-@caret.158 =    constant [?? x i8] c"now ten = \00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -349,7 +343,7 @@ entry:
   %155 = inttoptr i64 %149 to i64* 
   %156 = getelementptr  i64, i64* %155, i64 0 
   %157 = load  i64, i64* %156 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @caret.159, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @caret.145, i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %157)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
@@ -777,6 +771,24 @@ printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
  
 
 
+@position.13 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.12 to i64) }
+
+
+@position.7 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.6 to i64) }
+
+
+@position.2 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @position.1 to i64) }
+
+
+@position.1 =    constant [?? x i8] c" (\00"
+
+
+@position.12 =    constant [?? x i8] c")\00"
+
+
+@position.6 =    constant [?? x i8] c",\00"
+
+
 declare external ccc  void @putchar(i8)    
 
 
@@ -784,24 +796,6 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 
 
 declare external ccc  void @print_int(i64)    
-
-
-@position.13 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.12 to i64) }
-
-
-@position.12 =    constant [?? x i8] c")\00"
-
-
-@position.7 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @position.6 to i64) }
-
-
-@position.6 =    constant [?? x i8] c",\00"
-
-
-@position.2 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @position.1 to i64) }
-
-
-@position.1 =    constant [?? x i8] c" (\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
