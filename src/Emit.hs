@@ -35,7 +35,7 @@ import           LLVM.Target
 import           LLVM.Analysis              (verify)
 import           ObjectInterface
 import           Options                    (LogSelection (Blocks,Builder,Emit),
-                                             optNoVerifyLLVM, optNoLLVMOpt)
+                                             optNoVerifyLLVM, optNoLLVMOpt, Options (optLLVMOptLevel, Options))
 import           System.Exit                (ExitCode (..))
 import           System.Process
 import           System.FilePath            ((-<.>))
@@ -95,8 +95,8 @@ emitBitcodeFile m f = do
     modBS <- encodeModule m
     llmod <- descendentModuleLLVM m
     logEmit $ "===> Writing bitcode file " ++ filename
-    noVerify <- gets $ optNoVerifyLLVM . options
-    liftIO $ makeWrappedBCFile noVerify filename llmod modBS
+    opts <- gets options
+    liftIO $ makeWrappedBCFile opts filename llmod modBS
 
 
 -- | With the LLVM AST representation of a LPVM Module, create a
@@ -108,10 +108,9 @@ emitAssemblyFile m f = do
         ", with optimisations."
     llmod <- descendentModuleLLVM m
     logEmit $ "===> Writing assembly file " ++ filename
-    noVerify <- gets $ optNoVerifyLLVM . options
-    noOpt <- gets $ optNoLLVMOpt . options
-    let withMod = if noOpt then withModule else withOptimisedModule
-    liftIO $ withMod noVerify llmod
+    opts <- gets options
+    let withMod = if optNoLLVMOpt opts then withModule else withOptimisedModule
+    liftIO $ withMod opts llmod
         (\mm -> withHostTargetMachineDefault $ \_ ->
             writeLLVMAssemblyToFile (File filename) mm)
 
@@ -131,8 +130,8 @@ liftError :: ExceptT String IO a -> IO a
 liftError = runExceptT >=> either fail return
 
 -- | Return string form LLVM IR represenation of a LLVMAST.Module
-codeemit :: Bool -> LLVMAST.Module -> IO BS.ByteString
-codeemit noVerify llmod = withOptimisedModule noVerify llmod moduleLLVMAssembly
+codeemit :: Options -> LLVMAST.Module -> IO BS.ByteString
+codeemit opts llmod = withOptimisedModule opts llmod moduleLLVMAssembly
 -- codeemit noVerify llmod = withModule noVerify llmod moduleLLVMAssembly
 
 
@@ -142,8 +141,8 @@ codeemit noVerify llmod = withOptimisedModule noVerify llmod moduleLLVMAssembly
 
 -- | Setup the set of passes for optimisations.
 -- Currently using the curated set provided by LLVM.
-passes :: PassSetSpec
-passes = defaultCuratedPassSetSpec { optLevel = Just 3 }
+passes :: Word -> PassSetSpec
+passes lvl = defaultCuratedPassSetSpec { optLevel = Just lvl }
 
 
 -- -- | Return a string LLVM IR representation of a LLVMAST.Module after
@@ -172,17 +171,19 @@ passes = defaultCuratedPassSetSpec { optLevel = Just 3 }
 -- | Using a bracket pattern, perform an action on the C++ Module
 -- representation of a LLVMAST.Module after the C++ module has been through
 -- a set of curated passes.
-withOptimisedModule :: Bool -> LLVMAST.Module -> (Mod.Module -> IO a) -> IO a
-withOptimisedModule noVerify llmod action = withModule noVerify llmod $ \m -> do
-    withPassManager passes $ \pm -> do
-        success <- runPassManager pm m
-        if success
-            then action m
-            else error "Running of optimisation passes not successful"
+withOptimisedModule :: Options -> LLVMAST.Module -> (Mod.Module -> IO a) -> IO a
+withOptimisedModule opts@Options{optLLVMOptLevel=lvl} llmod action = 
+    withModule opts llmod $ \m -> do
+        withPassManager (passes lvl') $ \pm -> do
+            success <- runPassManager pm m
+            if success
+                then action m
+                else error "Running of optimisation passes not successful"
+    where lvl' = either (shouldnt "bad llvm opt level") id lvl
 
 -- | Bracket pattern to run an [action] on the [LLVMAST.Module].
-withModule :: Bool -> LLVMAST.Module -> (Mod.Module -> IO a) -> IO a
-withModule noVerify llmod action =
+withModule :: Options -> LLVMAST.Module -> (Mod.Module -> IO a) -> IO a
+withModule Options{optNoVerifyLLVM=noVerify} llmod action =
     withContext $ \context ->
         withModuleFromAST context llmod $ \m -> do
             unless noVerify $ verify m
@@ -196,9 +197,9 @@ withModule noVerify llmod action =
 
 -- | Use the bitcode wrapper structure to wrap both the AST.Module
 -- (serialised) and the bitcode generated for the Module
-makeWrappedBCFile :: Bool -> FilePath -> LLVMAST.Module -> BL.ByteString -> IO ()
-makeWrappedBCFile noVerify file llmod modBS =
-    withOptimisedModule noVerify llmod $ \m -> do
+makeWrappedBCFile :: Options -> FilePath -> LLVMAST.Module -> BL.ByteString -> IO ()
+makeWrappedBCFile opts file llmod modBS =
+    withOptimisedModule opts llmod $ \m -> do
         bc <- moduleBitcode m
         let wrapped = getWrappedBitcode (BL.fromStrict bc) modBS
         BL.writeFile file wrapped
@@ -208,9 +209,9 @@ makeWrappedBCFile noVerify file llmod modBS =
 makeWrappedObjFile :: FilePath -> LLVMAST.Module -> BL.ByteString -> Compiler ()
 makeWrappedObjFile file llmod modBS = do
     tmpDir <- gets tmpDir
-    noVerify <- gets $ optNoVerifyLLVM . options
+    opts <- gets options
     result <- liftIO $ withContext $ \_ ->
-        withOptimisedModule noVerify llmod $ \m -> do
+        withOptimisedModule opts llmod $ \m -> do
             withHostTargetMachineDefault $ \tm ->
                 writeObjectToFile tm (File file) m
             insertLPVMData tmpDir modBS file
@@ -306,9 +307,9 @@ logLLVMString thisMod = do
 -- IR String for it, if it exists.
 extractLLVM :: AST.Module -> Compiler String
 extractLLVM thisMod = do
-    noVerify <- gets $ optNoVerifyLLVM . options
+    opts <- gets options
     case modImplementation thisMod >>= modLLVM of
-        Just llmod -> liftIO $ B8.unpack <$> codeemit noVerify llmod
+        Just llmod -> liftIO $ B8.unpack <$> codeemit opts llmod
         Nothing    -> return "No LLVM IR generated."
 
 -- | Log the LLVMIR strings for all the modules compiled, except the standard

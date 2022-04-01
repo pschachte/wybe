@@ -17,6 +17,7 @@ import           Data.List.Extra
 import           Data.Map              as Map
 import           Data.Set              as Set
 import           Data.Either           as Either
+import           Text.Read             (readEither)
 import           Control.Monad 
 import           System.Console.GetOpt
 import           System.Environment
@@ -39,6 +40,8 @@ data Options = Options
                                  
     , optLogUnknown   :: Set String
                                   -- ^Unknown log aspects
+    , optLLVMOptLevel :: Either String Word
+                                  -- ^LLVM optimisation level, or invalid
     , optNoLLVMOpt    :: Bool     -- ^Don't run the LLVM optimisation passes
     , optNoMultiSpecz :: Bool     -- ^Disable multiple specialization
     , optDumpLib      :: Bool     -- ^Also dump wybe.* modules when dumping
@@ -60,6 +63,7 @@ defaultOptions = Options
   , optLibDirs      = []
   , optLogAspects   = Set.empty
   , optLogUnknown   = Set.empty
+  , optLLVMOptLevel = Right 3
   , optNoLLVMOpt    = False
   , optNoMultiSpecz = False 
   , optDumpLib      = False
@@ -144,6 +148,9 @@ options =
  , Option ['h']     ["help"]
      (NoArg (\ opts -> opts { optShowHelp = True }))
      "display this help text and exit"
+ , Option ['O']     ["llvm-opt-level"]
+     (ReqArg (\lvl opts -> opts {optLLVMOptLevel=readEither lvl}) "Optimisation level")
+     "specify the LLVM compiler optimisation level"
  , Option ['s']     ["no-llvm-opt"]
      (NoArg (\opts -> opts { optNoLLVMOpt = True }))
      "don't run the LLVM optimisation pass manager on the emitted LLVM"
@@ -152,7 +159,7 @@ options =
      "disable multiple specialization"
  , Option []     ["dump-lib"]
      (NoArg (\opts -> opts { optDumpLib = True }))
-     "Also dump wybe library when dumping"
+     "also dump wybe library when dumping"
  , Option ['v']     ["verbose"]
      (NoArg (\opts -> opts { optVerbose = True }))
      "dump verbose messages after compilation"
@@ -204,11 +211,18 @@ handleCmdline = do
         putStrLn "The argument to this option should be a comma-separated"
         putStrLn "list (with no spaces) of these options:"
         putStr $ formatMapping logSelectionDescription
-        when badLogs $ do
-            unless (optNoFont opts) $ setSGR [SetColor Foreground Vivid Red]
-            putStrLn $ "\nError: Unknown log options: " 
-                               ++ intercalate ", " (Set.toList unknown)
-        if badLogs then exitFailure else exitSuccess
+        if badLogs 
+        then do
+            reportErrorExit opts
+                $ "Unknown log options: " 
+                ++ intercalate ", " (Set.toList unknown)
+        else exitSuccess
+    else let optLvl = optLLVMOptLevel opts
+         in if isLeft optLvl
+    then do
+        reportErrorExit opts 
+            $ "Unknown LLVM optimisation level: " 
+            ++ fromLeft "" optLvl 
     else if optShowVersion opts
     then do
         putStrLn $ "wybemk " ++ version ++ " (git " ++ gitHash ++ ")"
@@ -223,6 +237,11 @@ handleCmdline = do
     else do
         return (opts,files)
 
+reportErrorExit :: Options -> String -> IO a
+reportErrorExit Options{optNoFont=noFont} msg = do
+    unless noFont $ setSGR [SetColor Foreground Vivid Red]
+    putStrLn $ "Error: " ++ msg
+    exitFailure 
 
 addLogAspects :: String -> Options -> Options
 addLogAspects aspectsStr opts@Options{optLogUnknown=unknown0, 
