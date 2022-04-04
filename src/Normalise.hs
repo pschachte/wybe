@@ -281,7 +281,7 @@ data CtorInfo = CtorInfo {
            ctorInfoName  :: ProcName,  -- ^ this constructor's name
            ctorInfoParams:: [(Param,Bool,TypeRepresentation,Int)],
                                        -- ^ params of this ctor, with their
-                                       -- anonymity (namedness), 
+                                       -- anonymity (namedness),
                                        -- representation and bit size
            ctorInfoPos   :: OptPos,    -- ^ file position of ctor
            ctorInfoTag   :: Int,       -- ^ this constructor's tag
@@ -664,7 +664,7 @@ deconstructorItems uniq ctorName typeSpec params numConsts numNonConsts tag
         ([tagCheck numConsts numNonConsts tag tagBits tagLimit (Just size) outputVariableName]
          -- Code to fetch all the fields
          ++ List.map (\(var,_,_,_,aligned) ->
-                        (maybePlace (ForeignCall "lpvm" "access" 
+                        (maybePlace (ForeignCall "lpvm" "access"
                             ["unique" | uniq]
                             [Unplaced $ Var outputVariableName ParamIn Ordinary,
                             Unplaced $ iVal (aligned - startOffset),
@@ -1093,8 +1093,8 @@ equalityField param =
 
 
 inlineModifiers :: ProcVariant -> Determinism -> ProcModifiers
-inlineModifiers variant detism 
-    = setInline Inline 
+inlineModifiers variant detism
+    = setInline Inline
     $ setVariant variant
     $ setDetism detism defaultProcModifiers
 

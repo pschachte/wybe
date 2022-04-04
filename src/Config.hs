@@ -9,7 +9,7 @@
 -- |Compiler configuration parameters.  These may vary between
 --  OSes.
 module Config (sourceExtension, objectExtension, executableExtension,
-               bitcodeExtension, assemblyExtension, archiveExtension, 
+               bitcodeExtension, assemblyExtension, archiveExtension,
                moduleDirectoryBasename, currentModuleAlias,
                wordSize, wordSizeBytes,
                availableTagBits, tagMask, smallestAllocatedAddress,
@@ -105,8 +105,8 @@ sharedLibDirName :: String
 sharedLibDirName = "lib/"
 
 
-localCacheLibDir :: IO FilePath 
-localCacheLibDir = do 
+localCacheLibDir :: IO FilePath
+localCacheLibDir = do
     homeDir <- getHomeDirectory
     return $ homeDir </> ".wybe/cache"
 
@@ -122,7 +122,7 @@ magicVersion =
 -- Look for "Link time dead code elimination" in "Emit.hs" for more detail
 linkerDeadStripArgs :: [String]
 linkerDeadStripArgs =
-    case buildOS of 
+    case buildOS of
         OSX   -> ["-dead_strip"]
         Linux -> ["-Wl,--gc-sections"]
         _     -> error "Unsupported operation system"
@@ -133,7 +133,7 @@ linkerDeadStripArgs =
 -- sections on Linux to fit the "-Wl,--gc-sections" above.
 functionDefSection :: String -> Maybe String
 functionDefSection label =
-    case buildOS of 
+    case buildOS of
         OSX   -> Nothing
         Linux -> Just $ ".text." ++ label
         _     -> error "Unsupported operation system"
@@ -143,7 +143,7 @@ functionDefSection label =
 -- since we don't need it on macOS.
 removeLPVMSection :: FilePath -> IO (Either String ())
 removeLPVMSection target =
-    case buildOS of 
+    case buildOS of
         OSX   -> return $ Right ()
         Linux -> do
             let args = ["--remove-section", "__LPVM.__lpvm", target]

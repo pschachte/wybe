@@ -20,10 +20,10 @@ The source files in this directory and their purposes are:
 
 | File                         | Purpose                                                  |
 | ---------------------------- | -------------------------------------------------------- |
-| [AST.hs](#AST)               | Wybe Abstract Syntax Tree and LPVM representation |
-| [ASTShow.hs](#ASTShow)       | Show Wybe intermediate representation |
 | [AliasAnalysis.hs](#AliasAnalysis)| Alias analysis for a single module |
 | [Analysis.hs](#Analysis)     | Entry point of all kinds of analysis for a single module |
+| [AST.hs](#AST)               | Wybe Abstract Syntax Tree and LPVM representation |
+| [ASTShow.hs](#ASTShow)       | Show Wybe intermediate representation |
 | [BinaryFactory.hs](#BinaryFactory)| Deriving AST Types to be Binary instances |
 | [Blocks.hs](#Blocks)         | Transform a clausal form (LPVM) module to LLVM |
 | [BodyBuilder.hs](#BodyBuilder)| A monad to build up a procedure Body, with copy propagation |
@@ -35,7 +35,7 @@ The source files in this directory and their purposes are:
 | [Emit.hs](#Emit)             | Emit LLVM code |
 | [Expansion.hs](#Expansion)   | Replace certain procedure calls with others |
 | [Flatten.hs](#Flatten)       | Flatten function calls (expressions) into procedure calls |
-| [Macho.hs](#Macho)           | Extended version of parser for Mach-O object format files  |
+| [Macho.hs](#Macho)           | Extended version of parser for Mach-O object format files |
 | [Normalise.hs](#Normalise)   | Convert parse tree into an AST |
 | [ObjectInterface.hs](#ObjectInterface)| Parse and edit a object file. |
 | [Optimise.hs](#Optimise)     | Framework to optimise a single module |
@@ -47,6 +47,8 @@ The source files in this directory and their purposes are:
 | [Transform.hs](#Transform)   | Transform LPVM after alias analysis |
 | [Types.hs](#Types)           | Type checker/inferencer for Wybe |
 | [Unbranch.hs](#Unbranch)     | Turn loops and conditionals into separate procedures |
+| [Unique.hs](#Unique)         | The unique typing system for Wybe |
+| [UnivSet.hs](#UnivSet)       | Provide a set type supporting the universal set. |
 | [Util.hs](#Util)             | Various small utility functions |
 | [wybemk.hs](#wybemk)         | Wybe compiler/builder main code |
 
@@ -54,16 +56,16 @@ The source files in this directory and their purposes are:
 # Modules in more detail
 
 
-## AST --  Wybe Abstract Syntax Tree and LPVM representation
-
-
-## ASTShow --  Show Wybe intermediate representation
-
-
 ## AliasAnalysis --  Alias analysis for a single module
 
 
 ## Analysis --  Entry point of all kinds of analysis for a single module
+
+
+## AST --  Wybe Abstract Syntax Tree and LPVM representation
+
+
+## ASTShow --  Show Wybe intermediate representation
 
 
 ## BinaryFactory --  Deriving AST Types to be Binary instances
@@ -300,7 +302,7 @@ the initial value of the expression, and a second to assign it
 the specified new value.  For example, a statement p(f(!x,y),z) is
 transformed to f(x,y,?t); p(!t,z); f(!x,y,t).
 
-## Macho --  Extended version of parser for Mach-O object format files 
+## Macho --  Extended version of parser for Mach-O object format files
 
 
 ## Normalise --  Convert parse tree into an AST
@@ -320,6 +322,35 @@ transformed to f(x,y,?t); p(!t,z); f(!x,y,t).
 
 ## Resources --  Resource checker for Wybe
 
+###                 Resource Transformations.
+
+There are three passes related to resources within the Wybe compiler.
+
+The first pass canonicalises the `use` declarations in procedure prototypes.
+This resolves the module which each resource refers to.
+
+The second, performed after type checking, transforms resource usage into
+regular parameters/arguments. Here, each procedure is modifed to include
+parameters corresponding to each resource and respective flow.
+Each call is also transformed to include the resources as arguments.
+The order of arguments is dictated by the ordering of the `ResourceSpec`
+type, ordering by module then name. `use` blocks are also transformed to
+contain LPVM `move` instructions of respectively used resources, to save
+and subsequently restore the value of each resource variable.
+
+The final pass tranforms resource into global variables. This pass must be
+performed after uniqueness checking, as uniqueness checking assumes only the
+second pass has been performed. The additional parameters and arguments
+introduced in the second pass are removed here, as they are now passed in
+global variables. Each reference to an in scope resource by name is
+transformed into a load (input) or a store (output), or both (in/out).
+Finally, `use` blocks are also transformed to save (load) and then restore
+(store) each out-of-scope resource.
+
+The final two passes assume that type and mode checking has occured. Type
+checking ensures that resources have the correct types, and mode checking
+ensures that resources, where applicable are in scope.
+
 
 ## Scanner --  Lexical scanner for the Wybe language
 
@@ -338,12 +369,14 @@ Our type inference is flow sensitive, that is, types flow from callees to
 callers, but not vice versa.  Therefore, types must be uniquely determined by
 proc definitions.
 
-Because submodules automatically have access to all items (even private ones)
-in their supermodule, submodules are considered to depend on their
-supermodules.  Likewise, supermodules automatically import everything
-exported by their submodules, so supermodules depend on their submodules.
-This means a module is always in the same module dependency SCC as all its
-submodules.
+Because submodules in a file automatically have access to all items (even
+private ones) in their supermodule, submodules in that file are considered to
+depend on their supermodules.  Likewise, supermodules automatically import
+everything exported by their submodules in the same file, so supermodules
+depend on their submodules. This means all modules in a given file are always
+in the same module dependency SCC.  Since SCCs are type checked in
+topological order, this ensures that all proc calls can only refer to procs
+that have already been type checked or are defined in the current SCC.
 
 Type checking is responsible for overloading resolution, therefore during
 type checking, there may be multiple possible procs that could be referenced
@@ -351,6 +384,14 @@ by an individual call.  To support this, we use a type RoughProcSpec which
 represents a proc as best we are able to identify it.  This is only used
 during type checking to determine potential call graph SCCs.  Type
 checking/inference is then performed bottom-up by potential call graph SCC.
+
+Handling of resources here is a little tricky, because resources in lower
+SCCs will have been transformed into parameters, but resources in the current
+SCC will not have been transformed.  This problem is unavoidable because types
+must be determined (so that overloading can be resolved) before resources can
+be transformed.  Therefore, type checking must be prepared to handle both
+calls that have had resources transformed to parameters and calls that
+haven't.
 
 ## Unbranch --  Turn loops and conditionals into separate procedures
 
@@ -407,6 +448,12 @@ AST form with the following requirements:
     statement types, or a Cond whose condition is a single
     TestBool, and whose branches are bodies satisfying these
     same conditions.
+
+## Unique --  The unique typing system for Wybe
+
+
+## UnivSet --  Provide a set type supporting the universal set.
+
 
 ## Util --  Various small utility functions
 

@@ -1,6 +1,6 @@
 --  File     : Macho.hs
 --  Author   : Erik Charlebois, extended by Rishi Ranjan
---  Purpose  : Extended version of parser for Mach-O object format files 
+--  Purpose  : Extended version of parser for Mach-O object format files
 --  Original : hackage.haskell.org/package/macho-0.22
 --  Copyright: (c) Erik Charlebois.  All rights reserved.
 

@@ -116,7 +116,7 @@ typeItem :: Visibility -> Parser Item
 typeItem v = do
     pos <- tokenPosition <$> ident "type"
     modifiers <- List.foldl processTypeModifier defaultTypeModifiers
-                 <$> modifierList 
+                 <$> modifierList
     proto <- TypeProto <$> moduleName <*> typeVarNames
     (imp,items) <- typeImpln <|> typeCtors
     return $ TypeDecl v proto modifiers imp items (Just pos)
@@ -129,7 +129,7 @@ typeRepItem = do
     params <- typeVarNames
     ident "is"
     modifiers <- List.foldl processTypeModifier defaultTypeModifiers
-                 <$> modifierList 
+                 <$> modifierList
     rep <- typeRep
     return $ RepresentationDecl params modifiers rep $ Just keypos
 
@@ -140,7 +140,7 @@ dataCtorItemParser v = do
     pos <- tokenPosition <$> (ident "constructor" <|> ident "constructors")
     params <- typeVarNames
     modifiers <- List.foldl processTypeModifier defaultTypeModifiers
-                 <$> modifierList 
+                 <$> modifierList
     ctors <- ctorDecls
     return $ ConstructorDecl v params modifiers ctors $ Just pos
 
@@ -168,7 +168,7 @@ typeRep = do
 typeCtors :: Parser (TypeImpln,[Item])
 typeCtors = betweenB Brace $ do
     vis <- visibility
-    ctors <- ctorDecls 
+    ctors <- ctorDecls
     items <- option [] (separator *> items)
     return (TypeCtors vis ctors,items)
 
@@ -211,14 +211,14 @@ useBody v pos mods =
         else fail "inavlid use-block")
     <|> return (ImportMods v mods pos)
 
--- | Parse a top-level use statement with specified 
+-- | Parse a top-level use statement with specified
 topLevelUseStmt :: OptPos -> [ResourceSpec] -> Parser Item
 topLevelUseStmt pos ress = do
     body <- stmtSeq
     return $ StmtDecl (UseResources ress Nothing body) pos
 
 
--- | Convert a ModSpce to a ResourceSpec 
+-- | Convert a ModSpce to a ResourceSpec
 modSpecToResourceSpec :: ModSpec -> ResourceSpec
 modSpecToResourceSpec modspec = ResourceSpec (init modspec) (last modspec)
 
@@ -288,8 +288,8 @@ processTypeModifier tms unknown  = tms {tmUnknown = tmUnknown tms ++ [unknown]}
 -- then don't report any errors in the modifiers.  The position is the source
 -- location of the list of modifiers.
 processProcModifiers :: [String] -> ProcModifiers
-processProcModifiers 
-    = List.foldl (flip processProcModifier) defaultProcModifiers 
+processProcModifiers
+    = List.foldl (flip processProcModifier) defaultProcModifiers
 
 -- | Update a collection of ProcModifiers
 processProcModifier :: String -> ProcModifiers -> ProcModifiers
@@ -438,13 +438,13 @@ applyArguments term args =
     case term of
         call@Call{} ->
             return $ call {callArguments = callArguments call ++ args}
-        embraced@Embraced{embracedArg=Nothing, embracedPos=pos} -> 
+        embraced@Embraced{embracedArg=Nothing, embracedPos=pos} ->
             return $ embraced{embracedArg=Just $ Embraced pos Paren args Nothing}
         other -> fail $ "unexpected argument list following expression "
                         ++ show other
 
 applyEmbraced :: Term -> Term -> Parser Term
-applyEmbraced expr@(Embraced _ Brace _ Nothing) arg = 
+applyEmbraced expr@(Embraced _ Brace _ Nothing) arg =
     return expr{embracedArg=Just arg}
 applyEmbraced expr _ = fail $ "unexpected embraced expression following " ++ show expr
 
@@ -510,7 +510,7 @@ primaryTerm =
 parenthesisedTerm :: Parser Term
 parenthesisedTerm = do
     pos <- sourcePos
-    exps <- betweenB Paren (limitedTerm lowestParenthesisedPrecedence 
+    exps <- betweenB Paren (limitedTerm lowestParenthesisedPrecedence
                             `sepBy` comma)
     return $ Embraced pos Paren exps Nothing
 
@@ -670,13 +670,13 @@ applyPrefixOp tok term = do
         ("-", FloatConst _ num) -> return $ FloatConst pos (-num)
         ("-", Call{}) -> return $ call1 pos "-" term
         ("-", Foreign{}) -> return $ call1 pos "-" term
-        ("-", Embraced{embracedStyle=Paren,embraced=[expr]}) 
+        ("-", Embraced{embracedStyle=Paren,embraced=[expr]})
             -> return $ call1 pos "-" expr
         ("-", _) -> fail $ "cannot negate " ++ show term
         ("~", IntConst _ num) -> return $ IntConst pos (complement num)
         ("~", Call{}) -> return $ call1 pos "~" term
         ("~", Foreign{}) -> return $ call1 pos "~" term
-        ("~", Embraced{embracedStyle=Paren,embraced=[expr]}) 
+        ("~", Embraced{embracedStyle=Paren,embraced=[expr]})
             -> return $ call1 pos "~" expr
         ("~", _) -> fail $ "cannot negate " ++ show term
         ("?", Call{callVariableFlow=ParamIn}) -> return $ setCallFlow ParamOut term
@@ -805,20 +805,20 @@ identString = takeToken test
 -- | Parse a type variable name
 typeVarName :: Parser Ident
 typeVarName = takeToken test
- where 
+ where
     test (TokIdent s _) | isTypeVar s = Just s
     test _                            = Nothing
 
 
 -- | Parse a list of comma-separated TypeVarNames, between parentheses
-typeVarNames :: Parser [Ident] 
+typeVarNames :: Parser [Ident]
 typeVarNames = option [] (betweenB Paren $ typeVarName `sepBy` comma)
 
 
 -- | Parse a module name, any ident that is not a TypeVarName
-moduleName :: Parser Ident 
+moduleName :: Parser Ident
 moduleName = takeToken test
- where 
+ where
     test (TokIdent s _) | not $ isTypeVar s = Just s
     test _                                  = Nothing
 
@@ -981,8 +981,8 @@ termToStmt (Embraced _ Paren [body] Nothing) = termToStmt body
 termToStmt (Embraced _ Brace [body] Nothing) = termToStmt body
 termToStmt (Call pos [] "if" ParamIn [conditional]) =
     termToStmt conditional
-termToStmt (Call pos [] "case" ParamIn 
-                [Call _ [] "in" ParamIn 
+termToStmt (Call pos [] "case" ParamIn
+                [Call _ [] "in" ParamIn
                       [exp,Embraced _ Brace [body] Nothing]]) = do
     expr' <- termToExp exp
     (cases,deflt) <- termToCases termToBody body
@@ -1149,7 +1149,7 @@ termToExp (Embraced _ Paren [exp] Nothing) = termToExp exp
 termToExp body@(Embraced pos Brace _ Nothing) = do
     body' <- termToBody body
     return $ Placed (AnonProc defaultProcModifiers [] body' Nothing Nothing) pos
-termToExp mods@(Embraced pos Brace _ 
+termToExp mods@(Embraced pos Brace _
                     (Just body@(Embraced _ Brace _ _))) = do
     procMods <- termToProcModifiers mods
     anonProc <- content <$> termToExp body
@@ -1157,9 +1157,9 @@ termToExp mods@(Embraced pos Brace _
         AnonProc oldMods ps body clsd _ | oldMods == defaultProcModifiers
             -> return $ Placed (AnonProc procMods ps body clsd Nothing) pos
         _ -> syntaxError pos $ "malformed anonymous procedure " ++ show anonProc
-termToExp embraced@(Embraced pos _ _ _) = 
+termToExp embraced@(Embraced pos _ _ _) =
     syntaxError pos $ "malformed anonymous procedure " ++ show embraced
-termToExp (Call pos [] "case" ParamIn 
+termToExp (Call pos [] "case" ParamIn
             [Call _ [] "in" ParamIn [exp,Embraced _ Brace [body] Nothing]]) = do
     expr' <- termToExp exp
     (cases,deflt) <- termToCases termToExp body
@@ -1186,11 +1186,11 @@ termToExp str@StringConst{stringPos=pos}
 
 termToIdent :: TranslateTo Ident
 termToIdent (Call _ [] ident ParamIn []) = return ident
-termToIdent other 
+termToIdent other
     = syntaxError (termPos other) $ "invalid ident " ++ show other
 
-termToProcModifiers :: TranslateTo ProcModifiers 
-termToProcModifiers (Embraced _ Brace mods _) = 
+termToProcModifiers :: TranslateTo ProcModifiers
+termToProcModifiers (Embraced _ Brace mods _) =
     processProcModifiers <$> mapM termToIdent mods
 termToProcModifiers other
     = syntaxError (termPos other) $ "invalid modifiers " ++ show other
@@ -1226,13 +1226,13 @@ termToTypeSpec mods@(Embraced pos Brace _ (Just ty@(Embraced _ Paren _ Nothing))
     ty' <- termToTypeSpec ty
     case ty' of
         HigherOrderType _ params -> return $ HigherOrderType procMods params
-        _ -> syntaxError pos $ "invalid type spec " ++ show mods 
+        _ -> syntaxError pos $ "invalid type spec " ++ show mods
 termToTypeSpec (Embraced _ Paren args Nothing) =
     HigherOrderType defaultProcModifiers <$> mapM termToTypeFlow args
-termToTypeSpec (Call _ [] name ParamIn []) 
-  | isTypeVar name = 
+termToTypeSpec (Call _ [] name ParamIn [])
+  | isTypeVar name =
     return $ TypeVariable $ RealTypeVar name
-termToTypeSpec (Call _ mod name ParamIn params) 
+termToTypeSpec (Call _ mod name ParamIn params)
   | not $ isTypeVar name =
     TypeSpec mod name <$> mapM termToTypeSpec params
 termToTypeSpec other =
@@ -1282,10 +1282,10 @@ termToCtorField :: TranslateTo Param
 termToCtorField (Call _ [] ":" ParamIn [Call _ [] name ParamIn [],ty]) = do
     ty' <- termToTypeSpec ty
     return $ Param name ty' ParamIn Ordinary
-termToCtorField (Call pos [] name ParamIn []) 
+termToCtorField (Call pos [] name ParamIn [])
   | isTypeVar name = do
     return $ Param "" (TypeVariable $ RealTypeVar name) ParamIn Ordinary
-termToCtorField (Call pos mod name ParamIn params) 
+termToCtorField (Call pos mod name ParamIn params)
   | not $ isTypeVar name = do
     tyParams <- mapM termToTypeSpec params
     return $ Param "" (TypeSpec mod name tyParams) ParamIn Ordinary
@@ -1325,7 +1325,7 @@ data Term
         foreignFlags::[Ident],         -- ^the specified modifiers
         foreignArguments::[Term]       -- ^the specified arguments
     }
-    | Embraced { 
+    | Embraced {
         embracedPos::SourcePos,
         embracedStyle::BracketStyle,
         embraced::[Term],
@@ -1352,7 +1352,7 @@ instance Show Term where
         "foreign " ++ lang ++ " " ++ showFlags' flags ++ instr
         ++ showArguments args
     show (Embraced _ style embraced arg) =
-        bracketString True style ++ intercalate "," (show <$> embraced) 
+        bracketString True style ++ intercalate "," (show <$> embraced)
                                  ++ bracketString False style
                                  ++ maybe "" show arg
     show (IntConst _ int) = show int

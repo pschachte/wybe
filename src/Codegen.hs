@@ -9,7 +9,7 @@
 {-# LANGUAGE OverloadedStrings          #-}
 
 module Codegen (
-  Codegen(..), CodegenState(..), BlockState(..), 
+  Codegen(..), CodegenState(..), BlockState(..),
   Translation(..), TranslationState(..), SymbolTable(..),
   emptyModule, addExtern, addGlobalConstant, getGlobalResource,
   emptyCodegen, emptyTranslation,
@@ -20,7 +20,7 @@ module Codegen (
   -- * Symbol storage
   alloca, store, local, assign, addOperand, load, getVar, localVar, preservingSymtab,
   makeGlobalResourceVariable,
-  operandType, doAlloca, doLoad, 
+  operandType, doAlloca, doLoad,
   bitcast, cbitcast, inttoptr, cinttoptr, ptrtoint, cptrtoint,
   trunc, ctrunc, zext, czext, sext, csext,
   -- * Types
@@ -142,7 +142,7 @@ type Names = Map.Map String Int
 data CodegenState
     = CodegenState {
         currentBlock :: Name     -- ^ Name of the active block to append to
-      , blocks       :: Map.Map Name BlockState 
+      , blocks       :: Map.Map Name BlockState
                                  -- ^ Blocks for function
       , blockCount   :: Int      -- ^ Incrementing count of basic blocks
       , symtab       :: SymbolTable
@@ -165,10 +165,10 @@ data BlockState
 
 -- | SymbolTable state.
 -- Stores assignments and generated operands
-data SymbolTable 
+data SymbolTable
      = SymbolTable {
-         stVars :: Map.Map String (Operand,TypeRepresentation) 
-         
+         stVars :: Map.Map String (Operand,TypeRepresentation)
+
                       -- ^ Assigned names
        , stOpds :: Map.Map PrimArg Operand
                       -- ^ Previously generated operands
@@ -184,10 +184,10 @@ type Codegen = StateT CodegenState Translation
 
 -- | TranslationState
 -- Stores data required across tranlating an LPVM module into an LLVm module
-data TranslationState 
+data TranslationState
     = TranslationState {
-        txCount   :: Word -- ^ Count of used virtual registers 
-      , txConsts  :: Map.Map (C.Constant, Type) Global 
+        txCount   :: Word -- ^ Count of used virtual registers
+      , txConsts  :: Map.Map (C.Constant, Type) Global
                           -- ^ Needed global constants
       , txVars    :: Map.Map GlobalInfo Global
                           -- ^ Needed global variables
@@ -221,7 +221,7 @@ addExtern prim = lift $ modify $ \s -> s { txExterns=prim:txExterns s}
 -- values into Global module level definitions. A UnName is generated too
 -- for reference.
 addGlobalConstant :: LLVMAST.Type -> C.Constant -> Codegen Name
-addGlobalConstant ty con = do 
+addGlobalConstant ty con = do
     modName <- lift2 $ showModSpec <$> getModuleSpec
     consts <- lift $ gets txConsts
     case Map.lookup (con, ty) consts of
@@ -252,10 +252,10 @@ getGlobalResource spec@(ResourceSpec mod nm) ty = do
 
 makeGlobalResourceVariable :: ResourceSpec -> Type -> Compiler Global
 makeGlobalResourceVariable spec@(ResourceSpec mod nm) ty = do
-    when (ty == VoidType) 
+    when (ty == VoidType)
         $ shouldnt $ "global resource " ++ show spec ++ " cant have voidtype"
-    let ref = Name $ fromString $ makeGlobalResourceName spec 
-    thisMod <- getModuleSpec 
+    let ref = Name $ fromString $ makeGlobalResourceName spec
+    thisMod <- getModuleSpec
     let init = if thisMod == mod
                then Just $ C.Undef ty
                else Nothing
@@ -340,7 +340,7 @@ emptyCodegen = CodegenState{ currentBlock=Name $ fromString entryBlockName
                            , symtab=SymbolTable Map.empty Map.empty
                            , names=Map.empty
                            }
-    
+
 
 -- | 'addBlock' creates and adds a new block to the current blocks
 addBlock :: String -> Codegen Name
@@ -471,7 +471,7 @@ preservingSymtab code = do
     return result
 
 addOperand :: PrimArg -> Operand -> Codegen ()
-addOperand arg opd = do  
+addOperand arg opd = do
     st <- gets symtab
     modify $ \s -> s { symtab=st{stOpds=Map.insert arg opd $ stOpds st} }
 
@@ -726,7 +726,7 @@ extractvalue st i = ExtractValue st [i] []
 
 -- * GetElementPtr helper
 getElementPtrInstr :: Operand -> [Integer] -> LLVMAST.Instruction
-getElementPtrInstr op idxs = 
+getElementPtrInstr op idxs =
   LLVMAST.GetElementPtr False op (cons . C.Int (fromIntegral wordSize) <$> idxs) []
 
 

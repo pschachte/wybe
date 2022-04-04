@@ -131,7 +131,7 @@ data BodyState = BodyState {
       buildState    :: BuildState,      -- ^The fork at the bottom of this node
       parent        :: Maybe BodyState, -- ^What comes before/above this
       globalsLoaded :: Map GlobalInfo PrimArg
-                                        -- ^The set of globals that we currently 
+                                        -- ^The set of globals that we currently
                                         -- know the value of
       } deriving (Eq,Show)
 
@@ -197,7 +197,7 @@ freshVarName = do
 
 -- |Run a BodyBuilder monad and extract the final proc body, along with the
 -- final temp variable count and the set of variables used in the body.
-buildBody :: Int -> VarSubstitution 
+buildBody :: Int -> VarSubstitution
           -> BodyBuilder a -> Compiler (a, Int, Set PrimVarName, ProcBody)
 buildBody tmp oSubst builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
@@ -433,11 +433,11 @@ instr' prim@(PrimForeign "lpvm" "store" _ [var, ArgGlobal info _]) pos = do
     mbVal <- Map.lookup info <$> gets globalsLoaded
     logBuild $ " ... found value " ++ show mbVal
     case mbVal of
-        Just val 
+        Just val
           | on (==) (mkInput . canonicaliseArg) var val -> do
-            logBuild " ... it is, no need to store" 
+            logBuild " ... it is, no need to store"
         _ -> do
-            logBuild " ... it isn't, we need to store" 
+            logBuild " ... it isn't, we need to store"
             ordinaryInstr prim pos
 instr' prim pos = ordinaryInstr prim pos
 
@@ -455,7 +455,7 @@ ordinaryInstr prim pos = do
             logBuild "not found"
             impurity <- lift $ primImpurity prim
             let gFlows = snd $ primArgs prim
-            when (impurity <= Pure && gFlows == emptyGlobalFlows) 
+            when (impurity <= Pure && gFlows == emptyGlobalFlows)
                 $ recordEntailedPrims prim
             rawInstr prim pos
             mapM_ recordVarSet $ primOutputs prim
@@ -493,10 +493,10 @@ argExpandedPrim call@(PrimCall id pspec args gFlows) = do
     args'' <- zipWithM (transformUnneededArg $ zip params args) params args'
     return $ PrimCall id pspec args'' gFlows
 argExpandedPrim call@(PrimHigher id fn args) = do
-    logBuild $ "Expanding Higher call " ++ show call       
+    logBuild $ "Expanding Higher call " ++ show call
     fn' <- expandArg fn
     case fn' of
-        ArgProcRef pspec clsd _ -> do 
+        ArgProcRef pspec clsd _ -> do
             pspec' <- fromMaybe pspec <$> lift (maybeGetClosureOf pspec)
             logBuild $ "As first-order call to " ++ show pspec'
             params <- lift $ getPrimParams pspec'
@@ -504,7 +504,7 @@ argExpandedPrim call@(PrimHigher id fn args) = do
             gFlows <- lift $ getProcGlobalFlows pspec
             argExpandedPrim $ PrimCall id pspec' (clsd ++ args') gFlows
         _ -> do
-            logBuild $ "Leaving as higher call to " ++ show fn'       
+            logBuild $ "Leaving as higher call to " ++ show fn'
             args' <- mapM expandArg args
             return $ PrimHigher id fn' args'
 argExpandedPrim (PrimForeign lang nm flags args) = do
@@ -545,8 +545,8 @@ transformUnneededArg _ _ arg = return arg
 splitPrimOutputs :: Prim -> (Prim, [PrimArg])
 splitPrimOutputs prim =
     let (args, gFlows) = primArgs prim
-        (inArgs,outArgs) = splitArgsByMode args 
-    in  (canonicalisePrim $ replacePrimArgs prim (canonicaliseArg <$> inArgs) gFlows, 
+        (inArgs,outArgs) = splitArgsByMode args
+    in  (canonicalisePrim $ replacePrimArgs prim (canonicaliseArg <$> inArgs) gFlows,
          outArgs)
 
 
@@ -684,7 +684,7 @@ canonicalisePrim (PrimForeign lang op flags args) =
 canonicaliseArg :: PrimArg -> PrimArg
 canonicaliseArg ArgVar{argVarName=nm, argVarFlow=fl} =
     ArgVar nm AnyType fl Ordinary False
-canonicaliseArg (ArgProcRef ms as _) = 
+canonicaliseArg (ArgProcRef ms as _) =
     ArgProcRef ms (canonicaliseArg <$> as) AnyType
 canonicaliseArg (ArgInt v _)        = ArgInt v AnyType
 canonicaliseArg (ArgFloat v _)      = ArgFloat v AnyType
@@ -741,7 +741,7 @@ expandArg :: PrimArg -> BodyBuilder PrimArg
 expandArg arg@ArgVar{argVarName=var, argVarFlow=FlowIn} = do
     var' <- gets (Map.lookup var . currSubst)
     let ty = argVarType arg
-    let var'' = setArgType ty <$> var' 
+    let var'' = setArgType ty <$> var'
     logBuild $ "Expanded " ++ show var ++ " to " ++ show var''
     maybe (return arg) expandArg var''
 expandArg arg@ArgVar{argVarName=var, argVarFlow=FlowOut} = do
@@ -750,7 +750,7 @@ expandArg arg@ArgVar{argVarName=var, argVarFlow=FlowOut} = do
       $ logBuild $ "Replaced output variable " ++ show var
                    ++ " with " ++ show var'
     return arg{argVarName=var'}
-expandArg arg@(ArgProcRef ps as ty) = do 
+expandArg arg@(ArgProcRef ps as ty) = do
     as' <- mapM expandArg as
     return $ ArgProcRef ps as' ty
 expandArg arg = return arg
@@ -772,8 +772,8 @@ updateGlobalsLoaded prim pos = do
     loaded' <- gets globalsLoaded
     when (loaded /= loaded') $ do
         logBuild $ "Globals Loaded: " ++ simpleShowMap loaded
-        logBuild $ "             -> " ++ simpleShowMap loaded' 
-                    
+        logBuild $ "             -> " ++ simpleShowMap loaded'
+
 
 ----------------------------------------------------------------
 --                              Constant Folding
@@ -1040,7 +1040,7 @@ addBodyContinuation prev@BodyState{buildState=Forked{}} next = do
 
 -- | Add the appropriate branch(es) to follow the specified list of prims, which
 -- includes both the prims of the previous unforked body and the unforked part
--- of the following 
+-- of the following
 addSelectedContinuation :: [Placed Prim] -> Substitution -> Set PrimVarName
                         -> VarSubstitution -> BodyState -> Compiler BodyState
                         -- XXX Must merge subst with currSubst of st
@@ -1085,7 +1085,7 @@ addSelectedContinuation prevPrims subst defs osubst
 selectedBranch :: Substitution -> BuildState -> Maybe Integer
 selectedBranch subst Unforked = Nothing
 selectedBranch subst Forked{knownVal=known, forkingVar=var} =
-    known `orElse` (Map.lookup var subst >>= argIntegerValue)    
+    known `orElse` (Map.lookup var subst >>= argIntegerValue)
 
 
 ----------------------------------------------------------------
@@ -1100,7 +1100,7 @@ selectedBranch subst Forked{knownVal=known, forkingVar=var} =
 -- parameters.
 ----------------------------------------------------------------
 
-currBody :: ProcBody -> BodyState 
+currBody :: ProcBody -> BodyState
          -> Compiler (Int,Set PrimVarName,ProcBody)
 currBody body st@BodyState{tmpCount=tmp} = do
     logMsg BodyBuilder $ "Now reconstructing body with usedLater = "
@@ -1131,7 +1131,7 @@ data BkwdBuilderState = BkwdBuilderState {
                                            -- branches.
       bkwdRenaming     :: VarSubstitution, -- ^Variable substitution to apply
       bkwdTmpCount     :: Int,             -- ^Highest temporary variable number
-      bkwdGlobalStored :: Set GlobalInfo,  -- ^The set of globals we have 
+      bkwdGlobalStored :: Set GlobalInfo,  -- ^The set of globals we have
                                            -- recently stored
       bkwdFollowing    :: ProcBody         -- ^Code to come later
       } deriving (Eq,Show)
@@ -1220,15 +1220,15 @@ bkwdBuildStmt defs prim pos = do
     case (prim,args') of
       (PrimForeign "llvm" "move" [] _, [ArgVar{argVarName=fromVar},
                                         ArgVar{argVarName=toVar}])
-          | Set.notMember fromVar usedLater && Set.member fromVar defs -> 
-              modify $ \s -> s { bkwdRenaming = Map.insert fromVar toVar 
+          | Set.notMember fromVar usedLater && Set.member fromVar defs ->
+              modify $ \s -> s { bkwdRenaming = Map.insert fromVar toVar
                                               $ bkwdRenaming s }
-      (PrimForeign "lpvm" "store" [] _, [_, ArgGlobal info _]) 
+      (PrimForeign "lpvm" "store" [] _, [_, ArgGlobal info _])
           | info `Set.member` gStored -> return ()
           | otherwise -> do
               modify $ \s -> s { bkwdGlobalStored = Set.insert info gStored }
               bkwdBuildStmt' defs args' gFlows prim pos
-      _ -> do 
+      _ -> do
           let filter info = not $ hasGlobalFlow gFlows FlowIn info
           modify $ \s -> s { bkwdGlobalStored = Set.filter filter gStored }
           bkwdBuildStmt' defs args' gFlows prim pos
@@ -1269,7 +1269,7 @@ flattenArgs :: [PrimArg] -> [PrimArg]
 flattenArgs = concatMap flattenArg
 
 flattenArg :: PrimArg -> [PrimArg]
-flattenArg arg@(ArgProcRef _ as ts) = arg:flattenArgs as 
+flattenArg arg@(ArgProcRef _ as ts) = arg:flattenArgs as
 flattenArg arg = [arg]
 
 
@@ -1308,7 +1308,7 @@ showState indent BodyState{parent=par, currBuild=revPrims, buildState=bld,
                            blockDefs=defs, forkConsts=consts,
                            currSubst=substs, globalsLoaded=loaded} =
     let (str  ,indent')   = maybe ("",indent)
-                            (mapFst (++ (startLine indent ++ "----------")) 
+                            (mapFst (++ (startLine indent ++ "----------"))
                             . showState indent) par
         substStr          = startLine indent
                             ++ "# Substs: " ++ simpleShowMap substs
@@ -1325,7 +1325,7 @@ showState indent BodyState{parent=par, currBuild=revPrims, buildState=bld,
                                 startLine indent
                                 ++ "# Fusion consts: " ++ show consts
                               _ -> ""
-        
+
         (str'',indent'') = showBuildState indent' bld
     in  (str ++ str' ++ substStr ++ sets ++ globalStr ++ str'' ++ suffix, indent'')
 
