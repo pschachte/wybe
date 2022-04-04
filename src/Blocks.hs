@@ -659,13 +659,6 @@ filterPhantomArgs :: [PrimArg] -> Codegen [PrimArg]
 filterPhantomArgs = filterM ((not <$>) . lift2 . argIsPhantom)
 
 
--- |Return the integer constant from an argument; error if it's not one
-trustArgInt :: PrimArg -> Integer
-trustArgInt arg = trustFromJust
-                  "LPVM instruction argument must be an integer constant."
-                  $ argIntVal arg
-
-
 -- | Code generation for LPVM instructions.
 cgenLPVM :: ProcName -> [Ident] -> [PrimArg] -> Codegen ()
 cgenLPVM "alloc" _ args@[sizeArg,addrArg] = do
@@ -1516,8 +1509,7 @@ callMemCpy dst src bytes = do
 gcAllocate :: PrimArg -> LLVMAST.Type -> Codegen Operand
 gcAllocate size castTy = do
     voidPtr <- callWybeMalloc size
-    ptrtoint voidPtr address_t
-
+    doCast voidPtr castTy
 
 
 -- | Index and return the value in the memory field referenced by the pointer
@@ -1528,9 +1520,8 @@ gcAccess :: Operand -> LLVMAST.Type -> Codegen Operand
 gcAccess ptr outTy = do
     logCodegen $ "gcAccess " ++ show ptr ++ " " ++ show outTy
     let ptrTy = ptr_t outTy
-    ptr' <- inttoptr ptr ptrTy
-    logCodegen $ "inttoptr " ++ show ptr ++ " " ++ show (ptr_t outTy)
-    logCodegen $ "inttoptr produced " ++ show ptr'
+    ptr' <- doCast ptr ptrTy
+    logCodegen $ "doCast produced " ++ show ptr'
 
     let getel = getElementPtrInstr ptr' [0]
     logCodegen $ "getel = " ++ show getel
