@@ -413,7 +413,7 @@ buildOutputOp params = do
 -- instructions.
 structPack :: [Operand] -> Codegen Operand
 structPack ops = do
-    let opTypes = List.map operandType ops
+    let opTypes = List.map typeOf ops
     let strType = struct_t opTypes
     let strCons = cons $ C.Undef strType
     sequentialInsert ops strType strCons 0
@@ -810,16 +810,6 @@ offsetAddr baseAddr offsetFn offset = do
           instr address_t (offsetFn baseAddr offsetArg)
 
 
-isNullCons :: C.Constant -> Bool
-isNullCons (C.Int _ val) = val == 0
-isNullCons _             = False
-
-
-isPtr :: LLVMAST.Type -> Bool
-isPtr (PointerType _ _) = True
-isPtr _                 = False
-
-
 doCast :: Operand -> LLVMAST.Type -> Codegen Operand
 doCast op ty2 = do
     (op',caseStr) <- castHelper bitcast zext trunc inttoptr ptrtoint op (typeOf op) ty2
@@ -878,15 +868,6 @@ castHelper b z t _ _ op ty1@(IntegerType bs1) ty2@(FloatingPointType fp)
     caseStr = (,"int" ++ show bs1 ++ "-fp" ++ show bs2)
 castHelper b _ _ _ _ op ty1 ty2 =
     (,"bitcast from " ++ show ty1 ++ " case") <$> b op ty2
-
-
--- | Predicate to check if an operand is a constant
-constantType :: C.Constant -> LLVMAST.Type
-constantType (C.Int bs _) = int_c bs
-constantType (C.Float _)  = float_t
-constantType (C.Null ty)  = ty
-constantType (C.Undef ty) = ty
-constantType _            = shouldnt "Cannot determine constant type."
 
 
 ----------------------------------------------------------------------------
@@ -960,12 +941,6 @@ primReturnLLVMType tys  = return $ struct_t tys
 
 goesIn :: PrimArg -> Bool
 goesIn p = argFlowDirection p == FlowIn
-
-
--- | Pull out the name of a primitive argument if it is a variable.
-argName :: PrimArg -> Maybe String
-argName ArgVar{argVarName=var} = Just $ show var
-argName _                    = Nothing
 
 
 argIntVal :: PrimArg -> Maybe Integer
@@ -1304,10 +1279,6 @@ repLLVMType (Floating 128) = FloatingPointType FP128FP
 repLLVMType (Floating b)   = shouldnt $ "unknown floating point width "
                                         ++ show b
 repLLVMType (Func _ _)     = address_t
-
-
-defaultLLVMType :: LLVMAST.Type
-defaultLLVMType = repLLVMType defaultTypeRepresentation
 
 
 ------------------------------------------------------------------------------

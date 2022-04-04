@@ -19,8 +19,7 @@ module Codegen (
   phi, br, cbr, getBlock, retNothing, fresh,
   -- * Symbol storage
   alloca, store, local, assign, addOperand, load, getVar, localVar, preservingSymtab,
-  makeGlobalResourceVariable,
-  operandType, doAlloca, doLoad,
+  makeGlobalResourceVariable, doLoad,
   bitcast, cbitcast, inttoptr, cinttoptr, ptrtoint, cptrtoint,
   trunc, ctrunc, zext, czext, sext, csext,
   -- * Types
@@ -477,23 +476,6 @@ addOperand arg opd = do
     modify $ \s -> s { symtab=st{stOpds=Map.insert arg opd $ stOpds st} }
 
 
--- | Look inside an operand and determine it's type.
-operandType :: Operand -> Type
-operandType (LocalReference ty _) = ty
-operandType (ConstantOperand cons) =
-    case cons of
-        C.Int bs _ -> int_c bs
-        C.Float _ -> float_t
-        C.Null ty -> ty
-        C.GlobalReference ty _ -> ty
-        C.GetElementPtr _ (C.GlobalReference ty _) _ -> ty
-        C.IntToPtr _ ty -> ty
-        C.PtrToInt _ ty -> ty
-        C.Undef ty -> ty
-        _ -> shouldnt $ "Not a recognised constant operand: " ++ show cons
-operandType _ = void_t
-
-
 ----------------------------------------------------------------------------
 -- Instructions                                                           --
 ----------------------------------------------------------------------------
@@ -707,11 +689,6 @@ sext op ty = instr ty $ SExt op ty []
 csext :: C.Constant -> LLVMAST.Type -> Codegen C.Constant
 csext op ty = return $ C.SExt op ty
 
-
--- Helpers for allocating, storing, loading
-doAlloca :: Type -> Codegen Operand
-doAlloca (PointerType ty _) = instr (ptr_t ty) $ Alloca ty Nothing 0 []
-doAlloca ty                 = instr (ptr_t ty) $ Alloca ty Nothing 0 []
 
 doLoad :: Type -> Operand -> Codegen Operand
 doLoad ty ptr = instr ty $ Load False ptr Nothing 0 []
