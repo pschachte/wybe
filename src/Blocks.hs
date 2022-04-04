@@ -18,7 +18,7 @@ import           BinaryFactory
 import           Codegen
 import           Resources
 import           Config                          (wordSize, wordSizeBytes)
-import           Util                            (maybeNth, zipWith3M_, lift2,
+import           Util                            (maybeNth, lift2,
                                                   (|||), (&&&))
 import           Snippets
 import           Control.Monad                   as M
@@ -375,7 +375,7 @@ assignParam p@PrimParam{primParamType=ty} = do
       $ do
             let nm = show (primParamName p)
             let llty = repLLVMType trep
-            assign nm (localVar llty nm) trep
+            assign nm (localVar llty nm)
 
 
 -- | Convert a PrimParam to an Operand value and reference this value by the
@@ -386,7 +386,7 @@ preassignOutput p = do
     let nm = show (primParamName p)
     trep <- typeRep' ty
     let llty = repLLVMType trep
-    assign nm (cons $ C.Undef llty) trep
+    assign nm (cons $ C.Undef llty)
 
 
 -- | Retrive or build the output operand from the given parameters.
@@ -616,10 +616,9 @@ cgenLLVMUnop "move" flags args =
     case partitionArgs args of
       ([input],[output]) -> do
            inRep <- typeRep' $ argType input
-           outRep <- typeRep' $ argType output
            (outTy, outNm) <- openPrimArg output
            inop <- cgenArg input
-           assign outNm inop outRep
+           assign outNm inop
       _ ->
            shouldnt "llvm move instruction with wrong arity"
 
@@ -655,6 +654,12 @@ prepareArgs' (a:as) (p@PrimParam{primParamType=ty}:ps) = do
     rest <- prepareArgs' as ps
     return $ if real then setArgType ty a:rest else rest
 
+data FlowOutByReferenceShim = FlowOutByReferenceShim {
+    shimVarType :: TypeSpec,
+    shimVarName :: PrimVarName,
+    referenceVarName :: PrimVarName
+} deriving (Show)
+
 
 filterPhantomArgs :: [PrimArg] -> Codegen [PrimArg]
 filterPhantomArgs = filterM ((not <$>) . lift2 . argIsPhantom)
@@ -677,7 +682,7 @@ cgenLPVM "alloc" _ args@[sizeArg,addrArg] = do
                 outRep <- typeRep' $ argType addrArg
                 let outTy = repLLVMType outRep
                 op <- gcAllocate sizeArg outTy
-                assign (pullName addrArg) op outRep
+                assign (pullName addrArg) op
             _ ->
               shouldnt $ "alloc instruction with " ++ show (length inputs)
                          ++ " inputs"
@@ -691,7 +696,7 @@ cgenLPVM "access" _ args@[addrArg,offsetArg,_,_,val] = do
           let outTy = repLLVMType outRep
           logCodegen $ "outTy = " ++ show outTy
           op <- gcAccess finalAddr outTy
-          assign (pullName val) op outRep
+          assign (pullName val) op
 
 cgenLPVM "mutate" flags
     [addrArg, outArg, offsetArg, ArgInt 0 intTy, sizeArg, startOffsetArg,
@@ -708,7 +713,7 @@ cgenLPVM "mutate" flags
           let outTy = repLLVMType outRep
           allocAddr <- gcAllocate sizeArg outTy
           outAddr <- offsetAddr allocAddr iadd startOffsetArg
-          assign (pullName outArg) outAddr outRep
+          assign (pullName outArg) outAddr
           taggedAddr <- cgenArg addrArg
           baseAddr <- offsetAddr taggedAddr isub startOffsetArg
           callMemCpy allocAddr baseAddr sizeArg
@@ -729,7 +734,8 @@ cgenLPVM "mutate" _
           baseAddr <- cgenArg addrArg
           gcMutate baseAddr offsetArg valArg
           outRep <- typeRep' $ argType addrArg
-          assign (pullName outArg) baseAddr Address
+          when (outRep == Address) (return $ shouldnt "outRep != Address")
+          assign (pullName outArg) baseAddr
 
 cgenLPVM "mutate" _ [_, _, _, destructiveArg, _, _, _] =
       nyi "lpvm mutate instruction with non-constant destructive flag"
@@ -757,7 +763,7 @@ cgenLPVM "cast" _ args@[inArg,outArg] =
                                 ++ show (argType outArg)
             logCodegen $ " CAST OP  : " ++ show castOp
 
-            assign (pullName outArg) castOp outRep
+            assign (pullName outArg) castOp
 
         -- A cast with no outputs:  do nothing
         (_, []) -> return ()
@@ -784,14 +790,21 @@ cgenLPVM "load" _ args = do
          [output@(ArgVar nm _ _ _ _)]) -> do
             logCodegen $ "lpvm load " ++ show input ++ " " ++ show output
             ty' <- llvmType' ty
-            trep <- typeRep' ty
             global <- getGlobalResource res ty'
             op' <- doLoad ty' global
-            assign (show nm) op' trep
+            assign (show nm) op'
         ([],[]) ->
             return ()
         _ ->
             shouldnt $ "lpvm load instruction with wrong arity " ++ show args
+
+-- like `access`, except it only computes the address offset and stores it in `val`
+cgenLPVM "address" _ args@[addrArg,offsetArg,_,_,out] = do
+    baseAddr <- cgenArg addrArg
+    finalAddr <- offsetAddr baseAddr iadd offsetArg
+    outRep <- typeRep' $ argType out
+    finalAddrPtr <- doCast finalAddr (typeOf finalAddr) (repLLVMType outRep)
+    assign (pullName out) finalAddrPtr
 
 cgenLPVM pname flags args = do
     shouldnt $ "Instruction " ++ pname ++ " arity " ++ show (length args)
@@ -914,15 +927,14 @@ addInstruction ins outArgs = do
             logCodegen $ "outRep = " ++ show outRep
             let outName = pullName outArg
             outop <- namedInstr outTy outName ins
-            assign outName outop outRep
+            assign outName outop
         _ -> do
             outOp <- instr outTy ins
             let outTySpecs = argType <$> outArgs
             outTys <- mapM llvmType' outTySpecs
-            treps <- mapM typeRep' outTySpecs
             fields <- structUnPack outOp outTys
             let outNames = List.map pullName outArgs
-            zipWith3M_ assign outNames fields treps
+            zipWithM_ assign outNames fields
 
 
 pullName :: PrimArg -> String
@@ -1105,8 +1117,7 @@ castVar nm ty = do
     toTyRep <- typeRep' ty
     toTy <- llvmType' ty
     lift2 $ logBlocks $ "Coercing var " ++ show nm ++ " to " ++ show ty
-    (varOp,rep) <- getVar (show nm)
-    let fromTy = repLLVMType rep
+    (varOp,fromTy) <- getVar (show nm)
     doCast varOp fromTy toTy
 
 

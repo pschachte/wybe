@@ -76,6 +76,7 @@ import           Options                         (LogSelection (Blocks,Codegen))
 import           Config                          (wordSize, functionDefSection)
 import           Unsafe.Coerce
 import           Debug.Trace
+import LLVM.AST.Typed (Typed(typeOf))
 
 ----------------------------------------------------------------------------
 -- Types                                                                  --
@@ -167,7 +168,7 @@ data BlockState
 -- Stores assignments and generated operands
 data SymbolTable
      = SymbolTable {
-         stVars :: Map.Map String (Operand,TypeRepresentation)
+         stVars :: Map.Map String (Operand,LLVM.AST.Type)
 
                       -- ^ Assigned names
        , stOpds :: Map.Map PrimArg Operand
@@ -442,17 +443,17 @@ globalVar t s = C.GlobalReference t $ LLVMAST.Name $ fromString s
 ----------------------------------------------------------------------------
 
 -- | Store a local variable on the front of the symbol table.
-assign :: String -> Operand -> TypeRepresentation -> Codegen ()
-assign var op trep = do
-    logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show op ++ ":" ++ show trep
+assign :: String -> Operand -> Codegen ()
+assign var op = do
+    logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show op ++ ":" ++ show (typeOf op)
     st <- gets symtab
-    modify $ \s -> s { symtab=st{stVars=Map.insert var (op,trep) $ stVars st} }
+    modify $ \s -> s { symtab=st{stVars=Map.insert var (op,typeOf op) $ stVars st} }
 
 
 -- | Find and return the local operand by its given name from the symbol
 -- table. Only the first find will be returned so new names can shadow
 -- the same older names.
-getVar :: String -> Codegen (Operand,TypeRepresentation)
+getVar :: String -> Codegen (Operand,LLVM.AST.Type)
 getVar var = do
     let err = shouldnt $ "Local variable not in scope: " ++ show var
     lcls <- gets (stVars . symtab)
