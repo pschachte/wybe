@@ -86,7 +86,7 @@ getCurrNumbering = gets nextVars
 
 -- |Set both current and next numberings to the specified mapping.
 putNumberings :: Numbering -> ClauseComp ()
-putNumberings numbering = 
+putNumberings numbering =
     modify (\st -> st {currVars = numbering, nextVars = numbering})
 
 
@@ -137,7 +137,7 @@ evalClauseComp clcomp =
 -- |Compile a ProcDefSrc to a ProcDefPrim, ie, compile a proc
 --  definition in source form to one in clausal form.
 compileProc :: ProcDef -> Int -> Compiler ProcDef
-compileProc proc procID = 
+compileProc proc procID =
     evalClauseComp $ do
         let ProcDefSrc body = procImpln proc
         let proto = procProto proc
@@ -163,7 +163,7 @@ compileProc proc procID =
         callSiteCount <- gets nextCallSiteID
         mSpec <- lift $ getModule modSpec
         let pSpec = ProcSpec mSpec procName procID Set.empty
-        return $ proc { procImpln = ProcDefPrim pSpec proto' compiled 
+        return $ proc { procImpln = ProcDefPrim pSpec proto' compiled
                                         emptyProcAnalysis Map.empty,
                         procCallSiteCount = callSiteCount}
 
@@ -198,7 +198,7 @@ compileBody stmts params detism = do
                 shouldnt $ "CompileBody of Cond with non-simple test:\n"
                            ++ show tstStmt
         -- XXX There shouldn't be any semidet code here any more
-        call@(ProcCall _ SemiDet _ _) -> 
+        call@(ProcCall _ SemiDet _ _) ->
             shouldnt "compileBody of SemiDet call"
         _ -> do
           prims <- mapM compileSimpleStmt stmts
@@ -273,7 +273,7 @@ compileSimpleStmt' call@(ProcCall func _ _ args) = do
                             procID
             let pSpec = ProcSpec mod name procID' generalVersion
             gFlows <- lift $ getProcGlobalFlows pSpec
-            return $ PrimCall callSiteID pSpec args' gFlows 
+            return $ PrimCall callSiteID pSpec args' gFlows
         Higher fn -> do
             fn' <- compileHigherFunc fn
             return $ PrimHigher callSiteID fn' args'
@@ -283,7 +283,7 @@ compileSimpleStmt' (ForeignCall lang name flags args) = do
 compileSimpleStmt' (TestBool expr) =
     -- Only for handling a TestBool other than as the condition of a Cond:
     compileSimpleStmt' $ content $ move (boolCast expr) (boolVarSet outputStatusName)
-compileSimpleStmt' Nop = 
+compileSimpleStmt' Nop =
     compileSimpleStmt' $ content $ move boolTrue (boolVarSet outputStatusName)
 compileSimpleStmt' Fail =
     compileSimpleStmt' $ content $ move boolFalse (boolVarSet outputStatusName)
@@ -330,7 +330,7 @@ compileArg' typ arg _ =
 compileHigherFunc :: Placed Exp -> ClauseComp PrimArg
 compileHigherFunc exp = do
     exps' <- placedApply compileArg exp
-    case exps' of 
+    case exps' of
         [arg] -> return arg
         _ -> shouldnt $ "compileHigherFunc of " ++ show exp
 
@@ -362,13 +362,13 @@ compileParam :: Numbering -> Numbering -> ProcName -> Param -> [PrimParam]
 compileParam startVars endVars procName param@(Param name ty flow ftype) =
     [PrimParam (PrimVarName name num) ty FlowIn ftype (ParamInfo False)
     | flowsIn flow
-    , let num = Map.findWithDefault 
+    , let num = Map.findWithDefault
                 (shouldnt ("compileParam for input param " ++ show param
                             ++ " of proc " ++ show procName))
                 name startVars]
     ++ [PrimParam (PrimVarName name num) ty FlowOut ftype (ParamInfo False)
     | flowsOut flow
-    , let num = Map.findWithDefault 
+    , let num = Map.findWithDefault
                 (shouldnt ("compileParam for output param " ++ show param
                             ++ " of proc " ++ show procName))
                 name endVars]

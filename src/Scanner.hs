@@ -138,7 +138,7 @@ delimitString d s = delimStringStart d ++ tail (init $ show s)
                                        ++ delimStringEnd d
 
 
--- |Return the specified starting quote as a string. 
+-- |Return the specified starting quote as a string.
 delimStringStart :: StringDelim -> String
 delimStringStart DoubleQuote      = "\""
 delimStringStart BackQuote        = "`"
@@ -146,7 +146,7 @@ delimStringStart (LongQuote s)    = s
 delimStringStart (IdentQuote i s) = i ++ delimStringStart s
 
 
--- |Return the specified ending quote as a string. 
+-- |Return the specified ending quote as a string.
 delimStringEnd :: StringDelim -> String
 delimStringEnd DoubleQuote      = "\""
 delimStringEnd BackQuote        = "`"

@@ -18,7 +18,7 @@ import           Data.Map              as Map
 import           Data.Set              as Set
 import           Data.Either           as Either
 import           Text.Read             (readEither)
-import           Control.Monad 
+import           Control.Monad
 import           System.Console.GetOpt
 import           System.Environment
 import           System.Exit
@@ -37,7 +37,7 @@ data Options = Options
     , optLibDirs      :: [String] -- ^Directories where library files live
     , optLogAspects   :: Set LogSelection
                                   -- ^Which aspects to log
-                                 
+
     , optLogUnknown   :: Set String
                                   -- ^Unknown log aspects
     , optLLVMOptLevel :: Either String Word
@@ -65,7 +65,7 @@ defaultOptions = Options
   , optLogUnknown   = Set.empty
   , optLLVMOptLevel = Right 3
   , optNoLLVMOpt    = False
-  , optNoMultiSpecz = False 
+  , optNoMultiSpecz = False
   , optDumpLib      = False
   , optVerbose      = False
   , optNoFont       = False
@@ -211,18 +211,18 @@ handleCmdline = do
         putStrLn "The argument to this option should be a comma-separated"
         putStrLn "list (with no spaces) of these options:"
         putStr $ formatMapping logSelectionDescription
-        if badLogs 
+        if badLogs
         then do
             reportErrorExit opts
-                $ "Unknown log options: " 
+                $ "Unknown log options: "
                 ++ intercalate ", " (Set.toList unknown)
         else exitSuccess
     else let optLvl = optLLVMOptLevel opts
          in if isLeft optLvl
     then do
-        reportErrorExit opts 
-            $ "Unknown LLVM optimisation level: " 
-            ++ fromLeft "" optLvl 
+        reportErrorExit opts
+            $ "Unknown LLVM optimisation level: "
+            ++ fromLeft "" optLvl
     else if optShowVersion opts
     then do
         putStrLn $ "wybemk " ++ version ++ " (git " ++ gitHash ++ ")"
@@ -241,16 +241,16 @@ reportErrorExit :: Options -> String -> IO a
 reportErrorExit Options{optNoFont=noFont} msg = do
     unless noFont $ setSGR [SetColor Foreground Vivid Red]
     putStrLn $ "Error: " ++ msg
-    exitFailure 
+    exitFailure
 
 addLogAspects :: String -> Options -> Options
-addLogAspects aspectsStr opts@Options{optLogUnknown=unknown0, 
-                                      optLogAspects=aspects0} = 
+addLogAspects aspectsStr opts@Options{optLogUnknown=unknown0,
+                                      optLogAspects=aspects0} =
     let aspectList = separate ',' aspectsStr
-        (unknown', aspects') = partitionEithers $ getLogRequest <$> aspectList 
+        (unknown', aspects') = partitionEithers $ getLogRequest <$> aspectList
         unknown'' = Set.fromList unknown'
         aspects'' = let aspectSet = Set.fromList aspects'
-                    in if Set.member All aspectSet 
+                    in if Set.member All aspectSet
                        then Set.fromList allLogSelections else aspectSet
     in opts{optLogUnknown=unknown0 `Set.union` unknown'',
             optLogAspects=aspects0 `Set.union` aspects''}

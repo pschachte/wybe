@@ -73,7 +73,7 @@ data ProcDefBlock =
 -- procedures can the prototype checked (match and eliminate unneeded
 -- arguments in cgen.)
 blockTransformModule :: ModSpec -> Compiler ()
-blockTransformModule thisMod = do 
+blockTransformModule thisMod = do
     reenterModule thisMod
     logBlocks $ "*** Translating Module: " ++ showModSpec thisMod
     modRec <- getModule id
@@ -111,7 +111,7 @@ blockTransformModule thisMod = do
     -- Translate
     (procBlocks, txState) <- mapM translateProc mangledProcs
                              `runStateT` emptyTranslation
-    
+
     let procBlocks' = List.concat procBlocks
     --------------------------------------------------
 
@@ -240,7 +240,7 @@ translateProc proc = do
     return $ block:blocks
 
 
--- Helper for `translateProc`. Translate the given `ProcBody` 
+-- Helper for `translateProc`. Translate the given `ProcBody`
 -- (A specialized version of a procedure).
 _translateProcImpl :: PrimProto -> Bool -> ProcBody -> Translation ProcDefBlock
 _translateProcImpl proto isClosure body = do
@@ -254,7 +254,7 @@ _translateProcImpl proto isClosure body = do
         logBlocks $ "proto: " ++ show proto'
                     ++ "body: " ++ show body'
                     ++ "\n" ++ replicate 50 '-' ++ "\n"
-    codestate <- doCodegenBody proto' body' 
+    codestate <- doCodegenBody proto' body'
                     `execStateT` emptyCodegen
     let pname = primProtoName proto
     let body' = createBlocks codestate
@@ -263,10 +263,10 @@ _translateProcImpl proto isClosure body = do
     return $ ProcDefBlock proto lldef
 
 -- | Updates a PrimProto and ProcBody as though the Free Params are accessed
--- via the closure environment 
+-- via the closure environment
 closeClosure :: PrimProto -> ProcBody -> (PrimProto, ProcBody)
 closeClosure proto@PrimProto{primProtoParams=params}
-             body@ProcBody{bodyPrims=prims} = 
+             body@ProcBody{bodyPrims=prims} =
     (proto{primProtoParams=
             envPrimParam:(setPrimParamType AnyType <$> actualParams)},
      body{bodyPrims=unpacker ++ prims})
@@ -533,7 +533,7 @@ cgen prim@(PrimHigher cId (ArgProcRef pspec closed _) args) = do
     logCodegen $ "Compiling " ++ show prim
               ++ " as first order call to " ++ show pspec'
               ++ " closed over " ++ show closed
-    cgen $ PrimCall cId pspec' (closed ++ args) univGlobalFlows 
+    cgen $ PrimCall cId pspec' (closed ++ args) univGlobalFlows
 
 cgen prim@(PrimHigher callSiteId fn@ArgVar{} args) = do
     logCodegen $ "Compiling " ++ show prim
@@ -637,8 +637,8 @@ cgenLLVMUnop name flags args =
 
 
 -- | Match PrimArgs with the paramaters in the given prototype. If a PrimArg's
--- counterpart in the prototype is unneeded, filtered out. Arguments 
--- are matched positionally, and are coerced to the type of corresponding 
+-- counterpart in the prototype is unneeded, filtered out. Arguments
+-- are matched positionally, and are coerced to the type of corresponding
 -- parameters.
 prepareArgs :: PrimProto -> [PrimArg] -> Codegen [PrimArg]
 prepareArgs proto args = prepareArgs' args $ primProtoParams proto
@@ -985,7 +985,7 @@ openPrimArg a = shouldnt $ "Can't Open!: "
                 ++ show (argFlowDirection a)
 
 
--- | 'cgenArg' makes an Operand of the input argument. 
+-- | 'cgenArg' makes an Operand of the input argument.
 -- * Variables return a casted version of their respective symbol table operand
 -- * Constants are generated with cgenArgConst, then wrapped in `cons`
 cgenArg :: PrimArg -> Codegen LLVMAST.Operand
@@ -1028,8 +1028,8 @@ cgenArg' arg = do
 -- * Ints, Floats, Chars, Undefs are of respective LLVMTypes
 -- * Strings are handled based on string variant
 --   * CString    - ptr to global constant of [N x i8]
---   * WybeString - ptr to global constant of { i64, i64 } with the second 
---                  element being as though it were a CString. This representation 
+--   * WybeString - ptr to global constant of { i64, i64 } with the second
+--                  element being as though it were a CString. This representation
 --                  is to comply with the stdlib string implementation
 cgenArgConst :: PrimArg -> Codegen C.Constant
 cgenArgConst arg = do
@@ -1112,10 +1112,10 @@ castVar nm ty = do
 
 primActualParams :: ProcSpec -> Codegen [PrimParam]
 primActualParams pspec = lift2 $ do
-    primParams <- protoRealParams . procImplnProto . procImpln 
+    primParams <- protoRealParams . procImplnProto . procImpln
               =<< getProcDef pspec
     let nonFreeParams = List.filter ((/= Free) . primParamFlowType) primParams
-    ifM (isClosureProc pspec) 
+    ifM (isClosureProc pspec)
         (return $ setPrimParamType AnyType <$> envPrimParam : nonFreeParams)
         (return nonFreeParams)
 
@@ -1320,15 +1320,15 @@ defaultLLVMType = repLLVMType defaultTypeRepresentation
 -- | Initialize and fill a new LLVMAST.Module with the translated
 -- global definitions (extern declarations and defined functions)
 -- of LPVM procedures in a module.
-newLLVMModule :: String -> String -> [ProcDefBlock] -> TranslationState 
+newLLVMModule :: String -> String -> [ProcDefBlock] -> TranslationState
               -> [ResourceSpec] -> Compiler LLVMAST.Module
 newLLVMModule name fname blocks (TranslationState _ consts vars exts) ress = do
     let defs = List.map blockDef blocks
         varDefs = LLVMAST.GlobalDefinition <$> Map.elems vars
-        constDefs = LLVMAST.GlobalDefinition <$> Map.elems consts 
+        constDefs = LLVMAST.GlobalDefinition <$> Map.elems consts
     resDefs <- catMaybes <$> mapM globalResourceExtern ress
     extDefs <- mapM declareExtern exts
-    let exs' = uniqueExterns (resDefs ++ varDefs ++ constDefs) 
+    let exs' = uniqueExterns (resDefs ++ varDefs ++ constDefs)
             ++ uniqueExterns (extDefs ++ [mallocExtern] ++ intrinsicExterns)
     return $ modWithDefinitions name fname $ exs' ++ defs
 

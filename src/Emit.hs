@@ -172,7 +172,7 @@ passes lvl = defaultCuratedPassSetSpec { optLevel = Just lvl }
 -- representation of a LLVMAST.Module after the C++ module has been through
 -- a set of curated passes.
 withOptimisedModule :: Options -> LLVMAST.Module -> (Mod.Module -> IO a) -> IO a
-withOptimisedModule opts@Options{optLLVMOptLevel=lvl} llmod action = 
+withOptimisedModule opts@Options{optLLVMOptLevel=lvl} llmod action =
     withModule opts llmod $ \m -> do
         withPassManager (passes lvl') $ \pm -> do
             success <- runPassManager pm m

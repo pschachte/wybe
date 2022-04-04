@@ -1,6 +1,6 @@
 --  File     : Unique.hs
 --  Purpose  : The unique typing system for Wybe
---  Copyright: (c) 
+--  Copyright: (c)
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 --
@@ -29,9 +29,9 @@ data UniquenessError = UniquenessError {
         errTypeSpec :: TypeSpec,    -- ^ Type of the variable
         errPos      :: OptPos,      -- ^ Source position of the variable or expr
         errFlowType :: ArgFlowType, -- ^ The flow type (variable or resource)
-        errKind     :: UniquenessErrorKind 
+        errKind     :: UniquenessErrorKind
                                     -- ^ The kind of error
-    } 
+    }
     | UniqueGenericError {
         errGenMod      :: ModSpec,  -- ^ The module of the callee
         errGenProc     :: ProcName, -- ^ The callee proc
@@ -43,14 +43,14 @@ data UniquenessError = UniquenessError {
  deriving Show
 
 
-data UniquenessErrorKind 
+data UniquenessErrorKind
     = ErrorReuse               -- ^ Reuse of variable without intervening assignment
     | ErrorReturn ProcName     -- ^ Variable returned after being used
     | ErrorDetism Determinism  -- ^ Variable assigned in non-deterministic contxt
     | ErrorClosed              -- ^ Closure over a unique variable
   deriving (Eq, Show)
 
-data UniquenessGenericKind 
+data UniquenessGenericKind
     = ErrorCallBinding Bool TypeVarName -- ^ Call binds type variable to a generic
                                         -- type. The boolean indicates if this is
                                         -- from a partial application
@@ -133,7 +133,7 @@ checkNoNestedUnique pos member =
 --               The Uniqueness Checker Monad
 ----------------------------------------------------------------
 
--- |The Uniqueness monad is a state transformer monad carrying the 
+-- |The Uniqueness monad is a state transformer monad carrying the
 --  uniqueness state over the compiler monad.
 
 type Uniqueness = StateT UniquenessState Compiler
@@ -149,7 +149,7 @@ logUniqueness msg = do
 uniquenessCheckDef :: ProcName -> OptPos -> Determinism -> [Placed Stmt]
                    -> [Param] -> Compiler UniquenessState
 uniquenessCheckDef name pos detism body params =
-    execStateT 
+    execStateT
     (uniquenessCheckStmts body >> mapM_ (uniquenessCheckParam name pos) params)
     $ initUniquenessState detism
 
@@ -216,8 +216,8 @@ forgivingly forgive checker = do
     return result
 
 
--- | Combine two uniqueness computations into a uniqueness computation.  
--- The resulting computation includes all the errors from both, and takes 
+-- | Combine two uniqueness computations into a uniqueness computation.
+-- The resulting computation includes all the errors from both, and takes
 -- the more conservative binding state
 joinUniqueness :: Uniqueness () -> Uniqueness () -> Uniqueness ()
 joinUniqueness first second = do
@@ -231,7 +231,7 @@ joinUniqueness first second = do
     secondState <- get
     let allErrs = uniquenessErrors secondState ++ uniquenessErrors firstState
                   ++ uniquenessErrors initial
-    let joinUsed = uniquenessUsedMap firstState 
+    let joinUsed = uniquenessUsedMap firstState
                    `Map.union` uniquenessUsedMap secondState
     let joinForgiveness = uniquenessForgive firstState
                           && uniquenessForgive secondState
@@ -252,7 +252,7 @@ uniquenessCheckStmt call@(ProcCall (First mod name mbId) _ _ args) pos = do
     let pspec = ProcSpec mod name (trustFromJust "uniquenessCheckStmt" mbId)
                     generalVersion
     params <- lift $ procProtoParams . procProto <$> getProcDef pspec
-    zipWithM_ (uniquenessCheckArg mod name pos) params $ content <$> args 
+    zipWithM_ (uniquenessCheckArg mod name pos) params $ content <$> args
 uniquenessCheckStmt call@(ProcCall (Higher fn) _ _ args) pos = do
     logUniqueness $ "Uniqueness checking higher call " ++ show call
     mapM_ (defaultPlacedApply uniquenessCheckExp pos) $ fn:args
@@ -342,19 +342,19 @@ uniquenessCheckExp (ForeignFn _ _ _ exps) pos =
 uniquenessCheckExp (CaseExp exp cases deflt) pos = do
     placedApply uniquenessCheckExp exp
     uniquenessCheckCases (placedApply uniquenessCheckExp) cases deflt
-uniquenessCheckExp var@(AnonParamVar _ _) _ = 
+uniquenessCheckExp var@(AnonParamVar _ _) _ =
     shouldnt $ "AnonParamVar " ++ show var ++ " in uniqueness checking"
 uniquenessCheckExp (AnonProc mods params body clsd _) pos = do
     uniquenessCheckClosedMap clsd pos
-    errs <- uniquenessErrors <$> lift (uniquenessCheckDef "anonymous procedure" pos 
+    errs <- uniquenessErrors <$> lift (uniquenessCheckDef "anonymous procedure" pos
                                         (modifierDetism mods) body params)
     mapM_ uniquenessErr errs
 uniquenessCheckExp (Global _) _ = return ()
-uniquenessCheckExp ref@(ProcRef _ clsd) _ = 
+uniquenessCheckExp ref@(ProcRef _ clsd) _ =
     shouldnt $ "Untyped ProcRef " ++ show ref ++ " in uniqueness checking"
 
 
--- Uniqueness check an argument of a call, ensuring that no argument binds a 
+-- Uniqueness check an argument of a call, ensuring that no argument binds a
 -- unique type to a generic type
 uniquenessCheckArg :: ModSpec -> ProcName -> OptPos -> Param -> Exp -> Uniqueness ()
 uniquenessCheckArg mod name pos Param{paramType=paramTy} (Typed _ argTy _) =
@@ -362,35 +362,35 @@ uniquenessCheckArg mod name pos Param{paramType=paramTy} (Typed _ argTy _) =
 uniquenessCheckArg _ _ _ _ _ = return ()
 
 
--- Uniqueness check an argument of a call, ensuring that no argument binds a 
+-- Uniqueness check an argument of a call, ensuring that no argument binds a
 -- unique type to a generic type
 uniquenessCheckProcRef :: ProcSpec -> OptPos -> [Placed Exp] -> TypeSpec -> Uniqueness ()
 uniquenessCheckProcRef pspec@(ProcSpec mod name _ _) pos clsd (HigherOrderType _ tfs) = do
     params <- lift $ procProtoParams . procProto <$> getProcDef pspec
-    zipWithM_ (uniquenessCheckGeneric True mod name pos) (paramType <$> params) 
-        $ (fromMaybe AnyType . maybeExpType . content <$> clsd) ++ (typeFlowType <$> tfs) 
+    zipWithM_ (uniquenessCheckGeneric True mod name pos) (paramType <$> params)
+        $ (fromMaybe AnyType . maybeExpType . content <$> clsd) ++ (typeFlowType <$> tfs)
     mapM_ (placedApply uniquenessCheckClosedVariable) clsd
-uniquenessCheckProcRef _ _ _ ty = 
+uniquenessCheckProcRef _ _ _ ty =
     shouldnt $ "uniquenessCheckProcRef on type " ++ show ty
 
-uniquenessCheckGeneric :: Bool -> ModSpec -> ProcName -> OptPos 
+uniquenessCheckGeneric :: Bool -> ModSpec -> ProcName -> OptPos
                        -> TypeSpec -> TypeSpec -> Uniqueness ()
-uniquenessCheckGeneric partial mod name pos ty (TypeVariable var) = 
+uniquenessCheckGeneric partial mod name pos ty (TypeVariable var) =
     whenM (lift $ typeIsUnique ty)
-        $ uniquenessErr $ UniqueGenericError mod name pos ty 
+        $ uniquenessErr $ UniqueGenericError mod name pos ty
                         $ ErrorCallBinding partial var
-uniquenessCheckGeneric partial mod name pos (TypeVariable var) ty = 
+uniquenessCheckGeneric partial mod name pos (TypeVariable var) ty =
     whenM (lift $ typeIsUnique ty)
-        $ uniquenessErr $ UniqueGenericError mod name pos ty 
+        $ uniquenessErr $ UniqueGenericError mod name pos ty
                         $ ErrorCallBinding partial var
-uniquenessCheckGeneric partial mod name pos 
+uniquenessCheckGeneric partial mod name pos
         (TypeSpec _ _ tys1) (TypeSpec _ _ tys2) =
-    zipWithM_ (uniquenessCheckGeneric partial mod name pos) tys1 tys2 
-uniquenessCheckGeneric partial mod name pos 
+    zipWithM_ (uniquenessCheckGeneric partial mod name pos) tys1 tys2
+uniquenessCheckGeneric partial mod name pos
         (HigherOrderType _ tfs1) (HigherOrderType _ tfs2) =
-    zipWithM_ (uniquenessCheckGeneric partial mod name pos) 
+    zipWithM_ (uniquenessCheckGeneric partial mod name pos)
         (typeFlowType <$> tfs1) (typeFlowType <$> tfs2)
-uniquenessCheckGeneric _ _ _ _ _ _ = return () 
+uniquenessCheckGeneric _ _ _ _ _ _ = return ()
 
 -- | Uniqueness check a parameter (including used resources) following checking
 -- of the proc body.  This will catch unique outputs following use of the value.
@@ -402,35 +402,35 @@ uniquenessCheckParam name pos (Param pName ty flow flowType) = do
     uniquenessCheckParamType name pos pName ty
 
 
--- | Uniqueness check the type of a parameter. This ensures that type parameters 
--- are all non-unique 
+-- | Uniqueness check the type of a parameter. This ensures that type parameters
+-- are all non-unique
 uniquenessCheckParamType :: ProcName -> OptPos -> VarName -> TypeSpec -> Uniqueness ()
 uniquenessCheckParamType procName pos paramName TypeSpec{typeParams=params} = do
     mapM_ (uniquenessCheckTypeParam procName pos paramName) params
-uniquenessCheckParamType procName pos paramName (HigherOrderType _ tfs) = 
-    mapM_ (uniquenessCheckParamType procName pos paramName . typeFlowType) tfs 
+uniquenessCheckParamType procName pos paramName (HigherOrderType _ tfs) =
+    mapM_ (uniquenessCheckParamType procName pos paramName . typeFlowType) tfs
 uniquenessCheckParamType _ _ _ _ = return ()
 
 
--- | Uniqueness check the type of a type parameter, ensuring the parateter is 
+-- | Uniqueness check the type of a type parameter, ensuring the parateter is
 -- non-unique
-uniquenessCheckTypeParam :: ProcName -> OptPos -> VarName -> TypeSpec -> Uniqueness () 
+uniquenessCheckTypeParam :: ProcName -> OptPos -> VarName -> TypeSpec -> Uniqueness ()
 uniquenessCheckTypeParam procName pos paramName ty@TypeSpec{typeParams=params} = do
     whenM (lift $ typeIsUnique ty)
         $ uniquenessErr $ UniqueGenericError [] procName pos ty (ErrorParamType paramName)
-    mapM_ (uniquenessCheckParamType procName pos paramName) params 
+    mapM_ (uniquenessCheckParamType procName pos paramName) params
 uniquenessCheckTypeParam procName pos paramName (HigherOrderType _ tfs) =
-    mapM_ (uniquenessCheckParamType procName pos paramName . typeFlowType) tfs 
+    mapM_ (uniquenessCheckParamType procName pos paramName . typeFlowType) tfs
 uniquenessCheckTypeParam _ _ _ _ = return ()
 
 
 -- Ensure that no closed Variable contained within the VarDict is unique
 uniquenessCheckClosedMap :: Maybe VarDict -> OptPos -> Uniqueness ()
 uniquenessCheckClosedMap Nothing _ = return ()
-uniquenessCheckClosedMap (Just vars) pos = 
-    mapM_ (placedApply uniquenessCheckClosedVariable) 
-        $ (\(nm,ty) -> Typed (Var nm ParamIn Free) ty Nothing `maybePlace` pos) 
-       <$> Map.toList vars 
+uniquenessCheckClosedMap (Just vars) pos =
+    mapM_ (placedApply uniquenessCheckClosedVariable)
+        $ (\(nm,ty) -> Typed (Var nm ParamIn Free) ty Nothing `maybePlace` pos)
+       <$> Map.toList vars
 
 uniquenessCheckClosedVariable :: Exp -> OptPos -> Uniqueness ()
 uniquenessCheckClosedVariable (Typed (Var name fl ft) ty _) pos = do
@@ -451,12 +451,12 @@ reportUniquenessError (UniquenessError name ty pos flow (ErrorDetism detism)) = 
                  ++ determinismName detism ++ " context"
 reportUniquenessError (UniquenessError name ty pos flow ErrorClosed) = do
     errmsg pos $ "Cannot close over a unique " ++ flowKind flow name ty
-reportUniquenessError (UniqueGenericError mod name pos ty (ErrorCallBinding partial tyVar)) = do 
+reportUniquenessError (UniqueGenericError mod name pos ty (ErrorCallBinding partial tyVar)) = do
     errmsg pos $ (if partial then "Partial application of "
-                  else "Call to ") ++ maybeModPrefix mod ++ name ++ " binds " 
-                 ++ genericTypeVar tyVar ++ " to unique type " ++ show ty 
-reportUniquenessError (UniqueGenericError mod name pos ty (ErrorParamType param)) = do 
-    errmsg pos $ "Parameter " ++ param ++ " of " ++ name 
+                  else "Call to ") ++ maybeModPrefix mod ++ name ++ " binds "
+                 ++ genericTypeVar tyVar ++ " to unique type " ++ show ty
+reportUniquenessError (UniqueGenericError mod name pos ty (ErrorParamType param)) = do
+    errmsg pos $ "Parameter " ++ param ++ " of " ++ name
                  ++ " has type with unique type parameter " ++ show ty
 
 -- | Give a human-readable description of reused variable (may be a resource).

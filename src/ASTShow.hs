@@ -57,7 +57,7 @@ instance Show Module where
                  (if Map.null (modSubmods impl)
                   then ""
                   else "\n  submodules      : " ++
-                       showMap "" ", " "" (const "") showModSpec 
+                       showMap "" ", " "" (const "") showModSpec
                        (modSubmods impl)) ++
                  "\n  procs           : " ++ "\n" ++
                  (showMap "" "\n\n" "" (const "") (showProcDefs 0)
@@ -90,9 +90,9 @@ logDump :: LogSelection -> LogSelection -> String -> Compiler ()
 logDump = logDumpWith (const $ return Nothing)
 
 
--- |Dump the content of the specified module and all submodules, with the 
--- result of an optional action applied to each module if either of the 
--- specified log selectors have been selected for logging.  This is called 
+-- |Dump the content of the specified module and all submodules, with the
+-- result of an optional action applied to each module if either of the
+-- specified log selectors have been selected for logging.  This is called
 -- between the passes of those two selectors.
 logDumpWith :: (Module -> Compiler (Maybe String))
             -> LogSelection -> LogSelection -> String -> Compiler ()

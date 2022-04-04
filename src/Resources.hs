@@ -42,27 +42,27 @@ import Control.Monad.Extra (unlessM)
 -- The first pass canonicalises the `use` declarations in procedure prototypes.
 -- This resolves the module which each resource refers to.
 --
--- The second, performed after type checking, transforms resource usage into 
+-- The second, performed after type checking, transforms resource usage into
 -- regular parameters/arguments. Here, each procedure is modifed to include
--- parameters corresponding to each resource and respective flow. 
--- Each call is also transformed to include the resources as arguments. 
--- The order of arguments is dictated by the ordering of the `ResourceSpec` 
--- type, ordering by module then name. `use` blocks are also transformed to 
--- contain LPVM `move` instructions of respectively used resources, to save 
+-- parameters corresponding to each resource and respective flow.
+-- Each call is also transformed to include the resources as arguments.
+-- The order of arguments is dictated by the ordering of the `ResourceSpec`
+-- type, ordering by module then name. `use` blocks are also transformed to
+-- contain LPVM `move` instructions of respectively used resources, to save
 -- and subsequently restore the value of each resource variable.
 --
--- The final pass tranforms resource into global variables. This pass must be 
+-- The final pass tranforms resource into global variables. This pass must be
 -- performed after uniqueness checking, as uniqueness checking assumes only the
--- second pass has been performed. The additional parameters and arguments 
--- introduced in the second pass are removed here, as they are now passed in 
--- global variables. Each reference to an in scope resource by name is 
--- transformed into a load (input) or a store (output), or both (in/out). 
+-- second pass has been performed. The additional parameters and arguments
+-- introduced in the second pass are removed here, as they are now passed in
+-- global variables. Each reference to an in scope resource by name is
+-- transformed into a load (input) or a store (output), or both (in/out).
 -- Finally, `use` blocks are also transformed to save (load) and then restore
 -- (store) each out-of-scope resource.
 --
--- The final two passes assume that type and mode checking has occured. Type 
+-- The final two passes assume that type and mode checking has occured. Type
 -- checking ensures that resources have the correct types, and mode checking
--- ensures that resources, where applicable are in scope. 
+-- ensures that resources, where applicable are in scope.
 --
 -- END MAJOR DOC
 ----------------------------------------------------------------
@@ -148,7 +148,7 @@ data ResourceState = ResourceState {
     resTmpCtr         :: Int,
     -- ^ The current tmp variable counter
     resHaveGlobals    :: Maybe Bool,
-    -- ^ Do we currently have a #globals variable? 
+    -- ^ Do we currently have a #globals variable?
     -- Nothing if we arent globalising
 
     -- The following are only used when globalising
@@ -157,9 +157,9 @@ data ResourceState = ResourceState {
     resOut            :: Map ResourceSpec TypeSpec,
     -- ^ The set of resources that flow out of the current stmt
     resMentioned      :: Map ResourceSpec TypeSpec,
-    -- ^ The set of resources that have been mentioned anywhere 
+    -- ^ The set of resources that have been mentioned anywhere
     -- in this procedure
-    resLoopTmps       :: Map ResourceSpec (VarName, TypeSpec), 
+    resLoopTmps       :: Map ResourceSpec (VarName, TypeSpec),
     -- ^ The tmp vars that are used to restore resources when breaking a loop
     resIsExecMain     :: Bool
     -- ^ Are we currently globalising the executable main procedure
@@ -220,7 +220,7 @@ resourceParams (ResourceFlowSpec res flow, typ) =
 
 -- | Transform a given procedure's body and resources, producing the body with
 -- resources transformed into arguments, the additional parameters for resources
--- and the new tmpCtr 
+-- and the new tmpCtr
 transformProc :: Set ResourceFlowSpec -> [Placed Stmt] -> OptPos
               -> Resourcer ([Placed Stmt], [Param], Int)
 transformProc resourceFlows body pos = do
@@ -321,8 +321,8 @@ transformStmt (UseResources res vars body) pos = do
                      resResources=oldResTypes `Map.union` Map.fromList resTys}
     body' <- transformStmts body
     modify $ \s -> s{ resTmpVars=oldTmp }
-    return $ saves 
-          ++ [UseResources res vars body' `maybePlace` pos] 
+    return $ saves
+          ++ [UseResources res vars body' `maybePlace` pos]
           ++ restores
 transformStmt Nop pos = return [maybePlace Nop pos]
 transformStmt Fail pos = return [maybePlace Fail pos]
@@ -378,7 +378,7 @@ resourceArgs pos rflow = do
 
 ------------------------- Globalisation --------------------------------
 
--- | Transform a givn ProcDef, transforming resource usage into loads/stores of 
+-- | Transform a givn ProcDef, transforming resource usage into loads/stores of
 -- global variables, and threads a global variable state through calls instead
 -- of passing resources as parameters
 --
@@ -400,7 +400,7 @@ transformProcGlobals pd _ = do
     let params = procProtoParams proto
     let res = procProtoResources proto
     let ProcDefSrc body = procImpln pd
-    (params', body', tmp') <- evalStateT (globaliseProc pos (Just name) variant 
+    (params', body', tmp') <- evalStateT (globaliseProc pos (Just name) variant
                                             detism params res body)
                                 $ initResourceState (Just False) tmp
     let proto' = proto { procProtoParams=params' }
@@ -411,7 +411,7 @@ transformProcGlobals pd _ = do
     return pd'
 
 
--- Globalise a proc, tranforming resources into globals. 
+-- Globalise a proc, tranforming resources into globals.
 -- This returns an updated list of Params, transofrmed list of Stmts (body),
 -- and the value of the tmpCtr after globalising the proc
 globaliseProc :: OptPos -> Maybe ProcName -> ProcVariant
@@ -441,10 +441,10 @@ globaliseProc pos name variant detism params ress body = do
     let ress' = [res | ResourceFlowSpec res flow <- Set.toList ress
                 , not $ flowsOut flow
                 , not $ isSpecialResource res ]
-    body' <- fst <$> globaliseStmts [UseResources ress' (Just Map.empty) body 
+    body' <- fst <$> globaliseStmts [UseResources ress' (Just Map.empty) body
                                         `maybePlace` pos]
-    -- In the case of a proc that may fail, we need to roll back the state of 
-    -- resources we can if we fail. We can do this with the following 
+    -- In the case of a proc that may fail, we need to roll back the state of
+    -- resources we can if we fail. We can do this with the following
     -- transformation
     --  <stmts>
     -- ... into ...
@@ -453,22 +453,22 @@ globaliseProc pos name variant detism params ress body = do
     -- Unbranching will then force the stores to be executed in the case of
     -- failure, ensuring the global variables are unmoddified
     newMentioned <- gets resMentioned
-    body'' <- if detism /= SemiDet && detism /= Failure 
+    body'' <- if detism /= SemiDet && detism /= Failure
                 || Map.null newMentioned
               then return body'
               else do
-                (saves, restores, tmpVars, _) <- saveRestoreResourcesTmp pos 
+                (saves, restores, tmpVars, _) <- saveRestoreResourcesTmp pos
                                             $ Map.toList newMentioned
                 return $ saves
-                      ++ [Unplaced $ Cond (seqToStmt body') 
-                            [] 
-                            (restores ++ [Unplaced Fail]) 
+                      ++ [Unplaced $ Cond (seqToStmt body')
+                            []
+                            (restores ++ [Unplaced Fail])
                             (Just tmpVars) (Just tmpVars) (Just Set.empty)]
     modify $ \s -> s{resResources=oldResources,
                      resHaveGlobals=oldHaveGlobals,
                      resTmpVars=oldTmpVars,
-                     resLoopTmps=oldLoopTmps,                
-                     resIsExecMain=oldIsExecMain,   
+                     resLoopTmps=oldLoopTmps,
+                     resIsExecMain=oldIsExecMain,
                      resMentioned=oldMentioned `Map.union` newMentioned}
     tmp <- gets resTmpCtr
     -- executable main gets special treatment
@@ -496,11 +496,11 @@ globaliseStmt (ProcCall fn@(First m n mbId) d r args) pos = do
     (args'', ins, outs) <- globaliseExps args'
     let argTys = fromMaybe AnyType . maybeExpType . content <$> args''
     let hasResfulHigherArgs = any isResourcefulHigherOrder argTys
-    let needsGlobals = not (List.null res) || hasResfulHigherArgs 
-    unlessM ((not needsGlobals ||) . trustFromJust "globaliseStmt first" 
+    let needsGlobals = not (List.null res) || hasResfulHigherArgs
+    unlessM ((not needsGlobals ||) . trustFromJust "globaliseStmt first"
                 <$> gets resHaveGlobals)
         $ lift $ errmsg pos $ "Cannot make resourceful call to " ++ showProcName n
-                           ++ " in current context"                   
+                           ++ " in current context"
     proto <- procProto <$> lift (getProcDef $ ProcSpec m n procID generalVersion)
     let paramTys = paramType <$> procProtoParams proto
     let globals = any isResourcefulHigherOrder paramTys || not (List.null res)
@@ -510,9 +510,9 @@ globaliseStmt (ProcCall fn@(First m n mbId) d r args) pos = do
 globaliseStmt (ProcCall (Higher fn) d r args) pos = do
     (fn':args', ins, outs) <- globaliseExps $ fn:args
     let globals = case maybeExpType $ content fn' of
-                    Just (HigherOrderType mods _) -> modifierResourceful mods 
+                    Just (HigherOrderType mods _) -> modifierResourceful mods
                     _ -> shouldnt "glabalise badly typed higher"
-    unlessM ((not globals ||) . trustFromJust "globaliseStmt higher" 
+    unlessM ((not globals ||) . trustFromJust "globaliseStmt higher"
                 <$> gets resHaveGlobals)
         $ lift $ errmsg pos $ "Cannot make resourceful call to " ++ show (content fn')
                            ++ " in current context"
@@ -541,7 +541,7 @@ globaliseStmt (And stmts) pos = do
     return ([And stmts' `maybePlace` pos], globals)
 globaliseStmt (Or disjs vars _) pos = do
     (disjs', globals) <- unzip <$> mapM (placedApply globaliseStmt) disjs
-    -- we only need to save resources, and restore before each disj if 
+    -- we only need to save resources, and restore before each disj if
     -- any of the init use globals
     -- the last's restoration is handled implicity
     (saves, restores) <- loadStoreResourcesIf pos $ or $ init globals
@@ -556,7 +556,7 @@ globaliseStmt (Not stmt) pos = do
     return ([Not stmt' `maybePlace` pos], globals)
 globaliseStmt (TestBool exp) pos = do
     ([exp'], ins, outs) <- globaliseExps [exp `maybePlace` pos]
-    -- TestBool cannot modify a resource 
+    -- TestBool cannot modify a resource
     unless (Map.null outs) $ shouldnt "globalise TestBool with out flowing resource"
     return (loadStoreResources pos ins outs [TestBool (content exp') `maybePlace` pos],
             False)
@@ -568,13 +568,13 @@ globaliseStmt (Loop stmts vars _) pos = do
     res <- gets resResources
     modify $ \s -> s{resLoopTmps=loopTmps}
     return ([Loop stmts' vars' (Just $ Map.keysSet res) `maybePlace` pos], usesGlobals)
-globaliseStmt (UseResources res vars stmts) pos = 
+globaliseStmt (UseResources res vars stmts) pos =
     case List.filter (not . isSpecialResource) res of
         [] -> globaliseStmts stmts
-        newRes' -> do 
+        newRes' -> do
             -- this handles the resources that were previously out-of-scope
             let vars' = trustFromJust "globalise use with no vars" vars
-            resTypes <- (mapSnd (trustFromJust "globalise use") <$>) 
+            resTypes <- (mapSnd (trustFromJust "globalise use") <$>)
                     <$> lift (mapM (canonicaliseResourceSpec pos "use block") res)
             ResourceState{resHaveGlobals=haveGlobals,
                           resResources=resources,
@@ -598,10 +598,10 @@ globaliseStmt (UseResources res vars stmts) pos =
             -- no need to load and store resources in executable main
             if isExecMain
             then return (stmts', True)
-            else return 
+            else return
                     -- load the old values of the resources
                 (loads
-                    -- store the values of the new resources, 
+                    -- store the values of the new resources,
                     -- if theyve been assigned before the use block
                 ++ [storeResource pos (res, ty)
                    | (res, ty) <- resTypes
@@ -626,16 +626,16 @@ globaliseStmt For{} _ = shouldnt "for in globalise"
 restoreLoopGlobals :: OptPos -> Resourcer [Placed Stmt]
 restoreLoopGlobals pos = do
     loopTmps <- gets resLoopTmps
-    return [rePlace pos $ globalStore res ty 
-                        $ Typed (Var tmp ParamIn Ordinary) ty Nothing 
+    return [rePlace pos $ globalStore res ty
+                        $ Typed (Var tmp ParamIn Ordinary) ty Nothing
            | (res, (tmp, ty)) <- Map.toList loopTmps]
 
 
 -- | Globalise a list of expressions.
--- This returns a list of inflowing and outflowing resources, and keeps the 
+-- This returns a list of inflowing and outflowing resources, and keeps the
 -- Resourcer monad's in and out resources in tact
 globaliseExps :: [Placed Exp]
-              -> Resourcer ([Placed Exp], Map ResourceSpec TypeSpec, 
+              -> Resourcer ([Placed Exp], Map ResourceSpec TypeSpec,
                                           Map ResourceSpec TypeSpec)
 globaliseExps exps = do
     ResourceState{resIn=oldIn, resOut=oldOut} <- get
@@ -665,7 +665,7 @@ globaliseExp _ (ProcRef pspec exps) pos = do
     return $ ProcRef pspec exps' `maybePlace` pos
 globaliseExp _ (AnonProc mods@(ProcModifiers detism _ _ _ resful _ _)
                 params body clsd res) pos = do
-    (params', body', _) <- globaliseProc pos Nothing AnonymousProc 
+    (params', body', _) <- globaliseProc pos Nothing AnonymousProc
                                 detism params Set.empty body
     let clsd' = trustFromJust "gloablise anon proc without clsd" clsd
     clsd'' <- if resful
@@ -765,8 +765,8 @@ eitherResourceExp var@(Typed (Var _ _ (Resource res)) ty _) pos =
 eitherResourceExp exp pos = Right $ exp `maybePlace` pos
 
 
--- | Add tmp variables into a resource dictionary. If we are globalising, we 
--- remove resources from the dict, and if the flag is true, we also 
+-- | Add tmp variables into a resource dictionary. If we are globalising, we
+-- remove resources from the dict, and if the flag is true, we also
 -- add the #globals variable
 fixVarDict :: Maybe VarDict -> Resourcer (Maybe VarDict)
 fixVarDict Nothing = return Nothing
@@ -792,7 +792,7 @@ setResource nm (rs, ty) = varSetTyped nm ty `setExpFlowType` Resource rs
 
 -- | Save and restore the given resources in tmp variables
 saveRestoreResourcesTmp :: OptPos -> [(ResourceSpec, TypeSpec)]
-                        -> Resourcer ([Placed Stmt], [Placed Stmt], VarDict, 
+                        -> Resourcer ([Placed Stmt], [Placed Stmt], VarDict,
                                       Map ResourceSpec (VarName, TypeSpec))
 saveRestoreResourcesTmp pos resTys = do
     tmp <- gets resTmpCtr
@@ -853,15 +853,15 @@ loadResources :: OptPos -> Map ResourceSpec TypeSpec -> [Placed Stmt]
 loadResources pos = (loadResource pos <$>) . Map.toList
 
 
--- | Surround a given list of statements with loads/stores to the given 
--- resources 
-loadStoreResources :: OptPos 
+-- | Surround a given list of statements with loads/stores to the given
+-- resources
+loadStoreResources :: OptPos
                    -> Map ResourceSpec TypeSpec -> Map ResourceSpec TypeSpec
                    -> [Placed Stmt] -> [Placed Stmt]
 loadStoreResources pos inRes outRes stmts =
     loadResources pos inRes ++ stmts ++ storeResources pos outRes
 
--- | Surround a given list of statements with loads/stores to the given 
+-- | Surround a given list of statements with loads/stores to the given
 -- resources, iff the flag is True
 loadStoreResourcesIf :: OptPos -> Bool -> Resourcer ([Placed Stmt],[Placed Stmt])
 loadStoreResourcesIf pos False = return ([], [])
@@ -873,17 +873,17 @@ loadStoreResourcesIf pos True = do
 
 -- Build a map of resource names to their respective resource specs
 resourceNameMap :: Map ResourceSpec TypeSpec -> Map VarName ResourceSpec
-resourceNameMap = Map.fromList . ((((,) =<< resourceName) . fst) <$>) 
+resourceNameMap = Map.fromList . ((((,) =<< resourceName) . fst) <$>)
                                . Map.toList
 
 
--- |Log a message in the Compiler monad, 
+-- |Log a message in the Compiler monad,
 -- if we are logging resource transformation activity.
 logResources :: String -> Compiler ()
 logResources s = logMsg Resources s
 
 
--- |Log a message in the Resourcer monad, 
+-- |Log a message in the Resourcer monad,
 -- if we are logging resource transformation activity.
 logResourcer :: String -> Resourcer ()
 logResourcer = lift . logResources

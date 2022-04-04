@@ -168,7 +168,7 @@ testInExp = boolVarGet outputStatusName
 -- | Get the index a test output should be if the given params are from a
 -- SemiDet proc
 testOutIndex :: [Param] -> Int
-testOutIndex = length . takeWhile (((==Free) ||| (==Ordinary)) . paramFlowType) 
+testOutIndex = length . takeWhile (((==Free) ||| (==Ordinary)) . paramFlowType)
 
 
 -- | Add a test output param to the list of params, as well as the index of the
@@ -177,25 +177,25 @@ addTestOutParam :: [Param] -> [Param]
 addTestOutParam params = insertAt (testOutIndex params) testOutParam params
 
 
--- | Add a tmp var to the list of expressions in the position dictated by the 
+-- | Add a tmp var to the list of expressions in the position dictated by the
 -- ProcFunctor to determinise a statement
 addTestOutExp :: ProcFunctor -> [Placed Exp] -> Unbrancher ([Placed Exp], Exp)
 addTestOutExp func args = do
     testResultVar <- tempVar
     (nParams, detism) <- case func of
-        Higher fn -> 
+        Higher fn ->
             case content fn of
                 Typed _ (HigherOrderType mods params) _ -> do
                     return (length params, modifierDetism mods)
                 _ -> shouldnt "badly typed higher in addTestOutExp"
         First mod nm pId -> do
-            ProcDef{procProto=ProcProto _ params _, procDetism=detism} 
-                <- lift $ getProcDef $ ProcSpec mod nm 
-                                        (trustFromJust "addTestOutExp" pId) 
+            ProcDef{procProto=ProcProto _ params _, procDetism=detism}
+                <- lift $ getProcDef $ ProcSpec mod nm
+                                        (trustFromJust "addTestOutExp" pId)
                                         generalVersion
             return (testOutIndex params, detism)
     let idx = selectDetism (nParams - 1) nParams detism
-    return (insertAt idx (Unplaced $ boolVarSet testResultVar) args, 
+    return (insertAt idx (Unplaced $ boolVarSet testResultVar) args,
             boolVarGet testResultVar)
 
 ----------------------------------------------------------------
@@ -207,7 +207,7 @@ addTestOutExp func args = do
 type Unbrancher = StateT UnbrancherState Compiler
 
 data UnbrancherState = Unbrancher {
-    brLoopInfo   :: Maybe LoopInfo, 
+    brLoopInfo   :: Maybe LoopInfo,
                                   -- ^If in a loop, break and continue stmts
     brVars       :: VarDict,      -- ^Types of variables defined up to here
     brTempCtr    :: Int,          -- ^Number of next temp variable to make
@@ -352,7 +352,7 @@ unbranchStmts detism (stmt:stmts) alt sense = do
 --   considers the sense of the test: if True, execution should go to the
 --   following statements on success and the alternative statements on
 --   failure; if False, then vice-versa. The following statements are
---   represented as a pair of a list of not yet unbranched statements 
+--   represented as a pair of a list of not yet unbranched statements
 --   and a list of unbranched alternative statements. The alternative
 --   statements will have been factored out into a call to a fresh
 --   procedure if necessary (ie, if it will be used in more than one case,
@@ -569,9 +569,9 @@ mkCond True exp pos thn els condVars vars
               else if thnSrcContent == boolFalse && elsSrcContent == boolTrue
                    then boolNegate exp dest
                    else maybePlace
-                        (Cond test thn els 
+                        (Cond test thn els
                             (Just condVars) (Just vars) (Just Set.empty)) pos]
-      _ -> [maybePlace (Cond test thn els 
+      _ -> [maybePlace (Cond test thn els
                             (Just condVars) (Just vars) (Just Set.empty)) pos]
   where test = Unplaced $ TestBool exp
 
@@ -580,7 +580,7 @@ mkCond True exp pos thn els condVars vars
 -- statements by turning them into a fresh proc if necessary.  The resulting
 -- statement list will have been unbranched.
 maybeFactorContinuation :: Determinism -> VarDict -> Set ResourceSpec
-                        -> [Placed Stmt] -> [Placed Stmt] -> Bool 
+                        -> [Placed Stmt] -> [Placed Stmt] -> Bool
                         -> Unbrancher [Placed Stmt]
 maybeFactorContinuation detism vars res stmts alt sense = do
     logUnbranch $ "Maybe factor " ++ show detism ++ " continuation: "
@@ -613,16 +613,16 @@ inputParams params =
          if flowsIn dir then Map.insert v ty vdict else vdict)
     Map.empty params
 
-    
+
 -- | Unbranch a type, ensuring that all higher order types are no longer SemiDet
 unbranchType :: TypeSpec -> TypeSpec
 unbranchType (TypeSpec mod nm params) = TypeSpec mod nm $ unbranchType <$> params
-unbranchType (HigherOrderType mods tfs) = 
+unbranchType (HigherOrderType mods tfs) =
     let (tys, flows) = unzipTypeFlows tfs
         tfs' = zipWith TypeFlow (unbranchType <$> tys) flows
-    in selectDetism 
+    in selectDetism
             (HigherOrderType mods tfs')
-            (HigherOrderType mods{modifierDetism=Det} 
+            (HigherOrderType mods{modifierDetism=Det}
                 $ tfs' ++ [TypeFlow boolType ParamOut])
             (modifierDetism mods)
 unbranchType ty = ty
@@ -673,7 +673,7 @@ unbranchExp exp@(AnonProc mods params pstmts clsd res) pos = do
     procDef' <- lift $ unbranchProc procDef tmpCtr
     logUnbranch $ "  Resultant hoisted proc: " ++ show procProto
     procSpec <- lift $ addProcDef procDef'
-    addClosure procSpec freeVars pos name 
+    addClosure procSpec freeVars pos name
 unbranchExp exp@(ProcRef ps free) pos = do
     free' <- unbranchExps free
     isClosure <- lift $ isClosureProc ps
@@ -683,9 +683,9 @@ unbranchExp exp@(ProcRef ps free) pos = do
 unbranchExp exp pos = return $ maybePlace exp pos
 
 
--- | Create and add a closure of the given ProcSpec with the given name 
+-- | Create and add a closure of the given ProcSpec with the given name
 -- and free variables
-addClosure :: ProcSpec -> [Placed Exp] -> OptPos -> String 
+addClosure :: ProcSpec -> [Placed Exp] -> OptPos -> String
            -> Unbrancher (Placed Exp)
 addClosure regularProcSpec@(ProcSpec mod nm pID _) free pos name = do
     ProcDef{procDetism=detism, procInlining=inlining, procImpurity=impurity,
@@ -699,9 +699,9 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) free pos name = do
         Nothing -> do
             let pDefClosure =
                     ProcDef name (ProcProto name params' res)
-                    (ProcDefSrc [Unplaced $ ProcCall (First mod nm $ Just pID) 
+                    (ProcDefSrc [Unplaced $ ProcCall (First mod nm $ Just pID)
                                                 detism False args])
-                    Nothing 0 0 Map.empty Private detism inlining impurity 
+                    Nothing 0 0 Map.empty Private detism inlining impurity
                     (ClosureProc regularProcSpec) NoSuperproc
             logUnbranch $ "Creating closure for " ++ show regularProcSpec
             logUnbranch $ "  with params: " ++ show params'
@@ -710,7 +710,7 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) free pos name = do
             pDefClosure' <- lift $ unbranchProc pDefClosure 0
             closureProcSpec <- lift $ addProcDef pDefClosure'
             logUnbranch $ "  Resultant closure proc: " ++ show closureProcSpec
-            modify $ \s -> s{brClosures=Map.insert (regularProcSpec, constMap) 
+            modify $ \s -> s{brClosures=Map.insert (regularProcSpec, constMap)
                                         closureProcSpec $ brClosures s}
             return $ ProcRef closureProcSpec free `maybePlace` pos
 
@@ -720,24 +720,24 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) free pos name = do
 -- params are the closure's params, the args are the arguments to the inner call,
 -- and the free variables represent the variables that are free to the closure.
 -- This removes params/free variables where the expression is a known constant
-makeFreeParams :: [Param] -> [Placed Exp] 
+makeFreeParams :: [Param] -> [Placed Exp]
                -> ([Param], [Placed Exp], Map Integer Exp)
 makeFreeParams params exps = makeFreeParams' 1 params $ unPlace <$> exps
 
 
-makeFreeParams' :: Integer -> [Param] -> [(Exp, OptPos)] 
+makeFreeParams' :: Integer -> [Param] -> [(Exp, OptPos)]
                 -> ([Param], [Placed Exp], Map Integer Exp)
 makeFreeParams' _ params [] = (params', paramToVar <$> params', Map.empty)
   where params' = freeParamToOrdinary . unbranchParam <$> params
 makeFreeParams' _ [] _ = shouldnt "too many exps for params"
-makeFreeParams' idx ((Param nm pTy fl _):params) ((Typed exp ty cast,pos):exps) 
+makeFreeParams' idx ((Param nm pTy fl _):params) ((Typed exp ty cast,pos):exps)
     | flowsOut fl = shouldnt "out flowing free param"
     | otherwise   = (param':params', exp' `maybePlace` pos:exps', constMap')
-  where 
+  where
     (params', exps', constMap) = makeFreeParams' (idx + 1) params exps
     param' = Param nm (unbranchType pTy) ParamIn Free
     mbExp = expIsConstant exp
-    exp' = Typed (fromMaybe (Var nm ParamIn Free) $ expIsConstant exp) ty' cast' 
+    exp' = Typed (fromMaybe (Var nm ParamIn Free) $ expIsConstant exp) ty' cast'
     constMap' = if isJust mbExp
                 then Map.insert idx exp' constMap
                 else constMap
@@ -752,17 +752,17 @@ freeParamToOrdinary param@(Param _ _ _ Free) = param{paramFlowType=Ordinary}
 freeParamToOrdinary param                    = param
 
 
--- |Get Free Param and Typed Var for the given VarName and TypeSpec 
+-- |Get Free Param and Typed Var for the given VarName and TypeSpec
 freeParamVar :: VarName -> TypeSpec -> (Param, Placed Exp)
-freeParamVar nm ty = 
-    let ty' = unbranchType ty 
-    in (Param nm ty' ParamIn Free, 
+freeParamVar nm ty =
+    let ty' = unbranchType ty
+    in (Param nm ty' ParamIn Free,
         Unplaced $ Typed (Var nm ParamIn Free) ty' Nothing)
 
 
 -- |Add the output variables defined by the expression to the symbol
---  table. Since the expression is already flattened (excluding AnonProcs), 
---  it will only be a constant, in which case it doesn't define any variables, 
+--  table. Since the expression is already flattened (excluding AnonProcs),
+--  it will only be a constant, in which case it doesn't define any variables,
 --  or a variable, in which case it might.
 defArg :: Exp -> Unbrancher ()
 defArg = ifIsVarDef defVar (return ())
@@ -828,7 +828,7 @@ factorLoopProc break inVars pos detism res stmts alt sense = do
     return next
 
 varExp :: FlowDirection -> VarName -> TypeSpec -> Placed Exp
-varExp flow var ty 
+varExp flow var ty
     = Unplaced $ Typed (Var var flow Ordinary) (unbranchType ty) Nothing
 
 
@@ -848,7 +848,7 @@ newProcProto name inVars res = do
     let inParams  = [unbranchParam $ Param v ty ParamIn Ordinary
                     | (v,ty) <- Map.toList inVars]
     outParams <- gets brOutParams
-    return $ ProcProto name (inParams ++ outParams) 
+    return $ ProcProto name (inParams ++ outParams)
            $ Set.map (`ResourceFlowSpec` ParamInOut) res
 
 
