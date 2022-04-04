@@ -721,7 +721,6 @@ cgenLPVM "mutate" _
           baseAddr <- cgenArg addrArg
           gcMutate baseAddr offsetArg valArg
           outRep <- typeRep' $ argType addrArg
-          when (outRep == Address) (return $ shouldnt "outRep != Address")
           assign (pullName outArg) baseAddr
 
 cgenLPVM "mutate" _ [_, _, _, destructiveArg, _, _, _] =
