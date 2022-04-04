@@ -91,16 +91,25 @@ yorn(prompt##0:wybe.string, ?result##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.i
  
 
 
-declare external ccc  void @putchar(i8)    
-
-
-declare external fastcc  void @"wybe.io.print<5>"(i1)    
+@proc_yorn.4 =    constant {i64, i64} { i64 7, i64 ptrtoint ([?? x i8]* @proc_yorn.3 to i64) }
 
 
 @proc_yorn.2 =    constant {i64, i64} { i64 16, i64 ptrtoint ([?? x i8]* @proc_yorn.1 to i64) }
 
 
+@proc_yorn.6 =    constant {i64, i64} { i64 28, i64 ptrtoint ([?? x i8]* @proc_yorn.5 to i64) }
+
+
+@proc_yorn.3 =    constant [?? x i8] c" (y/n) \00"
+
+
+@proc_yorn.5 =    constant [?? x i8] c"Please answer 'yes' or 'no'.\00"
+
+
 @proc_yorn.1 =    constant [?? x i8] c"Well, yes or no?\00"
+
+
+declare external ccc  void @putchar(i8)    
 
 
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
@@ -109,16 +118,7 @@ declare external fastcc  void @"wybe.string.print_string<0>"(i64)
 declare external ccc  i8 @read_char()    
 
 
-@proc_yorn.6 =    constant {i64, i64} { i64 28, i64 ptrtoint ([?? x i8]* @proc_yorn.5 to i64) }
-
-
-@proc_yorn.5 =    constant [?? x i8] c"Please answer 'yes' or 'no'.\00"
-
-
-@proc_yorn.4 =    constant {i64, i64} { i64 7, i64 ptrtoint ([?? x i8]* @proc_yorn.3 to i64) }
-
-
-@proc_yorn.3 =    constant [?? x i8] c" (y/n) \00"
+declare external fastcc  void @"wybe.io.print<5>"(i1)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

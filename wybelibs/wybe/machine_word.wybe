@@ -1,3 +1,4 @@
-# A low level type holding a machine address
+# purpose: Standard Machine Word type, a low level type holding a machine address
+# since  : 0.1
 
 representation is address

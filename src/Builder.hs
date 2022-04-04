@@ -577,71 +577,72 @@ loadModuleFromObjFile required objfile = do
     Informational <!> "Loading module " ++ showModSpec required
                       ++ " from " ++ objfile
     extracted <- loadLPVMFromObjFile objfile [required]
-    if List.null extracted
-    then do
-        logBuild $ "xxx Failed extraction of LPVM Modules from object file "
-            ++ objfile
-        shouldnt $ "Invalid Wybe object file " ++ objfile
-    else do
-        logBuild $ "===> Extracted Module bytes from " ++ objfile
-        logBuild $ "===> Found modules: "
-                ++ showModSpecs (List.map modSpec extracted)
+    case extracted of
+        Left msg -> do
+            Error <!> msg
+            stopOnError $ "loading of object file " ++ objfile
+            return [] -- unreachable
+        Right mods -> do
+            logBuild $ "===> Extracted Module bytes from " ++ objfile
+            logBuild $ "===> Found modules: "
+                    ++ showModSpecs (List.map modSpec mods)
 
-        -- This object should contain the required mod (parent mod) and some
-        -- sub mods.
-        let (requiredMods, subMods) = List.partition (\m ->
-                modSpec m == required) extracted
+            -- This object should contain the required mod (parent mod) and some
+            -- sub mods.
+            let (requiredMods, subMods) = List.partition (\m ->
+                    modSpec m == required) mods
 
-        -- Check if the `required` modspec is in the extracted ones.
-        case requiredMods of
-            [requiredMod] -> do
-                -- don't need to worried about root mod, it will be overridden
-                enterModule objfile required Nothing
-                updateModule (\m -> requiredMod {modOrigin = modOrigin m})
-                -- inserts sub modules
-                mapM_ (\mod -> do
-                    let spec = modSpec mod
-                    enterModule objfile spec Nothing
-                    updateModule (\m -> mod {modOrigin = modOrigin m})
+            -- Check if the `required` modspec is in the extracted ones.
+            case requiredMods of
+                [requiredMod] -> do
+                    -- don't need to worried about root mod, it will be overridden
+                    enterModule objfile required Nothing
+                    updateModule (\m -> requiredMod {modOrigin = modOrigin m})
+                    -- inserts sub modules
+                    mapM_ (\mod -> do
+                        let spec = modSpec mod
+                        enterModule objfile spec Nothing
+                        updateModule (\m -> mod {modOrigin = modOrigin m})
+                        exitModule
+                        ) subMods
                     exitModule
-                    ) subMods
-                exitModule
-                -- mark mods as unchanged
-                updateCompiler (\st ->
-                    let unchanged = List.map modSpec extracted
-                            |> Set.fromList |> Set.union (unchangedMods st)
-                    in st {unchangedMods = unchanged})
-                let loaded = List.map modSpec extracted
-                when (List.null loaded) $ do
-                    -- if extraction failed, it is uncrecoverable now
-                    let err = "Object file " ++ objfile ++
-                                " yielded no LPVM modules for " ++
-                                showModSpec required ++ "."
-                    Error <!> "No other options to pursue."
-                    Error <!> err
-                return loaded
-            _ ->
-                -- The required modspec was not part of the extracted, abort.
-                shouldnt $ "Invalid Wybe object file"
-                        ++ "(can't find matching module)" ++ objfile
+                    -- mark mods as unchanged
+                    updateCompiler (\st ->
+                        let unchanged = List.map modSpec mods
+                                |> Set.fromList |> Set.union (unchangedMods st)
+                        in st {unchangedMods = unchanged})
+                    let loaded = List.map modSpec mods
+                    when (List.null loaded) $ do
+                        -- if extraction failed, it is uncrecoverable now
+                        let err = "Object file " ++ objfile ++
+                                    " yielded no LPVM modules for " ++
+                                    showModSpec required ++ "."
+                        Error <!> "No other options to pursue."
+                        Error <!> err
+                    return loaded
+                _ ->
+                    -- The required modspec was not part of the extracted, abort.
+                    shouldnt $ "Invalid Wybe object file"
+                            ++ "(can't find matching module)" ++ objfile
 
 
 -- |Extract all the LPVM modules from the specified object file.
-loadLPVMFromObjFile :: FilePath -> [ModSpec] -> Compiler [Module]
+loadLPVMFromObjFile :: FilePath -> [ModSpec]
+                    -> Compiler (Either String [Module])
 loadLPVMFromObjFile objFile required = do
     tmpDir <- gets tmpDir
     objFile' <- liftIO $ useLocalCacheFileIfPossible objFile
+    logBuild $ "Cache (or not) file to load: " ++ objFile'
     unless (objFile == objFile')
         (logBuild $ "find local cache file, use it instead: " ++ objFile')
     result <- liftIO $ extractLPVMData tmpDir objFile'
     case result of
-        Left err -> do
-            logMsg Builder err
-            return []
+        Left err -> return $ Left $ "Error decoding object file data: " ++ err
         Right modBS -> do
-            mods <- decodeModule required modBS
-            unless (List.null mods) $ logMsg Builder "Decoding successful!"
-            return $ List.map (\m -> m { modOrigin = objFile } ) mods
+            logBuild "No error decoding object file data."
+            logBuild $ "Extracted LPVM data: " ++ show modBS
+            (List.map (\m -> m { modOrigin = objFile } ) <$>)
+              <$> decodeModule required modBS
 
 
 -- XXX This needs to be rewritten:

@@ -9,15 +9,16 @@
 {-# LANGUAGE OverloadedStrings          #-}
 
 module Codegen (
-  Codegen(..), CodegenState(..), BlockState(..), Translation,
-  emptyModule, evalCodegen, addExtern, addGlobalConstant, getGlobalResource,
-  execCodegen, emptyCodegen, evalTranslation, getCount, putCount,
+  Codegen(..), CodegenState(..), BlockState(..),
+  Translation(..), TranslationState(..), SymbolTable(..),
+  emptyModule, addExtern, addGlobalConstant, getGlobalResource,
+  emptyCodegen, emptyTranslation,
   -- * Blocks
   createBlocks, setBlock, addBlock, entryBlockName,
   callWybe, callC, externf, ret, globalDefine, externalC, externalWybe,
   phi, br, cbr, getBlock, retNothing, fresh,
   -- * Symbol storage
-  alloca, store, local, assign, load, getVar, localVar, preservingSymtab,
+  alloca, store, local, assign, addOperand, load, getVar, localVar, preservingSymtab,
   makeGlobalResourceVariable,
   operandType, doAlloca, doLoad,
   bitcast, cbitcast, inttoptr, cinttoptr, ptrtoint, cptrtoint,
@@ -65,15 +66,16 @@ import qualified LLVM.AST.CallingConvention      as CC
 import qualified LLVM.AST.Constant               as C
 import qualified LLVM.AST.FloatingPointPredicate as FP
 import qualified LLVM.AST.IntegerPredicate       as IP
-
-import           AST                             hiding (Stmt(..))
 import           LLVM.Context
 import           LLVM.Module
+import           LLVM.AST.Linkage (Linkage(External))
+
+import           Util                            (lift2)
+import           AST                             hiding (Stmt(..))
 import           Options                         (LogSelection (Blocks,Codegen))
 import           Config                          (wordSize, functionDefSection)
 import           Unsafe.Coerce
 import           Debug.Trace
-import LLVM.AST.Linkage (Linkage(ExternWeak, External))
 
 ----------------------------------------------------------------------------
 -- Types                                                                  --
@@ -142,17 +144,10 @@ data CodegenState
         currentBlock :: Name     -- ^ Name of the active block to append to
       , blocks       :: Map.Map Name BlockState
                                  -- ^ Blocks for function
-      , symtab       :: Map.Map String (Operand,TypeRepresentation)
-                                 -- ^ Local symbol table of a function
       , blockCount   :: Int      -- ^ Incrementing count of basic blocks
-      , count        :: Word     -- ^ Count for temporary operands
+      , symtab       :: SymbolTable
+                                 -- ^ Local symbol table of a function
       , names        :: Names    -- ^ Name supply
-      , externs      :: [Prim]   -- ^ Primitives which need to be declared
-      , globalVars   :: [Global] -- ^ Needed global variables/constants
-      , resources    :: Map.Map ResourceSpec Global
-                                 -- ^ Needed global variables for resources
-      , modProtos    :: [PrimProto]
-                                 -- ^ Module procedures prototypes
       } deriving Show
 
 -- | 'BlockState' will generate the code for basic blocks inside of
@@ -168,45 +163,57 @@ data BlockState
       } deriving Show
 
 
+-- | SymbolTable state.
+-- Stores assignments and generated operands
+data SymbolTable
+     = SymbolTable {
+         stVars :: Map.Map String (Operand,TypeRepresentation)
+
+                      -- ^ Assigned names
+       , stOpds :: Map.Map PrimArg Operand
+                      -- ^ Previously generated operands
+       } deriving Show
+
+
 -- | The 'Codegen' state monad will hold the state of the code generator
 -- That is, a map of block names to their 'BlockState' representation
 -- newtype Codegen a = Codegen { runCodegen :: StateT CodegenState Compiler a }
 --     deriving (Functor, Applicative, Monad, MonadState CodegenState)
 
-type Codegen = StateT CodegenState Compiler
+type Codegen = StateT CodegenState Translation
 
-execCodegen :: Word -> [PrimProto] -> Codegen a -> Compiler CodegenState
-execCodegen startCount protos codegen
-    = execStateT codegen (emptyCodegen startCount protos)
+-- | TranslationState
+-- Stores data required across tranlating an LPVM module into an LLVm module
+data TranslationState
+    = TranslationState {
+        txCount   :: Word -- ^ Count of used virtual registers
+      , txConsts  :: Map.Map (C.Constant, Type) Global
+                          -- ^ Needed global constants
+      , txVars    :: Map.Map GlobalInfo Global
+                          -- ^ Needed global variables
+      , txExterns :: [Prim]
+                          -- ^ Primitives which need to be declared
+      } deriving Show
 
-evalCodegen :: [PrimProto] -> Codegen t -> Compiler t
-evalCodegen protos codegen = evalStateT codegen (emptyCodegen 0 protos)
 
-type Translation = StateT Word Compiler
+type Translation = StateT TranslationState Compiler
 
-evalTranslation :: Word -> Translation a -> Compiler a
-evalTranslation = flip evalStateT
+emptyTranslation :: TranslationState
+emptyTranslation = TranslationState 0 Map.empty Map.empty []
 
-getCount :: Translation Word
-getCount = get
-
-putCount :: Word -> Translation ()
-putCount = put
 
 -- | Gets a new incremental word suffix for a temporary local operands
-fresh :: Codegen Word
+fresh :: Translation Word
 fresh = do
-  ix <- gets count
-  modify $ \s -> s { count = 1 + ix }
-  return (ix + 1)
+    count <- gets txCount
+    modify $ \s -> s { txCount=count + 1 }
+    return $ count + 1
 
 
 -- | Update the list of externs which will be needed. The 'Prim' will be
 -- converted to an extern declaration later.
 addExtern :: Prim -> Codegen ()
-addExtern p = do
-  ex <- gets externs
-  modify $ \s -> s { externs = p : ex }
+addExtern prim = lift $ modify $ \s -> s { txExterns=prim:txExterns s}
 
 
 -- | Creates a Global value for a constant, given the type and appends it
@@ -214,26 +221,30 @@ addExtern p = do
 -- values into Global module level definitions. A UnName is generated too
 -- for reference.
 addGlobalConstant :: LLVMAST.Type -> C.Constant -> Codegen Name
-addGlobalConstant ty con =
-    do modName <- lift $ fmap showModSpec getModuleSpec
-       gs <- gets globalVars
-       n <- fresh
-       let ref = Name $ fromString $ modName ++ "." ++ show n
-       let gvar = globalVariableDefaults { name = ref
-                                         , isConstant = True
-                                         , G.type' = ty
-                                         , initializer = Just con }
-       modify $ \s -> s { globalVars = gvar : gs }
-       return ref
+addGlobalConstant ty con = do
+    modName <- lift2 $ showModSpec <$> getModuleSpec
+    consts <- lift $ gets txConsts
+    case Map.lookup (con, ty) consts of
+        Just global -> return $ name global
+        Nothing -> lift $ do
+            n <- fresh
+            let ref = Name $ fromString $ modName ++ "." ++ show n
+            let gvar = globalVariableDefaults { name = ref
+                                              , isConstant = True
+                                              , G.type' = ty
+                                              , initializer = Just con }
+            modify $ \s -> s {txConsts=Map.insert (con, ty) gvar $ txConsts s}
+            return ref
 
 
 getGlobalResource :: ResourceSpec -> Type -> Codegen Operand
 getGlobalResource spec@(ResourceSpec mod nm) ty = do
-    ress <- gets resources
-    nm <- case Map.lookup spec ress of
+    vars <- lift $ gets txVars
+    let info = GlobalResource spec
+    nm <- case Map.lookup info vars of
             Nothing -> do
-                global <- lift $ makeGlobalResourceVariable spec ty
-                modify $ \s -> s { resources = Map.insert spec global ress }
+                global <- lift2 $ makeGlobalResourceVariable spec ty
+                lift $ modify $ \s -> s {txVars=Map.insert info global vars}
                 return $ G.name global
             Just ref -> return $ G.name ref
     return $ ConstantOperand $ C.GlobalReference (ptr_t ty) nm
@@ -322,18 +333,14 @@ emptyBlock :: Int -> BlockState
 emptyBlock i = BlockState i [] Nothing
 
 -- | Initialize an empty CodegenState for a new Definition.
-emptyCodegen :: Word -> [PrimProto] -> CodegenState
-emptyCodegen startCount =
-  CodegenState
-    (Name $ fromString entryBlockName)
-    Map.empty
-    Map.empty
-    1
-    startCount
-    Map.empty
-    []
-    []
-    Map.empty
+emptyCodegen :: CodegenState
+emptyCodegen = CodegenState{ currentBlock=Name $ fromString entryBlockName
+                           , blocks=Map.empty
+                           , blockCount=1
+                           , symtab=SymbolTable Map.empty Map.empty
+                           , names=Map.empty
+                           }
+
 
 -- | 'addBlock' creates and adds a new block to the current blocks
 addBlock :: String -> Codegen Name
@@ -387,10 +394,10 @@ createBlocks m = map makeBlock $ sortBlocks $ Map.toList (blocks m)
 
 -- | Convert our BlockState to the LLVM BasicBlock Type.
 makeBlock :: (Name, BlockState) -> BasicBlock
-makeBlock (l, (BlockState _ s t)) = BasicBlock l s (maketerm t)
+makeBlock (l, BlockState _ s t) = BasicBlock l s (maketerm t)
   where
     maketerm (Just x) = x
-    maketerm Nothing  = error $ "Block has no terminator: " ++ (show l)
+    maketerm Nothing  = error $ "Block has no terminator: " ++ show l
 
 -- | Sort the blocks on their ids. Blocks do get out of order since any block
 -- can be brought to be the 'currentBlock'.
@@ -438,7 +445,8 @@ globalVar t s = C.GlobalReference t $ LLVMAST.Name $ fromString s
 assign :: String -> Operand -> TypeRepresentation -> Codegen ()
 assign var op trep = do
     logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show op ++ ":" ++ show trep
-    modify $ \s -> s { symtab = Map.insert var (op,trep) $ symtab s }
+    st <- gets symtab
+    modify $ \s -> s { symtab=st{stVars=Map.insert var (op,trep) $ stVars st} }
 
 
 -- | Find and return the local operand by its given name from the symbol
@@ -447,7 +455,7 @@ assign var op trep = do
 getVar :: String -> Codegen (Operand,TypeRepresentation)
 getVar var = do
     let err = shouldnt $ "Local variable not in scope: " ++ show var
-    lcls <- gets symtab
+    lcls <- gets (stVars . symtab)
     return $ fromMaybe err $ Map.lookup var lcls
 
 
@@ -459,9 +467,13 @@ preservingSymtab :: Codegen a -> Codegen a
 preservingSymtab code = do
     oldSymtab <- gets symtab
     result <- code
-    modify $ \s -> s { symtab = oldSymtab }
+    modify $ \s -> s { symtab=oldSymtab }
     return result
 
+addOperand :: PrimArg -> Operand -> Codegen ()
+addOperand arg opd = do
+    st <- gets symtab
+    modify $ \s -> s { symtab=st{stOpds=Map.insert arg opd $ stOpds st} }
 
 
 -- | Look inside an operand and determine it's type.
@@ -503,7 +515,7 @@ namedInstr ty nm ins = do
 -- BasicBlock. The temp name is generated using a fresh word counter.
 instr :: Type -> Instruction -> Codegen Operand
 instr ty ins = do
-    ref <- UnName <$> fresh
+    ref <- UnName <$> lift fresh
     addInstr $ ref := ins
     return $ local ty ref
 
@@ -737,4 +749,4 @@ phi ty incoming = instr ty $ Phi ty incoming []
 
 
 logCodegen :: String -> Codegen ()
-logCodegen s = lift $ logMsg Codegen s
+logCodegen s = lift2 $ logMsg Codegen s

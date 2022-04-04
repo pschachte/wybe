@@ -68,7 +68,7 @@ module AST (
   setPrimParamType, setTypeFlowType,
   flowsIn, flowsOut, primFlowToFlowDir,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
-  expToStmt, seqToStmt, procCallToExp,
+  expToStmt, seqToStmt, stmtsImpurity, stmtImpurity, procCallToExp,
   expOutputs, pexpListOutputs, expInputs, pexpListInputs,
   setExpTypeFlow, setPExpTypeFlow,
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
@@ -85,7 +85,7 @@ module AST (
   updateTypeModifiers,
   addParameters, addTypeRep, setTypeRep, addConstructor,
   getModuleImplementationField, getModuleImplementation,
-  getLoadedModule, ifCurrentModuleElse, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
+  getLoadedModule, getLoadingModule, updateLoadedModule, updateLoadedModuleM,
   getLoadedModuleImpln, updateLoadedModuleImpln, updateLoadedModuleImplnM,
   getModule, getModuleInterface, updateModule, getSpecModule,
   updateModImplementation, updateModImplementationM,
@@ -507,17 +507,6 @@ getLoadedModule modspec = do
     maybeMod <- gets (Map.lookup modspec . modules)
     logAST $ if isNothing maybeMod then " got nothing!" else " worked"
     return maybeMod
-
--- | Perform an action if in the current module or a submodule,
--- else perform another
-ifCurrentModuleElse :: ModSpec -> StateT s Compiler a -> StateT s Compiler a
-                    -> StateT s Compiler a
-ifCurrentModuleElse mod current other = do
-    thisMod <- lift $ getModuleSpec
-    fileMod <- lift $ getModule modRootModSpec
-    if thisMod == mod || maybe False (`List.isPrefixOf` mod) fileMod
-    then current
-    else other
 
 
 -- |Apply the given function to the specified module, if it has been loaded;
@@ -2921,6 +2910,39 @@ seqToStmt [] = Unplaced $ TestBool
                $ Typed (IntValue 1) AnyType $ Just $ TypeSpec ["wybe"] "bool" []
 seqToStmt [stmt] = stmt
 seqToStmt stmts = Unplaced $ And stmts
+
+-- | Find the Impurity of a sequence of Stmts, the maximum impurity of all
+-- statements
+stmtsImpurity :: [Placed Stmt] -> Compiler Impurity
+stmtsImpurity stmts = List.foldl max PromisedPure
+                   <$> mapM (stmtImpurity . content) stmts
+
+-- | The Impurity of a statement
+stmtImpurity :: Stmt -> Compiler Impurity
+stmtImpurity (ProcCall (First mod name mbId) _ _ _) =
+    procImpurity <$> getProcDef
+                        (ProcSpec mod name
+                            (trustFromJust "stmtImpurity" mbId) generalVersion)
+stmtImpurity (ProcCall (Higher fn) _ _ _) =
+    case content fn of
+        Typed _ (HigherOrderType mods _) _ -> return $ modifierImpurity mods
+        _ -> return Impure -- assume the worst case
+stmtImpurity (ForeignCall _ _ flags _) = return $ flagsImpurity flags
+stmtImpurity (Cond cond thn els _ _ _) = stmtsImpurity $ cond:thn ++ els
+stmtImpurity (UseResources _ _ stmts) = stmtsImpurity stmts
+stmtImpurity (Case _ cases _) =
+    stmtsImpurity . concat $ snd <$> cases
+stmtImpurity (And stmts) = stmtsImpurity stmts
+stmtImpurity (Or stmts _ _) = stmtsImpurity stmts
+stmtImpurity (Not stmt) = stmtImpurity $ content stmt
+stmtImpurity (Loop stmts _ _) = stmtsImpurity stmts
+stmtImpurity (For _ stmts) = stmtsImpurity stmts
+stmtImpurity (TestBool _) = return Pure
+stmtImpurity Nop = return Pure
+stmtImpurity Fail = return Pure
+stmtImpurity Break = return Pure
+stmtImpurity Next = return Pure
+
 
 
 data ProcFunctor

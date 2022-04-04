@@ -55,6 +55,22 @@ Note that `wybemk` is like `make` in that you give it the name of the
 file you want it to build, and it figures out what files it needs
 to compile.
 
+### Compiler Options
+
+`wybemk` supports various compiler options. A full listing of available flags
+can be found with the following:
+
+```
+% wybemk --help
+```
+
+#### Optimisation Options
+
+The `--llvm-opt-level` (`-O`) options specifies the level of optimisation used 
+within the LLVM compiler during the compilations stage of a Wybe module. By 
+default this is set to 3, yet supports the values 0, 1, 2, or 3. More information
+can be found [here](https://llvm.org/docs/CommandGuide/llc.html#id1).
+
 
 # Wybe Source files
 

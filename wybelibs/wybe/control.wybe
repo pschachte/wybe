@@ -1,3 +1,6 @@
+# purpose: Standard Control Library
+# since  : 0.1
+
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.int, wybe.bool, wybe.c_string, wybe.string

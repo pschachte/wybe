@@ -38,6 +38,18 @@ my_error(msg##0:wybe.string)<{}; {}>:
  
 
 
+@early_error.2 =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @early_error.1 to i64) }
+
+
+@early_error.4 =    constant {i64, i64} { i64 31, i64 ptrtoint ([?? x i8]* @early_error.3 to i64) }
+
+
+@early_error.1 =    constant [?? x i8] c"should print this\00"
+
+
+@early_error.3 =    constant [?? x i8] c"should print this error message\00"
+
+
 declare external ccc  void @exit(i64)    
 
 
@@ -48,18 +60,6 @@ declare external ccc  void @putchar(i8)
 
 
 declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
-
-
-@early_error.4 =    constant {i64, i64} { i64 31, i64 ptrtoint ([?? x i8]* @early_error.3 to i64) }
-
-
-@early_error.3 =    constant [?? x i8] c"should print this error message\00"
-
-
-@early_error.2 =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @early_error.1 to i64) }
-
-
-@early_error.1 =    constant [?? x i8] c"should print this\00"
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

@@ -48,13 +48,13 @@ init_res()<{}; {<<bug228-okay.res>>}>:
  
 
 
+@"resource#bug228-okay.res" =    global i64 undef
+
+
 declare external ccc  void @putchar(i8)    
 
 
 declare external ccc  void @print_int(i64)    
-
-
-@"resource#bug228-okay.res" =    global i64 undef
 
 
 declare external ccc  i8* @wybe_malloc(i32)    

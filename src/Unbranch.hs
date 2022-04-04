@@ -213,7 +213,9 @@ data UnbrancherState = Unbrancher {
     brTempCtr    :: Int,          -- ^Number of next temp variable to make
     brOutParams  :: [Param],      -- ^Output arguments for generated procs
     brOutArgs    :: [Placed Exp], -- ^Output arguments for call to gen procs
-    brNewDefs    :: [ProcDef]     -- ^Generated unbranched auxilliary procedures
+    brNewDefs    :: [ProcDef],    -- ^Generated unbranched auxilliary procedures
+    brClosures   :: Map (ProcSpec, Map Integer Exp) ProcSpec
+                                  -- ^Generated procs for closures
     }
 
 
@@ -232,7 +234,7 @@ initUnbrancherState loopinfo tmpCtr params =
         outArgs   = [Unplaced $ Typed (varSet nm) (unbranchType ty) Nothing
                     | Param nm ty fl _ <- params
                     , flowsOut fl]
-    in Unbrancher loopinfo defined tmpCtr outParams outArgs []
+    in Unbrancher loopinfo defined tmpCtr outParams outArgs [] Map.empty
 
 
 -- | Add the specified variable to the symbol table
@@ -683,27 +685,34 @@ unbranchExp exp pos = return $ maybePlace exp pos
 
 -- | Create and add a closure of the given ProcSpec with the given name 
 -- and free variables
-addClosure :: ProcSpec -> [Placed Exp] -> OptPos -> String -> Unbrancher (Placed Exp)
+addClosure :: ProcSpec -> [Placed Exp] -> OptPos -> String 
+           -> Unbrancher (Placed Exp)
 addClosure regularProcSpec@(ProcSpec mod nm pID _) free pos name = do
     ProcDef{procDetism=detism, procInlining=inlining, procImpurity=impurity,
             procProto=procProto@ProcProto{procProtoParams=params,
                                           procProtoResources=res}}
         <- lift $ getProcDef regularProcSpec
-    let (params', args) = makeFreeParams params free
-    let pDefClosure =
-            ProcDef name (ProcProto name params' res)
-            (ProcDefSrc [Unplaced $ ProcCall (First mod nm $ Just pID) 
-                                        detism False args])
-            Nothing 0 0 Map.empty Private detism inlining impurity 
-            (ClosureProc regularProcSpec) NoSuperproc
-    logUnbranch $ "Creating closure for " ++ show regularProcSpec
-    logUnbranch $ "  with params: " ++ show params'
-    logUnbranch $ "  with args  : " ++ show args
-    logUnbranch $ "  with free  : " ++ show free
-    pDefClosure' <- lift $ unbranchProc pDefClosure 0
-    closureProcSpec <- lift $ addProcDef pDefClosure'
-    logUnbranch $ "  Resultant closure proc: " ++ show closureProcSpec
-    return $ ProcRef closureProcSpec free `maybePlace` pos
+    let (params', args, constMap) = makeFreeParams params free
+    closProcs <- gets brClosures
+    case Map.lookup (regularProcSpec, constMap) closProcs of
+        Just closProc -> return $ ProcRef closProc free `maybePlace` pos
+        Nothing -> do
+            let pDefClosure =
+                    ProcDef name (ProcProto name params' res)
+                    (ProcDefSrc [Unplaced $ ProcCall (First mod nm $ Just pID) 
+                                                detism False args])
+                    Nothing 0 0 Map.empty Private detism inlining impurity 
+                    (ClosureProc regularProcSpec) NoSuperproc
+            logUnbranch $ "Creating closure for " ++ show regularProcSpec
+            logUnbranch $ "  with params: " ++ show params'
+            logUnbranch $ "  with args  : " ++ show args
+            logUnbranch $ "  with free  : " ++ show free
+            pDefClosure' <- lift $ unbranchProc pDefClosure 0
+            closureProcSpec <- lift $ addProcDef pDefClosure'
+            logUnbranch $ "  Resultant closure proc: " ++ show closureProcSpec
+            modify $ \s -> s{brClosures=Map.insert (regularProcSpec, constMap) 
+                                        closureProcSpec $ brClosures s}
+            return $ ProcRef closureProcSpec free `maybePlace` pos
 
 
 -- | Transform a list of params a prefix of corresponding arguments into a
@@ -711,25 +720,30 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) free pos name = do
 -- params are the closure's params, the args are the arguments to the inner call,
 -- and the free variables represent the variables that are free to the closure.
 -- This removes params/free variables where the expression is a known constant
-makeFreeParams :: [Param] -> [Placed Exp] -> ([Param], [Placed Exp])
-makeFreeParams params exps = makeFreeParams' params $ unPlace <$> exps
+makeFreeParams :: [Param] -> [Placed Exp] 
+               -> ([Param], [Placed Exp], Map Integer Exp)
+makeFreeParams params exps = makeFreeParams' 1 params $ unPlace <$> exps
 
 
-makeFreeParams' :: [Param] -> [(Exp, OptPos)] -> ([Param], [Placed Exp])
-makeFreeParams' params [] = (params', paramToVar <$> params')
+makeFreeParams' :: Integer -> [Param] -> [(Exp, OptPos)] 
+                -> ([Param], [Placed Exp], Map Integer Exp)
+makeFreeParams' _ params [] = (params', paramToVar <$> params', Map.empty)
   where params' = freeParamToOrdinary . unbranchParam <$> params
-makeFreeParams' [] _ = shouldnt "too many exps for params"
-makeFreeParams' ((Param nm pTy fl _):params) ((Typed exp ty cast,pos):exps) 
+makeFreeParams' _ [] _ = shouldnt "too many exps for params"
+makeFreeParams' idx ((Param nm pTy fl _):params) ((Typed exp ty cast,pos):exps) 
     | flowsOut fl = shouldnt "out flowing free param"
-    | otherwise   = (param':params', exp':exps')
+    | otherwise   = (param':params', exp' `maybePlace` pos:exps', constMap')
   where 
-    (params', exps') = makeFreeParams' params exps
+    (params', exps', constMap) = makeFreeParams' (idx + 1) params exps
     param' = Param nm (unbranchType pTy) ParamIn Free
-    exp' = Typed (fromMaybe (Var nm ParamIn Free) $ expIsConstant exp) 
-            ty' cast' `maybePlace` pos
+    mbExp = expIsConstant exp
+    exp' = Typed (fromMaybe (Var nm ParamIn Free) $ expIsConstant exp) ty' cast' 
+    constMap' = if isJust mbExp
+                then Map.insert idx exp' constMap
+                else constMap
     ty' = unbranchType ty
     cast' = unbranchType <$> cast
-makeFreeParams' _ _ = shouldnt "untyped free var"
+makeFreeParams' _ _ _ = shouldnt "untyped free var"
 
 
 -- | Set the ArgFlowType of a Free Param to Ordinary, else do nothing
