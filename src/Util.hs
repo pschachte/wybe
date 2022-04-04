@@ -127,9 +127,9 @@ type DisjointSet a = Set (Set a)
 
 
 _findOneInSet :: (a -> Bool) -> Set a -> Maybe a
-_findOneInSet f = 
-    Set.foldr 
-        (\x result -> 
+_findOneInSet f =
+    Set.foldr
+        (\x result ->
             case result of
                 Just _ -> result
                 Nothing -> if f x then Just x else Nothing
@@ -137,30 +137,30 @@ _findOneInSet f =
 
 
 addOneToDS :: Ord a => a -> DisjointSet a -> DisjointSet a
-addOneToDS x ds = 
+addOneToDS x ds =
     case _findOneInSet (Set.member x) ds of
         Just _ -> ds
-        Nothing -> 
+        Nothing ->
             Set.insert (Set.singleton x) ds
 
 
 addConnectedGroupToDS :: Ord a => [a] -> DisjointSet a -> DisjointSet a
-addConnectedGroupToDS l ds = 
-    case l of 
+addConnectedGroupToDS l ds =
+    case l of
         [] -> ds
-        x:xs -> 
+        x:xs ->
             let ds' = addOneToDS x ds in
             List.foldl (flip (unionTwoInDS x)) ds' xs
 
 
 unionTwoInDS :: Ord a => a -> a -> DisjointSet a -> DisjointSet a
-unionTwoInDS x y ds = 
-    let xSet = _findOneInSet (Set.member x) ds in 
-    let ySet = _findOneInSet (Set.member y) ds in 
+unionTwoInDS x y ds =
+    let xSet = _findOneInSet (Set.member x) ds in
+    let ySet = _findOneInSet (Set.member y) ds in
         if (isJust xSet) && (xSet == ySet)
         then ds
-        else 
-            let (ds', newSet') = case xSet of 
+        else
+            let (ds', newSet') = case xSet of
                     Nothing -> (ds, Set.singleton x)
                     Just xSet -> (Set.delete xSet ds, xSet)
             in
@@ -177,19 +177,19 @@ combineTwoDS =
 
 
 removeOneFromDS :: Ord a => a -> DisjointSet a -> DisjointSet a
-removeOneFromDS x ds = 
-    case _findOneInSet (Set.member x) ds of 
+removeOneFromDS x ds =
+    case _findOneInSet (Set.member x) ds of
         Nothing -> ds
-        Just xSet -> 
+        Just xSet ->
             let xSet' = Set.delete x xSet in
             let ds' = Set.delete xSet ds in
-                if Set.null xSet' 
+                if Set.null xSet'
                     then ds'
                     else  Set.insert xSet' ds'
 
 
 removeFromDS :: Ord a => Set a -> DisjointSet a -> DisjointSet a
-removeFromDS set = 
+removeFromDS set =
     filterDS (\x -> not $ Set.member x set)
 
 
@@ -201,14 +201,14 @@ removeSingletonFromDS =
 -- return a set of items that the given item is connected to.
 connectedItemsInDS :: Ord a => a -> DisjointSet a -> Set a
 connectedItemsInDS x ds =
-    case _findOneInSet (Set.member x) ds of 
+    case _findOneInSet (Set.member x) ds of
         Nothing -> Set.empty
         Just xSet -> Set.delete x xSet
 
 
 -- The map function must be a bijection, i.e. 1-to-1 mapping.
 mapDS :: (Ord a, Ord b) => (a -> b) -> DisjointSet a -> DisjointSet b
-mapDS f = 
+mapDS f =
     Set.map (Set.map f)
 
 
@@ -294,7 +294,7 @@ lift2 act = lift $ lift act
 
 _localCachePathOfFile :: FilePath -> IO (FilePath, FilePath)
 _localCachePathOfFile file = do
-    localCacheLibDir <- localCacheLibDir 
+    localCacheLibDir <- localCacheLibDir
     let cacheFilename = show (hashWith SHA1 (B8.pack file))
     let cacheFilePath = localCacheLibDir </> cacheFilename
     let cacheFileMeta = cacheFilePath <.> "meta"
@@ -311,7 +311,7 @@ _getFileHash :: FilePath -> IO String
 _getFileHash file = do
     exist <- doesFileExist file
     if exist
-    then do 
+    then do
         content <- BL.readFile file
         return $ show (hashlazy content :: Digest SHA1)
     else return ""
@@ -319,14 +319,14 @@ _getFileHash file = do
 
 -- | Given a file path and return the actual file that should be used.
 -- It can the original file or a local cache file.
-useLocalCacheFileIfPossible :: FilePath -> IO FilePath 
+useLocalCacheFileIfPossible :: FilePath -> IO FilePath
 useLocalCacheFileIfPossible file = do
     (cacheFile, meta) <- _localCachePathOfFile file
     cacheFileExist <- doesFileExist cacheFile
     metaExist <- doesFileExist meta
     valid <-
         if cacheFileExist && metaExist
-        then do 
+        then do
             srcFileHash <- _getFileHash file
             hashInMeta <- readFile meta
             return (srcFileHash == hashInMeta)
@@ -341,9 +341,9 @@ useLocalCacheFileIfPossible file = do
 
 -- | Given a file path and return the file path to the local cache
 -- file of the actual file.
-createLocalCacheFile :: FilePath -> IO FilePath 
-createLocalCacheFile file = do 
-    localCacheLibDir  <- localCacheLibDir 
+createLocalCacheFile :: FilePath -> IO FilePath
+createLocalCacheFile file = do
+    localCacheLibDir  <- localCacheLibDir
     createDirectoryIfMissing True localCacheLibDir
     (cacheFile, meta) <- _localCachePathOfFile file
     srcFileHash <- _getFileHash file

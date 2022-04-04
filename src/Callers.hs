@@ -55,7 +55,7 @@ type CallRec = Map ProcSpec Int
 
 noteCall :: ModSpec -> ProcSpec -> Bool -> Prim -> CallRec -> CallRec
 noteCall mod caller final prim rec =
-    List.foldr (noteCalls' mod) rec (localCallees mod prim) 
+    List.foldr (noteCalls' mod) rec (localCallees mod prim)
 
 
 noteCalls' :: ModSpec -> ProcSpec -> CallRec -> CallRec
@@ -126,11 +126,11 @@ localBodyCallees modspec body =
 
 -- | Find all callees in a given prim
 localCallees :: ModSpec -> Prim -> [ProcSpec]
-localCallees modspec (PrimCall _ pspec args _) 
+localCallees modspec (PrimCall _ pspec args _)
   = pspec{procSpeczVersion=generalVersion}:concatMap (argRefs modspec) args
-localCallees modspec (PrimHigher _ fn args) 
+localCallees modspec (PrimHigher _ fn args)
   = concatMap (argRefs modspec) (fn:args)
-localCallees modspec (PrimForeign _ _ _ args)  
+localCallees modspec (PrimForeign _ _ _ args)
   = concatMap (argRefs modspec) args
 
 -- | Find all callees in a given PromArg

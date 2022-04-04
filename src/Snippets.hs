@@ -7,13 +7,13 @@
 
 module Snippets (castFromTo, castTo, withType, intType, intCast,
                  tagType, tagCast, phantomType, stringType, cStringType,
-                 isTypeVar, 
+                 isTypeVar,
                  varSet, varGet, varGetSet,
                  varSetTyped, varGetTyped, varGetSetTyped,
                  boolType, boolCast, boolTrue, boolFalse, boolBool,
                  boolVarSet, boolVarGet, intVarSet, intVarGet,
-                 lpvmCast, lpvmCastExp, lpvmCastToVar, iVal, 
-                 move, access, mutate, 
+                 lpvmCast, lpvmCastExp, lpvmCastToVar, iVal,
+                 move, access, mutate,
                  globalStore, globalLoad,
                  primMove, primAccess, primCast,
                  boolNegate, comparison, succeedTest, failTest, testVar, succeedIfSemiDet) where
@@ -29,7 +29,7 @@ castFromTo innerType outerType exp = Typed exp outerType $ Just innerType
 
 -- |An expression to cast a value to the specified type
 castTo :: Exp -> TypeSpec -> Exp
-castTo = flip $ castFromTo AnyType 
+castTo = flip $ castFromTo AnyType
 
 -- |An expression to constrain th subexpression to have the specified type
 withType :: Exp -> TypeSpec -> Exp
@@ -154,33 +154,33 @@ move :: Exp -> Exp -> Placed Stmt
 move src dest =
     Unplaced $ ForeignCall "llvm" "move" [] [Unplaced src, Unplaced dest]
 
-    
+
 -- |An instruction to access a value from some address
 access :: Exp -> Exp -> Exp -> Exp -> Exp -> Placed Stmt
 access addr offset size startOffset val =
-    Unplaced $ ForeignCall "lpvm" "acesss" [] 
+    Unplaced $ ForeignCall "lpvm" "acesss" []
              $ Unplaced <$> [addr, offset, size, startOffset, val]
 
-             
+
 -- |An instruction to mutate a value from some address
 mutate :: Exp -> Exp -> Exp -> Exp -> Exp -> Exp -> Exp -> Placed Stmt
 mutate addr0 addr1 offset destructive size startOffset val =
-    Unplaced $ ForeignCall "lpvm" "mutate" [] 
-             $ Unplaced <$> [addr0, addr1, offset, destructive, 
+    Unplaced $ ForeignCall "lpvm" "mutate" []
+             $ Unplaced <$> [addr0, addr1, offset, destructive,
                              size, startOffset, val]
 
 
 globalStore :: ResourceSpec -> TypeSpec -> Exp -> Placed Stmt
 globalStore rs ty src =
-    Unplaced $ ForeignCall "lpvm" "store" [] 
+    Unplaced $ ForeignCall "lpvm" "store" []
       [Unplaced src,
        Unplaced $ Typed (Global $ GlobalResource rs) ty Nothing]
 
 
 globalLoad :: ResourceSpec -> TypeSpec -> Exp -> Placed Stmt
 globalLoad rs ty dest =
-    Unplaced $ ForeignCall "lpvm" "load" [] 
-      [Unplaced $ Typed (Global $ GlobalResource rs) ty Nothing, 
+    Unplaced $ ForeignCall "lpvm" "load" []
+      [Unplaced $ Typed (Global $ GlobalResource rs) ty Nothing,
        Unplaced dest]
 
 
@@ -203,7 +203,7 @@ primMove :: PrimArg -> PrimArg -> Prim
 primMove src dest =
   PrimForeign "llvm" "move" [] [src, dest]
 
-  
+
 -- |A primitive access instruction
 primAccess :: PrimArg -> PrimArg -> PrimArg -> PrimArg -> PrimArg -> Prim
 primAccess struct offset size startOffset val =

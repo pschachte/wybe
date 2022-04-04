@@ -982,8 +982,7 @@ testToBoolFn _ = Nothing
 -- |Check if ProcInfo can be transformed into a partial application, given a
 -- list of FlowDirections. This returns Just if the final FlowDirection is ParamOut
 -- if the call has an arity lower than expected or, in the case of a resourceful
--- call where the call does not have a ! prefix, at most 1 more than the
--- expected
+-- call where the call does not have a ! prefix, at most 1 more than the expected
 -- arity. The Bool returned indicates if the call should have a ! or not
 procToPartial :: [FlowDirection] -> Bool -> CallInfo -> (Maybe CallInfo, Bool)
 procToPartial callFlows hasBang info@FirstInfo{firstInfoPartial=False,
@@ -2048,7 +2047,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
         bindings <- mapFromUnivSetM ultimateVarType Set.empty
                     $ bindingVars assigned3
         impurity <- lift $ stmtsImpurity tstStmt'
-        let stmts' = if impurity > Pure 
+        let stmts' = if impurity > Pure
                      -- if the test is non-pure, need to keep the test around
                      then Not (seqToStmt tstStmt') `maybePlace` pos:elsStmts'
                      -- otherwise, the cond must fail and wont bind anything

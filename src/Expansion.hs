@@ -46,7 +46,7 @@ procExpansion pspec def = do
                                 $ execStateT (expandBody body) st
     let params' = markParamNeededness isClosure used ins <$> params
     let proto' = proto {primProtoParams = params'}
-    let impln' = impln{ procImplnProto = proto', 
+    let impln' = impln{ procImplnProto = proto',
                         procImplnBody = body' }
     let def' = def { procImpln = impln',
                      procTmpCount = tmp',
@@ -300,7 +300,7 @@ expandArg arg@(ArgVar var ty flow ft _) = do
     if renameAll
     then case flow of
         FlowOut -> freshVar var ty ft
-        FlowIn -> 
+        FlowIn ->
             setArgType ty . setArgFlowType ft
             <$> gets (Map.findWithDefault arg var . renaming)
     else return arg

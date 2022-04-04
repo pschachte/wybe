@@ -68,13 +68,13 @@ flattenProcDecl (ProcDecl vis mods proto stmts pos) = do
                    List.map paramName $
                    List.filter (flowsIn . paramFlow) $
                    procProtoParams proto
-    let resources = Set.map (resourceName . resourceFlowRes) 
+    let resources = Set.map (resourceName . resourceFlowRes)
                   $ procProtoResources proto
     (stmts',tmpCtr) <- flattenBody stmts (inParams `Set.union` resources)
                        (modifierDetism mods)
     let resful = modifierResourceful mods
-    when resful 
-        $ modifierError (resourcefulName resful) 
+    when resful
+        $ modifierError (resourcefulName resful)
             "procedure or function declaration" pos
     return (ProcDecl vis mods proto stmts' pos,tmpCtr)
 flattenProcDecl _ =
@@ -106,7 +106,7 @@ insertOutVar varSet expr _ = varSet
 --                       The Flattener Monad
 ----------------------------------------------------------------
 
--- |The Flattener monad is a state transformer monad carrying the 
+-- |The Flattener monad is a state transformer monad carrying the
 --  flattener state over the compiler monad.
 type Flattener = StateT FlattenerState Compiler
 
@@ -140,7 +140,7 @@ initAnonProcState = AnonProcState 0 0 (Just 0) Map.empty
 
 
 pushAnonProcState :: AnonProcState -> AnonProcState
-pushAnonProcState (AnonProcState t _ _ _) = 
+pushAnonProcState (AnonProcState t _ _ _) =
     let t' = t + 1
     in initAnonProcState{totalAnons=t', currentAnon=t'}
 
@@ -150,22 +150,22 @@ popAnonProcState old@AnonProcState{} (AnonProcState t _ _ _) = old{totalAnons=t}
 
 
 processAnonProcParams :: AnonProcState -> [Param]
-processAnonProcParams AnonProcState{params=paramMap, currentAnon=current} 
+processAnonProcParams AnonProcState{params=paramMap, currentAnon=current}
     | Map.null paramMap = []
-    | otherwise = List.map 
-                    (\i -> Map.findWithDefault 
+    | otherwise = List.map
+                    (\i -> Map.findWithDefault
                             (makeAnonParam (makeAnonParamName current i) ParamIn)
-                            i paramMap) 
+                            i paramMap)
                     [1 .. Set.findMax (Map.keysSet paramMap)]
 
 
-makeAnonParamName :: Integer -> Integer -> VarName 
+makeAnonParamName :: Integer -> Integer -> VarName
 makeAnonParamName procNum num = specialName2 "anon"
                               $ specialName2 (show procNum) (show num)
 
 
-makeAnonParam :: VarName -> FlowDirection -> Param 
-makeAnonParam name flow = Param name AnyType flow Ordinary 
+makeAnonParam :: VarName -> FlowDirection -> Param
+makeAnonParam name flow = Param name AnyType flow Ordinary
 
 
 
@@ -202,7 +202,7 @@ flattenInner transparent detism inner = do
                     anonProcState = anonProcState oldState})
     logFlatten $ "-- Flattened:" ++ showBody 4 (List.reverse
                                                 $ flattened innerState)
-    -- logFlatten $ "-- Postponed:\n" ++ 
+    -- logFlatten $ "-- Postponed:\n" ++
     --   showBody 4 (postponed innerState)
     if transparent
       then put $ oldState { tempCtr = tempCtr innerState,
@@ -296,7 +296,7 @@ flattenStmt' stmt@(ProcCall fn@(First [] "=" id) callDetism res [arg1,arg2]) pos
         (arg1':args') <- flattenStmtArgs (arg1:args) pos
         emit pos $ ProcCall (First mod name Nothing) Det False (args'++[arg1'])
         flushPostponed
-      (_,_) | callDetism == Det 
+      (_,_) | callDetism == Det
                 && (varCheck arg1content arg2outs || varCheck arg2content arg1outs)
                 || arg1outs && arg2outs -> do
         logFlatten $ "Leaving = call alone: " ++ showStmt 4 stmt
@@ -307,8 +307,8 @@ flattenStmt' stmt@(ProcCall fn@(First [] "=" id) callDetism res [arg1,arg2]) pos
         -- Must be a mode error:  both sides want to bind variables
         logFlatten $ "Error: out=out assignment " ++ show stmt
         lift $ message Error "Cannot generate bindings on both sides of '='" pos
-  where varCheck argContent hasOuts 
-            = expIsVar argContent && flowsOut (flattenedExpFlow argContent) 
+  where varCheck argContent hasOuts
+            = expIsVar argContent && flowsOut (flattenedExpFlow argContent)
                                   && hasOuts
 flattenStmt' stmt@(ProcCall (First [] "fail" _) _ _ []) pos _ =
     emit pos Fail
@@ -377,7 +377,7 @@ flattenStmt' for@(For pgens body) pos detism = do
     -- ?temp1 = x
     -- ?temp2 = y
     -- do {
-    --     if { `[|]`(?i, ?temp1, temp1) :: 
+    --     if { `[|]`(?i, ?temp1, temp1) ::
     --          if { `[|]`(?j, ?temp2, temp2) ::
     --              <stmts>
     --          | else :: break
@@ -388,7 +388,7 @@ flattenStmt' for@(For pgens body) pos detism = do
     logFlatten $ "Generating for " ++ showStmt 4 for
     let (gens, poss) = unzip $ unPlace <$> pgens
     temps <- mapM (const tempVar) gens
-    -- XXX Should check for input only    
+    -- XXX Should check for input only
     origs <- mapM (flattenPExp . genExp) gens
     let instrs = zipWith (\orig temp ->
                             ForeignCall "llvm" "move" []
@@ -396,9 +396,9 @@ flattenStmt' for@(For pgens body) pos detism = do
                     origs temps
     mapM_ (emit pos) instrs
     modify (\s -> s {defdVars = Set.union (Set.fromList temps) $ defdVars s})
-    let loop = List.foldr 
-                (\(var, gen, pos') loop -> 
-                    [Unplaced $ Cond (ProcCall (regularProc "[|]") SemiDet False 
+    let loop = List.foldr
+                (\(var, gen, pos') loop ->
+                    [Unplaced $ Cond (ProcCall (regularProc "[|]") SemiDet False
                                         [var,
                                          Unplaced $ Var gen ParamOut Ordinary,
                                          Unplaced $ Var gen ParamIn Ordinary]
@@ -463,9 +463,9 @@ translateCases val pos ((key,body):rest) deflt =
 --                      Flattening Expressions
 ----------------------------------------------------------------
 
--- |Compile a list of expressions as proc call arguments to a list of 
---  primitive arguments, a list of statements to execute before the 
---  call to bind those arguments, and a list of statements to execute 
+-- |Compile a list of expressions as proc call arguments to a list of
+--  primitive arguments, a list of statements to execute before the
+--  call to bind those arguments, and a list of statements to execute
 --  after the call to store the results appropriately.
 flattenArgs :: [Placed Exp] -> Flattener [Placed Exp]
 flattenArgs args = do
@@ -487,7 +487,7 @@ flattenPExp pexp = do
 
 -- |Flatten a single expressions with specified flow direction to
 --  primitive argument(s), a list of statements to execute
---  to bind it, and a list of statements to execute 
+--  to bind it, and a list of statements to execute
 --  after the call to store the result appropriately.
 --  The first part of the output (a Placed Exp) will always be a list
 --  of only atomic Exps and Var references (in any direction).
@@ -504,7 +504,7 @@ flattenExp expr@(CharValue _) ty castFrom pos =
     return $ typeAndPlace expr ty castFrom pos
 flattenExp expr@(Var "_" flow _) ty castFrom pos = do
     when (flow == ParamInOut)
-        $ lift $ errmsg pos $ "A \"don't care\" value (_) cannot be used with " 
+        $ lift $ errmsg pos $ "A \"don't care\" value (_) cannot be used with "
                               ++ flowPrefix flow ++ " mode prefix"
     dummyName <- tempVar
     return $ typeAndPlace (Var dummyName ParamOut Ordinary) ty castFrom pos
@@ -528,20 +528,20 @@ flattenExp expr@(AnonParamVar mbNum dir) ty castFrom pos = do
     anonState <- gets anonProcState
     let AnonProcState _ currentAnon count params = anonState
     (num, count') <- case (mbNum, count) of
-        (Nothing, Just n) -> 
+        (Nothing, Just n) ->
             let n' = n + 1
             in return (n', Just n')
         (Just n, _) | fromMaybe 0 count == 0 -> do
             return (n, Nothing)
-        _ -> do 
-            lift $ message Error 
+        _ -> do
+            lift $ message Error
                     "Mixed use of numbered and un-numbered anonymous parameters" pos
             return (-1, count)
     let name = makeAnonParamName currentAnon num
-    let var = Var name dir Ordinary 
+    let var = Var name dir Ordinary
     let paramDir = paramFlow <$> Map.lookup num params
-    let paramDir' = if fromMaybe dir paramDir == dir 
-                    then dir 
+    let paramDir' = if fromMaybe dir paramDir == dir
+                    then dir
                     else ParamInOut
     let param = makeAnonParam name paramDir'
     modify (\s -> s{anonProcState=anonState{paramCount=count',
@@ -549,7 +549,7 @@ flattenExp expr@(AnonParamVar mbNum dir) ty castFrom pos = do
     if currentAnon == 0
     then do
         lift $ message Error
-               ("Anonymous parameter @" ++ maybe "" show mbNum 
+               ("Anonymous parameter @" ++ maybe "" show mbNum
                 ++ " outside of anonymous procedure expression")
                pos
         flattenExp var ty castFrom pos
@@ -686,7 +686,7 @@ translateExpCases pexp varName ((pat,val):rest) deflt =
                      (place pat))
         [Unplaced $ ForeignCall "llvm" "move" []
                     [val, Unplaced $ varSet varName]]
-        [Unplaced (translateExpCases pexp varName rest deflt)] 
+        [Unplaced (translateExpCases pexp varName rest deflt)]
         Nothing Nothing Nothing
 
 
@@ -715,11 +715,11 @@ inputOnlyExp (Var name ParamOut flowType) =
 inputOnlyExp exp = exp
 
 
--- | Add an error message to the compiler for the specified modifier in the 
--- given context 
+-- | Add an error message to the compiler for the specified modifier in the
+-- given context
 modifierError :: String -> String -> OptPos -> Compiler ()
 modifierError modName context =
-    message Error 
+    message Error
         ("Modifier '" ++ modName ++
         "' cannot be used in a " ++ context)
 

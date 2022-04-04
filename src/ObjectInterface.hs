@@ -18,7 +18,7 @@ import qualified Data.ByteString.Lazy as BL
 import           Data.Int
 import           Data.List as List
 import           Data.Maybe (isJust)
-import           Distribution.System       (buildOS, OS (..)) 
+import           Distribution.System       (buildOS, OS (..))
 import           System.Exit               (ExitCode (..))
 import           System.Process
 import System.FilePath (takeBaseName, (</>))
@@ -39,19 +39,19 @@ insertLPVMData tmpDir modBS objFile = do
     let modFile = takeBaseName objFile ++ ".module"
     let lpvmFile = tmpDir </> modFile
     BL.writeFile lpvmFile modBS
-    case buildOS of 
+    case buildOS of
         OSX   -> insertLPVMDataMacOS lpvmFile objFile
         Linux -> insertLPVMDataLinux lpvmFile objFile
         _     -> shouldnt "Unsupported operation system"
 
 
--- | Extract LPVM data from the given object file 
+-- | Extract LPVM data from the given object file
 -- and return it as [BL.ByteString].
 -- The first [FilePath] is for [tmpDir]
 extractLPVMData :: FilePath -> FilePath -> IO (Either String BL.ByteString)
 extractLPVMData tmpDir objFile =
-    case buildOS of 
-        OSX   -> extractLPVMDataMacOS tmpDir objFile 
+    case buildOS of
+        OSX   -> extractLPVMDataMacOS tmpDir objFile
         Linux -> extractLPVMDataLinux tmpDir objFile
         _     -> shouldnt "Unsupported operation system"
 
@@ -65,9 +65,9 @@ extractLPVMData tmpDir objFile =
 -- 1. Unit test for Roundtrip.
 -- 2. We currently use tools that aren't in Wybe dependencies such as [ld]
 --    and [objcopy]. Once we start to use a LLVM version that fully supports
---    [mach-o], we can use [llvm-objcopy] instead and unify the logic for 
+--    [mach-o], we can use [llvm-objcopy] instead and unify the logic for
 --    different os.
--- 3. The currently code is highly depends on tmp files and the we write 
+-- 3. The currently code is highly depends on tmp files and the we write
 --    the object file first then update it. It would be better if we could
 --    insert the LPVM data when we creating the object file and read LPVM
 --    data from it directly.
@@ -86,8 +86,8 @@ insertLPVMDataMacOS lpvmFile objFile = do
         _ -> return $ Left serr
 
 
--- | Use system [objcopy] to create a __LPVM.__lpvm section and put the 
--- given [BL.ByteString] into it. The section of ELF doesn't have a 
+-- | Use system [objcopy] to create a __LPVM.__lpvm section and put the
+-- given [BL.ByteString] into it. The section of ELF doesn't have a
 -- [Segment] field, so the section name is bit different.
 -- | Actual implementation of [insertLPVMData] for Linux
 -- Uses system [objcopy]
@@ -103,7 +103,7 @@ insertLPVMDataLinux lpvmFile objFile = do
 extractLPVMDataMacOS :: FilePath -> FilePath -> IO (Either String BL.ByteString)
 extractLPVMDataMacOS _ objFile = do
     objBS <- liftIO $ BL.readFile objFile
-    if not $ isMachoBytes objBS 
+    if not $ isMachoBytes objBS
         then return $ Left ("Not a recognised object file: " ++ objFile)
         else do
             let (_, macho) = parseMacho (BL.toStrict objBS)

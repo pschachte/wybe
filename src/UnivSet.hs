@@ -31,7 +31,7 @@ import qualified Data.Functor as UnivSet
 --
 ----------------------------------------------------------------
 
-data UnivSet a 
+data UnivSet a
     = FiniteSet (Set a)
     | UniversalSet
     deriving (Eq, Ord, Show, Generic)
@@ -55,7 +55,7 @@ intersection (FiniteSet s1) (FiniteSet s2) = FiniteSet $ s1 `S.intersection` s2
 -- | Subtract the given UnivSet from an ordinary set.
 subtractUnivSet :: Ord a => Set a -> UnivSet a -> Set a
 subtractUnivSet _ UniversalSet    = S.empty
-subtractUnivSet s1 (FiniteSet s2) = s1 S.\\ s2 
+subtractUnivSet s1 (FiniteSet s2) = s1 S.\\ s2
 
 
 -- | Is the specified value a member of the given UnivSet?
