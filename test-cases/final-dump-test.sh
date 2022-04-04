@@ -12,6 +12,11 @@ rm -f final-dump/*.bc
 rm -f final-dump/*.o
 rm -f final-dump/*.out
 
+abort () {
+	printf "\033[0;31m$1\033[0;0m\n\n"
+	exit 1
+}
+
 for f in `ls final-dump/*.wybe`
 do
 	out=`echo -e "$f" | sed 's/.wybe$/.out/'`
@@ -23,18 +28,18 @@ do
             -e 's/\[[0-9][0-9]* x i8\]/[?? x i8]/g' \
         > $out
 	# Add a newline to the end of a file if there isn't to resolve platform differences.
-	ed -s $out <<< w > /dev/null 2>&1
-	if [ ! -r $exp ] ; then 
+	ed -s $out <<< w > /dev/null 2>&1 || abort "failed to add newline to output, is ed installed?"
+	if [ ! -r $exp ] ; then
 		printf "[31m?[39m"
 		NEW="$NEW\n    $out"
 	elif diff -q $exp $out >/dev/null 2>&1 ; then
 		printf "."
-	else 
+	else
 		printf "\n[34;1m**************** difference building $targ ****************[0m\n" >> ../ERRS
 		dwdiff -c -d '()<>~!@:?.%#' $exp $out >> ../ERRS 2>&1
 		printf "[31mX[39m"
 		FAILS="$FAILS\n    $out"
-	fi 
+	fi
 done
 echo -e
 if [ -n "$FAILS" ] ; then

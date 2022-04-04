@@ -12,6 +12,11 @@ LIBDIR="../wybelibs"
 rm -f execution/*.o
 rm -f execution/*.out
 
+abort () {
+	printf "\033[0;31m$1\033[0;0m\n\n"
+	exit 1
+}
+
 for f in `ls execution/*.wybe`
 do
 	in=`echo -e "$f" | sed 's/.wybe$/.in/'`
@@ -24,19 +29,19 @@ do
         if [ -r $cmdline ] ; then
             cmd="$targ `cat $cmdline`"
         fi
-	$TIMEOUT 20 ../wybemk --force-all -L $LIBDIR $targ >/dev/null
+	$TIMEOUT 20 ../wybemk --force-all -L $LIBDIR $targ >/dev/null || abort "failed to compile $targ"
     $TIMEOUT 20 $cmd< $in &> $out
-	if [ ! -r $exp ] ; then 
+	if [ ! -r $exp ] ; then
 		printf "[31m?[39m"
 		NEW="$NEW\n    $out"
 	elif diff -q $exp $out >/dev/null 2>&1 ; then
 		printf "."
-	else 
+	else
 		printf "\n[34;1m**************** difference building $targ ****************[0m\n" >> ../ERRS
 		dwdiff -c -d '()<>~!@:?.%#' $exp $out >> ../ERRS 2>&1
 		printf "[31mX[39m"
 		FAILS="$FAILS\n    $out"
-	fi 
+	fi
 done
 echo -e
 if [ -n "$FAILS" ] ; then
