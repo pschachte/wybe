@@ -547,7 +547,7 @@ cgen prim@(PrimHigher callSiteId fn@ArgVar{} args) = do
     let addrPtrTy = ptr_t address_t
     envPtr <- inttoptr env addrPtrTy
     eltPtr <- doLoad address_t envPtr
-    fnPtr <- doCast eltPtr address_t fnPtrTy
+    fnPtr <- doCast eltPtr fnPtrTy
     let callIns = callWybe fnPtr inOps
     addInstruction callIns outArgs
 
@@ -654,12 +654,6 @@ prepareArgs' (a:as) (p@PrimParam{primParamType=ty}:ps) = do
     rest <- prepareArgs' as ps
     return $ if real then setArgType ty a:rest else rest
 
-data FlowOutByReferenceShim = FlowOutByReferenceShim {
-    shimVarType :: TypeSpec,
-    shimVarName :: PrimVarName,
-    referenceVarName :: PrimVarName
-} deriving (Show)
-
 
 filterPhantomArgs :: [PrimArg] -> Codegen [PrimArg]
 filterPhantomArgs = filterM ((not <$>) . lift2 . argIsPhantom)
@@ -752,10 +746,10 @@ cgenLPVM "cast" _ args@[inArg,outArg] =
             castOp <- if argIsConst inArg
                       then do
                           inOp <- cgenArgConst inArg
-                          cons <$> consCast inOp inTy outTy
+                          cons <$> consCast inOp outTy
                       else do
                           inOp <- cgenArg inArg
-                          doCast inOp inTy outTy
+                          doCast inOp outTy
 
             logCodegen $ "CAST IN  : " ++ show inArg ++ " -> "
                                 ++ show (argType inArg)
@@ -798,14 +792,6 @@ cgenLPVM "load" _ args = do
         _ ->
             shouldnt $ "lpvm load instruction with wrong arity " ++ show args
 
--- like `access`, except it only computes the address offset and stores it in `val`
-cgenLPVM "address" _ args@[addrArg,offsetArg,_,_,out] = do
-    baseAddr <- cgenArg addrArg
-    finalAddr <- offsetAddr baseAddr iadd offsetArg
-    outRep <- typeRep' $ argType out
-    finalAddrPtr <- doCast finalAddr (typeOf finalAddr) (repLLVMType outRep)
-    assign (pullName out) finalAddrPtr
-
 cgenLPVM pname flags args = do
     shouldnt $ "Instruction " ++ pname ++ " arity " ++ show (length args)
                ++ " not implemented."
@@ -834,17 +820,17 @@ isPtr (PointerType _ _) = True
 isPtr _                 = False
 
 
-doCast :: Operand -> LLVMAST.Type -> LLVMAST.Type -> Codegen Operand
-doCast op ty1 ty2 = do
-    (op',caseStr) <- castHelper bitcast zext trunc inttoptr ptrtoint op ty1 ty2
+doCast :: Operand -> LLVMAST.Type -> Codegen Operand
+doCast op ty2 = do
+    (op',caseStr) <- castHelper bitcast zext trunc inttoptr ptrtoint op (typeOf op) ty2
     logCodegen $ "doCast from " ++ show op' ++ " to " ++ show ty2
                  ++ ":  " ++ caseStr
     return op'
 
 
-consCast :: C.Constant -> LLVMAST.Type -> LLVMAST.Type -> Codegen C.Constant
-consCast c ty1 ty2 = do
-    (c',caseStr) <- castHelper cbitcast czext ctrunc cinttoptr cptrtoint c ty1 ty2
+consCast :: C.Constant -> LLVMAST.Type -> Codegen C.Constant
+consCast c ty2 = do
+    (c',caseStr) <- castHelper cbitcast czext ctrunc cinttoptr cptrtoint c (typeOf c) ty2
     logCodegen $ "doCast from " ++ show c' ++ " to " ++ show ty2
                  ++ ":  " ++ caseStr
     return c'
@@ -1059,12 +1045,12 @@ cgenArgConst' (ArgInt val ty) = do
     toTy <- llvmType' ty
     case toTy of
         IntegerType bs -> return $ C.Int bs val
-        _ -> consCast (C.Int (fromIntegral wordSize) val) address_t toTy
+        _ -> consCast (C.Int (fromIntegral wordSize) val) toTy
 cgenArgConst' (ArgFloat val ty) = do
     toTy <- llvmType' ty
     case toTy of
         FloatingPointType DoubleFP -> return $ C.Float $ F.Double val
-        _ -> consCast (C.Float $ F.Double val) float_t toTy
+        _ -> consCast (C.Float $ F.Double val) toTy
 cgenArgConst' (ArgString s WybeString ty) = do
     conPtr <- snd <$> addStringConstant s
     let strType = struct_t [address_t, address_t]
@@ -1074,17 +1060,17 @@ cgenArgConst' (ArgString s WybeString ty) = do
     strName <- addGlobalConstant strType strStruct
     let strPtr = C.GlobalReference (ptr_t strType) strName
     let strElem = C.GetElementPtr True strPtr [C.Int 32 0, C.Int 32 0]
-    consCast strElem (ptr_t strType) address_t
+    consCast strElem address_t
 cgenArgConst' (ArgString s CString _) = do
-    (conPtrTy, conPtr) <- addStringConstant s
+    (_, conPtr) <- addStringConstant s
     let strElem = C.GetElementPtr True conPtr [C.Int 32 0, C.Int 32 0]
-    consCast strElem conPtrTy address_t
+    consCast strElem address_t
 cgenArgConst' (ArgChar c ty) = do
     let val = integerOrd c
     toTy <- llvmType' ty
     case toTy of
         IntegerType bs -> return $ C.Int bs val
-        _ -> consCast (C.Int (fromIntegral wordSize) val) address_t toTy
+        _ -> consCast (C.Int (fromIntegral wordSize) val) toTy
 cgenArgConst' (ArgUndef ty) = do
     llty <- llvmType' ty
     return $ C.Undef llty
@@ -1097,7 +1083,7 @@ cgenArgConst' (ArgProcRef ps args ty) = do
     let arr = C.Array address_t arrElems
     conArrPtr <- C.GlobalReference (ptr_t arrTy) <$> addGlobalConstant arrTy arr
     let rawElem = C.GetElementPtr True conArrPtr [C.Int 32 0, C.Int 32 0]
-    consCast rawElem (ptr_t arrTy) address_t
+    consCast rawElem address_t
 cgenArgConst' arg = shouldnt $ "cgenArgConst of " ++ show arg
 
 
@@ -1117,8 +1103,8 @@ castVar nm ty = do
     toTyRep <- typeRep' ty
     toTy <- llvmType' ty
     lift2 $ logBlocks $ "Coercing var " ++ show nm ++ " to " ++ show ty
-    (varOp,fromTy) <- getVar (show nm)
-    doCast varOp fromTy toTy
+    (varOp,_) <- getVar (show nm)
+    doCast varOp toTy
 
 
 primActualParams :: ProcSpec -> Codegen [PrimParam]
@@ -1520,10 +1506,9 @@ callWybeMalloc size = do
     let outTy = ptr_t (int_c 8)
     let fnName = LLVMAST.Name $ toSBString "wybe_malloc"
     sizeOp <- cgenArg size
-    sizeTy <- llvmType' $ argType size
     logCodegen $ "callWybeMalloc casting size " ++ show sizeOp
                  ++ " to " ++ show int_t
-    inops <- (:[]) <$> doCast sizeOp sizeTy int_t
+    inops <- (:[]) <$> doCast sizeOp int_t
     let ins =
           callC
           (externf (ptr_t (FunctionType outTy (typeOf <$> inops) False)) fnName)
@@ -1537,10 +1522,10 @@ callMemCpy :: Operand -> Operand -> PrimArg -> Codegen ()
 callMemCpy dst src bytes = do
     let fnName = LLVMAST.Name $ toSBString "llvm.memcpy.p0i8.p0i8.i32"
     let charptr_t = ptr_t (int_c 8)
-    dstCast <- doCast dst address_t charptr_t
-    srcCast <- doCast src address_t charptr_t
+    dstCast <- doCast dst charptr_t
+    srcCast <- doCast src charptr_t
     bytesOp <- cgenArg bytes
-    bytesCast <- doCast bytesOp address_t int_t
+    bytesCast <- doCast bytesOp int_t
     -- dstCast <- instr charptr_t $ LLVMAST.BitCast dst charptr_t []
     -- srcCast <- instr charptr_t $ LLVMAST.BitCast src charptr_t []
     -- bytesOp <- cgenArg bytes
@@ -1582,7 +1567,7 @@ gcAccess ptr outTy = do
     logCodegen $ "accessPtr = " ++ show accessPtr
     let loadInstr = load accessPtr
     logCodegen $ "loadInstr = " ++ show loadInstr
-    instr outTy $ load accessPtr
+    instr outTy $ loadInstr
 
 
     -- inttoptr loadedOp outTy
