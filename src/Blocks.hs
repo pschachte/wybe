@@ -710,7 +710,8 @@ data FlowOutByReferenceShim = FlowOutByReferenceShim {
 shimBeforeCall :: FlowOutByReferenceShim -> Codegen ()
 shimBeforeCall FlowOutByReferenceShim { shimVarType = shimVarType, shimVarName = shimVarName, referenceVarName = referenceVarName }
     = do
-    cgen $ PrimForeign "lpvm" "alloc" [] [ArgInt 8 intType, ArgVar referenceVarName (Pointer shimVarType) FlowOut Ordinary False]
+    -- TODO: don't hardcode 8 bytes for this type
+    cgen $ PrimForeign "lpvm" "alloca" [] [ArgInt 8 intType, ArgVar referenceVarName (Pointer shimVarType) FlowOut Ordinary False]
 
 
 shimAfterCall :: FlowOutByReferenceShim -> Codegen ()
@@ -742,6 +743,24 @@ cgenLPVM "alloc" _ args@[sizeArg,addrArg] = do
                 assign (pullName addrArg) op outRep
             _ ->
               shouldnt $ "alloc instruction with " ++ show (length inputs)
+                         ++ " inputs"
+
+-- | Code generation for LPVM instructions.
+cgenLPVM "alloca" _ args@[sizeArg,addrArg] = do
+          logCodegen $ "lpvm alloca " ++ show sizeArg ++ " " ++ show addrArg
+          let (inputs,outputs) = partitionArgs args
+          case inputs of
+            [input] -> do
+                outRep <- lift $ typeRep $ argType addrArg
+                case outRep of
+                    (PointerRep baseRep) -> do
+                        let baseTy = repLLVMType baseRep
+                        let outTy = repLLVMType outRep
+                        op <- instr outTy (alloca baseTy)
+                        assign (pullName addrArg) op outRep
+                    _ -> shouldnt "alloca instruction should have a PointerRep output"
+            _ ->
+              shouldnt $ "alloca instruction with " ++ show (length inputs)
                          ++ " inputs"
 
 cgenLPVM "access" _ args@[addrArg,offsetArg,_,_,val] = do
