@@ -1,1 +1,0 @@
-pub constructor coordinate(x: int, y: int)
