@@ -167,7 +167,7 @@ data BlockState
 -- Stores assignments and generated operands
 data SymbolTable
      = SymbolTable {
-         stVars :: Map.Map String (Operand,LLVM.AST.Type)
+         stVars :: Map.Map String Operand
 
                       -- ^ Assigned names
        , stOpds :: Map.Map PrimArg Operand
@@ -446,13 +446,13 @@ assign :: String -> Operand -> Codegen ()
 assign var op = do
     logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show op ++ ":" ++ show (typeOf op)
     st <- gets symtab
-    modify $ \s -> s { symtab=st{stVars=Map.insert var (op,typeOf op) $ stVars st} }
+    modify $ \s -> s { symtab=st{stVars=Map.insert var op $ stVars st} }
 
 
 -- | Find and return the local operand by its given name from the symbol
 -- table. Only the first find will be returned so new names can shadow
 -- the same older names.
-getVar :: String -> Codegen (Operand,LLVM.AST.Type)
+getVar :: String -> Codegen Operand
 getVar var = do
     let err = shouldnt $ "Local variable not in scope: " ++ show var
     lcls <- gets (stVars . symtab)

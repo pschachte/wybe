@@ -1070,7 +1070,7 @@ castVar nm ty = do
     toTyRep <- typeRep' ty
     toTy <- llvmType' ty
     lift2 $ logBlocks $ "Coercing var " ++ show nm ++ " to " ++ show ty
-    (varOp,_) <- getVar (show nm)
+    varOp <- getVar (show nm)
     doCast varOp toTy
 
 
