@@ -657,7 +657,7 @@ prepareArgs' (ArgUnneeded _ _:as) (p:ps)
     | paramNeeded p = shouldnt $ "unneeded arg for needed param " ++ show p
     | otherwise     = prepareArgs' as ps
 prepareArgs' (a@ArgVar{argVarFlow = FlowOut, argVarType=argTy, argVarName=argVar}:as) (p@PrimParam{primParamType=ty, primParamFlow=FlowOutByReference }:ps) = do
-    real <- lift $ paramIsReal p
+    real <- lift2 $ paramIsReal p
     (rest,shims) <- prepareArgs' as ps
     names <- gets names
     return $
@@ -689,7 +689,7 @@ shimBeforeCall FlowOutByReferenceShim { shimVarType = shimVarType, shimVarName =
 shimAfterCall :: FlowOutByReferenceShim -> Codegen ()
 shimAfterCall FlowOutByReferenceShim { shimVarType = shimVarType, shimVarName = shimVarName, referenceVarName = referenceVarName }
     = do
-    trep <- lift $ typeRep shimVarType
+    trep <- typeRep' shimVarType
     cgen $ PrimForeign "lpvm" "access" [] [
         ArgVar referenceVarName (Pointer shimVarType) FlowIn Ordinary True,
         ArgInt 0 intType,
@@ -722,7 +722,7 @@ cgenLPVM "alloca" _ args@[sizeArg,addrArg] = do
           let (inputs,outputs) = partitionArgs args
           case inputs of
             [input] -> do
-                outRep <- lift $ typeRep $ argType addrArg
+                outRep <- typeRep' $ argType addrArg
                 case outRep of
                     (PointerRep baseRep) -> do
                         let baseTy = repLLVMType baseRep
@@ -858,7 +858,7 @@ cgenLPVM "load" _ args = do
 cgenLPVM "address" _ args@[addrArg,offsetArg,_,_,out] = do
     baseAddr <- cgenArg addrArg
     finalAddr <- offsetAddr baseAddr iadd offsetArg
-    outRep <- lift $ typeRep $ argType out
+    outRep <- typeRep' $ argType out
     finalAddrPtr <- doCast finalAddr (typeOf finalAddr) (repLLVMType outRep)
     assign (pullName out) finalAddrPtr outRep
 
