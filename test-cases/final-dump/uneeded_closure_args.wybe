@@ -1,0 +1,6 @@
+
+def {noinline} call(f:(A, ?A), a:A):A = f(a)
+
+def second(a:A, b:B):B = b
+
+!print(call(second(1), 2))

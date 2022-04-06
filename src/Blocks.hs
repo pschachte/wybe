@@ -511,7 +511,7 @@ cgen prim@(PrimCall callSiteID pspec args _) = do
     logCodegen $ "Prepared args = " ++ show args'
 
     -- if the call is to an external module, declare it
-    addExternProcRef pspec
+    addExternClosure pspec
 
     let (inArgs,outArgs) = partitionArgs args'
     logCodegen $ "In args = " ++ show inArgs
@@ -528,7 +528,7 @@ cgen prim@(PrimCall callSiteID pspec args _) = do
     logCodegen $ "Translated ins = " ++ show ins
     addInstruction ins outArgs
 
-cgen prim@(PrimHigher cId (ArgProcRef pspec closed _) args) = do
+cgen prim@(PrimHigher cId (ArgClosure pspec closed _) args) = do
     pspec' <- fromMaybe pspec <$> lift2 (maybeGetClosureOf pspec)
     logCodegen $ "Compiling " ++ show prim
               ++ " as first order call to " ++ show pspec'
@@ -1002,7 +1002,7 @@ cgenArg arg = do
 cgenArg' :: PrimArg -> Codegen LLVMAST.Operand
 cgenArg' var@ArgVar{argVarName=nm, argVarType=ty} = castVar nm ty
 cgenArg' (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
-cgenArg' arg@(ArgProcRef ps args ty) = do
+cgenArg' arg@(ArgClosure ps args ty) = do
     logCodegen $ "cgenArg of " ++ show arg
     args' <- neededFreeArgs ps args
     if all argIsConst args'
@@ -1076,7 +1076,7 @@ cgenArgConst' (ArgChar c ty) = do
 cgenArgConst' (ArgUndef ty) = do
     llty <- llvmType' ty
     return $ C.Undef llty
-cgenArgConst' (ArgProcRef ps args ty) = do
+cgenArgConst' (ArgClosure ps args ty) = do
     fnRef <- cgenFuncRef ps
     args' <- neededFreeArgs ps args
     constArgs <- mapM cgenArgConst (setArgType intType <$> args')
@@ -1091,7 +1091,7 @@ cgenArgConst' arg = shouldnt $ "cgenArgConst of " ++ show arg
 
 cgenFuncRef :: ProcSpec -> Codegen C.Constant
 cgenFuncRef ps = do
-    addExternProcRef ps
+    addExternClosure ps
     let fName = LLVMAST.Name $ fromString $ show ps
     psType <- HigherOrderType defaultProcModifiers . (primParamTypeFlow <$>)
           <$> primActualParams ps
@@ -1127,8 +1127,8 @@ neededFreeArgs pspec args = lift2 $ do
     List.map snd <$> filterM (paramIsReal . fst) (zip params args)
 
 
-addExternProcRef :: ProcSpec -> Codegen ()
-addExternProcRef ps@(ProcSpec mod _ _ _) = do
+addExternClosure :: ProcSpec -> Codegen ()
+addExternClosure ps@(ProcSpec mod _ _ _) = do
     args <- (primParamToArg <$>) <$> primActualParams ps
     thisMod <- lift2 getModuleSpec
     fileMod <- lift2 $ getModule modRootModSpec
