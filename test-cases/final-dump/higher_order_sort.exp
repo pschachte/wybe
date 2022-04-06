@@ -1,0 +1,164 @@
+======================================================================
+AFTER EVERYTHING:
+ Module higher_order_sort
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : 
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+gen#1 > (2 calls)
+0: higher_order_sort.gen#1<0>
+gen#1(<=##0:(X, X, ?wybe.bool), sorted##0:wybe.list(X), tmp#0##0:wybe.list(X), tmp#1##0:wybe.list(X), xs##0:wybe.list(X), ?sorted##2:wybe.list(X))<{}; {}>:
+  AliasPairs: [(sorted##0,sorted##2)]
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(tmp#1##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool)
+    case ~tmp#4##0:wybe.bool of
+    0:
+        foreign llvm move(~sorted##0:wybe.list(X), ?sorted##2:wybe.list(X))
+
+    1:
+        foreign lpvm access(tmp#1##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:X) @list:nn:nn
+        foreign lpvm access(~tmp#1##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##1:wybe.list(X)) @list:nn:nn
+        higher_order_sort.insert<0>(<=##0:(X, X, ?wybe.bool), ~x##0:X, ~sorted##0:wybe.list(X), ?sorted##1:wybe.list(X)) #1 @higher_order_sort:nn:nn
+        higher_order_sort.gen#1<0>(~<=##0:(X, X, ?wybe.bool), ~sorted##1:wybe.list(X), ~tmp#0##0:wybe.list(X), ~tmp#1##1:wybe.list(X), ~xs##0:wybe.list(X), ?sorted##2:wybe.list(X)) #2 @higher_order_sort:nn:nn
+
+
+
+insert > (2 calls)
+0: higher_order_sort.insert<0>
+insert(<=##0:(X, X, ?wybe.bool), x##0:X, xs##0:wybe.list(X), ?xs##1:wybe.list(X))<{}; {}>:
+  AliasPairs: [(xs##0,xs##1)]
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(xs##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool)
+    case ~tmp#7##0:wybe.bool of
+    0:
+        foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T)) @list:nn:nn
+        foreign lpvm mutate(~tmp#10##0:wybe.list(T), ?tmp#11##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:T) @list:nn:nn
+        foreign lpvm mutate(~tmp#11##0:wybe.list(T), ?xs##1:wybe.list(X), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @list:nn:nn
+
+    1:
+        foreign lpvm access(xs##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?head##0:X) @list:nn:nn
+        foreign lpvm access(xs##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?rest##0:wybe.list(X)) @list:nn:nn
+        <=##0:(X, X, ?wybe.bool)(x##0:X, head##0:X, ?tmp#4##0:wybe.bool) #1 @higher_order_sort:nn:nn
+        case ~tmp#4##0:wybe.bool of
+        0:
+            higher_order_sort.insert<0>(~<=##0:(X, X, ?wybe.bool), ~x##0:X, ~rest##0:wybe.list(X), ?rest##1:wybe.list(X)) #3 @higher_order_sort:nn:nn
+            foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T)) @list:nn:nn
+            foreign lpvm mutate(~tmp#10##0:wybe.list(T), ?tmp#11##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head##0:T) @list:nn:nn
+            foreign lpvm mutate(~tmp#11##0:wybe.list(T), ?xs##1:wybe.list(X), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~rest##1:wybe.list(T)) @list:nn:nn
+
+        1:
+            foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T)) @list:nn:nn
+            foreign lpvm mutate(~tmp#10##0:wybe.list(T), ?tmp#11##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:T) @list:nn:nn
+            foreign lpvm mutate(~tmp#11##0:wybe.list(T), ?xs##1:wybe.list(X), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~xs##0:wybe.list(T)) @list:nn:nn
+
+
+
+
+sort > {inline} (0 calls)
+0: higher_order_sort.sort<0>
+sort(<=##0:(X, X, ?wybe.bool), xs##0:wybe.list(X), ?sorted##1:wybe.list(X))<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    higher_order_sort.gen#1<0>(~<=##0:(X, X, ?wybe.bool), 0:wybe.list(X), 0:wybe.list(X), ~xs##0:wybe.list(X), ~xs##0:wybe.list(X), ?sorted##1:wybe.list(X)) #1 @higher_order_sort:nn:nn
+
+  LLVM code       :
+
+; ModuleID = 'higher_order_sort'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  i64 @"higher_order_sort.gen#1<0>"(i64  %"<=##0", i64  %"sorted##0", i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"xs##0")    {
+entry:
+  %"1#tmp#4##0" = icmp ne i64 %"tmp#1##0", 0 
+  br i1 %"1#tmp#4##0", label %if.then, label %if.else 
+if.then:
+  %1 = inttoptr i64 %"tmp#1##0" to i64* 
+  %2 = getelementptr  i64, i64* %1, i64 0 
+  %3 = load  i64, i64* %2 
+  %4 = add   i64 %"tmp#1##0", 8 
+  %5 = inttoptr i64 %4 to i64* 
+  %6 = getelementptr  i64, i64* %5, i64 0 
+  %7 = load  i64, i64* %6 
+  %"2#sorted##1" = tail call fastcc  i64  @"higher_order_sort.insert<0>"(i64  %"<=##0", i64  %3, i64  %"sorted##0")  
+  %"2#sorted##2" = tail call fastcc  i64  @"higher_order_sort.gen#1<0>"(i64  %"<=##0", i64  %"2#sorted##1", i64  %"tmp#0##0", i64  %7, i64  %"xs##0")  
+  ret i64 %"2#sorted##2" 
+if.else:
+  ret i64 %"sorted##0" 
+}
+
+
+define external fastcc  i64 @"higher_order_sort.insert<0>"(i64  %"<=##0", i64  %"x##0", i64  %"xs##0")    {
+entry:
+  %"1#tmp#7##0" = icmp ne i64 %"xs##0", 0 
+  br i1 %"1#tmp#7##0", label %if.then, label %if.else 
+if.then:
+  %8 = inttoptr i64 %"xs##0" to i64* 
+  %9 = getelementptr  i64, i64* %8, i64 0 
+  %10 = load  i64, i64* %9 
+  %11 = add   i64 %"xs##0", 8 
+  %12 = inttoptr i64 %11 to i64* 
+  %13 = getelementptr  i64, i64* %12, i64 0 
+  %14 = load  i64, i64* %13 
+  %15 = inttoptr i64 %"<=##0" to i64* 
+  %16 = load  i64, i64* %15 
+  %17 = inttoptr i64 %16 to i64 (i64, i64, i64)* 
+  %"2#tmp#4##0" = tail call fastcc  i64  %17(i64  %"<=##0", i64  %"x##0", i64  %10)  
+  %18 = trunc i64 %"2#tmp#4##0" to i1  
+  br i1 %18, label %if.then1, label %if.else1 
+if.else:
+  %35 = trunc i64 16 to i32  
+  %36 = tail call ccc  i8*  @wybe_malloc(i32  %35)  
+  %37 = ptrtoint i8* %36 to i64 
+  %38 = inttoptr i64 %37 to i64* 
+  %39 = getelementptr  i64, i64* %38, i64 0 
+  store  i64 %"x##0", i64* %39 
+  %40 = add   i64 %37, 8 
+  %41 = inttoptr i64 %40 to i64* 
+  %42 = getelementptr  i64, i64* %41, i64 0 
+  store  i64 0, i64* %42 
+  ret i64 %37 
+if.then1:
+  %19 = trunc i64 16 to i32  
+  %20 = tail call ccc  i8*  @wybe_malloc(i32  %19)  
+  %21 = ptrtoint i8* %20 to i64 
+  %22 = inttoptr i64 %21 to i64* 
+  %23 = getelementptr  i64, i64* %22, i64 0 
+  store  i64 %"x##0", i64* %23 
+  %24 = add   i64 %21, 8 
+  %25 = inttoptr i64 %24 to i64* 
+  %26 = getelementptr  i64, i64* %25, i64 0 
+  store  i64 %"xs##0", i64* %26 
+  ret i64 %21 
+if.else1:
+  %"5#rest##1" = tail call fastcc  i64  @"higher_order_sort.insert<0>"(i64  %"<=##0", i64  %"x##0", i64  %14)  
+  %27 = trunc i64 16 to i32  
+  %28 = tail call ccc  i8*  @wybe_malloc(i32  %27)  
+  %29 = ptrtoint i8* %28 to i64 
+  %30 = inttoptr i64 %29 to i64* 
+  %31 = getelementptr  i64, i64* %30, i64 0 
+  store  i64 %10, i64* %31 
+  %32 = add   i64 %29, 8 
+  %33 = inttoptr i64 %32 to i64* 
+  %34 = getelementptr  i64, i64* %33, i64 0 
+  store  i64 %"5#rest##1", i64* %34 
+  ret i64 %29 
+}
+
+
+define external fastcc  i64 @"higher_order_sort.sort<0>"(i64  %"<=##0", i64  %"xs##0")    {
+entry:
+  %"1#sorted##1" = tail call fastcc  i64  @"higher_order_sort.gen#1<0>"(i64  %"<=##0", i64  0, i64  0, i64  %"xs##0", i64  %"xs##0")  
+  ret i64 %"1#sorted##1" 
+}
