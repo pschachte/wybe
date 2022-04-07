@@ -744,7 +744,7 @@ expType' (AnonProc mods params pstmts _ _) _ = do
     mapM_ ultimateVarType $ paramName <$> params
     params' <- updateParamTypes params
     return $ HigherOrderType mods $ paramTypeFlow <$> params'
-expType' (ProcRef pspec closed) _ = do
+expType' (Closure pspec closed) _ = do
     ProcDef _ (ProcProto _ params res) _ _ _ _ _ _ detism _ impurity _ _
         <- lift $ getProcDef pspec
     let params' = List.filter ((==Ordinary) . paramFlowType) params
@@ -787,7 +787,7 @@ expMode' _ (IntValue _) = (ParamIn, True, Nothing)
 expMode' _ (FloatValue _) = (ParamIn, True, Nothing)
 expMode' _ (StringValue _ _) = (ParamIn, True, Nothing)
 expMode' _ (CharValue _) = (ParamIn, True, Nothing)
-expMode' _ (ProcRef _ _) = (ParamIn, True, Nothing)
+expMode' _ (Closure _ _) = (ParamIn, True, Nothing)
 expMode' _ AnonProc{} = (ParamIn, True, Nothing)
 expMode' assigned (Var name flow _) =
     (flow, name `assignedIn` assigned, Nothing)
@@ -2311,7 +2311,7 @@ finaliseCall m name defPos assigned detism resourceful tmpCount final pos args
         let result = last args'
         resultTy <- expType result
         let closed = init args'
-        let partial = ProcRef matchProc closed `withType` resultTy
+        let partial = Closure matchProc closed `withType` resultTy
         logTyped $ "Finalising call as partial: " ++ show partial
         typeErrors
               [ReasonResourceUnavail ("partial application of " ++ name) res pos

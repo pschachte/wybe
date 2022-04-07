@@ -1,0 +1,93 @@
+======================================================================
+AFTER EVERYTHING:
+ Module uneeded_closure_args
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : uneeded_closure_args.<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+module top-level code > public {impure} (0 calls)
+0: uneeded_closure_args.<0>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    uneeded_closure_args.call<0>(uneeded_closure_args.gen#1<0><_:A>:(wybe.int, ?wybe.int), 2:wybe.int, ?tmp#0##0:wybe.int) #0 @uneeded_closure_args:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+
+
+call > {noinline} (1 calls)
+0: uneeded_closure_args.call<0>
+call(f##0:(A, ?A), a##0:A, ?#result##0:A)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    ~f##0:(A, ?A)(~a##0:A, ?#result##0:A) #0 @uneeded_closure_args:nn:nn
+
+
+gen#1 > {inline} (1 calls)
+0: uneeded_closure_args.gen#1<0>
+gen#1([^a##0:A], b##0:B, ?#result##0:B)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(~b##0:B, ?#result##0:B) @uneeded_closure_args:nn:nn
+
+
+second > {inline} (1 calls)
+0: uneeded_closure_args.second<0>
+second([a##0:A], b##0:B, ?#result##0:B)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(~b##0:B, ?#result##0:B) @uneeded_closure_args:nn:nn
+
+  LLVM code       :
+
+; ModuleID = 'uneeded_closure_args'
+
+
+ 
+
+
+@uneeded_closure_args.1 =    constant [1 x i64] [i64 ptrtoint (i64 (i64, i64)* @"uneeded_closure_args.gen#1<0>" to i64)]
+
+
+declare external ccc  void @print_int(i64)    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  void @"uneeded_closure_args.<0>"()    {
+entry:
+  %"1#tmp#0##0" = tail call fastcc  i64  @"uneeded_closure_args.call<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @uneeded_closure_args.1, i32 0, i32 0) to i64), i64  2)  
+  tail call ccc  void  @print_int(i64  %"1#tmp#0##0")  
+  ret void 
+}
+
+
+define external fastcc  i64 @"uneeded_closure_args.call<0>"(i64  %"f##0", i64  %"a##0")    {
+entry:
+  %2 = inttoptr i64 %"f##0" to i64* 
+  %3 = load  i64, i64* %2 
+  %4 = inttoptr i64 %3 to i64 (i64, i64)* 
+  %"1##result##0" = tail call fastcc  i64  %4(i64  %"f##0", i64  %"a##0")  
+  ret i64 %"1##result##0" 
+}
+
+
+define external fastcc  i64 @"uneeded_closure_args.gen#1<0>"(i64  %"#env##0", i64  %"b##0")    {
+entry:
+  ret i64 %"b##0" 
+}
+
+
+define external fastcc  i64 @"uneeded_closure_args.second<0>"(i64  %"b##0")    {
+entry:
+  ret i64 %"b##0" 
+}

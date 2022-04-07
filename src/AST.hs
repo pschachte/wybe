@@ -1963,7 +1963,7 @@ procCallCount proc = Map.foldr (+) 0 $ procCallers proc
 primImpurity :: Prim -> Compiler Impurity
 primImpurity (PrimCall _ pspec _ _)
     = procImpurity <$> getProcDef pspec
-primImpurity (PrimHigher _ (ArgProcRef pspec _ _) _)
+primImpurity (PrimHigher _ (ArgClosure pspec _ _) _)
     = procImpurity <$> getProcDef pspec
 primImpurity (PrimHigher _ ArgVar{argVarType=HigherOrderType
                                 ProcModifiers{modifierImpurity=purity} _} _)
@@ -2466,7 +2466,7 @@ foldExp' _   _   val StringValue{} pos = val
 foldExp' _   _   val CharValue{} pos = val
 foldExp' _   _   val Var{} pos = val
 foldExp' _   _   val (Global _) pos = val
-foldExp' sfn efn val (ProcRef _ es) pos = foldExps sfn efn pos val es
+foldExp' sfn efn val (Closure _ es) pos = foldExps sfn efn pos val es
 foldExp' sfn efn val (AnonProc _ _ pstmts _ _) pos = foldStmts sfn efn val pstmts
 foldExp' sfn efn val (Typed exp _ _) pos = foldExp sfn efn val exp pos
 foldExp' _   _   val AnonParamVar{} pos = val
@@ -2946,7 +2946,7 @@ data Exp
       | CharValue Char
       | StringValue String StringVariant
       | Var VarName FlowDirection ArgFlowType
-      | ProcRef ProcSpec [Placed Exp]
+      | Closure ProcSpec [Placed Exp]
       | Typed Exp TypeSpec (Maybe TypeSpec)
                -- ^explicitly typed expr giving the type of the expression, and,
                -- if it is a cast, the type of the Exp argument.  If not a cast,
@@ -2995,7 +2995,7 @@ flattenedExpFlow (FloatValue _)        = ParamIn
 flattenedExpFlow (CharValue _)         = ParamIn
 flattenedExpFlow (StringValue _ _)     = ParamIn
 flattenedExpFlow AnonProc{}            = ParamIn
-flattenedExpFlow (ProcRef _ _)         = ParamIn
+flattenedExpFlow (Closure _ _)         = ParamIn
 flattenedExpFlow (Var _ flow _)        = flow
 flattenedExpFlow (AnonParamVar _ flow) = flow
 flattenedExpFlow (Typed exp _ _)       = flattenedExpFlow exp
@@ -3010,7 +3010,7 @@ expIsConstant exp@IntValue{}         = Just exp
 expIsConstant exp@FloatValue{}       = Just exp
 expIsConstant exp@CharValue{}        = Just exp
 expIsConstant exp@StringValue{}      = Just exp
-expIsConstant exp@(ProcRef _ closed)
+expIsConstant exp@(Closure _ closed)
     | all (isJust . expIsConstant . content) closed = Just exp
     | otherwise                                     = Nothing
 expIsConstant (Typed exp _ _)        = expIsConstant exp
@@ -3160,7 +3160,7 @@ data PrimArg
      | ArgFloat Double TypeSpec                -- ^Constant floating point arg
      | ArgString String StringVariant TypeSpec -- ^Constant string arg
      | ArgChar Char TypeSpec                   -- ^Constant character arg
-     | ArgProcRef ProcSpec [PrimArg] TypeSpec  -- ^Constant procedure reference
+     | ArgClosure ProcSpec [PrimArg] TypeSpec  -- ^Closure, with closed args
      | ArgGlobal GlobalInfo TypeSpec           -- ^Constant global reference
      | ArgUnneeded PrimFlow TypeSpec           -- ^Unneeded input or output
      | ArgUndef TypeSpec                       -- ^Undefined variable, used
@@ -3200,15 +3200,15 @@ argIsVar _ = False
 
 -- | Test if a PrimArg is a compile-time constant.
 argIsConst :: PrimArg -> Bool
-argIsConst ArgVar{} = False
-argIsConst ArgInt{} = True
-argIsConst ArgFloat{} = True
-argIsConst ArgString{} = True
-argIsConst ArgChar{} = True
-argIsConst (ArgProcRef _ as _) = all argIsConst as
-argIsConst ArgGlobal{} = True
-argIsConst ArgUnneeded{} = False
-argIsConst ArgUndef{} = False
+argIsConst ArgVar{}            = False
+argIsConst ArgInt{}            = True
+argIsConst ArgFloat{}          = True
+argIsConst ArgString{}         = True
+argIsConst ArgChar{}           = True
+argIsConst (ArgClosure _ as _) = all argIsConst as
+argIsConst ArgGlobal{}         = False
+argIsConst ArgUnneeded{}       = False
+argIsConst ArgUndef{}          = False
 
 
 -- | Return Just the integer constant value if a PrimArg iff it is an integer
@@ -3239,7 +3239,7 @@ argFlowDirection ArgInt{} = FlowIn
 argFlowDirection ArgFloat{} = FlowIn
 argFlowDirection ArgString{} = FlowIn
 argFlowDirection ArgChar{} = FlowIn
-argFlowDirection ArgProcRef{} = FlowIn
+argFlowDirection ArgClosure{} = FlowIn
 argFlowDirection ArgGlobal{} = FlowIn
 argFlowDirection (ArgUnneeded flow _) = flow
 argFlowDirection ArgUndef{} = FlowIn
@@ -3252,7 +3252,7 @@ argType (ArgInt _ typ) = typ
 argType (ArgFloat _ typ) = typ
 argType (ArgString _ _ typ) = typ
 argType (ArgChar _ typ) = typ
-argType (ArgProcRef _ _ typ) = typ
+argType (ArgClosure _ _ typ) = typ
 argType (ArgGlobal _ typ) = typ
 argType (ArgUnneeded _ typ) = typ
 argType (ArgUndef typ) = typ
@@ -3265,7 +3265,7 @@ setArgType typ (ArgInt i _) = ArgInt i typ
 setArgType typ (ArgFloat f _) = ArgFloat f typ
 setArgType typ (ArgString s v ty) = ArgString s v typ
 setArgType typ (ArgChar c _) = ArgChar c typ
-setArgType typ (ArgProcRef ms as _) = ArgProcRef ms as typ
+setArgType typ (ArgClosure ms as _) = ArgClosure ms as typ
 setArgType typ (ArgGlobal rs _) = ArgGlobal rs typ
 setArgType typ (ArgUnneeded u _) = ArgUnneeded u typ
 setArgType typ (ArgUndef _) = ArgUndef typ
@@ -3300,9 +3300,9 @@ argDescription (ArgInt val _) = "constant argument '" ++ show val ++ "'"
 argDescription (ArgFloat val _) = "constant argument '" ++ show val ++ "'"
 argDescription arg@ArgString{} = "constant argument " ++ show arg
 argDescription (ArgChar val _) = "constant argument '" ++ show val ++ "'"
-argDescription (ArgProcRef ms as _)
-    = "constant procedure ref '" ++ show ms ++ "' with <"
-    ++ intercalate ", " (argDescription <$> as) ++ ">"
+argDescription (ArgClosure ms as _)
+    = "closure of '" ++ show ms ++ "' with <"
+    ++ intercalate ", " (argDescription <$> as) ++ "> closed arguments"
 argDescription (ArgGlobal info _) = "global reference to " ++ show info
 argDescription (ArgUnneeded flow _) = "unneeded " ++ argFlowDescription flow
 argDescription (ArgUndef _) = "undefined argument"
@@ -3351,7 +3351,7 @@ expOutputs (AnonParamVar mbNum flow) =
     if flowsOut flow then Set.singleton (show mbNum) else Set.empty
 expOutputs (Global _) = Set.empty
 expOutputs AnonProc{} = Set.empty
-expOutputs (ProcRef _ _) = Set.empty
+expOutputs (Closure _ _) = Set.empty
 expOutputs (Typed expr _ _) = expOutputs expr
 expOutputs (DisjExp pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
 expOutputs (Where _ pexp) = expOutputs $ content pexp
@@ -3381,7 +3381,7 @@ expInputs (AnonParamVar mbNum flow) =
     if flowsIn flow then Set.singleton (show mbNum) else Set.empty
 expInputs (Global _) = Set.empty
 expInputs (AnonProc{}) = Set.empty
-expInputs (ProcRef _ _) = Set.empty
+expInputs (Closure _ _) = Set.empty
 expInputs (Typed expr _ _) = expInputs expr
 expInputs (Where _ pexp) = expInputs $ content pexp
 expInputs (DisjExp pexp1 pexp2) = pexpListInputs [pexp1,pexp2]
@@ -3445,7 +3445,7 @@ setPExpTypeFlow typeflow pexpr = setExpTypeFlow typeflow <$> pexpr
 varsInPrimArg :: PrimFlow -> PrimArg -> Set PrimVarName
 varsInPrimArg dir ArgVar{argVarName=var,argVarFlow=dir'}
     = if dir == dir' then Set.singleton var else Set.empty
-varsInPrimArg dir (ArgProcRef _ as _)
+varsInPrimArg dir (ArgClosure _ as _)
     = Set.unions $ Set.fromList (varsInPrimArg dir <$> as)
 varsInPrimArg _ ArgInt{}      = Set.empty
 varsInPrimArg _ ArgFloat{}    = Set.empty
@@ -3947,7 +3947,7 @@ instance Show PrimArg where
   show (ArgFloat f typ)  = show f ++ showTypeSuffix typ Nothing
   show (ArgString s v typ) = show v ++ show s ++ showTypeSuffix typ Nothing
   show (ArgChar c typ)   = show c ++ showTypeSuffix typ Nothing
-  show (ArgProcRef ms as typ) = show ms ++ "<" ++ intercalate ", " (show <$> as)
+  show (ArgClosure ms as typ) = show ms ++ "<" ++ intercalate ", " (show <$> as)
                              ++ ">" ++ showTypeSuffix typ Nothing
   show (ArgGlobal info typ) = show info ++ showTypeSuffix typ Nothing
   show (ArgUnneeded dir typ) =
@@ -3966,7 +3966,7 @@ instance Show Exp where
   show (AnonProc mods params ss _ _) =
       showProcModifiers mods
       ++ "{" ++ intercalate "; " (showStmt 0 . content <$> ss) ++ "}"
-  show (ProcRef ps es) = show ps ++ "<" ++ intercalate ", " (show <$> es) ++ ">"
+  show (Closure ps es) = show ps ++ "<" ++ intercalate ", " (show <$> es) ++ ">"
   show (AnonParamVar num dir) = flowPrefix dir ++ "@" ++ maybe "" show num
   show (Where stmts exp) = show exp ++ " where" ++ showBody 8 stmts
   show (DisjExp e1 e2) =

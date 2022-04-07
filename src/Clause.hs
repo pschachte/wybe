@@ -305,11 +305,11 @@ compileArg' typ (FloatValue float) _ = return [ArgFloat float typ]
 compileArg' typ (StringValue string v) _ = return [ArgString string v typ]
 compileArg' typ (CharValue char) _ = return [ArgChar char typ]
 compileArg' typ (Global info) _ = return [ArgGlobal info typ]
-compileArg' typ (ProcRef ms es) _ = do
+compileArg' typ (Closure ms es) _ = do
     as <- concat <$> mapM (placedApply compileArg) es
     unless (sameLength es as)
-           $ shouldnt "compileArg' procRef with in/out args"
-    return [ArgProcRef ms as typ]
+           $ shouldnt "compileArg' Closure with in/out args"
+    return [ArgClosure ms as typ]
 compileArg' typ var@(Var name flow flowType) pos = do
     inArg <- if flowsIn flow
         then do

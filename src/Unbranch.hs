@@ -647,7 +647,7 @@ unbranchExps args = do
     mapM (placedApply unbranchExp) args
 
 
--- | Unbranch an expression, transforming ProcRefs and AnonProcs into fresh
+-- | Unbranch an expression, transforming Closures and AnonProcs into fresh
 -- 'closure' procs
 unbranchExp :: Exp -> OptPos -> Unbrancher (Placed Exp)
 unbranchExp (Typed exp ty cast) pos = do
@@ -659,7 +659,7 @@ unbranchExp exp@(AnonProc mods params pstmts clsd res) pos = do
     let clsd' = trustFromJust "unbranch annon proc without closed" clsd
     let res' = trustFromJust "unbranch annon proc without resources" res
     name <- newProcName
-    logUnbranch $ "Creating procref for " ++ show exp ++ " under " ++ name
+    logUnbranch $ "Creating Closure for " ++ show exp ++ " under " ++ name
     let ProcModifiers detism inlining impurity _ _ _ _ = mods
     lift $ checkProcMods "anonymous procedure" pos mods
     let (freeParams, freeVars) = unzip $ uncurry freeParamVar <$> Map.toAscList clsd'
@@ -674,7 +674,7 @@ unbranchExp exp@(AnonProc mods params pstmts clsd res) pos = do
     logUnbranch $ "  Resultant hoisted proc: " ++ show procProto
     procSpec <- lift $ addProcDef procDef'
     addClosure procSpec freeVars pos name
-unbranchExp exp@(ProcRef ps free) pos = do
+unbranchExp exp@(Closure ps free) pos = do
     free' <- unbranchExps free
     isClosure <- lift $ isClosureProc ps
     if isClosure
@@ -695,7 +695,7 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) free pos name = do
     let (params', args, constMap) = makeFreeParams params free
     closProcs <- gets brClosures
     case Map.lookup (regularProcSpec, constMap) closProcs of
-        Just closProc -> return $ ProcRef closProc free `maybePlace` pos
+        Just closProc -> return $ Closure closProc free `maybePlace` pos
         Nothing -> do
             let pDefClosure =
                     ProcDef name (ProcProto name params' res)
@@ -712,7 +712,7 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) free pos name = do
             logUnbranch $ "  Resultant closure proc: " ++ show closureProcSpec
             modify $ \s -> s{brClosures=Map.insert (regularProcSpec, constMap)
                                         closureProcSpec $ brClosures s}
-            return $ ProcRef closureProcSpec free `maybePlace` pos
+            return $ Closure closureProcSpec free `maybePlace` pos
 
 
 -- | Transform a list of params a prefix of corresponding arguments into a

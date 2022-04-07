@@ -477,7 +477,7 @@ mkInput arg@ArgInt{} = arg
 mkInput arg@ArgFloat{} = arg
 mkInput arg@ArgString{} = arg
 mkInput arg@ArgChar{} = arg
-mkInput arg@ArgProcRef{} = arg
+mkInput arg@ArgClosure{} = arg
 mkInput (ArgUnneeded _ ty) = ArgUnneeded FlowIn ty
 mkInput arg@ArgGlobal{} = arg
 mkInput arg@ArgUndef{} = arg
@@ -485,18 +485,13 @@ mkInput arg@ArgUndef{} = arg
 
 argExpandedPrim :: Prim -> BodyBuilder Prim
 argExpandedPrim call@(PrimCall id pspec args gFlows) = do
-    args' <- mapM expandArg args
-    params <- lift $ primProtoParams <$> getProcPrimProto pspec
-    unless (sameLength args' params) $
-        shouldnt $ "arguments in call " ++ show call
-                   ++ " don't match params " ++ show params
-    args'' <- zipWithM (transformUnneededArg $ zip params args) params args'
-    return $ PrimCall id pspec args'' gFlows
+    args' <- transformUnneededArgs pspec args
+    return $ PrimCall id pspec args' gFlows
 argExpandedPrim call@(PrimHigher id fn args) = do
     logBuild $ "Expanding Higher call " ++ show call
     fn' <- expandArg fn
     case fn' of
-        ArgProcRef pspec clsd _ -> do
+        ArgClosure pspec clsd _ -> do
             pspec' <- fromMaybe pspec <$> lift (maybeGetClosureOf pspec)
             logBuild $ "As first-order call to " ++ show pspec'
             params <- lift $ getPrimParams pspec'
@@ -511,11 +506,19 @@ argExpandedPrim (PrimForeign lang nm flags args) = do
     args' <- mapM expandArg args
     return $ simplifyForeign lang nm flags args'
 
-
--- |Replace any arguments corresponding to unneeded parameters with
+-- |Replace any unneeded arguments corresponding to unneeded parameters with
 --  ArgUnneeded.  For unneeded *output* parameters, there must be an
 --  input with the same name.  We must set the output argument variable
 --  to the corresponding input argument, so the value is defined.
+transformUnneededArgs :: ProcSpec -> [PrimArg] -> BodyBuilder [PrimArg]
+transformUnneededArgs pspec args = do
+    args' <- mapM expandArg args
+    params <- lift $ primProtoParams <$> getProcPrimProto pspec
+    zipWithM (transformUnneededArg $ zip params args) params args'
+
+
+-- |Replace an unneeded argument corresponding to unneeded parameters with
+--  ArgUnneeded. 
 transformUnneededArg :: [(PrimParam,PrimArg)] -> PrimParam -> PrimArg
                      -> BodyBuilder PrimArg
 transformUnneededArg pairs
@@ -536,6 +539,9 @@ transformUnneededArg pairs
               _       -> shouldnt $ "Multiple input params match output "
                                     ++ show name
         return $ ArgUnneeded flow typ
+transformUnneededArg _ _ (ArgClosure pspec args ty) = do
+    args' <- transformUnneededArgs pspec args
+    return $ ArgClosure pspec args' ty
 transformUnneededArg _ _ arg = return arg
 
 
@@ -684,8 +690,8 @@ canonicalisePrim (PrimForeign lang op flags args) =
 canonicaliseArg :: PrimArg -> PrimArg
 canonicaliseArg ArgVar{argVarName=nm, argVarFlow=fl} =
     ArgVar nm AnyType fl Ordinary False
-canonicaliseArg (ArgProcRef ms as _) =
-    ArgProcRef ms (canonicaliseArg <$> as) AnyType
+canonicaliseArg (ArgClosure ms as _) =
+    ArgClosure ms (canonicaliseArg <$> as) AnyType
 canonicaliseArg (ArgInt v _)        = ArgInt v AnyType
 canonicaliseArg (ArgFloat v _)      = ArgFloat v AnyType
 canonicaliseArg (ArgString v r _)   = ArgString v r AnyType
@@ -707,7 +713,7 @@ validateArg instr (ArgInt    _ ty)      = validateType ty instr
 validateArg instr (ArgFloat  _ ty)      = validateType ty instr
 validateArg instr (ArgString _ _ ty)    = validateType ty instr
 validateArg instr (ArgChar   _ ty)      = validateType ty instr
-validateArg instr (ArgProcRef _ _ ty)   = validateType ty instr
+validateArg instr (ArgClosure _ _ ty)   = validateType ty instr
 validateArg instr (ArgGlobal _ ty)      = validateType ty instr
 validateArg instr (ArgUnneeded _ ty)    = validateType ty instr
 validateArg instr (ArgUndef ty)         = validateType ty instr
@@ -750,9 +756,9 @@ expandArg arg@ArgVar{argVarName=var, argVarFlow=FlowOut} = do
       $ logBuild $ "Replaced output variable " ++ show var
                    ++ " with " ++ show var'
     return arg{argVarName=var'}
-expandArg arg@(ArgProcRef ps as ty) = do
+expandArg arg@(ArgClosure ps as ty) = do
     as' <- mapM expandArg as
-    return $ ArgProcRef ps as' ty
+    return $ ArgClosure ps as' ty
 expandArg arg = return arg
 
 
@@ -1260,16 +1266,16 @@ renameArg :: PrimArg -> BkwdBuilder PrimArg
 renameArg arg@ArgVar{argVarName=name} = do
     name' <- gets (Map.findWithDefault name name . bkwdRenaming)
     return $ arg {argVarName=name'}
-renameArg (ArgProcRef ps args ts) = do
+renameArg (ArgClosure ps args ts) = do
     args' <- mapM renameArg args
-    return $ ArgProcRef ps args' ts
+    return $ ArgClosure ps args' ts
 renameArg arg = return arg
 
 flattenArgs :: [PrimArg] -> [PrimArg]
 flattenArgs = concatMap flattenArg
 
 flattenArg :: PrimArg -> [PrimArg]
-flattenArg arg@(ArgProcRef _ as ts) = arg:flattenArgs as
+flattenArg arg@(ArgClosure _ as ts) = arg:flattenArgs as
 flattenArg arg = [arg]
 
 

@@ -660,9 +660,9 @@ globaliseExp _ (Typed exp ty cast) pos = do
 globaliseExp ty exp@(Var nm fl _) pos = do
     addResourceInOuts fl nm ty
     return $ exp `maybePlace` pos
-globaliseExp _ (ProcRef pspec exps) pos = do
+globaliseExp _ (Closure pspec exps) pos = do
     exps' <- globaliseExps' exps
-    return $ ProcRef pspec exps' `maybePlace` pos
+    return $ Closure pspec exps' `maybePlace` pos
 globaliseExp _ (AnonProc mods@(ProcModifiers detism _ _ _ resful _ _)
                 params body clsd res) pos = do
     (params', body', _) <- globaliseProc pos Nothing AnonymousProc

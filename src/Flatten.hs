@@ -558,9 +558,9 @@ flattenExp expr@(AnonParamVar mbNum dir) ty castFrom pos = do
         expr' <- flattenExp var ty castFrom pos
         logFlatten $ "  Anon param flattened " ++ show var ++ " -> " ++ show expr'
         return expr'
-flattenExp expr@(ProcRef ms es) ty castFrom pos = do
+flattenExp expr@(Closure ms es) ty castFrom pos = do
     es' <- mapM flattenPExp es
-    return $ typeAndPlace (ProcRef ms es') ty castFrom pos
+    return $ typeAndPlace (Closure ms es') ty castFrom pos
 flattenExp global@(Global _) _ _ pos = return $ maybePlace global pos
 flattenExp (Where stmts pexp) _ _ _ = do
     flattenStmts stmts Det
