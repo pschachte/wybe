@@ -1190,6 +1190,9 @@ recordCasts caller instr@(ForeignCall lang callee _ args) pos = do
 recordCasts caller instr@(ProcCall (First _ callee _) _ _ args) pos = do
     logTyped $ "Recording casts in " ++ show instr
     mapM_ (uncurry $ recordCast Nothing caller callee) $ zip args [1..]
+recordCasts caller instr@(ProcCall (Higher fn) _ _ args) _ = do
+    logTyped $ "Recording casts in " ++ show instr
+    mapM_ (uncurry $ recordCast Nothing caller $ show $ content fn) $ zip (fn:args) [0..]
 recordCasts caller stmt _ =
     shouldnt $ "recordCasts of non-call statement " ++ show stmt
 
@@ -1327,6 +1330,8 @@ callInfos vars pstmt = do
                 defs <- lift $ mapM getProcDef procs
                 firstInfos <- zipWithM firstInfo defs procs
                 return $ StmtTypings pstmt firstInfos
+        ProcCall (Higher fn) _ _ _ -> 
+            return $ StmtTypings pstmt [HigherInfo $ content fn]
         _ ->
           shouldnt $ "callProcInfos with non-call statement "
                      ++ showStmt 4 stmt
@@ -1402,6 +1407,8 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt typs):calls)
             = case stmt of
                 ProcCall (First mod callee _) _ resful pexps ->
                     (mod, callee, pexps, resful)
+                ProcCall (Higher fn) _ resful pexps ->
+                    ([], show $ content fn, pexps, resful)
                 noncall -> shouldnt $ "typecheckCalls with non-call stmt"
                                         ++ show noncall
     actualTypes <- mapM expType pexps
