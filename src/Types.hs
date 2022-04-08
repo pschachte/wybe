@@ -1003,7 +1003,7 @@ procToPartial callFlows hasBang info@FirstInfo{firstInfoPartial=False,
     (closedTys, higherTys) = List.splitAt nClosed tys
     (closedFls, higherFls) = List.splitAt nClosed flows
     resful = any isResourcefulHigherOrder tys
-                || not (Set.null inRes || Set.null outRes)
+                || not (Set.null inRes && Set.null outRes)
     needsBang = resful || impurity > Pure
     higherTy = HigherOrderType (normaliseModifiers
                                 $ ProcModifiers detism MayInline
