@@ -690,6 +690,11 @@ csext :: C.Constant -> LLVMAST.Type -> Codegen C.Constant
 csext op ty = return $ C.SExt op ty
 
 
+-- Helpers for allocating, storing, loading
+doAlloca :: Type -> Codegen Operand
+doAlloca (PointerType ty _) = instr (ptr_t ty) $ Alloca ty Nothing 0 []
+doAlloca ty                 = instr (ptr_t ty) $ Alloca ty Nothing 0 []
+
 doLoad :: Type -> Operand -> Codegen Operand
 doLoad ty ptr = instr ty $ Load False ptr Nothing 0 []
 
