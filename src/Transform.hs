@@ -31,7 +31,7 @@ import           Util
 ----------------------------------------------------------------
 --
 -- Transform mutate instructions with correct destructive flag
--- This is the extra pass after found the alais analysis fixed point
+-- This is the extra pass after found the alias analysis fixed point
 --
 ----------------------------------------------------------------
 transformProc :: ProcDef -> Int -> Compiler ProcDef

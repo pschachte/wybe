@@ -19,8 +19,7 @@ module Codegen (
   phi, br, cbr, getBlock, retNothing, fresh,
   -- * Symbol storage
   alloca, store, local, assign, addOperand, load, getVar, localVar, preservingSymtab,
-  makeGlobalResourceVariable,
-  operandType, doAlloca, doLoad,
+  makeGlobalResourceVariable, doLoad,
   bitcast, cbitcast, inttoptr, cinttoptr, ptrtoint, cptrtoint,
   trunc, ctrunc, zext, czext, sext, csext,
   -- * Types
@@ -76,6 +75,7 @@ import           Options                         (LogSelection (Blocks,Codegen))
 import           Config                          (wordSize, functionDefSection)
 import           Unsafe.Coerce
 import           Debug.Trace
+import LLVM.AST.Typed (Typed(typeOf))
 
 ----------------------------------------------------------------------------
 -- Types                                                                  --
@@ -167,7 +167,7 @@ data BlockState
 -- Stores assignments and generated operands
 data SymbolTable
      = SymbolTable {
-         stVars :: Map.Map String (Operand,TypeRepresentation)
+         stVars :: Map.Map String Operand
 
                       -- ^ Assigned names
        , stOpds :: Map.Map PrimArg Operand
@@ -442,17 +442,17 @@ globalVar t s = C.GlobalReference t $ LLVMAST.Name $ fromString s
 ----------------------------------------------------------------------------
 
 -- | Store a local variable on the front of the symbol table.
-assign :: String -> Operand -> TypeRepresentation -> Codegen ()
-assign var op trep = do
-    logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show op ++ ":" ++ show trep
+assign :: String -> Operand -> Codegen ()
+assign var op = do
+    logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show op ++ ":" ++ show (typeOf op)
     st <- gets symtab
-    modify $ \s -> s { symtab=st{stVars=Map.insert var (op,trep) $ stVars st} }
+    modify $ \s -> s { symtab=st{stVars=Map.insert var op $ stVars st} }
 
 
 -- | Find and return the local operand by its given name from the symbol
 -- table. Only the first find will be returned so new names can shadow
 -- the same older names.
-getVar :: String -> Codegen (Operand,TypeRepresentation)
+getVar :: String -> Codegen Operand
 getVar var = do
     let err = shouldnt $ "Local variable not in scope: " ++ show var
     lcls <- gets (stVars . symtab)
@@ -474,23 +474,6 @@ addOperand :: PrimArg -> Operand -> Codegen ()
 addOperand arg opd = do
     st <- gets symtab
     modify $ \s -> s { symtab=st{stOpds=Map.insert arg opd $ stOpds st} }
-
-
--- | Look inside an operand and determine it's type.
-operandType :: Operand -> Type
-operandType (LocalReference ty _) = ty
-operandType (ConstantOperand cons) =
-    case cons of
-        C.Int bs _ -> int_c bs
-        C.Float _ -> float_t
-        C.Null ty -> ty
-        C.GlobalReference ty _ -> ty
-        C.GetElementPtr _ (C.GlobalReference ty _) _ -> ty
-        C.IntToPtr _ ty -> ty
-        C.PtrToInt _ ty -> ty
-        C.Undef ty -> ty
-        _ -> shouldnt $ "Not a recognised constant operand: " ++ show cons
-operandType _ = void_t
 
 
 ----------------------------------------------------------------------------
