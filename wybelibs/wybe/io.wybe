@@ -7,6 +7,7 @@ use foreign object cbits
 use foreign library gc
 
 use wybe.bool, wybe.int, wybe.count, wybe.float, wybe.char, wybe.string, wybe.c_string
+use wybe.list
 use wybe.phantom
 
 # XXX We shouldn't need to initialise a resource (or variable) of a 0-bit type
@@ -40,5 +41,23 @@ pub def println(x:bool) use !io { !print(x); !nl }
 pub def print(x:string) use !io { !print_string(x) }
 pub def println(x:string) use !io { !print(x); !nl }
 pub def read(?x:string) use !io { !read(?str:c_string); ?x = string(str) }
+
+pub def print_list(xs:list(int)) use !io {
+    !print("[")
+    !_print_list(xs)
+    !println("]")
+}
+
+def _print_list(xs:list(int)) use !io {
+    if { [?x | ?xs1] = xs ::
+        !print(x)
+        if { [ ?x2 | ?xs2 ] = xs1 ::
+            !print(", ")
+        }
+        !_print_list(xs1)
+        | else ::
+            !print("")
+    }
+}
 
 pub def eof:char = foreign lpvm cast(-1)

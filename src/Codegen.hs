@@ -5,7 +5,6 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings          #-}
 
 module Codegen (
@@ -18,8 +17,8 @@ module Codegen (
   callWybe, callC, externf, ret, globalDefine, externalC, externalWybe,
   phi, br, cbr, getBlock, retNothing, fresh,
   -- * Symbol storage
-  alloca, store, local, assign, addOperand, load, getVar, localVar, preservingSymtab,
-  makeGlobalResourceVariable, doLoad,
+  alloca, store, addOperand, load, getVar, localVar, preservingSymtab,
+  makeGlobalResourceVariable, doAlloca, doLoad,
   bitcast, cbitcast, inttoptr, cinttoptr, ptrtoint, cptrtoint,
   trunc, ctrunc, zext, czext, sext, csext,
   -- * Types
@@ -148,6 +147,7 @@ data CodegenState
       , symtab       :: SymbolTable
                                  -- ^ Local symbol table of a function
       , names        :: Names    -- ^ Name supply
+      , proto        :: PrimProto -- ^ Proto of current proc
       } deriving Show
 
 -- | 'BlockState' will generate the code for basic blocks inside of
@@ -333,12 +333,13 @@ emptyBlock :: Int -> BlockState
 emptyBlock i = BlockState i [] Nothing
 
 -- | Initialize an empty CodegenState for a new Definition.
-emptyCodegen :: CodegenState
-emptyCodegen = CodegenState{ currentBlock=Name $ fromString entryBlockName
+emptyCodegen :: PrimProto -> CodegenState
+emptyCodegen proto = CodegenState{ currentBlock=Name $ fromString entryBlockName
                            , blocks=Map.empty
                            , blockCount=1
                            , symtab=SymbolTable Map.empty Map.empty
                            , names=Map.empty
+                           , proto=proto
                            }
 
 
@@ -430,9 +431,8 @@ externf ty = ConstantOperand . C.GlobalReference ty
 localVar :: Type -> String -> Operand
 localVar t s = LocalReference t $ LLVMAST.Name $ fromString s
 
-
-local :: Type -> LLVMAST.Name -> Operand
-local ty nm = LocalReference ty nm
+-- local :: Type -> LLVMAST.Name -> Operand
+-- local ty nm = LocalReference ty nm
 
 globalVar :: Type -> String -> C.Constant
 globalVar t s = C.GlobalReference t $ LLVMAST.Name $ fromString s
@@ -440,14 +440,6 @@ globalVar t s = C.GlobalReference t $ LLVMAST.Name $ fromString s
 ----------------------------------------------------------------------------
 -- Symbol Table                                                           --
 ----------------------------------------------------------------------------
-
--- | Store a local variable on the front of the symbol table.
-assign :: String -> Operand -> Codegen ()
-assign var op = do
-    logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show op ++ ":" ++ show (typeOf op)
-    st <- gets symtab
-    modify $ \s -> s { symtab=st{stVars=Map.insert var op $ stVars st} }
-
 
 -- | Find and return the local operand by its given name from the symbol
 -- table. Only the first find will be returned so new names can shadow
@@ -491,7 +483,7 @@ namedInstr ty nm ins = do
     blockId <- idx <$> current
     let ref = Name $ fromString $ specialName2 (show blockId) nm
     addInstr $ ref := ins
-    return $ local ty ref
+    return $ LocalReference ty ref
 
 
 -- | Append an unnamed instruction to the instruction stack of the current
@@ -500,7 +492,7 @@ instr :: Type -> Instruction -> Codegen Operand
 instr ty ins = do
     ref <- UnName <$> lift fresh
     addInstr $ ref := ins
-    return $ local ty ref
+    return $ LocalReference ty ref
 
 
 -- | Append a void instruction to the instruction stack of the current
