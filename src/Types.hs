@@ -1330,7 +1330,7 @@ callInfos vars pstmt = do
                 defs <- lift $ mapM getProcDef procs
                 firstInfos <- zipWithM firstInfo defs procs
                 return $ StmtTypings pstmt firstInfos
-        ProcCall (Higher fn) _ _ _ -> 
+        ProcCall (Higher fn) _ _ _ ->
             return $ StmtTypings pstmt [HigherInfo $ content fn]
         _ ->
           shouldnt $ "callProcInfos with non-call statement "
@@ -2508,27 +2508,21 @@ compatibleReps Address      (Bits bs)    = bs == wordSize
 compatibleReps Address      (Signed bs)  = bs == wordSize
 compatibleReps Address      (Floating _) = False
 compatibleReps Address      (Func _ _)   = True
-compatibleReps Address      (PointerRep ty) = False
-compatibleReps (PointerRep a) (PointerRep b) = compatibleReps a b
-compatibleReps (PointerRep _)      _ = False
 compatibleReps (Bits bs)    Address      = bs == wordSize
 compatibleReps (Bits m)     (Bits n)     = m == n
 compatibleReps (Bits m)     (Signed n)   = m == n
 compatibleReps (Bits _)     (Floating _) = False
 compatibleReps (Bits bs)    (Func _ _)   = bs == wordSize
-compatibleReps (Bits bs)    (PointerRep _ )   = False
 compatibleReps (Signed bs)  Address      = bs == wordSize
 compatibleReps (Signed m)   (Bits n)     = m == n
 compatibleReps (Signed m)   (Signed n)   = m == n
 compatibleReps (Signed _)   (Floating _) = False
 compatibleReps (Signed bs)  (Func _ _)   = bs == wordSize
-compatibleReps (Signed _)   (PointerRep _ ) = False
 compatibleReps (Floating _) Address      = False
 compatibleReps (Floating _) (Bits _)     = False
 compatibleReps (Floating _) (Signed _)   = False
 compatibleReps (Floating m) (Floating n) = m == n
 compatibleReps (Floating _) (Func _ _)   = False
-compatibleReps (Floating _)    (PointerRep _ )   = False
 compatibleReps (Func _ _)   Address      = True
 compatibleReps (Func i1 o1) (Func i2 o2) = sameLength i1 i2 && sameLength o1 o2 &&
                                            and (zipWith compatibleReps i1 i2) &&
@@ -2536,7 +2530,6 @@ compatibleReps (Func i1 o1) (Func i2 o2) = sameLength i1 i2 && sameLength o1 o2 
 compatibleReps (Func _ _)   (Bits bs)    = bs == wordSize
 compatibleReps (Func _ _)   (Signed bs)  = bs == wordSize
 compatibleReps (Func _ _)   (Floating _) = False
-compatibleReps (Func _ _)   (PointerRep _ ) = False
 
 
 -- | Check arg types of an LPVM instruction
