@@ -316,8 +316,8 @@ uniquenessCheckExp (Typed (Var name ParamOut flowType) ty _) pos =
 uniquenessCheckExp (Typed (Var name ParamInOut flowType) ty _) pos = do
     variableUsed name pos ty flowType
     variableAssigned name pos ty flowType
-uniquenessCheckExp (Typed (ProcRef pspec clsd) ty _) pos = do
-    uniquenessCheckProcRef pspec pos clsd ty
+uniquenessCheckExp (Typed (Closure pspec clsd) ty _) pos = do
+    uniquenessCheckClosure pspec pos clsd ty
 uniquenessCheckExp (Typed exp _ _) pos = uniquenessCheckExp exp pos
 uniquenessCheckExp IntValue{} _ = return ()
 uniquenessCheckExp FloatValue{} _ = return ()
@@ -350,8 +350,8 @@ uniquenessCheckExp (AnonProc mods params body clsd _) pos = do
                                         (modifierDetism mods) body params)
     mapM_ uniquenessErr errs
 uniquenessCheckExp (Global _) _ = return ()
-uniquenessCheckExp ref@(ProcRef _ clsd) _ =
-    shouldnt $ "Untyped ProcRef " ++ show ref ++ " in uniqueness checking"
+uniquenessCheckExp ref@(Closure _ clsd) _ =
+    shouldnt $ "Untyped Closure " ++ show ref ++ " in uniqueness checking"
 
 
 -- Uniqueness check an argument of a call, ensuring that no argument binds a
@@ -364,14 +364,14 @@ uniquenessCheckArg _ _ _ _ _ = return ()
 
 -- Uniqueness check an argument of a call, ensuring that no argument binds a
 -- unique type to a generic type
-uniquenessCheckProcRef :: ProcSpec -> OptPos -> [Placed Exp] -> TypeSpec -> Uniqueness ()
-uniquenessCheckProcRef pspec@(ProcSpec mod name _ _) pos clsd (HigherOrderType _ tfs) = do
+uniquenessCheckClosure :: ProcSpec -> OptPos -> [Placed Exp] -> TypeSpec -> Uniqueness ()
+uniquenessCheckClosure pspec@(ProcSpec mod name _ _) pos clsd (HigherOrderType _ tfs) = do
     params <- lift $ procProtoParams . procProto <$> getProcDef pspec
     zipWithM_ (uniquenessCheckGeneric True mod name pos) (paramType <$> params)
         $ (fromMaybe AnyType . maybeExpType . content <$> clsd) ++ (typeFlowType <$> tfs)
     mapM_ (placedApply uniquenessCheckClosedVariable) clsd
-uniquenessCheckProcRef _ _ _ ty =
-    shouldnt $ "uniquenessCheckProcRef on type " ++ show ty
+uniquenessCheckClosure _ _ _ ty =
+    shouldnt $ "uniquenessCheckClosure on type " ++ show ty
 
 uniquenessCheckGeneric :: Bool -> ModSpec -> ProcName -> OptPos
                        -> TypeSpec -> TypeSpec -> Uniqueness ()

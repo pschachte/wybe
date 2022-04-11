@@ -744,7 +744,7 @@ expType' (AnonProc mods params pstmts _ _) _ = do
     mapM_ ultimateVarType $ paramName <$> params
     params' <- updateParamTypes params
     return $ HigherOrderType mods $ paramTypeFlow <$> params'
-expType' (ProcRef pspec closed) _ = do
+expType' (Closure pspec closed) _ = do
     ProcDef _ (ProcProto _ params res) _ _ _ _ _ _ detism _ impurity _ _
         <- lift $ getProcDef pspec
     let params' = List.filter ((==Ordinary) . paramFlowType) params
@@ -787,7 +787,7 @@ expMode' _ (IntValue _) = (ParamIn, True, Nothing)
 expMode' _ (FloatValue _) = (ParamIn, True, Nothing)
 expMode' _ (StringValue _ _) = (ParamIn, True, Nothing)
 expMode' _ (CharValue _) = (ParamIn, True, Nothing)
-expMode' _ (ProcRef _ _) = (ParamIn, True, Nothing)
+expMode' _ (Closure _ _) = (ParamIn, True, Nothing)
 expMode' _ AnonProc{} = (ParamIn, True, Nothing)
 expMode' assigned (Var name flow _) =
     (flow, name `assignedIn` assigned, Nothing)
@@ -1003,7 +1003,7 @@ procToPartial callFlows hasBang info@FirstInfo{firstInfoPartial=False,
     (closedTys, higherTys) = List.splitAt nClosed tys
     (closedFls, higherFls) = List.splitAt nClosed flows
     resful = any isResourcefulHigherOrder tys
-                || not (Set.null inRes || Set.null outRes)
+                || not (Set.null inRes && Set.null outRes)
     needsBang = resful || impurity > Pure
     higherTy = HigherOrderType (normaliseModifiers
                                 $ ProcModifiers detism MayInline
@@ -1190,6 +1190,9 @@ recordCasts caller instr@(ForeignCall lang callee _ args) pos = do
 recordCasts caller instr@(ProcCall (First _ callee _) _ _ args) pos = do
     logTyped $ "Recording casts in " ++ show instr
     mapM_ (uncurry $ recordCast Nothing caller callee) $ zip args [1..]
+recordCasts caller instr@(ProcCall (Higher fn) _ _ args) _ = do
+    logTyped $ "Recording casts in " ++ show instr
+    mapM_ (uncurry $ recordCast Nothing caller $ show $ content fn) $ zip (fn:args) [0..]
 recordCasts caller stmt _ =
     shouldnt $ "recordCasts of non-call statement " ++ show stmt
 
@@ -1327,6 +1330,8 @@ callInfos vars pstmt = do
                 defs <- lift $ mapM getProcDef procs
                 firstInfos <- zipWithM firstInfo defs procs
                 return $ StmtTypings pstmt firstInfos
+        ProcCall (Higher fn) _ _ _ -> 
+            return $ StmtTypings pstmt [HigherInfo $ content fn]
         _ ->
           shouldnt $ "callProcInfos with non-call statement "
                      ++ showStmt 4 stmt
@@ -1402,6 +1407,8 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt typs):calls)
             = case stmt of
                 ProcCall (First mod callee _) _ resful pexps ->
                     (mod, callee, pexps, resful)
+                ProcCall (Higher fn) _ resful pexps ->
+                    ([], show $ content fn, pexps, resful)
                 noncall -> shouldnt $ "typecheckCalls with non-call stmt"
                                         ++ show noncall
     actualTypes <- mapM expType pexps
@@ -2304,7 +2311,7 @@ finaliseCall m name defPos assigned detism resourceful tmpCount final pos args
         let result = last args'
         resultTy <- expType result
         let closed = init args'
-        let partial = ProcRef matchProc closed `withType` resultTy
+        let partial = Closure matchProc closed `withType` resultTy
         logTyped $ "Finalising call as partial: " ++ show partial
         typeErrors
               [ReasonResourceUnavail ("partial application of " ++ name) res pos

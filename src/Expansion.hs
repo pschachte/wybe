@@ -254,7 +254,7 @@ expandPrim call@(PrimHigher id fn args) pos = do
     logExpansion $ "  Expand higher call " ++ show call
     fn' <- expandArg fn
     case fn' of
-        ArgProcRef pspec closed _ -> do
+        ArgClosure pspec closed _ -> do
             pspec' <- fromMaybe pspec <$> lift (lift $ maybeGetClosureOf pspec)
             logExpansion $ "  As first order call to " ++ show pspec'
             gFlows <- lift2 $ getProcGlobalFlows pspec
@@ -304,9 +304,9 @@ expandArg arg@(ArgVar var ty flow ft _) = do
             setArgType ty . setArgFlowType ft
             <$> gets (Map.findWithDefault arg var . renaming)
     else return arg
-expandArg arg@(ArgProcRef ps as ty) = do
+expandArg arg@(ArgClosure ps as ty) = do
     as' <- mapM expandArg as
-    return $ ArgProcRef ps as' ty
+    return $ ArgClosure ps as' ty
 expandArg arg = return arg
 
 

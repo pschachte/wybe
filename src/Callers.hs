@@ -135,6 +135,6 @@ localCallees modspec (PrimForeign _ _ _ args)
 
 -- | Find all callees in a given PromArg
 argRefs :: ModSpec -> PrimArg -> [ProcSpec]
-argRefs modspec (ArgProcRef pspec closed _)
+argRefs modspec (ArgClosure pspec closed _)
   = localCallees modspec (PrimCall (shouldnt "argRefs") pspec closed univGlobalFlows)
 argRefs _ _ = []
