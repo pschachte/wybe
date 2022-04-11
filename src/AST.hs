@@ -2143,6 +2143,7 @@ addGlobalFlow info FlowOut gFlows@GlobalFlows{globalFlowsOut=outs}
     = gFlows{globalFlowsOut=whenFinite (Set.insert info) outs}
 -- global flows don't use this flow type
 addGlobalFlow info FlowOutByReference gFlows = gFlows
+addGlobalFlow info FlowTakeReference gFlows = gFlows
 
 -- | Test if the given flow of a global exists in the global flow set
 hasGlobalFlow :: GlobalFlows -> PrimFlow -> GlobalInfo -> Bool
@@ -2152,6 +2153,7 @@ hasGlobalFlow gFlows@GlobalFlows{globalFlowsOut=outs} FlowOut info
     = USet.member info outs
 -- global flows don't use this flow type
 hasGlobalFlow gFlows FlowOutByReference info = False
+hasGlobalFlow gFlows FlowTakeReference info = False
 
 
 -- | Take the union of the sets of two global flows
@@ -2764,8 +2766,13 @@ data ParamInfo = ParamInfo {
 data FlowDirection = ParamIn | ParamOut | ParamInOut
                    deriving (Show,Eq,Ord,Generic)
 
--- |A primitive dataflow direction:  in or out
-data PrimFlow = FlowIn | FlowOut | FlowOutByReference
+-- |A primitive dataflow direction
+data PrimFlow =
+    --  in or out
+    FlowIn | FlowOut
+    -- Two "special" flows used to improve last-call optimization.
+    -- Users cannot (at present) manually refer to these flows
+    | FlowOutByReference | FlowTakeReference
                    deriving (Show,Eq,Ord,Generic)
 
 
@@ -2842,6 +2849,7 @@ primFlowToFlowDir :: PrimFlow -> FlowDirection
 primFlowToFlowDir FlowIn  = ParamIn
 primFlowToFlowDir FlowOut = ParamOut
 primFlowToFlowDir FlowOutByReference = ParamOut
+primFlowToFlowDir FlowTakeReference = ParamIn
 
 
 -- |Source program statements.  These will be normalised into Prims.
@@ -3333,7 +3341,8 @@ argDescription (ArgUndef _) = "undefined argument"
 argFlowDescription :: PrimFlow -> String
 argFlowDescription FlowIn  = "input"
 argFlowDescription FlowOut = "output"
-argFlowDescription FlowOutByReference = "output (by reference)"
+argFlowDescription FlowOutByReference = "outByReference"
+argFlowDescription FlowTakeReference = "takeReference"
 
 
 argIntVal :: PrimArg -> Maybe Integer
@@ -3831,6 +3840,7 @@ primFlowPrefix :: PrimFlow -> String
 primFlowPrefix FlowIn    = ""
 primFlowPrefix FlowOut   = "?"
 primFlowPrefix FlowOutByReference   = "outByReference "
+primFlowPrefix FlowTakeReference   = "takeReference "
 
 -- |Start a new line with the specified indent.
 startLine :: Int -> String

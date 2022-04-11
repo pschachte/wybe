@@ -533,7 +533,7 @@ cgen prim@(PrimCall callSiteID pspec args _) = do
     addInstruction ins outArgs
     mapM_ shimAfterCall shims
 
-cgen prim@(PrimHigher cId (ArgProcRef pspec closed _) args) = do
+cgen prim@(PrimHigher cId (ArgClosure pspec closed _) args) = do
     pspec' <- fromMaybe pspec <$> lift2 (maybeGetClosureOf pspec)
     logCodegen $ "Compiling " ++ show prim
               ++ " as first order call to " ++ show pspec'
@@ -726,7 +726,7 @@ cgenLPVM "alloca" _ args@[sizeArg,addrArg] = do
                         let baseTy = repLLVMType baseRep
                         let outTy = repLLVMType outRep
                         op <- instr outTy (alloca baseTy)
-                        assign (pullName addrArg) op outRep
+                        assign (pullName addrArg) op
                     _ -> shouldnt "alloca instruction should have a PointerRep output"
             _ ->
               shouldnt $ "alloca instruction with " ++ show (length inputs)
@@ -854,8 +854,8 @@ cgenLPVM "address" _ args@[addrArg,offsetArg,_,_,out] = do
     baseAddr <- cgenArg addrArg
     finalAddr <- offsetAddr baseAddr iadd offsetArg
     outRep <- typeRep' $ argType out
-    finalAddrPtr <- doCast finalAddr (typeOf finalAddr) (repLLVMType outRep)
-    assign (pullName out) finalAddrPtr outRep
+    finalAddrPtr <- doCast finalAddr (repLLVMType outRep)
+    assign (pullName out) finalAddrPtr
 
 cgenLPVM pname flags args = do
     shouldnt $ "Instruction " ++ pname ++ " arity " ++ show (length args)
@@ -1005,20 +1005,17 @@ primReturnLLVMType tys  = return $ struct_t tys
 
 isLLVMInput :: PrimFlow -> Bool
 isLLVMInput FlowIn = True
--- `FlowOutByReference` args is codegen-ed as pointer inputs
-isLLVMInput FlowOutByReference  = True
 isLLVMInput FlowOut  = False
+-- a `FlowOutByReference` arg is codegen-ed as a pointer input
+isLLVMInput FlowOutByReference  = True
+-- a `FlowTakeReference` arg is codegen-ed as a pointer output
+isLLVMInput FlowTakeReference  = False
 
 goesIn :: PrimArg -> Bool
 goesIn = isLLVMInput . argFlowDirection
 
 paramGoesIn :: PrimParam -> Bool
 paramGoesIn = isLLVMInput . primParamFlow
-
-argIntVal :: PrimArg -> Maybe Integer
-argIntVal (ArgInt val _) = Just val
-argIntVal _              = Nothing
-
 
 -- | Open a PrimArg into it's inferred type and string name.
 openPrimArg :: PrimArg -> Codegen (Type, String)
