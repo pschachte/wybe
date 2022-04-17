@@ -526,7 +526,7 @@ cgen (prim@(PrimCall callSiteID pspec args _ attrs):nextPrims) = do
     -- and remove the unneeded ones.
     proto <- lift2 $ getProcPrimProto pspec
     logCodegen $ "Proto = " ++ show proto
-    (args', shims) <- prepareArgs proto args
+    (args', shims) <- prepareArgs args (primProtoParams proto)
     logCodegen $ "Prepared args = " ++ show args'
 
     -- If this call was marked with `tail`, then we generate the remaining prims
@@ -698,37 +698,23 @@ cgenLLVMUnop name flags args =
         (Nothing,_) -> shouldnt $ "Unknown unary LLVM Instruction " ++ name
 
 
--- | Match PrimArgs with the paramaters in the given prototype. If a PrimArg's
+-- | Match PrimArgs with the parameters in the given prototype. If a PrimArg's
 -- counterpart in the prototype is unneeded, filtered out. Arguments
 -- are matched positionally, and are coerced to the type of corresponding
 -- parameters.
-prepareArgs :: PrimProto -> [PrimArg] -> Codegen ([PrimArg], [FlowOutByReferenceShim])
-prepareArgs proto args = prepareArgs' args $ primProtoParams proto
-
-prepareArgs' :: [PrimArg] -> [PrimParam] -> Codegen ([PrimArg], [FlowOutByReferenceShim])
-prepareArgs' [] []    = return ([], [])
-prepareArgs' [] (_:_) = shouldnt "more parameters than arguments"
-prepareArgs' (_:_) [] = shouldnt "more arguments than parameters"
-prepareArgs' (ArgUnneeded _ _:as) (p:ps)
+prepareArgs :: [PrimArg] -> [PrimParam] -> Codegen ([PrimArg], [FlowOutByReferenceShim])
+prepareArgs [] []    = return ([], [])
+prepareArgs [] (_:_) = shouldnt "more parameters than arguments"
+prepareArgs (_:_) [] = shouldnt "more arguments than parameters"
+prepareArgs (ArgUnneeded _ _:as) (p:ps)
     | paramNeeded p = shouldnt $ "unneeded arg for needed param " ++ show p
-    | otherwise     = prepareArgs' as ps
-prepareArgs' (a@ArgVar{argVarFlow = f1}:as) (p@PrimParam{primParamFlow=f2}:ps) | (f1 == FlowOutByReference && f2 /= FlowOutByReference) || f1 == FlowTakeReference =
-    shouldnt $ "incompatible flows: definition=" ++ show f2 ++ " invocation: " ++ show f1
-prepareArgs' (a@ArgVar{argVarFlow = FlowOut, argVarType=argTy, argVarName=argVar}:as) (p@PrimParam{primParamType=ty, primParamFlow=FlowOutByReference }:ps) = do
+    | otherwise     = prepareArgs as ps
+prepareArgs (a:as) (p@PrimParam{primParamType=ty}:ps) | argFlowDirection a == primParamFlow p = do
     real <- lift2 $ paramIsReal p
-    (rest,shims) <- prepareArgs' as ps
-    names <- gets names
-    return $
-        if real then
-            let referenceVarName = argVar { primVarName = primVarName argVar ++ "#ref" }
-                arg = a { argVarFlow = FlowOutByReference, argVarType = ty, argVarName = referenceVarName }
-                shim = FlowOutByReferenceShim { shimVarType = argTy, shimVarName = argVar, referenceVarName = referenceVarName } in
-            (arg:rest, shim:shims)
-        else (rest, shims)
-prepareArgs' (a:as) (p@PrimParam{primParamType=ty}:ps) = do
-    real <- lift2 $ paramIsReal p
-    (rest,shims) <- prepareArgs' as ps
+    (rest,shims) <- prepareArgs as ps
     return $ if real then (setArgType ty a:rest, shims) else (rest, shims)
+prepareArgs (a:as) (p:ps) = do
+    shouldnt $ "incompatible flows: invocation=" ++ show (argFlowDirection a) ++ " definition: " ++ show (primParamFlow p)
 
 data FlowOutByReferenceShim = FlowOutByReferenceShim {
     shimVarType :: TypeSpec,

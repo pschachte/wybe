@@ -19,51 +19,68 @@ import Data.List.Predicate (allUnique)
 import Callers (getSccProcs)
 import Data.Graph (SCC (AcyclicSCC, CyclicSCC))
 import Control.Monad.State (StateT (runStateT), MonadTrans (lift), execStateT, execState, runState, MonadState (get, put), gets, modify, unless, MonadPlus (mzero))
-import Control.Monad (liftM)
+import Control.Monad (liftM, (>=>))
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Control.Monad.Trans.Maybe (MaybeT (runMaybeT))
+import Control.Monad (when)
 
 lastCallAnalyseMod :: ModSpec -> Compiler ()
 lastCallAnalyseMod thisMod = do
     reenterModule thisMod
-
-    -- TODO: run this on specialized versions as well:
     orderedProcs <- getSccProcs thisMod
-
-    -- Some logging
-    logLastCallAnalysis $ replicate 60 '='
-    logLastCallAnalysis $ "analyseMod:" ++ show thisMod
-    logLastCallAnalysis $ ">>> orderedProcs:" ++ show orderedProcs
+    logLastCallAnalysis $ ">>> Analyse Mod:" ++ show thisMod
+    logLastCallAnalysis $ ">>> Ordered Procs:" ++ show orderedProcs
     logLastCallAnalysis $ ">>> Analyse SCCs: \n" ++
         unlines (List.map ((++) "    " . show . sccElts) orderedProcs)
-    logLastCallAnalysis $ replicate 60 '='
-
-    mapM_ lastCallAnalyseSCC orderedProcs
-
+    mapM_ (forEachProc lastCallAnalyseProc) orderedProcs
+    mapM_ (forEachProc fixupCallsInProc) orderedProcs
     reexitModule
 
-lastCallAnalyseSCC :: SCC ProcSpec -> Compiler ()
-lastCallAnalyseSCC (AcyclicSCC proc) = lastCallAnalyseProcSpec proc
-lastCallAnalyseSCC (CyclicSCC procs) = mapM_ lastCallAnalyseProcSpec procs
+forEachProc :: (ProcDef -> Compiler ProcDef) -> SCC ProcSpec -> Compiler ()
+forEachProc f (AcyclicSCC pspec) = updateProcDefM f pspec
+forEachProc f (CyclicSCC pspecs) = mapM_ (updateProcDefM f) pspecs
 
-lastCallAnalyseProcSpec :: ProcSpec -> Compiler ()
-lastCallAnalyseProcSpec pspec = do
-    updateProcDefM (lastCallAnalyseProc pspec) pspec
-    return ()
-
-lastCallAnalyseProc :: ProcSpec -> ProcDef -> Compiler ProcDef
-lastCallAnalyseProc spec def = do
-    logLastCallAnalysis $ "\n>>> Last Call Analysis: " ++ show spec
+lastCallAnalyseProc :: ProcDef -> Compiler ProcDef
+lastCallAnalyseProc def = do
     let impln = procImpln def
-    res <- tryMakeTailCall spec (procImplnProto impln) (procImplnBody impln)
-    case res of
-        Just (proto', body') -> return def {procImpln = impln{procImplnProto = proto', procImplnBody = body'}}
-        Nothing -> return def
+    let spec = procImplnProcSpec impln
+    let proto = procImplnProto impln
+    let body = procImplnBody impln
+    logLastCallAnalysis $ ">>> Last Call Analysis: " ++ show spec
+    (maybeBody', finalState) <- runStateT (runMaybeT (mapProcLeavesM transformLeaf body))
+        LeafTransformState { procSpec = spec, originalProto = proto, transformedProto = Nothing }
+    case (maybeBody', transformedProto finalState) of
+        (Just body', Just proto') -> do
+            logLastCallAnalysis $ "new proto: " ++ show proto'
+            return def {procImpln = impln{procImplnProto = proto', procImplnBody = body'}}
+        _ -> return def
 
-isDirectRecursiveCall :: Prim -> ProcSpec -> Bool
-isDirectRecursiveCall (PrimCall _ spec' _ _ _) spec | spec == spec' = True
-isDirectRecursiveCall _ _ = False
+fixupCallsInProc :: ProcDef -> Compiler ProcDef
+fixupCallsInProc def@ProcDef { procImpln = impln@ProcDefPrim { procImplnBody = body}} = do
+    logLastCallAnalysis $ ">>> Fix up calls in proc: " ++ show (procName def)
+    body' <- mapProcPrimsM (updatePlacedM fixupCallsInPrim) body
+    return $ def { procImpln = impln { procImplnBody = body' } }
+fixupCallsInProc _ = shouldnt "uncompiled"
+
+fixupCallsInPrim :: Prim -> Compiler Prim
+fixupCallsInPrim p@(PrimCall siteId pspec args gFlows attrs) = do
+    logLastCallAnalysis $ "checking call " ++ show p
+    proto <- getProcPrimProto pspec
+    let args' = coerceArgs args (primProtoParams proto)
+    when (args /= args') $ logLastCallAnalysis $ "coerced args: " ++ show args ++ " " ++ show args'
+    return $ PrimCall siteId pspec args' gFlows attrs
+fixupCallsInPrim p = return p
+
+-- coerce FlowOut arguments into FlowOutByReference where needed
+coerceArgs :: [PrimArg] -> [PrimParam] -> [PrimArg]
+coerceArgs [] []    = []
+coerceArgs [] (_:_) = shouldnt "more parameters than arguments"
+coerceArgs (_:_) [] = shouldnt "more arguments than parameters"
+coerceArgs (a@ArgVar{argVarFlow = FlowOut}:as) (p@PrimParam{primParamFlow=FlowOutByReference }:ps) =
+    let rest = coerceArgs as ps in
+    a { argVarFlow = FlowOutByReference }:rest
+coerceArgs (a:as) (p:ps) = a:coerceArgs as ps
 
 data LeafTransformState = LeafTransformState {
     procSpec :: ProcSpec,
@@ -73,30 +90,12 @@ data LeafTransformState = LeafTransformState {
 
 type LeafTransformer = MaybeT (StateT LeafTransformState Compiler)
 
-tryMakeTailCall :: ProcSpec -> PrimProto -> ProcBody -> Compiler (Maybe (PrimProto, ProcBody))
-tryMakeTailCall spec proto body = do
-    -- First we identify the leaves
-    -- where can move the last call -> tail call.
-    (result, finalState) <- runStateT (runMaybeT (mapProcLeaves transformLeaf body)) LeafTransformState { procSpec = spec, originalProto = proto, transformedProto = Nothing }
-
-    case (result, transformedProto finalState) of
-        (Just body', Just proto') -> do
-            -- Then we map over leaves a second time, inserting
-            -- `foreign lpvm store()` calls for all FlowOutByReference args
-            -- logLastCallAnalysis "inserting missing store() calls for out-by-reference args"
-            -- body'' <- mapProcLeaves (assignReferenceOutputs proto proto') body'
-
-            -- Return modified result
-            logLastCallAnalysis $ "new body: " ++ show body'
-            return $ Just (proto', body')
-        _ -> return Nothing
-
 transformLeaf :: [Placed Prim] -> LeafTransformer [Placed Prim]
 transformLeaf lastBlock = do
     spec <- gets procSpec
     case partitionLastCall lastBlock of
         -- TODO: use multiple specialization to relax the restriction that
-        -- the last call is a directly-recursive call...
+        --       the last call is a directly-recursive call...
         (Just (beforeCall, call), afterLastCall) | isDirectRecursiveCall (content call) spec -> do
             let lastCall = content call
             logLeaf $ "identified a directly-recursive last-call: " ++ show call
@@ -145,6 +144,10 @@ transformLeaf lastBlock = do
         _ -> do
             logLeaf "leaf didn't qualify for last-call transformation"
             return lastBlock
+
+isDirectRecursiveCall :: Prim -> ProcSpec -> Bool
+isDirectRecursiveCall (PrimCall _ spec' _ _ _) spec | spec == spec' = True
+isDirectRecursiveCall _ _ = False
 
 trySetProto :: PrimProto -> LeafTransformer ()
 trySetProto proto'' = do
@@ -202,14 +205,6 @@ buildTailCallLeaf beforeCall call mutateChains = do
     let modifiedMutates = concatMap annotateFinalMutates mutateChains
     let call' = contentApply (transformIntoTailCall mutateChains) call
     return $ beforeCall ++ [call'] ++ modifiedMutates
-
-
-addressSuffix :: [Char]
-addressSuffix = "address"
-
-
-outByRefSuffix :: [Char]
-outByRefSuffix = "outByRef"
 
 
 annotateFinalMutates :: MutateChain -> [Placed Prim]
@@ -307,15 +302,24 @@ _partitionLastCall (x:xs) =
 
 -- Applies a transformation to the leaves of a proc body
 -- TODO: this is almost like a functor fmap?
-mapProcLeaves :: (Monad t) => ([Placed Prim] -> t [Placed Prim]) -> ProcBody -> t ProcBody
-mapProcLeaves f leafBlock@ProcBody { bodyPrims = prims, bodyFork = NoFork } =
+mapProcLeavesM :: (Monad t) => ([Placed Prim] -> t [Placed Prim]) -> ProcBody -> t ProcBody
+mapProcLeavesM f leafBlock@ProcBody { bodyPrims = prims, bodyFork = NoFork } =
     do
         prims <- f prims
         return leafBlock { bodyPrims = prims }
-mapProcLeaves f current@ProcBody { bodyFork = fork@PrimFork{forkBodies = bodies} } =
+mapProcLeavesM f current@ProcBody { bodyFork = fork@PrimFork{forkBodies = bodies} } =
     do
-        bodies' <- mapM (mapProcLeaves f) bodies
+        bodies' <- mapM (mapProcLeavesM f) bodies
         return current { bodyFork = fork { forkBodies = bodies' } }
+
+mapProcPrimsM :: (Monad t) => (Placed Prim -> t (Placed Prim)) -> ProcBody -> t ProcBody
+mapProcPrimsM fn body@ProcBody { bodyPrims = prims, bodyFork = NoFork } = do
+        prims' <- mapM fn prims
+        return body { bodyPrims = prims' }
+mapProcPrimsM fn body@ProcBody { bodyPrims = prims, bodyFork = fork@PrimFork{forkBodies = bodies } } = do
+        prims' <- mapM fn prims
+        bodies <- mapM (mapProcPrimsM fn) bodies
+        return body { bodyPrims = prims', bodyFork = fork { forkBodies = bodies } }
 
 ----------------------------------------------------------------------------
 -- Logging                                                                --

@@ -1270,7 +1270,7 @@ getProcDef (ProcSpec modSpec procName procID _) = do
            getLoadingModule modSpec
     let impl = trustFromJust ("unimplemented module " ++ showModSpec modSpec) $
                modImplementation mod
-    logAST $ "Looking up proc '" ++ procName ++ "' ID " ++ show procID
+    logAST $ "Looking up proc '" ++ procName ++ "' ID " ++ show procID ++ " in " ++ showModSpec modSpec
     let proc = modProcs impl ! procName !! procID
     logAST $ "  proc = " ++ showProcDef 9 proc
     return proc
@@ -1320,6 +1320,7 @@ updateProcDefM updater pspec@(ProcSpec modspec procName procID _) =
              [] -> shouldnt $ "invalid proc spec " ++ show pspec
              (this:rest) -> do
                updated <- updater this
+               logAST $ "updated ProcDef: proto = " ++ show (procProto updated) ++ " implnProto = " ++ show (procImplnProto (procImpln updated))
                let defs' = front ++ updated:rest
                let procs' = Map.insert procName defs' procs
                return $ imp { modProcs = procs' })
