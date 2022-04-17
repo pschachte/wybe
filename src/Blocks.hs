@@ -59,6 +59,7 @@ import           Unsafe.Coerce
 import           System.FilePath
 import qualified UnivSet
 import Control.Exception (assert)
+import Data.Set (Set)
 
 -- | Holds information on the LLVM representation of the LPVM procedure.
 data ProcDefBlock =
@@ -192,7 +193,7 @@ extractLPVMProto procdef =
 -- of all ProcDefs in the module implementation.
 getPrimProtos :: ModSpec -> Compiler [PrimProto]
 getPrimProtos modspec = do
-    (_, procs) <- (unzip . Map.toList . modProcs) <$>
+    (_, procs) <- unzip . Map.toList . modProcs <$>
                   getLoadedModuleImpln modspec
     let protos = List.map extractLPVMProto (concat procs)
     return protos
@@ -434,20 +435,24 @@ sequentialInsert (op:ops) ty struct i = do
     sequentialInsert ops ty newStruct (i + 1)
 
 
-structUnPack :: Operand -> [Type] -> Codegen [Operand]
-structUnPack st tys = do
-    let n = (fromIntegral $ length tys) :: Word32
-    let ins = List.map (extractvalue st) [0..n-1]
-    zipWithM instr tys ins
+structUnPack :: Operand -> Codegen [Operand]
+structUnPack st = case typeOf st of
+        StructureType { elementTypes = tys } -> do
+            let n = (fromIntegral $ length tys) :: Word32
+            let ins = List.map (extractvalue st) [0..n-1]
+            zipWithM instr tys ins
+        _ -> shouldnt "expected struct to unpack"
 
 
 -- | Generate basic blocks for a procedure body. The first block is named
 -- 'entry' by default. All parameters go on the symbol table (output too).
 codegenBody :: ProcBody -> Codegen ()
 codegenBody body = do
-    let ps = List.map content (bodyPrims body)
+    let prims = List.map content (bodyPrims body)
+    let primsWithLookahead = lookaheadPrims prims
+    logCodegen $ "prims with lookahead: " ++ show primsWithLookahead
     -- Filter out prims which contain only phantom arguments
-    mapM_ cgen ps
+    mapM_ cgen primsWithLookahead
     params <- gets (primProtoParams . proto)
     case bodyFork body of
         NoFork -> do
@@ -455,6 +460,19 @@ codegenBody body = do
             ret retOp
             return ()
         (PrimFork var ty _ fbody) -> codegenForkBody var fbody
+
+
+-- Transforms a list of Prims into a list of Prims with "lookahead".
+-- i.e.: if we have a list of prims A, B, C, D, then return nested list:
+-- [[A, B, C, D], [B, C, D], [C, D], [D]]
+--
+-- this allows each `cgen` call to "see into the future"
+-- and handle last-call-optimisation nicely
+lookaheadPrims :: [Prim] -> [[Prim]]
+lookaheadPrims [] = []
+lookaheadPrims (p1:p2s) = case lookaheadPrims p2s of
+    p2:p2s' -> (p1:p2):p2:p2s'
+    _ -> [[p1]]
 
 
 -- | Code generation for a conditional branch. Currently a binary split
@@ -499,8 +517,8 @@ codegenForkBody var _ =
 -- in the current module and imported modules. All primitive calls' arguments
 -- are position checked with the respective prototype, eliminating arguments
 -- which do not eventually appear in the prototype.
-cgen :: Prim -> Codegen ()
-cgen prim@(PrimCall callSiteID pspec args _ attrs) = do
+cgen :: [Prim] -> Codegen ()
+cgen (prim@(PrimCall callSiteID pspec args _ attrs):nextPrims) = do
     logCodegen $ "--> Compiling " ++ show prim
     let nm = LLVMAST.Name $ toSBString $ show pspec
     -- Find the prototype of the pspec being called
@@ -510,6 +528,11 @@ cgen prim@(PrimCall callSiteID pspec args _ attrs) = do
     logCodegen $ "Proto = " ++ show proto
     (args', shims) <- prepareArgs proto args
     logCodegen $ "Prepared args = " ++ show args'
+
+    -- If this call was marked with `tail`, then we generate the remaining prims
+    --  *before* the call instruction.
+    when (AST.Tail `elem` attrs) $ mapM_ cgenPostTailCall nextPrims
+
     logCodegen $ "Shims = " ++ show shims
     mapM_ shimBeforeCall shims
 
@@ -520,29 +543,26 @@ cgen prim@(PrimCall callSiteID pspec args _ attrs) = do
     logCodegen $ "In args = " ++ show inArgs
 
     outTy <- lift2 $ primReturnType outArgs
+    let tailCall = getTailCallHint attrs args' outTy
+    logCodegen $ "Tail call kind = " ++ show tailCall
 
     inops <- mapM cgenArg inArgs
     logCodegen $ "Translated inputs = " ++ show inops
-    logCodegen $ "Out Tye = " ++ show outTy
-    let tailCallKind = if AST.MustTail `elem` attrs then Just LLVMAST.MustTail else Nothing
-    logCodegen $ "Tail call kind = " ++ show tailCallKind
-    let ins =
-          callWybe
-          tailCallKind
-          (externf (ptr_t (FunctionType outTy (typeOf <$> inops) False)) nm)
-          inops
-    logCodegen $ "Translated ins = " ++ show ins
-    addInstruction ins outArgs
+    logCodegen $ "Out ty = " ++ show outTy
+    let funcRef = externf (ptr_t (FunctionType outTy (typeOf <$> inops) False)) nm
+    let callIns = callWybe tailCall funcRef inops
+    logCodegen $ "Translated ins = " ++ show callIns
+    addInstruction callIns outArgs
     mapM_ shimAfterCall shims
 
-cgen prim@(PrimHigher cId (ArgClosure pspec closed _) args) = do
+cgen (prim@(PrimHigher cId (ArgClosure pspec closed _) args):ps) = do
     pspec' <- fromMaybe pspec <$> lift2 (maybeGetClosureOf pspec)
     logCodegen $ "Compiling " ++ show prim
               ++ " as first order call to " ++ show pspec'
               ++ " closed over " ++ show closed
-    cgen $ PrimCall cId pspec' (closed ++ args) univGlobalFlows Set.empty
+    cgen $ (PrimCall cId pspec' (closed ++ args) univGlobalFlows Set.empty : ps)
 
-cgen prim@(PrimHigher callSiteId fn@ArgVar{} args) = do
+cgen (prim@(PrimHigher callSiteId fn@ArgVar{} args):_) = do
     logCodegen $ "--> Compiling " ++ show prim
     -- We must set all arguments to be `AnyType`
     -- This ensures that we can uniformly pass all parameters to be passed in
@@ -558,13 +578,13 @@ cgen prim@(PrimHigher callSiteId fn@ArgVar{} args) = do
     --- XXX: Tail could cause undef-behaviour in optimizer if the callee
     ---      users allocas from
     ---      the caller.
-    let callIns = callWybe (Just Tail) fnPtr inOps
+    let callIns = callWybe (Just LLVMAST.Tail) fnPtr inOps
     addInstruction callIns outArgs
 
-cgen prim@(PrimHigher _ fn _) =
+cgen (prim@(PrimHigher _ fn _):ps) =
     shouldnt $ "cgen higher call to " ++ show fn
 
-cgen prim@(PrimForeign "llvm" name flags args) = do
+cgen (prim@(PrimForeign "llvm" name flags args):_) = do
     logCodegen $ "--> Compiling " ++ show prim
     args' <- filterPhantomArgs args
     case length args' of
@@ -575,12 +595,12 @@ cgen prim@(PrimForeign "llvm" name flags args) = do
        _ -> shouldnt $ "LLVM instruction " ++ name
                        ++ " with wrong arity (" ++ show (length args') ++ ")!"
 
-cgen prim@(PrimForeign "lpvm" name flags args) = do
+cgen (prim@(PrimForeign "lpvm" name flags args):_) = do
     logCodegen $ "--> Compiling " ++ show prim
     args' <- filterPhantomArgs args
     cgenLPVM name flags args'
 
-cgen prim@(PrimForeign lang name flags args) = do
+cgen (prim@(PrimForeign lang name flags args):_) = do
     logCodegen $ "--> Compiling " ++ show prim
     when (lang /= "c") $
       shouldnt $ "Unknown foreign language " ++ lang ++ " in call " ++ show prim
@@ -596,6 +616,40 @@ cgen prim@(PrimForeign lang name flags args) = do
           (externf (ptr_t (FunctionType outty (typeOf <$> inops) False)) nm)
           inops
     addInstruction ins outArgs
+cgen [] = shouldnt "lookahead list must have at least one Prim in it"
+
+
+-- We observe hints from previous stages of compilation (`attrs`), as well
+-- as the callee's signature, in order suggest a stricter LLVM
+-- TailCallKind where possible.
+-- In the best case, the call is marked `musttail`, which signals LLVM must
+-- tail-call-optimize.
+-- `tail` is just a hint that LLVM "can" tail-call optimize but doesn't have to.
+-- However there are certain restrictions on when these hints. LLVM may optimize
+-- our code incorrectly (or crash) if we get this wrong.
+getTailCallHint :: Set PrimCallAttribute -> [PrimArg] -> LLVMAST.Type -> Maybe LLVMAST.TailCallKind
+getTailCallHint attrs args outTy =
+    let hasTailAttr = AST.Tail `elem` attrs
+        hasFlowOutByRefArg = FlowOutByReference `elem` List.map argFlowDirection args in
+    case (hasTailAttr, outTy, hasFlowOutByRefArg) of
+        -- Although this call is in LPVM tail position, we'll need to add some
+        -- `extractvalue` instrs after this call, so it won't be in LLVM
+        -- tail position, thus we cannot use `musttail`
+        (True, StructureType {}, _) -> Just LLVMAST.Tail
+        -- We know this LLVM call will be in tail position (since scalar/void
+        -- return type), and also the AST.Tail attribute is a promise that
+        -- the callee doesn't use any allocas from the caller.
+        (True, _, _) -> Just LLVMAST.MustTail
+        -- This function wasn't caught the "LastCallAnalysis" pass
+        -- but we know it doesn't take any outByReference pointers (which could
+        -- point to allocas), so can safely mark it as `tail`,
+        -- indicating LLVM "can" perform tail-call opt
+        (False, _, False) -> Just LLVMAST.Tail
+        -- Oh no! There is an `outByReference` argument in args',
+        -- which could point to an `alloca`.
+        -- Don't add `tail` attribute as it could trigger LLVM
+        -- undef-behaviour.
+        (False, _, True) -> Nothing
 
 
 -- | Translate a Binary primitive procedure into a binary llvm instruction,
@@ -696,12 +750,12 @@ shimAfterCall :: FlowOutByReferenceShim -> Codegen ()
 shimAfterCall FlowOutByReferenceShim { shimVarType = shimVarType, shimVarName = shimVarName, referenceVarName = referenceVarName }
     = do
     trep <- typeRep' shimVarType
-    cgen $ PrimForeign "lpvm" "access" [] [
+    cgen [PrimForeign "lpvm" "access" [] [
         ArgVar referenceVarName (Representation Address) FlowIn Ordinary True,
         ArgInt 0 intType,
         ArgInt (fromIntegral $ typeRepSize trep `div` 8) intType,
         ArgInt 0 intType,
-        ArgVar shimVarName shimVarType FlowOut Ordinary False]
+        ArgVar shimVarName shimVarType FlowOut Ordinary False]]
 
 filterPhantomArgs :: [PrimArg] -> Codegen [PrimArg]
 filterPhantomArgs = filterM ((not <$>) . lift2 . argIsPhantom)
@@ -766,25 +820,13 @@ cgenLPVM "mutate" _
           baseAddr <- cgenArg addrArg
           gcMutate baseAddr offsetArg valArg
           assign (pullName outArg) baseAddr
-cgenLPVM "mutate" flags
-    [_, _, _, ArgInt x _, _, _, _, _] | x == 0 || x == 1 = shouldnt "final argument should be FlowIn"
--- in this mode, we instead compute the address and store it in `refArg`
-cgenLPVM "mutate" _
-    [inArg, outArg, offsetArg, ArgInt 1 _, sizeArg, startOffsetArg,
+cgenLPVM "mutate" _  [inArg, outArg, offsetArg, ArgInt 1 _, sizeArg, startOffsetArg,
         refArg@ArgVar { argVarName = refArgName, argVarFlow = FlowTakeReference  }] = do
-        baseAddr <- cgenArg inArg
-        finalAddr <- offsetAddr baseAddr iadd offsetArg
-        outTy <- lift2 $ argLLVMType refArg
-        finalAddrPtr <- doCast finalAddr outTy
-        -- take a reference to the field that we're interested in
-        assign (show refArgName) finalAddrPtr
-        -- assign outArg to be the same address as inArg
-        -- This may implicitly write to a pointer (through a `store`
-        -- instruction) if outArg is an `outByReference` param
-        assign (pullName outArg) baseAddr
+        logCodegen $ "treating lpvm mutate(..., takeReference ...) as a noop - should have been generated before tail call"
+cgenLPVM "mutate" _
+    [_, _, _, ArgInt x _, _, _, _, _] | x == 0 || x == 1 = shouldnt "final argument to mutate should be FlowIn"
 cgenLPVM "mutate" _ [_, _, _, destructiveArg, _, _, _] =
       nyi "lpvm mutate instruction with non-constant destructive flag"
-
 
 cgenLPVM "cast" _ args@[inArg,outArg] =
     case partitionArgs args of
@@ -844,6 +886,26 @@ cgenLPVM "load" _ args = do
 cgenLPVM pname flags args = do
     shouldnt $ "Instruction " ++ pname ++ " arity " ++ show (length args)
                ++ " not implemented."
+
+
+-- Codegen a Prim that was *after* a tail call.
+-- Only a particular type of "mutate" instr is allowed to be here.
+-- Otherwise we throw an error.
+cgenPostTailCall :: Prim -> Codegen ()
+cgenPostTailCall prim@(PrimForeign "lpvm" "mutate" _  [inArg, outArg, offsetArg, ArgInt 1 _, sizeArg, startOffsetArg,
+        refArg@ArgVar { argVarName = refArgName, argVarFlow = FlowTakeReference  }]) = do
+        logCodegen $ "--> Compiling " ++ show prim
+        baseAddr <- cgenArg inArg
+        outTy <- lift2 $ argLLVMType refArg
+        finalAddr <- offsetAddr baseAddr iadd offsetArg
+        finalAddrPtr <- doCast finalAddr outTy
+        -- take a reference to the field that we're interested in
+        assign (show refArgName) finalAddrPtr
+        -- assign outArg to be the same address as inArg
+        -- This may implicitly write to a pointer (through a `store`
+        -- instruction) if outArg is an `outByReference` param
+        assign (pullName outArg) baseAddr
+cgenPostTailCall _ = shouldnt "illegal prim after call marked with LPVM `tail` attribute"
 
 
 -- | Generate code to add an offset to an address
@@ -944,8 +1006,7 @@ addInstruction ins outArgs = do
             assign outName outop
         _ -> do
             outOp <- instr outTy ins
-            outTys <- mapM (lift2 . argLLVMType) outArgs
-            fields <- structUnPack outOp outTys
+            fields <- structUnPack outOp
             let outNames = List.map pullName outArgs
             zipWithM_ assign outNames fields
 
@@ -1201,13 +1262,6 @@ assign var op = do
       locOp' <- doCast locOp (ptr_t (typeOf op))
       store locOp' op
     else modifySymtab var op
-
--- | Store a local variable on the front of the symbol table.
-modifySymtab :: String -> Operand -> Codegen ()
-modifySymtab var op = do
-    logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show op ++ ":" ++ show (typeOf op)
-    st <- gets symtab
-    modify $ \s -> s { symtab=st{stVars=Map.insert var op $ stVars st} }
 
 ----------------------------------------------------------------------------
 -- Instruction maps                                                       --

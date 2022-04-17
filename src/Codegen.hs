@@ -17,7 +17,7 @@ module Codegen (
   callWybe, callC, externf, ret, globalDefine, externalC, externalWybe,
   phi, br, cbr, getBlock, retNothing, fresh,
   -- * Symbol storage
-  alloca, store, addOperand, load, getVar, localVar, preservingSymtab,
+  alloca, store, addOperand, load, modifySymtab, getVar, localVar, preservingSymtab,
   makeGlobalResourceVariable, doAlloca, doLoad,
   bitcast, cbitcast, inttoptr, cinttoptr, ptrtoint, cptrtoint,
   trunc, ctrunc, zext, czext, sext, csext,
@@ -441,6 +441,13 @@ globalVar t s = C.GlobalReference t $ LLVMAST.Name $ fromString s
 -- Symbol Table                                                           --
 ----------------------------------------------------------------------------
 
+-- | Store a local variable on the front of the symbol table.
+modifySymtab :: String -> Operand -> Codegen ()
+modifySymtab var op = do
+    logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show op ++ ":" ++ show (typeOf op)
+    st <- gets symtab
+    modify $ \s -> s { symtab=st{stVars=Map.insert var op $ stVars st} }
+
 -- | Find and return the local operand by its given name from the symbol
 -- table. Only the first find will be returned so new names can shadow
 -- the same older names.
@@ -612,7 +619,7 @@ callWybe tailCallKind fn args = Call tailCallKind CC.Fast [] (Right fn) (toArgs 
 
 -- | A foreign call instruction, using C calling conventions
 callC :: Operand -> [Operand] -> Instruction
-callC fn args = Call (Just Tail) CC.C [] (Right fn) (toArgs args) [] []
+callC fn args = Call (Just LLVMAST.Tail) CC.C [] (Right fn) (toArgs args) [] []
 
 
 toArgs :: [Operand] -> [(Operand, [A.ParameterAttribute])]

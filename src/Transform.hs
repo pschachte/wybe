@@ -87,12 +87,12 @@ transformProcBody procDef speczVersion = do
     logTransform $ "callSiteMap: " ++ show callSiteMap
 
     let outVarSubs = primProtoParams proto
-                    |> List.filter ((==FlowOut) . primParamFlow)
+                    |> List.filter (isOutputFlow . primParamFlow)
                     |> List.map primParamName |> List.map (\x -> (x,x))
                     |> Map.fromList
     let tmp = procTmpCount procDef
-    (_, tmp', _, body') <- buildBody tmp outVarSubs $
-                transformBody proto body (aliasMap, Map.empty) callSiteMap
+    let bodyState = transformBody proto body (aliasMap, Map.empty) callSiteMap
+    (_, tmp', _, body') <- buildBody tmp outVarSubs bodyState
     unless (tmp==tmp') $ shouldnt "tmp count changed in transform"
     return body'
 
@@ -404,6 +404,7 @@ generateSpeczVersionInProc def _
                     Nothing -> do
                         -- generate the specz version
                         sbody' <- transformProcBody def ver
+                        logTransform $ "new specz body: " ++ show sbody'
                         return (ver, Just sbody')
                         ) (Map.toAscList speczBodies)
             let speczBodies' = Map.fromDistinctAscList speczBodiesList

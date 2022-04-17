@@ -82,6 +82,10 @@ markParamNeededness isClosure _ ins param@PrimParam{primParamName=nm,
     param {primParamInfo=info{paramInfoUnneeded=Set.member nm ins
                                                 && (not isClosure
                                                     || ft /= Ordinary)}}
+markParamNeededness _ _ _ PrimParam{ primParamFlow=FlowOutByReference } =
+    shouldnt "unexpected FlowOutByReference at this stage of compilation"
+markParamNeededness _ _ _ PrimParam{ primParamFlow=FlowTakeReference } =
+    shouldnt "unexpected FlowTakeReference at this stage of compilation"
 
 
 -- |Type to remember the variable renamings.
@@ -318,11 +322,6 @@ inputOutputParams proto =
       (ins,outs) = List.partition ((==FlowIn) . primParamFlow)
                    $ primProtoParams proto
   in  (setFromParamList ins, setFromParamList outs)
-
-
--- outputArgs :: [PrimArg] -> [PrimVarName]
--- outputArgs args =
---     List.map outArgVar $ List.filter ((FlowOut ==) . argFlowDirection) args
 
 
 -- |Add a writeNaming assignment of output parameter to output argument

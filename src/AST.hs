@@ -66,7 +66,7 @@ module AST (
   argFlowDirection, argType, setArgType, setArgFlow, setArgFlowType, setArgFinal, maybeArgFlowType,
   argDescription, argIntVal, trustArgInt, setParamType, paramIsResourceful,
   setPrimParamType, setTypeFlowType,
-  flowsIn, flowsOut, primFlowToFlowDir,
+  flowsIn, flowsOut, primFlowToFlowDir, isInputFlow, isOutputFlow,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, stmtsImpurity, stmtImpurity, procCallToExp,
   expOutputs, pexpListOutputs, expInputs, pexpListInputs,
@@ -2839,6 +2839,19 @@ primFlowToFlowDir FlowOutByReference = ParamOut
 primFlowToFlowDir FlowTakeReference = ParamIn
 
 
+-- Returns true if the flow is conceptually an "output"
+isInputFlow :: PrimFlow -> Bool
+isInputFlow = not . isOutputFlow
+
+
+-- Returns true if the flow is conceptually an "output"
+isOutputFlow :: PrimFlow -> Bool
+isOutputFlow FlowOut = True
+isOutputFlow FlowOutByReference = True
+isOutputFlow FlowTakeReference  = False
+isOutputFlow FlowIn  = False
+
+
 -- |Source program statements.  These will be normalised into Prims.
 data Stmt
      -- |A Wybe procedure call, with module, proc name, proc ID, determinism,
@@ -3157,13 +3170,22 @@ instance Show Prim where
 
 
 data PrimCallAttribute =
-    -- Semantics equivalent to LLVM's musttail attribute.
-    -- Notably, this call *must* be the last prim in a proc
-    MustTail
+    -- This attribute has some strict conditions where it is valid to apply,
+    -- as such, it cannot be added by the user, only by the compiler internals:
+    -- - the call must be the last prim in a proc.
+    -- - the callee may not use any "allocas" from the caller.
+    --
+    -- If the return value of this call is scalar/void, then
+    -- this attribute is equivalent to LLVM's `musttail` attribute.
+    -- Otherwise if the return value of this call is a structure, then
+    -- this attribute is equivalent to LLVM's `tail` attribute
+    -- (since we emit `extractvalue` instrs afterwards,
+    --  we disqualify the call from being `musttail`)
+    Tail
     deriving (Eq, Ord, Generic)
 
 instance Show PrimCallAttribute where
-    show MustTail = "musttail"
+    show Tail = "tail"
 
 
 -- |An id for each call site, should be unique within a proc.

@@ -7,7 +7,7 @@
 
 
 module BodyBuilder (
-  BodyBuilder, buildBody, freshVarName, instr, buildFork, completeFork,
+  BodyBuilder, BodyState(..), buildBody, showState, freshVarName, instr, buildFork, completeFork,
   beginBranch, endBranch, definiteVariableValue
   ) where
 
@@ -51,7 +51,7 @@ import Control.Monad.Trans.State
 -- between endBranch and beginBranch, or if the current state does not have
 -- a unique continuation. A new fork can be built within a branch, but must
 -- be completed before the branch is ended.
---
+-- buildState = Forked {forkingVar = tmp#4##0, forkingVarTy = wybe.bool, knownVal = Nothing, fused = False, bodies = [BodyState {currBuild = [tail append.append<0>[410bae77d3](~t##0:wybe.list(wybe.int), ~back##0:wybe.list(wybe.int), outByReference tail##0:wybe.list(wybe.int)) #1 @append:7:13,foreign lpvm mutate(~tmp#10##0:wybe.list(T), ?result##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, takeReference tail##0:wybe.list(T)) @list:8:27,foreign lpvm mutate(~front##0:wybe.list(T), ?tmp#10##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:T) @list:8:27,foreign llvm move(~front##0:wybe.list(T), ?tmp#9##0:wybe.list(T)) @list:8:27,foreign llvm add(~h##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int) @int:16:27,foreign lpvm access(~front##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:wybe.list(wybe.int)) @list:8:27,foreign lpvm access(front##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @list:8:27], currSubst = fromList [(tmp#4##0,1:wybe.int),(tmp#9##0,~front##0:wybe.list(T))], blockDefs = fromList [h##0,result##0,t##0,tmp#1##0,tmp#10##0,tmp#9##0], forkConsts = fromList [], outSubst = fromList [], subExprs = fromList [(tail append.append<0>[410bae77d3](t##0, back##0) #0,[outByReference tail##0:wybe.list(wybe.int)]),(foreign llvm add(h##0, 1),[?tmp#1##0:wybe.int]),(foreign llvm add(1, h##0),[?tmp#1##0:wybe.int]),(foreign llvm icmp_ne(front##0, 0),[?tmp#4##0:wybe.bool]),(foreign llvm icmp_ne(0, front##0),[?tmp#4##0:wybe.bool]),(foreign llvm sub(tmp#1##0, h##0),[1:wybe.int]),(foreign llvm sub(tmp#1##0, 1),[~h##0:wybe.int]),(foreign lpvm access(front##0, 0, 16, 0),[?h##0:wybe.int]),(foreign lpvm access(front##0, 8, 16, 0),[?t##0:wybe.list(wybe.int)]),(foreign lpvm access(result##0, 8, 16, 0),[takeReference tail##0:wybe.list(T)]),(foreign lpvm access(tmp#10##0, 0, 16, 0),[~tmp#1##0:T]),(foreign lpvm mutate(front##0, 0, 0, 16, 0, h##0),[front##0:wybe.list(T)]),(foreign lpvm mutate(front##0, 0, 1, 16, 0, h##0),[front##0:wybe.list(T)]),(foreign lpvm mutate(front##0, 0, 1, 16, 0, tmp#1##0),[?tmp#10##0:wybe.list(T)]),(foreign lpvm mutate(front##0, 8, 0, 16, 0, t##0),[~front##0:wybe.list(T)]),(foreign lpvm mutate(front##0, 8, 1, 16, 0, t##0),[~front##0:wybe.list(T)]),(foreign lpvm mutate(tmp#10##0, 8, 1, 16, 0),[?result##0:wybe.list(wybe.int),takeReference tail##0:wybe.list(T)])], failed = False, tmpCount = 5, buildState = Unforked, parent = Nothing, globalsLoaded = fromList []},BodyState {currBuild = [foreign llvm move(~back##0:wybe.list(wybe.int), ?result##0:wybe.list(wybe.int)) @append:16:14], currSubst = fromList [(result##0,~back##0:wybe.list(wybe.int)),(tmp#4##0,0:wybe.int)], blockDefs = fromList [result##0], forkConsts = fromList [], outSubst = fromList [], subExprs = fromList [(foreign llvm icmp_ne(front##0, 0),[?tmp#4##0:wybe.bool]),(foreign llvm icmp_ne(0, front##0),[?tmp#4##0:wybe.bool])], failed = False, tmpCount = 5, buildState = Unforked, parent = Nothing, globalsLoaded = fromList []}], complete = True}, parent = Nothing, globalsLoaded = fromList []})
 -- The ProcBody type does not support having anything follow a fork. Once a
 -- ProcBody forks, the branches do not join again. Instead, each branch of
 -- a fork should end with a call to another proc, which does whatever
@@ -202,7 +202,7 @@ buildBody :: Int -> VarSubstitution
 buildBody tmp oSubst builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
     (a, st) <- runStateT builder $ initState tmp oSubst
-    logMsg BodyBuilder ">>>> Finished building a proc body"
+    logMsg BodyBuilder ">>>> Finished building a proc body (buildBody)"
     logMsg BodyBuilder "     Final state:"
     logMsg BodyBuilder $ fst $ showState 8 st
     st' <- fuseBodies st
@@ -526,9 +526,9 @@ transformUnneededArg pairs
                primParamFlow=flow, primParamType=typ, primParamName=name}
     arg = do
         logBuild $ "Marking unneeded argument " ++ show arg
-        when (flow == FlowOut) $ do
+        when (isOutputFlow flow) $ do
             case List.filter
-                 (\(p,a)-> primParamName p == name && primParamFlow p == FlowIn)
+                 (\(p,a)-> primParamName p == name && isInputFlow (primParamFlow p))
                  pairs of
               []      -> shouldnt $ "No input param matching output "
                                     ++ show name
@@ -559,7 +559,7 @@ splitPrimOutputs prim =
 -- |Returns a list of all output arguments of the input Prim
 primOutputs :: Prim -> [PrimArg]
 primOutputs prim =
-    List.filter ((==FlowOut) . argFlowDirection) $ fst $ primArgs prim
+    List.filter (isOutputFlow . argFlowDirection) $ fst $ primArgs prim
 
 
 -- |Add a binding for a variable. If that variable is an output for the
@@ -574,9 +574,9 @@ addSubst var val = do
 
 -- |Record that the specified arg (which must be a variable) has been set.
 recordVarSet :: PrimArg -> BodyBuilder ()
-recordVarSet ArgVar{argVarName=nm, argVarFlow=FlowOut} =
+recordVarSet ArgVar{argVarName=nm, argVarFlow=flow} | isOutputFlow flow =
     modify (\s -> s { blockDefs = Set.insert nm $ blockDefs s })
-recordVarSet (ArgUnneeded FlowOut _) = return ()
+recordVarSet (ArgUnneeded flow _) | isOutputFlow flow = return ()
 recordVarSet arg =
     shouldnt $ "recordVarSet of non-output argument " ++ show arg
 
@@ -673,7 +673,7 @@ rawInstr prim pos = do
 
 
 splitArgsByMode :: [PrimArg] -> ([PrimArg], [PrimArg])
-splitArgsByMode = List.partition ((==FlowIn) . argFlowDirection)
+splitArgsByMode = List.partition (isInputFlow . argFlowDirection)
 
 
 canonicalisePrim :: Prim -> Prim
@@ -744,13 +744,13 @@ expandVar var ty = expandArg $ ArgVar var ty FlowIn Ordinary False
 
 -- |Return the current ultimate value of the input argument.
 expandArg :: PrimArg -> BodyBuilder PrimArg
-expandArg arg@ArgVar{argVarName=var, argVarFlow=FlowIn} = do
+expandArg arg@ArgVar{argVarName=var, argVarFlow=flow} | isInputFlow flow = do
     var' <- gets (Map.lookup var . currSubst)
     let ty = argVarType arg
     let var'' = setArgType ty <$> var'
     logBuild $ "Expanded " ++ show var ++ " to " ++ show var''
     maybe (return arg) expandArg var''
-expandArg arg@ArgVar{argVarName=var, argVarFlow=FlowOut} = do
+expandArg arg@ArgVar{argVarName=var, argVarFlow=flow} | isOutputFlow flow = do
     var' <- gets (Map.findWithDefault var var . outSubst)
     when (var /= var')
       $ logBuild $ "Replaced output variable " ++ show var
@@ -1116,7 +1116,7 @@ currBody body st@BodyState{tmpCount=tmp} = do
                               0 Set.empty body
     let BkwdBuilderState{bkwdUsedLater=usedLater,
                          bkwdFollowing=following} = st'
-    logMsg BodyBuilder ">>>> Finished rebuilding a proc body"
+    logMsg BodyBuilder ">>>> Finished rebuilding a proc body (currBody)"
     logMsg BodyBuilder "     Final state:"
     logMsg BodyBuilder $ showBlock 5 following
     return (tmp, usedLater, following)
@@ -1280,7 +1280,7 @@ flattenArg arg = [arg]
 
 
 markIfLastUse :: Set PrimVarName -> PrimArg -> PrimArg
-markIfLastUse usedLater arg@ArgVar{argVarName=nm,argVarFlow=FlowIn} =
+markIfLastUse usedLater arg@ArgVar{argVarName=nm,argVarFlow=flow} | isInputFlow flow =
   arg {argVarFinal=Set.notMember nm usedLater}
 markIfLastUse _ arg = arg
 

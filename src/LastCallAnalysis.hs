@@ -97,7 +97,7 @@ transformLeaf lastBlock = do
     case partitionLastCall lastBlock of
         -- TODO: use multiple specialization to relax the restriction that
         -- the last call is a directly-recursive call...
-        (Just (beforeCall, call), afterLastCall@(_:_)) | isDirectRecursiveCall (content call) spec -> do
+        (Just (beforeCall, call), afterLastCall) | isDirectRecursiveCall (content call) spec -> do
             let lastCall = content call
             logLeaf $ "identified a directly-recursive last-call: " ++ show call
             logLeaf $ "before: " ++ show beforeCall ++ "\nafter: " ++ show afterLastCall
@@ -137,12 +137,11 @@ transformLeaf lastBlock = do
                 Left error -> do
                     logLeaf $ "remaining prims didn't satisfy constraints: " ++ error
                     return lastBlock
-        (Just (beforeCall, call), afterLastCall@[]) | isDirectRecursiveCall (content call) spec -> do
-            logLeaf "last call is already in tail position, adding `musttail` LPVM call attr"
-            proto <- gets originalProto
-            trySetProto proto
-            -- return $ beforeCall ++ [call]
-            return $ beforeCall ++ [contentApply (addAttributeToCall MustTail) call]
+        -- (Just (beforeCall, call), afterLastCall@[]) | isDirectRecursiveCall (content call) spec -> do
+        --     logLeaf "last call is already in tail position, adding `musttail` LPVM call attr"
+        --     proto <- gets originalProto
+        --     trySetProto proto
+        --     return $ beforeCall ++ [contentApply (addAttributeToCall Tail) call]
         _ -> do
             logLeaf "leaf didn't qualify for last-call transformation"
             return lastBlock
@@ -202,7 +201,7 @@ buildTailCallLeaf :: [Placed Prim] -> Placed Prim -> [MutateChain] -> Compiler [
 buildTailCallLeaf beforeCall call mutateChains = do
     let modifiedMutates = concatMap annotateFinalMutates mutateChains
     let call' = contentApply (transformIntoTailCall mutateChains) call
-    return $ beforeCall ++ modifiedMutates ++ [call']
+    return $ beforeCall ++ [call'] ++ modifiedMutates
 
 
 addressSuffix :: [Char]
@@ -216,7 +215,7 @@ outByRefSuffix = "outByRef"
 annotateFinalMutates :: MutateChain -> [Placed Prim]
 annotateFinalMutates = map $
     contentApply (\case {
-            PrimForeign "lpvm" "mutate" [] [input, output, offset, destructive, size, startOffset, val] -> PrimForeign "lpvm" "mutate" [] [input, output, offset, destructive, size, startOffset, setArgFlow FlowTakeReference $ setArgFinal False val ];
+            PrimForeign "lpvm" "mutate" [] [input, output, offset, destructive, size, startOffset, val] -> PrimForeign "lpvm" "mutate" [] [input, output, offset, destructive, size, startOffset, setArgFlow FlowTakeReference val ];
             _ -> shouldnt "must be mutate instr"
     }) . prim
 
@@ -228,7 +227,7 @@ transformIntoTailCall mutateChains (PrimCall siteId spec args globalFlows attrs)
             var@ArgVar { argVarName = name } | name `elem` List.map valueName mutates
                 -> var { argVarFlow = FlowOutByReference }
             _ -> arg
-        ) args) globalFlows (Set.insert MustTail attrs)
+        ) args) globalFlows (Set.insert Tail attrs)
 transformIntoTailCall mutateChains _ = shouldnt "not a call"
 
 data MovePrimsResult = MovePrimsResult {
