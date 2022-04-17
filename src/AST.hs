@@ -71,7 +71,7 @@ module AST (
   expToStmt, seqToStmt, stmtsImpurity, stmtImpurity, procCallToExp,
   expOutputs, pexpListOutputs, expInputs, pexpListInputs,
   setExpTypeFlow, setPExpTypeFlow,
-  Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
+  Prim(..), PrimCallAttribute(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
   varsInPrims, varsInPrim, varsInPrimArgs, varsInPrimArg,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
@@ -155,6 +155,7 @@ import           System.Console.ANSI
 import           GHC.Generics (Generic)
 
 import qualified LLVM.AST as LLVMAST
+import Data.Binary (Binary)
 
 ----------------------------------------------------------------
 --                      Types Just For Parsing
@@ -1094,7 +1095,7 @@ data ProcModifiers = ProcModifiers {
 
 
 data Inlining = Inline | MayInline | NoInline
-    deriving (Eq, Ord, Generic)
+    deriving (Eq, Ord, Generic, Show)
 
 
 -- | The printable modifier name for a Impurity, as specified by the user.
@@ -1962,7 +1963,7 @@ procCallCount proc = Map.foldr (+) 0 $ procCallers proc
 
 -- | What is the Impurity of the given Prim?
 primImpurity :: Prim -> Compiler Impurity
-primImpurity (PrimCall _ pspec _ _)
+primImpurity (PrimCall _ pspec _ _ _)
     = procImpurity <$> getProcDef pspec
 primImpurity (PrimHigher _ (ArgClosure pspec _ _) _)
     = procImpurity <$> getProcDef pspec
@@ -3146,13 +3147,23 @@ data PrimVarName =
 -- |A primitive statment, including those that can only appear in a
 --  loop.
 data Prim
-     = PrimCall CallSiteID ProcSpec [PrimArg] GlobalFlows
+     = PrimCall CallSiteID ProcSpec [PrimArg] GlobalFlows (Set PrimCallAttribute)
      | PrimHigher CallSiteID PrimArg [PrimArg]
      | PrimForeign Ident ProcName [Ident] [PrimArg]
      deriving (Eq,Ord,Generic)
 
 instance Show Prim where
     show = showPrim 0
+
+
+data PrimCallAttribute =
+    -- Semantics equivalent to LLVM's musttail attribute.
+    -- Notably, this call *must* be the last prim in a proc
+    MustTail
+    deriving (Eq, Ord, Generic)
+
+instance Show PrimCallAttribute where
+    show MustTail = "musttail"
 
 
 -- |An id for each call site, should be unique within a proc.
@@ -3184,7 +3195,7 @@ data PrimArg
 
 -- |Returns a list of all arguments to a prim, including global flows
 primArgs :: Prim -> ([PrimArg], GlobalFlows)
-primArgs (PrimCall _ _ args gFlows) = (args, gFlows)
+primArgs (PrimCall _ _ args gFlows _) = (args, gFlows)
 primArgs (PrimHigher _ fn args)
     = (fn:args, if isResourcefulHigherOrder $ argType fn
                 then univGlobalFlows else emptyGlobalFlows)
@@ -3197,8 +3208,8 @@ primArgs prim@(PrimForeign _ _ _ args) = (args, emptyGlobalFlows)
 
 -- |Replace a Prim's args and global flows with a list of args and global flows
 replacePrimArgs :: Prim -> [PrimArg] -> GlobalFlows -> Prim
-replacePrimArgs (PrimCall id pspec _ _) args gFlows
-    = PrimCall id pspec args gFlows
+replacePrimArgs (PrimCall id pspec _ _ attrs) args gFlows
+    = PrimCall id pspec args gFlows attrs
 replacePrimArgs (PrimHigher id _ _) [] _
     = shouldnt "replacePrimArgs of higher call with not enough args"
 replacePrimArgs (PrimHigher id _ _) (fn:args) _
@@ -3876,8 +3887,9 @@ showPlacedPrim' ind prim pos =
 -- |Show a single primitive statement.
 -- XXX the first argument is unused; can we get rid of it?
 showPrim :: Int -> Prim -> String
-showPrim _ (PrimCall id pspec args globalFlows) =
-    show pspec ++ showArguments args
+showPrim _ (PrimCall id pspec args globalFlows attrs) =
+    concatMap (\attr -> show attr ++ " ") attrs
+        ++ show pspec ++ showArguments args
         ++ (if globalFlows == emptyGlobalFlows then "" else show globalFlows)
         ++ " #" ++ show id
 showPrim _ (PrimHigher id var args) =

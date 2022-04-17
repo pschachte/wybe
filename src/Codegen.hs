@@ -607,8 +607,8 @@ cons = ConstantOperand
 -- * Memory effecting instructions
 
 -- | The 'call' instruction represents a simple function call to wybe code
-callWybe :: Operand -> [Operand] -> Instruction
-callWybe fn args = Call (Just Tail) CC.Fast [] (Right fn) (toArgs args) [] []
+callWybe :: Maybe TailCallKind -> Operand -> [Operand] -> Instruction
+callWybe tailCallKind fn args = Call tailCallKind CC.Fast [] (Right fn) (toArgs args) [] []
 
 -- | A foreign call instruction, using C calling conventions
 callC :: Operand -> [Operand] -> Instruction

@@ -640,7 +640,7 @@ loadLPVMFromObjFile objFile required = do
         Left err -> return $ Left $ "Error decoding object file data: " ++ err
         Right modBS -> do
             logBuild "No error decoding object file data."
-            logBuild $ "Extracted LPVM data: " ++ show modBS
+            logBuild $ "Extracted LPVM data"
             (List.map (\m -> m { modOrigin = objFile } ) <$>)
               <$> decodeModule required modBS
 
@@ -868,6 +868,7 @@ compileModSCC mspecs = do
     logMsg LastCallAnalysis  "Start LAST CALL ANALYSIS in Builder.hs"
     logMsg LastCallAnalysis  $ "mspecs: " ++ show mspecs
     logMsg LastCallAnalysis  $ replicate 70 '='
+    -- XXX: use `transformModuleProcs` instead...
     mapM_ lastCallAnalyseMod mspecs
     -- mapM_ (transformModuleProcs transformProc)  mspecs
     logDump LastCallAnalysis LastCallAnalysis  "LAST CALL ANALYSIS"

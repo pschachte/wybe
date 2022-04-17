@@ -44,6 +44,7 @@ instance Binary Stmt
 instance Binary ProcFunctor
 instance Binary ParamInfo
 instance Binary Prim
+instance Binary PrimCallAttribute
 instance Binary PrimVarName
 instance Binary PrimArg
 instance Binary ProcAnalysis

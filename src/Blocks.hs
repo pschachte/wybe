@@ -500,7 +500,7 @@ codegenForkBody var _ =
 -- are position checked with the respective prototype, eliminating arguments
 -- which do not eventually appear in the prototype.
 cgen :: Prim -> Codegen ()
-cgen prim@(PrimCall callSiteID pspec args _) = do
+cgen prim@(PrimCall callSiteID pspec args _ attrs) = do
     logCodegen $ "--> Compiling " ++ show prim
     let nm = LLVMAST.Name $ toSBString $ show pspec
     -- Find the prototype of the pspec being called
@@ -523,9 +523,12 @@ cgen prim@(PrimCall callSiteID pspec args _) = do
 
     inops <- mapM cgenArg inArgs
     logCodegen $ "Translated inputs = " ++ show inops
-    logCodegen $ "Out Type = " ++ show outTy
+    logCodegen $ "Out Tye = " ++ show outTy
+    let tailCallKind = if AST.MustTail `elem` attrs then Just LLVMAST.MustTail else Nothing
+    logCodegen $ "Tail call kind = " ++ show tailCallKind
     let ins =
           callWybe
+          tailCallKind
           (externf (ptr_t (FunctionType outTy (typeOf <$> inops) False)) nm)
           inops
     logCodegen $ "Translated ins = " ++ show ins
@@ -537,7 +540,7 @@ cgen prim@(PrimHigher cId (ArgClosure pspec closed _) args) = do
     logCodegen $ "Compiling " ++ show prim
               ++ " as first order call to " ++ show pspec'
               ++ " closed over " ++ show closed
-    cgen $ PrimCall cId pspec' (closed ++ args) univGlobalFlows
+    cgen $ PrimCall cId pspec' (closed ++ args) univGlobalFlows Set.empty
 
 cgen prim@(PrimHigher callSiteId fn@ArgVar{} args) = do
     logCodegen $ "--> Compiling " ++ show prim
@@ -552,7 +555,10 @@ cgen prim@(PrimHigher callSiteId fn@ArgVar{} args) = do
     envPtr <- inttoptr env addrPtrTy
     eltPtr <- doLoad address_t envPtr
     fnPtr <- doCast eltPtr fnPtrTy
-    let callIns = callWybe fnPtr inOps
+    --- XXX: Tail could cause undef-behaviour in optimizer if the callee
+    ---      users allocas from
+    ---      the caller.
+    let callIns = callWybe (Just Tail) fnPtr inOps
     addInstruction callIns outArgs
 
 cgen prim@(PrimHigher _ fn _) =
@@ -1140,7 +1146,7 @@ addExternClosure ps@(ProcSpec mod _ _ _) = do
     thisMod <- lift2 getModuleSpec
     fileMod <- lift2 $ getModule modRootModSpec
     unless (thisMod == mod || maybe False (`List.isPrefixOf` mod) fileMod)
-        $ addExtern $ PrimCall 0 ps args univGlobalFlows
+        $ addExtern $ PrimCall 0 ps args univGlobalFlows Set.empty
 
 
 addStringConstant :: String -> Codegen (LLVMAST.Type, C.Constant)
@@ -1417,7 +1423,7 @@ declareExtern (PrimForeign otherlang name _ _) =
 declareExtern (PrimHigher _ var _) =
     shouldnt $ "Don't know how to declare extern function var " ++ show var
 
-declareExtern (PrimCall _ pspec@(ProcSpec m n _ _) args _) = do
+declareExtern (PrimCall _ pspec@(ProcSpec m n _ _) args _ _) = do
     let (inArgs,outArgs) = partitionArgs args
     retty <- primReturnType outArgs
     fnargs <- mapM makeExArg $ zip [1..] inArgs

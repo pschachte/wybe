@@ -13,6 +13,7 @@ import           Data.Graph
 import           Data.List  as List
 import           Data.Map   as Map
 import           Data.Maybe
+import qualified Data.Set as Set
 
 -- | Count calls to all the procs in the specified module from procs in modules
 -- in the specified list of modules, which is a strongly connected component in
@@ -111,6 +112,37 @@ getSccProcs thisMod = do
            ]
   return ordered
 
+-- printProc :: ProcDef -> Compiler ()
+-- printProc def@ProcDef {procImpln=ProcDefPrim{procImplnBody=body, procImplnSpeczBodies = speczBodies}} =
+--   logMsg LastCallAnalysis $ show (procProto def) ++ " specz: " ++ show speczBodies
+-- printProc _ = shouldnt "can't display"
+
+-- getSccProcs :: ModSpec -> Compiler [SCC ProcSpec]
+-- getSccProcs thisMod = do
+--   procs <- getModuleImplementationField (Map.toList . modProcs)
+--   mapM_ (mapM_ printProc . snd) procs
+--   -- let pspecs = [pspec | (name,procDefs) <- procs,
+--   --              (n,def) <- zip [0..] procDefs,
+--   --              speczVersion <- procSpeczVersions def,
+--   --              let pspec = ProcSpec thisMod name n speczVersion
+--   --             ]
+--   -- logMsg LastCallAnalysis $ "specs: " ++ show pspecs
+--   let graph = [(pspec,pspec,
+--             nub $ concatMap (localBodyCallees thisMod . procBody) procDefs)
+--            | (name,procDefs) <- procs,
+--              (n,def) <- zip [0..] procDefs,
+--              speczVersion <- procSpeczVersions def,
+--              let pspec = ProcSpec thisMod name n speczVersion
+--            ]
+--   logMsg LastCallAnalysis $ "graph: " ++ show graph
+--   let ordered = stronglyConnComp graph
+--   return ordered
+
+-- get a list of all specz versions of a proc, including the `general version`
+procSpeczVersions :: ProcDef -> [SpeczVersion]
+procSpeczVersions ProcDef {procImpln=ProcDefPrim{procImplnSpeczBodies = speczBodies}} = generalVersion:keys speczBodies
+procSpeczVersions ProcDef { procImpln=ProcDefSrc _} = shouldnt "Analysing un-compiled code"
+
 procBody :: ProcDef -> ProcBody
 procBody def =
   case procImpln def of
@@ -126,7 +158,7 @@ localBodyCallees modspec body =
 
 -- | Find all callees in a given prim
 localCallees :: ModSpec -> Prim -> [ProcSpec]
-localCallees modspec (PrimCall _ pspec args _)
+localCallees modspec (PrimCall _ pspec args _ _)
   = pspec{procSpeczVersion=generalVersion}:concatMap (argRefs modspec) args
 localCallees modspec (PrimHigher _ fn args)
   = concatMap (argRefs modspec) (fn:args)
@@ -136,5 +168,5 @@ localCallees modspec (PrimForeign _ _ _ args)
 -- | Find all callees in a given PromArg
 argRefs :: ModSpec -> PrimArg -> [ProcSpec]
 argRefs modspec (ArgClosure pspec closed _)
-  = localCallees modspec (PrimCall (shouldnt "argRefs") pspec closed univGlobalFlows)
+  = localCallees modspec (PrimCall (shouldnt "argRefs") pspec closed univGlobalFlows Set.empty)
 argRefs _ _ = []

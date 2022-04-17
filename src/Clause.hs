@@ -273,7 +273,7 @@ compileSimpleStmt' call@(ProcCall func _ _ args) = do
                             procID
             let pSpec = ProcSpec mod name procID' generalVersion
             gFlows <- lift $ getProcGlobalFlows pSpec
-            return $ PrimCall callSiteID pSpec args' gFlows
+            return $ PrimCall callSiteID pSpec args' gFlows Set.empty
         Higher fn -> do
             fn' <- compileHigherFunc fn
             return $ PrimHigher callSiteID fn' args'

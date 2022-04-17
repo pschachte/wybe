@@ -484,9 +484,9 @@ mkInput arg@ArgUndef{} = arg
 
 
 argExpandedPrim :: Prim -> BodyBuilder Prim
-argExpandedPrim call@(PrimCall id pspec args gFlows) = do
+argExpandedPrim call@(PrimCall id pspec args gFlows attrs) = do
     args' <- transformUnneededArgs pspec args
-    return $ PrimCall id pspec args' gFlows
+    return $ PrimCall id pspec args' gFlows attrs
 argExpandedPrim call@(PrimHigher id fn args) = do
     logBuild $ "Expanding Higher call " ++ show call
     fn' <- expandArg fn
@@ -497,7 +497,7 @@ argExpandedPrim call@(PrimHigher id fn args) = do
             params <- lift $ getPrimParams pspec'
             let args' = zipWith (setArgType . primParamType) params args
             gFlows <- lift $ getProcGlobalFlows pspec
-            argExpandedPrim $ PrimCall id pspec' (clsd ++ args') gFlows
+            argExpandedPrim $ PrimCall id pspec' (clsd ++ args') gFlows Set.empty
         _ -> do
             logBuild $ "Leaving as higher call to " ++ show fn'
             args' <- mapM expandArg args
@@ -518,7 +518,7 @@ transformUnneededArgs pspec args = do
 
 
 -- |Replace an unneeded argument corresponding to unneeded parameters with
---  ArgUnneeded. 
+--  ArgUnneeded.
 transformUnneededArg :: [(PrimParam,PrimArg)] -> PrimParam -> PrimArg
                      -> BodyBuilder PrimArg
 transformUnneededArg pairs
@@ -677,8 +677,8 @@ splitArgsByMode = List.partition ((==FlowIn) . argFlowDirection)
 
 
 canonicalisePrim :: Prim -> Prim
-canonicalisePrim (PrimCall _ nm args gFlows) =
-    PrimCall 0 nm (canonicaliseArg . mkInput <$> args) gFlows
+canonicalisePrim (PrimCall _ nm args gFlows attrs) =
+    PrimCall 0 nm (canonicaliseArg . mkInput <$> args) gFlows attrs
 canonicalisePrim (PrimHigher _ var args) =
     PrimHigher 0 (canonicaliseArg $ mkInput var) $ canonicaliseArg . mkInput <$> args
 canonicalisePrim (PrimForeign lang op flags args) =
@@ -702,7 +702,7 @@ canonicaliseArg (ArgUndef _)        = ArgUndef AnyType
 
 
 validateInstr :: Prim -> BodyBuilder ()
-validateInstr p@(PrimCall _ _ args _) = mapM_ (validateArg p) args
+validateInstr p@(PrimCall _ _ args _ _) = mapM_ (validateArg p) args
 validateInstr p@(PrimHigher _ fn args) = mapM_ (validateArg p) $ fn:args
 validateInstr p@(PrimForeign _ _ _ args) = mapM_ (validateArg p) args
 

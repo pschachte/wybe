@@ -4,6 +4,7 @@
 --  Copyright: (c) 2016 Peter Schachte.  All rights reserved.
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module Emit (emitObjectFile, emitBitcodeFile, emitAssemblyFile,
              makeArchive, makeExec,
@@ -39,8 +40,10 @@ import           Options                    (LogSelection (Blocks,Builder,Emit),
 import           System.Exit                (ExitCode (..))
 import           System.Process
 import           System.FilePath            ((-<.>))
-import           System.Directory           (getPermissions, writable, doesFileExist)
+import           System.Directory           (getPermissions, writable, doesFileExist, removeFile)
 import           Util                       (createLocalCacheFile)
+import Control.Exception (catch)
+import Control.Exception.Base (try)
 
 
 -- This does not check the permission if the file does not exists.
@@ -110,6 +113,8 @@ emitAssemblyFile m f = do
     logEmit $ "===> Writing assembly file " ++ filename
     opts <- gets options
     let withMod = if optNoLLVMOpt opts then withModule else withOptimisedModule
+    -- remove the file before writing to it
+    liftIO $ catch (removeFile filename)  (\(e :: IOError) -> return ())
     liftIO $ withMod opts llmod
         (\mm -> withHostTargetMachineDefault $ \_ ->
             writeLLVMAssemblyToFile (File filename) mm)

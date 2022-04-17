@@ -157,7 +157,7 @@ bodyCost pprims = sum <$> mapM (primCost . content) pprims
 --  cost of the arguments, and a test instruction as free.
 primCost :: Prim -> Compiler Int
 primCost (PrimForeign "llvm" _ _ _) = return 1
-primCost (PrimCall _ _ args _)      = (1+) . sum <$> mapM argCost args
+primCost (PrimCall _ _ args _ _)      = (1+) . sum <$> mapM argCost args
 primCost (PrimHigher _ fn args)     = (1+) . sum <$> mapM argCost (fn:args)
 primCost (PrimForeign _ _ _ args)   = (1+) . sum <$> mapM argCost args
 
@@ -199,7 +199,7 @@ addGlobalFlows procs gFlows pspec =
 -- If the call is to a proc in the given Set of ProcSpecs, we do not add the
 -- GlobalFlows, else we add the global flows associated with the proc
 primGlobalFlows' :: Set ProcSpec -> Prim -> GlobalFlows
-primGlobalFlows' procs (PrimCall _ pspec _ _)
+primGlobalFlows' procs (PrimCall _ pspec _ _ _)
     | pspec `Set.member` procs = emptyGlobalFlows
 primGlobalFlows' _ prim = snd $ primArgs prim
 
@@ -235,10 +235,12 @@ updateBodyGlobalFlows procs newFlows (ProcBody body fork) = do
 -- If the prim is a call to a proc in the Set of ProcSpecs, we update the
 -- GlobalFlows to the intersection of the given GlobalFlows and the current
 updatePrimGlobalFlows :: Set ProcSpec -> GlobalFlows -> Prim -> Compiler Prim
-updatePrimGlobalFlows procs newFlows (PrimCall cID pspec args gFlows)
+updatePrimGlobalFlows procs newFlows (PrimCall cID pspec args gFlows attrs)
     | pspec `Set.member` procs
-    = return $ PrimCall cID pspec args $ globalFlowsIntersection newFlows gFlows
-    | otherwise = PrimCall cID pspec args <$> getProcGlobalFlows pspec
+    = return $ PrimCall cID pspec args (globalFlowsIntersection newFlows gFlows) attrs
+    | otherwise = do
+        flows <- getProcGlobalFlows pspec
+        return $ PrimCall cID pspec args flows attrs
 updatePrimGlobalFlows _ _ prim = return prim
 
 

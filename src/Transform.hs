@@ -155,12 +155,12 @@ transformPrim callSiteMap (aliasMap, deadCells) prim = do
     let primc = content prim
 
     (primc', deadCells') <- case primc of
-            PrimCall id spec args gFlows -> do
+            PrimCall id spec args gFlows attrs -> do
                 noMultiSpecz <- lift $ gets (optNoMultiSpecz . options)
                 let spec' = if noMultiSpecz
                     then spec
                     else Map.findWithDefault spec id callSiteMap
-                return (PrimCall id spec' args gFlows, deadCells)
+                return (PrimCall id spec' args gFlows attrs, deadCells)
             PrimForeign "lpvm" "mutate" flags args -> do
                 let args' = _updateMutateForAlias aliasMap args
                 return (PrimForeign "lpvm" "mutate" flags args', deadCells)
