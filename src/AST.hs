@@ -40,7 +40,7 @@ module AST (
   paramIsPhantom, argIsPhantom, typeIsPhantom, repIsPhantom,
   primProtoParamNames,
   protoRealParams, realParams, paramIsReal,
-  protoInputParamNames, isProcProtoArg,
+  protoInputParamNames, protoParamsOfFlow, isProcProtoArg,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace, unPlace,
   placedApply, defaultPlacedApply, placedApplyM, contentApply, updatePlacedM,
@@ -3129,8 +3129,16 @@ paramIsReal param =
 
 
 -- |Get names of proto input params
+-- XXX: is this really just input params? or all params
+--      was changed in this commit:
+--      https://github.com/pschachte/wybe/commit/99749ad485a760813ac63e2addcf8745a824a6e9
 protoInputParamNames :: PrimProto -> Compiler [PrimVarName]
 protoInputParamNames proto = (primParamName <$>) <$> protoRealParams proto
+
+
+-- | Get all params of a given flow direction
+protoParamsOfFlow :: PrimFlow -> PrimProto -> [PrimParam]
+protoParamsOfFlow flow proto = List.filter (\param -> flow==primParamFlow param) (primProtoParams proto)
 
 
 -- |Is the supplied argument a parameter of the proc proto

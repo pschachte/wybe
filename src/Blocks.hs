@@ -364,13 +364,15 @@ doCodegenBody body = do
     params <- lift2 $ protoRealParams proto
     let (ins,outs) = List.partition paramGoesIn params
     mapM_ assignParam ins
-    -- mapM_ preassignOutput outs
-    codegenBody body  -- Codegen on body prims
+    -- This handles the fact that some outputs are not defined on failing branches,
+    -- by initialising all outputs to `Undef` at the start of the proc.
+    mapM_ preassignOutput outs
+    -- Codegen on body prims
+    codegenBody body
 
 -- | Convert a PrimParam to an Operand value and reference this value by the
 -- param's name on the symbol table. Don't assign if phantom.
 assignParam :: PrimParam -> Codegen ()
--- assignParam p@PrimParam{primParamType=ty, primParamFlow = FlowOutByReference } = assignParam
 assignParam p@PrimParam{primParamType=ty, primParamFlow = paramFlow } = do
     trep <- typeRep' ty
     logCodegen $ "Maybe generating parameter " ++ show p
@@ -382,12 +384,11 @@ assignParam p@PrimParam{primParamType=ty, primParamFlow = paramFlow } = do
             modifySymtab nm (localVar llty nm)
 
 -- | Convert a PrimParam to an Operand value and reference this value by the
--- param's name on the symbol table. Don't assign if phantom.
+-- param's name on the symbol table. Don't assign if phantom
 preassignOutput :: PrimParam -> Codegen ()
 preassignOutput p = do
-    let ty = primParamType p
     let nm = show (primParamName p)
-    llty <- llvmType' ty FlowOut
+    llty <- lift2 $ primParamLLVMType p
     modifySymtab nm (cons $ C.Undef llty)
 
 
@@ -549,6 +550,8 @@ cgen (prim@(PrimCall callSiteID pspec args _ attrs):nextPrims) = do
     let callIns = callWybe tailCall funcRef inops
     logCodegen $ "Translated ins = " ++ show callIns
     addInstruction callIns outArgs
+    -- if this isn't a tail call, then later on we might want to access
+    -- the underlying values written to by these `outByReference` pointers.
     unless (AST.Tail `elem` attrs) $ mapM_ cgenLoadReference args'
 
 cgen (prim@(PrimHigher cId (ArgClosure pspec closed _) args):ps) = do
@@ -572,8 +575,7 @@ cgen (prim@(PrimHigher callSiteId fn@ArgVar{} args):_) = do
     eltPtr <- doLoad address_t envPtr
     fnPtr <- doCast eltPtr fnPtrTy
     --- XXX: Tail could cause undef-behaviour in optimizer if the callee
-    ---      users allocas from
-    ---      the caller.
+    ---      user allocas from the caller. Double check this is okay.
     let callIns = callWybe (Just LLVMAST.Tail) fnPtr inOps
     addInstruction callIns outArgs
 
@@ -583,11 +585,10 @@ cgen (prim@(PrimHigher _ fn _):ps) =
 cgen (prim@(PrimForeign "llvm" name flags args):_) = do
     logCodegen $ "--> Compiling " ++ show prim
     args' <- filterPhantomArgs args
-    case length args' of
-      -- XXX deconstruct args' in these calls
-       0 | name == "move" -> return () -- move phantom to phantom
-       2 -> cgenLLVMUnop name flags args'
-       3 -> cgenLLVMBinop name flags args'
+    case partitionArgs args' of
+       ([], []) | name == "move" -> return () -- move phantom to phantom
+       ([a], [b]) -> cgenLLVMUnop name flags a b
+       ([a, b], [c]) -> cgenLLVMBinop name flags a b c
        _ -> shouldnt $ "LLVM instruction " ++ name
                        ++ " with wrong arity (" ++ show (length args') ++ ")!"
 
@@ -615,7 +616,7 @@ cgen (prim@(PrimForeign lang name flags args):_) = do
 cgen [] = shouldnt "lookahead list must have at least one Prim in it"
 
 
--- We observe hints from previous stages of compilation (`attrs`), as well
+-- | We observe hints from previous stages of compilation (`attrs`), as well
 -- as the callee's signature, in order suggest a stricter LLVM
 -- TailCallKind where possible.
 -- In the best case, the call is marked `musttail`, which signals LLVM must
@@ -654,14 +655,13 @@ getTailCallHint attrs args outTy =
 -- arguments are split into inputs and outputs (according to their flow
 -- type). The output argument is used to name and reference the resulting
 -- Operand of the instruction.
-cgenLLVMBinop :: ProcName -> [Ident] -> [PrimArg] -> Codegen ()
-cgenLLVMBinop name flags args =
-    do let (inArgs,outArgs) = partitionArgs args
-       inOps <- mapM cgenArg inArgs
-       case (inOps, Map.lookup (withFlags name flags) llvmMapBinop) of
-         ([a1,a2], Just (f,_,_)) -> addInstruction (f a1 a2) outArgs
-         ([_,_],Nothing) -> shouldnt $ "LLVM Instruction not found: " ++ name
-         (_,_) -> shouldnt $ "Binary instruction with /= 2 inputs: " ++ name
+cgenLLVMBinop :: ProcName -> [Ident] -> PrimArg -> PrimArg -> PrimArg -> Codegen ()
+cgenLLVMBinop name flags inArg1 inArg2 outArg = do
+       inOp1 <- cgenArg inArg1
+       inOp2 <- cgenArg inArg2
+       case Map.lookup (withFlags name flags) llvmMapBinop of
+         Just (f,_,_) -> addInstruction (f inOp1 inOp2) [outArg]
+         Nothing -> shouldnt $ "LLVM Instruction not found: " ++ name
 
 
 -- | Similar to 'cgenLLVMBinop', but for unary operations on the
@@ -671,27 +671,19 @@ cgenLLVMBinop name flags args =
 -- input operand at the front of the symbol table. The next time the output
 -- name is referenced, the symbol table will return the latest assignment to
 -- it.
-cgenLLVMUnop :: ProcName -> [Ident] -> [PrimArg] -> Codegen ()
-cgenLLVMUnop "move" flags args =
-    case partitionArgs args of
-      ([input],[output]) -> do
-           inRep <- typeRep' $ argType input
-           inop <- cgenArg input
-           assign (pullName output) inop
-      _ ->
-           shouldnt "llvm move instruction with wrong arity"
+cgenLLVMUnop :: ProcName -> [Ident] -> PrimArg -> PrimArg -> Codegen ()
+cgenLLVMUnop "move" flags input output = do
+    inRep <- typeRep' $ argType input
+    inop <- cgenArg input
+    assign (pullName output) inop
 
-cgenLLVMUnop name flags args =
-    case (Map.lookup name llvmMapUnop,partitionArgs args) of
-        (Just (f,_,_),([inArg],[outArg])) -> do
+cgenLLVMUnop name flags inArg outArg =
+    case Map.lookup name llvmMapUnop of
+        Just (f,_,_) -> do
             inOp <- cgenArg inArg
             outTy <- lift2 $ argLLVMType outArg
             addInstruction (f inOp outTy) [outArg]
-        (Just _,(inArgs,outArgs)) ->
-            shouldnt $ "unary LLVM Instruction " ++ name ++ " with "
-                        ++ show (length inArgs) ++ " input(s) and "
-                        ++ show (length outArgs) ++ " output(s)"
-        (Nothing,_) -> shouldnt $ "Unknown unary LLVM Instruction " ++ name
+        Nothing -> shouldnt $ "Unknown unary LLVM Instruction " ++ name
 
 
 -- | Match PrimArgs with the parameters in the given prototype. If a PrimArg's
@@ -858,9 +850,8 @@ cgenLPVM pname flags args = do
                ++ " not implemented."
 
 
--- Codegen a Prim that was *after* a tail call.
--- Only a particular type of "mutate" instr is allowed to be here.
--- Otherwise we throw an error.
+-- | Codegen a Prim that comes *after* a call annotated with `tail`.
+-- Only a particular type of mutate instr is allowed, otherwise we throw an error.
 cgenPostTailCall :: Prim -> Codegen ()
 cgenPostTailCall prim@(PrimForeign "lpvm" "mutate" _  [inArg, outArg, offsetArg, ArgInt 1 _, sizeArg, startOffsetArg,
         refArg@ArgVar { argVarName = refArgName, argVarFlow = FlowTakeReference  }]) = do
@@ -1048,14 +1039,19 @@ cgenArg arg = do
 cgenArg' :: PrimArg -> Codegen LLVMAST.Operand
 cgenArg' var@ArgVar{argVarName=name, argVarType=ty, argVarFlow=flow@FlowOutByReference} = do
     op <- maybeGetVar (show name)
-    if isNothing op then do
-        -- variable wasn't already defined,
-        -- so we alloca space to store it
+    currentProto <- gets proto
+    let outputParams = List.map primParamName $ protoParamsOfFlow FlowOut currentProto
+    if isNothing op || name `elem` outputParams then do
+        -- This variable wasn't already defined or was an output param of the
+        -- current proc (which get set to `Undef`, so not really explicitly defined)
+        -- In this case we need to allocate space on the stack and create a
+        -- shadow reference variable to it.
         allocaTy <- llvmType' ty FlowOut
         alloca <- doAlloca allocaTy
         logCodegen $ "Performing %" ++ show name ++ " = alloca " ++ show allocaTy
         let refName = getRefName name
         assign (show refName) alloca
+        -- Supply the shadow reference variable as argument to this proc.
         castVar refName ty flow
     else castVar name ty flow
 cgenArg' var@ArgVar{argVarName=nm, argVarType=ty, argVarFlow=flow} = castVar nm ty flow

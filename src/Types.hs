@@ -1330,7 +1330,7 @@ callInfos vars pstmt = do
                 defs <- lift $ mapM getProcDef procs
                 firstInfos <- zipWithM firstInfo defs procs
                 return $ StmtTypings pstmt firstInfos
-        ProcCall (Higher fn) _ _ _ ->
+        ProcCall (Higher fn) _ _ _ -> 
             return $ StmtTypings pstmt [HigherInfo $ content fn]
         _ ->
           shouldnt $ "callProcInfos with non-call statement "
