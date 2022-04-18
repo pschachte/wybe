@@ -55,8 +55,6 @@ def _print_list(xs:list(int)) use !io {
             !print(", ")
         }
         !_print_list(xs1)
-        | else ::
-            !print("")
     }
 }
 

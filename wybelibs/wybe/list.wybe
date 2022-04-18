@@ -7,8 +7,8 @@ use wybe.bool, wybe.int
 
 pub constructors (T) [] | [head:T | tail:_(T)]
 
-# pub def (x:_(T) ,, y:_(T)):_(T) =
-#     if { x = [?h|?t] :: [h|t,,y] | else :: y }
+pub def (x:_(T) ,, y:_(T)):_(T) =
+    if { x = [?h|?t] :: [h|t,,y] | else :: y }
 
 pub def length(x:_(T)) : int = length1(x, 0)
 

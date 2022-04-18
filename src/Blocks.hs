@@ -311,7 +311,7 @@ makeGlobalDefinition pname proto bls = do
 -- | Predicate to check if a primitive's parameter is of input flow (input)
 -- and the param is needed (inferred by it's param info field)
 isInputParam :: PrimParam -> Bool
-isInputParam p = isLLVMInput (primParamFlow p) && paramNeeded p
+isInputParam p = paramGoesIn p && paramNeeded p
 
 -- | Convert a primitive's input parameter to LLVM's Definition parameter.
 makeFnArg :: PrimParam -> Compiler (Type, LLVMAST.Name)
@@ -335,7 +335,7 @@ primOutputType params = do
 isOutputParam :: PrimParam -> Compiler Bool
 isOutputParam p = do
     phantom <- paramIsPhantom p
-    return $ primParamFlow p == FlowOut && not phantom && paramNeeded p
+    return $ (not $ paramGoesIn p) && not phantom && paramNeeded p
 
 
 paramNeeded :: PrimParam -> Bool

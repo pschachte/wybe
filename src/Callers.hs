@@ -112,37 +112,6 @@ getSccProcs thisMod = do
            ]
   return ordered
 
--- printProc :: ProcDef -> Compiler ()
--- printProc def@ProcDef {procImpln=ProcDefPrim{procImplnBody=body, procImplnSpeczBodies = speczBodies}} =
---   logMsg LastCallAnalysis $ show (procProto def) ++ " specz: " ++ show speczBodies
--- printProc _ = shouldnt "can't display"
-
--- getSccProcs :: ModSpec -> Compiler [SCC ProcSpec]
--- getSccProcs thisMod = do
---   procs <- getModuleImplementationField (Map.toList . modProcs)
---   mapM_ (mapM_ printProc . snd) procs
---   -- let pspecs = [pspec | (name,procDefs) <- procs,
---   --              (n,def) <- zip [0..] procDefs,
---   --              speczVersion <- procSpeczVersions def,
---   --              let pspec = ProcSpec thisMod name n speczVersion
---   --             ]
---   -- logMsg LastCallAnalysis $ "specs: " ++ show pspecs
---   let graph = [(pspec,pspec,
---             nub $ concatMap (localBodyCallees thisMod . procBody) procDefs)
---            | (name,procDefs) <- procs,
---              (n,def) <- zip [0..] procDefs,
---              speczVersion <- procSpeczVersions def,
---              let pspec = ProcSpec thisMod name n speczVersion
---            ]
---   logMsg LastCallAnalysis $ "graph: " ++ show graph
---   let ordered = stronglyConnComp graph
---   return ordered
-
--- get a list of all specz versions of a proc, including the `general version`
-procSpeczVersions :: ProcDef -> [SpeczVersion]
-procSpeczVersions ProcDef {procImpln=ProcDefPrim{procImplnSpeczBodies = speczBodies}} = generalVersion:keys speczBodies
-procSpeczVersions ProcDef { procImpln=ProcDefSrc _} = shouldnt "Analysing un-compiled code"
-
 procBody :: ProcDef -> ProcBody
 procBody def =
   case procImpln def of

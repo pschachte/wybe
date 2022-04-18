@@ -15,7 +15,7 @@
 # resolver:
 #  name: custom-snapshot
 #  location: "./custom-snapshot.yaml"
-resolver: lts-16.27
+resolver: lts-16.7
 
 # User packages to be built.
 # Various formats can be used as shown in the example below.
@@ -73,4 +73,4 @@ ghc-options:
 
 flags:
   llvm-hs:
-    shared-llvm: false
+    shared-llvm: true

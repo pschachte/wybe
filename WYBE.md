@@ -2041,12 +2041,6 @@ converting its type from *type1* to *type2*, without changing the
 representation. This just allows getting around LLVM strong typing; it does not
 actually require any instructions.
 
-- `foreign lpvm load()` tbc...
-
-- `foreign lpvm store(`*var:type1*, *var2: &type1*`)` tbc...
-
-- `foreign lpvm address(`*struct:type*, *offset:*`int`, *size*:`int`,
-                        *start_offset*:`int`, `?`*member: `&`type2*`)` tbc...
 
 #### Handling impurity
 

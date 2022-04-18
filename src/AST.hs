@@ -63,7 +63,7 @@ module AST (
   ProcAnalysis(..), emptyProcAnalysis,
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, ResourceDef(..), FlowDirection(..),
-  argFlowDirection, argType, setArgType, setArgFlow, setArgFlowType, setArgFinal, maybeArgFlowType,
+  argFlowDirection, argType, setArgType, setArgFlow, setArgFlowType, maybeArgFlowType,
   argDescription, argIntVal, trustArgInt, setParamType, paramIsResourceful,
   setPrimParamType, setTypeFlowType,
   flowsIn, flowsOut, primFlowToFlowDir, isInputFlow, isOutputFlow,
@@ -265,10 +265,10 @@ determinismName SemiDet  = "test"
 
 -- | Internal representation of data
 data TypeRepresentation
-    = Address                 -- A pointer; occupies wordSize bits
-    | Bits Int                -- An unsigned integer representation
-    | Signed Int              -- A signed integer representation
-    | Floating Int            -- A floating point representation
+    = Address           -- ^ A pointer; occupies wordSize bits
+    | Bits Int          -- ^ An unsigned integer representation
+    | Signed Int        -- ^ A signed integer representation
+    | Floating Int      -- ^ A floating point representation
     | Func [TypeRepresentation] [TypeRepresentation]
                         -- ^ A function pointer with inputs and outputs
     deriving (Eq, Ord, Generic)
@@ -3323,11 +3323,6 @@ setArgType typ (ArgUndef _) = ArgUndef typ
 setArgFlow :: PrimFlow -> PrimArg -> PrimArg
 setArgFlow f arg@ArgVar{} = arg{argVarFlow=f}
 setArgFlow _ arg          = arg
-
--- | Set the flow of a prim arg. This is a nop for a non-ArgVar value
-setArgFinal :: Bool -> PrimArg -> PrimArg
-setArgFinal f arg@ArgVar{} = arg{argVarFinal=f}
-setArgFinal _ arg          = arg
 
 -- | Set the flow type of a prim arg. This is a nop for a non-ArgVar value
 setArgFlowType :: ArgFlowType -> PrimArg -> PrimArg

@@ -243,7 +243,7 @@ import qualified Data.ByteString.Char8 as BS
 import qualified LLVM.AST              as LLVMAST
 
 import           Debug.Trace
-import LastCallAnalysis (lastCallAnalyseMod, lastCallAnalyseProc)
+import LastCallAnalysis (lastCallAnalyseMod)
 
 ------------------------ Handling dependencies ------------------------
 
@@ -868,9 +868,7 @@ compileModSCC mspecs = do
     logMsg LastCallAnalysis  "Start LAST CALL ANALYSIS in Builder.hs"
     logMsg LastCallAnalysis  $ "mspecs: " ++ show mspecs
     logMsg LastCallAnalysis  $ replicate 70 '='
-    -- XXX: use `transformModuleProcs` instead...
     mapM_ lastCallAnalyseMod mspecs
-    -- mapM_ (transformModuleProcs transformProc)  mspecs
     logDump LastCallAnalysis LastCallAnalysis  "LAST CALL ANALYSIS"
 
     -- mods <- mapM getLoadedModule mods

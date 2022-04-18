@@ -431,9 +431,6 @@ externf ty = ConstantOperand . C.GlobalReference ty
 localVar :: Type -> String -> Operand
 localVar t s = LocalReference t $ LLVMAST.Name $ fromString s
 
--- local :: Type -> LLVMAST.Name -> Operand
--- local ty nm = LocalReference ty nm
-
 globalVar :: Type -> String -> C.Constant
 globalVar t s = C.GlobalReference t $ LLVMAST.Name $ fromString s
 
