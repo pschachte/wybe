@@ -254,9 +254,9 @@ _translateProcImpl proto isClosure body = do
     lift $ do
         logBlocks $ "\n" ++ replicate 70 '=' ++ "\n"
         logBlocks $ "In Module: " ++ showModSpec modspec
-                    ++ ", creating definition of: "
-        logBlocks $ "proto: " ++ show proto'
-                    ++ "body: " ++ show body'
+                    ++ ", creating definition of:\n\n"
+        logBlocks $ show proto'
+                    ++ showBlock 4 body'
                     ++ "\n" ++ replicate 50 '-' ++ "\n"
     codestate <- doCodegenBody body'
                     `execStateT` emptyCodegen proto'
@@ -364,7 +364,7 @@ doCodegenBody body = do
     params <- lift2 $ protoRealParams proto
     let (ins,outs) = List.partition paramGoesIn params
     mapM_ assignParam ins
-    mapM_ preassignOutput outs
+    -- mapM_ preassignOutput outs
     codegenBody body  -- Codegen on body prims
 
 -- | Convert a PrimParam to an Operand value and reference this value by the
@@ -714,15 +714,17 @@ prepareArgs (a:as) (p:ps) = do
 
 cgenLoadReference :: PrimArg -> Codegen ()
 cgenLoadReference arg@ArgVar { argVarName = name, argVarType = ty, argVarFlow = FlowOutByReference } = do
-    -- load the actual variable `[name]` from the shadow reference variable
-    -- `[name]#ref`
-    trep <- typeRep' ty
-    cgen [PrimForeign "lpvm" "access" [] [
-        ArgVar (getRefName name) (Representation Address) FlowIn Ordinary True,
-        ArgInt 0 intType,
-        ArgInt (fromIntegral $ typeRepSize trep `div` 8) intType,
-        ArgInt 0 intType,
-        ArgVar name ty FlowOut Ordinary False]]
+    op <- maybeGetVar $ show (getRefName name)
+    case op of
+        -- the corresponding shadow variable `[name]#ref` exists, so let's load
+        -- the contents into `[name]`
+        Just var -> do
+            outTy <- lift2 $ argLLVMType arg { argVarFlow = FlowOut }
+            loadOp <- doLoad outTy var
+            assign (show name) loadOp
+        -- the shadow `[name]#ref` variable wasn't generated, so
+        -- we don't need to load it
+        Nothing -> return ()
 cgenLoadReference _ = return ()
 
 filterPhantomArgs :: [PrimArg] -> Codegen [PrimArg]

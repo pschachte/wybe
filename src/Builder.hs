@@ -863,7 +863,7 @@ compileModSCC mspecs = do
 
     ----------------------------------
     -- LAST CALL ANALYSIS
-    -- Identify situations in which we can turn a last-call into a tail-call
+    -- Identifies situations in which we can turn a last-call into a tail-call
     logMsg LastCallAnalysis  $ replicate 70 '='
     logMsg LastCallAnalysis  "Start LAST CALL ANALYSIS in Builder.hs"
     logMsg LastCallAnalysis  $ "mspecs: " ++ show mspecs
