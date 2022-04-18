@@ -36,7 +36,7 @@ import qualified Data.Set                        as Set
 import           Data.String
 import           Data.Functor                    ((<&>))
 import           Data.Word                       (Word32)
-import           Data.Maybe                      (fromMaybe, isJust, catMaybes)
+import           Data.Maybe                      (fromMaybe, isJust, catMaybes, isNothing)
 import           Flow                            ((|>))
 import qualified LLVM.AST                        as LLVMAST
 import qualified LLVM.AST.Constant               as C
@@ -450,7 +450,6 @@ codegenBody :: ProcBody -> Codegen ()
 codegenBody body = do
     let prims = List.map content (bodyPrims body)
     let primsWithLookahead = lookaheadPrims prims
-    logCodegen $ "prims with lookahead: " ++ show primsWithLookahead
     -- Filter out prims which contain only phantom arguments
     mapM_ cgen primsWithLookahead
     params <- gets (primProtoParams . proto)
@@ -526,15 +525,12 @@ cgen (prim@(PrimCall callSiteID pspec args _ attrs):nextPrims) = do
     -- and remove the unneeded ones.
     proto <- lift2 $ getProcPrimProto pspec
     logCodegen $ "Proto = " ++ show proto
-    (args', shims) <- prepareArgs args (primProtoParams proto)
+    args' <- prepareArgs args (primProtoParams proto)
     logCodegen $ "Prepared args = " ++ show args'
 
     -- If this call was marked with `tail`, then we generate the remaining prims
     --  *before* the call instruction.
     when (AST.Tail `elem` attrs) $ mapM_ cgenPostTailCall nextPrims
-
-    logCodegen $ "Shims = " ++ show shims
-    mapM_ shimBeforeCall shims
 
     -- if the call is to an external module, declare it
     addExternClosure pspec
@@ -553,7 +549,7 @@ cgen (prim@(PrimCall callSiteID pspec args _ attrs):nextPrims) = do
     let callIns = callWybe tailCall funcRef inops
     logCodegen $ "Translated ins = " ++ show callIns
     addInstruction callIns outArgs
-    mapM_ shimAfterCall shims
+    unless (AST.Tail `elem` attrs) $ mapM_ cgenLoadReference args'
 
 cgen (prim@(PrimHigher cId (ArgClosure pspec closed _) args):ps) = do
     pspec' <- fromMaybe pspec <$> lift2 (maybeGetClosureOf pspec)
@@ -702,8 +698,8 @@ cgenLLVMUnop name flags args =
 -- counterpart in the prototype is unneeded, filtered out. Arguments
 -- are matched positionally, and are coerced to the type of corresponding
 -- parameters.
-prepareArgs :: [PrimArg] -> [PrimParam] -> Codegen ([PrimArg], [FlowOutByReferenceShim])
-prepareArgs [] []    = return ([], [])
+prepareArgs :: [PrimArg] -> [PrimParam] -> Codegen [PrimArg]
+prepareArgs [] []    = return []
 prepareArgs [] (_:_) = shouldnt "more parameters than arguments"
 prepareArgs (_:_) [] = shouldnt "more arguments than parameters"
 prepareArgs (ArgUnneeded _ _:as) (p:ps)
@@ -711,37 +707,23 @@ prepareArgs (ArgUnneeded _ _:as) (p:ps)
     | otherwise     = prepareArgs as ps
 prepareArgs (a:as) (p@PrimParam{primParamType=ty}:ps) | argFlowDirection a == primParamFlow p = do
     real <- lift2 $ paramIsReal p
-    (rest,shims) <- prepareArgs as ps
-    return $ if real then (setArgType ty a:rest, shims) else (rest, shims)
+    rest <- prepareArgs as ps
+    return $ if real then setArgType ty a:rest else rest
 prepareArgs (a:as) (p:ps) = do
     shouldnt $ "incompatible flows: invocation=" ++ show (argFlowDirection a) ++ " definition: " ++ show (primParamFlow p)
 
-data FlowOutByReferenceShim = FlowOutByReferenceShim {
-    shimVarType :: TypeSpec,
-    shimVarName :: PrimVarName,
-    referenceVarName :: PrimVarName
-} deriving (Show)
-
-
-shimBeforeCall :: FlowOutByReferenceShim -> Codegen ()
-shimBeforeCall FlowOutByReferenceShim { shimVarType = shimVarType, shimVarName = shimVarName, referenceVarName = referenceVarName }
-    = do
-    ty <- llvmType' shimVarType FlowOut
-    alloca <- doAlloca ty
-    logCodegen $ "Performing %" ++ show referenceVarName ++ " = alloca " ++ show ty
-    assign (show referenceVarName) alloca
-
-
-shimAfterCall :: FlowOutByReferenceShim -> Codegen ()
-shimAfterCall FlowOutByReferenceShim { shimVarType = shimVarType, shimVarName = shimVarName, referenceVarName = referenceVarName }
-    = do
-    trep <- typeRep' shimVarType
+cgenLoadReference :: PrimArg -> Codegen ()
+cgenLoadReference arg@ArgVar { argVarName = name, argVarType = ty, argVarFlow = FlowOutByReference } = do
+    -- load the actual variable `[name]` from the shadow reference variable
+    -- `[name]#ref`
+    trep <- typeRep' ty
     cgen [PrimForeign "lpvm" "access" [] [
-        ArgVar referenceVarName (Representation Address) FlowIn Ordinary True,
+        ArgVar (getRefName name) (Representation Address) FlowIn Ordinary True,
         ArgInt 0 intType,
         ArgInt (fromIntegral $ typeRepSize trep `div` 8) intType,
         ArgInt 0 intType,
-        ArgVar shimVarName shimVarType FlowOut Ordinary False]]
+        ArgVar name ty FlowOut Ordinary False]]
+cgenLoadReference _ = return ()
 
 filterPhantomArgs :: [PrimArg] -> Codegen [PrimArg]
 filterPhantomArgs = filterM ((not <$>) . lift2 . argIsPhantom)
@@ -1062,6 +1044,18 @@ cgenArg arg = do
 
 
 cgenArg' :: PrimArg -> Codegen LLVMAST.Operand
+cgenArg' var@ArgVar{argVarName=name, argVarType=ty, argVarFlow=flow@FlowOutByReference} = do
+    op <- maybeGetVar (show name)
+    if isNothing op then do
+        -- variable wasn't already defined,
+        -- so we alloca space to store it
+        allocaTy <- llvmType' ty FlowOut
+        alloca <- doAlloca allocaTy
+        logCodegen $ "Performing %" ++ show name ++ " = alloca " ++ show allocaTy
+        let refName = getRefName name
+        assign (show refName) alloca
+        castVar refName ty flow
+    else castVar name ty flow
 cgenArg' var@ArgVar{argVarName=nm, argVarType=ty, argVarFlow=flow} = castVar nm ty flow
 cgenArg' (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
 cgenArg' arg@(ArgClosure ps args ty) = do
@@ -1084,6 +1078,12 @@ cgenArg' arg@(ArgClosure ps args ty) = do
         return mem
 cgenArg' arg = do
     cons <$> cgenArgConst arg
+
+
+-- returns the name of a "shadow" variable which is a pointer to the
+-- underlying variable
+getRefName :: PrimVarName -> PrimVarName
+getRefName name = name { primVarName = primVarName name ++ "#ref" }
 
 
 -- Generates a constant for a constant PrimArg, casted to the respective type

@@ -17,7 +17,7 @@ module Codegen (
   callWybe, callC, externf, ret, globalDefine, externalC, externalWybe,
   phi, br, cbr, getBlock, retNothing, fresh,
   -- * Symbol storage
-  alloca, store, addOperand, load, modifySymtab, getVar, localVar, preservingSymtab,
+  alloca, store, addOperand, load, modifySymtab, getVar, maybeGetVar, localVar, preservingSymtab,
   makeGlobalResourceVariable, doAlloca, doLoad,
   bitcast, cbitcast, inttoptr, cinttoptr, ptrtoint, cptrtoint,
   trunc, ctrunc, zext, czext, sext, csext,
@@ -454,9 +454,16 @@ modifySymtab var op = do
 getVar :: String -> Codegen Operand
 getVar var = do
     let err = shouldnt $ "Local variable not in scope: " ++ show var
-    lcls <- gets (stVars . symtab)
-    return $ fromMaybe err $ Map.lookup var lcls
+    maybeOp <- maybeGetVar var
+    return $ fromMaybe err maybeOp
 
+-- | Find and return the local operand by its given name from the symbol
+-- table. Only the first find will be returned so new names can shadow
+-- the same older names. Returns Nothing if var was not found.
+maybeGetVar :: String -> Codegen (Maybe Operand)
+maybeGetVar var = do
+    lcls <- gets (stVars . symtab)
+    return $ Map.lookup var lcls
 
 -- | Evaluate nested code generating code, and reset the symtab to its original
 -- state afterwards. Other parts of the Codegen state are allowed to change.
