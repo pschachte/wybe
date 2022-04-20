@@ -114,6 +114,7 @@ AFTER BUILDING MAIN:
                     use wybe.machine_word
                     use wybe.memory_management
                     use wybe.phantom
+                    use wybe.predicate
                     use wybe.range
                     use wybe.string
   resources       : 
@@ -1018,6 +1019,7 @@ AFTER EVERYTHING:
                     use wybe.machine_word
                     use wybe.memory_management
                     use wybe.phantom
+                    use wybe.predicate
                     use wybe.range
                     use wybe.string
   resources       : 

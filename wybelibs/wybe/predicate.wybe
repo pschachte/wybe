@@ -1,0 +1,8 @@
+# purpose: Standard Wybe predicates, common predicates 
+# since  : 0.1
+
+pragma no_standard_library  # Standard library can't depend on itself!
+
+pub def id(a:A):A = a
+
+pub def const(a:A, b:B):A = a
