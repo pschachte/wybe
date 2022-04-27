@@ -102,10 +102,10 @@ gen#3(^y##0:wybe.float, anon#3#1##0:wybe.float, ?anon#3#2##0:wybe.float)<{}; {}>
 
 gen#4 > {inline} (1 calls)
 0: higher_order_refs.gen#4<0>
-gen#4(i##0:K, ?#result##0:K)<{}; {}>:
+gen#4(a##0:A, ?#result##0:A)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm move(~i##0:K, ?#result##0:K) @higher_order_refs:nn:nn
+    foreign llvm move(~a##0:A, ?#result##0:A) @predicate:nn:nn
 
 
 gen#5 > {inline} (1 calls)
@@ -122,14 +122,6 @@ gen#6([^x##0:wybe.int], y##0:wybe.int, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(~y##0:wybe.int, 10:wybe.int, ?#result##0:wybe.int) @int:nn:nn
-
-
-id > {inline} (1 calls)
-0: higher_order_refs.id<0>
-id(i##0:K, ?#result##0:K)<{}; {}>:
-  AliasPairs: []
-  InterestingCallProperties: []
-    foreign llvm move(~i##0:K, ?#result##0:K) @higher_order_refs:nn:nn
 
   LLVM code       :
 
@@ -272,9 +264,9 @@ entry:
 }
 
 
-define external fastcc  i64 @"higher_order_refs.gen#4<0>"(i64  %"#env##0", i64  %"i##0")    {
+define external fastcc  i64 @"higher_order_refs.gen#4<0>"(i64  %"#env##0", i64  %"a##0")    {
 entry:
-  ret i64 %"i##0" 
+  ret i64 %"a##0" 
 }
 
 
@@ -289,10 +281,4 @@ define external fastcc  i64 @"higher_order_refs.gen#6<0>"(i64  %"#env##0", i64  
 entry:
   %"1##result##0" = add   i64 %"y##0", 10 
   ret i64 %"1##result##0" 
-}
-
-
-define external fastcc  i64 @"higher_order_refs.id<0>"(i64  %"i##0")    {
-entry:
-  ret i64 %"i##0" 
 }
