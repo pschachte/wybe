@@ -39,8 +39,8 @@ module AST (
   lookupTypeRepresentation, lookupModuleRepresentation,
   paramIsPhantom, argIsPhantom, typeIsPhantom, repIsPhantom,
   primProtoParamNames,
-  protoRealParams, realParams, paramIsReal,
-  protoInputParamNames, protoParamsOfFlow, isProcProtoArg,
+  protoRealParams, realParams, paramIsReal, paramIsNeeded,
+  protoInputParamNames, protoRealParamsWhere, isProcProtoArg,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace, unPlace,
   placedApply, defaultPlacedApply, placedApplyM, contentApply, updatePlacedM,
@@ -71,7 +71,7 @@ module AST (
   expToStmt, seqToStmt, stmtsImpurity, stmtImpurity, procCallToExp,
   expOutputs, pexpListOutputs, expInputs, pexpListInputs,
   setExpTypeFlow, setPExpTypeFlow,
-  Prim(..), PrimCallAttribute(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
+  Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
   varsInPrims, varsInPrim, varsInPrimArgs, varsInPrimArg,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
@@ -1964,7 +1964,7 @@ procCallCount proc = Map.foldr (+) 0 $ procCallers proc
 
 -- | What is the Impurity of the given Prim?
 primImpurity :: Prim -> Compiler Impurity
-primImpurity (PrimCall _ pspec _ _ _)
+primImpurity (PrimCall _ pspec _ _)
     = procImpurity <$> getProcDef pspec
 primImpurity (PrimHigher _ (ArgClosure pspec _ _) _)
     = procImpurity <$> getProcDef pspec
@@ -3124,9 +3124,10 @@ realParams = filterM paramIsReal
 -- |The param actually needs to be passed; ie, it is needed and not phantom.
 paramIsReal :: PrimParam -> Compiler Bool
 paramIsReal param =
-    (((not . paramInfoUnneeded)
-        $ primParamInfo param) &&) . not <$> paramIsPhantom param
+    (paramIsNeeded param &&) . not <$> paramIsPhantom param
 
+paramIsNeeded :: PrimParam -> Bool
+paramIsNeeded = not . paramInfoUnneeded . primParamInfo
 
 -- |Get names of proto input params
 -- XXX: is this really just input params? or all params
@@ -3135,11 +3136,11 @@ paramIsReal param =
 protoInputParamNames :: PrimProto -> Compiler [PrimVarName]
 protoInputParamNames proto = (primParamName <$>) <$> protoRealParams proto
 
-
--- | Get all params of a given flow direction
-protoParamsOfFlow :: PrimFlow -> PrimProto -> [PrimParam]
-protoParamsOfFlow flow proto = List.filter (\param -> flow==primParamFlow param) (primProtoParams proto)
-
+-- | Get all params matching certain criteria
+protoRealParamsWhere :: (PrimParam -> Bool) -> PrimProto -> Compiler [PrimParam]
+protoRealParamsWhere f proto = do
+    realParams <- protoRealParams proto
+    return $ List.filter f realParams
 
 -- |Is the supplied argument a parameter of the proc proto
 isProcProtoArg :: [PrimVarName] -> PrimArg -> Bool
@@ -3169,33 +3170,13 @@ data PrimVarName =
 -- |A primitive statment, including those that can only appear in a
 --  loop.
 data Prim
-     = PrimCall CallSiteID ProcSpec [PrimArg] GlobalFlows (Set PrimCallAttribute)
+     = PrimCall CallSiteID ProcSpec [PrimArg] GlobalFlows
      | PrimHigher CallSiteID PrimArg [PrimArg]
      | PrimForeign Ident ProcName [Ident] [PrimArg]
      deriving (Eq,Ord,Generic)
 
 instance Show Prim where
     show = showPrim 0
-
-
-data PrimCallAttribute =
-    -- This attribute has some strict conditions where it is valid to apply,
-    -- as such, it cannot be added by the user, only by the compiler internals:
-    -- - the call must be the last prim in a proc.
-    -- - the callee may not use any "allocas" from the caller.
-    --
-    -- If the return value of this call is scalar/void, then
-    -- this attribute is equivalent to LLVM's `musttail` attribute.
-    -- Otherwise if the return value of this call is a structure, then
-    -- this attribute is equivalent to LLVM's `tail` attribute
-    -- (since we emit `extractvalue` instrs afterwards,
-    --  we disqualify the call from being `musttail`)
-    Tail
-    deriving (Eq, Ord, Generic)
-
-instance Show PrimCallAttribute where
-    show Tail = "tail"
-
 
 -- |An id for each call site, should be unique within a proc.
 type CallSiteID = Int
@@ -3226,7 +3207,7 @@ data PrimArg
 
 -- |Returns a list of all arguments to a prim, including global flows
 primArgs :: Prim -> ([PrimArg], GlobalFlows)
-primArgs (PrimCall _ _ args gFlows _) = (args, gFlows)
+primArgs (PrimCall _ _ args gFlows) = (args, gFlows)
 primArgs (PrimHigher _ fn args)
     = (fn:args, if isResourcefulHigherOrder $ argType fn
                 then univGlobalFlows else emptyGlobalFlows)
@@ -3239,8 +3220,8 @@ primArgs prim@(PrimForeign _ _ _ args) = (args, emptyGlobalFlows)
 
 -- |Replace a Prim's args and global flows with a list of args and global flows
 replacePrimArgs :: Prim -> [PrimArg] -> GlobalFlows -> Prim
-replacePrimArgs (PrimCall id pspec _ _ attrs) args gFlows
-    = PrimCall id pspec args gFlows attrs
+replacePrimArgs (PrimCall id pspec _ _) args gFlows
+    = PrimCall id pspec args gFlows
 replacePrimArgs (PrimHigher id _ _) [] _
     = shouldnt "replacePrimArgs of higher call with not enough args"
 replacePrimArgs (PrimHigher id _ _) (fn:args) _
@@ -3913,9 +3894,8 @@ showPlacedPrim' ind prim pos =
 -- |Show a single primitive statement.
 -- XXX the first argument is unused; can we get rid of it?
 showPrim :: Int -> Prim -> String
-showPrim _ (PrimCall id pspec args globalFlows attrs) =
-    concatMap (\attr -> show attr ++ " ") attrs
-        ++ show pspec ++ showArguments args
+showPrim _ (PrimCall id pspec args globalFlows) =
+    show pspec ++ showArguments args
         ++ (if globalFlows == emptyGlobalFlows then "" else show globalFlows)
         ++ " #" ++ show id
 showPrim _ (PrimHigher id var args) =

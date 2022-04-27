@@ -269,7 +269,7 @@ completeAliasMap caller aliasMap = do
 updateAliasedByPrim :: AliasMapLocal -> Placed Prim -> Compiler AliasMapLocal
 updateAliasedByPrim aliasMap prim =
     case content prim of
-        PrimCall _ spec args _ _ -> do
+        PrimCall _ spec args _ -> do
             -- Analyse proc calls
             calleeDef <- getProcDef spec
             let ProcDefPrim _ calleeProto _ analysis _ = procImpln calleeDef
@@ -436,7 +436,7 @@ updateMultiSpeczInfoByPrim :: PrimProto
 updateMultiSpeczInfoByPrim proto
         (aliasMap, interestingCallProperties, multiSpeczDepInfo) prim =
     case content prim of
-        PrimCall callSiteID spec args  _ _ -> do
+        PrimCall callSiteID spec args  _ -> do
             calleeDef <- getProcDef spec
             let ProcDefPrim _ calleeProto _ analysis _ = procImpln calleeDef
             let interestingPrimCallInfo = List.zip args [0..]
@@ -529,13 +529,10 @@ isArgUnaliased _ _ = Nothing
 -- no need to worry about output var since it's in SSA form.
 isArgVarUsedOnceInArgs :: PrimArg -> [PrimArg] -> PrimProto -> Bool
 isArgVarUsedOnceInArgs ArgVar{argVarName=varName} args calleeProto =
-    let isParamNeeded p =
-            not (paramInfoUnneeded (primParamInfo p))
-    in
     List.zip args (primProtoParams calleeProto)
     |> List.filter (\case
             (ArgVar{argVarName=varName'}, param)
-                -> varName == varName' && isParamNeeded param
+                -> varName == varName' && paramIsNeeded param
             _
                 -> False)
     |> List.length |> (== 1)

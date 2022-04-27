@@ -296,22 +296,13 @@ makeGlobalDefinition :: String -> PrimProto
                      -> Compiler LLVMAST.Definition
 makeGlobalDefinition pname proto bls = do
     modName <- showModSpec <$> getModuleSpec
-    params <- protoRealParams proto
     let label0 = modName ++ "." ++ pname
     -- For the top-level main program
     let isMain = label0 == ".<0>"
-    let (label,isForeign)  = if isMain then ("main",True) else (label0,False)
-    params' <- filterM ((not <$>) . paramIsPhantom) params
-    let inputs = List.filter isInputParam params'
-    fnargs <- mapM makeFnArg inputs
-    retty <- primOutputType params
+    let (label,isForeign) = if isMain then ("main",True) else (label0,False)
+    fnargs <- protoLLVMArguments proto
+    retty <- protoLLVMOutputType proto
     return $ globalDefine isForeign retty label fnargs bls
-
-
--- | Predicate to check if a primitive's parameter is of input flow (input)
--- and the param is needed (inferred by it's param info field)
-isInputParam :: PrimParam -> Bool
-isInputParam p = paramGoesIn p && paramNeeded p
 
 -- | Convert a primitive's input parameter to LLVM's Definition parameter.
 makeFnArg :: PrimParam -> Compiler (Type, LLVMAST.Name)
@@ -320,26 +311,26 @@ makeFnArg param = do
     let nm = LLVMAST.Name $ toSBString $ show $ primParamName param
     return (ty, nm)
 
+type LLVMCallSignature = ([Type], Type)
+
+getLLVMSignature :: PrimProto -> Compiler LLVMCallSignature
+getLLVMSignature proto = do
+    out <- protoLLVMOutputType proto
+    args <- protoLLVMArguments proto
+    return (List.map fst args, out)
+
+protoLLVMArguments :: PrimProto -> Compiler [(Type, LLVMAST.Name)]
+protoLLVMArguments proto = do
+    inputs <- protoRealParamsWhere paramGoesIn proto
+    mapM makeFnArg inputs
+
 -- | Open the Out parameter of a primitive (if there is one) into it's
 -- inferred 'Type' and name.
-primOutputType :: [PrimParam] -> Compiler Type
-primOutputType params = do
-    reals <- realParams params
-    let outputs = List.filter ((FlowOut==) . primParamFlow) reals
-    case outputs of
-        [] -> return void_t
-        [o] -> primParamLLVMType o
-        _ -> struct_t <$> mapM primParamLLVMType outputs
-
-
-isOutputParam :: PrimParam -> Compiler Bool
-isOutputParam p = do
-    phantom <- paramIsPhantom p
-    return $ (not $ paramGoesIn p) && not phantom && paramNeeded p
-
-
-paramNeeded :: PrimParam -> Bool
-paramNeeded = not . paramInfoUnneeded . primParamInfo
+protoLLVMOutputType :: PrimProto -> Compiler Type
+protoLLVMOutputType proto = do
+    outputs <- protoRealParamsWhere paramGoesOut proto
+    outTys <- mapM primParamLLVMType outputs
+    primReturnLLVMType outTys
 
 ----------------------------------------------------------------------------
 -- Body Compilation                                                       --
@@ -397,9 +388,9 @@ preassignOutput p = do
 -- For 1 single output, retrieve it's assigned operand from the symbol
 -- table, and for multiple outputs, generate code for creating an valid
 -- structure, pack the operands into it and return it.
-buildOutputOp :: [PrimParam] -> Codegen (Maybe Operand)
-buildOutputOp params = do
-    outParams <- lift2 $ filterM isOutputParam params
+buildOutputOp :: PrimProto -> Codegen (Maybe Operand)
+buildOutputOp proto = do
+    outParams <- lift2 $ protoRealParamsWhere paramGoesOut proto
     logCodegen $ "OutParams: " ++ show outParams
     outputs <- mapM (liftM3 castVar primParamName primParamType primParamFlow) outParams
     logCodegen $ "Built outputs from symbol table: " ++ show outputs
@@ -450,30 +441,17 @@ structUnPack st = case typeOf st of
 codegenBody :: ProcBody -> Codegen ()
 codegenBody body = do
     let prims = List.map content (bodyPrims body)
-    let primsWithLookahead = lookaheadPrims prims
     -- Filter out prims which contain only phantom arguments
-    mapM_ cgen primsWithLookahead
-    params <- gets (primProtoParams . proto)
     case bodyFork body of
         NoFork -> do
-            retOp <- buildOutputOp params
+            cgen prims True
+            proto <- gets proto
+            retOp <- buildOutputOp proto
             ret retOp
             return ()
-        (PrimFork var ty _ fbody) -> codegenForkBody var fbody
-
-
--- Transforms a list of Prims into a list of Prims with "lookahead".
--- i.e.: if we have a list of prims A, B, C, D, then return nested list:
--- [[A, B, C, D], [B, C, D], [C, D], [D]]
---
--- this allows each `cgen` call to "see into the future"
--- and handle last-call-optimisation nicely
-lookaheadPrims :: [Prim] -> [[Prim]]
-lookaheadPrims [] = []
-lookaheadPrims (p1:p2s) = case lookaheadPrims p2s of
-    p2:p2s' -> (p1:p2):p2:p2s'
-    _ -> [[p1]]
-
+        (PrimFork var ty _ fbody) -> do
+            cgen prims False
+            codegenForkBody var fbody
 
 -- | Code generation for a conditional branch. Currently a binary split
 -- is handled, which each branch returning the left value of their last
@@ -517,21 +495,22 @@ codegenForkBody var _ =
 -- in the current module and imported modules. All primitive calls' arguments
 -- are position checked with the respective prototype, eliminating arguments
 -- which do not eventually appear in the prototype.
-cgen :: [Prim] -> Codegen ()
-cgen (prim@(PrimCall callSiteID pspec args _ attrs):nextPrims) = do
+cgen :: [Prim] -> Bool -> Codegen ()
+cgen (prim@(PrimCall callSiteID pspec args _):nextPrims) isLeaf = do
     logCodegen $ "--> Compiling " ++ show prim
     let nm = LLVMAST.Name $ toSBString $ show pspec
     -- Find the prototype of the pspec being called
     -- and match it's parameters with the args here
     -- and remove the unneeded ones.
-    proto <- lift2 $ getProcPrimProto pspec
-    logCodegen $ "Proto = " ++ show proto
-    args' <- prepareArgs args (primProtoParams proto)
+    callerProto <- gets proto
+    calleeProto <- lift2 $ getProcPrimProto pspec
+    logCodegen $ "Proto = " ++ show calleeProto
+    args' <- prepareArgs args (primProtoParams calleeProto)
     logCodegen $ "Prepared args = " ++ show args'
 
     -- If this call was marked with `tail`, then we generate the remaining prims
     --  *before* the call instruction.
-    when (AST.Tail `elem` attrs) $ mapM_ cgenPostTailCall nextPrims
+    nextPrims' <- cgenTakeReferences nextPrims
 
     -- if the call is to an external module, declare it
     addExternClosure pspec
@@ -540,7 +519,9 @@ cgen (prim@(PrimCall callSiteID pspec args _ attrs):nextPrims) = do
     logCodegen $ "In args = " ++ show inArgs
 
     outTy <- lift2 $ primReturnType outArgs
-    let tailCall = getTailCallHint attrs args' outTy
+    callerSignature <- lift2 $ getLLVMSignature callerProto
+    calleeSignature <- lift2 $ getLLVMSignature calleeProto
+    let tailCall = getTailCallHint (List.null nextPrims' && isLeaf) args' outTy callerSignature calleeSignature
     logCodegen $ "Tail call kind = " ++ show tailCall
 
     inops <- mapM cgenArg inArgs
@@ -550,18 +531,25 @@ cgen (prim@(PrimCall callSiteID pspec args _ attrs):nextPrims) = do
     let callIns = callWybe tailCall funcRef inops
     logCodegen $ "Translated ins = " ++ show callIns
     addInstruction callIns outArgs
-    -- if this isn't a tail call, then later on we might want to access
+    -- if this isn't in tail position, then later on we might want to access
     -- the underlying values written to by these `outByReference` pointers.
-    unless (AST.Tail `elem` attrs) $ mapM_ cgenLoadReference args'
+    unless (List.null nextPrims) $ mapM_ cgenLoadReference args'
+    cgen nextPrims' isLeaf
 
-cgen (prim@(PrimHigher cId (ArgClosure pspec closed _) args):ps) = do
+cgen (prim@(PrimHigher cId (ArgClosure pspec closed _) args):ps) isLeaf = do
     pspec' <- fromMaybe pspec <$> lift2 (maybeGetClosureOf pspec)
     logCodegen $ "Compiling " ++ show prim
               ++ " as first order call to " ++ show pspec'
               ++ " closed over " ++ show closed
-    cgen $ (PrimCall cId pspec' (closed ++ args) univGlobalFlows Set.empty : ps)
+    cgen (PrimCall cId pspec' (closed ++ args) univGlobalFlows : ps) isLeaf
 
-cgen (prim@(PrimHigher callSiteId fn@ArgVar{} args):_) = do
+cgen [] _ = return ()
+cgen (p:ps) isLeaf = do
+    cgenPrim p
+    cgen ps isLeaf
+
+cgenPrim :: Prim -> Codegen ()
+cgenPrim prim@(PrimHigher callSiteId fn@ArgVar{} args) = do
     logCodegen $ "--> Compiling " ++ show prim
     -- We must set all arguments to be `AnyType`
     -- This ensures that we can uniformly pass all parameters to be passed in
@@ -579,10 +567,10 @@ cgen (prim@(PrimHigher callSiteId fn@ArgVar{} args):_) = do
     let callIns = callWybe (Just LLVMAST.Tail) fnPtr inOps
     addInstruction callIns outArgs
 
-cgen (prim@(PrimHigher _ fn _):ps) =
+cgenPrim prim@(PrimHigher _ fn _) =
     shouldnt $ "cgen higher call to " ++ show fn
 
-cgen (prim@(PrimForeign "llvm" name flags args):_) = do
+cgenPrim prim@(PrimForeign "llvm" name flags args) = do
     logCodegen $ "--> Compiling " ++ show prim
     args' <- filterPhantomArgs args
     case partitionArgs args' of
@@ -592,12 +580,12 @@ cgen (prim@(PrimForeign "llvm" name flags args):_) = do
        _ -> shouldnt $ "LLVM instruction " ++ name
                        ++ " with wrong arity (" ++ show (length args') ++ ")!"
 
-cgen (prim@(PrimForeign "lpvm" name flags args):_) = do
+cgenPrim prim@(PrimForeign "lpvm" name flags args) = do
     logCodegen $ "--> Compiling " ++ show prim
     args' <- filterPhantomArgs args
     cgenLPVM name flags args'
 
-cgen (prim@(PrimForeign lang name flags args):_) = do
+cgenPrim prim@(PrimForeign lang name flags args) = do
     logCodegen $ "--> Compiling " ++ show prim
     when (lang /= "c") $
       shouldnt $ "Unknown foreign language " ++ lang ++ " in call " ++ show prim
@@ -613,7 +601,8 @@ cgen (prim@(PrimForeign lang name flags args):_) = do
           (externf (ptr_t (FunctionType outty (typeOf <$> inops) False)) nm)
           inops
     addInstruction ins outArgs
-cgen [] = shouldnt "lookahead list must have at least one Prim in it"
+
+cgenPrim prim@PrimCall {} = shouldnt "calls should be handled by `cgen`"
 
 
 -- | We observe hints from previous stages of compilation (`attrs`), as well
@@ -624,29 +613,32 @@ cgen [] = shouldnt "lookahead list must have at least one Prim in it"
 -- `tail` is just a hint that LLVM "can" tail-call optimize but doesn't have to.
 -- However there are certain restrictions on when these hints. LLVM may optimize
 -- our code incorrectly (or crash) if we get this wrong.
-getTailCallHint :: Set PrimCallAttribute -> [PrimArg] -> LLVMAST.Type -> Maybe LLVMAST.TailCallKind
-getTailCallHint attrs args outTy =
-    let hasTailAttr = AST.Tail `elem` attrs
-        hasFlowOutByRefArg = FlowOutByReference `elem` List.map argFlowDirection args in
-    case (hasTailAttr, outTy, hasFlowOutByRefArg) of
-        -- Although this call is in LPVM tail position, we'll need to add some
-        -- `extractvalue` instrs after this call, so it won't be in LLVM
-        -- tail position, thus we cannot use `musttail`
-        (True, StructureType {}, _) -> Just LLVMAST.Tail
-        -- We know this LLVM call will be in tail position (since scalar/void
-        -- return type), and also the AST.Tail attribute is a promise that
-        -- the callee doesn't use any allocas from the caller.
-        (True, _, _) -> Just LLVMAST.MustTail
-        -- This function wasn't caught the "LastCallAnalysis" pass
-        -- but we know it doesn't take any outByReference pointers (which could
-        -- point to allocas), so can safely mark it as `tail`,
-        -- indicating LLVM "can" perform tail-call opt
-        (False, _, False) -> Just LLVMAST.Tail
-        -- Oh no! There is an `outByReference` argument in args',
-        -- which could point to an `alloca`.
-        -- Don't add `tail` attribute as it could trigger LLVM
-        -- undef-behaviour.
-        (False, _, True) -> Nothing
+getTailCallHint :: Bool -> [PrimArg] -> LLVMAST.Type -> LLVMCallSignature -> LLVMCallSignature -> Maybe LLVMAST.TailCallKind
+getTailCallHint lpvmTailPosition args outTy callerSignature calleeSignature = do
+    let hasFlowOutByRefArg = FlowOutByReference `elem` List.map argFlowDirection args in
+        case (lpvmTailPosition, outTy, hasFlowOutByRefArg) of
+            -- Although this call is in LPVM tail position, we'll need to add some
+            -- `extractvalue` instrs after this call, so it won't be in LLVM
+            -- tail position, thus we cannot use `musttail`
+            (True, StructureType {}, _) -> Just LLVMAST.Tail
+            -- Although this call is in LPVM tail position, the signatures of the
+            -- the caller and callee may not match , thus according to LLVM
+            -- language reference we aren't allowed to use `musttail`.
+            (True, _, _) | callerSignature /= calleeSignature  -> Just LLVMAST.Tail
+            -- We know this LLVM call will be in tail position (since scalar/void
+            -- return type), and also the AST.Tail attribute is a promise that
+            -- the callee doesn't use any allocas from the caller.
+            (True, _, _) -> Just LLVMAST.MustTail
+            -- This function isn't in LPVM tail position,
+            -- but we know it doesn't take any outByReference pointers (which are
+            -- currently the only type of argument which could point to an alloca),
+            -- so we can safely mark it as `tail`.
+            (False, _, False) -> Just LLVMAST.Tail
+            -- Oh no! There is an `outByReference` argument in args',
+            -- which could point to an `alloca`.
+            -- Don't add `tail` attribute as it could trigger LLVM
+            -- undef-behaviour.
+            (False, _, True) -> Nothing
 
 
 -- | Translate a Binary primitive procedure into a binary llvm instruction,
@@ -695,7 +687,7 @@ prepareArgs [] []    = return []
 prepareArgs [] (_:_) = shouldnt "more parameters than arguments"
 prepareArgs (_:_) [] = shouldnt "more arguments than parameters"
 prepareArgs (ArgUnneeded _ _:as) (p:ps)
-    | paramNeeded p = shouldnt $ "unneeded arg for needed param " ++ show p
+    | paramIsNeeded p = shouldnt $ "unneeded arg for needed param " ++ show p
     | otherwise     = prepareArgs as ps
 prepareArgs (a:as) (p@PrimParam{primParamType=ty}:ps) | argFlowDirection a == primParamFlow p = do
     real <- lift2 $ paramIsReal p
@@ -784,7 +776,7 @@ cgenLPVM "mutate" _
           assign (pullName outArg) baseAddr
 cgenLPVM "mutate" _  [inArg, outArg, offsetArg, ArgInt 1 _, sizeArg, startOffsetArg,
         refArg@ArgVar { argVarName = refArgName, argVarFlow = FlowTakeReference  }] = do
-        logCodegen $ "treating lpvm mutate(..., takeReference ...) as a noop - should have been generated before tail call"
+        shouldnt "lpvm mutate(..., takeReference ...) should be immediately following a call instruction, and should have already been generated"
 cgenLPVM "mutate" _
     [_, _, _, ArgInt x _, _, _, _, _] | x == 0 || x == 1 = shouldnt "final argument to mutate should be FlowIn"
 cgenLPVM "mutate" _ [_, _, _, destructiveArg, _, _, _] =
@@ -850,11 +842,12 @@ cgenLPVM pname flags args = do
                ++ " not implemented."
 
 
--- | Codegen a Prim that comes *after* a call annotated with `tail`.
--- Only a particular type of mutate instr is allowed, otherwise we throw an error.
-cgenPostTailCall :: Prim -> Codegen ()
-cgenPostTailCall prim@(PrimForeign "lpvm" "mutate" _  [inArg, outArg, offsetArg, ArgInt 1 _, sizeArg, startOffsetArg,
-        refArg@ArgVar { argVarName = refArgName, argVarFlow = FlowTakeReference  }]) = do
+-- | Codegen all `foreign lpvm mutate(..., takeReference xyz)` calls which occur
+-- immediately after a PrimCall.
+-- Returns the remaining prims which didn't match the above pattern.
+cgenTakeReferences :: [Prim] -> Codegen [Prim]
+cgenTakeReferences (prim@(PrimForeign "lpvm" "mutate" _  [inArg, outArg, offsetArg, ArgInt 1 _, sizeArg, startOffsetArg,
+        refArg@ArgVar { argVarName = refArgName, argVarFlow = FlowTakeReference  }]):nextPrims) = do
         logCodegen $ "--> Compiling " ++ show prim
         baseAddr <- cgenArg inArg
         outTy <- lift2 $ argLLVMType refArg
@@ -866,8 +859,8 @@ cgenPostTailCall prim@(PrimForeign "lpvm" "mutate" _  [inArg, outArg, offsetArg,
         -- This may implicitly write to a pointer (through a `store`
         -- instruction) if outArg is an `outByReference` param
         assign (pullName outArg) baseAddr
-cgenPostTailCall _ = shouldnt "illegal prim after call marked with LPVM `tail` attribute"
-
+        cgenTakeReferences nextPrims
+cgenTakeReferences prims = return prims
 
 -- | Generate code to add an offset to an address
 offsetAddr :: Operand -> (Operand -> Operand -> Instruction) -> PrimArg
@@ -1021,6 +1014,8 @@ goesIn = isLLVMInput . argFlowDirection
 paramGoesIn :: PrimParam -> Bool
 paramGoesIn = isLLVMInput . primParamFlow
 
+paramGoesOut :: PrimParam -> Bool
+paramGoesOut = not . paramGoesIn
 
 -- | 'cgenArg' makes an Operand of the input argument.
 -- * Variables return a casted version of their respective symbol table operand
@@ -1040,8 +1035,9 @@ cgenArg' :: PrimArg -> Codegen LLVMAST.Operand
 cgenArg' var@ArgVar{argVarName=name, argVarType=ty, argVarFlow=flow@FlowOutByReference} = do
     op <- maybeGetVar (show name)
     currentProto <- gets proto
-    let outputParams = List.map primParamName $ protoParamsOfFlow FlowOut currentProto
-    if isNothing op || name `elem` outputParams then do
+    outParams <- lift2 $ protoRealParamsWhere paramGoesOut currentProto
+    let outParamNames = List.map primParamName outParams
+    if isNothing op || name `elem` outParamNames then do
         -- This variable wasn't already defined or was an output param of the
         -- current proc (which get set to `Undef`, so not really explicitly defined)
         -- In this case we need to allocate space on the stack and create a
@@ -1191,7 +1187,7 @@ addExternClosure ps@(ProcSpec mod _ _ _) = do
     thisMod <- lift2 getModuleSpec
     fileMod <- lift2 $ getModule modRootModSpec
     unless (thisMod == mod || maybe False (`List.isPrefixOf` mod) fileMod)
-        $ addExtern $ PrimCall 0 ps args univGlobalFlows Set.empty
+        $ addExtern $ PrimCall 0 ps args univGlobalFlows
 
 
 addStringConstant :: String -> Codegen (LLVMAST.Type, C.Constant)
@@ -1461,7 +1457,7 @@ declareExtern (PrimForeign otherlang name _ _) =
 declareExtern (PrimHigher _ var _) =
     shouldnt $ "Don't know how to declare extern function var " ++ show var
 
-declareExtern (PrimCall _ pspec@(ProcSpec m n _ _) args _ _) = do
+declareExtern (PrimCall _ pspec@(ProcSpec m n _ _) args _) = do
     let (inArgs,outArgs) = partitionArgs args
     retty <- primReturnType outArgs
     fnargs <- mapM makeExArg $ zip [1..] inArgs
