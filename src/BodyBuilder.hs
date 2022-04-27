@@ -1234,9 +1234,14 @@ bkwdBuildStmt defs prim pos = do
           | otherwise -> do
               modify $ \s -> s { bkwdGlobalStored = Set.insert info gStored }
               bkwdBuildStmt' defs args' gFlows prim pos
+      (PrimForeign "lpvm" "load" [] _, [ArgGlobal info _, _]) -> do
+          modify $ \s -> s { bkwdGlobalStored = Set.delete info gStored }
+          bkwdBuildStmt' defs args' gFlows prim pos
       _ -> do
           let filter info = not $ hasGlobalFlow gFlows FlowIn info
-          modify $ \s -> s { bkwdGlobalStored = Set.filter filter gStored }
+          let outs = USet.toSet Set.empty $ globalFlowsOut gFlows
+          modify $ \s -> s { bkwdGlobalStored = Set.filter filter 
+                                                $ gStored `Set.union` outs }
           bkwdBuildStmt' defs args' gFlows prim pos
 
 
