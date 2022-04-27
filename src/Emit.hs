@@ -122,7 +122,16 @@ descendentModuleLLVM mspec = do
     unless (List.null someMods) $
         logEmit $ "### Combining descendents of " ++ showModSpec mspec
                    ++ ": " ++ showModSpecs someMods
-    concatLLVMASTModules mspec someMods
+    llmod <- concatLLVMASTModules mspec someMods
+    modBS <- encodeModule mspec
+    addLPVMtoLLVM llmod modBS
+
+
+-- | Inject the linearised LPVM byte string into the LLVM code, so that it can
+-- later be extracted from the generated object file.
+addLPVMtoLLVM :: LLVMAST.Module -> BL.ByteString -> Compiler LLVMAST.Module
+addLPVMtoLLVM llmod modBS = do
+    return llmod
 
 
 -- | Handle the ExceptT monad. If there is an error, it is better to fail.
@@ -181,6 +190,7 @@ withOptimisedModule opts@Options{optLLVMOptLevel=lvl} llmod action =
                 else error "Running of optimisation passes not successful"
     where lvl' = either (shouldnt "bad llvm opt level") id lvl
 
+
 -- | Bracket pattern to run an [action] on the [LLVMAST.Module].
 withModule :: Options -> LLVMAST.Module -> (Mod.Module -> IO a) -> IO a
 withModule Options{optNoVerifyLLVM=noVerify} llmod action =
@@ -220,7 +230,6 @@ makeWrappedObjFile file llmod modBS = do
         Left serr -> Error <!> serr
 
 
-
 ----------------------------------------------------------------------------
 -- -- * Linking                                                           --
 ----------------------------------------------------------------------------
@@ -234,6 +243,7 @@ makeWrappedObjFile file llmod modBS = do
 
 
 -- | Remove OSX Ld warnings of incompatible built object file version.
+
 suppressLdWarnings :: String -> String
 suppressLdWarnings s = intercalate "\n" $ List.filter notWarning $ lines s
   where

@@ -76,6 +76,9 @@ import           Config                          (wordSize, functionDefSection)
 import           Unsafe.Coerce
 import           Debug.Trace
 import LLVM.AST.Typed (Typed(typeOf))
+import qualified Data.ByteString.Lazy as BL
+import qualified Data.ByteString.Short as BS
+import Data.ByteString.Char8 hiding (cons, map)
 
 ----------------------------------------------------------------------------
 -- Types                                                                  --
@@ -291,6 +294,20 @@ globalDefine isForeign rettype label argtypes body
                , basicBlocks = body
                , section = fromString <$> functionDefSection label
                }
+
+
+-- | Create a definition to hold the encoded LPVM for a module as LLVM data
+lpvmDefine :: ModSpec -> BL.ByteString -> Definition
+lpvmDefine mspec modBS
+             = GlobalDefinition $ globalVariableDefaults {
+                      name = Name $ fromString $ show mspec
+                    , isConstant = True
+                    , G.type' = string_t $ fromIntegral $ BL.length modBS
+                    , initializer = Just $ C.Array char_t
+                                         $ map (C.Int 8 . fromIntegral)
+                                         $ BL.unpack modBS
+                    , section = Just "_LLVM"
+                    }
 
 
 -- | create a global declaration of an external function for the specified
