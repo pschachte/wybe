@@ -1224,47 +1224,35 @@ bkwdBuildStmt defs prim pos = do
     args' <- mapM renameArg args
     logBkwd $ "    renamed args = " ++ show args'
     case (prim,args') of
-      (PrimForeign "llvm" "move" [] _, [ArgVar{argVarName=fromVar},
-                                        ArgVar{argVarName=toVar}])
-          | Set.notMember fromVar usedLater && Set.member fromVar defs ->
-              modify $ \s -> s { bkwdRenaming = Map.insert fromVar toVar
-                                              $ bkwdRenaming s }
-      (PrimForeign "lpvm" "store" [] _, [_, ArgGlobal info _])
-          | info `Set.member` gStored -> return ()
-          | otherwise -> do
-              modify $ \s -> s { bkwdGlobalStored = Set.insert info gStored }
-              bkwdBuildStmt' defs args' gFlows prim pos
-      (PrimForeign "lpvm" "load" [] _, [ArgGlobal info _, _]) -> do
-          modify $ \s -> s { bkwdGlobalStored = Set.delete info gStored }
-          bkwdBuildStmt' defs args' gFlows prim pos
-      _ -> do
-          let filter info = not $ hasGlobalFlow gFlows FlowIn info
-          let outs = USet.toSet Set.empty $ globalFlowsOut gFlows
-          modify $ \s -> s { bkwdGlobalStored = Set.filter filter 
-                                                $ gStored `Set.union` outs }
-          bkwdBuildStmt' defs args' gFlows prim pos
-
-
-bkwdBuildStmt' :: Set PrimVarName -> [PrimArg] -> GlobalFlows -> Prim -> OptPos -> BkwdBuilder ()
-bkwdBuildStmt' defs args gFlows prim pos = do
-    usedLater <- gets bkwdUsedLater
-    let (ins, outs) = splitArgsByMode $ List.filter argIsVar $ flattenArgs args
-    -- Filter out pure instructions that produce no needed outputs or out flowing
-    -- globals
-    purity <- lift $ primImpurity prim
-    when (purity > Pure || any (`Set.member` usedLater) (argVarName <$> outs)
-                        || not (USet.isEmpty $ globalFlowsOut gFlows))
-      $ do
-        -- XXX Careful:  probably shouldn't mark last use of variable passed
-        -- as input argument more than once in the call
-        let prim' = replacePrimArgs prim (markIfLastUse usedLater <$> args) gFlows
-        logBkwd $ "    updated prim = " ++ show prim'
-        let inVars = argVarName <$> ins
-        let usedLater' = List.foldr Set.insert usedLater inVars
-        st@BkwdBuilderState{bkwdFollowing=bd@ProcBody{bodyPrims=prims}} <- get
-        put $ st { bkwdFollowing =
-                      bd { bodyPrims     = maybePlace prim' pos:prims },
-                           bkwdUsedLater = usedLater' }
+        (PrimForeign "llvm" "move" [] _, [ArgVar{argVarName=fromVar},
+                                          ArgVar{argVarName=toVar}])
+            | Set.notMember fromVar usedLater && Set.member fromVar defs ->
+                modify $ \s -> s { bkwdRenaming = Map.insert fromVar toVar
+                                                $ bkwdRenaming s }
+        _ -> do
+            let (ins, outs) = splitArgsByMode $ List.filter argIsVar 
+                                              $ flattenArgs args'
+            let gOuts = globalFlowsOut gFlows
+            purity <- lift $ primImpurity prim
+            -- Filter out pure instructions that produce no needed outputs nor 
+            -- out flowing globals that arent stored to later
+            when (purity > Pure || any (`Set.member` usedLater) (argVarName <$> outs)
+                                || not (USet.isEmpty $ whenFinite (Set.\\ gStored) gOuts))
+              $ do
+                -- XXX Careful:  probably shouldn't mark last use of variable passed
+                -- as input argument more than once in the call
+                let prim' = replacePrimArgs prim (markIfLastUse usedLater <$> args') gFlows
+                logBkwd $ "    updated prim = " ++ show prim'
+                let usedLater' = List.foldr Set.insert usedLater $ argVarName <$> ins
+                -- Add all globals that FlowOut from this prim, then remove all that FlowIn
+                -- FlowOut means it is overwritten, FlowIn means the value may be read
+                let gStored' = Set.filter (not . hasGlobalFlow gFlows FlowIn) 
+                             $ gStored `Set.union` USet.toSet Set.empty gOuts
+                st@BkwdBuilderState{bkwdFollowing=bd@ProcBody{bodyPrims=prims}} <- get
+                put $ st { bkwdFollowing = bd { bodyPrims = maybePlace prim' pos
+                                                          : prims },
+                           bkwdUsedLater = usedLater',
+                           bkwdGlobalStored = gStored' }    
 
 
 renameArg :: PrimArg -> BkwdBuilder PrimArg
