@@ -15,7 +15,7 @@ import           AST
 import           BinaryFactory              (encodeModule)
 import           Blocks                     (concatLLVMASTModules)
 import           Config
-import           Control.Monad
+import Control.Monad ( (>=>), unless )
 import           Control.Monad.Trans        (liftIO)
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.State

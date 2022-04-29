@@ -25,6 +25,24 @@ import System.FilePath (takeBaseName, (</>))
 import Control.Monad.Trans (liftIO)
 import Macho
 
+----------------------------------------------------------------------------
+-- -- * Object file manipulation                                          --
+----------------------------------------------------------------------------
+
+
+-- | Extract LPVM data from the given object file
+-- and return it as [BL.ByteString].
+-- The first [FilePath] is for [tmpDir]
+extractLPVMData :: FilePath -> FilePath -> IO (Either String BL.ByteString)
+extractLPVMData tmpDir objFile =
+    case buildOS of
+        OSX   -> extractLPVMDataMacOS tmpDir objFile
+        Linux -> extractLPVMDataLinux tmpDir objFile
+        _     -> shouldnt "Unsupported operation system"
+
+----------------------------------------------------------------------------
+-- -- * Object file manipulation (Internal)                               --
+----------------------------------------------------------------------------
 
 -- | Actual implementation of [extractLPVMData] for macOS
 extractLPVMDataMacOS :: FilePath -> FilePath -> IO (Either String BL.ByteString)
