@@ -215,7 +215,7 @@ entry:
   %"1#tmp#1##0" = icmp sgt i64 %45, 0 
   br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
-  %"2#r##0" = tail call fastcc  i64  @"alias_recursion1.if_test<0>"(i64  %"b##0", i64  %"a##0")  
+  %"2#r##0" = musttail call fastcc  i64  @"alias_recursion1.if_test<0>"(i64  %"b##0", i64  %"a##0")  
   ret i64 %"2#r##0" 
 if.else:
   ret i64 %"a##0" 

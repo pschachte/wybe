@@ -84,7 +84,7 @@ if.else:
   %"3#tmp#0##0" = add   i64 %"x##0", 1 
   tail call ccc  void  @print_int(i64  %"3#tmp#0##0")  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"afterbreak.gen#1<0>"(i64  %"3#tmp#0##0")  
+  musttail call fastcc  void  @"afterbreak.gen#1<0>"(i64  %"3#tmp#0##0")  
   ret void 
 }
 
@@ -93,6 +93,6 @@ define external fastcc  void @"afterbreak.gen#2<0>"(i64  %"y##0")    {
 entry:
   tail call ccc  void  @print_int(i64  %"y##0")  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"afterbreak.gen#1<0>"(i64  %"y##0")  
+  musttail call fastcc  void  @"afterbreak.gen#1<0>"(i64  %"y##0")  
   ret void 
 }

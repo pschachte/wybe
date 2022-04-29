@@ -41,7 +41,7 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm alloc(16:wybe.int, ?tmp#27##0:thistype) @thistype:nn:nn
     foreign lpvm mutate(~tmp#27##0:thistype, ?tmp#28##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 100:wybe.int) @thistype:nn:nn
     foreign lpvm mutate(~tmp#28##0:thistype, ?tmp#4##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#5##0:thistype) @thistype:nn:nn
-    thistype.concat<0>[410bae77d3](~tmp#0##0:thistype, ~tmp#4##0:thistype, ?tmp#8##0:thistype) #7 @thistype:nn:nn
+    thistype.concat<0>[410bae77d3](~tmp#0##0:thistype, ~tmp#4##0:thistype, outByReference tmp#8##0:thistype) #7 @thistype:nn:nn
     thistype.length<0>(~tmp#8##0:thistype, ?tmp#7##0:wybe.int) #8 @thistype:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#30##0:wybe.phantom) @io:nn:nn
     foreign c print_int(~tmp#7##0:wybe.int, ~tmp#30##0:wybe.phantom, ?tmp#31##0:wybe.phantom) @io:nn:nn
@@ -84,7 +84,7 @@ module top-level code > public {impure} (0 calls)
 
 concat > public (2 calls)
 0: thistype.concat<0>[410bae77d3]
-concat(x##0:thistype, y##0:thistype, ?#result##0:thistype)<{}; {}>:
+concat(x##0:thistype, y##0:thistype, outByReference #result##0:thistype)<{}; {}>:
   AliasPairs: [(#result##0,y##0)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(1,(thistype.concat<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -96,10 +96,10 @@ concat(x##0:thistype, y##0:thistype, ?#result##0:thistype)<{}; {}>:
     1:
         foreign lpvm access(x##0:thistype, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @thistype:nn:nn
         foreign lpvm access(~x##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:thistype) @thistype:nn:nn
-        thistype.concat<0>(~t##0:thistype, ~y##0:thistype, ?tmp#2##0:thistype) #1 @thistype:nn:nn
         foreign lpvm alloc(16:wybe.int, ?tmp#8##0:thistype) @thistype:nn:nn
         foreign lpvm mutate(~tmp#8##0:thistype, ?tmp#9##0:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h##0:wybe.int) @thistype:nn:nn
-        foreign lpvm mutate(~tmp#9##0:thistype, ?#result##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:thistype) @thistype:nn:nn
+        thistype.concat<0>(~t##0:thistype, ~y##0:thistype, outByReference tmp#2##0:thistype) #1 @thistype:nn:nn
+        foreign lpvm mutate(~tmp#9##0:thistype, ?#result##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~takeReference tmp#2##0:thistype) @thistype:nn:nn
 
  [410bae77d3] [NonAliasedParam 0] :
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
@@ -109,8 +109,8 @@ concat(x##0:thistype, y##0:thistype, ?#result##0:thistype)<{}; {}>:
 
     1:
         foreign lpvm access(x##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:thistype) @thistype:nn:nn
-        thistype.concat<0>[410bae77d3](~t##0:thistype, ~y##0:thistype, ?tmp#2##0:thistype) #1 @thistype:nn:nn
-        foreign lpvm mutate(~x##0:thistype, ?#result##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:thistype) @thistype:nn:nn
+        thistype.concat<0>[410bae77d3](~t##0:thistype, ~y##0:thistype, outByReference tmp#2##0:thistype) #1 @thistype:nn:nn
+        foreign lpvm mutate(~x##0:thistype, ?#result##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~takeReference tmp#2##0:thistype) @thistype:nn:nn
 
 
 
@@ -310,8 +310,10 @@ entry:
   %39 = inttoptr i64 %38 to i64* 
   %40 = getelementptr  i64, i64* %39, i64 0 
   store  i64 %27, i64* %40 
-  %"1#tmp#8##0" = tail call fastcc  i64  @"thistype.concat<0>[410bae77d3]"(i64  %19, i64  %35)  
-  %"1#tmp#7##0" = tail call fastcc  i64  @"thistype.length<0>"(i64  %"1#tmp#8##0")  
+  %41 = alloca i64 
+   call fastcc  void  @"thistype.concat<0>[410bae77d3]"(i64  %19, i64  %35, i64*  %41)  
+  %42 = load  i64, i64* %41 
+  %"1#tmp#7##0" = tail call fastcc  i64  @"thistype.length<0>"(i64  %42)  
   tail call ccc  void  @print_int(i64  %"1#tmp#7##0")  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
@@ -323,84 +325,84 @@ entry:
   %"1#tmp#0##0" = icmp ne i64 %"#left##0", 0 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  %41 = inttoptr i64 %"#left##0" to i64* 
-  %42 = getelementptr  i64, i64* %41, i64 0 
-  %43 = load  i64, i64* %42 
-  %44 = add   i64 %"#left##0", 8 
-  %45 = inttoptr i64 %44 to i64* 
-  %46 = getelementptr  i64, i64* %45, i64 0 
-  %47 = load  i64, i64* %46 
+  %43 = inttoptr i64 %"#left##0" to i64* 
+  %44 = getelementptr  i64, i64* %43, i64 0 
+  %45 = load  i64, i64* %44 
+  %46 = add   i64 %"#left##0", 8 
+  %47 = inttoptr i64 %46 to i64* 
+  %48 = getelementptr  i64, i64* %47, i64 0 
+  %49 = load  i64, i64* %48 
   %"2#tmp#9##0" = icmp ne i64 %"#right##0", 0 
   br i1 %"2#tmp#9##0", label %if.then1, label %if.else1 
 if.else:
   %"3##success##0" = icmp eq i64 %"#left##0", %"#right##0" 
   ret i1 %"3##success##0" 
 if.then1:
-  %48 = inttoptr i64 %"#right##0" to i64* 
-  %49 = getelementptr  i64, i64* %48, i64 0 
-  %50 = load  i64, i64* %49 
-  %51 = add   i64 %"#right##0", 8 
-  %52 = inttoptr i64 %51 to i64* 
-  %53 = getelementptr  i64, i64* %52, i64 0 
-  %54 = load  i64, i64* %53 
-  %"4#tmp#4##0" = icmp eq i64 %43, %50 
+  %50 = inttoptr i64 %"#right##0" to i64* 
+  %51 = getelementptr  i64, i64* %50, i64 0 
+  %52 = load  i64, i64* %51 
+  %53 = add   i64 %"#right##0", 8 
+  %54 = inttoptr i64 %53 to i64* 
+  %55 = getelementptr  i64, i64* %54, i64 0 
+  %56 = load  i64, i64* %55 
+  %"4#tmp#4##0" = icmp eq i64 %45, %52 
   br i1 %"4#tmp#4##0", label %if.then2, label %if.else2 
 if.else1:
   ret i1 0 
 if.then2:
-  %"6##success##0" = tail call fastcc  i1  @"thistype.=<0>"(i64  %47, i64  %54)  
+  %"6##success##0" = musttail call fastcc  i1  @"thistype.=<0>"(i64  %49, i64  %56)  
   ret i1 %"6##success##0" 
 if.else2:
   ret i1 0 
 }
 
 
-define external fastcc  i64 @"thistype.concat<0>"(i64  %"x##0", i64  %"y##0")    {
+define external fastcc  void @"thistype.concat<0>"(i64  %"x##0", i64  %"y##0", i64*  %"#result##0")    {
 entry:
   %"1#tmp#5##0" = icmp ne i64 %"x##0", 0 
   br i1 %"1#tmp#5##0", label %if.then, label %if.else 
 if.then:
-  %55 = inttoptr i64 %"x##0" to i64* 
-  %56 = getelementptr  i64, i64* %55, i64 0 
-  %57 = load  i64, i64* %56 
-  %58 = add   i64 %"x##0", 8 
-  %59 = inttoptr i64 %58 to i64* 
-  %60 = getelementptr  i64, i64* %59, i64 0 
-  %61 = load  i64, i64* %60 
-  %"2#tmp#2##0" = tail call fastcc  i64  @"thistype.concat<0>"(i64  %61, i64  %"y##0")  
-  %62 = trunc i64 16 to i32  
-  %63 = tail call ccc  i8*  @wybe_malloc(i32  %62)  
-  %64 = ptrtoint i8* %63 to i64 
-  %65 = inttoptr i64 %64 to i64* 
-  %66 = getelementptr  i64, i64* %65, i64 0 
-  store  i64 %57, i64* %66 
-  %67 = add   i64 %64, 8 
-  %68 = inttoptr i64 %67 to i64* 
-  %69 = getelementptr  i64, i64* %68, i64 0 
-  store  i64 %"2#tmp#2##0", i64* %69 
-  ret i64 %64 
+  %57 = inttoptr i64 %"x##0" to i64* 
+  %58 = getelementptr  i64, i64* %57, i64 0 
+  %59 = load  i64, i64* %58 
+  %60 = add   i64 %"x##0", 8 
+  %61 = inttoptr i64 %60 to i64* 
+  %62 = getelementptr  i64, i64* %61, i64 0 
+  %63 = load  i64, i64* %62 
+  %64 = trunc i64 16 to i32  
+  %65 = tail call ccc  i8*  @wybe_malloc(i32  %64)  
+  %66 = ptrtoint i8* %65 to i64 
+  %67 = inttoptr i64 %66 to i64* 
+  %68 = getelementptr  i64, i64* %67, i64 0 
+  store  i64 %59, i64* %68 
+  %69 = add   i64 %66, 8 
+  %70 = inttoptr i64 %69 to i64* 
+  store  i64 %66, i64* %"#result##0" 
+  musttail call fastcc  void  @"thistype.concat<0>"(i64  %63, i64  %"y##0", i64*  %70)  
+  ret void 
 if.else:
-  ret i64 %"y##0" 
+  store  i64 %"y##0", i64* %"#result##0" 
+  ret void 
 }
 
 
-define external fastcc  i64 @"thistype.concat<0>[410bae77d3]"(i64  %"x##0", i64  %"y##0")    {
+define external fastcc  void @"thistype.concat<0>[410bae77d3]"(i64  %"x##0", i64  %"y##0", i64*  %"#result##0")    {
 entry:
   %"1#tmp#5##0" = icmp ne i64 %"x##0", 0 
   br i1 %"1#tmp#5##0", label %if.then, label %if.else 
 if.then:
-  %70 = add   i64 %"x##0", 8 
-  %71 = inttoptr i64 %70 to i64* 
-  %72 = getelementptr  i64, i64* %71, i64 0 
-  %73 = load  i64, i64* %72 
-  %"2#tmp#2##0" = tail call fastcc  i64  @"thistype.concat<0>[410bae77d3]"(i64  %73, i64  %"y##0")  
-  %74 = add   i64 %"x##0", 8 
-  %75 = inttoptr i64 %74 to i64* 
-  %76 = getelementptr  i64, i64* %75, i64 0 
-  store  i64 %"2#tmp#2##0", i64* %76 
-  ret i64 %"x##0" 
+  %71 = add   i64 %"x##0", 8 
+  %72 = inttoptr i64 %71 to i64* 
+  %73 = getelementptr  i64, i64* %72, i64 0 
+  %74 = load  i64, i64* %73 
+  %75 = add   i64 %"x##0", 8 
+  %76 = inttoptr i64 %75 to i64* 
+  store  i64 %"x##0", i64* %"#result##0" 
+  musttail call fastcc  void  @"thistype.concat<0>[410bae77d3]"(i64  %74, i64  %"y##0", i64*  %76)  
+  ret void 
 if.else:
-  ret i64 %"y##0" 
+  store  i64 %"y##0", i64* %"#result##0" 
+  ret void 
 }
 
 

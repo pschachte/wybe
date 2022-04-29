@@ -308,7 +308,7 @@ entry:
   %"1#tmp#1##0" = icmp eq i64 %3, %10 
   br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
-  %"2##success##0" = tail call fastcc  i1  @"wybe.string.=<0>"(i64  %7, i64  %14)  
+  %"2##success##0" = musttail call fastcc  i1  @"wybe.string.=<0>"(i64  %7, i64  %14)  
   ret i1 %"2##success##0" 
 if.else:
   ret i1 0 
@@ -604,7 +604,7 @@ if.then:
 if.else:
   ret i1 0 
 if.then1:
-  %"4##success##0" = tail call fastcc  i1  @"wybe.string.=<0>"(i64  %21, i64  %28)  
+  %"4##success##0" = musttail call fastcc  i1  @"wybe.string.=<0>"(i64  %21, i64  %28)  
   ret i1 %"4##success##0" 
 if.else1:
   ret i1 0 

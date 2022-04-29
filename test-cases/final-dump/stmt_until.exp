@@ -85,7 +85,7 @@ if.else:
   %"3#tmp#5##0" = sub   i64 %"n##0", 1 
   tail call ccc  void  @print_int(i64  %"3#tmp#5##0")  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"stmt_until.gen#1<0>"(i64  %"3#tmp#5##0")  
+  musttail call fastcc  void  @"stmt_until.gen#1<0>"(i64  %"3#tmp#5##0")  
   ret void 
 }
 
@@ -95,6 +95,6 @@ entry:
   %"1#tmp#0##0" = sub   i64 %"n##0", 1 
   tail call ccc  void  @print_int(i64  %"1#tmp#0##0")  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"stmt_until.gen#1<0>"(i64  %"1#tmp#0##0")  
+  musttail call fastcc  void  @"stmt_until.gen#1<0>"(i64  %"1#tmp#0##0")  
   ret void 
 }

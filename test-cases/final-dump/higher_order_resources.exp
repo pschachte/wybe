@@ -459,7 +459,7 @@ entry:
 define external fastcc  void @"higher_order_resources.gen#1<0>"(i64  %"anon#1#1##0")    {
 entry:
   %"1#tmp#10##0" = tail call fastcc  i64  @"wybe.list.length1<0>"(i64  %"anon#1#1##0", i64  0)  
-  tail call fastcc  void  @"higher_order_resources.take_max<0>"(i64  %"1#tmp#10##0")  
+  musttail call fastcc  void  @"higher_order_resources.take_max<0>"(i64  %"1#tmp#10##0")  
   ret void 
 }
 
@@ -483,7 +483,7 @@ entry:
   tail call ccc  void  @putchar(i8  10)  
   store  i64 %160, i64* @"resource#higher_order_resources.maximum" 
   %"1#tmp#27##0" = tail call fastcc  i64  @"wybe.list.length1<0>"(i64  %"anon#2#1##0", i64  0)  
-  tail call fastcc  void  @"higher_order_resources.take_max<0>"(i64  %"1#tmp#27##0")  
+  musttail call fastcc  void  @"higher_order_resources.take_max<0>"(i64  %"1#tmp#27##0")  
   ret void 
 }
 
@@ -506,7 +506,7 @@ entry:
 
 define external fastcc  void @"higher_order_resources.gen#3<0>"(i64  %"anon#3#1##0")    {
 entry:
-  tail call fastcc  void  @"higher_order_resources.take_max<0>"(i64  %"anon#3#1##0")  
+  musttail call fastcc  void  @"higher_order_resources.take_max<0>"(i64  %"anon#3#1##0")  
   ret void 
 }
 
@@ -534,7 +534,7 @@ if.then:
   %175 = load  i64, i64* %174 
   %176 = inttoptr i64 %175 to void (i64, i64)* 
   tail call fastcc  void  %176(i64  %"f##0", i64  %169)  
-  tail call fastcc  void  @"higher_order_resources.gen#4<0>"(i64  %"as##0", i64  %"f##0", i64  %173)  
+  musttail call fastcc  void  @"higher_order_resources.gen#4<0>"(i64  %"as##0", i64  %"f##0", i64  %173)  
   ret void 
 if.else:
   ret void 

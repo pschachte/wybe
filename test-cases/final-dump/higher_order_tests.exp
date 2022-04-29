@@ -323,10 +323,10 @@ entry:
 if.then:
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_tests.18, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"higher_order_tests.gen#3<0>"(i64  %"t##0")  
+  musttail call fastcc  void  @"higher_order_tests.gen#3<0>"(i64  %"t##0")  
   ret void 
 if.else:
-  tail call fastcc  void  @"higher_order_tests.gen#3<0>"(i64  %"t##0")  
+  musttail call fastcc  void  @"higher_order_tests.gen#3<0>"(i64  %"t##0")  
   ret void 
 }
 
@@ -342,10 +342,10 @@ entry:
 if.then:
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_tests.24, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"higher_order_tests.gen#4<0>"(i64  %"t##0")  
+  musttail call fastcc  void  @"higher_order_tests.gen#4<0>"(i64  %"t##0")  
   ret void 
 if.else:
-  tail call fastcc  void  @"higher_order_tests.gen#4<0>"(i64  %"t##0")  
+  musttail call fastcc  void  @"higher_order_tests.gen#4<0>"(i64  %"t##0")  
   ret void 
 }
 
@@ -412,10 +412,10 @@ entry:
 if.then:
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_tests.18, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"higher_order_tests.gen#8<0>"(i64  %"t##0")  
+  musttail call fastcc  void  @"higher_order_tests.gen#8<0>"(i64  %"t##0")  
   ret void 
 if.else:
-  tail call fastcc  void  @"higher_order_tests.gen#8<0>"(i64  %"t##0")  
+  musttail call fastcc  void  @"higher_order_tests.gen#8<0>"(i64  %"t##0")  
   ret void 
 }
 
@@ -431,10 +431,10 @@ entry:
 if.then:
   tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_tests.24, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"higher_order_tests.gen#9<0>"(i64  %"t##0")  
+  musttail call fastcc  void  @"higher_order_tests.gen#9<0>"(i64  %"t##0")  
   ret void 
 if.else:
-  tail call fastcc  void  @"higher_order_tests.gen#9<0>"(i64  %"t##0")  
+  musttail call fastcc  void  @"higher_order_tests.gen#9<0>"(i64  %"t##0")  
   ret void 
 }
 

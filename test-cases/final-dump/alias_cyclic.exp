@@ -131,7 +131,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  void @"alias_cyclic.<0>"()    {
 entry:
-  tail call fastcc  void  @"alias_cyclic.bar<0>"()  
+  musttail call fastcc  void  @"alias_cyclic.bar<0>"()  
   ret void 
 }
 
@@ -178,7 +178,7 @@ if.else:
   %22 = inttoptr i64 %18 to i64* 
   %23 = getelementptr  i64, i64* %22, i64 0 
   store  i64 %"3#tmp#2##0", i64* %23 
-  %"3#p2##0" = tail call fastcc  i64  @"alias_cyclic.updateY<0>[410bae77d3]"(i64  %18)  
+  %"3#p2##0" = musttail call fastcc  i64  @"alias_cyclic.updateY<0>[410bae77d3]"(i64  %18)  
   ret i64 %"3#p2##0" 
 }
 
@@ -197,7 +197,7 @@ if.else:
   %27 = inttoptr i64 %"p1##0" to i64* 
   %28 = getelementptr  i64, i64* %27, i64 0 
   store  i64 %"3#tmp#2##0", i64* %28 
-  %"3#p2##0" = tail call fastcc  i64  @"alias_cyclic.updateY<0>[410bae77d3]"(i64  %"p1##0")  
+  %"3#p2##0" = musttail call fastcc  i64  @"alias_cyclic.updateY<0>[410bae77d3]"(i64  %"p1##0")  
   ret i64 %"3#p2##0" 
 }
 
@@ -225,7 +225,7 @@ if.else:
   %40 = inttoptr i64 %39 to i64* 
   %41 = getelementptr  i64, i64* %40, i64 0 
   store  i64 %"3#tmp#2##0", i64* %41 
-  %"3#p2##0" = tail call fastcc  i64  @"alias_cyclic.updateX<0>[410bae77d3]"(i64  %35)  
+  %"3#p2##0" = musttail call fastcc  i64  @"alias_cyclic.updateX<0>[410bae77d3]"(i64  %35)  
   ret i64 %"3#p2##0" 
 }
 
@@ -246,7 +246,7 @@ if.else:
   %47 = inttoptr i64 %46 to i64* 
   %48 = getelementptr  i64, i64* %47, i64 0 
   store  i64 %"3#tmp#2##0", i64* %48 
-  %"3#p2##0" = tail call fastcc  i64  @"alias_cyclic.updateX<0>[410bae77d3]"(i64  %"p1##0")  
+  %"3#p2##0" = musttail call fastcc  i64  @"alias_cyclic.updateX<0>[410bae77d3]"(i64  %"p1##0")  
   ret i64 %"3#p2##0" 
 }
 --------------------------------------------------

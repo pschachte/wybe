@@ -111,7 +111,7 @@ entry:
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
   %"2#tmp#8##0" = tail call fastcc  i64  @"proc_gcd.mod<0>"(i64  %"x##0", i64  %"y##0")  
-  %"2#r##0" = tail call fastcc  i64  @"proc_gcd.gen#1<0>"(i64  %"a##0", i64  %"b##0", i64  %"y##0", i64  %"2#tmp#8##0")  
+  %"2#r##0" = musttail call fastcc  i64  @"proc_gcd.gen#1<0>"(i64  %"a##0", i64  %"b##0", i64  %"y##0", i64  %"2#tmp#8##0")  
   ret i64 %"2#r##0" 
 if.else:
   ret i64 %"x##0" 
@@ -121,7 +121,7 @@ if.else:
 define external fastcc  i64 @"proc_gcd.gen#2<0>"(i64  %"a##0", i64  %"b##0", i64  %"x##0", i64  %"y##0")    {
 entry:
   %"1#y##1" = tail call fastcc  i64  @"proc_gcd.mod<0>"(i64  %"x##0", i64  %"y##0")  
-  %"1#r##0" = tail call fastcc  i64  @"proc_gcd.gen#1<0>"(i64  %"a##0", i64  %"b##0", i64  %"y##0", i64  %"1#y##1")  
+  %"1#r##0" = musttail call fastcc  i64  @"proc_gcd.gen#1<0>"(i64  %"a##0", i64  %"b##0", i64  %"y##0", i64  %"1#y##1")  
   ret i64 %"1#r##0" 
 }
 

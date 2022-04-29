@@ -142,7 +142,7 @@ if.else2:
 
 define external fastcc  void @"call_site_id.bar<0>"(i64  %"x##0")    {
 entry:
-  tail call fastcc  void  @"call_site_id.foo<0>"(i64  %"x##0")  
+  musttail call fastcc  void  @"call_site_id.foo<0>"(i64  %"x##0")  
   ret void 
 }
 

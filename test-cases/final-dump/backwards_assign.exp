@@ -85,7 +85,7 @@ entry:
   %"1#tmp#0##0" = icmp slt i64 %"1#i##1", 10 
   br i1 %"1#tmp#0##0", label %if.then, label %if.else 
 if.then:
-  tail call fastcc  void  @"backwards_assign.gen#1<0>"(i64  %"1#i##1")  
+  musttail call fastcc  void  @"backwards_assign.gen#1<0>"(i64  %"1#i##1")  
   ret void 
 if.else:
   ret void 

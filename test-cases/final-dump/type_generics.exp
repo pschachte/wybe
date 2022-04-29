@@ -201,10 +201,10 @@ entry:
 if.then:
   tail call ccc  void  @print_int(i64  %2)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"type_generics.gen#1<0>"()  
+  musttail call fastcc  void  @"type_generics.gen#1<0>"()  
   ret void 
 if.else:
-  tail call fastcc  void  @"type_generics.gen#1<0>"()  
+  musttail call fastcc  void  @"type_generics.gen#1<0>"()  
   ret void 
 }
 
@@ -265,10 +265,10 @@ entry:
 if.then:
   tail call ccc  void  @print_int(i64  %28)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"type_generics.gen#2<0>"()  
+  musttail call fastcc  void  @"type_generics.gen#2<0>"()  
   ret void 
 if.else:
-  tail call fastcc  void  @"type_generics.gen#2<0>"()  
+  musttail call fastcc  void  @"type_generics.gen#2<0>"()  
   ret void 
 }
 
@@ -283,10 +283,10 @@ if.then:
   %33 = bitcast i64 %31 to double 
   tail call ccc  void  @print_float(double  %33)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"type_generics.gen#3<0>"()  
+  musttail call fastcc  void  @"type_generics.gen#3<0>"()  
   ret void 
 if.else:
-  tail call fastcc  void  @"type_generics.gen#3<0>"()  
+  musttail call fastcc  void  @"type_generics.gen#3<0>"()  
   ret void 
 }
 
@@ -301,10 +301,10 @@ if.then:
   %37 = bitcast i64 %35 to double 
   tail call ccc  void  @print_float(double  %37)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"type_generics.gen#4<0>"()  
+  musttail call fastcc  void  @"type_generics.gen#4<0>"()  
   ret void 
 if.else:
-  tail call fastcc  void  @"type_generics.gen#4<0>"()  
+  musttail call fastcc  void  @"type_generics.gen#4<0>"()  
   ret void 
 }
 
@@ -319,10 +319,10 @@ if.then:
   %41 = trunc i64 %39 to i8  
   tail call ccc  void  @putchar(i8  %41)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"type_generics.gen#5<0>"()  
+  musttail call fastcc  void  @"type_generics.gen#5<0>"()  
   ret void 
 if.else:
-  tail call fastcc  void  @"type_generics.gen#5<0>"()  
+  musttail call fastcc  void  @"type_generics.gen#5<0>"()  
   ret void 
 }
 

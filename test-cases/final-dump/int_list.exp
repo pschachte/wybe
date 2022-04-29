@@ -144,7 +144,7 @@ if.then:
   %31 = load  i64, i64* %30 
   tail call ccc  void  @print_int(i64  %27)  
   tail call ccc  void  @putchar(i8  32)  
-  tail call fastcc  void  @"int_list.print<0>"(i64  %31)  
+  musttail call fastcc  void  @"int_list.print<0>"(i64  %31)  
   ret void 
 if.else:
   ret void 
@@ -360,7 +360,7 @@ if.then1:
 if.else1:
   ret i1 0 
 if.then2:
-  %"6##success##0" = tail call fastcc  i1  @"int_list.int_list.=<0>"(i64  %7, i64  %14)  
+  %"6##success##0" = musttail call fastcc  i1  @"int_list.int_list.=<0>"(i64  %7, i64  %14)  
   ret i1 %"6##success##0" 
 if.else2:
   ret i1 0 

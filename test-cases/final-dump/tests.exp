@@ -168,14 +168,14 @@ if.else:
 
 define external fastcc  i1 @"tests.lt2<0>"(i64  %"x##0", i64  %"y##0")    {
 entry:
-  %"1#res##0" = tail call fastcc  i1  @"tests.lt<0>"(i64  %"x##0", i64  %"y##0")  
+  %"1#res##0" = musttail call fastcc  i1  @"tests.lt<0>"(i64  %"x##0", i64  %"y##0")  
   ret i1 %"1#res##0" 
 }
 
 
 define external fastcc  i1 @"tests.lt3<0>"(i64  %"x##0", i64  %"y##0")    {
 entry:
-  %"1##success##0" = tail call fastcc  i1  @"tests.lt<0>"(i64  %"y##0", i64  %"x##0")  
+  %"1##success##0" = musttail call fastcc  i1  @"tests.lt<0>"(i64  %"y##0", i64  %"x##0")  
   ret i1 %"1##success##0" 
 }
 --------------------------------------------------
@@ -499,7 +499,7 @@ if.then3:
 if.else3:
   ret i1 0 
 if.then4:
-  %"10##success##0" = tail call fastcc  i1  @"tests.map.=<0>"(i64  %15, i64  %30)  
+  %"10##success##0" = musttail call fastcc  i1  @"tests.map.=<0>"(i64  %15, i64  %30)  
   ret i1 %"10##success##0" 
 if.else4:
   ret i1 0 
