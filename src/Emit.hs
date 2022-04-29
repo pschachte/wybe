@@ -41,6 +41,11 @@ import           System.Process
 import           System.FilePath            ((-<.>))
 import           System.Directory           (getPermissions, writable, doesFileExist)
 import           Util                       (createLocalCacheFile)
+import LLVM.AST (Module(moduleDefinitions), Definition (GlobalDefinition), Type (ArrayType, IntegerType))
+import LLVM.AST.Global
+import qualified LLVM.AST.Global as G
+import qualified LLVM.AST.Constant as C
+import Data.String
 
 
 -- This does not check the permission if the file does not exists.
@@ -124,14 +129,29 @@ descendentModuleLLVM mspec = do
                    ++ ": " ++ showModSpecs someMods
     llmod <- concatLLVMASTModules mspec someMods
     modBS <- encodeModule mspec
-    addLPVMtoLLVM llmod modBS
+    logEmit $ "### flattened LPVM module to " ++ show modBS
+    addLPVMtoLLVM mspec llmod modBS
+
+
+-- | Create a definition to hold the encoded LPVM for a module as LLVM data
+lpvmDefine :: ModSpec -> BL.ByteString -> Definition
+lpvmDefine mspec modBS
+             = GlobalDefinition $ globalVariableDefaults {
+                      name = LLVMAST.Name $ fromString $ show mspec
+                    , isConstant = True
+                    , G.type' = ArrayType (fromIntegral $ BL.length modBS) (IntegerType 8)
+                    , initializer = Just $ C.Array (IntegerType 8)
+                                         $ List.map (C.Int 8 . fromIntegral)
+                                         $ BL.unpack modBS
+                    , section = Just $ fromString "__LPVM,__lpvm"
+                    }
 
 
 -- | Inject the linearised LPVM byte string into the LLVM code, so that it can
 -- later be extracted from the generated object file.
-addLPVMtoLLVM :: LLVMAST.Module -> BL.ByteString -> Compiler LLVMAST.Module
-addLPVMtoLLVM llmod modBS = do
-    return llmod
+addLPVMtoLLVM :: ModSpec -> LLVMAST.Module -> BL.ByteString -> Compiler LLVMAST.Module
+addLPVMtoLLVM mspec llmod modBS = do
+    return $ llmod { moduleDefinitions = lpvmDefine mspec modBS:moduleDefinitions llmod}
 
 
 -- | Handle the ExceptT monad. If there is an error, it is better to fail.
@@ -220,14 +240,10 @@ makeWrappedObjFile :: FilePath -> LLVMAST.Module -> BL.ByteString -> Compiler ()
 makeWrappedObjFile file llmod modBS = do
     tmpDir <- gets tmpDir
     opts <- gets options
-    result <- liftIO $ withContext $ \_ ->
+    liftIO $ withContext $ \_ ->
         withOptimisedModule opts llmod $ \m -> do
             withHostTargetMachineDefault $ \tm ->
                 writeObjectToFile tm (File file) m
-            insertLPVMData tmpDir modBS file
-    case result of
-        Right () -> return ()
-        Left serr -> Error <!> serr
 
 
 ----------------------------------------------------------------------------

@@ -296,20 +296,6 @@ globalDefine isForeign rettype label argtypes body
                }
 
 
--- | Create a definition to hold the encoded LPVM for a module as LLVM data
-lpvmDefine :: ModSpec -> BL.ByteString -> Definition
-lpvmDefine mspec modBS
-             = GlobalDefinition $ globalVariableDefaults {
-                      name = Name $ fromString $ show mspec
-                    , isConstant = True
-                    , G.type' = string_t $ fromIntegral $ BL.length modBS
-                    , initializer = Just $ C.Array char_t
-                                         $ map (C.Int 8 . fromIntegral)
-                                         $ BL.unpack modBS
-                    , section = Just "_LLVM"
-                    }
-
-
 -- | create a global declaration of an external function for the specified
 -- calling convention
 externalFunction :: CC.CallingConvention -> Type -> String -> [(Type, Name)]

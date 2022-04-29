@@ -5,7 +5,7 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
-module ObjectInterface (insertLPVMData, extractLPVMData, getWrappedBitcode) where
+module ObjectInterface (extractLPVMData, getWrappedBitcode) where
 
 import           AST
 import Options (LogSelection(Builder))
@@ -25,79 +25,6 @@ import System.FilePath (takeBaseName, (</>))
 import Control.Monad.Trans (liftIO)
 import Macho
 
-----------------------------------------------------------------------------
--- -- * Object file manipulation                                          --
-----------------------------------------------------------------------------
-
--- | Save LPVM data [BL.ByteString] into the given object file.
--- The first [FilePath] is for [tmpDir]
--- Currently supports macOS & Linux.
--- On macOS, it stores in segment [__LPVM], section [__lpvm].
--- On Linux, it sotres in section [__LPVM.__lpvm].
-insertLPVMData :: FilePath -> BL.ByteString -> FilePath -> IO (Either String ())
-insertLPVMData tmpDir modBS objFile = do
-    let modFile = takeBaseName objFile ++ ".module"
-    let lpvmFile = tmpDir </> modFile
-    BL.writeFile lpvmFile modBS
-    case buildOS of
-        OSX   -> insertLPVMDataMacOS lpvmFile objFile
-        Linux -> insertLPVMDataLinux lpvmFile objFile
-        _     -> shouldnt "Unsupported operation system"
-
-
--- | Extract LPVM data from the given object file
--- and return it as [BL.ByteString].
--- The first [FilePath] is for [tmpDir]
-extractLPVMData :: FilePath -> FilePath -> IO (Either String BL.ByteString)
-extractLPVMData tmpDir objFile =
-    case buildOS of
-        OSX   -> extractLPVMDataMacOS tmpDir objFile
-        Linux -> extractLPVMDataLinux tmpDir objFile
-        _     -> shouldnt "Unsupported operation system"
-
-----------------------------------------------------------------------------
--- -- * Object file manipulation (Internal)                               --
-----------------------------------------------------------------------------
-
--- XXX
--- The current implementation is a bit hacky, here are something we should
--- consider improving:
--- 1. Unit test for Roundtrip.
--- 2. We currently use tools that aren't in Wybe dependencies such as [ld]
---    and [objcopy]. Once we start to use a LLVM version that fully supports
---    [mach-o], we can use [llvm-objcopy] instead and unify the logic for
---    different os.
--- 3. The currently code is highly depends on tmp files and the we write
---    the object file first then update it. It would be better if we could
---    insert the LPVM data when we creating the object file and read LPVM
---    data from it directly.
-
-
--- | Actual implementation of [insertLPVMData] for macOS
--- Uses system [ld]
-insertLPVMDataMacOS :: FilePath -> FilePath -> IO (Either String ())
-insertLPVMDataMacOS lpvmFile objFile = do
-    let args = [objFile] ++ ["-r"]
-                ++ ["-sectcreate", "__LPVM", "__lpvm", lpvmFile]
-                ++ ["-o", objFile]
-    (exCode, _, serr) <- readCreateProcessWithExitCode (proc "ld" args) ""
-    case exCode of
-        ExitSuccess  -> return $ Right ()
-        _ -> return $ Left serr
-
-
--- | Use system [objcopy] to create a __LPVM.__lpvm section and put the
--- given [BL.ByteString] into it. The section of ELF doesn't have a
--- [Segment] field, so the section name is bit different.
--- | Actual implementation of [insertLPVMData] for Linux
--- Uses system [objcopy]
-insertLPVMDataLinux :: FilePath -> FilePath -> IO (Either String ())
-insertLPVMDataLinux lpvmFile objFile = do
-    let args = ["--add-section", "__LPVM.__lpvm=" ++ lpvmFile] ++ [objFile]
-    (exCode, _, serr) <- readCreateProcessWithExitCode (proc "objcopy" args) ""
-    case exCode of
-        ExitSuccess  -> return $ Right ()
-        _ -> return $ Left serr
 
 -- | Actual implementation of [extractLPVMData] for macOS
 extractLPVMDataMacOS :: FilePath -> FilePath -> IO (Either String BL.ByteString)
