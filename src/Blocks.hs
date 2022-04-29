@@ -511,6 +511,7 @@ cgen (prim@(PrimCall callSiteID pspec args _):nextPrims) isLeaf = do
     -- If this call was marked with `tail`, then we generate the remaining prims
     --  *before* the call instruction.
     nextPrims' <- cgenTakeReferences nextPrims
+    let isTailPosition = List.null nextPrims' && isLeaf
 
     -- if the call is to an external module, declare it
     addExternClosure pspec
@@ -518,22 +519,26 @@ cgen (prim@(PrimCall callSiteID pspec args _):nextPrims) isLeaf = do
     let (inArgs,outArgs) = partitionArgs args'
     logCodegen $ "In args = " ++ show inArgs
 
+    (inops, allocaTracking) <- cgenArgsFull inArgs
+
     outTy <- lift2 $ primReturnType outArgs
     callerSignature <- lift2 $ getLLVMSignature callerProto
     calleeSignature <- lift2 $ getLLVMSignature calleeProto
-    let tailCall = getTailCallHint (List.null nextPrims' && isLeaf) args' outTy callerSignature calleeSignature
+    let tailCall = getTailCallHint isTailPosition allocaTracking outTy callerSignature calleeSignature
     logCodegen $ "Tail call kind = " ++ show tailCall
 
-    inops <- mapM cgenArg inArgs
     logCodegen $ "Translated inputs = " ++ show inops
     logCodegen $ "Out ty = " ++ show outTy
     let funcRef = externf (ptr_t (FunctionType outTy (typeOf <$> inops) False)) nm
     let callIns = callWybe tailCall funcRef inops
     logCodegen $ "Translated ins = " ++ show callIns
     addInstruction callIns outArgs
-    -- if this isn't in tail position, then later on we might want to access
+
+    -- We may need to generate "load" instructions after this call to grab
     -- the underlying values written to by these `outByReference` pointers.
-    unless (List.null nextPrims) $ mapM_ cgenLoadReference args'
+    mapM_ (cgenMaybeLoadReference isTailPosition) args'
+
+    -- Generate the remaining prims in the block
     cgen nextPrims' isLeaf
 
 cgen (prim@(PrimHigher cId (ArgClosure pspec closed _) args):ps) isLeaf = do
@@ -605,41 +610,33 @@ cgenPrim prim@(PrimForeign lang name flags args) = do
 cgenPrim prim@PrimCall {} = shouldnt "calls should be handled by `cgen`"
 
 
--- | We observe hints from previous stages of compilation (`attrs`), as well
--- as the callee's signature, in order suggest a stricter LLVM
--- TailCallKind where possible.
+-- | We use a number of indicators to choose the best TailCallKind where possible.
 -- In the best case, the call is marked `musttail`, which signals LLVM must
--- tail-call-optimize.
+-- tail-call-optimize, or else will throw an error.
 -- `tail` is just a hint that LLVM "can" tail-call optimize but doesn't have to.
 -- However there are certain restrictions on when these hints. LLVM may optimize
 -- our code incorrectly (or crash) if we get this wrong.
-getTailCallHint :: Bool -> [PrimArg] -> LLVMAST.Type -> LLVMCallSignature -> LLVMCallSignature -> Maybe LLVMAST.TailCallKind
-getTailCallHint lpvmTailPosition args outTy callerSignature calleeSignature = do
-    let hasFlowOutByRefArg = FlowOutByReference `elem` List.map argFlowDirection args in
-        case (lpvmTailPosition, outTy, hasFlowOutByRefArg) of
-            -- Although this call is in LPVM tail position, we'll need to add some
-            -- `extractvalue` instrs after this call, so it won't be in LLVM
-            -- tail position, thus we cannot use `musttail`
-            (True, StructureType {}, _) -> Just LLVMAST.Tail
-            -- Although this call is in LPVM tail position, the signatures of the
-            -- the caller and callee may not match , thus according to LLVM
-            -- language reference we aren't allowed to use `musttail`.
-            (True, _, _) | callerSignature /= calleeSignature  -> Just LLVMAST.Tail
-            -- We know this LLVM call will be in tail position (since scalar/void
-            -- return type), and also the AST.Tail attribute is a promise that
-            -- the callee doesn't use any allocas from the caller.
-            (True, _, _) -> Just LLVMAST.MustTail
-            -- This function isn't in LPVM tail position,
-            -- but we know it doesn't take any outByReference pointers (which are
-            -- currently the only type of argument which could point to an alloca),
-            -- so we can safely mark it as `tail`.
-            (False, _, False) -> Just LLVMAST.Tail
-            -- Oh no! There is an `outByReference` argument in args',
-            -- which could point to an `alloca`.
-            -- Don't add `tail` attribute as it could trigger LLVM
-            -- undef-behaviour.
-            (False, _, True) -> Nothing
-
+getTailCallHint :: Bool -> AllocaTracking -> LLVMAST.Type -> LLVMCallSignature -> LLVMCallSignature -> Maybe LLVMAST.TailCallKind
+-- Oh no! There is an `outByReference` argument which points to an `alloca`.
+-- The LLVM language reference dictates that we are not allowed to add
+-- `tail` or `musttail` in this case
+getTailCallHint _ IsAlloca _ _ _ = Nothing
+-- Although this call is in LPVM tail position, we'll need to add some
+-- `extractvalue` instrs after this call, so it won't be in LLVM
+-- tail position, thus we cannot use `musttail`
+getTailCallHint True NoAlloca StructureType {} _ _ = Just LLVMAST.Tail
+-- Although this call is in LPVM tail position, the signatures of the
+-- the caller and callee may not match , thus according to LLVM
+-- language reference we aren't allowed to use `musttail`.
+-- XXX: LLVM version >= 13.0.0 relaxes this restriction
+getTailCallHint True NoAlloca _ callerSignature calleeSignature | callerSignature /= calleeSignature = Just LLVMAST.Tail
+-- We know this LLVM call will be in LLVM tail position (since scalar/void
+-- return type), and also we don't refer to any allocas to in the caller.
+getTailCallHint True NoAlloca _ _ _ = Just LLVMAST.MustTail
+-- This function isn't in LPVM tail position,
+-- but we know it doesn't take any arguments which were created by allocas
+-- in the caller.
+getTailCallHint False NoAlloca _ _ _ = Just LLVMAST.Tail
 
 -- | Translate a Binary primitive procedure into a binary llvm instruction,
 -- add the instruction to the current BasicBlock's instruction stack and emit
@@ -696,20 +693,31 @@ prepareArgs (a:as) (p@PrimParam{primParamType=ty}:ps) | argFlowDirection a == pr
 prepareArgs (a:as) (p:ps) = do
     shouldnt $ "incompatible flows: invocation=" ++ show (argFlowDirection a) ++ " definition: " ++ show (primParamFlow p)
 
-cgenLoadReference :: PrimArg -> Codegen ()
-cgenLoadReference arg@ArgVar { argVarName = name, argVarType = ty, argVarFlow = FlowOutByReference } = do
-    op <- maybeGetVar $ show (getRefName name)
-    case op of
-        -- the corresponding shadow variable `[name]#ref` exists, so let's load
-        -- the contents into `[name]`
-        Just var -> do
-            outTy <- lift2 $ argLLVMType arg { argVarFlow = FlowOut }
-            loadOp <- doLoad outTy var
-            assign (show name) loadOp
-        -- the shadow `[name]#ref` variable wasn't generated, so
-        -- we don't need to load it
-        Nothing -> return ()
-cgenLoadReference _ = return ()
+cgenMaybeLoadReference :: Bool -> PrimArg -> Codegen ()
+cgenMaybeLoadReference callIsTailPosition arg@ArgVar { argVarName = name, argVarType = ty, argVarFlow = FlowOutByReference } = do
+    currentProto <- gets proto
+    outParams <- lift2 $ protoRealParamsWhere paramGoesOut currentProto
+    let outParamNames = List.map primParamName outParams
+    let isFlowOutParam = name `elem` outParamNames
+    logCodegen $ "determining whether to `load` " ++ show name ++ " after call. callIsTailPosition=" ++ show callIsTailPosition ++ " isFlowOutParam=" ++ show isFlowOutParam
+    when (not callIsTailPosition || isFlowOutParam) $ do
+        -- This call isn't in LPVM tail position,
+        -- or the output was one of the outputs of the overall proc.
+        -- In this case, we need to perform the load
+        op <- maybeGetVar $ show (getRefName name)
+        op' <- maybeGetVar $ show name
+        var <- case (op, op') of
+            -- the corresponding shadow variable `[name]#ref` exists
+            (Just var, _) -> return var
+            -- the shadow `[name]#ref` variable wasn't created, so instead
+            -- we load `[name]` directly
+            (Nothing, Just var) -> return var
+            _ -> shouldnt $ show name ++ "not defined - when loading reference after call"
+        logCodegen $ "doing `load` after call: " ++ show var
+        outTy <- lift2 $ argLLVMType arg { argVarFlow = FlowOut }
+        loadOp <- doLoad outTy var
+        modifySymtab (show name) loadOp
+cgenMaybeLoadReference _ _ = return ()
 
 filterPhantomArgs :: [PrimArg] -> Codegen [PrimArg]
 filterPhantomArgs = filterM ((not <$>) . lift2 . argIsPhantom)
@@ -1020,18 +1028,44 @@ paramGoesOut = not . paramGoesIn
 -- | 'cgenArg' makes an Operand of the input argument.
 -- * Variables return a casted version of their respective symbol table operand
 -- * Constants are generated with cgenArgConst, then wrapped in `cons`
-cgenArg :: PrimArg -> Codegen LLVMAST.Operand
-cgenArg arg = do
+--
+-- Also returns `AllocaTracking`, which specifies if any of these arguments will
+-- point to allocas from the current proc.
+-- The presence of such allocas breaks core assumptions of the LLVM `tail`
+-- attribute, so we need to carefully handle this case.
+cgenArgFull :: PrimArg -> Codegen (LLVMAST.Operand, AllocaTracking)
+cgenArgFull arg = do
     opds <- gets (stOpds . symtab)
     case Map.lookup arg opds of
-        Just opd -> return opd
+        Just opd -> noAlloca $ return opd
         Nothing -> do
-            opd <- cgenArg' arg
+            (opd, alloca) <- cgenArg' arg
             addOperand arg opd
-            return opd
+            return (opd, alloca)
 
+cgenArg :: PrimArg -> Codegen LLVMAST.Operand
+cgenArg a = do
+    (op, alloca) <- cgenArgFull a
+    return op
 
-cgenArg' :: PrimArg -> Codegen LLVMAST.Operand
+-- Tracks whether a given pointer argument comes
+-- from an LLVM "alloca" instruction inside the current function.
+-- In this case, we are not allowed to mark an LLVM call
+-- with `tail` or `musttail`
+data AllocaTracking = IsAlloca | NoAlloca deriving (Eq)
+
+noAlloca :: Codegen LLVMAST.Operand -> Codegen (LLVMAST.Operand, AllocaTracking)
+noAlloca s = s >>= (\op -> return (op, NoAlloca))
+
+-- | Makes Operands of the passed arguments, and returns
+--   an summary AllocaTracking result for the whole list of arguments.
+cgenArgsFull :: [PrimArg] -> Codegen ([LLVMAST.Operand], AllocaTracking)
+cgenArgsFull args = do
+    args' <- mapM cgenArgFull args
+    let allocaTracking = if elem IsAlloca $ List.map snd args' then IsAlloca else NoAlloca
+    return (List.map fst args', allocaTracking)
+
+cgenArg' :: PrimArg -> Codegen (LLVMAST.Operand, AllocaTracking)
 cgenArg' var@ArgVar{argVarName=name, argVarType=ty, argVarFlow=flow@FlowOutByReference} = do
     op <- maybeGetVar (show name)
     currentProto <- gets proto
@@ -1048,19 +1082,20 @@ cgenArg' var@ArgVar{argVarName=name, argVarType=ty, argVarFlow=flow@FlowOutByRef
         let refName = getRefName name
         assign (show refName) alloca
         -- Supply the shadow reference variable as argument to this proc.
-        castVar refName ty flow
-    else castVar name ty flow
-cgenArg' var@ArgVar{argVarName=nm, argVarType=ty, argVarFlow=flow} = castVar nm ty flow
+        op <- castVar refName ty flow
+        return (op, IsAlloca)
+    else noAlloca $ castVar name ty flow
+cgenArg' var@ArgVar{argVarName=nm, argVarType=ty, argVarFlow=flow} = noAlloca $ castVar nm ty flow
 cgenArg' (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
 cgenArg' arg@(ArgClosure ps args ty) = do
     logCodegen $ "cgenArg of " ++ show arg
     args' <- neededFreeArgs ps args
     if all argIsConst args'
     then do
-        cons <$> cgenArgConst arg
+        noAlloca $ cons <$> cgenArgConst arg
     else do
         fnOp <- cons <$> cgenFuncRef ps
-        envArgs <- mapM cgenArg (setArgType intType <$> args')
+        (envArgs, allocaTracking) <- cgenArgsFull (setArgType intType <$> args')
         mem <- gcAllocate (toInteger (wordSizeBytes * (1 + length args))
                                       `ArgInt` intType) address_t
         memPtr <- inttoptr mem (ptr_t address_t)
@@ -1069,9 +1104,9 @@ cgenArg' arg@(ArgClosure ps args ty) = do
             accessPtr <- instr (ptr_t address_t) getEltPtr
             store accessPtr arg
             ) $ zip [0..] (fnOp:envArgs)
-        return mem
+        return (mem, allocaTracking)
 cgenArg' arg = do
-    cons <$> cgenArgConst arg
+    noAlloca $ cons <$> cgenArgConst arg
 
 
 -- returns the name of a "shadow" variable which is a pointer to the
@@ -1235,12 +1270,14 @@ assign :: String -> Operand -> Codegen ()
 assign var op = do
     params <- gets (primProtoParams . proto)
     let outByRefParamNames = List.map (show . primParamName) $ List.filter (\param -> FlowOutByReference == primParamFlow param) params
-    logCodegen $ "outByRefParamsNames = " ++ show outByRefParamNames
     if var `elem` outByRefParamNames then do
       logCodegen $ "assign outByReference " ++ var ++ " = " ++ show op ++ ":" ++ show (typeOf op)
       locOp <- getVar var
       locOp' <- doCast locOp (ptr_t (typeOf op))
       store locOp' op
+      -- also store this operand in the symtab, for the case where
+      -- we access this outByReference param later on in the proc
+      modifySymtab var op
     else modifySymtab var op
 
 ----------------------------------------------------------------------------
