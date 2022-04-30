@@ -525,7 +525,7 @@ cgen (prim@(PrimCall callSiteID pspec args _):nextPrims) isLeaf = do
     callerSignature <- lift2 $ getLLVMSignature callerProto
     calleeSignature <- lift2 $ getLLVMSignature calleeProto
     let tailCall = getTailCallHint isTailPosition allocaTracking outTy callerSignature calleeSignature
-    logCodegen $ "Tail call kind = " ++ show tailCall
+    logCodegen $ "Tail call kind = " ++ show tailCall ++ " (isTailPosition=" ++ show isTailPosition ++ " allocaTracking=" ++ show allocaTracking ++ " outTy=" ++ show outTy ++ " callerSignature=" ++ show callerSignature ++ " calleeSignature=" ++ show calleeSignature ++ ")"
 
     logCodegen $ "Translated inputs = " ++ show inops
     logCodegen $ "Out ty = " ++ show outTy
@@ -620,7 +620,7 @@ getTailCallHint :: Bool -> AllocaTracking -> LLVMAST.Type -> LLVMCallSignature -
 -- Oh no! There is an `outByReference` argument which points to an `alloca`.
 -- The LLVM language reference dictates that we are not allowed to add
 -- `tail` or `musttail` in this case
-getTailCallHint _ IsAlloca _ _ _ = Nothing
+getTailCallHint _ DoesAlloca _ _ _ = Nothing
 -- Although this call is in LPVM tail position, we'll need to add some
 -- `extractvalue` instrs after this call, so it won't be in LLVM
 -- tail position, thus we cannot use `musttail`
@@ -1052,7 +1052,7 @@ cgenArg a = do
 -- from an LLVM "alloca" instruction inside the current function.
 -- In this case, we are not allowed to mark an LLVM call
 -- with `tail` or `musttail`
-data AllocaTracking = IsAlloca | NoAlloca deriving (Eq)
+data AllocaTracking = DoesAlloca | NoAlloca deriving (Eq, Show)
 
 noAlloca :: Codegen LLVMAST.Operand -> Codegen (LLVMAST.Operand, AllocaTracking)
 noAlloca s = s >>= (\op -> return (op, NoAlloca))
@@ -1062,7 +1062,7 @@ noAlloca s = s >>= (\op -> return (op, NoAlloca))
 cgenArgsFull :: [PrimArg] -> Codegen ([LLVMAST.Operand], AllocaTracking)
 cgenArgsFull args = do
     args' <- mapM cgenArgFull args
-    let allocaTracking = if elem IsAlloca $ List.map snd args' then IsAlloca else NoAlloca
+    let allocaTracking = if elem DoesAlloca $ List.map snd args' then DoesAlloca else NoAlloca
     return (List.map fst args', allocaTracking)
 
 cgenArg' :: PrimArg -> Codegen (LLVMAST.Operand, AllocaTracking)
@@ -1083,7 +1083,7 @@ cgenArg' var@ArgVar{argVarName=name, argVarType=ty, argVarFlow=flow@FlowOutByRef
         assign (show refName) alloca
         -- Supply the shadow reference variable as argument to this proc.
         op <- castVar refName ty flow
-        return (op, IsAlloca)
+        return (op,DoesAlloca)
     else noAlloca $ castVar name ty flow
 cgenArg' var@ArgVar{argVarName=nm, argVarType=ty, argVarFlow=flow} = noAlloca $ castVar nm ty flow
 cgenArg' (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
