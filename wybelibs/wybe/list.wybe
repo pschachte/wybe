@@ -29,3 +29,49 @@ def {test} index(xs:_(T), idx:int):T = x where {
     [?x | ?xs] = xs
     (idx = 0 | index(xs, idx - 1, ?x))
 }
+
+pub def map(f:{resource}(A), as:_(A)) {
+    for ?a in as {
+        !f(a)
+    }
+}
+
+pub def map(f:(A, ?B), as:_(A)):_(B) =
+    if { [?a | ?as] = as :: [ f(a) | map(f, as) ] | else :: [] }
+
+
+pub def map(f:(A, B, ?C), as:_(A), bs:_(B)):_(C) = 
+    if { [?a | ?as] = as & [?b | ?bs] = bs :: [ f(a, b) | map(f, as, bs) ]
+       | else                              :: [] }
+
+pub def {test} all(p:{test}(A), as:_(A)) {
+    for ?a in as {
+        p(a)
+    }
+}
+
+pub def {test} any(p:{test}(A), as:_(A)) {
+    [?a | ?as] = as
+    (p(a) | any(p, as))
+}
+
+pub def foldl(f:(A, !B), as:_(A), !b:B) {
+    for ?a in as {
+        f(a, !b)
+    }
+}
+
+pub def foldr(f:(A, !B), as:_(A), !b:B) {
+    if { [?a | ?as] = as ::
+        foldr(f, as, !b)
+        f(a, !b)
+    }
+}
+
+pub def filter(p:{test}(A), !as:_(A)) {
+    ?out = []
+    for ?a in as {
+        if { p(a) :: ?out = [a | out] }
+    }
+    ?as = reverse(out)
+}

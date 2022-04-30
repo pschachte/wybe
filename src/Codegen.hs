@@ -312,7 +312,7 @@ externalC :: Type -> String -> [(Type, Name)] -> Definition
 externalC = externalFunction CC.C
 
 
--- | 'externalC' creates a global declaration of an external C function
+-- | 'externalWybe' creates a global declaration of an external Wybe function
 externalWybe :: Type -> String -> [(Type, Name)] -> Definition
 externalWybe = externalFunction CC.Fast
 
