@@ -15,7 +15,7 @@ module Config (sourceExtension, objectExtension, executableExtension,
                availableTagBits, tagMask, smallestAllocatedAddress,
                magicVersion,
                linkerDeadStripArgs, functionDefSection, removeLPVMSection,
-               localCacheLibDir)
+               lpvmSectionName, localCacheLibDir)
     where
 
 import Data.Word
@@ -75,7 +75,7 @@ wordSize = wordSizeBytes * 8
 
 -- |Word size of the machine in bytes
 wordSizeBytes :: Int
-wordSizeBytes = sizeOf (fromIntegral 3 :: Word)
+wordSizeBytes = sizeOf (3 :: Word)
 
 
 -- |The number of tag bits available on this architecture.  This is the base 2
@@ -125,7 +125,7 @@ linkerDeadStripArgs =
     case buildOS of
         OSX   -> ["-dead_strip"]
         Linux -> ["-Wl,--gc-sections"]
-        _     -> error "Unsupported operation system"
+        os    -> error $ "Unsupported OS: " ++ show os
 
 
 -- | Given the name of a function and return which section to store it,
@@ -136,7 +136,16 @@ functionDefSection label =
     case buildOS of
         OSX   -> Nothing
         Linux -> Just $ ".text." ++ label
-        _     -> error "Unsupported operation system"
+        os    -> error $ "Unsupported OS: " ++ show os
+
+
+-- | The section name of the LPVM object file section.  This includes the
+-- segment name, as well, and the format varies depending on object file format.
+lpvmSectionName :: String
+lpvmSectionName = case buildOS of
+    OSX   -> "__LPVM,__lpvm"
+    Linux -> "__LPVM.__lpvm"
+    os    -> error $ "Unsupported OS: " ++ show os
 
 
 -- | Remove the lpvm section from the given file. It's only effective on Linux,
@@ -152,4 +161,4 @@ removeLPVMSection target =
             case exCode of
                 ExitSuccess  -> return $ Right ()
                 _ -> return $ Left serr
-        _     -> error "Unsupported operation system"
+        os    -> error $ "Unsupported OS: " ++ show os

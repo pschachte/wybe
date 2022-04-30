@@ -15,7 +15,7 @@ import           AST
 import           BinaryFactory              (encodeModule)
 import           Blocks                     (concatLLVMASTModules)
 import           Config
-import           Control.Monad
+import Control.Monad ( (>=>), unless )
 import           Control.Monad.Trans        (liftIO)
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.State
@@ -41,6 +41,12 @@ import           System.Process
 import           System.FilePath            ((-<.>))
 import           System.Directory           (getPermissions, writable, doesFileExist)
 import           Util                       (createLocalCacheFile)
+import LLVM.AST (Module(moduleDefinitions), Definition (GlobalDefinition), Type (ArrayType, IntegerType))
+import LLVM.AST.Global
+import qualified LLVM.AST.Global as G
+import qualified LLVM.AST.Constant as C
+import Data.String
+import Config (lpvmSectionName)
 
 
 -- This does not check the permission if the file does not exists.
@@ -122,7 +128,31 @@ descendentModuleLLVM mspec = do
     unless (List.null someMods) $
         logEmit $ "### Combining descendents of " ++ showModSpec mspec
                    ++ ": " ++ showModSpecs someMods
-    concatLLVMASTModules mspec someMods
+    llmod <- concatLLVMASTModules mspec someMods
+    modBS <- encodeModule mspec
+    logEmit $ "### flattened LPVM module to " ++ show modBS
+    addLPVMtoLLVM mspec llmod modBS
+
+
+-- | Create a definition to hold the encoded LPVM for a module as LLVM data
+lpvmDefine :: ModSpec -> BL.ByteString -> Definition
+lpvmDefine mspec modBS
+             = GlobalDefinition $ globalVariableDefaults {
+                      name = LLVMAST.Name $ fromString $ show mspec
+                    , isConstant = True
+                    , G.type' = ArrayType (fromIntegral $ BL.length modBS) (IntegerType 8)
+                    , initializer = Just $ C.Array (IntegerType 8)
+                                         $ List.map (C.Int 8 . fromIntegral)
+                                         $ BL.unpack modBS
+                    , section = Just $ fromString lpvmSectionName
+                    }
+
+
+-- | Inject the linearised LPVM byte string into the LLVM code, so that it can
+-- later be extracted from the generated object file.
+addLPVMtoLLVM :: ModSpec -> LLVMAST.Module -> BL.ByteString -> Compiler LLVMAST.Module
+addLPVMtoLLVM mspec llmod modBS = do
+    return $ llmod { moduleDefinitions = lpvmDefine mspec modBS:moduleDefinitions llmod}
 
 
 -- | Handle the ExceptT monad. If there is an error, it is better to fail.
@@ -181,6 +211,7 @@ withOptimisedModule opts@Options{optLLVMOptLevel=lvl} llmod action =
                 else error "Running of optimisation passes not successful"
     where lvl' = either (shouldnt "bad llvm opt level") id lvl
 
+
 -- | Bracket pattern to run an [action] on the [LLVMAST.Module].
 withModule :: Options -> LLVMAST.Module -> (Mod.Module -> IO a) -> IO a
 withModule Options{optNoVerifyLLVM=noVerify} llmod action =
@@ -210,15 +241,10 @@ makeWrappedObjFile :: FilePath -> LLVMAST.Module -> BL.ByteString -> Compiler ()
 makeWrappedObjFile file llmod modBS = do
     tmpDir <- gets tmpDir
     opts <- gets options
-    result <- liftIO $ withContext $ \_ ->
+    liftIO $ withContext $ \_ ->
         withOptimisedModule opts llmod $ \m -> do
             withHostTargetMachineDefault $ \tm ->
                 writeObjectToFile tm (File file) m
-            insertLPVMData tmpDir modBS file
-    case result of
-        Right () -> return ()
-        Left serr -> Error <!> serr
-
 
 
 ----------------------------------------------------------------------------
@@ -234,6 +260,7 @@ makeWrappedObjFile file llmod modBS = do
 
 
 -- | Remove OSX Ld warnings of incompatible built object file version.
+
 suppressLdWarnings :: String -> String
 suppressLdWarnings s = intercalate "\n" $ List.filter notWarning $ lines s
   where
