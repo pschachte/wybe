@@ -46,6 +46,7 @@ import LLVM.AST.Global
 import qualified LLVM.AST.Global as G
 import qualified LLVM.AST.Constant as C
 import Data.String
+import Config (lpvmSectionName)
 
 
 -- This does not check the permission if the file does not exists.
@@ -143,7 +144,7 @@ lpvmDefine mspec modBS
                     , initializer = Just $ C.Array (IntegerType 8)
                                          $ List.map (C.Int 8 . fromIntegral)
                                          $ BL.unpack modBS
-                    , section = Just $ fromString "__LPVM,__lpvm"
+                    , section = Just $ fromString lpvmSectionName
                     }
 
 
