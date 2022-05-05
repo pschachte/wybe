@@ -4,7 +4,7 @@
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use foreign library m
-use wybe.bool, wybe.comparison
+use wybe.bool, wybe.comparison, wybe.io
 
 representation is signed
 
@@ -112,3 +112,12 @@ pub def decr(!x:_) { ?x = x - 1 }
 
 # The sign of an integer: +1, -1, or 0
 pub def signum(x:_):_ = foreign c signum(x)
+
+
+## I/O
+
+pub def print(x:_) use !io { foreign c print_int(x, !io) }
+
+pub def println(x:_) use !io { !print(x); !nl }
+
+pub def read(?x:_) use !io { foreign c read_int(?x, !io) }

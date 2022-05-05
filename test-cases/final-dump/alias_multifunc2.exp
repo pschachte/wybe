@@ -21,26 +21,26 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm mutate(~tmp#3##0:position.position, ?tmp#4##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int) @position:nn:nn
     foreign lpvm mutate(~tmp#4##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int) @position:nn:nn
     alias_multifunc2.replicate1<0>(tmp#0##0:position.position, ?p2##0:position.position, ?p3##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @alias_multifunc2:nn:nn
-    wybe.string.print_string<0>("--- After calling replicate1: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #17 @io:nn:nn
+    wybe.string.print<0>("--- After calling replicate1: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #17 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>("expect p1(10,10):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #18 @io:nn:nn
+    wybe.string.print<0>("expect p1(10,10):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @alias_multifunc2:nn:nn
     position.printPosition<0>(tmp#0##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @alias_multifunc2:nn:nn
-    wybe.string.print_string<0>("expect p2(22,10):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #19 @io:nn:nn
+    wybe.string.print<0>("expect p2(22,10):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #5 @alias_multifunc2:nn:nn
     position.printPosition<0>(p2##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #6 @alias_multifunc2:nn:nn
-    wybe.string.print_string<0>("expect p3(10,10):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #20 @io:nn:nn
+    wybe.string.print<0>("expect p3(10,10):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7 @alias_multifunc2:nn:nn
     position.printPosition<0>(p3##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #8 @alias_multifunc2:nn:nn
     foreign lpvm {noalias} mutate(~tmp#0##0:position.position, ?p1##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 11:wybe.int) @position:nn:nn
-    wybe.string.print_string<0>("--- After calling x(!p1, 11): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #21 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#15##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>("expect p1(11,10):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #22 @io:nn:nn
+    wybe.string.print<0>("--- After calling x(!p1, 11): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #18 @string:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>("expect p1(11,10):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #11 @alias_multifunc2:nn:nn
     position.printPosition<0>(~p1##1:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #12 @alias_multifunc2:nn:nn
-    wybe.string.print_string<0>("expect p2(22,10):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #23 @io:nn:nn
+    wybe.string.print<0>("expect p2(22,10):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #13 @alias_multifunc2:nn:nn
     position.printPosition<0>(~p2##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #14 @alias_multifunc2:nn:nn
-    wybe.string.print_string<0>("expect p3(10,10):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #24 @io:nn:nn
+    wybe.string.print<0>("expect p3(10,10):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #15 @alias_multifunc2:nn:nn
     position.printPosition<0>(~p3##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #16 @alias_multifunc2:nn:nn
 
 
@@ -62,12 +62,12 @@ replicate2(p1##0:position.position, ?p2##0:position.position)<{<<wybe.io.io>>}; 
     foreign lpvm alloc(16:wybe.int, ?tmp#4##0:position.position) @position:nn:nn
     foreign lpvm mutate(~tmp#4##0:position.position, ?tmp#5##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int) @position:nn:nn
     foreign lpvm mutate(~tmp#5##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int) @position:nn:nn
-    wybe.string.print_string<0>("random replicate2 ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @io:nn:nn
+    wybe.string.print<0>("random replicate2 ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @alias_multifunc2:nn:nn
     foreign lpvm access(~tmp#0##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @position:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @int:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @int:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
     foreign llvm move(~p1##0:position.position, ?p2##0:position.position) @alias_multifunc2:nn:nn
 
   LLVM code       :
@@ -126,7 +126,7 @@ declare external ccc  void @putchar(i8)
 declare external ccc  void @print_int(i64)    
 
 
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+declare external fastcc  void @"wybe.string.print<0>"(i64)    
 
 
 declare external fastcc  void @"position.printPosition<0>"(i64)    
@@ -153,13 +153,13 @@ entry:
   %9 = tail call fastcc  {i64, i64}  @"alias_multifunc2.replicate1<0>"(i64  %3)  
   %10 = extractvalue {i64, i64} %9, 0 
   %11 = extractvalue {i64, i64} %9, 1 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.13, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.13, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.15, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.15, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %3)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.17, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.17, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %10)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.19, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.19, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %11)  
   %20 = trunc i64 16 to i32  
   %21 = tail call ccc  i8*  @wybe_malloc(i32  %20)  
@@ -171,13 +171,13 @@ entry:
   %26 = inttoptr i64 %22 to i64* 
   %27 = getelementptr  i64, i64* %26, i64 0 
   store  i64 11, i64* %27 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.29, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.29, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.31, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.31, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %22)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.17, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.17, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %10)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.19, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.19, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %11)  
   ret void 
 }
@@ -215,7 +215,7 @@ entry:
   %48 = inttoptr i64 %47 to i64* 
   %49 = getelementptr  i64, i64* %48, i64 0 
   store  i64 0, i64* %49 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.51, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc2.51, i32 0, i32 0) to i64))  
   %52 = inttoptr i64 %44 to i64* 
   %53 = getelementptr  i64, i64* %52, i64 0 
   %54 = load  i64, i64* %53 
@@ -248,20 +248,20 @@ printPosition > public (0 calls)
 printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print_string<0>(" (":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7 @io:nn:nn
+    wybe.string.print<0>(" (":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @position:nn:nn
     foreign lpvm access(pos##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @position:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>(",":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #8 @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @int:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @int:nn:nn
+    foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+    wybe.string.print<0>(",":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @position:nn:nn
     foreign lpvm access(~pos##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @position:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @io:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    wybe.string.print_string<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #9 @io:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @int:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @int:nn:nn
+    foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+    wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7 @string:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
   LLVM code       :
 
@@ -292,7 +292,7 @@ printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
 declare external ccc  void @putchar(i8)    
 
 
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+declare external fastcc  void @"wybe.string.print<0>"(i64)    
 
 
 declare external ccc  void @print_int(i64)    
@@ -306,18 +306,18 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  void @"position.printPosition<0>"(i64  %"pos##0")    {
 entry:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position.2, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position.2, i32 0, i32 0) to i64))  
   %3 = inttoptr i64 %"pos##0" to i64* 
   %4 = getelementptr  i64, i64* %3, i64 0 
   %5 = load  i64, i64* %4 
   tail call ccc  void  @print_int(i64  %5)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position.7, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position.7, i32 0, i32 0) to i64))  
   %8 = add   i64 %"pos##0", 8 
   %9 = inttoptr i64 %8 to i64* 
   %10 = getelementptr  i64, i64* %9, i64 0 
   %11 = load  i64, i64* %10 
   tail call ccc  void  @print_int(i64  %11)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position.13, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @position.13, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }

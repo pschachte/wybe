@@ -3,7 +3,7 @@
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
-use wybe.bool, wybe.int, wybe.char
+use wybe.bool, wybe.int, wybe.char, wybe.io
 
 representation is address
 
@@ -31,4 +31,11 @@ pub def {test} [](str:_, idx:int):char = c where {
 
 pub def unsafe_c_string_index(str:_, idx:int):char 
     = foreign lpvm access(str, idx, 1, 0)
+
+pub def print(x:_) use !io { foreign c print_string(x, !io) }
+
+pub def println(x:_) use !io { !print(x); !nl }
+
+pub def read(?x:_) use !io { foreign c read_line(?x, !io) }
+
     

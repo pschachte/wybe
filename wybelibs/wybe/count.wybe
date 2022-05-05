@@ -3,7 +3,7 @@
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
-use wybe.bool, wybe.comparison
+use wybe.bool, wybe.comparison, wybe.io
 
 representation is unsigned
 
@@ -82,3 +82,11 @@ pub def incr(!x:_) { ?x = x + 1:_ }
 
 # Decrement.
 pub def {partial} decr(!x:_) { ?x = x - 1:_ }
+
+## I/O
+
+pub def print(x:_) use !io { foreign c print_count(x, !io) }
+
+pub def println(x:_) use !io { !print(x); !nl }
+
+pub def read(?x:_) use !io { foreign c read_count(?x, !io) }
