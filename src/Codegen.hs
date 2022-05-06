@@ -76,6 +76,9 @@ import           Config                          (wordSize, functionDefSection)
 import           Unsafe.Coerce
 import           Debug.Trace
 import LLVM.AST.Typed (Typed(typeOf))
+import qualified Data.ByteString.Lazy as BL
+import qualified Data.ByteString.Short as BS
+import Data.ByteString.Char8 hiding (cons, map)
 
 ----------------------------------------------------------------------------
 -- Types                                                                  --
