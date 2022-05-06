@@ -7,7 +7,6 @@ use foreign object cbits
 use foreign library gc
 
 use wybe.bool, wybe.int, wybe.count, wybe.float, wybe.char, wybe.string, wybe.c_string
-use wybe.list
 use wybe.phantom
 
 # XXX We shouldn't need to initialise a resource (or variable) of a 0-bit type
