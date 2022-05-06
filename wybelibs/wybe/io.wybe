@@ -42,20 +42,4 @@ pub def print(x:string) use !io { !print_string(x) }
 pub def println(x:string) use !io { !print(x); !nl }
 pub def read(?x:string) use !io { !read(?str:c_string); ?x = string(str) }
 
-pub def print_list(xs:list(int)) use !io {
-    !print("[")
-    !_print_list(xs)
-    !println("]")
-}
-
-def _print_list(xs:list(int)) use !io {
-    if { [?x | ?xs1] = xs ::
-        !print(x)
-        if { [ ?x2 | ?xs2 ] = xs1 ::
-            !print(", ")
-        }
-        !_print_list(xs1)
-    }
-}
-
 pub def eof:char = foreign lpvm cast(-1)

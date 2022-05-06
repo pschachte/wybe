@@ -1,0 +1,14 @@
+def append(front: list(int), back: list(int), ?result: list(int)) {
+    if { [?h | ?t] = front ::
+            append(t, back, ?tail)
+            ?result = [h|tail]
+       | else ::
+            ?result = back
+    }
+}
+
+?x = [[1],[2],[3]]
+?cons = [4,6]
+map({append(@, cons, ?@)}, x, ?y)
+!println(x)
+!println(y)

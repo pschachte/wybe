@@ -1,5 +1,7 @@
 Error detected during type checking of module(s) type_ambig
 [91mfinal-dump/type_ambig.wybe:1:25: Ambiguous overloading: call could refer to:
+    wybe.list.print<1>
+    wybe.list.print<0>
     wybe.io.print<6>
     wybe.io.print<5>
     wybe.io.print<4>

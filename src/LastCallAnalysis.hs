@@ -55,13 +55,18 @@ lastCallAnalyseProc def = do
     let proto = procImplnProto impln
     let body = procImplnBody impln
     logLastCallAnalysis $ ">>> Last Call Analysis: " ++ show spec
-    (maybeBody', finalState) <- runStateT (runMaybeT (mapProcLeavesM transformLeaf body))
-        LeafTransformState { procSpec = spec, originalProto = proto, transformedProto = Nothing }
-    case (maybeBody', transformedProto finalState) of
-        (Just body', Just proto') -> do
-            logLastCallAnalysis $ "new proto: " ++ show proto'
-            return def {procImpln = impln{procImplnProto = proto', procImplnBody = body'}}
-        _ -> return def
+    case procVariant def of
+        ClosureProc {} -> do
+            logLastCallAnalysis "skipping closure proc, shouldn't have direct tail-recursion anyway"
+            return def
+        _ -> do
+            (maybeBody', finalState) <- runStateT (runMaybeT (mapProcLeavesM transformLeaf body))
+                LeafTransformState { procSpec = spec, originalProto = proto, transformedProto = Nothing }
+            case (maybeBody', transformedProto finalState) of
+                (Just body', Just proto') -> do
+                    logLastCallAnalysis $ "new proto: " ++ show proto'
+                    return def {procImpln = impln{procImplnProto = proto', procImplnBody = body'}}
+                _ -> return def
 
 data LeafTransformState = LeafTransformState {
     procSpec :: ProcSpec,
