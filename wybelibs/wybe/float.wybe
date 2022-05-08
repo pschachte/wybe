@@ -3,10 +3,9 @@
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
-use wybe.bool, wybe.int, wybe.comparison
+use wybe.bool, wybe.int, wybe.comparison, wybe.io
 
 representation is 64 bit float
-
 
 ## Constants
 
@@ -128,3 +127,11 @@ pub def log10(x:_):_ = foreign c `llvm.log10.f64`(x)
 
 # Base 2 logarithm.
 pub def log2(x:_):_ = foreign c `llvm.log2.f64`(x)
+
+## I/O
+
+pub def print(x:_) use !io { foreign c print_float(x, !io) }
+
+pub def println(x:_) use !io { !print(x); !nl }
+
+pub def read(?x:_) use !io { foreign c read_float(?x, !io) }

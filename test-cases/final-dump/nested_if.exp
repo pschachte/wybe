@@ -23,27 +23,27 @@ nested_if(i##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
             foreign llvm icmp_eq(~i##0:wybe.int, 2:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
             case ~tmp#1##0:wybe.bool of
             0:
-                wybe.string.print_string<0>("other":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #8 @io:nn:nn
+                wybe.string.print<0>("other":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #8 @string:nn:nn
                 foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
                 foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
                 foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
             1:
-                wybe.string.print_string<0>("two":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #9 @io:nn:nn
+                wybe.string.print<0>("two":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #9 @string:nn:nn
                 foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
                 foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
                 foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
         1:
-            wybe.string.print_string<0>("one thousand and one":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #10 @io:nn:nn
+            wybe.string.print<0>("one thousand and one":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #10 @string:nn:nn
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
             foreign c putchar('\n':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
             foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
     1:
-        wybe.string.print_string<0>("zero":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #11 @io:nn:nn
+        wybe.string.print<0>("zero":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #11 @string:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
@@ -84,7 +84,7 @@ nested_if(i##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
 declare external ccc  void @putchar(i8)    
 
 
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+declare external fastcc  void @"wybe.string.print<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -98,25 +98,25 @@ entry:
   %"1#tmp#3##0" = icmp eq i64 %"i##0", 0 
   br i1 %"1#tmp#3##0", label %if.then, label %if.else 
 if.then:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @nested_if.2, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @nested_if.2, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else:
   %"3#tmp#2##0" = icmp eq i64 %"i##0", 1001 
   br i1 %"3#tmp#2##0", label %if.then1, label %if.else1 
 if.then1:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @nested_if.4, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @nested_if.4, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else1:
   %"5#tmp#1##0" = icmp eq i64 %"i##0", 2 
   br i1 %"5#tmp#1##0", label %if.then2, label %if.else2 
 if.then2:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @nested_if.6, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @nested_if.6, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else2:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @nested_if.8, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @nested_if.8, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }

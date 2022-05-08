@@ -1,10 +1,10 @@
 Error detected during type checking of module(s) type_ambig
 [91mfinal-dump/type_ambig.wybe:1:25: Ambiguous overloading: call could refer to:
-    wybe.io.print<6>
-    wybe.io.print<5>
-    wybe.io.print<4>
-    wybe.io.print<3>
-    wybe.io.print<2>
-    wybe.io.print<1>
-    wybe.io.print<0>
+    wybe.string.print<0>
+    wybe.int.print<0>
+    wybe.float.print<0>
+    wybe.count.print<0>
+    wybe.char.print<0>
+    wybe.c_string.print<0>
+    wybe.bool.print<0>
 [0m

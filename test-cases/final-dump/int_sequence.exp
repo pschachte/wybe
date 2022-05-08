@@ -117,8 +117,8 @@ gen#1(tmp#0##0:int_sequence, tmp#1##0:int_sequence)<{<<wybe.io.io>>}; {<<wybe.io
     0:
 
     1:
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @io:nn:nn
-        foreign c print_int(~i##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @int:nn:nn
+        foreign c print_int(~i##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @int:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
         int_sequence.gen#1<0>[410bae77d3](~tmp#0##1:int_sequence, ~tmp#1##0:int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @int_sequence:nn:nn
@@ -129,8 +129,8 @@ gen#1(tmp#0##0:int_sequence, tmp#1##0:int_sequence)<{<<wybe.io.io>>}; {<<wybe.io
     0:
 
     1:
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @io:nn:nn
-        foreign c print_int(~i##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @int:nn:nn
+        foreign c print_int(~i##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @int:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
         int_sequence.gen#1<0>[410bae77d3](~tmp#0##1:int_sequence, ~tmp#1##0:int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @int_sequence:nn:nn

@@ -6,39 +6,15 @@ pragma no_standard_library  # Standard library can't depend on itself!
 use foreign object cbits
 use foreign library gc
 
-use wybe.bool, wybe.int, wybe.count, wybe.float, wybe.char, wybe.string, wybe.c_string
-use wybe.phantom
+pub use wybe.phantom
+use wybe.char
 
 # XXX We shouldn't need to initialise a resource (or variable) of a 0-bit type
 pub resource io:phantom = 0:phantom
 
-pub def nl use !io { foreign c putchar('\n', !io) }
+# XXX This module depends on wybe.char, and as such inline marking is delayed
+# before other modules
+pub def {inline} nl use !io { foreign c putchar('\n', !io) }
 
-pub def print(x:int) use !io { foreign c print_int(x, !io) }
-pub def println(x:int) use !io { !print(x); !nl }
-pub def read(?x:int) use !io { foreign c read_int(?x, !io) }
-
-pub def print(x:count) use !io { foreign c print_count(x, !io) }
-pub def println(x:count) use !io { !print(x); !nl }
-pub def read(?x:count) use !io { foreign c read_count(?x, !io) }
-
-pub def print(x:float) use !io { foreign c print_float(x, !io) }
-pub def println(x:float) use !io { !print(x); !nl }
-pub def read(?x:float) use !io { foreign c read_float(?x, !io) }
-
-pub def print(x:char) use !io { foreign c putchar(x, !io) }
-pub def println(x:char) use !io { !print(x); !nl }
-pub def read(?x:char) use !io { foreign c read_char(?x, !io) }
-
-pub def print(x:c_string) use !io { foreign c print_string(x, !io) }
-pub def println(x:c_string) use !io { !print(x); !nl }
-pub def read(?x:c_string) use !io { foreign c read_line(?x, !io) }
-
-pub def print(x:bool) use !io { !print(if {x:: c"true" | else:: c"false"}) }
-pub def println(x:bool) use !io { !print(x); !nl }
-
-pub def print(x:string) use !io { !print_string(x) }
-pub def println(x:string) use !io { !print(x); !nl }
-pub def read(?x:string) use !io { !read(?str:c_string); ?x = string(str) }
-
-pub def eof:char = foreign lpvm cast(-1)
+# XXX see nl for inline note
+pub def {inline} eof:char = foreign lpvm cast(-1)

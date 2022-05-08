@@ -3,6 +3,8 @@
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
+use wybe.c_string, wybe.io
+
 pub constructors false | true
 
 ## Common Boolean operations
@@ -39,3 +41,9 @@ pub def (x:_ ~= y:_):_ = foreign llvm icmp_ne(x, y)
 ## Other
 
 pub def succeed { pass } # always succeed
+
+## I/O
+
+pub def print(x:_) use !io { !print(if {x:: c"true" | else:: c"false"}) }
+
+pub def println(x:_) use !io { !print(x); !nl }

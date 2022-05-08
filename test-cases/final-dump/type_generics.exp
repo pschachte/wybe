@@ -24,8 +24,8 @@ module top-level code > public {impure} (0 calls)
         type_generics.gen#1<0>(_:wybe.bool, _:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #8
 
     1:
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
-        foreign c print_int(~y##0:wybe.int, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @int:nn:nn
+        foreign c print_int(~y##0:wybe.int, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @int:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
         type_generics.gen#1<0>(_:wybe.bool, _:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7
@@ -41,8 +41,8 @@ foo(x##0:T)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
     foreign lpvm mutate(~tmp#5##0:wybe.list(T), ?tmp#6##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:T) @list:nn:nn
     foreign lpvm mutate(~tmp#6##0:wybe.list(T), ?tmp#0##0:wybe.list(T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @list:nn:nn
     wybe.list.length1<0>(~tmp#0##0:wybe.list(T), 0:wybe.int, ?tmp#2##0:wybe.int) #4 @list:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
-    foreign c print_int(~tmp#2##0:wybe.int, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @int:nn:nn
+    foreign c print_int(~tmp#2##0:wybe.int, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @int:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
@@ -78,8 +78,8 @@ gen#1([tmp#0##0:wybe.bool], [x##0:wybe.float])<{<<wybe.io.io>>}; {<<wybe.io.io>>
         type_generics.gen#2<0>(_:wybe.int, _:wybe.bool, _:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3
 
     1:
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @io:nn:nn
-        foreign c print_int(~y##0:wybe.int, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @int:nn:nn
+        foreign c print_int(~y##0:wybe.int, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @int:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
         type_generics.gen#2<0>(_:wybe.int, _:wybe.bool, _:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2
@@ -97,8 +97,8 @@ gen#2([i##0:wybe.int], [tmp#0##0:wybe.bool], [x##0:wybe.float])<{<<wybe.io.io>>}
         type_generics.gen#3<0>(_:wybe.float, _:wybe.int, _:wybe.bool, _:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3
 
     1:
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @io:nn:nn
-        foreign c print_float(~fx##0:wybe.float, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @float:nn:nn
+        foreign c print_float(~fx##0:wybe.float, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @float:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
         type_generics.gen#3<0>(_:wybe.float, _:wybe.int, _:wybe.bool, _:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2
@@ -116,8 +116,8 @@ gen#3([f##0:wybe.float], [i##0:wybe.int], [tmp#0##0:wybe.bool], [x##0:wybe.float
         type_generics.gen#4<0>(_:wybe.float, _:wybe.int, _:wybe.bool, _:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3
 
     1:
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io:nn:nn
-        foreign c print_float(~x##1:wybe.float, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @float:nn:nn
+        foreign c print_float(~x##1:wybe.float, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @float:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
         type_generics.gen#4<0>(_:wybe.float, _:wybe.int, _:wybe.bool, _:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2
@@ -135,8 +135,8 @@ gen#4([f##0:wybe.float], [i##0:wybe.int], [tmp#0##0:wybe.bool], [x##0:wybe.float
         type_generics.gen#5<0>(_:wybe.float, _:wybe.int, _:wybe.bool, _:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3
 
     1:
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
-        foreign c putchar(~z##0:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @char:nn:nn
+        foreign c putchar(~z##0:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @char:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
         type_generics.gen#5<0>(_:wybe.float, _:wybe.int, _:wybe.bool, _:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2
@@ -153,7 +153,7 @@ gen#5([f##0:wybe.float], [i##0:wybe.int], [tmp#0##0:wybe.bool], [x##0:wybe.float
     0:
 
     1:
-        wybe.io.print<5>(~b##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @io:nn:nn
+        wybe.bool.print<0>(~b##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @bool:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
@@ -170,7 +170,7 @@ gen#5([f##0:wybe.float], [i##0:wybe.int], [tmp#0##0:wybe.bool], [x##0:wybe.float
 declare external ccc  void @putchar(i8)    
 
 
-declare external fastcc  void @"wybe.io.print<5>"(i1)    
+declare external fastcc  void @"wybe.bool.print<0>"(i1)    
 
 
 declare external ccc  void @print_float(double)    
@@ -335,7 +335,7 @@ entry:
   br i1 %44, label %if.then, label %if.else 
 if.then:
   %45 = trunc i64 %43 to i1  
-  tail call fastcc  void  @"wybe.io.print<5>"(i1  %45)  
+  tail call fastcc  void  @"wybe.bool.print<0>"(i1  %45)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else:

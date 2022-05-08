@@ -3,7 +3,7 @@
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
-use wybe.bool, wybe.int, wybe.comparison
+use wybe.bool, wybe.int, wybe.comparison, wybe.io
 
 representation is 8 bit unsigned
 
@@ -31,3 +31,11 @@ pub def ord(c:_):int = foreign lpvm cast(c)
 
 # Char of an integer character code
 pub def {test} chr(i:int):_ = foreign lpvm cast(i) where { 0 <= i ; i <= 255 }
+
+## I/O
+
+pub def print(x:_) use !io { foreign c putchar(x, !io) }
+
+pub def println(x:_) use !io { !print(x); !nl }
+
+pub def read(?x:_) use !io { foreign c read_char(?x, !io) }

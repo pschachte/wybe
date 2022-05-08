@@ -3,10 +3,8 @@
 
 pragma no_standard_library
 
-use wybe.int, wybe.c_string, wybe.range
-use wybe.int, wybe.char, wybe.bool
-use wybe.io, wybe.float, wybe.count
-use wybe.comparison, wybe.phantom
+use wybe.c_string, wybe.range, wybe.int, wybe.char, wybe.bool, wybe.comparison
+use wybe.io 
 
 # Private constructors.
 # This ensures that strings can only be manipulated with public procedures,
@@ -138,15 +136,21 @@ pub def (x:_ <=> y:_):comparison = c where {
     }
 }
 
-# Print helper, for wybe.io
-pub def print_string(s:_) use !io {
-    case s in { 
+
+## I/O
+
+pub def print(x:_) use !io {
+    case x in { 
         buffer(_, ?str) :: !print(str)
       | concat(?left, ?right) :: !print(left); !print(right)
-      | slice(_, _) :: for ?c in s { !print(c) }
+      | slice(_, _) :: for ?c in x { !print(c) }
       | singleton(?c) :: !print(c)
     }
 }
+
+pub def println(x:_) use !io { !print(x); !nl }
+
+pub def read(?x:_) use !io { !read(?str:c_string); ?x = string(str) }
 
 
 ## Private helper functions
