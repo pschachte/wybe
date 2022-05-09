@@ -24,7 +24,7 @@ foo(size##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   InterestingCallProperties: []
     foreign lpvm alloc(~size##0:wybe.int, ?str##0:wybe.string) @alloc_args:nn:nn
     foreign lpvm mutate(~str##0:wybe.string, ?str##1:wybe.string, 0:wybe.int, 1:wybe.bool, 1:wybe.int, 0:wybe.int, 0:wybe.int) @alloc_args:nn:nn
-    wybe.string.print_string<0>(~str##1:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @io:nn:nn
+    wybe.string.print<0>(~str##1:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
@@ -40,7 +40,7 @@ foo(size##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
 declare external ccc  void @putchar(i8)    
 
 
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+declare external fastcc  void @"wybe.string.print<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -64,7 +64,7 @@ entry:
   %4 = inttoptr i64 %3 to i64* 
   %5 = getelementptr  i64, i64* %4, i64 0 
   store  i64 0, i64* %5 
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %3)  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  %3)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }

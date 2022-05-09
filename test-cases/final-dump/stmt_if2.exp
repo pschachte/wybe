@@ -37,7 +37,7 @@ module top-level code > public {impure} (0 calls)
     0:
 
     1:
-        wybe.string.print_string<0>("found":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #5 @io:nn:nn
+        wybe.string.print<0>("found":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @stmt_if2:nn:nn
 
 
 
@@ -101,7 +101,7 @@ lookup(key##0:wybe.int, tree##0:stmt_if2.tree, ?#result##0:wybe.bool)<{}; {}>:
 @stmt_if2.12 =    constant [?? x i8] c"found\00"
 
 
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+declare external fastcc  void @"wybe.string.print<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -129,7 +129,7 @@ entry:
   %"1#tmp#3##0" = tail call fastcc  i1  @"stmt_if2.lookup<0>"(i64  1, i64  %3)  
   br i1 %"1#tmp#3##0", label %if.then, label %if.else 
 if.then:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_if2.13, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_if2.13, i32 0, i32 0) to i64))  
   ret void 
 if.else:
   ret void 

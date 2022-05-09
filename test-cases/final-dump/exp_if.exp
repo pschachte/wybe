@@ -15,9 +15,9 @@ module top-level code > public {inline,impure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print_string<0>("expect larger: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @io:nn:nn
+    wybe.string.print<0>("expect larger: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @exp_if:nn:nn
     exp_if.if_test<0>(3:wybe.int, ?tmp#0##0:wybe.string) #1 @exp_if:nn:nn
-    wybe.string.print_string<0>(~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @io:nn:nn
+    wybe.string.print<0>(~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @exp_if:nn:nn
 
 
 if_test > public (1 calls)
@@ -60,7 +60,7 @@ if_test(x##0:wybe.int, ?#result##0:wybe.string)<{}; {}>:
 @exp_if.5 =    constant [?? x i8] c"smaller\00"
 
 
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+declare external fastcc  void @"wybe.string.print<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -71,9 +71,9 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  void @"exp_if.<0>"()    {
 entry:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @exp_if.2, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @exp_if.2, i32 0, i32 0) to i64))  
   %"1#tmp#0##0" = tail call fastcc  i64  @"exp_if.if_test<0>"(i64  3)  
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  %"1#tmp#0##0")  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  %"1#tmp#0##0")  
   ret void 
 }
 

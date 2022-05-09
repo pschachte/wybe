@@ -24,7 +24,7 @@ module top-level code > public {inline,impure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print_string<0>("Wang":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @io:nn:nn
+    wybe.string.print<0>("Wang":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @person1:nn:nn
 
   LLVM code       :
 
@@ -40,7 +40,7 @@ module top-level code > public {inline,impure} (0 calls)
 @person1.1 =    constant [?? x i8] c"Wang\00"
 
 
-declare external fastcc  void @"wybe.string.print_string<0>"(i64)    
+declare external fastcc  void @"wybe.string.print<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -51,7 +51,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  void @"person1.<0>"()    {
 entry:
-  tail call fastcc  void  @"wybe.string.print_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @person1.2, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @person1.2, i32 0, i32 0) to i64))  
   ret void 
 }
 --------------------------------------------------
