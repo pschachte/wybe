@@ -77,37 +77,20 @@ pub def filter(p:{test}(A), !as:_(A)) {
     ?as = reverse(out)
 }
 
-pub def print(x:list(int)) use !io {
+pub def print(x:_(T), printer:{resource}(T)) use !io {
     !print("[")
-    !_print_list(x)
+    !_print_list(x, printer)
     !print("]")
 }
 
-pub def print(xs:list(list(int))) use !io {
-    !print("[")
-    !_print_list(xs)
-    !print("]")
-}
+pub def println(x:_(T), printer:{resource}(T)) use !io { !print(x, printer); !nl }
 
-pub def println(x:list(int)) use !io { !print(x); !nl }
-pub def println(x:list(list(int))) use !io { !print(x); !nl }
-
-def _print_list(xs:list(int)) use !io {
+def _print_list(xs:_(T), printer:{resource}(T)) use !io {
     if { [?x | ?xs1] = xs ::
-        !print(x)
+        !printer(x)
         if { [ ?x2 | ?xs2 ] = xs1 ::
             !print(", ")
         }
-        !_print_list(xs1)
-    }
-}
-
-def _print_list(xs:list(list(int))) use !io {
-    if { [?x | ?xs1] = xs ::
-        !print(x)
-        if { [ ?x2 | ?xs2 ] = xs1 ::
-            !print(", ")
-        }
-        !_print_list(xs1)
+        !_print_list(xs1, printer)
     }
 }

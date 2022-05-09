@@ -10,5 +10,8 @@ def append(front: list(int), back: list(int), ?result: list(int)) {
 ?x = [[1],[2],[3]]
 ?cons = [4,6]
 map({append(@, cons, ?@)}, x, ?y)
-!println(x)
-!println(y)
+def print_list_of_ints(l: list(int)) use !io {
+    !list.print(l, int.print)
+}
+!list.println(x, print_list_of_ints)
+!list.println(y, print_list_of_ints)
