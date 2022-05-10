@@ -194,12 +194,12 @@ entry:
   tail call fastcc  void  @"type_generics.foo<0>"(i64  1)  
   tail call fastcc  void  @"type_generics.foo<0>"(i64  bitcast (double 1.000000e0 to i64))  
   tail call fastcc  void  @"type_generics.foo<0>"(i64  bitcast (double 1.000000e0 to i64))  
-  %1 = tail call fastcc  {i64, i1}  @"type_generics.foo2<0>"(i64  1)  
-  %2 = extractvalue {i64, i1} %1, 0 
-  %3 = extractvalue {i64, i1} %1, 1 
-  br i1 %3, label %if.then, label %if.else 
+  %0 = tail call fastcc  {i64, i1}  @"type_generics.foo2<0>"(i64  1)  
+  %1 = extractvalue {i64, i1} %0, 0 
+  %2 = extractvalue {i64, i1} %0, 1 
+  br i1 %2, label %if.then, label %if.else 
 if.then:
-  tail call ccc  void  @print_int(i64  %2)  
+  tail call ccc  void  @print_int(i64  %1)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"type_generics.gen#1<0>"()  
   ret void 
@@ -211,17 +211,17 @@ if.else:
 
 define external fastcc  void @"type_generics.foo<0>"(i64  %"x##0")    {
 entry:
-  %4 = trunc i64 16 to i32  
-  %5 = tail call ccc  i8*  @wybe_malloc(i32  %4)  
-  %6 = ptrtoint i8* %5 to i64 
-  %7 = inttoptr i64 %6 to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
-  store  i64 %"x##0", i64* %8 
-  %9 = add   i64 %6, 8 
-  %10 = inttoptr i64 %9 to i64* 
-  %11 = getelementptr  i64, i64* %10, i64 0 
-  store  i64 0, i64* %11 
-  %"1#tmp#2##0" = tail call fastcc  i64  @"wybe.list.length1<0>"(i64  %6, i64  0)  
+  %0 = trunc i64 16 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  store  i64 %"x##0", i64* %4 
+  %5 = add   i64 %2, 8 
+  %6 = inttoptr i64 %5 to i64* 
+  %7 = getelementptr  i64, i64* %6, i64 0 
+  store  i64 0, i64* %7 
+  %"1#tmp#2##0" = tail call fastcc  i64  @"wybe.list.length1<0>"(i64  %2, i64  0)  
   tail call ccc  void  @print_int(i64  %"1#tmp#2##0")  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
@@ -230,40 +230,40 @@ entry:
 
 define external fastcc  {i64, i1} @"type_generics.foo2<0>"(i64  %"x##0")    {
 entry:
-  %12 = trunc i64 16 to i32  
-  %13 = tail call ccc  i8*  @wybe_malloc(i32  %12)  
-  %14 = ptrtoint i8* %13 to i64 
-  %15 = inttoptr i64 %14 to i64* 
-  %16 = getelementptr  i64, i64* %15, i64 0 
-  store  i64 %"x##0", i64* %16 
-  %17 = add   i64 %14, 8 
-  %18 = inttoptr i64 %17 to i64* 
-  %19 = getelementptr  i64, i64* %18, i64 0 
-  store  i64 0, i64* %19 
-  %"1#tmp#9##0" = icmp ne i64 %14, 0 
+  %0 = trunc i64 16 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  store  i64 %"x##0", i64* %4 
+  %5 = add   i64 %2, 8 
+  %6 = inttoptr i64 %5 to i64* 
+  %7 = getelementptr  i64, i64* %6, i64 0 
+  store  i64 0, i64* %7 
+  %"1#tmp#9##0" = icmp ne i64 %2, 0 
   br i1 %"1#tmp#9##0", label %if.then, label %if.else 
 if.then:
-  %20 = inttoptr i64 %14 to i64* 
-  %21 = getelementptr  i64, i64* %20, i64 0 
-  %22 = load  i64, i64* %21 
-  %23 = insertvalue {i64, i1} undef, i64 %22, 0 
-  %24 = insertvalue {i64, i1} %23, i1 1, 1 
-  ret {i64, i1} %24 
+  %8 = inttoptr i64 %2 to i64* 
+  %9 = getelementptr  i64, i64* %8, i64 0 
+  %10 = load  i64, i64* %9 
+  %11 = insertvalue {i64, i1} undef, i64 %10, 0 
+  %12 = insertvalue {i64, i1} %11, i1 1, 1 
+  ret {i64, i1} %12 
 if.else:
-  %25 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %26 = insertvalue {i64, i1} %25, i1 0, 1 
-  ret {i64, i1} %26 
+  %13 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %14 = insertvalue {i64, i1} %13, i1 0, 1 
+  ret {i64, i1} %14 
 }
 
 
 define external fastcc  void @"type_generics.gen#1<0>"()    {
 entry:
-  %27 = tail call fastcc  {i64, i1}  @"type_generics.foo2<0>"(i64  1)  
-  %28 = extractvalue {i64, i1} %27, 0 
-  %29 = extractvalue {i64, i1} %27, 1 
-  br i1 %29, label %if.then, label %if.else 
+  %0 = tail call fastcc  {i64, i1}  @"type_generics.foo2<0>"(i64  1)  
+  %1 = extractvalue {i64, i1} %0, 0 
+  %2 = extractvalue {i64, i1} %0, 1 
+  br i1 %2, label %if.then, label %if.else 
 if.then:
-  tail call ccc  void  @print_int(i64  %28)  
+  tail call ccc  void  @print_int(i64  %1)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"type_generics.gen#2<0>"()  
   ret void 
@@ -275,13 +275,13 @@ if.else:
 
 define external fastcc  void @"type_generics.gen#2<0>"()    {
 entry:
-  %30 = tail call fastcc  {i64, i1}  @"type_generics.foo2<0>"(i64  bitcast (double 1.000000e0 to i64))  
-  %31 = extractvalue {i64, i1} %30, 0 
-  %32 = extractvalue {i64, i1} %30, 1 
-  br i1 %32, label %if.then, label %if.else 
+  %0 = tail call fastcc  {i64, i1}  @"type_generics.foo2<0>"(i64  bitcast (double 1.000000e0 to i64))  
+  %1 = extractvalue {i64, i1} %0, 0 
+  %2 = extractvalue {i64, i1} %0, 1 
+  br i1 %2, label %if.then, label %if.else 
 if.then:
-  %33 = bitcast i64 %31 to double 
-  tail call ccc  void  @print_float(double  %33)  
+  %3 = bitcast i64 %1 to double 
+  tail call ccc  void  @print_float(double  %3)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"type_generics.gen#3<0>"()  
   ret void 
@@ -293,13 +293,13 @@ if.else:
 
 define external fastcc  void @"type_generics.gen#3<0>"()    {
 entry:
-  %34 = tail call fastcc  {i64, i1}  @"type_generics.foo2<0>"(i64  bitcast (double 1.000000e0 to i64))  
-  %35 = extractvalue {i64, i1} %34, 0 
-  %36 = extractvalue {i64, i1} %34, 1 
-  br i1 %36, label %if.then, label %if.else 
+  %0 = tail call fastcc  {i64, i1}  @"type_generics.foo2<0>"(i64  bitcast (double 1.000000e0 to i64))  
+  %1 = extractvalue {i64, i1} %0, 0 
+  %2 = extractvalue {i64, i1} %0, 1 
+  br i1 %2, label %if.then, label %if.else 
 if.then:
-  %37 = bitcast i64 %35 to double 
-  tail call ccc  void  @print_float(double  %37)  
+  %3 = bitcast i64 %1 to double 
+  tail call ccc  void  @print_float(double  %3)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"type_generics.gen#4<0>"()  
   ret void 
@@ -311,13 +311,13 @@ if.else:
 
 define external fastcc  void @"type_generics.gen#4<0>"()    {
 entry:
-  %38 = tail call fastcc  {i64, i1}  @"type_generics.foo2<0>"(i64  97)  
-  %39 = extractvalue {i64, i1} %38, 0 
-  %40 = extractvalue {i64, i1} %38, 1 
-  br i1 %40, label %if.then, label %if.else 
+  %0 = tail call fastcc  {i64, i1}  @"type_generics.foo2<0>"(i64  97)  
+  %1 = extractvalue {i64, i1} %0, 0 
+  %2 = extractvalue {i64, i1} %0, 1 
+  br i1 %2, label %if.then, label %if.else 
 if.then:
-  %41 = trunc i64 %39 to i8  
-  tail call ccc  void  @putchar(i8  %41)  
+  %3 = trunc i64 %1 to i8  
+  tail call ccc  void  @putchar(i8  %3)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"type_generics.gen#5<0>"()  
   ret void 
@@ -329,13 +329,13 @@ if.else:
 
 define external fastcc  void @"type_generics.gen#5<0>"()    {
 entry:
-  %42 = tail call fastcc  {i64, i1}  @"type_generics.foo2<0>"(i64  0)  
-  %43 = extractvalue {i64, i1} %42, 0 
-  %44 = extractvalue {i64, i1} %42, 1 
-  br i1 %44, label %if.then, label %if.else 
+  %0 = tail call fastcc  {i64, i1}  @"type_generics.foo2<0>"(i64  0)  
+  %1 = extractvalue {i64, i1} %0, 0 
+  %2 = extractvalue {i64, i1} %0, 1 
+  br i1 %2, label %if.then, label %if.else 
 if.then:
-  %45 = trunc i64 %43 to i1  
-  tail call fastcc  void  @"wybe.bool.print<0>"(i1  %45)  
+  %3 = trunc i64 %1 to i1  
+  tail call fastcc  void  @"wybe.bool.print<0>"(i1  %3)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else:

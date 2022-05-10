@@ -61,11 +61,11 @@ entry:
   %"1#tmp#5##0" = icmp ne i64 %"lst##0", 0 
   br i1 %"1#tmp#5##0", label %if.then, label %if.else 
 if.then:
-  %1 = add   i64 %"lst##0", 8 
-  %2 = inttoptr i64 %1 to i64* 
-  %3 = getelementptr  i64, i64* %2, i64 0 
-  %4 = load  i64, i64* %3 
-  %"2#tmp#2##0" = tail call fastcc  i64  @"cases.len<0>"(i64  %4)  
+  %0 = add   i64 %"lst##0", 8 
+  %1 = inttoptr i64 %0 to i64* 
+  %2 = getelementptr  i64, i64* %1, i64 0 
+  %3 = load  i64, i64* %2 
+  %"2#tmp#2##0" = tail call fastcc  i64  @"cases.len<0>"(i64  %3)  
   %"2##result##0" = add   i64 %"2#tmp#2##0", 1 
   ret i64 %"2##result##0" 
 if.else:
@@ -78,11 +78,11 @@ entry:
   %"1#tmp#6##0" = icmp ne i64 %"lst##0", 0 
   br i1 %"1#tmp#6##0", label %if.then, label %if.else 
 if.then:
-  %5 = add   i64 %"lst##0", 8 
-  %6 = inttoptr i64 %5 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  %8 = load  i64, i64* %7 
-  %"2#tmp#3##0" = tail call fastcc  i64  @"cases.len2<0>"(i64  %8)  
+  %0 = add   i64 %"lst##0", 8 
+  %1 = inttoptr i64 %0 to i64* 
+  %2 = getelementptr  i64, i64* %1, i64 0 
+  %3 = load  i64, i64* %2 
+  %"2#tmp#3##0" = tail call fastcc  i64  @"cases.len2<0>"(i64  %3)  
   %"2##result##0" = add   i64 %"2#tmp#3##0", 1 
   ret i64 %"2##result##0" 
 if.else:

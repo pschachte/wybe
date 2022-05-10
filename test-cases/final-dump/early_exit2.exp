@@ -36,10 +36,10 @@ my_exit(code##0:wybe.int)<{}; {}>:
  
 
 
-@early_exit2.2 =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @early_exit2.1 to i64) }
+@early_exit2.1 =    constant {i64, i64} { i64 17, i64 ptrtoint ([?? x i8]* @early_exit2.0 to i64) }
 
 
-@early_exit2.1 =    constant [?? x i8] c"should print this\00"
+@early_exit2.0 =    constant [?? x i8] c"should print this\00"
 
 
 declare external ccc  void @exit(i64)    
@@ -59,7 +59,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  void @"early_exit2.<0>"()    {
 entry:
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @early_exit2.2, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @early_exit2.1, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call ccc  void  @exit(i64  1)  
   ret void 

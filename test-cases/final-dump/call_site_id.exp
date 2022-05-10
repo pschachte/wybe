@@ -84,10 +84,10 @@ foo(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
  
 
 
-@call_site_id.2 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @call_site_id.1 to i64) }
+@call_site_id.1 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @call_site_id.0 to i64) }
 
 
-@call_site_id.1 =    constant [?? x i8] c" \00"
+@call_site_id.0 =    constant [?? x i8] c" \00"
 
 
 declare external ccc  void @putchar(i8)    
@@ -149,13 +149,13 @@ entry:
 
 define external fastcc  void @"call_site_id.foo<0>"(i64  %"x##0")    {
 entry:
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.2, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.2, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.2, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.2, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.2, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.2, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.2, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.1, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.1, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.1, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.1, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.1, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.1, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @call_site_id.1, i32 0, i32 0) to i64))  
   %"1#tmp#1##0" = mul   i64 %"x##0", 5 
   %"1#tmp#0##0" = add   i64 %"1#tmp#1##0", 10 
   tail call ccc  void  @print_int(i64  %"1#tmp#0##0")  

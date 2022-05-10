@@ -361,7 +361,7 @@ if.else:
 if.then1:
   %"4#tmp#15##0" = lshr  i64 %"#left##0", 2 
   %"4#tmp#16##0" = and i64 %"4#tmp#15##0", 255 
-  %1 = trunc i64 %"4#tmp#16##0" to i8  
+  %0 = trunc i64 %"4#tmp#16##0" to i8  
   %"4#tmp#18##0" = icmp ne i64 %"#right##0", 0 
   br i1 %"4#tmp#18##0", label %if.then2, label %if.else2 
 if.else1:
@@ -376,16 +376,16 @@ if.else2:
 if.then3:
   %"8#tmp#21##0" = lshr  i64 %"#right##0", 2 
   %"8#tmp#22##0" = and i64 %"8#tmp#21##0", 255 
-  %2 = trunc i64 %"8#tmp#22##0" to i8  
-  %"8##success##0" = icmp eq i8 %1, %2 
+  %1 = trunc i64 %"8#tmp#22##0" to i8  
+  %"8##success##0" = icmp eq i8 %0, %1 
   ret i1 %"8##success##0" 
 if.else3:
   ret i1 0 
 if.then4:
-  %3 = add   i64 %"#left##0", -1 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
+  %2 = add   i64 %"#left##0", -1 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  %5 = load  i64, i64* %4 
   %"10#tmp#22##0" = icmp ne i64 %"#right##0", 0 
   br i1 %"10#tmp#22##0", label %if.then5, label %if.else5 
 if.else4:
@@ -398,19 +398,19 @@ if.then5:
 if.else5:
   ret i1 0 
 if.then6:
-  %7 = add   i64 %"#right##0", -1 
-  %8 = inttoptr i64 %7 to i64* 
-  %9 = getelementptr  i64, i64* %8, i64 0 
-  %10 = load  i64, i64* %9 
-  %"14##success##0" = tail call fastcc  i1  @"ctor_char2.=<0>"(i64  %6, i64  %10)  
+  %6 = add   i64 %"#right##0", -1 
+  %7 = inttoptr i64 %6 to i64* 
+  %8 = getelementptr  i64, i64* %7, i64 0 
+  %9 = load  i64, i64* %8 
+  %"14##success##0" = tail call fastcc  i1  @"ctor_char2.=<0>"(i64  %5, i64  %9)  
   ret i1 %"14##success##0" 
 if.else6:
   ret i1 0 
 if.then7:
-  %11 = add   i64 %"#left##0", -2 
-  %12 = inttoptr i64 %11 to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
-  %14 = load  i64, i64* %13 
+  %10 = add   i64 %"#left##0", -2 
+  %11 = inttoptr i64 %10 to i64* 
+  %12 = getelementptr  i64, i64* %11, i64 0 
+  %13 = load  i64, i64* %12 
   %"16#tmp#26##0" = icmp ne i64 %"#right##0", 0 
   br i1 %"16#tmp#26##0", label %if.then8, label %if.else8 
 if.else7:
@@ -422,11 +422,11 @@ if.then8:
 if.else8:
   ret i1 0 
 if.then9:
-  %15 = add   i64 %"#right##0", -2 
-  %16 = inttoptr i64 %15 to i64* 
-  %17 = getelementptr  i64, i64* %16, i64 0 
-  %18 = load  i64, i64* %17 
-  %"20##success##0" = tail call fastcc  i1  @"ctor_char2.=<0>"(i64  %14, i64  %18)  
+  %14 = add   i64 %"#right##0", -2 
+  %15 = inttoptr i64 %14 to i64* 
+  %16 = getelementptr  i64, i64* %15, i64 0 
+  %17 = load  i64, i64* %16 
+  %"20##success##0" = tail call fastcc  i1  @"ctor_char2.=<0>"(i64  %13, i64  %17)  
   ret i1 %"20##success##0" 
 if.else9:
   ret i1 0 
@@ -435,13 +435,13 @@ if.else9:
 
 define external fastcc  i64 @"ctor_char2.another_ctor<0>"(i64  %"another_ctor#1##0")    {
 entry:
-  %19 = trunc i64 8 to i32  
-  %20 = tail call ccc  i8*  @wybe_malloc(i32  %19)  
-  %21 = ptrtoint i8* %20 to i64 
-  %22 = inttoptr i64 %21 to i64* 
-  %23 = getelementptr  i64, i64* %22, i64 0 
-  store  i64 %"another_ctor#1##0", i64* %23 
-  %"1##result##0" = or i64 %21, 2 
+  %0 = trunc i64 8 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  store  i64 %"another_ctor#1##0", i64* %4 
+  %"1##result##0" = or i64 %2, 2 
   ret i64 %"1##result##0" 
 }
 
@@ -455,21 +455,21 @@ if.then:
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 2 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
-  %32 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %33 = insertvalue {i64, i1} %32, i1 0, 1 
-  ret {i64, i1} %33 
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
 if.then1:
-  %24 = add   i64 %"#result##0", -2 
-  %25 = inttoptr i64 %24 to i64* 
-  %26 = getelementptr  i64, i64* %25, i64 0 
-  %27 = load  i64, i64* %26 
-  %28 = insertvalue {i64, i1} undef, i64 %27, 0 
-  %29 = insertvalue {i64, i1} %28, i1 1, 1 
-  ret {i64, i1} %29 
+  %0 = add   i64 %"#result##0", -2 
+  %1 = inttoptr i64 %0 to i64* 
+  %2 = getelementptr  i64, i64* %1, i64 0 
+  %3 = load  i64, i64* %2 
+  %4 = insertvalue {i64, i1} undef, i64 %3, 0 
+  %5 = insertvalue {i64, i1} %4, i1 1, 1 
+  ret {i64, i1} %5 
 if.else1:
-  %30 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %31 = insertvalue {i64, i1} %30, i1 0, 1 
-  ret {i64, i1} %31 
+  %6 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %7 = insertvalue {i64, i1} %6, i1 0, 1 
+  ret {i64, i1} %7 
 }
 
 
@@ -482,20 +482,20 @@ if.then:
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 0 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
-  %39 = insertvalue {i8, i1} undef, i8 undef, 0 
-  %40 = insertvalue {i8, i1} %39, i1 0, 1 
-  ret {i8, i1} %40 
+  %5 = insertvalue {i8, i1} undef, i8 undef, 0 
+  %6 = insertvalue {i8, i1} %5, i1 0, 1 
+  ret {i8, i1} %6 
 if.then1:
   %"4##rec##1" = lshr  i64 %"#rec##0", 2 
   %"4##field##0" = and i64 %"4##rec##1", 255 
-  %34 = trunc i64 %"4##field##0" to i8  
-  %35 = insertvalue {i8, i1} undef, i8 %34, 0 
-  %36 = insertvalue {i8, i1} %35, i1 1, 1 
-  ret {i8, i1} %36 
+  %0 = trunc i64 %"4##field##0" to i8  
+  %1 = insertvalue {i8, i1} undef, i8 %0, 0 
+  %2 = insertvalue {i8, i1} %1, i1 1, 1 
+  ret {i8, i1} %2 
 if.else1:
-  %37 = insertvalue {i8, i1} undef, i8 undef, 0 
-  %38 = insertvalue {i8, i1} %37, i1 0, 1 
-  ret {i8, i1} %38 
+  %3 = insertvalue {i8, i1} undef, i8 undef, 0 
+  %4 = insertvalue {i8, i1} %3, i1 0, 1 
+  ret {i8, i1} %4 
 }
 
 
@@ -508,21 +508,21 @@ if.then:
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 0 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
-  %46 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %47 = insertvalue {i64, i1} %46, i1 0, 1 
-  ret {i64, i1} %47 
+  %5 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %6 = insertvalue {i64, i1} %5, i1 0, 1 
+  ret {i64, i1} %6 
 if.then1:
   %"4##rec##1" = and i64 %"#rec##0", -1021 
-  %41 = zext i8 %"#field##0" to i64  
-  %"4##temp##0" = shl   i64 %41, 2 
+  %0 = zext i8 %"#field##0" to i64  
+  %"4##temp##0" = shl   i64 %0, 2 
   %"4##rec##2" = or i64 %"4##rec##1", %"4##temp##0" 
-  %42 = insertvalue {i64, i1} undef, i64 %"4##rec##2", 0 
-  %43 = insertvalue {i64, i1} %42, i1 1, 1 
-  ret {i64, i1} %43 
+  %1 = insertvalue {i64, i1} undef, i64 %"4##rec##2", 0 
+  %2 = insertvalue {i64, i1} %1, i1 1, 1 
+  ret {i64, i1} %2 
 if.else1:
-  %44 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %45 = insertvalue {i64, i1} %44, i1 0, 1 
-  ret {i64, i1} %45 
+  %3 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %4 = insertvalue {i64, i1} %3, i1 0, 1 
+  ret {i64, i1} %4 
 }
 
 
@@ -534,8 +534,8 @@ entry:
 
 define external fastcc  i64 @"ctor_char2.ctor<0>"(i8  %"c##0")    {
 entry:
-  %48 = zext i8 %"c##0" to i64  
-  %"1##temp##0" = shl   i64 %48, 2 
+  %0 = zext i8 %"c##0" to i64  
+  %"1##temp##0" = shl   i64 %0, 2 
   %"1##result##3" = or i64 %"1##temp##0", 1024 
   ret i64 %"1##result##3" 
 }
@@ -550,20 +550,20 @@ if.then:
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 0 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
-  %54 = insertvalue {i8, i1} undef, i8 undef, 0 
-  %55 = insertvalue {i8, i1} %54, i1 0, 1 
-  ret {i8, i1} %55 
+  %5 = insertvalue {i8, i1} undef, i8 undef, 0 
+  %6 = insertvalue {i8, i1} %5, i1 0, 1 
+  ret {i8, i1} %6 
 if.then1:
   %"4##temp##0" = lshr  i64 %"#result##0", 2 
   %"4##temp2##0" = and i64 %"4##temp##0", 255 
-  %49 = trunc i64 %"4##temp2##0" to i8  
-  %50 = insertvalue {i8, i1} undef, i8 %49, 0 
-  %51 = insertvalue {i8, i1} %50, i1 1, 1 
-  ret {i8, i1} %51 
+  %0 = trunc i64 %"4##temp2##0" to i8  
+  %1 = insertvalue {i8, i1} undef, i8 %0, 0 
+  %2 = insertvalue {i8, i1} %1, i1 1, 1 
+  ret {i8, i1} %2 
 if.else1:
-  %52 = insertvalue {i8, i1} undef, i8 undef, 0 
-  %53 = insertvalue {i8, i1} %52, i1 0, 1 
-  ret {i8, i1} %53 
+  %3 = insertvalue {i8, i1} undef, i8 undef, 0 
+  %4 = insertvalue {i8, i1} %3, i1 0, 1 
+  ret {i8, i1} %4 
 }
 
 
@@ -580,8 +580,8 @@ if.else:
 if.then1:
   %"4#tmp#6##0" = lshr  i64 %"this##0", 2 
   %"4#tmp#7##0" = and i64 %"4#tmp#6##0", 255 
-  %56 = trunc i64 %"4#tmp#7##0" to i8  
-  ret i8 %56 
+  %0 = trunc i64 %"4#tmp#7##0" to i8  
+  ret i8 %0 
 if.else1:
   ret i8 48 
 }
@@ -589,13 +589,13 @@ if.else1:
 
 define external fastcc  i64 @"ctor_char2.other_ctor<0>"(i64  %"other_ctor#1##0")    {
 entry:
-  %57 = trunc i64 8 to i32  
-  %58 = tail call ccc  i8*  @wybe_malloc(i32  %57)  
-  %59 = ptrtoint i8* %58 to i64 
-  %60 = inttoptr i64 %59 to i64* 
-  %61 = getelementptr  i64, i64* %60, i64 0 
-  store  i64 %"other_ctor#1##0", i64* %61 
-  %"1##result##0" = or i64 %59, 1 
+  %0 = trunc i64 8 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  store  i64 %"other_ctor#1##0", i64* %4 
+  %"1##result##0" = or i64 %2, 1 
   ret i64 %"1##result##0" 
 }
 
@@ -609,21 +609,21 @@ if.then:
   %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 1 
   br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
 if.else:
-  %70 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %71 = insertvalue {i64, i1} %70, i1 0, 1 
-  ret {i64, i1} %71 
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
 if.then1:
-  %62 = add   i64 %"#result##0", -1 
-  %63 = inttoptr i64 %62 to i64* 
-  %64 = getelementptr  i64, i64* %63, i64 0 
-  %65 = load  i64, i64* %64 
-  %66 = insertvalue {i64, i1} undef, i64 %65, 0 
-  %67 = insertvalue {i64, i1} %66, i1 1, 1 
-  ret {i64, i1} %67 
+  %0 = add   i64 %"#result##0", -1 
+  %1 = inttoptr i64 %0 to i64* 
+  %2 = getelementptr  i64, i64* %1, i64 0 
+  %3 = load  i64, i64* %2 
+  %4 = insertvalue {i64, i1} undef, i64 %3, 0 
+  %5 = insertvalue {i64, i1} %4, i1 1, 1 
+  ret {i64, i1} %5 
 if.else1:
-  %68 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %69 = insertvalue {i64, i1} %68, i1 0, 1 
-  ret {i64, i1} %69 
+  %6 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %7 = insertvalue {i64, i1} %6, i1 0, 1 
+  ret {i64, i1} %7 
 }
 
 
