@@ -302,16 +302,16 @@ entry:
   %19 = inttoptr i64 %18 to i64* 
   %20 = getelementptr  i64, i64* %19, i64 0 
   %21 = load  i64, i64* %20 
-  %"1#tmp#1##0" = icmp eq i64 %2, %13 
-  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
+  %22 = icmp eq i64 %2, %13 
+  br i1 %22, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = icmp eq i64 %6, %17 
-  br i1 %"2#tmp#2##0", label %if.then1, label %if.else1 
+  %23 = icmp eq i64 %6, %17 
+  br i1 %23, label %if.then1, label %if.else1 
 if.else:
   ret i1 0 
 if.then1:
-  %"4##success##0" = icmp eq i64 %10, %21 
-  ret i1 %"4##success##0" 
+  %24 = icmp eq i64 %10, %21 
+  ret i1 %24 
 if.else1:
   ret i1 0 
 }
@@ -460,19 +460,19 @@ entry:
   %19 = inttoptr i64 %18 to i64* 
   %20 = getelementptr  i64, i64* %19, i64 0 
   %21 = load  i64, i64* %20 
-  %"1#tmp#9##0" = icmp eq i64 %2, %13 
-  br i1 %"1#tmp#9##0", label %if.then, label %if.else 
+  %22 = icmp eq i64 %2, %13 
+  br i1 %22, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#10##0" = icmp eq i64 %6, %17 
-  br i1 %"2#tmp#10##0", label %if.then1, label %if.else1 
+  %23 = icmp eq i64 %6, %17 
+  br i1 %23, label %if.then1, label %if.else1 
 if.else:
-  %"3##success##0" = xor i1 0, 1 
-  ret i1 %"3##success##0" 
+  %27 = xor i1 0, 1 
+  ret i1 %27 
 if.then1:
-  %"4#tmp#0##0" = icmp eq i64 %10, %21 
-  %"4##success##0" = xor i1 %"4#tmp#0##0", 1 
-  ret i1 %"4##success##0" 
+  %24 = icmp eq i64 %10, %21 
+  %25 = xor i1 %24, 1 
+  ret i1 %25 
 if.else1:
-  %"5##success##0" = xor i1 0, 1 
-  ret i1 %"5##success##0" 
+  %26 = xor i1 0, 1 
+  ret i1 %26 
 }

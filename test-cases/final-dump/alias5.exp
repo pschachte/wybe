@@ -118,7 +118,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  void @"alias5.<0>"()    {
 entry:
-  tail call fastcc  void  @"alias5.bar<0>"()  
+  musttail call fastcc  void  @"alias5.bar<0>"()  
   ret void 
 }
 
@@ -152,10 +152,10 @@ entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias5.9, i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  2)  
   tail call ccc  void  @putchar(i8  10)  
-  %"1#tmp#0##0" = add   i64 %"v3##0", 100 
-  %"1#tmp#2##0" = mul   i64 %"1#tmp#0##0", 200 
-  %"1#v4##1" = sdiv exact i64 %"1#tmp#2##0", 4 
-  %0 = insertvalue {i64, i64} undef, i64 %"v1##0", 0 
-  %1 = insertvalue {i64, i64} %0, i64 %"1#v4##1", 1 
-  ret {i64, i64} %1 
+  %0 = add   i64 %"v3##0", 100 
+  %1 = mul   i64 %0, 200 
+  %2 = sdiv exact i64 %1, 4 
+  %3 = insertvalue {i64, i64} undef, i64 %"v1##0", 0 
+  %4 = insertvalue {i64, i64} %3, i64 %2, 1 
+  ret {i64, i64} %4 
 }

@@ -93,8 +93,8 @@ entry:
   %14 = inttoptr i64 %13 to i64* 
   %15 = getelementptr  i64, i64* %14, i64 0 
   store  i64 0, i64* %15 
-  %"1#tmp#0##0" = tail call fastcc  i64  @"import.distance<0>"(i64  %2, i64  %10)  
-  tail call ccc  void  @print_int(i64  %"1#tmp#0##0")  
+  %16 = tail call fastcc  i64  @"import.distance<0>"(i64  %2, i64  %10)  
+  tail call ccc  void  @print_int(i64  %16)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
@@ -108,21 +108,21 @@ entry:
   %3 = inttoptr i64 %"p1##0" to i64* 
   %4 = getelementptr  i64, i64* %3, i64 0 
   %5 = load  i64, i64* %4 
-  %"1#tmp#3##0" = sub   i64 %2, %5 
-  %"1#tmp#2##0" = tail call ccc  i64  @ipow(i64  %"1#tmp#3##0", i64  2)  
-  %6 = add   i64 %"p2##0", 8 
-  %7 = inttoptr i64 %6 to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
-  %9 = load  i64, i64* %8 
-  %10 = add   i64 %"p1##0", 8 
-  %11 = inttoptr i64 %10 to i64* 
-  %12 = getelementptr  i64, i64* %11, i64 0 
-  %13 = load  i64, i64* %12 
-  %"1#tmp#7##0" = sub   i64 %9, %13 
-  %"1#tmp#6##0" = tail call ccc  i64  @ipow(i64  %"1#tmp#7##0", i64  2)  
-  %"1#tmp#1##0" = add   i64 %"1#tmp#2##0", %"1#tmp#6##0" 
-  %"1##result##0" = tail call ccc  i64  @isqrt(i64  %"1#tmp#1##0")  
-  ret i64 %"1##result##0" 
+  %6 = sub   i64 %2, %5 
+  %7 = tail call ccc  i64  @ipow(i64  %6, i64  2)  
+  %8 = add   i64 %"p2##0", 8 
+  %9 = inttoptr i64 %8 to i64* 
+  %10 = getelementptr  i64, i64* %9, i64 0 
+  %11 = load  i64, i64* %10 
+  %12 = add   i64 %"p1##0", 8 
+  %13 = inttoptr i64 %12 to i64* 
+  %14 = getelementptr  i64, i64* %13, i64 0 
+  %15 = load  i64, i64* %14 
+  %16 = sub   i64 %11, %15 
+  %17 = tail call ccc  i64  @ipow(i64  %16, i64  2)  
+  %18 = add   i64 %7, %17 
+  %19 = tail call ccc  i64  @isqrt(i64  %18)  
+  ret i64 %19 
 }
 --------------------------------------------------
  Module position
@@ -354,11 +354,11 @@ entry:
   %11 = inttoptr i64 %10 to i64* 
   %12 = getelementptr  i64, i64* %11, i64 0 
   %13 = load  i64, i64* %12 
-  %"1#tmp#1##0" = icmp eq i64 %2, %9 
-  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
+  %14 = icmp eq i64 %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %"2##success##0" = icmp eq i64 %6, %13 
-  ret i1 %"2##success##0" 
+  %15 = icmp eq i64 %6, %13 
+  ret i1 %15 
 if.else:
   ret i1 0 
 }
@@ -463,13 +463,13 @@ entry:
   %11 = inttoptr i64 %10 to i64* 
   %12 = getelementptr  i64, i64* %11, i64 0 
   %13 = load  i64, i64* %12 
-  %"1#tmp#7##0" = icmp eq i64 %2, %9 
-  br i1 %"1#tmp#7##0", label %if.then, label %if.else 
+  %14 = icmp eq i64 %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#0##0" = icmp eq i64 %6, %13 
-  %"2##success##0" = xor i1 %"2#tmp#0##0", 1 
-  ret i1 %"2##success##0" 
+  %15 = icmp eq i64 %6, %13 
+  %16 = xor i1 %15, 1 
+  ret i1 %16 
 if.else:
-  %"3##success##0" = xor i1 0, 1 
-  ret i1 %"3##success##0" 
+  %17 = xor i1 0, 1 
+  ret i1 %17 
 }

@@ -269,11 +269,11 @@ entry:
   %11 = inttoptr i64 %10 to i64* 
   %12 = getelementptr  i64, i64* %11, i64 0 
   %13 = load  i64, i64* %12 
-  %"1#tmp#1##0" = icmp eq i64 %2, %9 
-  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
+  %14 = icmp eq i64 %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %"2##success##0" = icmp eq i64 %6, %13 
-  ret i1 %"2##success##0" 
+  %15 = icmp eq i64 %6, %13 
+  ret i1 %15 
 if.else:
   ret i1 0 
 }
@@ -288,29 +288,29 @@ entry:
   %4 = inttoptr i64 %3 to i64* 
   %5 = getelementptr  i64, i64* %4, i64 0 
   %6 = load  i64, i64* %5 
-  %"1#tmp#7##0" = icmp sle i64 %2, %6 
-  br i1 %"1#tmp#7##0", label %if.then, label %if.else 
+  %7 = icmp sle i64 %2, %6 
+  br i1 %7, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#4##0" = add   i64 %2, 1 
-  %7 = trunc i64 16 to i32  
-  %8 = tail call ccc  i8*  @wybe_malloc(i32  %7)  
-  %9 = ptrtoint i8* %8 to i64 
-  %10 = inttoptr i64 %9 to i64* 
-  %11 = getelementptr  i64, i64* %10, i64 0 
-  store  i64 %"2#tmp#4##0", i64* %11 
-  %12 = add   i64 %9, 8 
-  %13 = inttoptr i64 %12 to i64* 
-  %14 = getelementptr  i64, i64* %13, i64 0 
-  store  i64 %6, i64* %14 
-  %15 = insertvalue {i64, i64, i1} undef, i64 %2, 0 
-  %16 = insertvalue {i64, i64, i1} %15, i64 %9, 1 
-  %17 = insertvalue {i64, i64, i1} %16, i1 1, 2 
-  ret {i64, i64, i1} %17 
+  %8 = add   i64 %2, 1 
+  %9 = trunc i64 16 to i32  
+  %10 = tail call ccc  i8*  @wybe_malloc(i32  %9)  
+  %11 = ptrtoint i8* %10 to i64 
+  %12 = inttoptr i64 %11 to i64* 
+  %13 = getelementptr  i64, i64* %12, i64 0 
+  store  i64 %8, i64* %13 
+  %14 = add   i64 %11, 8 
+  %15 = inttoptr i64 %14 to i64* 
+  %16 = getelementptr  i64, i64* %15, i64 0 
+  store  i64 %6, i64* %16 
+  %17 = insertvalue {i64, i64, i1} undef, i64 %2, 0 
+  %18 = insertvalue {i64, i64, i1} %17, i64 %11, 1 
+  %19 = insertvalue {i64, i64, i1} %18, i1 1, 2 
+  ret {i64, i64, i1} %19 
 if.else:
-  %18 = insertvalue {i64, i64, i1} undef, i64 undef, 0 
-  %19 = insertvalue {i64, i64, i1} %18, i64 undef, 1 
-  %20 = insertvalue {i64, i64, i1} %19, i1 0, 2 
-  ret {i64, i64, i1} %20 
+  %20 = insertvalue {i64, i64, i1} undef, i64 undef, 0 
+  %21 = insertvalue {i64, i64, i1} %20, i64 undef, 1 
+  %22 = insertvalue {i64, i64, i1} %21, i1 0, 2 
+  ret {i64, i64, i1} %22 
 }
 
 
@@ -323,26 +323,26 @@ entry:
   %4 = inttoptr i64 %3 to i64* 
   %5 = getelementptr  i64, i64* %4, i64 0 
   %6 = load  i64, i64* %5 
-  %"1#tmp#7##0" = icmp sle i64 %2, %6 
-  br i1 %"1#tmp#7##0", label %if.then, label %if.else 
+  %7 = icmp sle i64 %2, %6 
+  br i1 %7, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#4##0" = add   i64 %2, 1 
-  %7 = inttoptr i64 %"seq##0" to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
-  store  i64 %"2#tmp#4##0", i64* %8 
-  %9 = add   i64 %"seq##0", 8 
-  %10 = inttoptr i64 %9 to i64* 
-  %11 = getelementptr  i64, i64* %10, i64 0 
-  store  i64 %6, i64* %11 
-  %12 = insertvalue {i64, i64, i1} undef, i64 %2, 0 
-  %13 = insertvalue {i64, i64, i1} %12, i64 %"seq##0", 1 
-  %14 = insertvalue {i64, i64, i1} %13, i1 1, 2 
-  ret {i64, i64, i1} %14 
+  %8 = add   i64 %2, 1 
+  %9 = inttoptr i64 %"seq##0" to i64* 
+  %10 = getelementptr  i64, i64* %9, i64 0 
+  store  i64 %8, i64* %10 
+  %11 = add   i64 %"seq##0", 8 
+  %12 = inttoptr i64 %11 to i64* 
+  %13 = getelementptr  i64, i64* %12, i64 0 
+  store  i64 %6, i64* %13 
+  %14 = insertvalue {i64, i64, i1} undef, i64 %2, 0 
+  %15 = insertvalue {i64, i64, i1} %14, i64 %"seq##0", 1 
+  %16 = insertvalue {i64, i64, i1} %15, i1 1, 2 
+  ret {i64, i64, i1} %16 
 if.else:
-  %15 = insertvalue {i64, i64, i1} undef, i64 undef, 0 
-  %16 = insertvalue {i64, i64, i1} %15, i64 undef, 1 
-  %17 = insertvalue {i64, i64, i1} %16, i1 0, 2 
-  ret {i64, i64, i1} %17 
+  %17 = insertvalue {i64, i64, i1} undef, i64 undef, 0 
+  %18 = insertvalue {i64, i64, i1} %17, i64 undef, 1 
+  %19 = insertvalue {i64, i64, i1} %18, i1 0, 2 
+  ret {i64, i64, i1} %19 
 }
 
 
@@ -356,7 +356,7 @@ entry:
 if.then:
   tail call ccc  void  @print_int(i64  %1)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"int_sequence.gen#1<0>[410bae77d3]"(i64  %2, i64  %"tmp#1##0")  
+  musttail call fastcc  void  @"int_sequence.gen#1<0>[410bae77d3]"(i64  %2, i64  %"tmp#1##0")  
   ret void 
 if.else:
   ret void 
@@ -373,7 +373,7 @@ entry:
 if.then:
   tail call ccc  void  @print_int(i64  %1)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"int_sequence.gen#1<0>[410bae77d3]"(i64  %2, i64  %"tmp#1##0")  
+  musttail call fastcc  void  @"int_sequence.gen#1<0>[410bae77d3]"(i64  %2, i64  %"tmp#1##0")  
   ret void 
 if.else:
   ret void 
@@ -448,13 +448,13 @@ entry:
   %11 = inttoptr i64 %10 to i64* 
   %12 = getelementptr  i64, i64* %11, i64 0 
   %13 = load  i64, i64* %12 
-  %"1#tmp#7##0" = icmp eq i64 %2, %9 
-  br i1 %"1#tmp#7##0", label %if.then, label %if.else 
+  %14 = icmp eq i64 %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#0##0" = icmp eq i64 %6, %13 
-  %"2##success##0" = xor i1 %"2#tmp#0##0", 1 
-  ret i1 %"2##success##0" 
+  %15 = icmp eq i64 %6, %13 
+  %16 = xor i1 %15, 1 
+  ret i1 %16 
 if.else:
-  %"3##success##0" = xor i1 0, 1 
-  ret i1 %"3##success##0" 
+  %17 = xor i1 0, 1 
+  ret i1 %17 
 }

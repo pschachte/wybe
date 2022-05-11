@@ -163,11 +163,11 @@ entry:
   %11 = inttoptr i64 %10 to double* 
   %12 = getelementptr  double, double* %11, i64 0 
   %13 = load  double, double* %12 
-  %"1#tmp#1##0" = fcmp oeq double %2, %9 
-  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
+  %14 = fcmp oeq double %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %"2##success##0" = fcmp oeq double %6, %13 
-  ret i1 %"2##success##0" 
+  %15 = fcmp oeq double %6, %13 
+  ret i1 %15 
 if.else:
   ret i1 0 
 }
@@ -272,13 +272,13 @@ entry:
   %11 = inttoptr i64 %10 to double* 
   %12 = getelementptr  double, double* %11, i64 0 
   %13 = load  double, double* %12 
-  %"1#tmp#7##0" = fcmp oeq double %2, %9 
-  br i1 %"1#tmp#7##0", label %if.then, label %if.else 
+  %14 = fcmp oeq double %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#0##0" = fcmp oeq double %6, %13 
-  %"2##success##0" = xor i1 %"2#tmp#0##0", 1 
-  ret i1 %"2##success##0" 
+  %15 = fcmp oeq double %6, %13 
+  %16 = xor i1 %15, 1 
+  ret i1 %16 
 if.else:
-  %"3##success##0" = xor i1 0, 1 
-  ret i1 %"3##success##0" 
+  %17 = xor i1 0, 1 
+  ret i1 %17 
 }

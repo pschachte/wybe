@@ -243,6 +243,7 @@ import qualified Data.ByteString.Char8 as BS
 import qualified LLVM.AST              as LLVMAST
 
 import           Debug.Trace
+import LastCallAnalysis (lastCallAnalyseMod)
 
 ------------------------ Handling dependencies ------------------------
 
@@ -639,7 +640,7 @@ loadLPVMFromObjFile objFile required = do
         Left err -> return $ Left $ "Error decoding object file data: " ++ err
         Right modBS -> do
             logBuild "No error decoding object file data."
-            logBuild $ "Extracted LPVM data: " ++ show modBS
+            logBuild $ "Extracted LPVM data"
             (List.map (\m -> m { modOrigin = objFile } ) <$>)
               <$> decodeModule required modBS
 
@@ -859,6 +860,16 @@ compileModSCC mspecs = do
     logMsg Transform $ replicate 70 '='
     mapM_ (transformModuleProcs transformProc)  mspecs
     logDump Transform Transform "TRANSFORM"
+
+    ----------------------------------
+    -- LAST CALL ANALYSIS
+    -- Identifies situations in which we can turn a last-call into a tail-call
+    logMsg LastCallAnalysis  $ replicate 70 '='
+    logMsg LastCallAnalysis  "Start LAST CALL ANALYSIS in Builder.hs"
+    logMsg LastCallAnalysis  $ "mspecs: " ++ show mspecs
+    logMsg LastCallAnalysis  $ replicate 70 '='
+    mapM_ lastCallAnalyseMod mspecs
+    logDump LastCallAnalysis LastCallAnalysis  "LAST CALL ANALYSIS"
 
     -- mods <- mapM getLoadedModule mods
     -- callgraph <- mapM (\m -> getSpecModule m

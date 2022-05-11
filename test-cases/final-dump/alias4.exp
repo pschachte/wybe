@@ -131,7 +131,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  void @"alias4.<0>"()    {
 entry:
-  tail call fastcc  void  @"alias4.bar<0>"()  
+  musttail call fastcc  void  @"alias4.bar<0>"()  
   ret void 
 }
 
@@ -148,22 +148,22 @@ entry:
   %6 = inttoptr i64 %5 to i64* 
   %7 = getelementptr  i64, i64* %6, i64 0 
   store  i64 100, i64* %7 
-  %"1#p2##0" = tail call fastcc  i64  @"alias4.replicate1<0>"(i64  %2)  
+  %8 = tail call fastcc  i64  @"alias4.replicate1<0>"(i64  %2)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias4.1, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias4.3, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %2)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias4.5, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %"1#p2##0")  
-  %8 = inttoptr i64 %2 to i64* 
-  %9 = getelementptr  i64, i64* %8, i64 0 
-  store  i64 555, i64* %9 
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %8)  
+  %9 = inttoptr i64 %2 to i64* 
+  %10 = getelementptr  i64, i64* %9, i64 0 
+  store  i64 555, i64* %10 
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias4.7, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias4.9, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %2)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias4.5, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %"1#p2##0")  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %8)  
   ret void 
 }
 
@@ -429,11 +429,11 @@ entry:
   %11 = inttoptr i64 %10 to i64* 
   %12 = getelementptr  i64, i64* %11, i64 0 
   %13 = load  i64, i64* %12 
-  %"1#tmp#1##0" = icmp eq i64 %2, %9 
-  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
+  %14 = icmp eq i64 %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %"2##success##0" = icmp eq i64 %6, %13 
-  ret i1 %"2##success##0" 
+  %15 = icmp eq i64 %6, %13 
+  ret i1 %15 
 if.else:
   ret i1 0 
 }
@@ -538,13 +538,13 @@ entry:
   %11 = inttoptr i64 %10 to i64* 
   %12 = getelementptr  i64, i64* %11, i64 0 
   %13 = load  i64, i64* %12 
-  %"1#tmp#7##0" = icmp eq i64 %2, %9 
-  br i1 %"1#tmp#7##0", label %if.then, label %if.else 
+  %14 = icmp eq i64 %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#0##0" = icmp eq i64 %6, %13 
-  %"2##success##0" = xor i1 %"2#tmp#0##0", 1 
-  ret i1 %"2##success##0" 
+  %15 = icmp eq i64 %6, %13 
+  %16 = xor i1 %15, 1 
+  ret i1 %16 
 if.else:
-  %"3##success##0" = xor i1 0, 1 
-  ret i1 %"3##success##0" 
+  %17 = xor i1 0, 1 
+  ret i1 %17 
 }

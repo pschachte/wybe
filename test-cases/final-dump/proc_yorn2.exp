@@ -81,23 +81,23 @@ define external fastcc  i1 @"proc_yorn2.gen#1<0>"(i64  %"prompt##0")    {
 entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  %"prompt##0")  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @proc_yorn2.1, i32 0, i32 0) to i64))  
-  %"1#response##0" = tail call ccc  i8  @read_char()  
-  %"1#tmp#0##0" = icmp eq i8 %"1#response##0", 89 
-  %"1#tmp#1##0" = icmp eq i8 %"1#response##0", 78 
-  %"1#tmp#2##0" = or i1 %"1#tmp#0##0", %"1#tmp#1##0" 
-  br i1 %"1#tmp#2##0", label %if.then, label %if.else 
+  %0 = tail call ccc  i8  @read_char()  
+  %1 = icmp eq i8 %0, 89 
+  %2 = icmp eq i8 %0, 78 
+  %3 = or i1 %1, %2 
+  br i1 %3, label %if.then, label %if.else 
 if.then:
-  ret i1 %"1#tmp#0##0" 
+  ret i1 %1 
 if.else:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @proc_yorn2.3, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  %"3#result##1" = tail call fastcc  i1  @"proc_yorn2.gen#1<0>"(i64  %"prompt##0")  
-  ret i1 %"3#result##1" 
+  %4 = musttail call fastcc  i1  @"proc_yorn2.gen#1<0>"(i64  %"prompt##0")  
+  ret i1 %4 
 }
 
 
 define external fastcc  i1 @"proc_yorn2.yorn<0>"(i64  %"prompt##0")    {
 entry:
-  %"1#result##0" = tail call fastcc  i1  @"proc_yorn2.gen#1<0>"(i64  %"prompt##0")  
-  ret i1 %"1#result##0" 
+  %0 = musttail call fastcc  i1  @"proc_yorn2.gen#1<0>"(i64  %"prompt##0")  
+  ret i1 %0 
 }

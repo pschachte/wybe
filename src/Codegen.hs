@@ -5,7 +5,6 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE OverloadedStrings          #-}
 
 module Codegen (
@@ -18,8 +17,8 @@ module Codegen (
   callWybe, callC, externf, ret, globalDefine, externalC, externalWybe,
   phi, br, cbr, getBlock, retNothing, freshUnName,
   -- * Symbol storage
-  alloca, store, local, assign, addOperand, load, getVar, localVar, preservingSymtab,
-  makeGlobalResourceVariable, doLoad,
+  alloca, store, addOperand, load, modifySymtab, getVar, maybeGetVar, localVar, preservingSymtab,
+  makeGlobalResourceVariable, doAlloca, doLoad,
   bitcast, cbitcast, inttoptr, cinttoptr, ptrtoint, cptrtoint,
   trunc, ctrunc, zext, czext, sext, csext,
   -- * Types
@@ -28,7 +27,7 @@ module Codegen (
   -- * Custom Types
   int_c, float_c,
   -- * Instructions
-  instr, namedInstr, voidInstr,
+  instr, voidInstr,
   iadd, isub, imul, idiv, fadd, fsub, fmul, fdiv, sdiv, urem, srem, frem,
   cons, uitofp, sitofp, fptoui, fptosi,
   icmp, fcmp, lOr, lAnd, lXor, shl, lshr, ashr,
@@ -152,6 +151,7 @@ data CodegenState
                                  -- ^ Local symbol table of a function
       , names        :: Names    -- ^ Name supply
       , unNameCount  :: Word     -- ^ Count of UnNames
+      , proto        :: PrimProto -- ^ Proto of current proc
       } deriving Show
 
 -- | 'BlockState' will generate the code for basic blocks inside of
@@ -337,13 +337,14 @@ emptyBlock :: Int -> BlockState
 emptyBlock i = BlockState i [] Nothing
 
 -- | Initialize an empty CodegenState for a new Definition.
-emptyCodegen :: CodegenState
-emptyCodegen = CodegenState{ currentBlock=Name $ fromString entryBlockName
+emptyCodegen :: PrimProto -> CodegenState
+emptyCodegen proto = CodegenState{ currentBlock=Name $ fromString entryBlockName
                            , blocks=Map.empty
                            , blockCount=1
                            , symtab=SymbolTable Map.empty Map.empty
                            , names=Map.empty
                            , unNameCount=0
+                           , proto=proto
                            }
 
 
@@ -435,10 +436,6 @@ externf ty = ConstantOperand . C.GlobalReference ty
 localVar :: Type -> String -> Operand
 localVar t s = LocalReference t $ LLVMAST.Name $ fromString s
 
-
-local :: Type -> LLVMAST.Name -> Operand
-local ty nm = LocalReference ty nm
-
 globalVar :: Type -> String -> C.Constant
 globalVar t s = C.GlobalReference t $ LLVMAST.Name $ fromString s
 
@@ -447,12 +444,11 @@ globalVar t s = C.GlobalReference t $ LLVMAST.Name $ fromString s
 ----------------------------------------------------------------------------
 
 -- | Store a local variable on the front of the symbol table.
-assign :: String -> Operand -> Codegen ()
-assign var op = do
+modifySymtab :: String -> Operand -> Codegen ()
+modifySymtab var op = do
     logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show op ++ ":" ++ show (typeOf op)
     st <- gets symtab
     modify $ \s -> s { symtab=st{stVars=Map.insert var op $ stVars st} }
-
 
 -- | Find and return the local operand by its given name from the symbol
 -- table. Only the first find will be returned so new names can shadow
@@ -460,9 +456,16 @@ assign var op = do
 getVar :: String -> Codegen Operand
 getVar var = do
     let err = shouldnt $ "Local variable not in scope: " ++ show var
-    lcls <- gets (stVars . symtab)
-    return $ fromMaybe err $ Map.lookup var lcls
+    maybeOp <- maybeGetVar var
+    return $ fromMaybe err maybeOp
 
+-- | Find and return the local operand by its given name from the symbol
+-- table. Only the first find will be returned so new names can shadow
+-- the same older names. Returns Nothing if var was not found.
+maybeGetVar :: String -> Codegen (Maybe Operand)
+maybeGetVar var = do
+    lcls <- gets (stVars . symtab)
+    return $ Map.lookup var lcls
 
 -- | Evaluate nested code generating code, and reset the symtab to its original
 -- state afterwards. Other parts of the Codegen state are allowed to change.
@@ -485,27 +488,13 @@ addOperand arg opd = do
 -- Instructions                                                           --
 ----------------------------------------------------------------------------
 
--- | Append a named instruction into the instruction stack of the current
--- BasicBlock. This action also produces a Operand value of the given type (this
--- will be the result type of performing that instruction).
-namedInstr :: Type -> String -> Instruction -> Codegen Operand
-namedInstr ty nm ins = do
-    -- lpvm allows variables in different forks(blocks) have the same name,
-    -- but llvm doesn't. So the block id is attached to the variable name to
-    -- make it unique.
-    blockId <- idx <$> current
-    let ref = Name $ fromString $ specialName2 (show blockId) nm
-    addInstr $ ref := ins
-    return $ local ty ref
-
-
 -- | Append an unnamed instruction to the instruction stack of the current
 -- BasicBlock. The temp name is generated using a fresh word counter.
 instr :: Type -> Instruction -> Codegen Operand
 instr ty ins = do
     ref <- freshUnName
     addInstr $ ref := ins
-    return $ local ty ref
+    return $ LocalReference ty ref
 
 
 -- | Append a void instruction to the instruction stack of the current
@@ -620,12 +609,12 @@ cons = ConstantOperand
 -- * Memory effecting instructions
 
 -- | The 'call' instruction represents a simple function call to wybe code
-callWybe :: Operand -> [Operand] -> Instruction
-callWybe fn args = Call (Just Tail) CC.Fast [] (Right fn) (toArgs args) [] []
+callWybe :: Maybe TailCallKind -> Operand -> [Operand] -> Instruction
+callWybe tailCallKind fn args = Call tailCallKind CC.Fast [] (Right fn) (toArgs args) [] []
 
 -- | A foreign call instruction, using C calling conventions
 callC :: Operand -> [Operand] -> Instruction
-callC fn args = Call (Just Tail) CC.C [] (Right fn) (toArgs args) [] []
+callC fn args = Call (Just LLVMAST.Tail) CC.C [] (Right fn) (toArgs args) [] []
 
 
 toArgs :: [Operand] -> [(Operand, [A.ParameterAttribute])]

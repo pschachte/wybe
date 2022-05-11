@@ -271,8 +271,8 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 define external fastcc  void @"hypot.<0>"()    {
 entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @hypot.1, i32 0, i32 0) to i64))  
-  %"1#tmp#0##0" = tail call ccc  double  @llvm.sqrt.f64(double  2.500000e1)  
-  tail call ccc  void  @print_float(double  %"1#tmp#0##0")  
+  %0 = tail call ccc  double  @llvm.sqrt.f64(double  2.500000e1)  
+  tail call ccc  void  @print_float(double  %0)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @hypot.3, i32 0, i32 0) to i64))  
   tail call ccc  void  @print_float(double  7.853982e1)  
@@ -280,52 +280,52 @@ entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @hypot.5, i32 0, i32 0) to i64))  
   tail call ccc  void  @print_float(double  2.718282e0)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @hypot.7, i32 0, i32 0) to i64))  
-  %"1#tmp#3##0" = tail call ccc  double  @llvm.exp.f64(double  1.000000e0)  
-  tail call ccc  void  @print_float(double  %"1#tmp#3##0")  
+  %1 = tail call ccc  double  @llvm.exp.f64(double  1.000000e0)  
+  tail call ccc  void  @print_float(double  %1)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @hypot.9, i32 0, i32 0) to i64))  
-  %"1#tmp#4##0" = tail call ccc  double  @llvm.sin.f64(double  3.000000e1)  
-  tail call ccc  void  @print_float(double  %"1#tmp#4##0")  
+  %2 = tail call ccc  double  @llvm.sin.f64(double  3.000000e1)  
+  tail call ccc  void  @print_float(double  %2)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @hypot.11, i32 0, i32 0) to i64))  
-  %"1#tmp#5##0" = tail call ccc  double  @llvm.cos.f64(double  3.000000e1)  
-  tail call ccc  void  @print_float(double  %"1#tmp#5##0")  
+  %3 = tail call ccc  double  @llvm.cos.f64(double  3.000000e1)  
+  tail call ccc  void  @print_float(double  %3)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @hypot.13, i32 0, i32 0) to i64))  
-  %"1#tmp#6##0" = tail call ccc  double  @llvm.sin.f64(double  5.235988e-1)  
-  tail call ccc  void  @print_float(double  %"1#tmp#6##0")  
+  %4 = tail call ccc  double  @llvm.sin.f64(double  5.235988e-1)  
+  tail call ccc  void  @print_float(double  %4)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @hypot.15, i32 0, i32 0) to i64))  
-  %"1#tmp#10##0" = tail call ccc  double  @llvm.cos.f64(double  5.235988e-1)  
-  tail call ccc  void  @print_float(double  %"1#tmp#10##0")  
+  %5 = tail call ccc  double  @llvm.cos.f64(double  5.235988e-1)  
+  tail call ccc  void  @print_float(double  %5)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @hypot.17, i32 0, i32 0) to i64))  
-  %"1#tmp#14##0" = tail call ccc  double  @llvm.log.f64(double  2.718282e0)  
-  tail call ccc  void  @print_float(double  %"1#tmp#14##0")  
+  %6 = tail call ccc  double  @llvm.log.f64(double  2.718282e0)  
+  tail call ccc  void  @print_float(double  %6)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @hypot.19, i32 0, i32 0) to i64))  
-  %"1#tmp#16##0" = tail call ccc  double  @llvm.log10.f64(double  2.718282e0)  
-  tail call ccc  void  @print_float(double  %"1#tmp#16##0")  
+  %7 = tail call ccc  double  @llvm.log10.f64(double  2.718282e0)  
+  tail call ccc  void  @print_float(double  %7)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @hypot.21, i32 0, i32 0) to i64))  
-  %"1#tmp#18##0" = tail call ccc  double  @llvm.log2.f64(double  2.718282e0)  
-  tail call ccc  void  @print_float(double  %"1#tmp#18##0")  
+  %8 = tail call ccc  double  @llvm.log2.f64(double  2.718282e0)  
+  tail call ccc  void  @print_float(double  %8)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @hypot.23, i32 0, i32 0) to i64))  
-  %"1#tmp#20##0" = tail call ccc  double  @llvm.floor.f64(double  3.141593e0)  
-  tail call ccc  void  @print_float(double  %"1#tmp#20##0")  
+  %9 = tail call ccc  double  @llvm.floor.f64(double  3.141593e0)  
+  tail call ccc  void  @print_float(double  %9)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @hypot.25, i32 0, i32 0) to i64))  
-  %"1#tmp#22##0" = tail call ccc  double  @llvm.ceil.f64(double  3.141593e0)  
-  tail call ccc  void  @print_float(double  %"1#tmp#22##0")  
+  %10 = tail call ccc  double  @llvm.ceil.f64(double  3.141593e0)  
+  tail call ccc  void  @print_float(double  %10)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @hypot.27, i32 0, i32 0) to i64))  
-  %"1#tmp#24##0" = tail call ccc  double  @llvm.round.f64(double  3.141593e0)  
-  tail call ccc  void  @print_float(double  %"1#tmp#24##0")  
+  %11 = tail call ccc  double  @llvm.round.f64(double  3.141593e0)  
+  tail call ccc  void  @print_float(double  %11)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @hypot.29, i32 0, i32 0) to i64))  
-  %"1#tmp#26##0" = fptosi double %"1#tmp#24##0" to i64 
-  tail call ccc  void  @print_int(i64  %"1#tmp#26##0")  
+  %12 = fptosi double %11 to i64 
+  tail call ccc  void  @print_int(i64  %12)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
@@ -333,17 +333,17 @@ entry:
 
 define external fastcc  double @"hypot.area<0>"(double  %"r##0")    {
 entry:
-  %"1#tmp#2##0" = fmul double %"r##0", %"r##0" 
-  %"1##result##0" = fmul double 3.141593e0, %"1#tmp#2##0" 
-  ret double %"1##result##0" 
+  %0 = fmul double %"r##0", %"r##0" 
+  %1 = fmul double 3.141593e0, %0 
+  ret double %1 
 }
 
 
 define external fastcc  double @"hypot.hypot<0>"(double  %"s1##0", double  %"s2##0")    {
 entry:
-  %"1#tmp#2##0" = fmul double %"s1##0", %"s1##0" 
-  %"1#tmp#3##0" = fmul double %"s2##0", %"s2##0" 
-  %"1#tmp#1##0" = fadd double %"1#tmp#2##0", %"1#tmp#3##0" 
-  %"1##result##0" = tail call ccc  double  @llvm.sqrt.f64(double  %"1#tmp#1##0")  
-  ret double %"1##result##0" 
+  %0 = fmul double %"s1##0", %"s1##0" 
+  %1 = fmul double %"s2##0", %"s2##0" 
+  %2 = fadd double %0, %1 
+  %3 = tail call ccc  double  @llvm.sqrt.f64(double  %2)  
+  ret double %3 
 }

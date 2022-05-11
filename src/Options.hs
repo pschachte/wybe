@@ -78,6 +78,7 @@ data LogSelection =
   All | AST | BodyBuilder | Builder | Clause | Expansion | FinalDump
   | Flatten | Normalise | Optimise | Resources | Types
   | Unbranch | Codegen | Blocks | Emit | Analysis | Transform | Uniqueness
+  | LastCallAnalysis
   deriving (Eq, Ord, Bounded, Enum, Show, Read)
 
 allLogSelections :: [LogSelection]
@@ -123,6 +124,8 @@ logSelectionDescription Transform
     = "Log transform of mutate instructions"
 logSelectionDescription Uniqueness
     = "Log uniqueness checking"
+logSelectionDescription LastCallAnalysis
+    = "Log last call analysis"
 
 -- |Command line option parser and help text
 options :: [OptDescr (Options -> Options)]

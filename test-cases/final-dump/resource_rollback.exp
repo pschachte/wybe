@@ -103,11 +103,11 @@ entry:
 if.then:
   tail call ccc  void  @print_string(i64  %1)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"resource_rollback.gen#1<0>"()  
+  musttail call fastcc  void  @"resource_rollback.gen#1<0>"()  
   ret void 
 if.else:
   store  i64 0, i64* @"resource#resource_rollback.res" 
-  tail call fastcc  void  @"resource_rollback.gen#1<0>"()  
+  musttail call fastcc  void  @"resource_rollback.gen#1<0>"()  
   ret void 
 }
 

@@ -346,31 +346,31 @@ entry:
   %43 = inttoptr i64 %42 to i64* 
   %44 = getelementptr  i64, i64* %43, i64 0 
   %45 = load  i64, i64* %44 
-  %"1#tmp#1##0" = icmp eq i64 %14, %37 
-  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
+  %46 = icmp eq i64 %14, %37 
+  br i1 %46, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = icmp eq i8 %2, %25 
-  br i1 %"2#tmp#2##0", label %if.then1, label %if.else1 
+  %47 = icmp eq i8 %2, %25 
+  br i1 %47, label %if.then1, label %if.else1 
 if.else:
   ret i1 0 
 if.then1:
-  %"4#tmp#3##0" = icmp eq i64 %18, %41 
-  br i1 %"4#tmp#3##0", label %if.then2, label %if.else2 
+  %48 = icmp eq i64 %18, %41 
+  br i1 %48, label %if.then2, label %if.else2 
 if.else1:
   ret i1 0 
 if.then2:
-  %"6#tmp#4##0" = icmp eq i1 %6, %29 
-  br i1 %"6#tmp#4##0", label %if.then3, label %if.else3 
+  %49 = icmp eq i1 %6, %29 
+  br i1 %49, label %if.then3, label %if.else3 
 if.else2:
   ret i1 0 
 if.then3:
-  %"8#tmp#5##0" = icmp eq i64 %22, %45 
-  br i1 %"8#tmp#5##0", label %if.then4, label %if.else4 
+  %50 = icmp eq i64 %22, %45 
+  br i1 %50, label %if.then4, label %if.else4 
 if.else3:
   ret i1 0 
 if.then4:
-  %"10##success##0" = icmp eq i8 %10, %33 
-  ret i1 %"10##success##0" 
+  %51 = icmp eq i8 %10, %33 
+  ret i1 %51 
 if.else4:
   ret i1 0 
 }
@@ -646,7 +646,7 @@ entry:
 
 define external fastcc  i1 @"mixed_fields.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
 entry:
-  %"1#tmp#0##0" = tail call fastcc  i1  @"mixed_fields.=<0>"(i64  %"#left##0", i64  %"#right##0")  
-  %"1##success##0" = xor i1 %"1#tmp#0##0", 1 
-  ret i1 %"1##success##0" 
+  %0 = tail call fastcc  i1  @"mixed_fields.=<0>"(i64  %"#left##0", i64  %"#right##0")  
+  %1 = xor i1 %0, 1 
+  ret i1 %1 
 }

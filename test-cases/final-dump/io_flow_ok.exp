@@ -102,8 +102,8 @@ define external fastcc  void @"io_flow_ok.<0>"()    {
 entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @io_flow_ok.1, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  %"1#tmp#0##0" = tail call fastcc  i1  @"io_flow_ok.unknown<0>"()  
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = tail call fastcc  i1  @"io_flow_ok.unknown<0>"()  
+  br i1 %0, label %if.then, label %if.else 
 if.then:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @io_flow_ok.3, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  

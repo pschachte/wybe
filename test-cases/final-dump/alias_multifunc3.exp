@@ -138,29 +138,29 @@ entry:
   %6 = inttoptr i64 %5 to i64* 
   %7 = getelementptr  i64, i64* %6, i64 0 
   store  i64 10, i64* %7 
-  %"1#p2##0" = tail call fastcc  i64  @"alias_multifunc3.replicate1<0>"(i64  %2)  
+  %8 = tail call fastcc  i64  @"alias_multifunc3.replicate1<0>"(i64  %2)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc3.1, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc3.3, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %2)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc3.5, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %"1#p2##0")  
-  %8 = trunc i64 16 to i32  
-  %9 = tail call ccc  i8*  @wybe_malloc(i32  %8)  
-  %10 = ptrtoint i8* %9 to i64 
-  %11 = inttoptr i64 %10 to i8* 
-  %12 = inttoptr i64 %2 to i8* 
-  %13 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %11, i8*  %12, i32  %13, i1  0)  
-  %14 = inttoptr i64 %10 to i64* 
-  %15 = getelementptr  i64, i64* %14, i64 0 
-  store  i64 999, i64* %15 
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %8)  
+  %9 = trunc i64 16 to i32  
+  %10 = tail call ccc  i8*  @wybe_malloc(i32  %9)  
+  %11 = ptrtoint i8* %10 to i64 
+  %12 = inttoptr i64 %11 to i8* 
+  %13 = inttoptr i64 %2 to i8* 
+  %14 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %12, i8*  %13, i32  %14, i1  0)  
+  %15 = inttoptr i64 %11 to i64* 
+  %16 = getelementptr  i64, i64* %15, i64 0 
+  store  i64 999, i64* %16 
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc3.7, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc3.9, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %10)  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %11)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc3.5, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %"1#p2##0")  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %8)  
   ret void 
 }
 
@@ -415,11 +415,11 @@ entry:
   %11 = inttoptr i64 %10 to i64* 
   %12 = getelementptr  i64, i64* %11, i64 0 
   %13 = load  i64, i64* %12 
-  %"1#tmp#1##0" = icmp eq i64 %2, %9 
-  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
+  %14 = icmp eq i64 %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %"2##success##0" = icmp eq i64 %6, %13 
-  ret i1 %"2##success##0" 
+  %15 = icmp eq i64 %6, %13 
+  ret i1 %15 
 if.else:
   ret i1 0 
 }
@@ -524,13 +524,13 @@ entry:
   %11 = inttoptr i64 %10 to i64* 
   %12 = getelementptr  i64, i64* %11, i64 0 
   %13 = load  i64, i64* %12 
-  %"1#tmp#7##0" = icmp eq i64 %2, %9 
-  br i1 %"1#tmp#7##0", label %if.then, label %if.else 
+  %14 = icmp eq i64 %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#0##0" = icmp eq i64 %6, %13 
-  %"2##success##0" = xor i1 %"2#tmp#0##0", 1 
-  ret i1 %"2##success##0" 
+  %15 = icmp eq i64 %6, %13 
+  %16 = xor i1 %15, 1 
+  ret i1 %16 
 if.else:
-  %"3##success##0" = xor i1 0, 1 
-  ret i1 %"3##success##0" 
+  %17 = xor i1 0, 1 
+  ret i1 %17 
 }

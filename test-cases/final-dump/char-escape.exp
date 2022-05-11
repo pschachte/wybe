@@ -168,8 +168,8 @@ entry:
 define external fastcc  void @"char-escape.test<0>"(i8  %"ch##0", i64  %"code##0", i64  %"name##0")    {
 entry:
   %0 = zext i8 %"ch##0" to i64  
-  %"1#tmp#1##0" = icmp eq i64 %"code##0", %0 
-  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
+  %1 = icmp eq i64 %"code##0", %0 
+  br i1 %1, label %if.then, label %if.else 
 if.then:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  %"name##0")  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @char-escape.23, i32 0, i32 0) to i64))  

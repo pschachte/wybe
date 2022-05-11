@@ -89,10 +89,10 @@ entry:
 
 define external fastcc  void @"stmt_unless.gen#1<0>"(i64  %"n##0")    {
 entry:
-  %"1#tmp#3##0" = icmp sgt i64 %"n##0", 0 
-  br i1 %"1#tmp#3##0", label %if.then, label %if.else 
+  %0 = icmp sgt i64 %"n##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  tail call fastcc  void  @"stmt_unless.gen#2<0>"(i64  %"n##0")  
+  musttail call fastcc  void  @"stmt_unless.gen#2<0>"(i64  %"n##0")  
   ret void 
 if.else:
   ret void 
@@ -101,23 +101,23 @@ if.else:
 
 define external fastcc  void @"stmt_unless.gen#2<0>"(i64  %"n##0")    {
 entry:
-  %"1#tmp#0##0" = sub   i64 %"n##0", 1 
-  %"1#tmp#1##0" = urem i64 %"1#tmp#0##0", 2 
-  %"1#tmp#2##0" = icmp eq i64 %"1#tmp#1##0", 0 
-  br i1 %"1#tmp#2##0", label %if.then, label %if.else 
+  %0 = sub   i64 %"n##0", 1 
+  %1 = urem i64 %0, 2 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then, label %if.else 
 if.then:
-  tail call fastcc  void  @"stmt_unless.gen#1<0>"(i64  %"1#tmp#0##0")  
+  musttail call fastcc  void  @"stmt_unless.gen#1<0>"(i64  %0)  
   ret void 
 if.else:
-  tail call ccc  void  @print_int(i64  %"1#tmp#0##0")  
+  tail call ccc  void  @print_int(i64  %0)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"stmt_unless.gen#1<0>"(i64  %"1#tmp#0##0")  
+  musttail call fastcc  void  @"stmt_unless.gen#1<0>"(i64  %0)  
   ret void 
 }
 
 
 define external fastcc  i64 @"stmt_unless.mod<0>"(i64  %"x##0", i64  %"y##0")    {
 entry:
-  %"1##result##0" = urem i64 %"x##0", %"y##0" 
-  ret i64 %"1##result##0" 
+  %0 = urem i64 %"x##0", %"y##0" 
+  ret i64 %0 
 }

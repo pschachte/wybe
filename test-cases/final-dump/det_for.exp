@@ -67,18 +67,18 @@ entry:
 
 define external fastcc  {i64, i64} @"det_for.[|]<0>"(i64  %"current##0")    {
 entry:
-  %"1#next##0" = add   i64 %"current##0", 1 
-  %0 = insertvalue {i64, i64} undef, i64 %"current##0", 0 
-  %1 = insertvalue {i64, i64} %0, i64 %"1#next##0", 1 
-  ret {i64, i64} %1 
+  %0 = add   i64 %"current##0", 1 
+  %1 = insertvalue {i64, i64} undef, i64 %"current##0", 0 
+  %2 = insertvalue {i64, i64} %1, i64 %0, 1 
+  ret {i64, i64} %2 
 }
 
 
 define external fastcc  void @"det_for.gen#1<0>"(i64  %"tmp#0##0")    {
 entry:
-  %"1#tmp#0##1" = add   i64 %"tmp#0##0", 1 
+  %0 = add   i64 %"tmp#0##0", 1 
   tail call ccc  void  @print_int(i64  %"tmp#0##0")  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"det_for.gen#1<0>"(i64  %"1#tmp#0##1")  
+  musttail call fastcc  void  @"det_for.gen#1<0>"(i64  %0)  
   ret void 
 }

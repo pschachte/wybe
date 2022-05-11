@@ -92,19 +92,19 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  void @"alias_des.<0>"()    {
 entry:
-  tail call fastcc  void  @"alias_des.foo<0>"()  
+  musttail call fastcc  void  @"alias_des.foo<0>"()  
   ret void 
 }
 
 
 define external fastcc  void @"alias_des.foo<0>"()    {
 entry:
-  %"1#p2##0" = tail call fastcc  i64  @"alias_des.replicate<0>"()  
-  %0 = inttoptr i64 %"1#p2##0" to i64* 
-  %1 = getelementptr  i64, i64* %0, i64 0 
-  store  i64 20000, i64* %1 
+  %0 = tail call fastcc  i64  @"alias_des.replicate<0>"()  
+  %1 = inttoptr i64 %0 to i64* 
+  %2 = getelementptr  i64, i64* %1, i64 0 
+  store  i64 20000, i64* %2 
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_des.1, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %"1#p2##0")  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %0)  
   ret void 
 }
 
@@ -141,11 +141,11 @@ entry:
   %22 = inttoptr i64 %21 to i64* 
   %23 = getelementptr  i64, i64* %22, i64 0 
   %24 = load  i64, i64* %23 
-  %"1#tmp#4##0" = add   i64 %24, 1 
-  %25 = add   i64 %13, 8 
-  %26 = inttoptr i64 %25 to i64* 
-  %27 = getelementptr  i64, i64* %26, i64 0 
-  store  i64 %"1#tmp#4##0", i64* %27 
+  %25 = add   i64 %24, 1 
+  %26 = add   i64 %13, 8 
+  %27 = inttoptr i64 %26 to i64* 
+  %28 = getelementptr  i64, i64* %27, i64 0 
+  store  i64 %25, i64* %28 
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_des.3, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %2)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_des.5, i32 0, i32 0) to i64))  
@@ -382,11 +382,11 @@ entry:
   %11 = inttoptr i64 %10 to i64* 
   %12 = getelementptr  i64, i64* %11, i64 0 
   %13 = load  i64, i64* %12 
-  %"1#tmp#1##0" = icmp eq i64 %2, %9 
-  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
+  %14 = icmp eq i64 %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %"2##success##0" = icmp eq i64 %6, %13 
-  ret i1 %"2##success##0" 
+  %15 = icmp eq i64 %6, %13 
+  ret i1 %15 
 if.else:
   ret i1 0 
 }
@@ -491,13 +491,13 @@ entry:
   %11 = inttoptr i64 %10 to i64* 
   %12 = getelementptr  i64, i64* %11, i64 0 
   %13 = load  i64, i64* %12 
-  %"1#tmp#7##0" = icmp eq i64 %2, %9 
-  br i1 %"1#tmp#7##0", label %if.then, label %if.else 
+  %14 = icmp eq i64 %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#0##0" = icmp eq i64 %6, %13 
-  %"2##success##0" = xor i1 %"2#tmp#0##0", 1 
-  ret i1 %"2##success##0" 
+  %15 = icmp eq i64 %6, %13 
+  %16 = xor i1 %15, 1 
+  ret i1 %16 
 if.else:
-  %"3##success##0" = xor i1 0, 1 
-  ret i1 %"3##success##0" 
+  %17 = xor i1 0, 1 
+  ret i1 %17 
 }

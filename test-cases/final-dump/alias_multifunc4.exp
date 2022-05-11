@@ -210,20 +210,20 @@ entry:
   tail call fastcc  void  @"position.printPosition<0>"(i64  %9)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc4.7, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %10)  
-  %"1#p4##0" = tail call fastcc  i64  @"alias_multifunc4.replicate21<0>"()  
+  %11 = tail call fastcc  i64  @"alias_multifunc4.replicate21<0>"()  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc4.9, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc4.11, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %"1#p4##0")  
-  %11 = tail call fastcc  {i64, i64}  @"alias_multifunc4.replicate22<0>"()  
-  %12 = extractvalue {i64, i64} %11, 0 
-  %13 = extractvalue {i64, i64} %11, 1 
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %11)  
+  %12 = tail call fastcc  {i64, i64}  @"alias_multifunc4.replicate22<0>"()  
+  %13 = extractvalue {i64, i64} %12, 0 
+  %14 = extractvalue {i64, i64} %12, 1 
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc4.13, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc4.15, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %12)  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc4.17, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %13)  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_multifunc4.17, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %14)  
   ret void 
 }
 
@@ -547,11 +547,11 @@ entry:
   %11 = inttoptr i64 %10 to i64* 
   %12 = getelementptr  i64, i64* %11, i64 0 
   %13 = load  i64, i64* %12 
-  %"1#tmp#1##0" = icmp eq i64 %2, %9 
-  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
+  %14 = icmp eq i64 %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %"2##success##0" = icmp eq i64 %6, %13 
-  ret i1 %"2##success##0" 
+  %15 = icmp eq i64 %6, %13 
+  ret i1 %15 
 if.else:
   ret i1 0 
 }
@@ -656,13 +656,13 @@ entry:
   %11 = inttoptr i64 %10 to i64* 
   %12 = getelementptr  i64, i64* %11, i64 0 
   %13 = load  i64, i64* %12 
-  %"1#tmp#7##0" = icmp eq i64 %2, %9 
-  br i1 %"1#tmp#7##0", label %if.then, label %if.else 
+  %14 = icmp eq i64 %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#0##0" = icmp eq i64 %6, %13 
-  %"2##success##0" = xor i1 %"2#tmp#0##0", 1 
-  ret i1 %"2##success##0" 
+  %15 = icmp eq i64 %6, %13 
+  %16 = xor i1 %15, 1 
+  ret i1 %16 
 if.else:
-  %"3##success##0" = xor i1 0, 1 
-  ret i1 %"3##success##0" 
+  %17 = xor i1 0, 1 
+  ret i1 %17 
 }

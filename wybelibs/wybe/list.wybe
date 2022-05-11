@@ -4,6 +4,7 @@
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.bool, wybe.int
+use wybe.io, wybe.string, wybe.c_string, wybe.char, wybe.range, wybe.phantom, wybe.count, wybe.float
 
 pub constructors (T) [] | [head:T | tail:_(T)]
 
@@ -40,7 +41,7 @@ pub def map(f:(A, ?B), as:_(A)):_(B) =
     if { [?a | ?as] = as :: [ f(a) | map(f, as) ] | else :: [] }
 
 
-pub def map(f:(A, B, ?C), as:_(A), bs:_(B)):_(C) = 
+pub def map(f:(A, B, ?C), as:_(A), bs:_(B)):_(C) =
     if { [?a | ?as] = as & [?b | ?bs] = bs :: [ f(a, b) | map(f, as, bs) ]
        | else                              :: [] }
 
@@ -74,4 +75,22 @@ pub def filter(p:{test}(A), !as:_(A)) {
         if { p(a) :: ?out = [a | out] }
     }
     ?as = reverse(out)
+}
+
+pub def print(x:_(T), printer:{resource}(T)) use !io {
+    !print("[")
+    !_print_list(x, printer)
+    !print("]")
+}
+
+pub def println(x:_(T), printer:{resource}(T)) use !io { !print(x, printer); !nl }
+
+def _print_list(xs:_(T), printer:{resource}(T)) use !io {
+    if { [?x | ?xs1] = xs ::
+        !printer(x)
+        if { [ ?x2 | ?xs2 ] = xs1 ::
+            !print(", ")
+        }
+        !_print_list(xs1, printer)
+    }
 }

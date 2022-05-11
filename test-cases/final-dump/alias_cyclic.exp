@@ -131,7 +131,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  void @"alias_cyclic.<0>"()    {
 entry:
-  tail call fastcc  void  @"alias_cyclic.bar<0>"()  
+  musttail call fastcc  void  @"alias_cyclic.bar<0>"()  
   ret void 
 }
 
@@ -148,11 +148,11 @@ entry:
   %6 = inttoptr i64 %5 to i64* 
   %7 = getelementptr  i64, i64* %6, i64 0 
   store  i64 900, i64* %7 
-  %"1#p2##0" = tail call fastcc  i64  @"alias_cyclic.updateX<0>"(i64  %2)  
+  %8 = tail call fastcc  i64  @"alias_cyclic.updateX<0>"(i64  %2)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_cyclic.1, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %2)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_cyclic.3, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %"1#p2##0")  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %8)  
   ret void 
 }
 
@@ -162,24 +162,24 @@ entry:
   %0 = inttoptr i64 %"p1##0" to i64* 
   %1 = getelementptr  i64, i64* %0, i64 0 
   %2 = load  i64, i64* %1 
-  %"1#tmp#3##0" = icmp sgt i64 %2, 101 
-  br i1 %"1#tmp#3##0", label %if.then, label %if.else 
+  %3 = icmp sgt i64 %2, 101 
+  br i1 %3, label %if.then, label %if.else 
 if.then:
   ret i64 %"p1##0" 
 if.else:
-  %"3#tmp#2##0" = add   i64 %2, 1 
-  %3 = trunc i64 16 to i32  
-  %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
-  %5 = ptrtoint i8* %4 to i64 
-  %6 = inttoptr i64 %5 to i8* 
-  %7 = inttoptr i64 %"p1##0" to i8* 
-  %8 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %6, i8*  %7, i32  %8, i1  0)  
-  %9 = inttoptr i64 %5 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  store  i64 %"3#tmp#2##0", i64* %10 
-  %"3#p2##0" = tail call fastcc  i64  @"alias_cyclic.updateY<0>[410bae77d3]"(i64  %5)  
-  ret i64 %"3#p2##0" 
+  %4 = add   i64 %2, 1 
+  %5 = trunc i64 16 to i32  
+  %6 = tail call ccc  i8*  @wybe_malloc(i32  %5)  
+  %7 = ptrtoint i8* %6 to i64 
+  %8 = inttoptr i64 %7 to i8* 
+  %9 = inttoptr i64 %"p1##0" to i8* 
+  %10 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %8, i8*  %9, i32  %10, i1  0)  
+  %11 = inttoptr i64 %7 to i64* 
+  %12 = getelementptr  i64, i64* %11, i64 0 
+  store  i64 %4, i64* %12 
+  %13 = musttail call fastcc  i64  @"alias_cyclic.updateY<0>[410bae77d3]"(i64  %7)  
+  ret i64 %13 
 }
 
 
@@ -188,17 +188,17 @@ entry:
   %0 = inttoptr i64 %"p1##0" to i64* 
   %1 = getelementptr  i64, i64* %0, i64 0 
   %2 = load  i64, i64* %1 
-  %"1#tmp#3##0" = icmp sgt i64 %2, 101 
-  br i1 %"1#tmp#3##0", label %if.then, label %if.else 
+  %3 = icmp sgt i64 %2, 101 
+  br i1 %3, label %if.then, label %if.else 
 if.then:
   ret i64 %"p1##0" 
 if.else:
-  %"3#tmp#2##0" = add   i64 %2, 1 
-  %3 = inttoptr i64 %"p1##0" to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 %"3#tmp#2##0", i64* %4 
-  %"3#p2##0" = tail call fastcc  i64  @"alias_cyclic.updateY<0>[410bae77d3]"(i64  %"p1##0")  
-  ret i64 %"3#p2##0" 
+  %4 = add   i64 %2, 1 
+  %5 = inttoptr i64 %"p1##0" to i64* 
+  %6 = getelementptr  i64, i64* %5, i64 0 
+  store  i64 %4, i64* %6 
+  %7 = musttail call fastcc  i64  @"alias_cyclic.updateY<0>[410bae77d3]"(i64  %"p1##0")  
+  ret i64 %7 
 }
 
 
@@ -208,25 +208,25 @@ entry:
   %1 = inttoptr i64 %0 to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   %3 = load  i64, i64* %2 
-  %"1#tmp#3##0" = icmp sgt i64 %3, 901 
-  br i1 %"1#tmp#3##0", label %if.then, label %if.else 
+  %4 = icmp sgt i64 %3, 901 
+  br i1 %4, label %if.then, label %if.else 
 if.then:
   ret i64 %"p1##0" 
 if.else:
-  %"3#tmp#2##0" = add   i64 %3, 1 
-  %4 = trunc i64 16 to i32  
-  %5 = tail call ccc  i8*  @wybe_malloc(i32  %4)  
-  %6 = ptrtoint i8* %5 to i64 
-  %7 = inttoptr i64 %6 to i8* 
-  %8 = inttoptr i64 %"p1##0" to i8* 
-  %9 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %7, i8*  %8, i32  %9, i1  0)  
-  %10 = add   i64 %6, 8 
-  %11 = inttoptr i64 %10 to i64* 
-  %12 = getelementptr  i64, i64* %11, i64 0 
-  store  i64 %"3#tmp#2##0", i64* %12 
-  %"3#p2##0" = tail call fastcc  i64  @"alias_cyclic.updateX<0>[410bae77d3]"(i64  %6)  
-  ret i64 %"3#p2##0" 
+  %5 = add   i64 %3, 1 
+  %6 = trunc i64 16 to i32  
+  %7 = tail call ccc  i8*  @wybe_malloc(i32  %6)  
+  %8 = ptrtoint i8* %7 to i64 
+  %9 = inttoptr i64 %8 to i8* 
+  %10 = inttoptr i64 %"p1##0" to i8* 
+  %11 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %9, i8*  %10, i32  %11, i1  0)  
+  %12 = add   i64 %8, 8 
+  %13 = inttoptr i64 %12 to i64* 
+  %14 = getelementptr  i64, i64* %13, i64 0 
+  store  i64 %5, i64* %14 
+  %15 = musttail call fastcc  i64  @"alias_cyclic.updateX<0>[410bae77d3]"(i64  %8)  
+  ret i64 %15 
 }
 
 
@@ -236,18 +236,18 @@ entry:
   %1 = inttoptr i64 %0 to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   %3 = load  i64, i64* %2 
-  %"1#tmp#3##0" = icmp sgt i64 %3, 901 
-  br i1 %"1#tmp#3##0", label %if.then, label %if.else 
+  %4 = icmp sgt i64 %3, 901 
+  br i1 %4, label %if.then, label %if.else 
 if.then:
   ret i64 %"p1##0" 
 if.else:
-  %"3#tmp#2##0" = add   i64 %3, 1 
-  %4 = add   i64 %"p1##0", 8 
-  %5 = inttoptr i64 %4 to i64* 
-  %6 = getelementptr  i64, i64* %5, i64 0 
-  store  i64 %"3#tmp#2##0", i64* %6 
-  %"3#p2##0" = tail call fastcc  i64  @"alias_cyclic.updateX<0>[410bae77d3]"(i64  %"p1##0")  
-  ret i64 %"3#p2##0" 
+  %5 = add   i64 %3, 1 
+  %6 = add   i64 %"p1##0", 8 
+  %7 = inttoptr i64 %6 to i64* 
+  %8 = getelementptr  i64, i64* %7, i64 0 
+  store  i64 %5, i64* %8 
+  %9 = musttail call fastcc  i64  @"alias_cyclic.updateX<0>[410bae77d3]"(i64  %"p1##0")  
+  ret i64 %9 
 }
 --------------------------------------------------
  Module position
@@ -479,11 +479,11 @@ entry:
   %11 = inttoptr i64 %10 to i64* 
   %12 = getelementptr  i64, i64* %11, i64 0 
   %13 = load  i64, i64* %12 
-  %"1#tmp#1##0" = icmp eq i64 %2, %9 
-  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
+  %14 = icmp eq i64 %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %"2##success##0" = icmp eq i64 %6, %13 
-  ret i1 %"2##success##0" 
+  %15 = icmp eq i64 %6, %13 
+  ret i1 %15 
 if.else:
   ret i1 0 
 }
@@ -588,13 +588,13 @@ entry:
   %11 = inttoptr i64 %10 to i64* 
   %12 = getelementptr  i64, i64* %11, i64 0 
   %13 = load  i64, i64* %12 
-  %"1#tmp#7##0" = icmp eq i64 %2, %9 
-  br i1 %"1#tmp#7##0", label %if.then, label %if.else 
+  %14 = icmp eq i64 %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#0##0" = icmp eq i64 %6, %13 
-  %"2##success##0" = xor i1 %"2#tmp#0##0", 1 
-  ret i1 %"2##success##0" 
+  %15 = icmp eq i64 %6, %13 
+  %16 = xor i1 %15, 1 
+  ret i1 %16 
 if.else:
-  %"3##success##0" = xor i1 0, 1 
-  ret i1 %"3##success##0" 
+  %17 = xor i1 0, 1 
+  ret i1 %17 
 }

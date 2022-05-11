@@ -201,10 +201,10 @@ entry:
 if.then:
   tail call ccc  void  @print_int(i64  %1)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"type_generics.gen#1<0>"()  
+  musttail call fastcc  void  @"type_generics.gen#1<0>"()  
   ret void 
 if.else:
-  tail call fastcc  void  @"type_generics.gen#1<0>"()  
+  musttail call fastcc  void  @"type_generics.gen#1<0>"()  
   ret void 
 }
 
@@ -221,8 +221,8 @@ entry:
   %6 = inttoptr i64 %5 to i64* 
   %7 = getelementptr  i64, i64* %6, i64 0 
   store  i64 0, i64* %7 
-  %"1#tmp#2##0" = tail call fastcc  i64  @"wybe.list.length1<0>"(i64  %2, i64  0)  
-  tail call ccc  void  @print_int(i64  %"1#tmp#2##0")  
+  %8 = tail call fastcc  i64  @"wybe.list.length1<0>"(i64  %2, i64  0)  
+  tail call ccc  void  @print_int(i64  %8)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
@@ -240,19 +240,19 @@ entry:
   %6 = inttoptr i64 %5 to i64* 
   %7 = getelementptr  i64, i64* %6, i64 0 
   store  i64 0, i64* %7 
-  %"1#tmp#9##0" = icmp ne i64 %2, 0 
-  br i1 %"1#tmp#9##0", label %if.then, label %if.else 
+  %8 = icmp ne i64 %2, 0 
+  br i1 %8, label %if.then, label %if.else 
 if.then:
-  %8 = inttoptr i64 %2 to i64* 
-  %9 = getelementptr  i64, i64* %8, i64 0 
-  %10 = load  i64, i64* %9 
-  %11 = insertvalue {i64, i1} undef, i64 %10, 0 
-  %12 = insertvalue {i64, i1} %11, i1 1, 1 
-  ret {i64, i1} %12 
+  %9 = inttoptr i64 %2 to i64* 
+  %10 = getelementptr  i64, i64* %9, i64 0 
+  %11 = load  i64, i64* %10 
+  %12 = insertvalue {i64, i1} undef, i64 %11, 0 
+  %13 = insertvalue {i64, i1} %12, i1 1, 1 
+  ret {i64, i1} %13 
 if.else:
-  %13 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %14 = insertvalue {i64, i1} %13, i1 0, 1 
-  ret {i64, i1} %14 
+  %14 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %15 = insertvalue {i64, i1} %14, i1 0, 1 
+  ret {i64, i1} %15 
 }
 
 
@@ -265,10 +265,10 @@ entry:
 if.then:
   tail call ccc  void  @print_int(i64  %1)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"type_generics.gen#2<0>"()  
+  musttail call fastcc  void  @"type_generics.gen#2<0>"()  
   ret void 
 if.else:
-  tail call fastcc  void  @"type_generics.gen#2<0>"()  
+  musttail call fastcc  void  @"type_generics.gen#2<0>"()  
   ret void 
 }
 
@@ -283,10 +283,10 @@ if.then:
   %3 = bitcast i64 %1 to double 
   tail call ccc  void  @print_float(double  %3)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"type_generics.gen#3<0>"()  
+  musttail call fastcc  void  @"type_generics.gen#3<0>"()  
   ret void 
 if.else:
-  tail call fastcc  void  @"type_generics.gen#3<0>"()  
+  musttail call fastcc  void  @"type_generics.gen#3<0>"()  
   ret void 
 }
 
@@ -301,10 +301,10 @@ if.then:
   %3 = bitcast i64 %1 to double 
   tail call ccc  void  @print_float(double  %3)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"type_generics.gen#4<0>"()  
+  musttail call fastcc  void  @"type_generics.gen#4<0>"()  
   ret void 
 if.else:
-  tail call fastcc  void  @"type_generics.gen#4<0>"()  
+  musttail call fastcc  void  @"type_generics.gen#4<0>"()  
   ret void 
 }
 
@@ -319,10 +319,10 @@ if.then:
   %3 = trunc i64 %1 to i8  
   tail call ccc  void  @putchar(i8  %3)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"type_generics.gen#5<0>"()  
+  musttail call fastcc  void  @"type_generics.gen#5<0>"()  
   ret void 
 if.else:
-  tail call fastcc  void  @"type_generics.gen#5<0>"()  
+  musttail call fastcc  void  @"type_generics.gen#5<0>"()  
   ret void 
 }
 

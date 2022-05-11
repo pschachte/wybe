@@ -176,7 +176,7 @@ entry:
   tail call fastcc  void  @"position.printPosition<0>"(i64  %2)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_recursion1.5, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"position.printPosition<0>"(i64  %10)  
-  %"1#r##0" = tail call fastcc  i64  @"alias_recursion1.if_test<0>"(i64  %2, i64  %10)  
+  %16 = tail call fastcc  i64  @"alias_recursion1.if_test<0>"(i64  %2, i64  %10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_recursion1.7, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_recursion1.3, i32 0, i32 0) to i64))  
@@ -186,23 +186,23 @@ entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_recursion1.9, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_recursion1.11, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %"1#r##0")  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %16)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_recursion1.13, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  %16 = trunc i64 16 to i32  
-  %17 = tail call ccc  i8*  @wybe_malloc(i32  %16)  
-  %18 = ptrtoint i8* %17 to i64 
-  %19 = inttoptr i64 %18 to i8* 
-  %20 = inttoptr i64 %2 to i8* 
-  %21 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %19, i8*  %20, i32  %21, i1  0)  
-  %22 = inttoptr i64 %18 to i64* 
-  %23 = getelementptr  i64, i64* %22, i64 0 
-  store  i64 -1000, i64* %23 
+  %17 = trunc i64 16 to i32  
+  %18 = tail call ccc  i8*  @wybe_malloc(i32  %17)  
+  %19 = ptrtoint i8* %18 to i64 
+  %20 = inttoptr i64 %19 to i8* 
+  %21 = inttoptr i64 %2 to i8* 
+  %22 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %20, i8*  %21, i32  %22, i1  0)  
+  %23 = inttoptr i64 %19 to i64* 
+  %24 = getelementptr  i64, i64* %23, i64 0 
+  store  i64 -1000, i64* %24 
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_recursion1.15, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %18)  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %19)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_recursion1.17, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %"1#r##0")  
+  tail call fastcc  void  @"position.printPosition<0>"(i64  %16)  
   ret void 
 }
 
@@ -212,11 +212,11 @@ entry:
   %0 = inttoptr i64 %"a##0" to i64* 
   %1 = getelementptr  i64, i64* %0, i64 0 
   %2 = load  i64, i64* %1 
-  %"1#tmp#1##0" = icmp sgt i64 %2, 0 
-  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
+  %3 = icmp sgt i64 %2, 0 
+  br i1 %3, label %if.then, label %if.else 
 if.then:
-  %"2#r##0" = tail call fastcc  i64  @"alias_recursion1.if_test<0>"(i64  %"b##0", i64  %"a##0")  
-  ret i64 %"2#r##0" 
+  %4 = musttail call fastcc  i64  @"alias_recursion1.if_test<0>"(i64  %"b##0", i64  %"a##0")  
+  ret i64 %4 
 if.else:
   ret i64 %"a##0" 
 }
@@ -450,11 +450,11 @@ entry:
   %11 = inttoptr i64 %10 to i64* 
   %12 = getelementptr  i64, i64* %11, i64 0 
   %13 = load  i64, i64* %12 
-  %"1#tmp#1##0" = icmp eq i64 %2, %9 
-  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
+  %14 = icmp eq i64 %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %"2##success##0" = icmp eq i64 %6, %13 
-  ret i1 %"2##success##0" 
+  %15 = icmp eq i64 %6, %13 
+  ret i1 %15 
 if.else:
   ret i1 0 
 }
@@ -559,13 +559,13 @@ entry:
   %11 = inttoptr i64 %10 to i64* 
   %12 = getelementptr  i64, i64* %11, i64 0 
   %13 = load  i64, i64* %12 
-  %"1#tmp#7##0" = icmp eq i64 %2, %9 
-  br i1 %"1#tmp#7##0", label %if.then, label %if.else 
+  %14 = icmp eq i64 %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#0##0" = icmp eq i64 %6, %13 
-  %"2##success##0" = xor i1 %"2#tmp#0##0", 1 
-  ret i1 %"2##success##0" 
+  %15 = icmp eq i64 %6, %13 
+  %16 = xor i1 %15, 1 
+  ret i1 %16 
 if.else:
-  %"3##success##0" = xor i1 0, 1 
-  ret i1 %"3##success##0" 
+  %17 = xor i1 0, 1 
+  ret i1 %17 
 }

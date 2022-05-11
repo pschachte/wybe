@@ -113,8 +113,8 @@ entry:
 define external fastcc  void @"use_resource.inc_count<0>"()    {
 entry:
   %0 = load  i64, i64* @"resource#use_resource.count" 
-  %"1#tmp#0##0" = add   i64 %0, 1 
-  store  i64 %"1#tmp#0##0", i64* @"resource#use_resource.count" 
+  %1 = add   i64 %0, 1 
+  store  i64 %1, i64* @"resource#use_resource.count" 
   ret void 
 }
 
@@ -122,16 +122,16 @@ entry:
 define external fastcc  void @"use_resource.use_test<0>"()    {
 entry:
   %0 = load  i64, i64* @"resource#use_resource.count" 
-  %"1#tmp#3##0" = add   i64 %0, 1 
-  %"1#tmp#5##0" = add   i64 %"1#tmp#3##0", 1 
-  %"1#tmp#7##0" = add   i64 %"1#tmp#5##0", 1 
-  %"1#tmp#9##0" = add   i64 %"1#tmp#7##0", 1 
+  %1 = add   i64 %0, 1 
+  %2 = add   i64 %1, 1 
+  %3 = add   i64 %2, 1 
+  %4 = add   i64 %3, 1 
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @use_resource.1, i32 0, i32 0) to i64))  
-  tail call ccc  void  @print_int(i64  %"1#tmp#9##0")  
+  tail call ccc  void  @print_int(i64  %4)  
   tail call ccc  void  @putchar(i8  10)  
-  store  i64 %"1#tmp#3##0", i64* @"resource#use_resource.count" 
+  store  i64 %1, i64* @"resource#use_resource.count" 
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @use_resource.3, i32 0, i32 0) to i64))  
-  tail call ccc  void  @print_int(i64  %"1#tmp#3##0")  
+  tail call ccc  void  @print_int(i64  %1)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }

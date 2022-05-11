@@ -181,19 +181,19 @@ entry:
 if.then:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @disjunctive-cond.3, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"disjunctive-cond.gen#2<0>"(i1  1, i1  %"b##0")  
+  musttail call fastcc  void  @"disjunctive-cond.gen#2<0>"(i1  1, i1  %"b##0")  
   ret void 
 if.else:
   br i1 %"b##0", label %if.then1, label %if.else1 
 if.then1:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @disjunctive-cond.3, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"disjunctive-cond.gen#2<0>"(i1  0, i1  1)  
+  musttail call fastcc  void  @"disjunctive-cond.gen#2<0>"(i1  0, i1  1)  
   ret void 
 if.else1:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @disjunctive-cond.5, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"disjunctive-cond.gen#2<0>"(i1  0, i1  0)  
+  musttail call fastcc  void  @"disjunctive-cond.gen#2<0>"(i1  0, i1  0)  
   ret void 
 }
 
@@ -204,23 +204,23 @@ entry:
 if.then:
   br i1 %"b##0", label %if.then1, label %if.else1 
 if.else:
-  %"3#tmp#2##0" = xor i1 %"b##0", 1 
-  br i1 %"3#tmp#2##0", label %if.then2, label %if.else2 
+  %0 = xor i1 %"b##0", 1 
+  br i1 %0, label %if.then2, label %if.else2 
 if.then1:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @disjunctive-cond.5, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"disjunctive-cond.gen#3<0>"(i1  1, i1  1)  
+  musttail call fastcc  void  @"disjunctive-cond.gen#3<0>"(i1  1, i1  1)  
   ret void 
 if.else1:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @disjunctive-cond.7, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"disjunctive-cond.gen#3<0>"(i1  1, i1  0)  
+  musttail call fastcc  void  @"disjunctive-cond.gen#3<0>"(i1  1, i1  0)  
   ret void 
 if.then2:
-  tail call fastcc  void  @"disjunctive-cond.gen#3<0>"(i1  0, i1  %"b##0")  
+  musttail call fastcc  void  @"disjunctive-cond.gen#3<0>"(i1  0, i1  %"b##0")  
   ret void 
 if.else2:
-  tail call fastcc  void  @"disjunctive-cond.gen#3<0>"(i1  0, i1  %"b##0")  
+  musttail call fastcc  void  @"disjunctive-cond.gen#3<0>"(i1  0, i1  %"b##0")  
   ret void 
 }
 

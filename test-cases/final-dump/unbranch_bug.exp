@@ -76,8 +76,8 @@ entry:
 
 define external fastcc  void @"unbranch_bug.gen#3<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0")    {
 entry:
-  %"1#tmp#6##0" = icmp ne i64 %"tmp#0##0", 0 
-  br i1 %"1#tmp#6##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"tmp#0##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
   ret void 
 if.else:

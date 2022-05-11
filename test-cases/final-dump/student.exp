@@ -305,11 +305,11 @@ entry:
   %11 = inttoptr i64 %10 to i64* 
   %12 = getelementptr  i64, i64* %11, i64 0 
   %13 = load  i64, i64* %12 
-  %"1#tmp#1##0" = icmp eq i64 %2, %9 
-  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
+  %14 = icmp eq i64 %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %"2##success##0" = tail call fastcc  i1  @"wybe.string.=<0>"(i64  %6, i64  %13)  
-  ret i1 %"2##success##0" 
+  %15 = musttail call fastcc  i1  @"wybe.string.=<0>"(i64  %6, i64  %13)  
+  ret i1 %15 
 if.else:
   ret i1 0 
 }
@@ -414,15 +414,15 @@ entry:
   %11 = inttoptr i64 %10 to i64* 
   %12 = getelementptr  i64, i64* %11, i64 0 
   %13 = load  i64, i64* %12 
-  %"1#tmp#7##0" = icmp eq i64 %2, %9 
-  br i1 %"1#tmp#7##0", label %if.then, label %if.else 
+  %14 = icmp eq i64 %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#0##0" = tail call fastcc  i1  @"wybe.string.=<0>"(i64  %6, i64  %13)  
-  %"2##success##0" = xor i1 %"2#tmp#0##0", 1 
-  ret i1 %"2##success##0" 
+  %15 = tail call fastcc  i1  @"wybe.string.=<0>"(i64  %6, i64  %13)  
+  %16 = xor i1 %15, 1 
+  ret i1 %16 
 if.else:
-  %"3##success##0" = xor i1 0, 1 
-  ret i1 %"3##success##0" 
+  %17 = xor i1 0, 1 
+  ret i1 %17 
 }
 --------------------------------------------------
  Module student.student
@@ -582,30 +582,30 @@ entry:
   %11 = inttoptr i64 %10 to i64* 
   %12 = getelementptr  i64, i64* %11, i64 0 
   %13 = load  i64, i64* %12 
-  %"1#tmp#1##0" = icmp eq i64 %2, %9 
-  br i1 %"1#tmp#1##0", label %if.then, label %if.else 
+  %14 = icmp eq i64 %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %14 = inttoptr i64 %6 to i64* 
-  %15 = getelementptr  i64, i64* %14, i64 0 
-  %16 = load  i64, i64* %15 
-  %17 = add   i64 %6, 8 
-  %18 = inttoptr i64 %17 to i64* 
-  %19 = getelementptr  i64, i64* %18, i64 0 
-  %20 = load  i64, i64* %19 
-  %21 = inttoptr i64 %13 to i64* 
-  %22 = getelementptr  i64, i64* %21, i64 0 
-  %23 = load  i64, i64* %22 
-  %24 = add   i64 %13, 8 
-  %25 = inttoptr i64 %24 to i64* 
-  %26 = getelementptr  i64, i64* %25, i64 0 
-  %27 = load  i64, i64* %26 
-  %"2#tmp#13##0" = icmp eq i64 %23, %16 
-  br i1 %"2#tmp#13##0", label %if.then1, label %if.else1 
+  %15 = inttoptr i64 %6 to i64* 
+  %16 = getelementptr  i64, i64* %15, i64 0 
+  %17 = load  i64, i64* %16 
+  %18 = add   i64 %6, 8 
+  %19 = inttoptr i64 %18 to i64* 
+  %20 = getelementptr  i64, i64* %19, i64 0 
+  %21 = load  i64, i64* %20 
+  %22 = inttoptr i64 %13 to i64* 
+  %23 = getelementptr  i64, i64* %22, i64 0 
+  %24 = load  i64, i64* %23 
+  %25 = add   i64 %13, 8 
+  %26 = inttoptr i64 %25 to i64* 
+  %27 = getelementptr  i64, i64* %26, i64 0 
+  %28 = load  i64, i64* %27 
+  %29 = icmp eq i64 %24, %17 
+  br i1 %29, label %if.then1, label %if.else1 
 if.else:
   ret i1 0 
 if.then1:
-  %"4##success##0" = tail call fastcc  i1  @"wybe.string.=<0>"(i64  %20, i64  %27)  
-  ret i1 %"4##success##0" 
+  %30 = musttail call fastcc  i1  @"wybe.string.=<0>"(i64  %21, i64  %28)  
+  ret i1 %30 
 if.else1:
   ret i1 0 
 }
@@ -710,33 +710,33 @@ entry:
   %11 = inttoptr i64 %10 to i64* 
   %12 = getelementptr  i64, i64* %11, i64 0 
   %13 = load  i64, i64* %12 
-  %"1#tmp#7##0" = icmp eq i64 %2, %9 
-  br i1 %"1#tmp#7##0", label %if.then, label %if.else 
+  %14 = icmp eq i64 %2, %9 
+  br i1 %14, label %if.then, label %if.else 
 if.then:
-  %14 = inttoptr i64 %6 to i64* 
-  %15 = getelementptr  i64, i64* %14, i64 0 
-  %16 = load  i64, i64* %15 
-  %17 = add   i64 %6, 8 
-  %18 = inttoptr i64 %17 to i64* 
-  %19 = getelementptr  i64, i64* %18, i64 0 
-  %20 = load  i64, i64* %19 
-  %21 = inttoptr i64 %13 to i64* 
-  %22 = getelementptr  i64, i64* %21, i64 0 
-  %23 = load  i64, i64* %22 
-  %24 = add   i64 %13, 8 
-  %25 = inttoptr i64 %24 to i64* 
-  %26 = getelementptr  i64, i64* %25, i64 0 
-  %27 = load  i64, i64* %26 
-  %"2#tmp#12##0" = icmp eq i64 %23, %16 
-  br i1 %"2#tmp#12##0", label %if.then1, label %if.else1 
+  %15 = inttoptr i64 %6 to i64* 
+  %16 = getelementptr  i64, i64* %15, i64 0 
+  %17 = load  i64, i64* %16 
+  %18 = add   i64 %6, 8 
+  %19 = inttoptr i64 %18 to i64* 
+  %20 = getelementptr  i64, i64* %19, i64 0 
+  %21 = load  i64, i64* %20 
+  %22 = inttoptr i64 %13 to i64* 
+  %23 = getelementptr  i64, i64* %22, i64 0 
+  %24 = load  i64, i64* %23 
+  %25 = add   i64 %13, 8 
+  %26 = inttoptr i64 %25 to i64* 
+  %27 = getelementptr  i64, i64* %26, i64 0 
+  %28 = load  i64, i64* %27 
+  %29 = icmp eq i64 %24, %17 
+  br i1 %29, label %if.then1, label %if.else1 
 if.else:
-  %"3##success##0" = xor i1 0, 1 
-  ret i1 %"3##success##0" 
+  %33 = xor i1 0, 1 
+  ret i1 %33 
 if.then1:
-  %"4#tmp#0##0" = tail call fastcc  i1  @"wybe.string.=<0>"(i64  %20, i64  %27)  
-  %"4##success##0" = xor i1 %"4#tmp#0##0", 1 
-  ret i1 %"4##success##0" 
+  %30 = tail call fastcc  i1  @"wybe.string.=<0>"(i64  %21, i64  %28)  
+  %31 = xor i1 %30, 1 
+  ret i1 %31 
 if.else1:
-  %"5##success##0" = xor i1 0, 1 
-  ret i1 %"5##success##0" 
+  %32 = xor i1 0, 1 
+  ret i1 %32 
 }

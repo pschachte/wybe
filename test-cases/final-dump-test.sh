@@ -24,17 +24,17 @@ do
         > $out
 	# Add a newline to the end of a file if there isn't to resolve platform differences.
 	ed -s $out <<< w > /dev/null 2>&1
-	if [ ! -r $exp ] ; then 
+	if [ ! -r $exp ] ; then
 		printf "[31m?[39m"
 		NEW="$NEW\n    $out"
 	elif diff -q $exp $out >/dev/null 2>&1 ; then
 		printf "."
-	else 
+	else
 		printf "\n[34;1m**************** difference building $targ ****************[0m\n" >> ../ERRS
-		dwdiff -c -d '()<>~!@:?.%#' $exp $out >> ../ERRS 2>&1
+		dwdiff -C1 -c -d '()<>~!@:?.%#' $exp $out >> ../ERRS 2>&1
 		printf "[31mX[39m"
 		FAILS="$FAILS\n    $out"
-	fi 
+	fi
 done
 echo -e
 if [ -n "$FAILS" ] ; then
