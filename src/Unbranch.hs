@@ -500,7 +500,8 @@ unbranchStmt detism (Loop body exitVars res) pos stmts alt sense = do
     logUnbranch $ "  with entry vars " ++ showVarMap beforeVars
     brk <- maybeFactorContinuation detism exitVars' res' stmts alt sense
     logUnbranch $ "Generated break: " ++ showBody 4 brk
-    next <- factorLoopProc brk beforeVars pos detism res' body alt sense
+    next <- factorLoopProc brk beforeVars pos detism res' 
+                (body ++ [maybePlace Next pos]) alt sense
     logUnbranch $ "Generated next " ++ showStmt 4 (content next)
     logUnbranch "Finished handling loop"
     return [next]

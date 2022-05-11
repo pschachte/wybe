@@ -365,8 +365,7 @@ flattenStmt' (Not tstStmt) pos SemiDet = do
 flattenStmt' (Not tstStmt) _pos detism =
     shouldnt $ "negation in a " ++ show detism ++ " context"
 flattenStmt' (Loop body defVars res) pos detism = do
-    body' <- flattenInner False detism
-             (flattenStmts (body ++ [Unplaced Next]) detism)
+    body' <- flattenInner False detism (flattenStmts body detism)
     emit pos $ Loop body' defVars res
 flattenStmt' for@(For pgens body) pos detism = do
     -- For loops are transformed into `do` loops
