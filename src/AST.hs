@@ -39,8 +39,8 @@ module AST (
   lookupTypeRepresentation, lookupModuleRepresentation,
   paramIsPhantom, argIsPhantom, typeIsPhantom, repIsPhantom,
   primProtoParamNames,
-  protoRealParams, realParams, paramIsReal,
-  protoInputParamNames, isProcProtoArg,
+  protoRealParams, realParams, paramIsReal, paramIsNeeded,
+  protoInputParamNames, protoRealParamsWhere, isProcProtoArg,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace, unPlace,
   placedApply, defaultPlacedApply, placedApplyM, contentApply, updatePlacedM,
@@ -64,14 +64,15 @@ module AST (
   ProcBody(..), PrimFork(..), Ident, VarName,
   ProcName, ResourceDef(..), FlowDirection(..),
   argFlowDirection, argType, setArgType, setArgFlow, setArgFlowType, maybeArgFlowType,
-  argDescription, setParamType, paramIsResourceful,
+  argDescription, argIntVal, trustArgInt, setParamType, paramIsResourceful,
   setPrimParamType, setTypeFlowType,
-  flowsIn, flowsOut, primFlowToFlowDir,
+  flowsIn, flowsOut, primFlowToFlowDir, isInputFlow, isOutputFlow,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, stmtsImpurity, stmtImpurity, procCallToExp,
   expOutputs, pexpListOutputs, expInputs, pexpListInputs,
   setExpTypeFlow, setPExpTypeFlow,
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
+  varsInPrims, varsInPrim, varsInPrimArgs, varsInPrimArg,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
   maybeGetClosureOf, isClosureProc, isClosureVariant,
@@ -154,6 +155,7 @@ import           System.Console.ANSI
 import           GHC.Generics (Generic)
 
 import qualified LLVM.AST as LLVMAST
+import Data.Binary (Binary)
 
 ----------------------------------------------------------------
 --                      Types Just For Parsing
@@ -1093,7 +1095,7 @@ data ProcModifiers = ProcModifiers {
 
 
 data Inlining = Inline | MayInline | NoInline
-    deriving (Eq, Ord, Generic)
+    deriving (Eq, Ord, Generic, Show)
 
 
 -- | The printable modifier name for a Impurity, as specified by the user.
@@ -1268,7 +1270,7 @@ getProcDef (ProcSpec modSpec procName procID _) = do
            getLoadingModule modSpec
     let impl = trustFromJust ("unimplemented module " ++ showModSpec modSpec) $
                modImplementation mod
-    logAST $ "Looking up proc '" ++ procName ++ "' ID " ++ show procID
+    logAST $ "Looking up proc '" ++ procName ++ "' ID " ++ show procID ++ " in " ++ showModSpec modSpec
     let proc = modProcs impl ! procName !! procID
     logAST $ "  proc = " ++ showProcDef 9 proc
     return proc
@@ -1311,13 +1313,14 @@ updateProcDefM updater pspec@(ProcSpec modspec procName procID _) =
     (\imp -> do
        let procs = modProcs imp
        case Map.lookup procName procs of
-         Nothing -> return imp
+         Nothing -> shouldnt ("proc not found by name: " ++ show procName)
          Just defs -> do
            let (front,back) = List.splitAt procID defs
            case back of
              [] -> shouldnt $ "invalid proc spec " ++ show pspec
              (this:rest) -> do
                updated <- updater this
+               logAST $ "updated ProcDef: proto = " ++ show (procProto updated) ++ " implnProto = " ++ show (procImplnProto (procImpln updated))
                let defs' = front ++ updated:rest
                let procs' = Map.insert procName defs' procs
                return $ imp { modProcs = procs' })
@@ -2060,7 +2063,7 @@ isClosureVariant (ClosureProc _) = True
 isClosureVariant _               = False
 
 
--- |A procedure defintion body.  Initially, this is in a form similar
+-- |A procedure definition body.  Initially, this is in a form similar
 -- to what is read in from the source file.  As compilation procedes,
 -- this is gradually refined and constrained, until it is converted
 -- into a ProcBody, which is a clausal, logic programming form.
@@ -2132,7 +2135,9 @@ addGlobalFlow info FlowIn gFlows@GlobalFlows{globalFlowsIn=ins}
     = gFlows{globalFlowsIn=whenFinite (Set.insert info) ins}
 addGlobalFlow info FlowOut gFlows@GlobalFlows{globalFlowsOut=outs}
     = gFlows{globalFlowsOut=whenFinite (Set.insert info) outs}
-
+-- global flows don't use this flow type
+addGlobalFlow info FlowOutByReference gFlows = gFlows
+addGlobalFlow info FlowTakeReference gFlows = gFlows
 
 -- | Test if the given flow of a global exists in the global flow set
 hasGlobalFlow :: GlobalFlows -> PrimFlow -> GlobalInfo -> Bool
@@ -2140,6 +2145,9 @@ hasGlobalFlow gFlows@GlobalFlows{globalFlowsIn=ins} FlowIn info
     = USet.member info ins
 hasGlobalFlow gFlows@GlobalFlows{globalFlowsOut=outs} FlowOut info
     = USet.member info outs
+-- global flows don't use this flow type
+hasGlobalFlow gFlows FlowOutByReference info = False
+hasGlobalFlow gFlows FlowTakeReference info = False
 
 
 -- | Take the union of the sets of two global flows
@@ -2587,6 +2595,7 @@ data TypeSpec = TypeSpec {
     }
     | TypeVariable { typeVariableName :: TypeVarName }
     | Representation { typeSpecRepresentation :: TypeRepresentation }
+    -- the top or bottom of the type lattice, respectively
     | AnyType | InvalidType
               deriving (Eq,Ord,Generic)
 
@@ -2745,8 +2754,13 @@ data ParamInfo = ParamInfo {
 data FlowDirection = ParamIn | ParamOut | ParamInOut
                    deriving (Show,Eq,Ord,Generic)
 
--- |A primitive dataflow direction:  in or out
-data PrimFlow = FlowIn | FlowOut
+-- |A primitive dataflow direction
+data PrimFlow =
+    --  in or out
+    FlowIn | FlowOut
+    -- Two "special" flows used to improve last-call optimization.
+    -- Users cannot (at present) manually refer to these flows
+    | FlowOutByReference | FlowTakeReference
                    deriving (Show,Eq,Ord,Generic)
 
 
@@ -2822,6 +2836,21 @@ flowsOut ParamInOut = True
 primFlowToFlowDir :: PrimFlow -> FlowDirection
 primFlowToFlowDir FlowIn  = ParamIn
 primFlowToFlowDir FlowOut = ParamOut
+primFlowToFlowDir FlowOutByReference = ParamOut
+primFlowToFlowDir FlowTakeReference = ParamIn
+
+
+-- Returns true if the flow is conceptually an "output"
+isInputFlow :: PrimFlow -> Bool
+isInputFlow = not . isOutputFlow
+
+
+-- Returns true if the flow is conceptually an "output"
+isOutputFlow :: PrimFlow -> Bool
+isOutputFlow FlowOut = True
+isOutputFlow FlowOutByReference = True
+isOutputFlow FlowTakeReference  = False
+isOutputFlow FlowIn  = False
 
 
 -- |Source program statements.  These will be normalised into Prims.
@@ -2974,7 +3003,7 @@ data StringVariant = WybeString | CString
 
 
 -- Information about a global variable.
--- A global vairbale is a variable that is available everywhere,
+-- A global variable is a variable that is available everywhere,
 -- and can be access via an LPVM load instruction, or written to via an LPVM store
 data GlobalInfo = GlobalResource { globalResourceSpec :: ResourceSpec }
     deriving (Eq, Ord, Generic)
@@ -3095,14 +3124,23 @@ realParams = filterM paramIsReal
 -- |The param actually needs to be passed; ie, it is needed and not phantom.
 paramIsReal :: PrimParam -> Compiler Bool
 paramIsReal param =
-    (((not . paramInfoUnneeded)
-        $ primParamInfo param) &&) . not <$> paramIsPhantom param
+    (paramIsNeeded param &&) . not <$> paramIsPhantom param
 
+paramIsNeeded :: PrimParam -> Bool
+paramIsNeeded = not . paramInfoUnneeded . primParamInfo
 
 -- |Get names of proto input params
+-- XXX: is this really just input params? or all params
+--      was changed in this commit:
+--      https://github.com/pschachte/wybe/commit/99749ad485a760813ac63e2addcf8745a824a6e9
 protoInputParamNames :: PrimProto -> Compiler [PrimVarName]
 protoInputParamNames proto = (primParamName <$>) <$> protoRealParams proto
 
+-- | Get all params matching certain criteria
+protoRealParamsWhere :: (PrimParam -> Bool) -> PrimProto -> Compiler [PrimParam]
+protoRealParamsWhere f proto = do
+    realParams <- protoRealParams proto
+    return $ List.filter f realParams
 
 -- |Is the supplied argument a parameter of the proc proto
 isProcProtoArg :: [PrimVarName] -> PrimArg -> Bool
@@ -3139,7 +3177,6 @@ data Prim
 
 instance Show Prim where
     show = showPrim 0
-
 
 -- |An id for each call site, should be unique within a proc.
 type CallSiteID = Int
@@ -3276,7 +3313,6 @@ setArgFlow :: PrimFlow -> PrimArg -> PrimArg
 setArgFlow f arg@ArgVar{} = arg{argVarFlow=f}
 setArgFlow _ arg          = arg
 
-
 -- | Set the flow type of a prim arg. This is a nop for a non-ArgVar value
 setArgFlowType :: ArgFlowType -> PrimArg -> PrimArg
 setArgFlowType ft arg@ArgVar{} = arg{argVarFlowType=ft}
@@ -3313,6 +3349,20 @@ argDescription (ArgUndef _) = "undefined argument"
 argFlowDescription :: PrimFlow -> String
 argFlowDescription FlowIn  = "input"
 argFlowDescription FlowOut = "output"
+argFlowDescription FlowOutByReference = "outByReference"
+argFlowDescription FlowTakeReference = "takeReference"
+
+
+argIntVal :: PrimArg -> Maybe Integer
+argIntVal (ArgInt val _) = Just val
+argIntVal _              = Nothing
+
+
+-- |Return the integer constant from an argument; error if it's not one
+trustArgInt :: PrimArg -> Integer
+trustArgInt arg = trustFromJust
+                  "LPVM instruction argument must be an integer constant."
+                  $ argIntVal arg
 
 
 -- |Convert a statement read as an expression to a Stmt.
@@ -3429,18 +3479,16 @@ setPExpTypeFlow typeflow pexpr = setExpTypeFlow typeflow <$> pexpr
 -- or definitions.
 ----------------------------------------------------------------
 
--- varsInPrims :: PrimFlow -> [Prim] -> Set PrimVarName
--- varsInPrims dir prims =
---     List.foldr Set.union Set.empty $ List.map (varsInPrim dir) prims
+varsInPrims :: PrimFlow -> [Prim] -> Set PrimVarName
+varsInPrims dir =
+    List.foldr (Set.union . (varsInPrim dir)) Set.empty
 
--- varsInPrim :: PrimFlow -> Prim     -> Set PrimVarName
--- varsInPrim dir (PrimCall _ args)      = varsInPrimArgs dir args
--- varsInPrim dir (PrimForeign _ _ _ args) = varsInPrimArgs dir args
--- varsInPrim dir (PrimTest arg)         = varsInPrimArgs dir [arg]
+varsInPrim :: PrimFlow -> Prim     -> Set PrimVarName
+varsInPrim dir prim      = let (args, globals) = primArgs prim in varsInPrimArgs dir args
 
--- varsInPrimArgs :: PrimFlow -> [PrimArg] -> Set PrimVarName
--- varsInPrimArgs dir args =
---     List.foldr Set.union Set.empty $ List.map (varsInPrimArg dir) args
+varsInPrimArgs :: PrimFlow -> [PrimArg] -> Set PrimVarName
+varsInPrimArgs dir =
+    List.foldr (Set.union . varsInPrimArg dir) Set.empty
 
 varsInPrimArg :: PrimFlow -> PrimArg -> Set PrimVarName
 varsInPrimArg dir ArgVar{argVarName=var,argVarFlow=dir'}
@@ -3451,7 +3499,7 @@ varsInPrimArg _ ArgInt{}      = Set.empty
 varsInPrimArg _ ArgFloat{}    = Set.empty
 varsInPrimArg _ ArgString{}   = Set.empty
 varsInPrimArg _ ArgChar{}     = Set.empty
-varsInPrimArg _ (ArgGlobal{}) = Set.empty
+varsInPrimArg _ ArgGlobal{} = Set.empty
 varsInPrimArg _ ArgUnneeded{} = Set.empty
 varsInPrimArg _ ArgUndef{}    = Set.empty
 
@@ -3797,6 +3845,8 @@ flowPrefix ParamInOut = "!"
 primFlowPrefix :: PrimFlow -> String
 primFlowPrefix FlowIn    = ""
 primFlowPrefix FlowOut   = "?"
+primFlowPrefix FlowOutByReference   = "outByReference "
+primFlowPrefix FlowTakeReference   = "takeReference "
 
 -- |Start a new line with the specified indent.
 startLine :: Int -> String

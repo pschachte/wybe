@@ -194,7 +194,7 @@ entry:
   %"1#tmp#1##0" = tail call fastcc  i1  @"wybe.string.=<0>"(i64  %3, i64  %10)  
   br i1 %"1#tmp#1##0", label %if.then, label %if.else 
 if.then:
-  %"2##success##0" = tail call fastcc  i1  @"wybe.string.=<0>"(i64  %7, i64  %14)  
+  %"2##success##0" = musttail call fastcc  i1  @"wybe.string.=<0>"(i64  %7, i64  %14)  
   ret i1 %"2##success##0" 
 if.else:
   ret i1 0 

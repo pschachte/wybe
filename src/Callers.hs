@@ -13,6 +13,7 @@ import           Data.Graph
 import           Data.List  as List
 import           Data.Map   as Map
 import           Data.Maybe
+import qualified Data.Set as Set
 
 -- | Count calls to all the procs in the specified module from procs in modules
 -- in the specified list of modules, which is a strongly connected component in

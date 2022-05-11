@@ -270,7 +270,7 @@ entry:
   tail call fastcc  void  @"alias1.bar<0>"()  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias1.6, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"alias1.baz<0>"()  
+  musttail call fastcc  void  @"alias1.baz<0>"()  
   ret void 
 }
 

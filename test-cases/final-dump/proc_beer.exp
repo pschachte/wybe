@@ -115,7 +115,7 @@ if.then:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @proc_beer.2, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   %"2#tmp#8##0" = sub   i64 %"count##0", 1 
-  tail call fastcc  void  @"proc_beer.gen#1<0>"(i64  %"2#tmp#8##0")  
+  musttail call fastcc  void  @"proc_beer.gen#1<0>"(i64  %"2#tmp#8##0")  
   ret void 
 if.else:
   ret void 
@@ -128,6 +128,6 @@ entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @proc_beer.2, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   %"1#count##1" = sub   i64 %"count##0", 1 
-  tail call fastcc  void  @"proc_beer.gen#1<0>"(i64  %"1#count##1")  
+  musttail call fastcc  void  @"proc_beer.gen#1<0>"(i64  %"1#count##1")  
   ret void 
 }

@@ -438,10 +438,10 @@ if.then:
   %"2#tmp#21##0" = tail call ccc  i64  @read_line()  
   %"2#pos##1" = tail call fastcc  i64  @"bug214.move<0>"(i64  %"pos##0", i2  %64, i64  %"2#units##0")  
   %"2#sub##1" = tail call fastcc  i64  @"bug214.move<1>"(i64  %"sub##0", i2  %64, i64  %"2#units##0")  
-  tail call fastcc  void  @"bug214.gen#2<0>"(i64  %"2#pos##1", i64  %"2#sub##1", i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0")  
+  musttail call fastcc  void  @"bug214.gen#2<0>"(i64  %"2#pos##1", i64  %"2#sub##1", i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0")  
   ret void 
 if.else:
-  tail call fastcc  void  @"bug214.gen#2<0>"(i64  %"pos##0", i64  %"sub##0", i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0")  
+  musttail call fastcc  void  @"bug214.gen#2<0>"(i64  %"pos##0", i64  %"sub##0", i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0")  
   ret void 
 }
 
@@ -1154,7 +1154,7 @@ entry:
   %49 = getelementptr  i64, i64* %48, i64 0 
   %50 = load  i64, i64* %49 
   tail call ccc  void  @print_int(i64  %50)  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @bug214.position.52, i32 0, i32 0) to i64))  
+  musttail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @bug214.position.52, i32 0, i32 0) to i64))  
   ret void 
 }
 

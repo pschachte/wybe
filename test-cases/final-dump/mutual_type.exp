@@ -228,7 +228,7 @@ if.then1:
 if.else1:
   ret i1 0 
 if.then2:
-  %"6##success##0" = tail call fastcc  i1  @"mutual_type.b.=<0>"(i64  %7, i64  %14)  
+  %"6##success##0" = musttail call fastcc  i1  @"mutual_type.b.=<0>"(i64  %7, i64  %14)  
   ret i1 %"6##success##0" 
 if.else2:
   ret i1 0 
@@ -578,7 +578,7 @@ if.then1:
 if.else1:
   ret i1 0 
 if.then2:
-  %"6##success##0" = tail call fastcc  i1  @"mutual_type.a.=<0>"(i64  %7, i64  %14)  
+  %"6##success##0" = musttail call fastcc  i1  @"mutual_type.a.=<0>"(i64  %7, i64  %14)  
   ret i1 %"6##success##0" 
 if.else2:
   ret i1 0 

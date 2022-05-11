@@ -237,8 +237,10 @@ updateBodyGlobalFlows procs newFlows (ProcBody body fork) = do
 updatePrimGlobalFlows :: Set ProcSpec -> GlobalFlows -> Prim -> Compiler Prim
 updatePrimGlobalFlows procs newFlows (PrimCall cID pspec args gFlows)
     | pspec `Set.member` procs
-    = return $ PrimCall cID pspec args $ globalFlowsIntersection newFlows gFlows
-    | otherwise = PrimCall cID pspec args <$> getProcGlobalFlows pspec
+    = return $ PrimCall cID pspec args (globalFlowsIntersection newFlows gFlows)
+    | otherwise = do
+        flows <- getProcGlobalFlows pspec
+        return $ PrimCall cID pspec args flows
 updatePrimGlobalFlows _ _ prim = return prim
 
 

@@ -79,6 +79,6 @@ entry:
   %"1#tmp#0##1" = add   i64 %"tmp#0##0", 1 
   tail call ccc  void  @print_int(i64  %"tmp#0##0")  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"det_for.gen#1<0>"(i64  %"1#tmp#0##1")  
+  musttail call fastcc  void  @"det_for.gen#1<0>"(i64  %"1#tmp#0##1")  
   ret void 
 }

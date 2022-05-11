@@ -217,10 +217,10 @@ if.else1:
   %"5#tmp#2##0" = icmp slt i64 %"key##0", %26 
   br i1 %"5#tmp#2##0", label %if.then2, label %if.else2 
 if.then2:
-  %"6#result##0" = tail call fastcc  i1  @"stmt_if.lookup<0>"(i64  %"key##0", i64  %22)  
+  %"6#result##0" = musttail call fastcc  i1  @"stmt_if.lookup<0>"(i64  %"key##0", i64  %22)  
   ret i1 %"6#result##0" 
 if.else2:
-  %"7#result##0" = tail call fastcc  i1  @"stmt_if.lookup<0>"(i64  %"key##0", i64  %30)  
+  %"7#result##0" = musttail call fastcc  i1  @"stmt_if.lookup<0>"(i64  %"key##0", i64  %30)  
   ret i1 %"7#result##0" 
 }
 --------------------------------------------------
@@ -485,7 +485,7 @@ if.then2:
 if.else2:
   ret i1 0 
 if.then3:
-  %"8##success##0" = tail call fastcc  i1  @"stmt_if.tree.=<0>"(i64  %11, i64  %22)  
+  %"8##success##0" = musttail call fastcc  i1  @"stmt_if.tree.=<0>"(i64  %11, i64  %22)  
   ret i1 %"8##success##0" 
 if.else3:
   ret i1 0 

@@ -439,10 +439,10 @@ entry:
 if.then:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @anon_field.18, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"anon_field.gen#1<0>"()  
+  musttail call fastcc  void  @"anon_field.gen#1<0>"()  
   ret void 
 if.else:
-  tail call fastcc  void  @"anon_field.gen#1<0>"()  
+  musttail call fastcc  void  @"anon_field.gen#1<0>"()  
   ret void 
 }
 
@@ -726,10 +726,10 @@ entry:
 if.then:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @anon_field.148, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"anon_field.gen#2<0>"()  
+  musttail call fastcc  void  @"anon_field.gen#2<0>"()  
   ret void 
 if.else:
-  tail call fastcc  void  @"anon_field.gen#2<0>"()  
+  musttail call fastcc  void  @"anon_field.gen#2<0>"()  
   ret void 
 }
 
@@ -769,10 +769,10 @@ entry:
 if.then:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @anon_field.172, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"anon_field.gen#3<0>"()  
+  musttail call fastcc  void  @"anon_field.gen#3<0>"()  
   ret void 
 if.else:
-  tail call fastcc  void  @"anon_field.gen#3<0>"()  
+  musttail call fastcc  void  @"anon_field.gen#3<0>"()  
   ret void 
 }
 
