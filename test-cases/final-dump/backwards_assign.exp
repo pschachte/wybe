@@ -72,8 +72,8 @@ entry:
 
 define external fastcc  i64 @"backwards_assign.backwards_assign<0>"(i64  %"input##0")    {
 entry:
-  %"1#output##0" = add   i64 %"input##0", 1 
-  ret i64 %"1#output##0" 
+  %0 = add   i64 %"input##0", 1 
+  ret i64 %0 
 }
 
 
@@ -81,11 +81,11 @@ define external fastcc  void @"backwards_assign.gen#1<0>"(i64  %"i##0")    {
 entry:
   tail call ccc  void  @print_int(i64  %"i##0")  
   tail call ccc  void  @putchar(i8  10)  
-  %"1#i##1" = add   i64 %"i##0", 1 
-  %"1#tmp#0##0" = icmp slt i64 %"1#i##1", 10 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = add   i64 %"i##0", 1 
+  %1 = icmp slt i64 %0, 10 
+  br i1 %1, label %if.then, label %if.else 
 if.then:
-  musttail call fastcc  void  @"backwards_assign.gen#1<0>"(i64  %"1#i##1")  
+  musttail call fastcc  void  @"backwards_assign.gen#1<0>"(i64  %0)  
   ret void 
 if.else:
   ret void 

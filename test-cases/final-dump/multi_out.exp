@@ -48,8 +48,8 @@ entry:
 
 define external fastcc  {i64, i64, i64} @"multi_out.onetwothree<0>"()    {
 entry:
-  %1 = insertvalue {i64, i64, i64} undef, i64 1, 0 
-  %2 = insertvalue {i64, i64, i64} %1, i64 2, 1 
-  %3 = insertvalue {i64, i64, i64} %2, i64 3, 2 
-  ret {i64, i64, i64} %3 
+  %0 = insertvalue {i64, i64, i64} undef, i64 1, 0 
+  %1 = insertvalue {i64, i64, i64} %0, i64 2, 1 
+  %2 = insertvalue {i64, i64, i64} %1, i64 3, 2 
+  ret {i64, i64, i64} %2 
 }

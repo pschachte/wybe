@@ -55,10 +55,10 @@ toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}>:
  
 
 
-@numbers.2 =    constant {i64, i64} { i64 29, i64 ptrtoint ([?? x i8]* @numbers.1 to i64) }
+@numbers.1 =    constant {i64, i64} { i64 29, i64 ptrtoint ([?? x i8]* @numbers.0 to i64) }
 
 
-@numbers.1 =    constant [?? x i8] c"Numbers has been initialised.\00"
+@numbers.0 =    constant [?? x i8] c"Numbers has been initialised.\00"
 
 
 declare external ccc  void @putchar(i8)    
@@ -75,7 +75,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  void @"numbers.<0>"()    {
 entry:
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @numbers.2, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @numbers.1, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
@@ -83,21 +83,21 @@ entry:
 
 define external fastcc  i64 @"numbers.factorial<0>"(i64  %"n##0")    {
 entry:
-  %"1#tmp#4##0" = icmp sle i64 %"n##0", 0 
-  br i1 %"1#tmp#4##0", label %if.then, label %if.else 
+  %0 = icmp sle i64 %"n##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
   ret i64 1 
 if.else:
-  %"3#tmp#3##0" = sub   i64 %"n##0", 1 
-  %"3#tmp#2##0" = tail call fastcc  i64  @"numbers.factorial<0>"(i64  %"3#tmp#3##0")  
-  %"3##result##0" = mul   i64 %"n##0", %"3#tmp#2##0" 
-  ret i64 %"3##result##0" 
+  %1 = sub   i64 %"n##0", 1 
+  %2 = tail call fastcc  i64  @"numbers.factorial<0>"(i64  %1)  
+  %3 = mul   i64 %"n##0", %2 
+  ret i64 %3 
 }
 
 
 define external fastcc  double @"numbers.toCelsius<0>"(double  %"f##0")    {
 entry:
-  %"1#tmp#1##0" = fsub double %"f##0", 3.200000e1 
-  %"1##result##0" = fdiv double %"1#tmp#1##0", 1.800000e0 
-  ret double %"1##result##0" 
+  %0 = fsub double %"f##0", 3.200000e1 
+  %1 = fdiv double %0, 1.800000e0 
+  ret double %1 
 }

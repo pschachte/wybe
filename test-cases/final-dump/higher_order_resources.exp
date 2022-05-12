@@ -173,25 +173,25 @@ take_max(i##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_re
 @"resource#higher_order_resources.maximum" =    global i64 undef
 
 
-@higher_order_resources.163 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @higher_order_resources.162 to i64) }
+@higher_order_resources.6 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @higher_order_resources.5 to i64) }
 
 
-@higher_order_resources.61 =    constant {i64, i64} { i64 5, i64 ptrtoint ([?? x i8]* @higher_order_resources.60 to i64) }
+@higher_order_resources.2 =    constant {i64, i64} { i64 5, i64 ptrtoint ([?? x i8]* @higher_order_resources.1 to i64) }
 
 
-@higher_order_resources.60 =    constant [?? x i8] c"*****\00"
+@higher_order_resources.1 =    constant [?? x i8] c"*****\00"
 
 
-@higher_order_resources.162 =    constant [?? x i8] c"> \00"
+@higher_order_resources.5 =    constant [?? x i8] c"> \00"
 
 
-@higher_order_resources.58 =    constant [1 x i64] [i64 ptrtoint (void (i64, i64)* @"higher_order_resources.gen#1<1>" to i64)]
+@higher_order_resources.0 =    constant [1 x i64] [i64 ptrtoint (void (i64, i64)* @"higher_order_resources.gen#1<1>" to i64)]
 
 
-@higher_order_resources.158 =    constant [1 x i64] [i64 ptrtoint (void (i64, i64)* @"higher_order_resources.gen#2<1>" to i64)]
+@higher_order_resources.3 =    constant [1 x i64] [i64 ptrtoint (void (i64, i64)* @"higher_order_resources.gen#2<1>" to i64)]
 
 
-@higher_order_resources.161 =    constant [1 x i64] [i64 ptrtoint (void (i64, i64)* @"higher_order_resources.gen#3<0>" to i64)]
+@higher_order_resources.4 =    constant [1 x i64] [i64 ptrtoint (void (i64, i64)* @"higher_order_resources.gen#3<0>" to i64)]
 
 
 declare external fastcc  i64 @"wybe.int.max<0>"(i64, i64)    
@@ -220,258 +220,258 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  void @"higher_order_resources.<0>"()    {
 entry:
-  %1 = trunc i64 16 to i32  
-  %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
-  %3 = ptrtoint i8* %2 to i64 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  store  i64 3, i64* %5 
-  %6 = add   i64 %3, 8 
-  %7 = inttoptr i64 %6 to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
-  store  i64 0, i64* %8 
-  %9 = trunc i64 16 to i32  
-  %10 = tail call ccc  i8*  @wybe_malloc(i32  %9)  
-  %11 = ptrtoint i8* %10 to i64 
-  %12 = inttoptr i64 %11 to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
-  store  i64 2, i64* %13 
-  %14 = add   i64 %11, 8 
-  %15 = inttoptr i64 %14 to i64* 
-  %16 = getelementptr  i64, i64* %15, i64 0 
-  store  i64 %3, i64* %16 
-  %17 = trunc i64 16 to i32  
-  %18 = tail call ccc  i8*  @wybe_malloc(i32  %17)  
-  %19 = ptrtoint i8* %18 to i64 
-  %20 = inttoptr i64 %19 to i64* 
-  %21 = getelementptr  i64, i64* %20, i64 0 
-  store  i64 1, i64* %21 
-  %22 = add   i64 %19, 8 
-  %23 = inttoptr i64 %22 to i64* 
-  %24 = getelementptr  i64, i64* %23, i64 0 
-  store  i64 %11, i64* %24 
-  %25 = trunc i64 16 to i32  
-  %26 = tail call ccc  i8*  @wybe_malloc(i32  %25)  
-  %27 = ptrtoint i8* %26 to i64 
-  %28 = inttoptr i64 %27 to i64* 
-  %29 = getelementptr  i64, i64* %28, i64 0 
-  store  i64 1, i64* %29 
-  %30 = add   i64 %27, 8 
-  %31 = inttoptr i64 %30 to i64* 
-  %32 = getelementptr  i64, i64* %31, i64 0 
-  store  i64 0, i64* %32 
-  %33 = trunc i64 16 to i32  
-  %34 = tail call ccc  i8*  @wybe_malloc(i32  %33)  
-  %35 = ptrtoint i8* %34 to i64 
-  %36 = inttoptr i64 %35 to i64* 
-  %37 = getelementptr  i64, i64* %36, i64 0 
-  store  i64 5, i64* %37 
-  %38 = add   i64 %35, 8 
-  %39 = inttoptr i64 %38 to i64* 
-  %40 = getelementptr  i64, i64* %39, i64 0 
-  store  i64 %27, i64* %40 
-  %41 = trunc i64 16 to i32  
-  %42 = tail call ccc  i8*  @wybe_malloc(i32  %41)  
-  %43 = ptrtoint i8* %42 to i64 
-  %44 = inttoptr i64 %43 to i64* 
-  %45 = getelementptr  i64, i64* %44, i64 0 
-  store  i64 %35, i64* %45 
-  %46 = add   i64 %43, 8 
-  %47 = inttoptr i64 %46 to i64* 
-  %48 = getelementptr  i64, i64* %47, i64 0 
-  store  i64 0, i64* %48 
-  %49 = trunc i64 16 to i32  
-  %50 = tail call ccc  i8*  @wybe_malloc(i32  %49)  
-  %51 = ptrtoint i8* %50 to i64 
-  %52 = inttoptr i64 %51 to i64* 
-  %53 = getelementptr  i64, i64* %52, i64 0 
-  store  i64 %19, i64* %53 
-  %54 = add   i64 %51, 8 
-  %55 = inttoptr i64 %54 to i64* 
-  %56 = getelementptr  i64, i64* %55, i64 0 
-  store  i64 %43, i64* %56 
+  %0 = trunc i64 16 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  store  i64 3, i64* %4 
+  %5 = add   i64 %2, 8 
+  %6 = inttoptr i64 %5 to i64* 
+  %7 = getelementptr  i64, i64* %6, i64 0 
+  store  i64 0, i64* %7 
+  %8 = trunc i64 16 to i32  
+  %9 = tail call ccc  i8*  @wybe_malloc(i32  %8)  
+  %10 = ptrtoint i8* %9 to i64 
+  %11 = inttoptr i64 %10 to i64* 
+  %12 = getelementptr  i64, i64* %11, i64 0 
+  store  i64 2, i64* %12 
+  %13 = add   i64 %10, 8 
+  %14 = inttoptr i64 %13 to i64* 
+  %15 = getelementptr  i64, i64* %14, i64 0 
+  store  i64 %2, i64* %15 
+  %16 = trunc i64 16 to i32  
+  %17 = tail call ccc  i8*  @wybe_malloc(i32  %16)  
+  %18 = ptrtoint i8* %17 to i64 
+  %19 = inttoptr i64 %18 to i64* 
+  %20 = getelementptr  i64, i64* %19, i64 0 
+  store  i64 1, i64* %20 
+  %21 = add   i64 %18, 8 
+  %22 = inttoptr i64 %21 to i64* 
+  %23 = getelementptr  i64, i64* %22, i64 0 
+  store  i64 %10, i64* %23 
+  %24 = trunc i64 16 to i32  
+  %25 = tail call ccc  i8*  @wybe_malloc(i32  %24)  
+  %26 = ptrtoint i8* %25 to i64 
+  %27 = inttoptr i64 %26 to i64* 
+  %28 = getelementptr  i64, i64* %27, i64 0 
+  store  i64 1, i64* %28 
+  %29 = add   i64 %26, 8 
+  %30 = inttoptr i64 %29 to i64* 
+  %31 = getelementptr  i64, i64* %30, i64 0 
+  store  i64 0, i64* %31 
+  %32 = trunc i64 16 to i32  
+  %33 = tail call ccc  i8*  @wybe_malloc(i32  %32)  
+  %34 = ptrtoint i8* %33 to i64 
+  %35 = inttoptr i64 %34 to i64* 
+  %36 = getelementptr  i64, i64* %35, i64 0 
+  store  i64 5, i64* %36 
+  %37 = add   i64 %34, 8 
+  %38 = inttoptr i64 %37 to i64* 
+  %39 = getelementptr  i64, i64* %38, i64 0 
+  store  i64 %26, i64* %39 
+  %40 = trunc i64 16 to i32  
+  %41 = tail call ccc  i8*  @wybe_malloc(i32  %40)  
+  %42 = ptrtoint i8* %41 to i64 
+  %43 = inttoptr i64 %42 to i64* 
+  %44 = getelementptr  i64, i64* %43, i64 0 
+  store  i64 %34, i64* %44 
+  %45 = add   i64 %42, 8 
+  %46 = inttoptr i64 %45 to i64* 
+  %47 = getelementptr  i64, i64* %46, i64 0 
+  store  i64 0, i64* %47 
+  %48 = trunc i64 16 to i32  
+  %49 = tail call ccc  i8*  @wybe_malloc(i32  %48)  
+  %50 = ptrtoint i8* %49 to i64 
+  %51 = inttoptr i64 %50 to i64* 
+  %52 = getelementptr  i64, i64* %51, i64 0 
+  store  i64 %18, i64* %52 
+  %53 = add   i64 %50, 8 
+  %54 = inttoptr i64 %53 to i64* 
+  %55 = getelementptr  i64, i64* %54, i64 0 
+  store  i64 %42, i64* %55 
+  %56 = load  i64, i64* @"resource#higher_order_resources.maximum" 
+  store  i64 -1000, i64* @"resource#higher_order_resources.maximum" 
+  tail call fastcc  void  @"wybe.list.gen#4<0>"(i64  %50, i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_resources.0, i32 0, i32 0) to i64), i64  %50)  
   %57 = load  i64, i64* @"resource#higher_order_resources.maximum" 
+  tail call ccc  void  @print_int(i64  %57)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_resources.2, i32 0, i32 0) to i64))  
+  tail call ccc  void  @putchar(i8  10)  
+  %58 = trunc i64 16 to i32  
+  %59 = tail call ccc  i8*  @wybe_malloc(i32  %58)  
+  %60 = ptrtoint i8* %59 to i64 
+  %61 = inttoptr i64 %60 to i64* 
+  %62 = getelementptr  i64, i64* %61, i64 0 
+  store  i64 3, i64* %62 
+  %63 = add   i64 %60, 8 
+  %64 = inttoptr i64 %63 to i64* 
+  %65 = getelementptr  i64, i64* %64, i64 0 
+  store  i64 0, i64* %65 
+  %66 = trunc i64 16 to i32  
+  %67 = tail call ccc  i8*  @wybe_malloc(i32  %66)  
+  %68 = ptrtoint i8* %67 to i64 
+  %69 = inttoptr i64 %68 to i64* 
+  %70 = getelementptr  i64, i64* %69, i64 0 
+  store  i64 2, i64* %70 
+  %71 = add   i64 %68, 8 
+  %72 = inttoptr i64 %71 to i64* 
+  %73 = getelementptr  i64, i64* %72, i64 0 
+  store  i64 %60, i64* %73 
+  %74 = trunc i64 16 to i32  
+  %75 = tail call ccc  i8*  @wybe_malloc(i32  %74)  
+  %76 = ptrtoint i8* %75 to i64 
+  %77 = inttoptr i64 %76 to i64* 
+  %78 = getelementptr  i64, i64* %77, i64 0 
+  store  i64 1, i64* %78 
+  %79 = add   i64 %76, 8 
+  %80 = inttoptr i64 %79 to i64* 
+  %81 = getelementptr  i64, i64* %80, i64 0 
+  store  i64 %68, i64* %81 
+  %82 = trunc i64 16 to i32  
+  %83 = tail call ccc  i8*  @wybe_malloc(i32  %82)  
+  %84 = ptrtoint i8* %83 to i64 
+  %85 = inttoptr i64 %84 to i64* 
+  %86 = getelementptr  i64, i64* %85, i64 0 
+  store  i64 2, i64* %86 
+  %87 = add   i64 %84, 8 
+  %88 = inttoptr i64 %87 to i64* 
+  %89 = getelementptr  i64, i64* %88, i64 0 
+  store  i64 0, i64* %89 
+  %90 = trunc i64 16 to i32  
+  %91 = tail call ccc  i8*  @wybe_malloc(i32  %90)  
+  %92 = ptrtoint i8* %91 to i64 
+  %93 = inttoptr i64 %92 to i64* 
+  %94 = getelementptr  i64, i64* %93, i64 0 
+  store  i64 1, i64* %94 
+  %95 = add   i64 %92, 8 
+  %96 = inttoptr i64 %95 to i64* 
+  %97 = getelementptr  i64, i64* %96, i64 0 
+  store  i64 %84, i64* %97 
+  %98 = trunc i64 16 to i32  
+  %99 = tail call ccc  i8*  @wybe_malloc(i32  %98)  
+  %100 = ptrtoint i8* %99 to i64 
+  %101 = inttoptr i64 %100 to i64* 
+  %102 = getelementptr  i64, i64* %101, i64 0 
+  store  i64 2, i64* %102 
+  %103 = add   i64 %100, 8 
+  %104 = inttoptr i64 %103 to i64* 
+  %105 = getelementptr  i64, i64* %104, i64 0 
+  store  i64 %92, i64* %105 
+  %106 = trunc i64 16 to i32  
+  %107 = tail call ccc  i8*  @wybe_malloc(i32  %106)  
+  %108 = ptrtoint i8* %107 to i64 
+  %109 = inttoptr i64 %108 to i64* 
+  %110 = getelementptr  i64, i64* %109, i64 0 
+  store  i64 1, i64* %110 
+  %111 = add   i64 %108, 8 
+  %112 = inttoptr i64 %111 to i64* 
+  %113 = getelementptr  i64, i64* %112, i64 0 
+  store  i64 %100, i64* %113 
+  %114 = trunc i64 16 to i32  
+  %115 = tail call ccc  i8*  @wybe_malloc(i32  %114)  
+  %116 = ptrtoint i8* %115 to i64 
+  %117 = inttoptr i64 %116 to i64* 
+  %118 = getelementptr  i64, i64* %117, i64 0 
+  store  i64 1, i64* %118 
+  %119 = add   i64 %116, 8 
+  %120 = inttoptr i64 %119 to i64* 
+  %121 = getelementptr  i64, i64* %120, i64 0 
+  store  i64 0, i64* %121 
+  %122 = trunc i64 16 to i32  
+  %123 = tail call ccc  i8*  @wybe_malloc(i32  %122)  
+  %124 = ptrtoint i8* %123 to i64 
+  %125 = inttoptr i64 %124 to i64* 
+  %126 = getelementptr  i64, i64* %125, i64 0 
+  store  i64 5, i64* %126 
+  %127 = add   i64 %124, 8 
+  %128 = inttoptr i64 %127 to i64* 
+  %129 = getelementptr  i64, i64* %128, i64 0 
+  store  i64 %116, i64* %129 
+  %130 = trunc i64 16 to i32  
+  %131 = tail call ccc  i8*  @wybe_malloc(i32  %130)  
+  %132 = ptrtoint i8* %131 to i64 
+  %133 = inttoptr i64 %132 to i64* 
+  %134 = getelementptr  i64, i64* %133, i64 0 
+  store  i64 %124, i64* %134 
+  %135 = add   i64 %132, 8 
+  %136 = inttoptr i64 %135 to i64* 
+  %137 = getelementptr  i64, i64* %136, i64 0 
+  store  i64 0, i64* %137 
+  %138 = trunc i64 16 to i32  
+  %139 = tail call ccc  i8*  @wybe_malloc(i32  %138)  
+  %140 = ptrtoint i8* %139 to i64 
+  %141 = inttoptr i64 %140 to i64* 
+  %142 = getelementptr  i64, i64* %141, i64 0 
+  store  i64 %108, i64* %142 
+  %143 = add   i64 %140, 8 
+  %144 = inttoptr i64 %143 to i64* 
+  %145 = getelementptr  i64, i64* %144, i64 0 
+  store  i64 %132, i64* %145 
+  %146 = trunc i64 16 to i32  
+  %147 = tail call ccc  i8*  @wybe_malloc(i32  %146)  
+  %148 = ptrtoint i8* %147 to i64 
+  %149 = inttoptr i64 %148 to i64* 
+  %150 = getelementptr  i64, i64* %149, i64 0 
+  store  i64 %76, i64* %150 
+  %151 = add   i64 %148, 8 
+  %152 = inttoptr i64 %151 to i64* 
+  %153 = getelementptr  i64, i64* %152, i64 0 
+  store  i64 %140, i64* %153 
   store  i64 -1000, i64* @"resource#higher_order_resources.maximum" 
-  tail call fastcc  void  @"wybe.list.gen#4<0>"(i64  %51, i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_resources.58, i32 0, i32 0) to i64), i64  %51)  
-  %59 = load  i64, i64* @"resource#higher_order_resources.maximum" 
-  tail call ccc  void  @print_int(i64  %59)  
+  tail call fastcc  void  @"wybe.list.gen#4<0>"(i64  %148, i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_resources.3, i32 0, i32 0) to i64), i64  %148)  
+  %154 = load  i64, i64* @"resource#higher_order_resources.maximum" 
+  tail call ccc  void  @print_int(i64  %154)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_resources.61, i32 0, i32 0) to i64))  
-  tail call ccc  void  @putchar(i8  10)  
-  %62 = trunc i64 16 to i32  
-  %63 = tail call ccc  i8*  @wybe_malloc(i32  %62)  
-  %64 = ptrtoint i8* %63 to i64 
-  %65 = inttoptr i64 %64 to i64* 
-  %66 = getelementptr  i64, i64* %65, i64 0 
-  store  i64 3, i64* %66 
-  %67 = add   i64 %64, 8 
-  %68 = inttoptr i64 %67 to i64* 
-  %69 = getelementptr  i64, i64* %68, i64 0 
-  store  i64 0, i64* %69 
-  %70 = trunc i64 16 to i32  
-  %71 = tail call ccc  i8*  @wybe_malloc(i32  %70)  
-  %72 = ptrtoint i8* %71 to i64 
-  %73 = inttoptr i64 %72 to i64* 
-  %74 = getelementptr  i64, i64* %73, i64 0 
-  store  i64 2, i64* %74 
-  %75 = add   i64 %72, 8 
-  %76 = inttoptr i64 %75 to i64* 
-  %77 = getelementptr  i64, i64* %76, i64 0 
-  store  i64 %64, i64* %77 
-  %78 = trunc i64 16 to i32  
-  %79 = tail call ccc  i8*  @wybe_malloc(i32  %78)  
-  %80 = ptrtoint i8* %79 to i64 
-  %81 = inttoptr i64 %80 to i64* 
-  %82 = getelementptr  i64, i64* %81, i64 0 
-  store  i64 1, i64* %82 
-  %83 = add   i64 %80, 8 
-  %84 = inttoptr i64 %83 to i64* 
-  %85 = getelementptr  i64, i64* %84, i64 0 
-  store  i64 %72, i64* %85 
-  %86 = trunc i64 16 to i32  
-  %87 = tail call ccc  i8*  @wybe_malloc(i32  %86)  
-  %88 = ptrtoint i8* %87 to i64 
-  %89 = inttoptr i64 %88 to i64* 
-  %90 = getelementptr  i64, i64* %89, i64 0 
-  store  i64 2, i64* %90 
-  %91 = add   i64 %88, 8 
-  %92 = inttoptr i64 %91 to i64* 
-  %93 = getelementptr  i64, i64* %92, i64 0 
-  store  i64 0, i64* %93 
-  %94 = trunc i64 16 to i32  
-  %95 = tail call ccc  i8*  @wybe_malloc(i32  %94)  
-  %96 = ptrtoint i8* %95 to i64 
-  %97 = inttoptr i64 %96 to i64* 
-  %98 = getelementptr  i64, i64* %97, i64 0 
-  store  i64 1, i64* %98 
-  %99 = add   i64 %96, 8 
-  %100 = inttoptr i64 %99 to i64* 
-  %101 = getelementptr  i64, i64* %100, i64 0 
-  store  i64 %88, i64* %101 
-  %102 = trunc i64 16 to i32  
-  %103 = tail call ccc  i8*  @wybe_malloc(i32  %102)  
-  %104 = ptrtoint i8* %103 to i64 
-  %105 = inttoptr i64 %104 to i64* 
-  %106 = getelementptr  i64, i64* %105, i64 0 
-  store  i64 2, i64* %106 
-  %107 = add   i64 %104, 8 
-  %108 = inttoptr i64 %107 to i64* 
-  %109 = getelementptr  i64, i64* %108, i64 0 
-  store  i64 %96, i64* %109 
-  %110 = trunc i64 16 to i32  
-  %111 = tail call ccc  i8*  @wybe_malloc(i32  %110)  
-  %112 = ptrtoint i8* %111 to i64 
-  %113 = inttoptr i64 %112 to i64* 
-  %114 = getelementptr  i64, i64* %113, i64 0 
-  store  i64 1, i64* %114 
-  %115 = add   i64 %112, 8 
-  %116 = inttoptr i64 %115 to i64* 
-  %117 = getelementptr  i64, i64* %116, i64 0 
-  store  i64 %104, i64* %117 
-  %118 = trunc i64 16 to i32  
-  %119 = tail call ccc  i8*  @wybe_malloc(i32  %118)  
-  %120 = ptrtoint i8* %119 to i64 
-  %121 = inttoptr i64 %120 to i64* 
-  %122 = getelementptr  i64, i64* %121, i64 0 
-  store  i64 1, i64* %122 
-  %123 = add   i64 %120, 8 
-  %124 = inttoptr i64 %123 to i64* 
-  %125 = getelementptr  i64, i64* %124, i64 0 
-  store  i64 0, i64* %125 
-  %126 = trunc i64 16 to i32  
-  %127 = tail call ccc  i8*  @wybe_malloc(i32  %126)  
-  %128 = ptrtoint i8* %127 to i64 
-  %129 = inttoptr i64 %128 to i64* 
-  %130 = getelementptr  i64, i64* %129, i64 0 
-  store  i64 5, i64* %130 
-  %131 = add   i64 %128, 8 
-  %132 = inttoptr i64 %131 to i64* 
-  %133 = getelementptr  i64, i64* %132, i64 0 
-  store  i64 %120, i64* %133 
-  %134 = trunc i64 16 to i32  
-  %135 = tail call ccc  i8*  @wybe_malloc(i32  %134)  
-  %136 = ptrtoint i8* %135 to i64 
-  %137 = inttoptr i64 %136 to i64* 
-  %138 = getelementptr  i64, i64* %137, i64 0 
-  store  i64 %128, i64* %138 
-  %139 = add   i64 %136, 8 
-  %140 = inttoptr i64 %139 to i64* 
-  %141 = getelementptr  i64, i64* %140, i64 0 
-  store  i64 0, i64* %141 
-  %142 = trunc i64 16 to i32  
-  %143 = tail call ccc  i8*  @wybe_malloc(i32  %142)  
-  %144 = ptrtoint i8* %143 to i64 
-  %145 = inttoptr i64 %144 to i64* 
-  %146 = getelementptr  i64, i64* %145, i64 0 
-  store  i64 %112, i64* %146 
-  %147 = add   i64 %144, 8 
-  %148 = inttoptr i64 %147 to i64* 
-  %149 = getelementptr  i64, i64* %148, i64 0 
-  store  i64 %136, i64* %149 
-  %150 = trunc i64 16 to i32  
-  %151 = tail call ccc  i8*  @wybe_malloc(i32  %150)  
-  %152 = ptrtoint i8* %151 to i64 
-  %153 = inttoptr i64 %152 to i64* 
-  %154 = getelementptr  i64, i64* %153, i64 0 
-  store  i64 %80, i64* %154 
-  %155 = add   i64 %152, 8 
-  %156 = inttoptr i64 %155 to i64* 
-  %157 = getelementptr  i64, i64* %156, i64 0 
-  store  i64 %144, i64* %157 
-  store  i64 -1000, i64* @"resource#higher_order_resources.maximum" 
-  tail call fastcc  void  @"wybe.list.gen#4<0>"(i64  %152, i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_resources.158, i32 0, i32 0) to i64), i64  %152)  
-  %159 = load  i64, i64* @"resource#higher_order_resources.maximum" 
-  tail call ccc  void  @print_int(i64  %159)  
-  tail call ccc  void  @putchar(i8  10)  
-  store  i64 %57, i64* @"resource#higher_order_resources.maximum" 
+  store  i64 %56, i64* @"resource#higher_order_resources.maximum" 
   ret void 
 }
 
 
 define external fastcc  void @"higher_order_resources.gen#1<0>"(i64  %"anon#1#1##0")    {
 entry:
-  %"1#tmp#10##0" = tail call fastcc  i64  @"wybe.list.length1<0>"(i64  %"anon#1#1##0", i64  0)  
-  musttail call fastcc  void  @"higher_order_resources.take_max<0>"(i64  %"1#tmp#10##0")  
+  %0 = tail call fastcc  i64  @"wybe.list.length1<0>"(i64  %"anon#1#1##0", i64  0)  
+  musttail call fastcc  void  @"higher_order_resources.take_max<0>"(i64  %0)  
   ret void 
 }
 
 
 define external fastcc  void @"higher_order_resources.gen#1<1>"(i64  %"#env##0", i64  %"anon#1#1##0")    {
 entry:
-  %"1#tmp#1##0" = tail call fastcc  i64  @"wybe.list.length1<0>"(i64  %"anon#1#1##0", i64  0)  
-  tail call fastcc  void  @"higher_order_resources.take_max<0>"(i64  %"1#tmp#1##0")  
+  %0 = tail call fastcc  i64  @"wybe.list.length1<0>"(i64  %"anon#1#1##0", i64  0)  
+  tail call fastcc  void  @"higher_order_resources.take_max<0>"(i64  %0)  
   ret void 
 }
 
 
 define external fastcc  void @"higher_order_resources.gen#2<0>"(i64  %"anon#2#1##0")    {
 entry:
-  %160 = load  i64, i64* @"resource#higher_order_resources.maximum" 
+  %0 = load  i64, i64* @"resource#higher_order_resources.maximum" 
   store  i64 -1000, i64* @"resource#higher_order_resources.maximum" 
-  tail call fastcc  void  @"wybe.list.gen#4<0>"(i64  %"anon#2#1##0", i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_resources.161, i32 0, i32 0) to i64), i64  %"anon#2#1##0")  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_resources.163, i32 0, i32 0) to i64))  
-  %164 = load  i64, i64* @"resource#higher_order_resources.maximum" 
-  tail call ccc  void  @print_int(i64  %164)  
+  tail call fastcc  void  @"wybe.list.gen#4<0>"(i64  %"anon#2#1##0", i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_resources.4, i32 0, i32 0) to i64), i64  %"anon#2#1##0")  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_resources.6, i32 0, i32 0) to i64))  
+  %1 = load  i64, i64* @"resource#higher_order_resources.maximum" 
+  tail call ccc  void  @print_int(i64  %1)  
   tail call ccc  void  @putchar(i8  10)  
-  store  i64 %160, i64* @"resource#higher_order_resources.maximum" 
-  %"1#tmp#28##0" = tail call fastcc  i64  @"wybe.list.length1<0>"(i64  %"anon#2#1##0", i64  0)  
-  musttail call fastcc  void  @"higher_order_resources.take_max<0>"(i64  %"1#tmp#28##0")  
+  store  i64 %0, i64* @"resource#higher_order_resources.maximum" 
+  %2 = tail call fastcc  i64  @"wybe.list.length1<0>"(i64  %"anon#2#1##0", i64  0)  
+  musttail call fastcc  void  @"higher_order_resources.take_max<0>"(i64  %2)  
   ret void 
 }
 
 
 define external fastcc  void @"higher_order_resources.gen#2<1>"(i64  %"#env##0", i64  %"anon#2#1##0")    {
 entry:
-  %165 = load  i64, i64* @"resource#higher_order_resources.maximum" 
+  %0 = load  i64, i64* @"resource#higher_order_resources.maximum" 
   store  i64 -1000, i64* @"resource#higher_order_resources.maximum" 
-  tail call fastcc  void  @"wybe.list.gen#4<0>"(i64  %"anon#2#1##0", i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_resources.161, i32 0, i32 0) to i64), i64  %"anon#2#1##0")  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_resources.163, i32 0, i32 0) to i64))  
-  %166 = load  i64, i64* @"resource#higher_order_resources.maximum" 
-  tail call ccc  void  @print_int(i64  %166)  
+  tail call fastcc  void  @"wybe.list.gen#4<0>"(i64  %"anon#2#1##0", i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_resources.4, i32 0, i32 0) to i64), i64  %"anon#2#1##0")  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_resources.6, i32 0, i32 0) to i64))  
+  %1 = load  i64, i64* @"resource#higher_order_resources.maximum" 
+  tail call ccc  void  @print_int(i64  %1)  
   tail call ccc  void  @putchar(i8  10)  
-  store  i64 %165, i64* @"resource#higher_order_resources.maximum" 
-  %"1#tmp#6##0" = tail call fastcc  i64  @"wybe.list.length1<0>"(i64  %"anon#2#1##0", i64  0)  
-  tail call fastcc  void  @"higher_order_resources.take_max<0>"(i64  %"1#tmp#6##0")  
+  store  i64 %0, i64* @"resource#higher_order_resources.maximum" 
+  %2 = tail call fastcc  i64  @"wybe.list.length1<0>"(i64  %"anon#2#1##0", i64  0)  
+  tail call fastcc  void  @"higher_order_resources.take_max<0>"(i64  %2)  
   ret void 
 }
 
@@ -485,8 +485,8 @@ entry:
 
 define external fastcc  void @"higher_order_resources.take_max<0>"(i64  %"i##0")    {
 entry:
-  %167 = load  i64, i64* @"resource#higher_order_resources.maximum" 
-  %"1#tmp#0##0" = tail call fastcc  i64  @"wybe.int.max<0>"(i64  %"i##0", i64  %167)  
-  store  i64 %"1#tmp#0##0", i64* @"resource#higher_order_resources.maximum" 
+  %0 = load  i64, i64* @"resource#higher_order_resources.maximum" 
+  %1 = tail call fastcc  i64  @"wybe.int.max<0>"(i64  %"i##0", i64  %0)  
+  store  i64 %1, i64* @"resource#higher_order_resources.maximum" 
   ret void 
 }

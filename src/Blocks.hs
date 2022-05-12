@@ -964,13 +964,12 @@ addInstruction ins outArgs = do
             outTy <- lift2 $ argLLVMType outArg
             logCodegen $ "outTy = " ++ show outTy
             let outName = pullName outArg
-            outop <- namedInstr outTy outName ins
+            outop <- instr outTy ins
             assign outName outop
         _ -> do
             outOp <- instr outTy ins
             fields <- structUnPack outOp
-            let outNames = List.map pullName outArgs
-            zipWithM_ assign outNames fields
+            zipWithM_ assign (pullName <$> outArgs) fields
 
 
 pullName :: PrimArg -> String

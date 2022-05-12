@@ -308,52 +308,52 @@ print_t2(x##0:dead_cell_size.t2)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
  
 
 
-@dead_cell_size.74 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @dead_cell_size.73 to i64) }
+@dead_cell_size.5 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @dead_cell_size.4 to i64) }
 
 
-@dead_cell_size.90 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @dead_cell_size.89 to i64) }
+@dead_cell_size.9 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @dead_cell_size.8 to i64) }
 
 
-@dead_cell_size.67 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @dead_cell_size.66 to i64) }
+@dead_cell_size.1 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @dead_cell_size.0 to i64) }
 
 
-@dead_cell_size.72 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @dead_cell_size.71 to i64) }
+@dead_cell_size.11 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @dead_cell_size.10 to i64) }
 
 
-@dead_cell_size.88 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @dead_cell_size.87 to i64) }
+@dead_cell_size.13 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @dead_cell_size.12 to i64) }
 
 
-@dead_cell_size.96 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @dead_cell_size.95 to i64) }
+@dead_cell_size.3 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @dead_cell_size.2 to i64) }
 
 
-@dead_cell_size.98 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @dead_cell_size.97 to i64) }
+@dead_cell_size.7 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @dead_cell_size.6 to i64) }
 
 
-@dead_cell_size.103 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @dead_cell_size.102 to i64) }
+@dead_cell_size.15 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @dead_cell_size.14 to i64) }
 
 
-@dead_cell_size.73 =    constant [?? x i8] c")\00"
+@dead_cell_size.4 =    constant [?? x i8] c")\00"
 
 
-@dead_cell_size.89 =    constant [?? x i8] c",\00"
+@dead_cell_size.8 =    constant [?? x i8] c",\00"
 
 
-@dead_cell_size.97 =    constant [?? x i8] c"t2a\00"
+@dead_cell_size.12 =    constant [?? x i8] c"t2a\00"
 
 
-@dead_cell_size.102 =    constant [?? x i8] c"t2b(\00"
+@dead_cell_size.14 =    constant [?? x i8] c"t2b(\00"
 
 
-@dead_cell_size.66 =    constant [?? x i8] c"ta\00"
+@dead_cell_size.0 =    constant [?? x i8] c"ta\00"
 
 
-@dead_cell_size.71 =    constant [?? x i8] c"tb(\00"
+@dead_cell_size.2 =    constant [?? x i8] c"tb(\00"
 
 
-@dead_cell_size.87 =    constant [?? x i8] c"tc(\00"
+@dead_cell_size.6 =    constant [?? x i8] c"tc(\00"
 
 
-@dead_cell_size.95 =    constant [?? x i8] c"td(\00"
+@dead_cell_size.10 =    constant [?? x i8] c"td(\00"
 
 
 declare external ccc  void @putchar(i8)    
@@ -373,56 +373,56 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  void @"dead_cell_size.<0>"()    {
 entry:
-  %1 = trunc i64 8 to i32  
-  %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
-  %3 = ptrtoint i8* %2 to i64 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  store  i64 9, i64* %5 
-  %"1#tmp#0##0" = tail call fastcc  i64  @"dead_cell_size.foo<0>"(i64  %3)  
-  tail call fastcc  void  @"dead_cell_size.print_t<0>"(i64  %"1#tmp#0##0")  
+  %0 = trunc i64 8 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  store  i64 9, i64* %4 
+  %5 = tail call fastcc  i64  @"dead_cell_size.foo<0>"(i64  %2)  
+  tail call fastcc  void  @"dead_cell_size.print_t<0>"(i64  %5)  
   %6 = trunc i64 8 to i32  
   %7 = tail call ccc  i8*  @wybe_malloc(i32  %6)  
   %8 = ptrtoint i8* %7 to i64 
   %9 = inttoptr i64 %8 to i64* 
   %10 = getelementptr  i64, i64* %9, i64 0 
   store  i64 9, i64* %10 
-  %"1#tmp#2##0" = tail call fastcc  i64  @"dead_cell_size.bar<0>[410bae77d3]"(i64  %8)  
-  tail call fastcc  void  @"dead_cell_size.print_t<0>"(i64  %"1#tmp#2##0")  
-  %11 = trunc i64 8 to i32  
-  %12 = tail call ccc  i8*  @wybe_malloc(i32  %11)  
-  %13 = ptrtoint i8* %12 to i64 
-  %14 = inttoptr i64 %13 to i64* 
-  %15 = getelementptr  i64, i64* %14, i64 0 
-  store  i64 9, i64* %15 
-  %"1#tmp#4##0" = tail call fastcc  i64  @"dead_cell_size.diff_type<0>[410bae77d3]"(i64  %13)  
-  tail call fastcc  void  @"dead_cell_size.print_t2<0>"(i64  %"1#tmp#4##0")  
+  %11 = tail call fastcc  i64  @"dead_cell_size.bar<0>[410bae77d3]"(i64  %8)  
+  tail call fastcc  void  @"dead_cell_size.print_t<0>"(i64  %11)  
+  %12 = trunc i64 8 to i32  
+  %13 = tail call ccc  i8*  @wybe_malloc(i32  %12)  
+  %14 = ptrtoint i8* %13 to i64 
+  %15 = inttoptr i64 %14 to i64* 
+  %16 = getelementptr  i64, i64* %15, i64 0 
+  store  i64 9, i64* %16 
+  %17 = tail call fastcc  i64  @"dead_cell_size.diff_type<0>[410bae77d3]"(i64  %14)  
+  tail call fastcc  void  @"dead_cell_size.print_t2<0>"(i64  %17)  
   ret void 
 }
 
 
 define external fastcc  i64 @"dead_cell_size.bar<0>"(i64  %"x##0")    {
 entry:
-  %"1#tmp#3##0" = icmp ne i64 %"x##0", 0 
-  br i1 %"1#tmp#3##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"x##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#4##0" = and i64 %"x##0", 3 
-  %"2#tmp#5##0" = icmp eq i64 %"2#tmp#4##0", 0 
-  br i1 %"2#tmp#5##0", label %if.then1, label %if.else1 
+  %1 = and i64 %"x##0", 3 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
 if.else:
   ret i64 %"x##0" 
 if.then1:
-  %16 = inttoptr i64 %"x##0" to i64* 
-  %17 = getelementptr  i64, i64* %16, i64 0 
-  %18 = load  i64, i64* %17 
-  %19 = trunc i64 8 to i32  
-  %20 = tail call ccc  i8*  @wybe_malloc(i32  %19)  
-  %21 = ptrtoint i8* %20 to i64 
-  %22 = inttoptr i64 %21 to i64* 
-  %23 = getelementptr  i64, i64* %22, i64 0 
-  store  i64 %18, i64* %23 
-  %"4#x##1" = or i64 %21, 2 
-  ret i64 %"4#x##1" 
+  %3 = inttoptr i64 %"x##0" to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  %5 = load  i64, i64* %4 
+  %6 = trunc i64 8 to i32  
+  %7 = tail call ccc  i8*  @wybe_malloc(i32  %6)  
+  %8 = ptrtoint i8* %7 to i64 
+  %9 = inttoptr i64 %8 to i64* 
+  %10 = getelementptr  i64, i64* %9, i64 0 
+  store  i64 %5, i64* %10 
+  %11 = or i64 %8, 2 
+  ret i64 %11 
 if.else1:
   ret i64 %"x##0" 
 }
@@ -430,17 +430,17 @@ if.else1:
 
 define external fastcc  i64 @"dead_cell_size.bar<0>[410bae77d3]"(i64  %"x##0")    {
 entry:
-  %"1#tmp#3##0" = icmp ne i64 %"x##0", 0 
-  br i1 %"1#tmp#3##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"x##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#4##0" = and i64 %"x##0", 3 
-  %"2#tmp#5##0" = icmp eq i64 %"2#tmp#4##0", 0 
-  br i1 %"2#tmp#5##0", label %if.then1, label %if.else1 
+  %1 = and i64 %"x##0", 3 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
 if.else:
   ret i64 %"x##0" 
 if.then1:
-  %"4#x##1" = or i64 %"x##0", 2 
-  ret i64 %"4#x##1" 
+  %3 = or i64 %"x##0", 2 
+  ret i64 %3 
 if.else1:
   ret i64 %"x##0" 
 }
@@ -448,101 +448,101 @@ if.else1:
 
 define external fastcc  i64 @"dead_cell_size.diff_type<0>"(i64  %"x##0")    {
 entry:
-  %"1#tmp#4##0" = icmp ne i64 %"x##0", 0 
-  br i1 %"1#tmp#4##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"x##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#5##0" = and i64 %"x##0", 3 
-  %"2#tmp#6##0" = icmp eq i64 %"2#tmp#5##0", 0 
-  br i1 %"2#tmp#6##0", label %if.then1, label %if.else1 
+  %1 = and i64 %"x##0", 3 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %37 = trunc i64 8 to i32  
-  %38 = tail call ccc  i8*  @wybe_malloc(i32  %37)  
-  %39 = ptrtoint i8* %38 to i64 
-  %40 = inttoptr i64 %39 to i64* 
-  %41 = getelementptr  i64, i64* %40, i64 0 
-  store  i64 -1, i64* %41 
-  ret i64 %39 
+  %16 = trunc i64 8 to i32  
+  %17 = tail call ccc  i8*  @wybe_malloc(i32  %16)  
+  %18 = ptrtoint i8* %17 to i64 
+  %19 = inttoptr i64 %18 to i64* 
+  %20 = getelementptr  i64, i64* %19, i64 0 
+  store  i64 -1, i64* %20 
+  ret i64 %18 
 if.then1:
-  %24 = inttoptr i64 %"x##0" to i64* 
-  %25 = getelementptr  i64, i64* %24, i64 0 
-  %26 = load  i64, i64* %25 
-  %27 = trunc i64 8 to i32  
-  %28 = tail call ccc  i8*  @wybe_malloc(i32  %27)  
-  %29 = ptrtoint i8* %28 to i64 
-  %30 = inttoptr i64 %29 to i64* 
-  %31 = getelementptr  i64, i64* %30, i64 0 
-  store  i64 %26, i64* %31 
-  ret i64 %29 
+  %3 = inttoptr i64 %"x##0" to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  %5 = load  i64, i64* %4 
+  %6 = trunc i64 8 to i32  
+  %7 = tail call ccc  i8*  @wybe_malloc(i32  %6)  
+  %8 = ptrtoint i8* %7 to i64 
+  %9 = inttoptr i64 %8 to i64* 
+  %10 = getelementptr  i64, i64* %9, i64 0 
+  store  i64 %5, i64* %10 
+  ret i64 %8 
 if.else1:
-  %32 = trunc i64 8 to i32  
-  %33 = tail call ccc  i8*  @wybe_malloc(i32  %32)  
-  %34 = ptrtoint i8* %33 to i64 
-  %35 = inttoptr i64 %34 to i64* 
-  %36 = getelementptr  i64, i64* %35, i64 0 
-  store  i64 -1, i64* %36 
-  ret i64 %34 
+  %11 = trunc i64 8 to i32  
+  %12 = tail call ccc  i8*  @wybe_malloc(i32  %11)  
+  %13 = ptrtoint i8* %12 to i64 
+  %14 = inttoptr i64 %13 to i64* 
+  %15 = getelementptr  i64, i64* %14, i64 0 
+  store  i64 -1, i64* %15 
+  ret i64 %13 
 }
 
 
 define external fastcc  i64 @"dead_cell_size.diff_type<0>[410bae77d3]"(i64  %"x##0")    {
 entry:
-  %"1#tmp#4##0" = icmp ne i64 %"x##0", 0 
-  br i1 %"1#tmp#4##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"x##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#5##0" = and i64 %"x##0", 3 
-  %"2#tmp#6##0" = icmp eq i64 %"2#tmp#5##0", 0 
-  br i1 %"2#tmp#6##0", label %if.then1, label %if.else1 
+  %1 = and i64 %"x##0", 3 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %47 = trunc i64 8 to i32  
-  %48 = tail call ccc  i8*  @wybe_malloc(i32  %47)  
-  %49 = ptrtoint i8* %48 to i64 
-  %50 = inttoptr i64 %49 to i64* 
-  %51 = getelementptr  i64, i64* %50, i64 0 
-  store  i64 -1, i64* %51 
-  ret i64 %49 
+  %8 = trunc i64 8 to i32  
+  %9 = tail call ccc  i8*  @wybe_malloc(i32  %8)  
+  %10 = ptrtoint i8* %9 to i64 
+  %11 = inttoptr i64 %10 to i64* 
+  %12 = getelementptr  i64, i64* %11, i64 0 
+  store  i64 -1, i64* %12 
+  ret i64 %10 
 if.then1:
   ret i64 %"x##0" 
 if.else1:
-  %42 = trunc i64 8 to i32  
-  %43 = tail call ccc  i8*  @wybe_malloc(i32  %42)  
-  %44 = ptrtoint i8* %43 to i64 
-  %45 = inttoptr i64 %44 to i64* 
-  %46 = getelementptr  i64, i64* %45, i64 0 
-  store  i64 -1, i64* %46 
-  ret i64 %44 
+  %3 = trunc i64 8 to i32  
+  %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
+  %5 = ptrtoint i8* %4 to i64 
+  %6 = inttoptr i64 %5 to i64* 
+  %7 = getelementptr  i64, i64* %6, i64 0 
+  store  i64 -1, i64* %7 
+  ret i64 %5 
 }
 
 
 define external fastcc  i64 @"dead_cell_size.foo<0>"(i64  %"x##0")    {
 entry:
-  %"1#tmp#3##0" = icmp ne i64 %"x##0", 0 
-  br i1 %"1#tmp#3##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"x##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#4##0" = and i64 %"x##0", 3 
-  %"2#tmp#5##0" = icmp eq i64 %"2#tmp#4##0", 0 
-  br i1 %"2#tmp#5##0", label %if.then1, label %if.else1 
+  %1 = and i64 %"x##0", 3 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
 if.else:
   ret i64 %"x##0" 
 if.then1:
-  %52 = inttoptr i64 %"x##0" to i64* 
-  %53 = getelementptr  i64, i64* %52, i64 0 
-  %54 = load  i64, i64* %53 
-  %55 = trunc i64 24 to i32  
-  %56 = tail call ccc  i8*  @wybe_malloc(i32  %55)  
-  %57 = ptrtoint i8* %56 to i64 
-  %58 = inttoptr i64 %57 to i64* 
-  %59 = getelementptr  i64, i64* %58, i64 0 
-  store  i64 %54, i64* %59 
-  %60 = add   i64 %57, 8 
-  %61 = inttoptr i64 %60 to i64* 
-  %62 = getelementptr  i64, i64* %61, i64 0 
-  store  i64 2, i64* %62 
-  %63 = add   i64 %57, 16 
-  %64 = inttoptr i64 %63 to i64* 
-  %65 = getelementptr  i64, i64* %64, i64 0 
-  store  i64 3, i64* %65 
-  %"4#x##1" = or i64 %57, 1 
-  ret i64 %"4#x##1" 
+  %3 = inttoptr i64 %"x##0" to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  %5 = load  i64, i64* %4 
+  %6 = trunc i64 24 to i32  
+  %7 = tail call ccc  i8*  @wybe_malloc(i32  %6)  
+  %8 = ptrtoint i8* %7 to i64 
+  %9 = inttoptr i64 %8 to i64* 
+  %10 = getelementptr  i64, i64* %9, i64 0 
+  store  i64 %5, i64* %10 
+  %11 = add   i64 %8, 8 
+  %12 = inttoptr i64 %11 to i64* 
+  %13 = getelementptr  i64, i64* %12, i64 0 
+  store  i64 2, i64* %13 
+  %14 = add   i64 %8, 16 
+  %15 = inttoptr i64 %14 to i64* 
+  %16 = getelementptr  i64, i64* %15, i64 0 
+  store  i64 3, i64* %16 
+  %17 = or i64 %8, 1 
+  ret i64 %17 
 if.else1:
   ret i64 %"x##0" 
 }
@@ -550,67 +550,67 @@ if.else1:
 
 define external fastcc  void @"dead_cell_size.print_t<0>"(i64  %"x##0")    {
 entry:
-  %"1#tmp#4##0" = tail call fastcc  i1  @"dead_cell_size.t.=<0>"(i64  0, i64  %"x##0")  
-  br i1 %"1#tmp#4##0", label %if.then, label %if.else 
+  %0 = tail call fastcc  i1  @"dead_cell_size.t.=<0>"(i64  0, i64  %"x##0")  
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.67, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.1, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else:
-  %"3#tmp#6##0" = icmp ne i64 %"x##0", 0 
-  br i1 %"3#tmp#6##0", label %if.then1, label %if.else1 
+  %1 = icmp ne i64 %"x##0", 0 
+  br i1 %1, label %if.then1, label %if.else1 
 if.then1:
-  %"4#tmp#7##0" = and i64 %"x##0", 3 
-  %"4#tmp#8##0" = icmp eq i64 %"4#tmp#7##0", 0 
-  br i1 %"4#tmp#8##0", label %if.then2, label %if.else2 
+  %2 = and i64 %"x##0", 3 
+  %3 = icmp eq i64 %2, 0 
+  br i1 %3, label %if.then2, label %if.else2 
 if.else1:
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.then2:
-  %68 = inttoptr i64 %"x##0" to i64* 
-  %69 = getelementptr  i64, i64* %68, i64 0 
-  %70 = load  i64, i64* %69 
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.72, i32 0, i32 0) to i64))  
-  tail call ccc  void  @print_int(i64  %70)  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.74, i32 0, i32 0) to i64))  
+  %4 = inttoptr i64 %"x##0" to i64* 
+  %5 = getelementptr  i64, i64* %4, i64 0 
+  %6 = load  i64, i64* %5 
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.3, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %6)  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.5, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else2:
-  %"7#tmp#12##0" = icmp eq i64 %"4#tmp#7##0", 1 
-  br i1 %"7#tmp#12##0", label %if.then3, label %if.else3 
+  %7 = icmp eq i64 %2, 1 
+  br i1 %7, label %if.then3, label %if.else3 
 if.then3:
-  %75 = add   i64 %"x##0", -1 
-  %76 = inttoptr i64 %75 to i64* 
-  %77 = getelementptr  i64, i64* %76, i64 0 
-  %78 = load  i64, i64* %77 
-  %79 = add   i64 %"x##0", 7 
-  %80 = inttoptr i64 %79 to i64* 
-  %81 = getelementptr  i64, i64* %80, i64 0 
-  %82 = load  i64, i64* %81 
-  %83 = add   i64 %"x##0", 15 
-  %84 = inttoptr i64 %83 to i64* 
-  %85 = getelementptr  i64, i64* %84, i64 0 
-  %86 = load  i64, i64* %85 
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.88, i32 0, i32 0) to i64))  
-  tail call ccc  void  @print_int(i64  %78)  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.90, i32 0, i32 0) to i64))  
-  tail call ccc  void  @print_int(i64  %82)  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.90, i32 0, i32 0) to i64))  
-  tail call ccc  void  @print_int(i64  %86)  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.74, i32 0, i32 0) to i64))  
+  %8 = add   i64 %"x##0", -1 
+  %9 = inttoptr i64 %8 to i64* 
+  %10 = getelementptr  i64, i64* %9, i64 0 
+  %11 = load  i64, i64* %10 
+  %12 = add   i64 %"x##0", 7 
+  %13 = inttoptr i64 %12 to i64* 
+  %14 = getelementptr  i64, i64* %13, i64 0 
+  %15 = load  i64, i64* %14 
+  %16 = add   i64 %"x##0", 15 
+  %17 = inttoptr i64 %16 to i64* 
+  %18 = getelementptr  i64, i64* %17, i64 0 
+  %19 = load  i64, i64* %18 
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.7, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %11)  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.9, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %15)  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.9, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %19)  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.5, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else3:
-  %"9#tmp#16##0" = icmp eq i64 %"4#tmp#7##0", 2 
-  br i1 %"9#tmp#16##0", label %if.then4, label %if.else4 
+  %20 = icmp eq i64 %2, 2 
+  br i1 %20, label %if.then4, label %if.else4 
 if.then4:
-  %91 = add   i64 %"x##0", -2 
-  %92 = inttoptr i64 %91 to i64* 
-  %93 = getelementptr  i64, i64* %92, i64 0 
-  %94 = load  i64, i64* %93 
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.96, i32 0, i32 0) to i64))  
-  tail call ccc  void  @print_int(i64  %94)  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.74, i32 0, i32 0) to i64))  
+  %21 = add   i64 %"x##0", -2 
+  %22 = inttoptr i64 %21 to i64* 
+  %23 = getelementptr  i64, i64* %22, i64 0 
+  %24 = load  i64, i64* %23 
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.11, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %24)  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.5, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else4:
@@ -621,22 +621,22 @@ if.else4:
 
 define external fastcc  void @"dead_cell_size.print_t2<0>"(i64  %"x##0")    {
 entry:
-  %"1#tmp#2##0" = tail call fastcc  i1  @"dead_cell_size.t2.=<0>"(i64  0, i64  %"x##0")  
-  br i1 %"1#tmp#2##0", label %if.then, label %if.else 
+  %0 = tail call fastcc  i1  @"dead_cell_size.t2.=<0>"(i64  0, i64  %"x##0")  
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.98, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.13, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else:
-  %"3#tmp#4##0" = icmp ne i64 %"x##0", 0 
-  br i1 %"3#tmp#4##0", label %if.then1, label %if.else1 
+  %1 = icmp ne i64 %"x##0", 0 
+  br i1 %1, label %if.then1, label %if.else1 
 if.then1:
-  %99 = inttoptr i64 %"x##0" to i64* 
-  %100 = getelementptr  i64, i64* %99, i64 0 
-  %101 = load  i64, i64* %100 
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.103, i32 0, i32 0) to i64))  
-  tail call ccc  void  @print_int(i64  %101)  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.74, i32 0, i32 0) to i64))  
+  %2 = inttoptr i64 %"x##0" to i64* 
+  %3 = getelementptr  i64, i64* %2, i64 0 
+  %4 = load  i64, i64* %3 
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.15, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %4)  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @dead_cell_size.5, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else1:
@@ -1169,111 +1169,111 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  i1 @"dead_cell_size.t.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#left##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#left##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#15##0" = and i64 %"#left##0", 3 
-  %"2#tmp#16##0" = icmp eq i64 %"2#tmp#15##0", 0 
-  br i1 %"2#tmp#16##0", label %if.then1, label %if.else1 
+  %1 = and i64 %"#left##0", 3 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %"3##success##0" = icmp eq i64 %"#left##0", %"#right##0" 
-  ret i1 %"3##success##0" 
+  %57 = icmp eq i64 %"#left##0", %"#right##0" 
+  ret i1 %57 
 if.then1:
-  %1 = inttoptr i64 %"#left##0" to i64* 
-  %2 = getelementptr  i64, i64* %1, i64 0 
-  %3 = load  i64, i64* %2 
-  %"4#tmp#18##0" = icmp ne i64 %"#right##0", 0 
-  br i1 %"4#tmp#18##0", label %if.then2, label %if.else2 
+  %3 = inttoptr i64 %"#left##0" to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  %5 = load  i64, i64* %4 
+  %6 = icmp ne i64 %"#right##0", 0 
+  br i1 %6, label %if.then2, label %if.else2 
 if.else1:
-  %"5#tmp#20##0" = icmp eq i64 %"2#tmp#15##0", 1 
-  br i1 %"5#tmp#20##0", label %if.then4, label %if.else4 
+  %13 = icmp eq i64 %1, 1 
+  br i1 %13, label %if.then4, label %if.else4 
 if.then2:
-  %"6#tmp#19##0" = and i64 %"#right##0", 3 
-  %"6#tmp#20##0" = icmp eq i64 %"6#tmp#19##0", 0 
-  br i1 %"6#tmp#20##0", label %if.then3, label %if.else3 
+  %7 = and i64 %"#right##0", 3 
+  %8 = icmp eq i64 %7, 0 
+  br i1 %8, label %if.then3, label %if.else3 
 if.else2:
   ret i1 0 
 if.then3:
-  %4 = inttoptr i64 %"#right##0" to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %"8##success##0" = icmp eq i64 %3, %6 
-  ret i1 %"8##success##0" 
+  %9 = inttoptr i64 %"#right##0" to i64* 
+  %10 = getelementptr  i64, i64* %9, i64 0 
+  %11 = load  i64, i64* %10 
+  %12 = icmp eq i64 %5, %11 
+  ret i1 %12 
 if.else3:
   ret i1 0 
 if.then4:
-  %7 = add   i64 %"#left##0", -1 
-  %8 = inttoptr i64 %7 to i64* 
-  %9 = getelementptr  i64, i64* %8, i64 0 
-  %10 = load  i64, i64* %9 
-  %11 = add   i64 %"#left##0", 7 
-  %12 = inttoptr i64 %11 to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
-  %14 = load  i64, i64* %13 
-  %15 = add   i64 %"#left##0", 15 
-  %16 = inttoptr i64 %15 to i64* 
-  %17 = getelementptr  i64, i64* %16, i64 0 
-  %18 = load  i64, i64* %17 
-  %"10#tmp#22##0" = icmp ne i64 %"#right##0", 0 
-  br i1 %"10#tmp#22##0", label %if.then5, label %if.else5 
+  %14 = add   i64 %"#left##0", -1 
+  %15 = inttoptr i64 %14 to i64* 
+  %16 = getelementptr  i64, i64* %15, i64 0 
+  %17 = load  i64, i64* %16 
+  %18 = add   i64 %"#left##0", 7 
+  %19 = inttoptr i64 %18 to i64* 
+  %20 = getelementptr  i64, i64* %19, i64 0 
+  %21 = load  i64, i64* %20 
+  %22 = add   i64 %"#left##0", 15 
+  %23 = inttoptr i64 %22 to i64* 
+  %24 = getelementptr  i64, i64* %23, i64 0 
+  %25 = load  i64, i64* %24 
+  %26 = icmp ne i64 %"#right##0", 0 
+  br i1 %26, label %if.then5, label %if.else5 
 if.else4:
-  %"11#tmp#24##0" = icmp eq i64 %"2#tmp#15##0", 2 
-  br i1 %"11#tmp#24##0", label %if.then9, label %if.else9 
+  %44 = icmp eq i64 %1, 2 
+  br i1 %44, label %if.then9, label %if.else9 
 if.then5:
-  %"12#tmp#23##0" = and i64 %"#right##0", 3 
-  %"12#tmp#24##0" = icmp eq i64 %"12#tmp#23##0", 1 
-  br i1 %"12#tmp#24##0", label %if.then6, label %if.else6 
+  %27 = and i64 %"#right##0", 3 
+  %28 = icmp eq i64 %27, 1 
+  br i1 %28, label %if.then6, label %if.else6 
 if.else5:
   ret i1 0 
 if.then6:
-  %19 = add   i64 %"#right##0", -1 
-  %20 = inttoptr i64 %19 to i64* 
-  %21 = getelementptr  i64, i64* %20, i64 0 
-  %22 = load  i64, i64* %21 
-  %23 = add   i64 %"#right##0", 7 
-  %24 = inttoptr i64 %23 to i64* 
-  %25 = getelementptr  i64, i64* %24, i64 0 
-  %26 = load  i64, i64* %25 
-  %27 = add   i64 %"#right##0", 15 
-  %28 = inttoptr i64 %27 to i64* 
-  %29 = getelementptr  i64, i64* %28, i64 0 
-  %30 = load  i64, i64* %29 
-  %"14#tmp#5##0" = icmp eq i64 %10, %22 
-  br i1 %"14#tmp#5##0", label %if.then7, label %if.else7 
+  %29 = add   i64 %"#right##0", -1 
+  %30 = inttoptr i64 %29 to i64* 
+  %31 = getelementptr  i64, i64* %30, i64 0 
+  %32 = load  i64, i64* %31 
+  %33 = add   i64 %"#right##0", 7 
+  %34 = inttoptr i64 %33 to i64* 
+  %35 = getelementptr  i64, i64* %34, i64 0 
+  %36 = load  i64, i64* %35 
+  %37 = add   i64 %"#right##0", 15 
+  %38 = inttoptr i64 %37 to i64* 
+  %39 = getelementptr  i64, i64* %38, i64 0 
+  %40 = load  i64, i64* %39 
+  %41 = icmp eq i64 %17, %32 
+  br i1 %41, label %if.then7, label %if.else7 
 if.else6:
   ret i1 0 
 if.then7:
-  %"16#tmp#6##0" = icmp eq i64 %14, %26 
-  br i1 %"16#tmp#6##0", label %if.then8, label %if.else8 
+  %42 = icmp eq i64 %21, %36 
+  br i1 %42, label %if.then8, label %if.else8 
 if.else7:
   ret i1 0 
 if.then8:
-  %"18##success##0" = icmp eq i64 %18, %30 
-  ret i1 %"18##success##0" 
+  %43 = icmp eq i64 %25, %40 
+  ret i1 %43 
 if.else8:
   ret i1 0 
 if.then9:
-  %31 = add   i64 %"#left##0", -2 
-  %32 = inttoptr i64 %31 to i64* 
-  %33 = getelementptr  i64, i64* %32, i64 0 
-  %34 = load  i64, i64* %33 
-  %"20#tmp#26##0" = icmp ne i64 %"#right##0", 0 
-  br i1 %"20#tmp#26##0", label %if.then10, label %if.else10 
+  %45 = add   i64 %"#left##0", -2 
+  %46 = inttoptr i64 %45 to i64* 
+  %47 = getelementptr  i64, i64* %46, i64 0 
+  %48 = load  i64, i64* %47 
+  %49 = icmp ne i64 %"#right##0", 0 
+  br i1 %49, label %if.then10, label %if.else10 
 if.else9:
   ret i1 0 
 if.then10:
-  %"22#tmp#27##0" = and i64 %"#right##0", 3 
-  %"22#tmp#28##0" = icmp eq i64 %"22#tmp#27##0", 2 
-  br i1 %"22#tmp#28##0", label %if.then11, label %if.else11 
+  %50 = and i64 %"#right##0", 3 
+  %51 = icmp eq i64 %50, 2 
+  br i1 %51, label %if.then11, label %if.else11 
 if.else10:
   ret i1 0 
 if.then11:
-  %35 = add   i64 %"#right##0", -2 
-  %36 = inttoptr i64 %35 to i64* 
-  %37 = getelementptr  i64, i64* %36, i64 0 
-  %38 = load  i64, i64* %37 
-  %"24##success##0" = icmp eq i64 %34, %38 
-  ret i1 %"24##success##0" 
+  %52 = add   i64 %"#right##0", -2 
+  %53 = inttoptr i64 %52 to i64* 
+  %54 = getelementptr  i64, i64* %53, i64 0 
+  %55 = load  i64, i64* %54 
+  %56 = icmp eq i64 %48, %55 
+  ret i1 %56 
 if.else11:
   ret i1 0 
 }
@@ -1287,460 +1287,460 @@ entry:
 
 define external fastcc  i64 @"dead_cell_size.t.tb<0>"(i64  %"tb1##0")    {
 entry:
-  %39 = trunc i64 8 to i32  
-  %40 = tail call ccc  i8*  @wybe_malloc(i32  %39)  
-  %41 = ptrtoint i8* %40 to i64 
-  %42 = inttoptr i64 %41 to i64* 
-  %43 = getelementptr  i64, i64* %42, i64 0 
-  store  i64 %"tb1##0", i64* %43 
-  ret i64 %41 
+  %0 = trunc i64 8 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  store  i64 %"tb1##0", i64* %4 
+  ret i64 %2 
 }
 
 
 define external fastcc  {i64, i1} @"dead_cell_size.t.tb<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#result##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#result##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"#result##0", 3 
-  %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 0 
-  br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
+  %1 = and i64 %"#result##0", 3 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %51 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %52 = insertvalue {i64, i1} %51, i1 0, 1 
-  ret {i64, i1} %52 
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
 if.then1:
-  %44 = inttoptr i64 %"#result##0" to i64* 
-  %45 = getelementptr  i64, i64* %44, i64 0 
-  %46 = load  i64, i64* %45 
-  %47 = insertvalue {i64, i1} undef, i64 %46, 0 
-  %48 = insertvalue {i64, i1} %47, i1 1, 1 
-  ret {i64, i1} %48 
+  %3 = inttoptr i64 %"#result##0" to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
 if.else1:
-  %49 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %50 = insertvalue {i64, i1} %49, i1 0, 1 
-  ret {i64, i1} %50 
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
 }
 
 
 define external fastcc  {i64, i1} @"dead_cell_size.t.tb1<0>"(i64  %"#rec##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#rec##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"#rec##0", 3 
-  %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 0 
-  br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
+  %1 = and i64 %"#rec##0", 3 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %60 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %61 = insertvalue {i64, i1} %60, i1 0, 1 
-  ret {i64, i1} %61 
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
 if.then1:
-  %53 = inttoptr i64 %"#rec##0" to i64* 
-  %54 = getelementptr  i64, i64* %53, i64 0 
-  %55 = load  i64, i64* %54 
-  %56 = insertvalue {i64, i1} undef, i64 %55, 0 
-  %57 = insertvalue {i64, i1} %56, i1 1, 1 
-  ret {i64, i1} %57 
+  %3 = inttoptr i64 %"#rec##0" to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
 if.else1:
-  %58 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %59 = insertvalue {i64, i1} %58, i1 0, 1 
-  ret {i64, i1} %59 
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
 }
 
 
 define external fastcc  {i64, i1} @"dead_cell_size.t.tb1<1>"(i64  %"#rec##0", i64  %"#field##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#rec##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"#rec##0", 3 
-  %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 0 
-  br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
+  %1 = and i64 %"#rec##0", 3 
+  %2 = icmp eq i64 %1, 0 
+  br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %74 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %75 = insertvalue {i64, i1} %74, i1 0, 1 
-  ret {i64, i1} %75 
+  %15 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %16 = insertvalue {i64, i1} %15, i1 0, 1 
+  ret {i64, i1} %16 
 if.then1:
-  %62 = trunc i64 8 to i32  
-  %63 = tail call ccc  i8*  @wybe_malloc(i32  %62)  
-  %64 = ptrtoint i8* %63 to i64 
-  %65 = inttoptr i64 %64 to i8* 
-  %66 = inttoptr i64 %"#rec##0" to i8* 
-  %67 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %65, i8*  %66, i32  %67, i1  0)  
-  %68 = inttoptr i64 %64 to i64* 
-  %69 = getelementptr  i64, i64* %68, i64 0 
-  store  i64 %"#field##0", i64* %69 
-  %70 = insertvalue {i64, i1} undef, i64 %64, 0 
-  %71 = insertvalue {i64, i1} %70, i1 1, 1 
-  ret {i64, i1} %71 
+  %3 = trunc i64 8 to i32  
+  %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
+  %5 = ptrtoint i8* %4 to i64 
+  %6 = inttoptr i64 %5 to i8* 
+  %7 = inttoptr i64 %"#rec##0" to i8* 
+  %8 = trunc i64 8 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %6, i8*  %7, i32  %8, i1  0)  
+  %9 = inttoptr i64 %5 to i64* 
+  %10 = getelementptr  i64, i64* %9, i64 0 
+  store  i64 %"#field##0", i64* %10 
+  %11 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %12 = insertvalue {i64, i1} %11, i1 1, 1 
+  ret {i64, i1} %12 
 if.else1:
-  %72 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %73 = insertvalue {i64, i1} %72, i1 0, 1 
-  ret {i64, i1} %73 
+  %13 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %14 = insertvalue {i64, i1} %13, i1 0, 1 
+  ret {i64, i1} %14 
 }
 
 
 define external fastcc  i64 @"dead_cell_size.t.tc<0>"(i64  %"tc1##0", i64  %"tc2##0", i64  %"tc3##0")    {
 entry:
-  %76 = trunc i64 24 to i32  
-  %77 = tail call ccc  i8*  @wybe_malloc(i32  %76)  
-  %78 = ptrtoint i8* %77 to i64 
-  %79 = inttoptr i64 %78 to i64* 
-  %80 = getelementptr  i64, i64* %79, i64 0 
-  store  i64 %"tc1##0", i64* %80 
-  %81 = add   i64 %78, 8 
-  %82 = inttoptr i64 %81 to i64* 
-  %83 = getelementptr  i64, i64* %82, i64 0 
-  store  i64 %"tc2##0", i64* %83 
-  %84 = add   i64 %78, 16 
-  %85 = inttoptr i64 %84 to i64* 
-  %86 = getelementptr  i64, i64* %85, i64 0 
-  store  i64 %"tc3##0", i64* %86 
-  %"1##result##0" = or i64 %78, 1 
-  ret i64 %"1##result##0" 
+  %0 = trunc i64 24 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  store  i64 %"tc1##0", i64* %4 
+  %5 = add   i64 %2, 8 
+  %6 = inttoptr i64 %5 to i64* 
+  %7 = getelementptr  i64, i64* %6, i64 0 
+  store  i64 %"tc2##0", i64* %7 
+  %8 = add   i64 %2, 16 
+  %9 = inttoptr i64 %8 to i64* 
+  %10 = getelementptr  i64, i64* %9, i64 0 
+  store  i64 %"tc3##0", i64* %10 
+  %11 = or i64 %2, 1 
+  ret i64 %11 
 }
 
 
 define external fastcc  {i64, i64, i64, i1} @"dead_cell_size.t.tc<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#result##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#result##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"#result##0", 3 
-  %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 1 
-  br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
+  %1 = and i64 %"#result##0", 3 
+  %2 = icmp eq i64 %1, 1 
+  br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %107 = insertvalue {i64, i64, i64, i1} undef, i64 undef, 0 
-  %108 = insertvalue {i64, i64, i64, i1} %107, i64 undef, 1 
-  %109 = insertvalue {i64, i64, i64, i1} %108, i64 undef, 2 
-  %110 = insertvalue {i64, i64, i64, i1} %109, i1 0, 3 
-  ret {i64, i64, i64, i1} %110 
+  %23 = insertvalue {i64, i64, i64, i1} undef, i64 undef, 0 
+  %24 = insertvalue {i64, i64, i64, i1} %23, i64 undef, 1 
+  %25 = insertvalue {i64, i64, i64, i1} %24, i64 undef, 2 
+  %26 = insertvalue {i64, i64, i64, i1} %25, i1 0, 3 
+  ret {i64, i64, i64, i1} %26 
 if.then1:
-  %87 = add   i64 %"#result##0", -1 
-  %88 = inttoptr i64 %87 to i64* 
-  %89 = getelementptr  i64, i64* %88, i64 0 
-  %90 = load  i64, i64* %89 
-  %91 = add   i64 %"#result##0", 7 
-  %92 = inttoptr i64 %91 to i64* 
-  %93 = getelementptr  i64, i64* %92, i64 0 
-  %94 = load  i64, i64* %93 
-  %95 = add   i64 %"#result##0", 15 
-  %96 = inttoptr i64 %95 to i64* 
-  %97 = getelementptr  i64, i64* %96, i64 0 
-  %98 = load  i64, i64* %97 
-  %99 = insertvalue {i64, i64, i64, i1} undef, i64 %90, 0 
-  %100 = insertvalue {i64, i64, i64, i1} %99, i64 %94, 1 
-  %101 = insertvalue {i64, i64, i64, i1} %100, i64 %98, 2 
-  %102 = insertvalue {i64, i64, i64, i1} %101, i1 1, 3 
-  ret {i64, i64, i64, i1} %102 
+  %3 = add   i64 %"#result##0", -1 
+  %4 = inttoptr i64 %3 to i64* 
+  %5 = getelementptr  i64, i64* %4, i64 0 
+  %6 = load  i64, i64* %5 
+  %7 = add   i64 %"#result##0", 7 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = getelementptr  i64, i64* %8, i64 0 
+  %10 = load  i64, i64* %9 
+  %11 = add   i64 %"#result##0", 15 
+  %12 = inttoptr i64 %11 to i64* 
+  %13 = getelementptr  i64, i64* %12, i64 0 
+  %14 = load  i64, i64* %13 
+  %15 = insertvalue {i64, i64, i64, i1} undef, i64 %6, 0 
+  %16 = insertvalue {i64, i64, i64, i1} %15, i64 %10, 1 
+  %17 = insertvalue {i64, i64, i64, i1} %16, i64 %14, 2 
+  %18 = insertvalue {i64, i64, i64, i1} %17, i1 1, 3 
+  ret {i64, i64, i64, i1} %18 
 if.else1:
-  %103 = insertvalue {i64, i64, i64, i1} undef, i64 undef, 0 
-  %104 = insertvalue {i64, i64, i64, i1} %103, i64 undef, 1 
-  %105 = insertvalue {i64, i64, i64, i1} %104, i64 undef, 2 
-  %106 = insertvalue {i64, i64, i64, i1} %105, i1 0, 3 
-  ret {i64, i64, i64, i1} %106 
+  %19 = insertvalue {i64, i64, i64, i1} undef, i64 undef, 0 
+  %20 = insertvalue {i64, i64, i64, i1} %19, i64 undef, 1 
+  %21 = insertvalue {i64, i64, i64, i1} %20, i64 undef, 2 
+  %22 = insertvalue {i64, i64, i64, i1} %21, i1 0, 3 
+  ret {i64, i64, i64, i1} %22 
 }
 
 
 define external fastcc  {i64, i1} @"dead_cell_size.t.tc1<0>"(i64  %"#rec##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#rec##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"#rec##0", 3 
-  %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 1 
-  br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
+  %1 = and i64 %"#rec##0", 3 
+  %2 = icmp eq i64 %1, 1 
+  br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %119 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %120 = insertvalue {i64, i1} %119, i1 0, 1 
-  ret {i64, i1} %120 
+  %11 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %12 = insertvalue {i64, i1} %11, i1 0, 1 
+  ret {i64, i1} %12 
 if.then1:
-  %111 = add   i64 %"#rec##0", -1 
-  %112 = inttoptr i64 %111 to i64* 
-  %113 = getelementptr  i64, i64* %112, i64 0 
-  %114 = load  i64, i64* %113 
-  %115 = insertvalue {i64, i1} undef, i64 %114, 0 
-  %116 = insertvalue {i64, i1} %115, i1 1, 1 
-  ret {i64, i1} %116 
+  %3 = add   i64 %"#rec##0", -1 
+  %4 = inttoptr i64 %3 to i64* 
+  %5 = getelementptr  i64, i64* %4, i64 0 
+  %6 = load  i64, i64* %5 
+  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %8 = insertvalue {i64, i1} %7, i1 1, 1 
+  ret {i64, i1} %8 
 if.else1:
-  %117 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %118 = insertvalue {i64, i1} %117, i1 0, 1 
-  ret {i64, i1} %118 
+  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %10 = insertvalue {i64, i1} %9, i1 0, 1 
+  ret {i64, i1} %10 
 }
 
 
 define external fastcc  {i64, i1} @"dead_cell_size.t.tc1<1>"(i64  %"#rec##0", i64  %"#field##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#rec##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"#rec##0", 3 
-  %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 1 
-  br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
+  %1 = and i64 %"#rec##0", 3 
+  %2 = icmp eq i64 %1, 1 
+  br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %136 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %137 = insertvalue {i64, i1} %136, i1 0, 1 
-  ret {i64, i1} %137 
+  %18 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %19 = insertvalue {i64, i1} %18, i1 0, 1 
+  ret {i64, i1} %19 
 if.then1:
-  %121 = trunc i64 24 to i32  
-  %122 = tail call ccc  i8*  @wybe_malloc(i32  %121)  
-  %123 = ptrtoint i8* %122 to i64 
-  %124 = add   i64 %123, 1 
-  %125 = sub   i64 %"#rec##0", 1 
-  %126 = inttoptr i64 %123 to i8* 
-  %127 = inttoptr i64 %125 to i8* 
-  %128 = trunc i64 24 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %126, i8*  %127, i32  %128, i1  0)  
-  %129 = add   i64 %124, -1 
-  %130 = inttoptr i64 %129 to i64* 
-  %131 = getelementptr  i64, i64* %130, i64 0 
-  store  i64 %"#field##0", i64* %131 
-  %132 = insertvalue {i64, i1} undef, i64 %124, 0 
-  %133 = insertvalue {i64, i1} %132, i1 1, 1 
-  ret {i64, i1} %133 
+  %3 = trunc i64 24 to i32  
+  %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
+  %5 = ptrtoint i8* %4 to i64 
+  %6 = add   i64 %5, 1 
+  %7 = sub   i64 %"#rec##0", 1 
+  %8 = inttoptr i64 %5 to i8* 
+  %9 = inttoptr i64 %7 to i8* 
+  %10 = trunc i64 24 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %8, i8*  %9, i32  %10, i1  0)  
+  %11 = add   i64 %6, -1 
+  %12 = inttoptr i64 %11 to i64* 
+  %13 = getelementptr  i64, i64* %12, i64 0 
+  store  i64 %"#field##0", i64* %13 
+  %14 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %15 = insertvalue {i64, i1} %14, i1 1, 1 
+  ret {i64, i1} %15 
 if.else1:
-  %134 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %135 = insertvalue {i64, i1} %134, i1 0, 1 
-  ret {i64, i1} %135 
+  %16 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %17 = insertvalue {i64, i1} %16, i1 0, 1 
+  ret {i64, i1} %17 
 }
 
 
 define external fastcc  {i64, i1} @"dead_cell_size.t.tc2<0>"(i64  %"#rec##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#rec##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"#rec##0", 3 
-  %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 1 
-  br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
+  %1 = and i64 %"#rec##0", 3 
+  %2 = icmp eq i64 %1, 1 
+  br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %146 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %147 = insertvalue {i64, i1} %146, i1 0, 1 
-  ret {i64, i1} %147 
+  %11 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %12 = insertvalue {i64, i1} %11, i1 0, 1 
+  ret {i64, i1} %12 
 if.then1:
-  %138 = add   i64 %"#rec##0", 7 
-  %139 = inttoptr i64 %138 to i64* 
-  %140 = getelementptr  i64, i64* %139, i64 0 
-  %141 = load  i64, i64* %140 
-  %142 = insertvalue {i64, i1} undef, i64 %141, 0 
-  %143 = insertvalue {i64, i1} %142, i1 1, 1 
-  ret {i64, i1} %143 
+  %3 = add   i64 %"#rec##0", 7 
+  %4 = inttoptr i64 %3 to i64* 
+  %5 = getelementptr  i64, i64* %4, i64 0 
+  %6 = load  i64, i64* %5 
+  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %8 = insertvalue {i64, i1} %7, i1 1, 1 
+  ret {i64, i1} %8 
 if.else1:
-  %144 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %145 = insertvalue {i64, i1} %144, i1 0, 1 
-  ret {i64, i1} %145 
+  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %10 = insertvalue {i64, i1} %9, i1 0, 1 
+  ret {i64, i1} %10 
 }
 
 
 define external fastcc  {i64, i1} @"dead_cell_size.t.tc2<1>"(i64  %"#rec##0", i64  %"#field##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#rec##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"#rec##0", 3 
-  %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 1 
-  br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
+  %1 = and i64 %"#rec##0", 3 
+  %2 = icmp eq i64 %1, 1 
+  br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %163 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %164 = insertvalue {i64, i1} %163, i1 0, 1 
-  ret {i64, i1} %164 
+  %18 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %19 = insertvalue {i64, i1} %18, i1 0, 1 
+  ret {i64, i1} %19 
 if.then1:
-  %148 = trunc i64 24 to i32  
-  %149 = tail call ccc  i8*  @wybe_malloc(i32  %148)  
-  %150 = ptrtoint i8* %149 to i64 
-  %151 = add   i64 %150, 1 
-  %152 = sub   i64 %"#rec##0", 1 
-  %153 = inttoptr i64 %150 to i8* 
-  %154 = inttoptr i64 %152 to i8* 
-  %155 = trunc i64 24 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %153, i8*  %154, i32  %155, i1  0)  
-  %156 = add   i64 %151, 7 
-  %157 = inttoptr i64 %156 to i64* 
-  %158 = getelementptr  i64, i64* %157, i64 0 
-  store  i64 %"#field##0", i64* %158 
-  %159 = insertvalue {i64, i1} undef, i64 %151, 0 
-  %160 = insertvalue {i64, i1} %159, i1 1, 1 
-  ret {i64, i1} %160 
+  %3 = trunc i64 24 to i32  
+  %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
+  %5 = ptrtoint i8* %4 to i64 
+  %6 = add   i64 %5, 1 
+  %7 = sub   i64 %"#rec##0", 1 
+  %8 = inttoptr i64 %5 to i8* 
+  %9 = inttoptr i64 %7 to i8* 
+  %10 = trunc i64 24 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %8, i8*  %9, i32  %10, i1  0)  
+  %11 = add   i64 %6, 7 
+  %12 = inttoptr i64 %11 to i64* 
+  %13 = getelementptr  i64, i64* %12, i64 0 
+  store  i64 %"#field##0", i64* %13 
+  %14 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %15 = insertvalue {i64, i1} %14, i1 1, 1 
+  ret {i64, i1} %15 
 if.else1:
-  %161 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %162 = insertvalue {i64, i1} %161, i1 0, 1 
-  ret {i64, i1} %162 
+  %16 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %17 = insertvalue {i64, i1} %16, i1 0, 1 
+  ret {i64, i1} %17 
 }
 
 
 define external fastcc  {i64, i1} @"dead_cell_size.t.tc3<0>"(i64  %"#rec##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#rec##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"#rec##0", 3 
-  %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 1 
-  br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
+  %1 = and i64 %"#rec##0", 3 
+  %2 = icmp eq i64 %1, 1 
+  br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %173 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %174 = insertvalue {i64, i1} %173, i1 0, 1 
-  ret {i64, i1} %174 
+  %11 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %12 = insertvalue {i64, i1} %11, i1 0, 1 
+  ret {i64, i1} %12 
 if.then1:
-  %165 = add   i64 %"#rec##0", 15 
-  %166 = inttoptr i64 %165 to i64* 
-  %167 = getelementptr  i64, i64* %166, i64 0 
-  %168 = load  i64, i64* %167 
-  %169 = insertvalue {i64, i1} undef, i64 %168, 0 
-  %170 = insertvalue {i64, i1} %169, i1 1, 1 
-  ret {i64, i1} %170 
+  %3 = add   i64 %"#rec##0", 15 
+  %4 = inttoptr i64 %3 to i64* 
+  %5 = getelementptr  i64, i64* %4, i64 0 
+  %6 = load  i64, i64* %5 
+  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %8 = insertvalue {i64, i1} %7, i1 1, 1 
+  ret {i64, i1} %8 
 if.else1:
-  %171 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %172 = insertvalue {i64, i1} %171, i1 0, 1 
-  ret {i64, i1} %172 
+  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %10 = insertvalue {i64, i1} %9, i1 0, 1 
+  ret {i64, i1} %10 
 }
 
 
 define external fastcc  {i64, i1} @"dead_cell_size.t.tc3<1>"(i64  %"#rec##0", i64  %"#field##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#rec##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"#rec##0", 3 
-  %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 1 
-  br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
+  %1 = and i64 %"#rec##0", 3 
+  %2 = icmp eq i64 %1, 1 
+  br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %190 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %191 = insertvalue {i64, i1} %190, i1 0, 1 
-  ret {i64, i1} %191 
+  %18 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %19 = insertvalue {i64, i1} %18, i1 0, 1 
+  ret {i64, i1} %19 
 if.then1:
-  %175 = trunc i64 24 to i32  
-  %176 = tail call ccc  i8*  @wybe_malloc(i32  %175)  
-  %177 = ptrtoint i8* %176 to i64 
-  %178 = add   i64 %177, 1 
-  %179 = sub   i64 %"#rec##0", 1 
-  %180 = inttoptr i64 %177 to i8* 
-  %181 = inttoptr i64 %179 to i8* 
-  %182 = trunc i64 24 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %180, i8*  %181, i32  %182, i1  0)  
-  %183 = add   i64 %178, 15 
-  %184 = inttoptr i64 %183 to i64* 
-  %185 = getelementptr  i64, i64* %184, i64 0 
-  store  i64 %"#field##0", i64* %185 
-  %186 = insertvalue {i64, i1} undef, i64 %178, 0 
-  %187 = insertvalue {i64, i1} %186, i1 1, 1 
-  ret {i64, i1} %187 
+  %3 = trunc i64 24 to i32  
+  %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
+  %5 = ptrtoint i8* %4 to i64 
+  %6 = add   i64 %5, 1 
+  %7 = sub   i64 %"#rec##0", 1 
+  %8 = inttoptr i64 %5 to i8* 
+  %9 = inttoptr i64 %7 to i8* 
+  %10 = trunc i64 24 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %8, i8*  %9, i32  %10, i1  0)  
+  %11 = add   i64 %6, 15 
+  %12 = inttoptr i64 %11 to i64* 
+  %13 = getelementptr  i64, i64* %12, i64 0 
+  store  i64 %"#field##0", i64* %13 
+  %14 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %15 = insertvalue {i64, i1} %14, i1 1, 1 
+  ret {i64, i1} %15 
 if.else1:
-  %188 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %189 = insertvalue {i64, i1} %188, i1 0, 1 
-  ret {i64, i1} %189 
+  %16 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %17 = insertvalue {i64, i1} %16, i1 0, 1 
+  ret {i64, i1} %17 
 }
 
 
 define external fastcc  i64 @"dead_cell_size.t.td<0>"(i64  %"td1##0")    {
 entry:
-  %192 = trunc i64 8 to i32  
-  %193 = tail call ccc  i8*  @wybe_malloc(i32  %192)  
-  %194 = ptrtoint i8* %193 to i64 
-  %195 = inttoptr i64 %194 to i64* 
-  %196 = getelementptr  i64, i64* %195, i64 0 
-  store  i64 %"td1##0", i64* %196 
-  %"1##result##0" = or i64 %194, 2 
-  ret i64 %"1##result##0" 
+  %0 = trunc i64 8 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  store  i64 %"td1##0", i64* %4 
+  %5 = or i64 %2, 2 
+  ret i64 %5 
 }
 
 
 define external fastcc  {i64, i1} @"dead_cell_size.t.td<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#result##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#result##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"#result##0", 3 
-  %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 2 
-  br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
+  %1 = and i64 %"#result##0", 3 
+  %2 = icmp eq i64 %1, 2 
+  br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %205 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %206 = insertvalue {i64, i1} %205, i1 0, 1 
-  ret {i64, i1} %206 
+  %11 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %12 = insertvalue {i64, i1} %11, i1 0, 1 
+  ret {i64, i1} %12 
 if.then1:
-  %197 = add   i64 %"#result##0", -2 
-  %198 = inttoptr i64 %197 to i64* 
-  %199 = getelementptr  i64, i64* %198, i64 0 
-  %200 = load  i64, i64* %199 
-  %201 = insertvalue {i64, i1} undef, i64 %200, 0 
-  %202 = insertvalue {i64, i1} %201, i1 1, 1 
-  ret {i64, i1} %202 
+  %3 = add   i64 %"#result##0", -2 
+  %4 = inttoptr i64 %3 to i64* 
+  %5 = getelementptr  i64, i64* %4, i64 0 
+  %6 = load  i64, i64* %5 
+  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %8 = insertvalue {i64, i1} %7, i1 1, 1 
+  ret {i64, i1} %8 
 if.else1:
-  %203 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %204 = insertvalue {i64, i1} %203, i1 0, 1 
-  ret {i64, i1} %204 
+  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %10 = insertvalue {i64, i1} %9, i1 0, 1 
+  ret {i64, i1} %10 
 }
 
 
 define external fastcc  {i64, i1} @"dead_cell_size.t.td1<0>"(i64  %"#rec##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#rec##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"#rec##0", 3 
-  %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 2 
-  br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
+  %1 = and i64 %"#rec##0", 3 
+  %2 = icmp eq i64 %1, 2 
+  br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %215 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %216 = insertvalue {i64, i1} %215, i1 0, 1 
-  ret {i64, i1} %216 
+  %11 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %12 = insertvalue {i64, i1} %11, i1 0, 1 
+  ret {i64, i1} %12 
 if.then1:
-  %207 = add   i64 %"#rec##0", -2 
-  %208 = inttoptr i64 %207 to i64* 
-  %209 = getelementptr  i64, i64* %208, i64 0 
-  %210 = load  i64, i64* %209 
-  %211 = insertvalue {i64, i1} undef, i64 %210, 0 
-  %212 = insertvalue {i64, i1} %211, i1 1, 1 
-  ret {i64, i1} %212 
+  %3 = add   i64 %"#rec##0", -2 
+  %4 = inttoptr i64 %3 to i64* 
+  %5 = getelementptr  i64, i64* %4, i64 0 
+  %6 = load  i64, i64* %5 
+  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %8 = insertvalue {i64, i1} %7, i1 1, 1 
+  ret {i64, i1} %8 
 if.else1:
-  %213 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %214 = insertvalue {i64, i1} %213, i1 0, 1 
-  ret {i64, i1} %214 
+  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %10 = insertvalue {i64, i1} %9, i1 0, 1 
+  ret {i64, i1} %10 
 }
 
 
 define external fastcc  {i64, i1} @"dead_cell_size.t.td1<1>"(i64  %"#rec##0", i64  %"#field##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#rec##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = and i64 %"#rec##0", 3 
-  %"2#tmp#1##0" = icmp eq i64 %"2#tmp#2##0", 2 
-  br i1 %"2#tmp#1##0", label %if.then1, label %if.else1 
+  %1 = and i64 %"#rec##0", 3 
+  %2 = icmp eq i64 %1, 2 
+  br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %232 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %233 = insertvalue {i64, i1} %232, i1 0, 1 
-  ret {i64, i1} %233 
+  %18 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %19 = insertvalue {i64, i1} %18, i1 0, 1 
+  ret {i64, i1} %19 
 if.then1:
-  %217 = trunc i64 8 to i32  
-  %218 = tail call ccc  i8*  @wybe_malloc(i32  %217)  
-  %219 = ptrtoint i8* %218 to i64 
-  %220 = add   i64 %219, 2 
-  %221 = sub   i64 %"#rec##0", 2 
-  %222 = inttoptr i64 %219 to i8* 
-  %223 = inttoptr i64 %221 to i8* 
-  %224 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %222, i8*  %223, i32  %224, i1  0)  
-  %225 = add   i64 %220, -2 
-  %226 = inttoptr i64 %225 to i64* 
-  %227 = getelementptr  i64, i64* %226, i64 0 
-  store  i64 %"#field##0", i64* %227 
-  %228 = insertvalue {i64, i1} undef, i64 %220, 0 
-  %229 = insertvalue {i64, i1} %228, i1 1, 1 
-  ret {i64, i1} %229 
+  %3 = trunc i64 8 to i32  
+  %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
+  %5 = ptrtoint i8* %4 to i64 
+  %6 = add   i64 %5, 2 
+  %7 = sub   i64 %"#rec##0", 2 
+  %8 = inttoptr i64 %5 to i8* 
+  %9 = inttoptr i64 %7 to i8* 
+  %10 = trunc i64 8 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %8, i8*  %9, i32  %10, i1  0)  
+  %11 = add   i64 %6, -2 
+  %12 = inttoptr i64 %11 to i64* 
+  %13 = getelementptr  i64, i64* %12, i64 0 
+  store  i64 %"#field##0", i64* %13 
+  %14 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %15 = insertvalue {i64, i1} %14, i1 1, 1 
+  ret {i64, i1} %15 
 if.else1:
-  %230 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %231 = insertvalue {i64, i1} %230, i1 0, 1 
-  ret {i64, i1} %231 
+  %16 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %17 = insertvalue {i64, i1} %16, i1 0, 1 
+  ret {i64, i1} %17 
 }
 
 
 define external fastcc  i1 @"dead_cell_size.t.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
 entry:
-  %"1#tmp#0##0" = tail call fastcc  i1  @"dead_cell_size.t.=<0>"(i64  %"#left##0", i64  %"#right##0")  
-  %"1##success##0" = xor i1 %"1#tmp#0##0", 1 
-  ret i1 %"1##success##0" 
+  %0 = tail call fastcc  i1  @"dead_cell_size.t.=<0>"(i64  %"#left##0", i64  %"#right##0")  
+  %1 = xor i1 %0, 1 
+  ret i1 %1 
 }
 --------------------------------------------------
  Module dead_cell_size.t2
@@ -1871,23 +1871,23 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  i1 @"dead_cell_size.t2.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#left##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#left##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
   %1 = inttoptr i64 %"#left##0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
   %3 = load  i64, i64* %2 
-  %"2#tmp#8##0" = icmp ne i64 %"#right##0", 0 
-  br i1 %"2#tmp#8##0", label %if.then1, label %if.else1 
+  %4 = icmp ne i64 %"#right##0", 0 
+  br i1 %4, label %if.then1, label %if.else1 
 if.else:
-  %"3##success##0" = icmp eq i64 %"#left##0", %"#right##0" 
-  ret i1 %"3##success##0" 
+  %9 = icmp eq i64 %"#left##0", %"#right##0" 
+  ret i1 %9 
 if.then1:
-  %4 = inttoptr i64 %"#right##0" to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %"4##success##0" = icmp eq i64 %3, %6 
-  ret i1 %"4##success##0" 
+  %5 = inttoptr i64 %"#right##0" to i64* 
+  %6 = getelementptr  i64, i64* %5, i64 0 
+  %7 = load  i64, i64* %6 
+  %8 = icmp eq i64 %3, %7 
+  ret i1 %8 
 if.else1:
   ret i1 0 
 }
@@ -1895,44 +1895,44 @@ if.else1:
 
 define external fastcc  {i64, i1} @"dead_cell_size.t2.a<0>"(i64  %"#rec##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#rec##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %7 = inttoptr i64 %"#rec##0" to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
-  %9 = load  i64, i64* %8 
-  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
-  %11 = insertvalue {i64, i1} %10, i1 1, 1 
-  ret {i64, i1} %11 
+  %1 = inttoptr i64 %"#rec##0" to i64* 
+  %2 = getelementptr  i64, i64* %1, i64 0 
+  %3 = load  i64, i64* %2 
+  %4 = insertvalue {i64, i1} undef, i64 %3, 0 
+  %5 = insertvalue {i64, i1} %4, i1 1, 1 
+  ret {i64, i1} %5 
 if.else:
-  %12 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %13 = insertvalue {i64, i1} %12, i1 0, 1 
-  ret {i64, i1} %13 
+  %6 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %7 = insertvalue {i64, i1} %6, i1 0, 1 
+  ret {i64, i1} %7 
 }
 
 
 define external fastcc  {i64, i1} @"dead_cell_size.t2.a<1>"(i64  %"#rec##0", i64  %"#field##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#rec##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %14 = trunc i64 8 to i32  
-  %15 = tail call ccc  i8*  @wybe_malloc(i32  %14)  
-  %16 = ptrtoint i8* %15 to i64 
-  %17 = inttoptr i64 %16 to i8* 
-  %18 = inttoptr i64 %"#rec##0" to i8* 
-  %19 = trunc i64 8 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %17, i8*  %18, i32  %19, i1  0)  
-  %20 = inttoptr i64 %16 to i64* 
-  %21 = getelementptr  i64, i64* %20, i64 0 
-  store  i64 %"#field##0", i64* %21 
-  %22 = insertvalue {i64, i1} undef, i64 %16, 0 
-  %23 = insertvalue {i64, i1} %22, i1 1, 1 
-  ret {i64, i1} %23 
+  %1 = trunc i64 8 to i32  
+  %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
+  %3 = ptrtoint i8* %2 to i64 
+  %4 = inttoptr i64 %3 to i8* 
+  %5 = inttoptr i64 %"#rec##0" to i8* 
+  %6 = trunc i64 8 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %4, i8*  %5, i32  %6, i1  0)  
+  %7 = inttoptr i64 %3 to i64* 
+  %8 = getelementptr  i64, i64* %7, i64 0 
+  store  i64 %"#field##0", i64* %8 
+  %9 = insertvalue {i64, i1} undef, i64 %3, 0 
+  %10 = insertvalue {i64, i1} %9, i1 1, 1 
+  ret {i64, i1} %10 
 if.else:
-  %24 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %25 = insertvalue {i64, i1} %24, i1 0, 1 
-  ret {i64, i1} %25 
+  %11 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %12 = insertvalue {i64, i1} %11, i1 0, 1 
+  ret {i64, i1} %12 
 }
 
 
@@ -1944,37 +1944,37 @@ entry:
 
 define external fastcc  i64 @"dead_cell_size.t2.t2b<0>"(i64  %"a##0")    {
 entry:
-  %26 = trunc i64 8 to i32  
-  %27 = tail call ccc  i8*  @wybe_malloc(i32  %26)  
-  %28 = ptrtoint i8* %27 to i64 
-  %29 = inttoptr i64 %28 to i64* 
-  %30 = getelementptr  i64, i64* %29, i64 0 
-  store  i64 %"a##0", i64* %30 
-  ret i64 %28 
+  %0 = trunc i64 8 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  store  i64 %"a##0", i64* %4 
+  ret i64 %2 
 }
 
 
 define external fastcc  {i64, i1} @"dead_cell_size.t2.t2b<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#result##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#result##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %31 = inttoptr i64 %"#result##0" to i64* 
-  %32 = getelementptr  i64, i64* %31, i64 0 
-  %33 = load  i64, i64* %32 
-  %34 = insertvalue {i64, i1} undef, i64 %33, 0 
-  %35 = insertvalue {i64, i1} %34, i1 1, 1 
-  ret {i64, i1} %35 
+  %1 = inttoptr i64 %"#result##0" to i64* 
+  %2 = getelementptr  i64, i64* %1, i64 0 
+  %3 = load  i64, i64* %2 
+  %4 = insertvalue {i64, i1} undef, i64 %3, 0 
+  %5 = insertvalue {i64, i1} %4, i1 1, 1 
+  ret {i64, i1} %5 
 if.else:
-  %36 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %37 = insertvalue {i64, i1} %36, i1 0, 1 
-  ret {i64, i1} %37 
+  %6 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %7 = insertvalue {i64, i1} %6, i1 0, 1 
+  ret {i64, i1} %7 
 }
 
 
 define external fastcc  i1 @"dead_cell_size.t2.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
 entry:
-  %"1#tmp#0##0" = tail call fastcc  i1  @"dead_cell_size.t2.=<0>"(i64  %"#left##0", i64  %"#right##0")  
-  %"1##success##0" = xor i1 %"1#tmp#0##0", 1 
-  ret i1 %"1##success##0" 
+  %0 = tail call fastcc  i1  @"dead_cell_size.t2.=<0>"(i64  %"#left##0", i64  %"#right##0")  
+  %1 = xor i1 %0, 1 
+  ret i1 %1 
 }

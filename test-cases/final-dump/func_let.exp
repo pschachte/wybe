@@ -54,7 +54,7 @@ entry:
 
 define external fastcc  i64 @"func_let.quad<0>"(i64  %"x##0")    {
 entry:
-  %"1#tmp#0##0" = add   i64 %"x##0", %"x##0" 
-  %"1##result##0" = add   i64 %"1#tmp#0##0", %"1#tmp#0##0" 
-  ret i64 %"1##result##0" 
+  %0 = add   i64 %"x##0", %"x##0" 
+  %1 = add   i64 %0, %0 
+  ret i64 %1 
 }

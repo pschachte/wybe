@@ -15,7 +15,7 @@ module Codegen (
   -- * Blocks
   createBlocks, setBlock, addBlock, entryBlockName,
   callWybe, callC, externf, ret, globalDefine, externalC, externalWybe,
-  phi, br, cbr, getBlock, retNothing, fresh,
+  phi, br, cbr, getBlock, retNothing, freshUnName,
   -- * Symbol storage
   alloca, store, addOperand, load, modifySymtab, getVar, maybeGetVar, localVar, preservingSymtab,
   makeGlobalResourceVariable, doAlloca, doLoad,
@@ -27,7 +27,7 @@ module Codegen (
   -- * Custom Types
   int_c, float_c,
   -- * Instructions
-  instr, namedInstr, voidInstr,
+  instr, voidInstr,
   iadd, isub, imul, idiv, fadd, fsub, fmul, fdiv, sdiv, urem, srem, frem,
   cons, uitofp, sitofp, fptoui, fptosi,
   icmp, fcmp, lOr, lAnd, lXor, shl, lshr, ashr,
@@ -150,6 +150,7 @@ data CodegenState
       , symtab       :: SymbolTable
                                  -- ^ Local symbol table of a function
       , names        :: Names    -- ^ Name supply
+      , unNameCount  :: Word     -- ^ Count of UnNames
       , proto        :: PrimProto -- ^ Proto of current proc
       } deriving Show
 
@@ -189,13 +190,12 @@ type Codegen = StateT CodegenState Translation
 -- Stores data required across tranlating an LPVM module into an LLVm module
 data TranslationState
     = TranslationState {
-        txCount   :: Word -- ^ Count of used virtual registers
-      , txConsts  :: Map.Map (C.Constant, Type) Global
-                          -- ^ Needed global constants
-      , txVars    :: Map.Map GlobalInfo Global
-                          -- ^ Needed global variables
-      , txExterns :: [Prim]
-                          -- ^ Primitives which need to be declared
+        txConstCount :: Word   -- ^ Count of constants
+      , txConsts     :: Map.Map (C.Constant, Type) Global
+                               -- ^ Needed global constants
+      , txVars       :: Map.Map GlobalInfo Global
+                               -- ^ Needed global variables
+      , txExterns    :: [Prim] -- ^ Primitives which need to be declared
       } deriving Show
 
 
@@ -205,12 +205,12 @@ emptyTranslation :: TranslationState
 emptyTranslation = TranslationState 0 Map.empty Map.empty []
 
 
--- | Gets a new incremental word suffix for a temporary local operands
-fresh :: Translation Word
-fresh = do
-    count <- gets txCount
-    modify $ \s -> s { txCount=count + 1 }
-    return $ count + 1
+-- | Gets a fresh UnName
+freshUnName :: Codegen Name
+freshUnName = do
+    count <- gets unNameCount
+    modify $ \s -> s { unNameCount=count + 1 }
+    return $ UnName count
 
 
 -- | Update the list of externs which will be needed. The 'Prim' will be
@@ -230,8 +230,9 @@ addGlobalConstant ty con = do
     case Map.lookup (con, ty) consts of
         Just global -> return $ name global
         Nothing -> lift $ do
-            n <- fresh
-            let ref = Name $ fromString $ modName ++ "." ++ show n
+            count <- gets txConstCount
+            modify $ \s -> s{txConstCount = count + 1}
+            let ref = Name $ fromString $ modName ++ "." ++ show count
             let gvar = globalVariableDefaults { name = ref
                                               , isConstant = True
                                               , G.type' = ty
@@ -342,6 +343,7 @@ emptyCodegen proto = CodegenState{ currentBlock=Name $ fromString entryBlockName
                            , blockCount=1
                            , symtab=SymbolTable Map.empty Map.empty
                            , names=Map.empty
+                           , unNameCount=0
                            , proto=proto
                            }
 
@@ -486,25 +488,11 @@ addOperand arg opd = do
 -- Instructions                                                           --
 ----------------------------------------------------------------------------
 
--- | Append a named instruction into the instruction stack of the current
--- BasicBlock. This action also produces a Operand value of the given type (this
--- will be the result type of performing that instruction).
-namedInstr :: Type -> String -> Instruction -> Codegen Operand
-namedInstr ty nm ins = do
-    -- lpvm allows variables in different forks(blocks) have the same name,
-    -- but llvm doesn't. So the block id is attached to the variable name to
-    -- make it unique.
-    blockId <- idx <$> current
-    let ref = Name $ fromString $ specialName2 (show blockId) nm
-    addInstr $ ref := ins
-    return $ LocalReference ty ref
-
-
 -- | Append an unnamed instruction to the instruction stack of the current
 -- BasicBlock. The temp name is generated using a fresh word counter.
 instr :: Type -> Instruction -> Codegen Operand
 instr ty ins = do
-    ref <- UnName <$> lift fresh
+    ref <- freshUnName
     addInstr $ ref := ins
     return $ LocalReference ty ref
 
