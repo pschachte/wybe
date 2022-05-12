@@ -1,0 +1,5 @@
+def {noinline} foo(i:I, ?j:I) { ?j = i }
+
+foo(1.0, ?j)
+
+!println(j)

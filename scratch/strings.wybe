@@ -1,0 +1,81 @@
+pragma no_standard_library
+
+use wybe.int, wybe.c_string, wybe.range
+use wybe.int, wybe.char, wybe.bool
+use wybe.io, wybe.float, wybe.count, wybe.string
+use wybe.comparison, wybe.phantom
+
+constructor empty
+          | buffer(len:int, raw:c_string) # must be first non-const ctor
+          | concat(left:_, right:_)
+          | slice(base:_, range:range)
+          | singleton(c:char)
+
+pub def string(str:c_string, ?s:_) {
+    ?len = length(str)
+    if { len = 0 :: ?s = empty 
+       | len = 1 :: foreign lpvm access(str, 0, 1, 0, ?c); ?s = singleton(c) 
+       | else :: ?s = buffer(len, str)
+    }
+}
+
+pub def length(s:_):int = 
+    if { s = buffer(?len, _) :: len
+       | s = concat(?left, ?right) :: length(left) + length(right)
+       | s = slice(?base, ?range) :: 1# fixed_range_size(length(base), range)
+       | s = singleton(_) :: 1
+       | else :: 0
+    }
+pub def (x:_ ,, y:_):_ =
+    if { x = empty :: y 
+       | y = empty :: x
+       | else :: concat(x, y)
+    }
+
+
+pub def {test} `[|]`(?head:char, ?tail:_, s:_) {
+    if { s = buffer(?len, ?str) :: 
+            [?head | ?str] = str
+            ?tail = if { len = 1 :: empty | else :: buffer(len - 1, str) }
+       | s = concat(?left, ?right) :: 
+            if { [?head | ?t] = left :: ?tail = concat(t, right)
+               | else :: [?head | ?tail] = right
+            }
+       | s = slice(?base, ?range) :: 
+            do { # this could be faster
+                [?idx | ?range] = range
+                if { ?head = base[idx] :: ?tail = slice(base, range); break }
+            }
+       | s = singleton(?head) :: ?tail = empty
+       | else :: fail
+    }
+}
+
+pub def empty_string:_ = empty
+# pub def []:_ = empty
+pub def {test} [](s:_, idx:int, ?c:char) {
+    if { s = buffer(?len, ?str) :: 
+            (0 <= idx)
+            (idx < len)
+            unsafe_c_string_index(str, idx, ?c)
+       | s = concat(?left, ?right) :: 
+            ?left_len = length(left)
+            if { idx < left_len :: ?c = left[idx]
+               | else :: ?c = right[idx - left_len]
+            }
+       | s = slice(?base, ?range) :: ?c = base[range[idx]]
+       | s = singleton(?c) :: (idx = 0)
+       | else :: fail
+    }
+}
+pub def [](s:_, r:range):_ = slice(s, r)
+
+pub def print_string(s:_) use !io {
+    if { s = buffer(_, ?str) :: !print(str)
+       | s = concat(?left, ?right) :: pass # !print(left); !print(right)
+       | s = slice(_, _) :: for ?c in s { !print(c:char) }
+       | s = singleton(?c) :: !print(c)
+    }
+}
+
+!println(1)

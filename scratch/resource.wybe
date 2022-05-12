@@ -1,0 +1,53 @@
+
+resource counter:int = 100
+
+# use pub_res
+
+# def {noinline} do(f:{resource}()) use !io, !counter, foo { 
+#     !f
+#     if {counter < foo :: ?counter = foo}
+#     !tick
+#     !print_counter("do")
+# }
+
+def {} tick use !counter { incr(!counter) }
+
+def {} print_counter(ctx:string) use counter, !io { 
+    !print(counter)
+    !println("\tin ",,ctx)
+}
+
+!println(counter)
+incr(!counter)
+!println(counter)
+!print_counter("before")
+use counter in {
+
+    !print_counter("A")
+    !tick
+    !print_counter("A")
+    !tick
+}
+!print_counter("after")
+!tick
+!tick
+!print_counter("B")
+!println(counter)
+
+# ?lambda = {resource}{
+#     !tick
+#     !print_counter("lambda")
+#     use counter in {
+#         !tick
+#         !print_counter("use")
+#     }
+# }
+
+# !lambda
+# !do(lambda)
+# !do(lambda)
+# !lambda
+# !print_counter("top-level")
+# !do(lambda)
+
+# def foo(?f:{resource}()) { ?f = {resource}{ pass }}

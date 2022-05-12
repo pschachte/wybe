@@ -1,0 +1,12 @@
+def zip(`$`:(:?a, :?b, ?:?c), as:list(?a), bs:list(?b), ?cs:list(?c)) {
+    ?tmp = []
+    for ?a in as; ?b in bs {
+        ?tmp = [a $ b | tmp]
+    }
+    reverse(tmp, ?cs)
+}   
+
+?ls = [1,2,3,4,5,6]
+zip(`*`, ls, reverse(ls), ?cs)
+for ?i in cs { !println i }
+

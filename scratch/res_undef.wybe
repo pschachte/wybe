@@ -1,0 +1,60 @@
+# # def foo(?s:string) {
+# #     ?io = "not a phantom"
+# #     !read(?s)
+# # }
+
+# # !println(foo)
+
+# resource res:int = 1
+
+# def {test} quux(f:{resource}()) {
+#     !save_f
+#     !f
+#     ?g = f
+#     !save_g
+#     !g
+#     fail
+#     if { fail :: pass
+#     | else :: 
+#         !restore_g
+#         !restore_f
+#         fail
+#     }
+# }
+
+# def {test} foo(f:{resource}()) {
+#     # !save_f
+#     !f
+#     !quux(f)
+#     # if {
+#     #     !quux(f) ::
+#     #     pass
+#     # | else ::
+#     #     !restore_f
+#     #     fail
+#     # }
+# }
+
+# def bar(f:{resource}()) {
+#     !f
+#     if { !foo(f) :: pass }
+# }
+
+# bar({resource}{ incr(!res) })
+
+
+# def baz(f:{resource}()) {
+#     use res in {
+#         ?res = 2
+#         !f
+#     }
+# }
+# ?f = {resource}{ incr(!res) }
+# !baz(f)
+# !f
+
+# closure(closedValues, ..., arg1, arg2, ?arg3)
+
+# [nResources, saver, restorer, closure, closedValues...]
+
+!println('\0')

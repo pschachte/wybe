@@ -1,0 +1,67 @@
+type direction {
+    pub forward | down | up
+
+    pub def {test} parse(str:string, ?dir:_) {
+        case str in {
+          "forward"  :: ?dir = forward
+        | "down"     :: ?dir = down
+        | "up"       :: ?dir = up
+        | else :: fail
+        }
+    }
+}
+
+type position {
+    pub position(x:int, y:int)
+
+    pub def origin:_ = position(0,0)
+
+    pub def print(pos:_) use !io {
+        !print(pos^x * pos^y)
+        !print(" - (")
+        !print(pos^x)
+        !print(",")
+        !print(pos^y)
+        !print(")")
+    }
+
+    pub def move(!pos:_, dir:direction, units:int) {
+        case dir in {
+            forward :: x(!pos, pos^x + units)
+          | down    :: y(!pos, pos^y + units)
+          | up      :: y(!pos, pos^y - units)
+        }
+    }
+}
+
+
+type submarine {
+    pub submarine(pos:position, aim:int)
+
+    pub def move(!sub:_, dir:direction, units:int) {
+        case dir in {
+            forward :: 
+                x(!sub^pos, sub^pos^x + units)
+                y(!sub^pos, sub^pos^y + units * sub^aim)
+          | down :: 
+                aim(!sub, sub^aim + units)
+          | up :: 
+                aim(!sub, sub^aim - units)
+        }
+    }
+}
+
+?pos:position = origin
+?sub = submarine(origin, 0)
+
+do {
+    !read(?dir_str)
+    while parse(dir_str) = ?dir
+    !read(?units)
+    !read(?_:string) # read(?int) does not consume the newline
+    move(!pos, dir, units)
+    move(!sub, dir, units)
+}
+
+!print("Part 1: "); !print(pos); !nl
+!print("Part 2: "); !print(sub^pos); !nl

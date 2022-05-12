@@ -1,0 +1,33 @@
+resource output_stream:stream 
+resource err_stream:stream
+
+pub type stream is signed { }
+
+def with_output_to(filename:string, writer:{resource}()) use !io {
+    !open(filename, ?output_stream)
+    use output_stream in {
+        !writer
+        !close
+    }
+}
+
+def with_output_to_err(writer:{resource}()) use !io, err_stream {
+    use output_stream in {
+        ?output_stream = err_stream 
+        !writer
+    }
+}
+
+def open(filename, ?output_stream) use !io {
+    foreign c fopen(filename, ?output_stream, !io)
+}
+
+def close use !io, output_stream {
+    foreign c fclose(output_stream, !io)
+}
+
+def write(str:string) use !output_stream {
+    foreign c write(c_string(str), !output_stream)
+}
+
+!with_output_to("./scratch/dump.txt", {resource}{ !write("hello") })

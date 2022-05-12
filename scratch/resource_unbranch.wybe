@@ -1,0 +1,9 @@
+
+resource counter:int = 0
+
+use counter in {
+    if { false :: pass }
+    ?counter = 1
+    !println(counter)
+}
+!println(counter)

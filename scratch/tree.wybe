@@ -1,0 +1,24 @@
+type tree(?T) { pub nil | node(left:tree(?T), value:?T, right:tree(?T)) }
+
+resource strings:list(string) = []
+
+def collect(tree:tree(string)) use !strings {
+    if { tree = node(?left, ?value, ?right) ::
+          !collect(left)
+          !collect(value) 
+          !collect(right)
+    }
+}
+
+def collect(str:string) use !strings { 
+    ?strings = strings ,, [str] 
+}
+
+?strings = []
+?tree = node(node(nil, "A", nil), "B", 
+             node(node(nil, "C", nil), "D", nil))
+!collect(tree)
+# strings = ["A", "B", "C", "D"]
+for ?i in strings { !println(i) }
+
+for ?i in println { strings}

@@ -1,0 +1,14 @@
+
+resource foo:int = 1
+
+!println(foo)
+?foo = 2
+!use_foo
+!println(foo)
+?foo=3
+!println("good")
+
+def {noinline} use_foo use !io, !foo {
+    !println(foo)
+    ?foo = 1
+}

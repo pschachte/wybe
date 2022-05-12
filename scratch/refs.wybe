@@ -1,0 +1,24 @@
+def id(i:K):K = i
+
+def add_one(i:int):int = i + 1
+def add_one(f:float):float = f + 1.0
+
+def {noinline} app(f:(I, ?J), i:I):J = f(i)
+
+# ?y = 0.0
+!println(app({@=?@}, 1.0))
+!println(app({@+0.0=?@}, 1.0))
+!println(app({@=?@+0.0}, 1.0))
+
+?identity = id
+!println(app(identity, 1.0))
+
+!println(app(add_one, 1))
+
+!println(app(`+`(10), 1))
+
+# def one:int = 1
+# def get(f:(?V)):?v = v where { f(?v) }
+
+# get(one:(?:int), ?v)
+# !println(v)

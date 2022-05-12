@@ -1,0 +1,28 @@
+
+# resource counter:int = 10
+
+# def {inline} tick use !counter { incr(!counter) }
+
+# def reader(?i:int) {
+#     use counter in {
+#         ?counter = 0
+#         !tick
+#         !tick
+#         !tick
+#         !tick
+#         ?i = counter
+#     }
+# }
+
+# use counter in {
+#     !tick
+#     ?i = counter
+# }
+# !println(i:int)
+# !println(reader)
+
+# !println(counter)
+
+?ls = [1]
+?a = false
+if {~a | false :: pass }

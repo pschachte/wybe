@@ -1,0 +1,56 @@
+
+# # if { true :: pass }
+# # ?ls = []:list(int)
+# # do {
+# #     while [?i | ?ls] = ls
+# # }
+# # for ?i in []:list(int) { !print(i) }
+# if { true :: pass }
+# for ?i in [] { pass }
+# if { true :: pass }
+# if { true :: pass }
+# for ?i in [1] { pass }
+# for ?i in [1] { pass }
+
+
+
+# ?x = 1
+# do {
+#     if {
+#       x > 10    :: break
+#     | else :: ?y = x + 1
+#     }
+#     ?x = y
+#     !println(x)
+# }
+
+# # pub type intlist { pub nil | cons(head:int, tail:intlist) }
+
+# # ?x = cons(1,cons(2,cons(3,nil)))
+# # ?l = x
+# # do {while (l = cons(?h, ?l))
+# #     !println(h)
+# #     ?l2 = x
+# #     do {while (l2 = cons(?h2, ?l2))
+# #         !print("    ")
+# #         !print(h)
+# #         !print(" ")
+# #         !println(h2)
+# #     }
+# # }
+
+# # ?n = 10
+# # do {
+# #     # until n < 0
+# #     ?n = n - 1
+# #     # !println(n)
+# # }
+
+
+# def `[|]`(?a:int, ?b:int, c:int) {
+#     ?a = c
+#     ?b = c + 1
+# }
+
+for ?i in [] { !println i }
+!println(i:int)

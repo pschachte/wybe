@@ -1,0 +1,53 @@
+def {noinline} i_o(f, i:int, ?j:int) {
+    f(i, ?j)
+}
+
+def {noinline} o_i(f, ?i:int, ?j:int) {
+    f(?i, j)
+}
+
+def {noinline} n_o(f, !i:int, ?j:int) {
+    f(!i, ?j)
+    # f(i, ?j)
+}
+
+def {noinline} foo(f) {
+    f(?tmp,  j) && tmp = i # f:(in, in) as a test
+    # f(!i, j)
+    f(?i, j) # f:(out, in)
+}
+
+def {noinline} bar(f:(!int), g:(?int)) {
+    f(i!j)
+    ?j = i
+    f(!j)
+    ?tmp = i
+    f(!tmp)
+}
+
+#        out
+#        / \
+#    inout  
+#        \ /
+#        in
+
+
+  !?.
+ ----
+!|!
+?| ?
+.|  .
+
+
+f(3,  ?x) 
+f(?t1,  ?x) && t1 = 3 
+f(?y,  3) 
+f(?y, ?t2) && t2 = 3
+
+?f = { ?@ = a; ?@ = b }
+
+g(?x, ?y, z)
+g(!x, ?y, z)
+g(x, y, z)
+
+

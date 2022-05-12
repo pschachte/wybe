@@ -1,0 +1,8 @@
+module foo {
+    module bar {
+        pass
+    }
+}
+
+
+!println(1)

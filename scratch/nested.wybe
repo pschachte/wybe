@@ -1,0 +1,23 @@
+
+resource curr_max:int = -1000
+
+def take_max(i:int) use !curr_max { if { i > curr_max :: ?curr_max = i } }
+
+?matrix = [[1,2], [3,4]]
+?curr_max = -1000
+!map({resource}{
+    use curr_max in {
+        ?curr_max = -1000
+        !map({resource}{!take_max(@)}, @1)
+        !println(curr_max)
+    }
+    !take_max(length(@1))
+}, matrix)
+!println(curr_max)
+
+def  map(f:{resource}(A), as:list(A)) {
+    if { [?a | ?as] = as :: 
+            !f(a)
+            !map(f, as)
+       }
+}

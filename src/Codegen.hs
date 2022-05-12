@@ -15,7 +15,7 @@ module Codegen (
   -- * Blocks
   createBlocks, setBlock, addBlock, entryBlockName,
   callWybe, callC, externf, ret, globalDefine, externalC, externalWybe,
-  phi, br, cbr, getBlock, retNothing, freshUnName,
+  phi, br, cbr, switch, retNothing, freshUnName,
   -- * Symbol storage
   alloca, store, addOperand, load, modifySymtab, getVar, maybeGetVar, localVar, preservingSymtab,
   makeGlobalResourceVariable, doAlloca, doLoad,
@@ -143,15 +143,15 @@ type Names = Map.Map String Int
 -- | 'CodegenState' will hold a global Definition level code.
 data CodegenState
     = CodegenState {
-        currentBlock :: Name     -- ^ Name of the active block to append to
-      , blocks       :: Map.Map Name BlockState
-                                 -- ^ Blocks for function
-      , blockCount   :: Int      -- ^ Incrementing count of basic blocks
-      , symtab       :: SymbolTable
-                                 -- ^ Local symbol table of a function
-      , names        :: Names    -- ^ Name supply
-      , unNameCount  :: Word     -- ^ Count of UnNames
-      , proto        :: PrimProto -- ^ Proto of current proc
+        cgCurrentBlock :: Name     -- ^ Name of the active block to append to
+      , cgBlocks       :: Map.Map Name BlockState
+                                   -- ^ Blocks for function
+      , cgBlockCount   :: Int
+      , cgNames        :: Names    -- ^ Name supply
+      , cgSymtab       :: SymbolTable
+                                   -- ^ Local symbol table of a function
+      , cgUnNameCount  :: Word     -- ^ Count of UnNames
+      , cgProto        :: PrimProto -- ^ Proto of current proc
       } deriving Show
 
 -- | 'BlockState' will generate the code for basic blocks inside of
@@ -208,8 +208,8 @@ emptyTranslation = TranslationState 0 Map.empty Map.empty []
 -- | Gets a fresh UnName
 freshUnName :: Codegen Name
 freshUnName = do
-    count <- gets unNameCount
-    modify $ \s -> s { unNameCount=count + 1 }
+    count <- gets cgUnNameCount
+    modify $ \s -> s { cgUnNameCount=count + 1 }
     return $ UnName count
 
 
@@ -325,9 +325,6 @@ externalWybe = externalFunction CC.Fast
 -- Blocks                                                                 --
 ----------------------------------------------------------------------------
 
-entry :: Codegen Name
-entry = gets currentBlock
-
 -- | Sample name for the 'entry' block. (Usually 'entry')
 entryBlockName :: String
 entryBlockName = "entry"
@@ -338,55 +335,45 @@ emptyBlock i = BlockState i [] Nothing
 
 -- | Initialize an empty CodegenState for a new Definition.
 emptyCodegen :: PrimProto -> CodegenState
-emptyCodegen proto = CodegenState{ currentBlock=Name $ fromString entryBlockName
-                           , blocks=Map.empty
-                           , blockCount=1
-                           , symtab=SymbolTable Map.empty Map.empty
-                           , names=Map.empty
-                           , unNameCount=0
-                           , proto=proto
-                           }
+emptyCodegen proto = CodegenState{ cgCurrentBlock=Name $ fromString entryBlockName
+                                 , cgBlocks=Map.empty
+                                 , cgBlockCount=0
+                                 , cgSymtab=SymbolTable Map.empty Map.empty
+                                 , cgNames=Map.empty
+                                 , cgUnNameCount=0
+                                 , cgProto=proto
+                                 }
 
 
 -- | 'addBlock' creates and adds a new block to the current blocks
 addBlock :: String -> Codegen Name
-addBlock bname = do
+addBlock blockName = do
   -- Retrieving the current field values
-  blks <- gets blocks
-  ix <- gets blockCount
-  ns <- gets names
-  let new = emptyBlock ix
-      (qname, supply) = uniqueName bname ns
+  blks <- gets cgBlocks
+  idx <- gets cgBlockCount
+  name <- uniqueName blockName
   -- updating with new block appended
-  modify $ \s -> s { blocks = Map.insert (Name $ fromString qname) new blks
-                   , blockCount = ix + 1
-                   , names = supply
-                   }
-  return (Name $ fromString qname)
+  modify $ \s -> s { cgBlocks = Map.insert name (emptyBlock idx) blks
+                   , cgBlockCount=idx+1 }
+  return name
 
 -- | Set the current block label.
-setBlock :: Name -> Codegen Name
-setBlock bname =
-    do modify $ \s -> s { currentBlock = bname }
-       return bname
-
--- | Get the current block being written to.
-getBlock :: Codegen Name
-getBlock = gets currentBlock
+setBlock :: Name -> Codegen ()
+setBlock bname = modify $ \s -> s { cgCurrentBlock = bname }
 
 
 -- | Replace the current block with a 'new' block
 modifyBlock :: BlockState -> Codegen ()
 modifyBlock new = do
-  active <- gets currentBlock
-  modify $ \s -> s { blocks = Map.insert active new (blocks s) }
+  active <- gets cgCurrentBlock
+  modify $ \s -> s { cgBlocks = Map.insert active new (cgBlocks s) }
 
 
 -- | Find the current block in the list of blocks (Map of blocks)
 current :: Codegen BlockState
 current = do
-  curr <- gets currentBlock
-  blks <- gets blocks
+  curr <- gets cgCurrentBlock
+  blks <- gets cgBlocks
   case Map.lookup curr blks of
     Just x  -> return x
     Nothing -> error $ "No such block found: " ++ show curr
@@ -396,7 +383,7 @@ current = do
 -- definition. This list would be in order of execution. This list forms the
 -- body of a global function definition.
 createBlocks :: CodegenState -> [BasicBlock]
-createBlocks m = map makeBlock $ sortBlocks $ Map.toList (blocks m)
+createBlocks m = map makeBlock $ sortBlocks $ Map.toList (cgBlocks m)
 
 -- | Convert our BlockState to the LLVM BasicBlock Type.
 makeBlock :: (Name, BlockState) -> BasicBlock
@@ -417,11 +404,12 @@ sortBlocks = sortBy (compare `on` (idx . snd))
 -- | 'uniqueName' checks a name supply to generate a unique name by
 -- adding a number suffix (which is incremental) to a name which has already
 -- been used.
-uniqueName :: String -> Names -> (String, Names)
-uniqueName nm ns =
-    case Map.lookup nm ns of
-      Nothing -> (nm, Map.insert nm 1 ns)
-      Just ix -> (nm ++ show ix, Map.insert nm (ix + 1) ns)
+uniqueName :: String -> Codegen Name
+uniqueName base = do
+    names <- gets cgNames
+    let name = base ++ maybe "" show (Map.lookup base names)
+    modify $ \s -> s{ cgNames=Map.alter (Just . maybe 1 (+1)) base names }
+    return $ Name $ fromString name
 
 
 ----------------------------------------------------------------------------
@@ -447,8 +435,8 @@ globalVar t s = C.GlobalReference t $ LLVMAST.Name $ fromString s
 modifySymtab :: String -> Operand -> Codegen ()
 modifySymtab var op = do
     logCodegen $ "SYMTAB: " ++ var ++ " <- " ++ show op ++ ":" ++ show (typeOf op)
-    st <- gets symtab
-    modify $ \s -> s { symtab=st{stVars=Map.insert var op $ stVars st} }
+    st <- gets cgSymtab
+    modify $ \s -> s { cgSymtab=st{stVars=Map.insert var op $ stVars st} }
 
 -- | Find and return the local operand by its given name from the symbol
 -- table. Only the first find will be returned so new names can shadow
@@ -464,7 +452,7 @@ getVar var = do
 -- the same older names. Returns Nothing if var was not found.
 maybeGetVar :: String -> Codegen (Maybe Operand)
 maybeGetVar var = do
-    lcls <- gets (stVars . symtab)
+    lcls <- gets (stVars . cgSymtab)
     return $ Map.lookup var lcls
 
 -- | Evaluate nested code generating code, and reset the symtab to its original
@@ -473,28 +461,30 @@ maybeGetVar var = do
 -- apply an another branch.
 preservingSymtab :: Codegen a -> Codegen a
 preservingSymtab code = do
-    oldSymtab <- gets symtab
+    oldSymtab <- gets cgSymtab
     result <- code
-    modify $ \s -> s { symtab=oldSymtab }
+    modify $ \s -> s { cgSymtab=oldSymtab }
     return result
 
 addOperand :: PrimArg -> Operand -> Codegen ()
 addOperand arg opd = do
-    st <- gets symtab
-    modify $ \s -> s { symtab=st{stOpds=Map.insert arg opd $ stOpds st} }
+    st <- gets cgSymtab
+    modify $ \s -> s { cgSymtab=st{stOpds=Map.insert arg opd $ stOpds st} }
 
 
 ----------------------------------------------------------------------------
 -- Instructions                                                           --
 ----------------------------------------------------------------------------
 
+
+
 -- | Append an unnamed instruction to the instruction stack of the current
 -- BasicBlock. The temp name is generated using a fresh word counter.
 instr :: Type -> Instruction -> Codegen Operand
 instr ty ins = do
-    ref <- freshUnName
-    addInstr $ ref := ins
-    return $ LocalReference ty ref
+    reg <- freshUnName
+    addInstr $ reg := ins
+    return $ LocalReference ty reg
 
 
 -- | Append a void instruction to the instruction stack of the current
@@ -714,6 +704,9 @@ br val = terminator $ Do $ Br val []
 
 cbr :: Operand -> Name -> Name -> Codegen (Named Terminator)
 cbr cond tr fl = terminator $ Do $ CondBr cond tr fl []
+
+switch :: Operand -> Name -> [(C.Constant, Name)] -> Codegen (Named Terminator)
+switch op0 deflt dests = terminator $ Do $ Switch op0 deflt dests []
 
 ret :: Maybe Operand -> Codegen (Named Terminator)
 ret val = terminator $ Do $ Ret val []
