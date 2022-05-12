@@ -71,10 +71,10 @@ gen#2(count##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
  
 
 
-@proc_beer.2 =    constant {i64, i64} { i64 28, i64 ptrtoint ([?? x i8]* @proc_beer.1 to i64) }
+@proc_beer.1 =    constant {i64, i64} { i64 28, i64 ptrtoint ([?? x i8]* @proc_beer.0 to i64) }
 
 
-@proc_beer.1 =    constant [?? x i8] c" bottles of beer on the wall\00"
+@proc_beer.0 =    constant [?? x i8] c" bottles of beer on the wall\00"
 
 
 declare external ccc  void @putchar(i8)    
@@ -108,14 +108,14 @@ entry:
 
 define external fastcc  void @"proc_beer.gen#1<0>"(i64  %"count##0")    {
 entry:
-  %"1#tmp#0##0" = icmp sge i64 %"count##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp sge i64 %"count##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
   tail call ccc  void  @print_int(i64  %"count##0")  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @proc_beer.2, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @proc_beer.1, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  %"2#tmp#8##0" = sub   i64 %"count##0", 1 
-  musttail call fastcc  void  @"proc_beer.gen#1<0>"(i64  %"2#tmp#8##0")  
+  %1 = sub   i64 %"count##0", 1 
+  musttail call fastcc  void  @"proc_beer.gen#1<0>"(i64  %1)  
   ret void 
 if.else:
   ret void 
@@ -125,9 +125,9 @@ if.else:
 define external fastcc  void @"proc_beer.gen#2<0>"(i64  %"count##0")    {
 entry:
   tail call ccc  void  @print_int(i64  %"count##0")  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @proc_beer.2, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @proc_beer.1, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  %"1#count##1" = sub   i64 %"count##0", 1 
-  musttail call fastcc  void  @"proc_beer.gen#1<0>"(i64  %"1#count##1")  
+  %0 = sub   i64 %"count##0", 1 
+  musttail call fastcc  void  @"proc_beer.gen#1<0>"(i64  %0)  
   ret void 
 }

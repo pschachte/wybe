@@ -78,8 +78,8 @@ entry:
 
 define external fastcc  void @"break_in_loop_in_do.gen#1<0>"()    {
 entry:
-  %1 = load  i64, i64* @"resource#break_in_loop_in_do.counter" 
-  tail call ccc  void  @print_int(i64  %1)  
+  %0 = load  i64, i64* @"resource#break_in_loop_in_do.counter" 
+  tail call ccc  void  @print_int(i64  %0)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }

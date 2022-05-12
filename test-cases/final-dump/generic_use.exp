@@ -177,8 +177,8 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  void @"generic_list.append<0>"(i64  %"x##0", i64  %"y##0", i64*  %"#result##0")    {
 entry:
-  %"1#tmp#5##0" = icmp ne i64 %"x##0", 0 
-  br i1 %"1#tmp#5##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"x##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
   %1 = inttoptr i64 %"x##0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
@@ -206,151 +206,151 @@ if.else:
 
 define external fastcc  {i64, i1} @"generic_list.car<0>"(i64  %"#rec##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#rec##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %15 = inttoptr i64 %"#rec##0" to i64* 
-  %16 = getelementptr  i64, i64* %15, i64 0 
-  %17 = load  i64, i64* %16 
-  %18 = insertvalue {i64, i1} undef, i64 %17, 0 
-  %19 = insertvalue {i64, i1} %18, i1 1, 1 
-  ret {i64, i1} %19 
+  %1 = inttoptr i64 %"#rec##0" to i64* 
+  %2 = getelementptr  i64, i64* %1, i64 0 
+  %3 = load  i64, i64* %2 
+  %4 = insertvalue {i64, i1} undef, i64 %3, 0 
+  %5 = insertvalue {i64, i1} %4, i1 1, 1 
+  ret {i64, i1} %5 
 if.else:
-  %20 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %21 = insertvalue {i64, i1} %20, i1 0, 1 
-  ret {i64, i1} %21 
+  %6 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %7 = insertvalue {i64, i1} %6, i1 0, 1 
+  ret {i64, i1} %7 
 }
 
 
 define external fastcc  {i64, i1} @"generic_list.car<1>"(i64  %"#rec##0", i64  %"#field##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#rec##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %22 = trunc i64 16 to i32  
-  %23 = tail call ccc  i8*  @wybe_malloc(i32  %22)  
-  %24 = ptrtoint i8* %23 to i64 
-  %25 = inttoptr i64 %24 to i8* 
-  %26 = inttoptr i64 %"#rec##0" to i8* 
-  %27 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %25, i8*  %26, i32  %27, i1  0)  
-  %28 = inttoptr i64 %24 to i64* 
-  %29 = getelementptr  i64, i64* %28, i64 0 
-  store  i64 %"#field##0", i64* %29 
-  %30 = insertvalue {i64, i1} undef, i64 %24, 0 
-  %31 = insertvalue {i64, i1} %30, i1 1, 1 
-  ret {i64, i1} %31 
+  %1 = trunc i64 16 to i32  
+  %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
+  %3 = ptrtoint i8* %2 to i64 
+  %4 = inttoptr i64 %3 to i8* 
+  %5 = inttoptr i64 %"#rec##0" to i8* 
+  %6 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %4, i8*  %5, i32  %6, i1  0)  
+  %7 = inttoptr i64 %3 to i64* 
+  %8 = getelementptr  i64, i64* %7, i64 0 
+  store  i64 %"#field##0", i64* %8 
+  %9 = insertvalue {i64, i1} undef, i64 %3, 0 
+  %10 = insertvalue {i64, i1} %9, i1 1, 1 
+  ret {i64, i1} %10 
 if.else:
-  %32 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %33 = insertvalue {i64, i1} %32, i1 0, 1 
-  ret {i64, i1} %33 
+  %11 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %12 = insertvalue {i64, i1} %11, i1 0, 1 
+  ret {i64, i1} %12 
 }
 
 
 define external fastcc  {i64, i1} @"generic_list.cdr<0>"(i64  %"#rec##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#rec##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %34 = add   i64 %"#rec##0", 8 
-  %35 = inttoptr i64 %34 to i64* 
-  %36 = getelementptr  i64, i64* %35, i64 0 
-  %37 = load  i64, i64* %36 
-  %38 = insertvalue {i64, i1} undef, i64 %37, 0 
-  %39 = insertvalue {i64, i1} %38, i1 1, 1 
-  ret {i64, i1} %39 
+  %1 = add   i64 %"#rec##0", 8 
+  %2 = inttoptr i64 %1 to i64* 
+  %3 = getelementptr  i64, i64* %2, i64 0 
+  %4 = load  i64, i64* %3 
+  %5 = insertvalue {i64, i1} undef, i64 %4, 0 
+  %6 = insertvalue {i64, i1} %5, i1 1, 1 
+  ret {i64, i1} %6 
 if.else:
-  %40 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %41 = insertvalue {i64, i1} %40, i1 0, 1 
-  ret {i64, i1} %41 
+  %7 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %8 = insertvalue {i64, i1} %7, i1 0, 1 
+  ret {i64, i1} %8 
 }
 
 
 define external fastcc  {i64, i1} @"generic_list.cdr<1>"(i64  %"#rec##0", i64  %"#field##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#rec##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %42 = trunc i64 16 to i32  
-  %43 = tail call ccc  i8*  @wybe_malloc(i32  %42)  
-  %44 = ptrtoint i8* %43 to i64 
-  %45 = inttoptr i64 %44 to i8* 
-  %46 = inttoptr i64 %"#rec##0" to i8* 
-  %47 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %45, i8*  %46, i32  %47, i1  0)  
-  %48 = add   i64 %44, 8 
-  %49 = inttoptr i64 %48 to i64* 
-  %50 = getelementptr  i64, i64* %49, i64 0 
-  store  i64 %"#field##0", i64* %50 
-  %51 = insertvalue {i64, i1} undef, i64 %44, 0 
-  %52 = insertvalue {i64, i1} %51, i1 1, 1 
-  ret {i64, i1} %52 
+  %1 = trunc i64 16 to i32  
+  %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
+  %3 = ptrtoint i8* %2 to i64 
+  %4 = inttoptr i64 %3 to i8* 
+  %5 = inttoptr i64 %"#rec##0" to i8* 
+  %6 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %4, i8*  %5, i32  %6, i1  0)  
+  %7 = add   i64 %3, 8 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = getelementptr  i64, i64* %8, i64 0 
+  store  i64 %"#field##0", i64* %9 
+  %10 = insertvalue {i64, i1} undef, i64 %3, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
 if.else:
-  %53 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %54 = insertvalue {i64, i1} %53, i1 0, 1 
-  ret {i64, i1} %54 
+  %12 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
 define external fastcc  i64 @"generic_list.cons<0>"(i64  %"car##0", i64  %"cdr##0")    {
 entry:
-  %55 = trunc i64 16 to i32  
-  %56 = tail call ccc  i8*  @wybe_malloc(i32  %55)  
-  %57 = ptrtoint i8* %56 to i64 
-  %58 = inttoptr i64 %57 to i64* 
-  %59 = getelementptr  i64, i64* %58, i64 0 
-  store  i64 %"car##0", i64* %59 
-  %60 = add   i64 %57, 8 
-  %61 = inttoptr i64 %60 to i64* 
-  %62 = getelementptr  i64, i64* %61, i64 0 
-  store  i64 %"cdr##0", i64* %62 
-  ret i64 %57 
+  %0 = trunc i64 16 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = getelementptr  i64, i64* %3, i64 0 
+  store  i64 %"car##0", i64* %4 
+  %5 = add   i64 %2, 8 
+  %6 = inttoptr i64 %5 to i64* 
+  %7 = getelementptr  i64, i64* %6, i64 0 
+  store  i64 %"cdr##0", i64* %7 
+  ret i64 %2 
 }
 
 
 define external fastcc  {i64, i64, i1} @"generic_list.cons<1>"(i64  %"#result##0")    {
 entry:
-  %"1#tmp#0##0" = icmp ne i64 %"#result##0", 0 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"#result##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %63 = inttoptr i64 %"#result##0" to i64* 
-  %64 = getelementptr  i64, i64* %63, i64 0 
-  %65 = load  i64, i64* %64 
-  %66 = add   i64 %"#result##0", 8 
-  %67 = inttoptr i64 %66 to i64* 
-  %68 = getelementptr  i64, i64* %67, i64 0 
-  %69 = load  i64, i64* %68 
-  %70 = insertvalue {i64, i64, i1} undef, i64 %65, 0 
-  %71 = insertvalue {i64, i64, i1} %70, i64 %69, 1 
-  %72 = insertvalue {i64, i64, i1} %71, i1 1, 2 
-  ret {i64, i64, i1} %72 
+  %1 = inttoptr i64 %"#result##0" to i64* 
+  %2 = getelementptr  i64, i64* %1, i64 0 
+  %3 = load  i64, i64* %2 
+  %4 = add   i64 %"#result##0", 8 
+  %5 = inttoptr i64 %4 to i64* 
+  %6 = getelementptr  i64, i64* %5, i64 0 
+  %7 = load  i64, i64* %6 
+  %8 = insertvalue {i64, i64, i1} undef, i64 %3, 0 
+  %9 = insertvalue {i64, i64, i1} %8, i64 %7, 1 
+  %10 = insertvalue {i64, i64, i1} %9, i1 1, 2 
+  ret {i64, i64, i1} %10 
 if.else:
-  %73 = insertvalue {i64, i64, i1} undef, i64 undef, 0 
-  %74 = insertvalue {i64, i64, i1} %73, i64 undef, 1 
-  %75 = insertvalue {i64, i64, i1} %74, i1 0, 2 
-  ret {i64, i64, i1} %75 
+  %11 = insertvalue {i64, i64, i1} undef, i64 undef, 0 
+  %12 = insertvalue {i64, i64, i1} %11, i64 undef, 1 
+  %13 = insertvalue {i64, i64, i1} %12, i1 0, 2 
+  ret {i64, i64, i1} %13 
 }
 
 
 define external fastcc  i64 @"generic_list.length<0>"(i64  %"x##0")    {
 entry:
-  %"1##result##0" = tail call fastcc  i64  @"generic_list.length1<0>"(i64  %"x##0", i64  0)  
-  ret i64 %"1##result##0" 
+  %0 = tail call fastcc  i64  @"generic_list.length1<0>"(i64  %"x##0", i64  0)  
+  ret i64 %0 
 }
 
 
 define external fastcc  i64 @"generic_list.length1<0>"(i64  %"x##0", i64  %"acc##0")    {
 entry:
-  %"1#tmp#5##0" = icmp ne i64 %"x##0", 0 
-  br i1 %"1#tmp#5##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"x##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %76 = add   i64 %"x##0", 8 
-  %77 = inttoptr i64 %76 to i64* 
-  %78 = getelementptr  i64, i64* %77, i64 0 
-  %79 = load  i64, i64* %78 
-  %"2#tmp#2##0" = add   i64 %"acc##0", 1 
-  %"2##result##0" = musttail call fastcc  i64  @"generic_list.length1<0>"(i64  %79, i64  %"2#tmp#2##0")  
-  ret i64 %"2##result##0" 
+  %1 = add   i64 %"x##0", 8 
+  %2 = inttoptr i64 %1 to i64* 
+  %3 = getelementptr  i64, i64* %2, i64 0 
+  %4 = load  i64, i64* %3 
+  %5 = add   i64 %"acc##0", 1 
+  %6 = musttail call fastcc  i64  @"generic_list.length1<0>"(i64  %4, i64  %5)  
+  ret i64 %6 
 if.else:
   ret i64 %"acc##0" 
 }
@@ -614,10 +614,10 @@ reverse1(lst##0:generic_list(T), suffix##0:generic_list(T), ?#result##0:generic_
  
 
 
-@generic_use.72 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @generic_use.71 to i64) }
+@generic_use.1 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @generic_use.0 to i64) }
 
 
-@generic_use.71 =    constant [?? x i8] c", \00"
+@generic_use.0 =    constant [?? x i8] c", \00"
 
 
 declare external ccc  void @putchar(i8)    
@@ -637,22 +637,22 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  void @"generic_use.<0>"()    {
 entry:
-  %"1#tmp#0##0" = tail call fastcc  i64  @"generic_use.fromto1<0>"(i64  1, i64  5, i64  0)  
-  %"1#tmp#1##0" = tail call fastcc  i64  @"generic_use.fromto1<0>"(i64  6, i64  10, i64  0)  
-  tail call fastcc  void  @"generic_use.print<0>"(i64  %"1#tmp#0##0")  
+  %0 = tail call fastcc  i64  @"generic_use.fromto1<0>"(i64  1, i64  5, i64  0)  
+  %1 = tail call fastcc  i64  @"generic_use.fromto1<0>"(i64  6, i64  10, i64  0)  
+  tail call fastcc  void  @"generic_use.print<0>"(i64  %0)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"generic_use.print<0>"(i64  %"1#tmp#1##0")  
+  tail call fastcc  void  @"generic_use.print<0>"(i64  %1)  
   tail call ccc  void  @putchar(i8  10)  
-  %1 = alloca i64 
-   call fastcc  void  @"generic_use.concat<0>"(i64  %"1#tmp#0##0", i64  %"1#tmp#1##0", i64*  %1)  
-  %2 = load  i64, i64* %1 
-  tail call fastcc  void  @"generic_use.print<0>"(i64  %2)  
+  %2 = alloca i64 
+   call fastcc  void  @"generic_use.concat<0>"(i64  %0, i64  %1, i64*  %2)  
+  %3 = load  i64, i64* %2 
+  tail call fastcc  void  @"generic_use.print<0>"(i64  %3)  
   tail call ccc  void  @putchar(i8  10)  
-  %"1#tmp#3##0" = tail call fastcc  i64  @"generic_use.reverse1<0>[410bae77d3]"(i64  %"1#tmp#0##0", i64  0)  
-  tail call fastcc  void  @"generic_use.print<0>"(i64  %"1#tmp#3##0")  
+  %4 = tail call fastcc  i64  @"generic_use.reverse1<0>[410bae77d3]"(i64  %0, i64  0)  
+  tail call fastcc  void  @"generic_use.print<0>"(i64  %4)  
   tail call ccc  void  @putchar(i8  10)  
-  %"1#tmp#4##0" = tail call fastcc  i64  @"generic_use.nrev<0>[410bae77d3]"(i64  %"1#tmp#1##0")  
-  tail call fastcc  void  @"generic_use.print<0>"(i64  %"1#tmp#4##0")  
+  %5 = tail call fastcc  i64  @"generic_use.nrev<0>[410bae77d3]"(i64  %1)  
+  tail call fastcc  void  @"generic_use.print<0>"(i64  %5)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
@@ -660,26 +660,26 @@ entry:
 
 define external fastcc  void @"generic_use.concat<0>"(i64  %"l1##0", i64  %"l2##0", i64*  %"#result##0")    {
 entry:
-  %"1#tmp#5##0" = icmp ne i64 %"l1##0", 0 
-  br i1 %"1#tmp#5##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"l1##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %3 = inttoptr i64 %"l1##0" to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  %5 = load  i64, i64* %4 
-  %6 = add   i64 %"l1##0", 8 
-  %7 = inttoptr i64 %6 to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
-  %9 = load  i64, i64* %8 
-  %10 = trunc i64 16 to i32  
-  %11 = tail call ccc  i8*  @wybe_malloc(i32  %10)  
-  %12 = ptrtoint i8* %11 to i64 
-  %13 = inttoptr i64 %12 to i64* 
-  %14 = getelementptr  i64, i64* %13, i64 0 
-  store  i64 %5, i64* %14 
-  %15 = add   i64 %12, 8 
-  %16 = inttoptr i64 %15 to i64* 
-  store  i64 %12, i64* %"#result##0" 
-  musttail call fastcc  void  @"generic_use.concat<0>"(i64  %9, i64  %"l2##0", i64*  %16)  
+  %1 = inttoptr i64 %"l1##0" to i64* 
+  %2 = getelementptr  i64, i64* %1, i64 0 
+  %3 = load  i64, i64* %2 
+  %4 = add   i64 %"l1##0", 8 
+  %5 = inttoptr i64 %4 to i64* 
+  %6 = getelementptr  i64, i64* %5, i64 0 
+  %7 = load  i64, i64* %6 
+  %8 = trunc i64 16 to i32  
+  %9 = tail call ccc  i8*  @wybe_malloc(i32  %8)  
+  %10 = ptrtoint i8* %9 to i64 
+  %11 = inttoptr i64 %10 to i64* 
+  %12 = getelementptr  i64, i64* %11, i64 0 
+  store  i64 %3, i64* %12 
+  %13 = add   i64 %10, 8 
+  %14 = inttoptr i64 %13 to i64* 
+  store  i64 %10, i64* %"#result##0" 
+  musttail call fastcc  void  @"generic_use.concat<0>"(i64  %7, i64  %"l2##0", i64*  %14)  
   ret void 
 if.else:
   store  i64 %"l2##0", i64* %"#result##0" 
@@ -689,17 +689,17 @@ if.else:
 
 define external fastcc  void @"generic_use.concat<0>[410bae77d3]"(i64  %"l1##0", i64  %"l2##0", i64*  %"#result##0")    {
 entry:
-  %"1#tmp#5##0" = icmp ne i64 %"l1##0", 0 
-  br i1 %"1#tmp#5##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"l1##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %17 = add   i64 %"l1##0", 8 
-  %18 = inttoptr i64 %17 to i64* 
-  %19 = getelementptr  i64, i64* %18, i64 0 
-  %20 = load  i64, i64* %19 
-  %21 = add   i64 %"l1##0", 8 
-  %22 = inttoptr i64 %21 to i64* 
+  %1 = add   i64 %"l1##0", 8 
+  %2 = inttoptr i64 %1 to i64* 
+  %3 = getelementptr  i64, i64* %2, i64 0 
+  %4 = load  i64, i64* %3 
+  %5 = add   i64 %"l1##0", 8 
+  %6 = inttoptr i64 %5 to i64* 
   store  i64 %"l1##0", i64* %"#result##0" 
-  musttail call fastcc  void  @"generic_use.concat<0>[410bae77d3]"(i64  %20, i64  %"l2##0", i64*  %22)  
+  musttail call fastcc  void  @"generic_use.concat<0>[410bae77d3]"(i64  %4, i64  %"l2##0", i64*  %6)  
   ret void 
 if.else:
   store  i64 %"l2##0", i64* %"#result##0" 
@@ -709,29 +709,29 @@ if.else:
 
 define external fastcc  i64 @"generic_use.fromto<0>"(i64  %"lo##0", i64  %"hi##0")    {
 entry:
-  %"1##result##0" = tail call fastcc  i64  @"generic_use.fromto1<0>"(i64  %"lo##0", i64  %"hi##0", i64  0)  
-  ret i64 %"1##result##0" 
+  %0 = tail call fastcc  i64  @"generic_use.fromto1<0>"(i64  %"lo##0", i64  %"hi##0", i64  0)  
+  ret i64 %0 
 }
 
 
 define external fastcc  i64 @"generic_use.fromto1<0>"(i64  %"lo##0", i64  %"hi##0", i64  %"sofar##0")    {
 entry:
-  %"1#tmp#4##0" = icmp sge i64 %"hi##0", %"lo##0" 
-  br i1 %"1#tmp#4##0", label %if.then, label %if.else 
+  %0 = icmp sge i64 %"hi##0", %"lo##0" 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#2##0" = sub   i64 %"hi##0", 1 
-  %23 = trunc i64 16 to i32  
-  %24 = tail call ccc  i8*  @wybe_malloc(i32  %23)  
-  %25 = ptrtoint i8* %24 to i64 
-  %26 = inttoptr i64 %25 to i64* 
-  %27 = getelementptr  i64, i64* %26, i64 0 
-  store  i64 %"hi##0", i64* %27 
-  %28 = add   i64 %25, 8 
-  %29 = inttoptr i64 %28 to i64* 
-  %30 = getelementptr  i64, i64* %29, i64 0 
-  store  i64 %"sofar##0", i64* %30 
-  %"2##result##0" = musttail call fastcc  i64  @"generic_use.fromto1<0>"(i64  %"lo##0", i64  %"2#tmp#2##0", i64  %25)  
-  ret i64 %"2##result##0" 
+  %1 = sub   i64 %"hi##0", 1 
+  %2 = trunc i64 16 to i32  
+  %3 = tail call ccc  i8*  @wybe_malloc(i32  %2)  
+  %4 = ptrtoint i8* %3 to i64 
+  %5 = inttoptr i64 %4 to i64* 
+  %6 = getelementptr  i64, i64* %5, i64 0 
+  store  i64 %"hi##0", i64* %6 
+  %7 = add   i64 %4, 8 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = getelementptr  i64, i64* %8, i64 0 
+  store  i64 %"sofar##0", i64* %9 
+  %10 = musttail call fastcc  i64  @"generic_use.fromto1<0>"(i64  %"lo##0", i64  %1, i64  %4)  
+  ret i64 %10 
 if.else:
   ret i64 %"sofar##0" 
 }
@@ -739,38 +739,38 @@ if.else:
 
 define external fastcc  i64 @"generic_use.iota<0>"(i64  %"n##0")    {
 entry:
-  %"1##result##0" = tail call fastcc  i64  @"generic_use.fromto1<0>"(i64  1, i64  %"n##0", i64  0)  
-  ret i64 %"1##result##0" 
+  %0 = tail call fastcc  i64  @"generic_use.fromto1<0>"(i64  1, i64  %"n##0", i64  0)  
+  ret i64 %0 
 }
 
 
 define external fastcc  i64 @"generic_use.nrev<0>"(i64  %"lst##0")    {
 entry:
-  %"1#tmp#8##0" = icmp ne i64 %"lst##0", 0 
-  br i1 %"1#tmp#8##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"lst##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %31 = inttoptr i64 %"lst##0" to i64* 
-  %32 = getelementptr  i64, i64* %31, i64 0 
-  %33 = load  i64, i64* %32 
-  %34 = add   i64 %"lst##0", 8 
-  %35 = inttoptr i64 %34 to i64* 
-  %36 = getelementptr  i64, i64* %35, i64 0 
-  %37 = load  i64, i64* %36 
-  %"2#tmp#2##0" = tail call fastcc  i64  @"generic_use.nrev<0>"(i64  %37)  
-  %38 = trunc i64 16 to i32  
-  %39 = tail call ccc  i8*  @wybe_malloc(i32  %38)  
-  %40 = ptrtoint i8* %39 to i64 
-  %41 = inttoptr i64 %40 to i64* 
-  %42 = getelementptr  i64, i64* %41, i64 0 
-  store  i64 %33, i64* %42 
-  %43 = add   i64 %40, 8 
-  %44 = inttoptr i64 %43 to i64* 
-  %45 = getelementptr  i64, i64* %44, i64 0 
-  store  i64 0, i64* %45 
-  %46 = alloca i64 
-   call fastcc  void  @"generic_use.concat<0>[410bae77d3]"(i64  %"2#tmp#2##0", i64  %40, i64*  %46)  
-  %47 = load  i64, i64* %46 
-  ret i64 %47 
+  %1 = inttoptr i64 %"lst##0" to i64* 
+  %2 = getelementptr  i64, i64* %1, i64 0 
+  %3 = load  i64, i64* %2 
+  %4 = add   i64 %"lst##0", 8 
+  %5 = inttoptr i64 %4 to i64* 
+  %6 = getelementptr  i64, i64* %5, i64 0 
+  %7 = load  i64, i64* %6 
+  %8 = tail call fastcc  i64  @"generic_use.nrev<0>"(i64  %7)  
+  %9 = trunc i64 16 to i32  
+  %10 = tail call ccc  i8*  @wybe_malloc(i32  %9)  
+  %11 = ptrtoint i8* %10 to i64 
+  %12 = inttoptr i64 %11 to i64* 
+  %13 = getelementptr  i64, i64* %12, i64 0 
+  store  i64 %3, i64* %13 
+  %14 = add   i64 %11, 8 
+  %15 = inttoptr i64 %14 to i64* 
+  %16 = getelementptr  i64, i64* %15, i64 0 
+  store  i64 0, i64* %16 
+  %17 = alloca i64 
+   call fastcc  void  @"generic_use.concat<0>[410bae77d3]"(i64  %8, i64  %11, i64*  %17)  
+  %18 = load  i64, i64* %17 
+  ret i64 %18 
 if.else:
   ret i64 0 
 }
@@ -778,22 +778,22 @@ if.else:
 
 define external fastcc  i64 @"generic_use.nrev<0>[410bae77d3]"(i64  %"lst##0")    {
 entry:
-  %"1#tmp#8##0" = icmp ne i64 %"lst##0", 0 
-  br i1 %"1#tmp#8##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"lst##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %48 = add   i64 %"lst##0", 8 
-  %49 = inttoptr i64 %48 to i64* 
-  %50 = getelementptr  i64, i64* %49, i64 0 
-  %51 = load  i64, i64* %50 
-  %"2#tmp#2##0" = tail call fastcc  i64  @"generic_use.nrev<0>[410bae77d3]"(i64  %51)  
-  %52 = add   i64 %"lst##0", 8 
-  %53 = inttoptr i64 %52 to i64* 
-  %54 = getelementptr  i64, i64* %53, i64 0 
-  store  i64 0, i64* %54 
-  %55 = alloca i64 
-   call fastcc  void  @"generic_use.concat<0>[410bae77d3]"(i64  %"2#tmp#2##0", i64  %"lst##0", i64*  %55)  
-  %56 = load  i64, i64* %55 
-  ret i64 %56 
+  %1 = add   i64 %"lst##0", 8 
+  %2 = inttoptr i64 %1 to i64* 
+  %3 = getelementptr  i64, i64* %2, i64 0 
+  %4 = load  i64, i64* %3 
+  %5 = tail call fastcc  i64  @"generic_use.nrev<0>[410bae77d3]"(i64  %4)  
+  %6 = add   i64 %"lst##0", 8 
+  %7 = inttoptr i64 %6 to i64* 
+  %8 = getelementptr  i64, i64* %7, i64 0 
+  store  i64 0, i64* %8 
+  %9 = alloca i64 
+   call fastcc  void  @"generic_use.concat<0>[410bae77d3]"(i64  %5, i64  %"lst##0", i64*  %9)  
+  %10 = load  i64, i64* %9 
+  ret i64 %10 
 if.else:
   ret i64 0 
 }
@@ -802,18 +802,18 @@ if.else:
 define external fastcc  void @"generic_use.print<0>"(i64  %"lst##0")    {
 entry:
   tail call ccc  void  @putchar(i8  91)  
-  %"1#tmp#5##0" = icmp ne i64 %"lst##0", 0 
-  br i1 %"1#tmp#5##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"lst##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %57 = inttoptr i64 %"lst##0" to i64* 
-  %58 = getelementptr  i64, i64* %57, i64 0 
-  %59 = load  i64, i64* %58 
-  %60 = add   i64 %"lst##0", 8 
-  %61 = inttoptr i64 %60 to i64* 
-  %62 = getelementptr  i64, i64* %61, i64 0 
-  %63 = load  i64, i64* %62 
-  tail call ccc  void  @print_int(i64  %59)  
-  tail call fastcc  void  @"generic_use.print_tail<0>"(i64  %63)  
+  %1 = inttoptr i64 %"lst##0" to i64* 
+  %2 = getelementptr  i64, i64* %1, i64 0 
+  %3 = load  i64, i64* %2 
+  %4 = add   i64 %"lst##0", 8 
+  %5 = inttoptr i64 %4 to i64* 
+  %6 = getelementptr  i64, i64* %5, i64 0 
+  %7 = load  i64, i64* %6 
+  tail call ccc  void  @print_int(i64  %3)  
+  tail call fastcc  void  @"generic_use.print_tail<0>"(i64  %7)  
   tail call ccc  void  @putchar(i8  93)  
   ret void 
 if.else:
@@ -824,19 +824,19 @@ if.else:
 
 define external fastcc  void @"generic_use.print_tail<0>"(i64  %"lst##0")    {
 entry:
-  %"1#tmp#2##0" = icmp ne i64 %"lst##0", 0 
-  br i1 %"1#tmp#2##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"lst##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %64 = inttoptr i64 %"lst##0" to i64* 
-  %65 = getelementptr  i64, i64* %64, i64 0 
-  %66 = load  i64, i64* %65 
-  %67 = add   i64 %"lst##0", 8 
-  %68 = inttoptr i64 %67 to i64* 
-  %69 = getelementptr  i64, i64* %68, i64 0 
-  %70 = load  i64, i64* %69 
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @generic_use.72, i32 0, i32 0) to i64))  
-  tail call ccc  void  @print_int(i64  %66)  
-  musttail call fastcc  void  @"generic_use.print_tail<0>"(i64  %70)  
+  %1 = inttoptr i64 %"lst##0" to i64* 
+  %2 = getelementptr  i64, i64* %1, i64 0 
+  %3 = load  i64, i64* %2 
+  %4 = add   i64 %"lst##0", 8 
+  %5 = inttoptr i64 %4 to i64* 
+  %6 = getelementptr  i64, i64* %5, i64 0 
+  %7 = load  i64, i64* %6 
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @generic_use.1, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %3)  
+  musttail call fastcc  void  @"generic_use.print_tail<0>"(i64  %7)  
   ret void 
 if.else:
   ret void 
@@ -853,35 +853,35 @@ entry:
 
 define external fastcc  i64 @"generic_use.reverse<0>"(i64  %"lst##0")    {
 entry:
-  %"1##result##0" = tail call fastcc  i64  @"generic_use.reverse1<0>"(i64  %"lst##0", i64  0)  
-  ret i64 %"1##result##0" 
+  %0 = tail call fastcc  i64  @"generic_use.reverse1<0>"(i64  %"lst##0", i64  0)  
+  ret i64 %0 
 }
 
 
 define external fastcc  i64 @"generic_use.reverse1<0>"(i64  %"lst##0", i64  %"suffix##0")    {
 entry:
-  %"1#tmp#5##0" = icmp ne i64 %"lst##0", 0 
-  br i1 %"1#tmp#5##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"lst##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %73 = inttoptr i64 %"lst##0" to i64* 
-  %74 = getelementptr  i64, i64* %73, i64 0 
-  %75 = load  i64, i64* %74 
-  %76 = add   i64 %"lst##0", 8 
-  %77 = inttoptr i64 %76 to i64* 
-  %78 = getelementptr  i64, i64* %77, i64 0 
-  %79 = load  i64, i64* %78 
-  %80 = trunc i64 16 to i32  
-  %81 = tail call ccc  i8*  @wybe_malloc(i32  %80)  
-  %82 = ptrtoint i8* %81 to i64 
-  %83 = inttoptr i64 %82 to i64* 
-  %84 = getelementptr  i64, i64* %83, i64 0 
-  store  i64 %75, i64* %84 
-  %85 = add   i64 %82, 8 
-  %86 = inttoptr i64 %85 to i64* 
-  %87 = getelementptr  i64, i64* %86, i64 0 
-  store  i64 %"suffix##0", i64* %87 
-  %"2##result##0" = musttail call fastcc  i64  @"generic_use.reverse1<0>"(i64  %79, i64  %82)  
-  ret i64 %"2##result##0" 
+  %1 = inttoptr i64 %"lst##0" to i64* 
+  %2 = getelementptr  i64, i64* %1, i64 0 
+  %3 = load  i64, i64* %2 
+  %4 = add   i64 %"lst##0", 8 
+  %5 = inttoptr i64 %4 to i64* 
+  %6 = getelementptr  i64, i64* %5, i64 0 
+  %7 = load  i64, i64* %6 
+  %8 = trunc i64 16 to i32  
+  %9 = tail call ccc  i8*  @wybe_malloc(i32  %8)  
+  %10 = ptrtoint i8* %9 to i64 
+  %11 = inttoptr i64 %10 to i64* 
+  %12 = getelementptr  i64, i64* %11, i64 0 
+  store  i64 %3, i64* %12 
+  %13 = add   i64 %10, 8 
+  %14 = inttoptr i64 %13 to i64* 
+  %15 = getelementptr  i64, i64* %14, i64 0 
+  store  i64 %"suffix##0", i64* %15 
+  %16 = musttail call fastcc  i64  @"generic_use.reverse1<0>"(i64  %7, i64  %10)  
+  ret i64 %16 
 if.else:
   ret i64 %"suffix##0" 
 }
@@ -889,19 +889,19 @@ if.else:
 
 define external fastcc  i64 @"generic_use.reverse1<0>[410bae77d3]"(i64  %"lst##0", i64  %"suffix##0")    {
 entry:
-  %"1#tmp#5##0" = icmp ne i64 %"lst##0", 0 
-  br i1 %"1#tmp#5##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"lst##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %88 = add   i64 %"lst##0", 8 
-  %89 = inttoptr i64 %88 to i64* 
-  %90 = getelementptr  i64, i64* %89, i64 0 
-  %91 = load  i64, i64* %90 
-  %92 = add   i64 %"lst##0", 8 
-  %93 = inttoptr i64 %92 to i64* 
-  %94 = getelementptr  i64, i64* %93, i64 0 
-  store  i64 %"suffix##0", i64* %94 
-  %"2##result##0" = musttail call fastcc  i64  @"generic_use.reverse1<0>[410bae77d3]"(i64  %91, i64  %"lst##0")  
-  ret i64 %"2##result##0" 
+  %1 = add   i64 %"lst##0", 8 
+  %2 = inttoptr i64 %1 to i64* 
+  %3 = getelementptr  i64, i64* %2, i64 0 
+  %4 = load  i64, i64* %3 
+  %5 = add   i64 %"lst##0", 8 
+  %6 = inttoptr i64 %5 to i64* 
+  %7 = getelementptr  i64, i64* %6, i64 0 
+  store  i64 %"suffix##0", i64* %7 
+  %8 = musttail call fastcc  i64  @"generic_use.reverse1<0>[410bae77d3]"(i64  %4, i64  %"lst##0")  
+  ret i64 %8 
 if.else:
   ret i64 %"suffix##0" 
 }

@@ -78,8 +78,8 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  void @"proc_factorial.<0>"()    {
 entry:
-  %"1#tmp#0##0" = tail call fastcc  i64  @"proc_factorial.gen#1<0>"(i64  5, i64  1)  
-  tail call ccc  void  @print_int(i64  %"1#tmp#0##0")  
+  %0 = tail call fastcc  i64  @"proc_factorial.gen#1<0>"(i64  5, i64  1)  
+  tail call ccc  void  @print_int(i64  %0)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
@@ -87,20 +87,20 @@ entry:
 
 define external fastcc  i64 @"proc_factorial.factorial<0>"(i64  %"n##0")    {
 entry:
-  %"1#result##1" = tail call fastcc  i64  @"proc_factorial.gen#1<0>"(i64  %"n##0", i64  1)  
-  ret i64 %"1#result##1" 
+  %0 = tail call fastcc  i64  @"proc_factorial.gen#1<0>"(i64  %"n##0", i64  1)  
+  ret i64 %0 
 }
 
 
 define external fastcc  i64 @"proc_factorial.gen#1<0>"(i64  %"n##0", i64  %"result##0")    {
 entry:
-  %"1#tmp#2##0" = icmp sgt i64 %"n##0", 1 
-  br i1 %"1#tmp#2##0", label %if.then, label %if.else 
+  %0 = icmp sgt i64 %"n##0", 1 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %"2#tmp#7##0" = mul   i64 %"n##0", %"result##0" 
-  %"2#tmp#8##0" = sub   i64 %"n##0", 1 
-  %"2#result##1" = musttail call fastcc  i64  @"proc_factorial.gen#1<0>"(i64  %"2#tmp#8##0", i64  %"2#tmp#7##0")  
-  ret i64 %"2#result##1" 
+  %1 = mul   i64 %"n##0", %"result##0" 
+  %2 = sub   i64 %"n##0", 1 
+  %3 = musttail call fastcc  i64  @"proc_factorial.gen#1<0>"(i64  %2, i64  %1)  
+  ret i64 %3 
 if.else:
   ret i64 %"result##0" 
 }
@@ -108,8 +108,8 @@ if.else:
 
 define external fastcc  i64 @"proc_factorial.gen#2<0>"(i64  %"n##0", i64  %"result##0")    {
 entry:
-  %"1#tmp#0##0" = mul   i64 %"n##0", %"result##0" 
-  %"1#tmp#1##0" = sub   i64 %"n##0", 1 
-  %"1#result##2" = musttail call fastcc  i64  @"proc_factorial.gen#1<0>"(i64  %"1#tmp#1##0", i64  %"1#tmp#0##0")  
-  ret i64 %"1#result##2" 
+  %0 = mul   i64 %"n##0", %"result##0" 
+  %1 = sub   i64 %"n##0", 1 
+  %2 = musttail call fastcc  i64  @"proc_factorial.gen#1<0>"(i64  %1, i64  %0)  
+  ret i64 %2 
 }

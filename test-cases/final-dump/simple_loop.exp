@@ -64,11 +64,11 @@ entry:
 
 define external fastcc  void @"simple_loop.gen#1<0>"()    {
 entry:
-  %"1#c##0" = tail call ccc  i8  @read_char()  
-  %"1#tmp#0##0" = icmp ne i8 %"1#c##0", 97 
-  br i1 %"1#tmp#0##0", label %if.then, label %if.else 
+  %0 = tail call ccc  i8  @read_char()  
+  %1 = icmp ne i8 %0, 97 
+  br i1 %1, label %if.then, label %if.else 
 if.then:
-  tail call ccc  void  @putchar(i8  %"1#c##0")  
+  tail call ccc  void  @putchar(i8  %0)  
   musttail call fastcc  void  @"simple_loop.gen#1<0>"()  
   ret void 
 if.else:

@@ -81,8 +81,8 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  i64 @"higher_order_sort.gen#1<0>"(i64  %"<=##0", i64  %"sorted##0", i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"xs##0")    {
 entry:
-  %"1#tmp#4##0" = icmp ne i64 %"tmp#1##0", 0 
-  br i1 %"1#tmp#4##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"tmp#1##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
   %1 = inttoptr i64 %"tmp#1##0" to i64* 
   %2 = getelementptr  i64, i64* %1, i64 0 
@@ -94,8 +94,8 @@ if.then:
   %8 = alloca i64 
    call fastcc  void  @"higher_order_sort.insert<0>"(i64  %"<=##0", i64  %3, i64  %"sorted##0", i64*  %8)  
   %9 = load  i64, i64* %8 
-  %"2#sorted##2" = musttail call fastcc  i64  @"higher_order_sort.gen#1<0>"(i64  %"<=##0", i64  %9, i64  %"tmp#0##0", i64  %7, i64  %"xs##0")  
-  ret i64 %"2#sorted##2" 
+  %10 = musttail call fastcc  i64  @"higher_order_sort.gen#1<0>"(i64  %"<=##0", i64  %9, i64  %"tmp#0##0", i64  %7, i64  %"xs##0")  
+  ret i64 %10 
 if.else:
   ret i64 %"sorted##0" 
 }
@@ -103,65 +103,65 @@ if.else:
 
 define external fastcc  void @"higher_order_sort.insert<0>"(i64  %"<=##0", i64  %"x##0", i64  %"xs##0", i64*  %"xs##1")    {
 entry:
-  %"1#tmp#7##0" = icmp ne i64 %"xs##0", 0 
-  br i1 %"1#tmp#7##0", label %if.then, label %if.else 
+  %0 = icmp ne i64 %"xs##0", 0 
+  br i1 %0, label %if.then, label %if.else 
 if.then:
-  %10 = inttoptr i64 %"xs##0" to i64* 
-  %11 = getelementptr  i64, i64* %10, i64 0 
-  %12 = load  i64, i64* %11 
-  %13 = add   i64 %"xs##0", 8 
-  %14 = inttoptr i64 %13 to i64* 
-  %15 = getelementptr  i64, i64* %14, i64 0 
-  %16 = load  i64, i64* %15 
-  %17 = inttoptr i64 %"<=##0" to i64* 
-  %18 = load  i64, i64* %17 
-  %19 = inttoptr i64 %18 to i64 (i64, i64, i64)* 
-  %"2#tmp#4##0" = tail call fastcc  i64  %19(i64  %"<=##0", i64  %"x##0", i64  %12)  
-  %20 = trunc i64 %"2#tmp#4##0" to i1  
-  br i1 %20, label %if.then1, label %if.else1 
+  %1 = inttoptr i64 %"xs##0" to i64* 
+  %2 = getelementptr  i64, i64* %1, i64 0 
+  %3 = load  i64, i64* %2 
+  %4 = add   i64 %"xs##0", 8 
+  %5 = inttoptr i64 %4 to i64* 
+  %6 = getelementptr  i64, i64* %5, i64 0 
+  %7 = load  i64, i64* %6 
+  %8 = inttoptr i64 %"<=##0" to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = inttoptr i64 %9 to i64 (i64, i64, i64)* 
+  %11 = tail call fastcc  i64  %10(i64  %"<=##0", i64  %"x##0", i64  %3)  
+  %12 = trunc i64 %11 to i1  
+  br i1 %12, label %if.then1, label %if.else1 
 if.else:
-  %36 = trunc i64 16 to i32  
-  %37 = tail call ccc  i8*  @wybe_malloc(i32  %36)  
-  %38 = ptrtoint i8* %37 to i64 
-  %39 = inttoptr i64 %38 to i64* 
-  %40 = getelementptr  i64, i64* %39, i64 0 
-  store  i64 %"x##0", i64* %40 
-  %41 = add   i64 %38, 8 
-  %42 = inttoptr i64 %41 to i64* 
-  %43 = getelementptr  i64, i64* %42, i64 0 
-  store  i64 0, i64* %43 
-  store  i64 %38, i64* %"xs##1" 
+  %28 = trunc i64 16 to i32  
+  %29 = tail call ccc  i8*  @wybe_malloc(i32  %28)  
+  %30 = ptrtoint i8* %29 to i64 
+  %31 = inttoptr i64 %30 to i64* 
+  %32 = getelementptr  i64, i64* %31, i64 0 
+  store  i64 %"x##0", i64* %32 
+  %33 = add   i64 %30, 8 
+  %34 = inttoptr i64 %33 to i64* 
+  %35 = getelementptr  i64, i64* %34, i64 0 
+  store  i64 0, i64* %35 
+  store  i64 %30, i64* %"xs##1" 
   ret void 
 if.then1:
+  %13 = trunc i64 16 to i32  
+  %14 = tail call ccc  i8*  @wybe_malloc(i32  %13)  
+  %15 = ptrtoint i8* %14 to i64 
+  %16 = inttoptr i64 %15 to i64* 
+  %17 = getelementptr  i64, i64* %16, i64 0 
+  store  i64 %"x##0", i64* %17 
+  %18 = add   i64 %15, 8 
+  %19 = inttoptr i64 %18 to i64* 
+  %20 = getelementptr  i64, i64* %19, i64 0 
+  store  i64 %"xs##0", i64* %20 
+  store  i64 %15, i64* %"xs##1" 
+  ret void 
+if.else1:
   %21 = trunc i64 16 to i32  
   %22 = tail call ccc  i8*  @wybe_malloc(i32  %21)  
   %23 = ptrtoint i8* %22 to i64 
   %24 = inttoptr i64 %23 to i64* 
   %25 = getelementptr  i64, i64* %24, i64 0 
-  store  i64 %"x##0", i64* %25 
+  store  i64 %3, i64* %25 
   %26 = add   i64 %23, 8 
   %27 = inttoptr i64 %26 to i64* 
-  %28 = getelementptr  i64, i64* %27, i64 0 
-  store  i64 %"xs##0", i64* %28 
   store  i64 %23, i64* %"xs##1" 
-  ret void 
-if.else1:
-  %29 = trunc i64 16 to i32  
-  %30 = tail call ccc  i8*  @wybe_malloc(i32  %29)  
-  %31 = ptrtoint i8* %30 to i64 
-  %32 = inttoptr i64 %31 to i64* 
-  %33 = getelementptr  i64, i64* %32, i64 0 
-  store  i64 %12, i64* %33 
-  %34 = add   i64 %31, 8 
-  %35 = inttoptr i64 %34 to i64* 
-  store  i64 %31, i64* %"xs##1" 
-  musttail call fastcc  void  @"higher_order_sort.insert<0>"(i64  %"<=##0", i64  %"x##0", i64  %16, i64*  %35)  
+  musttail call fastcc  void  @"higher_order_sort.insert<0>"(i64  %"<=##0", i64  %"x##0", i64  %7, i64*  %27)  
   ret void 
 }
 
 
 define external fastcc  i64 @"higher_order_sort.sort<0>"(i64  %"<=##0", i64  %"xs##0")    {
 entry:
-  %"1#sorted##1" = tail call fastcc  i64  @"higher_order_sort.gen#1<0>"(i64  %"<=##0", i64  0, i64  0, i64  %"xs##0", i64  %"xs##0")  
-  ret i64 %"1#sorted##1" 
+  %0 = tail call fastcc  i64  @"higher_order_sort.gen#1<0>"(i64  %"<=##0", i64  0, i64  0, i64  %"xs##0", i64  %"xs##0")  
+  ret i64 %0 
 }

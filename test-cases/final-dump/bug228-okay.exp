@@ -75,11 +75,11 @@ entry:
 
 define external fastcc  {i64, i64} @"bug228-okay.bar<0>"()    {
 entry:
-  %1 = load  i64, i64* @"resource#bug228-okay.res" 
-  store  i64 %1, i64* @"resource#bug228-okay.res" 
-  %2 = insertvalue {i64, i64} undef, i64 1, 0 
-  %3 = insertvalue {i64, i64} %2, i64 2, 1 
-  ret {i64, i64} %3 
+  %0 = load  i64, i64* @"resource#bug228-okay.res" 
+  store  i64 %0, i64* @"resource#bug228-okay.res" 
+  %1 = insertvalue {i64, i64} undef, i64 1, 0 
+  %2 = insertvalue {i64, i64} %1, i64 2, 1 
+  ret {i64, i64} %2 
 }
 
 

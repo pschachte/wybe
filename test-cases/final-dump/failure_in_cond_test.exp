@@ -53,7 +53,7 @@ entry:
 
 define external fastcc  {i64, i1} @"failure_in_cond_test.foo<0>"()    {
 entry:
-  %1 = insertvalue {i64, i1} undef, i64 1, 0 
-  %2 = insertvalue {i64, i1} %1, i1 1, 1 
-  ret {i64, i1} %2 
+  %0 = insertvalue {i64, i1} undef, i64 1, 0 
+  %1 = insertvalue {i64, i1} %0, i1 1, 1 
+  ret {i64, i1} %1 
 }
