@@ -43,7 +43,7 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm alloc(16:wybe.int, ?tmp#31##0:type_list.intlist) @type_list:nn:nn
     foreign lpvm mutate(~tmp#31##0:type_list.intlist, ?tmp#32##0:type_list.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 100:wybe.int) @type_list:nn:nn
     foreign lpvm mutate(~tmp#32##0:type_list.intlist, ?tmp#33##0:type_list.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#28##0:type_list.intlist) @type_list:nn:nn
-    type_list.,,<0>[410bae77d3](~tmp#23##0:type_list.intlist, ~tmp#33##0:type_list.intlist, ?tmp#8##0:type_list.intlist) #7 @type_list:nn:nn
+    type_list.,,<0>[410bae77d3](~tmp#23##0:type_list.intlist, ~tmp#33##0:type_list.intlist, outByReference tmp#8##0:type_list.intlist) #7 @type_list:nn:nn
     type_list.length<0>(~tmp#8##0:type_list.intlist, ?tmp#7##0:wybe.int) #8 @type_list:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#35##0:wybe.phantom) @int:nn:nn
     foreign c print_int(~tmp#7##0:wybe.int, ~tmp#35##0:wybe.phantom, ?tmp#36##0:wybe.phantom) @int:nn:nn
@@ -52,7 +52,7 @@ module top-level code > public {impure} (0 calls)
 
 ,, > public (2 calls)
 0: type_list.,,<0>[410bae77d3]
-,,(x##0:type_list.intlist, y##0:type_list.intlist, ?#result##0:type_list.intlist)<{}; {}>:
+,,(x##0:type_list.intlist, y##0:type_list.intlist, outByReference #result##0:type_list.intlist)<{}; {}>:
   AliasPairs: [(#result##0,y##0)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(1,(type_list.,,<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -64,10 +64,10 @@ module top-level code > public {impure} (0 calls)
     1:
         foreign lpvm access(x##0:type_list.intlist, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @type_list:nn:nn
         foreign lpvm access(~x##0:type_list.intlist, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:type_list.intlist) @type_list:nn:nn
-        type_list.,,<0>(~t##0:type_list.intlist, ~y##0:type_list.intlist, ?tmp#2##0:type_list.intlist) #1 @type_list:nn:nn
         foreign lpvm alloc(16:wybe.int, ?tmp#8##0:type_list.intlist) @type_list:nn:nn
         foreign lpvm mutate(~tmp#8##0:type_list.intlist, ?tmp#9##0:type_list.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h##0:wybe.int) @type_list:nn:nn
-        foreign lpvm mutate(~tmp#9##0:type_list.intlist, ?#result##0:type_list.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:type_list.intlist) @type_list:nn:nn
+        type_list.,,<0>(~t##0:type_list.intlist, ~y##0:type_list.intlist, outByReference tmp#2##0:type_list.intlist) #1 @type_list:nn:nn
+        foreign lpvm mutate(~tmp#9##0:type_list.intlist, ?#result##0:type_list.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~takeReference tmp#2##0:type_list.intlist) @type_list:nn:nn
 
  [410bae77d3] [NonAliasedParam 0] :
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
@@ -77,8 +77,8 @@ module top-level code > public {impure} (0 calls)
 
     1:
         foreign lpvm access(x##0:type_list.intlist, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:type_list.intlist) @type_list:nn:nn
-        type_list.,,<0>[410bae77d3](~t##0:type_list.intlist, ~y##0:type_list.intlist, ?tmp#2##0:type_list.intlist) #1 @type_list:nn:nn
-        foreign lpvm mutate(~x##0:type_list.intlist, ?#result##0:type_list.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:type_list.intlist) @type_list:nn:nn
+        type_list.,,<0>[410bae77d3](~t##0:type_list.intlist, ~y##0:type_list.intlist, outByReference tmp#2##0:type_list.intlist) #1 @type_list:nn:nn
+        foreign lpvm mutate(~x##0:type_list.intlist, ?#result##0:type_list.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~takeReference tmp#2##0:type_list.intlist) @type_list:nn:nn
 
 
 
@@ -167,59 +167,61 @@ entry:
   %39 = inttoptr i64 %38 to i64* 
   %40 = getelementptr  i64, i64* %39, i64 0 
   store  i64 %27, i64* %40 
-  %"1#tmp#8##0" = tail call fastcc  i64  @"type_list.,,<0>[410bae77d3]"(i64  %19, i64  %35)  
-  %"1#tmp#7##0" = tail call fastcc  i64  @"type_list.length<0>"(i64  %"1#tmp#8##0")  
+  %41 = alloca i64 
+   call fastcc  void  @"type_list.,,<0>[410bae77d3]"(i64  %19, i64  %35, i64*  %41)  
+  %42 = load  i64, i64* %41 
+  %"1#tmp#7##0" = tail call fastcc  i64  @"type_list.length<0>"(i64  %42)  
   tail call ccc  void  @print_int(i64  %"1#tmp#7##0")  
   ret void 
 }
 
 
-define external fastcc  i64 @"type_list.,,<0>"(i64  %"x##0", i64  %"y##0")    {
+define external fastcc  void @"type_list.,,<0>"(i64  %"x##0", i64  %"y##0", i64*  %"#result##0")    {
 entry:
   %"1#tmp#5##0" = icmp ne i64 %"x##0", 0 
   br i1 %"1#tmp#5##0", label %if.then, label %if.else 
 if.then:
-  %41 = inttoptr i64 %"x##0" to i64* 
-  %42 = getelementptr  i64, i64* %41, i64 0 
-  %43 = load  i64, i64* %42 
-  %44 = add   i64 %"x##0", 8 
-  %45 = inttoptr i64 %44 to i64* 
-  %46 = getelementptr  i64, i64* %45, i64 0 
-  %47 = load  i64, i64* %46 
-  %"2#tmp#2##0" = tail call fastcc  i64  @"type_list.,,<0>"(i64  %47, i64  %"y##0")  
-  %48 = trunc i64 16 to i32  
-  %49 = tail call ccc  i8*  @wybe_malloc(i32  %48)  
-  %50 = ptrtoint i8* %49 to i64 
-  %51 = inttoptr i64 %50 to i64* 
-  %52 = getelementptr  i64, i64* %51, i64 0 
-  store  i64 %43, i64* %52 
-  %53 = add   i64 %50, 8 
-  %54 = inttoptr i64 %53 to i64* 
-  %55 = getelementptr  i64, i64* %54, i64 0 
-  store  i64 %"2#tmp#2##0", i64* %55 
-  ret i64 %50 
+  %43 = inttoptr i64 %"x##0" to i64* 
+  %44 = getelementptr  i64, i64* %43, i64 0 
+  %45 = load  i64, i64* %44 
+  %46 = add   i64 %"x##0", 8 
+  %47 = inttoptr i64 %46 to i64* 
+  %48 = getelementptr  i64, i64* %47, i64 0 
+  %49 = load  i64, i64* %48 
+  %50 = trunc i64 16 to i32  
+  %51 = tail call ccc  i8*  @wybe_malloc(i32  %50)  
+  %52 = ptrtoint i8* %51 to i64 
+  %53 = inttoptr i64 %52 to i64* 
+  %54 = getelementptr  i64, i64* %53, i64 0 
+  store  i64 %45, i64* %54 
+  %55 = add   i64 %52, 8 
+  %56 = inttoptr i64 %55 to i64* 
+  store  i64 %52, i64* %"#result##0" 
+  musttail call fastcc  void  @"type_list.,,<0>"(i64  %49, i64  %"y##0", i64*  %56)  
+  ret void 
 if.else:
-  ret i64 %"y##0" 
+  store  i64 %"y##0", i64* %"#result##0" 
+  ret void 
 }
 
 
-define external fastcc  i64 @"type_list.,,<0>[410bae77d3]"(i64  %"x##0", i64  %"y##0")    {
+define external fastcc  void @"type_list.,,<0>[410bae77d3]"(i64  %"x##0", i64  %"y##0", i64*  %"#result##0")    {
 entry:
   %"1#tmp#5##0" = icmp ne i64 %"x##0", 0 
   br i1 %"1#tmp#5##0", label %if.then, label %if.else 
 if.then:
-  %56 = add   i64 %"x##0", 8 
-  %57 = inttoptr i64 %56 to i64* 
-  %58 = getelementptr  i64, i64* %57, i64 0 
-  %59 = load  i64, i64* %58 
-  %"2#tmp#2##0" = tail call fastcc  i64  @"type_list.,,<0>[410bae77d3]"(i64  %59, i64  %"y##0")  
-  %60 = add   i64 %"x##0", 8 
-  %61 = inttoptr i64 %60 to i64* 
-  %62 = getelementptr  i64, i64* %61, i64 0 
-  store  i64 %"2#tmp#2##0", i64* %62 
-  ret i64 %"x##0" 
+  %57 = add   i64 %"x##0", 8 
+  %58 = inttoptr i64 %57 to i64* 
+  %59 = getelementptr  i64, i64* %58, i64 0 
+  %60 = load  i64, i64* %59 
+  %61 = add   i64 %"x##0", 8 
+  %62 = inttoptr i64 %61 to i64* 
+  store  i64 %"x##0", i64* %"#result##0" 
+  musttail call fastcc  void  @"type_list.,,<0>[410bae77d3]"(i64  %60, i64  %"y##0", i64*  %62)  
+  ret void 
 if.else:
-  ret i64 %"y##0" 
+  store  i64 %"y##0", i64* %"#result##0" 
+  ret void 
 }
 
 
@@ -441,7 +443,7 @@ if.then1:
 if.else1:
   ret i1 0 
 if.then2:
-  %"6##success##0" = tail call fastcc  i1  @"type_list.intlist.=<0>"(i64  %7, i64  %14)  
+  %"6##success##0" = musttail call fastcc  i1  @"type_list.intlist.=<0>"(i64  %7, i64  %14)  
   ret i1 %"6##success##0" 
 if.else2:
   ret i1 0 

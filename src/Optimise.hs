@@ -289,7 +289,6 @@ killFlows prim oldKilled =
     (oldKilled `Set.union` USet.toSet Set.empty outs) `USet.subtractUnivSet` ins
   where GlobalFlows ins outs = snd $ primArgs prim
 
-
 -- |Log a message, if we are logging optimisation activity.
 logOptimise :: String -> Compiler ()
 logOptimise = logMsg Optimise

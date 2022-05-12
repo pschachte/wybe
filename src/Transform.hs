@@ -87,7 +87,7 @@ transformProcBody procDef speczVersion = do
     logTransform $ "callSiteMap: " ++ show callSiteMap
 
     let outVarSubs = primProtoParams proto
-                    |> List.filter ((==FlowOut) . primParamFlow)
+                    |> List.filter (isOutputFlow . primParamFlow)
                     |> List.map primParamName |> List.map (\x -> (x,x))
                     |> Map.fromList
     let tmp = procTmpCount procDef

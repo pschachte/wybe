@@ -103,7 +103,7 @@ define external fastcc  void @"global_flow_inference.inout<0>"(i1  %"b##0")    {
 entry:
   br i1 %"b##0", label %if.then, label %if.else 
 if.then:
-  tail call fastcc  void  @"global_flow_inference.only_out<0>"(i1  1)  
+  musttail call fastcc  void  @"global_flow_inference.only_out<0>"(i1  1)  
   ret void 
 if.else:
   ret void 
@@ -124,14 +124,14 @@ if.else:
 
 define external fastcc  void @"global_flow_inference.rec_out_only1<0>"()    {
 entry:
-  tail call fastcc  void  @"global_flow_inference.rec_out_only2<0>"()  
+  musttail call fastcc  void  @"global_flow_inference.rec_out_only2<0>"()  
   ret void 
 }
 
 
 define external fastcc  void @"global_flow_inference.rec_out_only2<0>"()    {
 entry:
-  tail call fastcc  void  @"global_flow_inference.rec_out_only1<0>"()  
+  musttail call fastcc  void  @"global_flow_inference.rec_out_only1<0>"()  
   ret void 
 }
 

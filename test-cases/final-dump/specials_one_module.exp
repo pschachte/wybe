@@ -170,6 +170,6 @@ entry:
 
 define external fastcc  void @"specials_one_module.show_location<0>"(i64  %"call_source_location##0")    {
 entry:
-  tail call fastcc  void  @"specials_one_module.indirect_call_location<0>"(i64  %"call_source_location##0")  
+  musttail call fastcc  void  @"specials_one_module.indirect_call_location<0>"(i64  %"call_source_location##0")  
   ret void 
 }

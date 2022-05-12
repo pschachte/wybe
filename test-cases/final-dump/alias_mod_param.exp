@@ -97,7 +97,7 @@ entry:
   %18 = getelementptr  i64, i64* %17, i64 0 
   store  i64 1111, i64* %18 
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_mod_param.20, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"position.printPosition<0>"(i64  %13)  
+  musttail call fastcc  void  @"position.printPosition<0>"(i64  %13)  
   ret void 
 }
 --------------------------------------------------

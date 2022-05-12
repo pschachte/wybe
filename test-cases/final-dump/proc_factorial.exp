@@ -99,7 +99,7 @@ entry:
 if.then:
   %"2#tmp#7##0" = mul   i64 %"n##0", %"result##0" 
   %"2#tmp#8##0" = sub   i64 %"n##0", 1 
-  %"2#result##1" = tail call fastcc  i64  @"proc_factorial.gen#1<0>"(i64  %"2#tmp#8##0", i64  %"2#tmp#7##0")  
+  %"2#result##1" = musttail call fastcc  i64  @"proc_factorial.gen#1<0>"(i64  %"2#tmp#8##0", i64  %"2#tmp#7##0")  
   ret i64 %"2#result##1" 
 if.else:
   ret i64 %"result##0" 
@@ -110,6 +110,6 @@ define external fastcc  i64 @"proc_factorial.gen#2<0>"(i64  %"n##0", i64  %"resu
 entry:
   %"1#tmp#0##0" = mul   i64 %"n##0", %"result##0" 
   %"1#tmp#1##0" = sub   i64 %"n##0", 1 
-  %"1#result##2" = tail call fastcc  i64  @"proc_factorial.gen#1<0>"(i64  %"1#tmp#1##0", i64  %"1#tmp#0##0")  
+  %"1#result##2" = musttail call fastcc  i64  @"proc_factorial.gen#1<0>"(i64  %"1#tmp#1##0", i64  %"1#tmp#0##0")  
   ret i64 %"1#result##2" 
 }

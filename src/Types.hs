@@ -470,6 +470,48 @@ typeErrorMessage (ReasonUnnreachable name pos) =
         "In " ++ showProcName name ++ ", this statement is unreachable"
 
 
+-- | Get the position from a type error
+typeErrorPos :: TypeError -> OptPos
+typeErrorPos (ReasonParam _ _ pos) = pos
+typeErrorPos (ReasonOutputUndef _ _ pos) = pos
+typeErrorPos (ReasonUndef _ _ pos) = pos
+typeErrorPos (ReasonArgType _ _ _ pos) = pos
+typeErrorPos (ReasonCond pos) = pos
+typeErrorPos (ReasonArgFlow _ _ pos) = pos
+typeErrorPos (ReasonUndefinedFlow _ pos) = pos
+typeErrorPos (ReasonOverload _ pos) = pos
+typeErrorPos (ReasonWarnMultipleMatches _ _ pos) = pos
+typeErrorPos (ReasonAmbig _ pos _) = pos
+typeErrorPos (ReasonArity _ _ pos _ _) = pos
+typeErrorPos (ReasonUndeclared _ pos) = pos
+typeErrorPos (ReasonEqual _ _ pos) = pos
+typeErrorPos (ReasonHigher _ _ pos) = pos
+typeErrorPos (ReasonPartialFlow _ _ _ _ pos) = pos
+typeErrorPos (ReasonDeterminism _ _ _ pos) = pos
+typeErrorPos (ReasonWeakDetism _ _ _ pos) = pos
+typeErrorPos (ReasonPurity _ _ _ pos) = pos
+typeErrorPos (ReasonLooksPure _ _ pos) = pos
+typeErrorPos (ReasonForeignLanguage _ _ pos) = pos
+typeErrorPos (ReasonForeignArgType _ _ pos) = pos
+typeErrorPos (ReasonForeignArity _ _ _ pos) = pos
+typeErrorPos (ReasonBadForeign _ _ pos) = pos
+typeErrorPos (ReasonBadMove _ pos) = pos
+typeErrorPos (ReasonResourceDef _ _ pos) = pos
+typeErrorPos (ReasonResourceUndef _ _ pos) = pos
+typeErrorPos (ReasonResourceUnavail _ _ pos) = pos
+typeErrorPos (ReasonResourceOutOfScope _ _ pos) = pos
+typeErrorPos (ReasonUseType _ pos) = pos
+typeErrorPos (ReasonWrongFamily _ _ _ pos) = pos
+typeErrorPos (ReasonIncompatible _ _ _ pos) = pos
+typeErrorPos (ReasonWrongOutput _ _ _ pos) = pos
+typeErrorPos (ReasonForeignArgRep _ _ _ _ pos) = pos
+typeErrorPos (ReasonBadCast _ _ _ pos) = pos
+typeErrorPos (ReasonBadConstraint _ _ _ _ _ pos) = pos
+typeErrorPos ReasonShouldnt = Nothing
+typeErrorPos (ReasonActuallyPure _ _ pos) = pos
+typeErrorPos (ReasonUnnreachable _ pos) = pos
+
+
 ----------------------------------------------------------------
 --                       The Typed Monad
 ----------------------------------------------------------------
@@ -483,15 +525,16 @@ type Typed = StateT Typing Compiler
 --   records bindings of type variables, and contains a counter for generating
 --   new type variables.
 data Typing = Typing {
-                  typingDict::VarDict,                -- ^variable types
-                  tvarDict::Map TypeVarName TypeSpec, -- ^type variable types
-                  typeVarCounter::Int,                -- for renumbering tvars
-                  typingErrs::[TypeError]             -- type errors seen
-                  } deriving (Eq, Ord)
+                  typingDict::VarDict                -- ^variable types
+                , tvarDict::Map TypeVarName TypeSpec -- ^type variable types
+                , typeVarCounter::Int                -- ^for renumbering tvars
+                , typingErrs::[TypeError]            -- ^type errors seen
+                , tyTmpCtr::Int                      -- ^temp variable counter
+                } deriving (Eq, Ord)
 
 
 instance Show Typing where
-  show (Typing dict tvardict _ errs) =
+  show (Typing dict tvardict _ errs _) =
     "Typing " ++ showVarMap dict ++ "; " ++ showVarMap (Map.mapKeys show tvardict)
     ++ if List.null errs
        then " (with no errors)"
@@ -527,7 +570,19 @@ bindTypeVariables _ _ = return ()
 
 -- |The empty typing, assigning every var the type AnyType.
 initTyping :: Typing
-initTyping = Typing Map.empty Map.empty 0 []
+initTyping = Typing Map.empty Map.empty 0 [] $ shouldnt "unititialised counter"
+
+
+-- | Apply the monadic action with the given temp counter, returning the 
+-- action's value and the new tempt counter
+withCounter :: Int -> Typed m -> Typed (Int, m)
+withCounter tmpCtr action = do
+    oldTmpCtr <- gets tyTmpCtr
+    modify $ \s -> s{tyTmpCtr=tmpCtr}
+    m <- action
+    tmpCtr' <- gets tyTmpCtr
+    modify $ \s -> s{tyTmpCtr=oldTmpCtr}
+    return (tmpCtr', m)
 
 
 -- |Does the current typing have no errors?
@@ -576,26 +631,11 @@ constrainVarType reason var ty = do
 
 constrainType :: TypeError -> (TypeRepresentation -> Bool) -> TypeSpec -> Typed ()
 constrainType reason constraint ty = do
-    ty' <- lift (lookupType "type constraint" Nothing ty) >>= ultimateType
+    ty' <- lift (lookupType "type constraint" (typeErrorPos reason) ty) 
+        >>= ultimateType
     typeRep <- trustFromJust "constrainType"
            <$> lift (lookupTypeRepresentation ty')
     reportErrorUnless reason (constraint typeRep)
-
-
--- |Unify the types of two variables; ie, constrain them to have the same types.
-unifyVarTypes :: OptPos -> VarName -> VarName -> Typed ()
-unifyVarTypes pos v1 v2 = do
-    t1 <- varType v1
-    t2 <- varType v2
-    ty <- unifyTypes
-          (ReasonEqual (Var v1 ParamIn Ordinary) (Var v2 ParamOut Ordinary) pos)
-          t1 t2
-    ty' <- case ty of
-        AnyType -> -- two unconstrained vars:  must create type var
-            freshTypeVar
-        _ -> return ty
-    setVarType v1 ty'
-    setVarType v2 ty'
 
 
 -- |Unify two types, returning a type that describes all instances of both input
@@ -603,8 +643,9 @@ unifyVarTypes pos v1 v2 = do
 -- the error.  Unifying types may have the effect of binding variables.
 unifyTypes :: TypeError -> TypeSpec -> TypeSpec -> Typed TypeSpec
 unifyTypes reason t1 t2 = do
-    t1' <- lift (lookupType "proc declaration" Nothing t1) >>= ultimateType
-    t2' <- lift (lookupType "proc declaration" Nothing t2) >>= ultimateType
+    let pos = typeErrorPos reason
+    t1' <- lift (lookupType "proc declaration" pos t1) >>= ultimateType
+    t2' <- lift (lookupType "proc declaration" pos t2) >>= ultimateType
     logTyped $ "Unifying types " ++ show t1 ++ " (-> " ++ show t1'
                ++ ") and " ++ show t2 ++ " (-> " ++ show t2' ++ ")"
     t <- unifyTypes' reason t1' t2'
@@ -1097,8 +1138,9 @@ typecheckProcDecl' m pdef = do
                                 $ initBindingState pdef
                                   $ Set.map resourceFlowRes resources
                     logTyped $ "bound vars: " ++ show bound
-                    (def',assigned,tmpCount') <-
-                        modecheckStmts m name pos bound detism tmpCount True def
+                    (tmpCount', (def',assigned) )
+                        <- withCounter tmpCount 
+                            $ modecheckStmts m name pos bound detism True def
                     logTyped $ "Mode checked body   : " ++ show def'
                     logTyped $ "Vars defined by body: " ++ show assigned
                     logTyped $ "Output parameters   : "
@@ -1862,25 +1904,23 @@ infoDescription info = show info
 --  This code threads a set of assigned variables through, which starts as
 --  the set of in parameter names.
 modecheckStmts :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism
-               -> Int -> Bool -> [Placed Stmt]
-               -> Typed ([Placed Stmt],BindingState,Int)
-modecheckStmts _ name pos assigned detism tmpCount final [] = do
+               -> Bool -> [Placed Stmt] -> Typed ([Placed Stmt],BindingState)
+modecheckStmts _ name pos assigned detism final [] = do
     logTyped $ "Mode check end of " ++ show detism ++ " proc '" ++ name ++ "'"
     when final
         $ typeErrors $ detismCheck name pos detism $ bindingDetism assigned
-    return ([],assigned,tmpCount)
-modecheckStmts m name pos assigned detism tmpCount final (pstmt:pstmts) = do
+    return ([],assigned)
+modecheckStmts m name pos assigned detism final (pstmt:pstmts) = do
     logTyped $ "Mode check stmt " ++ showStmt 16 (content pstmt)
     when (bindingDetism assigned == Terminal)
         $ typeErrors [ReasonUnnreachable name (place pstmt)]
     let final' = final && List.null pstmts
-    (pstmt',assigned',tmpCount') <-
-        placedApply (modecheckStmt m name pos assigned detism tmpCount final')
-            pstmt
+    (pstmt',assigned') <-
+        placedApply (modecheckStmt m name pos assigned detism final') pstmt
     logTyped $ "Now assigned = " ++ show assigned'
-    (pstmts',assigned'',tmpCount'')
-        <- modecheckStmts m name pos assigned' detism tmpCount' final pstmts
-    return (pstmt'++pstmts',assigned'',tmpCount'')
+    (pstmts',assigned'')
+        <- modecheckStmts m name pos assigned' detism final pstmts
+    return (pstmt'++pstmts',assigned'')
 
 
 -- |Mode check a single statement, returning a list of moded statements, plus a
@@ -1907,15 +1947,14 @@ modecheckStmts m name pos assigned detism tmpCount final (pstmt:pstmts) = do
 --    the first that matches.
 
 modecheckStmt :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism
-              -> Int -> Bool -> Stmt -> OptPos
-              -> Typed ([Placed Stmt],BindingState,Int)
-modecheckStmt m name defPos assigned detism tmpCount final
+              -> Bool -> Stmt -> OptPos -> Typed ([Placed Stmt],BindingState)
+modecheckStmt m name defPos assigned detism final
     stmt@(ProcCall (First cmod cname pid) d resourceful args) pos = do
     logTyped $ "Mode checking call   : " ++ show stmt
     logTyped $ "    with assigned    : " ++ show assigned
 
     -- Find arg types and expand type variables
-    (args', tmpCount') <- modeCheckExps m name defPos assigned detism tmpCount args
+    args' <- modeCheckExps m name defPos assigned detism args
     assignedVars <- gets (Map.keysSet . typingDict)
     callInfos <- callInfos assignedVars (maybePlace stmt pos)
                 <&> typingInfos
@@ -1924,7 +1963,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
     logTyped $ "    actual types     : " ++ show actualTypes
     let actualModes = List.map (expMode assigned) args'
     logTyped $ "    actual modes     : " ++ show actualModes
-    checkFlowErrors False False cname pos actualModes ([],assigned,tmpCount') $ do
+    checkFlowErrors False False cname pos actualModes ([],assigned) $ do
         typeMatches <- catOKs <$> mapM
                     (matchTypes name cname pos resourceful actualTypes (sel1 <$> actualModes))
                     callInfos
@@ -1941,39 +1980,39 @@ modecheckStmt m name defPos assigned detism tmpCount final
                 put typing
                 unless (List.null rest) $
                     typeError $ ReasonWarnMultipleMatches match (fst <$> rest) pos
-                finaliseCall m name defPos assigned detism resourceful tmpCount'
+                finaliseCall m name defPos assigned detism resourceful
                             final pos args' match stmt'
             ([], (match,typing):rest) -> do
                 put typing
                 unless (List.null rest) $
                     typeError $ ReasonWarnMultipleMatches match (fst <$> rest) pos
-                finaliseCall m name defPos assigned detism resourceful tmpCount'
+                finaliseCall m name defPos assigned detism resourceful
                             final pos args' match stmt'
             ([],[]) -> do
                 case (cmod, cname, actualModes, args) of
                     -- Special cases to handle = as assignment when one argument is
                     -- known to be defined and the other is an output or unknown.
                     ([], "=", [(ParamIn,True,_),(ParamOut,_,_)],[arg1,arg2]) ->
-                        modecheckStmt m name defPos assigned detism tmpCount final
+                        modecheckStmt m name defPos assigned detism final
                             (ForeignCall "llvm" "move" [] [arg1, arg2]) pos
                     ([], "=", [(ParamOut,_,_),(ParamIn,True,_)],[arg1,arg2]) ->
-                        modecheckStmt m name defPos assigned detism tmpCount final
+                        modecheckStmt m name defPos assigned detism final
                             (ForeignCall "llvm" "move" [] [arg2, arg1]) pos
                     _ -> do
                         logTyped $ "Mode errors in call"
                         typeError $ ReasonUndefinedFlow cname pos
-                        return ([],assigned,tmpCount)
-modecheckStmt m name defPos assigned detism tmpCount final
+                        return ([],assigned)
+modecheckStmt m name defPos assigned detism final
   stmt@(ProcCall (Higher fn) d resourceful args) pos = do
     logTyped $ "Mode checking higher : " ++ show stmt
     logTyped $ "    with assigned    : " ++ show assigned
-    (fnArgs',tmpCount') <- modeCheckExps m name defPos assigned detism tmpCount (fn:args)
+    fnArgs' <- modeCheckExps m name defPos assigned detism (fn:args)
     actualTypes@(fnTy:_) <- mapM (expType >=> ultimateType) fnArgs'
     logTyped $ "    actual types     : " ++ show actualTypes
     let actualModes = List.map (expMode assigned) fnArgs'
     logTyped $ "    actual modes     : " ++ show actualModes
     checkFlowErrors False True (show $ innerExp $ content fn)
-                    pos actualModes ([],assigned,tmpCount')
+                    pos actualModes ([],assigned)
       $ do
         let typeflows = List.zipWith TypeFlow actualTypes
                       $ sel1 <$> actualModes
@@ -1987,17 +2026,17 @@ modecheckStmt m name defPos assigned detism tmpCount final
                                     (pexpListOutputs fnArgs') assigned
                 return ([maybePlace (ProcCall (Higher fn')
                                         detism' resourceful args') pos],
-                        assigned', tmpCount')
+                        assigned')
             _ -> shouldnt $ "modecheckStmt on higher typed " ++ show fnTy
-modecheckStmt m name defPos assigned detism tmpCount final
+modecheckStmt m name defPos assigned detism final
     stmt@(ForeignCall lang cname flags args) pos = do
     logTyped $ "Mode checking foreign call " ++ show stmt
     logTyped $ "    with assigned " ++ show assigned
-    (args',tmpCount') <- modeCheckExps m name defPos assigned detism tmpCount args
+    args' <- modeCheckExps m name defPos assigned detism args
     actualTypes <- mapM (expType >=> ultimateType) args'
     let actualModes = List.map (expMode assigned) args'
     checkFlowErrors True False ("foreign " ++ lang ++ " " ++ cname)
-                    pos actualModes ([],assigned,tmpCount')
+                    pos actualModes ([],assigned)
       $ do
             let typeflows = List.zipWith TypeFlow actualTypes
                             $ sel1 <$> actualModes
@@ -2019,35 +2058,35 @@ modecheckStmt m name defPos assigned detism tmpCount final
             let assigned' = assigned {bindingDetism=nextDetism}
             logTyped $ "New instr = " ++ show stmt'
             return ([maybePlace stmt' pos],
-                    bindingStateSeq stmtDetism impurity vars assigned,tmpCount')
-modecheckStmt _ _ _ assigned _ tmpCount final Nop pos = do
+                    bindingStateSeq stmtDetism impurity vars assigned)
+modecheckStmt _ _ _ assigned _ final Nop pos = do
     logTyped "Mode checking Nop"
-    return ([maybePlace Nop pos], assigned, tmpCount)
-modecheckStmt _ _ _ assigned _ tmpCount final Fail pos = do
+    return ([maybePlace Nop pos], assigned)
+modecheckStmt _ _ _ assigned _ final Fail pos = do
     logTyped "Mode checking Fail"
-    return ([maybePlace Fail pos], forceFailure assigned, tmpCount)
-modecheckStmt m name defPos assigned detism tmpCount final
+    return ([maybePlace Fail pos], forceFailure assigned)
+modecheckStmt m name defPos assigned detism final
     stmt@(Cond tstStmt thnStmts elsStmts _ _ res) pos = do
     logTyped $ "Mode checking conditional " ++ show stmt
-    (tstStmt', assigned1, tmpCount1) <-
+    (tstStmt', assigned1) <-
         placedApplyM
-        (modecheckStmt m name defPos assigned SemiDet tmpCount False)
+        (modecheckStmt m name defPos assigned SemiDet False)
         tstStmt
     logTyped $ "Assigned by test: " ++ show assigned1
     condBindings <- mapFromUnivSetM ultimateVarType Set.empty
                     $ bindingVars assigned1
     logTyped $ "Assigned by test: " ++ show assigned1
-    (thnStmts', assigned2, tmpCount2) <-
-        modecheckStmts m name defPos (forceDet assigned1) detism tmpCount1
+    (thnStmts', assigned2) <-
+        modecheckStmts m name defPos (forceDet assigned1) detism
                        final thnStmts
     logTyped $ "Assigned by then branch: " ++ show assigned2
-    (elsStmts', assigned3, tmpCount3) <-
-        modecheckStmts m name defPos assigned detism tmpCount2 final elsStmts
+    (elsStmts', assigned3) <-
+        modecheckStmts m name defPos assigned detism final elsStmts
     logTyped $ "Assigned by else branch: " ++ show assigned3
     if mustSucceed assigned1 -- is condition guaranteed to succeed?
       then do
         logTyped $ "Assigned by succeeding conditional: " ++ show assigned2
-        return (tstStmt'++thnStmts', assigned2, tmpCount2)
+        return (tstStmt'++thnStmts', assigned2)
       else if mustFail assigned1 -- is condition guaranteed to fail?
       then do
         logTyped $ "Assigned by failing conditional: " ++ show assigned3
@@ -2059,7 +2098,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
                      then Not (seqToStmt tstStmt') `maybePlace` pos:elsStmts'
                      -- otherwise, the cond must fail and wont bind anything
                      else elsStmts'
-        return (stmts', assigned3, tmpCount3)
+        return (stmts', assigned3)
       else do
         let finalAssigned = assigned2 `joinState` assigned3
         logTyped $ "Assigned by conditional: " ++ show finalAssigned
@@ -2068,40 +2107,40 @@ modecheckStmt m name defPos assigned detism tmpCount final
         return
           ([maybePlace (Cond (seqToStmt tstStmt') thnStmts' elsStmts'
                         (Just condBindings) (Just bindings) res)
-            pos], finalAssigned,tmpCount3)
-modecheckStmt m name defPos assigned detism tmpCount final
+            pos], finalAssigned)
+modecheckStmt m name defPos assigned detism final
     stmt@(TestBool exp) pos = do
     logTyped $ "Mode checking test " ++ show exp
     let exp' = [maybePlace (TestBool $ setExpTypeFlow (TypeFlow boolType ParamIn) exp) pos]
     case expIsConstant exp of
-      Just (IntValue 0) -> return (exp', forceFailure assigned,tmpCount)
-      Just (IntValue 1) -> return ([maybePlace Nop pos], assigned,tmpCount)
+      Just (IntValue 0) -> return (exp', forceFailure assigned)
+      Just (IntValue 1) -> return ([maybePlace Nop pos], assigned)
       _                 -> return (exp',
                                    bindingStateSeq SemiDet Pure Set.empty
-                                   assigned,tmpCount)
-modecheckStmt m name defPos assigned detism tmpCount final
+                                   assigned)
+modecheckStmt m name defPos assigned detism final
     stmt@(Loop stmts _ res) pos = do
     logTyped $ "Mode checking loop " ++ show stmt
     -- XXX `final` is wrong:  checking for a terminal loop is not this easy
-    (stmts', assigned', tmpCount') <-
+    (stmts', assigned') <-
       modecheckStmts m name defPos (loopEntryBindingState assigned) detism
-                     tmpCount final stmts
+                     final stmts
     let startVars = toSet Set.empty $ bindingVars assigned
     logTyped $ "Assigned by loop: " ++ show assigned'
     vars <- mapFromUnivSetM ultimateVarType startVars
                     $ bindingBreakVars assigned'
     logTyped $ "Loop exit vars: " ++ show vars
     return ([maybePlace (Loop stmts' (Just vars) res) pos]
-           ,postLoopBindingState assigned assigned',tmpCount')
-modecheckStmt m name defPos assigned detism tmpCount final
+           ,postLoopBindingState assigned assigned')
+modecheckStmt m name defPos assigned detism final
     stmt@(UseResources resources _ stmts) pos = do
     logTyped $ "Mode checking use ... in stmt " ++ show stmt
     canonRes <- lift (mapM (canonicaliseResourceSpec pos "use block") resources)
     let resources' = fst <$> canonRes
     let assigned' = assigned { bindingResources =
             List.foldr Set.insert (bindingResources assigned) resources' }
-    (stmts', assigned'', tmpCount')
-        <- modecheckStmts m name defPos assigned' detism tmpCount final stmts
+    (stmts', assigned'')
+        <- modecheckStmts m name defPos assigned' detism final stmts
     let resVars = USet.fromList $ resourceName <$> resources'
     resfulBoundPre <- resfulBoundVars resVars assigned
     resfulBoundPost <- resfulBoundVars resVars assigned''
@@ -2112,8 +2151,7 @@ modecheckStmt m name defPos assigned detism tmpCount final
         ([maybePlace (UseResources resources' (Just resfulBoundPre) stmts')
           pos]
         ,assigned'' { bindingResources = bindingResources assigned,
-                      bindingVars = vars }
-        ,tmpCount')
+                      bindingVars = vars })
   where
     resfulBoundVars resVars bindings = do
         let boundVars = bindingVars bindings
@@ -2123,70 +2161,67 @@ modecheckStmt m name defPos assigned detism tmpCount final
                         || isResourcefulHigherOrder ty
         return $ Map.filterWithKey filter varTys
 -- XXX Need to implement these correctly:
-modecheckStmt m name defPos assigned detism tmpCount final
+modecheckStmt m name defPos assigned detism final
     stmt@(And stmts) pos = do
     logTyped $ "Mode checking conjunction " ++ show stmt
-    (stmts', assigned', tmpCount')
-        <- modecheckStmts m name defPos assigned detism tmpCount final stmts
+    (stmts', assigned')
+        <- modecheckStmts m name defPos assigned detism final stmts
     if mustSucceed assigned'
-        then return (stmts', assigned',tmpCount')
-        else return ([maybePlace (And stmts') pos], assigned',tmpCount')
-modecheckStmt m name defPos assigned detism tmpCount final
+        then return (stmts', assigned')
+        else return ([maybePlace (And stmts') pos], assigned')
+modecheckStmt m name defPos assigned detism final
     stmt@(Or disj _ res) pos = do
     logTyped $ "Mode checking disjunction " ++ show stmt
-    (disj',assigned',tmpCount') <-
-        modecheckDisj m name defPos assigned detism tmpCount final
+    (disj',assigned') <-
+        modecheckDisj m name defPos assigned detism final
                       (failingBindingState assigned) disj
     varDict <- mapFromUnivSetM ultimateVarType Set.empty
                 $ bindingVars assigned'
-    return ([maybePlace (Or disj' (Just varDict) res) pos],assigned',tmpCount')
-modecheckStmt m name defPos assigned detism tmpCount final
+    return ([maybePlace (Or disj' (Just varDict) res) pos],assigned')
+modecheckStmt m name defPos assigned detism final
     (Not stmt) pos = do
     logTyped $ "Mode checking negation " ++ show stmt
-    (stmt', _, tmpCount') <-
+    (stmt', _) <-
         placedApplyM
-        (modecheckStmt m name defPos assigned detism tmpCount final)
+        (modecheckStmt m name defPos assigned detism final)
         stmt
-    return ([maybePlace (Not (seqToStmt stmt')) pos], assigned, tmpCount')
-modecheckStmt _ _ _ _ _ _ final stmt@For{} pos =
+    return ([maybePlace (Not (seqToStmt stmt')) pos], assigned)
+modecheckStmt _ _ _ _ _ final stmt@For{} pos =
     shouldnt $ "For statement left by unbranching: " ++ show stmt
-modecheckStmt _ _ _ _ _ _ final stmt@Case{} pos =
+modecheckStmt _ _ _ _ _ final stmt@Case{} pos =
     shouldnt $ "Case statement left by unbranching: " ++ show stmt
-modecheckStmt m name defPos assigned detism tmpCount final
+modecheckStmt m name defPos assigned detism final
     Break pos = do
     logTyped $ "Mode checking break with assigned=" ++ show assigned
-    return ([maybePlace Break pos],bindingStateAfterBreak assigned, tmpCount)
-modecheckStmt m name defPos assigned detism tmpCount final
+    return ([maybePlace Break pos],bindingStateAfterBreak assigned)
+modecheckStmt m name defPos assigned detism final
     Next pos = do
     logTyped $ "Mode checking continue with assigned=" ++ show assigned
-    return ([maybePlace Next pos],bindingStateAfterNext assigned, tmpCount)
+    return ([maybePlace Next pos],bindingStateAfterNext assigned)
 
 
 -- | Mode check a list of Placed Exps,
 -- returning the mode checked Placed Exps and tmp counter
 modeCheckExps :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism
-             -> Int -> [Placed Exp] -> Typed ([Placed Exp],Int)
-modeCheckExps _ _ _ _ _ tmpCount [] = return ([], tmpCount)
-modeCheckExps m name pos assigned detism tmpCount (pexp:pexps) = do
+             -> [Placed Exp] -> Typed [Placed Exp]
+modeCheckExps _ _ _ _ _ [] = return []
+modeCheckExps m name pos assigned detism (pexp:pexps) = do
     logTyped $ "Mode check exp " ++ show (content pexp)
-    (pexp',tmpCount') <-
-        placedApply (modeCheckExp m name pos assigned detism tmpCount)
-            pexp
+    pexp' <- placedApply (modeCheckExp m name pos assigned detism) pexp
     logTyped $ "Mode check exp resulted in " ++ show (content pexp')
-    (pexps',tmpCount'')
-        <- modeCheckExps m name pos assigned detism tmpCount pexps
-    return (pexp':pexps',max tmpCount' tmpCount'')
+    pexps' <- modeCheckExps m name pos assigned detism pexps
+    return (pexp':pexps')
 
 -- | Mode check an Expression
 -- This performs mode checking on the inner Stmts inside an AnonProc
 modeCheckExp :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism
-             -> Int -> Exp -> OptPos -> Typed (Placed Exp,Int)
-modeCheckExp m name defPos assigned _ tmpCount
+             -> Exp -> OptPos -> Typed (Placed Exp)
+modeCheckExp m name defPos assigned _
         exp@(AnonProc mods@ProcModifiers{modifierDetism=detism} params ss _ res) pos = do
     logTyped $ "Mode checking AnonProc " ++ show exp
     let inArgs = List.foldl collectInParams Set.empty params
-    (ss',_,tmpCount') <- modecheckStmts m name defPos (addBindings inArgs assigned)
-                             detism tmpCount True ss
+    (ss',_) <- modecheckStmts m name defPos (addBindings inArgs assigned)
+                             detism True ss
     let paramVars = expVar . content . paramToVar <$> params
     let vars = foldStmts (const . const)
                          ((const .) . (. expInputs) . Set.union) Set.empty ss'
@@ -2195,16 +2230,15 @@ modeCheckExp m name defPos assigned _ tmpCount
                 $ bindingVars assigned
     let closed = Map.filterWithKey (const . flip Set.member toClose) varDict
     params' <- updateParamTypes params
-    return (maybePlace (AnonProc mods params' ss' (Just closed) res) pos, tmpCount')
-modeCheckExp m name defPos assigned detism tmpCount
+    return (maybePlace (AnonProc mods params' ss' (Just closed) res) pos)
+modeCheckExp m name defPos assigned detism
         (Typed exp ty cast) pos = do
     ty' <- ultimateType ty
     cast' <- forM cast ultimateType
-    (exp', tmpCount') <- modeCheckExp m name defPos assigned
-                            detism tmpCount exp pos
-    return (maybePlace (Typed (content exp') ty' cast') pos, tmpCount')
-modeCheckExp m name defPos assigned detism tmpCount exp pos =
-    return (maybePlace exp pos, tmpCount)
+    exp' <- modeCheckExp m name defPos assigned detism exp pos
+    return (maybePlace (Typed (content exp') ty' cast') pos)
+modeCheckExp m name defPos assigned detism exp pos =
+    return (maybePlace exp pos)
 
 -- | Check for flow errors in the given list of flows
 checkFlowErrors :: Bool -> Bool -> String -> OptPos -> [(FlowDirection, Bool, Maybe VarName)]
@@ -2232,34 +2266,30 @@ collectInParams s _ = s
 
 
 modecheckDisj :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism
-              -> Int -> Bool -> BindingState -> [Placed Stmt]
-              -> Typed ([Placed Stmt],BindingState,Int)
-modecheckDisj m name defPos assigned detism tmpCount final disjAssigned [] =
-    return ([],disjAssigned,tmpCount)
-modecheckDisj m name defPos assigned detism tmpCount final disjAssigned
-        (stmt:stmts) = do
+              -> Bool -> BindingState -> [Placed Stmt]
+              -> Typed ([Placed Stmt],BindingState)
+modecheckDisj m name defPos assigned detism final disjAssigned [] =
+    return ([],disjAssigned)
+modecheckDisj m name defPos assigned detism final disjAssigned (stmt:stmts) = do
     -- The last disjunct in a disjunction must have the same determinism
     -- required of the whole disjunction; others can be SemiDet.
     let detism1 = if List.null stmts then detism else SemiDet
-    (disj1,assigned1,tmpCount1) <-
-        placedApply
-        (modecheckStmt m name defPos assigned detism1 tmpCount final)
-        stmt
+    (disj1,assigned1) <-
+        placedApply (modecheckStmt m name defPos assigned detism1 final) stmt
     let disjAssigned' = joinState disjAssigned assigned1
-    (disjs,disjAssigned'',tmpCounts) <-
-            modecheckDisj m name defPos assigned detism tmpCount1 final
-                          disjAssigned' stmts
+    (disjs,disjAssigned'') <-
+        modecheckDisj m name defPos assigned detism final disjAssigned' stmts
     let disj1' = seqToStmt disj1
-    return (disj1':disjs, disjAssigned'', tmpCounts)
+    return (disj1':disjs, disjAssigned'')
 
 
 
 -- |Produce a typed statement sequence, the binding state, and final temp count
 -- from a single proc call.
 finaliseCall :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism -> Bool
-             -> Int -> Bool -> OptPos -> [Placed Exp] -> CallInfo -> Stmt
-             -> Typed ([Placed Stmt],BindingState,Int)
-finaliseCall m name defPos assigned detism resourceful tmpCount final pos args
+             -> Bool -> OptPos -> [Placed Exp] -> CallInfo -> Stmt
+             -> Typed ([Placed Stmt],BindingState)
+finaliseCall m name defPos assigned detism resourceful final pos args
              match@FirstInfo{} stmt = do
     let matchProc = firstInfoProc match
     let matchName = procSpecName matchProc
@@ -2271,8 +2301,7 @@ finaliseCall m name defPos assigned detism resourceful tmpCount final pos args
     let impurity = bindingImpurity assigned
     let isPartial = firstInfoPartial match
     tys <- mapM (expType >=> ultimateType) args
-    let (args',stmts,tmpCount') = matchArguments tmpCount
-                                    (zipWith TypeFlow tys (firstInfoFlows match)) args
+    (args',stmts) <- matchArguments (zipWith TypeFlow tys (firstInfoFlows match)) args
     let procIdent = "proc " ++ show matchProc
     let outOfScope = allResources `Set.difference`
                     (bindingResources assigned `Set.union` specialResourcesSet)
@@ -2316,7 +2345,7 @@ finaliseCall m name defPos assigned detism resourceful tmpCount final pos args
         typeErrors
               [ReasonResourceUnavail ("partial application of " ++ name) res pos
               | res <- Set.toList specials]
-        modecheckStmt m name defPos assigned detism tmpCount' final
+        modecheckStmt m name defPos assigned detism final
             (ForeignCall "llvm" "move" [] [Unplaced partial, result]) pos
     else do
         let stmt' = ProcCall (First (procSpecMod matchProc) (procSpecName matchProc)
@@ -2345,43 +2374,43 @@ finaliseCall m name defPos assigned detism resourceful tmpCount final pos args
         logTyped $ "Generated special stmts = " ++ show specialInstrs
         logTyped $ "New instr = " ++ show stmt'
         logTyped $ "Generated extra stmts = " ++ show stmts
-        (stmts',assigned'',tmpCount'') <-
-            modecheckStmts m name pos assigned' detism tmpCount' final stmts
-        return (specialInstrs ++ maybePlace stmt' pos : stmts'
-            , assigned'', tmpCount'')
-finaliseCall m name defPos assigned detism resourceful tmpCount final pos args
+        (stmts',assigned'') <-
+            modecheckStmts m name pos assigned' detism final stmts
+        return (specialInstrs ++ maybePlace stmt' pos : stmts', assigned'')
+finaliseCall m name defPos assigned detism resourceful final pos args
         (HigherInfo fn) _ =
-    modecheckStmt m name defPos assigned detism tmpCount final
+    modecheckStmt m name defPos assigned detism final
         (ProcCall (Higher $ fn `maybePlace` pos) detism resourceful args) pos
 
 
-matchArguments :: Int -> [TypeFlow] -> [Placed Exp]
-               -> ([Placed Exp],[Placed Stmt],Int)
-matchArguments tmpCount [] [] = ([],[],tmpCount)
-matchArguments _ [] _ = shouldnt "matchArguments arity mismatch"
-matchArguments _ _ [] = shouldnt "matchArguments arity mismatch"
-matchArguments tmpCount (typeflow:typeflows) (arg:args) =
-    let (arg', stmts1, tmpCount') = matchArgument tmpCount typeflow arg
-        (args', stmts2, tmpCount'') = matchArguments tmpCount' typeflows args
-    in  (arg':args', stmts1++stmts2, tmpCount'')
+matchArguments :: [TypeFlow] -> [Placed Exp] -> Typed ([Placed Exp],[Placed Stmt])
+matchArguments [] [] = return ([],[])
+matchArguments [] _ = shouldnt "matchArguments arity mismatch"
+matchArguments _ [] = shouldnt "matchArguments arity mismatch"
+matchArguments (typeflow:typeflows) (arg:args) = do
+    (arg', stmts1) <- matchArgument typeflow arg
+    (args', stmts2) <- matchArguments typeflows args
+    return (arg':args', stmts1++stmts2)
 
 
 -- |Transform an argument as supplied to match the param it is passed to.  This
 -- includes handling implied modes by generating a fresh variable to pass in the
 -- call, and generating code to match it with the provided input.  Thus also
 -- attaches the correct type to the argument.
-matchArgument :: Int -> TypeFlow -> Placed Exp -> (Placed Exp,[Placed Stmt],Int)
-matchArgument tmpCount typeflow arg
+matchArgument :: TypeFlow -> Placed Exp -> Typed (Placed Exp,[Placed Stmt])
+matchArgument typeflow arg
     | ParamOut == typeFlowMode typeflow
-      && ParamIn == flattenedExpFlow (content arg) =
+      && ParamIn == flattenedExpFlow (content arg) = do
+          tmpCount <- gets tyTmpCtr
+          modify $ \s -> s{tyTmpCtr = tmpCount + 1}
           let var = mkTempName tmpCount
               inTypeFlow = typeflow {typeFlowMode = ParamIn}
               arg' = setPExpTypeFlow inTypeFlow arg
               setVar = Unplaced $ setExpTypeFlow typeflow (varSet var)
               getVar = Unplaced $ setExpTypeFlow inTypeFlow (varGet var)
               call = ProcCall (regularProc "=") SemiDet False [getVar, arg']
-          in (setVar, [maybePlace call $ place arg], tmpCount+1)
-    | otherwise = (setPExpTypeFlow typeflow arg,[],tmpCount)
+          return (setVar, [maybePlace call $ place arg])
+    | otherwise = return (setPExpTypeFlow typeflow arg,[])
 
 
 -- |Return a list of error messages for too weak a determinism at the end of a
@@ -2393,30 +2422,6 @@ detismCheck name pos expectedDetism actualDetism
     | actualDetism `determinismLEQ` expectedDetism = []
     | Det `determinismLEQ` expectedDetism = []
     | otherwise = [ReasonWeakDetism name actualDetism expectedDetism pos]
-
-
--- |Ensure the two exprs have the same types; if both are variables, this
---  means unifying their types.
-unifyExprTypes :: OptPos -> Placed Exp -> Placed Exp -> Typed ()
-unifyExprTypes pos a1 a2 = do
-    logTyped $ "Type checking foreign instruction unifying types "
-               ++ show a1 ++ " and " ++ show a2
-    let a1Content = content a1
-    let a2Content = content a2
-    case expVar' $ content a2 of
-        Nothing -> typeError (ReasonBadMove a2Content pos)
-        Just toVar ->
-            case ultimateExp a1Content of
-                Var fromVar _ _ -> do
-                    unifyVarTypes pos fromVar toVar
-                    logTyping "Resulting typing = "
-                _ -> do
-                    ty <- expType $ Unplaced a1Content
-                    logTyped $ "constraining var " ++ show toVar
-                            ++ " to type " ++ show ty
-                    constrainVarType
-                        (ReasonEqual a1Content a2Content (place a2))
-                        toVar ty
 
 
 ----------------------------------------------------------------

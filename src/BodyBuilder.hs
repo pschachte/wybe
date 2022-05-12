@@ -518,7 +518,7 @@ transformUnneededArgs pspec args = do
 
 
 -- |Replace an unneeded argument corresponding to unneeded parameters with
---  ArgUnneeded. 
+--  ArgUnneeded.
 transformUnneededArg :: [(PrimParam,PrimArg)] -> PrimParam -> PrimArg
                      -> BodyBuilder PrimArg
 transformUnneededArg pairs
@@ -526,9 +526,9 @@ transformUnneededArg pairs
                primParamFlow=flow, primParamType=typ, primParamName=name}
     arg = do
         logBuild $ "Marking unneeded argument " ++ show arg
-        when (flow == FlowOut) $ do
+        when (isOutputFlow flow) $ do
             case List.filter
-                 (\(p,a)-> primParamName p == name && primParamFlow p == FlowIn)
+                 (\(p,a)-> primParamName p == name && isInputFlow (primParamFlow p))
                  pairs of
               []      -> shouldnt $ "No input param matching output "
                                     ++ show name
@@ -559,7 +559,7 @@ splitPrimOutputs prim =
 -- |Returns a list of all output arguments of the input Prim
 primOutputs :: Prim -> [PrimArg]
 primOutputs prim =
-    List.filter ((==FlowOut) . argFlowDirection) $ fst $ primArgs prim
+    List.filter (isOutputFlow . argFlowDirection) $ fst $ primArgs prim
 
 
 -- |Add a binding for a variable. If that variable is an output for the
@@ -574,9 +574,9 @@ addSubst var val = do
 
 -- |Record that the specified arg (which must be a variable) has been set.
 recordVarSet :: PrimArg -> BodyBuilder ()
-recordVarSet ArgVar{argVarName=nm, argVarFlow=FlowOut} =
+recordVarSet ArgVar{argVarName=nm, argVarFlow=flow} | isOutputFlow flow =
     modify (\s -> s { blockDefs = Set.insert nm $ blockDefs s })
-recordVarSet (ArgUnneeded FlowOut _) = return ()
+recordVarSet (ArgUnneeded flow _) | isOutputFlow flow = return ()
 recordVarSet arg =
     shouldnt $ "recordVarSet of non-output argument " ++ show arg
 
@@ -673,7 +673,7 @@ rawInstr prim pos = do
 
 
 splitArgsByMode :: [PrimArg] -> ([PrimArg], [PrimArg])
-splitArgsByMode = List.partition ((==FlowIn) . argFlowDirection)
+splitArgsByMode = List.partition (isInputFlow . argFlowDirection)
 
 
 canonicalisePrim :: Prim -> Prim
@@ -744,13 +744,13 @@ expandVar var ty = expandArg $ ArgVar var ty FlowIn Ordinary False
 
 -- |Return the current ultimate value of the input argument.
 expandArg :: PrimArg -> BodyBuilder PrimArg
-expandArg arg@ArgVar{argVarName=var, argVarFlow=FlowIn} = do
+expandArg arg@ArgVar{argVarName=var, argVarFlow=flow} | isInputFlow flow = do
     var' <- gets (Map.lookup var . currSubst)
     let ty = argVarType arg
     let var'' = setArgType ty <$> var'
     logBuild $ "Expanded " ++ show var ++ " to " ++ show var''
     maybe (return arg) expandArg var''
-expandArg arg@ArgVar{argVarName=var, argVarFlow=FlowOut} = do
+expandArg arg@ArgVar{argVarName=var, argVarFlow=flow} | isOutputFlow flow = do
     var' <- gets (Map.findWithDefault var var . outSubst)
     when (var /= var')
       $ logBuild $ "Replaced output variable " ++ show var
@@ -1274,7 +1274,7 @@ flattenArg arg = [arg]
 
 
 markIfLastUse :: Set PrimVarName -> PrimArg -> PrimArg
-markIfLastUse usedLater arg@ArgVar{argVarName=nm,argVarFlow=FlowIn} =
+markIfLastUse usedLater arg@ArgVar{argVarName=nm,argVarFlow=flow} | isInputFlow flow =
   arg {argVarFinal=Set.notMember nm usedLater}
 markIfLastUse _ arg = arg
 

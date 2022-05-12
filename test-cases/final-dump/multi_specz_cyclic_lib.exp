@@ -127,7 +127,7 @@ if.then:
   tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x4##0", i64  444)  
   ret void 
 if.else:
-  tail call fastcc  void  @"multi_specz_cyclic_lib2.foo2<0>"(i64  %"x2##0", i64  %"x3##0", i64  %"x4##0", i64  %"x1##0", i64  %"1#tmp#0##0")  
+  musttail call fastcc  void  @"multi_specz_cyclic_lib2.foo2<0>"(i64  %"x2##0", i64  %"x3##0", i64  %"x4##0", i64  %"x1##0", i64  %"1#tmp#0##0")  
   ret void 
 }
 
@@ -479,6 +479,6 @@ if.then:
   tail call fastcc  void  @"multi_specz_cyclic_lib.modifyAndPrint<0>"(i64  %"x4##0", i64  444)  
   ret void 
 if.else:
-  tail call fastcc  void  @"multi_specz_cyclic_lib.foo1<0>"(i64  %"x2##0", i64  %"x3##0", i64  %"x4##0", i64  %"x1##0", i64  %"1#tmp#0##0")  
+  musttail call fastcc  void  @"multi_specz_cyclic_lib.foo1<0>"(i64  %"x2##0", i64  %"x3##0", i64  %"x4##0", i64  %"x1##0", i64  %"1#tmp#0##0")  
   ret void 
 }

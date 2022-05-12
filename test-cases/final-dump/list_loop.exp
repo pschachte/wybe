@@ -230,7 +230,7 @@ if.then:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @list_loop.42, i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %34)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"list_loop.gen#3<0>"(i64  %"h##0", i64  %"l##0", i64  %38, i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"x##0")  
+  musttail call fastcc  void  @"list_loop.gen#3<0>"(i64  %"h##0", i64  %"l##0", i64  %38, i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"x##0")  
   ret void 
 if.else:
   tail call fastcc  void  @"list_loop.gen#1<0>"(i64  %"l##0", i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"x##0")  
@@ -451,7 +451,7 @@ if.then1:
 if.else1:
   ret i1 0 
 if.then2:
-  %"6##success##0" = tail call fastcc  i1  @"list_loop.intlist.=<0>"(i64  %7, i64  %14)  
+  %"6##success##0" = musttail call fastcc  i1  @"list_loop.intlist.=<0>"(i64  %7, i64  %14)  
   ret i1 %"6##success##0" 
 if.else2:
   ret i1 0 

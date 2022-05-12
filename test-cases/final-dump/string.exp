@@ -387,7 +387,7 @@ entry:
   br i1 %28, label %if.then, label %if.else 
 if.then:
   tail call ccc  void  @putchar(i8  %26)  
-  tail call fastcc  void  @"string.gen#1<0>[6dacb8fd25]"(i64  %"s##0", i64  %27)  
+  musttail call fastcc  void  @"string.gen#1<0>[6dacb8fd25]"(i64  %"s##0", i64  %27)  
   ret void 
 if.else:
   tail call ccc  void  @putchar(i8  10)  
@@ -404,7 +404,7 @@ entry:
   br i1 %32, label %if.then, label %if.else 
 if.then:
   tail call ccc  void  @putchar(i8  %30)  
-  tail call fastcc  void  @"string.gen#1<0>[6dacb8fd25]"(i64  %"s##0", i64  %31)  
+  musttail call fastcc  void  @"string.gen#1<0>[6dacb8fd25]"(i64  %"s##0", i64  %31)  
   ret void 
 if.else:
   tail call ccc  void  @putchar(i8  10)  

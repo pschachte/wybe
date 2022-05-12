@@ -95,7 +95,7 @@ entry:
   tail call ccc  void  @putchar(i8  108)  
   tail call ccc  void  @putchar(i8  100)  
   tail call ccc  void  @putchar(i8  33)  
-  tail call fastcc  void  @"inline_decl.finish<0>"()  
+  musttail call fastcc  void  @"inline_decl.finish<0>"()  
   ret void 
 }
 
@@ -121,6 +121,6 @@ entry:
   tail call ccc  void  @putchar(i8  108)  
   tail call ccc  void  @putchar(i8  100)  
   tail call ccc  void  @putchar(i8  33)  
-  tail call fastcc  void  @"inline_decl.finish<0>"()  
+  musttail call fastcc  void  @"inline_decl.finish<0>"()  
   ret void 
 }

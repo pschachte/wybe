@@ -851,7 +851,7 @@ entry:
   tail call fastcc  void  @"stmt_for.using_irange<0>"()  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @stmt_for.26, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"stmt_for.using_irange_reverse<0>"()  
+  musttail call fastcc  void  @"stmt_for.using_irange_reverse<0>"()  
   ret void 
 }
 
@@ -884,7 +884,7 @@ if.then1:
   tail call ccc  void  @putchar(i8  10)  
   tail call ccc  void  @print_int(i64  %36)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"stmt_for.gen#1<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %"tmp#5##0", i64  %"tmp#6##0", i64  %"tmp#7##0", i64  %33, i64  %40, i64  %"x##0", i64  %"y##0")  
+  musttail call fastcc  void  @"stmt_for.gen#1<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %"tmp#5##0", i64  %"tmp#6##0", i64  %"tmp#7##0", i64  %33, i64  %40, i64  %"x##0", i64  %"y##0")  
   ret void 
 if.else1:
   ret void 
@@ -912,7 +912,7 @@ if.then1:
 if.else1:
   tail call ccc  void  @print_int(i64  %43)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"stmt_for.gen#10<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %47, i64  %"x##0")  
+  musttail call fastcc  void  @"stmt_for.gen#10<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %47, i64  %"x##0")  
   ret void 
 }
 
@@ -936,10 +936,10 @@ if.else:
 if.then1:
   tail call ccc  void  @print_int(i64  %50)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"stmt_for.gen#11<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %54, i64  %"x##0")  
+  musttail call fastcc  void  @"stmt_for.gen#11<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %54, i64  %"x##0")  
   ret void 
 if.else1:
-  tail call fastcc  void  @"stmt_for.gen#11<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %54, i64  %"x##0")  
+  musttail call fastcc  void  @"stmt_for.gen#11<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %54, i64  %"x##0")  
   ret void 
 }
 
@@ -963,7 +963,7 @@ if.else:
 if.then1:
   tail call ccc  void  @print_int(i64  %57)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"stmt_for.gen#12<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %61, i64  %"x##0")  
+  musttail call fastcc  void  @"stmt_for.gen#12<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %61, i64  %"x##0")  
   ret void 
 if.else1:
   ret void 
@@ -980,7 +980,7 @@ entry:
 if.then:
   tail call ccc  void  @print_int(i64  %63)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"stmt_for.gen#13<0>"(i64  %64, i64  %"tmp#1##0")  
+  musttail call fastcc  void  @"stmt_for.gen#13<0>"(i64  %64, i64  %"tmp#1##0")  
   ret void 
 if.else:
   ret void 
@@ -997,7 +997,7 @@ entry:
 if.then:
   tail call ccc  void  @print_int(i64  %67)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"stmt_for.gen#14<0>"(i64  %68, i64  %"tmp#1##0")  
+  musttail call fastcc  void  @"stmt_for.gen#14<0>"(i64  %68, i64  %"tmp#1##0")  
   ret void 
 if.else:
   ret void 
@@ -1017,7 +1017,7 @@ if.then:
 if.else:
   ret i1 1 
 if.then1:
-  %"4##success##0" = tail call fastcc  i1  @"stmt_for.gen#2<0>"(i64  %72, i64  %"tmp#1##0")  
+  %"4##success##0" = musttail call fastcc  i1  @"stmt_for.gen#2<0>"(i64  %72, i64  %"tmp#1##0")  
   ret i1 %"4##success##0" 
 if.else1:
   ret i1 0 
@@ -1052,7 +1052,7 @@ if.then1:
   tail call ccc  void  @putchar(i8  10)  
   tail call ccc  void  @print_int(i64  %83)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"stmt_for.gen#3<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %"tmp#5##0", i64  %"tmp#6##0", i64  %"tmp#7##0", i64  %80, i64  %87, i64  %"x##0", i64  %"y##0")  
+  musttail call fastcc  void  @"stmt_for.gen#3<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %"tmp#5##0", i64  %"tmp#6##0", i64  %"tmp#7##0", i64  %80, i64  %87, i64  %"x##0", i64  %"y##0")  
   ret void 
 if.else1:
   ret void 
@@ -1073,7 +1073,7 @@ if.then:
   %94 = load  i64, i64* %93 
   tail call ccc  void  @print_int(i64  %90)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"stmt_for.gen#4<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %94, i64  %"x##0")  
+  musttail call fastcc  void  @"stmt_for.gen#4<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %94, i64  %"x##0")  
   ret void 
 if.else:
   ret void 
@@ -1101,7 +1101,7 @@ if.then1:
 if.else1:
   tail call ccc  void  @print_int(i64  %97)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"stmt_for.gen#5<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %101, i64  %"x##0")  
+  musttail call fastcc  void  @"stmt_for.gen#5<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %101, i64  %"x##0")  
   ret void 
 }
 
@@ -1116,7 +1116,7 @@ entry:
 if.then:
   tail call ccc  void  @print_int(i64  %103)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"stmt_for.gen#6<0>"(i64  %104, i64  %"tmp#1##0")  
+  musttail call fastcc  void  @"stmt_for.gen#6<0>"(i64  %104, i64  %"tmp#1##0")  
   ret void 
 if.else:
   ret void 
@@ -1133,7 +1133,7 @@ entry:
 if.then:
   tail call ccc  void  @print_int(i64  %107)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"stmt_for.gen#7<0>"(i64  %108, i64  %"tmp#1##0")  
+  musttail call fastcc  void  @"stmt_for.gen#7<0>"(i64  %108, i64  %"tmp#1##0")  
   ret void 
 if.else:
   ret void 
@@ -1157,12 +1157,12 @@ if.then:
 if.else:
   ret void 
 if.then1:
-  tail call fastcc  void  @"stmt_for.gen#8<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %116, i64  %"x##0")  
+  musttail call fastcc  void  @"stmt_for.gen#8<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %116, i64  %"x##0")  
   ret void 
 if.else1:
   tail call ccc  void  @print_int(i64  %112)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"stmt_for.gen#8<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %116, i64  %"x##0")  
+  musttail call fastcc  void  @"stmt_for.gen#8<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %116, i64  %"x##0")  
   ret void 
 }
 
@@ -1184,12 +1184,12 @@ if.then:
 if.else:
   ret void 
 if.then1:
-  tail call fastcc  void  @"stmt_for.gen#9<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %123, i64  %"x##0")  
+  musttail call fastcc  void  @"stmt_for.gen#9<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %123, i64  %"x##0")  
   ret void 
 if.else1:
   tail call ccc  void  @print_int(i64  %119)  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"stmt_for.gen#9<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %123, i64  %"x##0")  
+  musttail call fastcc  void  @"stmt_for.gen#9<0>"(i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %123, i64  %"x##0")  
   ret void 
 }
 
