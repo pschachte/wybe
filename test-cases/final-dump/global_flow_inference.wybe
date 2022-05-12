@@ -1,0 +1,29 @@
+resource res:int = 1
+
+def {noinline} inout(b:bool) use !res {
+    if { b :: !only_out(b) }
+}
+
+def {noinline} only_out(b:bool) use !res {
+    if { b :: ?res = 2 | else :: ?res = 3 }
+}
+
+def {noinline} rec_out_only1 use !res {
+    ?res = 1
+    !rec_out_only2
+}
+
+def {noinline} rec_out_only2 use !res {
+    ?res = 1
+    !rec_out_only1
+}
+
+def {noinline} rec_out_only_notail1 use !res {
+    !rec_out_only_notail2
+    ?res = 1
+}
+
+def {noinline} rec_out_only_notail2 use !res {
+    !rec_out_only_notail1
+    ?res = 1
+}

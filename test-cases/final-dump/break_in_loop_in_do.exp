@@ -23,7 +23,7 @@ module top-level code > public {impure} (0 calls)
 
 gen#1 > {inline} (2 calls)
 0: break_in_loop_in_do.gen#1<0>
-gen#1([counter##0:wybe.int])<{<<break_in_loop_in_do.counter>>, <<wybe.io.io>>}; {<<break_in_loop_in_do.counter>>, <<wybe.io.io>>}>:
+gen#1([counter##0:wybe.int])<{<<break_in_loop_in_do.counter>>, <<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<break_in_loop_in_do.counter>>:wybe.int, ?%counter##1:wybe.int) @break_in_loop_in_do:nn:nn
@@ -35,7 +35,7 @@ gen#1([counter##0:wybe.int])<{<<break_in_loop_in_do.counter>>, <<wybe.io.io>>}; 
 
 gen#2 > {inline} (1 calls)
 0: break_in_loop_in_do.gen#2<0>
-gen#2(tmp#0##0:wybe.int, [tmp#1##0:wybe.int])<{<<break_in_loop_in_do.counter>>, <<wybe.io.io>>}; {<<break_in_loop_in_do.counter>>, <<wybe.io.io>>}>:
+gen#2(tmp#0##0:wybe.int, [tmp#1##0:wybe.int])<{<<wybe.io.io>>}; {<<break_in_loop_in_do.counter>>, <<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm store(tmp#0##0:wybe.int, <<break_in_loop_in_do.counter>>:wybe.int) @break_in_loop_in_do:nn:nn

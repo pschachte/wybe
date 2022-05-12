@@ -65,21 +65,21 @@ optimiseSccBottomUp' procs = do
     -- We perform an extra inference here because it is possible
     -- that the current global flow interface is not strict
     inferGlobalFlows procs
-    inlines <- optimiseProcsBottomUp procs
+    repeat <- optimiseProcsBottomUp procs
     -- If any but first in SCC were marked for inlining, repeat to inline
     -- in earlier procs in the SCC.
-    when (or $ tail inlines)
+    when repeat
         $ void $ optimiseProcsBottomUp procs
 
 
 -- | Do bottom-up optimisations of Procs, returning which to inline
-optimiseProcsBottomUp :: [ProcSpec] -> Compiler [Bool]
+optimiseProcsBottomUp :: [ProcSpec] -> Compiler Bool
 optimiseProcsBottomUp procs = do
     inlines <- mapM optimiseProcBottomUp procs
     -- Optimise may have removed some global flows, so we try to restrict the
     -- interface
-    inferGlobalFlows procs
-    return inlines
+    globals <- inferGlobalFlows procs
+    return $ or $ tail inlines ++ tail globals
 
 
 -- | Do bottom-up optimisations of a Proc, returning whether to inline it
@@ -179,67 +179,115 @@ argCost arg = do
 -- | Infer all global flows across the given procedures,
 -- updating their associated GlobalFlows to (possibly) smaller sets, and
 -- ensuring the global flows of all prims are correct
-inferGlobalFlows :: [ProcSpec] -> Compiler ()
+inferGlobalFlows :: [ProcSpec] -> Compiler [Bool]
 inferGlobalFlows procs = do
     let procSet = Set.fromList procs
-    gFlows <- foldM (addGlobalFlows procSet) emptyGlobalFlows procs
-    mapM_ (updateProcDefM $ updateProcDefGlobalFlows procSet gFlows) procs
+    implns <- (procImpln <$>) <$> mapM getProcDef procs
+    let oldFlows = primProtoGlobalFlows . procImplnProto <$> implns 
+    let newFlows = inferGlobalFlows' <$> implns
+    let sccFlows = Map.fromList $ zipWith ((,) . procImplnProcSpec) implns newFlows
+    mapM_ (updateProcDefM $ updateProcDefGlobalFlows sccFlows) procs
+    return $ zipWith (/=) newFlows oldFlows
 
 
--- | Add all Global Flows from a given procedure to a set of GlobalFlows,
--- ingoring calls to those that are in the Set of ProcSpecs
-addGlobalFlows :: Set ProcSpec -> GlobalFlows -> ProcSpec -> Compiler GlobalFlows
-addGlobalFlows procs gFlows pspec =
-    foldBodyPrims (const $ globalFlowsUnion . primGlobalFlows' procs)
-                  gFlows globalFlowsUnion
-        . procImplnBody . procImpln <$> getProcDef pspec
+-- | Helper for inferGlobalFlows, applied to a single ProcBody
+inferGlobalFlows' :: ProcImpln -> GlobalFlows
+inferGlobalFlows' ProcDefSrc{} = shouldnt "inferGlobalFlows'"
+inferGlobalFlows' (ProcDefPrim pspec 
+                    (PrimProto _ _ oldFlows@(GlobalFlows ins outs) ) body _ _) = 
+    bodyGlobalFlows (ins `USet.intersection` outs) body
+                `globalFlowsIntersection` oldFlows
 
 
--- | Add all Global Flows from a given Prim to a set of GlobalFlows.
--- If the call is to a proc in the given Set of ProcSpecs, we do not add the
--- GlobalFlows, else we add the global flows associated with the proc
-primGlobalFlows' :: Set ProcSpec -> Prim -> GlobalFlows
-primGlobalFlows' procs (PrimCall _ pspec _ _)
-    | pspec `Set.member` procs = emptyGlobalFlows
-primGlobalFlows' _ prim = snd $ primArgs prim
+
+-- | Get the global flows that occur across a ProcBody, given the procs that appear
+-- in the SCC and the Globals that occur in/out
+bodyGlobalFlows :: UnivSet GlobalInfo -> ProcBody -> GlobalFlows 
+bodyGlobalFlows oldFlows (ProcBody prims fork) 
+    = List.foldr (globalFlowsUnion . (snd . primArgs) . content) 
+                 (forkGlobalFlows oldFlows fork) prims
+
+
+-- | Global flows that occur across forks, accounting for the old in/out flows.
+-- If a flow out does not occur in all branches, but at least 1, and occurs in
+-- the old in/out, then this also occurs in/out 
+forkGlobalFlows :: UnivSet GlobalInfo -> PrimFork -> GlobalFlows
+forkGlobalFlows _ NoFork = emptyGlobalFlows
+forkGlobalFlows oldFlows (PrimFork _ _ _ bodies) =
+    let gFlows = bodyGlobalFlows oldFlows <$> bodies
+        gOuts = globalFlowsOut <$> gFlows
+        someOuts = List.foldr USet.union emptyUnivSet gOuts 
+        allOuts = List.foldr USet.intersection UniversalSet gOuts
+        oldFlows' = oldFlows `USet.intersection` 
+                        whenFinite (`USet.subtractUnivSet` allOuts) someOuts
+    in List.foldr globalFlowsUnion (GlobalFlows oldFlows' emptyUnivSet) gFlows
 
 
 -- | Update the GlobalFlows of Prims of a ProcDef and the prototype with
 -- the given GlobalFlows
-updateProcDefGlobalFlows :: Set ProcSpec -> GlobalFlows -> ProcDef -> Compiler ProcDef
-updateProcDefGlobalFlows _ _ ProcDef{procImpln=ProcDefSrc{}} =
+updateProcDefGlobalFlows :: Map ProcSpec GlobalFlows -> ProcDef -> Compiler ProcDef
+updateProcDefGlobalFlows _ ProcDef{procImpln=ProcDefSrc{}} =
     shouldnt "updateProcDefGlobalFlows on un-compiled code"
-updateProcDefGlobalFlows procs newFlows
-        def@ProcDef{procImpln=impln@ProcDefPrim{
-            procImplnBody=body,
-            procImplnProto=proto@PrimProto{primProtoGlobalFlows=oldFlows}}} = do
-    body' <- updateBodyGlobalFlows procs newFlows body
+updateProcDefGlobalFlows sccFlows def@ProcDef{procImpln=impln@ProcDefPrim{
+                                                procImplnProcSpec=pspec,
+                                                procImplnBody=body,
+                                                procImplnProto=proto}} = do
+    body' <- updateBodyGlobalFlows sccFlows body
+    let newFlows = trustFromJust "updateProcDefGlobalFlows" 
+                 $ Map.lookup pspec sccFlows
     return def{procImpln=impln{
         procImplnBody=body',
-        procImplnProto=proto{
-            primProtoGlobalFlows=globalFlowsIntersection newFlows oldFlows}}}
+        procImplnProto=proto{primProtoGlobalFlows=newFlows}}}
 
 
 -- | Update the GlobalFlows of Prims of a ProcBody
-updateBodyGlobalFlows :: Set ProcSpec -> GlobalFlows -> ProcBody -> Compiler ProcBody
-updateBodyGlobalFlows procs newFlows (ProcBody body fork) = do
-    body' <- mapM (updatePlacedM $ updatePrimGlobalFlows procs newFlows) body
-    ProcBody body' <$> case fork of
-        NoFork -> return NoFork
-        PrimFork{forkBodies=forks} -> do
-            forks' <- mapM (updateBodyGlobalFlows procs newFlows) forks
-            return fork{forkBodies=forks'}
+updateBodyGlobalFlows :: Map ProcSpec GlobalFlows -> ProcBody -> Compiler ProcBody
+updateBodyGlobalFlows sccFlows (ProcBody body fork) = do
+    body' <- mapM (updatePlacedM $ updatePrimGlobalFlows sccFlows) body
+    ProcBody body' <$> updateForkGlobalFlows sccFlows fork
+    
+
+-- | Update the GlobalFlows of Prims across a PrimFork
+updateForkGlobalFlows :: Map ProcSpec GlobalFlows -> PrimFork -> Compiler PrimFork
+updateForkGlobalFlows _ NoFork = return NoFork
+updateForkGlobalFlows sccFlows (PrimFork var ty final bodies) =
+    PrimFork var ty final <$> mapM (updateBodyGlobalFlows sccFlows) bodies
 
 
 -- | Update the GlobalFlows of a Prim
 -- If the prim is a call to a proc in the Set of ProcSpecs, we update the
 -- GlobalFlows to the intersection of the given GlobalFlows and the current
-updatePrimGlobalFlows :: Set ProcSpec -> GlobalFlows -> Prim -> Compiler Prim
-updatePrimGlobalFlows procs newFlows (PrimCall cID pspec args gFlows)
-    | pspec `Set.member` procs
-    = return $ PrimCall cID pspec args $ globalFlowsIntersection newFlows gFlows
-    | otherwise = PrimCall cID pspec args <$> getProcGlobalFlows pspec
-updatePrimGlobalFlows _ _ prim = return prim
+updatePrimGlobalFlows :: Map ProcSpec GlobalFlows -> Prim -> Compiler Prim
+updatePrimGlobalFlows sccFlows (PrimCall cID pspec args gFlows) = 
+    case Map.lookup pspec sccFlows of
+        Just newFlows -> return $ PrimCall cID pspec args newFlows
+        Nothing -> do
+            flows <- getProcGlobalFlows pspec
+            return $ PrimCall cID pspec args flows
+updatePrimGlobalFlows _ prim = return prim
+
+
+-- | Get the leading outwards flows of a proc body, 
+-- i.e., outwards flows that occur before a corresponding inwards flow
+bodyLeadingOutFlows :: ProcBody -> Set GlobalInfo
+bodyLeadingOutFlows (ProcBody prims fork) = 
+    List.foldr (killFlows . content) (forkLeadingOutFlows fork) prims
+
+
+-- | Get the leading outwards flows of a PrimFork, 
+-- i.e., outwards flows that occur before a corresponding inwards flow
+forkLeadingOutFlows :: PrimFork -> Set GlobalInfo 
+forkLeadingOutFlows NoFork = Set.empty
+forkLeadingOutFlows (PrimFork _ _ _ bodies) = 
+    List.foldr1 Set.intersection $ bodyLeadingOutFlows <$> bodies
+
+
+-- | Get the leading outwards flows of a proc body, 
+-- i.e., outwards flows that occur before a corresponding inwards flow
+killFlows :: Prim -> Set GlobalInfo -> Set GlobalInfo
+killFlows prim oldKilled = 
+    (oldKilled `Set.union` USet.toSet Set.empty outs) `USet.subtractUnivSet` ins
+  where GlobalFlows ins outs = snd $ primArgs prim
 
 
 -- |Log a message, if we are logging optimisation activity.
