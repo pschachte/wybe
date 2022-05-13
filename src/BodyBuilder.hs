@@ -197,8 +197,8 @@ freshVarName = do
 
 -- |Run a BodyBuilder monad and extract the final proc body, along with the
 -- final temp variable count and the set of variables used in the body.
-buildBody :: Int -> VarSubstitution
-          -> BodyBuilder a -> Compiler (a, Int, Set PrimVarName, ProcBody)
+buildBody :: Int -> VarSubstitution -> BodyBuilder a 
+          -> Compiler (a, Int, Set PrimVarName, Set GlobalInfo, ProcBody)
 buildBody tmp oSubst builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
     (a, st) <- runStateT builder $ initState tmp oSubst
@@ -206,8 +206,8 @@ buildBody tmp oSubst builder = do
     logMsg BodyBuilder "     Final state:"
     logMsg BodyBuilder $ fst $ showState 8 st
     st' <- fuseBodies st
-    (tmp', used, body) <- currBody (ProcBody [] NoFork) st'
-    return (a, tmp', used, body)
+    (tmp', used, stored, body) <- currBody (ProcBody [] NoFork) st'
+    return (a, tmp', used, stored, body)
 
 
 -- |Start a new fork on var of type ty
@@ -1107,7 +1107,7 @@ selectedBranch subst Forked{knownVal=known, forkingVar=var} =
 ----------------------------------------------------------------
 
 currBody :: ProcBody -> BodyState
-         -> Compiler (Int,Set PrimVarName,ProcBody)
+         -> Compiler (Int,Set PrimVarName,Set GlobalInfo,ProcBody)
 currBody body st@BodyState{tmpCount=tmp} = do
     logMsg BodyBuilder $ "Now reconstructing body with usedLater = "
       ++ intercalate ", " (show <$> Map.keys (outSubst st))
@@ -1115,11 +1115,12 @@ currBody body st@BodyState{tmpCount=tmp} = do
            $ BkwdBuilderState (Map.keysSet $ outSubst st) Nothing Map.empty
                               0 Set.empty body
     let BkwdBuilderState{bkwdUsedLater=usedLater,
-                         bkwdFollowing=following} = st'
+                         bkwdFollowing=following,
+                         bkwdGlobalStored=stored} = st'
     logMsg BodyBuilder ">>>> Finished rebuilding a proc body"
     logMsg BodyBuilder "     Final state:"
     logMsg BodyBuilder $ showBlock 5 following
-    return (tmp, usedLater, following)
+    return (tmp, usedLater, stored, following)
 
 
 -- |Another monad, this one for rebuilding a proc body bottom-up.

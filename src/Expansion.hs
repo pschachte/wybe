@@ -16,6 +16,7 @@ module Expansion (procExpansion) where
 
 import           AST
 import           Util
+import           UnivSet as USet
 import           BodyBuilder
 import           Control.Monad
 import           Control.Monad.Extra       (ifM)
@@ -40,12 +41,14 @@ procExpansion pspec def = do
     let tmp = procTmpCount def
     let (ins,outs) = inputOutputParams proto
     isClosure <- isClosureProc pspec
-    let params = primProtoParams proto
     let st = initExpanderState (procCallSiteCount def)
-    (st', tmp', used, body') <- buildBody tmp (Map.fromSet id outs)
+    (st', tmp', used, stored, body') <- buildBody tmp (Map.fromSet id outs)
                                 $ execStateT (expandBody body) st
+    let PrimProto _ params (GlobalFlows gIns gOuts) = proto
     let params' = markParamNeededness isClosure used ins <$> params
-    let proto' = proto {primProtoParams = params'}
+    let globals' = GlobalFlows (USet.whenFinite (`Set.difference` stored) gIns) gOuts
+    let proto' = proto {primProtoParams = params',
+                        primProtoGlobalFlows = globals'}
     let impln' = impln{ procImplnProto = proto',
                         procImplnBody = body' }
     let def' = def { procImpln = impln',
