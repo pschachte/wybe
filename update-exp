@@ -88,7 +88,7 @@ updatefile () {
 if [ $# -eq 0 ] ; then
     make || exit 1
     make test
-    for f in test-cases/final-dump/globa*.wybe ; do
+    for f in test-cases/final-dump/*.wybe ; do
         updatefile "$f"
     done
     for f in test-cases/execution/*.wybe ; do
