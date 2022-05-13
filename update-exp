@@ -91,12 +91,12 @@ if [ $# -eq 0 ] ; then
     for f in test-cases/final-dump/globa*.wybe ; do
         updatefile "$f"
     done
-    # for f in test-cases/execution/*.wybe ; do
-    #     updatefile "$f"
-    # done
-    # for f in test-cases/complex/exp/*.wybe ; do
-    #     updatefile "$f"
-    # done
+    for f in test-cases/execution/*.wybe ; do
+        updatefile "$f"
+    done
+    for f in test-cases/complex/exp/*.wybe ; do
+        updatefile "$f"
+    done
 else
     for f in "$@" ; do
         updatefile "$f"
