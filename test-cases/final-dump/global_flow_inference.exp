@@ -30,6 +30,14 @@ inout(b##0:wybe.bool)<{<<global_flow_inference.res>>}; {<<global_flow_inference.
 
 
 
+only_in > {noinline} (0 calls)
+0: global_flow_inference.only_in<0>
+only_in(?x##0:wybe.int)<{<<global_flow_inference.res>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<global_flow_inference.res>>:wybe.int, ?%x##0:wybe.int) @global_flow_inference:nn:nn
+
+
 only_out > {noinline} (1 calls)
 0: global_flow_inference.only_out<0>
 only_out(b##0:wybe.bool)<{}; {<<global_flow_inference.res>>}>:
@@ -75,6 +83,20 @@ rec_out_only_notail2()<{}; {<<global_flow_inference.res>>}>:
   InterestingCallProperties: []
     foreign lpvm store(1:wybe.int, <<global_flow_inference.res>>:wybe.int) @global_flow_inference:nn:nn
 
+
+still_only_in > {noinline} (0 calls)
+0: global_flow_inference.still_only_in<0>
+still_only_in(b##0:wybe.bool, ?x##0:wybe.int)<{<<global_flow_inference.res>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    case ~b##0:wybe.bool of
+    0:
+        foreign lpvm load(<<global_flow_inference.res>>:wybe.int, ?%x##0:wybe.int) @global_flow_inference:nn:nn
+
+    1:
+        foreign llvm move(0:wybe.int, ?x##0:wybe.int) @global_flow_inference:nn:nn
+
+
   LLVM code       :
 
 ; ModuleID = 'global_flow_inference'
@@ -107,6 +129,13 @@ if.then:
   ret void 
 if.else:
   ret void 
+}
+
+
+define external fastcc  i64 @"global_flow_inference.only_in<0>"()    {
+entry:
+  %0 = load  i64, i64* @"resource#global_flow_inference.res" 
+  ret i64 %0 
 }
 
 
@@ -147,4 +176,15 @@ define external fastcc  void @"global_flow_inference.rec_out_only_notail2<0>"() 
 entry:
   store  i64 1, i64* @"resource#global_flow_inference.res" 
   ret void 
+}
+
+
+define external fastcc  i64 @"global_flow_inference.still_only_in<0>"(i1  %"b##0")    {
+entry:
+  br i1 %"b##0", label %if.then, label %if.else 
+if.then:
+  ret i64 0 
+if.else:
+  %0 = load  i64, i64* @"resource#global_flow_inference.res" 
+  ret i64 %0 
 }

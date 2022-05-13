@@ -913,9 +913,9 @@ simplifyOp "icmp_ult" flags [a1, ArgInt 1 ty, output] = -- only 0 is < 1
 simplifyOp "icmp_ult" flags [arg1, arg2, output]
     | arg2 < arg1 = PrimForeign "llvm" "icmp_ugt" flags [arg2, arg1, output]
 simplifyOp "icmp_ule" _ [ArgInt n1 _, ArgInt n2 _, output] =
-  let n1' = undefined
-      n2' = undefined
-  in primMove (boolConstant $ n1<=n2) output
+  let n1' = fromIntegral n1 :: Word
+      n2' = fromIntegral n2 :: Word
+  in primMove (boolConstant $ n1'<=n2') output
 simplifyOp "icmp_ule" _ [ArgInt 0 _, _, output] = -- 0 is <= everything
   primMove (ArgInt 1 boolType) output
 simplifyOp "icmp_ule" flags [ArgInt 1 ty, a2, output] = -- 1 is <= all but 0

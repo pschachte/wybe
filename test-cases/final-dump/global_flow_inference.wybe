@@ -8,6 +8,14 @@ def {noinline} only_out(b:bool) use !res {
     if { b :: ?res = 2 | else :: ?res = 3 }
 }
 
+def {noinline} only_in(?x:int) use !res {
+    ?x = res
+}
+
+def {noinline} still_only_in(b:bool, ?x:int) use !res {
+    if { b :: ?x = 0 | else :: ?x = res }
+}
+
 def {noinline} rec_out_only1 use !res {
     ?res = 1
     !rec_out_only2
