@@ -351,7 +351,7 @@ doCodegenBody body = do
     entry <- addBlock entryBlockName
     -- Start with creation of blocks and adding instructions to it
     setBlock entry
-    proto <- gets proto
+    proto <- gets cgProto
     params <- lift2 $ protoRealParams proto
     let (ins,outs) = List.partition paramGoesIn params
     mapM_ assignParam ins
@@ -388,8 +388,9 @@ preassignOutput p = do
 -- For 1 single output, retrieve it's assigned operand from the symbol
 -- table, and for multiple outputs, generate code for creating an valid
 -- structure, pack the operands into it and return it.
-buildOutputOp :: PrimProto -> Codegen (Maybe Operand)
-buildOutputOp proto = do
+buildOutputOp :: Codegen (Maybe Operand)
+buildOutputOp = do
+    proto <- gets cgProto
     outParams <- lift2 $ protoRealParamsWhere paramGoesOut proto
     logCodegen $ "OutParams: " ++ show outParams
     outputs <- mapM (liftM3 castVar primParamName primParamType primParamFlow) outParams
@@ -436,52 +437,48 @@ structUnPack st = case typeOf st of
         _ -> shouldnt "expected struct to unpack"
 
 
--- | Generate basic blocks for a procedure body. The first block is named
--- 'entry' by default. All parameters go on the symbol table (output too).
+-- | Generate basic blocks for a procedure body.
 codegenBody :: ProcBody -> Codegen ()
 codegenBody body = do
     let prims = List.map content (bodyPrims body)
-    -- Filter out prims which contain only phantom arguments
     case bodyFork body of
         NoFork -> do
             cgen prims True
-            proto <- gets proto
-            retOp <- buildOutputOp proto
-            ret retOp
-            return ()
-        (PrimFork var ty _ fbody) -> do
+            M.void $ ret =<< buildOutputOp
+        PrimFork var ty _ fbody -> do
             cgen prims False
-            codegenForkBody var fbody
+            codegenFork var ty fbody 
 
--- | Code generation for a conditional branch. Currently a binary split
--- is handled, which each branch returning the left value of their last
--- instruction.
-codegenForkBody :: PrimVarName -> [ProcBody] -> Codegen ()
--- XXX Revise this to handle forks with more than two branches using
---     computed gotos
-codegenForkBody var [b1, b2] = do
-    ifthen <- addBlock "if.then"
-    ifelse <- addBlock "if.else"
 
-    testop <- castVar var boolType FlowOut
-    cbr testop ifthen ifelse
+-- | Code generation for a conditional branch. 
+-- XXX revise when LPVM can be transformed to have n>3-ary branches
+codegenFork :: PrimVarName -> TypeSpec -> [ProcBody] -> Codegen ()
+codegenFork _ _ [] = shouldnt "fork with no branches"
+codegenFork _ _ [body] = codegenBody body
+codegenFork var ty [bElse,bThen] = do
+    ifThen <- addBlock "if.then"
+    ifElse <- addBlock "if.else"
+    brOp <- castVar var ty FlowIn
+    cbr brOp ifThen ifElse
+    codegenForkBody ifThen bThen
+    codegenForkBody ifElse bElse
+codegenFork var ty bodies  = do
+    let nBodies = length bodies
+    let blockPrefix = "switch." ++ show nBodies ++ "."
+    names@(deflt:rest) <- mapM (addBlock . (blockPrefix ++) . show) 
+                            [1..nBodies]
+    brOp <- castVar var ty FlowIn
+    let bits = getBits $ typeOf brOp
+    switch brOp deflt (zip (C.Int bits <$> [1..]) rest)
+    zipWithM_ codegenForkBody names bodies
 
-    -- if.then
+
+-- | Code generation for the fork of a conditional branch
+codegenForkBody :: LLVMAST.Name -> ProcBody -> Codegen ()
+codegenForkBody name body =
     preservingSymtab $ do
-        setBlock ifthen
-        codegenBody b2
-
-    -- if.else
-    preservingSymtab $ do
-        setBlock ifelse
-        codegenBody b1
-
-    -- -- if.exit
-    -- setBlock ifexit
-    -- phi int_t [(trueval, ifthen), (falseval, ifelse)]
-
-codegenForkBody var _ =
-    nyi $ "Fork on non-Boolean variable " ++ show var
+        setBlock name
+        codegenBody body
 
 
 -- | Translate a Primitive statement (in clausal form) to a LLVM instruction.
@@ -502,7 +499,7 @@ cgen (prim@(PrimCall callSiteID pspec args _):nextPrims) isLeaf = do
     -- Find the prototype of the pspec being called
     -- and match it's parameters with the args here
     -- and remove the unneeded ones.
-    callerProto <- gets proto
+    callerProto <- gets cgProto
     calleeProto <- lift2 $ getProcPrimProto pspec
     logCodegen $ "Proto = " ++ show calleeProto
     args' <- prepareArgs args (primProtoParams calleeProto)
@@ -695,8 +692,8 @@ prepareArgs (a:as) (p:ps) = do
 
 cgenMaybeLoadReference :: Bool -> PrimArg -> Codegen ()
 cgenMaybeLoadReference callIsTailPosition arg@ArgVar { argVarName = name, argVarType = ty, argVarFlow = FlowOutByReference } = do
-    currentProto <- gets proto
-    outParams <- lift2 $ protoRealParamsWhere paramGoesOut currentProto
+    proto <- gets cgProto
+    outParams <- lift2 $ protoRealParamsWhere paramGoesOut proto
     let outParamNames = List.map primParamName outParams
     let isFlowOutParam = name `elem` outParamNames
     logCodegen $ "determining whether to `load` " ++ show name ++ " after call. callIsTailPosition=" ++ show callIsTailPosition ++ " isFlowOutParam=" ++ show isFlowOutParam
@@ -1034,7 +1031,7 @@ paramGoesOut = not . paramGoesIn
 -- attribute, so we need to carefully handle this case.
 cgenArgFull :: PrimArg -> Codegen (LLVMAST.Operand, AllocaTracking)
 cgenArgFull arg = do
-    opds <- gets (stOpds . symtab)
+    opds <- gets (stOpds . cgSymtab)
     case Map.lookup arg opds of
         Just opd -> noAlloca $ return opd
         Nothing -> do
@@ -1067,8 +1064,8 @@ cgenArgsFull args = do
 cgenArg' :: PrimArg -> Codegen (LLVMAST.Operand, AllocaTracking)
 cgenArg' var@ArgVar{argVarName=name, argVarType=ty, argVarFlow=flow@FlowOutByReference} = do
     op <- maybeGetVar (show name)
-    currentProto <- gets proto
-    outParams <- lift2 $ protoRealParamsWhere paramGoesOut currentProto
+    proto <- gets cgProto
+    outParams <- lift2 $ protoRealParamsWhere paramGoesOut proto
     let outParamNames = List.map primParamName outParams
     if isNothing op || name `elem` outParamNames then do
         -- This variable wasn't already defined or was an output param of the
@@ -1123,7 +1120,7 @@ getRefName name = name { primVarName = primVarName name ++ "#ref" }
 --                  is to comply with the stdlib string implementation
 cgenArgConst :: PrimArg -> Codegen C.Constant
 cgenArgConst arg = do
-    opds <- gets (stOpds . symtab)
+    opds <- gets (stOpds . cgSymtab)
     case Map.lookup arg opds of
         Just (ConstantOperand constant) -> return constant
         Just other -> shouldnt $ "cgenArgConst with " ++ show other
@@ -1267,7 +1264,7 @@ integerOrd = toInteger . ord
 -- | using a store instruction.
 assign :: String -> Operand -> Codegen ()
 assign var op = do
-    params <- gets (primProtoParams . proto)
+    params <- gets (primProtoParams . cgProto)
     let outByRefParamNames = List.map (show . primParamName) $ List.filter (\param -> FlowOutByReference == primParamFlow param) params
     if var `elem` outByRefParamNames then do
       logCodegen $ "assign outByReference " ++ var ++ " = " ++ show op ++ ":" ++ show (typeOf op)
