@@ -1,3 +1,0 @@
-def {terminal} foo {
-    do { pass }
-}

@@ -1,5 +1,0 @@
-resource x:int
-
-use x in {
-    ?x = 0
-}
