@@ -204,9 +204,14 @@ inferGlobalFlows' (ProcDefPrim pspec
 -- in the SCC and the Globals that occur in/out
 bodyGlobalFlows :: UnivSet GlobalInfo -> ProcBody -> GlobalFlows 
 bodyGlobalFlows oldFlows (ProcBody prims fork) 
-    = List.foldr (globalFlowsUnion . (snd . primArgs) . content) 
+    = List.foldr (globalFlowsUnion' . (snd . primArgs) . content) 
                  (forkGlobalFlows oldFlows fork) prims
-
+  where 
+    -- kill in-flows from second that have only an outwards flow in first
+    globalFlowsUnion' (GlobalFlows i1 o1) (GlobalFlows i2 o2)
+        = GlobalFlows 
+            (i1 `USet.union` whenFinite (`Set.difference` USet.toSet Set.empty o1) i2) 
+            (o1 `USet.union` o2)
 
 -- | Global flows that occur across forks, accounting for the old in/out flows.
 -- If a flow out does not occur in all branches, but at least 1, and occurs in
