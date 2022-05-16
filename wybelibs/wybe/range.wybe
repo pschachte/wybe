@@ -1,7 +1,7 @@
 # purpose: Standard Range Library, an fixed-stride integer range
 # since  : 0.1
 
-pragma no_standard_library
+pragma no_standard_library # Standard library can't depend on itself!
 
 use wybe.int, wybe.bool
 
