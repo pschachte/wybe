@@ -516,8 +516,7 @@ nonConstCtorItems vis uniq typeSpec numConsts numNonConsts tagBits tagLimit
     if size <= wordSize && tag <= tagLimit
       then do -- unboxed representation
       let fields =
-            reverse
-            $ snd
+            snd
             $ List.foldr
               (\(param,anon,_,sz) (shift,flds) ->
                   (shift+sz,(paramName param,anon,paramType param,shift,sz):flds))
