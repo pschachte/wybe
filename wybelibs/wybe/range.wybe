@@ -1,6 +1,10 @@
 # purpose: Standard Range Library, an fixed-stride integer range
 # since  : 0.1
 
+pragma no_standard_library
+
+use wybe.int, wybe.bool
+
 pub constructor range(start:int, stride:int, end:int)
 
 # Reverse-mode cons for a range.
@@ -31,26 +35,26 @@ pub def irange(start:int, stride:int, end:int):_ =
 # Operator to construct a range
 # Good ol' Edsgar
 # https://www.cs.utexas.edu/users/EWD/transcriptions/EWD08xx/EWD831.html
-pub def (start:int .. end:int):_ = 
+pub def (start:int .. end:int):_ =
     construct(start, if { start <= end :: 1 | else :: -1 }, end)
 
 # Size of a range
 pub def size(r:_):int = sz where {
     r = range(?start, ?stride, ?end)
     ?sz = if { signum(stride) ~= signum(end - start) :: 0
-             | 0 <= stride :: (end - start - 1) / stride + 1 
+             | 0 <= stride :: (end - start - 1) / stride + 1
              | else :: (start - end - 1) / -stride + 1 }
 }
 
 # Helper to construct a range, ensuring the range end is the final value
 def construct(start:int, stride:int, end:int):_ = r where {
     ?diff = (end - start) % stride
-    ?final = if { 0 <= stride :: 
+    ?final = if { 0 <= stride ::
                     if { diff = 0 :: max(start, end)
                        | else :: max(start, end + stride - diff) }
-                | else :: 
+                | else ::
                     if { diff = 0 :: min(start, end)
-                       | else :: min(start, end + diff) } 
+                       | else :: min(start, end + diff) }
                 }
     ?r = range(start, stride, final)
 }
