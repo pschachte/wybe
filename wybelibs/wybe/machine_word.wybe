@@ -1,4 +1,6 @@
 # purpose: Standard Machine Word type, a low level type holding a machine address
 # since  : 0.1
 
+pragma no_standard_library # Standard library can't depend on itself!
+
 representation is address
