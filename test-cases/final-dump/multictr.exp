@@ -217,21 +217,21 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 card > public {inline} (0 calls)
 0: multictr.card.card<0>
-card(suit##0:multictr.suit, rank##0:multictr.rank, ?#result##3:multictr.card)<{}; {}>:
+card(rank##0:multictr.rank, suit##0:multictr.suit, ?#result##3:multictr.card)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm shl(~rank##0:multictr.card, 2:multictr.card, ?#temp##1:multictr.card) @multictr:nn:nn
-    foreign llvm or(~#temp##1:multictr.card, ~suit##0:multictr.card, ?#result##3:multictr.card) @multictr:nn:nn
+    foreign llvm shl(~rank##0:multictr.card, 2:multictr.card, ?#temp##0:multictr.card) @multictr:nn:nn
+    foreign llvm or(~#temp##0:multictr.card, ~suit##0:multictr.card, ?#result##3:multictr.card) @multictr:nn:nn
 card > public {inline} (0 calls)
 1: multictr.card.card<1>
-card(?suit##0:multictr.suit, ?rank##0:multictr.rank, #result##0:multictr.card)<{}; {}>:
+card(?rank##0:multictr.rank, ?suit##0:multictr.suit, #result##0:multictr.card)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(#result##0:multictr.card, 3:multictr.card, ?#temp2##0:multictr.card) @multictr:nn:nn
-    foreign lpvm cast(~#temp2##0:multictr.card, ?suit##0:multictr.suit) @multictr:nn:nn
-    foreign llvm lshr(~#result##0:multictr.card, 2:multictr.card, ?#temp##1:multictr.card) @multictr:nn:nn
-    foreign llvm and(~#temp##1:multictr.card, 15:multictr.card, ?#temp2##1:multictr.card) @multictr:nn:nn
-    foreign lpvm cast(~#temp2##1:multictr.card, ?rank##0:multictr.rank) @multictr:nn:nn
+    foreign llvm lshr(#result##0:multictr.card, 2:multictr.card, ?#temp##0:multictr.card) @multictr:nn:nn
+    foreign llvm and(~#temp##0:multictr.card, 15:multictr.card, ?#temp2##0:multictr.card) @multictr:nn:nn
+    foreign lpvm cast(~#temp2##0:multictr.card, ?rank##0:multictr.rank) @multictr:nn:nn
+    foreign llvm and(~#result##0:multictr.card, 3:multictr.card, ?#temp2##1:multictr.card) @multictr:nn:nn
+    foreign lpvm cast(~#temp2##1:multictr.card, ?suit##0:multictr.suit) @multictr:nn:nn
 
 
 rank > public {inline} (0 calls)
@@ -297,7 +297,7 @@ entry:
 }
 
 
-define external fastcc  i6 @"multictr.card.card<0>"(i2  %"suit##0", i4  %"rank##0")    {
+define external fastcc  i6 @"multictr.card.card<0>"(i4  %"rank##0", i2  %"suit##0")    {
 entry:
   %0 = zext i4 %"rank##0" to i6  
   %1 = shl   i6 %0, 2 
@@ -307,16 +307,16 @@ entry:
 }
 
 
-define external fastcc  {i2, i4} @"multictr.card.card<1>"(i6  %"#result##0")    {
+define external fastcc  {i4, i2} @"multictr.card.card<1>"(i6  %"#result##0")    {
 entry:
-  %0 = and i6 %"#result##0", 3 
-  %1 = trunc i6 %0 to i2  
-  %2 = lshr  i6 %"#result##0", 2 
-  %3 = and i6 %2, 15 
-  %4 = trunc i6 %3 to i4  
-  %5 = insertvalue {i2, i4} undef, i2 %1, 0 
-  %6 = insertvalue {i2, i4} %5, i4 %4, 1 
-  ret {i2, i4} %6 
+  %0 = lshr  i6 %"#result##0", 2 
+  %1 = and i6 %0, 15 
+  %2 = trunc i6 %1 to i4  
+  %3 = and i6 %"#result##0", 3 
+  %4 = trunc i6 %3 to i2  
+  %5 = insertvalue {i4, i2} undef, i4 %2, 0 
+  %6 = insertvalue {i4, i2} %5, i2 %4, 1 
+  ret {i4, i2} %6 
 }
 
 
