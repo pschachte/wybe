@@ -5,6 +5,14 @@ use foreign object benchmark_impl
 
 representation is {unique} address
 
+# Nice high-level wrapper around `start` and `finish`,
+# it will return the time it takes to run `func`, a higher-order proc
+pub def measure(func: (A, ?B), input: A, ?output: B, ?seconds_elapsed: float) use !io {
+    !start(?state)
+    func(input, ?output)
+    !finish(state, ?seconds_elapsed)
+}
+
 # Starts a measurement
 #
 # Usage note: every call to `start` should be matched with exactly one call to
