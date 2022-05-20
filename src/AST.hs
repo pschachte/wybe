@@ -7,7 +7,6 @@
 
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
-{-# LANGUAGE TupleSections #-}
 
 -- |The abstract syntax tree, and supporting types and functions.
 --  This includes the parse tree, as well as the AST types, which
@@ -920,6 +919,8 @@ lookupType context pos ty = do
     return ty' 
 
 
+-- |Find the definition of the specified type visible from the current module.
+-- Errors relating to the lookup are returned along with the looked-up type
 lookupType' :: String -> OptPos -> TypeSpec -> Compiler ([Message], TypeSpec)
 lookupType' _ _ AnyType = return ([], AnyType)
 lookupType' _ _ InvalidType = return ([], InvalidType)

@@ -1,10 +1,11 @@
-{-# LANGUAGE TupleSections #-}
 --  File     : Types.hs
 --  Author   : Peter Schachte
 --  Purpose  : Type checker/inferencer for Wybe
 --  Copyright: (c) 2012 Peter Schachte.  All rights reserved.
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
+
+{-# LANGUAGE TupleSections #-}
 
 -- |Support for type checking/inference.
 module Types (validateModExportTypes, typeCheckModSCC) where
@@ -14,7 +15,7 @@ import           AST
 import           Debug.Trace
 import           Control.Monad
 import           Control.Monad.State
-import           Control.Monad.Extra (ifM, maybeM)
+import           Control.Monad.Extra (ifM)
 import           Data.Graph
 import           Data.List           as List
 import           Data.Map            as Map
@@ -23,7 +24,6 @@ import           Data.Either         as Either
 import           Data.Set            as Set
 import           UnivSet             as USet
 import           Data.Tuple.Select
-import           Data.Function (on)
 import           Data.Foldable
 import           Data.Bifunctor
 import           Data.Functor        ((<&>))
@@ -544,6 +544,9 @@ instance Show Typing where
        then " (with no errors)"
        else " with errors: " ++ show errs
 
+
+-- |Find the definition of the specified type visible from the current module.
+-- TypeErrors are reported in the case the lookup reports an error
 lookupTyped :: String -> OptPos -> TypeSpec -> Typed TypeSpec
 lookupTyped context pos ty = do
     (msgs, ty') <- lift $ lookupType' context pos ty
