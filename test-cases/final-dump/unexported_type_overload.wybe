@@ -1,0 +1,9 @@
+module sub {
+    pub def proc(x:char) { pass }
+
+    pub def proc(x:hidden) { pass }
+
+    type hidden { hidden }
+}
+
+pub def proc(x:bool) { proc(' ') }

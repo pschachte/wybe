@@ -7,6 +7,7 @@
 
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE TupleSections #-}
 
 -- |The abstract syntax tree, and supporting types and functions.
 --  This includes the parse tree, as well as the AST types, which
@@ -23,7 +24,7 @@ module AST (
   inliningName,
   TypeProto(..), TypeModifiers(..), TypeSpec(..), typeVarSet, TypeVarName(..),
   genericType, higherOrderType, isHigherOrder,
-  isResourcefulHigherOrder, updateHigherOrderTypesM, typeModule,
+  isResourcefulHigherOrder, typeModule,
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..),
   paramTypeFlow, primParamTypeFlow, setParamArgFlowType,
@@ -94,7 +95,7 @@ module AST (
   getModuleSpec, moduleIsType, option,
   getOrigin, getSource, getDirectory,
   optionallyPutStr, message, errmsg, (<!>), prettyPos, Message(..), queueMessage,
-  genProcName, addImport, doImport, importFromSupermodule, lookupType,
+  genProcName, addImport, doImport, importFromSupermodule, lookupType, lookupType',
   typeIsUnique,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
   initialisedResources,
@@ -913,17 +914,26 @@ addKnownType mspec = do
 
 -- |Find the definition of the specified type visible from the current module.
 lookupType :: String -> OptPos -> TypeSpec -> Compiler TypeSpec
-lookupType _ _ AnyType = return AnyType
-lookupType _ _ InvalidType = return InvalidType
-lookupType _ _ ty@TypeVariable{} = return ty
-lookupType _ _ ty@Representation{} = return ty
-lookupType context pos ty@HigherOrderType{} =
-    updateHigherOrderTypesM (lookupType context pos) ty
-lookupType context pos ty@(TypeSpec [] typename args)
+lookupType context pos ty = do
+    (msgs, ty') <- lookupType' context pos ty
+    mapM_ queueMessage msgs
+    return ty' 
+
+
+lookupType' :: String -> OptPos -> TypeSpec -> Compiler ([Message], TypeSpec)
+lookupType' _ _ AnyType = return ([], AnyType)
+lookupType' _ _ InvalidType = return ([], InvalidType)
+lookupType' _ _ ty@TypeVariable{} = return ([], ty)
+lookupType' _ _ ty@Representation{} = return ([], ty)
+lookupType' context pos ty@HigherOrderType{higherTypeParams=typeFlows} = do
+    (msgs, types) <- unzip <$> mapM (lookupType' context pos . typeFlowType) typeFlows
+    return (concat msgs, 
+            ty{higherTypeParams=zipWith TypeFlow types (typeFlowMode <$> typeFlows)})
+lookupType' context pos ty@(TypeSpec [] typename args)
   | typename == currentModuleAlias = do
     currMod <- getModuleSpec
-    return $ TypeSpec (init currMod) (last currMod) args
-lookupType context pos ty@(TypeSpec mod name args) = do
+    return ([], TypeSpec (init currMod) (last currMod) args)
+lookupType' context pos ty@(TypeSpec mod name args) = do
     currMod <- getModuleSpec
     logAST $ "In module " ++ showModSpec currMod
              ++ ", looking up type " ++ show ty
@@ -931,8 +941,8 @@ lookupType context pos ty@(TypeSpec mod name args) = do
     logAST $ "Candidates: " ++ showModSpecs (Set.toList mspecs)
     case Set.size mspecs of
         0 -> do
-            errmsg pos $ "In " ++ context ++ ", unknown type " ++ show ty
-            return InvalidType
+            let msg = "In " ++ context ++ ", unknown type " ++ show ty
+            return ([Message Error pos msg], InvalidType)
         1 -> do
             let mspec = Set.findMin mspecs
             maybeMod <- getLoadingModule mspec
@@ -941,21 +951,21 @@ lookupType context pos ty@(TypeSpec mod name args) = do
             then shouldnt $ "Found type isn't a type: " ++ show mspec
             else if length params == length args
             then do
-                args' <- mapM (lookupType context pos) args
+                (msgs, args') <- unzip <$> mapM (lookupType' context pos) args
                 let matchingType = TypeSpec (init mspec) (last mspec) args'
                 logAST $ "Matching type = " ++ show matchingType
-                return matchingType
+                return (concat msgs, matchingType)
             else do
-                errmsg pos $ "In " ++ context
-                    ++ ", type '" ++ name ++ "' expects "
-                    ++ show (length params)
-                    ++ " arguments, but " ++ show (length args)
-                    ++ " was given"
-                return InvalidType
+                let msg = "In " ++ context
+                        ++ ", type '" ++ name ++ "' expects "
+                        ++ show (length params)
+                        ++ " arguments, but " ++ show (length args)
+                        ++ " was given"
+                return ([Message Error pos msg], InvalidType)
         _ -> do
-            errmsg pos $ "In " ++ context ++ ", type " ++ show ty ++
-                        " could refer to: " ++ showModSpecs (Set.toList mspecs)
-            return InvalidType
+            let msg = "In " ++ context ++ ", type " ++ show ty ++
+                      " could refer to: " ++ showModSpecs (Set.toList mspecs)
+            return ([Message Error pos msg], InvalidType)
 
 
 -- | Check if a type is unique
@@ -2644,14 +2654,6 @@ isResourcefulHigherOrder (HigherOrderType ProcModifiers{modifierResourceful=resf
 isResourcefulHigherOrder (TypeSpec _ _ tys) =
     any isResourcefulHigherOrder tys
 isResourcefulHigherOrder _ = False
-
-updateHigherOrderTypesM :: Monad m => (TypeSpec -> m TypeSpec) -> TypeSpec -> m TypeSpec
-updateHigherOrderTypesM trans ty@HigherOrderType{higherTypeDetism=mods,
-                                                 higherTypeParams=typeFlows} = do
-    types <- mapM trans $ typeFlowType <$> typeFlows
-    return $ ty{higherTypeParams=zipWith TypeFlow types (typeFlowMode <$> typeFlows)}
-updateHigherOrderTypesM _ ty =
-    shouldnt $ "updateHigherOrderTypesM on " ++ show ty
 
 
 -- | Return the module of the specified type, if it has one.
