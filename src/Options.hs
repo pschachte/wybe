@@ -44,6 +44,7 @@ data Options = Options
                                   -- ^LLVM optimisation level, or invalid
     , optNoLLVMOpt    :: Bool     -- ^Don't run the LLVM optimisation passes
     , optNoMultiSpecz :: Bool     -- ^Disable multiple specialization
+    , optNoTCMC       :: Bool     -- ^Disable tail-call-modulo-construction optimization
     , optDumpLib      :: Bool     -- ^Also dump wybe.* modules when dumping
     , optVerbose      :: Bool     -- ^Be verbose in compiler output
     , optNoFont       :: Bool     -- ^Disable ISO font change codes in messages
@@ -66,6 +67,7 @@ defaultOptions = Options
   , optLLVMOptLevel = Right 3
   , optNoLLVMOpt    = False
   , optNoMultiSpecz = False
+  , optNoTCMC       = False
   , optDumpLib      = False
   , optVerbose      = False
   , optNoFont       = False
@@ -160,6 +162,9 @@ options =
  , Option []     ["no-multi-specz"]
      (NoArg (\opts -> opts { optNoMultiSpecz = True }))
      "disable multiple specialization"
+ , Option []     ["no-tcmc"]
+     (NoArg (\opts -> opts { optNoTCMC = True }))
+     "disable tail-call-modulo-construction optimization"
  , Option []     ["dump-lib"]
      (NoArg (\opts -> opts { optDumpLib = True }))
      "also dump wybe library when dumping"
