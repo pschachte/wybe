@@ -1600,7 +1600,8 @@ matchTypeList callee pos callTypes
                        $ zip [1..] matches
     return $ if List.null mismatches
     then OK (calleeInfo{firstInfoTypes=matches}, typing)
-    else Err [ReasonArgType partial callee n pos | n <- mismatches]
+    else Err $ [ReasonArgType partial callee n pos | n <- mismatches] 
+            ++ typingErrs typing
 matchTypeList _ _ _ info = shouldnt $ "matchTypeList on " ++ show info
 
 
