@@ -1,0 +1,22 @@
+# purpose: Utilities for benchmarking Wybe code
+# since  : 0.1
+
+use foreign object benchmark_impl
+
+representation is {unique} address
+
+# Starts a measurement
+#
+# Usage note: every call to `start` should be matched with exactly one call to
+# `finish`, since internally `start` and `finish` malloc and
+# free a internal C data structure.
+pub def start(?state: _) use !io {
+    foreign c benchmark_start(?state, !io)
+}
+
+# Completes a measurement, returns a floating-point number seconds_elapsed
+# This may only be called once (this is enforced by the compiler since the
+# state argument is marked with `{unique}`)
+pub def finish(state: _, ?seconds_elapsed: float) use !io {
+    foreign c benchmark_finish(state, ?seconds_elapsed, !io)
+}

@@ -12,7 +12,7 @@ INSTALLLIB=/usr/local/lib/wybe
 VERSION = 0.1
 SRCDIR = src
 LIBDIR = wybelibs
-WYBELIBS = wybe.o command_line.o logging.o
+WYBELIBS = wybe.o command_line.o logging.o benchmark.o
 CLIBS = wybe/cbits.o
 LIBS = $(WYBELIBS) $(CLIBS)
 SHELL := /bin/bash
@@ -55,6 +55,8 @@ $(LIBDIR)/wybe.o:	wybemk $(LIBDIR)/wybe/*.wybe
 $(LIBDIR)/wybe/cbits.o: $(LIBDIR)/wybe/cbits.c
 	clang $(ISSYSROOT) -I /usr/local/include -c "$<" -o "$@"
 
+$(LIBDIR)/benchmark_impl.o: $(LIBDIR)/benchmark_impl.c
+	clang $(ISSYSROOT) -I /usr/local/include -c "$<" -o "$@"
 
 $(SRCDIR)/Version.lhs:	$(addprefix $(SRCDIR)/,*.hs)
 	@echo -e "Generating Version.lhs for version $(VERSION)"
