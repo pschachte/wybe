@@ -20,9 +20,9 @@ def build_list_of_length(n: int, x0: int, ?l: list(int)) {
 }
 
 build_list_of_length(100, 0, ?l)
-!println(l, int.print)
+!println(l, print)
 !benchmark.measure({ naive_reverse(@1, ?@2) }, l, ?l2, ?time)
-!println(l2, int.print)
+!println(l2, print)
 if { time > 0.0 && time < 0.01 ::
     !println("benchmark took a reasonable amount of time")
     | else ::
