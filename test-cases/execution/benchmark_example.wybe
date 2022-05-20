@@ -1,0 +1,31 @@
+use benchmark
+
+def naive_reverse(x: list(T), ?y: list(T)) {
+    if {
+        [ ?h | ?t] = x ::
+            naive_reverse(t, ?t2)
+            ?y = t2 ,, [h]
+        | else ::
+            ?y = []
+    }
+}
+
+def build_list_of_length(n: int, x0: int, ?l: list(int)) {
+    if { n = 0 ::
+        ?l = []
+        | else ::
+        build_list_of_length(n-1, x0 + 1, ?t)
+        ?l = [x0 | t]
+    }
+}
+
+build_list_of_length(100, 0, ?l)
+!println(l, int.print)
+!benchmark.measure({ naive_reverse(@1, ?@2) }, l, ?l2, ?time)
+!println(l2, int.print)
+if { time > 0.0 && time < 0.01 ::
+    !println("benchmark took a reasonable amount of time")
+    | else ::
+    !println("benchmark took too long: ")
+    !print(time)
+}
