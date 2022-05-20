@@ -13,7 +13,7 @@ VERSION = 0.1
 SRCDIR = src
 LIBDIR = wybelibs
 WYBELIBS = wybe.o command_line.o logging.o benchmark.o
-CLIBS = wybe/cbits.o
+CLIBS = wybe/cbits.o benchmark_impl.o
 LIBS = $(WYBELIBS) $(CLIBS)
 SHELL := /bin/bash
 
