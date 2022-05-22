@@ -116,11 +116,11 @@ checkNoNestedUnique :: OptPos -> Param -> Compiler ()
 checkNoNestedUnique pos member =
     when (flowsIn $ paramFlow member) $ do
         let ty = paramType member
-        ty' <- lookupType "ensureNotUnique" pos ty
+        ty' <- lookupType "uniqueness" pos ty
         case typeModule ty' of
             Nothing -> return ()
             Just mod -> do
-                isUnique <- getSpecModule "ensureNotUnique"
+                isUnique <- getSpecModule "checkNoNestedUnique"
                             (tmUniqueness . typeModifiers . modInterface) mod
                 when isUnique
                   $ errmsg pos $ "Unique constructor argument " ++ paramName member
