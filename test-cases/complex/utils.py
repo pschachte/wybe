@@ -94,7 +94,7 @@ class Context:
         if force_all:
             args.append("--force-all")
         if no_multi_specz:
-            args.append("--no-multi-specz")
+            args.append("--opt=no-multi-specz")
         args.append(target)
 
         r = subprocess.run(args, timeout=TIMEOUT,

@@ -35,7 +35,8 @@ import           LLVM.Target
 import           LLVM.Analysis              (verify)
 import           ObjectInterface
 import           Options                    (LogSelection (Blocks,Builder,Emit),
-                                             optNoVerifyLLVM, optNoLLVMOpt, Options (optLLVMOptLevel, Options))
+                                             Options(..), optNoVerifyLLVM, optLLVMOptLevel,
+                                             optimisationEnabled, OptFlag(LLVMOpt))
 import           System.Exit                (ExitCode (..))
 import           System.Process
 import           System.FilePath            ((-<.>))
@@ -115,7 +116,7 @@ emitAssemblyFile m f = do
     llmod <- descendentModuleLLVM m
     logEmit $ "===> Writing assembly file " ++ filename
     opts <- gets options
-    let withMod = if optNoLLVMOpt opts then withModule else withOptimisedModule
+    let withMod = if optimisationEnabled LLVMOpt opts then withOptimisedModule else withModule 
     liftIO $ withMod opts llmod
         (\mm -> withHostTargetMachineDefault $ \_ ->
             writeLLVMAssemblyToFile (File filename) mm)
@@ -204,12 +205,11 @@ passes lvl = defaultCuratedPassSetSpec { optLevel = Just lvl }
 withOptimisedModule :: Options -> LLVMAST.Module -> (Mod.Module -> IO a) -> IO a
 withOptimisedModule opts@Options{optLLVMOptLevel=lvl} llmod action =
     withModule opts llmod $ \m -> do
-        withPassManager (passes lvl') $ \pm -> do
+        withPassManager (passes lvl) $ \pm -> do
             success <- runPassManager pm m
             if success
-                then action m
-                else error "Running of optimisation passes not successful"
-    where lvl' = either (shouldnt "bad llvm opt level") id lvl
+            then action m
+            else error "Running of optimisation passes not successful"
 
 
 -- | Bracket pattern to run an [action] on the [LLVMAST.Module].
