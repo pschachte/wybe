@@ -12,7 +12,8 @@ module LastCallAnalysis (lastCallAnalyseMod, lastCallAnalyseProc) where
 import AST
 import qualified Data.List as List
 import qualified UnivSet
-import Options (LogSelection(LastCallAnalysis), Options (optNoTCMC))
+import Options (LogSelection(LastCallAnalysis),
+                optimisationEnabled, OptFlag(TailCallModCons))
 import Util (sccElts, lift2)
 import Data.Foldable (foldrM)
 import Data.List.Predicate (allUnique)
@@ -34,7 +35,7 @@ lastCallAnalyseMod thisMod = do
     logLastCallAnalysis $ ">>> Ordered Procs:" ++ show orderedProcs
     logLastCallAnalysis $ ">>> Analyse SCCs: \n" ++
         unlines (List.map ((++) "    " . show . sccElts) orderedProcs)
-    tcmcOpt <- gets (not . optNoTCMC . options)
+    tcmcOpt <- gets (optimisationEnabled TailCallModCons . options)
     when tcmcOpt $ mapM_ (updateEachProcM lastCallAnalyseProc) orderedProcs
     -- we need to fixup calls regardless whether tcmc is enabled or not,
     -- as there could be modified calls to e.g.: standard library functions

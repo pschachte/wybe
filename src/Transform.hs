@@ -24,7 +24,8 @@ import           Data.Map      as Map
 import           Data.Maybe    as Maybe
 import           Data.Set      as Set
 import           Flow          ((|>))
-import           Options       (LogSelection (Transform), optNoMultiSpecz)
+import           Options       (LogSelection (Transform), 
+                                OptFlag(MultiSpecz), optimisationEnabled)
 import           Util
 
 
@@ -156,10 +157,10 @@ transformPrim callSiteMap (aliasMap, deadCells) prim = do
 
     (primc', deadCells') <- case primc of
             PrimCall id spec args gFlows -> do
-                noMultiSpecz <- lift $ gets (optNoMultiSpecz . options)
-                let spec' = if noMultiSpecz
-                    then spec
-                    else Map.findWithDefault spec id callSiteMap
+                doMultiSpecz <- lift $ gets (optimisationEnabled MultiSpecz . options)
+                let spec' = if doMultiSpecz
+                    then Map.findWithDefault spec id callSiteMap
+                    else spec
                 return (PrimCall id spec' args gFlows, deadCells)
             PrimForeign "lpvm" "mutate" flags args -> do
                 let args' = _updateMutateForAlias aliasMap args
