@@ -1110,10 +1110,12 @@ typecheckProcDecl' m pdef = do
         let (calls, bodyRes) = bodyCallsResources False def
         logTyped $ "   containing calls: " ++ showBody 8 calls
         logTyped $ "   inner resources: " ++ show (fst <$> bodyRes)
-        let assignedVars = foldStmts
-                                (const . const)
-                                ((const .) . (. expOutputs) . Set.union)
-                                inputs def
+        let assignedVars = 
+                foldStmts 
+                    (const . const)
+                    (\outs exp _ -> 
+                        outs `Set.union` (expOutputs exp `Set.difference` expInputs exp))
+                    inputs def
         logTyped $ "   with assigned vars: " ++ show assignedVars
         logTyped $ "Recording parameter types: "
                    ++ intercalate ", " (show <$> params)
