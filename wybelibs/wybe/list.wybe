@@ -9,7 +9,7 @@ use wybe.io
 pub constructors (T) [] | [head:T | tail:_(T)]
 
 # Is the list empty?
-pub def {test} null(xs:_(T)) {
+pub def {test} empty(xs:_(T)) {
     if { [_ | _] = xs :: fail }
 }
 
@@ -18,23 +18,23 @@ pub def (x:_(T) ,, y:_(T)):_(T) =
     if { x = [?h | ?t] :: [h | t ,, y] | else :: y }
 
 # List length
-pub def length(x:_(T)) : int = length1(x, 0)
+pub def length(x:_(T)):int = length1(x, 0)
 
 # Helper for length
-def length1(x:_(T), acc:int) : int =
+def length1(x:_(T), acc:int):int =
     if { x = [?h | ?t] :: length1(t, acc + 1) | else :: acc }
 
 # List reversal
 pub def reverse(x:_(T)):_(T) = reverse1(x, [])
 
-# Helper for length
+# Helper for reverse
 def reverse1(x:_(T), tail:_(T)):_(T) =
     if { x = [?h | ?t] :: reverse1(t, [h | tail]) | else :: tail }
 
 # List index
 # Fails if the index is out of the "bounds" of the list
 pub def {test} `[]`(xs:_(T), idx:int):T = x where {
-    idx >= 0 # we dont want to check this every time
+    idx >= 0 # we don't want to check this every time
     ?x = index1(xs, idx)
 }
 
@@ -58,7 +58,8 @@ pub def map(f:(A, ?B), as:_(A)):_(B) =
     if { [?a | ?as] = as :: [ f(a) | map(f, as) ] | else :: [] }
 
 # List map
-# Map a procedure over two lists, producing a third of the results 
+# Map a procedure over two lists, producing a list of the results.
+# The tailing elements of the longer list are ignored
 pub def map(f:(A, B, ?C), as:_(A), bs:_(B)):_(C) =
     if { [?a | ?as] = as & [?b | ?bs] = bs :: [ f(a, b) | map(f, as, bs) ]
        | else                              :: [] }
@@ -72,7 +73,7 @@ pub def {test} all(p:{test}(T), xs:_(T)) {
 }
 
 # Any
-# Apply a test to all elements of a list. Succeed if at least one tests succeed
+# Apply a test to all elements of a list. Succeed if at least one test succeeds
 pub def {test} any(p:{test}(T), xs:_(T)) {
     [?x | ?xs] = xs
     (p(x) | any(p, xs))
@@ -97,7 +98,7 @@ pub def foldr(f:(A, !B), as:_(A), !b:B) {
     }
 }
 
-# Foldl
+# Filter
 # Filter elements from a list where the test succeeds
 pub def filter(p:{test}(T), !xs:_(T)) {
     ?out = []
