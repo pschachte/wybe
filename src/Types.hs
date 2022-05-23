@@ -468,7 +468,7 @@ typeErrorMessage ReasonShouldnt =
     Message Error Nothing "Mysterious typing error"
 typeErrorMessage (ReasonActuallyPure name impurity pos) =
     Message Warning pos $
-        "Calling proc " ++ showProcName name ++ " with unneeded ! marker"
+        "Calling " ++ showProcName name ++ " with unneeded ! marker"
 -- XXX These won't work until we better infer terminalness
 -- typeErrorMessage (ReasonUndeclaredTerminal name pos) =
 --     Message Warning pos $
