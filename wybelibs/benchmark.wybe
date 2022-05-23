@@ -3,14 +3,12 @@
 
 use foreign object benchmark_impl
 
-representation is {unique} address
-
 # Nice high-level wrapper around `start` and `finish`,
 # it will return the time it takes to run `func`, a higher-order proc
-pub def measure(func: (A, ?B), input: A, ?output: B, ?seconds_elapsed: float) use !io {
-    !start(?state)
-    func(input, ?output)
-    !finish(state, ?seconds_elapsed)
+pub def measure(func: {impure} (), ?seconds_elapsed: float) {
+    start(?started)
+    !func()
+    finish(started, ?seconds_elapsed)
 }
 
 # Starts a measurement
@@ -18,13 +16,14 @@ pub def measure(func: (A, ?B), input: A, ?output: B, ?seconds_elapsed: float) us
 # Usage note: every call to `start` should be matched with exactly one call to
 # `finish`, since internally `start` and `finish` malloc and
 # free a internal C data structure.
-pub def start(?state: _) use !io {
-    foreign c benchmark_start(?state, !io)
+pub def start(?started: float) {
+    foreign c get_clock_time(?started)
 }
 
 # Completes a measurement, returns a floating-point number seconds_elapsed
 # This may only be called once (this is enforced by the compiler since the
 # state argument is marked with `{unique}`)
-pub def finish(state: _, ?seconds_elapsed: float) use !io {
-    foreign c benchmark_finish(state, ?seconds_elapsed, !io)
+pub def finish(started: float, ?seconds_elapsed: float) {
+    foreign c get_clock_time(?finished)
+    ?seconds_elapsed = finished - started
 }
