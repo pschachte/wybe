@@ -971,6 +971,7 @@ transformModuleProcs trans thisMod = do
     -- (names, procs) <- :: StateT CompilerState IO ([Ident], [[ProcDef]])
     (names,procs) <- unzip <$>
                      getModuleImplementationField (Map.toList . modProcs)
+    logBuild $ show (names, List.map procName $ concat procs)
     -- for each name we have a list of procdefs, so we must double map
     procs' <- mapM (zipWithM (flip trans) [0..]) procs
     updateImplementation

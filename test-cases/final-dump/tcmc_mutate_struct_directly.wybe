@@ -1,0 +1,15 @@
+# suboptimal code generation at the moment - we want to
+# write `l ,, l2` directly into second field of the structure `combined`.
+
+type combined(T) {
+    pub combined(x: T, y: list(T), z: list(T))
+}
+
+pub def appendstuff(l: list(int), l2: list(int), ?result: combined(int)) {
+    ?result = combined(length(l) + length(l2), l ,, l2, l2 ,, l)
+}
+
+appendstuff([1,2,3], [4,5,6], ?l2)
+!println(combined.x(l2))
+!println(combined.y(l2), print)
+!println(combined.z(l2), print)

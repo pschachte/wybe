@@ -7,6 +7,7 @@
 --           : LICENSE in the root directory of this project.
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE FlexibleInstances #-}
 
 module LastCallAnalysis (lastCallAnalyseMod, lastCallAnalyseProc) where
 import AST
@@ -24,6 +25,7 @@ import Control.Monad ( liftM, (>=>), when )
 import Data.Set (Set)
 import qualified Data.Set as Set
 import Control.Monad.Trans.Maybe (MaybeT (runMaybeT))
+import Data.Binary.Get (remaining)
 
 -- | Perform last call analysis on a single module.
 -- Internally, we perform analysis bottom-up on proc SCCs.
@@ -37,9 +39,12 @@ lastCallAnalyseMod thisMod = do
         unlines (List.map ((++) "    " . show . sccElts) orderedProcs)
     tcmcOpt <- gets (optimisationEnabled TailCallModCons . options)
     when tcmcOpt $ mapM_ (updateEachProcM lastCallAnalyseProc) orderedProcs
-    -- we need to fixup calls regardless whether tcmc is enabled or not,
+    -- We need to fixup calls regardless whether tcmc is enabled or not,
     -- as there could be modified calls to e.g.: standard library functions
-    mapM_ (updateEachProcM fixupCallsInProc) orderedProcs
+    -- Also, we try where possible to write outByReference outputs from other
+    -- calls directly into a destination structure, rather than first `load`
+    -- then `mutate`.
+    mapM_ (updateEachProcM fixupProc) orderedProcs
     reexitModule
 
 -- | Apply a mapping function to each proc in an SCC
@@ -83,25 +88,29 @@ type LeafTransformer = MaybeT (StateT LeafTransformState Compiler)
 
 -- | Run our analysis on a single leaf of the function body,
 -- collecting state inside the LeafTransformer monad.
+--
+-- XXX: we should relax the assumption that last calls must be in the
+-- leaves of a proc body, as there are real-world examples which defy this
+-- assumption, e.g.: see test-cases/final-dump/tcmc_partition.wybe.
 transformLeaf :: [Placed Prim] -> LeafTransformer [Placed Prim]
 transformLeaf lastBlock = do
     spec <- gets procSpec
     case partitionLastCall lastBlock of
-        -- TODO: use multiple specialization to relax the restriction that
-        --       the last call is a directly-recursive call...
+        -- XXX: we currently only consider directly-recursive calls,
+        --      it would be nice to handle mutual recursion too.
         (Just (beforeCall, lastCall), afterLastCall@(_:_)) | primIsCallToProcSpec lastCall spec -> do
             logLeaf $ "identified a directly-recursive last-call: " ++ show lastCall
             logLeaf $ "before: " ++ show beforeCall ++ "\nafter: " ++ show afterLastCall
-            -- First we identify all the prims which can be trivially moved before the last call
-            -- i.e.: the prim doesn't depend on any values produced by the last call (or subsequent prims)
-            let moveResult = tryMovePrimsBeforeLastCall lastCall afterLastCall MovePrimsResult { remaining = [], succeeded = [] }
-            let remainingAfterLastCall = reverse $ remaining moveResult
-            let movedBeforeLastCall = reverse $ succeeded moveResult
-            logLeaf $ "prims still remaining after last call: " ++ show remainingAfterLastCall
+            -- First we identify whether we can move this last call below some of the prims
+            -- i.e.: the prims don't depend on any values produced by the last call
+            let (movedAboveCall, remainingBelowCall) = tryMovePrimAfterPrims lastCall afterLastCall
+            logLeaf $ "prims still remaining below last call: " ++ show remainingBelowCall
             -- Next, we look at the remaining prims which couldn't be simply moved before the last call,
-            -- to see if they are just "filling in the fields" of struct(s) with outputs from the last call.
-            case foldrM (analyzePrimAfterLastCall lastCall) [] remainingAfterLastCall of
-                Right mutateChains -> do
+            -- to see if they are just "filling in the fields" of struct(s) with
+            -- outputs from the last call.
+            (mutateChains, remainingBelowCall') <- lift2 $ analyzePrimsAfterCall lastCall remainingBelowCall
+            case remainingBelowCall' of
+                [] -> do
                     -- The output parameters which we want to convert to be
                     -- `FlowOutByReference` are the union of parameters we want to
                     -- convert for each leaf in the proc body.
@@ -111,14 +120,14 @@ transformLeaf lastBlock = do
 
                     -- We annotate the final call + remaining mutates with appropriate
                     -- `FlowOutByReference` and `FlowTakeReference` flows.
-                    body' <- lift2 $ buildTailCallLeaf (beforeCall ++ movedBeforeLastCall) lastCall mutateChains
+                    body' <- lift2 $ buildTailCallLeaf (beforeCall ++ movedAboveCall) lastCall mutateChains
 
                     logLeaf "remaining prims meet requirements tail call transformation"
                     logLeaf $ "identified mutate chains: " ++ show mutateChains
                     logLeaf $ "modified body: " ++ show body'
                     return body'
-                Left error -> do
-                    logLeaf $ "remaining prims didn't satisfy constraints: " ++ error
+                _ -> do
+                    logLeaf $ "there were leftover prims which didn't satisfy constraints: " ++ show remainingBelowCall'
                     return lastBlock
         (Just (_, call), []) | primIsCallToProcSpec call spec -> do
             logLeaf "directly-recursive last call is already in tail position"
@@ -135,13 +144,11 @@ primIsCallToProcSpec p spec = case content p of
 
 -- | Returns true if `prim` uses any of the outputs generated by `otherPrims`
 -- If this is the case, then it is not possible to move `prim` before the last call.
-primUsesOutputsOfOtherPrims :: Placed Prim -> [Placed Prim] -> Bool
-primUsesOutputsOfOtherPrims p ps =
-    let prim = content p
-        otherPrims = List.map content ps
-        (args, globals) = primArgs prim
-        vars = varsInPrimArgs FlowIn args
-        otherPrimOutputs = varsInPrims FlowOut otherPrims
+primUsesOutputsOfOtherPrims :: Prim -> [Prim] -> Bool
+primUsesOutputsOfOtherPrims prim otherPrims =
+    let (args, globals) = primArgs prim
+        vars = varsInPrimArgs isInputFlow args
+        otherPrimOutputs = varsInPrims isOutputFlow otherPrims
     in
     -- if the prim refers to any global variables, then skip reordering (conservative approximation for now)
     -- otherwise, check it doesn't refer to any outputs from `otherPrims`
@@ -166,7 +173,7 @@ modifyProto proto outputNames = do
 -- | Instead of a series of mutates *after* the last call, we instead
 -- perform some extra setup *before* the last call, allowing the last call
 -- of this block to be in tail-position.
-buildTailCallLeaf :: [Placed Prim] -> Placed Prim -> [MutateChain] -> Compiler [Placed Prim]
+buildTailCallLeaf :: [Placed Prim] -> Placed Prim -> [MutateChain (Placed Prim)] -> Compiler [Placed Prim]
 buildTailCallLeaf beforeCall call mutateChains = do
     let modifiedMutates = concatMap annotateFinalMutates mutateChains
     let call' = contentApply (transformIntoTailCall mutateChains) call
@@ -177,18 +184,18 @@ buildTailCallLeaf beforeCall call mutateChains = do
 -- instead, we take a reference to the memory location the mutate would have
 -- written to, and pass that reference into the tail call as an `outByReference`
 -- parameter.
-annotateFinalMutates :: MutateChain -> [Placed Prim]
+annotateFinalMutates :: HasPrim a => MutateChain a -> [a]
 annotateFinalMutates = map $
-    contentApply (\case {
-            PrimForeign "lpvm" "mutate" [] [input, output, offset, destructive, size, startOffset, val] ->
-                PrimForeign "lpvm" "mutate" [] [input, output, offset, destructive, size, startOffset, setArgFlow FlowTakeReference val ];
+    mapPrim (\case {
+            PrimForeign "lpvm" "mutate" flags [input, output, offset, destructive, size, startOffset, val] ->
+                PrimForeign "lpvm" "mutate" flags [input, output, offset, destructive, size, startOffset, setArgFlow FlowTakeReference val ];
             _ -> shouldnt "must be mutate instr"
     }) . prim
 
 -- | Given a set of mutate chains (which are linear sequences of mutations
 -- occuring after the call), decorate this call with appropriate
 -- `outByReference` args.
-transformIntoTailCall :: [MutateChain] -> Prim -> Prim
+transformIntoTailCall :: [MutateChain a] -> Prim -> Prim
 transformIntoTailCall mutateChains (PrimCall siteId spec args globalFlows) =
     let mutates = concat mutateChains in
     PrimCall siteId spec (map (\arg ->
@@ -199,52 +206,85 @@ transformIntoTailCall mutateChains (PrimCall siteId spec args globalFlows) =
         ) args) globalFlows
 transformIntoTailCall mutateChains _ = shouldnt "not a call"
 
-data MovePrimsResult = MovePrimsResult {
-    succeeded :: [Placed Prim],
-    remaining :: [Placed Prim]
-}
-
-data MutateInstr = MutateInstr {
-    prim      :: Placed Prim,
+data MutateInstr a = MutateInstr {
+    prim      :: a,
     inputName :: PrimVarName,
     outputName :: PrimVarName,
     valueName :: PrimVarName,
     offset :: Integer
 } deriving(Show)
 
-type MutateChain = [MutateInstr]
+type MutateChain a = [MutateInstr a]
 type LastCall = Placed Prim
 
-tryMovePrimsBeforeLastCall :: LastCall -> [Placed Prim] -> MovePrimsResult -> MovePrimsResult
-tryMovePrimsBeforeLastCall lastCall [] state = state
-tryMovePrimsBeforeLastCall lastCall (prim:nextPrims) state = if primUsesOutputsOfOtherPrims prim (lastCall : remaining state ++ nextPrims)
-    then tryMovePrimsBeforeLastCall lastCall nextPrims state { remaining = prim : remaining state }
-    else tryMovePrimsBeforeLastCall lastCall nextPrims state { succeeded = prim : succeeded state }
+class Show a => HasPrim a where
+    getPrim :: a -> Prim
+    mapPrim :: (Prim->Prim) -> a -> a
+
+instance HasPrim (Placed Prim) where
+    getPrim = content
+    mapPrim = contentApply
+
+instance HasPrim (Bool, Placed Prim) where
+    getPrim (_, p) = content p
+    mapPrim f (x, p) = (x, contentApply f p)
+
+-- XXX: may need to update 'last use' flags here?
+tryMovePrimAfterPrims :: HasPrim a => a -> [a] -> ([a], [a])
+tryMovePrimAfterPrims prim otherPrims =
+    let (above, below) = tryMovePrimAfterPrims' prim otherPrims ([], []) in (reverse above, reverse below)
+
+tryMovePrimAfterPrims' :: HasPrim a => a -> [a] -> ([a], [a]) -> ([a], [a])
+tryMovePrimAfterPrims' _ [] state = state
+tryMovePrimAfterPrims' prim (nextPrim:nextPrims) (above, below) =
+    let nextPrim' = getPrim nextPrim
+        otherPrims = List.map getPrim (prim : below ++ nextPrims) in
+    if primUsesOutputsOfOtherPrims nextPrim' otherPrims
+    then tryMovePrimAfterPrims' prim nextPrims (above, nextPrim : below)
+    else tryMovePrimAfterPrims' prim nextPrims (nextPrim : above, below)
+
+analyzePrimsAfterCall :: HasPrim a => a ->  [a] -> Compiler ([MutateChain a], [a])
+analyzePrimsAfterCall call = foldrM (analyzePrimAfterCall call) ([], [])
 
 -- | The only prims allowed after a "would-be tail call" are `foreign lpvm mutate`
--- instructions, which specific conditions (i.e.: the fields they are writing
+-- instructions, with specific conditions (i.e.: the fields they are writing
 -- into don't alias)
-analyzePrimAfterLastCall :: LastCall -> Placed Prim -> [MutateChain] -> Either String [MutateChain]
-analyzePrimAfterLastCall lastCall prim state = case content prim of
-    PrimForeign "lpvm" "mutate" _ mutateInstr@[
-        ArgVar { argVarName = inputName, argVarFlow = FlowIn },
-        ArgVar { argVarName = outputName, argVarFlow = FlowOut },
-        offsetArg,
-        ArgInt 1 _,
-        _,
-        _,
-        ArgVar { argVarName = valueName, argVarFlow = FlowIn, argVarFinal = final }]
-      | valueName `elem` varsInPrim FlowOut (content lastCall) -> if not final
-          then Left $ show valueName ++ " is used in more than one place"
-          else tryAddToMutateChain lastCall state MutateInstr { prim = prim, inputName = inputName, outputName = outputName, offset = trustArgInt offsetArg, valueName = valueName } state
-    prim -> Left "not a mutate instr or doesn't satisfy constraints"
+-- We expect this to be used with `foldr`, so prims are processed from final prim
+-- back to first prim after the last call.
+analyzePrimAfterCall :: HasPrim a => a -> a -> ([MutateChain a], [a]) -> Compiler ([MutateChain a], [a])
+analyzePrimAfterCall lastCall prim (chains, unsuccessfulPrims) = do
+    case getPrim prim of
+        PrimForeign "lpvm" "mutate" _ mutateInstr@[
+            ArgVar { argVarName = input, argVarFlow = FlowIn },
+            ArgVar { argVarName = output, argVarFlow = FlowOut },
+            offsetArg, ArgInt 1 _, _, _,
+            ArgVar { argVarName = valueName, argVarFlow = FlowIn, argVarFinal = final }] ->
+            case (final, valueName `elem` varsInPrim isOutputFlow (getPrim lastCall)) of
+                (False, _) -> do
+                    logLastCallAnalysis $ show valueName ++ " is used in more than one place"
+                    return ([], prim:unsuccessfulPrims)
+                (_, False) -> do
+                    logLastCallAnalysis $ "failed to add " ++ show prim ++ " to mutate chain " ++ show chains
+                                ++ " - " ++ show valueName ++ " doesn't originate from call"
+                    return ([], prim:unsuccessfulPrims)
+                _ -> do
+                    let result = tryAddToMutateChain lastCall (List.map outputName (concat chains))
+                            MutateInstr
+                                {prim = prim, inputName = input, outputName = output,
+                                offset = trustArgInt offsetArg, valueName = valueName} chains
+                    return $ case result of
+                        Left s -> ([], prim:unsuccessfulPrims)
+                        Right chains' -> (chains', unsuccessfulPrims)
+        _ -> do
+            logLastCallAnalysis $ show (getPrim prim) ++ " - not a mutate instr satisfying constraints"
+            return ([], prim:unsuccessfulPrims)
 
--- | We build up these "mutate-chains" incrementally, aborting early if
--- the conditions aren't satisfied.
--- This analysis makes sure that mutations for (zero or more) linear sequences
+-- | We build up these "mutate-chains" incrementally in reverse order of
+-- execution, aborting early if the conditions aren't satisfied.
+-- This analysis makes sure that we have (zero or more) linear sequences
 -- where each mutate in a sequence writes to a non-overlapping field.
-tryAddToMutateChain :: LastCall -> [MutateChain] -> MutateInstr -> [MutateChain] -> Either String [MutateChain]
-tryAddToMutateChain lastCall chains0 mut1 (chain@(mut:muts):chains) =
+tryAddToMutateChain :: HasPrim a => a -> [PrimVarName] -> MutateInstr a -> [MutateChain a] -> Either String [MutateChain a]
+tryAddToMutateChain lastCall existingIntermediateOutputs mut1 (chain@(mut:muts):chains) =
     if outputName mut == inputName mut1
         -- We check that writes in a single mutate-chain don't alias fields.
         -- Aliasing could be bad, since we cannot guarantee that the
@@ -255,10 +295,10 @@ tryAddToMutateChain lastCall chains0 mut1 (chain@(mut:muts):chains) =
                 Right $ (mut1:chain):chains
             else Left "offsets alias"
         else do
-            chains' <- tryAddToMutateChain lastCall chains0 mut1 chains
+            chains' <- tryAddToMutateChain lastCall existingIntermediateOutputs mut1 chains
             return $ chain:chains'
-tryAddToMutateChain lastCall chains0 mut' [] = let inputArg = inputName mut' in
-    if inputArg `elem` varsInPrim FlowOut (content lastCall) || any ((==inputArg) . outputName) (concat chains0)
+tryAddToMutateChain lastCall existingIntermediateOutputs mut' [] = let inputArg = inputName mut' in
+    if inputArg `elem` varsInPrim isOutputFlow (getPrim lastCall) || inputArg `elem` existingIntermediateOutputs
     then
         Left "Input arg is either generated by the last call, or by reusing an intermediate output from an existing mutate-chain."
     else
@@ -266,26 +306,92 @@ tryAddToMutateChain lastCall chains0 mut' [] = let inputArg = inputName mut' in
 tryAddToMutateChain _ _ _ ([]:_) = Left "a mutate chain shouldnt be empty"
 
 ----------------------------------------------------------------------------
+-- Write outByReference outputs directly into structures                  --
+----------------------------------------------------------------------------
+
+data ProcBodyAnnot = ProcBodyAnnot {
+      bodyPrims' ::[(Bool, Placed Prim)],
+      bodyFork' ::PrimForkAnnot}
+              deriving (Eq, Show)
+
+data PrimForkAnnot =
+    NoForkAnnot |
+    PrimForkAnnot {
+      forkVar' :: PrimVarName,       -- ^The variable that selects branch to take
+      forkVarType' :: TypeSpec,      -- ^The Wybe type of the forkVar
+      forkVarLast' :: Bool,          -- ^Is this the last occurrence of forkVar
+      forkBodies' :: [ProcBodyAnnot] -- ^one branch for each value of forkVar
+    }
+    deriving (Eq, Show)
+
+allUnvisited :: ProcBody -> ProcBodyAnnot
+allUnvisited body@ProcBody { bodyPrims=prims, bodyFork=fork} = ProcBodyAnnot { bodyPrims' = map (\p -> (False, p)) prims, bodyFork' =allUnvisitedFork fork}
+allUnvisitedFork :: PrimFork -> PrimForkAnnot
+allUnvisitedFork NoFork = NoForkAnnot
+allUnvisitedFork PrimFork{forkVar=var, forkVarType=varTy, forkVarLast=varLast, forkBodies=bodies} = PrimForkAnnot{forkVar'=var, forkVarType'=varTy, forkVarLast'=varLast, forkBodies'=map allUnvisited bodies}
+
+stripVisited :: ProcBodyAnnot -> ProcBody
+stripVisited body@ProcBodyAnnot { bodyPrims'=prims, bodyFork'=fork} = ProcBody { bodyPrims = map snd prims, bodyFork = stripVisitedFork fork}
+stripVisitedFork :: PrimForkAnnot -> PrimFork
+stripVisitedFork NoForkAnnot = NoFork
+stripVisitedFork PrimForkAnnot{forkVar'=var, forkVarType'=varTy, forkVarLast'=varLast, forkBodies'=bodies} = PrimFork {forkVar=var, forkVarType=varTy, forkVarLast=varLast, forkBodies=map stripVisited bodies}
+
+writeOutputsDirectlyIntoStructures :: ProcBodyAnnot -> Compiler ProcBodyAnnot
+writeOutputsDirectlyIntoStructures procBody@ProcBodyAnnot{bodyPrims'=[], bodyFork'=NoForkAnnot} = return procBody
+writeOutputsDirectlyIntoStructures procBody@ProcBodyAnnot{bodyPrims'=[], bodyFork'=fork@PrimForkAnnot{forkBodies'=bodies}} = do
+    bodies' <- mapM writeOutputsDirectlyIntoStructures bodies
+    return procBody{bodyFork'=fork{forkBodies'=bodies'}}
+writeOutputsDirectlyIntoStructures procBody@ProcBodyAnnot{bodyPrims'=call0@(False, call):prims} = do
+    let argFlows = Set.fromList $ map argFlowDirection (fst . primArgs . content $ call)
+    logLastCallAnalysis $ "call " ++ show call ++ " has flows: " ++ show argFlows
+    newBody <- if FlowOutByReference `elem` argFlows then do
+            logLastCallAnalysis $ "trying to move call " ++ show call ++ " down right before outputs are needed"
+            let (above, below) = tryMovePrimAfterPrims call0 prims
+            logLastCallAnalysis $ "remaining below: " ++ show below
+            -- For each FlowOutByReference output, we want to know if it
+            -- appears as the last argument to exactly 1 mutate().
+            -- In this case, we believe it is safe to turn that mutate into a
+            -- `FlowTakeReference`-style mutate.
+            (mutateChains, below') <- analyzePrimsAfterCall call0 below
+            if null mutateChains then do
+                logLastCallAnalysis "collected no mutate chains - perhaps this result isn't written into a structure?"
+                return procBody{bodyPrims'=(True, call):prims}
+            else do
+                logLastCallAnalysis $ "collected mutate chains" ++ show mutateChains
+                let below'' = annotateFinalMutates (concat mutateChains) ++ below'
+                let body' = procBody{bodyPrims'=above ++ (True, call):below''}
+                logLastCallAnalysis $ "new body: " ++ show (stripVisited body')
+                return body'
+        else return procBody{bodyPrims'=(True, call):prims}
+    writeOutputsDirectlyIntoStructures newBody
+writeOutputsDirectlyIntoStructures body@ProcBodyAnnot{bodyPrims'=(visited, prim):prims} = do
+    body' <- writeOutputsDirectlyIntoStructures body{bodyPrims'=prims}
+    return $ body'{bodyPrims'=(True, prim):bodyPrims' body'}
+
+----------------------------------------------------------------------------
 -- Coerce FlowOut into FlowOutByReference                                 --
 ----------------------------------------------------------------------------
 
 -- | Check the proc protos of all callees, and coerce FlowOut into
 -- FlowOutByReference where needed.
-fixupCallsInProc :: ProcDef -> Compiler ProcDef
-fixupCallsInProc def@ProcDef { procImpln = impln@ProcDefPrim { procImplnBody = body}} = do
+fixupProc :: ProcDef -> Compiler ProcDef
+fixupProc def@ProcDef { procImpln = impln@ProcDefPrim { procImplnBody = body}} = do
     logLastCallAnalysis $ ">>> Fix up calls in proc: " ++ show (procName def)
-    body' <- mapProcPrimsM (updatePlacedM fixupCallsInPrim) body
-    return $ def { procImpln = impln { procImplnBody = body' } }
-fixupCallsInProc _ = shouldnt "uncompiled"
+    body' <- mapProcPrimsM (updatePlacedM fixupPrim) body
+    logLastCallAnalysis $ ">>> Write outputs directly into structures: " ++ show (procName def)
+    body'' <- writeOutputsDirectlyIntoStructures (allUnvisited body')
+    let body''' = stripVisited body''
+    return $ def { procImpln = impln { procImplnBody = body''' } }
+fixupProc _ = shouldnt "uncompiled"
 
-fixupCallsInPrim :: Prim -> Compiler Prim
-fixupCallsInPrim p@(PrimCall siteId pspec args gFlows) = do
+fixupPrim :: Prim -> Compiler Prim
+fixupPrim p@(PrimCall siteId pspec args gFlows) = do
     logLastCallAnalysis $ "checking call " ++ show p
     proto <- getProcPrimProto pspec
     let args' = coerceArgs args (primProtoParams proto)
     when (args /= args') $ logLastCallAnalysis $ "coerced args: " ++ show args ++ " " ++ show args'
     return $ PrimCall siteId pspec args' gFlows
-fixupCallsInPrim p = return p
+fixupPrim p = return p
 
 -- | Coerce FlowOut arguments into FlowOutByReference where needed
 coerceArgs :: [PrimArg] -> [PrimParam] -> [PrimArg]

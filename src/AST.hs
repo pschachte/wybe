@@ -116,7 +116,7 @@ module AST (
   maybeShow, showMessages, stopOnError,
   logMsg, whenLogging2, whenLogging,
   -- *Helper functions
-  defaultBlock, moduleIsPackage,
+  moduleIsPackage,
   -- *LPVM Encoding types
   EncodedLPVM(..), makeEncodedLPVM
   ) where
@@ -916,7 +916,7 @@ lookupType :: String -> OptPos -> TypeSpec -> Compiler TypeSpec
 lookupType context pos ty = do
     (msgs, ty') <- lookupType' context pos ty
     mapM_ queueMessage msgs
-    return ty' 
+    return ty'
 
 
 -- |Find the definition of the specified type visible from the current module.
@@ -928,7 +928,7 @@ lookupType' _ _ ty@TypeVariable{} = return ([], ty)
 lookupType' _ _ ty@Representation{} = return ([], ty)
 lookupType' context pos ty@HigherOrderType{higherTypeParams=typeFlows} = do
     (msgs, types) <- unzip <$> mapM (lookupType' context pos . typeFlowType) typeFlows
-    return (concat msgs, 
+    return (concat msgs,
             ty{higherTypeParams=zipWith TypeFlow types (typeFlowMode <$> typeFlows)})
 lookupType' context pos ty@(TypeSpec [] typename args)
   | typename == currentModuleAlias = do
@@ -2378,32 +2378,9 @@ data PrimFork =
     }
     deriving (Eq, Show, Generic)
 
-
-data LLBlock = LLBlock {
-    llInstrs::[LLInstr],
-    llTerm::LLTerm
-    } deriving (Eq, Show)
-
-
-data LLInstr = LLNop
-  -- LLInstr {
-  --   llTarget::Maybe PrimVarName,
-  --   llOpr::[String],
-  --   llOperands::[(PrimVar,PrimType)]
-             deriving (Eq, Show)
-
-
-data LLTerm = TermNop
-            deriving (Eq, Show)
-
 -- |The variable name for the temporary variable whose number is given.
 mkTempName :: Int -> String
 mkTempName ctr = specialName2 "tmp" $ show ctr
-
--- |Make a default LLBlock
-defaultBlock :: LLBlock
-defaultBlock =  LLBlock { llInstrs = [], llTerm = TermNop }
-
 
 -- |Fold over a list of statements in a pre-order left-to-right traversal.
 -- Takes two folding functions, one for statements and one for expressions.
@@ -3482,22 +3459,22 @@ setPExpTypeFlow typeflow pexpr = setExpTypeFlow typeflow <$> pexpr
 -- or definitions.
 ----------------------------------------------------------------
 
-varsInPrims :: PrimFlow -> [Prim] -> Set PrimVarName
-varsInPrims dir =
-    List.foldr (Set.union . (varsInPrim dir)) Set.empty
+varsInPrims :: (PrimFlow -> Bool) -> [Prim] -> Set PrimVarName
+varsInPrims tst =
+    List.foldr (Set.union . varsInPrim tst) Set.empty
 
-varsInPrim :: PrimFlow -> Prim     -> Set PrimVarName
-varsInPrim dir prim      = let (args, globals) = primArgs prim in varsInPrimArgs dir args
+varsInPrim :: (PrimFlow -> Bool) -> Prim     -> Set PrimVarName
+varsInPrim tst prim      = let (args, globals) = primArgs prim in varsInPrimArgs tst args
 
-varsInPrimArgs :: PrimFlow -> [PrimArg] -> Set PrimVarName
-varsInPrimArgs dir =
-    List.foldr (Set.union . varsInPrimArg dir) Set.empty
+varsInPrimArgs :: (PrimFlow -> Bool) -> [PrimArg] -> Set PrimVarName
+varsInPrimArgs tst =
+    List.foldr (Set.union . varsInPrimArg tst) Set.empty
 
-varsInPrimArg :: PrimFlow -> PrimArg -> Set PrimVarName
-varsInPrimArg dir ArgVar{argVarName=var,argVarFlow=dir'}
-    = if dir == dir' then Set.singleton var else Set.empty
-varsInPrimArg dir (ArgClosure _ as _)
-    = Set.unions $ Set.fromList (varsInPrimArg dir <$> as)
+varsInPrimArg :: (PrimFlow -> Bool) -> PrimArg -> Set PrimVarName
+varsInPrimArg tst ArgVar{argVarName=var,argVarFlow=dir'}
+    = if tst dir' then Set.singleton var else Set.empty
+varsInPrimArg tst (ArgClosure _ as _)
+    = Set.unions $ Set.fromList (varsInPrimArg tst <$> as)
 varsInPrimArg _ ArgInt{}      = Set.empty
 varsInPrimArg _ ArgFloat{}    = Set.empty
 varsInPrimArg _ ArgString{}   = Set.empty
