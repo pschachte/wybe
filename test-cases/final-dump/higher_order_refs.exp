@@ -33,7 +33,9 @@ module top-level code > public {impure} (0 calls)
     higher_order_refs.app<0>(higher_order_refs.gen#6<0><_:wybe.int>:(wybe.int, ?wybe.int), 1:wybe.int, ?tmp#8##0:wybe.int) #10 @higher_order_refs:nn:nn
     foreign c print_int(~tmp#8##0:wybe.int, ~tmp#29##0:wybe.phantom, ?tmp#32##0:wybe.phantom) @int:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#32##0:wybe.phantom, ?tmp#33##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#33##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign c print_float(1.0:wybe.float, ~tmp#33##0:wybe.phantom, ?tmp#37##0:wybe.phantom) @float:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#37##0:wybe.phantom, ?tmp#38##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#38##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
 add_one > {inline} (1 calls)
@@ -152,10 +154,10 @@ gen#6([^x##0:wybe.int], y##0:wybe.int, ?#result##0:wybe.int)<{}; {}>:
 declare external ccc  void @putchar(i8)    
 
 
-declare external ccc  void @print_int(i64)    
-
-
 declare external ccc  void @print_float(double)    
+
+
+declare external ccc  void @print_int(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -187,6 +189,8 @@ entry:
   tail call ccc  void  @putchar(i8  10)  
   %9 = tail call fastcc  i64  @"higher_order_refs.app<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_refs.5, i32 0, i32 0) to i64), i64  1)  
   tail call ccc  void  @print_int(i64  %9)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call ccc  void  @print_float(double  1.000000e0)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }

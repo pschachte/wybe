@@ -16,3 +16,6 @@ def {noinline} app(f:(I, ?J), i:I):J = f(i)
 !println(app(add_one, 1))
 
 !println(app(`+`(10), 1))
+
+identity(1.0, ?i)
+!println(i)
