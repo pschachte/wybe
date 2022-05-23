@@ -33,5 +33,5 @@ define external fastcc  void @"purity_warning.<0>"()    {
 entry:
   ret void 
 }
-[93mfinal-dump/purity_warning.wybe:1:2: Calling proc wybe.list.length<0> with unneeded ! marker
+[93mfinal-dump/purity_warning.wybe:1:2: Calling proc proc wybe.list.length<0> with unneeded ! marker
 [0m
