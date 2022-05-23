@@ -1,10 +1,11 @@
-{-# LANGUAGE TupleSections #-}
 --  File     : Types.hs
 --  Author   : Peter Schachte
 --  Purpose  : Type checker/inferencer for Wybe
 --  Copyright: (c) 2012 Peter Schachte.  All rights reserved.
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
+
+{-# LANGUAGE TupleSections #-}
 
 -- |Support for type checking/inference.
 module Types (validateModExportTypes, typeCheckModSCC) where
@@ -23,7 +24,6 @@ import           Data.Either         as Either
 import           Data.Set            as Set
 import           UnivSet             as USet
 import           Data.Tuple.Select
-import           Data.Function (on)
 import           Data.Foldable
 import           Data.Bifunctor
 import           Data.Functor        ((<&>))
@@ -227,7 +227,9 @@ catOKs lst = let toMaybe (OK a) =  Just a
 
 
 -- |The reason a variable is given a certain type
-data TypeError = ReasonParam ProcName Int OptPos
+data TypeError = ReasonMessage Message
+                   -- ^Error originating from Message
+               | ReasonParam ProcName Int OptPos
                    -- ^Formal param type/flow inconsistent
                | ReasonOutputUndef ProcName Ident OptPos
                    -- ^Output param not defined by proc body
@@ -318,6 +320,7 @@ instance Show TypeError where
 
 -- |Produce a Message to be stored from a TypeError.
 typeErrorMessage :: TypeError -> Message
+typeErrorMessage (ReasonMessage msg) = msg
 typeErrorMessage (ReasonParam name num pos) =
     Message Error pos $
         "Type/flow error in definition of " ++ showProcName name ++
@@ -472,6 +475,7 @@ typeErrorMessage (ReasonUnnreachable name pos) =
 
 -- | Get the position from a type error
 typeErrorPos :: TypeError -> OptPos
+typeErrorPos (ReasonMessage (Message _ pos _)) = pos
 typeErrorPos (ReasonParam _ _ pos) = pos
 typeErrorPos (ReasonOutputUndef _ _ pos) = pos
 typeErrorPos (ReasonUndef _ _ pos) = pos
@@ -541,19 +545,26 @@ instance Show Typing where
        else " with errors: " ++ show errs
 
 
+-- |Find the definition of the specified type visible from the current module.
+-- TypeErrors are reported in the case the lookup reports an error
+lookupTyped :: String -> OptPos -> TypeSpec -> Typed TypeSpec
+lookupTyped context pos ty = do
+    (msgs, ty') <- lift $ lookupType' context pos ty
+    mapM_ (typeError . ReasonMessage) msgs
+    ultimateType ty'
+
+
 -- |Follow type variables to fully recursively resolve a type.
 ultimateType  :: TypeSpec -> Typed TypeSpec
 ultimateType ty@TypeVariable{typeVariableName=tvar} = do
-    mbval <- gets $ Map.lookup tvar . tvarDict
-    logTyped $ "Type variable " ++ show tvar ++ " is bound to " ++ show mbval
-    case mbval of
-        Nothing -> return ty
-        Just ty' -> ultimateType ty'
-ultimateType (TypeSpec mod name args) = do
-    args' <- mapM ultimateType args
-    return $ TypeSpec mod name args'
-ultimateType ty@HigherOrderType{} =
-    updateHigherOrderTypesM ultimateType ty
+    ty' <- gets $ Map.lookup tvar . tvarDict
+    logTyped $ "Type variable " ++ show tvar ++ " is bound to " ++ show ty'
+    maybe (return ty) ultimateType ty'
+ultimateType (TypeSpec mod name args) = 
+    TypeSpec mod name <$> mapM ultimateType args
+ultimateType ty@HigherOrderType{higherTypeParams=typeFlows} = do
+    types <- mapM (ultimateType . typeFlowType) typeFlows
+    return ty{higherTypeParams=zipWith TypeFlow types (typeFlowMode <$> typeFlows)}
 ultimateType ty = return ty
 
 
@@ -631,8 +642,7 @@ constrainVarType reason var ty = do
 
 constrainType :: TypeError -> (TypeRepresentation -> Bool) -> TypeSpec -> Typed ()
 constrainType reason constraint ty = do
-    ty' <- lift (lookupType "type constraint" (typeErrorPos reason) ty) 
-        >>= ultimateType
+    ty' <- lookupTyped "type constraint" (typeErrorPos reason) ty
     typeRep <- trustFromJust "constrainType"
            <$> lift (lookupTypeRepresentation ty')
     reportErrorUnless reason (constraint typeRep)
@@ -644,8 +654,8 @@ constrainType reason constraint ty = do
 unifyTypes :: TypeError -> TypeSpec -> TypeSpec -> Typed TypeSpec
 unifyTypes reason t1 t2 = do
     let pos = typeErrorPos reason
-    t1' <- lift (lookupType "proc declaration" pos t1) >>= ultimateType
-    t2' <- lift (lookupType "proc declaration" pos t2) >>= ultimateType
+    t1' <- lookupTyped "unification" pos t1
+    t2' <- lookupTyped "unification" pos t2
     logTyped $ "Unifying types " ++ show t1 ++ " (-> " ++ show t1'
                ++ ") and " ++ show t2 ++ " (-> " ++ show t2' ++ ")"
     t <- unifyTypes' reason t1' t2'
@@ -811,7 +821,7 @@ expType' (Closure pspec closed) _ = do
         return InvalidType
 expType' (Var name _ _) _             = ultimateVarType name
 expType' (Typed _ typ _) pos          =
-    lift (lookupType "typed expression" pos typ) >>= ultimateType
+    lookupTyped "typed expression" pos typ
 expType' expr _ =
     shouldnt $ "Expression '" ++ show expr ++ "' left after flattening"
 
@@ -1100,10 +1110,12 @@ typecheckProcDecl' m pdef = do
         let (calls, bodyRes) = bodyCallsResources False def
         logTyped $ "   containing calls: " ++ showBody 8 calls
         logTyped $ "   inner resources: " ++ show (fst <$> bodyRes)
-        let assignedVars = foldStmts
-                                (const . const)
-                                ((const .) . (. expOutputs) . Set.union)
-                                inputs def
+        let assignedVars = 
+                foldStmts 
+                    (const . const)
+                    (\outs exp _ -> 
+                        outs `Set.union` (expOutputs exp `Set.difference` expInputs exp))
+                    inputs def
         logTyped $ "   with assigned vars: " ++ show assignedVars
         logTyped $ "Recording parameter types: "
                    ++ intercalate ", " (show <$> params)
@@ -1195,7 +1207,7 @@ getTyping action = do
 
 addDeclaredType :: ProcName -> OptPos -> Int -> (Param,Int) -> Typed ()
 addDeclaredType procname pos arity (Param name typ flow _,argNum) = do
-    typ' <- lift $ lookupType "proc declaration" pos typ
+    typ' <- lookupTyped "proc declaration" pos typ
     logTyped $ "    type of '" ++ name ++ "' is " ++ show typ'
     constrainVarType (ReasonParam procname arity pos) name typ'
 
@@ -1590,7 +1602,8 @@ matchTypeList callee pos callTypes
                        $ zip [1..] matches
     return $ if List.null mismatches
     then OK (calleeInfo{firstInfoTypes=matches}, typing)
-    else Err [ReasonArgType partial callee n pos | n <- mismatches]
+    else Err $ [ReasonArgType partial callee n pos | n <- mismatches] 
+            ++ typingErrs typing
 matchTypeList _ _ _ info = shouldnt $ "matchTypeList on " ++ show info
 
 
