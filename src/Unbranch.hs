@@ -669,7 +669,7 @@ unbranchExp exp@(AnonProc mods params pstmts clsd res) pos = do
     tmpCtr <- gets brTempCtr
     let procProto = ProcProto name (freeParams ++ params) res'
     let procDef = ProcDef name procProto (ProcDefSrc pstmts) Nothing tmpCtr 0
-                    Map.empty Private detism inlining Pure AnonymousProc
+                    Map.empty Private detism inlining impurity AnonymousProc
                     NoSuperproc
     procDef' <- lift $ unbranchProc procDef tmpCtr
     logUnbranch $ "  Resultant hoisted proc: " ++ show procProto
