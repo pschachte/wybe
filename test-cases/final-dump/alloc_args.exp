@@ -62,8 +62,7 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 0, i64* %4 
+  store  i64 0, i64* %3 
   tail call fastcc  void  @"wybe.string.print<0>"(i64  %2)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 

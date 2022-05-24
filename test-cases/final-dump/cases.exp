@@ -63,11 +63,10 @@ entry:
 if.then:
   %1 = add   i64 %"lst##0", 8 
   %2 = inttoptr i64 %1 to i64* 
-  %3 = getelementptr  i64, i64* %2, i64 0 
-  %4 = load  i64, i64* %3 
-  %5 = tail call fastcc  i64  @"cases.len<0>"(i64  %4)  
-  %6 = add   i64 %5, 1 
-  ret i64 %6 
+  %3 = load  i64, i64* %2 
+  %4 = tail call fastcc  i64  @"cases.len<0>"(i64  %3)  
+  %5 = add   i64 %4, 1 
+  ret i64 %5 
 if.else:
   ret i64 0 
 }
@@ -80,11 +79,10 @@ entry:
 if.then:
   %1 = add   i64 %"lst##0", 8 
   %2 = inttoptr i64 %1 to i64* 
-  %3 = getelementptr  i64, i64* %2, i64 0 
-  %4 = load  i64, i64* %3 
-  %5 = tail call fastcc  i64  @"cases.len2<0>"(i64  %4)  
-  %6 = add   i64 %5, 1 
-  ret i64 %6 
+  %3 = load  i64, i64* %2 
+  %4 = tail call fastcc  i64  @"cases.len2<0>"(i64  %3)  
+  %5 = add   i64 %4, 1 
+  ret i64 %5 
 if.else:
   ret i64 0 
 }
