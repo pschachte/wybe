@@ -1,0 +1,32 @@
+constructors null | node(left: _, right: _, val: int)
+
+def append_tree(a: _, b: _, ?result: _) {
+    if { node(?lft, ?right, ?val) = a ::
+            append_tree(b, right, ?right2)
+            # mutate for val happens at the end. This breaks this optimization :((
+            ?result = node(lft, right2, val)
+       | else ::
+            ?result = b
+    }
+}
+def print_tree(a: _) use !io {
+    if { node(?left, ?right, ?val) = a ::
+        !print("node(")
+        !print(val)
+        !print(",")
+        !print_tree(left)
+        !print(",")
+        !print_tree(right)
+        !print(")")
+       | else ::
+        !print("empty")
+    }
+
+}
+?x = node(null, null, 1)
+?x2 = node(null, null, 2)
+append_tree(x, x2, ?x3)
+!print_tree(x2)
+!nl
+!print_tree(x3)
+!nl
