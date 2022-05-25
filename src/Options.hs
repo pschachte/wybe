@@ -10,14 +10,19 @@
 ----------------------------------------------------------------
 
 -- |The wybe compiler command line options.
-module Options (Options(..), LogSelection(..), handleCmdline, defaultOptions) where
+module Options (Options(..), 
+                LogSelection(..), 
+                OptFlag(..),
+                optimisationEnabled,
+                handleCmdline, 
+                defaultOptions) where
 
 import           Data.List             as List
 import           Data.List.Extra
 import           Data.Map              as Map
 import           Data.Set              as Set
 import           Data.Either           as Either
-import           Text.Read             (readEither)
+import           Text.Read             (readMaybe)
 import           Control.Monad
 import           System.Console.GetOpt
 import           System.Environment
@@ -29,50 +34,47 @@ import           System.Console.ANSI
 
 -- |Command line options for the wybe compiler.
 data Options = Options
-    { optForce        :: Bool     -- ^Compile specified files even if up to date
-    , optForceAll     :: Bool     -- ^Compile all files even if up to date
-    , optShowVersion  :: Bool     -- ^Print compiler version and exit
-    , optHelpLog      :: Bool     -- ^Print log option help and exit
-    , optShowHelp     :: Bool     -- ^Print compiler help and exit
-    , optLibDirs      :: [String] -- ^Directories where library files live
-    , optLogAspects   :: Set LogSelection
-                                  -- ^Which aspects to log
-
-    , optLogUnknown   :: Set String
-                                  -- ^Unknown log aspects
-    , optLLVMOptLevel :: Either String Word
-                                  -- ^LLVM optimisation level, or invalid
-    , optNoLLVMOpt    :: Bool     -- ^Don't run the LLVM optimisation passes
-    , optNoMultiSpecz :: Bool     -- ^Disable multiple specialization
-    , optNoTCMC       :: Bool     -- ^Disable tail-call-modulo-construction optimization
-    , optDumpLib      :: Bool     -- ^Also dump wybe.* modules when dumping
-    , optVerbose      :: Bool     -- ^Be verbose in compiler output
-    , optNoFont       :: Bool     -- ^Disable ISO font change codes in messages
-    , optNoVerifyLLVM :: Bool     -- ^Don't run LLVM verification
-    , optDumpOptLLVM  :: Bool     -- ^Dump optimised LLVM code
+    { optForce         :: Bool     -- ^Compile specified files even if up to date
+    , optForceAll      :: Bool     -- ^Compile all files even if up to date
+    , optShowVersion   :: Bool     -- ^Print compiler version and exit
+    , optShowHelp      :: Bool     -- ^Print compiler help and exit
+    , optHelpLog       :: Bool     -- ^Print log option help and exit
+    , optHelpOpt       :: Bool     -- ^Print optiisation option help and exit
+    , optLibDirs       :: [String] -- ^Directories where library files live
+    , optLogAspects    :: Set LogSelection
+                                   -- ^Which aspects to log
+    , optOptimisations :: Set OptFlag
+                                   -- ^Enabled optimisations
+    , optLLVMOptLevel  :: Word     -- ^LLVM optimisation level
+    , optDumpLib       :: Bool     -- ^Also dump wybe.* modules when dumping
+    , optVerbose       :: Bool     -- ^Be verbose in compiler output
+    , optNoFont        :: Bool     -- ^Disable ISO font change codes in messages
+    , optNoVerifyLLVM  :: Bool     -- ^Don't run LLVM verification
+    , optDumpOptLLVM   :: Bool     -- ^Dump optimised LLVM code
+    , optErrors        :: Set String 
+                                   -- ^Erroneous flag error messages
     } deriving Show
 
 
 -- |Defaults for all compiler options
 defaultOptions :: Options
 defaultOptions = Options
-  { optForce        = False
-  , optForceAll     = False
-  , optShowVersion  = False
-  , optHelpLog      = False
-  , optShowHelp     = False
-  , optLibDirs      = []
-  , optLogAspects   = Set.empty
-  , optLogUnknown   = Set.empty
-  , optLLVMOptLevel = Right 3
-  , optNoLLVMOpt    = False
-  , optNoMultiSpecz = False
-  , optNoTCMC       = False
-  , optDumpLib      = False
-  , optVerbose      = False
-  , optNoFont       = False
-  , optNoVerifyLLVM = False
-  , optDumpOptLLVM  = False
+  { optForce         = False
+  , optForceAll      = False
+  , optShowVersion   = False
+  , optShowHelp      = False
+  , optHelpLog       = False
+  , optHelpOpt       = False
+  , optLibDirs       = []
+  , optLogAspects    = Set.empty
+  , optOptimisations = defaultOptFlags
+  , optLLVMOptLevel  = 3
+  , optDumpLib       = False
+  , optVerbose       = False
+  , optNoFont        = False
+  , optNoVerifyLLVM  = False
+  , optDumpOptLLVM   = False
+  , optErrors        = Set.empty
   }
 
 -- |All compiler features we may want to log
@@ -85,7 +87,6 @@ data LogSelection =
 
 allLogSelections :: [LogSelection]
 allLogSelections = [minBound .. maxBound]
-
 
 logSelectionDescription :: LogSelection -> String
 logSelectionDescription All
@@ -129,58 +130,92 @@ logSelectionDescription Uniqueness
 logSelectionDescription LastCallAnalysis
     = "Log last call analysis"
 
+
+-- | Enumeration of compiler optimisations
+data OptFlag = LLVMOpt | MultiSpecz | TailCallModCons
+    deriving (Eq, Ord, Enum, Bounded, Show)
+
+
+-- | Check if a given OptFlag is enabled 
+optimisationEnabled :: OptFlag -> Options -> Bool
+optimisationEnabled flag Options{optOptimisations=opts} = flag `Set.member` opts
+
+
+-- | Default optimisations enabled
+defaultOptFlags :: Set OptFlag
+defaultOptFlags = Set.fromList [minBound..maxBound]
+
+
+-- | Description of an OptFlag
+optimisationFlagDesc :: OptFlag -> String
+optimisationFlagDesc flag 
+    = desc' ++ 
+        " (default: " ++ if optimisationEnabled flag defaultOptions
+                         then "enabled)" else "disabled)"
+  where 
+    desc' = case flag of 
+        LLVMOpt         -> "run the LLVM optimisations on the emitted LLVM"
+        MultiSpecz      -> "run the multiple specialisation optimisation"
+        TailCallModCons -> "run the tail-call-modulo-construction optimisation "
+
+
+-- | Command line flag for a given OptFlag
+optimisationFlag :: OptFlag -> String
+optimisationFlag LLVMOpt = "llvm-opt"
+optimisationFlag MultiSpecz = "multi-specz"
+optimisationFlag TailCallModCons = "tcmc"
+
+
+
 -- |Command line option parser and help text
 options :: [OptDescr (Options -> Options)]
 options =
- [ Option ['f']     ["force"]
-     (NoArg (\ opts -> opts { optForce = True }))
-   "force compilation of specified files"
- , Option []        ["force-all"]
-     (NoArg (\ opts -> opts { optForceAll = True }))
-   "force compilation of all dependencies"
- , Option ['L']     ["libdir"]
-   (ReqArg (\ d opts -> opts { optLibDirs = optLibDirs opts ++ [d] }) "DIR")
-         ("specify a library directory [default $WYBELIBS or " ++ libDir ++ "]")
- , Option ['l']     ["log"]
-   (ReqArg addLogAspects "ASPECT")
-         "add comma-separated aspects to log, or 'all'"
- , Option []        ["log-help"]
-     (NoArg (\ opts -> opts { optHelpLog = True }))
-     "display help on logging options and exit"
- , Option ['V']     ["version"]
-     (NoArg (\ opts -> opts { optShowVersion = True }))
-     "show version number"
- , Option ['h']     ["help"]
-     (NoArg (\ opts -> opts { optShowHelp = True }))
-     "display this help text and exit"
- , Option ['O']     ["llvm-opt-level"]
-     (ReqArg (\lvl opts -> opts {optLLVMOptLevel=readEither lvl}) "Optimisation level")
-     "specify the LLVM compiler optimisation level"
- , Option ['s']     ["no-llvm-opt"]
-     (NoArg (\opts -> opts { optNoLLVMOpt = True }))
-     "don't run the LLVM optimisation pass manager on the emitted LLVM"
- , Option []     ["no-multi-specz"]
-     (NoArg (\opts -> opts { optNoMultiSpecz = True }))
-     "disable multiple specialization"
- , Option []     ["no-tcmc"]
-     (NoArg (\opts -> opts { optNoTCMC = True }))
-     "disable tail-call-modulo-construction optimization"
- , Option []     ["dump-lib"]
-     (NoArg (\opts -> opts { optDumpLib = True }))
-     "also dump wybe library when dumping"
- , Option ['v']     ["verbose"]
-     (NoArg (\opts -> opts { optVerbose = True }))
-     "dump verbose messages after compilation"
- , Option ['n'] ["no-fonts"]
-     (NoArg (\opts -> opts { optNoFont = True }))
-     "disable font highlighting in messages"
- , Option [] ["no-verify-llvm"]
-     (NoArg (\opts -> opts { optNoVerifyLLVM = True }))
-     "disable verification of generated LLVM code"
- , Option [] ["dump-opt-llvm"]
-     (NoArg (\opts -> opts { optDumpOptLLVM = True }))
-     "dump optimised LLVM code"
- ]
+    [ Option ['f'] ["force"]
+        (NoArg (\ opts -> opts { optForce = True }))
+        "force compilation of specified files"
+    , Option []    ["force-all"]
+        (NoArg (\ opts -> opts { optForceAll = True }))
+        "force compilation of all dependencies"
+    , Option ['L'] ["libdir"]
+        (ReqArg (\ d opts -> opts { optLibDirs = optLibDirs opts ++ [d] }) "DIR")
+        ("specify a library directory [default $WYBELIBS or " ++ libDir ++ "]")
+    , Option ['l'] ["log"]
+      (ReqArg addLogAspects "ASPECT")
+       "add comma-separated aspects to log, or 'all'"
+    , Option ['h'] ["help"]
+        (NoArg (\ opts -> opts { optShowHelp = True }))
+        "display this help text and exit"
+    , Option []    ["log-help"]
+        (NoArg (\ opts -> opts { optHelpLog = True }))
+        "display help on logging options and exit"
+    , Option []    ["opt-help"]
+        (NoArg (\ opts -> opts { optHelpOpt = True }))
+        "display help on optimisation flags and exit"
+    , Option ['V'] ["version"]
+        (NoArg (\ opts -> opts { optShowVersion = True }))
+        "show version number"
+    , Option ['x'] ["opt"]
+        (ReqArg addOptFlags "FLAGS")
+        "add comma-separated optimisation flags"
+    , Option ['O'] ["llvm-opt-level"]
+        (ReqArg setLLVMOptLevel "LEVEL")
+        "specify the LLVM compiler optimisation level"
+    , Option []    ["dump-lib"]
+        (NoArg (\opts -> opts { optDumpLib = True }))
+        "also dump wybe library when dumping"
+    , Option ['v'] ["verbose"]
+        (NoArg (\opts -> opts { optVerbose = True }))
+        "dump verbose messages after compilation"
+    , Option ['n'] ["no-fonts"]
+        (NoArg (\opts -> opts { optNoFont = True }))
+        "disable font highlighting in messages"
+    , Option []    ["no-verify-llvm"]
+        (NoArg (\opts -> opts { optNoVerifyLLVM = True }))
+        "disable verification of generated LLVM code"
+    , Option []    ["dump-opt-llvm"]
+        (NoArg (\opts -> opts { optDumpOptLLVM = True }))
+        "dump optimised LLVM code"
+    ]
 
 
 -- |Help text header string
@@ -211,26 +246,23 @@ handleCmdline = do
     then do
         putStrLn $ usageInfo header options
         exitSuccess
-    else let unknown = optLogUnknown opts
-             badLogs = not $ Set.null unknown
-         in if optHelpLog opts || badLogs
+    else if optHelpLog opts 
     then do
-        putStrLn "Use the -l or --log option to select logging to stdout."
-        putStrLn "The argument to this option should be a comma-separated"
-        putStrLn "list (with no spaces) of these options:"
-        putStr $ formatMapping logSelectionDescription
-        if badLogs
-        then do
-            reportErrorExit opts
-                $ "Unknown log options: "
-                ++ intercalate ", " (Set.toList unknown)
-        else exitSuccess
-    else let optLvl = optLLVMOptLevel opts
-         in if isLeft optLvl
+        putStrLn "Use the -l or --log option to select logging to stdout.\n\
+                 \The argument to this option should be a comma-separated\n\
+                 \list (with no spaces) of these options:"
+        putStr $ formatMapping show logSelectionDescription
+        exitSuccess
+    else if optHelpOpt opts 
     then do
-        reportErrorExit opts
-            $ "Unknown LLVM optimisation level: "
-            ++ fromLeft "" optLvl
+        putStrLn "Use the --opt option to select applied optimisations.\n\
+                 \If a flag is prefixed with 'no-', the optimisation will not\n\
+                 \be applied.\n\
+                 \If a flag is specified multiple times, only the last applies.\n\
+                 \The argument to this option should be a comma-separated\n\
+                 \list (with no spaces) of these options:"
+        putStr $ formatMapping optimisationFlag optimisationFlagDesc
+        exitSuccess
     else if optShowVersion opts
     then do
         putStrLn $ "wybemk " ++ version ++ " (git " ++ gitHash ++ ")"
@@ -238,35 +270,77 @@ handleCmdline = do
         putStrLn $ "Using library directories:\n    " ++
             intercalate "\n    " (optLibDirs opts)
         exitSuccess
+    else let errs = optErrors opts
+         in if not $ List.null errs 
+    then do
+        unless (optNoFont opts) $ setSGR [SetColor Foreground Vivid Red]
+        putStrLn $ "Command line option errors:\n  " ++ intercalate "\n  " (Set.toList errs)
+        exitFailure
     else if List.null files
     then do
         putStrLn $ usageInfo header options
         exitFailure
-    else do
-        return (opts,files)
+    else return (opts,files)
+    
 
-reportErrorExit :: Options -> String -> IO a
-reportErrorExit Options{optNoFont=noFont} msg = do
-    unless noFont $ setSGR [SetColor Foreground Vivid Red]
-    putStrLn $ "Error: " ++ msg
-    exitFailure
-
+-- | Add log aspects specified by the String to the given options.
+-- Adds error messages when the log aspect is unknown
 addLogAspects :: String -> Options -> Options
-addLogAspects aspectsStr opts@Options{optLogUnknown=unknown0,
+addLogAspects aspectsStr opts@Options{optErrors=errors,
                                       optLogAspects=aspects0} =
     let aspectList = separate ',' aspectsStr
-        (unknown', aspects') = partitionEithers $ getLogRequest <$> aspectList
-        unknown'' = Set.fromList unknown'
-        aspects'' = let aspectSet = Set.fromList aspects'
-                    in if Set.member All aspectSet
-                       then Set.fromList allLogSelections else aspectSet
-    in opts{optLogUnknown=unknown0 `Set.union` unknown'',
-            optLogAspects=aspects0 `Set.union` aspects''}
+        (unknown, aspects) = partitionEithers $ getLogRequest <$> aspectList
+        unknown' = Set.fromList $ ("unknown log aspect: " ++) <$> unknown
+        aspects' = let aspectSet = Set.fromList aspects
+                   in if Set.member All aspectSet
+                      then Set.fromList allLogSelections else aspectSet
+    in opts{optErrors=errors `Set.union` unknown',
+            optLogAspects=aspects0 `Set.union` aspects'}
 
+-- | Get the LogSelection specified by the string,
+-- Left if the Selection is unknown
 getLogRequest :: String -> Either String LogSelection
 getLogRequest selection = maybe (Left selection) Right $ logMap Map.!? lower selection
   where
     logMap = Map.fromList [(lower $ show s, s) | s <- allLogSelections]
+
+
+-- | Add optimisation flags specified by the String to the given options.
+-- Adds error messages when the flag is unknown
+addOptFlags :: String -> Options -> Options
+addOptFlags optsStr opts@Options{optErrors=errors,
+                                      optOptimisations=optims} =
+    let optList = separate ',' optsStr
+        (unknown, optFlags) = partitionEithers $ getOptFlag <$> optList
+        unknown' = Set.fromList $ ("unknown optimisation flag: " ++) <$> unknown
+        optims' = List.foldl (\os (flag, insert) -> switch insert flag os) optims optFlags
+    in opts{optErrors=errors `Set.union` unknown',
+            optOptimisations=optims'}
+    where 
+        switch True  = Set.insert
+        switch False = Set.delete
+
+
+-- | Get the OptFlag specified by the string, and a Bool indicating if the
+-- flag should be enabled.
+-- Left if the OptFlag is unknown
+getOptFlag :: String -> Either String (OptFlag, Bool)
+getOptFlag flag = maybe (Left flag) Right $ optMap Map.!? lower flag
+  where
+    optMap = Map.fromList [(pre ++ optimisationFlag s, (s, insert)) 
+                          | s <- [minBound..maxBound]
+                          , (pre, insert) <- [("", True), ("no-", False)]]
+
+
+-- Set the LLVM optimisation level specified by the string.
+-- Add an error message if the string is not a number.
+setLLVMOptLevel :: String -> Options -> Options
+setLLVMOptLevel str opts@Options{optErrors=errors}=
+    case readMaybe str of
+        Nothing -> opts{optErrors=("LLVM opt level should be a number: " ++ str) 
+                                    `Set.insert` errors}
+        Just lvl -> opts{optLLVMOptLevel=lvl}
+
 
 
 -- |The inverse of intercalate:  split up a list into sublists separated
@@ -281,11 +355,11 @@ separate separator (e:es) =
 
 
 -- |Produce a table showing the domain and range of the input function and
-formatMapping :: (Bounded a, Enum a, Show a) => (a -> String) -> String
-formatMapping mapping =
+formatMapping :: (Bounded a, Enum a, Show a) => (a -> String) -> (a -> String) -> String
+formatMapping nameMap descMap =
     let domain = [minBound .. maxBound]
         width = 2 + maximum (List.map (length . show) domain)
     in  unlines $
-        [ let t = show elt
-          in  replicate (width - length t) ' ' ++ t ++ " : " ++ mapping elt
+        [ let t = nameMap elt
+          in  replicate (width - length t) ' ' ++ t ++ " : " ++ descMap elt
         | elt <- domain]

@@ -216,8 +216,7 @@ import           ObjectInterface
 
 import           Optimise                  (optimiseMod)
 import           Options                   (LogSelection (..), Options (..),
-                                            optForce, optForceAll, optLibDirs,
-                                            optNoMultiSpecz)
+                                            optForce, optForceAll, optLibDirs, optimisationEnabled, OptFlag (MultiSpecz))
 import           Parser                    (parseWybe)
 import           Resources                 (resourceCheckMod,
                                             transformProcResources,
@@ -1211,8 +1210,8 @@ multiSpeczTopDownPass :: [[ModSpec]] -> Compiler ()
 multiSpeczTopDownPass orderedSCCs = do
     logBuild " ===> Start top-down pass"
     mapM_ (\scc -> do
-        noMultiSpecz <- gets (optNoMultiSpecz . options)
-        unless noMultiSpecz $ do
+        doMultiSpecz <- gets (optimisationEnabled MultiSpecz . options)
+        when doMultiSpecz $ do
             logBuild $ " ---- Running on: " ++ showModSpecs scc
             -- collecting all required spec versions
             fixpointProcessSCC expandRequiredSpeczVersionsByMod scc

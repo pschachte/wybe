@@ -257,19 +257,14 @@ expandPrim (PrimCall id pspec args gFlows) pos = do
                     else do
                         logExpansion "  Not inlinable"
                         addInstr call' pos
-expandPrim call@(PrimHigher id fn args) pos = do
-    logExpansion $ "  Expand higher call " ++ show call
-    fn' <- expandArg fn
-    case fn' of
-        ArgClosure pspec closed _ -> do
-            pspec' <- fromMaybe pspec <$> lift (lift $ maybeGetClosureOf pspec)
-            logExpansion $ "  As first order call to " ++ show pspec'
-            gFlows <- lift2 $ getProcGlobalFlows pspec
-            expandPrim (PrimCall id pspec' (closed ++ args) gFlows) pos
-        _ -> do
-            args' <- mapM expandArg args
-            logExpansion $ "  As higher call to " ++ show fn'
-            addInstr (PrimHigher id fn' args') pos
+expandPrim prim@(PrimHigher id fn args) pos = do
+    logExpansion $ "  Checking inlining for higher order call " ++ show prim
+    inliningNow <- gets inlining
+    if inliningNow
+    then expandHigherOrder prim pos
+    else do
+        (fn':args') <- mapM expandArg $ fn:args
+        expandHigherOrder (PrimHigher id fn' args') pos
 expandPrim (PrimForeign lang nm flags args) pos = do
     st <- get
     logExpansion $ "  Expanding " ++ show (PrimForeign lang nm flags args)
@@ -279,6 +274,26 @@ expandPrim (PrimForeign lang nm flags args) pos = do
     addInstr (PrimForeign lang nm flags args')  pos
     st' <- get
     logExpansion $ "    renaming = " ++ show (renaming st')
+
+
+expandHigherOrder :: Prim -> OptPos -> Expander ()
+expandHigherOrder prim pos = do
+    logExpansion $ "  Expanding higher call " ++ show prim
+    prim' <- lift $ argExpandedPrim prim
+    case prim' of
+        PrimHigher id fn args -> do
+            fn' <- expandArg fn
+            case fn' of
+                ArgClosure pspec closed _ -> do
+                    pspec' <- fromMaybe pspec <$> lift2 (maybeGetClosureOf pspec)
+                    logExpansion $ "  As first order call to " ++ show pspec'
+                    gFlows <- lift2 $ getProcGlobalFlows pspec
+                    expandPrim (PrimCall id pspec' (closed ++ args) gFlows) pos
+                _ -> do
+                    args' <- mapM expandArg args
+                    logExpansion $ "  As higher call to " ++ show fn'
+                    addInstr (PrimHigher id fn' args') pos
+        _ -> expandPrim prim' pos
 
 
 
