@@ -858,7 +858,7 @@ compileModSCC mspecs = do
     logMsg Transform $ "mspecs: " ++ show mspecs
     logMsg Transform $ replicate 70 '='
     mapM_ (transformModuleProcs transformProc)  mspecs
-    logDump Transform Transform "TRANSFORM"
+    logDump Transform LastCallAnalysis "TRANSFORM -> LAST CALL ANALYSIS"
 
     ----------------------------------
     -- LAST CALL ANALYSIS
@@ -868,7 +868,7 @@ compileModSCC mspecs = do
     logMsg LastCallAnalysis  $ "mspecs: " ++ show mspecs
     logMsg LastCallAnalysis  $ replicate 70 '='
     mapM_ lastCallAnalyseMod mspecs
-    logDump LastCallAnalysis LastCallAnalysis  "LAST CALL ANALYSIS"
+    logDump LastCallAnalysis LastCallAnalysis "AFTER LAST CALL ANALYSIS"
 
     -- mods <- mapM getLoadedModule mods
     -- callgraph <- mapM (\m -> getSpecModule m
