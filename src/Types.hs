@@ -260,6 +260,8 @@ data TypeError = ReasonMessage Message
                    -- ^Expression should have a Boolean type
                | ReasonHigher ProcName ProcName OptPos
                    -- ^ Expression does not have correct higher type
+               | ReasonHigherFlow ProcName ProcName Int FlowDirection FlowDirection OptPos
+                   -- ^ Expression does not have correct higher type
                | ReasonPartialFlow ProcName ProcName Int FlowDirection OptPos
                    -- ^ ProcSpec does not have the correct type, in context
                | ReasonDeterminism String Determinism Determinism OptPos
@@ -383,8 +385,15 @@ typeErrorMessage (ReasonExpType exp ty pos) =
         "Type of " ++ show exp ++ " incompatible with " ++ show ty
 typeErrorMessage (ReasonHigher callFrom callTo pos) =
     Message Error pos $
-        "Higher order call to " ++ show callTo ++ " in "
+        "Higher order call to " ++ showProcName callTo ++ " in "
         ++ showProcName callFrom ++ " has a type/flow error."
+typeErrorMessage (ReasonHigherFlow callFrom callTo idx flow expected pos) =
+    Message Error pos $
+        "Higher order call to " ++ showProcName callTo ++ " in "
+        ++ showProcName callFrom ++ " has "
+        ++ showFlowName flow ++ " flow for argument " 
+        ++ show idx ++ ", but expects "
+        ++ showFlowName expected ++ " flow."
 typeErrorMessage (ReasonPartialFlow from to idx flow pos) =
     Message Error pos $
         "Partial application of " ++ to ++ " in "
@@ -496,6 +505,7 @@ typeErrorPos (ReasonUndeclared _ pos) = pos
 typeErrorPos (ReasonEqual _ _ pos) = pos
 typeErrorPos (ReasonExpType _ _ pos) = pos
 typeErrorPos (ReasonHigher _ _ pos) = pos
+typeErrorPos (ReasonHigherFlow _ _ _ _ _ pos) = pos
 typeErrorPos (ReasonPartialFlow _ _ _ _ pos) = pos
 typeErrorPos (ReasonDeterminism _ _ _ pos) = pos
 typeErrorPos (ReasonWeakDetism _ _ _ pos) = pos
@@ -1595,8 +1605,11 @@ matchTypes caller callee pos _ callTypes callFlows
                            && modifierDetism mods == SemiDet
                          = tfs ++ [last callTFs]
                          | otherwise = tfs
-                snd <$> getTyping (unifyTypeList' callee pos callTypes
-                                        (typeFlowType <$> tfs'))
+                snd <$> getTyping (do
+                    unifyTypeList' callee pos callTypes (typeFlowType <$> tfs')
+                    zipWith3M (\f1 f2 i -> unless (f1 == f2) 
+                                $ typeError $ ReasonHigherFlow caller callee i f1 f2 pos)
+                                    (typeFlowMode <$> callTFs) (typeFlowMode <$> tfs) [1..])
             _ ->
                 snd <$> getTyping (unifyTypes (ReasonHigher caller callee pos) fnTy
                                     $ HigherOrderType defaultProcModifiers callTFs)
