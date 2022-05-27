@@ -39,8 +39,14 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm mutate(~tmp#45##0:wybe.list(T), ?tmp#46##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:T) @list:nn:nn
     foreign lpvm mutate(~tmp#46##0:wybe.list(T), ?tmp#10##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#11##0:wybe.list(T)) @list:nn:nn
     wybe.list.map<1>(higher_order_append.gen#1<1><tmp#10##0:wybe.list(wybe.int)>:(wybe.list(wybe.int), ?wybe.list(wybe.int)), tmp#0##0:wybe.list(wybe.list(wybe.int)), outByReference y##0:wybe.list(wybe.list(wybe.int))) #13 @higher_order_append:nn:nn
-    wybe.list.println<0>(~tmp#0##0:wybe.list(wybe.list(wybe.int)), higher_order_append.gen#2<0><>:{resource}(wybe.list(wybe.int)))<Everything; Everything> #14 @higher_order_append:nn:nn
-    wybe.list.println<0>(~y##0:wybe.list(wybe.list(wybe.int)), higher_order_append.gen#2<0><>:{resource}(wybe.list(wybe.int)))<Everything; Everything> #15 @higher_order_append:nn:nn
+    wybe.list.print<0>(higher_order_append.gen#2<0><>:{resource}(T), ~tmp#0##0:wybe.list(T))<Everything; Everything> #16 @list:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#49##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#49##0:wybe.phantom, ?tmp#50##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#50##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.list.print<0>(higher_order_append.gen#2<0><>:{resource}(T), ~y##0:wybe.list(T))<Everything; Everything> #17 @list:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#53##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#53##0:wybe.phantom, ?tmp#54##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#54##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
 append > (2 calls)
@@ -83,9 +89,7 @@ gen#2 > {inline} (2 calls)
 gen#2(l##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("[":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @list:nn:nn
-    wybe.list._print_list<0>(~l##0:wybe.list(T), higher_order_append.gen#4<0><>:{resource}(T))<Everything; Everything> #2 @list:nn:nn
-    wybe.string.print<0>("]":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @list:nn:nn
+    wybe.list.print<0>(higher_order_append.gen#4<0><>:{resource}(wybe.int), ~l##0:wybe.list(wybe.int))<Everything; Everything> #1 @higher_order_append:nn:nn
 
 
 gen#4 > {inline} (1 calls)
@@ -103,9 +107,7 @@ print_list_of_ints > {inline} (1 calls)
 print_list_of_ints(l##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("[":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @list:nn:nn
-    wybe.list._print_list<0>(~l##0:wybe.list(T), higher_order_append.gen#4<0><>:{resource}(T))<Everything; Everything> #2 @list:nn:nn
-    wybe.string.print<0>("]":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @list:nn:nn
+    wybe.list.print<0>(higher_order_append.gen#4<0><>:{resource}(wybe.int), ~l##0:wybe.list(wybe.int))<Everything; Everything> #0 @higher_order_append:nn:nn
 
   LLVM code       :
 
@@ -115,34 +117,19 @@ print_list_of_ints(l##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>
  
 
 
-@higher_order_append.2 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @higher_order_append.1 to i64) }
-
-
-@higher_order_append.5 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @higher_order_append.4 to i64) }
-
-
-@higher_order_append.1 =    constant [?? x i8] c"[\00"
-
-
-@higher_order_append.4 =    constant [?? x i8] c"]\00"
-
-
 @higher_order_append.0 =    constant [1 x i64] [i64 ptrtoint (void (i64, i64)* @"higher_order_append.gen#2<0>" to i64)]
 
 
-@higher_order_append.3 =    constant [1 x i64] [i64 ptrtoint (void (i64, i64)* @"higher_order_append.gen#4<0>" to i64)]
+@higher_order_append.1 =    constant [1 x i64] [i64 ptrtoint (void (i64, i64)* @"higher_order_append.gen#4<0>" to i64)]
 
 
-declare external fastcc  void @"wybe.string.print<0>"(i64)    
-
-
-declare external fastcc  void @"wybe.list._print_list<0>"(i64, i64)    
+declare external fastcc  void @"wybe.list.print<0>"(i64, i64)    
 
 
 declare external ccc  void @print_int(i64)    
 
 
-declare external fastcc  void @"wybe.list.println<0>"(i64, i64)    
+declare external ccc  void @putchar(i8)    
 
 
 declare external fastcc  void @"wybe.list.map<1>"(i64, i64, i64*)    
@@ -247,8 +234,10 @@ entry:
   %70 = alloca i64 
    call fastcc  void  @"wybe.list.map<1>"(i64  %66, i64  %42, i64*  %70)  
   %71 = load  i64, i64* %70 
-  tail call fastcc  void  @"wybe.list.println<0>"(i64  %42, i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_append.0, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"wybe.list.println<0>"(i64  %71, i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_append.0, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.list.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_append.0, i32 0, i32 0) to i64), i64  %42)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"wybe.list.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_append.0, i32 0, i32 0) to i64), i64  %71)  
+  tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
 
@@ -306,9 +295,7 @@ entry:
 
 define external fastcc  void @"higher_order_append.gen#2<0>"(i64  %"#env##0", i64  %"l##0")    {
 entry:
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_append.2, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"wybe.list._print_list<0>"(i64  %"l##0", i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_append.3, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_append.5, i32 0, i32 0) to i64))  
+  musttail call fastcc  void  @"wybe.list.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_append.1, i32 0, i32 0) to i64), i64  %"l##0")  
   ret void 
 }
 
@@ -322,8 +309,6 @@ entry:
 
 define external fastcc  void @"higher_order_append.print_list_of_ints<0>"(i64  %"l##0")    {
 entry:
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_append.2, i32 0, i32 0) to i64))  
-  tail call fastcc  void  @"wybe.list._print_list<0>"(i64  %"l##0", i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_append.3, i32 0, i32 0) to i64))  
-  musttail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @higher_order_append.5, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"wybe.list.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_append.1, i32 0, i32 0) to i64), i64  %"l##0")  
   ret void 
 }
