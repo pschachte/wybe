@@ -58,8 +58,9 @@ import           Options                         (LogSelection (Blocks))
 import           Unsafe.Coerce
 import           System.FilePath
 import qualified UnivSet
-import Control.Exception (assert)
-import Data.Set (Set)
+import           Control.Exception (assert)
+import           Data.Set (Set)
+import           LastCallAnalysis (inseparablePrims)
 
 -- | Holds information on the LLVM representation of the LPVM procedure.
 data ProcDefBlock =
@@ -447,10 +448,10 @@ codegenBody body = do
             M.void $ ret =<< buildOutputOp
         PrimFork var ty _ fbody -> do
             cgen prims False
-            codegenFork var ty fbody 
+            codegenFork var ty fbody
 
 
--- | Code generation for a conditional branch. 
+-- | Code generation for a conditional branch.
 -- XXX revise when LPVM can be transformed to have n>3-ary branches
 codegenFork :: PrimVarName -> TypeSpec -> [ProcBody] -> Codegen ()
 codegenFork _ _ [] = shouldnt "fork with no branches"
@@ -465,7 +466,7 @@ codegenFork var ty [bElse,bThen] = do
 codegenFork var ty bodies  = do
     let nBodies = length bodies
     let blockPrefix = "switch." ++ show nBodies ++ "."
-    names@(deflt:rest) <- mapM (addBlock . (blockPrefix ++) . show) 
+    names@(deflt:rest) <- mapM (addBlock . (blockPrefix ++) . show)
                             [1..nBodies]
     brOp <- castVar var ty FlowIn
     let bits = getBits $ typeOf brOp
@@ -507,7 +508,8 @@ cgen (prim@(PrimCall callSiteID pspec args _):nextPrims) isLeaf = do
 
     -- If this call was marked with `tail`, then we generate the remaining prims
     --  *before* the call instruction.
-    nextPrims' <- cgenTakeReferences nextPrims
+    let (takeReferences, nextPrims') = inseparablePrims prim nextPrims
+    cgenTakeReferences True takeReferences
     let isTailPosition = List.null nextPrims' && isLeaf
 
     -- if the call is to an external module, declare it
@@ -849,23 +851,33 @@ cgenLPVM pname flags args = do
 
 -- | Codegen all `foreign lpvm mutate(..., takeReference xyz)` calls which occur
 -- immediately after a PrimCall.
--- Returns the remaining prims which didn't match the above pattern.
-cgenTakeReferences :: [Prim] -> Codegen [Prim]
-cgenTakeReferences (prim@(PrimForeign "lpvm" "mutate" _  [inArg, outArg, offsetArg, ArgInt 1 _, sizeArg, startOffsetArg,
+-- Returns the remaining prims which (didn't match the above pattern.
+cgenTakeReferences :: Bool -> [Prim] -> Codegen [Prim]
+cgenTakeReferences genAll (prim@(PrimForeign "lpvm" "mutate" _  [inArg, outArg@ArgVar { argVarFlow = outArgFlow }, offsetArg, ArgInt 1 _, sizeArg, startOffsetArg,
         refArg@ArgVar { argVarName = refArgName, argVarFlow = FlowTakeReference  }]):nextPrims) = do
-        logCodegen $ "--> Compiling " ++ show prim
-        baseAddr <- cgenArg inArg
-        outTy <- lift2 $ argLLVMType refArg
-        finalAddr <- offsetAddr baseAddr iadd offsetArg
-        finalAddrPtr <- doCast finalAddr outTy
-        -- take a reference to the field that we're interested in
-        assign (show refArgName) finalAddrPtr
-        -- assign outArg to be the same address as inArg
-        -- This may implicitly write to a pointer (through a `store`
-        -- instruction) if outArg is an `outByReference` param
+    logCodegen $ "--> Compiling " ++ show prim
+    nextPrims <- if outArgFlow == FlowOutByReference
+        then do cgenTakeReferences False nextPrims
+        else return nextPrims
+    baseAddr <- cgenArg inArg
+    outTy <- lift2 $ argLLVMType refArg
+    finalAddr <- offsetAddr baseAddr iadd offsetArg
+    finalAddrPtr <- doCast finalAddr outTy
+    -- take a reference to the field that we're interested in
+    assign (show refArgName) finalAddrPtr
+    -- assign outArg to be the same address as inArg
+    -- This may implicitly write to a pointer (through a `store`
+    -- instruction) if outArg is an `outByReference` param
+    if outArgFlow == FlowOut then do
         assign (pullName outArg) baseAddr
-        cgenTakeReferences nextPrims
-cgenTakeReferences prims = return prims
+    else do
+        outAddrOp <- cgenArg outArg
+        store outAddrOp baseAddr
+    if genAll
+    then do cgenTakeReferences genAll nextPrims
+    else return nextPrims
+cgenTakeReferences _ (_:nextPrims) = shouldnt "not a mutate(..., takeReference) instruction"
+cgenTakeReferences _ [] = return []
 
 -- | Generate code to add an offset to an address
 offsetAddr :: Operand -> (Operand -> Operand -> Instruction) -> PrimArg

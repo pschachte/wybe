@@ -7,8 +7,9 @@
 --           : LICENSE in the root directory of this project.
 {-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE LambdaCase #-}
 
-module LastCallAnalysis (lastCallAnalyseMod, lastCallAnalyseProc) where
+module LastCallAnalysis (lastCallAnalyseMod, lastCallAnalyseProc, inseparablePrims) where
 import AST
 import qualified Data.List as List
 import qualified UnivSet
@@ -26,7 +27,7 @@ import qualified Data.Set as Set
 import Control.Monad.Trans.Maybe (MaybeT (runMaybeT))
 import qualified Data.Map as Map
 import Data.Map (Map)
-import Data.Maybe (listToMaybe)
+import Data.Maybe (listToMaybe, fromJust)
 import Data.List (intercalate)
 import System.IO (hPutStrLn, stderr)
 import qualified Data.Text as T
@@ -78,6 +79,7 @@ lastCallAnalyseProc def = do
                 LeafTransformState { procSpec = spec, originalProto = proto, outByReferenceArguments = Set.empty }
             case maybeBody' of
                 Just body' -> do
+                    logLastCallAnalysis $ "out by reference arguments: " ++ show (outByReferenceArguments finalState)
                     proto' <- modifyProto proto (outByReferenceArguments finalState)
                     logLastCallAnalysis $ "new proto: " ++ show proto'
                     return def {procImpln = impln{procImplnProto = proto', procImplnBody = body'}}
@@ -86,7 +88,7 @@ lastCallAnalyseProc def = do
 data LeafTransformState = LeafTransformState {
     procSpec :: ProcSpec,
     originalProto :: PrimProto,
-    outByReferenceArguments :: Set PrimVarName
+    outByReferenceArguments :: Set ParameterID
 }
 
 type LeafTransformer = MaybeT (StateT LeafTransformState Compiler)
@@ -115,14 +117,17 @@ transformLeaf lastBlock = do
             (movedAboveCall2, mutateGraph, remainingBelowCall') <- lift2 $ buildMutateGraph lastCall isOutputFlow remainingBelowCall
             case remainingBelowCall' of
                 [] -> do
+                    let outByRefArgs = [name | (name, node) <- Map.assocs mutateGraph, callOutputIsOutByRef node]
+                    let outByRefIndices = Set.fromList [fromJust $ List.findIndex (\case
+                            ArgVar {argVarName=name'} -> name == name'
+                            _ -> False) (fst . primArgs $ content lastCall) | name <- outByRefArgs]
+
                     -- The output parameters which we want to convert to be
                     -- `FlowOutByReference` are the union of parameters we want to
                     -- convert for each leaf in the proc body.
-                    modify (\state@LeafTransformState{outByReferenceArguments=outByRefArgs} ->
-                        state { outByReferenceArguments = Set.union outByRefArgs $ Set.fromList [name | (name, node) <- Map.assocs mutateGraph, callOutputIsOutByRef node ]}
+                    modify (\state@LeafTransformState{outByReferenceArguments=params} ->
+                        state { outByReferenceArguments = Set.union params outByRefIndices }
                         )
-
-                    outByRefArgs <- gets outByReferenceArguments
 
                     -- We annotate the final call + remaining mutates with appropriate
                     -- `FlowOutByReference` and `FlowTakeReference` flows.
@@ -169,22 +174,20 @@ primsUseOutputsOfPrims prims otherPrims =
 
 -- | Converts a subset of proc outputs to be
 --   `FlowOutByReference` instead of `FlowOut`
-modifyProto :: PrimProto -> Set PrimVarName -> Compiler PrimProto
-modifyProto proto outputNames = do
+modifyProto :: PrimProto -> Set ParameterID -> Compiler PrimProto
+modifyProto proto outByRefOutputs = do
     let params = primProtoParams proto
-    let makeParamsOutByReference = (\param@PrimParam{primParamName = name, primParamFlow=flow } ->
-            if name `notElem` outputNames then
+    let makeParamsOutByReference = (\i param@PrimParam{primParamFlow=flow } ->
+            if i `notElem` outByRefOutputs then
                 param
             else case flow of
-                FlowOutByReference -> shouldnt "multiple mutate chains writing to same output"
-                FlowTakeReference -> shouldnt "takeReference arg should only appear as the last argument to a mutate() instruction"
-                FlowIn -> shouldnt $ "attempting to convert parameter " ++ show name ++ " from FlowIn -> FlowOutByReference.\nproto: " ++ show proto
                 FlowOut -> param { primParamFlow = FlowOutByReference }
+                _ -> shouldnt "can only convert FlowOut -> FlowOutByReference"
             )
-    return proto { primProtoParams = map makeParamsOutByReference params }
+    return proto { primProtoParams = zipWith makeParamsOutByReference [0..] params }
 
 -- | Turn the specified set of arguments into FlowOutByReference arguments.
-transformCall :: Set PrimVarName -> Prim -> Prim
+transformCall :: [PrimVarName] -> Prim -> Prim
 transformCall outByRefArgs call@(PrimCall siteId spec args globalFlows) =
     PrimCall siteId spec (map (\arg ->
         case arg of
@@ -219,6 +222,10 @@ instance HasPrim (Placed Prim) where
     getPrim = content
     setPrim p' = contentApply (const p')
 
+instance HasPrim Prim where
+    getPrim = id
+    setPrim p _ = p
+
 instance HasPrim (Bool, Placed Prim) where
     getPrim (_, p) = content p
     setPrim p' (x, p) = (x, contentApply (const p') p)
@@ -241,7 +248,8 @@ tryMovePrimBelowPrims prim otherPrims = do
 tryMovePrimBelowPrims' :: HasPrim a => a -> [a] -> ([a], [a]) -> Compiler ([a], [a])
 tryMovePrimBelowPrims' _ [] state = return state
 tryMovePrimBelowPrims' prim (nextPrim:remainingPrims) (above, below) =
-    let (nextPrims, remainingPrims') = inseparablePrims nextPrim remainingPrims
+    let (takeReferences, remainingPrims') = inseparablePrims nextPrim remainingPrims
+        nextPrims = nextPrim:takeReferences
     in
     if primsUseOutputsOfPrims (List.map getPrim nextPrims) (List.map getPrim (prim:below))
     then do
@@ -271,8 +279,8 @@ inseparablePrims prim prims = case getPrim prim of
                     _ -> False
                 ) prims
         in
-            (prim:takeReferenceMutates, rest)
-    _ -> ([prim], prims)
+            (takeReferenceMutates, rest)
+    _ -> ([], prims)
 
 -- | The only prims allowed after a "would-be tail call" are `foreign lpvm mutate`
 -- instructions, with specific conditions (e.g.: all the mutates have the
@@ -282,14 +290,14 @@ buildMutateGraph :: HasPrim a => a -> (PrimFlow -> Bool) -> [a] -> Compiler ([a]
 buildMutateGraph call allowedOutputFlows prims = do
     (graph, remainingBelowCall) <- buildMutateGraph' call allowedOutputFlows prims Map.empty
     logLastCallAnalysis $ "built mutate graph: " ++ show graph
-    liftIO $ hPutStrLn stderr $ graphvizOutput graph
+    logLastCallAnalysis $ graphvizOutput graph
     -- There may be some mutates in a chain which could be swapped such that
     -- some of them can be done before the last call.
     -- This allows us to handle the case of e.g.: snoc(tail: list(T), head: T)
     -- where the the `head` is written to after the tail.
     (pushedAboveCall, graph') <- transformGraph graph
     logLastCallAnalysis $ "mutate graph v2: " ++ show graph'
-    liftIO $ hPutStrLn stderr $ graphvizOutput graph'
+    logLastCallAnalysis $ graphvizOutput graph'
     return (pushedAboveCall, graph', remainingBelowCall)
 
 buildMutateGraph' :: HasPrim a => a -> (PrimFlow -> Bool) -> [a] -> MutateGraph a -> Compiler (MutateGraph a, [a])
@@ -420,7 +428,7 @@ transformGraph' ((name, ResultFromMutate mutateInstr@(MutateInstr prim)):nodes) 
                 _ -> shouldnt "error looking up input of mutate() in graph"
         -- Turns the FlowOut argument of the call into FlowOutByReference,
         -- and also switches mutate(..., member) to mutate(..., takeReference member)
-        (Just ResultFromCall { callResultFlow = FlowOut }) -> do
+        (Just ResultFromCall { }) -> do
             let graph' = Map.insert name (ResultFromMutate (mutateInstrTakeReference mutateInstr)) . Map.insert member ResultFromCall { callResultFlow = FlowOutByReference } $ graph
             transformGraph' nodes graph'
         -- Turns mutate(x, ?y, ...) into mutate(x, outByReference y , ...)
@@ -429,13 +437,27 @@ transformGraph' ((name, ResultFromMutate mutateInstr@(MutateInstr prim)):nodes) 
             let graph' = Map.insert name (ResultFromMutate (mutateInstrTakeReference mutateInstr)) . Map.insert member (ResultFromMutate (mutateInstrOutputByReference memberMutate)) $ graph
             transformGraph' nodes graph'
         Nothing -> shouldnt $ show member ++ " not found in graph"
-        _ -> transformGraph' nodes graph
+        -- _ -> transformGraph' nodes graph
 transformGraph' (_:nodes) graph = transformGraph' nodes graph
 
 -- | Returns the mutate() prims in a mutate graph, in order of appearance in the
 -- LPVM IR.
+-- Our mutate graph is essentially a directed-rooted-forest. So for each root
+-- (proc output) there is exactly one path to each vertex.
 mutateGraphPrims :: HasPrim a => MutateGraph a -> [a]
-mutateGraphPrims graph = []
+mutateGraphPrims graph = let sources = List.filter (not . varIsReferenced graph) (Map.keys graph) in
+    concatMap (mutateGraphPrims' graph) sources
+
+-- | Returns the mutate() prims for a given node and it's descendents.
+mutateGraphPrims' :: HasPrim a => MutateGraph a -> PrimVarName -> [a]
+mutateGraphPrims' graph name = case Map.lookup name graph of
+    (Just ResultFromCall {}) -> []
+    (Just ResultFromBeforeCall) -> []
+    (Just (ResultFromMutate mutateInstr@(MutateInstr prim))) ->
+        mutateGraphPrims' graph (mutateInstrInput mutateInstr) ++
+        mutateGraphPrims' graph (mutateInstrMember mutateInstr) ++
+        [prim]
+    Nothing -> shouldnt "source not found in graph"
 
 mutateInstrMember :: HasPrim a => MutateInstr a -> PrimVarName
 mutateInstrMember = fst . mutateInstrMember'
@@ -556,15 +578,10 @@ writeOutputsDirectlyIntoStructures procBody@ProcBodyAnnot{bodyPrims'=call0@(Fals
             -- In this case, we believe it is safe to turn that mutate into a
             -- `FlowTakeReference`-style mutate.
             (above2, mutateGraph, below') <- buildMutateGraph call0 (==FlowOutByReference) below
-            -- if null mutateGraph then do
-            --     logLastCallAnalysis "collected empty mutate graph - perhaps this result isn't written into a structure?"
-            --     return procBody{bodyPrims'=(True, call):prims}
-            -- else do
-                -- let below'' = annotateFinalMutates (concat mutateChains) ++ below'
-                -- let body' = procBody{bodyPrims'=above ++ (True, call):below''}
-                -- logLastCallAnalysis $ "new body: " ++ show (stripVisited body')
-                -- return body'
-            return procBody{bodyPrims'=(True, call):prims}
+
+            let body' = procBody{bodyPrims'=above ++ above2 ++ [(True, call)] ++ mutateGraphPrims mutateGraph ++ below'}
+            logLastCallAnalysis $ "new body: " ++ show (stripVisited body')
+            return body'
         else return procBody{bodyPrims'=(True, call):prims}
     writeOutputsDirectlyIntoStructures newBody
 writeOutputsDirectlyIntoStructures body@ProcBodyAnnot{bodyPrims'=(visited, prim):prims} = do

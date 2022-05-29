@@ -13,3 +13,6 @@ def map2(f: (T, ?K), x: list(T), ?y: list(K)) {
         ?y = []
     }
 }
+
+map2({?@2 = @1 + 1}, [1,2,3,4,5], ?y)
+!println(y, print)
