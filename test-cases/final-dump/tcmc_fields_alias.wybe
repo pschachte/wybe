@@ -1,5 +1,3 @@
-# constructors null | node(val: int, left: _, right: _)
-
 # UNSAFE
 # this forcibly writes without checking whether it is the correct variant or not
 def {inline} unsafe_update_tail(!x:list(T), field:list(T)) {
@@ -10,13 +8,14 @@ def partition(p: {test}(T), l: list(T), ?yes: list(T), ?no: list(T)) {
     if { [?h | ?t] = l ::
             if { p(h) ::
                 partition(p, t, ?yes0, ?no0)
+                # the idea here is that we write *both* yes0 and no0 to the tail
+                # of the list
+                # this should *not* be TCMC-optimizable, since it may not be
+                # deterministic which order yes0 or no0 are written (only the
+                # last one remains)
                 ?yes = [h|yes0]
-                # Since we use `no0` as our output `no`, `no0` isn't marked as "last use",
-                # and so this mutate() cannot be part of the mutate chain.
-                # This tests a very weird corner case where `no` becomes
-                # outByReference but `yes` doesn't.
                 unsafe_update_tail(!yes, no0)
-                ?no = no0
+                ?no = []
                 | else ::
                 partition(p, t, ?yes0, ?no0)
                 ?yes = yes0
@@ -34,13 +33,3 @@ partition({test} { @1 >= 3}, l, ?yes, ?no)
 !print(", ")
 !print(no, print)
 !nl
-
-# }
-# ?x = node(1, null, null)
-# ?x2 = node(2, null, null)
-# append_tree(x, x2, ?x3)
-# !print_tree(x2)
-# !nl
-# !print_tree(x3)
-# !nl
-# }

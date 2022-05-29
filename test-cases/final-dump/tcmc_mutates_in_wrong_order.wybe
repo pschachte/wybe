@@ -1,32 +1,31 @@
-constructors null | node(left: _, right: _, val: int)
+constructors null | snoc(tail: _, head: int)
 
-def append_tree(a: _, b: _, ?result: _) {
-    if { node(?lft, ?right, ?val) = a ::
-            append_tree(b, right, ?right2)
+def append(a: _, b: _, ?result: _) {
+    if { node(?t, ?h) = a ::
+            append_tree(b, t, ?t2)
             # mutate for val happens at the end. This breaks this optimization :((
-            ?result = node(lft, right2, val)
+            ?result = snoc(t2, h)
        | else ::
             ?result = b
     }
 }
-def print_tree(a: _) use !io {
-    if { node(?left, ?right, ?val) = a ::
+
+def print_list(a: _) use !io {
+    if { snoc(?tail, ?head) = a ::
         !print("node(")
-        !print(val)
+        !print(head)
         !print(",")
-        !print_tree(left)
-        !print(",")
-        !print_tree(right)
+        !print_list(tail)
         !print(")")
        | else ::
-        !print("empty")
+        !print("null")
     }
 
 }
-?x = node(null, null, 1)
-?x2 = node(null, null, 2)
-append_tree(x, x2, ?x3)
-!print_tree(x2)
+?x = snoc(null, 1)
+?x2 = snoc(null, 2)
+append(x, x2, ?x3)
+!print(x2)
 !nl
-!print_tree(x3)
+!print(x3)
 !nl

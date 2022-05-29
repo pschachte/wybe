@@ -1,14 +1,15 @@
-# suboptimal code generation at the moment - we want to
-# write `l ,, l2` directly into second field of the structure `combined`.
-
 type combined(T) {
     pub combined(x: T, y: list(T), z: list(T))
 }
 
+# we expect that this *should* get optimized into two outByReference ->
+# takeReference pairs
 pub def appendstuff(l: list(int), l2: list(int), ?result: combined(int)) {
     ?l3 = l ,, l2
     ?result = combined(length(l) + length(l2), [], l2 ,, l)
-    !result^combined.y = l3
+    # here we have that this mutate isn't specified to be *destructive* yet. RIP
+    # !result^y = l3
+    foreign lpvm mutate(result, ?result, 8, 1, 16, 0, l3)
     # equivalent to below:
     # ?result = combined(length(l) + length(l2), l ,, l2, l2 ,, l)
 }
