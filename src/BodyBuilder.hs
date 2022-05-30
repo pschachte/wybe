@@ -8,7 +8,7 @@
 
 module BodyBuilder (
   BodyBuilder, buildBody, freshVarName, instr, buildFork, completeFork,
-  beginBranch, endBranch, definiteVariableValue
+  beginBranch, endBranch, definiteVariableValue, argExpandedPrim
   ) where
 
 import AST
