@@ -52,15 +52,15 @@ appendstuff > public (1 calls)
 appendstuff(l##0:wybe.list(wybe.int), l2##0:wybe.list(wybe.int), ?result##0:tcmc_mutate_struct_directly.combined(wybe.int))<{}; {}>:
   AliasPairs: [(l##0,l2##0),(l##0,result##0),(l2##0,result##0)]
   InterestingCallProperties: []
-    wybe.list.length1<0>(l##0:wybe.list(T), 0:wybe.int, ?tmp#2##0:wybe.int) #6 @list:nn:nn
-    wybe.list.length1<0>(l2##0:wybe.list(T), 0:wybe.int, ?tmp#3##0:wybe.int) #7 @list:nn:nn
-    foreign llvm add(~tmp#2##0:wybe.int, ~tmp#3##0:wybe.int, ?tmp#1##0:wybe.int) @int:nn:nn
+    wybe.list.length1<0>(l##0:wybe.list(T), 0:wybe.int, ?tmp#3##0:wybe.int) #6 @list:nn:nn
+    wybe.list.length1<0>(l2##0:wybe.list(T), 0:wybe.int, ?tmp#4##0:wybe.int) #7 @list:nn:nn
+    foreign llvm add(~tmp#3##0:wybe.int, ~tmp#4##0:wybe.int, ?tmp#2##0:wybe.int) @int:nn:nn
     foreign lpvm alloc(24:wybe.int, ?tmp#13##0:tcmc_mutate_struct_directly.combined(T)) @tcmc_mutate_struct_directly:nn:nn
-    foreign lpvm mutate(~tmp#13##0:tcmc_mutate_struct_directly.combined(T), ?tmp#14##0:tcmc_mutate_struct_directly.combined(T), 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp#1##0:T) @tcmc_mutate_struct_directly:nn:nn
-    wybe.list.,,<0>(l##0:wybe.list(wybe.int), l2##0:wybe.list(wybe.int), outByReference tmp#4##0:wybe.list(wybe.int)) #3 @tcmc_mutate_struct_directly:nn:nn
-    foreign lpvm mutate(~tmp#14##0:tcmc_mutate_struct_directly.combined(T), ?tmp#15##0:tcmc_mutate_struct_directly.combined(T), 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~takeReference tmp#4##0:wybe.list(T)) @tcmc_mutate_struct_directly:nn:nn
-    wybe.list.,,<0>(~l2##0:wybe.list(wybe.int), ~l##0:wybe.list(wybe.int), outByReference tmp#5##0:wybe.list(wybe.int)) #4 @tcmc_mutate_struct_directly:nn:nn
-    foreign lpvm mutate(~tmp#15##0:tcmc_mutate_struct_directly.combined(T), ?result##0:tcmc_mutate_struct_directly.combined(T), 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~takeReference tmp#5##0:wybe.list(T)) @tcmc_mutate_struct_directly:nn:nn
+    foreign lpvm mutate(~tmp#13##0:tcmc_mutate_struct_directly.combined(T), ?tmp#14##0:tcmc_mutate_struct_directly.combined(T), 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp#2##0:T) @tcmc_mutate_struct_directly:nn:nn
+    wybe.list.,,<0>(l2##0:wybe.list(wybe.int), l##0:wybe.list(wybe.int), outByReference tmp#1##0:wybe.list(wybe.int)) #1 @tcmc_mutate_struct_directly:nn:nn
+    foreign lpvm mutate(~tmp#14##0:tcmc_mutate_struct_directly.combined(T), ?tmp#15##0:tcmc_mutate_struct_directly.combined(T), 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~takeReference tmp#1##0:wybe.list(T)) @tcmc_mutate_struct_directly:nn:nn
+    wybe.list.,,<0>(~l##0:wybe.list(wybe.int), ~l2##0:wybe.list(wybe.int), outByReference tmp#0##0:wybe.list(wybe.int)) #0 @tcmc_mutate_struct_directly:nn:nn
+    foreign lpvm mutate(~tmp#15##0:tcmc_mutate_struct_directly.combined(T), ?result##0:tcmc_mutate_struct_directly.combined(T), 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~takeReference tmp#0##0:wybe.list(T)) @tcmc_mutate_struct_directly:nn:nn
 
 
 gen#1 > {inline} (2 calls)
@@ -197,13 +197,13 @@ entry:
   %6 = inttoptr i64 %5 to i64* 
   %7 = getelementptr  i64, i64* %6, i64 0 
   store  i64 %2, i64* %7 
-  %8 = add   i64 %5, 8 
+  %8 = add   i64 %5, 16 
   %9 = inttoptr i64 %8 to i64* 
-  tail call fastcc  void  @"wybe.list.,,<0>"(i64  %"l##0", i64  %"l2##0", i64*  %9)  
+  tail call fastcc  void  @"wybe.list.,,<0>"(i64  %"l2##0", i64  %"l##0", i64*  %9)  
   %10 = load  i64, i64* %9 
-  %11 = add   i64 %5, 16 
+  %11 = add   i64 %5, 8 
   %12 = inttoptr i64 %11 to i64* 
-  tail call fastcc  void  @"wybe.list.,,<0>"(i64  %"l2##0", i64  %"l##0", i64*  %12)  
+  tail call fastcc  void  @"wybe.list.,,<0>"(i64  %"l##0", i64  %"l2##0", i64*  %12)  
   ret i64 %5 
 }
 

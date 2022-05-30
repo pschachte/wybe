@@ -5,11 +5,13 @@ def partition(p: {test}(T), l: list(T), ?yes: list(T), ?no: list(T)) {
                 # but that means that this call isn't actually tail recursive
                 # since we need to store `no` after the call.
                 # What can we do about this?
-                # - Could take the union of args + results from mutate graph,
+                # 1. Could take the union of args + results from mutate graph,
                 #   in this case that would mean we make both `yes` and `no`
                 #   outByReference
-                # - Or we make codegen not mark this call with `musttail` (but
+                # 2. Or we make codegen not mark this call with `musttail` (but
                 #   then the function essentially doesn't get optimized)
+                #
+                # Currently I have implemented option #2
                 partition(p, t, ?yes0, ?yes)
                 ?no = [h|yes0]
                 | else ::

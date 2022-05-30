@@ -521,9 +521,12 @@ cgen (prim@(PrimCall callSiteID pspec args _):nextPrims) isLeaf = do
     (inops, allocaTracking) <- cgenArgsFull inArgs
 
     outTy <- lift2 $ primReturnType outArgs
+    let outArgNames = Set.fromList $ pullName <$> outArgs
+    outByRefs <- Set.fromList <$> outByRefParamNames
+    let noOutByRefsToWrite = Set.null (Set.intersection outArgNames outByRefs)
     callerSignature <- lift2 $ getLLVMSignature callerProto
     calleeSignature <- lift2 $ getLLVMSignature calleeProto
-    let tailCall = getTailCallHint isTailPosition allocaTracking outTy callerSignature calleeSignature
+    let tailCall = getTailCallHint isTailPosition allocaTracking outTy noOutByRefsToWrite callerSignature calleeSignature
     logCodegen $ "Tail call kind = " ++ show tailCall ++ " (isTailPosition=" ++ show isTailPosition ++ " allocaTracking=" ++ show allocaTracking ++ " outTy=" ++ show outTy ++ " callerSignature=" ++ show callerSignature ++ " calleeSignature=" ++ show calleeSignature ++ ")"
 
     logCodegen $ "Translated inputs = " ++ show inops
@@ -615,27 +618,31 @@ cgenPrim prim@PrimCall {} = shouldnt "calls should be handled by `cgen`"
 -- `tail` is just a hint that LLVM "can" tail-call optimize but doesn't have to.
 -- However there are certain restrictions on when these hints. LLVM may optimize
 -- our code incorrectly (or crash) if we get this wrong.
-getTailCallHint :: Bool -> AllocaTracking -> LLVMAST.Type -> LLVMCallSignature -> LLVMCallSignature -> Maybe LLVMAST.TailCallKind
+getTailCallHint :: Bool -> AllocaTracking -> LLVMAST.Type -> Bool -> LLVMCallSignature -> LLVMCallSignature -> Maybe LLVMAST.TailCallKind
 -- Oh no! There is an `outByReference` argument which points to an `alloca`.
 -- The LLVM language reference dictates that we are not allowed to add
 -- `tail` or `musttail` in this case
-getTailCallHint _ DoesAlloca _ _ _ = Nothing
+getTailCallHint _ DoesAlloca _ _ _ _ = Nothing
 -- Although this call is in LPVM tail position, we'll need to add some
 -- `extractvalue` instrs after this call, so it won't be in LLVM
 -- tail position, thus we cannot use `musttail`
-getTailCallHint True NoAlloca StructureType {} _ _ = Just LLVMAST.Tail
+getTailCallHint True NoAlloca StructureType {} _ _ _ = Just LLVMAST.Tail
+-- Although this call is in LPVM tail position, we'll need to add at least one
+-- store() instr after this call, so it won't be in LLVM tail position,
+-- thus we cannot use `musttail`
+getTailCallHint True NoAlloca _ False _ _ = Just LLVMAST.Tail
 -- Although this call is in LPVM tail position, the signatures of the
 -- the caller and callee may not match , thus according to LLVM
 -- language reference we aren't allowed to use `musttail`.
 -- XXX: LLVM version >= 13.0.0 relaxes this restriction
-getTailCallHint True NoAlloca _ callerSignature calleeSignature | callerSignature /= calleeSignature = Just LLVMAST.Tail
+getTailCallHint True NoAlloca _ _ callerSignature calleeSignature | callerSignature /= calleeSignature = Just LLVMAST.Tail
 -- We know this LLVM call will be in LLVM tail position (since scalar/void
 -- return type), and also we don't refer to any allocas to in the caller.
-getTailCallHint True NoAlloca _ _ _ = Just LLVMAST.MustTail
+getTailCallHint True NoAlloca _ _ _ _ = Just LLVMAST.MustTail
 -- This function isn't in LPVM tail position,
 -- but we know it doesn't take any arguments which were created by allocas
 -- in the caller.
-getTailCallHint False NoAlloca _ _ _ = Just LLVMAST.Tail
+getTailCallHint False NoAlloca _ _ _ _ = Just LLVMAST.Tail
 
 -- | Translate a Binary primitive procedure into a binary llvm instruction,
 -- add the instruction to the current BasicBlock's instruction stack and emit
@@ -1269,6 +1276,11 @@ integerOrd = toInteger . ord
 -- Symbol Table                                                           --
 ----------------------------------------------------------------------------
 
+outByRefParamNames :: Codegen [String]
+outByRefParamNames = do
+    params <- gets (primProtoParams . cgProto)
+    return $ List.map (show . primParamName) $ List.filter (\param -> FlowOutByReference == primParamFlow param) params
+
 -- | Store a local variable on the front of the symbol table.
 -- |
 -- | If the local variable happens to be an outByReference parameter of the
@@ -1276,9 +1288,8 @@ integerOrd = toInteger . ord
 -- | using a store instruction.
 assign :: String -> Operand -> Codegen ()
 assign var op = do
-    params <- gets (primProtoParams . cgProto)
-    let outByRefParamNames = List.map (show . primParamName) $ List.filter (\param -> FlowOutByReference == primParamFlow param) params
-    if var `elem` outByRefParamNames then do
+    outByRefs <- outByRefParamNames
+    if var `elem` outByRefs then do
       logCodegen $ "assign outByReference " ++ var ++ " = " ++ show op ++ ":" ++ show (typeOf op)
       locOp <- getVar var
       locOp' <- doCast locOp (ptr_t (typeOf op))
