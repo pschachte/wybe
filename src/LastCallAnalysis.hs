@@ -79,9 +79,10 @@ lastCallAnalyseProc def = do
                 LeafTransformState { procSpec = spec, originalProto = proto, outByReferenceArguments = Set.empty }
             case maybeBody' of
                 Just body' -> do
-                    logLastCallAnalysis $ "out by reference arguments: " ++ show (outByReferenceArguments finalState)
+                    let outByRefArgs = outByReferenceArguments finalState
+                    unless (null outByRefArgs) $ logLastCallAnalysis $ "out by reference arguments: " ++ show outByRefArgs
                     proto' <- modifyProto proto (outByReferenceArguments finalState)
-                    logLastCallAnalysis $ "new proto: " ++ show proto'
+                    unless (null outByRefArgs) $ logLastCallAnalysis $ "new proto: " ++ show proto'
                     return def {procImpln = impln{procImplnProto = proto', procImplnBody = body'}}
                 _ -> return def
 
@@ -110,11 +111,11 @@ transformLeaf lastBlock = do
             logLeaf $ "before: " ++ showPrims beforeCall ++ "\nafter: " ++ showPrims afterLastCall
             -- First we identify whether we can move this last call below some of the prims
             -- i.e.: the prims don't depend on any values produced by the last call
-            (movedAboveCall, remainingBelowCall) <- lift2 $ tryMovePrimBelowPrims lastCall afterLastCall
+            (lastCall', movedAboveCall, remainingBelowCall) <- lift2 $ tryMovePrimBelowPrims lastCall afterLastCall
             -- Next, we look at the remaining prims which couldn't be simply moved before the last call,
             -- to see if they are just "filling in the fields" of struct(s) with
             -- outputs from the last call.
-            (movedAboveCall2, mutateGraph, remainingBelowCall') <- lift2 $ buildMutateGraph lastCall isOutputFlow remainingBelowCall
+            (movedAboveCall2, mutateGraph, remainingBelowCall') <- lift2 $ buildMutateGraph lastCall' isOutputFlow remainingBelowCall
             case remainingBelowCall' of
                 [] -> do
                     let outByRefArgs = [name | (name, node) <- Map.assocs mutateGraph, callOutputIsOutByRef node]
@@ -234,30 +235,57 @@ showPrims :: HasPrim a => [a] -> String
 showPrims ps = let ps' = List.map getPrim ps in
     show ps'
 
--- XXX: may need to update 'last use' flags here?
-tryMovePrimBelowPrims :: HasPrim a => a -> [a] -> Compiler ([a], [a])
+tryMovePrimBelowPrims :: HasPrim a => a -> [a] -> Compiler (a, [a], [a])
 tryMovePrimBelowPrims prim otherPrims = do
-    (above, below) <- tryMovePrimBelowPrims' prim otherPrims ([], [])
+    (prim, above, below) <- tryMovePrimBelowPrims' otherPrims (prim, [], [])
     logLastCallAnalysis $ "moved below: " ++ showPrims above
     logLastCallAnalysis $ "remaining below: " ++ showPrims below
-    return (above, below)
+    return (prim, above, below)
 
 -- when optimizing writes directly into structures,
 -- we need to treat "a call plus subseqent takeReference mutate()s" as an atomic
 -- statement that is not allowed to be split up.
-tryMovePrimBelowPrims' :: HasPrim a => a -> [a] -> ([a], [a]) -> Compiler ([a], [a])
-tryMovePrimBelowPrims' _ [] state = return state
-tryMovePrimBelowPrims' prim (nextPrim:remainingPrims) (above, below) =
+tryMovePrimBelowPrims' :: HasPrim a => [a] -> (a, [a], [a]) -> Compiler (a, [a], [a])
+tryMovePrimBelowPrims' [] state = return state
+tryMovePrimBelowPrims' (nextPrim:remainingPrims) (prim, above, below) =
     let (takeReferences, remainingPrims') = inseparablePrims nextPrim remainingPrims
         nextPrims = nextPrim:takeReferences
     in
     if primsUseOutputsOfPrims (List.map getPrim nextPrims) (List.map getPrim (prim:below))
     then do
         logLastCallAnalysis $ "cannot move " ++ showPrims (prim:below) ++ " below " ++ showPrims nextPrims
-        tryMovePrimBelowPrims' prim remainingPrims' (above, below ++ nextPrims)
+        tryMovePrimBelowPrims' remainingPrims' (prim, above, below ++ nextPrims)
     else do
         logLastCallAnalysis $ "can move " ++ showPrims (prim:below) ++ " below " ++ showPrims nextPrims
-        tryMovePrimBelowPrims' prim remainingPrims' (above ++ nextPrims, below)
+        let lastUseVarsToSwap = varsInPrims' (\flow isFinalUse -> isFinalUse) (List.map getPrim nextPrims)
+        unless (null lastUseVarsToSwap) $ logLastCallAnalysis $ "potentially swapping last use annotations `~` on " ++ show lastUseVarsToSwap
+        let (nextPrims', prim':below') = swapLastUsed lastUseVarsToSwap (nextPrims, prim:below)
+        unless (null lastUseVarsToSwap) $ logLastCallAnalysis $ "above=" ++ show nextPrims' ++ " below=" ++ show (prim':below')
+        tryMovePrimBelowPrims' remainingPrims' (prim', above ++ nextPrims', below')
+
+-- `var` is last used in list of prims `from`, we want to swap the last used
+-- flag to the last prim arg in `to`, which references `var`.
+swapLastUsed :: HasPrim a => Set PrimVarName -> ([a], [a]) -> ([a], [a])
+swapLastUsed vars (from, to) =
+        -- foldr works through `to` in reverse-order, so we mark the *final*
+        -- occurence of each var as "final".
+        let (to', varsNotFound) = List.foldr (setLastUse True) ([], vars) to
+            (from', varsNotFound1) = List.foldr (setLastUse False) ([], Set.difference vars varsNotFound) from
+        in
+        if null varsNotFound1
+            then (from', to')
+            else shouldnt "expected to swap last use flag for all vars"
+
+setLastUse :: HasPrim a => Bool -> a -> ([a], Set PrimVarName) -> ([a], Set PrimVarName)
+setLastUse newFinalValue p (prims, vars) =
+        let prim = getPrim p
+            (args, gFlows) = primArgs prim
+            (args', vars') = foldr (\arg (args, vars) -> case arg of
+                        arg@ArgVar {argVarName = var, argVarFinal=_ } | var `elem` vars -> (arg { argVarFinal = newFinalValue }:args, Set.delete var vars)
+                        _ -> (arg:args, vars)
+                        ) ([], vars) args
+            in
+        (setPrim (replacePrimArgs prim args' gFlows) p : prims, vars')
 
 -- | Given a prim and some subsequent prims, collects any prims that should
 -- never be separated from the first prim.
@@ -562,6 +590,9 @@ stripVisitedFork :: PrimForkAnnot -> PrimFork
 stripVisitedFork NoForkAnnot = NoFork
 stripVisitedFork PrimForkAnnot{forkVar'=var, forkVarType'=varTy, forkVarLast'=varLast, forkBodies'=bodies} = PrimFork {forkVar=var, forkVarType=varTy, forkVarLast=varLast, forkBodies=List.map stripVisited bodies}
 
+markVisited :: (Bool, Placed Prim) -> (Bool, Placed Prim)
+markVisited (_, p) = (True, p)
+
 writeOutputsDirectlyIntoStructures :: ProcBodyAnnot -> Compiler ProcBodyAnnot
 writeOutputsDirectlyIntoStructures procBody@ProcBodyAnnot{bodyPrims'=[], bodyFork'=NoForkAnnot} = return procBody
 writeOutputsDirectlyIntoStructures procBody@ProcBodyAnnot{bodyPrims'=[], bodyFork'=fork@PrimForkAnnot{forkBodies'=bodies}} = do
@@ -572,14 +603,14 @@ writeOutputsDirectlyIntoStructures procBody@ProcBodyAnnot{bodyPrims'=call0@(Fals
     newBody <- if FlowOutByReference `elem` argFlows then do
             logLastCallAnalysis $ "call " ++ show call ++ " has outByReference outputs"
             logLastCallAnalysis $ "trying to move call " ++ show call ++ " down right before outputs are needed"
-            (above, below) <- tryMovePrimBelowPrims call0 prims
+            (call0', above, below) <- tryMovePrimBelowPrims call0 prims
             -- For each FlowOutByReference output, we want to know if it
             -- appears as the last argument to exactly 1 mutate().
             -- In this case, we believe it is safe to turn that mutate into a
             -- `FlowTakeReference`-style mutate.
-            (above2, mutateGraph, below') <- buildMutateGraph call0 (==FlowOutByReference) below
+            (above2, mutateGraph, below') <- buildMutateGraph call0' (==FlowOutByReference) below
 
-            let body' = procBody{bodyPrims'=above ++ above2 ++ [(True, call)] ++ mutateGraphPrims mutateGraph ++ below'}
+            let body' = procBody{bodyPrims'=above ++ above2 ++ [markVisited call0'] ++ mutateGraphPrims mutateGraph ++ below'}
             logLastCallAnalysis $ "new body: " ++ show (stripVisited body')
             return body'
         else return procBody{bodyPrims'=(True, call):prims}
@@ -606,11 +637,11 @@ fixupProc _ = shouldnt "uncompiled"
 
 fixupPrim :: Prim -> Compiler Prim
 fixupPrim p@(PrimCall siteId pspec args gFlows) = do
-    logLastCallAnalysis $ "checking call " ++ show p
     proto <- getProcPrimProto pspec
     let args' = coerceArgs args (primProtoParams proto)
-    when (args /= args') $ logLastCallAnalysis $ "coerced args: " ++ show args ++ " " ++ show args'
-    return $ PrimCall siteId pspec args' gFlows
+    let call' = PrimCall siteId pspec args' gFlows
+    when (args /= args') $ logLastCallAnalysis $ "coerced call: " ++ show p ++ "\n          to: " ++ show call'
+    return call'
 fixupPrim p = return p
 
 -- | Coerce FlowOut arguments into FlowOutByReference where needed

@@ -1,6 +1,6 @@
 # we expect this should TCMC-optimize
 # however in order for this to happen, we need a generalisation of "mutate
-# chains", which we name "Mutate DAGs"
+# chains", which we name "mutate graphs"
 
 def map2(f: (T, ?K), x: list(T), ?y: list(K)) {
     if { [?x0 | ?xt1] = x ::

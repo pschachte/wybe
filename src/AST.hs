@@ -72,7 +72,7 @@ module AST (
   expOutputs, pexpListOutputs, expInputs, pexpListInputs,
   setExpTypeFlow, setPExpTypeFlow,
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
-  varsInPrims, varsInPrim, varsInPrimArgs, varsInPrimArg,
+  varsInPrims, varsInPrims', varsInPrim, varsInPrim', varsInPrimArgs, varsInPrimArg,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
   maybeGetClosureOf, isClosureProc, isClosureVariant,
@@ -3461,18 +3461,25 @@ setPExpTypeFlow typeflow pexpr = setExpTypeFlow typeflow <$> pexpr
 
 varsInPrims :: (PrimFlow -> Bool) -> [Prim] -> Set PrimVarName
 varsInPrims tst =
-    List.foldr (Set.union . varsInPrim tst) Set.empty
+    List.foldr (Set.union . varsInPrim' (\flow final -> tst flow)) Set.empty
 
 varsInPrim :: (PrimFlow -> Bool) -> Prim     -> Set PrimVarName
-varsInPrim tst prim      = let (args, globals) = primArgs prim in varsInPrimArgs tst args
+varsInPrim tst = varsInPrim' (\flow final -> tst flow)
 
-varsInPrimArgs :: (PrimFlow -> Bool) -> [PrimArg] -> Set PrimVarName
+varsInPrims' :: (PrimFlow -> Bool -> Bool) -> [Prim] -> Set PrimVarName
+varsInPrims' tst =
+    List.foldr (Set.union . varsInPrim' tst) Set.empty
+
+varsInPrim' :: (PrimFlow -> Bool -> Bool) -> Prim     -> Set PrimVarName
+varsInPrim' tst prim      = let (args, globals) = primArgs prim in varsInPrimArgs tst args
+
+varsInPrimArgs :: (PrimFlow -> Bool -> Bool) -> [PrimArg] -> Set PrimVarName
 varsInPrimArgs tst =
     List.foldr (Set.union . varsInPrimArg tst) Set.empty
 
-varsInPrimArg :: (PrimFlow -> Bool) -> PrimArg -> Set PrimVarName
-varsInPrimArg tst ArgVar{argVarName=var,argVarFlow=dir'}
-    = if tst dir' then Set.singleton var else Set.empty
+varsInPrimArg :: (PrimFlow -> Bool -> Bool) -> PrimArg -> Set PrimVarName
+varsInPrimArg tst ArgVar{argVarName=var,argVarFlow=dir, argVarFinal=final}
+    = if tst dir final then Set.singleton var else Set.empty
 varsInPrimArg tst (ArgClosure _ as _)
     = Set.unions $ Set.fromList (varsInPrimArg tst <$> as)
 varsInPrimArg _ ArgInt{}      = Set.empty
