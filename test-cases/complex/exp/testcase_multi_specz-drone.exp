@@ -170,22 +170,20 @@ entry:
   %3 = tail call ccc  i8*  @wybe_malloc(i32  %2)  
   %4 = ptrtoint i8* %3 to i64 
   %5 = inttoptr i64 %4 to i64* 
-  %6 = getelementptr  i64, i64* %5, i64 0 
-  store  i64 %0, i64* %6 
-  %7 = add   i64 %4, 8 
-  %8 = inttoptr i64 %7 to i64* 
-  %9 = getelementptr  i64, i64* %8, i64 0 
-  store  i64 %1, i64* %9 
+  store  i64 %0, i64* %5 
+  %6 = add   i64 %4, 8 
+  %7 = inttoptr i64 %6 to i64* 
+  store  i64 %1, i64* %7 
   store  i64 %4, i64* @"resource#command_line.arguments" 
   store  i64 ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @command_line.0, i32 0, i32 0) to i64), i64* @"resource#command_line.command" 
-  %10 = tail call fastcc  {i64, i64, i1}  @"wybe.array.[|]<0>[785a827a1b]"(i64  %4)  
-  %11 = extractvalue {i64, i64, i1} %10, 0 
-  %12 = extractvalue {i64, i64, i1} %10, 1 
-  %13 = extractvalue {i64, i64, i1} %10, 2 
-  br i1 %13, label %if.then, label %if.else 
+  %8 = tail call fastcc  {i64, i64, i1}  @"wybe.array.[|]<0>[785a827a1b]"(i64  %4)  
+  %9 = extractvalue {i64, i64, i1} %8, 0 
+  %10 = extractvalue {i64, i64, i1} %8, 1 
+  %11 = extractvalue {i64, i64, i1} %8, 2 
+  br i1 %11, label %if.then, label %if.else 
 if.then:
-  store  i64 %12, i64* @"resource#command_line.arguments" 
-  store  i64 %11, i64* @"resource#command_line.command" 
+  store  i64 %10, i64* @"resource#command_line.arguments" 
+  store  i64 %9, i64* @"resource#command_line.command" 
   store  i64 0, i64* @"resource#command_line.exit_code" 
   ret void 
 if.else:
@@ -838,22 +836,20 @@ entry:
   %3 = tail call ccc  i8*  @wybe_malloc(i32  %2)  
   %4 = ptrtoint i8* %3 to i64 
   %5 = inttoptr i64 %4 to i64* 
-  %6 = getelementptr  i64, i64* %5, i64 0 
-  store  i64 %0, i64* %6 
-  %7 = add   i64 %4, 8 
-  %8 = inttoptr i64 %7 to i64* 
-  %9 = getelementptr  i64, i64* %8, i64 0 
-  store  i64 %1, i64* %9 
+  store  i64 %0, i64* %5 
+  %6 = add   i64 %4, 8 
+  %7 = inttoptr i64 %6 to i64* 
+  store  i64 %1, i64* %7 
   store  i64 %4, i64* @"resource#command_line.arguments" 
   store  i64 ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @command_line.0, i32 0, i32 0) to i64), i64* @"resource#command_line.command" 
-  %10 = tail call fastcc  {i64, i64, i1}  @"wybe.array.[|]<0>[785a827a1b]"(i64  %4)  
-  %11 = extractvalue {i64, i64, i1} %10, 0 
-  %12 = extractvalue {i64, i64, i1} %10, 1 
-  %13 = extractvalue {i64, i64, i1} %10, 2 
-  br i1 %13, label %if.then, label %if.else 
+  %8 = tail call fastcc  {i64, i64, i1}  @"wybe.array.[|]<0>[785a827a1b]"(i64  %4)  
+  %9 = extractvalue {i64, i64, i1} %8, 0 
+  %10 = extractvalue {i64, i64, i1} %8, 1 
+  %11 = extractvalue {i64, i64, i1} %8, 2 
+  br i1 %11, label %if.then, label %if.else 
 if.then:
-  store  i64 %12, i64* @"resource#command_line.arguments" 
-  store  i64 %11, i64* @"resource#command_line.command" 
+  store  i64 %10, i64* @"resource#command_line.arguments" 
+  store  i64 %9, i64* @"resource#command_line.command" 
   store  i64 0, i64* @"resource#command_line.exit_code" 
   ret void 
 if.else:
@@ -1363,145 +1359,133 @@ entry:
 if.then:
   %1 = add   i64 %"d##0", 8 
   %2 = inttoptr i64 %1 to i64* 
-  %3 = getelementptr  i64, i64* %2, i64 0 
-  %4 = load  i64, i64* %3 
-  %5 = sub   i64 %4, 1 
-  %6 = trunc i64 32 to i32  
-  %7 = tail call ccc  i8*  @wybe_malloc(i32  %6)  
-  %8 = ptrtoint i8* %7 to i64 
-  %9 = inttoptr i64 %8 to i8* 
-  %10 = inttoptr i64 %"d##0" to i8* 
-  %11 = trunc i64 32 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %9, i8*  %10, i32  %11, i1  0)  
-  %12 = add   i64 %8, 8 
-  %13 = inttoptr i64 %12 to i64* 
-  %14 = getelementptr  i64, i64* %13, i64 0 
-  store  i64 %5, i64* %14 
-  %15 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %8, i1  1)  
-  %16 = insertvalue {i64, i1} undef, i64 %15, 0 
-  %17 = insertvalue {i64, i1} %16, i1 1, 1 
-  ret {i64, i1} %17 
+  %3 = load  i64, i64* %2 
+  %4 = sub   i64 %3, 1 
+  %5 = trunc i64 32 to i32  
+  %6 = tail call ccc  i8*  @wybe_malloc(i32  %5)  
+  %7 = ptrtoint i8* %6 to i64 
+  %8 = inttoptr i64 %7 to i8* 
+  %9 = inttoptr i64 %"d##0" to i8* 
+  %10 = trunc i64 32 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %8, i8*  %9, i32  %10, i1  0)  
+  %11 = add   i64 %7, 8 
+  %12 = inttoptr i64 %11 to i64* 
+  store  i64 %4, i64* %12 
+  %13 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %7, i1  1)  
+  %14 = insertvalue {i64, i1} undef, i64 %13, 0 
+  %15 = insertvalue {i64, i1} %14, i1 1, 1 
+  ret {i64, i1} %15 
 if.else:
-  %18 = icmp eq i8 %"action##0", 115 
-  br i1 %18, label %if.then1, label %if.else1 
+  %16 = icmp eq i8 %"action##0", 115 
+  br i1 %16, label %if.then1, label %if.else1 
 if.then1:
-  %19 = add   i64 %"d##0", 8 
-  %20 = inttoptr i64 %19 to i64* 
-  %21 = getelementptr  i64, i64* %20, i64 0 
-  %22 = load  i64, i64* %21 
-  %23 = add   i64 %22, 1 
-  %24 = trunc i64 32 to i32  
-  %25 = tail call ccc  i8*  @wybe_malloc(i32  %24)  
-  %26 = ptrtoint i8* %25 to i64 
-  %27 = inttoptr i64 %26 to i8* 
-  %28 = inttoptr i64 %"d##0" to i8* 
-  %29 = trunc i64 32 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %27, i8*  %28, i32  %29, i1  0)  
-  %30 = add   i64 %26, 8 
-  %31 = inttoptr i64 %30 to i64* 
-  %32 = getelementptr  i64, i64* %31, i64 0 
-  store  i64 %23, i64* %32 
-  %33 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %26, i1  1)  
-  %34 = insertvalue {i64, i1} undef, i64 %33, 0 
-  %35 = insertvalue {i64, i1} %34, i1 1, 1 
-  ret {i64, i1} %35 
+  %17 = add   i64 %"d##0", 8 
+  %18 = inttoptr i64 %17 to i64* 
+  %19 = load  i64, i64* %18 
+  %20 = add   i64 %19, 1 
+  %21 = trunc i64 32 to i32  
+  %22 = tail call ccc  i8*  @wybe_malloc(i32  %21)  
+  %23 = ptrtoint i8* %22 to i64 
+  %24 = inttoptr i64 %23 to i8* 
+  %25 = inttoptr i64 %"d##0" to i8* 
+  %26 = trunc i64 32 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %24, i8*  %25, i32  %26, i1  0)  
+  %27 = add   i64 %23, 8 
+  %28 = inttoptr i64 %27 to i64* 
+  store  i64 %20, i64* %28 
+  %29 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %23, i1  1)  
+  %30 = insertvalue {i64, i1} undef, i64 %29, 0 
+  %31 = insertvalue {i64, i1} %30, i1 1, 1 
+  ret {i64, i1} %31 
 if.else1:
-  %36 = icmp eq i8 %"action##0", 119 
-  br i1 %36, label %if.then2, label %if.else2 
+  %32 = icmp eq i8 %"action##0", 119 
+  br i1 %32, label %if.then2, label %if.else2 
 if.then2:
-  %37 = inttoptr i64 %"d##0" to i64* 
-  %38 = getelementptr  i64, i64* %37, i64 0 
-  %39 = load  i64, i64* %38 
-  %40 = sub   i64 %39, 1 
+  %33 = inttoptr i64 %"d##0" to i64* 
+  %34 = load  i64, i64* %33 
+  %35 = sub   i64 %34, 1 
+  %36 = trunc i64 32 to i32  
+  %37 = tail call ccc  i8*  @wybe_malloc(i32  %36)  
+  %38 = ptrtoint i8* %37 to i64 
+  %39 = inttoptr i64 %38 to i8* 
+  %40 = inttoptr i64 %"d##0" to i8* 
   %41 = trunc i64 32 to i32  
-  %42 = tail call ccc  i8*  @wybe_malloc(i32  %41)  
-  %43 = ptrtoint i8* %42 to i64 
-  %44 = inttoptr i64 %43 to i8* 
-  %45 = inttoptr i64 %"d##0" to i8* 
-  %46 = trunc i64 32 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %44, i8*  %45, i32  %46, i1  0)  
-  %47 = inttoptr i64 %43 to i64* 
-  %48 = getelementptr  i64, i64* %47, i64 0 
-  store  i64 %40, i64* %48 
-  %49 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %43, i1  1)  
-  %50 = insertvalue {i64, i1} undef, i64 %49, 0 
-  %51 = insertvalue {i64, i1} %50, i1 1, 1 
-  ret {i64, i1} %51 
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %39, i8*  %40, i32  %41, i1  0)  
+  %42 = inttoptr i64 %38 to i64* 
+  store  i64 %35, i64* %42 
+  %43 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %38, i1  1)  
+  %44 = insertvalue {i64, i1} undef, i64 %43, 0 
+  %45 = insertvalue {i64, i1} %44, i1 1, 1 
+  ret {i64, i1} %45 
 if.else2:
-  %52 = icmp eq i8 %"action##0", 101 
-  br i1 %52, label %if.then3, label %if.else3 
+  %46 = icmp eq i8 %"action##0", 101 
+  br i1 %46, label %if.then3, label %if.else3 
 if.then3:
-  %53 = inttoptr i64 %"d##0" to i64* 
-  %54 = getelementptr  i64, i64* %53, i64 0 
-  %55 = load  i64, i64* %54 
-  %56 = add   i64 %55, 1 
-  %57 = trunc i64 32 to i32  
-  %58 = tail call ccc  i8*  @wybe_malloc(i32  %57)  
-  %59 = ptrtoint i8* %58 to i64 
-  %60 = inttoptr i64 %59 to i8* 
-  %61 = inttoptr i64 %"d##0" to i8* 
-  %62 = trunc i64 32 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %60, i8*  %61, i32  %62, i1  0)  
-  %63 = inttoptr i64 %59 to i64* 
-  %64 = getelementptr  i64, i64* %63, i64 0 
-  store  i64 %56, i64* %64 
-  %65 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %59, i1  1)  
-  %66 = insertvalue {i64, i1} undef, i64 %65, 0 
-  %67 = insertvalue {i64, i1} %66, i1 1, 1 
-  ret {i64, i1} %67 
+  %47 = inttoptr i64 %"d##0" to i64* 
+  %48 = load  i64, i64* %47 
+  %49 = add   i64 %48, 1 
+  %50 = trunc i64 32 to i32  
+  %51 = tail call ccc  i8*  @wybe_malloc(i32  %50)  
+  %52 = ptrtoint i8* %51 to i64 
+  %53 = inttoptr i64 %52 to i8* 
+  %54 = inttoptr i64 %"d##0" to i8* 
+  %55 = trunc i64 32 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %53, i8*  %54, i32  %55, i1  0)  
+  %56 = inttoptr i64 %52 to i64* 
+  store  i64 %49, i64* %56 
+  %57 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %52, i1  1)  
+  %58 = insertvalue {i64, i1} undef, i64 %57, 0 
+  %59 = insertvalue {i64, i1} %58, i1 1, 1 
+  ret {i64, i1} %59 
 if.else3:
-  %68 = icmp eq i8 %"action##0", 117 
-  br i1 %68, label %if.then4, label %if.else4 
+  %60 = icmp eq i8 %"action##0", 117 
+  br i1 %60, label %if.then4, label %if.else4 
 if.then4:
-  %69 = add   i64 %"d##0", 16 
-  %70 = inttoptr i64 %69 to i64* 
-  %71 = getelementptr  i64, i64* %70, i64 0 
-  %72 = load  i64, i64* %71 
-  %73 = add   i64 %72, 1 
-  %74 = trunc i64 32 to i32  
-  %75 = tail call ccc  i8*  @wybe_malloc(i32  %74)  
-  %76 = ptrtoint i8* %75 to i64 
-  %77 = inttoptr i64 %76 to i8* 
-  %78 = inttoptr i64 %"d##0" to i8* 
-  %79 = trunc i64 32 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %77, i8*  %78, i32  %79, i1  0)  
-  %80 = add   i64 %76, 16 
-  %81 = inttoptr i64 %80 to i64* 
-  %82 = getelementptr  i64, i64* %81, i64 0 
-  store  i64 %73, i64* %82 
-  %83 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %76, i1  1)  
-  %84 = insertvalue {i64, i1} undef, i64 %83, 0 
-  %85 = insertvalue {i64, i1} %84, i1 1, 1 
-  ret {i64, i1} %85 
+  %61 = add   i64 %"d##0", 16 
+  %62 = inttoptr i64 %61 to i64* 
+  %63 = load  i64, i64* %62 
+  %64 = add   i64 %63, 1 
+  %65 = trunc i64 32 to i32  
+  %66 = tail call ccc  i8*  @wybe_malloc(i32  %65)  
+  %67 = ptrtoint i8* %66 to i64 
+  %68 = inttoptr i64 %67 to i8* 
+  %69 = inttoptr i64 %"d##0" to i8* 
+  %70 = trunc i64 32 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %68, i8*  %69, i32  %70, i1  0)  
+  %71 = add   i64 %67, 16 
+  %72 = inttoptr i64 %71 to i64* 
+  store  i64 %64, i64* %72 
+  %73 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %67, i1  1)  
+  %74 = insertvalue {i64, i1} undef, i64 %73, 0 
+  %75 = insertvalue {i64, i1} %74, i1 1, 1 
+  ret {i64, i1} %75 
 if.else4:
-  %86 = icmp eq i8 %"action##0", 100 
-  br i1 %86, label %if.then5, label %if.else5 
+  %76 = icmp eq i8 %"action##0", 100 
+  br i1 %76, label %if.then5, label %if.else5 
 if.then5:
-  %87 = add   i64 %"d##0", 16 
+  %77 = add   i64 %"d##0", 16 
+  %78 = inttoptr i64 %77 to i64* 
+  %79 = load  i64, i64* %78 
+  %80 = sub   i64 %79, 1 
+  %81 = trunc i64 32 to i32  
+  %82 = tail call ccc  i8*  @wybe_malloc(i32  %81)  
+  %83 = ptrtoint i8* %82 to i64 
+  %84 = inttoptr i64 %83 to i8* 
+  %85 = inttoptr i64 %"d##0" to i8* 
+  %86 = trunc i64 32 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %84, i8*  %85, i32  %86, i1  0)  
+  %87 = add   i64 %83, 16 
   %88 = inttoptr i64 %87 to i64* 
-  %89 = getelementptr  i64, i64* %88, i64 0 
-  %90 = load  i64, i64* %89 
-  %91 = sub   i64 %90, 1 
-  %92 = trunc i64 32 to i32  
-  %93 = tail call ccc  i8*  @wybe_malloc(i32  %92)  
-  %94 = ptrtoint i8* %93 to i64 
-  %95 = inttoptr i64 %94 to i8* 
-  %96 = inttoptr i64 %"d##0" to i8* 
-  %97 = trunc i64 32 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %95, i8*  %96, i32  %97, i1  0)  
-  %98 = add   i64 %94, 16 
-  %99 = inttoptr i64 %98 to i64* 
-  %100 = getelementptr  i64, i64* %99, i64 0 
-  store  i64 %91, i64* %100 
-  %101 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %94, i1  1)  
-  %102 = insertvalue {i64, i1} undef, i64 %101, 0 
-  %103 = insertvalue {i64, i1} %102, i1 1, 1 
-  ret {i64, i1} %103 
+  store  i64 %80, i64* %88 
+  %89 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %83, i1  1)  
+  %90 = insertvalue {i64, i1} undef, i64 %89, 0 
+  %91 = insertvalue {i64, i1} %90, i1 1, 1 
+  ret {i64, i1} %91 
 if.else5:
-  %104 = tail call fastcc  i64  @"drone.gen#2<0>"(i64  %"d##0", i1  0)  
-  %105 = insertvalue {i64, i1} undef, i64 %104, 0 
-  %106 = insertvalue {i64, i1} %105, i1 0, 1 
-  ret {i64, i1} %106 
+  %92 = tail call fastcc  i64  @"drone.gen#2<0>"(i64  %"d##0", i1  0)  
+  %93 = insertvalue {i64, i1} undef, i64 %92, 0 
+  %94 = insertvalue {i64, i1} %93, i1 0, 1 
+  ret {i64, i1} %94 
 }
 
 
@@ -1512,103 +1496,91 @@ entry:
 if.then:
   %1 = add   i64 %"d##0", 8 
   %2 = inttoptr i64 %1 to i64* 
-  %3 = getelementptr  i64, i64* %2, i64 0 
-  %4 = load  i64, i64* %3 
-  %5 = sub   i64 %4, 1 
-  %6 = add   i64 %"d##0", 8 
-  %7 = inttoptr i64 %6 to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
-  store  i64 %5, i64* %8 
-  %9 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %"d##0", i1  1)  
-  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
-  %11 = insertvalue {i64, i1} %10, i1 1, 1 
-  ret {i64, i1} %11 
+  %3 = load  i64, i64* %2 
+  %4 = sub   i64 %3, 1 
+  %5 = add   i64 %"d##0", 8 
+  %6 = inttoptr i64 %5 to i64* 
+  store  i64 %4, i64* %6 
+  %7 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %"d##0", i1  1)  
+  %8 = insertvalue {i64, i1} undef, i64 %7, 0 
+  %9 = insertvalue {i64, i1} %8, i1 1, 1 
+  ret {i64, i1} %9 
 if.else:
-  %12 = icmp eq i8 %"action##0", 115 
-  br i1 %12, label %if.then1, label %if.else1 
+  %10 = icmp eq i8 %"action##0", 115 
+  br i1 %10, label %if.then1, label %if.else1 
 if.then1:
-  %13 = add   i64 %"d##0", 8 
-  %14 = inttoptr i64 %13 to i64* 
-  %15 = getelementptr  i64, i64* %14, i64 0 
-  %16 = load  i64, i64* %15 
-  %17 = add   i64 %16, 1 
-  %18 = add   i64 %"d##0", 8 
-  %19 = inttoptr i64 %18 to i64* 
-  %20 = getelementptr  i64, i64* %19, i64 0 
-  store  i64 %17, i64* %20 
-  %21 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %"d##0", i1  1)  
-  %22 = insertvalue {i64, i1} undef, i64 %21, 0 
-  %23 = insertvalue {i64, i1} %22, i1 1, 1 
-  ret {i64, i1} %23 
+  %11 = add   i64 %"d##0", 8 
+  %12 = inttoptr i64 %11 to i64* 
+  %13 = load  i64, i64* %12 
+  %14 = add   i64 %13, 1 
+  %15 = add   i64 %"d##0", 8 
+  %16 = inttoptr i64 %15 to i64* 
+  store  i64 %14, i64* %16 
+  %17 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %"d##0", i1  1)  
+  %18 = insertvalue {i64, i1} undef, i64 %17, 0 
+  %19 = insertvalue {i64, i1} %18, i1 1, 1 
+  ret {i64, i1} %19 
 if.else1:
-  %24 = icmp eq i8 %"action##0", 119 
-  br i1 %24, label %if.then2, label %if.else2 
+  %20 = icmp eq i8 %"action##0", 119 
+  br i1 %20, label %if.then2, label %if.else2 
 if.then2:
-  %25 = inttoptr i64 %"d##0" to i64* 
-  %26 = getelementptr  i64, i64* %25, i64 0 
-  %27 = load  i64, i64* %26 
-  %28 = sub   i64 %27, 1 
-  %29 = inttoptr i64 %"d##0" to i64* 
-  %30 = getelementptr  i64, i64* %29, i64 0 
-  store  i64 %28, i64* %30 
-  %31 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %"d##0", i1  1)  
-  %32 = insertvalue {i64, i1} undef, i64 %31, 0 
-  %33 = insertvalue {i64, i1} %32, i1 1, 1 
-  ret {i64, i1} %33 
+  %21 = inttoptr i64 %"d##0" to i64* 
+  %22 = load  i64, i64* %21 
+  %23 = sub   i64 %22, 1 
+  %24 = inttoptr i64 %"d##0" to i64* 
+  store  i64 %23, i64* %24 
+  %25 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %"d##0", i1  1)  
+  %26 = insertvalue {i64, i1} undef, i64 %25, 0 
+  %27 = insertvalue {i64, i1} %26, i1 1, 1 
+  ret {i64, i1} %27 
 if.else2:
-  %34 = icmp eq i8 %"action##0", 101 
-  br i1 %34, label %if.then3, label %if.else3 
+  %28 = icmp eq i8 %"action##0", 101 
+  br i1 %28, label %if.then3, label %if.else3 
 if.then3:
-  %35 = inttoptr i64 %"d##0" to i64* 
-  %36 = getelementptr  i64, i64* %35, i64 0 
-  %37 = load  i64, i64* %36 
-  %38 = add   i64 %37, 1 
-  %39 = inttoptr i64 %"d##0" to i64* 
-  %40 = getelementptr  i64, i64* %39, i64 0 
-  store  i64 %38, i64* %40 
-  %41 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %"d##0", i1  1)  
-  %42 = insertvalue {i64, i1} undef, i64 %41, 0 
-  %43 = insertvalue {i64, i1} %42, i1 1, 1 
-  ret {i64, i1} %43 
+  %29 = inttoptr i64 %"d##0" to i64* 
+  %30 = load  i64, i64* %29 
+  %31 = add   i64 %30, 1 
+  %32 = inttoptr i64 %"d##0" to i64* 
+  store  i64 %31, i64* %32 
+  %33 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %"d##0", i1  1)  
+  %34 = insertvalue {i64, i1} undef, i64 %33, 0 
+  %35 = insertvalue {i64, i1} %34, i1 1, 1 
+  ret {i64, i1} %35 
 if.else3:
-  %44 = icmp eq i8 %"action##0", 117 
-  br i1 %44, label %if.then4, label %if.else4 
+  %36 = icmp eq i8 %"action##0", 117 
+  br i1 %36, label %if.then4, label %if.else4 
 if.then4:
-  %45 = add   i64 %"d##0", 16 
-  %46 = inttoptr i64 %45 to i64* 
-  %47 = getelementptr  i64, i64* %46, i64 0 
-  %48 = load  i64, i64* %47 
-  %49 = add   i64 %48, 1 
-  %50 = add   i64 %"d##0", 16 
-  %51 = inttoptr i64 %50 to i64* 
-  %52 = getelementptr  i64, i64* %51, i64 0 
-  store  i64 %49, i64* %52 
+  %37 = add   i64 %"d##0", 16 
+  %38 = inttoptr i64 %37 to i64* 
+  %39 = load  i64, i64* %38 
+  %40 = add   i64 %39, 1 
+  %41 = add   i64 %"d##0", 16 
+  %42 = inttoptr i64 %41 to i64* 
+  store  i64 %40, i64* %42 
+  %43 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %"d##0", i1  1)  
+  %44 = insertvalue {i64, i1} undef, i64 %43, 0 
+  %45 = insertvalue {i64, i1} %44, i1 1, 1 
+  ret {i64, i1} %45 
+if.else4:
+  %46 = icmp eq i8 %"action##0", 100 
+  br i1 %46, label %if.then5, label %if.else5 
+if.then5:
+  %47 = add   i64 %"d##0", 16 
+  %48 = inttoptr i64 %47 to i64* 
+  %49 = load  i64, i64* %48 
+  %50 = sub   i64 %49, 1 
+  %51 = add   i64 %"d##0", 16 
+  %52 = inttoptr i64 %51 to i64* 
+  store  i64 %50, i64* %52 
   %53 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %"d##0", i1  1)  
   %54 = insertvalue {i64, i1} undef, i64 %53, 0 
   %55 = insertvalue {i64, i1} %54, i1 1, 1 
   ret {i64, i1} %55 
-if.else4:
-  %56 = icmp eq i8 %"action##0", 100 
-  br i1 %56, label %if.then5, label %if.else5 
-if.then5:
-  %57 = add   i64 %"d##0", 16 
-  %58 = inttoptr i64 %57 to i64* 
-  %59 = getelementptr  i64, i64* %58, i64 0 
-  %60 = load  i64, i64* %59 
-  %61 = sub   i64 %60, 1 
-  %62 = add   i64 %"d##0", 16 
-  %63 = inttoptr i64 %62 to i64* 
-  %64 = getelementptr  i64, i64* %63, i64 0 
-  store  i64 %61, i64* %64 
-  %65 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %"d##0", i1  1)  
-  %66 = insertvalue {i64, i1} undef, i64 %65, 0 
-  %67 = insertvalue {i64, i1} %66, i1 1, 1 
-  ret {i64, i1} %67 
 if.else5:
-  %68 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %"d##0", i1  0)  
-  %69 = insertvalue {i64, i1} undef, i64 %68, 0 
-  %70 = insertvalue {i64, i1} %69, i1 0, 1 
-  ret {i64, i1} %70 
+  %56 = tail call fastcc  i64  @"drone.gen#2<0>[6dacb8fd25]"(i64  %"d##0", i1  0)  
+  %57 = insertvalue {i64, i1} undef, i64 %56, 0 
+  %58 = insertvalue {i64, i1} %57, i1 0, 1 
+  ret {i64, i1} %58 
 }
 
 
@@ -1618,20 +1590,16 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 0, i64* %4 
-  %5 = add   i64 %2, 8 
-  %6 = inttoptr i64 %5 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
+  store  i64 0, i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 0, i64* %5 
+  %6 = add   i64 %2, 16 
+  %7 = inttoptr i64 %6 to i64* 
   store  i64 0, i64* %7 
-  %8 = add   i64 %2, 16 
+  %8 = add   i64 %2, 24 
   %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  store  i64 0, i64* %10 
-  %11 = add   i64 %2, 24 
-  %12 = inttoptr i64 %11 to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
-  store  i64 0, i64* %13 
+  store  i64 0, i64* %9 
   ret i64 %2 
 }
 
@@ -1652,21 +1620,19 @@ entry:
 if.then:
   %0 = add   i64 %"d##0", 24 
   %1 = inttoptr i64 %0 to i64* 
-  %2 = getelementptr  i64, i64* %1, i64 0 
-  %3 = load  i64, i64* %2 
-  %4 = add   i64 %3, 1 
-  %5 = trunc i64 32 to i32  
-  %6 = tail call ccc  i8*  @wybe_malloc(i32  %5)  
-  %7 = ptrtoint i8* %6 to i64 
-  %8 = inttoptr i64 %7 to i8* 
-  %9 = inttoptr i64 %"d##0" to i8* 
-  %10 = trunc i64 32 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %8, i8*  %9, i32  %10, i1  0)  
-  %11 = add   i64 %7, 24 
-  %12 = inttoptr i64 %11 to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
-  store  i64 %4, i64* %13 
-  ret i64 %7 
+  %2 = load  i64, i64* %1 
+  %3 = add   i64 %2, 1 
+  %4 = trunc i64 32 to i32  
+  %5 = tail call ccc  i8*  @wybe_malloc(i32  %4)  
+  %6 = ptrtoint i8* %5 to i64 
+  %7 = inttoptr i64 %6 to i8* 
+  %8 = inttoptr i64 %"d##0" to i8* 
+  %9 = trunc i64 32 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %7, i8*  %8, i32  %9, i1  0)  
+  %10 = add   i64 %6, 24 
+  %11 = inttoptr i64 %10 to i64* 
+  store  i64 %3, i64* %11 
+  ret i64 %6 
 if.else:
   ret i64 %"d##0" 
 }
@@ -1678,13 +1644,11 @@ entry:
 if.then:
   %0 = add   i64 %"d##0", 24 
   %1 = inttoptr i64 %0 to i64* 
-  %2 = getelementptr  i64, i64* %1, i64 0 
-  %3 = load  i64, i64* %2 
-  %4 = add   i64 %3, 1 
-  %5 = add   i64 %"d##0", 24 
-  %6 = inttoptr i64 %5 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 %4, i64* %7 
+  %2 = load  i64, i64* %1 
+  %3 = add   i64 %2, 1 
+  %4 = add   i64 %"d##0", 24 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 %3, i64* %5 
   ret i64 %"d##0" 
 if.else:
   ret i64 %"d##0" 
@@ -1732,43 +1696,39 @@ if.else:
 if.then1:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.3, i32 0, i32 0) to i64))  
   %4 = inttoptr i64 %"d##0" to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  tail call ccc  void  @print_int(i64  %6)  
+  %5 = load  i64, i64* %4 
+  tail call ccc  void  @print_int(i64  %5)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.5, i32 0, i32 0) to i64))  
-  %7 = add   i64 %"d##0", 8 
-  %8 = inttoptr i64 %7 to i64* 
-  %9 = getelementptr  i64, i64* %8, i64 0 
-  %10 = load  i64, i64* %9 
-  tail call ccc  void  @print_int(i64  %10)  
+  %6 = add   i64 %"d##0", 8 
+  %7 = inttoptr i64 %6 to i64* 
+  %8 = load  i64, i64* %7 
+  tail call ccc  void  @print_int(i64  %8)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.5, i32 0, i32 0) to i64))  
-  %11 = add   i64 %"d##0", 16 
-  %12 = inttoptr i64 %11 to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
+  %9 = add   i64 %"d##0", 16 
+  %10 = inttoptr i64 %9 to i64* 
+  %11 = load  i64, i64* %10 
+  tail call ccc  void  @print_int(i64  %11)  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.7, i32 0, i32 0) to i64))  
+  %12 = add   i64 %"d##0", 24 
+  %13 = inttoptr i64 %12 to i64* 
   %14 = load  i64, i64* %13 
   tail call ccc  void  @print_int(i64  %14)  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.7, i32 0, i32 0) to i64))  
-  %15 = add   i64 %"d##0", 24 
-  %16 = inttoptr i64 %15 to i64* 
-  %17 = getelementptr  i64, i64* %16, i64 0 
-  %18 = load  i64, i64* %17 
-  tail call ccc  void  @print_int(i64  %18)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"drone.gen#3<0>"(i64  %"d##0")  
   ret void 
 if.else1:
-  %19 = tail call fastcc  {i64, i1}  @"drone.do_action<0>"(i64  %"d##0", i8  %"ch##0")  
-  %20 = extractvalue {i64, i1} %19, 0 
-  %21 = extractvalue {i64, i1} %19, 1 
-  %22 = icmp eq i1 %21, 0 
-  br i1 %22, label %if.then2, label %if.else2 
+  %15 = tail call fastcc  {i64, i1}  @"drone.do_action<0>"(i64  %"d##0", i8  %"ch##0")  
+  %16 = extractvalue {i64, i1} %15, 0 
+  %17 = extractvalue {i64, i1} %15, 1 
+  %18 = icmp eq i1 %17, 0 
+  br i1 %18, label %if.then2, label %if.else2 
 if.then2:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.9, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"drone.gen#3<0>"(i64  %20)  
+  tail call fastcc  void  @"drone.gen#3<0>"(i64  %16)  
   ret void 
 if.else2:
-  tail call fastcc  void  @"drone.gen#3<0>"(i64  %20)  
+  tail call fastcc  void  @"drone.gen#3<0>"(i64  %16)  
   ret void 
 }
 
@@ -1788,43 +1748,39 @@ if.else:
 if.then1:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.3, i32 0, i32 0) to i64))  
   %4 = inttoptr i64 %"d##0" to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  tail call ccc  void  @print_int(i64  %6)  
+  %5 = load  i64, i64* %4 
+  tail call ccc  void  @print_int(i64  %5)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.5, i32 0, i32 0) to i64))  
-  %7 = add   i64 %"d##0", 8 
-  %8 = inttoptr i64 %7 to i64* 
-  %9 = getelementptr  i64, i64* %8, i64 0 
-  %10 = load  i64, i64* %9 
-  tail call ccc  void  @print_int(i64  %10)  
+  %6 = add   i64 %"d##0", 8 
+  %7 = inttoptr i64 %6 to i64* 
+  %8 = load  i64, i64* %7 
+  tail call ccc  void  @print_int(i64  %8)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.5, i32 0, i32 0) to i64))  
-  %11 = add   i64 %"d##0", 16 
-  %12 = inttoptr i64 %11 to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
+  %9 = add   i64 %"d##0", 16 
+  %10 = inttoptr i64 %9 to i64* 
+  %11 = load  i64, i64* %10 
+  tail call ccc  void  @print_int(i64  %11)  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.7, i32 0, i32 0) to i64))  
+  %12 = add   i64 %"d##0", 24 
+  %13 = inttoptr i64 %12 to i64* 
   %14 = load  i64, i64* %13 
   tail call ccc  void  @print_int(i64  %14)  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.7, i32 0, i32 0) to i64))  
-  %15 = add   i64 %"d##0", 24 
-  %16 = inttoptr i64 %15 to i64* 
-  %17 = getelementptr  i64, i64* %16, i64 0 
-  %18 = load  i64, i64* %17 
-  tail call ccc  void  @print_int(i64  %18)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"drone.gen#3<0>[6dacb8fd25]"(i64  %"d##0")  
   ret void 
 if.else1:
-  %19 = tail call fastcc  {i64, i1}  @"drone.do_action<0>[410bae77d3]"(i64  %"d##0", i8  %"ch##0")  
-  %20 = extractvalue {i64, i1} %19, 0 
-  %21 = extractvalue {i64, i1} %19, 1 
-  %22 = icmp eq i1 %21, 0 
-  br i1 %22, label %if.then2, label %if.else2 
+  %15 = tail call fastcc  {i64, i1}  @"drone.do_action<0>[410bae77d3]"(i64  %"d##0", i8  %"ch##0")  
+  %16 = extractvalue {i64, i1} %15, 0 
+  %17 = extractvalue {i64, i1} %15, 1 
+  %18 = icmp eq i1 %17, 0 
+  br i1 %18, label %if.then2, label %if.else2 
 if.then2:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.9, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"drone.gen#3<0>[6dacb8fd25]"(i64  %20)  
+  tail call fastcc  void  @"drone.gen#3<0>[6dacb8fd25]"(i64  %16)  
   ret void 
 if.else2:
-  tail call fastcc  void  @"drone.gen#3<0>[6dacb8fd25]"(i64  %20)  
+  tail call fastcc  void  @"drone.gen#3<0>[6dacb8fd25]"(i64  %16)  
   ret void 
 }
 
@@ -1833,27 +1789,23 @@ define external fastcc  void @"drone.print_info<0>"(i64  %"d##0")    {
 entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.3, i32 0, i32 0) to i64))  
   %0 = inttoptr i64 %"d##0" to i64* 
-  %1 = getelementptr  i64, i64* %0, i64 0 
-  %2 = load  i64, i64* %1 
-  tail call ccc  void  @print_int(i64  %2)  
+  %1 = load  i64, i64* %0 
+  tail call ccc  void  @print_int(i64  %1)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.5, i32 0, i32 0) to i64))  
-  %3 = add   i64 %"d##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  tail call ccc  void  @print_int(i64  %6)  
+  %2 = add   i64 %"d##0", 8 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = load  i64, i64* %3 
+  tail call ccc  void  @print_int(i64  %4)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.5, i32 0, i32 0) to i64))  
-  %7 = add   i64 %"d##0", 16 
-  %8 = inttoptr i64 %7 to i64* 
-  %9 = getelementptr  i64, i64* %8, i64 0 
+  %5 = add   i64 %"d##0", 16 
+  %6 = inttoptr i64 %5 to i64* 
+  %7 = load  i64, i64* %6 
+  tail call ccc  void  @print_int(i64  %7)  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.7, i32 0, i32 0) to i64))  
+  %8 = add   i64 %"d##0", 24 
+  %9 = inttoptr i64 %8 to i64* 
   %10 = load  i64, i64* %9 
   tail call ccc  void  @print_int(i64  %10)  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.7, i32 0, i32 0) to i64))  
-  %11 = add   i64 %"d##0", 24 
-  %12 = inttoptr i64 %11 to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
-  %14 = load  i64, i64* %13 
-  tail call ccc  void  @print_int(i64  %14)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
@@ -2050,50 +2002,42 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 define external fastcc  i1 @"drone.drone_info.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
 entry:
   %0 = inttoptr i64 %"#left##0" to i64* 
-  %1 = getelementptr  i64, i64* %0, i64 0 
-  %2 = load  i64, i64* %1 
-  %3 = add   i64 %"#left##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = add   i64 %"#left##0", 16 
-  %8 = inttoptr i64 %7 to i64* 
-  %9 = getelementptr  i64, i64* %8, i64 0 
+  %1 = load  i64, i64* %0 
+  %2 = add   i64 %"#left##0", 8 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = load  i64, i64* %3 
+  %5 = add   i64 %"#left##0", 16 
+  %6 = inttoptr i64 %5 to i64* 
+  %7 = load  i64, i64* %6 
+  %8 = add   i64 %"#left##0", 24 
+  %9 = inttoptr i64 %8 to i64* 
   %10 = load  i64, i64* %9 
-  %11 = add   i64 %"#left##0", 24 
-  %12 = inttoptr i64 %11 to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
-  %14 = load  i64, i64* %13 
-  %15 = inttoptr i64 %"#right##0" to i64* 
-  %16 = getelementptr  i64, i64* %15, i64 0 
-  %17 = load  i64, i64* %16 
-  %18 = add   i64 %"#right##0", 8 
-  %19 = inttoptr i64 %18 to i64* 
-  %20 = getelementptr  i64, i64* %19, i64 0 
+  %11 = inttoptr i64 %"#right##0" to i64* 
+  %12 = load  i64, i64* %11 
+  %13 = add   i64 %"#right##0", 8 
+  %14 = inttoptr i64 %13 to i64* 
+  %15 = load  i64, i64* %14 
+  %16 = add   i64 %"#right##0", 16 
+  %17 = inttoptr i64 %16 to i64* 
+  %18 = load  i64, i64* %17 
+  %19 = add   i64 %"#right##0", 24 
+  %20 = inttoptr i64 %19 to i64* 
   %21 = load  i64, i64* %20 
-  %22 = add   i64 %"#right##0", 16 
-  %23 = inttoptr i64 %22 to i64* 
-  %24 = getelementptr  i64, i64* %23, i64 0 
-  %25 = load  i64, i64* %24 
-  %26 = add   i64 %"#right##0", 24 
-  %27 = inttoptr i64 %26 to i64* 
-  %28 = getelementptr  i64, i64* %27, i64 0 
-  %29 = load  i64, i64* %28 
-  %30 = icmp eq i64 %2, %17 
-  br i1 %30, label %if.then, label %if.else 
+  %22 = icmp eq i64 %1, %12 
+  br i1 %22, label %if.then, label %if.else 
 if.then:
-  %31 = icmp eq i64 %6, %21 
-  br i1 %31, label %if.then1, label %if.else1 
+  %23 = icmp eq i64 %4, %15 
+  br i1 %23, label %if.then1, label %if.else1 
 if.else:
   ret i1 0 
 if.then1:
-  %32 = icmp eq i64 %10, %25 
-  br i1 %32, label %if.then2, label %if.else2 
+  %24 = icmp eq i64 %7, %18 
+  br i1 %24, label %if.then2, label %if.else2 
 if.else1:
   ret i1 0 
 if.then2:
-  %33 = icmp eq i64 %14, %29 
-  ret i1 %33 
+  %25 = icmp eq i64 %10, %21 
+  ret i1 %25 
 if.else2:
   ret i1 0 
 }
@@ -2103,9 +2047,8 @@ define external fastcc  i64 @"drone.drone_info.count<0>"(i64  %"#rec##0")    {
 entry:
   %0 = add   i64 %"#rec##0", 24 
   %1 = inttoptr i64 %0 to i64* 
-  %2 = getelementptr  i64, i64* %1, i64 0 
-  %3 = load  i64, i64* %2 
-  ret i64 %3 
+  %2 = load  i64, i64* %1 
+  ret i64 %2 
 }
 
 
@@ -2120,8 +2063,7 @@ entry:
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %3, i8*  %4, i32  %5, i1  0)  
   %6 = add   i64 %2, 24 
   %7 = inttoptr i64 %6 to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
-  store  i64 %"#field##0", i64* %8 
+  store  i64 %"#field##0", i64* %7 
   ret i64 %2 
 }
 
@@ -2132,20 +2074,16 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 %"x##0", i64* %4 
-  %5 = add   i64 %2, 8 
-  %6 = inttoptr i64 %5 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 %"y##0", i64* %7 
-  %8 = add   i64 %2, 16 
+  store  i64 %"x##0", i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 %"y##0", i64* %5 
+  %6 = add   i64 %2, 16 
+  %7 = inttoptr i64 %6 to i64* 
+  store  i64 %"z##0", i64* %7 
+  %8 = add   i64 %2, 24 
   %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  store  i64 %"z##0", i64* %10 
-  %11 = add   i64 %2, 24 
-  %12 = inttoptr i64 %11 to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
-  store  i64 %"count##0", i64* %13 
+  store  i64 %"count##0", i64* %9 
   ret i64 %2 
 }
 
@@ -2153,34 +2091,29 @@ entry:
 define external fastcc  {i64, i64, i64, i64} @"drone.drone_info.drone_info<1>"(i64  %"#result##0")    {
 entry:
   %0 = inttoptr i64 %"#result##0" to i64* 
-  %1 = getelementptr  i64, i64* %0, i64 0 
-  %2 = load  i64, i64* %1 
-  %3 = add   i64 %"#result##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = add   i64 %"#result##0", 16 
-  %8 = inttoptr i64 %7 to i64* 
-  %9 = getelementptr  i64, i64* %8, i64 0 
+  %1 = load  i64, i64* %0 
+  %2 = add   i64 %"#result##0", 8 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = load  i64, i64* %3 
+  %5 = add   i64 %"#result##0", 16 
+  %6 = inttoptr i64 %5 to i64* 
+  %7 = load  i64, i64* %6 
+  %8 = add   i64 %"#result##0", 24 
+  %9 = inttoptr i64 %8 to i64* 
   %10 = load  i64, i64* %9 
-  %11 = add   i64 %"#result##0", 24 
-  %12 = inttoptr i64 %11 to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
-  %14 = load  i64, i64* %13 
-  %15 = insertvalue {i64, i64, i64, i64} undef, i64 %2, 0 
-  %16 = insertvalue {i64, i64, i64, i64} %15, i64 %6, 1 
-  %17 = insertvalue {i64, i64, i64, i64} %16, i64 %10, 2 
-  %18 = insertvalue {i64, i64, i64, i64} %17, i64 %14, 3 
-  ret {i64, i64, i64, i64} %18 
+  %11 = insertvalue {i64, i64, i64, i64} undef, i64 %1, 0 
+  %12 = insertvalue {i64, i64, i64, i64} %11, i64 %4, 1 
+  %13 = insertvalue {i64, i64, i64, i64} %12, i64 %7, 2 
+  %14 = insertvalue {i64, i64, i64, i64} %13, i64 %10, 3 
+  ret {i64, i64, i64, i64} %14 
 }
 
 
 define external fastcc  i64 @"drone.drone_info.x<0>"(i64  %"#rec##0")    {
 entry:
   %0 = inttoptr i64 %"#rec##0" to i64* 
-  %1 = getelementptr  i64, i64* %0, i64 0 
-  %2 = load  i64, i64* %1 
-  ret i64 %2 
+  %1 = load  i64, i64* %0 
+  ret i64 %1 
 }
 
 
@@ -2194,8 +2127,7 @@ entry:
   %5 = trunc i64 32 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %3, i8*  %4, i32  %5, i1  0)  
   %6 = inttoptr i64 %2 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 %"#field##0", i64* %7 
+  store  i64 %"#field##0", i64* %6 
   ret i64 %2 
 }
 
@@ -2204,9 +2136,8 @@ define external fastcc  i64 @"drone.drone_info.y<0>"(i64  %"#rec##0")    {
 entry:
   %0 = add   i64 %"#rec##0", 8 
   %1 = inttoptr i64 %0 to i64* 
-  %2 = getelementptr  i64, i64* %1, i64 0 
-  %3 = load  i64, i64* %2 
-  ret i64 %3 
+  %2 = load  i64, i64* %1 
+  ret i64 %2 
 }
 
 
@@ -2221,8 +2152,7 @@ entry:
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %3, i8*  %4, i32  %5, i1  0)  
   %6 = add   i64 %2, 8 
   %7 = inttoptr i64 %6 to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
-  store  i64 %"#field##0", i64* %8 
+  store  i64 %"#field##0", i64* %7 
   ret i64 %2 
 }
 
@@ -2231,9 +2161,8 @@ define external fastcc  i64 @"drone.drone_info.z<0>"(i64  %"#rec##0")    {
 entry:
   %0 = add   i64 %"#rec##0", 16 
   %1 = inttoptr i64 %0 to i64* 
-  %2 = getelementptr  i64, i64* %1, i64 0 
-  %3 = load  i64, i64* %2 
-  ret i64 %3 
+  %2 = load  i64, i64* %1 
+  ret i64 %2 
 }
 
 
@@ -2248,8 +2177,7 @@ entry:
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %3, i8*  %4, i32  %5, i1  0)  
   %6 = add   i64 %2, 16 
   %7 = inttoptr i64 %6 to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
-  store  i64 %"#field##0", i64* %8 
+  store  i64 %"#field##0", i64* %7 
   ret i64 %2 
 }
 
@@ -2257,56 +2185,48 @@ entry:
 define external fastcc  i1 @"drone.drone_info.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
 entry:
   %0 = inttoptr i64 %"#left##0" to i64* 
-  %1 = getelementptr  i64, i64* %0, i64 0 
-  %2 = load  i64, i64* %1 
-  %3 = add   i64 %"#left##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = add   i64 %"#left##0", 16 
-  %8 = inttoptr i64 %7 to i64* 
-  %9 = getelementptr  i64, i64* %8, i64 0 
+  %1 = load  i64, i64* %0 
+  %2 = add   i64 %"#left##0", 8 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = load  i64, i64* %3 
+  %5 = add   i64 %"#left##0", 16 
+  %6 = inttoptr i64 %5 to i64* 
+  %7 = load  i64, i64* %6 
+  %8 = add   i64 %"#left##0", 24 
+  %9 = inttoptr i64 %8 to i64* 
   %10 = load  i64, i64* %9 
-  %11 = add   i64 %"#left##0", 24 
-  %12 = inttoptr i64 %11 to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
-  %14 = load  i64, i64* %13 
-  %15 = inttoptr i64 %"#right##0" to i64* 
-  %16 = getelementptr  i64, i64* %15, i64 0 
-  %17 = load  i64, i64* %16 
-  %18 = add   i64 %"#right##0", 8 
-  %19 = inttoptr i64 %18 to i64* 
-  %20 = getelementptr  i64, i64* %19, i64 0 
+  %11 = inttoptr i64 %"#right##0" to i64* 
+  %12 = load  i64, i64* %11 
+  %13 = add   i64 %"#right##0", 8 
+  %14 = inttoptr i64 %13 to i64* 
+  %15 = load  i64, i64* %14 
+  %16 = add   i64 %"#right##0", 16 
+  %17 = inttoptr i64 %16 to i64* 
+  %18 = load  i64, i64* %17 
+  %19 = add   i64 %"#right##0", 24 
+  %20 = inttoptr i64 %19 to i64* 
   %21 = load  i64, i64* %20 
-  %22 = add   i64 %"#right##0", 16 
-  %23 = inttoptr i64 %22 to i64* 
-  %24 = getelementptr  i64, i64* %23, i64 0 
-  %25 = load  i64, i64* %24 
-  %26 = add   i64 %"#right##0", 24 
-  %27 = inttoptr i64 %26 to i64* 
-  %28 = getelementptr  i64, i64* %27, i64 0 
-  %29 = load  i64, i64* %28 
-  %30 = icmp eq i64 %2, %17 
-  br i1 %30, label %if.then, label %if.else 
+  %22 = icmp eq i64 %1, %12 
+  br i1 %22, label %if.then, label %if.else 
 if.then:
-  %31 = icmp eq i64 %6, %21 
-  br i1 %31, label %if.then1, label %if.else1 
+  %23 = icmp eq i64 %4, %15 
+  br i1 %23, label %if.then1, label %if.else1 
 if.else:
-  %37 = xor i1 0, 1 
-  ret i1 %37 
+  %29 = xor i1 0, 1 
+  ret i1 %29 
 if.then1:
-  %32 = icmp eq i64 %10, %25 
-  br i1 %32, label %if.then2, label %if.else2 
+  %24 = icmp eq i64 %7, %18 
+  br i1 %24, label %if.then2, label %if.else2 
 if.else1:
-  %36 = xor i1 0, 1 
-  ret i1 %36 
+  %28 = xor i1 0, 1 
+  ret i1 %28 
 if.then2:
-  %33 = icmp eq i64 %29, %14 
-  %34 = xor i1 %33, 1 
-  ret i1 %34 
+  %25 = icmp eq i64 %21, %10 
+  %26 = xor i1 %25, 1 
+  ret i1 %26 
 if.else2:
-  %35 = xor i1 0, 1 
-  ret i1 %35 
+  %27 = xor i1 0, 1 
+  ret i1 %27 
 }
 
 ----------------------------------------------------------------------

@@ -102,22 +102,20 @@ entry:
   %3 = tail call ccc  i8*  @wybe_malloc(i32  %2)  
   %4 = ptrtoint i8* %3 to i64 
   %5 = inttoptr i64 %4 to i64* 
-  %6 = getelementptr  i64, i64* %5, i64 0 
-  store  i64 %0, i64* %6 
-  %7 = add   i64 %4, 8 
-  %8 = inttoptr i64 %7 to i64* 
-  %9 = getelementptr  i64, i64* %8, i64 0 
-  store  i64 %1, i64* %9 
+  store  i64 %0, i64* %5 
+  %6 = add   i64 %4, 8 
+  %7 = inttoptr i64 %6 to i64* 
+  store  i64 %1, i64* %7 
   store  i64 %4, i64* @"resource#command_line.arguments" 
   store  i64 ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @command_line.0, i32 0, i32 0) to i64), i64* @"resource#command_line.command" 
-  %10 = tail call fastcc  {i64, i64, i1}  @"wybe.array.[|]<0>[785a827a1b]"(i64  %4)  
-  %11 = extractvalue {i64, i64, i1} %10, 0 
-  %12 = extractvalue {i64, i64, i1} %10, 1 
-  %13 = extractvalue {i64, i64, i1} %10, 2 
-  br i1 %13, label %if.then, label %if.else 
+  %8 = tail call fastcc  {i64, i64, i1}  @"wybe.array.[|]<0>[785a827a1b]"(i64  %4)  
+  %9 = extractvalue {i64, i64, i1} %8, 0 
+  %10 = extractvalue {i64, i64, i1} %8, 1 
+  %11 = extractvalue {i64, i64, i1} %8, 2 
+  br i1 %11, label %if.then, label %if.else 
 if.then:
-  store  i64 %12, i64* @"resource#command_line.arguments" 
-  store  i64 %11, i64* @"resource#command_line.command" 
+  store  i64 %10, i64* @"resource#command_line.arguments" 
+  store  i64 %9, i64* @"resource#command_line.command" 
   store  i64 0, i64* @"resource#command_line.exit_code" 
   ret void 
 if.else:
@@ -208,9 +206,8 @@ entry:
   tail call ccc  void  @putchar(i8  10)  
   %0 = load  i64, i64* @"resource#command_line.arguments" 
   %1 = inttoptr i64 %0 to i64* 
-  %2 = getelementptr  i64, i64* %1, i64 0 
-  %3 = load  i64, i64* %2 
-  tail call ccc  void  @print_int(i64  %3)  
+  %2 = load  i64, i64* %1 
+  tail call ccc  void  @print_int(i64  %2)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @main_hello.3, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
