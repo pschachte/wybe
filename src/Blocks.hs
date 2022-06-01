@@ -1697,23 +1697,9 @@ gcAccess ptr outTy = do
     let ptrTy = ptr_t outTy
     ptr' <- doCast ptr ptrTy
     logCodegen $ "doCast produced " ++ show ptr'
-
-    -- TODO: is getelementptr here redundant? we always index the 0th thing...
-    let getel = getElementPtrInstr ptr' [0]
-    logCodegen $ "getel = " ++ show getel
-    accessPtr <- instr ptrTy getel
-    logCodegen $ "accessPtr = " ++ show accessPtr
-    let loadInstr = load accessPtr
+    let loadInstr = load ptr'
     logCodegen $ "loadInstr = " ++ show loadInstr
-    instr outTy $ loadInstr
-
-
-    -- inttoptr loadedOp outTy
-    -- case outTy of
-    --     (PointerType ty _) -> do
-    --         loadedOp <- instr opType $ load accessPtr
-    --         inttoptr loadedOp outTy
-    --     _ -> instr opType $ load accessPtr
+    instr outTy loadInstr
 
 
 -- | Index the pointer at the given offset and store the given operand value
@@ -1731,12 +1717,8 @@ gcMutate baseAddr offsetArg valArg = do
     logCodegen $ "inttoptr " ++ show finalAddr ++ " " ++ show ptrTy
     logCodegen $ "inttoptr produced " ++ show ptr'
 
-    let getel = getElementPtrInstr ptr' [0]
-    logCodegen $ "getel = " ++ show getel
-    accessPtr <- instr ptrTy getel
-    logCodegen $ "accessPtr = " ++ show accessPtr
     val <- cgenArg valArg
-    store accessPtr val
+    store ptr' val
 
 
 -- | Get the LLVMAST.Type the given pointer type points to.

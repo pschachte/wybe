@@ -62,7 +62,7 @@ module AST (
   MultiSpeczDepInfo, CallSiteProperty(..), InterestingCallProperty(..),
   ProcAnalysis(..), emptyProcAnalysis,
   ProcBody(..), PrimFork(..), Ident, VarName,
-  ProcName, ResourceDef(..), FlowDirection(..),
+  ProcName, ResourceDef(..), FlowDirection(..), showFlowName,
   argFlowDirection, argType, setArgType, setArgFlow, setArgFlowType, maybeArgFlowType,
   argDescription, argIntVal, trustArgInt, setParamType, paramIsResourceful,
   setPrimParamType, setTypeFlowType,
@@ -2733,6 +2733,12 @@ data ParamInfo = ParamInfo {
 -- |A dataflow direction:  in, out, both, or neither.
 data FlowDirection = ParamIn | ParamOut | ParamInOut
                    deriving (Show,Eq,Ord,Generic)
+
+-- | A printable version of a flow direction
+showFlowName :: FlowDirection -> String
+showFlowName ParamIn    = "input"
+showFlowName ParamOut   = "output (?)"
+showFlowName ParamInOut = "in/output (!)"
 
 -- |A primitive dataflow direction
 data PrimFlow =

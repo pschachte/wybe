@@ -1,0 +1,8 @@
+pub def measure(func: {impure}(), ?seconds_elapsed: float) {
+    func()
+    ?seconds_elapsed = 3.0
+}
+
+?l2 = [1,2,3]
+measure({impure} { ?l = l2 }, ?time)
+!println(time)

@@ -2728,527 +2728,482 @@ if.then:
   %2 = icmp eq i64 %1, 0 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %276 = icmp eq i64 %"#left##0", %"#right##0" 
-  ret i1 %276 
+  %231 = icmp eq i64 %"#left##0", %"#right##0" 
+  ret i1 %231 
 if.then1:
   %3 = inttoptr i64 %"#left##0" to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  %5 = load  i64, i64* %4 
-  %6 = icmp uge i64 %"#right##0", 4 
-  br i1 %6, label %if.then2, label %if.else2 
+  %4 = load  i64, i64* %3 
+  %5 = icmp uge i64 %"#right##0", 4 
+  br i1 %5, label %if.then2, label %if.else2 
 if.else1:
-  %13 = icmp eq i64 %1, 1 
-  br i1 %13, label %if.then4, label %if.else4 
+  %11 = icmp eq i64 %1, 1 
+  br i1 %11, label %if.then4, label %if.else4 
 if.then2:
-  %7 = and i64 %"#right##0", 7 
-  %8 = icmp eq i64 %7, 0 
-  br i1 %8, label %if.then3, label %if.else3 
+  %6 = and i64 %"#right##0", 7 
+  %7 = icmp eq i64 %6, 0 
+  br i1 %7, label %if.then3, label %if.else3 
 if.else2:
   ret i1 0 
 if.then3:
-  %9 = inttoptr i64 %"#right##0" to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = icmp eq i64 %5, %11 
-  ret i1 %12 
+  %8 = inttoptr i64 %"#right##0" to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = icmp eq i64 %4, %9 
+  ret i1 %10 
 if.else3:
   ret i1 0 
 if.then4:
-  %14 = add   i64 %"#left##0", -1 
-  %15 = inttoptr i64 %14 to i64* 
-  %16 = getelementptr  i64, i64* %15, i64 0 
-  %17 = load  i64, i64* %16 
-  %18 = icmp uge i64 %"#right##0", 4 
-  br i1 %18, label %if.then5, label %if.else5 
+  %12 = add   i64 %"#left##0", -1 
+  %13 = inttoptr i64 %12 to i64* 
+  %14 = load  i64, i64* %13 
+  %15 = icmp uge i64 %"#right##0", 4 
+  br i1 %15, label %if.then5, label %if.else5 
 if.else4:
-  %26 = icmp eq i64 %1, 2 
-  br i1 %26, label %if.then7, label %if.else7 
+  %22 = icmp eq i64 %1, 2 
+  br i1 %22, label %if.then7, label %if.else7 
 if.then5:
-  %19 = and i64 %"#right##0", 7 
-  %20 = icmp eq i64 %19, 1 
-  br i1 %20, label %if.then6, label %if.else6 
+  %16 = and i64 %"#right##0", 7 
+  %17 = icmp eq i64 %16, 1 
+  br i1 %17, label %if.then6, label %if.else6 
 if.else5:
   ret i1 0 
 if.then6:
-  %21 = add   i64 %"#right##0", -1 
-  %22 = inttoptr i64 %21 to i64* 
-  %23 = getelementptr  i64, i64* %22, i64 0 
-  %24 = load  i64, i64* %23 
-  %25 = icmp eq i64 %17, %24 
-  ret i1 %25 
+  %18 = add   i64 %"#right##0", -1 
+  %19 = inttoptr i64 %18 to i64* 
+  %20 = load  i64, i64* %19 
+  %21 = icmp eq i64 %14, %20 
+  ret i1 %21 
 if.else6:
   ret i1 0 
 if.then7:
-  %27 = add   i64 %"#left##0", -2 
-  %28 = inttoptr i64 %27 to i64* 
-  %29 = getelementptr  i64, i64* %28, i64 0 
-  %30 = load  i64, i64* %29 
-  %31 = icmp uge i64 %"#right##0", 4 
-  br i1 %31, label %if.then8, label %if.else8 
+  %23 = add   i64 %"#left##0", -2 
+  %24 = inttoptr i64 %23 to i64* 
+  %25 = load  i64, i64* %24 
+  %26 = icmp uge i64 %"#right##0", 4 
+  br i1 %26, label %if.then8, label %if.else8 
 if.else7:
-  %39 = icmp eq i64 %1, 3 
-  br i1 %39, label %if.then10, label %if.else10 
+  %33 = icmp eq i64 %1, 3 
+  br i1 %33, label %if.then10, label %if.else10 
 if.then8:
-  %32 = and i64 %"#right##0", 7 
-  %33 = icmp eq i64 %32, 2 
-  br i1 %33, label %if.then9, label %if.else9 
+  %27 = and i64 %"#right##0", 7 
+  %28 = icmp eq i64 %27, 2 
+  br i1 %28, label %if.then9, label %if.else9 
 if.else8:
   ret i1 0 
 if.then9:
-  %34 = add   i64 %"#right##0", -2 
-  %35 = inttoptr i64 %34 to i64* 
-  %36 = getelementptr  i64, i64* %35, i64 0 
-  %37 = load  i64, i64* %36 
-  %38 = icmp eq i64 %30, %37 
-  ret i1 %38 
+  %29 = add   i64 %"#right##0", -2 
+  %30 = inttoptr i64 %29 to i64* 
+  %31 = load  i64, i64* %30 
+  %32 = icmp eq i64 %25, %31 
+  ret i1 %32 
 if.else9:
   ret i1 0 
 if.then10:
-  %40 = add   i64 %"#left##0", -3 
-  %41 = inttoptr i64 %40 to i64* 
-  %42 = getelementptr  i64, i64* %41, i64 0 
-  %43 = load  i64, i64* %42 
-  %44 = icmp uge i64 %"#right##0", 4 
-  br i1 %44, label %if.then11, label %if.else11 
+  %34 = add   i64 %"#left##0", -3 
+  %35 = inttoptr i64 %34 to i64* 
+  %36 = load  i64, i64* %35 
+  %37 = icmp uge i64 %"#right##0", 4 
+  br i1 %37, label %if.then11, label %if.else11 
 if.else10:
-  %52 = icmp eq i64 %1, 4 
-  br i1 %52, label %if.then13, label %if.else13 
+  %44 = icmp eq i64 %1, 4 
+  br i1 %44, label %if.then13, label %if.else13 
 if.then11:
-  %45 = and i64 %"#right##0", 7 
-  %46 = icmp eq i64 %45, 3 
-  br i1 %46, label %if.then12, label %if.else12 
+  %38 = and i64 %"#right##0", 7 
+  %39 = icmp eq i64 %38, 3 
+  br i1 %39, label %if.then12, label %if.else12 
 if.else11:
   ret i1 0 
 if.then12:
-  %47 = add   i64 %"#right##0", -3 
-  %48 = inttoptr i64 %47 to i64* 
-  %49 = getelementptr  i64, i64* %48, i64 0 
-  %50 = load  i64, i64* %49 
-  %51 = icmp eq i64 %43, %50 
-  ret i1 %51 
+  %40 = add   i64 %"#right##0", -3 
+  %41 = inttoptr i64 %40 to i64* 
+  %42 = load  i64, i64* %41 
+  %43 = icmp eq i64 %36, %42 
+  ret i1 %43 
 if.else12:
   ret i1 0 
 if.then13:
-  %53 = add   i64 %"#left##0", -4 
-  %54 = inttoptr i64 %53 to i64* 
-  %55 = getelementptr  i64, i64* %54, i64 0 
-  %56 = load  i64, i64* %55 
-  %57 = icmp uge i64 %"#right##0", 4 
-  br i1 %57, label %if.then14, label %if.else14 
+  %45 = add   i64 %"#left##0", -4 
+  %46 = inttoptr i64 %45 to i64* 
+  %47 = load  i64, i64* %46 
+  %48 = icmp uge i64 %"#right##0", 4 
+  br i1 %48, label %if.then14, label %if.else14 
 if.else13:
-  %65 = icmp eq i64 %1, 5 
-  br i1 %65, label %if.then16, label %if.else16 
+  %55 = icmp eq i64 %1, 5 
+  br i1 %55, label %if.then16, label %if.else16 
 if.then14:
-  %58 = and i64 %"#right##0", 7 
-  %59 = icmp eq i64 %58, 4 
-  br i1 %59, label %if.then15, label %if.else15 
+  %49 = and i64 %"#right##0", 7 
+  %50 = icmp eq i64 %49, 4 
+  br i1 %50, label %if.then15, label %if.else15 
 if.else14:
   ret i1 0 
 if.then15:
-  %60 = add   i64 %"#right##0", -4 
-  %61 = inttoptr i64 %60 to i64* 
-  %62 = getelementptr  i64, i64* %61, i64 0 
-  %63 = load  i64, i64* %62 
-  %64 = icmp eq i64 %56, %63 
-  ret i1 %64 
+  %51 = add   i64 %"#right##0", -4 
+  %52 = inttoptr i64 %51 to i64* 
+  %53 = load  i64, i64* %52 
+  %54 = icmp eq i64 %47, %53 
+  ret i1 %54 
 if.else15:
   ret i1 0 
 if.then16:
-  %66 = add   i64 %"#left##0", -5 
-  %67 = inttoptr i64 %66 to i64* 
-  %68 = getelementptr  i64, i64* %67, i64 0 
-  %69 = load  i64, i64* %68 
-  %70 = icmp uge i64 %"#right##0", 4 
-  br i1 %70, label %if.then17, label %if.else17 
+  %56 = add   i64 %"#left##0", -5 
+  %57 = inttoptr i64 %56 to i64* 
+  %58 = load  i64, i64* %57 
+  %59 = icmp uge i64 %"#right##0", 4 
+  br i1 %59, label %if.then17, label %if.else17 
 if.else16:
-  %78 = icmp eq i64 %1, 6 
-  br i1 %78, label %if.then19, label %if.else19 
+  %66 = icmp eq i64 %1, 6 
+  br i1 %66, label %if.then19, label %if.else19 
 if.then17:
-  %71 = and i64 %"#right##0", 7 
-  %72 = icmp eq i64 %71, 5 
-  br i1 %72, label %if.then18, label %if.else18 
+  %60 = and i64 %"#right##0", 7 
+  %61 = icmp eq i64 %60, 5 
+  br i1 %61, label %if.then18, label %if.else18 
 if.else17:
   ret i1 0 
 if.then18:
-  %73 = add   i64 %"#right##0", -5 
-  %74 = inttoptr i64 %73 to i64* 
-  %75 = getelementptr  i64, i64* %74, i64 0 
-  %76 = load  i64, i64* %75 
-  %77 = icmp eq i64 %69, %76 
-  ret i1 %77 
+  %62 = add   i64 %"#right##0", -5 
+  %63 = inttoptr i64 %62 to i64* 
+  %64 = load  i64, i64* %63 
+  %65 = icmp eq i64 %58, %64 
+  ret i1 %65 
 if.else18:
   ret i1 0 
 if.then19:
-  %79 = add   i64 %"#left##0", -6 
-  %80 = inttoptr i64 %79 to i64* 
-  %81 = getelementptr  i64, i64* %80, i64 0 
-  %82 = load  i64, i64* %81 
-  %83 = icmp uge i64 %"#right##0", 4 
-  br i1 %83, label %if.then20, label %if.else20 
+  %67 = add   i64 %"#left##0", -6 
+  %68 = inttoptr i64 %67 to i64* 
+  %69 = load  i64, i64* %68 
+  %70 = icmp uge i64 %"#right##0", 4 
+  br i1 %70, label %if.then20, label %if.else20 
 if.else19:
-  %91 = icmp eq i64 %1, 7 
-  br i1 %91, label %if.then22, label %if.else22 
+  %77 = icmp eq i64 %1, 7 
+  br i1 %77, label %if.then22, label %if.else22 
 if.then20:
-  %84 = and i64 %"#right##0", 7 
-  %85 = icmp eq i64 %84, 6 
-  br i1 %85, label %if.then21, label %if.else21 
+  %71 = and i64 %"#right##0", 7 
+  %72 = icmp eq i64 %71, 6 
+  br i1 %72, label %if.then21, label %if.else21 
 if.else20:
   ret i1 0 
 if.then21:
-  %86 = add   i64 %"#right##0", -6 
-  %87 = inttoptr i64 %86 to i64* 
-  %88 = getelementptr  i64, i64* %87, i64 0 
-  %89 = load  i64, i64* %88 
-  %90 = icmp eq i64 %82, %89 
-  ret i1 %90 
+  %73 = add   i64 %"#right##0", -6 
+  %74 = inttoptr i64 %73 to i64* 
+  %75 = load  i64, i64* %74 
+  %76 = icmp eq i64 %69, %75 
+  ret i1 %76 
 if.else21:
   ret i1 0 
 if.then22:
-  %92 = add   i64 %"#left##0", -7 
-  %93 = inttoptr i64 %92 to i16* 
-  %94 = getelementptr  i16, i16* %93, i64 0 
-  %95 = load  i16, i16* %94 
-  %96 = icmp eq i16 %95, 7 
-  br i1 %96, label %if.then23, label %if.else23 
+  %78 = add   i64 %"#left##0", -7 
+  %79 = inttoptr i64 %78 to i16* 
+  %80 = load  i16, i16* %79 
+  %81 = icmp eq i16 %80, 7 
+  br i1 %81, label %if.then23, label %if.else23 
 if.else22:
   ret i1 0 
 if.then23:
-  %97 = add   i64 %"#left##0", 1 
-  %98 = inttoptr i64 %97 to i64* 
-  %99 = getelementptr  i64, i64* %98, i64 0 
-  %100 = load  i64, i64* %99 
-  %101 = icmp uge i64 %"#right##0", 4 
-  br i1 %101, label %if.then24, label %if.else24 
+  %82 = add   i64 %"#left##0", 1 
+  %83 = inttoptr i64 %82 to i64* 
+  %84 = load  i64, i64* %83 
+  %85 = icmp uge i64 %"#right##0", 4 
+  br i1 %85, label %if.then24, label %if.else24 
 if.else23:
-  %114 = icmp eq i16 %95, 8 
-  br i1 %114, label %if.then27, label %if.else27 
+  %96 = icmp eq i16 %80, 8 
+  br i1 %96, label %if.then27, label %if.else27 
 if.then24:
-  %102 = and i64 %"#right##0", 7 
-  %103 = icmp eq i64 %102, 7 
-  br i1 %103, label %if.then25, label %if.else25 
+  %86 = and i64 %"#right##0", 7 
+  %87 = icmp eq i64 %86, 7 
+  br i1 %87, label %if.then25, label %if.else25 
 if.else24:
   ret i1 0 
 if.then25:
-  %104 = add   i64 %"#right##0", -7 
-  %105 = inttoptr i64 %104 to i16* 
-  %106 = getelementptr  i16, i16* %105, i64 0 
-  %107 = load  i16, i16* %106 
-  %108 = icmp eq i16 %107, 7 
-  br i1 %108, label %if.then26, label %if.else26 
+  %88 = add   i64 %"#right##0", -7 
+  %89 = inttoptr i64 %88 to i16* 
+  %90 = load  i16, i16* %89 
+  %91 = icmp eq i16 %90, 7 
+  br i1 %91, label %if.then26, label %if.else26 
 if.else25:
   ret i1 0 
 if.then26:
-  %109 = add   i64 %"#right##0", 1 
-  %110 = inttoptr i64 %109 to i64* 
-  %111 = getelementptr  i64, i64* %110, i64 0 
-  %112 = load  i64, i64* %111 
-  %113 = icmp eq i64 %100, %112 
-  ret i1 %113 
+  %92 = add   i64 %"#right##0", 1 
+  %93 = inttoptr i64 %92 to i64* 
+  %94 = load  i64, i64* %93 
+  %95 = icmp eq i64 %84, %94 
+  ret i1 %95 
 if.else26:
   ret i1 0 
 if.then27:
-  %115 = add   i64 %"#left##0", 1 
-  %116 = inttoptr i64 %115 to i64* 
-  %117 = getelementptr  i64, i64* %116, i64 0 
-  %118 = load  i64, i64* %117 
-  %119 = icmp uge i64 %"#right##0", 4 
-  br i1 %119, label %if.then28, label %if.else28 
+  %97 = add   i64 %"#left##0", 1 
+  %98 = inttoptr i64 %97 to i64* 
+  %99 = load  i64, i64* %98 
+  %100 = icmp uge i64 %"#right##0", 4 
+  br i1 %100, label %if.then28, label %if.else28 
 if.else27:
-  %132 = icmp eq i16 %95, 9 
-  br i1 %132, label %if.then31, label %if.else31 
+  %111 = icmp eq i16 %80, 9 
+  br i1 %111, label %if.then31, label %if.else31 
 if.then28:
-  %120 = and i64 %"#right##0", 7 
-  %121 = icmp eq i64 %120, 7 
-  br i1 %121, label %if.then29, label %if.else29 
+  %101 = and i64 %"#right##0", 7 
+  %102 = icmp eq i64 %101, 7 
+  br i1 %102, label %if.then29, label %if.else29 
 if.else28:
   ret i1 0 
 if.then29:
-  %122 = add   i64 %"#right##0", -7 
-  %123 = inttoptr i64 %122 to i16* 
-  %124 = getelementptr  i16, i16* %123, i64 0 
-  %125 = load  i16, i16* %124 
-  %126 = icmp eq i16 %125, 8 
-  br i1 %126, label %if.then30, label %if.else30 
+  %103 = add   i64 %"#right##0", -7 
+  %104 = inttoptr i64 %103 to i16* 
+  %105 = load  i16, i16* %104 
+  %106 = icmp eq i16 %105, 8 
+  br i1 %106, label %if.then30, label %if.else30 
 if.else29:
   ret i1 0 
 if.then30:
-  %127 = add   i64 %"#right##0", 1 
-  %128 = inttoptr i64 %127 to i64* 
-  %129 = getelementptr  i64, i64* %128, i64 0 
-  %130 = load  i64, i64* %129 
-  %131 = icmp eq i64 %118, %130 
-  ret i1 %131 
+  %107 = add   i64 %"#right##0", 1 
+  %108 = inttoptr i64 %107 to i64* 
+  %109 = load  i64, i64* %108 
+  %110 = icmp eq i64 %99, %109 
+  ret i1 %110 
 if.else30:
   ret i1 0 
 if.then31:
-  %133 = add   i64 %"#left##0", 1 
-  %134 = inttoptr i64 %133 to i64* 
-  %135 = getelementptr  i64, i64* %134, i64 0 
-  %136 = load  i64, i64* %135 
-  %137 = icmp uge i64 %"#right##0", 4 
-  br i1 %137, label %if.then32, label %if.else32 
+  %112 = add   i64 %"#left##0", 1 
+  %113 = inttoptr i64 %112 to i64* 
+  %114 = load  i64, i64* %113 
+  %115 = icmp uge i64 %"#right##0", 4 
+  br i1 %115, label %if.then32, label %if.else32 
 if.else31:
-  %150 = icmp eq i16 %95, 10 
-  br i1 %150, label %if.then35, label %if.else35 
+  %126 = icmp eq i16 %80, 10 
+  br i1 %126, label %if.then35, label %if.else35 
 if.then32:
-  %138 = and i64 %"#right##0", 7 
-  %139 = icmp eq i64 %138, 7 
-  br i1 %139, label %if.then33, label %if.else33 
+  %116 = and i64 %"#right##0", 7 
+  %117 = icmp eq i64 %116, 7 
+  br i1 %117, label %if.then33, label %if.else33 
 if.else32:
   ret i1 0 
 if.then33:
-  %140 = add   i64 %"#right##0", -7 
-  %141 = inttoptr i64 %140 to i16* 
-  %142 = getelementptr  i16, i16* %141, i64 0 
-  %143 = load  i16, i16* %142 
-  %144 = icmp eq i16 %143, 9 
-  br i1 %144, label %if.then34, label %if.else34 
+  %118 = add   i64 %"#right##0", -7 
+  %119 = inttoptr i64 %118 to i16* 
+  %120 = load  i16, i16* %119 
+  %121 = icmp eq i16 %120, 9 
+  br i1 %121, label %if.then34, label %if.else34 
 if.else33:
   ret i1 0 
 if.then34:
-  %145 = add   i64 %"#right##0", 1 
-  %146 = inttoptr i64 %145 to i64* 
-  %147 = getelementptr  i64, i64* %146, i64 0 
-  %148 = load  i64, i64* %147 
-  %149 = icmp eq i64 %136, %148 
-  ret i1 %149 
+  %122 = add   i64 %"#right##0", 1 
+  %123 = inttoptr i64 %122 to i64* 
+  %124 = load  i64, i64* %123 
+  %125 = icmp eq i64 %114, %124 
+  ret i1 %125 
 if.else34:
   ret i1 0 
 if.then35:
-  %151 = add   i64 %"#left##0", 1 
-  %152 = inttoptr i64 %151 to i64* 
-  %153 = getelementptr  i64, i64* %152, i64 0 
-  %154 = load  i64, i64* %153 
-  %155 = icmp uge i64 %"#right##0", 4 
-  br i1 %155, label %if.then36, label %if.else36 
+  %127 = add   i64 %"#left##0", 1 
+  %128 = inttoptr i64 %127 to i64* 
+  %129 = load  i64, i64* %128 
+  %130 = icmp uge i64 %"#right##0", 4 
+  br i1 %130, label %if.then36, label %if.else36 
 if.else35:
-  %168 = icmp eq i16 %95, 11 
-  br i1 %168, label %if.then39, label %if.else39 
+  %141 = icmp eq i16 %80, 11 
+  br i1 %141, label %if.then39, label %if.else39 
 if.then36:
-  %156 = and i64 %"#right##0", 7 
-  %157 = icmp eq i64 %156, 7 
-  br i1 %157, label %if.then37, label %if.else37 
+  %131 = and i64 %"#right##0", 7 
+  %132 = icmp eq i64 %131, 7 
+  br i1 %132, label %if.then37, label %if.else37 
 if.else36:
   ret i1 0 
 if.then37:
-  %158 = add   i64 %"#right##0", -7 
-  %159 = inttoptr i64 %158 to i16* 
-  %160 = getelementptr  i16, i16* %159, i64 0 
-  %161 = load  i16, i16* %160 
-  %162 = icmp eq i16 %161, 10 
-  br i1 %162, label %if.then38, label %if.else38 
+  %133 = add   i64 %"#right##0", -7 
+  %134 = inttoptr i64 %133 to i16* 
+  %135 = load  i16, i16* %134 
+  %136 = icmp eq i16 %135, 10 
+  br i1 %136, label %if.then38, label %if.else38 
 if.else37:
   ret i1 0 
 if.then38:
-  %163 = add   i64 %"#right##0", 1 
-  %164 = inttoptr i64 %163 to i64* 
-  %165 = getelementptr  i64, i64* %164, i64 0 
-  %166 = load  i64, i64* %165 
-  %167 = icmp eq i64 %154, %166 
-  ret i1 %167 
+  %137 = add   i64 %"#right##0", 1 
+  %138 = inttoptr i64 %137 to i64* 
+  %139 = load  i64, i64* %138 
+  %140 = icmp eq i64 %129, %139 
+  ret i1 %140 
 if.else38:
   ret i1 0 
 if.then39:
-  %169 = add   i64 %"#left##0", 1 
-  %170 = inttoptr i64 %169 to i64* 
-  %171 = getelementptr  i64, i64* %170, i64 0 
-  %172 = load  i64, i64* %171 
-  %173 = icmp uge i64 %"#right##0", 4 
-  br i1 %173, label %if.then40, label %if.else40 
+  %142 = add   i64 %"#left##0", 1 
+  %143 = inttoptr i64 %142 to i64* 
+  %144 = load  i64, i64* %143 
+  %145 = icmp uge i64 %"#right##0", 4 
+  br i1 %145, label %if.then40, label %if.else40 
 if.else39:
-  %186 = icmp eq i16 %95, 12 
-  br i1 %186, label %if.then43, label %if.else43 
+  %156 = icmp eq i16 %80, 12 
+  br i1 %156, label %if.then43, label %if.else43 
 if.then40:
-  %174 = and i64 %"#right##0", 7 
-  %175 = icmp eq i64 %174, 7 
-  br i1 %175, label %if.then41, label %if.else41 
+  %146 = and i64 %"#right##0", 7 
+  %147 = icmp eq i64 %146, 7 
+  br i1 %147, label %if.then41, label %if.else41 
 if.else40:
   ret i1 0 
 if.then41:
-  %176 = add   i64 %"#right##0", -7 
-  %177 = inttoptr i64 %176 to i16* 
-  %178 = getelementptr  i16, i16* %177, i64 0 
-  %179 = load  i16, i16* %178 
-  %180 = icmp eq i16 %179, 11 
-  br i1 %180, label %if.then42, label %if.else42 
+  %148 = add   i64 %"#right##0", -7 
+  %149 = inttoptr i64 %148 to i16* 
+  %150 = load  i16, i16* %149 
+  %151 = icmp eq i16 %150, 11 
+  br i1 %151, label %if.then42, label %if.else42 
 if.else41:
   ret i1 0 
 if.then42:
-  %181 = add   i64 %"#right##0", 1 
-  %182 = inttoptr i64 %181 to i64* 
-  %183 = getelementptr  i64, i64* %182, i64 0 
-  %184 = load  i64, i64* %183 
-  %185 = icmp eq i64 %172, %184 
-  ret i1 %185 
+  %152 = add   i64 %"#right##0", 1 
+  %153 = inttoptr i64 %152 to i64* 
+  %154 = load  i64, i64* %153 
+  %155 = icmp eq i64 %144, %154 
+  ret i1 %155 
 if.else42:
   ret i1 0 
 if.then43:
-  %187 = add   i64 %"#left##0", 1 
-  %188 = inttoptr i64 %187 to i64* 
-  %189 = getelementptr  i64, i64* %188, i64 0 
-  %190 = load  i64, i64* %189 
-  %191 = icmp uge i64 %"#right##0", 4 
-  br i1 %191, label %if.then44, label %if.else44 
+  %157 = add   i64 %"#left##0", 1 
+  %158 = inttoptr i64 %157 to i64* 
+  %159 = load  i64, i64* %158 
+  %160 = icmp uge i64 %"#right##0", 4 
+  br i1 %160, label %if.then44, label %if.else44 
 if.else43:
-  %204 = icmp eq i16 %95, 13 
-  br i1 %204, label %if.then47, label %if.else47 
+  %171 = icmp eq i16 %80, 13 
+  br i1 %171, label %if.then47, label %if.else47 
 if.then44:
-  %192 = and i64 %"#right##0", 7 
-  %193 = icmp eq i64 %192, 7 
-  br i1 %193, label %if.then45, label %if.else45 
+  %161 = and i64 %"#right##0", 7 
+  %162 = icmp eq i64 %161, 7 
+  br i1 %162, label %if.then45, label %if.else45 
 if.else44:
   ret i1 0 
 if.then45:
-  %194 = add   i64 %"#right##0", -7 
-  %195 = inttoptr i64 %194 to i16* 
-  %196 = getelementptr  i16, i16* %195, i64 0 
-  %197 = load  i16, i16* %196 
-  %198 = icmp eq i16 %197, 12 
-  br i1 %198, label %if.then46, label %if.else46 
+  %163 = add   i64 %"#right##0", -7 
+  %164 = inttoptr i64 %163 to i16* 
+  %165 = load  i16, i16* %164 
+  %166 = icmp eq i16 %165, 12 
+  br i1 %166, label %if.then46, label %if.else46 
 if.else45:
   ret i1 0 
 if.then46:
-  %199 = add   i64 %"#right##0", 1 
-  %200 = inttoptr i64 %199 to i64* 
-  %201 = getelementptr  i64, i64* %200, i64 0 
-  %202 = load  i64, i64* %201 
-  %203 = icmp eq i64 %190, %202 
-  ret i1 %203 
+  %167 = add   i64 %"#right##0", 1 
+  %168 = inttoptr i64 %167 to i64* 
+  %169 = load  i64, i64* %168 
+  %170 = icmp eq i64 %159, %169 
+  ret i1 %170 
 if.else46:
   ret i1 0 
 if.then47:
-  %205 = add   i64 %"#left##0", 1 
-  %206 = inttoptr i64 %205 to i64* 
-  %207 = getelementptr  i64, i64* %206, i64 0 
-  %208 = load  i64, i64* %207 
-  %209 = icmp uge i64 %"#right##0", 4 
-  br i1 %209, label %if.then48, label %if.else48 
+  %172 = add   i64 %"#left##0", 1 
+  %173 = inttoptr i64 %172 to i64* 
+  %174 = load  i64, i64* %173 
+  %175 = icmp uge i64 %"#right##0", 4 
+  br i1 %175, label %if.then48, label %if.else48 
 if.else47:
-  %222 = icmp eq i16 %95, 14 
-  br i1 %222, label %if.then51, label %if.else51 
+  %186 = icmp eq i16 %80, 14 
+  br i1 %186, label %if.then51, label %if.else51 
 if.then48:
-  %210 = and i64 %"#right##0", 7 
-  %211 = icmp eq i64 %210, 7 
-  br i1 %211, label %if.then49, label %if.else49 
+  %176 = and i64 %"#right##0", 7 
+  %177 = icmp eq i64 %176, 7 
+  br i1 %177, label %if.then49, label %if.else49 
 if.else48:
   ret i1 0 
 if.then49:
-  %212 = add   i64 %"#right##0", -7 
-  %213 = inttoptr i64 %212 to i16* 
-  %214 = getelementptr  i16, i16* %213, i64 0 
-  %215 = load  i16, i16* %214 
-  %216 = icmp eq i16 %215, 13 
-  br i1 %216, label %if.then50, label %if.else50 
+  %178 = add   i64 %"#right##0", -7 
+  %179 = inttoptr i64 %178 to i16* 
+  %180 = load  i16, i16* %179 
+  %181 = icmp eq i16 %180, 13 
+  br i1 %181, label %if.then50, label %if.else50 
 if.else49:
   ret i1 0 
 if.then50:
-  %217 = add   i64 %"#right##0", 1 
-  %218 = inttoptr i64 %217 to i64* 
-  %219 = getelementptr  i64, i64* %218, i64 0 
-  %220 = load  i64, i64* %219 
-  %221 = icmp eq i64 %208, %220 
-  ret i1 %221 
+  %182 = add   i64 %"#right##0", 1 
+  %183 = inttoptr i64 %182 to i64* 
+  %184 = load  i64, i64* %183 
+  %185 = icmp eq i64 %174, %184 
+  ret i1 %185 
 if.else50:
   ret i1 0 
 if.then51:
-  %223 = add   i64 %"#left##0", 1 
-  %224 = inttoptr i64 %223 to i64* 
-  %225 = getelementptr  i64, i64* %224, i64 0 
-  %226 = load  i64, i64* %225 
-  %227 = icmp uge i64 %"#right##0", 4 
-  br i1 %227, label %if.then52, label %if.else52 
+  %187 = add   i64 %"#left##0", 1 
+  %188 = inttoptr i64 %187 to i64* 
+  %189 = load  i64, i64* %188 
+  %190 = icmp uge i64 %"#right##0", 4 
+  br i1 %190, label %if.then52, label %if.else52 
 if.else51:
-  %240 = icmp eq i16 %95, 15 
-  br i1 %240, label %if.then55, label %if.else55 
+  %201 = icmp eq i16 %80, 15 
+  br i1 %201, label %if.then55, label %if.else55 
 if.then52:
-  %228 = and i64 %"#right##0", 7 
-  %229 = icmp eq i64 %228, 7 
-  br i1 %229, label %if.then53, label %if.else53 
+  %191 = and i64 %"#right##0", 7 
+  %192 = icmp eq i64 %191, 7 
+  br i1 %192, label %if.then53, label %if.else53 
 if.else52:
   ret i1 0 
 if.then53:
-  %230 = add   i64 %"#right##0", -7 
-  %231 = inttoptr i64 %230 to i16* 
-  %232 = getelementptr  i16, i16* %231, i64 0 
-  %233 = load  i16, i16* %232 
-  %234 = icmp eq i16 %233, 14 
-  br i1 %234, label %if.then54, label %if.else54 
+  %193 = add   i64 %"#right##0", -7 
+  %194 = inttoptr i64 %193 to i16* 
+  %195 = load  i16, i16* %194 
+  %196 = icmp eq i16 %195, 14 
+  br i1 %196, label %if.then54, label %if.else54 
 if.else53:
   ret i1 0 
 if.then54:
-  %235 = add   i64 %"#right##0", 1 
-  %236 = inttoptr i64 %235 to i64* 
-  %237 = getelementptr  i64, i64* %236, i64 0 
-  %238 = load  i64, i64* %237 
-  %239 = icmp eq i64 %226, %238 
-  ret i1 %239 
+  %197 = add   i64 %"#right##0", 1 
+  %198 = inttoptr i64 %197 to i64* 
+  %199 = load  i64, i64* %198 
+  %200 = icmp eq i64 %189, %199 
+  ret i1 %200 
 if.else54:
   ret i1 0 
 if.then55:
-  %241 = add   i64 %"#left##0", 1 
-  %242 = inttoptr i64 %241 to i64* 
-  %243 = getelementptr  i64, i64* %242, i64 0 
-  %244 = load  i64, i64* %243 
-  %245 = icmp uge i64 %"#right##0", 4 
-  br i1 %245, label %if.then56, label %if.else56 
+  %202 = add   i64 %"#left##0", 1 
+  %203 = inttoptr i64 %202 to i64* 
+  %204 = load  i64, i64* %203 
+  %205 = icmp uge i64 %"#right##0", 4 
+  br i1 %205, label %if.then56, label %if.else56 
 if.else55:
-  %258 = icmp eq i16 %95, 16 
-  br i1 %258, label %if.then59, label %if.else59 
+  %216 = icmp eq i16 %80, 16 
+  br i1 %216, label %if.then59, label %if.else59 
 if.then56:
-  %246 = and i64 %"#right##0", 7 
-  %247 = icmp eq i64 %246, 7 
-  br i1 %247, label %if.then57, label %if.else57 
+  %206 = and i64 %"#right##0", 7 
+  %207 = icmp eq i64 %206, 7 
+  br i1 %207, label %if.then57, label %if.else57 
 if.else56:
   ret i1 0 
 if.then57:
-  %248 = add   i64 %"#right##0", -7 
-  %249 = inttoptr i64 %248 to i16* 
-  %250 = getelementptr  i16, i16* %249, i64 0 
-  %251 = load  i16, i16* %250 
-  %252 = icmp eq i16 %251, 15 
-  br i1 %252, label %if.then58, label %if.else58 
+  %208 = add   i64 %"#right##0", -7 
+  %209 = inttoptr i64 %208 to i16* 
+  %210 = load  i16, i16* %209 
+  %211 = icmp eq i16 %210, 15 
+  br i1 %211, label %if.then58, label %if.else58 
 if.else57:
   ret i1 0 
 if.then58:
-  %253 = add   i64 %"#right##0", 1 
-  %254 = inttoptr i64 %253 to i64* 
-  %255 = getelementptr  i64, i64* %254, i64 0 
-  %256 = load  i64, i64* %255 
-  %257 = icmp eq i64 %244, %256 
-  ret i1 %257 
+  %212 = add   i64 %"#right##0", 1 
+  %213 = inttoptr i64 %212 to i64* 
+  %214 = load  i64, i64* %213 
+  %215 = icmp eq i64 %204, %214 
+  ret i1 %215 
 if.else58:
   ret i1 0 
 if.then59:
-  %259 = add   i64 %"#left##0", 1 
-  %260 = inttoptr i64 %259 to i64* 
-  %261 = getelementptr  i64, i64* %260, i64 0 
-  %262 = load  i64, i64* %261 
-  %263 = icmp uge i64 %"#right##0", 4 
-  br i1 %263, label %if.then60, label %if.else60 
+  %217 = add   i64 %"#left##0", 1 
+  %218 = inttoptr i64 %217 to i64* 
+  %219 = load  i64, i64* %218 
+  %220 = icmp uge i64 %"#right##0", 4 
+  br i1 %220, label %if.then60, label %if.else60 
 if.else59:
   ret i1 0 
 if.then60:
-  %264 = and i64 %"#right##0", 7 
-  %265 = icmp eq i64 %264, 7 
-  br i1 %265, label %if.then61, label %if.else61 
+  %221 = and i64 %"#right##0", 7 
+  %222 = icmp eq i64 %221, 7 
+  br i1 %222, label %if.then61, label %if.else61 
 if.else60:
   ret i1 0 
 if.then61:
-  %266 = add   i64 %"#right##0", -7 
-  %267 = inttoptr i64 %266 to i16* 
-  %268 = getelementptr  i16, i16* %267, i64 0 
-  %269 = load  i16, i16* %268 
-  %270 = icmp eq i16 %269, 16 
-  br i1 %270, label %if.then62, label %if.else62 
+  %223 = add   i64 %"#right##0", -7 
+  %224 = inttoptr i64 %223 to i16* 
+  %225 = load  i16, i16* %224 
+  %226 = icmp eq i16 %225, 16 
+  br i1 %226, label %if.then62, label %if.else62 
 if.else61:
   ret i1 0 
 if.then62:
-  %271 = add   i64 %"#right##0", 1 
-  %272 = inttoptr i64 %271 to i64* 
-  %273 = getelementptr  i64, i64* %272, i64 0 
-  %274 = load  i64, i64* %273 
-  %275 = icmp eq i64 %262, %274 
-  ret i1 %275 
+  %227 = add   i64 %"#right##0", 1 
+  %228 = inttoptr i64 %227 to i64* 
+  %229 = load  i64, i64* %228 
+  %230 = icmp eq i64 %219, %229 
+  ret i1 %230 
 if.else62:
   ret i1 0 
 }
@@ -3266,8 +3221,7 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 %"f01##0", i64* %4 
+  store  i64 %"f01##0", i64* %3 
   ret i64 %2 
 }
 
@@ -3281,20 +3235,19 @@ if.then:
   %2 = icmp eq i64 %1, 0 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %11 = insertvalue {i64, i1} %10, i1 0, 1 
-  ret {i64, i1} %11 
+  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %10 = insertvalue {i64, i1} %9, i1 0, 1 
+  ret {i64, i1} %10 
 if.then1:
   %3 = inttoptr i64 %"#result##0" to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  %5 = load  i64, i64* %4 
-  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
-  %7 = insertvalue {i64, i1} %6, i1 1, 1 
-  ret {i64, i1} %7 
+  %4 = load  i64, i64* %3 
+  %5 = insertvalue {i64, i1} undef, i64 %4, 0 
+  %6 = insertvalue {i64, i1} %5, i1 1, 1 
+  ret {i64, i1} %6 
 if.else1:
-  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %9 = insertvalue {i64, i1} %8, i1 0, 1 
-  ret {i64, i1} %9 
+  %7 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %8 = insertvalue {i64, i1} %7, i1 0, 1 
+  ret {i64, i1} %8 
 }
 
 
@@ -3304,10 +3257,9 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 %"f02##0", i64* %4 
-  %5 = or i64 %2, 1 
-  ret i64 %5 
+  store  i64 %"f02##0", i64* %3 
+  %4 = or i64 %2, 1 
+  ret i64 %4 
 }
 
 
@@ -3320,21 +3272,20 @@ if.then:
   %2 = icmp eq i64 %1, 1 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %11 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %12 = insertvalue {i64, i1} %11, i1 0, 1 
-  ret {i64, i1} %12 
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
 if.then1:
   %3 = add   i64 %"#result##0", -1 
   %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %8 = insertvalue {i64, i1} %7, i1 1, 1 
-  ret {i64, i1} %8 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
 if.else1:
-  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %10 = insertvalue {i64, i1} %9, i1 0, 1 
-  ret {i64, i1} %10 
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
 }
 
 
@@ -3344,10 +3295,9 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 %"f03##0", i64* %4 
-  %5 = or i64 %2, 2 
-  ret i64 %5 
+  store  i64 %"f03##0", i64* %3 
+  %4 = or i64 %2, 2 
+  ret i64 %4 
 }
 
 
@@ -3360,21 +3310,20 @@ if.then:
   %2 = icmp eq i64 %1, 2 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %11 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %12 = insertvalue {i64, i1} %11, i1 0, 1 
-  ret {i64, i1} %12 
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
 if.then1:
   %3 = add   i64 %"#result##0", -2 
   %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %8 = insertvalue {i64, i1} %7, i1 1, 1 
-  ret {i64, i1} %8 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
 if.else1:
-  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %10 = insertvalue {i64, i1} %9, i1 0, 1 
-  ret {i64, i1} %10 
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
 }
 
 
@@ -3384,10 +3333,9 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 %"f04##0", i64* %4 
-  %5 = or i64 %2, 3 
-  ret i64 %5 
+  store  i64 %"f04##0", i64* %3 
+  %4 = or i64 %2, 3 
+  ret i64 %4 
 }
 
 
@@ -3400,21 +3348,20 @@ if.then:
   %2 = icmp eq i64 %1, 3 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %11 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %12 = insertvalue {i64, i1} %11, i1 0, 1 
-  ret {i64, i1} %12 
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
 if.then1:
   %3 = add   i64 %"#result##0", -3 
   %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %8 = insertvalue {i64, i1} %7, i1 1, 1 
-  ret {i64, i1} %8 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
 if.else1:
-  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %10 = insertvalue {i64, i1} %9, i1 0, 1 
-  ret {i64, i1} %10 
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
 }
 
 
@@ -3424,10 +3371,9 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 %"f05##0", i64* %4 
-  %5 = or i64 %2, 4 
-  ret i64 %5 
+  store  i64 %"f05##0", i64* %3 
+  %4 = or i64 %2, 4 
+  ret i64 %4 
 }
 
 
@@ -3440,21 +3386,20 @@ if.then:
   %2 = icmp eq i64 %1, 4 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %11 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %12 = insertvalue {i64, i1} %11, i1 0, 1 
-  ret {i64, i1} %12 
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
 if.then1:
   %3 = add   i64 %"#result##0", -4 
   %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %8 = insertvalue {i64, i1} %7, i1 1, 1 
-  ret {i64, i1} %8 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
 if.else1:
-  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %10 = insertvalue {i64, i1} %9, i1 0, 1 
-  ret {i64, i1} %10 
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
 }
 
 
@@ -3464,10 +3409,9 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 %"f06##0", i64* %4 
-  %5 = or i64 %2, 5 
-  ret i64 %5 
+  store  i64 %"f06##0", i64* %3 
+  %4 = or i64 %2, 5 
+  ret i64 %4 
 }
 
 
@@ -3480,21 +3424,20 @@ if.then:
   %2 = icmp eq i64 %1, 5 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %11 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %12 = insertvalue {i64, i1} %11, i1 0, 1 
-  ret {i64, i1} %12 
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
 if.then1:
   %3 = add   i64 %"#result##0", -5 
   %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %8 = insertvalue {i64, i1} %7, i1 1, 1 
-  ret {i64, i1} %8 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
 if.else1:
-  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %10 = insertvalue {i64, i1} %9, i1 0, 1 
-  ret {i64, i1} %10 
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
 }
 
 
@@ -3504,10 +3447,9 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 %"f07##0", i64* %4 
-  %5 = or i64 %2, 6 
-  ret i64 %5 
+  store  i64 %"f07##0", i64* %3 
+  %4 = or i64 %2, 6 
+  ret i64 %4 
 }
 
 
@@ -3520,21 +3462,20 @@ if.then:
   %2 = icmp eq i64 %1, 6 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %11 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %12 = insertvalue {i64, i1} %11, i1 0, 1 
-  ret {i64, i1} %12 
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
 if.then1:
   %3 = add   i64 %"#result##0", -6 
   %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %8 = insertvalue {i64, i1} %7, i1 1, 1 
-  ret {i64, i1} %8 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
 if.else1:
-  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %10 = insertvalue {i64, i1} %9, i1 0, 1 
-  ret {i64, i1} %10 
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
 }
 
 
@@ -3544,14 +3485,12 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 7, i64* %4 
-  %5 = add   i64 %2, 8 
-  %6 = inttoptr i64 %5 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 %"f08##0", i64* %7 
-  %8 = or i64 %2, 7 
-  ret i64 %8 
+  store  i64 7, i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 %"f08##0", i64* %5 
+  %6 = or i64 %2, 7 
+  ret i64 %6 
 }
 
 
@@ -3564,32 +3503,30 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
-if.then1:
-  %3 = add   i64 %"#result##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 7 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %16 = insertvalue {i64, i1} undef, i64 undef, 0 
   %17 = insertvalue {i64, i1} %16, i1 0, 1 
   ret {i64, i1} %17 
-if.then2:
-  %8 = add   i64 %"#result##0", 1 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %13 = insertvalue {i64, i1} %12, i1 1, 1 
-  ret {i64, i1} %13 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#result##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 7 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %14 = insertvalue {i64, i1} undef, i64 undef, 0 
   %15 = insertvalue {i64, i1} %14, i1 0, 1 
   ret {i64, i1} %15 
+if.then2:
+  %7 = add   i64 %"#result##0", 1 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
+if.else2:
+  %12 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -3599,14 +3536,12 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 8, i64* %4 
-  %5 = add   i64 %2, 8 
-  %6 = inttoptr i64 %5 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 %"f09##0", i64* %7 
-  %8 = or i64 %2, 7 
-  ret i64 %8 
+  store  i64 8, i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 %"f09##0", i64* %5 
+  %6 = or i64 %2, 7 
+  ret i64 %6 
 }
 
 
@@ -3619,32 +3554,30 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
-if.then1:
-  %3 = add   i64 %"#result##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 8 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %16 = insertvalue {i64, i1} undef, i64 undef, 0 
   %17 = insertvalue {i64, i1} %16, i1 0, 1 
   ret {i64, i1} %17 
-if.then2:
-  %8 = add   i64 %"#result##0", 1 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %13 = insertvalue {i64, i1} %12, i1 1, 1 
-  ret {i64, i1} %13 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#result##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 8 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %14 = insertvalue {i64, i1} undef, i64 undef, 0 
   %15 = insertvalue {i64, i1} %14, i1 0, 1 
   ret {i64, i1} %15 
+if.then2:
+  %7 = add   i64 %"#result##0", 1 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
+if.else2:
+  %12 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -3654,14 +3587,12 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 9, i64* %4 
-  %5 = add   i64 %2, 8 
-  %6 = inttoptr i64 %5 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 %"f10##0", i64* %7 
-  %8 = or i64 %2, 7 
-  ret i64 %8 
+  store  i64 9, i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 %"f10##0", i64* %5 
+  %6 = or i64 %2, 7 
+  ret i64 %6 
 }
 
 
@@ -3674,32 +3605,30 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
-if.then1:
-  %3 = add   i64 %"#result##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 9 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %16 = insertvalue {i64, i1} undef, i64 undef, 0 
   %17 = insertvalue {i64, i1} %16, i1 0, 1 
   ret {i64, i1} %17 
-if.then2:
-  %8 = add   i64 %"#result##0", 1 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %13 = insertvalue {i64, i1} %12, i1 1, 1 
-  ret {i64, i1} %13 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#result##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 9 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %14 = insertvalue {i64, i1} undef, i64 undef, 0 
   %15 = insertvalue {i64, i1} %14, i1 0, 1 
   ret {i64, i1} %15 
+if.then2:
+  %7 = add   i64 %"#result##0", 1 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
+if.else2:
+  %12 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -3709,14 +3638,12 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 10, i64* %4 
-  %5 = add   i64 %2, 8 
-  %6 = inttoptr i64 %5 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 %"f11##0", i64* %7 
-  %8 = or i64 %2, 7 
-  ret i64 %8 
+  store  i64 10, i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 %"f11##0", i64* %5 
+  %6 = or i64 %2, 7 
+  ret i64 %6 
 }
 
 
@@ -3729,32 +3656,30 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
-if.then1:
-  %3 = add   i64 %"#result##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 10 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %16 = insertvalue {i64, i1} undef, i64 undef, 0 
   %17 = insertvalue {i64, i1} %16, i1 0, 1 
   ret {i64, i1} %17 
-if.then2:
-  %8 = add   i64 %"#result##0", 1 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %13 = insertvalue {i64, i1} %12, i1 1, 1 
-  ret {i64, i1} %13 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#result##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 10 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %14 = insertvalue {i64, i1} undef, i64 undef, 0 
   %15 = insertvalue {i64, i1} %14, i1 0, 1 
   ret {i64, i1} %15 
+if.then2:
+  %7 = add   i64 %"#result##0", 1 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
+if.else2:
+  %12 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -3764,14 +3689,12 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 11, i64* %4 
-  %5 = add   i64 %2, 8 
-  %6 = inttoptr i64 %5 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 %"f12##0", i64* %7 
-  %8 = or i64 %2, 7 
-  ret i64 %8 
+  store  i64 11, i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 %"f12##0", i64* %5 
+  %6 = or i64 %2, 7 
+  ret i64 %6 
 }
 
 
@@ -3784,32 +3707,30 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
-if.then1:
-  %3 = add   i64 %"#result##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 11 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %16 = insertvalue {i64, i1} undef, i64 undef, 0 
   %17 = insertvalue {i64, i1} %16, i1 0, 1 
   ret {i64, i1} %17 
-if.then2:
-  %8 = add   i64 %"#result##0", 1 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %13 = insertvalue {i64, i1} %12, i1 1, 1 
-  ret {i64, i1} %13 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#result##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 11 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %14 = insertvalue {i64, i1} undef, i64 undef, 0 
   %15 = insertvalue {i64, i1} %14, i1 0, 1 
   ret {i64, i1} %15 
+if.then2:
+  %7 = add   i64 %"#result##0", 1 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
+if.else2:
+  %12 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -3819,14 +3740,12 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 12, i64* %4 
-  %5 = add   i64 %2, 8 
-  %6 = inttoptr i64 %5 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 %"f13##0", i64* %7 
-  %8 = or i64 %2, 7 
-  ret i64 %8 
+  store  i64 12, i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 %"f13##0", i64* %5 
+  %6 = or i64 %2, 7 
+  ret i64 %6 
 }
 
 
@@ -3839,32 +3758,30 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
-if.then1:
-  %3 = add   i64 %"#result##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 12 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %16 = insertvalue {i64, i1} undef, i64 undef, 0 
   %17 = insertvalue {i64, i1} %16, i1 0, 1 
   ret {i64, i1} %17 
-if.then2:
-  %8 = add   i64 %"#result##0", 1 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %13 = insertvalue {i64, i1} %12, i1 1, 1 
-  ret {i64, i1} %13 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#result##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 12 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %14 = insertvalue {i64, i1} undef, i64 undef, 0 
   %15 = insertvalue {i64, i1} %14, i1 0, 1 
   ret {i64, i1} %15 
+if.then2:
+  %7 = add   i64 %"#result##0", 1 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
+if.else2:
+  %12 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -3874,14 +3791,12 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 13, i64* %4 
-  %5 = add   i64 %2, 8 
-  %6 = inttoptr i64 %5 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 %"f14##0", i64* %7 
-  %8 = or i64 %2, 7 
-  ret i64 %8 
+  store  i64 13, i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 %"f14##0", i64* %5 
+  %6 = or i64 %2, 7 
+  ret i64 %6 
 }
 
 
@@ -3894,32 +3809,30 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
-if.then1:
-  %3 = add   i64 %"#result##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 13 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %16 = insertvalue {i64, i1} undef, i64 undef, 0 
   %17 = insertvalue {i64, i1} %16, i1 0, 1 
   ret {i64, i1} %17 
-if.then2:
-  %8 = add   i64 %"#result##0", 1 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %13 = insertvalue {i64, i1} %12, i1 1, 1 
-  ret {i64, i1} %13 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#result##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 13 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %14 = insertvalue {i64, i1} undef, i64 undef, 0 
   %15 = insertvalue {i64, i1} %14, i1 0, 1 
   ret {i64, i1} %15 
+if.then2:
+  %7 = add   i64 %"#result##0", 1 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
+if.else2:
+  %12 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -3929,14 +3842,12 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 14, i64* %4 
-  %5 = add   i64 %2, 8 
-  %6 = inttoptr i64 %5 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 %"f15##0", i64* %7 
-  %8 = or i64 %2, 7 
-  ret i64 %8 
+  store  i64 14, i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 %"f15##0", i64* %5 
+  %6 = or i64 %2, 7 
+  ret i64 %6 
 }
 
 
@@ -3949,32 +3860,30 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
-if.then1:
-  %3 = add   i64 %"#result##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 14 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %16 = insertvalue {i64, i1} undef, i64 undef, 0 
   %17 = insertvalue {i64, i1} %16, i1 0, 1 
   ret {i64, i1} %17 
-if.then2:
-  %8 = add   i64 %"#result##0", 1 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %13 = insertvalue {i64, i1} %12, i1 1, 1 
-  ret {i64, i1} %13 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#result##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 14 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %14 = insertvalue {i64, i1} undef, i64 undef, 0 
   %15 = insertvalue {i64, i1} %14, i1 0, 1 
   ret {i64, i1} %15 
+if.then2:
+  %7 = add   i64 %"#result##0", 1 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
+if.else2:
+  %12 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -3984,14 +3893,12 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 15, i64* %4 
-  %5 = add   i64 %2, 8 
-  %6 = inttoptr i64 %5 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 %"f16##0", i64* %7 
-  %8 = or i64 %2, 7 
-  ret i64 %8 
+  store  i64 15, i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 %"f16##0", i64* %5 
+  %6 = or i64 %2, 7 
+  ret i64 %6 
 }
 
 
@@ -4004,32 +3911,30 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
-if.then1:
-  %3 = add   i64 %"#result##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 15 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %16 = insertvalue {i64, i1} undef, i64 undef, 0 
   %17 = insertvalue {i64, i1} %16, i1 0, 1 
   ret {i64, i1} %17 
-if.then2:
-  %8 = add   i64 %"#result##0", 1 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %13 = insertvalue {i64, i1} %12, i1 1, 1 
-  ret {i64, i1} %13 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#result##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 15 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %14 = insertvalue {i64, i1} undef, i64 undef, 0 
   %15 = insertvalue {i64, i1} %14, i1 0, 1 
   ret {i64, i1} %15 
+if.then2:
+  %7 = add   i64 %"#result##0", 1 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
+if.else2:
+  %12 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -4039,14 +3944,12 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 16, i64* %4 
-  %5 = add   i64 %2, 8 
-  %6 = inttoptr i64 %5 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 %"f17##0", i64* %7 
-  %8 = or i64 %2, 7 
-  ret i64 %8 
+  store  i64 16, i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 %"f17##0", i64* %5 
+  %6 = or i64 %2, 7 
+  ret i64 %6 
 }
 
 
@@ -4059,32 +3962,30 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
-if.then1:
-  %3 = add   i64 %"#result##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 16 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %16 = insertvalue {i64, i1} undef, i64 undef, 0 
   %17 = insertvalue {i64, i1} %16, i1 0, 1 
   ret {i64, i1} %17 
-if.then2:
-  %8 = add   i64 %"#result##0", 1 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %13 = insertvalue {i64, i1} %12, i1 1, 1 
-  ret {i64, i1} %13 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#result##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 16 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %14 = insertvalue {i64, i1} undef, i64 undef, 0 
   %15 = insertvalue {i64, i1} %14, i1 0, 1 
   ret {i64, i1} %15 
+if.then2:
+  %7 = add   i64 %"#result##0", 1 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
+if.else2:
+  %12 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -4097,20 +3998,19 @@ if.then:
   %2 = icmp eq i64 %1, 0 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %11 = insertvalue {i64, i1} %10, i1 0, 1 
-  ret {i64, i1} %11 
+  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %10 = insertvalue {i64, i1} %9, i1 0, 1 
+  ret {i64, i1} %10 
 if.then1:
   %3 = inttoptr i64 %"#rec##0" to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  %5 = load  i64, i64* %4 
-  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
-  %7 = insertvalue {i64, i1} %6, i1 1, 1 
-  ret {i64, i1} %7 
+  %4 = load  i64, i64* %3 
+  %5 = insertvalue {i64, i1} undef, i64 %4, 0 
+  %6 = insertvalue {i64, i1} %5, i1 1, 1 
+  ret {i64, i1} %6 
 if.else1:
-  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %9 = insertvalue {i64, i1} %8, i1 0, 1 
-  ret {i64, i1} %9 
+  %7 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %8 = insertvalue {i64, i1} %7, i1 0, 1 
+  ret {i64, i1} %8 
 }
 
 
@@ -4123,9 +4023,9 @@ if.then:
   %2 = icmp eq i64 %1, 0 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %15 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %16 = insertvalue {i64, i1} %15, i1 0, 1 
-  ret {i64, i1} %16 
+  %14 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %15 = insertvalue {i64, i1} %14, i1 0, 1 
+  ret {i64, i1} %15 
 if.then1:
   %3 = trunc i64 8 to i32  
   %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
@@ -4135,15 +4035,14 @@ if.then1:
   %8 = trunc i64 8 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %6, i8*  %7, i32  %8, i1  0)  
   %9 = inttoptr i64 %5 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  store  i64 %"#field##0", i64* %10 
-  %11 = insertvalue {i64, i1} undef, i64 %5, 0 
-  %12 = insertvalue {i64, i1} %11, i1 1, 1 
-  ret {i64, i1} %12 
+  store  i64 %"#field##0", i64* %9 
+  %10 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
 if.else1:
-  %13 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %14 = insertvalue {i64, i1} %13, i1 0, 1 
-  ret {i64, i1} %14 
+  %12 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -4156,21 +4055,20 @@ if.then:
   %2 = icmp eq i64 %1, 1 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %11 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %12 = insertvalue {i64, i1} %11, i1 0, 1 
-  ret {i64, i1} %12 
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
 if.then1:
   %3 = add   i64 %"#rec##0", -1 
   %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %8 = insertvalue {i64, i1} %7, i1 1, 1 
-  ret {i64, i1} %8 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
 if.else1:
-  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %10 = insertvalue {i64, i1} %9, i1 0, 1 
-  ret {i64, i1} %10 
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
 }
 
 
@@ -4183,9 +4081,9 @@ if.then:
   %2 = icmp eq i64 %1, 1 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
+  %17 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %18 = insertvalue {i64, i1} %17, i1 0, 1 
+  ret {i64, i1} %18 
 if.then1:
   %3 = trunc i64 8 to i32  
   %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
@@ -4198,15 +4096,14 @@ if.then1:
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %8, i8*  %9, i32  %10, i1  0)  
   %11 = add   i64 %6, -1 
   %12 = inttoptr i64 %11 to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
-  store  i64 %"#field##0", i64* %13 
-  %14 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %15 = insertvalue {i64, i1} %14, i1 1, 1 
-  ret {i64, i1} %15 
+  store  i64 %"#field##0", i64* %12 
+  %13 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %14 = insertvalue {i64, i1} %13, i1 1, 1 
+  ret {i64, i1} %14 
 if.else1:
-  %16 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %17 = insertvalue {i64, i1} %16, i1 0, 1 
-  ret {i64, i1} %17 
+  %15 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %16 = insertvalue {i64, i1} %15, i1 0, 1 
+  ret {i64, i1} %16 
 }
 
 
@@ -4219,21 +4116,20 @@ if.then:
   %2 = icmp eq i64 %1, 2 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %11 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %12 = insertvalue {i64, i1} %11, i1 0, 1 
-  ret {i64, i1} %12 
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
 if.then1:
   %3 = add   i64 %"#rec##0", -2 
   %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %8 = insertvalue {i64, i1} %7, i1 1, 1 
-  ret {i64, i1} %8 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
 if.else1:
-  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %10 = insertvalue {i64, i1} %9, i1 0, 1 
-  ret {i64, i1} %10 
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
 }
 
 
@@ -4246,9 +4142,9 @@ if.then:
   %2 = icmp eq i64 %1, 2 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
+  %17 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %18 = insertvalue {i64, i1} %17, i1 0, 1 
+  ret {i64, i1} %18 
 if.then1:
   %3 = trunc i64 8 to i32  
   %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
@@ -4261,15 +4157,14 @@ if.then1:
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %8, i8*  %9, i32  %10, i1  0)  
   %11 = add   i64 %6, -2 
   %12 = inttoptr i64 %11 to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
-  store  i64 %"#field##0", i64* %13 
-  %14 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %15 = insertvalue {i64, i1} %14, i1 1, 1 
-  ret {i64, i1} %15 
+  store  i64 %"#field##0", i64* %12 
+  %13 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %14 = insertvalue {i64, i1} %13, i1 1, 1 
+  ret {i64, i1} %14 
 if.else1:
-  %16 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %17 = insertvalue {i64, i1} %16, i1 0, 1 
-  ret {i64, i1} %17 
+  %15 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %16 = insertvalue {i64, i1} %15, i1 0, 1 
+  ret {i64, i1} %16 
 }
 
 
@@ -4282,21 +4177,20 @@ if.then:
   %2 = icmp eq i64 %1, 3 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %11 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %12 = insertvalue {i64, i1} %11, i1 0, 1 
-  ret {i64, i1} %12 
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
 if.then1:
   %3 = add   i64 %"#rec##0", -3 
   %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %8 = insertvalue {i64, i1} %7, i1 1, 1 
-  ret {i64, i1} %8 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
 if.else1:
-  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %10 = insertvalue {i64, i1} %9, i1 0, 1 
-  ret {i64, i1} %10 
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
 }
 
 
@@ -4309,9 +4203,9 @@ if.then:
   %2 = icmp eq i64 %1, 3 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
+  %17 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %18 = insertvalue {i64, i1} %17, i1 0, 1 
+  ret {i64, i1} %18 
 if.then1:
   %3 = trunc i64 8 to i32  
   %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
@@ -4324,15 +4218,14 @@ if.then1:
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %8, i8*  %9, i32  %10, i1  0)  
   %11 = add   i64 %6, -3 
   %12 = inttoptr i64 %11 to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
-  store  i64 %"#field##0", i64* %13 
-  %14 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %15 = insertvalue {i64, i1} %14, i1 1, 1 
-  ret {i64, i1} %15 
+  store  i64 %"#field##0", i64* %12 
+  %13 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %14 = insertvalue {i64, i1} %13, i1 1, 1 
+  ret {i64, i1} %14 
 if.else1:
-  %16 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %17 = insertvalue {i64, i1} %16, i1 0, 1 
-  ret {i64, i1} %17 
+  %15 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %16 = insertvalue {i64, i1} %15, i1 0, 1 
+  ret {i64, i1} %16 
 }
 
 
@@ -4345,21 +4238,20 @@ if.then:
   %2 = icmp eq i64 %1, 4 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %11 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %12 = insertvalue {i64, i1} %11, i1 0, 1 
-  ret {i64, i1} %12 
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
 if.then1:
   %3 = add   i64 %"#rec##0", -4 
   %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %8 = insertvalue {i64, i1} %7, i1 1, 1 
-  ret {i64, i1} %8 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
 if.else1:
-  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %10 = insertvalue {i64, i1} %9, i1 0, 1 
-  ret {i64, i1} %10 
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
 }
 
 
@@ -4372,9 +4264,9 @@ if.then:
   %2 = icmp eq i64 %1, 4 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
+  %17 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %18 = insertvalue {i64, i1} %17, i1 0, 1 
+  ret {i64, i1} %18 
 if.then1:
   %3 = trunc i64 8 to i32  
   %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
@@ -4387,15 +4279,14 @@ if.then1:
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %8, i8*  %9, i32  %10, i1  0)  
   %11 = add   i64 %6, -4 
   %12 = inttoptr i64 %11 to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
-  store  i64 %"#field##0", i64* %13 
-  %14 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %15 = insertvalue {i64, i1} %14, i1 1, 1 
-  ret {i64, i1} %15 
+  store  i64 %"#field##0", i64* %12 
+  %13 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %14 = insertvalue {i64, i1} %13, i1 1, 1 
+  ret {i64, i1} %14 
 if.else1:
-  %16 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %17 = insertvalue {i64, i1} %16, i1 0, 1 
-  ret {i64, i1} %17 
+  %15 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %16 = insertvalue {i64, i1} %15, i1 0, 1 
+  ret {i64, i1} %16 
 }
 
 
@@ -4408,21 +4299,20 @@ if.then:
   %2 = icmp eq i64 %1, 5 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %11 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %12 = insertvalue {i64, i1} %11, i1 0, 1 
-  ret {i64, i1} %12 
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
 if.then1:
   %3 = add   i64 %"#rec##0", -5 
   %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %8 = insertvalue {i64, i1} %7, i1 1, 1 
-  ret {i64, i1} %8 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
 if.else1:
-  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %10 = insertvalue {i64, i1} %9, i1 0, 1 
-  ret {i64, i1} %10 
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
 }
 
 
@@ -4435,9 +4325,9 @@ if.then:
   %2 = icmp eq i64 %1, 5 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
+  %17 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %18 = insertvalue {i64, i1} %17, i1 0, 1 
+  ret {i64, i1} %18 
 if.then1:
   %3 = trunc i64 8 to i32  
   %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
@@ -4450,15 +4340,14 @@ if.then1:
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %8, i8*  %9, i32  %10, i1  0)  
   %11 = add   i64 %6, -5 
   %12 = inttoptr i64 %11 to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
-  store  i64 %"#field##0", i64* %13 
-  %14 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %15 = insertvalue {i64, i1} %14, i1 1, 1 
-  ret {i64, i1} %15 
+  store  i64 %"#field##0", i64* %12 
+  %13 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %14 = insertvalue {i64, i1} %13, i1 1, 1 
+  ret {i64, i1} %14 
 if.else1:
-  %16 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %17 = insertvalue {i64, i1} %16, i1 0, 1 
-  ret {i64, i1} %17 
+  %15 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %16 = insertvalue {i64, i1} %15, i1 0, 1 
+  ret {i64, i1} %16 
 }
 
 
@@ -4471,21 +4360,20 @@ if.then:
   %2 = icmp eq i64 %1, 6 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %11 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %12 = insertvalue {i64, i1} %11, i1 0, 1 
-  ret {i64, i1} %12 
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
 if.then1:
   %3 = add   i64 %"#rec##0", -6 
   %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %8 = insertvalue {i64, i1} %7, i1 1, 1 
-  ret {i64, i1} %8 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
 if.else1:
-  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %10 = insertvalue {i64, i1} %9, i1 0, 1 
-  ret {i64, i1} %10 
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
 }
 
 
@@ -4498,9 +4386,9 @@ if.then:
   %2 = icmp eq i64 %1, 6 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
+  %17 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %18 = insertvalue {i64, i1} %17, i1 0, 1 
+  ret {i64, i1} %18 
 if.then1:
   %3 = trunc i64 8 to i32  
   %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
@@ -4513,15 +4401,14 @@ if.then1:
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %8, i8*  %9, i32  %10, i1  0)  
   %11 = add   i64 %6, -6 
   %12 = inttoptr i64 %11 to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
-  store  i64 %"#field##0", i64* %13 
-  %14 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %15 = insertvalue {i64, i1} %14, i1 1, 1 
-  ret {i64, i1} %15 
+  store  i64 %"#field##0", i64* %12 
+  %13 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %14 = insertvalue {i64, i1} %13, i1 1, 1 
+  ret {i64, i1} %14 
 if.else1:
-  %16 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %17 = insertvalue {i64, i1} %16, i1 0, 1 
-  ret {i64, i1} %17 
+  %15 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %16 = insertvalue {i64, i1} %15, i1 0, 1 
+  ret {i64, i1} %16 
 }
 
 
@@ -4534,32 +4421,30 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
-if.then1:
-  %3 = add   i64 %"#rec##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 7 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %16 = insertvalue {i64, i1} undef, i64 undef, 0 
   %17 = insertvalue {i64, i1} %16, i1 0, 1 
   ret {i64, i1} %17 
-if.then2:
-  %8 = add   i64 %"#rec##0", 1 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %13 = insertvalue {i64, i1} %12, i1 1, 1 
-  ret {i64, i1} %13 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#rec##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 7 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %14 = insertvalue {i64, i1} undef, i64 undef, 0 
   %15 = insertvalue {i64, i1} %14, i1 0, 1 
   ret {i64, i1} %15 
+if.then2:
+  %7 = add   i64 %"#rec##0", 1 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
+if.else2:
+  %12 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -4572,41 +4457,39 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %25 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %26 = insertvalue {i64, i1} %25, i1 0, 1 
-  ret {i64, i1} %26 
-if.then1:
-  %3 = add   i64 %"#rec##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 7 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %23 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %24 = insertvalue {i64, i1} %23, i1 0, 1 
   ret {i64, i1} %24 
-if.then2:
-  %8 = trunc i64 16 to i32  
-  %9 = tail call ccc  i8*  @wybe_malloc(i32  %8)  
-  %10 = ptrtoint i8* %9 to i64 
-  %11 = add   i64 %10, 7 
-  %12 = sub   i64 %"#rec##0", 7 
-  %13 = inttoptr i64 %10 to i8* 
-  %14 = inttoptr i64 %12 to i8* 
-  %15 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %13, i8*  %14, i32  %15, i1  0)  
-  %16 = add   i64 %11, 1 
-  %17 = inttoptr i64 %16 to i64* 
-  %18 = getelementptr  i64, i64* %17, i64 0 
-  store  i64 %"#field##0", i64* %18 
-  %19 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %20 = insertvalue {i64, i1} %19, i1 1, 1 
-  ret {i64, i1} %20 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#rec##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 7 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %21 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %22 = insertvalue {i64, i1} %21, i1 0, 1 
   ret {i64, i1} %22 
+if.then2:
+  %7 = trunc i64 16 to i32  
+  %8 = tail call ccc  i8*  @wybe_malloc(i32  %7)  
+  %9 = ptrtoint i8* %8 to i64 
+  %10 = add   i64 %9, 7 
+  %11 = sub   i64 %"#rec##0", 7 
+  %12 = inttoptr i64 %9 to i8* 
+  %13 = inttoptr i64 %11 to i8* 
+  %14 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %12, i8*  %13, i32  %14, i1  0)  
+  %15 = add   i64 %10, 1 
+  %16 = inttoptr i64 %15 to i64* 
+  store  i64 %"#field##0", i64* %16 
+  %17 = insertvalue {i64, i1} undef, i64 %10, 0 
+  %18 = insertvalue {i64, i1} %17, i1 1, 1 
+  ret {i64, i1} %18 
+if.else2:
+  %19 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %20 = insertvalue {i64, i1} %19, i1 0, 1 
+  ret {i64, i1} %20 
 }
 
 
@@ -4619,32 +4502,30 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
-if.then1:
-  %3 = add   i64 %"#rec##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 8 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %16 = insertvalue {i64, i1} undef, i64 undef, 0 
   %17 = insertvalue {i64, i1} %16, i1 0, 1 
   ret {i64, i1} %17 
-if.then2:
-  %8 = add   i64 %"#rec##0", 1 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %13 = insertvalue {i64, i1} %12, i1 1, 1 
-  ret {i64, i1} %13 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#rec##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 8 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %14 = insertvalue {i64, i1} undef, i64 undef, 0 
   %15 = insertvalue {i64, i1} %14, i1 0, 1 
   ret {i64, i1} %15 
+if.then2:
+  %7 = add   i64 %"#rec##0", 1 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
+if.else2:
+  %12 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -4657,41 +4538,39 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %25 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %26 = insertvalue {i64, i1} %25, i1 0, 1 
-  ret {i64, i1} %26 
-if.then1:
-  %3 = add   i64 %"#rec##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 8 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %23 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %24 = insertvalue {i64, i1} %23, i1 0, 1 
   ret {i64, i1} %24 
-if.then2:
-  %8 = trunc i64 16 to i32  
-  %9 = tail call ccc  i8*  @wybe_malloc(i32  %8)  
-  %10 = ptrtoint i8* %9 to i64 
-  %11 = add   i64 %10, 7 
-  %12 = sub   i64 %"#rec##0", 7 
-  %13 = inttoptr i64 %10 to i8* 
-  %14 = inttoptr i64 %12 to i8* 
-  %15 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %13, i8*  %14, i32  %15, i1  0)  
-  %16 = add   i64 %11, 1 
-  %17 = inttoptr i64 %16 to i64* 
-  %18 = getelementptr  i64, i64* %17, i64 0 
-  store  i64 %"#field##0", i64* %18 
-  %19 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %20 = insertvalue {i64, i1} %19, i1 1, 1 
-  ret {i64, i1} %20 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#rec##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 8 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %21 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %22 = insertvalue {i64, i1} %21, i1 0, 1 
   ret {i64, i1} %22 
+if.then2:
+  %7 = trunc i64 16 to i32  
+  %8 = tail call ccc  i8*  @wybe_malloc(i32  %7)  
+  %9 = ptrtoint i8* %8 to i64 
+  %10 = add   i64 %9, 7 
+  %11 = sub   i64 %"#rec##0", 7 
+  %12 = inttoptr i64 %9 to i8* 
+  %13 = inttoptr i64 %11 to i8* 
+  %14 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %12, i8*  %13, i32  %14, i1  0)  
+  %15 = add   i64 %10, 1 
+  %16 = inttoptr i64 %15 to i64* 
+  store  i64 %"#field##0", i64* %16 
+  %17 = insertvalue {i64, i1} undef, i64 %10, 0 
+  %18 = insertvalue {i64, i1} %17, i1 1, 1 
+  ret {i64, i1} %18 
+if.else2:
+  %19 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %20 = insertvalue {i64, i1} %19, i1 0, 1 
+  ret {i64, i1} %20 
 }
 
 
@@ -4704,32 +4583,30 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
-if.then1:
-  %3 = add   i64 %"#rec##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 9 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %16 = insertvalue {i64, i1} undef, i64 undef, 0 
   %17 = insertvalue {i64, i1} %16, i1 0, 1 
   ret {i64, i1} %17 
-if.then2:
-  %8 = add   i64 %"#rec##0", 1 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %13 = insertvalue {i64, i1} %12, i1 1, 1 
-  ret {i64, i1} %13 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#rec##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 9 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %14 = insertvalue {i64, i1} undef, i64 undef, 0 
   %15 = insertvalue {i64, i1} %14, i1 0, 1 
   ret {i64, i1} %15 
+if.then2:
+  %7 = add   i64 %"#rec##0", 1 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
+if.else2:
+  %12 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -4742,41 +4619,39 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %25 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %26 = insertvalue {i64, i1} %25, i1 0, 1 
-  ret {i64, i1} %26 
-if.then1:
-  %3 = add   i64 %"#rec##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 9 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %23 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %24 = insertvalue {i64, i1} %23, i1 0, 1 
   ret {i64, i1} %24 
-if.then2:
-  %8 = trunc i64 16 to i32  
-  %9 = tail call ccc  i8*  @wybe_malloc(i32  %8)  
-  %10 = ptrtoint i8* %9 to i64 
-  %11 = add   i64 %10, 7 
-  %12 = sub   i64 %"#rec##0", 7 
-  %13 = inttoptr i64 %10 to i8* 
-  %14 = inttoptr i64 %12 to i8* 
-  %15 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %13, i8*  %14, i32  %15, i1  0)  
-  %16 = add   i64 %11, 1 
-  %17 = inttoptr i64 %16 to i64* 
-  %18 = getelementptr  i64, i64* %17, i64 0 
-  store  i64 %"#field##0", i64* %18 
-  %19 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %20 = insertvalue {i64, i1} %19, i1 1, 1 
-  ret {i64, i1} %20 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#rec##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 9 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %21 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %22 = insertvalue {i64, i1} %21, i1 0, 1 
   ret {i64, i1} %22 
+if.then2:
+  %7 = trunc i64 16 to i32  
+  %8 = tail call ccc  i8*  @wybe_malloc(i32  %7)  
+  %9 = ptrtoint i8* %8 to i64 
+  %10 = add   i64 %9, 7 
+  %11 = sub   i64 %"#rec##0", 7 
+  %12 = inttoptr i64 %9 to i8* 
+  %13 = inttoptr i64 %11 to i8* 
+  %14 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %12, i8*  %13, i32  %14, i1  0)  
+  %15 = add   i64 %10, 1 
+  %16 = inttoptr i64 %15 to i64* 
+  store  i64 %"#field##0", i64* %16 
+  %17 = insertvalue {i64, i1} undef, i64 %10, 0 
+  %18 = insertvalue {i64, i1} %17, i1 1, 1 
+  ret {i64, i1} %18 
+if.else2:
+  %19 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %20 = insertvalue {i64, i1} %19, i1 0, 1 
+  ret {i64, i1} %20 
 }
 
 
@@ -4789,32 +4664,30 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
-if.then1:
-  %3 = add   i64 %"#rec##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 10 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %16 = insertvalue {i64, i1} undef, i64 undef, 0 
   %17 = insertvalue {i64, i1} %16, i1 0, 1 
   ret {i64, i1} %17 
-if.then2:
-  %8 = add   i64 %"#rec##0", 1 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %13 = insertvalue {i64, i1} %12, i1 1, 1 
-  ret {i64, i1} %13 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#rec##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 10 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %14 = insertvalue {i64, i1} undef, i64 undef, 0 
   %15 = insertvalue {i64, i1} %14, i1 0, 1 
   ret {i64, i1} %15 
+if.then2:
+  %7 = add   i64 %"#rec##0", 1 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
+if.else2:
+  %12 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -4827,41 +4700,39 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %25 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %26 = insertvalue {i64, i1} %25, i1 0, 1 
-  ret {i64, i1} %26 
-if.then1:
-  %3 = add   i64 %"#rec##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 10 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %23 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %24 = insertvalue {i64, i1} %23, i1 0, 1 
   ret {i64, i1} %24 
-if.then2:
-  %8 = trunc i64 16 to i32  
-  %9 = tail call ccc  i8*  @wybe_malloc(i32  %8)  
-  %10 = ptrtoint i8* %9 to i64 
-  %11 = add   i64 %10, 7 
-  %12 = sub   i64 %"#rec##0", 7 
-  %13 = inttoptr i64 %10 to i8* 
-  %14 = inttoptr i64 %12 to i8* 
-  %15 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %13, i8*  %14, i32  %15, i1  0)  
-  %16 = add   i64 %11, 1 
-  %17 = inttoptr i64 %16 to i64* 
-  %18 = getelementptr  i64, i64* %17, i64 0 
-  store  i64 %"#field##0", i64* %18 
-  %19 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %20 = insertvalue {i64, i1} %19, i1 1, 1 
-  ret {i64, i1} %20 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#rec##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 10 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %21 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %22 = insertvalue {i64, i1} %21, i1 0, 1 
   ret {i64, i1} %22 
+if.then2:
+  %7 = trunc i64 16 to i32  
+  %8 = tail call ccc  i8*  @wybe_malloc(i32  %7)  
+  %9 = ptrtoint i8* %8 to i64 
+  %10 = add   i64 %9, 7 
+  %11 = sub   i64 %"#rec##0", 7 
+  %12 = inttoptr i64 %9 to i8* 
+  %13 = inttoptr i64 %11 to i8* 
+  %14 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %12, i8*  %13, i32  %14, i1  0)  
+  %15 = add   i64 %10, 1 
+  %16 = inttoptr i64 %15 to i64* 
+  store  i64 %"#field##0", i64* %16 
+  %17 = insertvalue {i64, i1} undef, i64 %10, 0 
+  %18 = insertvalue {i64, i1} %17, i1 1, 1 
+  ret {i64, i1} %18 
+if.else2:
+  %19 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %20 = insertvalue {i64, i1} %19, i1 0, 1 
+  ret {i64, i1} %20 
 }
 
 
@@ -4874,32 +4745,30 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
-if.then1:
-  %3 = add   i64 %"#rec##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 11 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %16 = insertvalue {i64, i1} undef, i64 undef, 0 
   %17 = insertvalue {i64, i1} %16, i1 0, 1 
   ret {i64, i1} %17 
-if.then2:
-  %8 = add   i64 %"#rec##0", 1 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %13 = insertvalue {i64, i1} %12, i1 1, 1 
-  ret {i64, i1} %13 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#rec##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 11 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %14 = insertvalue {i64, i1} undef, i64 undef, 0 
   %15 = insertvalue {i64, i1} %14, i1 0, 1 
   ret {i64, i1} %15 
+if.then2:
+  %7 = add   i64 %"#rec##0", 1 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
+if.else2:
+  %12 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -4912,41 +4781,39 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %25 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %26 = insertvalue {i64, i1} %25, i1 0, 1 
-  ret {i64, i1} %26 
-if.then1:
-  %3 = add   i64 %"#rec##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 11 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %23 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %24 = insertvalue {i64, i1} %23, i1 0, 1 
   ret {i64, i1} %24 
-if.then2:
-  %8 = trunc i64 16 to i32  
-  %9 = tail call ccc  i8*  @wybe_malloc(i32  %8)  
-  %10 = ptrtoint i8* %9 to i64 
-  %11 = add   i64 %10, 7 
-  %12 = sub   i64 %"#rec##0", 7 
-  %13 = inttoptr i64 %10 to i8* 
-  %14 = inttoptr i64 %12 to i8* 
-  %15 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %13, i8*  %14, i32  %15, i1  0)  
-  %16 = add   i64 %11, 1 
-  %17 = inttoptr i64 %16 to i64* 
-  %18 = getelementptr  i64, i64* %17, i64 0 
-  store  i64 %"#field##0", i64* %18 
-  %19 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %20 = insertvalue {i64, i1} %19, i1 1, 1 
-  ret {i64, i1} %20 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#rec##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 11 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %21 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %22 = insertvalue {i64, i1} %21, i1 0, 1 
   ret {i64, i1} %22 
+if.then2:
+  %7 = trunc i64 16 to i32  
+  %8 = tail call ccc  i8*  @wybe_malloc(i32  %7)  
+  %9 = ptrtoint i8* %8 to i64 
+  %10 = add   i64 %9, 7 
+  %11 = sub   i64 %"#rec##0", 7 
+  %12 = inttoptr i64 %9 to i8* 
+  %13 = inttoptr i64 %11 to i8* 
+  %14 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %12, i8*  %13, i32  %14, i1  0)  
+  %15 = add   i64 %10, 1 
+  %16 = inttoptr i64 %15 to i64* 
+  store  i64 %"#field##0", i64* %16 
+  %17 = insertvalue {i64, i1} undef, i64 %10, 0 
+  %18 = insertvalue {i64, i1} %17, i1 1, 1 
+  ret {i64, i1} %18 
+if.else2:
+  %19 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %20 = insertvalue {i64, i1} %19, i1 0, 1 
+  ret {i64, i1} %20 
 }
 
 
@@ -4959,32 +4826,30 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
-if.then1:
-  %3 = add   i64 %"#rec##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 12 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %16 = insertvalue {i64, i1} undef, i64 undef, 0 
   %17 = insertvalue {i64, i1} %16, i1 0, 1 
   ret {i64, i1} %17 
-if.then2:
-  %8 = add   i64 %"#rec##0", 1 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %13 = insertvalue {i64, i1} %12, i1 1, 1 
-  ret {i64, i1} %13 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#rec##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 12 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %14 = insertvalue {i64, i1} undef, i64 undef, 0 
   %15 = insertvalue {i64, i1} %14, i1 0, 1 
   ret {i64, i1} %15 
+if.then2:
+  %7 = add   i64 %"#rec##0", 1 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
+if.else2:
+  %12 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -4997,41 +4862,39 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %25 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %26 = insertvalue {i64, i1} %25, i1 0, 1 
-  ret {i64, i1} %26 
-if.then1:
-  %3 = add   i64 %"#rec##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 12 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %23 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %24 = insertvalue {i64, i1} %23, i1 0, 1 
   ret {i64, i1} %24 
-if.then2:
-  %8 = trunc i64 16 to i32  
-  %9 = tail call ccc  i8*  @wybe_malloc(i32  %8)  
-  %10 = ptrtoint i8* %9 to i64 
-  %11 = add   i64 %10, 7 
-  %12 = sub   i64 %"#rec##0", 7 
-  %13 = inttoptr i64 %10 to i8* 
-  %14 = inttoptr i64 %12 to i8* 
-  %15 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %13, i8*  %14, i32  %15, i1  0)  
-  %16 = add   i64 %11, 1 
-  %17 = inttoptr i64 %16 to i64* 
-  %18 = getelementptr  i64, i64* %17, i64 0 
-  store  i64 %"#field##0", i64* %18 
-  %19 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %20 = insertvalue {i64, i1} %19, i1 1, 1 
-  ret {i64, i1} %20 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#rec##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 12 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %21 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %22 = insertvalue {i64, i1} %21, i1 0, 1 
   ret {i64, i1} %22 
+if.then2:
+  %7 = trunc i64 16 to i32  
+  %8 = tail call ccc  i8*  @wybe_malloc(i32  %7)  
+  %9 = ptrtoint i8* %8 to i64 
+  %10 = add   i64 %9, 7 
+  %11 = sub   i64 %"#rec##0", 7 
+  %12 = inttoptr i64 %9 to i8* 
+  %13 = inttoptr i64 %11 to i8* 
+  %14 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %12, i8*  %13, i32  %14, i1  0)  
+  %15 = add   i64 %10, 1 
+  %16 = inttoptr i64 %15 to i64* 
+  store  i64 %"#field##0", i64* %16 
+  %17 = insertvalue {i64, i1} undef, i64 %10, 0 
+  %18 = insertvalue {i64, i1} %17, i1 1, 1 
+  ret {i64, i1} %18 
+if.else2:
+  %19 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %20 = insertvalue {i64, i1} %19, i1 0, 1 
+  ret {i64, i1} %20 
 }
 
 
@@ -5044,32 +4907,30 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
-if.then1:
-  %3 = add   i64 %"#rec##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 13 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %16 = insertvalue {i64, i1} undef, i64 undef, 0 
   %17 = insertvalue {i64, i1} %16, i1 0, 1 
   ret {i64, i1} %17 
-if.then2:
-  %8 = add   i64 %"#rec##0", 1 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %13 = insertvalue {i64, i1} %12, i1 1, 1 
-  ret {i64, i1} %13 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#rec##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 13 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %14 = insertvalue {i64, i1} undef, i64 undef, 0 
   %15 = insertvalue {i64, i1} %14, i1 0, 1 
   ret {i64, i1} %15 
+if.then2:
+  %7 = add   i64 %"#rec##0", 1 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
+if.else2:
+  %12 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -5082,41 +4943,39 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %25 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %26 = insertvalue {i64, i1} %25, i1 0, 1 
-  ret {i64, i1} %26 
-if.then1:
-  %3 = add   i64 %"#rec##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 13 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %23 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %24 = insertvalue {i64, i1} %23, i1 0, 1 
   ret {i64, i1} %24 
-if.then2:
-  %8 = trunc i64 16 to i32  
-  %9 = tail call ccc  i8*  @wybe_malloc(i32  %8)  
-  %10 = ptrtoint i8* %9 to i64 
-  %11 = add   i64 %10, 7 
-  %12 = sub   i64 %"#rec##0", 7 
-  %13 = inttoptr i64 %10 to i8* 
-  %14 = inttoptr i64 %12 to i8* 
-  %15 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %13, i8*  %14, i32  %15, i1  0)  
-  %16 = add   i64 %11, 1 
-  %17 = inttoptr i64 %16 to i64* 
-  %18 = getelementptr  i64, i64* %17, i64 0 
-  store  i64 %"#field##0", i64* %18 
-  %19 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %20 = insertvalue {i64, i1} %19, i1 1, 1 
-  ret {i64, i1} %20 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#rec##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 13 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %21 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %22 = insertvalue {i64, i1} %21, i1 0, 1 
   ret {i64, i1} %22 
+if.then2:
+  %7 = trunc i64 16 to i32  
+  %8 = tail call ccc  i8*  @wybe_malloc(i32  %7)  
+  %9 = ptrtoint i8* %8 to i64 
+  %10 = add   i64 %9, 7 
+  %11 = sub   i64 %"#rec##0", 7 
+  %12 = inttoptr i64 %9 to i8* 
+  %13 = inttoptr i64 %11 to i8* 
+  %14 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %12, i8*  %13, i32  %14, i1  0)  
+  %15 = add   i64 %10, 1 
+  %16 = inttoptr i64 %15 to i64* 
+  store  i64 %"#field##0", i64* %16 
+  %17 = insertvalue {i64, i1} undef, i64 %10, 0 
+  %18 = insertvalue {i64, i1} %17, i1 1, 1 
+  ret {i64, i1} %18 
+if.else2:
+  %19 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %20 = insertvalue {i64, i1} %19, i1 0, 1 
+  ret {i64, i1} %20 
 }
 
 
@@ -5129,32 +4988,30 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
-if.then1:
-  %3 = add   i64 %"#rec##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 14 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %16 = insertvalue {i64, i1} undef, i64 undef, 0 
   %17 = insertvalue {i64, i1} %16, i1 0, 1 
   ret {i64, i1} %17 
-if.then2:
-  %8 = add   i64 %"#rec##0", 1 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %13 = insertvalue {i64, i1} %12, i1 1, 1 
-  ret {i64, i1} %13 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#rec##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 14 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %14 = insertvalue {i64, i1} undef, i64 undef, 0 
   %15 = insertvalue {i64, i1} %14, i1 0, 1 
   ret {i64, i1} %15 
+if.then2:
+  %7 = add   i64 %"#rec##0", 1 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
+if.else2:
+  %12 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -5167,41 +5024,39 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %25 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %26 = insertvalue {i64, i1} %25, i1 0, 1 
-  ret {i64, i1} %26 
-if.then1:
-  %3 = add   i64 %"#rec##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 14 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %23 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %24 = insertvalue {i64, i1} %23, i1 0, 1 
   ret {i64, i1} %24 
-if.then2:
-  %8 = trunc i64 16 to i32  
-  %9 = tail call ccc  i8*  @wybe_malloc(i32  %8)  
-  %10 = ptrtoint i8* %9 to i64 
-  %11 = add   i64 %10, 7 
-  %12 = sub   i64 %"#rec##0", 7 
-  %13 = inttoptr i64 %10 to i8* 
-  %14 = inttoptr i64 %12 to i8* 
-  %15 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %13, i8*  %14, i32  %15, i1  0)  
-  %16 = add   i64 %11, 1 
-  %17 = inttoptr i64 %16 to i64* 
-  %18 = getelementptr  i64, i64* %17, i64 0 
-  store  i64 %"#field##0", i64* %18 
-  %19 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %20 = insertvalue {i64, i1} %19, i1 1, 1 
-  ret {i64, i1} %20 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#rec##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 14 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %21 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %22 = insertvalue {i64, i1} %21, i1 0, 1 
   ret {i64, i1} %22 
+if.then2:
+  %7 = trunc i64 16 to i32  
+  %8 = tail call ccc  i8*  @wybe_malloc(i32  %7)  
+  %9 = ptrtoint i8* %8 to i64 
+  %10 = add   i64 %9, 7 
+  %11 = sub   i64 %"#rec##0", 7 
+  %12 = inttoptr i64 %9 to i8* 
+  %13 = inttoptr i64 %11 to i8* 
+  %14 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %12, i8*  %13, i32  %14, i1  0)  
+  %15 = add   i64 %10, 1 
+  %16 = inttoptr i64 %15 to i64* 
+  store  i64 %"#field##0", i64* %16 
+  %17 = insertvalue {i64, i1} undef, i64 %10, 0 
+  %18 = insertvalue {i64, i1} %17, i1 1, 1 
+  ret {i64, i1} %18 
+if.else2:
+  %19 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %20 = insertvalue {i64, i1} %19, i1 0, 1 
+  ret {i64, i1} %20 
 }
 
 
@@ -5214,32 +5069,30 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
-if.then1:
-  %3 = add   i64 %"#rec##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 15 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %16 = insertvalue {i64, i1} undef, i64 undef, 0 
   %17 = insertvalue {i64, i1} %16, i1 0, 1 
   ret {i64, i1} %17 
-if.then2:
-  %8 = add   i64 %"#rec##0", 1 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %13 = insertvalue {i64, i1} %12, i1 1, 1 
-  ret {i64, i1} %13 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#rec##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 15 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %14 = insertvalue {i64, i1} undef, i64 undef, 0 
   %15 = insertvalue {i64, i1} %14, i1 0, 1 
   ret {i64, i1} %15 
+if.then2:
+  %7 = add   i64 %"#rec##0", 1 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
+if.else2:
+  %12 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -5252,41 +5105,39 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %25 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %26 = insertvalue {i64, i1} %25, i1 0, 1 
-  ret {i64, i1} %26 
-if.then1:
-  %3 = add   i64 %"#rec##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 15 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %23 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %24 = insertvalue {i64, i1} %23, i1 0, 1 
   ret {i64, i1} %24 
-if.then2:
-  %8 = trunc i64 16 to i32  
-  %9 = tail call ccc  i8*  @wybe_malloc(i32  %8)  
-  %10 = ptrtoint i8* %9 to i64 
-  %11 = add   i64 %10, 7 
-  %12 = sub   i64 %"#rec##0", 7 
-  %13 = inttoptr i64 %10 to i8* 
-  %14 = inttoptr i64 %12 to i8* 
-  %15 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %13, i8*  %14, i32  %15, i1  0)  
-  %16 = add   i64 %11, 1 
-  %17 = inttoptr i64 %16 to i64* 
-  %18 = getelementptr  i64, i64* %17, i64 0 
-  store  i64 %"#field##0", i64* %18 
-  %19 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %20 = insertvalue {i64, i1} %19, i1 1, 1 
-  ret {i64, i1} %20 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#rec##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 15 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %21 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %22 = insertvalue {i64, i1} %21, i1 0, 1 
   ret {i64, i1} %22 
+if.then2:
+  %7 = trunc i64 16 to i32  
+  %8 = tail call ccc  i8*  @wybe_malloc(i32  %7)  
+  %9 = ptrtoint i8* %8 to i64 
+  %10 = add   i64 %9, 7 
+  %11 = sub   i64 %"#rec##0", 7 
+  %12 = inttoptr i64 %9 to i8* 
+  %13 = inttoptr i64 %11 to i8* 
+  %14 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %12, i8*  %13, i32  %14, i1  0)  
+  %15 = add   i64 %10, 1 
+  %16 = inttoptr i64 %15 to i64* 
+  store  i64 %"#field##0", i64* %16 
+  %17 = insertvalue {i64, i1} undef, i64 %10, 0 
+  %18 = insertvalue {i64, i1} %17, i1 1, 1 
+  ret {i64, i1} %18 
+if.else2:
+  %19 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %20 = insertvalue {i64, i1} %19, i1 0, 1 
+  ret {i64, i1} %20 
 }
 
 
@@ -5299,32 +5150,30 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
-if.then1:
-  %3 = add   i64 %"#rec##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 16 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %16 = insertvalue {i64, i1} undef, i64 undef, 0 
   %17 = insertvalue {i64, i1} %16, i1 0, 1 
   ret {i64, i1} %17 
-if.then2:
-  %8 = add   i64 %"#rec##0", 1 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %13 = insertvalue {i64, i1} %12, i1 1, 1 
-  ret {i64, i1} %13 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#rec##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 16 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %14 = insertvalue {i64, i1} undef, i64 undef, 0 
   %15 = insertvalue {i64, i1} %14, i1 0, 1 
   ret {i64, i1} %15 
+if.then2:
+  %7 = add   i64 %"#rec##0", 1 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = insertvalue {i64, i1} undef, i64 %9, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
+if.else2:
+  %12 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -5337,41 +5186,39 @@ if.then:
   %2 = icmp eq i64 %1, 7 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %25 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %26 = insertvalue {i64, i1} %25, i1 0, 1 
-  ret {i64, i1} %26 
-if.then1:
-  %3 = add   i64 %"#rec##0", -7 
-  %4 = inttoptr i64 %3 to i16* 
-  %5 = getelementptr  i16, i16* %4, i64 0 
-  %6 = load  i16, i16* %5 
-  %7 = icmp eq i16 %6, 16 
-  br i1 %7, label %if.then2, label %if.else2 
-if.else1:
   %23 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %24 = insertvalue {i64, i1} %23, i1 0, 1 
   ret {i64, i1} %24 
-if.then2:
-  %8 = trunc i64 16 to i32  
-  %9 = tail call ccc  i8*  @wybe_malloc(i32  %8)  
-  %10 = ptrtoint i8* %9 to i64 
-  %11 = add   i64 %10, 7 
-  %12 = sub   i64 %"#rec##0", 7 
-  %13 = inttoptr i64 %10 to i8* 
-  %14 = inttoptr i64 %12 to i8* 
-  %15 = trunc i64 16 to i32  
-  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %13, i8*  %14, i32  %15, i1  0)  
-  %16 = add   i64 %11, 1 
-  %17 = inttoptr i64 %16 to i64* 
-  %18 = getelementptr  i64, i64* %17, i64 0 
-  store  i64 %"#field##0", i64* %18 
-  %19 = insertvalue {i64, i1} undef, i64 %11, 0 
-  %20 = insertvalue {i64, i1} %19, i1 1, 1 
-  ret {i64, i1} %20 
-if.else2:
+if.then1:
+  %3 = add   i64 %"#rec##0", -7 
+  %4 = inttoptr i64 %3 to i16* 
+  %5 = load  i16, i16* %4 
+  %6 = icmp eq i16 %5, 16 
+  br i1 %6, label %if.then2, label %if.else2 
+if.else1:
   %21 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
   %22 = insertvalue {i64, i1} %21, i1 0, 1 
   ret {i64, i1} %22 
+if.then2:
+  %7 = trunc i64 16 to i32  
+  %8 = tail call ccc  i8*  @wybe_malloc(i32  %7)  
+  %9 = ptrtoint i8* %8 to i64 
+  %10 = add   i64 %9, 7 
+  %11 = sub   i64 %"#rec##0", 7 
+  %12 = inttoptr i64 %9 to i8* 
+  %13 = inttoptr i64 %11 to i8* 
+  %14 = trunc i64 16 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %12, i8*  %13, i32  %14, i1  0)  
+  %15 = add   i64 %10, 1 
+  %16 = inttoptr i64 %15 to i64* 
+  store  i64 %"#field##0", i64* %16 
+  %17 = insertvalue {i64, i1} undef, i64 %10, 0 
+  %18 = insertvalue {i64, i1} %17, i1 1, 1 
+  ret {i64, i1} %18 
+if.else2:
+  %19 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %20 = insertvalue {i64, i1} %19, i1 0, 1 
+  ret {i64, i1} %20 
 }
 
 
@@ -5647,19 +5494,17 @@ entry:
   br i1 %0, label %if.then, label %if.else 
 if.then:
   %1 = inttoptr i64 %"#left##0" to i64* 
-  %2 = getelementptr  i64, i64* %1, i64 0 
-  %3 = load  i64, i64* %2 
-  %4 = icmp ne i64 %"#right##0", 0 
-  br i1 %4, label %if.then1, label %if.else1 
+  %2 = load  i64, i64* %1 
+  %3 = icmp ne i64 %"#right##0", 0 
+  br i1 %3, label %if.then1, label %if.else1 
 if.else:
-  %9 = icmp eq i64 %"#left##0", %"#right##0" 
-  ret i1 %9 
+  %7 = icmp eq i64 %"#left##0", %"#right##0" 
+  ret i1 %7 
 if.then1:
-  %5 = inttoptr i64 %"#right##0" to i64* 
-  %6 = getelementptr  i64, i64* %5, i64 0 
-  %7 = load  i64, i64* %6 
-  %8 = icmp eq i64 %3, %7 
-  ret i1 %8 
+  %4 = inttoptr i64 %"#right##0" to i64* 
+  %5 = load  i64, i64* %4 
+  %6 = icmp eq i64 %2, %5 
+  ret i1 %6 
 if.else1:
   ret i1 0 
 }
@@ -5671,8 +5516,7 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 %"value##0", i64* %4 
+  store  i64 %"value##0", i64* %3 
   ret i64 %2 
 }
 
@@ -5683,15 +5527,14 @@ entry:
   br i1 %0, label %if.then, label %if.else 
 if.then:
   %1 = inttoptr i64 %"#result##0" to i64* 
-  %2 = getelementptr  i64, i64* %1, i64 0 
-  %3 = load  i64, i64* %2 
-  %4 = insertvalue {i64, i1} undef, i64 %3, 0 
-  %5 = insertvalue {i64, i1} %4, i1 1, 1 
-  ret {i64, i1} %5 
+  %2 = load  i64, i64* %1 
+  %3 = insertvalue {i64, i1} undef, i64 %2, 0 
+  %4 = insertvalue {i64, i1} %3, i1 1, 1 
+  ret {i64, i1} %4 
 if.else:
-  %6 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %7 = insertvalue {i64, i1} %6, i1 0, 1 
-  ret {i64, i1} %7 
+  %5 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %6 = insertvalue {i64, i1} %5, i1 0, 1 
+  ret {i64, i1} %6 
 }
 
 
@@ -5707,15 +5550,14 @@ entry:
   br i1 %0, label %if.then, label %if.else 
 if.then:
   %1 = inttoptr i64 %"#rec##0" to i64* 
-  %2 = getelementptr  i64, i64* %1, i64 0 
-  %3 = load  i64, i64* %2 
-  %4 = insertvalue {i64, i1} undef, i64 %3, 0 
-  %5 = insertvalue {i64, i1} %4, i1 1, 1 
-  ret {i64, i1} %5 
+  %2 = load  i64, i64* %1 
+  %3 = insertvalue {i64, i1} undef, i64 %2, 0 
+  %4 = insertvalue {i64, i1} %3, i1 1, 1 
+  ret {i64, i1} %4 
 if.else:
-  %6 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %7 = insertvalue {i64, i1} %6, i1 0, 1 
-  ret {i64, i1} %7 
+  %5 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %6 = insertvalue {i64, i1} %5, i1 0, 1 
+  ret {i64, i1} %6 
 }
 
 
@@ -5732,15 +5574,14 @@ if.then:
   %6 = trunc i64 8 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %4, i8*  %5, i32  %6, i1  0)  
   %7 = inttoptr i64 %3 to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
-  store  i64 %"#field##0", i64* %8 
-  %9 = insertvalue {i64, i1} undef, i64 %3, 0 
-  %10 = insertvalue {i64, i1} %9, i1 1, 1 
-  ret {i64, i1} %10 
+  store  i64 %"#field##0", i64* %7 
+  %8 = insertvalue {i64, i1} undef, i64 %3, 0 
+  %9 = insertvalue {i64, i1} %8, i1 1, 1 
+  ret {i64, i1} %9 
 if.else:
-  %11 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %12 = insertvalue {i64, i1} %11, i1 0, 1 
-  ret {i64, i1} %12 
+  %10 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
 }
 
 
@@ -5961,39 +5802,35 @@ entry:
   br i1 %1, label %if.then, label %if.else 
 if.then:
   %2 = inttoptr i64 %"#left##0" to i64* 
-  %3 = getelementptr  i64, i64* %2, i64 0 
-  %4 = load  i64, i64* %3 
-  %5 = and i64 %"#right##0", 1 
-  %6 = icmp eq i64 %5, 0 
-  br i1 %6, label %if.then1, label %if.else1 
+  %3 = load  i64, i64* %2 
+  %4 = and i64 %"#right##0", 1 
+  %5 = icmp eq i64 %4, 0 
+  br i1 %5, label %if.then1, label %if.else1 
 if.else:
-  %11 = icmp eq i64 %0, 1 
-  br i1 %11, label %if.then2, label %if.else2 
+  %9 = icmp eq i64 %0, 1 
+  br i1 %9, label %if.then2, label %if.else2 
 if.then1:
-  %7 = inttoptr i64 %"#right##0" to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
-  %9 = load  i64, i64* %8 
-  %10 = icmp eq i64 %4, %9 
-  ret i1 %10 
+  %6 = inttoptr i64 %"#right##0" to i64* 
+  %7 = load  i64, i64* %6 
+  %8 = icmp eq i64 %3, %7 
+  ret i1 %8 
 if.else1:
   ret i1 0 
 if.then2:
-  %12 = add   i64 %"#left##0", -1 
-  %13 = inttoptr i64 %12 to double* 
-  %14 = getelementptr  double, double* %13, i64 0 
-  %15 = load  double, double* %14 
-  %16 = and i64 %"#right##0", 1 
-  %17 = icmp eq i64 %16, 1 
-  br i1 %17, label %if.then3, label %if.else3 
+  %10 = add   i64 %"#left##0", -1 
+  %11 = inttoptr i64 %10 to double* 
+  %12 = load  double, double* %11 
+  %13 = and i64 %"#right##0", 1 
+  %14 = icmp eq i64 %13, 1 
+  br i1 %14, label %if.then3, label %if.else3 
 if.else2:
   ret i1 0 
 if.then3:
-  %18 = add   i64 %"#right##0", -1 
-  %19 = inttoptr i64 %18 to double* 
-  %20 = getelementptr  double, double* %19, i64 0 
-  %21 = load  double, double* %20 
-  %22 = fcmp oeq double %15, %21 
-  ret i1 %22 
+  %15 = add   i64 %"#right##0", -1 
+  %16 = inttoptr i64 %15 to double* 
+  %17 = load  double, double* %16 
+  %18 = fcmp oeq double %12, %17 
+  ret i1 %18 
 if.else3:
   ret i1 0 
 }
@@ -6005,10 +5842,9 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to double* 
-  %4 = getelementptr  double, double* %3, i64 0 
-  store  double %"float_value##0", double* %4 
-  %5 = or i64 %2, 1 
-  ret i64 %5 
+  store  double %"float_value##0", double* %3 
+  %4 = or i64 %2, 1 
+  ret i64 %4 
 }
 
 
@@ -6020,15 +5856,14 @@ entry:
 if.then:
   %2 = add   i64 %"#result##0", -1 
   %3 = inttoptr i64 %2 to double* 
-  %4 = getelementptr  double, double* %3, i64 0 
-  %5 = load  double, double* %4 
-  %6 = insertvalue {double, i1} undef, double %5, 0 
-  %7 = insertvalue {double, i1} %6, i1 1, 1 
-  ret {double, i1} %7 
+  %4 = load  double, double* %3 
+  %5 = insertvalue {double, i1} undef, double %4, 0 
+  %6 = insertvalue {double, i1} %5, i1 1, 1 
+  ret {double, i1} %6 
 if.else:
-  %8 = insertvalue {double, i1} undef, double undef, 0 
-  %9 = insertvalue {double, i1} %8, i1 0, 1 
-  ret {double, i1} %9 
+  %7 = insertvalue {double, i1} undef, double undef, 0 
+  %8 = insertvalue {double, i1} %7, i1 0, 1 
+  ret {double, i1} %8 
 }
 
 
@@ -6040,15 +5875,14 @@ entry:
 if.then:
   %2 = add   i64 %"#rec##0", -1 
   %3 = inttoptr i64 %2 to double* 
-  %4 = getelementptr  double, double* %3, i64 0 
-  %5 = load  double, double* %4 
-  %6 = insertvalue {double, i1} undef, double %5, 0 
-  %7 = insertvalue {double, i1} %6, i1 1, 1 
-  ret {double, i1} %7 
+  %4 = load  double, double* %3 
+  %5 = insertvalue {double, i1} undef, double %4, 0 
+  %6 = insertvalue {double, i1} %5, i1 1, 1 
+  ret {double, i1} %6 
 if.else:
-  %8 = insertvalue {double, i1} undef, double undef, 0 
-  %9 = insertvalue {double, i1} %8, i1 0, 1 
-  ret {double, i1} %9 
+  %7 = insertvalue {double, i1} undef, double undef, 0 
+  %8 = insertvalue {double, i1} %7, i1 0, 1 
+  ret {double, i1} %8 
 }
 
 
@@ -6069,15 +5903,14 @@ if.then:
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %7, i8*  %8, i32  %9, i1  0)  
   %10 = add   i64 %5, -1 
   %11 = inttoptr i64 %10 to double* 
-  %12 = getelementptr  double, double* %11, i64 0 
-  store  double %"#field##0", double* %12 
-  %13 = insertvalue {i64, i1} undef, i64 %5, 0 
-  %14 = insertvalue {i64, i1} %13, i1 1, 1 
-  ret {i64, i1} %14 
+  store  double %"#field##0", double* %11 
+  %12 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %13 = insertvalue {i64, i1} %12, i1 1, 1 
+  ret {i64, i1} %13 
 if.else:
-  %15 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %16 = insertvalue {i64, i1} %15, i1 0, 1 
-  ret {i64, i1} %16 
+  %14 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %15 = insertvalue {i64, i1} %14, i1 0, 1 
+  ret {i64, i1} %15 
 }
 
 
@@ -6087,8 +5920,7 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 %"int_value##0", i64* %4 
+  store  i64 %"int_value##0", i64* %3 
   ret i64 %2 
 }
 
@@ -6100,15 +5932,14 @@ entry:
   br i1 %1, label %if.then, label %if.else 
 if.then:
   %2 = inttoptr i64 %"#result##0" to i64* 
-  %3 = getelementptr  i64, i64* %2, i64 0 
-  %4 = load  i64, i64* %3 
-  %5 = insertvalue {i64, i1} undef, i64 %4, 0 
-  %6 = insertvalue {i64, i1} %5, i1 1, 1 
-  ret {i64, i1} %6 
+  %3 = load  i64, i64* %2 
+  %4 = insertvalue {i64, i1} undef, i64 %3, 0 
+  %5 = insertvalue {i64, i1} %4, i1 1, 1 
+  ret {i64, i1} %5 
 if.else:
-  %7 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %8 = insertvalue {i64, i1} %7, i1 0, 1 
-  ret {i64, i1} %8 
+  %6 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %7 = insertvalue {i64, i1} %6, i1 0, 1 
+  ret {i64, i1} %7 
 }
 
 
@@ -6119,15 +5950,14 @@ entry:
   br i1 %1, label %if.then, label %if.else 
 if.then:
   %2 = inttoptr i64 %"#rec##0" to i64* 
-  %3 = getelementptr  i64, i64* %2, i64 0 
-  %4 = load  i64, i64* %3 
-  %5 = insertvalue {i64, i1} undef, i64 %4, 0 
-  %6 = insertvalue {i64, i1} %5, i1 1, 1 
-  ret {i64, i1} %6 
+  %3 = load  i64, i64* %2 
+  %4 = insertvalue {i64, i1} undef, i64 %3, 0 
+  %5 = insertvalue {i64, i1} %4, i1 1, 1 
+  ret {i64, i1} %5 
 if.else:
-  %7 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %8 = insertvalue {i64, i1} %7, i1 0, 1 
-  ret {i64, i1} %8 
+  %6 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %7 = insertvalue {i64, i1} %6, i1 0, 1 
+  ret {i64, i1} %7 
 }
 
 
@@ -6145,15 +5975,14 @@ if.then:
   %7 = trunc i64 8 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %5, i8*  %6, i32  %7, i1  0)  
   %8 = inttoptr i64 %4 to i64* 
-  %9 = getelementptr  i64, i64* %8, i64 0 
-  store  i64 %"#field##0", i64* %9 
-  %10 = insertvalue {i64, i1} undef, i64 %4, 0 
-  %11 = insertvalue {i64, i1} %10, i1 1, 1 
-  ret {i64, i1} %11 
+  store  i64 %"#field##0", i64* %8 
+  %9 = insertvalue {i64, i1} undef, i64 %4, 0 
+  %10 = insertvalue {i64, i1} %9, i1 1, 1 
+  ret {i64, i1} %10 
 if.else:
-  %12 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %13 = insertvalue {i64, i1} %12, i1 0, 1 
-  ret {i64, i1} %13 
+  %11 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %12 = insertvalue {i64, i1} %11, i1 0, 1 
+  ret {i64, i1} %12 
 }
 
 
@@ -6880,66 +6709,60 @@ if.then:
   %2 = icmp eq i64 %1, 0 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %35 = icmp eq i64 %"#left##0", %"#right##0" 
-  ret i1 %35 
+  %29 = icmp eq i64 %"#left##0", %"#right##0" 
+  ret i1 %29 
 if.then1:
   %3 = inttoptr i64 %"#left##0" to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  %5 = load  i64, i64* %4 
-  %6 = icmp ne i64 %"#right##0", 0 
-  br i1 %6, label %if.then2, label %if.else2 
+  %4 = load  i64, i64* %3 
+  %5 = icmp ne i64 %"#right##0", 0 
+  br i1 %5, label %if.then2, label %if.else2 
 if.else1:
-  %13 = icmp eq i64 %1, 1 
-  br i1 %13, label %if.then4, label %if.else4 
+  %11 = icmp eq i64 %1, 1 
+  br i1 %11, label %if.then4, label %if.else4 
 if.then2:
-  %7 = and i64 %"#right##0", 1 
-  %8 = icmp eq i64 %7, 0 
-  br i1 %8, label %if.then3, label %if.else3 
+  %6 = and i64 %"#right##0", 1 
+  %7 = icmp eq i64 %6, 0 
+  br i1 %7, label %if.then3, label %if.else3 
 if.else2:
   ret i1 0 
 if.then3:
-  %9 = inttoptr i64 %"#right##0" to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  %11 = load  i64, i64* %10 
-  %12 = icmp eq i64 %5, %11 
-  ret i1 %12 
+  %8 = inttoptr i64 %"#right##0" to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = icmp eq i64 %4, %9 
+  ret i1 %10 
 if.else3:
   ret i1 0 
 if.then4:
-  %14 = add   i64 %"#left##0", -1 
-  %15 = inttoptr i64 %14 to i64* 
-  %16 = getelementptr  i64, i64* %15, i64 0 
+  %12 = add   i64 %"#left##0", -1 
+  %13 = inttoptr i64 %12 to i64* 
+  %14 = load  i64, i64* %13 
+  %15 = add   i64 %"#left##0", 7 
+  %16 = inttoptr i64 %15 to i64* 
   %17 = load  i64, i64* %16 
-  %18 = add   i64 %"#left##0", 7 
-  %19 = inttoptr i64 %18 to i64* 
-  %20 = getelementptr  i64, i64* %19, i64 0 
-  %21 = load  i64, i64* %20 
-  %22 = icmp ne i64 %"#right##0", 0 
-  br i1 %22, label %if.then5, label %if.else5 
+  %18 = icmp ne i64 %"#right##0", 0 
+  br i1 %18, label %if.then5, label %if.else5 
 if.else4:
   ret i1 0 
 if.then5:
-  %23 = and i64 %"#right##0", 1 
-  %24 = icmp eq i64 %23, 1 
-  br i1 %24, label %if.then6, label %if.else6 
+  %19 = and i64 %"#right##0", 1 
+  %20 = icmp eq i64 %19, 1 
+  br i1 %20, label %if.then6, label %if.else6 
 if.else5:
   ret i1 0 
 if.then6:
-  %25 = add   i64 %"#right##0", -1 
-  %26 = inttoptr i64 %25 to i64* 
-  %27 = getelementptr  i64, i64* %26, i64 0 
-  %28 = load  i64, i64* %27 
-  %29 = add   i64 %"#right##0", 7 
-  %30 = inttoptr i64 %29 to i64* 
-  %31 = getelementptr  i64, i64* %30, i64 0 
-  %32 = load  i64, i64* %31 
-  %33 = icmp eq i64 %17, %28 
-  br i1 %33, label %if.then7, label %if.else7 
+  %21 = add   i64 %"#right##0", -1 
+  %22 = inttoptr i64 %21 to i64* 
+  %23 = load  i64, i64* %22 
+  %24 = add   i64 %"#right##0", 7 
+  %25 = inttoptr i64 %24 to i64* 
+  %26 = load  i64, i64* %25 
+  %27 = icmp eq i64 %14, %23 
+  br i1 %27, label %if.then7, label %if.else7 
 if.else6:
   ret i1 0 
 if.then7:
-  %34 = icmp eq i64 %21, %32 
-  ret i1 %34 
+  %28 = icmp eq i64 %17, %26 
+  ret i1 %28 
 if.else7:
   ret i1 0 
 }
@@ -6951,8 +6774,7 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 %"one_field##0", i64* %4 
+  store  i64 %"one_field##0", i64* %3 
   ret i64 %2 
 }
 
@@ -6966,20 +6788,19 @@ if.then:
   %2 = icmp eq i64 %1, 0 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %11 = insertvalue {i64, i1} %10, i1 0, 1 
-  ret {i64, i1} %11 
+  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %10 = insertvalue {i64, i1} %9, i1 0, 1 
+  ret {i64, i1} %10 
 if.then1:
   %3 = inttoptr i64 %"#result##0" to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  %5 = load  i64, i64* %4 
-  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
-  %7 = insertvalue {i64, i1} %6, i1 1, 1 
-  ret {i64, i1} %7 
+  %4 = load  i64, i64* %3 
+  %5 = insertvalue {i64, i1} undef, i64 %4, 0 
+  %6 = insertvalue {i64, i1} %5, i1 1, 1 
+  ret {i64, i1} %6 
 if.else1:
-  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %9 = insertvalue {i64, i1} %8, i1 0, 1 
-  ret {i64, i1} %9 
+  %7 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %8 = insertvalue {i64, i1} %7, i1 0, 1 
+  ret {i64, i1} %8 
 }
 
 
@@ -6992,20 +6813,19 @@ if.then:
   %2 = icmp eq i64 %1, 0 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %11 = insertvalue {i64, i1} %10, i1 0, 1 
-  ret {i64, i1} %11 
+  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %10 = insertvalue {i64, i1} %9, i1 0, 1 
+  ret {i64, i1} %10 
 if.then1:
   %3 = inttoptr i64 %"#rec##0" to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  %5 = load  i64, i64* %4 
-  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
-  %7 = insertvalue {i64, i1} %6, i1 1, 1 
-  ret {i64, i1} %7 
+  %4 = load  i64, i64* %3 
+  %5 = insertvalue {i64, i1} undef, i64 %4, 0 
+  %6 = insertvalue {i64, i1} %5, i1 1, 1 
+  ret {i64, i1} %6 
 if.else1:
-  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %9 = insertvalue {i64, i1} %8, i1 0, 1 
-  ret {i64, i1} %9 
+  %7 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %8 = insertvalue {i64, i1} %7, i1 0, 1 
+  ret {i64, i1} %8 
 }
 
 
@@ -7018,9 +6838,9 @@ if.then:
   %2 = icmp eq i64 %1, 0 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %15 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %16 = insertvalue {i64, i1} %15, i1 0, 1 
-  ret {i64, i1} %16 
+  %14 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %15 = insertvalue {i64, i1} %14, i1 0, 1 
+  ret {i64, i1} %15 
 if.then1:
   %3 = trunc i64 8 to i32  
   %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
@@ -7030,15 +6850,14 @@ if.then1:
   %8 = trunc i64 8 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %6, i8*  %7, i32  %8, i1  0)  
   %9 = inttoptr i64 %5 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  store  i64 %"#field##0", i64* %10 
-  %11 = insertvalue {i64, i1} undef, i64 %5, 0 
-  %12 = insertvalue {i64, i1} %11, i1 1, 1 
-  ret {i64, i1} %12 
+  store  i64 %"#field##0", i64* %9 
+  %10 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %11 = insertvalue {i64, i1} %10, i1 1, 1 
+  ret {i64, i1} %11 
 if.else1:
-  %13 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %14 = insertvalue {i64, i1} %13, i1 0, 1 
-  ret {i64, i1} %14 
+  %12 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %13 = insertvalue {i64, i1} %12, i1 0, 1 
+  ret {i64, i1} %13 
 }
 
 
@@ -7048,14 +6867,12 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 %"two_field1##0", i64* %4 
-  %5 = add   i64 %2, 8 
-  %6 = inttoptr i64 %5 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 %"two_field2##0", i64* %7 
-  %8 = or i64 %2, 1 
-  ret i64 %8 
+  store  i64 %"two_field1##0", i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 %"two_field2##0", i64* %5 
+  %6 = or i64 %2, 1 
+  ret i64 %6 
 }
 
 
@@ -7068,28 +6885,26 @@ if.then:
   %2 = icmp eq i64 %1, 1 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %17 = insertvalue {i64, i64, i1} undef, i64 undef, 0 
-  %18 = insertvalue {i64, i64, i1} %17, i64 undef, 1 
-  %19 = insertvalue {i64, i64, i1} %18, i1 0, 2 
-  ret {i64, i64, i1} %19 
+  %15 = insertvalue {i64, i64, i1} undef, i64 undef, 0 
+  %16 = insertvalue {i64, i64, i1} %15, i64 undef, 1 
+  %17 = insertvalue {i64, i64, i1} %16, i1 0, 2 
+  ret {i64, i64, i1} %17 
 if.then1:
   %3 = add   i64 %"#result##0", -1 
   %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = add   i64 %"#result##0", 7 
-  %8 = inttoptr i64 %7 to i64* 
-  %9 = getelementptr  i64, i64* %8, i64 0 
-  %10 = load  i64, i64* %9 
-  %11 = insertvalue {i64, i64, i1} undef, i64 %6, 0 
-  %12 = insertvalue {i64, i64, i1} %11, i64 %10, 1 
-  %13 = insertvalue {i64, i64, i1} %12, i1 1, 2 
-  ret {i64, i64, i1} %13 
+  %5 = load  i64, i64* %4 
+  %6 = add   i64 %"#result##0", 7 
+  %7 = inttoptr i64 %6 to i64* 
+  %8 = load  i64, i64* %7 
+  %9 = insertvalue {i64, i64, i1} undef, i64 %5, 0 
+  %10 = insertvalue {i64, i64, i1} %9, i64 %8, 1 
+  %11 = insertvalue {i64, i64, i1} %10, i1 1, 2 
+  ret {i64, i64, i1} %11 
 if.else1:
-  %14 = insertvalue {i64, i64, i1} undef, i64 undef, 0 
-  %15 = insertvalue {i64, i64, i1} %14, i64 undef, 1 
-  %16 = insertvalue {i64, i64, i1} %15, i1 0, 2 
-  ret {i64, i64, i1} %16 
+  %12 = insertvalue {i64, i64, i1} undef, i64 undef, 0 
+  %13 = insertvalue {i64, i64, i1} %12, i64 undef, 1 
+  %14 = insertvalue {i64, i64, i1} %13, i1 0, 2 
+  ret {i64, i64, i1} %14 
 }
 
 
@@ -7102,21 +6917,20 @@ if.then:
   %2 = icmp eq i64 %1, 1 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %11 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %12 = insertvalue {i64, i1} %11, i1 0, 1 
-  ret {i64, i1} %12 
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
 if.then1:
   %3 = add   i64 %"#rec##0", -1 
   %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %8 = insertvalue {i64, i1} %7, i1 1, 1 
-  ret {i64, i1} %8 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
 if.else1:
-  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %10 = insertvalue {i64, i1} %9, i1 0, 1 
-  ret {i64, i1} %10 
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
 }
 
 
@@ -7129,9 +6943,9 @@ if.then:
   %2 = icmp eq i64 %1, 1 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
+  %17 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %18 = insertvalue {i64, i1} %17, i1 0, 1 
+  ret {i64, i1} %18 
 if.then1:
   %3 = trunc i64 16 to i32  
   %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
@@ -7144,15 +6958,14 @@ if.then1:
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %8, i8*  %9, i32  %10, i1  0)  
   %11 = add   i64 %6, -1 
   %12 = inttoptr i64 %11 to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
-  store  i64 %"#field##0", i64* %13 
-  %14 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %15 = insertvalue {i64, i1} %14, i1 1, 1 
-  ret {i64, i1} %15 
+  store  i64 %"#field##0", i64* %12 
+  %13 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %14 = insertvalue {i64, i1} %13, i1 1, 1 
+  ret {i64, i1} %14 
 if.else1:
-  %16 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %17 = insertvalue {i64, i1} %16, i1 0, 1 
-  ret {i64, i1} %17 
+  %15 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %16 = insertvalue {i64, i1} %15, i1 0, 1 
+  ret {i64, i1} %16 
 }
 
 
@@ -7165,21 +6978,20 @@ if.then:
   %2 = icmp eq i64 %1, 1 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %11 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %12 = insertvalue {i64, i1} %11, i1 0, 1 
-  ret {i64, i1} %12 
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
 if.then1:
   %3 = add   i64 %"#rec##0", 7 
   %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %8 = insertvalue {i64, i1} %7, i1 1, 1 
-  ret {i64, i1} %8 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
 if.else1:
-  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %10 = insertvalue {i64, i1} %9, i1 0, 1 
-  ret {i64, i1} %10 
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
 }
 
 
@@ -7192,9 +7004,9 @@ if.then:
   %2 = icmp eq i64 %1, 1 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %18 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %19 = insertvalue {i64, i1} %18, i1 0, 1 
-  ret {i64, i1} %19 
+  %17 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %18 = insertvalue {i64, i1} %17, i1 0, 1 
+  ret {i64, i1} %18 
 if.then1:
   %3 = trunc i64 16 to i32  
   %4 = tail call ccc  i8*  @wybe_malloc(i32  %3)  
@@ -7207,15 +7019,14 @@ if.then1:
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %8, i8*  %9, i32  %10, i1  0)  
   %11 = add   i64 %6, 7 
   %12 = inttoptr i64 %11 to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
-  store  i64 %"#field##0", i64* %13 
-  %14 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %15 = insertvalue {i64, i1} %14, i1 1, 1 
-  ret {i64, i1} %15 
+  store  i64 %"#field##0", i64* %12 
+  %13 = insertvalue {i64, i1} undef, i64 %6, 0 
+  %14 = insertvalue {i64, i1} %13, i1 1, 1 
+  ret {i64, i1} %14 
 if.else1:
-  %16 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
-  %17 = insertvalue {i64, i1} %16, i1 0, 1 
-  ret {i64, i1} %17 
+  %15 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %16 = insertvalue {i64, i1} %15, i1 0, 1 
+  ret {i64, i1} %16 
 }
 
 

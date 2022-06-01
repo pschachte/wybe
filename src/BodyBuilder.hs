@@ -8,7 +8,7 @@
 
 module BodyBuilder (
   BodyBuilder, buildBody, freshVarName, instr, buildFork, completeFork,
-  beginBranch, endBranch, definiteVariableValue
+  beginBranch, endBranch, definiteVariableValue, argExpandedPrim
   ) where
 
 import AST
@@ -380,7 +380,7 @@ instr prim pos = do
       _ ->
         shouldnt "instr in Forked context"
 
-
+-- Actually do the work of instr
 instr' :: Prim -> OptPos -> BodyBuilder ()
 instr' prim@(PrimForeign "llvm" "move" []
            [val, argvar@ArgVar{argVarName=var, argVarFlow=flow}]) pos
@@ -441,7 +441,9 @@ instr' prim@(PrimForeign "lpvm" "store" _ [var, ArgGlobal info _]) pos = do
             ordinaryInstr prim pos
 instr' prim pos = ordinaryInstr prim pos
 
-
+-- Do the normal work of instr.  First check if we've already computed its
+-- outputs, and if so, just add a move instruction to reuse the results.
+-- Otherwise, generate the instruction and record it for reuse.
 ordinaryInstr :: Prim -> OptPos -> BodyBuilder ()
 ordinaryInstr prim pos = do
     let (prim',newOuts) = splitPrimOutputs prim
@@ -725,15 +727,12 @@ validateType InvalidType instr =
 validateType _ instr = return ()
 
 
+-- Add an instruction to the given BodyState.  If unforked, add it at the front
+-- of the list of instructions, otherwise add it to all branches in the fork.
 addInstrToState :: Placed Prim -> BodyState -> BodyState
 addInstrToState ins st@BodyState{buildState=Unforked} =
     st { currBuild = ins:currBuild st}
--- XXX merge these two equations
-addInstrToState ins st@BodyState{buildState=bld@Forked{complete=False,
-                                                       bodies=bods}} =
-    st { buildState = bld {bodies=List.map (addInstrToState ins) bods} }
-addInstrToState ins st@BodyState{buildState=bld@Forked{complete=True,
-                                                       bodies=bods}} =
+addInstrToState ins st@BodyState{buildState=bld@Forked{bodies=bods}} =
     st { buildState = bld {bodies=List.map (addInstrToState ins) bods} }
 
 
@@ -1240,8 +1239,8 @@ bkwdBuildStmt defs prim pos = do
             when (purity > Pure || any (`Set.member` usedLater) (argVarName <$> outs)
                                 || not (USet.isEmpty $ whenFinite (Set.\\ gStored) gOuts))
               $ do
-                -- XXX Careful:  probably shouldn't mark last use of variable passed
-                -- as input argument more than once in the call
+                -- XXX Careful:  probably shouldn't mark last use of variable
+                -- passed as input argument more than once in the call
                 let prim' = replacePrimArgs prim (markIfLastUse usedLater <$> args') gFlows
                 logBkwd $ "    updated prim = " ++ show prim'
                 let usedLater' = List.foldr Set.insert usedLater $ argVarName <$> ins
