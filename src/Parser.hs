@@ -208,7 +208,7 @@ useBody v pos mods =
     (ident "in" *> do
         if v == Private
         then topLevelUseStmt pos (modSpecToResourceSpec <$> mods)
-        else fail "inavlid use-block")
+        else fail "invalid use-block")
     <|> return (ImportMods v mods pos)
 
 -- | Parse a top-level use statement with specified
