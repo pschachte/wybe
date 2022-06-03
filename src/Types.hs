@@ -2650,6 +2650,7 @@ checkLPVMArgs "cast" _ [old,new] stmt pos = return ()
 checkLPVMArgs "cast" _ [] stmt pos = return ()
 checkLPVMArgs "cast" _ args stmt pos =
     typeError (ReasonForeignArity "cast" (length args) 2 pos)
+checkLPVMArgs "void" _ args stmt pos = return ()
 checkLPVMArgs name _ args stmt pos =
     typeError (ReasonBadForeign "lpvm" name pos)
 

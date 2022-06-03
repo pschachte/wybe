@@ -1,0 +1,8 @@
+def {noinline} complex_computation(?x) { # super complex
+    ?x = 0
+    for ?i in 0..100 {
+        !x += i
+    }
+}
+
+foreign lpvm {impure} void(complex_computation)

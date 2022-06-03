@@ -842,6 +842,12 @@ cgenLPVM "load" _ args = do
         _ ->
             shouldnt $ "lpvm load instruction with wrong arity " ++ show args
 
+cgenLPVM "void" _ args = 
+    case partitionArgs args of
+        (_, outs@(_:_)) -> do
+            shouldnt $ "lpvm void cannot produce outputs " ++ show outs
+        _ -> return ()
+
 cgenLPVM pname flags args = do
     shouldnt $ "Instruction " ++ pname ++ " arity " ++ show (length args)
                ++ " not implemented."
