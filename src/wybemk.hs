@@ -31,7 +31,7 @@ main = do
       (\e -> do
              let msg = show e
              when (msg /= "ExitFailure 1") $
-                putStrLn msg
+                putStrLn $ displayException e
              exitFailure)
 
 

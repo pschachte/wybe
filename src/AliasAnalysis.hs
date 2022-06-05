@@ -60,7 +60,6 @@ type AnalysisInfo =
     (AliasMapLocal, Set InterestingCallProperty, MultiSpeczDepInfo, DeadCells)
 
 
--- XXX aliasSccBottomUp :: SCC ProcSpec -> Compiler a
 aliasSccBottomUp :: SCC ProcSpec -> Compiler ()
 aliasSccBottomUp (AcyclicSCC single) = do
     _ <- aliasProcBottomUp single -- immediate fixpoint if no mutual dependency
@@ -110,7 +109,6 @@ isAliasInfoChanged :: (AliasMap, Set InterestingCallProperty)
                     -> (AliasMap, Set InterestingCallProperty) -> Bool
 isAliasInfoChanged = (/=)
 
--- XXX aliasProcBottomUp :: ProcSpec -> Compiler a
 aliasProcBottomUp :: ProcSpec -> Compiler Bool
 aliasProcBottomUp pspec = do
     logAlias $ replicate 50 '-'
@@ -137,7 +135,6 @@ aliasProcBottomUp pspec = do
 
 -- Check if any argument become stale in this (not inlined) proc call
 -- Return updated ProcDef and a flag (indicating if proc analysis info changed)
--- XXX aliasProcDef :: ProcDef -> Compiler (ProcDef, a)
 aliasProcDef :: ProcDef -> Compiler ProcDef
 aliasProcDef def
     | not (procInline def) = do
@@ -222,16 +219,14 @@ mergeAnalysisInfo :: [AnalysisInfo] -> AnalysisInfo
 mergeAnalysisInfo infos =
     let (aliasMapList, interestingCallPropertiesList,
             multiSpeczDepInfoList, deadCellsList) = List.unzip4 infos
-    in
-    let aliasMap = List.foldl combineTwoDS emptyDS aliasMapList in
-    let interestingCallProperties =
+        aliasMap = List.foldl combineTwoDS emptyDS aliasMapList
+        interestingCallProperties =
             List.foldl Set.union Set.empty interestingCallPropertiesList
-    in
-    -- XXX there could be something better than "Map.unions"
-    let multiSpeczDepInfo = Map.unions multiSpeczDepInfoList in
-    -- We don't need "deadCells" after fork for now.
-    let deadCells = Map.empty in
-    (aliasMap, interestingCallProperties, multiSpeczDepInfo, deadCells)
+        -- XXX there could be something better than "Map.unions"
+        multiSpeczDepInfo = Map.unions multiSpeczDepInfoList
+        -- We don't need "deadCells" after fork for now.
+        deadCells = Map.empty
+    in (aliasMap, interestingCallProperties, multiSpeczDepInfo, deadCells)
 
 
 -- |Log a message, if we are logging optimisation activity.

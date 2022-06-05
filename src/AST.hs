@@ -47,7 +47,7 @@ module AST (
   -- *AST types
   Module(..), isRootModule, ModuleInterface(..), ModuleImplementation(..), InterfaceHash, PubProcInfo(..),
   ImportSpec(..), importSpec, Pragma(..), addPragma,
-  descendentModules, sameOriginModules, -- XXX not needed? differentOriginModules,
+  descendentModules, sameOriginModules, 
   refersTo,
   enterModule, reenterModule, exitModule, reexitModule, inModule,
   emptyInterface, emptyImplementation,
@@ -467,14 +467,12 @@ runCompiler opts comp = evalStateT comp
 
 
 -- |Apply some transformation function to the compiler state.
--- XXX updateCompiler :: (CompilerState -> (CompilerState, a)) -> Compiler a
 updateCompiler :: (CompilerState -> CompilerState) -> Compiler ()
 updateCompiler updater = do
     state <- get
     put $ updater state
 
 -- |Apply a monadic transformation function to the compiler state.
--- XXX updateCompilerM :: (CompilerState -> Compiler (CompilerState, a)) -> Compiler a
 updateCompilerM :: (CompilerState -> Compiler CompilerState) -> Compiler ()
 updateCompilerM updater = do
     state <- get
@@ -511,7 +509,6 @@ getLoadedModule modspec = do
 -- |Apply the given function to the specified module, if it has been loaded;
 -- does nothing if not.  Takes care to handle it if the specified
 -- module is under compilation.
--- XXX updateLoadedModule :: (Module -> (Module, a)) -> ModSpec -> Compiler a
 updateLoadedModule :: (Module -> Module) -> ModSpec -> Compiler ()
 updateLoadedModule updater modspec = do
     underComp <- gets underCompilation
@@ -529,7 +526,6 @@ updateLoadedModule updater modspec = do
 -- |Apply the given function to the specified module, if it has been loaded;
 -- does nothing if not.  Takes care to handle it if the specified
 -- module is under compilation.
--- XXX updateLoadedModuleM :: (Module -> Compiler (Module, a)) -> ModSpec -> Compiler a
 updateLoadedModuleM :: (Module -> Compiler Module) -> ModSpec -> Compiler ()
 updateLoadedModuleM updater modspec = do
     underComp <- gets underCompilation
@@ -573,7 +569,6 @@ updateLoadedModuleImpln updater =
 
 -- |Return the ModuleImplementation of the specified module.  An error
 -- if the module is not loaded or does not have an implementation.
--- XXX updateLoadedModuleImplnM ::
 --     (ModuleImplementation -> Compiler (ModuleImplementation, a)) ->
 --     ModSpec -> Compiler a
 updateLoadedModuleImplnM ::
@@ -1317,7 +1312,6 @@ updateProcDef updater pspec@(ProcSpec modspec procName procID _) =
     modspec
 
 
--- XXX updateProcDefM :: (ProcDef -> Compiler (ProcDef, a)) -> ProcSpec -> Compiler a
 updateProcDefM :: (ProcDef -> Compiler ProcDef) -> ProcSpec -> Compiler ()
 updateProcDefM updater pspec@(ProcSpec modspec procName procID _) =
     updateLoadedModuleImplnM
@@ -1443,20 +1437,6 @@ sameOriginModules mspec = do
     subMods <- Map.elems . modSubmods <$> getLoadedModuleImpln mspec
     sameOriginSubMods <- filterM (((== file) <$>) . origin) subMods
     (sameOriginSubMods ++) . concat <$> mapM sameOriginModules sameOriginSubMods
-
-
--- XXX Looks like this isn't actually needed
--- -- | Collect the nearest descendent modules of the given modspec that come from
--- -- a different origin and hence should be written to different target files.
--- differentOriginModules :: ModSpec -> Compiler [ModSpec]
--- differentOriginModules mspec = do
---     let origin m = modOrigin . trustFromJust "sameOriginModules"
---                    <$> getLoadedModule m
---     file <- origin mspec
---     subMods <- Map.elems . modSubmods <$> getLoadedModuleImpln mspec
---     (same,diff) <- List.partition snd . zip subMods
---                    <$> mapM (((== file) <$>) . origin) subMods
---     ((fst <$> diff) ++) . concat <$> mapM differentOriginModules (fst <$> same)
 
 
 -- |The set of defining modules that the given (possibly
@@ -3162,7 +3142,7 @@ data Prim
      deriving (Eq,Ord,Generic)
 
 instance Show Prim where
-    show = showPrim 0
+    show = showPrim
 
 -- |An id for each call site, should be unique within a proc.
 type CallSiteID = Int
@@ -3865,35 +3845,31 @@ showFork ind (PrimFork var ty last bodies) =
 
 
 -- |Show a list of placed prims.
--- XXX the first argument is unused; can we get rid of it?
 showPlacedPrims :: Int -> [Placed Prim] -> String
 showPlacedPrims ind = List.concatMap (showPlacedPrim ind)
 
 
 -- |Show a single primitive statement with the specified indent.
--- XXX the first argument is unused; can we get rid of it?
 showPlacedPrim :: Int -> Placed Prim -> String
 showPlacedPrim ind stmt = showPlacedPrim' ind (content stmt) (place stmt)
 
 
 -- |Show a single primitive statement with the specified indent and
 --  optional source position.
--- XXX the first argument is unused; can we get rid of it?
 showPlacedPrim' :: Int -> Prim -> OptPos -> String
 showPlacedPrim' ind prim pos =
-  startLine ind ++ showPrim ind prim ++ showOptPos pos
+  startLine ind ++ showPrim prim ++ showOptPos pos
 
 
 -- |Show a single primitive statement.
--- XXX the first argument is unused; can we get rid of it?
-showPrim :: Int -> Prim -> String
-showPrim _ (PrimCall id pspec args globalFlows) =
+showPrim :: Prim -> String
+showPrim (PrimCall id pspec args globalFlows) =
     show pspec ++ showArguments args
         ++ (if globalFlows == emptyGlobalFlows then "" else show globalFlows)
         ++ " #" ++ show id
-showPrim _ (PrimHigher id var args) =
+showPrim (PrimHigher id var args) =
     show var ++ showArguments args ++ " #" ++ show id
-showPrim _ (PrimForeign lang name flags args) =
+showPrim (PrimForeign lang name flags args) =
     "foreign " ++ lang ++ " " ++ showFlags' flags
     ++ name ++ showArguments args
 

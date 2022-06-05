@@ -301,9 +301,9 @@ beginBranch = do
                     else List.foldr1 intersectMapIdentity matchingSubsts
               logBuild $ "          Adding substs " ++ show extraSubsts
               -- XXX shouldn't need to do this sanity check
-        --       lostSubsts <- (Map.\\ extraSubsts) <$> gets currSubst
-        --       unless (Map.null lostSubsts )
-        --         $ shouldnt $ "Fusion loses substs " ++ simpleShowMap lostSubsts
+              -- lostSubsts <- (Map.\\ extraSubsts) <$> gets currSubst
+              -- unless (Map.null lostSubsts )
+              --   $ shouldnt $ "Fusion loses substs " ++ simpleShowMap lostSubsts
               modify $ \st -> st { currSubst =
                                    Map.union extraSubsts (currSubst st) }
             Unforked -> shouldnt "forkConst predicted parent branch"
@@ -408,7 +408,6 @@ instr' prim@(PrimForeign "lpvm" "alloc" [] [_,argvar]) pos = do
     logBuild "  Leaving alloc alone"
     rawInstr prim pos
     recordVarSet argvar
--- XXX can we get rid of this pseudo-instruction?
 instr' prim@(PrimForeign "lpvm" "cast" []
              [from, to@ArgVar{argVarName=var, argVarFlow=flow}]) pos = do
     logBuild $ "  Expanding cast(" ++ show from ++ ", " ++ show to ++ ")"
