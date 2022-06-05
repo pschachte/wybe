@@ -143,7 +143,7 @@ if.else:
 }
 
 
-define external fastcc  void @"int_list.println<0>"(i64  %"x##0")    {
+define external fastcc  void @"int_list.println<0>"(i64  %"x##0") alwaysinline   {
 entry:
   tail call fastcc  void  @"int_list.print<0>"(i64  %"x##0")  
   tail call ccc  void  @putchar(i8  10)  
@@ -355,7 +355,7 @@ if.else2:
 }
 
 
-define external fastcc  i64 @"int_list.int_list.cons<0>"(i64  %"head##0", i64  %"tail##0")    {
+define external fastcc  i64 @"int_list.int_list.cons<0>"(i64  %"head##0", i64  %"tail##0") alwaysinline   {
 entry:
   %0 = trunc i64 16 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -369,7 +369,7 @@ entry:
 }
 
 
-define external fastcc  {i64, i64, i1} @"int_list.int_list.cons<1>"(i64  %"#result##0")    {
+define external fastcc  {i64, i64, i1} @"int_list.int_list.cons<1>"(i64  %"#result##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#result##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -391,7 +391,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"int_list.int_list.head<0>"(i64  %"#rec##0")    {
+define external fastcc  {i64, i1} @"int_list.int_list.head<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -408,7 +408,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"int_list.int_list.head<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  {i64, i1} @"int_list.int_list.head<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -432,13 +432,13 @@ if.else:
 }
 
 
-define external fastcc  i64 @"int_list.int_list.nil<0>"()    {
+define external fastcc  i64 @"int_list.int_list.nil<0>"() alwaysinline   {
 entry:
   ret i64 0 
 }
 
 
-define external fastcc  {i64, i1} @"int_list.int_list.tail<0>"(i64  %"#rec##0")    {
+define external fastcc  {i64, i1} @"int_list.int_list.tail<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -456,7 +456,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"int_list.int_list.tail<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  {i64, i1} @"int_list.int_list.tail<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -481,7 +481,7 @@ if.else:
 }
 
 
-define external fastcc  i1 @"int_list.int_list.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"int_list.int_list.~=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = tail call fastcc  i1  @"int_list.int_list.=<0>"(i64  %"#left##0", i64  %"#right##0")  
   %1 = xor i1 %0, 1 

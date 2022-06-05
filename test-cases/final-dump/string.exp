@@ -412,7 +412,7 @@ if.else:
 }
 
 
-define external fastcc  void @"string.print_loop<0>"(i64  %"s##0")    {
+define external fastcc  void @"string.print_loop<0>"(i64  %"s##0") alwaysinline   {
 entry:
   tail call fastcc  void  @"string.gen#1<0>"(i64  %"s##0", i64  %"s##0")  
   ret void 

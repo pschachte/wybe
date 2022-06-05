@@ -157,7 +157,7 @@ if.else:
 }
 
 
-define external fastcc  i1 @"proc_yorn.is_yes<0>"(i8  %"ch##0")    {
+define external fastcc  i1 @"proc_yorn.is_yes<0>"(i8  %"ch##0") alwaysinline   {
 entry:
   %0 = icmp ne i8 %"ch##0", 121 
   %1 = icmp ne i8 %"ch##0", 89 
@@ -181,7 +181,7 @@ entry:
 }
 
 
-define external fastcc  i1 @"proc_yorn.yorn<0>"(i64  %"prompt##0")    {
+define external fastcc  i1 @"proc_yorn.yorn<0>"(i64  %"prompt##0") alwaysinline   {
 entry:
   %0 = musttail call fastcc  i1  @"proc_yorn.gen#1<0>"(i64  %"prompt##0")  
   ret i1 %0 

@@ -71,7 +71,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"uneeded_closure_args.call<0>"(i64  %"f##0", i64  %"a##0")    {
+define external fastcc  i64 @"uneeded_closure_args.call<0>"(i64  %"f##0", i64  %"a##0") noinline   {
 entry:
   %0 = inttoptr i64 %"f##0" to i64* 
   %1 = load  i64, i64* %0 
@@ -81,13 +81,13 @@ entry:
 }
 
 
-define external fastcc  i64 @"uneeded_closure_args.gen#1<0>"(i64  %"#env##0", i64  %"b##0")    {
+define external fastcc  i64 @"uneeded_closure_args.gen#1<0>"(i64  %"#env##0", i64  %"b##0") alwaysinline   {
 entry:
   ret i64 %"b##0" 
 }
 
 
-define external fastcc  i64 @"uneeded_closure_args.second<0>"(i64  %"b##0")    {
+define external fastcc  i64 @"uneeded_closure_args.second<0>"(i64  %"b##0") alwaysinline   {
 entry:
   ret i64 %"b##0" 
 }

@@ -524,7 +524,7 @@ if.else7:
 }
 
 
-define external fastcc  i64 @"anon_field.bar<0>"(i64  %"bar#1##0")    {
+define external fastcc  i64 @"anon_field.bar<0>"(i64  %"bar#1##0") alwaysinline   {
 entry:
   %0 = trunc i64 8 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -536,7 +536,7 @@ entry:
 }
 
 
-define external fastcc  {i64, i1} @"anon_field.bar<1>"(i64  %"#result##0")    {
+define external fastcc  {i64, i1} @"anon_field.bar<1>"(i64  %"#result##0") alwaysinline   {
 entry:
   %0 = and i64 %"#result##0", 3 
   %1 = icmp eq i64 %0, 1 
@@ -555,7 +555,7 @@ if.else:
 }
 
 
-define external fastcc  i64 @"anon_field.baz<0>"(i64  %"field##0")    {
+define external fastcc  i64 @"anon_field.baz<0>"(i64  %"field##0") alwaysinline   {
 entry:
   %0 = trunc i64 8 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -567,7 +567,7 @@ entry:
 }
 
 
-define external fastcc  {i64, i1} @"anon_field.baz<1>"(i64  %"#result##0")    {
+define external fastcc  {i64, i1} @"anon_field.baz<1>"(i64  %"#result##0") alwaysinline   {
 entry:
   %0 = and i64 %"#result##0", 3 
   %1 = icmp eq i64 %0, 2 
@@ -586,7 +586,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"anon_field.field<0>"(i64  %"#rec##0")    {
+define external fastcc  {i64, i1} @"anon_field.field<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = and i64 %"#rec##0", 3 
   %1 = icmp eq i64 %0, 2 
@@ -605,7 +605,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"anon_field.field<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  {i64, i1} @"anon_field.field<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = and i64 %"#rec##0", 3 
   %1 = icmp eq i64 %0, 2 
@@ -633,7 +633,7 @@ if.else:
 }
 
 
-define external fastcc  i64 @"anon_field.foo<0>"(i64  %"foo#1##0", i1  %"foo#2##0", i64  %"i##0")    {
+define external fastcc  i64 @"anon_field.foo<0>"(i64  %"foo#1##0", i1  %"foo#2##0", i64  %"i##0") alwaysinline   {
 entry:
   %0 = trunc i64 24 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -650,7 +650,7 @@ entry:
 }
 
 
-define external fastcc  {i64, i1, i64, i1} @"anon_field.foo<1>"(i64  %"#result##0")    {
+define external fastcc  {i64, i1, i64, i1} @"anon_field.foo<1>"(i64  %"#result##0") alwaysinline   {
 entry:
   %0 = and i64 %"#result##0", 3 
   %1 = icmp eq i64 %0, 0 
@@ -770,7 +770,7 @@ if.else1:
 }
 
 
-define external fastcc  {i64, i1} @"anon_field.i<0>"(i64  %"#rec##0")    {
+define external fastcc  {i64, i1} @"anon_field.i<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = and i64 %"#rec##0", 3 
   %1 = icmp eq i64 %0, 0 
@@ -789,7 +789,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"anon_field.i<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  {i64, i1} @"anon_field.i<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = and i64 %"#rec##0", 3 
   %1 = icmp eq i64 %0, 0 
@@ -815,7 +815,7 @@ if.else:
 }
 
 
-define external fastcc  i1 @"anon_field.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"anon_field.~=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = tail call fastcc  i1  @"anon_field.=<0>"(i64  %"#left##0", i64  %"#right##0")  
   %1 = xor i1 %0, 1 
@@ -921,7 +921,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  i1 @"anon_field.quux.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"anon_field.quux.=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#left##0" to i64* 
   %1 = load  i64, i64* %0 
@@ -943,7 +943,7 @@ if.else:
 }
 
 
-define external fastcc  i64 @"anon_field.quux.j<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"anon_field.quux.j<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = add   i64 %"#rec##0", 8 
   %1 = inttoptr i64 %0 to i64* 
@@ -952,7 +952,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"anon_field.quux.j<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"anon_field.quux.j<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 16 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -968,7 +968,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"anon_field.quux.quuz<0>"(i64  %"quuz#1##0", i64  %"j##0")    {
+define external fastcc  i64 @"anon_field.quux.quuz<0>"(i64  %"quuz#1##0", i64  %"j##0") alwaysinline   {
 entry:
   %0 = trunc i64 16 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -982,7 +982,7 @@ entry:
 }
 
 
-define external fastcc  {i64, i64} @"anon_field.quux.quuz<1>"(i64  %"#result##0")    {
+define external fastcc  {i64, i64} @"anon_field.quux.quuz<1>"(i64  %"#result##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#result##0" to i64* 
   %1 = load  i64, i64* %0 
@@ -995,7 +995,7 @@ entry:
 }
 
 
-define external fastcc  i1 @"anon_field.quux.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"anon_field.quux.~=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#left##0" to i64* 
   %1 = load  i64, i64* %0 

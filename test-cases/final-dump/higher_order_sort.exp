@@ -151,7 +151,7 @@ if.else1:
 }
 
 
-define external fastcc  i64 @"higher_order_sort.sort<0>"(i64  %"<=##0", i64  %"xs##0")    {
+define external fastcc  i64 @"higher_order_sort.sort<0>"(i64  %"<=##0", i64  %"xs##0") alwaysinline   {
 entry:
   %0 = tail call fastcc  i64  @"higher_order_sort.gen#1<0>"(i64  %"<=##0", i64  0, i64  0, i64  %"xs##0", i64  %"xs##0")  
   ret i64 %0 

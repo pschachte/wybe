@@ -331,7 +331,7 @@ entry:
 }
 
 
-define external fastcc  double @"hypot.area<0>"(double  %"r##0")    {
+define external fastcc  double @"hypot.area<0>"(double  %"r##0") alwaysinline   {
 entry:
   %0 = fmul double %"r##0", %"r##0" 
   %1 = fmul double 3.141593e0, %0 
@@ -339,7 +339,7 @@ entry:
 }
 
 
-define external fastcc  double @"hypot.hypot<0>"(double  %"s1##0", double  %"s2##0")    {
+define external fastcc  double @"hypot.hypot<0>"(double  %"s1##0", double  %"s2##0") alwaysinline   {
 entry:
   %0 = fmul double %"s1##0", %"s1##0" 
   %1 = fmul double %"s2##0", %"s2##0" 

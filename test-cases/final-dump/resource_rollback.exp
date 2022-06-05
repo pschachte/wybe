@@ -112,7 +112,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"resource_rollback.foo<0>"(i64  %"call_source_location##0")    {
+define external fastcc  {i64, i1} @"resource_rollback.foo<0>"(i64  %"call_source_location##0") noinline   {
 entry:
   %0 = insertvalue {i64, i1} undef, i64 %"call_source_location##0", 0 
   %1 = insertvalue {i64, i1} %0, i1 0, 1 

@@ -480,13 +480,13 @@ if.else3:
 }
 
 
-define external fastcc  i64 @"stmt_if.tree.empty<0>"()    {
+define external fastcc  i64 @"stmt_if.tree.empty<0>"() alwaysinline   {
 entry:
   ret i64 0 
 }
 
 
-define external fastcc  {i64, i1} @"stmt_if.tree.key<0>"(i64  %"#rec##0")    {
+define external fastcc  {i64, i1} @"stmt_if.tree.key<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -504,7 +504,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"stmt_if.tree.key<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  {i64, i1} @"stmt_if.tree.key<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -529,7 +529,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"stmt_if.tree.left<0>"(i64  %"#rec##0")    {
+define external fastcc  {i64, i1} @"stmt_if.tree.left<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -546,7 +546,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"stmt_if.tree.left<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  {i64, i1} @"stmt_if.tree.left<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -570,7 +570,7 @@ if.else:
 }
 
 
-define external fastcc  i64 @"stmt_if.tree.node<0>"(i64  %"left##0", i64  %"key##0", i64  %"right##0")    {
+define external fastcc  i64 @"stmt_if.tree.node<0>"(i64  %"left##0", i64  %"key##0", i64  %"right##0") alwaysinline   {
 entry:
   %0 = trunc i64 24 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -587,7 +587,7 @@ entry:
 }
 
 
-define external fastcc  {i64, i64, i64, i1} @"stmt_if.tree.node<1>"(i64  %"#result##0")    {
+define external fastcc  {i64, i64, i64, i1} @"stmt_if.tree.node<1>"(i64  %"#result##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#result##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -614,7 +614,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"stmt_if.tree.right<0>"(i64  %"#rec##0")    {
+define external fastcc  {i64, i1} @"stmt_if.tree.right<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -632,7 +632,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"stmt_if.tree.right<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  {i64, i1} @"stmt_if.tree.right<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -657,7 +657,7 @@ if.else:
 }
 
 
-define external fastcc  i1 @"stmt_if.tree.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"stmt_if.tree.~=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = tail call fastcc  i1  @"stmt_if.tree.=<0>"(i64  %"#left##0", i64  %"#right##0")  
   %1 = xor i1 %0, 1 

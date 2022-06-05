@@ -110,7 +110,7 @@ entry:
 }
 
 
-define external fastcc  void @"use_resource.inc_count<0>"()    {
+define external fastcc  void @"use_resource.inc_count<0>"() alwaysinline   {
 entry:
   %0 = load  i64, i64* @"resource#use_resource.count" 
   %1 = add   i64 %0, 1 
@@ -119,7 +119,7 @@ entry:
 }
 
 
-define external fastcc  void @"use_resource.use_test<0>"()    {
+define external fastcc  void @"use_resource.use_test<0>"() alwaysinline   {
 entry:
   %0 = load  i64, i64* @"resource#use_resource.count" 
   %1 = add   i64 %0, 1 

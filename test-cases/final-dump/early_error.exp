@@ -78,7 +78,7 @@ entry:
 }
 
 
-define external fastcc  void @"early_error.my_error<0>"(i64  %"msg##0")    {
+define external fastcc  void @"early_error.my_error<0>"(i64  %"msg##0") alwaysinline   {
 entry:
   tail call ccc  void  @puts(i64  %"msg##0")  
   tail call ccc  void  @exit(i64  1)  

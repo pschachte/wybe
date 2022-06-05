@@ -277,7 +277,7 @@ if.else:
 }
 
 
-define external fastcc  i1 @"higher_order_tests.do_test<0>"(i64  %"f##0", i64  %"i##0")    {
+define external fastcc  i1 @"higher_order_tests.do_test<0>"(i64  %"f##0", i64  %"i##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"f##0" to i64* 
   %1 = load  i64, i64* %0 
@@ -288,7 +288,7 @@ entry:
 }
 
 
-define external fastcc  i1 @"higher_order_tests.do_test2<0>"(i64  %"f##0", i64  %"i##0")    {
+define external fastcc  i1 @"higher_order_tests.do_test2<0>"(i64  %"f##0", i64  %"i##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"f##0" to i64* 
   %1 = load  i64, i64* %0 
@@ -299,13 +299,13 @@ entry:
 }
 
 
-define external fastcc  i1 @"higher_order_tests.gen#1<0>"()    {
+define external fastcc  i1 @"higher_order_tests.gen#1<0>"() alwaysinline   {
 entry:
   ret i1 1 
 }
 
 
-define external fastcc  i64 @"higher_order_tests.gen#1<1>"(i64  %"#env##0", i64  %"anon#1#1##0")    {
+define external fastcc  i64 @"higher_order_tests.gen#1<1>"(i64  %"#env##0", i64  %"anon#1#1##0") alwaysinline   {
 entry:
   %0 = zext i1 1 to i64  
   ret i64 %0 
@@ -386,14 +386,14 @@ if.else:
 }
 
 
-define external fastcc  i1 @"higher_order_tests.gen#6<0>"(i64  %"anon#2#1##0")    {
+define external fastcc  i1 @"higher_order_tests.gen#6<0>"(i64  %"anon#2#1##0") alwaysinline   {
 entry:
   %0 = icmp eq i64 %"anon#2#1##0", 1 
   ret i1 %0 
 }
 
 
-define external fastcc  i64 @"higher_order_tests.gen#6<1>"(i64  %"#env##0", i64  %"anon#2#1##0")    {
+define external fastcc  i64 @"higher_order_tests.gen#6<1>"(i64  %"#env##0", i64  %"anon#2#1##0") alwaysinline   {
 entry:
   %0 = icmp eq i64 %"anon#2#1##0", 1 
   %1 = zext i1 %0 to i64  

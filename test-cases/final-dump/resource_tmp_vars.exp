@@ -70,7 +70,7 @@ entry:
 }
 
 
-define external fastcc  void @"resource_tmp_vars.gen#1<0>"(i64  %"tmp#0##0")    {
+define external fastcc  void @"resource_tmp_vars.gen#1<0>"(i64  %"tmp#0##0") alwaysinline   {
 entry:
   tail call ccc  void  @print_int(i64  1)  
   tail call ccc  void  @putchar(i8  10)  
