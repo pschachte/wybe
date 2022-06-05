@@ -226,7 +226,7 @@ entry:
 }
 
 
-define external fastcc  void @"higher_order_append.append<0>"(i64  %"front##0", i64  %"back##0", i64*  %"result##0")    {
+define external fastcc  void @"higher_order_append.append<0>"(i64  %"front##0", i64  %"back##0", i64*  %"result#ref##0")    {
 entry:
   %0 = icmp ne i64 %"front##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -243,11 +243,11 @@ if.then:
   store  i64 %2, i64* %9 
   %10 = add   i64 %8, 8 
   %11 = inttoptr i64 %10 to i64* 
-  store  i64 %8, i64* %"result##0" 
+  store  i64 %8, i64* %"result#ref##0" 
   musttail call fastcc  void  @"higher_order_append.append<0>"(i64  %5, i64  %"back##0", i64*  %11)  
   ret void 
 if.else:
-  store  i64 %"back##0", i64* %"result##0" 
+  store  i64 %"back##0", i64* %"result#ref##0" 
   ret void 
 }
 

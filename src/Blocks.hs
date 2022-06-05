@@ -309,7 +309,7 @@ makeGlobalDefinition pname proto bls = do
 makeFnArg :: PrimParam -> Compiler (Type, LLVMAST.Name)
 makeFnArg param = do
     ty <- primParamLLVMType param
-    let nm = LLVMAST.Name $ toSBString $ show $ primParamName param
+    let nm = LLVMAST.Name $ toSBString $ show $ primParamLLVMName param
     return (ty, nm)
 
 type LLVMCallSignature = ([Type], Type)
@@ -371,15 +371,15 @@ assignParam p@PrimParam{primParamType=ty, primParamFlow = paramFlow } = do
                  ++ " (" ++ show trep ++ ")"
     unless (repIsPhantom trep || paramInfoUnneeded (primParamInfo p))
       $ do
-            let nm = show (primParamName p)
+            let nm = primParamLLVMName p
             llty <- lift2 $ primParamLLVMType p
-            modifySymtab nm (localVar llty nm)
+            modifySymtab (show nm) (localVar llty $ show nm)
 
 -- | Convert a PrimParam to an Operand value and reference this value by the
 -- param's name on the symbol table. Don't assign if phantom
 preassignOutput :: PrimParam -> Codegen ()
 preassignOutput p = do
-    let nm = show (primParamName p)
+    let nm = show (primParamLLVMName p)
     llty <- lift2 $ primParamLLVMType p
     modifySymtab nm (cons $ C.Undef llty)
 
@@ -394,7 +394,7 @@ buildOutputOp = do
     proto <- gets cgProto
     outParams <- lift2 $ protoRealParamsWhere paramGoesOut proto
     logCodegen $ "OutParams: " ++ show outParams
-    outputs <- mapM (liftM3 castVar primParamName primParamType primParamFlow) outParams
+    outputs <- mapM (liftM3 castVar primParamLLVMName primParamType primParamFlow) outParams
     logCodegen $ "Built outputs from symbol table: " ++ show outputs
     case outputs of
         -- No valid output
@@ -510,6 +510,7 @@ cgen (prim@(PrimCall callSiteID pspec args _):nextPrims) isLeaf = do
     --  *before* the call instruction.
     let (takeReferences, nextPrims') = inseparablePrims prim nextPrims
     cgenTakeReferences True takeReferences
+    logCodegen "--> Finished cgenTakeReferences"
     let isTailPosition = List.null nextPrims' && isLeaf
 
     -- if the call is to an external module, declare it
@@ -711,18 +712,14 @@ cgenMaybeLoadReference callIsTailPosition arg@ArgVar { argVarName = name, argVar
         -- or the output was one of the outputs of the overall proc.
         -- In this case, we need to perform the load
         op <- maybeGetVar $ show (getRefName name)
-        op' <- maybeGetVar $ show name
-        var <- case (op, op') of
-            -- the corresponding shadow variable `[name]#ref` exists
-            (Just var, _) -> return var
-            -- the shadow `[name]#ref` variable wasn't created, so instead
-            -- we load `[name]` directly
-            (Nothing, Just var) -> return var
+        case op of
+            -- the `[name]#ref` shadow variable should contain the destination to load
+            (Just var) -> do
+                logCodegen $ "doing `load` after call: " ++ show var
+                outTy <- lift2 $ argLLVMType arg { argVarFlow = FlowOut }
+                loadOp <- doLoad outTy var
+                modifySymtab (show name) loadOp
             _ -> shouldnt $ show name ++ "not defined - when loading reference after call"
-        logCodegen $ "doing `load` after call: " ++ show var
-        outTy <- lift2 $ argLLVMType arg { argVarFlow = FlowOut }
-        loadOp <- doLoad outTy var
-        modifySymtab (show name) loadOp
 cgenMaybeLoadReference _ _ = return ()
 
 filterPhantomArgs :: [PrimArg] -> Codegen [PrimArg]
@@ -845,7 +842,7 @@ cgenLPVM "load" _ args = do
             ty' <- llvmType' ty FlowIn
             global <- getGlobalResource res ty'
             op' <- doLoad ty' global
-            assign (show nm) op'
+            assign nm op'
         ([],[]) ->
             return ()
         _ ->
@@ -871,7 +868,8 @@ cgenTakeReferences genAll (prim@(PrimForeign "lpvm" "mutate" _  [inArg, outArg@A
     finalAddr <- offsetAddr baseAddr iadd offsetArg
     finalAddrPtr <- doCast finalAddr outTy
     -- take a reference to the field that we're interested in
-    assign (show refArgName) finalAddrPtr
+    -- and store it in the shadow variable `[name]#ref`
+    assign (getRefName refArgName) finalAddrPtr
     -- assign outArg to be the same address as inArg
     -- This may implicitly write to a pointer (through a `store`
     -- instruction) if outArg is an `outByReference` param
@@ -988,8 +986,8 @@ addInstruction ins outArgs = do
             zipWithM_ assign (pullName <$> outArgs) fields
 
 
-pullName :: PrimArg -> String
-pullName ArgVar{argVarName=var} = show var
+pullName :: PrimArg -> PrimVarName
+pullName ArgVar{argVarName=var} = var
 pullName _                      = shouldnt "Expected variable as output."
 
 -- | Generate an expanding instruction name using the passed flags. This is
@@ -1040,13 +1038,17 @@ paramGoesIn = isLLVMInput . primParamFlow
 paramGoesOut :: PrimParam -> Bool
 paramGoesOut = not . paramGoesIn
 
--- | 'cgenArg' makes an Operand of the input argument.
--- * Variables return a casted version of their respective symbol table operand
--- * Constants are generated with cgenArgConst, then wrapped in `cons`
---
--- Also returns `AllocaTracking`, which specifies if any of these arguments will
--- point to allocas from the current proc.
--- The presence of such allocas breaks core assumptions of the LLVM `tail`
+isReferenceFlow :: PrimFlow -> Bool
+isReferenceFlow FlowTakeReference = True
+isReferenceFlow FlowOutByReference = True
+isReferenceFlow _ = False
+
+-- outByReference or takeReference parameters use a shadow variable `[name]#ref`
+-- instead of the actual parameter name.
+primParamLLVMName :: PrimParam -> PrimVarName
+primParamLLVMName PrimParam {primParamName=name, primParamFlow=flow} | isReferenceFlow flow = getRefName name
+primParamLLVMName PrimParam {primParamName=name} = name
+
 -- attribute, so we need to carefully handle this case.
 cgenArgFull :: PrimArg -> Codegen (LLVMAST.Operand, AllocaTracking)
 cgenArgFull arg = do
@@ -1082,7 +1084,8 @@ cgenArgsFull args = do
 
 cgenArg' :: PrimArg -> Codegen (LLVMAST.Operand, AllocaTracking)
 cgenArg' var@ArgVar{argVarName=name, argVarType=ty, argVarFlow=flow@FlowOutByReference} = do
-    op <- maybeGetVar (show name)
+    let refName = getRefName name
+    op <- maybeGetVar (show refName)
     proto <- gets cgProto
     outParams <- lift2 $ protoRealParamsWhere paramGoesOut proto
     let outParamNames = List.map primParamName outParams
@@ -1094,12 +1097,11 @@ cgenArg' var@ArgVar{argVarName=name, argVarType=ty, argVarFlow=flow@FlowOutByRef
         allocaTy <- llvmType' ty FlowOut
         alloca <- doAlloca allocaTy
         logCodegen $ "Performing %" ++ show name ++ " = alloca " ++ show allocaTy
-        let refName = getRefName name
-        assign (show refName) alloca
+        assign refName alloca
         -- Supply the shadow reference variable as argument to this proc.
         op <- castVar refName ty flow
         return (op,DoesAlloca)
-    else noAlloca $ castVar name ty flow
+    else noAlloca $ castVar refName ty flow
 cgenArg' var@ArgVar{argVarName=nm, argVarType=ty, argVarFlow=flow} = noAlloca $ castVar nm ty flow
 cgenArg' (ArgUnneeded _ _) = shouldnt "Trying to generate LLVM for unneeded arg"
 cgenArg' arg@(ArgClosure ps args ty) = do
@@ -1276,28 +1278,28 @@ integerOrd = toInteger . ord
 -- Symbol Table                                                           --
 ----------------------------------------------------------------------------
 
-outByRefParamNames :: Codegen [String]
+outByRefParamNames :: Codegen [PrimVarName]
 outByRefParamNames = do
     params <- gets (primProtoParams . cgProto)
-    return $ List.map (show . primParamName) $ List.filter (\param -> FlowOutByReference == primParamFlow param) params
+    return $ List.map primParamName $ List.filter (\param -> FlowOutByReference == primParamFlow param) params
 
 -- | Store a local variable on the front of the symbol table.
 -- |
 -- | If the local variable happens to be an outByReference parameter of the
 -- | current function we're generating, then we instead "write" the variable
 -- | using a store instruction.
-assign :: String -> Operand -> Codegen ()
+assign :: PrimVarName -> Operand -> Codegen ()
 assign var op = do
     outByRefs <- outByRefParamNames
     if var `elem` outByRefs then do
-      logCodegen $ "assign outByReference " ++ var ++ " = " ++ show op ++ ":" ++ show (typeOf op)
-      locOp <- getVar var
+      logCodegen $ "assign outByReference " ++ show var ++ " = " ++ show op ++ ":" ++ show (typeOf op)
+      locOp <- getVar (show (getRefName var))
       locOp' <- doCast locOp (ptr_t (typeOf op))
       store locOp' op
       -- also store this operand in the symtab, for the case where
       -- we access this outByReference param later on in the proc
-      modifySymtab var op
-    else modifySymtab var op
+      modifySymtab (show var) op
+    else modifySymtab (show var) op
 
 ----------------------------------------------------------------------------
 -- Instruction maps                                                       --

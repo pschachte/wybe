@@ -13,5 +13,5 @@ pub def appendstuff(l: list(int), l2: list(int), ?result: combined(int)) {
 
 appendstuff([1,2,3], [4,5,6], ?l2)
 !println(combined.x(l2))
-!println(combined.y(l2), print)
-!println(combined.z(l2), print)
+!println(print, combined.y(l2))
+!println(print, combined.z(l2))

@@ -203,7 +203,7 @@ newtype MutateInstr a = MutateInstr a
 instance HasPrim a => Show (MutateInstr a) where
     show (MutateInstr p) = show (getPrim p)
 
-data MutateGraphNode a =
+data Source a =
     -- a mutate() call
     ResultFromMutate (MutateInstr a)
     -- a value which was available *before* the last call (e.g.: the head of the
@@ -213,7 +213,9 @@ data MutateGraphNode a =
     | ResultFromCall { callResultFlow :: PrimFlow }
     deriving (Show)
 
-type MutateGraph a = Map PrimVarName (MutateGraphNode a)
+type MutateGraph a = Map PrimVarName (Source a)
+
+data MutateGraphArc = Member | Input deriving (Show, Eq, Ord)
 
 class (Show a, Eq a) => HasPrim a where
     getPrim :: a -> Prim
@@ -230,6 +232,10 @@ instance HasPrim Prim where
 instance HasPrim (Bool, Placed Prim) where
     getPrim (_, p) = content p
     setPrim p' (x, p) = (x, contentApply (const p') p)
+
+sourceIsBeforeCall :: Source a -> Bool
+sourceIsBeforeCall ResultFromBeforeCall = True
+sourceIsBeforeCall _ = False
 
 showPrims :: HasPrim a => [a] -> String
 showPrims ps = show (getPrim <$> ps)
@@ -322,10 +328,23 @@ buildMutateGraph call allowedOutputFlows prims = do
     -- some of them can be done before the last call.
     -- This allows us to handle the case of e.g.: snoc(tail: list(T), head: T)
     -- where the the `head` is written to after the tail.
-    (pushedAboveCall, graph') <- transformGraph graph
-    logLastCallAnalysis $ "mutate graph v2: " ++ show graph'
-    logLastCallAnalysis $ graphvizOutput graph'
-    return (pushedAboveCall, graph', remainingBelowCall)
+    (pushedAboveCall, graph') <- slideMutatesOffGraph graph
+    graph'' <- tcmcOptimizeGraph graph'
+    logLastCallAnalysis $ "mutate graph v2: " ++ show graph''
+    logLastCallAnalysis $ graphvizOutput graph''
+
+    let validGraph = all (\(var, node) ->
+            -- any variable in the graph may be used at most once
+            List.length (varReferences graph var) <= 1 &&
+            case node of
+                -- last argument to mutate() must be marked as `final`
+                (ResultFromMutate instr) -> let (_, _, final) = mutateInstrMember' instr in final
+                _ -> True) (Map.assocs graph'')
+
+    if validGraph then
+        return (pushedAboveCall, graph'', remainingBelowCall)
+    else
+        return ([], Map.empty, prims)
 
 buildMutateGraph' :: HasPrim a => a -> (PrimFlow -> Bool) -> [a] -> MutateGraph a -> Compiler (MutateGraph a, [a])
 buildMutateGraph' lastCall allowedOutputFlows (prim:prims) graph = do
@@ -343,11 +362,11 @@ argVarHasName :: PrimArg -> PrimVarName -> Bool
 argVarHasName ArgVar {argVarName=name} name' | name == name' = True
 argVarHasName _ _ = False
 
-callOutputIsOutByRef :: MutateGraphNode a -> Bool
+callOutputIsOutByRef :: Source a -> Bool
 callOutputIsOutByRef ResultFromCall { callResultFlow = FlowOutByReference } = True
 callOutputIsOutByRef _ = False
 
-addVarToMutateGraph :: HasPrim a => PrimVarName -> Prim -> (PrimFlow -> Bool) -> Bool -> MutateGraph a -> ExceptT String Compiler (MutateGraphNode a, MutateGraph a)
+addVarToMutateGraph :: HasPrim a => PrimVarName -> Prim -> (PrimFlow -> Bool) -> Bool -> MutateGraph a -> ExceptT String Compiler (Source a, MutateGraph a)
 addVarToMutateGraph var lastCall allowedOutputFlows fromCallAllowed graph = do
     case Map.lookup var graph of
         (Just node) -> return (node, graph)
@@ -386,17 +405,15 @@ addMutateGraphVertex lastCall allowedOutputFlows prim graph = do
             ArgVar { argVarName = output, argVarFlow = FlowOut },
             -- mutate() must be destructive
             ArgInt offsetArg _, ArgInt 1 _, _, _,
-            ArgVar { argVarName = member, argVarFlow = FlowIn, argVarFinal = True }] -> do
+            ArgVar { argVarName = member, argVarFlow = FlowIn, argVarFinal = final }] -> do
                 -- make sure `input` exists in the graph
                 (inputNode, graph') <- addVarToMutateGraph input (getPrim lastCall) allowedOutputFlows False graph
                 -- make sure `member` exists in the graph
                 (memberNode, graph'') <- addVarToMutateGraph member (getPrim lastCall) allowedOutputFlows True graph'
                 let mutateInstr = ResultFromMutate $ MutateInstr prim
-                -- Check two conditions before adding this "mutate()" to the graph
+                -- Check some conditions before adding this "mutate()" to the graph
                 when (offsetArg `elem` getOffsetList graph'' inputNode) $
                     throwError "mutate()s in a single chain write to overlapping fields"
-                when (varIsReferenced graph input || varIsReferenced graph member) $
-                    throwError "values within mutate graph may only be used at most once"
                 let graph''' = Map.insert output mutateInstr graph''
                 return graph'''
         _ ->
@@ -405,7 +422,7 @@ addMutateGraphVertex lastCall allowedOutputFlows prim graph = do
 -- Returns a list of offsets written to in a single mutate chain.
 --
 -- XXX: Consider both offset and size to determine if writes alias.
-getOffsetList :: HasPrim a => MutateGraph a -> MutateGraphNode a -> [Integer]
+getOffsetList :: HasPrim a => MutateGraph a -> Source a -> [Integer]
 getOffsetList graph ResultFromBeforeCall = []
 getOffsetList graph ResultFromCall { } = shouldnt "mutate() shouldn't use result from call as it's input"
 getOffsetList graph (ResultFromMutate instr) = let input = mutateInstrInput instr in
@@ -416,63 +433,78 @@ getOffsetList graph (ResultFromMutate instr) = let input = mutateInstrInput inst
 -- Returns `True` if the given variable is currently
 -- referred to in the mutate graph. We only allow each value to be
 -- referenced *once* in the graph.
-varIsReferenced :: HasPrim a => MutateGraph a -> PrimVarName -> Bool
-varIsReferenced graph var = any (\(name, node) ->
+varReferences :: HasPrim a => MutateGraph a -> PrimVarName -> [MutateGraphArc]
+varReferences graph var = foldr (\(name, node) arcs ->
         case node of
-            ResultFromMutate instr
-                | mutateInstrInput instr == var || mutateInstrMember instr == var -> True
-            _ -> False)
-        (Map.assocs graph)
+            ResultFromMutate instr | mutateInstrMember instr == var -> Input:arcs
+            ResultFromMutate instr | mutateInstrMember instr == var -> Member:arcs
+            _ -> arcs)
+        [] (Map.assocs graph)
 
-transformGraph :: HasPrim a => MutateGraph a -> Compiler ([a], MutateGraph a)
-transformGraph graph = foldrM transformGraph' ([], graph) (Map.assocs graph)
+slideMutatesOffGraph :: HasPrim a => MutateGraph a -> Compiler ([a], MutateGraph a)
+slideMutatesOffGraph graph = foldrM slideMutatesOffGraph' ([], graph) (Map.keys graph)
 
-transformGraph' :: HasPrim a => (PrimVarName, MutateGraphNode a) -> ([a], MutateGraph a) -> Compiler ([a], MutateGraph a)
-transformGraph' (name, ResultFromMutate mutateInstr@(MutateInstr prim)) (pushedOut, graph)
-    =
-        let member = mutateInstrMember mutateInstr in
-        case Map.lookup member graph of
-        (Just ResultFromBeforeCall) -> do
-            logLastCallAnalysis $ "trying to push " ++ show mutateInstr ++ " out of graph."
-            let input = mutateInstrInput mutateInstr
-                member = mutateInstrMember mutateInstr
-            case Map.lookup input graph of
-                (Just ResultFromBeforeCall) -> do
-                    -- The two inputs to this mutate are available before this call.
-                    -- Therefore we can
-                    -- move the mutate above the call.
-                    let graph' = Map.delete member . Map.delete input . Map.insert name ResultFromBeforeCall $ graph
-                    return (prim:pushedOut, graph')
+slideMutatesOffGraph' :: HasPrim a => PrimVarName -> ([a], MutateGraph a) -> Compiler ([a], MutateGraph a)
+slideMutatesOffGraph' name state@(pushedOut, graph)
+    = case Map.lookup name graph of
+        Just (ResultFromMutate mutateInstr@(MutateInstr prim)) ->
+            let member = mutateInstrMember mutateInstr
+                input = mutateInstrInput mutateInstr in
+            case (Map.lookup member graph, Map.lookup input graph) of
+                -- The two inputs to this mutate are available before this call.
+                -- Therefore we can move the mutate above the call.
+                (Just ResultFromBeforeCall, Just ResultFromBeforeCall) -> do
+                    logLastCallAnalysis $ "popping " ++ show mutateInstr ++ " out of graph."
+                    let deleteMemberIfUnused = if List.length (varReferences graph member) > 1 then id else Map.delete member
+                    let graph' = deleteMemberIfUnused . Map.delete input . Map.insert name ResultFromBeforeCall $ graph
+                    logLastCallAnalysis $ "new graph: " ++ show graph'
+                    return (pushedOut ++ [prim], graph')
                 -- we can swap the two mutate()'s in the chain, in order to push the
                 -- first mutate closer to a "sink" vertex (at which point we can then
                 -- "pop" it out of the graph)
-                (Just (ResultFromMutate mutateInstr0)) -> do
+                (Just ResultFromBeforeCall, Just (ResultFromMutate mutateInstr0)) -> do
+                    logLastCallAnalysis $ "swapping " ++ show mutateInstr
                     let (mutateInstr', mutateInstr0') = mutateInstrSwap mutateInstr mutateInstr0
                     let graph' = Map.insert name (ResultFromMutate mutateInstr0') . Map.insert input (ResultFromMutate mutateInstr') $ graph
                     logLastCallAnalysis $ "mutate graph after swap: " ++ show graph'
                     -- make sure we continue doing swaps
-                    transformGraph' (input, ResultFromMutate mutateInstr') (pushedOut, graph')
-                _ -> shouldnt "error looking up input of mutate() in graph"
+                    slideMutatesOffGraph' input (pushedOut, graph')
+                (Nothing, _) -> shouldnt $ show member ++ " not found in graph"
+                (_, Nothing) -> shouldnt $ show input ++ " not found in graph"
+                _ -> return state
+        Nothing -> do
+            logLastCallAnalysis $ show name ++ " not found in graph - must have been removed already. Skipping..."
+            return state
+        _ -> return state
+
+-- Annotate the graph with `outByReference` and `takeReference` as required
+tcmcOptimizeGraph :: HasPrim a => MutateGraph a -> Compiler (MutateGraph a)
+tcmcOptimizeGraph graph = foldrM tcmcOptimizeGraph' graph (Map.assocs graph)
+
+tcmcOptimizeGraph' :: HasPrim a => (PrimVarName, Source a) -> MutateGraph a -> Compiler (MutateGraph a)
+tcmcOptimizeGraph' (name, ResultFromMutate mutateInstr@(MutateInstr prim)) graph =
+    let member = mutateInstrMember mutateInstr in
+    case Map.lookup member graph of
         -- Turns the FlowOut argument of the call into FlowOutByReference,
         -- and also switches mutate(..., member) to mutate(..., takeReference member)
         (Just ResultFromCall { }) -> do
             let graph' = Map.insert name (ResultFromMutate $ mutateInstrTakeReference mutateInstr) . Map.insert member ResultFromCall { callResultFlow = FlowOutByReference } $ graph
-            return (pushedOut, graph')
+            return graph'
         -- Turns mutate(x, ?y, ...) into mutate(x, outByReference y , ...)
         -- and mutate(..., y) to mutate(..., takeReference y)
         (Just (ResultFromMutate memberMutate)) -> do
             let graph' = Map.insert name (ResultFromMutate $ mutateInstrTakeReference mutateInstr) . Map.insert member (ResultFromMutate $ mutateInstrOutputByReference memberMutate) $ graph
-            return (pushedOut, graph')
+            return graph'
+        (Just ResultFromBeforeCall) -> shouldnt $ show member ++ " ResultFromBeforeCall should have already been removed"
         Nothing -> shouldnt $ show member ++ " not found in graph"
-transformGraph' (name, _) state
-    = return state
+tcmcOptimizeGraph' (name, _) graph = return graph
 
 -- | Returns the mutate() prims in a mutate graph, in order of appearance in the
 -- LPVM IR.
 -- Our mutate graph is essentially a directed-rooted-forest. So for each root
 -- (proc output) there is exactly one path to each vertex.
 mutateGraphPrims :: HasPrim a => MutateGraph a -> [a]
-mutateGraphPrims graph = let sources = List.filter (not . varIsReferenced graph) (Map.keys graph) in
+mutateGraphPrims graph = let sources = List.filter (null . varReferences graph) (Map.keys graph) in
     concatMap (mutateGraphPrims' graph) sources
 
 -- | Returns the mutate() prims for a given node and it's descendents.
@@ -487,11 +519,11 @@ mutateGraphPrims' graph name = case Map.lookup name graph of
     Nothing -> shouldnt "source not found in graph"
 
 mutateInstrMember :: HasPrim a => MutateInstr a -> PrimVarName
-mutateInstrMember = fst . mutateInstrMember'
+mutateInstrMember m =  let (name, _, _) = mutateInstrMember' m in name
 
-mutateInstrMember' :: HasPrim a => MutateInstr a -> (PrimVarName, PrimFlow)
+mutateInstrMember' :: HasPrim a => MutateInstr a -> (PrimVarName, PrimFlow, Bool)
 mutateInstrMember' (MutateInstr p) = case getPrim p of
-    PrimForeign _ _ _ [_, _, _, _, _, _, ArgVar { argVarName = member, argVarFlow = flow }] -> (member, flow)
+    PrimForeign _ _ _ [_, _, _, _, _, _, ArgVar { argVarName = member, argVarFlow = flow, argVarFinal = final }] -> (member, flow, final)
     _ -> shouldnt "not a mutate instr"
 
 mutateInstrInput :: HasPrim a => MutateInstr a -> PrimVarName
@@ -524,6 +556,7 @@ mutateInstrOutputByReference (MutateInstr p) = case getPrim p of
         MutateInstr $ setPrim (PrimForeign mode name flags (input:setArgFlow FlowOutByReference output:rest)) p
     _ -> shouldnt "not a mutate instr"
 
+-- XXX: may need to update last use flags here?
 mutateInstrSwap :: HasPrim a => MutateInstr a -> MutateInstr a -> (MutateInstr a, MutateInstr a)
 mutateInstrSwap (MutateInstr p1) (MutateInstr p2) = case (getPrim p1, getPrim p2) of
     (PrimForeign "lpvm" "mutate" flags1 (input1:output1:rest1),
@@ -542,17 +575,23 @@ graphvizOutput :: HasPrim a => MutateGraph a -> String
 graphvizOutput graph = "digraph D {\n" ++
     "    rankdir=\"BT\"\n" ++
     "    node [ordering=out]\n" ++
-    intercalate "\n"["    " ++ varLabel name ++ " [label=\"" ++ varLabel name ++ "\\n" ++ graphvizVertexLabel name node ++ " \"]" | (name, node) <- Map.assocs graph] ++
-    "\n" ++ intercalate "" [graphvizEdges name node | (name, node) <- Map.assocs graph] ++
+    intercalate "\n"["    " ++ varLabel name ++ " [style=\"filled\",fillcolor=\"" ++ graphvizVertexColor node ++ "\", label=\"" ++ varLabel name ++ "\\n" ++ graphvizVertexLabel name node ++ " \"]" | (name, node) <- Map.assocs graph] ++
+    "\n" ++ intercalate "" [graphvizArcs name node | (name, node) <- Map.assocs graph] ++
     "\n}\n"
 
 varLabel :: PrimVarName -> String
 varLabel var = filter (/= '#') $ T.unpack $ T.replace (T.pack "##0") (T.pack "") (T.pack $ show var)
 
-graphvizVertexLabel :: HasPrim a => PrimVarName -> MutateGraphNode a -> String
+graphvizVertexColor :: HasPrim a => Source a -> String
+graphvizVertexColor ResultFromMutate {} = "lightblue"
+graphvizVertexColor ResultFromBeforeCall {} = "gray"
+graphvizVertexColor ResultFromCall { callResultFlow = FlowOutByReference } = "lightgreen"
+graphvizVertexColor ResultFromCall { callResultFlow = _ } = "salmon"
+
+graphvizVertexLabel :: HasPrim a => PrimVarName -> Source a -> String
 graphvizVertexLabel name (ResultFromMutate instr) = "mutate(_, " ++ outByRef ++ ", offset=" ++ show (mutateInstrOffset instr) ++ ", ...," ++ takeReference ++ ")"
     where takeReference = case mutateInstrMember' instr of
-                        (name, FlowTakeReference) -> "takeReference " ++ varLabel name
+                        (name, FlowTakeReference, _) -> "takeReference " ++ varLabel name
                         _ -> "_"
           outByRef = case mutateInstrOutput' instr of
                         (name, FlowOutByReference) -> "outByReference " ++ varLabel name
@@ -560,11 +599,11 @@ graphvizVertexLabel name (ResultFromMutate instr) = "mutate(_, " ++ outByRef ++ 
 graphvizVertexLabel name ResultFromBeforeCall = "(before call)"
 graphvizVertexLabel name ResultFromCall {callResultFlow=flow}  = "(" ++ show flow ++ " from call)"
 
-graphvizEdges :: HasPrim a => PrimVarName -> MutateGraphNode a -> String
-graphvizEdges name (ResultFromMutate instr) =
+graphvizArcs :: HasPrim a => PrimVarName -> Source a -> String
+graphvizArcs name (ResultFromMutate instr) =
     "    " ++ varLabel name ++ " -> " ++ varLabel (mutateInstrMember instr) ++ " [label=\"member\"]\n" ++
     "    " ++ varLabel name ++ " -> " ++ varLabel (mutateInstrInput instr) ++ " [label=\"input\"]\n"
-graphvizEdges _ _ = ""
+graphvizArcs _ _ = ""
 
 ----------------------------------------------------------------------------
 -- Write outByReference outputs directly into structures                  --
