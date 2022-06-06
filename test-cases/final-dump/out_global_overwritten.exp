@@ -58,7 +58,7 @@ entry:
 }
 
 
-define external fastcc  void @"out_global_overwritten.out<0>"()    {
+define external fastcc  void @"out_global_overwritten.out<0>"() noinline   {
 entry:
   store  i64 11, i64* @"resource#out_global_overwritten.res" 
   ret void 

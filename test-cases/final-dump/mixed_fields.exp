@@ -358,7 +358,7 @@ if.else4:
 }
 
 
-define external fastcc  i64 @"mixed_fields.f1<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"mixed_fields.f1<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = add   i64 %"#rec##0", 8 
   %1 = inttoptr i64 %0 to i64* 
@@ -367,7 +367,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"mixed_fields.f1<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"mixed_fields.f1<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 32 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -383,7 +383,7 @@ entry:
 }
 
 
-define external fastcc  i8 @"mixed_fields.f2<0>"(i64  %"#rec##0")    {
+define external fastcc  i8 @"mixed_fields.f2<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#rec##0" to i8* 
   %1 = load  i8, i8* %0 
@@ -391,7 +391,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"mixed_fields.f2<1>"(i64  %"#rec##0", i8  %"#field##0")    {
+define external fastcc  i64 @"mixed_fields.f2<1>"(i64  %"#rec##0", i8  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 32 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -406,7 +406,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"mixed_fields.f3<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"mixed_fields.f3<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = add   i64 %"#rec##0", 16 
   %1 = inttoptr i64 %0 to i64* 
@@ -415,7 +415,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"mixed_fields.f3<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"mixed_fields.f3<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 32 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -431,7 +431,7 @@ entry:
 }
 
 
-define external fastcc  i1 @"mixed_fields.f4<0>"(i64  %"#rec##0")    {
+define external fastcc  i1 @"mixed_fields.f4<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = add   i64 %"#rec##0", 1 
   %1 = inttoptr i64 %0 to i1* 
@@ -440,7 +440,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"mixed_fields.f4<1>"(i64  %"#rec##0", i1  %"#field##0")    {
+define external fastcc  i64 @"mixed_fields.f4<1>"(i64  %"#rec##0", i1  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 32 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -456,7 +456,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"mixed_fields.f5<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"mixed_fields.f5<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = add   i64 %"#rec##0", 24 
   %1 = inttoptr i64 %0 to i64* 
@@ -465,7 +465,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"mixed_fields.f5<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"mixed_fields.f5<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 32 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -481,7 +481,7 @@ entry:
 }
 
 
-define external fastcc  i8 @"mixed_fields.f6<0>"(i64  %"#rec##0")    {
+define external fastcc  i8 @"mixed_fields.f6<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = add   i64 %"#rec##0", 2 
   %1 = inttoptr i64 %0 to i8* 
@@ -490,7 +490,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"mixed_fields.f6<1>"(i64  %"#rec##0", i8  %"#field##0")    {
+define external fastcc  i64 @"mixed_fields.f6<1>"(i64  %"#rec##0", i8  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 32 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -506,7 +506,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"mixed_fields.mixed<0>"(i64  %"f1##0", i8  %"f2##0", i64  %"f3##0", i1  %"f4##0", i64  %"f5##0", i8  %"f6##0")    {
+define external fastcc  i64 @"mixed_fields.mixed<0>"(i64  %"f1##0", i8  %"f2##0", i64  %"f3##0", i1  %"f4##0", i64  %"f5##0", i8  %"f6##0") alwaysinline   {
 entry:
   %0 = trunc i64 32 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -532,7 +532,7 @@ entry:
 }
 
 
-define external fastcc  {i64, i8, i64, i1, i64, i8} @"mixed_fields.mixed<1>"(i64  %"#result##0")    {
+define external fastcc  {i64, i8, i64, i1, i64, i8} @"mixed_fields.mixed<1>"(i64  %"#result##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#result##0" to i8* 
   %1 = load  i8, i8* %0 
@@ -596,7 +596,7 @@ entry:
 }
 
 
-define external fastcc  i1 @"mixed_fields.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"mixed_fields.~=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = tail call fastcc  i1  @"mixed_fields.=<0>"(i64  %"#left##0", i64  %"#right##0")  
   %1 = xor i1 %0, 1 

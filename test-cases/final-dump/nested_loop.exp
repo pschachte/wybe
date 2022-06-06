@@ -95,7 +95,7 @@ entry:
 }
 
 
-define external fastcc  void @"nested_loop.gen#1<0>"()    {
+define external fastcc  void @"nested_loop.gen#1<0>"() alwaysinline   {
 entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @nested_loop.1, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
@@ -106,7 +106,7 @@ entry:
 }
 
 
-define external fastcc  void @"nested_loop.gen#2<0>"()    {
+define external fastcc  void @"nested_loop.gen#2<0>"() alwaysinline   {
 entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @nested_loop.3, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  

@@ -231,7 +231,7 @@ if.else2:
 }
 
 
-define external fastcc  i64 @"mutual_type.a.a<0>"(i64  %"ahead##0", i64  %"atail##0")    {
+define external fastcc  i64 @"mutual_type.a.a<0>"(i64  %"ahead##0", i64  %"atail##0") alwaysinline   {
 entry:
   %0 = trunc i64 16 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -245,7 +245,7 @@ entry:
 }
 
 
-define external fastcc  {i64, i64, i1} @"mutual_type.a.a<1>"(i64  %"#result##0")    {
+define external fastcc  {i64, i64, i1} @"mutual_type.a.a<1>"(i64  %"#result##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#result##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -267,7 +267,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"mutual_type.a.ahead<0>"(i64  %"#rec##0")    {
+define external fastcc  {i64, i1} @"mutual_type.a.ahead<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -284,7 +284,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"mutual_type.a.ahead<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  {i64, i1} @"mutual_type.a.ahead<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -308,7 +308,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"mutual_type.a.atail<0>"(i64  %"#rec##0")    {
+define external fastcc  {i64, i1} @"mutual_type.a.atail<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -326,7 +326,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"mutual_type.a.atail<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  {i64, i1} @"mutual_type.a.atail<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -351,13 +351,13 @@ if.else:
 }
 
 
-define external fastcc  i64 @"mutual_type.a.no_a<0>"()    {
+define external fastcc  i64 @"mutual_type.a.no_a<0>"() alwaysinline   {
 entry:
   ret i64 0 
 }
 
 
-define external fastcc  i1 @"mutual_type.a.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"mutual_type.a.~=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = tail call fastcc  i1  @"mutual_type.a.=<0>"(i64  %"#left##0", i64  %"#right##0")  
   %1 = xor i1 %0, 1 
@@ -569,7 +569,7 @@ if.else2:
 }
 
 
-define external fastcc  i64 @"mutual_type.b.b<0>"(i64  %"bhead##0", i64  %"btail##0")    {
+define external fastcc  i64 @"mutual_type.b.b<0>"(i64  %"bhead##0", i64  %"btail##0") alwaysinline   {
 entry:
   %0 = trunc i64 16 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -583,7 +583,7 @@ entry:
 }
 
 
-define external fastcc  {i64, i64, i1} @"mutual_type.b.b<1>"(i64  %"#result##0")    {
+define external fastcc  {i64, i64, i1} @"mutual_type.b.b<1>"(i64  %"#result##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#result##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -605,7 +605,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"mutual_type.b.bhead<0>"(i64  %"#rec##0")    {
+define external fastcc  {i64, i1} @"mutual_type.b.bhead<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -622,7 +622,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"mutual_type.b.bhead<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  {i64, i1} @"mutual_type.b.bhead<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -646,7 +646,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"mutual_type.b.btail<0>"(i64  %"#rec##0")    {
+define external fastcc  {i64, i1} @"mutual_type.b.btail<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -664,7 +664,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"mutual_type.b.btail<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  {i64, i1} @"mutual_type.b.btail<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -689,13 +689,13 @@ if.else:
 }
 
 
-define external fastcc  i64 @"mutual_type.b.no_b<0>"()    {
+define external fastcc  i64 @"mutual_type.b.no_b<0>"() alwaysinline   {
 entry:
   ret i64 0 
 }
 
 
-define external fastcc  i1 @"mutual_type.b.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"mutual_type.b.~=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = tail call fastcc  i1  @"mutual_type.b.=<0>"(i64  %"#left##0", i64  %"#right##0")  
   %1 = xor i1 %0, 1 

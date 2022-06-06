@@ -98,7 +98,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"proc_gcd.gcd<0>"(i64  %"a##0", i64  %"b##0")    {
+define external fastcc  i64 @"proc_gcd.gcd<0>"(i64  %"a##0", i64  %"b##0") alwaysinline   {
 entry:
   %0 = tail call fastcc  i64  @"proc_gcd.gen#1<0>"(i64  %"a##0", i64  %"b##0", i64  %"a##0", i64  %"b##0")  
   ret i64 %0 
@@ -118,7 +118,7 @@ if.else:
 }
 
 
-define external fastcc  i64 @"proc_gcd.gen#2<0>"(i64  %"a##0", i64  %"b##0", i64  %"x##0", i64  %"y##0")    {
+define external fastcc  i64 @"proc_gcd.gen#2<0>"(i64  %"a##0", i64  %"b##0", i64  %"x##0", i64  %"y##0") alwaysinline   {
 entry:
   %0 = tail call fastcc  i64  @"proc_gcd.mod<0>"(i64  %"x##0", i64  %"y##0")  
   %1 = musttail call fastcc  i64  @"proc_gcd.gen#1<0>"(i64  %"a##0", i64  %"b##0", i64  %"y##0", i64  %0)  

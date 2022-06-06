@@ -78,6 +78,7 @@ import LLVM.AST.Typed (Typed(typeOf))
 import qualified Data.ByteString.Lazy as BL
 import qualified Data.ByteString.Short as BS
 import Data.ByteString.Char8 hiding (cons, map)
+import LLVM.AST.FunctionAttribute (FunctionAttribute)
 
 ----------------------------------------------------------------------------
 -- Types                                                                  --
@@ -284,17 +285,17 @@ emptyModule label = defaultModule { moduleName = fromString label }
 -- function will be called from foreign code, so it should use C calling
 -- conventions.
 globalDefine :: Bool -> Type -> String -> [(Type, Name)]
-             -> [BasicBlock] -> Definition
-globalDefine isForeign rettype label argtypes body
-             = GlobalDefinition $ functionDefaults {
-                 G.callingConvention = if isForeign then CC.C else CC.Fast
-               , name = Name $ fromString label
-               , parameters = ([Parameter ty nm [] | (ty, nm) <- argtypes],
-                               False)
-               , returnType = rettype
-               , basicBlocks = body
-               , section = fromString <$> functionDefSection label
-               }
+             -> [FunctionAttribute] -> [BasicBlock] -> Definition
+globalDefine isForeign rettype label argtypes attrs body
+    = GlobalDefinition $ functionDefaults {
+        G.callingConvention = if isForeign then CC.C else CC.Fast
+      , name = Name $ fromString label
+      , parameters = ([Parameter ty nm [] | (ty, nm) <- argtypes], False)
+      , returnType = rettype
+      , G.functionAttributes = Right <$> attrs
+      , basicBlocks = body
+      , section = fromString <$> functionDefSection label
+      }
 
 
 -- | create a global declaration of an external function for the specified

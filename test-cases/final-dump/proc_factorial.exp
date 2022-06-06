@@ -85,7 +85,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"proc_factorial.factorial<0>"(i64  %"n##0")    {
+define external fastcc  i64 @"proc_factorial.factorial<0>"(i64  %"n##0") alwaysinline   {
 entry:
   %0 = tail call fastcc  i64  @"proc_factorial.gen#1<0>"(i64  %"n##0", i64  1)  
   ret i64 %0 
@@ -106,7 +106,7 @@ if.else:
 }
 
 
-define external fastcc  i64 @"proc_factorial.gen#2<0>"(i64  %"n##0", i64  %"result##0")    {
+define external fastcc  i64 @"proc_factorial.gen#2<0>"(i64  %"n##0", i64  %"result##0") alwaysinline   {
 entry:
   %0 = mul   i64 %"n##0", %"result##0" 
   %1 = sub   i64 %"n##0", 1 

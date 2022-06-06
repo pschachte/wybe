@@ -124,7 +124,7 @@ if.else:
 }
 
 
-define external fastcc  void @"command_line.set_exit_code<0>"(i64  %"code##0")    {
+define external fastcc  void @"command_line.set_exit_code<0>"(i64  %"code##0") alwaysinline   {
 entry:
   store  i64 %"code##0", i64* @"resource#command_line.exit_code" 
   ret void 

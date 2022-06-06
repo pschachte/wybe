@@ -74,7 +74,7 @@ entry:
 }
 
 
-define external fastcc  void @"commonsubexpr.common_subexpr<0>"(i64  %"x##0")    {
+define external fastcc  void @"commonsubexpr.common_subexpr<0>"(i64  %"x##0") alwaysinline   {
 entry:
   %0 = add   i64 %"x##0", 1 
   %1 = sub   i64 %"x##0", 1 

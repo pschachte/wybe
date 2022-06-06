@@ -1841,7 +1841,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  i1 @"stmt_for.int_sequence.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"stmt_for.int_sequence.=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#left##0" to i64* 
   %1 = load  i64, i64* %0 
@@ -1923,7 +1923,7 @@ if.else2:
 }
 
 
-define external fastcc  i64 @"stmt_for.int_sequence.end<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"stmt_for.int_sequence.end<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = add   i64 %"#rec##0", 16 
   %1 = inttoptr i64 %0 to i64* 
@@ -1932,7 +1932,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"stmt_for.int_sequence.end<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"stmt_for.int_sequence.end<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 24 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -1969,7 +1969,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"stmt_for.int_sequence.int_sequence<0>"(i64  %"start##0", i64  %"stride##0", i64  %"end##0")    {
+define external fastcc  i64 @"stmt_for.int_sequence.int_sequence<0>"(i64  %"start##0", i64  %"stride##0", i64  %"end##0") alwaysinline   {
 entry:
   %0 = trunc i64 24 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -1986,7 +1986,7 @@ entry:
 }
 
 
-define external fastcc  {i64, i64, i64} @"stmt_for.int_sequence.int_sequence<1>"(i64  %"#result##0")    {
+define external fastcc  {i64, i64, i64} @"stmt_for.int_sequence.int_sequence<1>"(i64  %"#result##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#result##0" to i64* 
   %1 = load  i64, i64* %0 
@@ -2003,7 +2003,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"stmt_for.int_sequence.start<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"stmt_for.int_sequence.start<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#rec##0" to i64* 
   %1 = load  i64, i64* %0 
@@ -2011,7 +2011,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"stmt_for.int_sequence.start<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"stmt_for.int_sequence.start<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 24 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -2026,7 +2026,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"stmt_for.int_sequence.stride<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"stmt_for.int_sequence.stride<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = add   i64 %"#rec##0", 8 
   %1 = inttoptr i64 %0 to i64* 
@@ -2035,7 +2035,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"stmt_for.int_sequence.stride<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"stmt_for.int_sequence.stride<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 24 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -2051,7 +2051,7 @@ entry:
 }
 
 
-define external fastcc  i1 @"stmt_for.int_sequence.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"stmt_for.int_sequence.~=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#left##0" to i64* 
   %1 = load  i64, i64* %0 

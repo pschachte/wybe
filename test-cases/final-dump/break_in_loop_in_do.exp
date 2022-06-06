@@ -76,7 +76,7 @@ entry:
 }
 
 
-define external fastcc  void @"break_in_loop_in_do.gen#1<0>"()    {
+define external fastcc  void @"break_in_loop_in_do.gen#1<0>"() alwaysinline   {
 entry:
   %0 = load  i64, i64* @"resource#break_in_loop_in_do.counter" 
   tail call ccc  void  @print_int(i64  %0)  
@@ -85,7 +85,7 @@ entry:
 }
 
 
-define external fastcc  void @"break_in_loop_in_do.gen#2<0>"(i64  %"tmp#0##0")    {
+define external fastcc  void @"break_in_loop_in_do.gen#2<0>"(i64  %"tmp#0##0") alwaysinline   {
 entry:
   store  i64 %"tmp#0##0", i64* @"resource#break_in_loop_in_do.counter" 
   tail call ccc  void  @print_int(i64  %"tmp#0##0")  

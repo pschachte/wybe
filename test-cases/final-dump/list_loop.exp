@@ -196,7 +196,7 @@ if.else:
 }
 
 
-define external fastcc  void @"list_loop.gen#2<0>"(i64  %"h##0", i64  %"l##0", i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"x##0")    {
+define external fastcc  void @"list_loop.gen#2<0>"(i64  %"h##0", i64  %"l##0", i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"x##0") alwaysinline   {
 entry:
   tail call ccc  void  @print_int(i64  %"h##0")  
   tail call ccc  void  @putchar(i8  10)  
@@ -228,7 +228,7 @@ if.else:
 }
 
 
-define external fastcc  void @"list_loop.gen#4<0>"(i64  %"h##0", i64  %"h2##0", i64  %"l##0", i64  %"l2##0", i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"x##0")    {
+define external fastcc  void @"list_loop.gen#4<0>"(i64  %"h##0", i64  %"h2##0", i64  %"l##0", i64  %"l2##0", i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"x##0") alwaysinline   {
 entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @list_loop.1, i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %"h##0")  
@@ -444,7 +444,7 @@ if.else2:
 }
 
 
-define external fastcc  i64 @"list_loop.intlist.cons<0>"(i64  %"head##0", i64  %"tail##0")    {
+define external fastcc  i64 @"list_loop.intlist.cons<0>"(i64  %"head##0", i64  %"tail##0") alwaysinline   {
 entry:
   %0 = trunc i64 16 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -458,7 +458,7 @@ entry:
 }
 
 
-define external fastcc  {i64, i64, i1} @"list_loop.intlist.cons<1>"(i64  %"#result##0")    {
+define external fastcc  {i64, i64, i1} @"list_loop.intlist.cons<1>"(i64  %"#result##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#result##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -480,7 +480,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"list_loop.intlist.head<0>"(i64  %"#rec##0")    {
+define external fastcc  {i64, i1} @"list_loop.intlist.head<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -497,7 +497,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"list_loop.intlist.head<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  {i64, i1} @"list_loop.intlist.head<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -521,13 +521,13 @@ if.else:
 }
 
 
-define external fastcc  i64 @"list_loop.intlist.nil<0>"()    {
+define external fastcc  i64 @"list_loop.intlist.nil<0>"() alwaysinline   {
 entry:
   ret i64 0 
 }
 
 
-define external fastcc  {i64, i1} @"list_loop.intlist.tail<0>"(i64  %"#rec##0")    {
+define external fastcc  {i64, i1} @"list_loop.intlist.tail<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -545,7 +545,7 @@ if.else:
 }
 
 
-define external fastcc  {i64, i1} @"list_loop.intlist.tail<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  {i64, i1} @"list_loop.intlist.tail<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -570,7 +570,7 @@ if.else:
 }
 
 
-define external fastcc  i1 @"list_loop.intlist.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"list_loop.intlist.~=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = tail call fastcc  i1  @"list_loop.intlist.=<0>"(i64  %"#left##0", i64  %"#right##0")  
   %1 = xor i1 %0, 1 

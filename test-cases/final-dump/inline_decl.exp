@@ -100,14 +100,14 @@ entry:
 }
 
 
-define external fastcc  void @"inline_decl.finish<0>"()    {
+define external fastcc  void @"inline_decl.finish<0>"() noinline   {
 entry:
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
 
 
-define external fastcc  void @"inline_decl.long<0>"()    {
+define external fastcc  void @"inline_decl.long<0>"() alwaysinline   {
 entry:
   tail call ccc  void  @putchar(i8  104)  
   tail call ccc  void  @putchar(i8  101)  

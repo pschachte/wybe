@@ -73,7 +73,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  void @"numbers.<0>"()    {
+define external fastcc  void @"numbers.<0>"() alwaysinline   {
 entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @numbers.1, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
@@ -95,7 +95,7 @@ if.else:
 }
 
 
-define external fastcc  double @"numbers.toCelsius<0>"(double  %"f##0")    {
+define external fastcc  double @"numbers.toCelsius<0>"(double  %"f##0") alwaysinline   {
 entry:
   %0 = fsub double %"f##0", 3.200000e1 
   %1 = fdiv double %0, 1.800000e0 

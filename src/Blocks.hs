@@ -48,6 +48,7 @@ import qualified LLVM.AST.IntegerPredicate       as IP
 import           LLVM.AST.Operand                hiding (PointerType, operands)
 import           LLVM.AST.Type
 import           LLVM.AST.Typed
+import qualified LLVM.AST.Attribute              as A (FunctionAttribute(..)) 
 import           LLVM.Pretty                     (ppllvm)
 
 import qualified Data.ByteString                 as BS
@@ -216,12 +217,11 @@ isStdLib (m:_) = m == "wybe"
 -- externs and globals go on the top of the module.
 translateProc :: ProcDef -> Translation [ProcDefBlock]
 translateProc proc = do
-    let proto = procImplnProto $ procImpln proc
-    let body = procImplnBody $ procImpln proc
-    let isClosure = isClosureVariant $ procVariant proc
-    let speczBodies = procImplnSpeczBodies $ procImpln proc
+    let impln = procImpln proc
+    let proto = procImplnProto impln
+    let speczBodies = procImplnSpeczBodies impln
     -- translate the standard version
-    block <- _translateProcImpl proto isClosure body
+    block <- _translateProcImpl proc
     -- translate the specialized versions
     let speczBodies' = speczBodies
                         |> Map.toList
@@ -235,21 +235,24 @@ translateProc proc = do
     when (hasDuplicates (List.map fst speczBodies'))
             $ shouldnt $ "Specz version id conflicts"
                 ++ show (List.map fst speczBodies')
-    blocks <- mapM (\(id, currBody) -> do
+    blocks <- mapM (\(id, currBody) -> 
                     -- rename this version of proc
                     let pname = primProtoName proto ++ "[" ++ id ++ "]"
-                    let proto' = proto {primProtoName = pname}
-                    _translateProcImpl proto' isClosure currBody
+                        proto' = proto {primProtoName = pname}
+                    in _translateProcImpl proc{procImpln=impln{procImplnProto = proto',
+                                                               procImplnBody=currBody}}
             ) speczBodies'
     return $ block:blocks
 
 
 -- Helper for `translateProc`. Translate the given `ProcBody`
 -- (A specialized version of a procedure).
-_translateProcImpl :: PrimProto -> Bool -> ProcBody -> Translation ProcDefBlock
-_translateProcImpl proto isClosure body = do
-    let (proto', body') = if isClosure then closeClosure proto body
-                                       else (proto, body)
+_translateProcImpl :: ProcDef -> Translation ProcDefBlock
+_translateProcImpl proc@ProcDef{procVariant=variant,
+                                procImpln=(ProcDefPrim _ proto body _ _)} = do
+    let (proto', body') = if isClosureVariant variant 
+                          then closeClosure proto body
+                          else (proto, body)
     modspec <- lift getModuleSpec
     lift $ do
         logBlocks $ "\n" ++ replicate 70 '=' ++ "\n"
@@ -258,13 +261,12 @@ _translateProcImpl proto isClosure body = do
         logBlocks $ show proto'
                     ++ showBlock 4 body'
                     ++ "\n" ++ replicate 50 '-' ++ "\n"
-    codestate <- doCodegenBody body'
-                    `execStateT` emptyCodegen proto'
-    let pname = primProtoName proto
-    let body' = createBlocks codestate
-    lldef <- lift $ makeGlobalDefinition pname proto' body'
+    codestate <- doCodegenBody body' `execStateT` emptyCodegen proto'
+    let blocks = createBlocks codestate
+    lldef <- lift $ makeGlobalDefinition proc proto' blocks
     lift $ logBlocks $ show lldef
     return $ ProcDefBlock proto lldef
+_translateProcImpl ProcDef{procImpln=ProcDefSrc{}} = shouldnt "_translateProcImpl on source"
 
 -- | Updates a PrimProto and ProcBody as though the Free Params are accessed
 -- via the closure environment
@@ -291,18 +293,19 @@ closeClosure proto@PrimProto{primProtoParams=params}
 -- prototype and its body as a list of BasicBlock(s). The return type of such
 -- a definition is decided based on the Ouput parameter of the procedure, or
 -- is made to be phantom.
-makeGlobalDefinition :: String -> PrimProto
+makeGlobalDefinition :: ProcDef -> PrimProto
                      -> [LLVMAST.BasicBlock]
                      -> Compiler LLVMAST.Definition
-makeGlobalDefinition pname proto bls = do
+makeGlobalDefinition proc proto bls = do
     modName <- showModSpec <$> getModuleSpec
-    let label0 = modName ++ "." ++ pname
+    let label0 = modName ++ "." ++ primProtoName proto
     -- For the top-level main program
     let isMain = label0 == ".<0>"
     let (label,isForeign) = if isMain then ("main",True) else (label0,False)
     fnargs <- protoLLVMArguments proto
     retty <- protoLLVMOutputType proto
-    return $ globalDefine isForeign retty label fnargs bls
+    let attrs = procLLVMFuncAttrs proc
+    return $ globalDefine isForeign retty label fnargs attrs bls
 
 -- | Convert a primitive's input parameter to LLVM's Definition parameter.
 makeFnArg :: PrimParam -> Compiler (Type, LLVMAST.Name)
@@ -331,6 +334,11 @@ protoLLVMOutputType proto = do
     outputs <- protoRealParamsWhere paramGoesOut proto
     outTys <- mapM primParamLLVMType outputs
     primReturnLLVMType outTys
+
+procLLVMFuncAttrs :: ProcDef -> [A.FunctionAttribute]
+procLLVMFuncAttrs ProcDef{procInlining=MayInline} = []
+procLLVMFuncAttrs ProcDef{procInlining=Inline}    = [A.AlwaysInline]
+procLLVMFuncAttrs ProcDef{procInlining=NoInline}  = [A.NoInline]
 
 ----------------------------------------------------------------------------
 -- Body Compilation                                                       --

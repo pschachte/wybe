@@ -89,7 +89,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"exp_simple.foreign_add<0>"()    {
+define external fastcc  i64 @"exp_simple.foreign_add<0>"() alwaysinline   {
 entry:
   ret i64 3 
 }

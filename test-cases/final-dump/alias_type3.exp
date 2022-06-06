@@ -240,7 +240,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  i1 @"alias_type3.position.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"alias_type3.position.=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#left##0" to i64* 
   %1 = load  i64, i64* %0 
@@ -262,7 +262,7 @@ if.else:
 }
 
 
-define external fastcc  i64 @"alias_type3.position.position<0>"(i64  %"x##0", i64  %"y##0")    {
+define external fastcc  i64 @"alias_type3.position.position<0>"(i64  %"x##0", i64  %"y##0") alwaysinline   {
 entry:
   %0 = trunc i64 16 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -276,7 +276,7 @@ entry:
 }
 
 
-define external fastcc  {i64, i64} @"alias_type3.position.position<1>"(i64  %"#result##0")    {
+define external fastcc  {i64, i64} @"alias_type3.position.position<1>"(i64  %"#result##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#result##0" to i64* 
   %1 = load  i64, i64* %0 
@@ -289,7 +289,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"alias_type3.position.x<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"alias_type3.position.x<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#rec##0" to i64* 
   %1 = load  i64, i64* %0 
@@ -297,7 +297,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"alias_type3.position.x<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"alias_type3.position.x<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 16 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -312,7 +312,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"alias_type3.position.y<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"alias_type3.position.y<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = add   i64 %"#rec##0", 8 
   %1 = inttoptr i64 %0 to i64* 
@@ -321,7 +321,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"alias_type3.position.y<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"alias_type3.position.y<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 16 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -337,7 +337,7 @@ entry:
 }
 
 
-define external fastcc  i1 @"alias_type3.position.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"alias_type3.position.~=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#left##0" to i64* 
   %1 = load  i64, i64* %0 
@@ -498,7 +498,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  i1 @"alias_type3.posrec.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"alias_type3.posrec.=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#left##0" to i64* 
   %1 = load  i64, i64* %0 
@@ -535,7 +535,7 @@ if.else1:
 }
 
 
-define external fastcc  i64 @"alias_type3.posrec.a<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"alias_type3.posrec.a<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = add   i64 %"#rec##0", 8 
   %1 = inttoptr i64 %0 to i64* 
@@ -544,7 +544,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"alias_type3.posrec.a<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"alias_type3.posrec.a<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 16 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -560,7 +560,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"alias_type3.posrec.p<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"alias_type3.posrec.p<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#rec##0" to i64* 
   %1 = load  i64, i64* %0 
@@ -568,7 +568,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"alias_type3.posrec.p<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"alias_type3.posrec.p<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 16 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -583,7 +583,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"alias_type3.posrec.posrec<0>"(i64  %"p##0", i64  %"a##0")    {
+define external fastcc  i64 @"alias_type3.posrec.posrec<0>"(i64  %"p##0", i64  %"a##0") alwaysinline   {
 entry:
   %0 = trunc i64 16 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -597,7 +597,7 @@ entry:
 }
 
 
-define external fastcc  {i64, i64} @"alias_type3.posrec.posrec<1>"(i64  %"#result##0")    {
+define external fastcc  {i64, i64} @"alias_type3.posrec.posrec<1>"(i64  %"#result##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#result##0" to i64* 
   %1 = load  i64, i64* %0 
@@ -610,7 +610,7 @@ entry:
 }
 
 
-define external fastcc  i1 @"alias_type3.posrec.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"alias_type3.posrec.~=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#left##0" to i64* 
   %1 = load  i64, i64* %0 

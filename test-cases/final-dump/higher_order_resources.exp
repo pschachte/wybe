@@ -390,7 +390,7 @@ entry:
 }
 
 
-define external fastcc  void @"higher_order_resources.gen#1<0>"(i64  %"anon#1#1##0")    {
+define external fastcc  void @"higher_order_resources.gen#1<0>"(i64  %"anon#1#1##0") alwaysinline   {
 entry:
   %0 = tail call fastcc  i64  @"wybe.list.length1<0>"(i64  %"anon#1#1##0", i64  0)  
   musttail call fastcc  void  @"higher_order_resources.take_max<0>"(i64  %0)  
@@ -398,7 +398,7 @@ entry:
 }
 
 
-define external fastcc  void @"higher_order_resources.gen#1<1>"(i64  %"#env##0", i64  %"anon#1#1##0")    {
+define external fastcc  void @"higher_order_resources.gen#1<1>"(i64  %"#env##0", i64  %"anon#1#1##0") alwaysinline   {
 entry:
   %0 = tail call fastcc  i64  @"wybe.list.length1<0>"(i64  %"anon#1#1##0", i64  0)  
   tail call fastcc  void  @"higher_order_resources.take_max<0>"(i64  %0)  
@@ -406,7 +406,7 @@ entry:
 }
 
 
-define external fastcc  void @"higher_order_resources.gen#2<0>"(i64  %"anon#2#1##0")    {
+define external fastcc  void @"higher_order_resources.gen#2<0>"(i64  %"anon#2#1##0") alwaysinline   {
 entry:
   %0 = load  i64, i64* @"resource#higher_order_resources.maximum" 
   store  i64 -1000, i64* @"resource#higher_order_resources.maximum" 
@@ -422,7 +422,7 @@ entry:
 }
 
 
-define external fastcc  void @"higher_order_resources.gen#2<1>"(i64  %"#env##0", i64  %"anon#2#1##0")    {
+define external fastcc  void @"higher_order_resources.gen#2<1>"(i64  %"#env##0", i64  %"anon#2#1##0") alwaysinline   {
 entry:
   %0 = load  i64, i64* @"resource#higher_order_resources.maximum" 
   store  i64 -1000, i64* @"resource#higher_order_resources.maximum" 
@@ -438,7 +438,7 @@ entry:
 }
 
 
-define external fastcc  void @"higher_order_resources.gen#3<0>"(i64  %"#env##0", i64  %"i##0")    {
+define external fastcc  void @"higher_order_resources.gen#3<0>"(i64  %"#env##0", i64  %"i##0") alwaysinline   {
 entry:
   tail call fastcc  void  @"higher_order_resources.take_max<0>"(i64  %"i##0")  
   ret void 

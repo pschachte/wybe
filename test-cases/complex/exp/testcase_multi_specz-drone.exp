@@ -192,7 +192,7 @@ if.else:
 }
 
 
-define external fastcc  void @"command_line.set_exit_code<0>"(i64  %"code##0")    {
+define external fastcc  void @"command_line.set_exit_code<0>"(i64  %"code##0") alwaysinline   {
 entry:
   store  i64 %"code##0", i64* @"resource#command_line.exit_code" 
   ret void 
@@ -722,7 +722,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external ccc  i64 @main(i64  %"argc##0", i64  %"argv##0")    {
+define external ccc  i64 @main(i64  %"argc##0", i64  %"argv##0") alwaysinline   {
 entry:
   store  i64 %"argc##0", i64* @"resource#command_line.argc" 
   store  i64 %"argv##0", i64* @"resource#command_line.argv" 
@@ -858,7 +858,7 @@ if.else:
 }
 
 
-define external fastcc  void @"command_line.set_exit_code<0>"(i64  %"code##0")    {
+define external fastcc  void @"command_line.set_exit_code<0>"(i64  %"code##0") alwaysinline   {
 entry:
   store  i64 %"code##0", i64* @"resource#command_line.exit_code" 
   ret void 
@@ -1604,7 +1604,7 @@ entry:
 }
 
 
-define external fastcc  void @"drone.gen#1<0>"()    {
+define external fastcc  void @"drone.gen#1<0>"() alwaysinline   {
 entry:
   %0 = tail call ccc  i64  @malloc_count()  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.1, i32 0, i32 0) to i64))  
@@ -1785,7 +1785,7 @@ if.else2:
 }
 
 
-define external fastcc  void @"drone.print_info<0>"(i64  %"d##0")    {
+define external fastcc  void @"drone.print_info<0>"(i64  %"d##0") alwaysinline   {
 entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.3, i32 0, i32 0) to i64))  
   %0 = inttoptr i64 %"d##0" to i64* 
@@ -1999,7 +1999,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  i1 @"drone.drone_info.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"drone.drone_info.=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#left##0" to i64* 
   %1 = load  i64, i64* %0 
@@ -2043,7 +2043,7 @@ if.else2:
 }
 
 
-define external fastcc  i64 @"drone.drone_info.count<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"drone.drone_info.count<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = add   i64 %"#rec##0", 24 
   %1 = inttoptr i64 %0 to i64* 
@@ -2052,7 +2052,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"drone.drone_info.count<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"drone.drone_info.count<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 32 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -2068,7 +2068,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"drone.drone_info.drone_info<0>"(i64  %"x##0", i64  %"y##0", i64  %"z##0", i64  %"count##0")    {
+define external fastcc  i64 @"drone.drone_info.drone_info<0>"(i64  %"x##0", i64  %"y##0", i64  %"z##0", i64  %"count##0") alwaysinline   {
 entry:
   %0 = trunc i64 32 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -2088,7 +2088,7 @@ entry:
 }
 
 
-define external fastcc  {i64, i64, i64, i64} @"drone.drone_info.drone_info<1>"(i64  %"#result##0")    {
+define external fastcc  {i64, i64, i64, i64} @"drone.drone_info.drone_info<1>"(i64  %"#result##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#result##0" to i64* 
   %1 = load  i64, i64* %0 
@@ -2109,7 +2109,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"drone.drone_info.x<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"drone.drone_info.x<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#rec##0" to i64* 
   %1 = load  i64, i64* %0 
@@ -2117,7 +2117,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"drone.drone_info.x<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"drone.drone_info.x<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 32 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -2132,7 +2132,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"drone.drone_info.y<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"drone.drone_info.y<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = add   i64 %"#rec##0", 8 
   %1 = inttoptr i64 %0 to i64* 
@@ -2141,7 +2141,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"drone.drone_info.y<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"drone.drone_info.y<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 32 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -2157,7 +2157,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"drone.drone_info.z<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"drone.drone_info.z<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = add   i64 %"#rec##0", 16 
   %1 = inttoptr i64 %0 to i64* 
@@ -2166,7 +2166,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"drone.drone_info.z<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"drone.drone_info.z<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 32 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -2182,7 +2182,7 @@ entry:
 }
 
 
-define external fastcc  i1 @"drone.drone_info.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"drone.drone_info.~=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#left##0" to i64* 
   %1 = load  i64, i64* %0 
