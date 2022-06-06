@@ -1,0 +1,7 @@
+Error detected during type checking of module(s) higher_order_ambig
+[91mfinal-dump/higher_order_ambig.wybe:2:6: Ambiguous overloading: call could refer to:
+    higher f with modifiers {semipure,resource}
+    higher f with modifiers {resource}
+    higher f with modifiers {semipure}
+    higher f
+[0m

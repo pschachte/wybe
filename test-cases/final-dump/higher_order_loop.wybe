@@ -1,0 +1,6 @@
+
+?fs = [int.println, int.print]
+
+for ?f in fs {
+    !f(10)
+}
