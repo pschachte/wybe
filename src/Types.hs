@@ -830,7 +830,7 @@ expType' (Closure pspec closed) _ = do
         return $ HigherOrderType
                     (normaliseModifiers
                         $ ProcModifiers detism MayInline
-                            impurity RegularProc resful [] [])
+                            impurity RegularProc resful)
                     $ zipWith TypeFlow freeTypes freeFlows
     else do
         typeError ReasonShouldnt
@@ -881,8 +881,6 @@ normaliseModifiers :: ProcModifiers -> ProcModifiers
 normaliseModifiers mods@ProcModifiers{modifierImpurity=imp}
     = mods{modifierInline=MayInline,
            modifierImpurity=max imp Pure,
-           modifierUnknown=[],
-           modifierConflict=[],
            modifierVariant=RegularProc}
 
 ----------------------------------------------------------------
@@ -1000,7 +998,7 @@ instance Show CallInfo where
     show (FirstInfo procSpec tys flows detism impurity inRes outRes partial) =
         (if partial then "partial application of " else "")
         ++ showProcModifiers' (ProcModifiers detism MayInline impurity
-                                RegularProc False [] [])
+                                RegularProc False)
         ++ show procSpec
         ++ "(" ++ intercalate "," (zipWith ((show .) . TypeFlow) tys flows) ++ ")"
         ++ if Set.null inRes && Set.null outRes
@@ -1078,7 +1076,7 @@ procToPartial callFlows hasBang info@FirstInfo{firstInfoPartial=False,
     needsBang = resful || impurity > Pure
     higherTy = HigherOrderType (normaliseModifiers
                                 $ ProcModifiers detism MayInline
-                                    impurity RegularProc resful [] [])
+                                    impurity RegularProc resful)
                     $ zipWith TypeFlow higherTys higherFls
 procToPartial _ _ _ = (Nothing, False)
 

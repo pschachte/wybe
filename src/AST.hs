@@ -101,7 +101,7 @@ module AST (
   addSimpleResource, lookupResource,
   specialResources, specialResourcesSet, isSpecialResource,
   publicResource, resourcefulName,
-  ProcModifiers(..), defaultProcModifiers, checkProcMods,
+  ProcModifiers(..), defaultProcModifiers,
   setDetism, setInline, setImpurity, setVariant,
   ProcVariant(..), Inlining(..), Impurity(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
@@ -1087,16 +1087,12 @@ addImport modspec imports = do
 
 
 -- | Represent any user-declared or inferred properties of a proc.
--- XXX the list of unknown and conflicting modifiers shouldn't be needed,
--- but to get rid of them, the parser needs to be able to report errors.
 data ProcModifiers = ProcModifiers {
     modifierDetism::Determinism,   -- ^ The proc determinism
     modifierInline::Inlining,      -- ^ Aggresively inline this proc?
     modifierImpurity::Impurity,    -- ^ Don't assume purity when optimising
     modifierVariant::ProcVariant,  -- ^ Is proc actually a constructor?
-    modifierResourceful::Bool,     -- ^ Can this procedure use resources?
-    modifierUnknown::[String],     -- ^ Unknown modifiers specified
-    modifierConflict::[String]     -- ^ Modifiers that conflict with others
+    modifierResourceful::Bool      -- ^ Can this procedure use resources?
 } deriving (Eq, Ord, Generic)
 
 
@@ -1152,7 +1148,7 @@ showResourceSets (ins, outs) = "{" ++ showSet ins ++ ";" ++ showSet outs ++ "}"
 
 -- | The default Det, non-inlined, pure ProcModifiers.
 defaultProcModifiers :: ProcModifiers
-defaultProcModifiers = ProcModifiers Det MayInline Pure RegularProc False [] []
+defaultProcModifiers = ProcModifiers Det MayInline Pure RegularProc False
 
 
 -- | Set the modifierDetism attribute of a ProcModifiers.
@@ -1177,7 +1173,7 @@ setVariant variant mods = mods {modifierVariant=variant}
 
 -- | How to display ProcModifiers
 showProcModifiers :: ProcModifiers -> String
-showProcModifiers (ProcModifiers detism inlining impurity _ res _ _) =
+showProcModifiers (ProcModifiers detism inlining impurity _ res) =
     showFlags $ List.filter (not . List.null) [d,i,p,r]
     where d = determinismName detism
           i = inliningName inlining
@@ -1208,8 +1204,7 @@ showFlags' flags = showFlags flags ++ if List.null flags then "" else " "
 addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
     let name = procProtoName proto
-    let ProcModifiers detism inlining impurity variant _ _ _ = mods
-    checkProcMods ("declaratation of " ++ name) pos mods
+    let ProcModifiers detism inlining impurity variant _ = mods
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 Map.empty
                   vis detism inlining impurity variant (initSuperprocSpec vis)
     void $ addProcDef procDef
@@ -1238,19 +1233,6 @@ addProcDef procDef = do
     logAST $ "Adding definition of " ++ show spec ++ ":" ++
       showProcDef 4 procDef
     return spec
-
-
--- | Check a set of ProcModifiers, providing error messages for unknown and
--- conflicting mods
-checkProcMods :: String -> OptPos -> ProcModifiers -> Compiler ()
-checkProcMods context pos ProcModifiers{modifierUnknown=unknown,
-                                        modifierConflict=conflicting} = do
-    mapM_ (errmsg pos . ("Unknown modifier '" ++)
-                      . (++ "' in " ++ context))
-        unknown
-    mapM_ (errmsg pos . ("Modifier '" ++)
-                      . (++ "' conflicts with earlier modifier in " ++ context))
-        conflicting
 
 
 getParams :: ProcSpec -> Compiler [Param]
@@ -3761,7 +3743,7 @@ showProcDef thisID
     "\n"
     ++ showProcName n ++ " > "
     ++ visibilityPrefix vis
-    ++ showProcModifiers' (ProcModifiers detism inline impurity ctor False [] [])
+    ++ showProcModifiers' (ProcModifiers detism inline impurity ctor False)
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
     ++ showSuperProc sub
     ++ "\n"

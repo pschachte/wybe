@@ -663,7 +663,7 @@ globaliseExp ty exp@(Var nm fl _) pos = do
 globaliseExp _ (Closure pspec exps) pos = do
     exps' <- globaliseExps' exps
     return $ Closure pspec exps' `maybePlace` pos
-globaliseExp _ (AnonProc mods@(ProcModifiers detism _ _ _ resful _ _)
+globaliseExp _ (AnonProc mods@(ProcModifiers detism _ _ _ resful)
                 params body clsd res) pos = do
     (params', body', _) <- globaliseProc pos Nothing AnonymousProc
                                 detism params Set.empty body
