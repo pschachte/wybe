@@ -356,8 +356,8 @@ typeErrorMessage (ReasonWarnMultipleMatches match rest pos) =
     Message Warning pos $
         "Multiple procedures match this call's types and flows:" ++
         List.concatMap (("\n    "++) . show)
-                       (firstInfoProc <$> (match:rest))
-        ++ "\nDefaulting to: " ++ show (firstInfoProc match)
+                       (fiProc <$> (match:rest))
+        ++ "\nDefaulting to: " ++ show (fiProc match)
 typeErrorMessage (ReasonAmbig procName pos varAmbigs) =
     Message Error pos $
         "Type ambiguity in defn of " ++ procName ++ ":" ++
@@ -391,7 +391,7 @@ typeErrorMessage (ReasonHigherFlow callFrom callTo idx flow expected pos) =
     Message Error pos $
         "Higher order call to " ++ showProcName callTo ++ " in "
         ++ showProcName callFrom ++ " has "
-        ++ showFlowName flow ++ " flow for argument " 
+        ++ showFlowName flow ++ " flow for argument "
         ++ show idx ++ ", but expects "
         ++ showFlowName expected ++ " flow."
 typeErrorMessage (ReasonPartialFlow from to idx flow pos) =
@@ -576,7 +576,7 @@ ultimateType ty@TypeVariable{typeVariableName=tvar} = do
     ty' <- gets $ Map.lookup tvar . tvarDict
     logTyped $ "Type variable " ++ show tvar ++ " is bound to " ++ show ty'
     maybe (return ty) ultimateType ty'
-ultimateType (TypeSpec mod name args) = 
+ultimateType (TypeSpec mod name args) =
     TypeSpec mod name <$> mapM ultimateType args
 ultimateType ty@HigherOrderType{higherTypeParams=typeFlows} = do
     types <- mapM (ultimateType . typeFlowType) typeFlows
@@ -978,24 +978,25 @@ typecheckProcDecl (RoughProc m name) = do
 -- |An individual call, and information that is related to this call
 data CallInfo
     = FirstInfo {
-        firstInfoProc     :: ProcSpec,
-        firstInfoTypes    :: [TypeSpec],
-        firstInfoFlows    :: [FlowDirection],
-        firstInfoDetism   :: Determinism,
-        firstInfoImpurity :: Impurity,
-        firstInfoInRes    :: Set ResourceSpec,
-        firstInfoOutRes   :: Set ResourceSpec,
-        firstInfoPartial  :: Bool
+        fiProc         :: ProcSpec
+      , fiTypes        :: [TypeSpec]
+      , fiFlows        :: [FlowDirection]
+      , fiDetism       :: Determinism
+      , fiImpurity     :: Impurity
+      , fiInRes        :: Set ResourceSpec
+      , fiOutRes       :: Set ResourceSpec
+      , fiNeedsResBang :: Bool
+      , fiPartial      :: Bool
     } | HigherInfo {
-        higherInfoFunc :: Exp
+        hiFunc :: Exp
     } | TestInfo {
-        testInfoVar :: Exp
+        tiVar :: Exp
     }
    deriving (Eq, Ord)
 
 
 instance Show CallInfo where
-    show (FirstInfo procSpec tys flows detism impurity inRes outRes partial) =
+    show (FirstInfo procSpec tys flows detism impurity inRes outRes _ partial) =
         (if partial then "partial application of " else "")
         ++ showProcModifiers' (ProcModifiers detism MayInline impurity
                                 RegularProc False)
@@ -1012,7 +1013,7 @@ instance Show CallInfo where
 
 
 callInfoTypes :: CallInfo -> Maybe [TypeSpec]
-callInfoTypes FirstInfo{firstInfoTypes=tys} = Just tys
+callInfoTypes FirstInfo{fiTypes=tys} = Just tys
 callInfoTypes HigherInfo{} = Nothing
 callInfoTypes TestInfo{} = Nothing
 
@@ -1021,15 +1022,15 @@ callInfoTypes TestInfo{} = Nothing
 --  and if so, return Just the FirstInfo for the equivalent test proc
 -- Higher order reification of bool fns to tests is handled in `matchTypes'
 boolFnToTest :: CallInfo -> Maybe CallInfo
-boolFnToTest info@FirstInfo{firstInfoDetism=Det,
-                            firstInfoPartial=False,
-                            firstInfoTypes=tys,
-                            firstInfoFlows=flows}
+boolFnToTest info@FirstInfo{fiDetism=Det,
+                            fiPartial=False,
+                            fiTypes=tys,
+                            fiFlows=flows}
     | List.null tys = Nothing
     | last tys == boolType && last flows == ParamOut =
-        Just $ info {firstInfoDetism=SemiDet,
-                     firstInfoTypes=init tys,
-                     firstInfoFlows=init flows}
+        Just $ info {fiDetism=SemiDet,
+                     fiTypes=init tys,
+                     fiFlows=init flows}
     | otherwise = Nothing
 boolFnToTest _ = Nothing
 
@@ -1038,13 +1039,13 @@ boolFnToTest _ = Nothing
 --  the Det proc with a single Bool output as last arg
 -- Higher order reification of tests bool fns is handled in `matchTypes'
 testToBoolFn :: CallInfo -> Maybe CallInfo
-testToBoolFn info@FirstInfo{firstInfoDetism=SemiDet,
-                            firstInfoPartial=False,
-                            firstInfoTypes=tys,
-                            firstInfoFlows=flows}
-    = Just $ info {firstInfoDetism=Det,
-                   firstInfoTypes=tys ++ [boolType],
-                   firstInfoFlows=flows ++ [ParamOut]}
+testToBoolFn info@FirstInfo{fiDetism=SemiDet,
+                            fiPartial=False,
+                            fiTypes=tys,
+                            fiFlows=flows}
+    = Just $ info {fiDetism=Det,
+                   fiTypes=tys ++ [boolType],
+                   fiFlows=flows ++ [ParamOut]}
 testToBoolFn _ = Nothing
 
 
@@ -1054,25 +1055,22 @@ testToBoolFn _ = Nothing
 -- call where the call does not have a ! prefix, at most 1 more than the expected
 -- arity. The Bool returned indicates if the call should have a ! or not
 procToPartial :: [FlowDirection] -> Bool -> CallInfo -> (Maybe CallInfo, Bool)
-procToPartial callFlows hasBang info@FirstInfo{firstInfoPartial=False,
-                                               firstInfoTypes=tys,
-                                               firstInfoFlows=flows,
-                                               firstInfoInRes=inRes,
-                                               firstInfoOutRes=outRes,
-                                               firstInfoDetism=detism,
-                                               firstInfoImpurity=impurity}
+procToPartial callFlows hasBang info@FirstInfo{fiPartial=False,
+                                               fiTypes=tys,
+                                               fiFlows=flows,
+                                               fiNeedsResBang=resful,
+                                               fiDetism=detism,
+                                               fiImpurity=impurity}
     | not hasBang  && not (List.null callFlows) && last callFlows == ParamOut
                    && (length callFlows < length tys
                        || length callFlows <= length tys + 1 && resful)
-        = (Just info{firstInfoPartial=True,
-                     firstInfoTypes=closedTys ++ [higherTy],
-                     firstInfoFlows=closedFls ++ [ParamOut]}, needsBang)
+        = (Just info{fiPartial=True,
+                     fiTypes=closedTys ++ [higherTy],
+                     fiFlows=closedFls ++ [ParamOut]}, needsBang)
   where
     nClosed = length callFlows - 1
     (closedTys, higherTys) = List.splitAt nClosed tys
     (closedFls, higherFls) = List.splitAt nClosed flows
-    resful = any isResourcefulHigherOrder tys
-                || not (Set.null inRes && Set.null outRes)
     needsBang = resful || impurity > Pure
     higherTy = HigherOrderType (normaliseModifiers
                                 $ ProcModifiers detism MayInline
@@ -1128,10 +1126,10 @@ typecheckProcDecl' m pdef = do
         calls <- bodyCallsConstraints False def
         logTyped $ "   containing calls: " ++ showBody 8 calls
         -- logTyped $ "   inner resources: " ++ show (fst <$> bodyRes)
-        let assignedVars = 
-                foldStmts 
+        let assignedVars =
+                foldStmts
                     (const . const)
-                    (\outs exp _ -> 
+                    (\outs exp _ ->
                         outs `Set.union` (expOutputs exp `Set.difference` expInputs exp))
                     inputs def
         logTyped $ "   with assigned vars: " ++ show assignedVars
@@ -1168,7 +1166,7 @@ typecheckProcDecl' m pdef = do
                                   $ Set.map resourceFlowRes resources
                     logTyped $ "bound vars: " ++ show bound
                     (tmpCount', (def',assigned) )
-                        <- withCounter tmpCount 
+                        <- withCounter tmpCount
                             $ modecheckStmts m name pos bound detism True def
                     logTyped $ "Mode checked body   : " ++ show def'
                     logTyped $ "Vars defined by body: " ++ show assigned
@@ -1320,7 +1318,7 @@ bodyCallsConstraints nested stmts =
 bodyCallsConstraints' :: Bool -> Placed Stmt -> Typed [Placed Stmt]
 bodyCallsConstraints' nested pstmt = do
     calls <- bodyCalls'' nested (content pstmt) (place pstmt)
-    if nested 
+    if nested
     then return calls
     else do
         let expCalls = foldStmts (const . const) expStmts [] [pstmt]
@@ -1346,7 +1344,7 @@ bodyCalls'' _ For{} _ = shouldnt "bodyCalls: flattening left For stmt"
 bodyCalls'' _ Case{} _ = shouldnt "bodyCalls: flattening left Case stmt"
 bodyCalls'' _ (TestBool exp) pos = do
     ty <- expType $ exp `maybePlace` pos
-    unifyTypes (ReasonExpType exp boolType pos) ty boolType 
+    unifyTypes (ReasonExpType exp boolType pos) ty boolType
     return []
 bodyCalls'' _ Nop _ = return []
 bodyCalls'' _ Fail _ = return []
@@ -1385,7 +1383,7 @@ callInfos vars pstmt = do
         ProcCall (First m name procId) d resful args -> do
             varTy <- varType name >>= ultimateType
             let couldBeVar = List.null m && isNothing procId
-                           && name `Set.member` vars 
+                           && name `Set.member` vars
                 couldBeHigher = isHigherOrder varTy || varTy == AnyType
                 couldBeTest   = (boolType == varTy || varTy == AnyType)
                              && List.null args && not resful
@@ -1421,10 +1419,11 @@ firstInfo def proc = do
         outResources = Set.fromList
                         $ resourceFlowRes <$>
                             List.filter (flowsOut . resourceFlowFlow) resources
+        needsResBang = not (List.null resources) || any isResourcefulHigherOrder types
         detism = procDetism def
         imp = procImpurity def
     types' <- refreshTypes types
-    return $ FirstInfo proc types' flows detism imp inResources outResources False
+    return $ FirstInfo proc types' flows detism imp inResources outResources needsResBang False
 
 
 -- |Return the "primitive" expr of the specified expr.  This unwraps Typed
@@ -1462,6 +1461,7 @@ typecheckCalls m name pos [] residue True foreigns =
     typecheckCalls m name pos residue [] False foreigns
 typecheckCalls m name pos [] residue False foreigns = do
     let (typings@StmtTypings{typingInfos=infos},rest) = findMinimumTyping residue
+    logTyped $ "Recursively checking types with " ++ show typings
     typings' <- mapM (getTyping . typecheckCallWithInfo m name pos typings rest foreigns) infos
     case List.filter (List.null . typingErrs) $ snd <$> typings' of
         [typing] -> put typing
@@ -1491,12 +1491,12 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt typs):calls)
                     <$> catOKs matches
     let validTypes = fst <$> nubBy ((==) `on` snd) canonMatches
     logTyped $ "Valid types = " ++ show (snd <$> validTypes)
-    logTyped $ "Converted types = " ++ show (boolFnToTest <$> typs)
     let matchErrs = concatMap errList matches
     case validTypes of
         [] -> case (mod, callee, content <$> pexps, actualTypes) of
             -- special case for assigment
             ([], "=", [arg1, arg2], [ty1, ty2]) -> do
+                logTyped "Trying to check = call as assignment"
                 void $ unifyTypes (ReasonEqual arg1 arg2 stmtPos) ty1 ty2
                 ifM validTyping
                     (typecheckCalls m name pos calls residue True foreigns)
@@ -1506,14 +1506,14 @@ typecheckCalls m name pos (stmtTyping@(StmtTypings pstmt typs):calls)
                 case (mod, pexps) of
                     -- special case for bool test
                     ([], []) | not resful && (nameTy == boolType || nameTy == AnyType) -> do
-                        constrainVarType 
-                            (ReasonExpType (Var callee ParamIn Ordinary) boolType stmtPos) 
+                        constrainVarType
+                            (ReasonExpType (Var callee ParamIn Ordinary) boolType stmtPos)
                             callee boolType
                         typecheckCalls m name pos calls residue True foreigns
                     _ -> do
                         logTyped "Type error: no valid types for call"
                         typeErrors matchErrs
-        [(match,typing)] -> do
+        [(_,typing)] -> do
             put typing
             logTyping "Resulting typing = "
             typecheckCalls m name pos calls residue True foreigns
@@ -1555,7 +1555,7 @@ typecheckCallWithInfo m name pos typings rest fs info = do
 matchTypes :: Ident -> Ident -> OptPos -> Bool -> [TypeSpec] -> [FlowDirection]
            -> CallInfo -> Typed (MaybeErr (CallInfo,Typing))
 matchTypes caller callee pos hasBang callTypes callFlows
-        calleeInfo@FirstInfo{firstInfoTypes=tys}
+        calleeInfo@FirstInfo{fiTypes=tys}
     -- Handle case whre call should have a ! but doesnt, and the call
     -- can be made partial
     | not hasBang && needsBang && isJust partialCallInfo
@@ -1564,10 +1564,10 @@ matchTypes caller callee pos hasBang callTypes callFlows
     | sameLength callTypes tys
     = matchTypeList callee pos callTypes calleeInfo
     -- Handle case of SemiDet context call to bool function as a proc call
-    | isJust testInfo && sameLength callTypes (firstInfoTypes calleeInfo')
+    | isJust testInfo && sameLength callTypes (fiTypes calleeInfo')
     = matchTypeList callee pos callTypes calleeInfo'
     -- Handle case of reified test call
-    | isJust detCallInfo && sameLength callTypes (firstInfoTypes calleeInfo'')
+    | isJust detCallInfo && sameLength callTypes (fiTypes calleeInfo'')
     = matchTypeList callee pos callTypes calleeInfo''
     -- Handle case where the call is partial
     | isJust partialCallInfo
@@ -1585,7 +1585,7 @@ matchTypes caller callee pos _ callTypes callFlows
         calleeInfo@(HigherInfo fn) = do
     let callTFs = zipWith TypeFlow callTypes callFlows
     fnTy <- expType (Unplaced fn) >>= ultimateType
-    logTyped $ "Checking call " ++ show fn ++ ":" ++ show fnTy
+    logTyped $ "Checking higher call " ++ show fn ++ ":" ++ show fnTy
             ++ " with type " ++ show callTFs
     typing <-
         case fnTy of
@@ -1605,7 +1605,7 @@ matchTypes caller callee pos _ callTypes callFlows
                          | otherwise = tfs
                 snd <$> getTyping (do
                     unifyTypeList' callee pos callTypes (typeFlowType <$> tfs')
-                    zipWith3M (\f1 f2 i -> unless (f1 == f2) 
+                    zipWith3M (\f1 f2 i -> unless (f1 == f2)
                                 $ typeError $ ReasonHigherFlow caller callee i f1 f2 pos)
                                     (typeFlowMode <$> callTFs) (typeFlowMode <$> tfs) [1..])
             _ ->
@@ -1618,7 +1618,7 @@ matchTypes caller callee pos _ callTypes callFlows
 matchTypes caller calleee pos _ _ _
         calleeInfo@(TestInfo exp) = do
     ty <- expType $ Unplaced exp
-    typing <- snd <$> getTyping (unifyTypes (ReasonExpType exp boolType pos) 
+    typing <- snd <$> getTyping (unifyTypes (ReasonExpType exp boolType pos)
                                     boolType ty)
     let errs = typingErrs typing
     return $ if List.null errs
@@ -1629,8 +1629,8 @@ matchTypes caller calleee pos _ _ _
 matchTypeList :: Ident -> OptPos -> [TypeSpec] -> CallInfo
                -> Typed (MaybeErr (CallInfo,Typing))
 matchTypeList callee pos callTypes
-        calleeInfo@FirstInfo{firstInfoPartial=partial,
-                             firstInfoTypes=calleeTypes} = do
+        calleeInfo@FirstInfo{fiPartial=partial,
+                             fiTypes=calleeTypes} = do
     logTyped $ "Matching types " ++ show callTypes
                ++ " with " ++ show calleeInfo
     (matches, typing)
@@ -1638,8 +1638,8 @@ matchTypeList callee pos callTypes
     let mismatches = List.map fst $ List.filter (invalidType . snd)
                        $ zip [1..] matches
     return $ if List.null mismatches
-    then OK (calleeInfo{firstInfoTypes=matches}, typing)
-    else Err $ [ReasonArgType partial callee n pos | n <- mismatches] 
+    then OK (calleeInfo{fiTypes=matches}, typing)
+    else Err $ [ReasonArgType partial callee n pos | n <- mismatches]
             ++ typingErrs typing
 matchTypeList _ _ _ info = shouldnt $ "matchTypeList on " ++ show info
 
@@ -1899,7 +1899,7 @@ assignedIn var bstate = var `USet.member` bindingVars bstate
 -- |Return a list of (actual,formal) argument mode pairs.
 actualFormalModes :: [(FlowDirection,Bool,Maybe VarName)] -> CallInfo
                   -> [(FlowDirection,FlowDirection)]
-actualFormalModes modes FirstInfo{firstInfoFlows=flows} =
+actualFormalModes modes FirstInfo{fiFlows=flows} =
     zip flows (sel1 <$> modes)
 actualFormalModes _ info = shouldnt $ "actualFormalModes on " ++ show info
 
@@ -1909,7 +1909,7 @@ actualFormalModes _ info = shouldnt $ "actualFormalModes on " ++ show info
 -- if the corresponding parameter is an input.
 matchModeList :: [(FlowDirection,Bool,Maybe VarName)]
               -> CallInfo -> Bool
-matchModeList modes info@FirstInfo{firstInfoPartial=False}
+matchModeList modes info@FirstInfo{fiPartial=False}
     -- Check that no param is in where actual is out
     = (ParamIn,ParamOut) `notElem` actualFormalModes modes info
 matchModeList _ _ = False
@@ -1920,9 +1920,9 @@ matchModeList _ _ = False
 -- proc mode.
 exactModeMatch :: [(FlowDirection,Bool,Maybe VarName)]
                -> CallInfo -> Bool
-exactModeMatch modes info@FirstInfo{firstInfoPartial=False}
+exactModeMatch modes info@FirstInfo{fiPartial=False}
     = all (uncurry (==)) $ actualFormalModes modes info
-exactModeMatch modes info@FirstInfo{firstInfoPartial=True}
+exactModeMatch modes info@FirstInfo{fiPartial=True}
     = all (==(ParamIn,ParamIn)) (init formalModes)
         && last formalModes == (ParamOut, ParamOut)
     where formalModes = actualFormalModes modes info
@@ -1935,8 +1935,8 @@ overloadErr StmtTypings{typingStmt=call,typingInfos=candidates} =
     ReasonOverload (infoDescription <$> candidates) $ place call
 
 infoDescription :: CallInfo -> String
-infoDescription FirstInfo{firstInfoProc=pspec, firstInfoPartial=partial} =
-    show pspec  ++ (if partial then " (partial)" else "")
+infoDescription FirstInfo{fiProc=pspec, fiPartial=partial} =
+    show pspec ++ (if partial then " (partial)" else "")
 infoDescription info = show info
 
 
@@ -2071,11 +2071,11 @@ modecheckStmt m name defPos assigned detism final
         case fnTy of
             HigherOrderType mods fnTyFlows -> do
                 let name = show (innerExp $ content fn)
-                typeErrors 
+                typeErrors
                     $ detismPurityErrors pos "higher-order term" name
                         detism (bindingImpurity assigned) resourceful
-                        (modifierDetism mods) (modifierImpurity mods) 
-                        (modifierResourceful mods) 
+                        (modifierDetism mods) (modifierImpurity mods)
+                        (modifierResourceful mods)
                 let detism' = if sameLength args fnTyFlows
                               then modifierDetism mods
                               else SemiDet
@@ -2347,29 +2347,28 @@ finaliseCall :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism -> 
              -> Bool -> OptPos -> [Placed Exp] -> CallInfo -> Stmt
              -> Typed ([Placed Stmt],BindingState)
 finaliseCall m name defPos assigned detism resourceful final pos args
-             match@FirstInfo{} stmt = do
-    let matchProc = firstInfoProc match
+             match@FirstInfo{ fiProc=matchProc
+                            , fiDetism=matchDetism
+                            , fiImpurity=matchImpurity
+                            , fiInRes=inResources
+                            , fiOutRes=outResources
+                            , fiNeedsResBang=needsResBang
+                            , fiPartial=isPartial} stmt = do
     let matchName = procSpecName matchProc
-    let matchDetism = firstInfoDetism match
-    let matchImpurity = firstInfoImpurity match
-    let outResources = firstInfoOutRes match
-    let inResources = firstInfoInRes match
     let allResources = inResources `Set.union` outResources
     let impurity = bindingImpurity assigned
-    let isPartial = firstInfoPartial match
+    let isPartial = fiPartial match
     tys <- mapM (expType >=> ultimateType) args
-    (args',stmts) <- matchArguments (zipWith TypeFlow tys (firstInfoFlows match)) args
+    (args',stmts) <- matchArguments (zipWith TypeFlow tys (fiFlows match)) args
     let outOfScope = allResources `Set.difference`
                     (bindingResources assigned `Set.union` specialResourcesSet)
     let specials = Set.map resourceName
                    $ inResources `Set.intersection` specialResourcesSet
     let avail    = USet.toSet Set.empty $ bindingVars assigned
     typeErrors $
-            detismPurityErrors pos "proc" (show matchProc) 
+            detismPurityErrors pos "proc" (show matchProc)
                 detism impurity resourceful
-                matchDetism matchImpurity 
-                (not (Set.null inResources) || not (Set.null outResources)
-                  || any isResourcefulHigherOrder tys)
+                matchDetism matchImpurity needsResBang
             ++ [ReasonResourceOutOfScope matchName res pos
                 | res <- Set.toList outOfScope]
             ++ [ReasonResourceUnavail matchName res pos
@@ -2432,11 +2431,11 @@ finaliseCall m name defPos assigned detism resourceful final pos args
     modecheckStmt m name defPos assigned detism final (TestBool exp) pos
 
 
-detismPurityErrors :: OptPos -> String -> String    
-                   -> Determinism -> Impurity -> Bool 
+detismPurityErrors :: OptPos -> String -> String
+                   -> Determinism -> Impurity -> Bool
                    -> Determinism -> Impurity -> Bool -> [TypeError]
 detismPurityErrors pos prefix name contextDetism contextImpurity
-    banged detism impurity usesResources =     
+    banged detism impurity usesResources =
     -- XXX Should postpone detism errors until we see if we
     -- can work out if the test is certain to succeed.
     -- Perhaps add mutual exclusion inference to the mode

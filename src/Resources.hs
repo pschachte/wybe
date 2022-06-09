@@ -243,10 +243,11 @@ transformStmt :: Stmt -> OptPos -> Resourcer [Placed Stmt]
 transformStmt stmt@(ProcCall func@(First m n mbId) detism resourceful args) pos = do
     let procID = trustFromJust "transformStmt" mbId
     procDef <- lift (getProcDef $ ProcSpec m n procID generalVersion)
-    let callResFlows = Set.toList $ procProtoResources $ procProto procDef
+    let proto = procProto procDef
+    let callResFlows = Set.toList $ procProtoResources proto
+    let callParamTys = paramType <$> procProtoParams proto
     let variant = procVariant procDef
-    let argTys = fromMaybe AnyType . maybeExpType . content <$> args
-    let hasResfulHigherArgs = any isResourcefulHigherOrder argTys
+    let hasResfulHigherArgs = any isResourcefulHigherOrder callParamTys
     let usesResources = not (List.null callResFlows) || hasResfulHigherArgs
     unless (resourceful || not usesResources)
         $ lift $ errmsg pos
