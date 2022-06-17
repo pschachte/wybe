@@ -246,17 +246,8 @@ expandPrim (PrimCall id pspec args gFlows) pos = do
                 if procInline def
                 then inlineCall proto args' body pos
                 else do
-                    -- inlinableLast <- gets (((final && singleCaller def
-                    --                          && procVis def == Private) &&)
-                    --                        . noFork)
-                    let inlinableLast = False
-                    if inlinableLast
-                    then do
-                        logExpansion "  Inlining tail call to branching proc"
-                        inlineCall proto args' body pos
-                    else do
-                        logExpansion "  Not inlinable"
-                        addInstr call' pos
+                    logExpansion "  Not inlinable"
+                    addInstr call' pos
 expandPrim prim@(PrimHigher id fn args) pos = do
     logExpansion $ "  Checking inlining for higher order call " ++ show prim
     inliningNow <- gets inlining

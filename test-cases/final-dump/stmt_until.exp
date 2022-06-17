@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > public {inline,impure} (0 calls)
+module top-level code > public {impure} (0 calls)
 0: stmt_until.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -68,7 +68,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  void @"stmt_until.<0>"() alwaysinline   {
+define external fastcc  void @"stmt_until.<0>"()    {
 entry:
   tail call fastcc  void  @"stmt_until.gen#1<0>"(i64  10)  
   ret void 

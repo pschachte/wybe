@@ -57,7 +57,7 @@ entry:
   submodules      : import_in_sub_mod_main.sub
   procs           : 
 
-module top-level code > public {inline,impure} (0 calls)
+module top-level code > public {impure} (0 calls)
 0: import_in_sub_mod_main.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -87,7 +87,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  void @"import_in_sub_mod_main.<0>"() alwaysinline   {
+define external fastcc  void @"import_in_sub_mod_main.<0>"()    {
 entry:
   tail call ccc  void  @print_int(i64  10)  
   tail call ccc  void  @putchar(i8  10)  

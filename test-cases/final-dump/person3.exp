@@ -19,7 +19,7 @@ AFTER EVERYTHING:
   submodules      : person3.person
   procs           : 
 
-module top-level code > public {inline,impure} (0 calls)
+module top-level code > public {impure} (0 calls)
 0: person3.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -56,7 +56,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  void @"person3.<0>"() alwaysinline   {
+define external fastcc  void @"person3.<0>"()    {
 entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @person3.1, i32 0, i32 0) to i64))  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @person3.3, i32 0, i32 0) to i64))  

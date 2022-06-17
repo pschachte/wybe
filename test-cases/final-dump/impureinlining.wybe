@@ -1,0 +1,8 @@
+# shouldn't be marked for inlining
+def {impure} impure {foreign c {impure} printf(c"Hello, World!\n")}
+
+# should be marked for inlining
+def {inline,impure} inlined {foreign c {impure} printf(c"Hello, World!\n")}
+
+!impure # shouldn't be inlined
+!inlined # should be inlined
