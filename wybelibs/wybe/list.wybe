@@ -3,10 +3,13 @@
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
-use wybe.bool, wybe.int, wybe.char
+use wybe.bool, wybe.int, wybe.char, wybe.array, wybe.machine_word
 use wybe.io
 
 pub constructors (T) [] | [head:T | tail:_(T)]
+
+
+## Common operations
 
 # Is the list empty?
 pub def {test} empty(xs:_(T)) {
@@ -20,16 +23,8 @@ pub def (x:_(T) ,, y:_(T)):_(T) =
 # List length
 pub def length(x:_(T)):int = length1(x, 0)
 
-# Helper for length
-def length1(x:_(T), acc:int):int =
-    if { x = [?h | ?t] :: length1(t, acc + 1) | else :: acc }
-
 # List reversal
 pub def reverse(x:_(T)):_(T) = reverse1(x, [])
-
-# Helper for reverse
-def reverse1(x:_(T), tail:_(T)):_(T) =
-    if { x = [?h | ?t] :: reverse1(t, [h | tail]) | else :: tail }
 
 # List index
 # Fails if the index is out of the "bounds" of the list
@@ -38,11 +33,8 @@ pub def {test} `[]`(xs:_(T), idx:int):T = x where {
     ?x = index1(xs, idx)
 }
 
-# Helper for `[]`
-def {test} index1(xs:_(T), idx:int):T = x where {
-    [?x | ?xs] = xs
-    (idx = 0 | index1(xs, idx - 1, ?x))
-}
+
+## Higher-order procedures
 
 # List map
 # Apply a resourceful procedure over all elements in a list
@@ -127,6 +119,35 @@ pub def print(printer:{resource}(T), xs:_(T)) use !io {
 pub def println(printer:{resource}(T), xs:_(T)) use !io { 
     !print(printer, xs)
     !nl
+}
+
+
+## Conversion procedures
+
+# Conversion from an array
+pub def list(ar:array(T)):_(T) = ls where {
+    ?ls = []
+    for ?x in ar {
+        ?ls = [x | ls]
+    }
+    reverse(ls, ?ls)
+}
+
+
+## Private helper procedures
+
+# Helper for length
+def length1(x:_(T), acc:int):int =
+    if { x = [?h | ?t] :: length1(t, acc + 1) | else :: acc }
+
+# Helper for reverse
+def reverse1(x:_(T), tail:_(T)):_(T) =
+    if { x = [?h | ?t] :: reverse1(t, [h | tail]) | else :: tail }
+
+# Helper for `[]`
+def {test} index1(xs:_(T), idx:int):T = x where {
+    [?x | ?xs] = xs
+    (idx = 0 | index1(xs, idx - 1, ?x))
 }
 
 # Helper for print

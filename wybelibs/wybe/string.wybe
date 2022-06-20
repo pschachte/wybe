@@ -38,7 +38,7 @@ pub def string(c:char):_ = singleton(c)
 
 # Conversion to c_string
 pub def c_string(s:_):c_string = str where {
-    if { s = buffer(_, ?c_string) :: ?str = c_string
+    if { s = buffer(_, ?str) :: pass
        | else :: 
             ?len = length(s) + 1
             foreign lpvm alloc(len, ?str)
@@ -153,7 +153,7 @@ pub def println(x:_) use !io { !print(x); !nl }
 pub def read(?x:_) use !io { !read(?str:c_string); ?x = string(str) }
 
 
-## Private helper functions
+## Private helper procedures
 
 # Pack a string into a c_string, from offset
 # Note: mutates mem, increasing offset
