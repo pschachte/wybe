@@ -9,7 +9,7 @@ use wybe.io
 pub constructors (T) [] | [head:T | tail:_(T)]
 
 
-## Utility procedures
+## Common operations
 
 # Is the list empty?
 pub def {test} empty(xs:_(T)) {
@@ -125,7 +125,7 @@ pub def println(printer:{resource}(T), xs:_(T)) use !io {
 ## Conversion procedures
 
 # Conversion an array into a list
-pub def list(ar:array(T), ?ls:list(T)) {
+pub def list(ar:array(T)):_(T) = ls where {
     ?ls = []
     for ?x in ar {
         ?ls = [x | ls]

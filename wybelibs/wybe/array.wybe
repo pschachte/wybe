@@ -11,10 +11,11 @@ pub constructor (T) array(length:int, raw_data:raw_array(T))
 # Raw array type
 pub type raw_array(T) is address {}
 
+
 # Get the head and tail of an array.
 # Fails if the array is empty 
-pub def {test} `[|]`(?head:T, ?tail:array(T), a:array(T)) {
-    array(?length,?data) = a
+pub def {test} `[|]`(?head:T, ?tail:_(T), a:_(T)) {
+    array(?length, ?data) = a
     (length > 0)
     foreign lpvm access(data, 0, word_size, 0, ?head)
     foreign llvm add(data, word_size, ?data)
@@ -23,7 +24,7 @@ pub def {test} `[|]`(?head:T, ?tail:array(T), a:array(T)) {
 
 # Get the element of an array at a given index.
 # Fails if the index is out of the bounds of the array 
-pub def {test} `[]`(a:array(T), idx:int):T = x where {
+pub def {test} `[]`(a:_(T), idx:int):T = x where {
     (0 <= idx)
     (idx < a^length)
     ?x = a^unsafe_index(idx)
@@ -32,12 +33,12 @@ pub def {test} `[]`(a:array(T), idx:int):T = x where {
 # WARNING: does not check that the index is in the bound of the array. You 
 # probably want `[]`.
 # Get the element of an array at a given index.
-pub def {inline} unsafe_index(a:array(T), idx:int):T = x where {
+pub def {inline} unsafe_index(a:_(T), idx:int):T = x where {
     foreign lpvm access(a^raw_data, idx * word_size, word_size, 0, ?x)
 }
 
 # Conversion from list
-pub def array(ls:list(T), ?ar:array(T)) {
+pub def array(ls:list(T)):_(T) = ar where {
     ?len = length(ls) 
     foreign lpvm alloc(len * word_size, ?mem)
     ?offset = 0
