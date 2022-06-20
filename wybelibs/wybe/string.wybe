@@ -153,7 +153,7 @@ pub def println(x:_) use !io { !print(x); !nl }
 pub def read(?x:_) use !io { !read(?str:c_string); ?x = string(str) }
 
 
-## Private helper functions
+## Private helper procedures
 
 # Pack a string into a c_string, from offset
 # Note: mutates mem, increasing offset

@@ -39,12 +39,11 @@ pub def (start:int .. end:int):_ =
     construct(start, if { start <= end :: 1 | else :: -1 }, end)
 
 # Size of a range
-pub def size(r:_):int = sz where {
-    r = range(?start, ?stride, ?end)
-    ?sz = if { signum(stride) ~= signum(end - start) :: 0
-             | 0 <= stride :: (end - start - 1) / stride + 1
-             | else :: (start - end - 1) / -stride + 1 }
-}
+pub def size(r:_):int = 
+    let { r = range(?start, ?stride, ?end) } in 
+    if { signum(stride) ~= signum(end - start) :: 0
+       | 0 <= stride :: (end - start - 1) / stride + 1
+       | else :: (start - end - 1) / -stride + 1 } 
 
 # Helper to construct a range, ensuring the range end is the final value
 def construct(start:int, stride:int, end:int):_ = r where {

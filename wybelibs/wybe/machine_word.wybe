@@ -4,3 +4,7 @@
 pragma no_standard_library # Standard library can't depend on itself!
 
 representation is address
+
+use wybe.int
+
+pub def word_size:int = 8
