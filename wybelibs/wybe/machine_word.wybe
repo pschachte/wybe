@@ -7,4 +7,6 @@ representation is address
 
 use wybe.int
 
-pub def word_size:int = 8
+pub def word_size_bytes:int = 8
+
+pub def word_size_bits:int = 8 * word_size_bytes
