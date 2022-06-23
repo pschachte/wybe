@@ -422,10 +422,9 @@ limitedTerm precedence = termFirst >>= termRest precedence
 -- Valid suffixes include parenthesised argument lists or square bracketed
 -- indices.  If both prefix and suffix are present, the suffix binds tighter.
 termFirst :: Parser Term
-termFirst = (do
-             op <- prefixOp
-             termFirst >>= applyPrefixOp op)
-         <|> (primaryTerm >>= termSuffix)
+termFirst = 
+    ((prefixOp >>= (primaryTerm >>=) . applyPrefixOp) <|> primaryTerm) 
+        >>= termSuffix
 
 
 -- |Apply zero or more parenthesised or square bracketed suffixes to the
