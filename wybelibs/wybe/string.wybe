@@ -24,7 +24,7 @@ constructors empty
 
 ## Conversion procedures.
 
-# Conversion from c_string
+# Convert a c_string into a string
 pub def string(str:c_string):_ = s where {
     ?len = length(str)
     ?s = if { len = 0 :: empty 
@@ -33,10 +33,10 @@ pub def string(str:c_string):_ = s where {
             }
 }
 
-# Conversion from char
+# Convert a char into a string
 pub def string(c:char):_ = singleton(c)
 
-# Conversion to c_string
+# Convert a string into a c_string
 pub def c_string(s:_):c_string = str where {
     if { s = buffer(_, ?str) :: pass
        | else :: 

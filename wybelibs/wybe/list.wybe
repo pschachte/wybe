@@ -124,7 +124,7 @@ pub def println(printer:{resource}(T), xs:_(T)) use !io {
 
 ## Conversion procedures
 
-# Conversion from an array
+# Convert an array into a list
 pub def list(ar:array(T)):_(T) = ls where {
     ?ls = []
     for ?x in ar {

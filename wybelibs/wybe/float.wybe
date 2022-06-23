@@ -81,7 +81,7 @@ pub def min(x:_, y:_):_ = foreign c `llvm.minnum.f64`(x,y)
 pub def max(x:_, y:_):_ = foreign c `llvm.maxnum.f64`(x,y)
 
 
-## Conversions
+## Conversion procedures
 
 # The smallest whole number greater than or equal to the input, as a float.
 pub def ceil(x:_):_ = foreign c `llvm.ceil.f64`(x)
