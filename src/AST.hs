@@ -2563,7 +2563,7 @@ data TypeSpec = TypeSpec {
     typeParams::[TypeSpec]
     }
     | HigherOrderType {
-        higherTypeDetism::ProcModifiers,
+        higherTypeModifiers::ProcModifiers,
         higherTypeParams::[TypeFlow]
     }
     | TypeVariable { typeVariableName :: TypeVarName }
