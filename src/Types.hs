@@ -1588,32 +1588,37 @@ matchTypes caller callee pos _ callTypes callFlows
     logTyped $ "Checking higher call " ++ show fn ++ ":" ++ show fnTy
             ++ " with type " ++ show callTFs
     typing <-
-        case fnTy of
-            HigherOrderType mods tfs -> do
+        getTyping $ case fnTy of
+            HigherOrderType mods tfs -> 
                 -- This handles the reification of higher order tests <-> bool fns
                 -- For first order cases, see `boolFnToTest' and `testToBoolFn'
                 let nCallTFs = length callTFs
                     nTFs = length tfs
                     tfs' | nCallTFs == nTFs - 1
                            && last tfs == TypeFlow boolType ParamOut
-                           && modifierDetism mods == Det
+                           && modifierDetism mods == Det -- reified tesst
                          = init tfs
                          | nCallTFs == nTFs + 1
                            && last callTFs == TypeFlow boolType ParamOut
-                           && modifierDetism mods == SemiDet
+                           && modifierDetism mods == SemiDet -- de-reified test
                          = tfs ++ [last callTFs]
                          | otherwise = tfs
-                snd <$> getTyping (do
+                in if nCallTFs == length tfs'
+                then do
                     unifyTypeList' callee pos callTypes (typeFlowType <$> tfs')
-                    zipWith3M (\f1 f2 i -> unless (f1 == f2)
-                                $ typeError $ ReasonHigherFlow caller callee i f1 f2 pos)
-                                    (typeFlowMode <$> callTFs) (typeFlowMode <$> tfs) [1..])
+                    zipWith3M_ (\f1 f2 i -> 
+                        unless (f1 == f2)
+                            $ typeError $ ReasonHigherFlow caller callee i f1 f2 pos)
+                        (typeFlowMode <$> callTFs) (typeFlowMode <$> tfs) [1..]
+                else typeError $ ReasonArity caller callee pos nCallTFs (length tfs')
             _ ->
-                snd <$> getTyping (unifyTypes (ReasonHigher caller callee pos) fnTy
-                                    $ HigherOrderType defaultProcModifiers callTFs)
-    let errs = typingErrs typing
+                void $ getTyping 
+                     $ unifyTypes (ReasonHigher caller callee pos)
+                        fnTy $ HigherOrderType defaultProcModifiers callTFs
+    let typing' = snd typing
+    let errs = typingErrs typing'
     return $ if List.null errs
-    then OK (calleeInfo, typing)
+    then OK (calleeInfo, typing')
     else Err errs
 matchTypes caller calleee pos _ _ _
         calleeInfo@(TestInfo exp) = do
@@ -2070,19 +2075,17 @@ modecheckStmt m name defPos assigned detism final
         let (fn':args') = List.zipWith setPExpTypeFlow typeflows fnArgs'
         case fnTy of
             HigherOrderType mods fnTyFlows -> do
-                let name = show (innerExp $ content fn)
+                let detism' = case on compare length (tail typeflows) fnTyFlows of
+                        LT -> SemiDet -- de-reified test
+                        GT -> Det     -- reified test
+                        EQ -> modifierDetism mods
+                    imp = modifierImpurity mods
+                    assigned' = bindingStateSeq detism' imp (pexpListOutputs fnArgs') assigned
                 typeErrors
-                    $ detismPurityErrors pos "higher-order term" name
+                    $ detismPurityErrors pos "higher-order term" (show $ innerExp $ content fn)
                         detism (bindingImpurity assigned) resourceful
-                        (modifierDetism mods) (modifierImpurity mods)
-                        (modifierResourceful mods)
-                let detism' = if sameLength args fnTyFlows
-                              then modifierDetism mods
-                              else SemiDet
-                let assigned' = bindingStateSeq detism' (modifierImpurity mods)
-                                    (pexpListOutputs fnArgs') assigned
-                return ([maybePlace (ProcCall (Higher fn')
-                                        detism' resourceful args') pos],
+                        detism' imp (modifierResourceful mods)
+                return ([maybePlace (ProcCall (Higher fn') detism' resourceful args') pos],
                         assigned')
             _ -> shouldnt $ "modecheckStmt on higher typed " ++ show fnTy
 modecheckStmt m name defPos assigned detism final
@@ -2132,7 +2135,6 @@ modecheckStmt m name defPos assigned detism final
     logTyped $ "Assigned by test: " ++ show assigned1
     condBindings <- mapFromUnivSetM ultimateVarType Set.empty
                     $ bindingVars assigned1
-    logTyped $ "Assigned by test: " ++ show assigned1
     (thnStmts', assigned2) <-
         modecheckStmts m name defPos (forceDet assigned1) detism
                        final thnStmts
