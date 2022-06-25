@@ -36,13 +36,13 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm store(~%tmp#33##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-add_one > {inline} (1 calls)
+add_one > {inferredinline} (1 calls)
 0: higher_order_refs.add_one<0>
 add_one(i##0:wybe.int, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @int:nn:nn
-add_one > {inline} (0 calls)
+add_one > {inferredinline} (0 calls)
 1: higher_order_refs.add_one<1>
 add_one(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}>:
   AliasPairs: []
@@ -58,13 +58,13 @@ app(f##0:(I, ?J), i##0:I, ?#result##0:J)<{}; {}>:
     ~f##0:(I, ?J)(~i##0:I, ?#result##0:J) #0 @higher_order_refs:nn:nn
 
 
-gen#1 > {inline} (1 calls)
+gen#1 > {inferredinline} (1 calls)
 0: higher_order_refs.gen#1<0>
 gen#1(anon#1#1##0:wybe.float, ?anon#1#2##0:wybe.float)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(~anon#1#1##0:wybe.float, ?anon#1#2##0:wybe.float) @higher_order_refs:nn:nn
-gen#1 > {inline} (1 calls)
+gen#1 > {inferredinline} (1 calls)
 1: higher_order_refs.gen#1<1>
 gen#1(anon#1#1##0:wybe.float, ?anon#1#2##0:wybe.float)<{}; {}>:
   AliasPairs: []
@@ -72,13 +72,13 @@ gen#1(anon#1#1##0:wybe.float, ?anon#1#2##0:wybe.float)<{}; {}>:
     foreign llvm move(~anon#1#1##0:wybe.float, ?anon#1#2##0:wybe.float) @higher_order_refs:nn:nn
 
 
-gen#2 > {inline} (1 calls)
+gen#2 > {inferredinline} (1 calls)
 0: higher_order_refs.gen#2<0>
 gen#2(anon#2#1##0:wybe.float, ?anon#2#2##0:wybe.float)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(~anon#2#1##0:wybe.float, ?anon#2#2##0:wybe.float) @higher_order_refs:nn:nn
-gen#2 > {inline} (1 calls)
+gen#2 > {inferredinline} (1 calls)
 1: higher_order_refs.gen#2<1>
 gen#2(anon#2#1##0:wybe.float, ?anon#2#2##0:wybe.float)<{}; {}>:
   AliasPairs: []
@@ -86,13 +86,13 @@ gen#2(anon#2#1##0:wybe.float, ?anon#2#2##0:wybe.float)<{}; {}>:
     foreign llvm move(~anon#2#1##0:wybe.float, ?anon#2#2##0:wybe.float) @higher_order_refs:nn:nn
 
 
-gen#3 > {inline} (1 calls)
+gen#3 > {inferredinline} (1 calls)
 0: higher_order_refs.gen#3<0>
 gen#3(^y##0:wybe.float, anon#3#1##0:wybe.float, ?anon#3#2##0:wybe.float)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm fsub(~anon#3#1##0:wybe.float, ~y##0:wybe.float, ?anon#3#2##0:wybe.float) @float:nn:nn
-gen#3 > {inline} (1 calls)
+gen#3 > {inferredinline} (1 calls)
 1: higher_order_refs.gen#3<1>
 gen#3(^y##0:wybe.float, anon#3#1##0:wybe.float, ?anon#3#2##0:wybe.float)<{}; {}>:
   AliasPairs: []
@@ -100,7 +100,7 @@ gen#3(^y##0:wybe.float, anon#3#1##0:wybe.float, ?anon#3#2##0:wybe.float)<{}; {}>
     foreign llvm fsub(~anon#3#1##0:wybe.float, ~^y##0:wybe.float, ?anon#3#2##0:wybe.float) @float:nn:nn
 
 
-gen#4 > {inline} (1 calls)
+gen#4 > {inferredinline} (1 calls)
 0: higher_order_refs.gen#4<0>
 gen#4(a##0:A, ?#result##0:A)<{}; {}>:
   AliasPairs: []
@@ -108,7 +108,7 @@ gen#4(a##0:A, ?#result##0:A)<{}; {}>:
     foreign llvm move(~a##0:A, ?#result##0:A) @predicate:nn:nn
 
 
-gen#5 > {inline} (1 calls)
+gen#5 > {inferredinline} (1 calls)
 0: higher_order_refs.gen#5<0>
 gen#5(i##0:wybe.int, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
@@ -116,7 +116,7 @@ gen#5(i##0:wybe.int, ?#result##0:wybe.int)<{}; {}>:
     foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @int:nn:nn
 
 
-gen#6 > {inline} (1 calls)
+gen#6 > {inferredinline} (1 calls)
 0: higher_order_refs.gen#6<0>
 gen#6([^x##0:wybe.int], y##0:wybe.int, ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
@@ -192,14 +192,14 @@ entry:
 }
 
 
-define external fastcc  i64 @"higher_order_refs.add_one<0>"(i64  %"i##0") alwaysinline   {
+define external fastcc  i64 @"higher_order_refs.add_one<0>"(i64  %"i##0") inlinehint   {
 entry:
   %0 = add   i64 %"i##0", 1 
   ret i64 %0 
 }
 
 
-define external fastcc  double @"higher_order_refs.add_one<1>"(double  %"f##0") alwaysinline   {
+define external fastcc  double @"higher_order_refs.add_one<1>"(double  %"f##0") inlinehint   {
 entry:
   %0 = fadd double %"f##0", 1.000000e0 
   ret double %0 
@@ -216,13 +216,13 @@ entry:
 }
 
 
-define external fastcc  double @"higher_order_refs.gen#1<0>"(double  %"anon#1#1##0") alwaysinline   {
+define external fastcc  double @"higher_order_refs.gen#1<0>"(double  %"anon#1#1##0") inlinehint   {
 entry:
   ret double %"anon#1#1##0" 
 }
 
 
-define external fastcc  i64 @"higher_order_refs.gen#1<1>"(i64  %"#env##0", i64  %"anon#1#1##0") alwaysinline   {
+define external fastcc  i64 @"higher_order_refs.gen#1<1>"(i64  %"#env##0", i64  %"anon#1#1##0") inlinehint   {
 entry:
   %0 = bitcast i64 %"anon#1#1##0" to double 
   %1 = bitcast double %0 to i64 
@@ -230,13 +230,13 @@ entry:
 }
 
 
-define external fastcc  double @"higher_order_refs.gen#2<0>"(double  %"anon#2#1##0") alwaysinline   {
+define external fastcc  double @"higher_order_refs.gen#2<0>"(double  %"anon#2#1##0") inlinehint   {
 entry:
   ret double %"anon#2#1##0" 
 }
 
 
-define external fastcc  i64 @"higher_order_refs.gen#2<1>"(i64  %"#env##0", i64  %"anon#2#1##0") alwaysinline   {
+define external fastcc  i64 @"higher_order_refs.gen#2<1>"(i64  %"#env##0", i64  %"anon#2#1##0") inlinehint   {
 entry:
   %0 = bitcast i64 %"anon#2#1##0" to double 
   %1 = bitcast double %0 to i64 
@@ -244,14 +244,14 @@ entry:
 }
 
 
-define external fastcc  double @"higher_order_refs.gen#3<0>"(double  %"y##0", double  %"anon#3#1##0") alwaysinline   {
+define external fastcc  double @"higher_order_refs.gen#3<0>"(double  %"y##0", double  %"anon#3#1##0") inlinehint   {
 entry:
   %0 = fsub double %"anon#3#1##0", %"y##0" 
   ret double %0 
 }
 
 
-define external fastcc  i64 @"higher_order_refs.gen#3<1>"(i64  %"#env##0", i64  %"anon#3#1##0") alwaysinline   {
+define external fastcc  i64 @"higher_order_refs.gen#3<1>"(i64  %"#env##0", i64  %"anon#3#1##0") inlinehint   {
 entry:
   %0 = add   i64 %"#env##0", 8 
   %1 = inttoptr i64 %0 to double* 
@@ -263,20 +263,20 @@ entry:
 }
 
 
-define external fastcc  i64 @"higher_order_refs.gen#4<0>"(i64  %"#env##0", i64  %"a##0") alwaysinline   {
+define external fastcc  i64 @"higher_order_refs.gen#4<0>"(i64  %"#env##0", i64  %"a##0") inlinehint   {
 entry:
   ret i64 %"a##0" 
 }
 
 
-define external fastcc  i64 @"higher_order_refs.gen#5<0>"(i64  %"#env##0", i64  %"i##0") alwaysinline   {
+define external fastcc  i64 @"higher_order_refs.gen#5<0>"(i64  %"#env##0", i64  %"i##0") inlinehint   {
 entry:
   %0 = add   i64 %"i##0", 1 
   ret i64 %0 
 }
 
 
-define external fastcc  i64 @"higher_order_refs.gen#6<0>"(i64  %"#env##0", i64  %"y##0") alwaysinline   {
+define external fastcc  i64 @"higher_order_refs.gen#6<0>"(i64  %"#env##0", i64  %"y##0") inlinehint   {
 entry:
   %0 = add   i64 %"y##0", 10 
   ret i64 %0 

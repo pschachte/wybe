@@ -129,7 +129,7 @@ cons(?car##0:T, ?cdr##0:generic_list(T), #result##0:generic_list(T), ?#success##
 
 
 
-length > public {inline} (0 calls)
+length > public {inferredinline} (0 calls)
 0: generic_list.length<0>
 length(x##0:generic_list(T), ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
@@ -321,7 +321,7 @@ if.else:
 }
 
 
-define external fastcc  i64 @"generic_list.length<0>"(i64  %"x##0") alwaysinline   {
+define external fastcc  i64 @"generic_list.length<0>"(i64  %"x##0") inlinehint   {
 entry:
   %0 = tail call fastcc  i64  @"generic_list.length1<0>"(i64  %"x##0", i64  0)  
   ret i64 %0 
@@ -430,7 +430,7 @@ concat(l1##0:generic_list(T), l2##0:generic_list(T), outByReference #result##0:g
 
 
 
-fromto > public {inline} (2 calls)
+fromto > public {inferredinline} (2 calls)
 0: generic_use.fromto<0>
 fromto(lo##0:wybe.int, hi##0:wybe.int, ?#result##0:generic_list(wybe.int))<{}; {}>:
   AliasPairs: []
@@ -457,7 +457,7 @@ fromto1(lo##0:wybe.int, hi##0:wybe.int, sofar##0:generic_list(wybe.int), ?#resul
 
 
 
-iota > public {inline} (1 calls)
+iota > public {inferredinline} (1 calls)
 0: generic_use.iota<0>
 iota(n##0:wybe.int, ?#result##0:generic_list(wybe.int))<{}; {}>:
   AliasPairs: []
@@ -544,7 +544,7 @@ print_tail(lst##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
 
 
 
-println > {inline} (5 calls)
+println > {inferredinline} (5 calls)
 0: generic_use.println<0>
 println(lst##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -555,7 +555,7 @@ println(lst##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
     foreign lpvm store(~%tmp#1##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-reverse > public {inline} (1 calls)
+reverse > public {inferredinline} (1 calls)
 0: generic_use.reverse<0>
 reverse(lst##0:generic_list(T), ?#result##0:generic_list(T))<{}; {}>:
   AliasPairs: []
@@ -691,7 +691,7 @@ if.else:
 }
 
 
-define external fastcc  i64 @"generic_use.fromto<0>"(i64  %"lo##0", i64  %"hi##0") alwaysinline   {
+define external fastcc  i64 @"generic_use.fromto<0>"(i64  %"lo##0", i64  %"hi##0") inlinehint   {
 entry:
   %0 = tail call fastcc  i64  @"generic_use.fromto1<0>"(i64  %"lo##0", i64  %"hi##0", i64  0)  
   ret i64 %0 
@@ -719,7 +719,7 @@ if.else:
 }
 
 
-define external fastcc  i64 @"generic_use.iota<0>"(i64  %"n##0") alwaysinline   {
+define external fastcc  i64 @"generic_use.iota<0>"(i64  %"n##0") inlinehint   {
 entry:
   %0 = tail call fastcc  i64  @"generic_use.fromto1<0>"(i64  1, i64  %"n##0", i64  0)  
   ret i64 %0 
@@ -815,7 +815,7 @@ if.else:
 }
 
 
-define external fastcc  void @"generic_use.println<0>"(i64  %"lst##0") alwaysinline   {
+define external fastcc  void @"generic_use.println<0>"(i64  %"lst##0") inlinehint   {
 entry:
   tail call fastcc  void  @"generic_use.print<0>"(i64  %"lst##0")  
   tail call ccc  void  @putchar(i8  10)  
@@ -823,7 +823,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"generic_use.reverse<0>"(i64  %"lst##0") alwaysinline   {
+define external fastcc  i64 @"generic_use.reverse<0>"(i64  %"lst##0") inlinehint   {
 entry:
   %0 = tail call fastcc  i64  @"generic_use.reverse1<0>"(i64  %"lst##0", i64  0)  
   ret i64 %0 

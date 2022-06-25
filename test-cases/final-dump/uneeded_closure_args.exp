@@ -28,7 +28,7 @@ call(f##0:(A, ?A), a##0:A, ?#result##0:A)<{}; {}>:
     ~f##0:(A, ?A)(~a##0:A, ?#result##0:A) #0 @uneeded_closure_args:nn:nn
 
 
-gen#1 > {inline} (1 calls)
+gen#1 > {inferredinline} (1 calls)
 0: uneeded_closure_args.gen#1<0>
 gen#1([^a##0:A], b##0:B, ?#result##0:B)<{}; {}>:
   AliasPairs: []
@@ -36,7 +36,7 @@ gen#1([^a##0:A], b##0:B, ?#result##0:B)<{}; {}>:
     foreign llvm move(~b##0:B, ?#result##0:B) @uneeded_closure_args:nn:nn
 
 
-second > {inline} (1 calls)
+second > {inferredinline} (1 calls)
 0: uneeded_closure_args.second<0>
 second([a##0:A], b##0:B, ?#result##0:B)<{}; {}>:
   AliasPairs: []
@@ -81,13 +81,13 @@ entry:
 }
 
 
-define external fastcc  i64 @"uneeded_closure_args.gen#1<0>"(i64  %"#env##0", i64  %"b##0") alwaysinline   {
+define external fastcc  i64 @"uneeded_closure_args.gen#1<0>"(i64  %"#env##0", i64  %"b##0") inlinehint   {
 entry:
   ret i64 %"b##0" 
 }
 
 
-define external fastcc  i64 @"uneeded_closure_args.second<0>"(i64  %"b##0") alwaysinline   {
+define external fastcc  i64 @"uneeded_closure_args.second<0>"(i64  %"b##0") inlinehint   {
 entry:
   ret i64 %"b##0" 
 }

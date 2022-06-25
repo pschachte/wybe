@@ -28,7 +28,7 @@ module top-level code > public {impure} (0 calls)
 
 
 
-do_test > {inline} (12 calls)
+do_test > {inferredinline} (12 calls)
 0: higher_order_tests.do_test<0>
 do_test(f##0:(I, ?wybe.bool), i##0:I, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
@@ -36,7 +36,7 @@ do_test(f##0:(I, ?wybe.bool), i##0:I, ?#success##0:wybe.bool)<{}; {}>:
     ~f##0:(I, ?wybe.bool)(~i##0:I, ?#success##0:wybe.bool) #0 @higher_order_tests:nn:nn
 
 
-do_test2 > {inline} (12 calls)
+do_test2 > {inferredinline} (12 calls)
 0: higher_order_tests.do_test2<0>
 do_test2(f##0:(I, ?wybe.bool), i##0:I, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
@@ -44,13 +44,13 @@ do_test2(f##0:(I, ?wybe.bool), i##0:I, ?#success##0:wybe.bool)<{}; {}>:
     ~f##0:(I, ?wybe.bool)(~i##0:I, ?#success##0:wybe.bool) #0 @higher_order_tests:nn:nn
 
 
-gen#1 > {inline} (1 calls)
+gen#1 > {inferredinline} (1 calls)
 0: higher_order_tests.gen#1<0>
 gen#1([anon#1#1##0:wybe.int], ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
-gen#1 > {inline} (3 calls)
+gen#1 > {inferredinline} (3 calls)
 1: higher_order_tests.gen#1<1>
 gen#1(anon#1#1##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
@@ -138,13 +138,13 @@ gen#5([t##0:(wybe.int, ?wybe.bool)])<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
 
 
 
-gen#6 > {inline} (1 calls)
+gen#6 > {inferredinline} (1 calls)
 0: higher_order_tests.gen#6<0>
 gen#6(anon#2#1##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~anon#2#1##0:wybe.int, 1:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
-gen#6 > {inline} (3 calls)
+gen#6 > {inferredinline} (3 calls)
 1: higher_order_tests.gen#6<1>
 gen#6(anon#2#1##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
@@ -277,7 +277,7 @@ if.else:
 }
 
 
-define external fastcc  i1 @"higher_order_tests.do_test<0>"(i64  %"f##0", i64  %"i##0") alwaysinline   {
+define external fastcc  i1 @"higher_order_tests.do_test<0>"(i64  %"f##0", i64  %"i##0") inlinehint   {
 entry:
   %0 = inttoptr i64 %"f##0" to i64* 
   %1 = load  i64, i64* %0 
@@ -288,7 +288,7 @@ entry:
 }
 
 
-define external fastcc  i1 @"higher_order_tests.do_test2<0>"(i64  %"f##0", i64  %"i##0") alwaysinline   {
+define external fastcc  i1 @"higher_order_tests.do_test2<0>"(i64  %"f##0", i64  %"i##0") inlinehint   {
 entry:
   %0 = inttoptr i64 %"f##0" to i64* 
   %1 = load  i64, i64* %0 
@@ -299,13 +299,13 @@ entry:
 }
 
 
-define external fastcc  i1 @"higher_order_tests.gen#1<0>"() alwaysinline   {
+define external fastcc  i1 @"higher_order_tests.gen#1<0>"() inlinehint   {
 entry:
   ret i1 1 
 }
 
 
-define external fastcc  i64 @"higher_order_tests.gen#1<1>"(i64  %"#env##0", i64  %"anon#1#1##0") alwaysinline   {
+define external fastcc  i64 @"higher_order_tests.gen#1<1>"(i64  %"#env##0", i64  %"anon#1#1##0") inlinehint   {
 entry:
   %0 = zext i1 1 to i64  
   ret i64 %0 
@@ -386,14 +386,14 @@ if.else:
 }
 
 
-define external fastcc  i1 @"higher_order_tests.gen#6<0>"(i64  %"anon#2#1##0") alwaysinline   {
+define external fastcc  i1 @"higher_order_tests.gen#6<0>"(i64  %"anon#2#1##0") inlinehint   {
 entry:
   %0 = icmp eq i64 %"anon#2#1##0", 1 
   ret i1 %0 
 }
 
 
-define external fastcc  i64 @"higher_order_tests.gen#6<1>"(i64  %"#env##0", i64  %"anon#2#1##0") alwaysinline   {
+define external fastcc  i64 @"higher_order_tests.gen#6<1>"(i64  %"#env##0", i64  %"anon#2#1##0") inlinehint   {
 entry:
   %0 = icmp eq i64 %"anon#2#1##0", 1 
   %1 = zext i1 %0 to i64  

@@ -22,7 +22,7 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-factorial > public {inline} (1 calls)
+factorial > public {inferredinline} (1 calls)
 0: proc_factorial.factorial<0>
 factorial(n##0:wybe.int, ?result##1:wybe.int)<{}; {}>:
   AliasPairs: []
@@ -47,7 +47,7 @@ gen#1(n##0:wybe.int, result##0:wybe.int, ?result##1:wybe.int)<{}; {}>:
 
 
 
-gen#2 > {inline} (1 calls)
+gen#2 > {inferredinline} (1 calls)
 0: proc_factorial.gen#2<0>
 gen#2(n##0:wybe.int, result##0:wybe.int, ?result##2:wybe.int)<{}; {}>:
   AliasPairs: []
@@ -85,7 +85,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"proc_factorial.factorial<0>"(i64  %"n##0") alwaysinline   {
+define external fastcc  i64 @"proc_factorial.factorial<0>"(i64  %"n##0") inlinehint   {
 entry:
   %0 = tail call fastcc  i64  @"proc_factorial.gen#1<0>"(i64  %"n##0", i64  1)  
   ret i64 %0 
@@ -106,7 +106,7 @@ if.else:
 }
 
 
-define external fastcc  i64 @"proc_factorial.gen#2<0>"(i64  %"n##0", i64  %"result##0") alwaysinline   {
+define external fastcc  i64 @"proc_factorial.gen#2<0>"(i64  %"n##0", i64  %"result##0") inlinehint   {
 entry:
   %0 = mul   i64 %"n##0", %"result##0" 
   %1 = sub   i64 %"n##0", 1 

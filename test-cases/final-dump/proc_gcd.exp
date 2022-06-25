@@ -22,7 +22,7 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
 
 
-gcd > public {inline} (1 calls)
+gcd > public {inferredinline} (1 calls)
 0: proc_gcd.gcd<0>
 gcd(a##0:wybe.int, b##0:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -46,7 +46,7 @@ gen#1(a##0:wybe.int, b##0:wybe.int, [t##0:wybe.int], x##0:wybe.int, y##0:wybe.in
 
 
 
-gen#2 > {inline} (1 calls)
+gen#2 > {inferredinline} (1 calls)
 0: proc_gcd.gen#2<0>
 gen#2(a##0:wybe.int, b##0:wybe.int, [t##0:wybe.int], x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -98,7 +98,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"proc_gcd.gcd<0>"(i64  %"a##0", i64  %"b##0") alwaysinline   {
+define external fastcc  i64 @"proc_gcd.gcd<0>"(i64  %"a##0", i64  %"b##0") inlinehint   {
 entry:
   %0 = tail call fastcc  i64  @"proc_gcd.gen#1<0>"(i64  %"a##0", i64  %"b##0", i64  %"a##0", i64  %"b##0")  
   ret i64 %0 
@@ -118,7 +118,7 @@ if.else:
 }
 
 
-define external fastcc  i64 @"proc_gcd.gen#2<0>"(i64  %"a##0", i64  %"b##0", i64  %"x##0", i64  %"y##0") alwaysinline   {
+define external fastcc  i64 @"proc_gcd.gen#2<0>"(i64  %"a##0", i64  %"b##0", i64  %"x##0", i64  %"y##0") inlinehint   {
 entry:
   %0 = tail call fastcc  i64  @"proc_gcd.mod<0>"(i64  %"x##0", i64  %"y##0")  
   %1 = musttail call fastcc  i64  @"proc_gcd.gen#1<0>"(i64  %"a##0", i64  %"b##0", i64  %"y##0", i64  %0)  

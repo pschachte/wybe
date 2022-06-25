@@ -23,7 +23,7 @@ module top-level code > public {impure} (0 calls)
     higher_order_loop.gen#3<0>(~tmp#0##0:wybe.list({resource}(wybe.int)), ~tmp#0##0:wybe.list({resource}(wybe.int)), higher_order_loop.gen#1<0><>:{resource}(wybe.int), ~tmp#2##0:wybe.list({resource}(wybe.int)), higher_order_loop.gen#2<0><>:{resource}(wybe.int), 0:wybe.list({resource}(wybe.int)), ~tmp#0##0:wybe.list({resource}(wybe.int)))<Everything; Everything> #3 @higher_order_loop:nn:nn
 
 
-gen#1 > {inline} (1 calls)
+gen#1 > {inferredinline} (1 calls)
 0: higher_order_loop.gen#1<0>
 gen#1(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -34,7 +34,7 @@ gen#1(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-gen#2 > {inline} (1 calls)
+gen#2 > {inferredinline} (1 calls)
 0: higher_order_loop.gen#2<0>
 gen#2(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -109,7 +109,7 @@ entry:
 }
 
 
-define external fastcc  void @"higher_order_loop.gen#1<0>"(i64  %"#env##0", i64  %"x##0") alwaysinline   {
+define external fastcc  void @"higher_order_loop.gen#1<0>"(i64  %"#env##0", i64  %"x##0") inlinehint   {
 entry:
   tail call ccc  void  @print_int(i64  %"x##0")  
   tail call ccc  void  @putchar(i8  10)  
@@ -117,7 +117,7 @@ entry:
 }
 
 
-define external fastcc  void @"higher_order_loop.gen#2<0>"(i64  %"#env##0", i64  %"x##0") alwaysinline   {
+define external fastcc  void @"higher_order_loop.gen#2<0>"(i64  %"#env##0", i64  %"x##0") inlinehint   {
 entry:
   tail call ccc  void  @print_int(i64  %"x##0")  
   ret void 

@@ -88,7 +88,7 @@ optimiseProcBottomUp pspec = do
     logOptimise $ "\n>>> Optimise (Bottom-up) " ++ show pspec
     updateProcDefM (optimiseProcDefBU pspec) pspec
     newDef <- getProcDef pspec
-    return $ procInline newDef
+    return $ procInferredInline newDef
 
 
 optimiseProcDefBU :: ProcSpec -> ProcDef -> Compiler ProcDef
@@ -129,7 +129,7 @@ decideInlining def
     -- Inline procs where benefit >= cost and private procs with only one use
     if benefit >= cost
        || procCallCount def <= 1 && procVis def == Private
-    then return $ def { procInlining = Inline }
+    then return $ def { procInlining = InferredInline }
     else return def
     where impln = procImpln def
           proto = procImplnProto impln

@@ -58,7 +58,7 @@ insert(<=##0:(X, X, ?wybe.bool), x##0:X, xs##0:wybe.list(X), outByReference xs##
 
 
 
-sort > {inline} (0 calls)
+sort > {inferredinline} (0 calls)
 0: higher_order_sort.sort<0>
 sort(<=##0:(X, X, ?wybe.bool), xs##0:wybe.list(X), ?sorted##1:wybe.list(X))<{}; {}>:
   AliasPairs: []
@@ -151,7 +151,7 @@ if.else1:
 }
 
 
-define external fastcc  i64 @"higher_order_sort.sort<0>"(i64  %"<=##0", i64  %"xs##0") alwaysinline   {
+define external fastcc  i64 @"higher_order_sort.sort<0>"(i64  %"<=##0", i64  %"xs##0") inlinehint   {
 entry:
   %0 = tail call fastcc  i64  @"higher_order_sort.gen#1<0>"(i64  %"<=##0", i64  0, i64  0, i64  %"xs##0", i64  %"xs##0")  
   ret i64 %0 

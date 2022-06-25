@@ -39,9 +39,10 @@ procExpansion pspec def = do
     let body = procImplnBody impln
     logMsg Expansion $ "    initial body: " ++ show (procImpln def)
     let tmp = procTmpCount def
+    let imp = procImpurity def
     let (ins,outs) = inputOutputParams proto
     isClosure <- isClosureProc pspec
-    let st = initExpanderState (procCallSiteCount def)
+    let st = initExpanderState imp (procCallSiteCount def)
     (st', tmp', used, stored, body') <- buildBody tmp (Map.fromSet id outs)
                                 $ execStateT (expandBody body) st
     let PrimProto _ params (GlobalFlows gIns gOuts) = proto
@@ -112,11 +113,12 @@ identityRenaming = Map.empty
 ----------------------------------------------------------------
 
 data ExpanderState = Expander {
-    inlining       :: Bool,      -- ^Whether we are currently inlining (and
-                                 --  therefore should not inline calls)
-    renaming       :: Renaming,  -- ^The current variable renaming
-    writeNaming    :: Renaming,  -- ^Renaming for new assignments
-    noFork         :: Bool,      -- ^There's no fork at the end of this body
+    inlining       :: Bool,       -- ^Whether we are currently inlining (and
+                                  --  therefore should not inline calls)
+    renaming       :: Renaming,   -- ^The current variable renaming
+    writeNaming    :: Renaming,   -- ^Renaming for new assignments
+    noFork         :: Bool,       -- ^There's no fork at the end of this body
+    impurity       :: Impurity,   -- ^The current proc's impurity 
     nextCallSiteID :: CallSiteID -- ^The next callSiteID to use
     }
 
@@ -168,7 +170,7 @@ addInstr prim pos = do
 
 
 -- init a expander state based on the given call site count
-initExpanderState :: CallSiteID -> ExpanderState
+initExpanderState :: Impurity -> CallSiteID -> ExpanderState
 initExpanderState = Expander False identityRenaming identityRenaming True
 
 
@@ -240,10 +242,12 @@ expandPrim (PrimCall id pspec args gFlows) pos = do
         addInstr call' pos
     else do
         def <- lift2 $ getProcDef pspec
+        imp <- gets impurity
         case procImpln def of
             ProcDefSrc _ -> shouldnt $ "uncompiled proc: " ++ show pspec
             ProcDefPrim{procImplnProto = proto, procImplnBody = body} ->
-                if procInline def
+                if procUserInline def 
+                    || procInferredInline def && procImpurity def <= max Pure imp
                 then inlineCall proto args' body pos
                 else do
                     -- inlinableLast <- gets (((final && singleCaller def

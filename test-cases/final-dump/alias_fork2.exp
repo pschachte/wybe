@@ -243,7 +243,7 @@ entry:
   submodules      : mytree.tree
   procs           : 
 
-printTree > public {inline} (0 calls)
+printTree > public {inferredinline} (0 calls)
 0: mytree.printTree<0>
 printTree(t##0:mytree.tree)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -312,7 +312,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  void @"mytree.printTree<0>"(i64  %"t##0") alwaysinline   {
+define external fastcc  void @"mytree.printTree<0>"(i64  %"t##0") inlinehint   {
 entry:
   %0 = tail call fastcc  i64  @"mytree.printTree1<0>"(i64  %"t##0", i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @mytree.1, i32 0, i32 0) to i64))  
   musttail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @mytree.3, i32 0, i32 0) to i64))  

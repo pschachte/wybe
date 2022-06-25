@@ -50,7 +50,7 @@ gen#1(prompt##0:wybe.string, ?result##1:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.
 
 
 
-is_yes > {inline} (4 calls)
+is_yes > {inferredinline} (4 calls)
 0: proc_yorn.is_yes<0>
 is_yes(ch##0:wybe.char, ?#result##0:wybe.bool)<{}; {}>:
   AliasPairs: []
@@ -76,7 +76,7 @@ is_yes_or_no(ch##0:wybe.char, ?#result##0:wybe.bool)<{}; {}>:
     foreign llvm or(~tmp#1##0:wybe.bool, ~tmp#2##0:wybe.bool, ?#result##0:wybe.bool) @bool:nn:nn
 
 
-yorn > public {inline} (1 calls)
+yorn > public {inferredinline} (1 calls)
 0: proc_yorn.yorn<0>
 yorn(prompt##0:wybe.string, ?result##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -157,7 +157,7 @@ if.else:
 }
 
 
-define external fastcc  i1 @"proc_yorn.is_yes<0>"(i8  %"ch##0") alwaysinline   {
+define external fastcc  i1 @"proc_yorn.is_yes<0>"(i8  %"ch##0") inlinehint   {
 entry:
   %0 = icmp ne i8 %"ch##0", 121 
   %1 = icmp ne i8 %"ch##0", 89 
@@ -181,7 +181,7 @@ entry:
 }
 
 
-define external fastcc  i1 @"proc_yorn.yorn<0>"(i64  %"prompt##0") alwaysinline   {
+define external fastcc  i1 @"proc_yorn.yorn<0>"(i64  %"prompt##0") inlinehint   {
 entry:
   %0 = musttail call fastcc  i1  @"proc_yorn.gen#1<0>"(i64  %"prompt##0")  
   ret i1 %0 

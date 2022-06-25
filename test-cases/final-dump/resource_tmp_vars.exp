@@ -23,7 +23,7 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-gen#1 > {inline} (1 calls)
+gen#1 > {inferredinline} (1 calls)
 0: resource_tmp_vars.gen#1<0>
 gen#1(tmp#0##0:wybe.int, [tmp#1##0:wybe.int])<{<<wybe.io.io>>}; {<<resource_tmp_vars.counter>>, <<wybe.io.io>>}>:
   AliasPairs: []
@@ -70,7 +70,7 @@ entry:
 }
 
 
-define external fastcc  void @"resource_tmp_vars.gen#1<0>"(i64  %"tmp#0##0") alwaysinline   {
+define external fastcc  void @"resource_tmp_vars.gen#1<0>"(i64  %"tmp#0##0") inlinehint   {
 entry:
   tail call ccc  void  @print_int(i64  1)  
   tail call ccc  void  @putchar(i8  10)  

@@ -76,7 +76,7 @@ lt(x##0:wybe.int, y##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
 
 
 
-lt2 > public {inline} (1 calls)
+lt2 > public {inferredinline} (1 calls)
 0: tests.lt2<0>
 lt2(x##0:wybe.int, y##0:wybe.int, ?res##0:wybe.bool)<{}; {}>:
   AliasPairs: []
@@ -84,7 +84,7 @@ lt2(x##0:wybe.int, y##0:wybe.int, ?res##0:wybe.bool)<{}; {}>:
     tests.lt<0>(~x##0:wybe.int, ~y##0:wybe.int, ?res##0:wybe.bool) #0 @tests:nn:nn
 
 
-lt3 > public {inline} (0 calls)
+lt3 > public {inferredinline} (0 calls)
 0: tests.lt3<0>
 lt3(x##0:wybe.int, y##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
@@ -162,14 +162,14 @@ if.else:
 }
 
 
-define external fastcc  i1 @"tests.lt2<0>"(i64  %"x##0", i64  %"y##0") alwaysinline   {
+define external fastcc  i1 @"tests.lt2<0>"(i64  %"x##0", i64  %"y##0") inlinehint   {
 entry:
   %0 = musttail call fastcc  i1  @"tests.lt<0>"(i64  %"x##0", i64  %"y##0")  
   ret i1 %0 
 }
 
 
-define external fastcc  i1 @"tests.lt3<0>"(i64  %"x##0", i64  %"y##0") alwaysinline   {
+define external fastcc  i1 @"tests.lt3<0>"(i64  %"x##0", i64  %"y##0") inlinehint   {
 entry:
   %0 = musttail call fastcc  i1  @"tests.lt<0>"(i64  %"y##0", i64  %"x##0")  
   ret i1 %0 

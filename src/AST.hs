@@ -53,7 +53,8 @@ module AST (
   emptyInterface, emptyImplementation,
   getParams, getPrimParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
-  ModSpec, maybeModPrefix, ProcImpln(..), ProcDef(..), procInline, procCallCount,
+  ModSpec, maybeModPrefix, ProcImpln(..), ProcDef(..), 
+  procInline, procUserInline, procInferredInline, procCallCount,
   getProcGlobalFlows,
   primImpurity, flagsImpurity, flagsDetism,
   AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
@@ -1096,15 +1097,23 @@ data ProcModifiers = ProcModifiers {
 } deriving (Eq, Ord, Generic)
 
 
-data Inlining = Inline | MayInline | NoInline
+data Inlining = Inline
+              -- ^User specified to inline
+              | InferredInline 
+              -- ^ Inlining has been inferred
+              | MayInline 
+              -- ^ No inlining specified, inlining may be inferred
+              | NoInline
+              -- ^ User specified not to inline
     deriving (Eq, Ord, Generic, Show)
 
 
 -- | The printable modifier name for a Impurity, as specified by the user.
 inliningName :: Inlining -> String
-inliningName Inline     = "inline"
-inliningName MayInline  = ""
-inliningName NoInline   = "noinline"
+inliningName Inline         = "inline"
+inliningName InferredInline = "inferredinline"
+inliningName MayInline      = ""
+inliningName NoInline       = "noinline"
 
 
 -- | The Wybe impurity system.
@@ -1912,10 +1921,20 @@ data ProcDef = ProcDef {
              deriving (Eq, Generic)
 
 
--- |Whether this proc should definitely be inlined, either because the user said
--- to, or because we inferred it would be a good idea.
+-- |Whether this proc should definitely be inlined, either because the user said 
+-- to or because we inferred it to.
 procInline :: ProcDef -> Bool
-procInline = (==Inline) . procInlining
+procInline = ((==InferredInline) ||| (==Inline)) . procInlining
+
+
+-- |Whether this proc should definitely be inlined, because the user said to.
+procUserInline :: ProcDef -> Bool
+procUserInline = (==Inline) . procInlining
+
+
+-- |Whether this proc should definitely be inlined, because we inferred it to.
+procInferredInline :: ProcDef -> Bool
+procInferredInline = (==InferredInline) . procInlining
 
 
 -- | What are the GlobalFLows of the given ProcSpec

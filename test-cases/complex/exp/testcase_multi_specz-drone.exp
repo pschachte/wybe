@@ -51,7 +51,7 @@ AFTER BUILDING MAIN:
   resources       : 
   procs           : 
 
-module top-level code > {terminal,inline,impure} (0 calls)
+module top-level code > {terminal,inferredinline,impure} (0 calls)
 0: .<0>
 (%argc##0:wybe.int, %argv##0:wybe.array.raw_array(wybe.c_string), %?exit_code##0:wybe.int)<{}; {<<command_line.exit_code>>}>:
   AliasPairs: []
@@ -111,7 +111,7 @@ module top-level code > public {impure} (0 calls)
 
 
 
-set_exit_code > public {inline} (0 calls)
+set_exit_code > public {inferredinline} (0 calls)
 0: command_line.set_exit_code<0>
 set_exit_code(code##0:wybe.int)<{}; {<<command_line.exit_code>>}>:
   AliasPairs: []
@@ -192,7 +192,7 @@ if.else:
 }
 
 
-define external fastcc  void @"command_line.set_exit_code<0>"(i64  %"code##0") alwaysinline   {
+define external fastcc  void @"command_line.set_exit_code<0>"(i64  %"code##0") inlinehint   {
 entry:
   store  i64 %"code##0", i64* @"resource#command_line.exit_code" 
   ret void 
@@ -224,8 +224,8 @@ module top-level code > public {impure} (0 calls)
     foreign llvm icmp_ne(ch##0:wybe.char, ~tmp#1##0:wybe.char, ?tmp#2##0:wybe.bool) @char:nn:nn
     case ~tmp#2##0:wybe.bool of
     0:
-        foreign c {impure} malloc_count(?tmp#10##0:wybe.int) @memory_management:nn:nn
-        wybe.string.print<0>("** malloc count: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7 @drone:nn:nn
+        wybe.memory_management.malloc_count<0>(?tmp#10##0:wybe.int) #7 @drone:nn:nn
+        wybe.string.print<0>("** malloc count: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #8 @drone:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @int:nn:nn
         foreign c print_int(~tmp#10##0:wybe.int, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @int:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @io:nn:nn
@@ -233,8 +233,8 @@ module top-level code > public {impure} (0 calls)
 
     1:
         drone.loop<0>[410bae77d3](~tmp#0##0:drone.drone_info, ~ch##0:wybe.char)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @drone:nn:nn
-        foreign c {impure} malloc_count(?tmp#10##0:wybe.int) @memory_management:nn:nn
-        wybe.string.print<0>("** malloc count: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #8 @drone:nn:nn
+        wybe.memory_management.malloc_count<0>(?tmp#10##0:wybe.int) #9 @drone:nn:nn
+        wybe.string.print<0>("** malloc count: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #10 @drone:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @int:nn:nn
         foreign c print_int(~tmp#10##0:wybe.int, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @int:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @io:nn:nn
@@ -330,12 +330,12 @@ drone_init(?#result##0:drone.drone_info)<{}; {}>:
     foreign lpvm mutate(~tmp#8##0:drone.drone_info, ?#result##0:drone.drone_info, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 0:wybe.int) @drone:nn:nn
 
 
-gen#1 > {inline} (2 calls)
+gen#1 > {inferredinline} (2 calls)
 0: drone.gen#1<0>
 gen#1([ch##0:wybe.char], [d##0:drone.drone_info], [tmp#0##0:drone.drone_info])<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign c {impure} malloc_count(?mc##0:wybe.int) @memory_management:nn:nn
+    wybe.memory_management.malloc_count<0>(?mc##0:wybe.int) #0 @drone:nn:nn
     wybe.string.print<0>("** malloc count: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @drone:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @int:nn:nn
     foreign c print_int(~mc##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @int:nn:nn
@@ -436,7 +436,7 @@ loop(d##0:drone.drone_info, ch##0:wybe.char)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>
 
 
 
-print_info > {inline} (1 calls)
+print_info > {inferredinline} (1 calls)
 0: drone.print_info<0>
 print_info(d##0:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -673,7 +673,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > {terminal,inline,impure} (0 calls)
+module top-level code > {terminal,inferredinline,impure} (0 calls)
 0: .<0>
 (%argc##0:wybe.int, %argv##0:wybe.array.raw_array(wybe.c_string), %?exit_code##0:wybe.int)<{}; {<<command_line.exit_code>>}>:
   AliasPairs: []
@@ -722,7 +722,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external ccc  i64 @main(i64  %"argc##0", i64  %"argv##0") alwaysinline   {
+define external ccc  i64 @main(i64  %"argc##0", i64  %"argv##0") inlinehint   {
 entry:
   store  i64 %"argc##0", i64* @"resource#command_line.argc" 
   store  i64 %"argv##0", i64* @"resource#command_line.argv" 
@@ -777,7 +777,7 @@ module top-level code > public {impure} (0 calls)
 
 
 
-set_exit_code > public {inline} (0 calls)
+set_exit_code > public {inferredinline} (0 calls)
 0: command_line.set_exit_code<0>
 set_exit_code(code##0:wybe.int)<{}; {<<command_line.exit_code>>}>:
   AliasPairs: []
@@ -858,7 +858,7 @@ if.else:
 }
 
 
-define external fastcc  void @"command_line.set_exit_code<0>"(i64  %"code##0") alwaysinline   {
+define external fastcc  void @"command_line.set_exit_code<0>"(i64  %"code##0") inlinehint   {
 entry:
   store  i64 %"code##0", i64* @"resource#command_line.exit_code" 
   ret void 
@@ -890,8 +890,8 @@ module top-level code > public {impure} (0 calls)
     foreign llvm icmp_ne(ch##0:wybe.char, ~tmp#1##0:wybe.char, ?tmp#2##0:wybe.bool) @char:nn:nn
     case ~tmp#2##0:wybe.bool of
     0:
-        foreign c {impure} malloc_count(?tmp#10##0:wybe.int) @memory_management:nn:nn
-        wybe.string.print<0>("** malloc count: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7 @drone:nn:nn
+        wybe.memory_management.malloc_count<0>(?tmp#10##0:wybe.int) #7 @drone:nn:nn
+        wybe.string.print<0>("** malloc count: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #8 @drone:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @int:nn:nn
         foreign c print_int(~tmp#10##0:wybe.int, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @int:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @io:nn:nn
@@ -899,8 +899,8 @@ module top-level code > public {impure} (0 calls)
 
     1:
         drone.loop<0>[410bae77d3](~tmp#0##0:drone.drone_info, ~ch##0:wybe.char)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @drone:nn:nn
-        foreign c {impure} malloc_count(?tmp#10##0:wybe.int) @memory_management:nn:nn
-        wybe.string.print<0>("** malloc count: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #8 @drone:nn:nn
+        wybe.memory_management.malloc_count<0>(?tmp#10##0:wybe.int) #9 @drone:nn:nn
+        wybe.string.print<0>("** malloc count: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #10 @drone:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @int:nn:nn
         foreign c print_int(~tmp#10##0:wybe.int, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @int:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @io:nn:nn
@@ -1065,12 +1065,12 @@ drone_init(?#result##0:drone.drone_info)<{}; {}>:
     foreign lpvm mutate(~tmp#8##0:drone.drone_info, ?#result##0:drone.drone_info, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 0:wybe.int) @drone:nn:nn
 
 
-gen#1 > {inline} (2 calls)
+gen#1 > {inferredinline} (2 calls)
 0: drone.gen#1<0>
 gen#1([ch##0:wybe.char], [d##0:drone.drone_info], [tmp#0##0:drone.drone_info])<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign c {impure} malloc_count(?mc##0:wybe.int) @memory_management:nn:nn
+    wybe.memory_management.malloc_count<0>(?mc##0:wybe.int) #0 @drone:nn:nn
     wybe.string.print<0>("** malloc count: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @drone:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @int:nn:nn
     foreign c print_int(~mc##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @int:nn:nn
@@ -1244,7 +1244,7 @@ loop(d##0:drone.drone_info, ch##0:wybe.char)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>
 
 
 
-print_info > {inline} (1 calls)
+print_info > {inferredinline} (1 calls)
 0: drone.print_info<0>
 print_info(d##0:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -1321,7 +1321,7 @@ declare external fastcc  void @"wybe.string.print<0>"(i64)
 declare external ccc  i8 @read_char()    
 
 
-declare external ccc  i64 @malloc_count()    
+declare external fastcc  i64 @"wybe.memory_management.malloc_count<0>"()    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -1338,13 +1338,13 @@ entry:
   br i1 %2, label %if.then, label %if.else 
 if.then:
   tail call fastcc  void  @"drone.loop<0>[410bae77d3]"(i64  %0, i8  %1)  
-  %3 = tail call ccc  i64  @malloc_count()  
+  %3 = tail call fastcc  i64  @"wybe.memory_management.malloc_count<0>"()  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.1, i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %3)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 if.else:
-  %4 = tail call ccc  i64  @malloc_count()  
+  %4 = tail call fastcc  i64  @"wybe.memory_management.malloc_count<0>"()  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.1, i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %4)  
   tail call ccc  void  @putchar(i8  10)  
@@ -1604,9 +1604,9 @@ entry:
 }
 
 
-define external fastcc  void @"drone.gen#1<0>"() alwaysinline   {
+define external fastcc  void @"drone.gen#1<0>"() inlinehint   {
 entry:
-  %0 = tail call ccc  i64  @malloc_count()  
+  %0 = tail call fastcc  i64  @"wybe.memory_management.malloc_count<0>"()  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.1, i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %0)  
   tail call ccc  void  @putchar(i8  10)  
@@ -1785,7 +1785,7 @@ if.else2:
 }
 
 
-define external fastcc  void @"drone.print_info<0>"(i64  %"d##0") alwaysinline   {
+define external fastcc  void @"drone.print_info<0>"(i64  %"d##0") inlinehint   {
 entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @drone.3, i32 0, i32 0) to i64))  
   %0 = inttoptr i64 %"d##0" to i64* 

@@ -129,7 +129,7 @@ cons(?car##0:T, ?cdr##0:list_this(T), #result##0:list_this(T), ?#success##0:wybe
 
 
 
-length > public {inline} (0 calls)
+length > public {inferredinline} (0 calls)
 0: list_this.length<0>
 length(x##0:list_this(T), ?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
@@ -321,7 +321,7 @@ if.else:
 }
 
 
-define external fastcc  i64 @"list_this.length<0>"(i64  %"x##0") alwaysinline   {
+define external fastcc  i64 @"list_this.length<0>"(i64  %"x##0") inlinehint   {
 entry:
   %0 = tail call fastcc  i64  @"list_this.length1<0>"(i64  %"x##0", i64  0)  
   ret i64 %0 

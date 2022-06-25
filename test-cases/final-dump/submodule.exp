@@ -36,7 +36,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
   resources       : 
   procs           : 
 
-hidden > {inline} (0 calls)
+hidden > {inferredinline} (0 calls)
 0: submodule.privatetest.hidden<0>
 hidden()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -44,7 +44,7 @@ hidden()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
     wybe.string.print<0>("private proc in a private module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @submodule:nn:nn
 
 
-semi_hidden > public {inline} (0 calls)
+semi_hidden > public {inferredinline} (0 calls)
 0: submodule.privatetest.semi_hidden<0>
 semi_hidden()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -80,14 +80,14 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  void @"submodule.privatetest.hidden<0>"() alwaysinline   {
+define external fastcc  void @"submodule.privatetest.hidden<0>"() inlinehint   {
 entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @submodule.privatetest.1, i32 0, i32 0) to i64))  
   ret void 
 }
 
 
-define external fastcc  void @"submodule.privatetest.semi_hidden<0>"() alwaysinline   {
+define external fastcc  void @"submodule.privatetest.semi_hidden<0>"() inlinehint   {
 entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @submodule.privatetest.3, i32 0, i32 0) to i64))  
   ret void 
@@ -103,7 +103,7 @@ entry:
   resources       : 
   procs           : 
 
-semi_visible > {inline} (0 calls)
+semi_visible > {inferredinline} (0 calls)
 0: submodule.publictest.semi_visible<0>
 semi_visible()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -111,7 +111,7 @@ semi_visible()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
     wybe.string.print<0>("private proc in a public module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @submodule:nn:nn
 
 
-visible > public {inline} (0 calls)
+visible > public {inferredinline} (0 calls)
 0: submodule.publictest.visible<0>
 visible()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -147,14 +147,14 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  void @"submodule.publictest.semi_visible<0>"() alwaysinline   {
+define external fastcc  void @"submodule.publictest.semi_visible<0>"() inlinehint   {
 entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @submodule.publictest.1, i32 0, i32 0) to i64))  
   ret void 
 }
 
 
-define external fastcc  void @"submodule.publictest.visible<0>"() alwaysinline   {
+define external fastcc  void @"submodule.publictest.visible<0>"() inlinehint   {
 entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @submodule.publictest.3, i32 0, i32 0) to i64))  
   ret void 

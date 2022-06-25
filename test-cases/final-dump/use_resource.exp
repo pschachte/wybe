@@ -27,7 +27,7 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-inc_count > {inline} (4 calls)
+inc_count > {inferredinline} (4 calls)
 0: use_resource.inc_count<0>
 inc_count()<{<<use_resource.count>>}; {<<use_resource.count>>}>:
   AliasPairs: []
@@ -37,7 +37,7 @@ inc_count()<{<<use_resource.count>>}; {<<use_resource.count>>}>:
     foreign lpvm store(~tmp#0##0:wybe.int, <<use_resource.count>>:wybe.int) @use_resource:nn:nn
 
 
-use_test > {inline} (1 calls)
+use_test > {inferredinline} (1 calls)
 0: use_resource.use_test<0>
 use_test()<{<<use_resource.count>>, <<wybe.io.io>>}; {<<use_resource.count>>, <<wybe.io.io>>}>:
   AliasPairs: []
@@ -110,7 +110,7 @@ entry:
 }
 
 
-define external fastcc  void @"use_resource.inc_count<0>"() alwaysinline   {
+define external fastcc  void @"use_resource.inc_count<0>"() inlinehint   {
 entry:
   %0 = load  i64, i64* @"resource#use_resource.count" 
   %1 = add   i64 %0, 1 
@@ -119,7 +119,7 @@ entry:
 }
 
 
-define external fastcc  void @"use_resource.use_test<0>"() alwaysinline   {
+define external fastcc  void @"use_resource.use_test<0>"() inlinehint   {
 entry:
   %0 = load  i64, i64* @"resource#use_resource.count" 
   %1 = add   i64 %0, 1 

@@ -22,7 +22,7 @@ module top-level code > public {impure} (0 calls)
     foreign c {terminal,semipure} exit(1:wybe.int) @early_error:nn:nn
 
 
-my_error > {terminal,inline,semipure} (1 calls)
+my_error > {terminal,inferredinline,semipure} (1 calls)
 0: early_error.my_error<0>
 my_error(msg##0:wybe.string)<{}; {}>:
   AliasPairs: []
@@ -78,7 +78,7 @@ entry:
 }
 
 
-define external fastcc  void @"early_error.my_error<0>"(i64  %"msg##0") alwaysinline   {
+define external fastcc  void @"early_error.my_error<0>"(i64  %"msg##0") inlinehint   {
 entry:
   tail call ccc  void  @puts(i64  %"msg##0")  
   tail call ccc  void  @exit(i64  1)  

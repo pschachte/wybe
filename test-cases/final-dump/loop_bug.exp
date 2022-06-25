@@ -43,7 +43,7 @@ gen#1([h##0:wybe.int], lst##0:loop_bug.int_list, t##0:loop_bug.int_list)<{<<wybe
 
 
 
-gen#2 > {inline} (1 calls)
+gen#2 > {inferredinline} (1 calls)
 0: loop_bug.gen#2<0>
 gen#2(h##0:wybe.int, lst##0:loop_bug.int_list, t##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -125,7 +125,7 @@ if.else:
 }
 
 
-define external fastcc  void @"loop_bug.gen#2<0>"(i64  %"h##0", i64  %"lst##0", i64  %"t##0") alwaysinline   {
+define external fastcc  void @"loop_bug.gen#2<0>"(i64  %"h##0", i64  %"lst##0", i64  %"t##0") inlinehint   {
 entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @loop_bug.1, i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  %"h##0")  

@@ -25,7 +25,7 @@ module top-level code > public {impure} (0 calls)
     nested_loop.gen#2<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @nested_loop:nn:nn
 
 
-gen#1 > {inline} (1 calls)
+gen#1 > {inferredinline} (1 calls)
 0: nested_loop.gen#1<0>
 gen#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -41,7 +41,7 @@ gen#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
     nested_loop.gen#2<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @nested_loop:nn:nn
 
 
-gen#2 > {inline} (2 calls)
+gen#2 > {inferredinline} (2 calls)
 0: nested_loop.gen#2<0>
 gen#2()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -95,7 +95,7 @@ entry:
 }
 
 
-define external fastcc  void @"nested_loop.gen#1<0>"() alwaysinline   {
+define external fastcc  void @"nested_loop.gen#1<0>"() inlinehint   {
 entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @nested_loop.1, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
@@ -106,7 +106,7 @@ entry:
 }
 
 
-define external fastcc  void @"nested_loop.gen#2<0>"() alwaysinline   {
+define external fastcc  void @"nested_loop.gen#2<0>"() inlinehint   {
 entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @nested_loop.3, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  

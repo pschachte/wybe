@@ -70,13 +70,13 @@ append(front##0:wybe.list(wybe.int), back##0:wybe.list(wybe.int), outByReference
 
 
 
-gen#1 > {inline} (1 calls)
+gen#1 > {inferredinline} (1 calls)
 0: higher_order_append.gen#1<0>
 gen#1(^cons##0:wybe.list(wybe.int), anon#1#1##0:wybe.list(wybe.int), ?anon#1#2##0:wybe.list(wybe.int))<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     higher_order_append.append<0>(~anon#1#1##0:wybe.list(wybe.int), ~cons##0:wybe.list(wybe.int), outByReference anon#1#2##0:wybe.list(wybe.int)) #0 @higher_order_append:nn:nn
-gen#1 > {inline} (1 calls)
+gen#1 > {inferredinline} (1 calls)
 1: higher_order_append.gen#1<1>
 gen#1(^cons##0:wybe.list(wybe.int), anon#1#1##0:wybe.list(wybe.int), ?anon#1#2##0:wybe.list(wybe.int))<{}; {}>:
   AliasPairs: []
@@ -84,7 +84,7 @@ gen#1(^cons##0:wybe.list(wybe.int), anon#1#1##0:wybe.list(wybe.int), ?anon#1#2##
     higher_order_append.append<0>(~anon#1#1##0:wybe.list(wybe.int), ~^cons##0:wybe.list(wybe.int), outByReference anon#1#2##0:wybe.list(wybe.int)) #1 @higher_order_append:nn:nn
 
 
-gen#2 > {inline} (2 calls)
+gen#2 > {inferredinline} (2 calls)
 0: higher_order_append.gen#2<0>
 gen#2(l##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -92,7 +92,7 @@ gen#2(l##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
     wybe.list.print<0>(higher_order_append.gen#4<0><>:{resource}(wybe.int), ~l##0:wybe.list(wybe.int))<Everything; Everything> #1 @higher_order_append:nn:nn
 
 
-gen#4 > {inline} (1 calls)
+gen#4 > {inferredinline} (1 calls)
 0: higher_order_append.gen#4<0>
 gen#4(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -102,7 +102,7 @@ gen#4(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
     foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
 
 
-print_list_of_ints > {inline} (1 calls)
+print_list_of_ints > {inferredinline} (1 calls)
 0: higher_order_append.print_list_of_ints<0>
 print_list_of_ints(l##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -252,7 +252,7 @@ if.else:
 }
 
 
-define external fastcc  i64 @"higher_order_append.gen#1<0>"(i64  %"cons##0", i64  %"anon#1#1##0") alwaysinline   {
+define external fastcc  i64 @"higher_order_append.gen#1<0>"(i64  %"cons##0", i64  %"anon#1#1##0") inlinehint   {
 entry:
   %0 = alloca i64 
    call fastcc  void  @"higher_order_append.append<0>"(i64  %"anon#1#1##0", i64  %"cons##0", i64*  %0)  
@@ -261,7 +261,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"higher_order_append.gen#1<1>"(i64  %"#env##0", i64  %"anon#1#1##0") alwaysinline   {
+define external fastcc  i64 @"higher_order_append.gen#1<1>"(i64  %"#env##0", i64  %"anon#1#1##0") inlinehint   {
 entry:
   %0 = add   i64 %"#env##0", 8 
   %1 = inttoptr i64 %0 to i64* 
@@ -273,21 +273,21 @@ entry:
 }
 
 
-define external fastcc  void @"higher_order_append.gen#2<0>"(i64  %"#env##0", i64  %"l##0") alwaysinline   {
+define external fastcc  void @"higher_order_append.gen#2<0>"(i64  %"#env##0", i64  %"l##0") inlinehint   {
 entry:
   musttail call fastcc  void  @"wybe.list.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_append.1, i32 0, i32 0) to i64), i64  %"l##0")  
   ret void 
 }
 
 
-define external fastcc  void @"higher_order_append.gen#4<0>"(i64  %"#env##0", i64  %"x##0") alwaysinline   {
+define external fastcc  void @"higher_order_append.gen#4<0>"(i64  %"#env##0", i64  %"x##0") inlinehint   {
 entry:
   tail call ccc  void  @print_int(i64  %"x##0")  
   ret void 
 }
 
 
-define external fastcc  void @"higher_order_append.print_list_of_ints<0>"(i64  %"l##0") alwaysinline   {
+define external fastcc  void @"higher_order_append.print_list_of_ints<0>"(i64  %"l##0") inlinehint   {
 entry:
   tail call fastcc  void  @"wybe.list.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_append.1, i32 0, i32 0) to i64), i64  %"l##0")  
   ret void 

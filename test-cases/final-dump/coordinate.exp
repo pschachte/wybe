@@ -45,7 +45,7 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm store(~%tmp#23##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-fcopy > public {inline} (1 calls)
+fcopy > public {inferredinline} (1 calls)
 0: coordinate.fcopy<0>
 fcopy(crd1##0:coordinate.Coordinate, ?#result##0:coordinate.Coordinate)<{}; {}>:
   AliasPairs: []
@@ -116,7 +116,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"coordinate.fcopy<0>"(i64  %"crd1##0") alwaysinline   {
+define external fastcc  i64 @"coordinate.fcopy<0>"(i64  %"crd1##0") inlinehint   {
 entry:
   ret i64 %"crd1##0" 
 }

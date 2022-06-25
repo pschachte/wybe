@@ -336,9 +336,10 @@ protoLLVMOutputType proto = do
     primReturnLLVMType outTys
 
 procLLVMFuncAttrs :: ProcDef -> [A.FunctionAttribute]
-procLLVMFuncAttrs ProcDef{procInlining=MayInline} = []
-procLLVMFuncAttrs ProcDef{procInlining=Inline}    = [A.AlwaysInline]
-procLLVMFuncAttrs ProcDef{procInlining=NoInline}  = [A.NoInline]
+procLLVMFuncAttrs ProcDef{procInlining=Inline}         = [A.AlwaysInline]
+procLLVMFuncAttrs ProcDef{procInlining=InferredInline} = [A.InlineHint]
+procLLVMFuncAttrs ProcDef{procInlining=MayInline}      = []
+procLLVMFuncAttrs ProcDef{procInlining=NoInline}       = [A.NoInline]
 
 ----------------------------------------------------------------------------
 -- Body Compilation                                                       --

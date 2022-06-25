@@ -32,7 +32,7 @@ module top-level code > public {impure} (0 calls)
     foreign lpvm store(~%tmp#33##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
 
 
-foreign_add > {inline} (1 calls)
+foreign_add > {inferredinline} (1 calls)
 0: exp_simple.foreign_add<0>
 foreign_add(?#result##0:wybe.int)<{}; {}>:
   AliasPairs: []
@@ -89,7 +89,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"exp_simple.foreign_add<0>"() alwaysinline   {
+define external fastcc  i64 @"exp_simple.foreign_add<0>"() inlinehint   {
 entry:
   ret i64 3 
 }
