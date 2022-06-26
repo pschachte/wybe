@@ -166,7 +166,7 @@ entry:
 }
 
 
-define external fastcc  void @"type_list.,,<0>"(i64  %"x##0", i64  %"y##0", i64*  %"#result##0")    {
+define external fastcc  void @"type_list.,,<0>"(i64  %"x##0", i64  %"y##0", i64*  %"#result#ref##0")    {
 entry:
   %0 = icmp ne i64 %"x##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -183,16 +183,16 @@ if.then:
   store  i64 %2, i64* %9 
   %10 = add   i64 %8, 8 
   %11 = inttoptr i64 %10 to i64* 
-  store  i64 %8, i64* %"#result##0" 
+  store  i64 %8, i64* %"#result#ref##0" 
   musttail call fastcc  void  @"type_list.,,<0>"(i64  %5, i64  %"y##0", i64*  %11)  
   ret void 
 if.else:
-  store  i64 %"y##0", i64* %"#result##0" 
+  store  i64 %"y##0", i64* %"#result#ref##0" 
   ret void 
 }
 
 
-define external fastcc  void @"type_list.,,<0>[410bae77d3]"(i64  %"x##0", i64  %"y##0", i64*  %"#result##0")    {
+define external fastcc  void @"type_list.,,<0>[410bae77d3]"(i64  %"x##0", i64  %"y##0", i64*  %"#result#ref##0")    {
 entry:
   %0 = icmp ne i64 %"x##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -202,11 +202,11 @@ if.then:
   %3 = load  i64, i64* %2 
   %4 = add   i64 %"x##0", 8 
   %5 = inttoptr i64 %4 to i64* 
-  store  i64 %"x##0", i64* %"#result##0" 
+  store  i64 %"x##0", i64* %"#result#ref##0" 
   musttail call fastcc  void  @"type_list.,,<0>[410bae77d3]"(i64  %3, i64  %"y##0", i64*  %5)  
   ret void 
 if.else:
-  store  i64 %"y##0", i64* %"#result##0" 
+  store  i64 %"y##0", i64* %"#result#ref##0" 
   ret void 
 }
 

@@ -1,0 +1,7 @@
+def {impure} do_something_with(l: list(T)) {
+    ?l2 = l
+}
+
+?l = [1,2,3]
+!println(l, print)
+!do_something_with(l)

@@ -278,11 +278,11 @@ updateAliasedByPrim aliasMap prim =
             logAlias $ "args: " ++ show args
             logAlias $ "paramArgMap: " ++ show paramArgMap
             let calleeArgsAliases =
-                    mapDS (\x -> Map.lookup x paramArgMap) calleeParamAliases
+                    mapDS (`Map.lookup` paramArgMap) calleeParamAliases
                     -- filter out aliases of constant args
                     -- (caused by constant constructor)
                     |> filterDS isJust
-                    |> mapDS (\x -> LiveVar (fromJust x))
+                    |> mapDS (LiveVar . fromJust)
             combined <- aliasedArgsInPrimCall calleeArgsAliases aliasMap args
             logAlias $ "calleeParamAliases: " ++ show calleeParamAliases
             logAlias $ "calleeArgsAliases:  " ++ show calleeArgsAliases
@@ -538,8 +538,8 @@ isArgVarUsedOnceInArgs _ _ _ = True -- we don't care about constant value
 addInterestingUnaliasedParams :: PrimProto -> Set InterestingCallProperty
         -> [PrimVarName] -> Set InterestingCallProperty
 addInterestingUnaliasedParams proto properties params =
-    List.map (InterestingUnaliased . (parameterVarNameToID proto)) params
-    |> (List.foldr Set.insert) properties
+    List.map (InterestingUnaliased . parameterVarNameToID proto) params
+    |> List.foldr Set.insert properties
 
 
 -- adding new specz version dependency

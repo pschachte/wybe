@@ -858,7 +858,7 @@ compileModSCC mspecs = do
     logMsg Transform $ "mspecs: " ++ show mspecs
     logMsg Transform $ replicate 70 '='
     mapM_ (transformModuleProcs transformProc)  mspecs
-    logDump Transform Transform "TRANSFORM"
+    logDump Transform LastCallAnalysis "TRANSFORM -> LAST CALL ANALYSIS"
 
     ----------------------------------
     -- LAST CALL ANALYSIS
@@ -868,7 +868,7 @@ compileModSCC mspecs = do
     logMsg LastCallAnalysis  $ "mspecs: " ++ show mspecs
     logMsg LastCallAnalysis  $ replicate 70 '='
     mapM_ lastCallAnalyseMod mspecs
-    logDump LastCallAnalysis LastCallAnalysis  "LAST CALL ANALYSIS"
+    logDump LastCallAnalysis LastCallAnalysis "AFTER LAST CALL ANALYSIS"
 
     -- mods <- mapM getLoadedModule mods
     -- callgraph <- mapM (\m -> getSpecModule m
@@ -971,6 +971,7 @@ transformModuleProcs trans thisMod = do
     -- (names, procs) <- :: StateT CompilerState IO ([Ident], [[ProcDef]])
     (names,procs) <- unzip <$>
                      getModuleImplementationField (Map.toList . modProcs)
+    logBuild $ show (names, List.map procName $ concat procs)
     -- for each name we have a list of procdefs, so we must double map
     procs' <- mapM (zipWithM (flip trans) [0..]) procs
     updateImplementation

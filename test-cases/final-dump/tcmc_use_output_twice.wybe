@@ -1,0 +1,32 @@
+pub type tree(T) { pub empty | node(val: T, left: tree(T), right: tree(T)) }
+
+def append_tree(a: tree(int), b: tree(int), ?result: tree(int)) {
+    if { node(?val, ?left, ?right) = a ::
+            append_tree(b, right, ?right2)
+            ?result = node(val, right2, right2)
+       | else ::
+            ?result = b
+    }
+}
+
+def print_tree(a: tree(int)) use !io {
+    if { node(?val, ?left, ?right) = a ::
+        !print("node(")
+        !print(val)
+        !print(",")
+        !print_tree(left)
+        !print(",")
+        !print_tree(right)
+        !print(")")
+       | else ::
+        !print("empty")
+    }
+}
+
+?x = node(1, empty, empty)
+?x2 = node(2, empty, empty)
+append_tree(x, x2, ?x3)
+!print_tree(x2)
+!nl
+!print_tree(x3)
+!nl

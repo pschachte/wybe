@@ -1,0 +1,31 @@
+constructors null | snoc(tail: _, head: int)
+
+def append(a: _, b: _, ?result: _) {
+    if { snoc(?t, ?h) = a ::
+            append(b, t, ?t2)
+            # mutate for val happens at the end. This breaks this optimization :((
+            ?result = snoc(t2, h)
+       | else ::
+            ?result = b
+    }
+}
+
+def print_list(a: _) use !io {
+    if { snoc(?tail, ?head) = a ::
+        !print("node(")
+        !print(head)
+        !print(",")
+        !print_list(tail)
+        !print(")")
+       | else ::
+        !print("null")
+    }
+
+}
+?x = snoc(null, 1)
+?x2 = snoc(null, 2)
+append(x, x2, ?x3)
+!print_list(x2)
+!nl
+!print_list(x3)
+!nl

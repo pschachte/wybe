@@ -1,0 +1,17 @@
+# we expect this should TCMC-optimize
+# however in order for this to happen, we need a generalisation of "mutate
+# chains", which we name "mutate graphs"
+
+def map2(f: (T, ?K), x: list(T)): list(K) =
+    if { [?x0 | ?xt1] = x ::
+        if { [?x1 | ?xt2] = xt1 ::
+            [f(x0), f(x1) |  map2(f, xt2)]
+        | else ::
+            [f(x0)]
+        }
+    | else ::
+        []
+    }
+
+map2({?@2 = @1 + 1}, [1,2,3,4,5], ?y)
+!println(print, y)

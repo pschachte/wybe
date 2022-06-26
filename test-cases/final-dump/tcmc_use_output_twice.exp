@@ -1,0 +1,568 @@
+======================================================================
+AFTER EVERYTHING:
+ Module tcmc_use_output_twice
+  representation  : (not a type)
+  public submods  : tree -> tcmc_use_output_twice.tree
+  public resources: 
+  public procs    : tcmc_use_output_twice.<0>
+                    tcmc_use_output_twice.tree.empty<0>
+                    tcmc_use_output_twice.tree.left<0>
+                    tcmc_use_output_twice.tree.left<1>
+                    tcmc_use_output_twice.tree.node<0>
+                    tcmc_use_output_twice.tree.node<1>
+                    tcmc_use_output_twice.tree.right<0>
+                    tcmc_use_output_twice.tree.right<1>
+                    tcmc_use_output_twice.tree.val<0>
+                    tcmc_use_output_twice.tree.val<1>
+  imports         : public use tcmc_use_output_twice.tree
+                    use wybe
+  resources       : 
+  submodules      : tcmc_use_output_twice.tree
+  procs           : 
+
+module top-level code > public {impure} (0 calls)
+0: tcmc_use_output_twice.<0>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm cast(0:tcmc_use_output_twice.tree(T), ?tmp#1##0:tcmc_use_output_twice.tree(wybe.int))
+    foreign lpvm alloc(24:wybe.int, ?tmp#9##0:tcmc_use_output_twice.tree(T)) @tcmc_use_output_twice:nn:nn
+    foreign lpvm mutate(~tmp#9##0:tcmc_use_output_twice.tree(T), ?tmp#10##0:tcmc_use_output_twice.tree(T), 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1:T) @tcmc_use_output_twice:nn:nn
+    foreign lpvm mutate(~tmp#10##0:tcmc_use_output_twice.tree(T), ?tmp#11##0:tcmc_use_output_twice.tree(T), 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, tmp#1##0:tcmc_use_output_twice.tree(T)) @tcmc_use_output_twice:nn:nn
+    foreign lpvm mutate(~tmp#11##0:tcmc_use_output_twice.tree(T), ?tmp#12##0:tcmc_use_output_twice.tree(T), 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, tmp#1##0:tcmc_use_output_twice.tree(T)) @tcmc_use_output_twice:nn:nn
+    foreign lpvm alloc(24:wybe.int, ?tmp#16##0:tcmc_use_output_twice.tree(T)) @tcmc_use_output_twice:nn:nn
+    foreign lpvm mutate(~tmp#16##0:tcmc_use_output_twice.tree(T), ?tmp#17##0:tcmc_use_output_twice.tree(T), 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 2:T) @tcmc_use_output_twice:nn:nn
+    foreign lpvm mutate(~tmp#17##0:tcmc_use_output_twice.tree(T), ?tmp#18##0:tcmc_use_output_twice.tree(T), 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, tmp#1##0:tcmc_use_output_twice.tree(T)) @tcmc_use_output_twice:nn:nn
+    foreign lpvm mutate(~tmp#18##0:tcmc_use_output_twice.tree(T), ?tmp#19##0:tcmc_use_output_twice.tree(T), 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp#1##0:tcmc_use_output_twice.tree(T)) @tcmc_use_output_twice:nn:nn
+    tcmc_use_output_twice.append_tree<0>(~tmp#12##0:tcmc_use_output_twice.tree(wybe.int), tmp#19##0:tcmc_use_output_twice.tree(wybe.int), ?x3##0:tcmc_use_output_twice.tree(wybe.int)) #6 @tcmc_use_output_twice:nn:nn
+    tcmc_use_output_twice.print_tree<0>(~tmp#19##0:tcmc_use_output_twice.tree(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7 @tcmc_use_output_twice:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#20##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#21##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    tcmc_use_output_twice.print_tree<0>(~x3##0:tcmc_use_output_twice.tree(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #9 @tcmc_use_output_twice:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#22##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#23##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+
+
+append_tree > (2 calls)
+0: tcmc_use_output_twice.append_tree<0>
+append_tree(a##0:tcmc_use_output_twice.tree(wybe.int), b##0:tcmc_use_output_twice.tree(wybe.int), ?result##0:tcmc_use_output_twice.tree(wybe.int))<{}; {}>:
+  AliasPairs: [(a##0,b##0),(a##0,result##0),(b##0,result##0)]
+  InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1]
+  MultiSpeczDepInfo: [(1,(tcmc_use_output_twice.append_tree<0>,fromList [NonAliasedParamCond 0 [1],NonAliasedParamCond 1 [0]]))]
+    foreign llvm icmp_ne(a##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool)
+    case ~tmp#3##0:wybe.bool of
+    0:
+        foreign llvm move(~b##0:tcmc_use_output_twice.tree(wybe.int), ?result##0:tcmc_use_output_twice.tree(wybe.int)) @tcmc_use_output_twice:nn:nn
+
+    1:
+        foreign lpvm access(a##0:tcmc_use_output_twice.tree(T), 0:wybe.int, 24:wybe.int, 0:wybe.int, ?val##0:wybe.int) @tcmc_use_output_twice:nn:nn
+        foreign lpvm access(~a##0:tcmc_use_output_twice.tree(T), 16:wybe.int, 24:wybe.int, 0:wybe.int, ?right##0:tcmc_use_output_twice.tree(wybe.int)) @tcmc_use_output_twice:nn:nn
+        tcmc_use_output_twice.append_tree<0>(~b##0:tcmc_use_output_twice.tree(wybe.int), ~right##0:tcmc_use_output_twice.tree(wybe.int), ?right2##0:tcmc_use_output_twice.tree(wybe.int)) #1 @tcmc_use_output_twice:nn:nn
+        foreign lpvm alloc(24:wybe.int, ?tmp#7##0:tcmc_use_output_twice.tree(T)) @tcmc_use_output_twice:nn:nn
+        foreign lpvm mutate(~tmp#7##0:tcmc_use_output_twice.tree(T), ?tmp#8##0:tcmc_use_output_twice.tree(T), 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~val##0:T) @tcmc_use_output_twice:nn:nn
+        foreign lpvm mutate(~tmp#8##0:tcmc_use_output_twice.tree(T), ?tmp#9##0:tcmc_use_output_twice.tree(T), 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, right2##0:tcmc_use_output_twice.tree(T)) @tcmc_use_output_twice:nn:nn
+        foreign lpvm mutate(~tmp#9##0:tcmc_use_output_twice.tree(T), ?result##0:tcmc_use_output_twice.tree(T), 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~right2##0:tcmc_use_output_twice.tree(T)) @tcmc_use_output_twice:nn:nn
+
+
+
+print_tree > (4 calls)
+0: tcmc_use_output_twice.print_tree<0>
+print_tree(a##0:tcmc_use_output_twice.tree(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(a##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool)
+    case ~tmp#2##0:wybe.bool of
+    0:
+        wybe.string.print<0>("empty":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #8 @tcmc_use_output_twice:nn:nn
+
+    1:
+        foreign lpvm access(a##0:tcmc_use_output_twice.tree(T), 0:wybe.int, 24:wybe.int, 0:wybe.int, ?val##0:wybe.int) @tcmc_use_output_twice:nn:nn
+        foreign lpvm access(a##0:tcmc_use_output_twice.tree(T), 8:wybe.int, 24:wybe.int, 0:wybe.int, ?left##0:tcmc_use_output_twice.tree(wybe.int)) @tcmc_use_output_twice:nn:nn
+        foreign lpvm access(~a##0:tcmc_use_output_twice.tree(T), 16:wybe.int, 24:wybe.int, 0:wybe.int, ?right##0:tcmc_use_output_twice.tree(wybe.int)) @tcmc_use_output_twice:nn:nn
+        wybe.string.print<0>("node(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @tcmc_use_output_twice:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @int:nn:nn
+        foreign c print_int(~val##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @int:nn:nn
+        foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+        wybe.string.print<0>(",":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @tcmc_use_output_twice:nn:nn
+        tcmc_use_output_twice.print_tree<0>(~left##0:tcmc_use_output_twice.tree(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @tcmc_use_output_twice:nn:nn
+        wybe.string.print<0>(",":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #5 @tcmc_use_output_twice:nn:nn
+        tcmc_use_output_twice.print_tree<0>(~right##0:tcmc_use_output_twice.tree(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #6 @tcmc_use_output_twice:nn:nn
+        wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7 @tcmc_use_output_twice:nn:nn
+
+
+  LLVM code       :
+
+; ModuleID = 'tcmc_use_output_twice'
+
+
+ 
+
+
+@tcmc_use_output_twice.3 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @tcmc_use_output_twice.2 to i64) }
+
+
+@tcmc_use_output_twice.5 =    constant {i64, i64} { i64 1, i64 ptrtoint ([?? x i8]* @tcmc_use_output_twice.4 to i64) }
+
+
+@tcmc_use_output_twice.1 =    constant {i64, i64} { i64 5, i64 ptrtoint ([?? x i8]* @tcmc_use_output_twice.0 to i64) }
+
+
+@tcmc_use_output_twice.7 =    constant {i64, i64} { i64 5, i64 ptrtoint ([?? x i8]* @tcmc_use_output_twice.6 to i64) }
+
+
+@tcmc_use_output_twice.4 =    constant [?? x i8] c")\00"
+
+
+@tcmc_use_output_twice.2 =    constant [?? x i8] c",\00"
+
+
+@tcmc_use_output_twice.6 =    constant [?? x i8] c"empty\00"
+
+
+@tcmc_use_output_twice.0 =    constant [?? x i8] c"node(\00"
+
+
+declare external fastcc  void @"wybe.string.print<0>"(i64)    
+
+
+declare external ccc  void @print_int(i64)    
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  void @"tcmc_use_output_twice.<0>"()    {
+entry:
+  %0 = trunc i64 24 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  store  i64 1, i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 0, i64* %5 
+  %6 = add   i64 %2, 16 
+  %7 = inttoptr i64 %6 to i64* 
+  store  i64 0, i64* %7 
+  %8 = trunc i64 24 to i32  
+  %9 = tail call ccc  i8*  @wybe_malloc(i32  %8)  
+  %10 = ptrtoint i8* %9 to i64 
+  %11 = inttoptr i64 %10 to i64* 
+  store  i64 2, i64* %11 
+  %12 = add   i64 %10, 8 
+  %13 = inttoptr i64 %12 to i64* 
+  store  i64 0, i64* %13 
+  %14 = add   i64 %10, 16 
+  %15 = inttoptr i64 %14 to i64* 
+  store  i64 0, i64* %15 
+  %16 = tail call fastcc  i64  @"tcmc_use_output_twice.append_tree<0>"(i64  %2, i64  %10)  
+  tail call fastcc  void  @"tcmc_use_output_twice.print_tree<0>"(i64  %10)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"tcmc_use_output_twice.print_tree<0>"(i64  %16)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+}
+
+
+define external fastcc  i64 @"tcmc_use_output_twice.append_tree<0>"(i64  %"a##0", i64  %"b##0")    {
+entry:
+  %0 = icmp ne i64 %"a##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = inttoptr i64 %"a##0" to i64* 
+  %2 = load  i64, i64* %1 
+  %3 = add   i64 %"a##0", 16 
+  %4 = inttoptr i64 %3 to i64* 
+  %5 = load  i64, i64* %4 
+  %6 = tail call fastcc  i64  @"tcmc_use_output_twice.append_tree<0>"(i64  %"b##0", i64  %5)  
+  %7 = trunc i64 24 to i32  
+  %8 = tail call ccc  i8*  @wybe_malloc(i32  %7)  
+  %9 = ptrtoint i8* %8 to i64 
+  %10 = inttoptr i64 %9 to i64* 
+  store  i64 %2, i64* %10 
+  %11 = add   i64 %9, 8 
+  %12 = inttoptr i64 %11 to i64* 
+  store  i64 %6, i64* %12 
+  %13 = add   i64 %9, 16 
+  %14 = inttoptr i64 %13 to i64* 
+  store  i64 %6, i64* %14 
+  ret i64 %9 
+if.else:
+  ret i64 %"b##0" 
+}
+
+
+define external fastcc  void @"tcmc_use_output_twice.print_tree<0>"(i64  %"a##0")    {
+entry:
+  %0 = icmp ne i64 %"a##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = inttoptr i64 %"a##0" to i64* 
+  %2 = load  i64, i64* %1 
+  %3 = add   i64 %"a##0", 8 
+  %4 = inttoptr i64 %3 to i64* 
+  %5 = load  i64, i64* %4 
+  %6 = add   i64 %"a##0", 16 
+  %7 = inttoptr i64 %6 to i64* 
+  %8 = load  i64, i64* %7 
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @tcmc_use_output_twice.1, i32 0, i32 0) to i64))  
+  tail call ccc  void  @print_int(i64  %2)  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @tcmc_use_output_twice.3, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"tcmc_use_output_twice.print_tree<0>"(i64  %5)  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @tcmc_use_output_twice.3, i32 0, i32 0) to i64))  
+  tail call fastcc  void  @"tcmc_use_output_twice.print_tree<0>"(i64  %8)  
+  musttail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @tcmc_use_output_twice.5, i32 0, i32 0) to i64))  
+  ret void 
+if.else:
+  musttail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @tcmc_use_output_twice.7, i32 0, i32 0) to i64))  
+  ret void 
+}
+--------------------------------------------------
+ Module tcmc_use_output_twice.tree(T)
+  representation  : address
+  public submods  : 
+  public resources: 
+  public procs    : tcmc_use_output_twice.tree.empty<0>
+                    tcmc_use_output_twice.tree.left<0>
+                    tcmc_use_output_twice.tree.left<1>
+                    tcmc_use_output_twice.tree.node<0>
+                    tcmc_use_output_twice.tree.node<1>
+                    tcmc_use_output_twice.tree.right<0>
+                    tcmc_use_output_twice.tree.right<1>
+                    tcmc_use_output_twice.tree.val<0>
+                    tcmc_use_output_twice.tree.val<1>
+  imports         : use tcmc_use_output_twice
+                    use wybe
+  resources       : 
+  procs           : 
+
+empty > public {inline} (0 calls)
+0: tcmc_use_output_twice.tree.empty<0>
+empty(?#result##0:tcmc_use_output_twice.tree(T))<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(0:tcmc_use_output_twice.tree(T), ?#result##0:tcmc_use_output_twice.tree(T))
+
+
+left > public {inline} (0 calls)
+0: tcmc_use_output_twice.tree.left<0>
+left(#rec##0:tcmc_use_output_twice.tree(T), ?#result##0:tcmc_use_output_twice.tree(T), ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:tcmc_use_output_twice.tree(T), ?#result##0:tcmc_use_output_twice.tree(T))
+
+    1:
+        foreign lpvm access(~#rec##0:tcmc_use_output_twice.tree(T), 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:tcmc_use_output_twice.tree(T)) @tcmc_use_output_twice:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+left > public {inline} (0 calls)
+1: tcmc_use_output_twice.tree.left<1>
+left(#rec##0:tcmc_use_output_twice.tree(T), ?#rec##1:tcmc_use_output_twice.tree(T), #field##0:tcmc_use_output_twice.tree(T), ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(~#rec##0:tcmc_use_output_twice.tree(T), ?#rec##1:tcmc_use_output_twice.tree(T))
+
+    1:
+        foreign lpvm mutate(~#rec##0:tcmc_use_output_twice.tree(T), ?#rec##1:tcmc_use_output_twice.tree(T), 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:tcmc_use_output_twice.tree(T)) @tcmc_use_output_twice:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+node > public {inline} (0 calls)
+0: tcmc_use_output_twice.tree.node<0>
+node(val##0:T, left##0:tcmc_use_output_twice.tree(T), right##0:tcmc_use_output_twice.tree(T), ?#result##0:tcmc_use_output_twice.tree(T))<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm alloc(24:wybe.int, ?#rec##0:tcmc_use_output_twice.tree(T)) @tcmc_use_output_twice:nn:nn
+    foreign lpvm mutate(~#rec##0:tcmc_use_output_twice.tree(T), ?#rec##1:tcmc_use_output_twice.tree(T), 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~val##0:T) @tcmc_use_output_twice:nn:nn
+    foreign lpvm mutate(~#rec##1:tcmc_use_output_twice.tree(T), ?#rec##2:tcmc_use_output_twice.tree(T), 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~left##0:tcmc_use_output_twice.tree(T)) @tcmc_use_output_twice:nn:nn
+    foreign lpvm mutate(~#rec##2:tcmc_use_output_twice.tree(T), ?#result##0:tcmc_use_output_twice.tree(T), 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~right##0:tcmc_use_output_twice.tree(T)) @tcmc_use_output_twice:nn:nn
+node > public {inline} (0 calls)
+1: tcmc_use_output_twice.tree.node<1>
+node(?val##0:T, ?left##0:tcmc_use_output_twice.tree(T), ?right##0:tcmc_use_output_twice.tree(T), #result##0:tcmc_use_output_twice.tree(T), ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:T, ?val##0:T)
+        foreign llvm move(undef:tcmc_use_output_twice.tree(T), ?left##0:tcmc_use_output_twice.tree(T))
+        foreign llvm move(undef:tcmc_use_output_twice.tree(T), ?right##0:tcmc_use_output_twice.tree(T))
+
+    1:
+        foreign lpvm access(#result##0:tcmc_use_output_twice.tree(T), 0:wybe.int, 24:wybe.int, 0:wybe.int, ?val##0:T) @tcmc_use_output_twice:nn:nn
+        foreign lpvm access(#result##0:tcmc_use_output_twice.tree(T), 8:wybe.int, 24:wybe.int, 0:wybe.int, ?left##0:tcmc_use_output_twice.tree(T)) @tcmc_use_output_twice:nn:nn
+        foreign lpvm access(~#result##0:tcmc_use_output_twice.tree(T), 16:wybe.int, 24:wybe.int, 0:wybe.int, ?right##0:tcmc_use_output_twice.tree(T)) @tcmc_use_output_twice:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+right > public {inline} (0 calls)
+0: tcmc_use_output_twice.tree.right<0>
+right(#rec##0:tcmc_use_output_twice.tree(T), ?#result##0:tcmc_use_output_twice.tree(T), ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:tcmc_use_output_twice.tree(T), ?#result##0:tcmc_use_output_twice.tree(T))
+
+    1:
+        foreign lpvm access(~#rec##0:tcmc_use_output_twice.tree(T), 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:tcmc_use_output_twice.tree(T)) @tcmc_use_output_twice:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+right > public {inline} (0 calls)
+1: tcmc_use_output_twice.tree.right<1>
+right(#rec##0:tcmc_use_output_twice.tree(T), ?#rec##1:tcmc_use_output_twice.tree(T), #field##0:tcmc_use_output_twice.tree(T), ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(~#rec##0:tcmc_use_output_twice.tree(T), ?#rec##1:tcmc_use_output_twice.tree(T))
+
+    1:
+        foreign lpvm mutate(~#rec##0:tcmc_use_output_twice.tree(T), ?#rec##1:tcmc_use_output_twice.tree(T), 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:tcmc_use_output_twice.tree(T)) @tcmc_use_output_twice:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+val > public {inline} (0 calls)
+0: tcmc_use_output_twice.tree.val<0>
+val(#rec##0:tcmc_use_output_twice.tree(T), ?#result##0:T, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:T, ?#result##0:T)
+
+    1:
+        foreign lpvm access(~#rec##0:tcmc_use_output_twice.tree(T), 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:T) @tcmc_use_output_twice:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+val > public {inline} (0 calls)
+1: tcmc_use_output_twice.tree.val<1>
+val(#rec##0:tcmc_use_output_twice.tree(T), ?#rec##1:tcmc_use_output_twice.tree(T), #field##0:T, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(~#rec##0:tcmc_use_output_twice.tree(T), ?#rec##1:tcmc_use_output_twice.tree(T))
+
+    1:
+        foreign lpvm mutate(~#rec##0:tcmc_use_output_twice.tree(T), ?#rec##1:tcmc_use_output_twice.tree(T), 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:T) @tcmc_use_output_twice:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+  LLVM code       :
+
+; ModuleID = 'tcmc_use_output_twice.tree'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  i64 @"tcmc_use_output_twice.tree.empty<0>"()    {
+entry:
+  ret i64 0 
+}
+
+
+define external fastcc  {i64, i1} @"tcmc_use_output_twice.tree.left<0>"(i64  %"#rec##0")    {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = add   i64 %"#rec##0", 8 
+  %2 = inttoptr i64 %1 to i64* 
+  %3 = load  i64, i64* %2 
+  %4 = insertvalue {i64, i1} undef, i64 %3, 0 
+  %5 = insertvalue {i64, i1} %4, i1 1, 1 
+  ret {i64, i1} %5 
+if.else:
+  %6 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %7 = insertvalue {i64, i1} %6, i1 0, 1 
+  ret {i64, i1} %7 
+}
+
+
+define external fastcc  {i64, i1} @"tcmc_use_output_twice.tree.left<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = trunc i64 24 to i32  
+  %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
+  %3 = ptrtoint i8* %2 to i64 
+  %4 = inttoptr i64 %3 to i8* 
+  %5 = inttoptr i64 %"#rec##0" to i8* 
+  %6 = trunc i64 24 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %4, i8*  %5, i32  %6, i1  0)  
+  %7 = add   i64 %3, 8 
+  %8 = inttoptr i64 %7 to i64* 
+  store  i64 %"#field##0", i64* %8 
+  %9 = insertvalue {i64, i1} undef, i64 %3, 0 
+  %10 = insertvalue {i64, i1} %9, i1 1, 1 
+  ret {i64, i1} %10 
+if.else:
+  %11 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %12 = insertvalue {i64, i1} %11, i1 0, 1 
+  ret {i64, i1} %12 
+}
+
+
+define external fastcc  i64 @"tcmc_use_output_twice.tree.node<0>"(i64  %"val##0", i64  %"left##0", i64  %"right##0")    {
+entry:
+  %0 = trunc i64 24 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  store  i64 %"val##0", i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 %"left##0", i64* %5 
+  %6 = add   i64 %2, 16 
+  %7 = inttoptr i64 %6 to i64* 
+  store  i64 %"right##0", i64* %7 
+  ret i64 %2 
+}
+
+
+define external fastcc  {i64, i64, i64, i1} @"tcmc_use_output_twice.tree.node<1>"(i64  %"#result##0")    {
+entry:
+  %0 = icmp ne i64 %"#result##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = inttoptr i64 %"#result##0" to i64* 
+  %2 = load  i64, i64* %1 
+  %3 = add   i64 %"#result##0", 8 
+  %4 = inttoptr i64 %3 to i64* 
+  %5 = load  i64, i64* %4 
+  %6 = add   i64 %"#result##0", 16 
+  %7 = inttoptr i64 %6 to i64* 
+  %8 = load  i64, i64* %7 
+  %9 = insertvalue {i64, i64, i64, i1} undef, i64 %2, 0 
+  %10 = insertvalue {i64, i64, i64, i1} %9, i64 %5, 1 
+  %11 = insertvalue {i64, i64, i64, i1} %10, i64 %8, 2 
+  %12 = insertvalue {i64, i64, i64, i1} %11, i1 1, 3 
+  ret {i64, i64, i64, i1} %12 
+if.else:
+  %13 = insertvalue {i64, i64, i64, i1} undef, i64 undef, 0 
+  %14 = insertvalue {i64, i64, i64, i1} %13, i64 undef, 1 
+  %15 = insertvalue {i64, i64, i64, i1} %14, i64 undef, 2 
+  %16 = insertvalue {i64, i64, i64, i1} %15, i1 0, 3 
+  ret {i64, i64, i64, i1} %16 
+}
+
+
+define external fastcc  {i64, i1} @"tcmc_use_output_twice.tree.right<0>"(i64  %"#rec##0")    {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = add   i64 %"#rec##0", 16 
+  %2 = inttoptr i64 %1 to i64* 
+  %3 = load  i64, i64* %2 
+  %4 = insertvalue {i64, i1} undef, i64 %3, 0 
+  %5 = insertvalue {i64, i1} %4, i1 1, 1 
+  ret {i64, i1} %5 
+if.else:
+  %6 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %7 = insertvalue {i64, i1} %6, i1 0, 1 
+  ret {i64, i1} %7 
+}
+
+
+define external fastcc  {i64, i1} @"tcmc_use_output_twice.tree.right<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = trunc i64 24 to i32  
+  %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
+  %3 = ptrtoint i8* %2 to i64 
+  %4 = inttoptr i64 %3 to i8* 
+  %5 = inttoptr i64 %"#rec##0" to i8* 
+  %6 = trunc i64 24 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %4, i8*  %5, i32  %6, i1  0)  
+  %7 = add   i64 %3, 16 
+  %8 = inttoptr i64 %7 to i64* 
+  store  i64 %"#field##0", i64* %8 
+  %9 = insertvalue {i64, i1} undef, i64 %3, 0 
+  %10 = insertvalue {i64, i1} %9, i1 1, 1 
+  ret {i64, i1} %10 
+if.else:
+  %11 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %12 = insertvalue {i64, i1} %11, i1 0, 1 
+  ret {i64, i1} %12 
+}
+
+
+define external fastcc  {i64, i1} @"tcmc_use_output_twice.tree.val<0>"(i64  %"#rec##0")    {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = inttoptr i64 %"#rec##0" to i64* 
+  %2 = load  i64, i64* %1 
+  %3 = insertvalue {i64, i1} undef, i64 %2, 0 
+  %4 = insertvalue {i64, i1} %3, i1 1, 1 
+  ret {i64, i1} %4 
+if.else:
+  %5 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %6 = insertvalue {i64, i1} %5, i1 0, 1 
+  ret {i64, i1} %6 
+}
+
+
+define external fastcc  {i64, i1} @"tcmc_use_output_twice.tree.val<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = trunc i64 24 to i32  
+  %2 = tail call ccc  i8*  @wybe_malloc(i32  %1)  
+  %3 = ptrtoint i8* %2 to i64 
+  %4 = inttoptr i64 %3 to i8* 
+  %5 = inttoptr i64 %"#rec##0" to i8* 
+  %6 = trunc i64 24 to i32  
+  tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %4, i8*  %5, i32  %6, i1  0)  
+  %7 = inttoptr i64 %3 to i64* 
+  store  i64 %"#field##0", i64* %7 
+  %8 = insertvalue {i64, i1} undef, i64 %3, 0 
+  %9 = insertvalue {i64, i1} %8, i1 1, 1 
+  ret {i64, i1} %9 
+if.else:
+  %10 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
+}

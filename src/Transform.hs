@@ -24,7 +24,7 @@ import           Data.Map      as Map
 import           Data.Maybe    as Maybe
 import           Data.Set      as Set
 import           Flow          ((|>))
-import           Options       (LogSelection (Transform), 
+import           Options       (LogSelection (Transform),
                                 OptFlag(MultiSpecz), optimisationEnabled)
 import           Util
 
@@ -42,8 +42,9 @@ transformProc def _
         let body = procImplnBody impln
         body' <- transformProcBody def generalVersion
         return def {procImpln = impln{procImplnBody = body'}}
-
-transformProc def _ = return def
+transformProc def _ = do
+    logTransform $ "skipping " ++ show (procName def) ++ " since it's inline"
+    return def
 
 
 -- init aliasMap based on the given "nonAliasedParams",
@@ -117,7 +118,7 @@ transformPrims :: PrimProto -> ProcBody -> (AliasMapLocal, DeadCells)
 transformPrims caller body (aliasMap, deadCells) callSiteMap = do
     let prims = bodyPrims body
     -- Transform simple prims:
-    lift $ logTransform "\nTransform prims (transformPrims):   "
+    lift $ logTransform $ "\nTransform prims (transformPrims):   " ++ show caller ++ "\n" ++ show body
     foldM (transformPrim callSiteMap) (aliasMap, deadCells) prims
 
 
@@ -150,7 +151,7 @@ transformPrim :: Map CallSiteID ProcSpec
         -> (AliasMapLocal, DeadCells) -> Placed Prim
         -> BodyBuilder (AliasMapLocal, DeadCells)
 transformPrim callSiteMap (aliasMap, deadCells) prim = do
-    -- XXX Redundent work here. We should change the current design.
+    -- XXX Redundant work here. We should change the current design.
     aliasMap' <- lift $ updateAliasedByPrim aliasMap prim
     lift $ logTransform $ "\n--- prim:           " ++ show prim
     let primc = content prim
@@ -163,6 +164,7 @@ transformPrim callSiteMap (aliasMap, deadCells) prim = do
                     else spec
                 return (PrimCall id spec' args gFlows, deadCells)
             PrimForeign "lpvm" "mutate" flags args -> do
+                lift $ logTransform $ "alias map: " ++ show aliasMap
                 let args' = _updateMutateForAlias aliasMap args
                 return (PrimForeign "lpvm" "mutate" flags args', deadCells)
             -- dead cell transform

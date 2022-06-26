@@ -1,0 +1,28 @@
+def appendtwice(front1: list(T), back1: list(T), ?result1: list(T), front2: list(T), back2: list(T), ?result2: list(T)) {
+    if { [?h1 | ?t1] = front1 ::
+        if { [?h2 | ?t2] = front2 ::
+            # this should still be eligible for the optimisation, even though we
+            # are constructing two separate lists
+            appendtwice(t1, back1, ?tail1, t2, back2, ?tail2)
+            ?result1 = [h1 | tail1]
+            ?result2 = [h2 | tail2]
+        | else ::
+            appendtwice(t1, back1, ?tail1, [], [], _)
+            ?result1 = [h1 | tail1]
+            ?result2 = back2
+        }
+    | else ::
+        if { [?h2 | ?t2] = front2 ::
+            appendtwice([], [], _, t2, back2, ?tail2)
+            ?result1 = back1
+            ?result2 = [h2 | tail2]
+        | else ::
+            ?result1 = back1
+            ?result2 = back2
+        }
+    }
+}
+
+appendtwice([1,2,3], [4,5,6], ?result1, [7,8], [9, 10, 11], ?result2)
+!println(print, result1)
+!println(print, result2)

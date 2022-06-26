@@ -1825,7 +1825,7 @@ if.else1:
 }
 
 
-define external fastcc  void @"int_list.extend<0>"(i64  %"lst1##0", i64  %"lst2##0", i64*  %"#result##0")    {
+define external fastcc  void @"int_list.extend<0>"(i64  %"lst1##0", i64  %"lst2##0", i64*  %"#result#ref##0")    {
 entry:
   %0 = icmp ne i64 %"lst1##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -1842,16 +1842,16 @@ if.then:
   store  i64 %2, i64* %9 
   %10 = add   i64 %8, 8 
   %11 = inttoptr i64 %10 to i64* 
-  store  i64 %8, i64* %"#result##0" 
+  store  i64 %8, i64* %"#result#ref##0" 
   musttail call fastcc  void  @"int_list.extend<0>"(i64  %5, i64  %"lst2##0", i64*  %11)  
   ret void 
 if.else:
-  store  i64 %"lst2##0", i64* %"#result##0" 
+  store  i64 %"lst2##0", i64* %"#result#ref##0" 
   ret void 
 }
 
 
-define external fastcc  void @"int_list.extend<0>[410bae77d3]"(i64  %"lst1##0", i64  %"lst2##0", i64*  %"#result##0")    {
+define external fastcc  void @"int_list.extend<0>[410bae77d3]"(i64  %"lst1##0", i64  %"lst2##0", i64*  %"#result#ref##0")    {
 entry:
   %0 = icmp ne i64 %"lst1##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -1861,11 +1861,11 @@ if.then:
   %3 = load  i64, i64* %2 
   %4 = add   i64 %"lst1##0", 8 
   %5 = inttoptr i64 %4 to i64* 
-  store  i64 %"lst1##0", i64* %"#result##0" 
+  store  i64 %"lst1##0", i64* %"#result#ref##0" 
   musttail call fastcc  void  @"int_list.extend<0>[410bae77d3]"(i64  %3, i64  %"lst2##0", i64*  %5)  
   ret void 
 if.else:
-  store  i64 %"lst2##0", i64* %"#result##0" 
+  store  i64 %"lst2##0", i64* %"#result#ref##0" 
   ret void 
 }
 
@@ -1937,7 +1937,7 @@ entry:
 }
 
 
-define external fastcc  void @"int_list.greater<0>"(i64  %"lst##0", i64  %"v##0", i64*  %"#result##0")    {
+define external fastcc  void @"int_list.greater<0>"(i64  %"lst##0", i64  %"v##0", i64*  %"#result#ref##0")    {
 entry:
   %0 = icmp ne i64 %"lst##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -1950,7 +1950,7 @@ if.then:
   %6 = icmp sge i64 %2, %"v##0" 
   br i1 %6, label %if.then1, label %if.else1 
 if.else:
-  store  i64 0, i64* %"#result##0" 
+  store  i64 0, i64* %"#result#ref##0" 
   ret void 
 if.then1:
   %7 = trunc i64 16 to i32  
@@ -1960,16 +1960,16 @@ if.then1:
   store  i64 %2, i64* %10 
   %11 = add   i64 %9, 8 
   %12 = inttoptr i64 %11 to i64* 
-  store  i64 %9, i64* %"#result##0" 
+  store  i64 %9, i64* %"#result#ref##0" 
   musttail call fastcc  void  @"int_list.greater<0>"(i64  %5, i64  %"v##0", i64*  %12)  
   ret void 
 if.else1:
-  musttail call fastcc  void  @"int_list.greater<0>"(i64  %5, i64  %"v##0", i64*  %"#result##0")  
+  musttail call fastcc  void  @"int_list.greater<0>"(i64  %5, i64  %"v##0", i64*  %"#result#ref##0")  
   ret void 
 }
 
 
-define external fastcc  void @"int_list.greater<0>[410bae77d3]"(i64  %"lst##0", i64  %"v##0", i64*  %"#result##0")    {
+define external fastcc  void @"int_list.greater<0>[410bae77d3]"(i64  %"lst##0", i64  %"v##0", i64*  %"#result#ref##0")    {
 entry:
   %0 = icmp ne i64 %"lst##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -1982,16 +1982,16 @@ if.then:
   %6 = icmp sge i64 %2, %"v##0" 
   br i1 %6, label %if.then1, label %if.else1 
 if.else:
-  store  i64 0, i64* %"#result##0" 
+  store  i64 0, i64* %"#result#ref##0" 
   ret void 
 if.then1:
   %7 = add   i64 %"lst##0", 8 
   %8 = inttoptr i64 %7 to i64* 
-  store  i64 %"lst##0", i64* %"#result##0" 
+  store  i64 %"lst##0", i64* %"#result#ref##0" 
   musttail call fastcc  void  @"int_list.greater<0>[410bae77d3]"(i64  %5, i64  %"v##0", i64*  %8)  
   ret void 
 if.else1:
-  musttail call fastcc  void  @"int_list.greater<0>[410bae77d3]"(i64  %5, i64  %"v##0", i64*  %"#result##0")  
+  musttail call fastcc  void  @"int_list.greater<0>[410bae77d3]"(i64  %5, i64  %"v##0", i64*  %"#result#ref##0")  
   ret void 
 }
 
@@ -2026,7 +2026,7 @@ if.else1:
 }
 
 
-define external fastcc  void @"int_list.insert<0>"(i64  %"lst##0", i64  %"idx##0", i64  %"v##0", i64*  %"#result##0")    {
+define external fastcc  void @"int_list.insert<0>"(i64  %"lst##0", i64  %"idx##0", i64  %"v##0", i64*  %"#result#ref##0")    {
 entry:
   %0 = icmp eq i64 %"idx##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -2039,7 +2039,7 @@ if.then:
   %5 = add   i64 %3, 8 
   %6 = inttoptr i64 %5 to i64* 
   store  i64 %"lst##0", i64* %6 
-  store  i64 %3, i64* %"#result##0" 
+  store  i64 %3, i64* %"#result#ref##0" 
   ret void 
 if.else:
   %7 = icmp ne i64 %"lst##0", 0 
@@ -2058,17 +2058,17 @@ if.then1:
   store  i64 %9, i64* %17 
   %18 = add   i64 %16, 8 
   %19 = inttoptr i64 %18 to i64* 
-  store  i64 %16, i64* %"#result##0" 
+  store  i64 %16, i64* %"#result#ref##0" 
   musttail call fastcc  void  @"int_list.insert<0>"(i64  %12, i64  %13, i64  %"v##0", i64*  %19)  
   ret void 
 if.else1:
   %20 = sub   i64 %"idx##0", 1 
-  musttail call fastcc  void  @"int_list.insert<0>"(i64  %"lst##0", i64  %20, i64  %"v##0", i64*  %"#result##0")  
+  musttail call fastcc  void  @"int_list.insert<0>"(i64  %"lst##0", i64  %20, i64  %"v##0", i64*  %"#result#ref##0")  
   ret void 
 }
 
 
-define external fastcc  void @"int_list.insert<0>[410bae77d3]"(i64  %"lst##0", i64  %"idx##0", i64  %"v##0", i64*  %"#result##0")    {
+define external fastcc  void @"int_list.insert<0>[410bae77d3]"(i64  %"lst##0", i64  %"idx##0", i64  %"v##0", i64*  %"#result#ref##0")    {
 entry:
   %0 = icmp eq i64 %"idx##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -2081,7 +2081,7 @@ if.then:
   %5 = add   i64 %3, 8 
   %6 = inttoptr i64 %5 to i64* 
   store  i64 %"lst##0", i64* %6 
-  store  i64 %3, i64* %"#result##0" 
+  store  i64 %3, i64* %"#result#ref##0" 
   ret void 
 if.else:
   %7 = icmp ne i64 %"lst##0", 0 
@@ -2093,17 +2093,17 @@ if.then1:
   %11 = sub   i64 %"idx##0", 1 
   %12 = add   i64 %"lst##0", 8 
   %13 = inttoptr i64 %12 to i64* 
-  store  i64 %"lst##0", i64* %"#result##0" 
+  store  i64 %"lst##0", i64* %"#result#ref##0" 
   musttail call fastcc  void  @"int_list.insert<0>[410bae77d3]"(i64  %10, i64  %11, i64  %"v##0", i64*  %13)  
   ret void 
 if.else1:
   %14 = sub   i64 %"idx##0", 1 
-  musttail call fastcc  void  @"int_list.insert<0>[410bae77d3]"(i64  %"lst##0", i64  %14, i64  %"v##0", i64*  %"#result##0")  
+  musttail call fastcc  void  @"int_list.insert<0>[410bae77d3]"(i64  %"lst##0", i64  %14, i64  %"v##0", i64*  %"#result#ref##0")  
   ret void 
 }
 
 
-define external fastcc  void @"int_list.lesser<0>"(i64  %"lst##0", i64  %"v##0", i64*  %"#result##0")    {
+define external fastcc  void @"int_list.lesser<0>"(i64  %"lst##0", i64  %"v##0", i64*  %"#result#ref##0")    {
 entry:
   %0 = icmp ne i64 %"lst##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -2116,7 +2116,7 @@ if.then:
   %6 = icmp slt i64 %2, %"v##0" 
   br i1 %6, label %if.then1, label %if.else1 
 if.else:
-  store  i64 0, i64* %"#result##0" 
+  store  i64 0, i64* %"#result#ref##0" 
   ret void 
 if.then1:
   %7 = trunc i64 16 to i32  
@@ -2126,16 +2126,16 @@ if.then1:
   store  i64 %2, i64* %10 
   %11 = add   i64 %9, 8 
   %12 = inttoptr i64 %11 to i64* 
-  store  i64 %9, i64* %"#result##0" 
+  store  i64 %9, i64* %"#result#ref##0" 
   musttail call fastcc  void  @"int_list.lesser<0>"(i64  %5, i64  %"v##0", i64*  %12)  
   ret void 
 if.else1:
-  musttail call fastcc  void  @"int_list.lesser<0>"(i64  %5, i64  %"v##0", i64*  %"#result##0")  
+  musttail call fastcc  void  @"int_list.lesser<0>"(i64  %5, i64  %"v##0", i64*  %"#result#ref##0")  
   ret void 
 }
 
 
-define external fastcc  void @"int_list.pop<0>"(i64  %"lst##0", i64  %"idx##0", i64*  %"#result##0")    {
+define external fastcc  void @"int_list.pop<0>"(i64  %"lst##0", i64  %"idx##0", i64*  %"#result#ref##0")    {
 entry:
   %0 = icmp ne i64 %"lst##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -2148,10 +2148,10 @@ if.then:
   %6 = icmp eq i64 %"idx##0", 0 
   br i1 %6, label %if.then1, label %if.else1 
 if.else:
-  store  i64 0, i64* %"#result##0" 
+  store  i64 0, i64* %"#result#ref##0" 
   ret void 
 if.then1:
-  store  i64 %5, i64* %"#result##0" 
+  store  i64 %5, i64* %"#result#ref##0" 
   ret void 
 if.else1:
   %7 = sub   i64 %"idx##0", 1 
@@ -2162,13 +2162,13 @@ if.else1:
   store  i64 %2, i64* %11 
   %12 = add   i64 %10, 8 
   %13 = inttoptr i64 %12 to i64* 
-  store  i64 %10, i64* %"#result##0" 
+  store  i64 %10, i64* %"#result#ref##0" 
   musttail call fastcc  void  @"int_list.pop<0>"(i64  %5, i64  %7, i64*  %13)  
   ret void 
 }
 
 
-define external fastcc  void @"int_list.pop<0>[410bae77d3]"(i64  %"lst##0", i64  %"idx##0", i64*  %"#result##0")    {
+define external fastcc  void @"int_list.pop<0>[410bae77d3]"(i64  %"lst##0", i64  %"idx##0", i64*  %"#result#ref##0")    {
 entry:
   %0 = icmp ne i64 %"lst##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -2179,16 +2179,16 @@ if.then:
   %4 = icmp eq i64 %"idx##0", 0 
   br i1 %4, label %if.then1, label %if.else1 
 if.else:
-  store  i64 0, i64* %"#result##0" 
+  store  i64 0, i64* %"#result#ref##0" 
   ret void 
 if.then1:
-  store  i64 %3, i64* %"#result##0" 
+  store  i64 %3, i64* %"#result#ref##0" 
   ret void 
 if.else1:
   %5 = sub   i64 %"idx##0", 1 
   %6 = add   i64 %"lst##0", 8 
   %7 = inttoptr i64 %6 to i64* 
-  store  i64 %"lst##0", i64* %"#result##0" 
+  store  i64 %"lst##0", i64* %"#result#ref##0" 
   musttail call fastcc  void  @"int_list.pop<0>[410bae77d3]"(i64  %3, i64  %5, i64*  %7)  
   ret void 
 }
@@ -2228,7 +2228,7 @@ entry:
 }
 
 
-define external fastcc  void @"int_list.remove<0>"(i64  %"lst##0", i64  %"v##0", i64*  %"#result##0")    {
+define external fastcc  void @"int_list.remove<0>"(i64  %"lst##0", i64  %"v##0", i64*  %"#result#ref##0")    {
 entry:
   %0 = icmp ne i64 %"lst##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -2241,10 +2241,10 @@ if.then:
   %6 = icmp eq i64 %2, %"v##0" 
   br i1 %6, label %if.then1, label %if.else1 
 if.else:
-  store  i64 0, i64* %"#result##0" 
+  store  i64 0, i64* %"#result#ref##0" 
   ret void 
 if.then1:
-  store  i64 %5, i64* %"#result##0" 
+  store  i64 %5, i64* %"#result#ref##0" 
   ret void 
 if.else1:
   %7 = trunc i64 16 to i32  
@@ -2254,13 +2254,13 @@ if.else1:
   store  i64 %2, i64* %10 
   %11 = add   i64 %9, 8 
   %12 = inttoptr i64 %11 to i64* 
-  store  i64 %9, i64* %"#result##0" 
+  store  i64 %9, i64* %"#result#ref##0" 
   musttail call fastcc  void  @"int_list.remove<0>"(i64  %5, i64  %"v##0", i64*  %12)  
   ret void 
 }
 
 
-define external fastcc  void @"int_list.remove<0>[410bae77d3]"(i64  %"lst##0", i64  %"v##0", i64*  %"#result##0")    {
+define external fastcc  void @"int_list.remove<0>[410bae77d3]"(i64  %"lst##0", i64  %"v##0", i64*  %"#result#ref##0")    {
 entry:
   %0 = icmp ne i64 %"lst##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -2273,15 +2273,15 @@ if.then:
   %6 = icmp eq i64 %2, %"v##0" 
   br i1 %6, label %if.then1, label %if.else1 
 if.else:
-  store  i64 0, i64* %"#result##0" 
+  store  i64 0, i64* %"#result#ref##0" 
   ret void 
 if.then1:
-  store  i64 %5, i64* %"#result##0" 
+  store  i64 %5, i64* %"#result#ref##0" 
   ret void 
 if.else1:
   %7 = add   i64 %"lst##0", 8 
   %8 = inttoptr i64 %7 to i64* 
-  store  i64 %"lst##0", i64* %"#result##0" 
+  store  i64 %"lst##0", i64* %"#result#ref##0" 
   musttail call fastcc  void  @"int_list.remove<0>[410bae77d3]"(i64  %5, i64  %"v##0", i64*  %8)  
   ret void 
 }
