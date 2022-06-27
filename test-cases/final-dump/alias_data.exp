@@ -12,7 +12,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > public {impure} (0 calls)
+module top-level code > public {inline,semipure} (0 calls)
 0: alias_data.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -91,7 +91,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  void @"alias_data.<0>"()    {
+define external fastcc  void @"alias_data.<0>"() alwaysinline   {
 entry:
   musttail call fastcc  void  @"alias_data.bar<0>"()  
   ret void 
@@ -161,7 +161,7 @@ entry:
   submodules      : student.course, student.student
   procs           : 
 
-module top-level code > public {impure} (0 calls)
+module top-level code > public {semipure} (0 calls)
 0: student.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []

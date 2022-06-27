@@ -14,7 +14,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > public {impure} (0 calls)
+module top-level code > public {inline,semipure} (0 calls)
 0: multi_specz.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -157,7 +157,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  void @"multi_specz.<0>"()    {
+define external fastcc  void @"multi_specz.<0>"() alwaysinline   {
 entry:
   tail call fastcc  void  @"multi_specz.bar1<0>"()  
   musttail call fastcc  void  @"multi_specz.bar2<0>"()  

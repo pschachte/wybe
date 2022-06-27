@@ -501,7 +501,7 @@ codegenForkBody name body =
 -- are position checked with the respective prototype, eliminating arguments
 -- which do not eventually appear in the prototype.
 cgen :: [Prim] -> Bool -> Codegen ()
-cgen (prim@(PrimCall callSiteID pspec args _):nextPrims) isLeaf = do
+cgen (prim@(PrimCall callSiteID pspec _ args _):nextPrims) isLeaf = do
     logCodegen $ "--> Compiling " ++ show prim
     let nm = LLVMAST.Name $ toSBString $ show pspec
     -- Find the prototype of the pspec being called
@@ -551,7 +551,7 @@ cgen (prim@(PrimHigher cId (ArgClosure pspec closed _) args):ps) isLeaf = do
     logCodegen $ "Compiling " ++ show prim
               ++ " as first order call to " ++ show pspec'
               ++ " closed over " ++ show closed
-    cgen (PrimCall cId pspec' (closed ++ args) univGlobalFlows : ps) isLeaf
+    cgen (PrimCall cId pspec' Pure (closed ++ args) univGlobalFlows : ps) isLeaf
 
 cgen [] _ = return ()
 cgen (p:ps) isLeaf = do
@@ -1226,7 +1226,7 @@ addExternClosure ps@(ProcSpec mod _ _ _) = do
     thisMod <- lift2 getModuleSpec
     fileMod <- lift2 $ getModule modRootModSpec
     unless (thisMod == mod || maybe False (`List.isPrefixOf` mod) fileMod)
-        $ addExtern $ PrimCall 0 ps args univGlobalFlows
+        $ addExtern $ PrimCall 0 ps Pure args univGlobalFlows
 
 
 addStringConstant :: String -> Codegen (LLVMAST.Type, C.Constant)
@@ -1498,7 +1498,7 @@ declareExtern (PrimForeign otherlang name _ _) =
 declareExtern (PrimHigher _ var _) =
     shouldnt $ "Don't know how to declare extern function var " ++ show var
 
-declareExtern (PrimCall _ pspec@(ProcSpec m n _ _) args _) = do
+declareExtern (PrimCall _ pspec@(ProcSpec m n _ _) _ args _) = do
     let (inArgs,outArgs) = partitionArgs args
     retty <- primReturnType outArgs
     fnargs <- mapM makeExArg $ zip [1..] inArgs

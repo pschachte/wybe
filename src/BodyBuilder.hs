@@ -403,7 +403,7 @@ instr' prim@(PrimForeign "llvm" "move" []
 --     the only problem that needs fixing.  We don't want to fix this
 --     by threading a heap through, because it's fine to reorder calls
 --     to alloc.
--- XXX can we git rid of this special case by making lpvm alloc "impure"?
+-- XXX can we git rid of this special case by making lpvm alloc "semipure"?
 instr' prim@(PrimForeign "lpvm" "alloc" [] [_,argvar]) pos = do
     logBuild "  Leaving alloc alone"
     rawInstr prim pos
@@ -485,9 +485,9 @@ mkInput arg@ArgUndef{} = arg
 
 
 argExpandedPrim :: Prim -> BodyBuilder Prim
-argExpandedPrim call@(PrimCall id pspec args gFlows) = do
+argExpandedPrim call@(PrimCall id pspec impurity args gFlows) = do
     args' <- transformUnneededArgs pspec args
-    return $ PrimCall id pspec args' gFlows
+    return $ PrimCall id pspec impurity args' gFlows
 argExpandedPrim call@(PrimHigher id fn args) = do
     logBuild $ "Expanding Higher call " ++ show call
     fn' <- expandArg fn
@@ -498,7 +498,7 @@ argExpandedPrim call@(PrimHigher id fn args) = do
             params <- lift $ getPrimParams pspec'
             let args' = zipWith (setArgType . primParamType) params args
             gFlows <- lift $ getProcGlobalFlows pspec
-            argExpandedPrim $ PrimCall id pspec' (clsd ++ args') gFlows
+            argExpandedPrim $ PrimCall id pspec' Pure (clsd ++ args') gFlows
         _ -> do
             logBuild $ "Leaving as higher call to " ++ show fn'
             args' <- mapM expandArg args
@@ -678,8 +678,8 @@ splitArgsByMode = List.partition (isInputFlow . argFlowDirection)
 
 
 canonicalisePrim :: Prim -> Prim
-canonicalisePrim (PrimCall _ nm args gFlows) =
-    PrimCall 0 nm (canonicaliseArg . mkInput <$> args) gFlows
+canonicalisePrim (PrimCall _ nm impurity args gFlows) =
+    PrimCall 0 nm impurity (canonicaliseArg . mkInput <$> args) gFlows
 canonicalisePrim (PrimHigher _ var args) =
     PrimHigher 0 (canonicaliseArg $ mkInput var) $ canonicaliseArg . mkInput <$> args
 canonicalisePrim (PrimForeign lang op flags args) =
@@ -703,7 +703,7 @@ canonicaliseArg (ArgUndef _)        = ArgUndef AnyType
 
 
 validateInstr :: Prim -> BodyBuilder ()
-validateInstr p@(PrimCall _ _ args _) = mapM_ (validateArg p) args
+validateInstr p@(PrimCall _ _ _ args _) = mapM_ (validateArg p) args
 validateInstr p@(PrimHigher _ fn args) = mapM_ (validateArg p) $ fn:args
 validateInstr p@(PrimForeign _ _ _ args) = mapM_ (validateArg p) args
 

@@ -23,7 +23,7 @@ AFTER EVERYTHING:
   submodules      : stmt_if2.tree
   procs           : 
 
-module top-level code > public {impure} (0 calls)
+module top-level code > public {semipure} (0 calls)
 0: stmt_if2.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []

@@ -22,7 +22,7 @@ AFTER EVERYTHING:
   submodules      : type_list.intlist
   procs           : 
 
-module top-level code > public {impure} (0 calls)
+module top-level code > public {semipure} (0 calls)
 0: type_list.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []

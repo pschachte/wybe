@@ -35,7 +35,8 @@ gen#4 > {inline} (1 calls)
 gen#4()<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.control.error<0>("lol":wybe.string, c"loop_terminators:14:11":wybe.c_string) #0 @loop_terminators:nn:nn
+    wybe.string.c_string<0>("lol":wybe.string, ?tmp#2##0:wybe.c_string) #1 @control:nn:nn
+    foreign c {terminal,semipure} error_exit(c"loop_terminators:14:11":wybe.c_string, ~tmp#2##0:wybe.c_string) @control:nn:nn
 
 
 loop0 > {inline} (0 calls)
@@ -64,7 +65,8 @@ loop3 > {inline} (0 calls)
 loop3()<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.control.error<0>("lol":wybe.string, c"loop_terminators:14:11":wybe.c_string) #1 @loop_terminators:nn:nn
+    wybe.string.c_string<0>("lol":wybe.string, ?tmp#0##0:wybe.c_string) #1 @control:nn:nn
+    foreign c {terminal,semipure} error_exit(c"loop_terminators:14:11":wybe.c_string, ~tmp#0##0:wybe.c_string) @control:nn:nn
 
   LLVM code       :
 
@@ -83,7 +85,10 @@ loop3()<{}; {}>:
 @loop_terminators.2 =    constant [?? x i8] c"loop_terminators:14:11\00"
 
 
-declare external fastcc  void @"wybe.control.error<0>"(i64, i64)    
+declare external ccc  void @error_exit(i64, i64)    
+
+
+declare external fastcc  i64 @"wybe.string.c_string<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -112,7 +117,8 @@ entry:
 
 define external fastcc  void @"loop_terminators.gen#4<0>"() alwaysinline   {
 entry:
-  tail call fastcc  void  @"wybe.control.error<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @loop_terminators.1, i32 0, i32 0) to i64), i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @loop_terminators.2, i32 0, i32 0) to i64))  
+  %0 = tail call fastcc  i64  @"wybe.string.c_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @loop_terminators.1, i32 0, i32 0) to i64))  
+  tail call ccc  void  @error_exit(i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @loop_terminators.2, i32 0, i32 0) to i64), i64  %0)  
   ret void 
 }
 
@@ -137,6 +143,7 @@ entry:
 
 define external fastcc  void @"loop_terminators.loop3<0>"() alwaysinline   {
 entry:
-  tail call fastcc  void  @"wybe.control.error<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @loop_terminators.1, i32 0, i32 0) to i64), i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @loop_terminators.2, i32 0, i32 0) to i64))  
+  %0 = tail call fastcc  i64  @"wybe.string.c_string<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @loop_terminators.1, i32 0, i32 0) to i64))  
+  tail call ccc  void  @error_exit(i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @loop_terminators.2, i32 0, i32 0) to i64), i64  %0)  
   ret void 
 }

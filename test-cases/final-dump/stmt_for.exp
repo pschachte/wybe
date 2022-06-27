@@ -38,7 +38,7 @@ AFTER EVERYTHING:
   submodules      : stmt_for.int_sequence
   procs           : 
 
-module top-level code > public {impure} (0 calls)
+module top-level code > public {semipure} (0 calls)
 0: stmt_for.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []

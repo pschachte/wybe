@@ -143,12 +143,13 @@ compileProc proc procID =
         let proto = procProto proc
         let procName = procProtoName proto
         let params = procProtoParams proto
+        let impurity = procImpurity proc
         modify (\st -> st {nextCallSiteID=procCallSiteCount proc})
         logClause $ "--------------\nCompiling proc " ++ show proto
         mapM_ (nextVar . paramName) $ List.filter (flowsIn . paramFlow) params
         finishStmt
         startVars <- getCurrNumbering
-        compiled <- compileBody body params Det
+        compiled <- compileBody impurity body params Det
         logClause $ "Compiled to  :"  ++ showBlock 4 compiled
         endVars <- getCurrNumbering
         logClause $ "  startVars  : " ++ show startVars
@@ -179,21 +180,21 @@ compileProc proc procID =
 --  statement or, in the case of a SemiDet proc, as the final statement of a
 --  body. This code assumes that these invariants are observed, and does not
 --  worry whether the proc is Det or SemiDet.
-compileBody :: [Placed Stmt] -> [Param] -> Determinism -> ClauseComp ProcBody
-compileBody [] params detism = do
+compileBody :: Impurity -> [Placed Stmt] -> [Param] -> Determinism -> ClauseComp ProcBody
+compileBody _ [] params detism = do
     logClause $ "Compiling empty body"
     end <- closingStmts detism params
     logClause $ "Compiling empty body produced:" ++ showPlacedPrims 4 end
     return $ ProcBody end NoFork
-compileBody stmts params detism = do
+compileBody impurity stmts params detism = do
     logClause $ "Compiling body:" ++ showBody 4 stmts
     let final = last stmts
     case content final of
         Cond tst thn els _ _ _ ->
           case content tst of
               TestBool var -> do
-                front <- mapM compileSimpleStmt $ init stmts
-                compileCond front (place final) var thn els params detism
+                front <- mapM (compileSimpleStmt impurity) $ init stmts
+                compileCond impurity front (place final) var thn els params detism
               tstStmt ->
                 shouldnt $ "CompileBody of Cond with non-simple test:\n"
                            ++ show tstStmt
@@ -201,26 +202,26 @@ compileBody stmts params detism = do
         call@(ProcCall _ SemiDet _ _) ->
             shouldnt "compileBody of SemiDet call"
         _ -> do
-          prims <- mapM compileSimpleStmt stmts
+          prims <- mapM (compileSimpleStmt impurity) stmts
           end <- closingStmts detism params
           return $ ProcBody (prims++end) NoFork
 
 
-compileCond :: [Placed Prim] -> OptPos -> Exp -> [Placed Stmt]
+compileCond :: Impurity -> [Placed Prim] -> OptPos -> Exp -> [Placed Stmt]
     -> [Placed Stmt] -> [Param] -> Determinism -> ClauseComp ProcBody
-compileCond front pos (Typed expr _typ _) thn els params detism =
-    compileCond front pos expr thn els params detism
-compileCond front pos expr thn els params detism = do
+compileCond impurity front pos (Typed expr _typ _) thn els params detism =
+    compileCond impurity front pos expr thn els params detism
+compileCond impurity front pos expr thn els params detism = do
     name' <- case expr of
         Var var ParamIn _ -> Just <$> currVar var Nothing
         _                 -> return Nothing
     logClause $ "conditional on " ++ show expr ++ " new name = " ++ show name'
     beforeTest <- getCurrNumbering
-    thn' <- compileBody thn params detism
+    thn' <- compileBody impurity thn params detism
     afterThen <- getCurrNumbering
     logClause $ "  vars after then: " ++ show afterThen
     putNumberings beforeTest
-    els' <- compileBody els params detism
+    els' <- compileBody impurity els params detism
     afterElse <- getCurrNumbering
     logClause $ "  vars after else: " ++ show afterElse
     let final = Map.intersectionWith max afterThen afterElse
@@ -253,16 +254,16 @@ prependToBody :: [Placed Prim] -> ProcBody -> ProcBody
 prependToBody before (ProcBody prims fork)
     = ProcBody (before++prims) fork
 
-compileSimpleStmt :: Placed Stmt -> ClauseComp (Placed Prim)
-compileSimpleStmt stmt = do
+compileSimpleStmt :: Impurity -> Placed Stmt -> ClauseComp (Placed Prim)
+compileSimpleStmt impurity stmt = do
     logClause $ "Compiling " ++ showStmt 4 (content stmt)
-    stmt' <- compileSimpleStmt' (content stmt)
+    stmt' <- compileSimpleStmt' impurity (content stmt)
     finishStmt
     logClause $ "Compiled to " ++ show stmt'
     return $ maybePlace stmt' (place stmt)
 
-compileSimpleStmt' :: Stmt -> ClauseComp Prim
-compileSimpleStmt' call@(ProcCall func _ _ args) = do
+compileSimpleStmt' :: Impurity -> Stmt -> ClauseComp Prim
+compileSimpleStmt' impurity call@(ProcCall func _ _ args) = do
     logClause $ "Compiling call " ++ showStmt 4 call
     callSiteID <- gets nextCallSiteID
     modify (\st -> st {nextCallSiteID = callSiteID + 1})
@@ -272,22 +273,23 @@ compileSimpleStmt' call@(ProcCall func _ _ args) = do
             let procID' = trustFromJust ("compileSimpleStmt' for " ++ showStmt 4 call)
                             procID
             let pSpec = ProcSpec mod name procID' generalVersion
+            impurity' <- max impurity . procImpurity <$> lift (getProcDef pSpec)
             gFlows <- lift $ getProcGlobalFlows pSpec
-            return $ PrimCall callSiteID pSpec args' gFlows
+            return $ PrimCall callSiteID pSpec impurity  args' gFlows
         Higher fn -> do
             fn' <- compileHigherFunc fn
             return $ PrimHigher callSiteID fn' args'
-compileSimpleStmt' (ForeignCall lang name flags args) = do
+compileSimpleStmt' _ (ForeignCall lang name flags args) = do
     args' <- concat <$> mapM (placedApply compileArg) args
     return $ PrimForeign lang name flags args'
-compileSimpleStmt' (TestBool expr) =
+compileSimpleStmt' impurity (TestBool expr) =
     -- Only for handling a TestBool other than as the condition of a Cond:
-    compileSimpleStmt' $ content $ move (boolCast expr) (boolVarSet outputStatusName)
-compileSimpleStmt' Nop =
-    compileSimpleStmt' $ content $ move boolTrue (boolVarSet outputStatusName)
-compileSimpleStmt' Fail =
-    compileSimpleStmt' $ content $ move boolFalse (boolVarSet outputStatusName)
-compileSimpleStmt' stmt =
+    compileSimpleStmt' impurity $ content $ move (boolCast expr) (boolVarSet outputStatusName)
+compileSimpleStmt' impurity Nop =
+    compileSimpleStmt' impurity $ content $ move boolTrue (boolVarSet outputStatusName)
+compileSimpleStmt' impurity Fail =
+    compileSimpleStmt' impurity $ content $ move boolFalse (boolVarSet outputStatusName)
+compileSimpleStmt' impurity stmt =
     shouldnt $ "Normalisation left complex statement:\n" ++ showStmt 4 stmt
 
 

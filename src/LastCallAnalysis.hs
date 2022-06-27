@@ -132,7 +132,7 @@ transformLeaf lastBlock = do
 -- Returns true if this prim is calling proc spec
 primIsCallToProcSpec :: Placed Prim -> ProcSpec -> Bool
 primIsCallToProcSpec p spec = case content p of
-    (PrimCall _ spec' _ _) | spec == spec' -> True
+    (PrimCall _ spec' _ _ _) | spec == spec' -> True
     _ -> False
 
 -- | We don't want two different leaves to each try to update the proc's
@@ -213,9 +213,10 @@ annotateFinalMutates = map $
 -- occuring after the call), decorate this call with appropriate
 -- `outByReference` args.
 transformIntoTailCall :: [MutateChain] -> Prim -> Prim
-transformIntoTailCall mutateChains (PrimCall siteId spec args globalFlows) =
+transformIntoTailCall mutateChains
+                      (PrimCall siteId spec impurity args globalFlows) =
     let mutates = concat mutateChains in
-    PrimCall siteId spec (map (\arg ->
+    PrimCall siteId spec impurity (map (\arg ->
         case arg of
             var@ArgVar { argVarName = name } | name `elem` List.map valueName mutates
                 -> var { argVarFlow = FlowOutByReference }
@@ -303,12 +304,12 @@ fixupCallsInProc def@ProcDef { procImpln = impln@ProcDefPrim { procImplnBody = b
 fixupCallsInProc _ = shouldnt "uncompiled"
 
 fixupCallsInPrim :: Prim -> Compiler Prim
-fixupCallsInPrim p@(PrimCall siteId pspec args gFlows) = do
+fixupCallsInPrim p@(PrimCall siteId pspec impurity args gFlows) = do
     logLastCallAnalysis $ "checking call " ++ show p
     proto <- getProcPrimProto pspec
     let args' = coerceArgs args (primProtoParams proto)
     when (args /= args') $ logLastCallAnalysis $ "coerced args: " ++ show args ++ " " ++ show args'
-    return $ PrimCall siteId pspec args' gFlows
+    return $ PrimCall siteId pspec impurity args' gFlows
 fixupCallsInPrim p = return p
 
 -- | Coerce FlowOut arguments into FlowOutByReference where needed
