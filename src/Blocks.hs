@@ -559,23 +559,25 @@ cgen (p:ps) isLeaf = do
     cgen ps isLeaf
 
 cgenPrim :: Prim -> Codegen ()
-cgenPrim prim@(PrimHigher callSiteId fn@ArgVar{} args) = do
+cgenPrim prim@(PrimHigher callSiteId fn@ArgVar{argVarType=ty@(HigherOrderType mods _)} args) = do
     logCodegen $ "--> Compiling " ++ show prim
-    -- We must set all arguments to be `AnyType`
-    -- This ensures that we can uniformly pass all parameters to be passed in
-    -- the same registers
-    let (inArgs, outArgs) = partitionArgs $ setArgType AnyType <$> args
-    inOps@(env:_) <- mapM cgenArg $ fn:inArgs
-    logCodegen $ "In args = " ++ show inOps
-    fnPtrTy <- llvmClosureType (argType fn)
-    let addrPtrTy = ptr_t address_t
-    envPtr <- inttoptr env addrPtrTy
-    eltPtr <- doLoad address_t envPtr
-    fnPtr <- doCast eltPtr fnPtrTy
-    --- XXX: Tail could cause undef-behaviour in optimizer if the callee
-    ---      user allocas from the caller. Double check this is okay.
-    let callIns = callWybe (Just LLVMAST.Tail) fnPtr inOps
-    addInstruction callIns outArgs
+    -- If a HO call only produces phantoms, no need to call it
+    allPhantoms <- and <$> lift2 (mapM argIsPhantom $ snd $ partitionArgs args)
+    unless (allPhantoms && not (isResourcefulHigherOrder ty) 
+                        && modifierImpurity mods <= Pure) $ do
+        args' <- mapM fixHigherOrderArg args
+        let (inArgs, outArgs) = partitionArgs args'
+        inOps@(env:_) <- mapM cgenArg $ fn:inArgs
+        logCodegen $ "In args = " ++ show inOps
+        fnPtrTy <- llvmClosureType (argType fn)
+        let addrPtrTy = ptr_t address_t
+        envPtr <- inttoptr env addrPtrTy
+        eltPtr <- doLoad address_t envPtr
+        fnPtr <- doCast eltPtr fnPtrTy
+        --- XXX: Tail could cause undef-behaviour in optimizer if the callee
+        ---      user allocas from the caller. Double check this is okay.
+        let callIns = callWybe (Just LLVMAST.Tail) fnPtr inOps
+        addInstruction callIns outArgs
 
 cgenPrim prim@(PrimHigher _ fn _) =
     shouldnt $ "cgen higher call to " ++ show fn
@@ -643,6 +645,17 @@ getTailCallHint True NoAlloca _ _ _ = Just LLVMAST.MustTail
 -- in the caller.
 getTailCallHint False NoAlloca _ _ _ = Just LLVMAST.Tail
 
+
+-- | Fix a higher order call argument. Transforms an input phantom into an ArgUndef, 
+-- and all types into AnyType
+fixHigherOrderArg :: PrimArg -> Codegen PrimArg
+fixHigherOrderArg arg@ArgVar{argVarType=ty, argVarFlow=FlowIn} = 
+    ifM (lift2 $ argIsPhantom arg) 
+        (return $ ArgUndef AnyType)
+        (return $ setArgType AnyType arg)
+fixHigherOrderArg arg = return $ setArgType AnyType arg
+
+
 -- | Translate a Binary primitive procedure into a binary llvm instruction,
 -- add the instruction to the current BasicBlock's instruction stack and emit
 -- the resulting Operand. Reads the 'llvmMapBinop' Map.  The primitive
@@ -651,11 +664,11 @@ getTailCallHint False NoAlloca _ _ _ = Just LLVMAST.Tail
 -- Operand of the instruction.
 cgenLLVMBinop :: ProcName -> [Ident] -> PrimArg -> PrimArg -> PrimArg -> Codegen ()
 cgenLLVMBinop name flags inArg1 inArg2 outArg = do
-       inOp1 <- cgenArg inArg1
-       inOp2 <- cgenArg inArg2
-       case Map.lookup (withFlags name flags) llvmMapBinop of
-         Just (f,_,_) -> addInstruction (f inOp1 inOp2) [outArg]
-         Nothing -> shouldnt $ "LLVM Instruction not found: " ++ name
+    inOp1 <- cgenArg inArg1
+    inOp2 <- cgenArg inArg2
+    case Map.lookup (withFlags name flags) llvmMapBinop of
+        Just (f,_,_) -> addInstruction (f inOp1 inOp2) [outArg]
+        Nothing -> shouldnt $ "LLVM Instruction not found: " ++ name
 
 
 -- | Similar to 'cgenLLVMBinop', but for unary operations on the
@@ -1048,9 +1061,7 @@ cgenArgFull arg = do
             return (opd, alloca)
 
 cgenArg :: PrimArg -> Codegen LLVMAST.Operand
-cgenArg a = do
-    (op, alloca) <- cgenArgFull a
-    return op
+cgenArg a = fst <$> cgenArgFull a
 
 -- Tracks whether a given pointer argument comes
 -- from an LLVM "alloca" instruction inside the current function.

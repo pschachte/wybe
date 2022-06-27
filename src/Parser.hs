@@ -1,4 +1,5 @@
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE TupleSections #-}
 --  File     : Parser.hs
 --  Author   : Peter Schachte <schachte@unimelb.edu.au>
 --  Purpose  : Parser for the Wybe language using Parsec.
@@ -14,6 +15,7 @@ import Data.Set as Set
 import Data.List as List
 import Data.Maybe as Maybe
 import Data.Bits
+import Data.Either.Extra (mapLeft)
 import Control.Monad.Identity (Identity)
 import Scanner
 import Util
@@ -84,6 +86,7 @@ visibilityItem = do
         <|> resourceItem v
         <|> useItemParser v
         <|> fromUseItemParser v
+    <?> "top-level item"
 
 
 -- | Parse module-local items (with no visibility prefix).
@@ -236,20 +239,20 @@ fromUseItemParser v = do
 -- 'visibility' 'determinism'.
 procOrFuncItem :: Visibility -> Parser Item
 procOrFuncItem vis = do
-    pos <- Just . tokenPosition <$> ident "def"
-    mods <- processProcModifiers <$> modifierList
+    pos <- tokenPosition <$> ident "def"
+    mods <- modifierList >>= parseWith (processProcModifiers pos "procedure or function declaration")
     (proto, returnType) <- limitedTerm prototypePrecedence
                             >>= parseWith termToPrototype
     do
         body <- symbol "=" *> expr
-        return $ FuncDecl vis mods proto returnType body pos
+        return $ FuncDecl vis mods proto returnType body $ Just pos
       <|> if returnType /= AnyType
           then fail "unexpected return type in proc declaration"
           else do
             rs <- option [] (ident "use" *> resourceFlowSpec `sepBy1` comma)
             let proto' = proto { procProtoResources = Set.fromList rs }
             body <- embracedTerm >>= parseWith termToBody
-            return $ ProcDecl vis mods proto' body pos
+            return $ ProcDecl vis mods proto' body $ Just pos
 
 
 -- | Parse a specification of a resource and its flow direction.
@@ -287,64 +290,81 @@ processTypeModifier tms unknown  = tms {tmUnknown = tmUnknown tms ++ [unknown]}
 -- | Extract a ProcModifiers from a list of identifiers.  If the Bool is False,
 -- then don't report any errors in the modifiers.  The position is the source
 -- location of the list of modifiers.
-processProcModifiers :: [String] -> ProcModifiers
-processProcModifiers
-    = List.foldl (flip processProcModifier) defaultProcModifiers
+processProcModifiers :: SourcePos -> String -> [String] -> Either (SourcePos,String) ProcModifiers
+processProcModifiers pos ctx
+    = mapLeft (pos,) . foldM (flip $ processProcModifier ctx) defaultProcModifiers
 
 -- | Update a collection of ProcModifiers
-processProcModifier :: String -> ProcModifiers -> ProcModifiers
-processProcModifier "test"     = updateModsDetism   "test" SemiDet
-processProcModifier "partial"  = updateModsDetism   "partial" SemiDet
-processProcModifier "failing"  = updateModsDetism   "failing" Failure
-processProcModifier "terminal" = updateModsDetism   "terminal" Terminal
-processProcModifier "inline"   = updateModsInlining "inline" Inline
-processProcModifier "noinline" = updateModsInlining "noinline" NoInline
-processProcModifier "pure"     = updateModsImpurity "pure" PromisedPure
-processProcModifier "semipure" = updateModsImpurity "semipure" Semipure
-processProcModifier "impure"   = updateModsImpurity "impure" Impure
-processProcModifier "resource" = updateModsResource "resource" True
-processProcModifier modName    =
-    \ms -> ms {modifierUnknown=modName:modifierUnknown ms}
+processProcModifier :: String -> String -> ProcModifiers -> Either String ProcModifiers
+processProcModifier ctx "test"     = updateModsDetism   ctx "test" SemiDet
+processProcModifier ctx "partial"  = updateModsDetism   ctx "partial" SemiDet
+processProcModifier ctx "failing"  = updateModsDetism   ctx "failing" Failure
+processProcModifier ctx "terminal" = updateModsDetism   ctx "terminal" Terminal
+processProcModifier ctx "inline"   = updateModsInlining ctx "inline" Inline
+processProcModifier ctx "noinline" = updateModsInlining ctx "noinline" NoInline
+processProcModifier ctx "pure"     = updateModsImpurity ctx "pure" PromisedPure
+processProcModifier ctx "semipure" = updateModsImpurity ctx "semipure" Semipure
+processProcModifier ctx "impure"   = updateModsImpurity ctx "impure" Impure
+processProcModifier ctx "resource" = updateModsResource ctx "resource" True
+processProcModifier ctx modName    = 
+    const $ Left $ "Unknown modifier '" ++ modName ++ "' in " ++ ctx
 
 
 
 -- | Update the ProcModifiers to specify the given determinism, which was
 -- specified with the given identifier.  Since Det is the default, and can't be
 -- explicitly specified, it's alway OK to change from Det to something else.
-updateModsDetism :: String -> Determinism -> ProcModifiers -> ProcModifiers
-updateModsDetism _ detism mods@ProcModifiers{modifierDetism=Det} =
-    mods {modifierDetism=detism}
-updateModsDetism modName detism mods =
-    mods {modifierConflict=modName:modifierConflict mods}
+updateModsDetism :: String -> String -> Determinism -> ProcModifiers 
+                 -> Either String ProcModifiers
+updateModsDetism _ _ detism mods@ProcModifiers{modifierDetism=Det} =
+    return mods {modifierDetism=detism}
+updateModsDetism ctx modName detism mods =
+    Left $ modifierConflictMsg modName ctx
 
 
 -- | Update the ProcModifiers to specify the given inlining, which was specified
 -- with the given identifier.  Since MayInline is the default, and can't be
 -- explicitly specified, it's alway OK to change from MayInline to something
 -- else.
-updateModsInlining :: String -> Inlining -> ProcModifiers -> ProcModifiers
-updateModsInlining _ inlining mods@ProcModifiers{modifierInline=MayInline} =
-    mods {modifierInline=inlining}
-updateModsInlining modName inlining mods =
-    mods {modifierConflict=modName:modifierConflict mods}
-
+updateModsInlining :: String -> String -> Inlining -> ProcModifiers 
+                   -> Either String ProcModifiers
+updateModsInlining _ _ inlining mods@ProcModifiers{modifierInline=MayInline} =
+    return $ mods {modifierInline=inlining}
+updateModsInlining ctx modName _ mods =    
+    Left $ modifierConflictMsg modName ctx
+    
 
 -- | Update the ProcModifiers to specify the given Impurity, which was specified
 -- with the given identifier.  Since Pure is the default, and can't be
 -- explicitly specified, it's alway OK to change from Pure to something
 -- else.
-updateModsImpurity :: String -> Impurity -> ProcModifiers -> ProcModifiers
-updateModsImpurity _ impurity mods@ProcModifiers{modifierImpurity=Pure} =
-    mods {modifierImpurity=impurity}
-updateModsImpurity modName _ mods =
-    mods {modifierConflict=modName:modifierConflict mods}
+updateModsImpurity :: String -> String -> Impurity -> ProcModifiers 
+                   -> Either String ProcModifiers
+updateModsImpurity _ _ impurity mods@ProcModifiers{modifierImpurity=Pure} =
+    return $ mods {modifierImpurity=impurity}
+updateModsImpurity ctx modName _ mods =    
+    Left $ modifierConflictMsg modName ctx
 
-updateModsResource :: String -> Bool -> ProcModifiers -> ProcModifiers
-updateModsResource _ resful mods@ProcModifiers{modifierResourceful=False} =
-    mods {modifierResourceful=resful}
-updateModsResource modName _ mods =
-    mods {modifierConflict=modName:modifierConflict mods}
+-- | Update the ProcModifiers to specify the given Resourcefulness, which was 
+-- specified with the given identifier.  Since resourceless is the default, 
+-- and can't be explicitly specified, it's alway OK to change from resourceless
+-- to resourceful.
+updateModsResource :: String -> String -> Bool -> ProcModifiers 
+                   -> Either String ProcModifiers
+updateModsResource _ _ resful mods@ProcModifiers{modifierResourceful=False} =
+    return $ mods {modifierResourceful=resful}
+updateModsResource ctx modName _ mods =
+    Left $ modifierConflictMsg modName ctx
 
+
+modifierConflictMsg :: String -> String -> String
+modifierConflictMsg mod ctx = 
+    "Modifier '" ++ mod ++ "' conflicts with earlier modifier in " ++ ctx
+
+
+modifierError :: SourcePos -> String -> String -> Either (SourcePos,String) a
+modifierError pos modName ctx = 
+    syntaxError pos $ "Modifier '" ++ modName ++ "' cannot be used in a " ++ ctx
 
 -----------------------------------------------------------------------------
 -- Combined statement and expression parsing                               --
@@ -379,6 +399,7 @@ stmt = limitedTerm lowestStmtPrecedence >>= parseWith termToStmt
 -- |Parse a placed Exp
 expr :: Parser (Placed Exp)
 expr = term >>= parseWith termToExp
+    <?> "expression"
 
 
 -- | Parse a TypeSpec
@@ -401,10 +422,9 @@ limitedTerm precedence = termFirst >>= termRest precedence
 -- Valid suffixes include parenthesised argument lists or square bracketed
 -- indices.  If both prefix and suffix are present, the suffix binds tighter.
 termFirst :: Parser Term
-termFirst = (do
-             op <- prefixOp
-             termFirst >>= applyPrefixOp op)
-         <|> (primaryTerm >>= termSuffix)
+termFirst = 
+    ((prefixOp >>= (primaryTerm >>=) . applyPrefixOp) <|> primaryTerm) 
+        >>= termSuffix
 
 
 -- |Apply zero or more parenthesised or square bracketed suffixes to the
@@ -446,7 +466,7 @@ applyArguments term args =
 applyEmbraced :: Term -> Term -> Parser Term
 applyEmbraced expr@(Embraced _ Brace _ Nothing) arg =
     return expr{embracedArg=Just arg}
-applyEmbraced expr _ = fail $ "unexpected embraced expression following " ++ show expr
+applyEmbraced expr _ = fail $ "unexpected embraced term following " ++ show expr
 
 
 -- |Complete parsing an term of precedence no looser than specified, given
@@ -1151,7 +1171,10 @@ termToExp body@(Embraced pos Brace _ Nothing) = do
     return $ Placed (AnonProc defaultProcModifiers [] body' Nothing Nothing) pos
 termToExp mods@(Embraced pos Brace _
                     (Just body@(Embraced _ Brace _ _))) = do
-    procMods <- termToProcModifiers mods
+    procMods <- termToProcModifiers "anonymous procedure" mods
+    let inlining = modifierInline procMods
+    unless (inlining == MayInline)
+        $ modifierError pos (inliningName inlining) "anonymous procedure"
     anonProc <- content <$> termToExp body
     case anonProc of
         AnonProc oldMods ps body clsd _ | oldMods == defaultProcModifiers
@@ -1189,11 +1212,13 @@ termToIdent (Call _ [] ident ParamIn []) = return ident
 termToIdent other
     = syntaxError (termPos other) $ "invalid ident " ++ show other
 
-termToProcModifiers :: TranslateTo ProcModifiers
-termToProcModifiers (Embraced _ Brace mods _) =
-    processProcModifiers <$> mapM termToIdent mods
-termToProcModifiers other
-    = syntaxError (termPos other) $ "invalid modifiers " ++ show other
+termToProcModifiers :: String -> TranslateTo ProcModifiers
+termToProcModifiers ctx (Embraced pos Brace mods _) = do
+    idents <- mapM termToIdent mods
+    processProcModifiers pos ctx idents
+termToProcModifiers ctx other
+    = syntaxError (termPos other) 
+    $ "invalid modifiers " ++ show other ++ " in " ++ ctx
 
 
 
@@ -1222,11 +1247,14 @@ termToConditionalExp' term =
 -- |Convert a Term to a TypeSpec, or produce an error
 termToTypeSpec :: TranslateTo TypeSpec
 termToTypeSpec mods@(Embraced pos Brace _ (Just ty@(Embraced _ Paren _ Nothing))) = do
-    procMods <- termToProcModifiers mods
+    mods <- termToProcModifiers "type constraint" mods
+    let inlining = modifierInline mods
+    unless (inlining == MayInline)
+        $ modifierError pos (inliningName inlining) "type constraint"
     ty' <- termToTypeSpec ty
     case ty' of
-        HigherOrderType _ params -> return $ HigherOrderType procMods params
-        _ -> syntaxError pos $ "invalid type spec " ++ show mods
+        HigherOrderType _ params -> return $ HigherOrderType mods params
+        _ -> syntaxError pos $ "invalid higher-order type " ++ show ty'
 termToTypeSpec (Embraced _ Paren args Nothing) =
     HigherOrderType defaultProcModifiers <$> mapM termToTypeFlow args
 termToTypeSpec (Call _ [] name ParamIn [])

@@ -1,25 +1,93 @@
-# purpose: Standard Array type, a null-terminated array
+# purpose: Standard Array type, a fixed-length array
 # since  : 0.1
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
-use wybe.bool, wybe.int
+use wybe.bool, wybe.int, wybe.machine_word, wybe.list
 
 pub constructor (T) array(length:int, raw_data:raw_array(T))
 
+
+# Raw array type
 pub type raw_array(T) is address {}
 
-pub def {test} `[|]`(?head:T, ?tail:array(T), a:array(T)) {
-    array(?length,?data) = a
+
+## Construction procedures
+
+# Construct an array filled with the given element of a given length.
+pub def array(x:T, len:int):_(T) = ar where {
+    ?size = len * word_size_bytes
+    foreign lpvm alloc(size, ?data)
+    ?offset = 0
+    do {
+        while offset < size
+        foreign lpvm mutate(data, ?data, offset, 1, size, 0, x)
+        !offset += word_size_bytes
+    }
+    ?ar = array(len, data)
+}
+
+
+## Conversion procedures
+
+# Convert a list into an array
+pub def array(ls:list(T)):_(T) = ar where {
+    ?len = length(ls) 
+    ?size = len * word_size_bytes
+    foreign lpvm alloc(size, ?data)
+    ?offset = 0
+    for ?x in ls {
+        foreign lpvm mutate(data, ?data, offset, 1, size, 0, x)
+        !offset += word_size_bytes
+    }
+    ?ar = array(len, data)
+}
+
+
+## Common operations
+
+# Get the head and tail of an array.
+# Fails if the array is empty
+pub def {test} `[|]`(?head:T, ?tail:_(T), a:_(T)) {
+    array(?length, ?data) = a
     (length > 0)
-    foreign lpvm access(data, 0, 0, 0, ?head)
-    foreign llvm add(data, 8, ?data)
+    foreign lpvm access(data, 0, word_size_bytes, 0, ?head)
+    foreign llvm add(data, word_size_bytes, ?data)
     ?tail = array(length - 1, data)
 }
 
-pub def {test} `[]`(a:array(T), idx:int):T = x where {
+# Test if an index is within the bounds of an array
+pub def {test, inline} inbounds(a:_(T), idx:int) {
     (0 <= idx)
-    array(?length, ?data) = a
-    (idx < length)
-    foreign lpvm access(data, idx, 0, 8, ?x)
+    (idx < a^length)
+}
+
+# Get the element of an array at a given index.
+# Fails when the index is out of the bounds of the array
+pub def {test} `[]`(a:_(T), idx:int):T = x where {
+    inbounds(a, idx)
+    ?x = a^unsafe_get(idx)
+}
+
+# WARNING: does not check that the index is in the bound of the array. You 
+# probably want `[]`.
+# Get the element of an array at a given index
+pub def {inline} unsafe_get(a:_(T), idx:int):T = x where {
+    foreign lpvm access(a^raw_data, idx * word_size_bytes, word_size_bytes, 0, ?x)
+}
+
+# Update the array at the given index to the given element.
+# Fails when the index is out of the bounds of the array
+pub def {test} `[]`(!a:_(T), idx:int, x:T) {
+    inbounds(a, idx)
+    unsafe_update(!a, idx, x)
+}
+
+# WARNING: does not check that the index is in the bound of the array. You 
+# probably want `[]`.
+# Update the array at the given index to the given element
+pub def {inline} unsafe_update(!a:_(T), idx:int, x:T) {
+    foreign lpvm mutate(a^raw_data, ?data, idx * word_size_bytes, 0, 
+                                           a^length * word_size_bytes, 0, x)
+    !a^raw_data = data
 }

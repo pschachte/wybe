@@ -24,7 +24,7 @@ constructors empty
 
 ## Conversion procedures.
 
-# Conversion from c_string
+# Convert a c_string into a string
 pub def string(str:c_string):_ = s where {
     ?len = length(str)
     ?s = if { len = 0 :: empty 
@@ -33,18 +33,18 @@ pub def string(str:c_string):_ = s where {
             }
 }
 
-# Conversion from char
+# Convert a char into a string
 pub def string(c:char):_ = singleton(c)
 
-# Conversion to c_string
+# Convert a string into a c_string
 pub def c_string(s:_):c_string = str where {
-    if { s = buffer(_, ?c_string) :: ?str = c_string
+    if { s = buffer(_, ?str) :: pass
        | else :: 
             ?len = length(s) + 1
             foreign lpvm alloc(len, ?str)
-            foreign lpvm mutate(str, ?str, len, true, 1, 0, '\0')
+            foreign lpvm mutate(str, ?str, len, true, len, 0, '\0')
             ?offset = 0
-            pack(s, !str, !offset)
+            pack(s, !str, len, !offset)
     }
 }
 
@@ -153,28 +153,28 @@ pub def println(x:_) use !io { !print(x); !nl }
 pub def read(?x:_) use !io { !read(?str:c_string); ?x = string(str) }
 
 
-## Private helper functions
+## Private helper procedures
 
 # Pack a string into a c_string, from offset
-# Note: mutates mem, increasing offset
-def pack(s:_, !mem:c_string, !offset:int) {
+# Note: mutates raw, increasing offset
+def pack(s:_, !raw:c_string, size:int, !offset:int) {
     case s in {
         buffer(_, ?str) :: 
             for ?c in str {
-                foreign lpvm mutate(mem, ?mem, offset, true, 1, 0, c)
+                foreign lpvm mutate(raw, ?raw, offset, true, size, 0, c)
                 incr(!offset)
             }
       | concat(?left, ?right) :: 
-            pack(left, !mem, !offset)
-            pack(right, !mem, !offset)
+            pack(left, !raw, size, !offset)
+            pack(right, !raw, size, !offset)
             incr(!offset)
       | slice(_, _) :: 
             for ?c in s {
-                foreign lpvm mutate(mem, ?mem, offset, true, 1, 0, c)
+                foreign lpvm mutate(raw, ?raw, offset, true, size, 0, c)
                 incr(!offset)
             }
       | singleton(?c) ::
-            foreign lpvm mutate(mem, ?mem, offset, true, 1, 0, c)
+            foreign lpvm mutate(raw, ?raw, offset, true, size, 0, c)
             incr(!offset)
     }
 }

@@ -243,10 +243,11 @@ transformStmt :: Stmt -> OptPos -> Resourcer [Placed Stmt]
 transformStmt stmt@(ProcCall func@(First m n mbId) detism resourceful args) pos = do
     let procID = trustFromJust "transformStmt" mbId
     procDef <- lift (getProcDef $ ProcSpec m n procID generalVersion)
-    let callResFlows = Set.toList $ procProtoResources $ procProto procDef
+    let proto = procProto procDef
+    let callResFlows = Set.toList $ procProtoResources proto
+    let callParamTys = paramType <$> procProtoParams proto
     let variant = procVariant procDef
-    let argTys = fromMaybe AnyType . maybeExpType . content <$> args
-    let hasResfulHigherArgs = any isResourcefulHigherOrder argTys
+    let hasResfulHigherArgs = any isResourcefulHigherOrder callParamTys
     let usesResources = not (List.null callResFlows) || hasResfulHigherArgs
     unless (resourceful || not usesResources)
         $ lift $ errmsg pos
@@ -663,7 +664,7 @@ globaliseExp ty exp@(Var nm fl _) pos = do
 globaliseExp _ (Closure pspec exps) pos = do
     exps' <- globaliseExps' exps
     return $ Closure pspec exps' `maybePlace` pos
-globaliseExp _ (AnonProc mods@(ProcModifiers detism _ _ _ resful _ _)
+globaliseExp _ (AnonProc mods@(ProcModifiers detism _ _ _ resful)
                 params body clsd res) pos = do
     (params', body', _) <- globaliseProc pos Nothing AnonymousProc
                                 detism params Set.empty body

@@ -661,8 +661,7 @@ unbranchExp exp@(AnonProc mods params pstmts clsd res) pos = do
     let res' = trustFromJust "unbranch annon proc without resources" res
     name <- newProcName
     logUnbranch $ "Creating Closure for " ++ show exp ++ " under " ++ name
-    let ProcModifiers detism inlining impurity _ _ _ _ = mods
-    lift $ checkProcMods "anonymous procedure" pos mods
+    let ProcModifiers detism inlining impurity _ _ = mods
     let (freeParams, freeVars) = unzip $ uncurry freeParamVar <$> Map.toAscList clsd'
     logUnbranch $ "  With params " ++ show params
     logUnbranch $ "  With free variables " ++ show freeVars
