@@ -1,6 +1,6 @@
 # force computation of unneeded value
 
-pub def {impure} need(stmt:{impure}()) {!stmt}
+pub def {semipure} need(stmt:{impure}()) {!stmt}
 
 pub def iota(n:int):list(int) =
     if { n<=0 :: []
