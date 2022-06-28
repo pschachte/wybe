@@ -1664,7 +1664,7 @@ configured when Wybe is installed, but can be overridden with the `--libdir` or
 ### <a name="purity"></a>Purity
 
 Wybe code is mostly purely logical, and the Wybe compiler takes advantage of
-this.  For example, if none of the outputs of a proc call are actually used, the compiler will eliminate the call.  A proc call may also be omitted if a proc call has previously been made with the same inputs, with the compiler assuming the output(s) will be identical.  The compiler may also reorder calls however it likes, as long as all the inputs to a proc are available when the proc is called.  As long as your code is purely logical, all of these optimisations and more are perfectly safe.
+this.  For example, if none of the outputs of a proc call are actually used, the compiler will eliminate the call.  A proc call may also be omitted if a proc call with the same inputs has previously been made; in this case, the compiler will assume the output(s) will be identical.  The compiler may also reorder calls however it likes, as long as all the inputs to a proc are available when the proc is called.  As long as your code is purely logical, all of these optimisations and more are perfectly safe.
 
 However, occasionally it is important that the compiler not perform such optimisations.  For example, the `exit` command has no outputs, it is only executed for its effect (terminating the program prematurely).  In some cases, purely logical Wybe procs can be written based on impure building blocks, particularly when interfacing to code written in conventional languages.
 
@@ -1673,20 +1673,22 @@ To support such cases, the Wybe compiler provides a *purity* system, allowing yo
 Wybe supports the following three levels of purity:
 
 - *pure*
-the default purity level.  An ordinary call, subject to omission or reordering.
+the default purity level.  An ordinary procedure or function, calls to which are subject to all optimisations.
 
 - *impure*
-an impure call that should not be reordered or omitted.  Impure procs must be declared to be so, and in general, a proc that calls an impure proc must itself be impure.
+an impure procedure, calls to which should not be reordered or omitted.  Impure procs must be declared to be so, and in general, a proc that calls an impure proc must itself be impure.  The bodies of impure procs are also not optimised as extensively as pure and semipure procs.  Even calls to pure procs appearing in the bodies of impure procs will not be optimised.  This provides a way to prevent unwanted optimisation in a fine-grained way, such as for the purposes of benchmarking.
 
 - *semipure*
-a proc that behaves as impure itself, and will not be reordered or omitted, however its impurity is not "contagious".  It may be called from an ordinary, pure proc without that proc becoming impure.
+a proc that is not pure, so calls to it must not be reordered or omitted, however its impurity is not "contagious".  It may be called from an ordinary, pure proc without that proc becoming impure.  It may also call impure procs.  Note that calls to pure procs in the bodies of semipure procs are optimised as usual; it is only in the bodies of *impure* procs that calls to ordinary pure procs are not optimised.
 
 In the absence of any declaration of impurity, your procedures and functions will be assumed to be pure.  An ordinary pure proc can call a semipure proc, but if it calls an impure proc, the compiler will report an error.  You can specify that your proc is pure despite calling impure procs by explicitly promising that it is pure.
+
+Note that top-level code in any module is treated as semipure:  it may call impure procs, but calls to pure procs will be optimised as normal.
 
 Purity is managed by including one of the following modifiers, between curly braces, in the proc declaration, between the `def` keyword and the procedure or function name:
 
 - `pure`
-promise that the proc is pure, despite calling impure procs.
+explicitly promise that the proc is pure, despite calling impure procs.
 
 - `semipure`
 specify that the proc is effectively impure, meaning that calls to it are not subject to normal optimisations, but that its callers are not rendered impure by calling it.
@@ -1714,6 +1716,8 @@ force inlining of calls to this proc
 
 - `noinline`
 prevent inlining of calls to this proc
+
+Procs that are declared `impure` are never automatically inlined, however, you may explicitly declare them `inline`.
 
 If you wish to include other modifiers along with one of these, include them all between the braces, in any order, separated by commas.
 
