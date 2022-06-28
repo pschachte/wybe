@@ -1938,12 +1938,12 @@ procCallCount proc = Map.foldr (+) 0 $ procCallers proc
 -- | What is the Impurity of the given Prim?
 primImpurity :: Prim -> Compiler Impurity
 primImpurity (PrimCall _ pspec impurity _ _) = return impurity
-primImpurity (PrimHigher _ (ArgClosure pspec _ _) _)
-    = procImpurity <$> getProcDef pspec
+primImpurity (PrimHigher _ (ArgClosure pspec _ _) impurity _)
+    = max impurity . procImpurity <$> getProcDef pspec
 primImpurity (PrimHigher _ ArgVar{argVarType=HigherOrderType
-                                ProcModifiers{modifierImpurity=purity} _} _)
-    = return purity
-primImpurity (PrimHigher _ fn _)
+                    ProcModifiers{modifierImpurity=modimpurity} _} impurity _)
+    = return $ max impurity modimpurity
+primImpurity (PrimHigher _ fn _ _)
     = shouldnt $ "primImpurity of" ++ show fn
 primImpurity (PrimForeign _ _ flags _)
     = return $ flagsImpurity flags
@@ -3141,7 +3141,7 @@ data PrimVarName =
 --  loop.
 data Prim
      = PrimCall CallSiteID ProcSpec Impurity [PrimArg] GlobalFlows
-     | PrimHigher CallSiteID PrimArg [PrimArg]
+     | PrimHigher CallSiteID PrimArg Impurity [PrimArg]
      | PrimForeign Ident ProcName [Ident] [PrimArg]
      deriving (Eq,Ord,Generic)
 
@@ -3178,7 +3178,7 @@ data PrimArg
 -- |Returns a list of all arguments to a prim, including global flows
 primArgs :: Prim -> ([PrimArg], GlobalFlows)
 primArgs (PrimCall _ _ _ args gFlows) = (args, gFlows)
-primArgs (PrimHigher _ fn args)
+primArgs (PrimHigher _ fn _ args)
     = (fn:args, if isResourcefulHigherOrder $ argType fn
                 then univGlobalFlows else emptyGlobalFlows)
 primArgs (PrimForeign "lpvm" "load" _ args@[ArgGlobal info _, _])
@@ -3192,10 +3192,10 @@ primArgs prim@(PrimForeign _ _ _ args) = (args, emptyGlobalFlows)
 replacePrimArgs :: Prim -> [PrimArg] -> GlobalFlows -> Prim
 replacePrimArgs (PrimCall id pspec impurity _ _) args gFlows
     = PrimCall id pspec impurity args gFlows
-replacePrimArgs (PrimHigher id _ _) [] _
+replacePrimArgs (PrimHigher id _ _ _) [] _
     = shouldnt "replacePrimArgs of higher call with not enough args"
-replacePrimArgs (PrimHigher id _ _) (fn:args) _
-    = PrimHigher id fn args
+replacePrimArgs (PrimHigher id _ impurity _) (fn:args) _
+    = PrimHigher id fn impurity args
 replacePrimArgs (PrimForeign lang nm flags _) args _
     = PrimForeign lang nm flags args
 
@@ -3864,7 +3864,7 @@ showPrim (PrimCall id pspec _ args globalFlows) =
     show pspec ++ showArguments args
         ++ (if globalFlows == emptyGlobalFlows then "" else show globalFlows)
         ++ " #" ++ show id
-showPrim (PrimHigher id var args) =
+showPrim (PrimHigher id var _ args) =
     show var ++ showArguments args ++ " #" ++ show id
 showPrim (PrimForeign lang name flags args) =
     "foreign " ++ lang ++ " " ++ showFlags' flags

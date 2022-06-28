@@ -546,7 +546,7 @@ cgen (prim@(PrimCall callSiteID pspec _ args _):nextPrims) isLeaf = do
     -- Generate the remaining prims in the block
     cgen nextPrims' isLeaf
 
-cgen (prim@(PrimHigher cId (ArgClosure pspec closed _) args):ps) isLeaf = do
+cgen (prim@(PrimHigher cId (ArgClosure pspec closed _) _ args):ps) isLeaf = do
     pspec' <- fromMaybe pspec <$> lift2 (maybeGetClosureOf pspec)
     logCodegen $ "Compiling " ++ show prim
               ++ " as first order call to " ++ show pspec'
@@ -559,7 +559,8 @@ cgen (p:ps) isLeaf = do
     cgen ps isLeaf
 
 cgenPrim :: Prim -> Codegen ()
-cgenPrim prim@(PrimHigher callSiteId fn@ArgVar{argVarType=ty@(HigherOrderType mods _)} args) = do
+cgenPrim prim@(PrimHigher callSiteId 
+               fn@ArgVar{argVarType=ty@(HigherOrderType mods _)} _ args) = do
     logCodegen $ "--> Compiling " ++ show prim
     -- If a HO call only produces phantoms, no need to call it
     allPhantoms <- and <$> lift2 (mapM argIsPhantom $ snd $ partitionArgs args)
@@ -579,7 +580,7 @@ cgenPrim prim@(PrimHigher callSiteId fn@ArgVar{argVarType=ty@(HigherOrderType mo
         let callIns = callWybe (Just LLVMAST.Tail) fnPtr inOps
         addInstruction callIns outArgs
 
-cgenPrim prim@(PrimHigher _ fn _) =
+cgenPrim prim@(PrimHigher _ fn _ _) =
     shouldnt $ "cgen higher call to " ++ show fn
 
 cgenPrim prim@(PrimForeign "llvm" name flags args) = do
@@ -1506,7 +1507,7 @@ declareExtern (PrimForeign otherlang name _ _) =
     shouldnt $ "Don't know how to declare extern foreign function " ++ name
       ++ " in language " ++ otherlang
 
-declareExtern (PrimHigher _ var _) =
+declareExtern (PrimHigher _ var _ _) =
     shouldnt $ "Don't know how to declare extern function var " ++ show var
 
 declareExtern (PrimCall _ pspec@(ProcSpec m n _ _) _ args _) = do

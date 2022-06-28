@@ -129,7 +129,7 @@ localBodyCallees modspec body =
 localCallees :: ModSpec -> Prim -> [ProcSpec]
 localCallees modspec (PrimCall _ pspec _ args _)
   = pspec{procSpeczVersion=generalVersion}:concatMap (argRefs modspec) args
-localCallees modspec (PrimHigher _ fn args)
+localCallees modspec (PrimHigher _ fn _ args)
   = concatMap (argRefs modspec) (fn:args)
 localCallees modspec (PrimForeign _ _ _ args)
   = concatMap (argRefs modspec) args

@@ -278,7 +278,7 @@ compileSimpleStmt' impurity call@(ProcCall func _ _ args) = do
             return $ PrimCall callSiteID pSpec impurity  args' gFlows
         Higher fn -> do
             fn' <- compileHigherFunc fn
-            return $ PrimHigher callSiteID fn' args'
+            return $ PrimHigher callSiteID fn' impurity args'
 compileSimpleStmt' _ (ForeignCall lang name flags args) = do
     args' <- concat <$> mapM (placedApply compileArg) args
     return $ PrimForeign lang name flags args'

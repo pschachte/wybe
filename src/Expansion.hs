@@ -248,14 +248,14 @@ expandPrim (PrimCall id pspec impurity args gFlows) pos = do
                 else do
                     logExpansion "  Not inlinable"
                     addInstr call' pos
-expandPrim prim@(PrimHigher id fn args) pos = do
+expandPrim prim@(PrimHigher id fn impurity args) pos = do
     logExpansion $ "  Checking inlining for higher order call " ++ show prim
     inliningNow <- gets inlining
     if inliningNow
     then expandHigherOrder prim pos
     else do
         (fn':args') <- mapM expandArg $ fn:args
-        expandHigherOrder (PrimHigher id fn' args') pos
+        expandHigherOrder (PrimHigher id fn' impurity args') pos
 expandPrim (PrimForeign lang nm flags args) pos = do
     st <- get
     logExpansion $ "  Expanding " ++ show (PrimForeign lang nm flags args)
@@ -272,18 +272,19 @@ expandHigherOrder prim pos = do
     logExpansion $ "  Expanding higher call " ++ show prim
     prim' <- lift $ argExpandedPrim prim
     case prim' of
-        PrimHigher id fn args -> do
+        PrimHigher id fn impurity args -> do
             fn' <- expandArg fn
             case fn' of
                 ArgClosure pspec closed _ -> do
                     pspec' <- fromMaybe pspec <$> lift2 (maybeGetClosureOf pspec)
                     logExpansion $ "  As first order call to " ++ show pspec'
                     gFlows <- lift2 $ getProcGlobalFlows pspec
-                    expandPrim (PrimCall id pspec' Pure (closed ++ args) gFlows) pos
+                    expandPrim (PrimCall id pspec' impurity (closed ++ args)
+                                         gFlows) pos
                 _ -> do
                     args' <- mapM expandArg args
                     logExpansion $ "  As higher call to " ++ show fn'
-                    addInstr (PrimHigher id fn' args') pos
+                    addInstr (PrimHigher id fn' impurity args') pos
         _ -> expandPrim prim' pos
 
 
