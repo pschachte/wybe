@@ -16,6 +16,7 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
+    need.need<0>(need.gen#1<1><>:{impure}()) #0 @need:nn:nn
 
 
 gen#1 > {impure} (1 calls)
@@ -51,7 +52,7 @@ iota(n##0:wybe.int, outByReference #result##0:wybe.list(wybe.int))<{}; {}>:
 
 
 
-need > public {inline,semipure} (1 calls)
+need > public {impure} (1 calls)
 0: need.need<0>
 need(stmt##0:{impure}())<{}; {}>:
   AliasPairs: []
@@ -66,6 +67,9 @@ need(stmt##0:{impure}())<{}; {}>:
  
 
 
+@need.0 =    constant [1 x i64] [i64 ptrtoint (void (i64)* @"need.gen#1<1>" to i64)]
+
+
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
@@ -74,6 +78,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  void @"need.<0>"() alwaysinline   {
 entry:
+  tail call fastcc  void  @"need.need<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @need.0, i32 0, i32 0) to i64))  
   ret void 
 }
 
@@ -115,7 +120,7 @@ if.else:
 }
 
 
-define external fastcc  void @"need.need<0>"(i64  %"stmt##0") alwaysinline   {
+define external fastcc  void @"need.need<0>"(i64  %"stmt##0")    {
 entry:
   %0 = inttoptr i64 %"stmt##0" to i64* 
   %1 = load  i64, i64* %0 
