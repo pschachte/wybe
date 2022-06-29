@@ -1707,7 +1707,7 @@ If you wish to include other modifiers along with one of these, include them all
 
 ### Inlining
 
-The Wybe compiler optimises your code in some situations by replacing a proc call with its definition, while being careful not to change the meaning of the program.  The compiler uses heuristics to determine when to do this, and for the most part it is not something you need to think about.
+The Wybe compiler optimises your code in some situations by replacing a proc call with its definition, while being careful not to change the meaning of the program.  The compiler uses heuristics to determine when to do this, and for the most part it is not something you need to think about.  In general, the compiler will decide to inline small, non-recursive functions and procedures.
 
 If you wish to have finer control, you can do this by placing one of these two modifiers between curly braces between `def` and the procedure or function name:
 
@@ -1717,9 +1717,8 @@ force inlining of calls to this proc
 - `noinline`
 prevent inlining of calls to this proc
 
-Procs that are declared `impure` are never automatically inlined, however, you may explicitly declare them `inline`.
-
 If you wish to include other modifiers along with one of these, include them all between the braces, in any order, separated by commas.
+
 
 ### Foreign language interface
 
