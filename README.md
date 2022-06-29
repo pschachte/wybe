@@ -1,3 +1,5 @@
+![Wybe logo](assets/blue.svg)
+
 # The Wybe Programming Language
 
 Wybe is a programming language intended to combine the best features of
