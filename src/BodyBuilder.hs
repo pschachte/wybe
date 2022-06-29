@@ -394,16 +394,16 @@ instr' prim@(PrimForeign "llvm" "move" []
     -- can we just not generate it?
     rawInstr prim pos
     recordVarSet argvar
---     this is a bit of a hack to work around not threading a heap
---     through the code, which causes the compiler to try to reuse
---     the results of calls to alloc.  Since the mutate primitives
---     already have an output value, that should stop us from trying
---     to reuse modified structures or the results of calls to
---     access after a structure is modified, so alloc should be
---     the only problem that needs fixing.  We don't want to fix this
---     by threading a heap through, because it's fine to reorder calls
---     to alloc.
--- XXX can we git rid of this special case by making lpvm alloc "semipure"?
+-- The following equation is a bit of a hack to work around not threading a heap
+-- through the code, which causes the compiler to try to reuse the results of
+-- calls to alloc.  Since the mutate primitives already have an output value,
+-- that should stop us from trying to reuse modified structures or the results
+-- of calls to access after a structure is modified, so alloc should be the only
+-- problem that needs fixing.  We don't want to fix this by threading a heap
+-- through, because it's fine to reorder calls to alloc.  We can't handle this
+-- with impurity because if we forgot the impurity modifier on any alloc,
+-- disaster would ensue, and an impure alloc wouldn't be removed if the
+-- structure weren't needed, which we want.
 instr' prim@(PrimForeign "lpvm" "alloc" [] [_,argvar]) pos = do
     logBuild "  Leaving alloc alone"
     rawInstr prim pos
