@@ -120,7 +120,7 @@ AFTER BUILDING MAIN:
   resources       : 
   procs           : 
 
-module top-level code > {terminal,impure} (0 calls)
+module top-level code > {terminal,inline,impure} (0 calls)
 0: .<0>
 (%argc##0:wybe.int, %argv##0:wybe.array.raw_array(wybe.c_string), %?exit_code##0:wybe.int)<{}; {<<command_line.exit_code>>}>:
   AliasPairs: []
@@ -1023,7 +1023,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > {terminal,impure} (0 calls)
+module top-level code > {terminal,inline,impure} (0 calls)
 0: .<0>
 (%argc##0:wybe.int, %argv##0:wybe.array.raw_array(wybe.c_string), %?exit_code##0:wybe.int)<{}; {<<command_line.exit_code>>}>:
   AliasPairs: []
@@ -1072,7 +1072,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external ccc  i64 @main(i64  %"argc##0", i64  %"argv##0")    {
+define external ccc  i64 @main(i64  %"argc##0", i64  %"argv##0") alwaysinline   {
 entry:
   store  i64 %"argc##0", i64* @"resource#command_line.argc" 
   store  i64 %"argv##0", i64* @"resource#command_line.argv" 

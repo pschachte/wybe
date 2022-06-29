@@ -120,7 +120,6 @@ optimiseProcDefTD pspec def = do
 --  marked to be inlined, don't second guess that.  If it's impure, don't
 --  mark it for inlining, but don't override if the user declared it inline.
 decideInlining :: ProcDef -> Compiler ProcDef
-decideInlining def | procImpurity def > Semipure  = return def
 decideInlining def
     |  NoFork == bodyFork body && procInlining def == MayInline = do
     logOptimise $ "Considering inline of " ++ procName def

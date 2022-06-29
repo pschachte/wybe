@@ -19,18 +19,18 @@ module top-level code > public {inline,semipure} (0 calls)
     need.gen#1<0> #0 @need:nn:nn
 
 
-gen#1 > {impure} (1 calls)
+gen#1 > {inline,impure} (1 calls)
 0: need.gen#1<0>
 gen#1()<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     need.iota<0>(1000:wybe.int, outByReference l##0:wybe.list(wybe.int)) #0 @need:nn:nn
-gen#1 > {impure} (1 calls)
+gen#1 > {inline,impure} (1 calls)
 1: need.gen#1<1>
 gen#1()<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    need.gen#1<0> #0
+    need.iota<0>(1000:wybe.int, outByReference tmp#0##0:wybe.list(wybe.int)) #1 @need:nn:nn
 
 
 iota > public (2 calls)
@@ -80,7 +80,7 @@ entry:
 }
 
 
-define external fastcc  void @"need.gen#1<0>"()    {
+define external fastcc  void @"need.gen#1<0>"() alwaysinline   {
 entry:
   %0 = alloca i64 
    call fastcc  void  @"need.iota<0>"(i64  1000, i64*  %0)  
@@ -88,9 +88,10 @@ entry:
 }
 
 
-define external fastcc  void @"need.gen#1<1>"(i64  %"#env##0")    {
+define external fastcc  void @"need.gen#1<1>"(i64  %"#env##0") alwaysinline   {
 entry:
-  tail call fastcc  void  @"need.gen#1<0>"()  
+  %0 = alloca i64 
+   call fastcc  void  @"need.iota<0>"(i64  1000, i64*  %0)  
   ret void 
 }
 

@@ -546,12 +546,14 @@ cgen (prim@(PrimCall callSiteID pspec _ args _):nextPrims) isLeaf = do
     -- Generate the remaining prims in the block
     cgen nextPrims' isLeaf
 
-cgen (prim@(PrimHigher cId (ArgClosure pspec closed _) _ args):ps) isLeaf = do
+cgen (prim@(PrimHigher cId (ArgClosure pspec closed _) impurity args):ps) isLeaf
+ = do
     pspec' <- fromMaybe pspec <$> lift2 (maybeGetClosureOf pspec)
+    globalFlows <- lift2 $ getProcGlobalFlows pspec'          
     logCodegen $ "Compiling " ++ show prim
               ++ " as first order call to " ++ show pspec'
               ++ " closed over " ++ show closed
-    cgen (PrimCall cId pspec' Pure (closed ++ args) univGlobalFlows : ps) isLeaf
+    cgen (PrimCall cId pspec' impurity (closed ++ args) globalFlows : ps) isLeaf
 
 cgen [] _ = return ()
 cgen (p:ps) isLeaf = do
