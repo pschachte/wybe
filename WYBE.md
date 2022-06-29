@@ -1,4 +1,7 @@
+![Wybe logo](assets/grey.svg)
+
 # The Wybe Programming Language
+
 
 The Wybe programming language is intended to be easy to learn and easy to use,
 but powerful and efficient enough for practical use.  It is intended to
