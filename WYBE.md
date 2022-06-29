@@ -1,4 +1,4 @@
-![Wybe logo](assets/blue.svg)
+![Wybe logo](assets/logo/blue.svg)
 
 # The Wybe Programming Language
 
