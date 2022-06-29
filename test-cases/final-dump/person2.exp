@@ -19,7 +19,7 @@ AFTER EVERYTHING:
   submodules      : person2.person
   procs           : 
 
-module top-level code > public {inline,impure} (0 calls)
+module top-level code > public {inline,semipure} (0 calls)
 0: person2.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []

@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : counter: fromList [(break_in_loop_in_do.counter,wybe.int = 10 @break_in_loop_in_do:nn:nn @break_in_loop_in_do:nn:nn)]
   procs           : 
 
-module top-level code > public {impure} (0 calls)
+module top-level code > public {semipure} (0 calls)
 0: break_in_loop_in_do.<0>
 ()<{<<wybe.io.io>>}; {<<break_in_loop_in_do.counter>>, <<wybe.io.io>>}>:
   AliasPairs: []

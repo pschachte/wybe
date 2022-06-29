@@ -419,7 +419,7 @@ normaliseModMain = do
     let initBody = List.reverse stmts
     logNormalise $ "Top-level statements = " ++ show initBody
     unless (List.null stmts)
-      $ normaliseItem $ ProcDecl Public (setImpurity Impure defaultProcModifiers)
+      $ normaliseItem $ ProcDecl Public (setImpurity Semipure defaultProcModifiers)
                         (ProcProto "" [] resources) initBody Nothing
 
 

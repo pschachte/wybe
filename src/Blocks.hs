@@ -501,7 +501,7 @@ codegenForkBody name body =
 -- are position checked with the respective prototype, eliminating arguments
 -- which do not eventually appear in the prototype.
 cgen :: [Prim] -> Bool -> Codegen ()
-cgen (prim@(PrimCall callSiteID pspec args _):nextPrims) isLeaf = do
+cgen (prim@(PrimCall callSiteID pspec _ args _):nextPrims) isLeaf = do
     logCodegen $ "--> Compiling " ++ show prim
     let nm = LLVMAST.Name $ toSBString $ show pspec
     -- Find the prototype of the pspec being called
@@ -546,12 +546,14 @@ cgen (prim@(PrimCall callSiteID pspec args _):nextPrims) isLeaf = do
     -- Generate the remaining prims in the block
     cgen nextPrims' isLeaf
 
-cgen (prim@(PrimHigher cId (ArgClosure pspec closed _) args):ps) isLeaf = do
+cgen (prim@(PrimHigher cId (ArgClosure pspec closed _) impurity args):ps) isLeaf
+ = do
     pspec' <- fromMaybe pspec <$> lift2 (maybeGetClosureOf pspec)
+    globalFlows <- lift2 $ getProcGlobalFlows pspec'          
     logCodegen $ "Compiling " ++ show prim
               ++ " as first order call to " ++ show pspec'
               ++ " closed over " ++ show closed
-    cgen (PrimCall cId pspec' (closed ++ args) univGlobalFlows : ps) isLeaf
+    cgen (PrimCall cId pspec' impurity (closed ++ args) globalFlows : ps) isLeaf
 
 cgen [] _ = return ()
 cgen (p:ps) isLeaf = do
@@ -559,7 +561,8 @@ cgen (p:ps) isLeaf = do
     cgen ps isLeaf
 
 cgenPrim :: Prim -> Codegen ()
-cgenPrim prim@(PrimHigher callSiteId fn@ArgVar{argVarType=ty@(HigherOrderType mods _)} args) = do
+cgenPrim prim@(PrimHigher callSiteId 
+               fn@ArgVar{argVarType=ty@(HigherOrderType mods _)} _ args) = do
     logCodegen $ "--> Compiling " ++ show prim
     -- If a HO call only produces phantoms, no need to call it
     allPhantoms <- and <$> lift2 (mapM argIsPhantom $ snd $ partitionArgs args)
@@ -579,7 +582,7 @@ cgenPrim prim@(PrimHigher callSiteId fn@ArgVar{argVarType=ty@(HigherOrderType mo
         let callIns = callWybe (Just LLVMAST.Tail) fnPtr inOps
         addInstruction callIns outArgs
 
-cgenPrim prim@(PrimHigher _ fn _) =
+cgenPrim prim@(PrimHigher _ fn _ _) =
     shouldnt $ "cgen higher call to " ++ show fn
 
 cgenPrim prim@(PrimForeign "llvm" name flags args) = do
@@ -1237,7 +1240,7 @@ addExternClosure ps@(ProcSpec mod _ _ _) = do
     thisMod <- lift2 getModuleSpec
     fileMod <- lift2 $ getModule modRootModSpec
     unless (thisMod == mod || maybe False (`List.isPrefixOf` mod) fileMod)
-        $ addExtern $ PrimCall 0 ps args univGlobalFlows
+        $ addExtern $ PrimCall 0 ps Pure args univGlobalFlows
 
 
 addStringConstant :: String -> Codegen (LLVMAST.Type, C.Constant)
@@ -1506,10 +1509,10 @@ declareExtern (PrimForeign otherlang name _ _) =
     shouldnt $ "Don't know how to declare extern foreign function " ++ name
       ++ " in language " ++ otherlang
 
-declareExtern (PrimHigher _ var _) =
+declareExtern (PrimHigher _ var _ _) =
     shouldnt $ "Don't know how to declare extern function var " ++ show var
 
-declareExtern (PrimCall _ pspec@(ProcSpec m n _ _) args _) = do
+declareExtern (PrimCall _ pspec@(ProcSpec m n _ _) _ args _) = do
     let (inArgs,outArgs) = partitionArgs args
     retty <- primReturnType outArgs
     fnargs <- mapM makeExArg $ zip [1..] inArgs

@@ -1,0 +1,11 @@
+# force computation of unneeded value
+
+pub def {semipure} need(stmt:{impure}()) {!stmt}
+
+pub def iota(n:int):list(int) =
+    if { n<=0 :: []
+       | else :: [n|iota(n-1)]
+    }
+
+# the call to iota will be made even though the output is unused
+!need {impure}{?l=iota(1000)}

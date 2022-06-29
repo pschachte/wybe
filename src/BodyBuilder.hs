@@ -394,16 +394,16 @@ instr' prim@(PrimForeign "llvm" "move" []
     -- can we just not generate it?
     rawInstr prim pos
     recordVarSet argvar
---     this is a bit of a hack to work around not threading a heap
---     through the code, which causes the compiler to try to reuse
---     the results of calls to alloc.  Since the mutate primitives
---     already have an output value, that should stop us from trying
---     to reuse modified structures or the results of calls to
---     access after a structure is modified, so alloc should be
---     the only problem that needs fixing.  We don't want to fix this
---     by threading a heap through, because it's fine to reorder calls
---     to alloc.
--- XXX can we git rid of this special case by making lpvm alloc "impure"?
+-- The following equation is a bit of a hack to work around not threading a heap
+-- through the code, which causes the compiler to try to reuse the results of
+-- calls to alloc.  Since the mutate primitives already have an output value,
+-- that should stop us from trying to reuse modified structures or the results
+-- of calls to access after a structure is modified, so alloc should be the only
+-- problem that needs fixing.  We don't want to fix this by threading a heap
+-- through, because it's fine to reorder calls to alloc.  We can't handle this
+-- with impurity because if we forgot the impurity modifier on any alloc,
+-- disaster would ensue, and an impure alloc wouldn't be removed if the
+-- structure weren't needed, which we want.
 instr' prim@(PrimForeign "lpvm" "alloc" [] [_,argvar]) pos = do
     logBuild "  Leaving alloc alone"
     rawInstr prim pos
@@ -485,10 +485,10 @@ mkInput arg@ArgUndef{} = arg
 
 
 argExpandedPrim :: Prim -> BodyBuilder Prim
-argExpandedPrim call@(PrimCall id pspec args gFlows) = do
+argExpandedPrim call@(PrimCall id pspec impurity args gFlows) = do
     args' <- transformUnneededArgs pspec args
-    return $ PrimCall id pspec args' gFlows
-argExpandedPrim call@(PrimHigher id fn args) = do
+    return $ PrimCall id pspec impurity args' gFlows
+argExpandedPrim call@(PrimHigher id fn impurity args) = do
     logBuild $ "Expanding Higher call " ++ show call
     fn' <- expandArg fn
     case fn' of
@@ -498,11 +498,11 @@ argExpandedPrim call@(PrimHigher id fn args) = do
             params <- lift $ getPrimParams pspec'
             let args' = zipWith (setArgType . primParamType) params args
             gFlows <- lift $ getProcGlobalFlows pspec
-            argExpandedPrim $ PrimCall id pspec' (clsd ++ args') gFlows
+            argExpandedPrim $ PrimCall id pspec' impurity (clsd ++ args') gFlows
         _ -> do
             logBuild $ "Leaving as higher call to " ++ show fn'
             args' <- mapM expandArg args
-            return $ PrimHigher id fn' args'
+            return $ PrimHigher id fn' impurity args'
 argExpandedPrim (PrimForeign lang nm flags args) = do
     args' <- mapM expandArg args
     return $ simplifyForeign lang nm flags args'
@@ -678,10 +678,11 @@ splitArgsByMode = List.partition (isInputFlow . argFlowDirection)
 
 
 canonicalisePrim :: Prim -> Prim
-canonicalisePrim (PrimCall _ nm args gFlows) =
-    PrimCall 0 nm (canonicaliseArg . mkInput <$> args) gFlows
-canonicalisePrim (PrimHigher _ var args) =
-    PrimHigher 0 (canonicaliseArg $ mkInput var) $ canonicaliseArg . mkInput <$> args
+canonicalisePrim (PrimCall _ nm impurity args gFlows) =
+    PrimCall 0 nm impurity (canonicaliseArg . mkInput <$> args) gFlows
+canonicalisePrim (PrimHigher _ var impurity args) =
+    PrimHigher 0 (canonicaliseArg $ mkInput var) impurity
+               $ canonicaliseArg . mkInput <$> args
 canonicalisePrim (PrimForeign lang op flags args) =
     PrimForeign lang op flags $ List.map (canonicaliseArg . mkInput) args
 
@@ -703,8 +704,8 @@ canonicaliseArg (ArgUndef _)        = ArgUndef AnyType
 
 
 validateInstr :: Prim -> BodyBuilder ()
-validateInstr p@(PrimCall _ _ args _) = mapM_ (validateArg p) args
-validateInstr p@(PrimHigher _ fn args) = mapM_ (validateArg p) $ fn:args
+validateInstr p@(PrimCall _ _ _ args _) = mapM_ (validateArg p) args
+validateInstr p@(PrimHigher _ fn _ args) = mapM_ (validateArg p) $ fn:args
 validateInstr p@(PrimForeign _ _ _ args) = mapM_ (validateArg p) args
 
 

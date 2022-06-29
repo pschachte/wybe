@@ -117,7 +117,8 @@ optimiseProcDefTD pspec def = do
 ----------------------------------------------------------------
 
 -- |Decide whether to inline the proc and mark it if so.  If it's already
---  marked to be inlined, don't second guess that.
+--  marked to be inlined, don't second guess that.  If it's impure, don't
+--  mark it for inlining, but don't override if the user declared it inline.
 decideInlining :: ProcDef -> Compiler ProcDef
 decideInlining def
     |  NoFork == bodyFork body && procInlining def == MayInline = do
@@ -157,8 +158,8 @@ bodyCost pprims = sum <$> mapM (primCost . content) pprims
 --  cost of the arguments, and a test instruction as free.
 primCost :: Prim -> Compiler Int
 primCost (PrimForeign "llvm" _ _ _) = return 1
-primCost (PrimCall _ _ args _)      = (1+) . sum <$> mapM argCost args
-primCost (PrimHigher _ fn args)     = (1+) . sum <$> mapM argCost (fn:args)
+primCost (PrimCall _ _ _ args _)    = (1+) . sum <$> mapM argCost args
+primCost (PrimHigher _ fn _ args)   = (1+) . sum <$> mapM argCost (fn:args)
 primCost (PrimForeign _ _ _ args)   = (1+) . sum <$> mapM argCost args
 
 
@@ -263,12 +264,12 @@ updateForkGlobalFlows sccFlows (PrimFork var ty final bodies) =
 -- If the prim is a call to a proc in the Set of ProcSpecs, we update the
 -- GlobalFlows to the intersection of the given GlobalFlows and the current
 updatePrimGlobalFlows :: Map ProcSpec GlobalFlows -> Prim -> Compiler Prim
-updatePrimGlobalFlows sccFlows (PrimCall cID pspec args gFlows) = 
+updatePrimGlobalFlows sccFlows (PrimCall cID pspec impurity args gFlows) = 
     case Map.lookup pspec sccFlows of
-        Just newFlows -> return $ PrimCall cID pspec args newFlows
+        Just newFlows -> return $ PrimCall cID pspec impurity args newFlows
         Nothing -> do
             flows <- getProcGlobalFlows pspec
-            return $ PrimCall cID pspec args flows
+            return $ PrimCall cID pspec impurity args flows
 updatePrimGlobalFlows _ prim = return prim
 
 

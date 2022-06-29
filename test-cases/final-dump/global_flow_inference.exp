@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : res: fromList [(global_flow_inference.res,wybe.int = 1 @global_flow_inference:nn:nn @global_flow_inference:nn:nn)]
   procs           : 
 
-module top-level code > public {inline,impure} (0 calls)
+module top-level code > public {inline,semipure} (0 calls)
 0: global_flow_inference.<0>
 ()<{}; {<<global_flow_inference.res>>}>:
   AliasPairs: []

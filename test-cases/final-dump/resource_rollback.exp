@@ -10,7 +10,7 @@ AFTER EVERYTHING:
                     ser: fromList [(resource_rollback.ser,wybe.int = 0 @resource_rollback:nn:nn @resource_rollback:nn:nn)]
   procs           : 
 
-module top-level code > public {impure} (0 calls)
+module top-level code > public {semipure} (0 calls)
 0: resource_rollback.<0>
 ()<{<<wybe.io.io>>}; {<<resource_rollback.res>>, <<resource_rollback.ser>>, <<wybe.io.io>>}>:
   AliasPairs: []
