@@ -47,7 +47,7 @@ module AST (
   -- *AST types
   Module(..), isRootModule, ModuleInterface(..), ModuleImplementation(..), InterfaceHash, PubProcInfo(..),
   ImportSpec(..), importSpec, Pragma(..), addPragma,
-  descendentModules, sameOriginModules, 
+  descendentModules, sameOriginModules,
   refersTo,
   enterModule, reenterModule, exitModule, reexitModule, inModule,
   emptyInterface, emptyImplementation,
@@ -101,7 +101,7 @@ module AST (
   addSimpleResource, lookupResource,
   specialResources, specialResourcesSet, isSpecialResource,
   publicResource, resourcefulName,
-  ProcModifiers(..), defaultProcModifiers,
+  ProcModifiers(..), unifyProcMods, defaultProcModifiers,
   setDetism, setInline, setImpurity, setVariant,
   ProcVariant(..), Inlining(..), Impurity(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
@@ -911,7 +911,7 @@ lookupType :: String -> OptPos -> TypeSpec -> Compiler TypeSpec
 lookupType context pos ty = do
     (msgs, ty') <- lookupType' context pos ty
     mapM_ queueMessage msgs
-    return ty' 
+    return ty'
 
 
 -- |Find the definition of the specified type visible from the current module.
@@ -923,7 +923,7 @@ lookupType' _ _ ty@TypeVariable{} = return ([], ty)
 lookupType' _ _ ty@Representation{} = return ([], ty)
 lookupType' context pos ty@HigherOrderType{higherTypeParams=typeFlows} = do
     (msgs, types) <- unzip <$> mapM (lookupType' context pos . typeFlowType) typeFlows
-    return (concat msgs, 
+    return (concat msgs,
             ty{higherTypeParams=zipWith TypeFlow types (typeFlowMode <$> typeFlows)})
 lookupType' context pos ty@(TypeSpec [] typename args)
   | typename == currentModuleAlias = do
@@ -1094,6 +1094,25 @@ data ProcModifiers = ProcModifiers {
     modifierVariant::ProcVariant,  -- ^ Is proc actually a constructor?
     modifierResourceful::Bool      -- ^ Can this procedure use resources?
 } deriving (Eq, Ord, Generic)
+
+
+-- | Reconcile declared proc modifiers of a proc (1st arg) with the actual
+--   modifiers provided (2nd), returning Just the actual modifiers, if they're
+--   reconcilable.  They are reconcilable if the expected impurity is at least
+--   as impure as the actual impurity, the type is expected to be resourceful if
+--   it actuall y is (but it need not be resourceful if it is expected to be).
+--   If not, return Nothing.  For the moment, we require the determinism to be
+--   exactly as expected, though this could be more flexible.
+unifyProcMods :: ProcModifiers -> ProcModifiers -> Maybe ProcModifiers
+unifyProcMods declMods actualMods =
+    if modifierDetism declMods == modifierDetism declMods -- XXX be more flexible
+        && modifierImpurity actualMods <= modifierImpurity declMods
+        && (not (modifierResourceful actualMods)
+             || modifierResourceful declMods)
+    then Just actualMods
+    else Nothing
+
+
 
 
 data Inlining = Inline | MayInline | NoInline

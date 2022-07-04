@@ -34,7 +34,6 @@ import           Util
 import           Config
 import           Snippets
 import           Blocks              (llvmMapBinop, llvmMapUnop)
-import           Debug.Trace
 
 
 ----------------------------------------------------------------
@@ -666,7 +665,9 @@ constrainType reason constraint ty = do
 
 -- |Unify two types, returning a type that describes all instances of both input
 -- types.  If this produces an invalid type, the specified type error describes
--- the error.  Unifying types may have the effect of binding variables.
+-- the error.  Unifying types may have the effect of binding variables.  After
+-- unification, the second type must be equivalent to the first, or the second
+-- may be a subtype of the first, otherwise unification fails.
 unifyTypes :: TypeError -> TypeSpec -> TypeSpec -> Typed TypeSpec
 unifyTypes reason t1 t2 = do
     let pos = typeErrorPos reason
@@ -722,18 +723,23 @@ unifyTypes' reason ty1@(TypeSpec m1 n1 ps1) ty2@(TypeSpec m2 n2 ps2)
           | m2 `isSuffixOf` m1 = (True,  m1)
           | otherwise          = (False, [])
 unifyTypes' reason (HigherOrderType mods1 ps1) (HigherOrderType mods2 ps2)
-    | sameLength ps1Tys ps2Tys
-            && mods1' == mods2'
+    | sameLength ps1Tys ps2Tys && isJust mods
             && and (zipWith (==) ps1Fls ps2Fls) = do
         logTyped $ "Unifying higher types " ++ show ps1Tys ++ "; " ++ show ps2Tys
-        HigherOrderType mods1' . zipWith (flip TypeFlow) ps1Fls <$>
+        HigherOrderType (fromJust mods) . zipWith (flip TypeFlow) ps1Fls <$>
             zipWithM (unifyTypes reason) ps1Tys ps2Tys
-    | otherwise =
-        typeError reason >> return InvalidType
+    | otherwise = do
+        logTyped $ "Can't unify higher types " ++ show (HigherOrderType mods1 ps1)
+                   ++ " and " ++ show (HigherOrderType mods2 ps2)
+        logTyped $ "Impurities " ++ show (modifierImpurity mods1')
+                  ++ " and " ++ show (modifierImpurity mods2')
+        invalidTypeError reason
     where
         (mods1', (ps1Tys, ps1Fls)) = typeFlowsToSemiDet mods1 ps1 ps2
         (mods2', (ps2Tys, ps2Fls)) = typeFlowsToSemiDet mods2 ps2 ps1
-unifyTypes' reason _ _ = typeError reason >> return InvalidType
+        mods = unifyProcMods mods1' mods2'
+unifyTypes' reason _ _ = invalidTypeError reason
+
 
 invalidTypeError :: TypeError -> Typed TypeSpec
 invalidTypeError reason = typeError reason >> return InvalidType
@@ -1388,7 +1394,7 @@ callInfos vars pstmt = do
                 couldBeTest   = (boolType == varTy || varTy == AnyType)
                              && List.null args && not resful
             if couldBeVar && (couldBeHigher || couldBeTest)
-            then let var = varGet name 
+            then let var = varGet name
                  in return $ StmtTypings pstmt $ [HigherInfo var | couldBeHigher]
                                               ++ [TestInfo var | couldBeTest]
             else do
@@ -1398,7 +1404,7 @@ callInfos vars pstmt = do
                 defs <- lift $ mapM getProcDef procs
                 firstInfos <- zipWithM firstInfo defs procs
                 return $ StmtTypings pstmt firstInfos
-        ProcCall (Higher fn) _ _ _ -> 
+        ProcCall (Higher fn) _ _ _ ->
             return $ StmtTypings pstmt [HigherInfo $ content fn]
         _ ->
           shouldnt $ "callProcInfos with non-call statement "
@@ -1589,7 +1595,7 @@ matchTypes caller callee pos _ callTypes callFlows
             ++ " with type " ++ show callTFs
     typing <-
         getTyping $ case fnTy of
-            HigherOrderType mods tfs -> 
+            HigherOrderType mods tfs ->
                 -- This handles the reification of higher order tests <-> bool fns
                 -- For first order cases, see `boolFnToTest' and `testToBoolFn'
                 let nCallTFs = length callTFs
@@ -1606,13 +1612,13 @@ matchTypes caller callee pos _ callTypes callFlows
                 in if nCallTFs == length tfs'
                 then do
                     unifyTypeList' callee pos callTypes (typeFlowType <$> tfs')
-                    zipWith3M_ (\f1 f2 i -> 
+                    zipWith3M_ (\f1 f2 i ->
                         unless (f1 == f2)
                             $ typeError $ ReasonHigherFlow caller callee i f1 f2 pos)
                         (typeFlowMode <$> callTFs) (typeFlowMode <$> tfs) [1..]
                 else typeError $ ReasonArity caller callee pos nCallTFs (length tfs')
             _ ->
-                void $ getTyping 
+                void $ getTyping
                      $ unifyTypes (ReasonHigher caller callee pos)
                         fnTy $ HigherOrderType defaultProcModifiers callTFs
     let typing' = snd typing
@@ -1650,10 +1656,10 @@ matchTypeList _ _ _ info = shouldnt $ "matchTypeList on " ++ show info
 
 
 
-unifyTypeList' :: ProcName -> OptPos -> [TypeSpec] -> [TypeSpec] -> Typed [TypeSpec]
-unifyTypeList' callee pos callerTypes calleeTypes
-    = zipWith3M (unifyTypes . flip (ReasonArgType False callee) pos)
-                        [1..] callerTypes calleeTypes
+unifyTypeList' :: ProcName -> OptPos -> [TypeSpec] -> [TypeSpec]
+               -> Typed [TypeSpec]
+unifyTypeList' callee pos =
+     zipWith3M (unifyTypes . flip (ReasonArgType False callee) pos) [1..]
 
 
 invalidType :: TypeSpec -> Bool
@@ -2055,7 +2061,7 @@ modecheckStmt m name defPos assigned detism final
                         modecheckStmt m name defPos assigned detism final
                             (ForeignCall "llvm" "move" [] [arg2, arg1]) pos
                     _ -> do
-                        logTyped $ "Mode errors in call"
+                        logTyped "Mode errors in call"
                         typeError $ ReasonUndefinedFlow cname pos
                         return ([],assigned)
 modecheckStmt m name defPos assigned detism final

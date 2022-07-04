@@ -1,4 +1,4 @@
-resource maximum:int 
+resource maximum:int
 
 def take_max(i:int) use !maximum { ?maximum = max(i, maximum) }
 
@@ -21,10 +21,24 @@ use maximum in {
     !map({resource}{
         use maximum in {
             ?maximum = -1000
-            !map(take_max, @1) 
+            !map(take_max, @1)
             !print("> "); !println(maximum)
         }
         !take_max(length(@1))
     }, matrix)
     !println(maximum)
 }
+
+def my_map(p:{resource}(T), lst:list(T)) {
+    for ?e in lst { !p(e) }
+}
+
+def ignore(x:T) { pass }
+
+use maximum in {
+    ?maximum = 0
+    !my_map(take_max, [1,3,5,3,1])
+    !println(maximum)
+}
+
+!my_map(ignore, [1,3,5,3,1])
