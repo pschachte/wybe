@@ -281,14 +281,14 @@ flattenStmt' stmt@(ProcCall fn@(First [] "=" id) callDetism res [arg1,arg2]) pos
     logFlatten $ "Flattening assignment with arg1 outputs? " ++ show arg1outs
                  ++ " and arg2 outputs? " ++ show arg2outs
     case (arg1content, arg2content) of
-      (Fncall mod name args, _)
+      (Fncall mod name bang args, _)
         | not arg1outs && arg2outs -> do
-        let stmt' = ProcCall (First mod name Nothing) Det False (args++[arg2])
+        let stmt' = ProcCall (First mod name Nothing) Det bang (args++[arg2])
         flattenStmt stmt' pos detism
-      (_, Fncall mod name args)
+      (_, Fncall mod name bang args)
         | not arg2outs && arg1outs -> do
         (arg1':args') <- flattenStmtArgs (arg1:args) pos
-        emit pos $ ProcCall (First mod name Nothing) Det False (args'++[arg1'])
+        emit pos $ ProcCall (First mod name Nothing) Det bang (args'++[arg1'])
         flushPostponed
       (_,_) | callDetism == Det
                 && (varCheck arg1content arg2outs || varCheck arg2content arg1outs)
@@ -595,8 +595,8 @@ flattenExp (CaseExp pexpr cases deflt) ty castFrom pos = do
     pexpr' <- flattenPExp pexpr
     flattenStmt (translateExpCases pexpr' resultName cases deflt) pos Det
     return $ maybePlace (Var resultName ParamIn Ordinary) pos
-flattenExp (Fncall mod name exps) ty castFrom pos = do
-    let stmtBuilder = ProcCall (First mod name Nothing) Det False
+flattenExp (Fncall mod name bang exps) ty castFrom pos = do
+    let stmtBuilder = ProcCall (First mod name Nothing) Det bang
     flattenCall stmtBuilder False ty castFrom pos exps
 flattenExp (ForeignFn lang name flags exps) ty castFrom pos = do
     flattenCall (ForeignCall lang name flags) True ty castFrom pos exps

@@ -335,7 +335,7 @@ uniquenessCheckExp (CondExp stmt e1 e2) pos =
     (placedApply uniquenessCheckStmt stmt `withDetism` SemiDet
      >> placedApply uniquenessCheckExp e1)
     `joinUniqueness` placedApply uniquenessCheckExp e2
-uniquenessCheckExp (Fncall _ _ exps) pos =
+uniquenessCheckExp (Fncall _ _ _ exps) pos =
     mapM_  (placedApply uniquenessCheckExp) exps
 uniquenessCheckExp (ForeignFn _ _ _ exps) pos =
     mapM_  (placedApply uniquenessCheckExp) exps

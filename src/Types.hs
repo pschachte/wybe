@@ -1612,8 +1612,7 @@ matchTypes caller callee pos _ callTypes callFlows
                         (typeFlowMode <$> callTFs) (typeFlowMode <$> tfs) [1..]
                 else typeError $ ReasonArity caller callee pos nCallTFs (length tfs')
             _ ->
-                void $ getTyping 
-                     $ unifyTypes (ReasonHigher caller callee pos)
+                void $ unifyTypes (ReasonHigher caller callee pos)
                         fnTy $ HigherOrderType defaultProcModifiers callTFs
     let typing' = snd typing
     let errs = typingErrs typing'

@@ -1148,10 +1148,10 @@ termToExp (Call pos [] "^" ParamIn [exp,op]) = do
     exp' <- termToExp exp
     op'  <- termToExp op
     case op' of
-        Placed (Fncall mod fn args) _
-            -> return $ Placed (Fncall mod fn (exp':args)) pos
+        Placed (Fncall mod fn False args) _
+            -> return $ Placed (Fncall mod fn False (exp':args)) pos
         Placed (Var var ParamIn Ordinary) _
-            -> return $ Placed (Fncall [] var [exp']) pos
+            -> return $ Placed (Fncall [] var False [exp']) pos
         _ -> syntaxError pos "invalid second argument to '^'"
 termToExp (Call pos [] "@" flow exps) = do
     exps' <- mapM termToExp exps
@@ -1192,8 +1192,11 @@ termToExp (Call pos [] sep ParamIn [])
     syntaxError pos "invalid separated expression"
 termToExp (Call pos [] var flow []) = -- looks like a var; assume it is
     return $ Placed (Var var flow Ordinary) pos
-termToExp (Call pos mod fn flow args) =
-    (`Placed` pos) . Fncall mod fn <$> mapM termToExp args
+termToExp (Call pos mod fn flow args)
+  | flow == ParamOut = 
+    syntaxError pos $ "invalid function call prefix " ++ flowPrefix flow
+  | otherwise = 
+    (`Placed` pos) . Fncall mod fn (flow == ParamInOut) <$> mapM termToExp args
 termToExp (Foreign pos lang inst flags args) =
     (`Placed` pos) . ForeignFn lang inst flags <$> mapM termToExp args
 termToExp (IntConst pos num) = Right $ Placed (IntValue num) pos

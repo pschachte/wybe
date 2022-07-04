@@ -2459,7 +2459,7 @@ foldExp' sfn efn val (CondExp stmt e1 e2) pos =
     let val1 = defaultPlacedApply (foldStmt sfn efn val) pos stmt
         val2 = placedApply (foldExp sfn efn val1) e1
     in         defaultPlacedApply (foldExp sfn efn val2) pos e2
-foldExp' sfn efn val (Fncall _ _ exps) pos = foldExps sfn efn pos val exps
+foldExp' sfn efn val (Fncall _ _ _ exps) pos = foldExps sfn efn pos val exps
 foldExp' sfn efn val (ForeignFn _ _ _ exps) pos = foldExps sfn efn pos val exps
 foldExp' sfn efn val (CaseExp exp cases deflt) pos =
     let val1 = defaultPlacedApply (foldExp sfn efn val) pos exp
@@ -2957,7 +2957,8 @@ data Exp
       | Where [Placed Stmt] (Placed Exp)
       | DisjExp (Placed Exp) (Placed Exp)
       | CondExp (Placed Stmt) (Placed Exp) (Placed Exp)
-      | Fncall ModSpec ProcName [Placed Exp]
+      | Fncall ModSpec ProcName Bool [Placed Exp]
+      -- ^Bool indicates if the fncall has a !
       | ForeignFn Ident ProcName [Ident] [Placed Exp]
       --- | An expression that matches the first expression against each of the
       --  fst expressions in the list, returning the value of the snd expression
@@ -3337,12 +3338,12 @@ trustArgInt arg = trustFromJust
 
 -- |Convert a statement read as an expression to a Stmt.
 expToStmt :: Exp -> Stmt
-expToStmt (Fncall [] "&" args) = And $ List.map (fmap expToStmt) args
-expToStmt (Fncall [] "|"  args) = Or (List.map (fmap expToStmt) args) Nothing Nothing
-expToStmt (Fncall [] "~" [arg]) = Not $ fmap expToStmt arg
-expToStmt (Fncall [] "~" args) = shouldnt $ "non-unary 'not' " ++ show args
-expToStmt (Fncall maybeMod name args) =
-    ProcCall (First maybeMod name Nothing) Det False args
+expToStmt (Fncall [] "&" False args) = And $ List.map (fmap expToStmt) args
+expToStmt (Fncall [] "|" False args) = Or (List.map (fmap expToStmt) args) Nothing Nothing
+expToStmt (Fncall [] "~" False [arg]) = Not $ fmap expToStmt arg
+expToStmt (Fncall [] "~" False args) = shouldnt $ "non-unary 'not' " ++ show args
+expToStmt (Fncall maybeMod name bang args) =
+    ProcCall (First maybeMod name Nothing) Det bang args
 expToStmt (ForeignFn lang name flags args) =
     ForeignCall lang name flags args
 expToStmt (Var name ParamIn _) = ProcCall (First [] name Nothing) Det False []
@@ -3351,8 +3352,8 @@ expToStmt expr = shouldnt $ "non-Fncall expr " ++ show expr
 
 
 procCallToExp :: Stmt -> Exp
-procCallToExp (ProcCall (First maybeMod name Nothing) _ _ args) =
-    Fncall maybeMod name args
+procCallToExp (ProcCall (First maybeMod name Nothing) _ bang args) =
+    Fncall maybeMod name bang args
 procCallToExp stmt =
     shouldnt $ "converting non-proccall to expr " ++ showStmt 4 stmt
 
@@ -3376,7 +3377,7 @@ expOutputs (Typed expr _ _) = expOutputs expr
 expOutputs (DisjExp pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
 expOutputs (Where _ pexp) = expOutputs $ content pexp
 expOutputs (CondExp _ pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
-expOutputs (Fncall _ _ args) = pexpListOutputs args
+expOutputs (Fncall _ _ _ args) = pexpListOutputs args
 expOutputs (ForeignFn _ _ _ args) = pexpListOutputs args
 expOutputs (CaseExp _ cases deflt) =
     pexpListOutputs $ maybe id (:) deflt (snd <$> cases)
@@ -3406,7 +3407,7 @@ expInputs (Typed expr _ _) = expInputs expr
 expInputs (Where _ pexp) = expInputs $ content pexp
 expInputs (DisjExp pexp1 pexp2) = pexpListInputs [pexp1,pexp2]
 expInputs (CondExp _ pexp1 pexp2) = pexpListInputs [pexp1,pexp2]
-expInputs (Fncall _ _ args) = pexpListInputs args
+expInputs (Fncall _ _ _ args) = pexpListInputs args
 expInputs (ForeignFn _ _ _ args) = pexpListInputs args
 expInputs (CaseExp exp cases deflt) =
     expInputs (content exp)
@@ -3989,8 +3990,9 @@ instance Show Exp where
     "(" ++ show e1 ++ " | " ++ show e2 ++ ")"
   show (CondExp cond thn els) =
     "if {" ++ show cond ++ ":: " ++ show thn ++ " | " ++ show els ++ "}"
-  show (Fncall maybeMod fn args) =
-    maybeModPrefix maybeMod ++ fn ++ showArguments args
+  show (Fncall maybeMod fn bang args) =
+    (if bang then "!" else "")
+    ++ maybeModPrefix maybeMod ++ fn ++ showArguments args
   show (ForeignFn lang fn flags args) =
     "foreign " ++ lang ++ " " ++ fn
     ++ (if List.null flags then "" else " " ++ unwords flags)
