@@ -1105,6 +1105,7 @@ data ProcModifiers = ProcModifiers {
 --   exactly as expected, though this could be more flexible.
 unifyProcMods :: ProcModifiers -> ProcModifiers -> Maybe ProcModifiers
 unifyProcMods declMods actualMods =
+    -- if declMods == actualMods -- XXX delete me
     if modifierDetism declMods == modifierDetism declMods -- XXX be more flexible
         && modifierImpurity actualMods <= modifierImpurity declMods
         && (not (modifierResourceful actualMods)

@@ -1,44 +1,57 @@
-resource maximum:int
+# resource maximum:int
 
-def take_max(i:int) use !maximum { ?maximum = max(i, maximum) }
+# def take_max(i:int) use !maximum { ?maximum = max(i, maximum) }
 
-?matrix = [[1,2,3], [5,1]]
+# ?matrix = [[1,2,3], [5,1]]
 
-use maximum in {
-    ?maximum = -1000
-    !map({resource}{
-        !take_max(length(@))
-    }, matrix)
-    !println(maximum)
-}
+# use maximum in {
+#     ?maximum = -1000
+#     !map({resource}{
+#         !take_max(length(@))
+#     }, matrix)
+#     !println(maximum)
+# }
 
-!println("*****")
+# !println("*****")
 
-?matrix = [[1,2,3], [1,2,1,2], [5,1]]
+# ?matrix = [[1,2,3], [1,2,1,2], [5,1]]
 
-use maximum in {
-    ?maximum = -1000
-    !map({resource}{
-        use maximum in {
-            ?maximum = -1000
-            !map(take_max, @1)
-            !print("> "); !println(maximum)
-        }
-        !take_max(length(@1))
-    }, matrix)
-    !println(maximum)
-}
+# use maximum in {
+#     ?maximum = -1000
+#     !map({resource}{
+#         use maximum in {
+#             ?maximum = -1000
+#             !map(take_max, @1)
+#             !print("> "); !println(maximum)
+#         }
+#         !take_max(length(@1))
+#     }, matrix)
+#     !println(maximum)
+# }
 
-def my_map(p:{resource}(T), lst:list(T)) {
-    for ?e in lst { !p(e) }
-}
+# # def maplist(f:(T,?T), lst:list(T)):list(T) =
+# #     if { lst = [?h|?t] :: [f(h) | maplist(f, t)]
+# #        | else          :: []
+# #     }
 
-def ignore(x:T) { pass }
 
-use maximum in {
-    ?maximum = 0
-    !my_map(take_max, [1,3,5,3,1])
-    !println(maximum)
-}
+def my_map(f:{resource}(T,?T), lst:list(T)):list(T) =
+    if {
+        lst = [?h|?t] :: [h2 | my_map(f, t)] where { !f(h, ?h2) }
+    |   else          :: []
+    }
 
-!my_map(ignore, [1,3,5,3,1])
+def double(x:int):int = x*2
+
+# def max_double(x:int,?x2:int) use !maximum {
+#     ?x2 = 2*x
+#     !take_max(x2)
+# }
+
+# use maximum in {
+#     ?maximum = 0
+#     !my_map(max_double, [1,3,5,3,1], ?dbl)
+#     !println(maximum)
+# }
+
+# !my_map(double, [1,3,5,3,1], ?dbl)

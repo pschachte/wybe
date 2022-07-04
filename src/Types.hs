@@ -1643,7 +1643,7 @@ matchTypeList callee pos callTypes
         calleeInfo@FirstInfo{fiPartial=partial,
                              fiTypes=calleeTypes} = do
     logTyped $ "Matching types " ++ show callTypes
-               ++ " with " ++ show calleeInfo
+               ++ " with candidate " ++ show calleeInfo
     (matches, typing)
         <- getTyping $ unifyTypeList' callee pos callTypes calleeTypes
     let mismatches = List.map fst $ List.filter (invalidType . snd)
