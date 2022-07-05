@@ -20,9 +20,9 @@ module top-level code > public {inline,semipure} (0 calls)
     foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-gen#1 > {inline} (1 calls)
-0: higher_order_inline.gen#1<0>
-gen#1(a##0:A, ?#result##0:A)<{}; {}>:
+#closure#1 > {inline} (1 calls)
+0: higher_order_inline.#closure#1<0>
+#closure#1(a##0:A, ?#result##0:A)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(~a##0:A, ?#result##0:A) @predicate:nn:nn
@@ -55,7 +55,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"higher_order_inline.gen#1<0>"(i64  %"#env##0", i64  %"a##0") alwaysinline   {
+define external fastcc  i64 @"higher_order_inline.#closure#1<0>"(i64  %"#env##0", i64  %"a##0") alwaysinline   {
 entry:
   ret i64 %"a##0" 
 }

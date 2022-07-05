@@ -2282,9 +2282,7 @@ modeCheckExp m name defPos assigned _
     (ss',_) <- modecheckStmts m name defPos (addBindings inArgs assigned)
                              detism True ss
     let paramVars = expVar . content . paramToVar <$> params
-    let vars = foldStmts (const . const)
-                         ((const .) . (. expInputs) . Set.union) Set.empty ss'
-    let toClose = vars `Set.difference` Set.fromList paramVars
+    let toClose = stmtsInputs ss' `Set.difference` Set.fromList paramVars
     varDict <- mapFromUnivSetM ultimateVarType Set.empty
                 $ bindingVars assigned
     let closed = Map.filterWithKey (const . flip Set.member toClose) varDict

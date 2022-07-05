@@ -100,12 +100,13 @@ import LLVM.Internal.Function (getPrefixData)
 --  constraint.
 
 unbranchProc :: ProcDef -> Int -> Compiler ProcDef
-unbranchProc proc _ = unbranchProc' Nothing proc
+unbranchProc proc _ = unbranchProc' proc
 
 
-unbranchProc' :: Maybe LoopInfo -> ProcDef -> Compiler ProcDef
-unbranchProc' loopinfo proc = do
-    logMsg Unbranch $ "** Unbranching proc " ++ procName proc ++ ":"
+unbranchProc' :: ProcDef -> Compiler ProcDef
+unbranchProc' proc = do
+    let name = procName proc
+    logMsg Unbranch $ "** Unbranching proc " ++ name ++ ":"
                       ++ showProcDef 0 proc ++ "\n"
     let ProcDefSrc body = procImpln proc
     let detism = procDetism proc
@@ -119,7 +120,7 @@ unbranchProc' loopinfo proc = do
     let stmts = selectDetism body (body++[move boolTrue testOutExp]) detism
     let proto' = proto {procProtoParams = params'}
     (body',tmpCtr',newProcs) <-
-        unbranchBody loopinfo tmpCtr params' detism stmts alt
+        unbranchBody name tmpCtr params' detism stmts alt
     let proc' = proc { procProto = proto'
                      , procDetism = selectDetism detism Det detism
                      , procImpln = ProcDefSrc body'
@@ -132,11 +133,11 @@ unbranchProc' loopinfo proc = do
 
 -- |Eliminate loops and ensure that Conds only appear as the final
 --  statement of a body.
-unbranchBody :: Maybe LoopInfo -> Int -> [Param] -> Determinism
+unbranchBody :: ProcName -> Int -> [Param] -> Determinism
              -> [Placed Stmt] -> [Placed Stmt]
              -> Compiler ([Placed Stmt],Int,[ProcDef])
-unbranchBody loopinfo tmpCtr params detism body alt = do
-    let unbrancher = initUnbrancherState loopinfo tmpCtr params
+unbranchBody name tmpCtr params detism body alt = do
+    let unbrancher = initUnbrancherState Nothing tmpCtr params name
     let outparams =  brOutParams unbrancher
     let outvars = brOutArgs unbrancher
     let stmts = body
@@ -214,8 +215,9 @@ data UnbrancherState = Unbrancher {
     brOutParams  :: [Param],      -- ^Output arguments for generated procs
     brOutArgs    :: [Placed Exp], -- ^Output arguments for call to gen procs
     brNewDefs    :: [ProcDef],    -- ^Generated unbranched auxilliary procedures
-    brClosures   :: Map (ProcSpec, Map Integer Exp) ProcSpec
+    brClosures   :: Map (ProcSpec, Map Integer Exp) ProcSpec,
                                   -- ^Generated procs for closures
+    brProcName   :: ProcName      -- ^The name of the proc being unbranched
     }
 
 
@@ -225,7 +227,7 @@ data LoopInfo = LoopInfo {
     } deriving (Eq)
 
 
-initUnbrancherState :: Maybe LoopInfo -> Int -> [Param] -> UnbrancherState
+initUnbrancherState :: Maybe LoopInfo -> Int -> [Param] -> ProcName -> UnbrancherState
 initUnbrancherState loopinfo tmpCtr params =
     let defined = inputParams params
         outParams = [unbranchParam $ Param nm ty ParamOut ft
@@ -267,8 +269,8 @@ withVars vars unbrancher = do
 
 -- |Generate a fresh proc name that does not collide with any proc in the
 -- current module.
-newProcName :: Unbrancher String
-newProcName = lift genProcName
+newProcName :: ProcName -> Unbrancher String
+newProcName name = lift . genProcName . (`specialName2` name) =<< gets brProcName
 
 
 -- |Create, unbranch, and record a new proc with the specified proto and body.
@@ -659,7 +661,7 @@ unbranchExp (Typed exp ty cast) pos = do
 unbranchExp exp@(AnonProc mods params pstmts clsd res) pos = do
     let clsd' = trustFromJust "unbranch annon proc without closed" clsd
     let res' = trustFromJust "unbranch annon proc without resources" res
-    name <- newProcName
+    name <- newProcName "anon"
     logUnbranch $ "Creating Closure for " ++ show exp ++ " under " ++ name
     let ProcModifiers detism inlining impurity _ _ = mods
     let (freeParams, freeVars) = unzip $ uncurry freeParamVar <$> Map.toAscList clsd'
@@ -679,7 +681,7 @@ unbranchExp exp@(Closure ps free) pos = do
     isClosure <- lift $ isClosureProc ps
     if isClosure
     then return $ maybePlace exp pos
-    else newProcName >>= addClosure ps free pos
+    else newProcName "closure" >>= addClosure ps free pos
 unbranchExp exp pos = return $ maybePlace exp pos
 
 
@@ -784,6 +786,10 @@ outputVars :: VarDict -> [Placed Exp] -> VarDict
 outputVars = List.foldr (ifIsVarDef Map.insert id  . content)
 
 
+continutationProcName :: ProcName 
+continutationProcName = "cont"
+
+
 -- |Generate a fresh proc with all the vars in the supplied dictionary
 --  as inputs, and all the output params of the proc we're unbranching as
 --  outputs.  Then return a call to this proc with the same inputs and outputs.
@@ -796,13 +802,15 @@ factorContinuationProc :: VarDict -> OptPos -> Determinism
                        -> [Placed Stmt] -> [Placed Stmt] -> Bool
                        -> Unbrancher (Placed Stmt)
 factorContinuationProc inVars pos detism res stmts alt sense = do
-    pname <- newProcName
+    name <- newProcName continutationProcName
     logUnbranch $ "Factoring " ++ show detism ++ " continuation proc "
-                  ++ pname ++ ":" ++ showBody 4 stmts
+                  ++ name ++ ":" ++ showBody 4 stmts
     stmts' <- unbranchStmts detism stmts alt sense
-    proto <- newProcProto pname inVars res
+    let stmtsIns = stmtsInputs stmts'
+    let usedVars = Map.filterWithKey (const . (`Set.member` stmtsIns)) inVars
+    proto <- newProcProto name usedVars res
     genProc proto Det stmts' -- Continuation procs are always Det
-    newProcCall pname inVars pos Det
+    newProcCall name usedVars pos Det
 
 
 -- |Generate a fresh proc with all the vars in the supplied dictionary
@@ -813,17 +821,19 @@ factorLoopProc :: [Placed Stmt] -> VarDict -> OptPos -> Determinism
                -> [Placed Stmt] -> [Placed Stmt] -> Bool
                -> Unbrancher (Placed Stmt)
 factorLoopProc break inVars pos detism res stmts alt sense = do
-    pname <- newProcName
+    pname <- newProcName continutationProcName
     logUnbranch $ "Factoring " ++ show detism ++ " loop proc "
                   ++ pname ++ ":" ++ showBody 4 stmts
                   ++ "\nLoop input vars = " ++ show inVars
-    next <- newProcCall pname inVars pos Det -- Continuation procs always Det
+    let stmtsIns = stmtsInputs $ break ++ stmts ++ alt
+    let usedVars = Map.filterWithKey (const . (`Set.member` stmtsIns)) inVars
+    next <- newProcCall pname usedVars pos Det -- Continuation procs always Det
     let loopinfo = Just (LoopInfo next break)
     oldLoopinfo <- gets brLoopInfo
     modify (\s -> s { brLoopInfo = loopinfo })
-    stmts' <- withVars inVars $ unbranchStmts detism stmts alt sense
+    stmts' <- withVars usedVars $ unbranchStmts detism stmts alt sense
     modify (\s -> s { brLoopInfo = oldLoopinfo })
-    proto <- newProcProto pname inVars res
+    proto <- newProcProto pname usedVars res
     genProc proto Det stmts'
     return next
 

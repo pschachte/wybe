@@ -31,7 +31,8 @@ test > (10 calls)
 0: char-escape.test<0>
 test(ch##0:wybe.char, code##0:wybe.int, name##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
-  InterestingCallProperties: []
+  InterestingCallProperties: [InterestingUnaliased 2]
+  MultiSpeczDepInfo: [(2,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 [2]])),(4,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 [2]]))]
     foreign lpvm cast(~ch##0:wybe.char, ?tmp#0##0:wybe.int) @char:nn:nn
     foreign llvm icmp_eq(~code##0:wybe.int, ~tmp#0##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
     case ~tmp#1##0:wybe.bool of
