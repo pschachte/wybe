@@ -1058,12 +1058,14 @@ procToPartial :: [FlowDirection] -> Bool -> CallInfo -> (Maybe CallInfo, Bool)
 procToPartial callFlows hasBang info@FirstInfo{fiPartial=False,
                                                fiTypes=tys,
                                                fiFlows=flows,
+                                               fiInRes=inRes,
+                                               fiOutRes=outRes,
                                                fiNeedsResBang=resful,
                                                fiDetism=detism,
                                                fiImpurity=impurity}
-    | not hasBang  && not (List.null callFlows) && last callFlows == ParamOut
-                   && (length callFlows < length tys
-                       || length callFlows <= length tys + 1 && resful)
+    | not hasBang && not (List.null callFlows) && last callFlows == ParamOut
+                  && (length callFlows < length tys
+                      || length callFlows <= length tys + 1 && usesResources)
         = (Just info{fiPartial=True,
                      fiTypes=closedTys ++ [higherTy],
                      fiFlows=closedFls ++ [ParamOut]}, needsBang)
@@ -1071,6 +1073,7 @@ procToPartial callFlows hasBang info@FirstInfo{fiPartial=False,
     nClosed = length callFlows - 1
     (closedTys, higherTys) = List.splitAt nClosed tys
     (closedFls, higherFls) = List.splitAt nClosed flows
+    usesResources = not (Set.null inRes) || not (Set.null outRes)
     needsBang = resful || impurity > Pure
     higherTy = HigherOrderType (normaliseModifiers
                                 $ ProcModifiers detism MayInline
