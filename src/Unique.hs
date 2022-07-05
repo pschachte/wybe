@@ -10,6 +10,7 @@
 module Unique (uniquenessCheckProc) where
 
 import AST
+import Resources
 import Util
 import Options
 import Control.Monad
@@ -82,27 +83,38 @@ initUniquenessState = UniquenessState Map.empty [] False
 -- | Check correctness of uniqueness for a procedure
 uniquenessCheckProc :: ProcDef -> Int -> Compiler ProcDef
 uniquenessCheckProc def _ = do
-    let name = procName def
+    let name = showProcName $ procName def
     let pos = procPos def
-    logMsg Uniqueness $ "Uniqueness checking proc: " ++ showProcName name
+    logMsg Uniqueness $ "Uniqueness checking proc: " ++ name
     let detism = procDetism def
     let params = procProtoParams $ procProto def
-    logMsg Uniqueness $ "with params: " ++ show params
+    let ress = procProtoResources $ procProto def
+    logMsg Uniqueness $ "with params:    " ++ show params
+    logMsg Uniqueness $ "with resources: " ++ show ress
     -- XXX this only considers whether arguments are unique, ignoring direction
     -- of flow.  When users can declare their own unique types, this won't work.
-    someUnique <- elem (Just True) <$>
-                  mapM (((tmUniqueness . typeModifiers . modInterface <$>) <$>)
-                        <$> getLoadingModule)
-                      (catMaybes $ typeModule . paramType <$> params)
-    unless (detism `determinismLEQ` Det || not someUnique)
-           (errmsg (procPos def)
-            $ showProcName name ++ " with unique argument can fail")
+    someUniqueParam <- elem (Just True) <$>
+                       mapM (((tmUniqueness . typeModifiers . modInterface <$>) <$>)
+                             <$> getLoadingModule)
+                           (catMaybes $ typeModule . paramType <$> params)
+    resTys <- mapM (canonicaliseResourceSpec pos "uniqueness checking" . resourceFlowRes) 
+            $ Set.toList ress
+    someUniqueRes <- elem (Just True) <$>
+                     mapM (((tmUniqueness . typeModifiers . modInterface <$>) <$>)
+                           <$> getLoadingModule)
+                         (catMaybes $ typeModule . trustFromJust "unique res ty" . snd 
+                            <$> resTys)
+    unless (detism `determinismLEQ` Det) $ do
+        when someUniqueRes $
+            errmsg pos $ name ++ " with unique parameter(s) can fail"
+        when someUniqueRes $
+            errmsg pos $ name ++ " with unique resource(s) can fail"
     isUnique <- getModule (tmUniqueness . typeModifiers . modInterface)
     when (procVariant def == ConstructorProc && not isUnique)
       $ mapM_ (checkNoNestedUnique pos) $ procProtoParams $ procProto def
     case procImpln def of
         ProcDefSrc body -> do
-            state <- uniquenessCheckDef name pos detism body params
+            state <- uniquenessCheckDef name pos detism body params ress
             logMsg Uniqueness $ "After checking params: " ++ show state
             mapM_ reportUniquenessError $ reverse $ uniquenessErrors state
             return def
@@ -147,11 +159,14 @@ logUniqueness msg = do
 
 
 uniquenessCheckDef :: ProcName -> OptPos -> Determinism -> [Placed Stmt]
-                   -> [Param] -> Compiler UniquenessState
-uniquenessCheckDef name pos detism body params =
-    execStateT
-    (uniquenessCheckStmts body >> mapM_ (uniquenessCheckParam name pos) params)
-    $ initUniquenessState detism
+                   -> [Param] -> Set ResourceFlowSpec -> Compiler UniquenessState
+uniquenessCheckDef name pos detism body params res =
+    execStateT (do
+        uniquenessCheckStmts body
+        mapM_ (uniquenessCheckParam name pos) params
+        mapM_ (uniquenessCheckResourceParam name pos) $ Set.toList res
+        
+    ) $ initUniquenessState detism
 
 
 -- | Note a variable use, reporting an error if it has already been used.
@@ -249,10 +264,14 @@ uniquenessCheckStmt :: Stmt -> OptPos -> Uniqueness ()
 uniquenessCheckStmt call@(ProcCall (First mod name mbId) _ _ args) pos = do
     logUniqueness $ "Uniqueness checking call " ++ show call
     mapM_ (defaultPlacedApply uniquenessCheckExp pos) args
-    let pspec = ProcSpec mod name (trustFromJust "uniquenessCheckStmt" mbId)
-                    generalVersion
-    params <- lift $ procProtoParams . procProto <$> getProcDef pspec
+    let id = trustFromJust "uniquenessCheckStmt" mbId
+    let pspec = ProcSpec mod name id generalVersion
+    def <- lift $ getProcDef pspec
+    let proto = procProto def
+    let params = procProtoParams proto
     zipWithM_ (uniquenessCheckArg mod name pos) params $ content <$> args
+    let resources = procProtoResources proto
+    mapM_ (uniquenessCheckResourceArg pos) $ Set.toList resources
 uniquenessCheckStmt call@(ProcCall (Higher fn) _ _ args) pos = do
     logUniqueness $ "Uniqueness checking higher call " ++ show call
     mapM_ (defaultPlacedApply uniquenessCheckExp pos) $ fn:args
@@ -282,7 +301,12 @@ uniquenessCheckStmt (TestBool exp) pos = uniquenessCheckExp exp pos
 uniquenessCheckStmt Nop pos = return ()
 uniquenessCheckStmt Fail pos = return ()
 uniquenessCheckStmt (Loop body _ _) _ = uniquenessCheckStmts body
-uniquenessCheckStmt (UseResources _ _ body) _ = uniquenessCheckStmts body
+uniquenessCheckStmt (UseResources res _ body) pos = do
+    -- resource is implicitly stored before block
+    mapM_ (uniquenessCheckResourceArg pos . (`ResourceFlowSpec` ParamIn)) res 
+    uniquenessCheckStmts body
+    -- resource is implicitly restored before block
+    mapM_ (uniquenessCheckResourceArg pos . (`ResourceFlowSpec` ParamOut)) res 
 uniquenessCheckStmt (For generators body) pos = do
     mapM_ ((\gen -> do
             placedApply uniquenessCheckExp $ genExp gen
@@ -347,7 +371,7 @@ uniquenessCheckExp var@(AnonParamVar _ _) _ =
 uniquenessCheckExp (AnonProc mods params body clsd _) pos = do
     uniquenessCheckClosedMap clsd pos
     errs <- uniquenessErrors <$> lift (uniquenessCheckDef "anonymous procedure" pos
-                                        (modifierDetism mods) body params)
+                                        (modifierDetism mods) body params Set.empty)
     mapM_ uniquenessErr errs
 uniquenessCheckExp (Global _) _ = return ()
 uniquenessCheckExp ref@(Closure _ clsd) _ =
@@ -362,6 +386,14 @@ uniquenessCheckArg mod name pos Param{paramType=paramTy} (Typed _ argTy _) =
 uniquenessCheckArg _ _ _ _ _ = return ()
 
 
+uniquenessCheckResourceArg :: OptPos -> ResourceFlowSpec -> Uniqueness ()
+uniquenessCheckResourceArg pos (ResourceFlowSpec res flow) = do
+    let name = resourceName res
+        flowType = Resource res
+    ty <- lift $ trustFromJust "uniquenessCheckResource" . snd 
+        <$> canonicaliseResourceSpec pos "uniqueness checking" res
+    uniquenessCheckExp (Typed (Var name flow flowType) ty Nothing) pos 
+    
 -- Uniqueness check an argument of a call, ensuring that no argument binds a
 -- unique type to a generic type
 uniquenessCheckClosure :: ProcSpec -> OptPos -> [Placed Exp] -> TypeSpec -> Uniqueness ()
@@ -400,6 +432,15 @@ uniquenessCheckParam name pos (Param pName ty flow flowType) = do
     when (flowsOut flow && used)
         $ uniquenessErr $ UniquenessError pName ty pos flowType (ErrorReturn name)
     uniquenessCheckParamType name pos pName ty
+
+    
+uniquenessCheckResourceParam :: ProcName -> OptPos -> ResourceFlowSpec -> Uniqueness ()
+uniquenessCheckResourceParam name pos (ResourceFlowSpec res flow) = do
+    let rName = resourceName res
+        flowType = Resource res
+    ty <- lift $ trustFromJust "uniquenessCheckResource" . snd 
+        <$> canonicaliseResourceSpec pos "uniqueness checking" res
+    uniquenessCheckParam name pos (Param rName ty flow flowType)
 
 
 -- | Uniqueness check the type of a parameter. This ensures that type parameters

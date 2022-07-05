@@ -220,7 +220,6 @@ import           Options                   (LogSelection (..), Options (..),
 import           Parser                    (parseWybe)
 import           Resources                 (resourceCheckMod,
                                             transformProcResources,
-                                            transformProcGlobals,
                                             canonicaliseProcResources)
 import           Unique                    ( uniquenessCheckProc )
 import           Scanner                   (fileTokens)
@@ -810,15 +809,13 @@ compileModSCC mspecs = do
     stopOnError $ "type checking of module(s) "
                   ++ showModSpecs mspecs
     logDump Types Unbranch "TYPE CHECK"
-    mapM_ (transformModuleProcs transformProcResources)  mspecs
-    stopOnError $ "resource checking of module(s) "
-                  ++ showModSpecs mspecs
     mapM_ (transformModuleProcs uniquenessCheckProc)  mspecs
     stopOnError $ "uniqueness checking of module(s) "
                   ++ showModSpecs mspecs
-    mapM_ (transformModuleProcs transformProcGlobals)  mspecs
-    stopOnError $ "globalisation of module(s) "
+    mapM_ (transformModuleProcs transformProcResources)  mspecs
+    stopOnError $ "resource checking of module(s) "
                   ++ showModSpecs mspecs
+    
     ----------------------------------
     -- UNBRANCHING
     mapM_ (transformModuleProcs unbranchProc)  mspecs
