@@ -596,6 +596,8 @@ flattenExp (CaseExp pexpr cases deflt) ty castFrom pos = do
     flattenStmt (translateExpCases pexpr' resultName cases deflt) pos Det
     return $ maybePlace (Var resultName ParamIn Ordinary) pos
 flattenExp (Fncall mod name bang exps) ty castFrom pos = do
+    when bang $ lift 
+        $ errmsg pos "function call cannot have preceding !"
     let stmtBuilder = ProcCall (First mod name Nothing) Det bang
     flattenCall stmtBuilder False ty castFrom pos exps
 flattenExp (ForeignFn lang name flags exps) ty castFrom pos = do

@@ -1,0 +1,12 @@
+
+def my_map(f:{resource}(T,?T), lst:list(T)):list(T) = 
+    if {
+        lst = [?h|?t] :: [!f(h) | !my_map(f, t)]
+    |   else          :: []
+    }
+    
+def my_map2(f:{resource}(T,?T), lst:list(T)):list(T) = 
+    if {
+        lst = [?h|?t] :: [h2 | !my_map2(f, t)] where { ?h2 = !f(h) }
+    |   else          :: []
+    }
