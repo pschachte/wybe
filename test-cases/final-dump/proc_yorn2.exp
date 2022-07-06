@@ -9,9 +9,17 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-gen#1 > (2 calls)
-0: proc_yorn2.gen#1<0>
-gen#1(prompt##0:wybe.string, ?result##1:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+yorn > public {inline} (0 calls)
+0: proc_yorn2.yorn<0>
+yorn(prompt##0:wybe.string, ?result##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    proc_yorn2.yorn#cont#1<0>(~prompt##0:wybe.string, ?result##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @proc_yorn2:nn:nn
+
+
+yorn#cont#1 > (2 calls)
+0: proc_yorn2.yorn#cont#1<0>
+yorn#cont#1(prompt##0:wybe.string, ?result##1:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print<0>(prompt##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @proc_yorn2:nn:nn
@@ -28,19 +36,11 @@ gen#1(prompt##0:wybe.string, ?result##1:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#13##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-        proc_yorn2.gen#1<0>(~prompt##0:wybe.string, ?result##1:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7 @proc_yorn2:nn:nn
+        proc_yorn2.yorn#cont#1<0>(~prompt##0:wybe.string, ?result##1:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7 @proc_yorn2:nn:nn
 
     1:
         foreign llvm move(~tmp#0##0:wybe.bool, ?result##1:wybe.bool)
 
-
-
-yorn > public {inline} (0 calls)
-0: proc_yorn2.yorn<0>
-yorn(prompt##0:wybe.string, ?result##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
-  AliasPairs: []
-  InterestingCallProperties: []
-    proc_yorn2.gen#1<0>(~prompt##0:wybe.string, ?result##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @proc_yorn2:nn:nn
 
   LLVM code       :
 
@@ -77,7 +77,14 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  i1 @"proc_yorn2.gen#1<0>"(i64  %"prompt##0")    {
+define external fastcc  i1 @"proc_yorn2.yorn<0>"(i64  %"prompt##0") alwaysinline   {
+entry:
+  %0 = musttail call fastcc  i1  @"proc_yorn2.yorn#cont#1<0>"(i64  %"prompt##0")  
+  ret i1 %0 
+}
+
+
+define external fastcc  i1 @"proc_yorn2.yorn#cont#1<0>"(i64  %"prompt##0")    {
 entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  %"prompt##0")  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @proc_yorn2.1, i32 0, i32 0) to i64))  
@@ -91,13 +98,6 @@ if.then:
 if.else:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @proc_yorn2.3, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  %4 = musttail call fastcc  i1  @"proc_yorn2.gen#1<0>"(i64  %"prompt##0")  
+  %4 = musttail call fastcc  i1  @"proc_yorn2.yorn#cont#1<0>"(i64  %"prompt##0")  
   ret i1 %4 
-}
-
-
-define external fastcc  i1 @"proc_yorn2.yorn<0>"(i64  %"prompt##0") alwaysinline   {
-entry:
-  %0 = musttail call fastcc  i1  @"proc_yorn2.gen#1<0>"(i64  %"prompt##0")  
-  ret i1 %0 
 }

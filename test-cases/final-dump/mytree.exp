@@ -36,7 +36,8 @@ printTree1 > public (3 calls)
 0: mytree.printTree1<0>
 printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: [(prefix##0,prefix##3)]
-  InterestingCallProperties: []
+  InterestingCallProperties: [InterestingUnaliased 1]
+  MultiSpeczDepInfo: [(1,(mytree.printTree1<0>,fromList [NonAliasedParamCond 1 [1]])),(2,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 [1]]))]
     foreign llvm icmp_ne(t##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool)
     case ~tmp#2##0:wybe.bool of
     0:

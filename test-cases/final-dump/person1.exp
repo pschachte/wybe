@@ -81,13 +81,15 @@ entry:
     foreign lpvm access(~#left##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#lastname##0:wybe.string) @person1:nn:nn
     foreign lpvm access(#right##0:person1.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#firstname##0:wybe.string) @person1:nn:nn
     foreign lpvm access(~#right##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#lastname##0:wybe.string) @person1:nn:nn
-    wybe.string.=<0>(~#left#firstname##0:wybe.string, ~#right#firstname##0:wybe.string, ?tmp#1##0:wybe.bool) #2
+    wybe.string.<=>#cont#2<0>(1:wybe.comparison, ~#left#firstname##0:wybe.string, ~#right#firstname##0:wybe.string, ~#left#firstname##0:wybe.string, ~#right#firstname##0:wybe.string, ?tmp#7##0:wybe.comparison) #4 @string:nn:nn
+    foreign llvm icmp_eq(~tmp#7##0:wybe.comparison, 1:wybe.comparison, ?tmp#1##0:wybe.bool) @comparison:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
     1:
-        wybe.string.=<0>(~#left#lastname##0:wybe.string, ~#right#lastname##0:wybe.string, ?#success##0:wybe.bool) #3
+        wybe.string.<=>#cont#2<0>(1:wybe.comparison, ~#left#lastname##0:wybe.string, ~#right#lastname##0:wybe.string, ~#left#lastname##0:wybe.string, ~#right#lastname##0:wybe.string, ?tmp#10##0:wybe.comparison) #5 @string:nn:nn
+        foreign llvm icmp_eq(~tmp#10##0:wybe.comparison, 1:wybe.comparison, ?#success##0:wybe.bool) @comparison:nn:nn
 
 
 
@@ -145,14 +147,16 @@ person(?firstname##0:wybe.string, ?lastname##0:wybe.string, #result##0:person1.p
     foreign lpvm access(~#left##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.string) @person1:nn:nn
     foreign lpvm access(#right##0:person1.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.string) @person1:nn:nn
     foreign lpvm access(~#right##0:person1.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.string) @person1:nn:nn
-    wybe.string.=<0>(~tmp#3##0:wybe.string, ~tmp#5##0:wybe.string, ?tmp#7##0:wybe.bool) #1
-    case ~tmp#7##0:wybe.bool of
+    wybe.string.<=>#cont#2<0>(1:wybe.comparison, ~tmp#3##0:wybe.string, ~tmp#5##0:wybe.string, ~tmp#3##0:wybe.string, ~tmp#5##0:wybe.string, ?tmp#7##0:wybe.comparison) #1 @string:nn:nn
+    foreign llvm icmp_eq(~tmp#7##0:wybe.comparison, 1:wybe.comparison, ?tmp#8##0:wybe.bool) @comparison:nn:nn
+    case ~tmp#8##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
         foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
     1:
-        wybe.string.=<0>(~tmp#4##0:wybe.string, ~tmp#6##0:wybe.string, ?tmp#0##0:wybe.bool) #2
+        wybe.string.<=>#cont#2<0>(1:wybe.comparison, ~tmp#4##0:wybe.string, ~tmp#6##0:wybe.string, ~tmp#4##0:wybe.string, ~tmp#6##0:wybe.string, ?tmp#9##0:wybe.comparison) #2 @string:nn:nn
+        foreign llvm icmp_eq(~tmp#9##0:wybe.comparison, 1:wybe.comparison, ?tmp#0##0:wybe.bool) @comparison:nn:nn
         foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -164,7 +168,7 @@ person(?firstname##0:wybe.string, ?lastname##0:wybe.string, #result##0:person1.p
  
 
 
-declare external fastcc  i1 @"wybe.string.=<0>"(i64, i64)    
+declare external fastcc  i2 @"wybe.string.<=>#cont#2<0>"(i2, i64, i64, i64, i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -185,11 +189,13 @@ entry:
   %7 = add   i64 %"#right##0", 8 
   %8 = inttoptr i64 %7 to i64* 
   %9 = load  i64, i64* %8 
-  %10 = tail call fastcc  i1  @"wybe.string.=<0>"(i64  %1, i64  %6)  
-  br i1 %10, label %if.then, label %if.else 
+  %10 = tail call fastcc  i2  @"wybe.string.<=>#cont#2<0>"(i2  1, i64  %1, i64  %6, i64  %1, i64  %6)  
+  %11 = icmp eq i2 %10, 1 
+  br i1 %11, label %if.then, label %if.else 
 if.then:
-  %11 = musttail call fastcc  i1  @"wybe.string.=<0>"(i64  %4, i64  %9)  
-  ret i1 %11 
+  %12 = tail call fastcc  i2  @"wybe.string.<=>#cont#2<0>"(i2  1, i64  %4, i64  %9, i64  %4, i64  %9)  
+  %13 = icmp eq i2 %12, 1 
+  ret i1 %13 
 if.else:
   ret i1 0 
 }
@@ -282,13 +288,15 @@ entry:
   %7 = add   i64 %"#right##0", 8 
   %8 = inttoptr i64 %7 to i64* 
   %9 = load  i64, i64* %8 
-  %10 = tail call fastcc  i1  @"wybe.string.=<0>"(i64  %1, i64  %6)  
-  br i1 %10, label %if.then, label %if.else 
+  %10 = tail call fastcc  i2  @"wybe.string.<=>#cont#2<0>"(i2  1, i64  %1, i64  %6, i64  %1, i64  %6)  
+  %11 = icmp eq i2 %10, 1 
+  br i1 %11, label %if.then, label %if.else 
 if.then:
-  %11 = tail call fastcc  i1  @"wybe.string.=<0>"(i64  %4, i64  %9)  
-  %12 = xor i1 %11, 1 
-  ret i1 %12 
+  %12 = tail call fastcc  i2  @"wybe.string.<=>#cont#2<0>"(i2  1, i64  %4, i64  %9, i64  %4, i64  %9)  
+  %13 = icmp eq i2 %12, 1 
+  %14 = xor i1 %13, 1 
+  ret i1 %14 
 if.else:
-  %13 = xor i1 0, 1 
-  ret i1 %13 
+  %15 = xor i1 0, 1 
+  ret i1 %15 
 }

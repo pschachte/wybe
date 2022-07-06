@@ -69,7 +69,7 @@ module AST (
   flowsIn, flowsOut, primFlowToFlowDir, isInputFlow, isOutputFlow,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, stmtsImpurity, stmtImpurity, procCallToExp,
-  expOutputs, pexpListOutputs, expInputs, pexpListInputs,
+  stmtsInputs, expOutputs, pexpListOutputs, expInputs, pexpListInputs,
   setExpTypeFlow, setPExpTypeFlow,
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
   varsInPrims, varsInPrim, varsInPrimArgs, varsInPrimArg,
@@ -782,11 +782,12 @@ getModuleImplementationMaybe fn = do
 
 
 -- |Return a new, unused proc name.
-genProcName :: Compiler ProcName
-genProcName = do
-  ctr <- getModule procCount
-  updateModule (\mod -> mod {procCount = ctr + 1 })
-  return $ specialName2 "gen" $ show (ctr + 1)
+genProcName :: ProcName -> Compiler ProcName
+genProcName pname = do
+  names <- getModule procNames
+  let ctr = 1 + Map.findWithDefault 0 pname names 
+  updateModule (\mod -> mod {procNames = Map.alter (const $ Just ctr) pname names })
+  return $ specialName2 pname $ show ctr
 
 -- |Apply the given function to the current module interface if the
 --  specified visibility is Public.
@@ -1365,7 +1366,8 @@ data Module = Module {
                                    -- ^Hash of the "modInterface" above
   modImplementation :: Maybe ModuleImplementation,
                                    -- ^the module's implementation
-  procCount :: Int,                -- ^a counter for gensym-ed proc names
+  procNames :: Map.Map ProcName Int,
+                                   -- ^a counter for gensym-ed proc names
   stmtDecls :: [Placed Stmt],      -- ^top-level statements in this module
   itemsHash :: Maybe String        -- ^map of proc name to its hash
   } deriving (Generic)
@@ -1384,7 +1386,7 @@ emptyModule = Module
     , modInterface      = emptyInterface
     , modInterfaceHash  = Nothing
     , modImplementation = Just emptyImplementation
-    , procCount         = 0
+    , procNames         = Map.empty
     , stmtDecls         = []
     , itemsHash         = Nothing
     }
@@ -3355,6 +3357,13 @@ procCallToExp (ProcCall (First maybeMod name Nothing) _ _ args) =
     Fncall maybeMod name args
 procCallToExp stmt =
     shouldnt $ "converting non-proccall to expr " ++ showStmt 4 stmt
+
+
+-- |Return all input variables to each statement in a list of statements
+stmtsInputs :: [Placed Stmt] -> Set VarName
+stmtsInputs = foldStmts (const . const) 
+                        ((const .) . (. expInputs) . Set.union) 
+                        Set.empty 
 
 
 -- |Return the set of variables that might be freshly assigned by the
