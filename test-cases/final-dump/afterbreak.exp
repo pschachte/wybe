@@ -14,38 +14,38 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
-    afterbreak.gen#1<0>(1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @afterbreak:nn:nn
+    afterbreak.#cont#1<0>(1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @afterbreak:nn:nn
 
 
-gen#1 > (2 calls)
-0: afterbreak.gen#1<0>
-gen#1(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+#cont#1 > (2 calls)
+0: afterbreak.#cont#1<0>
+#cont#1(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_sgt(x##0:wybe.int, 10:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
         foreign llvm add(~x##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @int:nn:nn
-        foreign c print_int(tmp#0##0:wybe.int, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @int:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-        afterbreak.gen#1<0>(~tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @afterbreak:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @int:nn:nn
+        foreign c print_int(tmp#0##0:wybe.int, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @int:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        afterbreak.#cont#1<0>(~tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @afterbreak:nn:nn
 
     1:
 
 
 
-gen#2 > {inline} (1 calls)
-0: afterbreak.gen#2<0>
-gen#2([tmp#0##0:wybe.int], [x##0:wybe.int], y##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+#cont#2 > {inline} (1 calls)
+0: afterbreak.#cont#2<0>
+#cont#2([x##0:wybe.int], y##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @int:nn:nn
     foreign c print_int(y##0:wybe.int, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @int:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    afterbreak.gen#1<0>(~y##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @afterbreak:nn:nn
+    afterbreak.#cont#1<0>(~y##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @afterbreak:nn:nn
 
   LLVM code       :
 
@@ -69,12 +69,12 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  void @"afterbreak.<0>"() alwaysinline   {
 entry:
-  tail call fastcc  void  @"afterbreak.gen#1<0>"(i64  1)  
+  tail call fastcc  void  @"afterbreak.#cont#1<0>"(i64  1)  
   ret void 
 }
 
 
-define external fastcc  void @"afterbreak.gen#1<0>"(i64  %"x##0")    {
+define external fastcc  void @"afterbreak.#cont#1<0>"(i64  %"x##0")    {
 entry:
   %0 = icmp sgt i64 %"x##0", 10 
   br i1 %0, label %if.then, label %if.else 
@@ -84,15 +84,15 @@ if.else:
   %1 = add   i64 %"x##0", 1 
   tail call ccc  void  @print_int(i64  %1)  
   tail call ccc  void  @putchar(i8  10)  
-  musttail call fastcc  void  @"afterbreak.gen#1<0>"(i64  %1)  
+  musttail call fastcc  void  @"afterbreak.#cont#1<0>"(i64  %1)  
   ret void 
 }
 
 
-define external fastcc  void @"afterbreak.gen#2<0>"(i64  %"y##0") alwaysinline   {
+define external fastcc  void @"afterbreak.#cont#2<0>"(i64  %"y##0") alwaysinline   {
 entry:
   tail call ccc  void  @print_int(i64  %"y##0")  
   tail call ccc  void  @putchar(i8  10)  
-  musttail call fastcc  void  @"afterbreak.gen#1<0>"(i64  %"y##0")  
+  musttail call fastcc  void  @"afterbreak.#cont#1<0>"(i64  %"y##0")  
   ret void 
 }

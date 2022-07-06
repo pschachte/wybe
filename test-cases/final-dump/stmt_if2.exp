@@ -41,14 +41,6 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-gen#1 > {inline} (3 calls)
-0: stmt_if2.gen#1<0>
-gen#1([k##0:wybe.int], [key##0:wybe.int], [l##0:stmt_if2.tree], [r##0:stmt_if2.tree], tmp#4##0:wybe.bool, [tree##0:stmt_if2.tree], ?#result##0:wybe.bool)<{}; {}>:
-  AliasPairs: []
-  InterestingCallProperties: []
-    foreign llvm move(~tmp#4##0:wybe.bool, ?#result##0:wybe.bool) @stmt_if2:nn:nn
-
-
 lookup > public (5 calls)
 0: stmt_if2.lookup<0>
 lookup(key##0:wybe.int, tree##0:stmt_if2.tree, ?#result##0:wybe.bool)<{}; {}>:
@@ -86,6 +78,14 @@ lookup(key##0:wybe.int, tree##0:stmt_if2.tree, ?#result##0:wybe.bool)<{}; {}>:
     1:
         foreign llvm move(0:wybe.bool, ?#result##0:wybe.bool) @stmt_if2:nn:nn
 
+
+
+lookup#cont#1 > {inline} (3 calls)
+0: stmt_if2.lookup#cont#1<0>
+lookup#cont#1(tmp#4##0:wybe.bool, ?#result##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(~tmp#4##0:wybe.bool, ?#result##0:wybe.bool) @stmt_if2:nn:nn
 
   LLVM code       :
 
@@ -133,12 +133,6 @@ if.else:
 }
 
 
-define external fastcc  i1 @"stmt_if2.gen#1<0>"(i1  %"tmp#4##0") alwaysinline   {
-entry:
-  ret i1 %"tmp#4##0" 
-}
-
-
 define external fastcc  i1 @"stmt_if2.lookup<0>"(i64  %"key##0", i64  %"tree##0")    {
 entry:
   %0 = tail call fastcc  i1  @"stmt_if2.tree.=<0>"(i64  %"tree##0", i64  0)  
@@ -172,6 +166,12 @@ if.then3:
 if.else3:
   %13 = musttail call fastcc  i1  @"stmt_if2.lookup<0>"(i64  %"key##0", i64  %9)  
   ret i1 %13 
+}
+
+
+define external fastcc  i1 @"stmt_if2.lookup#cont#1<0>"(i1  %"tmp#4##0") alwaysinline   {
+entry:
+  ret i1 %"tmp#4##0" 
 }
 --------------------------------------------------
  Module stmt_if2.tree

@@ -93,6 +93,7 @@ flattenBody stmts varSet detism = do
 -- the variable set alone.
 insertOutVar :: Set VarName -> Exp -> OptPos -> Set VarName
 insertOutVar varSet (Var name ParamOut _) _ = Set.insert name varSet
+insertOutVar varSet (Typed exp _ _) pos = insertOutVar varSet exp pos
 insertOutVar varSet expr _ = varSet
 
 

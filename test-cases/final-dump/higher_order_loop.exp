@@ -15,17 +15,17 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.list(T)) @list:nn:nn
-    foreign lpvm mutate(~tmp#9##0:wybe.list(T), ?tmp#10##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, higher_order_loop.gen#2<0><>:T) @list:nn:nn
+    foreign lpvm mutate(~tmp#9##0:wybe.list(T), ?tmp#10##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, higher_order_loop.#closure#2<0><>:T) @list:nn:nn
     foreign lpvm mutate(~tmp#10##0:wybe.list(T), ?tmp#2##0:wybe.list({resource}(wybe.int)), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @list:nn:nn
     foreign lpvm alloc(16:wybe.int, ?tmp#13##0:wybe.list(T)) @list:nn:nn
-    foreign lpvm mutate(~tmp#13##0:wybe.list(T), ?tmp#14##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, higher_order_loop.gen#1<0><>:T) @list:nn:nn
-    foreign lpvm mutate(~tmp#14##0:wybe.list(T), ?tmp#0##0:wybe.list({resource}(wybe.int)), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, tmp#2##0:wybe.list(T)) @list:nn:nn
-    higher_order_loop.gen#3<0>(~tmp#0##0:wybe.list({resource}(wybe.int)), ~tmp#0##0:wybe.list({resource}(wybe.int)), higher_order_loop.gen#1<0><>:{resource}(wybe.int), ~tmp#2##0:wybe.list({resource}(wybe.int)), higher_order_loop.gen#2<0><>:{resource}(wybe.int), 0:wybe.list({resource}(wybe.int)), ~tmp#0##0:wybe.list({resource}(wybe.int)))<Everything; Everything> #3 @higher_order_loop:nn:nn
+    foreign lpvm mutate(~tmp#13##0:wybe.list(T), ?tmp#14##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, higher_order_loop.#closure#1<0><>:T) @list:nn:nn
+    foreign lpvm mutate(~tmp#14##0:wybe.list(T), ?tmp#0##0:wybe.list({resource}(wybe.int)), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(T)) @list:nn:nn
+    higher_order_loop.#cont#1<0>(~tmp#0##0:wybe.list({resource}(wybe.int)))<Everything; Everything> #3 @higher_order_loop:nn:nn
 
 
-gen#1 > {inline} (1 calls)
-0: higher_order_loop.gen#1<0>
-gen#1(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+#closure#1 > {inline} (1 calls)
+0: higher_order_loop.#closure#1<0>
+#closure#1(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @int:nn:nn
@@ -34,9 +34,9 @@ gen#1(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-gen#2 > {inline} (1 calls)
-0: higher_order_loop.gen#2<0>
-gen#2(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+#closure#2 > {inline} (1 calls)
+0: higher_order_loop.#closure#2<0>
+#closure#2(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @int:nn:nn
@@ -44,9 +44,9 @@ gen#2(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
     foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
 
 
-gen#3 > (2 calls)
-0: higher_order_loop.gen#3<0>
-gen#3(fs##0:wybe.list({resource}(wybe.int)), tmp#0##0:wybe.list({resource}(wybe.int)), tmp#1##0:{resource}(wybe.int), tmp#2##0:wybe.list({resource}(wybe.int)), tmp#3##0:{resource}(wybe.int), tmp#4##0:wybe.list({resource}(wybe.int)), tmp#5##0:wybe.list({resource}(wybe.int)))<Everything; Everything>:
+#cont#1 > (2 calls)
+0: higher_order_loop.#cont#1<0>
+#cont#1(tmp#5##0:wybe.list({resource}(wybe.int)))<Everything; Everything>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.bool)
@@ -57,7 +57,7 @@ gen#3(fs##0:wybe.list({resource}(wybe.int)), tmp#0##0:wybe.list({resource}(wybe.
         foreign lpvm access(tmp#5##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?f##0:{resource}(wybe.int)) @list:nn:nn
         foreign lpvm access(~tmp#5##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##1:wybe.list({resource}(wybe.int))) @list:nn:nn
         ~f##0:{resource}(wybe.int)(10:wybe.int) #1 @higher_order_loop:nn:nn
-        higher_order_loop.gen#3<0>(~fs##0:wybe.list({resource}(wybe.int)), ~tmp#0##0:wybe.list({resource}(wybe.int)), ~tmp#1##0:{resource}(wybe.int), ~tmp#2##0:wybe.list({resource}(wybe.int)), ~tmp#3##0:{resource}(wybe.int), ~tmp#4##0:wybe.list({resource}(wybe.int)), ~tmp#5##1:wybe.list({resource}(wybe.int)))<Everything; Everything> #2 @higher_order_loop:nn:nn
+        higher_order_loop.#cont#1<0>(~tmp#5##1:wybe.list({resource}(wybe.int)))<Everything; Everything> #2 @higher_order_loop:nn:nn
 
 
   LLVM code       :
@@ -68,10 +68,10 @@ gen#3(fs##0:wybe.list({resource}(wybe.int)), tmp#0##0:wybe.list({resource}(wybe.
  
 
 
-@higher_order_loop.1 =    constant [1 x i64] [i64 ptrtoint (void (i64, i64)* @"higher_order_loop.gen#1<0>" to i64)]
+@higher_order_loop.1 =    constant [1 x i64] [i64 ptrtoint (void (i64, i64)* @"higher_order_loop.#closure#1<0>" to i64)]
 
 
-@higher_order_loop.0 =    constant [1 x i64] [i64 ptrtoint (void (i64, i64)* @"higher_order_loop.gen#2<0>" to i64)]
+@higher_order_loop.0 =    constant [1 x i64] [i64 ptrtoint (void (i64, i64)* @"higher_order_loop.#closure#2<0>" to i64)]
 
 
 declare external ccc  void @print_int(i64)    
@@ -104,12 +104,12 @@ entry:
   %10 = add   i64 %8, 8 
   %11 = inttoptr i64 %10 to i64* 
   store  i64 %2, i64* %11 
-  tail call fastcc  void  @"higher_order_loop.gen#3<0>"(i64  %8, i64  %8, i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_loop.1, i32 0, i32 0) to i64), i64  %2, i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_loop.0, i32 0, i32 0) to i64), i64  0, i64  %8)  
+  tail call fastcc  void  @"higher_order_loop.#cont#1<0>"(i64  %8)  
   ret void 
 }
 
 
-define external fastcc  void @"higher_order_loop.gen#1<0>"(i64  %"#env##0", i64  %"x##0") alwaysinline   {
+define external fastcc  void @"higher_order_loop.#closure#1<0>"(i64  %"#env##0", i64  %"x##0") alwaysinline   {
 entry:
   tail call ccc  void  @print_int(i64  %"x##0")  
   tail call ccc  void  @putchar(i8  10)  
@@ -117,14 +117,14 @@ entry:
 }
 
 
-define external fastcc  void @"higher_order_loop.gen#2<0>"(i64  %"#env##0", i64  %"x##0") alwaysinline   {
+define external fastcc  void @"higher_order_loop.#closure#2<0>"(i64  %"#env##0", i64  %"x##0") alwaysinline   {
 entry:
   tail call ccc  void  @print_int(i64  %"x##0")  
   ret void 
 }
 
 
-define external fastcc  void @"higher_order_loop.gen#3<0>"(i64  %"fs##0", i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %"tmp#5##0")    {
+define external fastcc  void @"higher_order_loop.#cont#1<0>"(i64  %"tmp#5##0")    {
 entry:
   %0 = icmp ne i64 %"tmp#5##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -138,7 +138,7 @@ if.then:
   %7 = load  i64, i64* %6 
   %8 = inttoptr i64 %7 to void (i64, i64)* 
   tail call fastcc  void  %8(i64  %2, i64  10)  
-  musttail call fastcc  void  @"higher_order_loop.gen#3<0>"(i64  %"fs##0", i64  %"tmp#0##0", i64  %"tmp#1##0", i64  %"tmp#2##0", i64  %"tmp#3##0", i64  %"tmp#4##0", i64  %5)  
+  musttail call fastcc  void  @"higher_order_loop.#cont#1<0>"(i64  %5)  
   ret void 
 if.else:
   ret void 
