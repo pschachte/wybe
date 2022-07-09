@@ -11,7 +11,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > public {impure} (0 calls)
+module top-level code > public {semipure} (0 calls)
 0: call_site_id.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -140,7 +140,7 @@ if.else2:
 }
 
 
-define external fastcc  void @"call_site_id.bar<0>"(i64  %"x##0")    {
+define external fastcc  void @"call_site_id.bar<0>"(i64  %"x##0") alwaysinline   {
 entry:
   musttail call fastcc  void  @"call_site_id.foo<0>"(i64  %"x##0")  
   ret void 

@@ -3,65 +3,86 @@
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
-use wybe.bool, wybe.int
-use wybe.io, wybe.string, wybe.c_string, wybe.char, wybe.range, wybe.phantom, wybe.count, wybe.float
+use wybe.bool, wybe.int, wybe.char, wybe.array, wybe.machine_word
+use wybe.io
 
 pub constructors (T) [] | [head:T | tail:_(T)]
 
+
+## Common operations
+
+# Is the list empty?
+pub def {test} empty(xs:_(T)) {
+    if { [_ | _] = xs :: fail }
+}
+
+# List concatenation
 pub def (x:_(T) ,, y:_(T)):_(T) =
-    if { x = [?h|?t] :: [h|t,,y] | else :: y }
+    if { x = [?h | ?t] :: [h | t ,, y] | else :: y }
 
-pub def length(x:_(T)) : int = length1(x, 0)
+# List length
+pub def length(x:_(T)):int = length1(x, 0)
 
-def length1(x:_(T), acc:int) : int =
-    if { x = [?h|?t] :: length1(t, acc+1) | else :: acc }
-
+# List reversal
 pub def reverse(x:_(T)):_(T) = reverse1(x, [])
 
-def reverse1(x:_(T), tail:_(T)):_(T) =
-    if { x = [?h|?t] :: reverse1(t, [h|tail]) | else :: tail }
-
+# List index
+# Fails if the index is out of the "bounds" of the list
 pub def {test} `[]`(xs:_(T), idx:int):T = x where {
-    idx >= 0 # we dont want to check this every time
-    ?x = index(xs, idx)
+    idx >= 0 # we don't want to check this every time
+    ?x = index1(xs, idx)
 }
 
-def {test} index(xs:_(T), idx:int):T = x where {
-    [?x | ?xs] = xs
-    (idx = 0 | index(xs, idx - 1, ?x))
-}
 
-pub def map(f:{resource}(A), as:_(A)) {
-    for ?a in as {
-        !f(a)
+## Higher-order procedures
+
+# List map
+# Apply a resourceful procedure over all elements in a list
+pub def map(f:{resource}(T), xs:_(T)) {
+    for ?x in xs {
+        !f(x)
     }
 }
 
+# List map
+# Map a procedure over all elements in a list, producing a list of the results
 pub def map(f:(A, ?B), as:_(A)):_(B) =
     if { [?a | ?as] = as :: [ f(a) | map(f, as) ] | else :: [] }
 
-
+# List map
+# Map a procedure over two lists, producing a list of the results.
+# The tailing elements of the longer list are ignored
 pub def map(f:(A, B, ?C), as:_(A), bs:_(B)):_(C) =
     if { [?a | ?as] = as & [?b | ?bs] = bs :: [ f(a, b) | map(f, as, bs) ]
        | else                              :: [] }
 
-pub def {test} all(p:{test}(A), as:_(A)) {
-    for ?a in as {
-        p(a)
+# All
+# Apply a test to all elements of a list. Succeed if all tests succeed
+pub def {test} all(p:{test}(T), xs:_(T)) {
+    for ?x in xs {
+        p(x)
     }
 }
 
-pub def {test} any(p:{test}(A), as:_(A)) {
-    [?a | ?as] = as
-    (p(a) | any(p, as))
+# Any
+# Apply a test to all elements of a list. Succeed if at least one test succeeds
+pub def {test} any(p:{test}(T), xs:_(T)) {
+    [?x | ?xs] = xs
+    (p(x) | any(p, xs))
 }
 
+# Foldl
+# Fold elements in a list into an accumulator, in a left-to-right order
+# foldl(f, [a1, a2, ..., aN], !b) ~ f(a1, !b); f(a2, !b); ...; f(aN, !b)
 pub def foldl(f:(A, !B), as:_(A), !b:B) {
     for ?a in as {
         f(a, !b)
     }
 }
 
+# Foldr
+# Fold elements in a list into an accumulator, in a right-to-left order
+# foldl(f, [a1, a2, ..., aN], !b) ~ f(aN, !b); ...; f(a2, !b); f(a1, !b)
 pub def foldr(f:(A, !B), as:_(A), !b:B) {
     if { [?a | ?as] = as ::
         foldr(f, as, !b)
@@ -69,28 +90,71 @@ pub def foldr(f:(A, !B), as:_(A), !b:B) {
     }
 }
 
-pub def filter(p:{test}(A), !as:_(A)) {
+# Filter
+# Filter elements from a list where the test succeeds
+pub def filter(p:{test}(T), !xs:_(T)) {
     ?out = []
-    for ?a in as {
-        if { p(a) :: ?out = [a | out] }
+    for ?x in xs {
+        if { p(x) :: ?out = [x | out] }
     }
     ?as = reverse(out)
 }
 
-pub def print(x:_(T), printer:{resource}(T)) use !io {
-    !print("[")
-    !_print_list(x, printer)
-    !print("]")
+
+## I/O
+
+# Print a list, using `printer` to print each element
+# XXX: refactor when we have typeclasses
+pub def print(printer:{resource}(T), xs:_(T)) use !io {
+    !print('[')
+    if { [?x | ?xs] = xs :: 
+        !printer(x)
+        !print1(printer, xs)
+    }
+    !print(']')
 }
 
-pub def println(x:_(T), printer:{resource}(T)) use !io { !print(x, printer); !nl }
+# Print a list followed by a newline, using `printer` to print each element
+# XXX: refactor when we have typeclasses
+pub def println(printer:{resource}(T), xs:_(T)) use !io { 
+    !print(printer, xs)
+    !nl
+}
 
-def _print_list(xs:_(T), printer:{resource}(T)) use !io {
-    if { [?x | ?xs1] = xs ::
+
+## Conversion procedures
+
+# Convert an array into a list
+pub def list(ar:array(T)):_(T) = ls where {
+    ?ls = []
+    for ?x in ar {
+        ?ls = [x | ls]
+    }
+    reverse(ls, ?ls)
+}
+
+
+## Private helper procedures
+
+# Helper for length
+def length1(x:_(T), acc:int):int =
+    if { x = [?h | ?t] :: length1(t, acc + 1) | else :: acc }
+
+# Helper for reverse
+def reverse1(x:_(T), tail:_(T)):_(T) =
+    if { x = [?h | ?t] :: reverse1(t, [h | tail]) | else :: tail }
+
+# Helper for `[]`
+def {test} index1(xs:_(T), idx:int):T = x where {
+    [?x | ?xs] = xs
+    (idx = 0 | index1(xs, idx - 1, ?x))
+}
+
+# Helper for print
+def print1(printer:{resource}(T), xs:_(T)) use !io {
+    if { [?x | ?xs] = xs ::
+        !print(',')
         !printer(x)
-        if { [ ?x2 | ?xs2 ] = xs1 ::
-            !print(", ")
-        }
-        !_print_list(xs1, printer)
+        !print1(printer, xs)
     }
 }

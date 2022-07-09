@@ -47,7 +47,7 @@ module AST (
   -- *AST types
   Module(..), isRootModule, ModuleInterface(..), ModuleImplementation(..), InterfaceHash, PubProcInfo(..),
   ImportSpec(..), importSpec, Pragma(..), addPragma,
-  descendentModules, sameOriginModules, -- XXX not needed? differentOriginModules,
+  descendentModules, sameOriginModules, 
   refersTo,
   enterModule, reenterModule, exitModule, reexitModule, inModule,
   emptyInterface, emptyImplementation,
@@ -62,14 +62,14 @@ module AST (
   MultiSpeczDepInfo, CallSiteProperty(..), InterestingCallProperty(..),
   ProcAnalysis(..), emptyProcAnalysis,
   ProcBody(..), PrimFork(..), Ident, VarName,
-  ProcName, ResourceDef(..), FlowDirection(..),
+  ProcName, ResourceDef(..), FlowDirection(..), showFlowName,
   argFlowDirection, argType, setArgType, setArgFlow, setArgFlowType, maybeArgFlowType,
   argDescription, argIntVal, trustArgInt, setParamType, paramIsResourceful,
   setPrimParamType, setTypeFlowType,
   flowsIn, flowsOut, primFlowToFlowDir, isInputFlow, isOutputFlow,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
   expToStmt, seqToStmt, stmtsImpurity, stmtImpurity, procCallToExp,
-  expOutputs, pexpListOutputs, expInputs, pexpListInputs,
+  stmtsInputs, expOutputs, pexpListOutputs, expInputs, pexpListInputs,
   setExpTypeFlow, setPExpTypeFlow,
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
   varsInPrims, varsInPrim, varsInPrimArgs, varsInPrimArg,
@@ -101,7 +101,7 @@ module AST (
   addSimpleResource, lookupResource,
   specialResources, specialResourcesSet, isSpecialResource,
   publicResource, resourcefulName,
-  ProcModifiers(..), defaultProcModifiers, checkProcMods,
+  ProcModifiers(..), defaultProcModifiers,
   setDetism, setInline, setImpurity, setVariant,
   ProcVariant(..), Inlining(..), Impurity(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
@@ -467,14 +467,12 @@ runCompiler opts comp = evalStateT comp
 
 
 -- |Apply some transformation function to the compiler state.
--- XXX updateCompiler :: (CompilerState -> (CompilerState, a)) -> Compiler a
 updateCompiler :: (CompilerState -> CompilerState) -> Compiler ()
 updateCompiler updater = do
     state <- get
     put $ updater state
 
 -- |Apply a monadic transformation function to the compiler state.
--- XXX updateCompilerM :: (CompilerState -> Compiler (CompilerState, a)) -> Compiler a
 updateCompilerM :: (CompilerState -> Compiler CompilerState) -> Compiler ()
 updateCompilerM updater = do
     state <- get
@@ -511,7 +509,6 @@ getLoadedModule modspec = do
 -- |Apply the given function to the specified module, if it has been loaded;
 -- does nothing if not.  Takes care to handle it if the specified
 -- module is under compilation.
--- XXX updateLoadedModule :: (Module -> (Module, a)) -> ModSpec -> Compiler a
 updateLoadedModule :: (Module -> Module) -> ModSpec -> Compiler ()
 updateLoadedModule updater modspec = do
     underComp <- gets underCompilation
@@ -529,7 +526,6 @@ updateLoadedModule updater modspec = do
 -- |Apply the given function to the specified module, if it has been loaded;
 -- does nothing if not.  Takes care to handle it if the specified
 -- module is under compilation.
--- XXX updateLoadedModuleM :: (Module -> Compiler (Module, a)) -> ModSpec -> Compiler a
 updateLoadedModuleM :: (Module -> Compiler Module) -> ModSpec -> Compiler ()
 updateLoadedModuleM updater modspec = do
     underComp <- gets underCompilation
@@ -573,7 +569,6 @@ updateLoadedModuleImpln updater =
 
 -- |Return the ModuleImplementation of the specified module.  An error
 -- if the module is not loaded or does not have an implementation.
--- XXX updateLoadedModuleImplnM ::
 --     (ModuleImplementation -> Compiler (ModuleImplementation, a)) ->
 --     ModSpec -> Compiler a
 updateLoadedModuleImplnM ::
@@ -787,11 +782,12 @@ getModuleImplementationMaybe fn = do
 
 
 -- |Return a new, unused proc name.
-genProcName :: Compiler ProcName
-genProcName = do
-  ctr <- getModule procCount
-  updateModule (\mod -> mod {procCount = ctr + 1 })
-  return $ specialName2 "gen" $ show (ctr + 1)
+genProcName :: ProcName -> Compiler ProcName
+genProcName pname = do
+  names <- getModule procNames
+  let ctr = 1 + Map.findWithDefault 0 pname names 
+  updateModule (\mod -> mod {procNames = Map.alter (const $ Just ctr) pname names })
+  return $ specialName2 pname $ show ctr
 
 -- |Apply the given function to the current module interface if the
 --  specified visibility is Public.
@@ -1092,16 +1088,12 @@ addImport modspec imports = do
 
 
 -- | Represent any user-declared or inferred properties of a proc.
--- XXX the list of unknown and conflicting modifiers shouldn't be needed,
--- but to get rid of them, the parser needs to be able to report errors.
 data ProcModifiers = ProcModifiers {
     modifierDetism::Determinism,   -- ^ The proc determinism
     modifierInline::Inlining,      -- ^ Aggresively inline this proc?
     modifierImpurity::Impurity,    -- ^ Don't assume purity when optimising
     modifierVariant::ProcVariant,  -- ^ Is proc actually a constructor?
-    modifierResourceful::Bool,     -- ^ Can this procedure use resources?
-    modifierUnknown::[String],     -- ^ Unknown modifiers specified
-    modifierConflict::[String]     -- ^ Modifiers that conflict with others
+    modifierResourceful::Bool      -- ^ Can this procedure use resources?
 } deriving (Eq, Ord, Generic)
 
 
@@ -1157,7 +1149,7 @@ showResourceSets (ins, outs) = "{" ++ showSet ins ++ ";" ++ showSet outs ++ "}"
 
 -- | The default Det, non-inlined, pure ProcModifiers.
 defaultProcModifiers :: ProcModifiers
-defaultProcModifiers = ProcModifiers Det MayInline Pure RegularProc False [] []
+defaultProcModifiers = ProcModifiers Det MayInline Pure RegularProc False
 
 
 -- | Set the modifierDetism attribute of a ProcModifiers.
@@ -1182,7 +1174,7 @@ setVariant variant mods = mods {modifierVariant=variant}
 
 -- | How to display ProcModifiers
 showProcModifiers :: ProcModifiers -> String
-showProcModifiers (ProcModifiers detism inlining impurity _ res _ _) =
+showProcModifiers (ProcModifiers detism inlining impurity _ res) =
     showFlags $ List.filter (not . List.null) [d,i,p,r]
     where d = determinismName detism
           i = inliningName inlining
@@ -1213,8 +1205,7 @@ showFlags' flags = showFlags flags ++ if List.null flags then "" else " "
 addProc :: Int -> Item -> Compiler ()
 addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
     let name = procProtoName proto
-    let ProcModifiers detism inlining impurity variant _ _ _ = mods
-    checkProcMods ("declaratation of " ++ name) pos mods
+    let ProcModifiers detism inlining impurity variant _ = mods
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 Map.empty
                   vis detism inlining impurity variant (initSuperprocSpec vis)
     void $ addProcDef procDef
@@ -1243,19 +1234,6 @@ addProcDef procDef = do
     logAST $ "Adding definition of " ++ show spec ++ ":" ++
       showProcDef 4 procDef
     return spec
-
-
--- | Check a set of ProcModifiers, providing error messages for unknown and
--- conflicting mods
-checkProcMods :: String -> OptPos -> ProcModifiers -> Compiler ()
-checkProcMods context pos ProcModifiers{modifierUnknown=unknown,
-                                        modifierConflict=conflicting} = do
-    mapM_ (errmsg pos . ("Unknown modifier '" ++)
-                      . (++ "' in " ++ context))
-        unknown
-    mapM_ (errmsg pos . ("Modifier '" ++)
-                      . (++ "' conflicts with earlier modifier in " ++ context))
-        conflicting
 
 
 getParams :: ProcSpec -> Compiler [Param]
@@ -1317,7 +1295,6 @@ updateProcDef updater pspec@(ProcSpec modspec procName procID _) =
     modspec
 
 
--- XXX updateProcDefM :: (ProcDef -> Compiler (ProcDef, a)) -> ProcSpec -> Compiler a
 updateProcDefM :: (ProcDef -> Compiler ProcDef) -> ProcSpec -> Compiler ()
 updateProcDefM updater pspec@(ProcSpec modspec procName procID _) =
     updateLoadedModuleImplnM
@@ -1389,7 +1366,8 @@ data Module = Module {
                                    -- ^Hash of the "modInterface" above
   modImplementation :: Maybe ModuleImplementation,
                                    -- ^the module's implementation
-  procCount :: Int,                -- ^a counter for gensym-ed proc names
+  procNames :: Map.Map ProcName Int,
+                                   -- ^a counter for gensym-ed proc names
   stmtDecls :: [Placed Stmt],      -- ^top-level statements in this module
   itemsHash :: Maybe String        -- ^map of proc name to its hash
   } deriving (Generic)
@@ -1408,7 +1386,7 @@ emptyModule = Module
     , modInterface      = emptyInterface
     , modInterfaceHash  = Nothing
     , modImplementation = Just emptyImplementation
-    , procCount         = 0
+    , procNames         = Map.empty
     , stmtDecls         = []
     , itemsHash         = Nothing
     }
@@ -1443,20 +1421,6 @@ sameOriginModules mspec = do
     subMods <- Map.elems . modSubmods <$> getLoadedModuleImpln mspec
     sameOriginSubMods <- filterM (((== file) <$>) . origin) subMods
     (sameOriginSubMods ++) . concat <$> mapM sameOriginModules sameOriginSubMods
-
-
--- XXX Looks like this isn't actually needed
--- -- | Collect the nearest descendent modules of the given modspec that come from
--- -- a different origin and hence should be written to different target files.
--- differentOriginModules :: ModSpec -> Compiler [ModSpec]
--- differentOriginModules mspec = do
---     let origin m = modOrigin . trustFromJust "sameOriginModules"
---                    <$> getLoadedModule m
---     file <- origin mspec
---     subMods <- Map.elems . modSubmods <$> getLoadedModuleImpln mspec
---     (same,diff) <- List.partition snd . zip subMods
---                    <$> mapM (((== file) <$>) . origin) subMods
---     ((fst <$> diff) ++) . concat <$> mapM differentOriginModules (fst <$> same)
 
 
 -- |The set of defining modules that the given (possibly
@@ -1975,14 +1939,13 @@ procCallCount proc = Map.foldr (+) 0 $ procCallers proc
 
 -- | What is the Impurity of the given Prim?
 primImpurity :: Prim -> Compiler Impurity
-primImpurity (PrimCall _ pspec _ _)
-    = procImpurity <$> getProcDef pspec
-primImpurity (PrimHigher _ (ArgClosure pspec _ _) _)
-    = procImpurity <$> getProcDef pspec
+primImpurity (PrimCall _ pspec impurity _ _) = return impurity
+primImpurity (PrimHigher _ (ArgClosure pspec _ _) impurity _)
+    = max impurity . procImpurity <$> getProcDef pspec
 primImpurity (PrimHigher _ ArgVar{argVarType=HigherOrderType
-                                ProcModifiers{modifierImpurity=purity} _} _)
-    = return purity
-primImpurity (PrimHigher _ fn _)
+                    ProcModifiers{modifierImpurity=modimpurity} _} impurity _)
+    = return $ max impurity modimpurity
+primImpurity (PrimHigher _ fn _ _)
     = shouldnt $ "primImpurity of" ++ show fn
 primImpurity (PrimForeign _ _ flags _)
     = return $ flagsImpurity flags
@@ -2601,7 +2564,7 @@ data TypeSpec = TypeSpec {
     typeParams::[TypeSpec]
     }
     | HigherOrderType {
-        higherTypeDetism::ProcModifiers,
+        higherTypeModifiers::ProcModifiers,
         higherTypeParams::[TypeFlow]
     }
     | TypeVariable { typeVariableName :: TypeVarName }
@@ -2756,6 +2719,12 @@ data ParamInfo = ParamInfo {
 -- |A dataflow direction:  in, out, both, or neither.
 data FlowDirection = ParamIn | ParamOut | ParamInOut
                    deriving (Show,Eq,Ord,Generic)
+
+-- | A printable version of a flow direction
+showFlowName :: FlowDirection -> String
+showFlowName ParamIn    = "input"
+showFlowName ParamOut   = "output (?)"
+showFlowName ParamInOut = "in/output (!)"
 
 -- |A primitive dataflow direction
 data PrimFlow =
@@ -3173,13 +3142,13 @@ data PrimVarName =
 -- |A primitive statment, including those that can only appear in a
 --  loop.
 data Prim
-     = PrimCall CallSiteID ProcSpec [PrimArg] GlobalFlows
-     | PrimHigher CallSiteID PrimArg [PrimArg]
+     = PrimCall CallSiteID ProcSpec Impurity [PrimArg] GlobalFlows
+     | PrimHigher CallSiteID PrimArg Impurity [PrimArg]
      | PrimForeign Ident ProcName [Ident] [PrimArg]
      deriving (Eq,Ord,Generic)
 
 instance Show Prim where
-    show = showPrim 0
+    show = showPrim
 
 -- |An id for each call site, should be unique within a proc.
 type CallSiteID = Int
@@ -3210,8 +3179,8 @@ data PrimArg
 
 -- |Returns a list of all arguments to a prim, including global flows
 primArgs :: Prim -> ([PrimArg], GlobalFlows)
-primArgs (PrimCall _ _ args gFlows) = (args, gFlows)
-primArgs (PrimHigher _ fn args)
+primArgs (PrimCall _ _ _ args gFlows) = (args, gFlows)
+primArgs (PrimHigher _ fn _ args)
     = (fn:args, if isResourcefulHigherOrder $ argType fn
                 then univGlobalFlows else emptyGlobalFlows)
 primArgs (PrimForeign "lpvm" "load" _ args@[ArgGlobal info _, _])
@@ -3223,12 +3192,12 @@ primArgs prim@(PrimForeign _ _ _ args) = (args, emptyGlobalFlows)
 
 -- |Replace a Prim's args and global flows with a list of args and global flows
 replacePrimArgs :: Prim -> [PrimArg] -> GlobalFlows -> Prim
-replacePrimArgs (PrimCall id pspec _ _) args gFlows
-    = PrimCall id pspec args gFlows
-replacePrimArgs (PrimHigher id _ _) [] _
+replacePrimArgs (PrimCall id pspec impurity _ _) args gFlows
+    = PrimCall id pspec impurity args gFlows
+replacePrimArgs (PrimHigher id _ _ _) [] _
     = shouldnt "replacePrimArgs of higher call with not enough args"
-replacePrimArgs (PrimHigher id _ _) (fn:args) _
-    = PrimHigher id fn args
+replacePrimArgs (PrimHigher id _ impurity _) (fn:args) _
+    = PrimHigher id fn impurity args
 replacePrimArgs (PrimForeign lang nm flags _) args _
     = PrimForeign lang nm flags args
 
@@ -3388,6 +3357,13 @@ procCallToExp (ProcCall (First maybeMod name Nothing) _ _ args) =
     Fncall maybeMod name args
 procCallToExp stmt =
     shouldnt $ "converting non-proccall to expr " ++ showStmt 4 stmt
+
+
+-- |Return all input variables to each statement in a list of statements
+stmtsInputs :: [Placed Stmt] -> Set VarName
+stmtsInputs = foldStmts (const . const) 
+                        ((const .) . (. expInputs) . Set.union) 
+                        Set.empty 
 
 
 -- |Return the set of variables that might be freshly assigned by the
@@ -3775,7 +3751,7 @@ showProcDef thisID
     "\n"
     ++ showProcName n ++ " > "
     ++ visibilityPrefix vis
-    ++ showProcModifiers' (ProcModifiers detism inline impurity ctor False [] [])
+    ++ showProcModifiers' (ProcModifiers detism inline impurity ctor False)
     ++ "(" ++ show (procCallCount procdef) ++ " calls)"
     ++ showSuperProc sub
     ++ "\n"
@@ -3875,35 +3851,31 @@ showFork ind (PrimFork var ty last bodies) =
 
 
 -- |Show a list of placed prims.
--- XXX the first argument is unused; can we get rid of it?
 showPlacedPrims :: Int -> [Placed Prim] -> String
 showPlacedPrims ind = List.concatMap (showPlacedPrim ind)
 
 
 -- |Show a single primitive statement with the specified indent.
--- XXX the first argument is unused; can we get rid of it?
 showPlacedPrim :: Int -> Placed Prim -> String
 showPlacedPrim ind stmt = showPlacedPrim' ind (content stmt) (place stmt)
 
 
 -- |Show a single primitive statement with the specified indent and
 --  optional source position.
--- XXX the first argument is unused; can we get rid of it?
 showPlacedPrim' :: Int -> Prim -> OptPos -> String
 showPlacedPrim' ind prim pos =
-  startLine ind ++ showPrim ind prim ++ showOptPos pos
+  startLine ind ++ showPrim prim ++ showOptPos pos
 
 
 -- |Show a single primitive statement.
--- XXX the first argument is unused; can we get rid of it?
-showPrim :: Int -> Prim -> String
-showPrim _ (PrimCall id pspec args globalFlows) =
+showPrim :: Prim -> String
+showPrim (PrimCall id pspec _ args globalFlows) =
     show pspec ++ showArguments args
         ++ (if globalFlows == emptyGlobalFlows then "" else show globalFlows)
         ++ " #" ++ show id
-showPrim _ (PrimHigher id var args) =
+showPrim (PrimHigher id var _ args) =
     show var ++ showArguments args ++ " #" ++ show id
-showPrim _ (PrimForeign lang name flags args) =
+showPrim (PrimForeign lang name flags args) =
     "foreign " ++ lang ++ " " ++ showFlags' flags
     ++ name ++ showArguments args
 

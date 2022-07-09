@@ -15,7 +15,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > public {impure} (0 calls)
+module top-level code > public {semipure} (0 calls)
 0: ctor_char2.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -356,8 +356,8 @@ if.then:
   %2 = icmp eq i64 %1, 0 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %39 = icmp eq i64 %"#left##0", %"#right##0" 
-  ret i1 %39 
+  %35 = icmp eq i64 %"#left##0", %"#right##0" 
+  ret i1 %35 
 if.then1:
   %3 = lshr  i64 %"#left##0", 2 
   %4 = and i64 %3, 255 
@@ -384,69 +384,64 @@ if.else3:
 if.then4:
   %14 = add   i64 %"#left##0", -1 
   %15 = inttoptr i64 %14 to i64* 
-  %16 = getelementptr  i64, i64* %15, i64 0 
-  %17 = load  i64, i64* %16 
-  %18 = icmp ne i64 %"#right##0", 0 
-  br i1 %18, label %if.then5, label %if.else5 
+  %16 = load  i64, i64* %15 
+  %17 = icmp ne i64 %"#right##0", 0 
+  br i1 %17, label %if.then5, label %if.else5 
 if.else4:
-  %26 = icmp eq i64 %1, 2 
-  br i1 %26, label %if.then7, label %if.else7 
+  %24 = icmp eq i64 %1, 2 
+  br i1 %24, label %if.then7, label %if.else7 
 if.then5:
-  %19 = and i64 %"#right##0", 3 
-  %20 = icmp eq i64 %19, 1 
-  br i1 %20, label %if.then6, label %if.else6 
+  %18 = and i64 %"#right##0", 3 
+  %19 = icmp eq i64 %18, 1 
+  br i1 %19, label %if.then6, label %if.else6 
 if.else5:
   ret i1 0 
 if.then6:
-  %21 = add   i64 %"#right##0", -1 
-  %22 = inttoptr i64 %21 to i64* 
-  %23 = getelementptr  i64, i64* %22, i64 0 
-  %24 = load  i64, i64* %23 
-  %25 = musttail call fastcc  i1  @"ctor_char2.=<0>"(i64  %17, i64  %24)  
-  ret i1 %25 
+  %20 = add   i64 %"#right##0", -1 
+  %21 = inttoptr i64 %20 to i64* 
+  %22 = load  i64, i64* %21 
+  %23 = musttail call fastcc  i1  @"ctor_char2.=<0>"(i64  %16, i64  %22)  
+  ret i1 %23 
 if.else6:
   ret i1 0 
 if.then7:
-  %27 = add   i64 %"#left##0", -2 
-  %28 = inttoptr i64 %27 to i64* 
-  %29 = getelementptr  i64, i64* %28, i64 0 
-  %30 = load  i64, i64* %29 
-  %31 = icmp ne i64 %"#right##0", 0 
-  br i1 %31, label %if.then8, label %if.else8 
+  %25 = add   i64 %"#left##0", -2 
+  %26 = inttoptr i64 %25 to i64* 
+  %27 = load  i64, i64* %26 
+  %28 = icmp ne i64 %"#right##0", 0 
+  br i1 %28, label %if.then8, label %if.else8 
 if.else7:
   ret i1 0 
 if.then8:
-  %32 = and i64 %"#right##0", 3 
-  %33 = icmp eq i64 %32, 2 
-  br i1 %33, label %if.then9, label %if.else9 
+  %29 = and i64 %"#right##0", 3 
+  %30 = icmp eq i64 %29, 2 
+  br i1 %30, label %if.then9, label %if.else9 
 if.else8:
   ret i1 0 
 if.then9:
-  %34 = add   i64 %"#right##0", -2 
-  %35 = inttoptr i64 %34 to i64* 
-  %36 = getelementptr  i64, i64* %35, i64 0 
-  %37 = load  i64, i64* %36 
-  %38 = musttail call fastcc  i1  @"ctor_char2.=<0>"(i64  %30, i64  %37)  
-  ret i1 %38 
+  %31 = add   i64 %"#right##0", -2 
+  %32 = inttoptr i64 %31 to i64* 
+  %33 = load  i64, i64* %32 
+  %34 = musttail call fastcc  i1  @"ctor_char2.=<0>"(i64  %27, i64  %33)  
+  ret i1 %34 
 if.else9:
   ret i1 0 
 }
 
 
-define external fastcc  i64 @"ctor_char2.another_ctor<0>"(i64  %"another_ctor#1##0")    {
+define external fastcc  i64 @"ctor_char2.another_ctor<0>"(i64  %"another_ctor#1##0") alwaysinline   {
 entry:
   %0 = trunc i64 8 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 %"another_ctor#1##0", i64* %4 
-  %5 = or i64 %2, 2 
-  ret i64 %5 
+  store  i64 %"another_ctor#1##0", i64* %3 
+  %4 = or i64 %2, 2 
+  ret i64 %4 
 }
 
 
-define external fastcc  {i64, i1} @"ctor_char2.another_ctor<1>"(i64  %"#result##0")    {
+define external fastcc  {i64, i1} @"ctor_char2.another_ctor<1>"(i64  %"#result##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#result##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -455,25 +450,24 @@ if.then:
   %2 = icmp eq i64 %1, 2 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %11 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %12 = insertvalue {i64, i1} %11, i1 0, 1 
-  ret {i64, i1} %12 
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
 if.then1:
   %3 = add   i64 %"#result##0", -2 
   %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %8 = insertvalue {i64, i1} %7, i1 1, 1 
-  ret {i64, i1} %8 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
 if.else1:
-  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %10 = insertvalue {i64, i1} %9, i1 0, 1 
-  ret {i64, i1} %10 
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
 }
 
 
-define external fastcc  {i8, i1} @"ctor_char2.c<0>"(i64  %"#rec##0")    {
+define external fastcc  {i8, i1} @"ctor_char2.c<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -499,7 +493,7 @@ if.else1:
 }
 
 
-define external fastcc  {i64, i1} @"ctor_char2.c<1>"(i64  %"#rec##0", i8  %"#field##0")    {
+define external fastcc  {i64, i1} @"ctor_char2.c<1>"(i64  %"#rec##0", i8  %"#field##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#rec##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -526,13 +520,13 @@ if.else1:
 }
 
 
-define external fastcc  i64 @"ctor_char2.const<0>"()    {
+define external fastcc  i64 @"ctor_char2.const<0>"() alwaysinline   {
 entry:
   ret i64 0 
 }
 
 
-define external fastcc  i64 @"ctor_char2.ctor<0>"(i8  %"c##0")    {
+define external fastcc  i64 @"ctor_char2.ctor<0>"(i8  %"c##0") alwaysinline   {
 entry:
   %0 = zext i8 %"c##0" to i64  
   %1 = shl   i64 %0, 2 
@@ -541,7 +535,7 @@ entry:
 }
 
 
-define external fastcc  {i8, i1} @"ctor_char2.ctor<1>"(i64  %"#result##0")    {
+define external fastcc  {i8, i1} @"ctor_char2.ctor<1>"(i64  %"#result##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#result##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -587,20 +581,19 @@ if.else1:
 }
 
 
-define external fastcc  i64 @"ctor_char2.other_ctor<0>"(i64  %"other_ctor#1##0")    {
+define external fastcc  i64 @"ctor_char2.other_ctor<0>"(i64  %"other_ctor#1##0") alwaysinline   {
 entry:
   %0 = trunc i64 8 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 %"other_ctor#1##0", i64* %4 
-  %5 = or i64 %2, 1 
-  ret i64 %5 
+  store  i64 %"other_ctor#1##0", i64* %3 
+  %4 = or i64 %2, 1 
+  ret i64 %4 
 }
 
 
-define external fastcc  {i64, i1} @"ctor_char2.other_ctor<1>"(i64  %"#result##0")    {
+define external fastcc  {i64, i1} @"ctor_char2.other_ctor<1>"(i64  %"#result##0") alwaysinline   {
 entry:
   %0 = icmp ne i64 %"#result##0", 0 
   br i1 %0, label %if.then, label %if.else 
@@ -609,25 +602,24 @@ if.then:
   %2 = icmp eq i64 %1, 1 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %11 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %12 = insertvalue {i64, i1} %11, i1 0, 1 
-  ret {i64, i1} %12 
+  %10 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %11 = insertvalue {i64, i1} %10, i1 0, 1 
+  ret {i64, i1} %11 
 if.then1:
   %3 = add   i64 %"#result##0", -1 
   %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = insertvalue {i64, i1} undef, i64 %6, 0 
-  %8 = insertvalue {i64, i1} %7, i1 1, 1 
-  ret {i64, i1} %8 
+  %5 = load  i64, i64* %4 
+  %6 = insertvalue {i64, i1} undef, i64 %5, 0 
+  %7 = insertvalue {i64, i1} %6, i1 1, 1 
+  ret {i64, i1} %7 
 if.else1:
-  %9 = insertvalue {i64, i1} undef, i64 undef, 0 
-  %10 = insertvalue {i64, i1} %9, i1 0, 1 
-  ret {i64, i1} %10 
+  %8 = insertvalue {i64, i1} undef, i64 undef, 0 
+  %9 = insertvalue {i64, i1} %8, i1 0, 1 
+  ret {i64, i1} %9 
 }
 
 
-define external fastcc  i1 @"ctor_char2.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"ctor_char2.~=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = tail call fastcc  i1  @"ctor_char2.=<0>"(i64  %"#left##0", i64  %"#right##0")  
   %1 = xor i1 %0, 1 

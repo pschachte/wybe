@@ -9,17 +9,17 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > public {inline,impure} (0 calls)
+module top-level code > public {inline,semipure} (0 calls)
 0: simple_loop.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
-    simple_loop.gen#1<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @simple_loop:nn:nn
+    simple_loop.#cont#1<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @simple_loop:nn:nn
 
 
-gen#1 > (2 calls)
-0: simple_loop.gen#1<0>
-gen#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+#cont#1 > (2 calls)
+0: simple_loop.#cont#1<0>
+#cont#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @char:nn:nn
@@ -32,7 +32,7 @@ gen#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
     1:
         foreign c putchar(~c##0:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @char:nn:nn
         foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char:nn:nn
-        simple_loop.gen#1<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @simple_loop:nn:nn
+        simple_loop.#cont#1<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @simple_loop:nn:nn
 
 
   LLVM code       :
@@ -55,21 +55,21 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  void @"simple_loop.<0>"()    {
+define external fastcc  void @"simple_loop.<0>"() alwaysinline   {
 entry:
-  musttail call fastcc  void  @"simple_loop.gen#1<0>"()  
+  musttail call fastcc  void  @"simple_loop.#cont#1<0>"()  
   ret void 
 }
 
 
-define external fastcc  void @"simple_loop.gen#1<0>"()    {
+define external fastcc  void @"simple_loop.#cont#1<0>"()    {
 entry:
   %0 = tail call ccc  i8  @read_char()  
   %1 = icmp ne i8 %0, 97 
   br i1 %1, label %if.then, label %if.else 
 if.then:
   tail call ccc  void  @putchar(i8  %0)  
-  musttail call fastcc  void  @"simple_loop.gen#1<0>"()  
+  musttail call fastcc  void  @"simple_loop.#cont#1<0>"()  
   ret void 
 if.else:
   ret void 

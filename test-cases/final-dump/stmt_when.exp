@@ -10,17 +10,17 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > public {inline,impure} (0 calls)
+module top-level code > public {inline,semipure} (0 calls)
 0: stmt_when.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
-    stmt_when.gen#1<0>(10:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @stmt_when:nn:nn
+    stmt_when.#cont#1<0>(10:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @stmt_when:nn:nn
 
 
-gen#1 > (3 calls)
-0: stmt_when.gen#1<0>
-gen#1(n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+#cont#1 > (3 calls)
+0: stmt_when.#cont#1<0>
+#cont#1(n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_sgt(n##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool) @int:nn:nn
@@ -28,13 +28,13 @@ gen#1(n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
     0:
 
     1:
-        stmt_when.gen#2<0>(~n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1
+        stmt_when.#cont#2<0>(~n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1
 
 
 
-gen#2 > (1 calls)
-0: stmt_when.gen#2<0>
-gen#2(n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+#cont#2 > (1 calls)
+0: stmt_when.#cont#2<0>
+#cont#2(n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
@@ -42,14 +42,14 @@ gen#2(n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
     foreign llvm icmp_eq(~tmp#1##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool) @int:nn:nn
     case ~tmp#2##0:wybe.bool of
     0:
-        stmt_when.gen#1<0>(~tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #5 @stmt_when:nn:nn
+        stmt_when.#cont#1<0>(~tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #5 @stmt_when:nn:nn
 
     1:
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @int:nn:nn
         foreign c print_int(tmp#0##0:wybe.int, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @int:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-        stmt_when.gen#1<0>(~tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @stmt_when:nn:nn
+        stmt_when.#cont#1<0>(~tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @stmt_when:nn:nn
 
 
 
@@ -80,26 +80,26 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  void @"stmt_when.<0>"()    {
+define external fastcc  void @"stmt_when.<0>"() alwaysinline   {
 entry:
-  tail call fastcc  void  @"stmt_when.gen#1<0>"(i64  10)  
+  tail call fastcc  void  @"stmt_when.#cont#1<0>"(i64  10)  
   ret void 
 }
 
 
-define external fastcc  void @"stmt_when.gen#1<0>"(i64  %"n##0")    {
+define external fastcc  void @"stmt_when.#cont#1<0>"(i64  %"n##0")    {
 entry:
   %0 = icmp sgt i64 %"n##0", 0 
   br i1 %0, label %if.then, label %if.else 
 if.then:
-  musttail call fastcc  void  @"stmt_when.gen#2<0>"(i64  %"n##0")  
+  musttail call fastcc  void  @"stmt_when.#cont#2<0>"(i64  %"n##0")  
   ret void 
 if.else:
   ret void 
 }
 
 
-define external fastcc  void @"stmt_when.gen#2<0>"(i64  %"n##0")    {
+define external fastcc  void @"stmt_when.#cont#2<0>"(i64  %"n##0")    {
 entry:
   %0 = sub   i64 %"n##0", 1 
   %1 = urem i64 %0, 2 
@@ -108,15 +108,15 @@ entry:
 if.then:
   tail call ccc  void  @print_int(i64  %0)  
   tail call ccc  void  @putchar(i8  10)  
-  musttail call fastcc  void  @"stmt_when.gen#1<0>"(i64  %0)  
+  musttail call fastcc  void  @"stmt_when.#cont#1<0>"(i64  %0)  
   ret void 
 if.else:
-  musttail call fastcc  void  @"stmt_when.gen#1<0>"(i64  %0)  
+  musttail call fastcc  void  @"stmt_when.#cont#1<0>"(i64  %0)  
   ret void 
 }
 
 
-define external fastcc  i64 @"stmt_when.mod<0>"(i64  %"x##0", i64  %"y##0")    {
+define external fastcc  i64 @"stmt_when.mod<0>"(i64  %"x##0", i64  %"y##0") alwaysinline   {
 entry:
   %0 = urem i64 %"x##0", %"y##0" 
   ret i64 %0 

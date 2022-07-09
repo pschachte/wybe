@@ -70,10 +70,6 @@ flattenProcDecl (ProcDecl vis mods proto stmts pos) = do
                   $ procProtoResources proto
     (stmts',tmpCtr) <- flattenBody stmts (inParams `Set.union` resources)
                        (modifierDetism mods)
-    let resful = modifierResourceful mods
-    when resful
-        $ modifierError (resourcefulName resful)
-            "procedure or function declaration" pos
     return (ProcDecl vis mods proto stmts' pos,tmpCtr)
 flattenProcDecl _ =
     shouldnt "flattening a non-proc item"
@@ -97,6 +93,7 @@ flattenBody stmts varSet detism = do
 -- the variable set alone.
 insertOutVar :: Set VarName -> Exp -> OptPos -> Set VarName
 insertOutVar varSet (Var name ParamOut _) _ = Set.insert name varSet
+insertOutVar varSet (Typed exp _ _) pos = insertOutVar varSet exp pos
 insertOutVar varSet expr _ = varSet
 
 
@@ -584,11 +581,6 @@ flattenExp (CondExp cond thn els) ty castFrom pos = do
         pos Det
     return $ maybePlace (Var resultName ParamIn Ordinary) pos
 flattenExp expr@(AnonProc mods _ pstmts clsd res) ty castFrom pos = do
-    let inliningMod = modifierInline mods
-    unless (inliningMod == MayInline)
-        $ lift $ modifierError (inliningName inliningMod)
-                    "anonymous procedure" pos
-    lift $ checkProcMods "anonymous procedure" pos mods
     anonState <- gets anonProcState
     let newAnonState = pushAnonProcState anonState
     logFlatten $ "Flattening new anon proc with state " ++ show newAnonState
@@ -612,14 +604,6 @@ flattenExp (ForeignFn lang name flags exps) ty castFrom pos = do
 flattenExp (Typed exp AnyType _) ty castFrom pos = do
     flattenExp exp ty castFrom pos
 flattenExp (Typed exp ty castFrom) _ _ pos = do
-    case ty of
-        HigherOrderType mods _ -> do
-            let inliningMod = modifierInline mods
-            unless (inliningMod == MayInline)
-                    $ lift $ modifierError (inliningName inliningMod)
-                                "type constraint" pos
-            lift $ checkProcMods "type constraint"  pos mods
-        _ -> return ()
     flattenExp exp ty castFrom pos
 
 
@@ -703,15 +687,6 @@ inputOnlyExp (Var name ParamInOut flowType) = Var name ParamIn flowType
 inputOnlyExp (Var name ParamOut flowType) =
     shouldnt $ "Making input-only version of output variable " ++ name
 inputOnlyExp exp = exp
-
-
--- | Add an error message to the compiler for the specified modifier in the
--- given context
-modifierError :: String -> String -> OptPos -> Compiler ()
-modifierError modName context =
-    message Error
-        ("Modifier '" ++ modName ++
-        "' cannot be used in a " ++ context)
 
 
 -- |Log a message, if we are logging flattening activity.

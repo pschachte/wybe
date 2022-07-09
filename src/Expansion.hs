@@ -154,13 +154,13 @@ addInstr :: Prim -> OptPos -> Expander ()
 addInstr prim pos = do
     -- reassign "CallSiteID" if the given prim is inlined from other proc
     prim' <- case prim of
-        PrimCall _ pspec args gFlows -> do
+        PrimCall _ pspec impurity args gFlows -> do
             inliningNow <- gets inlining
             if inliningNow
             then do
                 callSiteID <- gets nextCallSiteID
                 modify (\st -> st {nextCallSiteID = callSiteID + 1})
-                return $ PrimCall callSiteID pspec args gFlows
+                return $ PrimCall callSiteID pspec impurity args gFlows
             else
                 return prim
         _ -> return prim
@@ -229,9 +229,9 @@ expandFork var ty bodies = do
 -- fail.
 -- XXX allow this to handle non-primitives with all inputs known by inlining.
 expandPrim :: Prim -> OptPos -> Expander ()
-expandPrim (PrimCall id pspec args gFlows) pos = do
+expandPrim (PrimCall id pspec impurity args gFlows) pos = do
     args' <- mapM expandArg args
-    let call' = PrimCall id pspec args' gFlows
+    let call' = PrimCall id pspec impurity args' gFlows
     logExpansion $ "  Expand call " ++ show call'
     inliningNow <- gets inlining
     if inliningNow
@@ -246,25 +246,16 @@ expandPrim (PrimCall id pspec args gFlows) pos = do
                 if procInline def
                 then inlineCall proto args' body pos
                 else do
-                    -- inlinableLast <- gets (((final && singleCaller def
-                    --                          && procVis def == Private) &&)
-                    --                        . noFork)
-                    let inlinableLast = False
-                    if inlinableLast
-                    then do
-                        logExpansion "  Inlining tail call to branching proc"
-                        inlineCall proto args' body pos
-                    else do
-                        logExpansion "  Not inlinable"
-                        addInstr call' pos
-expandPrim prim@(PrimHigher id fn args) pos = do
+                    logExpansion "  Not inlinable"
+                    addInstr call' pos
+expandPrim prim@(PrimHigher id fn impurity args) pos = do
     logExpansion $ "  Checking inlining for higher order call " ++ show prim
     inliningNow <- gets inlining
     if inliningNow
     then expandHigherOrder prim pos
     else do
         (fn':args') <- mapM expandArg $ fn:args
-        expandHigherOrder (PrimHigher id fn' args') pos
+        expandHigherOrder (PrimHigher id fn' impurity args') pos
 expandPrim (PrimForeign lang nm flags args) pos = do
     st <- get
     logExpansion $ "  Expanding " ++ show (PrimForeign lang nm flags args)
@@ -281,18 +272,19 @@ expandHigherOrder prim pos = do
     logExpansion $ "  Expanding higher call " ++ show prim
     prim' <- lift $ argExpandedPrim prim
     case prim' of
-        PrimHigher id fn args -> do
+        PrimHigher id fn impurity args -> do
             fn' <- expandArg fn
             case fn' of
                 ArgClosure pspec closed _ -> do
                     pspec' <- fromMaybe pspec <$> lift2 (maybeGetClosureOf pspec)
                     logExpansion $ "  As first order call to " ++ show pspec'
                     gFlows <- lift2 $ getProcGlobalFlows pspec
-                    expandPrim (PrimCall id pspec' (closed ++ args) gFlows) pos
+                    expandPrim (PrimCall id pspec' impurity (closed ++ args)
+                                         gFlows) pos
                 _ -> do
                     args' <- mapM expandArg args
                     logExpansion $ "  As higher call to " ++ show fn'
-                    addInstr (PrimHigher id fn' args') pos
+                    addInstr (PrimHigher id fn' impurity args') pos
         _ -> expandPrim prim' pos
 
 

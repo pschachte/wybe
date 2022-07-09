@@ -50,11 +50,12 @@ type Numbering = Map VarName Int
 data ClauseCompState = ClauseCompState {
         currVars       :: Numbering,   -- ^current var number for each var
         nextVars       :: Numbering,   -- ^var numbers after current stmt
-        nextCallSiteID :: CallSiteID   -- ^The next callSiteID to use
+        nextCallSiteID :: CallSiteID,  -- ^The next callSiteID to use
+        clauseImpurity :: Impurity     -- ^Impurity of the enclosing proc
         }
 
 
-initClauseComp :: ClauseCompState
+initClauseComp :: Impurity -> ClauseCompState
 initClauseComp = ClauseCompState Map.empty Map.empty 0
 
 
@@ -129,16 +130,16 @@ assign name typ val = do
 
 -- |Run a clause compiler function from the Compiler monad to compile
 --  a generated procedure.
-evalClauseComp :: ClauseComp t -> Compiler t
-evalClauseComp clcomp =
-    evalStateT clcomp initClauseComp
+evalClauseComp :: Impurity -> ClauseComp t -> Compiler t
+evalClauseComp impurity clcomp =
+    evalStateT clcomp $ initClauseComp impurity
 
 
 -- |Compile a ProcDefSrc to a ProcDefPrim, ie, compile a proc
 --  definition in source form to one in clausal form.
 compileProc :: ProcDef -> Int -> Compiler ProcDef
 compileProc proc procID =
-    evalClauseComp $ do
+    evalClauseComp (procImpurity proc) $ do
         let ProcDefSrc body = procImpln proc
         let proto = procProto proc
         let procName = procProtoName proto
@@ -267,16 +268,18 @@ compileSimpleStmt' call@(ProcCall func _ _ args) = do
     callSiteID <- gets nextCallSiteID
     modify (\st -> st {nextCallSiteID = callSiteID + 1})
     args' <- concat <$> mapM (placedApply compileArg) args
+    impurity <- gets clauseImpurity
     case func of
         First mod name procID -> do
             let procID' = trustFromJust ("compileSimpleStmt' for " ++ showStmt 4 call)
                             procID
             let pSpec = ProcSpec mod name procID' generalVersion
+            impurity' <- max impurity . procImpurity <$> lift (getProcDef pSpec)
             gFlows <- lift $ getProcGlobalFlows pSpec
-            return $ PrimCall callSiteID pSpec args' gFlows
+            return $ PrimCall callSiteID pSpec impurity  args' gFlows
         Higher fn -> do
             fn' <- compileHigherFunc fn
-            return $ PrimHigher callSiteID fn' args'
+            return $ PrimHigher callSiteID fn' impurity args'
 compileSimpleStmt' (ForeignCall lang name flags args) = do
     args' <- concat <$> mapM (placedApply compileArg) args
     return $ PrimForeign lang name flags args'

@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > public {impure} (0 calls)
+module top-level code > public {semipure} (0 calls)
 0: commonsubexpr.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -74,7 +74,7 @@ entry:
 }
 
 
-define external fastcc  void @"commonsubexpr.common_subexpr<0>"(i64  %"x##0")    {
+define external fastcc  void @"commonsubexpr.common_subexpr<0>"(i64  %"x##0") alwaysinline   {
 entry:
   %0 = add   i64 %"x##0", 1 
   %1 = sub   i64 %"x##0", 1 

@@ -14,7 +14,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > public {impure} (0 calls)
+module top-level code > public {semipure} (0 calls)
 0: specials_one_module.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -144,7 +144,7 @@ entry:
 }
 
 
-define external fastcc  void @"specials_one_module.show_column<0>"(i64  %"call_source_column_number##0")    {
+define external fastcc  void @"specials_one_module.show_column<0>"(i64  %"call_source_column_number##0") alwaysinline   {
 entry:
   tail call ccc  void  @print_int(i64  %"call_source_column_number##0")  
   tail call ccc  void  @putchar(i8  10)  
@@ -152,7 +152,7 @@ entry:
 }
 
 
-define external fastcc  void @"specials_one_module.show_file<0>"(i64  %"call_source_file_name##0")    {
+define external fastcc  void @"specials_one_module.show_file<0>"(i64  %"call_source_file_name##0") alwaysinline   {
 entry:
   tail call ccc  void  @print_string(i64  %"call_source_file_name##0")  
   tail call ccc  void  @putchar(i8  10)  
@@ -160,7 +160,7 @@ entry:
 }
 
 
-define external fastcc  void @"specials_one_module.show_line<0>"(i64  %"call_source_line_number##0")    {
+define external fastcc  void @"specials_one_module.show_line<0>"(i64  %"call_source_line_number##0") alwaysinline   {
 entry:
   tail call ccc  void  @print_int(i64  %"call_source_line_number##0")  
   tail call ccc  void  @putchar(i8  10)  
@@ -168,7 +168,7 @@ entry:
 }
 
 
-define external fastcc  void @"specials_one_module.show_location<0>"(i64  %"call_source_location##0")    {
+define external fastcc  void @"specials_one_module.show_location<0>"(i64  %"call_source_location##0") alwaysinline   {
 entry:
   musttail call fastcc  void  @"specials_one_module.indirect_call_location<0>"(i64  %"call_source_location##0")  
   ret void 

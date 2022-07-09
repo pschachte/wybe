@@ -9,15 +9,23 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > public {impure} (0 calls)
+module top-level code > public {semipure} (0 calls)
 0: uneeded_closure_args.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
-    uneeded_closure_args.call<0>(uneeded_closure_args.gen#1<0><_:A>:(wybe.int, ?wybe.int), 2:wybe.int, ?tmp#0##0:wybe.int) #0 @uneeded_closure_args:nn:nn
+    uneeded_closure_args.call<0>(uneeded_closure_args.#closure#1<0><_:A>:(wybe.int, ?wybe.int), 2:wybe.int, ?tmp#0##0:wybe.int) #0 @uneeded_closure_args:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @int:nn:nn
     foreign c print_int(~tmp#0##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @int:nn:nn
     foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+
+
+#closure#1 > {inline} (1 calls)
+0: uneeded_closure_args.#closure#1<0>
+#closure#1([^a##0:A], b##0:B, ?#result##0:B)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(~b##0:B, ?#result##0:B) @uneeded_closure_args:nn:nn
 
 
 call > {noinline} (1 calls)
@@ -26,14 +34,6 @@ call(f##0:(A, ?A), a##0:A, ?#result##0:A)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     ~f##0:(A, ?A)(~a##0:A, ?#result##0:A) #0 @uneeded_closure_args:nn:nn
-
-
-gen#1 > {inline} (1 calls)
-0: uneeded_closure_args.gen#1<0>
-gen#1([^a##0:A], b##0:B, ?#result##0:B)<{}; {}>:
-  AliasPairs: []
-  InterestingCallProperties: []
-    foreign llvm move(~b##0:B, ?#result##0:B) @uneeded_closure_args:nn:nn
 
 
 second > {inline} (1 calls)
@@ -51,7 +51,7 @@ second([a##0:A], b##0:B, ?#result##0:B)<{}; {}>:
  
 
 
-@uneeded_closure_args.0 =    constant [1 x i64] [i64 ptrtoint (i64 (i64, i64)* @"uneeded_closure_args.gen#1<0>" to i64)]
+@uneeded_closure_args.0 =    constant [1 x i64] [i64 ptrtoint (i64 (i64, i64)* @"uneeded_closure_args.#closure#1<0>" to i64)]
 
 
 declare external ccc  void @print_int(i64)    
@@ -71,7 +71,13 @@ entry:
 }
 
 
-define external fastcc  i64 @"uneeded_closure_args.call<0>"(i64  %"f##0", i64  %"a##0")    {
+define external fastcc  i64 @"uneeded_closure_args.#closure#1<0>"(i64  %"#env##0", i64  %"b##0") alwaysinline   {
+entry:
+  ret i64 %"b##0" 
+}
+
+
+define external fastcc  i64 @"uneeded_closure_args.call<0>"(i64  %"f##0", i64  %"a##0") noinline   {
 entry:
   %0 = inttoptr i64 %"f##0" to i64* 
   %1 = load  i64, i64* %0 
@@ -81,13 +87,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"uneeded_closure_args.gen#1<0>"(i64  %"#env##0", i64  %"b##0")    {
-entry:
-  ret i64 %"b##0" 
-}
-
-
-define external fastcc  i64 @"uneeded_closure_args.second<0>"(i64  %"b##0")    {
+define external fastcc  i64 @"uneeded_closure_args.second<0>"(i64  %"b##0") alwaysinline   {
 entry:
   ret i64 %"b##0" 
 }

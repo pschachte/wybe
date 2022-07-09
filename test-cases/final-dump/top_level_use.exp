@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : res: fromList [(top_level_use.res,wybe.int = 0 @top_level_use:nn:nn @top_level_use:nn:nn)]
   procs           : 
 
-module top-level code > public {impure} (0 calls)
+module top-level code > public {semipure} (0 calls)
 0: top_level_use.<0>
 ()<{<<wybe.io.io>>}; {<<top_level_use.res>>, <<wybe.io.io>>}>:
   AliasPairs: []

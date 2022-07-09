@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > public {impure} (0 calls)
+module top-level code > public {semipure} (0 calls)
 0: io_flow_ok.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -119,7 +119,7 @@ if.else:
 }
 
 
-define external fastcc  void @"io_flow_ok.aok<0>"()    {
+define external fastcc  void @"io_flow_ok.aok<0>"() alwaysinline   {
 entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @io_flow_ok.1, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
@@ -127,7 +127,7 @@ entry:
 }
 
 
-define external fastcc  i1 @"io_flow_ok.unknown<0>"()    {
+define external fastcc  i1 @"io_flow_ok.unknown<0>"() noinline   {
 entry:
   ret i1 1 
 }

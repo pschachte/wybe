@@ -12,7 +12,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > public {inline,impure} (0 calls)
+module top-level code > public {inline,semipure} (0 calls)
 0: alias_data.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -33,6 +33,7 @@ bar > public (1 calls)
 bar()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
+  MultiSpeczDepInfo: [(6,(student.printStudent<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm alloc(16:wybe.int, ?tmp#4##0:student.course) @student:nn:nn
     foreign lpvm mutate(~tmp#4##0:student.course, ?tmp#5##0:student.course, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 101:wybe.int) @student:nn:nn
     foreign lpvm mutate(~tmp#5##0:student.course, ?tmp#0##0:student.course, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, "intro to cs":wybe.string) @student:nn:nn
@@ -48,7 +49,7 @@ bar()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#15##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#16##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    student.printStudent<0>(~tmp#1##0:student.student)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #6 @alias_data:nn:nn
+    student.printStudent<0>[410bae77d3](~tmp#1##0:student.student)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #6 @alias_data:nn:nn
 
   LLVM code       :
 
@@ -76,7 +77,7 @@ bar()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
 @alias_data.4 =    constant [?? x i8] c"student2\00"
 
 
-declare external fastcc  void @"student.printStudent<0>"(i64)    
+declare external fastcc  void @"student.printStudent<0>[410bae77d3]"(i64)    
 
 
 declare external ccc  void @putchar(i8)    
@@ -85,20 +86,23 @@ declare external ccc  void @putchar(i8)
 declare external fastcc  void @"wybe.string.print<0>"(i64)    
 
 
+declare external fastcc  void @"student.printStudent<0>"(i64)    
+
+
 declare external ccc  i8* @wybe_malloc(i32)    
 
 
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  void @"alias_data.<0>"()    {
+define external fastcc  void @"alias_data.<0>"() alwaysinline   {
 entry:
   musttail call fastcc  void  @"alias_data.bar<0>"()  
   ret void 
 }
 
 
-define external fastcc  i64 @"alias_data.backup<0>"(i64  %"student1##0")    {
+define external fastcc  i64 @"alias_data.backup<0>"(i64  %"student1##0") alwaysinline   {
 entry:
   ret i64 %"student1##0" 
 }
@@ -110,28 +114,24 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 101, i64* %4 
-  %5 = add   i64 %2, 8 
-  %6 = inttoptr i64 %5 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_data.1, i32 0, i32 0) to i64), i64* %7 
-  %8 = trunc i64 16 to i32  
-  %9 = tail call ccc  i8*  @wybe_malloc(i32  %8)  
-  %10 = ptrtoint i8* %9 to i64 
+  store  i64 101, i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_data.1, i32 0, i32 0) to i64), i64* %5 
+  %6 = trunc i64 16 to i32  
+  %7 = tail call ccc  i8*  @wybe_malloc(i32  %6)  
+  %8 = ptrtoint i8* %7 to i64 
+  %9 = inttoptr i64 %8 to i64* 
+  store  i64 9401, i64* %9 
+  %10 = add   i64 %8, 8 
   %11 = inttoptr i64 %10 to i64* 
-  %12 = getelementptr  i64, i64* %11, i64 0 
-  store  i64 9401, i64* %12 
-  %13 = add   i64 %10, 8 
-  %14 = inttoptr i64 %13 to i64* 
-  %15 = getelementptr  i64, i64* %14, i64 0 
-  store  i64 %2, i64* %15 
+  store  i64 %2, i64* %11 
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_data.3, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"student.printStudent<0>"(i64  %10)  
+  tail call fastcc  void  @"student.printStudent<0>"(i64  %8)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @alias_data.5, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  tail call fastcc  void  @"student.printStudent<0>"(i64  %10)  
+  tail call fastcc  void  @"student.printStudent<0>[410bae77d3]"(i64  %8)  
   ret void 
 }
 --------------------------------------------------
@@ -165,25 +165,27 @@ entry:
   submodules      : student.course, student.student
   procs           : 
 
-module top-level code > public {impure} (0 calls)
+module top-level code > public {semipure} (0 calls)
 0: student.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
+  MultiSpeczDepInfo: [(2,(student.printStudent<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm alloc(16:wybe.int, ?tmp#4##0:student.course) @student:nn:nn
     foreign lpvm mutate(~tmp#4##0:student.course, ?tmp#5##0:student.course, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 90048:wybe.int) @student:nn:nn
     foreign lpvm mutate(~tmp#5##0:student.course, ?tmp#6##0:student.course, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, "Declarative Programming":wybe.string) @student:nn:nn
     foreign lpvm alloc(16:wybe.int, ?tmp#9##0:student.student) @student:nn:nn
     foreign lpvm mutate(~tmp#9##0:student.student, ?tmp#10##0:student.student, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 12345:wybe.int) @student:nn:nn
     foreign lpvm mutate(~tmp#10##0:student.student, ?tmp#11##0:student.student, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#6##0:student.course) @student:nn:nn
-    student.printStudent<0>(~tmp#11##0:student.student)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @student:nn:nn
+    student.printStudent<0>[410bae77d3](~tmp#11##0:student.student)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @student:nn:nn
 
 
 printStudent > public (1 calls)
-0: student.printStudent<0>
+0: student.printStudent<0>[410bae77d3]
 printStudent(stu##0:student.student)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
-  InterestingCallProperties: []
+  InterestingCallProperties: [InterestingUnaliased 0]
+  MultiSpeczDepInfo: [(10,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 [0]]))]
     wybe.string.print<0>("student id: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @student:nn:nn
     foreign lpvm access(stu##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @student:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @int:nn:nn
@@ -200,6 +202,26 @@ printStudent(stu##0:student.student)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
     wybe.string.print<0>("course name: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7 @student:nn:nn
     foreign lpvm access(~tmp#1##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.string) @student:nn:nn
     wybe.string.print<0>(~tmp#3##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #10 @string:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#18##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+ [410bae77d3] [NonAliasedParam 0] :
+    wybe.string.print<0>("student id: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @student:nn:nn
+    foreign lpvm access(stu##0:student.student, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @student:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @int:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @int:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign lpvm access(~stu##0:student.student, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:student.course) @student:nn:nn
+    wybe.string.print<0>("course code: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @student:nn:nn
+    foreign lpvm access(tmp#1##0:student.course, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @student:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @int:nn:nn
+    foreign c print_int(~tmp#2##0:wybe.int, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @int:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>("course name: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7 @student:nn:nn
+    foreign lpvm access(~tmp#1##0:student.course, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.string) @student:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#3##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #10 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#18##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
@@ -239,6 +261,9 @@ printStudent(stu##0:student.student)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
 declare external ccc  void @putchar(i8)    
 
 
+declare external fastcc  void @"wybe.string.print<0>[410bae77d3]"(i64)    
+
+
 declare external fastcc  void @"wybe.string.print<0>"(i64)    
 
 
@@ -257,23 +282,19 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 90048, i64* %4 
-  %5 = add   i64 %2, 8 
-  %6 = inttoptr i64 %5 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @student.1, i32 0, i32 0) to i64), i64* %7 
-  %8 = trunc i64 16 to i32  
-  %9 = tail call ccc  i8*  @wybe_malloc(i32  %8)  
-  %10 = ptrtoint i8* %9 to i64 
+  store  i64 90048, i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @student.1, i32 0, i32 0) to i64), i64* %5 
+  %6 = trunc i64 16 to i32  
+  %7 = tail call ccc  i8*  @wybe_malloc(i32  %6)  
+  %8 = ptrtoint i8* %7 to i64 
+  %9 = inttoptr i64 %8 to i64* 
+  store  i64 12345, i64* %9 
+  %10 = add   i64 %8, 8 
   %11 = inttoptr i64 %10 to i64* 
-  %12 = getelementptr  i64, i64* %11, i64 0 
-  store  i64 12345, i64* %12 
-  %13 = add   i64 %10, 8 
-  %14 = inttoptr i64 %13 to i64* 
-  %15 = getelementptr  i64, i64* %14, i64 0 
-  store  i64 %2, i64* %15 
-  tail call fastcc  void  @"student.printStudent<0>"(i64  %10)  
+  store  i64 %2, i64* %11 
+  tail call fastcc  void  @"student.printStudent<0>[410bae77d3]"(i64  %8)  
   ret void 
 }
 
@@ -282,26 +303,47 @@ define external fastcc  void @"student.printStudent<0>"(i64  %"stu##0")    {
 entry:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @student.3, i32 0, i32 0) to i64))  
   %0 = inttoptr i64 %"stu##0" to i64* 
-  %1 = getelementptr  i64, i64* %0, i64 0 
-  %2 = load  i64, i64* %1 
-  tail call ccc  void  @print_int(i64  %2)  
+  %1 = load  i64, i64* %0 
+  tail call ccc  void  @print_int(i64  %1)  
   tail call ccc  void  @putchar(i8  10)  
-  %3 = add   i64 %"stu##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
+  %2 = add   i64 %"stu##0", 8 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = load  i64, i64* %3 
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @student.5, i32 0, i32 0) to i64))  
-  %7 = inttoptr i64 %6 to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
-  %9 = load  i64, i64* %8 
-  tail call ccc  void  @print_int(i64  %9)  
+  %5 = inttoptr i64 %4 to i64* 
+  %6 = load  i64, i64* %5 
+  tail call ccc  void  @print_int(i64  %6)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @student.7, i32 0, i32 0) to i64))  
-  %10 = add   i64 %6, 8 
-  %11 = inttoptr i64 %10 to i64* 
-  %12 = getelementptr  i64, i64* %11, i64 0 
-  %13 = load  i64, i64* %12 
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  %13)  
+  %7 = add   i64 %4, 8 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  %9)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+}
+
+
+define external fastcc  void @"student.printStudent<0>[410bae77d3]"(i64  %"stu##0")    {
+entry:
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @student.3, i32 0, i32 0) to i64))  
+  %0 = inttoptr i64 %"stu##0" to i64* 
+  %1 = load  i64, i64* %0 
+  tail call ccc  void  @print_int(i64  %1)  
+  tail call ccc  void  @putchar(i8  10)  
+  %2 = add   i64 %"stu##0", 8 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = load  i64, i64* %3 
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @student.5, i32 0, i32 0) to i64))  
+  %5 = inttoptr i64 %4 to i64* 
+  %6 = load  i64, i64* %5 
+  tail call ccc  void  @print_int(i64  %6)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @student.7, i32 0, i32 0) to i64))  
+  %7 = add   i64 %4, 8 
+  %8 = inttoptr i64 %7 to i64* 
+  %9 = load  i64, i64* %8 
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %9)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }
@@ -338,7 +380,8 @@ entry:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
     1:
-        wybe.string.=<0>(~#left#name##0:wybe.string, ~#right#name##0:wybe.string, ?#success##0:wybe.bool) #3
+        wybe.string.<=>#cont#2<0>(1:wybe.comparison, ~#left#name##0:wybe.string, ~#right#name##0:wybe.string, ~#left#name##0:wybe.string, ~#right#name##0:wybe.string, ?tmp#9##0:wybe.comparison) #4 @string:nn:nn
+        foreign llvm icmp_eq(~tmp#9##0:wybe.comparison, 1:wybe.comparison, ?#success##0:wybe.bool) @comparison:nn:nn
 
 
 
@@ -403,7 +446,8 @@ name(#rec##0:student.course, ?#rec##1:student.course, #field##0:wybe.string)<{};
         foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
     1:
-        wybe.string.=<0>(~tmp#4##0:wybe.string, ~tmp#6##0:wybe.string, ?tmp#0##0:wybe.bool) #1
+        wybe.string.<=>#cont#2<0>(1:wybe.comparison, ~tmp#4##0:wybe.string, ~tmp#6##0:wybe.string, ~tmp#4##0:wybe.string, ~tmp#6##0:wybe.string, ?tmp#8##0:wybe.comparison) #1 @string:nn:nn
+        foreign llvm icmp_eq(~tmp#8##0:wybe.comparison, 1:wybe.comparison, ?tmp#0##0:wybe.bool) @comparison:nn:nn
         foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -415,7 +459,7 @@ name(#rec##0:student.course, ?#rec##1:student.course, #field##0:wybe.string)<{};
  
 
 
-declare external fastcc  i1 @"wybe.string.=<0>"(i64, i64)    
+declare external fastcc  i2 @"wybe.string.<=>#cont#2<0>"(i2, i64, i64, i64, i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -424,42 +468,38 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  i1 @"student.course.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"student.course.=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#left##0" to i64* 
-  %1 = getelementptr  i64, i64* %0, i64 0 
-  %2 = load  i64, i64* %1 
-  %3 = add   i64 %"#left##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
+  %1 = load  i64, i64* %0 
+  %2 = add   i64 %"#left##0", 8 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = load  i64, i64* %3 
+  %5 = inttoptr i64 %"#right##0" to i64* 
   %6 = load  i64, i64* %5 
-  %7 = inttoptr i64 %"#right##0" to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
+  %7 = add   i64 %"#right##0", 8 
+  %8 = inttoptr i64 %7 to i64* 
   %9 = load  i64, i64* %8 
-  %10 = add   i64 %"#right##0", 8 
-  %11 = inttoptr i64 %10 to i64* 
-  %12 = getelementptr  i64, i64* %11, i64 0 
-  %13 = load  i64, i64* %12 
-  %14 = icmp eq i64 %2, %9 
-  br i1 %14, label %if.then, label %if.else 
+  %10 = icmp eq i64 %1, %6 
+  br i1 %10, label %if.then, label %if.else 
 if.then:
-  %15 = musttail call fastcc  i1  @"wybe.string.=<0>"(i64  %6, i64  %13)  
-  ret i1 %15 
+  %11 = tail call fastcc  i2  @"wybe.string.<=>#cont#2<0>"(i2  1, i64  %4, i64  %9, i64  %4, i64  %9)  
+  %12 = icmp eq i2 %11, 1 
+  ret i1 %12 
 if.else:
   ret i1 0 
 }
 
 
-define external fastcc  i64 @"student.course.code<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"student.course.code<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#rec##0" to i64* 
-  %1 = getelementptr  i64, i64* %0, i64 0 
-  %2 = load  i64, i64* %1 
-  ret i64 %2 
+  %1 = load  i64, i64* %0 
+  ret i64 %1 
 }
 
 
-define external fastcc  i64 @"student.course.code<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"student.course.code<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 16 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -469,54 +509,48 @@ entry:
   %5 = trunc i64 16 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %3, i8*  %4, i32  %5, i1  0)  
   %6 = inttoptr i64 %2 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 %"#field##0", i64* %7 
+  store  i64 %"#field##0", i64* %6 
   ret i64 %2 
 }
 
 
-define external fastcc  i64 @"student.course.course<0>"(i64  %"code##0", i64  %"name##0")    {
+define external fastcc  i64 @"student.course.course<0>"(i64  %"code##0", i64  %"name##0") alwaysinline   {
 entry:
   %0 = trunc i64 16 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 %"code##0", i64* %4 
-  %5 = add   i64 %2, 8 
-  %6 = inttoptr i64 %5 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 %"name##0", i64* %7 
+  store  i64 %"code##0", i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 %"name##0", i64* %5 
   ret i64 %2 
 }
 
 
-define external fastcc  {i64, i64} @"student.course.course<1>"(i64  %"#result##0")    {
+define external fastcc  {i64, i64} @"student.course.course<1>"(i64  %"#result##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#result##0" to i64* 
-  %1 = getelementptr  i64, i64* %0, i64 0 
-  %2 = load  i64, i64* %1 
-  %3 = add   i64 %"#result##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = insertvalue {i64, i64} undef, i64 %2, 0 
-  %8 = insertvalue {i64, i64} %7, i64 %6, 1 
-  ret {i64, i64} %8 
+  %1 = load  i64, i64* %0 
+  %2 = add   i64 %"#result##0", 8 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = load  i64, i64* %3 
+  %5 = insertvalue {i64, i64} undef, i64 %1, 0 
+  %6 = insertvalue {i64, i64} %5, i64 %4, 1 
+  ret {i64, i64} %6 
 }
 
 
-define external fastcc  i64 @"student.course.name<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"student.course.name<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = add   i64 %"#rec##0", 8 
   %1 = inttoptr i64 %0 to i64* 
-  %2 = getelementptr  i64, i64* %1, i64 0 
-  %3 = load  i64, i64* %2 
-  ret i64 %3 
+  %2 = load  i64, i64* %1 
+  ret i64 %2 
 }
 
 
-define external fastcc  i64 @"student.course.name<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"student.course.name<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 16 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -527,37 +561,33 @@ entry:
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %3, i8*  %4, i32  %5, i1  0)  
   %6 = add   i64 %2, 8 
   %7 = inttoptr i64 %6 to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
-  store  i64 %"#field##0", i64* %8 
+  store  i64 %"#field##0", i64* %7 
   ret i64 %2 
 }
 
 
-define external fastcc  i1 @"student.course.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"student.course.~=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#left##0" to i64* 
-  %1 = getelementptr  i64, i64* %0, i64 0 
-  %2 = load  i64, i64* %1 
-  %3 = add   i64 %"#left##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
+  %1 = load  i64, i64* %0 
+  %2 = add   i64 %"#left##0", 8 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = load  i64, i64* %3 
+  %5 = inttoptr i64 %"#right##0" to i64* 
   %6 = load  i64, i64* %5 
-  %7 = inttoptr i64 %"#right##0" to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
+  %7 = add   i64 %"#right##0", 8 
+  %8 = inttoptr i64 %7 to i64* 
   %9 = load  i64, i64* %8 
-  %10 = add   i64 %"#right##0", 8 
-  %11 = inttoptr i64 %10 to i64* 
-  %12 = getelementptr  i64, i64* %11, i64 0 
-  %13 = load  i64, i64* %12 
-  %14 = icmp eq i64 %2, %9 
-  br i1 %14, label %if.then, label %if.else 
+  %10 = icmp eq i64 %1, %6 
+  br i1 %10, label %if.then, label %if.else 
 if.then:
-  %15 = tail call fastcc  i1  @"wybe.string.=<0>"(i64  %6, i64  %13)  
-  %16 = xor i1 %15, 1 
-  ret i1 %16 
+  %11 = tail call fastcc  i2  @"wybe.string.<=>#cont#2<0>"(i2  1, i64  %4, i64  %9, i64  %4, i64  %9)  
+  %12 = icmp eq i2 %11, 1 
+  %13 = xor i1 %12, 1 
+  ret i1 %13 
 if.else:
-  %17 = xor i1 0, 1 
-  ret i1 %17 
+  %14 = xor i1 0, 1 
+  ret i1 %14 
 }
 --------------------------------------------------
  Module student.student
@@ -602,7 +632,8 @@ if.else:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
         1:
-            wybe.string.=<0>(~tmp#10##0:wybe.string, ~tmp#12##0:wybe.string, ?#success##0:wybe.bool) #4
+            wybe.string.<=>#cont#2<0>(1:wybe.comparison, ~tmp#10##0:wybe.string, ~tmp#12##0:wybe.string, ~tmp#10##0:wybe.string, ~tmp#12##0:wybe.string, ?tmp#14##0:wybe.comparison) #4 @string:nn:nn
+            foreign llvm icmp_eq(~tmp#14##0:wybe.comparison, 1:wybe.comparison, ?#success##0:wybe.bool) @comparison:nn:nn
 
 
 
@@ -679,7 +710,8 @@ student(?id##0:wybe.int, ?major##0:student.course, #result##0:student.student)<{
             foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
         1:
-            wybe.string.=<0>(~tmp#9##0:wybe.string, ~tmp#11##0:wybe.string, ?tmp#0##0:wybe.bool) #1
+            wybe.string.<=>#cont#2<0>(1:wybe.comparison, ~tmp#9##0:wybe.string, ~tmp#11##0:wybe.string, ~tmp#9##0:wybe.string, ~tmp#11##0:wybe.string, ?tmp#13##0:wybe.comparison) #1 @string:nn:nn
+            foreign llvm icmp_eq(~tmp#13##0:wybe.comparison, 1:wybe.comparison, ?tmp#0##0:wybe.bool) @comparison:nn:nn
             foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
 
@@ -692,7 +724,7 @@ student(?id##0:wybe.int, ?major##0:student.course, #result##0:student.student)<{
  
 
 
-declare external fastcc  i1 @"wybe.string.=<0>"(i64, i64)    
+declare external fastcc  i2 @"wybe.string.<=>#cont#2<0>"(i2, i64, i64, i64, i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -701,61 +733,53 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  i1 @"student.student.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"student.student.=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#left##0" to i64* 
-  %1 = getelementptr  i64, i64* %0, i64 0 
-  %2 = load  i64, i64* %1 
-  %3 = add   i64 %"#left##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
+  %1 = load  i64, i64* %0 
+  %2 = add   i64 %"#left##0", 8 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = load  i64, i64* %3 
+  %5 = inttoptr i64 %"#right##0" to i64* 
   %6 = load  i64, i64* %5 
-  %7 = inttoptr i64 %"#right##0" to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
+  %7 = add   i64 %"#right##0", 8 
+  %8 = inttoptr i64 %7 to i64* 
   %9 = load  i64, i64* %8 
-  %10 = add   i64 %"#right##0", 8 
-  %11 = inttoptr i64 %10 to i64* 
-  %12 = getelementptr  i64, i64* %11, i64 0 
-  %13 = load  i64, i64* %12 
-  %14 = icmp eq i64 %2, %9 
-  br i1 %14, label %if.then, label %if.else 
+  %10 = icmp eq i64 %1, %6 
+  br i1 %10, label %if.then, label %if.else 
 if.then:
-  %15 = inttoptr i64 %6 to i64* 
-  %16 = getelementptr  i64, i64* %15, i64 0 
+  %11 = inttoptr i64 %4 to i64* 
+  %12 = load  i64, i64* %11 
+  %13 = add   i64 %4, 8 
+  %14 = inttoptr i64 %13 to i64* 
+  %15 = load  i64, i64* %14 
+  %16 = inttoptr i64 %9 to i64* 
   %17 = load  i64, i64* %16 
-  %18 = add   i64 %6, 8 
+  %18 = add   i64 %9, 8 
   %19 = inttoptr i64 %18 to i64* 
-  %20 = getelementptr  i64, i64* %19, i64 0 
-  %21 = load  i64, i64* %20 
-  %22 = inttoptr i64 %13 to i64* 
-  %23 = getelementptr  i64, i64* %22, i64 0 
-  %24 = load  i64, i64* %23 
-  %25 = add   i64 %13, 8 
-  %26 = inttoptr i64 %25 to i64* 
-  %27 = getelementptr  i64, i64* %26, i64 0 
-  %28 = load  i64, i64* %27 
-  %29 = icmp eq i64 %24, %17 
-  br i1 %29, label %if.then1, label %if.else1 
+  %20 = load  i64, i64* %19 
+  %21 = icmp eq i64 %17, %12 
+  br i1 %21, label %if.then1, label %if.else1 
 if.else:
   ret i1 0 
 if.then1:
-  %30 = musttail call fastcc  i1  @"wybe.string.=<0>"(i64  %21, i64  %28)  
-  ret i1 %30 
+  %22 = tail call fastcc  i2  @"wybe.string.<=>#cont#2<0>"(i2  1, i64  %15, i64  %20, i64  %15, i64  %20)  
+  %23 = icmp eq i2 %22, 1 
+  ret i1 %23 
 if.else1:
   ret i1 0 
 }
 
 
-define external fastcc  i64 @"student.student.id<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"student.student.id<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#rec##0" to i64* 
-  %1 = getelementptr  i64, i64* %0, i64 0 
-  %2 = load  i64, i64* %1 
-  ret i64 %2 
+  %1 = load  i64, i64* %0 
+  ret i64 %1 
 }
 
 
-define external fastcc  i64 @"student.student.id<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"student.student.id<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 16 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -765,23 +789,21 @@ entry:
   %5 = trunc i64 16 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %3, i8*  %4, i32  %5, i1  0)  
   %6 = inttoptr i64 %2 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 %"#field##0", i64* %7 
+  store  i64 %"#field##0", i64* %6 
   ret i64 %2 
 }
 
 
-define external fastcc  i64 @"student.student.major<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"student.student.major<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = add   i64 %"#rec##0", 8 
   %1 = inttoptr i64 %0 to i64* 
-  %2 = getelementptr  i64, i64* %1, i64 0 
-  %3 = load  i64, i64* %2 
-  ret i64 %3 
+  %2 = load  i64, i64* %1 
+  ret i64 %2 
 }
 
 
-define external fastcc  i64 @"student.student.major<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"student.student.major<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 16 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -792,86 +814,74 @@ entry:
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %3, i8*  %4, i32  %5, i1  0)  
   %6 = add   i64 %2, 8 
   %7 = inttoptr i64 %6 to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
-  store  i64 %"#field##0", i64* %8 
+  store  i64 %"#field##0", i64* %7 
   ret i64 %2 
 }
 
 
-define external fastcc  i64 @"student.student.student<0>"(i64  %"id##0", i64  %"major##0")    {
+define external fastcc  i64 @"student.student.student<0>"(i64  %"id##0", i64  %"major##0") alwaysinline   {
 entry:
   %0 = trunc i64 16 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 %"id##0", i64* %4 
-  %5 = add   i64 %2, 8 
-  %6 = inttoptr i64 %5 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 %"major##0", i64* %7 
+  store  i64 %"id##0", i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 %"major##0", i64* %5 
   ret i64 %2 
 }
 
 
-define external fastcc  {i64, i64} @"student.student.student<1>"(i64  %"#result##0")    {
+define external fastcc  {i64, i64} @"student.student.student<1>"(i64  %"#result##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#result##0" to i64* 
-  %1 = getelementptr  i64, i64* %0, i64 0 
-  %2 = load  i64, i64* %1 
-  %3 = add   i64 %"#result##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = insertvalue {i64, i64} undef, i64 %2, 0 
-  %8 = insertvalue {i64, i64} %7, i64 %6, 1 
-  ret {i64, i64} %8 
+  %1 = load  i64, i64* %0 
+  %2 = add   i64 %"#result##0", 8 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = load  i64, i64* %3 
+  %5 = insertvalue {i64, i64} undef, i64 %1, 0 
+  %6 = insertvalue {i64, i64} %5, i64 %4, 1 
+  ret {i64, i64} %6 
 }
 
 
-define external fastcc  i1 @"student.student.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"student.student.~=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#left##0" to i64* 
-  %1 = getelementptr  i64, i64* %0, i64 0 
-  %2 = load  i64, i64* %1 
-  %3 = add   i64 %"#left##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
+  %1 = load  i64, i64* %0 
+  %2 = add   i64 %"#left##0", 8 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = load  i64, i64* %3 
+  %5 = inttoptr i64 %"#right##0" to i64* 
   %6 = load  i64, i64* %5 
-  %7 = inttoptr i64 %"#right##0" to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
+  %7 = add   i64 %"#right##0", 8 
+  %8 = inttoptr i64 %7 to i64* 
   %9 = load  i64, i64* %8 
-  %10 = add   i64 %"#right##0", 8 
-  %11 = inttoptr i64 %10 to i64* 
-  %12 = getelementptr  i64, i64* %11, i64 0 
-  %13 = load  i64, i64* %12 
-  %14 = icmp eq i64 %2, %9 
-  br i1 %14, label %if.then, label %if.else 
+  %10 = icmp eq i64 %1, %6 
+  br i1 %10, label %if.then, label %if.else 
 if.then:
-  %15 = inttoptr i64 %6 to i64* 
-  %16 = getelementptr  i64, i64* %15, i64 0 
+  %11 = inttoptr i64 %4 to i64* 
+  %12 = load  i64, i64* %11 
+  %13 = add   i64 %4, 8 
+  %14 = inttoptr i64 %13 to i64* 
+  %15 = load  i64, i64* %14 
+  %16 = inttoptr i64 %9 to i64* 
   %17 = load  i64, i64* %16 
-  %18 = add   i64 %6, 8 
+  %18 = add   i64 %9, 8 
   %19 = inttoptr i64 %18 to i64* 
-  %20 = getelementptr  i64, i64* %19, i64 0 
-  %21 = load  i64, i64* %20 
-  %22 = inttoptr i64 %13 to i64* 
-  %23 = getelementptr  i64, i64* %22, i64 0 
-  %24 = load  i64, i64* %23 
-  %25 = add   i64 %13, 8 
-  %26 = inttoptr i64 %25 to i64* 
-  %27 = getelementptr  i64, i64* %26, i64 0 
-  %28 = load  i64, i64* %27 
-  %29 = icmp eq i64 %24, %17 
-  br i1 %29, label %if.then1, label %if.else1 
+  %20 = load  i64, i64* %19 
+  %21 = icmp eq i64 %17, %12 
+  br i1 %21, label %if.then1, label %if.else1 
 if.else:
-  %33 = xor i1 0, 1 
-  ret i1 %33 
+  %26 = xor i1 0, 1 
+  ret i1 %26 
 if.then1:
-  %30 = tail call fastcc  i1  @"wybe.string.=<0>"(i64  %21, i64  %28)  
-  %31 = xor i1 %30, 1 
-  ret i1 %31 
+  %22 = tail call fastcc  i2  @"wybe.string.<=>#cont#2<0>"(i2  1, i64  %15, i64  %20, i64  %15, i64  %20)  
+  %23 = icmp eq i2 %22, 1 
+  %24 = xor i1 %23, 1 
+  ret i1 %24 
 if.else1:
-  %32 = xor i1 0, 1 
-  ret i1 %32 
+  %25 = xor i1 0, 1 
+  ret i1 %25 
 }

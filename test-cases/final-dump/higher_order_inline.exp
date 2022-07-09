@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > public {inline,impure} (0 calls)
+module top-level code > public {inline,semipure} (0 calls)
 0: higher_order_inline.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -20,9 +20,9 @@ module top-level code > public {inline,impure} (0 calls)
     foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-gen#1 > {inline} (1 calls)
-0: higher_order_inline.gen#1<0>
-gen#1(a##0:A, ?#result##0:A)<{}; {}>:
+#closure#1 > {inline} (1 calls)
+0: higher_order_inline.#closure#1<0>
+#closure#1(a##0:A, ?#result##0:A)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(~a##0:A, ?#result##0:A) @predicate:nn:nn
@@ -47,7 +47,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  void @"higher_order_inline.<0>"()    {
+define external fastcc  void @"higher_order_inline.<0>"() alwaysinline   {
 entry:
   tail call ccc  void  @print_int(i64  1)  
   tail call ccc  void  @putchar(i8  10)  
@@ -55,7 +55,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"higher_order_inline.gen#1<0>"(i64  %"#env##0", i64  %"a##0")    {
+define external fastcc  i64 @"higher_order_inline.#closure#1<0>"(i64  %"#env##0", i64  %"a##0") alwaysinline   {
 entry:
   ret i64 %"a##0" 
 }

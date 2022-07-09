@@ -11,7 +11,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-module top-level code > public {impure} (0 calls)
+module top-level code > public {semipure} (0 calls)
 0: io.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -76,7 +76,7 @@ entry:
 }
 
 
-define external fastcc  void @"io.myprint_a<0>"(i64  %"x##0")    {
+define external fastcc  void @"io.myprint_a<0>"(i64  %"x##0") alwaysinline   {
 entry:
   tail call ccc  void  @print_int(i64  %"x##0")  
   tail call ccc  void  @putchar(i8  10)  
@@ -84,7 +84,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"io.myprint_b<0>"(i64  %"x##0")    {
+define external fastcc  i64 @"io.myprint_b<0>"(i64  %"x##0") alwaysinline   {
 entry:
   tail call ccc  void  @print_int(i64  %"x##0")  
   tail call ccc  void  @putchar(i8  10)  

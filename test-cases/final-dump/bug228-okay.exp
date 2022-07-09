@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : res: fromList [(bug228-okay.res,wybe.int @bug228-okay:1:1)]
   procs           : 
 
-module top-level code > public {impure} (0 calls)
+module top-level code > public {semipure} (0 calls)
 0: bug228-okay.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -73,7 +73,7 @@ entry:
 }
 
 
-define external fastcc  {i64, i64} @"bug228-okay.bar<0>"()    {
+define external fastcc  {i64, i64} @"bug228-okay.bar<0>"() alwaysinline   {
 entry:
   %0 = load  i64, i64* @"resource#bug228-okay.res" 
   store  i64 %0, i64* @"resource#bug228-okay.res" 
@@ -83,7 +83,7 @@ entry:
 }
 
 
-define external fastcc  void @"bug228-okay.init_res<0>"()    {
+define external fastcc  void @"bug228-okay.init_res<0>"() alwaysinline   {
 entry:
   store  i64 2, i64* @"resource#bug228-okay.res" 
   ret void 

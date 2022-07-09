@@ -22,7 +22,7 @@ AFTER EVERYTHING:
   submodules      : coordinate.Coordinate
   procs           : 
 
-module top-level code > public {impure} (0 calls)
+module top-level code > public {semipure} (0 calls)
 0: coordinate.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
@@ -93,26 +93,21 @@ entry:
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 1000, i64* %4 
-  %5 = add   i64 %2, 8 
-  %6 = inttoptr i64 %5 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
+  store  i64 1000, i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 1000, i64* %5 
+  %6 = add   i64 %2, 16 
+  %7 = inttoptr i64 %6 to i64* 
   store  i64 1000, i64* %7 
   %8 = add   i64 %2, 16 
   %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  store  i64 1000, i64* %10 
-  %11 = add   i64 %2, 16 
-  %12 = inttoptr i64 %11 to i64* 
-  %13 = getelementptr  i64, i64* %12, i64 0 
-  store  i64 8000, i64* %13 
+  store  i64 8000, i64* %9 
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @coordinate.1, i32 0, i32 0) to i64))  
-  %14 = add   i64 %2, 16 
-  %15 = inttoptr i64 %14 to i64* 
-  %16 = getelementptr  i64, i64* %15, i64 0 
-  %17 = load  i64, i64* %16 
-  tail call ccc  void  @print_int(i64  %17)  
+  %10 = add   i64 %2, 16 
+  %11 = inttoptr i64 %10 to i64* 
+  %12 = load  i64, i64* %11 
+  tail call ccc  void  @print_int(i64  %12)  
   tail call ccc  void  @putchar(i8  10)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @coordinate.3, i32 0, i32 0) to i64))  
   tail call ccc  void  @print_int(i64  1000)  
@@ -121,7 +116,7 @@ entry:
 }
 
 
-define external fastcc  i64 @"coordinate.fcopy<0>"(i64  %"crd1##0")    {
+define external fastcc  i64 @"coordinate.fcopy<0>"(i64  %"crd1##0") alwaysinline   {
 entry:
   ret i64 %"crd1##0" 
 }
@@ -278,95 +273,82 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  i1 @"coordinate.Coordinate.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"coordinate.Coordinate.=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#left##0" to i64* 
-  %1 = getelementptr  i64, i64* %0, i64 0 
-  %2 = load  i64, i64* %1 
-  %3 = add   i64 %"#left##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = add   i64 %"#left##0", 16 
-  %8 = inttoptr i64 %7 to i64* 
-  %9 = getelementptr  i64, i64* %8, i64 0 
-  %10 = load  i64, i64* %9 
-  %11 = inttoptr i64 %"#right##0" to i64* 
-  %12 = getelementptr  i64, i64* %11, i64 0 
-  %13 = load  i64, i64* %12 
-  %14 = add   i64 %"#right##0", 8 
-  %15 = inttoptr i64 %14 to i64* 
-  %16 = getelementptr  i64, i64* %15, i64 0 
-  %17 = load  i64, i64* %16 
-  %18 = add   i64 %"#right##0", 16 
-  %19 = inttoptr i64 %18 to i64* 
-  %20 = getelementptr  i64, i64* %19, i64 0 
-  %21 = load  i64, i64* %20 
-  %22 = icmp eq i64 %2, %13 
-  br i1 %22, label %if.then, label %if.else 
+  %1 = load  i64, i64* %0 
+  %2 = add   i64 %"#left##0", 8 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = load  i64, i64* %3 
+  %5 = add   i64 %"#left##0", 16 
+  %6 = inttoptr i64 %5 to i64* 
+  %7 = load  i64, i64* %6 
+  %8 = inttoptr i64 %"#right##0" to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = add   i64 %"#right##0", 8 
+  %11 = inttoptr i64 %10 to i64* 
+  %12 = load  i64, i64* %11 
+  %13 = add   i64 %"#right##0", 16 
+  %14 = inttoptr i64 %13 to i64* 
+  %15 = load  i64, i64* %14 
+  %16 = icmp eq i64 %1, %9 
+  br i1 %16, label %if.then, label %if.else 
 if.then:
-  %23 = icmp eq i64 %6, %17 
-  br i1 %23, label %if.then1, label %if.else1 
+  %17 = icmp eq i64 %4, %12 
+  br i1 %17, label %if.then1, label %if.else1 
 if.else:
   ret i1 0 
 if.then1:
-  %24 = icmp eq i64 %10, %21 
-  ret i1 %24 
+  %18 = icmp eq i64 %7, %15 
+  ret i1 %18 
 if.else1:
   ret i1 0 
 }
 
 
-define external fastcc  i64 @"coordinate.Coordinate.Coordinate<0>"(i64  %"x##0", i64  %"y##0", i64  %"z##0")    {
+define external fastcc  i64 @"coordinate.Coordinate.Coordinate<0>"(i64  %"x##0", i64  %"y##0", i64  %"z##0") alwaysinline   {
 entry:
   %0 = trunc i64 24 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
   %2 = ptrtoint i8* %1 to i64 
   %3 = inttoptr i64 %2 to i64* 
-  %4 = getelementptr  i64, i64* %3, i64 0 
-  store  i64 %"x##0", i64* %4 
-  %5 = add   i64 %2, 8 
-  %6 = inttoptr i64 %5 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 %"y##0", i64* %7 
-  %8 = add   i64 %2, 16 
-  %9 = inttoptr i64 %8 to i64* 
-  %10 = getelementptr  i64, i64* %9, i64 0 
-  store  i64 %"z##0", i64* %10 
+  store  i64 %"x##0", i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 %"y##0", i64* %5 
+  %6 = add   i64 %2, 16 
+  %7 = inttoptr i64 %6 to i64* 
+  store  i64 %"z##0", i64* %7 
   ret i64 %2 
 }
 
 
-define external fastcc  {i64, i64, i64} @"coordinate.Coordinate.Coordinate<1>"(i64  %"#result##0")    {
+define external fastcc  {i64, i64, i64} @"coordinate.Coordinate.Coordinate<1>"(i64  %"#result##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#result##0" to i64* 
-  %1 = getelementptr  i64, i64* %0, i64 0 
-  %2 = load  i64, i64* %1 
-  %3 = add   i64 %"#result##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = add   i64 %"#result##0", 16 
-  %8 = inttoptr i64 %7 to i64* 
-  %9 = getelementptr  i64, i64* %8, i64 0 
-  %10 = load  i64, i64* %9 
-  %11 = insertvalue {i64, i64, i64} undef, i64 %2, 0 
-  %12 = insertvalue {i64, i64, i64} %11, i64 %6, 1 
-  %13 = insertvalue {i64, i64, i64} %12, i64 %10, 2 
-  ret {i64, i64, i64} %13 
+  %1 = load  i64, i64* %0 
+  %2 = add   i64 %"#result##0", 8 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = load  i64, i64* %3 
+  %5 = add   i64 %"#result##0", 16 
+  %6 = inttoptr i64 %5 to i64* 
+  %7 = load  i64, i64* %6 
+  %8 = insertvalue {i64, i64, i64} undef, i64 %1, 0 
+  %9 = insertvalue {i64, i64, i64} %8, i64 %4, 1 
+  %10 = insertvalue {i64, i64, i64} %9, i64 %7, 2 
+  ret {i64, i64, i64} %10 
 }
 
 
-define external fastcc  i64 @"coordinate.Coordinate.x<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"coordinate.Coordinate.x<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#rec##0" to i64* 
-  %1 = getelementptr  i64, i64* %0, i64 0 
-  %2 = load  i64, i64* %1 
-  ret i64 %2 
+  %1 = load  i64, i64* %0 
+  ret i64 %1 
 }
 
 
-define external fastcc  i64 @"coordinate.Coordinate.x<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"coordinate.Coordinate.x<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 24 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -376,23 +358,21 @@ entry:
   %5 = trunc i64 24 to i32  
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %3, i8*  %4, i32  %5, i1  0)  
   %6 = inttoptr i64 %2 to i64* 
-  %7 = getelementptr  i64, i64* %6, i64 0 
-  store  i64 %"#field##0", i64* %7 
+  store  i64 %"#field##0", i64* %6 
   ret i64 %2 
 }
 
 
-define external fastcc  i64 @"coordinate.Coordinate.y<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"coordinate.Coordinate.y<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = add   i64 %"#rec##0", 8 
   %1 = inttoptr i64 %0 to i64* 
-  %2 = getelementptr  i64, i64* %1, i64 0 
-  %3 = load  i64, i64* %2 
-  ret i64 %3 
+  %2 = load  i64, i64* %1 
+  ret i64 %2 
 }
 
 
-define external fastcc  i64 @"coordinate.Coordinate.y<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"coordinate.Coordinate.y<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 24 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -403,23 +383,21 @@ entry:
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %3, i8*  %4, i32  %5, i1  0)  
   %6 = add   i64 %2, 8 
   %7 = inttoptr i64 %6 to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
-  store  i64 %"#field##0", i64* %8 
+  store  i64 %"#field##0", i64* %7 
   ret i64 %2 
 }
 
 
-define external fastcc  i64 @"coordinate.Coordinate.z<0>"(i64  %"#rec##0")    {
+define external fastcc  i64 @"coordinate.Coordinate.z<0>"(i64  %"#rec##0") alwaysinline   {
 entry:
   %0 = add   i64 %"#rec##0", 16 
   %1 = inttoptr i64 %0 to i64* 
-  %2 = getelementptr  i64, i64* %1, i64 0 
-  %3 = load  i64, i64* %2 
-  ret i64 %3 
+  %2 = load  i64, i64* %1 
+  ret i64 %2 
 }
 
 
-define external fastcc  i64 @"coordinate.Coordinate.z<1>"(i64  %"#rec##0", i64  %"#field##0")    {
+define external fastcc  i64 @"coordinate.Coordinate.z<1>"(i64  %"#rec##0", i64  %"#field##0") alwaysinline   {
 entry:
   %0 = trunc i64 24 to i32  
   %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
@@ -430,49 +408,42 @@ entry:
   tail call ccc  void  @llvm.memcpy.p0i8.p0i8.i32(i8*  %3, i8*  %4, i32  %5, i1  0)  
   %6 = add   i64 %2, 16 
   %7 = inttoptr i64 %6 to i64* 
-  %8 = getelementptr  i64, i64* %7, i64 0 
-  store  i64 %"#field##0", i64* %8 
+  store  i64 %"#field##0", i64* %7 
   ret i64 %2 
 }
 
 
-define external fastcc  i1 @"coordinate.Coordinate.~=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+define external fastcc  i1 @"coordinate.Coordinate.~=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
 entry:
   %0 = inttoptr i64 %"#left##0" to i64* 
-  %1 = getelementptr  i64, i64* %0, i64 0 
-  %2 = load  i64, i64* %1 
-  %3 = add   i64 %"#left##0", 8 
-  %4 = inttoptr i64 %3 to i64* 
-  %5 = getelementptr  i64, i64* %4, i64 0 
-  %6 = load  i64, i64* %5 
-  %7 = add   i64 %"#left##0", 16 
-  %8 = inttoptr i64 %7 to i64* 
-  %9 = getelementptr  i64, i64* %8, i64 0 
-  %10 = load  i64, i64* %9 
-  %11 = inttoptr i64 %"#right##0" to i64* 
-  %12 = getelementptr  i64, i64* %11, i64 0 
-  %13 = load  i64, i64* %12 
-  %14 = add   i64 %"#right##0", 8 
-  %15 = inttoptr i64 %14 to i64* 
-  %16 = getelementptr  i64, i64* %15, i64 0 
-  %17 = load  i64, i64* %16 
-  %18 = add   i64 %"#right##0", 16 
-  %19 = inttoptr i64 %18 to i64* 
-  %20 = getelementptr  i64, i64* %19, i64 0 
-  %21 = load  i64, i64* %20 
-  %22 = icmp eq i64 %2, %13 
-  br i1 %22, label %if.then, label %if.else 
+  %1 = load  i64, i64* %0 
+  %2 = add   i64 %"#left##0", 8 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = load  i64, i64* %3 
+  %5 = add   i64 %"#left##0", 16 
+  %6 = inttoptr i64 %5 to i64* 
+  %7 = load  i64, i64* %6 
+  %8 = inttoptr i64 %"#right##0" to i64* 
+  %9 = load  i64, i64* %8 
+  %10 = add   i64 %"#right##0", 8 
+  %11 = inttoptr i64 %10 to i64* 
+  %12 = load  i64, i64* %11 
+  %13 = add   i64 %"#right##0", 16 
+  %14 = inttoptr i64 %13 to i64* 
+  %15 = load  i64, i64* %14 
+  %16 = icmp eq i64 %1, %9 
+  br i1 %16, label %if.then, label %if.else 
 if.then:
-  %23 = icmp eq i64 %6, %17 
-  br i1 %23, label %if.then1, label %if.else1 
+  %17 = icmp eq i64 %4, %12 
+  br i1 %17, label %if.then1, label %if.else1 
 if.else:
-  %27 = xor i1 0, 1 
-  ret i1 %27 
+  %21 = xor i1 0, 1 
+  ret i1 %21 
 if.then1:
-  %24 = icmp eq i64 %10, %21 
-  %25 = xor i1 %24, 1 
-  ret i1 %25 
+  %18 = icmp eq i64 %7, %15 
+  %19 = xor i1 %18, 1 
+  ret i1 %19 
 if.else1:
-  %26 = xor i1 0, 1 
-  ret i1 %26 
+  %20 = xor i1 0, 1 
+  ret i1 %20 
 }
