@@ -5,7 +5,6 @@
 #include <time.h>
 #include <stdbool.h>
 #include <stdlib.h>
-#include <assert.h>
 
 double get_clock_time() {
     return ((double) clock()) / CLOCKS_PER_SEC;

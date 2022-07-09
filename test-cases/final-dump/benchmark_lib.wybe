@@ -1,0 +1,19 @@
+use benchmark
+
+# very inefficient way of calculating fibonacci sequence
+def fib(x: int) = if {
+    x = 0 ::
+        0
+    | else :: if {
+        x = 1 ::
+            1
+        | else ::
+            fib(x-1) + fib(x-2)
+    }
+}
+
+!benchmark.cpu_time({impure} { ?@1 = fib(42) } , ?l1, ?time)
+# benchmark should still run since function call is impure
+
+!benchmark.benchmark({impure} { ?@1 = fib(42) } , ?l2)
+# we don't use `l2`, but the benchmark should still run since it's an impure proc

@@ -3,31 +3,18 @@
 
 use foreign object benchmark_impl
 
-# Nice high-level wrapper around `start` and `finish`,
-# it will return the time it takes to run `func`, a higher-order proc
-pub def {impure} measure(func: (input: T, ?output: T2), input: T, ?output: T2, ?seconds_elapsed: float) use !io {
-    !start(?started)
-    func(input, ?output)
-    # !start(?finished)
-    !finish(started, ?seconds_elapsed)
-}
-
-# Starts a measurement
-#
-# Usage note: every call to `start` should be matched with exactly one call to
-# `finish`, since internally `start` and `finish` malloc and
-# free a internal C data structure.
-pub def {impure, noinline} start(?started: float) use !io {
-    foreign c get_clock_time(?started)
-    # !print("clock time: ")
-    # !print(started)
-    # !nl
-}
-
-# Completes a measurement, returns a floating-point number seconds_elapsed
-# This may only be called once (this is enforced by the compiler since the
-# state argument is marked with `{unique}`)
-pub def {impure, noinline} finish(started: float, ?seconds_elapsed: float) use !io {
-    foreign c get_clock_time(?finished)
+# Benchmarks a piece of code, returning the number of seconds of CPU time elapsed.
+pub def {impure, noinline} cpu_time(func: {impure}(?output: T), ?output: T, ?seconds_elapsed: float) use !io {
+    foreign c {impure} get_clock_time(?started)
+    !func(?output)
+    foreign c {impure} get_clock_time(?finished)
     ?seconds_elapsed = finished - started
+}
+
+# Benchmarks a piece of code and prints how long it took to run.
+pub def {impure, noinline} benchmark(func: {impure}(?T), ?output: T) use !io {
+    !cpu_time(func, ?output, ?seconds_elapsed)
+    !print("Benchmark took ")
+    !print(seconds_elapsed)
+    !println(" seconds")
 }
