@@ -12,8 +12,7 @@ def fib(x: int) = if {
     }
 }
 
-!benchmark.cpu_time({impure} { ?@1 = fib(42) } , ?l1, ?time)
-# benchmark should still run since function call is impure
+!benchmark.cpu_time({impure} { ?foo = fib(42) } , ?time)
+!print(time)
 
-!benchmark.benchmark({impure} { ?@1 = fib(42) } , ?l2)
-# we don't use `l2`, but the benchmark should still run since it's an impure proc
+!benchmark.benchmark({impure} { ?foo = fib(42) })
