@@ -519,7 +519,7 @@ cgen (prim@(PrimCall callSiteID pspec _ args _):nextPrims) isLeaf = do
     let isTailPosition = List.null nextPrims' && isLeaf
 
     -- if the call is to an external module, declare it
-    addExternClosure pspec
+    addExternProc pspec
 
     let (inArgs,outArgs) = partitionArgs args'
     logCodegen $ "In args = " ++ show inArgs
@@ -1200,7 +1200,7 @@ cgenArgConst' arg = shouldnt $ "cgenArgConst of " ++ show arg
 
 cgenFuncRef :: ProcSpec -> Codegen C.Constant
 cgenFuncRef ps = do
-    addExternClosure ps
+    addExternProc ps
     let fName = LLVMAST.Name $ fromString $ show ps
     psType <- HigherOrderType defaultProcModifiers . (primParamTypeFlow <$>)
           <$> primActualParams ps
@@ -1221,10 +1221,10 @@ primActualParams :: ProcSpec -> Codegen [PrimParam]
 primActualParams pspec = lift2 $ do
     primParams <- protoRealParams . procImplnProto . procImpln
               =<< getProcDef pspec
-    let nonFreeParams = List.filter ((/= Free) . primParamFlowType) primParams
     ifM (isClosureProc pspec)
-        (return $ setPrimParamType AnyType <$> envPrimParam : nonFreeParams)
-        (return nonFreeParams)
+        (let nonFree = List.filter ((/= Free) . primParamFlowType) primParams
+         in return $ setPrimParamType AnyType <$> envPrimParam : nonFree)
+        (return primParams)
 
 
 neededFreeArgs :: ProcSpec -> [PrimArg] -> Codegen [PrimArg]
@@ -1234,8 +1234,8 @@ neededFreeArgs pspec args = lift2 $ do
     List.map snd <$> filterM (paramIsReal . fst) (zip params args)
 
 
-addExternClosure :: ProcSpec -> Codegen ()
-addExternClosure ps@(ProcSpec mod _ _ _) = do
+addExternProc :: ProcSpec -> Codegen ()
+addExternProc ps@(ProcSpec mod _ _ _) = do
     args <- (primParamToArg <$>) <$> primActualParams ps
     thisMod <- lift2 getModuleSpec
     fileMod <- lift2 $ getModule modRootModSpec
