@@ -3979,7 +3979,7 @@ instance Show Exp where
   show (CondExp cond thn els) =
     "if {" ++ show cond ++ ":: " ++ show thn ++ " | " ++ show els ++ "}"
   show (Fncall maybeMod fn resourceful args) =
-    flowPrefix (if resourceful then ParamInOut else ParamIn) ++ maybeModPrefix maybeMod ++ fn ++ showArguments args
+    (if resourceful then "!" else "") ++ maybeModPrefix maybeMod ++ fn ++ showArguments args
   show (ForeignFn lang fn flags args) =
     "foreign " ++ lang ++ " " ++ fn
     ++ (if List.null flags then "" else " " ++ unwords flags)
