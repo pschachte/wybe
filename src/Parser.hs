@@ -12,11 +12,11 @@ module Parser where
 
 import AST hiding (option)
 import Data.Set as Set
-import Data.List as List
+import Data.List as List hiding (uncons)
 import Data.Maybe as Maybe
 import Data.Bits
 import Data.Either.Extra (mapLeft)
-import Control.Monad.Identity (Identity)
+import Control.Monad.Identity (Identity (runIdentity))
 import Scanner
 import Util
 import Snippets
@@ -26,6 +26,9 @@ import Text.Parsec.Pos
 import Data.Functor
 import Control.Monad
 import Debug.Trace
+import Options (LogSelection(..), defaultOptions)
+import System.IO.Unsafe (unsafePerformIO)
+import Control.Monad.Trans (lift)
 
 
 -----------------------------------------------------------------------------
@@ -33,7 +36,7 @@ import Debug.Trace
 -----------------------------------------------------------------------------
 
 -- | The parser monad.
-type Parser a = Parsec [Token] () a
+type Parser a = ParsecT [Token] () Compiler a
 
 
 -- | Report a syntax error
@@ -47,8 +50,8 @@ sourcePos = statePos <$> getParserState
 
 
 -- | Parse a Wybe module.
-parseWybe :: [Token] -> FilePath -> Either ParseError [Item]
-parseWybe toks file = parse (maybeSetPosition toks items <* eof) file toks
+parseWybe :: [Token] -> FilePath -> Compiler (Either ParseError [Item])
+parseWybe toks file = runParserT (maybeSetPosition toks items <* eof) () file toks
 
 
 -- | Set the Parser position to the position of the head Token, if it exists
@@ -306,7 +309,7 @@ processProcModifier ctx "pure"     = updateModsImpurity ctx "pure" PromisedPure
 processProcModifier ctx "semipure" = updateModsImpurity ctx "semipure" Semipure
 processProcModifier ctx "impure"   = updateModsImpurity ctx "impure" Impure
 processProcModifier ctx "resource" = updateModsResource ctx "resource" True
-processProcModifier ctx modName    = 
+processProcModifier ctx modName    =
     const $ Left $ "Unknown modifier '" ++ modName ++ "' in " ++ ctx
 
 
@@ -314,7 +317,7 @@ processProcModifier ctx modName    =
 -- | Update the ProcModifiers to specify the given determinism, which was
 -- specified with the given identifier.  Since Det is the default, and can't be
 -- explicitly specified, it's alway OK to change from Det to something else.
-updateModsDetism :: String -> String -> Determinism -> ProcModifiers 
+updateModsDetism :: String -> String -> Determinism -> ProcModifiers
                  -> Either String ProcModifiers
 updateModsDetism _ _ detism mods@ProcModifiers{modifierDetism=Det} =
     return mods {modifierDetism=detism}
@@ -326,30 +329,30 @@ updateModsDetism ctx modName detism mods =
 -- with the given identifier.  Since MayInline is the default, and can't be
 -- explicitly specified, it's alway OK to change from MayInline to something
 -- else.
-updateModsInlining :: String -> String -> Inlining -> ProcModifiers 
+updateModsInlining :: String -> String -> Inlining -> ProcModifiers
                    -> Either String ProcModifiers
 updateModsInlining _ _ inlining mods@ProcModifiers{modifierInline=MayInline} =
     return $ mods {modifierInline=inlining}
-updateModsInlining ctx modName _ mods =    
+updateModsInlining ctx modName _ mods =
     Left $ modifierConflictMsg modName ctx
-    
+
 
 -- | Update the ProcModifiers to specify the given Impurity, which was specified
 -- with the given identifier.  Since Pure is the default, and can't be
--- explicitly specified, it's alway OK to change from Pure to something
+-- explicitly specified, it's always OK to change from Pure to something
 -- else.
-updateModsImpurity :: String -> String -> Impurity -> ProcModifiers 
+updateModsImpurity :: String -> String -> Impurity -> ProcModifiers
                    -> Either String ProcModifiers
 updateModsImpurity _ _ impurity mods@ProcModifiers{modifierImpurity=Pure} =
     return $ mods {modifierImpurity=impurity}
-updateModsImpurity ctx modName _ mods =    
+updateModsImpurity ctx modName _ mods =
     Left $ modifierConflictMsg modName ctx
 
--- | Update the ProcModifiers to specify the given Resourcefulness, which was 
--- specified with the given identifier.  Since resourceless is the default, 
+-- | Update the ProcModifiers to specify the given Resourcefulness, which was
+-- specified with the given identifier.  Since resourceless is the default,
 -- and can't be explicitly specified, it's alway OK to change from resourceless
 -- to resourceful.
-updateModsResource :: String -> String -> Bool -> ProcModifiers 
+updateModsResource :: String -> String -> Bool -> ProcModifiers
                    -> Either String ProcModifiers
 updateModsResource _ _ resful mods@ProcModifiers{modifierResourceful=False} =
     return $ mods {modifierResourceful=resful}
@@ -358,12 +361,12 @@ updateModsResource ctx modName _ mods =
 
 
 modifierConflictMsg :: String -> String -> String
-modifierConflictMsg mod ctx = 
+modifierConflictMsg mod ctx =
     "Modifier '" ++ mod ++ "' conflicts with earlier modifier in " ++ ctx
 
 
 modifierError :: SourcePos -> String -> String -> Either (SourcePos,String) a
-modifierError pos modName ctx = 
+modifierError pos modName ctx =
     syntaxError pos $ "Modifier '" ++ modName ++ "' cannot be used in a " ++ ctx
 
 -----------------------------------------------------------------------------
@@ -393,7 +396,10 @@ stmtSeq = term >>= parseWith termToBody
 
 -- |Parse a single Placed Stmt.
 stmt :: Parser (Placed Stmt)
-stmt = limitedTerm lowestStmtPrecedence >>= parseWith termToStmt
+stmt = do
+    term <- limitedTerm lowestStmtPrecedence
+    res <- parseWith termToStmt term
+    return res
 
 
 -- |Parse a placed Exp
@@ -422,8 +428,8 @@ limitedTerm precedence = termFirst >>= termRest precedence
 -- Valid suffixes include parenthesised argument lists or square bracketed
 -- indices.  If both prefix and suffix are present, the suffix binds tighter.
 termFirst :: Parser Term
-termFirst = 
-    ((prefixOp >>= (primaryTerm >>=) . applyPrefixOp) <|> primaryTerm) 
+termFirst =
+    ((prefixOp >>= (primaryTerm >>=) . applyPrefixOp) <|> primaryTerm)
         >>= termSuffix
 
 
@@ -755,7 +761,9 @@ defaultGuard = (=="else")
 
 -- | Tests an individual token.
 takeToken :: (Token -> Maybe a) -> Parser a
-takeToken = token show tokenPosition
+takeToken = tokenPrim show nextpos
+    -- XXX: I don't think this is correct
+    where nextpos pos token tks = tokenPosition token
 
 
 -- | Parse a float literal token.
@@ -1148,10 +1156,10 @@ termToExp (Call pos [] "^" ParamIn [exp,op]) = do
     exp' <- termToExp exp
     op'  <- termToExp op
     case op' of
-        Placed (Fncall mod fn args) _
-            -> return $ Placed (Fncall mod fn (exp':args)) pos
+        Placed (Fncall mod fn resourceful args) _
+            -> return $ Placed (Fncall mod fn resourceful (exp':args)) pos
         Placed (Var var ParamIn Ordinary) _
-            -> return $ Placed (Fncall [] var [exp']) pos
+            -> return $ Placed (Fncall [] var False [exp']) pos
         _ -> syntaxError pos "invalid second argument to '^'"
 termToExp (Call pos [] "@" flow exps) = do
     exps' <- mapM termToExp exps
@@ -1193,7 +1201,7 @@ termToExp (Call pos [] sep ParamIn [])
 termToExp (Call pos [] var flow []) = -- looks like a var; assume it is
     return $ Placed (Var var flow Ordinary) pos
 termToExp (Call pos mod fn flow args) =
-    (`Placed` pos) . Fncall mod fn <$> mapM termToExp args
+    (`Placed` pos) . Fncall mod fn (flow == ParamInOut) <$> mapM termToExp args
 termToExp (Foreign pos lang inst flags args) =
     (`Placed` pos) . ForeignFn lang inst flags <$> mapM termToExp args
 termToExp (IntConst pos num) = Right $ Placed (IntValue num) pos
@@ -1217,7 +1225,7 @@ termToProcModifiers ctx (Embraced pos Brace mods _) = do
     idents <- mapM termToIdent mods
     processProcModifiers pos ctx idents
 termToProcModifiers ctx other
-    = syntaxError (termPos other) 
+    = syntaxError (termPos other)
     $ "invalid modifiers " ++ show other ++ " in " ++ ctx
 
 
@@ -1427,17 +1435,19 @@ testFile :: String -> IO ()
 testFile file = do
     stream <- fileTokens file
     putStrLn "--------------------"
-    case parseWybe stream file of
+    res <- runCompiler defaultOptions (parseWybe stream file)
+    case res of
         Left err -> print err
         Right is -> mapM_ print is
 
-test :: Int -> String -> Term
+test :: Int -> String -> Compiler Term
 test prec input = do
     let toks = stringTokens input
-    case parse (maybeSetPosition toks (limitedTerm prec) <* eof) "<string>" toks of
-        Left err -> StringConst (errorPos err) (show err) DoubleQuote
-        Right is -> is
+    r <- runParserT (maybeSetPosition toks (limitedTerm prec) <* eof) () "<string>" toks
+    case r  of
+        Left err -> return $ StringConst (errorPos err) (show err) DoubleQuote
+        Right is -> return $ is
 
-testParser :: Parser a -> String -> Either ParseError a
-testParser parser input = parse (maybeSetPosition toks parser <* eof) "<string>" toks
+testParser :: Parser a -> String -> Compiler (Either ParseError a)
+testParser parser input = do runParserT (maybeSetPosition toks parser <* eof) () "<string>" toks
   where toks = stringTokens input

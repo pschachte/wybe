@@ -47,7 +47,7 @@ module AST (
   -- *AST types
   Module(..), isRootModule, ModuleInterface(..), ModuleImplementation(..), InterfaceHash, PubProcInfo(..),
   ImportSpec(..), importSpec, Pragma(..), addPragma,
-  descendentModules, sameOriginModules, 
+  descendentModules, sameOriginModules,
   refersTo,
   enterModule, reenterModule, exitModule, reexitModule, inModule,
   emptyInterface, emptyImplementation,
@@ -68,7 +68,7 @@ module AST (
   setPrimParamType, setTypeFlowType,
   flowsIn, flowsOut, primFlowToFlowDir, isInputFlow, isOutputFlow,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
-  expToStmt, seqToStmt, stmtsImpurity, stmtImpurity, procCallToExp,
+  seqToStmt, stmtsImpurity, stmtImpurity, procCallToExp,
   stmtsInputs, expOutputs, pexpListOutputs, expInputs, pexpListInputs,
   setExpTypeFlow, setPExpTypeFlow,
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
@@ -785,7 +785,7 @@ getModuleImplementationMaybe fn = do
 genProcName :: ProcName -> Compiler ProcName
 genProcName pname = do
   names <- getModule procNames
-  let ctr = 1 + Map.findWithDefault 0 pname names 
+  let ctr = 1 + Map.findWithDefault 0 pname names
   updateModule (\mod -> mod {procNames = Map.alter (const $ Just ctr) pname names })
   return $ specialName2 pname $ show ctr
 
@@ -912,7 +912,7 @@ lookupType :: String -> OptPos -> TypeSpec -> Compiler TypeSpec
 lookupType context pos ty = do
     (msgs, ty') <- lookupType' context pos ty
     mapM_ queueMessage msgs
-    return ty' 
+    return ty'
 
 
 -- |Find the definition of the specified type visible from the current module.
@@ -924,7 +924,7 @@ lookupType' _ _ ty@TypeVariable{} = return ([], ty)
 lookupType' _ _ ty@Representation{} = return ([], ty)
 lookupType' context pos ty@HigherOrderType{higherTypeParams=typeFlows} = do
     (msgs, types) <- unzip <$> mapM (lookupType' context pos . typeFlowType) typeFlows
-    return (concat msgs, 
+    return (concat msgs,
             ty{higherTypeParams=zipWith TypeFlow types (typeFlowMode <$> typeFlows)})
 lookupType' context pos ty@(TypeSpec [] typename args)
   | typename == currentModuleAlias = do
@@ -2461,7 +2461,7 @@ foldExp' sfn efn val (CondExp stmt e1 e2) pos =
     let val1 = defaultPlacedApply (foldStmt sfn efn val) pos stmt
         val2 = placedApply (foldExp sfn efn val1) e1
     in         defaultPlacedApply (foldExp sfn efn val2) pos e2
-foldExp' sfn efn val (Fncall _ _ exps) pos = foldExps sfn efn pos val exps
+foldExp' sfn efn val (Fncall _ _ _ exps) pos = foldExps sfn efn pos val exps
 foldExp' sfn efn val (ForeignFn _ _ _ exps) pos = foldExps sfn efn pos val exps
 foldExp' sfn efn val (CaseExp exp cases deflt) pos =
     let val1 = defaultPlacedApply (foldExp sfn efn val) pos exp
@@ -2959,7 +2959,9 @@ data Exp
       | Where [Placed Stmt] (Placed Exp)
       | DisjExp (Placed Exp) (Placed Exp)
       | CondExp (Placed Stmt) (Placed Exp) (Placed Exp)
-      | Fncall ModSpec ProcName [Placed Exp]
+      | Fncall ModSpec ProcName Bool [Placed Exp]
+        -- ^ Bool flag indicates whether the call is allowed to use resources
+        -- (! marker)
       | ForeignFn Ident ProcName [Ident] [Placed Exp]
       --- | An expression that matches the first expression against each of the
       --  fst expressions in the list, returning the value of the snd expression
@@ -3338,32 +3340,32 @@ trustArgInt arg = trustFromJust
 
 
 -- |Convert a statement read as an expression to a Stmt.
-expToStmt :: Exp -> Stmt
-expToStmt (Fncall [] "&" args) = And $ List.map (fmap expToStmt) args
-expToStmt (Fncall [] "|"  args) = Or (List.map (fmap expToStmt) args) Nothing Nothing
-expToStmt (Fncall [] "~" [arg]) = Not $ fmap expToStmt arg
-expToStmt (Fncall [] "~" args) = shouldnt $ "non-unary 'not' " ++ show args
-expToStmt (Fncall maybeMod name args) =
-    ProcCall (First maybeMod name Nothing) Det False args
-expToStmt (ForeignFn lang name flags args) =
-    ForeignCall lang name flags args
-expToStmt (Var name ParamIn _) = ProcCall (First [] name Nothing) Det False []
-expToStmt (Var name ParamInOut _) = ProcCall (First [] name Nothing) Det True []
-expToStmt expr = shouldnt $ "non-Fncall expr " ++ show expr
+-- expToStmt :: Exp -> Stmt
+-- expToStmt (Fncall [] "&" _ args) = And $ List.map (fmap expToStmt) args
+-- expToStmt (Fncall [] "|" _ args) = Or (List.map (fmap expToStmt) args) Nothing Nothing
+-- expToStmt (Fncall [] "~" _ [arg]) = Not $ fmap expToStmt arg
+-- expToStmt (Fncall [] "~" _ args) = shouldnt $ "non-unary 'not' " ++ show args
+-- expToStmt (Fncall maybeMod name resourceful args) =
+--     ProcCall (First maybeMod name Nothing) Det resourceful args
+-- expToStmt (ForeignFn lang name flags args) =
+--     ForeignCall lang name flags args
+-- expToStmt (Var name ParamIn _) = ProcCall (First [] name Nothing) Det False []
+-- expToStmt (Var name ParamInOut _) = ProcCall (First [] name Nothing) Det True []
+-- expToStmt expr = shouldnt $ "non-Fncall expr " ++ show expr
 
 
 procCallToExp :: Stmt -> Exp
-procCallToExp (ProcCall (First maybeMod name Nothing) _ _ args) =
-    Fncall maybeMod name args
+procCallToExp (ProcCall (First maybeMod name Nothing) _ resourceful args) =
+    Fncall maybeMod name resourceful args
 procCallToExp stmt =
     shouldnt $ "converting non-proccall to expr " ++ showStmt 4 stmt
 
 
 -- |Return all input variables to each statement in a list of statements
 stmtsInputs :: [Placed Stmt] -> Set VarName
-stmtsInputs = foldStmts (const . const) 
-                        ((const .) . (. expInputs) . Set.union) 
-                        Set.empty 
+stmtsInputs = foldStmts (const . const)
+                        ((const .) . (. expInputs) . Set.union)
+                        Set.empty
 
 
 -- |Return the set of variables that might be freshly assigned by the
@@ -3385,7 +3387,7 @@ expOutputs (Typed expr _ _) = expOutputs expr
 expOutputs (DisjExp pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
 expOutputs (Where _ pexp) = expOutputs $ content pexp
 expOutputs (CondExp _ pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
-expOutputs (Fncall _ _ args) = pexpListOutputs args
+expOutputs (Fncall _ _ _ args) = pexpListOutputs args
 expOutputs (ForeignFn _ _ _ args) = pexpListOutputs args
 expOutputs (CaseExp _ cases deflt) =
     pexpListOutputs $ maybe id (:) deflt (snd <$> cases)
@@ -3415,7 +3417,7 @@ expInputs (Typed expr _ _) = expInputs expr
 expInputs (Where _ pexp) = expInputs $ content pexp
 expInputs (DisjExp pexp1 pexp2) = pexpListInputs [pexp1,pexp2]
 expInputs (CondExp _ pexp1 pexp2) = pexpListInputs [pexp1,pexp2]
-expInputs (Fncall _ _ args) = pexpListInputs args
+expInputs (Fncall _ _ _ args) = pexpListInputs args
 expInputs (ForeignFn _ _ _ args) = pexpListInputs args
 expInputs (CaseExp exp cases deflt) =
     expInputs (content exp)
@@ -3998,8 +4000,8 @@ instance Show Exp where
     "(" ++ show e1 ++ " | " ++ show e2 ++ ")"
   show (CondExp cond thn els) =
     "if {" ++ show cond ++ ":: " ++ show thn ++ " | " ++ show els ++ "}"
-  show (Fncall maybeMod fn args) =
-    maybeModPrefix maybeMod ++ fn ++ showArguments args
+  show (Fncall maybeMod fn resourceful args) =
+    flowPrefix (if resourceful then ParamInOut else ParamIn) ++ maybeModPrefix maybeMod ++ fn ++ showArguments args
   show (ForeignFn lang fn flags args) =
     "foreign " ++ lang ++ " " ++ fn
     ++ (if List.null flags then "" else " " ++ unwords flags)

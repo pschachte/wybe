@@ -458,7 +458,9 @@ loadModuleFromSrcFile mspec srcfile maybeDir = do
     Informational <!> "Loading module " ++ showModSpec mspec
                       ++ " from " ++ srcfile
     tokens <- (liftIO . fileTokens) srcfile
-    let parseTree = parseWybe tokens srcfile
+    logBuild $ "Tokens: " ++ show tokens
+    parseTree <- parseWybe tokens srcfile
+    logBuild $ "Parsed source " ++ show parseTree
     mods <- either
             (\er -> errmsg
                     (Just $ errorPos er)
