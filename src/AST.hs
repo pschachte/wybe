@@ -68,7 +68,7 @@ module AST (
   setPrimParamType, setTypeFlowType,
   flowsIn, flowsOut, primFlowToFlowDir, isInputFlow, isOutputFlow,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
-  seqToStmt, stmtsImpurity, stmtImpurity, procCallToExp,
+  seqToStmt, stmtsImpurity, stmtImpurity,
   stmtsInputs, expOutputs, pexpListOutputs, expInputs, pexpListInputs,
   setExpTypeFlow, setPExpTypeFlow,
   Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
@@ -2960,8 +2960,8 @@ data Exp
       | DisjExp (Placed Exp) (Placed Exp)
       | CondExp (Placed Stmt) (Placed Exp) (Placed Exp)
       | Fncall ModSpec ProcName Bool [Placed Exp]
-        -- ^ Bool flag indicates whether the call is allowed to use resources
-        -- (! marker)
+        --                      ^ Bool flag indicates whether the call
+        --                        is allowed to use resources (! prefix)
       | ForeignFn Ident ProcName [Ident] [Placed Exp]
       --- | An expression that matches the first expression against each of the
       --  fst expressions in the list, returning the value of the snd expression
@@ -3337,28 +3337,6 @@ trustArgInt :: PrimArg -> Integer
 trustArgInt arg = trustFromJust
                   "LPVM instruction argument must be an integer constant."
                   $ argIntVal arg
-
-
--- |Convert a statement read as an expression to a Stmt.
--- expToStmt :: Exp -> Stmt
--- expToStmt (Fncall [] "&" _ args) = And $ List.map (fmap expToStmt) args
--- expToStmt (Fncall [] "|" _ args) = Or (List.map (fmap expToStmt) args) Nothing Nothing
--- expToStmt (Fncall [] "~" _ [arg]) = Not $ fmap expToStmt arg
--- expToStmt (Fncall [] "~" _ args) = shouldnt $ "non-unary 'not' " ++ show args
--- expToStmt (Fncall maybeMod name resourceful args) =
---     ProcCall (First maybeMod name Nothing) Det resourceful args
--- expToStmt (ForeignFn lang name flags args) =
---     ForeignCall lang name flags args
--- expToStmt (Var name ParamIn _) = ProcCall (First [] name Nothing) Det False []
--- expToStmt (Var name ParamInOut _) = ProcCall (First [] name Nothing) Det True []
--- expToStmt expr = shouldnt $ "non-Fncall expr " ++ show expr
-
-
-procCallToExp :: Stmt -> Exp
-procCallToExp (ProcCall (First maybeMod name Nothing) _ resourceful args) =
-    Fncall maybeMod name resourceful args
-procCallToExp stmt =
-    shouldnt $ "converting non-proccall to expr " ++ showStmt 4 stmt
 
 
 -- |Return all input variables to each statement in a list of statements
