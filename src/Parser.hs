@@ -12,11 +12,11 @@ module Parser where
 
 import AST hiding (option)
 import Data.Set as Set
-import Data.List as List hiding (uncons)
+import Data.List as List
 import Data.Maybe as Maybe
 import Data.Bits
 import Data.Either.Extra (mapLeft)
-import Control.Monad.Identity (Identity (runIdentity))
+import Control.Monad.Identity (Identity)
 import Scanner
 import Util
 import Snippets
@@ -26,9 +26,6 @@ import Text.Parsec.Pos
 import Data.Functor
 import Control.Monad
 import Debug.Trace
-import Options (LogSelection(..), defaultOptions)
-import System.IO.Unsafe (unsafePerformIO)
-import Control.Monad.Trans (lift)
 
 
 -----------------------------------------------------------------------------
@@ -36,7 +33,7 @@ import Control.Monad.Trans (lift)
 -----------------------------------------------------------------------------
 
 -- | The parser monad.
-type Parser a = ParsecT [Token] () Compiler a
+type Parser a = Parsec [Token] () a
 
 
 -- | Report a syntax error
@@ -50,8 +47,8 @@ sourcePos = statePos <$> getParserState
 
 
 -- | Parse a Wybe module.
-parseWybe :: [Token] -> FilePath -> Compiler (Either ParseError [Item])
-parseWybe toks file = runParserT (maybeSetPosition toks items <* eof) () file toks
+parseWybe :: [Token] -> FilePath -> Either ParseError [Item]
+parseWybe toks file = parse (maybeSetPosition toks items <* eof) file toks
 
 
 -- | Set the Parser position to the position of the head Token, if it exists
@@ -339,7 +336,7 @@ updateModsInlining ctx modName _ mods =
 
 -- | Update the ProcModifiers to specify the given Impurity, which was specified
 -- with the given identifier.  Since Pure is the default, and can't be
--- explicitly specified, it's always OK to change from Pure to something
+-- explicitly specified, it's alway OK to change from Pure to something
 -- else.
 updateModsImpurity :: String -> String -> Impurity -> ProcModifiers
                    -> Either String ProcModifiers
@@ -396,10 +393,7 @@ stmtSeq = term >>= parseWith termToBody
 
 -- |Parse a single Placed Stmt.
 stmt :: Parser (Placed Stmt)
-stmt = do
-    term <- limitedTerm lowestStmtPrecedence
-    res <- parseWith termToStmt term
-    return res
+stmt = limitedTerm lowestStmtPrecedence >>= parseWith termToStmt
 
 
 -- |Parse a placed Exp
@@ -761,9 +755,7 @@ defaultGuard = (=="else")
 
 -- | Tests an individual token.
 takeToken :: (Token -> Maybe a) -> Parser a
-takeToken = tokenPrim show nextpos
-    -- XXX: I don't think this is correct
-    where nextpos pos token tks = tokenPosition token
+takeToken = token show tokenPosition
 
 
 -- | Parse a float literal token.
@@ -1435,19 +1427,17 @@ testFile :: String -> IO ()
 testFile file = do
     stream <- fileTokens file
     putStrLn "--------------------"
-    res <- runCompiler defaultOptions (parseWybe stream file)
-    case res of
+    case parseWybe stream file of
         Left err -> print err
         Right is -> mapM_ print is
 
-test :: Int -> String -> Compiler Term
+test :: Int -> String -> Term
 test prec input = do
     let toks = stringTokens input
-    r <- runParserT (maybeSetPosition toks (limitedTerm prec) <* eof) () "<string>" toks
-    case r  of
-        Left err -> return $ StringConst (errorPos err) (show err) DoubleQuote
-        Right is -> return $ is
+    case parse (maybeSetPosition toks (limitedTerm prec) <* eof) "<string>" toks of
+        Left err -> StringConst (errorPos err) (show err) DoubleQuote
+        Right is -> is
 
-testParser :: Parser a -> String -> Compiler (Either ParseError a)
-testParser parser input = do runParserT (maybeSetPosition toks parser <* eof) () "<string>" toks
+testParser :: Parser a -> String -> Either ParseError a
+testParser parser input = parse (maybeSetPosition toks parser <* eof) "<string>" toks
   where toks = stringTokens input
