@@ -10,29 +10,32 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-benchmark > public {noinline,impure} (0 calls)
+benchmark > public {impure} (0 calls)
 0: benchmark.benchmark<0>
-benchmark(func##0:{impure}(?T), ?output##0:T)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+benchmark(func##0:{impure}(?T))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
-    benchmark.cpu_time<0>(~func##0:{impure}(?T), ?output##0:T, ?seconds_elapsed##0:wybe.float) #0 @benchmark:nn:nn
+    foreign c {impure} get_clock_time(?tmp#1##0:wybe.float) @benchmark:nn:nn
+    ~func##0:{impure}(?T)(?out##0:T) #0 @benchmark:nn:nn
+    foreign c {impure} get_clock_time(?tmp#2##0:wybe.float) @benchmark:nn:nn
+    foreign llvm fsub(~tmp#2##0:wybe.float, ~tmp#1##0:wybe.float, ?seconds_elapsed##0:wybe.float) @float:nn:nn
     wybe.string.print<0>("Benchmark took ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @benchmark:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @float:nn:nn
-    foreign c print_float(~seconds_elapsed##0:wybe.float, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @float:nn:nn
-    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @float:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @float:nn:nn
+    foreign c print_float(~seconds_elapsed##0:wybe.float, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @float:nn:nn
+    foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @float:nn:nn
     wybe.string.print<0>(" seconds":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-cpu_time > public {noinline,impure} (1 calls)
+cpu_time > public {inline,impure} (1 calls)
 0: benchmark.cpu_time<0>
-cpu_time(func##0:{impure}(?T), ?output##0:T, ?seconds_elapsed##0:wybe.float)<{}; {}>:
+cpu_time(func##0:{impure}(?T), ?out##0:T, ?seconds_elapsed##0:wybe.float)<{}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign c {impure} get_clock_time(?started##0:wybe.float) @benchmark:nn:nn
-    ~func##0:{impure}(?T)(?output##0:T) #0 @benchmark:nn:nn
+    ~func##0:{impure}(?T)(?out##0:T) #0 @benchmark:nn:nn
     foreign c {impure} get_clock_time(?finished##0:wybe.float) @benchmark:nn:nn
     foreign llvm fsub(~finished##0:wybe.float, ~started##0:wybe.float, ?seconds_elapsed##0:wybe.float) @float:nn:nn
 
@@ -74,20 +77,24 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  i64 @"benchmark.benchmark<0>"(i64  %"func##0") noinline   {
+define external fastcc  void @"benchmark.benchmark<0>"(i64  %"func##0")    {
 entry:
-  %0 = tail call fastcc  {i64, double}  @"benchmark.cpu_time<0>"(i64  %"func##0")  
-  %1 = extractvalue {i64, double} %0, 0 
-  %2 = extractvalue {i64, double} %0, 1 
+  %0 = tail call ccc  double  @get_clock_time()  
+  %1 = inttoptr i64 %"func##0" to i64* 
+  %2 = load  i64, i64* %1 
+  %3 = inttoptr i64 %2 to i64 (i64)* 
+  %4 = tail call fastcc  i64  %3(i64  %"func##0")  
+  %5 = tail call ccc  double  @get_clock_time()  
+  %6 = fsub double %5, %0 
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @benchmark.1, i32 0, i32 0) to i64))  
-  tail call ccc  void  @print_float(double  %2)  
+  tail call ccc  void  @print_float(double  %6)  
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @benchmark.3, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  ret i64 %1 
+  ret void 
 }
 
 
-define external fastcc  {i64, double} @"benchmark.cpu_time<0>"(i64  %"func##0") noinline   {
+define external fastcc  {i64, double} @"benchmark.cpu_time<0>"(i64  %"func##0") alwaysinline   {
 entry:
   %0 = tail call ccc  double  @get_clock_time()  
   %1 = inttoptr i64 %"func##0" to i64* 
@@ -111,13 +118,19 @@ entry:
   resources       : 
   procs           : 
 
-module top-level code > public {inline,semipure} (0 calls)
+module top-level code > public {semipure} (0 calls)
 0: benchmark_lib.<0>
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
-    benchmark.cpu_time<0>(benchmark_lib.#anon#1<1><>:{impure}(?wybe.int), ?l1##0:wybe.int, ?time##0:wybe.float) #0 @benchmark_lib:nn:nn
-    benchmark.benchmark<0>(benchmark_lib.#anon#2<1><>:{impure}(?wybe.int), ?l2##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @benchmark_lib:nn:nn
+    foreign c {impure} get_clock_time(?tmp#3##0:wybe.float) @benchmark:nn:nn
+    benchmark_lib.#anon#1<0>(?out##0:wybe.int) #0 @benchmark:nn:nn
+    foreign c {impure} get_clock_time(?tmp#4##0:wybe.float) @benchmark:nn:nn
+    foreign llvm fsub(~tmp#4##0:wybe.float, ~tmp#3##0:wybe.float, ?time##0:wybe.float) @float:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @float:nn:nn
+    foreign c print_float(~time##0:wybe.float, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @float:nn:nn
+    foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @float:nn:nn
+    benchmark.benchmark<0>(benchmark_lib.#anon#2<1><>:{impure}(?wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @benchmark_lib:nn:nn
 
 
 #anon#1 > {inline,impure} (1 calls)
@@ -181,16 +194,16 @@ fib(x##0:wybe.int, ?#result##0:wybe.int)<{}; {}>:
  
 
 
-@benchmark_lib.0 =    constant [1 x i64] [i64 ptrtoint (i64 (i64)* @"benchmark_lib.#anon#1<1>" to i64)]
+@benchmark_lib.0 =    constant [1 x i64] [i64 ptrtoint (i64 (i64)* @"benchmark_lib.#anon#2<1>" to i64)]
 
 
-@benchmark_lib.1 =    constant [1 x i64] [i64 ptrtoint (i64 (i64)* @"benchmark_lib.#anon#2<1>" to i64)]
+declare external fastcc  void @"benchmark.benchmark<0>"(i64)    
 
 
-declare external fastcc  i64 @"benchmark.benchmark<0>"(i64)    
+declare external ccc  void @print_float(double)    
 
 
-declare external fastcc  {i64, double} @"benchmark.cpu_time<0>"(i64)    
+declare external ccc  double @get_clock_time()    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -199,12 +212,14 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  void @"benchmark_lib.<0>"() alwaysinline   {
+define external fastcc  void @"benchmark_lib.<0>"()    {
 entry:
-  %0 = tail call fastcc  {i64, double}  @"benchmark.cpu_time<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @benchmark_lib.0, i32 0, i32 0) to i64))  
-  %1 = extractvalue {i64, double} %0, 0 
-  %2 = extractvalue {i64, double} %0, 1 
-  %3 = tail call fastcc  i64  @"benchmark.benchmark<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @benchmark_lib.1, i32 0, i32 0) to i64))  
+  %0 = tail call ccc  double  @get_clock_time()  
+  %1 = tail call fastcc  i64  @"benchmark_lib.#anon#1<0>"()  
+  %2 = tail call ccc  double  @get_clock_time()  
+  %3 = fsub double %2, %0 
+  tail call ccc  void  @print_float(double  %3)  
+  tail call fastcc  void  @"benchmark.benchmark<0>"(i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @benchmark_lib.0, i32 0, i32 0) to i64))  
   ret void 
 }
 

@@ -19,13 +19,11 @@ def build_list_of_length(n: int, x0: int, ?l: list(int)) {
     }
 }
 
-build_list_of_length(100, 0, ?l)
-!println(print, l)
-!benchmark.cpu_time({impure} { naive_reverse(l, ?@1) } , ?l2, ?time: float)
-!println(print, l2)
-if { time > 0.0 && time < 0.01 ::
+build_list_of_length(5000, 0, ?l)
+!benchmark.cpu_time({impure} { naive_reverse(l, ?@1) }, ?l2, ?time: float)
+if { time > 0.00001 && time < 1.0 ::
     !println("benchmark took a reasonable amount of time")
     | else ::
-    !println("benchmark took too long: ")
+    !println("benchmark took an unexpected amount of time: ")
     !print(time)
 }

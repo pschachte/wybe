@@ -12,7 +12,7 @@ def fib(x: int) = if {
     }
 }
 
-!benchmark.cpu_time({impure} { ?foo = fib(42) } , ?time)
+!benchmark.cpu_time({impure} { ?@1 = fib(42) }, ?out, ?time)
 !print(time)
 
-!benchmark.benchmark({impure} { ?foo = fib(42) })
+!benchmark.benchmark({impure} { ?@1 = fib(42) })

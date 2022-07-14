@@ -4,16 +4,16 @@
 use foreign object benchmark_impl
 
 # Benchmarks a piece of code, returning the number of seconds of CPU time elapsed.
-pub def {impure} cpu_time(func: {impure}(), ?seconds_elapsed: float) use !io {
+pub def {impure} cpu_time(func: {impure}(?T), ?out: T, ?seconds_elapsed: float) use !io {
     foreign c {impure} get_clock_time(?started)
-    !func()
+    !func(?out)
     foreign c {impure} get_clock_time(?finished)
     ?seconds_elapsed = finished - started
 }
 
 # Benchmarks a piece of code and prints how long it took to run.
-pub def {impure} benchmark(func: {impure}()) use !io {
-    !cpu_time(func, ?seconds_elapsed)
+pub def {impure} benchmark(func: {impure}(?T)) use !io {
+    !cpu_time(func, ?out, ?seconds_elapsed)
     !print("Benchmark took ")
     !print(seconds_elapsed)
     !println(" seconds")
