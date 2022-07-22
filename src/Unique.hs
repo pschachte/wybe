@@ -85,7 +85,7 @@ uniquenessCheckProc :: ProcDef -> Int -> Compiler ProcDef
 uniquenessCheckProc def _ = do
     let name = showProcName $ procName def
     let pos = procPos def
-    logMsg Uniqueness $ "Uniqueness checking proc: " ++ name
+    logMsg Uniqueness $ "Uniqueness checking proc: " ++ showProcName name
     let detism = procDetism def
     let params = procProtoParams $ procProto def
     let ress = procProtoResources $ procProto def

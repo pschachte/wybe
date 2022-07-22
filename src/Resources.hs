@@ -243,7 +243,7 @@ transformProc pos name variant detism params ress body = do
     -- Unbranching will then force the stores to be executed in the case of
     -- failure, ensuring the global variables are unmoddified
     newMentioned <- gets resMentioned
-    body'' <- if detism /= SemiDet && detism /= Failure || Map.null newMentioned
+    body'' <- if not (determinismCanFail detism) || Map.null newMentioned
               then return body'
               else do
                 (saves, restores, tmpVars, _) <- saveRestoreResourcesTmp pos
