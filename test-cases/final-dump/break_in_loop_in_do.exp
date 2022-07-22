@@ -26,21 +26,21 @@ module top-level code > public {semipure} (0 calls)
 #cont#1([counter##0:wybe.int])<{<<break_in_loop_in_do.counter>>, <<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm load(<<break_in_loop_in_do.counter>>:wybe.int, ?%counter##1:wybe.int) @break_in_loop_in_do:nn:nn
+    foreign lpvm load(<<break_in_loop_in_do.counter>>:wybe.int, ?%tmp#1##0:wybe.int) @break_in_loop_in_do:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~counter##1:wybe.int, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @int:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @int:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
 #cont#2 > {inline} (1 calls)
 0: break_in_loop_in_do.#cont#2<0>
-#cont#2(tmp#0##0:wybe.int, [tmp#1##0:wybe.int])<{<<wybe.io.io>>}; {<<break_in_loop_in_do.counter>>, <<wybe.io.io>>}>:
+#cont#2([tmp#0##0:wybe.int], tmp#1##0:wybe.int)<{<<wybe.io.io>>}; {<<break_in_loop_in_do.counter>>, <<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm store(tmp#0##0:wybe.int, <<break_in_loop_in_do.counter>>:wybe.int) @break_in_loop_in_do:nn:nn
+    foreign lpvm store(%tmp#1##0:wybe.int, <<break_in_loop_in_do.counter>>:wybe.int) @break_in_loop_in_do:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @int:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @int:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
@@ -85,10 +85,10 @@ entry:
 }
 
 
-define external fastcc  void @"break_in_loop_in_do.#cont#2<0>"(i64  %"tmp#0##0") alwaysinline   {
+define external fastcc  void @"break_in_loop_in_do.#cont#2<0>"(i64  %"tmp#1##0") alwaysinline   {
 entry:
-  store  i64 %"tmp#0##0", i64* @"resource#break_in_loop_in_do.counter" 
-  tail call ccc  void  @print_int(i64  %"tmp#0##0")  
+  store  i64 %"tmp#1##0", i64* @"resource#break_in_loop_in_do.counter" 
+  tail call ccc  void  @print_int(i64  %"tmp#1##0")  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
 }

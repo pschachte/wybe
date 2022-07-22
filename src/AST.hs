@@ -18,7 +18,7 @@ module AST (
   Item(..), Visibility(..), isPublic,
   Determinism(..), determinismLEQ, determinismJoin, determinismMeet,
   determinismFail, determinismSucceed,
-  determinismSeq, determinismProceding, determinismName,
+  determinismSeq, determinismProceding, determinismName, determinismCanFail,
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
   TypeProto(..), TypeModifiers(..), TypeSpec(..), typeVarSet, TypeVarName(..),
@@ -261,6 +261,13 @@ determinismName Failure  = "failing"
 determinismName Det      = ""
 determinismName SemiDet  = "test"
 -- NonDet = "generator"
+
+-- | Can the determinism fail?
+determinismCanFail :: Determinism -> Bool
+determinismCanFail Terminal = False
+determinismCanFail Failure  = True
+determinismCanFail Det      = False
+determinismCanFail SemiDet  = True
 
 
 -- | Internal representation of data

@@ -659,8 +659,8 @@ unbranchExp (Typed exp ty cast) pos = do
     let cast' = unbranchType <$> cast
     return $ maybePlace (Typed exp' ty' cast') pos
 unbranchExp exp@(AnonProc mods params pstmts clsd res) pos = do
-    let clsd' = trustFromJust "unbranch annon proc without closed" clsd
-    let res' = trustFromJust "unbranch annon proc without resources" res
+    let clsd' = trustFromJust "unbranch anon proc without closed" clsd
+    let res' = trustFromJust "unbranch anon proc without resources" res
     name <- newProcName "anon"
     logUnbranch $ "Creating Closure for " ++ show exp ++ " under " ++ name
     let ProcModifiers detism inlining impurity _ _ = mods
