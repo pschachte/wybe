@@ -737,7 +737,7 @@ unifyTypes' reason (HigherOrderType mods1 ps1) (HigherOrderType mods2 ps2)
     where
         (mods1', (ps1Tys, ps1Fls)) = typeFlowsToSemiDet mods1 ps1 ps2
         (mods2', (ps2Tys, ps2Fls)) = typeFlowsToSemiDet mods2 ps2 ps1
-        mods = unifyProcMods mods1' mods2'
+        mods = unifyProcMods mods2' mods1'
 unifyTypes' reason _ _ = invalidTypeError reason
 
 
