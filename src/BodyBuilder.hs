@@ -130,9 +130,11 @@ data BodyState = BodyState {
       tmpCount      :: Int,             -- ^The next temp variable number to use
       buildState    :: BuildState,      -- ^The fork at the bottom of this node
       parent        :: Maybe BodyState, -- ^What comes before/above this
-      globalsLoaded :: Map GlobalInfo PrimArg
+      globalsLoaded :: Map GlobalInfo PrimArg,
                                         -- ^The set of globals that we currently
                                         -- know the value of
+      reifiedConstr :: Map PrimVarName Constraint
+                                        -- ^Constraints attached to Boolean vars
       } deriving (Eq,Show)
 
 
@@ -156,14 +158,16 @@ data BuildState
 initState :: Int -> VarSubstitution -> BodyState
 initState tmp oSubst =
     BodyState [] Map.empty Set.empty Set.empty oSubst Map.empty False tmp
-              Unforked Nothing Map.empty
+              Unforked Nothing Map.empty Map.empty
 
 
 -- | Set up a BodyState as a new child of the specified BodyState
 childState :: BodyState -> BuildState -> BodyState
 childState st@BodyState{currSubst=iSubst,outSubst=oSubst,subExprs=subs,
-                        tmpCount=tmp, forkConsts=consts, globalsLoaded=loaded} bld =
-    BodyState [] iSubst Set.empty consts oSubst subs False tmp bld (Just st) loaded
+                        tmpCount=tmp, forkConsts=consts, globalsLoaded=loaded,
+                        reifiedConstr=reif} bld =
+    BodyState [] iSubst Set.empty consts oSubst subs False tmp bld (Just st)
+              loaded reif
 
 
 -- | A mapping from variables to definite values, in service to constant
@@ -192,12 +196,32 @@ freshVarName = do
 
 
 ----------------------------------------------------------------
+--                      Tracking Integer Constraints
+--
+-- We maintain constraints on integer variables, in particular to handle reified
+-- constraints.  LPVM Integer tests are all reified, producing a result as a
+-- separate value, and conditionals are always based on those reified values.
+-- This code allows us to remember what constraint stems from the reified value,
+-- so we can use that information in conditionals. For now we only support
+-- equality and disequality, as these are most useful.
+----------------------------------------------------------------
+
+data Constraint = Equal PrimVarName PrimArg
+                | NotEqual PrimVarName PrimArg
+     deriving (Eq, Show)
+
+-- negateConstraint :: Constraint -> Constraint
+-- negateConstraint (Equal v n)    = NotEqual v n
+-- negateConstraint (NotEqual v n) = Equal v n
+
+
+----------------------------------------------------------------
 --                      BodyBuilder Primitive Operations
 ----------------------------------------------------------------
 
 -- |Run a BodyBuilder monad and extract the final proc body, along with the
 -- final temp variable count and the set of variables used in the body.
-buildBody :: Int -> VarSubstitution -> BodyBuilder a 
+buildBody :: Int -> VarSubstitution -> BodyBuilder a
           -> Compiler (a, Int, Set PrimVarName, Set GlobalInfo, ProcBody)
 buildBody tmp oSubst builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
@@ -214,29 +238,27 @@ buildBody tmp oSubst builder = do
 buildFork :: PrimVarName -> TypeSpec -> BodyBuilder ()
 buildFork var ty = do
     st <- get
-    var' <- expandVar var boolType
+    var' <- expandVar var ty
     logBuild $ "<<<< beginning to build a new fork on " ++ show var
-               ++ " (-> " ++ show var' ++ ")"
     case buildState st of
       Forked{complete=True} ->
         shouldnt "Building a fork in Forked state"
       Forked{complete=False} ->
         shouldnt "Building a fork in Forking state"
       Unforked -> do
-        arg' <- expandVar var ty
-        logBuild $ "     (expands to " ++ show arg' ++ ")"
-        case arg' of
+        logBuild $ "     (expands to " ++ show var' ++ ")"
+        case var' of
           ArgInt n _ -> -- fork variable value known at compile-time
             put $ childState st $ Forked var ty (Just n) False [] False
-          ArgVar{argVarName=var',argVarType=varType} -> do
+          ArgVar{argVarName=var'',argVarType=varType} -> do
             -- statically unknown result
             consts <- gets forkConsts
             logBuild $ "Consts from parent fork = " ++ show consts
-            let fused = Set.member var' consts
+            let fused = Set.member var'' consts
             logBuild $ "This fork "
                        ++ (if fused then "WILL " else "will NOT ")
                        ++ "be fused with parent"
-            put $ st {buildState=Forked var' ty Nothing fused [] False}
+            put $ st {buildState=Forked var'' ty Nothing fused [] False}
           _ -> shouldnt "switch on non-integer variable"
         logState
 
@@ -308,10 +330,10 @@ beginBranch = do
                                    Map.union extraSubsts (currSubst st) }
             Unforked -> shouldnt "forkConst predicted parent branch"
         put $ childState st Unforked
-        -- XXX also add consequences of this, eg if var is result of X==Y
-        --     comparison and var == 1, then record that X==Y.
-        when (isNothing val && not fused)
-          $ addSubst var $ ArgInt (fromIntegral branchNum) intType
+        when (isNothing val && not fused) $ do
+          addSubst var $ ArgInt (fromIntegral branchNum) intType
+          noteBranchConstraints var branchNum 
+
         logState
 
 
@@ -339,6 +361,17 @@ popParent st@BodyState{parent=(Just
 popParent st@BodyState{parent=Just par} =
     let (ancestor, fixedPar, var, ty, val, fused, branches) = popParent par
     in  (ancestor,st {parent=Just fixedPar}, var, ty, val, fused, branches)
+
+
+-- | Record whatever we can deduce from our current branch variable and branch
+-- number, based on previously computed reified constraints.
+noteBranchConstraints :: PrimVarName -> Int -> BodyBuilder ()
+noteBranchConstraints var val = do
+    constr <- gets $ Map.lookup var . reifiedConstr
+    case (val,constr) of
+        (1, Just (Equal origVar origVal))    -> addSubst origVar origVal
+        (0, Just (NotEqual origVar origVal)) -> addSubst origVar origVal
+        _                                    -> return ()
 
 
 -- | Test if the specified variable is bound to the specified constant in the
@@ -458,6 +491,7 @@ ordinaryInstr prim pos = do
             let gFlows = snd $ primArgs prim
             when (impurity <= Pure && gFlows == emptyGlobalFlows)
                 $ recordEntailedPrims prim
+            recordReifications prim
             rawInstr prim pos
             mapM_ recordVarSet $ primOutputs prim
         Just oldOuts -> do
@@ -661,6 +695,36 @@ instrConsequences' (PrimForeign "llvm" "icmp_uge" flags [a1,a2,a3]) =
     return [(PrimForeign "llvm" "icmp_ule" flags [a2,a1], [a3])]
 instrConsequences' _ = return []
 
+
+
+-- |If this instruction reifies a constrant, record the fact, so that we know
+-- the constraint (or its negation) holds in contexts where we know the value of
+-- the Boolean variable.
+recordReifications :: Prim -> BodyBuilder ()
+recordReifications (PrimForeign "llvm" instr flags
+        [a1,a2,ArgVar{argVarName=reifVar,argVarFlow=FlowOut}]) =
+    case reification instr a1 a2 of
+        Just constr -> do
+            modify (\s -> s { reifiedConstr = Map.insert reifVar constr
+                                                    $ reifiedConstr s })
+            logBuild $ "Recording reification " ++ show reifVar ++ " <-> "
+                       ++ show constr
+        Nothing -> logBuild "No reification found"
+recordReifications _ = return ()
+
+
+-- |Given an LLVM comparison instruction and its input arguments, return Just
+-- the coresponding constraint, if there is one; otherwise Nothing.
+reification :: String -> PrimArg -> PrimArg -> Maybe Constraint
+reification "icmp_eq" ArgVar{argVarName=var,argVarFlow=FlowIn} arg =
+    Just $ Equal var arg
+reification "icmp_eq" arg ArgVar{argVarName=var,argVarFlow=FlowIn} =
+    Just $ Equal var arg
+reification "icmp_ne" ArgVar{argVarName=var,argVarFlow=FlowIn} arg =
+    Just $ NotEqual var arg
+reification "icmp_ne" arg ArgVar{argVarName=var,argVarFlow=FlowIn} =
+    Just $ NotEqual var arg
+reification _ _ _ = Nothing
 
 
 -- |Unconditionally add an instr to the current body
@@ -1032,12 +1096,12 @@ addBodyContinuation _ next@BodyState{parent=Just _} =
 addBodyContinuation prev@BodyState{buildState=Unforked, currBuild=bld,
                                    currSubst=subst, blockDefs=defs,
                                    outSubst=osubst} next = do
-    logMsg BodyBuilder $ "Adding state:" ++ fst (showState 4 next)
-    logMsg BodyBuilder $ "... after unforked body:" ++ fst (showState 4 prev)
+    logMsg BodyBuilder $ "Adding state:" ++ fst (showState 4 next)
+    logMsg BodyBuilder $ "... after unforked body:" ++ fst (showState 4 prev)
     addSelectedContinuation bld subst defs osubst next
 addBodyContinuation prev@BodyState{buildState=Forked{}} next = do
     logMsg BodyBuilder $ "Adding state:" ++ fst (showState 4 next)
-    logMsg BodyBuilder $ "... after forked body:" ++ fst (showState 4 prev)
+    logMsg BodyBuilder $ "... after forked body:" ++ fst (showState 4 prev)
     let build = buildState prev
     bods <- mapM (`addBodyContinuation` next) $ bodies build
     return $ prev {buildState = build {bodies = bods}}
@@ -1230,7 +1294,7 @@ bkwdBuildStmt defs prim pos = do
                 modify $ \s -> s { bkwdRenaming = Map.insert fromVar toVar
                                                 $ bkwdRenaming s }
         _ -> do
-            let (ins, outs) = splitArgsByMode $ List.filter argIsVar 
+            let (ins, outs) = splitArgsByMode $ List.filter argIsVar
                                               $ flattenArgs args'
             let gOuts = globalFlowsOut gFlows
             purity <- lift $ primImpurity prim
@@ -1246,13 +1310,13 @@ bkwdBuildStmt defs prim pos = do
                 let usedLater' = List.foldr Set.insert usedLater $ argVarName <$> ins
                 -- Add all globals that FlowOut from this prim, then remove all that FlowIn
                 -- FlowOut means it is overwritten, FlowIn means the value may be read
-                let gStored' = Set.filter (not . hasGlobalFlow gFlows FlowIn) 
+                let gStored' = Set.filter (not . hasGlobalFlow gFlows FlowIn)
                              $ gStored `Set.union` USet.toSet Set.empty gOuts
                 st@BkwdBuilderState{bkwdFollowing=bd@ProcBody{bodyPrims=prims}} <- get
                 put $ st { bkwdFollowing = bd { bodyPrims = maybePlace prim' pos
                                                           : prims },
                            bkwdUsedLater = usedLater',
-                           bkwdGlobalStored = gStored' }    
+                           bkwdGlobalStored = gStored' }
 
 
 renameArg :: PrimArg -> BkwdBuilder PrimArg

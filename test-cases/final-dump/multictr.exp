@@ -5386,7 +5386,7 @@ entry:
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
-        foreign llvm icmp_eq(~#left##0:multictr.maybe_int, ~#right##0:multictr.maybe_int, ?#success##0:wybe.bool)
+        foreign llvm icmp_eq(~#right##0:multictr.maybe_int, 0:multictr.maybe_int, ?#success##0:wybe.bool)
 
     1:
         foreign lpvm access(~#left##0:multictr.maybe_int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#left#value##0:wybe.int) @multictr:nn:nn
@@ -5458,7 +5458,7 @@ value(#rec##0:multictr.maybe_int, ?#rec##1:multictr.maybe_int, #field##0:wybe.in
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
-        foreign llvm move(~#rec##0:multictr.maybe_int, ?#rec##1:multictr.maybe_int)
+        foreign llvm move(0:multictr.maybe_int, ?#rec##1:multictr.maybe_int)
 
     1:
         foreign lpvm {noalias} mutate(~#rec##0:multictr.maybe_int, ?#rec##1:multictr.maybe_int, 0:wybe.int, 0:wybe.int, 8:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @multictr:nn:nn
@@ -5498,7 +5498,7 @@ if.then:
   %3 = icmp ne i64 %"#right##0", 0 
   br i1 %3, label %if.then1, label %if.else1 
 if.else:
-  %7 = icmp eq i64 %"#left##0", %"#right##0" 
+  %7 = icmp eq i64 %"#right##0", 0 
   ret i1 %7 
 if.then1:
   %4 = inttoptr i64 %"#right##0" to i64* 
@@ -5579,7 +5579,7 @@ if.then:
   %9 = insertvalue {i64, i1} %8, i1 1, 1 
   ret {i64, i1} %9 
 if.else:
-  %10 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %10 = insertvalue {i64, i1} undef, i64 0, 0 
   %11 = insertvalue {i64, i1} %10, i1 0, 1 
   ret {i64, i1} %11 
 }
@@ -6384,7 +6384,7 @@ entry:
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
-        foreign llvm icmp_eq(~#left##0:multictr.simple, ~#right##0:multictr.simple, ?#success##0:wybe.bool)
+        foreign llvm icmp_eq(~#right##0:multictr.simple, 0:multictr.simple, ?#success##0:wybe.bool)
 
     1:
         foreign llvm and(#left##0:wybe.int, 1:wybe.int, ?tmp#11##0:wybe.int)
@@ -6515,7 +6515,7 @@ one_field(#rec##0:multictr.simple, ?#rec##1:multictr.simple, #field##0:wybe.int,
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
-        foreign llvm move(~#rec##0:multictr.simple, ?#rec##1:multictr.simple)
+        foreign llvm move(0:multictr.simple, ?#rec##1:multictr.simple)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int)
@@ -6603,7 +6603,7 @@ two_field1(#rec##0:multictr.simple, ?#rec##1:multictr.simple, #field##0:wybe.int
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
-        foreign llvm move(~#rec##0:multictr.simple, ?#rec##1:multictr.simple)
+        foreign llvm move(0:multictr.simple, ?#rec##1:multictr.simple)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int)
@@ -6653,7 +6653,7 @@ two_field2(#rec##0:multictr.simple, ?#rec##1:multictr.simple, #field##0:wybe.int
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
-        foreign llvm move(~#rec##0:multictr.simple, ?#rec##1:multictr.simple)
+        foreign llvm move(0:multictr.simple, ?#rec##1:multictr.simple)
 
     1:
         foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int)
@@ -6709,7 +6709,7 @@ if.then:
   %2 = icmp eq i64 %1, 0 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %29 = icmp eq i64 %"#left##0", %"#right##0" 
+  %29 = icmp eq i64 %"#right##0", 0 
   ret i1 %29 
 if.then1:
   %3 = inttoptr i64 %"#left##0" to i64* 
@@ -6838,7 +6838,7 @@ if.then:
   %2 = icmp eq i64 %1, 0 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %14 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %14 = insertvalue {i64, i1} undef, i64 0, 0 
   %15 = insertvalue {i64, i1} %14, i1 0, 1 
   ret {i64, i1} %15 
 if.then1:
@@ -6943,7 +6943,7 @@ if.then:
   %2 = icmp eq i64 %1, 1 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %17 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %17 = insertvalue {i64, i1} undef, i64 0, 0 
   %18 = insertvalue {i64, i1} %17, i1 0, 1 
   ret {i64, i1} %18 
 if.then1:
@@ -7004,7 +7004,7 @@ if.then:
   %2 = icmp eq i64 %1, 1 
   br i1 %2, label %if.then1, label %if.else1 
 if.else:
-  %17 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %17 = insertvalue {i64, i1} undef, i64 0, 0 
   %18 = insertvalue {i64, i1} %17, i1 0, 1 
   ret {i64, i1} %18 
 if.then1:

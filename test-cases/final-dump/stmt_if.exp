@@ -246,7 +246,7 @@ if.else2:
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
-        foreign llvm icmp_eq(~#left##0:stmt_if.tree, ~#right##0:stmt_if.tree, ?#success##0:wybe.bool)
+        foreign llvm icmp_eq(~#right##0:stmt_if.tree, 0:stmt_if.tree, ?#success##0:wybe.bool)
 
     1:
         foreign lpvm access(#left##0:stmt_if.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#left##0:stmt_if.tree) @stmt_if:nn:nn
@@ -312,7 +312,7 @@ key(#rec##0:stmt_if.tree, ?#rec##1:stmt_if.tree, #field##0:wybe.int, ?#success##
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
-        foreign llvm move(~#rec##0:stmt_if.tree, ?#rec##1:stmt_if.tree)
+        foreign llvm move(0:stmt_if.tree, ?#rec##1:stmt_if.tree)
 
     1:
         foreign lpvm mutate(~#rec##0:stmt_if.tree, ?#rec##1:stmt_if.tree, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @stmt_if:nn:nn
@@ -344,7 +344,7 @@ left(#rec##0:stmt_if.tree, ?#rec##1:stmt_if.tree, #field##0:stmt_if.tree, ?#succ
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
-        foreign llvm move(~#rec##0:stmt_if.tree, ?#rec##1:stmt_if.tree)
+        foreign llvm move(0:stmt_if.tree, ?#rec##1:stmt_if.tree)
 
     1:
         foreign lpvm mutate(~#rec##0:stmt_if.tree, ?#rec##1:stmt_if.tree, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:stmt_if.tree) @stmt_if:nn:nn
@@ -406,7 +406,7 @@ right(#rec##0:stmt_if.tree, ?#rec##1:stmt_if.tree, #field##0:stmt_if.tree, ?#suc
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
-        foreign llvm move(~#rec##0:stmt_if.tree, ?#rec##1:stmt_if.tree)
+        foreign llvm move(0:stmt_if.tree, ?#rec##1:stmt_if.tree)
 
     1:
         foreign lpvm mutate(~#rec##0:stmt_if.tree, ?#rec##1:stmt_if.tree, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:stmt_if.tree) @stmt_if:nn:nn
@@ -452,7 +452,7 @@ if.then:
   %9 = icmp ne i64 %"#right##0", 0 
   br i1 %9, label %if.then1, label %if.else1 
 if.else:
-  %21 = icmp eq i64 %"#left##0", %"#right##0" 
+  %21 = icmp eq i64 %"#right##0", 0 
   ret i1 %21 
 if.then1:
   %10 = inttoptr i64 %"#right##0" to i64* 
@@ -523,7 +523,7 @@ if.then:
   %10 = insertvalue {i64, i1} %9, i1 1, 1 
   ret {i64, i1} %10 
 if.else:
-  %11 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %11 = insertvalue {i64, i1} undef, i64 0, 0 
   %12 = insertvalue {i64, i1} %11, i1 0, 1 
   ret {i64, i1} %12 
 }
@@ -564,7 +564,7 @@ if.then:
   %9 = insertvalue {i64, i1} %8, i1 1, 1 
   ret {i64, i1} %9 
 if.else:
-  %10 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %10 = insertvalue {i64, i1} undef, i64 0, 0 
   %11 = insertvalue {i64, i1} %10, i1 0, 1 
   ret {i64, i1} %11 
 }
@@ -651,7 +651,7 @@ if.then:
   %10 = insertvalue {i64, i1} %9, i1 1, 1 
   ret {i64, i1} %10 
 if.else:
-  %11 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %11 = insertvalue {i64, i1} undef, i64 0, 0 
   %12 = insertvalue {i64, i1} %11, i1 0, 1 
   ret {i64, i1} %12 
 }
