@@ -728,3 +728,10 @@ entry:
   %1 = xor i1 %0, 1 
   ret i1 %1 
 }
+[93mfinal-dump/tests.wybe:19:28: Explicit specification of current type map,
+  it is recommended to specify type as _
+[0m[93mfinal-dump/tests.wybe:19:33: Explicit specification of current type map,
+  it is recommended to specify type as _
+[0m[93mfinal-dump/tests.wybe:19:63: Explicit specification of current type map,
+  it is recommended to specify type as _
+[0m

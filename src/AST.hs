@@ -412,9 +412,10 @@ placedApplyM f placed = f (content placed) (place placed)
 
 
 -- |Apply an operator to the content of a placed thing.
-contentApply :: (a->a) -> Placed a -> Placed a
+contentApply :: (a->b) -> Placed a -> Placed b
 contentApply f (Placed a pos) = Placed (f a) pos
 contentApply f (Unplaced a) = Unplaced $ f a
+
 
 
 instance Functor Placed where
@@ -423,7 +424,7 @@ instance Functor Placed where
 
 
 -- |Apply a monadic function to the payload of a Placed thing
-updatePlacedM :: (t -> Compiler t) -> Placed t -> Compiler (Placed t)
+updatePlacedM :: (Monad m) => (a -> m b) -> Placed a -> m (Placed b)
 updatePlacedM fn (Placed content pos) = do
     content' <- fn content
     return $ Placed content' pos
@@ -886,7 +887,7 @@ addConstructor vis pctor = do
     let params = procProtoParams ctor
     -- unless (tmUniqueness isUnique) -- if not unique, params can't be, either
     --   $ mapM_ (ensureNotUnique pos) params
-    let typeVars = Set.unions (typeVarSet . paramType <$> params)
+    let typeVars = Set.unions (typeVarSet . paramType . content <$> params)
     missingParams <- Set.difference typeVars . Set.fromList
                      <$> getModule modParams
     unless (Set.null missingParams)
@@ -1246,7 +1247,7 @@ addProcDef procDef = do
 getParams :: ProcSpec -> Compiler [Param]
 getParams pspec =
     -- XXX shouldn't have to grovel in implementation to find prototype
-    procProtoParams . procProto <$> getProcDef pspec
+    (content <$>) . procProtoParams . procProto <$> getProcDef pspec
 
 
 getPrimParams :: ProcSpec -> Compiler [PrimParam]
@@ -1934,7 +1935,7 @@ getProcGlobalFlows pspec = do
     case procImpln pDef of
       ProcDefSrc _ ->
             let ProcProto _ params resFlows = procProto pDef
-            in return $ makeGlobalFlows (paramType <$> params) resFlows
+            in return $ makeGlobalFlows (paramType . content <$> params) resFlows
       ProcDefPrim _ (PrimProto _ _ gFlows) _ _ _ -> return gFlows
 
 
@@ -2670,7 +2671,7 @@ data Constant = Int Int
 -- |A proc or func prototype, including name and formal parameters.
 data ProcProto = ProcProto {
     procProtoName::ProcName,
-    procProtoParams::[Param],
+    procProtoParams::[Placed Param],
     procProtoResources::Set.Set ResourceFlowSpec
     } deriving (Eq, Generic)
 

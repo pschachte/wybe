@@ -143,7 +143,7 @@ compileProc proc procID =
         let ProcDefSrc body = procImpln proc
         let proto = procProto proc
         let procName = procProtoName proto
-        let params = procProtoParams proto
+        let params = content <$> procProtoParams proto
         modify (\st -> st {nextCallSiteID=procCallSiteCount proc})
         logClause $ "--------------\nCompiling proc " ++ show proto
         mapM_ (nextVar . paramName) $ List.filter (flowsIn . paramFlow) params

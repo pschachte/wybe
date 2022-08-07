@@ -619,3 +619,10 @@ entry:
   %1 = xor i1 %0, 1 
   ret i1 %1 
 }
+[93mfinal-dump/stmt_if2.wybe:3:29: Explicit specification of current type tree,
+  it is recommended to specify type as _
+[0m[93mfinal-dump/stmt_if2.wybe:3:34: Explicit specification of current type tree,
+  it is recommended to specify type as _
+[0m[93mfinal-dump/stmt_if2.wybe:3:54: Explicit specification of current type tree,
+  it is recommended to specify type as _
+[0m

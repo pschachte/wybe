@@ -35,3 +35,14 @@ entry:
   %0 = add   i16 %"x##0", %"y##0" 
   ret i16 %0 
 }
+[93mExplicit specification of current type representation,
+  it is recommended to specify type as _
+[0m[93mfinal-dump/representation.wybe:4:5: Explicit specification of current type representation,
+  it is recommended to specify type as _
+[0m[93mfinal-dump/representation.wybe:4:13: Explicit specification of current type representation,
+  it is recommended to specify type as _
+[0m[93mfinal-dump/representation.wybe:4:31: Explicit specification of current type representation,
+  it is recommended to specify type as _
+[0m[93mfinal-dump/representation.wybe:5:5: Explicit specification of current type representation,
+  it is recommended to specify type as _
+[0m

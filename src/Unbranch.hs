@@ -115,7 +115,7 @@ unbranchProc' proc = do
     let proto = procProto proc
     let params = procProtoParams proto
     let params' = selectDetism id addTestOutParam detism
-                $ unbranchParam <$> params
+                $ contentApply unbranchParam <$> params
     let alt = selectDetism [] [move boolFalse testOutExp] detism
     let stmts = selectDetism body (body++[move boolTrue testOutExp]) detism
     let proto' = proto {procProtoParams = params'}
@@ -133,7 +133,7 @@ unbranchProc' proc = do
 
 -- |Eliminate loops and ensure that Conds only appear as the final
 --  statement of a body.
-unbranchBody :: ProcName -> Int -> [Param] -> Determinism
+unbranchBody :: ProcName -> Int -> [Placed Param] -> Determinism
              -> [Placed Stmt] -> [Placed Stmt]
              -> Compiler ([Placed Stmt],Int,[ProcDef])
 unbranchBody name tmpCtr params detism body alt = do
@@ -174,8 +174,8 @@ testOutIndex = length . takeWhile (((==Free) ||| (==Ordinary)) . paramFlowType)
 
 -- | Add a test output param to the list of params, as well as the index of the
 -- test output
-addTestOutParam :: [Param] -> [Param]
-addTestOutParam params = insertAt (testOutIndex params) testOutParam params
+addTestOutParam :: [Placed Param] -> [Placed Param]
+addTestOutParam params = insertAt (testOutIndex $ content <$> params) (Unplaced testOutParam) params
 
 
 -- | Add a tmp var to the list of expressions in the position dictated by the
@@ -194,7 +194,7 @@ addTestOutExp func args = do
                 <- lift $ getProcDef $ ProcSpec mod nm
                                         (trustFromJust "addTestOutExp" pId)
                                         generalVersion
-            return (testOutIndex params, detism)
+            return (testOutIndex $ content <$> params, detism)
     let idx = selectDetism (nParams - 1) nParams detism
     return (insertAt idx (Unplaced $ boolVarSet testResultVar) args,
             boolVarGet testResultVar)
@@ -212,7 +212,8 @@ data UnbrancherState = Unbrancher {
                                   -- ^If in a loop, break and continue stmts
     brVars       :: VarDict,      -- ^Types of variables defined up to here
     brTempCtr    :: Int,          -- ^Number of next temp variable to make
-    brOutParams  :: [Param],      -- ^Output arguments for generated procs
+    brOutParams  :: [Placed Param],
+                                  -- ^Output arguments for generated procs
     brOutArgs    :: [Placed Exp], -- ^Output arguments for call to gen procs
     brNewDefs    :: [ProcDef],    -- ^Generated unbranched auxilliary procedures
     brClosures   :: Map (ProcSpec, Map Integer Exp) ProcSpec,
@@ -227,14 +228,14 @@ data LoopInfo = LoopInfo {
     } deriving (Eq)
 
 
-initUnbrancherState :: Maybe LoopInfo -> Int -> [Param] -> ProcName -> UnbrancherState
+initUnbrancherState :: Maybe LoopInfo -> Int -> [Placed Param] -> ProcName -> UnbrancherState
 initUnbrancherState loopinfo tmpCtr params =
-    let defined = inputParams params
-        outParams = [unbranchParam $ Param nm ty ParamOut ft
-                    | Param nm ty fl ft <- params
+    let defined = inputParams $ content <$> params
+        outParams = [unbranchParam (Param nm ty ParamOut ft) `maybePlace` pos
+                    | (Param nm ty fl ft, pos) <- unPlace <$> params
                     , flowsOut fl]
-        outArgs   = [Unplaced $ Typed (varSet nm) (unbranchType ty) Nothing
-                    | Param nm ty fl _ <- params
+        outArgs   = [Typed (varSet nm) (unbranchType ty) Nothing `maybePlace` pos
+                    | (Param nm ty fl _, pos) <- unPlace <$> params
                     , flowsOut fl]
     in Unbrancher loopinfo defined tmpCtr outParams outArgs [] Map.empty
 
@@ -668,7 +669,7 @@ unbranchExp exp@(AnonProc mods params pstmts clsd res) pos = do
     logUnbranch $ "  With params " ++ show params
     logUnbranch $ "  With free variables " ++ show freeVars
     tmpCtr <- gets brTempCtr
-    let procProto = ProcProto name (freeParams ++ params) res'
+    let procProto = ProcProto name (freeParams ++ (Unplaced <$> params)) res'
     let procDef = ProcDef name procProto (ProcDefSrc pstmts) Nothing tmpCtr 0
                     Map.empty Private detism inlining impurity AnonymousProc
                     NoSuperproc
@@ -694,7 +695,7 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) free pos name = do
             procProto=procProto@ProcProto{procProtoParams=params,
                                           procProtoResources=res}}
         <- lift $ getProcDef regularProcSpec
-    let (params', args, constMap) = makeFreeParams params free
+    let (params', args, constMap) = makeFreeParams (content <$> params) free
     closProcs <- gets brClosures
     case Map.lookup (regularProcSpec, constMap) closProcs of
         Just closProc -> return $ Closure closProc free `maybePlace` pos
@@ -723,13 +724,13 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) free pos name = do
 -- and the free variables represent the variables that are free to the closure.
 -- This removes params/free variables where the expression is a known constant
 makeFreeParams :: [Param] -> [Placed Exp]
-               -> ([Param], [Placed Exp], Map Integer Exp)
+               -> ([Placed Param], [Placed Exp], Map Integer Exp)
 makeFreeParams params exps = makeFreeParams' 1 params $ unPlace <$> exps
 
 
 makeFreeParams' :: Integer -> [Param] -> [(Exp, OptPos)]
-                -> ([Param], [Placed Exp], Map Integer Exp)
-makeFreeParams' _ params [] = (params', paramToVar <$> params', Map.empty)
+                -> ([Placed Param], [Placed Exp], Map Integer Exp)
+makeFreeParams' _ params [] = (Unplaced <$> params', paramToVar <$> params', Map.empty)
   where params' = freeParamToOrdinary . unbranchParam <$> params
 makeFreeParams' _ [] _ = shouldnt "too many exps for params"
 makeFreeParams' idx ((Param nm pTy fl _):params) ((Typed exp ty cast,pos):exps)
@@ -737,7 +738,7 @@ makeFreeParams' idx ((Param nm pTy fl _):params) ((Typed exp ty cast,pos):exps)
     | otherwise   = (param':params', exp' `maybePlace` pos:exps', constMap')
   where
     (params', exps', constMap) = makeFreeParams' (idx + 1) params exps
-    param' = Param nm (unbranchType pTy) ParamIn Free
+    param' = Param nm (unbranchType pTy) ParamIn Free `maybePlace` pos
     mbExp = expIsConstant exp
     exp' = Typed (fromMaybe (Var nm ParamIn Free) $ expIsConstant exp) ty' cast'
     constMap' = if isJust mbExp
@@ -755,10 +756,10 @@ freeParamToOrdinary param                    = param
 
 
 -- |Get Free Param and Typed Var for the given VarName and TypeSpec
-freeParamVar :: VarName -> TypeSpec -> (Param, Placed Exp)
+freeParamVar :: VarName -> TypeSpec -> (Placed Param, Placed Exp)
 freeParamVar nm ty =
     let ty' = unbranchType ty
-    in (Param nm ty' ParamIn Free,
+    in (Unplaced $ Param nm ty' ParamIn Free,
         Unplaced $ Typed (Var nm ParamIn Free) ty' Nothing)
 
 
@@ -855,7 +856,7 @@ newProcCall name inVars pos detism = do
 
 newProcProto :: ProcName -> VarDict -> Set ResourceSpec -> Unbrancher ProcProto
 newProcProto name inVars res = do
-    let inParams  = [unbranchParam $ Param v ty ParamIn Ordinary
+    let inParams  = [Unplaced $ unbranchParam $ Param v ty ParamIn Ordinary
                     | (v,ty) <- Map.toList inVars]
     outParams <- gets brOutParams
     return $ ProcProto name (inParams ++ outParams)
