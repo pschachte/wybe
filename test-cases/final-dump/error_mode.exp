@@ -1,7 +1,5 @@
 Error detected during type checking of module(s) error_mode, error_mode.tree
-[93mfinal-dump/error_mode.wybe:3:29: Explicit specification of current type tree,
-  it is recommended to specify type as _
-[0m[93mfinal-dump/error_mode.wybe:3:34: Explicit specification of current type tree,
+[93mfinal-dump/error_mode.wybe:3:34: Explicit specification of current type tree,
   it is recommended to specify type as _
 [0m[93mfinal-dump/error_mode.wybe:3:54: Explicit specification of current type tree,
   it is recommended to specify type as _

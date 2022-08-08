@@ -348,23 +348,13 @@ define external fastcc  i64 @"generic_list.nil<0>"() alwaysinline   {
 entry:
   ret i64 0 
 }
-[93mExplicit specification of current type generic_list(T),
+[93mfinal-dump/generic_list.wybe:1:40: Explicit specification of current type generic_list(T),
   it is recommended to specify type as _
-[0m[93mfinal-dump/generic_list.wybe:1:27: Explicit specification of current type generic_list(T),
-  it is recommended to specify type as _
-[0m[93mfinal-dump/generic_list.wybe:1:40: Explicit specification of current type generic_list(T),
-  it is recommended to specify type as _
-[0m[93mfinal-dump/generic_list.wybe:3:5: Explicit specification of current type generic_list(T),
+[0m[93mfinal-dump/generic_list.wybe:3:9: Explicit specification of current type generic_list(T),
   it is recommended to specify type as _
 [0m[93mfinal-dump/generic_list.wybe:3:16: Explicit specification of current type generic_list(T),
   it is recommended to specify type as _
 [0m[93mfinal-dump/generic_list.wybe:3:35: Explicit specification of current type generic_list(T),
-  it is recommended to specify type as _
-[0m[93mfinal-dump/generic_list.wybe:4:9: Explicit specification of current type generic_list(T),
-  it is recommended to specify type as _
-[0m[93mfinal-dump/generic_list.wybe:4:28: Explicit specification of current type generic_list(T),
-  it is recommended to specify type as _
-[0m[93mfinal-dump/generic_list.wybe:5:17: Explicit specification of current type generic_list(T),
   it is recommended to specify type as _
 [0m[93mfinal-dump/generic_list.wybe:8:16: Explicit specification of current type generic_list(T),
   it is recommended to specify type as _

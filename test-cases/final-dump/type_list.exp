@@ -563,8 +563,6 @@ entry:
   %1 = xor i1 %0, 1 
   ret i1 %1 
 }
-[93mfinal-dump/type_list.wybe:1:30: Explicit specification of current type intlist,
-  it is recommended to specify type as _
-[0m[93mfinal-dump/type_list.wybe:1:45: Explicit specification of current type intlist,
+[93mfinal-dump/type_list.wybe:1:45: Explicit specification of current type intlist,
   it is recommended to specify type as _
 [0m

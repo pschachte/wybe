@@ -239,7 +239,8 @@ fromUseItemParser v = do
 -- 'visibility' 'determinism'.
 procOrFuncItem :: Visibility -> Parser Item
 procOrFuncItem vis = do
-    pos <- tokenPosition <$> ident "def"
+    ident "def"
+    pos <- getPosition 
     mods <- modifierList >>= parseWith (processProcModifiers pos "procedure or function declaration")
     (proto, returnType) <- limitedTerm prototypePrecedence
                             >>= parseWith termToPrototype

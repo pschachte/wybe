@@ -101,11 +101,7 @@ normaliseItem (FuncDecl vis mods (ProcProto name params resources)
                                         ParamOut Ordinary `maybePlace` pos])
                        resources)
              [maybePlace (ForeignCall "llvm" "move" []
-                 [maybePlace (Typed (content result) resulttype Nothing)
-                  $ place result,
-                  Unplaced
-                  $ Typed (Var outputVariableName ParamOut Ordinary)
-                          resulttype Nothing])
+                 [result, varSet outputVariableName `maybePlace` pos])
               pos]
         pos)
 normaliseItem item@ProcDecl{} = do
@@ -518,8 +514,8 @@ nonConstCtorItems vis uniq typeSpec numConsts numNonConsts tagBits tagLimit
             snd
             $ List.foldr
               (\(param,anon,_,sz) (shift,flds) ->
-                  let var = content param
-                  in (shift+sz,(paramName var,anon,paramType var,shift,sz):flds))
+                  let (pName, pPos) = unPlace param
+                  in (shift+sz,(paramName pName,pPos,anon,paramType pName,shift,sz):flds))
               (tagBits,[])
               paramsReps
       return (Bits size,
@@ -528,7 +524,7 @@ nonConstCtorItems vis uniq typeSpec numConsts numNonConsts tagBits tagLimit
                ++ unboxedDeconstructorItems vis uniq ctorName typeSpec
                   numConsts numNonConsts tag tagBits pos fields
                ++ concatMap (unboxedGetterSetterItems vis typeSpec
-                             numConsts numNonConsts tag tagBits pos) fields
+                             numConsts numNonConsts tag tagBits) fields
              )
       else do -- boxed representation
       let (fields,size) = layoutRecord paramsReps tag tagLimit
@@ -545,7 +541,7 @@ nonConstCtorItems vis uniq typeSpec numConsts numNonConsts tagBits tagLimit
               ++ deconstructorItems uniq ctorName typeSpec params numConsts
                      numNonConsts tag tagBits tagLimit pos fields size
               ++ concatMap
-                 (getterSetterItems vis typeSpec pos numConsts numNonConsts
+                 (getterSetterItems vis typeSpec numConsts numNonConsts
                   ptrCount size tag tagBits tagLimit)
                  fields
              )
@@ -560,7 +556,7 @@ nonConstCtorItems vis uniq typeSpec numConsts numNonConsts tagBits tagLimit
 -- values are aligned properly for their size (eg, word sized values are
 -- aligned on word boundaries).
 layoutRecord :: [(Placed Param,Bool,TypeRepresentation,Int)] -> Int -> Int
-             -> ([(VarName,Bool,TypeSpec,TypeRepresentation,Int)], Int)
+             -> ([(VarName,OptPos,Bool,TypeSpec,TypeRepresentation,Int)], Int)
 layoutRecord paramsReps tag tagLimit =
       let sizes = (2^) <$> [0..floor $ logBase 2 $ fromIntegral wordSizeBytes]
           fields = List.map
@@ -570,8 +566,8 @@ layoutRecord paramsReps tag tagLimit =
                                         `div` wordSizeBytes) * wordSizeBytes
                            alignment =
                              fromMaybe wordSizeBytes $ find (>=byteSize) sizes
-                           var = content param
-                       in ((paramName var,anon,paramType var,rep,byteSize),
+                           (p, pos) = unPlace param
+                       in ((paramName p, pos, anon,paramType p,rep,byteSize),
                            alignment))
                    paramsReps
           -- put fields in order of increasing alignment
@@ -583,11 +579,11 @@ layoutRecord paramsReps tag tagLimit =
 
 
 -- | Actually layout the fields.
-align :: ([(VarName,Bool,TypeSpec,TypeRepresentation,Int)], Int)
-      -> ((VarName,Bool,TypeSpec,TypeRepresentation,Int),Int)
-      -> ([(VarName,Bool,TypeSpec,TypeRepresentation,Int)], Int)
-align (aligned,offset) ((name,anon,ty,rep,sz),alignment) =
-    ((name,anon,ty,rep,alignedOffset):aligned, alignedOffset+sz)
+align :: ([(VarName,OptPos,Bool,TypeSpec,TypeRepresentation,Int)], Int)
+      -> ((VarName,OptPos,Bool,TypeSpec,TypeRepresentation,Int),Int)
+      -> ([(VarName,OptPos,Bool,TypeSpec,TypeRepresentation,Int)], Int)
+align (aligned,offset) ((name,pos,anon,ty,rep,sz),alignment) =
+    ((name,pos,anon,ty,rep,alignedOffset):aligned, alignedOffset+sz)
   where alignedOffset = alignOffset offset alignment
 
 
@@ -600,7 +596,7 @@ alignOffset offset alignment =
 
 -- |Generate constructor code for a non-const constructor
 constructorItems :: ProcName -> TypeSpec -> [Placed Param]
-                 -> [(VarName,Bool,TypeSpec,TypeRepresentation,Int)]
+                 -> [(VarName,OptPos,Bool,TypeSpec,TypeRepresentation,Int)]
                  -> Int -> Int -> Int -> OptPos -> [Item]
 constructorItems ctorName typeSpec params fields size tag tagLimit pos =
     [ProcDecl Public (inlineModifiers ConstructorProc Det)
@@ -627,7 +623,7 @@ constructorItems ctorName typeSpec params fields size tag tagLimit pos =
          ++
          -- Code to fill all the fields
          (List.map
-          (\(var,_,ty,_,offset) ->
+          (\(var,pPos,_,ty,_,offset) ->
                (maybePlace (ForeignCall "lpvm" "mutate" []
                $ [varGetTyped recName typeSpec `maybePlace` pos,
                   varSetTyped recName typeSpec `maybePlace` pos,
@@ -635,7 +631,7 @@ constructorItems ctorName typeSpec params fields size tag tagLimit pos =
                   Unplaced $ iVal 1,
                   Unplaced $ iVal size,
                   Unplaced $ iVal 0,
-                  varGetTyped var ty`maybePlace` pos])) pos)
+                  varGetTyped var ty `maybePlace` pPos])) pos)
           fields)
          ++
          -- Finally, code to tag the reference
@@ -649,7 +645,7 @@ constructorItems ctorName typeSpec params fields size tag tagLimit pos =
 -- |Generate deconstructor code for a non-const constructor
 deconstructorItems :: Bool -> Ident -> TypeSpec -> [Placed Param] -> Int -> Int -> Int
                    -> Int -> Int -> OptPos
-                   -> [(Ident,Bool,TypeSpec,TypeRepresentation,Int)]
+                   -> [(Ident,OptPos,Bool,TypeSpec,TypeRepresentation,Int)]
                    -> Int -> [Item]
 deconstructorItems uniq ctorName typeSpec params numConsts numNonConsts tag
                    tagBits tagLimit pos fields size =
@@ -664,14 +660,14 @@ deconstructorItems uniq ctorName typeSpec params numConsts numNonConsts tag
         ([tagCheck pos numConsts numNonConsts tag tagBits tagLimit 
             (Just size) outputVariableName]
          -- Code to fetch all the fields
-         ++ List.map (\(var,_,ty,_,aligned) ->
+         ++ List.map (\(var,pPos,_,ty,_,aligned) ->
                         (maybePlace (ForeignCall "lpvm" "access"
                             ["unique" | uniq]
                             $ [varGetTyped outputVariableName typeSpec `maybePlace` pos,
                                Unplaced $ iVal (aligned - startOffset),
                                Unplaced $ iVal size,
                                Unplaced $ iVal startOffset,
-                               varSetTyped var ty `maybePlace` pos]) pos))
+                               varSetTyped var ty `maybePlace` pPos]) pos))
             fields)
         pos]
 
@@ -721,12 +717,12 @@ tagCheck pos numConsts numNonConsts tag tagBits tagLimit size varName =
 
 
 -- | Produce a getter and a setter for one field of the specified type.
-getterSetterItems :: Visibility -> TypeSpec -> OptPos
+getterSetterItems :: Visibility -> TypeSpec
                     -> Int -> Int -> Int -> Int -> Int -> Int -> Int
-                    -> (VarName,Bool,TypeSpec,TypeRepresentation,Int) -> [Item]
-getterSetterItems _ _ _ _ _ _ _ _ _ _ (_,True,_,_,_) = []
-getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
-                  tag tagBits tagLimit (field,_,fieldtype,rep,offset) =
+                    -> (VarName,OptPos,Bool,TypeSpec,TypeRepresentation,Int) -> [Item]
+getterSetterItems _ _ _ _ _ _ _ _ _ (_,_,True,_,_,_) = []
+getterSetterItems vis rectype numConsts numNonConsts ptrCount size
+                  tag tagBits tagLimit (field,pos,_,fieldtype,rep,offset) =
     -- XXX generate cleverer code if multiple constructors have some of
     --     the same field names
     let startOffset = (if tag > tagLimit then tagLimit+1 else tag) in
@@ -777,12 +773,12 @@ getterSetterItems vis rectype pos numConsts numNonConsts ptrCount size
 -- |Generate constructor code for a non-const constructor
 -- unboxedConstructorItems
 unboxedConstructorItems :: Visibility -> ProcName -> TypeSpec -> Int
-                        -> Maybe Int -> [(VarName,Bool,TypeSpec,Int,Int)]
+                        -> Maybe Int -> [(VarName,OptPos,Bool,TypeSpec,Int,Int)]
                         -> OptPos -> [Item]
 unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
     let proto = ProcProto ctorName
-                ([Param name paramType ParamIn Ordinary `maybePlace` pos
-                 | (name,_,paramType,_,_) <- fields]
+                ([Param name paramType ParamIn Ordinary `maybePlace` pPos
+                 | (name,pPos,_,paramType,_,_) <- fields]
                   ++ [Param outputVariableName typeSpec ParamOut Ordinary `maybePlace` pos])
                 Set.empty
     in [ProcDecl vis (inlineModifiers ConstructorProc Det) proto
@@ -794,9 +790,9 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
          ++
          -- Shift each field into place and or with the result
          List.concatMap
-          (\(var,_,ty,shift,sz) ->
+          (\(var,pPos,_,ty,shift,sz) ->
                [maybePlace (ForeignCall "llvm" "shl" []
-                 [castFromTo ty typeSpec (varGet var) `maybePlace` pos,
+                 [castFromTo ty typeSpec (varGet var) `maybePlace` pPos,
                   iVal shift `castTo` typeSpec `maybePlace` pos,
                   varSetTyped tmpName1 typeSpec `maybePlace` pos]) pos,
                 maybePlace (ForeignCall "llvm" "or" []
@@ -828,13 +824,13 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
 -- |Generate deconstructor code for a unboxed non-const constructor
 unboxedDeconstructorItems :: Visibility -> Bool -> ProcName -> TypeSpec -> Int
                           -> Int -> Int -> Int -> OptPos
-                          -> [(VarName,Bool,TypeSpec,Int,Int)] -> [Item]
+                          -> [(VarName,OptPos,Bool,TypeSpec,Int,Int)] -> [Item]
 unboxedDeconstructorItems vis uniq ctorName recType numConsts numNonConsts tag
                           tagBits pos fields =
     let detism = deconstructorDetism numConsts numNonConsts
     in [ProcDecl vis (inlineModifiers DeconstructorProc detism)
         (ProcProto ctorName
-         (List.map (\(n,_,fieldType,_,_) -> Param n fieldType ParamOut Ordinary `maybePlace` pos)
+         (List.map (\(n,pPos,_,fieldType,_,_) -> Param n fieldType ParamOut Ordinary `maybePlace` pPos)
           fields
           ++ [Param outputVariableName recType ParamIn Ordinary `maybePlace` pos])
          Set.empty)
@@ -843,19 +839,19 @@ unboxedDeconstructorItems vis uniq ctorName recType numConsts numNonConsts tag
           outputVariableName]
          -- Code to fetch all the fields
          ++ List.concatMap
-            (\(var,_,fieldType,shift,sz) ->
+            (\(n,pPos,_,fieldType,shift,sz) ->
                -- Code to access the selected field
                [maybePlace (ForeignCall "llvm" "lshr" ["unique" | uniq]
                  [varGetTyped outputVariableName recType `maybePlace` pos,
-                  Unplaced $ Typed (iVal shift) recType Nothing,
-                  Unplaced $ Typed (varSet tmpName1) recType Nothing]) pos,
+                  Typed (iVal shift) recType Nothing `maybePlace` pos,
+                  varSetTyped tmpName1 recType `maybePlace` pos]) pPos,
                 maybePlace (ForeignCall "llvm" "and" []
-                 [Unplaced $ Typed (varGet tmpName1) recType Nothing,
-                  Unplaced $ Typed (iVal $ (bit sz::Int) - 1) recType Nothing,
-                  Unplaced $ Typed (varSet tmpName2) recType Nothing]) pos,
+                 [varGetTyped tmpName1 recType `maybePlace` pos,
+                  Typed (iVal $ (bit sz::Int) - 1) recType Nothing `maybePlace` pos,
+                  varSetTyped tmpName2 recType `maybePlace` pos]) pos,
                 maybePlace (ForeignCall "lpvm" "cast" []
-                 [Unplaced $ Typed (varGet tmpName2) recType Nothing,
-                  Unplaced $ Typed (varSet var) fieldType Nothing]) pos
+                 [varGetTyped tmpName2 recType `maybePlace` pos,
+                  varSetTyped n fieldType `maybePlace` pPos]) pPos
                ])
             fields)
         pos]
@@ -863,10 +859,10 @@ unboxedDeconstructorItems vis uniq ctorName recType numConsts numNonConsts tag
 
 -- -- | Produce a getter and a setter for one field of the specified type.
 unboxedGetterSetterItems :: Visibility -> TypeSpec -> Int -> Int -> Int -> Int
-                         -> OptPos -> (VarName,Bool,TypeSpec,Int,Int) -> [Item]
-unboxedGetterSetterItems _ _ _ _ _ _ _ (_,True,_,_,_) = []
-unboxedGetterSetterItems vis recType numConsts numNonConsts tag tagBits pos
-                         (field,_,fieldType,shift,sz) =
+                         -> (VarName,OptPos,Bool,TypeSpec,Int,Int) -> [Item]
+unboxedGetterSetterItems _ _ _ _ _ _ (_,_,True,_,_,_) = []
+unboxedGetterSetterItems vis recType numConsts numNonConsts tag tagBits
+                         (field,pos,_,fieldType,shift,sz) =
     -- XXX generate cleverer code if multiple constructors have some of
     --     the same field names
     let detism = deconstructorDetism numConsts numNonConsts
