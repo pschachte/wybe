@@ -78,22 +78,13 @@ validateProcDefTypes name def = do
     let proto = procProto def
     let params = procProtoParams proto
     logTypes $ "Validating def of " ++ name
-    params' <- mapM (validateParamType name pos public) params
+    params' <- mapM (updatePlacedM $ validateParamType name pos public) params
     return $ def { procProto = proto { procProtoParams = params' }}
 
 
 validateParamType :: Ident -> OptPos -> Bool -> Param -> Compiler Param
 validateParamType pname ppos public param = do
     let ty = paramType param
-    -- XXX For Issue #135, but this issues warnings about OK constructor decls
-    -- currMod <- getModuleSpec
-    -- case ty of
-    --     TypeSpec tmod tname _ | tname == last currMod && tmod == init currMod ->
-    --       message Warning
-    --       ("Explicit specification of current type " ++ show ty
-    --        ++ "\n  it is recommended to specify type as _")
-    --       ppos
-    --     _ -> return ()
     checkDeclIfPublic pname ppos public ty
     logTypes $ "Checking type " ++ show ty ++ " of param " ++ show param
     ty' <- lookupType "proc declaration" ppos ty
@@ -809,13 +800,13 @@ expType' (StringValue _ CString) _    = return $ TypeSpec ["wybe"] "c_string" []
 expType' (CharValue _) _              = return $ TypeSpec ["wybe"] "char" []
 expType' (AnonProc mods params pstmts _ _) _ = do
     mapM_ ultimateVarType $ paramName <$> params
-    params' <- updateParamTypes params
-    return $ HigherOrderType mods $ paramTypeFlow <$> params'
+    params' <- updateParamTypes $ Unplaced <$> params
+    return $ HigherOrderType mods $ paramTypeFlow . content <$> params'
 expType' (Closure pspec closed) _ = do
     ProcDef _ (ProcProto _ params res) _ _ _ _ _ _ detism _ impurity _ _
         <- lift $ getProcDef pspec
-    let params' = List.filter ((==Ordinary) . paramFlowType) params
-    let typeFlows = paramTypeFlow <$> params'
+    let params' = List.filter ((==Ordinary) . paramFlowType . content) params
+    let typeFlows = paramTypeFlow . content <$> params'
     let pTypes = typeFlowType <$> typeFlows
     let pFlows = typeFlowMode <$> typeFlows
     let nClosed = length closed
@@ -1103,7 +1094,8 @@ typecheckProcDecl' m pdef = do
     let name = procName pdef
     logTyped $ "Type checking " ++ showProcName name
     let proto = procProto pdef
-    let params = procProtoParams proto
+    let posParams = procProtoParams proto
+    let params = content <$> posParams
     let resources = procProtoResources proto
     let tmpCount = procTmpCount pdef
     let (ProcDefSrc def) = procImpln pdef
@@ -1186,12 +1178,12 @@ typecheckProcDecl' m pdef = do
                           | param <- Set.toList
                                      $ missingBindings outParams assigned]
                     typeErrors modeErrs
-                    params' <- updateParamTypes params
+                    params' <- updateParamTypes posParams
                     let proto' = proto { procProtoParams = params' }
                     let pdef' = pdef { procProto = proto',
                                        procTmpCount = tmpCount',
                                        procImpln = ProcDefSrc def' }
-                    sccAgain <- (&& params' /= params) <$> validTyping
+                    sccAgain <- (&& params' /= posParams) <$> validTyping
                     logTyped $ "===== "
                                ++ (if sccAgain then "" else "NO ")
                                ++ "Need to check again."
@@ -1305,11 +1297,11 @@ recordCast' _ caller callee argNum ty exp pos = do
     void $ unifyTypes (ReasonBadConstraint caller callee argNum exp ty pos) ty' ty
 
 
-updateParamTypes :: [Param] -> Typed [Param]
+updateParamTypes :: [Placed Param] -> Typed [Placed Param]
 updateParamTypes =
-    mapM (\p@(Param name _ fl afl) -> do
-            ty <- ultimateVarType name
-            return $ Param name ty fl afl)
+    mapM $ updatePlacedM (\p -> do
+                            ty <- ultimateVarType (paramName p)
+                            return p{paramType=ty})
 
 
 -- |Return a list of the proc and foreign calls recursively in a list of
@@ -1410,7 +1402,7 @@ callInfos vars pstmt = do
 firstInfo :: ProcDef -> ProcSpec -> Typed CallInfo
 firstInfo def proc = do
     let proto = procProto def
-        params = procProtoParams proto
+        params = content <$> procProtoParams proto
         resources = Set.elems $ procProtoResources proto
         realParams = List.filter ((==Ordinary) . paramFlowType) params
         typeFlows = paramTypeFlow <$> realParams
@@ -2288,7 +2280,7 @@ modeCheckExp m name defPos assigned _
     varDict <- mapFromUnivSetM ultimateVarType Set.empty
                 $ bindingVars assigned
     let closed = Map.filterWithKey (const . flip Set.member toClose) varDict
-    params' <- updateParamTypes params
+    params' <- (content <$>) <$> updateParamTypes (Unplaced <$> params)
     return (maybePlace (AnonProc mods params' ss' (Just closed) res) pos)
 modeCheckExp m name defPos assigned detism
         (Typed exp ty cast) pos = do
@@ -2661,8 +2653,8 @@ checkProcDefFullytyped :: ProcDef -> Compiler ()
 checkProcDefFullytyped def = do
     let name = procName def
     let pos = procPos def
-    mapM_ (checkParamTyped name pos) $
-      zip [1..] $ procProtoParams $ procProto def
+    zipWithM_ (placedApplyM . checkParamTyped name)
+       [1..] (procProtoParams $ procProto def)
     mapM_ (placedApply (checkStmtTyped name pos)) $
           procDefSrc $ procImpln def
 
@@ -2672,8 +2664,8 @@ procDefSrc (ProcDefSrc def) = def
 procDefSrc ProcDefPrim{} = shouldnt "procDefSrc applied to ProcDefPrim"
 
 
-checkParamTyped :: ProcName -> OptPos -> (Int,Param) -> Compiler ()
-checkParamTyped name pos (num,Param{paramName=pName,paramType=ty,paramFlow=flow}) = do
+checkParamTyped :: ProcName -> Int -> Param -> OptPos -> Compiler ()
+checkParamTyped name num Param{paramName=pName,paramType=ty,paramFlow=flow} pos = do
     when (AnyType == ty) $
         reportUntyped name pos (" parameter " ++ show num)
 

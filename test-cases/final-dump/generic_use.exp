@@ -871,3 +871,16 @@ if.then:
 if.else:
   ret i64 %"suffix##0" 
 }
+[93mfinal-dump/generic_list.wybe:1:40: Explicit specification of current type generic_list(T),
+  it is recommended to specify type as _
+[0m[93mfinal-dump/generic_list.wybe:3:9: Explicit specification of current type generic_list(T),
+  it is recommended to specify type as _
+[0m[93mfinal-dump/generic_list.wybe:3:16: Explicit specification of current type generic_list(T),
+  it is recommended to specify type as _
+[0m[93mfinal-dump/generic_list.wybe:3:35: Explicit specification of current type generic_list(T),
+  it is recommended to specify type as _
+[0m[93mfinal-dump/generic_list.wybe:8:16: Explicit specification of current type generic_list(T),
+  it is recommended to specify type as _
+[0m[93mfinal-dump/generic_list.wybe:10:13: Explicit specification of current type generic_list(T),
+  it is recommended to specify type as _
+[0m

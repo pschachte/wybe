@@ -490,3 +490,6 @@ entry:
   %1 = xor i1 %0, 1 
   ret i1 %1 
 }
+[93mfinal-dump/loop_bug.wybe:1:46: Explicit specification of current type int_list,
+  it is recommended to specify type as _
+[0m
