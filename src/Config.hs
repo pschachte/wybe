@@ -13,7 +13,7 @@ module Config (sourceExtension, objectExtension, executableExtension,
                moduleDirectoryBasename, currentModuleAlias,
                wordSize, wordSizeBytes,
                availableTagBits, tagMask, smallestAllocatedAddress,
-               magicVersion,
+               minimumSwitchCases, magicVersion,
                linkerDeadStripArgs, functionDefSection, removeLPVMSection,
                lpvmSectionName, localCacheLibDir)
     where
@@ -98,6 +98,12 @@ tagMask = 2^availableTagBits - 1
 --  on the constant constructors we can accommodate without boxing.
 smallestAllocatedAddress :: Integer
 smallestAllocatedAddress = 65536 -- this is a pretty safe guess
+
+
+-- |The smallest number of nested equality tests of the same variable we will
+-- bother to turn into a switch.
+minimumSwitchCases :: Int
+minimumSwitchCases = 3
 
 
 -- |Foreign shared library directory name

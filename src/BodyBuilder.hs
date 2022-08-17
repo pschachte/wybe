@@ -15,6 +15,7 @@ import AST
 import Debug.Trace
 import Snippets ( boolType, intType, primMove )
 import Util
+import Config (minimumSwitchCases)
 import Options (LogSelection(BodyBuilder))
 import Data.Map as Map
 import Data.List as List
@@ -206,9 +207,16 @@ freshVarName = do
 -- equality and disequality, as these are most useful.
 ----------------------------------------------------------------
 
-data Constraint = Equal PrimVarName PrimArg
-                | NotEqual PrimVarName PrimArg
-     deriving (Eq, Show)
+data Constraint = Equal PrimVarName TypeSpec PrimArg
+                | NotEqual PrimVarName TypeSpec PrimArg
+     deriving (Eq)
+
+instance Show Constraint where
+    show (Equal v t a)
+        = show v ++ ":" ++ show t ++ " = " ++ show a
+    show (NotEqual v t a)
+        = show v ++ ":" ++ show t ++ " ~= " ++ show a
+
 
 -- negateConstraint :: Constraint -> Constraint
 -- negateConstraint (Equal v n)    = NotEqual v n
@@ -332,7 +340,7 @@ beginBranch = do
         put $ childState st Unforked
         when (isNothing val && not fused) $ do
           addSubst var $ ArgInt (fromIntegral branchNum) intType
-          noteBranchConstraints var branchNum 
+          noteBranchConstraints var intType branchNum 
 
         logState
 
@@ -365,13 +373,13 @@ popParent st@BodyState{parent=Just par} =
 
 -- | Record whatever we can deduce from our current branch variable and branch
 -- number, based on previously computed reified constraints.
-noteBranchConstraints :: PrimVarName -> Int -> BodyBuilder ()
-noteBranchConstraints var val = do
+noteBranchConstraints :: PrimVarName -> TypeSpec -> Int -> BodyBuilder ()
+noteBranchConstraints var ty val = do
     constr <- gets $ Map.lookup var . reifiedConstr
     case (val,constr) of
-        (1, Just (Equal origVar origVal))    -> addSubst origVar origVal
-        (0, Just (NotEqual origVar origVal)) -> addSubst origVar origVal
-        _                                    -> return ()
+        (1, Just (Equal origVar _ origVal))    -> addSubst origVar origVal
+        (0, Just (NotEqual origVar _ origVal)) -> addSubst origVar origVal
+        _                                      -> return ()
 
 
 -- | Test if the specified variable is bound to the specified constant in the
@@ -716,14 +724,18 @@ recordReifications _ = return ()
 -- |Given an LLVM comparison instruction and its input arguments, return Just
 -- the coresponding constraint, if there is one; otherwise Nothing.
 reification :: String -> PrimArg -> PrimArg -> Maybe Constraint
-reification "icmp_eq" ArgVar{argVarName=var,argVarFlow=FlowIn} arg =
-    Just $ Equal var arg
-reification "icmp_eq" arg ArgVar{argVarName=var,argVarFlow=FlowIn} =
-    Just $ Equal var arg
-reification "icmp_ne" ArgVar{argVarName=var,argVarFlow=FlowIn} arg =
-    Just $ NotEqual var arg
-reification "icmp_ne" arg ArgVar{argVarName=var,argVarFlow=FlowIn} =
-    Just $ NotEqual var arg
+reification "icmp_eq"
+            ArgVar{argVarName=var,argVarType=ty,argVarFlow=FlowIn} arg =
+    Just $ Equal var ty arg
+reification "icmp_eq" arg
+            ArgVar{argVarName=var,argVarType=ty,argVarFlow=FlowIn} =
+    Just $ Equal var ty arg
+reification "icmp_ne"
+            ArgVar{argVarName=var,argVarType=ty,argVarFlow=FlowIn} arg =
+    Just $ NotEqual var ty arg
+reification "icmp_ne" arg
+            ArgVar{argVarName=var,argVarType=ty,argVarFlow=FlowIn} =
+    Just $ NotEqual var ty arg
 reification _ _ _ = Nothing
 
 
@@ -1163,7 +1175,7 @@ selectedBranch subst Forked{knownVal=known, forkingVar=var} =
 -- Once we've built up a BodyState, this code assembles it into a new ProcBody.
 -- While we're at it, we also mark the last use of each variable, eliminate
 -- calls that don't produce any output needed later in the body, and eliminate
--- any move instructions that moves a variable defined in the same block as the
+-- any move instruction that moves a variable defined in the same block as the
 -- move and not used after the move.  Most other move instructions were removed
 -- while building BodyState, but that approach cannot eliminate moves to output
 -- parameters.
@@ -1211,7 +1223,8 @@ rebuildBody :: BodyState -> BkwdBuilder ()
 rebuildBody st@BodyState{parent=Just par} =
     shouldnt $ "Body parent left by fusion: " ++ fst (showState 4 par)
 rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
-                         buildState=bldst, parent=Nothing} = do
+                         buildState=bldst, parent=Nothing,
+                         reifiedConstr=reif} = do
     usedLater <- gets bkwdUsedLater
     following <- gets bkwdFollowing
     logBkwd $ "Rebuilding body:" ++ fst (showState 8 st)
@@ -1228,7 +1241,8 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
           Nothing -> do
             -- XXX Perhaps we should generate a new proc for the parent par in
             -- cases where it's more than a few prims.
-            sts <- mapM (rebuildBranch subst) $ reverse bods
+            (var',ty',bods') <- rebuildSwitch var ty bods reif
+            sts <- mapM (rebuildBranch subst) $ reverse bods'
             usedLater' <- gets bkwdUsedLater
             let usedLaters = bkwdUsedLater <$> sts
             let usedLater'' = List.foldr Set.union usedLater' usedLaters
@@ -1236,18 +1250,18 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
                   if fused
                   then Just usedLaters
                   else Nothing
-            logBkwd $ "Switch on " ++ show var
+            logBkwd $ "Switch on " ++ show var'
                       ++ " with usedLater " ++ simpleShowSet usedLater''
             logBkwd $ "branchesUsedLater = "
                       ++ show branchesUsedLater
-            let lastUse = Set.notMember var usedLater''
-            let usedLater''' = Set.insert var usedLater''
+            let lastUse = Set.notMember var' usedLater''
+            let usedLater''' = Set.insert var' usedLater''
             let tmp = maximum $ List.map bkwdTmpCount sts
             let followingBranches = List.map bkwdFollowing sts
             let gStored = List.foldr1 Set.intersection (bkwdGlobalStored <$> sts)
             put $ BkwdBuilderState usedLater''' branchesUsedLater
                   Map.empty tmp gStored
-                  $ ProcBody [] $ PrimFork var ty lastUse followingBranches
+                  $ ProcBody [] $ PrimFork var' ty' lastUse followingBranches
     mapM_ (placedApply (bkwdBuildStmt defs)) prims
     finalUsedLater <- gets bkwdUsedLater
     logBkwd $ "Finished rebuild with usedLater = " ++ show finalUsedLater
@@ -1266,6 +1280,52 @@ selectElt num bods =
 revSelectElt :: Integral a => a -> [b] -> b
 revSelectElt num revBods =
     selectElt (length revBods - 1 - fromIntegral num) revBods
+
+
+-- | Try to turn nested branches into a single switch, where possible.
+-- XXX Must handle straight line code before branches
+rebuildSwitch :: PrimVarName -> TypeSpec -> [BodyState]
+           -> Map PrimVarName Constraint
+           -> BkwdBuilder (PrimVarName, TypeSpec, [BodyState])
+rebuildSwitch var ty branches@[branch0,branch1] reif =
+    case Map.lookup var reif of
+        Nothing ->
+            return (var, ty, branches)
+        Just (Equal var' ty' (ArgInt val _)) -> do
+            sw <- rebuildSwitch' var' ty' branch0 $ Map.singleton val branch1
+            return $ fromMaybe (var, ty, branches) sw
+        Just (NotEqual var' ty' (ArgInt val _)) -> do
+            sw <- rebuildSwitch' var' ty' branch1 $ Map.singleton val branch0
+            return $ fromMaybe (var, ty, branches) sw
+        _ ->
+            return (var, ty, branches)
+rebuildSwitch var ty branches _ = return (var, ty, branches)
+
+
+-- | Try to add more cases to a switch.
+rebuildSwitch' :: PrimVarName -> TypeSpec -> BodyState -> Map Integer BodyState
+               -> BkwdBuilder (Maybe (PrimVarName, TypeSpec, [BodyState]))
+rebuildSwitch' var ty st@BodyState{buildState=bldst@(Forked v _ _ _ [b0,b1] _),
+                         parent=Nothing, reifiedConstr=reif} cases
+    | isJust constr = case fromJust constr of
+        Equal var' _ (ArgInt val _) | var == var' ->
+            rebuildSwitch' var ty b0 $ Map.insert val b1 cases
+        NotEqual var' _ (ArgInt val _) | var == var' ->
+            rebuildSwitch' var ty b1 $ Map.insert val b0 cases
+        _ -> completeSwitch var ty st cases
+    where constr = Map.lookup v reif
+rebuildSwitch' var ty st cases =
+    completeSwitch var ty st cases
+
+
+-- | Finish building a switch, if there are enough branches for it to be
+-- worthwhile.
+completeSwitch :: PrimVarName -> TypeSpec -> BodyState -> Map Integer BodyState
+               -> BkwdBuilder (Maybe (PrimVarName, TypeSpec, [BodyState]))
+completeSwitch var ty st cases
+    | Map.size cases >= minimumSwitchCases =
+        return Nothing -- XXX actually build switch
+    | otherwise = return Nothing
 
 
 rebuildBranch :: Substitution -> BodyState -> BkwdBuilder BkwdBuilderState
@@ -1369,14 +1429,15 @@ logState = do
 showState :: Int -> BodyState -> (String,Int)
 showState indent BodyState{parent=par, currBuild=revPrims, buildState=bld,
                            blockDefs=defs, forkConsts=consts,
-                           currSubst=substs, globalsLoaded=loaded} =
+                           currSubst=substs, globalsLoaded=loaded,
+                           reifiedConstr=reifs} =
     let (str  ,indent')   = maybe ("",indent)
                             (mapFst (++ (startLine indent ++ "----------"))
                             . showState indent) par
         substStr          = startLine indent
-                            ++ "# Substs: " ++ simpleShowMap substs
+                            ++ "# Substs           : " ++ simpleShowMap substs
         globalStr         = startLine indent
-                            ++ "# Loaded globals: " ++ simpleShowMap loaded
+                            ++ "# Loaded globals   : " ++ simpleShowMap loaded
         str'              = showPlacedPrims indent' (reverse revPrims)
         sets              = if List.null revPrims
                             then ""
@@ -1388,9 +1449,19 @@ showState indent BodyState{parent=par, currBuild=revPrims, buildState=bld,
                                 startLine indent
                                 ++ "# Fusion consts: " ++ show consts
                               _ -> ""
+        reifstr           = startLine indent
+                                ++ "# Reifications : " ++ showReifications reifs 
 
         (str'',indent'') = showBuildState indent' bld
-    in  (str ++ str' ++ substStr ++ sets ++ globalStr ++ str'' ++ suffix, indent'')
+    in  (str ++ str' ++ substStr ++ sets ++ globalStr ++ str''
+             ++ suffix ++ reifstr
+        , indent'')
+
+
+-- | Show the current reifications
+showReifications :: Map PrimVarName Constraint -> String
+showReifications reifs =
+    intercalate ", " [show k ++ " <-> " ++ show c | (k,c) <-  Map.assocs reifs]
 
 
 -- | Show the current part of a build state.
