@@ -1282,12 +1282,15 @@ revSelectElt num revBods =
     selectElt (length revBods - 1 - fromIntegral num) revBods
 
 
--- | Try to turn nested branches into a single switch, where possible.
+-- | Try to turn nested branches into a single switch, where possible.  NB:
+-- branches are in reversed order at this point.
 -- XXX Must handle straight line code before branches
 rebuildSwitch :: PrimVarName -> TypeSpec -> [BodyState]
            -> Map PrimVarName Constraint
            -> BkwdBuilder (PrimVarName, TypeSpec, [BodyState])
-rebuildSwitch var ty branches@[branch0,branch1] reif =
+rebuildSwitch var ty branches@[branch1,branch0] reif = do
+    logBkwd $ "Rebuild fork on " ++ show var
+            ++ ", reified from " ++ show (Map.lookup var reif)
     case Map.lookup var reif of
         Nothing ->
             return (var, ty, branches)
@@ -1302,19 +1305,27 @@ rebuildSwitch var ty branches@[branch0,branch1] reif =
 rebuildSwitch var ty branches _ = return (var, ty, branches)
 
 
--- | Try to add more cases to a switch.
+-- | Try to add more cases to a switch.  Again, branches are reversed.
 rebuildSwitch' :: PrimVarName -> TypeSpec -> BodyState -> Map Integer BodyState
                -> BkwdBuilder (Maybe (PrimVarName, TypeSpec, [BodyState]))
-rebuildSwitch' var ty st@BodyState{buildState=bldst@(Forked v _ _ _ [b0,b1] _),
+rebuildSwitch' var ty st@BodyState{buildState=bldst@(Forked v _ _ _ [b1,b0] _),
                          parent=Nothing, reifiedConstr=reif} cases
-    | isJust constr = case fromJust constr of
-        Equal var' _ (ArgInt val _) | var == var' ->
-            rebuildSwitch' var ty b0 $ Map.insert val b1 cases
-        NotEqual var' _ (ArgInt val _) | var == var' ->
-            rebuildSwitch' var ty b1 $ Map.insert val b0 cases
-        _ -> completeSwitch var ty st cases
+    | isJust constr = do
+        logBkwd $ "Rebuild nested fork on " ++ show v
+                ++ ", reified from " ++ show constr
+        case fromJust constr of
+            Equal var' _ (ArgInt val _) | var == var' ->
+                rebuildSwitch' var ty b0 $ Map.insert val b1 cases
+            NotEqual var' _ (ArgInt val _) | var == var' ->
+                rebuildSwitch' var ty b1 $ Map.insert val b0 cases
+            _ -> completeSwitch var ty st cases
     where constr = Map.lookup v reif
-rebuildSwitch' var ty st cases =
+rebuildSwitch' var ty st cases = do
+    logBkwd $ "Nested branch not switching on " ++ show var
+    case buildState st of
+        Forked{forkingVar=v} -> logBkwd $ "  Fork on " ++ show v 
+                                    ++ ", where " ++ show cases
+        Unforked -> logBkwd "  Not a fork"
     completeSwitch var ty st cases
 
 
@@ -1322,10 +1333,22 @@ rebuildSwitch' var ty st cases =
 -- worthwhile.
 completeSwitch :: PrimVarName -> TypeSpec -> BodyState -> Map Integer BodyState
                -> BkwdBuilder (Maybe (PrimVarName, TypeSpec, [BodyState]))
-completeSwitch var ty st cases
-    | Map.size cases >= minimumSwitchCases =
-        return Nothing -- XXX actually build switch
-    | otherwise = return Nothing
+completeSwitch var ty deflt cases
+    | Map.size cases >= minimumSwitchCases = do
+        let cases' = Map.toAscList cases
+        if (fst <$> cases') == [0..fst (last cases')]
+            then do
+                logBkwd $ "Producing switch with cases "
+                          ++ show (fst <$> cases')
+                return $ Just (var, ty, reverse (snd <$> cases')) -- XXX handle last default
+            else do
+                logBkwd $ "Not producing switch:  non-dense cases " 
+                          ++ show (fst <$> cases')
+                return Nothing -- XXX generalise to handle more switches
+    | otherwise = do
+        logBkwd $ "Not producing switch (only " ++ show (Map.size cases)
+                ++ " case(s))"
+        return Nothing
 
 
 rebuildBranch :: Substitution -> BodyState -> BkwdBuilder BkwdBuilderState
