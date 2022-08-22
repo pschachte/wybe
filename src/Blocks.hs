@@ -36,7 +36,7 @@ import qualified Data.Set                        as Set
 import           Data.String
 import           Data.Functor                    ((<&>))
 import           Data.Word                       (Word32)
-import           Data.Maybe                      (fromMaybe, isJust, catMaybes, isNothing)
+import           Data.Maybe                      (fromMaybe, isJust, catMaybes, isNothing, maybeToList)
 import           Flow                            ((|>))
 import qualified LLVM.AST                        as LLVMAST
 import qualified LLVM.AST.Constant               as C
@@ -453,32 +453,34 @@ codegenBody body = do
         NoFork -> do
             cgen prims True
             M.void $ ret =<< buildOutputOp
-        PrimFork var ty _ fbody -> do
+        PrimFork var ty _ fbody deflt -> do
             cgen prims False
-            codegenFork var ty fbody
+            codegenFork var ty fbody deflt
 
 
 -- | Code generation for a conditional branch.
 -- XXX revise when LPVM can be transformed to have n>3-ary branches
-codegenFork :: PrimVarName -> TypeSpec -> [ProcBody] -> Codegen ()
-codegenFork _ _ [] = shouldnt "fork with no branches"
-codegenFork _ _ [body] = codegenBody body
-codegenFork var ty [bElse,bThen] = do
+codegenFork :: PrimVarName -> TypeSpec -> [ProcBody] -> Maybe ProcBody
+            -> Codegen ()
+codegenFork _ _ [] _ = shouldnt "fork with no branches"
+codegenFork _ _ [body] Nothing = codegenBody body
+codegenFork var ty [bElse,bThen] Nothing = do
     ifThen <- addBlock "if.then"
     ifElse <- addBlock "if.else"
     brOp <- castVar var ty FlowIn
     cbr brOp ifThen ifElse
     codegenForkBody ifThen bThen
     codegenForkBody ifElse bElse
-codegenFork var ty bodies  = do
-    let nBodies = length bodies
+codegenFork var ty bodies deflt  = do
+    let bodies' = bodies ++ maybeToList deflt
+    let nBodies = length bodies'
     let blockPrefix = "switch." ++ show nBodies ++ "."
-    names@(deflt:rest) <- mapM (addBlock . (blockPrefix ++) . show)
-                            [1..nBodies]
+    names <- mapM (addBlock . (blockPrefix ++) . show)
+                            [0..nBodies-1]
     brOp <- castVar var ty FlowIn
     let bits = getBits $ typeOf brOp
-    switch brOp deflt (zip (C.Int bits <$> [1..]) rest)
-    zipWithM_ codegenForkBody names bodies
+    switch brOp (last names) (zip (C.Int bits <$> [0..]) names)
+    zipWithM_ codegenForkBody names bodies'
 
 
 -- | Code generation for the fork of a conditional branch

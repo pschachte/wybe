@@ -1241,7 +1241,7 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
           Nothing -> do
             -- XXX Perhaps we should generate a new proc for the parent par in
             -- cases where it's more than a few prims.
-            (var',ty',bods') <- rebuildSwitch var ty bods reif
+            (var',ty',bods',deflt') <- rebuildSwitch var ty bods reif
             sts <- mapM (rebuildBranch subst) $ reverse bods'
             usedLater' <- gets bkwdUsedLater
             let usedLaters = bkwdUsedLater <$> sts
@@ -1261,7 +1261,7 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
             let gStored = List.foldr1 Set.intersection (bkwdGlobalStored <$> sts)
             put $ BkwdBuilderState usedLater''' branchesUsedLater
                   Map.empty tmp gStored
-                  $ ProcBody [] $ PrimFork var' ty' lastUse followingBranches
+                  $ ProcBody [] $ PrimFork var' ty' lastUse followingBranches Nothing -- XXX is Nothing right?
     mapM_ (placedApply (bkwdBuildStmt defs)) prims
     finalUsedLater <- gets bkwdUsedLater
     logBkwd $ "Finished rebuild with usedLater = " ++ show finalUsedLater
@@ -1287,27 +1287,28 @@ revSelectElt num revBods =
 -- XXX Must handle straight line code before branches
 rebuildSwitch :: PrimVarName -> TypeSpec -> [BodyState]
            -> Map PrimVarName Constraint
-           -> BkwdBuilder (PrimVarName, TypeSpec, [BodyState])
+           -> BkwdBuilder (PrimVarName, TypeSpec, [BodyState], Maybe BodyState)
 rebuildSwitch var ty branches@[branch1,branch0] reif = do
     logBkwd $ "Rebuild fork on " ++ show var
             ++ ", reified from " ++ show (Map.lookup var reif)
     case Map.lookup var reif of
         Nothing ->
-            return (var, ty, branches)
+            return (var, ty, branches, Nothing)
         Just (Equal var' ty' (ArgInt val _)) -> do
             sw <- rebuildSwitch' var' ty' branch0 $ Map.singleton val branch1
-            return $ fromMaybe (var, ty, branches) sw
+            return $ fromMaybe (var, ty, branches, Nothing) sw
         Just (NotEqual var' ty' (ArgInt val _)) -> do
             sw <- rebuildSwitch' var' ty' branch1 $ Map.singleton val branch0
-            return $ fromMaybe (var, ty, branches) sw
+            return $ fromMaybe (var, ty, branches, Nothing) sw
         _ ->
-            return (var, ty, branches)
-rebuildSwitch var ty branches _ = return (var, ty, branches)
+            return (var, ty, branches, Nothing)
+rebuildSwitch var ty branches _ = return (var, ty, branches, Nothing)
 
 
 -- | Try to add more cases to a switch.  Again, branches are reversed.
 rebuildSwitch' :: PrimVarName -> TypeSpec -> BodyState -> Map Integer BodyState
-               -> BkwdBuilder (Maybe (PrimVarName, TypeSpec, [BodyState]))
+               -> BkwdBuilder (Maybe (PrimVarName, TypeSpec, [BodyState]
+                                     , Maybe BodyState))
 rebuildSwitch' var ty st@BodyState{buildState=bldst@(Forked v _ _ _ [b1,b0] _),
                          parent=Nothing, reifiedConstr=reif} cases
     | isJust constr = do
@@ -1332,7 +1333,8 @@ rebuildSwitch' var ty st cases = do
 -- | Finish building a switch, if there are enough branches for it to be
 -- worthwhile.
 completeSwitch :: PrimVarName -> TypeSpec -> BodyState -> Map Integer BodyState
-               -> BkwdBuilder (Maybe (PrimVarName, TypeSpec, [BodyState]))
+               -> BkwdBuilder (Maybe (PrimVarName, TypeSpec, [BodyState]
+                                     , Maybe BodyState))
 completeSwitch var ty deflt cases
     | Map.size cases >= minimumSwitchCases = do
         let cases' = Map.toAscList cases
@@ -1340,7 +1342,7 @@ completeSwitch var ty deflt cases
             then do
                 logBkwd $ "Producing switch with cases "
                           ++ show (fst <$> cases')
-                return $ Just (var, ty, reverse (snd <$> cases')) -- XXX handle last default
+                return $ Just (var, ty, reverse (snd <$> cases'), Nothing) -- XXX handle last default
             else do
                 logBkwd $ "Not producing switch:  non-dense cases " 
                           ++ show (fst <$> cases')

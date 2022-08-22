@@ -22,6 +22,7 @@ import           Options                   (LogSelection (Optimise))
 import           Types
 import           Util
 import           Debug.Trace
+import Data.Maybe (maybeToList)
 
 
 -- optimiseMod :: ModSpec -> Compiler (Bool,[(String,OptPos)])
@@ -219,8 +220,9 @@ bodyGlobalFlows oldFlows (ProcBody prims fork)
 -- the old in/out, then this also occurs in/out 
 forkGlobalFlows :: UnivSet GlobalInfo -> PrimFork -> GlobalFlows
 forkGlobalFlows _ NoFork = emptyGlobalFlows
-forkGlobalFlows oldFlows (PrimFork _ _ _ bodies) =
-    let gFlows = bodyGlobalFlows oldFlows <$> bodies
+forkGlobalFlows oldFlows (PrimFork _ _ _ bodies deflt) =
+    let bodies' = bodies ++ maybeToList deflt
+        gFlows = bodyGlobalFlows oldFlows <$> bodies'
         gOuts = globalFlowsOut <$> gFlows
         someOuts = List.foldr USet.union emptyUnivSet gOuts 
         allOuts = List.foldr USet.intersection UniversalSet gOuts
@@ -256,8 +258,12 @@ updateBodyGlobalFlows sccFlows (ProcBody body fork) = do
 -- | Update the GlobalFlows of Prims across a PrimFork
 updateForkGlobalFlows :: Map ProcSpec GlobalFlows -> PrimFork -> Compiler PrimFork
 updateForkGlobalFlows _ NoFork = return NoFork
-updateForkGlobalFlows sccFlows (PrimFork var ty final bodies) =
-    PrimFork var ty final <$> mapM (updateBodyGlobalFlows sccFlows) bodies
+updateForkGlobalFlows sccFlows (PrimFork var ty final bodies deflt) = do
+    bodies' <- mapM (updateBodyGlobalFlows sccFlows) bodies
+    deflt' <- case deflt of
+        Nothing -> return Nothing
+        Just d -> Just <$> updateBodyGlobalFlows sccFlows d
+    return $ PrimFork var ty final bodies' deflt'
 
 
 -- | Update the GlobalFlows of a Prim
@@ -284,8 +290,9 @@ bodyLeadingOutFlows (ProcBody prims fork) =
 -- i.e., outwards flows that occur before a corresponding inwards flow
 forkLeadingOutFlows :: PrimFork -> Set GlobalInfo 
 forkLeadingOutFlows NoFork = Set.empty
-forkLeadingOutFlows (PrimFork _ _ _ bodies) = 
-    List.foldr1 Set.intersection $ bodyLeadingOutFlows <$> bodies
+forkLeadingOutFlows (PrimFork _ _ _ bodies deflt) = 
+    List.foldr1 Set.intersection $ bodyLeadingOutFlows
+                                    <$> (bodies ++ maybeToList deflt)
 
 
 -- | Get the leading outwards flows of a proc body, 

@@ -238,6 +238,7 @@ compileCond front pos expr thn els params detism = do
             return $ ProcBody front
                 $ PrimFork (fromJust name') boolType False
                 [appendToBody els' elsAssigns, appendToBody thn' thnAssigns]
+                Nothing
         _ ->
             shouldnt $ "TestBool with invalid argument " ++ show expr
 
@@ -245,9 +246,10 @@ compileCond front pos expr thn els params detism = do
 appendToBody :: ProcBody -> [Placed Prim] -> ProcBody
 appendToBody (ProcBody prims NoFork) after
     = ProcBody (prims++after) NoFork
-appendToBody (ProcBody prims (PrimFork v ty lst bodies)) after
+appendToBody (ProcBody prims (PrimFork v ty lst bodies deflt)) after
     = let bodies' = List.map (`appendToBody` after) bodies
       in ProcBody prims $ PrimFork v ty lst bodies'
+                            $ (`appendToBody` after) <$> deflt
 
 -- |Add the specified statements at the front of the given body
 prependToBody :: [Placed Prim] -> ProcBody -> ProcBody

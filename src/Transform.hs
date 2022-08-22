@@ -130,7 +130,7 @@ transformForks caller body (aliasMap, deadCells) callSiteMap = do
     lift $ logTransform "\nTransform forks (transformForks):"
     let fork = bodyFork body
     case fork of
-        PrimFork var ty _ fBodies -> do
+        PrimFork var ty _ fBodies deflt -> do
             buildFork var ty
             lift $ logTransform "Forking:"
             mapM_ (\currBody -> do
@@ -138,7 +138,7 @@ transformForks caller body (aliasMap, deadCells) callSiteMap = do
                     transformBody caller currBody
                                 (aliasMap, deadCells) callSiteMap
                     endBranch
-                ) fBodies
+                ) (fBodies ++ maybeToList deflt)
             completeFork
         NoFork -> do
             -- NoFork: transform prims done
