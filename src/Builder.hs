@@ -400,6 +400,11 @@ loadModuleIfNeeded force modspec possDirs = do
         modSrc <- moduleSources modspec possDirs
         logBuild $ show modSrc
         case modSrc of
+            _ | isTypeVar (last modspec) -> do
+                Error <!>
+                    "Invalid module " ++ showModSpec modspec
+                    ++ " (looks like a type variable)"
+                return []
             NoSource -> do
                 Error <!> "Could not find source for module " ++
                             showModSpec modspec
@@ -411,8 +416,9 @@ loadModuleIfNeeded force modspec possDirs = do
                 -- only object file exists
                 loadModuleFromObjFile modspec objfile
 
-            ModuleSource (Just srcfile) Nothing Nothing Nothing False ->
+            ModuleSource (Just srcfile) Nothing Nothing Nothing False -> do
                 -- only source file exists, and not a library
+                maybemod <- getLoadedModule modspec
                 loadModuleFromSrcFile modspec srcfile Nothing
 
             ModuleSource (Just srcfile) Nothing Nothing Nothing True -> do
