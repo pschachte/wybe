@@ -1,7 +1,7 @@
 pub type suit { pub
     clubs | diamonds | hearts | spades
 
-    pub def suits:list(suit) = [clubs, diamonds, hearts, spades]
+    pub def suits:list(_) = [clubs, diamonds, hearts, spades]
 
     pub def char(s:_):char =
         case s in {
@@ -20,7 +20,7 @@ pub type rank { pub
     r2 | r3 | r4 | r5 | r6 | r7 | r8
     | r9 | r10 | jack | queen | king | ace
 
-    pub def ranks:list(rank) =
+    pub def ranks:list(_) =
          [r2, r3, r4, r5, r6, r7, r8, r9, r10, jack, queen, king, ace]
 
     pub def char(r:_):char =
