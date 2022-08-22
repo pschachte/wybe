@@ -205,13 +205,13 @@ transformProcResources pd _ = do
 -- This returns an updated list of Params, transformed list of Stmts (body),
 -- and the value of the tmpCtr after transforming the proc
 transformProc :: OptPos -> Maybe ProcName -> ProcVariant
-              -> Determinism -> [Param] -> Set ResourceFlowSpec
-              -> [Placed Stmt] -> Resourcer ([Param], [Placed Stmt], Int)
+              -> Determinism -> [Placed Param] -> Set ResourceFlowSpec
+              -> [Placed Stmt] -> Resourcer ([Placed Param], [Placed Stmt], Int)
 transformProc pos name variant detism params ress body = do
     logResourcer $ "Transforming proc " ++ fromMaybe "un-named (anon)" name
     resTys <- concat <$> mapM (simpleResourceFlows pos) (Set.elems ress)
     let allParams = params ++ List.map resourceParams resTys
-    let hasHigherResources = any paramIsResourceful allParams
+    let hasHigherResources = any (paramIsResourceful . content) allParams
     let (resFlows, realParams) = partitionEithers $ eitherResourceParam <$> allParams
     let needsGlobalParam = hasHigherResources || not (List.null resFlows)
     thisMod <- lift getModuleSpec
@@ -286,7 +286,7 @@ transformStmt stmt@(ProcCall fn@(First m n mbId) d resourceful args) pos = do
     unless (List.null res) $ shouldnt $ "statement with resource args " ++ show stmt
     (args'', ins, outs) <- transformExps args'
     let callResFlows = Set.toList $ procProtoResources proto
-    let callParamTys = paramType <$> procProtoParams proto
+    let callParamTys = paramType . content <$> procProtoParams proto
     let hasResfulHigherArgs = any isResourcefulHigherOrder callParamTys
     let usesResources = not (List.null callResFlows) || hasResfulHigherArgs
     unless (resourceful || not usesResources)
@@ -459,14 +459,14 @@ transformExp _ (AnonProc mods@(ProcModifiers detism _ _ _ resful)
                 then Set.fromList res
                 else Set.empty
     (params', body', _) <- transformProc pos Nothing AnonymousProc
-                                detism params res' body
+                                detism (Unplaced <$> params) res' body
     let clsd' = trustFromJust "gloablise anon proc without clsd" clsd
     clsd'' <- if resful
               then (clsd' `Map.difference`) . resourceNameMap <$> gets resResources
               else do
                   mapM_ (uncurry $ addResourceInOuts ParamIn) $ Map.toList clsd'
                   return clsd'
-    return $ AnonProc mods params' body' (Just clsd'') (Just res') `maybePlace` pos
+    return $ AnonProc mods (content <$> params') body' (Just clsd'') (Just res') `maybePlace` pos
 transformExp _ exp pos = return $ exp `maybePlace` pos
 
 
@@ -547,9 +547,9 @@ resourceVar (ResourceSpec mod name) =
 
     
 -- | Transform a ResourceFlowSpec with a type into a Param
-resourceParams :: (ResourceFlowSpec,TypeSpec) -> Param
+resourceParams :: (ResourceFlowSpec,TypeSpec) -> Placed Param
 resourceParams (ResourceFlowSpec res flow, typ) =
-    Param (resourceVar res) typ flow (Resource res)
+    Unplaced $ Param (resourceVar res) typ flow (Resource res)
 
 
 -- | Given a ResourceSpec and something, return Right of something if the
@@ -563,11 +563,13 @@ eitherResource res a =
 
 -- | Given a Param, return either the (ResourceFlowSpec, TypeSpec) associated
 -- with the parameter or the param itself
-eitherResourceParam :: Param -> Either (ResourceFlowSpec, TypeSpec) Param
-eitherResourceParam param@(Param _ ty fl (Resource res)) =
-    mapLeft ((,ty) . (`ResourceFlowSpec` fl))
-    $ eitherResource res param
-eitherResourceParam param = Right param
+eitherResourceParam :: Placed Param -> Either (ResourceFlowSpec, TypeSpec) (Placed Param)
+eitherResourceParam param = 
+    case content param of
+        Param _ ty fl (Resource res) ->
+            mapLeft ((,ty) . (`ResourceFlowSpec` fl))
+            $ eitherResource res param
+        _ -> Right param
 
 
 -- | Given an Exp, return either the ResourceSpec associated with a Var, else

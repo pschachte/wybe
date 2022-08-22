@@ -239,7 +239,8 @@ fromUseItemParser v = do
 -- 'visibility' 'determinism'.
 procOrFuncItem :: Visibility -> Parser Item
 procOrFuncItem vis = do
-    pos <- tokenPosition <$> ident "def"
+    ident "def"
+    pos <- getPosition 
     mods <- modifierList >>= parseWith (processProcModifiers pos "procedure or function declaration")
     (proto, returnType) <- limitedTerm prototypePrecedence
                             >>= parseWith termToPrototype
@@ -1288,12 +1289,12 @@ termToProto other =
 
 
 -- | Translate a Term to a proc or func parameter
-termToParam :: TranslateTo Param
-termToParam (Call _ [] ":" ParamIn [Call _ [] name flow [],ty]) = do
+termToParam :: TranslateTo (Placed Param)
+termToParam (Call pos [] ":" ParamIn [Call _ [] name flow [],ty]) = do
     ty' <- termToTypeSpec ty
-    return $ Param name ty' flow Ordinary
+    return $ Param name ty' flow Ordinary `maybePlace` Just pos
 termToParam (Call pos [] name flow []) =
-    return $ Param name AnyType flow Ordinary
+    return $ Param name AnyType flow Ordinary `maybePlace` Just pos
 termToParam other =
     syntaxError (termPos other) $ "invalid parameter " ++ show other
 
@@ -1309,17 +1310,19 @@ termToCtorDecl other =
 
 
 -- | Translate a Term to a ctor field
-termToCtorField :: TranslateTo Param
-termToCtorField (Call _ [] ":" ParamIn [Call _ [] name ParamIn [],ty]) = do
+termToCtorField :: TranslateTo (Placed Param)
+termToCtorField (Call pos [] ":" ParamIn [Call _ [] name ParamIn [],ty]) = do
     ty' <- termToTypeSpec ty
-    return $ Param name ty' ParamIn Ordinary
+    return $ Param name ty' ParamIn Ordinary `maybePlace` Just pos
 termToCtorField (Call pos [] name ParamIn [])
   | isTypeVar name = do
     return $ Param "" (TypeVariable $ RealTypeVar name) ParamIn Ordinary
+                `maybePlace` Just pos
 termToCtorField (Call pos mod name ParamIn params)
   | not $ isTypeVar name = do
     tyParams <- mapM termToTypeSpec params
     return $ Param "" (TypeSpec mod name tyParams) ParamIn Ordinary
+                `maybePlace` Just pos
 termToCtorField other =
     syntaxError (termPos other) $ "invalid constructor field " ++ show other
 

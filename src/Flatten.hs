@@ -38,6 +38,7 @@
 module Flatten (flattenProcDecl) where
 
 import AST
+import Config
 import Debug.Trace
 import Snippets
 import Options (LogSelection(Flatten))
@@ -62,10 +63,11 @@ flattenProcDecl (ProcDecl vis mods proto stmts pos) = do
     logMsg Flatten $ "** Flattening "
            ++ "def " ++ showProcModifiers' mods
            ++ show proto ++ " {" ++ showBody 4 stmts ++ "}"
-    let inParams = Set.fromList $
-                   List.map paramName $
-                   List.filter (flowsIn . paramFlow) $
-                   procProtoParams proto
+    mapM_ (placedApply $ flip explicitTypeSpecificationWarning . paramType) params
+    let inParams = Set.fromList
+                 $ List.map paramName
+                 $ List.filter (flowsIn . paramFlow)
+                 $ List.map content params
     let resources = Set.map (resourceName . resourceFlowRes)
                   $ procProtoResources proto
     (stmts',tmpCtr) <- flattenBody stmts (inParams `Set.union` resources)
@@ -597,7 +599,7 @@ flattenExp (CaseExp pexpr cases deflt) ty castFrom pos = do
     flattenStmt (translateExpCases pexpr' resultName cases deflt) pos Det
     return $ maybePlace (Var resultName ParamIn Ordinary) pos
 flattenExp (Fncall mod name bang exps) ty castFrom pos = do
-    when bang $ lift 
+    when bang $ lift
         $ errmsg pos "function call cannot have preceding !"
     let stmtBuilder = ProcCall (First mod name Nothing) Det bang
     flattenCall stmtBuilder False ty castFrom pos exps
@@ -606,7 +608,27 @@ flattenExp (ForeignFn lang name flags exps) ty castFrom pos = do
 flattenExp (Typed exp AnyType _) ty castFrom pos = do
     flattenExp exp ty castFrom pos
 flattenExp (Typed exp ty castFrom) _ _ pos = do
+    lift $ explicitTypeSpecificationWarning pos ty
+    lift $ forM_ castFrom (explicitTypeSpecificationWarning pos)
     flattenExp exp ty castFrom pos
+
+
+-- | Emit a warning if a type constraint is the current module.
+explicitTypeSpecificationWarning :: OptPos -> TypeSpec -> Compiler ()
+explicitTypeSpecificationWarning pos ty@(TypeSpec tmod tname params) = do
+    currMod <- getModuleSpec
+    isType <- moduleIsType currMod
+    when (((tmod ++ [tname]) `isSuffixOf` currMod) && isType) $ do
+        logMsg Flatten "here<<<"
+        message Warning
+            ("Explicit specification of current type " ++ show ty
+            ++ ",\n  it is recommended to specify type as " ++ currentModuleAlias)
+            pos
+    mapM_ (explicitTypeSpecificationWarning pos) params
+explicitTypeSpecificationWarning pos ty@(HigherOrderType _ tyflows) = do
+    mapM_ (explicitTypeSpecificationWarning pos . typeFlowType) tyflows
+explicitTypeSpecificationWarning _ _ = return ()
+
 
 
 -- |Flatten a Wybe or foreign *function* call, returning a simple expression for
