@@ -2346,7 +2346,7 @@ data PrimFork =
       forkVarType::TypeSpec,    -- ^The Wybe type of the forkVar
       forkVarLast::Bool,        -- ^Is this the last occurrence of forkVar
       forkBodies::[ProcBody],   -- ^one branch for each value of forkVar
-      forkDefault::Maybe ProcBody -- ^branch to take if out of range
+      forkDefault::Maybe ProcBody -- ^branch to take if forkVar is out of range
     }
     deriving (Eq, Show, Generic)
 
