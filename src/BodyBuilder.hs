@@ -332,10 +332,9 @@ popParent :: BodyState -> (BodyState,BodyState,PrimVarName,TypeSpec,
                            Maybe Integer,Bool,[BodyState])
 popParent st@BodyState{parent=Nothing} =
     shouldnt "endBranch with no open branch to end"
-popParent st@BodyState{parent=(Just
-             par@BodyState{buildState=(Forked var ty val fused
-                                       branches False)})} =
-    (par, st {parent = Nothing}, var, ty, val, fused, branches)
+popParent st@BodyState{tmpCount=tmp, parent=(Just
+             par@BodyState{buildState=(Forked var ty val fused brs False)})} =
+    (par {tmpCount=tmp}, st {parent = Nothing}, var, ty, val, fused, brs)
 popParent st@BodyState{parent=Just par} =
     let (ancestor, fixedPar, var, ty, val, fused, branches) = popParent par
     in  (ancestor,st {parent=Just fixedPar}, var, ty, val, fused, branches)

@@ -36,8 +36,8 @@ print(lst##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
     1:
         foreign lpvm access(lst##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @loop_bug:nn:nn
         foreign lpvm access(~lst##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:loop_bug.int_list) @loop_bug:nn:nn
-        foreign c print_int(~h##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @int:nn:nn
-        foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+        foreign c print_int(~h##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @int:nn:nn
+        foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
         loop_bug.print#cont#1<0>(_:wybe.int, ~t##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @loop_bug:nn:nn
 
 

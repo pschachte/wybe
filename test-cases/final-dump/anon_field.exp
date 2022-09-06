@@ -163,9 +163,9 @@ module top-level code > public {semipure} (0 calls)
 
         1:
             foreign lpvm access(~#left##0:anon_field, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?#left#bar#1##0:wybe.int) @anon_field:nn:nn
-            foreign llvm and(#right##0:wybe.int, 3:wybe.int, ?tmp#19##0:wybe.int)
-            foreign llvm icmp_eq(~tmp#19##0:wybe.int, 1:wybe.int, ?tmp#20##0:wybe.bool)
-            case ~tmp#20##0:wybe.bool of
+            foreign llvm and(#right##0:wybe.int, 3:wybe.int, ?tmp#22##0:wybe.int)
+            foreign llvm icmp_eq(~tmp#22##0:wybe.int, 1:wybe.int, ?tmp#23##0:wybe.bool)
+            case ~tmp#23##0:wybe.bool of
             0:
                 foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
@@ -179,9 +179,9 @@ module top-level code > public {semipure} (0 calls)
         foreign lpvm access(#left##0:anon_field, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#foo#2##0:wybe.bool) @anon_field:nn:nn
         foreign lpvm access(#left##0:anon_field, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#foo#1##0:wybe.int) @anon_field:nn:nn
         foreign lpvm access(~#left##0:anon_field, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#left#i##0:wybe.int) @anon_field:nn:nn
-        foreign llvm and(#right##0:wybe.int, 3:wybe.int, ?tmp#16##0:wybe.int)
-        foreign llvm icmp_eq(~tmp#16##0:wybe.int, 0:wybe.int, ?tmp#17##0:wybe.bool)
-        case ~tmp#17##0:wybe.bool of
+        foreign llvm and(#right##0:wybe.int, 3:wybe.int, ?tmp#19##0:wybe.int)
+        foreign llvm icmp_eq(~tmp#19##0:wybe.int, 0:wybe.int, ?tmp#20##0:wybe.bool)
+        case ~tmp#20##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
