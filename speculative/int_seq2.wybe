@@ -264,14 +264,14 @@ def {test} gen2_next(?parity:int, !cp:int) {
 # new choicepoint.
 
 def {test} gen1_next(start:int, end:int, ?val:int, !cp:machine_word) {
-    if {foreign llvm icmp_eq(cp, 0:!machine_word, ?result:bool) && result::
+    if {foreign llvm icmp_eq(cp, 0:machine_word, ?result:bool) & result::
         ?val = start
         foreign llvm move(1:!machine_word, ?cp)
-    |   foreign llvm icmp_eq(cp, 1:!machine_word, ?result:bool) && result::
+    |   foreign llvm icmp_eq(cp, 1:machine_word, ?result:bool) & result::
         ?val = start + 1
         foreign lpvm alloc(8, ?cp)
         foreign lpvm mutate(cp, ?cp, 0, 1, 8, 0, 0:machine_word)
-    |   foreign llvm icmp_ugt(cp, 1:!machine_word, ?result:bool) && result::
+    |   foreign llvm icmp_ugt(cp, 1:machine_word, ?result:bool) & result::
         foreign lpvm access(cp, 0, 8, 0, ?innercp)
         if {int_seq(start + 2, end, ?val, !innercp)::
             foreign lpvm mutate(cp, ?cp, 0, 1, 8, 0, innercp)
@@ -282,10 +282,11 @@ def {test} gen1_next(start:int, end:int, ?val:int, !cp:machine_word) {
 }
 
 def {test} int_seq(start:int, end:int, ?val:int, !cp:machine_word) {
-    if {foreign llvm icmp_eq(cp, 0:machine_word, ?result:bool) && result::
+    if {foreign llvm icmp_eq(cp, 0:machine_word, ?result:bool) & result::
         (start < end)
-        int_seq_cont1(start, end, ?val, 0:machine_word, !cp)
-    |   foreign llvm icmp_ne(cp, 0:machine_word, ?result:bool) && result::
+        foreign llvm move(0:!machine_word, ?zero)
+        int_seq_cont1(start, end, ?val, zero, !cp)
+    |   foreign llvm icmp_ne(cp, 0:machine_word, ?result:bool) & result::
         foreign lpvm access(cp,  0, 8, 0, ?cp1)
         foreign lpvm access(cp,  8, 8, 0, ?cp2)
         foreign lpvm access(cp, 16, 8, 0, ?val)
@@ -325,7 +326,7 @@ def {test} int_seq_cont2(start:int, end:int, val0:int, ?val:int,
 # testing it:
 
 
-?cp = 0:machine_word
+foreign llvm move(0:!machine_word, ?cp)
 do {while int_seq(1, 10, ?val, !cp)
     !println(val)
 }

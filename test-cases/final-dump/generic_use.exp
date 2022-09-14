@@ -515,12 +515,12 @@ print(lst##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
     1:
         foreign lpvm access(lst##0:generic_list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @generic_list:nn:nn
         foreign lpvm access(~lst##0:generic_list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:generic_list(wybe.int)) @generic_list:nn:nn
-        foreign c print_int(~h##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @int:nn:nn
-        foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+        foreign c print_int(~h##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @int:nn:nn
+        foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
         generic_use.print_tail<0>(~t##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @generic_use:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @char:nn:nn
-        foreign c putchar(']':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @char:nn:nn
-        foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @char:nn:nn
+        foreign c putchar(']':wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @char:nn:nn
+        foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char:nn:nn
 
 
 

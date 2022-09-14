@@ -100,7 +100,7 @@ finishStmt = do
     gets currVars >>= logClause . (("Finish with numbering " ++) . show)
 
 -- |Return a list of prims to complete a proc body.  For a SemiDet body
--- that hasn't already had $$ assigned a value, this will assign it
+-- that hasn't already had #success assigned a value, this will assign it
 -- True; otherwise it'll be empty.
 closingStmts :: Determinism -> [Param] -> ClauseComp [Placed Prim]
 closingStmts detism params = do

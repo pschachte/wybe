@@ -48,13 +48,13 @@ simpleMerge(tl##0:mytree.tree, tr##0:mytree.tree, ?#result##0:mytree.tree)<{}; {
     1:
         foreign lpvm access(tl##0:mytree.tree, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?k1##0:wybe.int) @mytree:nn:nn
         foreign lpvm access(tl##0:mytree.tree, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?r1##0:mytree.tree) @mytree:nn:nn
-        foreign llvm icmp_ne(tr##0:wybe.int, 0:wybe.int, ?tmp#17##0:wybe.bool)
-        case ~tmp#17##0:wybe.bool of
+        foreign llvm icmp_ne(tr##0:wybe.int, 0:wybe.int, ?tmp#23##0:wybe.bool)
+        case ~tmp#23##0:wybe.bool of
         0:
-            foreign lpvm alloc(24:wybe.int, ?tmp#21##0:mytree.tree) @mytree:nn:nn
-            foreign lpvm mutate(~tmp#21##0:mytree.tree, ?tmp#22##0:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree) @mytree:nn:nn
-            foreign lpvm mutate(~tmp#22##0:mytree.tree, ?tmp#23##0:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:wybe.int) @mytree:nn:nn
-            foreign lpvm mutate(~tmp#23##0:mytree.tree, ?#result##0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree) @mytree:nn:nn
+            foreign lpvm alloc(24:wybe.int, ?tmp#27##0:mytree.tree) @mytree:nn:nn
+            foreign lpvm mutate(~tmp#27##0:mytree.tree, ?tmp#28##0:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree) @mytree:nn:nn
+            foreign lpvm mutate(~tmp#28##0:mytree.tree, ?tmp#29##0:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:wybe.int) @mytree:nn:nn
+            foreign lpvm mutate(~tmp#29##0:mytree.tree, ?#result##0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree) @mytree:nn:nn
 
         1:
             foreign lpvm access(tr##0:mytree.tree, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?k2##0:wybe.int) @mytree:nn:nn
@@ -62,16 +62,16 @@ simpleMerge(tl##0:mytree.tree, tr##0:mytree.tree, ?#result##0:mytree.tree)<{}; {
             foreign llvm icmp_slt(k1##0:wybe.int, k2##0:wybe.int, ?tmp#11##0:wybe.bool) @int:nn:nn
             case ~tmp#11##0:wybe.bool of
             0:
-                foreign lpvm alloc(24:wybe.int, ?tmp#23##0:mytree.tree) @mytree:nn:nn
-                foreign lpvm mutate(~tmp#23##0:mytree.tree, ?tmp#24##0:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tr##0:mytree.tree) @mytree:nn:nn
-                foreign lpvm mutate(~tmp#24##0:mytree.tree, ?tmp#25##0:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~k1##0:wybe.int) @mytree:nn:nn
-                foreign lpvm mutate(~tmp#25##0:mytree.tree, ?#result##0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~r1##0:mytree.tree) @mytree:nn:nn
+                foreign lpvm alloc(24:wybe.int, ?tmp#35##0:mytree.tree) @mytree:nn:nn
+                foreign lpvm mutate(~tmp#35##0:mytree.tree, ?tmp#36##0:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tr##0:mytree.tree) @mytree:nn:nn
+                foreign lpvm mutate(~tmp#36##0:mytree.tree, ?tmp#37##0:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~k1##0:wybe.int) @mytree:nn:nn
+                foreign lpvm mutate(~tmp#37##0:mytree.tree, ?#result##0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~r1##0:mytree.tree) @mytree:nn:nn
 
             1:
-                foreign lpvm alloc(24:wybe.int, ?tmp#23##0:mytree.tree) @mytree:nn:nn
-                foreign lpvm mutate(~tmp#23##0:mytree.tree, ?tmp#24##0:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tl##0:mytree.tree) @mytree:nn:nn
-                foreign lpvm mutate(~tmp#24##0:mytree.tree, ?tmp#25##0:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~k2##0:wybe.int) @mytree:nn:nn
-                foreign lpvm mutate(~tmp#25##0:mytree.tree, ?#result##0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~r2##0:mytree.tree) @mytree:nn:nn
+                foreign lpvm alloc(24:wybe.int, ?tmp#42##0:mytree.tree) @mytree:nn:nn
+                foreign lpvm mutate(~tmp#42##0:mytree.tree, ?tmp#43##0:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tl##0:mytree.tree) @mytree:nn:nn
+                foreign lpvm mutate(~tmp#43##0:mytree.tree, ?tmp#44##0:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~k2##0:wybe.int) @mytree:nn:nn
+                foreign lpvm mutate(~tmp#44##0:mytree.tree, ?#result##0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~r2##0:mytree.tree) @mytree:nn:nn
 
 
 

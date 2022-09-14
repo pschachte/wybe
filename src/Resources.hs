@@ -201,7 +201,7 @@ transformProcResources pd _ = do
     return pd'
 
 
--- Transform a proc, tranforming resources into globals.
+-- Transform a proc, transforming resources into globals.
 -- This returns an updated list of Params, transformed list of Stmts (body),
 -- and the value of the tmpCtr after transforming the proc
 transformProc :: OptPos -> Maybe ProcName -> ProcVariant

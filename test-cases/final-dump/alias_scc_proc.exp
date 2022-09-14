@@ -83,9 +83,9 @@ foo(p1##0:position.position, ?p2##0:position.position, ?p3##0:position.position)
 
     1:
         foreign llvm move(~p1##0:position.position, ?p2##0:position.position) @alias_scc_proc:nn:nn
-        foreign lpvm alloc(16:wybe.int, ?tmp#11##0:position.position) @position:nn:nn
-        foreign lpvm mutate(~tmp#11##0:position.position, ?tmp#12##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @position:nn:nn
-        foreign lpvm mutate(~tmp#12##0:position.position, ?tmp#1##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @position:nn:nn
+        foreign lpvm alloc(16:wybe.int, ?tmp#20##0:position.position) @position:nn:nn
+        foreign lpvm mutate(~tmp#20##0:position.position, ?tmp#21##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @position:nn:nn
+        foreign lpvm mutate(~tmp#21##0:position.position, ?tmp#1##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @position:nn:nn
         foreign llvm move(tmp#1##0:position.position, ?p3##0:position.position) @alias_scc_proc:nn:nn
         wybe.string.print<0>("--- Inside foo: expect p3(3,3):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @alias_scc_proc:nn:nn
         position.printPosition<0>(~tmp#1##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @alias_scc_proc:nn:nn
@@ -104,9 +104,9 @@ foo(p1##0:position.position, ?p2##0:position.position, ?p3##0:position.position)
 
     1:
         foreign llvm move(~p1##0:position.position, ?p2##0:position.position) @alias_scc_proc:nn:nn
-        foreign lpvm alloc(16:wybe.int, ?tmp#11##0:position.position) @position:nn:nn
-        foreign lpvm mutate(~tmp#11##0:position.position, ?tmp#12##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @position:nn:nn
-        foreign lpvm mutate(~tmp#12##0:position.position, ?tmp#1##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @position:nn:nn
+        foreign lpvm alloc(16:wybe.int, ?tmp#20##0:position.position) @position:nn:nn
+        foreign lpvm mutate(~tmp#20##0:position.position, ?tmp#21##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @position:nn:nn
+        foreign lpvm mutate(~tmp#21##0:position.position, ?tmp#1##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 3:wybe.int) @position:nn:nn
         foreign llvm move(tmp#1##0:position.position, ?p3##0:position.position) @alias_scc_proc:nn:nn
         wybe.string.print<0>("--- Inside foo: expect p3(3,3):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @alias_scc_proc:nn:nn
         position.printPosition<0>(~tmp#1##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @alias_scc_proc:nn:nn

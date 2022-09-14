@@ -192,6 +192,7 @@ type ComputedCalls = Map Prim [PrimArg]
 freshVarName :: BodyBuilder PrimVarName
 freshVarName = do
     tmp <- gets tmpCount
+    logBuild $ "Generating fresh variable " ++ mkTempName tmp
     modify (\st -> st {tmpCount = tmp + 1})
     return $ PrimVarName (mkTempName tmp) 0
 
@@ -320,6 +321,7 @@ beginBranch = do
         logBuild $ "<<<< <<<< Beginning to build "
                    ++ (if fused then "fused " else "") ++ "branch "
                    ++ show branchNum ++ " on " ++ show var
+        gets tmpCount >>= logBuild . ("  tmpCount = "++) . show
         when fused $ do
           par <- gets $ trustFromJust "forkConst with no parent branch" . parent
           case buildState par of
@@ -332,10 +334,6 @@ beginBranch = do
                     then Map.empty
                     else List.foldr1 intersectMapIdentity matchingSubsts
               logBuild $ "          Adding substs " ++ show extraSubsts
-              -- XXX shouldn't need to do this sanity check
-              -- lostSubsts <- (Map.\\ extraSubsts) <$> gets currSubst
-              -- unless (Map.null lostSubsts )
-              --   $ shouldnt $ "Fusion loses substs " ++ simpleShowMap lostSubsts
               modify $ \st -> st { currSubst =
                                    Map.union extraSubsts (currSubst st) }
             Unforked -> shouldnt "forkConst predicted parent branch"
@@ -354,7 +352,10 @@ endBranch = do
     (par,st,var,ty,val,fused,bodies,deflt) <- gets popParent
     logBuild $ ">>>> >>>> Ending branch "
                ++ show (length bodies) ++ " on " ++ show var
-    put $ par { buildState=Forked var ty val fused (st:bodies) deflt False }
+    tmp <- gets tmpCount
+    logBuild $ "  tmpCount = " ++ show tmp
+    put $ par { buildState=Forked var ty val fused (st:bodies) deflt False
+              , tmpCount = tmp }
     logState
 
 
@@ -365,9 +366,8 @@ popParent :: BodyState -> (BodyState,BodyState,PrimVarName,TypeSpec,
 popParent st@BodyState{parent=Nothing} =
     shouldnt "endBranch with no open branch to end"
 popParent st@BodyState{parent=(Just
-             par@BodyState{buildState=(Forked var ty val fused
-                                       branches deflt False)})} =
-    (par, st {parent = Nothing}, var, ty, val, fused, branches, deflt)
+             par@BodyState{buildState=(Forked var ty val fused brs deflt False)})} =
+    (par, st {parent = Nothing}, var, ty, val, fused, brs, deflt)
 popParent st@BodyState{parent=Just par} =
     let (anc, fixedPar, var, ty, val, fused, branches, deflt) = popParent par
     in  (anc,st {parent=Just fixedPar}, var, ty, val, fused, branches, deflt)
@@ -1208,7 +1208,8 @@ type BkwdBuilder = StateT BkwdBuilderState Compiler
 -- forwards.  Because construction runs backwards, the state mostly holds
 -- information about the following code.
 data BkwdBuilderState = BkwdBuilderState {
-      bkwdUsedLater    :: Set PrimVarName, -- ^Variables used later in computation
+      bkwdUsedLater    :: Set PrimVarName, -- ^Vars used later in computation,
+                                           --  but not defined later
       bkwdBranchesUsedLater :: Maybe [Set PrimVarName],
                                            -- ^The usedLater set for each
                                            -- following branch, used for fused
@@ -1253,6 +1254,11 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
             usedLater' <- gets bkwdUsedLater
             let sts' = sts ++ maybeToList deflt''
             let usedLaters = bkwdUsedLater <$> sts'
+            -- XXX Not right!  When processing the prims prior to each fork
+            -- being assembled into a switch, we must only consider the
+            -- usedLater set from *following* code.  Doing the following winds
+            -- up keeping Undef assignments to variables that will be assigned
+            -- later if they are needed.
             let usedLater'' = List.foldr Set.union usedLater' usedLaters
             let branchesUsedLater =
                   if fused
@@ -1403,9 +1409,6 @@ bkwdBuildStmt defs prim pos = do
             | Set.notMember fromVar usedLater && Set.member fromVar defs ->
                 modify $ \s -> s { bkwdRenaming = Map.insert fromVar toVar
                                                 $ bkwdRenaming s }
-        -- XXX only filter these out for failing branch
-        -- (PrimForeign "llvm" "move" [] _, [ArgUndef{},_]) ->
-        --     return () -- We can just drop undef values as they won't be needed
         _ -> do
             let (ins, outs) = splitArgsByMode $ List.filter argIsVar
                                               $ flattenArgs args'
@@ -1420,7 +1423,15 @@ bkwdBuildStmt defs prim pos = do
                 -- passed as input argument more than once in the call
                 let prim' = replacePrimArgs prim (markIfLastUse usedLater <$> args') gFlows
                 logBkwd $ "    updated prim = " ++ show prim'
-                let usedLater' = List.foldr Set.insert usedLater $ argVarName <$> ins
+                -- Don't consider variables assigned here to be used later.
+                -- Variables should only be assigned once, but rearranging
+                -- nested forks into a switch can move Undef assignments in
+                -- front of real assignments, and we want those to be considered
+                -- to be unneeded.
+                let usedLater' = List.foldr Set.insert 
+                                    (List.foldr Set.delete usedLater
+                                    $ argVarName <$> outs)
+                                 $ argVarName <$> ins
                 -- Add all globals that FlowOut from this prim, then remove all that FlowIn
                 -- FlowOut means it is overwritten, FlowIn means the value may be read
                 let gStored' = Set.filter (not . hasGlobalFlow gFlows FlowIn)
