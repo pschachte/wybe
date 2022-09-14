@@ -15,7 +15,7 @@ import AST
 import Debug.Trace
 import Snippets ( boolType, intType, primMove )
 import Util
-import Config (minimumSwitchCases)
+import Config (minimumSwitchCases, wordSize)
 import Options (LogSelection(BodyBuilder))
 import Data.Map as Map
 import Data.List as List
@@ -1369,11 +1369,19 @@ completeSwitch :: [Placed Prim] -> PrimVarName -> TypeSpec -> BodyState
 completeSwitch prims var ty deflt cases
     | Map.size cases >= minimumSwitchCases = do
         let cases' = Map.toAscList cases
-        if (fst <$> cases') == [0..fst (last cases')]
+        let maxCase = fst $ last cases'
+        if (fst <$> cases') == [0..maxCase]
             then do
                 logBkwd $ "Producing switch with cases "
                           ++ show (fst <$> cases') ++ " and a default"
-                return $ Just (prims, var, ty, snd <$> cases', Just deflt)
+                logBkwd $ "Switch variable type: " ++ show ty
+                switchVarRep <- lift $ lookupTypeRepresentation ty
+                let maxPossible = 2^(maybe wordSize typeRepSize switchVarRep)-1
+                logBkwd $ "Max possible switch var value: " ++ show maxPossible
+                return $ Just (prims, var, ty, snd <$> cases',
+                               if maxPossible >= maxCase
+                                then Nothing
+                                else Just deflt)
             else do
                 logBkwd $ "Not producing switch:  non-dense cases "
                           ++ show (fst <$> cases')

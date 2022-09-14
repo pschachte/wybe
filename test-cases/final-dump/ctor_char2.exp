@@ -106,9 +106,6 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-        3:
-            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
-
 
 
 
@@ -344,30 +341,28 @@ entry:
   br i1 %0, label %if.then, label %if.else 
 if.then:
   %1 = and i64 %"#left##0", 3 
-  switch i64 %1, label %switch.4.3 [i64 0, label %switch.4.0 i64 1, label %switch.4.1 i64 2, label %switch.4.2 i64 3, label %switch.4.3] 
+  switch i64 %1, label %switch.3.2 [i64 0, label %switch.3.0 i64 1, label %switch.3.1 i64 2, label %switch.3.2] 
 if.else:
   %32 = icmp eq i64 %"#right##0", 0 
   ret i1 %32 
-switch.4.0:
+switch.3.0:
   %2 = lshr  i64 %"#left##0", 2 
   %3 = and i64 %2, 255 
   %4 = trunc i64 %3 to i8  
   %5 = icmp ne i64 %"#right##0", 0 
   br i1 %5, label %if.then1, label %if.else1 
-switch.4.1:
+switch.3.1:
   %12 = add   i64 %"#left##0", -1 
   %13 = inttoptr i64 %12 to i64* 
   %14 = load  i64, i64* %13 
   %15 = icmp ne i64 %"#right##0", 0 
   br i1 %15, label %if.then3, label %if.else3 
-switch.4.2:
+switch.3.2:
   %22 = add   i64 %"#left##0", -2 
   %23 = inttoptr i64 %22 to i64* 
   %24 = load  i64, i64* %23 
   %25 = icmp ne i64 %"#right##0", 0 
   br i1 %25, label %if.then5, label %if.else5 
-switch.4.3:
-  ret i1 0 
 if.then1:
   %6 = and i64 %"#right##0", 3 
   %7 = icmp eq i64 %6, 0 
