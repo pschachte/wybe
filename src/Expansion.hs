@@ -186,7 +186,7 @@ expandBody (ProcBody prims fork) = do
       NoFork -> do
         logExpansion "No fork for this body"
         return ()
-      PrimFork var ty final bodies -> do
+      PrimFork var ty final bodies deflt -> do
         st <- get
         logExpansion $ "Now expanding fork (" ++
           (if inlining st then "without" else "WITH") ++ " inlining)"
@@ -197,7 +197,7 @@ expandBody (ProcBody prims fork) = do
               Just _ -> shouldnt "expansion led to non-var conditional"
         logExpansion $ "  fork on " ++ show var' ++ ":" ++ show ty
                        ++ " with " ++ show (length bodies) ++ " branches"
-        expandFork var' ty bodies
+        expandFork var' ty $ bodies ++ maybeToList deflt
         logExpansion $ "Finished expanding fork on " ++ show var'
 
 

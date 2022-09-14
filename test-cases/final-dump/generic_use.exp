@@ -62,7 +62,7 @@ car(#rec##0:generic_list(T), ?#rec##1:generic_list(T), #field##0:T, ?#success##0
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
-        foreign llvm move(~#rec##0:generic_list(T), ?#rec##1:generic_list(T))
+        foreign llvm move(0:generic_list(T), ?#rec##1:generic_list(T))
 
     1:
         foreign lpvm mutate(~#rec##0:generic_list(T), ?#rec##1:generic_list(T), 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:T) @generic_list:nn:nn
@@ -94,7 +94,7 @@ cdr(#rec##0:generic_list(T), ?#rec##1:generic_list(T), #field##0:generic_list(T)
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
-        foreign llvm move(~#rec##0:generic_list(T), ?#rec##1:generic_list(T))
+        foreign llvm move(0:generic_list(T), ?#rec##1:generic_list(T))
 
     1:
         foreign lpvm {noalias} mutate(~#rec##0:generic_list(T), ?#rec##1:generic_list(T), 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:generic_list(T)) @generic_list:nn:nn
@@ -236,7 +236,7 @@ if.then:
   %9 = insertvalue {i64, i1} %8, i1 1, 1 
   ret {i64, i1} %9 
 if.else:
-  %10 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %10 = insertvalue {i64, i1} undef, i64 0, 0 
   %11 = insertvalue {i64, i1} %10, i1 0, 1 
   ret {i64, i1} %11 
 }
@@ -279,7 +279,7 @@ if.then:
   %10 = insertvalue {i64, i1} %9, i1 1, 1 
   ret {i64, i1} %10 
 if.else:
-  %11 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %11 = insertvalue {i64, i1} undef, i64 0, 0 
   %12 = insertvalue {i64, i1} %11, i1 0, 1 
   ret {i64, i1} %12 
 }
@@ -515,12 +515,12 @@ print(lst##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
     1:
         foreign lpvm access(lst##0:generic_list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @generic_list:nn:nn
         foreign lpvm access(~lst##0:generic_list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:generic_list(wybe.int)) @generic_list:nn:nn
-        foreign c print_int(~h##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @int:nn:nn
-        foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+        foreign c print_int(~h##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @int:nn:nn
+        foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
         generic_use.print_tail<0>(~t##0:generic_list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @generic_use:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @char:nn:nn
-        foreign c putchar(']':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @char:nn:nn
-        foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @char:nn:nn
+        foreign c putchar(']':wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @char:nn:nn
+        foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char:nn:nn
 
 
 

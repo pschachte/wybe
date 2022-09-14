@@ -252,7 +252,7 @@ if.else:
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
     case ~tmp#0##0:wybe.bool of
     0:
-        foreign llvm icmp_eq(~#left##0:type_list.intlist, ~#right##0:type_list.intlist, ?#success##0:wybe.bool)
+        foreign llvm icmp_eq(~#right##0:type_list.intlist, 0:type_list.intlist, ?#success##0:wybe.bool)
 
     1:
         foreign lpvm access(#left##0:type_list.intlist, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#head##0:wybe.int) @type_list:nn:nn
@@ -328,7 +328,7 @@ head(#rec##0:type_list.intlist, ?#rec##1:type_list.intlist, #field##0:wybe.int, 
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
-        foreign llvm move(~#rec##0:type_list.intlist, ?#rec##1:type_list.intlist)
+        foreign llvm move(0:type_list.intlist, ?#rec##1:type_list.intlist)
 
     1:
         foreign lpvm mutate(~#rec##0:type_list.intlist, ?#rec##1:type_list.intlist, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @type_list:nn:nn
@@ -368,7 +368,7 @@ tail(#rec##0:type_list.intlist, ?#rec##1:type_list.intlist, #field##0:type_list.
     case ~tmp#0##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
-        foreign llvm move(~#rec##0:type_list.intlist, ?#rec##1:type_list.intlist)
+        foreign llvm move(0:type_list.intlist, ?#rec##1:type_list.intlist)
 
     1:
         foreign lpvm {noalias} mutate(~#rec##0:type_list.intlist, ?#rec##1:type_list.intlist, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:type_list.intlist) @type_list:nn:nn
@@ -411,7 +411,7 @@ if.then:
   %6 = icmp ne i64 %"#right##0", 0 
   br i1 %6, label %if.then1, label %if.else1 
 if.else:
-  %14 = icmp eq i64 %"#left##0", %"#right##0" 
+  %14 = icmp eq i64 %"#right##0", 0 
   ret i1 %14 
 if.then1:
   %7 = inttoptr i64 %"#right##0" to i64* 
@@ -502,7 +502,7 @@ if.then:
   %9 = insertvalue {i64, i1} %8, i1 1, 1 
   ret {i64, i1} %9 
 if.else:
-  %10 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %10 = insertvalue {i64, i1} undef, i64 0, 0 
   %11 = insertvalue {i64, i1} %10, i1 0, 1 
   ret {i64, i1} %11 
 }
@@ -551,7 +551,7 @@ if.then:
   %10 = insertvalue {i64, i1} %9, i1 1, 1 
   ret {i64, i1} %10 
 if.else:
-  %11 = insertvalue {i64, i1} undef, i64 %"#rec##0", 0 
+  %11 = insertvalue {i64, i1} undef, i64 0, 0 
   %12 = insertvalue {i64, i1} %11, i1 0, 1 
   ret {i64, i1} %12 
 }

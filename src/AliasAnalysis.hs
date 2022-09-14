@@ -187,10 +187,11 @@ aliasedByFork caller body analysisInfo = do
     logAlias "\nAnalyse forks (aliasedByFork):"
     let fork = bodyFork body
     case fork of
-        PrimFork _ _ _ fBodies -> do
+        PrimFork _ _ _ fBodies deflt -> do
             logAlias ">>> Forking:"
             analysisInfos <-
-                mapM (\body' -> aliasedByBody caller body' analysisInfo) fBodies
+                mapM (\body' -> aliasedByBody caller body' analysisInfo) 
+                    $ fBodies ++ maybeToList deflt
             return $ mergeAnalysisInfo analysisInfos
         NoFork -> do
             logAlias ">>> No fork."

@@ -47,7 +47,7 @@ module AST (
   -- *AST types
   Module(..), isRootModule, ModuleInterface(..), ModuleImplementation(..), InterfaceHash, PubProcInfo(..),
   ImportSpec(..), importSpec, Pragma(..), addPragma,
-  descendentModules, sameOriginModules, 
+  descendentModules, sameOriginModules,
   refersTo,
   enterModule, reenterModule, exitModule, reexitModule, inModule,
   emptyInterface, emptyImplementation,
@@ -793,7 +793,7 @@ getModuleImplementationMaybe fn = do
 genProcName :: ProcName -> Compiler ProcName
 genProcName pname = do
   names <- getModule procNames
-  let ctr = 1 + Map.findWithDefault 0 pname names 
+  let ctr = 1 + Map.findWithDefault 0 pname names
   updateModule (\mod -> mod {procNames = Map.alter (const $ Just ctr) pname names })
   return $ specialName2 pname $ show ctr
 
@@ -920,7 +920,7 @@ lookupType :: String -> OptPos -> TypeSpec -> Compiler TypeSpec
 lookupType context pos ty = do
     (msgs, ty') <- lookupType' context pos ty
     mapM_ queueMessage msgs
-    return ty' 
+    return ty'
 
 
 -- |Find the definition of the specified type visible from the current module.
@@ -932,7 +932,7 @@ lookupType' _ _ ty@TypeVariable{} = return ([], ty)
 lookupType' _ _ ty@Representation{} = return ([], ty)
 lookupType' context pos ty@HigherOrderType{higherTypeParams=typeFlows} = do
     (msgs, types) <- unzip <$> mapM (lookupType' context pos . typeFlowType) typeFlows
-    return (concat msgs, 
+    return (concat msgs,
             ty{higherTypeParams=zipWith TypeFlow types (typeFlowMode <$> typeFlows)})
 lookupType' context pos ty@(TypeSpec [] typename args)
   | typename == currentModuleAlias = do
@@ -2345,7 +2345,8 @@ data PrimFork =
       forkVar::PrimVarName,     -- ^The variable that selects branch to take
       forkVarType::TypeSpec,    -- ^The Wybe type of the forkVar
       forkVarLast::Bool,        -- ^Is this the last occurrence of forkVar
-      forkBodies::[ProcBody]    -- ^one branch for each value of forkVar
+      forkBodies::[ProcBody],   -- ^one branch for each value of forkVar
+      forkDefault::Maybe ProcBody -- ^branch to take if forkVar is out of range
     }
     deriving (Eq, Show, Generic)
 
@@ -2506,12 +2507,11 @@ foldBodyPrims primFn emptyConj abDisj (ProcBody pprims fork) =
                  emptyConj $ tails pprims
     in case fork of
       NoFork -> common
-      PrimFork _ _ _ [] -> shouldnt "empty clause list in a PrimFork"
-      PrimFork _ _ _ (body:bodies) ->
-          List.foldl
-          (\a b -> abDisj a $ foldBodyPrims primFn common abDisj b)
-          (foldBodyPrims primFn common abDisj body)
-          bodies
+      PrimFork _ _ _ [] _ -> shouldnt "empty clause list in a PrimFork"
+      PrimFork _ _ _ (body:bodies) deflt ->
+          List.foldl (\a b -> abDisj a $ foldBodyPrims primFn common abDisj b)
+                (foldBodyPrims primFn common abDisj body)
+                $ bodies ++ maybeToList deflt
 
 
 -- |Similar to foldBodyPrims, except that it assumes that abstract
@@ -2533,13 +2533,12 @@ foldBodyDistrib primFn emptyConj abDisj abConj (ProcBody pprims fork) =
                  emptyConj $ tails pprims
     in case fork of
       NoFork -> common
-      PrimFork _ _ _ [] -> shouldnt "empty clause list in a PrimFork"
-      PrimFork _ _ _ (body:bodies) ->
+      PrimFork _ _ _ [] _ -> shouldnt "empty clause list in a PrimFork"
+      PrimFork _ _ _ (body:bodies) deflt ->
         abConj common $
-        List.foldl
-        (\a b -> abDisj a $ foldBodyDistrib primFn common abDisj abConj b)
+        List.foldl (\a b -> abDisj a $ foldBodyDistrib primFn common abDisj abConj b)
         (foldBodyPrims primFn common abDisj body)
-        bodies
+        $ bodies ++ maybeToList deflt
 
 
 -- |Info about a proc call, including the ID, prototype, and an
@@ -3370,9 +3369,9 @@ procCallToExp stmt =
 
 -- |Return all input variables to each statement in a list of statements
 stmtsInputs :: [Placed Stmt] -> Set VarName
-stmtsInputs = foldStmts (const . const) 
-                        ((const .) . (. expInputs) . Set.union) 
-                        Set.empty 
+stmtsInputs = foldStmts (const . const)
+                        ((const .) . (. expInputs) . Set.union)
+                        Set.empty
 
 
 -- |Return the set of variables that might be freshly assigned by the
@@ -3850,13 +3849,15 @@ showBlock ind (ProcBody stmts fork) =
 -- |Show a primitive fork.
 showFork :: Int -> PrimFork -> String
 showFork ind NoFork = ""
-showFork ind (PrimFork var ty last bodies) =
+showFork ind (PrimFork var ty last bodies deflt) =
     startLine ind ++ "case " ++ (if last then "~" else "") ++ show var ++
                   ":" ++ show ty ++ " of" ++
     List.concatMap (\(val,body) ->
                         startLine ind ++ show val ++ ":" ++
                         showBlock (ind+4) body ++ "\n")
     (zip [0..] bodies)
+    ++ maybe "" (\b -> startLine ind ++ "else:"
+                       ++ showBlock (ind+4) b ++ "\n") deflt
 
 
 -- |Show a list of placed prims.
