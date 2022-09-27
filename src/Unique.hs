@@ -111,7 +111,7 @@ uniquenessCheckProc def _ = do
         when someUniqueRes $
             errmsg pos $ name ++ " with unique resource(s) can fail"
     isUnique <- getModule (tmUniqueness . typeModifiers . modInterface)
-    when (procVariant def == ConstructorProc && not isUnique)
+    when (isConstructorVariant (procVariant def) && not isUnique)
       $ mapM_ (placedApply checkNoNestedUnique) $ procProtoParams $ procProto def
     case procImpln def of
         ProcDefSrc body -> do

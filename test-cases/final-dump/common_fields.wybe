@@ -1,0 +1,20 @@
+pub constructors book(title:string, author:string, genre:string, id:int)
+                | magazine(title:string, frequency:int, id:int)
+                | DVD(title:string, director:string, genre:string, id:int)
+                | other(title:string, id:int)
+
+?b = book("a", "b", "c", 0)
+?c = magazine("b", 0, 1)
+
+!println(b^title)
+!println(c^id)
+
+!c^id = 10
+!println(c^id)
+
+if { b^genre = ?g & !b^genre = "g":: 
+    !println(g) 
+    if { b^genre = ?g2 ::
+        !println(g2) 
+    }
+}
