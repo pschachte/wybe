@@ -75,7 +75,7 @@ module AST (
   varsInPrims, varsInPrim, varsInPrimArgs, varsInPrimArg,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
-  maybeGetClosureOf, isClosureProc, isClosureVariant,
+  maybeGetClosureOf, isClosureProc, isClosureVariant, isConstructorVariant,
   GlobalFlows(..), emptyGlobalFlows, univGlobalFlows, makeGlobalFlows,
   addGlobalFlow, hasGlobalFlow, globalFlowsUnion, globalFlowsIntersection,
   -- *Stateful monad for the compilation process
@@ -1988,10 +1988,10 @@ flagDetism detism _     = detism
 
 data ProcVariant
     = RegularProc
-    | ConstructorProc
-    | DeconstructorProc
-    | GetterProc
-    | SetterProc
+    | ConstructorProc ProcName
+    | DeconstructorProc ProcName
+    | GetterProc VarName TypeSpec
+    | SetterProc VarName TypeSpec
     | GeneratedProc
     | AnonymousProc
     | ClosureProc ProcSpec
@@ -2043,6 +2043,10 @@ isClosureProc pspec = isClosureVariant . procVariant <$> getProcDef pspec
 isClosureVariant :: ProcVariant -> Bool
 isClosureVariant (ClosureProc _) = True
 isClosureVariant _               = False
+
+isConstructorVariant :: ProcVariant -> Bool
+isConstructorVariant (ConstructorProc _) = True
+isConstructorVariant _                   = False
 
 
 -- |A procedure definition body.  Initially, this is in a form similar
