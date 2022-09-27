@@ -349,7 +349,8 @@ that it can read various forms of input, such as integers, floating point
 numbers, and strings.  If a later operation uniquely determines the
 expression's type, the compiler will work this out.  However, if other
 references to the variables do not uniquely determine a type, you will need to
-explicitly specify the expression type.  This is done by following the expression with its type, separated by a colon, similar to the way parameter types are specified:
+explicitly specify the expression type.  This is done by following the expression 
+with its type, separated by a colon, similar to the way parameter types are specified:
 
 > *expr* `:` *type*
 
@@ -370,7 +371,8 @@ separate lines.  It is generally recommended to lay your code out this way.
 The Wybe compiler tries to distinguish line breaks that appear in the middle of
 a statement from ones that separate statements by considering adjacent
 characters.  If what preceeded the line break was an operator symbol, a comma,
-semicolon, left parenthesis, bracket, or brace, or one of the keywords `in`, `is`, `where`, `pub`, `def`, `type`, `constructor`, or `constructors`,
+semicolon, left parenthesis, bracket, or brace, or one of the keywords 
+`in`, `is`, `where`, `pub`, `def`, `type`, `constructor`, or `constructors`,
 then the line break is not considered to be a separator.  Likewise, if what
 follows is an operator symbol other than `?`, `!`, or `~`, a comma, semicolon, a
 right parenthesis, bracket, or brace, or one of the keywords
@@ -901,8 +903,9 @@ that differ from existing ones only in one field, and Wybe provides a convenient
 way to combine these two things to support data structure update.  For example,
 if you define a type `position` with a constructor `position(x:int, y:int)`, the
 compiler not only generates a constructor and deconstructor function, and
-accessor functions `x` and `y` that map from a `position` to an `int`, it also
-generates backward mode structure update functions `x` and `y`.  Using the
+accessor functions for the fields `x` and `y` that map from a `position` to an `int`, 
+it also generates backward mode structure update functions `x` and `y`.  
+Using the
 convenient infix `^` [operator syntax](#operator-syntax), a statement
 ```
 !pos^x = 0
@@ -916,7 +919,9 @@ incr(!pos^y)
 ```
 would increment the `y` component of `pos`.
 
-For types with multiple constructors, structure updates become tests, and therefore can only be used in test contexts.  For example,
+For types with multiple constructors where a field is not shared by all constructors,
+structure updates for said fields become tests, and therefore can only be used in test contexts.  
+For example,
 ```
 !lst^head = 42
 ```
@@ -950,7 +955,8 @@ the second *test* is tried.
 If this test succeeds, its corresponding *statements* are executed, and so on.
 At most one *statements* sequence is executed, but if none of the specified
 *test*s succeed, none of the *statements* are executed.
-The last test may optionally be the keyword `else`, which always succeeds, so it may be used to provide code to execute if none of the preceding tests succeeds.
+The last test may optionally be the keyword `else`, which always succeeds, 
+so it may be used to provide code to execute if none of the preceding tests succeeds.
 
 For example:
 ```
@@ -965,7 +971,7 @@ if { x < 0 :: !println("negative")
 
 Wybe's `case` construct has the form:
 
-> `case` *expression `in {` *cases* `}`
+> `case` *expression* `in {` *cases* `}`
 
 where *expression* is used to select the code to execute, and *cases* is one
 more more cases, separated by vertical bar characters (`|`). Each case takes the
@@ -1584,11 +1590,13 @@ held prior to the call.
 ### Declaring unique types
 
 A type may be declared to be unique by including the `{unique}` modifier when
-declaring the type.  For a `constructor` (or `constructors`) declaration, the declaration of a unique type takes this form:
+declaring the type.  For a `constructor` (or `constructors`) declaration, 
+the declaration of a unique type takes this form:
 
 > `constructor` *typevars* `{unique}` *ctors*
 
-where *typevars* is either empty or a parenthesised list type type variables, and *ctors* is [as described above](#constructor-declarations).  For example:
+where *typevars* is either empty or a parenthesised list type type variables, 
+and *ctors* is [as described above](#constructor-declarations).  For example:
 
 ```
 constructor {unique} unique_position(x:int, y:int)
@@ -1667,52 +1675,96 @@ configured when Wybe is installed, but can be overridden with the `--libdir` or
 ### <a name="purity"></a>Purity
 
 Wybe code is mostly purely logical, and the Wybe compiler takes advantage of
-this.  For example, if none of the outputs of a proc call are actually used, the compiler will eliminate the call.  A proc call may also be omitted if a proc call with the same inputs has previously been made; in this case, the compiler will assume the output(s) will be identical.  The compiler may also reorder calls however it likes, as long as all the inputs to a proc are available when the proc is called.  As long as your code is purely logical, all of these optimisations and more are perfectly safe.
+this.  For example, if none of the outputs of a proc call are actually used, 
+the compiler will eliminate the call.  
+A proc call may also be omitted if a proc call with the same inputs has previously 
+been made; in this case, the compiler will assume the output(s) will be identical.  
+The compiler may also reorder calls however it likes, as long as all the inputs 
+to a proc are available when the proc is called.  As long as your code is purely 
+logical, all of these optimisations and more are perfectly safe.
 
-However, occasionally it is important that the compiler not perform such optimisations.  For example, the `exit` command has no outputs, it is only executed for its effect (terminating the program prematurely).  In some cases, purely logical Wybe procs can be written based on impure building blocks, particularly when interfacing to code written in conventional languages.
+However, occasionally it is important that the compiler not perform such optimisations.  
+For example, the `exit` command has no outputs, it is only executed for its effect 
+(terminating the program prematurely).  In some cases, purely logical Wybe procs 
+can be written based on impure building blocks, particularly when interfacing to 
+code written in conventional languages.
 
-To support such cases, the Wybe compiler provides a *purity* system, allowing you to declare the purity of your procedures and functions, which tells the Wybe compiler (and other programmers) to treat them more carefully.
+To support such cases, the Wybe compiler provides a *purity* system, 
+allowing you to declare the purity of your procedures and functions, 
+which tells the Wybe compiler (and other programmers) to treat them more carefully.
 
 Wybe supports the following three levels of purity:
 
 - *pure*
-the default purity level.  An ordinary procedure or function, calls to which are subject to all optimisations.
+the default purity level.  An ordinary procedure or function, calls to which 
+are subject to all optimisations.
 
 - *impure*
-an impure procedure, calls to which should not be reordered or omitted.  Impure procs must be declared to be so, and in general, a proc that calls an impure proc must itself be impure.  The bodies of impure procs are also not optimised as extensively as pure and semipure procs.  Even calls to pure procs appearing in the bodies of impure procs will not be optimised.  This provides a way to prevent unwanted optimisation in a fine-grained way, such as for the purposes of benchmarking.
+an impure procedure, calls to which should not be reordered or omitted.  
+Impure procs must be declared to be so, and in general, a proc that calls an 
+impure proc must itself be impure.  The bodies of impure procs are also not 
+optimised as extensively as pure and semipure procs.  Even calls to pure procs 
+appearing in the bodies of impure procs will not be optimised.  This provides 
+a way to prevent unwanted optimisation in a fine-grained way, such as for the 
+purposes of benchmarking.
 
 - *semipure*
-a proc that is not pure, so calls to it must not be reordered or omitted, however its impurity is not "contagious".  It may be called from an ordinary, pure proc without that proc becoming impure.  It may also call impure procs.  Note that calls to pure procs in the bodies of semipure procs are optimised as usual; it is only in the bodies of *impure* procs that calls to ordinary pure procs are not optimised.
+a proc that is not pure, so calls to it must not be reordered or omitted, 
+however its impurity is not "contagious".  It may be called from an ordinary, 
+pure proc without that proc becoming impure.  It may also call impure procs.  
+Note that calls to pure procs in the bodies of semipure procs are optimised as usual; 
+it is only in the bodies of *impure* procs that calls to ordinary pure procs are 
+not optimised.
 
-In the absence of any declaration of impurity, your procedures and functions will be assumed to be pure.  An ordinary pure proc can call a semipure proc, but if it calls an impure proc, the compiler will report an error.  You can specify that your proc is pure despite calling impure procs by explicitly promising that it is pure.
+In the absence of any declaration of impurity, your procedures and functions 
+will be assumed to be pure.  An ordinary pure proc can call a semipure proc, 
+but if it calls an impure proc, the compiler will report an error.  You can 
+specify that your proc is pure despite calling impure procs by explicitly 
+promising that it is pure.
 
-Note that top-level code in any module is treated as semipure:  it may call impure procs, but calls to pure procs will be optimised as normal.
+Note that top-level code in any module is treated as semipure:  it may call 
+impure procs, but calls to pure procs will be optimised as normal.
 
-Purity is managed by including one of the following modifiers, between curly braces, in the proc declaration, between the `def` keyword and the procedure or function name:
+Purity is managed by including one of the following modifiers, between curly 
+braces, in the proc declaration, between the `def` keyword and the procedure or 
+function name:
 
 - `pure`
 explicitly promise that the proc is pure, despite calling impure procs.
 
 - `semipure`
-specify that the proc is effectively impure, meaning that calls to it are not subject to normal optimisations, but that its callers are not rendered impure by calling it.
+specify that the proc is effectively impure, meaning that calls to it are not 
+subject to normal optimisations, but that its callers are not rendered impure by 
+calling it.
 
 - `impure`
-the proc is impure, so calls to it are not subject to normal optimisations, and its callers should also be considered impure unless explicitly promised to be pure with a `pure` modifier.
+the proc is impure, so calls to it are not subject to normal optimisations, and 
+its callers should also be considered impure unless explicitly promised to be pure 
+with a `pure` modifier.
 
-Any call to an `impure` or `semipure` proc must be preceded with the `!` annotation, as if it were a call to a proc that used resources.  This reminds the reader that the call is not pure, and that they must be careful when reading or modifying the code.  For example, to prematurely exit the program, you can insert the following proc call:
+Any call to an `impure` or `semipure` proc must be preceded with the `!` annotation, 
+as if it were a call to a proc that used resources.  This reminds the reader that 
+the call is not pure, and that they must be careful when reading or modifying the code.  
+For example, to prematurely exit the program, you can insert the following proc call:
 
 ```
 !exit(1)
 ```
 
-If you wish to include other modifiers along with one of these, include them all between the braces, in any order, separated by commas.
+If you wish to include other modifiers along with one of these, include them all 
+between the braces, in any order, separated by commas.
 
 
 ### Inlining
 
-The Wybe compiler optimises your code in some situations by replacing a proc call with its definition, while being careful not to change the meaning of the program.  The compiler uses heuristics to determine when to do this, and for the most part it is not something you need to think about.  In general, the compiler will decide to inline small, non-recursive functions and procedures.
+The Wybe compiler optimises your code in some situations by replacing a proc call 
+with its definition, while being careful not to change the meaning of the program.  
+The compiler uses heuristics to determine when to do this, and for the most part 
+it is not something you need to think about.  In general, the compiler will decide 
+to inline small, non-recursive functions and procedures.
 
-If you wish to have finer control, you can do this by placing one of these two modifiers between curly braces between `def` and the procedure or function name:
+If you wish to have finer control, you can do this by placing one of these two 
+modifiers between curly braces between `def` and the procedure or function name:
 
 - `inline`
 force inlining of calls to this proc
@@ -1720,7 +1772,8 @@ force inlining of calls to this proc
 - `noinline`
 prevent inlining of calls to this proc
 
-If you wish to include other modifiers along with one of these, include them all between the braces, in any order, separated by commas.
+If you wish to include other modifiers along with one of these, include them all 
+between the braces, in any order, separated by commas.
 
 
 ### Foreign language interface
@@ -1761,7 +1814,8 @@ linked in with a `-l`*librarybasename* switch.
 #### Calling foreign code
 
 To call code written in other languages from Wybe, use the `foreign` construct.
-This is a very low-level interface, and performs no sanity checking, so be careful to get the call right.
+This is a very low-level interface, and performs no sanity checking, 
+so be careful to get the call right.
 
 The form of a foreign call is:
 
@@ -1789,7 +1843,9 @@ Wybe proc to make each foreign call, as shown above.  This will allow the Wybe
 type checker to ensure the type safety of your calls, as long as your foreign
 call is type correct.
 
-Foreign calls may optionally specify *modifiers* to provide extra information useful to the Wybe compiler.  If modifiers are to be specified, they are written after the *language* name:
+Foreign calls may optionally specify *modifiers* to provide extra information 
+useful to the Wybe compiler.  If modifiers are to be specified, they are written 
+after the *language* name:
 
 > `foreign` *language* `{`*modifiers*`}` *function*(*arg*, *arg*, ...)
 
@@ -1836,7 +1892,10 @@ For more detail on the behaviour of these operations, please consult the
 
 ##### Integer operations
 
-In the following, all inputs and outputs listed as `int` can in fact be any integer type:  signed or unsigned, and any number of bits of precision.  However, all `int` inputs and outputs must be the same number of bits of precision.  All `bool` outputs may be any 1-bit integer type.
+In the following, all inputs and outputs listed as `int` can in fact be any 
+integer type:  signed or unsigned, and any number of bits of precision.  
+However, all `int` inputs and outputs must be the same number of bits of precision.  
+All `bool` outputs may be any 1-bit integer type.
 
 
 - `foreign llvm add(`arg1:int, arg2:int`)`:int
@@ -1888,7 +1947,9 @@ Bitwise exclusive or
 
 ##### Floating point operations
 
-Similar to above, all inputs and outputs listed as `float` can be any legal LLVM floating point type:  16, 32, 64, or 128 bits.  Again, in a single instruction, all the `float` inputs and outputs must be the same bit width.
+Similar to above, all inputs and outputs listed as `float` can be any legal 
+LLVM floating point type:  16, 32, 64, or 128 bits.  Again, in a single instruction, 
+all the `float` inputs and outputs must be the same bit width.
 
 - `foreign llvm fadd(`arg1:float, arg2:float`)`:float
 Floating point addition
@@ -2003,11 +2064,13 @@ it will not change the bits of the value.  If you wish to convert between
 floating point and integer representations, see the [integer/floating point
 conversion](#conversion) instructions.
 
-A type cast may be combined with a type constraint to specify both the type of the expression *and* the type of the value:
+A type cast may be combined with a type constraint to specify both the type of 
+the expression *and* the type of the value:
 
 > *var* `:!` *type*`:`*type2*
 
-This specifies that the type of the variable *var* is *type2*, but that the type of the whole *var* `:!` *type*`:`*type2* expression is *type*.
+This specifies that the type of the variable *var* is *type2*, but that the type 
+of the whole *var* `:!` *type*`:`*type2* expression is *type*.
 
 
 #### Wybe low-level memory management primitives
