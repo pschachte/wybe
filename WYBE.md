@@ -905,8 +905,7 @@ if you define a type `position` with a constructor `position(x:int, y:int)`, the
 compiler not only generates a constructor and deconstructor function, and
 accessor functions for the fields `x` and `y` that map from a `position` to an `int`, 
 it also generates backward mode structure update functions `x` and `y`.  
-Using the
-convenient infix `^` [operator syntax](#operator-syntax), a statement
+Using the convenient infix `^` [operator syntax](#operator-syntax), a statement
 ```
 !pos^x = 0
 ```
@@ -919,9 +918,13 @@ incr(!pos^y)
 ```
 would increment the `y` component of `pos`.
 
+If a field is shared by multiple constructors for a type, then a single accessor 
+and updater function will be generated, which can be used to access or update 
+said field across all such constructors. 
+
 For types with multiple constructors where a field is not shared by all constructors,
-structure updates for said fields become tests, and therefore can only be used in test contexts.  
-For example,
+structure updates for said fields become tests, and therefore can only be used in 
+test contexts.  For example,
 ```
 !lst^head = 42
 ```
