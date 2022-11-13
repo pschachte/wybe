@@ -398,6 +398,7 @@ transformStmt (UseResources res vars stmts) pos = do
          ++ stores)
 transformStmt Nop pos = return ([Nop `maybePlace` pos], False)
 transformStmt Fail pos = return ([Fail `maybePlace` pos], False)
+transformStmt Return pos = return ([Return `maybePlace` pos], False)
 transformStmt Break pos = do
     restores <- restoreLoopGlobals pos
     return (restores ++ [Break `maybePlace` pos], False)

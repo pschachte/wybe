@@ -1343,6 +1343,7 @@ bodyCalls'' _ (TestBool exp) pos = do
     return []
 bodyCalls'' _ Nop _ = return []
 bodyCalls'' _ Fail _ = return []
+bodyCalls'' _ Return _ = return []
 bodyCalls'' _ Break _ = return []
 bodyCalls'' _ Next _ = return []
 
@@ -1856,6 +1857,12 @@ forceFailure st =
             bindingDetism = determinismFail $ bindingDetism st}
 
 
+-- | Returns the definitely terminal version of the specified binding state.
+forceTerminal :: BindingState -> BindingState
+forceTerminal st =
+        st {bindingDetism = Terminal}
+
+
 -- | Returns the binding state after a statement with the specified determinism that
 --   definitely binds the specified variables.
 bindingStateSeq :: Determinism -> Impurity -> Set VarName -> BindingState
@@ -2119,6 +2126,9 @@ modecheckStmt _ _ _ assigned _ final Nop pos = do
 modecheckStmt _ _ _ assigned _ final Fail pos = do
     logTyped "Mode checking Fail"
     return ([maybePlace Fail pos], forceFailure assigned)
+modecheckStmt _ _ _ assigned _ final Return pos = do
+    logTyped "Mode checking Return"
+    return ([maybePlace Return pos], forceTerminal assigned)
 modecheckStmt m name defPos assigned detism final
     stmt@(Cond tstStmt thnStmts elsStmts _ _ res) pos = do
     logTyped $ "Mode checking conditional " ++ show stmt
@@ -2714,6 +2724,7 @@ checkStmtTyped name pos Case{} ppos =
     shouldnt "Case statement left by flattening"
 checkStmtTyped _ _ Nop _ = return ()
 checkStmtTyped _ _ Fail _ = return ()
+checkStmtTyped _ _ Return _ = return ()
 checkStmtTyped _ _ Break _ = return ()
 checkStmtTyped _ _ Next _ = return ()
 

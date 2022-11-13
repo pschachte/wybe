@@ -300,6 +300,7 @@ uniquenessCheckStmt (Not negated) pos =
 uniquenessCheckStmt (TestBool exp) pos = uniquenessCheckExp exp pos
 uniquenessCheckStmt Nop pos = return ()
 uniquenessCheckStmt Fail pos = return ()
+uniquenessCheckStmt Return pos = return ()
 uniquenessCheckStmt (Loop body _ _) _ = uniquenessCheckStmts body
 uniquenessCheckStmt (UseResources res _ body) pos = do
     -- resource is implicitly stored before block

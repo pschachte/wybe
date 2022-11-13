@@ -522,6 +522,9 @@ unbranchStmt detism Fail pos stmts alt sense = do
     -- XXX JB we stil have alt stmts to go...
     -- return [maybePlace Fail pos] -- no execution after Fail
     return alt
+unbranchStmt detism Return pos stmts alt sense = do
+    logUnbranch "Unbranching a Return"
+    return []
 unbranchStmt _ Break pos _ _ _ = do
     logUnbranch "Unbranching a Break"
     brk <- getLoopBreak pos

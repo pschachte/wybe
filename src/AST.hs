@@ -2422,6 +2422,7 @@ foldStmt' sfn efn val (Not negated) pos =
 foldStmt' sfn efn val (TestBool exp) pos = foldExp sfn efn val exp Nothing
 foldStmt' _   _   val Nop pos = val
 foldStmt' _   _   val Fail pos = val
+foldStmt' _   _   val Return pos = val
 foldStmt' sfn efn val (Loop body _ _) pos = foldStmts sfn efn val body
 foldStmt' sfn efn val (UseResources _ _ body) pos = foldStmts sfn efn val body
 foldStmt' sfn efn val (For generators body) pos = val3
@@ -2848,6 +2849,8 @@ data Stmt
      | Nop
      -- |Do nothing (and fail)
      | Fail
+     -- |Do nothing (and exit call)
+     | Return
 
      -- After unbranching, this can only appear as the last Stmt in a body.
 
@@ -2932,6 +2935,7 @@ stmtImpurity (For _ stmts) = stmtsImpurity stmts
 stmtImpurity (TestBool _) = return Pure
 stmtImpurity Nop = return Pure
 stmtImpurity Fail = return Pure
+stmtImpurity Return = return Pure
 stmtImpurity Break = return Pure
 stmtImpurity Next = return Pure
 
@@ -3952,6 +3956,7 @@ showStmt indent (UseResources resources vars stmts) =
     ++ maybe "" (("\n   preserving -> "++) . showVarMap) vars
 showStmt _ Fail = "fail"
 showStmt _ Nop = "pass"
+showStmt _ Return = "return"
 showStmt indent (For generators body) =
   "for "
     ++ intercalate ", " [show var ++ " in " ++ show gen

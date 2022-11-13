@@ -1032,6 +1032,14 @@ termToStmt (Call pos [] "unless" ParamIn [test]) = do
     return $ Placed (Cond t [Unplaced Next] [Unplaced Nop] Nothing Nothing Nothing) pos
 termToStmt (Call pos [] "pass" ParamIn []) = do
     return $ Placed Nop pos
+termToStmt (Call pos [] "return" ParamIn []) = do
+    return $ Placed Return pos
+termToStmt (Call pos [] "break" ParamIn []) = do
+    return $ Placed Break pos
+termToStmt (Call pos [] "fail" ParamIn []) = do
+    return $ Placed Fail pos
+termToStmt (Call pos [] "next" ParamIn []) = do
+    return $ Placed Next pos
 termToStmt (Call pos [] "|" ParamIn
              [Call _ [] "::" ParamIn [test1,thn],
               Call _ [] "::" ParamIn [Call _ [] test2 ParamIn [],els]])
