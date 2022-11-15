@@ -105,7 +105,7 @@ test:	wybemk
 	@echo -e "Building $(LIBDIR)/wybe/cbits.o"
 	@make $(LIBDIR)/wybe/cbits.o
 	@printf "Testing building wybe library ("
-	@$(TIMEOUT) 20 $(MAKE) libs
+	@$(TIMEOUT) 40 $(MAKE) libs
 	@printf ") done.\n"
 	@time ( cd test-cases/ && ./run-all-test.sh )
 
