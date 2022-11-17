@@ -77,6 +77,20 @@ defaultOptions = Options
   , optErrors        = Set.empty
   }
 
+
+class (Ord a) => Toggleable a where
+    parseFlag :: String -> Either String (Set a -> Set a)
+
+    toggle :: String -> (Options -> Set a) -> (Options -> Set a -> Options)
+            -> String -> Options -> Options
+    toggle prefix getter setter str opts@Options{optErrors=errors} =
+        let strs = separate ',' str
+            (unknown, toggles) = partitionEithers $ parseFlag <$> strs
+            unknown' = Set.fromList $ (prefix ++) <$> unknown
+            opts' = opts{optErrors=errors `Set.union` unknown'}
+            flags' = List.foldl (flip (.)) id toggles $ getter opts'
+        in setter opts' flags'
+
 -- |All compiler features we may want to log
 data LogSelection =
   All | AST | BodyBuilder | Builder | Clause | Expansion | FinalDump
@@ -84,6 +98,24 @@ data LogSelection =
   | Unbranch | Codegen | Blocks | Emit | Analysis | Transform | Uniqueness
   | LastCallAnalysis
   deriving (Eq, Ord, Bounded, Enum, Show, Read)
+
+instance Toggleable LogSelection where
+    parseFlag flag = maybe (Left flag) Right $ optMap Map.!? lower flag
+      where
+        optMap = Map.fromList 
+            $ [(pre ++ lower (show s), mut s)
+              | s <- [minBound..maxBound]
+              , (pre, mut) <- [ ("", Set.insert)
+                              , ("no-", Set.delete) ]]
+           ++ [ ("all", const $ Set.fromList [minBound..maxBound])
+              , ("no-all", const Set.empty)
+              ]
+
+-- | Add log aspects specified by the String to the given options.
+-- Adds error messages when the log aspect is unknown
+addLogAspects :: String -> Options -> Options
+addLogAspects = toggle "unknown log aspect: "
+                optLogAspects (\s o -> s{optLogAspects=o})
 
 allLogSelections :: [LogSelection]
 allLogSelections = [minBound .. maxBound]
@@ -135,6 +167,21 @@ logSelectionDescription LastCallAnalysis
 data OptFlag = LLVMOpt | MultiSpecz | TailCallModCons
     deriving (Eq, Ord, Enum, Bounded, Show)
 
+instance Toggleable OptFlag where
+    parseFlag flag = maybe (Left flag) Right $ optMap Map.!? lower flag
+      where
+        optMap = Map.fromList [(pre ++ optimisationFlag s, mut s)
+                              | s <- [minBound..maxBound]
+                              , (pre, mut) <- [ ("", Set.insert)
+                                              , ("no-", Set.delete) ]]
+
+
+-- | Add optimisation flags specified by the String to the given options.
+-- Adds error messages when the flag is unknown
+addOptFlags :: String -> Options -> Options
+addOptFlags = toggle "unknown optimisation flag: "
+                optOptimisations (\s o -> s{optOptimisations=o})
+
 
 -- | Check if a given OptFlag is enabled 
 optimisationEnabled :: OptFlag -> Options -> Bool
@@ -164,7 +211,6 @@ optimisationFlag :: OptFlag -> String
 optimisationFlag LLVMOpt = "llvm-opt"
 optimisationFlag MultiSpecz = "multi-specz"
 optimisationFlag TailCallModCons = "tcmc"
-
 
 
 -- |Command line option parser and help text
@@ -249,6 +295,9 @@ handleCmdline = do
     else if optHelpLog opts 
     then do
         putStrLn "Use the -l or --log option to select logging to stdout.\n\
+                 \If an option is prefixed with 'no-', the logging option will not\n\
+                 \be applied.\n\
+                 \If an option is specified multiple times, only the last applies.\n\
                  \The argument to this option should be a comma-separated\n\
                  \list (with no spaces) of these options:"
         putStr $ formatMapping show logSelectionDescription
@@ -282,55 +331,6 @@ handleCmdline = do
         exitFailure
     else return (opts,files)
     
-
--- | Add log aspects specified by the String to the given options.
--- Adds error messages when the log aspect is unknown
-addLogAspects :: String -> Options -> Options
-addLogAspects aspectsStr opts@Options{optErrors=errors,
-                                      optLogAspects=aspects0} =
-    let aspectList = separate ',' aspectsStr
-        (unknown, aspects) = partitionEithers $ getLogRequest <$> aspectList
-        unknown' = Set.fromList $ ("unknown log aspect: " ++) <$> unknown
-        aspects' = let aspectSet = Set.fromList aspects
-                   in if Set.member All aspectSet
-                      then Set.fromList allLogSelections else aspectSet
-    in opts{optErrors=errors `Set.union` unknown',
-            optLogAspects=aspects0 `Set.union` aspects'}
-
--- | Get the LogSelection specified by the string,
--- Left if the Selection is unknown
-getLogRequest :: String -> Either String LogSelection
-getLogRequest selection = maybe (Left selection) Right $ logMap Map.!? lower selection
-  where
-    logMap = Map.fromList [(lower $ show s, s) | s <- allLogSelections]
-
-
--- | Add optimisation flags specified by the String to the given options.
--- Adds error messages when the flag is unknown
-addOptFlags :: String -> Options -> Options
-addOptFlags optsStr opts@Options{optErrors=errors,
-                                      optOptimisations=optims} =
-    let optList = separate ',' optsStr
-        (unknown, optFlags) = partitionEithers $ getOptFlag <$> optList
-        unknown' = Set.fromList $ ("unknown optimisation flag: " ++) <$> unknown
-        optims' = List.foldl (\os (flag, insert) -> switch insert flag os) optims optFlags
-    in opts{optErrors=errors `Set.union` unknown',
-            optOptimisations=optims'}
-    where 
-        switch True  = Set.insert
-        switch False = Set.delete
-
-
--- | Get the OptFlag specified by the string, and a Bool indicating if the
--- flag should be enabled.
--- Left if the OptFlag is unknown
-getOptFlag :: String -> Either String (OptFlag, Bool)
-getOptFlag flag = maybe (Left flag) Right $ optMap Map.!? lower flag
-  where
-    optMap = Map.fromList [(pre ++ optimisationFlag s, (s, insert)) 
-                          | s <- [minBound..maxBound]
-                          , (pre, insert) <- [("", True), ("no-", False)]]
-
 
 -- Set the LLVM optimisation level specified by the string.
 -- Add an error message if the string is not a number.
