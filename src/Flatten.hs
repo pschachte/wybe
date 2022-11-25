@@ -404,6 +404,12 @@ flattenStmt' (UseResources res vars body) pos detism = do
     body' <- flattenInner True detism (flattenStmts body detism)
     modify $ \s -> s { defdVars = oldVars}
     emit pos $ UseResources res vars body'
+flattenStmt' (DisuseResources res body) pos detism = do
+    oldVars <- gets defdVars
+    mapM_ (noteVarIntro . resourceName) res
+    body' <- flattenInner True detism (flattenStmts body detism)
+    modify $ \s -> s { defdVars = oldVars}
+    emit pos $ DisuseResources res body'
 flattenStmt' Nop pos _ = emit pos Nop
 flattenStmt' Fail pos _ = emit pos Fail
 flattenStmt' Break pos _ = emit pos Break

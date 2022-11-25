@@ -396,6 +396,9 @@ transformStmt (UseResources res vars stmts) pos = do
          ++ stmts'
             -- store the old values of the resources
          ++ stores)
+transformStmt (DisuseResources _ stmts) _ = 
+    -- disused resources should already by out of scope
+    transformStmts stmts
 transformStmt Nop pos = return ([Nop `maybePlace` pos], False)
 transformStmt Fail pos = return ([Fail `maybePlace` pos], False)
 transformStmt Break pos = do

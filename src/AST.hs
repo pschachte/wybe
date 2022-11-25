@@ -2424,6 +2424,7 @@ foldStmt' _   _   val Nop pos = val
 foldStmt' _   _   val Fail pos = val
 foldStmt' sfn efn val (Loop body _ _) pos = foldStmts sfn efn val body
 foldStmt' sfn efn val (UseResources _ _ body) pos = foldStmts sfn efn val body
+foldStmt' sfn efn val (DisuseResources _ body) pos = foldStmts sfn efn val body
 foldStmt' sfn efn val (For generators body) pos = val3
     where val1 = foldExps sfn efn pos val  $ loopVar . content <$> generators
           val2 = foldExps sfn efn pos val1 $ genExp  . content <$> generators
@@ -2865,6 +2866,7 @@ data Stmt
      --   listed resources can be used, and in which those resources do not
      --   change value. This statement is eliminated during resource processing.
      | UseResources [ResourceSpec] (Maybe VarDict) [Placed Stmt]
+     | DisuseResources [ResourceSpec] [Placed Stmt]
      -- |A case statement, which selects the statement sequence corresponding to
      -- the first expression that matches the value of the first argument.  This
      -- is transformed to nested Cond statements.
@@ -2922,6 +2924,7 @@ stmtImpurity (ProcCall (Higher fn) _ _ _) =
 stmtImpurity (ForeignCall _ _ flags _) = return $ flagsImpurity flags
 stmtImpurity (Cond cond thn els _ _ _) = stmtsImpurity $ cond:thn ++ els
 stmtImpurity (UseResources _ _ stmts) = stmtsImpurity stmts
+stmtImpurity (DisuseResources _ stmts) = stmtsImpurity stmts
 stmtImpurity (Case _ cases _) =
     stmtsImpurity . concat $ snd <$> cases
 stmtImpurity (And stmts) = stmtsImpurity stmts
@@ -3950,6 +3953,10 @@ showStmt indent (UseResources resources vars stmts) =
     ++ " in" ++ showBody (indent + 4) stmts
     ++ startLine indent ++ "}"
     ++ maybe "" (("\n   preserving -> "++) . showVarMap) vars
+showStmt indent (DisuseResources resources stmts) =
+    "disuse " ++ intercalate ", " (List.map show resources)
+    ++ " in" ++ showBody (indent + 4) stmts
+    ++ startLine indent ++ "}"
 showStmt _ Fail = "fail"
 showStmt _ Nop = "pass"
 showStmt indent (For generators body) =

@@ -1018,6 +1018,11 @@ termToStmt (Call pos [] "use" ParamIn
     ress' <- termToResourceList ress
     body' <- termToBody body
     return $ Placed (UseResources ress' Nothing body') pos
+termToStmt (Call pos [] "disuse" ParamIn
+                [Call _ [] "in" ParamIn [ress,body]]) = do
+    ress' <- termToResourceList ress
+    body' <- termToBody body
+    return $ Placed (DisuseResources ress' body') pos
 termToStmt (Call pos [] "while" ParamIn [test]) = do
     t <- termToStmt test
     return $ Placed (Cond t [Unplaced Nop] [Unplaced Break] Nothing Nothing Nothing) pos

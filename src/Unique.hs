@@ -307,6 +307,8 @@ uniquenessCheckStmt (UseResources res _ body) pos = do
     uniquenessCheckStmts body
     -- resource is implicitly restored before block
     mapM_ (uniquenessCheckResourceArg pos . (`ResourceFlowSpec` ParamOut)) res 
+uniquenessCheckStmt (DisuseResources _ body) pos = do
+    uniquenessCheckStmts body
 uniquenessCheckStmt (For generators body) pos = do
     mapM_ ((\gen -> do
             placedApply uniquenessCheckExp $ genExp gen
