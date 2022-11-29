@@ -1,0 +1,5 @@
+def my_map(f:(T,?T), lst:list(T)):list(T) =
+    if {
+        lst = [?h|?t] :: [h2 | my_map(f, t)] where { !f(h, ?h2) }
+    |   else          :: []
+    }
