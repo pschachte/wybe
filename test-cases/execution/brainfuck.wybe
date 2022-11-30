@@ -1,0 +1,113 @@
+type instruction {
+    pub incr | decr | left | right | input | output | loop(list(_))
+
+    # no implicit equality for list, hence none for _
+    pub def {test} (x:_ = y:_) { foreign lpvm cast(x):int = foreign lpvm cast(y) }
+
+    pub def {test} parse(str:string):list(_) = instrs where {
+        parse_(!str, ?instrs)
+        # str^length = 0 # this should be possible, but I get a segfault on "[]"
+    }
+
+    def {test} parse_(!str:string, ?instrs:list(_)) {
+        if { [?c | ?str] = str ::
+            case c in {
+                '+' :: ?instr = incr
+              | '-' :: ?instr = decr
+              | '<' :: ?instr = left
+              | '>' :: ?instr = right
+              | ',' :: ?instr = input
+              | '.' :: ?instr = output
+              | '[' :: 
+                    parse_body(!str, ?body)
+                    ?instr = loop(body)
+              | else :: fail
+            }
+            parse_(!str, ?instrs)
+            ?instrs = [instr | instrs]
+           | else ::
+            ?instrs = []
+        }
+    }
+
+    def {test} parse_body(!str:string, ?instrs:list(_)) {
+        [?c | ?str] = str
+        if { c = ']' :: 
+            ?instrs = []
+           | else ::
+            case c in {
+                '+' :: ?instr = incr
+              | '-' :: ?instr = decr
+              | '<' :: ?instr = left
+              | '>' :: ?instr = right
+              | ',' :: ?instr = input
+              | '.' :: ?instr = output
+              | '[' :: 
+                parse_body(!str, ?body)
+                ?instr = loop(body)
+              | else :: fail
+            }
+            parse_body(!str, ?instrs)
+            ?instrs = [instr | instrs]
+        }
+    }
+}
+
+type tape {
+    pub tape(left:list(char), current:char, right:list(char))
+    
+    pub def {test} (x:_ = y:_) { fail }
+    
+    pub def left(!tape:_) {
+        tape(?left, ?current, ?right) = tape
+        if { right = [?r | ?right] :: 
+            ?tape = tape([current | left], r, right)
+           | else :: 
+            ?tape = tape([current | left], '\0', [])
+        }
+    }
+
+    pub def right(!tape:_) {
+        tape(?left, ?current, ?right) = tape
+        if { left = [?l | ?left] :: 
+            ?tape = tape(left, l, [current | right])
+           | else :: 
+            ?tape = tape([], '\0', [current | right])
+        }
+    }
+
+    pub def incr(!tape:_) {
+        !tape^current = foreign llvm add(tape^current, 1:char)
+    }
+
+    pub def decr(!tape:_) {
+        !tape^current = foreign llvm sub(tape^current, 1:char)
+    }
+}
+
+
+def run(instrs:list(instruction), !state:tape) use !io {
+    for ?instr in instrs {
+        case instr in {
+            incr :: incr(!state)
+          | decr :: decr(!state)
+          | left :: left(!state)
+          | right :: right(!state)
+          | input :: !read(?state^current)
+          | output :: !print(state^current)
+          | loop(?body) :: 
+            do {
+                until state^current = '\0'
+                !run(body, !state)
+            }
+        }
+    }
+}
+
+# unfortunately can't read from a file, so first line from stdin is the program
+!read(?str)
+if { parse(str, ?instrs) ::
+    !run(instrs, tape([], '\0', []))
+| else ::
+    !error("parse error")
+}
