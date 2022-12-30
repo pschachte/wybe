@@ -1,0 +1,6 @@
+pub def foreign c putchar(c:char) use !io
+
+!putchar 'W'
+!putchar 'y'
+!putchar 'b'
+!putchar 'e'
