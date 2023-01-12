@@ -34,7 +34,6 @@ import Distribution.Parsec.FieldLineStream (fieldLineStreamEnd)
 import UnivSet (UnivSet(FiniteSet, UniversalSet))
 import Data.Function (on)
 import Data.List.Extra (groupSort)
-import AST (errmsg)
 
 -- |Normalise a list of file items, storing the results in the current module.
 normalise :: [Item] -> Compiler ()
@@ -231,7 +230,7 @@ modTypeDeps :: Set ModSpec -> Compiler ((ModSpec,TypeDef), ModSpec, [ModSpec])
 modTypeDeps modSet = do
     tyMod <- getModule modSpec
     tyParams <- getModule modParams
-    ctorsVis <- (reverse . trustFromJust "modTypeDeps")
+    ctorsVis <- reverse . trustFromJust "modTypeDeps"
                <$> getModuleImplementationField modConstructors
     ctors <- mapM (placedApply resolveCtorTypes . snd) ctorsVis
     let deps = List.filter (`Set.member` modSet)
@@ -277,16 +276,21 @@ completeTypeSCC (CyclicSCC modTypeDefs) = do
 
 -- | Information about a non-constant constructor
 data CtorInfo = CtorInfo {
-           ctorInfoName  :: ProcName,  -- ^ this constructor's name
-           ctorInfoParams:: [(Placed Param,Bool,TypeRepresentation,Int)],
-                                       -- ^ params of this ctor, with their
-                                       -- anonymity (namedness),
-                                       -- representation and bit size
-           ctorVis       :: Visibility,
-           ctorInfoPos   :: OptPos,    -- ^ file position of ctor
-           ctorInfoTag   :: Int,       -- ^ this constructor's tag
-           ctorInfoBits  :: Int        -- ^ min number of bits needed
+           ctorInfoName   :: ProcName,        -- ^ this constructor's name
+           ctorInfoParams :: [CtorParamInfo], -- ^ params of this ctor
+           ctorInfoVis    :: Visibility,      -- ^ Vsibility of ctor
+           ctorInfoPos    :: OptPos,          -- ^ file position of ctor
+           ctorInfoTag    :: Int,             -- ^ this constructor's tag
+           ctorInfoBits   :: Int              -- ^ min number of bits needed
      } deriving (Show)
+
+
+data CtorParamInfo = CtorParamInfo {
+    paramInfoParam :: Placed Param,
+    paramInfoAnon :: Bool,
+    paramInfoTypeRep :: TypeRepresentation,
+    paramInfoBitSize :: Int
+} deriving (Show)
 
 
 -- | Layout the specified type, and then generate constructors,
@@ -311,12 +315,12 @@ data CtorInfo = CtorInfo {
 --          rep = integer with max ctorSize bits
 --     * else: rep = integer with wordSizeBytes bits
 completeType :: ModSpec -> TypeDef -> Compiler ()
+completeType modspec (TypeDef params []) =
+    shouldnt $ "completeType with no constructors: " ++ show modspec
 completeType modspec (TypeDef params ctors) = do
-    let _ = ctors :: [(Visibility, Placed ProcProto)]
     logNormalise $ "Completing type " ++ showModSpec modspec
-    when (List.null ctors)
-      $ shouldnt $ "completeType with no constructors: " ++ show modspec
     reenterModule modspec
+
     let (constCtors,nonConstCtors) =
             List.partition (List.null . procProtoParams . content . snd) ctors
     let numConsts = length constCtors
@@ -332,34 +336,40 @@ completeType modspec (TypeDef params ctors) = do
     logNormalise $ "Complete " ++ showModSpec modspec
                    ++ " with " ++ show tagBits ++ " tag bits and "
                    ++ show tagLimit ++ " tag limit"
+
     -- XXX if numNonConsts == 0, then we could handle more consts.
     when (numConsts >= fromIntegral smallestAllocatedAddress)
       $ nyi $ "Type '" ++ show modspec ++ "' has too many constant constructors"
-    -- XXX remove name from TypeSpec, and add type variable as an alternative ctor
+
     let typespec = TypeSpec [] currentModuleAlias $ List.map TypeVariable params
-    let constItems =
-          concatMap (constCtorItems typespec) $ zip (constCtors :: [(Visibility, Placed ProcProto)]) [0..]
-    isUnique <- tmUniqueness . typeModifiers <$> getModuleInterface
+
+    let constItems = concatMap (constCtorItems typespec) $ zip constCtors [0..]
+
     (nonConstCtors',infos) <- unzip <$> zipWithM nonConstCtorInfo nonConstCtors [0..]
+    isUnique <- tmUniqueness . typeModifiers <$> getModuleInterface
     (reps,nonconstItemsList,gettersSetters) <-
          unzip3 <$> mapM
          (nonConstCtorItems isUnique typespec numConsts numNonConsts
           tagBits tagLimit)
          infos
-    getSetItems <- concat <$> 
-        mapM (uncurry $ getterSetterItems numConsts numNonConsts typespec) 
-            (groupSort (concat gettersSetters))
+
     let rep = typeRepresentation reps numConsts
+    setTypeRep rep
+    logNormalise $ "Representation of type " ++ showModSpec modspec
+                   ++ " is " ++ show rep
+
+    getSetItems <- concat <$>
+        mapM (uncurry $ getterSetterItems numConsts numNonConsts typespec)
+            (groupSort (concat gettersSetters))
+
     extraItems <-
         if isUnique
             then return [] -- No implicit procs for unique types
             else implicitItems Nothing typespec constCtors nonConstCtors' rep
-    logNormalise $ "Representation of type " ++ showModSpec modspec
-                   ++ " is " ++ show rep
-    setTypeRep rep
+
     normalise $ constItems ++ concat nonconstItemsList ++ extraItems ++ getSetItems
+
     reexitModule
-    return ()
 
 
 -- | Analyse the representation of a single constructor, determining the
@@ -378,25 +388,26 @@ nonConstCtorInfo (vis, placedProto) tag = do
     let name   = procProtoName proto
     let params = procProtoParams proto
     let anonParams = zipWith (placedApply . fixAnonFieldName name) [1..] params
-    let params' = fst <$> anonParams
+    let (params', anons) = unzip anonParams
     logNormalise $ "With types resolved: " ++ show placedProto
-    reps <- mapM ( placedApply resolveParamType >=> lookupTypeRepresentation . paramType . content ) params'
+
+    reps <- mapM (placedApply resolveParamType >=> lookupTypeRepresentation . paramType . content) params'
     let reps' = catMaybes reps
-    logNormalise $ "Member representations: "
-                   ++ intercalate ", " (show <$> reps')
+    logNormalise $ "Member representations: " ++ intercalate ", " (show <$> reps')
+
     let bitSizes = typeRepSize <$> reps'
     let bitSize  = sum bitSizes
-    let typeReps = zipWith3 (uncurry (,,,)) anonParams reps' bitSizes
+    let paramInfos = zipWith4 CtorParamInfo params' anons reps' bitSizes
     return (maybePlace proto{procProtoParams=params'} pos,
-            CtorInfo name typeReps vis pos tag bitSize)
+            CtorInfo name paramInfos vis pos tag bitSize)
 
 
 -- | Replace a field's name with an appropriate replacement if it is anonymous
 -- (empty string). Bool indicates if the name was replaced
-fixAnonFieldName :: ProcName -> Int -> Param -> OptPos -> (Placed Param,Bool)
+fixAnonFieldName :: ProcName -> Int -> Param -> OptPos -> (Placed Param, Bool)
 fixAnonFieldName name i param@Param{paramName=""} pos
-  = (param{paramName = specialName2 name $ show i} `maybePlace` pos,True)
-fixAnonFieldName _ _ param pos = (param `maybePlace` pos,False)
+  = (param{paramName = specialName2 name $ show i} `maybePlace` pos, True)
+fixAnonFieldName _ _ param pos = (param `maybePlace` pos, False)
 
 
 -- | Determine the appropriate representation for a type based on a list of
@@ -475,6 +486,30 @@ initResources = do
 --                Generating code for type declarations
 ----------------------------------------------------------------
 
+-- Data used to create a getter and setter for a field
+data GetterSetterInfo = GetterSetterInfo {
+    gsPos :: OptPos,
+    gsVisibility :: Visibility,
+    gsTypeSpec :: TypeSpec,
+    gsTagCheck :: Placed Stmt,
+    gsGetter :: [Placed Stmt],
+    gsSetter :: [Placed Stmt]
+} deriving (Show, Eq, Ord)
+
+
+-- Data about a boxed field
+data FieldInfo = FieldInfo {
+    fldName     :: VarName,
+    fldPos      :: OptPos,
+    fldAnon     :: Bool,
+    fldTypeSpec :: TypeSpec,
+    fldRep      :: TypeRepresentation,
+    fldOffset   :: Int,
+    fldSize     :: Int
+} deriving (Show)
+
+
+
 
 -- |All items needed to implement a const contructor for the specified type.
 constCtorItems :: TypeSpec -> ((Visibility, Placed ProcProto),Integer) -> [Item]
@@ -482,18 +517,18 @@ constCtorItems typeSpec ((vis, placedProto), num) =
     let (proto,pos) = unPlace placedProto
         constName = procProtoName proto
     in [ProcDecl vis (inlineModifiers (ConstructorProc constName) Det)
-        (ProcProto constName [Param outputVariableName typeSpec ParamOut Ordinary `maybePlace` pos] Set.empty)
+        (ProcProto constName
+            [Param outputVariableName typeSpec ParamOut Ordinary `maybePlace` pos] Set.empty)
         [lpvmCastToVar (castTo (iVal num) typeSpec) outputVariableName] pos
        ]
 
 
 -- |All items needed to implement a non-const contructor for the specified type.
 nonConstCtorItems :: Bool -> TypeSpec -> Int -> Int -> Int -> Int
-                  -> CtorInfo 
-                  -> Compiler (TypeRepresentation, [Item], 
-                                [(VarName, (OptPos, Visibility, TypeSpec, Placed Stmt, [Placed Stmt], [Placed Stmt]))])
+                  -> CtorInfo
+                  -> Compiler (TypeRepresentation, [Item], [(VarName, GetterSetterInfo)])
 nonConstCtorItems uniq typeSpec numConsts numNonConsts tagBits tagLimit
-                  info@(CtorInfo ctorName paramsReps vis pos tag bits) = do
+                  info@(CtorInfo ctorName paramInfos vis pos tag bits) = do
     -- If we're unboxed and there are const ctors, then we need an extra
     -- bit to make sure the unboxed value is > than any const value
     let nonConstsize = bits + tagBits
@@ -508,98 +543,89 @@ nonConstCtorItems uniq typeSpec numConsts numNonConsts tagBits tagLimit
     logNormalise $ show bits ++ " data bit(s)"
     logNormalise $ show tagBits ++ " tag bit(s)"
     logNormalise $ "nonConst bit = " ++ show nonConstBit
+
     if size <= wordSize && tag <= tagLimit
       then do -- unboxed representation
-      let fields =
-            snd
-            $ List.foldr
-              (\(param,anon,_,sz) (shift,flds) ->
-                  let (pName, pPos) = unPlace param
-                  in (shift+sz,(paramName pName,pPos,anon,paramType pName,shift,sz):flds))
-              (tagBits,[])
-              paramsReps
-      return (Bits size,
-              unboxedConstructorItems vis ctorName typeSpec tag nonConstBit
-               fields pos
-               ++ unboxedDeconstructorItems vis uniq ctorName typeSpec
-                  numConsts numNonConsts tag tagBits pos fields,
-              concatMap 
-                (unboxedGetterSetterStmts vis typeSpec numConsts numNonConsts 
-                    tag tagBits) 
-                fields
-             )
+        let fields =
+                fst
+                $ List.foldr
+                (\(CtorParamInfo param anon rep sz) (flds, shift) ->
+                    let (param', pPos) = unPlace param
+                        Param pName pType _ _ = param'
+                    in (FieldInfo pName pPos anon pType rep shift sz : flds,
+                        shift + sz))
+                ([],tagBits)
+                paramInfos
+        return (Bits size,
+                unboxedConstructorItems vis ctorName typeSpec tag nonConstBit
+                fields pos
+                ++ unboxedDeconstructorItems vis uniq ctorName typeSpec
+                    numConsts numNonConsts tag tagBits pos fields,
+                concatMap
+                    (unboxedGetterSetterStmts vis typeSpec numConsts numNonConsts
+                        tag tagBits)
+                    fields
+                )
       else do -- boxed representation
-      let (fields,size) = layoutRecord paramsReps tag tagLimit
-      logNormalise $ "Laid out structure size " ++ show size
-          ++ ": " ++ show fields
-      let ptrCount = length $ List.filter ((==Address) . sel3) paramsReps
-      logNormalise $ "Structure contains " ++ show ptrCount ++ " pointers, "
-                     ++ show numConsts ++ " const constructors, "
-                     ++ show numNonConsts ++ " non-const constructors"
-      let params = sel1 <$> paramsReps
-      return (Address,
-              constructorItems vis ctorName typeSpec params fields
-                  size tag tagLimit pos
-              ++ deconstructorItems uniq vis ctorName typeSpec params numConsts
-                     numNonConsts tag tagBits tagLimit pos fields size, 
-              concatMap
-                (boxedGetterSetterStmts vis typeSpec numConsts numNonConsts
-                   ptrCount size tag tagBits tagLimit)
-                fields
-             )
+        let (fields,size) = layoutRecord paramInfos tag tagLimit
+        logNormalise $ "Laid out structure size " ++ show size
+            ++ ": " ++ show fields
+        let ptrCount = length $ List.filter ((==Address) . paramInfoTypeRep) paramInfos
+        logNormalise $ "Structure contains " ++ show ptrCount ++ " pointers, "
+                        ++ show numConsts ++ " const constructors, "
+                        ++ show numNonConsts ++ " non-const constructors"
+        let params = paramInfoParam <$> paramInfos
+        return (Address,
+                constructorItems vis ctorName typeSpec params fields
+                    size tag tagLimit pos
+                ++ deconstructorItems uniq vis ctorName typeSpec params numConsts
+                        numNonConsts tag tagBits tagLimit pos fields size,
+                concatMap
+                    (boxedGetterSetterStmts vis typeSpec numConsts numNonConsts
+                    ptrCount size tag tagBits tagLimit)
+                    fields
+                )
 
 
 
 ----------------------------------------------------------------
---                Generating code for boxed types
+--                Generating code for boxed types (records)
 ----------------------------------------------------------------
 
 -- | Lay out a record in memory, returning the size of the record and a
 -- list of the fields and offsets of the structure.  This ensures that
 -- values are aligned properly for their size (eg, word sized values are
 -- aligned on word boundaries).
-layoutRecord :: [(Placed Param,Bool,TypeRepresentation,Int)] -> Int -> Int
-             -> ([(VarName,OptPos,Bool,TypeSpec,TypeRepresentation,Int)], Int)
-layoutRecord paramsReps tag tagLimit =
-      let sizes = (2^) <$> [0..floor $ logBase 2 $ fromIntegral wordSizeBytes]
-          fields = List.map
-                   (\(param,anon,rep,sz) ->
-                       let byteSize = (sz + 7) `div` 8
-                           wordSize = ((byteSize + wordSizeBytes - 1)
-                                        `div` wordSizeBytes) * wordSizeBytes
-                           alignment =
-                             fromMaybe wordSizeBytes $ find (>=byteSize) sizes
-                           (p, pos) = unPlace param
-                       in ((paramName p, pos, anon,paramType p,rep,byteSize),
-                           alignment))
-                   paramsReps
-          -- put fields in order of increasing alignment
-          ordFields = sortOn snd fields
-          -- add secondary tag if necessary
-          initOffset = if tag > tagLimit then wordSizeBytes else 0
-          offsets = List.foldl align ([],initOffset) ordFields
-      in mapFst reverse offsets
+layoutRecord :: [CtorParamInfo] -> Int -> Int -> ([FieldInfo], Int)
+layoutRecord paramInfos tag tagLimit =
+    let sizes = (2^) <$> [0..floor $ logBase 2 $ fromIntegral wordSizeBytes]
+        fields = List.map
+                (\(CtorParamInfo param anon rep sz) ->
+                    let byteSize = (sz + 7) `div` 8
+                        wordSize = (byteSize + wordSizeBytes - 1)
+                                    `div` wordSizeBytes * wordSizeBytes
+                        alignment =
+                            fromMaybe wordSizeBytes $ find (>=byteSize) sizes
+                        (p, pos) = unPlace param
+                    in ((paramName p, pos, anon,paramType p,rep,byteSize),
+                        alignment))
+                paramInfos
+        -- put fields in order of increasing alignment
+        ordFields = sortOn snd fields
+        -- add secondary tag if necessary
+        initOffset = if tag > tagLimit then wordSizeBytes else 0
+        offsets = List.foldl align ([],initOffset) ordFields
+    in mapFst reverse offsets
+    where align (aligned,offset) ((name,pos,anon,ty,rep,sz),alignment) =
+            let alignedOffset = offset + (-offset) `mod` alignment
+            in (FieldInfo name pos anon ty rep alignedOffset sz:aligned,
+                alignedOffset + sz)
 
-
--- | Actually layout the fields.
-align :: ([(VarName,OptPos,Bool,TypeSpec,TypeRepresentation,Int)], Int)
-      -> ((VarName,OptPos,Bool,TypeSpec,TypeRepresentation,Int),Int)
-      -> ([(VarName,OptPos,Bool,TypeSpec,TypeRepresentation,Int)], Int)
-align (aligned,offset) ((name,pos,anon,ty,rep,sz),alignment) =
-    ((name,pos,anon,ty,rep,alignedOffset):aligned, alignedOffset+sz)
-  where alignedOffset = alignOffset offset alignment
-
-
--- |Given the smallest offset into a structure that a value can be stored at
--- and the required alignment for that value, return the aligned offset.
-alignOffset :: Int -> Int -> Int
-alignOffset offset alignment =
-    offset + (-offset) `mod` alignment
 
 
 -- |Generate constructor code for a non-const constructor
 constructorItems :: Visibility -> ProcName -> TypeSpec -> [Placed Param]
-                 -> [(VarName,OptPos,Bool,TypeSpec,TypeRepresentation,Int)]
+                 -> [FieldInfo]
                  -> Int -> Int -> Int -> OptPos -> [Item]
 constructorItems vis ctorName typeSpec params fields size tag tagLimit pos =
     [ProcDecl vis (inlineModifiers (ConstructorProc ctorName) Det)
@@ -613,43 +639,41 @@ constructorItems vis ctorName typeSpec params fields size tag tagLimit pos =
            varSetTyped recName typeSpec `maybePlace` pos]) pos]
          ++
          -- fill in the secondary tag, if necessary
-         (if tag > tagLimit
-          then [maybePlace (ForeignCall "lpvm" "mutate" []
-               $ [varGetTyped recName typeSpec `maybePlace` pos,
-                  varSetTyped recName typeSpec `maybePlace` pos,
-                  Unplaced $ iVal 0,
-                  Unplaced $ iVal 1,
-                  Unplaced $ iVal size,
-                  Unplaced $ iVal 0,
-                  Unplaced $ iVal tag]) pos]
-          else [])
+         ([maybePlace (ForeignCall "lpvm" "mutate" []
+            [varGetTyped recName typeSpec `maybePlace` pos,
+              varSetTyped recName typeSpec `maybePlace` pos,
+              Unplaced $ iVal 0,
+              Unplaced $ iVal 1,
+              Unplaced $ iVal size,
+              Unplaced $ iVal 0,
+              Unplaced $ iVal tag]) pos
+          | tag > tagLimit])
          ++
          -- Code to fill all the fields
-         (List.map
-          (\(var,pPos,_,ty,_,offset) ->
-               (maybePlace (ForeignCall "lpvm" "mutate" []
-               $ [varGetTyped recName typeSpec `maybePlace` pos,
+         List.map
+          (\(FieldInfo var pPos _ ty _ offset _) ->
+               maybePlace (ForeignCall "lpvm" "mutate" []
+                [varGetTyped recName typeSpec `maybePlace` pos,
                   varSetTyped recName typeSpec `maybePlace` pos,
                   Unplaced $ iVal offset,
                   Unplaced $ iVal 1,
                   Unplaced $ iVal size,
                   Unplaced $ iVal 0,
-                  varGetTyped var ty `maybePlace` pPos])) pos)
-          fields)
+                  varGetTyped var ty `maybePlace` pPos]) pos)
+          fields
          ++
          -- Finally, code to tag the reference
          [maybePlace (ForeignCall "llvm" "or" []
-         $ [varGetTyped recName typeSpec `maybePlace` pos,
+           [varGetTyped recName typeSpec `maybePlace` pos,
             Unplaced $ iVal (if tag > tagLimit then tagLimit+1 else tag),
             varSetTyped outputVariableName typeSpec `maybePlace` pos]) pos])
         pos]
 
 
 -- |Generate deconstructor code for a non-const constructor
-deconstructorItems :: Bool -> Visibility -> Ident -> TypeSpec -> [Placed Param] -> Int -> Int -> Int
-                   -> Int -> Int -> OptPos
-                   -> [(Ident,OptPos,Bool,TypeSpec,TypeRepresentation,Int)]
-                   -> Int -> [Item]
+deconstructorItems :: Bool -> Visibility -> Ident -> TypeSpec -> [Placed Param]
+                   -> Int -> Int -> Int -> Int -> Int -> OptPos
+                   -> [FieldInfo] -> Int -> [Item]
 deconstructorItems uniq vis ctorName typeSpec params numConsts numNonConsts tag
                    tagBits tagLimit pos fields size =
     let startOffset = (if tag > tagLimit then tagLimit+1 else tag)
@@ -660,17 +684,18 @@ deconstructorItems uniq vis ctorName typeSpec params numConsts numNonConsts tag
           ++ [Param outputVariableName typeSpec ParamIn Ordinary `maybePlace` pos])
          Set.empty)
         -- Code to check we have the right constructor
-        ([tagCheck pos numConsts numNonConsts tag tagBits tagLimit 
-            (Just size) outputVariableName]
+        (tagCheck pos numConsts numNonConsts tag tagBits tagLimit
+            (Just size) outputVariableName
          -- Code to fetch all the fields
-         ++ List.map (\(var,pPos,_,ty,_,aligned) ->
-                        (maybePlace (ForeignCall "lpvm" "access"
+         : List.map (\(FieldInfo var pPos _ ty _ aligned _) ->
+                        maybePlace (ForeignCall "lpvm" "access"
                             ["unique" | uniq]
-                            $ [varGetTyped outputVariableName typeSpec `maybePlace` pos,
+                              [varGetTyped outputVariableName typeSpec `maybePlace` pos,
                                Unplaced $ iVal (aligned - startOffset),
                                Unplaced $ iVal size,
                                Unplaced $ iVal startOffset,
-                               varSetTyped var ty `maybePlace` pPos]) pos))
+                               varSetTyped var ty `maybePlace` pPos])
+                            pos)
             fields)
         pos]
 
@@ -694,8 +719,7 @@ tagCheck pos numConsts numNonConsts tag tagBits tagLimit size varName =
            (case numNonConsts of
                1 -> []  -- Nothing to do if it's the only non-const constructor
                _ -> [comparison "icmp_eq"
-                     (intCast $ ForeignFn "llvm" "and" []
-                      $ [Unplaced $ intCast $ varGet varName,
+                     (intCast $ ForeignFn "llvm" "and" [] [Unplaced $ intCast $ varGet varName,
                          Unplaced $ iVal (2^tagBits-1) `withType` intType])
                      (intCast $ iVal (if tag > tagLimit
                                       then wordSizeBytes-1
@@ -703,8 +727,7 @@ tagCheck pos numConsts numNonConsts tag tagBits tagLimit size varName =
            ++
            -- If there's a secondary tag, check that, too.
            if tag > tagLimit
-           then [maybePlace (ForeignCall "lpvm" "access" []
-                 $ [varGet varName `maybePlace` pos,
+           then [maybePlace (ForeignCall "lpvm" "access" [] [varGet varName `maybePlace` pos,
                     Unplaced $ iVal (negate startOffset),
                     Unplaced $ iVal $ trustFromJust
                                "unboxed type shouldn't have a secondary tag" size,
@@ -721,31 +744,29 @@ tagCheck pos numConsts numNonConsts tag tagBits tagLimit size varName =
 
 -- | Produce a getter and a setter for one field of the specified type.
 boxedGetterSetterStmts :: Visibility -> TypeSpec
-                    -> Int -> Int -> Int -> Int -> Int -> Int -> Int
-                    -> (VarName,OptPos,Bool,TypeSpec,TypeRepresentation,Int) 
-                    -> [(VarName, (OptPos, Visibility, TypeSpec, Placed Stmt, [Placed Stmt], [Placed Stmt]))]
-boxedGetterSetterStmts _ _ _ _ _ _ _ _ _ (_,_,True,_,_,_) = []
+                       -> Int -> Int -> Int -> Int -> Int -> Int -> Int
+                       -> FieldInfo
+                       -> [(VarName, GetterSetterInfo)]
+boxedGetterSetterStmts _ _ _ _ _ _ _ _ _ FieldInfo{fldAnon=True} = []
 boxedGetterSetterStmts vis rectype numConsts numNonConsts ptrCount size
-                  tag tagBits tagLimit (field,pos,_,fieldtype,rep,offset) =
-    let startOffset = (if tag > tagLimit then tagLimit+1 else tag) in
-    let detism = deconstructorDetism numConsts numNonConsts
+        tag tagBits tagLimit (FieldInfo field pos _ fieldtype rep offset _) =
+    let startOffset = if tag > tagLimit then tagLimit+1 else tag
+        detism = deconstructorDetism numConsts numNonConsts
         -- Set the "noalias" flag when all other fields (exclude the one
         -- that is being changed) in this struct aren't [Address].
         -- This flag is used in [AliasAnalysis.hs]
         otherPtrCount = if rep == Address then ptrCount-1 else ptrCount
         flags = ["noalias" | otherPtrCount == 0]
     in [( field
-        , ( pos
-          , vis
-          , fieldtype
-          , tagCheck pos numConsts numNonConsts tag tagBits tagLimit (Just size) recName
-          , [maybePlace (ForeignCall "lpvm" "access" []
+        , GetterSetterInfo pos vis fieldtype
+           (tagCheck pos numConsts numNonConsts tag tagBits tagLimit (Just size) recName)
+           [maybePlace (ForeignCall "lpvm" "access" []
                 [ varGetTyped recName rectype `maybePlace` pos
                 , Unplaced $ iVal (offset - startOffset)
                 , Unplaced $ iVal size
                 , Unplaced $ iVal startOffset
                 , varSetTyped outputVariableName fieldtype `maybePlace` pos]) pos]
-          , [maybePlace (ForeignCall "lpvm" "mutate" flags
+           [maybePlace (ForeignCall "lpvm" "mutate" flags
                 [ varGetTyped recName rectype `maybePlace` pos
                 , varSetTyped recName rectype `maybePlace` pos
                 , Unplaced $ iVal (offset - startOffset)
@@ -753,7 +774,7 @@ boxedGetterSetterStmts vis rectype numConsts numNonConsts ptrCount size
                 , Unplaced $ iVal size
                 , Unplaced $ iVal startOffset
                 , Unplaced $ varGet fieldName]) pos]
-          ))]
+          )]
 
 
 ----------------------------------------------------------------
@@ -761,14 +782,13 @@ boxedGetterSetterStmts vis rectype numConsts numNonConsts ptrCount size
 ----------------------------------------------------------------
 
 -- |Generate constructor code for a non-const constructor
--- unboxedConstructorItems
 unboxedConstructorItems :: Visibility -> ProcName -> TypeSpec -> Int
-                        -> Maybe Int -> [(VarName,OptPos,Bool,TypeSpec,Int,Int)]
+                        -> Maybe Int -> [FieldInfo]
                         -> OptPos -> [Item]
 unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
     let proto = ProcProto ctorName
                 ([Param name paramType ParamIn Ordinary `maybePlace` pPos
-                 | (name,pPos,_,paramType,_,_) <- fields]
+                 | FieldInfo name pPos _ paramType _ _ _ <- fields]
                   ++ [Param outputVariableName typeSpec ParamOut Ordinary `maybePlace` pos])
                 Set.empty
     in [ProcDecl vis (inlineModifiers (ConstructorProc ctorName) Det) proto
@@ -780,7 +800,7 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
          ++
          -- Shift each field into place and or with the result
          List.concatMap
-          (\(var,pPos,_,ty,shift,sz) ->
+          (\(FieldInfo var pPos _ ty _ shift sz) ->
                [maybePlace (ForeignCall "llvm" "shl" []
                  [castFromTo ty typeSpec (varGet var) `maybePlace` pPos,
                   iVal shift `castTo` typeSpec `maybePlace` pos,
@@ -814,22 +834,22 @@ unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
 -- |Generate deconstructor code for a unboxed non-const constructor
 unboxedDeconstructorItems :: Visibility -> Bool -> ProcName -> TypeSpec -> Int
                           -> Int -> Int -> Int -> OptPos
-                          -> [(VarName,OptPos,Bool,TypeSpec,Int,Int)] -> [Item]
+                          -> [FieldInfo] -> [Item]
 unboxedDeconstructorItems vis uniq ctorName recType numConsts numNonConsts tag
                           tagBits pos fields =
     let detism = deconstructorDetism numConsts numNonConsts
     in [ProcDecl vis (inlineModifiers (DeconstructorProc ctorName) detism)
         (ProcProto ctorName
-         (List.map (\(n,pPos,_,fieldType,_,_) -> Param n fieldType ParamOut Ordinary `maybePlace` pPos)
+         (List.map (\(FieldInfo n pPos _ fieldType _ _ _) -> Param n fieldType ParamOut Ordinary `maybePlace` pPos)
           fields
           ++ [Param outputVariableName recType ParamIn Ordinary `maybePlace` pos])
          Set.empty)
          -- Code to check we have the right constructor
-        ([tagCheck pos numConsts numNonConsts tag tagBits (wordSizeBytes-1) Nothing
-          outputVariableName]
+        (tagCheck pos numConsts numNonConsts tag tagBits (wordSizeBytes-1) Nothing
+          outputVariableName
          -- Code to fetch all the fields
-         ++ List.concatMap
-            (\(n,pPos,_,fieldType,shift,sz) ->
+         : List.concatMap
+            (\(FieldInfo n pPos _ fieldType _ shift sz) ->
                -- Code to access the selected field
                [maybePlace (ForeignCall "llvm" "lshr" ["unique" | uniq]
                  [varGetTyped outputVariableName recType `maybePlace` pos,
@@ -849,20 +869,18 @@ unboxedDeconstructorItems vis uniq ctorName recType numConsts numNonConsts tag
 
 -- -- | Produce a getter and a setter for one field of the specified type.
 unboxedGetterSetterStmts :: Visibility -> TypeSpec -> Int -> Int -> Int -> Int
-                         -> (VarName,OptPos,Bool,TypeSpec,Int,Int)
-                         -> [(VarName, (OptPos, Visibility, TypeSpec, Placed Stmt, [Placed Stmt], [Placed Stmt]))]
-unboxedGetterSetterStmts _ _ _ _ _ _ (_,_,True,_,_,_) = []
+                         -> FieldInfo
+                         -> [(VarName, GetterSetterInfo)]
+unboxedGetterSetterStmts _ _ _ _ _ _ FieldInfo{fldAnon=True} = []
 unboxedGetterSetterStmts vis recType numConsts numNonConsts tag tagBits
-                         (field,pos,_,fieldType,shift,sz) =
+                         (FieldInfo field pos _ fieldType _ shift sz) =
     let detism = deconstructorDetism numConsts numNonConsts
         fieldMask = (bit sz::Int) - 1
         shiftedHoleMask = complement $ fieldMask `shiftL` shift
     in [ ( field
-         , ( pos
-           , vis
-           , fieldType
-           , tagCheck pos numConsts numNonConsts tag tagBits (wordSizeBytes-1) Nothing recName
-           , [maybePlace (ForeignCall "llvm" "lshr" [] -- The getter:
+         , GetterSetterInfo pos vis fieldType
+           (tagCheck pos numConsts numNonConsts tag tagBits (wordSizeBytes-1) Nothing recName)
+           [maybePlace (ForeignCall "llvm" "lshr" [] -- The getter:
                 [varGetTyped recName recType `maybePlace` pos,
                     iVal shift `withType` recType `maybePlace` pos,
                     varSetTyped recName recType `maybePlace` pos]) pos,
@@ -875,7 +893,7 @@ unboxedGetterSetterStmts vis recType numConsts numNonConsts tag tagBits
                 [varGetTyped fieldName recType `maybePlace` pos,
                     varSetTyped outputVariableName fieldType `maybePlace` pos]) pos
                 ]
-            , [maybePlace (ForeignCall "llvm" "and" []
+            [maybePlace (ForeignCall "llvm" "and" []
                 [varGetTyped recName recType `maybePlace` pos,
                     iVal shiftedHoleMask `withType` recType `maybePlace` pos,
                     varSetTyped recName recType `maybePlace` pos]) pos,
@@ -888,7 +906,7 @@ unboxedGetterSetterStmts vis recType numConsts numNonConsts tag tagBits
                     varGetTyped recName recType `maybePlace` pos,
                     varSetTyped recName recType `maybePlace` pos]) pos
                 ]
-            ))]
+            )]
 
 
 deconstructorDetism :: Int -> Int -> Determinism
@@ -898,25 +916,25 @@ deconstructorDetism numConsts numNonConsts
 
 
 -- | Construct Getter and Setter items for a given field over a series of constructors
-getterSetterItems :: Int -> Int -> TypeSpec -> VarName 
-                  -> [(OptPos, Visibility, TypeSpec, Placed Stmt, [Placed Stmt], [Placed Stmt])] 
+getterSetterItems :: Int -> Int -> TypeSpec -> VarName -> [GetterSetterInfo]
                   -> Compiler [Item]
 getterSetterItems _ _ _ _ [] = shouldnt "empty getterSetterItems"
-getterSetterItems numConsts numNonConsts recType field stmts = do
-    let nCtors = length stmts
-        (pos, fieldVis, fieldType, lastCheck, lastGet, lastSet) = last stmts
-        detism = if nCtors == numNonConsts && numConsts == 0 then Det else SemiDet 
-        inline = if nCtors == 1 then Inline else MayInline 
+getterSetterItems numConsts numNonConsts recType field infos = do
+    let nCtors = length infos
+        GetterSetterInfo _ fieldVis fieldType lastCheck lastGet lastSet = last infos
+        pos = gsPos $ head infos
+        detism = if nCtors == numNonConsts && numConsts == 0 then Det else SemiDet
+        inline = if nCtors == 1 then Inline else MayInline
         body0 = if nCtors == numNonConsts && numConsts == 0
-                then (lastGet, lastSet, True, True)
-                else ( lastCheck:lastGet, lastCheck:lastSet, True, True)
-        (getBody, setBody, visCheck, tyCheck) = List.foldr (
-                \(pos, vis, ty, check, get, set) (getBody, setBody, visCheck, tyCheck) -> 
-                    ( [Cond check get getBody Nothing Nothing Nothing `maybePlace` pos]
-                    , [Cond check set setBody Nothing Nothing Nothing `maybePlace` pos]
-                    , vis == fieldVis && visCheck
-                    , ty == fieldType && tyCheck)
-            ) body0 $ init stmts
+                then (lastGet, lastSet)
+                else (lastCheck:lastGet, lastCheck:lastSet)
+        ((getBody, setBody), visCheck, tyCheck) = List.foldr (
+            \(GetterSetterInfo pos vis ty check get set) ((getBody, setBody), visCheck, tyCheck) ->
+                ( ( [Cond check get getBody Nothing Nothing Nothing `maybePlace` pos]
+                    , [Cond check set setBody Nothing Nothing Nothing `maybePlace` pos])
+                , vis == fieldVis && visCheck
+                , ty == fieldType && tyCheck)
+         ) (body0, True, True) $ init infos
     unless visCheck $
         errmsg pos $
             "field '" ++ field ++ "' declared with multiple visibilities"
@@ -946,7 +964,7 @@ getterSetterItems numConsts numNonConsts recType field stmts = do
 --
 ----------------------------------------------------------------
 
-implicitItems :: OptPos -> TypeSpec 
+implicitItems :: OptPos -> TypeSpec
               -> [(Visibility, Placed ProcProto)] -> [Placed ProcProto]
               -> TypeRepresentation -> Compiler [Item]
 implicitItems pos typespec consts nonconsts rep
@@ -987,10 +1005,10 @@ implicitDisequality pos typespec consts nonconsts _ = do
       let neProto = ProcProto "~=" [Param leftName typespec ParamIn Ordinary `maybePlace` pos,
                                      Param rightName typespec ParamIn Ordinary `maybePlace` pos]
                     Set.empty
-      let neBody = [maybePlace (Not $ 
+      let neBody = [maybePlace (Not $
                         ProcCall (First [] "=" Nothing) SemiDet False
-                            [varGetTyped leftName typespec `maybePlace` pos, 
-                             varGetTyped rightName typespec `maybePlace` pos] 
+                            [varGetTyped leftName typespec `maybePlace` pos,
+                             varGetTyped rightName typespec `maybePlace` pos]
                             `maybePlace` pos) pos]
       return [ProcDecl Public inlineSemiDetModifiers neProto neBody Nothing]
 
@@ -1023,7 +1041,7 @@ isTestProc _ _ _ = False
 --   there is no more than one non-const constructor and either it has no more
 --   than two arguments or there are no const constructors.
 --
-equalityBody :: OptPos -> [Placed ProcProto] -> [Placed ProcProto] 
+equalityBody :: OptPos -> [Placed ProcProto] -> [Placed ProcProto]
              -> TypeRepresentation -> ([Placed Stmt],Inlining)
 -- Special case for phantom (void) types
 equalityBody _ _ _ (Bits 0) = ([succeedTest], Inline)
@@ -1056,7 +1074,7 @@ equalityConsts pos _  = simpleEqualityTest pos
 
 -- |An equality test that just compares $left and $right for identity
 simpleEqualityTest :: OptPos -> Placed Stmt
-simpleEqualityTest pos = 
+simpleEqualityTest pos =
     rePlace pos $ comparison "icmp_eq" (varGet leftName) (varGet rightName)
 
 
@@ -1086,8 +1104,7 @@ equalityMultiNonconsts :: OptPos -> [ProcProto] -> Placed Stmt
 equalityMultiNonconsts pos [] = rePlace pos failTest
 equalityMultiNonconsts pos (ProcProto name params _:ctrs) =
     Cond (deconstructCall name leftName params SemiDet)
-        [And ([deconstructCall name rightName params SemiDet]
-            ++ concatMap equalityField params) `maybePlace` pos]
+        [And (deconstructCall name rightName params SemiDet : concatMap equalityField params) `maybePlace` pos]
         [equalityMultiNonconsts pos ctrs] Nothing Nothing Nothing `maybePlace` pos
 
 -- |Return code to deconstruct
