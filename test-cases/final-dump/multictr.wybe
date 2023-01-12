@@ -49,8 +49,6 @@ pub type simple { pub constructors
      | two(two_field1:int, two_field2:int)
 }
 
-pass
-
 # This type requires a secondary tag, plus a value test
 pub type complicated { pub constructors 
        winter | spring | summer | autumn
