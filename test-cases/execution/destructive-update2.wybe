@@ -1,6 +1,6 @@
 # related to issue: https://github.com/pschachte/wybe/issues/21
 
-pub type intlist { pub nil | cons(head:int, tail:intlist) }
+pub type intlist { pub constructors nil | cons(head:int, tail:intlist) }
 
 pub def list_print(x:intlist) use !io {
     if { x = cons(?h, ?t) ::

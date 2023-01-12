@@ -166,7 +166,7 @@ data Item
      = TypeDecl Visibility TypeProto TypeModifiers TypeImpln [Item] OptPos
      | ModuleDecl Visibility Ident [Item] OptPos
      | RepresentationDecl [Ident] TypeModifiers TypeRepresentation OptPos
-     | ConstructorDecl Visibility [Ident] TypeModifiers [Placed ProcProto]
+     | ConstructorDecl Visibility [Ident] TypeModifiers [(Visibility, Placed ProcProto)]
                        OptPos
      | ImportMods Visibility [ModSpec] OptPos
      | ImportItems Visibility ModSpec [Ident] OptPos
@@ -316,7 +316,7 @@ typeFamily _            = IntFamily
 -- | Declared implementation of a type, either in terms of representation or by
 --   listing constructors and having the compiler determine the representation.
 data TypeImpln = TypeRepresentation TypeRepresentation
-               | TypeCtors Visibility [Placed ProcProto]
+               | TypeCtors Visibility [(Visibility, Placed ProcProto)]
                deriving (Generic, Eq)
 
 
@@ -3577,12 +3577,13 @@ instance Show Item where
     ++ showOptPos pos ++ " {\n  "
     ++ intercalate "\n  " (List.map show items)
     ++ "\n}\n"
-  show (TypeDecl vis name typeModifiers (TypeCtors ctorvis ctors) items pos) =
+  show (TypeDecl vis name typeModifiers (TypeCtors ctorVis ctors) items pos) =
     visibilityPrefix vis ++ "type " ++ show name
     ++ show typeModifiers
-    ++ " " ++ visibilityPrefix ctorvis
     ++ showOptPos pos ++ "\n    "
-    ++ intercalate "\n  | " (List.map show ctors)
+    ++ visibilityPrefix vis ++ "constructors "
+    ++ intercalate "\n  | " 
+        (List.map (\(vis, ctor) -> visibilityPrefix vis ++ show ctor) ctors)
     ++ concatMap (("\n  "++) . show) items
     ++ "\n}\n"
   show (RepresentationDecl params typeModifiers repn pos) =

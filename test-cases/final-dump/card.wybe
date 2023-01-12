@@ -1,4 +1,4 @@
-pub type suit { pub
+pub type suit { pub constructors 
     clubs | diamonds | hearts | spades
 
     pub def suits:list(_) = [clubs, diamonds, hearts, spades]
@@ -16,7 +16,7 @@ pub type suit { pub
     }
 }
 
-pub type rank { pub
+pub type rank { pub constructors 
     r2 | r3 | r4 | r5 | r6 | r7 | r8
     | r9 | r10 | jack | queen | king | ace
 

@@ -1,6 +1,6 @@
 # if case
 
-pub type tree { pub empty | node(left:tree, key:int, right:tree) }
+pub type tree { pub constructors empty | node(left:tree, key:int, right:tree) }
 
 pub def lookup(key:int, tree:tree):bool =
     if {tree = empty:: false

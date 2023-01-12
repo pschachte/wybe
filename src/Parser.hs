@@ -121,7 +121,7 @@ typeItem v = do
     modifiers <- List.foldl processTypeModifier defaultTypeModifiers
                  <$> modifierList
     proto <- TypeProto <$> moduleName <*> typeVarNames
-    (imp,items) <- typeImpln <|> typeCtors
+    (imp, items) <- typeImpln <|> typeCtors
     return $ TypeDecl v proto modifiers imp items (Just pos)
 
 
@@ -170,15 +170,16 @@ typeRep = do
 -- | Type declaration body where visibility, constructors, and items are given
 typeCtors :: Parser (TypeImpln,[Item])
 typeCtors = betweenB Brace $ do
-    vis <- visibility
-    ctors <- ctorDecls
+    vis <- option Private 
+        $ try (visibility <* (ident "constructor" <|> ident "constructors"))
+    ctors <- TypeCtors vis <$> ctorDecls
     items <- option [] (separator *> items)
-    return (TypeCtors vis ctors,items)
+    return (ctors, items)
 
 
 -- | Parse a collection of Constructor declarations, separated by `|`s
-ctorDecls :: Parser [Placed ProcProto]
-ctorDecls = (term >>= parseWith termToCtorDecl) `sepBy1` symbol "|"
+ctorDecls :: Parser [(Visibility, Placed ProcProto)]
+ctorDecls = (visibility >>= \vis -> (vis,) <$> (term >>= parseWith termToCtorDecl)) `sepBy1` symbol "|"
 
 
 -- | Resource declaration parser.
@@ -239,8 +240,7 @@ fromUseItemParser v = do
 -- 'visibility' 'determinism'.
 procOrFuncItem :: Visibility -> Parser Item
 procOrFuncItem vis = do
-    ident "def"
-    pos <- getPosition 
+    pos <- tokenPosition <$> ident "def"
     mods <- modifierList >>= parseWith (processProcModifiers pos "procedure or function declaration")
     (proto, returnType) <- limitedTerm prototypePrecedence
                             >>= parseWith termToPrototype
