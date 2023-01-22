@@ -21,7 +21,7 @@ import Data.Map as Map
 import Data.List as List
 import Data.Set as Set
 import UnivSet as USet
-import Data.Maybe
+import Data.Maybe as Maybe
 import Data.Tuple.HT (mapFst)
 import Data.Bits
 import Data.Function
@@ -121,20 +121,21 @@ type BodyBuilder = StateT BodyState Compiler
 
 -- Holds the content of a ProcBody while we're building it.
 data BodyState = BodyState {
-      currBuild     :: [Placed Prim],   -- ^The body we're building, reversed
-      currSubst     :: Substitution,    -- ^variable substitutions to propagate
-      blockDefs     :: Set PrimVarName, -- ^All variables defined in this block
-      forkConsts    :: Set PrimVarName, -- ^Consts in some branches of prev fork
-      outSubst      :: VarSubstitution, -- ^Substitutions for var assignments
-      subExprs      :: ComputedCalls,   -- ^Previously computed calls to reuse
-      failed        :: Bool,            -- ^True if this body always fails
-      tmpCount      :: Int,             -- ^The next temp variable number to use
-      buildState    :: BuildState,      -- ^The fork at the bottom of this node
-      parent        :: Maybe BodyState, -- ^What comes before/above this
-      globalsLoaded :: Map GlobalInfo PrimArg,
+      currBuild      :: [Placed Prim],   -- ^The body we're building, reversed
+      currSubst      :: Substitution,    -- ^variable substitutions to propagate
+      blockDefs      :: Set PrimVarName, -- ^All variables defined in this block
+      forkConsts     :: Set PrimVarName, -- ^Consts in some branches of prev fork
+      outSubst       :: VarSubstitution, -- ^Substitutions for var assignments
+      subExprs       :: ComputedCalls,   -- ^Previously computed calls to reuse
+      failed         :: Bool,            -- ^True if this body always fails
+      tmpCount       :: Int,             -- ^The next temp variable number to use
+      buildState     :: BuildState,      -- ^The fork at the bottom of this node
+      parent         :: Maybe BodyState, -- ^What comes before/above this
+      globalsLoaded  :: Map GlobalInfo PrimArg,
                                         -- ^The set of globals that we currently
                                         -- know the value of
-      reifiedConstr :: Map PrimVarName Constraint
+      varGlobalFlows :: Map PrimVarName GlobalFlows,
+      reifiedConstr  :: Map PrimVarName Constraint
                                         -- ^Constraints attached to Boolean vars
       } deriving (Eq,Show)
 
@@ -157,20 +158,28 @@ data BuildState
 
 
 -- | A fresh BodyState with specified temp counter and output var substitution
-initState :: Int -> VarSubstitution -> BodyState
-initState tmp oSubst =
+initState :: Int -> VarSubstitution -> [PrimParam] -> BodyState
+initState tmp oSubst params =
     BodyState [] Map.empty Set.empty Set.empty oSubst Map.empty False tmp
-              Unforked Nothing Map.empty Map.empty
+              Unforked Nothing Map.empty (initGlobalVarFlows params) Map.empty
 
 
 -- | Set up a BodyState as a new child of the specified BodyState
 childState :: BodyState -> BuildState -> BodyState
 childState st@BodyState{currSubst=iSubst,outSubst=oSubst,subExprs=subs,
-                        tmpCount=tmp, forkConsts=consts, globalsLoaded=loaded,
+                        tmpCount=tmp, forkConsts=consts,
+                        globalsLoaded=loaded, varGlobalFlows=varFlows,
                         reifiedConstr=reif} bld =
     BodyState [] iSubst Set.empty consts oSubst subs False tmp bld (Just st)
-              loaded reif
+              loaded varFlows reif
 
+
+initGlobalVarFlows :: [PrimParam] -> Map PrimVarName GlobalFlows
+initGlobalVarFlows = Map.fromList . Maybe.mapMaybe (uncurry init) . zip [0..]
+  where
+    init i (PrimParam name ty flow _ (ParamInfo _ flows))
+      | isInputFlow flow = Just (name, flows)
+    init _ _ = Nothing
 
 -- | A mapping from variables to definite values, in service to constant
 -- propagation.
@@ -231,17 +240,18 @@ instance Show Constraint where
 
 -- |Run a BodyBuilder monad and extract the final proc body, along with the
 -- final temp variable count and the set of variables used in the body.
-buildBody :: Int -> VarSubstitution -> BodyBuilder a
-          -> Compiler (a, Int, Set PrimVarName, Set GlobalInfo, ProcBody)
-buildBody tmp oSubst builder = do
+buildBody :: Int -> VarSubstitution -> [PrimParam] -> BodyBuilder a
+          -> Compiler (a, Int, Set PrimVarName,
+                       Set GlobalInfo, Map PrimVarName GlobalFlows, ProcBody)
+buildBody tmp oSubst params builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
-    (a, st) <- runStateT builder $ initState tmp oSubst
+    (a, st) <- runStateT builder $ initState tmp oSubst params
     logMsg BodyBuilder ">>>> Finished building a proc body"
     logMsg BodyBuilder "     Final state:"
     logMsg BodyBuilder $ fst $ showState 8 st
     st' <- fuseBodies st
-    (tmp', used, stored, body) <- currBody (ProcBody [] NoFork) st'
-    return (a, tmp', used, stored, body)
+    (tmp', used, stored, varFlows, body) <- currBody (ProcBody [] NoFork) st'
+    return (a, tmp', used, stored, varFlows, body)
 
 
 -- |Start a new fork on var of type ty
@@ -746,7 +756,8 @@ rawInstr :: Prim -> OptPos -> BodyBuilder ()
 rawInstr prim pos = do
     logBuild $ "---- adding instruction " ++ show prim
     validateInstr prim
-    updateGlobalsLoaded prim pos
+    updateGlobalsLoaded prim
+    updateVariableFlows prim
     modify $ addInstrToState (maybePlace prim pos)
 
 
@@ -839,16 +850,17 @@ expandArg arg@(ArgClosure ps as ty) = do
 expandArg arg = return arg
 
 
-updateGlobalsLoaded :: Prim -> OptPos -> BodyBuilder ()
-updateGlobalsLoaded prim pos = do
+updateGlobalsLoaded :: Prim -> BodyBuilder ()
+updateGlobalsLoaded prim = do
     loaded <- gets globalsLoaded
+    varFlows <- gets varGlobalFlows
     case prim of
         PrimForeign "lpvm" "load" _ [ArgGlobal info _, var] ->
             modify $ \s -> s{globalsLoaded=Map.insert info var loaded}
         PrimForeign "lpvm" "store" _ [var, ArgGlobal info _] ->
             modify $ \s -> s{globalsLoaded=Map.insert info var loaded}
         _ -> do
-            let gFlows = snd $ primArgs prim
+            let gFlows = primGlobalFlows varFlows prim
             logBuild $ "Call has global flows: " ++ show gFlows
             let filter info _ = not $ hasGlobalFlow gFlows FlowOut info
             modify $ \s -> s {globalsLoaded=Map.filterWithKey filter loaded}
@@ -856,6 +868,42 @@ updateGlobalsLoaded prim pos = do
     when (loaded /= loaded') $ do
         logBuild $ "Globals Loaded: " ++ simpleShowMap loaded
         logBuild $ "             -> " ++ simpleShowMap loaded'
+
+
+updateVariableFlows :: Prim -> BodyBuilder ()
+updateVariableFlows prim = do
+    varFlows <- gets varGlobalFlows
+    let args = fst $ primArgs prim
+    argFlows <- lift $ mapM (argGlobalFlow varFlows) args
+    let (ins, outs) = splitArgsByMode args
+    inFlows <- lift $ mapM (argGlobalFlow varFlows) ins
+    let gFlows = List.foldr globalFlowsUnion emptyGlobalFlows inFlows
+    varFlows' <- case prim of
+        PrimCall _ pspec _ _ _ -> do
+          params <- lift $ getPrimParams pspec
+          return $ Map.fromList $ catMaybes $ zipWith
+            (\PrimParam{primParamInfo=ParamInfo _ flows} arg ->
+              case arg of
+                ArgVar name _ flow _ _ | isOutputFlow flow
+                  -> Just (name, gFlows)
+                _ -> Nothing)
+            params args
+        PrimHigher _ (ArgVar name _ _ _ _) _ _ ->
+          return $ Map.fromList $ List.map
+              (\(ArgVar name ty _ _ _) ->
+                  (name, if isResourcefulHigherOrder ty
+                         then univGlobalFlows
+                         else emptyGlobalFlows)) outs
+        PrimForeign{} -> do
+          return $ Map.fromList $ List.map
+              (\(ArgVar name ty _ _ _) ->
+                  if List.null ins && isResourcefulHigherOrder ty
+                  then (name, univGlobalFlows)
+                  else (name, gFlows)) outs
+        _ -> shouldnt "updateVariableFlows"
+    when (any (/= emptyGlobalFlows) $ Map.elems varFlows') $
+        logBuild $ "New Variable Flows: " ++ simpleShowMap varFlows'
+    modify $ \s -> s {varGlobalFlows=Map.unionWith globalFlowsUnion varFlows varFlows'}
 
 
 ----------------------------------------------------------------
@@ -1184,8 +1232,9 @@ selectedBranch subst Forked{knownVal=known, forkingVar=var} =
 ----------------------------------------------------------------
 
 currBody :: ProcBody -> BodyState
-         -> Compiler (Int,Set PrimVarName,Set GlobalInfo,ProcBody)
-currBody body st@BodyState{tmpCount=tmp} = do
+         -> Compiler (Int,Set PrimVarName,Set GlobalInfo,
+                      Map PrimVarName GlobalFlows,ProcBody)
+currBody body st@BodyState{tmpCount=tmp, varGlobalFlows=varFlows} = do
     logMsg BodyBuilder $ "Now reconstructing body with usedLater = "
       ++ intercalate ", " (show <$> Map.keys (outSubst st))
     st' <- execStateT (rebuildBody st)
@@ -1197,7 +1246,7 @@ currBody body st@BodyState{tmpCount=tmp} = do
     logMsg BodyBuilder ">>>> Finished rebuilding a proc body"
     logMsg BodyBuilder "     Final state:"
     logMsg BodyBuilder $ showBlock 5 following
-    return (tmp, usedLater, stored, following)
+    return (tmp, usedLater, stored, varFlows, following)
 
 
 -- |Another monad, this one for rebuilding a proc body bottom-up.
@@ -1436,7 +1485,7 @@ bkwdBuildStmt defs prim pos = do
                 -- nested forks into a switch can move Undef assignments in
                 -- front of real assignments, and we want those to be considered
                 -- to be unneeded.
-                let usedLater' = List.foldr Set.insert 
+                let usedLater' = List.foldr Set.insert
                                     (List.foldr Set.delete usedLater
                                     $ argVarName <$> outs)
                                  $ argVarName <$> ins

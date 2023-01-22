@@ -22,6 +22,7 @@ import           Snippets
 import           Text.ParserCombinators.Parsec.Pos
 import           Util
 import           Resources
+import UnivSet (emptyUnivSet)
 
 
 ----------------------------------------------------------------
@@ -155,12 +156,12 @@ compileProc proc procID =
         logClause $ "  startVars  : " ++ show startVars
         logClause $ "  endVars    : " ++ show endVars
         logClause $ "  params     : " ++ show params
-        let params' = concatMap (compileParam startVars endVars procName) params
-        let gFlows = makeGlobalFlows (paramType <$> params)
-                   $ procProtoResources proto
+        let params' = concat $ zipWith (compileParam gFlows startVars endVars procName) [0..] params
+            gFlows  = makeGlobalFlows (zip [0..] params')
+                    $ procProtoResources proto
         let proto' = PrimProto (procProtoName proto) params' gFlows
         logClause $ "  comparams  : " ++ show params'
-        logClause $ "  globalFlows: " ++ show gFlows
+        logClause $ "  globalFlows: " ++ show gFlows 
         callSiteCount <- gets nextCallSiteID
         mSpec <- lift $ getModule modSpec
         let pSpec = ProcSpec mSpec procName procID Set.empty
@@ -363,20 +364,28 @@ reconcileOne caseVars jointVars (Param name ty flow ftype) =
        _ -> Nothing
 
 
-compileParam :: Numbering -> Numbering -> ProcName -> Param -> [PrimParam]
-compileParam startVars endVars procName param@(Param name ty flow ftype) =
-    [PrimParam (PrimVarName name num) ty FlowIn ftype (ParamInfo False)
+compileParam :: GlobalFlows -> Numbering -> Numbering -> ProcName -> Int -> Param -> [PrimParam]
+compileParam allFlows startVars endVars procName idx param@(Param name ty flow ftype) =
+    [PrimParam (PrimVarName name num) ty FlowIn ftype (ParamInfo False gFlows)
     | flowsIn flow
     , let num = Map.findWithDefault
                 (shouldnt ("compileParam for input param " ++ show param
                             ++ " of proc " ++ show procName))
-                name startVars]
-    ++ [PrimParam (PrimVarName name num) ty FlowOut ftype (ParamInfo False)
+                name startVars
+          gFlows 
+            | isResourcefulHigherOrder ty = GlobalFlows emptyUnivSet emptyUnivSet (Set.singleton idx)
+            | otherwise = emptyGlobalFlows
+    ]
+    ++ [PrimParam (PrimVarName name num) ty FlowOut ftype (ParamInfo False gFlows)
     | flowsOut flow
     , let num = Map.findWithDefault
                 (shouldnt ("compileParam for output param " ++ show param
                             ++ " of proc " ++ show procName))
-                name endVars]
+                name endVars
+          gFlows 
+            | isResourcefulHigherOrder ty = allFlows
+            | otherwise = emptyGlobalFlows
+    ]
 
 
 -- |A synthetic output parameter carrying the test result

@@ -42,18 +42,20 @@ procExpansion pspec def = do
     let (ins,outs) = inputOutputParams proto
     isClosure <- isClosureProc pspec
     let st = initExpanderState (procCallSiteCount def)
-    (st', tmp', used, stored, body') <- buildBody tmp (Map.fromSet id outs)
-                                $ execStateT (expandBody body) st
-    let PrimProto _ params (GlobalFlows gIns gOuts) = proto
-    let params' = markParamNeededness isClosure used ins <$> params
-    let globals' = GlobalFlows (USet.whenFinite (`Set.difference` stored) gIns) gOuts
+    let PrimProto _ params (GlobalFlows gIns gOuts gParams) = proto
+    (st', tmp', used, stored, varFlows, body') 
+        <- buildBody tmp (Map.fromSet id outs) params
+            $ execStateT (expandBody body) st
+    let params' = updateParamGlobalFlows varFlows . markParamNeededness isClosure used ins <$> params
+    let globals' = GlobalFlows (USet.whenFinite (`Set.difference` stored) gIns) gOuts gParams
     let proto' = proto {primProtoParams = params',
                         primProtoGlobalFlows = globals'}
     let impln' = impln{ procImplnProto = proto',
                         procImplnBody = body' }
     let def' = def { procImpln = impln',
                      procTmpCount = tmp',
-                     procCallSiteCount = nextCallSiteID st' }
+                     procCallSiteCount = nextCallSiteID st',
+                     procVariableFlows = varFlows }
     if def /= def'
         then
         logMsg Expansion
@@ -89,6 +91,11 @@ markParamNeededness _ _ _ PrimParam{ primParamFlow=FlowOutByReference } =
     shouldnt "unexpected FlowOutByReference at this stage of compilation"
 markParamNeededness _ _ _ PrimParam{ primParamFlow=FlowTakeReference } =
     shouldnt "unexpected FlowTakeReference at this stage of compilation"
+
+updateParamGlobalFlows :: Map PrimVarName GlobalFlows -> PrimParam -> PrimParam 
+updateParamGlobalFlows varFlows param@(PrimParam name _ _ _ info) =
+    param {primParamInfo=info{paramInfoGlobalFlows=
+        fromMaybe emptyGlobalFlows $ Map.lookup name varFlows}}
 
 
 -- |Type to remember the variable renamings.

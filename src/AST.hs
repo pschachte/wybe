@@ -71,7 +71,7 @@ module AST (
   expToStmt, seqToStmt, stmtsImpurity, stmtImpurity, procCallToExp,
   stmtsInputs, expOutputs, pexpListOutputs, expInputs, pexpListInputs,
   setExpTypeFlow, setPExpTypeFlow,
-  Prim(..), primArgs, replacePrimArgs, argIsVar, argIsConst, argIntegerValue,
+  Prim(..), primArgs, replacePrimArgs, primGlobalFlows, argGlobalFlow, argIsVar, argIsConst, argIntegerValue,
   varsInPrims, varsInPrim, varsInPrimArgs, varsInPrimArg,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
@@ -1215,7 +1215,7 @@ addProc tmpCtr (ProcDecl vis mods proto stmts pos) = do
     let name = procProtoName proto
     let ProcModifiers detism inlining impurity variant _ = mods
     let procDef = ProcDef name proto (ProcDefSrc stmts) pos tmpCtr 0 Map.empty
-                  vis detism inlining impurity variant (initSuperprocSpec vis)
+                  vis detism inlining impurity variant (initSuperprocSpec vis) Map.empty
     void $ addProcDef procDef
 addProc _ item =
     shouldnt $ "addProc given non-Proc item " ++ show item
@@ -1916,8 +1916,9 @@ data ProcDef = ProcDef {
     procInlining :: Inlining,   -- ^should we inline calls to this proc?
     procImpurity :: Impurity,   -- ^ Is this proc pure?
     procVariant :: ProcVariant, -- ^ How is this proc manifested in the source code
-    procSuperproc :: SuperprocSpec
+    procSuperproc :: SuperprocSpec,
                                 -- ^the proc this should be part of, if any
+    procVariableFlows :: Map PrimVarName GlobalFlows
 }
              deriving (Eq, Generic)
 
@@ -1935,7 +1936,7 @@ getProcGlobalFlows pspec = do
     case procImpln pDef of
       ProcDefSrc _ ->
             let ProcProto _ params resFlows = procProto pDef
-            in return $ makeGlobalFlows (paramType . content <$> params) resFlows
+            in return $ univGlobalFlows -- makeGlobalFlows (zip [0..] $ content <$> params) resFlows
       ProcDefPrim _ (PrimProto _ _ gFlows) _ _ _ -> return gFlows
 
 
@@ -2071,27 +2072,30 @@ data GlobalFlows
     = GlobalFlows {
         globalFlowsIn :: UnivSet GlobalInfo,
         -- ^ The set of globals that flow in
-        globalFlowsOut :: UnivSet GlobalInfo
+        globalFlowsOut :: UnivSet GlobalInfo,
         -- ^ The set of globals that flow out
+        globalFlowsParams :: Set.Set ParameterID
+        -- ^ The set of parameters (by ID) that effect the global flwos
     }
     deriving (Eq, Ord, Generic)
 
 
 instance Show GlobalFlows where
-    show (GlobalFlows ins outs) =
+    show (GlobalFlows ins outs params) =
         "<" ++ showUnivSet show ins
         ++ "; " ++ showUnivSet show outs
+        ++ "; " ++ simpleShowSet params
         ++ ">"
 
 
 -- | An empty set of GlobalFlows
 emptyGlobalFlows :: GlobalFlows
-emptyGlobalFlows = GlobalFlows emptyUnivSet emptyUnivSet
+emptyGlobalFlows = GlobalFlows emptyUnivSet emptyUnivSet Set.empty
 
 
 -- | The set of all GlobalFlows
 univGlobalFlows :: GlobalFlows
-univGlobalFlows = GlobalFlows UniversalSet UniversalSet
+univGlobalFlows = GlobalFlows UniversalSet UniversalSet Set.empty
 
 
 -- | Given a list of Types and a set of ResourceFlowSpecs, make a GlobalFlows.
@@ -2101,10 +2105,16 @@ univGlobalFlows = GlobalFlows UniversalSet UniversalSet
 -- In the case we have a higher order resourceful argument, we may not know
 -- exactly which global variables flow into or out of a procedure, and as such
 -- we take a conservative approach and assume all do.
-makeGlobalFlows :: [TypeSpec] -> Set ResourceFlowSpec -> GlobalFlows
-makeGlobalFlows tys resFlows
-    | any isResourcefulHigherOrder tys = univGlobalFlows
-    | otherwise = Set.fold addGlobalResourceFlows emptyGlobalFlows resFlows
+makeGlobalFlows :: [(ParameterID, PrimParam)] -> Set ResourceFlowSpec -> GlobalFlows
+makeGlobalFlows params resFlows =
+    Set.fold addGlobalResourceFlows 
+        (emptyGlobalFlows{globalFlowsParams=pFlows}) resFlows
+  where
+    pFlows = Set.fromList $ catMaybes $ List.map (uncurry paramFlow) params
+    paramFlow i PrimParam{primParamName=name, primParamType=ty, primParamFlow=flow}
+        | isInputFlow flow && isResourcefulHigherOrder ty
+        = Just i
+        | otherwise = Nothing
 
 
 -- |Add flows associated with a given resource to a set of GlobalFlows
@@ -2127,6 +2137,8 @@ addGlobalFlow info FlowTakeReference gFlows = gFlows
 
 -- | Test if the given flow of a global exists in the global flow set
 hasGlobalFlow :: GlobalFlows -> PrimFlow -> GlobalInfo -> Bool
+hasGlobalFlow gFlows@GlobalFlows{globalFlowsParams=params} _ _
+    | not (Set.null params) = True
 hasGlobalFlow gFlows@GlobalFlows{globalFlowsIn=ins} FlowIn info
     = USet.member info ins
 hasGlobalFlow gFlows@GlobalFlows{globalFlowsOut=outs} FlowOut info
@@ -2138,14 +2150,23 @@ hasGlobalFlow gFlows FlowTakeReference info = False
 
 -- | Take the union of the sets of two global flows
 globalFlowsUnion :: GlobalFlows -> GlobalFlows -> GlobalFlows
-globalFlowsUnion (GlobalFlows ins1 outs1) (GlobalFlows ins2 outs2)
-    = GlobalFlows (USet.union ins1 ins2) (USet.union outs1 outs2)
+globalFlowsUnion (GlobalFlows ins1 outs1 params1) (GlobalFlows ins2 outs2 params2)
+    = GlobalFlows 
+        (USet.union ins1 ins2) 
+        (USet.union outs1 outs2) 
+        (Set.union params1 params2)
 
 
 -- | Take the intersection of the sets of two global flows
 globalFlowsIntersection :: GlobalFlows -> GlobalFlows -> GlobalFlows
-globalFlowsIntersection (GlobalFlows ins1 outs1) (GlobalFlows ins2 outs2)
-    = GlobalFlows (USet.intersection ins1 ins2) (USet.intersection outs1 outs2)
+globalFlowsIntersection (GlobalFlows ins1 outs1 params1) 
+                        (GlobalFlows ins2 outs2 params2)
+    = GlobalFlows 
+        (USet.intersection ins1 ins2) 
+        (USet.intersection outs1 outs2) 
+        $ if any (UniversalSet ==) [ins1, ins2, outs1, outs2]
+          then (Set.union params1 params2)
+          else (Set.intersection params1 params2)
 
 
 -- |An ID for a parameter of a proc
@@ -2724,7 +2745,8 @@ data PrimParam = PrimParam {
 
 -- |Info inferred about a single proc parameter
 data ParamInfo = ParamInfo {
-        paramInfoUnneeded::Bool -- ^Can this parameter be eliminated?
+        paramInfoUnneeded :: Bool, -- ^Can this parameter be eliminated?
+        paramInfoGlobalFlows :: GlobalFlows 
     } deriving (Eq,Generic)
 
 -- |A dataflow direction:  in, out, both, or neither.
@@ -3214,6 +3236,24 @@ replacePrimArgs (PrimForeign lang nm flags _) args _
     = PrimForeign lang nm flags args
 
 
+primGlobalFlows :: Map PrimVarName GlobalFlows -> Prim -> GlobalFlows
+primGlobalFlows knownVars prim@(PrimHigher _ ArgVar{argVarName=name} _ _)
+    = Map.findWithDefault (snd $ primArgs prim) name knownVars
+primGlobalFlows _ prim = snd $ primArgs prim
+
+
+argGlobalFlow :: Map PrimVarName GlobalFlows -> PrimArg -> Compiler GlobalFlows
+argGlobalFlow knownVars (ArgVar name ty _ _ _) 
+    | isResourcefulHigherOrder ty 
+    = return $ Map.findWithDefault univGlobalFlows name knownVars
+argGlobalFlow knownVars (ArgClosure pspec args _) = do
+    gFlows <- getProcGlobalFlows pspec
+    params <- getPrimParams pspec 
+    -- XXX JB
+    return gFlows{globalFlowsParams=Set.empty}
+argGlobalFlow _ _ = return emptyGlobalFlows
+
+
 argIsVar :: PrimArg -> Bool
 argIsVar ArgVar{} = True
 argIsVar _ = False
@@ -3536,7 +3576,7 @@ envParamName = PrimVarName (specialName "env") 0
 
 
 envPrimParam :: PrimParam
-envPrimParam = PrimParam envParamName AnyType FlowIn Ordinary (ParamInfo False)
+envPrimParam = PrimParam envParamName AnyType FlowIn Ordinary (ParamInfo False emptyGlobalFlows)
 
 
 makeGlobalResourceName :: ResourceSpec -> String
@@ -3759,7 +3799,7 @@ showProcDefs firstID (def:defs) =
 -- |How to show a proc definition.
 showProcDef :: Int -> ProcDef -> String
 showProcDef thisID
-  procdef@(ProcDef n proto def pos _ _ _ vis detism inline impurity ctor sub) =
+  procdef@(ProcDef n proto def pos _ _ _ vis detism inline impurity ctor sub _) =
     "\n"
     ++ showProcName n ++ " > "
     ++ visibilityPrefix vis
@@ -3812,10 +3852,11 @@ instance Show Param where
 
 -- |How to show a formal parameter.
 instance Show PrimParam where
-  show (PrimParam name typ dir ft (ParamInfo unneeded)) =
+  show (PrimParam name typ dir ft (ParamInfo unneeded flows)) =
       let (pre,post) = if unneeded then ("[","]") else ("","")
+          flowStr = if flows == emptyGlobalFlows then "" else " " ++ show flows
       in  pre ++ show ft ++ primFlowPrefix dir ++ show name
-          ++ showTypeSuffix typ Nothing ++ post
+          ++ showTypeSuffix typ Nothing ++ flowStr ++ post
 
 
 -- |Show the type of an expression, if it's known.
