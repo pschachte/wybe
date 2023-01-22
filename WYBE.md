@@ -1162,8 +1162,9 @@ constructor (such as `new` in many object oriented languages), they are ordinary
 functions, aside from the fact that they are automatically generated.
 
 The form of declaration above keeps the constructors of a type private; they may
-be used within the current module, but not outside.  To make the constructors
-public, simply precede the `constructor` keyword with `pub`.
+be used within the current module, but not outside.  To make all constructors
+public, simply precede the `constructor` keyword with `pub`. 
+If you want a particular constructor to be public, precede that constructor `pub`.
 
 Note that, unlike most Object Oriented languages, making constructors public
 does not commit you to any particular representation of the type.

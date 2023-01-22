@@ -1,3 +1,5 @@
+type ctor_keyword { constructor foo | bar }
+
 type all_priv { foo | bar }
 
 type one_pub { pub foo | bar }

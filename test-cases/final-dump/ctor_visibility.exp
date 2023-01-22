@@ -8,13 +8,14 @@ AFTER EVERYTHING:
   imports         : use ctor_visibility.all_priv
                     use ctor_visibility.all_public_long
                     use ctor_visibility.all_public_short
+                    use ctor_visibility.ctor_keyword
                     use ctor_visibility.one_pub
                     use ctor_visibility.one_pub2
                     use ctor_visibility.with_fields
                     use ctor_visibility.with_fields2
                     use wybe
   resources       : 
-  submodules      : ctor_visibility.all_priv, ctor_visibility.all_public_long, ctor_visibility.all_public_short, ctor_visibility.one_pub, ctor_visibility.one_pub2, ctor_visibility.with_fields, ctor_visibility.with_fields2
+  submodules      : ctor_visibility.all_priv, ctor_visibility.all_public_long, ctor_visibility.all_public_short, ctor_visibility.ctor_keyword, ctor_visibility.one_pub, ctor_visibility.one_pub2, ctor_visibility.with_fields, ctor_visibility.with_fields2
   procs           : 
 
 
@@ -278,6 +279,89 @@ entry:
 
 
 define external fastcc  i1 @"ctor_visibility.all_public_short.~=<0>"(i1  %"#left##0", i1  %"#right##0") alwaysinline   {
+entry:
+  %0 = icmp eq i1 %"#left##0", %"#right##0" 
+  %1 = xor i1 %0, 1 
+  ret i1 %1 
+}
+--------------------------------------------------
+ Module ctor_visibility.ctor_keyword
+  representation  : 1 bit unsigned
+  public submods  : 
+  public resources: 
+  public procs    : ctor_visibility.ctor_keyword.=<0>
+                    ctor_visibility.ctor_keyword.~=<0>
+  imports         : use ctor_visibility
+                    use wybe
+  resources       : 
+  procs           : 
+
+= > public {inline} (1 calls)
+0: ctor_visibility.ctor_keyword.=<0>
+=(#left##0:ctor_visibility.ctor_keyword, #right##0:ctor_visibility.ctor_keyword, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_eq(~#left##0:ctor_visibility.ctor_keyword, ~#right##0:ctor_visibility.ctor_keyword, ?#success##0:wybe.bool)
+
+
+bar > {inline} (0 calls)
+0: ctor_visibility.ctor_keyword.bar<0>
+bar(?#result##0:ctor_visibility.ctor_keyword)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(1:ctor_visibility.ctor_keyword, ?#result##0:ctor_visibility.ctor_keyword)
+
+
+foo > {inline} (0 calls)
+0: ctor_visibility.ctor_keyword.foo<0>
+foo(?#result##0:ctor_visibility.ctor_keyword)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(0:ctor_visibility.ctor_keyword, ?#result##0:ctor_visibility.ctor_keyword)
+
+
+~= > public {inline} (0 calls)
+0: ctor_visibility.ctor_keyword.~=<0>
+~=(#left##0:ctor_visibility.ctor_keyword, #right##0:ctor_visibility.ctor_keyword, ?#success##0:wybe.bool)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_eq(~#left##0:ctor_visibility.ctor_keyword, ~#right##0:ctor_visibility.ctor_keyword, ?tmp#0##0:wybe.bool)
+    foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
+
+  LLVM code       :
+
+; ModuleID = 'ctor_visibility.ctor_keyword'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  i1 @"ctor_visibility.ctor_keyword.=<0>"(i1  %"#left##0", i1  %"#right##0") alwaysinline   {
+entry:
+  %0 = icmp eq i1 %"#left##0", %"#right##0" 
+  ret i1 %0 
+}
+
+
+define external fastcc  i1 @"ctor_visibility.ctor_keyword.bar<0>"() alwaysinline   {
+entry:
+  ret i1 1 
+}
+
+
+define external fastcc  i1 @"ctor_visibility.ctor_keyword.foo<0>"() alwaysinline   {
+entry:
+  ret i1 0 
+}
+
+
+define external fastcc  i1 @"ctor_visibility.ctor_keyword.~=<0>"(i1  %"#left##0", i1  %"#right##0") alwaysinline   {
 entry:
   %0 = icmp eq i1 %"#left##0", %"#right##0" 
   %1 = xor i1 %0, 1 
