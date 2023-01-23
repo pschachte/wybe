@@ -1164,7 +1164,8 @@ functions, aside from the fact that they are automatically generated.
 The form of declaration above keeps the constructors of a type private; they may
 be used within the current module, but not outside.  To make all constructors
 public, simply precede the `constructor` keyword with `pub`. 
-If you want a particular constructor to be public, precede that constructor `pub`.
+If you want a particular constructor to be public, precede that constructor 
+with the `pub` keyword.
 
 Note that, unlike most Object Oriented languages, making constructors public
 does not commit you to any particular representation of the type.
@@ -1314,9 +1315,11 @@ separated by vertical bar characters (`|`), just as they would appear in a
 `constructor` declaration.
 To make the declared *type* public, precede the `type` keyword with the keyword
 `pub`.
-If you wish for the constructors of the type public,
-precede the first constructor declaration with the `pub` keyword
-(this makes all the constructors public).
+
+Optionally, the constructors can be preceded by the `constructors` 
+(or `constructor`) keyword. Each constructor can be made public by preceding
+that constructor with the `pub` keyword. To make all constructors public, precede
+`constructors` keyword with `pub`.
 
 The *defs* part may be empty, but if specified, may include any number of
 procedure and function declarations, which will have full access to the
