@@ -23,7 +23,7 @@ def int_list(ctx: Context) -> None:
 WYBE_INT_LIST = r"""
 # contains the def of a int list and some helper functions
 # (similar to the python list)
-pub type int_list { pub nil | cons(head:int, tail:int_list) }
+pub type int_list { pub constructors nil | cons(head:int, tail:int_list) }
 
 
 pub def print(x:int_list) use !io {

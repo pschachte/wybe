@@ -1,4 +1,4 @@
-pub type tree { pub empty | node(left:tree, key:int, right:tree) }
+pub type tree { pub constructors empty | node(left:tree, key:int, right:tree) }
 
 # resource prefix:string
 

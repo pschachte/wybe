@@ -6,12 +6,6 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : anon_field.<0>
                     anon_field.=<0>
-                    anon_field.bar<0>
-                    anon_field.bar<1>
-                    anon_field.baz<0>
-                    anon_field.baz<1>
-                    anon_field.foo<0>
-                    anon_field.foo<1>
                     anon_field.~=<0>
                     anon_field.quux.=<0>
                     anon_field.quux.j<0>
@@ -196,7 +190,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-bar > public {inline} (3 calls)
+bar > {inline} (3 calls)
 0: anon_field.bar<0>
 bar(bar#1##0:wybe.int, ?#result##0:anon_field)<{}; {}>:
   AliasPairs: []
@@ -204,7 +198,7 @@ bar(bar#1##0:wybe.int, ?#result##0:anon_field)<{}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:anon_field) @anon_field:nn:nn
     foreign lpvm mutate(~#rec##0:anon_field, ?#rec##1:anon_field, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~bar#1##0:wybe.int) @anon_field:nn:nn
     foreign llvm or(~#rec##1:anon_field, 1:wybe.int, ?#result##0:anon_field) @anon_field:nn:nn
-bar > public {inline} (7 calls)
+bar > {inline} (7 calls)
 1: anon_field.bar<1>
 bar(?bar#1##0:wybe.int, #result##0:anon_field, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
@@ -222,7 +216,7 @@ bar(?bar#1##0:wybe.int, #result##0:anon_field, ?#success##0:wybe.bool)<{}; {}>:
 
 
 
-baz > public {inline} (5 calls)
+baz > {inline} (5 calls)
 0: anon_field.baz<0>
 baz(field##0:wybe.int, ?#result##0:anon_field)<{}; {}>:
   AliasPairs: []
@@ -230,7 +224,7 @@ baz(field##0:wybe.int, ?#result##0:anon_field)<{}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:anon_field) @anon_field:nn:nn
     foreign lpvm mutate(~#rec##0:anon_field, ?#rec##1:anon_field, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~field##0:wybe.int) @anon_field:nn:nn
     foreign llvm or(~#rec##1:anon_field, 2:wybe.int, ?#result##0:anon_field) @anon_field:nn:nn
-baz > public {inline} (5 calls)
+baz > {inline} (5 calls)
 1: anon_field.baz<1>
 baz(?field##0:wybe.int, #result##0:anon_field, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []
@@ -282,7 +276,7 @@ field(#rec##0:anon_field, ?#rec##1:anon_field, #field##0:wybe.int, ?#success##0:
 
 
 
-foo > public {inline} (14 calls)
+foo > {inline} (14 calls)
 0: anon_field.foo<0>
 foo(foo#1##0:wybe.int, foo#2##0:wybe.bool, i##0:wybe.int, ?#result##0:anon_field)<{}; {}>:
   AliasPairs: []
@@ -291,7 +285,7 @@ foo(foo#1##0:wybe.int, foo#2##0:wybe.bool, i##0:wybe.int, ?#result##0:anon_field
     foreign lpvm mutate(~#rec##0:anon_field, ?#rec##1:anon_field, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~foo#2##0:wybe.bool) @anon_field:nn:nn
     foreign lpvm mutate(~#rec##1:anon_field, ?#rec##2:anon_field, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~foo#1##0:wybe.int) @anon_field:nn:nn
     foreign lpvm mutate(~#rec##2:anon_field, ?#result##0:anon_field, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~i##0:wybe.int) @anon_field:nn:nn
-foo > public {inline} (20 calls)
+foo > {inline} (20 calls)
 1: anon_field.foo<1>
 foo(?foo#1##0:wybe.int, ?foo#2##0:wybe.bool, ?i##0:wybe.int, #result##0:anon_field, ?#success##0:wybe.bool)<{}; {}>:
   AliasPairs: []

@@ -1,7 +1,7 @@
 type instruction {
     ## instruction
     # Enumeration of brainfuck instructions.
-    pub incr | decr | left | right | input | output | loop(list(_))
+    pub constructors incr | decr | left | right | input | output | loop(list(_))
 
     ## `=`/2
     # Simple, naive equality test for instrucitons.

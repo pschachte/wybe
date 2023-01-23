@@ -1,5 +1,5 @@
-pub type t { pub ta | tb(tb1:int) | tc(tc1:int, tc2:int, tc3:int) | td(td1:int) }
-pub type t2 { pub t2a | t2b(a:int) }
+pub type t { pub constructors ta | tb(tb1:int) | tc(tc1:int, tc2:int, tc3:int) | td(td1:int) }
+pub type t2 { pub constructors t2a | t2b(a:int) }
 
 pub def print_t(x: t) use !io {
     if { ta = x ::

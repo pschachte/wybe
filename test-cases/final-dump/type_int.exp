@@ -274,7 +274,7 @@ entry:
   %0 = icmp ne i64 %"x##0", %"y##0" 
   ret i1 %0 
 }
-[93mfinal-dump/type_int.wybe:2:13: Explicit specification of current type myint,
+[93mfinal-dump/type_int.wybe:2:9: Explicit specification of current type myint,
   it is recommended to specify type as _
 [0m[93mfinal-dump/type_int.wybe:2:17: Explicit specification of current type myint,
   it is recommended to specify type as _
@@ -292,7 +292,7 @@ entry:
   it is recommended to specify type as _
 [0m[93mfinal-dump/type_int.wybe:4:34: Explicit specification of current type myint,
   it is recommended to specify type as _
-[0m[93mfinal-dump/type_int.wybe:5:13: Explicit specification of current type myint,
+[0m[93mfinal-dump/type_int.wybe:5:9: Explicit specification of current type myint,
   it is recommended to specify type as _
 [0m[93mfinal-dump/type_int.wybe:5:17: Explicit specification of current type myint,
   it is recommended to specify type as _
@@ -310,13 +310,13 @@ entry:
   it is recommended to specify type as _
 [0m[93mfinal-dump/type_int.wybe:7:34: Explicit specification of current type myint,
   it is recommended to specify type as _
-[0m[93mfinal-dump/type_int.wybe:8:13: Explicit specification of current type myint,
+[0m[93mfinal-dump/type_int.wybe:8:9: Explicit specification of current type myint,
   it is recommended to specify type as _
 [0m[93mfinal-dump/type_int.wybe:8:17: Explicit specification of current type myint,
   it is recommended to specify type as _
 [0m[93mfinal-dump/type_int.wybe:8:25: Explicit specification of current type myint,
   it is recommended to specify type as _
-[0m[93mfinal-dump/type_int.wybe:9:13: Explicit specification of current type myint,
+[0m[93mfinal-dump/type_int.wybe:9:9: Explicit specification of current type myint,
   it is recommended to specify type as _
 [0m[93mfinal-dump/type_int.wybe:9:17: Explicit specification of current type myint,
   it is recommended to specify type as _

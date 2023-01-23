@@ -16,7 +16,7 @@ pub def {test} lt3(x:int, y:int) {
     lt2(y,x)
 }
 
-pub type map { pub empty | node(left:map, key:int, value:int, right:map) }
+pub type map { pub constructors empty | node(left:map, key:int, value:int, right:map) }
 
 pub def {test} lookup(key:int, map:map, ?result:int) {
     if{ key = map^key:: ?result = map^value

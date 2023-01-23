@@ -1,6 +1,6 @@
 # Wybe implementation of https://benchmarksgame-team.pages.debian.net/benchmarksgame/description/nbody.html#nbody
 
-pub type bodylist { pub empty | body(x:float, y:float, z:float, vx:float, vy:float, vz:float, m:float, tail:bodylist) }
+pub type bodylist { pub constructors empty | body(x:float, y:float, z:float, vx:float, vy:float, vz:float, m:float, tail:bodylist) }
 
 pub def get_bodies(?bodies:bodylist) {
     ?PI = 3.14159265358979323

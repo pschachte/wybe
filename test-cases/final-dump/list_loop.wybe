@@ -1,4 +1,4 @@
-pub type intlist { pub nil | cons(head:int, tail:intlist) }
+pub type intlist { pub constructors nil | cons(head:int, tail:intlist) }
 
 ?x = cons(1,cons(2,cons(3,nil)))
 ?l = x
