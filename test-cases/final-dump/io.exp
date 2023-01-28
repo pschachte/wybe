@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {semipure} (0 calls)
 0: io.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @int:nn:nn
@@ -26,7 +26,7 @@ module top-level code > public {semipure} (0 calls)
 
 myprint_a > public {inline} (1 calls)
 0: io.myprint_a<0>
-myprint_a(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+myprint_a(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @int:nn:nn
@@ -37,7 +37,7 @@ myprint_a(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
 
 myprint_b > public {inline} (1 calls)
 0: io.myprint_b<0>
-myprint_b(x##0:wybe.int, ?y##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+myprint_b(x##0:wybe.int, ?y##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @int:nn:nn

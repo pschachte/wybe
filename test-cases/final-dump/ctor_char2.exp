@@ -17,7 +17,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {semipure} (0 calls)
 0: ctor_char2.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm shl('a':ctor_char2, 2:ctor_char2, ?tmp#3##0:ctor_char2) @ctor_char2:nn:nn
@@ -31,7 +31,7 @@ module top-level code > public {semipure} (0 calls)
 
 = > public (3 calls)
 0: ctor_char2.=<0>
-=(#left##0:ctor_char2, #right##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}>:
+=(#left##0:ctor_char2, #right##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -111,7 +111,7 @@ module top-level code > public {semipure} (0 calls)
 
 another_ctor > public {inline} (0 calls)
 0: ctor_char2.another_ctor<0>
-another_ctor(another_ctor#1##0:ctor_char2, ?#result##0:ctor_char2)<{}; {}>:
+another_ctor(another_ctor#1##0:ctor_char2, ?#result##0:ctor_char2)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_char2) @ctor_char2:nn:nn
@@ -119,7 +119,7 @@ another_ctor(another_ctor#1##0:ctor_char2, ?#result##0:ctor_char2)<{}; {}>:
     foreign llvm or(~#rec##1:ctor_char2, 2:wybe.int, ?#result##0:ctor_char2) @ctor_char2:nn:nn
 another_ctor > public {inline} (5 calls)
 1: ctor_char2.another_ctor<1>
-another_ctor(?another_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}>:
+another_ctor(?another_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -145,7 +145,7 @@ another_ctor(?another_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:
 
 c > {inline} (0 calls)
 0: ctor_char2.c<0>
-c(#rec##0:ctor_char2, ?#result##0:wybe.char, ?#success##0:wybe.bool)<{}; {}>:
+c(#rec##0:ctor_char2, ?#result##0:wybe.char, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -171,7 +171,7 @@ c(#rec##0:ctor_char2, ?#result##0:wybe.char, ?#success##0:wybe.bool)<{}; {}>:
 
 c > {inline} (0 calls)
 1: ctor_char2.c<1>
-c(#rec##0:ctor_char2, ?#rec##2:ctor_char2, #field##0:wybe.char, ?#success##0:wybe.bool)<{}; {}>:
+c(#rec##0:ctor_char2, ?#rec##2:ctor_char2, #field##0:wybe.char, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -199,7 +199,7 @@ c(#rec##0:ctor_char2, ?#rec##2:ctor_char2, #field##0:wybe.char, ?#success##0:wyb
 
 const > {inline} (0 calls)
 0: ctor_char2.const<0>
-const(?#result##0:ctor_char2)<{}; {}>:
+const(?#result##0:ctor_char2)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(0:ctor_char2, ?#result##0:ctor_char2)
@@ -207,14 +207,14 @@ const(?#result##0:ctor_char2)<{}; {}>:
 
 ctor > {inline} (1 calls)
 0: ctor_char2.ctor<0>
-ctor(c##0:wybe.char, ?#result##3:ctor_char2)<{}; {}>:
+ctor(c##0:wybe.char, ?#result##3:ctor_char2)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm shl(~c##0:ctor_char2, 2:ctor_char2, ?#temp##0:ctor_char2) @ctor_char2:nn:nn
     foreign llvm or(~#temp##0:ctor_char2, 1024:ctor_char2, ?#result##3:ctor_char2) @ctor_char2:nn:nn
 ctor > {inline} (15 calls)
 1: ctor_char2.ctor<1>
-ctor(?c##0:wybe.char, #result##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}>:
+ctor(?c##0:wybe.char, #result##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -242,7 +242,7 @@ ctor(?c##0:wybe.char, #result##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}>:
 
 foo > (1 calls)
 0: ctor_char2.foo<0>
-foo(this##0:ctor_char2, ?#result##0:wybe.char)<{}; {}>:
+foo(this##0:ctor_char2, ?#result##0:wybe.char)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(this##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool)
@@ -267,7 +267,7 @@ foo(this##0:ctor_char2, ?#result##0:wybe.char)<{}; {}>:
 
 other_ctor > public {inline} (0 calls)
 0: ctor_char2.other_ctor<0>
-other_ctor(other_ctor#1##0:ctor_char2, ?#result##0:ctor_char2)<{}; {}>:
+other_ctor(other_ctor#1##0:ctor_char2, ?#result##0:ctor_char2)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_char2) @ctor_char2:nn:nn
@@ -275,7 +275,7 @@ other_ctor(other_ctor#1##0:ctor_char2, ?#result##0:ctor_char2)<{}; {}>:
     foreign llvm or(~#rec##1:ctor_char2, 1:wybe.int, ?#result##0:ctor_char2) @ctor_char2:nn:nn
 other_ctor > public {inline} (7 calls)
 1: ctor_char2.other_ctor<1>
-other_ctor(?other_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}>:
+other_ctor(?other_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -301,7 +301,7 @@ other_ctor(?other_ctor#1##0:ctor_char2, #result##0:ctor_char2, ?#success##0:wybe
 
 ~= > public {inline} (0 calls)
 0: ctor_char2.~=<0>
-~=(#left##0:ctor_char2, #right##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}>:
+~=(#left##0:ctor_char2, #right##0:ctor_char2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     ctor_char2.=<0>(~#left##0:ctor_char2, ~#right##0:ctor_char2, ?tmp#0##0:wybe.bool) #0

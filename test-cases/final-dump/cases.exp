@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 len > (1 calls)
 0: cases.len<0>
-len(lst##0:wybe.list(T), ?#result##0:wybe.int)<{}; {}>:
+len(lst##0:wybe.list(T), ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
@@ -28,7 +28,7 @@ len(lst##0:wybe.list(T), ?#result##0:wybe.int)<{}; {}>:
 
 len2 > (1 calls)
 0: cases.len2<0>
-len2(lst##0:wybe.list(T), ?#result##0:wybe.int)<{}; {}>:
+len2(lst##0:wybe.list(T), ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool)

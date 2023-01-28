@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,semipure} (0 calls)
 0: terminal_ok.<0>
-()<{}; {}>:
+()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     terminal_ok.exit_bool<0>(0:wybe.bool) #1 @terminal_ok:nn:nn
@@ -19,7 +19,7 @@ module top-level code > public {inline,semipure} (0 calls)
 
 exit_bool > {terminal,semipure} (1 calls)
 0: terminal_ok.exit_bool<0>
-exit_bool(b##0:wybe.bool)<{}; {}>:
+exit_bool(b##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     case ~b##0:wybe.bool of

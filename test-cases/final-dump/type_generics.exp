@@ -11,106 +11,106 @@ AFTER EVERYTHING:
 
 module top-level code > public {semipure} (0 calls)
 0: type_generics.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    type_generics.foo<0>(1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @type_generics:nn:nn
-    type_generics.foo<0>(1:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @type_generics:nn:nn
-    type_generics.foo<0>(1.0:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @type_generics:nn:nn
-    type_generics.foo<0>(1.0:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @type_generics:nn:nn
+    type_generics.foo<0>(1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @type_generics:nn:nn
+    type_generics.foo<0>(1:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @type_generics:nn:nn
+    type_generics.foo<0>(1.0:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @type_generics:nn:nn
+    type_generics.foo<0>(1.0:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @type_generics:nn:nn
     type_generics.foo2<0>(1:wybe.int, ?y##0:wybe.int, ?tmp#7##0:wybe.bool) #5 @type_generics:nn:nn
     case ~tmp#7##0:wybe.bool of
     0:
-        type_generics.#cont#1<0>(_:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #8
+        type_generics.#cont#1<0>(_:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8
 
     1:
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @int:nn:nn
         foreign c print_int(~y##0:wybe.int, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @int:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-        type_generics.#cont#1<0>(_:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7
+        type_generics.#cont#1<0>(_:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7
 
 
 
 #cont#1 > (2 calls)
 0: type_generics.#cont#1<0>
-#cont#1([x##0:wybe.float])<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+#cont#1([x##0:wybe.float])<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     type_generics.foo2<0>(1:wybe.int, ?y##0:wybe.int, ?tmp#6##0:wybe.bool) #0 @type_generics:nn:nn
     case ~tmp#6##0:wybe.bool of
     0:
-        type_generics.#cont#2<0>(_:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3
+        type_generics.#cont#2<0>(_:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
 
     1:
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @int:nn:nn
         foreign c print_int(~y##0:wybe.int, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @int:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-        type_generics.#cont#2<0>(_:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2
+        type_generics.#cont#2<0>(_:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2
 
 
 
 #cont#2 > (2 calls)
 0: type_generics.#cont#2<0>
-#cont#2([x##0:wybe.float])<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+#cont#2([x##0:wybe.float])<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     type_generics.foo2<0>(1.0:wybe.float, ?fx##0:wybe.float, ?tmp#5##0:wybe.bool) #0 @type_generics:nn:nn
     case ~tmp#5##0:wybe.bool of
     0:
-        type_generics.#cont#3<0>(_:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3
+        type_generics.#cont#3<0>(_:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
 
     1:
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @float:nn:nn
         foreign c print_float(~fx##0:wybe.float, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @float:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-        type_generics.#cont#3<0>(_:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2
+        type_generics.#cont#3<0>(_:wybe.float)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2
 
 
 
 #cont#3 > (2 calls)
 0: type_generics.#cont#3<0>
-#cont#3([x##0:wybe.float])<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+#cont#3([x##0:wybe.float])<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     type_generics.foo2<0>(1.0:wybe.float, ?x##1:wybe.float, ?tmp#4##0:wybe.bool) #0 @type_generics:nn:nn
     case ~tmp#4##0:wybe.bool of
     0:
-        type_generics.#cont#4<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3
+        type_generics.#cont#4<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
 
     1:
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @float:nn:nn
         foreign c print_float(~x##1:wybe.float, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @float:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-        type_generics.#cont#4<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2
+        type_generics.#cont#4<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2
 
 
 
 #cont#4 > (2 calls)
 0: type_generics.#cont#4<0>
-#cont#4()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+#cont#4()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     type_generics.foo2<0>('a':wybe.char, ?z##0:wybe.char, ?tmp#3##0:wybe.bool) #0 @type_generics:nn:nn
     case ~tmp#3##0:wybe.bool of
     0:
-        type_generics.#cont#5<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3
+        type_generics.#cont#5<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
 
     1:
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @char:nn:nn
         foreign c putchar(~z##0:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @char:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-        type_generics.#cont#5<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2
+        type_generics.#cont#5<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2
 
 
 
 #cont#5 > (2 calls)
 0: type_generics.#cont#5<0>
-#cont#5()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+#cont#5()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     type_generics.foo2<0>(0:wybe.bool, ?b##0:wybe.bool, ?tmp#2##0:wybe.bool) #1 @type_generics:nn:nn
@@ -118,7 +118,7 @@ module top-level code > public {semipure} (0 calls)
     0:
 
     1:
-        wybe.bool.print<0>(~b##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @bool:nn:nn
+        wybe.bool.print<0>(~b##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @bool:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
@@ -127,7 +127,7 @@ module top-level code > public {semipure} (0 calls)
 
 foo > (12 calls)
 0: type_generics.foo<0>
-foo(x##0:T)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+foo(x##0:T)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#5##0:wybe.list(T)) @list:nn:nn
@@ -142,7 +142,7 @@ foo(x##0:T)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
 
 foo2 > (18 calls)
 0: type_generics.foo2<0>
-foo2(x##0:T0, ?y##0:T0, ?#success##0:wybe.bool)<{}; {}>:
+foo2(x##0:T0, ?y##0:T0, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#6##0:wybe.list(T)) @list:nn:nn

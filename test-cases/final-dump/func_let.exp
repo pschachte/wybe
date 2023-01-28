@@ -12,7 +12,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,semipure} (0 calls)
 0: func_let.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @int:nn:nn
@@ -22,7 +22,7 @@ module top-level code > public {inline,semipure} (0 calls)
 
 quad > public {inline} (1 calls)
 0: func_let.quad<0>
-quad(x##0:wybe.int, ?#result##0:wybe.int)<{}; {}>:
+quad(x##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(~x##0:wybe.int, ~x##0:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn

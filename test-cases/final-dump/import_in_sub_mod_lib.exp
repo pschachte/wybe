@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 foo > public {inline} (0 calls)
 0: import_in_sub_mod_lib.foo<0>
-foo(v##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+foo(v##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @int:nn:nn

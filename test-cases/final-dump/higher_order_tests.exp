@@ -11,32 +11,32 @@ AFTER EVERYTHING:
 
 module top-level code > public {semipure} (0 calls)
 0: higher_order_tests.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     higher_order_tests.#anon#1<0>(_:wybe.int, ?tmp#8##0:wybe.bool) #0 @higher_order_tests:nn:nn
     case ~tmp#8##0:wybe.bool of
     0:
-        higher_order_tests.#cont#1<0>(higher_order_tests.#anon#1<1><>:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3
+        higher_order_tests.#cont#1<0>(higher_order_tests.#anon#1<1><>:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
 
     1:
-        wybe.string.print<0>("*1":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @string:nn:nn
+        wybe.string.print<0>("*1":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @string:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#13##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-        higher_order_tests.#cont#1<0>(higher_order_tests.#anon#1<1><>:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2
+        higher_order_tests.#cont#1<0>(higher_order_tests.#anon#1<1><>:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2
 
 
 
 #anon#1 > {inline} (1 calls)
 0: higher_order_tests.#anon#1<0>
-#anon#1([anon#1#1##0:wybe.int], ?#success##0:wybe.bool)<{}; {}>:
+#anon#1([anon#1#1##0:wybe.int], ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 #anon#1 > {inline} (3 calls)
 1: higher_order_tests.#anon#1<1>
-#anon#1(anon#1#1##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
+#anon#1(anon#1#1##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
@@ -44,13 +44,13 @@ module top-level code > public {semipure} (0 calls)
 
 #anon#2 > {inline} (1 calls)
 0: higher_order_tests.#anon#2<0>
-#anon#2(anon#2#1##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
+#anon#2(anon#2#1##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~anon#2#1##0:wybe.int, 1:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 #anon#2 > {inline} (3 calls)
 1: higher_order_tests.#anon#2<1>
-#anon#2(anon#2#1##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
+#anon#2(anon#2#1##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~anon#2#1##0:wybe.int, 1:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
@@ -58,125 +58,125 @@ module top-level code > public {semipure} (0 calls)
 
 #cont#1 > (2 calls)
 0: higher_order_tests.#cont#1<0>
-#cont#1(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+#cont#1(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     t##0:(I, ?wybe.bool)(1:I, ?tmp#7##0:wybe.bool) #0 @higher_order_tests:nn:nn
     case ~tmp#7##0:wybe.bool of
     0:
-        higher_order_tests.#cont#2<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3
+        higher_order_tests.#cont#2<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
 
     1:
-        wybe.string.print<0>("1":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @string:nn:nn
+        wybe.string.print<0>("1":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @string:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-        higher_order_tests.#cont#2<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2
+        higher_order_tests.#cont#2<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2
 
 
 
 #cont#2 > (2 calls)
 0: higher_order_tests.#cont#2<0>
-#cont#2(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+#cont#2(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     t##0:(I, ?wybe.bool)(2:I, ?tmp#6##0:wybe.bool) #0 @higher_order_tests:nn:nn
     case ~tmp#6##0:wybe.bool of
     0:
-        higher_order_tests.#cont#3<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3
+        higher_order_tests.#cont#3<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
 
     1:
-        wybe.string.print<0>("*2":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @string:nn:nn
+        wybe.string.print<0>("*2":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @string:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-        higher_order_tests.#cont#3<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2
+        higher_order_tests.#cont#3<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2
 
 
 
 #cont#3 > (2 calls)
 0: higher_order_tests.#cont#3<0>
-#cont#3(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+#cont#3(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     ~t##0:(I, ?wybe.bool)(2:I, ?tmp#5##0:wybe.bool) #0 @higher_order_tests:nn:nn
     case ~tmp#5##0:wybe.bool of
     0:
-        higher_order_tests.#cont#4<0>(_:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3
+        higher_order_tests.#cont#4<0>(_:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
 
     1:
-        wybe.string.print<0>("2":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @string:nn:nn
+        wybe.string.print<0>("2":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @string:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-        higher_order_tests.#cont#4<0>(_:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2
+        higher_order_tests.#cont#4<0>(_:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2
 
 
 
 #cont#4 > (2 calls)
 0: higher_order_tests.#cont#4<0>
-#cont#4([t##0:(wybe.int, ?wybe.bool)])<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+#cont#4([t##0:(wybe.int, ?wybe.bool)])<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("------":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #5 @string:nn:nn
+    wybe.string.print<0>("------":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
     higher_order_tests.#anon#2<0>(1:wybe.int, ?tmp#4##0:wybe.bool) #0 @higher_order_tests:nn:nn
     case ~tmp#4##0:wybe.bool of
     0:
-        higher_order_tests.#cont#5<0>(higher_order_tests.#anon#2<1><>:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4
+        higher_order_tests.#cont#5<0>(higher_order_tests.#anon#2<1><>:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4
 
     1:
-        wybe.string.print<0>("*1":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #6 @string:nn:nn
+        wybe.string.print<0>("*1":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @string:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-        higher_order_tests.#cont#5<0>(higher_order_tests.#anon#2<1><>:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3
+        higher_order_tests.#cont#5<0>(higher_order_tests.#anon#2<1><>:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
 
 
 
 #cont#5 > (2 calls)
 0: higher_order_tests.#cont#5<0>
-#cont#5(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+#cont#5(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     t##0:(I, ?wybe.bool)(1:I, ?tmp#3##0:wybe.bool) #0 @higher_order_tests:nn:nn
     case ~tmp#3##0:wybe.bool of
     0:
-        higher_order_tests.#cont#6<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3
+        higher_order_tests.#cont#6<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
 
     1:
-        wybe.string.print<0>("1":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @string:nn:nn
+        wybe.string.print<0>("1":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @string:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-        higher_order_tests.#cont#6<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2
+        higher_order_tests.#cont#6<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2
 
 
 
 #cont#6 > (2 calls)
 0: higher_order_tests.#cont#6<0>
-#cont#6(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+#cont#6(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     t##0:(I, ?wybe.bool)(2:I, ?tmp#2##0:wybe.bool) #0 @higher_order_tests:nn:nn
     case ~tmp#2##0:wybe.bool of
     0:
-        higher_order_tests.#cont#7<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3
+        higher_order_tests.#cont#7<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
 
     1:
-        wybe.string.print<0>("*2":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @string:nn:nn
+        wybe.string.print<0>("*2":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @string:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-        higher_order_tests.#cont#7<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2
+        higher_order_tests.#cont#7<0>(~t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2
 
 
 
 #cont#7 > (2 calls)
 0: higher_order_tests.#cont#7<0>
-#cont#7(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+#cont#7(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     ~t##0:(I, ?wybe.bool)(2:I, ?tmp#1##0:wybe.bool) #0 @higher_order_tests:nn:nn
@@ -184,7 +184,7 @@ module top-level code > public {semipure} (0 calls)
     0:
 
     1:
-        wybe.string.print<0>("2":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @string:nn:nn
+        wybe.string.print<0>("2":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @string:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
@@ -193,7 +193,7 @@ module top-level code > public {semipure} (0 calls)
 
 do_test > {inline} (12 calls)
 0: higher_order_tests.do_test<0>
-do_test(f##0:(I, ?wybe.bool), i##0:I, ?#success##0:wybe.bool)<{}; {}>:
+do_test(f##0:(I, ?wybe.bool), i##0:I, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     ~f##0:(I, ?wybe.bool)(~i##0:I, ?#success##0:wybe.bool) #0 @higher_order_tests:nn:nn
@@ -201,7 +201,7 @@ do_test(f##0:(I, ?wybe.bool), i##0:I, ?#success##0:wybe.bool)<{}; {}>:
 
 do_test2 > {inline} (12 calls)
 0: higher_order_tests.do_test2<0>
-do_test2(f##0:(I, ?wybe.bool), i##0:I, ?#success##0:wybe.bool)<{}; {}>:
+do_test2(f##0:(I, ?wybe.bool), i##0:I, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     ~f##0:(I, ?wybe.bool)(~i##0:I, ?#success##0:wybe.bool) #0 @higher_order_tests:nn:nn

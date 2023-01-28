@@ -28,7 +28,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {semipure} (0 calls)
 0: mixed_fields.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(32:wybe.int, ?tmp#8##0:mixed_fields) @mixed_fields:nn:nn
@@ -38,12 +38,12 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm mutate(~tmp#11##0:mixed_fields, ?tmp#12##0:mixed_fields, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 3:wybe.int) @mixed_fields:nn:nn
     foreign lpvm mutate(~tmp#12##0:mixed_fields, ?tmp#13##0:mixed_fields, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 42:wybe.int) @mixed_fields:nn:nn
     foreign lpvm mutate(~tmp#13##0:mixed_fields, ?tmp#0##0:mixed_fields, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 17:wybe.int) @mixed_fields:nn:nn
-    mixed_fields.printit<0>(~tmp#0##0:mixed_fields)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @mixed_fields:nn:nn
+    mixed_fields.printit<0>(~tmp#0##0:mixed_fields)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @mixed_fields:nn:nn
 
 
 = > public (1 calls)
 0: mixed_fields.=<0>
-=(#left##0:mixed_fields, #right##0:mixed_fields, ?#success##0:wybe.bool)<{}; {}>:
+=(#left##0:mixed_fields, #right##0:mixed_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:mixed_fields, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?#left#f2##0:wybe.char) @mixed_fields:nn:nn
@@ -98,13 +98,13 @@ module top-level code > public {semipure} (0 calls)
 
 f1 > public {inline} (1 calls)
 0: mixed_fields.f1<0>
-f1(#rec##0:mixed_fields, ?#result##0:wybe.int)<{}; {}>:
+f1(#rec##0:mixed_fields, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:mixed_fields, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @mixed_fields:nn:nn
 f1 > public {inline} (0 calls)
 1: mixed_fields.f1<1>
-f1(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.int)<{}; {}>:
+f1(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:mixed_fields, ?#rec##1:mixed_fields, 8:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @mixed_fields:nn:nn
@@ -112,13 +112,13 @@ f1(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.int)<{}; {}>:
 
 f2 > public {inline} (1 calls)
 0: mixed_fields.f2<0>
-f2(#rec##0:mixed_fields, ?#result##0:wybe.char)<{}; {}>:
+f2(#rec##0:mixed_fields, ?#result##0:wybe.char)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:mixed_fields, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.char) @mixed_fields:nn:nn
 f2 > public {inline} (0 calls)
 1: mixed_fields.f2<1>
-f2(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.char)<{}; {}>:
+f2(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.char)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:mixed_fields, ?#rec##1:mixed_fields, 0:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.char) @mixed_fields:nn:nn
@@ -126,13 +126,13 @@ f2(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.char)<{}; {}>:
 
 f3 > public {inline} (1 calls)
 0: mixed_fields.f3<0>
-f3(#rec##0:mixed_fields, ?#result##0:wybe.int)<{}; {}>:
+f3(#rec##0:mixed_fields, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:mixed_fields, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @mixed_fields:nn:nn
 f3 > public {inline} (0 calls)
 1: mixed_fields.f3<1>
-f3(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.int)<{}; {}>:
+f3(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:mixed_fields, ?#rec##1:mixed_fields, 16:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @mixed_fields:nn:nn
@@ -140,13 +140,13 @@ f3(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.int)<{}; {}>:
 
 f4 > public {inline} (1 calls)
 0: mixed_fields.f4<0>
-f4(#rec##0:mixed_fields, ?#result##0:wybe.bool)<{}; {}>:
+f4(#rec##0:mixed_fields, ?#result##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:mixed_fields, 1:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.bool) @mixed_fields:nn:nn
 f4 > public {inline} (0 calls)
 1: mixed_fields.f4<1>
-f4(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.bool)<{}; {}>:
+f4(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:mixed_fields, ?#rec##1:mixed_fields, 1:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.bool) @mixed_fields:nn:nn
@@ -154,13 +154,13 @@ f4(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.bool)<{}; {}>:
 
 f5 > public {inline} (1 calls)
 0: mixed_fields.f5<0>
-f5(#rec##0:mixed_fields, ?#result##0:wybe.int)<{}; {}>:
+f5(#rec##0:mixed_fields, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:mixed_fields, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @mixed_fields:nn:nn
 f5 > public {inline} (0 calls)
 1: mixed_fields.f5<1>
-f5(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.int)<{}; {}>:
+f5(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:mixed_fields, ?#rec##1:mixed_fields, 24:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @mixed_fields:nn:nn
@@ -168,13 +168,13 @@ f5(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.int)<{}; {}>:
 
 f6 > public {inline} (1 calls)
 0: mixed_fields.f6<0>
-f6(#rec##0:mixed_fields, ?#result##0:wybe.char)<{}; {}>:
+f6(#rec##0:mixed_fields, ?#result##0:wybe.char)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:mixed_fields, 2:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.char) @mixed_fields:nn:nn
 f6 > public {inline} (0 calls)
 1: mixed_fields.f6<1>
-f6(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.char)<{}; {}>:
+f6(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.char)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm {noalias} mutate(~#rec##0:mixed_fields, ?#rec##1:mixed_fields, 2:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.char) @mixed_fields:nn:nn
@@ -182,7 +182,7 @@ f6(#rec##0:mixed_fields, ?#rec##1:mixed_fields, #field##0:wybe.char)<{}; {}>:
 
 mixed > public {inline} (1 calls)
 0: mixed_fields.mixed<0>
-mixed(f1##0:wybe.int, f2##0:wybe.char, f3##0:wybe.int, f4##0:wybe.bool, f5##0:wybe.int, f6##0:wybe.char, ?#result##0:mixed_fields)<{}; {}>:
+mixed(f1##0:wybe.int, f2##0:wybe.char, f3##0:wybe.int, f4##0:wybe.bool, f5##0:wybe.int, f6##0:wybe.char, ?#result##0:mixed_fields)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(32:wybe.int, ?#rec##0:mixed_fields) @mixed_fields:nn:nn
@@ -194,7 +194,7 @@ mixed(f1##0:wybe.int, f2##0:wybe.char, f3##0:wybe.int, f4##0:wybe.bool, f5##0:wy
     foreign lpvm mutate(~#rec##5:mixed_fields, ?#result##0:mixed_fields, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~f5##0:wybe.int) @mixed_fields:nn:nn
 mixed > public {inline} (22 calls)
 1: mixed_fields.mixed<1>
-mixed(?f1##0:wybe.int, ?f2##0:wybe.char, ?f3##0:wybe.int, ?f4##0:wybe.bool, ?f5##0:wybe.int, ?f6##0:wybe.char, #result##0:mixed_fields)<{}; {}>:
+mixed(?f1##0:wybe.int, ?f2##0:wybe.char, ?f3##0:wybe.int, ?f4##0:wybe.bool, ?f5##0:wybe.int, ?f6##0:wybe.char, #result##0:mixed_fields)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:mixed_fields, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?f2##0:wybe.char) @mixed_fields:nn:nn
@@ -207,7 +207,7 @@ mixed(?f1##0:wybe.int, ?f2##0:wybe.char, ?f3##0:wybe.int, ?f4##0:wybe.bool, ?f5#
 
 printit > public (1 calls)
 0: mixed_fields.printit<0>
-printit(ob##0:mixed_fields)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+printit(ob##0:mixed_fields)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(ob##0:mixed_fields, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @mixed_fields:nn:nn
@@ -222,7 +222,7 @@ printit(ob##0:mixed_fields)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
     foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
     foreign lpvm access(ob##0:mixed_fields, 1:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool) @mixed_fields:nn:nn
-    wybe.bool.print<0>(~tmp#3##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #12 @bool:nn:nn
+    wybe.bool.print<0>(~tmp#3##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #12 @bool:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#23##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @io:nn:nn
     foreign lpvm access(ob##0:mixed_fields, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int) @mixed_fields:nn:nn
@@ -236,7 +236,7 @@ printit(ob##0:mixed_fields)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
 
 ~= > public {inline} (0 calls)
 0: mixed_fields.~=<0>
-~=(#left##0:mixed_fields, #right##0:mixed_fields, ?#success##0:wybe.bool)<{}; {}>:
+~=(#left##0:mixed_fields, #right##0:mixed_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     mixed_fields.=<0>(~#left##0:mixed_fields, ~#right##0:mixed_fields, ?tmp#0##0:wybe.bool) #0
