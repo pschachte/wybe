@@ -5,6 +5,8 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
+{-# LANGUAGE TupleSections #-}
+{-# LANGUAGE LambdaCase #-}
 
 module BodyBuilder (
   BodyBuilder, buildBody, freshVarName, instr, buildFork, completeFork,
@@ -859,8 +861,16 @@ updateGlobalsLoaded prim = do
             modify $ \s -> s{globalsLoaded=Map.insert info var loaded}
         PrimForeign "lpvm" "store" _ [var, ArgGlobal info _] ->
             modify $ \s -> s{globalsLoaded=Map.insert info var loaded}
+        PrimHigher _ (ArgVar name _ _ _ _) _ _ -> 
+            case Map.lookup name varFlows of
+              Just gFlows -> do
+                let filter info _ = not $ hasGlobalFlow gFlows FlowOut info
+                modify $ \s -> s {globalsLoaded=Map.filterWithKey filter loaded}
+              Nothing -> nop
         _ -> do
-            let gFlows = primGlobalFlows varFlows prim
+            let (args, primFlows) = primArgs prim
+            argFlows <- lift $ mapM (argGlobalFlow varFlows) args
+            let gFlows = inferredArgGlobalFlows argFlows primFlows
             logBuild $ "Call has global flows: " ++ show gFlows
             let filter info _ = not $ hasGlobalFlow gFlows FlowOut info
             modify $ \s -> s {globalsLoaded=Map.filterWithKey filter loaded}
@@ -877,7 +887,7 @@ updateVariableFlows prim = do
     argFlows <- lift $ mapM (argGlobalFlow varFlows) args
     let (ins, outs) = splitArgsByMode args
     inFlows <- lift $ mapM (argGlobalFlow varFlows) ins
-    let gFlows = List.foldr globalFlowsUnion emptyGlobalFlows inFlows
+    let gFlows = globalFlowsUnions inFlows
     varFlows' <- case prim of
         PrimCall _ pspec _ _ _ -> do
           params <- lift $ getPrimParams pspec
@@ -885,22 +895,26 @@ updateVariableFlows prim = do
             (\PrimParam{primParamInfo=ParamInfo _ flows} arg ->
               case arg of
                 ArgVar name _ flow _ _ | isOutputFlow flow
-                  -> Just (name, gFlows)
+                  -> Just . (name, ) 
+                   $ inferredArgGlobalFlows argFlows flows
                 _ -> Nothing)
             params args
-        PrimHigher _ (ArgVar name _ _ _ _) _ _ ->
+        PrimHigher{} ->
           return $ Map.fromList $ List.map
               (\(ArgVar name ty _ _ _) ->
                   (name, if isResourcefulHigherOrder ty
                          then univGlobalFlows
                          else emptyGlobalFlows)) outs
+        PrimForeign "lpvm" "load" _ [_, ArgVar name ty flow _ _]
+            | isResourcefulHigherOrder ty -> 
+          return $ Map.singleton name univGlobalFlows
         PrimForeign{} -> do
-          return $ Map.fromList $ List.map
-              (\(ArgVar name ty _ _ _) ->
-                  if List.null ins && isResourcefulHigherOrder ty
-                  then (name, univGlobalFlows)
-                  else (name, gFlows)) outs
-        _ -> shouldnt "updateVariableFlows"
+          return $ Map.fromList $ catMaybes $ List.map
+              (\case {
+                  ArgVar name ty _ _ _ | isResourcefulHigherOrder ty ->
+                    Just (name, gFlows);
+                  _ -> Nothing 
+              }) outs
     when (any (/= emptyGlobalFlows) $ Map.elems varFlows') $
         logBuild $ "New Variable Flows: " ++ simpleShowMap varFlows'
     modify $ \s -> s {varGlobalFlows=Map.unionWith globalFlowsUnion varFlows varFlows'}
@@ -1239,7 +1253,7 @@ currBody body st@BodyState{tmpCount=tmp, varGlobalFlows=varFlows} = do
       ++ intercalate ", " (show <$> Map.keys (outSubst st))
     st' <- execStateT (rebuildBody st)
            $ BkwdBuilderState (Map.keysSet $ outSubst st) Nothing Map.empty
-                              0 Set.empty body
+                              0 Set.empty varFlows body
     let BkwdBuilderState{bkwdUsedLater=usedLater,
                          bkwdFollowing=following,
                          bkwdGlobalStored=stored} = st'
@@ -1257,17 +1271,18 @@ type BkwdBuilder = StateT BkwdBuilderState Compiler
 -- forwards.  Because construction runs backwards, the state mostly holds
 -- information about the following code.
 data BkwdBuilderState = BkwdBuilderState {
-      bkwdUsedLater    :: Set PrimVarName, -- ^Vars used later in computation,
-                                           --  but not defined later
+      bkwdUsedLater     :: Set PrimVarName, -- ^Vars used later in computation,
+                                            --  but not defined later
       bkwdBranchesUsedLater :: Maybe [Set PrimVarName],
-                                           -- ^The usedLater set for each
-                                           -- following branch, used for fused
-                                           -- branches.
-      bkwdRenaming     :: VarSubstitution, -- ^Variable substitution to apply
-      bkwdTmpCount     :: Int,             -- ^Highest temporary variable number
-      bkwdGlobalStored :: Set GlobalInfo,  -- ^The set of globals we have
-                                           -- recently stored
-      bkwdFollowing    :: ProcBody         -- ^Code to come later
+                                            -- ^The usedLater set for each
+                                            -- following branch, used for fused
+                                            -- branches.
+      bkwdRenaming      :: VarSubstitution, -- ^Variable substitution to apply
+      bkwdTmpCount      :: Int,             -- ^Highest temporary variable number
+      bkwdGlobalStored  :: Set GlobalInfo,  -- ^The set of globals we have
+                                            -- recently stored
+      bkwdVariableFlows :: Map PrimVarName GlobalFlows,
+      bkwdFollowing     :: ProcBody         -- ^Code to come later
       } deriving (Eq,Show)
 
 
@@ -1279,6 +1294,7 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
                          reifiedConstr=reif} = do
     usedLater <- gets bkwdUsedLater
     following <- gets bkwdFollowing
+    varFlows <- gets bkwdVariableFlows
     logBkwd $ "Rebuilding body:" ++ fst (showState 8 st)
               ++ "\nwith currSubst = " ++ simpleShowMap subst
               ++ "\n     usedLater = " ++ simpleShowSet usedLater
@@ -1324,7 +1340,7 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
             let followingBranches = List.map bkwdFollowing sts
             let gStored = List.foldr1 Set.intersection (bkwdGlobalStored <$> sts')
             put $ BkwdBuilderState usedLater''' branchesUsedLater
-                  Map.empty tmp gStored
+                  Map.empty tmp gStored varFlows
                   $ ProcBody [] $ PrimFork var' ty' lastUse followingBranches
                              (bkwdFollowing <$> deflt'')
             mapM_ (placedApply (bkwdBuildStmt defs)) prims'
@@ -1452,12 +1468,16 @@ bkwdBuildStmt defs prim pos = do
     usedLater <- gets bkwdUsedLater
     renaming <- gets bkwdRenaming
     gStored <- gets bkwdGlobalStored
+    varFlows <- gets bkwdVariableFlows
     logBkwd $ "  Rebuilding prim: " ++ show prim
-              ++ "\n    with usedLater   = " ++ show usedLater
-              ++ "\n    and bkwdRenaming = " ++ simpleShowMap renaming
-              ++ "\n    and defs         = " ++ simpleShowSet defs
-              ++ "\n    and globalStored = " ++ simpleShowSet gStored
-    let (args, gFlows) = primArgs prim
+              ++ "\n    with usedLater     = " ++ show usedLater
+              ++ "\n    and bkwdRenaming   = " ++ simpleShowMap renaming
+              ++ "\n    and defs           = " ++ simpleShowSet defs
+              ++ "\n    and globalStored   = " ++ simpleShowSet gStored
+              ++ "\n    and varGlobalFlows = " ++ simpleShowMap varFlows
+    let (args, primFlows) = primArgs prim
+    argFlows <- lift $ mapM (argGlobalFlow varFlows) args
+    let gFlows = inferredArgGlobalFlows argFlows primFlows
     args' <- mapM renameArg args
     logBkwd $ "    renamed args = " ++ show args'
     case (prim,args') of
@@ -1474,11 +1494,12 @@ bkwdBuildStmt defs prim pos = do
             -- Filter out pure instructions that produce no needed outputs nor 
             -- out flowing globals that arent stored to later
             when (purity > Pure || any (`Set.member` usedLater) (argVarName <$> outs)
-                                || not (USet.isEmpty $ whenFinite (Set.\\ gStored) gOuts))
+                                || not (USet.isEmpty $ whenFinite (Set.\\ gStored) gOuts)
+                                || not (USet.isEmpty $ globalFlowsParams gFlows))
               $ do
                 -- XXX Careful:  probably shouldn't mark last use of variable
                 -- passed as input argument more than once in the call
-                let prim' = replacePrimArgs prim (markIfLastUse usedLater <$> args') gFlows
+                let prim' = replacePrimArgs prim (markIfLastUse usedLater <$> args') primFlows
                 logBkwd $ "    updated prim = " ++ show prim'
                 -- Don't consider variables assigned here to be used later.
                 -- Variables should only be assigned once, but rearranging

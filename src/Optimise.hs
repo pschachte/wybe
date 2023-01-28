@@ -200,11 +200,12 @@ inferGlobalFlows' knownVarFlows ProcDefSrc{} = shouldnt "inferGlobalFlows'"
 inferGlobalFlows' knownVarFlows (ProcDefPrim pspec 
                     proto@(PrimProto name _ oldFlows@(GlobalFlows ins outs params)) body _ _) = do
     logOptimise $ "Inferring global flows of " ++ show proto
-    let newFlows = bodyGlobalFlows knownVarFlows
-                        (if Set.null params then ins `USet.intersection` outs
+    let allFlows = bodyGlobalFlows knownVarFlows
+                        (if USet.isEmpty params then ins `USet.intersection` outs
                         else USet.UniversalSet) body
-    logOptimise $ "---> " ++ show newFlows
-    return $ newFlows `globalFlowsIntersection` oldFlows
+        newFlows = allFlows `globalFlowsIntersection` oldFlows
+    logOptimise $ "---> " ++ show newFlows ++ " (" ++ show allFlows ++ ")"
+    return newFlows
 
 
 -- | Get the global flows that occur across a ProcBody, given the procs that appear
@@ -219,7 +220,7 @@ bodyGlobalFlows knownVarFlows oldFlows (ProcBody prims fork)
         = GlobalFlows 
             (i1 `USet.union` whenFinite (`Set.difference` USet.toSet Set.empty o1) i2) 
             (o1 `USet.union` o2)
-            (p1 `Set.union` p2)
+            (p1 `USet.union` p2)
 
 -- | Global flows that occur across forks, accounting for the old in/out flows.
 -- If a flow out does not occur in all branches, but at least 1, and occurs in
@@ -234,7 +235,7 @@ forkGlobalFlows knownVarFlows oldFlows (PrimFork _ _ _ bodies deflt) =
         allOuts = List.foldr USet.intersection UniversalSet gOuts
         oldFlows' = oldFlows `USet.intersection` 
                         whenFinite (`USet.subtractUnivSet` allOuts) someOuts
-    in List.foldr globalFlowsUnion (GlobalFlows oldFlows' emptyUnivSet Set.empty) gFlows
+    in globalFlowsUnions (emptyGlobalFlows{globalFlowsOut=oldFlows'}:gFlows)
 
 
 -- | Update the GlobalFlows of Prims of a ProcDef and the prototype with
@@ -305,7 +306,7 @@ forkLeadingOutFlows (PrimFork _ _ _ bodies deflt) =
 -- i.e., outwards flows that occur before a corresponding inwards flow
 killFlows :: Prim -> Set GlobalInfo -> Set GlobalInfo
 killFlows prim oldKilled 
-    | Set.null params 
+    | USet.isEmpty params 
     = Set.empty
     | otherwise
     = (oldKilled `Set.union` USet.toSet Set.empty outs) 

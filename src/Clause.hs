@@ -17,6 +17,7 @@ import           Data.List                         as List
 import           Data.Map                          as Map
 import           Data.Maybe                        as Maybe
 import           Data.Set                          as Set
+import           UnivSet                           as USet
 import           Options                           (LogSelection (Clause))
 import           Snippets
 import           Text.ParserCombinators.Parsec.Pos
@@ -157,8 +158,7 @@ compileProc proc procID =
         logClause $ "  endVars    : " ++ show endVars
         logClause $ "  params     : " ++ show params
         let params' = concat $ zipWith (compileParam gFlows startVars endVars procName) [0..] params
-            gFlows  = makeGlobalFlows (zip [0..] params')
-                    $ procProtoResources proto
+            gFlows  = makeGlobalFlows (zip [0..] params') $ procProtoResources proto
         let proto' = PrimProto (procProtoName proto) params' gFlows
         logClause $ "  comparams  : " ++ show params'
         logClause $ "  globalFlows: " ++ show gFlows 
@@ -373,7 +373,7 @@ compileParam allFlows startVars endVars procName idx param@(Param name ty flow f
                             ++ " of proc " ++ show procName))
                 name startVars
           gFlows 
-            | isResourcefulHigherOrder ty = GlobalFlows emptyUnivSet emptyUnivSet (Set.singleton idx)
+            | isResourcefulHigherOrder ty = GlobalFlows emptyUnivSet emptyUnivSet (USet.singleton idx)
             | otherwise = emptyGlobalFlows
     ]
     ++ [PrimParam (PrimVarName name num) ty FlowOut ftype (ParamInfo False gFlows)

@@ -71,13 +71,15 @@ module AST (
   expToStmt, seqToStmt, stmtsImpurity, stmtImpurity, procCallToExp,
   stmtsInputs, expOutputs, pexpListOutputs, expInputs, pexpListInputs,
   setExpTypeFlow, setPExpTypeFlow,
-  Prim(..), primArgs, replacePrimArgs, primGlobalFlows, argGlobalFlow, argIsVar, argIsConst, argIntegerValue,
+  Prim(..), primArgs, replacePrimArgs, 
+  primGlobalFlows, argGlobalFlow, inferredArgGlobalFlows, 
+  argIsVar, argIsConst, argIntegerValue,
   varsInPrims, varsInPrim, varsInPrimArgs, varsInPrimArg,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
   CallSiteID, SuperprocSpec(..), initSuperprocSpec, -- addSuperprocSpec,
   maybeGetClosureOf, isClosureProc, isClosureVariant, isConstructorVariant,
   GlobalFlows(..), emptyGlobalFlows, univGlobalFlows, makeGlobalFlows,
-  addGlobalFlow, hasGlobalFlow, globalFlowsUnion, globalFlowsIntersection,
+  addGlobalFlow, hasGlobalFlow, globalFlowsUnion, globalFlowsUnions, globalFlowsIntersection,
   -- *Stateful monad for the compilation process
   MessageLevel(..), updateCompiler,
   CompilerState(..), Compiler, runCompiler,
@@ -2074,7 +2076,7 @@ data GlobalFlows
         -- ^ The set of globals that flow in
         globalFlowsOut :: UnivSet GlobalInfo,
         -- ^ The set of globals that flow out
-        globalFlowsParams :: Set.Set ParameterID
+        globalFlowsParams :: UnivSet ParameterID
         -- ^ The set of parameters (by ID) that effect the global flwos
     }
     deriving (Eq, Ord, Generic)
@@ -2084,18 +2086,18 @@ instance Show GlobalFlows where
     show (GlobalFlows ins outs params) =
         "<" ++ showUnivSet show ins
         ++ "; " ++ showUnivSet show outs
-        ++ "; " ++ simpleShowSet params
+        ++ "; " ++ showUnivSet show params
         ++ ">"
 
 
 -- | An empty set of GlobalFlows
 emptyGlobalFlows :: GlobalFlows
-emptyGlobalFlows = GlobalFlows emptyUnivSet emptyUnivSet Set.empty
+emptyGlobalFlows = GlobalFlows emptyUnivSet emptyUnivSet emptyUnivSet
 
 
 -- | The set of all GlobalFlows
 univGlobalFlows :: GlobalFlows
-univGlobalFlows = GlobalFlows UniversalSet UniversalSet Set.empty
+univGlobalFlows = GlobalFlows UniversalSet UniversalSet UniversalSet
 
 
 -- | Given a list of Types and a set of ResourceFlowSpecs, make a GlobalFlows.
@@ -2110,7 +2112,7 @@ makeGlobalFlows params resFlows =
     Set.fold addGlobalResourceFlows 
         (emptyGlobalFlows{globalFlowsParams=pFlows}) resFlows
   where
-    pFlows = Set.fromList $ catMaybes $ List.map (uncurry paramFlow) params
+    pFlows = FiniteSet $ Set.fromList $ catMaybes $ List.map (uncurry paramFlow) params
     paramFlow i PrimParam{primParamName=name, primParamType=ty, primParamFlow=flow}
         | isInputFlow flow && isResourcefulHigherOrder ty
         = Just i
@@ -2138,7 +2140,7 @@ addGlobalFlow info FlowTakeReference gFlows = gFlows
 -- | Test if the given flow of a global exists in the global flow set
 hasGlobalFlow :: GlobalFlows -> PrimFlow -> GlobalInfo -> Bool
 hasGlobalFlow gFlows@GlobalFlows{globalFlowsParams=params} _ _
-    | not (Set.null params) = True
+    | not (USet.isEmpty params) = True
 hasGlobalFlow gFlows@GlobalFlows{globalFlowsIn=ins} FlowIn info
     = USet.member info ins
 hasGlobalFlow gFlows@GlobalFlows{globalFlowsOut=outs} FlowOut info
@@ -2154,7 +2156,10 @@ globalFlowsUnion (GlobalFlows ins1 outs1 params1) (GlobalFlows ins2 outs2 params
     = GlobalFlows 
         (USet.union ins1 ins2) 
         (USet.union outs1 outs2) 
-        (Set.union params1 params2)
+        (USet.union params1 params2)
+
+globalFlowsUnions :: [GlobalFlows] -> GlobalFlows
+globalFlowsUnions = List.foldr globalFlowsUnion emptyGlobalFlows
 
 
 -- | Take the intersection of the sets of two global flows
@@ -2164,9 +2169,7 @@ globalFlowsIntersection (GlobalFlows ins1 outs1 params1)
     = GlobalFlows 
         (USet.intersection ins1 ins2) 
         (USet.intersection outs1 outs2) 
-        $ if any (UniversalSet ==) [ins1, ins2, outs1, outs2]
-          then (Set.union params1 params2)
-          else (Set.intersection params1 params2)
+        (USet.intersection params1 params2)
 
 
 -- |An ID for a parameter of a proc
@@ -3250,8 +3253,16 @@ argGlobalFlow knownVars (ArgClosure pspec args _) = do
     gFlows <- getProcGlobalFlows pspec
     params <- getPrimParams pspec 
     -- XXX JB
-    return gFlows{globalFlowsParams=Set.empty}
+    return gFlows{globalFlowsParams=emptyUnivSet}
 argGlobalFlow _ _ = return emptyGlobalFlows
+
+
+inferredArgGlobalFlows :: [GlobalFlows] -> GlobalFlows -> GlobalFlows
+inferredArgGlobalFlows argFlows primFlows@(GlobalFlows _ _ UniversalSet) 
+    = globalFlowsUnions $ primFlows{globalFlowsParams=emptyUnivSet}:argFlows
+inferredArgGlobalFlows argFlows primFlows@(GlobalFlows _ _ (FiniteSet ids)) 
+    = globalFlowsUnions $ primFlows{globalFlowsParams=emptyUnivSet}
+                        : List.map (argFlows !!) (Set.toList ids)
 
 
 argIsVar :: PrimArg -> Bool
