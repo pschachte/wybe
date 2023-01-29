@@ -281,7 +281,7 @@ data TypeError = ReasonMessage Message
                    -- ^Input resource not available in proc call
                | ReasonResourceOutOfScope ProcName ResourceSpec OptPos
                    -- ^Resource not in scope in proc call
-               | ReasonUseType ResourceSpec OptPos
+               | ReasonUseType Bool ResourceSpec OptPos
                    -- ^Type of resource in use stmt inconsistent with other use
                | ReasonWrongFamily Ident Int TypeFamily OptPos
                    -- ^LLVM instruction expected different argument family
@@ -436,9 +436,10 @@ typeErrorMessage (ReasonResourceUnavail proc res pos) =
 typeErrorMessage (ReasonResourceOutOfScope proc res pos) =
     Message Error pos $
         "Resource " ++ show res ++ " not in scope at call to proc " ++ proc
-typeErrorMessage (ReasonUseType res pos) =
+typeErrorMessage (ReasonUseType use res pos) =
     Message Error pos $
-        "Inconsistent type of resource " ++ show res ++ " in use statement"
+        "Inconsistent type of resource " ++ show res ++ " in "
+        ++ (if use then "" else "dis") ++ "use statement"
 typeErrorMessage (ReasonWrongFamily instr argNum fam pos) =
     Message Error pos $
         "LLVM instruction '" ++ instr ++ "' argument " ++ show argNum
@@ -511,7 +512,7 @@ typeErrorPos (ReasonResourceDef _ _ pos) = pos
 typeErrorPos (ReasonResourceUndef _ _ pos) = pos
 typeErrorPos (ReasonResourceUnavail _ _ pos) = pos
 typeErrorPos (ReasonResourceOutOfScope _ _ pos) = pos
-typeErrorPos (ReasonUseType _ pos) = pos
+typeErrorPos (ReasonUseType _ _ pos) = pos
 typeErrorPos (ReasonWrongFamily _ _ _ pos) = pos
 typeErrorPos (ReasonIncompatible _ _ _ pos) = pos
 typeErrorPos (ReasonWrongOutput _ _ _ pos) = pos
@@ -1333,7 +1334,10 @@ bodyCalls'' nested (Cond cond thn els _ _ _) _ = do
     return $ cond' ++ thn' ++ els'
 bodyCalls'' nested (Loop stmts _ _) _ = bodyCallsConstraints nested stmts
 bodyCalls'' nested (UseResources res _ stmts) pos = do
-    mapM_ (flip (addResourceType ReasonUseType) pos) res
+    mapM_ (flip (addResourceType (ReasonUseType True)) pos) res
+    bodyCallsConstraints nested stmts
+bodyCalls'' nested (DisuseResources res stmts) pos = do
+    mapM_ (flip (addResourceType (ReasonUseType False)) pos) res
     bodyCallsConstraints nested stmts
 bodyCalls'' _ For{} _ = shouldnt "bodyCalls: flattening left For stmt"
 bodyCalls'' _ Case{} _ = shouldnt "bodyCalls: flattening left Case stmt"
@@ -2213,6 +2217,19 @@ modecheckStmt m name defPos assigned detism final
         let filter nm ty = nm `USet.member` resVars
                         || isResourcefulHigherOrder ty
         return $ Map.filterWithKey filter varTys
+        
+modecheckStmt m name defPos assigned detism final
+    stmt@(DisuseResources resources stmts) pos = do
+    logTyped $ "Mode checking disuse ... in stmt " ++ show stmt
+    canonRes <- lift (mapM (canonicaliseResourceSpec pos "use block") resources)
+    let resources' = fst <$> canonRes
+    let assigned' = assigned { bindingResources =
+            List.foldr Set.delete (bindingResources assigned) resources' }
+    (stmts', assigned'')
+        <- modecheckStmts m name defPos assigned' detism final stmts
+    return 
+        ([DisuseResources resources stmts' `maybePlace` pos]
+        ,assigned'')
 -- XXX Need to implement these correctly:
 modecheckStmt m name defPos assigned detism final
     stmt@(And stmts) pos = do
@@ -2707,6 +2724,8 @@ checkStmtTyped name pos stmt@(Loop stmts _ _) _ppos = do
     --      shouldnt $ "exit vars of loop undetermined: " ++ showStmt 4 stmt
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
 checkStmtTyped name pos (UseResources _ _ stmts) _ppos =
+    mapM_ (placedApply (checkStmtTyped name pos)) stmts
+checkStmtTyped name pos (DisuseResources _ stmts) _ppos =
     mapM_ (placedApply (checkStmtTyped name pos)) stmts
 checkStmtTyped name pos For{} ppos =
     shouldnt "For statement left by flattening"

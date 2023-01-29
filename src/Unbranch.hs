@@ -510,6 +510,8 @@ unbranchStmt detism (Loop body exitVars res) pos stmts alt sense = do
     return [next]
 unbranchStmt _ UseResources{} _ _ _ _ =
     shouldnt "resource handling should have removed use ... in statements"
+unbranchStmt _ DisuseResources{} _ _ _ _ =
+    shouldnt "resource handling should have removed disuse ... in statements"
 unbranchStmt _ For{} _ _ _ _ =
     shouldnt "flattening should have removed For statements"
 unbranchStmt _ Case{} _ _ _ _ =
