@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,semipure} (0 calls)
 0: global_flow_inference.<0>
-()<{}; {<<global_flow_inference.res>>}>:
+()<{}; {<<global_flow_inference.res>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm store(1:wybe.int, <<global_flow_inference.res>>:wybe.int) @global_flow_inference:nn:nn
@@ -19,20 +19,20 @@ module top-level code > public {inline,semipure} (0 calls)
 
 inout > {noinline} (0 calls)
 0: global_flow_inference.inout<0>
-inout(b##0:wybe.bool)<{<<global_flow_inference.res>>}; {<<global_flow_inference.res>>}>:
+inout(b##0:wybe.bool)<{<<global_flow_inference.res>>}; {<<global_flow_inference.res>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     case ~b##0:wybe.bool of
     0:
 
     1:
-        global_flow_inference.only_out<0>(1:wybe.bool)<{}; {<<global_flow_inference.res>>}> #0 @global_flow_inference:nn:nn
+        global_flow_inference.only_out<0>(1:wybe.bool)<{}; {<<global_flow_inference.res>>}; {}> #0 @global_flow_inference:nn:nn
 
 
 
 only_in > {noinline} (0 calls)
 0: global_flow_inference.only_in<0>
-only_in(?x##0:wybe.int)<{<<global_flow_inference.res>>}; {}>:
+only_in(?x##0:wybe.int)<{<<global_flow_inference.res>>}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<global_flow_inference.res>>:wybe.int, ?%x##0:wybe.int) @global_flow_inference:nn:nn
@@ -40,7 +40,7 @@ only_in(?x##0:wybe.int)<{<<global_flow_inference.res>>}; {}>:
 
 only_out > {noinline} (1 calls)
 0: global_flow_inference.only_out<0>
-only_out(b##0:wybe.bool)<{}; {<<global_flow_inference.res>>}>:
+only_out(b##0:wybe.bool)<{}; {<<global_flow_inference.res>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     case ~b##0:wybe.bool of
@@ -54,23 +54,23 @@ only_out(b##0:wybe.bool)<{}; {<<global_flow_inference.res>>}>:
 
 rec_out_only1 > {noinline} (1 calls)
 0: global_flow_inference.rec_out_only1<0>
-rec_out_only1()<{}; {<<global_flow_inference.res>>}>:
+rec_out_only1()<{}; {<<global_flow_inference.res>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    global_flow_inference.rec_out_only2<0><{}; {<<global_flow_inference.res>>}> #0 @global_flow_inference:nn:nn
+    global_flow_inference.rec_out_only2<0><{}; {<<global_flow_inference.res>>}; {}> #0 @global_flow_inference:nn:nn
 
 
 rec_out_only2 > {noinline} (1 calls)
 0: global_flow_inference.rec_out_only2<0>
-rec_out_only2()<{}; {<<global_flow_inference.res>>}>:
+rec_out_only2()<{}; {<<global_flow_inference.res>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    global_flow_inference.rec_out_only1<0><{}; {<<global_flow_inference.res>>}> #0 @global_flow_inference:nn:nn
+    global_flow_inference.rec_out_only1<0><{}; {<<global_flow_inference.res>>}; {}> #0 @global_flow_inference:nn:nn
 
 
 rec_out_only_notail1 > {noinline} (1 calls)
 0: global_flow_inference.rec_out_only_notail1<0>
-rec_out_only_notail1()<{}; {<<global_flow_inference.res>>}>:
+rec_out_only_notail1()<{}; {<<global_flow_inference.res>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm store(1:wybe.int, <<global_flow_inference.res>>:wybe.int) @global_flow_inference:nn:nn
@@ -78,7 +78,7 @@ rec_out_only_notail1()<{}; {<<global_flow_inference.res>>}>:
 
 rec_out_only_notail2 > {noinline} (1 calls)
 0: global_flow_inference.rec_out_only_notail2<0>
-rec_out_only_notail2()<{}; {<<global_flow_inference.res>>}>:
+rec_out_only_notail2()<{}; {<<global_flow_inference.res>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm store(1:wybe.int, <<global_flow_inference.res>>:wybe.int) @global_flow_inference:nn:nn
@@ -86,7 +86,7 @@ rec_out_only_notail2()<{}; {<<global_flow_inference.res>>}>:
 
 still_only_in > {noinline} (0 calls)
 0: global_flow_inference.still_only_in<0>
-still_only_in(b##0:wybe.bool, ?x##0:wybe.int)<{<<global_flow_inference.res>>}; {}>:
+still_only_in(b##0:wybe.bool, ?x##0:wybe.int)<{<<global_flow_inference.res>>}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     case ~b##0:wybe.bool of

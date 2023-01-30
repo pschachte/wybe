@@ -127,7 +127,7 @@ module top-level code > public {semipure} (0 calls)
 
 foo > (12 calls)
 0: type_generics.foo<0>
-foo(x##0:T)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+foo(x##0:T <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#5##0:wybe.list(T)) @list:nn:nn
@@ -142,7 +142,7 @@ foo(x##0:T)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 
 foo2 > (18 calls)
 0: type_generics.foo2<0>
-foo2(x##0:T0, ?y##0:T0, ?#success##0:wybe.bool)<{}; {}; {}>:
+foo2(x##0:T0 <{}; {}; {0}>, ?y##0:T0 <{}; {}; {0}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#6##0:wybe.list(T)) @list:nn:nn

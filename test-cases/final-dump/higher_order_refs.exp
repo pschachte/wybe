@@ -80,7 +80,7 @@ module top-level code > public {semipure} (0 calls)
 
 #closure#1 > {inline} (1 calls)
 0: higher_order_refs.#closure#1<0>
-#closure#1(a##0:A, ?#result##0:A)<{}; {}; {}>:
+#closure#1(a##0:A <{}; {}; {0}>, ?#result##0:A <{}; {}; {0}>)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(~a##0:A, ?#result##0:A) @predicate:nn:nn
@@ -118,7 +118,7 @@ add_one(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
 
 app > {noinline} (6 calls)
 0: higher_order_refs.app<0>
-app(f##0:(I, ?J), i##0:I, ?#result##0:J)<{}; {}; {}>:
+app(f##0:(I, ?J) <{}; {}; {0}>, i##0:I <{}; {}; {1}>, ?#result##0:J <{}; {}; {0, 1}>)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     ~f##0:(I, ?J)(~i##0:I, ?#result##0:J) #0 @higher_order_refs:nn:nn

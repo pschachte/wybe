@@ -35,7 +35,7 @@ module top-level code > public {semipure} (0 calls)
 
 bar > public {inline} (0 calls)
 0: anon_field_variable.bar<0>
-bar(bar#1##0:wybe.int, field##0:T, bar#3##0:T, ?#result##0:anon_field_variable(T))<{}; {}; {}>:
+bar(bar#1##0:wybe.int, field##0:T <{}; {}; {1}>, bar#3##0:T <{}; {}; {2}>, ?#result##0:anon_field_variable(T) <{}; {}; {1, 2}>)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:anon_field_variable(T)) @anon_field_variable:nn:nn
@@ -45,7 +45,7 @@ bar(bar#1##0:wybe.int, field##0:T, bar#3##0:T, ?#result##0:anon_field_variable(T
     foreign llvm or(~#rec##3:anon_field_variable(T), 1:wybe.int, ?#result##0:anon_field_variable(T)) @anon_field_variable:nn:nn
 bar > public {inline} (0 calls)
 1: anon_field_variable.bar<1>
-bar(?bar#1##0:wybe.int, ?field##0:T, ?bar#3##0:T, #result##0:anon_field_variable(T), ?#success##0:wybe.bool)<{}; {}; {}>:
+bar(?bar#1##0:wybe.int <{}; {}; {3}>, ?field##0:T <{}; {}; {3}>, ?bar#3##0:T <{}; {}; {3}>, #result##0:anon_field_variable(T) <{}; {}; {3}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
@@ -67,7 +67,7 @@ bar(?bar#1##0:wybe.int, ?field##0:T, ?bar#3##0:T, #result##0:anon_field_variable
 
 field > {inline} (0 calls)
 0: anon_field_variable.field<0>
-field(#rec##0:anon_field_variable(T), ?#result##0:T, ?#success##0:wybe.bool)<{}; {}; {}>:
+field(#rec##0:anon_field_variable(T) <{}; {}; {0}>, ?#result##0:T <{}; {}; {0}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
@@ -83,7 +83,7 @@ field(#rec##0:anon_field_variable(T), ?#result##0:T, ?#success##0:wybe.bool)<{};
 
 field > {inline} (0 calls)
 1: anon_field_variable.field<1>
-field(#rec##0:anon_field_variable(T), ?#rec##1:anon_field_variable(T), #field##0:T, ?#success##0:wybe.bool)<{}; {}; {}>:
+field(#rec##0:anon_field_variable(T) <{}; {}; {0}>, ?#rec##1:anon_field_variable(T) <{}; {}; {0, 2}>, #field##0:T <{}; {}; {2}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
@@ -101,14 +101,14 @@ field(#rec##0:anon_field_variable(T), ?#rec##1:anon_field_variable(T), #field##0
 
 foo > public {inline} (3 calls)
 0: anon_field_variable.foo<0>
-foo(foo#1##0:T, ?#result##0:anon_field_variable(T))<{}; {}; {}>:
+foo(foo#1##0:T <{}; {}; {0}>, ?#result##0:anon_field_variable(T) <{}; {}; {0}>)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:anon_field_variable(T)) @anon_field_variable:nn:nn
     foreign lpvm mutate(~#rec##0:anon_field_variable(T), ?#result##0:anon_field_variable(T), 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~foo#1##0:T) @anon_field_variable:nn:nn
 foo > public {inline} (3 calls)
 1: anon_field_variable.foo<1>
-foo(?foo#1##0:T, #result##0:anon_field_variable(T), ?#success##0:wybe.bool)<{}; {}; {}>:
+foo(?foo#1##0:T <{}; {}; {1}>, #result##0:anon_field_variable(T) <{}; {}; {1}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)

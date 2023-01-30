@@ -31,6 +31,7 @@ import Control.Monad
 import Control.Monad.Extra (whenJust, whenM)
 import Control.Monad.Trans (lift)
 import Control.Monad.Trans.State
+import AST (simpleShowMap)
 
 
 ----------------------------------------------------------------
@@ -177,11 +178,11 @@ childState st@BodyState{currSubst=iSubst,outSubst=oSubst,subExprs=subs,
 
 
 initGlobalVarFlows :: [PrimParam] -> Map PrimVarName GlobalFlows
-initGlobalVarFlows = Map.fromList . Maybe.mapMaybe (uncurry init) . zip [0..]
+initGlobalVarFlows = Map.fromList . Maybe.mapMaybe init
   where
-    init i (PrimParam name ty flow _ (ParamInfo _ flows))
+    init (PrimParam name _ flow _ (ParamInfo _ flows))
       | isInputFlow flow = Just (name, flows)
-    init _ _ = Nothing
+    init _ = Nothing
 
 -- | A mapping from variables to definite values, in service to constant
 -- propagation.
@@ -296,23 +297,28 @@ completeFork = do
         shouldnt "Completing an un-built fork"
       Forked var ty val fused bods deflt False -> do
         logBuild $ ">>>> ending fork on " ++ show var
+        let allBods = bods ++ maybeToList deflt
         -- let branchMap = List.foldr1 (Map.intersectionWith Set.union)
         --                 (Map.map Set.singleton
         --                  . Map.filter argIsConst . currSubst <$> bods)
         let branchMaps =
-              Map.filter argIsConst . currSubst <$> (bods ++ maybeToList deflt)
+              Map.filter argIsConst . currSubst <$> allBods
         -- Variables set to the same constant in every branch
         let extraSubsts = List.foldr1 intersectMapIdentity branchMaps
         logBuild $ "     extraSubsts = " ++ show extraSubsts
         -- Variables with a constant value in each branch.  These can be
         -- used later to fuse branches of subsequent forks on those variables
         -- with this fork.
+        
         let consts = List.foldr1 Set.union
                      $ List.map Map.keysSet branchMaps
         logBuild $ "     definite variables in all branches: " ++ show consts
+        let varFlows = Map.unionsWith globalFlowsUnion $ varGlobalFlows <$> st:allBods
+        logBuild $ "     variable flows in all branches: " ++ simpleShowMap varFlows
         -- Prepare for any instructions coming after the fork
-        let parent = st {buildState = Forked var ty val fused bods deflt True,
-                         tmpCount = maximum $ tmpCount <$> bods }
+        let parent = st { buildState = Forked var ty val fused bods deflt True
+                        , tmpCount = maximum $ tmpCount <$> bods
+                        , varGlobalFlows = varFlows}
         let child = childState parent Unforked
         put $ child { forkConsts = consts,
                       currSubst = Map.union extraSubsts $ currSubst child}
@@ -869,8 +875,8 @@ updateGlobalsLoaded prim = do
               Nothing -> nop
         _ -> do
             let (args, primFlows) = primArgs prim
-            argFlows <- lift $ mapM (argGlobalFlow varFlows) args
-            let gFlows = inferredArgGlobalFlows argFlows primFlows
+            argFlows <- lift $ argsGlobalFlows varFlows args
+            let gFlows = effectiveGlobalFlows argFlows primFlows
             logBuild $ "Call has global flows: " ++ show gFlows
             let filter info _ = not $ hasGlobalFlow gFlows FlowOut info
             modify $ \s -> s {globalsLoaded=Map.filterWithKey filter loaded}
@@ -884,19 +890,18 @@ updateVariableFlows :: Prim -> BodyBuilder ()
 updateVariableFlows prim = do
     varFlows <- gets varGlobalFlows
     let args = fst $ primArgs prim
-    argFlows <- lift $ mapM (argGlobalFlow varFlows) args
+    argFlows <- lift $ argsGlobalFlows varFlows args
     let (ins, outs) = splitArgsByMode args
-    inFlows <- lift $ mapM (argGlobalFlow varFlows) ins
-    let gFlows = globalFlowsUnions inFlows
-    varFlows' <- case prim of
+    inFlows <- globalFlowsUnions <$> lift (mapM (argGlobalFlow varFlows) ins)
+    logBuild $ "Arg Flows: " ++ show argFlows
+    newFlows <- case prim of
         PrimCall _ pspec _ _ _ -> do
           params <- lift $ getPrimParams pspec
           return $ Map.fromList $ catMaybes $ zipWith
             (\PrimParam{primParamInfo=ParamInfo _ flows} arg ->
               case arg of
                 ArgVar name _ flow _ _ | isOutputFlow flow
-                  -> Just . (name, ) 
-                   $ inferredArgGlobalFlows argFlows flows
+                  -> Just . (name, ) $ effectiveGlobalFlows argFlows flows
                 _ -> Nothing)
             params args
         PrimHigher{} ->
@@ -904,20 +909,18 @@ updateVariableFlows prim = do
               (\(ArgVar name ty _ _ _) ->
                   (name, if isResourcefulHigherOrder ty
                          then univGlobalFlows
+                         else if genericType ty
+                         then inFlows
                          else emptyGlobalFlows)) outs
         PrimForeign "lpvm" "load" _ [_, ArgVar name ty flow _ _]
             | isResourcefulHigherOrder ty -> 
           return $ Map.singleton name univGlobalFlows
         PrimForeign{} -> do
-          return $ Map.fromList $ catMaybes $ List.map
-              (\case {
-                  ArgVar name ty _ _ _ | isResourcefulHigherOrder ty ->
-                    Just (name, gFlows);
-                  _ -> Nothing 
-              }) outs
-    when (any (/= emptyGlobalFlows) $ Map.elems varFlows') $
-        logBuild $ "New Variable Flows: " ++ simpleShowMap varFlows'
-    modify $ \s -> s {varGlobalFlows=Map.unionWith globalFlowsUnion varFlows varFlows'}
+          return $ Map.fromList $ List.map ((, inFlows) . argVarName) 
+                 $ List.filter argIsVar $ outs
+    when (any (/= emptyGlobalFlows) $ Map.elems newFlows) $
+        logBuild $ "New Variable Flows: " ++ simpleShowMap newFlows
+    modify $ \s -> s {varGlobalFlows=Map.unionWith globalFlowsUnion varFlows newFlows}
 
 
 ----------------------------------------------------------------
@@ -1171,41 +1174,47 @@ addBodyContinuation _ next@BodyState{parent=Just _} =
                ++ fst (showState 4 next)
 addBodyContinuation prev@BodyState{buildState=Unforked, currBuild=bld,
                                    currSubst=subst, blockDefs=defs,
-                                   outSubst=osubst} next = do
+                                   outSubst=osubst, varGlobalFlows=vFlows} next = do
     logMsg BodyBuilder $ "Adding state:" ++ fst (showState 4 next)
     logMsg BodyBuilder $ "... after unforked body:" ++ fst (showState 4 prev)
-    addSelectedContinuation bld subst defs osubst next
-addBodyContinuation prev@BodyState{buildState=Forked{}} next = do
+    addSelectedContinuation bld subst defs osubst vFlows next 
+addBodyContinuation prev@BodyState{buildState=Forked{}, varGlobalFlows=vFlows} next = do
     logMsg BodyBuilder $ "Adding state:" ++ fst (showState 4 next)
     logMsg BodyBuilder $ "... after forked body:" ++ fst (showState 4 prev)
     let build = buildState prev
     bods <- mapM (`addBodyContinuation` next) $ bodies build
-    return $ prev {buildState = build {bodies = bods}}
+    return $ prev { buildState = build {bodies = bods}
+                  , varGlobalFlows = Map.unionsWith globalFlowsUnion
+                                   $ vFlows : List.map varGlobalFlows bods}
 
 
 -- | Add the appropriate branch(es) to follow the specified list of prims, which
 -- includes both the prims of the previous unforked body and the unforked part
 -- of the following
 addSelectedContinuation :: [Placed Prim] -> Substitution -> Set PrimVarName
-                        -> VarSubstitution -> BodyState -> Compiler BodyState
+                        -> VarSubstitution -> Map PrimVarName GlobalFlows
+                        -> BodyState -> Compiler BodyState
                         -- XXX Must merge subst with currSubst of st
-addSelectedContinuation prevPrims subst defs osubst
+addSelectedContinuation prevPrims subst defs osubst vFlows
                         st@BodyState{buildState=Unforked} = do
     let subst'  = Map.union (currSubst st) subst
     let defs'   = Set.union (blockDefs st) defs
     let oSubst' = Map.union (outSubst st)  osubst
-    let st' = st { currBuild = currBuild st ++ prevPrims
-                 , currSubst = subst'
-                 , blockDefs = defs'
-                 , outSubst  = oSubst' }
+    let vFlows' = Map.unionWith globalFlowsUnion (varGlobalFlows st) vFlows
+    let st' = st { currBuild      = currBuild st ++ prevPrims
+                 , currSubst      = subst'
+                 , blockDefs      = defs'
+                 , outSubst       = oSubst'
+                 , varGlobalFlows = vFlows' }
     logMsg BodyBuilder $ "Adding unforked continuation produces:"
                          ++ fst (showState 4 st')
     return st'
-addSelectedContinuation prevPrims subst defs osubst
+addSelectedContinuation prevPrims subst defs osubst vFlows
                         st@BodyState{buildState=bst@Forked{}} = do
     let subst'  = Map.union (currSubst st) subst
     let defs'   = Set.union (blockDefs st) defs
     let osubst' = Map.union (outSubst st)  osubst
+    let vFlows' = Map.unionWith globalFlowsUnion (varGlobalFlows st) vFlows
     case selectedBranch subst bst of
         Nothing -> do
             bst <- fuseBranches $ buildState st
@@ -1213,6 +1222,7 @@ addSelectedContinuation prevPrims subst defs osubst
                          , currSubst  = subst'
                          , blockDefs  = defs'
                          , outSubst   = osubst'
+                         , varGlobalFlows = vFlows'
                          , buildState = bst }
             logMsg BodyBuilder $ "No fork selection possible, producing:"
                          ++ fst (showState 4 st')
@@ -1222,7 +1232,7 @@ addSelectedContinuation prevPrims subst defs osubst
             logMsg BodyBuilder $ "Selected branch " ++ show branchNum
             selectedBranch' <- fuseBodies selectedBranch
             addSelectedContinuation (currBuild st ++ prevPrims)
-                                    subst' defs' osubst' selectedBranch'
+                                    subst' defs' osubst' vFlows' selectedBranch'
 
 
 -- |Given a variable substitution, determine which branch will be selected,
@@ -1256,11 +1266,12 @@ currBody body st@BodyState{tmpCount=tmp, varGlobalFlows=varFlows} = do
                               0 Set.empty varFlows body
     let BkwdBuilderState{bkwdUsedLater=usedLater,
                          bkwdFollowing=following,
-                         bkwdGlobalStored=stored} = st'
+                         bkwdGlobalStored=stored,
+                         bkwdVariableFlows=varFlows'} = st'
     logMsg BodyBuilder ">>>> Finished rebuilding a proc body"
     logMsg BodyBuilder "     Final state:"
     logMsg BodyBuilder $ showBlock 5 following
-    return (tmp, usedLater, stored, varFlows, following)
+    return (tmp, usedLater, stored, varFlows', following)
 
 
 -- |Another monad, this one for rebuilding a proc body bottom-up.
@@ -1290,15 +1301,15 @@ rebuildBody :: BodyState -> BkwdBuilder ()
 rebuildBody st@BodyState{parent=Just par} =
     shouldnt $ "Body parent left by fusion: " ++ fst (showState 4 par)
 rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
-                         buildState=bldst, parent=Nothing,
+                         buildState=bldst, parent=Nothing, varGlobalFlows=varFlows,
                          reifiedConstr=reif} = do
     usedLater <- gets bkwdUsedLater
     following <- gets bkwdFollowing
-    varFlows <- gets bkwdVariableFlows
     logBkwd $ "Rebuilding body:" ++ fst (showState 8 st)
               ++ "\nwith currSubst = " ++ simpleShowMap subst
               ++ "\n     usedLater = " ++ simpleShowSet usedLater
               ++ "\n     currBuild = " ++ showPlacedPrims 17 prims
+              ++ "\n     varFlows  = " ++ simpleShowMap varFlows
     case bldst of
       Unforked -> mapM_ (placedApply (bkwdBuildStmt defs)) prims
       Forked{complete=False} ->
@@ -1325,6 +1336,8 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
             -- up keeping Undef assignments to variables that will be assigned
             -- later if they are needed.
             let usedLater'' = List.foldr Set.union usedLater' usedLaters
+            let varFlowss = bkwdVariableFlows <$> sts'
+            let varFlows' = Map.unionsWith globalFlowsUnion $ varFlows:varFlowss
             let branchesUsedLater =
                   if fused
                   then Just usedLaters
@@ -1340,7 +1353,7 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
             let followingBranches = List.map bkwdFollowing sts
             let gStored = List.foldr1 Set.intersection (bkwdGlobalStored <$> sts')
             put $ BkwdBuilderState usedLater''' branchesUsedLater
-                  Map.empty tmp gStored varFlows
+                  Map.empty tmp gStored varFlows'
                   $ ProcBody [] $ PrimFork var' ty' lastUse followingBranches
                              (bkwdFollowing <$> deflt'')
             mapM_ (placedApply (bkwdBuildStmt defs)) prims'
@@ -1476,8 +1489,8 @@ bkwdBuildStmt defs prim pos = do
               ++ "\n    and globalStored   = " ++ simpleShowSet gStored
               ++ "\n    and varGlobalFlows = " ++ simpleShowMap varFlows
     let (args, primFlows) = primArgs prim
-    argFlows <- lift $ mapM (argGlobalFlow varFlows) args
-    let gFlows = inferredArgGlobalFlows argFlows primFlows
+    argFlows <- lift $ argsGlobalFlows varFlows args
+    let gFlows = effectiveGlobalFlows argFlows primFlows
     args' <- mapM renameArg args
     logBkwd $ "    renamed args = " ++ show args'
     case (prim,args') of
@@ -1572,7 +1585,7 @@ showState :: Int -> BodyState -> (String,Int)
 showState indent BodyState{parent=par, currBuild=revPrims, buildState=bld,
                            blockDefs=defs, forkConsts=consts,
                            currSubst=substs, globalsLoaded=loaded,
-                           reifiedConstr=reifs} =
+                           varGlobalFlows=vFlows, reifiedConstr=reifs} =
     let (str  ,indent')   = maybe ("",indent)
                             (mapFst (++ (startLine indent ++ "----------"))
                             . showState indent) par
@@ -1580,6 +1593,8 @@ showState indent BodyState{parent=par, currBuild=revPrims, buildState=bld,
                             ++ "# Substs           : " ++ simpleShowMap substs
         globalStr         = startLine indent
                             ++ "# Loaded globals   : " ++ simpleShowMap loaded
+        vFlowsStr         = startLine indent
+                            ++ "# Variable flows   : " ++ simpleShowMap vFlows
         str'              = showPlacedPrims indent' (reverse revPrims)
         sets              = if List.null revPrims
                             then ""
@@ -1592,10 +1607,10 @@ showState indent BodyState{parent=par, currBuild=revPrims, buildState=bld,
                                 ++ "# Fusion consts: " ++ show consts
                               _ -> ""
         reifstr           = startLine indent
-                                ++ "# Reifications : " ++ showReifications reifs
+                                ++ "# Reifications     : " ++ showReifications reifs
 
         (str'',indent'') = showBuildState indent' bld
-    in  (str ++ str' ++ substStr ++ sets ++ globalStr ++ str''
+    in  (str ++ str' ++ substStr ++ sets ++ globalStr ++ vFlowsStr ++ str''
              ++ suffix ++ reifstr
         , indent'')
 

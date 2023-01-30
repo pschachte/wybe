@@ -7,6 +7,7 @@
 
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE TupleSections #-}
 
 -- |The abstract syntax tree, and supporting types and functions.
 --  This includes the parse tree, as well as the AST types, which
@@ -72,7 +73,7 @@ module AST (
   stmtsInputs, expOutputs, pexpListOutputs, expInputs, pexpListInputs,
   setExpTypeFlow, setPExpTypeFlow,
   Prim(..), primArgs, replacePrimArgs, 
-  primGlobalFlows, argGlobalFlow, inferredArgGlobalFlows, 
+  primGlobalFlows, argGlobalFlow, argsGlobalFlows, effectiveGlobalFlows, 
   argIsVar, argIsConst, argIntegerValue,
   varsInPrims, varsInPrim, varsInPrimArgs, varsInPrimArg,
   ProcSpec(..), PrimVarName(..), PrimArg(..), PrimFlow(..), ArgFlowType(..),
@@ -1938,7 +1939,12 @@ getProcGlobalFlows pspec = do
     case procImpln pDef of
       ProcDefSrc _ ->
             let ProcProto _ params resFlows = procProto pDef
-            in return $ univGlobalFlows -- makeGlobalFlows (zip [0..] $ content <$> params) resFlows
+                paramFlows 
+                    | any (isResourcefulHigherOrder . paramType . content) params
+                    = UniversalSet
+                    | otherwise
+                    = emptyUnivSet
+            in return $ (makeGlobalFlows [] resFlows){globalFlowsParams=paramFlows}
       ProcDefPrim _ (PrimProto _ _ gFlows) _ _ _ -> return gFlows
 
 
@@ -2114,7 +2120,7 @@ makeGlobalFlows params resFlows =
   where
     pFlows = FiniteSet $ Set.fromList $ catMaybes $ List.map (uncurry paramFlow) params
     paramFlow i PrimParam{primParamName=name, primParamType=ty, primParamFlow=flow}
-        | isInputFlow flow && isResourcefulHigherOrder ty
+        | isInputFlow flow && (isResourcefulHigherOrder ||| genericType) ty
         = Just i
         | otherwise = Nothing
 
@@ -2141,13 +2147,11 @@ addGlobalFlow info FlowTakeReference gFlows = gFlows
 hasGlobalFlow :: GlobalFlows -> PrimFlow -> GlobalInfo -> Bool
 hasGlobalFlow gFlows@GlobalFlows{globalFlowsParams=params} _ _
     | not (USet.isEmpty params) = True
-hasGlobalFlow gFlows@GlobalFlows{globalFlowsIn=ins} FlowIn info
+hasGlobalFlow GlobalFlows{globalFlowsIn=ins, globalFlowsOut=outs} flow info
+    | isInputFlow flow
     = USet.member info ins
-hasGlobalFlow gFlows@GlobalFlows{globalFlowsOut=outs} FlowOut info
+    | otherwise
     = USet.member info outs
--- global flows don't use this flow type
-hasGlobalFlow gFlows FlowOutByReference info = False
-hasGlobalFlow gFlows FlowTakeReference info = False
 
 
 -- | Take the union of the sets of two global flows
@@ -3238,33 +3242,48 @@ replacePrimArgs (PrimHigher id _ impurity _) (fn:args) _
 replacePrimArgs (PrimForeign lang nm flags _) args _
     = PrimForeign lang nm flags args
 
-
+-- |Return the GlobalFlows of a prim, given the currently known GlobalFlows 
+-- of variables
 primGlobalFlows :: Map PrimVarName GlobalFlows -> Prim -> GlobalFlows
-primGlobalFlows knownVars prim@(PrimHigher _ ArgVar{argVarName=name} _ _)
-    = Map.findWithDefault (snd $ primArgs prim) name knownVars
+primGlobalFlows varFlows prim@(PrimHigher _ ArgVar{argVarName=name} _ _)
+    = Map.findWithDefault (snd $ primArgs prim) name varFlows
 primGlobalFlows _ prim = snd $ primArgs prim
 
 
+-- |Return the GlobalFlows of a PrimArg, given the currently known GlobalFlows 
+-- of variables 
 argGlobalFlow :: Map PrimVarName GlobalFlows -> PrimArg -> Compiler GlobalFlows
-argGlobalFlow knownVars (ArgVar name ty _ _ _) 
-    | isResourcefulHigherOrder ty 
-    = return $ Map.findWithDefault univGlobalFlows name knownVars
-argGlobalFlow knownVars (ArgClosure pspec args _) = do
-    gFlows <- getProcGlobalFlows pspec
+argGlobalFlow varFlows (ArgVar name ty _ _ _) 
+    = return $ Map.findWithDefault univGlobalFlows name varFlows
+argGlobalFlow varFlows (ArgClosure pspec args _) = do
     params <- getPrimParams pspec 
-    -- XXX JB
-    return gFlows{globalFlowsParams=emptyUnivSet}
+    let nArgs = length args
+        (closedParams, freeParams) = List.splitAt nArgs params
+    if any (\(PrimParam _ ty flow _ _) -> 
+            isOutputFlow flow && isResourcefulHigherOrder ty) freeParams
+    then return univGlobalFlows
+    else do
+        gFlows <- getProcGlobalFlows pspec
+        argFlows <- argsGlobalFlows varFlows args
+        return $ effectiveGlobalFlows argFlows gFlows
 argGlobalFlow _ _ = return emptyGlobalFlows
 
+argsGlobalFlows :: Map PrimVarName GlobalFlows -> [PrimArg] -> Compiler [(GlobalFlows, PrimFlow)]
+argsGlobalFlows varFlows = mapM (\a -> (, argFlowDirection a) <$> argGlobalFlow varFlows a)
 
-inferredArgGlobalFlows :: [GlobalFlows] -> GlobalFlows -> GlobalFlows
-inferredArgGlobalFlows argFlows primFlows@(GlobalFlows _ _ UniversalSet) 
-    = globalFlowsUnions $ primFlows{globalFlowsParams=emptyUnivSet}:argFlows
-inferredArgGlobalFlows argFlows primFlows@(GlobalFlows _ _ (FiniteSet ids)) 
+
+-- | Gather the effective GlobalFLobals of a given set of global flows, 
+-- using the GlobalFLows of the arguments corresponding to each parameter
+effectiveGlobalFlows :: [(GlobalFlows, PrimFlow)] -> GlobalFlows -> GlobalFlows
+effectiveGlobalFlows argFlows primFlows@(GlobalFlows _ _ UniversalSet) 
     = globalFlowsUnions $ primFlows{globalFlowsParams=emptyUnivSet}
-                        : List.map (argFlows !!) (Set.toList ids)
+                        : List.map fst (List.filter (isInputFlow . snd) argFlows)
+effectiveGlobalFlows argFlows primFlows@(GlobalFlows _ _ (FiniteSet ids)) 
+    = globalFlowsUnions $ primFlows{globalFlowsParams=emptyUnivSet}
+                        : List.map (fst . (argFlows !!)) (Set.toList ids)
 
 
+-- | Test if a PrimArg is a variable.
 argIsVar :: PrimArg -> Bool
 argIsVar ArgVar{} = True
 argIsVar _ = False

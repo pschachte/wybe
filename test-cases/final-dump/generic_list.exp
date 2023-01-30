@@ -19,7 +19,7 @@ AFTER EVERYTHING:
 
 append > public (1 calls)
 0: generic_list.append<0>
-append(x##0:generic_list(T), y##0:generic_list(T), outByReference #result##0:generic_list(T))<{}; {}; {}>:
+append(x##0:generic_list(T) <{}; {}; {0}>, y##0:generic_list(T) <{}; {}; {1}>, outByReference #result##0:generic_list(T) <{}; {}; {0, 1}>)<{}; {}; {}>:
   AliasPairs: [(#result##0,y##0)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(1,(generic_list.append<0>,fromList [NonAliasedParamCond 0 [0]]))]
@@ -40,7 +40,7 @@ append(x##0:generic_list(T), y##0:generic_list(T), outByReference #result##0:gen
 
 car > public {inline} (0 calls)
 0: generic_list.car<0>
-car(#rec##0:generic_list(T), ?#result##0:T, ?#success##0:wybe.bool)<{}; {}; {}>:
+car(#rec##0:generic_list(T) <{}; {}; {0}>, ?#result##0:T <{}; {}; {0}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -55,7 +55,7 @@ car(#rec##0:generic_list(T), ?#result##0:T, ?#success##0:wybe.bool)<{}; {}; {}>:
 
 car > public {inline} (0 calls)
 1: generic_list.car<1>
-car(#rec##0:generic_list(T), ?#rec##1:generic_list(T), #field##0:T, ?#success##0:wybe.bool)<{}; {}; {}>:
+car(#rec##0:generic_list(T) <{}; {}; {0}>, ?#rec##1:generic_list(T) <{}; {}; {0, 2}>, #field##0:T <{}; {}; {2}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -72,7 +72,7 @@ car(#rec##0:generic_list(T), ?#rec##1:generic_list(T), #field##0:T, ?#success##0
 
 cdr > public {inline} (0 calls)
 0: generic_list.cdr<0>
-cdr(#rec##0:generic_list(T), ?#result##0:generic_list(T), ?#success##0:wybe.bool)<{}; {}; {}>:
+cdr(#rec##0:generic_list(T) <{}; {}; {0}>, ?#result##0:generic_list(T) <{}; {}; {0}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -87,7 +87,7 @@ cdr(#rec##0:generic_list(T), ?#result##0:generic_list(T), ?#success##0:wybe.bool
 
 cdr > public {inline} (0 calls)
 1: generic_list.cdr<1>
-cdr(#rec##0:generic_list(T), ?#rec##1:generic_list(T), #field##0:generic_list(T), ?#success##0:wybe.bool)<{}; {}; {}>:
+cdr(#rec##0:generic_list(T) <{}; {}; {0}>, ?#rec##1:generic_list(T) <{}; {}; {0, 2}>, #field##0:generic_list(T) <{}; {}; {2}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -104,7 +104,7 @@ cdr(#rec##0:generic_list(T), ?#rec##1:generic_list(T), #field##0:generic_list(T)
 
 cons > public {inline} (1 calls)
 0: generic_list.cons<0>
-cons(car##0:T, cdr##0:generic_list(T), ?#result##0:generic_list(T))<{}; {}; {}>:
+cons(car##0:T <{}; {}; {0}>, cdr##0:generic_list(T) <{}; {}; {1}>, ?#result##0:generic_list(T) <{}; {}; {0, 1}>)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:generic_list(T)) @generic_list:nn:nn
@@ -112,7 +112,7 @@ cons(car##0:T, cdr##0:generic_list(T), ?#result##0:generic_list(T))<{}; {}; {}>:
     foreign lpvm mutate(~#rec##1:generic_list(T), ?#result##0:generic_list(T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~cdr##0:generic_list(T)) @generic_list:nn:nn
 cons > public {inline} (6 calls)
 1: generic_list.cons<1>
-cons(?car##0:T, ?cdr##0:generic_list(T), #result##0:generic_list(T), ?#success##0:wybe.bool)<{}; {}; {}>:
+cons(?car##0:T <{}; {}; {2}>, ?cdr##0:generic_list(T) <{}; {}; {2}>, #result##0:generic_list(T) <{}; {}; {2}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -131,7 +131,7 @@ cons(?car##0:T, ?cdr##0:generic_list(T), #result##0:generic_list(T), ?#success##
 
 length > public {inline} (0 calls)
 0: generic_list.length<0>
-length(x##0:generic_list(T), ?#result##0:wybe.int)<{}; {}; {}>:
+length(x##0:generic_list(T) <{}; {}; {0}>, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     generic_list.length1<0>(~x##0:generic_list(T), 0:wybe.int, ?#result##0:wybe.int) #0 @generic_list:nn:nn
@@ -139,7 +139,7 @@ length(x##0:generic_list(T), ?#result##0:wybe.int)<{}; {}; {}>:
 
 length1 > (2 calls)
 0: generic_list.length1<0>
-length1(x##0:generic_list(T), acc##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
+length1(x##0:generic_list(T) <{}; {}; {0}>, acc##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)

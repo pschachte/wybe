@@ -33,7 +33,7 @@ module top-level code > public {inline,semipure} (0 calls)
 
 #cont#3 > (2 calls)
 0: unbranch_bug.#cont#3<0>
-#cont#3(tmp#0##0:wybe.list(5))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+#cont#3(tmp#0##0:wybe.list(5) <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool)

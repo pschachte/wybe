@@ -193,7 +193,7 @@ module top-level code > public {semipure} (0 calls)
 
 do_test > {inline} (12 calls)
 0: higher_order_tests.do_test<0>
-do_test(f##0:(I, ?wybe.bool), i##0:I, ?#success##0:wybe.bool)<{}; {}; {}>:
+do_test(f##0:(I, ?wybe.bool) <{}; {}; {0}>, i##0:I <{}; {}; {1}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     ~f##0:(I, ?wybe.bool)(~i##0:I, ?#success##0:wybe.bool) #0 @higher_order_tests:nn:nn
@@ -201,7 +201,7 @@ do_test(f##0:(I, ?wybe.bool), i##0:I, ?#success##0:wybe.bool)<{}; {}; {}>:
 
 do_test2 > {inline} (12 calls)
 0: higher_order_tests.do_test2<0>
-do_test2(f##0:(I, ?wybe.bool), i##0:I, ?#success##0:wybe.bool)<{}; {}; {}>:
+do_test2(f##0:(I, ?wybe.bool) <{}; {}; {0}>, i##0:I <{}; {}; {1}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     ~f##0:(I, ?wybe.bool)(~i##0:I, ?#success##0:wybe.bool) #0 @higher_order_tests:nn:nn

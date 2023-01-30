@@ -37,7 +37,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm mutate(~tmp#60##0:wybe.list(T), ?tmp#0##0:wybe.list(wybe.list(wybe.int)), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#5##0:wybe.list(T)) @list:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%tmp#29##0:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm store(-1000:wybe.int, <<higher_order_resources.maximum>>:wybe.int) @higher_order_resources:nn:nn
-    wybe.list.map#cont#1<0>(higher_order_resources.#anon#1<1><>:{resource}(T), ~tmp#0##0:wybe.list(T))<{}; {}; {0}> #31 @list:nn:nn
+    wybe.list.map#cont#1<0>(higher_order_resources.#anon#1<1><>:{resource}(T), ~tmp#0##0:wybe.list(T))<{}; {}; {0, 1}> #31 @list:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%maximum##1:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#64##0:wybe.phantom) @int:nn:nn
     foreign c print_int(~maximum##1:wybe.int, ~tmp#64##0:wybe.phantom, ?tmp#65##0:wybe.phantom) @int:nn:nn
@@ -84,7 +84,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm mutate(~tmp#116##0:wybe.list(T), ?tmp#117##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#12##0:T) @list:nn:nn
     foreign lpvm mutate(~tmp#117##0:wybe.list(T), ?tmp#11##0:wybe.list(wybe.list(wybe.int)), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#16##0:wybe.list(T)) @list:nn:nn
     foreign lpvm store(-1000:wybe.int, <<higher_order_resources.maximum>>:wybe.int) @higher_order_resources:nn:nn
-    wybe.list.map#cont#1<0>(higher_order_resources.#anon#2<1><>:{resource}(T), ~tmp#11##0:wybe.list(T))<{}; {}; {0}> #33 @list:nn:nn
+    wybe.list.map#cont#1<0>(higher_order_resources.#anon#2<1><>:{resource}(T), ~tmp#11##0:wybe.list(T))<{}; {}; {0, 1}> #33 @list:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%maximum##3:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#121##0:wybe.phantom) @int:nn:nn
     foreign c print_int(~maximum##3:wybe.int, ~tmp#121##0:wybe.phantom, ?tmp#122##0:wybe.phantom) @int:nn:nn
@@ -116,7 +116,7 @@ module top-level code > public {semipure} (0 calls)
   InterestingCallProperties: []
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%tmp#32##0:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm store(-1000:wybe.int, <<higher_order_resources.maximum>>:wybe.int) @higher_order_resources:nn:nn
-    wybe.list.map#cont#1<0>(higher_order_resources.#anon#2#closure#1<0><>:{resource}(T), anon#2#1##0:wybe.list(T))<{}; {}; {0}> #5 @list:nn:nn
+    wybe.list.map#cont#1<0>(higher_order_resources.#anon#2#closure#1<0><>:{resource}(T), anon#2#1##0:wybe.list(T))<{}; {}; {0, 1}> #5 @list:nn:nn
     wybe.string.print<0>("> ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @higher_order_resources:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%maximum##2:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#36##0:wybe.phantom) @int:nn:nn
@@ -133,7 +133,7 @@ module top-level code > public {semipure} (0 calls)
   InterestingCallProperties: []
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%tmp#1##0:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm store(-1000:wybe.int, <<higher_order_resources.maximum>>:wybe.int) @higher_order_resources:nn:nn
-    wybe.list.map#cont#1<0>(higher_order_resources.#anon#2#closure#1<0><>:{resource}(T), anon#2#1##0:wybe.list(T))<{}; {}; {0}> #1 @list:nn:nn
+    wybe.list.map#cont#1<0>(higher_order_resources.#anon#2#closure#1<0><>:{resource}(T), anon#2#1##0:wybe.list(T))<{}; {}; {0, 1}> #1 @list:nn:nn
     wybe.string.print<0>("> ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @higher_order_resources:nn:nn
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%tmp#2##0:wybe.int) @higher_order_resources:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @int:nn:nn

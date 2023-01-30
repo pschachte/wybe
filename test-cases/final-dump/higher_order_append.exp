@@ -39,11 +39,11 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm mutate(~tmp#45##0:wybe.list(T), ?tmp#46##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 4:T) @list:nn:nn
     foreign lpvm mutate(~tmp#46##0:wybe.list(T), ?tmp#10##0:wybe.list(wybe.int), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#11##0:wybe.list(T)) @list:nn:nn
     wybe.list.map<1>(higher_order_append.#anon#1<1><tmp#10##0:wybe.list(wybe.int)>:(wybe.list(wybe.int), ?wybe.list(wybe.int)), tmp#0##0:wybe.list(wybe.list(wybe.int)), outByReference y##0:wybe.list(wybe.list(wybe.int))) #13 @higher_order_append:nn:nn
-    wybe.list.print<0>(higher_order_append.#closure#1<0><>:{resource}(T), ~tmp#0##0:wybe.list(T))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0}> #16 @list:nn:nn
+    wybe.list.print<0>(higher_order_append.#closure#1<0><>:{resource}(T), ~tmp#0##0:wybe.list(T))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0, 1}> #16 @list:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#49##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#49##0:wybe.phantom, ?tmp#50##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#50##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    wybe.list.print<0>(higher_order_append.#closure#1<0><>:{resource}(T), ~y##0:wybe.list(T))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0}> #17 @list:nn:nn
+    wybe.list.print<0>(higher_order_append.#closure#1<0><>:{resource}(T), ~y##0:wybe.list(T))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0, 1}> #17 @list:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#53##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#53##0:wybe.phantom, ?tmp#54##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#54##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
@@ -68,7 +68,7 @@ module top-level code > public {semipure} (0 calls)
 #closure#1(l##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.list.print<0>(higher_order_append.print_list_of_ints#closure#1<0><>:{resource}(wybe.int), ~l##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0}> #1 @higher_order_append:nn:nn
+    wybe.list.print<0>(higher_order_append.print_list_of_ints#closure#1<0><>:{resource}(wybe.int), ~l##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0, 1}> #1 @higher_order_append:nn:nn
 
 
 append > (2 calls)
@@ -97,7 +97,7 @@ print_list_of_ints > {inline} (1 calls)
 print_list_of_ints(l##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.list.print<0>(higher_order_append.print_list_of_ints#closure#1<0><>:{resource}(wybe.int), ~l##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0}> #0 @higher_order_append:nn:nn
+    wybe.list.print<0>(higher_order_append.print_list_of_ints#closure#1<0><>:{resource}(wybe.int), ~l##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0, 1}> #0 @higher_order_append:nn:nn
 
 
 print_list_of_ints#closure#1 > {inline} (1 calls)

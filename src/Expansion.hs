@@ -46,7 +46,8 @@ procExpansion pspec def = do
     (st', tmp', used, stored, varFlows, body') 
         <- buildBody tmp (Map.fromSet id outs) params
             $ execStateT (expandBody body) st
-    let params' = updateParamGlobalFlows varFlows . markParamNeededness isClosure used ins <$> params
+    let params' = updateParamGlobalFlows varFlows 
+                . markParamNeededness isClosure used ins <$> params
     let globals' = GlobalFlows (USet.whenFinite (`Set.difference` stored) gIns) gOuts gParams
     let proto' = proto {primProtoParams = params',
                         primProtoGlobalFlows = globals'}
@@ -60,7 +61,7 @@ procExpansion pspec def = do
         then
         logMsg Expansion
         $ "*** Expanded:" ++ showProcDef 4 def
-          ++ "\n*** To:" ++ showProcDef 4 def'
+          ++ "\n*** To:" ++simpleShowMap varFlows++ showProcDef 4 def'
           ++ "\nTemp counter = " ++ show (procTmpCount def')
         else
         logMsg Expansion

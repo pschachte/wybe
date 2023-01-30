@@ -22,7 +22,7 @@ module top-level code > public {semipure} (0 calls)
 
 #closure#1 > {inline} (1 calls)
 0: uneeded_closure_args.#closure#1<0>
-#closure#1([^a##0:A], b##0:B, ?#result##0:B)<{}; {}; {}>:
+#closure#1([^a##0:A <{}; {}; {0}>], b##0:B <{}; {}; {1}>, ?#result##0:B <{}; {}; {1}>)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(~b##0:B, ?#result##0:B) @uneeded_closure_args:nn:nn
@@ -30,7 +30,7 @@ module top-level code > public {semipure} (0 calls)
 
 call > {noinline} (1 calls)
 0: uneeded_closure_args.call<0>
-call(f##0:(A, ?A), a##0:A, ?#result##0:A)<{}; {}; {}>:
+call(f##0:(A, ?A) <{}; {}; {0}>, a##0:A <{}; {}; {1}>, ?#result##0:A <{}; {}; {0, 1}>)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     ~f##0:(A, ?A)(~a##0:A, ?#result##0:A) #0 @uneeded_closure_args:nn:nn
@@ -38,7 +38,7 @@ call(f##0:(A, ?A), a##0:A, ?#result##0:A)<{}; {}; {}>:
 
 second > {inline} (1 calls)
 0: uneeded_closure_args.second<0>
-second([a##0:A], b##0:B, ?#result##0:B)<{}; {}; {}>:
+second([a##0:A <{}; {}; {0}>], b##0:B <{}; {}; {1}>, ?#result##0:B <{}; {}; {1}>)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(~b##0:B, ?#result##0:B) @uneeded_closure_args:nn:nn
