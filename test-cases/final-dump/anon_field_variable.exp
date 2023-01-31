@@ -45,7 +45,7 @@ bar(bar#1##0:wybe.int, field##0:T <{}; {}; {1}>, bar#3##0:T <{}; {}; {2}>, ?#res
     foreign llvm or(~#rec##3:anon_field_variable(T), 1:wybe.int, ?#result##0:anon_field_variable(T)) @anon_field_variable:nn:nn
 bar > public {inline} (0 calls)
 1: anon_field_variable.bar<1>
-bar(?bar#1##0:wybe.int <{}; {}; {3}>, ?field##0:T <{}; {}; {3}>, ?bar#3##0:T <{}; {}; {3}>, #result##0:anon_field_variable(T) <{}; {}; {3}>, ?#success##0:wybe.bool)<{}; {}; {}>:
+bar(?bar#1##0:wybe.int, ?field##0:T <{}; {}; {3}>, ?bar#3##0:T <{}; {}; {3}>, #result##0:anon_field_variable(T) <{}; {}; {3}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int)
