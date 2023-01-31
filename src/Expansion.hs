@@ -78,25 +78,28 @@ markParamNeededness isClosure used _ param@PrimParam{primParamName=nm,
                                                      primParamFlow=FlowIn,
                                                      primParamFlowType=ft,
                                                      primParamInfo=info} =
-    param {primParamInfo=info{paramInfoUnneeded=Set.notMember nm used
-                                                && (not isClosure
-                                                    || ft /= Ordinary)}}
+    param {primParamInfo=info{
+            paramInfoUnneeded=Set.notMember nm used
+                                && (not isClosure || ft /= Ordinary)}}
 markParamNeededness isClosure _ ins param@PrimParam{primParamName=nm,
                                                     primParamFlow=FlowOut,
                                                     primParamFlowType=ft,
                                                     primParamInfo=info} =
-    param {primParamInfo=info{paramInfoUnneeded=Set.member nm ins
-                                                && (not isClosure
-                                                    || ft /= Ordinary)}}
+    param {primParamInfo=info{
+            paramInfoUnneeded=Set.member nm ins
+                                && (not isClosure || ft /= Ordinary)}}
 markParamNeededness _ _ _ PrimParam{ primParamFlow=FlowOutByReference } =
     shouldnt "unexpected FlowOutByReference at this stage of compilation"
 markParamNeededness _ _ _ PrimParam{ primParamFlow=FlowTakeReference } =
     shouldnt "unexpected FlowTakeReference at this stage of compilation"
 
+
+-- | Update the global flows of a parameter, given the 
 updateParamGlobalFlows :: Map PrimVarName GlobalFlows -> PrimParam -> PrimParam 
-updateParamGlobalFlows varFlows param@(PrimParam name _ _ _ info) =
-    param {primParamInfo=info{paramInfoGlobalFlows=
-        fromMaybe emptyGlobalFlows $ Map.lookup name varFlows}}
+updateParamGlobalFlows varFlows param@(PrimParam name _ _ _ info@(ParamInfo _ flows)) =
+    param {primParamInfo=info{
+            paramInfoGlobalFlows=flows `globalFlowsIntersection` newFlows}}
+  where newFlows = Map.findWithDefault univGlobalFlows name varFlows
 
 
 -- |Type to remember the variable renamings.

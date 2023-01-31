@@ -3260,7 +3260,7 @@ argGlobalFlow varFlows (ArgClosure pspec args _) = do
     let nArgs = length args
         (closedParams, freeParams) = List.splitAt nArgs params
     if any (\(PrimParam _ ty flow _ _) -> 
-            isOutputFlow flow && isResourcefulHigherOrder ty) freeParams
+            isInputFlow flow && isResourcefulHigherOrder ty) freeParams
     then return univGlobalFlows
     else do
         gFlows <- getProcGlobalFlows pspec
