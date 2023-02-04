@@ -12,7 +12,7 @@ rm -f final-dump/*.bc
 rm -f final-dump/*.o
 rm -f final-dump/*.out
 
-for f in `ls final-dump/glob*.wybe`
+for f in `ls final-dump/*.wybe`
 do
 	out=`echo -e "$f" | sed 's/.wybe$/.out/'`
 	exp=`echo -e "$f" | sed 's/.wybe$/.exp/'`

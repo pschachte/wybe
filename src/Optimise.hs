@@ -236,16 +236,13 @@ forkGlobalFlows _ _ NoFork = return emptyGlobalFlows
 forkGlobalFlows varFlows oldFlows (PrimFork _ _ _ bodies deflt) = do
     let bodies' = bodies ++ maybeToList deflt
     gFlows <- mapM (bodyGlobalFlows varFlows oldFlows) bodies'
-    let possibleOuts = possibleFlows <$> gFlows
-        someOuts = List.foldr USet.union emptyUnivSet possibleOuts 
-        allOuts = List.foldr USet.intersection UniversalSet possibleOuts
-        oldFlows' = oldFlows `USet.intersection` 
+    let outs = globalFlowsOut <$> gFlows
+        someOuts = List.foldr USet.union emptyUnivSet outs 
+        allOuts = List.foldr USet.intersection UniversalSet outs
+        oldFlows' = oldFlows `USet.intersection`
                         whenFinite (`USet.subtractUnivSet` allOuts) someOuts
     return $ globalFlowsUnions (emptyGlobalFlows{globalFlowsIn=oldFlows'}:gFlows)
   where
-    possibleFlows (GlobalFlows _ outs params) 
-        | isEmpty params = outs
-    possibleFlows _ = UniversalSet
 
 -- | Update the GlobalFlows of Prims of a ProcDef and the prototype with
 -- the given GlobalFlows
