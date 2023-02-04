@@ -1,5 +1,5 @@
 type instruction {
-    pub incr | decr | left | right | input | output | loop(list(_))
+    pub constructors incr | decr | left | right | input | output | loop(list(_))
 
     # no implicit equality for list, hence none for _
     pub def {test} (x:_ = y:_) { foreign lpvm cast(x):int = foreign lpvm cast(y) }

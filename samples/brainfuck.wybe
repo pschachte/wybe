@@ -1,0 +1,135 @@
+type instruction {
+    ## instruction
+    # Enumeration of brainfuck instructions.
+    pub constructors incr | decr | left | right | input | output | loop(list(_))
+
+    ## `=`/2
+    # Simple, naive equality test for instrucitons.
+    # XXX: no implicit equality for list, hence none for _
+    pub def {test} (x:_ = y:_) { foreign lpvm cast(x):int = foreign lpvm cast(y) }
+
+    ## parse/2
+    # Parse a string into a list of brainfuck instructions.
+    # Fails if the string is not a valid brainfuck program.
+    pub def {test} parse(str:string):list(_) = instrs where {
+        # start parsing at top_level
+        parse(true, !str, ?instrs)
+    }
+
+    ## parse/3
+    # Parse a string into a list of brainfuck instructions, 
+    # terminating at the end of the string if top_level is true, else at a ']'
+    # if not.
+    def {test} parse(top_level:bool, !str:string, ?instrs:list(_)) {
+        if { [?c | ?str] = str ::
+            if { c = ']' :: 
+                # ']' should not occur if at top_level
+                ~top_level
+                ?instrs = []
+               | else ::
+                ?instr = case c in {
+                    '+' :: incr
+                  | '-' :: decr
+                  | '<' :: left
+                  | '>' :: right
+                  | ',' :: input
+                  | '.' :: output
+                  | '[' :: loop(body) where { 
+                                # parse the body of a loop, no longer top_level 
+                                parse(false, !str, ?body) 
+                           }
+                }
+                parse(top_level, !str, ?instrs)
+                ?instrs = [instr | instrs]
+            }
+           | else :: 
+            # str is empty, so must be at top_level
+            top_level
+            ?instrs = []
+        }
+    }
+}
+
+type tape {
+    ## tape
+    # Infinite length tape type, with tape expanded when required.
+    pub tape(list(char), current:char, list(char))
+    
+    ## `=`/2
+    # Always fails. No need to test for equality of tapes anyway.
+    def {test} (x:_ = y:_) { fail }
+
+    ## init/1
+    # Initialise a blank tape.
+    pub def blank_tape:_ = tape([], '\0', [])
+    
+    ## left/1
+    # Move the tape to the left.
+    pub def left(!tape:_) {
+        tape(?left, ?current, ?right) = tape
+        if { right = [?r | ?right] :: 
+            ?tape = tape([current | left], r, right)
+           | else :: 
+            ?tape = tape([current | left], '\0', [])
+        }
+    }
+
+    ## right/1
+    # Move the tape to the right.
+    pub def right(!tape:_) {
+        tape(?left, ?current, ?right) = tape
+        if { left = [?l | ?left] :: 
+            ?tape = tape(left, l, [current | right])
+           | else :: 
+            ?tape = tape([], '\0', [current | right])
+        }
+    }
+
+    ## incr/1
+    # Increment the current tape cell by 1.
+    pub def incr(!tape:_) {
+        !tape^current = foreign llvm add(tape^current, 1:char)
+    }
+
+    ## decr/1
+    # Decrement the current tape cell by 1.
+    pub def decr(!tape:_) {
+        !tape^current = foreign llvm sub(tape^current, 1:char)
+    }
+}
+
+## run/2 use !io
+# Simulate a brainfuck program (a list of instructions) using the given
+# tape state. 
+def run(instrs:list(instruction), !state:tape) use !io {
+    for ?instr in instrs {
+        case instr in {
+            incr :: incr(!state)
+          | decr :: decr(!state)
+          | left :: left(!state)
+          | right :: right(!state)
+          | input :: !read(?state^current)
+          | output :: !print(state^current)
+          | loop(?body) :: 
+            do {
+                until state^current = '\0'
+                !run(body, !state)
+            }
+        }
+    }
+}
+
+## top-level code
+# 1. read program
+# 2. parse program, reporting error if invalid
+# 3. run program
+
+# unfortunately can't read from a file (yet), 
+# so first line from stdin is the program
+!read(?str)
+
+if { parse(str, ?instrs) ::
+    !run(instrs, blank_tape)
+   | else ::
+    !error("parse error")
+}

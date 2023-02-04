@@ -6,8 +6,6 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : ctor_char.<0>
                     ctor_char.=<0>
-                    ctor_char.other_ctor<0>
-                    ctor_char.other_ctor<1>
                     ctor_char.~=<0>
   imports         : use wybe
   resources       : 
@@ -217,7 +215,7 @@ foo(this##0:ctor_char, ?#result##0:wybe.char)<{}; {}; {}>:
 
 
 
-other_ctor > public {inline} (0 calls)
+other_ctor > {inline} (0 calls)
 0: ctor_char.other_ctor<0>
 other_ctor(other_ctor#1##0:ctor_char, ?#result##0:ctor_char)<{}; {}; {}>:
   AliasPairs: []
@@ -225,7 +223,7 @@ other_ctor(other_ctor#1##0:ctor_char, ?#result##0:ctor_char)<{}; {}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_char) @ctor_char:nn:nn
     foreign lpvm mutate(~#rec##0:ctor_char, ?#rec##1:ctor_char, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~other_ctor#1##0:ctor_char) @ctor_char:nn:nn
     foreign llvm or(~#rec##1:ctor_char, 1:wybe.int, ?#result##0:ctor_char) @ctor_char:nn:nn
-other_ctor > public {inline} (5 calls)
+other_ctor > {inline} (5 calls)
 1: ctor_char.other_ctor<1>
 other_ctor(?other_ctor#1##0:ctor_char, #result##0:ctor_char, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

@@ -6,8 +6,6 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : bug214.<0>
                     bug214.=<0>
-                    bug214.submarine<0>
-                    bug214.submarine<1>
                     bug214.~=<0>
   imports         : use bug214.direction
                     use bug214.position
@@ -272,7 +270,7 @@ sub_pos(#rec##0:bug214, ?#rec##1:bug214, #field##0:bug214.position)<{}; {}; {}>:
     foreign lpvm {noalias} mutate(~#rec##0:bug214, ?#rec##1:bug214, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:bug214.position) @bug214:nn:nn
 
 
-submarine > public {inline} (1 calls)
+submarine > {inline} (1 calls)
 0: bug214.submarine<0>
 submarine(sub_pos##0:bug214.position, aim##0:wybe.int, ?#result##0:bug214)<{}; {}; {}>:
   AliasPairs: []
@@ -280,7 +278,7 @@ submarine(sub_pos##0:bug214.position, aim##0:wybe.int, ?#result##0:bug214)<{}; {
     foreign lpvm alloc(16:wybe.int, ?#rec##0:bug214) @bug214:nn:nn
     foreign lpvm mutate(~#rec##0:bug214, ?#rec##1:bug214, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~sub_pos##0:bug214.position) @bug214:nn:nn
     foreign lpvm mutate(~#rec##1:bug214, ?#result##0:bug214, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~aim##0:wybe.int) @bug214:nn:nn
-submarine > public {inline} (6 calls)
+submarine > {inline} (6 calls)
 1: bug214.submarine<1>
 submarine(?sub_pos##0:bug214.position, ?aim##0:wybe.int, #result##0:bug214)<{}; {}; {}>:
   AliasPairs: []

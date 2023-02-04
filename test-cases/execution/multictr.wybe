@@ -1,4 +1,4 @@
-pub type t { pub
+pub type t { pub constructors 
        c01(f01:int)
      | c02
      | c03(f03:int)

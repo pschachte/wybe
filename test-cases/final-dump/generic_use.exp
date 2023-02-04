@@ -873,7 +873,7 @@ if.else:
 }
 [93mfinal-dump/generic_list.wybe:1:40: Explicit specification of current type generic_list(T),
   it is recommended to specify type as _
-[0m[93mfinal-dump/generic_list.wybe:3:9: Explicit specification of current type generic_list(T),
+[0m[93mfinal-dump/generic_list.wybe:3:5: Explicit specification of current type generic_list(T),
   it is recommended to specify type as _
 [0m[93mfinal-dump/generic_list.wybe:3:16: Explicit specification of current type generic_list(T),
   it is recommended to specify type as _

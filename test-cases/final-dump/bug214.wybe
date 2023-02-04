@@ -1,5 +1,5 @@
 type direction {
-    pub fwd | down | up
+    pub constructors fwd | down | up
 
     pub def {test} parse_direction(str:string, ?dir:_) {
         case str in {
