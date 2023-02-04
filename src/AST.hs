@@ -3244,10 +3244,13 @@ replacePrimArgs (PrimForeign lang nm flags _) args _
 
 -- |Return the GlobalFlows of a prim, given the currently known GlobalFlows 
 -- of variables
-primGlobalFlows :: Map PrimVarName GlobalFlows -> Prim -> GlobalFlows
+primGlobalFlows :: Map PrimVarName GlobalFlows -> Prim -> Compiler GlobalFlows
 primGlobalFlows varFlows prim@(PrimHigher _ ArgVar{argVarName=name} _ _)
-    = Map.findWithDefault (snd $ primArgs prim) name varFlows
-primGlobalFlows _ prim = snd $ primArgs prim
+    = return $ Map.findWithDefault (snd $ primArgs prim) name varFlows
+primGlobalFlows varFlows prim = do
+    let (args, gFlows) = primArgs prim
+    argFlows <- argsGlobalFlows varFlows args
+    return $ effectiveGlobalFlows argFlows gFlows
 
 
 -- |Return the GlobalFlows of a PrimArg, given the currently known GlobalFlows 
@@ -3268,12 +3271,14 @@ argGlobalFlow varFlows (ArgClosure pspec args _) = do
         return $ effectiveGlobalFlows argFlows gFlows
 argGlobalFlow _ _ = return emptyGlobalFlows
 
+-- Get the corresponding GlobalFlows and Flows of the given PrimArgs
 argsGlobalFlows :: Map PrimVarName GlobalFlows -> [PrimArg] -> Compiler [(GlobalFlows, PrimFlow)]
-argsGlobalFlows varFlows = mapM (\a -> (, argFlowDirection a) <$> argGlobalFlow varFlows a)
+argsGlobalFlows varFlows 
+    = mapM (\a -> (, argFlowDirection a) <$> argGlobalFlow varFlows a)
 
 
--- | Gather the effective GlobalFLobals of a given set of global flows, 
--- using the GlobalFLows of the arguments corresponding to each parameter
+-- | Gather the effective GlobalFLows of a given set of GlobalGlows, 
+-- using the GlobalFlows of the arguments corresponding to each parameter
 effectiveGlobalFlows :: [(GlobalFlows, PrimFlow)] -> GlobalFlows -> GlobalFlows
 effectiveGlobalFlows argFlows primFlows@(GlobalFlows _ _ UniversalSet) 
     = globalFlowsUnions $ primFlows{globalFlowsParams=emptyUnivSet}

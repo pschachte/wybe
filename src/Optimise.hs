@@ -200,43 +200,52 @@ inferGlobalFlows' varFlows ProcDefSrc{} = shouldnt "inferGlobalFlows'"
 inferGlobalFlows' varFlows (ProcDefPrim pspec 
                     proto@(PrimProto name _ oldFlows@(GlobalFlows ins outs params)) body _ _) = do
     logOptimise $ "Inferring global flows of " ++ show proto
-    let allFlows = bodyGlobalFlows varFlows
-                        (if USet.isEmpty params then ins `USet.intersection` outs
-                        else USet.UniversalSet) body
-        newFlows = allFlows `globalFlowsIntersection` oldFlows
+    allFlows <- bodyGlobalFlows varFlows
+                    (if USet.isEmpty params then ins `USet.intersection` outs
+                     else USet.UniversalSet) body
+    let newFlows = allFlows `globalFlowsIntersection` oldFlows
     logOptimise $ "---> " ++ show newFlows ++ " (" ++ show allFlows ++ ")"
     return newFlows
 
 
 -- | Get the global flows that occur across a ProcBody, given the procs that appear
 -- in the SCC and the Globals that occur in/out
-bodyGlobalFlows :: Map PrimVarName GlobalFlows -> UnivSet GlobalInfo -> ProcBody -> GlobalFlows
-bodyGlobalFlows varFlows oldFlows (ProcBody prims fork) 
-    = List.foldr (globalFlowsUnion' . primGlobalFlows varFlows . content) 
-                 (forkGlobalFlows varFlows oldFlows fork) prims
+bodyGlobalFlows :: Map PrimVarName GlobalFlows -> UnivSet GlobalInfo -> ProcBody 
+                -> Compiler GlobalFlows
+bodyGlobalFlows varFlows oldFlows (ProcBody prims fork) = do
+    bodyFlows <- mapM (primGlobalFlows varFlows . content) prims
+    forkFlows <- forkGlobalFlows varFlows oldFlows fork
+    return $ List.foldr killFlows forkFlows bodyFlows
   where 
     -- kill in-flows from second that have only an outwards flow in first
-    globalFlowsUnion' (GlobalFlows i1 o1 p1) (GlobalFlows i2 o2 p2)
-        = GlobalFlows 
-            (i1 `USet.union` whenFinite (`Set.difference` USet.toSet Set.empty o1) i2) 
-            (o1 `USet.union` o2)
-            (p1 `USet.union` p2)
+    killFlows (GlobalFlows i1 o1 p1) (GlobalFlows i2 o2 p2)
+        = let toKill
+                | isEmpty p1 && isEmpty p2 = USet.toSet Set.empty o1
+                | otherwise = Set.empty
+          in GlobalFlows 
+                (i1 `USet.union` whenFinite (Set.\\ toKill) i2) 
+                (o1 `USet.union` o2)
+                (p1 `USet.union` p2)
 
 -- | Global flows that occur across forks, accounting for the old in/out flows.
 -- If a flow out does not occur in all branches, but at least 1, and occurs in
 -- the old in/out, then this also occurs in/out 
-forkGlobalFlows :: Map PrimVarName GlobalFlows -> UnivSet GlobalInfo -> PrimFork -> GlobalFlows
-forkGlobalFlows _ _ NoFork = emptyGlobalFlows
-forkGlobalFlows varFlows oldFlows (PrimFork _ _ _ bodies deflt) =
+forkGlobalFlows :: Map PrimVarName GlobalFlows -> UnivSet GlobalInfo -> PrimFork 
+                -> Compiler GlobalFlows
+forkGlobalFlows _ _ NoFork = return emptyGlobalFlows
+forkGlobalFlows varFlows oldFlows (PrimFork _ _ _ bodies deflt) = do
     let bodies' = bodies ++ maybeToList deflt
-        gFlows = bodyGlobalFlows varFlows oldFlows <$> bodies'
-        gOuts = globalFlowsOut <$> gFlows
-        someOuts = List.foldr USet.union emptyUnivSet gOuts 
-        allOuts = List.foldr USet.intersection UniversalSet gOuts
+    gFlows <- mapM (bodyGlobalFlows varFlows oldFlows) bodies'
+    let possibleOuts = possibleFlows <$> gFlows
+        someOuts = List.foldr USet.union emptyUnivSet possibleOuts 
+        allOuts = List.foldr USet.intersection UniversalSet possibleOuts
         oldFlows' = oldFlows `USet.intersection` 
                         whenFinite (`USet.subtractUnivSet` allOuts) someOuts
-    in globalFlowsUnions (emptyGlobalFlows{globalFlowsIn=oldFlows'}:gFlows)
-
+    return $ globalFlowsUnions (emptyGlobalFlows{globalFlowsIn=oldFlows'}:gFlows)
+  where
+    possibleFlows (GlobalFlows _ outs params) 
+        | isEmpty params = outs
+    possibleFlows _ = UniversalSet
 
 -- | Update the GlobalFlows of Prims of a ProcDef and the prototype with
 -- the given GlobalFlows
