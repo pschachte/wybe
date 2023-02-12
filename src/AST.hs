@@ -1922,6 +1922,10 @@ data ProcDef = ProcDef {
     procSuperproc :: SuperprocSpec,
                                 -- ^the proc this should be part of, if any
     procVariableFlows :: Map PrimVarName GlobalFlows
+                                -- ^ The currently known global flows of each
+                                -- variable in this proc. If a variable is not
+                                -- contained in the map, the flows are not
+                                -- known, and can be assumed to be universal
 }
              deriving (Eq, Generic)
 

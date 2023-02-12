@@ -138,6 +138,8 @@ data BodyState = BodyState {
                                         -- ^The set of globals that we currently
                                         -- know the value of
       varGlobalFlows :: Map PrimVarName GlobalFlows,
+                                        -- ^The global flows associated with each
+                                        -- variable assigned in this body.
       reifiedConstr  :: Map PrimVarName Constraint
                                         -- ^Constraints attached to Boolean vars
       } deriving (Eq,Show)
@@ -858,6 +860,11 @@ expandArg arg@(ArgClosure ps as ty) = do
 expandArg arg = return arg
 
 
+-- Update the set of global variables that are curently loaded after adding
+-- the given prim to the body. Any global variables that flow out are removed
+-- from the set of loaded globals.
+-- For an LPVM load instruction, the variable the global variable is loaded into
+-- is remembered 
 updateGlobalsLoaded :: Prim -> BodyBuilder ()
 updateGlobalsLoaded prim = do
     loaded <- gets globalsLoaded
@@ -885,7 +892,14 @@ updateGlobalsLoaded prim = do
         logBuild $ "Globals Loaded: " ++ simpleShowMap loaded
         logBuild $ "             -> " ++ simpleShowMap loaded'
 
-
+-- Update the global flows of variables set by the given prim. 
+-- This is conservately set as:
+-- * For first order prims, the global flows are inferred from the known flows of
+-- proc's params and corresponding in-flowing args.
+-- * For higher order prims, if the outflowing variable is resourceful,
+-- the flows are conservatively set to be universal, else if the type is 
+-- generic th flows are that of the params, else empty.
+-- * For foreign prims, the flows is set to the union of the flows of all inputs.
 updateVariableFlows :: Prim -> BodyBuilder ()
 updateVariableFlows prim = do
     varFlows <- gets varGlobalFlows
@@ -916,8 +930,12 @@ updateVariableFlows prim = do
             | isResourcefulHigherOrder ty -> 
           return $ Map.singleton name univGlobalFlows
         PrimForeign{} -> do
-          return $ Map.fromList $ List.map ((, inFlows) . argVarName) 
-                 $ List.filter argIsVar $ outs
+          return $ Map.fromList $ List.map 
+            (\ArgVar{argVarName=name, argVarType=ty} ->
+              (name, if isResourcefulHigherOrder ty || genericType ty
+                     then inFlows
+                     else emptyGlobalFlows)) 
+                $ List.filter argIsVar $ outs
     when (any (/= emptyGlobalFlows) $ Map.elems newFlows) $
         logBuild $ "New Variable Flows: " ++ simpleShowMap newFlows
     modify $ \s -> s {varGlobalFlows=Map.unionWith globalFlowsUnion varFlows newFlows}

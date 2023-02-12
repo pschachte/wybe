@@ -94,9 +94,13 @@ markParamNeededness _ _ _ PrimParam{ primParamFlow=FlowTakeReference } =
     shouldnt "unexpected FlowTakeReference at this stage of compilation"
 
 
--- | Update the global flows of a parameter, given the 
+-- | Update the global flows of a parameter, given the global flows
+-- of varaibles in the procedure
 updateParamGlobalFlows :: Map PrimVarName GlobalFlows -> PrimParam -> PrimParam 
 updateParamGlobalFlows varFlows param@(PrimParam name _ _ _ info@(ParamInfo _ flows)) =
+    -- We take th intersection here to ensure that the global flows
+    -- never increase. The flows should never be increased because previous
+    -- analyses may exploit a more restricted global flows
     param {primParamInfo=info{
             paramInfoGlobalFlows=flows `globalFlowsIntersection` newFlows}}
   where newFlows = Map.findWithDefault univGlobalFlows name varFlows
