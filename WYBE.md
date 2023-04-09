@@ -531,6 +531,22 @@ f(2, ?j) # j = 3; i = 1
 f(3, ?j) # j = 4; i = 2
 ```
 
+### Anonymous functions
+
+Anonymous functions are also supported with the following syntax:
+
+> `@(` *exp* `)`
+
+Where *exp* is an expression that may contain a number of `@` holes as
+per the parameter syntax of anonymous procedures. These parameters must all
+have an input mode, and the expression may only contain input-mode variables.
+
+This syntax is a syntactic sugar for an anonymous procedure, that is equivalent to the following:
+
+> `{ foreign llvm move(` *exp*`, ?@) }`
+
+with the output `@` with an appropriate numbering. 
+
 
 ##  <a name="operator-syntax"></a>Operator syntax
 

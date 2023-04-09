@@ -2463,6 +2463,7 @@ foldExp' _   _   val Var{} pos = val
 foldExp' _   _   val (Global _) pos = val
 foldExp' sfn efn val (Closure _ es) pos = foldExps sfn efn pos val es
 foldExp' sfn efn val (AnonProc _ _ pstmts _ _) pos = foldStmts sfn efn val pstmts
+foldExp' sfn efn val (AnonFunc exp) _ = placedApply (foldExp sfn efn val) exp
 foldExp' sfn efn val (Typed exp _ _) pos = foldExp sfn efn val exp pos
 foldExp' _   _   val AnonParamVar{} pos = val
 foldExp' sfn efn val (Where stmts exp) pos =
@@ -2966,6 +2967,7 @@ data Exp
       | Global GlobalInfo
       -- The following are eliminated during flattening
       | AnonProc ProcModifiers [Param] [Placed Stmt] (Maybe VarDict) (Maybe (Set ResourceFlowSpec))
+      | AnonFunc (Placed Exp)
       | AnonParamVar (Maybe Integer) FlowDirection
       | Where [Placed Stmt] (Placed Exp)
       | DisjExp (Placed Exp) (Placed Exp)
@@ -3389,9 +3391,10 @@ expOutputs (Var "_" ParamIn _) = Set.singleton "_" -- special _ variable is out
 expOutputs (Var name flow _) =
     if flowsOut flow then Set.singleton name else Set.empty
 expOutputs (AnonParamVar mbNum flow) =
-    if flowsOut flow then Set.singleton (show mbNum) else Set.empty
+    if flowsOut flow then Set.singleton ("@" ++ maybe "" show mbNum) else Set.empty
 expOutputs (Global _) = Set.empty
 expOutputs AnonProc{} = Set.empty
+expOutputs AnonFunc{} = Set.empty
 expOutputs (Closure _ _) = Set.empty
 expOutputs (Typed expr _ _) = expOutputs expr
 expOutputs (DisjExp pexp1 pexp2) = pexpListOutputs [pexp1,pexp2]
@@ -3421,7 +3424,8 @@ expInputs (Var name flow _) =
 expInputs (AnonParamVar mbNum flow) =
     if flowsIn flow then Set.singleton (show mbNum) else Set.empty
 expInputs (Global _) = Set.empty
-expInputs (AnonProc{}) = Set.empty
+expInputs AnonProc{} = Set.empty
+expInputs AnonFunc{} = Set.empty
 expInputs (Closure _ _) = Set.empty
 expInputs (Typed expr _ _) = expInputs expr
 expInputs (Where _ pexp) = expInputs $ content pexp
@@ -4006,6 +4010,7 @@ instance Show Exp where
   show (AnonProc mods params ss _ _) =
       showProcModifiers mods
       ++ "{" ++ intercalate "; " (showStmt 0 . content <$> ss) ++ "}"
+  show (AnonFunc exp) = "@(" ++ show exp ++ ")"
   show (Closure ps es) = show ps ++ "<" ++ intercalate ", " (show <$> es) ++ ">"
   show (AnonParamVar num dir) = flowPrefix dir ++ "@" ++ maybe "" show num
   show (Where stmts exp) = show exp ++ " where" ++ showBody 8 stmts

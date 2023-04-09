@@ -1,0 +1,325 @@
+======================================================================
+AFTER EVERYTHING:
+ Module higher_order_anon
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : higher_order_anon.<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+module top-level code > public {inline,semipure} (0 calls)
+0: higher_order_anon.<0>
+()<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+
+
+#anon#1 > {inline} (1 calls)
+0: higher_order_anon.#anon#1<0>
+#anon#1(anon#1#1##0:wybe.int, ?anon#1#2##0:wybe.int)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm add(~anon#1#1##0:wybe.int, 1:wybe.int, ?anon#1#2##0:wybe.int) @int:nn:nn
+#anon#1 > {inline} (1 calls)
+1: higher_order_anon.#anon#1<1>
+#anon#1(anon#1#1##0:wybe.int, ?anon#1#2##0:wybe.int)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm add(~anon#1#1##0:wybe.int, 1:wybe.int, ?anon#1#2##0:wybe.int) @int:nn:nn
+
+
+#anon#2 > {inline} (1 calls)
+0: higher_order_anon.#anon#2<0>
+#anon#2(anon#2#1##0:wybe.int, ?anon#2#2##0:wybe.int)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm add(~anon#2#1##0:wybe.int, 1:wybe.int, ?anon#2#2##0:wybe.int) @int:nn:nn
+#anon#2 > {inline} (1 calls)
+1: higher_order_anon.#anon#2<1>
+#anon#2(anon#2#1##0:wybe.int, ?anon#2#2##0:wybe.int)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm add(~anon#2#1##0:wybe.int, 1:wybe.int, ?anon#2#2##0:wybe.int) @int:nn:nn
+
+
+#anon#3 > {inline} (1 calls)
+0: higher_order_anon.#anon#3<0>
+#anon#3([anon#3#1##0:20], anon#3#2##0:2, ?anon#3#3##0:2)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(~anon#3#2##0:2, ?anon#3#3##0:2) @higher_order_anon:nn:nn
+#anon#3 > {inline} (1 calls)
+1: higher_order_anon.#anon#3<1>
+#anon#3(anon#3#1##0:20, anon#3#2##0:2, ?anon#3#3##0:2)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(~anon#3#2##0:2, ?anon#3#3##0:2) @higher_order_anon:nn:nn
+
+
+#anon#4 > {inline} (1 calls)
+0: higher_order_anon.#anon#4<0>
+#anon#4([anon#4#1##0:20], anon#4#2##0:2, ?anon#4#3##0:2)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(~anon#4#2##0:2, ?anon#4#3##0:2) @higher_order_anon:nn:nn
+#anon#4 > {inline} (1 calls)
+1: higher_order_anon.#anon#4<1>
+#anon#4(anon#4#1##0:20, anon#4#2##0:2, ?anon#4#3##0:2)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(~anon#4#2##0:2, ?anon#4#3##0:2) @higher_order_anon:nn:nn
+
+
+#anon#5 > {inline} (1 calls)
+0: higher_order_anon.#anon#5<0>
+#anon#5(anon#5#1##0:(wybe.int, ?wybe.int), ?anon#5#2##0:(wybe.int, ?wybe.int))<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(~anon#5#1##0:(wybe.int, ?wybe.int), ?anon#5#2##0:(wybe.int, ?wybe.int)) @higher_order_anon:nn:nn
+#anon#5 > {inline} (1 calls)
+1: higher_order_anon.#anon#5<1>
+#anon#5(anon#5#1##0:(wybe.int, ?wybe.int), ?anon#5#2##0:(wybe.int, ?wybe.int))<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(~anon#5#1##0:(wybe.int, ?wybe.int), ?anon#5#2##0:(wybe.int, ?wybe.int)) @higher_order_anon:nn:nn
+
+
+#anon#6 > {inline} (1 calls)
+0: higher_order_anon.#anon#6<0>
+#anon#6(anon#6#1##0:(wybe.int, ?wybe.int), ?anon#6#2##0:(wybe.int, ?wybe.int))<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(~anon#6#1##0:(wybe.int, ?wybe.int), ?anon#6#2##0:(wybe.int, ?wybe.int)) @higher_order_anon:nn:nn
+#anon#6 > {inline} (1 calls)
+1: higher_order_anon.#anon#6<1>
+#anon#6(anon#6#1##0:(wybe.int, ?wybe.int), ?anon#6#2##0:(wybe.int, ?wybe.int))<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(~anon#6#1##0:(wybe.int, ?wybe.int), ?anon#6#2##0:(wybe.int, ?wybe.int)) @higher_order_anon:nn:nn
+
+
+#anon#7 > {inline} (1 calls)
+0: higher_order_anon.#anon#7<0>
+#anon#7(^id##0:((wybe.int, ?wybe.int), ?(wybe.int, ?wybe.int)), ?anon#7#1##0:(wybe.int, ?wybe.int))<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    ~id##0:((wybe.int, ?wybe.int), ?(wybe.int, ?wybe.int))(higher_order_anon.#anon#7#anon#1<1><>:(wybe.int, ?wybe.int), ?anon#7#1##0:(wybe.int, ?wybe.int)) #0 @higher_order_anon:nn:nn
+#anon#7 > {inline} (1 calls)
+1: higher_order_anon.#anon#7<1>
+#anon#7(^id##0:((wybe.int, ?wybe.int), ?(wybe.int, ?wybe.int)), ?anon#7#1##0:(wybe.int, ?wybe.int))<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    ~^id##0:((wybe.int, ?wybe.int), ?(wybe.int, ?wybe.int))(higher_order_anon.#anon#7#anon#1<1><>:(wybe.int, ?wybe.int), ?anon#7#1##0:(wybe.int, ?wybe.int)) #0 @higher_order_anon:nn:nn
+
+
+#anon#7#anon#1 > {inline} (1 calls)
+0: higher_order_anon.#anon#7#anon#1<0>
+#anon#7#anon#1(anon#8#1##0:wybe.int, ?anon#8#2##0:wybe.int)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm add(~anon#8#1##0:wybe.int, 1:wybe.int, ?anon#8#2##0:wybe.int) @int:nn:nn
+#anon#7#anon#1 > {inline} (1 calls)
+1: higher_order_anon.#anon#7#anon#1<1>
+#anon#7#anon#1(anon#8#1##0:wybe.int, ?anon#8#2##0:wybe.int)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm add(~anon#8#1##0:wybe.int, 1:wybe.int, ?anon#8#2##0:wybe.int) @int:nn:nn
+
+
+#anon#8 > {inline} (1 calls)
+0: higher_order_anon.#anon#8<0>
+#anon#8(anon#9#1##0:wybe.float, [anon#9#2##0:29], anon#9#3##0:wybe.float, ?anon#9#4##0:wybe.float)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm fadd(~anon#9#1##0:wybe.float, ~anon#9#3##0:wybe.float, ?anon#9#4##0:wybe.float) @float:nn:nn
+#anon#8 > {inline} (1 calls)
+1: higher_order_anon.#anon#8<1>
+#anon#8(anon#9#1##0:wybe.float, anon#9#2##0:29, anon#9#3##0:wybe.float, ?anon#9#4##0:wybe.float)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm fadd(~anon#9#1##0:wybe.float, ~anon#9#3##0:wybe.float, ?anon#9#4##0:wybe.float) @float:nn:nn
+
+
+#anon#9 > {inline} (1 calls)
+0: higher_order_anon.#anon#9<0>
+#anon#9(anon#10#1##0:wybe.float, [anon#10#2##0:29], anon#10#3##0:wybe.float, ?anon#10#4##0:wybe.float)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm fadd(~anon#10#1##0:wybe.float, ~anon#10#3##0:wybe.float, ?anon#10#4##0:wybe.float) @float:nn:nn
+#anon#9 > {inline} (1 calls)
+1: higher_order_anon.#anon#9<1>
+#anon#9(anon#10#1##0:wybe.float, anon#10#2##0:29, anon#10#3##0:wybe.float, ?anon#10#4##0:wybe.float)<{}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm fadd(~anon#10#1##0:wybe.float, ~anon#10#3##0:wybe.float, ?anon#10#4##0:wybe.float) @float:nn:nn
+
+  LLVM code       :
+
+; ModuleID = 'higher_order_anon'
+
+
+ 
+
+
+@higher_order_anon.0 =    constant [1 x i64] [i64 ptrtoint (i64 (i64, i64)* @"higher_order_anon.#anon#7#anon#1<1>" to i64)]
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  void @"higher_order_anon.<0>"() alwaysinline   {
+entry:
+  ret void 
+}
+
+
+define external fastcc  i64 @"higher_order_anon.#anon#1<0>"(i64  %"anon#1#1##0") alwaysinline   {
+entry:
+  %0 = add   i64 %"anon#1#1##0", 1 
+  ret i64 %0 
+}
+
+
+define external fastcc  i64 @"higher_order_anon.#anon#1<1>"(i64  %"#env##0", i64  %"anon#1#1##0") alwaysinline   {
+entry:
+  %0 = add   i64 %"anon#1#1##0", 1 
+  ret i64 %0 
+}
+
+
+define external fastcc  i64 @"higher_order_anon.#anon#2<0>"(i64  %"anon#2#1##0") alwaysinline   {
+entry:
+  %0 = add   i64 %"anon#2#1##0", 1 
+  ret i64 %0 
+}
+
+
+define external fastcc  i64 @"higher_order_anon.#anon#2<1>"(i64  %"#env##0", i64  %"anon#2#1##0") alwaysinline   {
+entry:
+  %0 = add   i64 %"anon#2#1##0", 1 
+  ret i64 %0 
+}
+
+
+define external fastcc  i64 @"higher_order_anon.#anon#3<0>"(i64  %"anon#3#2##0") alwaysinline   {
+entry:
+  ret i64 %"anon#3#2##0" 
+}
+
+
+define external fastcc  i64 @"higher_order_anon.#anon#3<1>"(i64  %"#env##0", i64  %"anon#3#1##0", i64  %"anon#3#2##0") alwaysinline   {
+entry:
+  ret i64 %"anon#3#2##0" 
+}
+
+
+define external fastcc  i64 @"higher_order_anon.#anon#4<0>"(i64  %"anon#4#2##0") alwaysinline   {
+entry:
+  ret i64 %"anon#4#2##0" 
+}
+
+
+define external fastcc  i64 @"higher_order_anon.#anon#4<1>"(i64  %"#env##0", i64  %"anon#4#1##0", i64  %"anon#4#2##0") alwaysinline   {
+entry:
+  ret i64 %"anon#4#2##0" 
+}
+
+
+define external fastcc  i64 @"higher_order_anon.#anon#5<0>"(i64  %"anon#5#1##0") alwaysinline   {
+entry:
+  ret i64 %"anon#5#1##0" 
+}
+
+
+define external fastcc  i64 @"higher_order_anon.#anon#5<1>"(i64  %"#env##0", i64  %"anon#5#1##0") alwaysinline   {
+entry:
+  ret i64 %"anon#5#1##0" 
+}
+
+
+define external fastcc  i64 @"higher_order_anon.#anon#6<0>"(i64  %"anon#6#1##0") alwaysinline   {
+entry:
+  ret i64 %"anon#6#1##0" 
+}
+
+
+define external fastcc  i64 @"higher_order_anon.#anon#6<1>"(i64  %"#env##0", i64  %"anon#6#1##0") alwaysinline   {
+entry:
+  ret i64 %"anon#6#1##0" 
+}
+
+
+define external fastcc  i64 @"higher_order_anon.#anon#7<0>"(i64  %"id##0") alwaysinline   {
+entry:
+  %0 = inttoptr i64 %"id##0" to i64* 
+  %1 = load  i64, i64* %0 
+  %2 = inttoptr i64 %1 to i64 (i64, i64)* 
+  %3 = tail call fastcc  i64  %2(i64  %"id##0", i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_anon.0, i32 0, i32 0) to i64))  
+  ret i64 %3 
+}
+
+
+define external fastcc  i64 @"higher_order_anon.#anon#7<1>"(i64  %"#env##0") alwaysinline   {
+entry:
+  %0 = add   i64 %"#env##0", 8 
+  %1 = inttoptr i64 %0 to i64* 
+  %2 = load  i64, i64* %1 
+  %3 = inttoptr i64 %2 to i64* 
+  %4 = load  i64, i64* %3 
+  %5 = inttoptr i64 %4 to i64 (i64, i64)* 
+  %6 = tail call fastcc  i64  %5(i64  %2, i64  ptrtoint (i64* getelementptr inbounds ([1 x i64], [1 x i64]* @higher_order_anon.0, i32 0, i32 0) to i64))  
+  ret i64 %6 
+}
+
+
+define external fastcc  i64 @"higher_order_anon.#anon#7#anon#1<0>"(i64  %"anon#8#1##0") alwaysinline   {
+entry:
+  %0 = add   i64 %"anon#8#1##0", 1 
+  ret i64 %0 
+}
+
+
+define external fastcc  i64 @"higher_order_anon.#anon#7#anon#1<1>"(i64  %"#env##0", i64  %"anon#8#1##0") alwaysinline   {
+entry:
+  %0 = add   i64 %"anon#8#1##0", 1 
+  ret i64 %0 
+}
+
+
+define external fastcc  double @"higher_order_anon.#anon#8<0>"(double  %"anon#9#1##0", double  %"anon#9#3##0") alwaysinline   {
+entry:
+  %0 = fadd double %"anon#9#1##0", %"anon#9#3##0" 
+  ret double %0 
+}
+
+
+define external fastcc  i64 @"higher_order_anon.#anon#8<1>"(i64  %"#env##0", i64  %"anon#9#1##0", i64  %"anon#9#2##0", i64  %"anon#9#3##0") alwaysinline   {
+entry:
+  %0 = bitcast i64 %"anon#9#1##0" to double 
+  %1 = bitcast i64 %"anon#9#3##0" to double 
+  %2 = fadd double %0, %1 
+  %3 = bitcast double %2 to i64 
+  ret i64 %3 
+}
+
+
+define external fastcc  double @"higher_order_anon.#anon#9<0>"(double  %"anon#10#1##0", double  %"anon#10#3##0") alwaysinline   {
+entry:
+  %0 = fadd double %"anon#10#1##0", %"anon#10#3##0" 
+  ret double %0 
+}
+
+
+define external fastcc  i64 @"higher_order_anon.#anon#9<1>"(i64  %"#env##0", i64  %"anon#10#1##0", i64  %"anon#10#2##0", i64  %"anon#10#3##0") alwaysinline   {
+entry:
+  %0 = bitcast i64 %"anon#10#1##0" to double 
+  %1 = bitcast i64 %"anon#10#3##0" to double 
+  %2 = fadd double %0, %1 
+  %3 = bitcast double %2 to i64 
+  ret i64 %3 
+}

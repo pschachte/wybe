@@ -374,6 +374,8 @@ uniquenessCheckExp (AnonProc mods params body clsd _) pos = do
                                         (modifierDetism mods) body 
                                         ((`maybePlace` pos) <$> params) Set.empty)
     mapM_ uniquenessErr errs
+uniquenessCheckExp func@(AnonFunc _) _ = 
+    shouldnt $ "AnonFunc " ++ show func ++ " in uniqueness checking"
 uniquenessCheckExp (Global _) _ = return ()
 uniquenessCheckExp ref@(Closure _ clsd) _ =
     shouldnt $ "Untyped Closure " ++ show ref ++ " in uniqueness checking"
