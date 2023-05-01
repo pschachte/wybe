@@ -547,6 +547,16 @@ This syntax is a syntactic sugar for an anonymous procedure, that is equivalent 
 
 with the output `@` with an appropriate numbering. 
 
+For example, the following pairs are equivalent:
+
+```
+@( @ + 1 )
+{ ?@2 = @1 + 1 }
+
+@( @2 ^ @1 )
+{ @2 ^ @1 = ?@3 }
+```
+
 
 ##  <a name="operator-syntax"></a>Operator syntax
 

@@ -1,8 +1,8 @@
 ?incr = { 1 + @ = ?@ }
 ?incr = @(1 + @)
 
-?const = { foreign llvm move(@2, ?@3) }
-?const = @(@2)
+?ignore = { foreign llvm move(@2, ?@3) }
+?ignore = @(@2)
 
 ?id = { @ = ?@ }
 ?id = @(@)
