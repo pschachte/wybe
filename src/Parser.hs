@@ -519,7 +519,7 @@ primaryTerm =
     <|> foreignCall
     <|> forLoop
     <|> varOrCall
-    <|> anonParamVar
+    <|> anonymousTerm
     <|> intConst
     <|> floatConst
     <|> charConst
@@ -543,11 +543,11 @@ varOrCall = do
     return $ Call pos (init modVar) (last modVar) ParamIn []
 
 
-anonParamVar :: Parser Term
-anonParamVar = do
+anonymousTerm :: Parser Term
+anonymousTerm = do
     pos <- tokenPosition <$> symbol "@"
-    num <- optionMaybe intConst
-    return $ Call pos [] "@" ParamIn $ maybeToList num
+    term <- optionMaybe (choice [intConst, parenthesisedTerm])
+    return $ Call pos [] "@" ParamIn $ maybeToList term
 
 
 -- | Parse a sequence of Terms enclosed in braces.
@@ -1158,8 +1158,11 @@ termToExp (Call pos [] "@" flow exps) = do
     exps' <- mapM termToExp exps
     case content <$> exps' of
         [] -> return $ Placed (AnonParamVar Nothing flow) pos
-        [IntValue i] | i > 0 -> return $ Placed (AnonParamVar (Just i) flow) pos
-        _ -> syntaxError pos "invalid anonymous parameter expression"
+        [IntValue i] | i > 0 
+            -> return $ Placed (AnonParamVar (Just i) flow) pos
+        [exp] 
+            -> return $ Placed (AnonFunc $ head exps') pos
+        _ -> syntaxError pos "invalid anonymous parameter/function expression"
 termToExp (Call pos [] "|" ParamIn [exp1,exp2]) = do
     exp1' <- termToExp exp1
     exp2' <- termToExp exp2
