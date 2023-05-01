@@ -16,7 +16,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {semipure} (0 calls)
 0: bug214.<0>
-()<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}>:
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(3,(bug214.#cont#2<0>,fromList [NonAliasedParamCond 0 [],NonAliasedParamCond 1 []]))]
@@ -25,7 +25,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm alloc(16:wybe.int, ?tmp#17##0:bug214) @bug214:nn:nn
     foreign lpvm mutate(~tmp#17##0:bug214, ?tmp#18##0:bug214, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:bug214.position) @bug214:nn:nn
     foreign lpvm mutate(~tmp#18##0:bug214, ?tmp#1##0:bug214, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.int) @bug214:nn:nn
-    bug214.#cont#2<0>[7477e50a09](~tmp#0##0:bug214.position, ~tmp#1##0:bug214)<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}> #3 @bug214:nn:nn
+    bug214.#cont#2<0>[7477e50a09](~tmp#0##0:bug214.position, ~tmp#1##0:bug214)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @bug214:nn:nn
 
 
 #cont#1 > {inline} (0 calls)
@@ -58,7 +58,7 @@ module top-level code > public {semipure} (0 calls)
 
 #cont#2 > (3 calls)
 0: bug214.#cont#2<0>[7477e50a09]
-#cont#2(pos##0:bug214.position, sub##0:bug214)<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}>:
+#cont#2(pos##0:bug214.position, sub##0:bug214)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1]
   MultiSpeczDepInfo: [(4,(bug214.move<0>,fromList [NonAliasedParamCond 0 [0]])),(5,(bug214.move<1>,fromList [NonAliasedParamCond 0 [1]])),(6,(bug214.#cont#2<0>,fromList [NonAliasedParamCond 0 [],NonAliasedParamCond 1 [1]])),(7,(bug214.#cont#2<0>,fromList [NonAliasedParamCond 0 [0],NonAliasedParamCond 1 [1]]))]
@@ -69,7 +69,7 @@ module top-level code > public {semipure} (0 calls)
     bug214.direction.parse_direction<0>(~dir_str##0:wybe.string, ?tmp#3##0:bug214.direction, ?tmp#14##0:wybe.bool) #1 @bug214:nn:nn
     case ~tmp#14##0:wybe.bool of
     0:
-        bug214.#cont#2<0>(~pos##0:bug214.position, ~sub##0:bug214)<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}> #7 @bug214:nn:nn
+        bug214.#cont#2<0>(~pos##0:bug214.position, ~sub##0:bug214)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7 @bug214:nn:nn
 
     1:
         foreign c read_int(?units##0:wybe.int, ~tmp#17##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @int:nn:nn
@@ -77,7 +77,7 @@ module top-level code > public {semipure} (0 calls)
         foreign lpvm store(~%tmp#22##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @c_string:nn:nn
         bug214.move<0>(~pos##0:bug214.position, ?pos##1:bug214.position, tmp#3##0:bug214.direction, units##0:wybe.int) #4 @bug214:nn:nn
         bug214.move<1>(~sub##0:bug214, ?sub##1:bug214, ~tmp#3##0:bug214.direction, ~units##0:wybe.int) #5 @bug214:nn:nn
-        bug214.#cont#2<0>[410bae77d3](~pos##1:bug214.position, ~sub##1:bug214)<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}> #6 @bug214:nn:nn
+        bug214.#cont#2<0>[410bae77d3](~pos##1:bug214.position, ~sub##1:bug214)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #6 @bug214:nn:nn
 
  [410bae77d3] [NonAliasedParam 0] :
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#15##0:wybe.phantom) @c_string:nn:nn
@@ -87,7 +87,7 @@ module top-level code > public {semipure} (0 calls)
     bug214.direction.parse_direction<0>(~dir_str##0:wybe.string, ?tmp#3##0:bug214.direction, ?tmp#14##0:wybe.bool) #1 @bug214:nn:nn
     case ~tmp#14##0:wybe.bool of
     0:
-        bug214.#cont#2<0>[410bae77d3](~pos##0:bug214.position, ~sub##0:bug214)<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}> #7 @bug214:nn:nn
+        bug214.#cont#2<0>[410bae77d3](~pos##0:bug214.position, ~sub##0:bug214)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7 @bug214:nn:nn
 
     1:
         foreign c read_int(?units##0:wybe.int, ~tmp#17##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @int:nn:nn
@@ -95,7 +95,7 @@ module top-level code > public {semipure} (0 calls)
         foreign lpvm store(~%tmp#22##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @c_string:nn:nn
         bug214.move<0>[410bae77d3](~pos##0:bug214.position, ?pos##1:bug214.position, tmp#3##0:bug214.direction, units##0:wybe.int) #4 @bug214:nn:nn
         bug214.move<1>(~sub##0:bug214, ?sub##1:bug214, ~tmp#3##0:bug214.direction, ~units##0:wybe.int) #5 @bug214:nn:nn
-        bug214.#cont#2<0>[410bae77d3](~pos##1:bug214.position, ~sub##1:bug214)<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}> #6 @bug214:nn:nn
+        bug214.#cont#2<0>[410bae77d3](~pos##1:bug214.position, ~sub##1:bug214)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #6 @bug214:nn:nn
 
 
  [7477e50a09] [NonAliasedParam 0,NonAliasedParam 1] :
@@ -106,7 +106,7 @@ module top-level code > public {semipure} (0 calls)
     bug214.direction.parse_direction<0>(~dir_str##0:wybe.string, ?tmp#3##0:bug214.direction, ?tmp#14##0:wybe.bool) #1 @bug214:nn:nn
     case ~tmp#14##0:wybe.bool of
     0:
-        bug214.#cont#2<0>[7477e50a09](~pos##0:bug214.position, ~sub##0:bug214)<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}> #7 @bug214:nn:nn
+        bug214.#cont#2<0>[7477e50a09](~pos##0:bug214.position, ~sub##0:bug214)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #7 @bug214:nn:nn
 
     1:
         foreign c read_int(?units##0:wybe.int, ~tmp#17##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @int:nn:nn
@@ -114,7 +114,7 @@ module top-level code > public {semipure} (0 calls)
         foreign lpvm store(~%tmp#22##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @c_string:nn:nn
         bug214.move<0>[410bae77d3](~pos##0:bug214.position, ?pos##1:bug214.position, tmp#3##0:bug214.direction, units##0:wybe.int) #4 @bug214:nn:nn
         bug214.move<1>[410bae77d3](~sub##0:bug214, ?sub##1:bug214, ~tmp#3##0:bug214.direction, ~units##0:wybe.int) #5 @bug214:nn:nn
-        bug214.#cont#2<0>[7477e50a09](~pos##1:bug214.position, ~sub##1:bug214)<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}> #6 @bug214:nn:nn
+        bug214.#cont#2<0>[7477e50a09](~pos##1:bug214.position, ~sub##1:bug214)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #6 @bug214:nn:nn
 
 
 

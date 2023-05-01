@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : counter: fromList [(break_in_loop_in_do.counter,wybe.int = 10 @break_in_loop_in_do:nn:nn @break_in_loop_in_do:nn:nn)]
   procs           : 
 
-module top-level code > public {inline,semipure} (0 calls)
+module top-level code > public {semipure} (0 calls)
 0: break_in_loop_in_do.<0>
 ()<{<<wybe.io.io>>}; {<<break_in_loop_in_do.counter>>, <<wybe.io.io>>}>:
   AliasPairs: []
@@ -67,7 +67,7 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  void @"break_in_loop_in_do.<0>"() alwaysinline   {
+define external fastcc  void @"break_in_loop_in_do.<0>"()    {
 entry:
   store  i64 10, i64* @"resource#break_in_loop_in_do.counter" 
   tail call ccc  void  @print_int(i64  10)  

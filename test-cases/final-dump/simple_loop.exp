@@ -11,15 +11,15 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,semipure} (0 calls)
 0: simple_loop.<0>
-()<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}>:
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
-    simple_loop.#cont#1<0><{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}> #0 @simple_loop:nn:nn
+    simple_loop.#cont#1<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @simple_loop:nn:nn
 
 
 #cont#1 > (2 calls)
 0: simple_loop.#cont#1<0>
-#cont#1()<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}>:
+#cont#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @char:nn:nn
@@ -32,7 +32,7 @@ module top-level code > public {inline,semipure} (0 calls)
     1:
         foreign c putchar(~c##0:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @char:nn:nn
         foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char:nn:nn
-        simple_loop.#cont#1<0><{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}> #3 @simple_loop:nn:nn
+        simple_loop.#cont#1<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @simple_loop:nn:nn
 
 
   LLVM code       :
