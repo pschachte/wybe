@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {semipure} (0 calls)
 0: higher_order_resources.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+()<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#35##0:wybe.list(T)) @list:nn:nn
@@ -111,7 +111,7 @@ module top-level code > public {semipure} (0 calls)
 
 #anon#2 > {inline} (1 calls)
 0: higher_order_resources.#anon#2<0>
-#anon#2(anon#2#1##0:wybe.list(wybe.int))<{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}>:
+#anon#2(anon#2#1##0:wybe.list(wybe.int))<{<<higher_order_resources.maximum>>, <<wybe.io.io>>, <<wybe.random.random>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>, <<wybe.random.random>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%tmp#32##0:wybe.int) @higher_order_resources:nn:nn
@@ -128,7 +128,7 @@ module top-level code > public {semipure} (0 calls)
     higher_order_resources.take_max<0>(~tmp#28##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}> #4 @higher_order_resources:nn:nn
 #anon#2 > {inline} (1 calls)
 1: higher_order_resources.#anon#2<1>
-#anon#2(anon#2#1##0:wybe.list(wybe.int))<{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}>:
+#anon#2(anon#2#1##0:wybe.list(wybe.int))<{<<higher_order_resources.maximum>>, <<wybe.io.io>>, <<wybe.random.random>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>, <<wybe.random.random>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<higher_order_resources.maximum>>:wybe.int, ?%tmp#1##0:wybe.int) @higher_order_resources:nn:nn

@@ -26,13 +26,13 @@ module top-level code > public {semipure} (0 calls)
   MultiSpeczDepInfo: [(1,(wybe.array.[|]<0>,fromList [NonAliasedParamCond 2 []]))]
     foreign lpvm load(<<command_line.argc>>:wybe.int, ?%tmp#1##0:wybe.int) @command_line:nn:nn
     foreign lpvm load(<<command_line.argv>>:wybe.array.raw_array(wybe.c_string), ?%tmp#3##0:wybe.array.raw_array(wybe.c_string)) @command_line:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.array(T)) @array:nn:nn
-    foreign lpvm mutate(~tmp#10##0:wybe.array(T), ?tmp#11##0:wybe.array(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.int) @array:nn:nn
-    foreign lpvm mutate(~tmp#11##0:wybe.array(T), ?tmp#0##0:wybe.array(wybe.c_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.array.raw_array(T)) @array:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#11##0:wybe.array(T)) @array:nn:nn
+    foreign lpvm mutate(~tmp#11##0:wybe.array(T), ?tmp#12##0:wybe.array(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.int) @array:nn:nn
+    foreign lpvm mutate(~tmp#12##0:wybe.array(T), ?tmp#0##0:wybe.array(wybe.c_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.array.raw_array(T)) @array:nn:nn
     foreign lpvm store(tmp#0##0:wybe.array(wybe.c_string), <<command_line.arguments>>:wybe.array(wybe.c_string)) @command_line:nn:nn
     foreign lpvm store(c"":wybe.c_string, <<command_line.command>>:wybe.c_string) @command_line:nn:nn
-    wybe.array.[|]<0>[785a827a1b](?command##1:wybe.c_string, ?arguments##2:wybe.array(wybe.c_string), ~tmp#0##0:wybe.array(wybe.c_string), ?tmp#7##0:wybe.bool) #1 @command_line:nn:nn
-    case ~tmp#7##0:wybe.bool of
+    wybe.array.[|]<0>[785a827a1b](?command##1:wybe.c_string, ?arguments##2:wybe.array(wybe.c_string), ~tmp#0##0:wybe.array(wybe.c_string), ?tmp#8##0:wybe.bool) #1 @command_line:nn:nn
+    case ~tmp#8##0:wybe.bool of
     0:
         foreign c {terminal,semipure} error_exit(c"command_line:18:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @control:nn:nn
 
