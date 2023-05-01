@@ -1,0 +1,13 @@
+?incr = { 1 + @ = ?@ }
+?incr = @(1 + @)
+
+?ignore = { foreign llvm move(@2, ?@3) }
+?ignore = @(@2)
+
+?id = { @ = ?@ }
+?id = @(@)
+
+?cursed = @(id(@(1 + @1)))
+
+?multi_arg = { @1 + @3:float = ?@4 }
+?multi_arg = @(@1 + @3:float)

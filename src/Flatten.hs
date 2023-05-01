@@ -124,7 +124,7 @@ data AnonProcState = AnonProcState {
     currentAnon :: Integer,      -- ^Current anon proc number
     paramCount :: Maybe Integer, -- ^Number of params encountered in current
                                  -- anonProc. Nothing if we have numbered params
-    params :: Map Integer Param  -- ^Unrocessed params
+    params :: Map Integer Param  -- ^Unprocessed params
     } deriving Show
 
 
@@ -197,8 +197,8 @@ flattenInner transparent detism inner = do
               (initFlattenerState (defdVars oldState)) {
                     tempCtr = tempCtr oldState,
                     anonProcState = anonProcState oldState})
-    logFlatten $ "-- Flattened:" ++ showBody 4 (List.reverse
-                                                $ flattened innerState)
+    let stmts = List.reverse $ flattened innerState
+    logFlatten $ "-- Flattened:" ++ showBody 4 stmts
     -- logFlatten $ "-- Postponed:\n" ++
     --   showBody 4 (postponed innerState)
     if transparent
@@ -207,8 +207,8 @@ flattenInner transparent detism inner = do
                             anonProcState = anonProcState innerState }
       else put $ oldState { tempCtr = tempCtr innerState,
                             anonProcState = anonProcState innerState }
-    return $ List.reverse $ flattened innerState
-
+    return stmts
+    
 
 flattenStmtArgs :: [Placed Exp] -> OptPos -> Flattener [Placed Exp]
 flattenStmtArgs args pos = do
@@ -523,8 +523,8 @@ flattenExp expr@(AnonParamVar mbNum dir) ty castFrom pos = do
         (Just n, _) | fromMaybe 0 count == 0 -> do
             return (n, Nothing)
         _ -> do
-            lift $ message Error
-                    "Mixed use of numbered and un-numbered anonymous parameters" pos
+            lift $ errmsg pos 
+                 $ "Mixed use of numbered and un-numbered anonymous parameters"
             return (-1, count)
     let name = makeAnonParamName currentAnon num
     let var = Var name dir Ordinary
@@ -539,7 +539,7 @@ flattenExp expr@(AnonParamVar mbNum dir) ty castFrom pos = do
     then do
         lift $ message Error
                ("Anonymous parameter @" ++ maybe "" show mbNum
-                ++ " outside of anonymous procedure expression")
+                ++ " outside of anonymous procedure/function expression")
                pos
         flattenExp var ty castFrom pos
     else do
@@ -582,17 +582,28 @@ flattenExp (CondExp cond thn els) ty castFrom pos = do
                 Nothing Nothing Nothing)
         pos Det
     return $ maybePlace (Var resultName ParamIn Ordinary) pos
-flattenExp expr@(AnonProc mods _ pstmts clsd res) ty castFrom pos = do
-    anonState <- gets anonProcState
-    let newAnonState = pushAnonProcState anonState
-    logFlatten $ "Flattening new anon proc with state " ++ show newAnonState
-    modify $ \s -> s{anonProcState=newAnonState}
+flattenExp (AnonProc mods _ pstmts clsd res) ty castFrom pos =
     let detism = modifierDetism mods
-    pstmts' <- flattenInner True detism $ flattenStmts pstmts detism
-    anonState' <- gets anonProcState
-    modify $ \s -> s{anonProcState=popAnonProcState anonState anonState'}
-    let anonParams = processAnonProcParams anonState'
-    return $ typeAndPlace (AnonProc mods anonParams pstmts' clsd res) ty castFrom pos
+    in flattenAnon mods clsd res ty castFrom pos $ flattenStmts pstmts detism
+flattenExp (AnonFunc exp) ty castFrom pos = 
+    flattenAnon defaultProcModifiers Nothing Nothing ty castFrom pos
+    $ do
+        logFlatten $ "Flattening AnonFunc expression: " ++ show exp 
+        let outs = expOutputs $ content exp
+        unless (Set.null outs)
+            $ lift $ errmsg pos 
+            $ "Anonymous function cannot contain output variables: " 
+            ++ intercalate ", " (Set.toList outs)
+        exp' <- flattenPExp exp
+        AnonProcState _ _ paramCount params <- gets anonProcState
+        let outNum = case paramCount of
+                Nothing -> Just $ (+1) . maximum $ (-1) : Map.keys params
+                Just _ -> Nothing
+        logFlatten $ "Flattened AnonFunc has output num: " ++ show outNum
+        out <- flattenPExp (AnonParamVar outNum ParamOut `maybePlace` pos)
+        logFlatten $ "Flattened AnonFunc has output var: " ++ show out 
+        emit pos $ ForeignCall "llvm" "move" [] [exp', out]
+        flushPostponed
 flattenExp (CaseExp pexpr cases deflt) ty castFrom pos = do
     resultName <- tempVar
     pexpr' <- flattenPExp pexpr
@@ -611,6 +622,24 @@ flattenExp (Typed exp ty castFrom) _ _ pos = do
     lift $ explicitTypeSpecificationWarning pos ty
     lift $ forM_ castFrom (explicitTypeSpecificationWarning pos)
     flattenExp exp ty castFrom pos
+
+    
+-- | Flatten something, and produce an anonymous procedure from the resultant flattened
+-- statements
+flattenAnon :: ProcModifiers -> (Maybe VarDict) -> (Maybe (Set ResourceFlowSpec)) 
+            -> TypeSpec -> Maybe TypeSpec -> OptPos
+            -> Flattener () -> Flattener (Placed Exp)
+flattenAnon mods clsd res ty castFrom pos inner = do
+    anonState <- gets anonProcState
+    let newAnonState = pushAnonProcState anonState
+    logFlatten $ "Flattening new anon proc with state " ++ show newAnonState
+    modify $ \s -> s{anonProcState=newAnonState}
+    let detism = modifierDetism mods
+    body <- flattenInner True detism inner
+    anonState' <- gets anonProcState
+    modify $ \s -> s{anonProcState=popAnonProcState anonState anonState'}
+    let anonParams = processAnonProcParams anonState'
+    return $ typeAndPlace (AnonProc mods anonParams body clsd res) ty castFrom pos
 
 
 -- | Emit a warning if a type constraint is the current module.
