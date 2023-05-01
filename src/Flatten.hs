@@ -183,8 +183,10 @@ tempVar :: Flattener VarName
 tempVar = do
     ctr <- gets tempCtr
     modify (\s -> s { tempCtr = ctr + 1 })
-    return $ mkTempName ctr
-
+    let name = mkTempName ctr
+    noteVarIntro name
+    return name
+    
 
 -- |Run a flattener, ignoring its state changes except for the temp variable
 --  counter.  If transparent is True, also keep changes to the set of defined
