@@ -9,7 +9,7 @@ support best programming practice, but not necessarily *common* practice.
 
 Wybe combines the best features of declarative and imperative languages,
 in particular borrowing features from functional, logic, imperative, and
-object oriented languages, but does not neatly fit into any of these
+object-oriented languages, but does not neatly fit into any of these
 paradigms.  Its main organising principle is that *values* are
 immutable, but *variables* may be reassigned.  This means that values
 may be passed around at will without worrying that they may be modified.
@@ -19,7 +19,7 @@ may be passed around at will without worrying that they may be modified.
 
 Code appearing at the top level of a module (that is, not inside a procedure
 or function definition) is executed when the program
-is run, so Hello, World! in Wybe is quite simple:
+is run, so "Hello, World!" in Wybe is quite simple:
 ```
 # Print a friendly greeting
 !println("Hello, World!")
@@ -70,8 +70,7 @@ can be found with the following:
 #### Optimisation Options
 
 The `--llvm-opt-level` (`-O`) options specifies the level of optimisation used
-within the LLVM compiler during the compilations stage of a Wybe module. By
-default this is set to 3, yet supports the values 0, 1, 2, or 3. More information
+within the LLVM compiler during the compilations stage of a Wybe module. By default, this is set to 3, yet supports the values 0, 1, 2, or 3. More information
 can be found [here](https://llvm.org/docs/CommandGuide/llc.html#id1).
 
 
@@ -126,7 +125,7 @@ Wybe has the usual complement of primitive types:
 | `bool`     | Boolean; either `true` or `false`                |
 | `string`   | Character string (double quotes)                 |
 | `c_string` | C-style character string (double quotes)         |
-| `char`     | Individual ascii character (single quotes)       |
+| `char`     | Individual ASCII character (single quotes)       |
 
 These are all defined in the `wybe` module, which is automatically imported into
 every module, so there is no need to explicitly import them.
@@ -143,7 +142,7 @@ A higher order type has one of the two following forms
 Two higher order types are considered compatible if they share the same flows
 and the type parameters are also compatible.
 
-The list of modifiers specify the modifiers of the higher order type. These modifiers
+The list of modifiers specifies the modifiers of the higher order type. These modifiers
 can be a purity modifier, a determinism modifier, or `resource`. The special
 `resource` modifier states that this higher order term may use some resource.
 
@@ -177,7 +176,7 @@ String constants are written as any number of characters between double quote
 (`"`) characters.  Character constants are written as a single character between
 single quote (`'`) characters.
 
-To denote a a C-style (null-terminated) string, a `c` precedes the first `"`.
+To denote a C-style (null-terminated) string, a `c` precedes the first `"`.
 This is provided for interoperability with external libraries.
 
 In both strings and character constants, the backslash (`\`) character is special,
@@ -191,14 +190,14 @@ the following character:
 | `a`       | Alert or bell (ASCII code 0x07)         |
 | `b`       | Backspace (ASCII code 0x08)             |
 | `e`       | Escape (ASCII code 0x1b)                |
-| `f`       | Formfeed (ASCII code 0x0c)              |
+| `f`       | Form feed (ASCII code 0x0c)              |
 | `n`       | Newline or Line feed (ASCII code 0x0a)  |
 | `r`       | Carriage return (ASCII code 0x0d)       |
 | `t`       | Horizontal tab (ASCII code 0x09)        |
 | `v`       | Vertical tab (ASCII code 0x0b)          |
 
 If the character following the backslash is an `x` or `X`, the following two
-characters must be hexidecimal characters, in which case the hexidecimal number
+characters must be hexadecimal characters, in which case the hexadecimal number
 specifies the character code.  For example `'\x20'` specifies character code 32,
 which is the space character.
 
@@ -291,7 +290,7 @@ infix and prefix operator syntax.
 
 Function calls may have one of the following forms:
   - A call with all arguments inputs.  This is the conventional form, where all
-    arguments are evaluated and then the function is called, producing the
+    arguments are evaluated, and then the function is called, producing the
     function value.  This form of expression is considered to be an input to
     whatever statement or expression it occurs in.
 
@@ -370,7 +369,7 @@ separate lines.  It is generally recommended to lay your code out this way.
 
 The Wybe compiler tries to distinguish line breaks that appear in the middle of
 a statement from ones that separate statements by considering adjacent
-characters.  If what preceeded the line break was an operator symbol, a comma,
+characters.  If what preceded the line break was an operator symbol, a comma,
 semicolon, left parenthesis, bracket, or brace, or one of the keywords 
 `in`, `is`, `where`, `pub`, `def`, `type`, `constructor`, or `constructors`,
 then the line break is not considered to be a separator.  Likewise, if what
@@ -415,7 +414,7 @@ Again *name* is the procedure name, each *param* is a parameter name, the
 corresponding *type* is its type, and *body* is a sequence of statements making
 up the body of the procedure.  The statements in *body* should be placed on
 separate lines, or should be separated with semicolon (`;`) characters.  Each
-*dir* is a dataflow
+*dir* is a data flow
 direction annotation, either nothing to indicate an input, `?` for an
 output, or `!` to indicate both an input and an output.
 Procedures may have any number of input, output, and input/output
@@ -500,8 +499,7 @@ an input.
 
 The modifiers here are exactly those found in a [higher order type](#higher-order-types).
 These modifiers act like the modifiers of a procedure or function declaration, stating the
-purity and determinism of the anonymous procedure. The special `resource` modifier is
-allows all in-scope [resources](#resources) to be used within this anonymous
+purity and determinism of the anonymous procedure. The special `resource` modifier allows all in-scope [resources](#resources) to be used within this anonymous
 procedure.
 
 Some example anonymous procedures are as follows, with examples as to their use:
@@ -666,7 +664,7 @@ following syntax:
 def (a:int + b:int):int = ...
 ```
 
-Alternatively, the "operatorness" of a name can be overriden, making the
+Alternatively, the "operatorness" of a name can be overridden, making the
 compiler treat it as an ordinary identifier, by surrounding it with backquote
 characters (`` ` ``).  So the `+` function could also be defined with the
 syntax:
@@ -729,7 +727,7 @@ pub def add(?x:int, y:int, xy:int) { ?x = xy - y }
 ```
 
 Like any procedures, all of these can be called as functions, so with
-these definitions, all of the following are valid:
+these definitions, all the following are valid:
 ```
 ?z = add(x, 1)
 z = add(?x, 1)
@@ -760,7 +758,7 @@ in which case they do not produce their usual output(s).  Functions
 that may fail to produce a result are also known as *partial* functions.
 
 Test procedures and functions must be explicitly declared by inserting
-the modifier `test`, enclosed within curley braces, after the `def` keyword.
+the modifier `test`, enclosed within curly braces, after the `def` keyword.
 You can also use the modifier `partial` in place of `test`.  For example:
 
 ```
@@ -796,6 +794,8 @@ Note that `|` binds looser than `;` (or newline), so in this example,
 *statement1* `;` *statement2* is the first disjunct, and  *statement3* `;`
 *statement4* is the second.  Each disjunct can have one or more statements, and
 there can be more than two disjuncts by repeating the `|` operator.
+You can enclose a disjunction within `{` braces `}` to limit the scope of
+a disjunction. 
 
 If the first disjunct completes without a failure, the second and subsequent
 disjuncts are ignored.  However, if any [test or partial function call](#tests)
@@ -811,7 +811,7 @@ Braces may be used for grouping, so that code before or after the disjunction
 will always be executed, regardless of which disjunct succeeds.  Variables bound
 before the start of the disjunction will be available at the start of every
 disjunct, and variables that are bound by *every* disjunct will be available in
-following code, and are consideredd to be bound by the enclosing procedure.
+following code, and are considered to be bound by the enclosing procedure.
 
 Disjunction can be used in a test procedure, in which case the test succeeds if
 any disjunct succeeds.  It can also be used in an ordinary (deterministic)
@@ -827,7 +827,7 @@ parentheses are required because of the precedence of the `|` operator.  The
 value of this expression will be the value of *expression1* if no failure occurs
 during its evaluation, or *expression2* otherwise.  Each expression can involve
 any number of partial function calls, and will be considered to succeed if and
-only if all of the partial function calls succeed.  As with disjunctive
+only if all the partial function calls succeed.  As with disjunctive
 statements, a disjunctive expression can have two or more disjuncts, and is
 partial (a test) if and only if the last disjunct is partial.  For example, we
 can define a function to return the tail of a list, or return the empty list if
@@ -854,10 +854,10 @@ as an input.
 This can serve the role filled by *pattern matching* in other programming
 languages.  Indeed, when constructors are defined in Wybe (see the section on
 [constructor declarations](#constructor-declarations)), the compiler
-automatically generates a backward mode function for each construcor function.
+automatically generates a backward mode function for each constructor function.
 For example, if you define a type `position` with a constructor `position(x:int,
 y:int)`, the compiler automatically generates a backward mode function
-`position(?x:int,?y:int)`.  Thus a new position can be created with the
+`position(?x:int,?y:int)`.  Thus, a new position can be created with the
 statement
 ```
 ?pos = position(x, y)
@@ -884,9 +884,9 @@ pos = polar(?r, ?theta)
 will succeed, and the other will fail.  Therefore, these statements are tests,
 and can only appear where test statements are allowed, such as in a [conditional
 statement](#conditionals).  Note that variables assigned by such a test cannot
-be used outside of the context in which that test has succeeded.
+be used outside the context in which that test has succeeded.
 
-Patterns can also be nested.  For example, with the type `region` definined by:
+Patterns can also be nested.  For example, with the type `region` defined by:
 ```
 constructor region(bottom_left:position, top_right:position)
 ```
@@ -894,7 +894,7 @@ the statement
 ```
 region(cartesian(?x1,?y1),cartesian(?x2,?y2)) = reg
 ```
-will deconstruct a region `reg` expressed as two cartesian coordinates.
+will deconstruct a region `reg` expressed as two Cartesian coordinates.
 
 It is also possible to include input values where outputs are expected, as long
 as the type supports an equality test.  This is equivalent to providing an
@@ -970,7 +970,7 @@ Wybe's conditional construct has the form:
 
 > `if` `{` *cases* `}`
 
-where *cases* is one more more cases, separated by vertical bar characters
+where *cases* is one or more cases, separated by vertical bar characters
 (`|`). Each case takes the form:
 
 > *test* `::` *statements*
@@ -1003,7 +1003,7 @@ Wybe's `case` construct has the form:
 > `case` *expression* `in {` *cases* `}`
 
 where *expression* is used to select the code to execute, and *cases* is one
-more more cases, separated by vertical bar characters (`|`). Each case takes the
+or more cases, separated by vertical bar characters (`|`). Each case takes the
 form:
 
 > *case_expr* `::` *statements*
@@ -1179,12 +1179,12 @@ the specified types and returns a value of the type being defined (namely, the
 current module) holding all the provided data.  Constructor functions can also
 be used ["backwards"](function-calls), with the constructed value provided and
 the arguments taken as outputs, to extract the data stored in the constructed
-value.  Note that, unlike object oriented languages, a constructor in Wybe
+value.  Note that, unlike object-oriented languages, a constructor in Wybe
 cannot specify a body, it simply creates a value of the specified type
 containing the specified data.  If you wish to carry out some computation to
 determine what values to store, you may write a function or procedure that calls
 the constructor.  Since Wybe does not require any special syntax to call a
-constructor (such as `new` in many object oriented languages), they are ordinary
+constructor (such as `new` in many object-oriented languages), they are ordinary
 functions, aside from the fact that they are automatically generated.
 
 The form of declaration above keeps the constructors of a type private; they may
@@ -1193,7 +1193,7 @@ public, simply precede the `constructor` keyword with `pub`.
 If you want a particular constructor to be public, precede that constructor 
 with the `pub` keyword.
 
-Note that, unlike most Object Oriented languages, making constructors public
+Note that, unlike most object-oriented languages, making constructors public
 does not commit you to any particular representation of the type.
 You may define your own public functions to act as constructors, and they will
 be indistinguishable from the actual constructors by users of the type.
@@ -1252,7 +1252,7 @@ Wybe does not have the concept of
 nor the concepts of pointers or references.
 You can safely have multiple variables refer to the same data without worrying
 that modifying the data through one of them will change the values of the
-others.  Thus Wybe implements a
+others.  Thus, Wybe implements a
 [copy-on-write](https://en.wikipedia.org/wiki/Copy-on-write) semantics.
 For example
 ```
@@ -1420,7 +1420,7 @@ An application may build up logging message throughout, but explicitly threading
 the log through the entire application can become tiresome, and can make code
 maintenance more difficult.
 Resources are often useful where an imperative application would use a global or
-static variable, or where an object oriented application would use a class
+static variable, or where an object-oriented application would use a class
 variable.
 
 ### <a name="resource-declarations"></a>Declaring a resource
@@ -1512,8 +1512,8 @@ resources it names. This also applies to higher order terms that have a
 Wybe uses predefined resources for a few key language features.
 In particular, the `io` resource holds a representation of the state of the
 world outside the computation being performed, including the file system.
-Thus all procedures that perform input/output are declared to `use !io`,
-the `!` being necessary because any procedure that does I/O changes the state of
+Thus, all procedures that perform input/output are declared to `use !io`,
+the `!` being necessary because any procedure that performs I/O changes the state of
 the world outside the computation, either by outputting something, or by
 changing the part of an input stream being read.
 Therefore, any call to a procedure that performs I/O (or that calls a procedure
@@ -1546,7 +1546,7 @@ procedure that uses an implicit resource is called in the context of a procedure
 that does not `use` that resource, the value supplied for the resource reflects
 the location of the source code of the call to that procedure.  If called in the
 context of a procedure that does `use` that resource, the value of the resource
-in that context is used.  Thus a procedure can obtain information about the
+in that context is used.  Thus, a procedure can obtain information about the
 context in which it is called simply by using the appropriate resources.
 However, if that procedure is called from another procedure that uses that
 resource, the caller's caller's calling context will be used instead.
@@ -1640,7 +1640,7 @@ When used in a `type` declaration, it has this form:
 > `type` `{unique}` *type* `{` *ctors* *defs* `}`
 
 Note that parameters of constructors must not have unique types, unless the
-constructor is a member of a unique type.  Also accessors for unique types are
+constructor is a member of a unique type.  Also, accessors for unique types are
 not usually useful, because once you have accessed one member of the type, you
 cannot use the value again, such as to access the other members.  Instead, it is
 usually preferable to use a deconstructor.  This code is illegal, because it
@@ -2072,10 +2072,10 @@ This differs from an ordinary type constraint in that:
 -  this may only be used in foreign calls;
 -  it may only be applied to (input or output) variables; and
 -  it specifies the type of the expression without requiring that the value
-   produced by the expression should be the same; ie, the type of the expression
+   produced by the expression should be the same; i.e., the type of the expression
    is *changed* to the specified type.
 
-The final point is the key difference:  a *type constraint* specifies the what
+The final point is the key difference:  a *type constraint* specifies what
 the type of the expression must be, while a *type cast* specifies that its type
 should be converted from whatever it is to the specified type.  A type
 constraint will cause a type error if the specified type is incompatible with
@@ -2171,7 +2171,7 @@ This gives two ways of managing impurity in Wybe:
 
 If impurity is managed through a `phantom` (or other zero-bit type) resource or
 value, that resource or value will need to be threaded through the entire
-application.  In most cases, this is the prefered approach:  it gives the
+application.  In most cases, this is the preferred approach:  it gives the
 compiler more scope for optimisation, and provides documentation to the user of
 how operations impact the state of the computation.
 
