@@ -12,7 +12,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {semipure} (0 calls)
 0: func_factorial.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     func_factorial.factorial<0>(5:wybe.int, ?tmp#0##0:wybe.int) #0 @func_factorial:nn:nn
@@ -24,7 +24,7 @@ module top-level code > public {semipure} (0 calls)
 
 factorial > public (2 calls)
 0: func_factorial.factorial<0>
-factorial(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}>:
+factorial(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_sle(n##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @int:nn:nn

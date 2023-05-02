@@ -14,7 +14,7 @@ AFTER EVERYTHING:
 
 in > public (2 calls)
 0: disjunction.in<0>
-in(e##0:wybe.int, lst##0:wybe.list(wybe.int), ?#success##0:wybe.bool)<{}; {}>:
+in(e##0:wybe.int, lst##0:wybe.list(wybe.int), ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool)
@@ -38,7 +38,7 @@ in(e##0:wybe.int, lst##0:wybe.list(wybe.int), ?#success##0:wybe.bool)<{}; {}>:
 
 member > public (1 calls)
 0: disjunction.member<0>
-member(e##0:wybe.int, lst##0:wybe.list(wybe.int), ?#success##0:wybe.bool)<{}; {}>:
+member(e##0:wybe.int, lst##0:wybe.list(wybe.int), ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool)
@@ -62,7 +62,7 @@ member(e##0:wybe.int, lst##0:wybe.list(wybe.int), ?#success##0:wybe.bool)<{}; {}
 
 saturating_tail > public (0 calls)
 0: disjunction.saturating_tail<0>
-saturating_tail(lst##0:wybe.list(T), ?tl##0:wybe.list(T))<{}; {}>:
+saturating_tail(lst##0:wybe.list(T) <{}; {}; {0}>, ?tl##0:wybe.list(T) <{}; {}; {0}>)<{}; {}; {}>:
   AliasPairs: [(lst##0,tl##0)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool)
@@ -77,7 +77,7 @@ saturating_tail(lst##0:wybe.list(T), ?tl##0:wybe.list(T))<{}; {}>:
 
 saturating_tail2 > public (0 calls)
 0: disjunction.saturating_tail2<0>
-saturating_tail2(lst##0:wybe.list(T), ?#result##0:wybe.list(T))<{}; {}>:
+saturating_tail2(lst##0:wybe.list(T) <{}; {}; {0}>, ?#result##0:wybe.list(T) <{}; {}; {0}>)<{}; {}; {}>:
   AliasPairs: [(#result##0,lst##0)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)

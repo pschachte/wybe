@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,semipure} (0 calls)
 0: failure_in_cond_test.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @int:nn:nn
@@ -21,7 +21,7 @@ module top-level code > public {inline,semipure} (0 calls)
 
 foo > {inline} (3 calls)
 0: failure_in_cond_test.foo<0>
-foo(?i##3:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
+foo(?i##3:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.int, ?i##3:wybe.int) @failure_in_cond_test:nn:nn

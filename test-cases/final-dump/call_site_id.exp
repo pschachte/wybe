@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {semipure} (0 calls)
 0: call_site_id.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @int:nn:nn
@@ -24,51 +24,51 @@ module top-level code > public {semipure} (0 calls)
     case ~tmp#5##0:wybe.bool of
     0:
         foreign llvm sub(0:wybe.int, ~x##0:wybe.int, ?tmp#1##0:wybe.int) @int:nn:nn
-        call_site_id.foo<0>(~tmp#1##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #14 @call_site_id:nn:nn
+        call_site_id.foo<0>(~tmp#1##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @call_site_id:nn:nn
         foreign llvm icmp_sgt(y##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @int:nn:nn
         case ~tmp#4##0:wybe.bool of
         0:
             foreign llvm sub(0:wybe.int, ~y##0:wybe.int, ?tmp#2##0:wybe.int) @int:nn:nn
-            call_site_id.foo<0>(~tmp#2##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #15 @call_site_id:nn:nn
+            call_site_id.foo<0>(~tmp#2##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #15 @call_site_id:nn:nn
 
         1:
-            call_site_id.foo<0>(~y##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #16 @call_site_id:nn:nn
+            call_site_id.foo<0>(~y##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #16 @call_site_id:nn:nn
 
 
     1:
-        call_site_id.foo<0>(~x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #17 @call_site_id:nn:nn
+        call_site_id.foo<0>(~x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #17 @call_site_id:nn:nn
         foreign llvm icmp_sgt(y##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool) @int:nn:nn
         case ~tmp#3##0:wybe.bool of
         0:
             foreign llvm sub(0:wybe.int, ~y##0:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
-            call_site_id.foo<0>(~tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #18 @call_site_id:nn:nn
+            call_site_id.foo<0>(~tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #18 @call_site_id:nn:nn
 
         1:
-            call_site_id.foo<0>(~y##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #19 @call_site_id:nn:nn
+            call_site_id.foo<0>(~y##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #19 @call_site_id:nn:nn
 
 
 
 
 bar > public {inline} (9 calls)
 0: call_site_id.bar<0>
-bar(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+bar(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    call_site_id.foo<0>(~x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @call_site_id:nn:nn
+    call_site_id.foo<0>(~x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @call_site_id:nn:nn
 
 
 foo > public (1 calls)
 0: call_site_id.foo<0>
-foo(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+foo(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @call_site_id:nn:nn
-    wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @call_site_id:nn:nn
-    wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @call_site_id:nn:nn
-    wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @call_site_id:nn:nn
-    wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @call_site_id:nn:nn
-    wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #5 @call_site_id:nn:nn
-    wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #6 @call_site_id:nn:nn
+    wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @call_site_id:nn:nn
+    wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @call_site_id:nn:nn
+    wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @call_site_id:nn:nn
+    wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @call_site_id:nn:nn
+    wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @call_site_id:nn:nn
+    wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @call_site_id:nn:nn
+    wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @call_site_id:nn:nn
     foreign llvm mul(~x##0:wybe.int, 5:wybe.int, ?tmp#1##0:wybe.int) @int:nn:nn
     foreign llvm add(~tmp#1##0:wybe.int, 10:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @int:nn:nn

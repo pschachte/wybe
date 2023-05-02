@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,semipure} (0 calls)
 0: higher_order_inline.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @int:nn:nn
@@ -22,7 +22,7 @@ module top-level code > public {inline,semipure} (0 calls)
 
 #closure#1 > {inline} (1 calls)
 0: higher_order_inline.#closure#1<0>
-#closure#1(a##0:A, ?#result##0:A)<{}; {}>:
+#closure#1(a##0:A <{}; {}; {0}>, ?#result##0:A <{}; {}; {0}>)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(~a##0:A, ?#result##0:A) @predicate:nn:nn

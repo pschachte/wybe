@@ -10,11 +10,11 @@
 
 module UnivSet (
     UnivSet(..), UnivSet.union, UnivSet.intersection, subtractUnivSet,
-    UnivSet.member, isEmpty, isUniv, emptyUnivSet,
+    UnivSet.member, isEmpty, isUniv, emptyUnivSet, UnivSet.singleton,
     UnivSet.fromList, UnivSet.toList, UnivSet.toSet,
     showUnivSet, showSet,
     mapFromUnivSetM,
-    whenFinite
+    whenFinite, mapUnivSet
     ) where
 
 
@@ -22,7 +22,6 @@ import           Data.Set     as S
 import           Data.List
 import           Data.Map     as M
 import           GHC.Generics (Generic)
-import qualified Data.Functor as UnivSet
 
 
 ----------------------------------------------------------------
@@ -40,9 +39,8 @@ data UnivSet a
 
 -- | Take the union of two UnivSets.
 union :: Ord a => UnivSet a -> UnivSet a -> UnivSet a
-union UniversalSet _ = UniversalSet
-union _ UniversalSet = UniversalSet
 union (FiniteSet s1) (FiniteSet s2) = FiniteSet $ s1 `S.union` s2
+union _ _ = UniversalSet
 
 
 -- | Take the intersection of two UnivSets.
@@ -79,6 +77,11 @@ isUniv (FiniteSet s) = False
 -- | The empty UnivSet
 emptyUnivSet :: UnivSet a
 emptyUnivSet = FiniteSet S.empty
+
+
+-- | A singleton UnivSet
+singleton :: a -> UnivSet a
+singleton = FiniteSet . S.singleton
 
 
 -- | Make a finite UnivSet from a list of elements
@@ -122,3 +125,10 @@ mapFromUnivSetM f set uset = do
 whenFinite :: Ord a => (Set a -> Set a) -> UnivSet a -> UnivSet a
 whenFinite _  UniversalSet  = UniversalSet
 whenFinite fn (FiniteSet s) = FiniteSet $ fn s
+
+
+-- | Map a UnivSet to a fixed value when infinite, else map the finite set
+-- under a function 
+mapUnivSet :: b -> (Set a -> b) -> UnivSet a -> b
+mapUnivSet x _ UniversalSet  = x
+mapUnivSet _ f (FiniteSet s) = f s 

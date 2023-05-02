@@ -12,7 +12,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,semipure} (0 calls)
 0: higher_order_impure.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     higher_order_impure.#anon#1<0>(_:wybe.list(wybe.int)) #0 @higher_order_impure:nn:nn
@@ -24,19 +24,19 @@ module top-level code > public {inline,semipure} (0 calls)
 
 #anon#1 > {inline,impure} (1 calls)
 0: higher_order_impure.#anon#1<0>
-#anon#1([^l2##0:wybe.list(wybe.int)])<{}; {}>:
+#anon#1([^l2##0:wybe.list(wybe.int)])<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
 #anon#1 > {inline,impure} (1 calls)
 1: higher_order_impure.#anon#1<1>
-#anon#1([^l2##0:wybe.list(wybe.int)])<{}; {}>:
+#anon#1([^l2##0:wybe.list(wybe.int)])<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
 
 
 measure > public {inline,impure} (1 calls)
 0: higher_order_impure.measure<0>
-measure(func##0:{impure}(), ?seconds_elapsed##0:wybe.float)<{}; {}>:
+measure(func##0:{impure}(), ?seconds_elapsed##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     ~func##0:{impure}() #0 @higher_order_impure:nn:nn

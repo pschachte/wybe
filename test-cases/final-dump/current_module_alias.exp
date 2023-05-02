@@ -13,7 +13,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {semipure} (0 calls)
 0: current_module_alias.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     current_module_alias.toCelsius<0>(1.0:wybe.float, ?tmp#0##0:wybe.float) #0 @current_module_alias:nn:nn
@@ -25,7 +25,7 @@ module top-level code > public {semipure} (0 calls)
 
 toCelsius > public {noinline} (1 calls)
 0: current_module_alias.toCelsius<0>
-toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}>:
+toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm fsub(~f##0:wybe.float, 32.0:wybe.float, ?tmp#1##0:wybe.float) @float:nn:nn
@@ -78,7 +78,7 @@ entry:
 
 toCelsius > public {inline} (0 calls)
 0: math.temperature.toCelsius<0>
-toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}>:
+toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm fsub(~f##0:wybe.float, 32.0:wybe.float, ?tmp#1##0:wybe.float) @float:nn:nn

@@ -46,7 +46,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 = > public (1 calls)
 0: mutual_type.a.=<0>
-=(#left##0:mutual_type.a, #right##0:mutual_type.a, ?#success##0:wybe.bool)<{}; {}>:
+=(#left##0:mutual_type.a, #right##0:mutual_type.a, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -79,7 +79,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 a > public {inline} (0 calls)
 0: mutual_type.a.a<0>
-a(ahead##0:wybe.int, atail##0:mutual_type.b, ?#result##0:mutual_type.a)<{}; {}>:
+a(ahead##0:wybe.int, atail##0:mutual_type.b, ?#result##0:mutual_type.a)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:mutual_type.a) @mutual_type:nn:nn
@@ -87,7 +87,7 @@ a(ahead##0:wybe.int, atail##0:mutual_type.b, ?#result##0:mutual_type.a)<{}; {}>:
     foreign lpvm mutate(~#rec##1:mutual_type.a, ?#result##0:mutual_type.a, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~atail##0:mutual_type.b) @mutual_type:nn:nn
 a > public {inline} (12 calls)
 1: mutual_type.a.a<1>
-a(?ahead##0:wybe.int, ?atail##0:mutual_type.b, #result##0:mutual_type.a, ?#success##0:wybe.bool)<{}; {}>:
+a(?ahead##0:wybe.int, ?atail##0:mutual_type.b, #result##0:mutual_type.a, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -106,7 +106,7 @@ a(?ahead##0:wybe.int, ?atail##0:mutual_type.b, #result##0:mutual_type.a, ?#succe
 
 ahead > public {inline} (0 calls)
 0: mutual_type.a.ahead<0>
-ahead(#rec##0:mutual_type.a, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
+ahead(#rec##0:mutual_type.a, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -121,7 +121,7 @@ ahead(#rec##0:mutual_type.a, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {
 
 ahead > public {inline} (0 calls)
 1: mutual_type.a.ahead<1>
-ahead(#rec##0:mutual_type.a, ?#rec##1:mutual_type.a, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
+ahead(#rec##0:mutual_type.a, ?#rec##1:mutual_type.a, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -138,7 +138,7 @@ ahead(#rec##0:mutual_type.a, ?#rec##1:mutual_type.a, #field##0:wybe.int, ?#succe
 
 atail > public {inline} (0 calls)
 0: mutual_type.a.atail<0>
-atail(#rec##0:mutual_type.a, ?#result##0:mutual_type.b, ?#success##0:wybe.bool)<{}; {}>:
+atail(#rec##0:mutual_type.a, ?#result##0:mutual_type.b, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -153,7 +153,7 @@ atail(#rec##0:mutual_type.a, ?#result##0:mutual_type.b, ?#success##0:wybe.bool)<
 
 atail > public {inline} (0 calls)
 1: mutual_type.a.atail<1>
-atail(#rec##0:mutual_type.a, ?#rec##1:mutual_type.a, #field##0:mutual_type.b, ?#success##0:wybe.bool)<{}; {}>:
+atail(#rec##0:mutual_type.a, ?#rec##1:mutual_type.a, #field##0:mutual_type.b, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -170,7 +170,7 @@ atail(#rec##0:mutual_type.a, ?#rec##1:mutual_type.a, #field##0:mutual_type.b, ?#
 
 no_a > public {inline} (0 calls)
 0: mutual_type.a.no_a<0>
-no_a(?#result##0:mutual_type.a)<{}; {}>:
+no_a(?#result##0:mutual_type.a)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(0:mutual_type.a, ?#result##0:mutual_type.a)
@@ -178,7 +178,7 @@ no_a(?#result##0:mutual_type.a)<{}; {}>:
 
 ~= > public {inline} (0 calls)
 0: mutual_type.a.~=<0>
-~=(#left##0:mutual_type.a, #right##0:mutual_type.a, ?#success##0:wybe.bool)<{}; {}>:
+~=(#left##0:mutual_type.a, #right##0:mutual_type.a, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     mutual_type.a.=<0>(~#left##0:mutual_type.a, ~#right##0:mutual_type.a, ?tmp#0##0:wybe.bool) #0
@@ -384,7 +384,7 @@ entry:
 
 = > public (1 calls)
 0: mutual_type.b.=<0>
-=(#left##0:mutual_type.b, #right##0:mutual_type.b, ?#success##0:wybe.bool)<{}; {}>:
+=(#left##0:mutual_type.b, #right##0:mutual_type.b, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -417,7 +417,7 @@ entry:
 
 b > public {inline} (0 calls)
 0: mutual_type.b.b<0>
-b(bhead##0:wybe.int, btail##0:mutual_type.a, ?#result##0:mutual_type.b)<{}; {}>:
+b(bhead##0:wybe.int, btail##0:mutual_type.a, ?#result##0:mutual_type.b)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:mutual_type.b) @mutual_type:nn:nn
@@ -425,7 +425,7 @@ b(bhead##0:wybe.int, btail##0:mutual_type.a, ?#result##0:mutual_type.b)<{}; {}>:
     foreign lpvm mutate(~#rec##1:mutual_type.b, ?#result##0:mutual_type.b, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~btail##0:mutual_type.a) @mutual_type:nn:nn
 b > public {inline} (12 calls)
 1: mutual_type.b.b<1>
-b(?bhead##0:wybe.int, ?btail##0:mutual_type.a, #result##0:mutual_type.b, ?#success##0:wybe.bool)<{}; {}>:
+b(?bhead##0:wybe.int, ?btail##0:mutual_type.a, #result##0:mutual_type.b, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -444,7 +444,7 @@ b(?bhead##0:wybe.int, ?btail##0:mutual_type.a, #result##0:mutual_type.b, ?#succe
 
 bhead > public {inline} (0 calls)
 0: mutual_type.b.bhead<0>
-bhead(#rec##0:mutual_type.b, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
+bhead(#rec##0:mutual_type.b, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -459,7 +459,7 @@ bhead(#rec##0:mutual_type.b, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {
 
 bhead > public {inline} (0 calls)
 1: mutual_type.b.bhead<1>
-bhead(#rec##0:mutual_type.b, ?#rec##1:mutual_type.b, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
+bhead(#rec##0:mutual_type.b, ?#rec##1:mutual_type.b, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -476,7 +476,7 @@ bhead(#rec##0:mutual_type.b, ?#rec##1:mutual_type.b, #field##0:wybe.int, ?#succe
 
 btail > public {inline} (0 calls)
 0: mutual_type.b.btail<0>
-btail(#rec##0:mutual_type.b, ?#result##0:mutual_type.a, ?#success##0:wybe.bool)<{}; {}>:
+btail(#rec##0:mutual_type.b, ?#result##0:mutual_type.a, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -491,7 +491,7 @@ btail(#rec##0:mutual_type.b, ?#result##0:mutual_type.a, ?#success##0:wybe.bool)<
 
 btail > public {inline} (0 calls)
 1: mutual_type.b.btail<1>
-btail(#rec##0:mutual_type.b, ?#rec##1:mutual_type.b, #field##0:mutual_type.a, ?#success##0:wybe.bool)<{}; {}>:
+btail(#rec##0:mutual_type.b, ?#rec##1:mutual_type.b, #field##0:mutual_type.a, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
@@ -508,7 +508,7 @@ btail(#rec##0:mutual_type.b, ?#rec##1:mutual_type.b, #field##0:mutual_type.a, ?#
 
 no_b > public {inline} (0 calls)
 0: mutual_type.b.no_b<0>
-no_b(?#result##0:mutual_type.b)<{}; {}>:
+no_b(?#result##0:mutual_type.b)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(0:mutual_type.b, ?#result##0:mutual_type.b)
@@ -516,7 +516,7 @@ no_b(?#result##0:mutual_type.b)<{}; {}>:
 
 ~= > public {inline} (0 calls)
 0: mutual_type.b.~=<0>
-~=(#left##0:mutual_type.b, #right##0:mutual_type.b, ?#success##0:wybe.bool)<{}; {}>:
+~=(#left##0:mutual_type.b, #right##0:mutual_type.b, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     mutual_type.b.=<0>(~#left##0:mutual_type.b, ~#right##0:mutual_type.b, ?tmp#0##0:wybe.bool) #0

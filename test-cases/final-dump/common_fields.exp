@@ -33,7 +33,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {semipure} (0 calls)
 0: common_fields.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(6,(common_fields.id<1>,fromList [NonAliasedParamCond 0 []])),(16,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -48,7 +48,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm mutate(~tmp#23##0:common_fields, ?tmp#24##0:common_fields, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1:wybe.int) @common_fields:nn:nn
     foreign llvm or(~tmp#24##0:common_fields, 1:wybe.int, ?tmp#1##0:common_fields) @common_fields:nn:nn
     common_fields.title<0>(tmp#0##0:common_fields, ?tmp#2##0:wybe.string) #2 @common_fields:nn:nn
-    wybe.string.print<0>(~tmp#2##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #14 @string:nn:nn
+    wybe.string.print<0>(~tmp#2##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#26##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#26##0:wybe.phantom, ?tmp#27##0:wybe.phantom) @io:nn:nn
     common_fields.id<0>(tmp#1##0:common_fields, ?tmp#3##0:wybe.int) #4 @common_fields:nn:nn
@@ -69,7 +69,7 @@ module top-level code > public {semipure} (0 calls)
         0:
 
         1:
-            wybe.string.print<0>(~tmp#5##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #15 @string:nn:nn
+            wybe.string.print<0>(~tmp#5##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #15 @string:nn:nn
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#37##0:wybe.phantom) @io:nn:nn
             foreign c putchar('\n':wybe.char, ~tmp#37##0:wybe.phantom, ?tmp#38##0:wybe.phantom) @io:nn:nn
             foreign lpvm store(~%tmp#38##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
@@ -78,7 +78,7 @@ module top-level code > public {semipure} (0 calls)
             0:
 
             1:
-                wybe.string.print<0>[410bae77d3](~tmp#6##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #16 @string:nn:nn
+                wybe.string.print<0>[410bae77d3](~tmp#6##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #16 @string:nn:nn
                 foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#40##0:wybe.phantom) @io:nn:nn
                 foreign c putchar('\n':wybe.char, ~tmp#40##0:wybe.phantom, ?tmp#41##0:wybe.phantom) @io:nn:nn
                 foreign lpvm store(~%tmp#41##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
@@ -89,7 +89,7 @@ module top-level code > public {semipure} (0 calls)
 
 = > public (1 calls)
 0: common_fields.=<0>
-=(#left##0:common_fields, #right##0:common_fields, ?#success##0:wybe.bool)<{}; {}>:
+=(#left##0:common_fields, #right##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#left##0:wybe.int, 3:wybe.int, ?tmp#23##0:wybe.int)
@@ -239,7 +239,7 @@ module top-level code > public {semipure} (0 calls)
 
 DVD > public {inline} (0 calls)
 0: common_fields.DVD<0>
-DVD(title##0:wybe.string, director##0:wybe.string, genre##0:wybe.string, id##0:wybe.int, ?#result##0:common_fields)<{}; {}>:
+DVD(title##0:wybe.string, director##0:wybe.string, genre##0:wybe.string, id##0:wybe.int, ?#result##0:common_fields)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(32:wybe.int, ?#rec##0:common_fields) @common_fields:nn:nn
@@ -250,7 +250,7 @@ DVD(title##0:wybe.string, director##0:wybe.string, genre##0:wybe.string, id##0:w
     foreign llvm or(~#rec##4:common_fields, 2:wybe.int, ?#result##0:common_fields) @common_fields:nn:nn
 DVD > public {inline} (14 calls)
 1: common_fields.DVD<1>
-DVD(?title##0:wybe.string, ?director##0:wybe.string, ?genre##0:wybe.string, ?id##0:wybe.int, #result##0:common_fields, ?#success##0:wybe.bool)<{}; {}>:
+DVD(?title##0:wybe.string, ?director##0:wybe.string, ?genre##0:wybe.string, ?id##0:wybe.int, #result##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -274,7 +274,7 @@ DVD(?title##0:wybe.string, ?director##0:wybe.string, ?genre##0:wybe.string, ?id#
 
 author > public {inline} (0 calls)
 0: common_fields.author<0>
-author(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)<{}; {}>:
+author(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -290,7 +290,7 @@ author(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)<{
 
 author > public {inline} (0 calls)
 1: common_fields.author<1>
-author(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?#success##0:wybe.bool)<{}; {}>:
+author(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -308,7 +308,7 @@ author(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?#s
 
 book > public {inline} (7 calls)
 0: common_fields.book<0>
-book(title##0:wybe.string, author##0:wybe.string, genre##0:wybe.string, id##0:wybe.int, ?#result##0:common_fields)<{}; {}>:
+book(title##0:wybe.string, author##0:wybe.string, genre##0:wybe.string, id##0:wybe.int, ?#result##0:common_fields)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(32:wybe.int, ?#rec##0:common_fields) @common_fields:nn:nn
@@ -318,7 +318,7 @@ book(title##0:wybe.string, author##0:wybe.string, genre##0:wybe.string, id##0:wy
     foreign lpvm mutate(~#rec##3:common_fields, ?#result##0:common_fields, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~id##0:wybe.int) @common_fields:nn:nn
 book > public {inline} (32 calls)
 1: common_fields.book<1>
-book(?title##0:wybe.string, ?author##0:wybe.string, ?genre##0:wybe.string, ?id##0:wybe.int, #result##0:common_fields, ?#success##0:wybe.bool)<{}; {}>:
+book(?title##0:wybe.string, ?author##0:wybe.string, ?genre##0:wybe.string, ?id##0:wybe.int, #result##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -342,7 +342,7 @@ book(?title##0:wybe.string, ?author##0:wybe.string, ?genre##0:wybe.string, ?id##
 
 director > public {inline} (0 calls)
 0: common_fields.director<0>
-director(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)<{}; {}>:
+director(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -358,7 +358,7 @@ director(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)
 
 director > public {inline} (0 calls)
 1: common_fields.director<1>
-director(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?#success##0:wybe.bool)<{}; {}>:
+director(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -376,7 +376,7 @@ director(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?
 
 frequency > public {inline} (0 calls)
 0: common_fields.frequency<0>
-frequency(#rec##0:common_fields, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
+frequency(#rec##0:common_fields, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -392,7 +392,7 @@ frequency(#rec##0:common_fields, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{
 
 frequency > public {inline} (0 calls)
 1: common_fields.frequency<1>
-frequency(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}>:
+frequency(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -410,7 +410,7 @@ frequency(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.int, ?#s
 
 genre > public (10 calls)
 0: common_fields.genre<0>
-genre(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)<{}; {}>:
+genre(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: [(#rec##0,#result##0)]
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -434,7 +434,7 @@ genre(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)<{}
 
 genre > public (5 calls)
 1: common_fields.genre<1>
-genre(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?#success##0:wybe.bool)<{}; {}>:
+genre(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: [(#field##0,#rec##0),(#field##0,#rec##1),(#rec##0,#rec##1)]
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -460,7 +460,7 @@ genre(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?#su
 
 id > public (14 calls)
 0: common_fields.id<0>
-id(#rec##0:common_fields, ?#result##0:wybe.int)<{}; {}>:
+id(#rec##0:common_fields, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -476,7 +476,7 @@ id(#rec##0:common_fields, ?#result##0:wybe.int)<{}; {}>:
 
 id > public (7 calls)
 1: common_fields.id<1>[410bae77d3]
-id(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.int)<{}; {}>:
+id(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: [(#rec##0,#rec##1)]
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -506,7 +506,7 @@ id(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.int)<{}; {}>:
 
 magazine > public {inline} (7 calls)
 0: common_fields.magazine<0>
-magazine(title##0:wybe.string, frequency##0:wybe.int, id##0:wybe.int, ?#result##0:common_fields)<{}; {}>:
+magazine(title##0:wybe.string, frequency##0:wybe.int, id##0:wybe.int, ?#result##0:common_fields)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(24:wybe.int, ?#rec##0:common_fields) @common_fields:nn:nn
@@ -516,7 +516,7 @@ magazine(title##0:wybe.string, frequency##0:wybe.int, id##0:wybe.int, ?#result##
     foreign llvm or(~#rec##3:common_fields, 1:wybe.int, ?#result##0:common_fields) @common_fields:nn:nn
 magazine > public {inline} (17 calls)
 1: common_fields.magazine<1>
-magazine(?title##0:wybe.string, ?frequency##0:wybe.int, ?id##0:wybe.int, #result##0:common_fields, ?#success##0:wybe.bool)<{}; {}>:
+magazine(?title##0:wybe.string, ?frequency##0:wybe.int, ?id##0:wybe.int, #result##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -538,7 +538,7 @@ magazine(?title##0:wybe.string, ?frequency##0:wybe.int, ?id##0:wybe.int, #result
 
 other > public {inline} (0 calls)
 0: common_fields.other<0>
-other(title##0:wybe.string, id##0:wybe.int, ?#result##0:common_fields)<{}; {}>:
+other(title##0:wybe.string, id##0:wybe.int, ?#result##0:common_fields)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:common_fields) @common_fields:nn:nn
@@ -547,7 +547,7 @@ other(title##0:wybe.string, id##0:wybe.int, ?#result##0:common_fields)<{}; {}>:
     foreign llvm or(~#rec##2:common_fields, 3:wybe.int, ?#result##0:common_fields) @common_fields:nn:nn
 other > public {inline} (7 calls)
 1: common_fields.other<1>
-other(?title##0:wybe.string, ?id##0:wybe.int, #result##0:common_fields, ?#success##0:wybe.bool)<{}; {}>:
+other(?title##0:wybe.string, ?id##0:wybe.int, #result##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(#result##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -567,7 +567,7 @@ other(?title##0:wybe.string, ?id##0:wybe.int, #result##0:common_fields, ?#succes
 
 title > public (7 calls)
 0: common_fields.title<0>
-title(#rec##0:common_fields, ?#result##0:wybe.string)<{}; {}>:
+title(#rec##0:common_fields, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasPairs: [(#rec##0,#result##0)]
   InterestingCallProperties: []
     foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -583,7 +583,7 @@ title(#rec##0:common_fields, ?#result##0:wybe.string)<{}; {}>:
 
 title > public (0 calls)
 1: common_fields.title<1>
-title(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string)<{}; {}>:
+title(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string)<{}; {}; {}>:
   AliasPairs: [(#field##0,#rec##0),(#field##0,#rec##1),(#rec##0,#rec##1)]
   InterestingCallProperties: [InterestingUnaliased 0]
     foreign llvm and(#rec##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int)
@@ -601,7 +601,7 @@ title(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string)<{}; 
 
 ~= > public {inline} (0 calls)
 0: common_fields.~=<0>
-~=(#left##0:common_fields, #right##0:common_fields, ?#success##0:wybe.bool)<{}; {}>:
+~=(#left##0:common_fields, #right##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     common_fields.=<0>(~#left##0:common_fields, ~#right##0:common_fields, ?tmp#0##0:wybe.bool) #0

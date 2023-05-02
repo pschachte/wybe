@@ -21,16 +21,16 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,semipure} (0 calls)
 0: person5.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("Amy":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #3 @person5:nn:nn
-    wybe.string.print<0>("Bob":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #5 @person5:nn:nn
+    wybe.string.print<0>("Amy":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @person5:nn:nn
+    wybe.string.print<0>("Bob":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @person5:nn:nn
 
 
 update_both > {inline} (1 calls)
 0: person5.update_both<0>
-update_both(p1##0:person5.person, ?p1##1:person5.person, p2##0:person5.person, ?p2##1:person5.person)<{}; {}>:
+update_both(p1##0:person5.person, ?p1##1:person5.person, p2##0:person5.person, ?p2##1:person5.person)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm mutate(~p1##0:person5.person, ?p1##1:person5.person, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, "Amy":wybe.string) @person5:nn:nn
@@ -117,7 +117,7 @@ entry:
 
 = > public {inline} (1 calls)
 0: person5.person.=<0>
-=(#left##0:person5.person, #right##0:person5.person, ?#success##0:wybe.bool)<{}; {}>:
+=(#left##0:person5.person, #right##0:person5.person, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:person5.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#left#firstname##0:wybe.string) @person5:nn:nn
@@ -138,13 +138,13 @@ entry:
 
 firstname > public {inline} (0 calls)
 0: person5.person.firstname<0>
-firstname(#rec##0:person5.person, ?#result##0:wybe.string)<{}; {}>:
+firstname(#rec##0:person5.person, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:person5.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string) @person5:nn:nn
 firstname > public {inline} (0 calls)
 1: person5.person.firstname<1>
-firstname(#rec##0:person5.person, ?#rec##1:person5.person, #field##0:wybe.string)<{}; {}>:
+firstname(#rec##0:person5.person, ?#rec##1:person5.person, #field##0:wybe.string)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm mutate(~#rec##0:person5.person, ?#rec##1:person5.person, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string) @person5:nn:nn
@@ -152,13 +152,13 @@ firstname(#rec##0:person5.person, ?#rec##1:person5.person, #field##0:wybe.string
 
 lastname > public {inline} (0 calls)
 0: person5.person.lastname<0>
-lastname(#rec##0:person5.person, ?#result##0:wybe.string)<{}; {}>:
+lastname(#rec##0:person5.person, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:person5.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.string) @person5:nn:nn
 lastname > public {inline} (0 calls)
 1: person5.person.lastname<1>
-lastname(#rec##0:person5.person, ?#rec##1:person5.person, #field##0:wybe.string)<{}; {}>:
+lastname(#rec##0:person5.person, ?#rec##1:person5.person, #field##0:wybe.string)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm mutate(~#rec##0:person5.person, ?#rec##1:person5.person, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.string) @person5:nn:nn
@@ -166,7 +166,7 @@ lastname(#rec##0:person5.person, ?#rec##1:person5.person, #field##0:wybe.string)
 
 person > public {inline} (0 calls)
 0: person5.person.person<0>
-person(firstname##0:wybe.string, lastname##0:wybe.string, ?#result##0:person5.person)<{}; {}>:
+person(firstname##0:wybe.string, lastname##0:wybe.string, ?#result##0:person5.person)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?#rec##0:person5.person) @person5:nn:nn
@@ -174,7 +174,7 @@ person(firstname##0:wybe.string, lastname##0:wybe.string, ?#result##0:person5.pe
     foreign lpvm mutate(~#rec##1:person5.person, ?#result##0:person5.person, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~lastname##0:wybe.string) @person5:nn:nn
 person > public {inline} (6 calls)
 1: person5.person.person<1>
-person(?firstname##0:wybe.string, ?lastname##0:wybe.string, #result##0:person5.person)<{}; {}>:
+person(?firstname##0:wybe.string, ?lastname##0:wybe.string, #result##0:person5.person)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#result##0:person5.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?firstname##0:wybe.string) @person5:nn:nn
@@ -183,7 +183,7 @@ person(?firstname##0:wybe.string, ?lastname##0:wybe.string, #result##0:person5.p
 
 ~= > public {inline} (0 calls)
 0: person5.person.~=<0>
-~=(#left##0:person5.person, #right##0:person5.person, ?#success##0:wybe.bool)<{}; {}>:
+~=(#left##0:person5.person, #right##0:person5.person, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(#left##0:person5.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.string) @person5:nn:nn

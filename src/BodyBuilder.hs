@@ -5,6 +5,8 @@
 --  License  : Licensed under terms of the MIT license.  See the file
 --           : LICENSE in the root directory of this project.
 
+{-# LANGUAGE TupleSections #-}
+{-# LANGUAGE LambdaCase #-}
 
 module BodyBuilder (
   BodyBuilder, buildBody, freshVarName, instr, buildFork, completeFork,
@@ -21,7 +23,7 @@ import Data.Map as Map
 import Data.List as List
 import Data.Set as Set
 import UnivSet as USet
-import Data.Maybe
+import Data.Maybe as Maybe
 import Data.Tuple.HT (mapFst)
 import Data.Bits
 import Data.Function
@@ -29,6 +31,7 @@ import Control.Monad
 import Control.Monad.Extra (whenJust, whenM)
 import Control.Monad.Trans (lift)
 import Control.Monad.Trans.State
+import AST (simpleShowMap)
 
 
 ----------------------------------------------------------------
@@ -121,20 +124,23 @@ type BodyBuilder = StateT BodyState Compiler
 
 -- Holds the content of a ProcBody while we're building it.
 data BodyState = BodyState {
-      currBuild     :: [Placed Prim],   -- ^The body we're building, reversed
-      currSubst     :: Substitution,    -- ^variable substitutions to propagate
-      blockDefs     :: Set PrimVarName, -- ^All variables defined in this block
-      forkConsts    :: Set PrimVarName, -- ^Consts in some branches of prev fork
-      outSubst      :: VarSubstitution, -- ^Substitutions for var assignments
-      subExprs      :: ComputedCalls,   -- ^Previously computed calls to reuse
-      failed        :: Bool,            -- ^True if this body always fails
-      tmpCount      :: Int,             -- ^The next temp variable number to use
-      buildState    :: BuildState,      -- ^The fork at the bottom of this node
-      parent        :: Maybe BodyState, -- ^What comes before/above this
-      globalsLoaded :: Map GlobalInfo PrimArg,
+      currBuild      :: [Placed Prim],   -- ^The body we're building, reversed
+      currSubst      :: Substitution,    -- ^variable substitutions to propagate
+      blockDefs      :: Set PrimVarName, -- ^All variables defined in this block
+      forkConsts     :: Set PrimVarName, -- ^Consts in some branches of prev fork
+      outSubst       :: VarSubstitution, -- ^Substitutions for var assignments
+      subExprs       :: ComputedCalls,   -- ^Previously computed calls to reuse
+      failed         :: Bool,            -- ^True if this body always fails
+      tmpCount       :: Int,             -- ^The next temp variable number to use
+      buildState     :: BuildState,      -- ^The fork at the bottom of this node
+      parent         :: Maybe BodyState, -- ^What comes before/above this
+      globalsLoaded  :: Map GlobalInfo PrimArg,
                                         -- ^The set of globals that we currently
                                         -- know the value of
-      reifiedConstr :: Map PrimVarName Constraint
+      varGlobalFlows :: Map PrimVarName GlobalFlows,
+                                        -- ^The global flows associated with each
+                                        -- variable assigned in this body.
+      reifiedConstr  :: Map PrimVarName Constraint
                                         -- ^Constraints attached to Boolean vars
       } deriving (Eq,Show)
 
@@ -157,20 +163,28 @@ data BuildState
 
 
 -- | A fresh BodyState with specified temp counter and output var substitution
-initState :: Int -> VarSubstitution -> BodyState
-initState tmp oSubst =
+initState :: Int -> VarSubstitution -> [PrimParam] -> BodyState
+initState tmp oSubst params =
     BodyState [] Map.empty Set.empty Set.empty oSubst Map.empty False tmp
-              Unforked Nothing Map.empty Map.empty
+              Unforked Nothing Map.empty (initGlobalVarFlows params) Map.empty
 
 
 -- | Set up a BodyState as a new child of the specified BodyState
 childState :: BodyState -> BuildState -> BodyState
 childState st@BodyState{currSubst=iSubst,outSubst=oSubst,subExprs=subs,
-                        tmpCount=tmp, forkConsts=consts, globalsLoaded=loaded,
+                        tmpCount=tmp, forkConsts=consts,
+                        globalsLoaded=loaded, varGlobalFlows=varFlows,
                         reifiedConstr=reif} bld =
     BodyState [] iSubst Set.empty consts oSubst subs False tmp bld (Just st)
-              loaded reif
+              loaded varFlows reif
 
+
+initGlobalVarFlows :: [PrimParam] -> Map PrimVarName GlobalFlows
+initGlobalVarFlows = Map.fromList . Maybe.mapMaybe init
+  where
+    init (PrimParam name _ flow _ (ParamInfo _ flows))
+      | isInputFlow flow = Just (name, flows)
+    init _ = Nothing
 
 -- | A mapping from variables to definite values, in service to constant
 -- propagation.
@@ -231,17 +245,18 @@ instance Show Constraint where
 
 -- |Run a BodyBuilder monad and extract the final proc body, along with the
 -- final temp variable count and the set of variables used in the body.
-buildBody :: Int -> VarSubstitution -> BodyBuilder a
-          -> Compiler (a, Int, Set PrimVarName, Set GlobalInfo, ProcBody)
-buildBody tmp oSubst builder = do
+buildBody :: Int -> VarSubstitution -> [PrimParam] -> BodyBuilder a
+          -> Compiler (a, Int, Set PrimVarName,
+                       Set GlobalInfo, Map PrimVarName GlobalFlows, ProcBody)
+buildBody tmp oSubst params builder = do
     logMsg BodyBuilder "<<<< Beginning to build a proc body"
-    (a, st) <- runStateT builder $ initState tmp oSubst
+    (a, st) <- runStateT builder $ initState tmp oSubst params
     logMsg BodyBuilder ">>>> Finished building a proc body"
     logMsg BodyBuilder "     Final state:"
     logMsg BodyBuilder $ fst $ showState 8 st
     st' <- fuseBodies st
-    (tmp', used, stored, body) <- currBody (ProcBody [] NoFork) st'
-    return (a, tmp', used, stored, body)
+    (tmp', used, stored, varFlows, body) <- currBody (ProcBody [] NoFork) st'
+    return (a, tmp', used, stored, varFlows, body)
 
 
 -- |Start a new fork on var of type ty
@@ -284,23 +299,28 @@ completeFork = do
         shouldnt "Completing an un-built fork"
       Forked var ty val fused bods deflt False -> do
         logBuild $ ">>>> ending fork on " ++ show var
+        let allBods = bods ++ maybeToList deflt
         -- let branchMap = List.foldr1 (Map.intersectionWith Set.union)
         --                 (Map.map Set.singleton
         --                  . Map.filter argIsConst . currSubst <$> bods)
         let branchMaps =
-              Map.filter argIsConst . currSubst <$> (bods ++ maybeToList deflt)
+              Map.filter argIsConst . currSubst <$> allBods
         -- Variables set to the same constant in every branch
         let extraSubsts = List.foldr1 intersectMapIdentity branchMaps
         logBuild $ "     extraSubsts = " ++ show extraSubsts
         -- Variables with a constant value in each branch.  These can be
         -- used later to fuse branches of subsequent forks on those variables
         -- with this fork.
+        
         let consts = List.foldr1 Set.union
                      $ List.map Map.keysSet branchMaps
         logBuild $ "     definite variables in all branches: " ++ show consts
+        let varFlows = Map.unionsWith globalFlowsUnion $ varGlobalFlows <$> st:allBods
+        logBuild $ "     variable flows in all branches: " ++ simpleShowMap varFlows
         -- Prepare for any instructions coming after the fork
-        let parent = st {buildState = Forked var ty val fused bods deflt True,
-                         tmpCount = maximum $ tmpCount <$> bods }
+        let parent = st { buildState = Forked var ty val fused bods deflt True
+                        , tmpCount = maximum $ tmpCount <$> bods
+                        , varGlobalFlows = varFlows}
         let child = childState parent Unforked
         put $ child { forkConsts = consts,
                       currSubst = Map.union extraSubsts $ currSubst child}
@@ -746,7 +766,8 @@ rawInstr :: Prim -> OptPos -> BodyBuilder ()
 rawInstr prim pos = do
     logBuild $ "---- adding instruction " ++ show prim
     validateInstr prim
-    updateGlobalsLoaded prim pos
+    updateGlobalsLoaded prim
+    updateVariableFlows prim
     modify $ addInstrToState (maybePlace prim pos)
 
 
@@ -839,16 +860,30 @@ expandArg arg@(ArgClosure ps as ty) = do
 expandArg arg = return arg
 
 
-updateGlobalsLoaded :: Prim -> OptPos -> BodyBuilder ()
-updateGlobalsLoaded prim pos = do
+-- Update the set of global variables that are curently loaded after adding
+-- the given prim to the body. Any global variables that flow out are removed
+-- from the set of loaded globals.
+-- For an LPVM load instruction, the variable the global variable is loaded into
+-- is remembered 
+updateGlobalsLoaded :: Prim -> BodyBuilder ()
+updateGlobalsLoaded prim = do
     loaded <- gets globalsLoaded
+    varFlows <- gets varGlobalFlows
     case prim of
         PrimForeign "lpvm" "load" _ [ArgGlobal info _, var] ->
             modify $ \s -> s{globalsLoaded=Map.insert info var loaded}
         PrimForeign "lpvm" "store" _ [var, ArgGlobal info _] ->
             modify $ \s -> s{globalsLoaded=Map.insert info var loaded}
+        PrimHigher _ (ArgVar name _ _ _ _) _ _ -> 
+            case Map.lookup name varFlows of
+              Just gFlows -> do
+                let filter info _ = not $ hasGlobalFlow gFlows FlowOut info
+                modify $ \s -> s {globalsLoaded=Map.filterWithKey filter loaded}
+              Nothing -> nop
         _ -> do
-            let gFlows = snd $ primArgs prim
+            let (args, primFlows) = primArgs prim
+            argFlows <- lift $ argsGlobalFlows varFlows args
+            let gFlows = effectiveGlobalFlows argFlows primFlows
             logBuild $ "Call has global flows: " ++ show gFlows
             let filter info _ = not $ hasGlobalFlow gFlows FlowOut info
             modify $ \s -> s {globalsLoaded=Map.filterWithKey filter loaded}
@@ -856,6 +891,54 @@ updateGlobalsLoaded prim pos = do
     when (loaded /= loaded') $ do
         logBuild $ "Globals Loaded: " ++ simpleShowMap loaded
         logBuild $ "             -> " ++ simpleShowMap loaded'
+
+-- Update the global flows of variables set by the given prim. 
+-- This is conservately set as:
+-- * For first order prims, the global flows are inferred from the known flows of
+-- proc's params and corresponding in-flowing args.
+-- * For higher order prims, if the outflowing variable is resourceful,
+-- the flows are conservatively set to be universal, else if the type is 
+-- generic th flows are that of the params, else empty.
+-- * For foreign prims, the flows is set to the union of the flows of all inputs.
+updateVariableFlows :: Prim -> BodyBuilder ()
+updateVariableFlows prim = do
+    varFlows <- gets varGlobalFlows
+    let args = fst $ primArgs prim
+    argFlows <- lift $ argsGlobalFlows varFlows args
+    let (ins, outs) = splitArgsByMode args
+    inFlows <- globalFlowsUnions <$> lift (mapM (argGlobalFlow varFlows) ins)
+    logBuild $ "Arg Flows: " ++ show argFlows
+    newFlows <- case prim of
+        PrimCall _ pspec _ _ _ -> do
+          params <- lift $ getPrimParams pspec
+          return $ Map.fromList $ catMaybes $ zipWith
+            (\PrimParam{primParamInfo=ParamInfo _ flows} arg ->
+              case arg of
+                ArgVar name _ flow _ _ | isOutputFlow flow
+                  -> Just . (name, ) $ effectiveGlobalFlows argFlows flows
+                _ -> Nothing)
+            params args
+        PrimHigher{} ->
+          return $ Map.fromList $ List.map
+              (\(ArgVar name ty _ _ _) ->
+                  (name, if isResourcefulHigherOrder ty
+                         then univGlobalFlows
+                         else if genericType ty
+                         then inFlows
+                         else emptyGlobalFlows)) outs
+        PrimForeign "lpvm" "load" _ [_, ArgVar name ty flow _ _]
+            | isResourcefulHigherOrder ty -> 
+          return $ Map.singleton name univGlobalFlows
+        PrimForeign{} -> do
+          return $ Map.fromList $ List.map 
+            (\ArgVar{argVarName=name, argVarType=ty} ->
+              (name, if isResourcefulHigherOrder ty || genericType ty
+                     then inFlows
+                     else emptyGlobalFlows)) 
+                $ List.filter argIsVar $ outs
+    when (any (/= emptyGlobalFlows) $ Map.elems newFlows) $
+        logBuild $ "New Variable Flows: " ++ simpleShowMap newFlows
+    modify $ \s -> s {varGlobalFlows=Map.unionWith globalFlowsUnion varFlows newFlows}
 
 
 ----------------------------------------------------------------
@@ -1109,41 +1192,47 @@ addBodyContinuation _ next@BodyState{parent=Just _} =
                ++ fst (showState 4 next)
 addBodyContinuation prev@BodyState{buildState=Unforked, currBuild=bld,
                                    currSubst=subst, blockDefs=defs,
-                                   outSubst=osubst} next = do
+                                   outSubst=osubst, varGlobalFlows=vFlows} next = do
     logMsg BodyBuilder $ "Adding state:" ++ fst (showState 4 next)
     logMsg BodyBuilder $ "... after unforked body:" ++ fst (showState 4 prev)
-    addSelectedContinuation bld subst defs osubst next
-addBodyContinuation prev@BodyState{buildState=Forked{}} next = do
+    addSelectedContinuation bld subst defs osubst vFlows next 
+addBodyContinuation prev@BodyState{buildState=Forked{}, varGlobalFlows=vFlows} next = do
     logMsg BodyBuilder $ "Adding state:" ++ fst (showState 4 next)
     logMsg BodyBuilder $ "... after forked body:" ++ fst (showState 4 prev)
     let build = buildState prev
     bods <- mapM (`addBodyContinuation` next) $ bodies build
-    return $ prev {buildState = build {bodies = bods}}
+    return $ prev { buildState = build {bodies = bods}
+                  , varGlobalFlows = Map.unionsWith globalFlowsUnion
+                                   $ vFlows : List.map varGlobalFlows bods}
 
 
 -- | Add the appropriate branch(es) to follow the specified list of prims, which
 -- includes both the prims of the previous unforked body and the unforked part
 -- of the following
 addSelectedContinuation :: [Placed Prim] -> Substitution -> Set PrimVarName
-                        -> VarSubstitution -> BodyState -> Compiler BodyState
+                        -> VarSubstitution -> Map PrimVarName GlobalFlows
+                        -> BodyState -> Compiler BodyState
                         -- XXX Must merge subst with currSubst of st
-addSelectedContinuation prevPrims subst defs osubst
+addSelectedContinuation prevPrims subst defs osubst vFlows
                         st@BodyState{buildState=Unforked} = do
     let subst'  = Map.union (currSubst st) subst
     let defs'   = Set.union (blockDefs st) defs
     let oSubst' = Map.union (outSubst st)  osubst
-    let st' = st { currBuild = currBuild st ++ prevPrims
-                 , currSubst = subst'
-                 , blockDefs = defs'
-                 , outSubst  = oSubst' }
+    let vFlows' = Map.unionWith globalFlowsUnion (varGlobalFlows st) vFlows
+    let st' = st { currBuild      = currBuild st ++ prevPrims
+                 , currSubst      = subst'
+                 , blockDefs      = defs'
+                 , outSubst       = oSubst'
+                 , varGlobalFlows = vFlows' }
     logMsg BodyBuilder $ "Adding unforked continuation produces:"
                          ++ fst (showState 4 st')
     return st'
-addSelectedContinuation prevPrims subst defs osubst
+addSelectedContinuation prevPrims subst defs osubst vFlows
                         st@BodyState{buildState=bst@Forked{}} = do
     let subst'  = Map.union (currSubst st) subst
     let defs'   = Set.union (blockDefs st) defs
     let osubst' = Map.union (outSubst st)  osubst
+    let vFlows' = Map.unionWith globalFlowsUnion (varGlobalFlows st) vFlows
     case selectedBranch subst bst of
         Nothing -> do
             bst <- fuseBranches $ buildState st
@@ -1151,6 +1240,7 @@ addSelectedContinuation prevPrims subst defs osubst
                          , currSubst  = subst'
                          , blockDefs  = defs'
                          , outSubst   = osubst'
+                         , varGlobalFlows = vFlows'
                          , buildState = bst }
             logMsg BodyBuilder $ "No fork selection possible, producing:"
                          ++ fst (showState 4 st')
@@ -1160,7 +1250,7 @@ addSelectedContinuation prevPrims subst defs osubst
             logMsg BodyBuilder $ "Selected branch " ++ show branchNum
             selectedBranch' <- fuseBodies selectedBranch
             addSelectedContinuation (currBuild st ++ prevPrims)
-                                    subst' defs' osubst' selectedBranch'
+                                    subst' defs' osubst' vFlows' selectedBranch'
 
 
 -- |Given a variable substitution, determine which branch will be selected,
@@ -1184,20 +1274,22 @@ selectedBranch subst Forked{knownVal=known, forkingVar=var} =
 ----------------------------------------------------------------
 
 currBody :: ProcBody -> BodyState
-         -> Compiler (Int,Set PrimVarName,Set GlobalInfo,ProcBody)
-currBody body st@BodyState{tmpCount=tmp} = do
+         -> Compiler (Int,Set PrimVarName,Set GlobalInfo,
+                      Map PrimVarName GlobalFlows,ProcBody)
+currBody body st@BodyState{tmpCount=tmp, varGlobalFlows=varFlows} = do
     logMsg BodyBuilder $ "Now reconstructing body with usedLater = "
       ++ intercalate ", " (show <$> Map.keys (outSubst st))
     st' <- execStateT (rebuildBody st)
            $ BkwdBuilderState (Map.keysSet $ outSubst st) Nothing Map.empty
-                              0 Set.empty body
+                              0 Set.empty varFlows body
     let BkwdBuilderState{bkwdUsedLater=usedLater,
                          bkwdFollowing=following,
-                         bkwdGlobalStored=stored} = st'
+                         bkwdGlobalStored=stored,
+                         bkwdVariableFlows=varFlows'} = st'
     logMsg BodyBuilder ">>>> Finished rebuilding a proc body"
     logMsg BodyBuilder "     Final state:"
     logMsg BodyBuilder $ showBlock 5 following
-    return (tmp, usedLater, stored, following)
+    return (tmp, usedLater, stored, varFlows', following)
 
 
 -- |Another monad, this one for rebuilding a proc body bottom-up.
@@ -1208,17 +1300,18 @@ type BkwdBuilder = StateT BkwdBuilderState Compiler
 -- forwards.  Because construction runs backwards, the state mostly holds
 -- information about the following code.
 data BkwdBuilderState = BkwdBuilderState {
-      bkwdUsedLater    :: Set PrimVarName, -- ^Vars used later in computation,
-                                           --  but not defined later
+      bkwdUsedLater     :: Set PrimVarName, -- ^Vars used later in computation,
+                                            --  but not defined later
       bkwdBranchesUsedLater :: Maybe [Set PrimVarName],
-                                           -- ^The usedLater set for each
-                                           -- following branch, used for fused
-                                           -- branches.
-      bkwdRenaming     :: VarSubstitution, -- ^Variable substitution to apply
-      bkwdTmpCount     :: Int,             -- ^Highest temporary variable number
-      bkwdGlobalStored :: Set GlobalInfo,  -- ^The set of globals we have
-                                           -- recently stored
-      bkwdFollowing    :: ProcBody         -- ^Code to come later
+                                            -- ^The usedLater set for each
+                                            -- following branch, used for fused
+                                            -- branches.
+      bkwdRenaming      :: VarSubstitution, -- ^Variable substitution to apply
+      bkwdTmpCount      :: Int,             -- ^Highest temporary variable number
+      bkwdGlobalStored  :: Set GlobalInfo,  -- ^The set of globals we have
+                                            -- recently stored
+      bkwdVariableFlows :: Map PrimVarName GlobalFlows,
+      bkwdFollowing     :: ProcBody         -- ^Code to come later
       } deriving (Eq,Show)
 
 
@@ -1226,7 +1319,7 @@ rebuildBody :: BodyState -> BkwdBuilder ()
 rebuildBody st@BodyState{parent=Just par} =
     shouldnt $ "Body parent left by fusion: " ++ fst (showState 4 par)
 rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
-                         buildState=bldst, parent=Nothing,
+                         buildState=bldst, parent=Nothing, varGlobalFlows=varFlows,
                          reifiedConstr=reif} = do
     usedLater <- gets bkwdUsedLater
     following <- gets bkwdFollowing
@@ -1234,6 +1327,7 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
               ++ "\nwith currSubst = " ++ simpleShowMap subst
               ++ "\n     usedLater = " ++ simpleShowSet usedLater
               ++ "\n     currBuild = " ++ showPlacedPrims 17 prims
+              ++ "\n     varFlows  = " ++ simpleShowMap varFlows
     case bldst of
       Unforked -> mapM_ (placedApply (bkwdBuildStmt defs)) prims
       Forked{complete=False} ->
@@ -1260,6 +1354,8 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
             -- up keeping Undef assignments to variables that will be assigned
             -- later if they are needed.
             let usedLater'' = List.foldr Set.union usedLater' usedLaters
+            let varFlowss = bkwdVariableFlows <$> sts'
+            let varFlows' = Map.unionsWith globalFlowsUnion $ varFlows:varFlowss
             let branchesUsedLater =
                   if fused
                   then Just usedLaters
@@ -1275,7 +1371,7 @@ rebuildBody st@BodyState{currBuild=prims, currSubst=subst, blockDefs=defs,
             let followingBranches = List.map bkwdFollowing sts
             let gStored = List.foldr1 Set.intersection (bkwdGlobalStored <$> sts')
             put $ BkwdBuilderState usedLater''' branchesUsedLater
-                  Map.empty tmp gStored
+                  Map.empty tmp gStored varFlows'
                   $ ProcBody [] $ PrimFork var' ty' lastUse followingBranches
                              (bkwdFollowing <$> deflt'')
             mapM_ (placedApply (bkwdBuildStmt defs)) prims'
@@ -1403,12 +1499,16 @@ bkwdBuildStmt defs prim pos = do
     usedLater <- gets bkwdUsedLater
     renaming <- gets bkwdRenaming
     gStored <- gets bkwdGlobalStored
+    varFlows <- gets bkwdVariableFlows
     logBkwd $ "  Rebuilding prim: " ++ show prim
-              ++ "\n    with usedLater   = " ++ show usedLater
-              ++ "\n    and bkwdRenaming = " ++ simpleShowMap renaming
-              ++ "\n    and defs         = " ++ simpleShowSet defs
-              ++ "\n    and globalStored = " ++ simpleShowSet gStored
-    let (args, gFlows) = primArgs prim
+              ++ "\n    with usedLater     = " ++ show usedLater
+              ++ "\n    and bkwdRenaming   = " ++ simpleShowMap renaming
+              ++ "\n    and defs           = " ++ simpleShowSet defs
+              ++ "\n    and globalStored   = " ++ simpleShowSet gStored
+              ++ "\n    and varGlobalFlows = " ++ simpleShowMap varFlows
+    let (args, primFlows) = primArgs prim
+    argFlows <- lift $ argsGlobalFlows varFlows args
+    let gFlows = effectiveGlobalFlows argFlows primFlows
     args' <- mapM renameArg args
     logBkwd $ "    renamed args = " ++ show args'
     case (prim,args') of
@@ -1425,18 +1525,19 @@ bkwdBuildStmt defs prim pos = do
             -- Filter out pure instructions that produce no needed outputs nor 
             -- out flowing globals that arent stored to later
             when (purity > Pure || any (`Set.member` usedLater) (argVarName <$> outs)
-                                || not (USet.isEmpty $ whenFinite (Set.\\ gStored) gOuts))
+                                || not (USet.isEmpty $ whenFinite (Set.\\ gStored) gOuts)
+                                || not (USet.isEmpty $ globalFlowsParams gFlows))
               $ do
                 -- XXX Careful:  probably shouldn't mark last use of variable
                 -- passed as input argument more than once in the call
-                let prim' = replacePrimArgs prim (markIfLastUse usedLater <$> args') gFlows
+                let prim' = replacePrimArgs prim (markIfLastUse usedLater <$> args') primFlows
                 logBkwd $ "    updated prim = " ++ show prim'
                 -- Don't consider variables assigned here to be used later.
                 -- Variables should only be assigned once, but rearranging
                 -- nested forks into a switch can move Undef assignments in
                 -- front of real assignments, and we want those to be considered
                 -- to be unneeded.
-                let usedLater' = List.foldr Set.insert 
+                let usedLater' = List.foldr Set.insert
                                     (List.foldr Set.delete usedLater
                                     $ argVarName <$> outs)
                                  $ argVarName <$> ins
@@ -1502,7 +1603,7 @@ showState :: Int -> BodyState -> (String,Int)
 showState indent BodyState{parent=par, currBuild=revPrims, buildState=bld,
                            blockDefs=defs, forkConsts=consts,
                            currSubst=substs, globalsLoaded=loaded,
-                           reifiedConstr=reifs} =
+                           varGlobalFlows=vFlows, reifiedConstr=reifs} =
     let (str  ,indent')   = maybe ("",indent)
                             (mapFst (++ (startLine indent ++ "----------"))
                             . showState indent) par
@@ -1510,6 +1611,8 @@ showState indent BodyState{parent=par, currBuild=revPrims, buildState=bld,
                             ++ "# Substs           : " ++ simpleShowMap substs
         globalStr         = startLine indent
                             ++ "# Loaded globals   : " ++ simpleShowMap loaded
+        vFlowsStr         = startLine indent
+                            ++ "# Variable flows   : " ++ simpleShowMap vFlows
         str'              = showPlacedPrims indent' (reverse revPrims)
         sets              = if List.null revPrims
                             then ""
@@ -1522,10 +1625,10 @@ showState indent BodyState{parent=par, currBuild=revPrims, buildState=bld,
                                 ++ "# Fusion consts: " ++ show consts
                               _ -> ""
         reifstr           = startLine indent
-                                ++ "# Reifications : " ++ showReifications reifs
+                                ++ "# Reifications     : " ++ showReifications reifs
 
         (str'',indent'') = showBuildState indent' bld
-    in  (str ++ str' ++ substStr ++ sets ++ globalStr ++ str''
+    in  (str ++ str' ++ substStr ++ sets ++ globalStr ++ vFlowsStr ++ str''
              ++ suffix ++ reifstr
         , indent'')
 
