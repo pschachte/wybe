@@ -1087,7 +1087,7 @@ where a *generator* is one or more expressions of the form
 separated by semicolons or newlines. Each *generator* is a value of any
 type that implements the backwards mode of the cons operator (`[|]`),
 where the list is input and the head and tail are outputs. Presently
-`array` and `list` in the standard library implement this operator.
+`array`, `list`, and `range` in the standard library implement this operator.
 
 The enclosed *statements* in both `do` and `for` loops may include any ordinary
 Wybe statements, plus any of the following:
