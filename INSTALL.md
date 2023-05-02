@@ -43,6 +43,18 @@ Note that Wybe has been ported to macOS and Linux (Ubuntu) so far.
 7.  LaTeX is needed for building the documentation.  We recommend
 [MacTeX](https://www.tug.org/mactex/).
 
+8.  You may find you have a dependency on libffi.7.dylib, when what you have
+    installed is libffi.8.dylib, causing an error like
+```
+dyld[40396]: Library not loaded: /usr/local/opt/libffi/lib/libffi.7.dylib
+```
+    If this happens, you can work around it by creating a link to
+    `libffi.7.dylib`:
+```
+    cd /usr/local/opt/libffi/lib
+    sudo ln -s libffi.8.dylib libffi.7.dylib
+```
+
 
 ### Linux (Ubuntu)
 
