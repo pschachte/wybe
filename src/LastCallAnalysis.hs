@@ -159,13 +159,13 @@ primUsesOutputsOfOtherPrims :: Placed Prim -> [Placed Prim] -> Bool
 primUsesOutputsOfOtherPrims p ps =
     let prim = content p
         otherPrims = List.map content ps
-        (args, globals) = primArgs prim
+        (args, gFlows) = primArgs prim
         vars = varsInPrimArgs FlowIn args
         otherPrimOutputs = varsInPrims FlowOut otherPrims
     in
     -- if the prim refers to any global variables, then skip reordering (conservative approximation for now)
     -- otherwise, check it doesn't refer to any outputs from `otherPrims`
-    not (UnivSet.isEmpty (globalFlowsIn globals) && UnivSet.isEmpty (globalFlowsOut globals)) || any (`elem` otherPrimOutputs) vars
+    not (gFlows == emptyGlobalFlows) || any (`elem` otherPrimOutputs) vars
 
 -- | Finds outputs which are the final result of a mutate chain
 -- and modifies them to be `FlowOutByReference` instead of `FlowOut`

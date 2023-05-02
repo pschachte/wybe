@@ -63,7 +63,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 * > public {inline} (0 calls)
 0: type_int.myint.*<0>
-*(x##0:type_int.myint, y##0:type_int.myint, ?#result##0:type_int.myint)<{}; {}>:
+*(x##0:type_int.myint, y##0:type_int.myint, ?#result##0:type_int.myint)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm mul(~x##0:type_int.myint, ~y##0:type_int.myint, ?#result##0:type_int.myint) @type_int:nn:nn
@@ -71,19 +71,19 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 + > public {inline} (0 calls)
 0: type_int.myint.+<0>
-+(x##0:type_int.myint, y##0:type_int.myint, ?#result##0:type_int.myint)<{}; {}>:
++(x##0:type_int.myint, y##0:type_int.myint, ?#result##0:type_int.myint)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(~x##0:type_int.myint, ~y##0:type_int.myint, ?#result##0:type_int.myint) @type_int:nn:nn
 + > public {inline} (0 calls)
 1: type_int.myint.+<1>
-+(?x##0:type_int.myint, y##0:type_int.myint, z##0:type_int.myint)<{}; {}>:
++(?x##0:type_int.myint, y##0:type_int.myint, z##0:type_int.myint)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm sub(~z##0:type_int.myint, ~y##0:type_int.myint, ?x##0:type_int.myint) @type_int:nn:nn
 + > public {inline} (0 calls)
 2: type_int.myint.+<2>
-+(x##0:type_int.myint, ?y##0:type_int.myint, z##0:type_int.myint)<{}; {}>:
++(x##0:type_int.myint, ?y##0:type_int.myint, z##0:type_int.myint)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm sub(~z##0:type_int.myint, ~x##0:type_int.myint, ?y##0:type_int.myint) @type_int:nn:nn
@@ -91,19 +91,19 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 - > public {inline} (0 calls)
 0: type_int.myint.-<0>
--(x##0:type_int.myint, y##0:type_int.myint, ?#result##0:type_int.myint)<{}; {}>:
+-(x##0:type_int.myint, y##0:type_int.myint, ?#result##0:type_int.myint)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm sub(~x##0:type_int.myint, ~y##0:type_int.myint, ?#result##0:type_int.myint) @type_int:nn:nn
 - > public {inline} (0 calls)
 1: type_int.myint.-<1>
--(?x##0:type_int.myint, y##0:type_int.myint, z##0:type_int.myint)<{}; {}>:
+-(?x##0:type_int.myint, y##0:type_int.myint, z##0:type_int.myint)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(~y##0:type_int.myint, ~z##0:type_int.myint, ?x##0:type_int.myint) @type_int:nn:nn
 - > public {inline} (0 calls)
 2: type_int.myint.-<2>
--(x##0:type_int.myint, ?y##0:type_int.myint, z##0:type_int.myint)<{}; {}>:
+-(x##0:type_int.myint, ?y##0:type_int.myint, z##0:type_int.myint)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm sub(~z##0:type_int.myint, ~x##0:type_int.myint, ?y##0:type_int.myint) @type_int:nn:nn
@@ -111,7 +111,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 / > public {inline} (0 calls)
 0: type_int.myint./<0>
-/(x##0:type_int.myint, y##0:type_int.myint, ?#result##0:type_int.myint)<{}; {}>:
+/(x##0:type_int.myint, y##0:type_int.myint, ?#result##0:type_int.myint)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm sdiv(~x##0:type_int.myint, ~y##0:type_int.myint, ?#result##0:type_int.myint) @type_int:nn:nn
@@ -119,7 +119,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 < > public {inline} (0 calls)
 0: type_int.myint.<<0>
-<(x##0:type_int.myint, y##0:type_int.myint, ?#result##0:wybe.bool)<{}; {}>:
+<(x##0:type_int.myint, y##0:type_int.myint, ?#result##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_slt(~x##0:type_int.myint, ~y##0:type_int.myint, ?#result##0:wybe.bool) @type_int:nn:nn
@@ -127,7 +127,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 <= > public {inline} (0 calls)
 0: type_int.myint.<=<0>
-<=(x##0:type_int.myint, y##0:type_int.myint, ?#result##0:wybe.bool)<{}; {}>:
+<=(x##0:type_int.myint, y##0:type_int.myint, ?#result##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_sle(~x##0:type_int.myint, ~y##0:type_int.myint, ?#result##0:wybe.bool) @type_int:nn:nn
@@ -135,7 +135,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 = > public {inline} (0 calls)
 0: type_int.myint.=<0>
-=(x##0:type_int.myint, y##0:type_int.myint, ?#result##0:wybe.bool)<{}; {}>:
+=(x##0:type_int.myint, y##0:type_int.myint, ?#result##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~x##0:type_int.myint, ~y##0:type_int.myint, ?#result##0:wybe.bool) @type_int:nn:nn
@@ -143,7 +143,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 > > public {inline} (0 calls)
 0: type_int.myint.><0>
->(x##0:type_int.myint, y##0:type_int.myint, ?#result##0:wybe.bool)<{}; {}>:
+>(x##0:type_int.myint, y##0:type_int.myint, ?#result##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_sgt(~x##0:type_int.myint, ~y##0:type_int.myint, ?#result##0:wybe.bool) @type_int:nn:nn
@@ -151,7 +151,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 >= > public {inline} (0 calls)
 0: type_int.myint.>=<0>
->=(x##0:type_int.myint, y##0:type_int.myint, ?#result##0:wybe.bool)<{}; {}>:
+>=(x##0:type_int.myint, y##0:type_int.myint, ?#result##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_sge(~x##0:type_int.myint, ~y##0:type_int.myint, ?#result##0:wybe.bool) @type_int:nn:nn
@@ -159,7 +159,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 ~= > public {inline} (0 calls)
 0: type_int.myint.~=<0>
-~=(x##0:type_int.myint, y##0:type_int.myint, ?#result##0:wybe.bool)<{}; {}>:
+~=(x##0:type_int.myint, y##0:type_int.myint, ?#result##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(~x##0:type_int.myint, ~y##0:type_int.myint, ?#result##0:wybe.bool) @type_int:nn:nn

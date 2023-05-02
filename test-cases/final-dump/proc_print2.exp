@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 print2 > public {inline} (0 calls)
 0: proc_print2.print2<0>
-print2(x##0:wybe.int, y##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+print2(x##0:wybe.int, y##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @int:nn:nn

@@ -16,7 +16,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {semipure} (0 calls)
 0: specials_one_module.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @c_string:nn:nn
@@ -27,18 +27,18 @@ module top-level code > public {semipure} (0 calls)
     foreign c print_int(2:wybe.int, ~tmp#7##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @int:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    specials_one_module.indirect_call_location<0>(c"specials_one_module:29:2":wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #4 @specials_one_module:nn:nn
+    specials_one_module.indirect_call_location<0>(c"specials_one_module:29:2":wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @specials_one_module:nn:nn
 
 
 indirect_call_location > public (1 calls)
 0: specials_one_module.indirect_call_location<0>
-indirect_call_location(%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+indirect_call_location(%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @c_string:nn:nn
     foreign c print_string(~call_source_location##0:wybe.c_string, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @c_string:nn:nn
     foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @c_string:nn:nn
-    wybe.string.print<0>(" (should be line 28)":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @string:nn:nn
+    wybe.string.print<0>(" (should be line 28)":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
@@ -46,7 +46,7 @@ indirect_call_location(%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>};
 
 show_column > public {inline} (1 calls)
 0: specials_one_module.show_column<0>
-show_column(%call_source_column_number##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+show_column(%call_source_column_number##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @int:nn:nn
@@ -57,7 +57,7 @@ show_column(%call_source_column_number##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io
 
 show_file > public {inline} (1 calls)
 0: specials_one_module.show_file<0>
-show_file(%call_source_file_name##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+show_file(%call_source_file_name##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @c_string:nn:nn
@@ -68,7 +68,7 @@ show_file(%call_source_file_name##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.
 
 show_line > public {inline} (1 calls)
 0: specials_one_module.show_line<0>
-show_line(%call_source_line_number##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+show_line(%call_source_line_number##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @int:nn:nn
@@ -79,10 +79,10 @@ show_line(%call_source_line_number##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>
 
 show_location > public {inline} (1 calls)
 0: specials_one_module.show_location<0>
-show_location(%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+show_location(%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    specials_one_module.indirect_call_location<0>(~%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @specials_one_module:nn:nn
+    specials_one_module.indirect_call_location<0>(~%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @specials_one_module:nn:nn
 
   LLVM code       :
 

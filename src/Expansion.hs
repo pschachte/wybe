@@ -42,23 +42,26 @@ procExpansion pspec def = do
     let (ins,outs) = inputOutputParams proto
     isClosure <- isClosureProc pspec
     let st = initExpanderState (procCallSiteCount def)
-    (st', tmp', used, stored, body') <- buildBody tmp (Map.fromSet id outs)
-                                $ execStateT (expandBody body) st
-    let PrimProto _ params (GlobalFlows gIns gOuts) = proto
-    let params' = markParamNeededness isClosure used ins <$> params
-    let globals' = GlobalFlows (USet.whenFinite (`Set.difference` stored) gIns) gOuts
+    let PrimProto _ params (GlobalFlows gIns gOuts gParams) = proto
+    (st', tmp', used, stored, varFlows, body') 
+        <- buildBody tmp (Map.fromSet id outs) params
+            $ execStateT (expandBody body) st
+    let params' = updateParamGlobalFlows varFlows 
+                . markParamNeededness isClosure used ins <$> params
+    let globals' = GlobalFlows (USet.whenFinite (`Set.difference` stored) gIns) gOuts gParams
     let proto' = proto {primProtoParams = params',
                         primProtoGlobalFlows = globals'}
     let impln' = impln{ procImplnProto = proto',
                         procImplnBody = body' }
     let def' = def { procImpln = impln',
                      procTmpCount = tmp',
-                     procCallSiteCount = nextCallSiteID st' }
+                     procCallSiteCount = nextCallSiteID st',
+                     procVariableFlows = varFlows }
     if def /= def'
         then
         logMsg Expansion
         $ "*** Expanded:" ++ showProcDef 4 def
-          ++ "\n*** To:" ++ showProcDef 4 def'
+          ++ "\n*** To:" ++simpleShowMap varFlows++ showProcDef 4 def'
           ++ "\nTemp counter = " ++ show (procTmpCount def')
         else
         logMsg Expansion
@@ -75,20 +78,32 @@ markParamNeededness isClosure used _ param@PrimParam{primParamName=nm,
                                                      primParamFlow=FlowIn,
                                                      primParamFlowType=ft,
                                                      primParamInfo=info} =
-    param {primParamInfo=info{paramInfoUnneeded=Set.notMember nm used
-                                                && (not isClosure
-                                                    || ft /= Ordinary)}}
+    param {primParamInfo=info{
+            paramInfoUnneeded=Set.notMember nm used
+                                && (not isClosure || ft /= Ordinary)}}
 markParamNeededness isClosure _ ins param@PrimParam{primParamName=nm,
                                                     primParamFlow=FlowOut,
                                                     primParamFlowType=ft,
                                                     primParamInfo=info} =
-    param {primParamInfo=info{paramInfoUnneeded=Set.member nm ins
-                                                && (not isClosure
-                                                    || ft /= Ordinary)}}
+    param {primParamInfo=info{
+            paramInfoUnneeded=Set.member nm ins
+                                && (not isClosure || ft /= Ordinary)}}
 markParamNeededness _ _ _ PrimParam{ primParamFlow=FlowOutByReference } =
     shouldnt "unexpected FlowOutByReference at this stage of compilation"
 markParamNeededness _ _ _ PrimParam{ primParamFlow=FlowTakeReference } =
     shouldnt "unexpected FlowTakeReference at this stage of compilation"
+
+
+-- | Update the global flows of a parameter, given the global flows
+-- of varaibles in the procedure
+updateParamGlobalFlows :: Map PrimVarName GlobalFlows -> PrimParam -> PrimParam 
+updateParamGlobalFlows varFlows param@(PrimParam name _ _ _ info@(ParamInfo _ flows)) =
+    -- We take th intersection here to ensure that the global flows
+    -- never increase. The flows should never be increased because previous
+    -- analyses may exploit a more restricted global flows
+    param {primParamInfo=info{
+            paramInfoGlobalFlows=flows `globalFlowsIntersection` newFlows}}
+  where newFlows = Map.findWithDefault univGlobalFlows name varFlows
 
 
 -- |Type to remember the variable renamings.

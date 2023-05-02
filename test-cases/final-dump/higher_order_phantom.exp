@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 a > {inline} (0 calls)
 0: higher_order_phantom.a<0>
-a(f##0:(wybe.phantom, ?wybe.phantom), x##0:wybe.phantom, ?#result##0:wybe.phantom)<{}; {}>:
+a(f##0:(wybe.phantom, ?wybe.phantom), x##0:wybe.phantom, ?#result##0:wybe.phantom)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     ~f##0:(wybe.phantom, ?wybe.phantom)(~x##0:wybe.phantom, ?#result##0:wybe.phantom) #0 @higher_order_phantom:nn:nn
@@ -19,7 +19,7 @@ a(f##0:(wybe.phantom, ?wybe.phantom), x##0:wybe.phantom, ?#result##0:wybe.phanto
 
 b > {inline,semipure} (0 calls)
 0: higher_order_phantom.b<0>
-b(f##0:{impure}(wybe.phantom, ?wybe.phantom), x##0:wybe.phantom, [y##0:wybe.phantom])<{}; {}>:
+b(f##0:{impure}(wybe.phantom, ?wybe.phantom), x##0:wybe.phantom, [y##0:wybe.phantom])<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     ~f##0:{impure}(wybe.phantom, ?wybe.phantom)(~x##0:wybe.phantom, ?y##1:wybe.phantom) #0 @higher_order_phantom:nn:nn
@@ -27,7 +27,7 @@ b(f##0:{impure}(wybe.phantom, ?wybe.phantom), x##0:wybe.phantom, [y##0:wybe.phan
 
 c > {inline} (0 calls)
 0: higher_order_phantom.c<0>
-c(f##0:(wybe.phantom, ?X), x##0:wybe.phantom, ?#result##0:X)<{}; {}>:
+c(f##0:(wybe.phantom, ?X) <{}; {}; {0}>, x##0:wybe.phantom, ?#result##0:X <{}; {}; {0}>)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     ~f##0:(wybe.phantom, ?X)(~x##0:wybe.phantom, ?#result##0:X) #0 @higher_order_phantom:nn:nn

@@ -282,7 +282,7 @@ genProc proto detism stmts = do
     -- call site count will be refilled later
     let procDef = ProcDef name proto (ProcDefSrc stmts) Nothing tmpCtr 0
                   Map.empty Private detism MayInline Pure GeneratedProc
-                  NoSuperproc
+                  NoSuperproc Map.empty
     logUnbranch $ "Generating fresh " ++ show detism ++ " proc:"
                   ++ showProcDef 8 procDef
     logUnbranch $ "Unbranched generated " ++ show detism ++ " proc:"
@@ -672,7 +672,7 @@ unbranchExp exp@(AnonProc mods params pstmts clsd res) pos = do
     let procProto = ProcProto name (freeParams ++ (Unplaced <$> params)) res'
     let procDef = ProcDef name procProto (ProcDefSrc pstmts) Nothing tmpCtr 0
                     Map.empty Private detism inlining impurity AnonymousProc
-                    NoSuperproc
+                    NoSuperproc Map.empty
     procDef' <- lift $ unbranchProc procDef tmpCtr
     logUnbranch $ "  Resultant hoisted proc: " ++ show procProto
     procSpec <- lift $ addProcDef procDef'
@@ -705,7 +705,7 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) free pos name = do
                     (ProcDefSrc [Unplaced $ ProcCall (First mod nm $ Just pID)
                                                 detism False args])
                     Nothing 0 0 Map.empty Private detism inlining impurity
-                    (ClosureProc regularProcSpec) NoSuperproc
+                    (ClosureProc regularProcSpec) NoSuperproc Map.empty
             logUnbranch $ "Creating closure for " ++ show regularProcSpec
             logUnbranch $ "  with params: " ++ show params'
             logUnbranch $ "  with args  : " ++ show args

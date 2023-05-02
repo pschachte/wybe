@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {semipure} (0 calls)
 0: higher_order_loop.<0>
-()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.list(T)) @list:nn:nn
@@ -20,12 +20,12 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm alloc(16:wybe.int, ?tmp#13##0:wybe.list(T)) @list:nn:nn
     foreign lpvm mutate(~tmp#13##0:wybe.list(T), ?tmp#14##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, higher_order_loop.#closure#1<0><>:T) @list:nn:nn
     foreign lpvm mutate(~tmp#14##0:wybe.list(T), ?tmp#0##0:wybe.list({resource}(wybe.int)), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(T)) @list:nn:nn
-    higher_order_loop.#cont#1<0>(~tmp#0##0:wybe.list({resource}(wybe.int)))<Everything; Everything> #3 @higher_order_loop:nn:nn
+    higher_order_loop.#cont#1<0>(~tmp#0##0:wybe.list({resource}(wybe.int)))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0}> #3 @higher_order_loop:nn:nn
 
 
 #closure#1 > {inline} (1 calls)
 0: higher_order_loop.#closure#1<0>
-#closure#1(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+#closure#1(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @int:nn:nn
@@ -36,7 +36,7 @@ module top-level code > public {semipure} (0 calls)
 
 #closure#2 > {inline} (1 calls)
 0: higher_order_loop.#closure#2<0>
-#closure#2(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
+#closure#2(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @int:nn:nn
@@ -46,7 +46,7 @@ module top-level code > public {semipure} (0 calls)
 
 #cont#1 > (2 calls)
 0: higher_order_loop.#cont#1<0>
-#cont#1(tmp#5##0:wybe.list({resource}(wybe.int)))<Everything; Everything>:
+#cont#1(tmp#5##0:wybe.list({resource}(wybe.int)) <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#5##0:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.bool)
@@ -57,7 +57,7 @@ module top-level code > public {semipure} (0 calls)
         foreign lpvm access(tmp#5##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?f##0:{resource}(wybe.int)) @list:nn:nn
         foreign lpvm access(~tmp#5##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##1:wybe.list({resource}(wybe.int))) @list:nn:nn
         ~f##0:{resource}(wybe.int)(10:wybe.int) #1 @higher_order_loop:nn:nn
-        higher_order_loop.#cont#1<0>(~tmp#5##1:wybe.list({resource}(wybe.int)))<Everything; Everything> #2 @higher_order_loop:nn:nn
+        higher_order_loop.#cont#1<0>(~tmp#5##1:wybe.list({resource}(wybe.int)))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {0}> #2 @higher_order_loop:nn:nn
 
 
   LLVM code       :

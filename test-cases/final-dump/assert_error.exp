@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 module top-level code > public {semipure} (0 calls)
 0: assert_error.<0>
-()<{}; {}>:
+()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.control.assert<0>(0:wybe.bool, c"assert_error:3:2":wybe.c_string) #1 @assert_error:nn:nn

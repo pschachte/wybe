@@ -11,7 +11,7 @@ AFTER EVERYTHING:
 
 insert > (2 calls)
 0: higher_order_sort.insert<0>
-insert(<=##0:(X, X, ?wybe.bool), x##0:X, xs##0:wybe.list(X), outByReference xs##1:wybe.list(X))<{}; {}>:
+insert(<=##0:(X, X, ?wybe.bool) <{}; {}; {0}>, x##0:X <{}; {}; {1}>, xs##0:wybe.list(X) <{}; {}; {2}>, outByReference xs##1:wybe.list(X) <{}; {}; {0, 1, 2}>)<{}; {}; {}>:
   AliasPairs: [(xs##0,xs##1)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(xs##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool)
@@ -42,7 +42,7 @@ insert(<=##0:(X, X, ?wybe.bool), x##0:X, xs##0:wybe.list(X), outByReference xs##
 
 sort > {inline} (0 calls)
 0: higher_order_sort.sort<0>
-sort(<=##0:(X, X, ?wybe.bool), xs##0:wybe.list(X), ?sorted##1:wybe.list(X))<{}; {}>:
+sort(<=##0:(X, X, ?wybe.bool) <{}; {}; {0}>, xs##0:wybe.list(X) <{}; {}; {1}>, ?sorted##1:wybe.list(X) <{}; {}; {0, 1}>)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     higher_order_sort.sort#cont#1<0>(~<=##0:(X, X, ?wybe.bool), 0:wybe.list(X), ~xs##0:wybe.list(X), ?sorted##1:wybe.list(X)) #1 @higher_order_sort:nn:nn
@@ -50,7 +50,7 @@ sort(<=##0:(X, X, ?wybe.bool), xs##0:wybe.list(X), ?sorted##1:wybe.list(X))<{}; 
 
 sort#cont#1 > (2 calls)
 0: higher_order_sort.sort#cont#1<0>
-sort#cont#1(<=##0:(X, X, ?wybe.bool), sorted##0:wybe.list(X), tmp#1##0:wybe.list(X), ?sorted##2:wybe.list(X))<{}; {}>:
+sort#cont#1(<=##0:(X, X, ?wybe.bool) <{}; {}; {0}>, sorted##0:wybe.list(X) <{}; {}; {1}>, tmp#1##0:wybe.list(X) <{}; {}; {2}>, ?sorted##2:wybe.list(X) <{}; {}; {0, 1, 2}>)<{}; {}; {}>:
   AliasPairs: [(sorted##0,sorted##2)]
   InterestingCallProperties: []
     foreign llvm icmp_ne(tmp#1##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool)
