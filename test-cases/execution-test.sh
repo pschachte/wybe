@@ -1,10 +1,11 @@
 #!/bin/bash
 
+LIMIT=30
 
 if [[ `uname` == 'Darwin' ]]; then
-	TIMEOUT=gtimeout
+	TIMEOUT="gtimeout $LIMIT"
 elif [[ `uname` == 'Linux' ]]; then
-	TIMEOUT=timeout
+	TIMEOUT="timeout $LIMIT"
 fi
 LIBDIR="../wybelibs"
 
@@ -24,8 +25,8 @@ do
         if [ -r $cmdline ] ; then
             cmd="$targ `cat $cmdline`"
         fi
-	$TIMEOUT 20 ../wybemk --force-all -L $LIBDIR $targ >/dev/null
-    $TIMEOUT 20 $cmd< $in &> $out
+	$TIMEOUT ../wybemk --force-all -L $LIBDIR $targ >/dev/null
+    $TIMEOUT $cmd< $in &> $out
 	if [ ! -r $exp ] ; then 
 		printf "[31m?[39m"
 		NEW="$NEW\n    $out"
