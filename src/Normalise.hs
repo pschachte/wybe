@@ -92,16 +92,20 @@ normaliseItem (FuncDecl vis mods (ProcProto name params resources) resulttype
     -- Handle special reverse mode case of def foo(...) = var where ....
     normaliseItem
         (ProcDecl vis mods
-            (ProcProto name (params ++ [Param var resulttype ParamIn rflow `maybePlace` pos])
-                       resources)
-             body
+            (ProcProto name 
+              (params ++ [Param var resulttype ParamIn rflow Nothing
+                         `maybePlace` pos])
+              resources)
+            body
         pos)
 normaliseItem (FuncDecl vis mods (ProcProto name params resources)
                         resulttype result pos) =
     normaliseItem
         (ProcDecl vis mods
-            (ProcProto name (params ++ [Param outputVariableName resulttype
-                                        ParamOut Ordinary `maybePlace` pos])
+            (ProcProto name 
+              (params ++ [Param outputVariableName resulttype ParamOut Ordinary
+                          Nothing
+                          `maybePlace` pos])
                        resources)
              [maybePlace (ForeignCall "llvm" "move" []
                  [result, varSet outputVariableName `maybePlace` pos])
@@ -518,7 +522,9 @@ constCtorItems typeSpec ((vis, placedProto), num) =
         constName = procProtoName proto
     in [ProcDecl vis (inlineModifiers (ConstructorProc constName) Det)
         (ProcProto constName
-            [Param outputVariableName typeSpec ParamOut Ordinary `maybePlace` pos] Set.empty)
+            [Param outputVariableName typeSpec ParamOut Ordinary Nothing 
+             `maybePlace` pos] 
+            Set.empty)
         [lpvmCastToVar (castTo (iVal num) typeSpec) outputVariableName] pos
        ]
 
@@ -551,7 +557,7 @@ nonConstCtorItems uniq typeSpec numConsts numNonConsts tagBits tagLimit
                 $ List.foldr
                 (\(CtorParamInfo param anon rep sz) (flds, shift) ->
                     let (param', pPos) = unPlace param
-                        Param pName pType _ _ = param'
+                        Param pName pType _ _ _ = param'
                     in (FieldInfo pName pPos anon pType rep shift sz : flds,
                         shift + sz))
                 ([],tagBits)
@@ -631,7 +637,8 @@ constructorItems vis ctorName typeSpec params fields size tag tagLimit pos =
     [ProcDecl vis (inlineModifiers (ConstructorProc ctorName) Det)
         (ProcProto ctorName
             ((placedApply (\p -> maybePlace p {paramFlow=ParamIn, paramFlowType=Ordinary}) <$> params)
-             ++ [Param outputVariableName typeSpec ParamOut Ordinary `maybePlace` pos])
+             ++ [Param outputVariableName typeSpec ParamOut Ordinary Nothing        
+                 `maybePlace` pos])
             Set.empty)
         -- Code to allocate memory for the value
         ([maybePlace (ForeignCall "lpvm" "alloc" []
@@ -681,7 +688,8 @@ deconstructorItems uniq vis ctorName typeSpec params numConsts numNonConsts tag
     in [ProcDecl vis (inlineModifiers (DeconstructorProc ctorName) detism)
         (ProcProto ctorName
          ((contentApply (\p -> p {paramFlow=ParamOut, paramFlowType=Ordinary}) <$> params)
-          ++ [Param outputVariableName typeSpec ParamIn Ordinary `maybePlace` pos])
+          ++ [Param outputVariableName typeSpec ParamIn Ordinary Nothing        
+              `maybePlace` pos])
          Set.empty)
         -- Code to check we have the right constructor
         (tagCheck pos numConsts numNonConsts tag tagBits tagLimit
@@ -787,9 +795,10 @@ unboxedConstructorItems :: Visibility -> ProcName -> TypeSpec -> Int
                         -> OptPos -> [Item]
 unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
     let proto = ProcProto ctorName
-                ([Param name paramType ParamIn Ordinary `maybePlace` pPos
+                ([Param name paramType ParamIn Ordinary Nothing `maybePlace` pPos
                  | FieldInfo name pPos _ paramType _ _ _ <- fields]
-                  ++ [Param outputVariableName typeSpec ParamOut Ordinary `maybePlace` pos])
+                  ++ [Param outputVariableName typeSpec ParamOut Ordinary Nothing 
+                      `maybePlace` pos])
                 Set.empty
     in [ProcDecl vis (inlineModifiers (ConstructorProc ctorName) Det) proto
          -- Initialise result to 0
@@ -840,9 +849,11 @@ unboxedDeconstructorItems vis uniq ctorName recType numConsts numNonConsts tag
     let detism = deconstructorDetism numConsts numNonConsts
     in [ProcDecl vis (inlineModifiers (DeconstructorProc ctorName) detism)
         (ProcProto ctorName
-         (List.map (\(FieldInfo n pPos _ fieldType _ _ _) -> Param n fieldType ParamOut Ordinary `maybePlace` pPos)
+         (List.map (\(FieldInfo n pPos _ fieldType _ _ _) -> 
+                    Param n fieldType ParamOut Ordinary Nothing `maybePlace` pPos)
           fields
-          ++ [Param outputVariableName recType ParamIn Ordinary `maybePlace` pos])
+          ++ [Param outputVariableName recType ParamIn Ordinary Nothing 
+              `maybePlace` pos])
          Set.empty)
          -- Code to check we have the right constructor
         (tagCheck pos numConsts numNonConsts tag tagBits (wordSizeBytes-1) Nothing
@@ -944,14 +955,20 @@ getterSetterItems numConsts numNonConsts recType field infos = do
     return
         [-- The getter:
         ProcDecl fieldVis (setInline inline $ inlineModifiers (GetterProc field fieldType) detism)
-        (ProcProto field [Param recName recType ParamIn Ordinary `maybePlace` pos,
-                          Param outputVariableName fieldType ParamOut Ordinary `maybePlace` pos] Set.empty)
+        (ProcProto field [Param recName recType ParamIn Ordinary Nothing 
+                          `maybePlace` pos,
+                          Param outputVariableName fieldType ParamOut Ordinary
+                            Nothing `maybePlace` pos]
+            Set.empty)
         getBody
         pos,
         -- The setter:
         ProcDecl fieldVis (setInline inline $ inlineModifiers (SetterProc field fieldType) detism)
-        (ProcProto field [Param recName recType ParamInOut Ordinary `maybePlace` pos,
-                          Param fieldName fieldType ParamIn Ordinary `maybePlace` pos] Set.empty)
+        (ProcProto field [Param recName recType ParamInOut Ordinary Nothing 
+                          `maybePlace` pos,
+                          Param fieldName fieldType ParamIn Ordinary Nothing 
+                          `maybePlace` pos]
+            Set.empty)
         setBody
         pos]
 
@@ -986,8 +1003,11 @@ implicitEquality pos typespec consts nonconsts rep = do
     if isJust defs
     then return [] -- don't generate if user-defined
     else do
-      let eqProto = ProcProto "=" [Param leftName typespec ParamIn Ordinary `maybePlace` pos,
-                                   Param rightName typespec ParamIn Ordinary `maybePlace` pos]
+      let eqProto = ProcProto "=" 
+                        [Param leftName typespec ParamIn Ordinary Nothing       
+                         `maybePlace` pos,
+                         Param rightName typespec ParamIn Ordinary Nothing 
+                         `maybePlace` pos]
                     Set.empty
       let (body,inline) = equalityBody pos consts nonconsts rep
       return [ProcDecl Public (setInline inline
@@ -1002,8 +1022,11 @@ implicitDisequality pos typespec consts nonconsts _ = do
     if isJust defs
     then return [] -- don't generate if user-defined
     else do
-      let neProto = ProcProto "~=" [Param leftName typespec ParamIn Ordinary `maybePlace` pos,
-                                     Param rightName typespec ParamIn Ordinary `maybePlace` pos]
+      let neProto = ProcProto "~=" 
+                        [Param leftName typespec ParamIn Ordinary Nothing 
+                         `maybePlace` pos,
+                         Param rightName typespec ParamIn Ordinary Nothing 
+                          `maybePlace` pos]
                     Set.empty
       let neBody = [maybePlace (Not $
                         ProcCall (First [] "=" Nothing) SemiDet False

@@ -286,7 +286,7 @@ closeClosure proto@PrimProto{primProtoParams=params}
                              (ArgInt (toInteger wordSize) intType)
                              (ArgInt 0 intType)
                              (ArgVar nm ty FlowOut Free False)
-                | (i,PrimParam nm ty _ _ _) <- zip [1..] neededFree ]
+                | (i,PrimParam nm ty _ _ _ _) <- zip [1..] neededFree ]
 
 
 -- | Create LLVM's module level Function Definition from the LPVM procedure

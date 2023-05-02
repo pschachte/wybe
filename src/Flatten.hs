@@ -162,7 +162,7 @@ makeAnonParamName procNum num = specialName2 "anon"
 
 
 makeAnonParam :: VarName -> FlowDirection -> Param
-makeAnonParam name flow = Param name AnyType flow Ordinary
+makeAnonParam name flow = Param name AnyType flow Ordinary Nothing
 
 
 

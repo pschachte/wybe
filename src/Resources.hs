@@ -549,7 +549,7 @@ resourceVar (ResourceSpec mod name) =
 -- | Transform a ResourceFlowSpec with a type into a Param
 resourceParams :: (ResourceFlowSpec,TypeSpec) -> Placed Param
 resourceParams (ResourceFlowSpec res flow, typ) =
-    Unplaced $ Param (resourceVar res) typ flow (Resource res)
+    Unplaced $ Param (resourceVar res) typ flow (Resource res) Nothing
 
 
 -- | Given a ResourceSpec and something, return Right of something if the
@@ -566,7 +566,7 @@ eitherResource res a =
 eitherResourceParam :: Placed Param -> Either (ResourceFlowSpec, TypeSpec) (Placed Param)
 eitherResourceParam param = 
     case content param of
-        Param _ ty fl (Resource res) ->
+        Param _ ty fl (Resource res) _ ->
             mapLeft ((,ty) . (`ResourceFlowSpec` fl))
             $ eitherResource res param
         _ -> Right param

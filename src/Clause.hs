@@ -351,7 +351,7 @@ reconcilingAssignments caseVars jointVars params =
 
 reconcileOne :: Numbering -> Numbering -> Param
              -> Maybe (Placed Prim)
-reconcileOne caseVars jointVars (Param name ty flow ftype) =
+reconcileOne caseVars jointVars (Param name ty flow ftype _) =
     case (Map.lookup name caseVars,
           Map.lookup name jointVars)
     of (Just caseNum, Just jointNum) ->
@@ -367,8 +367,9 @@ reconcileOne caseVars jointVars (Param name ty flow ftype) =
 
 
 compileParam :: GlobalFlows -> Numbering -> Numbering -> ProcName -> Int -> Param -> [PrimParam]
-compileParam allFlows startVars endVars procName idx param@(Param name ty flow ftype) =
-    [PrimParam (PrimVarName name num) ty FlowIn ftype (ParamInfo False gFlows)
+compileParam allFlows startVars endVars procName idx 
+        param@(Param name ty flow ftype _) =
+    [PrimParam (PrimVarName name num) ty FlowIn Nothing ftype (ParamInfo False gFlows)
     | flowsIn flow
     , let num = Map.findWithDefault
                 (shouldnt ("compileParam for input param " ++ show param
@@ -380,7 +381,7 @@ compileParam allFlows startVars endVars procName idx param@(Param name ty flow f
             | otherwise = emptyGlobalFlows
     ]
     ++ 
-    [PrimParam (PrimVarName name num) ty FlowOut ftype (ParamInfo False gFlows)
+    [PrimParam (PrimVarName name num) ty FlowOut Nothing ftype (ParamInfo False gFlows)
     | flowsOut flow
     , let num = Map.findWithDefault
                 (shouldnt ("compileParam for output param " ++ show param
@@ -398,7 +399,7 @@ compileParam allFlows startVars endVars procName idx param@(Param name ty flow f
 
 -- |A synthetic output parameter carrying the test result
 testOutParam :: Param
-testOutParam = Param outputStatusName boolType ParamOut Ordinary
+testOutParam = Param outputStatusName boolType ParamOut Ordinary Nothing
 
 
 -- |Log a message, if we are logging clause generation.

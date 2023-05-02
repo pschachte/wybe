@@ -2731,7 +2731,8 @@ data Param = Param {
     paramName::VarName,
     paramType::TypeSpec,
     paramFlow::FlowDirection,
-    paramFlowType::ArgFlowType
+    paramFlowType::ArgFlowType,
+    paramDefault::Maybe (Placed Exp)
     } deriving (Eq, Ord, Generic)
 
 
@@ -2747,10 +2748,11 @@ instance Show TypeFlow where
 
 -- |A formal parameter, including name, type, and flow direction.
 data PrimParam = PrimParam {
-    primParamName::PrimVarName,
-    primParamType::TypeSpec,
-    primParamFlow::PrimFlow,
-    primParamFlowType::ArgFlowType,
+    primParamName::PrimVarName,     -- ^Parameter name
+    primParamType::TypeSpec,        -- ^Parameter type
+    primParamFlow::PrimFlow,        -- ^Flow direction for this parameter
+    primParamDefault::Maybe (Placed Exp), -- ^Default value for this parameter
+    primParamFlowType::ArgFlowType, -- ^How this parameter was created
     primParamInfo::ParamInfo        -- ^What we've inferred about this param
     } deriving (Eq, Generic)
 
@@ -2786,7 +2788,7 @@ setParamType :: TypeSpec -> Param -> Param
 setParamType t p = p{paramType=t}
 
 paramIsResourceful :: Param -> Bool
-paramIsResourceful (Param _ ty _ _) = isResourcefulHigherOrder ty
+paramIsResourceful (Param _ ty _ _ _) = isResourcefulHigherOrder ty
 
 
 -- |Set the type of the given PrimParam
@@ -2812,13 +2814,13 @@ setParamArgFlowType ft p = p{paramFlowType=ft}
 
 -- |Convert a Param to a Var
 paramToVar :: Param -> Placed Exp
-paramToVar (Param n t f ft)
+paramToVar (Param n t f ft _)
     = Unplaced $ Typed (Var n f ft) t Nothing
 
 
 -- |Convert a PrimParam to a PrimArg
 primParamToArg :: PrimParam -> PrimArg
-primParamToArg (PrimParam nm ty fl ft _) = ArgVar nm ty fl ft False
+primParamToArg (PrimParam nm ty fl _ ft _) = ArgVar nm ty fl ft False
 
 
 -- |Set the TypeSpec of a given TypeFlow
@@ -3268,7 +3270,7 @@ argGlobalFlow varFlows (ArgClosure pspec args _) = do
     params <- getPrimParams pspec 
     let nArgs = length args
         (closedParams, freeParams) = List.splitAt nArgs params
-    if any (\(PrimParam _ ty flow _ _) -> 
+    if any (\(PrimParam _ ty flow _ _ _) -> 
             isInputFlow flow && isResourcefulHigherOrder ty) freeParams
     then return univGlobalFlows
     else do
@@ -3619,7 +3621,8 @@ envParamName = PrimVarName (specialName "env") 0
 
 
 envPrimParam :: PrimParam
-envPrimParam = PrimParam envParamName AnyType FlowIn Ordinary (ParamInfo False emptyGlobalFlows)
+envPrimParam = PrimParam envParamName AnyType FlowIn Nothing Ordinary
+               (ParamInfo False emptyGlobalFlows)
 
 
 makeGlobalResourceName :: ResourceSpec -> String
@@ -3891,16 +3894,18 @@ instance Show ProcProto where
 
 -- |How to show a formal parameter.
 instance Show Param where
-  show (Param name typ dir flowType) =
+  show (Param name typ dir flowType dflt) =
     show flowType ++ flowPrefix dir ++ name ++ showTypeSuffix typ Nothing
+    ++ maybe "" ((" = " ++) . show) dflt
 
 -- |How to show a formal parameter.
 instance Show PrimParam where
-  show (PrimParam name typ dir ft (ParamInfo unneeded flows)) =
+  show (PrimParam name typ dir dflt ft (ParamInfo unneeded flows)) =
       let (pre,post) = if unneeded then ("[","]") else ("","")
           flowStr = if flows == emptyGlobalFlows then "" else " " ++ show flows
+          defltStr = maybe "" ((" = " ++) . show) dflt
       in  pre ++ show ft ++ primFlowPrefix dir ++ show name
-          ++ showTypeSuffix typ Nothing ++ flowStr ++ post
+          ++ showTypeSuffix typ Nothing ++ defltStr ++ flowStr ++ post
 
 
 -- |Show the type of an expression, if it's known.

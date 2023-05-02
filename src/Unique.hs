@@ -431,7 +431,7 @@ uniquenessCheckGeneric _ _ _ _ _ _ = return ()
 -- | Uniqueness check a parameter (including used resources) following checking
 -- of the proc body.  This will catch unique outputs following use of the value.
 uniquenessCheckParam :: ProcName -> Param -> OptPos -> Uniqueness ()
-uniquenessCheckParam name (Param pName ty flow flowType) pos = do
+uniquenessCheckParam name (Param pName ty flow flowType _) pos = do
     used <- Map.member pName <$> gets uniquenessUsedMap
     when (flowsOut flow && used)
         $ uniquenessErr $ UniquenessError pName ty pos flowType (ErrorReturn name)
@@ -444,7 +444,7 @@ uniquenessCheckResourceParam name pos (ResourceFlowSpec res flow) = do
         flowType = Resource res
     ty <- lift $ trustFromJust "uniquenessCheckResource" . snd 
         <$> canonicaliseResourceSpec pos "uniqueness checking" res
-    uniquenessCheckParam name (Param rName ty flow flowType) pos
+    uniquenessCheckParam name (Param rName ty flow flowType Nothing) pos
 
 
 -- | Uniqueness check the type of a parameter. This ensures that type parameters

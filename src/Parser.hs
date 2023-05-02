@@ -1295,9 +1295,9 @@ termToProto other =
 termToParam :: TranslateTo (Placed Param)
 termToParam (Call pos [] ":" ParamIn [Call _ [] name flow [],ty]) = do
     ty' <- termToTypeSpec ty
-    return $ Param name ty' flow Ordinary `maybePlace` Just pos
+    return $ Param name ty' flow Ordinary Nothing `maybePlace` Just pos
 termToParam (Call pos [] name flow []) =
-    return $ Param name AnyType flow Ordinary `maybePlace` Just pos
+    return $ Param name AnyType flow Ordinary Nothing `maybePlace` Just pos
 termToParam other =
     syntaxError (termPos other) $ "invalid parameter " ++ show other
 
@@ -1316,15 +1316,15 @@ termToCtorDecl other =
 termToCtorField :: TranslateTo (Placed Param)
 termToCtorField (Call pos [] ":" ParamIn [Call _ [] name ParamIn [],ty]) = do
     ty' <- termToTypeSpec ty
-    return $ Param name ty' ParamIn Ordinary `maybePlace` Just pos
+    return $ Param name ty' ParamIn Ordinary Nothing `maybePlace` Just pos
 termToCtorField (Call pos [] name ParamIn [])
   | isTypeVar name = do
-    return $ Param "" (TypeVariable $ RealTypeVar name) ParamIn Ordinary
+    return $ Param "" (TypeVariable $ RealTypeVar name) ParamIn Ordinary Nothing
                 `maybePlace` Just pos
 termToCtorField (Call pos mod name ParamIn params)
   | not $ isTypeVar name = do
     tyParams <- mapM termToTypeSpec params
-    return $ Param "" (TypeSpec mod name tyParams) ParamIn Ordinary
+    return $ Param "" (TypeSpec mod name tyParams) ParamIn Ordinary Nothing
                 `maybePlace` Just pos
 termToCtorField other =
     syntaxError (termPos other) $ "invalid constructor field " ++ show other

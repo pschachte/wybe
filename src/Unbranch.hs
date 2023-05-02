@@ -153,7 +153,7 @@ unbranchBody name tmpCtr params detism body alt = do
 
 -- |A synthetic output parameter carrying the test result
 testOutParam :: Param
-testOutParam = Param outputStatusName boolType ParamOut Ordinary
+testOutParam = Param outputStatusName boolType ParamOut Ordinary Nothing
 
 
 -- |The output exp we use to hold the success/failure of a test proc.
@@ -231,11 +231,11 @@ data LoopInfo = LoopInfo {
 initUnbrancherState :: Maybe LoopInfo -> Int -> [Placed Param] -> ProcName -> UnbrancherState
 initUnbrancherState loopinfo tmpCtr params =
     let defined = inputParams $ content <$> params
-        outParams = [unbranchParam (Param nm ty ParamOut ft) `maybePlace` pos
-                    | (Param nm ty fl ft, pos) <- unPlace <$> params
+        outParams = [unbranchParam (Param nm ty ParamOut ft Nothing) `maybePlace` pos
+                    | (Param nm ty fl ft _, pos) <- unPlace <$> params
                     , flowsOut fl]
         outArgs   = [Typed (varSet nm) (unbranchType ty) Nothing `maybePlace` pos
-                    | (Param nm ty fl _, pos) <- unPlace <$> params
+                    | (Param nm ty fl _ _, pos) <- unPlace <$> params
                     , flowsOut fl]
     in Unbrancher loopinfo defined tmpCtr outParams outArgs [] Map.empty
 
@@ -613,7 +613,7 @@ flatStmt _             = False
 inputParams :: [Param] -> VarDict
 inputParams params =
     List.foldr
-    (\(Param v ty dir _) vdict ->
+    (\(Param v ty dir _ _) vdict ->
          if flowsIn dir then Map.insert v ty vdict else vdict)
     Map.empty params
 
@@ -733,12 +733,12 @@ makeFreeParams' :: Integer -> [Param] -> [(Exp, OptPos)]
 makeFreeParams' _ params [] = (Unplaced <$> params', paramToVar <$> params', Map.empty)
   where params' = freeParamToOrdinary . unbranchParam <$> params
 makeFreeParams' _ [] _ = shouldnt "too many exps for params"
-makeFreeParams' idx ((Param nm pTy fl _):params) ((Typed exp ty cast,pos):exps)
+makeFreeParams' idx ((Param nm pTy fl _ _):params) ((Typed exp ty cast,pos):exps)
     | flowsOut fl = shouldnt "out flowing free param"
     | otherwise   = (param':params', exp' `maybePlace` pos:exps', constMap')
   where
     (params', exps', constMap) = makeFreeParams' (idx + 1) params exps
-    param' = Param nm (unbranchType pTy) ParamIn Free `maybePlace` pos
+    param' = Param nm (unbranchType pTy) ParamIn Free Nothing `maybePlace` pos
     mbExp = expIsConstant exp
     exp' = Typed (fromMaybe (Var nm ParamIn Free) $ expIsConstant exp) ty' cast'
     constMap' = if isJust mbExp
@@ -751,7 +751,7 @@ makeFreeParams' _ _ _ = shouldnt "untyped free var"
 
 -- | Set the ArgFlowType of a Free Param to Ordinary, else do nothing
 freeParamToOrdinary :: Param -> Param
-freeParamToOrdinary param@(Param _ _ _ Free) = param{paramFlowType=Ordinary}
+freeParamToOrdinary param@(Param _ _ _ Free _) = param{paramFlowType=Ordinary}
 freeParamToOrdinary param                    = param
 
 
@@ -759,7 +759,7 @@ freeParamToOrdinary param                    = param
 freeParamVar :: VarName -> TypeSpec -> (Placed Param, Placed Exp)
 freeParamVar nm ty =
     let ty' = unbranchType ty
-    in (Unplaced $ Param nm ty' ParamIn Free,
+    in (Unplaced $ Param nm ty' ParamIn Free Nothing,
         Unplaced $ Typed (Var nm ParamIn Free) ty' Nothing)
 
 
@@ -856,7 +856,7 @@ newProcCall name inVars pos detism = do
 
 newProcProto :: ProcName -> VarDict -> Set ResourceSpec -> Unbrancher ProcProto
 newProcProto name inVars res = do
-    let inParams  = [Unplaced $ unbranchParam $ Param v ty ParamIn Ordinary
+    let inParams  = [Unplaced $ unbranchParam $ Param v ty ParamIn Ordinary Nothing
                     | (v,ty) <- Map.toList inVars]
     outParams <- gets brOutParams
     return $ ProcProto name (inParams ++ outParams)

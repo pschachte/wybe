@@ -97,7 +97,7 @@ markParamNeededness _ _ _ PrimParam{ primParamFlow=FlowTakeReference } =
 -- | Update the global flows of a parameter, given the global flows
 -- of varaibles in the procedure
 updateParamGlobalFlows :: Map PrimVarName GlobalFlows -> PrimParam -> PrimParam 
-updateParamGlobalFlows varFlows param@(PrimParam name _ _ _ info@(ParamInfo _ flows)) =
+updateParamGlobalFlows varFlows param@(PrimParam name _ _ _ _ info@(ParamInfo _ flows)) =
     -- We take th intersection here to ensure that the global flows
     -- never increase. The flows should never be increased because previous
     -- analyses may exploit a more restricted global flows
@@ -354,7 +354,7 @@ inputOutputParams proto =
 --  be replaced with an assignment of the argument variable, rather than
 --  generating a temp variable name.
 addOutputNaming :: OptPos -> (PrimParam,PrimArg) -> Expander ()
-addOutputNaming _ (param@(PrimParam pname ty FlowOut _ _),
+addOutputNaming _ (param@(PrimParam pname ty FlowOut _ _ _),
                      v@ArgVar{argVarName=vname}) = do
     when (AnyType == ty) $
       shouldnt $ "Danger: untyped param: " ++ show param
@@ -371,7 +371,7 @@ addOutputNaming _ _ = return ()
 -- the argument has already been renamed as appropriate for the calling
 -- context.
 addInputAssign :: OptPos -> (PrimParam,PrimArg) -> Expander ()
-addInputAssign pos (param@(PrimParam name ty FlowIn ft _),v) = do
+addInputAssign pos (param@(PrimParam name ty FlowIn _ ft _),v) = do
     newVar <- freshVar name ty ft
     addInstr (PrimForeign "llvm" "move" [] [v,newVar]) pos
 addInputAssign _ _ = return ()

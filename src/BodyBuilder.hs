@@ -182,7 +182,7 @@ childState st@BodyState{currSubst=iSubst,outSubst=oSubst,subExprs=subs,
 initGlobalVarFlows :: [PrimParam] -> Map PrimVarName GlobalFlows
 initGlobalVarFlows = Map.fromList . Maybe.mapMaybe init
   where
-    init (PrimParam name _ flow _ (ParamInfo _ flows))
+    init (PrimParam name _ flow _ _ (ParamInfo _ flows))
       | isInputFlow flow = Just (name, flows)
     init _ = Nothing
 

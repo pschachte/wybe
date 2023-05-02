@@ -1216,7 +1216,7 @@ getTyping action = do
 
 
 addDeclaredType :: ProcName -> OptPos -> Int -> (Param,Int) -> Typed ()
-addDeclaredType procname pos arity (Param name typ flow _,argNum) = do
+addDeclaredType procname pos arity (Param name typ flow _ _,argNum) = do
     typ' <- lookupTyped "proc declaration" pos typ
     logTyped $ "    type of '" ++ name ++ "' is " ++ show typ'
     constrainVarType (ReasonParam procname arity pos) name typ'
@@ -2311,7 +2311,7 @@ checkFlowErrors isForeign isHigherOrder name pos flows thn doEls = do
 
 -- |Add in-flowing params to a set of varnames
 collectInParams :: Set.Set VarName -> Param -> Set.Set VarName
-collectInParams s (Param n _ flow _)
+collectInParams s (Param n _ flow _ _)
     | flowsIn flow = Set.insert n s
 collectInParams s _ = s
 
