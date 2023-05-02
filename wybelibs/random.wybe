@@ -1,31 +1,27 @@
 # purpose: Interface for the C stdlib random functions
 # since  : 0.1
 
-pragma no_standard_library  # Standard library can't depend on itself!
-
-use wybe.int, wybe.phantom
-
 # Random number generator state
 pub resource random:phantom = 0:phantom
 
 # Seed the random number generator
-pub def seed(s:int) use ?random {
+pub def set_random_seed(s:int) use ?random {
     foreign c srand(s, ?random)
 }
 
 # Generate a random number
-pub def generate(?n:int) use !random {
+pub def random(?n:int) use !random {
     foreign c rand(?n, !random)
 }
 
 # Generate a random number between 0 and hi-1
-pub def generate(?n:int, hi:int) use !random {
-    !generate(?n)
+pub def random(?n:int, hi:int) use !random {
+    !random(?n)
     !n %= hi
 }
 
 # Generate a random number between lo and hi-1
-pub def generate(lo:int, ?n:int, hi:int) use !random {
-    !generate(?n)
+pub def random(lo:int, ?n:int, hi:int) use !random {
+    !random(?n)
     ?n = lo + (n - lo) % (hi - lo)
 }

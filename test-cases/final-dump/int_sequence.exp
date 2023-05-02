@@ -20,19 +20,19 @@ AFTER EVERYTHING:
 
 module top-level code > public {semipure} (0 calls)
 0: int_sequence.<0>
-()<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}>:
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(1,(int_sequence.#cont#1<0>,fromList [NonAliasedParamCond 0 []]))]
     foreign lpvm alloc(16:wybe.int, ?tmp#5##0:int_sequence) @int_sequence:nn:nn
     foreign lpvm mutate(~tmp#5##0:int_sequence, ?tmp#6##0:int_sequence, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1:wybe.int) @int_sequence:nn:nn
     foreign lpvm mutate(~tmp#6##0:int_sequence, ?tmp#1##0:int_sequence, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int) @int_sequence:nn:nn
-    int_sequence.#cont#1<0>[410bae77d3](~tmp#1##0:int_sequence)<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}> #1 @int_sequence:nn:nn
+    int_sequence.#cont#1<0>[410bae77d3](~tmp#1##0:int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #1 @int_sequence:nn:nn
 
 
 #cont#1 > (2 calls)
 0: int_sequence.#cont#1<0>[410bae77d3]
-#cont#1(tmp#0##0:int_sequence)<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}>:
+#cont#1(tmp#0##0:int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(0,(int_sequence.[|]<0>,fromList [NonAliasedParamCond 2 [0]])),(2,(int_sequence.#cont#1<0>,fromList [NonAliasedParamCond 0 []]))]
@@ -45,7 +45,7 @@ module top-level code > public {semipure} (0 calls)
         foreign c print_int(~i##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @int:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-        int_sequence.#cont#1<0>[410bae77d3](~tmp#0##1:int_sequence)<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}> #2 @int_sequence:nn:nn
+        int_sequence.#cont#1<0>[410bae77d3](~tmp#0##1:int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @int_sequence:nn:nn
 
  [410bae77d3] [NonAliasedParam 0] :
     int_sequence.[|]<0>[785a827a1b](?i##0:wybe.int, ?tmp#0##1:int_sequence, ~tmp#0##0:int_sequence, ?tmp#2##0:wybe.bool) #0 @int_sequence:nn:nn
@@ -57,7 +57,7 @@ module top-level code > public {semipure} (0 calls)
         foreign c print_int(~i##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @int:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-        int_sequence.#cont#1<0>[410bae77d3](~tmp#0##1:int_sequence)<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}> #2 @int_sequence:nn:nn
+        int_sequence.#cont#1<0>[410bae77d3](~tmp#0##1:int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @int_sequence:nn:nn
 
 
 

@@ -11,15 +11,15 @@ AFTER EVERYTHING:
 
 module top-level code > public {inline,semipure} (0 calls)
 0: stmt_while.<0>
-()<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}>:
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
-    stmt_while.#cont#1<0>(10:wybe.int)<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}> #0 @stmt_while:nn:nn
+    stmt_while.#cont#1<0>(10:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #0 @stmt_while:nn:nn
 
 
 #cont#1 > (2 calls)
 0: stmt_while.#cont#1<0>
-#cont#1(n##0:wybe.int)<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}>:
+#cont#1(n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_sgt(n##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
@@ -32,13 +32,13 @@ module top-level code > public {inline,semipure} (0 calls)
         foreign c print_int(tmp#5##0:wybe.int, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @int:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
         foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-        stmt_while.#cont#1<0>(~tmp#5##0:wybe.int)<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}> #2 @stmt_while:nn:nn
+        stmt_while.#cont#1<0>(~tmp#5##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @stmt_while:nn:nn
 
 
 
 #cont#2 > {inline} (1 calls)
 0: stmt_while.#cont#2<0>
-#cont#2(n##0:wybe.int)<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}>:
+#cont#2(n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
@@ -46,7 +46,7 @@ module top-level code > public {inline,semipure} (0 calls)
     foreign c print_int(tmp#0##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @int:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    stmt_while.#cont#1<0>(~tmp#0##0:wybe.int)<{<<wybe.io.io>>, <<wybe.random.random>>}; {<<wybe.io.io>>, <<wybe.random.random>>}> #2 @stmt_while:nn:nn
+    stmt_while.#cont#1<0>(~tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}> #2 @stmt_while:nn:nn
 
   LLVM code       :
 

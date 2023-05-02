@@ -1,0 +1,5 @@
+use random
+
+!set_random_seed(0)
+!random(0, ?not_so_random, 1)
+if { not_so_random ~= 0 :: !println("That was random!") }
