@@ -423,7 +423,7 @@ Again each `:`*type* is optional, with types inferred if omitted,
 and parentheses omitted for niladic procedures.
 
 The procedure is private unless preceded by the `pub` keyword.
-All types must be included in public procedure definitions.
+All argument types must be included in public procedure definitions.
 
 For example:
 
@@ -447,11 +447,11 @@ pub def toCelsius(f:float, ?result:float) { ?result = (f - 32.0) / 1.8 }
 
 Likewise, every function call is transformed into a procedure call, so:
 ```
-pub def example(f:float, ?c:float) {?c = toCelsius(f) }
+pub def example(f:float, ?c:float) { ?c = toCelsius(f) }
 ```
 is exactly equivalent to
 ```
-pub def example(f:float, ?c:float) {toCelsius(f, ?c) }
+pub def example(f:float, ?c:float) { toCelsius(f, ?c) }
 ```
 
 This means that what you define as a procedure, you can still call as a
