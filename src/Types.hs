@@ -1120,7 +1120,8 @@ typecheckProcDecl' m pdef = do
         logTyped $ "   with resources: " ++ show resources
         calls <- bodyCallsConstraints False def
         logTyped $ "   containing calls: " ++ showBody 8 calls
-        -- logTyped $ "   inner resources: " ++ show (fst <$> bodyRes)
+        let defaultCalls = Maybe.mapMaybe paramAssignment params
+        logTyped $ "   and defaults: " ++ showBody 8 defaultCalls 
         let assignedVars =
                 foldStmts
                     (const . const)
@@ -1142,7 +1143,7 @@ typecheckProcDecl' m pdef = do
             -- let unifs = List.concatMap foreignTypeEquivs
             --             (content . fst <$> calls)
             -- mapM_ (uncurry $ unifyExprTypes pos) unifs
-            calls' <- mapM (callInfos assignedVars) procCalls
+            calls' <- mapM (callInfos assignedVars) (defaultCalls ++ procCalls)
             logTyping $ "  With calls:\n  " ++ intercalate "\n    " (show <$> calls')
             let badCalls = List.map typingStmt
                          $ List.filter (List.null . typingInfos) calls'
@@ -1194,6 +1195,16 @@ typecheckProcDecl' m pdef = do
                                     ++ showProcDef 4 pdef' ++ "\n")
                     return (pdef',sccAgain)
 
+
+-- |If the parameter has a default, generate an assignment of the default
+--  value to the parameter variable, otherwise return Nothing
+
+paramAssignment :: Param -> Maybe (Placed Stmt)
+paramAssignment (Param name _ _ _ Nothing) = Nothing
+paramAssignment (Param name _ _ _ (Just deflt)) =
+    Just $ Unplaced 
+    $ ProcCall (First [] "=" Nothing) Det False 
+        [Unplaced (Var name ParamOut Ordinary),deflt]
 
 -- | If no type errors have been recorded, execute the enclosed code; otherwise
 -- just return the specified proc definition.  This is probably only useful in

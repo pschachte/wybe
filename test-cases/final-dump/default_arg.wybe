@@ -2,4 +2,4 @@ def foo(a:int,b:int=1) = a+b
 def bar(x:int,y=2) = x+y
 
 def pfoo(a:int, b:int=1, ?c:int) { ?c = a+b }
-def pbar(x:int, y:int=2, ?z:int) { ?z = a+b }
+def pbar(x:int, y=2, ?z:int) { ?z = x+y }

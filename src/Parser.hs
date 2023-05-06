@@ -1293,6 +1293,10 @@ termToProto other =
 
 -- | Translate a Term to a proc or func parameter
 termToParam :: TranslateTo (Placed Param)
+termToParam (Call pos [] "=" ParamIn [decl,exp]) = do
+    pparam <- termToParam decl
+    exp' <- termToExp exp
+    return $ contentApply (setParamDefault exp') pparam
 termToParam (Call pos [] ":" ParamIn [Call _ [] name flow [],ty]) = do
     ty' <- termToTypeSpec ty
     return $ Param name ty' flow Ordinary Nothing `maybePlace` Just pos

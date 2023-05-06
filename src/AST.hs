@@ -27,7 +27,7 @@ module AST (
   isResourcefulHigherOrder, typeModule,
   VarDict, TypeImpln(..),
   ProcProto(..), Param(..), TypeFlow(..),
-  paramTypeFlow, primParamTypeFlow, setParamArgFlowType,
+  paramTypeFlow, primParamTypeFlow, setParamArgFlowType, setParamDefault,
   paramToVar, primParamToArg, unzipTypeFlow, unzipTypeFlows,
   PrimProto(..), PrimParam(..), ParamInfo(..),
   Exp(..), StringVariant(..), GlobalInfo(..), Generator(..), Stmt(..), ProcFunctor(..),
@@ -2810,6 +2810,11 @@ primParamTypeFlow PrimParam{primParamType=ty, primParamFlow=fl}
 -- |Set the ArgFlowType of the given Param
 setParamArgFlowType :: ArgFlowType -> Param -> Param
 setParamArgFlowType ft p = p{paramFlowType=ft}
+
+
+-- |Set the default value of a param
+setParamDefault :: Placed Exp -> Param -> Param
+setParamDefault exp p = p{paramDefault=Just exp}
 
 
 -- |Convert a Param to a Var
