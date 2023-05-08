@@ -211,7 +211,7 @@ data TypeDef = TypeDef {
 -- -- |How to show a type definition.
 -- instance Show TypeDef where
 --   show (TypeDef params members _ pos items) =
---     bracketList "(" "," ")" params
+--     showListIfNonempty "(" "," ")" params
 --     ++ " { "
 --     ++ intercalate " | " (show <$> members)
 --     ++ " "

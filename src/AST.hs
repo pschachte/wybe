@@ -44,7 +44,8 @@ module AST (
   protoInputParamNames, protoRealParamsWhere, isProcProtoArg,
   -- *Source Position Types
   OptPos, Placed(..), place, betterPlace, content, maybePlace, rePlace, unPlace,
-  placedApply, defaultPlacedApply, placedApplyM, contentApply, updatePlacedM,
+  placedApply, defaultPlacedApply, placedApplyM, contentApply,
+  updatePlacedM,
   -- *AST types
   Module(..), isRootModule, ModuleInterface(..), ModuleImplementation(..), InterfaceHash, PubProcInfo(..),
   ImportSpec(..), importSpec, Pragma(..), addPragma,
@@ -69,6 +70,7 @@ module AST (
   setPrimParamType, setTypeFlowType,
   flowsIn, flowsOut, primFlowToFlowDir, isInputFlow, isOutputFlow,
   foldStmts, foldExps, foldBodyPrims, foldBodyDistrib,
+  transformExp, transformStmt,
   expToStmt, seqToStmt, stmtsImpurity, stmtImpurity, procCallToExp,
   stmtsInputs, expOutputs, pexpListOutputs, expInputs, pexpListInputs,
   setExpTypeFlow, setPExpTypeFlow,
@@ -115,7 +117,7 @@ module AST (
   showModSpec, showModSpecs, showResources, showOptPos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
   flowPrefix, showProcModifiers, showProcModifiers', showFlags, showFlags',
-  showMap, showVarMap, simpleShowMap, simpleShowSet, bracketList,
+  showVarMap, showListIfNonempty,
   maybeShow, showMessages, stopOnError,
   logMsg, whenLogging2, whenLogging,
   -- *Helper functions
@@ -418,7 +420,6 @@ placedApplyM f placed = f (content placed) (place placed)
 contentApply :: (a->b) -> Placed a -> Placed b
 contentApply f (Placed a pos) = Placed (f a) pos
 contentApply f (Unplaced a) = Unplaced $ f a
-
 
 
 instance Functor Placed where
@@ -2578,6 +2579,87 @@ foldBodyDistrib primFn emptyConj abDisj abConj (ProcBody pprims fork) =
         $ bodies ++ maybeToList deflt
 
 
+-- |Recursively Transform an Exp, applying Exp and Stmt transformers.  First
+-- recursively transforms parts of the Exp, and then applies the Exp
+-- transformer to the result.
+
+transformExp :: (Exp -> Exp) -> (Stmt -> Stmt) -> Exp -> Exp
+transformExp efn sfn (AnonProc ms params body dict rflows) =
+    efn $ AnonProc ms params (List.map (transformStmt sfn efn <$>) body) dict rflows
+transformExp efn sfn (AnonFunc exp) =
+    efn $ AnonFunc $ transformExp efn sfn <$> exp
+transformExp efn sfn (Typed exp t1 t2) =
+    efn $ Typed (transformExp efn sfn exp) t1 t2
+transformExp efn sfn (Where stmts exp) =
+    let stmts' = List.map (transformStmt sfn efn <$>) stmts
+    in  efn $ Where stmts' $ transformExp efn sfn <$> exp
+transformExp efn sfn (DisjExp e1 e2) =
+    efn $ DisjExp (transformExp efn sfn <$> e1) (transformExp efn sfn <$> e2)
+transformExp efn sfn (CondExp stmt e1 e2) =
+    let stmt' = transformStmt sfn efn <$> stmt
+    in  efn $ CondExp stmt' (transformExp efn sfn <$> e1)
+                            (transformExp efn sfn <$> e2)
+transformExp efn sfn (Fncall m p r exps) =
+    efn $ Fncall m p r $ List.map (transformExp efn sfn <$>) exps
+transformExp efn sfn (ForeignFn l p fs exps) =
+    efn $ ForeignFn l p fs $ List.map (transformExp efn sfn <$>) exps
+transformExp efn sfn (CaseExp exp cases deflt) =
+    let exp' = transformExp efn sfn <$> exp
+        deflt' = (transformExp efn sfn <$>) <$> deflt
+        cases' = List.map (\(e1,e2) ->
+                           (transformExp efn sfn <$> e1
+                           ,transformExp efn sfn <$> e2))
+                          cases
+    in efn $ CaseExp exp' cases' deflt'
+transformExp efn sfn val = efn val -- Exp not containing Exps or Stmts
+
+
+-- |Recursively Transform a Stmt, applying Stmt and Exp transformers.  First
+-- recursively transforms parts of the Stmt, and then applies the Stmt
+-- transformer to the result.
+
+transformStmt :: (Stmt -> Stmt) -> (Exp -> Exp) -> Stmt -> Stmt
+transformStmt sfn efn (ProcCall fn d r args) =
+    sfn $ ProcCall fn d r $ List.map (transformExp efn sfn <$>) args
+transformStmt sfn efn (ForeignCall l p f args) =
+    sfn $ ForeignCall l p f $ List.map (transformExp efn sfn <$>) args
+transformStmt sfn efn (Cond tst thn els d1 d2 rs) =
+    sfn $ Cond tst' thn' els' d1 d2 rs
+    where tst' = transformStmt sfn efn <$> tst
+          thn' = List.map (transformStmt sfn efn <$>) thn
+          els' = List.map (transformStmt sfn efn <$>) els
+transformStmt sfn efn (Case exp cases deflt) =
+    sfn $ Case exp' cases' deflt'
+    where exp' = transformExp efn sfn <$> exp
+          cases' = List.map
+                   (\(e,ss) ->
+                    (transformExp efn sfn <$> e
+                    ,List.map (transformStmt sfn efn <$>) ss)) cases
+          deflt' = List.map (transformStmt sfn efn <$>) <$> deflt
+transformStmt sfn efn (And stmts) =
+    sfn $ And $ List.map (transformStmt sfn efn <$>) stmts
+transformStmt sfn efn (Or stmts vs rs) =
+    sfn $ Or (List.map (transformStmt sfn efn <$>) stmts) vs rs
+transformStmt sfn efn (Not negated) =
+    sfn $ Not $ transformStmt sfn efn <$> negated
+transformStmt sfn efn (TestBool exp) =
+    sfn $ TestBool $ transformExp efn sfn exp
+transformStmt sfn efn (Loop body vs rs) =
+    sfn $ Loop (List.map (transformStmt sfn efn <$>) body) vs rs
+transformStmt sfn efn (UseResources rs vs body) =
+    sfn $ UseResources rs vs $ List.map (transformStmt sfn efn <$>) body
+transformStmt sfn efn (For generators body) =
+    sfn $ For generators' body'
+    where generators' = List.map 
+                        ((\(In var gen) ->
+                            In (transformExp efn sfn <$> var)
+                               (transformExp efn sfn <$> gen)) <$>)
+                        generators
+          body' = List.map (transformStmt sfn efn <$>) body
+transformStmt sfn _ stmt = sfn stmt -- Stmt not containing Exps or Stmts
+
+
+
 -- |Info about a proc call, including the ID, prototype, and an
 --  optional source position.
 data ProcSpec = ProcSpec {
@@ -3054,6 +3136,7 @@ flattenedExpFlow (Closure _ _)         = ParamIn
 flattenedExpFlow (Var _ flow _)        = flow
 flattenedExpFlow (AnonParamVar _ flow) = flow
 flattenedExpFlow (Typed exp _ _)       = flattenedExpFlow exp
+flattenedExpFlow (Where _ exp)         = flattenedExpFlow $ content exp
 flattenedExpFlow otherExp =
     shouldnt $ "Getting flow direction of unflattened exp " ++ show otherExp
 
@@ -3679,11 +3762,11 @@ instance Show Item where
     ++ "\n}\n"
   show (RepresentationDecl params typeModifiers repn pos) =
     "representation"
-    ++ bracketList "(" ", " ")" (("?"++) <$> params)
+    ++ showListIfNonempty "(" ", " ")" (("?"++) <$> params)
     ++ " is " ++ show typeModifiers ++ show repn ++ showOptPos pos ++ "\n"
   show (ConstructorDecl vis params typeModifiers ctors pos) =
     visibilityPrefix vis ++ "constructors"
-    ++ bracketList "(" ", " ")" (("?"++) <$> params) ++ " "
+    ++ showListIfNonempty "(" ", " ")" (("?"++) <$> params) ++ " "
     ++ show typeModifiers
     ++ intercalate " | " (show <$> ctors)
     ++ showOptPos pos ++ "\n"
@@ -3815,10 +3898,6 @@ showSourcePos full pos =
   (if full then id else takeBaseName) (sourceName pos) ++ ":"
   ++ show (sourceLine pos) ++ ":" ++ show (sourceColumn pos)
 
-
--- |How to show a set of identifiers as a comma-separated list
-showIdSet :: Set Ident -> String
-showIdSet set = intercalate ", " $ Set.elems set
 
 -- |How to show a type definition.
 instance Show TypeDef where
@@ -4133,30 +4212,14 @@ instance Show GlobalInfo where
 
 
 
-showMap :: String -> String -> String -> (k->String) -> (v->String)
-        -> Map k v -> String
-showMap pre sep post kfn vfn m =
-    pre
-    ++ intercalate sep (List.map (\(k,v) -> kfn k ++ vfn v) $ Map.toList m)
-    ++ post
-
 -- |Show a readable version of a VarDict showVarMap :: VarDict -> String showVarMap = showVarMap
 
 -- |Show a readable version of a Map from variable names to showable things
 showVarMap :: Show a => Map VarName a -> String
 showVarMap = showMap "{" ", " "}" (++"::") show
 
--- |Show a readable version of a Map of showable things
-simpleShowMap :: (Show k, Show v) => Map k v -> String
-simpleShowMap = showMap "{" ", " "}" ((++"::") . show) show
 
 
--- |Show a readable version of a Map of showable things
-simpleShowSet :: Show a => Set a -> String
-simpleShowSet s =
-    "{"
-    ++ intercalate ", " (List.map show $ Set.toList s)
-    ++ "}"
 
 
 -- |maybeShow pre maybe post
@@ -4334,13 +4397,6 @@ makeBold :: String -> Compiler String
 makeBold s = do
     noBold <- gets $ optNoFont . options
     return $ if noBold then s else "\x1b[1m" ++ s ++ "\x1b[0m"
-
-
--- | Wrap brackets around a list of strings, with a separator.  If the list
--- is empty, just return the empty string.
-bracketList :: String -> String -> String -> [String] -> String
-bracketList _ _ _ [] = ""
-bracketList prefix sep suffix elts = prefix ++ intercalate sep elts ++ suffix
 
 
 ------------------------------ Module Encoding Types -----------------------

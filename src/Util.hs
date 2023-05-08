@@ -14,8 +14,11 @@ module Util (sameLength, maybeNth, insertAt,
              removeFromDS, connectedItemsInDS,
              mapDS, filterDS, dsToTransitivePairs,
              intersectMapIdentity, orElse,
-             apply2way, (&&&), (|||), zipWith3M, zipWith3M_, lift2,
-             useLocalCacheFileIfPossible, createLocalCacheFile
+             apply2way, (&&&), (|||), justIf,
+             zipWith3M, zipWith3M_, lift2,
+             useLocalCacheFileIfPossible, createLocalCacheFile,
+             showListIfNonempty, showStringList, simpleShowSet, showSet,
+             simpleShowMap, showMap
              ) where
 
 
@@ -102,11 +105,13 @@ fillLines' marginText currColumn lineLength (word1:word2:words) =
              fillLines' marginText (length marginText) lineLength (word2:words)
         else " " ++ fillLines' marginText nextColumn lineLength (word2:words)
 
+
 -- |Do nothing monadically.
 nop :: Monad m => m ()
 nop = return ()
 
 
+-- |The list of all elements in the given SCC
 sccElts :: SCC a -> [a]
 sccElts (AcyclicSCC single) = [single]
 sccElts (CyclicSCC multi)   = multi
@@ -123,7 +128,6 @@ emptyDS = Set.empty
 -- So we use this version as a quick fix.
 
 type DisjointSet a = Set (Set a)
-
 
 
 _findOneInSet :: (a -> Bool) -> Set a -> Maybe a
@@ -240,9 +244,11 @@ orElse :: Maybe a -> Maybe a -> Maybe a
 orElse Nothing b  = b
 orElse a@Just{} _ = a
 
+
 -- | apply two functions to the same input and combine the results
 apply2way :: (a->b->c) -> (d->a) -> (d->b) -> d -> c
 apply2way combine f1 f2 input = combine (f1 input) (f2 input)
+
 
 -- | conjoin two functions
 infixl 4 &&&
@@ -254,6 +260,14 @@ infixl 4 &&&
 infixl 4 |||
 (|||) :: (a->Bool) -> (a->Bool) -> a -> Bool
 (|||) = apply2way (||)
+
+
+-- |Applies a predicate to a value, returning Just the value iff the predicate
+-- holds for that value.
+justIf :: (a->Bool) -> a -> Maybe a
+justIf p x
+    | p x       = Just x
+    | otherwise = Nothing
 
 
 -- |zipWithM version for 3 lists.
@@ -350,3 +364,51 @@ createLocalCacheFile file = do
     writeFile meta srcFileHash
     return cacheFile
 
+
+----------------------------------------------------------------
+--
+-- Code to readably show general collections
+--
+----------------------------------------------------------------
+
+
+-- | Wrap brackets around a list of strings, with a separator.  If the list
+-- is empty, just return the empty string.
+showListIfNonempty :: String -> String -> String -> [String] -> String
+showListIfNonempty _ _ _ [] = ""
+showListIfNonempty prefix sep suffix elts = showStringList prefix sep suffix elts
+
+
+-- | Wrap specified brackets around a list of strings, with a separator. 
+-- If the list is empty, return empty brackets.
+showStringList :: [a] -> [a] -> [a] -> [[a]] -> [a]
+showStringList prefix sep suffix elts =
+        prefix ++ intercalate sep elts ++ suffix
+
+
+-- |Show a readable version of a Set of showable things using conventional
+-- notation, eg {1, 2, 3}
+simpleShowSet :: Show a => Set a -> String
+simpleShowSet = showSet show
+
+
+-- |Show a readable version of a Set of things, given a function to show each.
+-- The result begins with "{", ends with "}", with elements separated by ", ".
+showSet :: (a -> String) -> Set a -> String
+showSet showFn s  =
+    showStringList "{" ", " "}" $ List.map showFn $ Set.toList s
+
+
+-- |Show a readable version of a Map of showable things, using notation like:
+-- {1::"one", 2::"two"}
+simpleShowMap :: (Show k, Show v) => Map k v -> String
+simpleShowMap = showMap "{" ", " "}" ((++"::") . show) show
+
+-- |Show a readable version of a Map, given the strings to show at the front,
+-- between mappings, at the end, and functions to show the keys and values.
+showMap :: String -> String -> String -> (k->String) -> (v->String)
+        -> Map k v -> String
+showMap pre sep post kfn vfn m =
+    pre
+    ++ intercalate sep (List.map (\(k,v) -> kfn k ++ vfn v) $ Map.toList m)
+    ++ post

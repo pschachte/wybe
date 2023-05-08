@@ -12,7 +12,7 @@ module UnivSet (
     UnivSet(..), UnivSet.union, UnivSet.intersection, subtractUnivSet,
     UnivSet.member, isEmpty, isUniv, emptyUnivSet, UnivSet.singleton,
     UnivSet.fromList, UnivSet.toList, UnivSet.toSet,
-    showUnivSet, showSet,
+    showUnivSet,
     mapFromUnivSetM,
     whenFinite, mapUnivSet
     ) where
@@ -22,6 +22,7 @@ import           Data.Set     as S
 import           Data.List
 import           Data.Map     as M
 import           GHC.Generics (Generic)
+import           Util (showSet)
 
 
 ----------------------------------------------------------------
@@ -105,12 +106,6 @@ toSet univSet UniversalSet  = univSet
 showUnivSet :: (a -> String) -> UnivSet a -> String
 showUnivSet f UniversalSet = "Everything"
 showUnivSet f (FiniteSet set) = showSet f set
-
-
--- | Nicely show a set, given the supplied fn to show each element
-showSet :: (a -> String) -> Set a -> String
-showSet showFn set =
-    "{" ++ intercalate ", " (showFn <$> S.toList set) ++ "}"
 
 
 -- | Produce a map from a UnivSet using a monadic mapping function.

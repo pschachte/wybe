@@ -10,6 +10,7 @@ module ASTShow (
   ) where
 
 import AST
+import Util
 import Options (optDumpLib, LogSelection)
 import Data.List as List
 import Data.Set  as Set
@@ -30,7 +31,7 @@ instance Show Module where
             typeMods = typeModifiers int
             maybeimpl = modImplementation mod
         in " Module " ++ showModSpec (modSpec mod) ++
-           bracketList "(" ", " ")" (show <$> modParams mod) ++
+           showListIfNonempty "(" ", " ")" (show <$> modParams mod) ++
            (if typeMods == defaultTypeModifiers
                then ""
                else "\n modifiers       : " ++ (show $ typeModifiers int)) ++

@@ -827,6 +827,7 @@ expType' (Closure pspec closed) _ = do
         typeError ReasonShouldnt
         return InvalidType
 expType' (Var name _ _) _             = ultimateVarType name
+expType' (Where _ exp) _              = placedApply expType' exp
 expType' (Typed _ typ _) pos          =
     lookupTyped "typed expression" pos typ
 expType' expr _ =
@@ -850,6 +851,7 @@ expMode' _ AnonProc{} = (ParamIn, True, Nothing)
 expMode' assigned (Var name flow _) =
     (flow, name `assignedIn` assigned, Nothing)
 expMode' assigned (Typed expr _ _) = expMode' assigned expr
+expMode' assigned (Where _ expr) = expMode' assigned $ content expr
 expMode' _ expr =
     shouldnt $ "Expression '" ++ show expr ++ "' left after flattening"
 

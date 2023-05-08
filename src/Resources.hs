@@ -272,7 +272,7 @@ transformProc pos name variant detism params ress body = do
 -- The returned bool indicates if any of the Stmts could modify globals
 transformStmts :: [Placed Stmt] -> Resourcer ([Placed Stmt], Bool)
 transformStmts pstmts = (concat *** or) . unzip
-                     <$> mapM (placedApply transformStmt) pstmts
+                     <$> mapM (placedApply Resources.transformStmt) pstmts
 
 
 -- Transform a Stmt, tranforming resources into globals
@@ -312,7 +312,7 @@ transformStmt (ForeignCall lang name flags args) pos = do
                 [ForeignCall lang name flags args' `maybePlace` pos],
             not $ Map.null outs)
 transformStmt (Cond tst thn els condVars exitVars _) pos = do
-    (tst', tstGlobals) <- placedApply transformStmt tst
+    (tst', tstGlobals) <- placedApply Resources.transformStmt tst
     (thn', thnGlobals) <- transformStmts thn
     (els', elsGlobals) <- transformStmts els
     (saves, restores) <- loadStoreResourcesIf pos tstGlobals
@@ -327,7 +327,7 @@ transformStmt (And stmts) pos = do
     (stmts', globals) <- transformStmts stmts
     return ([And stmts' `maybePlace` pos], globals)
 transformStmt (Or disjs vars _) pos = do
-    (disjs', globals) <- unzip <$> mapM (placedApply transformStmt) disjs
+    (disjs', globals) <- unzip <$> mapM (placedApply Resources.transformStmt) disjs
     -- we only need to save resources, and restore before each disj if
     -- any of the init use globals
     -- the last's restoration is handled implicity
@@ -434,14 +434,14 @@ transformExps exps = do
 
 -- | transform a list of expresstions
 transformExps' :: [Placed Exp] -> Resourcer [Placed Exp]
-transformExps' = mapM (placedApply $ transformExp AnyType)
+transformExps' = mapM (placedApply $ Resources.transformExp AnyType)
 
 
 -- | transform a single expression, adding any in flowing or out flowing
 -- resources to the Resourcer monad as necessary.
 transformExp :: TypeSpec -> Exp -> OptPos -> Resourcer (Placed Exp)
 transformExp _ (Typed exp ty cast) pos = do
-    exp' <- transformExp ty exp pos
+    exp' <- Resources.transformExp ty exp pos
     return $ Typed (content exp') ty cast `maybePlace` pos
 transformExp ty exp@(Var nm fl _) pos = do
     addResourceInOuts fl nm ty

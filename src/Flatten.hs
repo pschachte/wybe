@@ -41,6 +41,7 @@ import AST
 import Config
 import Debug.Trace
 import Snippets
+import Util
 import Options (LogSelection(Flatten))
 import Data.Map as Map
 import Data.Set as Set
@@ -64,21 +65,23 @@ flattenProcDecl (ProcDecl vis mods proto stmts pos) = do
            ++ "def " ++ showProcModifiers' mods
            ++ show proto ++ " {" ++ showBody 4 stmts ++ "}"
     mapM_ (placedApply $ flip explicitTypeSpecificationWarning . paramType) params
+    params' <- flattenParamDefaults params
+    let proto' = proto {procProtoParams = params'}
     let inParams = Set.fromList
                  $ List.map paramName
                  $ List.filter (flowsIn . paramFlow)
-                 $ List.map content params
+                 $ List.map content params'
     let resources = Set.map (resourceName . resourceFlowRes)
                   $ procProtoResources proto
     (stmts',tmpCtr) <- flattenBody stmts (inParams `Set.union` resources)
                        (modifierDetism mods)
-    return (ProcDecl vis mods proto stmts' pos,tmpCtr)
+    return (ProcDecl vis mods proto' stmts' pos,tmpCtr)
 flattenProcDecl _ =
     shouldnt "flattening a non-proc item"
 
-
 -- |Flatten the specified statement sequence given a set of input parameter
 -- and resource names.
+
 flattenBody :: [Placed Stmt] -> Set VarName -> Determinism
             -> Compiler ([Placed Stmt],Int)
 flattenBody stmts varSet detism = do
@@ -97,6 +100,90 @@ insertOutVar :: Set VarName -> Exp -> OptPos -> Set VarName
 insertOutVar varSet (Var name ParamOut _) _ = Set.insert name varSet
 insertOutVar varSet (Typed exp _ _) pos = insertOutVar varSet exp pos
 insertOutVar varSet expr _ = varSet
+
+
+----------------------------------------------------------------
+--               Flattening Optional Parameter Defaults
+----------------------------------------------------------------
+
+flattenParamDefaults :: [Placed Param] -> Compiler [Placed Param]
+flattenParamDefaults params
+  | any (isJust . paramDefault . content) params = do
+     -- The set of non-optional in-flowing parameter names
+    let mandatoryVars =
+            Set.fromList
+            $ paramName . content
+                <$> List.filter 
+                    (((isNothing . paramDefault) &&& (flowsIn . paramFlow ))
+                    . content) params
+    logMsg Flatten $ "Mandatory parameters = " ++ showSet id mandatoryVars
+    -- For each parameter, a list of names of optional params appearing
+    -- earlier in the parameter list
+    let earlier = 
+            inits
+            $ (paramName <$>)
+              . justIf ((isJust . paramDefault) 
+                      &&& (flowsIn . paramFlow )) 
+              . content <$> params
+    -- For each param, a list of variable names that can be used
+    let sets = List.map (Set.union mandatoryVars . Set.fromList . catMaybes)
+                earlier
+    logMsg Flatten $ "Vars available for each parameter's default = "
+                     ++ showListIfNonempty "[" ", " "]" (List.map (showSet id) sets)
+    zipWithM (placedApplyM . flattenDefaultParam) sets params
+  | otherwise = return params
+
+
+-- |If the specified param has a default value expression, flatten it.  Default
+-- value expressions are only allowed to reference other non-default parameters
+-- and default parameters that appear earlier in the parameter list.  The set
+-- of referenceable parameter names is the first argument here.
+-- XXX It would be useful also to allow them to reference in-scope resources.
+-- XXX This would make the *call* depend on the resource, but not necessarily
+-- XXX the called proc.
+flattenDefaultParam :: Set VarName -> Param -> OptPos -> Compiler (Placed Param)
+flattenDefaultParam _ param@Param{paramDefault=Nothing} pos =
+    return $ maybePlace param pos
+flattenDefaultParam vars param@Param{paramDefault=Just exp,paramName=name} pos = do
+    logMsg Flatten $ "Flattening optional param " ++ name 
+                        ++ " = " ++ show exp
+                        ++ " with vars = " ++ showSet id vars
+    let var dir = Var (callParamName name) dir Ordinary 
+    (stmts,_) <- flattenBody [ForeignCall "llvm" "move" []
+                              [exp, Unplaced $ var ParamOut] `maybePlace` pos]
+                             vars Det
+    let stmts' = List.map (transformStmt id (renameCallParam vars) <$>) stmts
+    let exp' = Where stmts' (var ParamIn `maybePlace` pos) <$ exp
+    logMsg Flatten $ "Flattened default value = " ++ show exp' 
+    return $ maybePlace param {paramDefault = Just exp'} pos
+
+
+-- |To allow the default values of optional parameters to refer to the values
+-- of other parameters, we generate code for calls that assigns a known temp
+-- variable name for each parameter, beginning with the non-optional ones, and
+-- then the optional ones in left-to-right order, and then pass the special
+-- temp variables in the call.  callParamName returns the special temp variable
+-- name for the input parameter name.
+
+callParamName :: VarName -> VarName
+callParamName = specialName2 "tmpparam"
+
+
+-- |Rename all the named variables to the callParamName version, so the 
+-- generated code for default arguments refers to other parameters by that name.
+
+renameCallParams :: Set VarName -> Exp -> Exp
+renameCallParams vs =
+    transformExp (renameCallParam vs) id
+
+
+-- |Rename all the named variables to the callParamName version.  This is
+-- mapped recursively over an Exp, so it only needs to handle variable refs.
+renameCallParam :: Set VarName -> Exp -> Exp
+renameCallParam vs exp@(Var v ParamIn Ordinary)
+    | Set.member v vs = Var (callParamName v) ParamIn Ordinary
+    | otherwise       = exp
+renameCallParam vs exp = exp
 
 
 ----------------------------------------------------------------
@@ -186,7 +273,7 @@ tempVar = do
     let name = mkTempName ctr
     noteVarIntro name
     return name
-    
+
 
 -- |Run a flattener, ignoring its state changes except for the temp variable
 --  counter.  If transparent is True, also keep changes to the set of defined
@@ -210,7 +297,7 @@ flattenInner transparent detism inner = do
       else put $ oldState { tempCtr = tempCtr innerState,
                             anonProcState = anonProcState innerState }
     return stmts
-    
+
 
 flattenStmtArgs :: [Placed Exp] -> OptPos -> Flattener [Placed Exp]
 flattenStmtArgs args pos = do
@@ -254,6 +341,7 @@ noteVarMention name dir = do
 noteVarIntro :: VarName -> Flattener ()
 noteVarIntro name =
     modify (\s -> s {defdVars = Set.insert name $ defdVars s})
+
 
 ----------------------------------------------------------------
 --                      Flattening Statements
@@ -525,7 +613,7 @@ flattenExp expr@(AnonParamVar mbNum dir) ty castFrom pos = do
         (Just n, _) | fromMaybe 0 count == 0 -> do
             return (n, Nothing)
         _ -> do
-            lift $ errmsg pos 
+            lift $ errmsg pos
                  $ "Mixed use of numbered and un-numbered anonymous parameters"
             return (-1, count)
     let name = makeAnonParamName currentAnon num
@@ -587,14 +675,14 @@ flattenExp (CondExp cond thn els) ty castFrom pos = do
 flattenExp (AnonProc mods _ pstmts clsd res) ty castFrom pos =
     let detism = modifierDetism mods
     in flattenAnon mods clsd res ty castFrom pos $ flattenStmts pstmts detism
-flattenExp (AnonFunc exp) ty castFrom pos = 
+flattenExp (AnonFunc exp) ty castFrom pos =
     flattenAnon defaultProcModifiers Nothing Nothing ty castFrom pos
     $ do
-        logFlatten $ "Flattening AnonFunc expression: " ++ show exp 
+        logFlatten $ "Flattening AnonFunc expression: " ++ show exp
         let outs = expOutputs $ content exp
         unless (Set.null outs)
-            $ lift $ errmsg pos 
-            $ "Anonymous function cannot contain output variables: " 
+            $ lift $ errmsg pos
+            $ "Anonymous function cannot contain output variables: "
             ++ intercalate ", " (Set.toList outs)
         exp' <- flattenPExp exp
         AnonProcState _ _ paramCount params <- gets anonProcState
@@ -603,7 +691,7 @@ flattenExp (AnonFunc exp) ty castFrom pos =
                 Just _ -> Nothing
         logFlatten $ "Flattened AnonFunc has output num: " ++ show outNum
         out <- flattenPExp (AnonParamVar outNum ParamOut `maybePlace` pos)
-        logFlatten $ "Flattened AnonFunc has output var: " ++ show out 
+        logFlatten $ "Flattened AnonFunc has output var: " ++ show out
         emit pos $ ForeignCall "llvm" "move" [] [exp', out]
         flushPostponed
 flattenExp (CaseExp pexpr cases deflt) ty castFrom pos = do
@@ -625,10 +713,10 @@ flattenExp (Typed exp ty castFrom) _ _ pos = do
     lift $ forM_ castFrom (explicitTypeSpecificationWarning pos)
     flattenExp exp ty castFrom pos
 
-    
+
 -- | Flatten something, and produce an anonymous procedure from the resultant flattened
 -- statements
-flattenAnon :: ProcModifiers -> (Maybe VarDict) -> (Maybe (Set ResourceFlowSpec)) 
+flattenAnon :: ProcModifiers -> (Maybe VarDict) -> (Maybe (Set ResourceFlowSpec))
             -> TypeSpec -> Maybe TypeSpec -> OptPos
             -> Flattener () -> Flattener (Placed Exp)
 flattenAnon mods clsd res ty castFrom pos inner = do

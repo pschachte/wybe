@@ -31,7 +31,6 @@ import Control.Monad
 import Control.Monad.Extra (whenJust, whenM)
 import Control.Monad.Trans (lift)
 import Control.Monad.Trans.State
-import AST (simpleShowMap)
 
 
 ----------------------------------------------------------------

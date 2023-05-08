@@ -1,5 +1,11 @@
+# Functions
 def foo(a:int,b:int=1) = a+b
-def bar(x:int,y=2) = x+y
+def bar(x:int,y=2) = x+y          # untyped optional
+def baz(x:int,y:int=x+1) = x+y    # using mandatory arg in default
+def qux(x:int,y=x,z=y+1) = x+y+z  # using earlier optional arg in default
 
-def pfoo(a:int, b:int=1, ?c:int) { ?c = a+b }
-def pbar(x:int, y=2, ?z:int) { ?z = x+y }
+# Procecures
+def pfoo(a:int, b:int=1, ?r:int)  { ?r = a+b }
+def pbar(x:int, y=2, ?r:int)      { ?r = x+y }
+def pbaz(x:int,y:int=x+1, ?r:int) { ?r = x+y }
+def pqux(x:int,y=x,z=y+1,?r:int)  { ?r = x+y+z }
