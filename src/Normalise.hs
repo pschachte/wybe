@@ -87,7 +87,8 @@ normaliseItem (ResourceDecl vis name typ init pos) = do
     Nothing  -> return ()
     Just val -> normaliseItem (StmtDecl (ProcCall (regularProc "=") Det False
                                          [varSet name `maybePlace` pos, val]) pos)
-normaliseItem (FuncDecl vis mods (ProcProto name params resources) resulttype
+normaliseItem (FuncDecl vis mods 
+                (ProcProto name params resources minArity maxArity) resulttype
     (Placed (Where body (Placed (Var var ParamOut rflow) _)) _) pos) =
     -- Handle special reverse mode case of def foo(...) = var where ....
     normaliseItem
@@ -95,18 +96,19 @@ normaliseItem (FuncDecl vis mods (ProcProto name params resources) resulttype
             (ProcProto name 
               (params ++ [Param var resulttype ParamIn rflow Nothing
                          `maybePlace` pos])
-              resources)
+              resources (minArity+1) (maxArity+1))
             body
         pos)
-normaliseItem (FuncDecl vis mods (ProcProto name params resources)
-                        resulttype result pos) =
+normaliseItem (FuncDecl vis mods
+                (ProcProto name params resources minArity maxArity)
+                resulttype result pos) =
     normaliseItem
         (ProcDecl vis mods
             (ProcProto name 
               (params ++ [Param outputVariableName resulttype ParamOut Ordinary
                           Nothing
                           `maybePlace` pos])
-                       resources)
+                       resources (minArity+1) (maxArity+1))
              [maybePlace (ForeignCall "llvm" "move" []
                  [result, varSet outputVariableName `maybePlace` pos])
               pos]
@@ -438,7 +440,7 @@ normaliseModMain = do
     logNormalise $ "Top-level statements = " ++ show initBody
     unless (List.null stmts)
       $ normaliseItem $ ProcDecl Public (setImpurity Semipure defaultProcModifiers)
-                        (ProcProto "" [] resources) initBody Nothing
+                        (ProcProto "" [] resources 0 0) initBody Nothing
 
 
 -- |The resources available at the top level of this module, plus the
@@ -524,7 +526,7 @@ constCtorItems typeSpec ((vis, placedProto), num) =
         (ProcProto constName
             [Param outputVariableName typeSpec ParamOut Ordinary Nothing 
              `maybePlace` pos] 
-            Set.empty)
+            Set.empty 1 1)
         [lpvmCastToVar (castTo (iVal num) typeSpec) outputVariableName] pos
        ]
 
@@ -634,12 +636,13 @@ constructorItems :: Visibility -> ProcName -> TypeSpec -> [Placed Param]
                  -> [FieldInfo]
                  -> Int -> Int -> Int -> OptPos -> [Item]
 constructorItems vis ctorName typeSpec params fields size tag tagLimit pos =
-    [ProcDecl vis (inlineModifiers (ConstructorProc ctorName) Det)
+    let arity = 1 + length params
+    in [ProcDecl vis (inlineModifiers (ConstructorProc ctorName) Det)
         (ProcProto ctorName
             ((placedApply (\p -> maybePlace p {paramFlow=ParamIn, paramFlowType=Ordinary}) <$> params)
              ++ [Param outputVariableName typeSpec ParamOut Ordinary Nothing        
                  `maybePlace` pos])
-            Set.empty)
+            Set.empty arity arity)
         -- Code to allocate memory for the value
         ([maybePlace (ForeignCall "lpvm" "alloc" []
           [Unplaced $ iVal size,
@@ -685,12 +688,13 @@ deconstructorItems uniq vis ctorName typeSpec params numConsts numNonConsts tag
                    tagBits tagLimit pos fields size =
     let startOffset = (if tag > tagLimit then tagLimit+1 else tag)
         detism = deconstructorDetism numConsts numNonConsts
+        arity = 1 + length params
     in [ProcDecl vis (inlineModifiers (DeconstructorProc ctorName) detism)
         (ProcProto ctorName
          ((contentApply (\p -> p {paramFlow=ParamOut, paramFlowType=Ordinary}) <$> params)
           ++ [Param outputVariableName typeSpec ParamIn Ordinary Nothing        
               `maybePlace` pos])
-         Set.empty)
+         Set.empty arity arity)
         -- Code to check we have the right constructor
         (tagCheck pos numConsts numNonConsts tag tagBits tagLimit
             (Just size) outputVariableName
@@ -794,12 +798,13 @@ unboxedConstructorItems :: Visibility -> ProcName -> TypeSpec -> Int
                         -> Maybe Int -> [FieldInfo]
                         -> OptPos -> [Item]
 unboxedConstructorItems vis ctorName typeSpec tag nonConstBit fields pos =
-    let proto = ProcProto ctorName
+    let arity = 1 + length fields
+        proto = ProcProto ctorName
                 ([Param name paramType ParamIn Ordinary Nothing `maybePlace` pPos
                  | FieldInfo name pPos _ paramType _ _ _ <- fields]
                   ++ [Param outputVariableName typeSpec ParamOut Ordinary Nothing 
                       `maybePlace` pos])
-                Set.empty
+                Set.empty arity arity
     in [ProcDecl vis (inlineModifiers (ConstructorProc ctorName) Det) proto
          -- Initialise result to 0
         ([ForeignCall "llvm" "move" []
@@ -847,6 +852,7 @@ unboxedDeconstructorItems :: Visibility -> Bool -> ProcName -> TypeSpec -> Int
 unboxedDeconstructorItems vis uniq ctorName recType numConsts numNonConsts tag
                           tagBits pos fields =
     let detism = deconstructorDetism numConsts numNonConsts
+        arity = 1 + length fields
     in [ProcDecl vis (inlineModifiers (DeconstructorProc ctorName) detism)
         (ProcProto ctorName
          (List.map (\(FieldInfo n pPos _ fieldType _ _ _) -> 
@@ -854,7 +860,7 @@ unboxedDeconstructorItems vis uniq ctorName recType numConsts numNonConsts tag
           fields
           ++ [Param outputVariableName recType ParamIn Ordinary Nothing 
               `maybePlace` pos])
-         Set.empty)
+         Set.empty arity arity)
          -- Code to check we have the right constructor
         (tagCheck pos numConsts numNonConsts tag tagBits (wordSizeBytes-1) Nothing
           outputVariableName
@@ -959,7 +965,7 @@ getterSetterItems numConsts numNonConsts recType field infos = do
                           `maybePlace` pos,
                           Param outputVariableName fieldType ParamOut Ordinary
                             Nothing `maybePlace` pos]
-            Set.empty)
+            Set.empty 2 2)
         getBody
         pos,
         -- The setter:
@@ -968,7 +974,7 @@ getterSetterItems numConsts numNonConsts recType field infos = do
                           `maybePlace` pos,
                           Param fieldName fieldType ParamIn Ordinary Nothing 
                           `maybePlace` pos]
-            Set.empty)
+            Set.empty 2 2)
         setBody
         pos]
 
@@ -1008,7 +1014,7 @@ implicitEquality pos typespec consts nonconsts rep = do
                          `maybePlace` pos,
                          Param rightName typespec ParamIn Ordinary Nothing 
                          `maybePlace` pos]
-                    Set.empty
+                    Set.empty 2 2
       let (body,inline) = equalityBody pos consts nonconsts rep
       return [ProcDecl Public (setInline inline
                                $ setDetism SemiDet defaultProcModifiers)
@@ -1027,7 +1033,7 @@ implicitDisequality pos typespec consts nonconsts _ = do
                          `maybePlace` pos,
                          Param rightName typespec ParamIn Ordinary Nothing 
                           `maybePlace` pos]
-                    Set.empty
+                    Set.empty 2 2
       let neBody = [maybePlace (Not $
                         ProcCall (First [] "=" Nothing) SemiDet False
                             [varGetTyped leftName typespec `maybePlace` pos,
@@ -1039,9 +1045,9 @@ implicitDisequality pos typespec consts nonconsts _ = do
 -- |Does the item declare a test or Boolean function with the specified
 -- name and arity?
 isTestProc :: ProcName -> Int -> Item -> Bool
-isTestProc name arity (ProcDecl _ mods (ProcProto n params _) _ _) =
+isTestProc name arity (ProcDecl _ mods (ProcProto n params _ _ _) _ _) =
     n == name && modifierDetism mods == SemiDet && length params == arity
-isTestProc name arity (FuncDecl _ mods (ProcProto n params _) ty _ _) =
+isTestProc name arity (FuncDecl _ mods (ProcProto n params _ _ _) ty _ _) =
     n == name && modifierDetism mods == Det
     && length params == arity && ty == boolType
 isTestProc _ _ _ = False
@@ -1082,7 +1088,7 @@ equalityBody pos consts nonconsts _ =
      -- Decide to inline if only 1 non-const constructor, no non-const
      -- constructors (so not recursive), and at most 4 fields
      case List.map content nonconsts of
-         [ProcProto _ params _ ] | length params <= 4 && List.null consts ->
+         [ProcProto _ params _ _ _] | length params <= 4 && List.null consts ->
               Inline
          _ -> MayInline
         )
@@ -1107,7 +1113,7 @@ simpleEqualityTest pos =
 equalityNonconsts :: OptPos -> [ProcProto] -> Bool -> Placed Stmt
 equalityNonconsts _ [] _ =
     shouldnt "type with no non-const constructors should have been handled"
-equalityNonconsts pos [ProcProto name params _] noConsts =
+equalityNonconsts pos [ProcProto name params _ _ _] noConsts =
     -- single non-const and no const constructors:  just compare fields
     let detism = if noConsts then Det else SemiDet
     in  And ([deconstructCall name leftName params detism,
@@ -1125,7 +1131,7 @@ equalityNonconsts pos ctrs _ =
 --  it doesn't match, it tests the next possible constructor, etc.
 equalityMultiNonconsts :: OptPos -> [ProcProto] -> Placed Stmt
 equalityMultiNonconsts pos [] = rePlace pos failTest
-equalityMultiNonconsts pos (ProcProto name params _:ctrs) =
+equalityMultiNonconsts pos (ProcProto name params _ _ _:ctrs) =
     Cond (deconstructCall name leftName params SemiDet)
         [And (deconstructCall name rightName params SemiDet : concatMap equalityField params) `maybePlace` pos]
         [equalityMultiNonconsts pos ctrs] Nothing Nothing Nothing `maybePlace` pos

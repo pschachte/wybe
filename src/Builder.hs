@@ -1143,7 +1143,7 @@ buildMain mainImports = do
     let detism = setDetism Terminal
                  $ setImpurity Impure defaultProcModifiers
     -- Program main has argc, argv, and exit_code as resources
-    let proto = ProcProto "" [] mainRes
+    let proto = ProcProto "" [] mainRes 0 0
     let mainBody =
           [ Unplaced $
             UseResources (Set.toList initRes) Nothing $

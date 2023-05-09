@@ -190,7 +190,7 @@ addTestOutExp func args = do
                     return (length params, modifierDetism mods)
                 _ -> shouldnt "badly typed higher in addTestOutExp"
         First mod nm pId -> do
-            ProcDef{procProto=ProcProto _ params _, procDetism=detism}
+            ProcDef{procProto=ProcProto _ params _ _ _, procDetism=detism}
                 <- lift $ getProcDef $ ProcSpec mod nm
                                         (trustFromJust "addTestOutExp" pId)
                                         generalVersion
@@ -669,7 +669,9 @@ unbranchExp exp@(AnonProc mods params pstmts clsd res) pos = do
     logUnbranch $ "  With params " ++ show params
     logUnbranch $ "  With free variables " ++ show freeVars
     tmpCtr <- gets brTempCtr
-    let procProto = ProcProto name (freeParams ++ (Unplaced <$> params)) res'
+    let allParams = freeParams ++ (Unplaced <$> params)
+    let arity = length allParams
+    let procProto = ProcProto name allParams res' arity arity
     let procDef = ProcDef name procProto (ProcDefSrc pstmts) Nothing tmpCtr 0
                     Map.empty Private detism inlining impurity AnonymousProc
                     NoSuperproc Map.empty
@@ -700,8 +702,9 @@ addClosure regularProcSpec@(ProcSpec mod nm pID _) free pos name = do
     case Map.lookup (regularProcSpec, constMap) closProcs of
         Just closProc -> return $ Closure closProc free `maybePlace` pos
         Nothing -> do
+            let arity = length params'
             let pDefClosure =
-                    ProcDef name (ProcProto name params' res)
+                    ProcDef name (ProcProto name params' res arity arity)
                     (ProcDefSrc [Unplaced $ ProcCall (First mod nm $ Just pID)
                                                 detism False args])
                     Nothing 0 0 Map.empty Private detism inlining impurity
@@ -859,8 +862,11 @@ newProcProto name inVars res = do
     let inParams  = [Unplaced $ unbranchParam $ Param v ty ParamIn Ordinary Nothing
                     | (v,ty) <- Map.toList inVars]
     outParams <- gets brOutParams
-    return $ ProcProto name (inParams ++ outParams)
-           $ Set.map (`ResourceFlowSpec` ParamInOut) res
+    let allParams = inParams ++ outParams
+    let arity = length allParams
+    return $ ProcProto name allParams
+                (Set.map (`ResourceFlowSpec` ParamInOut) res)
+                arity arity
 
 
 -- |Return the second value when the detism is SemiDet, otherwise the second.

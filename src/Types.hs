@@ -803,7 +803,7 @@ expType' (AnonProc mods params pstmts _ _) _ = do
     params' <- updateParamTypes $ Unplaced <$> params
     return $ HigherOrderType mods $ paramTypeFlow . content <$> params'
 expType' (Closure pspec closed) _ = do
-    ProcDef _ (ProcProto _ params res) _ _ _ _ _ _ detism _ impurity _ _ _
+    ProcDef _ (ProcProto _ params res _ _) _ _ _ _ _ _ detism _ impurity _ _ _
         <- lift $ getProcDef pspec
     let params' = List.filter ((==Ordinary) . paramFlowType . content) params
     let typeFlows = paramTypeFlow . content <$> params'

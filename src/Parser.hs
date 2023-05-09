@@ -975,11 +975,19 @@ termToPrototype (Call pos mod name ParamIn rawParams) =
     if List.null mod
     then do
         params <- mapM termToParam $ parensToTerm rawParams
-        return (ProcProto name params Set.empty,AnyType)
+        let maxArity = length rawParams
+        let optionals = length $ List.filter isEqualCall rawParams
+        return (ProcProto name params Set.empty (maxArity-optionals) maxArity
+               ,AnyType)
     else Left (pos, "module not permitted in proc declaration " ++ show mod)
 termToPrototype other =
     syntaxError (termPos other)
                 $ "invalid proc/func prototype " ++ show other
+
+-- |Is the term an =/2 term (signifying an optional parameter)?
+isEqualCall :: Term -> Bool
+isEqualCall Call{callName="=", callArguments=[_,_]} = True
+isEqualCall _ = False
 
 
 -- |Convert a Term to a body, if possible, or give a syntax error if not.
@@ -1282,15 +1290,6 @@ termToTypeFlow other =
     syntaxError (termPos other) $ "invalid higher order type argument " ++ show other
 
 
--- | Translate a Term to a proc or func prototype (with empty resource list)
-termToProto :: TranslateTo (Placed ProcProto)
-termToProto (Call pos [] name ParamIn params) = do
-    params' <- mapM termToParam params
-    return $ Placed (ProcProto name params' Set.empty) pos
-termToProto other =
-    syntaxError (termPos other) $ "invalid prototype " ++ show other
-
-
 -- | Translate a Term to a proc or func parameter
 termToParam :: TranslateTo (Placed Param)
 termToParam (Call pos [] "=" ParamIn [decl,exp]) = do
@@ -1310,7 +1309,8 @@ termToParam other =
 termToCtorDecl :: TranslateTo (Placed ProcProto)
 termToCtorDecl (Call pos [] name ParamIn fields) = do
     fields' <- mapM termToCtorField fields
-    return $ Placed (ProcProto name fields' Set.empty) pos
+    let arity = length fields
+    return $ Placed (ProcProto name fields' Set.empty arity arity) pos
 termToCtorDecl other =
     syntaxError (termPos other)
         $ "invalid constructor declaration " ++ show other

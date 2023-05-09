@@ -1942,8 +1942,9 @@ getProcGlobalFlows :: ProcSpec -> Compiler GlobalFlows
 getProcGlobalFlows pspec = do
     pDef <- getProcDef pspec
     case procImpln pDef of
-      ProcDefSrc _ ->
-            let ProcProto _ params resFlows = procProto pDef
+      ProcDefSrc{} ->
+            let ProcProto{procProtoParams=params,
+                          procProtoResources=resFlows} = procProto pDef
                 paramFlows 
                     | any (isResourcefulHigherOrder . paramType . content) params
                     = UniversalSet
@@ -2790,7 +2791,9 @@ data Constant = Int Int
 data ProcProto = ProcProto {
     procProtoName::ProcName,
     procProtoParams::[Placed Param],
-    procProtoResources::Set.Set ResourceFlowSpec
+    procProtoResources::Set.Set ResourceFlowSpec,
+    procProtoMinArity::Int,     -- the number of mandatory parameters
+    procProtoMaxArity::Int      -- the number of optional and mandatory params
     } deriving (Eq, Generic)
 
 
@@ -3972,7 +3975,7 @@ showResources resources
 
 -- |How to show a proc prototype.
 instance Show ProcProto where
-  show (ProcProto name params resources) =
+  show (ProcProto name params resources _ _) =
     name ++ "(" ++ intercalate ", " (List.map show params) ++ ")" ++
     showResources resources
 
