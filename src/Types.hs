@@ -12,7 +12,7 @@ module Types (validateModExportTypes, typeCheckModSCC) where
 
 
 import           AST
-import           Debug.Trace
+-- import           Debug.Trace
 import           Control.Monad
 import           Control.Monad.State
 import           Control.Monad.Extra (ifM)
@@ -2019,7 +2019,6 @@ modecheckStmt m name defPos assigned detism final
     -- Find arg types and expand type variables
     args' <- modeCheckExps m name defPos assigned detism args
     assignedVars <- gets (Map.keysSet . typingDict)
-    x <- callInfos assignedVars (maybePlace stmt pos)
     infos <- callInfos assignedVars (maybePlace stmt pos) <&> typingInfos
     actualTypes <- mapM (expType >=> ultimateType) args'
     logTyped $ "    actual types     : " ++ show actualTypes
@@ -2027,7 +2026,8 @@ modecheckStmt m name defPos assigned detism final
     logTyped $ "    actual modes     : " ++ show actualModes
     checkFlowErrors False False cname pos actualModes ([],assigned) $ do
         typeMatches <- catOKs <$> mapM
-                    (matchTypes name cname pos resourceful actualTypes (sel1 <$> actualModes))
+                    (matchTypes name cname pos resourceful actualTypes
+                     (sel1 <$> actualModes))
                     infos
         logTyped $ "Type-correct modes   : " ++ show typeMatches
         -- All the possibly matching modes
