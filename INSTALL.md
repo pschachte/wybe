@@ -97,6 +97,16 @@ Note that this is an experimental support and only has been tested on Ubuntu 18.
     sudo apt-get install dwdiff
 ```
 
+### Windows
+
+For Windows, please build under
+[Windows Subsystem for Linux](https://learn.microsoft.com/en-us/windows/wsl/) (WSL), following the Linux installation
+instructions.
+
+Note:  use the version of `git` under WSL to fetch the wybe
+compiler source code from github, not any version of `git` running
+under windows.
+
 ## Building
 
 1.  Just do:
