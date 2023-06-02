@@ -1,0 +1,218 @@
+pub constructors jobject(list(pair)) | jstring(string) | jbool(bool) | jnumber(float) | jlist(list(_)) | jnull
+    
+pub def {test} (a:_ = b:_) { fail }
+
+pub type pair {
+    pub pair(key:string, value:json)
+
+    pub def {test} (a:_ = b:_) { fail }
+}
+
+pub def {test} parse(s:string, ?json:_) {
+    space(!s)
+    json(!s, ?json)
+}
+
+def {test} char(c:char, !s:string) {
+    # this is necessary because the uncons may fail, but the failure overwrites s
+    # [c | ?s] = s
+    [c | ?s_] = s
+    ?s = s_
+}
+
+def {test} string(str:string, !s:string) {
+    for ?c in str {
+        char(c, !s)
+    }
+    space(!s)
+} 
+
+def space(!s:string) {
+    if { { char(' ', !s) | char('\n', !s) | char('\t', !s) } :: space(!s) }
+}
+
+def {test} json(!s:string, ?j:_) {
+    object(!s, ?j)
+  | string(!s, ?str) & ?j = jstring(str)
+  | bool(!s, ?b) & ?j = jbool(b)
+  | number(!s, ?n) & ?j = jnumber(n)
+  | list(!s, ?l) & ?j = jlist(l)
+  | null(!s) & ?j = jnull
+}
+
+# this should work...
+# I think the xs is not being passed out
+# def {test} list_like(before:char, parse:{test}(!string, ?X), !s:string, ?xs:list(X), after:char) {
+#     char(before, !s)
+#     if { parse(!s, ?x) :: 
+#         list_tail(parse, !s, ?xs)
+#         ?xs = [x | xs]
+#        | else :: 
+#         ?xs = []
+#     }
+#     space(!s)
+#     char(after, !s)
+#     space(!s)
+# }
+
+def {test} list_like(before:char, parse:{test}(!string, ?X), !s:string, ?xs:list(X), after:char) {
+    char(before, !s)
+    space(!s)
+    list_like(parse, !s, ?xs)
+    space(!s)
+    char(after, !s)
+    space(!s)
+}
+def {test} list_like(parse:{test}(!string, ?X), !s:string, ?xs:list(X)) {
+    if { parse(!s, ?x) :: 
+        list_tail(parse, !s, ?xs)
+        ?xs = [x | xs]
+      | else :: 
+        ?xs = []
+    }
+}
+
+def {test} list_tail(parse:{test}(!string, ?X), !s:string, ?xs:list(X)) {
+    if { char(',', !s) ::
+        space(!s)
+        parse(!s, ?x)
+        list_tail(parse, !s, ?xs)
+        ?xs = [x | xs]
+    | else ::
+        ?xs = []
+    }
+}
+
+def {test} object(!s:string, ?obj:_) {
+    list_like('{', pair, !s, ?ps, '}')
+    ?obj = jobject(ps)
+}
+
+def {test} pair(!s:string, ?pair:pair) {
+    string(!s, ?key)
+    space(!s)
+    char(':', !s)
+    space(!s)
+    json(!s, ?value)
+    space(!s)
+    ?pair = pair(key, value)
+}
+
+def {test} string(!s:string, ?str:string) {
+    char('\"', !s)
+    string_(!s, ?str)
+    ?str = string(c_string(str))
+}
+
+def {test} string_(!s:string, ?str:string) {
+    char('\"', !s)
+    ?str = ""
+    space(!s)
+  | [?c | ?s] = s
+    if { c = '\\' :: 
+        [?c | ?s] = s
+    }
+    string_(!s, ?str)
+    ?str = [c | str]
+}
+
+def {test} bool(!s:string, ?bool:bool) {
+    string("false", !s)
+    ?bool = false
+  | string("true", !s)
+    ?bool = true
+}
+
+def {test} number(!s:string, ?n:float) {
+    digit(!s, ?n)
+    number(!s, _, !n)
+    if { char('.', !s) ::
+        digit(!s, ?f)
+        number(!s, ?len, !f)
+        !n += f / power(10.0, float(len + 1))
+    }
+    space(!s)
+}
+
+def {test} number(!s:string, ?len:int, !n:float) {
+    digit(!s, ?d)
+    ?n = n * 10.0 + d
+    number(!s, ?len, !n)
+    !len += 1
+  | ?len = 0
+}
+
+def {test} digit(!s:string, ?d:float) {
+    [?c | ?rest] = s
+    '0' <= c & c <= '9'
+    ?s = rest
+    ?d = float(ord(c) - ord('0'))
+}
+
+def {test} list(!s:string, ?js:list(_)) {
+    list_like('[', json, !s, ?js, ']')
+}
+
+def {test} null(!s:string) {
+    string("null", !s)
+}
+
+pub def print(x:_) use !io {
+    !print(0, x)
+    !nl
+}
+
+def print(ind:int, p:pair) use !io {
+    !indent(ind)
+    !print('"'); !print(p^key); !print('"')
+    !print(": ")
+    !print(ind + 1, p^value)
+}
+
+def print_list(start:char, printer:{resource}(int, X), ind:int, xs:list(X), end:char) use !io {
+    !print(start)
+    if { [?x | ?xs] = xs :: 
+        !nl
+        !printer(ind + 1, x)
+        for ?x in xs {
+            !println(',')
+            !printer(ind + 1, x)
+        }
+        !nl
+        !indent(ind)
+    }
+    !print(end)
+}
+
+def print(ind:int, x:_) use !io {
+    case x in {
+        jobject(?pairs) :: 
+        !print_list('{', print, ind, pairs, '}')
+      | jlist(?list) :: 
+        !print_list('[', {resource}{
+            !indent(@1)
+            !print(@1, @2)
+        }, ind, list, ']')
+      | jstring(?s) :: 
+        !print('"'); !print(s); !print('"')
+      | jbool(?b) :: 
+        !print(b)
+      | jnumber(?n) :: 
+        !print(n)
+      | else :: 
+        !print("null")
+    }
+}
+
+def indent(ind:int) use !io {
+    for _ in 0..ind {
+        !print("  ")
+    }
+}
+
+?s = "{\"abc\" : [null, false, true, 123.098]}"
+if { parse(!s, ?j) :: 
+    !print(j) 
+   | else :: 
+    !println("fail to parse") 
+}

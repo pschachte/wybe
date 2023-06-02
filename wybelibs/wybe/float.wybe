@@ -101,6 +101,9 @@ pub def iceil(x:_):int = foreign llvm fptosi(ceil(x))
 # The largest whole number less than or equal to the input, as an int.
 pub def ifloor(x:_):int = foreign llvm fptosi(floor(x))
 
+# Convert an int to a float
+pub def float(x:int):_ = foreign llvm sitofp(x)
+
 
 ## Transcendental functions
 
