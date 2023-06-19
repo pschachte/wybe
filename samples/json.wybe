@@ -1,18 +1,24 @@
 pub constructors jobject(list(pair)) | jstring(string) | jbool(bool) | jnumber(float) | jlist(list(_)) | jnull
     
-pub def {test} (a:_ = b:_) { fail }
+pub def {test} (a:_ = b:_) { foreign lpvm cast(a):int = foreign lpvm cast(b):int }
 
 pub type pair {
+    ## pair type
+    # A pair contianing a key and value.
     pub pair(key:string, value:json)
-
-    pub def {test} (a:_ = b:_) { fail }
 }
 
+## parse/2
+# Parse a string into a JSON value. 
+# Fails if the string cannot be parsed.
 pub def {test} parse(s:string, ?json:_) {
     space(!s)
     json(!s, ?json)
 }
 
+## char/2
+# Parse a single character from the input string.
+# Fails if the first character of the string is not said character.
 def {test} char(c:char, !s:string) {
     # this is necessary because the uncons may fail, but the failure overwrites s
     # [c | ?s] = s
@@ -20,17 +26,33 @@ def {test} char(c:char, !s:string) {
     ?s = s_
 }
 
-def {test} string(str:string, !s:string) {
+
+## space/1
+# Parse zero or more whitespace characters from the input.
+def space(!s:string) {
+    if { { char(' ', !s) | char('\n', !s) | char('\r', !s) | char('\t', !s) } :: 
+        space(!s) 
+    }
+}
+
+## char_token/2
+# Parse a character followed by whitespace.
+def {test} char_token(c:char, !s:string) {
+    char(c, !s)
+    space(!s)
+}
+
+## string_token/2
+# Parse a string literal followed by whitespace.
+def {test} string_token(str:string, !s:string) {
     for ?c in str {
         char(c, !s)
     }
     space(!s)
-} 
-
-def space(!s:string) {
-    if { { char(' ', !s) | char('\n', !s) | char('\r', !s) | char('\t', !s) } :: space(!s) }
 }
 
+## json/1
+# Parse a JSON object followed by whitespace.
 def {test} json(!s:string, ?j:_) {
     object(!s, ?j)
   | string(!s, ?str) & ?j = jstring(str)
@@ -40,74 +62,57 @@ def {test} json(!s:string, ?j:_) {
   | null(!s) & ?j = jnull
 }
 
-# this should work...
-# I think the xs is not being passed out
-# def {test} list_like(before:char, parse:{test}(!string, ?X), !s:string, ?xs:list(X), after:char) {
-#     char(before, !s)
-#     if { parse(!s, ?x) :: 
-#         list_tail(parse, !s, ?xs)
-#         ?xs = [x | xs]
-#        | else :: 
-#         ?xs = []
-#     }
-#     space(!s)
-#     char(after, !s)
-#     space(!s)
-# }
-
-def {test} list_like(before:char, parse:{test}(!string, ?X), !s:string, ?xs:list(X), after:char) {
-    char(before, !s)
-    space(!s)
-    list_like(parse, !s, ?xs)
-    space(!s)
-    char(after, !s)
-    space(!s)
-}
-def {test} list_like(parse:{test}(!string, ?X), !s:string, ?xs:list(X)) {
+## sequence/5
+# Parse a comma-separated sequence of things, with a preceding and 
+# following character, followed by whitespace.
+def {test} sequence(before:char, parse:{test}(!string, ?X), !s:string, ?xs:list(X), after:char) {
+    char_token(before, !s)
     if { parse(!s, ?x) :: 
-        list_tail(parse, !s, ?xs)
+        sequence_tail(parse, !s, ?xs)
         ?xs = [x | xs]
       | else :: 
         ?xs = []
     }
+    char_token(after, !s)
 }
 
-def {test} list_tail(parse:{test}(!string, ?X), !s:string, ?xs:list(X)) {
-    if { char(',', !s) ::
-        space(!s)
+## sequence_tail/3
+# Parse the tail of a sequnece. Helper for sequence/2.
+def {test} sequence_tail(parse:{test}(!string, ?X), !s:string, ?xs:list(X)) {
+    if { char_token(',', !s) ::
         parse(!s, ?x)
-        list_tail(parse, !s, ?xs)
+        sequence_tail(parse, !s, ?xs)
         ?xs = [x | xs]
     | else ::
         ?xs = []
     }
 }
 
+## object/2
+# Parse a JSON object, followed by whitespace.
 def {test} object(!s:string, ?obj:_) {
-    list_like('{', pair, !s, ?ps, '}')
+    sequence('{', {test}{
+        string(!@1, ?key)
+        char_token(':', !@1)
+        json(!@1, ?value)
+        ?@2 = pair(key, value)
+    }, !s, ?ps, '}')
     ?obj = jobject(ps)
 }
 
-def {test} pair(!s:string, ?pair:pair) {
-    string(!s, ?key)
-    space(!s)
-    char(':', !s)
-    space(!s)
-    json(!s, ?value)
-    space(!s)
-    ?pair = pair(key, value)
-}
-
+## string/2
+# Parse a string, followed by whitespace.
 def {test} string(!s:string, ?str:string) {
     char('\"', !s)
-    string_(!s, ?str)
+    string_tail(!s, ?str)
     ?str = string(c_string(str))
 }
 
-def {test} string_(!s:string, ?str:string) {
-    char('\"', !s)
+## string_tail/2
+# Parse the tail of a string. Helper for string/2.
+def {test} string_tail(!s:string, ?str:string) {
+    char_token('\"', !s)
     ?str = ""
-    space(!s)
   | [?c | ?s] = s
     if { c = '\\' :: 
         [?c | ?s] = s
@@ -122,17 +127,21 @@ def {test} string_(!s:string, ?str:string) {
            | else :: fail
         }
     }
-    string_(!s, ?str)
+    string_tail(!s, ?str)
     ?str = [c | str]
 }
 
+## bool/2
+# Parse a JSON Boolean, followed by whitespace.
 def {test} bool(!s:string, ?bool:_) {
-    string("false", !s)
+    string_token("false", !s)
     ?bool = jbool(false)
-  | string("true", !s)
+  | string_token("true", !s)
     ?bool = jbool(true)
 }
 
+## number/2
+# Parse a JSON number, followed by whitespace.
 def {test} number(!s:string, ?number:_) {
     digit(!s, ?n)
     digits(!s, _, !n)
@@ -150,6 +159,8 @@ def {test} number(!s:string, ?number:_) {
     ?number = jnumber(n)
 }
 
+## digits/3
+# Parse a sequence of digits, outputting the number of digits parsed
 def {test} digits(!s:string, ?len:float, !n:float) {
     digit(!s, ?d)
     ?n = n * 10.0 + d
@@ -158,6 +169,8 @@ def {test} digits(!s:string, ?len:float, !n:float) {
   | ?len = 1.0
 }
 
+## digits/3
+# Parse a single digit digits
 def {test} digit(!s:string, ?d:float) {
     [?c | ?rest] = s
     '0' <= c & c <= '9'
@@ -165,13 +178,17 @@ def {test} digit(!s:string, ?d:float) {
     ?d = float(ord(c) - ord('0'))
 }
 
+## list/2
+# Parse a JSON list, followed by whitespace.
 def {test} list(!s:string, ?list:_) {
-    list_like('[', json, !s, ?js, ']')
+    sequence('[', json, !s, ?js, ']')
     ?list = jlist(js)
 }
 
+## null/2
+# Parse a JSON null, followed by whitespace.
 def {test} null(!s:string) {
-    string("null", !s)
+    string_token("null", !s)
 }
 
 pub def print(x:_) use !io {
