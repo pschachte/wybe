@@ -26,20 +26,21 @@ def {test} char(c:char, !s:string) {
     ?s = s_
 }
 
-
-## space/1
-# Parse zero or more whitespace characters from the input.
-def space(!s:string) {
-    if { { char(' ', !s) | char('\n', !s) | char('\r', !s) | char('\t', !s) } :: 
-        space(!s) 
-    }
-}
-
 ## char_token/2
 # Parse a character followed by whitespace.
 def {test} char_token(c:char, !s:string) {
     char(c, !s)
     space(!s)
+}
+
+## space/1
+# Parse zero or more whitespace characters from the input.
+def space(!s:string) {
+    char_token(' ', !s)
+  | char_token('\n', !s)
+  | char_token('\r', !s)
+  | char_token('\t', !s)
+  | pass
 }
 
 ## string_token/2
