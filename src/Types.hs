@@ -968,18 +968,21 @@ typecheckProcDecl (RoughProc m name) = do
 -- otherwise we report a type error.
 
 
--- |An individual call, and information that is related to this call
+-- |An individual call, and information that is related to the proc it calls.
 data CallInfo
     = FirstInfo {
-        fiProc         :: ProcSpec
-      , fiTypes        :: [TypeSpec]
-      , fiFlows        :: [FlowDirection]
-      , fiDetism       :: Determinism
-      , fiImpurity     :: Impurity
-      , fiInRes        :: Set ResourceSpec
-      , fiOutRes       :: Set ResourceSpec
-      , fiNeedsResBang :: Bool
-      , fiPartial      :: Bool
+        fiProc         :: ProcSpec              -- The called proc
+      , fiDefaults     :: [Maybe (Placed Exp)]  -- default values of its params
+      , fiTypes        :: [TypeSpec]            -- types of its params
+      , fiFlows        :: [FlowDirection]       -- modes of its params
+      , fiMinArity     :: Int                   -- the fewest args it can accept
+      , fiMaxArity     :: Int                   -- the most args it can accept
+      , fiDetism       :: Determinism           -- its determinism
+      , fiImpurity     :: Impurity              -- its impurity
+      , fiInRes        :: Set ResourceSpec      -- its input resources
+      , fiOutRes       :: Set ResourceSpec      -- its output resources
+      , fiNeedsResBang :: Bool                  -- calls to it need an !
+      , fiPartial      :: Bool                  -- the call is a partial applic
     } | HigherInfo {
         hiFunc :: Exp
     } | TestInfo {
@@ -989,12 +992,12 @@ data CallInfo
 
 
 instance Show CallInfo where
-    show (FirstInfo procSpec tys flows detism impurity inRes outRes _ partial) =
+    show (FirstInfo procSpec _ tys flows _ _ detism impurity inRes outRes _ partial) =
         (if partial then "partial application of " else "")
         ++ showProcModifiers' (ProcModifiers detism MayInline impurity
                                 RegularProc False)
         ++ show procSpec
-        ++ "(" ++ intercalate "," (zipWith ((show .) . TypeFlow) tys flows) ++ ")"
+        ++ showStringList "(" "," ")" (zipWith ((show .) . TypeFlow) tys flows)
         ++ if Set.null inRes && Set.null outRes
             then ""
             else " use "
@@ -1015,15 +1018,16 @@ callInfoTypes TestInfo{} = Nothing
 --  and if so, return Just the FirstInfo for the equivalent test proc
 -- Higher order reification of bool fns to tests is handled in `matchTypes'
 boolFnToTest :: CallInfo -> Maybe CallInfo
-boolFnToTest info@FirstInfo{fiDetism=Det,
-                            fiPartial=False,
-                            fiTypes=tys,
-                            fiFlows=flows}
+boolFnToTest info@FirstInfo{fiDetism=Det, fiPartial=False,
+                            fiTypes=tys, fiFlows=flows, fiDefaults=defaults}
     | List.null tys = Nothing
     | last tys == boolType && last flows == ParamOut =
         Just $ info {fiDetism=SemiDet,
                      fiTypes=init tys,
-                     fiFlows=init flows}
+                     fiFlows=init flows,
+                     fiDefaults=init defaults,
+                     fiMinArity=fiMinArity info - 1,
+                     fiMaxArity=fiMaxArity info - 1}
     | otherwise = Nothing
 boolFnToTest _ = Nothing
 
@@ -1032,13 +1036,15 @@ boolFnToTest _ = Nothing
 --  the Det proc with a single Bool output as last arg
 -- Higher order reification of tests bool fns is handled in `matchTypes'
 testToBoolFn :: CallInfo -> Maybe CallInfo
-testToBoolFn info@FirstInfo{fiDetism=SemiDet,
-                            fiPartial=False,
-                            fiTypes=tys,
-                            fiFlows=flows}
+testToBoolFn info@FirstInfo{fiDetism=SemiDet, fiPartial=False,
+                            fiTypes=tys, fiFlows=flows, fiDefaults=defaults,
+                            fiMinArity=minArity, fiMaxArity=maxArity}
     = Just $ info {fiDetism=Det,
                    fiTypes=tys ++ [boolType],
-                   fiFlows=flows ++ [ParamOut]}
+                   fiFlows=flows ++ [ParamOut],
+                   fiDefaults=defaults ++ [Nothing],
+                   fiMinArity=minArity + 1,
+                   fiMaxArity=maxArity + 1}
 testToBoolFn _ = Nothing
 
 
@@ -1048,24 +1054,24 @@ testToBoolFn _ = Nothing
 -- call where the call does not have a ! prefix, at most 1 more than the expected
 -- arity. The Bool returned indicates if the call should have a ! or not
 procToPartial :: [FlowDirection] -> Bool -> CallInfo -> (Maybe CallInfo, Bool)
-procToPartial callFlows hasBang info@FirstInfo{fiPartial=False,
-                                               fiTypes=tys,
-                                               fiFlows=flows,
-                                               fiInRes=inRes,
-                                               fiOutRes=outRes,
-                                               fiNeedsResBang=resful,
-                                               fiDetism=detism,
-                                               fiImpurity=impurity}
+procToPartial callFlows hasBang
+        info@FirstInfo{fiPartial=False, fiMinArity=minArity, fiTypes=tys,
+                       fiDefaults=defaults, fiFlows=flows, fiInRes=inRes,
+                       fiOutRes=outRes, fiNeedsResBang=resful, fiDetism=detism,
+                       fiImpurity=impurity}
     | not hasBang && not (List.null callFlows) && last callFlows == ParamOut
-                  && (length callFlows < length tys
-                      || length callFlows <= length tys + 1 && usesResources)
+                  && (length callFlows < minArity
+                      || length callFlows <= minArity + 1 && usesResources)
+                  && all isNothing higherDefs
         = (Just info{fiPartial=True,
                      fiTypes=closedTys ++ [higherTy],
-                     fiFlows=closedFls ++ [ParamOut]}, needsBang)
+                     fiFlows=closedFls ++ [ParamOut],
+                     fiDefaults=closedDefs ++ [Nothing]}, needsBang)
   where
     nClosed = length callFlows - 1
     (closedTys, higherTys) = List.splitAt nClosed tys
     (closedFls, higherFls) = List.splitAt nClosed flows
+    (closedDefs, higherDefs) = List.splitAt nClosed defaults
     usesResources = not (Set.null inRes) || not (Set.null outRes)
     needsBang = resful || impurity > Pure
     higherTy = HigherOrderType (normaliseModifiers
@@ -1123,7 +1129,7 @@ typecheckProcDecl' m pdef = do
         calls <- bodyCallsConstraints False def
         logTyped $ "   containing calls: " ++ showBody 8 calls
         let defaultCalls = Maybe.mapMaybe paramAssignment params
-        logTyped $ "   and defaults: " ++ showBody 8 defaultCalls 
+        logTyped $ "   and defaults: " ++ showBody 8 defaultCalls
         let assignedVars =
                 foldStmts
                     (const . const)
@@ -1204,8 +1210,8 @@ typecheckProcDecl' m pdef = do
 paramAssignment :: Param -> Maybe (Placed Stmt)
 paramAssignment (Param name _ _ _ Nothing) = Nothing
 paramAssignment (Param name _ _ _ (Just deflt)) =
-    Just $ Unplaced 
-    $ ProcCall (First [] "=" Nothing) Det False 
+    Just $ Unplaced
+    $ ProcCall (First [] "=" Nothing) Det False
         [Unplaced (Var name ParamOut Ordinary),deflt]
 
 -- | If no type errors have been recorded, execute the enclosed code; otherwise
@@ -1216,6 +1222,7 @@ ifOK :: ProcDef -> Typed (ProcDef,Bool) -> Typed (ProcDef,Bool)
 ifOK pdef body = do
     allGood <- validTyping
     if allGood then body else return (pdef,False)
+
 
 -- | Get the TypingState of a given action, along with the result.
 -- Does not modify the underlying Typing state
@@ -1396,7 +1403,7 @@ callInfos vars pstmt = do
                 couldBeTest   = (boolType == varTy || varTy == AnyType)
                              && List.null args && not resful
             if couldBeVar && (couldBeHigher || couldBeTest)
-            then let var = varGet name 
+            then let var = varGet name
                  in return $ StmtTypings pstmt $ [HigherInfo var | couldBeHigher]
                                               ++ [TestInfo var | couldBeTest]
             else do
@@ -1406,7 +1413,7 @@ callInfos vars pstmt = do
                 defs <- lift $ mapM getProcDef procs
                 firstInfos <- zipWithM firstInfo defs procs
                 return $ StmtTypings pstmt firstInfos
-        ProcCall (Higher fn) _ _ _ -> 
+        ProcCall (Higher fn) _ _ _ ->
             return $ StmtTypings pstmt [HigherInfo $ content fn]
         _ ->
           shouldnt $ "callProcInfos with non-call statement "
@@ -1415,12 +1422,14 @@ callInfos vars pstmt = do
 firstInfo :: ProcDef -> ProcSpec -> Typed CallInfo
 firstInfo def proc = do
     let proto = procProto def
+        loArity = procProtoMinArity proto
+        hiArity = procProtoMaxArity proto
         params = content <$> procProtoParams proto
         resources = Set.elems $ procProtoResources proto
         realParams = List.filter ((==Ordinary) . paramFlowType) params
-        typeFlows = paramTypeFlow <$> realParams
-        types = typeFlowType <$> typeFlows
-        flows = typeFlowMode <$> typeFlows
+        types = paramType <$> realParams
+        flows = paramFlow <$> realParams
+        defaults = paramDefault <$> realParams
         inResources = Set.fromList
                         $ resourceFlowRes <$>
                             List.filter (flowsIn . resourceFlowFlow) resources
@@ -1431,7 +1440,8 @@ firstInfo def proc = do
         detism = procDetism def
         imp = procImpurity def
     types' <- refreshTypes types
-    return $ FirstInfo proc types' flows detism imp inResources outResources needsResBang False
+    return $ FirstInfo proc defaults types' flows loArity hiArity detism imp
+                       inResources outResources needsResBang False
 
 
 -- |Return the "primitive" expr of the specified expr.  This unwraps Typed
@@ -1558,18 +1568,20 @@ typecheckCallWithInfo m name pos typings rest fs info = do
 
 
 -- |Match up the argument types of a call with the parameter types of the
--- callee, producing a list of the actual types.  If this list contains
--- InvalidType, then the call would be a type error.
+-- callee, producing a list of the actual types, accounting for optional
+-- parameters.  If this list contains InvalidType, then the call would be a type
+-- error.
 matchTypes :: Ident -> Ident -> OptPos -> Bool -> [TypeSpec] -> [FlowDirection]
            -> CallInfo -> Typed (MaybeErr (CallInfo,Typing))
 matchTypes caller callee pos hasBang callTypes callFlows
-        calleeInfo@FirstInfo{fiTypes=tys}
+        calleeInfo@FirstInfo{fiDefaults=defs,fiTypes=tys
+                            ,fiMinArity=minArity,fiMaxArity=maxArity}
     -- Handle case whre call should have a ! but doesnt, and the call
     -- can be made partial
     | not hasBang && needsBang && isJust partialCallInfo
     = matchTypeList callee pos callTypes calleeInfo'''
     -- Handle case where call arity is correct
-    | sameLength callTypes tys
+    | minArity <= callArity && callArity <= maxArity
     = matchTypeList callee pos callTypes calleeInfo
     -- Handle case of SemiDet context call to bool function as a proc call
     | isJust testInfo && sameLength callTypes (fiTypes calleeInfo')
@@ -1583,7 +1595,8 @@ matchTypes caller callee pos hasBang callTypes callFlows
     -- Else, we must have an arity error
     | otherwise = return $ Err [ReasonArity caller callee pos
                                 (length callTypes) (length tys)]
-    where testInfo = boolFnToTest calleeInfo
+    where callArity = length callTypes
+          testInfo = boolFnToTest calleeInfo
           calleeInfo' = fromJust testInfo
           detCallInfo = testToBoolFn calleeInfo
           calleeInfo'' = fromJust detCallInfo
@@ -1597,7 +1610,7 @@ matchTypes caller callee pos _ callTypes callFlows
             ++ " with type " ++ show callTFs
     typing <-
         getTyping $ case fnTy of
-            HigherOrderType mods tfs -> 
+            HigherOrderType mods tfs ->
                 -- This handles the reification of higher order tests <-> bool fns
                 -- For first order cases, see `boolFnToTest' and `testToBoolFn'
                 let nCallTFs = length callTFs
@@ -1613,8 +1626,9 @@ matchTypes caller callee pos _ callTypes callFlows
                          | otherwise = tfs
                 in if nCallTFs == length tfs'
                 then do
-                    unifyTypeList' callee pos callTypes (typeFlowType <$> tfs')
-                    zipWith3M_ (\f1 f2 i -> 
+                    unifyTypeList 1 0 callee pos (List.map (const False) tfs')
+                        callTypes (typeFlowType <$> tfs')
+                    zipWith3M_ (\f1 f2 i ->
                         unless (f1 == f2)
                             $ typeError $ ReasonHigherFlow caller callee i f1 f2 pos)
                         (typeFlowMode <$> callTFs) (typeFlowMode <$> tfs) [1..]
@@ -1642,11 +1656,22 @@ matchTypeList :: Ident -> OptPos -> [TypeSpec] -> CallInfo
                -> Typed (MaybeErr (CallInfo,Typing))
 matchTypeList callee pos callTypes
         calleeInfo@FirstInfo{fiPartial=partial,
+                             fiMinArity=minArity,
+                             fiMaxArity=maxArity,
+                             fiDefaults=defs,
                              fiTypes=calleeTypes} = do
     logTyped $ "Matching types " ++ show callTypes
                ++ " with " ++ show calleeInfo
+    logTyped $ "Call arity " ++ show (length callTypes)
+               ++ "; proc arity " ++ show minArity ++ " - " ++ show maxArity
+    when (length calleeTypes /= length defs) 
+        $ shouldnt $ "FirstInfo fiDefaults length = " ++ show (length defs)
+                     ++ "; fiTypes length = " ++ show (length calleeTypes)
+    let opts = length callTypes - minArity
+    logTyped $ "Filling  " ++ show opts ++ " optional arguments"
     (matches, typing)
-        <- getTyping $ unifyTypeList' callee pos callTypes calleeTypes
+        <- getTyping $ unifyTypeList 1 opts callee pos (isJust <$> defs)
+                             callTypes calleeTypes
     let mismatches = List.map fst $ List.filter (invalidType . snd)
                        $ zip [1..] matches
     return $ if List.null mismatches
@@ -1655,12 +1680,28 @@ matchTypeList callee pos callTypes
             ++ typingErrs typing
 matchTypeList _ _ _ info = shouldnt $ "matchTypeList on " ++ show info
 
-
-
-unifyTypeList' :: ProcName -> OptPos -> [TypeSpec] -> [TypeSpec] -> Typed [TypeSpec]
-unifyTypeList' callee pos callerTypes calleeTypes
-    = zipWith3M (unifyTypes . flip (ReasonArgType False callee) pos)
-                        [1..] callerTypes calleeTypes
+-- |unifyTypeList arg opts callee pos defs callerTs calleeTs
+--  Match up a list of argument types callerTs with the corresponding list of
+--  of parameter types calleeTs, handling optional arguments.  For this, opts
+--  is the number of optional arguments for which values _have_ been specified
+--  in callerTs, and defs is a Bool for each element of calleeTs indiciating
+--  whether or not it has a default and is therefore optional.  arg is argument
+--  number of the next element of callerTs, callee is the name of the called
+--  proc, and pos is the source position of the call for error reporting.  We
+--  apply the defaults for all but the first opts optional arguments.
+unifyTypeList :: Int -> Int -> ProcName -> OptPos -> [Bool]
+              -> [TypeSpec] -> [TypeSpec] -> Typed [TypeSpec]
+unifyTypeList _ _ _ _ _ [] [] = return []
+unifyTypeList arg opts callee pos (def:defs) (ctyp:callerTs) (ptyp:calleeTs) =
+    if def && opts<=0
+    then unifyTypeList arg opts callee pos defs (ctyp:callerTs) calleeTs
+    else do
+        let opts' = if def then opts-1 else opts
+        ty <- unifyTypes (ReasonArgType False callee arg pos) ctyp ptyp
+        (ty:) <$> unifyTypeList (arg+1) opts' callee pos defs callerTs calleeTs
+unifyTypeList _ _ _ _ defs ctypes ptypes =
+    shouldnt $ "unifyTypeList arguments don't align:  defs = " ++ show defs
+        ++ "; ctypes = " ++ show ctypes ++ "; ptypes = " ++ show ptypes
 
 
 invalidType :: TypeSpec -> Bool
@@ -1911,8 +1952,7 @@ assignedIn var bstate = var `USet.member` bindingVars bstate
 -- |Return a list of (actual,formal) argument mode pairs.
 actualFormalModes :: [(FlowDirection,Bool,Maybe VarName)] -> CallInfo
                   -> [(FlowDirection,FlowDirection)]
-actualFormalModes modes FirstInfo{fiFlows=flows} =
-    zip flows (sel1 <$> modes)
+actualFormalModes modes FirstInfo{fiFlows=flows} = zip flows (sel1 <$> modes)
 actualFormalModes _ info = shouldnt $ "actualFormalModes on " ++ show info
 
 
