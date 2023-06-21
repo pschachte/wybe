@@ -1,0 +1,8 @@
+# elicit a warning for explicitly using the current type name, rather than _
+
+constructors mt | oops(h:int, t:explicit_type_warning)
+
+def oops2(l:explicit_type_warning) =
+    if { l = oops(_, ?t) ::  1 + oops2(t)
+       | else :: 0
+    }
