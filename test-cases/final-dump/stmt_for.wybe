@@ -88,7 +88,7 @@ pub def using_unless use !io {
 pub type int_sequence {
     pub int_sequence(start: int, stride: int, end: int)
 
-    pub def {test} `[|]`(?value: int, ?rest: int_sequence, current: int_sequence) {
+    pub def {test} `[|]`(?value: int, ?rest: _, current: _) {
         int_sequence(?s, ?st, ?en, current)
 
         if {

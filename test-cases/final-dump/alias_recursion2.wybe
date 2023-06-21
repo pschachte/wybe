@@ -1,4 +1,4 @@
-pub type mynode { pub constructors empty | mynode(data:int, next:mynode) }
+pub type mynode { pub constructors empty | mynode(data:int, next:_) }
 
 
 pub def printMyNode(nd:mynode) use !io {

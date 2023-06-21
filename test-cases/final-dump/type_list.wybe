@@ -1,4 +1,4 @@
-pub type intlist { pub constructors nil | cons(head:int, tail:intlist) }
+pub type intlist { pub constructors nil | cons(head:int, tail:_) }
 
 pub def (x:intlist ,, y:intlist):intlist =
     if {x = cons(?h, ?t)::

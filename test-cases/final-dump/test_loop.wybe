@@ -3,7 +3,7 @@
 pub type int_seq {
     pub int_seq(low:int, step:int, high:int)
 
-    pub def {partial} seq_next(!seq:int_seq, ?elt:int) {
+    pub def {partial} seq_next(!seq:_, ?elt:int) {
         int_seq(?elt, ?step, ?limit, seq)
         (elt <= limit)
         low(!seq, elt+step)
