@@ -241,7 +241,7 @@ data TypeError = ReasonMessage Message
                    -- XXX remove when handling multiple matches is better defined
                | ReasonAmbig ProcName OptPos [(VarName,[TypeSpec])]
                    -- ^Proc defn has ambiguous types
-               | ReasonArity ProcName ProcName OptPos Int Int
+               | ReasonArity ProcName ProcName OptPos Int Int Int
                    -- ^Call to proc with wrong arity
                | ReasonUndeclared ProcName OptPos
                    -- ^Public proc with some undeclared types
@@ -358,13 +358,16 @@ typeErrorMessage (ReasonAmbig procName pos varAmbigs) =
 typeErrorMessage (ReasonUndef callFrom callTo pos) =
     Message Error pos $
         "'" ++ callTo ++ "' unknown in " ++ showProcName callFrom
-typeErrorMessage (ReasonArity callFrom callTo pos callArity procArity) =
+typeErrorMessage (ReasonArity callFrom callTo pos callArity minArity maxArity) =
     Message Error pos $
         "Call from " ++ showProcName callFrom
         ++ " to " ++ callTo ++ " with " ++
-        (if callArity == procArity
-            then "unsupported argument flow"
-            else show callArity ++ " argument(s), expected " ++ show procArity)
+        (if minArity <= callArity && callArity <= maxArity
+         then "unsupported argument flow"
+         else show callArity ++ " argument(s), expected "
+              ++ (if minArity == maxArity
+                  then show minArity
+                  else "between " ++ show minArity ++ " and " ++ show maxArity))
 typeErrorMessage (ReasonUndeclared name pos) =
     Message Error pos $
         "Public definition of '" ++ name ++ "' with some undeclared types."
@@ -491,7 +494,7 @@ typeErrorPos (ReasonUndefinedFlow _ pos) = pos
 typeErrorPos (ReasonOverload _ pos) = pos
 typeErrorPos (ReasonWarnMultipleMatches _ _ pos) = pos
 typeErrorPos (ReasonAmbig _ pos _) = pos
-typeErrorPos (ReasonArity _ _ pos _ _) = pos
+typeErrorPos (ReasonArity _ _ pos _ _ _) = pos
 typeErrorPos (ReasonUndeclared _ pos) = pos
 typeErrorPos (ReasonEqual _ _ pos) = pos
 typeErrorPos (ReasonExpType _ _ pos) = pos
@@ -1058,7 +1061,7 @@ procToPartial callFlows hasBang
         info@FirstInfo{fiPartial=False, fiMinArity=minArity, fiTypes=tys,
                        fiDefaults=defaults, fiFlows=flows, fiInRes=inRes,
                        fiOutRes=outRes, fiNeedsResBang=resful, fiDetism=detism,
-                       fiImpurity=impurity}
+                       fiImpurity=impurity, fiMaxArity=maxArity}
     | not hasBang && not (List.null callFlows) && last callFlows == ParamOut
                   && (length callFlows < minArity
                       || length callFlows <= minArity + 1 && usesResources)
@@ -1066,7 +1069,8 @@ procToPartial callFlows hasBang
         = (Just info{fiPartial=True,
                      fiTypes=closedTys ++ [higherTy],
                      fiFlows=closedFls ++ [ParamOut],
-                     fiDefaults=closedDefs ++ [Nothing]}, needsBang)
+                     fiDefaults=closedDefs ++ [Nothing],
+                     fiMinArity=minArity-1, fiMaxArity=maxArity-1}, needsBang)
   where
     nClosed = length callFlows - 1
     (closedTys, higherTys) = List.splitAt nClosed tys
@@ -1576,25 +1580,37 @@ matchTypes :: Ident -> Ident -> OptPos -> Bool -> [TypeSpec] -> [FlowDirection]
 matchTypes caller callee pos hasBang callTypes callFlows
         calleeInfo@FirstInfo{fiDefaults=defs,fiTypes=tys
                             ,fiMinArity=minArity,fiMaxArity=maxArity}
-    -- Handle case whre call should have a ! but doesnt, and the call
+    -- Handle case where call should have a ! but doesnt, and the call
     -- can be made partial
     | not hasBang && needsBang && isJust partialCallInfo
-    = matchTypeList callee pos callTypes calleeInfo'''
+    = do 
+        logTyped $ "matchTypeList needsBang case"
+        matchTypeList caller callee pos callTypes calleeInfo'''
     -- Handle case where call arity is correct
-    | minArity <= callArity && callArity <= maxArity
-    = matchTypeList callee pos callTypes calleeInfo
+-- | sameLength callTypes tys  -- builds with this test!
+    | arityMatches callTypes calleeInfo
+    = do 
+        logTyped $ "matchTypeList call arity in range case"
+        matchTypeList caller callee pos callTypes calleeInfo
     -- Handle case of SemiDet context call to bool function as a proc call
-    | isJust testInfo && sameLength callTypes (fiTypes calleeInfo')
-    = matchTypeList callee pos callTypes calleeInfo'
+    | isJust testInfo && arityMatches callTypes calleeInfo'
+    = do 
+        logTyped $ "matchTypeList semiDet call to bool function case"
+        matchTypeList caller callee pos callTypes calleeInfo'
     -- Handle case of reified test call
-    | isJust detCallInfo && sameLength callTypes (fiTypes calleeInfo'')
-    = matchTypeList callee pos callTypes calleeInfo''
+    | isJust detCallInfo && arityMatches callTypes calleeInfo''
+    = do 
+        logTyped $ "matchTypeList reified test call case"
+        matchTypeList caller callee pos callTypes calleeInfo''
     -- Handle case where the call is partial
     | isJust partialCallInfo
-    = matchTypeList callee pos callTypes calleeInfo'''
+    = do 
+        logTyped $ "matchTypeList partially applied function case"
+        matchTypeList caller callee pos callTypes calleeInfo'''
     -- Else, we must have an arity error
-    | otherwise = return $ Err [ReasonArity caller callee pos
-                                (length callTypes) (length tys)]
+    | otherwise = do
+        logTyped $ "matchTypeList wrong arity case"
+        return $ Err [ReasonArity caller callee pos callArity minArity maxArity]
     where callArity = length callTypes
           testInfo = boolFnToTest calleeInfo
           calleeInfo' = fromJust testInfo
@@ -1632,7 +1648,9 @@ matchTypes caller callee pos _ callTypes callFlows
                         unless (f1 == f2)
                             $ typeError $ ReasonHigherFlow caller callee i f1 f2 pos)
                         (typeFlowMode <$> callTFs) (typeFlowMode <$> tfs) [1..]
-                else typeError $ ReasonArity caller callee pos nCallTFs (length tfs')
+                else let arity = length tfs'
+                     in typeError
+                        $ ReasonArity caller callee pos nCallTFs arity arity
             _ ->
                 void $ unifyTypes (ReasonHigher caller callee pos)
                         fnTy $ HigherOrderType defaultProcModifiers callTFs
@@ -1651,10 +1669,19 @@ matchTypes caller calleee pos _ _ _
     then OK (calleeInfo, typing)
     else Err errs
 
+-- | Does the arity of the call match the arity of the proc being called?
+arityMatches :: [TypeSpec] -> CallInfo -> Bool
+arityMatches callTypes calleeInfo@FirstInfo{} =
+    fiMinArity calleeInfo <= arity && arity <= fiMaxArity calleeInfo
+    where arity = length callTypes
+arityMatches _ _ =
+    shouldnt "arityMatches with non-first order call case"
 
-matchTypeList :: Ident -> OptPos -> [TypeSpec] -> CallInfo
+
+-- | Unify caller types with candidate callee types.
+matchTypeList :: Ident -> Ident -> OptPos -> [TypeSpec] -> CallInfo
                -> Typed (MaybeErr (CallInfo,Typing))
-matchTypeList callee pos callTypes
+matchTypeList caller callee pos callTypes
         calleeInfo@FirstInfo{fiPartial=partial,
                              fiMinArity=minArity,
                              fiMaxArity=maxArity,
@@ -1664,21 +1691,24 @@ matchTypeList callee pos callTypes
                ++ " with " ++ show calleeInfo
     logTyped $ "Call arity " ++ show (length callTypes)
                ++ "; proc arity " ++ show minArity ++ " - " ++ show maxArity
-    when (length calleeTypes /= length defs) 
-        $ shouldnt $ "FirstInfo fiDefaults length = " ++ show (length defs)
-                     ++ "; fiTypes length = " ++ show (length calleeTypes)
-    let opts = length callTypes - minArity
-    logTyped $ "Filling  " ++ show opts ++ " optional arguments"
-    (matches, typing)
-        <- getTyping $ unifyTypeList 1 opts callee pos (isJust <$> defs)
+    let callArity = length callTypes
+    let opts = callArity - minArity
+    if opts < 0 || callArity > maxArity
+        then return $ Err 
+                [ReasonArity caller callee pos callArity minArity maxArity]
+        else do
+            logTyped $ "Filling  " ++ show opts ++ " optional arguments"
+            (matches, typing)
+                <- getTyping $ unifyTypeList 1 opts callee pos (isJust <$> defs)
                              callTypes calleeTypes
-    let mismatches = List.map fst $ List.filter (invalidType . snd)
+            let mismatches = List.map fst $ List.filter (invalidType . snd)
                        $ zip [1..] matches
-    return $ if List.null mismatches
-    then OK (calleeInfo{fiTypes=matches}, typing)
-    else Err $ [ReasonArgType partial callee n pos | n <- mismatches]
-            ++ typingErrs typing
-matchTypeList _ _ _ info = shouldnt $ "matchTypeList on " ++ show info
+            return $ if List.null mismatches
+                        then OK (calleeInfo{fiTypes=matches}, typing)
+                        else Err $ [ReasonArgType partial callee n pos
+                                   | n <- mismatches]
+                                    ++ typingErrs typing
+matchTypeList _ _ _ _ info = shouldnt $ "matchTypeList on " ++ show info
 
 -- |unifyTypeList arg opts callee pos defs callerTs calleeTs
 --  Match up a list of argument types callerTs with the corresponding list of
@@ -1691,7 +1721,7 @@ matchTypeList _ _ _ info = shouldnt $ "matchTypeList on " ++ show info
 --  apply the defaults for all but the first opts optional arguments.
 unifyTypeList :: Int -> Int -> ProcName -> OptPos -> [Bool]
               -> [TypeSpec] -> [TypeSpec] -> Typed [TypeSpec]
-unifyTypeList _ _ _ _ _ [] [] = return []
+unifyTypeList _ _ _ _ [] [] [] = return []
 unifyTypeList arg opts callee pos (def:defs) (ctyp:callerTs) (ptyp:calleeTs) =
     if def && opts<=0
     then unifyTypeList arg opts callee pos defs (ctyp:callerTs) calleeTs

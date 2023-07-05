@@ -118,7 +118,12 @@ unbranchProc' proc = do
                 $ contentApply unbranchParam <$> params
     let alt = selectDetism [] [move boolFalse testOutExp] detism
     let stmts = selectDetism body (body++[move boolTrue testOutExp]) detism
-    let proto' = proto {procProtoParams = params'}
+    let proto' =
+            if detism == SemiDet
+                then proto {procProtoParams=params',
+                            procProtoMinArity=procProtoMinArity proto + 1,
+                            procProtoMaxArity=procProtoMaxArity proto + 1}
+                else proto {procProtoParams=params'}
     (body',tmpCtr',newProcs) <-
         unbranchBody name tmpCtr params' detism stmts alt
     let proc' = proc { procProto = proto'
