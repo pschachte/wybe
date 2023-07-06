@@ -1,0 +1,79 @@
+======================================================================
+AFTER FLATTENING:
+ Module higher_order_inline
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : higher_order_inline.<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+module top-level code > public {semipure} (0 calls)
+0: () use !wybe.io.io:
+    id(?tmp#0 @higher_order_inline:1:13)
+    =(?identity @higher_order_inline:1:2, tmp#0)
+    identity(1 @higher_order_inline:2:10, ?i @higher_order_inline:2:14)
+    !println(i @higher_order_inline:3:10)
+
+LLVM code       : None
+
+Types: **** Validating parameter types in module higher_order_inline
+Types: Validating def of 
+Types: **** Re-exiting module higher_order_inline
+Types: **** Type checking modules higher_order_inline
+Types: **** Strongly connected components:
+Types:     higher_order_inline.
+Types: Type checking non-recursive proc higher_order_inline.
+Types: ** Type checking decl of proc 
+Types: found 1 definition(s)
+Types: Type checking module top-level code
+Types: ** Type checking module top-level code: Typing {}; {} (with no errors)
+Types:    with resources: fromList [!wybe.io.io]
+Types:    containing calls: 
+Types:         id(?tmp#0 @higher_order_inline:1:13)
+Types:         =(?identity @higher_order_inline:1:2, tmp#0)
+Types:         identity(1 @higher_order_inline:2:10, ?i @higher_order_inline:2:14)
+Types:         !println(i @higher_order_inline:3:10)
+Types:    and defaults: 
+Types:    with assigned vars: fromList ["i","identity","io","tmp#0"]
+Types: Recording parameter types: 
+Types: Recording resource types: !wybe.io.io
+Types: Unifying types wybe.phantom (-> wybe.phantom) and any (-> any)
+Types:   Unification yields wybe.phantom
+Types: Variable io type constrained to wybe.phantom
+Types: Recording casts in {id(?tmp#0 @higher_order_inline:1:13)}
+Types: Recording casts in {=(?identity @higher_order_inline:1:2, tmp#0)}
+Types: Recording casts in {identity(1 @higher_order_inline:2:10, ?i @higher_order_inline:2:14)}
+Types: Recording casts in {!println(i @higher_order_inline:3:10)}
+Types: *** Before calls Typing {io::wybe.phantom}; {} (with no errors)
+Types: Refreshed types [A,A] with [0,0]
+Types: Refreshed types [{resource}(T),wybe.list(T)] with [{resource}(1),wybe.list(1)]
+Types:   With calls:
+Types:   StmtTypings {typingStmt = {id(?tmp#0 @higher_order_inline:1:13)} @higher_order_inline:1:13, typingInfos = [wybe.predicate.id<0>(0,?0)]}
+Types:     StmtTypings {typingStmt = {=(?identity @higher_order_inline:1:2, tmp#0)} @higher_order_inline:1:2, typingInfos = [wybe.bool.=<0>(wybe.bool,wybe.bool,?wybe.bool),wybe.c_string.=<0>(wybe.c_string,wybe.c_string,?wybe.bool),wybe.char.=<0>(wybe.char,wybe.char,?wybe.bool),wybe.comparison.=<0>(wybe.comparison,wybe.comparison,?wybe.bool),wybe.count.=<0>(wybe.count,wybe.count,?wybe.bool),wybe.float.=<0>(wybe.float,wybe.float,?wybe.bool),wybe.int.=<0>(wybe.int,wybe.int,?wybe.bool),wybe.range.=<0>(wybe.range,wybe.range,?wybe.bool),wybe.string.=<0>(wybe.string,wybe.string,?wybe.bool)]}
+Types:     StmtTypings {typingStmt = {identity(1 @higher_order_inline:2:10, ?i @higher_order_inline:2:14)} @higher_order_inline:2:1, typingInfos = [higher identity]}
+Types:     StmtTypings {typingStmt = {!println(i @higher_order_inline:3:10)} @higher_order_inline:3:2, typingInfos = [wybe.bool.println<0>(wybe.bool) use io, ?io,wybe.c_string.println<0>(wybe.c_string) use io, ?io,wybe.char.println<0>(wybe.char) use io, ?io,wybe.count.println<0>(wybe.count) use io, ?io,wybe.float.println<0>(wybe.float) use io, ?io,wybe.int.println<0>(wybe.int) use io, ?io,wybe.list.println<0>({resource}(1),wybe.list(1)) use io, ?io,wybe.string.println<0>(wybe.string) use io, ?io]}Typing {io::wybe.phantom}; {} (with no errors)
+Types: Type checking call {id(?tmp#0 @higher_order_inline:1:13)} @higher_order_inline:1:13
+Types: Candidate types:
+Types:     wybe.predicate.id<0>(0,?0)
+Types: Finding type of expr ?tmp#0 @higher_order_inline:1:13
+Types:   Type = 2
+Types: Actual types: [2]
+Types: matchTypes partially applied function case
+Types: Matching types [2] with partial application of wybe.predicate.id<0>(?(0, ?0))
+Types: Call arity 1; proc arity 2 - 2
+Types: Valid types = []
+Types: Type error: no valid types for call
+Types: Recording error(s): [Error Just "/Users/schachte/research/mine/wybe/test-cases/final-dump/higher_order_inline.wybe" (line 1, column 13): Call from module top-level code to id with 1 argument(s), expected 2]
+Types: ** New definition of :
+Types: 
+Types: module top-level code > public {semipure} (0 calls)
+Types: 4: () use !wybe.io.io:
+Types:     id(?tmp#0 @higher_order_inline:1:13)
+Types:     =(?identity @higher_order_inline:1:2, tmp#0)
+Types:     identity(1 @higher_order_inline:2:10, ?i @higher_order_inline:2:14)
+Types:     !println(i @higher_order_inline:3:10)
+Error detected during type checking of module(s) higher_order_inline
+[91mtest-cases/final-dump/higher_order_inline.wybe:1:13: Call from module top-level code to id with 1 argument(s), expected 2
+[0m
