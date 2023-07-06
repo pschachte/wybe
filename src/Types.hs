@@ -1070,7 +1070,7 @@ procToPartial callFlows hasBang
                      fiTypes=closedTys ++ [higherTy],
                      fiFlows=closedFls ++ [ParamOut],
                      fiDefaults=closedDefs ++ [Nothing],
-                     fiMinArity=minArity-1, fiMaxArity=maxArity-1}, needsBang)
+                     fiMinArity=minArity, fiMaxArity=maxArity}, needsBang)
   where
     nClosed = length callFlows - 1
     (closedTys, higherTys) = List.splitAt nClosed tys
@@ -1584,32 +1584,32 @@ matchTypes caller callee pos hasBang callTypes callFlows
     -- can be made partial
     | not hasBang && needsBang && isJust partialCallInfo
     = do 
-        logTyped $ "matchTypeList needsBang case"
+        logTyped $ "matchTypes needsBang case"
         matchTypeList caller callee pos callTypes calleeInfo'''
     -- Handle case where call arity is correct
 -- | sameLength callTypes tys  -- builds with this test!
     | arityMatches callTypes calleeInfo
     = do 
-        logTyped $ "matchTypeList call arity in range case"
+        logTyped $ "matchTypes call arity in range case"
         matchTypeList caller callee pos callTypes calleeInfo
     -- Handle case of SemiDet context call to bool function as a proc call
     | isJust testInfo && arityMatches callTypes calleeInfo'
     = do 
-        logTyped $ "matchTypeList semiDet call to bool function case"
+        logTyped $ "matchTypes semiDet call to bool function case"
         matchTypeList caller callee pos callTypes calleeInfo'
     -- Handle case of reified test call
     | isJust detCallInfo && arityMatches callTypes calleeInfo''
     = do 
-        logTyped $ "matchTypeList reified test call case"
+        logTyped $ "matchTypes reified test call case"
         matchTypeList caller callee pos callTypes calleeInfo''
     -- Handle case where the call is partial
     | isJust partialCallInfo
     = do 
-        logTyped $ "matchTypeList partially applied function case"
+        logTyped $ "matchTypes partially applied function case"
         matchTypeList caller callee pos callTypes calleeInfo'''
     -- Else, we must have an arity error
     | otherwise = do
-        logTyped $ "matchTypeList wrong arity case"
+        logTyped $ "matchTypes wrong arity case"
         return $ Err [ReasonArity caller callee pos callArity minArity maxArity]
     where callArity = length callTypes
           testInfo = boolFnToTest calleeInfo
