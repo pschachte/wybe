@@ -1693,8 +1693,8 @@ matchTypeList caller callee pos callTypes
     logTyped $ "Call arity " ++ show (length callTypes)
                ++ "; proc arity " ++ show minArity ++ " - " ++ show maxArity
     let callArity = length callTypes
-    let opts = callArity - minArity
-    if opts < 0 || callArity > maxArity
+    let opts = maxArity - callArity
+    if opts < 0 || callArity < minArity
         then return $ Err 
                 [ReasonArity caller callee pos callArity minArity maxArity]
         else do
@@ -1723,13 +1723,13 @@ matchTypeList _ _ _ _ info = shouldnt $ "matchTypeList on " ++ show info
 unifyTypeList :: Int -> Int -> ProcName -> OptPos -> [Bool]
               -> [TypeSpec] -> [TypeSpec] -> Typed [TypeSpec]
 unifyTypeList _ _ _ _ [] [] [] = return []
-unifyTypeList arg opts callee pos (def:defs) (ctyp:callerTs) (ptyp:calleeTs) =
-    if def && opts<=0
-    then unifyTypeList arg opts callee pos defs (ctyp:callerTs) calleeTs
-    else do
-        let opts' = if def then opts-1 else opts
-        ty <- unifyTypes (ReasonArgType False callee arg pos) ctyp ptyp
-        (ty:) <$> unifyTypeList (arg+1) opts' callee pos defs callerTs calleeTs
+unifyTypeList arg opts callee pos (def:defs) callerTs (ptyp:calleeTs)
+  | def && opts>0 = do
+    (ptyp:) <$> unifyTypeList arg (opts-1) callee pos defs callerTs calleeTs
+unifyTypeList arg opts callee pos (def:defs) (ctyp:callerTs) (ptyp:calleeTs)
+ = do
+    ty <- unifyTypes (ReasonArgType False callee arg pos) ctyp ptyp
+    (ty:) <$> unifyTypeList arg opts callee pos defs callerTs calleeTs
 unifyTypeList _ _ _ _ defs ctypes ptypes =
     shouldnt $ "unifyTypeList arguments don't align:  defs = " ++ show defs
         ++ "; ctypes = " ++ show ctypes ++ "; ptypes = " ++ show ptypes
