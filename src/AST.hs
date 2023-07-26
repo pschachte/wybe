@@ -4248,30 +4248,32 @@ makeMessage pos@(Just _) msg = do
 -- the other message levels are shown only when the 'verbose' option is set.
 showMessages :: Compiler ()
 showMessages = do
-    verbose <- optVerbose <$> gets options
+    opts <- gets options
+    let verbose = optVerbose opts
+    let noFonts = optNoFont opts 
     messages <- reverse <$> gets msgs -- messages are collected in reverse order
     let filtered =
             if verbose
             then messages
             else List.filter ((>=Warning) . messageLevel) messages
-    liftIO $ mapM_ showMessage $ nubOrd $ sortOn messagePlace filtered
+    liftIO $ mapM_ (showMessage noFonts) $ nubOrd $ sortOn messagePlace filtered
 
 
 -- |Prettify and show one compiler message.
-showMessage :: Message -> IO ()
-showMessage (Message lvl pos msg) = do
+showMessage :: Bool -> Message -> IO ()
+showMessage noFont (Message lvl pos msg) = do
     posMsg <- makeMessage pos msg
+    let showMsg colour msg =
+            if noFont 
+                then putStrLn msg
+                else do
+                    setSGR [SetColor Foreground Vivid colour]
+                    putStrLn msg
+                    setSGR [Reset]
     case lvl of
-      Informational ->
-          putStrLn posMsg
-      Warning -> do
-          setSGR [SetColor Foreground Vivid Yellow]
-          putStrLn posMsg
-          setSGR [Reset]
-      Error -> do
-          setSGR [SetColor Foreground Vivid Red]
-          putStrLn posMsg
-          setSGR [Reset]
+      Informational -> putStrLn posMsg
+      Warning       -> showMsg Yellow posMsg
+      Error         -> showMsg Red posMsg
 
 
 -- |Check if any errors have been detected, and if so, print the error messages
