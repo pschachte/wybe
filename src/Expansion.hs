@@ -140,8 +140,9 @@ type Expander = StateT ExpanderState BodyBuilder
 
 -- |Substitute a fresh temp variable for the specified variable, unless
 -- we've already recorded the mapping for that name in writeNaming
-freshVar :: PrimVarName -> TypeSpec -> ArgFlowType  -> Expander PrimArg
-freshVar oldVar typ ft = do
+freshVar :: PrimVarName -> TypeSpec -> PrimFlow -> ArgFlowType
+         -> Expander PrimArg
+freshVar oldVar typ flow ft = do
     logExpansion $ "Making fresh name for variable " ++ show oldVar
     maybeName <- gets (Map.lookup oldVar . writeNaming)
     case maybeName of
@@ -149,10 +150,10 @@ freshVar oldVar typ ft = do
             newVar <- lift freshVarName
             logExpansion $ "    Generated fresh name " ++ show newVar
             addRenaming oldVar $ ArgVar newVar typ FlowIn ft False
-            return $ ArgVar newVar typ FlowOut ft False
+            return $ ArgVar newVar typ flow ft False
         Just newArg -> do
             logExpansion $ "    Already named it " ++ show newArg
-            return newArg
+            return $ newArg{argVarFlow=flow}
 
 
 -- |Add a binding for a variable. If that variable is an output for the
@@ -328,7 +329,7 @@ expandArg arg@(ArgVar var ty flow ft _) = do
     renameAll <- gets inlining
     if renameAll
     then case flow of
-        FlowOut -> freshVar var ty ft
+        FlowOut -> freshVar var ty FlowOut ft
         FlowIn ->
             setArgType ty . setArgFlowType ft
             <$> gets (Map.findWithDefault arg var . renaming)
@@ -372,7 +373,7 @@ addOutputNaming _ _ = return ()
 -- context.
 addInputAssign :: OptPos -> (PrimParam,PrimArg) -> Expander ()
 addInputAssign pos (param@(PrimParam name ty FlowIn ft _),v) = do
-    newVar <- freshVar name ty ft
+    newVar <- freshVar name ty FlowOut ft
     addInstr (PrimForeign "llvm" "move" [] [v,newVar]) pos
 addInputAssign _ _ = return ()
 
