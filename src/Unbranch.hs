@@ -215,6 +215,7 @@ data UnbrancherState = Unbrancher {
     brOutParams  :: [Placed Param],
                                   -- ^Output arguments for generated procs
     brOutArgs    :: [Placed Exp], -- ^Output arguments for call to gen procs
+    brInOutVars  :: Set VarName,  -- ^In/Out argument names
     brNewDefs    :: [ProcDef],    -- ^Generated unbranched auxilliary procedures
     brClosures   :: Map (ProcSpec, Map Integer Exp) ProcSpec,
                                   -- ^Generated procs for closures
@@ -237,7 +238,10 @@ initUnbrancherState loopinfo tmpCtr params =
         outArgs   = [Typed (varSet nm) (unbranchType ty) Nothing `maybePlace` pos
                     | (Param nm ty fl _, pos) <- unPlace <$> params
                     , flowsOut fl]
-    in Unbrancher loopinfo defined tmpCtr outParams outArgs [] Map.empty
+        inOuts = [nm
+                 | (Param nm _ fl _, pos) <- unPlace <$> params
+                 , flowsOut fl && flowsIn fl]
+    in Unbrancher loopinfo defined tmpCtr outParams outArgs (Set.fromList inOuts) [] Map.empty
 
 
 -- | Add the specified variable to the symbol table
@@ -807,8 +811,9 @@ factorContinuationProc inVars pos detism res stmts alt sense = do
     logUnbranch $ "Factoring " ++ show detism ++ " continuation proc "
                   ++ name ++ ":" ++ showBody 4 stmts
     stmts' <- unbranchStmts detism stmts alt sense
+    inOuts <- gets brInOutVars
     let stmtsIns = stmtsInputs stmts'
-    let usedVars = Map.filterWithKey (const . (`Set.member` stmtsIns)) inVars
+    let usedVars = Map.filterWithKey (const . (`Set.member` (stmtsIns `Set.union` inOuts))) inVars
     proto <- newProcProto name usedVars res
     genProc proto Det stmts' -- Continuation procs are always Det
     newProcCall name usedVars pos Det
@@ -827,7 +832,8 @@ factorLoopProc break inVars pos detism res stmts alt sense = do
                   ++ pname ++ ":" ++ showBody 4 stmts
                   ++ "\nLoop input vars = " ++ show inVars
     let stmtsIns = stmtsInputs $ break ++ stmts ++ alt
-    let usedVars = Map.filterWithKey (const . (`Set.member` stmtsIns)) inVars
+    inOuts <- gets brInOutVars
+    let usedVars = Map.filterWithKey (const . (`Set.member` (stmtsIns `Set.union` inOuts))) inVars
     next <- newProcCall pname usedVars pos Det -- Continuation procs always Det
     let loopinfo = Just (LoopInfo next break)
     oldLoopinfo <- gets brLoopInfo
