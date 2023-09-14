@@ -3,16 +3,26 @@
 # The Wybe Programming Language
 
 
-The Wybe programming language is intended to be easy to learn and easy to use,
+The [Wybe](README.md) programming language is intended to be easy to learn and easy to use,
 but powerful and efficient enough for practical use.  It is intended to
 support best programming practice, but not necessarily *common* practice.
 
 Wybe combines the best features of declarative and imperative languages,
 in particular borrowing features from functional, logic, imperative, and
 object-oriented languages, but does not neatly fit into any of these
-paradigms.  Its main organising principle is that *values* are
-immutable, but *variables* may be reassigned.  This means that values
-may be passed around at will without worrying that they may be modified.
+paradigms.  Its main organising principle is **interface integrity**, which
+indicates that all information that flows between a procedure or function and
+its caller must be part of the interface (the signature) of that procedure or
+function.  Semantically, *values* are immutable (Wybe has
+[*value semantics*](https://en.wikipedia.org/wiki/Value_semantics)),
+but *variables* may be reassigned.  This means that data structures
+may be passed around at will without worrying that they may be unexpectedly
+modified, yet conventional looping constructs can be used freely.
+
+In some cases the compiler can arrange for values to be destructively
+updated in place, as long as it can be sure that the original value of the
+data structure will never be accessed again.  Thus the compiler can generate
+efficient executables while ensuring that interface integrity is maintained.  
 
 
 ## <a name="hello-world"></a>Hello, World!
@@ -241,7 +251,7 @@ any number of letters, digits, and underscores.
 A variable mention may *use* or *assign* its value.  If the variable
 name is preceded by a question mark (`?`), the mention assigns the
 variable a (new) value; without the question mark prefix, the mention
-uses the variable's current value.  It does not matter which side of an
+uses the variable's current value.  It does not matter on which side of an
 equal sign the variable appears; only its prefix determines whether the
 variable is assigned or used.
 
@@ -299,7 +309,8 @@ Function calls may have one of the following forms:
     output.  In this case, the function is run "backwards", working from the
     result to determine the output arguments.  So the value of the function must
     be supplied by the context in which it is called, and then the function is
-    called to produce the values for the outputs.
+    called to produce the values for the outputs.  One common use of this form
+    is for [*pattern matching*](#pattern-matching) (accessing the members of a data structure).
 
   - A call where one or more arguments are input/outputs (prefixed with `!`),
     and all others, if any, are inputs.  This form of expression is itself
@@ -315,7 +326,7 @@ Expressions containing both output and input/output arguments are not permitted.
 
 If a function call is made with *fewer* arguments than is dictated by the
 definition of procedure/function, the procedure is considered a partial
-application. The mode of all arguments must be an input (as the procedure is
+application. The mode of all arguments must be inputs (as the procedure is
 not called where used to produce any outputs).
 
 This binds the output name to a "partial application" of the procedure. The type
@@ -374,7 +385,7 @@ semicolon, left parenthesis, bracket, or brace, or one of the keywords
 `in`, `is`, `where`, `pub`, `def`, `type`, `constructor`, or `constructors`,
 then the line break is not considered to be a separator.  Likewise, if what
 follows is an operator symbol other than `?`, `!`, or `~`, a comma, semicolon, a
-right parenthesis, bracket, or brace, or one of the keywords
+right parenthesis, bracket, brace, or one of the keywords
 `in`, `is`, or `where`, then the line break is not considered to be a separator.
 Otherwise, the line break is treated as a separator, as if you had written an
 explicit semicolon.
@@ -442,7 +453,9 @@ pub def toCelsius(f:float):float = (f - 32.0) / 1.8
 ```
 is exactly equivalent to
 ```
-pub def toCelsius(f:float, ?result:float) { ?result = (f - 32.0) / 1.8 }
+pub def toCelsius(f:float, ?result:float) {
+    ?result = (f - 32.0) / 1.8
+}
 ```
 
 Likewise, every function call is transformed into a procedure call, so:
@@ -1709,14 +1722,14 @@ configured when Wybe is installed, but can be overridden with the `--libdir` or
 
 Wybe code is mostly purely logical, and the Wybe compiler takes advantage of
 this.  For example, if none of the outputs of a proc call are actually used, 
-the compiler will eliminate the call.  
+the compiler will eliminate the call.
 A proc call may also be omitted if a proc call with the same inputs has previously 
-been made; in this case, the compiler will assume the output(s) will be identical.  
+been made; in this case, the compiler will assume the output(s) will be identical.
 The compiler may also reorder calls however it likes, as long as all the inputs 
 to a proc are available when the proc is called.  As long as your code is purely 
 logical, all of these optimisations and more are perfectly safe.
 
-However, occasionally it is important that the compiler not perform such optimisations.  
+However, occasionally it is important that the compiler not perform such optimisations.
 For example, the `exit` command has no outputs, it is only executed for its effect 
 (terminating the program prematurely).  In some cases, purely logical Wybe procs 
 can be written based on impure building blocks, particularly when interfacing to 
@@ -1728,12 +1741,12 @@ which tells the Wybe compiler (and other programmers) to treat them more careful
 
 Wybe supports the following three levels of purity:
 
-- *pure*
+- *pure*  
 the default purity level.  An ordinary procedure or function, calls to which 
 are subject to all optimisations.
 
-- *impure*
-an impure procedure, calls to which should not be reordered or omitted.  
+- *impure*  
+an impure procedure, calls to which should not be reordered or omitted.
 Impure procs must be declared to be so, and in general, a proc that calls an 
 impure proc must itself be impure.  The bodies of impure procs are also not 
 optimised as extensively as pure and semipure procs.  Even calls to pure procs 
@@ -1741,11 +1754,11 @@ appearing in the bodies of impure procs will not be optimised.  This provides
 a way to prevent unwanted optimisation in a fine-grained way, such as for the 
 purposes of benchmarking.
 
-- *semipure*
+- *semipure*  
 a proc that is not pure, so calls to it must not be reordered or omitted, 
 however its impurity is not "contagious".  It may be called from an ordinary, 
-pure proc without that proc becoming impure.  It may also call impure procs.  
-Note that calls to pure procs in the bodies of semipure procs are optimised as usual; 
+pure proc without that proc becoming impure.  It may also call impure procs.
+Note that calls to pure procs in the bodies of semipure procs are optimised as usual;
 it is only in the bodies of *impure* procs that calls to ordinary pure procs are 
 not optimised.
 
