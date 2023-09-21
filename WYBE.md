@@ -200,14 +200,15 @@ the following character:
 | `a`       | Alert or bell (ASCII code 0x07)         |
 | `b`       | Backspace (ASCII code 0x08)             |
 | `e`       | Escape (ASCII code 0x1b)                |
-| `f`       | Form feed (ASCII code 0x0c)              |
+| `f`       | Form feed (ASCII code 0x0c)             |
 | `n`       | Newline or Line feed (ASCII code 0x0a)  |
 | `r`       | Carriage return (ASCII code 0x0d)       |
 | `t`       | Horizontal tab (ASCII code 0x09)        |
 | `v`       | Vertical tab (ASCII code 0x0b)          |
+| `x`       | Introduce a hexadecimal character code  |
 
-If the character following the backslash is an `x` or `X`, the following two
-characters must be hexadecimal characters, in which case the hexadecimal number
+The two characters following `\x` (or `\X`) must be hexadecimal characters,
+in which case the hexadecimal number
 specifies the character code.  For example `'\x20'` specifies character code 32,
 which is the space character.
 
