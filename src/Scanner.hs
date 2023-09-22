@@ -400,14 +400,18 @@ tokeniseString delim pos cs =
         tokErr = terminalTokError "unterminated string" pos
 
 
--- |Scan a string interpolation followed by the rest of the string, followed
--- by the rest of the input.  cs begins with the first character after the '$'.
+-- |Scan a string interpolation followed by the rest of the string.  cs begins
+-- with the first character after the '$'.
 scanInterpolation :: String -> StringDelim -> SourcePos -> PartialTokenisation
 scanInterpolation cs delim pos =
     case span isIdentChar cs of
-        ("",cs) -> mapFst3
-                   (TokError "$ must be followed by an identifier" pos:)
-                   $ tokeniseString delim pos cs
+        ("",'(':c:cs') ->
+            mapFst3 ([TokIdent "fmt" pos, TokLBracket Paren pos]++)
+            $ scanExprInterpolation 1 c cs' delim $ updatePosChar pos '('
+        ("",cs) ->
+            mapFst3
+            (TokError "invalid string interpolation" pos:)
+            $ tokeniseString delim pos cs
         (name,t:cs) | t == termchar ->
             let pos' = updatePosChar (updatePosString pos name) t
             in ([TokIdent "fmt" pos
@@ -426,6 +430,34 @@ scanInterpolation cs delim pos =
                $ tokeniseString delim pos' rest
   where termchar = delimChar delim
 
+
+-- |Scan a string interpolation of the form $(...), followed by the rest of the
+-- string.  cs begins with the first character after the "$("".  The provided
+-- depth indicates the current parenthesis nesting depth.  We scan until the
+-- nesting depth reaches 0, meaning we've reached the end of the opening "$(".
+-- After that, we scan the rest of the string.
+scanExprInterpolation :: Int -> Char -> String -> StringDelim -> SourcePos
+                      -> PartialTokenisation
+scanExprInterpolation 0 c cs delim pos
+  | c == delimChar delim = ([], updatePosChar pos c, cs)
+scanExprInterpolation 0 c cs delim pos =
+    mapFst3 ([TokSymbol ",," pos]++) $ tokeniseString delim pos (c:cs)
+scanExprInterpolation depth c cs delim pos =
+    let (toks, pos', cs') = tokenisePart pos c cs
+        depth' = foldr ((+) . tokenNesting) depth toks
+    in  case cs' of
+        [] -> terminalTokError "unterminated string" pos'
+        (c'':cs'') ->
+            mapFst3 (toks++)
+            $ scanExprInterpolation depth' c'' cs'' delim pos'
+
+
+-- |Return the change the token makes to the expression nesting depth.  This
+-- only considers parentheses to change the nesting depth.
+tokenNesting :: Token -> Int
+tokenNesting (TokLBracket Paren _) = 1
+tokenNesting (TokRBracket Paren _) = (-1)
+tokenNesting _ = 0
 
 -- |Scan a character escape sequence following a backslash character, returning
 -- Maybe a triple of the single escaped character, the position of the following
