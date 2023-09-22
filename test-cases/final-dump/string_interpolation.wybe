@@ -1,0 +1,8 @@
+?name = "Wybe"
+!println("Hello, $name!")
+
+?number = 6*7
+!println("$number is the answer")
+
+?base = 2 ; ?bits = 63
+!println("maxint is $(base**bits-1) and minint is $(base**bits)")
