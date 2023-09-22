@@ -3,7 +3,7 @@
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
-use wybe.c_string, wybe.io
+use wybe.c_string, wybe.string, wybe.io
 
 pub constructors false | true
 
@@ -41,6 +41,9 @@ pub def (x:_ ~= y:_):_ = foreign llvm icmp_ne(x, y)
 ## Other
 
 pub def succeed { pass } # always succeed
+
+## Formatting
+pub def fmt(x:_):string = if { x :: "true" | else :: "false" }
 
 ## I/O
 

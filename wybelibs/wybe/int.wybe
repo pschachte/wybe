@@ -4,7 +4,7 @@
 pragma no_standard_library  # Standard library can't depend on itself!
 
 use foreign library m
-use wybe.bool, wybe.comparison, wybe.io
+use wybe.bool, wybe.comparison, wybe.io, wybe.count, wybe.string, wybe.char
 
 representation is signed
 
@@ -97,6 +97,9 @@ pub def (x:_ <=> y:_):comparison =
 pub def min(x:_, y:_):_ = if {x<=y:: x | else:: y}
 pub def max(x:_, y:_):_ = if {x>=y:: x | else:: y}
 
+# Conversion
+def count(x:_):count = foreign lpvm cast(x)
+
 
 ## Other operations
 
@@ -105,6 +108,7 @@ pub def sqrt(x:_):_ = foreign c isqrt(x)
 
 # Integer exponentiation.
 pub def power(x:_, y:_):_ = foreign c ipow(x,y)
+pub def (x:_ ** y:_):_ = power(x,y)
 
 # Increment and Decrement.
 pub def incr(!x:_) { ?x = x + 1 }
@@ -113,6 +117,15 @@ pub def decr(!x:_) { ?x = x - 1 }
 # The sign of an integer: +1, -1, or 0
 pub def signum(x:_):_ = foreign c signum(x)
 
+# Absolute value
+pub def abs(x:_):_ = if {x < 0 :: -x | else :: x}
+pub def abs(x:_):count = if {x < 0 :: count(-x) | else :: count(x)}
+
+## Formatting
+pub def fmt(x:_):string =
+    if {x >= 0 :: fmt(count(x))
+       | else  :: '-' ,, fmt(count(-x))
+    }
 
 ## I/O
 

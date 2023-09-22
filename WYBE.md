@@ -1050,7 +1050,7 @@ Wybe's conditional and case constructs can also be used as expressions.  Both
 have the same form as their statement versions, except that instead of each case
 providing one or more statements, they provide a single expression.
 
-Note that in both case, the `else` case is required.
+Note that for both `if` and `case` expressions, the `else` is required.
 
 For example:
 ```
@@ -1069,6 +1069,9 @@ println(
     | else             :: error("should not be possible")
 })
 ```
+
+Note that where an `if` or `case` expression is used as an argument of another
+expression, it must be enclosed within parentheses.
 
 
 ## `terminal` and `failing` procedures

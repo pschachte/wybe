@@ -67,6 +67,16 @@ pub def (x:_ ,, y:_):_ =
        | else :: concat(x, y)
        }
 
+pub def (x:char ,, y:_):_ =
+    if { y = empty :: singleton(x)
+       | else      :: concat(singleton(x), y)
+       }
+
+pub def (x:_ ,, y:char):_ =
+    if { x = empty :: singleton(y)
+       | else      :: concat(x,singleton(y))
+       }
+
 # Reverse-mode cons
 pub def {test} `[|]`(?head:char, ?tail:_, s:_) {
     case s in { 
@@ -135,6 +145,9 @@ pub def (x:_ <=> y:_):comparison = c where {
         if { lx < ly :: ?c = lesser | lx > ly :: ?c = greater } 
     }
 }
+
+## Formatting
+pub def fmt(x:_):_ = x
 
 
 ## I/O

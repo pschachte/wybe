@@ -354,29 +354,55 @@ tokeniseChar pos chars =
 -- |Tokenise a delimited string and tokenize the rest of the input..
 tokeniseString :: StringDelim -> SourcePos -> String -> [Token]
 tokeniseString delim pos cs =
-  let termchar = delimChar delim
-  in  case scanString termchar pos cs of
-      Just (str,pos',rest) -> TokString delim str pos : tokenise pos' rest
-      Nothing              -> [TokError "unterminated string" pos]
-
-
--- |Scan a string literal that has already been opened, and will close with the
--- specified terminator character.  Also return the remainder of the input and
--- the new source position.
-scanString :: Char -> SourcePos -> String -> Maybe (String,SourcePos,String)
-scanString termchar pos input =
-    case break (`elem` [termchar,'\\']) input of
-        (_,[]) -> Nothing
+    case break (`elem` [termchar,'\\','$']) cs of
+        (_,[]) -> tokErr
         (front,'\\':cs) ->
             let pos' = updatePosChar (updatePosString pos front) '\\'
             in case scanCharEscape pos' cs of
                 Just (ch,pos'',cs') ->
-                    first3 ((front++) . (ch:)) <$> scanString termchar pos'' cs'
-                Nothing -> Nothing
+                    case tokeniseString delim pos'' cs' of
+                        (TokString d s p:rest) ->
+                            TokString d (front++(ch:s)) p:rest
+                        _ -> shouldnt "tokeniseString didn't return a string"
+                Nothing -> tokErr
+        ("",'$':cs) ->
+            scanInterpolation cs delim $ updatePosChar pos '$'
+        (front,'$':cs) ->
+            let pos' = updatePosString pos front
+            in TokString delim front pos
+                : TokSymbol ",," pos'
+                : scanInterpolation cs delim (updatePosChar pos' '$')
         (front,t:cs) | t == termchar ->
             let pos' = updatePosChar (updatePosString pos front) t
-            in Just (front, pos', cs)
-        (front,rest) -> shouldnt "break broke in scanString"
+            in TokString delim front pos : tokenise pos' cs
+        (front,rest) -> shouldnt "break broke in tokeniseString"
+  where termchar = delimChar delim
+        tokErr = [TokError "unterminated string" pos]
+
+
+-- |Scan a string interpolation followed by the rest of the string, followed
+-- by the rest of the input.  cs begins with the first character after the '$'.
+scanInterpolation :: String -> StringDelim -> SourcePos -> [Token]
+scanInterpolation cs delim pos =
+    case span isIdentChar cs of
+        ("",cs) -> TokError "$ must be followed by an identifier" pos
+                    : tokeniseString delim pos cs
+        (name,t:cs) | t == termchar ->
+            let pos' = updatePosChar (updatePosString pos name) t
+            in TokIdent "fmt" pos 
+                : TokLBracket Paren pos 
+                : TokIdent name pos
+                : TokRBracket Paren pos
+                : tokenise pos' cs
+        (name, rest) ->
+            let pos' = updatePosString pos name
+            in TokIdent "fmt" pos 
+                : TokLBracket Paren pos 
+                : TokIdent name pos
+                : TokRBracket Paren pos
+                : TokSymbol ",," pos'
+                : tokeniseString delim pos' rest
+  where termchar = delimChar delim
 
 
 -- |Scan a character escape sequence following a backslash character, returning

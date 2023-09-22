@@ -1,0 +1,2 @@
+?num = 42
+!println("the answer is $num!")
