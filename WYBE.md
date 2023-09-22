@@ -211,6 +211,8 @@ The two characters following `\x` (or `\X`) must be hexadecimal characters,
 in which case the hexadecimal number
 specifies the character code.  For example `'\x20'` specifies character code 32,
 which is the space character.
+Additionally, within strings, the dollar sign (`$`) character is special;
+see the discussion of [string interpolation](#string-interpolation) below.
 
 Any other character following a backslash is interpreted as itself. In
 particular, `\'` specifies a single quote character, `\"`
@@ -218,7 +220,7 @@ specifies one double-quote character, `\$` specifies a dollar sign character,
 and `\\` specifies a single backslash character.
 
 
-## String interpolation
+## <a name="string-interpolation">String interpolation
 
 Values of variables and expressions can be included within a string through
 *string interpolation*.  To include the value of a variable within a string,
