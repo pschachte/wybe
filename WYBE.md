@@ -214,9 +214,45 @@ which is the space character.
 
 Any other character following a backslash is interpreted as itself. In
 particular, `\'` specifies a single quote character, `\"`
-specifies one double-quote character, and `\\` specifies a single
-backslash character.
+specifies one double-quote character, `\$` specifies a dollar sign character,
+and `\\` specifies a single backslash character.
 
+
+## String interpolation
+
+Values of variables and expressions can be included within a string through
+*string interpolation*.  To include the value of a variable within a string,
+place the variable name within the string preceded by a dollar sign (`$`)
+character.  For example, if the variable `name` holds the string `"Wybe"`,
+then
+
+> `"Hello, $name!"`
+
+denotes the string `"Hello, Wybe!"`, and if the variable `number` holds the value 42, then
+
+> `"$number is the answer"`
+
+denotes `"42 is the answer"`
+
+More generally, the values of Wybe expressions can be included in strings by
+placing them within parentheses immediately preceded by a dollar sign.  For
+example, if `base` is 2 and `bits` is 63, then
+
+> `"maxint is $(base**bits-1) and minint is $(base**bits)"`
+
+denotes the string
+`"maxint is 9223372036854775807 and minint is -9223372036854775808"`
+
+Interpolated expressions can be arbitrarily complex, involving nested
+subexpressions, nested parentheses, and even nested quotes.
+
+Variables and expressions used in string interpolations are converted to
+strings using the `fmt` function, which is defined for all primitive types,
+and can be defined for user types to allow them to be interpolated.  Note
+that `fmt` applied to strings returns the strings as is, without surrounding
+them with quotation marks.  Then
+string concatenation (`,,`) is used to assemble the string from its fixed
+parts and the results of the call(s) to `fmt`.
 
 ## Procedure calls
 
