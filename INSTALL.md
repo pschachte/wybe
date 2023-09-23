@@ -58,7 +58,7 @@ dyld[40396]: Library not loaded: /usr/local/opt/libffi/lib/libffi.7.dylib
 
 ### Linux (Ubuntu)
 
-Note that this is an experimental support and only has been tested on Ubuntu 18.04.4 LTS.
+Note that this is an experimental support and only has been tested on Ubuntu 18.04 and 20.04 LTS.
 
 1.  Install Clang
 
