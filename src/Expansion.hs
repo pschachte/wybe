@@ -153,6 +153,7 @@ freshVar oldVar typ flow ft = do
             return $ ArgVar newVar typ flow ft False
         Just newArg -> do
             logExpansion $ "    Already named it " ++ show newArg
+            addRenaming oldVar newArg{argVarFlow=FlowIn}
             return $ newArg{argVarFlow=flow}
 
 
