@@ -1033,7 +1033,9 @@ buildExecutable orderedSCCs targetMod target = do
     loadModuleIfNeeded False ["command_line"] possDirs
     let privateImport = importSpec Nothing Private
     addImport ["command_line"] privateImport `inModule` targetMod
-    depends <- orderedDependencies targetMod
+    dependsUnsorted <- orderedDependencies targetMod
+    let topoMap = sccTopoMap orderedSCCs
+        depends = sortOn (modTopoOrder topoMap . fst) dependsUnsorted
     if List.null depends || not (snd (last depends))
         then
             -- No main code in the selected module: don't build executable
