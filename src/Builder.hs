@@ -1026,9 +1026,9 @@ handleModImports _ thisMod = do
 buildExecutable :: [[ModSpec]] -> ModSpec -> FilePath -> Compiler ()
 buildExecutable orderedSCCs targetMod target = do
     possDirs <- gets $ ((,True) <$>) . optLibDirs . options
-    loadModuleIfNeeded False ["command_line"] possDirs
+    loadModuleIfNeeded False cmdLineModSpec possDirs
     let privateImport = importSpec Nothing Private
-    addImport ["command_line"] privateImport `inModule` targetMod
+    addImport cmdLineModSpec privateImport `inModule` targetMod
     dependsUnsorted <- orderedDependencies targetMod
     let topoMap = sccTopoMap orderedSCCs
         depends = sortOn (modTopoOrder topoMap . fst) dependsUnsorted
@@ -1048,7 +1048,7 @@ buildExecutable orderedSCCs targetMod target = do
             let mainMod = []
             enterModule target mainMod Nothing
             addImport ["wybe"] privateImport
-            addImport ["command_line"] privateImport
+            addImport cmdLineModSpec privateImport
             -- Import all dependencies of the target mod
             mapM_ (\m -> addImport m $ importSpec Nothing Private)
                   (fst <$> depends)
@@ -1135,7 +1135,7 @@ foreignDependencies mods =
 buildMain :: [ModSpec] -> Compiler Item
 buildMain mainImports = do
     logBuild "Generating main executable code"
-    let cmdResource name = ResourceFlowSpec (ResourceSpec ["command_line"] name)
+    let cmdResource name = ResourceFlowSpec (ResourceSpec cmdLineModSpec name)
     let mainRes = Set.fromList [cmdResource "argc" ParamIn,
                                 cmdResource "argv" ParamIn,
                                 cmdResource "exit_code" ParamOut]
