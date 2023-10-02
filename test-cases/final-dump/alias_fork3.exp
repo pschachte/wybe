@@ -37,7 +37,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#25##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-simpleSlice > public (1 calls)
+proc simpleSlice > public (1 calls)
 0: alias_fork3.simpleSlice<0>
 simpleSlice(tr##0:mytree.tree, ?#result##0:mytree.tree)<{}; {}; {}>:
   AliasPairs: [(#result##0,tr##0)]
@@ -182,7 +182,7 @@ if.else:
   submodules      : mytree.tree
   procs           : 
 
-printTree > public {inline} (0 calls)
+proc printTree > public {inline} (0 calls)
 0: mytree.printTree<0>
 printTree(t##0:mytree.tree)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -191,7 +191,7 @@ printTree(t##0:mytree.tree)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     wybe.string.print<0>("}":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @mytree:nn:nn
 
 
-printTree1 > public (3 calls)
+proc printTree1 > public (3 calls)
 0: mytree.printTree1<0>
 printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: [(prefix##0,prefix##3)]
@@ -302,7 +302,7 @@ if.else:
   resources       : 
   procs           : 
 
-= > public (7 calls)
+proc = > public (7 calls)
 0: mytree.tree.=<0>
 =(#left##0:mytree.tree, #right##0:mytree.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -344,7 +344,7 @@ if.else:
 
 
 
-empty > public {inline} (0 calls)
+proc empty > public {inline} (0 calls)
 0: mytree.tree.empty<0>
 empty(?#result##0:mytree.tree)<{}; {}; {}>:
   AliasPairs: []
@@ -352,7 +352,7 @@ empty(?#result##0:mytree.tree)<{}; {}; {}>:
     foreign llvm move(0:mytree.tree, ?#result##0:mytree.tree)
 
 
-key > public {inline} (0 calls)
+proc key > public {inline} (0 calls)
 0: mytree.tree.key<0>
 key(#rec##0:mytree.tree, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -367,7 +367,7 @@ key(#rec##0:mytree.tree, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {
         foreign lpvm access(~#rec##0:mytree.tree, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @mytree:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-key > public {inline} (0 calls)
+proc key > public {inline} (0 calls)
 1: mytree.tree.key<1>
 key(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -384,7 +384,7 @@ key(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:wybe.int, ?#success##0:
 
 
 
-left > public {inline} (0 calls)
+proc left > public {inline} (0 calls)
 0: mytree.tree.left<0>
 left(#rec##0:mytree.tree, ?#result##0:mytree.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -399,7 +399,7 @@ left(#rec##0:mytree.tree, ?#result##0:mytree.tree, ?#success##0:wybe.bool)<{}; {
         foreign lpvm access(~#rec##0:mytree.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:mytree.tree) @mytree:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-left > public {inline} (0 calls)
+proc left > public {inline} (0 calls)
 1: mytree.tree.left<1>
 left(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:mytree.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -416,7 +416,7 @@ left(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:mytree.tree, ?#success
 
 
 
-node > public {inline} (0 calls)
+proc node > public {inline} (0 calls)
 0: mytree.tree.node<0>
 node(left##0:mytree.tree, key##0:wybe.int, right##0:mytree.tree, ?#result##0:mytree.tree)<{}; {}; {}>:
   AliasPairs: []
@@ -425,7 +425,7 @@ node(left##0:mytree.tree, key##0:wybe.int, right##0:mytree.tree, ?#result##0:myt
     foreign lpvm mutate(~#rec##0:mytree.tree, ?#rec##1:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~left##0:mytree.tree) @mytree:nn:nn
     foreign lpvm mutate(~#rec##1:mytree.tree, ?#rec##2:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~key##0:wybe.int) @mytree:nn:nn
     foreign lpvm mutate(~#rec##2:mytree.tree, ?#result##0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~right##0:mytree.tree) @mytree:nn:nn
-node > public {inline} (16 calls)
+proc node > public {inline} (16 calls)
 1: mytree.tree.node<1>
 node(?left##0:mytree.tree, ?key##0:wybe.int, ?right##0:mytree.tree, #result##0:mytree.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -446,7 +446,7 @@ node(?left##0:mytree.tree, ?key##0:wybe.int, ?right##0:mytree.tree, #result##0:m
 
 
 
-right > public {inline} (0 calls)
+proc right > public {inline} (0 calls)
 0: mytree.tree.right<0>
 right(#rec##0:mytree.tree, ?#result##0:mytree.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -461,7 +461,7 @@ right(#rec##0:mytree.tree, ?#result##0:mytree.tree, ?#success##0:wybe.bool)<{}; 
         foreign lpvm access(~#rec##0:mytree.tree, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:mytree.tree) @mytree:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-right > public {inline} (0 calls)
+proc right > public {inline} (0 calls)
 1: mytree.tree.right<1>
 right(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:mytree.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -478,7 +478,7 @@ right(#rec##0:mytree.tree, ?#rec##1:mytree.tree, #field##0:mytree.tree, ?#succes
 
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: mytree.tree.~=<0>
 ~=(#left##0:mytree.tree, #right##0:mytree.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

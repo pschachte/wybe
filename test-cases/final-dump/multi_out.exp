@@ -17,7 +17,7 @@ module top-level code > public {inline,semipure} (0 calls)
   InterestingCallProperties: []
 
 
-onetwothree > public {inline} (1 calls)
+proc onetwothree > public {inline} (1 calls)
 0: multi_out.onetwothree<0>
 onetwothree(?x##0:wybe.int, ?y##0:wybe.int, ?z##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []

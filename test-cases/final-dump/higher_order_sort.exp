@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-insert > (2 calls)
+proc insert > (2 calls)
 0: higher_order_sort.insert<0>
 insert(<=##0:(X, X, ?wybe.bool) <{}; {}; {0}>, x##0:X <{}; {}; {1}>, xs##0:wybe.list(X) <{}; {}; {2}>, outByReference xs##1:wybe.list(X) <{}; {}; {0, 1, 2}>)<{}; {}; {}>:
   AliasPairs: [(xs##0,xs##1)]
@@ -40,7 +40,7 @@ insert(<=##0:(X, X, ?wybe.bool) <{}; {}; {0}>, x##0:X <{}; {}; {1}>, xs##0:wybe.
 
 
 
-sort > {inline} (0 calls)
+proc sort > {inline} (0 calls)
 0: higher_order_sort.sort<0>
 sort(<=##0:(X, X, ?wybe.bool) <{}; {}; {0}>, xs##0:wybe.list(X) <{}; {}; {1}>, ?sorted##1:wybe.list(X) <{}; {}; {0, 1}>)<{}; {}; {}>:
   AliasPairs: []
@@ -48,7 +48,7 @@ sort(<=##0:(X, X, ?wybe.bool) <{}; {}; {0}>, xs##0:wybe.list(X) <{}; {}; {1}>, ?
     higher_order_sort.sort#cont#1<0>(~<=##0:(X, X, ?wybe.bool), 0:wybe.list(X), ~xs##0:wybe.list(X), ?sorted##1:wybe.list(X)) #1 @higher_order_sort:nn:nn
 
 
-sort#cont#1 > (2 calls)
+proc sort#cont#1 > (2 calls)
 0: higher_order_sort.sort#cont#1<0>
 sort#cont#1(<=##0:(X, X, ?wybe.bool) <{}; {}; {0}>, sorted##0:wybe.list(X) <{}; {}; {1}>, tmp#1##0:wybe.list(X) <{}; {}; {2}>, ?sorted##2:wybe.list(X) <{}; {}; {0, 1, 2}>)<{}; {}; {}>:
   AliasPairs: [(sorted##0,sorted##2)]

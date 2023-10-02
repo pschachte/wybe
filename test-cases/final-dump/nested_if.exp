@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-nested_if > public (0 calls)
+proc nested_if > public (0 calls)
 0: nested_if.nested_if<0>
 nested_if(i##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

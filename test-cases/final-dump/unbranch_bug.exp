@@ -17,21 +17,21 @@ module top-level code > public {inline,semipure} (0 calls)
     unbranch_bug.#cont#3<0>(0:wybe.list(5))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @unbranch_bug:nn:nn
 
 
-#cont#1 > {inline} (1 calls)
+proc #cont#1 > {inline} (1 calls)
 0: unbranch_bug.#cont#1<0>
 #cont#1()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
 
 
-#cont#2 > {inline} (1 calls)
+proc #cont#2 > {inline} (1 calls)
 0: unbranch_bug.#cont#2<0>
 #cont#2()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
 
 
-#cont#3 > (2 calls)
+proc #cont#3 > (2 calls)
 0: unbranch_bug.#cont#3<0>
 #cont#3(tmp#0##0:wybe.list(5) <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

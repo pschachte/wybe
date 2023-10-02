@@ -24,7 +24,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#0##0:wybe.int, <<out_only_global_flow.res>>:wybe.int) @out_only_global_flow:nn:nn
 
 
-out > {noinline} (1 calls)
+proc out > {noinline} (1 calls)
 0: out_only_global_flow.out<0>
 out()<{}; {<<out_only_global_flow.res>>}; {}>:
   AliasPairs: []

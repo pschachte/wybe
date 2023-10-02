@@ -23,7 +23,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-eq > {noinline} (1 calls)
+proc eq > {noinline} (1 calls)
 0: inline_rename.eq<0>
 eq(x##0:wybe.int, ?y##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -31,7 +31,7 @@ eq(x##0:wybe.int, ?y##0:wybe.int)<{}; {}; {}>:
     foreign llvm move(~x##0:wybe.int, ?y##0:wybe.int) @inline_rename:nn:nn
 
 
-foo > {inline} (1 calls)
+proc foo > {inline} (1 calls)
 0: inline_rename.foo<0>
 foo(?bar##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

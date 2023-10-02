@@ -32,7 +32,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-#cont#1 > (2 calls)
+proc #cont#1 > (2 calls)
 0: type_generics.#cont#1<0>
 #cont#1([x##0:wybe.float])<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -51,7 +51,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-#cont#2 > (2 calls)
+proc #cont#2 > (2 calls)
 0: type_generics.#cont#2<0>
 #cont#2([x##0:wybe.float])<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -70,7 +70,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-#cont#3 > (2 calls)
+proc #cont#3 > (2 calls)
 0: type_generics.#cont#3<0>
 #cont#3([x##0:wybe.float])<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -89,7 +89,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-#cont#4 > (2 calls)
+proc #cont#4 > (2 calls)
 0: type_generics.#cont#4<0>
 #cont#4()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -108,7 +108,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-#cont#5 > (2 calls)
+proc #cont#5 > (2 calls)
 0: type_generics.#cont#5<0>
 #cont#5()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -125,7 +125,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-foo > (12 calls)
+proc foo > (12 calls)
 0: type_generics.foo<0>
 foo(x##0:T <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -140,7 +140,7 @@ foo(x##0:T <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-foo2 > (18 calls)
+proc foo2 > (18 calls)
 0: type_generics.foo2<0>
 foo2(x##0:T0 <{}; {}; {0}>, ?y##0:T0 <{}; {}; {0}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

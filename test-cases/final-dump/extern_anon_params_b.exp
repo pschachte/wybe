@@ -10,7 +10,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-need > public {inline,semipure} (1 calls)
+proc need > public {inline,semipure} (1 calls)
 0: extern_anon_params_a.need<0>
 need(stmt##0:{impure}())<{}; {}; {}>:
   AliasPairs: []
@@ -18,7 +18,7 @@ need(stmt##0:{impure}())<{}; {}; {}>:
     ~stmt##0:{impure}() #0 @extern_anon_params_a:nn:nn
 
 
-run > public {inline,impure} (0 calls)
+proc run > public {inline,impure} (0 calls)
 0: extern_anon_params_a.run<0>
 run(func##0:{impure}())<{}; {}; {}>:
   AliasPairs: []
@@ -26,13 +26,13 @@ run(func##0:{impure}())<{}; {}; {}>:
     extern_anon_params_a.run#anon#1<0>(~^func##0:{impure}()) #0 @extern_anon_params_a:nn:nn
 
 
-run#anon#1 > {inline,impure} (1 calls)
+proc run#anon#1 > {inline,impure} (1 calls)
 0: extern_anon_params_a.run#anon#1<0>
 run#anon#1(^func##0:{impure}())<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     ~func##0:{impure}() #0 @extern_anon_params_a:nn:nn
-run#anon#1 > {inline,impure} (1 calls)
+proc run#anon#1 > {inline,impure} (1 calls)
 1: extern_anon_params_a.run#anon#1<1>
 run#anon#1(^func##0:{impure}())<{}; {}; {}>:
   AliasPairs: []
@@ -110,12 +110,12 @@ module top-level code > public {inline,semipure} (0 calls)
     extern_anon_params_a.run#anon#1<0>(extern_anon_params_b.#anon#1<1><>:{impure}()) #1 @extern_anon_params_a:nn:nn
 
 
-#anon#1 > {inline,impure} (1 calls)
+proc #anon#1 > {inline,impure} (1 calls)
 0: extern_anon_params_b.#anon#1<0>
 #anon#1()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-#anon#1 > {inline,impure} (1 calls)
+proc #anon#1 > {inline,impure} (1 calls)
 1: extern_anon_params_b.#anon#1<1>
 #anon#1()<{}; {}; {}>:
   AliasPairs: []

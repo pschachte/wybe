@@ -20,7 +20,7 @@ module top-level code > public {inline,semipure} (0 calls)
     wybe.string.print<0>(~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @exp_if:nn:nn
 
 
-if_test > public (1 calls)
+proc if_test > public (1 calls)
 0: exp_if.if_test<0>
 if_test(x##0:wybe.int, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasPairs: []

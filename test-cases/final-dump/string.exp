@@ -113,7 +113,7 @@ module top-level code > public {semipure} (0 calls)
     string.test_index<0>(~tmp#25##0:wybe.string, 1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #61 @string:nn:nn
 
 
-print_loop > {inline} (2 calls)
+proc print_loop > {inline} (2 calls)
 0: string.print_loop<0>
 print_loop(s##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -121,7 +121,7 @@ print_loop(s##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     string.print_loop#cont#1<0>(~s##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @string:nn:nn
 
 
-print_loop#cont#1 > (2 calls)
+proc print_loop#cont#1 > (2 calls)
 0: string.print_loop#cont#1<0>[410bae77d3]
 print_loop#cont#1(tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -156,7 +156,7 @@ print_loop#cont#1(tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 
 
 
-test_index > (13 calls)
+proc test_index > (13 calls)
 0: string.test_index<0>
 test_index(s##0:wybe.string, i##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

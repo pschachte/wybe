@@ -17,7 +17,7 @@ module top-level code > public {inline,semipure} (0 calls)
     simple_loop.#cont#1<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @simple_loop:nn:nn
 
 
-#cont#1 > (2 calls)
+proc #cont#1 > (2 calls)
 0: simple_loop.#cont#1<0>
 #cont#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

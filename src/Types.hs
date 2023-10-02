@@ -96,8 +96,8 @@ validateParamType pname ppos public param = do
 checkDeclIfPublic :: Ident -> OptPos -> Bool -> TypeSpec -> Compiler ()
 checkDeclIfPublic pname ppos public ty =
     when (public && ty == AnyType) $
-         message Error ("Public proc '" ++ pname ++
-                        "' with undeclared parameter or return type") ppos
+         message Error ("Public proc " ++ pname ++
+                        " with undeclared parameter or return type") ppos
 
 
 ----------------------------------------------------------------
@@ -255,14 +255,14 @@ data TypeError = ReasonMessage Message
                    -- ^ Expression does not have correct higher type
                | ReasonPartialFlow ProcName ProcName Int FlowDirection OptPos
                    -- ^ ProcSpec does not have the correct type, in context
-               | ReasonDeterminism String Determinism Determinism OptPos
-                   -- ^Calling a proc in a more deterministic context
+               | ReasonDeterminism String Ident Determinism Determinism OptPos
+                   -- ^Calling a proc or HO term in a more deterministic context
                | ReasonWeakDetism String Determinism Determinism OptPos
                    -- ^Actual determinism of proc body weaker than declared
-               | ReasonPurity String Impurity Impurity OptPos
-                   -- ^Calling a proc or foreign in a more pure context
-               | ReasonLooksPure ProcName Impurity OptPos
-                   -- ^Calling a not-pure proc without ! marker
+               | ReasonPurity String Ident Impurity Impurity OptPos
+                   -- ^Calling a proc or HO term or foreign in a more pure context
+               | ReasonLooksPure String ProcName Impurity OptPos
+                   -- ^Calling a not-pure proc or HO term without ! marker
                | ReasonForeignLanguage String String OptPos
                    -- ^Foreign call with bogus language
                | ReasonForeignArgType String Int OptPos
@@ -300,8 +300,8 @@ data TypeError = ReasonMessage Message
                    -- ^Type constraint on exp is invalid
                | ReasonShouldnt
                    -- ^This error should never happen
-               | ReasonActuallyPure ProcName Impurity OptPos
-                   -- ^Calling a pure proc with unneeded ! marker
+               | ReasonActuallyPure String ProcName Impurity OptPos
+                   -- ^Calling a pure proc or HO term with unneeded ! marker
             --    | ReasonUndeclaredTerminal ProcName OptPos
             --        -- ^The proc is terminal but not declared so
                | ReasonUnnreachable ProcName OptPos
@@ -322,23 +322,23 @@ typeErrorMessage (ReasonParam name num pos) =
         ", parameter " ++ show num
 typeErrorMessage (ReasonOutputUndef proc param pos) =
     Message Error pos $
-        "Output parameter " ++ param ++ " not defined by proc "
+        "Output parameter " ++ param ++ " not defined by "
         ++ showProcName proc
 typeErrorMessage (ReasonArgType isPartial name num pos) =
     Message Error pos $
         "Type error in " ++
         (if isPartial then "partial application of " else "call to ")
-        ++ name ++ ", argument " ++ show num
+        ++ showProcName name ++ ", argument " ++ show num
 typeErrorMessage (ReasonCond pos) =
     Message Error pos
         "Conditional or test expression with non-boolean result"
 typeErrorMessage (ReasonArgFlow name num pos) =
     Message Error pos $
-        "Uninitialised argument in call to " ++ name
+        "Uninitialised argument in call to " ++ showProcName name
         ++ ", argument " ++ show num
 typeErrorMessage (ReasonUndefinedFlow name pos) =
     Message Error pos $
-        "No matching mode in call to " ++ name
+        "No matching mode in call to " ++ showProcName name
 typeErrorMessage (ReasonOverload infos pos) =
     Message Error pos $
         "Ambiguous overloading: call could refer to:" ++
@@ -351,23 +351,24 @@ typeErrorMessage (ReasonWarnMultipleMatches match rest pos) =
         ++ "\nDefaulting to: " ++ show (fiProc match)
 typeErrorMessage (ReasonAmbig procName pos varAmbigs) =
     Message Error pos $
-        "Type ambiguity in defn of " ++ procName ++ ":" ++
+        "Type ambiguity in defn of " ++ showProcName procName ++ ":" ++
         concat ["\n    Variable '" ++ v ++ "' could be: " ++
                 intercalate ", " (List.map show typs)
                 | (v,typs) <- varAmbigs]
 typeErrorMessage (ReasonUndef callFrom callTo pos) =
     Message Error pos $
-        "'" ++ callTo ++ "' unknown in " ++ showProcName callFrom
+        showProcName callTo ++ " unknown in " ++ showProcName callFrom
 typeErrorMessage (ReasonArity callFrom callTo pos callArity procArity) =
     Message Error pos $
         "Call from " ++ showProcName callFrom
-        ++ " to " ++ callTo ++ " with " ++
+        ++ " to " ++ showProcName callTo ++ " with " ++
         (if callArity == procArity
             then "unsupported argument flow"
             else show callArity ++ " argument(s), expected " ++ show procArity)
 typeErrorMessage (ReasonUndeclared name pos) =
     Message Error pos $
-        "Public definition of '" ++ name ++ "' with some undeclared types."
+        "Public definition of " ++ showProcName name
+        ++ " with some undeclared types."
 typeErrorMessage (ReasonEqual exp1 exp2 pos) =
     Message Error pos $
         "Type of " ++ show exp2 ++ " incompatible with " ++ show exp1
@@ -387,24 +388,25 @@ typeErrorMessage (ReasonHigherFlow callFrom callTo idx flow expected pos) =
         ++ showFlowName expected ++ " flow."
 typeErrorMessage (ReasonPartialFlow from to idx flow pos) =
     Message Error pos $
-        "Partial application of " ++ to ++ " in "
+        "Partial application of " ++ showProcName to ++ " in "
         ++ showProcName from ++ " has flow " ++ flowPrefix flow
         ++ " but should be an input."
-typeErrorMessage (ReasonDeterminism name stmtDetism contextDetism pos) =
+typeErrorMessage (ReasonDeterminism kind name stmtDetism contextDetism pos) =
     Message Error pos $
-        "Calling " ++ determinismFullName stmtDetism ++ " " ++ name
+        "Calling " ++ determinismFullName stmtDetism ++ " " ++ showProcIdentifier kind name
         ++ " in a " ++ determinismFullName contextDetism ++ " context"
 typeErrorMessage (ReasonWeakDetism name actualDetism expectedDetism pos) =
     Message Error pos $
         name ++ " has " ++ determinismFullName actualDetism
         ++ " determinism, but declared " ++ determinismFullName expectedDetism
-typeErrorMessage (ReasonPurity descrip stmtPurity contextPurity pos) =
+typeErrorMessage (ReasonPurity kind name stmtPurity contextPurity pos) =
     Message Error pos $
-        "Calling " ++ impurityFullName stmtPurity ++ " " ++ descrip
+        "Calling " ++ impurityFullName stmtPurity ++ " "
+        ++ showProcIdentifier kind name
         ++ ", expecting at least " ++ impurityFullName contextPurity
-typeErrorMessage (ReasonLooksPure name impurity pos) =
+typeErrorMessage (ReasonLooksPure kind name impurity pos) =
     Message Error pos $
-        "Calling " ++ impurityFullName impurity ++ " " ++ name
+        "Calling " ++ impurityFullName impurity ++ " " ++ showProcIdentifier kind name
         ++ " without ! non-purity marker"
 typeErrorMessage (ReasonForeignLanguage lang instr pos) =
     Message Error pos $
@@ -429,13 +431,15 @@ typeErrorMessage (ReasonResourceDef name res pos) =
         ", resource " ++ show res
 typeErrorMessage (ReasonResourceUndef proc res pos) =
     Message Error pos $
-        "Output resource " ++ res ++ " not defined by proc " ++ proc
+        "Output resource " ++ res ++ " not defined by " ++ showProcName proc
 typeErrorMessage (ReasonResourceUnavail proc res pos) =
     Message Error pos $
-        "Input resource " ++ res ++ " not available at call to proc " ++ proc
+        "Input resource " ++ res ++ " not available at call to "
+        ++ showProcName proc
 typeErrorMessage (ReasonResourceOutOfScope proc res pos) =
     Message Error pos $
-        "Resource " ++ show res ++ " not in scope at call to proc " ++ proc
+        "Resource " ++ show res ++ " not in scope at call to "
+        ++ showProcName proc
 typeErrorMessage (ReasonUseType res pos) =
     Message Error pos $
         "Inconsistent type of resource " ++ show res ++ " in use statement"
@@ -461,14 +465,15 @@ typeErrorMessage (ReasonBadCast caller callee argNum pos) =
         ++ " to non-foreign " ++ callee ++ ", argument " ++ show argNum
 typeErrorMessage (ReasonBadConstraint caller callee argNum exp ty pos) =
     Message Error pos $
-        "Type constraint (:" ++ show ty ++ ") in call from " ++ showProcName caller
+        "Type constraint (:" ++ show ty ++ ") in call from "
+        ++ showProcName caller
         ++ " to " ++ callee ++ ", argument " ++ show argNum
         ++ ", is incompatible with expression " ++ show exp
 typeErrorMessage ReasonShouldnt =
     Message Error Nothing "Mysterious typing error"
-typeErrorMessage (ReasonActuallyPure name impurity pos) =
+typeErrorMessage (ReasonActuallyPure kind name impurity pos) =
     Message Warning pos $
-        "Calling " ++ showProcName name ++ " with unneeded ! marker"
+        "Calling " ++ showProcIdentifier kind name ++ " with unneeded ! marker"
 -- XXX These won't work until we better infer terminalness
 -- typeErrorMessage (ReasonUndeclaredTerminal name pos) =
 --     Message Warning pos $
@@ -498,10 +503,10 @@ typeErrorPos (ReasonExpType _ _ pos) = pos
 typeErrorPos (ReasonHigher _ _ pos) = pos
 typeErrorPos (ReasonHigherFlow _ _ _ _ _ pos) = pos
 typeErrorPos (ReasonPartialFlow _ _ _ _ pos) = pos
-typeErrorPos (ReasonDeterminism _ _ _ pos) = pos
+typeErrorPos (ReasonDeterminism _ _ _ _ pos) = pos
 typeErrorPos (ReasonWeakDetism _ _ _ pos) = pos
-typeErrorPos (ReasonPurity _ _ _ pos) = pos
-typeErrorPos (ReasonLooksPure _ _ pos) = pos
+typeErrorPos (ReasonPurity _ _ _ _ pos) = pos
+typeErrorPos (ReasonLooksPure _ _ _ pos) = pos
 typeErrorPos (ReasonForeignLanguage _ _ pos) = pos
 typeErrorPos (ReasonForeignArgType _ _ pos) = pos
 typeErrorPos (ReasonForeignArity _ _ _ pos) = pos
@@ -519,7 +524,7 @@ typeErrorPos (ReasonForeignArgRep _ _ _ _ pos) = pos
 typeErrorPos (ReasonBadCast _ _ _ pos) = pos
 typeErrorPos (ReasonBadConstraint _ _ _ _ _ pos) = pos
 typeErrorPos ReasonShouldnt = Nothing
-typeErrorPos (ReasonActuallyPure _ _ pos) = pos
+typeErrorPos (ReasonActuallyPure _ _ _ pos) = pos
 typeErrorPos (ReasonUnnreachable _ pos) = pos
 
 
@@ -1956,7 +1961,7 @@ infoDescription info = show info
 modecheckStmts :: ModSpec -> ProcName -> OptPos -> BindingState -> Determinism
                -> Bool -> [Placed Stmt] -> Typed ([Placed Stmt],BindingState)
 modecheckStmts _ name pos assigned detism final [] = do
-    logTyped $ "Mode check end of " ++ show detism ++ " proc '" ++ name ++ "'"
+    logTyped $ "Mode check end of " ++ show detism ++ " proc " ++ showProcName name
     when final
         $ typeErrors $ detismCheck name pos detism $ bindingDetism assigned
     return ([],assigned)
@@ -2098,11 +2103,11 @@ modecheckStmt m name defPos assigned detism final
             let actualImpurity = flagsImpurity flags
             let impurity = bindingImpurity assigned
             let stmtDetism = flagsDetism flags
-            let foreignIdent = "foreign " ++ cname
-            let errs = [ReasonDeterminism foreignIdent stmtDetism detism pos
+            let kind = "foreign proc"
+            let errs = [ReasonDeterminism kind cname stmtDetism detism pos
                        | Det `determinismLEQ` detism
                          && not (stmtDetism `determinismLEQ` detism)]
-                       ++ [ReasonPurity foreignIdent actualImpurity impurity pos
+                       ++ [ReasonPurity kind cname actualImpurity impurity pos
                           | actualImpurity > impurity]
             typeErrors errs
             let args'' = zipWith setPExpTypeFlow typeflows args'
@@ -2425,25 +2430,27 @@ finaliseCall m name defPos assigned detism resourceful final pos args
     modecheckStmt m name defPos assigned detism final (TestBool exp) pos
 
 
-detismPurityErrors :: OptPos -> String -> String
+-- |Report assorted purity errors in the named proc.  If isHO is true, then
+-- the proc name is actually a HO variable used for the call, otherwise it's
+-- the real proc name.
+detismPurityErrors :: OptPos -> String -> Ident
                    -> Determinism -> Impurity -> Bool
                    -> Determinism -> Impurity -> Bool -> [TypeError]
-detismPurityErrors pos prefix name contextDetism contextImpurity
+detismPurityErrors pos kind name contextDetism contextImpurity
     banged detism impurity usesResources =
     -- XXX Should postpone detism errors until we see if we
     -- can work out if the test is certain to succeed.
     -- Perhaps add mutual exclusion inference to the mode
     -- checker.
-    [ReasonDeterminism prefixedName detism contextDetism pos
+    [ReasonDeterminism kind name detism contextDetism pos
     | Det `determinismLEQ` contextDetism
         && not (detism `determinismLEQ` contextDetism)]
-    ++ [ReasonPurity prefixedName impurity contextImpurity pos
+    ++ [ReasonPurity kind name impurity contextImpurity pos
         | impurity > contextImpurity]
-    ++ [ReasonLooksPure prefixedName impurity pos
+    ++ [ReasonLooksPure kind name impurity pos
         | impurity > Pure && not banged]
-    ++ [ReasonActuallyPure prefixedName impurity pos
+    ++ [ReasonActuallyPure kind name impurity pos
         | impurity == Pure && banged && not usesResources]
-  where prefixedName = prefix ++ " " ++ name
 
 
 matchArguments :: [TypeFlow] -> [Placed Exp] -> Typed ([Placed Exp],[Placed Stmt])

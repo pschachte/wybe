@@ -20,7 +20,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
 
 
-#closure#1 > {inline} (1 calls)
+proc #closure#1 > {inline} (1 calls)
 0: uneeded_closure_args.#closure#1<0>
 #closure#1([^a##0:A <{}; {}; {0}>], b##0:B <{}; {}; {1}>, ?#result##0:B <{}; {}; {1}>)<{}; {}; {}>:
   AliasPairs: []
@@ -28,7 +28,7 @@ module top-level code > public {semipure} (0 calls)
     foreign llvm move(~b##0:B, ?#result##0:B) @uneeded_closure_args:nn:nn
 
 
-call > {noinline} (1 calls)
+proc call > {noinline} (1 calls)
 0: uneeded_closure_args.call<0>
 call(f##0:(A, ?A) <{}; {}; {0}>, a##0:A <{}; {}; {1}>, ?#result##0:A <{}; {}; {0, 1}>)<{}; {}; {}>:
   AliasPairs: []
@@ -36,7 +36,7 @@ call(f##0:(A, ?A) <{}; {}; {0}>, a##0:A <{}; {}; {1}>, ?#result##0:A <{}; {}; {0
     ~f##0:(A, ?A)(~a##0:A, ?#result##0:A) #0 @uneeded_closure_args:nn:nn
 
 
-second > {inline} (1 calls)
+proc second > {inline} (1 calls)
 0: uneeded_closure_args.second<0>
 second([a##0:A <{}; {}; {0}>], b##0:B <{}; {}; {1}>, ?#result##0:B <{}; {}; {1}>)<{}; {}; {}>:
   AliasPairs: []

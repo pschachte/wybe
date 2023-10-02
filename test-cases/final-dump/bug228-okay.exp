@@ -22,7 +22,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-bar > {inline} (1 calls)
+proc bar > {inline} (1 calls)
 0: bug228-okay.bar<0>
 bar(?out1##0:wybe.int, ?out2##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -33,7 +33,7 @@ bar(?out1##0:wybe.int, ?out2##0:wybe.int)<{}; {}; {}>:
     foreign llvm move(1:wybe.int, ?out1##0:wybe.int) @bug228-okay:11:6
 
 
-init_res > {inline} (1 calls)
+proc init_res > {inline} (1 calls)
 0: bug228-okay.init_res<0>
 init_res()<{}; {<<bug228-okay.res>>}; {}>:
   AliasPairs: []

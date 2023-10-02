@@ -27,7 +27,7 @@ module top-level code > public {semipure} (0 calls)
     wybe.string.print<0>("\astring with hex character escapes!\n":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @char-escape:23:2
 
 
-test > (10 calls)
+proc test > (10 calls)
 0: char-escape.test<0>
 test(ch##0:wybe.char, code##0:wybe.int, name##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

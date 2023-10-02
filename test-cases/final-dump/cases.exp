@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-len > (1 calls)
+proc len > (1 calls)
 0: cases.len<0>
 len(lst##0:wybe.list(T) <{}; {}; {0}>, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -26,7 +26,7 @@ len(lst##0:wybe.list(T) <{}; {}; {0}>, ?#result##0:wybe.int)<{}; {}; {}>:
 
 
 
-len2 > (1 calls)
+proc len2 > (1 calls)
 0: cases.len2<0>
 len2(lst##0:wybe.list(T) <{}; {}; {0}>, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
