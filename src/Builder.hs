@@ -233,7 +233,7 @@ import           Transform                 (transformProc,
 import           Types                     (typeCheckModSCC,
                                             validateModExportTypes)
 import           Unbranch                  (unbranchProc)
-import           Util                      (sccElts, useLocalCacheFileIfPossible)
+import           Util                      (sccElts, useLocalCacheFileIfPossible, (&&&))
 import           Snippets
 import           Text.Parsec.Error
 import           BinaryFactory
@@ -935,6 +935,10 @@ isStdLib :: ModSpec -> Bool
 isStdLib []    = False
 isStdLib (m:_) = m == "wybe"
 
+-- | Filter for avoiding the command line module, which is currently hardcoded
+--   into the executable module
+isCmdLine :: ModSpec -> Bool
+isCmdLine = (==["command_line"])
 
 -- |A Processor processes the specified module one iteration in a
 --  context of mutual dependency among the list of modules.  It
@@ -1196,6 +1200,25 @@ orderedDependencies targetMod =
                 |> List.filter (\x -> x `notElem` List.map fst collected')
         visit remains collected'
 
+-- | Maps the topological order of a non-std and non-cmdline modspec
+type TopoMap = Map ModSpec Integer
+
+-- | Generate a mapping from a non-std lib and non-cmdline modspec
+--   to its topological order
+sccTopoMap :: [[ModSpec]] -> TopoMap
+sccTopoMap orderedSCCs =
+    Map.fromList
+        $ concat
+        $ zipWith (\order scc -> (,order) <$> scc) [0..]
+        $ List.filter (not . all isStdLib &&& not . all isCmdLine) orderedSCCs
+
+-- | Takes in a topomap (defined in sccTopoMap) and a modspec, then return the
+--   modspec's topological order
+modTopoOrder :: TopoMap -> ModSpec -> Integer
+modTopoOrder topoMap modSpec =
+    case Map.lookup modSpec topoMap of
+        Just order -> order
+        Nothing -> if isStdLib modSpec then -2 else -1
 
 -----------------------------------------------------------------------------
 -- Top-Down Pass for Multiple Specialization                               --
