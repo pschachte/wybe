@@ -30,7 +30,7 @@ module top-level code > public {semipure} (0 calls)
     int_sequence.#cont#1<0>[410bae77d3](~tmp#1##0:int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @int_sequence:nn:nn
 
 
-#cont#1 > (2 calls)
+proc #cont#1 > (2 calls)
 0: int_sequence.#cont#1<0>[410bae77d3]
 #cont#1(tmp#0##0:int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -61,7 +61,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-.. > public {inline} (2 calls)
+proc .. > public {inline} (2 calls)
 0: int_sequence...<0>
 ..(lower##0:wybe.int, upper##0:wybe.int, ?#result##0:int_sequence)<{}; {}; {}>:
   AliasPairs: []
@@ -69,7 +69,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm alloc(16:wybe.int, ?#rec##0:int_sequence) @int_sequence:nn:nn
     foreign lpvm mutate(~#rec##0:int_sequence, ?#rec##1:int_sequence, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~lower##0:wybe.int) @int_sequence:nn:nn
     foreign lpvm mutate(~#rec##1:int_sequence, ?#result##0:int_sequence, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~upper##0:wybe.int) @int_sequence:nn:nn
-.. > public {inline} (6 calls)
+proc .. > public {inline} (6 calls)
 1: int_sequence...<1>
 ..(?lower##0:wybe.int, ?upper##0:wybe.int, #result##0:int_sequence)<{}; {}; {}>:
   AliasPairs: []
@@ -78,7 +78,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm access(~#result##0:int_sequence, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?upper##0:wybe.int) @int_sequence:nn:nn
 
 
-= > public {inline} (1 calls)
+proc = > public {inline} (1 calls)
 0: int_sequence.=<0>
 =(#left##0:int_sequence, #right##0:int_sequence, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -97,7 +97,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-[|] > public (3 calls)
+proc [|] > public (3 calls)
 0: int_sequence.[|]<0>[785a827a1b]
 [|](?head##0:wybe.int, ?tail##0:int_sequence, seq##0:int_sequence, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -138,13 +138,13 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-lower > public {inline} (5 calls)
+proc lower > public {inline} (5 calls)
 0: int_sequence.lower<0>
 lower(#rec##0:int_sequence, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:int_sequence, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @int_sequence:nn:nn
-lower > public {inline} (0 calls)
+proc lower > public {inline} (0 calls)
 1: int_sequence.lower<1>
 lower(#rec##0:int_sequence, ?#rec##1:int_sequence, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -152,13 +152,13 @@ lower(#rec##0:int_sequence, ?#rec##1:int_sequence, #field##0:wybe.int)<{}; {}; {
     foreign lpvm {noalias} mutate(~#rec##0:int_sequence, ?#rec##1:int_sequence, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @int_sequence:nn:nn
 
 
-upper > public {inline} (4 calls)
+proc upper > public {inline} (4 calls)
 0: int_sequence.upper<0>
 upper(#rec##0:int_sequence, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:int_sequence, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @int_sequence:nn:nn
-upper > public {inline} (0 calls)
+proc upper > public {inline} (0 calls)
 1: int_sequence.upper<1>
 upper(#rec##0:int_sequence, ?#rec##1:int_sequence, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -166,7 +166,7 @@ upper(#rec##0:int_sequence, ?#rec##1:int_sequence, #field##0:wybe.int)<{}; {}; {
     foreign lpvm {noalias} mutate(~#rec##0:int_sequence, ?#rec##1:int_sequence, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @int_sequence:nn:nn
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: int_sequence.~=<0>
 ~=(#left##0:int_sequence, #right##0:int_sequence, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

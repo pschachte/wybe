@@ -11,21 +11,21 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-bar > public {inline} (1 calls)
+proc bar > public {inline} (1 calls)
 0: unique_conditional.bar<0>
 bar([a##0:unique_conditional])<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
 
 
-baz > public {inline} (1 calls)
+proc baz > public {inline} (1 calls)
 0: unique_conditional.baz<0>
 baz([a##0:unique_conditional])<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
 
 
-foo > (0 calls)
+proc foo > (0 calls)
 0: unique_conditional.foo<0>
 foo(b##0:wybe.bool, [a##0:unique_conditional])<{}; {}; {}>:
   AliasPairs: []

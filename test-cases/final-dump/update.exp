@@ -10,14 +10,14 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-inc2 > public {inline} (0 calls)
+proc inc2 > public {inline} (0 calls)
 0: update.inc2<0>
 inc2(x##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(~x##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int) @int:nn:nn
     foreign llvm add(~tmp#1##0:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @int:nn:nn
-inc2 > public {inline} (0 calls)
+proc inc2 > public {inline} (0 calls)
 1: update.inc2<1>
 inc2(?x##0:wybe.int, y##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []

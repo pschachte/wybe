@@ -17,7 +17,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-append > public (1 calls)
+proc append > public (1 calls)
 0: generic_list.append<0>
 append(x##0:generic_list(T) <{}; {}; {0}>, y##0:generic_list(T) <{}; {}; {1}>, outByReference #result##0:generic_list(T) <{}; {}; {0, 1}>)<{}; {}; {}>:
   AliasPairs: [(#result##0,y##0)]
@@ -38,7 +38,7 @@ append(x##0:generic_list(T) <{}; {}; {0}>, y##0:generic_list(T) <{}; {}; {1}>, o
 
 
 
-car > public {inline} (0 calls)
+proc car > public {inline} (0 calls)
 0: generic_list.car<0>
 car(#rec##0:generic_list(T) <{}; {}; {0}>, ?#result##0:T <{}; {}; {0}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -53,7 +53,7 @@ car(#rec##0:generic_list(T) <{}; {}; {0}>, ?#result##0:T <{}; {}; {0}>, ?#succes
         foreign lpvm access(~#rec##0:generic_list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:T) @generic_list:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-car > public {inline} (0 calls)
+proc car > public {inline} (0 calls)
 1: generic_list.car<1>
 car(#rec##0:generic_list(T) <{}; {}; {0}>, ?#rec##1:generic_list(T) <{}; {}; {0, 2}>, #field##0:T <{}; {}; {2}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -70,7 +70,7 @@ car(#rec##0:generic_list(T) <{}; {}; {0}>, ?#rec##1:generic_list(T) <{}; {}; {0,
 
 
 
-cdr > public {inline} (0 calls)
+proc cdr > public {inline} (0 calls)
 0: generic_list.cdr<0>
 cdr(#rec##0:generic_list(T) <{}; {}; {0}>, ?#result##0:generic_list(T) <{}; {}; {0}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -85,7 +85,7 @@ cdr(#rec##0:generic_list(T) <{}; {}; {0}>, ?#result##0:generic_list(T) <{}; {}; 
         foreign lpvm access(~#rec##0:generic_list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:generic_list(T)) @generic_list:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-cdr > public {inline} (0 calls)
+proc cdr > public {inline} (0 calls)
 1: generic_list.cdr<1>
 cdr(#rec##0:generic_list(T) <{}; {}; {0}>, ?#rec##1:generic_list(T) <{}; {}; {0, 2}>, #field##0:generic_list(T) <{}; {}; {2}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -102,7 +102,7 @@ cdr(#rec##0:generic_list(T) <{}; {}; {0}>, ?#rec##1:generic_list(T) <{}; {}; {0,
 
 
 
-cons > public {inline} (1 calls)
+proc cons > public {inline} (1 calls)
 0: generic_list.cons<0>
 cons(car##0:T <{}; {}; {0}>, cdr##0:generic_list(T) <{}; {}; {1}>, ?#result##0:generic_list(T) <{}; {}; {0, 1}>)<{}; {}; {}>:
   AliasPairs: []
@@ -110,7 +110,7 @@ cons(car##0:T <{}; {}; {0}>, cdr##0:generic_list(T) <{}; {}; {1}>, ?#result##0:g
     foreign lpvm alloc(16:wybe.int, ?#rec##0:generic_list(T)) @generic_list:nn:nn
     foreign lpvm mutate(~#rec##0:generic_list(T), ?#rec##1:generic_list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~car##0:T) @generic_list:nn:nn
     foreign lpvm mutate(~#rec##1:generic_list(T), ?#result##0:generic_list(T), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~cdr##0:generic_list(T)) @generic_list:nn:nn
-cons > public {inline} (6 calls)
+proc cons > public {inline} (6 calls)
 1: generic_list.cons<1>
 cons(?car##0:T <{}; {}; {2}>, ?cdr##0:generic_list(T) <{}; {}; {2}>, #result##0:generic_list(T) <{}; {}; {2}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -129,7 +129,7 @@ cons(?car##0:T <{}; {}; {2}>, ?cdr##0:generic_list(T) <{}; {}; {2}>, #result##0:
 
 
 
-length > public {inline} (0 calls)
+proc length > public {inline} (0 calls)
 0: generic_list.length<0>
 length(x##0:generic_list(T) <{}; {}; {0}>, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -137,7 +137,7 @@ length(x##0:generic_list(T) <{}; {}; {0}>, ?#result##0:wybe.int)<{}; {}; {}>:
     generic_list.length1<0>(~x##0:generic_list(T), 0:wybe.int, ?#result##0:wybe.int) #0 @generic_list:nn:nn
 
 
-length1 > (2 calls)
+proc length1 > (2 calls)
 0: generic_list.length1<0>
 length1(x##0:generic_list(T) <{}; {}; {0}>, acc##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -154,7 +154,7 @@ length1(x##0:generic_list(T) <{}; {}; {0}>, acc##0:wybe.int, ?#result##0:wybe.in
 
 
 
-nil > public {inline} (0 calls)
+proc nil > public {inline} (0 calls)
 0: generic_list.nil<0>
 nil(?#result##0:generic_list(T))<{}; {}; {}>:
   AliasPairs: []

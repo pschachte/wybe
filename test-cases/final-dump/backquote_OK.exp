@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-OK backquote use! > {inline} (0 calls)
+proc OK backquote use! > {inline} (0 calls)
 0: backquote_OK.OK backquote use!<0>
 OK backquote use!(?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []

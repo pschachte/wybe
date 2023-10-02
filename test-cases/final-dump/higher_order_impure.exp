@@ -22,19 +22,19 @@ module top-level code > public {inline,semipure} (0 calls)
     foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-#anon#1 > {inline,impure} (1 calls)
+proc #anon#1 > {inline,impure} (1 calls)
 0: higher_order_impure.#anon#1<0>
 #anon#1([^l2##0:wybe.list(wybe.int)])<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-#anon#1 > {inline,impure} (1 calls)
+proc #anon#1 > {inline,impure} (1 calls)
 1: higher_order_impure.#anon#1<1>
 #anon#1([^l2##0:wybe.list(wybe.int)])<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
 
 
-measure > public {inline,impure} (1 calls)
+proc measure > public {inline,impure} (1 calls)
 0: higher_order_impure.measure<0>
 measure(func##0:{impure}(), ?seconds_elapsed##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []

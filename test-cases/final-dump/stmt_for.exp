@@ -114,7 +114,7 @@ module top-level code > public {semipure} (0 calls)
     stmt_for.using_irange_reverse#cont#1<0>(~tmp#42##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #46 @stmt_for:nn:nn
 
 
-irange > public (2 calls)
+proc irange > public (2 calls)
 0: stmt_for.irange<0>
 irange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_for.int_sequence)<{}; {}; {}>:
   AliasPairs: []
@@ -137,7 +137,7 @@ irange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_
 
 
 
-multiple_generator > public (1 calls)
+proc multiple_generator > public (1 calls)
 0: stmt_for.multiple_generator<0>
 multiple_generator()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -163,7 +163,7 @@ multiple_generator()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     stmt_for.multiple_generator#cont#1<0>(~tmp#0##0:wybe.list(wybe.int), ~tmp#4##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @stmt_for:nn:nn
 
 
-multiple_generator#cont#1 > (2 calls)
+proc multiple_generator#cont#1 > (2 calls)
 0: stmt_for.multiple_generator#cont#1<0>
 multiple_generator#cont#1(tmp#8##0:wybe.list(wybe.int), tmp#9##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -193,7 +193,7 @@ multiple_generator#cont#1(tmp#8##0:wybe.list(wybe.int), tmp#9##0:wybe.list(wybe.
 
 
 
-semi_det_for_loop > public (0 calls)
+proc semi_det_for_loop > public (0 calls)
 0: stmt_for.semi_det_for_loop<0>
 semi_det_for_loop(?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -202,7 +202,7 @@ semi_det_for_loop(?#success##0:wybe.bool)<{}; {}; {}>:
     stmt_for.semi_det_for_loop#cont#1<0>(~tmp#1##0:stmt_for.int_sequence, ?#success##0:wybe.bool) #1 @stmt_for:nn:nn
 
 
-semi_det_for_loop#cont#1 > (2 calls)
+proc semi_det_for_loop#cont#1 > (2 calls)
 0: stmt_for.semi_det_for_loop#cont#1<0>
 semi_det_for_loop#cont#1(tmp#0##0:stmt_for.int_sequence, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -224,7 +224,7 @@ semi_det_for_loop#cont#1(tmp#0##0:stmt_for.int_sequence, ?#success##0:wybe.bool)
 
 
 
-shortest_generator_termination > public (1 calls)
+proc shortest_generator_termination > public (1 calls)
 0: stmt_for.shortest_generator_termination<0>
 shortest_generator_termination()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -250,7 +250,7 @@ shortest_generator_termination()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     stmt_for.shortest_generator_termination#cont#1<0>(~tmp#0##0:wybe.list(wybe.int), ~tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @stmt_for:nn:nn
 
 
-shortest_generator_termination#cont#1 > (2 calls)
+proc shortest_generator_termination#cont#1 > (2 calls)
 0: stmt_for.shortest_generator_termination#cont#1<0>
 shortest_generator_termination#cont#1(tmp#8##0:wybe.list(wybe.int), tmp#9##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -280,7 +280,7 @@ shortest_generator_termination#cont#1(tmp#8##0:wybe.list(wybe.int), tmp#9##0:wyb
 
 
 
-single_generator > public (1 calls)
+proc single_generator > public (1 calls)
 0: stmt_for.single_generator<0>
 single_generator()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -297,7 +297,7 @@ single_generator()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     stmt_for.single_generator#cont#1<0>(~tmp#0##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @stmt_for:nn:nn
 
 
-single_generator#cont#1 > (2 calls)
+proc single_generator#cont#1 > (2 calls)
 0: stmt_for.single_generator#cont#1<0>
 single_generator#cont#1(tmp#4##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -317,7 +317,7 @@ single_generator#cont#1(tmp#4##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.
 
 
 
-using_break > public (1 calls)
+proc using_break > public (1 calls)
 0: stmt_for.using_break<0>
 using_break()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -337,7 +337,7 @@ using_break()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     stmt_for.using_break#cont#1<0>(~tmp#0##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
 
-using_break#cont#1 > (2 calls)
+proc using_break#cont#1 > (2 calls)
 0: stmt_for.using_break#cont#1<0>
 using_break#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -363,7 +363,7 @@ using_break#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io
 
 
 
-using_irange > public {inline} (1 calls)
+proc using_irange > public {inline} (1 calls)
 0: stmt_for.using_irange<0>
 using_irange()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -372,7 +372,7 @@ using_irange()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     stmt_for.using_irange#cont#1<0>(~tmp#1##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @stmt_for:nn:nn
 
 
-using_irange#cont#1 > (2 calls)
+proc using_irange#cont#1 > (2 calls)
 0: stmt_for.using_irange#cont#1<0>
 using_irange#cont#1(tmp#0##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -390,7 +390,7 @@ using_irange#cont#1(tmp#0##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io
 
 
 
-using_irange_reverse > public {inline} (1 calls)
+proc using_irange_reverse > public {inline} (1 calls)
 0: stmt_for.using_irange_reverse<0>
 using_irange_reverse()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -399,7 +399,7 @@ using_irange_reverse()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     stmt_for.using_irange_reverse#cont#1<0>(~tmp#1##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @stmt_for:nn:nn
 
 
-using_irange_reverse#cont#1 > (2 calls)
+proc using_irange_reverse#cont#1 > (2 calls)
 0: stmt_for.using_irange_reverse#cont#1<0>
 using_irange_reverse#cont#1(tmp#0##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -417,7 +417,7 @@ using_irange_reverse#cont#1(tmp#0##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<
 
 
 
-using_next > public (1 calls)
+proc using_next > public (1 calls)
 0: stmt_for.using_next<0>
 using_next()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -437,7 +437,7 @@ using_next()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     stmt_for.using_next#cont#1<0>(~tmp#0##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
 
-using_next#cont#1 > (3 calls)
+proc using_next#cont#1 > (3 calls)
 0: stmt_for.using_next#cont#1<0>
 using_next#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -464,7 +464,7 @@ using_next#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>
 
 
 
-using_unless > public (1 calls)
+proc using_unless > public (1 calls)
 0: stmt_for.using_unless<0>
 using_unless()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -484,7 +484,7 @@ using_unless()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     stmt_for.using_unless#cont#1<0>(~tmp#0##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
 
-using_unless#cont#1 > (3 calls)
+proc using_unless#cont#1 > (3 calls)
 0: stmt_for.using_unless#cont#1<0>
 using_unless#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -511,7 +511,7 @@ using_unless#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.i
 
 
 
-using_until > public (1 calls)
+proc using_until > public (1 calls)
 0: stmt_for.using_until<0>
 using_until()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -531,7 +531,7 @@ using_until()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     stmt_for.using_until#cont#1<0>(~tmp#0##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
 
-using_until#cont#1 > (2 calls)
+proc using_until#cont#1 > (2 calls)
 0: stmt_for.using_until#cont#1<0>
 using_until#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -557,7 +557,7 @@ using_until#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io
 
 
 
-using_when > public (1 calls)
+proc using_when > public (1 calls)
 0: stmt_for.using_when<0>
 using_when()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -577,7 +577,7 @@ using_when()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     stmt_for.using_when#cont#1<0>(~tmp#0##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
 
-using_when#cont#1 > (3 calls)
+proc using_when#cont#1 > (3 calls)
 0: stmt_for.using_when#cont#1<0>
 using_when#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -604,7 +604,7 @@ using_when#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>
 
 
 
-using_while > public (1 calls)
+proc using_while > public (1 calls)
 0: stmt_for.using_while<0>
 using_while()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -624,7 +624,7 @@ using_while()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     stmt_for.using_while#cont#1<0>(~tmp#0##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @stmt_for:nn:nn
 
 
-using_while#cont#1 > (2 calls)
+proc using_while#cont#1 > (2 calls)
 0: stmt_for.using_while#cont#1<0>
 using_while#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -650,7 +650,7 @@ using_while#cont#1(tmp#5##0:wybe.list(wybe.int))<{<<wybe.io.io>>}; {<<wybe.io.io
 
 
 
-using_xrange > public {inline} (1 calls)
+proc using_xrange > public {inline} (1 calls)
 0: stmt_for.using_xrange<0>
 using_xrange()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -659,7 +659,7 @@ using_xrange()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     stmt_for.using_xrange#cont#1<0>(~tmp#1##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @stmt_for:nn:nn
 
 
-using_xrange#cont#1 > (2 calls)
+proc using_xrange#cont#1 > (2 calls)
 0: stmt_for.using_xrange#cont#1<0>
 using_xrange#cont#1(tmp#0##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -677,7 +677,7 @@ using_xrange#cont#1(tmp#0##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io
 
 
 
-using_xrange_reverse > public {inline} (1 calls)
+proc using_xrange_reverse > public {inline} (1 calls)
 0: stmt_for.using_xrange_reverse<0>
 using_xrange_reverse()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -686,7 +686,7 @@ using_xrange_reverse()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     stmt_for.using_xrange_reverse#cont#1<0>(~tmp#1##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @stmt_for:nn:nn
 
 
-using_xrange_reverse#cont#1 > (2 calls)
+proc using_xrange_reverse#cont#1 > (2 calls)
 0: stmt_for.using_xrange_reverse#cont#1<0>
 using_xrange_reverse#cont#1(tmp#0##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -704,7 +704,7 @@ using_xrange_reverse#cont#1(tmp#0##0:stmt_for.int_sequence)<{<<wybe.io.io>>}; {<
 
 
 
-xrange > public (3 calls)
+proc xrange > public (3 calls)
 0: stmt_for.xrange<0>
 xrange(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_for.int_sequence)<{}; {}; {}>:
   AliasPairs: []
@@ -1666,7 +1666,7 @@ entry:
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls)
+proc = > public {inline} (1 calls)
 0: stmt_for.int_sequence.=<0>
 =(#left##0:stmt_for.int_sequence, #right##0:stmt_for.int_sequence, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -1694,7 +1694,7 @@ entry:
 
 
 
-[|] > public (0 calls)
+proc [|] > public (0 calls)
 0: stmt_for.int_sequence.[|]<0>
 [|](?value##0:wybe.int, ?rest##0:stmt_for.int_sequence, current##0:stmt_for.int_sequence, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -1730,7 +1730,7 @@ entry:
 
 
 
-[|]#cont#1 > (2 calls)
+proc [|]#cont#1 > (2 calls)
 0: stmt_for.int_sequence.[|]#cont#1<0>
 [|]#cont#1(en##0:wybe.int, s##0:wybe.int, st##0:wybe.int, ?value##0:wybe.int, ?rest##0:stmt_for.int_sequence, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -1744,13 +1744,13 @@ entry:
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
-end > public {inline} (0 calls)
+proc end > public {inline} (0 calls)
 0: stmt_for.int_sequence.end<0>
 end(#rec##0:stmt_for.int_sequence, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:stmt_for.int_sequence, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @stmt_for:nn:nn
-end > public {inline} (0 calls)
+proc end > public {inline} (0 calls)
 1: stmt_for.int_sequence.end<1>
 end(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -1758,7 +1758,7 @@ end(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:wyb
     foreign lpvm {noalias} mutate(~#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @stmt_for:nn:nn
 
 
-int_sequence > public {inline} (1 calls)
+proc int_sequence > public {inline} (1 calls)
 0: stmt_for.int_sequence.int_sequence<0>
 int_sequence(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0:stmt_for.int_sequence)<{}; {}; {}>:
   AliasPairs: []
@@ -1767,7 +1767,7 @@ int_sequence(start##0:wybe.int, stride##0:wybe.int, end##0:wybe.int, ?#result##0
     foreign lpvm mutate(~#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~start##0:wybe.int) @stmt_for:nn:nn
     foreign lpvm mutate(~#rec##1:stmt_for.int_sequence, ?#rec##2:stmt_for.int_sequence, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~stride##0:wybe.int) @stmt_for:nn:nn
     foreign lpvm mutate(~#rec##2:stmt_for.int_sequence, ?#result##0:stmt_for.int_sequence, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~end##0:wybe.int) @stmt_for:nn:nn
-int_sequence > public {inline} (16 calls)
+proc int_sequence > public {inline} (16 calls)
 1: stmt_for.int_sequence.int_sequence<1>
 int_sequence(?start##0:wybe.int, ?stride##0:wybe.int, ?end##0:wybe.int, #result##0:stmt_for.int_sequence)<{}; {}; {}>:
   AliasPairs: []
@@ -1777,13 +1777,13 @@ int_sequence(?start##0:wybe.int, ?stride##0:wybe.int, ?end##0:wybe.int, #result#
     foreign lpvm access(~#result##0:stmt_for.int_sequence, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?end##0:wybe.int) @stmt_for:nn:nn
 
 
-start > public {inline} (0 calls)
+proc start > public {inline} (0 calls)
 0: stmt_for.int_sequence.start<0>
 start(#rec##0:stmt_for.int_sequence, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:stmt_for.int_sequence, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @stmt_for:nn:nn
-start > public {inline} (0 calls)
+proc start > public {inline} (0 calls)
 1: stmt_for.int_sequence.start<1>
 start(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -1791,13 +1791,13 @@ start(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:w
     foreign lpvm {noalias} mutate(~#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @stmt_for:nn:nn
 
 
-stride > public {inline} (0 calls)
+proc stride > public {inline} (0 calls)
 0: stmt_for.int_sequence.stride<0>
 stride(#rec##0:stmt_for.int_sequence, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:stmt_for.int_sequence, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @stmt_for:nn:nn
-stride > public {inline} (0 calls)
+proc stride > public {inline} (0 calls)
 1: stmt_for.int_sequence.stride<1>
 stride(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -1805,7 +1805,7 @@ stride(#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, #field##0:
     foreign lpvm {noalias} mutate(~#rec##0:stmt_for.int_sequence, ?#rec##1:stmt_for.int_sequence, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @stmt_for:nn:nn
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: stmt_for.int_sequence.~=<0>
 ~=(#left##0:stmt_for.int_sequence, #right##0:stmt_for.int_sequence, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

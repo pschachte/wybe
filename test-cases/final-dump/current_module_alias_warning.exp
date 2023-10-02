@@ -24,14 +24,14 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-toCelsius > public {noinline} (1 calls)
+proc toCelsius > public {noinline} (1 calls)
 0: current_module_alias_warning.toCelsius<0>
 toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm fsub(~f##0:wybe.float, 32.0:wybe.float, ?tmp#1##0:wybe.float) @float:nn:nn
     foreign llvm fdiv(~tmp#1##0:wybe.float, 1.8:wybe.float, ?#result##0:wybe.float) @float:nn:nn
-toCelsius > public {noinline} (0 calls)
+proc toCelsius > public {noinline} (0 calls)
 1: current_module_alias_warning.toCelsius<1>
 toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
@@ -92,7 +92,7 @@ entry:
   resources       : 
   procs           : 
 
-toCelsius > public {inline} (0 calls)
+proc toCelsius > public {inline} (0 calls)
 0: math.temperature.toCelsius<0>
 toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []

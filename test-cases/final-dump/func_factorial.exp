@@ -22,7 +22,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-factorial > public (2 calls)
+proc factorial > public (2 calls)
 0: func_factorial.factorial<0>
 factorial(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []

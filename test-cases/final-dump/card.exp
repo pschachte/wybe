@@ -58,7 +58,7 @@ module top-level code > public {inline,semipure} (0 calls)
     card.#cont#1<0>(~tmp#1##0:wybe.list(card.suit))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @card:nn:nn
 
 
-#cont#1 > (2 calls)
+proc #cont#1 > (2 calls)
 0: card.#cont#1<0>
 #cont#1(tmp#0##0:wybe.list(card.suit))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -75,7 +75,7 @@ module top-level code > public {inline,semipure} (0 calls)
 
 
 
-#cont#2 > (2 calls)
+proc #cont#2 > (2 calls)
 0: card.#cont#2<0>
 #cont#2(s##0:card.suit, tmp#0##0:wybe.list(card.suit), tmp#2##0:wybe.list(card.rank))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -98,7 +98,7 @@ module top-level code > public {inline,semipure} (0 calls)
 
 
 
-= > public {inline} (1 calls)
+proc = > public {inline} (1 calls)
 0: card.=<0>
 =(#left##0:card, #right##0:card, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -106,14 +106,14 @@ module top-level code > public {inline,semipure} (0 calls)
     foreign llvm icmp_eq(~#left##0:card, ~#right##0:card, ?#success##0:wybe.bool)
 
 
-card > public {inline} (1 calls)
+proc card > public {inline} (1 calls)
 0: card.card<0>
 card(rank##0:card.rank, suit##0:card.suit, ?#result##3:card)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm shl(~rank##0:card, 2:card, ?#temp##0:card) @card:nn:nn
     foreign llvm or(~#temp##0:card, ~suit##0:card, ?#result##3:card) @card:nn:nn
-card > public {inline} (0 calls)
+proc card > public {inline} (0 calls)
 1: card.card<1>
 card(?rank##0:card.rank, ?suit##0:card.suit, #result##0:card)<{}; {}; {}>:
   AliasPairs: []
@@ -125,7 +125,7 @@ card(?rank##0:card.rank, ?suit##0:card.suit, #result##0:card)<{}; {}; {}>:
     foreign lpvm cast(~#temp2##1:card, ?suit##0:card.suit) @card:nn:nn
 
 
-print > public (1 calls)
+proc print > public (1 calls)
 0: card.print<0>
 print(c##0:card)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -139,7 +139,7 @@ print(c##0:card)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     card.suit.print<0>(~tmp#1##0:card.suit)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @card:nn:nn
 
 
-rank > public {inline} (1 calls)
+proc rank > public {inline} (1 calls)
 0: card.rank<0>
 rank(#rec##0:card, ?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -147,7 +147,7 @@ rank(#rec##0:card, ?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm lshr(~#rec##0:card, 2:card, ?#rec##1:card) @card:nn:nn
     foreign llvm and(~#rec##1:card, 15:card, ?#field##0:card) @card:nn:nn
     foreign lpvm cast(~#field##0:card, ?#result##0:card.rank) @card:nn:nn
-rank > public {inline} (0 calls)
+proc rank > public {inline} (0 calls)
 1: card.rank<1>
 rank(#rec##0:card, ?#rec##2:card, #field##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -157,14 +157,14 @@ rank(#rec##0:card, ?#rec##2:card, #field##0:card.rank)<{}; {}; {}>:
     foreign llvm or(~#rec##1:card, ~#temp##0:card, ?#rec##2:card) @card:nn:nn
 
 
-suit > public {inline} (1 calls)
+proc suit > public {inline} (1 calls)
 0: card.suit<0>
 suit(#rec##0:card, ?#result##0:card.suit)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm and(~#rec##0:card, 3:card, ?#field##0:card) @card:nn:nn
     foreign lpvm cast(~#field##0:card, ?#result##0:card.suit) @card:nn:nn
-suit > public {inline} (0 calls)
+proc suit > public {inline} (0 calls)
 1: card.suit<1>
 suit(#rec##0:card, ?#rec##2:card, #field##0:card.suit)<{}; {}; {}>:
   AliasPairs: []
@@ -173,7 +173,7 @@ suit(#rec##0:card, ?#rec##2:card, #field##0:card.suit)<{}; {}; {}>:
     foreign llvm or(~#field##0:card, ~#rec##1:card, ?#rec##2:card) @card:nn:nn
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: card.~=<0>
 ~=(#left##0:card, #right##0:card, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -361,7 +361,7 @@ entry:
   resources       : 
   procs           : 
 
-= > public {inline} (106 calls)
+proc = > public {inline} (106 calls)
 0: card.rank.=<0>
 =(#left##0:card.rank, #right##0:card.rank, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -369,7 +369,7 @@ entry:
     foreign llvm icmp_eq(~#left##0:card.rank, ~#right##0:card.rank, ?#success##0:wybe.bool)
 
 
-ace > public {inline} (3 calls)
+proc ace > public {inline} (3 calls)
 0: card.rank.ace<0>
 ace(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -377,7 +377,7 @@ ace(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(12:card.rank, ?#result##0:card.rank)
 
 
-char > public (1 calls)
+proc char > public (1 calls)
 0: card.rank.char<0>
 char(r##0:card.rank, ?#result##0:wybe.char)<{}; {}; {}>:
   AliasPairs: []
@@ -424,7 +424,7 @@ char(r##0:card.rank, ?#result##0:wybe.char)<{}; {}; {}>:
 
 
 
-jack > public {inline} (6 calls)
+proc jack > public {inline} (6 calls)
 0: card.rank.jack<0>
 jack(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -432,7 +432,7 @@ jack(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(9:card.rank, ?#result##0:card.rank)
 
 
-king > public {inline} (4 calls)
+proc king > public {inline} (4 calls)
 0: card.rank.king<0>
 king(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -440,7 +440,7 @@ king(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(11:card.rank, ?#result##0:card.rank)
 
 
-print > public {inline} (0 calls)
+proc print > public {inline} (0 calls)
 0: card.rank.print<0>
 print(r##0:card.rank)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -451,7 +451,7 @@ print(r##0:card.rank)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char:nn:nn
 
 
-queen > public {inline} (5 calls)
+proc queen > public {inline} (5 calls)
 0: card.rank.queen<0>
 queen(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -459,7 +459,7 @@ queen(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(10:card.rank, ?#result##0:card.rank)
 
 
-r10 > public {inline} (7 calls)
+proc r10 > public {inline} (7 calls)
 0: card.rank.r10<0>
 r10(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -467,7 +467,7 @@ r10(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(8:card.rank, ?#result##0:card.rank)
 
 
-r2 > public {inline} (16 calls)
+proc r2 > public {inline} (16 calls)
 0: card.rank.r2<0>
 r2(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -475,7 +475,7 @@ r2(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(0:card.rank, ?#result##0:card.rank)
 
 
-r3 > public {inline} (14 calls)
+proc r3 > public {inline} (14 calls)
 0: card.rank.r3<0>
 r3(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -483,7 +483,7 @@ r3(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(1:card.rank, ?#result##0:card.rank)
 
 
-r4 > public {inline} (13 calls)
+proc r4 > public {inline} (13 calls)
 0: card.rank.r4<0>
 r4(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -491,7 +491,7 @@ r4(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(2:card.rank, ?#result##0:card.rank)
 
 
-r5 > public {inline} (12 calls)
+proc r5 > public {inline} (12 calls)
 0: card.rank.r5<0>
 r5(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -499,7 +499,7 @@ r5(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(3:card.rank, ?#result##0:card.rank)
 
 
-r6 > public {inline} (11 calls)
+proc r6 > public {inline} (11 calls)
 0: card.rank.r6<0>
 r6(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -507,7 +507,7 @@ r6(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(4:card.rank, ?#result##0:card.rank)
 
 
-r7 > public {inline} (10 calls)
+proc r7 > public {inline} (10 calls)
 0: card.rank.r7<0>
 r7(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -515,7 +515,7 @@ r7(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(5:card.rank, ?#result##0:card.rank)
 
 
-r8 > public {inline} (9 calls)
+proc r8 > public {inline} (9 calls)
 0: card.rank.r8<0>
 r8(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -523,7 +523,7 @@ r8(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(6:card.rank, ?#result##0:card.rank)
 
 
-r9 > public {inline} (8 calls)
+proc r9 > public {inline} (8 calls)
 0: card.rank.r9<0>
 r9(?#result##0:card.rank)<{}; {}; {}>:
   AliasPairs: []
@@ -531,7 +531,7 @@ r9(?#result##0:card.rank)<{}; {}; {}>:
     foreign llvm move(7:card.rank, ?#result##0:card.rank)
 
 
-ranks > public (0 calls)
+proc ranks > public (0 calls)
 0: card.rank.ranks<0>
 ranks(?#result##0:wybe.list(card.rank))<{}; {}; {}>:
   AliasPairs: []
@@ -577,7 +577,7 @@ ranks(?#result##0:wybe.list(card.rank))<{}; {}; {}>:
     foreign lpvm mutate(~tmp#78##0:wybe.list(T), ?#result##0:wybe.list(card.rank), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(T)) @list:nn:nn
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: card.rank.~=<0>
 ~=(#left##0:card.rank, #right##0:card.rank, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -862,7 +862,7 @@ entry:
   resources       : 
   procs           : 
 
-= > public {inline} (16 calls)
+proc = > public {inline} (16 calls)
 0: card.suit.=<0>
 =(#left##0:card.suit, #right##0:card.suit, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -870,7 +870,7 @@ entry:
     foreign llvm icmp_eq(~#left##0:card.suit, ~#right##0:card.suit, ?#success##0:wybe.bool)
 
 
-char > public (1 calls)
+proc char > public (1 calls)
 0: card.suit.char<0>
 char(s##0:card.suit, ?#result##0:wybe.char)<{}; {}; {}>:
   AliasPairs: []
@@ -890,7 +890,7 @@ char(s##0:card.suit, ?#result##0:wybe.char)<{}; {}; {}>:
 
 
 
-clubs > public {inline} (7 calls)
+proc clubs > public {inline} (7 calls)
 0: card.suit.clubs<0>
 clubs(?#result##0:card.suit)<{}; {}; {}>:
   AliasPairs: []
@@ -898,7 +898,7 @@ clubs(?#result##0:card.suit)<{}; {}; {}>:
     foreign llvm move(0:card.suit, ?#result##0:card.suit)
 
 
-diamonds > public {inline} (5 calls)
+proc diamonds > public {inline} (5 calls)
 0: card.suit.diamonds<0>
 diamonds(?#result##0:card.suit)<{}; {}; {}>:
   AliasPairs: []
@@ -906,7 +906,7 @@ diamonds(?#result##0:card.suit)<{}; {}; {}>:
     foreign llvm move(1:card.suit, ?#result##0:card.suit)
 
 
-hearts > public {inline} (4 calls)
+proc hearts > public {inline} (4 calls)
 0: card.suit.hearts<0>
 hearts(?#result##0:card.suit)<{}; {}; {}>:
   AliasPairs: []
@@ -914,7 +914,7 @@ hearts(?#result##0:card.suit)<{}; {}; {}>:
     foreign llvm move(2:card.suit, ?#result##0:card.suit)
 
 
-print > public {inline} (0 calls)
+proc print > public {inline} (0 calls)
 0: card.suit.print<0>
 print(r##0:card.suit)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -925,7 +925,7 @@ print(r##0:card.suit)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char:nn:nn
 
 
-spades > public {inline} (3 calls)
+proc spades > public {inline} (3 calls)
 0: card.suit.spades<0>
 spades(?#result##0:card.suit)<{}; {}; {}>:
   AliasPairs: []
@@ -933,7 +933,7 @@ spades(?#result##0:card.suit)<{}; {}; {}>:
     foreign llvm move(3:card.suit, ?#result##0:card.suit)
 
 
-suits > public (0 calls)
+proc suits > public (0 calls)
 0: card.suit.suits<0>
 suits(?#result##0:wybe.list(card.suit))<{}; {}; {}>:
   AliasPairs: []
@@ -952,7 +952,7 @@ suits(?#result##0:wybe.list(card.suit))<{}; {}; {}>:
     foreign lpvm mutate(~tmp#24##0:wybe.list(T), ?#result##0:wybe.list(card.suit), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#2##0:wybe.list(T)) @list:nn:nn
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: card.suit.~=<0>
 ~=(#left##0:card.suit, #right##0:card.suit, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

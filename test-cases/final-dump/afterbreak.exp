@@ -17,7 +17,7 @@ module top-level code > public {inline,semipure} (0 calls)
     afterbreak.#cont#1<0>(1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @afterbreak:nn:nn
 
 
-#cont#1 > (2 calls)
+proc #cont#1 > (2 calls)
 0: afterbreak.#cont#1<0>
 #cont#1(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -36,7 +36,7 @@ module top-level code > public {inline,semipure} (0 calls)
 
 
 
-#cont#2 > {inline} (1 calls)
+proc #cont#2 > {inline} (1 calls)
 0: afterbreak.#cont#2<0>
 #cont#2([x##0:wybe.int], y##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

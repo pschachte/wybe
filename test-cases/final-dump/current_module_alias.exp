@@ -23,7 +23,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-toCelsius > public {noinline} (1 calls)
+proc toCelsius > public {noinline} (1 calls)
 0: current_module_alias.toCelsius<0>
 toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
@@ -76,7 +76,7 @@ entry:
   resources       : 
   procs           : 
 
-toCelsius > public {inline} (0 calls)
+proc toCelsius > public {inline} (0 calls)
 0: math.temperature.toCelsius<0>
 toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []

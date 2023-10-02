@@ -111,7 +111,8 @@ module AST (
   specialChar, specialName, specialName2,
   outputVariableName, outputStatusName,
   envParamName, envPrimParam, makeGlobalResourceName,
-  showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showProcName,
+  showBody, showPlacedPrims, showStmt, showBlock, showProcDef,
+  showProcIdentifier, showProcName,
   showModSpec, showModSpecs, showResources, showOptPos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
   flowPrefix, showProcModifiers, showProcModifiers', showFlags, showFlags',
@@ -3856,10 +3857,17 @@ showProcDef thisID
     ++ show def
 
 
+-- | A printable version of a proc name or HO term or foreign proc name.  First
+-- argument specifies what kind of proc it is.  Handles special empty proc
+-- name.
+showProcIdentifier :: String -> ProcName -> String
+showProcIdentifier _ ""       = "module top-level code"
+showProcIdentifier kind name = kind ++ " " ++ name
+
+
 -- | A printable version of a proc name; handles special empty proc name.
 showProcName :: ProcName -> String
-showProcName "" = "module top-level code"
-showProcName name = name
+showProcName = showProcIdentifier "proc"
 
 
 -- |How to show a type specification.

@@ -17,7 +17,7 @@ module top-level code > public {inline,semipure} (0 calls)
     det_for.#cont#1<0>(0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @det_for:nn:nn
 
 
-#cont#1 > (2 calls)
+proc #cont#1 > (2 calls)
 0: det_for.#cont#1<0>
 #cont#1(tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -30,7 +30,7 @@ module top-level code > public {inline,semipure} (0 calls)
     det_for.#cont#1<0>(~tmp#0##1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @det_for:nn:nn
 
 
-[|] > {inline} (1 calls)
+proc [|] > {inline} (1 calls)
 0: det_for.[|]<0>
 [|](?value##0:wybe.int, ?next##0:wybe.int, current##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []

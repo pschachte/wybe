@@ -22,7 +22,7 @@ AFTER EVERYTHING:
   submodules      : stmt_if.tree
   procs           : 
 
-foobar > (0 calls)
+proc foobar > (0 calls)
 0: stmt_if.foobar<0>
 foobar()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -49,7 +49,7 @@ foobar()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 
 
 
-foobar#cont#1 > (2 calls)
+proc foobar#cont#1 > (2 calls)
 0: stmt_if.foobar#cont#1<0>
 foobar#cont#1(tr##0:stmt_if.tree)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -70,7 +70,7 @@ foobar#cont#1(tr##0:stmt_if.tree)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 
 
 
-lookup > public (8 calls)
+proc lookup > public (8 calls)
 0: stmt_if.lookup<0>
 lookup(key##0:wybe.int, tree##0:stmt_if.tree, ?result##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -238,7 +238,7 @@ if.else2:
   resources       : 
   procs           : 
 
-= > public (7 calls)
+proc = > public (7 calls)
 0: stmt_if.tree.=<0>
 =(#left##0:stmt_if.tree, #right##0:stmt_if.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -280,7 +280,7 @@ if.else2:
 
 
 
-empty > public {inline} (0 calls)
+proc empty > public {inline} (0 calls)
 0: stmt_if.tree.empty<0>
 empty(?#result##0:stmt_if.tree)<{}; {}; {}>:
   AliasPairs: []
@@ -288,7 +288,7 @@ empty(?#result##0:stmt_if.tree)<{}; {}; {}>:
     foreign llvm move(0:stmt_if.tree, ?#result##0:stmt_if.tree)
 
 
-key > public {inline} (0 calls)
+proc key > public {inline} (0 calls)
 0: stmt_if.tree.key<0>
 key(#rec##0:stmt_if.tree, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -303,7 +303,7 @@ key(#rec##0:stmt_if.tree, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; 
         foreign lpvm access(~#rec##0:stmt_if.tree, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @stmt_if:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-key > public {inline} (0 calls)
+proc key > public {inline} (0 calls)
 1: stmt_if.tree.key<1>
 key(#rec##0:stmt_if.tree, ?#rec##1:stmt_if.tree, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -320,7 +320,7 @@ key(#rec##0:stmt_if.tree, ?#rec##1:stmt_if.tree, #field##0:wybe.int, ?#success##
 
 
 
-left > public {inline} (0 calls)
+proc left > public {inline} (0 calls)
 0: stmt_if.tree.left<0>
 left(#rec##0:stmt_if.tree, ?#result##0:stmt_if.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -335,7 +335,7 @@ left(#rec##0:stmt_if.tree, ?#result##0:stmt_if.tree, ?#success##0:wybe.bool)<{};
         foreign lpvm access(~#rec##0:stmt_if.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:stmt_if.tree) @stmt_if:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-left > public {inline} (0 calls)
+proc left > public {inline} (0 calls)
 1: stmt_if.tree.left<1>
 left(#rec##0:stmt_if.tree, ?#rec##1:stmt_if.tree, #field##0:stmt_if.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -352,7 +352,7 @@ left(#rec##0:stmt_if.tree, ?#rec##1:stmt_if.tree, #field##0:stmt_if.tree, ?#succ
 
 
 
-node > public {inline} (0 calls)
+proc node > public {inline} (0 calls)
 0: stmt_if.tree.node<0>
 node(left##0:stmt_if.tree, key##0:wybe.int, right##0:stmt_if.tree, ?#result##0:stmt_if.tree)<{}; {}; {}>:
   AliasPairs: []
@@ -361,7 +361,7 @@ node(left##0:stmt_if.tree, key##0:wybe.int, right##0:stmt_if.tree, ?#result##0:s
     foreign lpvm mutate(~#rec##0:stmt_if.tree, ?#rec##1:stmt_if.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~left##0:stmt_if.tree) @stmt_if:nn:nn
     foreign lpvm mutate(~#rec##1:stmt_if.tree, ?#rec##2:stmt_if.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~key##0:wybe.int) @stmt_if:nn:nn
     foreign lpvm mutate(~#rec##2:stmt_if.tree, ?#result##0:stmt_if.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~right##0:stmt_if.tree) @stmt_if:nn:nn
-node > public {inline} (16 calls)
+proc node > public {inline} (16 calls)
 1: stmt_if.tree.node<1>
 node(?left##0:stmt_if.tree, ?key##0:wybe.int, ?right##0:stmt_if.tree, #result##0:stmt_if.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -382,7 +382,7 @@ node(?left##0:stmt_if.tree, ?key##0:wybe.int, ?right##0:stmt_if.tree, #result##0
 
 
 
-right > public {inline} (0 calls)
+proc right > public {inline} (0 calls)
 0: stmt_if.tree.right<0>
 right(#rec##0:stmt_if.tree, ?#result##0:stmt_if.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -397,7 +397,7 @@ right(#rec##0:stmt_if.tree, ?#result##0:stmt_if.tree, ?#success##0:wybe.bool)<{}
         foreign lpvm access(~#rec##0:stmt_if.tree, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:stmt_if.tree) @stmt_if:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-right > public {inline} (0 calls)
+proc right > public {inline} (0 calls)
 1: stmt_if.tree.right<1>
 right(#rec##0:stmt_if.tree, ?#rec##1:stmt_if.tree, #field##0:stmt_if.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -414,7 +414,7 @@ right(#rec##0:stmt_if.tree, ?#rec##1:stmt_if.tree, #field##0:stmt_if.tree, ?#suc
 
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: stmt_if.tree.~=<0>
 ~=(#left##0:stmt_if.tree, #right##0:stmt_if.tree, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

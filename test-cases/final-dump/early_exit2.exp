@@ -21,7 +21,7 @@ module top-level code > public {semipure} (0 calls)
     foreign c {terminal,semipure} exit(1:wybe.int) @early_exit2:nn:nn
 
 
-my_exit > {terminal,inline} (1 calls)
+proc my_exit > {terminal,inline} (1 calls)
 0: early_exit2.my_exit<0>
 my_exit(code##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []

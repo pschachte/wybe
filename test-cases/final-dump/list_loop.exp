@@ -37,7 +37,7 @@ module top-level code > public {semipure} (0 calls)
     list_loop.#cont#1<0>(~tmp#20##0:list_loop.intlist, ~tmp#20##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @list_loop:nn:nn
 
 
-#cont#1 > (2 calls)
+proc #cont#1 > (2 calls)
 0: list_loop.#cont#1<0>
 #cont#1(l##0:list_loop.intlist, x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -57,7 +57,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-#cont#2 > {inline} (1 calls)
+proc #cont#2 > {inline} (1 calls)
 0: list_loop.#cont#2<0>
 #cont#2(h##0:wybe.int, l##0:list_loop.intlist, x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -69,7 +69,7 @@ module top-level code > public {semipure} (0 calls)
     list_loop.#cont#3<0>(~h##0:wybe.int, ~l##0:list_loop.intlist, ~x##0:list_loop.intlist, ~x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @list_loop:nn:nn
 
 
-#cont#3 > (2 calls)
+proc #cont#3 > (2 calls)
 0: list_loop.#cont#3<0>
 #cont#3(h##0:wybe.int, l##0:list_loop.intlist, l2##0:list_loop.intlist, x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -95,7 +95,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-#cont#4 > {inline} (1 calls)
+proc #cont#4 > {inline} (1 calls)
 0: list_loop.#cont#4<0>
 #cont#4(h##0:wybe.int, h2##0:wybe.int, l##0:list_loop.intlist, l2##0:list_loop.intlist, x##0:list_loop.intlist)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -257,7 +257,7 @@ entry:
   resources       : 
   procs           : 
 
-= > public (2 calls)
+proc = > public (2 calls)
 0: list_loop.intlist.=<0>
 =(#left##0:list_loop.intlist, #right##0:list_loop.intlist, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -290,7 +290,7 @@ entry:
 
 
 
-cons > public {inline} (0 calls)
+proc cons > public {inline} (0 calls)
 0: list_loop.intlist.cons<0>
 cons(head##0:wybe.int, tail##0:list_loop.intlist, ?#result##0:list_loop.intlist)<{}; {}; {}>:
   AliasPairs: []
@@ -298,7 +298,7 @@ cons(head##0:wybe.int, tail##0:list_loop.intlist, ?#result##0:list_loop.intlist)
     foreign lpvm alloc(16:wybe.int, ?#rec##0:list_loop.intlist) @list_loop:nn:nn
     foreign lpvm mutate(~#rec##0:list_loop.intlist, ?#rec##1:list_loop.intlist, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head##0:wybe.int) @list_loop:nn:nn
     foreign lpvm mutate(~#rec##1:list_loop.intlist, ?#result##0:list_loop.intlist, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail##0:list_loop.intlist) @list_loop:nn:nn
-cons > public {inline} (12 calls)
+proc cons > public {inline} (12 calls)
 1: list_loop.intlist.cons<1>
 cons(?head##0:wybe.int, ?tail##0:list_loop.intlist, #result##0:list_loop.intlist, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -317,7 +317,7 @@ cons(?head##0:wybe.int, ?tail##0:list_loop.intlist, #result##0:list_loop.intlist
 
 
 
-head > public {inline} (0 calls)
+proc head > public {inline} (0 calls)
 0: list_loop.intlist.head<0>
 head(#rec##0:list_loop.intlist, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -332,7 +332,7 @@ head(#rec##0:list_loop.intlist, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}
         foreign lpvm access(~#rec##0:list_loop.intlist, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @list_loop:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-head > public {inline} (0 calls)
+proc head > public {inline} (0 calls)
 1: list_loop.intlist.head<1>
 head(#rec##0:list_loop.intlist, ?#rec##1:list_loop.intlist, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -349,7 +349,7 @@ head(#rec##0:list_loop.intlist, ?#rec##1:list_loop.intlist, #field##0:wybe.int, 
 
 
 
-nil > public {inline} (0 calls)
+proc nil > public {inline} (0 calls)
 0: list_loop.intlist.nil<0>
 nil(?#result##0:list_loop.intlist)<{}; {}; {}>:
   AliasPairs: []
@@ -357,7 +357,7 @@ nil(?#result##0:list_loop.intlist)<{}; {}; {}>:
     foreign llvm move(0:list_loop.intlist, ?#result##0:list_loop.intlist)
 
 
-tail > public {inline} (0 calls)
+proc tail > public {inline} (0 calls)
 0: list_loop.intlist.tail<0>
 tail(#rec##0:list_loop.intlist, ?#result##0:list_loop.intlist, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -372,7 +372,7 @@ tail(#rec##0:list_loop.intlist, ?#result##0:list_loop.intlist, ?#success##0:wybe
         foreign lpvm access(~#rec##0:list_loop.intlist, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:list_loop.intlist) @list_loop:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-tail > public {inline} (0 calls)
+proc tail > public {inline} (0 calls)
 1: list_loop.intlist.tail<1>
 tail(#rec##0:list_loop.intlist, ?#rec##1:list_loop.intlist, #field##0:list_loop.intlist, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -389,7 +389,7 @@ tail(#rec##0:list_loop.intlist, ?#rec##1:list_loop.intlist, #field##0:list_loop.
 
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: list_loop.intlist.~=<0>
 ~=(#left##0:list_loop.intlist, #right##0:list_loop.intlist, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-incr > {inline} (0 calls)
+proc incr > {inline} (0 calls)
 0: func_untyped.incr<0>
 incr(a##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []

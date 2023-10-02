@@ -22,7 +22,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-is_yes > {inline} (4 calls)
+proc is_yes > {inline} (4 calls)
 0: proc_yorn.is_yes<0>
 is_yes(ch##0:wybe.char, ?#result##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -33,7 +33,7 @@ is_yes(ch##0:wybe.char, ?#result##0:wybe.bool)<{}; {}; {}>:
     foreign llvm xor(~tmp#1##0:wybe.bool, 1:wybe.bool, ?#result##0:wybe.bool) @bool:nn:nn
 
 
-is_yes_or_no > (3 calls)
+proc is_yes_or_no > (3 calls)
 0: proc_yorn.is_yes_or_no<0>
 is_yes_or_no(ch##0:wybe.char, ?#result##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -48,7 +48,7 @@ is_yes_or_no(ch##0:wybe.char, ?#result##0:wybe.bool)<{}; {}; {}>:
     foreign llvm or(~tmp#1##0:wybe.bool, ~tmp#2##0:wybe.bool, ?#result##0:wybe.bool) @bool:nn:nn
 
 
-yorn > public {inline} (1 calls)
+proc yorn > public {inline} (1 calls)
 0: proc_yorn.yorn<0>
 yorn(prompt##0:wybe.string, ?result##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -56,7 +56,7 @@ yorn(prompt##0:wybe.string, ?result##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.i
     proc_yorn.yorn#cont#1<0>(~prompt##0:wybe.string, ?result##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @proc_yorn:nn:nn
 
 
-yorn#cont#1 > (2 calls)
+proc yorn#cont#1 > (2 calls)
 0: proc_yorn.yorn#cont#1<0>
 yorn#cont#1(prompt##0:wybe.string, ?result##1:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

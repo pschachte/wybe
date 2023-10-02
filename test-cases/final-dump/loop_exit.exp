@@ -1,3 +1,3 @@
 Error detected during type checking of module(s) loop_exit
-[91mfinal-dump/loop_exit.wybe:5:2: Uninitialised argument in call to println, argument 1
+[91mfinal-dump/loop_exit.wybe:5:2: Uninitialised argument in call to proc println, argument 1
 [0m

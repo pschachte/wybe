@@ -33,7 +33,7 @@ module top-level code > public {semipure} (0 calls)
     inline_decl.finish<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @inline_decl:nn:nn
 
 
-finish > public {noinline} (1 calls)
+proc finish > public {noinline} (1 calls)
 0: inline_decl.finish<0>
 finish()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -43,7 +43,7 @@ finish()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     foreign lpvm store(~%tmp#1##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-long > public {inline} (1 calls)
+proc long > public {inline} (1 calls)
 0: inline_decl.long<0>
 long()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

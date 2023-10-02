@@ -43,7 +43,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-set_exit_code > public {inline} (0 calls)
+proc set_exit_code > public {inline} (0 calls)
 0: command_line.set_exit_code<0>
 set_exit_code(code##0:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
   AliasPairs: []

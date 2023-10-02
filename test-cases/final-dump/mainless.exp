@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-nothing_interesting > public {inline} (0 calls)
+proc nothing_interesting > public {inline} (0 calls)
 0: mainless.nothing_interesting<0>
 nothing_interesting(?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []

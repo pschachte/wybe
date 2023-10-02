@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-quad > public {inline} (0 calls)
+proc quad > public {inline} (0 calls)
 0: func_where.quad<0>
 quad(x##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []

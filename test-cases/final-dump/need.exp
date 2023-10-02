@@ -19,13 +19,13 @@ module top-level code > public {inline,semipure} (0 calls)
     need.#anon#1<0> #0 @need:nn:nn
 
 
-#anon#1 > {inline,impure} (1 calls)
+proc #anon#1 > {inline,impure} (1 calls)
 0: need.#anon#1<0>
 #anon#1()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     need.iota<0>(1000:wybe.int, outByReference l##0:wybe.list(wybe.int)) #0 @need:nn:nn
-#anon#1 > {inline,impure} (1 calls)
+proc #anon#1 > {inline,impure} (1 calls)
 1: need.#anon#1<1>
 #anon#1()<{}; {}; {}>:
   AliasPairs: []
@@ -33,7 +33,7 @@ module top-level code > public {inline,semipure} (0 calls)
     need.iota<0>(1000:wybe.int, outByReference tmp#0##0:wybe.list(wybe.int)) #1 @need:nn:nn
 
 
-iota > public (2 calls)
+proc iota > public (2 calls)
 0: need.iota<0>
 iota(n##0:wybe.int, outByReference #result##0:wybe.list(wybe.int))<{}; {}; {}>:
   AliasPairs: []
@@ -52,7 +52,7 @@ iota(n##0:wybe.int, outByReference #result##0:wybe.list(wybe.int))<{}; {}; {}>:
 
 
 
-need > public {inline,semipure} (1 calls)
+proc need > public {inline,semipure} (1 calls)
 0: need.need<0>
 need(stmt##0:{impure}())<{}; {}; {}>:
   AliasPairs: []

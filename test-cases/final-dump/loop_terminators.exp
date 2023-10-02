@@ -9,49 +9,49 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-loop0 > {inline} (0 calls)
+proc loop0 > {inline} (0 calls)
 0: loop_terminators.loop0<0>
 loop0()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
 
 
-loop0#cont#1 > {inline} (2 calls)
+proc loop0#cont#1 > {inline} (2 calls)
 0: loop_terminators.loop0#cont#1<0>
 loop0#cont#1()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
 
 
-loop1 > {inline} (0 calls)
+proc loop1 > {inline} (0 calls)
 0: loop_terminators.loop1<0>
 loop1()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
 
 
-loop1#cont#1 > {inline} (2 calls)
+proc loop1#cont#1 > {inline} (2 calls)
 0: loop_terminators.loop1#cont#1<0>
 loop1#cont#1()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
 
 
-loop2 > {inline} (0 calls)
+proc loop2 > {inline} (0 calls)
 0: loop_terminators.loop2<0>
 loop2()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
 
 
-loop2#cont#1 > {inline} (1 calls)
+proc loop2#cont#1 > {inline} (1 calls)
 0: loop_terminators.loop2#cont#1<0>
 loop2#cont#1()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
 
 
-loop3 > {inline} (0 calls)
+proc loop3 > {inline} (0 calls)
 0: loop_terminators.loop3<0>
 loop3()<{}; {}; {}>:
   AliasPairs: []
@@ -60,7 +60,7 @@ loop3()<{}; {}; {}>:
     foreign c {terminal,semipure} error_exit(c"loop_terminators:14:11":wybe.c_string, ~tmp#0##0:wybe.c_string) @control:nn:nn
 
 
-loop3#cont#1 > {inline} (1 calls)
+proc loop3#cont#1 > {inline} (1 calls)
 0: loop_terminators.loop3#cont#1<0>
 loop3#cont#1()<{}; {}; {}>:
   AliasPairs: []
