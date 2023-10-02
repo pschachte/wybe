@@ -1,0 +1,2 @@
+pub resource a:int = 0
+!println("main_topo0")
