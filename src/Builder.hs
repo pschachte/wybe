@@ -935,10 +935,6 @@ isStdLib :: ModSpec -> Bool
 isStdLib []    = False
 isStdLib (m:_) = m == "wybe"
 
--- | Filter for avoiding the command line module, which is currently hardcoded
---   into the executable module
-isCmdLine :: ModSpec -> Bool
-isCmdLine = (==["command_line"])
 
 -- |A Processor processes the specified module one iteration in a
 --  context of mutual dependency among the list of modules.  It
@@ -1212,7 +1208,9 @@ sccTopoMap orderedSCCs =
     Map.fromList
         $ concat
         $ zipWith (\order scc -> (,order) <$> scc) [0..]
-        $ List.filter (not . all isStdLib &&& not . all isCmdLine) orderedSCCs
+        $ List.filter
+            (not . all isStdLib &&& not . all (==cmdLineModSpec))
+            orderedSCCs
 
 -- | Takes in a topomap (defined in sccTopoMap) and a modspec, then return the
 --   modspec's topological order
