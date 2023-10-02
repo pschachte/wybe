@@ -233,7 +233,7 @@ import           Transform                 (transformProc,
 import           Types                     (typeCheckModSCC,
                                             validateModExportTypes)
 import           Unbranch                  (unbranchProc)
-import           Util                      (sccElts, useLocalCacheFileIfPossible)
+import           Util                      (sccElts, useLocalCacheFileIfPossible, (&&&))
 import           Snippets
 import           Text.Parsec.Error
 import           BinaryFactory
@@ -1026,10 +1026,12 @@ handleModImports _ thisMod = do
 buildExecutable :: [[ModSpec]] -> ModSpec -> FilePath -> Compiler ()
 buildExecutable orderedSCCs targetMod target = do
     possDirs <- gets $ ((,True) <$>) . optLibDirs . options
-    loadModuleIfNeeded False ["command_line"] possDirs
+    loadModuleIfNeeded False cmdLineModSpec possDirs
     let privateImport = importSpec Nothing Private
-    addImport ["command_line"] privateImport `inModule` targetMod
-    depends <- orderedDependencies targetMod
+    addImport cmdLineModSpec privateImport `inModule` targetMod
+    dependsUnsorted <- orderedDependencies targetMod
+    let topoMap = sccTopoMap orderedSCCs
+        depends = sortOn (modTopoOrder topoMap . fst) dependsUnsorted
     if List.null depends || not (snd (last depends))
         then
             -- No main code in the selected module: don't build executable
@@ -1046,7 +1048,7 @@ buildExecutable orderedSCCs targetMod target = do
             let mainMod = []
             enterModule target mainMod Nothing
             addImport ["wybe"] privateImport
-            addImport ["command_line"] privateImport
+            addImport cmdLineModSpec privateImport
             -- Import all dependencies of the target mod
             mapM_ (\m -> addImport m $ importSpec Nothing Private)
                   (fst <$> depends)
@@ -1133,7 +1135,7 @@ foreignDependencies mods =
 buildMain :: [ModSpec] -> Compiler Item
 buildMain mainImports = do
     logBuild "Generating main executable code"
-    let cmdResource name = ResourceFlowSpec (ResourceSpec ["command_line"] name)
+    let cmdResource name = ResourceFlowSpec (ResourceSpec cmdLineModSpec name)
     let mainRes = Set.fromList [cmdResource "argc" ParamIn,
                                 cmdResource "argv" ParamIn,
                                 cmdResource "exit_code" ParamOut]
@@ -1196,6 +1198,27 @@ orderedDependencies targetMod =
                 |> List.filter (\x -> x `notElem` List.map fst collected')
         visit remains collected'
 
+-- | Maps the topological order of a non-std and non-cmdline modspec
+type TopoMap = Map ModSpec Integer
+
+-- | Generate a mapping from a non-std lib and non-cmdline modspec
+--   to its topological order
+sccTopoMap :: [[ModSpec]] -> TopoMap
+sccTopoMap orderedSCCs =
+    Map.fromList
+        $ concat
+        $ zipWith (\order scc -> (,order) <$> scc) [0..]
+        $ List.filter
+            (not . all isStdLib &&& not . all (==cmdLineModSpec))
+            orderedSCCs
+
+-- | Takes in a topomap (defined in sccTopoMap) and a modspec, then return the
+--   modspec's topological order
+modTopoOrder :: TopoMap -> ModSpec -> Integer
+modTopoOrder topoMap modSpec =
+    case Map.lookup modSpec topoMap of
+        Just order -> order
+        Nothing -> if isStdLib modSpec then -2 else -1
 
 -----------------------------------------------------------------------------
 -- Top-Down Pass for Multiple Specialization                               --

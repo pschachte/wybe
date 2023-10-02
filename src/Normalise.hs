@@ -457,10 +457,9 @@ initResources = do
     -- the fact that they're automatically generated as arguments to the
     -- top-level main, but we can't declare them with resource initialisations,
     -- because that would overwrite them.
-    let cmdlineModSpec = ["command_line"]
     let cmdlineResources =
-            if cmdlineModSpec == thisMod
-            then let cmdline = ResourceSpec cmdlineModSpec
+            if cmdLineModSpec == thisMod
+            then let cmdline = ResourceSpec cmdLineModSpec 
                  in [ResourceFlowSpec (cmdline "argc") ParamInOut
                     ,ResourceFlowSpec (cmdline "argv") ParamInOut]
             else []

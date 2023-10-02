@@ -16,7 +16,8 @@ module Snippets (castFromTo, castTo, withType, intType, intCast,
                  move, access, mutate,
                  globalStore, globalLoad,
                  primMove, primAccess, primCast,
-                 boolNegate, comparison, succeedTest, failTest, testVar, succeedIfSemiDet) where
+                 boolNegate, comparison, succeedTest, failTest, testVar, succeedIfSemiDet,
+                 cmdLineModSpec) where
 
 import Config
 import AST
@@ -242,3 +243,7 @@ failTest = Unplaced $ Fail
 -- |An unplaced TestBool of a Boolean variable
 testVar :: Ident -> Placed Stmt
 testVar name = Unplaced $ TestBool $ boolCast $ varGet name
+
+-- | The module specification of the command line module
+cmdLineModSpec :: ModSpec
+cmdLineModSpec = ["command_line"]
