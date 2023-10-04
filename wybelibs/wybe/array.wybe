@@ -5,11 +5,11 @@ pragma no_standard_library  # Standard library can't depend on itself!
 
 use wybe.bool, wybe.int, wybe.machine_word, wybe.list
 
-pub constructor (T) array(length:int, raw_data:raw_array(T))
+pub constructor (T) array(length:int, raw_data:raw_array)
 
 
 # Raw array type
-pub type raw_array(T) is address {}
+pub type raw_array is address {}
 
 
 ## Construction procedures
