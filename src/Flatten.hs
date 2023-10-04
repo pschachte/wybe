@@ -35,7 +35,7 @@
 --
 ----------------------------------------------------------------
 
-module Flatten (flattenProcDecl) where
+module Flatten (flattenProcBody) where
 
 import AST
 import Config
@@ -57,25 +57,34 @@ import Control.Monad.Trans (lift,liftIO)
 --                        Exported Functions
 ----------------------------------------------------------------
 
-flattenProcDecl :: Item -> Compiler (Item,Int)
-flattenProcDecl (ProcDecl vis mods proto stmts pos) = do
-    let params = procProtoParams proto
-    logMsg Flatten $ "** Flattening "
-           ++ "def " ++ showProcModifiers' mods
-           ++ show proto ++ " {" ++ showBody 4 stmts ++ "}"
-    mapM_ (placedApply $ flip explicitTypeSpecificationWarning . paramType) params
-    let inParams = Set.fromList
+-- | Flatten the body of a proc def
+flattenProcBody :: ProcDef -> Int -> Compiler ProcDef
+flattenProcBody pd _ = do
+    let proto = procProto pd
+        params = procProtoParams proto
+        inParams = Set.fromList
                  $ List.map paramName
                  $ List.filter (flowsIn . paramFlow)
-                 $ List.map content params
-    let resources = Set.map (resourceName . resourceFlowRes)
+                 $ content <$> params
+        resources = Set.map (resourceName . resourceFlowRes)
                   $ procProtoResources proto
-    (stmts',tmpCtr) <- flattenBody stmts (inParams `Set.union` resources)
-                       (modifierDetism mods)
-    return (ProcDecl vis mods proto stmts' pos,tmpCtr)
-flattenProcDecl _ =
-    shouldnt "flattening a non-proc item"
+        ProcDefSrc body = procImpln pd
 
+        detism = procDetism pd
+        inlining = procInlining pd
+        impurity = procImpurity pd
+        variant = procVariant pd
+        resourceful = not $ Set.null resources
+        mods = ProcModifiers detism inlining impurity variant resourceful
+
+    logMsg Flatten
+        $ "** Flattening def " ++ showProcModifiers' mods ++ show proto
+            ++ " {" ++ showBody 4 body ++ "}"
+    mapM_ (placedApply $ flip explicitTypeSpecificationWarning . paramType) params
+    
+    (body',tmpCtr) <- flattenBody body (inParams `Set.union` resources) detism
+
+    return pd{procTmpCount = tmpCtr, procImpln = ProcDefSrc body'}
 
 -- |Flatten the specified statement sequence given a set of input parameter
 -- and resource names.

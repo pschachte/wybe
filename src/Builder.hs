@@ -966,26 +966,6 @@ fixpointProcessSCC processor scc = do        -- must find fixpoint
 
 
 
-transformModuleProcs :: (ProcDef -> Int -> Compiler ProcDef) -> ModSpec ->
-                        Compiler ()
-transformModuleProcs trans thisMod = do
-    logBuild $ "**** Reentering module " ++ showModSpec thisMod
-    reenterModule thisMod
-    -- (names, procs) <- :: StateT CompilerState IO ([Ident], [[ProcDef]])
-    (names,procs) <- unzip <$>
-                     getModuleImplementationField (Map.toList . modProcs)
-    -- for each name we have a list of procdefs, so we must double map
-    procs' <- mapM (zipWithM (flip trans) [0..]) procs
-    updateImplementation
-        (\imp -> imp { modProcs = Map.union
-                                  (Map.fromList $ zip names procs')
-                                  (modProcs imp) })
-    reexitModule
-    logBuild $ "**** Re-exiting module " ++ showModSpec thisMod
-    return ()
-
-
-
 ------------------------ Handling Imports ------------------------
 
 -- |Handle all the imports of the current module.  When called, all
