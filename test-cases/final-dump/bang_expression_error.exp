@@ -1,4 +1,4 @@
-Error detected during preliminary processing of module bang_expression_error
+Error detected during final normalisation of module(s) bang_expression_error
 [91mfinal-dump/bang_expression_error.wybe:4:28: function call cannot have preceding !
 [0m[91mfinal-dump/bang_expression_error.wybe:4:36: function call cannot have preceding !
 [0m[91mfinal-dump/bang_expression_error.wybe:10:33: function call cannot have preceding !

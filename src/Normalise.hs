@@ -26,7 +26,6 @@ import Data.Bits
 import Data.Graph
 import Data.Tuple.HT
 import Data.Tuple.Select
-import Flatten
 import Options (LogSelection(Normalise))
 import Snippets
 import Util
@@ -108,9 +107,8 @@ normaliseItem (FuncDecl vis mods (ProcProto name params resources)
               pos]
         pos)
 normaliseItem item@ProcDecl{} = do
-    (item',tmpCtr) <- flattenProcDecl item
-    logNormalise $ "Normalised proc:" ++ show item'
-    addProc tmpCtr item'
+    logNormalise $ "Recording proc without flattening:" ++ show item
+    addProc 0 item
 normaliseItem (StmtDecl stmt pos) = do
     logNormalise $ "Normalising statement decl " ++ show stmt
     updateModule (\s -> s { stmtDecls = maybePlace stmt pos : stmtDecls s})
