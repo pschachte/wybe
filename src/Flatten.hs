@@ -69,15 +69,20 @@ flattenProcBody pd _ = do
         resources = Set.map (resourceName . resourceFlowRes)
                   $ procProtoResources proto
         ProcDefSrc body = procImpln pd
+
         detism = procDetism pd
+        inlining = procInlining pd
+        impurity = procImpurity pd
+        variant = procVariant pd
+        resourceful = not $ Set.null resources
+        mods = ProcModifiers detism inlining impurity variant resourceful
 
     logMsg Flatten
-        $ "** Flattening " ++ "def " ++ show proto
+        $ "** Flattening def " ++ showProcModifiers' mods ++ show proto
             ++ " {" ++ showBody 4 body ++ "}"
     mapM_ (placedApply $ flip explicitTypeSpecificationWarning . paramType) params
     
-    (body',tmpCtr) <- flattenBody body (inParams `Set.union` resources)
-                    $ procDetism pd
+    (body',tmpCtr) <- flattenBody body (inParams `Set.union` resources) detism
 
     return pd{procTmpCount = tmpCtr, procImpln = ProcDefSrc body'}
 
