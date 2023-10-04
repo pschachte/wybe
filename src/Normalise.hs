@@ -26,6 +26,7 @@ import Data.Bits
 import Data.Graph
 import Data.Tuple.HT
 import Data.Tuple.Select
+import Flatten (flattenProcBody)
 import Options (LogSelection(Normalise))
 import Snippets
 import Util
@@ -155,12 +156,14 @@ normaliseSubmodule name vis pos items = do
 --  constructors, deconstructors, accessors, mutators, and auxilliary
 --  procs, and generation of main proc for
 --  the module, which needs to know what resources are available.
+--  Finally, we flatten the body of each proc in the module scc.
 
 completeNormalisation :: [ModSpec] -> Compiler ()
-completeNormalisation mods = do
-    logNormalise $ "Completing normalisation of modules " ++ showModSpecs mods
-    completeTypeNormalisation mods
-    mapM_ (normaliseModMain `inModule`) mods
+completeNormalisation modSCC = do
+    logNormalise $ "Completing normalisation of modules " ++ showModSpecs modSCC
+    completeTypeNormalisation modSCC
+    mapM_ (normaliseModMain `inModule`) modSCC
+    mapM_ (transformModuleProcs flattenProcBody) modSCC
 
 
 -- | Layout the types on the specified module list, which comprise a strongly

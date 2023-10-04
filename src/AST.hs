@@ -55,6 +55,7 @@ module AST (
   getParams, getPrimParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
   ModSpec, maybeModPrefix, ProcImpln(..), ProcDef(..), procInline, procCallCount,
+  transformModuleProcs,
   getProcGlobalFlows,
   primImpurity, flagsImpurity, flagsDetism,
   AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
@@ -1930,6 +1931,22 @@ data ProcDef = ProcDef {
 }
              deriving (Eq, Generic)
 
+-- | Takes in a monadic function that transforms a ProcDef, and a module spec
+--   whose ProcDefs we apply the transforming function on.
+transformModuleProcs :: (ProcDef -> Int -> Compiler ProcDef) -> ModSpec ->
+                        Compiler ()
+transformModuleProcs trans thisMod = do
+    reenterModule thisMod
+    -- (names, procs) <- :: StateT CompilerState IO ([Ident], [[ProcDef]])
+    (names,procs) <- unzip <$>
+                     getModuleImplementationField (Map.toList . modProcs)
+    -- for each name we have a list of procdefs, so we must double map
+    procs' <- mapM (zipWithM (flip trans) [0..]) procs
+    updateImplementation
+        (\imp -> imp { modProcs = Map.union
+                                  (Map.fromList $ zip names procs')
+                                  (modProcs imp) })
+    reexitModule
 
 -- |Whether this proc should definitely be inlined, either because the user said
 -- to, or because we inferred it would be a good idea.
