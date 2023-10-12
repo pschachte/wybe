@@ -2964,8 +2964,7 @@ instance Show Stmt where
 -- |Produce a single statement comprising the conjunctions of the statements
 --  in the supplied list.
 seqToStmt :: [Placed Stmt] -> Placed Stmt
-seqToStmt [] = Unplaced $ TestBool
-               $ Typed (IntValue 1) AnyType $ Just $ TypeSpec ["wybe"] "bool" []
+seqToStmt [] = Unplaced Nop
 seqToStmt [stmt] = stmt
 seqToStmt stmts = Unplaced $ And stmts
 
