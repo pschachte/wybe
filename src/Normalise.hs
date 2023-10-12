@@ -432,11 +432,11 @@ normaliseModMain = do
     modSpec <- getModuleSpec
     logNormalise $ "Completing main normalisation of module "
                    ++ showModSpec modSpec
-    resources <- initResources
     let initBody = List.reverse stmts
     logNormalise $ "Top-level statements = " ++ show initBody
-    unless (List.null stmts)
-      $ normaliseItem $ ProcDecl Public (setImpurity Semipure defaultProcModifiers)
+    unless (List.null stmts) $ do
+        resources <- initResources
+        normaliseItem $ ProcDecl Public (setImpurity Semipure defaultProcModifiers)
                         (ProcProto "" [] resources) initBody Nothing
 
 
@@ -448,11 +448,14 @@ initResources = do
     thisMod <- getModule modSpec
     mods <- getModuleImplementationField (Map.keys . modImports)
     mods' <- (mods ++) . concat <$> mapM descendentModules mods
-    logNormalise $ "in initResources, mods = " ++ showModSpecs mods'
+    logNormalise $ "in initResources for module " ++ showModSpec thisMod
+                   ++ ", mods = " ++ showModSpecs mods'
     importedMods <- catMaybes <$> mapM getLoadingModule mods'
     let importImplns = catMaybes (modImplementation <$> importedMods)
     initialisedImports <- Set.toList . Set.unions . (Map.keysSet <$>)
                           <$> mapM (initialisedResources `inModule`) mods'
+    logNormalise $ "in initResources, initialisedImports = "
+                   ++ show initialisedImports
     initialisedLocal <- Set.toList . Map.keysSet <$> initialisedResources
     -- Direct tie-in to command_line library module:  for the command_line
     -- module, or any module that imports it, we add argc and argv as resources.
@@ -478,7 +481,8 @@ initResources = do
     --             , let initExp = trustFromJust "initResources"
     --                             $ resourceInit resImpln
     --             , let resType = resourceType resImpln]
-    logNormalise $ "In initResources, resources = " ++ show resources
+    logNormalise $ "In initResources for module " ++ showModSpec thisMod
+                   ++ ", resources = " ++ show resources
     -- logNormalise $ "In initResources, initialisations =" ++ showBody 4 inits
     return (Set.fromList resources)
 

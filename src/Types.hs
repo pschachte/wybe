@@ -77,7 +77,7 @@ validateProcDefTypes name def = do
     let pos = procPos def
     let proto = procProto def
     let params = procProtoParams proto
-    logTypes $ "Validating def of " ++ name
+    logTypes $ "Validating def of " ++ showProcName name
     params' <- mapM (updatePlacedM $ validateParamType name pos public) params
     return $ def { procProto = proto { procProtoParams = params' }}
 
