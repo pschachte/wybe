@@ -243,6 +243,8 @@ data TypeError = ReasonMessage Message
                    -- ^Proc defn has ambiguous types
                | ReasonArity ProcName ProcName OptPos Int Int
                    -- ^Call to proc with wrong arity
+               | ReasonBadReification ProcName OptPos
+                   -- ^Attempt to reify a semidet proc with outputs
                | ReasonUndeclared ProcName OptPos
                    -- ^Public proc with some undeclared types
                | ReasonEqual Exp Exp OptPos
@@ -365,6 +367,9 @@ typeErrorMessage (ReasonArity callFrom callTo pos callArity procArity) =
         (if callArity == procArity
             then "unsupported argument flow"
             else show callArity ++ " argument(s), expected " ++ show procArity)
+typeErrorMessage (ReasonBadReification calledProc pos) =
+    Message Error pos $
+        "Can't reify call to test " ++ showProcName calledProc ++ " with outputs" 
 typeErrorMessage (ReasonUndeclared name pos) =
     Message Error pos $
         "Public definition of " ++ showProcName name
@@ -497,6 +502,7 @@ typeErrorPos (ReasonOverload _ pos) = pos
 typeErrorPos (ReasonWarnMultipleMatches _ _ pos) = pos
 typeErrorPos (ReasonAmbig _ pos _) = pos
 typeErrorPos (ReasonArity _ _ pos _ _) = pos
+typeErrorPos (ReasonBadReification _ pos) = pos
 typeErrorPos (ReasonUndeclared _ pos) = pos
 typeErrorPos (ReasonEqual _ _ pos) = pos
 typeErrorPos (ReasonExpType _ _ pos) = pos
@@ -1568,7 +1574,12 @@ matchTypes caller callee pos hasBang callTypes callFlows
     = matchTypeList callee pos callTypes calleeInfo'
     -- Handle case of reified test call
     | isJust detCallInfo && sameLength callTypes (fiTypes calleeInfo'')
-    = matchTypeList callee pos callTypes calleeInfo''
+    = do
+        match <- matchTypeList callee pos callTypes calleeInfo''
+        case match of
+            OK _ | all flowsOut $ fiFlows calleeInfo ->
+                return $ Err [ReasonBadReification callee pos]
+            _ -> return match
     -- Handle case where the call is partial
     | isJust partialCallInfo
     = matchTypeList callee pos callTypes calleeInfo'''
