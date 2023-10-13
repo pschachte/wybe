@@ -1120,10 +1120,11 @@ buildMain mainImports = do
                                 cmdResource "argv" ParamIn,
                                 cmdResource "exit_code" ParamOut]
     initRes <- Set.filter (`Set.notMember` Set.map resourceFlowRes mainRes)
-             . Set.unions . (keysSet <$>)
-            <$> mapM (initialisedResources `inModule`) mainImports
-    let detism = setDetism Terminal
-                 $ setImpurity Impure defaultProcModifiers
+                . Set.unions . ((keysSet . fst) <$>)
+                -- <$> initialisedResources
+                <$> mapM (initialisedResources `inModule`) mainImports
+    logBuild $ "Initialised resources:  " ++ show initRes
+    let detism = setDetism Terminal $ setImpurity Impure defaultProcModifiers
     -- Program main has argc, argv, and exit_code as resources
     let proto = ProcProto "" [] mainRes
     let mainBody =

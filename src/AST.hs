@@ -1893,24 +1893,30 @@ data ResourceImpln =
         } deriving (Generic, Eq)
 
 
--- | A list of the initialised resources defined by the current module.
-initialisedResources :: Compiler ResourceDef
+-- | Return the initialised resources *defined* by the current module, and
+-- initialised resources *visible* in the current module.  The former are
+-- explicitly initialised by the current module's main proc, and the latter
+-- are usable there, so the former are out-only resources for it, and the
+-- latter are in/out.
+initialisedResources :: Compiler (ResourceDef,ResourceDef)
 initialisedResources = do
     currMod <- getModuleSpec
-    -- modKnown <- Set.toList . Set.unions . Map.elems
-    --              <$> getModuleImplementationField modKnownResources
-    -- resDefs <- Map.filter (isJust . resourceInit) . Map.unions . catMaybes
-    --            <$> mapM lookupResource modKnown
-    modRes <- getModuleImplementationField modResources
-    logAST $ "Getting initialised resources defined in module " ++ showModSpec currMod
-            ++ " = " ++ show modRes
-    -- logAST $ "      modKnown = " ++ show modKnown
-    -- logAST $ "   initialised = " ++ show resDefs
-    let oldResDefs = Map.filter (isJust . resourceInit) $ Map.unions modRes
-    -- when (oldResDefs /= resDefs)
-    --   $ logAST $ "   NB:  different old initialised = " ++ show oldResDefs
-    -- return resDefs
-    return oldResDefs
+    localRes <- getModuleImplementationField modResources
+    let localDefs = Map.filter (isJust . resourceInit) $ Map.unions localRes
+    visableRes <- Set.toList . Set.unions . Map.elems
+                 <$> getModuleImplementationField modKnownResources
+    visibleDefs <- Map.filter (isJust . resourceInit) . Map.unions . catMaybes
+               <$> mapM lookupResource visableRes
+    logAST $ "Getting initialised resources defined and visible in module "
+                ++ showModSpec currMod
+    logAST $ "      local resources = " ++ show localRes
+    logAST $ "    local initialised = " ++ show localDefs
+    logAST $ "    visible resources = " ++ show visableRes
+    logAST $ "  visible initialised = " ++ show visibleDefs
+    when (localDefs /= visibleDefs)
+      $ logAST $ "   NB:  different old initialised = " ++ show visibleDefs
+    return (localDefs,visibleDefs)
+
 
 -- |A proc definition, including the ID, prototype, the body,
 --  normalised to a list of primitives, and an optional source
