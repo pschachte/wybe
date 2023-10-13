@@ -436,6 +436,9 @@ normaliseModMain = do
     logNormalise $ "Top-level statements = " ++ show initBody
     unless (List.null stmts) $ do
         resources <- initResources
+        logNormalise $ "Initialised resources in main code for module "
+                        ++ showModSpec modSpec
+                        ++ ": " ++ show resources
         normaliseItem $ ProcDecl Public (setImpurity Semipure defaultProcModifiers)
                         (ProcProto "" [] resources) initBody Nothing
 
@@ -450,13 +453,16 @@ initResources = do
     mods' <- (mods ++) . concat <$> mapM descendentModules mods
     logNormalise $ "in initResources for module " ++ showModSpec thisMod
                    ++ ", mods = " ++ showModSpecs mods'
-    importedMods <- catMaybes <$> mapM getLoadingModule mods'
-    let importImplns = catMaybes (modImplementation <$> importedMods)
-    initialisedImports <- Set.toList . Set.unions . (Map.keysSet <$>)
-                          <$> mapM (initialisedResources `inModule`) mods'
-    logNormalise $ "in initResources, initialisedImports = "
-                   ++ show initialisedImports
-    initialisedLocal <- Set.toList . Map.keysSet <$> initialisedResources
+    (localInitialised,visibleInitialised) <- initialisedResources
+    let visibleInitSet = Map.keysSet visibleInitialised
+    let localInitSet = Map.keysSet localInitialised
+    let importedInitSet = visibleInitSet Set.\\ localInitSet
+    logNormalise $ "in initResources, initialised resources = "
+                   ++ show visibleInitSet
+    logNormalise $ "            initialised local resources = "
+                   ++ show visibleInitSet
+    logNormalise $ "         initialised imported resources = "
+                   ++ show importedInitSet
     -- Direct tie-in to command_line library module:  for the command_line
     -- module, or any module that imports it, we add argc and argv as resources.
     -- This is necessary because argc and argv are effectively initialised by
@@ -470,14 +476,16 @@ initResources = do
                     ,ResourceFlowSpec (cmdline "argv") ParamInOut]
             else []
     let resources = cmdlineResources
-                    ++ ((`ResourceFlowSpec` ParamInOut) <$> initialisedImports)
-                    ++ ((`ResourceFlowSpec` ParamOut) <$> initialisedLocal)
+                    ++ ((`ResourceFlowSpec` ParamInOut)
+                         <$> Set.toList importedInitSet)
+                    ++ ((`ResourceFlowSpec` ParamOut)
+                        <$> Set.toList localInitSet)
     -- let inits = [ForeignCall "llvm" "move" []
     --                 [maybePlace ((content initExp) `withType` resType)
     --                     (place initExp)
     --                 , varSet (resourceName resSpec) `maybePlace` pos] 
     --                  `maybePlace` pos
-    --             | (resSpec, resImpln) <- initialisedLocal
+    --             | (resSpec, resImpln) <- localInitSet
     --             , let initExp = trustFromJust "initResources"
     --                             $ resourceInit resImpln
     --             , let resType = resourceType resImpln]

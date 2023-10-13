@@ -1,0 +1,9 @@
+use pub_importer
+# test pub_importer re-exporting fn and res
+!my_three(?n)
+?eight = fn(n)
+!println("2^$n = $eight")
+?eight = fn(res)
+!println("2^$n = $eight")
+
+def my_three(?n:int) use res {!three(?n)}
