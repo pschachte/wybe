@@ -1,0 +1,960 @@
+======================================================================
+AFTER TYPE CHECK:
+ Module foo
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : foo.<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+module top-level code > public {semipure} (0 calls)
+0: () use !wybe.io.io:
+    foreign llvm move(42:wybe.int @foo:4:6, ?x:wybe.int @foo:4:2)
+    wybe.int.<0>fmt(x:wybe.int @foo:5:35, ?tmp#1:wybe.string @foo:5:35)
+    wybe.string.<0>,,("before conditional: x = ":wybe.string @foo:5:10, tmp#1:wybe.string, ?tmp#0:wybe.string @foo:5:10)
+    !wybe.string.<0>println(tmp#0:wybe.string)
+    if {(   foreign llvm move(24:wybe.int @foo:6:11, ?x:wybe.int @foo:6:7)
+        & foo.<0>nope)::
+
+        wybe.int.<0>fmt(x:wybe.int @foo:6:53, ?tmp#3:wybe.string @foo:6:53)
+        wybe.string.<0>,,("nope succeeds: x = ":wybe.string @foo:6:33, tmp#3:wybe.string, ?tmp#2:wybe.string @foo:6:33)
+        !wybe.string.<0>println(tmp#2:wybe.string)
+    else::
+        wybe.int.<0>fmt(x:wybe.int @foo:7:41, ?tmp#5:wybe.string @foo:7:41)
+        wybe.string.<0>,,("nope fails; x = ":wybe.string @foo:7:24, tmp#5:wybe.string, ?tmp#4:wybe.string @foo:7:24)
+        !wybe.string.<0>println(tmp#4:wybe.string)
+
+    }
+   condition -> {io::wybe.phantom, tmp#0::wybe.string, tmp#1::wybe.string, x::wybe.int}
+   then&else -> {io::wybe.phantom, tmp#0::wybe.string, tmp#1::wybe.string, x::wybe.int}
+    wybe.int.<0>fmt(x:wybe.int @foo:9:34, ?tmp#7:wybe.string @foo:9:34)
+    wybe.string.<0>,,("after conditional; x = ":wybe.string @foo:9:10, tmp#7:wybe.string, ?tmp#6:wybe.string @foo:9:10)
+    !wybe.string.<0>println(tmp#6:wybe.string)
+    foreign llvm move(42:wybe.int @foo:11:6, ?x:wybe.int @foo:11:2)
+    wybe.int.<0>fmt(x:wybe.int @foo:12:42, ?tmp#9:wybe.string @foo:12:42)
+    wybe.string.<0>,,("before second conditional: x = ":wybe.string @foo:12:10, tmp#9:wybe.string, ?tmp#8:wybe.string @foo:12:10)
+    !wybe.string.<0>println(tmp#8:wybe.string)
+    if {foo.<0>nope2(?x:wybe.int @foo:13:13)::
+
+        wybe.int.<0>fmt(x:wybe.int @foo:13:49, ?tmp#11:wybe.string @foo:13:49)
+        wybe.string.<0>,,("nope2 succeeds: x = ":wybe.string @foo:13:28, tmp#11:wybe.string, ?tmp#10:wybe.string @foo:13:28)
+        !wybe.string.<0>println(tmp#10:wybe.string)
+    else::
+        wybe.int.<0>fmt(x:wybe.int @foo:14:42, ?tmp#13:wybe.string @foo:14:42)
+        wybe.string.<0>,,("nope2 fails; x = ":wybe.string @foo:14:24, tmp#13:wybe.string, ?tmp#12:wybe.string @foo:14:24)
+        !wybe.string.<0>println(tmp#12:wybe.string)
+
+    }
+   condition -> {io::wybe.phantom, tmp#0::wybe.string, tmp#1::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+   then&else -> {io::wybe.phantom, tmp#0::wybe.string, tmp#1::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+    wybe.int.<0>fmt(x:wybe.int @foo:16:41, ?tmp#15:wybe.string @foo:16:41)
+    wybe.string.<0>,,("after second conditional; x = ":wybe.string @foo:16:10, tmp#15:wybe.string, ?tmp#14:wybe.string @foo:16:10)
+    !wybe.string.<0>println(tmp#14:wybe.string)
+
+
+proc nope > {test,noinline} (0 calls)
+0: nope():
+    fail
+
+
+proc nope2 > {test,noinline} (0 calls)
+0: nope2(?value:wybe.int @foo:2:28):
+    foreign llvm move(2:wybe.int @foo:2:50, ?value:wybe.int @foo:2:42)
+    fail
+
+LLVM code       : None
+
+[1mUnbranch: [0m** Unbranching proc :
+[1mUnbranch: [0mmodule top-level code > public {semipure} (0 calls)
+[1mUnbranch: [0m0: () use !wybe.io.io:
+[1mUnbranch: [0m    foreign llvm move(42:wybe.int @foo:4:6, ?x:wybe.int @foo:4:2)
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:5:35, ?tmp#1:wybe.string @foo:5:35)
+[1mUnbranch: [0m    wybe.string.<0>,,("before conditional: x = ":wybe.string @foo:5:10, tmp#1:wybe.string, ?tmp#0:wybe.string @foo:5:10)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#0:wybe.string)
+[1mUnbranch: [0m    if {(   foreign llvm move(24:wybe.int @foo:6:11, ?x:wybe.int @foo:6:7)
+[1mUnbranch: [0m        & foo.<0>nope)::
+[1mUnbranch: [0m
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:6:53, ?tmp#3:wybe.string @foo:6:53)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope succeeds: x = ":wybe.string @foo:6:33, tmp#3:wybe.string, ?tmp#2:wybe.string @foo:6:33)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#2:wybe.string)
+[1mUnbranch: [0m    else::
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:7:41, ?tmp#5:wybe.string @foo:7:41)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope fails; x = ":wybe.string @foo:7:24, tmp#5:wybe.string, ?tmp#4:wybe.string @foo:7:24)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#4:wybe.string)
+[1mUnbranch: [0m
+[1mUnbranch: [0m    }
+[1mUnbranch: [0m   condition -> {tmp#0::wybe.string, tmp#1::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   then&else -> {tmp#0::wybe.string, tmp#1::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   resources -> {wybe.io.io}
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:9:34, ?tmp#7:wybe.string @foo:9:34)
+[1mUnbranch: [0m    wybe.string.<0>,,("after conditional; x = ":wybe.string @foo:9:10, tmp#7:wybe.string, ?tmp#6:wybe.string @foo:9:10)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#6:wybe.string)
+[1mUnbranch: [0m    foreign llvm move(42:wybe.int @foo:11:6, ?x:wybe.int @foo:11:2)
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:12:42, ?tmp#9:wybe.string @foo:12:42)
+[1mUnbranch: [0m    wybe.string.<0>,,("before second conditional: x = ":wybe.string @foo:12:10, tmp#9:wybe.string, ?tmp#8:wybe.string @foo:12:10)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#8:wybe.string)
+[1mUnbranch: [0m    if {foo.<0>nope2(?x:wybe.int @foo:13:13)::
+[1mUnbranch: [0m
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:13:49, ?tmp#11:wybe.string @foo:13:49)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope2 succeeds: x = ":wybe.string @foo:13:28, tmp#11:wybe.string, ?tmp#10:wybe.string @foo:13:28)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#10:wybe.string)
+[1mUnbranch: [0m    else::
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:14:42, ?tmp#13:wybe.string @foo:14:42)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope2 fails; x = ":wybe.string @foo:14:24, tmp#13:wybe.string, ?tmp#12:wybe.string @foo:14:24)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#12:wybe.string)
+[1mUnbranch: [0m
+[1mUnbranch: [0m    }
+[1mUnbranch: [0m   condition -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   then&else -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   resources -> {wybe.io.io}
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:16:41, ?tmp#15:wybe.string @foo:16:41)
+[1mUnbranch: [0m    wybe.string.<0>,,("after second conditional; x = ":wybe.string @foo:16:10, tmp#15:wybe.string, ?tmp#14:wybe.string @foo:16:10)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#14:wybe.string)
+[1mUnbranch: [0m** Unbranching with output params:[]
+[1mUnbranch: [0m** Unbranching with output args:[]
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    foreign llvm move(42:wybe.int @foo:4:6, ?x:wybe.int @foo:4:2)
+[1mUnbranch: [0m  with vars {}
+[1mUnbranch: [0mUnbranching foreign call foreign llvm move(42:wybe.int @foo:4:6, ?x:wybe.int @foo:4:2)
+[1mUnbranch: [0mLeaving stmt as is: foreign llvm move(42:wybe.int @foo:4:6, ?x:wybe.int @foo:4:2)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:5:35, ?tmp#1:wybe.string @foo:5:35)
+[1mUnbranch: [0m  with vars {x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.int.<0>fmt(x:wybe.int @foo:5:35, ?tmp#1:wybe.string @foo:5:35)
+[1mUnbranch: [0mLeaving stmt as is: wybe.int.<0>fmt(x:wybe.int @foo:5:35, ?tmp#1:wybe.string @foo:5:35)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.string.<0>,,("before conditional: x = ":wybe.string @foo:5:10, tmp#1:wybe.string, ?tmp#0:wybe.string @foo:5:10)
+[1mUnbranch: [0m  with vars {tmp#1::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.string.<0>,,("before conditional: x = ":wybe.string @foo:5:10, tmp#1:wybe.string, ?tmp#0:wybe.string @foo:5:10)
+[1mUnbranch: [0mLeaving stmt as is: wybe.string.<0>,,("before conditional: x = ":wybe.string @foo:5:10, tmp#1:wybe.string, ?tmp#0:wybe.string @foo:5:10)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#0:wybe.string)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.string.<0>println(tmp#0:wybe.string)
+[1mUnbranch: [0mLeaving stmt as is: wybe.string.<0>println(tmp#0:wybe.string)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    if {(   foreign llvm move(24:wybe.int @foo:6:11, ?x:wybe.int @foo:6:7)
+[1mUnbranch: [0m        & foo.<0>nope)::
+[1mUnbranch: [0m
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:6:53, ?tmp#3:wybe.string @foo:6:53)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope succeeds: x = ":wybe.string @foo:6:33, tmp#3:wybe.string, ?tmp#2:wybe.string @foo:6:33)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#2:wybe.string)
+[1mUnbranch: [0m    else::
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:7:41, ?tmp#5:wybe.string @foo:7:41)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope fails; x = ":wybe.string @foo:7:24, tmp#5:wybe.string, ?tmp#4:wybe.string @foo:7:24)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#4:wybe.string)
+[1mUnbranch: [0m
+[1mUnbranch: [0m    }
+[1mUnbranch: [0m   condition -> {tmp#0::wybe.string, tmp#1::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   then&else -> {tmp#0::wybe.string, tmp#1::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   resources -> {wybe.io.io}
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, x::wybe.int}
+[1mUnbranch: [0mMaybe factor Det continuation: 
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:9:34, ?tmp#7:wybe.string @foo:9:34)
+[1mUnbranch: [0m    wybe.string.<0>,,("after conditional; x = ":wybe.string @foo:9:10, tmp#7:wybe.string, ?tmp#6:wybe.string @foo:9:10)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#6:wybe.string)
+[1mUnbranch: [0m    foreign llvm move(42:wybe.int @foo:11:6, ?x:wybe.int @foo:11:2)
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:12:42, ?tmp#9:wybe.string @foo:12:42)
+[1mUnbranch: [0m    wybe.string.<0>,,("before second conditional: x = ":wybe.string @foo:12:10, tmp#9:wybe.string, ?tmp#8:wybe.string @foo:12:10)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#8:wybe.string)
+[1mUnbranch: [0m    if {foo.<0>nope2(?x:wybe.int @foo:13:13)::
+[1mUnbranch: [0m
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:13:49, ?tmp#11:wybe.string @foo:13:49)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope2 succeeds: x = ":wybe.string @foo:13:28, tmp#11:wybe.string, ?tmp#10:wybe.string @foo:13:28)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#10:wybe.string)
+[1mUnbranch: [0m    else::
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:14:42, ?tmp#13:wybe.string @foo:14:42)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope2 fails; x = ":wybe.string @foo:14:24, tmp#13:wybe.string, ?tmp#12:wybe.string @foo:14:24)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#12:wybe.string)
+[1mUnbranch: [0m
+[1mUnbranch: [0m    }
+[1mUnbranch: [0m   condition -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   then&else -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   resources -> {wybe.io.io}
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:16:41, ?tmp#15:wybe.string @foo:16:41)
+[1mUnbranch: [0m    wybe.string.<0>,,("after second conditional; x = ":wybe.string @foo:16:10, tmp#15:wybe.string, ?tmp#14:wybe.string @foo:16:10)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#14:wybe.string)
+[1mUnbranch: [0m  with brVars: {tmp#0::wybe.string, tmp#1::wybe.string, x::wybe.int}
+[1mUnbranch: [0mFactoring Det continuation proc #cont#1:
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:9:34, ?tmp#7:wybe.string @foo:9:34)
+[1mUnbranch: [0m    wybe.string.<0>,,("after conditional; x = ":wybe.string @foo:9:10, tmp#7:wybe.string, ?tmp#6:wybe.string @foo:9:10)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#6:wybe.string)
+[1mUnbranch: [0m    foreign llvm move(42:wybe.int @foo:11:6, ?x:wybe.int @foo:11:2)
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:12:42, ?tmp#9:wybe.string @foo:12:42)
+[1mUnbranch: [0m    wybe.string.<0>,,("before second conditional: x = ":wybe.string @foo:12:10, tmp#9:wybe.string, ?tmp#8:wybe.string @foo:12:10)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#8:wybe.string)
+[1mUnbranch: [0m    if {foo.<0>nope2(?x:wybe.int @foo:13:13)::
+[1mUnbranch: [0m
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:13:49, ?tmp#11:wybe.string @foo:13:49)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope2 succeeds: x = ":wybe.string @foo:13:28, tmp#11:wybe.string, ?tmp#10:wybe.string @foo:13:28)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#10:wybe.string)
+[1mUnbranch: [0m    else::
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:14:42, ?tmp#13:wybe.string @foo:14:42)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope2 fails; x = ":wybe.string @foo:14:24, tmp#13:wybe.string, ?tmp#12:wybe.string @foo:14:24)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#12:wybe.string)
+[1mUnbranch: [0m
+[1mUnbranch: [0m    }
+[1mUnbranch: [0m   condition -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   then&else -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   resources -> {wybe.io.io}
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:16:41, ?tmp#15:wybe.string @foo:16:41)
+[1mUnbranch: [0m    wybe.string.<0>,,("after second conditional; x = ":wybe.string @foo:16:10, tmp#15:wybe.string, ?tmp#14:wybe.string @foo:16:10)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#14:wybe.string)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:9:34, ?tmp#7:wybe.string @foo:9:34)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.int.<0>fmt(x:wybe.int @foo:9:34, ?tmp#7:wybe.string @foo:9:34)
+[1mUnbranch: [0mLeaving stmt as is: wybe.int.<0>fmt(x:wybe.int @foo:9:34, ?tmp#7:wybe.string @foo:9:34)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.string.<0>,,("after conditional; x = ":wybe.string @foo:9:10, tmp#7:wybe.string, ?tmp#6:wybe.string @foo:9:10)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#7::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.string.<0>,,("after conditional; x = ":wybe.string @foo:9:10, tmp#7:wybe.string, ?tmp#6:wybe.string @foo:9:10)
+[1mUnbranch: [0mLeaving stmt as is: wybe.string.<0>,,("after conditional; x = ":wybe.string @foo:9:10, tmp#7:wybe.string, ?tmp#6:wybe.string @foo:9:10)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#6:wybe.string)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.string.<0>println(tmp#6:wybe.string)
+[1mUnbranch: [0mLeaving stmt as is: wybe.string.<0>println(tmp#6:wybe.string)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    foreign llvm move(42:wybe.int @foo:11:6, ?x:wybe.int @foo:11:2)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching foreign call foreign llvm move(42:wybe.int @foo:11:6, ?x:wybe.int @foo:11:2)
+[1mUnbranch: [0mLeaving stmt as is: foreign llvm move(42:wybe.int @foo:11:6, ?x:wybe.int @foo:11:2)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:12:42, ?tmp#9:wybe.string @foo:12:42)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.int.<0>fmt(x:wybe.int @foo:12:42, ?tmp#9:wybe.string @foo:12:42)
+[1mUnbranch: [0mLeaving stmt as is: wybe.int.<0>fmt(x:wybe.int @foo:12:42, ?tmp#9:wybe.string @foo:12:42)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.string.<0>,,("before second conditional: x = ":wybe.string @foo:12:10, tmp#9:wybe.string, ?tmp#8:wybe.string @foo:12:10)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.string.<0>,,("before second conditional: x = ":wybe.string @foo:12:10, tmp#9:wybe.string, ?tmp#8:wybe.string @foo:12:10)
+[1mUnbranch: [0mLeaving stmt as is: wybe.string.<0>,,("before second conditional: x = ":wybe.string @foo:12:10, tmp#9:wybe.string, ?tmp#8:wybe.string @foo:12:10)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#8:wybe.string)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.string.<0>println(tmp#8:wybe.string)
+[1mUnbranch: [0mLeaving stmt as is: wybe.string.<0>println(tmp#8:wybe.string)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    if {foo.<0>nope2(?x:wybe.int @foo:13:13)::
+[1mUnbranch: [0m
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:13:49, ?tmp#11:wybe.string @foo:13:49)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope2 succeeds: x = ":wybe.string @foo:13:28, tmp#11:wybe.string, ?tmp#10:wybe.string @foo:13:28)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#10:wybe.string)
+[1mUnbranch: [0m    else::
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:14:42, ?tmp#13:wybe.string @foo:14:42)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope2 fails; x = ":wybe.string @foo:14:24, tmp#13:wybe.string, ?tmp#12:wybe.string @foo:14:24)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#12:wybe.string)
+[1mUnbranch: [0m
+[1mUnbranch: [0m    }
+[1mUnbranch: [0m   condition -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   then&else -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   resources -> {wybe.io.io}
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0mMaybe factor Det continuation: 
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:16:41, ?tmp#15:wybe.string @foo:16:41)
+[1mUnbranch: [0m    wybe.string.<0>,,("after second conditional; x = ":wybe.string @foo:16:10, tmp#15:wybe.string, ?tmp#14:wybe.string @foo:16:10)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#14:wybe.string)
+[1mUnbranch: [0m  with brVars: {tmp#0::wybe.string, tmp#1::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0mFactoring Det continuation proc #cont#2:
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:16:41, ?tmp#15:wybe.string @foo:16:41)
+[1mUnbranch: [0m    wybe.string.<0>,,("after second conditional; x = ":wybe.string @foo:16:10, tmp#15:wybe.string, ?tmp#14:wybe.string @foo:16:10)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#14:wybe.string)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:16:41, ?tmp#15:wybe.string @foo:16:41)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.int.<0>fmt(x:wybe.int @foo:16:41, ?tmp#15:wybe.string @foo:16:41)
+[1mUnbranch: [0mLeaving stmt as is: wybe.int.<0>fmt(x:wybe.int @foo:16:41, ?tmp#15:wybe.string @foo:16:41)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.string.<0>,,("after second conditional; x = ":wybe.string @foo:16:10, tmp#15:wybe.string, ?tmp#14:wybe.string @foo:16:10)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#15::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.string.<0>,,("after second conditional; x = ":wybe.string @foo:16:10, tmp#15:wybe.string, ?tmp#14:wybe.string @foo:16:10)
+[1mUnbranch: [0mLeaving stmt as is: wybe.string.<0>,,("after second conditional; x = ":wybe.string @foo:16:10, tmp#15:wybe.string, ?tmp#14:wybe.string @foo:16:10)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#14:wybe.string)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#14::wybe.string, tmp#15::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.string.<0>println(tmp#14:wybe.string)
+[1mUnbranch: [0mLeaving stmt as is: wybe.string.<0>println(tmp#14:wybe.string)
+[1mUnbranch: [0mUnbranching an empty Det body
+[1mUnbranch: [0mGenerating fresh Det proc:
+[1mUnbranch: [0mproc #cont#2 > (0 calls)
+[1mUnbranch: [0m8: #cont#2(x:wybe.int) use !wybe.io.io:
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:16:41, ?tmp#15:wybe.string @foo:16:41)
+[1mUnbranch: [0m    wybe.string.<0>,,("after second conditional; x = ":wybe.string @foo:16:10, tmp#15:wybe.string, ?tmp#14:wybe.string @foo:16:10)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#14:wybe.string)
+[1mUnbranch: [0mUnbranched generated Det proc:
+[1mUnbranch: [0mproc #cont#2 > (0 calls)
+[1mUnbranch: [0m8: #cont#2(x:wybe.int) use !wybe.io.io:
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:16:41, ?tmp#15:wybe.string @foo:16:41)
+[1mUnbranch: [0m    wybe.string.<0>,,("after second conditional; x = ":wybe.string @foo:16:10, tmp#15:wybe.string, ?tmp#14:wybe.string @foo:16:10)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#14:wybe.string)
+[1mUnbranch: [0mGenerating call: foo.<0>#cont#2(x:wybe.int)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:13:49, ?tmp#11:wybe.string @foo:13:49)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.int.<0>fmt(x:wybe.int @foo:13:49, ?tmp#11:wybe.string @foo:13:49)
+[1mUnbranch: [0mLeaving stmt as is: wybe.int.<0>fmt(x:wybe.int @foo:13:49, ?tmp#11:wybe.string @foo:13:49)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.string.<0>,,("nope2 succeeds: x = ":wybe.string @foo:13:28, tmp#11:wybe.string, ?tmp#10:wybe.string @foo:13:28)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#11::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.string.<0>,,("nope2 succeeds: x = ":wybe.string @foo:13:28, tmp#11:wybe.string, ?tmp#10:wybe.string @foo:13:28)
+[1mUnbranch: [0mLeaving stmt as is: wybe.string.<0>,,("nope2 succeeds: x = ":wybe.string @foo:13:28, tmp#11:wybe.string, ?tmp#10:wybe.string @foo:13:28)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#10:wybe.string)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#10::wybe.string, tmp#11::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.string.<0>println(tmp#10:wybe.string)
+[1mUnbranch: [0mLeaving stmt as is: wybe.string.<0>println(tmp#10:wybe.string)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    foo.<0>#cont#2(x:wybe.int)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#10::wybe.string, tmp#11::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call foo.<0>#cont#2(x:wybe.int)
+[1mUnbranch: [0mLeaving stmt as is: foo.<0>#cont#2(x:wybe.int)
+[1mUnbranch: [0mUnbranching an empty Det body
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:14:42, ?tmp#13:wybe.string @foo:14:42)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.int.<0>fmt(x:wybe.int @foo:14:42, ?tmp#13:wybe.string @foo:14:42)
+[1mUnbranch: [0mLeaving stmt as is: wybe.int.<0>fmt(x:wybe.int @foo:14:42, ?tmp#13:wybe.string @foo:14:42)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.string.<0>,,("nope2 fails; x = ":wybe.string @foo:14:24, tmp#13:wybe.string, ?tmp#12:wybe.string @foo:14:24)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#13::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.string.<0>,,("nope2 fails; x = ":wybe.string @foo:14:24, tmp#13:wybe.string, ?tmp#12:wybe.string @foo:14:24)
+[1mUnbranch: [0mLeaving stmt as is: wybe.string.<0>,,("nope2 fails; x = ":wybe.string @foo:14:24, tmp#13:wybe.string, ?tmp#12:wybe.string @foo:14:24)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#12:wybe.string)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#12::wybe.string, tmp#13::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.string.<0>println(tmp#12:wybe.string)
+[1mUnbranch: [0mLeaving stmt as is: wybe.string.<0>println(tmp#12:wybe.string)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    foo.<0>#cont#2(x:wybe.int)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#12::wybe.string, tmp#13::wybe.string, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call foo.<0>#cont#2(x:wybe.int)
+[1mUnbranch: [0mLeaving stmt as is: foo.<0>#cont#2(x:wybe.int)
+[1mUnbranch: [0mUnbranching an empty Det body
+[1mUnbranch: [0mconverting SemiDet proc call{foo.<0>nope2(?x:wybe.int @foo:13:13)}
+[1mUnbranch: [0mReassignment of variable x in module top-level code
+[1mUnbranch: [0munbranching SemiDet stmt
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:13:49, ?tmp#11:wybe.string @foo:13:49)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#12::wybe.string, tmp#13::wybe.string, tmp#16::wybe.bool, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.int.<0>fmt(x:wybe.int @foo:13:49, ?tmp#11:wybe.string @foo:13:49)
+[1mUnbranch: [0mLeaving stmt as is: wybe.int.<0>fmt(x:wybe.int @foo:13:49, ?tmp#11:wybe.string @foo:13:49)
+[1mUnbranch: [0munbranching SemiDet stmt
+[1mUnbranch: [0m    wybe.string.<0>,,("nope2 succeeds: x = ":wybe.string @foo:13:28, tmp#11:wybe.string, ?tmp#10:wybe.string @foo:13:28)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#11::wybe.string, tmp#12::wybe.string, tmp#13::wybe.string, tmp#16::wybe.bool, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.string.<0>,,("nope2 succeeds: x = ":wybe.string @foo:13:28, tmp#11:wybe.string, ?tmp#10:wybe.string @foo:13:28)
+[1mUnbranch: [0mLeaving stmt as is: wybe.string.<0>,,("nope2 succeeds: x = ":wybe.string @foo:13:28, tmp#11:wybe.string, ?tmp#10:wybe.string @foo:13:28)
+[1mUnbranch: [0munbranching SemiDet stmt
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#10:wybe.string)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#10::wybe.string, tmp#11::wybe.string, tmp#12::wybe.string, tmp#13::wybe.string, tmp#16::wybe.bool, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.string.<0>println(tmp#10:wybe.string)
+[1mUnbranch: [0mLeaving stmt as is: wybe.string.<0>println(tmp#10:wybe.string)
+[1mUnbranch: [0munbranching SemiDet stmt
+[1mUnbranch: [0m    foo.<0>#cont#2(x:wybe.int)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#10::wybe.string, tmp#11::wybe.string, tmp#12::wybe.string, tmp#13::wybe.string, tmp#16::wybe.bool, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call foo.<0>#cont#2(x:wybe.int)
+[1mUnbranch: [0mLeaving stmt as is: foo.<0>#cont#2(x:wybe.int)
+[1mUnbranch: [0mUnbranching an empty SemiDet body
+[1mUnbranch: [0mmkCond True tmp#16:wybe.bool
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:13:49, ?tmp#11:wybe.string @foo:13:49)
+[1mUnbranch: [0m    wybe.string.<0>,,("nope2 succeeds: x = ":wybe.string @foo:13:28, tmp#11:wybe.string, ?tmp#10:wybe.string @foo:13:28)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#10:wybe.string)
+[1mUnbranch: [0m    foo.<0>#cont#2(x:wybe.int)
+[1mUnbranch: [0melse
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:14:42, ?tmp#13:wybe.string @foo:14:42)
+[1mUnbranch: [0m    wybe.string.<0>,,("nope2 fails; x = ":wybe.string @foo:14:24, tmp#13:wybe.string, ?tmp#12:wybe.string @foo:14:24)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#12:wybe.string)
+[1mUnbranch: [0m    foo.<0>#cont#2(x:wybe.int)
+[1mUnbranch: [0m#Converted SemiDet proc call{foo.<0>nope2(?x:wybe.int @foo:13:13)}
+[1mUnbranch: [0m#To: 
+[1mUnbranch: [0m    foo.<0>nope2(?x:wybe.int @foo:13:13, ?tmp#16:wybe.bool)
+[1mUnbranch: [0m    if {testbool tmp#16:wybe.bool::
+[1mUnbranch: [0m
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:13:49, ?tmp#11:wybe.string @foo:13:49)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope2 succeeds: x = ":wybe.string @foo:13:28, tmp#11:wybe.string, ?tmp#10:wybe.string @foo:13:28)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#10:wybe.string)
+[1mUnbranch: [0m        foo.<0>#cont#2(x:wybe.int)
+[1mUnbranch: [0m    else::
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:14:42, ?tmp#13:wybe.string @foo:14:42)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope2 fails; x = ":wybe.string @foo:14:24, tmp#13:wybe.string, ?tmp#12:wybe.string @foo:14:24)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#12:wybe.string)
+[1mUnbranch: [0m        foo.<0>#cont#2(x:wybe.int)
+[1mUnbranch: [0m
+[1mUnbranch: [0m    }
+[1mUnbranch: [0m   condition -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#12::wybe.string, tmp#13::wybe.string, tmp#16::wybe.bool, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   then&else -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#10::wybe.string, tmp#11::wybe.string, tmp#12::wybe.string, tmp#13::wybe.string, tmp#16::wybe.bool, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   resources -> {}
+[1mUnbranch: [0mGenerating fresh Det proc:
+[1mUnbranch: [0mproc #cont#1 > (0 calls)
+[1mUnbranch: [0m8: #cont#1(x:wybe.int) use !wybe.io.io:
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:9:34, ?tmp#7:wybe.string @foo:9:34)
+[1mUnbranch: [0m    wybe.string.<0>,,("after conditional; x = ":wybe.string @foo:9:10, tmp#7:wybe.string, ?tmp#6:wybe.string @foo:9:10)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#6:wybe.string)
+[1mUnbranch: [0m    foreign llvm move(42:wybe.int @foo:11:6, ?x:wybe.int @foo:11:2)
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:12:42, ?tmp#9:wybe.string @foo:12:42)
+[1mUnbranch: [0m    wybe.string.<0>,,("before second conditional: x = ":wybe.string @foo:12:10, tmp#9:wybe.string, ?tmp#8:wybe.string @foo:12:10)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#8:wybe.string)
+[1mUnbranch: [0m    foo.<0>nope2(?x:wybe.int @foo:13:13, ?tmp#16:wybe.bool)
+[1mUnbranch: [0m    if {testbool tmp#16:wybe.bool::
+[1mUnbranch: [0m
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:13:49, ?tmp#11:wybe.string @foo:13:49)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope2 succeeds: x = ":wybe.string @foo:13:28, tmp#11:wybe.string, ?tmp#10:wybe.string @foo:13:28)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#10:wybe.string)
+[1mUnbranch: [0m        foo.<0>#cont#2(x:wybe.int)
+[1mUnbranch: [0m    else::
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:14:42, ?tmp#13:wybe.string @foo:14:42)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope2 fails; x = ":wybe.string @foo:14:24, tmp#13:wybe.string, ?tmp#12:wybe.string @foo:14:24)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#12:wybe.string)
+[1mUnbranch: [0m        foo.<0>#cont#2(x:wybe.int)
+[1mUnbranch: [0m
+[1mUnbranch: [0m    }
+[1mUnbranch: [0m   condition -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#12::wybe.string, tmp#13::wybe.string, tmp#16::wybe.bool, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   then&else -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#10::wybe.string, tmp#11::wybe.string, tmp#12::wybe.string, tmp#13::wybe.string, tmp#16::wybe.bool, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   resources -> {}
+[1mUnbranch: [0mUnbranched generated Det proc:
+[1mUnbranch: [0mproc #cont#1 > (0 calls)
+[1mUnbranch: [0m8: #cont#1(x:wybe.int) use !wybe.io.io:
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:9:34, ?tmp#7:wybe.string @foo:9:34)
+[1mUnbranch: [0m    wybe.string.<0>,,("after conditional; x = ":wybe.string @foo:9:10, tmp#7:wybe.string, ?tmp#6:wybe.string @foo:9:10)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#6:wybe.string)
+[1mUnbranch: [0m    foreign llvm move(42:wybe.int @foo:11:6, ?x:wybe.int @foo:11:2)
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:12:42, ?tmp#9:wybe.string @foo:12:42)
+[1mUnbranch: [0m    wybe.string.<0>,,("before second conditional: x = ":wybe.string @foo:12:10, tmp#9:wybe.string, ?tmp#8:wybe.string @foo:12:10)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#8:wybe.string)
+[1mUnbranch: [0m    foo.<0>nope2(?x:wybe.int @foo:13:13, ?tmp#16:wybe.bool)
+[1mUnbranch: [0m    if {testbool tmp#16:wybe.bool::
+[1mUnbranch: [0m
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:13:49, ?tmp#11:wybe.string @foo:13:49)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope2 succeeds: x = ":wybe.string @foo:13:28, tmp#11:wybe.string, ?tmp#10:wybe.string @foo:13:28)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#10:wybe.string)
+[1mUnbranch: [0m        foo.<0>#cont#2(x:wybe.int)
+[1mUnbranch: [0m    else::
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:14:42, ?tmp#13:wybe.string @foo:14:42)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope2 fails; x = ":wybe.string @foo:14:24, tmp#13:wybe.string, ?tmp#12:wybe.string @foo:14:24)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#12:wybe.string)
+[1mUnbranch: [0m        foo.<0>#cont#2(x:wybe.int)
+[1mUnbranch: [0m
+[1mUnbranch: [0m    }
+[1mUnbranch: [0m   condition -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#12::wybe.string, tmp#13::wybe.string, tmp#16::wybe.bool, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   then&else -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#10::wybe.string, tmp#11::wybe.string, tmp#12::wybe.string, tmp#13::wybe.string, tmp#16::wybe.bool, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   resources -> {}
+[1mUnbranch: [0mGenerating call: foo.<0>#cont#1(x:wybe.int)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:6:53, ?tmp#3:wybe.string @foo:6:53)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.int.<0>fmt(x:wybe.int @foo:6:53, ?tmp#3:wybe.string @foo:6:53)
+[1mUnbranch: [0mLeaving stmt as is: wybe.int.<0>fmt(x:wybe.int @foo:6:53, ?tmp#3:wybe.string @foo:6:53)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.string.<0>,,("nope succeeds: x = ":wybe.string @foo:6:33, tmp#3:wybe.string, ?tmp#2:wybe.string @foo:6:33)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#3::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.string.<0>,,("nope succeeds: x = ":wybe.string @foo:6:33, tmp#3:wybe.string, ?tmp#2:wybe.string @foo:6:33)
+[1mUnbranch: [0mLeaving stmt as is: wybe.string.<0>,,("nope succeeds: x = ":wybe.string @foo:6:33, tmp#3:wybe.string, ?tmp#2:wybe.string @foo:6:33)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#2:wybe.string)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#2::wybe.string, tmp#3::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.string.<0>println(tmp#2:wybe.string)
+[1mUnbranch: [0mLeaving stmt as is: wybe.string.<0>println(tmp#2:wybe.string)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    foo.<0>#cont#1(x:wybe.int)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#2::wybe.string, tmp#3::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call foo.<0>#cont#1(x:wybe.int)
+[1mUnbranch: [0mLeaving stmt as is: foo.<0>#cont#1(x:wybe.int)
+[1mUnbranch: [0mUnbranching an empty Det body
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:7:41, ?tmp#5:wybe.string @foo:7:41)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.int.<0>fmt(x:wybe.int @foo:7:41, ?tmp#5:wybe.string @foo:7:41)
+[1mUnbranch: [0mLeaving stmt as is: wybe.int.<0>fmt(x:wybe.int @foo:7:41, ?tmp#5:wybe.string @foo:7:41)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.string.<0>,,("nope fails; x = ":wybe.string @foo:7:24, tmp#5:wybe.string, ?tmp#4:wybe.string @foo:7:24)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#5::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.string.<0>,,("nope fails; x = ":wybe.string @foo:7:24, tmp#5:wybe.string, ?tmp#4:wybe.string @foo:7:24)
+[1mUnbranch: [0mLeaving stmt as is: wybe.string.<0>,,("nope fails; x = ":wybe.string @foo:7:24, tmp#5:wybe.string, ?tmp#4:wybe.string @foo:7:24)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#4:wybe.string)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#4::wybe.string, tmp#5::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.string.<0>println(tmp#4:wybe.string)
+[1mUnbranch: [0mLeaving stmt as is: wybe.string.<0>println(tmp#4:wybe.string)
+[1mUnbranch: [0munbranching Det stmt
+[1mUnbranch: [0m    foo.<0>#cont#1(x:wybe.int)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#4::wybe.string, tmp#5::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call foo.<0>#cont#1(x:wybe.int)
+[1mUnbranch: [0mLeaving stmt as is: foo.<0>#cont#1(x:wybe.int)
+[1mUnbranch: [0mUnbranching an empty Det body
+[1mUnbranch: [0mUnbranching conjunction {(   foreign llvm move(24:wybe.int @foo:6:11, ?x:wybe.int @foo:6:7)
+[1mUnbranch: [0m    & foo.<0>nope)}
+[1mUnbranch: [0munbranching SemiDet stmt
+[1mUnbranch: [0m    foreign llvm move(24:wybe.int @foo:6:11, ?x:wybe.int @foo:6:7)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#4::wybe.string, tmp#5::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching foreign call foreign llvm move(24:wybe.int @foo:6:11, ?x:wybe.int @foo:6:7)
+[1mUnbranch: [0mReassignment of variable x in module top-level code
+[1mUnbranch: [0mLeaving stmt as is: foreign llvm move(24:wybe.int @foo:6:11, ?x:wybe.int @foo:6:7)
+[1mUnbranch: [0munbranching SemiDet stmt
+[1mUnbranch: [0m    foo.<0>nope
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#4::wybe.string, tmp#5::wybe.string, x::wybe.int}
+[1mUnbranch: [0mconverting SemiDet proc call{foo.<0>nope}
+[1mUnbranch: [0munbranching SemiDet stmt
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:6:53, ?tmp#3:wybe.string @foo:6:53)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#17::wybe.bool, tmp#4::wybe.string, tmp#5::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.int.<0>fmt(x:wybe.int @foo:6:53, ?tmp#3:wybe.string @foo:6:53)
+[1mUnbranch: [0mLeaving stmt as is: wybe.int.<0>fmt(x:wybe.int @foo:6:53, ?tmp#3:wybe.string @foo:6:53)
+[1mUnbranch: [0munbranching SemiDet stmt
+[1mUnbranch: [0m    wybe.string.<0>,,("nope succeeds: x = ":wybe.string @foo:6:33, tmp#3:wybe.string, ?tmp#2:wybe.string @foo:6:33)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#17::wybe.bool, tmp#3::wybe.string, tmp#4::wybe.string, tmp#5::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.string.<0>,,("nope succeeds: x = ":wybe.string @foo:6:33, tmp#3:wybe.string, ?tmp#2:wybe.string @foo:6:33)
+[1mUnbranch: [0mLeaving stmt as is: wybe.string.<0>,,("nope succeeds: x = ":wybe.string @foo:6:33, tmp#3:wybe.string, ?tmp#2:wybe.string @foo:6:33)
+[1mUnbranch: [0munbranching SemiDet stmt
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#2:wybe.string)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#17::wybe.bool, tmp#2::wybe.string, tmp#3::wybe.string, tmp#4::wybe.string, tmp#5::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call wybe.string.<0>println(tmp#2:wybe.string)
+[1mUnbranch: [0mLeaving stmt as is: wybe.string.<0>println(tmp#2:wybe.string)
+[1mUnbranch: [0munbranching SemiDet stmt
+[1mUnbranch: [0m    foo.<0>#cont#1(x:wybe.int)
+[1mUnbranch: [0m  with vars {tmp#0::wybe.string, tmp#1::wybe.string, tmp#17::wybe.bool, tmp#2::wybe.string, tmp#3::wybe.string, tmp#4::wybe.string, tmp#5::wybe.string, x::wybe.int}
+[1mUnbranch: [0mUnbranching call foo.<0>#cont#1(x:wybe.int)
+[1mUnbranch: [0mLeaving stmt as is: foo.<0>#cont#1(x:wybe.int)
+[1mUnbranch: [0mUnbranching an empty SemiDet body
+[1mUnbranch: [0mmkCond True tmp#17:wybe.bool
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:6:53, ?tmp#3:wybe.string @foo:6:53)
+[1mUnbranch: [0m    wybe.string.<0>,,("nope succeeds: x = ":wybe.string @foo:6:33, tmp#3:wybe.string, ?tmp#2:wybe.string @foo:6:33)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#2:wybe.string)
+[1mUnbranch: [0m    foo.<0>#cont#1(x:wybe.int)
+[1mUnbranch: [0melse
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:7:41, ?tmp#5:wybe.string @foo:7:41)
+[1mUnbranch: [0m    wybe.string.<0>,,("nope fails; x = ":wybe.string @foo:7:24, tmp#5:wybe.string, ?tmp#4:wybe.string @foo:7:24)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#4:wybe.string)
+[1mUnbranch: [0m    foo.<0>#cont#1(x:wybe.int)
+[1mUnbranch: [0m#Converted SemiDet proc call{foo.<0>nope}
+[1mUnbranch: [0m#To: 
+[1mUnbranch: [0m    foo.<0>nope(?tmp#17:wybe.bool)
+[1mUnbranch: [0m    if {testbool tmp#17:wybe.bool::
+[1mUnbranch: [0m
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:6:53, ?tmp#3:wybe.string @foo:6:53)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope succeeds: x = ":wybe.string @foo:6:33, tmp#3:wybe.string, ?tmp#2:wybe.string @foo:6:33)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#2:wybe.string)
+[1mUnbranch: [0m        foo.<0>#cont#1(x:wybe.int)
+[1mUnbranch: [0m    else::
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:7:41, ?tmp#5:wybe.string @foo:7:41)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope fails; x = ":wybe.string @foo:7:24, tmp#5:wybe.string, ?tmp#4:wybe.string @foo:7:24)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#4:wybe.string)
+[1mUnbranch: [0m        foo.<0>#cont#1(x:wybe.int)
+[1mUnbranch: [0m
+[1mUnbranch: [0m    }
+[1mUnbranch: [0m   condition -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#17::wybe.bool, tmp#4::wybe.string, tmp#5::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   then&else -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#17::wybe.bool, tmp#2::wybe.string, tmp#3::wybe.string, tmp#4::wybe.string, tmp#5::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   resources -> {}
+[1mUnbranch: [0m** Unbranched defn:
+[1mUnbranch: [0mmodule top-level code > public {semipure} (0 calls)
+[1mUnbranch: [0m0: () use !wybe.io.io:
+[1mUnbranch: [0m    foreign llvm move(42:wybe.int @foo:4:6, ?x:wybe.int @foo:4:2)
+[1mUnbranch: [0m    wybe.int.<0>fmt(x:wybe.int @foo:5:35, ?tmp#1:wybe.string @foo:5:35)
+[1mUnbranch: [0m    wybe.string.<0>,,("before conditional: x = ":wybe.string @foo:5:10, tmp#1:wybe.string, ?tmp#0:wybe.string @foo:5:10)
+[1mUnbranch: [0m    wybe.string.<0>println(tmp#0:wybe.string)
+[1mUnbranch: [0m    foreign llvm move(24:wybe.int @foo:6:11, ?x:wybe.int @foo:6:7)
+[1mUnbranch: [0m    foo.<0>nope(?tmp#17:wybe.bool)
+[1mUnbranch: [0m    if {testbool tmp#17:wybe.bool::
+[1mUnbranch: [0m
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:6:53, ?tmp#3:wybe.string @foo:6:53)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope succeeds: x = ":wybe.string @foo:6:33, tmp#3:wybe.string, ?tmp#2:wybe.string @foo:6:33)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#2:wybe.string)
+[1mUnbranch: [0m        foo.<0>#cont#1(x:wybe.int)
+[1mUnbranch: [0m    else::
+[1mUnbranch: [0m        wybe.int.<0>fmt(x:wybe.int @foo:7:41, ?tmp#5:wybe.string @foo:7:41)
+[1mUnbranch: [0m        wybe.string.<0>,,("nope fails; x = ":wybe.string @foo:7:24, tmp#5:wybe.string, ?tmp#4:wybe.string @foo:7:24)
+[1mUnbranch: [0m        wybe.string.<0>println(tmp#4:wybe.string)
+[1mUnbranch: [0m        foo.<0>#cont#1(x:wybe.int)
+[1mUnbranch: [0m
+[1mUnbranch: [0m    }
+[1mUnbranch: [0m   condition -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#17::wybe.bool, tmp#4::wybe.string, tmp#5::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   then&else -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#17::wybe.bool, tmp#2::wybe.string, tmp#3::wybe.string, tmp#4::wybe.string, tmp#5::wybe.string, x::wybe.int}
+[1mUnbranch: [0m   resources -> {}
+[1mUnbranch: [0m================================================
+[1mUnbranch: [0m** Unbranching proc nope:
+[1mUnbranch: [0mproc nope > {test,noinline} (0 calls)
+[1mUnbranch: [0m0: nope():
+[1mUnbranch: [0m    fail
+[1mUnbranch: [0m** Unbranching with output params:[?#success:wybe.bool]
+[1mUnbranch: [0m** Unbranching with output args:[?#success:wybe.bool]
+[1mUnbranch: [0munbranching SemiDet stmt
+[1mUnbranch: [0m    fail
+[1mUnbranch: [0m  with vars {}
+[1mUnbranch: [0mUnbranching a Fail
+[1mUnbranch: [0m** Unbranched defn:
+[1mUnbranch: [0mproc nope > {noinline} (0 calls)
+[1mUnbranch: [0m0: nope(?#success:wybe.bool):
+[1mUnbranch: [0m    foreign llvm move(0:wybe.bool, ?#success:wybe.bool)
+[1mUnbranch: [0m================================================
+[1mUnbranch: [0m** Unbranching proc nope2:
+[1mUnbranch: [0mproc nope2 > {test,noinline} (0 calls)
+[1mUnbranch: [0m0: nope2(?value:wybe.int @foo:2:28):
+[1mUnbranch: [0m    foreign llvm move(2:wybe.int @foo:2:50, ?value:wybe.int @foo:2:42)
+[1mUnbranch: [0m    fail
+[1mUnbranch: [0m** Unbranching with output params:[?value:wybe.int @foo:2:28,?#success:wybe.bool]
+[1mUnbranch: [0m** Unbranching with output args:[?value:wybe.int @foo:2:28,?#success:wybe.bool]
+[1mUnbranch: [0munbranching SemiDet stmt
+[1mUnbranch: [0m    foreign llvm move(2:wybe.int @foo:2:50, ?value:wybe.int @foo:2:42)
+[1mUnbranch: [0m  with vars {}
+[1mUnbranch: [0mUnbranching foreign call foreign llvm move(2:wybe.int @foo:2:50, ?value:wybe.int @foo:2:42)
+[1mUnbranch: [0mLeaving stmt as is: foreign llvm move(2:wybe.int @foo:2:50, ?value:wybe.int @foo:2:42)
+[1mUnbranch: [0munbranching SemiDet stmt
+[1mUnbranch: [0m    fail
+[1mUnbranch: [0m  with vars {value::wybe.int}
+[1mUnbranch: [0mUnbranching a Fail
+[1mUnbranch: [0m** Unbranched defn:
+[1mUnbranch: [0mproc nope2 > {noinline} (0 calls)
+[1mUnbranch: [0m0: nope2(?value:wybe.int @foo:2:28, ?#success:wybe.bool):
+[1mUnbranch: [0m    foreign llvm move(2:wybe.int @foo:2:50, ?value:wybe.int @foo:2:42)
+[1mUnbranch: [0m    foreign llvm move(0:wybe.bool, ?#success:wybe.bool)
+[1mUnbranch: [0m================================================
+======================================================================
+AFTER UNBRANCHING:
+ Module foo
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : foo.<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+module top-level code > public {semipure} (0 calls)
+0: () use !wybe.io.io:
+    foreign llvm move(42:wybe.int @foo:4:6, ?x:wybe.int @foo:4:2)
+    wybe.int.<0>fmt(x:wybe.int @foo:5:35, ?tmp#1:wybe.string @foo:5:35)
+    wybe.string.<0>,,("before conditional: x = ":wybe.string @foo:5:10, tmp#1:wybe.string, ?tmp#0:wybe.string @foo:5:10)
+    wybe.string.<0>println(tmp#0:wybe.string)
+    foreign llvm move(24:wybe.int @foo:6:11, ?x:wybe.int @foo:6:7)
+    foo.<0>nope(?tmp#17:wybe.bool)
+    if {testbool tmp#17:wybe.bool::
+
+        wybe.int.<0>fmt(x:wybe.int @foo:6:53, ?tmp#3:wybe.string @foo:6:53)
+        wybe.string.<0>,,("nope succeeds: x = ":wybe.string @foo:6:33, tmp#3:wybe.string, ?tmp#2:wybe.string @foo:6:33)
+        wybe.string.<0>println(tmp#2:wybe.string)
+        foo.<0>#cont#1(x:wybe.int)
+    else::
+        wybe.int.<0>fmt(x:wybe.int @foo:7:41, ?tmp#5:wybe.string @foo:7:41)
+        wybe.string.<0>,,("nope fails; x = ":wybe.string @foo:7:24, tmp#5:wybe.string, ?tmp#4:wybe.string @foo:7:24)
+        wybe.string.<0>println(tmp#4:wybe.string)
+        foo.<0>#cont#1(x:wybe.int)
+
+    }
+   condition -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#17::wybe.bool, tmp#4::wybe.string, tmp#5::wybe.string, x::wybe.int}
+   then&else -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#17::wybe.bool, tmp#2::wybe.string, tmp#3::wybe.string, tmp#4::wybe.string, tmp#5::wybe.string, x::wybe.int}
+   resources -> {}
+
+
+proc #cont#1 > (0 calls)
+0: #cont#1(x:wybe.int) use !wybe.io.io:
+    wybe.int.<0>fmt(x:wybe.int @foo:9:34, ?tmp#7:wybe.string @foo:9:34)
+    wybe.string.<0>,,("after conditional; x = ":wybe.string @foo:9:10, tmp#7:wybe.string, ?tmp#6:wybe.string @foo:9:10)
+    wybe.string.<0>println(tmp#6:wybe.string)
+    foreign llvm move(42:wybe.int @foo:11:6, ?x:wybe.int @foo:11:2)
+    wybe.int.<0>fmt(x:wybe.int @foo:12:42, ?tmp#9:wybe.string @foo:12:42)
+    wybe.string.<0>,,("before second conditional: x = ":wybe.string @foo:12:10, tmp#9:wybe.string, ?tmp#8:wybe.string @foo:12:10)
+    wybe.string.<0>println(tmp#8:wybe.string)
+    foo.<0>nope2(?x:wybe.int @foo:13:13, ?tmp#16:wybe.bool)
+    if {testbool tmp#16:wybe.bool::
+
+        wybe.int.<0>fmt(x:wybe.int @foo:13:49, ?tmp#11:wybe.string @foo:13:49)
+        wybe.string.<0>,,("nope2 succeeds: x = ":wybe.string @foo:13:28, tmp#11:wybe.string, ?tmp#10:wybe.string @foo:13:28)
+        wybe.string.<0>println(tmp#10:wybe.string)
+        foo.<0>#cont#2(x:wybe.int)
+    else::
+        wybe.int.<0>fmt(x:wybe.int @foo:14:42, ?tmp#13:wybe.string @foo:14:42)
+        wybe.string.<0>,,("nope2 fails; x = ":wybe.string @foo:14:24, tmp#13:wybe.string, ?tmp#12:wybe.string @foo:14:24)
+        wybe.string.<0>println(tmp#12:wybe.string)
+        foo.<0>#cont#2(x:wybe.int)
+
+    }
+   condition -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#12::wybe.string, tmp#13::wybe.string, tmp#16::wybe.bool, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+   then&else -> {tmp#0::wybe.string, tmp#1::wybe.string, tmp#10::wybe.string, tmp#11::wybe.string, tmp#12::wybe.string, tmp#13::wybe.string, tmp#16::wybe.bool, tmp#6::wybe.string, tmp#7::wybe.string, tmp#8::wybe.string, tmp#9::wybe.string, x::wybe.int}
+   resources -> {}
+
+
+proc #cont#2 > (0 calls)
+0: #cont#2(x:wybe.int) use !wybe.io.io:
+    wybe.int.<0>fmt(x:wybe.int @foo:16:41, ?tmp#15:wybe.string @foo:16:41)
+    wybe.string.<0>,,("after second conditional; x = ":wybe.string @foo:16:10, tmp#15:wybe.string, ?tmp#14:wybe.string @foo:16:10)
+    wybe.string.<0>println(tmp#14:wybe.string)
+
+
+proc nope > {noinline} (0 calls)
+0: nope(?#success:wybe.bool):
+    foreign llvm move(0:wybe.bool, ?#success:wybe.bool)
+
+
+proc nope2 > {noinline} (0 calls)
+0: nope2(?value:wybe.int @foo:2:28, ?#success:wybe.bool):
+    foreign llvm move(2:wybe.int @foo:2:50, ?value:wybe.int @foo:2:42)
+    foreign llvm move(0:wybe.bool, ?#success:wybe.bool)
+
+LLVM code       : None
+
+======================================================================
+AFTER EVERYTHING:
+ Module foo
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : foo.<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+module top-level code > public {semipure} (0 calls)
+0: foo.<0>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+  MultiSpeczDepInfo: [(12,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(13,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(14,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+    wybe.int.fmt<0>(42:wybe.int, ?tmp#1##0:wybe.string) #0 @foo:5:35
+    wybe.string.,,<0>("before conditional: x = ":wybe.string, ~tmp#1##0:wybe.string, ?tmp#0##0:wybe.string) #1 @foo:5:10
+    wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #12 @string:164:33
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @io:17:31
+    foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @io:17:31
+    foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:17:31
+    foo.nope<0>(?tmp#17##0:wybe.bool) #3 @foo:6:16
+    case ~tmp#17##0:wybe.bool of
+    0:
+        wybe.int.fmt<0>(24:wybe.int, ?tmp#5##0:wybe.string) #8 @foo:7:41
+        wybe.string.,,<0>("nope fails; x = ":wybe.string, ~tmp#5##0:wybe.string, ?tmp#4##0:wybe.string) #9 @foo:7:24
+        wybe.string.print<0>[410bae77d3](~tmp#4##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @string:164:33
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#22##0:wybe.phantom) @io:17:31
+        foreign c putchar('\n':wybe.char, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @io:17:31
+        foreign lpvm store(~%tmp#23##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:17:31
+        foo.#cont#1<0>(24:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11
+
+    1:
+        wybe.int.fmt<0>(24:wybe.int, ?tmp#3##0:wybe.string) #4 @foo:6:53
+        wybe.string.,,<0>("nope succeeds: x = ":wybe.string, ~tmp#3##0:wybe.string, ?tmp#2##0:wybe.string) #5 @foo:6:33
+        wybe.string.print<0>[410bae77d3](~tmp#2##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @string:164:33
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#25##0:wybe.phantom) @io:17:31
+        foreign c putchar('\n':wybe.char, ~tmp#25##0:wybe.phantom, ?tmp#26##0:wybe.phantom) @io:17:31
+        foreign lpvm store(~%tmp#26##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:17:31
+        foo.#cont#1<0>(24:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7
+
+
+
+proc #cont#1 > (2 calls)
+0: foo.#cont#1<0>
+#cont#1(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+  MultiSpeczDepInfo: [(15,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(16,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(17,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(18,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+    wybe.int.fmt<0>(~x##0:wybe.int, ?tmp#7##0:wybe.string) #0 @foo:9:34
+    wybe.string.,,<0>("after conditional; x = ":wybe.string, ~tmp#7##0:wybe.string, ?tmp#6##0:wybe.string) #1 @foo:9:10
+    wybe.string.print<0>[410bae77d3](~tmp#6##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #15 @string:164:33
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom) @io:17:31
+    foreign c putchar('\n':wybe.char, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @io:17:31
+    foreign lpvm store(~%tmp#19##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:17:31
+    wybe.int.fmt<0>(42:wybe.int, ?tmp#9##0:wybe.string) #3 @foo:12:42
+    wybe.string.,,<0>("before second conditional: x = ":wybe.string, ~tmp#9##0:wybe.string, ?tmp#8##0:wybe.string) #4 @foo:12:10
+    wybe.string.print<0>[410bae77d3](~tmp#8##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #16 @string:164:33
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @io:17:31
+    foreign c putchar('\n':wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @io:17:31
+    foreign lpvm store(~%tmp#22##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:17:31
+    foo.nope2<0>(?x##2:wybe.int, ?tmp#16##0:wybe.bool) #6 @foo:13:6
+    case ~tmp#16##0:wybe.bool of
+    0:
+        wybe.int.fmt<0>(x##2:wybe.int, ?tmp#13##0:wybe.string) #11 @foo:14:42
+        wybe.string.,,<0>("nope2 fails; x = ":wybe.string, ~tmp#13##0:wybe.string, ?tmp#12##0:wybe.string) #12 @foo:14:24
+        wybe.string.print<0>[410bae77d3](~tmp#12##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #17 @string:164:33
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#24##0:wybe.phantom) @io:17:31
+        foreign c putchar('\n':wybe.char, ~tmp#24##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @io:17:31
+        foreign lpvm store(~%tmp#25##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:17:31
+        foo.#cont#2<0>(~x##2:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14
+
+    1:
+        wybe.int.fmt<0>(x##2:wybe.int, ?tmp#11##0:wybe.string) #7 @foo:13:49
+        wybe.string.,,<0>("nope2 succeeds: x = ":wybe.string, ~tmp#11##0:wybe.string, ?tmp#10##0:wybe.string) #8 @foo:13:28
+        wybe.string.print<0>[410bae77d3](~tmp#10##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #18 @string:164:33
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#27##0:wybe.phantom) @io:17:31
+        foreign c putchar('\n':wybe.char, ~tmp#27##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @io:17:31
+        foreign lpvm store(~%tmp#28##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:17:31
+        foo.#cont#2<0>(~x##2:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10
+
+
+
+proc #cont#2 > (2 calls)
+0: foo.#cont#2<0>
+#cont#2(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+  MultiSpeczDepInfo: [(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+    wybe.int.fmt<0>(~x##0:wybe.int, ?tmp#15##0:wybe.string) #0 @foo:16:41
+    wybe.string.,,<0>("after second conditional; x = ":wybe.string, ~tmp#15##0:wybe.string, ?tmp#14##0:wybe.string) #1 @foo:16:10
+    wybe.string.print<0>[410bae77d3](~tmp#14##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @string:164:33
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#17##0:wybe.phantom) @io:17:31
+    foreign c putchar('\n':wybe.char, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @io:17:31
+    foreign lpvm store(~%tmp#18##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:17:31
+
+
+proc nope > {noinline} (3 calls)
+0: foo.nope<0>
+nope(?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+
+proc nope2 > {noinline} (3 calls)
+0: foo.nope2<0>
+nope2(?value##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(2:wybe.int, ?value##0:wybe.int) @foo:2:42
+    foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+  LLVM code       :
+
+; ModuleID = 'foo'
+
+
+ 
+
+
+@foo.5 =    constant {i64, i64} { i64 16, i64 ptrtoint ([17 x i8]* @foo.4 to i64) }
+
+
+@foo.13 =    constant {i64, i64} { i64 17, i64 ptrtoint ([18 x i8]* @foo.12 to i64) }
+
+
+@foo.3 =    constant {i64, i64} { i64 19, i64 ptrtoint ([20 x i8]* @foo.2 to i64) }
+
+
+@foo.11 =    constant {i64, i64} { i64 20, i64 ptrtoint ([21 x i8]* @foo.10 to i64) }
+
+
+@foo.7 =    constant {i64, i64} { i64 23, i64 ptrtoint ([24 x i8]* @foo.6 to i64) }
+
+
+@foo.1 =    constant {i64, i64} { i64 24, i64 ptrtoint ([25 x i8]* @foo.0 to i64) }
+
+
+@foo.15 =    constant {i64, i64} { i64 30, i64 ptrtoint ([31 x i8]* @foo.14 to i64) }
+
+
+@foo.9 =    constant {i64, i64} { i64 31, i64 ptrtoint ([32 x i8]* @foo.8 to i64) }
+
+
+@foo.6 =    constant [24 x i8] c"after conditional; x = \00"
+
+
+@foo.14 =    constant [31 x i8] c"after second conditional; x = \00"
+
+
+@foo.0 =    constant [25 x i8] c"before conditional: x = \00"
+
+
+@foo.8 =    constant [32 x i8] c"before second conditional: x = \00"
+
+
+@foo.4 =    constant [17 x i8] c"nope fails; x = \00"
+
+
+@foo.2 =    constant [20 x i8] c"nope succeeds: x = \00"
+
+
+@foo.12 =    constant [18 x i8] c"nope2 fails; x = \00"
+
+
+@foo.10 =    constant [21 x i8] c"nope2 succeeds: x = \00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external fastcc  void @"wybe.string.print<0>[410bae77d3]"(i64)    
+
+
+declare external fastcc  i64 @"wybe.string.,,<0>"(i64, i64)    
+
+
+declare external fastcc  i64 @"wybe.int.fmt<0>"(i64)    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  void @"foo.<0>"()    {
+entry:
+  %0 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  42)  
+  %1 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @foo.1, i32 0, i32 0) to i64), i64  %0)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %1)  
+  tail call ccc  void  @putchar(i8  10)  
+  %2 = tail call fastcc  i1  @"foo.nope<0>"()  
+  br i1 %2, label %if.then, label %if.else 
+if.then:
+  %3 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  24)  
+  %4 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @foo.3, i32 0, i32 0) to i64), i64  %3)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %4)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"foo.#cont#1<0>"(i64  24)  
+  ret void 
+if.else:
+  %5 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  24)  
+  %6 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @foo.5, i32 0, i32 0) to i64), i64  %5)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %6)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call fastcc  void  @"foo.#cont#1<0>"(i64  24)  
+  ret void 
+}
+
+
+define external fastcc  void @"foo.#cont#1<0>"(i64  %"x##0")    {
+entry:
+  %0 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %"x##0")  
+  %1 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @foo.7, i32 0, i32 0) to i64), i64  %0)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %1)  
+  tail call ccc  void  @putchar(i8  10)  
+  %2 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  42)  
+  %3 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @foo.9, i32 0, i32 0) to i64), i64  %2)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %3)  
+  tail call ccc  void  @putchar(i8  10)  
+  %4 = tail call fastcc  {i64, i1}  @"foo.nope2<0>"()  
+  %5 = extractvalue {i64, i1} %4, 0 
+  %6 = extractvalue {i64, i1} %4, 1 
+  br i1 %6, label %if.then, label %if.else 
+if.then:
+  %7 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %5)  
+  %8 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @foo.11, i32 0, i32 0) to i64), i64  %7)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %8)  
+  tail call ccc  void  @putchar(i8  10)  
+  musttail call fastcc  void  @"foo.#cont#2<0>"(i64  %5)  
+  ret void 
+if.else:
+  %9 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %5)  
+  %10 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @foo.13, i32 0, i32 0) to i64), i64  %9)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %10)  
+  tail call ccc  void  @putchar(i8  10)  
+  musttail call fastcc  void  @"foo.#cont#2<0>"(i64  %5)  
+  ret void 
+}
+
+
+define external fastcc  void @"foo.#cont#2<0>"(i64  %"x##0")    {
+entry:
+  %0 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %"x##0")  
+  %1 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @foo.15, i32 0, i32 0) to i64), i64  %0)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %1)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+}
+
+
+define external fastcc  i1 @"foo.nope<0>"() noinline   {
+entry:
+  ret i1 0 
+}
+
+
+define external fastcc  {i64, i1} @"foo.nope2<0>"() noinline   {
+entry:
+  %0 = insertvalue {i64, i1} undef, i64 2, 0 
+  %1 = insertvalue {i64, i1} %0, i1 0, 1 
+  ret {i64, i1} %1 
+}

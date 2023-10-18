@@ -1,0 +1,1 @@
+pub def {test} lt(x:int, y:int) { foreign llvm icmp_slt(x,y) }

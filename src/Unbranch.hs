@@ -370,71 +370,81 @@ unbranchStmts (stmt:stmts) alt sense = do
     placedApply unbranchStmt stmt stmts alt sense
 
 
--- | 'Unbranch' a single statement, given a list of following statements
---   and an already unbranched list of alternative statements. This also
---   considers the sense of the test: if True, execution should go to the
---   following statements on success and the alternative statements on
---   failure; if False, then vice-versa. The following statements are
---   represented as a pair of a list of not yet unbranched statements
---   and a list of unbranched alternative statements. The alternative
---   statements will have been factored out into a call to a fresh
---   procedure if necessary (ie, if it will be used in more than one case,
---   it will be a short list).
+-- | 'Unbranch' a single statement, given a list of following statements and an
+--   already unbranched list of alternative statements. This also considers the
+--   sense of the test: if True, execution should go to the following statements
+--   on success and the alternative statements on failure; if False, then
+--   vice-versa. The following statements are represented as a pair of a list of
+--   not yet unbranched statements and a list of unbranched alternative
+--   statements. The alternative statements will have been factored out into a
+--   call to a fresh procedure if necessary (ie, if it will be used in more than
+--   one case, it will be a short list).
 --
 --   This transforms loops into calls to freshly generated procedures that
---   implement not only the loops themselves, but all following code. That
---   is, rather than returning at the loop exit(s), the generated procs
---   call procs for the code following the loops. Similarly, conditionals
---   are transformed by generating a separate proc for the code following
---   the conditional and adding a call to this proc at the end of each arm
---   of the conditional in place of the code following the conditional, so
---   that conditionals are always the final statement in a statement
---   sequence, as are calls to loop procs.
+--   implement not only the loops themselves, but all following code. That is,
+--   rather than returning at the loop exit(s), the generated procs call procs
+--   for the code following the loops. Similarly, conditionals are transformed
+--   by generating a separate proc for the code following the conditional and
+--   adding a call to this proc at the end of each arm of the conditional in
+--   place of the code following the conditional, so that conditionals are
+--   always the final statement in a statement sequence, as are calls to loop
+--   procs.
 --
---   The input arguments to generated procs are all the variables in
---   scope everywhere the proc is called. The proc generated for the code
---   after a conditional is called only from the end of each branch, so the
---   set of input arguments is just the intersection of the sets of
---   variables defined at the end of each branch. Also note that the only
---   variable defined by the condition of a conditional that can be used in
---   the 'else' branch is the condition variable itself. The condition may
---   be permitted to bind other variables, but in the 'else' branch the
---   condition is considered to have failed, so the other variables cannot
---   be used.
+--   The input arguments to generated procs are all the variables in scope
+--   everywhere the proc is called. The proc generated for the code after a
+--   conditional is called only from the end of each branch, so the set of input
+--   arguments is just the intersection of the sets of variables defined at the
+--   end of each branch. Also note that the only variable defined by the
+--   condition of a conditional that can be used in the 'else' branch is the
+--   condition variable itself. The condition may be permitted to bind other
+--   variables, but in the 'else' branch the condition is considered to have
+--   failed, so the other variables cannot be used.
 --
 --   The variables in scope at the start of a loop are the ones in scope at
---   *every* call to the generated proc. Since variables defined before the
---   loop can be redefined in the loop but cannot become "lost", this means
---   the intersection of the variables available at all calls is just the
---   set of variables defined at the start of the loop.  The inputs to the
---   proc generated for the code following a loop is the set of variables
---   defined at every 'break' in the loop.
+--   *every* call to the generated proc. Since variables defined before the loop
+--   can be redefined in the loop but cannot become "lost", this means the
+--   intersection of the variables available at all calls is just the set of
+--   variables defined at the start of the loop.  The inputs to the proc
+--   generated for the code following a loop is the set of variables defined at
+--   every 'break' in the loop.
 --
 --   Because these generated procs always chain to the next proc, they don't
---   need to return any values not returned by the proc they are generated
---   for, so the output arguments for all of them are just the output
---   arguments for the proc they are generated for.
+--   need to return any values not returned by the proc they are generated for,
+--   so the output arguments for all of them are just the output arguments for
+--   the proc they are generated for.
 --
---   Because later compiler passes will inline simple procs and remove dead
---   code and unneeded input and output arguments, we don't bother to try
---   to optimise these things here.
+--   Because later compiler passes will inline simple procs and remove dead code
+--   and unneeded input and output arguments, we don't bother to try to optimise
+--   these things here.
+--
+--   To handle "backtracking" of variable reassignment after failure (initial
+--   variable assignments need no effort; after failure, they are simply treated
+--   as unassigned), we copy variable values before they are first reassigned,
+--   and reset the variables to their saved values at the start of the else
+--   branch. If a variable is reassigned multiple times in a semidet block, it
+--   only needs to be saved before the first reassignment.  A variable that is
+--   first assigned in a semidet block and then reassigned in the same block
+--   need not be saved or restored.
+--
+--   A semidet conjunction is turned into nested conditionals, checking for
+--   success of each semidet call.  In this case, the failure of subsequent
+--   calls in the semidet block must restore the values of all saved variables
+--   in the whole semidet block.  In general, before each call, we generate an
+--   assignment to a temp variable for any variables that call re-assigns for
+--   the first time in that semidet code block.  We also add code to assign that
+--   variable from the saved temp variable to the alternative code block that
+--   will be executed if the semidet block fails.
 --
 unbranchStmt :: Stmt -> OptPos -> [Placed Stmt] -> [Placed Stmt]
              -> Bool -> Unbrancher [Placed Stmt]
 unbranchStmt stmt@(ProcCall _ _ True args) _ _ _ _ =
     shouldnt $ "Resources should have been handled before unbranching: "
                ++ showStmt 4 stmt
--- unbranchStmt context stmt@(ProcCall _ SemiDet _ _) _ _ _ _
---     detism <- gets brDetism
---   | detism < SemiDet
---   = shouldnt $ "SemiDet proc call " ++ show stmt
---                ++ " in a " ++ show context ++ " context"
-unbranchStmt stmt@(ProcCall func SemiDet _ args) pos
-             stmts alt sense = do
+unbranchStmt stmt@(ProcCall func SemiDet _ args) pos stmts alt sense = do
     mustBeSemiDet ("SemiDet proc call " ++ show stmt)
     logUnbranch $ "converting SemiDet proc call" ++ show stmt
     (args', val) <- addTestOutExp func args
-    args'' <- unbranchExps args'
+    args'' <- unbranchArgs args'
     condVars <- gets brVars
     stmts' <- unbranchStmts stmts alt sense
     vars <- gets brVars
@@ -447,10 +457,9 @@ unbranchStmt stmt@(ProcCall func SemiDet _ args) pos
     logUnbranch $ "#Converted SemiDet proc call" ++ show stmt
     logUnbranch $ "#To: " ++ showBody 4 result
     return result
-unbranchStmt stmt@(ProcCall func calldetism r args) pos stmts alt
-             sense = do
+unbranchStmt stmt@(ProcCall func calldetism r args) pos stmts alt sense = do
     logUnbranch $ "Unbranching call " ++ showStmt 4 stmt
-    args' <- unbranchExps args
+    args' <- unbranchArgs args
     func' <- unbranchProcFunctor func
     let stmt' = ProcCall func' calldetism r args'
     case calldetism of
@@ -460,7 +469,7 @@ unbranchStmt stmt@(ProcCall func calldetism r args) pos stmts alt
       SemiDet  -> shouldnt "SemiDet case already covered!"
 unbranchStmt stmt@(ForeignCall l nm fs args) pos stmts alt sense = do
     logUnbranch $ "Unbranching foreign call " ++ showStmt 4 stmt
-    args' <- unbranchExps args
+    args' <- unbranchArgs args
     let stmt' = ForeignCall l nm fs args'
     leaveStmtAsIs stmt' pos stmts alt sense
 unbranchStmt stmt@(TestBool val) pos stmts alt sense = do
@@ -485,7 +494,6 @@ unbranchStmt stmt@(Or [] exitVars _) pos stmts alt sense = do
 unbranchStmt stmt@(Or [disj] exitVars _) _ stmts alt sense = do
     placedApply unbranchStmt disj stmts alt sense
 unbranchStmt stmt@(Or (disj:disjs) exitVars res) pos stmts alt sense = do
-    detism <- gets brDetism
     let exitVars' = trustFromJust "unbranching Disjunction without exitVars"
                     exitVars
     let res' = trustFromJust "unbranching Loop without res" res
@@ -519,7 +527,6 @@ unbranchStmt (Cond tst thn els condVars exitVars res) pos stmts alt sense = do
     inSemiDetContext
       $ placedApply unbranchStmt tst thn' els' True
 unbranchStmt (Loop body exitVars res) pos stmts alt sense = do
-    detism <- gets brDetism
     let exitVars' = trustFromJust "unbranching Loop without exitVars" exitVars
     let res' = trustFromJust "unbranching Loop without res" res
     logUnbranch $ "Handling loop:" ++ showBody 4 body
@@ -567,7 +574,8 @@ leaveStmtAsIs stmt pos stmts alt sense = do
     return $ maybePlace stmt pos:stmts'
 
 
--- | Execute the given code if semi-deterministic; otherwise report an error
+-- | Execute the given code if the context is semi-deterministic; otherwise
+-- report an error
 mustBeSemiDet :: String -> Unbrancher ()
 mustBeSemiDet msg = do
     detism <- gets brDetism
@@ -666,19 +674,35 @@ unbranchParam param@Param{paramType=ty} = param{paramType=unbranchType ty}
 -- Unbranch a ProcFunctore, tansforming expressions in Highers
 unbranchProcFunctor :: ProcFunctor -> Unbrancher ProcFunctor
 unbranchProcFunctor func@First{} = return func
-unbranchProcFunctor (Higher fn)  = Higher . head <$> unbranchExps [fn]
+unbranchProcFunctor (Higher fn)  = Higher . head <$> unbranchArgs [fn]
 
 
 -- |Add all output arguments of a param list to the symbol table
 --  and hoist all closures
-unbranchExps :: [Placed Exp] -> Unbrancher [Placed Exp]
-unbranchExps args = do
+unbranchArgs :: [Placed Exp] -> Unbrancher [Placed Exp]
+unbranchArgs args = do
+    detism <- gets brDetism
+    selectDetism (return ())
+          (mapM_ (noteReassignment . content) args) detism
     mapM_ (defArg . content) args
     mapM (placedApply unbranchExp) args
 
 
+noteReassignment :: Exp -> Unbrancher ()
+noteReassignment (Typed exp _ _) = noteReassignment exp
+noteReassignment (Var name flow _)
+  | flowsOut flow = do
+    procName <- gets brProcName
+    reassigned <- Map.member name <$> gets brVars
+    when reassigned $ do
+        logUnbranch $ "Reassignment of variable " ++ name
+            ++ " in " ++ showProcName procName
+
+noteReassignment _ = return ()
+
+
 -- | Unbranch an expression, transforming Closures and AnonProcs into fresh
--- 'closure' procs
+-- 'closure' procs.  This shouldn't be called outside of unbranchArgs.
 unbranchExp :: Exp -> OptPos -> Unbrancher (Placed Exp)
 unbranchExp (Typed exp ty cast) pos = do
     exp' <- content <$> unbranchExp exp Nothing
@@ -704,7 +728,7 @@ unbranchExp exp@(AnonProc mods params pstmts clsd res) pos = do
     procSpec <- lift $ addProcDef procDef'
     addClosure procSpec freeVars pos name
 unbranchExp exp@(Closure ps free) pos = do
-    free' <- unbranchExps free
+    free' <- unbranchArgs free
     isClosure <- lift $ isClosureProc ps
     if isClosure
     then return $ maybePlace exp pos

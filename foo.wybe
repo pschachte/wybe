@@ -1,0 +1,16 @@
+def {test,noinline} nope { fail }
+def {test,noinline} nope2(?value:int) { ?value = 2; fail }
+
+?x = 42
+!println("before conditional: x = $x")
+if { ?x = 24 ; nope :: !println("nope succeeds: x = $x")
+    | else :: !println("nope fails; x = $x")
+    }
+!println("after conditional; x = $x")
+
+?x = 42
+!println("before second conditional: x = $x")
+if { nope2(?x) :: !println("nope2 succeeds: x = $x")
+    | else :: !println("nope2 fails; x = $x")
+    }
+!println("after second conditional; x = $x")
