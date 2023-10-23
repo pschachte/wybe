@@ -318,12 +318,6 @@ flattenStmt' stmt@(ProcCall fn@(First [] "=" id) callDetism res [arg1,arg2]) pos
   where varCheck argContent hasOuts
             = expIsVar argContent && flowsOut (flattenedExpFlow argContent)
                                   && hasOuts
-flattenStmt' stmt@(ProcCall (First [] "fail" _) _ _ []) pos _ =
-    emit pos Fail
-flattenStmt' stmt@(ProcCall (First [] "break" _) _ _ []) pos _ =
-    emit pos Break
-flattenStmt' stmt@(ProcCall (First [] "next" _) _ _ []) pos _ =
-    emit pos Next
 flattenStmt' stmt@(ProcCall func detism res args) pos d = do
     logFlatten $ " Flattening call " ++ show stmt
     args' <- flattenStmtArgs args pos
@@ -417,6 +411,7 @@ flattenStmt' (UseResources res vars body) pos detism = do
     emit pos $ UseResources res vars body'
 flattenStmt' Nop pos _ = emit pos Nop
 flattenStmt' Fail pos _ = emit pos Fail
+flattenStmt' Return pos _ = emit pos Return
 flattenStmt' Break pos _ = emit pos Break
 flattenStmt' Next pos _ = emit pos Next
 
