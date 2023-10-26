@@ -75,7 +75,6 @@ import Control.Monad
 import Control.Monad.Trans       (lift)
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.State
-import Control.Monad.Extra
 import Data.List                 as List
 import Data.Set                  as Set
 import Data.Map                  as Map
@@ -105,7 +104,7 @@ unbranchProc proc _ = unbranchProc' proc
 unbranchProc' :: ProcDef -> Compiler ProcDef
 unbranchProc' proc = do
     let name = procName proc
-    logMsg Unbranch $ "** Unbranching " ++ showProcName name ++ ":"
+    logMsg Unbranch $ "** Unbranching proc " ++ name ++ ":"
                       ++ showProcDef 0 proc ++ "\n"
     let ProcDefSrc body = procImpln proc
     let detism = procDetism proc
@@ -216,11 +215,9 @@ data UnbrancherState = Unbrancher {
     brNewDefs    :: [ProcDef],    -- ^Generated unbranched auxilliary procedures
     brClosures   :: Map (ProcSpec, Map Integer Exp) ProcSpec,
                                   -- ^Generated procs for closures
-    brBacktrack  :: Map VarName (Placed Stmt),
-                                  -- ^Map from variables reassigned in a semidet
-                                  -- context to the assignment statement that
-                                  -- will restore it to its state before the
-                                  -- semidet context (in case of failure).
+    brPreassigned:: Set VarName,  -- ^Variables already assigned at entry to
+                                  -- the current SemiDet context (and so must be
+                                  -- saved if they are reassigned)
     brDetism     :: Determinism,  -- ^The determinism of the current context
     brAlternate  :: [Placed Stmt], -- ^Code to execute in case of failure
     brSense      :: Bool,         -- ^True iff execute brAlternate on failure 
@@ -249,33 +246,20 @@ initUnbrancherState loopinfo tmpCtr detism params =
                  , flowsOut fl && flowsIn fl]
         alt = selectDetism [] [move boolFalse testOutExp] detism
     in Unbrancher loopinfo defined tmpCtr outParams outArgs
-            (Set.fromList inOuts) [] Map.empty Map.empty detism alt True
+            (Set.fromList inOuts) [] Map.empty Set.empty detism alt True
 
 
--- | Add the specified variable to the symbol table.  Also, if this is a semidet
--- context, this variable has been previously assigned and not saved yet in this
--- semidet block , it returns a statement to save the value of the variable so
--- that we can restore it on failure.  The code to restore it is saved in the
--- monad.
-defVar :: VarName -> TypeSpec -> Unbrancher (Maybe (Placed Stmt))
-defVar var ty = do
-    detism <- gets brDetism
-    reassigning <- Map.member var <$> gets brVars
-    alreadySaved <- Map.member var <$> gets brBacktrack
+-- | Add the specified variable to the symbol table
+defVar :: VarName -> TypeSpec -> Unbrancher ()
+defVar var ty =
     modify (\s -> s { brVars = Map.insert var ty $ brVars s })
-    if detism >= SemiDet && reassigning && not alreadySaved
-        then do
-            temp <- tempVar
-            modify (\s -> s { brVars = Map.insert temp ty $ brVars s })
-            let save = move (varGetTyped var ty) (varSetTyped temp ty)
-            let restore = move (varGetTyped temp ty) (varSetTyped var ty)
-            modify (\s -> s { brBacktrack
-                                = Map.insert var restore $ brBacktrack s })
-            logUnbranch $ "Variable " ++ var
-                    ++ " being reassigned in a semidet context"
-            logUnbranch $ "    Saving with " ++ showStmt 4 (content save)
-            return $ Just save
-        else return Nothing
+
+
+-- | if the Exp is a variable, add it to the symbol table
+defIfVar :: TypeSpec -> Exp -> Unbrancher ()
+defIfVar _ (Typed exp ty _) = defIfVar ty exp
+defIfVar defaultType (Var name _ _) = defVar name defaultType
+defIfVar _ _ = return ()
 
 
 -- |Record the specified dictionary as the current dictionary.
@@ -294,18 +278,15 @@ withVars vars unbrancher = do
 
 
 -- |Execute the specified code with the brancher determinism set to SemiDet, and
--- with the specified alternative code, and then reset the determinism and
--- alternative code to what they were.
+-- with the specified alternative code, and then reset the determinism to what
+-- it was. 
 inSemiDetContext :: [Placed Stmt] -> Unbrancher a -> Unbrancher a
 inSemiDetContext alt code = do
     oldDetism <- gets brDetism
     oldAlt <- gets brAlternate
-    backtrack0 <- gets brBacktrack
-    modify $ \s -> s { brAlternate = alt, brDetism = SemiDet
-                     , brBacktrack = Map.empty }
+    modify $ \s -> s { brAlternate = alt, brDetism = SemiDet }
     result <- code
-    modify (\s -> s { brAlternate = oldAlt, brDetism = oldDetism
-                    , brBacktrack = backtrack0 })
+    modify (\s -> s { brAlternate = oldAlt, brDetism = oldDetism })
     return result
 
 
@@ -396,6 +377,11 @@ unbranchStmts [] = do
     logUnbranch $ "Unbranching an empty " ++ show detism ++ " body"
     return []
 unbranchStmts (stmt:stmts) = do
+    detism <- gets brDetism
+    vars <- gets brVars
+    logUnbranch $ "unbranching " ++ show detism ++ " stmt"
+        ++ "\n    " ++ showStmt 4 (content stmt)
+        ++ "\n  with vars " ++ showVarMap vars
     placedApply unbranchStmt stmt stmts
 
 
@@ -471,9 +457,9 @@ unbranchStmt stmt@(ProcCall _ _ True args) _ _ =
                ++ showStmt 4 stmt
 unbranchStmt stmt@(ProcCall func SemiDet _ args) pos stmts = do
     mustBeSemiDet ("SemiDet proc call " ++ show stmt)
-    logStmt stmt
+    logUnbranch $ "converting SemiDet proc call" ++ show stmt
     (args', val) <- addTestOutExp func args
-    (args'', saves) <- unbranchArgs args'
+    args'' <- unbranchArgs args'
     condVars <- gets brVars
     stmts' <- unbranchStmts stmts
     vars <- gets brVars
@@ -483,38 +469,36 @@ unbranchStmt stmt@(ProcCall func SemiDet _ args) pos stmts = do
                 ++ showBody 4 stmts' ++ "\nelse"
                 ++ showBody 4 alt
     func' <- unbranchProcFunctor func
-    let result = saves
-                ++ maybePlace (ProcCall func' Det False args'') pos
+    let result = maybePlace (ProcCall func' Det False args'') pos
                 : mkCond sense val pos stmts' alt condVars vars
     logUnbranch $ "#Converted SemiDet proc call" ++ show stmt
     logUnbranch $ "#To: " ++ showBody 4 result
     return result
 unbranchStmt stmt@(ProcCall func calldetism r args) pos stmts = do
-    logStmt stmt
-    (args', saves) <- unbranchArgs args
+    alt <- gets brAlternate
+    logUnbranch $ "Unbranching call " ++ showStmt 4 stmt
+    args' <- unbranchArgs args
     func' <- unbranchProcFunctor func
     let stmt' = ProcCall func' calldetism r args'
     case calldetism of
       Terminal -> return [maybePlace stmt' pos] -- no execution after Terminal
-                                                -- and no need to save vars
-      Failure  -> return $ saves ++ [maybePlace stmt' pos]
-                                                -- no execution after Failure
-      Det      -> leaveStmtAsIs saves stmt' pos stmts
+      Failure  -> return [maybePlace stmt' pos] -- no execution after Failure
+      Det      -> leaveStmtAsIs stmt' pos stmts
       SemiDet  -> shouldnt "SemiDet case already covered!"
 unbranchStmt stmt@(ForeignCall l nm fs args) pos stmts = do
-    logStmt stmt
-    (args', saves) <- unbranchArgs args
+    alt <- gets brAlternate
+    logUnbranch $ "Unbranching foreign call " ++ showStmt 4 stmt
+    args' <- unbranchArgs args
     let stmt' = ForeignCall l nm fs args'
-    leaveStmtAsIs saves stmt' pos stmts
+    leaveStmtAsIs stmt' pos stmts
 unbranchStmt stmt@(TestBool val) pos stmts = do
+    alt <- gets brAlternate
     mustBeSemiDet (showStmt 4 stmt)
-    logStmt stmt
     condVars <- gets brVars
     logUnbranch $ "Unbranching a non-final primitive test " ++ show stmt
     stmts' <- unbranchStmts stmts
     vars <- gets brVars
     sense <- gets brSense
-    alt <- gets brAlternate
     logUnbranch $ "mkCond " ++ show sense ++ " " ++ show val
                 ++ showBody 4 stmts' ++ "\nelse"
                 ++ showBody 4 alt
@@ -523,17 +507,17 @@ unbranchStmt stmt@(TestBool val) pos stmts = do
     logUnbranch $ "#To: " ++ showBody 4 result
     return result
 unbranchStmt stmt@(And conj) pos stmts = do
-    logStmt stmt
+    alt <- gets brAlternate
+    logUnbranch $ "Unbranching conjunction " ++ show stmt
     unbranchStmts (conj ++ stmts)
 unbranchStmt stmt@(Or [] exitVars _) pos stmts = do
+    alt <- gets brAlternate
     mustBeSemiDet "Empty disjunction"
-    logStmt stmt
     unbranchStmt (TestBool boolFalse) pos stmts
 unbranchStmt stmt@(Or [disj] exitVars _) _ stmts = do
-    logStmt stmt
+    alt <- gets brAlternate
     placedApply unbranchStmt disj stmts
 unbranchStmt stmt@(Or (disj:disjs) exitVars res) pos stmts = do
-    logStmt stmt
     alt <- gets brAlternate
     let exitVars' = trustFromJust "unbranching Disjunction without exitVars"
                     exitVars
@@ -550,11 +534,12 @@ unbranchStmt stmt@(Or (disj:disjs) exitVars res) pos stmts = do
     inSemiDetContext disjs'
         $ placedApply unbranchStmt disj stmts'
 unbranchStmt stmt@(Not tst) pos stmts = do
+    alt <- gets brAlternate
     mustBeSemiDet ("Negation " ++ show stmt)
-    logStmt stmt
+    logUnbranch "Unbranching negation"
     withSense not $ placedApply unbranchStmt tst stmts
-unbranchStmt stmt@(Cond tst thn els condVars exitVars res) pos stmts = do
-    logStmt stmt
+unbranchStmt (Cond tst thn els condVars exitVars res) pos stmts = do
+    alt <- gets brAlternate
     let condVars' = trustFromJust "unbranching Cond without condVars" condVars
     let exitVars' = trustFromJust "unbranching Cond without exitVars" exitVars
     let res' = trustFromJust "unbranching Loop without res" res
@@ -568,8 +553,8 @@ unbranchStmt stmt@(Cond tst thn els condVars exitVars res) pos stmts = do
     els' <- unbranchStmts (els ++ stmts'')
     inSemiDetContext els' $ withSense (const True)
         $ placedApply unbranchStmt tst thn'
-unbranchStmt stmt@(Loop body exitVars res) pos stmts = do
-    logStmt stmt
+unbranchStmt (Loop body exitVars res) pos stmts = do
+    alt <- gets brAlternate
     let exitVars' = trustFromJust "unbranching Loop without exitVars" exitVars
     let res' = trustFromJust "unbranching Loop without res" res
     logUnbranch $ "Handling loop:" ++ showBody 4 body
@@ -588,41 +573,33 @@ unbranchStmt For{} _ _ =
     shouldnt "flattening should have removed For statements"
 unbranchStmt Case{} _ _ =
     shouldnt "flattening should have removed Case statements"
-unbranchStmt stmt@Nop _ stmts = do
-    logStmt stmt
+unbranchStmt Nop _ stmts = do
+    alt <- gets brAlternate
+    logUnbranch "Unbranching a Nop"
     unbranchStmts stmts     -- might as well filter out Nops
-unbranchStmt stmt@Fail pos stmts = do
-    logStmt stmt
-    gets brAlternate
-unbranchStmt stmt@Break pos _ = do
-    logStmt stmt
+unbranchStmt Fail pos stmts = do
+    alt <- gets brAlternate
+    logUnbranch "Unbranching a Fail"
+    -- XXX JB we stil have alt stmts to go...
+    -- return [maybePlace Fail pos] -- no execution after Fail
+    return alt
+unbranchStmt Break pos _ = do
+    logUnbranch "Unbranching a Break"
     brk <- getLoopBreak pos
     logUnbranch $ "Current break = " ++ showBody 4 brk
     return brk
-unbranchStmt stmt@Next pos _ = do
-    logStmt stmt
+unbranchStmt Next pos _ = do
+    logUnbranch "Unbranching a Next"
     nxt <- getLoopNext pos
     logUnbranch $ "Current next proc = " ++ showStmt 4 (content nxt)
     return [nxt]
 
 -- |Emit the supplied statement, and process the remaining statements.
-leaveStmtAsIs :: [Placed Stmt] -> Stmt -> OptPos -> [Placed Stmt]
-              -> Unbrancher [Placed Stmt]
-leaveStmtAsIs saves stmt pos stmts = do
+leaveStmtAsIs :: Stmt -> OptPos -> [Placed Stmt] -> Unbrancher [Placed Stmt]
+leaveStmtAsIs stmt pos stmts = do
     logUnbranch $ "Leaving stmt as is: " ++ showStmt 4 stmt
     stmts' <- unbranchStmts stmts
-    return $ saves ++ maybePlace stmt pos:stmts'
-
-
-
--- |Log statement to be unbranched with determinism context.
-logStmt :: Stmt -> Unbrancher ()
-logStmt stmt = do
-    vars <- gets brVars
-    detism <- gets brDetism
-    logUnbranch $ "Unbranching stmt in a " ++ show detism
-                 ++ " context with vars " ++ showVarMap vars
-                 ++ ":\n" ++ showStmt 4 stmt
+    return $ maybePlace stmt pos:stmts'
 
 
 -- | Execute the given code if the context is semi-deterministic; otherwise
@@ -724,21 +701,31 @@ unbranchParam param@Param{paramType=ty} = param{paramType=unbranchType ty}
 -- Unbranch a ProcFunctore, tansforming expressions in Highers
 unbranchProcFunctor :: ProcFunctor -> Unbrancher ProcFunctor
 unbranchProcFunctor func@First{} = return func
-unbranchProcFunctor (Higher fn)  = Higher . head . fst <$> unbranchArgs [fn]
+unbranchProcFunctor (Higher fn)  = Higher . head <$> unbranchArgs [fn]
 
 
 -- |Add all output arguments of a param list to the symbol table
 --  and hoist all closures
-unbranchArgs :: [Placed Exp] -> Unbrancher ([Placed Exp],[Placed Stmt])
+unbranchArgs :: [Placed Exp] -> Unbrancher [Placed Exp]
 unbranchArgs args = do
     detism <- gets brDetism
-    logUnbranch $ "Unbranching arg list in a " ++ show detism ++ " context:"
-    logUnbranch $ "    " ++ show args
-    saves <- mapMaybeM (defArg . content) args
-    unless (List.null saves)
-     $ logUnbranch $ "Saving variables: " ++ showBody 18 saves
-    args' <- mapM (placedApply unbranchExp) args
-    return (args', saves)
+    selectDetism (return ())
+          (mapM_ (noteReassignment . content) args) detism
+    mapM_ (defArg . content) args
+    mapM (placedApply unbranchExp) args
+
+
+noteReassignment :: Exp -> Unbrancher ()
+noteReassignment (Typed exp _ _) = noteReassignment exp
+noteReassignment (Var name flow _)
+  | flowsOut flow = do
+    procName <- gets brProcName
+    reassigned <- Map.member name <$> gets brVars
+    when reassigned $ do
+        logUnbranch $ "Reassignment of variable " ++ name
+            ++ " in " ++ showProcName procName
+
+noteReassignment _ = return ()
 
 
 -- | Unbranch an expression, transforming Closures and AnonProcs into fresh
@@ -768,10 +755,7 @@ unbranchExp exp@(AnonProc mods params pstmts clsd res) pos = do
     procSpec <- lift $ addProcDef procDef'
     addClosure procSpec freeVars pos name
 unbranchExp exp@(Closure ps free) pos = do
-    -- XXX free' is unused!  Do we want free' instead of free below?
-    (free', saves) <- unbranchArgs free
-    unless (List.null saves)
-        $ shouldnt "unbranching closure exp needs to save vars"
+    free' <- unbranchArgs free
     isClosure <- lift $ isClosureProc ps
     if isClosure
     then return $ maybePlace exp pos
@@ -860,8 +844,8 @@ freeParamVar nm ty =
 --  table. Since the expression is already flattened (excluding AnonProcs),
 --  it will only be a constant, in which case it doesn't define any variables,
 --  or a variable, in which case it might.
-defArg :: Exp -> Unbrancher (Maybe (Placed Stmt))
-defArg = ifIsVarDef defVar (return Nothing)
+defArg :: Exp -> Unbrancher ()
+defArg = ifIsVarDef defVar (return ())
 
 
 -- |Apply the function if the expression is a variable assignment,
@@ -876,8 +860,8 @@ ifIsVarDef' f v (Var name dir _) ty =
 ifIsVarDef' _ v t ty = v
 
 
--- outputVars :: VarDict -> [Placed Exp] -> VarDict
--- outputVars = List.foldr (ifIsVarDef Map.insert id  . content)
+outputVars :: VarDict -> [Placed Exp] -> VarDict
+outputVars = List.foldr (ifIsVarDef Map.insert id  . content)
 
 
 continutationProcName :: ProcName
