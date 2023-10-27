@@ -80,14 +80,14 @@ pub def logical_bitshift(!x:_, s:_) { ?x = logical_bitshift(x, s) }
 ## Comparisons
 
 # Equality and disequality.
-pub def (x:_ =  y:_):bool = foreign llvm icmp_eq(x,y)
-pub def (x:_ ~= y:_):bool = foreign llvm icmp_ne(x,y)
+pub def {test} (x:_ =  y:_) { foreign llvm {test} icmp_eq(x,y) }
+pub def {test} (x:_ ~= y:_) { foreign llvm {test} icmp_ne(x,y) }
 
 # Inequalities.
-pub def (x:_ <  y:_):bool = foreign llvm icmp_slt(x,y)
-pub def (x:_ <= y:_):bool = foreign llvm icmp_sle(x,y)
-pub def (x:_ >  y:_):bool = foreign llvm icmp_sgt(x,y)
-pub def (x:_ >= y:_):bool = foreign llvm icmp_sge(x,y)
+pub def {test} (x:_ <  y:_) { foreign llvm {test} icmp_slt(x,y) }
+pub def {test} (x:_ <= y:_) { foreign llvm {test} icmp_sle(x,y) }
+pub def {test} (x:_ >  y:_) { foreign llvm {test} icmp_sgt(x,y) }
+pub def {test} (x:_ >= y:_) { foreign llvm {test} icmp_sge(x,y) }
 
 # Three-way comparison.
 pub def (x:_ <=> y:_):comparison = 

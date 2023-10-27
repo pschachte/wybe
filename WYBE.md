@@ -1947,7 +1947,11 @@ information.  Supported modifiers in foreign calls are:
 - **unique**:  do not report [uniqueness errors](#unique-types) arising from use
   of unique arguments to the call (but do note the use or definition of unique
   arguments)
-
+- **test**:  the call is a [test](#tests); that is, it has one extra output argument,
+  beyond those explicitly provided, which indicates whether the call succeeds.
+  Where *language* is `llvm`, the output argument is a 1 bit integer; otherwise
+  the output argument is an `int`, which indicates success for any value other
+  than 0.
 
 For example, the `exit` proc in the standard library is implemented as
 follows:
@@ -1956,6 +1960,10 @@ follows:
 pub def {terminal,semipure} exit(code:int) {
     foreign c {terminal,semipure} exit(code)
 }
+```
+and the less than test for integers is defined as
+```
+pub def {test} (x:_ <  y:_) { foreign llvm {test} icmp_slt(x,y) }
 ```
 
 

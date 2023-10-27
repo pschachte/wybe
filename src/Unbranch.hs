@@ -432,24 +432,6 @@ unbranchStmts (stmt:stmts) = do
 --   and unneeded input and output arguments, we don't bother to try to optimise
 --   these things here.
 --
---   To handle "backtracking" of variable reassignment after failure (initial
---   variable assignments need no effort; after failure, they are simply treated
---   as unassigned), we copy variable values before they are first reassigned,
---   and reset the variables to their saved values at the start of the else
---   branch. If a variable is reassigned multiple times in a semidet block, it
---   only needs to be saved before the first reassignment.  A variable that is
---   first assigned in a semidet block and then reassigned in the same block
---   need not be saved or restored.
---
---   A semidet conjunction is turned into nested conditionals, checking for
---   success of each semidet call.  In this case, the failure of subsequent
---   calls in the semidet block must restore the values of all saved variables
---   in the whole semidet block.  In general, before each call, we generate an
---   assignment to a temp variable for any variables that call re-assigns for
---   the first time in that semidet code block.  We also add code to assign that
---   variable from the saved temp variable to the alternative code block that
---   will be executed if the semidet block fails.
---
 unbranchStmt :: Stmt -> OptPos -> [Placed Stmt]
              -> Unbrancher [Placed Stmt]
 unbranchStmt stmt@(ProcCall _ _ True args) _ _ =
@@ -469,8 +451,8 @@ unbranchStmt stmt@(ProcCall func SemiDet _ args) pos stmts = do
                 ++ showBody 4 stmts' ++ "\nelse"
                 ++ showBody 4 alt
     func' <- unbranchProcFunctor func
-    let result = maybePlace (ProcCall func' Det False args'') pos
-                : mkCond sense val pos stmts' alt condVars vars
+    result <- (maybePlace (ProcCall func' Det False args'') pos :)
+               <$> mkCond sense val pos stmts' alt condVars vars
     logUnbranch $ "#Converted SemiDet proc call" ++ show stmt
     logUnbranch $ "#To: " ++ showBody 4 result
     return result
@@ -502,7 +484,7 @@ unbranchStmt stmt@(TestBool val) pos stmts = do
     logUnbranch $ "mkCond " ++ show sense ++ " " ++ show val
                 ++ showBody 4 stmts' ++ "\nelse"
                 ++ showBody 4 alt
-    let result = mkCond sense val Nothing stmts' alt condVars vars
+    result <- mkCond sense val Nothing stmts' alt condVars vars
     logUnbranch $ "#Unbranched non-final primitive test " ++ show stmt
     logUnbranch $ "#To: " ++ showBody 4 result
     return result
@@ -613,15 +595,24 @@ mustBeSemiDet msg = do
 
 -- | Create a Cond statement, unless it can be simplified away.
 mkCond :: Bool -> Exp -> OptPos -> [Placed Stmt] -> [Placed Stmt]
-       -> VarDict -> VarDict -> [Placed Stmt]
+       -> VarDict -> VarDict -> Unbrancher [Placed Stmt]
 mkCond False tst pos thn els condVars vars =
     mkCond True tst pos els thn condVars vars
-mkCond True (IntValue 0) pos thn els condVars vars = els
-mkCond True (Typed (IntValue 0) _ _) pos thn els condVars vars = els
-mkCond True (IntValue 1) pos thn els condVars vars = thn
-mkCond True (Typed (IntValue 1) _ _) pos thn els condVars vars = thn
+mkCond True (IntValue 0) pos thn els condVars vars = return els
+mkCond True (Typed (IntValue 0) _ _) pos thn els condVars vars = return els
+mkCond True (IntValue 1) pos thn els condVars vars = return thn
+mkCond True (Typed (IntValue 1) _ _) pos thn els condVars vars = return thn
+mkCond True intval@(Typed val ty _) pos thn els condVars vars
+ | ty == intType = do
+    tmp <- tempVar
+    let comparison =
+            Unplaced (ForeignCall "llvm" "icmp_ne" []
+                [Unplaced intval,
+                 Unplaced $ iVal 0 `withType` intType,
+                 Unplaced $ boolVarSet tmp])
+    (comparison:) <$> mkCond True (boolVarGet tmp) pos thn els condVars vars
 mkCond True exp pos thn els condVars vars
-  | thn == els = thn
+  | thn == els = return thn
   | otherwise =
     case (thn,els) of
       ([Unplaced (ForeignCall "llvm" "move" [] [thnSrc, thnDest])],
@@ -630,14 +621,15 @@ mkCond True exp pos thn els condVars vars
           let thnSrcContent = content thnSrc
               elsSrcContent = content elsSrc
               dest = content thnDest
-          in [if thnSrcContent == boolTrue && elsSrcContent == boolFalse
-              then move exp dest
-              else if thnSrcContent == boolFalse && elsSrcContent == boolTrue
-                   then boolNegate exp dest
-                   else maybePlace
+          in return [if thnSrcContent == boolTrue && elsSrcContent == boolFalse
+                     then move exp dest
+                     else if thnSrcContent == boolFalse
+                             && elsSrcContent == boolTrue
+                     then boolNegate exp dest
+                     else maybePlace
                         (Cond test thn els
                             (Just condVars) (Just vars) (Just Set.empty)) pos]
-      _ -> [maybePlace (Cond test thn els
+      _ -> return [maybePlace (Cond test thn els
                             (Just condVars) (Just vars) (Just Set.empty)) pos]
   where test = Unplaced $ TestBool exp
 
