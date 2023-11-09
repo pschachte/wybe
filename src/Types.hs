@@ -2380,7 +2380,7 @@ modecheckStmt final stmt@(And stmts) pos = do
 modecheckStmt final stmt@(Or disj _ res) pos = do
     logModed $ "Mode checking disjunction " ++ show stmt
     failingState <- gets failingBindingState
-    disj' <- modecheckDisj final failingState disj
+    disj' <- modecheckDisj final [] failingState disj
     vars <- gets bindingVars
     varDict <- lift $ mapFromUnivSetM ultimateVarType Set.empty vars
     return [maybePlace (Or disj' (Just varDict) res) pos]
@@ -2469,12 +2469,12 @@ collectInParams s (Param n _ flow _)
 collectInParams s _ = s
 
 
-modecheckDisj :: Bool -> BindingState -> [Placed Stmt]
+modecheckDisj :: Bool -> [Placed Stmt] -> BindingState -> [Placed Stmt]
               -> Moded [Placed Stmt]
-modecheckDisj final disjAssigned [] = do
+modecheckDisj final _ disjAssigned [] = do
     put disjAssigned
     return []
-modecheckDisj final disjAssigned (stmt:stmts) = do
+modecheckDisj final preRestores disjAssigned (stmt:stmts) = do
     -- The last disjunct in a disjunction must have the same determinism
     -- required of the whole disjunction; others can be SemiDet.
     beforeDisj <- get
@@ -2482,12 +2482,15 @@ modecheckDisj final disjAssigned (stmt:stmts) = do
     let detism1 = if List.null stmts then detism else SemiDet
     (disj1, reassigns) <- withReassignments $ withDeterminism detism1
                 $ placedApply (modecheckStmt final) stmt
+    (saves,restores) <- unzip <$>
+             lift (mapM saveRestore $ Set.toList reassigns)
+    let saves' = if List.null stmts then [] else saves
     -- XXX Must handle rolling back reassignments
     afterDisjunct <- get
     put beforeDisj
-    let disj1' = seqToStmt disj1
+    let disj1' = seqToStmt $ preRestores ++ saves' ++ disj1
     let disjAssigned' = joinState disjAssigned afterDisjunct
-    (disj1':) <$> modecheckDisj final disjAssigned' stmts
+    (disj1':) <$> modecheckDisj final restores disjAssigned' stmts
 
 
 -- |Produce a typed statement sequence, the binding state, and final temp count

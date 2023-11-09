@@ -1,0 +1,49 @@
+def {test,noinline} nope { fail }
+def {test,noinline} yup { pass }
+def {test,noinline} nope2(?value:int) { ?value = 2; fail }
+
+resource r:int
+resource s:int
+
+?x = 42
+?y = 21
+
+use r,s in {
+    ?r = 7
+    ?s = 14
+    !println("before conditional: x = $x, r = $r")
+    if { ?x = 24 ; r = 8 ; nope :: !println("nope succeeds!")
+        | else :: !println("nope fails; x = $x, r = $r")
+        }
+    !println("after conditional; x = $x, r = $r")
+
+    !println("before second conditional: x = $x, r = $r")
+    if { ?r = 9 ; nope2(?x) :: !println("nope2 succeeds!")
+        | else :: !println("nope2 fails; x = $x, r = $r")
+        }
+    !println("after second conditional; x = $x, r = $r")
+
+    !println("before third conditional: x = $x, r = $r")
+    if { ?x = 25 ; nope2(?r) :: !println("nope2 succeeds!")
+        | else :: !println("nope2 fails; x = $x, r = $r")
+        }
+    !println("after third conditional; x = $x, r = $r")
+
+    !println("before fourth conditional: x = $x, y = $y, r = $r, s = $s")
+    if { ?x = 26 ; ?r = 10 ; yup ; ?y = 12 ; ?s = 41 ; nope :: !println("nope succeeds!")
+        | else :: !println("nope fails; x = $x, y = $y, r = $r, s = $s")
+        }
+    !println("after fourth conditional; x = $x, y = $y, r = $r, s = $s")
+
+    !println("before first disjunction: x = $x, y = $y, r = $r, s = $s")
+    ( ?x = 27 ; ?r = 11 ; ?y = 13 ; ?s = 40 ; nope | ?x = 28 ; ?r = 12 )
+    !println("after first disjunction: x = $x, y = $y, r = $r, s = $s")
+
+    ?x = 42
+    ?y = 21
+    ?r = 7
+    ?s = 14
+    !println("before second disjunction: x = $x, y = $y, r = $r, s = $s")
+    ( ?x = 28 ; ?r = 12 ; nope | ?x = 29 ; ?r = 13 ; nope | pass )
+    !println("after second disjunction: x = $x, y = $y, r = $r, s = $s")
+}
