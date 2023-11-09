@@ -63,8 +63,8 @@ proc #cont#1 > (2 calls)
 #cont#1(tmp#0##0:wybe.list(card.suit))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_ne(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.bool)
-    case ~tmp#8##0:wybe.bool of
+    foreign llvm icmp_ne(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.bool)
+    case ~tmp#10##0:wybe.bool of
     0:
 
     1:
@@ -80,20 +80,20 @@ proc #cont#2 > (2 calls)
 #cont#2(s##0:card.suit, tmp#0##0:wybe.list(card.suit), tmp#2##0:wybe.list(card.rank))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_ne(tmp#2##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool)
-    case ~tmp#7##0:wybe.bool of
+    foreign llvm icmp_ne(tmp#2##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
+    case ~tmp#9##0:wybe.bool of
     0:
         card.#cont#1<0>(~tmp#0##0:wybe.list(card.suit))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @card:nn:nn
 
     1:
         foreign lpvm access(tmp#2##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?r##0:card.rank) @list:nn:nn
         foreign lpvm access(~tmp#2##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#2##1:wybe.list(card.rank)) @list:nn:nn
-        foreign llvm shl(~r##0:card, 2:card, ?tmp#10##0:card) @card:nn:nn
-        foreign llvm or(s##0:card, ~tmp#10##0:card, ?tmp#4##0:card) @card:nn:nn
+        foreign llvm shl(~r##0:card, 2:card, ?tmp#12##0:card) @card:nn:nn
+        foreign llvm or(s##0:card, ~tmp#12##0:card, ?tmp#4##0:card) @card:nn:nn
         card.print<0>(~tmp#4##0:card)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @card:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#13##0:wybe.phantom) @io:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @io:nn:nn
+        foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
         card.#cont#2<0>(~s##0:card.suit, ~tmp#0##0:wybe.list(card.suit), ~tmp#2##1:wybe.list(card.rank))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @card:nn:nn
 
 

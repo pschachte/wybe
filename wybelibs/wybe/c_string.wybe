@@ -7,12 +7,12 @@ use wybe.bool, wybe.int, wybe.char, wybe.io
 
 representation is address
 
-pub def (x:_ =  y:_):bool = foreign c strcmp(x,y):int = 0
-pub def (x:_ ~= y:_):bool = foreign c strcmp(x,y):int ~= 0
-pub def (x:_ <  y:_):bool = foreign c strcmp(x,y):int < 0
-pub def (x:_ <= y:_):bool = foreign c strcmp(x,y):int <= 0
-pub def (x:_ >  y:_):bool = foreign c strcmp(x,y):int > 0
-pub def (x:_ >= y:_):bool = foreign c strcmp(x,y):int >= 0
+pub def {test} (x:_ =  y:_) { foreign c strcmp(x,y):int = 0  }
+pub def {test} (x:_ ~= y:_) { foreign c strcmp(x,y):int ~= 0 }
+pub def {test} (x:_ <  y:_) { foreign c strcmp(x,y):int < 0  }
+pub def {test} (x:_ <= y:_) { foreign c strcmp(x,y):int <= 0 }
+pub def {test} (x:_ >  y:_) { foreign c strcmp(x,y):int > 0  }
+pub def {test} (x:_ >= y:_) { foreign c strcmp(x,y):int >= 0 }
 
 pub def length(str:_):int = foreign c strlen(str)
 

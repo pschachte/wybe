@@ -25,19 +25,19 @@ proc print > public (0 calls)
 print(lst##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @char:nn:nn
-    foreign c putchar('[':wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @char:nn:nn
-    foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool)
-    case ~tmp#6##0:wybe.bool of
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @char:nn:nn
+    foreign c putchar('[':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @char:nn:nn
+    foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.bool)
+    case ~tmp#8##0:wybe.bool of
     0:
-        foreign c putchar(']':wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @char:nn:nn
-        foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char:nn:nn
+        foreign c putchar(']':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @char:nn:nn
+        foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char:nn:nn
 
     1:
         foreign lpvm access(lst##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @loop_bug:nn:nn
         foreign lpvm access(~lst##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:loop_bug.int_list) @loop_bug:nn:nn
-        foreign c print_int(~h##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @int:nn:nn
-        foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+        foreign c print_int(~h##0:wybe.int, ~tmp#6##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @int:nn:nn
+        foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
         loop_bug.print#cont#1<0>(_:wybe.int, ~t##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @loop_bug:nn:nn
 
 
@@ -47,20 +47,20 @@ proc print#cont#1 > (2 calls)
 print#cont#1([h##0:wybe.int], t##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_ne(t##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool)
-    case ~tmp#2##0:wybe.bool of
+    foreign llvm icmp_ne(t##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool)
+    case ~tmp#4##0:wybe.bool of
     0:
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @char:nn:nn
-        foreign c putchar(']':wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @char:nn:nn
-        foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @char:nn:nn
+        foreign c putchar(']':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @char:nn:nn
+        foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char:nn:nn
 
     1:
         foreign lpvm access(t##0:loop_bug.int_list, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##1:wybe.int) @loop_bug:nn:nn
         foreign lpvm access(~t##0:loop_bug.int_list, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##1:loop_bug.int_list) @loop_bug:nn:nn
         wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @loop_bug:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @int:nn:nn
-        foreign c print_int(~h##1:wybe.int, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @int:nn:nn
-        foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @int:nn:nn
+        foreign c print_int(~h##1:wybe.int, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @int:nn:nn
+        foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
         loop_bug.print#cont#1<0>(_:wybe.int, ~t##1:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @loop_bug:nn:nn
 
 
@@ -71,9 +71,9 @@ print#cont#2(h##0:wybe.int, t##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io
   AliasPairs: []
   InterestingCallProperties: []
     wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @loop_bug:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~h##0:wybe.int, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @int:nn:nn
-    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @int:nn:nn
+    foreign c print_int(~h##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @int:nn:nn
+    foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
     loop_bug.print#cont#1<0>(_:wybe.int, ~t##0:loop_bug.int_list)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @loop_bug:nn:nn
 
   LLVM code       :
