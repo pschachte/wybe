@@ -35,7 +35,6 @@ import           Util
 import           Config
 import           Snippets
 import           Blocks              (llvmMapBinop, llvmMapUnop)
-import           Debug.Trace
 
 
 ----------------------------------------------------------------
@@ -610,11 +609,24 @@ initTyping = Typing Map.empty Map.empty 0 [] $ shouldnt "unititialised counter"
 
 
 -- |Generate and return a new temp variable name
-genSym :: Typed(VarName)
+genSym :: Typed VarName
 genSym = do
     tmpCount <- gets tyTmpCtr
     modify $ \s -> s{tyTmpCtr = tmpCount + 1}
     return $ mkTempName tmpCount
+
+
+-- | Generate statements to save and restore the specified variable to/from a
+-- temporary variable, recording the type of the new temp variable.  The
+-- specified variable must already be typed.
+saveRestore :: VarName -> Typed (Placed Stmt, Placed Stmt)
+saveRestore var = do
+    ty <- ultimateVarType var
+    tmpVar <- genSym
+    setVarType tmpVar ty
+    let save = move (varGetTyped var ty) (varSetTyped tmpVar ty)
+    let restore = move (varGetTyped tmpVar ty) (varSetTyped var ty)
+    return (save,restore)
 
 
 -- | Apply the monadic action with the given temp counter, returning the 
@@ -1763,21 +1775,31 @@ data BindingState = BindingState {
         -- | The variables defined when this stmt appears
         bindingVars      :: UnivSet VarName,
         -- | The variables defined at the current loop exit
-        bindingBreakVars :: UnivSet VarName
+        bindingBreakVars :: UnivSet VarName,
+        -- | The variables that could have been re-assigned
+        bindingReassigned:: Set VarName
         }
 
 
 instance Show BindingState where
-    show (BindingState detism impurity resources boundVars breakVars) =
+    show (BindingState detism impurity resources boundVars breakVars reass) =
         impurityFullName impurity ++ " " ++ determinismFullName detism
         ++ " computation binding " ++ showUnivSet id boundVars
+        ++ ", reassigning = " ++ showSet show reass
         ++ ", break set = " ++ showUnivSet id breakVars
         ++ ", with resources " ++ showSet show resources
 
 
--- | Record that the specified set of variables are bound.
+-- | Record that the specified set of variables are bound.  Also note any
+-- variables that have been re-assigned.
 bindVars :: Set VarName -> Moded ()
-bindVars vars = modify $ addBindings vars
+bindVars vars = do
+    reassigning <- gets (USet.toSet Set.empty
+                        . USet.intersection (USet.fromSet vars) 
+                        . bindingVars)
+    modify $ addBindings vars
+    modify $ \st -> st { bindingReassigned =
+                            reassigning `Set.union` bindingReassigned st }
 
 
 showBindingState :: Moded ()
@@ -1818,7 +1840,7 @@ mustFail = gets $ (==Failure) . bindingDetism
 -- and no breaks seen.
 initBindingState :: ProcDef -> BindingState
 initBindingState pdef =
-    BindingState Det impurity resources emptyUnivSet UniversalSet
+    BindingState Det impurity resources emptyUnivSet UniversalSet Set.empty
     where impurity = expectedImpurity $ procImpurity pdef
           resources = Set.map resourceFlowRes
                         (procProtoResources $ procProto pdef)
@@ -1829,6 +1851,7 @@ initBindingState pdef =
 failingBindingState :: BindingState -> BindingState
 failingBindingState state =
     BindingState Failure Pure (bindingResources state) UniversalSet UniversalSet
+                 Set.empty
 
 
 -- | BindingState at the top of a loop, based on state before the loop.
@@ -1865,14 +1888,15 @@ intersectMaybeSets (Just mset1) (Just mset2) =
 
 -- | the join of two BindingStates.
 joinState :: BindingState -> BindingState -> BindingState
-joinState (BindingState detism1 impurity1 resources1 boundVars1 breakVars1)
-          (BindingState detism2 impurity2 resources2 boundVars2 breakVars2) =
-           BindingState detism  impurity  resources  boundVars  breakVars
+joinState (BindingState detism1 impurity1 resources1 boundVs1 breakVs1 reass1)
+          (BindingState detism2 impurity2 resources2 boundVs2 breakVs2 reass2) =
+           BindingState detism  impurity  resources  boundVs  breakVs reass
   where detism    = determinismJoin detism1 detism2
         impurity  = max impurity1 impurity2
         resources = resources1 `Set.intersection` resources2
-        breakVars = breakVars1 `USet.intersection` breakVars2
-        boundVars = boundVars1 `USet.intersection` boundVars2
+        breakVs = breakVs1 `USet.intersection` breakVs2
+        boundVs = boundVs1 `USet.intersection` boundVs2
+        reass     = reass1 `Set.union` reass2
 
 
 -- | Add some bindings to a BindingState
@@ -1883,6 +1907,22 @@ addBindings vars st@BindingState{bindingDetism=Det} =
     st {bindingVars=FiniteSet vars `USet.union` bindingVars st}
 addBindings vars st@BindingState{bindingDetism=SemiDet} =
     st {bindingVars=FiniteSet vars `USet.union` bindingVars st}
+
+
+-- | Execute the moded computation with variable reassignments initialised
+-- to empty, and return the final set of variable reassignments in addition to
+-- the computation result.  The set of reassignments at the end is the union of
+-- its initial state and the reassignments of the specified computation.
+withReassignments :: Moded t -> Moded (t, Set VarName)
+withReassignments moded = do
+    oldReassigns <- gets bindingReassigned
+    modify $ \st -> st { bindingReassigned = Set.empty }
+    result <- moded
+    newReassigns <- gets bindingReassigned
+    modify $ \st -> st { bindingReassigned =
+                            newReassigns `Set.union` oldReassigns}
+    return (result, newReassigns)
+
 
 
 -- | Make the currenting binding state deterministic
@@ -1904,11 +1944,10 @@ bindingStateSeq :: Determinism -> Impurity -> Set VarName -> Moded ()
 bindingStateSeq stmtDetism impurity outputs = do
     detism' <- gets ((`determinismSeq` stmtDetism) . bindingDetism)
     impurity' <- gets ((`impuritySeq` impurity). bindingImpurity)
-    modify $ \st -> st {bindingDetism=detism'
-                       , bindingImpurity=impurity'
-                       , bindingVars=if determinismProceding detism'
-                            then FiniteSet outputs `USet.union` bindingVars st
-                            else UniversalSet}
+    if determinismProceding detism'
+        then bindVars outputs
+        else modify $ \st -> st { bindingVars=UniversalSet }
+    modify $ \st -> st {bindingDetism=detism', bindingImpurity=impurity'}
 
 
 -- | Returns the binding state after a next statement entered in the specified
@@ -2239,13 +2278,17 @@ modecheckStmt final
     stmt@(Cond tstStmt thnStmts elsStmts _ _ res) pos = do
     logModed $ "Mode checking conditional " ++ show stmt
     initialState <- get
-    tstStmt' <- withDeterminism SemiDet
-          $ placedApplyM (modecheckStmt False) tstStmt
+    (tstStmt',condReassigns)
+        <- withReassignments $ withDeterminism SemiDet
+            $ placedApplyM (modecheckStmt False) tstStmt
     testSucceeds <- mustSucceed
     testFails <- mustFail
     logAssigned "Assigned by test: "
     bound <- gets bindingVars
     condBindings <- lift $ mapFromUnivSetM ultimateVarType Set.empty bound
+    logModed $ "Reassigned by test: " ++ showSet show condReassigns
+    (saves,restores) <- unzip <$>
+             lift (mapM saveRestore $ Set.toList condReassigns)
     forceDet
     thnStmts' <- modecheckStmts final thnStmts
     logAssigned "Assigned by then branch: "
@@ -2262,21 +2305,21 @@ modecheckStmt final
       else if testFails -- is condition guaranteed to fail?
       then do
         put afterElse
-        -- afterElseVars <- gets bindingVars
         logAssigned "Assigned by failing conditional: "
-        -- bindings <- lift $ mapFromUnivSetM ultimateVarType Set.empty afterElseVars
         impurity <- lift2 $ stmtsImpurity tstStmt'
         if impurity > Pure
             -- if the test is non-pure, need to keep the test around
             then return $ Not (seqToStmt tstStmt') `maybePlace` pos:elsStmts'
             -- otherwise, the cond must fail and wont bind anything
-            else return $ elsStmts'
+            else return elsStmts'
       else do
         put $ afterThen `joinState` afterElse
         logAssigned "Assigned by conditional: "
         finalVars <- gets bindingVars
         bindings <- lift $ mapFromUnivSetM ultimateVarType Set.empty finalVars
-        return [maybePlace (Cond (seqToStmt tstStmt') thnStmts' elsStmts'
+        return $ saves 
+                 ++  [maybePlace (Cond (seqToStmt tstStmt') thnStmts'
+                            (restores ++ elsStmts')
                             (Just condBindings) (Just bindings) res)
                 pos]
 modecheckStmt final stmt@(TestBool exp) pos = do
@@ -2437,8 +2480,9 @@ modecheckDisj final disjAssigned (stmt:stmts) = do
     beforeDisj <- get
     detism <- getsTy tyDeterminism
     let detism1 = if List.null stmts then detism else SemiDet
-    disj1 <- withDeterminism detism1
+    (disj1, reassigns) <- withReassignments $ withDeterminism detism1
                 $ placedApply (modecheckStmt final) stmt
+    -- XXX Must handle rolling back reassignments
     afterDisjunct <- get
     put beforeDisj
     let disj1' = seqToStmt disj1
@@ -2518,9 +2562,7 @@ finaliseCall resourceful final pos args
                                         cStringType)
                                 $ Map.lookup r specialResources
                 , let s = f $ maybePlace stmt pos]
-        modify $ \st -> st {bindingVars =
-                    FiniteSet (Set.map resourceName outResources)
-                            `USet.union` bindingVars st }
+        bindVars (Set.map resourceName outResources)
         bindingStateSeq matchDetism matchImpurity (pexpListOutputs args')
         logModed $ "Generated special stmts = " ++ show specialInstrs
         logModed $ "New instr = " ++ show stmt'
