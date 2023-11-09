@@ -804,35 +804,89 @@ actually replace the second statement with
 
 ## <a name="tests"></a>Tests and partial functions
 
-Some procedure and function calls are *tests*.  This means that instead
-of returning whatever outputs they ordinarily produce, they can *fail*,
-in which case they do not produce their usual output(s).  Functions
+Some procedure or function calls are *tests*.  This means that they can return
+whatever output(s) they are meant to produce, assigning or reassigning variables
+as specified, or instead they can *fail*, in which case they do not produce
+their usual output(s), leaving all variables and resources as they were before
+the test began.
+Functions
 that may fail to produce a result are also known as *partial* functions.
 
 Test procedures and functions must be explicitly declared by inserting
 the modifier `test`, enclosed within curly braces, after the `def` keyword.
-You can also use the modifier `partial` in place of `test`.  For example:
+You can instead use the modifier `partial` in place of `test`.  For example:
 
 ```
-def {test} even_number(num:int) { ... }
+def {test} even_number(num:int) { num % 2 = 0 }
 def {partial} lookup(key:int, table:map) = ...
 ```
 
-Calls to test (partial) procedures and functions are only permitted in two
-contexts:  in a conditional, described [below](#conditionals),
-or in the definition of a test/partial procedure or function.
+Calls to test (partial) procedures and functions are only permitted in three
+contexts:  in a [conditional](#conditionals), in the definition
+of a test/partial procedure or function, or in a
+[reified expression](reification).
 
-Any procedure or function call can also become a test if an input is provided
-where an output argument is expected.  In this case, the call is made
-producing the output, and then the output is compared for equality with
-supplied input.  Equality (`=`) with two input arguments is a test, so
-these two calls are equivalent tests (in fact, the former is transformed to the
-latter):
+Tests can take several forms:
+  *  A call to a test procedure is a test.
+  *  Any procedure call containing one or more partial function calls is also a
+     test; it succeeds only if all the partial function calls succeed, and when
+     any call fails the test fails immediately.
+  * A sequence of statements including one or more statements is a test; it
+    succeeds if and only if all the statements succeed, and fails immediately if
+    any test fails.
+  * Any procedure or function call is a test if an input is provided
+    where an output argument is expected.  In this case, the call is made
+    producing the output, and then the output is compared for equality with
+    supplied input.  Equality (`=`) with two input arguments is a test, so
+    these two calls are equivalent tests (in fact, the former is transformed to the
+    latter):
+
+    ```
+    add(x, y, xy)
+    xy = add(x, y)
+    ```
+
+  * Finally, a Boolean value by itself can also be used as a test, in which case
+    `true` succeeds and `false` fails.  This applies both to Boolean variables
+    and Boolean-valued functions.  However, tests are a more general facility
+    than Boolean-valued functions, because they can produce other outputs aside
+    from success or failure.  
+
+This flexibility makes Wybe tests more general than Boolean-valued functions.
+Because nested partial function calls and compound statements involving tests
+are considered to be tests, one can carry out a computation in which any of
+several steps may fail, and handle all possible failures together.  For example,
+taking the head of a list is a partial function, as is looking up a value in a
+table, so `lookup(head(list), table)` will immediately fail if `list` is empty,
+and if not, will fail if the head of the list is not present in the table.
+
+Because deconstructors are tests for types with multiple constructors, Wybe also
+naturally provides [pattern matching](#pattern-matching).  For example,
 
 ```
-add(x, y, xy)
-xy = add(x, y)
+xs = [0 | ?rest]
 ```
+
+would succeed if `xs` is currently a list whose head is `0`, and would assign
+`rest` to the tail.  It would fail if `xs` does not match that pattern.
+
+
+## <a name="reification"></a>Reification of tests
+
+Wybe allows a call to a test procedure to be reified into a Boolean value, as
+long as the call does not produce any outputs.  This allows you to save the
+success or otherwise of a test in a Boolean variable for later use.  For
+example, with the definition of `even_number` shown in the
+[Tests and partial functions](#tests) section, the following code will save
+whether or not a number is even in a variable for later use as a test.
+
+```
+?is_even = even_number(n)
+```
+
+Combined with the fact that Boolean values can be used as test, this makes test
+procedures with no outputs effectively interchangeable with Boolean valued
+functions.
 
 
 ## <a name="disjunction"></a>Disjunction
@@ -890,7 +944,7 @@ pub def saturating_tail(lst:list(T)):list(T) = (tail(lst) | [])
 ```
 
 
-## <a name="pattern matching"></a>Pattern matching
+## <a name="pattern-matching"></a>Pattern matching
 
 Like procedures, some Wybe functions can be "run backwards", where the function
 result is supplied as input and some or all of its arguments are produced as
@@ -1018,7 +1072,7 @@ again, this must appear in a test context, such as a conditional.
 
 ## <a name="conditionals"></a>Conditional statements
 
-Wybe's conditional construct has the form:
+Wybe's main conditional construct has the form:
 
 > `if` `{` *cases* `}`
 
@@ -1046,6 +1100,11 @@ if { x < 0 :: !println("negative")
    | else  :: !println("positive")
 }
 ```
+
+Other conditional constructs include [case statements](#cases),
+[conditional and case expressions](#conditional-and-case-expressions),
+and loop control tests, as discussed in the
+[iteration statements](#iteration-statements) section.
 
 
 ## <a name="cases"></a>Case statements
@@ -1125,7 +1184,7 @@ may fail or never return.  Wybe has a single built-in failing proc, named
 `fail`, with no parameters.
 
 
-## Iteration statements
+## <a name="iteration-statements"></a>Iteration statements
 
 Iteration is specified with the `do` and `for` statements, of the form:
 
