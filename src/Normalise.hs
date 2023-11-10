@@ -115,7 +115,7 @@ normaliseItem (FuncDecl vis mods (ProcProto name params resources)
                  [result, varSet outputVariableName `maybePlace` pos])
               pos]
         pos)
-normaliseItem item@(ProcDecl _ _ proto _ pos) = do
+normaliseItem item@ProcDecl{} = do
     logNormalise $ "Recording proc without flattening:" ++ show item
     addProc 0 item
 normaliseItem (StmtDecl stmt pos) = do
