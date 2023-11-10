@@ -55,15 +55,18 @@ normalise items = do
 normaliseItem :: Item -> Compiler ()
 normaliseItem (TypeDecl vis (TypeProto name params) mods
               (TypeRepresentation rep) items pos) = do
+    validateModuleName "type" pos name
     let items' = RepresentationDecl params mods rep pos : items
     unless (List.null params)
       $ errmsg pos "types defined by representation cannot have type parameters"
     normaliseSubmodule name vis pos items'
 normaliseItem (TypeDecl vis (TypeProto name params) mods
               (TypeCtors ctorVis ctors) items pos) = do
+    validateModuleName "type" pos name
     let items' = ConstructorDecl ctorVis params mods ctors pos : items
     normaliseSubmodule name vis pos items'
-normaliseItem (ModuleDecl vis name items pos) =
+normaliseItem (ModuleDecl vis name items pos) = do
+    validateModuleName "module" pos name
     normaliseSubmodule name vis pos items
 normaliseItem (RepresentationDecl params mods rep pos) = do
     updateTypeModifiers mods
@@ -76,9 +79,12 @@ normaliseItem (ConstructorDecl vis params mods ctors pos) = do
         Public -> mapM_ (addConstructor Public . snd) ctors
         Private -> mapM_ (uncurry addConstructor) ctors
 normaliseItem (ImportMods vis modspecs pos) =
-    mapM_ (\spec -> addImport spec (importSpec Nothing vis)) modspecs
+    mapM_ (\spec -> validateModSpec pos spec >>
+        addImport spec (importSpec Nothing vis)
+    ) modspecs
 normaliseItem (ImportItems vis modspec imports pos) =
-    addImport modspec (importSpec (Just imports) vis)
+    validateModSpec pos modspec
+     >> addImport modspec (importSpec (Just imports) vis)
 normaliseItem (ImportForeign files _) =
     mapM_ addForeignImport files
 normaliseItem (ImportForeignLib files _) =
@@ -275,6 +281,18 @@ completeTypeSCC (CyclicSCC modTypeDefs) = do
     -- First set representations to addresses, then layout types
     mapM_ ((setTypeRep Address `inModule`) . fst) modTypeDefs
     mapM_ (uncurry completeType) modTypeDefs
+
+
+-- |Check that the specified module name is valid, reporting and error if not.
+validateModuleName :: String -> OptPos -> Ident -> Compiler ()
+validateModuleName what pos name =
+    unless (validModuleName name)
+     $ errmsg pos $ "invalid character in " ++ what ++ " name `" ++ name ++ "`"
+
+
+-- |Check that the specified module name is valid, reporting and error if not.
+validateModSpec :: OptPos -> ModSpec -> Compiler ()
+validateModSpec pos = mapM_ (validateModuleName "module" pos) 
 
 
 -- | Information about a non-constant constructor
