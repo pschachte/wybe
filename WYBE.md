@@ -809,8 +809,8 @@ whatever output(s) they are meant to produce, assigning or reassigning variables
 as specified, or instead they can *fail*, in which case they do not produce
 their usual output(s), leaving all variables and resources as they were before
 the test began.
-Functions
-that may fail to produce a result are also known as *partial* functions.
+Functions that may fail to produce a result for some inputs are also known as
+*partial* functions.
 
 Test procedures and functions must be explicitly declared by inserting
 the modifier `test`, enclosed within curly braces, after the `def` keyword.
@@ -831,8 +831,8 @@ Tests can take several forms:
   *  Any procedure call containing one or more partial function calls is also a
      test; it succeeds only if all the partial function calls succeed, and when
      any call fails the test fails immediately.
-  * A sequence of statements including one or more statements is a test; it
-    succeeds if and only if all the statements succeed, and fails immediately if
+  * A sequence of statements including one or more tests is a test; it
+    succeeds if and only if all the tests succeed, and fails immediately if
     any test fails.
   * Any procedure or function call is a test if an input is provided
     where an output argument is expected.  In this case, the call is made
@@ -845,7 +845,8 @@ Tests can take several forms:
     add(x, y, xy)
     xy = add(x, y)
     ```
-
+  * A foreign language call can be a test; see the [foreign language
+    interface](#foreign-language-interface) section for details. 
   * Finally, a Boolean value by itself can also be used as a test, in which case
     `true` succeeds and `false` fails.  This applies both to Boolean variables
     and Boolean-valued functions.  However, tests are a more general facility
@@ -868,7 +869,14 @@ xs = [0 | ?rest]
 ```
 
 would succeed if `xs` is currently a list whose head is `0`, and would assign
-`rest` to the tail.  It would fail if `xs` does not match that pattern.
+`rest` to the tail.  It would fail if `xs` does not match that pattern, either
+because it is an empty list or because its head is not `0`.
+
+Note that all effects of a test are reverted if the test fails, including
+reassignments of variables or modifications of resources.  However, some
+effects, such as performing input/output, cannot be reverted, and therefore
+these effects cannot be performed within a test.  The compiler will issue an
+error message in such cases.
 
 
 ## <a name="reification"></a>Reification of tests
