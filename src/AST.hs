@@ -54,7 +54,8 @@ module AST (
   emptyInterface, emptyImplementation,
   getParams, getPrimParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
-  ModSpec, maybeModPrefix, ProcImpln(..), ProcDef(..), procInline, procCallCount,
+  ModSpec, validModuleName, maybeModPrefix, 
+  ProcImpln(..), ProcDef(..), procInline, procCallCount,
   transformModuleProcs,
   getProcGlobalFlows,
   primImpurity, flagsImpurity, flagsDetism,
@@ -1697,6 +1698,12 @@ instance Show TypeVarName where
 -- |A module specification, as a list of module names; module a.b.c would
 --  be represented as ["a","b","c"].
 type ModSpec = [Ident]
+
+
+-- |Check that a module name component is valid (ie, does not contain invalid
+-- characters).  Currently only period (.) and hash (#) are considered invalid.
+validModuleName :: Ident -> Bool
+validModuleName = not . any (`elem` ['.','#'])
 
 
 -- |The uses one module makes of another; first the public imports,
