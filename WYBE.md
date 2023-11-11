@@ -1559,10 +1559,15 @@ A resource can be declared at the level of a module, as follows:
 
 > `resource` *name*`:`*type*
 
-It may optionally specify an initial value, in which case the resource is
-defined throughout the execution of the program.
+It may optionally specify an initial value:
 
 > `resource` *name*`:`*type* `=` *expr*
+
+In this case, the resource is
+defined in any top level code in that module, as well as any top level code in
+any module that `use`s this module, but not in any module that this module
+`use`s.  The latter restriction is necessary because when two modules depend on
+one another, the order in which their resources are initialised is unspecified.
 
 A resource may be exported, allowing it to be referred to in other modules, by
 preceding the `resource` declaration with the `pub` keyword.

@@ -170,7 +170,7 @@ completeNormalisation :: [ModSpec] -> Compiler ()
 completeNormalisation modSCC = do
     logNormalise $ "Completing normalisation of modules " ++ showModSpecs modSCC
     completeTypeNormalisation modSCC
-    mapM_ (normaliseModMain `inModule`) modSCC
+    mapM_ (normaliseModMain modSCC `inModule`) modSCC
     mapM_ (transformModuleProcs flattenProcBody) modSCC
 
 
@@ -442,10 +442,11 @@ typeRepresentation _ _          = Address
 
 
 ----------------------------------------------------------------
--- Generating top-level code for the current module
+-- Generating top-level code for the current module, given a list of all
+-- the modules in the same module dependency SCC.
 
-normaliseModMain :: Compiler ()
-normaliseModMain = do
+normaliseModMain :: [ModSpec] -> Compiler ()
+normaliseModMain modSCC = do
     stmts <- getModule stmtDecls
     modSpec <- getModuleSpec
     logNormalise $ "Completing main normalisation of module "
@@ -453,7 +454,7 @@ normaliseModMain = do
     let initBody = List.reverse stmts
     logNormalise $ "Top-level statements = " ++ show initBody
     unless (List.null stmts) $ do
-        resources <- initResources
+        resources <- initResources modSCC
         logNormalise $ "Initialised resources in main code for module "
                         ++ showModSpec modSpec
                         ++ ": " ++ show resources
@@ -463,9 +464,11 @@ normaliseModMain = do
 
 -- |The resources available at the top level of this module, plus the
 -- initialisations to be performed before executing any code that uses this
--- module.
-initResources :: Compiler (Set ResourceFlowSpec)
-initResources = do
+-- module.  All resources initialised by the current module are taken to be
+-- outputs, and all resources defined by modules used by this module but not in
+-- the same SCC are taken as inputs.
+initResources :: [ModSpec] -> Compiler (Set ResourceFlowSpec)
+initResources modSCC = do
     thisMod <- getModule modSpec
     mods <- getModuleImplementationField (Map.keys . modImports)
     mods' <- (mods ++) . concat <$> mapM descendentModules mods
@@ -474,7 +477,8 @@ initResources = do
     (localInitialised,visibleInitialised) <- initialisedResources
     let visibleInitSet = Map.keysSet visibleInitialised
     let localInitSet = Map.keysSet localInitialised
-    let importedInitSet = visibleInitSet Set.\\ localInitSet
+    let importedInitSet = Set.filter (not . (`elem` modSCC) . resourceMod)
+                    $ visibleInitSet Set.\\ localInitSet
     logNormalise $ "in initResources, initialised resources = "
                    ++ show visibleInitSet
     logNormalise $ "            initialised local resources = "
