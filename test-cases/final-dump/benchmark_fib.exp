@@ -4,24 +4,24 @@ AFTER EVERYTHING:
   representation  : (not a type)
   public submods  : 
   public resources: 
-  public procs    : benchmark.benchmark_end<0>
-                    benchmark.benchmark_start<0>
+  public procs    : benchmark.end<0>
+                    benchmark.start<0>
   imports         : use wybe.c_string
                     use wybe.float
   resources       : 
   procs           : 
 
-proc benchmark_end > public {inline,semipure} (0 calls)
-0: benchmark.benchmark_end<0>
-benchmark_end(?time##0:wybe.float, %call_source_location##0:wybe.c_string)<{}; {}; {}>:
+proc end > public {inline,semipure} (0 calls)
+0: benchmark.end<0>
+end(?time##0:wybe.float, %call_source_location##0:wybe.c_string)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign c {impure} benchmark_end(~call_source_location##0:wybe.c_string, ?time##0:wybe.float) @benchmark:nn:nn
 
 
-proc benchmark_start > public {inline,semipure} (0 calls)
-0: benchmark.benchmark_start<0>
-benchmark_start(%call_source_location##0:wybe.c_string)<{}; {}; {}>:
+proc start > public {inline,semipure} (0 calls)
+0: benchmark.start<0>
+start(%call_source_location##0:wybe.c_string)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign c {impure} benchmark_start(~call_source_location##0:wybe.c_string) @benchmark:nn:nn
@@ -46,14 +46,14 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  double @"benchmark.benchmark_end<0>"(i64  %"call_source_location##0") alwaysinline   {
+define external fastcc  double @"benchmark.end<0>"(i64  %"call_source_location##0") alwaysinline   {
 entry:
   %0 = tail call ccc  double  @benchmark_end(i64  %"call_source_location##0")  
   ret double %0 
 }
 
 
-define external fastcc  void @"benchmark.benchmark_start<0>"(i64  %"call_source_location##0") alwaysinline   {
+define external fastcc  void @"benchmark.start<0>"(i64  %"call_source_location##0") alwaysinline   {
 entry:
   tail call ccc  void  @benchmark_start(i64  %"call_source_location##0")  
   ret void 
