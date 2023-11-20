@@ -12,16 +12,16 @@ pub def {semipure} start() use call_source_location {
 }
 
 # End the benchmark clock, yielding the elapsed time in seconds
-# Can only be called after a start() has been called
-# which has not been ended by an end()
+# Can only be called after start() has been called
+# which has not been ended by end()
 pub def {semipure} end(?time:float) use call_source_location {
     foreign c {impure} benchmark_end(call_source_location, ?time)
 }
 
 # Measure the running time of a semipure niladic procedure
-# Assumes any start() call has been ended
-pub def {semipure} time(proc:{semipure}(), ?time:float) {
-    !start
+# Assumes the preceding start() (if any) has been ended
+pub def {semipure} time(proc:{semipure}(), ?time:float) use call_source_location {
+    foreign c {impure} benchmark_start(call_source_location)
     !proc
-    !end(?time)
+    foreign c {impure} benchmark_end(call_source_location, ?time)
 }
