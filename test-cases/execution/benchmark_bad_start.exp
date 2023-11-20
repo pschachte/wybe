@@ -1,0 +1,1 @@
+benchmark_bad_start:18:2: Starting a new benchmark when there exists a preceding benchmark that has not been ended
