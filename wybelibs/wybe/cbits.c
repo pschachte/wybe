@@ -10,8 +10,11 @@
 #include <inttypes.h>
 #include <stdbool.h>
 #include <math.h>
+#include <time.h>
 
 unsigned long long g_malloc_count = 0;
+clock_t benchmark_clock;
+bool benchmark_in_progress = false;
 
 int64_t print_int(int64_t x) { return (int64_t)printf("%"PRId64, x); }
 
@@ -115,4 +118,23 @@ int64_t malloc_count() {
 void error_exit(char* location, char *message) {
     fprintf( stderr, "%s: %s\n", location, message);
     exit(1);
+}
+
+
+void benchmark_start(char* location) {
+    if (benchmark_in_progress)
+        fprintf(stderr, "%s: %s\n", location,
+                "benchmark_start should not be succeeded"
+                " by another benchmark_start");
+    benchmark_in_progress = true;
+    benchmark_clock = clock();
+}
+
+double benchmark_end(char* location) {
+    if (!benchmark_in_progress)
+        fprintf(stderr, "%s: %s\n", location,
+                "benchmark_end should be preceded"
+                " by a benchmark_start");
+    benchmark_in_progress = false;
+    return ((double) clock() - benchmark_clock) / CLOCKS_PER_SEC;
 }

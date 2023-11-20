@@ -1,0 +1,14 @@
+# purpose: Standard Benchmarking Library
+# since  : 0.1
+
+pragma no_standard_library  # Standard library can't depend on itself!
+
+use wybe.float, wybe.c_string
+
+pub def {semipure} benchmark_start() use call_source_location {
+    foreign c {impure} benchmark_start(call_source_location)
+}
+
+pub def {semipure} benchmark_end(?time:float) use call_source_location {
+    foreign c {impure} benchmark_end(call_source_location, ?time)
+}

@@ -1,0 +1,19 @@
+use benchmark
+
+def naive_fib(n:int):int = res where {
+    if {
+        n <= 0 :: !error(c"n should be strictly positive")
+    |   else :: ?res = naive_fib1(n)
+    }
+}
+
+def naive_fib1(n:int):int =
+    if {
+        (n = 1 | n = 2) :: 1
+    |   else :: naive_fib1(n-1) + naive_fib1(n-2)
+    }
+
+!benchmark_start
+?res = naive_fib(47)
+!benchmark_end(?time)
+!print("Elapsed time (s):  "); !println(time)
