@@ -20,7 +20,7 @@ pub def {semipure} end(?time:float) use call_source_location {
 
 # Measure the running time of a semipure niladic procedure
 # Assumes the preceding start() (if any) has been ended
-pub def {semipure} time(proc:{semipure}(), ?time:float) use call_source_location {
+pub def {semipure} time_execution(proc:{semipure}(), ?time:float) use call_source_location {
     foreign c {impure} benchmark_start(call_source_location)
     !proc
     foreign c {impure} benchmark_end(call_source_location, ?time)

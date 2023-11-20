@@ -6,7 +6,7 @@ AFTER EVERYTHING:
   public resources: 
   public procs    : benchmark.end<0>
                     benchmark.start<0>
-                    benchmark.time<0>
+                    benchmark.time_execution<0>
   imports         : use wybe.c_string
                     use wybe.float
   resources       : 
@@ -28,9 +28,9 @@ start(%call_source_location##0:wybe.c_string)<{}; {}; {}>:
     foreign c {impure} benchmark_start(~call_source_location##0:wybe.c_string) @benchmark:nn:nn
 
 
-proc time > public {inline,semipure} (0 calls)
-0: benchmark.time<0>
-time(proc##0:{semipure}(), ?time##0:wybe.float, %call_source_location##0:wybe.c_string)<{}; {}; {}>:
+proc time_execution > public {inline,semipure} (0 calls)
+0: benchmark.time_execution<0>
+time_execution(proc##0:{semipure}(), ?time##0:wybe.float, %call_source_location##0:wybe.c_string)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign c {impure} benchmark_start(call_source_location##0:wybe.c_string) @benchmark:nn:nn
@@ -71,7 +71,7 @@ entry:
 }
 
 
-define external fastcc  double @"benchmark.time<0>"(i64  %"proc##0", i64  %"call_source_location##0") alwaysinline   {
+define external fastcc  double @"benchmark.time_execution<0>"(i64  %"proc##0", i64  %"call_source_location##0") alwaysinline   {
 entry:
   tail call ccc  void  @benchmark_start(i64  %"call_source_location##0")  
   %0 = inttoptr i64 %"proc##0" to i64* 

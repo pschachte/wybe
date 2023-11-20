@@ -15,5 +15,5 @@ def fib1(pprev:int, prev:int, n:int) =
     }
 
 !benchmark.start
-!benchmark.time({semipure}{?res = fib(42)}, ?time)
+!benchmark.time_execution({semipure}{?res = fib(42)}, ?time)
 !print("Elapsed time (s):  "); !println(time)
