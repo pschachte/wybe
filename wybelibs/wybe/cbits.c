@@ -124,8 +124,8 @@ void error_exit(char* location, char *message) {
 void benchmark_start(char* location) {
     if (benchmark_in_progress) {
         fprintf(stderr, "%s: %s\n", location,
-                "Calling benchmark.start when a previous benchmark.start"
-                " has not been ended by a benchmark.end");
+                "Starting a new benchmark when there exists a preceding"
+                " benchmark that has not been ended");
         exit(1);
     }
     benchmark_in_progress = true;
@@ -135,8 +135,7 @@ void benchmark_start(char* location) {
 double benchmark_end(char* location) {
     if (!benchmark_in_progress) {
         fprintf(stderr, "%s: %s\n", location,
-                "Calling benchmark.end when there is no"
-                " ongoing benchmark.start");
+                "Ending an unstarted benchmark");
         exit(1);
     }
     benchmark_in_progress = false;
