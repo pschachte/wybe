@@ -42,7 +42,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-aok > {inline} (5 calls)
+proc aok > {inline} (5 calls)
 0: io_flow_ok.aok<0>
 aok()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -53,7 +53,7 @@ aok()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-unknown > {noinline} (3 calls)
+proc unknown > {noinline} (3 calls)
 0: io_flow_ok.unknown<0>
 unknown(?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

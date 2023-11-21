@@ -232,12 +232,33 @@ omitBefore _                        = False
 -- |Convert a sequence of characters to a sequence of tokens.
 tokenise :: SourcePos -> String -> [Token]
 tokenise _ [] = []
-tokenise pos str@(c:cs)
+tokenise pos (c:str) =
+    let (toks,pos',str') = tokenisePart pos c str
+    in  toks ++ tokenise pos' str'
+
+
+-- |The Scanner works by producing a list of tokens, the characters not yet
+-- parsed, and the source position of the unparsed text.
+type PartialTokenisation = ([Token],SourcePos,String)
+
+
+-- |Wrap up a partial tokenisation with a token error. Currently the parser
+-- gives up after an erroneous token, so there's not much point trying to carry
+-- on.
+terminalTokError :: String -> SourcePos -> PartialTokenisation
+terminalTokError msg pos = ([TokError msg pos], pos, [])
+
+
+-- |Partially convert a sequence of characters to a sequence of tokens,
+-- giving some tokens, the remaining input characters, and the source position
+-- of the start of the remaining characters.
+tokenisePart :: SourcePos -> Char -> String -> PartialTokenisation
+tokenisePart pos c cs
   | c == '\n' = singleCharTok c cs pos $ TokSeparator False pos
-  | isSpace c || isControl c = tokenise (updatePosChar pos c) cs
-  | isDigit c = scanNumberToken pos str
+  | isSpace c || isControl c = ([], updatePosChar pos c, cs)
+  | isDigit c = scanNumberToken pos (c:cs)
   | isIdentChar c =
-    case span isIdentChar str of
+    case span isIdentChar (c:cs) of
       (v@"c", '\"':cs') -> tokeniseString (IdentQuote "c" DoubleQuote) pos cs'
       (name, rest) -> multiCharTok name rest (TokIdent name pos) pos
   | otherwise = case c of
@@ -265,9 +286,9 @@ tokenise pos str@(c:cs)
                                     breakList (target `isPrefixOf`) cs
                                 pos' = updatePosString pos (c:comment++trim)
                             in if terminate && null rest
-                               then [TokError "unterminated comment" pos']
-                               else tokenise pos' $ drop (length trim) rest
-                    _   -> tokeniseSymbol pos str
+                               then terminalTokError "unterminated comment" pos'
+                               else ([], pos', drop (length trim) rest)
+                    _   -> tokeniseSymbol pos (c:cs)
 
 
 -- | Splits a list into the initial part whose prefix does not satisfy the
@@ -282,11 +303,11 @@ breakList pred lst@(h:t)
 
 
 -- |Handle a single character token and tokenize the rest of the input.
-singleCharTok :: Char -> String -> SourcePos -> Token -> [Token]
-singleCharTok c cs pos tok = tok:tokenise (updatePosChar pos c) cs
+singleCharTok :: Char -> String -> SourcePos -> Token -> PartialTokenisation
+singleCharTok c cs pos tok = ([tok], updatePosChar pos c, cs)
 
 -- |Handle a symbol token and tokenize the rest of the input.
-tokeniseSymbol :: SourcePos -> String -> [Token]
+tokeniseSymbol :: SourcePos -> String -> PartialTokenisation
 tokeniseSymbol pos (c:cs) =
   let (sym,rest) = span (isSymbolContinuation c) cs
       pos' = updatePosString pos sym
@@ -297,13 +318,13 @@ tokeniseSymbol _ [] = shouldnt "empty symbol does not exist"
 -- |Handle a token that is treated specially if not followed by symbol
 -- characters, and tokenize the rest of the input.  Special characters are
 -- comma, period, and semicolon.
-specialToken :: Char -> String -> SourcePos -> Token -> [Token]
+specialToken :: Char -> String -> SourcePos -> Token -> PartialTokenisation
 specialToken ch rest pos singleTok =
     case span (isSymbolContinuation ch) rest of
-        ([],_) -> singleTok : tokenise (updatePosChar pos ch) rest
+        ([],_) -> ([singleTok], updatePosChar pos ch, rest)
         (tokRest,rest') ->
             let sym = ch:tokRest
-            in  TokSymbol sym pos : tokenise (updatePosString pos sym) rest'
+            in ([TokSymbol sym pos], updatePosString pos sym, rest')
 
 
 -- |Recognise a character that cannot begin an expression, and therefore can
@@ -332,52 +353,111 @@ isSymbolContinuation startChar _   = False
 
 
 -- |Handle a mult-character token and tokenize the rest of the input.
-multiCharTok :: String -> String -> Token -> SourcePos -> [Token]
-multiCharTok str cs tok pos = tok:tokenise (updatePosString pos str) cs
+multiCharTok :: String -> String -> Token -> SourcePos -> PartialTokenisation
+multiCharTok str cs tok pos = ([tok], updatePosString pos str, cs)
 
 -- |Handle a character constant token and tokenize the rest of the input.
-tokeniseChar :: SourcePos -> String -> [Token]
+tokeniseChar :: SourcePos -> String -> PartialTokenisation
 tokeniseChar pos ('\\':rest) =
     case scanCharEscape (updatePosChar pos '\\') rest of
         Just (ch,pos'','\'':cs') ->
-             TokChar ch pos : tokenise pos'' cs'
-        _ -> TokError "invalid character escape" pos
-            : tokenise (updatePosChar pos '\'') rest
+             ([TokChar ch pos], pos'', cs')
+        _ -> ([TokError "invalid character escape" pos]
+                , updatePosChar pos '\'', rest)
 tokeniseChar pos (c:'\'':cs) =
-  TokChar c pos:
-  tokenise (updatePosChar (updatePosChar (updatePosChar pos '\'') c) '\'') cs
+  ([TokChar c pos]
+   ,updatePosChar (updatePosChar (updatePosChar pos '\'') c) '\'', cs)
 tokeniseChar pos chars =
-    TokError ("character constant beginning '" ++ front ++ "'...") pos
-    : tokenise (updatePosString pos ('\'':front)) back
+    ([TokError ("character constant beginning '" ++ front ++ "'...") pos]
+    , updatePosString pos ('\'':front), back)
     where (front,back) = splitAt 2 chars
 
 -- |Tokenise a delimited string and tokenize the rest of the input..
-tokeniseString :: StringDelim -> SourcePos -> String -> [Token]
+tokeniseString :: StringDelim -> SourcePos -> String -> PartialTokenisation
 tokeniseString delim pos cs =
-  let termchar = delimChar delim
-  in  case scanString termchar pos cs of
-      Just (str,pos',rest) -> TokString delim str pos : tokenise pos' rest
-      Nothing              -> [TokError "unterminated string" pos]
-
-
--- |Scan a string literal that has already been opened, and will close with the
--- specified terminator character.  Also return the remainder of the input and
--- the new source position.
-scanString :: Char -> SourcePos -> String -> Maybe (String,SourcePos,String)
-scanString termchar pos input =
-    case break (`elem` [termchar,'\\']) input of
-        (_,[]) -> Nothing
+    case break (`elem` [termchar,'\\','$']) cs of
+        (_,[]) -> tokErr
         (front,'\\':cs) ->
             let pos' = updatePosChar (updatePosString pos front) '\\'
             in case scanCharEscape pos' cs of
                 Just (ch,pos'',cs') ->
-                    first3 ((front++) . (ch:)) <$> scanString termchar pos'' cs'
-                Nothing -> Nothing
+                    case tokeniseString delim pos'' cs' of
+                        (TokString d s p:rest, pos''', cs'') ->
+                            (TokString d (front++(ch:s)) p:rest, pos''', cs'')
+                        _ -> shouldnt "tokeniseString didn't return a string"
+                Nothing -> tokErr
+        ("",'$':cs) ->
+            scanInterpolation cs delim $ updatePosChar pos '$'
+        (front,'$':cs) ->
+            let pos' = updatePosString pos front
+            in mapFst3 ([TokString delim front pos, TokSymbol ",," pos']++)
+               $ scanInterpolation cs delim (updatePosChar pos' '$')
         (front,t:cs) | t == termchar ->
             let pos' = updatePosChar (updatePosString pos front) t
-            in Just (front, pos', cs)
-        (front,rest) -> shouldnt "break broke in scanString"
+            in ([TokString delim front pos], pos', cs)
+        (front,rest) -> shouldnt "break broke in tokeniseString"
+  where termchar = delimChar delim
+        tokErr = terminalTokError "unterminated string" pos
 
+
+-- |Scan a string interpolation followed by the rest of the string.  cs begins
+-- with the first character after the '$'.
+scanInterpolation :: String -> StringDelim -> SourcePos -> PartialTokenisation
+scanInterpolation cs delim pos =
+    case span isIdentChar cs of
+        ("",'(':c:cs') ->
+            mapFst3 ([TokIdent "fmt" pos, TokLBracket Paren pos]++)
+            $ scanExprInterpolation 1 c cs' delim $ updatePosChar pos '('
+        ("",cs) ->
+            mapFst3
+            (TokError "invalid string interpolation" pos:)
+            $ tokeniseString delim pos cs
+        (name,t:cs) | t == termchar ->
+            let pos' = updatePosChar (updatePosString pos name) t
+            in ([TokIdent "fmt" pos
+                 , TokLBracket Paren pos
+                 , TokIdent name pos
+                 , TokRBracket Paren pos]
+                , pos', cs)
+        (name, rest) ->
+            let pos' = updatePosString pos name
+            in mapFst3
+               ([TokIdent "fmt" pos
+                , TokLBracket Paren pos
+                , TokIdent name pos
+                , TokRBracket Paren pos
+                , TokSymbol ",," pos']++)
+               $ tokeniseString delim pos' rest
+  where termchar = delimChar delim
+
+
+-- |Scan a string interpolation of the form $(...), followed by the rest of the
+-- string.  cs begins with the first character after the "$("".  The provided
+-- depth indicates the current parenthesis nesting depth.  We scan until the
+-- nesting depth reaches 0, meaning we've reached the end of the opening "$(".
+-- After that, we scan the rest of the string.
+scanExprInterpolation :: Int -> Char -> String -> StringDelim -> SourcePos
+                      -> PartialTokenisation
+scanExprInterpolation 0 c cs delim pos
+  | c == delimChar delim = ([], updatePosChar pos c, cs)
+scanExprInterpolation 0 c cs delim pos =
+    mapFst3 ([TokSymbol ",," pos]++) $ tokeniseString delim pos (c:cs)
+scanExprInterpolation depth c cs delim pos =
+    let (toks, pos', cs') = tokenisePart pos c cs
+        depth' = foldr ((+) . tokenNesting) depth toks
+    in  case cs' of
+        [] -> terminalTokError "unterminated string" pos'
+        (c'':cs'') ->
+            mapFst3 (toks++)
+            $ scanExprInterpolation depth' c'' cs'' delim pos'
+
+
+-- |Return the change the token makes to the expression nesting depth.  This
+-- only considers parentheses to change the nesting depth.
+tokenNesting :: Token -> Int
+tokenNesting (TokLBracket Paren _) = 1
+tokenNesting (TokRBracket Paren _) = (-1)
+tokenNesting _ = 0
 
 -- |Scan a character escape sequence following a backslash character, returning
 -- Maybe a triple of the single escaped character, the position of the following
@@ -428,7 +508,7 @@ escapedChar c = c
 -- |Scan a number token and the rest of the input.  Handles decimal and hex
 --  ints, floats with decimal point and/or e notation, and ignores embedded
 --  underscores in integers. Doesn't handle negative numbers (these are handled by the parser).
-scanNumberToken :: SourcePos -> [Char] -> [Token]
+scanNumberToken :: SourcePos -> [Char] -> PartialTokenisation
 scanNumberToken pos cs =
     let (num0,rest0) = grabNumberChars False cs
         num = map toLower $ filter (/='_') num0
@@ -438,7 +518,7 @@ scanNumberToken pos cs =
                                in (num++'-':negexp, remains')
           _ -> (num, rest0)
         pos' = foldl updatePosChar pos num
-    in  (case num' of
+    in ([case num' of
           '0':'x':hexDigits
             -> parseInteger 16 hexDigits pos
           '0':'b':binaryDigits
@@ -485,8 +565,8 @@ scanNumberToken pos cs =
                       in TokFloat value pos
                     (tok, _, _) -> shouldnt $ "unexpected token "
                                             ++ show tok
-                                            ++ " when parsing a number ")
-        : tokenise pos' rest
+                                            ++ " when parsing a number "],
+        pos', rest)
 
 
 grabNumberChars :: Bool -> [Char] -> ([Char],[Char])
@@ -512,19 +592,19 @@ parseInteger radix str pos =
 -- followed by the rest of the input.  In case of an invalid backquoted symbol,
 -- we give up on tokenising the rest of the file.  Currently the parser gives up
 -- after an erroneous token, so there's not much point trying to carry on.
-tokeniseBackquote :: String -> SourcePos -> [Token]
+tokeniseBackquote :: String -> SourcePos -> PartialTokenisation
 tokeniseBackquote cs pos =
     let pos'  = updatePosChar pos '`'  -- count the opening `
         pos'' = updatePosChar pos' '`' -- pre-count the closing `
     in case break ((=='`') ||| (<' ') ||| (=='#')) cs of
-        ([],_)           -> [TokError "empty backquoted symbol" pos]
-        (_,[])           -> [TokError "unclosed backquote" pos]
+        ([],_)           -> terminalTokError "empty backquoted symbol" pos
+        (_,[])           -> terminalTokError "unclosed backquote" pos
         (name,'`':rest)  -> multiCharTok name rest (TokIdent name pos) pos''
-        (name,'\n':rest) -> [TokError "multiline backquoted symbol" pos]
-        (name,'#':rest)  -> [TokError "hash character (#) in backquoted symbol"
-                             pos]
+        (name,'\n':rest) -> terminalTokError "multiline backquoted symbol" pos
+        (name,'#':rest)  ->
+            terminalTokError "hash character (#) in backquoted symbol" pos
         (name,_:rest)    ->
-            [TokError "control character in a backquoted symbol" pos]
+            terminalTokError "control character in a backquoted symbol" pos
 
 
 -- |Returns the integer value of the specified char which is either a digit or

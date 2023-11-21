@@ -37,57 +37,57 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(6,(common_fields.id<1>,fromList [NonAliasedParamCond 0 []])),(16,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    foreign lpvm alloc(32:wybe.int, ?tmp#14##0:common_fields) @common_fields:nn:nn
-    foreign lpvm mutate(~tmp#14##0:common_fields, ?tmp#15##0:common_fields, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, "a":wybe.string) @common_fields:nn:nn
-    foreign lpvm mutate(~tmp#15##0:common_fields, ?tmp#16##0:common_fields, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, "b":wybe.string) @common_fields:nn:nn
-    foreign lpvm mutate(~tmp#16##0:common_fields, ?tmp#17##0:common_fields, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, "c":wybe.string) @common_fields:nn:nn
-    foreign lpvm mutate(~tmp#17##0:common_fields, ?tmp#0##0:common_fields, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 0:wybe.int) @common_fields:nn:nn
-    foreign lpvm alloc(24:wybe.int, ?tmp#21##0:common_fields) @common_fields:nn:nn
-    foreign lpvm mutate(~tmp#21##0:common_fields, ?tmp#22##0:common_fields, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, "b":wybe.string) @common_fields:nn:nn
-    foreign lpvm mutate(~tmp#22##0:common_fields, ?tmp#23##0:common_fields, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:wybe.int) @common_fields:nn:nn
-    foreign lpvm mutate(~tmp#23##0:common_fields, ?tmp#24##0:common_fields, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1:wybe.int) @common_fields:nn:nn
-    foreign llvm or(~tmp#24##0:common_fields, 1:wybe.int, ?tmp#1##0:common_fields) @common_fields:nn:nn
+    foreign lpvm alloc(32:wybe.int, ?tmp#15##0:common_fields) @common_fields:nn:nn
+    foreign lpvm mutate(~tmp#15##0:common_fields, ?tmp#16##0:common_fields, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, "a":wybe.string) @common_fields:nn:nn
+    foreign lpvm mutate(~tmp#16##0:common_fields, ?tmp#17##0:common_fields, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, "b":wybe.string) @common_fields:nn:nn
+    foreign lpvm mutate(~tmp#17##0:common_fields, ?tmp#18##0:common_fields, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, "c":wybe.string) @common_fields:nn:nn
+    foreign lpvm mutate(~tmp#18##0:common_fields, ?tmp#0##0:common_fields, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 0:wybe.int) @common_fields:nn:nn
+    foreign lpvm alloc(24:wybe.int, ?tmp#22##0:common_fields) @common_fields:nn:nn
+    foreign lpvm mutate(~tmp#22##0:common_fields, ?tmp#23##0:common_fields, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, "b":wybe.string) @common_fields:nn:nn
+    foreign lpvm mutate(~tmp#23##0:common_fields, ?tmp#24##0:common_fields, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:wybe.int) @common_fields:nn:nn
+    foreign lpvm mutate(~tmp#24##0:common_fields, ?tmp#25##0:common_fields, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 1:wybe.int) @common_fields:nn:nn
+    foreign llvm or(~tmp#25##0:common_fields, 1:wybe.int, ?tmp#1##0:common_fields) @common_fields:nn:nn
     common_fields.title<0>(tmp#0##0:common_fields, ?tmp#2##0:wybe.string) #2 @common_fields:nn:nn
     wybe.string.print<0>(~tmp#2##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#26##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#26##0:wybe.phantom, ?tmp#27##0:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#27##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#27##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @io:nn:nn
     common_fields.id<0>(tmp#1##0:common_fields, ?tmp#3##0:wybe.int) #4 @common_fields:nn:nn
-    foreign c print_int(~tmp#3##0:wybe.int, ~tmp#27##0:wybe.phantom, ?tmp#30##0:wybe.phantom) @int:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#30##0:wybe.phantom, ?tmp#31##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(~tmp#3##0:wybe.int, ~tmp#28##0:wybe.phantom, ?tmp#31##0:wybe.phantom) @int:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#31##0:wybe.phantom, ?tmp#32##0:wybe.phantom) @io:nn:nn
     common_fields.id<1>[410bae77d3](~tmp#1##0:common_fields, ?c##1:common_fields, 10:wybe.int) #6 @common_fields:nn:nn
     common_fields.id<0>(~c##1:common_fields, ?tmp#4##0:wybe.int) #7 @common_fields:nn:nn
-    foreign c print_int(~tmp#4##0:wybe.int, ~tmp#31##0:wybe.phantom, ?tmp#34##0:wybe.phantom) @int:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#34##0:wybe.phantom, ?tmp#35##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#35##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    common_fields.genre<0>(tmp#0##0:common_fields, ?tmp#5##0:wybe.string, ?tmp#8##0:wybe.bool) #9 @common_fields:nn:nn
-    case ~tmp#8##0:wybe.bool of
+    foreign c print_int(~tmp#4##0:wybe.int, ~tmp#32##0:wybe.phantom, ?tmp#35##0:wybe.phantom) @int:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#35##0:wybe.phantom, ?tmp#36##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#36##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    common_fields.genre<0>(tmp#0##0:common_fields, ?tmp#5##0:wybe.string, ?tmp#9##0:wybe.bool) #9 @common_fields:nn:nn
+    case ~tmp#9##0:wybe.bool of
     0:
 
     1:
-        common_fields.genre<1>(~tmp#0##0:common_fields, ?b##1:common_fields, "g":wybe.string, ?tmp#9##0:wybe.bool) #10 @common_fields:nn:nn
-        case ~tmp#9##0:wybe.bool of
+        common_fields.genre<1>(~tmp#0##0:common_fields, ?b##1:common_fields, "g":wybe.string, ?tmp#10##0:wybe.bool) #10 @common_fields:nn:nn
+        case ~tmp#10##0:wybe.bool of
         0:
 
         1:
             wybe.string.print<0>(~tmp#5##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #15 @string:nn:nn
-            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#37##0:wybe.phantom) @io:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp#37##0:wybe.phantom, ?tmp#38##0:wybe.phantom) @io:nn:nn
-            foreign lpvm store(~%tmp#38##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-            common_fields.genre<0>(~b##1:common_fields, ?tmp#6##0:wybe.string, ?tmp#7##0:wybe.bool) #12 @common_fields:nn:nn
-            case ~tmp#7##0:wybe.bool of
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#38##0:wybe.phantom) @io:nn:nn
+            foreign c putchar('\n':wybe.char, ~tmp#38##0:wybe.phantom, ?tmp#39##0:wybe.phantom) @io:nn:nn
+            foreign lpvm store(~%tmp#39##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+            common_fields.genre<0>(~b##1:common_fields, ?tmp#6##0:wybe.string, ?tmp#8##0:wybe.bool) #12 @common_fields:nn:nn
+            case ~tmp#8##0:wybe.bool of
             0:
 
             1:
                 wybe.string.print<0>[410bae77d3](~tmp#6##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #16 @string:nn:nn
-                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#40##0:wybe.phantom) @io:nn:nn
-                foreign c putchar('\n':wybe.char, ~tmp#40##0:wybe.phantom, ?tmp#41##0:wybe.phantom) @io:nn:nn
-                foreign lpvm store(~%tmp#41##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#41##0:wybe.phantom) @io:nn:nn
+                foreign c putchar('\n':wybe.char, ~tmp#41##0:wybe.phantom, ?tmp#42##0:wybe.phantom) @io:nn:nn
+                foreign lpvm store(~%tmp#42##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
 
 
 
-= > public (1 calls)
+proc = > public (1 calls)
 0: common_fields.=<0>
 =(#left##0:common_fields, #right##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -237,7 +237,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-DVD > public {inline} (0 calls)
+proc DVD > public {inline} (0 calls)
 0: common_fields.DVD<0>
 DVD(title##0:wybe.string, director##0:wybe.string, genre##0:wybe.string, id##0:wybe.int, ?#result##0:common_fields)<{}; {}; {}>:
   AliasPairs: []
@@ -248,7 +248,7 @@ DVD(title##0:wybe.string, director##0:wybe.string, genre##0:wybe.string, id##0:w
     foreign lpvm mutate(~#rec##2:common_fields, ?#rec##3:common_fields, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~genre##0:wybe.string) @common_fields:nn:nn
     foreign lpvm mutate(~#rec##3:common_fields, ?#rec##4:common_fields, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~id##0:wybe.int) @common_fields:nn:nn
     foreign llvm or(~#rec##4:common_fields, 2:wybe.int, ?#result##0:common_fields) @common_fields:nn:nn
-DVD > public {inline} (14 calls)
+proc DVD > public {inline} (14 calls)
 1: common_fields.DVD<1>
 DVD(?title##0:wybe.string, ?director##0:wybe.string, ?genre##0:wybe.string, ?id##0:wybe.int, #result##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -272,7 +272,7 @@ DVD(?title##0:wybe.string, ?director##0:wybe.string, ?genre##0:wybe.string, ?id#
 
 
 
-author > public {inline} (0 calls)
+proc author > public {inline} (0 calls)
 0: common_fields.author<0>
 author(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -288,7 +288,7 @@ author(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)<{
         foreign lpvm access(~#rec##0:common_fields, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.string) @common_fields:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-author > public {inline} (0 calls)
+proc author > public {inline} (0 calls)
 1: common_fields.author<1>
 author(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -306,7 +306,7 @@ author(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?#s
 
 
 
-book > public {inline} (7 calls)
+proc book > public {inline} (7 calls)
 0: common_fields.book<0>
 book(title##0:wybe.string, author##0:wybe.string, genre##0:wybe.string, id##0:wybe.int, ?#result##0:common_fields)<{}; {}; {}>:
   AliasPairs: []
@@ -316,7 +316,7 @@ book(title##0:wybe.string, author##0:wybe.string, genre##0:wybe.string, id##0:wy
     foreign lpvm mutate(~#rec##1:common_fields, ?#rec##2:common_fields, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~author##0:wybe.string) @common_fields:nn:nn
     foreign lpvm mutate(~#rec##2:common_fields, ?#rec##3:common_fields, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~genre##0:wybe.string) @common_fields:nn:nn
     foreign lpvm mutate(~#rec##3:common_fields, ?#result##0:common_fields, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~id##0:wybe.int) @common_fields:nn:nn
-book > public {inline} (32 calls)
+proc book > public {inline} (32 calls)
 1: common_fields.book<1>
 book(?title##0:wybe.string, ?author##0:wybe.string, ?genre##0:wybe.string, ?id##0:wybe.int, #result##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -340,7 +340,7 @@ book(?title##0:wybe.string, ?author##0:wybe.string, ?genre##0:wybe.string, ?id##
 
 
 
-director > public {inline} (0 calls)
+proc director > public {inline} (0 calls)
 0: common_fields.director<0>
 director(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -356,7 +356,7 @@ director(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)
         foreign lpvm access(~#rec##0:common_fields, 6:wybe.int, 32:wybe.int, 2:wybe.int, ?#result##0:wybe.string) @common_fields:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-director > public {inline} (0 calls)
+proc director > public {inline} (0 calls)
 1: common_fields.director<1>
 director(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -374,7 +374,7 @@ director(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?
 
 
 
-frequency > public {inline} (0 calls)
+proc frequency > public {inline} (0 calls)
 0: common_fields.frequency<0>
 frequency(#rec##0:common_fields, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -390,7 +390,7 @@ frequency(#rec##0:common_fields, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{
         foreign lpvm access(~#rec##0:common_fields, 7:wybe.int, 24:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @common_fields:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-frequency > public {inline} (0 calls)
+proc frequency > public {inline} (0 calls)
 1: common_fields.frequency<1>
 frequency(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -408,7 +408,7 @@ frequency(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.int, ?#s
 
 
 
-genre > public (10 calls)
+proc genre > public (10 calls)
 0: common_fields.genre<0>
 genre(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: [(#rec##0,#result##0)]
@@ -432,7 +432,7 @@ genre(#rec##0:common_fields, ?#result##0:wybe.string, ?#success##0:wybe.bool)<{}
         foreign lpvm access(~#rec##0:common_fields, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.string) @common_fields:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-genre > public (5 calls)
+proc genre > public (5 calls)
 1: common_fields.genre<1>
 genre(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: [(#field##0,#rec##0),(#field##0,#rec##1),(#rec##0,#rec##1)]
@@ -458,7 +458,7 @@ genre(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string, ?#su
 
 
 
-id > public (14 calls)
+proc id > public (14 calls)
 0: common_fields.id<0>
 id(#rec##0:common_fields, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -474,7 +474,7 @@ id(#rec##0:common_fields, ?#result##0:wybe.int)<{}; {}; {}>:
     2:
         foreign lpvm access(~#rec##0:common_fields, 22:wybe.int, 32:wybe.int, 2:wybe.int, ?#result##0:wybe.int) @common_fields:nn:nn
 
-id > public (7 calls)
+proc id > public (7 calls)
 1: common_fields.id<1>[410bae77d3]
 id(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: [(#rec##0,#rec##1)]
@@ -504,7 +504,7 @@ id(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.int)<{}; {}; {}
 
 
 
-magazine > public {inline} (7 calls)
+proc magazine > public {inline} (7 calls)
 0: common_fields.magazine<0>
 magazine(title##0:wybe.string, frequency##0:wybe.int, id##0:wybe.int, ?#result##0:common_fields)<{}; {}; {}>:
   AliasPairs: []
@@ -514,7 +514,7 @@ magazine(title##0:wybe.string, frequency##0:wybe.int, id##0:wybe.int, ?#result##
     foreign lpvm mutate(~#rec##1:common_fields, ?#rec##2:common_fields, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~frequency##0:wybe.int) @common_fields:nn:nn
     foreign lpvm mutate(~#rec##2:common_fields, ?#rec##3:common_fields, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~id##0:wybe.int) @common_fields:nn:nn
     foreign llvm or(~#rec##3:common_fields, 1:wybe.int, ?#result##0:common_fields) @common_fields:nn:nn
-magazine > public {inline} (17 calls)
+proc magazine > public {inline} (17 calls)
 1: common_fields.magazine<1>
 magazine(?title##0:wybe.string, ?frequency##0:wybe.int, ?id##0:wybe.int, #result##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -536,7 +536,7 @@ magazine(?title##0:wybe.string, ?frequency##0:wybe.int, ?id##0:wybe.int, #result
 
 
 
-other > public {inline} (0 calls)
+proc other > public {inline} (0 calls)
 0: common_fields.other<0>
 other(title##0:wybe.string, id##0:wybe.int, ?#result##0:common_fields)<{}; {}; {}>:
   AliasPairs: []
@@ -545,7 +545,7 @@ other(title##0:wybe.string, id##0:wybe.int, ?#result##0:common_fields)<{}; {}; {
     foreign lpvm mutate(~#rec##0:common_fields, ?#rec##1:common_fields, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~title##0:wybe.string) @common_fields:nn:nn
     foreign lpvm mutate(~#rec##1:common_fields, ?#rec##2:common_fields, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~id##0:wybe.int) @common_fields:nn:nn
     foreign llvm or(~#rec##2:common_fields, 3:wybe.int, ?#result##0:common_fields) @common_fields:nn:nn
-other > public {inline} (7 calls)
+proc other > public {inline} (7 calls)
 1: common_fields.other<1>
 other(?title##0:wybe.string, ?id##0:wybe.int, #result##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -565,7 +565,7 @@ other(?title##0:wybe.string, ?id##0:wybe.int, #result##0:common_fields, ?#succes
 
 
 
-title > public (7 calls)
+proc title > public (7 calls)
 0: common_fields.title<0>
 title(#rec##0:common_fields, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasPairs: [(#rec##0,#result##0)]
@@ -581,7 +581,7 @@ title(#rec##0:common_fields, ?#result##0:wybe.string)<{}; {}; {}>:
     2:
         foreign lpvm access(~#rec##0:common_fields, -2:wybe.int, 32:wybe.int, 2:wybe.int, ?#result##0:wybe.string) @common_fields:nn:nn
 
-title > public (0 calls)
+proc title > public (0 calls)
 1: common_fields.title<1>
 title(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string)<{}; {}; {}>:
   AliasPairs: [(#field##0,#rec##0),(#field##0,#rec##1),(#rec##0,#rec##1)]
@@ -599,7 +599,7 @@ title(#rec##0:common_fields, ?#rec##1:common_fields, #field##0:wybe.string)<{}; 
 
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: common_fields.~=<0>
 ~=(#left##0:common_fields, #right##0:common_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

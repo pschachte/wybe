@@ -28,13 +28,13 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-#anon#1 > {inline} (1 calls)
+proc #anon#1 > {inline} (1 calls)
 0: higher_order_tests.#anon#1<0>
 #anon#1([anon#1#1##0:wybe.int], ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
-#anon#1 > {inline} (3 calls)
+proc #anon#1 > {inline} (3 calls)
 1: higher_order_tests.#anon#1<1>
 #anon#1(anon#1#1##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -42,13 +42,13 @@ module top-level code > public {semipure} (0 calls)
     foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
-#anon#2 > {inline} (1 calls)
+proc #anon#2 > {inline} (1 calls)
 0: higher_order_tests.#anon#2<0>
 #anon#2(anon#2#1##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm icmp_eq(~anon#2#1##0:wybe.int, 1:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
-#anon#2 > {inline} (3 calls)
+proc #anon#2 > {inline} (3 calls)
 1: higher_order_tests.#anon#2<1>
 #anon#2(anon#2#1##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -56,7 +56,7 @@ module top-level code > public {semipure} (0 calls)
     foreign llvm icmp_eq(~anon#2#1##0:wybe.int, 1:wybe.int, ?#success##0:wybe.bool) @int:nn:nn
 
 
-#cont#1 > (2 calls)
+proc #cont#1 > (2 calls)
 0: higher_order_tests.#cont#1<0>
 #cont#1(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -75,7 +75,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-#cont#2 > (2 calls)
+proc #cont#2 > (2 calls)
 0: higher_order_tests.#cont#2<0>
 #cont#2(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -94,7 +94,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-#cont#3 > (2 calls)
+proc #cont#3 > (2 calls)
 0: higher_order_tests.#cont#3<0>
 #cont#3(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -113,7 +113,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-#cont#4 > (2 calls)
+proc #cont#4 > (2 calls)
 0: higher_order_tests.#cont#4<0>
 #cont#4([t##0:(wybe.int, ?wybe.bool)])<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -136,7 +136,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-#cont#5 > (2 calls)
+proc #cont#5 > (2 calls)
 0: higher_order_tests.#cont#5<0>
 #cont#5(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -155,7 +155,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-#cont#6 > (2 calls)
+proc #cont#6 > (2 calls)
 0: higher_order_tests.#cont#6<0>
 #cont#6(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -174,7 +174,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-#cont#7 > (2 calls)
+proc #cont#7 > (2 calls)
 0: higher_order_tests.#cont#7<0>
 #cont#7(t##0:(wybe.int, ?wybe.bool))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -191,7 +191,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-do_test > {inline} (12 calls)
+proc do_test > {inline} (12 calls)
 0: higher_order_tests.do_test<0>
 do_test(f##0:(I, ?wybe.bool) <{}; {}; {0}>, i##0:I <{}; {}; {1}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -199,7 +199,7 @@ do_test(f##0:(I, ?wybe.bool) <{}; {}; {0}>, i##0:I <{}; {}; {1}>, ?#success##0:w
     ~f##0:(I, ?wybe.bool)(~i##0:I, ?#success##0:wybe.bool) #0 @higher_order_tests:nn:nn
 
 
-do_test2 > {inline} (12 calls)
+proc do_test2 > {inline} (12 calls)
 0: higher_order_tests.do_test2<0>
 do_test2(f##0:(I, ?wybe.bool) <{}; {}; {0}>, i##0:I <{}; {}; {1}>, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

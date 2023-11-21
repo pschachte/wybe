@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-foo > public {inline} (0 calls)
+proc foo > public {inline} (0 calls)
 0: import_in_sub_mod_lib.foo<0>
 foo(v##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -105,7 +105,7 @@ entry:
   resources       : 
   procs           : 
 
-bar > public {inline} (0 calls)
+proc bar > public {inline} (0 calls)
 0: import_in_sub_mod_main.sub.bar<0>
 bar(v##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

@@ -17,7 +17,7 @@ module top-level code > public {inline,semipure} (0 calls)
     alloc_args.foo<0>(1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @alloc_args:nn:nn
 
 
-foo > {noinline} (1 calls)
+proc foo > {noinline} (1 calls)
 0: alloc_args.foo<0>
 foo(size##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

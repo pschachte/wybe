@@ -1,0 +1,2 @@
+use mutual_res_b
+pub resource a_res:int = 42

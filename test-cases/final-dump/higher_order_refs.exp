@@ -36,13 +36,13 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#33##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-#anon#1 > {inline} (1 calls)
+proc #anon#1 > {inline} (1 calls)
 0: higher_order_refs.#anon#1<0>
 #anon#1(anon#1#1##0:wybe.float, ?anon#1#2##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(~anon#1#1##0:wybe.float, ?anon#1#2##0:wybe.float) @higher_order_refs:nn:nn
-#anon#1 > {inline} (1 calls)
+proc #anon#1 > {inline} (1 calls)
 1: higher_order_refs.#anon#1<1>
 #anon#1(anon#1#1##0:wybe.float, ?anon#1#2##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
@@ -50,13 +50,13 @@ module top-level code > public {semipure} (0 calls)
     foreign llvm move(~anon#1#1##0:wybe.float, ?anon#1#2##0:wybe.float) @higher_order_refs:nn:nn
 
 
-#anon#2 > {inline} (1 calls)
+proc #anon#2 > {inline} (1 calls)
 0: higher_order_refs.#anon#2<0>
 #anon#2(anon#2#1##0:wybe.float, ?anon#2#2##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm move(~anon#2#1##0:wybe.float, ?anon#2#2##0:wybe.float) @higher_order_refs:nn:nn
-#anon#2 > {inline} (1 calls)
+proc #anon#2 > {inline} (1 calls)
 1: higher_order_refs.#anon#2<1>
 #anon#2(anon#2#1##0:wybe.float, ?anon#2#2##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
@@ -64,13 +64,13 @@ module top-level code > public {semipure} (0 calls)
     foreign llvm move(~anon#2#1##0:wybe.float, ?anon#2#2##0:wybe.float) @higher_order_refs:nn:nn
 
 
-#anon#3 > {inline} (1 calls)
+proc #anon#3 > {inline} (1 calls)
 0: higher_order_refs.#anon#3<0>
 #anon#3(^y##0:wybe.float, anon#3#1##0:wybe.float, ?anon#3#2##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm fsub(~anon#3#1##0:wybe.float, ~y##0:wybe.float, ?anon#3#2##0:wybe.float) @float:nn:nn
-#anon#3 > {inline} (1 calls)
+proc #anon#3 > {inline} (1 calls)
 1: higher_order_refs.#anon#3<1>
 #anon#3(^y##0:wybe.float, anon#3#1##0:wybe.float, ?anon#3#2##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
@@ -78,7 +78,7 @@ module top-level code > public {semipure} (0 calls)
     foreign llvm fsub(~anon#3#1##0:wybe.float, ~^y##0:wybe.float, ?anon#3#2##0:wybe.float) @float:nn:nn
 
 
-#closure#1 > {inline} (1 calls)
+proc #closure#1 > {inline} (1 calls)
 0: higher_order_refs.#closure#1<0>
 #closure#1(a##0:A <{}; {}; {0}>, ?#result##0:A <{}; {}; {0}>)<{}; {}; {}>:
   AliasPairs: []
@@ -86,7 +86,7 @@ module top-level code > public {semipure} (0 calls)
     foreign llvm move(~a##0:A, ?#result##0:A) @predicate:nn:nn
 
 
-#closure#2 > {inline} (1 calls)
+proc #closure#2 > {inline} (1 calls)
 0: higher_order_refs.#closure#2<0>
 #closure#2(i##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -94,7 +94,7 @@ module top-level code > public {semipure} (0 calls)
     foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @int:nn:nn
 
 
-#closure#3 > {inline} (1 calls)
+proc #closure#3 > {inline} (1 calls)
 0: higher_order_refs.#closure#3<0>
 #closure#3([^x##0:wybe.int], y##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -102,13 +102,13 @@ module top-level code > public {semipure} (0 calls)
     foreign llvm add(~y##0:wybe.int, 10:wybe.int, ?#result##0:wybe.int) @int:nn:nn
 
 
-add_one > {inline} (1 calls)
+proc add_one > {inline} (1 calls)
 0: higher_order_refs.add_one<0>
 add_one(i##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @int:nn:nn
-add_one > {inline} (0 calls)
+proc add_one > {inline} (0 calls)
 1: higher_order_refs.add_one<1>
 add_one(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
@@ -116,7 +116,7 @@ add_one(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
     foreign llvm fadd(~f##0:wybe.float, 1.0:wybe.float, ?#result##0:wybe.float) @float:nn:nn
 
 
-app > {noinline} (6 calls)
+proc app > {noinline} (6 calls)
 0: higher_order_refs.app<0>
 app(f##0:(I, ?J) <{}; {}; {0}>, i##0:I <{}; {}; {1}>, ?#result##0:J <{}; {}; {0, 1}>)<{}; {}; {}>:
   AliasPairs: []

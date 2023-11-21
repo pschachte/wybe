@@ -21,7 +21,7 @@ module top-level code > public {semipure} (0 calls)
     disjunctive-cond.#cont#1<0>(1:wybe.bool, 0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9
 
 
-#cont#1 > (5 calls)
+proc #cont#1 > (5 calls)
 0: disjunctive-cond.#cont#1<0>
 #cont#1(a##0:wybe.bool, b##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -53,7 +53,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-#cont#2 > (3 calls)
+proc #cont#2 > (3 calls)
 0: disjunctive-cond.#cont#2<0>
 #cont#2(a##0:wybe.bool, b##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -88,7 +88,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-#cont#3 > (7 calls)
+proc #cont#3 > (7 calls)
 0: disjunctive-cond.#cont#3<0>
 #cont#3(a##0:wybe.bool, b##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

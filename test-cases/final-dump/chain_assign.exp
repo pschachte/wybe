@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-chain > {inline} (0 calls)
+proc chain > {inline} (0 calls)
 0: chain_assign.chain<0>
 chain(?z##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []

@@ -1,0 +1,11 @@
+def {noinline} eq(x:int, ?y:int) {
+    ?y = x
+}
+
+def {inline} foo(?bar:int) use !io {
+    eq(0, ?bar)
+    !println(bar)
+}
+
+!foo(?b)
+!println(b)

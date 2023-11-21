@@ -36,7 +36,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
   resources       : 
   procs           : 
 
-hidden > {inline} (0 calls)
+proc hidden > {inline} (0 calls)
 0: submodule.privatetest.hidden<0>
 hidden()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -44,7 +44,7 @@ hidden()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     wybe.string.print<0>("private proc in a private module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @submodule:nn:nn
 
 
-semi_hidden > public {inline} (0 calls)
+proc semi_hidden > public {inline} (0 calls)
 0: submodule.privatetest.semi_hidden<0>
 semi_hidden()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -103,7 +103,7 @@ entry:
   resources       : 
   procs           : 
 
-semi_visible > {inline} (0 calls)
+proc semi_visible > {inline} (0 calls)
 0: submodule.publictest.semi_visible<0>
 semi_visible()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -111,7 +111,7 @@ semi_visible()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     wybe.string.print<0>("private proc in a public module":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @submodule:nn:nn
 
 
-visible > public {inline} (0 calls)
+proc visible > public {inline} (0 calls)
 0: submodule.publictest.visible<0>
 visible()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

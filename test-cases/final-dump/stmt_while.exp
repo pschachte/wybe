@@ -17,7 +17,7 @@ module top-level code > public {inline,semipure} (0 calls)
     stmt_while.#cont#1<0>(10:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @stmt_while:nn:nn
 
 
-#cont#1 > (2 calls)
+proc #cont#1 > (2 calls)
 0: stmt_while.#cont#1<0>
 #cont#1(n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -36,7 +36,7 @@ module top-level code > public {inline,semipure} (0 calls)
 
 
 
-#cont#2 > {inline} (1 calls)
+proc #cont#2 > {inline} (1 calls)
 0: stmt_while.#cont#2<0>
 #cont#2(n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

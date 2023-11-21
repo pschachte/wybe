@@ -1,6 +1,4 @@
 Error detected during type checking of module(s) alias_recursion2, alias_recursion2.mynode
-[93mfinal-dump/alias_recursion2.wybe:1:61: Explicit specification of current type mynode,
-  it is recommended to specify type as _
-[0m[91mfinal-dump/alias_recursion2.wybe:18:20: Calling test proc alias_recursion2.mynode.next<1> in a normal (total) context
+[91mfinal-dump/alias_recursion2.wybe:18:20: Calling test proc alias_recursion2.mynode.next<1> in a normal (total) context
 [0m[91mfinal-dump/alias_recursion2.wybe:19:20: Calling test proc alias_recursion2.mynode.next<1> in a normal (total) context
 [0m

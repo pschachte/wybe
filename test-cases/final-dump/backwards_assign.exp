@@ -17,7 +17,7 @@ module top-level code > public {inline,semipure} (0 calls)
     backwards_assign.#cont#1<0>(0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @backwards_assign:nn:nn
 
 
-#cont#1 > (2 calls)
+proc #cont#1 > (2 calls)
 0: backwards_assign.#cont#1<0>
 #cont#1(i##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -36,7 +36,7 @@ module top-level code > public {inline,semipure} (0 calls)
 
 
 
-backwards_assign > {inline} (3 calls)
+proc backwards_assign > {inline} (3 calls)
 0: backwards_assign.backwards_assign<0>
 backwards_assign(?output##0:wybe.int, input##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []

@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-print2 > public {inline} (0 calls)
+proc print2 > public {inline} (0 calls)
 0: proc_hello.print2<0>
 print2([x##0:wybe.int], [y##0:wybe.int])<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

@@ -84,9 +84,9 @@ initUniquenessState = UniquenessState Map.empty [] False
 -- | Check correctness of uniqueness for a procedure
 uniquenessCheckProc :: ProcDef -> Int -> Compiler ProcDef
 uniquenessCheckProc def _ = do
-    let name = showProcName $ procName def
+    let name = procName def
     let pos = procPos def
-    logMsg Uniqueness $ "Uniqueness checking proc: " ++ showProcName name
+    logMsg Uniqueness $ "Uniqueness checking " ++ showProcName name
     let detism = procDetism def
     let params = procProtoParams $ procProto def
     let ress = procProtoResources $ procProto def

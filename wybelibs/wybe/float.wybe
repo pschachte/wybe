@@ -63,14 +63,14 @@ pub def abs(x:_):_ = foreign c `llvm.fabs.f64`(x)
 ## Comparisons
 
 # Equality and disequality.
-pub def (x:_ =  y:_):bool = foreign llvm fcmp_eq(x,y)
-pub def (x:_ ~= y:_):bool = foreign llvm fcmp_ne(x,y)
+pub def {test} (x:_ =  y:_) { foreign llvm {test} fcmp_eq(x,y) }
+pub def {test} (x:_ ~= y:_) { foreign llvm {test} fcmp_ne(x,y) }
 
 # Inequalities.
-pub def (x:_ <  y:_):bool = foreign llvm fcmp_slt(x,y)
-pub def (x:_ <= y:_):bool = foreign llvm fcmp_sle(x,y)
-pub def (x:_ >  y:_):bool = foreign llvm fcmp_sgt(x,y)
-pub def (x:_ >= y:_):bool = foreign llvm fcmp_sge(x,y)
+pub def {test} (x:_ <  y:_) { foreign llvm {test} fcmp_slt(x,y) }
+pub def {test} (x:_ <= y:_) { foreign llvm {test} fcmp_sle(x,y) }
+pub def {test} (x:_ >  y:_) { foreign llvm {test} fcmp_sgt(x,y) }
+pub def {test} (x:_ >= y:_) { foreign llvm {test} fcmp_sge(x,y) }
 
 # Three-way comparison.
 pub def (x:_ <=> y:_):comparison = 

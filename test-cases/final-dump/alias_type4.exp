@@ -45,7 +45,7 @@ module top-level code > public {semipure} (0 calls)
     alias_type4.foo<0>[410bae77d3](~tmp#11##0:alias_type4.posrec)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @alias_type4:nn:nn
 
 
-foo > public (1 calls)
+proc foo > public (1 calls)
 0: alias_type4.foo<0>[410bae77d3]
 foo(r1##0:alias_type4.posrec)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -160,7 +160,7 @@ entry:
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls)
+proc = > public {inline} (1 calls)
 0: alias_type4.position.=<0>
 =(#left##0:alias_type4.position, #right##0:alias_type4.position, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -179,7 +179,7 @@ entry:
 
 
 
-position > public {inline} (0 calls)
+proc position > public {inline} (0 calls)
 0: alias_type4.position.position<0>
 position(x##0:wybe.int, y##0:wybe.int, ?#result##0:alias_type4.position)<{}; {}; {}>:
   AliasPairs: []
@@ -187,7 +187,7 @@ position(x##0:wybe.int, y##0:wybe.int, ?#result##0:alias_type4.position)<{}; {};
     foreign lpvm alloc(16:wybe.int, ?#rec##0:alias_type4.position) @alias_type4:nn:nn
     foreign lpvm mutate(~#rec##0:alias_type4.position, ?#rec##1:alias_type4.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:wybe.int) @alias_type4:nn:nn
     foreign lpvm mutate(~#rec##1:alias_type4.position, ?#result##0:alias_type4.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y##0:wybe.int) @alias_type4:nn:nn
-position > public {inline} (6 calls)
+proc position > public {inline} (6 calls)
 1: alias_type4.position.position<1>
 position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:alias_type4.position)<{}; {}; {}>:
   AliasPairs: []
@@ -196,13 +196,13 @@ position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:alias_type4.position)<{}; {}
     foreign lpvm access(~#result##0:alias_type4.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:wybe.int) @alias_type4:nn:nn
 
 
-x > public {inline} (0 calls)
+proc x > public {inline} (0 calls)
 0: alias_type4.position.x<0>
 x(#rec##0:alias_type4.position, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:alias_type4.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @alias_type4:nn:nn
-x > public {inline} (0 calls)
+proc x > public {inline} (0 calls)
 1: alias_type4.position.x<1>
 x(#rec##0:alias_type4.position, ?#rec##1:alias_type4.position, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -210,13 +210,13 @@ x(#rec##0:alias_type4.position, ?#rec##1:alias_type4.position, #field##0:wybe.in
     foreign lpvm {noalias} mutate(~#rec##0:alias_type4.position, ?#rec##1:alias_type4.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @alias_type4:nn:nn
 
 
-y > public {inline} (0 calls)
+proc y > public {inline} (0 calls)
 0: alias_type4.position.y<0>
 y(#rec##0:alias_type4.position, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:alias_type4.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @alias_type4:nn:nn
-y > public {inline} (0 calls)
+proc y > public {inline} (0 calls)
 1: alias_type4.position.y<1>
 y(#rec##0:alias_type4.position, ?#rec##1:alias_type4.position, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -224,7 +224,7 @@ y(#rec##0:alias_type4.position, ?#rec##1:alias_type4.position, #field##0:wybe.in
     foreign lpvm {noalias} mutate(~#rec##0:alias_type4.position, ?#rec##1:alias_type4.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @alias_type4:nn:nn
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: alias_type4.position.~=<0>
 ~=(#left##0:alias_type4.position, #right##0:alias_type4.position, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -395,7 +395,7 @@ if.else:
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls)
+proc = > public {inline} (1 calls)
 0: alias_type4.posrec.=<0>
 =(#left##0:alias_type4.posrec, #right##0:alias_type4.posrec, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -425,13 +425,13 @@ if.else:
 
 
 
-a > public {inline} (0 calls)
+proc a > public {inline} (0 calls)
 0: alias_type4.posrec.a<0>
 a(#rec##0:alias_type4.posrec, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:alias_type4.posrec, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @alias_type4:nn:nn
-a > public {inline} (0 calls)
+proc a > public {inline} (0 calls)
 1: alias_type4.posrec.a<1>
 a(#rec##0:alias_type4.posrec, ?#rec##1:alias_type4.posrec, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -439,13 +439,13 @@ a(#rec##0:alias_type4.posrec, ?#rec##1:alias_type4.posrec, #field##0:wybe.int)<{
     foreign lpvm mutate(~#rec##0:alias_type4.posrec, ?#rec##1:alias_type4.posrec, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @alias_type4:nn:nn
 
 
-p > public {inline} (0 calls)
+proc p > public {inline} (0 calls)
 0: alias_type4.posrec.p<0>
 p(#rec##0:alias_type4.posrec, ?#result##0:alias_type4.position)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:alias_type4.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:alias_type4.position) @alias_type4:nn:nn
-p > public {inline} (0 calls)
+proc p > public {inline} (0 calls)
 1: alias_type4.posrec.p<1>
 p(#rec##0:alias_type4.posrec, ?#rec##1:alias_type4.posrec, #field##0:alias_type4.position)<{}; {}; {}>:
   AliasPairs: []
@@ -453,7 +453,7 @@ p(#rec##0:alias_type4.posrec, ?#rec##1:alias_type4.posrec, #field##0:alias_type4
     foreign lpvm {noalias} mutate(~#rec##0:alias_type4.posrec, ?#rec##1:alias_type4.posrec, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:alias_type4.position) @alias_type4:nn:nn
 
 
-posrec > public {inline} (0 calls)
+proc posrec > public {inline} (0 calls)
 0: alias_type4.posrec.posrec<0>
 posrec(p##0:alias_type4.position, a##0:wybe.int, ?#result##0:alias_type4.posrec)<{}; {}; {}>:
   AliasPairs: []
@@ -461,7 +461,7 @@ posrec(p##0:alias_type4.position, a##0:wybe.int, ?#result##0:alias_type4.posrec)
     foreign lpvm alloc(16:wybe.int, ?#rec##0:alias_type4.posrec) @alias_type4:nn:nn
     foreign lpvm mutate(~#rec##0:alias_type4.posrec, ?#rec##1:alias_type4.posrec, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~p##0:alias_type4.position) @alias_type4:nn:nn
     foreign lpvm mutate(~#rec##1:alias_type4.posrec, ?#result##0:alias_type4.posrec, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~a##0:wybe.int) @alias_type4:nn:nn
-posrec > public {inline} (6 calls)
+proc posrec > public {inline} (6 calls)
 1: alias_type4.posrec.posrec<1>
 posrec(?p##0:alias_type4.position, ?a##0:wybe.int, #result##0:alias_type4.posrec)<{}; {}; {}>:
   AliasPairs: []
@@ -470,7 +470,7 @@ posrec(?p##0:alias_type4.position, ?a##0:wybe.int, #result##0:alias_type4.posrec
     foreign lpvm access(~#result##0:alias_type4.posrec, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?a##0:wybe.int) @alias_type4:nn:nn
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: alias_type4.posrec.~=<0>
 ~=(#left##0:alias_type4.posrec, #right##0:alias_type4.posrec, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

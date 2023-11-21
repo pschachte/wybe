@@ -102,12 +102,13 @@ checkResourceImpln rspec impln@(SimpleResource ty init pos) = do
 --  making them canonical.
 canonicaliseProcResources :: ProcDef -> Int -> Compiler ProcDef
 canonicaliseProcResources pd _ = do
-    logResources $ "Canonicalising resources used by proc " ++ procName pd
+    let name = procName pd
+    logResources $ "Canonicalising resources used by " ++ showProcName name
     let proto = procProto pd
     let pos = procPos pd
     let resources = Set.elems $ procProtoResources proto
     resourceFlows <- Set.fromList
-                 <$> mapM (canonicaliseResourceFlow pos) resources
+                 <$> mapM (canonicaliseResourceFlow pos name) resources
     logResources $ "Available resources: " ++ show resourceFlows
     let proto' = proto {procProtoResources = resourceFlows}
     let pd' = pd {procProto = proto'}
@@ -117,11 +118,12 @@ canonicaliseProcResources pd _ = do
 
 -- |Ensure a resource flow is fully module qualified, canonicalising the resource
 -- spec
-canonicaliseResourceFlow :: OptPos -> ResourceFlowSpec
+canonicaliseResourceFlow :: OptPos -> ProcName -> ResourceFlowSpec
                          -> Compiler ResourceFlowSpec
-canonicaliseResourceFlow pos spec = do
-    resTy <- canonicaliseResourceSpec pos "proc declaration"
-             $ resourceFlowRes spec
+canonicaliseResourceFlow pos name spec = do
+    resTy <- canonicaliseResourceSpec pos 
+                ("declaration of " ++ showProcName name)
+                $ resourceFlowRes spec
     return $ spec { resourceFlowRes = fst resTy }
 
 
@@ -499,7 +501,8 @@ canonicaliseResourceSpec pos context spec = do
             case Map.assocs def of
                 [(spec,impln)] -> do
                     let resType = resourceType impln
-                    logResources $ "    to --> " ++ show resType
+                    logResources $ "    to --> " ++ show spec
+                                    ++ ":" ++ show impln
                     return (spec,Just resType)
                 [] -> shouldnt $ "Empty resource " ++ show spec
                 _ -> nyi $ "compound resource " ++ show spec

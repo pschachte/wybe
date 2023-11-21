@@ -23,7 +23,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-#cont#1 > {inline} (1 calls)
+proc #cont#1 > {inline} (1 calls)
 0: resource_tmp_vars.#cont#1<0>
 #cont#1([tmp#0##0:wybe.int], tmp#1##0:wybe.int)<{<<wybe.io.io>>}; {<<resource_tmp_vars.counter>>, <<wybe.io.io>>}; {}>:
   AliasPairs: []

@@ -57,3 +57,4 @@ README.html
 .vscode
 dist-newstyle
 stack.yaml.lock
+LOG*

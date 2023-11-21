@@ -54,7 +54,9 @@ module AST (
   emptyInterface, emptyImplementation,
   getParams, getPrimParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
-  ModSpec, maybeModPrefix, ProcImpln(..), ProcDef(..), procInline, procCallCount,
+  ModSpec, validModuleName, maybeModPrefix, 
+  ProcImpln(..), ProcDef(..), procInline, procCallCount,
+  transformModuleProcs,
   getProcGlobalFlows,
   primImpurity, flagsImpurity, flagsDetism,
   AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
@@ -111,7 +113,8 @@ module AST (
   specialChar, specialName, specialName2,
   outputVariableName, outputStatusName,
   envParamName, envPrimParam, makeGlobalResourceName,
-  showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showProcName,
+  showBody, showPlacedPrims, showStmt, showBlock, showProcDef,
+  showProcIdentifier, showProcName,
   showModSpec, showModSpecs, showResources, showOptPos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
   flowPrefix, showProcModifiers, showProcModifiers', showFlags, showFlags',
@@ -647,9 +650,9 @@ getSpecModule context getter spec = do
     let msg = context ++ " looking up module " ++ showModSpec spec
     underComp <- gets underCompilation
     let curr = List.filter ((==spec) . modSpec) underComp
-    logAST $ "Under compilation: " ++ showModSpecs (modSpec <$> underComp)
-    logAST $ "found " ++ show (length curr) ++
-      " matching modules under compilation"
+    -- logAST $ "Under compilation: " ++ showModSpecs (modSpec <$> underComp)
+    -- logAST $ "found " ++ show (length curr) ++
+    --   " matching modules under compilation"
     case curr of
         []    -> gets (maybe (error msg) getter . Map.lookup spec . modules)
         [mod] -> return $ getter mod
@@ -1697,6 +1700,12 @@ instance Show TypeVarName where
 type ModSpec = [Ident]
 
 
+-- |Check that a module name component is valid (ie, does not contain invalid
+-- characters).  Currently only period (.) and hash (#) are considered invalid.
+validModuleName :: Ident -> Bool
+validModuleName = not . any (`elem` ['.','#'])
+
+
 -- |The uses one module makes of another; first the public imports,
 --  then the privates.  Each is either Nothing, meaning all exported
 --  names are imported, or Just a set of the specific names to import.
@@ -1727,8 +1736,11 @@ combineImportSpecs (ImportSpec pub1 priv1) (ImportSpec pub2 priv2) =
     ImportSpec (USet.union pub1 pub2) (USet.union priv1 priv2)
 
 
--- |Actually import into the current module.  The ImportSpec says what
--- to import.
+-- |Actually import the specified module into the current module.  The
+-- ImportSpec says what to import.  This is called after dependencies
+-- have been loaded and their imports have been handled.  The case of
+-- mutual dependencies is handled by repeating this until a fixed point
+-- is reached.
 doImport :: ModSpec -> (ImportSpec, InterfaceHash) -> Compiler ()
 doImport mod (imports, _) = do
     currMod <- getModuleSpec
@@ -1753,7 +1765,7 @@ doImport mod (imports, _) = do
     logAST $ "    importing resources: "
              ++ intercalate ", " (Map.keys importedResources)
     logAST $ "    importing procs    : "
-             ++ intercalate ", " (Map.keys importedProcs)
+             ++ intercalate ", " (showProcName <$> Map.keys importedProcs)
     -- XXX Must report error for imports of non-exported items
     let knownTypes = Map.unionWith Set.union (modKnownTypes impl)
                      $ Map.fromAscList
@@ -1885,16 +1897,33 @@ data ResourceImpln =
         resourceType::TypeSpec,
         resourceInit::Maybe (Placed Exp),
         resourcePos::OptPos
-        } deriving (Generic)
+        } deriving (Generic, Eq)
 
 
--- | A list of the initialised resources defined by the current module.
-initialisedResources :: Compiler ResourceDef
+-- | Return the initialised resources *defined* by the current module, and
+-- initialised resources *visible* in the current module.  The former are
+-- explicitly initialised by the current module's main proc, and the latter
+-- are usable there, so the former are out-only resources for it, and the
+-- latter are in/out.
+initialisedResources :: Compiler (ResourceDef,ResourceDef)
 initialisedResources = do
-    modRes <- getModuleImplementationField modResources
-    logAST $ "Getting initialised resources = " ++ show modRes
-    logAST $ "                       unions = " ++ show (Map.unions modRes)
-    return $ Map.filter (isJust . resourceInit) $ Map.unions modRes
+    currMod <- getModuleSpec
+    localRes <- getModuleImplementationField modResources
+    let localDefs = Map.filter (isJust . resourceInit) $ Map.unions localRes
+    visableRes <- Set.toList . Set.unions . Map.elems
+                 <$> getModuleImplementationField modKnownResources
+    visibleDefs <- Map.filter (isJust . resourceInit) . Map.unions . catMaybes
+               <$> mapM lookupResource visableRes
+    logAST $ "Getting initialised resources defined and visible in module "
+                ++ showModSpec currMod
+    logAST $ "      local resources = " ++ show localRes
+    logAST $ "    local initialised = " ++ show localDefs
+    logAST $ "    visible resources = " ++ show visableRes
+    logAST $ "  visible initialised = " ++ show visibleDefs
+    when (localDefs /= visibleDefs)
+      $ logAST $ "   NB:  different old initialised = " ++ show visibleDefs
+    return (localDefs,visibleDefs)
+
 
 -- |A proc definition, including the ID, prototype, the body,
 --  normalised to a list of primitives, and an optional source
@@ -1929,6 +1958,22 @@ data ProcDef = ProcDef {
 }
              deriving (Eq, Generic)
 
+-- | Takes in a monadic function that transforms a ProcDef, and a module spec
+--   whose ProcDefs we apply the transforming function on.
+transformModuleProcs :: (ProcDef -> Int -> Compiler ProcDef) -> ModSpec ->
+                        Compiler ()
+transformModuleProcs trans thisMod = do
+    reenterModule thisMod
+    -- (names, procs) <- :: StateT CompilerState IO ([Ident], [[ProcDef]])
+    (names,procs) <- unzip <$>
+                     getModuleImplementationField (Map.toList . modProcs)
+    -- for each name we have a list of procdefs, so we must double map
+    procs' <- mapM (zipWithM (flip trans) [0..]) procs
+    updateImplementation
+        (\imp -> imp { modProcs = Map.union
+                                  (Map.fromList $ zip names procs')
+                                  (modProcs imp) })
+    reexitModule
 
 -- |Whether this proc should definitely be inlined, either because the user said
 -- to, or because we inferred it would be a good idea.
@@ -2932,8 +2977,7 @@ instance Show Stmt where
 -- |Produce a single statement comprising the conjunctions of the statements
 --  in the supplied list.
 seqToStmt :: [Placed Stmt] -> Placed Stmt
-seqToStmt [] = Unplaced $ TestBool
-               $ Typed (IntValue 1) AnyType $ Just $ TypeSpec ["wybe"] "bool" []
+seqToStmt [] = Unplaced Nop
 seqToStmt [stmt] = stmt
 seqToStmt stmts = Unplaced $ And stmts
 
@@ -3856,10 +3900,17 @@ showProcDef thisID
     ++ show def
 
 
+-- | A printable version of a proc name or HO term or foreign proc name.  First
+-- argument specifies what kind of proc it is.  Handles special empty proc
+-- name.
+showProcIdentifier :: String -> ProcName -> String
+showProcIdentifier _ ""       = "module top-level code"
+showProcIdentifier kind name = kind ++ " " ++ name
+
+
 -- | A printable version of a proc name; handles special empty proc name.
 showProcName :: ProcName -> String
-showProcName "" = "module top-level code"
-showProcName name = name
+showProcName = showProcIdentifier "proc"
 
 
 -- |How to show a type specification.
@@ -4248,30 +4299,32 @@ makeMessage pos@(Just _) msg = do
 -- the other message levels are shown only when the 'verbose' option is set.
 showMessages :: Compiler ()
 showMessages = do
-    verbose <- optVerbose <$> gets options
+    opts <- gets options
+    let verbose = optVerbose opts
+    let noFonts = optNoFont opts 
     messages <- reverse <$> gets msgs -- messages are collected in reverse order
     let filtered =
             if verbose
             then messages
             else List.filter ((>=Warning) . messageLevel) messages
-    liftIO $ mapM_ showMessage $ nubOrd $ sortOn messagePlace filtered
+    liftIO $ mapM_ (showMessage noFonts) $ nubOrd $ sortOn messagePlace filtered
 
 
 -- |Prettify and show one compiler message.
-showMessage :: Message -> IO ()
-showMessage (Message lvl pos msg) = do
+showMessage :: Bool -> Message -> IO ()
+showMessage noFont (Message lvl pos msg) = do
     posMsg <- makeMessage pos msg
+    let showMsg colour msg =
+            if noFont 
+                then putStrLn msg
+                else do
+                    setSGR [SetColor Foreground Vivid colour]
+                    putStrLn msg
+                    setSGR [Reset]
     case lvl of
-      Informational ->
-          putStrLn posMsg
-      Warning -> do
-          setSGR [SetColor Foreground Vivid Yellow]
-          putStrLn posMsg
-          setSGR [Reset]
-      Error -> do
-          setSGR [SetColor Foreground Vivid Red]
-          putStrLn posMsg
-          setSGR [Reset]
+      Informational -> putStrLn posMsg
+      Warning       -> showMsg Yellow posMsg
+      Error         -> showMsg Red posMsg
 
 
 -- |Check if any errors have been detected, and if so, print the error messages

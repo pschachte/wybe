@@ -4,7 +4,7 @@
 # The number of command line arguments.  These are automatically
 # initialised by the code that builds executables.
 pub resource argc:int
-pub resource argv:raw_array(c_string)
+pub resource argv:raw_array
 
 
 # The command line arguments. This is a C array of strings.

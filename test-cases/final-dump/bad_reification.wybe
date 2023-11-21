@@ -1,0 +1,4 @@
+def {test} foo(?i:int) { ?i = 1; fail }
+
+foo(?i, _) # ignore if the test fails
+!println(i)

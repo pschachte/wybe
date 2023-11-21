@@ -49,7 +49,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#32##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-= > public (2 calls)
+proc = > public (2 calls)
 0: thistype.=<0>
 =(#left##0:thistype, #right##0:thistype, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -82,7 +82,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-concat > public (2 calls)
+proc concat > public (2 calls)
 0: thistype.concat<0>[410bae77d3]
 concat(x##0:thistype, y##0:thistype, outByReference #result##0:thistype)<{}; {}; {}>:
   AliasPairs: [(#result##0,y##0)]
@@ -114,7 +114,7 @@ concat(x##0:thistype, y##0:thistype, outByReference #result##0:thistype)<{}; {};
 
 
 
-cons > public {inline} (6 calls)
+proc cons > public {inline} (6 calls)
 0: thistype.cons<0>
 cons(head##0:wybe.int, tail##0:thistype, ?#result##0:thistype)<{}; {}; {}>:
   AliasPairs: []
@@ -122,7 +122,7 @@ cons(head##0:wybe.int, tail##0:thistype, ?#result##0:thistype)<{}; {}; {}>:
     foreign lpvm alloc(16:wybe.int, ?#rec##0:thistype) @thistype:nn:nn
     foreign lpvm mutate(~#rec##0:thistype, ?#rec##1:thistype, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head##0:wybe.int) @thistype:nn:nn
     foreign lpvm mutate(~#rec##1:thistype, ?#result##0:thistype, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tail##0:thistype) @thistype:nn:nn
-cons > public {inline} (18 calls)
+proc cons > public {inline} (18 calls)
 1: thistype.cons<1>
 cons(?head##0:wybe.int, ?tail##0:thistype, #result##0:thistype, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -141,7 +141,7 @@ cons(?head##0:wybe.int, ?tail##0:thistype, #result##0:thistype, ?#success##0:wyb
 
 
 
-head > public {inline} (0 calls)
+proc head > public {inline} (0 calls)
 0: thistype.head<0>
 head(#rec##0:thistype, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -156,7 +156,7 @@ head(#rec##0:thistype, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>
         foreign lpvm access(~#rec##0:thistype, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @thistype:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-head > public {inline} (0 calls)
+proc head > public {inline} (0 calls)
 1: thistype.head<1>
 head(#rec##0:thistype, ?#rec##1:thistype, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -173,7 +173,7 @@ head(#rec##0:thistype, ?#rec##1:thistype, #field##0:wybe.int, ?#success##0:wybe.
 
 
 
-length > public (2 calls)
+proc length > public (2 calls)
 0: thistype.length<0>
 length(x##0:thistype, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -190,7 +190,7 @@ length(x##0:thistype, ?#result##0:wybe.int)<{}; {}; {}>:
 
 
 
-nil > public {inline} (2 calls)
+proc nil > public {inline} (2 calls)
 0: thistype.nil<0>
 nil(?#result##0:thistype)<{}; {}; {}>:
   AliasPairs: []
@@ -198,7 +198,7 @@ nil(?#result##0:thistype)<{}; {}; {}>:
     foreign llvm move(0:thistype, ?#result##0:thistype)
 
 
-tail > public {inline} (0 calls)
+proc tail > public {inline} (0 calls)
 0: thistype.tail<0>
 tail(#rec##0:thistype, ?#result##0:thistype, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -213,7 +213,7 @@ tail(#rec##0:thistype, ?#result##0:thistype, ?#success##0:wybe.bool)<{}; {}; {}>
         foreign lpvm access(~#rec##0:thistype, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:thistype) @thistype:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-tail > public {inline} (0 calls)
+proc tail > public {inline} (0 calls)
 1: thistype.tail<1>
 tail(#rec##0:thistype, ?#rec##1:thistype, #field##0:thistype, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -230,7 +230,7 @@ tail(#rec##0:thistype, ?#rec##1:thistype, #field##0:thistype, ?#success##0:wybe.
 
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: thistype.~=<0>
 ~=(#left##0:thistype, #right##0:thistype, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

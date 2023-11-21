@@ -12,7 +12,7 @@ pub constructors (T) [] | [head:T | tail:_(T)]
 ## Common operations
 
 # Is the list empty?
-pub def {test} empty(xs:_(T)) {
+pub def {test} empty(xs:_(T)) { 
     if { [_ | _] = xs :: fail }
 }
 

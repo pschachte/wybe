@@ -1,5 +1,5 @@
 Error detected during type checking of module(s) purity_error
 [91mfinal-dump/purity_error.wybe:3:41: Calling impure proc purity_error.something_impure<0>, expecting at least semipure
-[0m[91mfinal-dump/purity_error.wybe:7:29: Calling impure foreign mul, expecting at least semipure
+[0m[91mfinal-dump/purity_error.wybe:7:29: Calling impure foreign proc mul, expecting at least semipure
 [0m[91mfinal-dump/purity_error.wybe:12:5: Calling impure proc purity_error.another_impure<0> without ! non-purity marker
 [0m

@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-nada > public {inline} (0 calls)
+proc nada > public {inline} (0 calls)
 0: proc_allin.nada<0>
 nada([x##0:wybe.int], [y##0:wybe.int])<{}; {}; {}>:
   AliasPairs: []

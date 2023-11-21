@@ -1,0 +1,218 @@
+======================================================================
+AFTER EVERYTHING:
+ Module exporter
+  representation  : (not a type)
+  public submods  : 
+  public resources: res: exporter.res
+  public procs    : exporter.<0>
+                    exporter.fn<0>
+                    exporter.three<0>
+  imports         : use wybe
+  resources       : res: fromList [(exporter.res,wybe.int = 3 @exporter:nn:nn @exporter:nn:nn)]
+  procs           : 
+
+module top-level code > public {inline,semipure} (0 calls)
+0: exporter.<0>
+()<{}; {<<exporter.res>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm store(3:wybe.int, <<exporter.res>>:wybe.int) @exporter:nn:nn
+
+
+proc fn > public {inline} (0 calls)
+0: exporter.fn<0>
+fn(i##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign c ipow(2:wybe.int, ~i##0:wybe.int, ?#result##0:wybe.int) @int:nn:nn
+
+
+proc three > public {inline} (0 calls)
+0: exporter.three<0>
+three(?n##0:wybe.int)<{<<exporter.res>>}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<exporter.res>>:wybe.int, ?%n##0:wybe.int) @exporter:nn:nn
+
+  LLVM code       :
+
+; ModuleID = 'exporter'
+
+
+ 
+
+
+@"resource#exporter.res" =    global i64 undef
+
+
+declare external ccc  i64 @ipow(i64, i64)    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  void @"exporter.<0>"() alwaysinline   {
+entry:
+  store  i64 3, i64* @"resource#exporter.res" 
+  ret void 
+}
+
+
+define external fastcc  i64 @"exporter.fn<0>"(i64  %"i##0") alwaysinline   {
+entry:
+  %0 = tail call ccc  i64  @ipow(i64  2, i64  %"i##0")  
+  ret i64 %0 
+}
+
+
+define external fastcc  i64 @"exporter.three<0>"() alwaysinline   {
+entry:
+  %0 = load  i64, i64* @"resource#exporter.res" 
+  ret i64 %0 
+}
+--------------------------------------------------
+ Module importer
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : importer.<0>
+  imports         : use pub_importer
+                    use wybe
+  resources       : 
+  procs           : 
+
+module top-level code > public {semipure} (0 calls)
+0: importer.<0>
+()<{<<exporter.res>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+  MultiSpeczDepInfo: [(15,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(16,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+    foreign lpvm load(<<exporter.res>>:wybe.int, ?n##0:wybe.int) @importer:nn:nn
+    foreign c ipow(2:wybe.int, n##0:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
+    wybe.int.fmt<0>(n##0:wybe.int, ?tmp#3##0:wybe.string) #2 @importer:nn:nn
+    wybe.int.fmt<0>(tmp#0##0:wybe.int, ?tmp#5##0:wybe.string) #3 @importer:nn:nn
+    wybe.string.,,<0>(" = ":wybe.string, ~tmp#5##0:wybe.string, ?tmp#4##0:wybe.string) #4 @importer:nn:nn
+    wybe.string.,,<0>(~tmp#3##0:wybe.string, ~tmp#4##0:wybe.string, ?tmp#2##0:wybe.string) #5 @importer:nn:nn
+    wybe.string.,,<0>("2^":wybe.string, ~tmp#2##0:wybe.string, ?tmp#1##0:wybe.string) #6 @importer:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#1##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #15 @string:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#15##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.int.fmt<0>(~n##0:wybe.int, ?tmp#9##0:wybe.string) #9 @importer:nn:nn
+    wybe.int.fmt<0>(~tmp#0##0:wybe.int, ?tmp#11##0:wybe.string) #10 @importer:nn:nn
+    wybe.string.,,<0>(" = ":wybe.string, ~tmp#11##0:wybe.string, ?tmp#10##0:wybe.string) #11 @importer:nn:nn
+    wybe.string.,,<0>(~tmp#9##0:wybe.string, ~tmp#10##0:wybe.string, ?tmp#8##0:wybe.string) #12 @importer:nn:nn
+    wybe.string.,,<0>("2^":wybe.string, ~tmp#8##0:wybe.string, ?tmp#7##0:wybe.string) #13 @importer:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#7##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #16 @string:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#19##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+
+
+proc my_three > {inline} (1 calls)
+0: importer.my_three<0>
+my_three(?n##0:wybe.int)<{<<exporter.res>>}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<exporter.res>>:wybe.int, ?%n##0:wybe.int) @importer:nn:nn
+
+  LLVM code       :
+
+; ModuleID = 'importer'
+
+
+ 
+
+
+@"resource#exporter.res" = external   global i64 
+
+
+@importer.3 =    constant {i64, i64} { i64 2, i64 ptrtoint ([?? x i8]* @importer.2 to i64) }
+
+
+@importer.1 =    constant {i64, i64} { i64 3, i64 ptrtoint ([?? x i8]* @importer.0 to i64) }
+
+
+@importer.0 =    constant [?? x i8] c" = \00"
+
+
+@importer.2 =    constant [?? x i8] c"2^\00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external fastcc  void @"wybe.string.print<0>[410bae77d3]"(i64)    
+
+
+declare external fastcc  i64 @"wybe.string.,,<0>"(i64, i64)    
+
+
+declare external fastcc  i64 @"wybe.int.fmt<0>"(i64)    
+
+
+declare external ccc  i64 @ipow(i64, i64)    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  void @"importer.<0>"()    {
+entry:
+  %0 = load  i64, i64* @"resource#exporter.res" 
+  %1 = tail call ccc  i64  @ipow(i64  2, i64  %0)  
+  %2 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %0)  
+  %3 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %1)  
+  %4 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @importer.1, i32 0, i32 0) to i64), i64  %3)  
+  %5 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %2, i64  %4)  
+  %6 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @importer.3, i32 0, i32 0) to i64), i64  %5)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %6)  
+  tail call ccc  void  @putchar(i8  10)  
+  %7 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %0)  
+  %8 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %1)  
+  %9 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @importer.1, i32 0, i32 0) to i64), i64  %8)  
+  %10 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %7, i64  %9)  
+  %11 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @importer.3, i32 0, i32 0) to i64), i64  %10)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %11)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+}
+
+
+define external fastcc  i64 @"importer.my_three<0>"() alwaysinline   {
+entry:
+  %0 = load  i64, i64* @"resource#exporter.res" 
+  ret i64 %0 
+}
+--------------------------------------------------
+ Module pub_importer
+  representation  : (not a type)
+  public submods  : exporter -> exporter
+  public resources: res: exporter.res
+  public procs    : exporter.<0>
+                    exporter.fn<0>
+                    exporter.three<0>
+  imports         : public use exporter
+                    use wybe
+  resources       : 
+  procs           : 
+
+
+  LLVM code       :
+
+; ModuleID = 'pub_importer'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    

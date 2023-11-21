@@ -1,0 +1,3 @@
+Error detected during preliminary processing of module parametric_repn
+[91mfinal-dump/parametric_repn.wybe:1:5: types defined by representation cannot have type parameters
+[0m

@@ -1,7 +1,7 @@
 name:                wybe
 version:             0.1.0.0
 synopsis:            Wybe compiler and build system.
-cabal-version:       >= 1.22.2.0
+cabal-version:       1.22.2.0
 Category:            Compilers
 build-type:          Simple
 

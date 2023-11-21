@@ -20,7 +20,7 @@ module top-level code > public {inline,semipure} (0 calls)
     foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-#closure#1 > {inline} (1 calls)
+proc #closure#1 > {inline} (1 calls)
 0: higher_order_inline.#closure#1<0>
 #closure#1(a##0:A <{}; {}; {0}>, ?#result##0:A <{}; {}; {0}>)<{}; {}; {}>:
   AliasPairs: []

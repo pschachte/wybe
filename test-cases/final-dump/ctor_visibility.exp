@@ -43,7 +43,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls)
+proc = > public {inline} (1 calls)
 0: ctor_visibility.all_priv.=<0>
 =(#left##0:ctor_visibility.all_priv, #right##0:ctor_visibility.all_priv, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -51,7 +51,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
     foreign llvm icmp_eq(~#left##0:ctor_visibility.all_priv, ~#right##0:ctor_visibility.all_priv, ?#success##0:wybe.bool)
 
 
-bar > {inline} (0 calls)
+proc bar > {inline} (0 calls)
 0: ctor_visibility.all_priv.bar<0>
 bar(?#result##0:ctor_visibility.all_priv)<{}; {}; {}>:
   AliasPairs: []
@@ -59,7 +59,7 @@ bar(?#result##0:ctor_visibility.all_priv)<{}; {}; {}>:
     foreign llvm move(1:ctor_visibility.all_priv, ?#result##0:ctor_visibility.all_priv)
 
 
-foo > {inline} (0 calls)
+proc foo > {inline} (0 calls)
 0: ctor_visibility.all_priv.foo<0>
 foo(?#result##0:ctor_visibility.all_priv)<{}; {}; {}>:
   AliasPairs: []
@@ -67,7 +67,7 @@ foo(?#result##0:ctor_visibility.all_priv)<{}; {}; {}>:
     foreign llvm move(0:ctor_visibility.all_priv, ?#result##0:ctor_visibility.all_priv)
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: ctor_visibility.all_priv.~=<0>
 ~=(#left##0:ctor_visibility.all_priv, #right##0:ctor_visibility.all_priv, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -128,7 +128,7 @@ entry:
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls)
+proc = > public {inline} (1 calls)
 0: ctor_visibility.all_public_long.=<0>
 =(#left##0:ctor_visibility.all_public_long, #right##0:ctor_visibility.all_public_long, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -136,7 +136,7 @@ entry:
     foreign llvm icmp_eq(~#left##0:ctor_visibility.all_public_long, ~#right##0:ctor_visibility.all_public_long, ?#success##0:wybe.bool)
 
 
-bar > public {inline} (0 calls)
+proc bar > public {inline} (0 calls)
 0: ctor_visibility.all_public_long.bar<0>
 bar(?#result##0:ctor_visibility.all_public_long)<{}; {}; {}>:
   AliasPairs: []
@@ -144,7 +144,7 @@ bar(?#result##0:ctor_visibility.all_public_long)<{}; {}; {}>:
     foreign llvm move(1:ctor_visibility.all_public_long, ?#result##0:ctor_visibility.all_public_long)
 
 
-foo > public {inline} (0 calls)
+proc foo > public {inline} (0 calls)
 0: ctor_visibility.all_public_long.foo<0>
 foo(?#result##0:ctor_visibility.all_public_long)<{}; {}; {}>:
   AliasPairs: []
@@ -152,7 +152,7 @@ foo(?#result##0:ctor_visibility.all_public_long)<{}; {}; {}>:
     foreign llvm move(0:ctor_visibility.all_public_long, ?#result##0:ctor_visibility.all_public_long)
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: ctor_visibility.all_public_long.~=<0>
 ~=(#left##0:ctor_visibility.all_public_long, #right##0:ctor_visibility.all_public_long, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -213,7 +213,7 @@ entry:
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls)
+proc = > public {inline} (1 calls)
 0: ctor_visibility.all_public_short.=<0>
 =(#left##0:ctor_visibility.all_public_short, #right##0:ctor_visibility.all_public_short, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -221,7 +221,7 @@ entry:
     foreign llvm icmp_eq(~#left##0:ctor_visibility.all_public_short, ~#right##0:ctor_visibility.all_public_short, ?#success##0:wybe.bool)
 
 
-bar > public {inline} (0 calls)
+proc bar > public {inline} (0 calls)
 0: ctor_visibility.all_public_short.bar<0>
 bar(?#result##0:ctor_visibility.all_public_short)<{}; {}; {}>:
   AliasPairs: []
@@ -229,7 +229,7 @@ bar(?#result##0:ctor_visibility.all_public_short)<{}; {}; {}>:
     foreign llvm move(1:ctor_visibility.all_public_short, ?#result##0:ctor_visibility.all_public_short)
 
 
-foo > public {inline} (0 calls)
+proc foo > public {inline} (0 calls)
 0: ctor_visibility.all_public_short.foo<0>
 foo(?#result##0:ctor_visibility.all_public_short)<{}; {}; {}>:
   AliasPairs: []
@@ -237,7 +237,7 @@ foo(?#result##0:ctor_visibility.all_public_short)<{}; {}; {}>:
     foreign llvm move(0:ctor_visibility.all_public_short, ?#result##0:ctor_visibility.all_public_short)
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: ctor_visibility.all_public_short.~=<0>
 ~=(#left##0:ctor_visibility.all_public_short, #right##0:ctor_visibility.all_public_short, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -296,7 +296,7 @@ entry:
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls)
+proc = > public {inline} (1 calls)
 0: ctor_visibility.ctor_keyword.=<0>
 =(#left##0:ctor_visibility.ctor_keyword, #right##0:ctor_visibility.ctor_keyword, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -304,7 +304,7 @@ entry:
     foreign llvm icmp_eq(~#left##0:ctor_visibility.ctor_keyword, ~#right##0:ctor_visibility.ctor_keyword, ?#success##0:wybe.bool)
 
 
-bar > {inline} (0 calls)
+proc bar > {inline} (0 calls)
 0: ctor_visibility.ctor_keyword.bar<0>
 bar(?#result##0:ctor_visibility.ctor_keyword)<{}; {}; {}>:
   AliasPairs: []
@@ -312,7 +312,7 @@ bar(?#result##0:ctor_visibility.ctor_keyword)<{}; {}; {}>:
     foreign llvm move(1:ctor_visibility.ctor_keyword, ?#result##0:ctor_visibility.ctor_keyword)
 
 
-foo > {inline} (0 calls)
+proc foo > {inline} (0 calls)
 0: ctor_visibility.ctor_keyword.foo<0>
 foo(?#result##0:ctor_visibility.ctor_keyword)<{}; {}; {}>:
   AliasPairs: []
@@ -320,7 +320,7 @@ foo(?#result##0:ctor_visibility.ctor_keyword)<{}; {}; {}>:
     foreign llvm move(0:ctor_visibility.ctor_keyword, ?#result##0:ctor_visibility.ctor_keyword)
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: ctor_visibility.ctor_keyword.~=<0>
 ~=(#left##0:ctor_visibility.ctor_keyword, #right##0:ctor_visibility.ctor_keyword, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -380,7 +380,7 @@ entry:
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls)
+proc = > public {inline} (1 calls)
 0: ctor_visibility.one_pub.=<0>
 =(#left##0:ctor_visibility.one_pub, #right##0:ctor_visibility.one_pub, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -388,7 +388,7 @@ entry:
     foreign llvm icmp_eq(~#left##0:ctor_visibility.one_pub, ~#right##0:ctor_visibility.one_pub, ?#success##0:wybe.bool)
 
 
-bar > {inline} (0 calls)
+proc bar > {inline} (0 calls)
 0: ctor_visibility.one_pub.bar<0>
 bar(?#result##0:ctor_visibility.one_pub)<{}; {}; {}>:
   AliasPairs: []
@@ -396,7 +396,7 @@ bar(?#result##0:ctor_visibility.one_pub)<{}; {}; {}>:
     foreign llvm move(1:ctor_visibility.one_pub, ?#result##0:ctor_visibility.one_pub)
 
 
-foo > public {inline} (0 calls)
+proc foo > public {inline} (0 calls)
 0: ctor_visibility.one_pub.foo<0>
 foo(?#result##0:ctor_visibility.one_pub)<{}; {}; {}>:
   AliasPairs: []
@@ -404,7 +404,7 @@ foo(?#result##0:ctor_visibility.one_pub)<{}; {}; {}>:
     foreign llvm move(0:ctor_visibility.one_pub, ?#result##0:ctor_visibility.one_pub)
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: ctor_visibility.one_pub.~=<0>
 ~=(#left##0:ctor_visibility.one_pub, #right##0:ctor_visibility.one_pub, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -464,7 +464,7 @@ entry:
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls)
+proc = > public {inline} (1 calls)
 0: ctor_visibility.one_pub2.=<0>
 =(#left##0:ctor_visibility.one_pub2, #right##0:ctor_visibility.one_pub2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -472,7 +472,7 @@ entry:
     foreign llvm icmp_eq(~#left##0:ctor_visibility.one_pub2, ~#right##0:ctor_visibility.one_pub2, ?#success##0:wybe.bool)
 
 
-bar > public {inline} (0 calls)
+proc bar > public {inline} (0 calls)
 0: ctor_visibility.one_pub2.bar<0>
 bar(?#result##0:ctor_visibility.one_pub2)<{}; {}; {}>:
   AliasPairs: []
@@ -480,7 +480,7 @@ bar(?#result##0:ctor_visibility.one_pub2)<{}; {}; {}>:
     foreign llvm move(1:ctor_visibility.one_pub2, ?#result##0:ctor_visibility.one_pub2)
 
 
-foo > {inline} (0 calls)
+proc foo > {inline} (0 calls)
 0: ctor_visibility.one_pub2.foo<0>
 foo(?#result##0:ctor_visibility.one_pub2)<{}; {}; {}>:
   AliasPairs: []
@@ -488,7 +488,7 @@ foo(?#result##0:ctor_visibility.one_pub2)<{}; {}; {}>:
     foreign llvm move(0:ctor_visibility.one_pub2, ?#result##0:ctor_visibility.one_pub2)
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: ctor_visibility.one_pub2.~=<0>
 ~=(#left##0:ctor_visibility.one_pub2, #right##0:ctor_visibility.one_pub2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -555,7 +555,7 @@ entry:
   resources       : 
   procs           : 
 
-= > public (1 calls)
+proc = > public (1 calls)
 0: ctor_visibility.with_fields.=<0>
 =(#left##0:ctor_visibility.with_fields, #right##0:ctor_visibility.with_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -607,7 +607,7 @@ entry:
 
 
 
-a > public (0 calls)
+proc a > public (0 calls)
 0: ctor_visibility.with_fields.a<0>
 a(#rec##0:ctor_visibility.with_fields, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -621,7 +621,7 @@ a(#rec##0:ctor_visibility.with_fields, ?#result##0:wybe.int)<{}; {}; {}>:
     1:
         foreign lpvm access(~#rec##0:ctor_visibility.with_fields, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @ctor_visibility:nn:nn
 
-a > public (0 calls)
+proc a > public (0 calls)
 1: ctor_visibility.with_fields.a<1>
 a(#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -637,7 +637,7 @@ a(#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, #fi
 
 
 
-b > public {inline} (0 calls)
+proc b > public {inline} (0 calls)
 0: ctor_visibility.with_fields.b<0>
 b(#rec##0:ctor_visibility.with_fields, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -653,7 +653,7 @@ b(#rec##0:ctor_visibility.with_fields, ?#result##0:wybe.int, ?#success##0:wybe.b
         foreign lpvm access(~#rec##0:ctor_visibility.with_fields, 7:wybe.int, 16:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @ctor_visibility:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-b > public {inline} (0 calls)
+proc b > public {inline} (0 calls)
 1: ctor_visibility.with_fields.b<1>
 b(#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -671,7 +671,7 @@ b(#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, #fi
 
 
 
-bar > public {inline} (0 calls)
+proc bar > public {inline} (0 calls)
 0: ctor_visibility.with_fields.bar<0>
 bar(a##0:wybe.int, b##0:wybe.int, ?#result##0:ctor_visibility.with_fields)<{}; {}; {}>:
   AliasPairs: []
@@ -680,7 +680,7 @@ bar(a##0:wybe.int, b##0:wybe.int, ?#result##0:ctor_visibility.with_fields)<{}; {
     foreign lpvm mutate(~#rec##0:ctor_visibility.with_fields, ?#rec##1:ctor_visibility.with_fields, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~a##0:wybe.int) @ctor_visibility:nn:nn
     foreign lpvm mutate(~#rec##1:ctor_visibility.with_fields, ?#rec##2:ctor_visibility.with_fields, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~b##0:wybe.int) @ctor_visibility:nn:nn
     foreign llvm or(~#rec##2:ctor_visibility.with_fields, 1:wybe.int, ?#result##0:ctor_visibility.with_fields) @ctor_visibility:nn:nn
-bar > public {inline} (7 calls)
+proc bar > public {inline} (7 calls)
 1: ctor_visibility.with_fields.bar<1>
 bar(?a##0:wybe.int, ?b##0:wybe.int, #result##0:ctor_visibility.with_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -700,14 +700,14 @@ bar(?a##0:wybe.int, ?b##0:wybe.int, #result##0:ctor_visibility.with_fields, ?#su
 
 
 
-foo > public {inline} (0 calls)
+proc foo > public {inline} (0 calls)
 0: ctor_visibility.with_fields.foo<0>
 foo(a##0:wybe.int, ?#result##0:ctor_visibility.with_fields)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_visibility.with_fields) @ctor_visibility:nn:nn
     foreign lpvm mutate(~#rec##0:ctor_visibility.with_fields, ?#result##0:ctor_visibility.with_fields, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~a##0:wybe.int) @ctor_visibility:nn:nn
-foo > public {inline} (11 calls)
+proc foo > public {inline} (11 calls)
 1: ctor_visibility.with_fields.foo<1>
 foo(?a##0:wybe.int, #result##0:ctor_visibility.with_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -725,7 +725,7 @@ foo(?a##0:wybe.int, #result##0:ctor_visibility.with_fields, ?#success##0:wybe.bo
 
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: ctor_visibility.with_fields.~=<0>
 ~=(#left##0:ctor_visibility.with_fields, #right##0:ctor_visibility.with_fields, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -986,7 +986,7 @@ entry:
   resources       : 
   procs           : 
 
-= > public (1 calls)
+proc = > public (1 calls)
 0: ctor_visibility.with_fields2.=<0>
 =(#left##0:ctor_visibility.with_fields2, #right##0:ctor_visibility.with_fields2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -1029,7 +1029,7 @@ entry:
 
 
 
-a > public {inline} (0 calls)
+proc a > public {inline} (0 calls)
 0: ctor_visibility.with_fields2.a<0>
 a(#rec##0:ctor_visibility.with_fields2, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -1045,7 +1045,7 @@ a(#rec##0:ctor_visibility.with_fields2, ?#result##0:wybe.int, ?#success##0:wybe.
         foreign lpvm access(~#rec##0:ctor_visibility.with_fields2, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @ctor_visibility:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-a > public {inline} (0 calls)
+proc a > public {inline} (0 calls)
 1: ctor_visibility.with_fields2.a<1>
 a(#rec##0:ctor_visibility.with_fields2, ?#rec##1:ctor_visibility.with_fields2, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -1063,7 +1063,7 @@ a(#rec##0:ctor_visibility.with_fields2, ?#rec##1:ctor_visibility.with_fields2, #
 
 
 
-b > {inline} (0 calls)
+proc b > {inline} (0 calls)
 0: ctor_visibility.with_fields2.b<0>
 b(#rec##0:ctor_visibility.with_fields2, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -1079,7 +1079,7 @@ b(#rec##0:ctor_visibility.with_fields2, ?#result##0:wybe.int, ?#success##0:wybe.
         foreign lpvm access(~#rec##0:ctor_visibility.with_fields2, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @ctor_visibility:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-b > {inline} (0 calls)
+proc b > {inline} (0 calls)
 1: ctor_visibility.with_fields2.b<1>
 b(#rec##0:ctor_visibility.with_fields2, ?#rec##1:ctor_visibility.with_fields2, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -1097,7 +1097,7 @@ b(#rec##0:ctor_visibility.with_fields2, ?#rec##1:ctor_visibility.with_fields2, #
 
 
 
-bar > {inline} (0 calls)
+proc bar > {inline} (0 calls)
 0: ctor_visibility.with_fields2.bar<0>
 bar(b##0:wybe.int, ?#result##0:ctor_visibility.with_fields2)<{}; {}; {}>:
   AliasPairs: []
@@ -1105,7 +1105,7 @@ bar(b##0:wybe.int, ?#result##0:ctor_visibility.with_fields2)<{}; {}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_visibility.with_fields2) @ctor_visibility:nn:nn
     foreign lpvm mutate(~#rec##0:ctor_visibility.with_fields2, ?#rec##1:ctor_visibility.with_fields2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~b##0:wybe.int) @ctor_visibility:nn:nn
     foreign llvm or(~#rec##1:ctor_visibility.with_fields2, 1:wybe.int, ?#result##0:ctor_visibility.with_fields2) @ctor_visibility:nn:nn
-bar > {inline} (5 calls)
+proc bar > {inline} (5 calls)
 1: ctor_visibility.with_fields2.bar<1>
 bar(?b##0:wybe.int, #result##0:ctor_visibility.with_fields2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -1123,14 +1123,14 @@ bar(?b##0:wybe.int, #result##0:ctor_visibility.with_fields2, ?#success##0:wybe.b
 
 
 
-foo > public {inline} (0 calls)
+proc foo > public {inline} (0 calls)
 0: ctor_visibility.with_fields2.foo<0>
 foo(a##0:wybe.int, ?#result##0:ctor_visibility.with_fields2)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_visibility.with_fields2) @ctor_visibility:nn:nn
     foreign lpvm mutate(~#rec##0:ctor_visibility.with_fields2, ?#result##0:ctor_visibility.with_fields2, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~a##0:wybe.int) @ctor_visibility:nn:nn
-foo > public {inline} (10 calls)
+proc foo > public {inline} (10 calls)
 1: ctor_visibility.with_fields2.foo<1>
 foo(?a##0:wybe.int, #result##0:ctor_visibility.with_fields2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -1148,7 +1148,7 @@ foo(?a##0:wybe.int, #result##0:ctor_visibility.with_fields2, ?#success##0:wybe.b
 
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: ctor_visibility.with_fields2.~=<0>
 ~=(#left##0:ctor_visibility.with_fields2, #right##0:ctor_visibility.with_fields2, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

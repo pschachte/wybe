@@ -18,7 +18,7 @@ module top-level code > public {inline,semipure} (0 calls)
     proc_beer.beer99#cont#1<0>(99:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @proc_beer:nn:nn
 
 
-beer99 > public {inline} (1 calls)
+proc beer99 > public {inline} (1 calls)
 0: proc_beer.beer99<0>
 beer99()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -26,7 +26,7 @@ beer99()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     proc_beer.beer99#cont#1<0>(99:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @proc_beer:nn:nn
 
 
-beer99#cont#1 > (2 calls)
+proc beer99#cont#1 > (2 calls)
 0: proc_beer.beer99#cont#1<0>
 beer99#cont#1(count##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -48,7 +48,7 @@ beer99#cont#1(count##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
 
 
 
-beer99#cont#2 > {inline} (1 calls)
+proc beer99#cont#2 > {inline} (1 calls)
 0: proc_beer.beer99#cont#2<0>
 beer99#cont#2(count##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

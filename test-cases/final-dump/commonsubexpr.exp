@@ -24,7 +24,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-common_subexpr > {inline} (1 calls)
+proc common_subexpr > {inline} (1 calls)
 0: commonsubexpr.common_subexpr<0>
 common_subexpr(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

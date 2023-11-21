@@ -22,7 +22,7 @@ AFTER EVERYTHING:
   submodules      : multi_specz_cyclic_lib.position
   procs           : 
 
-foo1 > public (0 calls)
+proc foo1 > public (0 calls)
 0: multi_specz_cyclic_lib.foo1<0>
 foo1(x1##0:multi_specz_cyclic_lib.position, x2##0:multi_specz_cyclic_lib.position, x3##0:multi_specz_cyclic_lib.position, x4##0:multi_specz_cyclic_lib.position, n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -42,7 +42,7 @@ foo1(x1##0:multi_specz_cyclic_lib.position, x2##0:multi_specz_cyclic_lib.positio
 
 
 
-modifyAndPrint > public (4 calls)
+proc modifyAndPrint > public (4 calls)
 0: multi_specz_cyclic_lib.modifyAndPrint<0>
 modifyAndPrint(pos##0:multi_specz_cyclic_lib.position, v##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -51,7 +51,7 @@ modifyAndPrint(pos##0:multi_specz_cyclic_lib.position, v##0:wybe.int)<{<<wybe.io
     multi_specz_cyclic_lib.printPosition<0>(~pos##1:multi_specz_cyclic_lib.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @multi_specz_cyclic_lib:nn:nn
 
 
-printPosition > public (1 calls)
+proc printPosition > public (1 calls)
 0: multi_specz_cyclic_lib.printPosition<0>
 printPosition(pos##0:multi_specz_cyclic_lib.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -181,7 +181,7 @@ entry:
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls)
+proc = > public {inline} (1 calls)
 0: multi_specz_cyclic_lib.position.=<0>
 =(#left##0:multi_specz_cyclic_lib.position, #right##0:multi_specz_cyclic_lib.position, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -200,7 +200,7 @@ entry:
 
 
 
-position > public {inline} (0 calls)
+proc position > public {inline} (0 calls)
 0: multi_specz_cyclic_lib.position.position<0>
 position(x##0:wybe.int, y##0:wybe.int, ?#result##0:multi_specz_cyclic_lib.position)<{}; {}; {}>:
   AliasPairs: []
@@ -208,7 +208,7 @@ position(x##0:wybe.int, y##0:wybe.int, ?#result##0:multi_specz_cyclic_lib.positi
     foreign lpvm alloc(16:wybe.int, ?#rec##0:multi_specz_cyclic_lib.position) @multi_specz_cyclic_lib:nn:nn
     foreign lpvm mutate(~#rec##0:multi_specz_cyclic_lib.position, ?#rec##1:multi_specz_cyclic_lib.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:wybe.int) @multi_specz_cyclic_lib:nn:nn
     foreign lpvm mutate(~#rec##1:multi_specz_cyclic_lib.position, ?#result##0:multi_specz_cyclic_lib.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~y##0:wybe.int) @multi_specz_cyclic_lib:nn:nn
-position > public {inline} (6 calls)
+proc position > public {inline} (6 calls)
 1: multi_specz_cyclic_lib.position.position<1>
 position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:multi_specz_cyclic_lib.position)<{}; {}; {}>:
   AliasPairs: []
@@ -217,13 +217,13 @@ position(?x##0:wybe.int, ?y##0:wybe.int, #result##0:multi_specz_cyclic_lib.posit
     foreign lpvm access(~#result##0:multi_specz_cyclic_lib.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?y##0:wybe.int) @multi_specz_cyclic_lib:nn:nn
 
 
-x > public {inline} (0 calls)
+proc x > public {inline} (0 calls)
 0: multi_specz_cyclic_lib.position.x<0>
 x(#rec##0:multi_specz_cyclic_lib.position, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:multi_specz_cyclic_lib.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @multi_specz_cyclic_lib:nn:nn
-x > public {inline} (0 calls)
+proc x > public {inline} (0 calls)
 1: multi_specz_cyclic_lib.position.x<1>
 x(#rec##0:multi_specz_cyclic_lib.position, ?#rec##1:multi_specz_cyclic_lib.position, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -231,13 +231,13 @@ x(#rec##0:multi_specz_cyclic_lib.position, ?#rec##1:multi_specz_cyclic_lib.posit
     foreign lpvm {noalias} mutate(~#rec##0:multi_specz_cyclic_lib.position, ?#rec##1:multi_specz_cyclic_lib.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @multi_specz_cyclic_lib:nn:nn
 
 
-y > public {inline} (0 calls)
+proc y > public {inline} (0 calls)
 0: multi_specz_cyclic_lib.position.y<0>
 y(#rec##0:multi_specz_cyclic_lib.position, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:multi_specz_cyclic_lib.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @multi_specz_cyclic_lib:nn:nn
-y > public {inline} (0 calls)
+proc y > public {inline} (0 calls)
 1: multi_specz_cyclic_lib.position.y<1>
 y(#rec##0:multi_specz_cyclic_lib.position, ?#rec##1:multi_specz_cyclic_lib.position, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -245,7 +245,7 @@ y(#rec##0:multi_specz_cyclic_lib.position, ?#rec##1:multi_specz_cyclic_lib.posit
     foreign lpvm {noalias} mutate(~#rec##0:multi_specz_cyclic_lib.position, ?#rec##1:multi_specz_cyclic_lib.position, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @multi_specz_cyclic_lib:nn:nn
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: multi_specz_cyclic_lib.position.~=<0>
 ~=(#left##0:multi_specz_cyclic_lib.position, #right##0:multi_specz_cyclic_lib.position, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -409,7 +409,7 @@ if.else:
   resources       : 
   procs           : 
 
-foo2 > public (0 calls)
+proc foo2 > public (0 calls)
 0: multi_specz_cyclic_lib2.foo2<0>
 foo2(x1##0:multi_specz_cyclic_lib.position, x2##0:multi_specz_cyclic_lib.position, x3##0:multi_specz_cyclic_lib.position, x4##0:multi_specz_cyclic_lib.position, n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

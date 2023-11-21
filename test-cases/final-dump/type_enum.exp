@@ -45,7 +45,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls)
+proc = > public {inline} (1 calls)
 0: type_enum.season.=<0>
 =(#left##0:type_enum.season, #right##0:type_enum.season, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -53,7 +53,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
     foreign llvm icmp_eq(~#left##0:type_enum.season, ~#right##0:type_enum.season, ?#success##0:wybe.bool)
 
 
-autumn > public {inline} (0 calls)
+proc autumn > public {inline} (0 calls)
 0: type_enum.season.autumn<0>
 autumn(?#result##0:type_enum.season)<{}; {}; {}>:
   AliasPairs: []
@@ -61,7 +61,7 @@ autumn(?#result##0:type_enum.season)<{}; {}; {}>:
     foreign llvm move(3:type_enum.season, ?#result##0:type_enum.season)
 
 
-spring > public {inline} (0 calls)
+proc spring > public {inline} (0 calls)
 0: type_enum.season.spring<0>
 spring(?#result##0:type_enum.season)<{}; {}; {}>:
   AliasPairs: []
@@ -69,7 +69,7 @@ spring(?#result##0:type_enum.season)<{}; {}; {}>:
     foreign llvm move(1:type_enum.season, ?#result##0:type_enum.season)
 
 
-summer > public {inline} (0 calls)
+proc summer > public {inline} (0 calls)
 0: type_enum.season.summer<0>
 summer(?#result##0:type_enum.season)<{}; {}; {}>:
   AliasPairs: []
@@ -77,7 +77,7 @@ summer(?#result##0:type_enum.season)<{}; {}; {}>:
     foreign llvm move(2:type_enum.season, ?#result##0:type_enum.season)
 
 
-winter > public {inline} (0 calls)
+proc winter > public {inline} (0 calls)
 0: type_enum.season.winter<0>
 winter(?#result##0:type_enum.season)<{}; {}; {}>:
   AliasPairs: []
@@ -85,7 +85,7 @@ winter(?#result##0:type_enum.season)<{}; {}; {}>:
     foreign llvm move(0:type_enum.season, ?#result##0:type_enum.season)
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: type_enum.season.~=<0>
 ~=(#left##0:type_enum.season, #right##0:type_enum.season, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

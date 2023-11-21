@@ -1,0 +1,9 @@
+module a {
+    pub module b {
+        !print("in a.b")
+    }
+}
+module `a.b` {
+    !print("in `a.b`")
+}
+pass

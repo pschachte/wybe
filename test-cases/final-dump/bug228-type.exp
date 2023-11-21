@@ -1,5 +1,5 @@
 Error detected during type checking of module(s) bug228-type
-[91mfinal-dump/bug228-type.wybe:5:2: Type error in call to =, argument 1
-[0m[91mfinal-dump/bug228-type.wybe:5:2: Type error in call to =, argument 2
+[91mfinal-dump/bug228-type.wybe:5:2: Type error in call to proc =, argument 1
+[0m[91mfinal-dump/bug228-type.wybe:5:2: Type error in call to proc =, argument 2
 [0m[91mfinal-dump/bug228-type.wybe:5:2: Type of "1.0" incompatible with ?bar
 [0m

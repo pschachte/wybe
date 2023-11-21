@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-yorn > public {inline} (0 calls)
+proc yorn > public {inline} (0 calls)
 0: proc_yorn2.yorn<0>
 yorn(prompt##0:wybe.string, ?result##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -17,7 +17,7 @@ yorn(prompt##0:wybe.string, ?result##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.i
     proc_yorn2.yorn#cont#1<0>(~prompt##0:wybe.string, ?result##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @proc_yorn2:nn:nn
 
 
-yorn#cont#1 > (2 calls)
+proc yorn#cont#1 > (2 calls)
 0: proc_yorn2.yorn#cont#1<0>
 yorn#cont#1(prompt##0:wybe.string, ?result##1:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

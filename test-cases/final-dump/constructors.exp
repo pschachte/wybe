@@ -15,7 +15,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-= > public (1 calls)
+proc = > public (1 calls)
 0: constructors.=<0>
 =(#left##0:constructors, #right##0:constructors, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -39,14 +39,14 @@ AFTER EVERYTHING:
 
 
 
-just > public {inline} (0 calls)
+proc just > public {inline} (0 calls)
 0: constructors.just<0>
 just(value##0:wybe.int, ?#result##0:constructors)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?#rec##0:constructors) @constructors:nn:nn
     foreign lpvm mutate(~#rec##0:constructors, ?#result##0:constructors, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~value##0:wybe.int) @constructors:nn:nn
-just > public {inline} (8 calls)
+proc just > public {inline} (8 calls)
 1: constructors.just<1>
 just(?value##0:wybe.int, #result##0:constructors, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -63,7 +63,7 @@ just(?value##0:wybe.int, #result##0:constructors, ?#success##0:wybe.bool)<{}; {}
 
 
 
-nothing > public {inline} (0 calls)
+proc nothing > public {inline} (0 calls)
 0: constructors.nothing<0>
 nothing(?#result##0:constructors)<{}; {}; {}>:
   AliasPairs: []
@@ -71,7 +71,7 @@ nothing(?#result##0:constructors)<{}; {}; {}>:
     foreign llvm move(0:constructors, ?#result##0:constructors)
 
 
-value > public {inline} (0 calls)
+proc value > public {inline} (0 calls)
 0: constructors.value<0>
 value(#rec##0:constructors, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -86,7 +86,7 @@ value(#rec##0:constructors, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}
         foreign lpvm access(~#rec##0:constructors, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @constructors:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-value > public {inline} (0 calls)
+proc value > public {inline} (0 calls)
 1: constructors.value<1>
 value(#rec##0:constructors, ?#rec##1:constructors, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -103,7 +103,7 @@ value(#rec##0:constructors, ?#rec##1:constructors, #field##0:wybe.int, ?#success
 
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: constructors.~=<0>
 ~=(#left##0:constructors, #right##0:constructors, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

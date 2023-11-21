@@ -1,3 +1,3 @@
 Error detected during type checking of module(s) unbound_after_for
-[91mfinal-dump/unbound_after_for.wybe:2:2: Uninitialised argument in call to println, argument 1
+[91mfinal-dump/unbound_after_for.wybe:2:2: Uninitialised argument in call to proc println, argument 1
 [0m

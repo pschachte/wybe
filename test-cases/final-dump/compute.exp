@@ -97,7 +97,7 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
   resources       : 
   procs           : 
 
-toCelsius > public {inline} (0 calls)
+proc toCelsius > public {inline} (0 calls)
 0: math.temperature.toCelsius<0>
 toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
@@ -147,7 +147,7 @@ module top-level code > public {inline,semipure} (0 calls)
     foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-factorial > public (1 calls)
+proc factorial > public (1 calls)
 0: math.utils.factorial<0>
 factorial(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []

@@ -17,7 +17,7 @@ module top-level code > public {inline,semipure} (0 calls)
     terminal_ok.exit_bool<0>(0:wybe.bool) #1 @terminal_ok:nn:nn
 
 
-exit_bool > {terminal,semipure} (1 calls)
+proc exit_bool > {terminal,semipure} (1 calls)
 0: terminal_ok.exit_bool<0>
 exit_bool(b##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

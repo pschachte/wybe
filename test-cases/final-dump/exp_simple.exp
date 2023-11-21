@@ -32,7 +32,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#33##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
 
 
-foreign_add > {inline} (1 calls)
+proc foreign_add > {inline} (1 calls)
 0: exp_simple.foreign_add<0>
 foreign_add(?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []

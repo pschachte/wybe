@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-unneeded > {inline} (0 calls)
+proc unneeded > {inline} (0 calls)
 0: unneeded.unneeded<0>
 unneeded(x##0:wybe.int, [y##0:wybe.int], ?z##0:wybe.int, q##0:wybe.int, [?q##0:wybe.int])<{}; {}; {}>:
   AliasPairs: []
