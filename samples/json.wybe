@@ -1,4 +1,11 @@
-pub constructors jobject(list(pair)) | jstring(string) | jbool(bool) | jnumber(float) | jlist(list(_)) | jnull
+use wybe.float
+
+pub constructors jobject(list(pair)) 
+               | jstring(string) 
+               | jbool(bool) 
+               | jnumber(float) 
+               | jlist(list(_)) 
+               | jnull
     
 pub def {test} (a:_ = b:_) { foreign lpvm cast(a):int = foreign lpvm cast(b):int }
 
@@ -21,6 +28,7 @@ pub def {test} parse(s:string, ?json:_) {
 # Fails if the first character of the string is not said character.
 def {test} char(c:char, !s:string) {
     # this is necessary because the uncons may fail, but the failure overwrites s
+    # this still doesnt work
     # [c | ?s] = s
     [c | ?s_] = s
     ?s = s_
@@ -115,7 +123,7 @@ def {test} string_tail(!s:string, ?str:string) {
     char_token('\"', !s)
     ?str = ""
   | [?c | ?s] = s
-    if { c = '\\' :: 
+    if { c:char = '\\' :: 
         [?c | ?s] = s
         if { c = '"' :: pass
            | c = '\\' :: pass
@@ -128,8 +136,10 @@ def {test} string_tail(!s:string, ?str:string) {
            | else :: fail
         }
     }
-    string_tail(!s, ?str)
-    ?str = [c | str]
+    string_tail(!s, ?str:string)
+    # this should work...
+    # ?str = [c | str]
+    ?str = string(c) ,, str
 }
 
 ## bool/2
@@ -176,7 +186,7 @@ def {test} digit(!s:string, ?d:float) {
     [?c | ?rest] = s
     '0' <= c & c <= '9'
     ?s = rest
-    ?d = float(ord(c) - ord('0'))
+    ?d = foreign llvm sitofp(ord(c) - ord('0'))
 }
 
 ## list/2
@@ -197,11 +207,35 @@ pub def print(x:_) use !io {
     !nl
 }
 
-def print(ind:int, p:pair) use !io {
-    !indent(ind)
-    !escape(p^key)
-    !print(": ")
-    !print(ind + 1, p^value)
+def print(ind:int, x:_) use !io {
+    case x in {
+        jobject(?pairs) :: 
+        !print_list('{', {resource}{
+            !indent(@1)
+            !escape(@2^key)
+            !print(": ")
+            !print(@1 + 1, @2^value)
+        }, ind, pairs, '}')
+      | jlist(?list) :: 
+        !print_list('[', {resource}{
+            !indent(@1)
+            !print(@1, @2)
+        }, ind, list, ']')
+      | jstring(?s) :: 
+        !escape(s)
+      | jbool(?b) :: 
+        !print(b)
+      | jnumber(?n) :: 
+        !print(n)
+      | else :: 
+        !print("null")
+    }
+}
+
+def indent(ind:int) use !io {
+    for _ in 0..ind {
+        !print("  ")
+    }
 }
 
 def escape(s:string) use !io {
@@ -233,32 +267,6 @@ def print_list(start:char, printer:{resource}(int, X), ind:int, xs:list(X), end:
         !indent(ind)
     }
     !print(end)
-}
-
-def print(ind:int, x:_) use !io {
-    case x in {
-        jobject(?pairs) :: 
-        !print_list('{', print, ind, pairs, '}')
-      | jlist(?list) :: 
-        !print_list('[', {resource}{
-            !indent(@1)
-            !print(@1, @2)
-        }, ind, list, ']')
-      | jstring(?s) :: 
-        !escape(s)
-      | jbool(?b) :: 
-        !print(b)
-      | jnumber(?n) :: 
-        !print(n)
-      | else :: 
-        !print("null")
-    }
-}
-
-def indent(ind:int) use !io {
-    for _ in 0..ind {
-        !print("  ")
-    }
 }
 
 ?s = "{\"ab\\nc\" : [false, true, 123.098, 123, 123.456e10], \"def\": null}"
