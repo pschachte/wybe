@@ -48,7 +48,7 @@ import qualified LLVM.AST.IntegerPredicate       as IP
 import           LLVM.AST.Operand                hiding (PointerType, operands)
 import           LLVM.AST.Type
 import           LLVM.AST.Typed
-import qualified LLVM.AST.Attribute              as A (FunctionAttribute(..)) 
+import qualified LLVM.AST.Attribute              as A (FunctionAttribute(..))
 import           LLVM.Pretty                     (ppllvm)
 
 import qualified Data.ByteString                 as BS
@@ -129,10 +129,10 @@ blockTransformModule thisMod = do
     modRec' <- getModule id
     logWrapWith '-' $ show modRec'
     reexitModule
-    logBlocks $ "*** Exiting Module " ++ showModSpec thisMod ++ " ***"
+    logBlocks $ "*** Finished Translating Module " ++ showModSpec thisMod ++ " ***"
 
 
--- -- |Affix its id number to the end of each proc name
+-- |Affix its id number to the end of each proc name
 mangleProcs :: [ProcDef] -> [ProcDef]
 mangleProcs ps = zipWith mangleProc ps [0..]
 
@@ -235,7 +235,7 @@ translateProc proc = do
     when (hasDuplicates (List.map fst speczBodies'))
             $ shouldnt $ "Specz version id conflicts"
                 ++ show (List.map fst speczBodies')
-    blocks <- mapM (\(id, currBody) -> 
+    blocks <- mapM (\(id, currBody) ->
                     -- rename this version of proc
                     let pname = primProtoName proto ++ "[" ++ id ++ "]"
                         proto' = proto {primProtoName = pname}
@@ -250,7 +250,7 @@ translateProc proc = do
 _translateProcImpl :: ProcDef -> Translation ProcDefBlock
 _translateProcImpl proc@ProcDef{procVariant=variant,
                                 procImpln=(ProcDefPrim _ proto body _ _)} = do
-    let (proto', body') = if isClosureVariant variant 
+    let (proto', body') = if isClosureVariant variant
                           then closeClosure proto body
                           else (proto, body)
     modspec <- lift getModuleSpec
@@ -551,7 +551,7 @@ cgen (prim@(PrimCall callSiteID pspec _ args _):nextPrims) isLeaf = do
 cgen (prim@(PrimHigher cId (ArgClosure pspec closed _) impurity args):ps) isLeaf
  = do
     pspec' <- fromMaybe pspec <$> lift2 (maybeGetClosureOf pspec)
-    globalFlows <- lift2 $ getProcGlobalFlows pspec'          
+    globalFlows <- lift2 $ getProcGlobalFlows pspec'
     logCodegen $ "Compiling " ++ show prim
               ++ " as first order call to " ++ show pspec'
               ++ " closed over " ++ show closed
@@ -563,12 +563,12 @@ cgen (p:ps) isLeaf = do
     cgen ps isLeaf
 
 cgenPrim :: Prim -> Codegen ()
-cgenPrim prim@(PrimHigher callSiteId 
+cgenPrim prim@(PrimHigher callSiteId
                fn@ArgVar{argVarType=ty@(HigherOrderType mods _)} _ args) = do
     logCodegen $ "--> Compiling " ++ show prim
     -- If a HO call only produces phantoms, no need to call it
     allPhantoms <- and <$> lift2 (mapM argIsPhantom $ snd $ partitionArgs args)
-    unless (allPhantoms && not (isResourcefulHigherOrder ty) 
+    unless (allPhantoms && not (isResourcefulHigherOrder ty)
                         && modifierImpurity mods <= Pure) $ do
         args' <- mapM fixHigherOrderArg args
         let (inArgs, outArgs) = partitionArgs args'
@@ -654,8 +654,8 @@ getTailCallHint False NoAlloca _ _ _ = Just LLVMAST.Tail
 -- | Fix a higher order call argument. Transforms an input phantom into an ArgUndef, 
 -- and all types into AnyType
 fixHigherOrderArg :: PrimArg -> Codegen PrimArg
-fixHigherOrderArg arg@ArgVar{argVarType=ty, argVarFlow=FlowIn} = 
-    ifM (lift2 $ argIsPhantom arg) 
+fixHigherOrderArg arg@ArgVar{argVarType=ty, argVarFlow=FlowIn} =
+    ifM (lift2 $ argIsPhantom arg)
         (return $ ArgUndef AnyType)
         (return $ setArgType AnyType arg)
 fixHigherOrderArg arg = return $ setArgType AnyType arg
@@ -1564,16 +1564,17 @@ concatLLVMASTModules :: ModSpec      -- ^ Module to append to
                      -> Compiler LLVMAST.Module
 concatLLVMASTModules thisMod mspecs = do
     -- pull LLVMAST.Module implementations of appending modspecs
-    maybeLLMods <- mapM ((fmap modLLVM) . getLoadedModuleImpln) mspecs
+    logBlocks $ "Concatenating LLVM code from modules "
+            ++ showModSpecs (thisMod:mspecs)
     let trustMsg = "LLVMAST.Module implementation not generated."
-    let llmods = List.map (trustFromJust trustMsg) maybeLLMods
+    llmods <- mapM
+        ((trustFromJust trustMsg . modLLVM <$>) . getLoadedModuleImpln)
+        mspecs
     let defs = List.map LLVMAST.moduleDefinitions llmods
     -- pull LLVMAST.Module implementation of the modspec to append to
-    thisLLMod <- trustFromJustM trustMsg $
-        fmap modLLVM $ getLoadedModuleImpln thisMod
+    thisLLMod <-
+        trustFromJust trustMsg . modLLVM <$> getLoadedModuleImpln thisMod
     let updatedLLMod = List.foldl addUniqueDefinitions thisLLMod defs
-    -- updateLoadedModuleImpln (\imp -> imp { modLLVM = Just updatedLLMod })
-    --     thisMod
     return updatedLLMod
 
 

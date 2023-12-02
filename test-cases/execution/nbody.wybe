@@ -201,5 +201,5 @@ advance(0.01, n, !bodies)
 !report_energy(bodies)
 !nl
 !malloc_count(?mc)
-!println("malloc count: (should be 5006 with multi-specz and 10007 without it)")
+!println("malloc count: (should be 5005 with multi-specz and 10006 without it)")
 !println(mc)

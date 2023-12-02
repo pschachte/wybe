@@ -280,7 +280,8 @@ buildTarget target = do
                        ++ " Module: " ++ showModSpec modspec
             -- target should be in the working directory, lib dir will be added
             -- later
-            depGraph <- loadAllNeededModules modspec True [(dir,False)]
+            depGraph <- loadAllNeededModules modspec True 
+                        (tType == ExecutableFile) [(dir,False)]
 
             -- topological sort (bottom-up)
             let orderedSCCs = List.map (\(m, ms) -> (m, m, ms)) depGraph
@@ -341,27 +342,35 @@ buildTarget target = do
 
 -- |Search and load all needed modules starting from the given modspec, defined
 -- in one of the specified absolute directories. Return a directed graph
--- representing module dependencies.
+-- representing module dependencies.  Add in the command_line module if this
+-- module is for a top-level executable.
 loadAllNeededModules :: ModSpec -- ^Module name
               -> Bool           -- ^Whether the provided mod is the final target
+              -> Bool           -- ^Whether the provided mod is an executable
               -> [(FilePath,Bool)] -- ^Directories to look in and whether libs
               -> Compiler [(ModSpec, [ModSpec])]
-loadAllNeededModules modspec isTarget possDirs = do
+loadAllNeededModules modspec isTarget isExec possDirs = do
     opts <- gets options
-    let force = optForceAll opts || (isTarget && optForce opts)
+    let forceAll = optForceAll opts
+    let force = forceAll || (isTarget && optForce opts)
     mods <- loadModuleIfNeeded force modspec possDirs
     stopOnError $ "loading module: " ++ showModSpec modspec
-    logBuild $ "Loading module " ++ showModSpec modspec
-               ++ " ... got " ++ showModSpecs mods
 
-    if List.null mods
+    -- add lib dir to the possDirs when moving from target to dependencies
+    let possDirs' = if isTarget
+        then possDirs ++ ((,True) <$> optLibDirs opts)
+        else possDirs
+    mods' <- if isExec 
+        then do
+            cmdLineMods <- loadModuleIfNeeded force cmdLineModSpec possDirs'
+            return $ nub $ cmdLineMods ++ mods 
+        else return mods
+    logBuild $ "Loading module " ++ showModSpec modspec
+               ++ " ... got " ++ showModSpecs mods'
+
+    if List.null mods'
     then return []
     else do
-        -- add lib dir to the possDirs when moving from target to dependencies
-        let possDirs' = if isTarget
-            then possDirs ++ ((,True) <$> optLibDirs opts)
-            else possDirs
-
         -- handle dependencies of recently loaded modules
         concatMapM (\m -> do
             imports <- getModuleImplementationField (keys . modImports)
@@ -370,10 +379,10 @@ loadAllNeededModules modspec isTarget possDirs = do
             logBuild $ "handle imports: " ++ showModSpecs imports ++ " in "
                         ++ showModSpec m
             depGraph <- concatMapM (\importMod ->
-                loadAllNeededModules importMod False possDirs') imports
+                loadAllNeededModules importMod False False possDirs') imports
 
             return $ (m, imports):depGraph
-            ) mods
+            ) mods'
 
 
 -- | Try to load the given "modspec" and try to use the compiled version from
@@ -821,7 +830,7 @@ compileModSCC mspecs = do
     mapM_ (transformModuleProcs transformProcResources)  mspecs
     stopOnError $ "resource checking of module(s) "
                   ++ showModSpecs mspecs
-    
+
     ----------------------------------
     -- UNBRANCHING
     mapM_ (transformModuleProcs unbranchProc)  mspecs
@@ -1009,31 +1018,27 @@ buildExecutable orderedSCCs targetMod target = do
     loadModuleIfNeeded False cmdLineModSpec possDirs
     let privateImport = importSpec Nothing Private
     addImport cmdLineModSpec privateImport `inModule` targetMod
-    dependsUnsorted <- orderedDependencies targetMod
-    let topoMap = sccTopoMap orderedSCCs
-        depends = sortOn (modTopoOrder topoMap . fst) dependsUnsorted
-    if List.null depends || not (snd (last depends))
-        then
-            -- No main code in the selected module: don't build executable
-            Error <!>
-            ("No main (top-level) code in module '"
-             ++ showModSpec targetMod ++ "'; not building executable")
-        else do
+    procs <- keys . modProcs <$> getLoadedModuleImpln targetMod
+    -- dependsUnsorted <- orderedDependencies targetMod
+    -- let topoMap = sccTopoMap orderedSCCs
+    --     depends = sortOn (modTopoOrder topoMap . fst) dependsUnsorted
+
+    -- order each SCC such that submodules come before their parents
+    let orderedSCCs' = List.map (reverse . sort) orderedSCCs
+    let depends = concat orderedSCCs'
+    if "" `elem` procs || "<0>" `elem` procs
+        then do
             -- find dependencies (including module itself) that have a main
             logBuild $ "Dependencies: " ++ show depends
-            let mainImports = fst <$> List.filter snd depends
-            -- We need to insert
-            logBuild $ "o Modules with 'main': " ++ showModSpecs mainImports
 
             let mainMod = []
             enterModule target mainMod Nothing
             addImport ["wybe"] privateImport
             addImport cmdLineModSpec privateImport
             -- Import all dependencies of the target mod
-            mapM_ (\m -> addImport m $ importSpec Nothing Private)
-                  (fst <$> depends)
+            mapM_ (\m -> addImport m $ importSpec Nothing Private) depends
             importFromSupermodule targetMod
-            mainProc <- buildMain mainImports
+            mainProc <- buildMain orderedSCCs'
             logBuild $ "Main proc:" ++ show mainProc
             normaliseItem mainProc
             exitModule
@@ -1051,27 +1056,37 @@ buildExecutable orderedSCCs targetMod target = do
             stopOnError $ "translating " ++ showModSpecs [mainMod]
             emitObjectFile mainMod tmpMainOFile
 
-            multiSpeczTopDownPass (orderedSCCs ++ [mainMod])
+            multiSpeczTopDownPass (orderedSCCs' ++ [mainMod])
+            logBuild "Finished top down pass of SCCs:"
+            mapM_ (logBuild . ("  - "++) . showModSpecs)
+                    (orderedSCCs' ++ [[["<mainMod>"]]])
 
             ofiles <- emitObjectFilesIfNeeded depends
-            depMods <- mapMaybeM (getLoadedModule . fst) depends
+            depMods <- mapMaybeM getLoadedModule depends
             let foreigns = foreignDependencies depMods
-            let allOFiles = tmpMainOFile:(ofiles ++ foreigns)
+            let dependentOs = Set.toList
+                    $ List.foldl' (flip Set.insert) Set.empty $ ofiles ++ foreigns
+            let allOFiles = tmpMainOFile:dependentOs
 
             logBuild "o Object Files to link: "
             logBuild $ "++ " ++ intercalate "\n++ " allOFiles
             logBuild $ "o Building Target (executable): " ++ target
 
             makeExec allOFiles target
+        else
+            -- No main code in the selected module: don't build executable
+            Error <!>
+            ("No main (top-level) code in module '"
+             ++ showModSpec targetMod ++ "'; not building executable")
 
 
 -- |Visit all dependencies that have a corresponding object file, emit object
 -- files that does not exist or are outdated.
-emitObjectFilesIfNeeded :: [(ModSpec, Bool)] -> Compiler [FilePath]
+emitObjectFilesIfNeeded :: [ModSpec] -> Compiler [FilePath]
 emitObjectFilesIfNeeded depends = do
     unchangedSet <- gets unchangedMods
     logBuild $ "Unchanged Set: " ++ show unchangedSet
-    mapM (\(m, _) -> do
+    mapM (\m -> do
         reenterModule m
         -- package (directory mod) won't be included in "depends", no need to
         -- handle it
@@ -1110,34 +1125,62 @@ foreignDependencies mods =
     in foreignOs ++ foreignLibs
 
 
--- |Generate a main function by piecing together calls to the main procs of all
--- the module dependencies that have them.
-buildMain :: [ModSpec] -> Compiler Item
-buildMain mainImports = do
+-- |Generate a main function by interleaving direct resource initialisations
+-- with calls to the main procs of all modules.  For each SCC in the module
+-- dependency graph, we first directly initialise all its initialised resources
+-- (in any order), and then call all its initialisation procedures (in any
+-- order).  This ensures that all visible initialised resources are initialised
+-- before any initialisation code that may depend on them, and that all modules'
+-- resource initialisation and top-level module code are executed before any
+-- module that depends on them, except for mutual depenencies.
+buildMain :: [[ModSpec]] -> Compiler Item
+buildMain sccs = do
     logBuild "Generating main executable code"
     let cmdResource name = ResourceFlowSpec (ResourceSpec cmdLineModSpec name)
     let mainRes = Set.fromList [cmdResource "argc" ParamIn,
                                 cmdResource "argv" ParamIn,
                                 cmdResource "exit_code" ParamOut]
-    initRes <- Set.filter (`Set.notMember` Set.map resourceFlowRes mainRes)
-                . Set.unions . ((keysSet . fst) <$>)
-                -- <$> initialisedResources
-                <$> mapM (initialisedResources `inModule`) mainImports
-    logBuild $ "Initialised resources:  " ++ show initRes
+    initPairs <- mapM sccInits sccs
+    let initRes = concatMap fst initPairs
+    let body = concatMap snd initPairs
+            ++ [Unplaced
+                $ ForeignCall "c" "exit"
+                    ["semipure","terminal"]
+                    [Unplaced $ intVarGet "exit_code"]]
+    logBuild $ "All initialised resources:  " ++ show initRes
     let detism = setDetism Terminal $ setImpurity Impure defaultProcModifiers
     -- Program main has argc, argv, and exit_code as resources
     let proto = ProcProto "" [] mainRes
-    let mainBody =
-          [ Unplaced $
-            UseResources (Set.toList initRes) Nothing $
-            -- Construct argumentless resourceful calls to all main procs
-              [Unplaced $ ProcCall (First m "" Nothing) Det True []
-              | m <- mainImports]
-              ++ [Unplaced $ ForeignCall "c" "exit" ["semipure","terminal"]
-                             [Unplaced $ intVarGet "exit_code"]]]
-    -- return $ ProcDef "" proto mainBody Nothing 0 0 Map.empty
-    --          Private Det MayInline Pure NoSuperproc
+    let mainBody = [ Unplaced $ UseResources initRes Nothing body]
     return $ ProcDecl Private detism proto mainBody Nothing
+
+
+-- |Returns a pair of lists of resource initialisations and initialisation procs
+-- for all the specified modules.
+sccInits :: [ModSpec] -> Compiler ([ResourceSpec],[Placed Stmt])
+sccInits mods = do
+    logBuild $ "Collecting initialisations for modules:  " ++ showModSpecs mods
+    initialisedRes <- mapM (initialisedResources `inModule`) mods
+    logBuild $ "Initialised resources:  " ++ show initialisedRes
+    let initRes = concat (Map.keys <$> initialisedRes)
+    let resInits = [maybePlace
+                    (ForeignCall "llvm" "move" []
+                        [initVal, Unplaced (varSet resName)])
+                    (resourcePos def)
+                   | (spec,def) <- concat $ Map.toList <$> initialisedRes
+                   , let resName = resourceName spec 
+                   , let maybeInit = resourceInit def
+                   , isJust maybeInit
+                   , let initVal = fromJust maybeInit]
+    initMods <- filterM 
+                    ((isJust . Map.lookup ""
+                        <$> getModuleImplementationField modProcs) `inModule`)
+                mods
+    let initProcCalls = [Unplaced 
+                            $ ProcCall (First modSpec "" Nothing) Det True []
+                        | modSpec <- initMods
+                        ]
+    return (initRes, resInits ++ initProcCalls)
 
 
 -- | Traverse and collect a depth first dependency list from the given initial
@@ -1232,6 +1275,7 @@ multiSpeczTopDownPass orderedSCCs = do
         -- with some new specz versions.
         let scc' = List.filter (`Set.notMember` unchanged) scc
         mapM_ blockTransformModule scc'
+        logBuild $ "Finished block transform SCC:  " ++ showModSpecs scc'
         stopOnError $ "translating: " ++ showModSpecs scc'
         ) (List.reverse orderedSCCs)
     logBuild " <=== Complete top-down pass"

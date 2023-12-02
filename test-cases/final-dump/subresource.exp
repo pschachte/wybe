@@ -1,0 +1,98 @@
+======================================================================
+AFTER EVERYTHING:
+ Module subresource
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : subresource.<0>
+  imports         : use subresource.a
+                    use wybe
+  resources       : 
+  submodules      : subresource.a
+  procs           : 
+
+module top-level code > public {semipure} (0 calls)
+0: subresource.<0>
+()<{<<subresource.a.res>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+  MultiSpeczDepInfo: [(3,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+    foreign lpvm load(<<subresource.a.res>>:wybe.int, ?%res##0:wybe.int) @subresource:nn:nn
+    wybe.int.fmt<0>(~res##0:wybe.int, ?tmp#1##0:wybe.string) #0 @subresource:nn:nn
+    wybe.string.,,<0>("res = ":wybe.string, ~tmp#1##0:wybe.string, ?tmp#0##0:wybe.string) #1 @subresource:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @string:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @io:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+
+  LLVM code       :
+
+; ModuleID = 'subresource'
+
+
+ 
+
+
+@"resource#subresource.a.res" = external   global i64 
+
+
+@subresource.1 =    constant {i64, i64} { i64 6, i64 ptrtoint ([?? x i8]* @subresource.0 to i64) }
+
+
+@subresource.0 =    constant [?? x i8] c"res = \00"
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external fastcc  void @"wybe.string.print<0>[410bae77d3]"(i64)    
+
+
+declare external fastcc  i64 @"wybe.string.,,<0>"(i64, i64)    
+
+
+declare external fastcc  i64 @"wybe.int.fmt<0>"(i64)    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  void @"subresource.<0>"()    {
+entry:
+  %0 = load  i64, i64* @"resource#subresource.a.res" 
+  %1 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %0)  
+  %2 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @subresource.1, i32 0, i32 0) to i64), i64  %1)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %2)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+}
+--------------------------------------------------
+ Module subresource.a
+  representation  : (not a type)
+  public submods  : 
+  public resources: res: subresource.a.res
+  public procs    : 
+  imports         : use subresource
+                    use wybe
+  resources       : res: fromList [(subresource.a.res,wybe.int = 42 @subresource:nn:nn @subresource:nn:nn)]
+  procs           : 
+
+
+  LLVM code       :
+
+; ModuleID = 'subresource.a'
+
+
+ 
+
+
+@"resource#subresource.a.res" =    global i64 undef
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
