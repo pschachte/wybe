@@ -940,10 +940,10 @@ lookupType' context pos ty@HigherOrderType{higherTypeParams=typeFlows} = do
     (msgs, types) <- unzip <$> mapM (lookupType' context pos . typeFlowType) typeFlows
     return (concat msgs,
             ty{higherTypeParams=zipWith TypeFlow types (typeFlowMode <$> typeFlows)})
-lookupType' context pos ty@(TypeSpec [] typename args)
+lookupType' context pos (TypeSpec [] typename args)
   | typename == currentModuleAlias = do
     currMod <- getModuleSpec
-    return ([], TypeSpec (init currMod) (last currMod) args)
+    lookupType' context pos $ TypeSpec (init currMod) (last currMod) args
 lookupType' context pos ty@(TypeSpec mod name args) = do
     currMod <- getModuleSpec
     logAST $ "In module " ++ showModSpec currMod
