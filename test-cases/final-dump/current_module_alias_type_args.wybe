@@ -1,0 +1,6 @@
+constructors (T) empty | cons(head:T, tail:_(T))
+
+?xs:_(int) = empty
+?ys = cons(42, xs)
+
+if { ?y = ys^head :: !println(y) }
