@@ -1,5 +1,5 @@
-module a {
+pub module a {
     pub resource res:int = 42
 }
-?c = 0
+
 !println("res = $res")
