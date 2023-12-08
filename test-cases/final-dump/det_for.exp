@@ -17,7 +17,7 @@ module top-level code > public {inline,semipure} (0 calls)
     det_for.#cont#1<0>(0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @det_for:nn:nn
 
 
-proc #cont#1 > (2 calls)
+proc #cont#1 > {semipure} (2 calls)
 0: det_for.#cont#1<0>
 #cont#1(tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

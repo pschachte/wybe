@@ -46,7 +46,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-proc #cont#1 > (2 calls)
+proc #cont#1 > {semipure} (2 calls)
 0: alias_fork2.#cont#1<0>
 #cont#1(t##0:mytree.tree, t1##0:mytree.tree)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

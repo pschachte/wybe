@@ -23,7 +23,7 @@ module top-level code > public {inline,semipure} (0 calls)
     foreign_test.#cont#2<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5
 
 
-proc #cont#1 > {inline} (2 calls)
+proc #cont#1 > {inline,semipure} (2 calls)
 0: foreign_test.#cont#1<0>
 #cont#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -31,7 +31,7 @@ proc #cont#1 > {inline} (2 calls)
     foreign_test.#cont#2<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
 
 
-proc #cont#2 > (2 calls)
+proc #cont#2 > {semipure} (2 calls)
 0: foreign_test.#cont#2<0>
 #cont#2()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -51,7 +51,7 @@ proc #cont#2 > (2 calls)
 
 
 
-proc #cont#3 > (2 calls)
+proc #cont#3 > {semipure} (2 calls)
 0: foreign_test.#cont#3<0>
 #cont#3()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

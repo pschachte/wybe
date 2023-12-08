@@ -41,24 +41,28 @@ module top-level code > public {semipure} (0 calls)
     failure_backtrack.#cont#1<0>(~tmp#143##0:wybe.int, ~tmp#144##0:wybe.int, 42:wybe.int, 21:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}> #23
 
 
-proc #cont#1 > (3 calls)
+proc #cont#1 > {semipure} (3 calls)
 0: failure_backtrack.#cont#1<0>
 #cont#1(tmp#143##0:wybe.int, tmp#144##0:wybe.int, x##0:wybe.int, y##0:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(24,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    wybe.int.fmt<0>(x##0:wybe.int, ?tmp#17##0:wybe.string) #0 @failure_backtrack:nn:nn
+  MultiSpeczDepInfo: [(22,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(23,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(24,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+    wybe.int.fmt<0>(x##0:wybe.int, ?tmp#12##0:wybe.string) #0 @failure_backtrack:nn:nn
     foreign lpvm load(<<failure_backtrack.r>>:wybe.int, ?%r##0:wybe.int) @failure_backtrack:nn:nn
-    wybe.int.fmt<0>(r##0:wybe.int, ?tmp#19##0:wybe.string) #1 @failure_backtrack:nn:nn
-    wybe.string.,,<0>(", r = ":wybe.string, ~tmp#19##0:wybe.string, ?tmp#18##0:wybe.string) #2 @failure_backtrack:nn:nn
-    wybe.string.,,<0>(~tmp#17##0:wybe.string, ~tmp#18##0:wybe.string, ?tmp#11##0:wybe.string) #3 @failure_backtrack:nn:nn
-    wybe.string.,,<0>("after conditional; x = ":wybe.string, tmp#11##0:wybe.string, ?tmp#10##0:wybe.string) #4 @failure_backtrack:nn:nn
-    wybe.string.print<0>(~tmp#10##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #22 @string:nn:nn
+    wybe.int.fmt<0>(r##0:wybe.int, ?tmp#14##0:wybe.string) #1 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(", r = ":wybe.string, ~tmp#14##0:wybe.string, ?tmp#13##0:wybe.string) #2 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(~tmp#12##0:wybe.string, ~tmp#13##0:wybe.string, ?tmp#11##0:wybe.string) #3 @failure_backtrack:nn:nn
+    wybe.string.,,<0>("after conditional; x = ":wybe.string, ~tmp#11##0:wybe.string, ?tmp#10##0:wybe.string) #4 @failure_backtrack:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#10##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #22 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#171##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#171##0:wybe.phantom, ?tmp#172##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#172##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    wybe.string.,,<0>("before second conditional: x = ":wybe.string, tmp#11##0:wybe.string, ?tmp#15##0:wybe.string) #10 @failure_backtrack:nn:nn
-    wybe.string.print<0>(~tmp#15##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #23 @string:nn:nn
+    wybe.int.fmt<0>(x##0:wybe.int, ?tmp#17##0:wybe.string) #6 @failure_backtrack:nn:nn
+    wybe.int.fmt<0>(r##0:wybe.int, ?tmp#19##0:wybe.string) #7 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(", r = ":wybe.string, ~tmp#19##0:wybe.string, ?tmp#18##0:wybe.string) #8 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(~tmp#17##0:wybe.string, ~tmp#18##0:wybe.string, ?tmp#16##0:wybe.string) #9 @failure_backtrack:nn:nn
+    wybe.string.,,<0>("before second conditional: x = ":wybe.string, ~tmp#16##0:wybe.string, ?tmp#15##0:wybe.string) #10 @failure_backtrack:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#15##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #23 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#174##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#174##0:wybe.phantom, ?tmp#147##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#147##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
@@ -66,8 +70,12 @@ proc #cont#1 > (3 calls)
     failure_backtrack.nope2<0>(?x##1:wybe.int, ?tmp#169##0:wybe.bool) #12 @failure_backtrack:nn:nn
     case ~tmp#169##0:wybe.bool of
     0:
-        foreign lpvm store(~r##0:wybe.int, <<failure_backtrack.r>>:wybe.int) @failure_backtrack:nn:nn
-        wybe.string.,,<0>("nope2 fails; x = ":wybe.string, ~tmp#11##0:wybe.string, ?tmp#20##0:wybe.string) #19 @failure_backtrack:nn:nn
+        foreign lpvm store(r##0:wybe.int, <<failure_backtrack.r>>:wybe.int) @failure_backtrack:nn:nn
+        wybe.int.fmt<0>(x##0:wybe.int, ?tmp#22##0:wybe.string) #15 @failure_backtrack:nn:nn
+        wybe.int.fmt<0>(~r##0:wybe.int, ?tmp#24##0:wybe.string) #16 @failure_backtrack:nn:nn
+        wybe.string.,,<0>(", r = ":wybe.string, ~tmp#24##0:wybe.string, ?tmp#23##0:wybe.string) #17 @failure_backtrack:nn:nn
+        wybe.string.,,<0>(~tmp#22##0:wybe.string, ~tmp#23##0:wybe.string, ?tmp#21##0:wybe.string) #18 @failure_backtrack:nn:nn
+        wybe.string.,,<0>("nope2 fails; x = ":wybe.string, ~tmp#21##0:wybe.string, ?tmp#20##0:wybe.string) #19 @failure_backtrack:nn:nn
         wybe.string.print<0>[410bae77d3](~tmp#20##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #24 @string:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#177##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#177##0:wybe.phantom, ?tmp#178##0:wybe.phantom) @io:nn:nn
@@ -83,31 +91,39 @@ proc #cont#1 > (3 calls)
 
 
 
-proc #cont#2 > (2 calls)
+proc #cont#2 > {semipure} (2 calls)
 0: failure_backtrack.#cont#2<0>
 #cont#2(tmp#143##0:wybe.int, tmp#144##0:wybe.int, x##0:wybe.int, y##0:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(24,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    wybe.int.fmt<0>(x##0:wybe.int, ?tmp#32##0:wybe.string) #0 @failure_backtrack:nn:nn
-    foreign lpvm load(<<failure_backtrack.r>>:wybe.int, ?%tmp#148##0:wybe.int) @failure_backtrack:nn:nn
-    wybe.int.fmt<0>(~tmp#148##0:wybe.int, ?tmp#34##0:wybe.string) #1 @failure_backtrack:nn:nn
-    wybe.string.,,<0>(", r = ":wybe.string, ~tmp#34##0:wybe.string, ?tmp#33##0:wybe.string) #2 @failure_backtrack:nn:nn
-    wybe.string.,,<0>(~tmp#32##0:wybe.string, ~tmp#33##0:wybe.string, ?tmp#26##0:wybe.string) #3 @failure_backtrack:nn:nn
-    wybe.string.,,<0>("after second conditional; x = ":wybe.string, tmp#26##0:wybe.string, ?tmp#25##0:wybe.string) #4 @failure_backtrack:nn:nn
-    wybe.string.print<0>(~tmp#25##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #22 @string:nn:nn
+  MultiSpeczDepInfo: [(22,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(23,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(24,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+    wybe.int.fmt<0>(x##0:wybe.int, ?tmp#27##0:wybe.string) #0 @failure_backtrack:nn:nn
+    foreign lpvm load(<<failure_backtrack.r>>:wybe.int, ?%r##0:wybe.int) @failure_backtrack:nn:nn
+    wybe.int.fmt<0>(r##0:wybe.int, ?tmp#29##0:wybe.string) #1 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(", r = ":wybe.string, ~tmp#29##0:wybe.string, ?tmp#28##0:wybe.string) #2 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(~tmp#27##0:wybe.string, ~tmp#28##0:wybe.string, ?tmp#26##0:wybe.string) #3 @failure_backtrack:nn:nn
+    wybe.string.,,<0>("after second conditional; x = ":wybe.string, ~tmp#26##0:wybe.string, ?tmp#25##0:wybe.string) #4 @failure_backtrack:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#25##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #22 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#170##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#170##0:wybe.phantom, ?tmp#171##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#171##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    wybe.string.,,<0>("before third conditional: x = ":wybe.string, tmp#26##0:wybe.string, ?tmp#30##0:wybe.string) #10 @failure_backtrack:nn:nn
-    wybe.string.print<0>(~tmp#30##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #23 @string:nn:nn
+    wybe.int.fmt<0>(x##0:wybe.int, ?tmp#32##0:wybe.string) #6 @failure_backtrack:nn:nn
+    wybe.int.fmt<0>(r##0:wybe.int, ?tmp#34##0:wybe.string) #7 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(", r = ":wybe.string, ~tmp#34##0:wybe.string, ?tmp#33##0:wybe.string) #8 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(~tmp#32##0:wybe.string, ~tmp#33##0:wybe.string, ?tmp#31##0:wybe.string) #9 @failure_backtrack:nn:nn
+    wybe.string.,,<0>("before third conditional: x = ":wybe.string, ~tmp#31##0:wybe.string, ?tmp#30##0:wybe.string) #10 @failure_backtrack:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#30##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #23 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#173##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#173##0:wybe.phantom, ?tmp#150##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#150##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
     failure_backtrack.nope2<0>(?r##3:wybe.int, ?tmp#168##0:wybe.bool) #12 @failure_backtrack:nn:nn
     case ~tmp#168##0:wybe.bool of
     0:
-        wybe.string.,,<0>("nope2 fails; x = ":wybe.string, ~tmp#26##0:wybe.string, ?tmp#35##0:wybe.string) #19 @failure_backtrack:nn:nn
+        wybe.int.fmt<0>(x##0:wybe.int, ?tmp#37##0:wybe.string) #15 @failure_backtrack:nn:nn
+        wybe.int.fmt<0>(~r##0:wybe.int, ?tmp#39##0:wybe.string) #16 @failure_backtrack:nn:nn
+        wybe.string.,,<0>(", r = ":wybe.string, ~tmp#39##0:wybe.string, ?tmp#38##0:wybe.string) #17 @failure_backtrack:nn:nn
+        wybe.string.,,<0>(~tmp#37##0:wybe.string, ~tmp#38##0:wybe.string, ?tmp#36##0:wybe.string) #18 @failure_backtrack:nn:nn
+        wybe.string.,,<0>("nope2 fails; x = ":wybe.string, ~tmp#36##0:wybe.string, ?tmp#35##0:wybe.string) #19 @failure_backtrack:nn:nn
         wybe.string.print<0>[410bae77d3](~tmp#35##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #24 @string:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#176##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#176##0:wybe.phantom, ?tmp#177##0:wybe.phantom) @io:nn:nn
@@ -124,33 +140,35 @@ proc #cont#2 > (2 calls)
 
 
 
-proc #cont#3 > (2 calls)
+proc #cont#3 > {semipure} (2 calls)
 0: failure_backtrack.#cont#3<0>
 #cont#3(tmp#143##0:wybe.int, tmp#144##0:wybe.int, x##0:wybe.int, y##0:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(50,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(51,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+  MultiSpeczDepInfo: [(48,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(49,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(50,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(51,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     wybe.int.fmt<0>(x##0:wybe.int, ?tmp#42##0:wybe.string) #0 @failure_backtrack:nn:nn
     foreign lpvm load(<<failure_backtrack.r>>:wybe.int, ?%r##0:wybe.int) @failure_backtrack:nn:nn
     wybe.int.fmt<0>(r##0:wybe.int, ?tmp#44##0:wybe.string) #1 @failure_backtrack:nn:nn
-    wybe.string.,,<0>(", r = ":wybe.string, tmp#44##0:wybe.string, ?tmp#43##0:wybe.string) #2 @failure_backtrack:nn:nn
-    wybe.string.,,<0>(tmp#42##0:wybe.string, ~tmp#43##0:wybe.string, ?tmp#41##0:wybe.string) #3 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(", r = ":wybe.string, ~tmp#44##0:wybe.string, ?tmp#43##0:wybe.string) #2 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(~tmp#42##0:wybe.string, ~tmp#43##0:wybe.string, ?tmp#41##0:wybe.string) #3 @failure_backtrack:nn:nn
     wybe.string.,,<0>("after third conditional; x = ":wybe.string, ~tmp#41##0:wybe.string, ?tmp#40##0:wybe.string) #4 @failure_backtrack:nn:nn
-    wybe.string.print<0>(~tmp#40##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #48 @string:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#40##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #48 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#169##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#169##0:wybe.phantom, ?tmp#170##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#170##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.int.fmt<0>(x##0:wybe.int, ?tmp#47##0:wybe.string) #6 @failure_backtrack:nn:nn
     wybe.int.fmt<0>(y##0:wybe.int, ?tmp#50##0:wybe.string) #7 @failure_backtrack:nn:nn
+    wybe.int.fmt<0>(r##0:wybe.int, ?tmp#53##0:wybe.string) #8 @failure_backtrack:nn:nn
     foreign lpvm load(<<failure_backtrack.s>>:wybe.int, ?%s##0:wybe.int) @failure_backtrack:nn:nn
     wybe.int.fmt<0>(s##0:wybe.int, ?tmp#55##0:wybe.string) #9 @failure_backtrack:nn:nn
     wybe.string.,,<0>(", s = ":wybe.string, ~tmp#55##0:wybe.string, ?tmp#54##0:wybe.string) #10 @failure_backtrack:nn:nn
-    wybe.string.,,<0>(~tmp#44##0:wybe.string, ~tmp#54##0:wybe.string, ?tmp#52##0:wybe.string) #11 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(~tmp#53##0:wybe.string, ~tmp#54##0:wybe.string, ?tmp#52##0:wybe.string) #11 @failure_backtrack:nn:nn
     wybe.string.,,<0>(", r = ":wybe.string, ~tmp#52##0:wybe.string, ?tmp#51##0:wybe.string) #12 @failure_backtrack:nn:nn
     wybe.string.,,<0>(~tmp#50##0:wybe.string, ~tmp#51##0:wybe.string, ?tmp#49##0:wybe.string) #13 @failure_backtrack:nn:nn
     wybe.string.,,<0>(", y = ":wybe.string, ~tmp#49##0:wybe.string, ?tmp#48##0:wybe.string) #14 @failure_backtrack:nn:nn
-    wybe.string.,,<0>(~tmp#42##0:wybe.string, ~tmp#48##0:wybe.string, ?tmp#46##0:wybe.string) #15 @failure_backtrack:nn:nn
-    wybe.string.,,<0>("before fourth conditional: x = ":wybe.string, tmp#46##0:wybe.string, ?tmp#45##0:wybe.string) #16 @failure_backtrack:nn:nn
-    wybe.string.print<0>(~tmp#45##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #49 @string:nn:nn
+    wybe.string.,,<0>(~tmp#47##0:wybe.string, ~tmp#48##0:wybe.string, ?tmp#46##0:wybe.string) #15 @failure_backtrack:nn:nn
+    wybe.string.,,<0>("before fourth conditional: x = ":wybe.string, ~tmp#46##0:wybe.string, ?tmp#45##0:wybe.string) #16 @failure_backtrack:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#45##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #49 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#172##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#172##0:wybe.phantom, ?tmp#153##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#153##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
@@ -158,8 +176,18 @@ proc #cont#3 > (2 calls)
     failure_backtrack.yup<0>(?tmp#166##0:wybe.bool) #18 @failure_backtrack:nn:nn
     case ~tmp#166##0:wybe.bool of
     0:
-        foreign lpvm store(~r##0:wybe.int, <<failure_backtrack.r>>:wybe.int) @failure_backtrack:nn:nn
-        wybe.string.,,<0>("nope fails; x = ":wybe.string, ~tmp#46##0:wybe.string, ?tmp#56##0:wybe.string) #45 @failure_backtrack:nn:nn
+        foreign lpvm store(r##0:wybe.int, <<failure_backtrack.r>>:wybe.int) @failure_backtrack:nn:nn
+        wybe.int.fmt<0>(x##0:wybe.int, ?tmp#58##0:wybe.string) #35 @failure_backtrack:nn:nn
+        wybe.int.fmt<0>(y##0:wybe.int, ?tmp#61##0:wybe.string) #36 @failure_backtrack:nn:nn
+        wybe.int.fmt<0>(~r##0:wybe.int, ?tmp#64##0:wybe.string) #37 @failure_backtrack:nn:nn
+        wybe.int.fmt<0>(~s##0:wybe.int, ?tmp#66##0:wybe.string) #38 @failure_backtrack:nn:nn
+        wybe.string.,,<0>(", s = ":wybe.string, ~tmp#66##0:wybe.string, ?tmp#65##0:wybe.string) #39 @failure_backtrack:nn:nn
+        wybe.string.,,<0>(~tmp#64##0:wybe.string, ~tmp#65##0:wybe.string, ?tmp#63##0:wybe.string) #40 @failure_backtrack:nn:nn
+        wybe.string.,,<0>(", r = ":wybe.string, ~tmp#63##0:wybe.string, ?tmp#62##0:wybe.string) #41 @failure_backtrack:nn:nn
+        wybe.string.,,<0>(~tmp#61##0:wybe.string, ~tmp#62##0:wybe.string, ?tmp#60##0:wybe.string) #42 @failure_backtrack:nn:nn
+        wybe.string.,,<0>(", y = ":wybe.string, ~tmp#60##0:wybe.string, ?tmp#59##0:wybe.string) #43 @failure_backtrack:nn:nn
+        wybe.string.,,<0>(~tmp#58##0:wybe.string, ~tmp#59##0:wybe.string, ?tmp#57##0:wybe.string) #44 @failure_backtrack:nn:nn
+        wybe.string.,,<0>("nope fails; x = ":wybe.string, ~tmp#57##0:wybe.string, ?tmp#56##0:wybe.string) #45 @failure_backtrack:nn:nn
         wybe.string.print<0>[410bae77d3](~tmp#56##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #50 @string:nn:nn
         foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#175##0:wybe.phantom) @io:nn:nn
         foreign c putchar('\n':wybe.char, ~tmp#175##0:wybe.phantom, ?tmp#176##0:wybe.phantom) @io:nn:nn
@@ -171,9 +199,19 @@ proc #cont#3 > (2 calls)
         failure_backtrack.nope<0>(?tmp#167##0:wybe.bool) #19 @failure_backtrack:nn:nn
         case ~tmp#167##0:wybe.bool of
         0:
-            foreign lpvm store(~r##0:wybe.int, <<failure_backtrack.r>>:wybe.int) @failure_backtrack:nn:nn
-            foreign lpvm store(~s##0:wybe.int, <<failure_backtrack.s>>:wybe.int) @failure_backtrack:nn:nn
-            wybe.string.,,<0>("nope fails; x = ":wybe.string, ~tmp#46##0:wybe.string, ?tmp#56##0:wybe.string) #32 @failure_backtrack:nn:nn
+            foreign lpvm store(r##0:wybe.int, <<failure_backtrack.r>>:wybe.int) @failure_backtrack:nn:nn
+            foreign lpvm store(s##0:wybe.int, <<failure_backtrack.s>>:wybe.int) @failure_backtrack:nn:nn
+            wybe.int.fmt<0>(x##0:wybe.int, ?tmp#58##0:wybe.string) #22 @failure_backtrack:nn:nn
+            wybe.int.fmt<0>(y##0:wybe.int, ?tmp#61##0:wybe.string) #23 @failure_backtrack:nn:nn
+            wybe.int.fmt<0>(~r##0:wybe.int, ?tmp#64##0:wybe.string) #24 @failure_backtrack:nn:nn
+            wybe.int.fmt<0>(~s##0:wybe.int, ?tmp#66##0:wybe.string) #25 @failure_backtrack:nn:nn
+            wybe.string.,,<0>(", s = ":wybe.string, ~tmp#66##0:wybe.string, ?tmp#65##0:wybe.string) #26 @failure_backtrack:nn:nn
+            wybe.string.,,<0>(~tmp#64##0:wybe.string, ~tmp#65##0:wybe.string, ?tmp#63##0:wybe.string) #27 @failure_backtrack:nn:nn
+            wybe.string.,,<0>(", r = ":wybe.string, ~tmp#63##0:wybe.string, ?tmp#62##0:wybe.string) #28 @failure_backtrack:nn:nn
+            wybe.string.,,<0>(~tmp#61##0:wybe.string, ~tmp#62##0:wybe.string, ?tmp#60##0:wybe.string) #29 @failure_backtrack:nn:nn
+            wybe.string.,,<0>(", y = ":wybe.string, ~tmp#60##0:wybe.string, ?tmp#59##0:wybe.string) #30 @failure_backtrack:nn:nn
+            wybe.string.,,<0>(~tmp#58##0:wybe.string, ~tmp#59##0:wybe.string, ?tmp#57##0:wybe.string) #31 @failure_backtrack:nn:nn
+            wybe.string.,,<0>("nope fails; x = ":wybe.string, ~tmp#57##0:wybe.string, ?tmp#56##0:wybe.string) #32 @failure_backtrack:nn:nn
             wybe.string.print<0>[410bae77d3](~tmp#56##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #51 @string:nn:nn
             foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#178##0:wybe.phantom) @io:nn:nn
             foreign c putchar('\n':wybe.char, ~tmp#178##0:wybe.phantom, ?tmp#179##0:wybe.phantom) @io:nn:nn
@@ -190,30 +228,40 @@ proc #cont#3 > (2 calls)
 
 
 
-proc #cont#4 > (3 calls)
+proc #cont#4 > {semipure} (3 calls)
 0: failure_backtrack.#cont#4<0>
 #cont#4(tmp#143##0:wybe.int, tmp#144##0:wybe.int, x##0:wybe.int, y##0:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(28,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
-    wybe.int.fmt<0>(~x##0:wybe.int, ?tmp#80##0:wybe.string) #0 @failure_backtrack:nn:nn
-    wybe.int.fmt<0>(y##0:wybe.int, ?tmp#83##0:wybe.string) #1 @failure_backtrack:nn:nn
+  MultiSpeczDepInfo: [(27,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(28,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+    wybe.int.fmt<0>(x##0:wybe.int, ?tmp#69##0:wybe.string) #0 @failure_backtrack:nn:nn
+    wybe.int.fmt<0>(y##0:wybe.int, ?tmp#72##0:wybe.string) #1 @failure_backtrack:nn:nn
     foreign lpvm load(<<failure_backtrack.r>>:wybe.int, ?%tmp#131##0:wybe.int) @failure_backtrack:nn:nn
-    wybe.int.fmt<0>(~tmp#131##0:wybe.int, ?tmp#86##0:wybe.string) #2 @failure_backtrack:nn:nn
+    wybe.int.fmt<0>(tmp#131##0:wybe.int, ?tmp#75##0:wybe.string) #2 @failure_backtrack:nn:nn
     foreign lpvm load(<<failure_backtrack.s>>:wybe.int, ?%s##0:wybe.int) @failure_backtrack:nn:nn
-    wybe.int.fmt<0>(s##0:wybe.int, ?tmp#88##0:wybe.string) #3 @failure_backtrack:nn:nn
-    wybe.string.,,<0>(", s = ":wybe.string, ~tmp#88##0:wybe.string, ?tmp#87##0:wybe.string) #4 @failure_backtrack:nn:nn
-    wybe.string.,,<0>(~tmp#86##0:wybe.string, ~tmp#87##0:wybe.string, ?tmp#85##0:wybe.string) #5 @failure_backtrack:nn:nn
-    wybe.string.,,<0>(", r = ":wybe.string, ~tmp#85##0:wybe.string, ?tmp#84##0:wybe.string) #6 @failure_backtrack:nn:nn
-    wybe.string.,,<0>(~tmp#83##0:wybe.string, ~tmp#84##0:wybe.string, ?tmp#82##0:wybe.string) #7 @failure_backtrack:nn:nn
-    wybe.string.,,<0>(", y = ":wybe.string, ~tmp#82##0:wybe.string, ?tmp#81##0:wybe.string) #8 @failure_backtrack:nn:nn
-    wybe.string.,,<0>(~tmp#80##0:wybe.string, ~tmp#81##0:wybe.string, ?tmp#68##0:wybe.string) #9 @failure_backtrack:nn:nn
-    wybe.string.,,<0>("after fourth conditional; x = ":wybe.string, tmp#68##0:wybe.string, ?tmp#67##0:wybe.string) #10 @failure_backtrack:nn:nn
-    wybe.string.print<0>(~tmp#67##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #27 @string:nn:nn
+    wybe.int.fmt<0>(s##0:wybe.int, ?tmp#77##0:wybe.string) #3 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(", s = ":wybe.string, ~tmp#77##0:wybe.string, ?tmp#76##0:wybe.string) #4 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(~tmp#75##0:wybe.string, ~tmp#76##0:wybe.string, ?tmp#74##0:wybe.string) #5 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(", r = ":wybe.string, ~tmp#74##0:wybe.string, ?tmp#73##0:wybe.string) #6 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(~tmp#72##0:wybe.string, ~tmp#73##0:wybe.string, ?tmp#71##0:wybe.string) #7 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(", y = ":wybe.string, ~tmp#71##0:wybe.string, ?tmp#70##0:wybe.string) #8 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(~tmp#69##0:wybe.string, ~tmp#70##0:wybe.string, ?tmp#68##0:wybe.string) #9 @failure_backtrack:nn:nn
+    wybe.string.,,<0>("after fourth conditional; x = ":wybe.string, ~tmp#68##0:wybe.string, ?tmp#67##0:wybe.string) #10 @failure_backtrack:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#67##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #27 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#167##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#167##0:wybe.phantom, ?tmp#168##0:wybe.phantom) @io:nn:nn
     foreign lpvm store(~%tmp#168##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    wybe.string.,,<0>("before first disjunction: x = ":wybe.string, ~tmp#68##0:wybe.string, ?tmp#78##0:wybe.string) #22 @failure_backtrack:nn:nn
+    wybe.int.fmt<0>(~x##0:wybe.int, ?tmp#80##0:wybe.string) #12 @failure_backtrack:nn:nn
+    wybe.int.fmt<0>(y##0:wybe.int, ?tmp#83##0:wybe.string) #13 @failure_backtrack:nn:nn
+    wybe.int.fmt<0>(~tmp#131##0:wybe.int, ?tmp#86##0:wybe.string) #14 @failure_backtrack:nn:nn
+    wybe.int.fmt<0>(s##0:wybe.int, ?tmp#88##0:wybe.string) #15 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(", s = ":wybe.string, ~tmp#88##0:wybe.string, ?tmp#87##0:wybe.string) #16 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(~tmp#86##0:wybe.string, ~tmp#87##0:wybe.string, ?tmp#85##0:wybe.string) #17 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(", r = ":wybe.string, ~tmp#85##0:wybe.string, ?tmp#84##0:wybe.string) #18 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(~tmp#83##0:wybe.string, ~tmp#84##0:wybe.string, ?tmp#82##0:wybe.string) #19 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(", y = ":wybe.string, ~tmp#82##0:wybe.string, ?tmp#81##0:wybe.string) #20 @failure_backtrack:nn:nn
+    wybe.string.,,<0>(~tmp#80##0:wybe.string, ~tmp#81##0:wybe.string, ?tmp#79##0:wybe.string) #21 @failure_backtrack:nn:nn
+    wybe.string.,,<0>("before first disjunction: x = ":wybe.string, ~tmp#79##0:wybe.string, ?tmp#78##0:wybe.string) #22 @failure_backtrack:nn:nn
     wybe.string.print<0>[410bae77d3](~tmp#78##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #28 @string:nn:nn
     foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#170##0:wybe.phantom) @io:nn:nn
     foreign c putchar('\n':wybe.char, ~tmp#170##0:wybe.phantom, ?tmp#156##0:wybe.phantom) @io:nn:nn
@@ -232,7 +280,7 @@ proc #cont#4 > (3 calls)
 
 
 
-proc #cont#5 > (2 calls)
+proc #cont#5 > {semipure} (2 calls)
 0: failure_backtrack.#cont#5<0>
 #cont#5(tmp#143##0:wybe.int, tmp#144##0:wybe.int, x##0:wybe.int, y##0:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -275,15 +323,23 @@ proc #cont#5 > (2 calls)
     failure_backtrack.nope<0>(?tmp#164##0:wybe.bool) #24 @failure_backtrack:nn:nn
     case ~tmp#164##0:wybe.bool of
     0:
-        foreign lpvm store(7:wybe.int, <<failure_backtrack.r>>:wybe.int) @failure_backtrack:nn:nn
-        failure_backtrack.#cont#6<0>(~tmp#143##0:wybe.int, ~tmp#144##0:wybe.int, 42:wybe.int, 21:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}> #28
+        foreign lpvm store(13:wybe.int, <<failure_backtrack.r>>:wybe.int) @failure_backtrack:nn:nn
+        failure_backtrack.nope<0>(?tmp#163##0:wybe.bool) #26 @failure_backtrack:nn:nn
+        case ~tmp#163##0:wybe.bool of
+        0:
+            foreign lpvm store(7:wybe.int, <<failure_backtrack.r>>:wybe.int) @failure_backtrack:nn:nn
+            failure_backtrack.#cont#6<0>(~tmp#143##0:wybe.int, ~tmp#144##0:wybe.int, 42:wybe.int, 21:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}> #28
+
+        1:
+            failure_backtrack.#cont#6<0>(~tmp#143##0:wybe.int, ~tmp#144##0:wybe.int, 29:wybe.int, 21:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}> #27
+
 
     1:
         failure_backtrack.#cont#6<0>(~tmp#143##0:wybe.int, ~tmp#144##0:wybe.int, 28:wybe.int, 21:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}> #25
 
 
 
-proc #cont#6 > (3 calls)
+proc #cont#6 > {semipure} (3 calls)
 0: failure_backtrack.#cont#6<0>
 #cont#6(tmp#143##0:wybe.int, tmp#144##0:wybe.int, x##0:wybe.int, y##0:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -516,25 +572,33 @@ entry:
   %3 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.1, i32 0, i32 0) to i64), i64  %2)  
   %4 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %0, i64  %3)  
   %5 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.7, i32 0, i32 0) to i64), i64  %4)  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  %5)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %5)  
   tail call ccc  void  @putchar(i8  10)  
-  %6 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.9, i32 0, i32 0) to i64), i64  %4)  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  %6)  
+  %6 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %"x##0")  
+  %7 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %1)  
+  %8 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.1, i32 0, i32 0) to i64), i64  %7)  
+  %9 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %6, i64  %8)  
+  %10 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.9, i32 0, i32 0) to i64), i64  %9)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %10)  
   tail call ccc  void  @putchar(i8  10)  
   store  i64 9, i64* @"resource#failure_backtrack.r" 
-  %7 = tail call fastcc  {i64, i1}  @"failure_backtrack.nope2<0>"()  
-  %8 = extractvalue {i64, i1} %7, 0 
-  %9 = extractvalue {i64, i1} %7, 1 
-  br i1 %9, label %if.then, label %if.else 
+  %11 = tail call fastcc  {i64, i1}  @"failure_backtrack.nope2<0>"()  
+  %12 = extractvalue {i64, i1} %11, 0 
+  %13 = extractvalue {i64, i1} %11, 1 
+  br i1 %13, label %if.then, label %if.else 
 if.then:
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.11, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
-  musttail call fastcc  void  @"failure_backtrack.#cont#2<0>"(i64  %"tmp#143##0", i64  %"tmp#144##0", i64  %8, i64  %"y##0")  
+  musttail call fastcc  void  @"failure_backtrack.#cont#2<0>"(i64  %"tmp#143##0", i64  %"tmp#144##0", i64  %12, i64  %"y##0")  
   ret void 
 if.else:
   store  i64 %1, i64* @"resource#failure_backtrack.r" 
-  %10 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.13, i32 0, i32 0) to i64), i64  %4)  
-  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %10)  
+  %14 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %"x##0")  
+  %15 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %1)  
+  %16 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.1, i32 0, i32 0) to i64), i64  %15)  
+  %17 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %14, i64  %16)  
+  %18 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.13, i32 0, i32 0) to i64), i64  %17)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %18)  
   tail call ccc  void  @putchar(i8  10)  
   musttail call fastcc  void  @"failure_backtrack.#cont#2<0>"(i64  %"tmp#143##0", i64  %"tmp#144##0", i64  %"x##0", i64  %"y##0")  
   ret void 
@@ -549,24 +613,32 @@ entry:
   %3 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.1, i32 0, i32 0) to i64), i64  %2)  
   %4 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %0, i64  %3)  
   %5 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.15, i32 0, i32 0) to i64), i64  %4)  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  %5)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %5)  
   tail call ccc  void  @putchar(i8  10)  
-  %6 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.17, i32 0, i32 0) to i64), i64  %4)  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  %6)  
+  %6 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %"x##0")  
+  %7 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %1)  
+  %8 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.1, i32 0, i32 0) to i64), i64  %7)  
+  %9 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %6, i64  %8)  
+  %10 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.17, i32 0, i32 0) to i64), i64  %9)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %10)  
   tail call ccc  void  @putchar(i8  10)  
-  %7 = tail call fastcc  {i64, i1}  @"failure_backtrack.nope2<0>"()  
-  %8 = extractvalue {i64, i1} %7, 0 
-  %9 = extractvalue {i64, i1} %7, 1 
-  br i1 %9, label %if.then, label %if.else 
+  %11 = tail call fastcc  {i64, i1}  @"failure_backtrack.nope2<0>"()  
+  %12 = extractvalue {i64, i1} %11, 0 
+  %13 = extractvalue {i64, i1} %11, 1 
+  br i1 %13, label %if.then, label %if.else 
 if.then:
-  store  i64 %8, i64* @"resource#failure_backtrack.r" 
+  store  i64 %12, i64* @"resource#failure_backtrack.r" 
   tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.11, i32 0, i32 0) to i64))  
   tail call ccc  void  @putchar(i8  10)  
   musttail call fastcc  void  @"failure_backtrack.#cont#3<0>"(i64  %"tmp#143##0", i64  %"tmp#144##0", i64  25, i64  %"y##0")  
   ret void 
 if.else:
-  %10 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.13, i32 0, i32 0) to i64), i64  %4)  
-  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %10)  
+  %14 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %"x##0")  
+  %15 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %1)  
+  %16 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.1, i32 0, i32 0) to i64), i64  %15)  
+  %17 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %14, i64  %16)  
+  %18 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.13, i32 0, i32 0) to i64), i64  %17)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %18)  
   tail call ccc  void  @putchar(i8  10)  
   musttail call fastcc  void  @"failure_backtrack.#cont#3<0>"(i64  %"tmp#143##0", i64  %"tmp#144##0", i64  %"x##0", i64  %"y##0")  
   ret void 
@@ -581,31 +653,43 @@ entry:
   %3 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.1, i32 0, i32 0) to i64), i64  %2)  
   %4 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %0, i64  %3)  
   %5 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.19, i32 0, i32 0) to i64), i64  %4)  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  %5)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %5)  
   tail call ccc  void  @putchar(i8  10)  
-  %6 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %"y##0")  
-  %7 = load  i64, i64* @"resource#failure_backtrack.s" 
-  %8 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %7)  
-  %9 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.21, i32 0, i32 0) to i64), i64  %8)  
-  %10 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %2, i64  %9)  
-  %11 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.1, i32 0, i32 0) to i64), i64  %10)  
-  %12 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %6, i64  %11)  
-  %13 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.23, i32 0, i32 0) to i64), i64  %12)  
-  %14 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %0, i64  %13)  
-  %15 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.25, i32 0, i32 0) to i64), i64  %14)  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  %15)  
+  %6 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %"x##0")  
+  %7 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %"y##0")  
+  %8 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %1)  
+  %9 = load  i64, i64* @"resource#failure_backtrack.s" 
+  %10 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %9)  
+  %11 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.21, i32 0, i32 0) to i64), i64  %10)  
+  %12 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %8, i64  %11)  
+  %13 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.1, i32 0, i32 0) to i64), i64  %12)  
+  %14 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %7, i64  %13)  
+  %15 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.23, i32 0, i32 0) to i64), i64  %14)  
+  %16 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %6, i64  %15)  
+  %17 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.25, i32 0, i32 0) to i64), i64  %16)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %17)  
   tail call ccc  void  @putchar(i8  10)  
   store  i64 10, i64* @"resource#failure_backtrack.r" 
-  %16 = tail call fastcc  i1  @"failure_backtrack.yup<0>"()  
-  br i1 %16, label %if.then, label %if.else 
+  %18 = tail call fastcc  i1  @"failure_backtrack.yup<0>"()  
+  br i1 %18, label %if.then, label %if.else 
 if.then:
   store  i64 41, i64* @"resource#failure_backtrack.s" 
-  %17 = tail call fastcc  i1  @"failure_backtrack.nope<0>"()  
-  br i1 %17, label %if.then1, label %if.else1 
+  %19 = tail call fastcc  i1  @"failure_backtrack.nope<0>"()  
+  br i1 %19, label %if.then1, label %if.else1 
 if.else:
   store  i64 %1, i64* @"resource#failure_backtrack.r" 
-  %19 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.5, i32 0, i32 0) to i64), i64  %14)  
-  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %19)  
+  %31 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %"x##0")  
+  %32 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %"y##0")  
+  %33 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %1)  
+  %34 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %9)  
+  %35 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.21, i32 0, i32 0) to i64), i64  %34)  
+  %36 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %33, i64  %35)  
+  %37 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.1, i32 0, i32 0) to i64), i64  %36)  
+  %38 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %32, i64  %37)  
+  %39 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.23, i32 0, i32 0) to i64), i64  %38)  
+  %40 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %31, i64  %39)  
+  %41 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.5, i32 0, i32 0) to i64), i64  %40)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %41)  
   tail call ccc  void  @putchar(i8  10)  
   musttail call fastcc  void  @"failure_backtrack.#cont#4<0>"(i64  %"tmp#143##0", i64  %"tmp#144##0", i64  %"x##0", i64  %"y##0")  
   ret void 
@@ -616,9 +700,19 @@ if.then1:
   ret void 
 if.else1:
   store  i64 %1, i64* @"resource#failure_backtrack.r" 
-  store  i64 %7, i64* @"resource#failure_backtrack.s" 
-  %18 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.5, i32 0, i32 0) to i64), i64  %14)  
-  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %18)  
+  store  i64 %9, i64* @"resource#failure_backtrack.s" 
+  %20 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %"x##0")  
+  %21 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %"y##0")  
+  %22 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %1)  
+  %23 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %9)  
+  %24 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.21, i32 0, i32 0) to i64), i64  %23)  
+  %25 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %22, i64  %24)  
+  %26 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.1, i32 0, i32 0) to i64), i64  %25)  
+  %27 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %21, i64  %26)  
+  %28 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.23, i32 0, i32 0) to i64), i64  %27)  
+  %29 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %20, i64  %28)  
+  %30 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.5, i32 0, i32 0) to i64), i64  %29)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %30)  
   tail call ccc  void  @putchar(i8  10)  
   musttail call fastcc  void  @"failure_backtrack.#cont#4<0>"(i64  %"tmp#143##0", i64  %"tmp#144##0", i64  %"x##0", i64  %"y##0")  
   ret void 
@@ -640,15 +734,25 @@ entry:
   %10 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.23, i32 0, i32 0) to i64), i64  %9)  
   %11 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %0, i64  %10)  
   %12 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.29, i32 0, i32 0) to i64), i64  %11)  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  %12)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %12)  
   tail call ccc  void  @putchar(i8  10)  
-  %13 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.31, i32 0, i32 0) to i64), i64  %11)  
-  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %13)  
+  %13 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %"x##0")  
+  %14 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %"y##0")  
+  %15 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %2)  
+  %16 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %4)  
+  %17 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.21, i32 0, i32 0) to i64), i64  %16)  
+  %18 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %15, i64  %17)  
+  %19 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.1, i32 0, i32 0) to i64), i64  %18)  
+  %20 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %14, i64  %19)  
+  %21 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.23, i32 0, i32 0) to i64), i64  %20)  
+  %22 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  %13, i64  %21)  
+  %23 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @failure_backtrack.31, i32 0, i32 0) to i64), i64  %22)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %23)  
   tail call ccc  void  @putchar(i8  10)  
   store  i64 11, i64* @"resource#failure_backtrack.r" 
   store  i64 40, i64* @"resource#failure_backtrack.s" 
-  %14 = tail call fastcc  i1  @"failure_backtrack.nope<0>"()  
-  br i1 %14, label %if.then, label %if.else 
+  %24 = tail call fastcc  i1  @"failure_backtrack.nope<0>"()  
+  br i1 %24, label %if.then, label %if.else 
 if.then:
   musttail call fastcc  void  @"failure_backtrack.#cont#5<0>"(i64  %"tmp#143##0", i64  %"tmp#144##0", i64  27, i64  13)  
   ret void 
@@ -698,6 +802,13 @@ if.then:
   musttail call fastcc  void  @"failure_backtrack.#cont#6<0>"(i64  %"tmp#143##0", i64  %"tmp#144##0", i64  28, i64  21)  
   ret void 
 if.else:
+  store  i64 13, i64* @"resource#failure_backtrack.r" 
+  %25 = tail call fastcc  i1  @"failure_backtrack.nope<0>"()  
+  br i1 %25, label %if.then1, label %if.else1 
+if.then1:
+  musttail call fastcc  void  @"failure_backtrack.#cont#6<0>"(i64  %"tmp#143##0", i64  %"tmp#144##0", i64  29, i64  21)  
+  ret void 
+if.else1:
   store  i64 7, i64* @"resource#failure_backtrack.r" 
   musttail call fastcc  void  @"failure_backtrack.#cont#6<0>"(i64  %"tmp#143##0", i64  %"tmp#144##0", i64  42, i64  21)  
   ret void 
