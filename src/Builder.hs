@@ -1061,12 +1061,12 @@ buildExecutable orderedSCCs targetMod target = do
             mapM_ (logBuild . ("  - "++) . showModSpecs)
                     (orderedSCCs' ++ [[["<mainMod>"]]])
 
-            ofiles <- emitObjectFilesIfNeeded depends
+            ofiles <- Set.toList . List.foldl' (flip Set.insert) Set.empty
+                        <$> emitObjectFilesIfNeeded depends
             depMods <- mapMaybeM getLoadedModule depends
             let foreigns = foreignDependencies depMods
-            let dependentOs = Set.toList
-                    $ List.foldl' (flip Set.insert) Set.empty $ ofiles ++ foreigns
-            let allOFiles = tmpMainOFile:dependentOs
+            logBuild $ "o Foreign dependencies: " ++ show foreigns
+            let allOFiles = tmpMainOFile:(ofiles ++ foreigns)
 
             logBuild "o Object Files to link: "
             logBuild $ "++ " ++ intercalate "\n++ " allOFiles
