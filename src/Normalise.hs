@@ -13,7 +13,7 @@ module Normalise (normalise, normaliseItem, completeNormalisation) where
 
 import AST
 import Config (wordSize, wordSizeBytes, availableTagBits,
-               tagMask, smallestAllocatedAddress, currentModuleAlias)
+               tagMask, smallestAllocatedAddress, currentModuleAlias, specialName2, specialName, initProcName)
 import Control.Monad
 import Control.Monad.State (gets)
 import Control.Monad.Trans (lift,liftIO)
@@ -91,10 +91,6 @@ normaliseItem (ImportForeignLib files _) =
     mapM_ addForeignLib files
 normaliseItem (ResourceDecl vis name typ init pos) = do
   addSimpleResource name (SimpleResource typ init pos) vis
-  case init of
-    Nothing  -> return ()
-    Just val -> normaliseItem (StmtDecl (ProcCall (regularProc "=") Det False
-                                         [varSet name `maybePlace` pos, val]) pos)
 normaliseItem (FuncDecl vis mods (ProcProto name params resources) resulttype
     (Placed (Where body (Placed (Var var ParamOut rflow) _)) _) pos) =
     -- Handle special reverse mode case of def foo(...) = var where ....
@@ -442,8 +438,16 @@ typeRepresentation _ _          = Address
 
 
 ----------------------------------------------------------------
--- Generating top-level code for the current module, given a list of all
--- the modules in the same module dependency SCC.
+-- Generating top-level code for the current module, given a list of all the
+-- modules in the same module dependency SCC.  This produces a proc with an
+-- empty proc name, which executes all the top-level code in the module.  This
+-- assumes that all resources in this modules and its dependencies (including
+-- mutual dependencies) have been initialised; therefore this proc considers all
+-- visible resources as both inputs and outputs.  The main executable proc will
+-- call this proc after initialising all initialised resources visible to this
+-- module.  The benefit of this approach is that it handles initialised resouces
+-- in mutually dependendent modules; note that modules are mutually dependent
+-- with their submodules.
 
 normaliseModMain :: [ModSpec] -> Compiler ()
 normaliseModMain modSCC = do
@@ -459,14 +463,13 @@ normaliseModMain modSCC = do
                         ++ showModSpec modSpec
                         ++ ": " ++ show resources
         normaliseItem $ ProcDecl Public (setImpurity Semipure defaultProcModifiers)
-                        (ProcProto "" [] resources) initBody Nothing
+                        (ProcProto initProcName [] resources) initBody Nothing
 
 
--- |The resources available at the top level of this module, plus the
--- initialisations to be performed before executing any code that uses this
--- module.  All resources initialised by the current module are taken to be
--- outputs, and all resources defined by modules used by this module but not in
--- the same SCC are taken as inputs.
+-- |The resource flows for the initialisation code of the current module.  This
+-- assumes that all resource initialisations have already been completed, and
+-- all are permitted to be modified by the initialisation code, so all
+-- visible initialised resources flow both in and out.
 initResources :: [ModSpec] -> Compiler (Set ResourceFlowSpec)
 initResources modSCC = do
     thisMod <- getModule modSpec
@@ -474,17 +477,10 @@ initResources modSCC = do
     mods' <- (mods ++) . concat <$> mapM descendentModules mods
     logNormalise $ "in initResources for module " ++ showModSpec thisMod
                    ++ ", mods = " ++ showModSpecs mods'
-    (localInitialised,visibleInitialised) <- initialisedResources
+    visibleInitialised <- initialisedVisibleResources
     let visibleInitSet = Map.keysSet visibleInitialised
-    let localInitSet = Map.keysSet localInitialised
-    let importedInitSet = Set.filter (not . (`elem` modSCC) . resourceMod)
-                    $ visibleInitSet Set.\\ localInitSet
     logNormalise $ "in initResources, initialised resources = "
                    ++ show visibleInitSet
-    logNormalise $ "            initialised local resources = "
-                   ++ show visibleInitSet
-    logNormalise $ "         initialised imported resources = "
-                   ++ show importedInitSet
     -- Direct tie-in to command_line library module:  for the command_line
     -- module, or any module that imports it, we add argc and argv as resources.
     -- This is necessary because argc and argv are effectively initialised by
@@ -499,21 +495,9 @@ initResources modSCC = do
             else []
     let resources = cmdlineResources
                     ++ ((`ResourceFlowSpec` ParamInOut)
-                         <$> Set.toList importedInitSet)
-                    ++ ((`ResourceFlowSpec` ParamOut)
-                        <$> Set.toList localInitSet)
-    -- let inits = [ForeignCall "llvm" "move" []
-    --                 [maybePlace ((content initExp) `withType` resType)
-    --                     (place initExp)
-    --                 , varSet (resourceName resSpec) `maybePlace` pos] 
-    --                  `maybePlace` pos
-    --             | (resSpec, resImpln) <- localInitSet
-    --             , let initExp = trustFromJust "initResources"
-    --                             $ resourceInit resImpln
-    --             , let resType = resourceType resImpln]
+                         <$> Set.toList visibleInitSet)
     logNormalise $ "In initResources for module " ++ showModSpec thisMod
                    ++ ", resources = " ++ show resources
-    -- logNormalise $ "In initResources, initialisations =" ++ showBody 4 inits
     return (Set.fromList resources)
 
 

@@ -11,6 +11,7 @@
 module Config (sourceExtension, objectExtension, executableExtension,
                bitcodeExtension, assemblyExtension, archiveExtension,
                moduleDirectoryBasename, currentModuleAlias,
+               specialChar, specialName, specialName2, initProcName,
                wordSize, wordSizeBytes,
                availableTagBits, tagMask, smallestAllocatedAddress,
                minimumSwitchCases, magicVersion,
@@ -66,6 +67,28 @@ moduleDirectoryBasename = "_"
 -- |The special name given to the current module.
 currentModuleAlias :: String
 currentModuleAlias = "_"
+
+
+-- | The character we include in every generated identifier to prevent capturing
+-- a user identifier.  It should not be possible for the user to include this
+-- character in an identifier.
+specialChar :: Char
+specialChar = '#' -- note # is not allowed in backquoted strings
+
+
+-- | Construct a name can't be a valid Wybe symbol from one user string.
+specialName :: String -> String
+specialName = (specialChar:)
+
+
+-- | Construct a name that can't be a valid Wybe symbol from two user strings.
+specialName2 :: String -> String -> String
+specialName2 front back = front ++ specialChar:back
+
+
+-- |The proc to initialise each module (using the top-level code of the module)
+initProcName :: String
+initProcName = ""
 
 
 -- |Determining word size of the machine in bits

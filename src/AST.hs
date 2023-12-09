@@ -102,7 +102,7 @@ module AST (
   genProcName, addImport, doImport, importFromSupermodule, lookupType, lookupType',
   typeIsUnique,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
-  initialisedResources,
+  initialisedResources, initialisedVisibleResources,
   addSimpleResource, lookupResource,
   specialResources, specialResourcesSet, isSpecialResource,
   publicResource, resourcefulName,
@@ -110,7 +110,6 @@ module AST (
   setDetism, setInline, setImpurity, setVariant,
   ProcVariant(..), Inlining(..), Impurity(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
-  specialChar, specialName, specialName2,
   outputVariableName, outputStatusName,
   envParamName, envPrimParam, makeGlobalResourceName,
   showBody, showPlacedPrims, showStmt, showBlock, showProcDef,
@@ -128,7 +127,8 @@ module AST (
   ) where
 
 import           Config (magicVersion, wordSize, objectExtension,
-                         sourceExtension, currentModuleAlias)
+                         sourceExtension, currentModuleAlias,
+                         specialChar, specialName, specialName2,)
 import           Control.Monad
 import           Control.Monad.Extra
 import           Control.Monad.Trans (lift,liftIO)
@@ -1703,7 +1703,7 @@ type ModSpec = [Ident]
 -- |Check that a module name component is valid (ie, does not contain invalid
 -- characters).  Currently only period (.) and hash (#) are considered invalid.
 validModuleName :: Ident -> Bool
-validModuleName = not . any (`elem` ['.','#'])
+validModuleName = not . any (`elem` ['.',specialChar])
 
 
 -- |The uses one module makes of another; first the public imports,
@@ -1900,29 +1900,27 @@ data ResourceImpln =
         } deriving (Generic, Eq)
 
 
--- | Return the initialised resources *defined* by the current module, and
--- initialised resources *visible* in the current module.  The former are
--- explicitly initialised by the current module's main proc, and the latter
--- are usable there, so the former are out-only resources for it, and the
--- latter are in/out.
-initialisedResources :: Compiler (ResourceDef,ResourceDef)
+-- | Return the initialised resources *defined* by the current module.
+initialisedResources :: Compiler ResourceDef
 initialisedResources = do
     currMod <- getModuleSpec
     localRes <- getModuleImplementationField modResources
     let localDefs = Map.filter (isJust . resourceInit) $ Map.unions localRes
+    logAST $ "      local resources = " ++ show localRes
+    logAST $ "    local initialised = " ++ show localDefs
+    return localDefs
+
+
+-- | Return the initialised resources *visible* to the current module.
+initialisedVisibleResources :: Compiler ResourceDef
+initialisedVisibleResources = do
     visableRes <- Set.toList . Set.unions . Map.elems
                  <$> getModuleImplementationField modKnownResources
     visibleDefs <- Map.filter (isJust . resourceInit) . Map.unions . catMaybes
                <$> mapM lookupResource visableRes
-    logAST $ "Getting initialised resources defined and visible in module "
-                ++ showModSpec currMod
-    logAST $ "      local resources = " ++ show localRes
-    logAST $ "    local initialised = " ++ show localDefs
     logAST $ "    visible resources = " ++ show visableRes
     logAST $ "  visible initialised = " ++ show visibleDefs
-    when (localDefs /= visibleDefs)
-      $ logAST $ "   NB:  different old initialised = " ++ show visibleDefs
-    return (localDefs,visibleDefs)
+    return visibleDefs
 
 
 -- |A proc definition, including the ID, prototype, the body,
@@ -3623,23 +3621,6 @@ varsInPrimArg _ ArgUndef{}    = Set.empty
 
 ----------------------------------------------------------------
 --                       Generating Symbols
-
--- | The character we include in every generated identifier to prevent capturing
--- a user identifier.  It should not be possible for the user to include this
--- character in an identifier.
-specialChar :: Char
-specialChar = '#' -- note # is not allowed in backquoted strings
-
-
--- | Construct a name can't be a valid Wybe symbol from one user string.
-specialName :: String -> String
-specialName = (specialChar:)
-
-
--- | Construct a name that can't be a valid Wybe symbol from two user strings.
-specialName2 :: String -> String -> String
-specialName2 front back = front ++ specialChar:back
-
 
 -- | The full name to give to a PrimVarName, including the variable number
 -- suffix.  Use two specialChars to distinguish from special separator.

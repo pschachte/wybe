@@ -38,7 +38,7 @@ extractLPVMData tmpDir objFile =
     case buildOS of
         OSX   -> extractLPVMDataMacOS tmpDir objFile
         Linux -> extractLPVMDataLinux tmpDir objFile
-        _     -> shouldnt "Unsupported operation system"
+        _     -> shouldnt "Unsupported operating system"
 
 ----------------------------------------------------------------------------
 -- -- * Object file manipulation (Internal)                               --

@@ -1,0 +1,5 @@
+pub module a {
+    pub resource res:int = 42
+}
+
+!println("res = $res")
