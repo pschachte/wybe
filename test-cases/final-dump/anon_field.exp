@@ -45,7 +45,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-proc #cont#1 > (2 calls)
+proc #cont#1 > {semipure} (2 calls)
 0: anon_field.#cont#1<0>
 #cont#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -69,7 +69,7 @@ proc #cont#1 > (2 calls)
 
 
 
-proc #cont#2 > (3 calls)
+proc #cont#2 > {semipure} (3 calls)
 0: anon_field.#cont#2<0>
 #cont#2()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -96,7 +96,7 @@ proc #cont#2 > (3 calls)
 
 
 
-proc #cont#3 > (2 calls)
+proc #cont#3 > {semipure} (2 calls)
 0: anon_field.#cont#3<0>
 #cont#3()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

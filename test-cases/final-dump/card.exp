@@ -58,7 +58,7 @@ module top-level code > public {inline,semipure} (0 calls)
     card.#cont#1<0>(~tmp#1##0:wybe.list(card.suit))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @card:nn:nn
 
 
-proc #cont#1 > (2 calls)
+proc #cont#1 > {semipure} (2 calls)
 0: card.#cont#1<0>
 #cont#1(tmp#0##0:wybe.list(card.suit))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -75,7 +75,7 @@ proc #cont#1 > (2 calls)
 
 
 
-proc #cont#2 > (2 calls)
+proc #cont#2 > {semipure} (2 calls)
 0: card.#cont#2<0>
 #cont#2(s##0:card.suit, tmp#0##0:wybe.list(card.suit), tmp#2##0:wybe.list(card.rank))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

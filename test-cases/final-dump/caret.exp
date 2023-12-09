@@ -37,7 +37,7 @@ module top-level code > public {semipure} (0 calls)
     caret.#cont#1<0>[410bae77d3](~tmp#27##0:caret.region)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8
 
 
-proc #cont#1 > (2 calls)
+proc #cont#1 > {semipure} (2 calls)
 0: caret.#cont#1<0>[410bae77d3]
 #cont#1(reg##0:caret.region)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

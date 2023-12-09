@@ -1,0 +1,19 @@
+use logging
+def {noinline} do_nothing {
+    pass
+}
+
+def {semipure} foo(x:int) {
+    if {
+        x ~= 0 ::
+            do_nothing
+    }
+    if {
+        x ~= 0 ::
+            !logmsg(x)
+            !foo(x-1)
+    }
+}
+
+!foo(3)
+!lognl

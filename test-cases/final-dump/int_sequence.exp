@@ -30,7 +30,7 @@ module top-level code > public {semipure} (0 calls)
     int_sequence.#cont#1<0>[410bae77d3](~tmp#1##0:int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @int_sequence:nn:nn
 
 
-proc #cont#1 > (2 calls)
+proc #cont#1 > {semipure} (2 calls)
 0: int_sequence.#cont#1<0>[410bae77d3]
 #cont#1(tmp#0##0:int_sequence)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

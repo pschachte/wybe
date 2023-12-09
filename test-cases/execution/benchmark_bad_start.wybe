@@ -1,0 +1,21 @@
+use benchmark
+
+def fib(n:int):int = res where {
+    if {
+        n <= 0 :: !error(c"n should be strictly positive")
+    |   (n = 1 | n = 2) :: ?res = 1
+    |   else :: ?res = fib1(1, 1, n-3)
+    }
+}
+
+def fib1(pprev:int, prev:int, n:int) =
+    if {
+        n = 0 :: pprev + prev
+    |   else :: fib1(prev, pprev + prev, n-1)
+    }
+
+!benchmark.start
+!benchmark.start
+?res = fib(42)
+!benchmark.end(?time)
+!print("Elapsed time (s):  "); !println(time)

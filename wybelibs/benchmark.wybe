@@ -1,0 +1,27 @@
+# purpose: Standard Benchmarking Library
+# since  : 0.1
+
+pragma no_standard_library  # Standard library can't depend on itself!
+
+use wybe.c_string, wybe.float
+
+# Start the benchmark clock
+# Can only be called once before being ended by end()
+pub def {semipure} start() use call_source_location {
+    foreign c {impure} benchmark_start(call_source_location)
+}
+
+# End the benchmark clock, yielding the elapsed time in seconds
+# Can only be called after start() has been called
+# which has not been ended by end()
+pub def {semipure} end(?time:float) use call_source_location {
+    foreign c {impure} benchmark_end(call_source_location, ?time)
+}
+
+# Measure the running time of a semipure niladic procedure
+# Assumes the preceding start() (if any) has been ended
+pub def {semipure} time_execution(proc:{semipure}(), ?time:float) use call_source_location {
+    foreign c {impure} benchmark_start(call_source_location)
+    !proc
+    foreign c {impure} benchmark_end(call_source_location, ?time)
+}
