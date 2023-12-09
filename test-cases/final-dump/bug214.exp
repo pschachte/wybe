@@ -28,7 +28,7 @@ module top-level code > public {semipure} (0 calls)
     bug214.#cont#2<0>[7477e50a09](~tmp#0##0:bug214.position, ~tmp#1##0:bug214)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @bug214:nn:nn
 
 
-proc #cont#1 > {inline} (0 calls)
+proc #cont#1 > {inline,semipure} (0 calls)
 0: bug214.#cont#1<0>
 #cont#1(pos##0:bug214.position, sub##0:bug214)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -56,7 +56,7 @@ proc #cont#1 > {inline} (0 calls)
     foreign lpvm store(~%tmp#38##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-proc #cont#2 > (3 calls)
+proc #cont#2 > {semipure} (3 calls)
 0: bug214.#cont#2<0>[7477e50a09]
 #cont#2(pos##0:bug214.position, sub##0:bug214)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

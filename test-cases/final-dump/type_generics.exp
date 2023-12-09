@@ -32,7 +32,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-proc #cont#1 > (2 calls)
+proc #cont#1 > {semipure} (2 calls)
 0: type_generics.#cont#1<0>
 #cont#1([x##0:wybe.float])<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -51,7 +51,7 @@ proc #cont#1 > (2 calls)
 
 
 
-proc #cont#2 > (2 calls)
+proc #cont#2 > {semipure} (2 calls)
 0: type_generics.#cont#2<0>
 #cont#2([x##0:wybe.float])<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -70,7 +70,7 @@ proc #cont#2 > (2 calls)
 
 
 
-proc #cont#3 > (2 calls)
+proc #cont#3 > {semipure} (2 calls)
 0: type_generics.#cont#3<0>
 #cont#3([x##0:wybe.float])<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -89,7 +89,7 @@ proc #cont#3 > (2 calls)
 
 
 
-proc #cont#4 > (2 calls)
+proc #cont#4 > {semipure} (2 calls)
 0: type_generics.#cont#4<0>
 #cont#4()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -108,7 +108,7 @@ proc #cont#4 > (2 calls)
 
 
 
-proc #cont#5 > (2 calls)
+proc #cont#5 > {semipure} (2 calls)
 0: type_generics.#cont#5<0>
 #cont#5()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

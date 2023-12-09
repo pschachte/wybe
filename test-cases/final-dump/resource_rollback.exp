@@ -35,7 +35,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-proc #cont#1 > (2 calls)
+proc #cont#1 > {semipure} (2 calls)
 0: resource_rollback.#cont#1<0>
 #cont#1()<{<<resource_rollback.res>>, <<resource_rollback.ser>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

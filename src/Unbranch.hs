@@ -115,9 +115,10 @@ unbranchProc' proc = do
     let params' = selectDetism id addTestOutParam detism
                 $ contentApply unbranchParam <$> params
     let stmts = selectDetism body (body++[move boolTrue testOutExp]) detism
+    let impurity = procImpurity proc
     let proto' = proto {procProtoParams = params'}
     (body',tmpCtr',newProcs) <-
-        unbranchBody name tmpCtr params' detism stmts
+        unbranchBody name tmpCtr params' detism impurity stmts
     let proc' = proc { procProto = proto'
                      , procDetism = selectDetism detism Det detism
                      , procImpln = ProcDefSrc body'
@@ -130,10 +131,11 @@ unbranchProc' proc = do
 
 -- |Eliminate loops and ensure that Conds only appear as the final
 --  statement of a body.
-unbranchBody :: ProcName -> Int -> [Placed Param] -> Determinism
+unbranchBody :: ProcName -> Int -> [Placed Param] -> Determinism -> Impurity
              -> [Placed Stmt] -> Compiler ([Placed Stmt],Int,[ProcDef])
-unbranchBody name tmpCtr params detism body = do
-    let unbrancher = initUnbrancherState Nothing tmpCtr detism params name
+unbranchBody name tmpCtr params detism impurity body = do
+    let unbrancher =
+            initUnbrancherState Nothing tmpCtr detism impurity params name
     let outparams =  brOutParams unbrancher
     let outvars = brOutArgs unbrancher
     let stmts = body
@@ -219,6 +221,7 @@ data UnbrancherState = Unbrancher {
                                   -- the current SemiDet context (and so must be
                                   -- saved if they are reassigned)
     brDetism     :: Determinism,  -- ^The determinism of the current context
+    brImpurity   :: Impurity,     -- ^The impurity of the enclosing proc
     brAlternate  :: [Placed Stmt], -- ^Code to execute in case of failure
     brSense      :: Bool,         -- ^True iff execute brAlternate on failure 
     brProcName   :: ProcName      -- ^The name of the proc being unbranched
@@ -231,9 +234,9 @@ data LoopInfo = LoopInfo {
     } deriving (Eq)
 
 
-initUnbrancherState :: Maybe LoopInfo -> Int -> Determinism -> [Placed Param]
-                    -> ProcName -> UnbrancherState
-initUnbrancherState loopinfo tmpCtr detism params =
+initUnbrancherState :: Maybe LoopInfo -> Int -> Determinism -> Impurity
+                    -> [Placed Param] -> ProcName -> UnbrancherState
+initUnbrancherState loopinfo tmpCtr detism impurity params =
     let defined = inputParams $ content <$> params
         outParams = [unbranchParam (Param nm ty ParamOut ft) `maybePlace` pos
                     | (Param nm ty fl ft, pos) <- unPlace <$> params
@@ -246,7 +249,8 @@ initUnbrancherState loopinfo tmpCtr detism params =
                  , flowsOut fl && flowsIn fl]
         alt = selectDetism [] [move boolFalse testOutExp] detism
     in Unbrancher loopinfo defined tmpCtr outParams outArgs
-            (Set.fromList inOuts) [] Map.empty Set.empty detism alt True
+            (Set.fromList inOuts) [] Map.empty Set.empty detism impurity
+            alt True
 
 
 -- | Add the specified variable to the symbol table
@@ -308,14 +312,15 @@ newProcName name = lift . genProcName . (`specialName2` name) =<< gets brProcNam
 
 
 -- |Create, unbranch, and record a new proc with the specified proto,
--- determinism and body.
+-- determinism and body.  Takes its impurity from the parent proc.
 genProc :: ProcProto -> Determinism -> [Placed Stmt] -> Unbrancher ()
 genProc proto detism stmts = do
     let name = procProtoName proto
     tmpCtr <- gets brTempCtr
+    impurity <- gets brImpurity
     -- call site count will be refilled later
     let procDef = ProcDef name proto (ProcDefSrc stmts) Nothing tmpCtr 0
-                  Map.empty Private detism MayInline Pure GeneratedProc
+                  Map.empty Private detism MayInline impurity GeneratedProc
                   NoSuperproc Map.empty
     logUnbranch $ "Generating fresh " ++ show detism ++ " proc:"
                   ++ showProcDef 8 procDef
