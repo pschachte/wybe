@@ -92,11 +92,6 @@ initProcName :: String
 initProcName = ""
 
 
--- |The proc to initialise each module (using the top-level code of the module)
-initResourceProcName :: String
-initResourceProcName = specialName "init_resources"
-
-
 -- |Determining word size of the machine in bits
 wordSize :: Int
 wordSize = wordSizeBytes * 8
