@@ -33,22 +33,22 @@ test(ch##0:wybe.char, code##0:wybe.int, name##0:wybe.string)<{<<wybe.io.io>>}; {
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 2]
   MultiSpeczDepInfo: [(2,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 [2]])),(4,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 [2]]))]
-    foreign lpvm cast(~ch##0:wybe.char, ?tmp#0##0:wybe.int) @char:nn:nn
-    foreign llvm icmp_eq(~code##0:wybe.int, ~tmp#0##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    foreign lpvm cast(~ch##0:wybe.char, ?tmp#0##0:wybe.int) @char-escape:4:10
+    foreign llvm icmp_eq(~code##0:wybe.int, ~tmp#0##0:wybe.int, ?tmp#1##0:wybe.bool) @char-escape:4:10
     case ~tmp#1##0:wybe.bool of
     0:
         wybe.string.print<0>(~name##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @char-escape:7:14
-        wybe.string.print<0>(" char escapes don't work":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @string:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        wybe.string.print<0>(" char escapes don't work":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @char-escape:7:29
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @char-escape:7:29
+        foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @char-escape:7:29
+        foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char-escape:7:29
 
     1:
         wybe.string.print<0>(~name##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @char-escape:5:14
-        wybe.string.print<0>(" char escapes work":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @string:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        wybe.string.print<0>(" char escapes work":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @char-escape:5:29
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @char-escape:5:29
+        foreign c putchar('\n':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @char-escape:5:29
+        foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char-escape:5:29
 
 
   LLVM code       :

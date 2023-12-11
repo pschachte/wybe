@@ -14,31 +14,31 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("hello world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>("hello world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @io_flow_ok:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @io_flow_ok:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io_flow_ok:nn:nn
+    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io_flow_ok:nn:nn
     io_flow_ok.unknown<0>(?tmp#0##0:wybe.bool) #1 @io_flow_ok:nn:nn
     case ~tmp#0##0:wybe.bool of
     0:
-        wybe.string.print<0>("That's odd!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @string:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-        wybe.string.print<0>("hello world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @string:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        wybe.string.print<0>("That's odd!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @io_flow_ok:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @io_flow_ok:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io_flow_ok:nn:nn
+        foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io_flow_ok:nn:nn
+        wybe.string.print<0>("hello world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @io_flow_ok:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io_flow_ok:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io_flow_ok:nn:nn
+        foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io_flow_ok:nn:nn
 
     1:
-        wybe.string.print<0>("OK":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @string:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-        wybe.string.print<0>("hello world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @string:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        wybe.string.print<0>("OK":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @io_flow_ok:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io_flow_ok:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io_flow_ok:nn:nn
+        foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io_flow_ok:nn:nn
+        wybe.string.print<0>("hello world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @io_flow_ok:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io_flow_ok:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io_flow_ok:nn:nn
+        foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io_flow_ok:nn:nn
 
 
 
@@ -47,10 +47,10 @@ proc aok > {inline} (5 calls)
 aok()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("hello world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>("hello world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @io_flow_ok:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @io_flow_ok:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io_flow_ok:nn:nn
+    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io_flow_ok:nn:nn
 
 
 proc unknown > {noinline} (3 calls)

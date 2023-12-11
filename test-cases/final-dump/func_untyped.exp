@@ -14,7 +14,7 @@ proc incr > {inline} (0 calls)
 incr(a##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm add(~a##0:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @int:nn:nn
+    foreign llvm add(~a##0:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @func_untyped:nn:nn
 
   LLVM code       :
 

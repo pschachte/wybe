@@ -52,8 +52,8 @@ find_modulo#cont#1(modulus##0:wybe.int, seq##0:test_loop.int_seq, ?i##1:wybe.int
         foreign llvm move(~i##0:wybe.int, ?i##1:wybe.int)
 
     1:
-        foreign llvm srem(i##0:wybe.int, modulus##0:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
-        foreign llvm icmp_eq(~tmp#0##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool) @int:nn:nn
+        foreign llvm srem(i##0:wybe.int, modulus##0:wybe.int, ?tmp#0##0:wybe.int) @test_loop:nn:nn
+        foreign llvm icmp_eq(~tmp#0##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool) @test_loop:nn:nn
         case ~tmp#2##0:wybe.bool of
         0:
             test_loop.find_modulo#cont#1<0>(~modulus##0:wybe.int, ~seq##1:test_loop.int_seq, ?i##1:wybe.int, ?#success##0:wybe.bool) #3 @test_loop:nn:nn
@@ -71,8 +71,8 @@ find_modulo#cont#1(modulus##0:wybe.int, seq##0:test_loop.int_seq, ?i##1:wybe.int
         foreign llvm move(~i##0:wybe.int, ?i##1:wybe.int)
 
     1:
-        foreign llvm srem(i##0:wybe.int, modulus##0:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
-        foreign llvm icmp_eq(~tmp#0##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool) @int:nn:nn
+        foreign llvm srem(i##0:wybe.int, modulus##0:wybe.int, ?tmp#0##0:wybe.int) @test_loop:nn:nn
+        foreign llvm icmp_eq(~tmp#0##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool) @test_loop:nn:nn
         case ~tmp#2##0:wybe.bool of
         0:
             test_loop.find_modulo#cont#1<0>[6dacb8fd25](~modulus##0:wybe.int, ~seq##1:test_loop.int_seq, ?i##1:wybe.int, ?#success##0:wybe.bool) #3 @test_loop:nn:nn
@@ -98,21 +98,21 @@ find_test(modulus##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     case ~tmp#1##0:wybe.bool of
     0:
         wybe.string.print<0>("Couldn't find even number divisible by ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @test_loop:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @int:nn:nn
-        foreign c print_int(~modulus##0:wybe.int, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @int:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @test_loop:nn:nn
+        foreign c print_int(~modulus##0:wybe.int, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @test_loop:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @test_loop:nn:nn
+        foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @test_loop:nn:nn
 
     1:
         wybe.string.print<0>("First even number divisible by ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @test_loop:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @int:nn:nn
-        foreign c print_int(~modulus##0:wybe.int, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @int:nn:nn
-        foreign lpvm store(~%tmp#17##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @test_loop:nn:nn
+        foreign c print_int(~modulus##0:wybe.int, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @test_loop:nn:nn
+        foreign lpvm store(~%tmp#17##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @test_loop:nn:nn
         wybe.string.print<0>(" is ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @test_loop:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @int:nn:nn
-        foreign c print_int(~i##0:wybe.int, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @int:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#21##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @test_loop:nn:nn
+        foreign c print_int(~i##0:wybe.int, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @test_loop:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @test_loop:nn:nn
+        foreign lpvm store(~%tmp#21##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @test_loop:nn:nn
 
 
   LLVM code       :
@@ -367,14 +367,14 @@ seq_next(seq##0:test_loop.int_seq, ?seq##1:test_loop.int_seq, ?elt##0:wybe.int, 
     foreign lpvm access(seq##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?elt##0:wybe.int) @test_loop:nn:nn
     foreign lpvm access(seq##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?step##0:wybe.int) @test_loop:nn:nn
     foreign lpvm access(seq##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?limit##0:wybe.int) @test_loop:nn:nn
-    foreign llvm icmp_sle(elt##0:wybe.int, ~limit##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    foreign llvm icmp_sle(elt##0:wybe.int, ~limit##0:wybe.int, ?tmp#1##0:wybe.bool) @test_loop:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
         foreign llvm move(~seq##0:test_loop.int_seq, ?seq##1:test_loop.int_seq)
 
     1:
-        foreign llvm add(elt##0:wybe.int, ~step##0:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
+        foreign llvm add(elt##0:wybe.int, ~step##0:wybe.int, ?tmp#0##0:wybe.int) @test_loop:nn:nn
         foreign lpvm {noalias} mutate(~seq##0:test_loop.int_seq, ?seq##1:test_loop.int_seq, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp#0##0:wybe.int) @test_loop:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
@@ -382,14 +382,14 @@ seq_next(seq##0:test_loop.int_seq, ?seq##1:test_loop.int_seq, ?elt##0:wybe.int, 
     foreign lpvm access(seq##0:test_loop.int_seq, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?elt##0:wybe.int) @test_loop:nn:nn
     foreign lpvm access(seq##0:test_loop.int_seq, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?step##0:wybe.int) @test_loop:nn:nn
     foreign lpvm access(seq##0:test_loop.int_seq, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?limit##0:wybe.int) @test_loop:nn:nn
-    foreign llvm icmp_sle(elt##0:wybe.int, ~limit##0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    foreign llvm icmp_sle(elt##0:wybe.int, ~limit##0:wybe.int, ?tmp#1##0:wybe.bool) @test_loop:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
         foreign llvm move(~seq##0:test_loop.int_seq, ?seq##1:test_loop.int_seq)
 
     1:
-        foreign llvm add(elt##0:wybe.int, ~step##0:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
+        foreign llvm add(elt##0:wybe.int, ~step##0:wybe.int, ?tmp#0##0:wybe.int) @test_loop:nn:nn
         foreign lpvm {noalias} mutate(~seq##0:test_loop.int_seq, ?seq##1:test_loop.int_seq, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp#0##0:wybe.int) @test_loop:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 

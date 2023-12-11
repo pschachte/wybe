@@ -127,8 +127,10 @@ identityRenaming = Map.empty
 ----------------------------------------------------------------
 
 data ExpanderState = Expander {
-    inlining       :: Bool,      -- ^Whether we are currently inlining (and
-                                 --  therefore should not inline calls)
+    inlining       :: Maybe OptPos, -- ^Whether we are currently inlining (and
+                                 --  therefore should not inline calls), and
+                                 -- if we are, the source location of the proc
+                                 -- being inlined
     renaming       :: Renaming,  -- ^The current variable renaming
     writeNaming    :: Renaming,  -- ^Renaming for new assignments
     noFork         :: Bool,      -- ^There's no fork at the end of this body
@@ -172,8 +174,8 @@ addInstr prim pos = do
     -- reassign "CallSiteID" if the given prim is inlined from other proc
     prim' <- case prim of
         PrimCall _ pspec impurity args gFlows -> do
-            inliningNow <- gets inlining
-            if inliningNow
+            inlinePos <- gets inlining
+            if isJust inlinePos
             then do
                 callSiteID <- gets nextCallSiteID
                 modify (\st -> st {nextCallSiteID = callSiteID + 1})
@@ -181,12 +183,16 @@ addInstr prim pos = do
             else
                 return prim
         _ -> return prim
-    lift $ instr prim' pos
+    inliningPos <- gets inlining
+    let pos' = case inliningPos of
+            Just p@(Just _) -> p
+            _ -> pos
+    lift $ instr prim' pos'
 
 
 -- init a expander state based on the given call site count
 initExpanderState :: CallSiteID -> ExpanderState
-initExpanderState = Expander False identityRenaming identityRenaming True
+initExpanderState = Expander Nothing identityRenaming identityRenaming True
 
 
 ----------------------------------------------------------------
@@ -206,7 +212,7 @@ expandBody (ProcBody prims fork) = do
       PrimFork var ty final bodies deflt -> do
         st <- get
         logExpansion $ "Now expanding fork (" ++
-          (if inlining st then "without" else "WITH") ++ " inlining)"
+          (if isJust (inlining st) then "without" else "WITH") ++ " inlining)"
         logExpansion $ "  with renaming = " ++ show (renaming st)
         let var' = case Map.lookup var $ renaming st of
               Nothing -> var
@@ -250,7 +256,7 @@ expandPrim (PrimCall id pspec impurity args gFlows) pos = do
     args' <- mapM expandArg args
     let call' = PrimCall id pspec impurity args' gFlows
     logExpansion $ "  Expand call " ++ show call'
-    inliningNow <- gets inlining
+    inliningNow <- isJust <$> gets inlining
     if inliningNow
     then do
         logExpansion "  Cannot inline:  already inlining"
@@ -267,7 +273,7 @@ expandPrim (PrimCall id pspec impurity args gFlows) pos = do
                     addInstr call' pos
 expandPrim prim@(PrimHigher id fn impurity args) pos = do
     logExpansion $ "  Checking inlining for higher order call " ++ show prim
-    inliningNow <- gets inlining
+    inliningNow <- isJust <$> gets inlining
     if inliningNow
     then expandHigherOrder prim pos
     else do
@@ -312,7 +318,7 @@ inlineCall proto args body pos = do
     logExpansion $ "  Before inlining:"
     logExpansion $ "    renaming = " ++ show (renaming saved)
     modify (\s -> s { renaming = identityRenaming,
-                      inlining = True })
+                      inlining = Just pos })
     mapM_ (addOutputNaming pos) $ zip (primProtoParams proto) args
     mapM_ (addInputAssign pos) $ zip (primProtoParams proto) args
     logExpansion $ "  Inlining defn: " ++ showBlock 4 body
@@ -327,7 +333,7 @@ inlineCall proto args body pos = do
 
 expandArg :: PrimArg -> Expander PrimArg
 expandArg arg@(ArgVar var ty flow ft _) = do
-    renameAll <- gets inlining
+    renameAll <- isJust <$> gets inlining
     if renameAll
     then case flow of
         FlowOut -> freshVar var ty FlowOut ft

@@ -34,15 +34,15 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm {noalias} mutate(~tmp#19##0:coordinate.Coordinate, ?crd1##1:coordinate.Coordinate, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 8000:wybe.int) @coordinate:nn:nn
     wybe.string.print<0>("expect crd1^z=8000: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @coordinate:nn:nn
     foreign lpvm access(~crd1##1:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @coordinate:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~tmp#2##0:wybe.int, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @int:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#18##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @coordinate:nn:nn
+    foreign c print_int(~tmp#2##0:wybe.int, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @coordinate:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#17##0:wybe.phantom, ?tmp#18##0:wybe.phantom) @coordinate:nn:nn
+    foreign lpvm store(~%tmp#18##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @coordinate:nn:nn
     wybe.string.print<0>("expect crd2^z=1000: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @coordinate:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(1000:wybe.int, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @int:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#23##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @coordinate:nn:nn
+    foreign c print_int(1000:wybe.int, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @coordinate:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @coordinate:nn:nn
+    foreign lpvm store(~%tmp#23##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @coordinate:nn:nn
 
 
 proc fcopy > public {inline} (1 calls)

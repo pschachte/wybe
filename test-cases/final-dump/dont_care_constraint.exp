@@ -14,9 +14,9 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @c_string:nn:nn
-    foreign c read_line(?tmp#2##0:wybe.c_string, ~tmp#1##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @c_string:nn:nn
-    foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @c_string:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @dont_care_constraint:nn:nn
+    foreign c read_line(?tmp#2##0:wybe.c_string, ~tmp#1##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @dont_care_constraint:nn:nn
+    foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @dont_care_constraint:nn:nn
 
   LLVM code       :
 

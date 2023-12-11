@@ -16,10 +16,10 @@ module top-level code > public {inline,semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
     higher_order_impure.#anon#1<0>(_:wybe.list(wybe.int)) #0 @higher_order_impure:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom) @float:nn:nn
-    foreign c print_float(3.0:wybe.float, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @float:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom) @higher_order_impure:nn:nn
+    foreign c print_float(3.0:wybe.float, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @higher_order_impure:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @higher_order_impure:nn:nn
+    foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_impure:nn:nn
 
 
 proc #anon#1 > {inline,impure} (1 calls)

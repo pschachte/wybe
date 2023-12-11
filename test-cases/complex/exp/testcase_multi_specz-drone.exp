@@ -63,9 +63,9 @@ module top-level code > {terminal,inline,impure} (0 calls)
     foreign lpvm store(0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
     foreign c {impure} gc_init @memory_management:nn:nn
     drone.<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1
-    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.array(T)) @array:nn:nn
-    foreign lpvm mutate(~tmp#9##0:wybe.array(T), ?tmp#10##0:wybe.array(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argc##0:wybe.int) @array:nn:nn
-    foreign lpvm mutate(~tmp#10##0:wybe.array(T), ?tmp#0##0:wybe.array(wybe.c_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argv##0:wybe.array.raw_array) @array:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.array(T)) @command_line:nn:nn
+    foreign lpvm mutate(~tmp#9##0:wybe.array(T), ?tmp#10##0:wybe.array(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argc##0:wybe.int) @command_line:nn:nn
+    foreign lpvm mutate(~tmp#10##0:wybe.array(T), ?tmp#0##0:wybe.array(wybe.c_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argv##0:wybe.array.raw_array) @command_line:nn:nn
     foreign lpvm store(~tmp#0##0:wybe.array(wybe.c_string), <<command_line.arguments>>:wybe.array(wybe.c_string)) @command_line:nn:nn
     foreign lpvm store(c"":wybe.c_string, <<command_line.command>>:wybe.c_string) @command_line:nn:nn
     foreign lpvm store(0:wybe.int, <<command_line.exit_code>>:wybe.int) @command_line:nn:nn
@@ -104,7 +104,7 @@ module top-level code > public {semipure} (0 calls)
     wybe.array.[|]<0>[785a827a1b](?command##1:wybe.c_string, ?arguments##2:wybe.array(wybe.c_string), ~arguments##0:wybe.array(wybe.c_string), ?tmp#8##0:wybe.bool) #0 @command_line:nn:nn
     case ~tmp#8##0:wybe.bool of
     0:
-        foreign c {terminal,semipure} error_exit(c"command_line:18:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @control:nn:nn
+        foreign c {terminal,semipure} error_exit(c"command_line:18:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @command_line:nn:nn
 
     1:
         foreign lpvm store(~%arguments##2:wybe.array(wybe.c_string), <<command_line.arguments>>:wybe.array(wybe.c_string)) @command_line:nn:nn
@@ -203,11 +203,11 @@ module top-level code > public {semipure} (0 calls)
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(4,(drone.loop<0>,fromList [NonAliasedParamCond 0 []]))]
     drone.drone_init<0>(?tmp#0##0:drone.drone_info) #0 @drone:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @char:nn:nn
-    foreign c read_char(?ch##0:wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @char:nn:nn
-    foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char:nn:nn
-    foreign lpvm cast(-1:wybe.int, ?tmp#1##0:wybe.char) @io:nn:nn
-    foreign llvm icmp_ne(ch##0:wybe.char, ~tmp#1##0:wybe.char, ?tmp#2##0:wybe.bool) @char:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @drone:nn:nn
+    foreign c read_char(?ch##0:wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @drone:nn:nn
+    foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
+    foreign lpvm cast(-1:wybe.int, ?tmp#1##0:wybe.char) @drone:nn:nn
+    foreign llvm icmp_ne(ch##0:wybe.char, ~tmp#1##0:wybe.char, ?tmp#2##0:wybe.bool) @drone:nn:nn
     case ~tmp#2##0:wybe.bool of
     0:
         drone.#cont#1<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6
@@ -223,12 +223,12 @@ proc #cont#1 > {semipure} (2 calls)
 #cont#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign c {impure} malloc_count(?mc##0:wybe.int) @memory_management:nn:nn
+    foreign c {impure} malloc_count(?mc##0:wybe.int) @drone:nn:nn
     wybe.string.print<0>("** malloc count: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @drone:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~mc##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @int:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @drone:nn:nn
+    foreign c print_int(~mc##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @drone:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @drone:nn:nn
+    foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
 
 
 proc do_action > (2 calls)
@@ -237,22 +237,22 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
   AliasPairs: [(d##0,d##2)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(5,(drone.do_action#cont#1<0>,fromList [NonAliasedParamCond 0 []])),(10,(drone.do_action#cont#1<0>,fromList [NonAliasedParamCond 0 []])),(15,(drone.do_action#cont#1<0>,fromList [NonAliasedParamCond 0 []])),(20,(drone.do_action#cont#1<0>,fromList [NonAliasedParamCond 0 []])),(25,(drone.do_action#cont#1<0>,fromList [NonAliasedParamCond 0 []])),(30,(drone.do_action#cont#1<0>,fromList [NonAliasedParamCond 0 []])),(32,(drone.do_action#cont#1<0>,fromList [NonAliasedParamCond 0 [0]]))]
-    foreign llvm icmp_eq(action##0:wybe.char, 'n':wybe.char, ?tmp#21##0:wybe.bool) @char:nn:nn
+    foreign llvm icmp_eq(action##0:wybe.char, 'n':wybe.char, ?tmp#21##0:wybe.bool) @drone:nn:nn
     case ~tmp#21##0:wybe.bool of
     0:
-        foreign llvm icmp_eq(action##0:wybe.char, 's':wybe.char, ?tmp#20##0:wybe.bool) @char:nn:nn
+        foreign llvm icmp_eq(action##0:wybe.char, 's':wybe.char, ?tmp#20##0:wybe.bool) @drone:nn:nn
         case ~tmp#20##0:wybe.bool of
         0:
-            foreign llvm icmp_eq(action##0:wybe.char, 'w':wybe.char, ?tmp#19##0:wybe.bool) @char:nn:nn
+            foreign llvm icmp_eq(action##0:wybe.char, 'w':wybe.char, ?tmp#19##0:wybe.bool) @drone:nn:nn
             case ~tmp#19##0:wybe.bool of
             0:
-                foreign llvm icmp_eq(action##0:wybe.char, 'e':wybe.char, ?tmp#18##0:wybe.bool) @char:nn:nn
+                foreign llvm icmp_eq(action##0:wybe.char, 'e':wybe.char, ?tmp#18##0:wybe.bool) @drone:nn:nn
                 case ~tmp#18##0:wybe.bool of
                 0:
-                    foreign llvm icmp_eq(action##0:wybe.char, 'u':wybe.char, ?tmp#17##0:wybe.bool) @char:nn:nn
+                    foreign llvm icmp_eq(action##0:wybe.char, 'u':wybe.char, ?tmp#17##0:wybe.bool) @drone:nn:nn
                     case ~tmp#17##0:wybe.bool of
                     0:
-                        foreign llvm icmp_eq(~action##0:wybe.char, 'd':wybe.char, ?tmp#16##0:wybe.bool) @char:nn:nn
+                        foreign llvm icmp_eq(~action##0:wybe.char, 'd':wybe.char, ?tmp#16##0:wybe.bool) @drone:nn:nn
                         case ~tmp#16##0:wybe.bool of
                         0:
                             foreign llvm move(0:wybe.bool, ?success##2:wybe.bool) @drone:nn:nn
@@ -260,7 +260,7 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
                         1:
                             foreign lpvm access(d##0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#12##0:wybe.int) @drone:nn:nn
-                            foreign llvm sub(~tmp#12##0:wybe.int, 1:wybe.int, ?tmp#11##0:wybe.int) @int:nn:nn
+                            foreign llvm sub(~tmp#12##0:wybe.int, 1:wybe.int, ?tmp#11##0:wybe.int) @drone:nn:nn
                             foreign lpvm {noalias} mutate(~d##0:drone.drone_info, ?d##1:drone.drone_info, 16:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~tmp#11##0:wybe.int) @drone:nn:nn
                             drone.do_action#cont#1<0>[410bae77d3](~d##1:drone.drone_info, 1:wybe.bool, ?d##2:drone.drone_info, ?_:wybe.bool) #30
                             foreign llvm move(1:wybe.bool, ?success##2:wybe.bool)
@@ -268,7 +268,7 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
                     1:
                         foreign lpvm access(d##0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.int) @drone:nn:nn
-                        foreign llvm add(~tmp#10##0:wybe.int, 1:wybe.int, ?tmp#9##0:wybe.int) @int:nn:nn
+                        foreign llvm add(~tmp#10##0:wybe.int, 1:wybe.int, ?tmp#9##0:wybe.int) @drone:nn:nn
                         foreign lpvm {noalias} mutate(~d##0:drone.drone_info, ?d##1:drone.drone_info, 16:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~tmp#9##0:wybe.int) @drone:nn:nn
                         drone.do_action#cont#1<0>[410bae77d3](~d##1:drone.drone_info, 1:wybe.bool, ?d##2:drone.drone_info, ?_:wybe.bool) #25
                         foreign llvm move(1:wybe.bool, ?success##2:wybe.bool)
@@ -276,7 +276,7 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
                 1:
                     foreign lpvm access(d##0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.int) @drone:nn:nn
-                    foreign llvm add(~tmp#8##0:wybe.int, 1:wybe.int, ?tmp#7##0:wybe.int) @int:nn:nn
+                    foreign llvm add(~tmp#8##0:wybe.int, 1:wybe.int, ?tmp#7##0:wybe.int) @drone:nn:nn
                     foreign lpvm {noalias} mutate(~d##0:drone.drone_info, ?d##1:drone.drone_info, 0:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~tmp#7##0:wybe.int) @drone:nn:nn
                     drone.do_action#cont#1<0>[410bae77d3](~d##1:drone.drone_info, 1:wybe.bool, ?d##2:drone.drone_info, ?_:wybe.bool) #20
                     foreign llvm move(1:wybe.bool, ?success##2:wybe.bool)
@@ -284,7 +284,7 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
             1:
                 foreign lpvm access(d##0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.int) @drone:nn:nn
-                foreign llvm sub(~tmp#6##0:wybe.int, 1:wybe.int, ?tmp#5##0:wybe.int) @int:nn:nn
+                foreign llvm sub(~tmp#6##0:wybe.int, 1:wybe.int, ?tmp#5##0:wybe.int) @drone:nn:nn
                 foreign lpvm {noalias} mutate(~d##0:drone.drone_info, ?d##1:drone.drone_info, 0:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~tmp#5##0:wybe.int) @drone:nn:nn
                 drone.do_action#cont#1<0>[410bae77d3](~d##1:drone.drone_info, 1:wybe.bool, ?d##2:drone.drone_info, ?_:wybe.bool) #15
                 foreign llvm move(1:wybe.bool, ?success##2:wybe.bool)
@@ -292,7 +292,7 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
         1:
             foreign lpvm access(d##0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int) @drone:nn:nn
-            foreign llvm add(~tmp#4##0:wybe.int, 1:wybe.int, ?tmp#3##0:wybe.int) @int:nn:nn
+            foreign llvm add(~tmp#4##0:wybe.int, 1:wybe.int, ?tmp#3##0:wybe.int) @drone:nn:nn
             foreign lpvm {noalias} mutate(~d##0:drone.drone_info, ?d##1:drone.drone_info, 8:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.int) @drone:nn:nn
             drone.do_action#cont#1<0>[410bae77d3](~d##1:drone.drone_info, 1:wybe.bool, ?d##2:drone.drone_info, ?_:wybe.bool) #10
             foreign llvm move(1:wybe.bool, ?success##2:wybe.bool)
@@ -300,7 +300,7 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
     1:
         foreign lpvm access(d##0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @drone:nn:nn
-        foreign llvm sub(~tmp#2##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int) @int:nn:nn
+        foreign llvm sub(~tmp#2##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int) @drone:nn:nn
         foreign lpvm {noalias} mutate(~d##0:drone.drone_info, ?d##1:drone.drone_info, 8:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.int) @drone:nn:nn
         drone.do_action#cont#1<0>[410bae77d3](~d##1:drone.drone_info, 1:wybe.bool, ?d##2:drone.drone_info, ?_:wybe.bool) #5
         foreign llvm move(1:wybe.bool, ?success##2:wybe.bool)
@@ -318,7 +318,7 @@ do_action#cont#1(d##0:drone.drone_info, success##0:wybe.bool, ?d##1:drone.drone_
 
     1:
         foreign lpvm access(d##0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#15##0:wybe.int) @drone:nn:nn
-        foreign llvm add(~tmp#15##0:wybe.int, 1:wybe.int, ?tmp#14##0:wybe.int) @int:nn:nn
+        foreign llvm add(~tmp#15##0:wybe.int, 1:wybe.int, ?tmp#14##0:wybe.int) @drone:nn:nn
         foreign lpvm {noalias} mutate(~d##0:drone.drone_info, ?d##1:drone.drone_info, 24:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~tmp#14##0:wybe.int) @drone:nn:nn
 
 
@@ -341,53 +341,53 @@ loop(d##0:drone.drone_info, ch##0:wybe.char)<{<<wybe.io.io>>}; {<<wybe.io.io>>};
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(5,(drone.loop#cont#1<0>,fromList [NonAliasedParamCond 1 [0]])),(6,(drone.do_action<0>,fromList [NonAliasedParamCond 0 [0]])),(10,(drone.loop#cont#1<0>,fromList [NonAliasedParamCond 1 [0]])),(11,(drone.loop#cont#1<0>,fromList [NonAliasedParamCond 1 [0]])),(12,(drone.loop#cont#1<0>,fromList [NonAliasedParamCond 1 [0]]))]
-    foreign llvm icmp_ne(ch##0:wybe.char, ' ':wybe.char, ?tmp#0##0:wybe.bool) @char:nn:nn
-    foreign llvm icmp_ne(ch##0:wybe.char, '\n':wybe.char, ?tmp#1##0:wybe.bool) @char:nn:nn
-    foreign llvm and(~tmp#0##0:wybe.bool, ~tmp#1##0:wybe.bool, ?tmp#7##0:wybe.bool) @bool:nn:nn
+    foreign llvm icmp_ne(ch##0:wybe.char, ' ':wybe.char, ?tmp#0##0:wybe.bool) @drone:nn:nn
+    foreign llvm icmp_ne(ch##0:wybe.char, '\n':wybe.char, ?tmp#1##0:wybe.bool) @drone:nn:nn
+    foreign llvm and(~tmp#0##0:wybe.bool, ~tmp#1##0:wybe.bool, ?tmp#7##0:wybe.bool) @drone:nn:nn
     case ~tmp#7##0:wybe.bool of
     0:
         drone.loop#cont#1<0>(_:wybe.char, ~d##0:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #12
 
     1:
-        foreign llvm icmp_eq(ch##0:wybe.char, 'p':wybe.char, ?tmp#6##0:wybe.bool) @char:nn:nn
+        foreign llvm icmp_eq(ch##0:wybe.char, 'p':wybe.char, ?tmp#6##0:wybe.bool) @drone:nn:nn
         case ~tmp#6##0:wybe.bool of
         0:
             drone.do_action<0>(~d##0:drone.drone_info, ?d##1:drone.drone_info, ~ch##0:wybe.char, ?success##0:wybe.bool) #6 @drone:nn:nn
-            foreign llvm icmp_eq(~success##0:wybe.bool, 0:wybe.bool, ?tmp#5##0:wybe.bool) @bool:nn:nn
+            foreign llvm icmp_eq(~success##0:wybe.bool, 0:wybe.bool, ?tmp#5##0:wybe.bool) @drone:nn:nn
             case ~tmp#5##0:wybe.bool of
             0:
                 drone.loop#cont#1<0>(_:wybe.char, ~d##1:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11
 
             1:
-                wybe.string.print<0>("invalid action!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @string:nn:nn
-                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @io:nn:nn
-                foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @io:nn:nn
-                foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+                wybe.string.print<0>("invalid action!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @drone:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @drone:nn:nn
+                foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @drone:nn:nn
+                foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
                 drone.loop#cont#1<0>(_:wybe.char, ~d##1:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10
 
 
         1:
             wybe.string.print<0>("(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @drone:nn:nn
             foreign lpvm access(d##0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#22##0:wybe.int) @drone:nn:nn
-            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#23##0:wybe.phantom) @int:nn:nn
-            foreign c print_int(~tmp#22##0:wybe.int, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @int:nn:nn
-            foreign lpvm store(~%tmp#24##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#23##0:wybe.phantom) @drone:nn:nn
+            foreign c print_int(~tmp#22##0:wybe.int, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @drone:nn:nn
+            foreign lpvm store(~%tmp#24##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
             wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #15 @drone:nn:nn
             foreign lpvm access(d##0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#25##0:wybe.int) @drone:nn:nn
-            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#26##0:wybe.phantom) @int:nn:nn
-            foreign c print_int(~tmp#25##0:wybe.int, ~tmp#26##0:wybe.phantom, ?tmp#27##0:wybe.phantom) @int:nn:nn
-            foreign lpvm store(~%tmp#27##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#26##0:wybe.phantom) @drone:nn:nn
+            foreign c print_int(~tmp#25##0:wybe.int, ~tmp#26##0:wybe.phantom, ?tmp#27##0:wybe.phantom) @drone:nn:nn
+            foreign lpvm store(~%tmp#27##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
             wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #16 @drone:nn:nn
             foreign lpvm access(d##0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#28##0:wybe.int) @drone:nn:nn
-            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#29##0:wybe.phantom) @int:nn:nn
-            foreign c print_int(~tmp#28##0:wybe.int, ~tmp#29##0:wybe.phantom, ?tmp#30##0:wybe.phantom) @int:nn:nn
-            foreign lpvm store(~%tmp#30##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#29##0:wybe.phantom) @drone:nn:nn
+            foreign c print_int(~tmp#28##0:wybe.int, ~tmp#29##0:wybe.phantom, ?tmp#30##0:wybe.phantom) @drone:nn:nn
+            foreign lpvm store(~%tmp#30##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
             wybe.string.print<0>(") #":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #17 @drone:nn:nn
             foreign lpvm access(d##0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#31##0:wybe.int) @drone:nn:nn
-            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#32##0:wybe.phantom) @int:nn:nn
-            foreign c print_int(~tmp#31##0:wybe.int, ~tmp#32##0:wybe.phantom, ?tmp#33##0:wybe.phantom) @int:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp#33##0:wybe.phantom, ?tmp#34##0:wybe.phantom) @io:nn:nn
-            foreign lpvm store(~%tmp#34##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#32##0:wybe.phantom) @drone:nn:nn
+            foreign c print_int(~tmp#31##0:wybe.int, ~tmp#32##0:wybe.phantom, ?tmp#33##0:wybe.phantom) @drone:nn:nn
+            foreign c putchar('\n':wybe.char, ~tmp#33##0:wybe.phantom, ?tmp#34##0:wybe.phantom) @drone:nn:nn
+            foreign lpvm store(~%tmp#34##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
             drone.loop#cont#1<0>(_:wybe.char, ~d##0:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5
 
 
@@ -399,11 +399,11 @@ loop#cont#1([ch##0:wybe.char], d##0:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 1]
   MultiSpeczDepInfo: [(3,(drone.loop<0>,fromList [NonAliasedParamCond 0 [1]]))]
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @char:nn:nn
-    foreign c read_char(?ch##1:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @char:nn:nn
-    foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char:nn:nn
-    foreign lpvm cast(-1:wybe.int, ?tmp#3##0:wybe.char) @io:nn:nn
-    foreign llvm icmp_ne(ch##1:wybe.char, ~tmp#3##0:wybe.char, ?tmp#4##0:wybe.bool) @char:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @drone:nn:nn
+    foreign c read_char(?ch##1:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @drone:nn:nn
+    foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
+    foreign lpvm cast(-1:wybe.int, ?tmp#3##0:wybe.char) @drone:nn:nn
+    foreign llvm icmp_ne(ch##1:wybe.char, ~tmp#3##0:wybe.char, ?tmp#4##0:wybe.bool) @drone:nn:nn
     case ~tmp#4##0:wybe.bool of
     0:
 
@@ -419,25 +419,25 @@ print_info(d##0:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   InterestingCallProperties: []
     wybe.string.print<0>("(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @drone:nn:nn
     foreign lpvm access(d##0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @drone:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @int:nn:nn
-    foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @drone:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @drone:nn:nn
+    foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
     wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @drone:nn:nn
     foreign lpvm access(d##0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @drone:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @int:nn:nn
-    foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @drone:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @drone:nn:nn
+    foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
     wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @drone:nn:nn
     foreign lpvm access(d##0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @drone:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~tmp#2##0:wybe.int, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @int:nn:nn
-    foreign lpvm store(~%tmp#15##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom) @drone:nn:nn
+    foreign c print_int(~tmp#2##0:wybe.int, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @drone:nn:nn
+    foreign lpvm store(~%tmp#15##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
     wybe.string.print<0>(") #":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @drone:nn:nn
     foreign lpvm access(~d##0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @drone:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~tmp#3##0:wybe.int, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @int:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#21##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom) @drone:nn:nn
+    foreign c print_int(~tmp#3##0:wybe.int, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @drone:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @drone:nn:nn
+    foreign lpvm store(~%tmp#21##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
 
 LLVM code       : None
 
@@ -661,9 +661,9 @@ module top-level code > {terminal,inline,impure} (0 calls)
     foreign lpvm store(0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
     foreign c {impure} gc_init @memory_management:nn:nn
     drone.<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1
-    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.array(T)) @array:nn:nn
-    foreign lpvm mutate(~tmp#9##0:wybe.array(T), ?tmp#10##0:wybe.array(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argc##0:wybe.int) @array:nn:nn
-    foreign lpvm mutate(~tmp#10##0:wybe.array(T), ?tmp#0##0:wybe.array(wybe.c_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argv##0:wybe.array.raw_array) @array:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.array(T)) @command_line:nn:nn
+    foreign lpvm mutate(~tmp#9##0:wybe.array(T), ?tmp#10##0:wybe.array(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argc##0:wybe.int) @command_line:nn:nn
+    foreign lpvm mutate(~tmp#10##0:wybe.array(T), ?tmp#0##0:wybe.array(wybe.c_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argv##0:wybe.array.raw_array) @command_line:nn:nn
     foreign lpvm store(~tmp#0##0:wybe.array(wybe.c_string), <<command_line.arguments>>:wybe.array(wybe.c_string)) @command_line:nn:nn
     foreign lpvm store(c"":wybe.c_string, <<command_line.command>>:wybe.c_string) @command_line:nn:nn
     foreign lpvm store(0:wybe.int, <<command_line.exit_code>>:wybe.int) @command_line:nn:nn
@@ -765,7 +765,7 @@ module top-level code > public {semipure} (0 calls)
     wybe.array.[|]<0>[785a827a1b](?command##1:wybe.c_string, ?arguments##2:wybe.array(wybe.c_string), ~arguments##0:wybe.array(wybe.c_string), ?tmp#8##0:wybe.bool) #0 @command_line:nn:nn
     case ~tmp#8##0:wybe.bool of
     0:
-        foreign c {terminal,semipure} error_exit(c"command_line:18:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @control:nn:nn
+        foreign c {terminal,semipure} error_exit(c"command_line:18:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @command_line:nn:nn
 
     1:
         foreign lpvm store(~%arguments##2:wybe.array(wybe.c_string), <<command_line.arguments>>:wybe.array(wybe.c_string)) @command_line:nn:nn
@@ -864,11 +864,11 @@ module top-level code > public {semipure} (0 calls)
   InterestingCallProperties: []
   MultiSpeczDepInfo: [(4,(drone.loop<0>,fromList [NonAliasedParamCond 0 []]))]
     drone.drone_init<0>(?tmp#0##0:drone.drone_info) #0 @drone:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @char:nn:nn
-    foreign c read_char(?ch##0:wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @char:nn:nn
-    foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char:nn:nn
-    foreign lpvm cast(-1:wybe.int, ?tmp#1##0:wybe.char) @io:nn:nn
-    foreign llvm icmp_ne(ch##0:wybe.char, ~tmp#1##0:wybe.char, ?tmp#2##0:wybe.bool) @char:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @drone:nn:nn
+    foreign c read_char(?ch##0:wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @drone:nn:nn
+    foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
+    foreign lpvm cast(-1:wybe.int, ?tmp#1##0:wybe.char) @drone:nn:nn
+    foreign llvm icmp_ne(ch##0:wybe.char, ~tmp#1##0:wybe.char, ?tmp#2##0:wybe.bool) @drone:nn:nn
     case ~tmp#2##0:wybe.bool of
     0:
         drone.#cont#1<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6
@@ -884,12 +884,12 @@ proc #cont#1 > {semipure} (2 calls)
 #cont#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign c {impure} malloc_count(?mc##0:wybe.int) @memory_management:nn:nn
+    foreign c {impure} malloc_count(?mc##0:wybe.int) @drone:nn:nn
     wybe.string.print<0>("** malloc count: ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @drone:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~mc##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @int:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @drone:nn:nn
+    foreign c print_int(~mc##0:wybe.int, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @drone:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @drone:nn:nn
+    foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
 
 
 proc do_action > (2 calls)
@@ -898,22 +898,22 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
   AliasPairs: [(d##0,d##2)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(5,(drone.do_action#cont#1<0>,fromList [NonAliasedParamCond 0 []])),(10,(drone.do_action#cont#1<0>,fromList [NonAliasedParamCond 0 []])),(15,(drone.do_action#cont#1<0>,fromList [NonAliasedParamCond 0 []])),(20,(drone.do_action#cont#1<0>,fromList [NonAliasedParamCond 0 []])),(25,(drone.do_action#cont#1<0>,fromList [NonAliasedParamCond 0 []])),(30,(drone.do_action#cont#1<0>,fromList [NonAliasedParamCond 0 []])),(32,(drone.do_action#cont#1<0>,fromList [NonAliasedParamCond 0 [0]]))]
-    foreign llvm icmp_eq(action##0:wybe.char, 'n':wybe.char, ?tmp#21##0:wybe.bool) @char:nn:nn
+    foreign llvm icmp_eq(action##0:wybe.char, 'n':wybe.char, ?tmp#21##0:wybe.bool) @drone:nn:nn
     case ~tmp#21##0:wybe.bool of
     0:
-        foreign llvm icmp_eq(action##0:wybe.char, 's':wybe.char, ?tmp#20##0:wybe.bool) @char:nn:nn
+        foreign llvm icmp_eq(action##0:wybe.char, 's':wybe.char, ?tmp#20##0:wybe.bool) @drone:nn:nn
         case ~tmp#20##0:wybe.bool of
         0:
-            foreign llvm icmp_eq(action##0:wybe.char, 'w':wybe.char, ?tmp#19##0:wybe.bool) @char:nn:nn
+            foreign llvm icmp_eq(action##0:wybe.char, 'w':wybe.char, ?tmp#19##0:wybe.bool) @drone:nn:nn
             case ~tmp#19##0:wybe.bool of
             0:
-                foreign llvm icmp_eq(action##0:wybe.char, 'e':wybe.char, ?tmp#18##0:wybe.bool) @char:nn:nn
+                foreign llvm icmp_eq(action##0:wybe.char, 'e':wybe.char, ?tmp#18##0:wybe.bool) @drone:nn:nn
                 case ~tmp#18##0:wybe.bool of
                 0:
-                    foreign llvm icmp_eq(action##0:wybe.char, 'u':wybe.char, ?tmp#17##0:wybe.bool) @char:nn:nn
+                    foreign llvm icmp_eq(action##0:wybe.char, 'u':wybe.char, ?tmp#17##0:wybe.bool) @drone:nn:nn
                     case ~tmp#17##0:wybe.bool of
                     0:
-                        foreign llvm icmp_eq(~action##0:wybe.char, 'd':wybe.char, ?tmp#16##0:wybe.bool) @char:nn:nn
+                        foreign llvm icmp_eq(~action##0:wybe.char, 'd':wybe.char, ?tmp#16##0:wybe.bool) @drone:nn:nn
                         case ~tmp#16##0:wybe.bool of
                         0:
                             foreign llvm move(0:wybe.bool, ?success##2:wybe.bool) @drone:nn:nn
@@ -921,7 +921,7 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
                         1:
                             foreign lpvm access(d##0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#12##0:wybe.int) @drone:nn:nn
-                            foreign llvm sub(~tmp#12##0:wybe.int, 1:wybe.int, ?tmp#11##0:wybe.int) @int:nn:nn
+                            foreign llvm sub(~tmp#12##0:wybe.int, 1:wybe.int, ?tmp#11##0:wybe.int) @drone:nn:nn
                             foreign lpvm {noalias} mutate(~d##0:drone.drone_info, ?d##1:drone.drone_info, 16:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~tmp#11##0:wybe.int) @drone:nn:nn
                             drone.do_action#cont#1<0>[410bae77d3](~d##1:drone.drone_info, 1:wybe.bool, ?d##2:drone.drone_info, ?_:wybe.bool) #30
                             foreign llvm move(1:wybe.bool, ?success##2:wybe.bool)
@@ -929,7 +929,7 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
                     1:
                         foreign lpvm access(d##0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.int) @drone:nn:nn
-                        foreign llvm add(~tmp#10##0:wybe.int, 1:wybe.int, ?tmp#9##0:wybe.int) @int:nn:nn
+                        foreign llvm add(~tmp#10##0:wybe.int, 1:wybe.int, ?tmp#9##0:wybe.int) @drone:nn:nn
                         foreign lpvm {noalias} mutate(~d##0:drone.drone_info, ?d##1:drone.drone_info, 16:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~tmp#9##0:wybe.int) @drone:nn:nn
                         drone.do_action#cont#1<0>[410bae77d3](~d##1:drone.drone_info, 1:wybe.bool, ?d##2:drone.drone_info, ?_:wybe.bool) #25
                         foreign llvm move(1:wybe.bool, ?success##2:wybe.bool)
@@ -937,7 +937,7 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
                 1:
                     foreign lpvm access(d##0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.int) @drone:nn:nn
-                    foreign llvm add(~tmp#8##0:wybe.int, 1:wybe.int, ?tmp#7##0:wybe.int) @int:nn:nn
+                    foreign llvm add(~tmp#8##0:wybe.int, 1:wybe.int, ?tmp#7##0:wybe.int) @drone:nn:nn
                     foreign lpvm {noalias} mutate(~d##0:drone.drone_info, ?d##1:drone.drone_info, 0:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~tmp#7##0:wybe.int) @drone:nn:nn
                     drone.do_action#cont#1<0>[410bae77d3](~d##1:drone.drone_info, 1:wybe.bool, ?d##2:drone.drone_info, ?_:wybe.bool) #20
                     foreign llvm move(1:wybe.bool, ?success##2:wybe.bool)
@@ -945,7 +945,7 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
             1:
                 foreign lpvm access(d##0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.int) @drone:nn:nn
-                foreign llvm sub(~tmp#6##0:wybe.int, 1:wybe.int, ?tmp#5##0:wybe.int) @int:nn:nn
+                foreign llvm sub(~tmp#6##0:wybe.int, 1:wybe.int, ?tmp#5##0:wybe.int) @drone:nn:nn
                 foreign lpvm {noalias} mutate(~d##0:drone.drone_info, ?d##1:drone.drone_info, 0:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~tmp#5##0:wybe.int) @drone:nn:nn
                 drone.do_action#cont#1<0>[410bae77d3](~d##1:drone.drone_info, 1:wybe.bool, ?d##2:drone.drone_info, ?_:wybe.bool) #15
                 foreign llvm move(1:wybe.bool, ?success##2:wybe.bool)
@@ -953,7 +953,7 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
         1:
             foreign lpvm access(d##0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int) @drone:nn:nn
-            foreign llvm add(~tmp#4##0:wybe.int, 1:wybe.int, ?tmp#3##0:wybe.int) @int:nn:nn
+            foreign llvm add(~tmp#4##0:wybe.int, 1:wybe.int, ?tmp#3##0:wybe.int) @drone:nn:nn
             foreign lpvm {noalias} mutate(~d##0:drone.drone_info, ?d##1:drone.drone_info, 8:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.int) @drone:nn:nn
             drone.do_action#cont#1<0>[410bae77d3](~d##1:drone.drone_info, 1:wybe.bool, ?d##2:drone.drone_info, ?_:wybe.bool) #10
             foreign llvm move(1:wybe.bool, ?success##2:wybe.bool)
@@ -961,28 +961,28 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
     1:
         foreign lpvm access(d##0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @drone:nn:nn
-        foreign llvm sub(~tmp#2##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int) @int:nn:nn
+        foreign llvm sub(~tmp#2##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int) @drone:nn:nn
         foreign lpvm {noalias} mutate(~d##0:drone.drone_info, ?d##1:drone.drone_info, 8:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.int) @drone:nn:nn
         drone.do_action#cont#1<0>[410bae77d3](~d##1:drone.drone_info, 1:wybe.bool, ?d##2:drone.drone_info, ?_:wybe.bool) #5
         foreign llvm move(1:wybe.bool, ?success##2:wybe.bool)
 
  [410bae77d3] [NonAliasedParam 0] :
-    foreign llvm icmp_eq(action##0:wybe.char, 'n':wybe.char, ?tmp#21##0:wybe.bool) @char:nn:nn
+    foreign llvm icmp_eq(action##0:wybe.char, 'n':wybe.char, ?tmp#21##0:wybe.bool) @drone:nn:nn
     case ~tmp#21##0:wybe.bool of
     0:
-        foreign llvm icmp_eq(action##0:wybe.char, 's':wybe.char, ?tmp#20##0:wybe.bool) @char:nn:nn
+        foreign llvm icmp_eq(action##0:wybe.char, 's':wybe.char, ?tmp#20##0:wybe.bool) @drone:nn:nn
         case ~tmp#20##0:wybe.bool of
         0:
-            foreign llvm icmp_eq(action##0:wybe.char, 'w':wybe.char, ?tmp#19##0:wybe.bool) @char:nn:nn
+            foreign llvm icmp_eq(action##0:wybe.char, 'w':wybe.char, ?tmp#19##0:wybe.bool) @drone:nn:nn
             case ~tmp#19##0:wybe.bool of
             0:
-                foreign llvm icmp_eq(action##0:wybe.char, 'e':wybe.char, ?tmp#18##0:wybe.bool) @char:nn:nn
+                foreign llvm icmp_eq(action##0:wybe.char, 'e':wybe.char, ?tmp#18##0:wybe.bool) @drone:nn:nn
                 case ~tmp#18##0:wybe.bool of
                 0:
-                    foreign llvm icmp_eq(action##0:wybe.char, 'u':wybe.char, ?tmp#17##0:wybe.bool) @char:nn:nn
+                    foreign llvm icmp_eq(action##0:wybe.char, 'u':wybe.char, ?tmp#17##0:wybe.bool) @drone:nn:nn
                     case ~tmp#17##0:wybe.bool of
                     0:
-                        foreign llvm icmp_eq(~action##0:wybe.char, 'd':wybe.char, ?tmp#16##0:wybe.bool) @char:nn:nn
+                        foreign llvm icmp_eq(~action##0:wybe.char, 'd':wybe.char, ?tmp#16##0:wybe.bool) @drone:nn:nn
                         case ~tmp#16##0:wybe.bool of
                         0:
                             foreign llvm move(0:wybe.bool, ?success##2:wybe.bool) @drone:nn:nn
@@ -990,7 +990,7 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
                         1:
                             foreign lpvm access(d##0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#12##0:wybe.int) @drone:nn:nn
-                            foreign llvm sub(~tmp#12##0:wybe.int, 1:wybe.int, ?tmp#11##0:wybe.int) @int:nn:nn
+                            foreign llvm sub(~tmp#12##0:wybe.int, 1:wybe.int, ?tmp#11##0:wybe.int) @drone:nn:nn
                             foreign lpvm {noalias} mutate(~d##0:drone.drone_info, ?d##1:drone.drone_info, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~tmp#11##0:wybe.int) @drone:nn:nn
                             drone.do_action#cont#1<0>[410bae77d3](~d##1:drone.drone_info, 1:wybe.bool, ?d##2:drone.drone_info, ?_:wybe.bool) #30
                             foreign llvm move(1:wybe.bool, ?success##2:wybe.bool)
@@ -998,7 +998,7 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
                     1:
                         foreign lpvm access(d##0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#10##0:wybe.int) @drone:nn:nn
-                        foreign llvm add(~tmp#10##0:wybe.int, 1:wybe.int, ?tmp#9##0:wybe.int) @int:nn:nn
+                        foreign llvm add(~tmp#10##0:wybe.int, 1:wybe.int, ?tmp#9##0:wybe.int) @drone:nn:nn
                         foreign lpvm {noalias} mutate(~d##0:drone.drone_info, ?d##1:drone.drone_info, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~tmp#9##0:wybe.int) @drone:nn:nn
                         drone.do_action#cont#1<0>[410bae77d3](~d##1:drone.drone_info, 1:wybe.bool, ?d##2:drone.drone_info, ?_:wybe.bool) #25
                         foreign llvm move(1:wybe.bool, ?success##2:wybe.bool)
@@ -1006,7 +1006,7 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
                 1:
                     foreign lpvm access(d##0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.int) @drone:nn:nn
-                    foreign llvm add(~tmp#8##0:wybe.int, 1:wybe.int, ?tmp#7##0:wybe.int) @int:nn:nn
+                    foreign llvm add(~tmp#8##0:wybe.int, 1:wybe.int, ?tmp#7##0:wybe.int) @drone:nn:nn
                     foreign lpvm {noalias} mutate(~d##0:drone.drone_info, ?d##1:drone.drone_info, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~tmp#7##0:wybe.int) @drone:nn:nn
                     drone.do_action#cont#1<0>[410bae77d3](~d##1:drone.drone_info, 1:wybe.bool, ?d##2:drone.drone_info, ?_:wybe.bool) #20
                     foreign llvm move(1:wybe.bool, ?success##2:wybe.bool)
@@ -1014,7 +1014,7 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
             1:
                 foreign lpvm access(d##0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.int) @drone:nn:nn
-                foreign llvm sub(~tmp#6##0:wybe.int, 1:wybe.int, ?tmp#5##0:wybe.int) @int:nn:nn
+                foreign llvm sub(~tmp#6##0:wybe.int, 1:wybe.int, ?tmp#5##0:wybe.int) @drone:nn:nn
                 foreign lpvm {noalias} mutate(~d##0:drone.drone_info, ?d##1:drone.drone_info, 0:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~tmp#5##0:wybe.int) @drone:nn:nn
                 drone.do_action#cont#1<0>[410bae77d3](~d##1:drone.drone_info, 1:wybe.bool, ?d##2:drone.drone_info, ?_:wybe.bool) #15
                 foreign llvm move(1:wybe.bool, ?success##2:wybe.bool)
@@ -1022,7 +1022,7 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
         1:
             foreign lpvm access(d##0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int) @drone:nn:nn
-            foreign llvm add(~tmp#4##0:wybe.int, 1:wybe.int, ?tmp#3##0:wybe.int) @int:nn:nn
+            foreign llvm add(~tmp#4##0:wybe.int, 1:wybe.int, ?tmp#3##0:wybe.int) @drone:nn:nn
             foreign lpvm {noalias} mutate(~d##0:drone.drone_info, ?d##1:drone.drone_info, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.int) @drone:nn:nn
             drone.do_action#cont#1<0>[410bae77d3](~d##1:drone.drone_info, 1:wybe.bool, ?d##2:drone.drone_info, ?_:wybe.bool) #10
             foreign llvm move(1:wybe.bool, ?success##2:wybe.bool)
@@ -1030,7 +1030,7 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
     1:
         foreign lpvm access(d##0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @drone:nn:nn
-        foreign llvm sub(~tmp#2##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int) @int:nn:nn
+        foreign llvm sub(~tmp#2##0:wybe.int, 1:wybe.int, ?tmp#1##0:wybe.int) @drone:nn:nn
         foreign lpvm {noalias} mutate(~d##0:drone.drone_info, ?d##1:drone.drone_info, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.int) @drone:nn:nn
         drone.do_action#cont#1<0>[410bae77d3](~d##1:drone.drone_info, 1:wybe.bool, ?d##2:drone.drone_info, ?_:wybe.bool) #5
         foreign llvm move(1:wybe.bool, ?success##2:wybe.bool)
@@ -1048,7 +1048,7 @@ do_action#cont#1(d##0:drone.drone_info, success##0:wybe.bool, ?d##1:drone.drone_
 
     1:
         foreign lpvm access(d##0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#15##0:wybe.int) @drone:nn:nn
-        foreign llvm add(~tmp#15##0:wybe.int, 1:wybe.int, ?tmp#14##0:wybe.int) @int:nn:nn
+        foreign llvm add(~tmp#15##0:wybe.int, 1:wybe.int, ?tmp#14##0:wybe.int) @drone:nn:nn
         foreign lpvm {noalias} mutate(~d##0:drone.drone_info, ?d##1:drone.drone_info, 24:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~tmp#14##0:wybe.int) @drone:nn:nn
 
  [410bae77d3] [NonAliasedParam 0] :
@@ -1058,7 +1058,7 @@ do_action#cont#1(d##0:drone.drone_info, success##0:wybe.bool, ?d##1:drone.drone_
 
     1:
         foreign lpvm access(d##0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#15##0:wybe.int) @drone:nn:nn
-        foreign llvm add(~tmp#15##0:wybe.int, 1:wybe.int, ?tmp#14##0:wybe.int) @int:nn:nn
+        foreign llvm add(~tmp#15##0:wybe.int, 1:wybe.int, ?tmp#14##0:wybe.int) @drone:nn:nn
         foreign lpvm {noalias} mutate(~d##0:drone.drone_info, ?d##1:drone.drone_info, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~tmp#14##0:wybe.int) @drone:nn:nn
 
 
@@ -1081,104 +1081,104 @@ loop(d##0:drone.drone_info, ch##0:wybe.char)<{<<wybe.io.io>>}; {<<wybe.io.io>>};
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(5,(drone.loop#cont#1<0>,fromList [NonAliasedParamCond 1 [0]])),(6,(drone.do_action<0>,fromList [NonAliasedParamCond 0 [0]])),(10,(drone.loop#cont#1<0>,fromList [NonAliasedParamCond 1 [0]])),(11,(drone.loop#cont#1<0>,fromList [NonAliasedParamCond 1 [0]])),(12,(drone.loop#cont#1<0>,fromList [NonAliasedParamCond 1 [0]]))]
-    foreign llvm icmp_ne(ch##0:wybe.char, ' ':wybe.char, ?tmp#0##0:wybe.bool) @char:nn:nn
-    foreign llvm icmp_ne(ch##0:wybe.char, '\n':wybe.char, ?tmp#1##0:wybe.bool) @char:nn:nn
-    foreign llvm and(~tmp#0##0:wybe.bool, ~tmp#1##0:wybe.bool, ?tmp#7##0:wybe.bool) @bool:nn:nn
+    foreign llvm icmp_ne(ch##0:wybe.char, ' ':wybe.char, ?tmp#0##0:wybe.bool) @drone:nn:nn
+    foreign llvm icmp_ne(ch##0:wybe.char, '\n':wybe.char, ?tmp#1##0:wybe.bool) @drone:nn:nn
+    foreign llvm and(~tmp#0##0:wybe.bool, ~tmp#1##0:wybe.bool, ?tmp#7##0:wybe.bool) @drone:nn:nn
     case ~tmp#7##0:wybe.bool of
     0:
         drone.loop#cont#1<0>(_:wybe.char, ~d##0:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #12
 
     1:
-        foreign llvm icmp_eq(ch##0:wybe.char, 'p':wybe.char, ?tmp#6##0:wybe.bool) @char:nn:nn
+        foreign llvm icmp_eq(ch##0:wybe.char, 'p':wybe.char, ?tmp#6##0:wybe.bool) @drone:nn:nn
         case ~tmp#6##0:wybe.bool of
         0:
             drone.do_action<0>(~d##0:drone.drone_info, ?d##1:drone.drone_info, ~ch##0:wybe.char, ?success##0:wybe.bool) #6 @drone:nn:nn
-            foreign llvm icmp_eq(~success##0:wybe.bool, 0:wybe.bool, ?tmp#5##0:wybe.bool) @bool:nn:nn
+            foreign llvm icmp_eq(~success##0:wybe.bool, 0:wybe.bool, ?tmp#5##0:wybe.bool) @drone:nn:nn
             case ~tmp#5##0:wybe.bool of
             0:
                 drone.loop#cont#1<0>(_:wybe.char, ~d##1:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11
 
             1:
-                wybe.string.print<0>("invalid action!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @string:nn:nn
-                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @io:nn:nn
-                foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @io:nn:nn
-                foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+                wybe.string.print<0>("invalid action!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @drone:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @drone:nn:nn
+                foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @drone:nn:nn
+                foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
                 drone.loop#cont#1<0>(_:wybe.char, ~d##1:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10
 
 
         1:
             wybe.string.print<0>("(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @drone:nn:nn
             foreign lpvm access(d##0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#22##0:wybe.int) @drone:nn:nn
-            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#23##0:wybe.phantom) @int:nn:nn
-            foreign c print_int(~tmp#22##0:wybe.int, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @int:nn:nn
-            foreign lpvm store(~%tmp#24##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#23##0:wybe.phantom) @drone:nn:nn
+            foreign c print_int(~tmp#22##0:wybe.int, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @drone:nn:nn
+            foreign lpvm store(~%tmp#24##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
             wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #15 @drone:nn:nn
             foreign lpvm access(d##0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#25##0:wybe.int) @drone:nn:nn
-            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#26##0:wybe.phantom) @int:nn:nn
-            foreign c print_int(~tmp#25##0:wybe.int, ~tmp#26##0:wybe.phantom, ?tmp#27##0:wybe.phantom) @int:nn:nn
-            foreign lpvm store(~%tmp#27##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#26##0:wybe.phantom) @drone:nn:nn
+            foreign c print_int(~tmp#25##0:wybe.int, ~tmp#26##0:wybe.phantom, ?tmp#27##0:wybe.phantom) @drone:nn:nn
+            foreign lpvm store(~%tmp#27##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
             wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #16 @drone:nn:nn
             foreign lpvm access(d##0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#28##0:wybe.int) @drone:nn:nn
-            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#29##0:wybe.phantom) @int:nn:nn
-            foreign c print_int(~tmp#28##0:wybe.int, ~tmp#29##0:wybe.phantom, ?tmp#30##0:wybe.phantom) @int:nn:nn
-            foreign lpvm store(~%tmp#30##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#29##0:wybe.phantom) @drone:nn:nn
+            foreign c print_int(~tmp#28##0:wybe.int, ~tmp#29##0:wybe.phantom, ?tmp#30##0:wybe.phantom) @drone:nn:nn
+            foreign lpvm store(~%tmp#30##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
             wybe.string.print<0>(") #":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #17 @drone:nn:nn
             foreign lpvm access(d##0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#31##0:wybe.int) @drone:nn:nn
-            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#32##0:wybe.phantom) @int:nn:nn
-            foreign c print_int(~tmp#31##0:wybe.int, ~tmp#32##0:wybe.phantom, ?tmp#33##0:wybe.phantom) @int:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp#33##0:wybe.phantom, ?tmp#34##0:wybe.phantom) @io:nn:nn
-            foreign lpvm store(~%tmp#34##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#32##0:wybe.phantom) @drone:nn:nn
+            foreign c print_int(~tmp#31##0:wybe.int, ~tmp#32##0:wybe.phantom, ?tmp#33##0:wybe.phantom) @drone:nn:nn
+            foreign c putchar('\n':wybe.char, ~tmp#33##0:wybe.phantom, ?tmp#34##0:wybe.phantom) @drone:nn:nn
+            foreign lpvm store(~%tmp#34##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
             drone.loop#cont#1<0>(_:wybe.char, ~d##0:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5
 
 
  [410bae77d3] [NonAliasedParam 0] :
-    foreign llvm icmp_ne(ch##0:wybe.char, ' ':wybe.char, ?tmp#0##0:wybe.bool) @char:nn:nn
-    foreign llvm icmp_ne(ch##0:wybe.char, '\n':wybe.char, ?tmp#1##0:wybe.bool) @char:nn:nn
-    foreign llvm and(~tmp#0##0:wybe.bool, ~tmp#1##0:wybe.bool, ?tmp#7##0:wybe.bool) @bool:nn:nn
+    foreign llvm icmp_ne(ch##0:wybe.char, ' ':wybe.char, ?tmp#0##0:wybe.bool) @drone:nn:nn
+    foreign llvm icmp_ne(ch##0:wybe.char, '\n':wybe.char, ?tmp#1##0:wybe.bool) @drone:nn:nn
+    foreign llvm and(~tmp#0##0:wybe.bool, ~tmp#1##0:wybe.bool, ?tmp#7##0:wybe.bool) @drone:nn:nn
     case ~tmp#7##0:wybe.bool of
     0:
         drone.loop#cont#1<0>[6dacb8fd25](_:wybe.char, ~d##0:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #12
 
     1:
-        foreign llvm icmp_eq(ch##0:wybe.char, 'p':wybe.char, ?tmp#6##0:wybe.bool) @char:nn:nn
+        foreign llvm icmp_eq(ch##0:wybe.char, 'p':wybe.char, ?tmp#6##0:wybe.bool) @drone:nn:nn
         case ~tmp#6##0:wybe.bool of
         0:
             drone.do_action<0>[410bae77d3](~d##0:drone.drone_info, ?d##1:drone.drone_info, ~ch##0:wybe.char, ?success##0:wybe.bool) #6 @drone:nn:nn
-            foreign llvm icmp_eq(~success##0:wybe.bool, 0:wybe.bool, ?tmp#5##0:wybe.bool) @bool:nn:nn
+            foreign llvm icmp_eq(~success##0:wybe.bool, 0:wybe.bool, ?tmp#5##0:wybe.bool) @drone:nn:nn
             case ~tmp#5##0:wybe.bool of
             0:
                 drone.loop#cont#1<0>[6dacb8fd25](_:wybe.char, ~d##1:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11
 
             1:
-                wybe.string.print<0>("invalid action!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @string:nn:nn
-                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @io:nn:nn
-                foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @io:nn:nn
-                foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+                wybe.string.print<0>("invalid action!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @drone:nn:nn
+                foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @drone:nn:nn
+                foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @drone:nn:nn
+                foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
                 drone.loop#cont#1<0>[6dacb8fd25](_:wybe.char, ~d##1:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10
 
 
         1:
             wybe.string.print<0>("(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @drone:nn:nn
             foreign lpvm access(d##0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#22##0:wybe.int) @drone:nn:nn
-            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#23##0:wybe.phantom) @int:nn:nn
-            foreign c print_int(~tmp#22##0:wybe.int, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @int:nn:nn
-            foreign lpvm store(~%tmp#24##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#23##0:wybe.phantom) @drone:nn:nn
+            foreign c print_int(~tmp#22##0:wybe.int, ~tmp#23##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @drone:nn:nn
+            foreign lpvm store(~%tmp#24##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
             wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #15 @drone:nn:nn
             foreign lpvm access(d##0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#25##0:wybe.int) @drone:nn:nn
-            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#26##0:wybe.phantom) @int:nn:nn
-            foreign c print_int(~tmp#25##0:wybe.int, ~tmp#26##0:wybe.phantom, ?tmp#27##0:wybe.phantom) @int:nn:nn
-            foreign lpvm store(~%tmp#27##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#26##0:wybe.phantom) @drone:nn:nn
+            foreign c print_int(~tmp#25##0:wybe.int, ~tmp#26##0:wybe.phantom, ?tmp#27##0:wybe.phantom) @drone:nn:nn
+            foreign lpvm store(~%tmp#27##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
             wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #16 @drone:nn:nn
             foreign lpvm access(d##0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#28##0:wybe.int) @drone:nn:nn
-            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#29##0:wybe.phantom) @int:nn:nn
-            foreign c print_int(~tmp#28##0:wybe.int, ~tmp#29##0:wybe.phantom, ?tmp#30##0:wybe.phantom) @int:nn:nn
-            foreign lpvm store(~%tmp#30##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#29##0:wybe.phantom) @drone:nn:nn
+            foreign c print_int(~tmp#28##0:wybe.int, ~tmp#29##0:wybe.phantom, ?tmp#30##0:wybe.phantom) @drone:nn:nn
+            foreign lpvm store(~%tmp#30##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
             wybe.string.print<0>(") #":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #17 @drone:nn:nn
             foreign lpvm access(d##0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#31##0:wybe.int) @drone:nn:nn
-            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#32##0:wybe.phantom) @int:nn:nn
-            foreign c print_int(~tmp#31##0:wybe.int, ~tmp#32##0:wybe.phantom, ?tmp#33##0:wybe.phantom) @int:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp#33##0:wybe.phantom, ?tmp#34##0:wybe.phantom) @io:nn:nn
-            foreign lpvm store(~%tmp#34##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#32##0:wybe.phantom) @drone:nn:nn
+            foreign c print_int(~tmp#31##0:wybe.int, ~tmp#32##0:wybe.phantom, ?tmp#33##0:wybe.phantom) @drone:nn:nn
+            foreign c putchar('\n':wybe.char, ~tmp#33##0:wybe.phantom, ?tmp#34##0:wybe.phantom) @drone:nn:nn
+            foreign lpvm store(~%tmp#34##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
             drone.loop#cont#1<0>[6dacb8fd25](_:wybe.char, ~d##0:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5
 
 
@@ -1190,11 +1190,11 @@ loop#cont#1([ch##0:wybe.char], d##0:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 1]
   MultiSpeczDepInfo: [(3,(drone.loop<0>,fromList [NonAliasedParamCond 0 [1]]))]
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @char:nn:nn
-    foreign c read_char(?ch##1:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @char:nn:nn
-    foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char:nn:nn
-    foreign lpvm cast(-1:wybe.int, ?tmp#3##0:wybe.char) @io:nn:nn
-    foreign llvm icmp_ne(ch##1:wybe.char, ~tmp#3##0:wybe.char, ?tmp#4##0:wybe.bool) @char:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @drone:nn:nn
+    foreign c read_char(?ch##1:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @drone:nn:nn
+    foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
+    foreign lpvm cast(-1:wybe.int, ?tmp#3##0:wybe.char) @drone:nn:nn
+    foreign llvm icmp_ne(ch##1:wybe.char, ~tmp#3##0:wybe.char, ?tmp#4##0:wybe.bool) @drone:nn:nn
     case ~tmp#4##0:wybe.bool of
     0:
 
@@ -1202,11 +1202,11 @@ loop#cont#1([ch##0:wybe.char], d##0:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.
         drone.loop<0>(~d##0:drone.drone_info, ~ch##1:wybe.char)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @drone:nn:nn
 
  [6dacb8fd25] [NonAliasedParam 1] :
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @char:nn:nn
-    foreign c read_char(?ch##1:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @char:nn:nn
-    foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char:nn:nn
-    foreign lpvm cast(-1:wybe.int, ?tmp#3##0:wybe.char) @io:nn:nn
-    foreign llvm icmp_ne(ch##1:wybe.char, ~tmp#3##0:wybe.char, ?tmp#4##0:wybe.bool) @char:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @drone:nn:nn
+    foreign c read_char(?ch##1:wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @drone:nn:nn
+    foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
+    foreign lpvm cast(-1:wybe.int, ?tmp#3##0:wybe.char) @drone:nn:nn
+    foreign llvm icmp_ne(ch##1:wybe.char, ~tmp#3##0:wybe.char, ?tmp#4##0:wybe.bool) @drone:nn:nn
     case ~tmp#4##0:wybe.bool of
     0:
 
@@ -1222,25 +1222,25 @@ print_info(d##0:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   InterestingCallProperties: []
     wybe.string.print<0>("(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @drone:nn:nn
     foreign lpvm access(d##0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @drone:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @int:nn:nn
-    foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @drone:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @drone:nn:nn
+    foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
     wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @drone:nn:nn
     foreign lpvm access(d##0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @drone:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @int:nn:nn
-    foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @drone:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @drone:nn:nn
+    foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
     wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @drone:nn:nn
     foreign lpvm access(d##0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @drone:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~tmp#2##0:wybe.int, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @int:nn:nn
-    foreign lpvm store(~%tmp#15##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#14##0:wybe.phantom) @drone:nn:nn
+    foreign c print_int(~tmp#2##0:wybe.int, ~tmp#14##0:wybe.phantom, ?tmp#15##0:wybe.phantom) @drone:nn:nn
+    foreign lpvm store(~%tmp#15##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
     wybe.string.print<0>(") #":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @drone:nn:nn
     foreign lpvm access(~d##0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @drone:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~tmp#3##0:wybe.int, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @int:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#21##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom) @drone:nn:nn
+    foreign c print_int(~tmp#3##0:wybe.int, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @drone:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @drone:nn:nn
+    foreign lpvm store(~%tmp#21##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @drone:nn:nn
 
   LLVM code       :
 

@@ -22,16 +22,16 @@ proc #cont#1 > {semipure} (2 calls)
 #cont#1(n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_sgt(n##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    foreign llvm icmp_sgt(n##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @stmt_while:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
 
     1:
-        foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#5##0:wybe.int) @int:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @int:nn:nn
-        foreign c print_int(tmp#5##0:wybe.int, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @int:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#5##0:wybe.int) @stmt_while:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @stmt_while:nn:nn
+        foreign c print_int(tmp#5##0:wybe.int, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @stmt_while:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @stmt_while:nn:nn
+        foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_while:nn:nn
         stmt_while.#cont#1<0>(~tmp#5##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @stmt_while:nn:nn
 
 
@@ -41,11 +41,11 @@ proc #cont#2 > {inline,semipure} (1 calls)
 #cont#2(n##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(tmp#0##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @int:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @stmt_while:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @stmt_while:nn:nn
+    foreign c print_int(tmp#0##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @stmt_while:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @stmt_while:nn:nn
+    foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @stmt_while:nn:nn
     stmt_while.#cont#1<0>(~tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @stmt_while:nn:nn
 
   LLVM code       :

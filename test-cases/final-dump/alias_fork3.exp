@@ -16,25 +16,25 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(24:wybe.int, ?tmp#9##0:mytree.tree) @mytree:nn:nn
-    foreign lpvm mutate(~tmp#9##0:mytree.tree, ?tmp#10##0:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree) @mytree:nn:nn
-    foreign lpvm mutate(~tmp#10##0:mytree.tree, ?tmp#11##0:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 100:wybe.int) @mytree:nn:nn
-    foreign lpvm mutate(~tmp#11##0:mytree.tree, ?tmp#1##0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree) @mytree:nn:nn
-    foreign lpvm alloc(24:wybe.int, ?tmp#15##0:mytree.tree) @mytree:nn:nn
-    foreign lpvm mutate(~tmp#15##0:mytree.tree, ?tmp#16##0:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp#1##0:mytree.tree) @mytree:nn:nn
-    foreign lpvm mutate(~tmp#16##0:mytree.tree, ?tmp#17##0:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 200:wybe.int) @mytree:nn:nn
-    foreign lpvm mutate(~tmp#17##0:mytree.tree, ?tmp#0##0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree) @mytree:nn:nn
+    foreign lpvm alloc(24:wybe.int, ?tmp#9##0:mytree.tree) @alias_fork3:nn:nn
+    foreign lpvm mutate(~tmp#9##0:mytree.tree, ?tmp#10##0:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree) @alias_fork3:nn:nn
+    foreign lpvm mutate(~tmp#10##0:mytree.tree, ?tmp#11##0:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 100:wybe.int) @alias_fork3:nn:nn
+    foreign lpvm mutate(~tmp#11##0:mytree.tree, ?tmp#1##0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree) @alias_fork3:nn:nn
+    foreign lpvm alloc(24:wybe.int, ?tmp#15##0:mytree.tree) @alias_fork3:nn:nn
+    foreign lpvm mutate(~tmp#15##0:mytree.tree, ?tmp#16##0:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~tmp#1##0:mytree.tree) @alias_fork3:nn:nn
+    foreign lpvm mutate(~tmp#16##0:mytree.tree, ?tmp#17##0:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 200:wybe.int) @alias_fork3:nn:nn
+    foreign lpvm mutate(~tmp#17##0:mytree.tree, ?tmp#0##0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree) @alias_fork3:nn:nn
     alias_fork3.simpleSlice<0>(~tmp#0##0:mytree.tree, ?tmp#5##0:mytree.tree) #5 @alias_fork3:nn:nn
-    wybe.string.print<0>("expect t - 100:":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    mytree.printTree1<0>(~tmp#5##0:mytree.tree, "{":wybe.string, ?tmp#22##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @mytree:nn:nn
-    wybe.string.print<0>("}":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @mytree:nn:nn
-    wybe.string.print<0>("":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #12 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#24##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#24##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#25##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>("expect t - 100:":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @alias_fork3:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#19##0:wybe.phantom) @alias_fork3:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @alias_fork3:nn:nn
+    foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias_fork3:nn:nn
+    mytree.printTree1<0>(~tmp#5##0:mytree.tree, "{":wybe.string, ?tmp#22##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #10 @alias_fork3:nn:nn
+    wybe.string.print<0>("}":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @alias_fork3:nn:nn
+    wybe.string.print<0>("":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #12 @alias_fork3:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#24##0:wybe.phantom) @alias_fork3:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#24##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @alias_fork3:nn:nn
+    foreign lpvm store(~%tmp#25##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias_fork3:nn:nn
 
 
 proc simpleSlice > public (1 calls)
@@ -42,16 +42,16 @@ proc simpleSlice > public (1 calls)
 simpleSlice(tr##0:mytree.tree, ?#result##0:mytree.tree)<{}; {}; {}>:
   AliasPairs: [(#result##0,tr##0)]
   InterestingCallProperties: []
-    foreign llvm icmp_ne(tr##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool)
+    foreign llvm icmp_ne(tr##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool) @alias_fork3:nn:nn
     case ~tmp#6##0:wybe.bool of
     0:
-        foreign lpvm alloc(24:wybe.int, ?tmp#10##0:mytree.tree) @mytree:nn:nn
-        foreign lpvm mutate(~tmp#10##0:mytree.tree, ?tmp#11##0:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree) @mytree:nn:nn
-        foreign lpvm mutate(~tmp#11##0:mytree.tree, ?tmp#12##0:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, -1:wybe.int) @mytree:nn:nn
-        foreign lpvm mutate(~tmp#12##0:mytree.tree, ?#result##0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree) @mytree:nn:nn
+        foreign lpvm alloc(24:wybe.int, ?tmp#10##0:mytree.tree) @alias_fork3:nn:nn
+        foreign lpvm mutate(~tmp#10##0:mytree.tree, ?tmp#11##0:mytree.tree, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree) @alias_fork3:nn:nn
+        foreign lpvm mutate(~tmp#11##0:mytree.tree, ?tmp#12##0:mytree.tree, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, -1:wybe.int) @alias_fork3:nn:nn
+        foreign lpvm mutate(~tmp#12##0:mytree.tree, ?#result##0:mytree.tree, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, 0:mytree.tree) @alias_fork3:nn:nn
 
     1:
-        foreign lpvm access(~tr##0:mytree.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:mytree.tree) @mytree:nn:nn
+        foreign lpvm access(~tr##0:mytree.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:mytree.tree) @alias_fork3:nn:nn
 
 
   LLVM code       :
@@ -197,7 +197,7 @@ printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string)<{<<w
   AliasPairs: [(prefix##0,prefix##3)]
   InterestingCallProperties: [InterestingUnaliased 1]
   MultiSpeczDepInfo: [(1,(mytree.printTree1<0>,fromList [NonAliasedParamCond 1 [1]])),(2,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 [1]]))]
-    foreign llvm icmp_ne(t##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool)
+    foreign llvm icmp_ne(t##0:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.bool) @mytree:nn:nn
     case ~tmp#2##0:wybe.bool of
     0:
         foreign llvm move(~prefix##0:wybe.string, ?prefix##3:wybe.string)
@@ -208,9 +208,9 @@ printTree1(t##0:mytree.tree, prefix##0:wybe.string, ?prefix##3:wybe.string)<{<<w
         foreign lpvm access(~t##0:mytree.tree, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?r##0:mytree.tree) @mytree:nn:nn
         mytree.printTree1<0>(~l##0:mytree.tree, ~prefix##0:wybe.string, ?prefix##1:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @mytree:nn:nn
         wybe.string.print<0>(~prefix##1:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @mytree:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @int:nn:nn
-        foreign c print_int(~k##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @int:nn:nn
-        foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @mytree:nn:nn
+        foreign c print_int(~k##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @mytree:nn:nn
+        foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @mytree:nn:nn
         mytree.printTree1<0>(~r##0:mytree.tree, ", ":wybe.string, ?prefix##3:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @mytree:nn:nn
 
 

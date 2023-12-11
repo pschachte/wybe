@@ -36,12 +36,12 @@ proc #cont#3 > {semipure} (2 calls)
 #cont#3(tmp#0##0:wybe.list(5) <{}; {}; {0}>)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_ne(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool)
+    foreign llvm icmp_ne(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool) @unbranch_bug:nn:nn
     case ~tmp#7##0:wybe.bool of
     0:
 
     1:
-        foreign lpvm access(~tmp#0##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##1:wybe.list(5)) @list:nn:nn
+        foreign lpvm access(~tmp#0##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##1:wybe.list(5)) @unbranch_bug:nn:nn
         unbranch_bug.#cont#3<0>(~tmp#0##1:wybe.list(5))<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @unbranch_bug:nn:nn
 
 

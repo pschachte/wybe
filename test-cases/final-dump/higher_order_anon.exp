@@ -21,13 +21,13 @@ proc #anon#1 > {inline} (1 calls)
 #anon#1(anon#1#1##0:wybe.int, ?anon#1#2##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm add(~anon#1#1##0:wybe.int, 1:wybe.int, ?anon#1#2##0:wybe.int) @int:nn:nn
+    foreign llvm add(~anon#1#1##0:wybe.int, 1:wybe.int, ?anon#1#2##0:wybe.int) @higher_order_anon:nn:nn
 proc #anon#1 > {inline} (1 calls)
 1: higher_order_anon.#anon#1<1>
 #anon#1(anon#1#1##0:wybe.int, ?anon#1#2##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm add(~anon#1#1##0:wybe.int, 1:wybe.int, ?anon#1#2##0:wybe.int) @int:nn:nn
+    foreign llvm add(~anon#1#1##0:wybe.int, 1:wybe.int, ?anon#1#2##0:wybe.int) @higher_order_anon:nn:nn
 
 
 proc #anon#2 > {inline} (1 calls)
@@ -35,13 +35,13 @@ proc #anon#2 > {inline} (1 calls)
 #anon#2(anon#2#1##0:wybe.int, ?anon#2#2##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm add(~anon#2#1##0:wybe.int, 1:wybe.int, ?anon#2#2##0:wybe.int) @int:nn:nn
+    foreign llvm add(~anon#2#1##0:wybe.int, 1:wybe.int, ?anon#2#2##0:wybe.int) @higher_order_anon:nn:nn
 proc #anon#2 > {inline} (1 calls)
 1: higher_order_anon.#anon#2<1>
 #anon#2(anon#2#1##0:wybe.int, ?anon#2#2##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm add(~anon#2#1##0:wybe.int, 1:wybe.int, ?anon#2#2##0:wybe.int) @int:nn:nn
+    foreign llvm add(~anon#2#1##0:wybe.int, 1:wybe.int, ?anon#2#2##0:wybe.int) @higher_order_anon:nn:nn
 
 
 proc #anon#3 > {inline} (1 calls)
@@ -119,13 +119,13 @@ proc #anon#7#anon#1 > {inline} (1 calls)
 #anon#7#anon#1(anon#8#1##0:wybe.int, ?anon#8#2##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm add(~anon#8#1##0:wybe.int, 1:wybe.int, ?anon#8#2##0:wybe.int) @int:nn:nn
+    foreign llvm add(~anon#8#1##0:wybe.int, 1:wybe.int, ?anon#8#2##0:wybe.int) @higher_order_anon:nn:nn
 proc #anon#7#anon#1 > {inline} (1 calls)
 1: higher_order_anon.#anon#7#anon#1<1>
 #anon#7#anon#1(anon#8#1##0:wybe.int, ?anon#8#2##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm add(~anon#8#1##0:wybe.int, 1:wybe.int, ?anon#8#2##0:wybe.int) @int:nn:nn
+    foreign llvm add(~anon#8#1##0:wybe.int, 1:wybe.int, ?anon#8#2##0:wybe.int) @higher_order_anon:nn:nn
 
 
 proc #anon#8 > {inline} (1 calls)
@@ -133,13 +133,13 @@ proc #anon#8 > {inline} (1 calls)
 #anon#8(anon#9#1##0:wybe.float, [anon#9#2##0:29 <{}; {}; {1}>], anon#9#3##0:wybe.float, ?anon#9#4##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm fadd(~anon#9#1##0:wybe.float, ~anon#9#3##0:wybe.float, ?anon#9#4##0:wybe.float) @float:nn:nn
+    foreign llvm fadd(~anon#9#1##0:wybe.float, ~anon#9#3##0:wybe.float, ?anon#9#4##0:wybe.float) @higher_order_anon:nn:nn
 proc #anon#8 > {inline} (1 calls)
 1: higher_order_anon.#anon#8<1>
 #anon#8(anon#9#1##0:wybe.float, anon#9#2##0:29 <{}; {}; {1}>, anon#9#3##0:wybe.float, ?anon#9#4##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm fadd(~anon#9#1##0:wybe.float, ~anon#9#3##0:wybe.float, ?anon#9#4##0:wybe.float) @float:nn:nn
+    foreign llvm fadd(~anon#9#1##0:wybe.float, ~anon#9#3##0:wybe.float, ?anon#9#4##0:wybe.float) @higher_order_anon:nn:nn
 
 
 proc #anon#9 > {inline} (1 calls)
@@ -147,13 +147,13 @@ proc #anon#9 > {inline} (1 calls)
 #anon#9(anon#10#1##0:wybe.float, [anon#10#2##0:29 <{}; {}; {1}>], anon#10#3##0:wybe.float, ?anon#10#4##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm fadd(~anon#10#1##0:wybe.float, ~anon#10#3##0:wybe.float, ?anon#10#4##0:wybe.float) @float:nn:nn
+    foreign llvm fadd(~anon#10#1##0:wybe.float, ~anon#10#3##0:wybe.float, ?anon#10#4##0:wybe.float) @higher_order_anon:nn:nn
 proc #anon#9 > {inline} (1 calls)
 1: higher_order_anon.#anon#9<1>
 #anon#9(anon#10#1##0:wybe.float, anon#10#2##0:29 <{}; {}; {1}>, anon#10#3##0:wybe.float, ?anon#10#4##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm fadd(~anon#10#1##0:wybe.float, ~anon#10#3##0:wybe.float, ?anon#10#4##0:wybe.float) @float:nn:nn
+    foreign llvm fadd(~anon#10#1##0:wybe.float, ~anon#10#3##0:wybe.float, ?anon#10#4##0:wybe.float) @higher_order_anon:nn:nn
 
   LLVM code       :
 

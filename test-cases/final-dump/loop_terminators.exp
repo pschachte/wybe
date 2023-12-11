@@ -56,8 +56,8 @@ proc loop3 > {inline} (0 calls)
 loop3()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.c_string<0>("lol":wybe.string, ?tmp#0##0:wybe.c_string) #1 @control:nn:nn
-    foreign c {terminal,semipure} error_exit(c"loop_terminators:14:11":wybe.c_string, ~tmp#0##0:wybe.c_string) @control:nn:nn
+    wybe.string.c_string<0>("lol":wybe.string, ?tmp#0##0:wybe.c_string) #1 @loop_terminators:nn:nn
+    foreign c {terminal,semipure} error_exit(c"loop_terminators:14:11":wybe.c_string, ~tmp#0##0:wybe.c_string) @loop_terminators:nn:nn
 
 
 proc loop3#cont#1 > {inline} (1 calls)
@@ -65,8 +65,8 @@ proc loop3#cont#1 > {inline} (1 calls)
 loop3#cont#1()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.c_string<0>("lol":wybe.string, ?tmp#2##0:wybe.c_string) #1 @control:nn:nn
-    foreign c {terminal,semipure} error_exit(c"loop_terminators:14:11":wybe.c_string, ~tmp#2##0:wybe.c_string) @control:nn:nn
+    wybe.string.c_string<0>("lol":wybe.string, ?tmp#2##0:wybe.c_string) #1 @loop_terminators:nn:nn
+    foreign c {terminal,semipure} error_exit(c"loop_terminators:14:11":wybe.c_string, ~tmp#2##0:wybe.c_string) @loop_terminators:nn:nn
 
   LLVM code       :
 

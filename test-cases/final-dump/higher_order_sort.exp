@@ -14,28 +14,28 @@ proc insert > (2 calls)
 insert(<=##0:(X, X, ?wybe.bool) <{}; {}; {0}>, x##0:X <{}; {}; {1}>, xs##0:wybe.list(X) <{}; {}; {2}>, outByReference xs##1:wybe.list(X) <{}; {}; {0, 1, 2}>)<{}; {}; {}>:
   AliasPairs: [(xs##0,xs##1)]
   InterestingCallProperties: []
-    foreign llvm icmp_ne(xs##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool)
+    foreign llvm icmp_ne(xs##0:wybe.int, 0:wybe.int, ?tmp#7##0:wybe.bool) @higher_order_sort:nn:nn
     case ~tmp#7##0:wybe.bool of
     0:
-        foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T)) @list:nn:nn
-        foreign lpvm mutate(~tmp#10##0:wybe.list(T), ?tmp#11##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:T) @list:nn:nn
-        foreign lpvm mutate(~tmp#11##0:wybe.list(T), ?xs##1:wybe.list(X), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @list:nn:nn
+        foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.list(T)) @higher_order_sort:nn:nn
+        foreign lpvm mutate(~tmp#10##0:wybe.list(T), ?tmp#11##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:T) @higher_order_sort:nn:nn
+        foreign lpvm mutate(~tmp#11##0:wybe.list(T), ?xs##1:wybe.list(X), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 0:wybe.list(T)) @higher_order_sort:nn:nn
 
     1:
-        foreign lpvm access(xs##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?head##0:X) @list:nn:nn
-        foreign lpvm access(xs##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?rest##0:wybe.list(X)) @list:nn:nn
+        foreign lpvm access(xs##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?head##0:X) @higher_order_sort:nn:nn
+        foreign lpvm access(xs##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?rest##0:wybe.list(X)) @higher_order_sort:nn:nn
         <=##0:(X, X, ?wybe.bool)(x##0:X, head##0:X, ?tmp#4##0:wybe.bool) #1 @higher_order_sort:nn:nn
         case ~tmp#4##0:wybe.bool of
         0:
-            foreign lpvm alloc(16:wybe.int, ?tmp#14##0:wybe.list(T)) @list:nn:nn
-            foreign lpvm mutate(~tmp#14##0:wybe.list(T), ?tmp#15##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head##0:T) @list:nn:nn
+            foreign lpvm alloc(16:wybe.int, ?tmp#14##0:wybe.list(T)) @higher_order_sort:nn:nn
+            foreign lpvm mutate(~tmp#14##0:wybe.list(T), ?tmp#15##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~head##0:T) @higher_order_sort:nn:nn
             higher_order_sort.insert<0>(~<=##0:(X, X, ?wybe.bool), ~x##0:X, ~rest##0:wybe.list(X), outByReference rest##1:wybe.list(X)) #3 @higher_order_sort:nn:nn
-            foreign lpvm mutate(~tmp#15##0:wybe.list(T), ?xs##1:wybe.list(X), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~takeReference rest##1:wybe.list(T)) @list:nn:nn
+            foreign lpvm mutate(~tmp#15##0:wybe.list(T), ?xs##1:wybe.list(X), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~takeReference rest##1:wybe.list(T)) @higher_order_sort:nn:nn
 
         1:
-            foreign lpvm alloc(16:wybe.int, ?tmp#18##0:wybe.list(T)) @list:nn:nn
-            foreign lpvm mutate(~tmp#18##0:wybe.list(T), ?tmp#19##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:T) @list:nn:nn
-            foreign lpvm mutate(~tmp#19##0:wybe.list(T), ?xs##1:wybe.list(X), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~xs##0:wybe.list(T)) @list:nn:nn
+            foreign lpvm alloc(16:wybe.int, ?tmp#18##0:wybe.list(T)) @higher_order_sort:nn:nn
+            foreign lpvm mutate(~tmp#18##0:wybe.list(T), ?tmp#19##0:wybe.list(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~x##0:T) @higher_order_sort:nn:nn
+            foreign lpvm mutate(~tmp#19##0:wybe.list(T), ?xs##1:wybe.list(X), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~xs##0:wybe.list(T)) @higher_order_sort:nn:nn
 
 
 
@@ -53,14 +53,14 @@ proc sort#cont#1 > (2 calls)
 sort#cont#1(<=##0:(X, X, ?wybe.bool) <{}; {}; {0}>, sorted##0:wybe.list(X) <{}; {}; {1}>, tmp#1##0:wybe.list(X) <{}; {}; {2}>, ?sorted##2:wybe.list(X) <{}; {}; {0, 1, 2}>)<{}; {}; {}>:
   AliasPairs: [(sorted##0,sorted##2)]
   InterestingCallProperties: []
-    foreign llvm icmp_ne(tmp#1##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
+    foreign llvm icmp_ne(tmp#1##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @higher_order_sort:nn:nn
     case ~tmp#5##0:wybe.bool of
     0:
         foreign llvm move(~sorted##0:wybe.list(X), ?sorted##2:wybe.list(X))
 
     1:
-        foreign lpvm access(tmp#1##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:X) @list:nn:nn
-        foreign lpvm access(~tmp#1##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##1:wybe.list(X)) @list:nn:nn
+        foreign lpvm access(tmp#1##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?x##0:X) @higher_order_sort:nn:nn
+        foreign lpvm access(~tmp#1##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##1:wybe.list(X)) @higher_order_sort:nn:nn
         higher_order_sort.insert<0>(<=##0:(X, X, ?wybe.bool), ~x##0:X, ~sorted##0:wybe.list(X), outByReference sorted##1:wybe.list(X)) #1 @higher_order_sort:nn:nn
         higher_order_sort.sort#cont#1<0>(~<=##0:(X, X, ?wybe.bool), ~sorted##1:wybe.list(X), ~tmp#1##1:wybe.list(X), ?sorted##2:wybe.list(X)) #2 @higher_order_sort:nn:nn
 

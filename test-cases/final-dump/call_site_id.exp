@@ -16,19 +16,19 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @int:nn:nn
-    foreign c read_int(?x##0:wybe.int, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @int:nn:nn
-    foreign c read_int(?y##0:wybe.int, ~tmp#7##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @int:nn:nn
-    foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
-    foreign llvm icmp_sgt(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @int:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @call_site_id:nn:nn
+    foreign c read_int(?x##0:wybe.int, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @call_site_id:nn:nn
+    foreign c read_int(?y##0:wybe.int, ~tmp#7##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @call_site_id:nn:nn
+    foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @call_site_id:nn:nn
+    foreign llvm icmp_sgt(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @call_site_id:nn:nn
     case ~tmp#5##0:wybe.bool of
     0:
-        foreign llvm sub(0:wybe.int, ~x##0:wybe.int, ?tmp#1##0:wybe.int) @int:nn:nn
+        foreign llvm sub(0:wybe.int, ~x##0:wybe.int, ?tmp#1##0:wybe.int) @call_site_id:nn:nn
         call_site_id.foo<0>(~tmp#1##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #14 @call_site_id:nn:nn
-        foreign llvm icmp_sgt(y##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @int:nn:nn
+        foreign llvm icmp_sgt(y##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @call_site_id:nn:nn
         case ~tmp#4##0:wybe.bool of
         0:
-            foreign llvm sub(0:wybe.int, ~y##0:wybe.int, ?tmp#2##0:wybe.int) @int:nn:nn
+            foreign llvm sub(0:wybe.int, ~y##0:wybe.int, ?tmp#2##0:wybe.int) @call_site_id:nn:nn
             call_site_id.foo<0>(~tmp#2##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #15 @call_site_id:nn:nn
 
         1:
@@ -37,10 +37,10 @@ module top-level code > public {semipure} (0 calls)
 
     1:
         call_site_id.foo<0>(~x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #17 @call_site_id:nn:nn
-        foreign llvm icmp_sgt(y##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool) @int:nn:nn
+        foreign llvm icmp_sgt(y##0:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.bool) @call_site_id:nn:nn
         case ~tmp#3##0:wybe.bool of
         0:
-            foreign llvm sub(0:wybe.int, ~y##0:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
+            foreign llvm sub(0:wybe.int, ~y##0:wybe.int, ?tmp#0##0:wybe.int) @call_site_id:nn:nn
             call_site_id.foo<0>(~tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #18 @call_site_id:nn:nn
 
         1:
@@ -69,12 +69,12 @@ foo(x##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @call_site_id:nn:nn
     wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @call_site_id:nn:nn
     wybe.string.print<0>(" ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @call_site_id:nn:nn
-    foreign llvm mul(~x##0:wybe.int, 5:wybe.int, ?tmp#1##0:wybe.int) @int:nn:nn
-    foreign llvm add(~tmp#1##0:wybe.int, 10:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @int:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign llvm mul(~x##0:wybe.int, 5:wybe.int, ?tmp#1##0:wybe.int) @call_site_id:nn:nn
+    foreign llvm add(~tmp#1##0:wybe.int, 10:wybe.int, ?tmp#0##0:wybe.int) @call_site_id:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @call_site_id:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @call_site_id:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @call_site_id:nn:nn
+    foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @call_site_id:nn:nn
 
   LLVM code       :
 

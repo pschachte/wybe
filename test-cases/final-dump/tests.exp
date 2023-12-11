@@ -32,7 +32,7 @@ proc lookup > public (6 calls)
 lookup(key##0:wybe.int, map##0:tests.map, ?result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_ne(map##0:wybe.int, 0:wybe.int, ?tmp#15##0:wybe.bool)
+    foreign llvm icmp_ne(map##0:wybe.int, 0:wybe.int, ?tmp#15##0:wybe.bool) @tests:nn:nn
     case ~tmp#15##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
@@ -40,10 +40,10 @@ lookup(key##0:wybe.int, map##0:tests.map, ?result##0:wybe.int, ?#success##0:wybe
 
     1:
         foreign lpvm access(map##0:tests.map, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @tests:nn:nn
-        foreign llvm icmp_eq(key##0:wybe.int, tmp#0##0:wybe.int, ?tmp#13##0:wybe.bool) @int:nn:nn
+        foreign llvm icmp_eq(key##0:wybe.int, tmp#0##0:wybe.int, ?tmp#13##0:wybe.bool) @tests:nn:nn
         case ~tmp#13##0:wybe.bool of
         0:
-            foreign llvm icmp_slt(key##0:wybe.int, ~tmp#0##0:wybe.int, ?tmp#11##0:wybe.bool) @int:nn:nn
+            foreign llvm icmp_slt(key##0:wybe.int, ~tmp#0##0:wybe.int, ?tmp#11##0:wybe.bool) @tests:nn:nn
             case ~tmp#11##0:wybe.bool of
             0:
                 foreign lpvm access(~map##0:tests.map, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?tmp#4##0:tests.map) @tests:nn:nn
@@ -66,7 +66,7 @@ proc lt > public (1 calls)
 lt(x##0:wybe.int, y##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_slt(~x##0:wybe.int, ~y##0:wybe.int, ?tmp#3##0:wybe.bool) @int:nn:nn
+    foreign llvm icmp_slt(~x##0:wybe.int, ~y##0:wybe.int, ?tmp#3##0:wybe.bool) @tests:nn:nn
     case ~tmp#3##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)

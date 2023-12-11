@@ -25,7 +25,7 @@ proc if_test > public (1 calls)
 if_test(x##0:wybe.int, ?#result##0:wybe.string)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_sgt(~x##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    foreign llvm icmp_sgt(~x##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @exp_if:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
         foreign llvm move("smaller":wybe.string, ?#result##0:wybe.string) @exp_if:nn:nn

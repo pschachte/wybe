@@ -53,18 +53,18 @@ foo(r1##0:alias_type4.posrec)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
     foreign lpvm access(~r1##0:alias_type4.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:alias_type4.position) @alias_type4:nn:nn
     foreign lpvm {noalias} mutate(~tmp#0##0:alias_type4.position, ?pos1##1:alias_type4.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 1111:wybe.int) @alias_type4:nn:nn
     foreign lpvm access(~pos1##1:alias_type4.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @alias_type4:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @int:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @alias_type4:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @alias_type4:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @alias_type4:nn:nn
+    foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias_type4:nn:nn
  [410bae77d3] [NonAliasedParam 0] :
     foreign lpvm access(~r1##0:alias_type4.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:alias_type4.position) @alias_type4:nn:nn
     foreign lpvm {noalias} mutate(~tmp#0##0:alias_type4.position, ?pos1##1:alias_type4.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 1111:wybe.int) @alias_type4:nn:nn
     foreign lpvm access(~pos1##1:alias_type4.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @alias_type4:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @int:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#7##0:wybe.phantom) @alias_type4:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @alias_type4:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @alias_type4:nn:nn
+    foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias_type4:nn:nn
 
   LLVM code       :
 

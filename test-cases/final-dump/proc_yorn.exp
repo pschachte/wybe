@@ -16,10 +16,10 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
     proc_yorn.yorn#cont#1<0>("Well, yes or no?":wybe.string, ?r##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @proc_yorn:nn:nn
-    wybe.bool.print<0>(~r##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @bool:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.bool.print<0>(~r##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @proc_yorn:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @proc_yorn:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @proc_yorn:nn:nn
+    foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @proc_yorn:nn:nn
 
 
 proc is_yes > {inline} (4 calls)
@@ -27,10 +27,10 @@ proc is_yes > {inline} (4 calls)
 is_yes(ch##0:wybe.char, ?#result##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_ne(ch##0:wybe.char, 'y':wybe.char, ?tmp#2##0:wybe.bool) @char:nn:nn
-    foreign llvm icmp_ne(~ch##0:wybe.char, 'Y':wybe.char, ?tmp#3##0:wybe.bool) @char:nn:nn
-    foreign llvm and(~tmp#2##0:wybe.bool, ~tmp#3##0:wybe.bool, ?tmp#1##0:wybe.bool) @bool:nn:nn
-    foreign llvm xor(~tmp#1##0:wybe.bool, 1:wybe.bool, ?#result##0:wybe.bool) @bool:nn:nn
+    foreign llvm icmp_ne(ch##0:wybe.char, 'y':wybe.char, ?tmp#2##0:wybe.bool) @proc_yorn:nn:nn
+    foreign llvm icmp_ne(~ch##0:wybe.char, 'Y':wybe.char, ?tmp#3##0:wybe.bool) @proc_yorn:nn:nn
+    foreign llvm and(~tmp#2##0:wybe.bool, ~tmp#3##0:wybe.bool, ?tmp#1##0:wybe.bool) @proc_yorn:nn:nn
+    foreign llvm xor(~tmp#1##0:wybe.bool, 1:wybe.bool, ?#result##0:wybe.bool) @proc_yorn:nn:nn
 
 
 proc is_yes_or_no > (3 calls)
@@ -38,14 +38,14 @@ proc is_yes_or_no > (3 calls)
 is_yes_or_no(ch##0:wybe.char, ?#result##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_ne(ch##0:wybe.char, 'y':wybe.char, ?tmp#6##0:wybe.bool) @char:nn:nn
-    foreign llvm icmp_ne(ch##0:wybe.char, 'Y':wybe.char, ?tmp#7##0:wybe.bool) @char:nn:nn
-    foreign llvm and(~tmp#6##0:wybe.bool, ~tmp#7##0:wybe.bool, ?tmp#8##0:wybe.bool) @bool:nn:nn
-    foreign llvm xor(~tmp#8##0:wybe.bool, 1:wybe.bool, ?tmp#1##0:wybe.bool) @bool:nn:nn
-    foreign llvm icmp_eq(ch##0:wybe.char, 'n':wybe.char, ?tmp#3##0:wybe.bool) @char:nn:nn
-    foreign llvm icmp_eq(~ch##0:wybe.char, 'N':wybe.char, ?tmp#4##0:wybe.bool) @char:nn:nn
-    foreign llvm or(~tmp#3##0:wybe.bool, ~tmp#4##0:wybe.bool, ?tmp#2##0:wybe.bool) @bool:nn:nn
-    foreign llvm or(~tmp#1##0:wybe.bool, ~tmp#2##0:wybe.bool, ?#result##0:wybe.bool) @bool:nn:nn
+    foreign llvm icmp_ne(ch##0:wybe.char, 'y':wybe.char, ?tmp#6##0:wybe.bool) @proc_yorn:nn:nn
+    foreign llvm icmp_ne(ch##0:wybe.char, 'Y':wybe.char, ?tmp#7##0:wybe.bool) @proc_yorn:nn:nn
+    foreign llvm and(~tmp#6##0:wybe.bool, ~tmp#7##0:wybe.bool, ?tmp#8##0:wybe.bool) @proc_yorn:nn:nn
+    foreign llvm xor(~tmp#8##0:wybe.bool, 1:wybe.bool, ?tmp#1##0:wybe.bool) @proc_yorn:nn:nn
+    foreign llvm icmp_eq(ch##0:wybe.char, 'n':wybe.char, ?tmp#3##0:wybe.bool) @proc_yorn:nn:nn
+    foreign llvm icmp_eq(~ch##0:wybe.char, 'N':wybe.char, ?tmp#4##0:wybe.bool) @proc_yorn:nn:nn
+    foreign llvm or(~tmp#3##0:wybe.bool, ~tmp#4##0:wybe.bool, ?tmp#2##0:wybe.bool) @proc_yorn:nn:nn
+    foreign llvm or(~tmp#1##0:wybe.bool, ~tmp#2##0:wybe.bool, ?#result##0:wybe.bool) @proc_yorn:nn:nn
 
 
 proc yorn > public {inline} (1 calls)
@@ -63,20 +63,20 @@ yorn#cont#1(prompt##0:wybe.string, ?result##1:wybe.bool)<{<<wybe.io.io>>}; {<<wy
   InterestingCallProperties: []
     wybe.string.print<0>(prompt##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @proc_yorn:nn:nn
     wybe.string.print<0>(" (y/n) ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @proc_yorn:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @char:nn:nn
-    foreign c read_char(?response##0:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @char:nn:nn
-    foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @char:nn:nn
-    foreign llvm icmp_ne(response##0:wybe.char, 'y':wybe.char, ?tmp#5##0:wybe.bool) @char:nn:nn
-    foreign llvm icmp_ne(response##0:wybe.char, 'Y':wybe.char, ?tmp#6##0:wybe.bool) @char:nn:nn
-    foreign llvm and(~tmp#5##0:wybe.bool, ~tmp#6##0:wybe.bool, ?tmp#7##0:wybe.bool) @bool:nn:nn
-    foreign llvm xor(~tmp#7##0:wybe.bool, 1:wybe.bool, ?tmp#0##0:wybe.bool) @bool:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#2##0:wybe.phantom) @proc_yorn:nn:nn
+    foreign c read_char(?response##0:wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @proc_yorn:nn:nn
+    foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @proc_yorn:nn:nn
+    foreign llvm icmp_ne(response##0:wybe.char, 'y':wybe.char, ?tmp#5##0:wybe.bool) @proc_yorn:nn:nn
+    foreign llvm icmp_ne(response##0:wybe.char, 'Y':wybe.char, ?tmp#6##0:wybe.bool) @proc_yorn:nn:nn
+    foreign llvm and(~tmp#5##0:wybe.bool, ~tmp#6##0:wybe.bool, ?tmp#7##0:wybe.bool) @proc_yorn:nn:nn
+    foreign llvm xor(~tmp#7##0:wybe.bool, 1:wybe.bool, ?tmp#0##0:wybe.bool) @proc_yorn:nn:nn
     proc_yorn.is_yes_or_no<0>(~response##0:wybe.char, ?tmp#1##0:wybe.bool) #4 @proc_yorn:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
-        wybe.string.print<0>("Please answer 'yes' or 'no'.":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @string:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        wybe.string.print<0>("Please answer 'yes' or 'no'.":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @proc_yorn:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @proc_yorn:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @proc_yorn:nn:nn
+        foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @proc_yorn:nn:nn
         proc_yorn.yorn#cont#1<0>(~prompt##0:wybe.string, ?result##1:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @proc_yorn:nn:nn
 
     1:

@@ -43,14 +43,14 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm mutate(~tmp#14##0:alias_type2.posrec, ?rec##1:alias_type2.posrec, 8:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 2:wybe.int) @alias_type2:nn:nn
     foreign lpvm {noalias} mutate(~tmp#9##0:alias_type2.position, ?pos##1:alias_type2.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 200:wybe.int) @alias_type2:nn:nn
     foreign lpvm access(~pos##1:alias_type2.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#2##0:wybe.int) @alias_type2:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~tmp#2##0:wybe.int, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @int:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @alias_type2:nn:nn
+    foreign c print_int(~tmp#2##0:wybe.int, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @alias_type2:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#22##0:wybe.phantom, ?tmp#23##0:wybe.phantom) @alias_type2:nn:nn
     foreign lpvm access(~rec##1:alias_type2.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:alias_type2.position) @alias_type2:nn:nn
     foreign lpvm access(~tmp#3##0:alias_type2.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.int) @alias_type2:nn:nn
-    foreign c print_int(~tmp#4##0:wybe.int, ~tmp#23##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @int:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#28##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#29##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign c print_int(~tmp#4##0:wybe.int, ~tmp#23##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @alias_type2:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#28##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @alias_type2:nn:nn
+    foreign lpvm store(~%tmp#29##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias_type2:nn:nn
 
   LLVM code       :
 

@@ -15,7 +15,7 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
     wybe.control.assert<0>(0:wybe.bool, c"assert_error:3:2":wybe.c_string) #1 @assert_error:nn:nn
-    foreign c {terminal,semipure} error_exit(c"assert_error:5:2":wybe.c_string, c"we should never get here":wybe.c_string) @control:nn:nn
+    foreign c {terminal,semipure} error_exit(c"assert_error:5:2":wybe.c_string, c"we should never get here":wybe.c_string) @assert_error:nn:nn
 
   LLVM code       :
 

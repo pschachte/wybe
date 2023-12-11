@@ -31,19 +31,19 @@ proc beer99#cont#1 > (2 calls)
 beer99#cont#1(count##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_sge(count##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool) @int:nn:nn
+    foreign llvm icmp_sge(count##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool) @proc_beer:nn:nn
     case ~tmp#0##0:wybe.bool of
     0:
 
     1:
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @int:nn:nn
-        foreign c print_int(count##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @int:nn:nn
-        foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
-        wybe.string.print<0>(" bottles of beer on the wall":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @string:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-        foreign llvm sub(~count##0:wybe.int, 1:wybe.int, ?tmp#8##0:wybe.int) @int:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @proc_beer:nn:nn
+        foreign c print_int(count##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @proc_beer:nn:nn
+        foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @proc_beer:nn:nn
+        wybe.string.print<0>(" bottles of beer on the wall":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @proc_beer:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @proc_beer:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @proc_beer:nn:nn
+        foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @proc_beer:nn:nn
+        foreign llvm sub(~count##0:wybe.int, 1:wybe.int, ?tmp#8##0:wybe.int) @proc_beer:nn:nn
         proc_beer.beer99#cont#1<0>(~tmp#8##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @proc_beer:nn:nn
 
 
@@ -53,14 +53,14 @@ proc beer99#cont#2 > {inline} (1 calls)
 beer99#cont#2(count##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(count##0:wybe.int, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @int:nn:nn
-    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
-    wybe.string.print<0>(" bottles of beer on the wall":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    foreign llvm sub(~count##0:wybe.int, 1:wybe.int, ?count##1:wybe.int) @int:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @proc_beer:nn:nn
+    foreign c print_int(count##0:wybe.int, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @proc_beer:nn:nn
+    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @proc_beer:nn:nn
+    wybe.string.print<0>(" bottles of beer on the wall":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @proc_beer:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @proc_beer:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @proc_beer:nn:nn
+    foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @proc_beer:nn:nn
+    foreign llvm sub(~count##0:wybe.int, 1:wybe.int, ?count##1:wybe.int) @proc_beer:nn:nn
     proc_beer.beer99#cont#1<0>(~count##1:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @proc_beer:nn:nn
 
   LLVM code       :

@@ -25,19 +25,19 @@ module top-level code > public {semipure} (0 calls)
     wybe.string.,,<0>(", r = ":wybe.string, ~tmp#4##0:wybe.string, ?tmp#3##0:wybe.string) #2 @failure_backtrack:nn:nn
     wybe.string.,,<0>(~tmp#2##0:wybe.string, ~tmp#3##0:wybe.string, ?tmp#1##0:wybe.string) #3 @failure_backtrack:nn:nn
     wybe.string.,,<0>("before conditional: x = ":wybe.string, ~tmp#1##0:wybe.string, ?tmp#0##0:wybe.string) #4 @failure_backtrack:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #24 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#173##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#173##0:wybe.phantom, ?tmp#174##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#174##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #24 @failure_backtrack:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#173##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#173##0:wybe.phantom, ?tmp#174##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign lpvm store(~%tmp#174##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @failure_backtrack:nn:nn
     wybe.int.fmt<0>(42:wybe.int, ?tmp#7##0:wybe.string) #17 @failure_backtrack:nn:nn
     wybe.int.fmt<0>(7:wybe.int, ?tmp#9##0:wybe.string) #18 @failure_backtrack:nn:nn
     wybe.string.,,<0>(", r = ":wybe.string, ~tmp#9##0:wybe.string, ?tmp#8##0:wybe.string) #19 @failure_backtrack:nn:nn
     wybe.string.,,<0>(~tmp#7##0:wybe.string, ~tmp#8##0:wybe.string, ?tmp#6##0:wybe.string) #20 @failure_backtrack:nn:nn
     wybe.string.,,<0>("nope fails; x = ":wybe.string, ~tmp#6##0:wybe.string, ?tmp#5##0:wybe.string) #21 @failure_backtrack:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#5##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #25 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#178##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#178##0:wybe.phantom, ?tmp#179##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#179##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#5##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #25 @failure_backtrack:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#178##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#178##0:wybe.phantom, ?tmp#179##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign lpvm store(~%tmp#179##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @failure_backtrack:nn:nn
     failure_backtrack.#cont#1<0>(~tmp#143##0:wybe.int, ~tmp#144##0:wybe.int, 42:wybe.int, 21:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}> #23
 
 
@@ -53,19 +53,19 @@ proc #cont#1 > {semipure} (3 calls)
     wybe.string.,,<0>(", r = ":wybe.string, ~tmp#14##0:wybe.string, ?tmp#13##0:wybe.string) #2 @failure_backtrack:nn:nn
     wybe.string.,,<0>(~tmp#12##0:wybe.string, ~tmp#13##0:wybe.string, ?tmp#11##0:wybe.string) #3 @failure_backtrack:nn:nn
     wybe.string.,,<0>("after conditional; x = ":wybe.string, ~tmp#11##0:wybe.string, ?tmp#10##0:wybe.string) #4 @failure_backtrack:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#10##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #22 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#171##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#171##0:wybe.phantom, ?tmp#172##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#172##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#10##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #22 @failure_backtrack:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#171##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#171##0:wybe.phantom, ?tmp#172##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign lpvm store(~%tmp#172##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @failure_backtrack:nn:nn
     wybe.int.fmt<0>(x##0:wybe.int, ?tmp#17##0:wybe.string) #6 @failure_backtrack:nn:nn
     wybe.int.fmt<0>(r##0:wybe.int, ?tmp#19##0:wybe.string) #7 @failure_backtrack:nn:nn
     wybe.string.,,<0>(", r = ":wybe.string, ~tmp#19##0:wybe.string, ?tmp#18##0:wybe.string) #8 @failure_backtrack:nn:nn
     wybe.string.,,<0>(~tmp#17##0:wybe.string, ~tmp#18##0:wybe.string, ?tmp#16##0:wybe.string) #9 @failure_backtrack:nn:nn
     wybe.string.,,<0>("before second conditional: x = ":wybe.string, ~tmp#16##0:wybe.string, ?tmp#15##0:wybe.string) #10 @failure_backtrack:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#15##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #23 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#174##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#174##0:wybe.phantom, ?tmp#147##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#147##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#15##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #23 @failure_backtrack:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#174##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#174##0:wybe.phantom, ?tmp#147##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign lpvm store(~%tmp#147##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @failure_backtrack:nn:nn
     foreign lpvm store(9:wybe.int, <<failure_backtrack.r>>:wybe.int) @failure_backtrack:nn:nn
     failure_backtrack.nope2<0>(?x##1:wybe.int, ?tmp#169##0:wybe.bool) #12 @failure_backtrack:nn:nn
     case ~tmp#169##0:wybe.bool of
@@ -76,17 +76,17 @@ proc #cont#1 > {semipure} (3 calls)
         wybe.string.,,<0>(", r = ":wybe.string, ~tmp#24##0:wybe.string, ?tmp#23##0:wybe.string) #17 @failure_backtrack:nn:nn
         wybe.string.,,<0>(~tmp#22##0:wybe.string, ~tmp#23##0:wybe.string, ?tmp#21##0:wybe.string) #18 @failure_backtrack:nn:nn
         wybe.string.,,<0>("nope2 fails; x = ":wybe.string, ~tmp#21##0:wybe.string, ?tmp#20##0:wybe.string) #19 @failure_backtrack:nn:nn
-        wybe.string.print<0>[410bae77d3](~tmp#20##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #24 @string:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#177##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#177##0:wybe.phantom, ?tmp#178##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#178##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        wybe.string.print<0>[410bae77d3](~tmp#20##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #24 @failure_backtrack:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#177##0:wybe.phantom) @failure_backtrack:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#177##0:wybe.phantom, ?tmp#178##0:wybe.phantom) @failure_backtrack:nn:nn
+        foreign lpvm store(~%tmp#178##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @failure_backtrack:nn:nn
         failure_backtrack.#cont#2<0>(~tmp#143##0:wybe.int, ~tmp#144##0:wybe.int, ~x##0:wybe.int, ~y##0:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}> #21
 
     1:
-        wybe.string.print<0>("nope2 succeeds!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #25 @string:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#180##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#180##0:wybe.phantom, ?tmp#181##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#181##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        wybe.string.print<0>("nope2 succeeds!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #25 @failure_backtrack:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#180##0:wybe.phantom) @failure_backtrack:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#180##0:wybe.phantom, ?tmp#181##0:wybe.phantom) @failure_backtrack:nn:nn
+        foreign lpvm store(~%tmp#181##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @failure_backtrack:nn:nn
         failure_backtrack.#cont#2<0>(~tmp#143##0:wybe.int, ~tmp#144##0:wybe.int, ~x##1:wybe.int, ~y##0:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}> #14
 
 
@@ -103,19 +103,19 @@ proc #cont#2 > {semipure} (2 calls)
     wybe.string.,,<0>(", r = ":wybe.string, ~tmp#29##0:wybe.string, ?tmp#28##0:wybe.string) #2 @failure_backtrack:nn:nn
     wybe.string.,,<0>(~tmp#27##0:wybe.string, ~tmp#28##0:wybe.string, ?tmp#26##0:wybe.string) #3 @failure_backtrack:nn:nn
     wybe.string.,,<0>("after second conditional; x = ":wybe.string, ~tmp#26##0:wybe.string, ?tmp#25##0:wybe.string) #4 @failure_backtrack:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#25##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #22 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#170##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#170##0:wybe.phantom, ?tmp#171##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#171##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#25##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #22 @failure_backtrack:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#170##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#170##0:wybe.phantom, ?tmp#171##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign lpvm store(~%tmp#171##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @failure_backtrack:nn:nn
     wybe.int.fmt<0>(x##0:wybe.int, ?tmp#32##0:wybe.string) #6 @failure_backtrack:nn:nn
     wybe.int.fmt<0>(r##0:wybe.int, ?tmp#34##0:wybe.string) #7 @failure_backtrack:nn:nn
     wybe.string.,,<0>(", r = ":wybe.string, ~tmp#34##0:wybe.string, ?tmp#33##0:wybe.string) #8 @failure_backtrack:nn:nn
     wybe.string.,,<0>(~tmp#32##0:wybe.string, ~tmp#33##0:wybe.string, ?tmp#31##0:wybe.string) #9 @failure_backtrack:nn:nn
     wybe.string.,,<0>("before third conditional: x = ":wybe.string, ~tmp#31##0:wybe.string, ?tmp#30##0:wybe.string) #10 @failure_backtrack:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#30##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #23 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#173##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#173##0:wybe.phantom, ?tmp#150##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#150##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#30##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #23 @failure_backtrack:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#173##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#173##0:wybe.phantom, ?tmp#150##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign lpvm store(~%tmp#150##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @failure_backtrack:nn:nn
     failure_backtrack.nope2<0>(?r##3:wybe.int, ?tmp#168##0:wybe.bool) #12 @failure_backtrack:nn:nn
     case ~tmp#168##0:wybe.bool of
     0:
@@ -124,18 +124,18 @@ proc #cont#2 > {semipure} (2 calls)
         wybe.string.,,<0>(", r = ":wybe.string, ~tmp#39##0:wybe.string, ?tmp#38##0:wybe.string) #17 @failure_backtrack:nn:nn
         wybe.string.,,<0>(~tmp#37##0:wybe.string, ~tmp#38##0:wybe.string, ?tmp#36##0:wybe.string) #18 @failure_backtrack:nn:nn
         wybe.string.,,<0>("nope2 fails; x = ":wybe.string, ~tmp#36##0:wybe.string, ?tmp#35##0:wybe.string) #19 @failure_backtrack:nn:nn
-        wybe.string.print<0>[410bae77d3](~tmp#35##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #24 @string:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#176##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#176##0:wybe.phantom, ?tmp#177##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#177##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        wybe.string.print<0>[410bae77d3](~tmp#35##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #24 @failure_backtrack:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#176##0:wybe.phantom) @failure_backtrack:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#176##0:wybe.phantom, ?tmp#177##0:wybe.phantom) @failure_backtrack:nn:nn
+        foreign lpvm store(~%tmp#177##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @failure_backtrack:nn:nn
         failure_backtrack.#cont#3<0>(~tmp#143##0:wybe.int, ~tmp#144##0:wybe.int, ~x##0:wybe.int, ~y##0:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}> #21
 
     1:
         foreign lpvm store(~%r##3:wybe.int, <<failure_backtrack.r>>:wybe.int) @failure_backtrack:nn:nn
-        wybe.string.print<0>("nope2 succeeds!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #25 @string:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#179##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#179##0:wybe.phantom, ?tmp#180##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#180##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        wybe.string.print<0>("nope2 succeeds!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #25 @failure_backtrack:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#179##0:wybe.phantom) @failure_backtrack:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#179##0:wybe.phantom, ?tmp#180##0:wybe.phantom) @failure_backtrack:nn:nn
+        foreign lpvm store(~%tmp#180##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @failure_backtrack:nn:nn
         failure_backtrack.#cont#3<0>(~tmp#143##0:wybe.int, ~tmp#144##0:wybe.int, 25:wybe.int, ~y##0:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}> #14
 
 
@@ -152,10 +152,10 @@ proc #cont#3 > {semipure} (2 calls)
     wybe.string.,,<0>(", r = ":wybe.string, ~tmp#44##0:wybe.string, ?tmp#43##0:wybe.string) #2 @failure_backtrack:nn:nn
     wybe.string.,,<0>(~tmp#42##0:wybe.string, ~tmp#43##0:wybe.string, ?tmp#41##0:wybe.string) #3 @failure_backtrack:nn:nn
     wybe.string.,,<0>("after third conditional; x = ":wybe.string, ~tmp#41##0:wybe.string, ?tmp#40##0:wybe.string) #4 @failure_backtrack:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#40##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #48 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#169##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#169##0:wybe.phantom, ?tmp#170##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#170##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#40##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #48 @failure_backtrack:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#169##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#169##0:wybe.phantom, ?tmp#170##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign lpvm store(~%tmp#170##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @failure_backtrack:nn:nn
     wybe.int.fmt<0>(x##0:wybe.int, ?tmp#47##0:wybe.string) #6 @failure_backtrack:nn:nn
     wybe.int.fmt<0>(y##0:wybe.int, ?tmp#50##0:wybe.string) #7 @failure_backtrack:nn:nn
     wybe.int.fmt<0>(r##0:wybe.int, ?tmp#53##0:wybe.string) #8 @failure_backtrack:nn:nn
@@ -168,10 +168,10 @@ proc #cont#3 > {semipure} (2 calls)
     wybe.string.,,<0>(", y = ":wybe.string, ~tmp#49##0:wybe.string, ?tmp#48##0:wybe.string) #14 @failure_backtrack:nn:nn
     wybe.string.,,<0>(~tmp#47##0:wybe.string, ~tmp#48##0:wybe.string, ?tmp#46##0:wybe.string) #15 @failure_backtrack:nn:nn
     wybe.string.,,<0>("before fourth conditional: x = ":wybe.string, ~tmp#46##0:wybe.string, ?tmp#45##0:wybe.string) #16 @failure_backtrack:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#45##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #49 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#172##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#172##0:wybe.phantom, ?tmp#153##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#153##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#45##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #49 @failure_backtrack:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#172##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#172##0:wybe.phantom, ?tmp#153##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign lpvm store(~%tmp#153##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @failure_backtrack:nn:nn
     foreign lpvm store(10:wybe.int, <<failure_backtrack.r>>:wybe.int) @failure_backtrack:nn:nn
     failure_backtrack.yup<0>(?tmp#166##0:wybe.bool) #18 @failure_backtrack:nn:nn
     case ~tmp#166##0:wybe.bool of
@@ -188,10 +188,10 @@ proc #cont#3 > {semipure} (2 calls)
         wybe.string.,,<0>(", y = ":wybe.string, ~tmp#60##0:wybe.string, ?tmp#59##0:wybe.string) #43 @failure_backtrack:nn:nn
         wybe.string.,,<0>(~tmp#58##0:wybe.string, ~tmp#59##0:wybe.string, ?tmp#57##0:wybe.string) #44 @failure_backtrack:nn:nn
         wybe.string.,,<0>("nope fails; x = ":wybe.string, ~tmp#57##0:wybe.string, ?tmp#56##0:wybe.string) #45 @failure_backtrack:nn:nn
-        wybe.string.print<0>[410bae77d3](~tmp#56##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #50 @string:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#175##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#175##0:wybe.phantom, ?tmp#176##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#176##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        wybe.string.print<0>[410bae77d3](~tmp#56##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #50 @failure_backtrack:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#175##0:wybe.phantom) @failure_backtrack:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#175##0:wybe.phantom, ?tmp#176##0:wybe.phantom) @failure_backtrack:nn:nn
+        foreign lpvm store(~%tmp#176##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @failure_backtrack:nn:nn
         failure_backtrack.#cont#4<0>(~tmp#143##0:wybe.int, ~tmp#144##0:wybe.int, ~x##0:wybe.int, ~y##0:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}> #47
 
     1:
@@ -212,17 +212,17 @@ proc #cont#3 > {semipure} (2 calls)
             wybe.string.,,<0>(", y = ":wybe.string, ~tmp#60##0:wybe.string, ?tmp#59##0:wybe.string) #30 @failure_backtrack:nn:nn
             wybe.string.,,<0>(~tmp#58##0:wybe.string, ~tmp#59##0:wybe.string, ?tmp#57##0:wybe.string) #31 @failure_backtrack:nn:nn
             wybe.string.,,<0>("nope fails; x = ":wybe.string, ~tmp#57##0:wybe.string, ?tmp#56##0:wybe.string) #32 @failure_backtrack:nn:nn
-            wybe.string.print<0>[410bae77d3](~tmp#56##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #51 @string:nn:nn
-            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#178##0:wybe.phantom) @io:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp#178##0:wybe.phantom, ?tmp#179##0:wybe.phantom) @io:nn:nn
-            foreign lpvm store(~%tmp#179##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+            wybe.string.print<0>[410bae77d3](~tmp#56##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #51 @failure_backtrack:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#178##0:wybe.phantom) @failure_backtrack:nn:nn
+            foreign c putchar('\n':wybe.char, ~tmp#178##0:wybe.phantom, ?tmp#179##0:wybe.phantom) @failure_backtrack:nn:nn
+            foreign lpvm store(~%tmp#179##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @failure_backtrack:nn:nn
             failure_backtrack.#cont#4<0>(~tmp#143##0:wybe.int, ~tmp#144##0:wybe.int, ~x##0:wybe.int, ~y##0:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}> #34
 
         1:
-            wybe.string.print<0>("nope succeeds!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #52 @string:nn:nn
-            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#181##0:wybe.phantom) @io:nn:nn
-            foreign c putchar('\n':wybe.char, ~tmp#181##0:wybe.phantom, ?tmp#182##0:wybe.phantom) @io:nn:nn
-            foreign lpvm store(~%tmp#182##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+            wybe.string.print<0>("nope succeeds!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #52 @failure_backtrack:nn:nn
+            foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#181##0:wybe.phantom) @failure_backtrack:nn:nn
+            foreign c putchar('\n':wybe.char, ~tmp#181##0:wybe.phantom, ?tmp#182##0:wybe.phantom) @failure_backtrack:nn:nn
+            foreign lpvm store(~%tmp#182##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @failure_backtrack:nn:nn
             failure_backtrack.#cont#4<0>(~tmp#143##0:wybe.int, ~tmp#144##0:wybe.int, 26:wybe.int, 12:wybe.int)<{<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {<<failure_backtrack.r>>, <<failure_backtrack.s>>, <<wybe.io.io>>}; {}> #21
 
 
@@ -247,10 +247,10 @@ proc #cont#4 > {semipure} (3 calls)
     wybe.string.,,<0>(", y = ":wybe.string, ~tmp#71##0:wybe.string, ?tmp#70##0:wybe.string) #8 @failure_backtrack:nn:nn
     wybe.string.,,<0>(~tmp#69##0:wybe.string, ~tmp#70##0:wybe.string, ?tmp#68##0:wybe.string) #9 @failure_backtrack:nn:nn
     wybe.string.,,<0>("after fourth conditional; x = ":wybe.string, ~tmp#68##0:wybe.string, ?tmp#67##0:wybe.string) #10 @failure_backtrack:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#67##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #27 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#167##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#167##0:wybe.phantom, ?tmp#168##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#168##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#67##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #27 @failure_backtrack:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#167##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#167##0:wybe.phantom, ?tmp#168##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign lpvm store(~%tmp#168##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @failure_backtrack:nn:nn
     wybe.int.fmt<0>(~x##0:wybe.int, ?tmp#80##0:wybe.string) #12 @failure_backtrack:nn:nn
     wybe.int.fmt<0>(y##0:wybe.int, ?tmp#83##0:wybe.string) #13 @failure_backtrack:nn:nn
     wybe.int.fmt<0>(~tmp#131##0:wybe.int, ?tmp#86##0:wybe.string) #14 @failure_backtrack:nn:nn
@@ -262,10 +262,10 @@ proc #cont#4 > {semipure} (3 calls)
     wybe.string.,,<0>(", y = ":wybe.string, ~tmp#82##0:wybe.string, ?tmp#81##0:wybe.string) #20 @failure_backtrack:nn:nn
     wybe.string.,,<0>(~tmp#80##0:wybe.string, ~tmp#81##0:wybe.string, ?tmp#79##0:wybe.string) #21 @failure_backtrack:nn:nn
     wybe.string.,,<0>("before first disjunction: x = ":wybe.string, ~tmp#79##0:wybe.string, ?tmp#78##0:wybe.string) #22 @failure_backtrack:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#78##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #28 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#170##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#170##0:wybe.phantom, ?tmp#156##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#156##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#78##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #28 @failure_backtrack:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#170##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#170##0:wybe.phantom, ?tmp#156##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign lpvm store(~%tmp#156##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @failure_backtrack:nn:nn
     foreign lpvm store(11:wybe.int, <<failure_backtrack.r>>:wybe.int) @failure_backtrack:nn:nn
     foreign lpvm store(40:wybe.int, <<failure_backtrack.s>>:wybe.int) @failure_backtrack:nn:nn
     failure_backtrack.nope<0>(?tmp#165##0:wybe.bool) #24 @failure_backtrack:nn:nn
@@ -299,10 +299,10 @@ proc #cont#5 > {semipure} (2 calls)
     wybe.string.,,<0>(", y = ":wybe.string, ~tmp#93##0:wybe.string, ?tmp#92##0:wybe.string) #8 @failure_backtrack:nn:nn
     wybe.string.,,<0>(~tmp#91##0:wybe.string, ~tmp#92##0:wybe.string, ?tmp#90##0:wybe.string) #9 @failure_backtrack:nn:nn
     wybe.string.,,<0>("after first disjunction: x = ":wybe.string, ~tmp#90##0:wybe.string, ?tmp#89##0:wybe.string) #10 @failure_backtrack:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#89##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #29 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#166##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#166##0:wybe.phantom, ?tmp#167##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#167##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#89##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #29 @failure_backtrack:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#166##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#166##0:wybe.phantom, ?tmp#167##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign lpvm store(~%tmp#167##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @failure_backtrack:nn:nn
     foreign lpvm store(14:wybe.int, <<failure_backtrack.s>>:wybe.int) @failure_backtrack:nn:nn
     wybe.int.fmt<0>(42:wybe.int, ?tmp#102##0:wybe.string) #12 @failure_backtrack:nn:nn
     wybe.int.fmt<0>(21:wybe.int, ?tmp#105##0:wybe.string) #13 @failure_backtrack:nn:nn
@@ -315,10 +315,10 @@ proc #cont#5 > {semipure} (2 calls)
     wybe.string.,,<0>(", y = ":wybe.string, ~tmp#104##0:wybe.string, ?tmp#103##0:wybe.string) #20 @failure_backtrack:nn:nn
     wybe.string.,,<0>(~tmp#102##0:wybe.string, ~tmp#103##0:wybe.string, ?tmp#101##0:wybe.string) #21 @failure_backtrack:nn:nn
     wybe.string.,,<0>("before second disjunction: x = ":wybe.string, ~tmp#101##0:wybe.string, ?tmp#100##0:wybe.string) #22 @failure_backtrack:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#100##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #30 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#169##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#169##0:wybe.phantom, ?tmp#162##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#162##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#100##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #30 @failure_backtrack:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#169##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#169##0:wybe.phantom, ?tmp#162##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign lpvm store(~%tmp#162##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @failure_backtrack:nn:nn
     foreign lpvm store(12:wybe.int, <<failure_backtrack.r>>:wybe.int) @failure_backtrack:nn:nn
     failure_backtrack.nope<0>(?tmp#164##0:wybe.bool) #24 @failure_backtrack:nn:nn
     case ~tmp#164##0:wybe.bool of
@@ -358,10 +358,10 @@ proc #cont#6 > {semipure} (3 calls)
     wybe.string.,,<0>(", y = ":wybe.string, ~tmp#115##0:wybe.string, ?tmp#114##0:wybe.string) #8 @failure_backtrack:nn:nn
     wybe.string.,,<0>(~tmp#113##0:wybe.string, ~tmp#114##0:wybe.string, ?tmp#112##0:wybe.string) #9 @failure_backtrack:nn:nn
     wybe.string.,,<0>("after second disjunction: x = ":wybe.string, ~tmp#112##0:wybe.string, ?tmp#111##0:wybe.string) #10 @failure_backtrack:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#111##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #12 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#164##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#164##0:wybe.phantom, ?tmp#165##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#165##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#111##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #12 @failure_backtrack:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#164##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#164##0:wybe.phantom, ?tmp#165##0:wybe.phantom) @failure_backtrack:nn:nn
+    foreign lpvm store(~%tmp#165##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @failure_backtrack:nn:nn
     foreign lpvm store(~%tmp#143##0:wybe.int, <<failure_backtrack.r>>:wybe.int) @failure_backtrack:nn:nn
     foreign lpvm store(~%tmp#144##0:wybe.int, <<failure_backtrack.s>>:wybe.int) @failure_backtrack:nn:nn
 

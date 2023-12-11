@@ -17,17 +17,17 @@ proc in > public (2 calls)
 in(e##0:wybe.int, lst##0:wybe.list(wybe.int), ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool)
+    foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.bool) @disjunction:nn:nn
     case ~tmp#6##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
     1:
-        foreign lpvm access(lst##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @list:nn:nn
-        foreign llvm icmp_eq(e##0:wybe.int, ~h##0:wybe.int, ?tmp#4##0:wybe.bool) @int:nn:nn
+        foreign lpvm access(lst##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @disjunction:nn:nn
+        foreign llvm icmp_eq(e##0:wybe.int, ~h##0:wybe.int, ?tmp#4##0:wybe.bool) @disjunction:nn:nn
         case ~tmp#4##0:wybe.bool of
         0:
-            foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.list(wybe.int)) @list:nn:nn
+            foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.list(wybe.int)) @disjunction:nn:nn
             disjunction.in<0>(~e##0:wybe.int, ~tmp#0##0:wybe.list(wybe.int), ?#success##0:wybe.bool) #3 @disjunction:nn:nn
 
         1:
@@ -41,15 +41,15 @@ proc member > public (1 calls)
 member(e##0:wybe.int, lst##0:wybe.list(wybe.int), ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool)
+    foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @disjunction:nn:nn
     case ~tmp#4##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
     1:
-        foreign lpvm access(lst##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @list:nn:nn
-        foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:wybe.list(wybe.int)) @list:nn:nn
-        foreign llvm icmp_eq(e##0:wybe.int, ~h##0:wybe.int, ?tmp#2##0:wybe.bool) @int:nn:nn
+        foreign lpvm access(lst##0:wybe.list(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?h##0:wybe.int) @disjunction:nn:nn
+        foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:wybe.list(wybe.int)) @disjunction:nn:nn
+        foreign llvm icmp_eq(e##0:wybe.int, ~h##0:wybe.int, ?tmp#2##0:wybe.bool) @disjunction:nn:nn
         case ~tmp#2##0:wybe.bool of
         0:
             disjunction.member<0>(~e##0:wybe.int, ~t##0:wybe.list(wybe.int), ?#success##0:wybe.bool) #2 @disjunction:nn:nn
@@ -65,13 +65,13 @@ proc saturating_tail > public (0 calls)
 saturating_tail(lst##0:wybe.list(T) <{}; {}; {0}>, ?tl##0:wybe.list(T) <{}; {}; {0}>)<{}; {}; {}>:
   AliasPairs: [(lst##0,tl##0)]
   InterestingCallProperties: []
-    foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool)
+    foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @disjunction:nn:nn
     case ~tmp#4##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.list(T), ?tl##0:wybe.list(T)) @disjunction:nn:nn
 
     1:
-        foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tl##0:wybe.list(T)) @list:nn:nn
+        foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tl##0:wybe.list(T)) @disjunction:nn:nn
 
 
 
@@ -80,13 +80,13 @@ proc saturating_tail2 > public (0 calls)
 saturating_tail2(lst##0:wybe.list(T) <{}; {}; {0}>, ?#result##0:wybe.list(T) <{}; {}; {0}>)<{}; {}; {}>:
   AliasPairs: [(#result##0,lst##0)]
   InterestingCallProperties: []
-    foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
+    foreign llvm icmp_ne(lst##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @disjunction:nn:nn
     case ~tmp#5##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.list(T), ?#result##0:wybe.list(T)) @disjunction:nn:nn
 
     1:
-        foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.list(T)) @list:nn:nn
+        foreign lpvm access(~lst##0:wybe.list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.list(T)) @disjunction:nn:nn
 
 
   LLVM code       :

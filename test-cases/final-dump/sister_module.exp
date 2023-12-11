@@ -69,7 +69,7 @@ proc foo > public {inline} (0 calls)
 foo(i##0:wybe.int, ?j##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?j##0:wybe.int) @int:nn:nn
+    foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?j##0:wybe.int) @sister_module:nn:nn
 
   LLVM code       :
 
@@ -106,7 +106,7 @@ proc bar > public {inline} (0 calls)
 bar(i##0:wybe.int, ?j##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?k##0:wybe.int) @int:nn:nn
+    foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?k##0:wybe.int) @sister_module:nn:nn
     sister_module.m1.foo<0>(~k##0:wybe.int, ?j##0:wybe.int) #2 @sister_module:nn:nn
 
   LLVM code       :

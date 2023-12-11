@@ -107,7 +107,7 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    extern_anon_params_a.run#anon#1<0>(extern_anon_params_b.#anon#1<1><>:{impure}()) #1 @extern_anon_params_a:nn:nn
+    extern_anon_params_a.run#anon#1<0>(extern_anon_params_b.#anon#1<1><>:{impure}()) #1 @extern_anon_params_b:nn:nn
 
 
 proc #anon#1 > {inline,impure} (1 calls)

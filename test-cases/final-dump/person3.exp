@@ -90,14 +90,14 @@ proc = > public {inline} (1 calls)
     foreign lpvm access(#right##0:person3.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#firstname##0:wybe.string) @person3:nn:nn
     foreign lpvm access(~#right##0:person3.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#right#lastname##0:wybe.string) @person3:nn:nn
     wybe.string.<=>#cont#2<0>(1:wybe.comparison, ~#left#firstname##0:wybe.string, ~#right#firstname##0:wybe.string, ~#left#firstname##0:wybe.string, ~#right#firstname##0:wybe.string, ?tmp#7##0:wybe.comparison) #4 @string:nn:nn
-    foreign llvm icmp_eq(~tmp#7##0:wybe.comparison, 1:wybe.comparison, ?tmp#1##0:wybe.bool) @comparison:nn:nn
+    foreign llvm icmp_eq(~tmp#7##0:wybe.comparison, 1:wybe.comparison, ?tmp#1##0:wybe.bool) @string:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
 
     1:
         wybe.string.<=>#cont#2<0>(1:wybe.comparison, ~#left#lastname##0:wybe.string, ~#right#lastname##0:wybe.string, ~#left#lastname##0:wybe.string, ~#right#lastname##0:wybe.string, ?tmp#10##0:wybe.comparison) #5 @string:nn:nn
-        foreign llvm icmp_eq(~tmp#10##0:wybe.comparison, 1:wybe.comparison, ?#success##0:wybe.bool) @comparison:nn:nn
+        foreign llvm icmp_eq(~tmp#10##0:wybe.comparison, 1:wybe.comparison, ?#success##0:wybe.bool) @string:nn:nn
 
 
 
@@ -156,7 +156,7 @@ proc ~= > public {inline} (0 calls)
     foreign lpvm access(#right##0:person3.person, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.string) @person3:nn:nn
     foreign lpvm access(~#right##0:person3.person, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#6##0:wybe.string) @person3:nn:nn
     wybe.string.<=>#cont#2<0>(1:wybe.comparison, ~tmp#3##0:wybe.string, ~tmp#5##0:wybe.string, ~tmp#3##0:wybe.string, ~tmp#5##0:wybe.string, ?tmp#7##0:wybe.comparison) #1 @string:nn:nn
-    foreign llvm icmp_eq(~tmp#7##0:wybe.comparison, 1:wybe.comparison, ?tmp#8##0:wybe.bool) @comparison:nn:nn
+    foreign llvm icmp_eq(~tmp#7##0:wybe.comparison, 1:wybe.comparison, ?tmp#8##0:wybe.bool) @string:nn:nn
     case ~tmp#8##0:wybe.bool of
     0:
         foreign llvm move(0:wybe.bool, ?tmp#0##0:wybe.bool)
@@ -164,7 +164,7 @@ proc ~= > public {inline} (0 calls)
 
     1:
         wybe.string.<=>#cont#2<0>(1:wybe.comparison, ~tmp#4##0:wybe.string, ~tmp#6##0:wybe.string, ~tmp#4##0:wybe.string, ~tmp#6##0:wybe.string, ?tmp#9##0:wybe.comparison) #2 @string:nn:nn
-        foreign llvm icmp_eq(~tmp#9##0:wybe.comparison, 1:wybe.comparison, ?tmp#0##0:wybe.bool) @comparison:nn:nn
+        foreign llvm icmp_eq(~tmp#9##0:wybe.comparison, 1:wybe.comparison, ?tmp#0##0:wybe.bool) @string:nn:nn
         foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
 
 

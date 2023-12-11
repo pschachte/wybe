@@ -54,105 +54,105 @@ proc print_t > public (0 calls)
 print_t(x##0:multictr2.t)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm and(x##0:wybe.int, 7:wybe.int, ?tmp#9##0:wybe.int)
+    foreign llvm and(x##0:wybe.int, 7:wybe.int, ?tmp#9##0:wybe.int) @multictr2:nn:nn
     case ~tmp#9##0:wybe.int of
     0:
         foreign lpvm access(~x##0:multictr2.t, 0:wybe.int, 8:wybe.int, 0:wybe.int, ?a##0:wybe.int) @multictr2:nn:nn
         wybe.string.print<0>("c01(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#76##0:wybe.phantom) @int:nn:nn
-        foreign c print_int(~a##0:wybe.int, ~tmp#76##0:wybe.phantom, ?tmp#77##0:wybe.phantom) @int:nn:nn
-        foreign lpvm store(~%tmp#77##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#76##0:wybe.phantom) @multictr2:nn:nn
+        foreign c print_int(~a##0:wybe.int, ~tmp#76##0:wybe.phantom, ?tmp#77##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#77##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
         wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#78##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#78##0:wybe.phantom, ?tmp#79##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#79##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#78##0:wybe.phantom) @multictr2:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#78##0:wybe.phantom, ?tmp#79##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#79##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
 
     1:
         foreign lpvm access(~x##0:multictr2.t, -1:wybe.int, 8:wybe.int, 1:wybe.int, ?a##1:wybe.int) @multictr2:nn:nn
         wybe.string.print<0>("c03(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#71##0:wybe.phantom) @int:nn:nn
-        foreign c print_int(~a##1:wybe.int, ~tmp#71##0:wybe.phantom, ?tmp#72##0:wybe.phantom) @int:nn:nn
-        foreign lpvm store(~%tmp#72##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#71##0:wybe.phantom) @multictr2:nn:nn
+        foreign c print_int(~a##1:wybe.int, ~tmp#71##0:wybe.phantom, ?tmp#72##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#72##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
         wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#73##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#73##0:wybe.phantom, ?tmp#74##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#74##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#73##0:wybe.phantom) @multictr2:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#73##0:wybe.phantom, ?tmp#74##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#74##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
 
     2:
         foreign lpvm access(~x##0:multictr2.t, -2:wybe.int, 8:wybe.int, 2:wybe.int, ?a##2:wybe.int) @multictr2:nn:nn
         wybe.string.print<0>("c03(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#66##0:wybe.phantom) @int:nn:nn
-        foreign c print_int(~a##2:wybe.int, ~tmp#66##0:wybe.phantom, ?tmp#67##0:wybe.phantom) @int:nn:nn
-        foreign lpvm store(~%tmp#67##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#66##0:wybe.phantom) @multictr2:nn:nn
+        foreign c print_int(~a##2:wybe.int, ~tmp#66##0:wybe.phantom, ?tmp#67##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#67##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
         wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#68##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#68##0:wybe.phantom, ?tmp#69##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#69##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#68##0:wybe.phantom) @multictr2:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#68##0:wybe.phantom, ?tmp#69##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#69##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
 
     3:
         foreign lpvm access(~x##0:multictr2.t, -3:wybe.int, 8:wybe.int, 3:wybe.int, ?a##3:wybe.int) @multictr2:nn:nn
         wybe.string.print<0>("c04(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #16 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#61##0:wybe.phantom) @int:nn:nn
-        foreign c print_int(~a##3:wybe.int, ~tmp#61##0:wybe.phantom, ?tmp#62##0:wybe.phantom) @int:nn:nn
-        foreign lpvm store(~%tmp#62##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#61##0:wybe.phantom) @multictr2:nn:nn
+        foreign c print_int(~a##3:wybe.int, ~tmp#61##0:wybe.phantom, ?tmp#62##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#62##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
         wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #18 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#63##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#63##0:wybe.phantom, ?tmp#64##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#64##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#63##0:wybe.phantom) @multictr2:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#63##0:wybe.phantom, ?tmp#64##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#64##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
 
     4:
         foreign lpvm access(~x##0:multictr2.t, -4:wybe.int, 8:wybe.int, 4:wybe.int, ?a##4:wybe.int) @multictr2:nn:nn
         wybe.string.print<0>("c05(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #21 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#56##0:wybe.phantom) @int:nn:nn
-        foreign c print_int(~a##4:wybe.int, ~tmp#56##0:wybe.phantom, ?tmp#57##0:wybe.phantom) @int:nn:nn
-        foreign lpvm store(~%tmp#57##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#56##0:wybe.phantom) @multictr2:nn:nn
+        foreign c print_int(~a##4:wybe.int, ~tmp#56##0:wybe.phantom, ?tmp#57##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#57##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
         wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #23 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#58##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#58##0:wybe.phantom, ?tmp#59##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#59##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#58##0:wybe.phantom) @multictr2:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#58##0:wybe.phantom, ?tmp#59##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#59##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
 
     5:
         foreign lpvm access(~x##0:multictr2.t, -5:wybe.int, 8:wybe.int, 5:wybe.int, ?a##5:wybe.int) @multictr2:nn:nn
         wybe.string.print<0>("c06(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #26 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#51##0:wybe.phantom) @int:nn:nn
-        foreign c print_int(~a##5:wybe.int, ~tmp#51##0:wybe.phantom, ?tmp#52##0:wybe.phantom) @int:nn:nn
-        foreign lpvm store(~%tmp#52##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#51##0:wybe.phantom) @multictr2:nn:nn
+        foreign c print_int(~a##5:wybe.int, ~tmp#51##0:wybe.phantom, ?tmp#52##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#52##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
         wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #28 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#53##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#53##0:wybe.phantom, ?tmp#54##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#54##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#53##0:wybe.phantom) @multictr2:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#53##0:wybe.phantom, ?tmp#54##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#54##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
 
     6:
         foreign lpvm access(~x##0:multictr2.t, -6:wybe.int, 8:wybe.int, 6:wybe.int, ?a##6:wybe.int) @multictr2:nn:nn
         wybe.string.print<0>("c07(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #31 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#46##0:wybe.phantom) @int:nn:nn
-        foreign c print_int(~a##6:wybe.int, ~tmp#46##0:wybe.phantom, ?tmp#47##0:wybe.phantom) @int:nn:nn
-        foreign lpvm store(~%tmp#47##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#46##0:wybe.phantom) @multictr2:nn:nn
+        foreign c print_int(~a##6:wybe.int, ~tmp#46##0:wybe.phantom, ?tmp#47##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#47##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
         wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #33 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#48##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#48##0:wybe.phantom, ?tmp#49##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#49##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#48##0:wybe.phantom) @multictr2:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#48##0:wybe.phantom, ?tmp#49##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#49##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
 
     7:
         foreign lpvm access(x##0:multictr2.t, -7:wybe.int, 24:wybe.int, 7:wybe.int, ?a##7:wybe.int) @multictr2:nn:nn
         foreign lpvm access(x##0:multictr2.t, 1:wybe.int, 24:wybe.int, 7:wybe.int, ?b##0:wybe.int) @multictr2:nn:nn
         foreign lpvm access(~x##0:multictr2.t, 9:wybe.int, 24:wybe.int, 7:wybe.int, ?c##0:wybe.float) @multictr2:nn:nn
         wybe.string.print<0>("c08(":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #36 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#35##0:wybe.phantom) @int:nn:nn
-        foreign c print_int(~a##7:wybe.int, ~tmp#35##0:wybe.phantom, ?tmp#36##0:wybe.phantom) @int:nn:nn
-        foreign lpvm store(~%tmp#36##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#35##0:wybe.phantom) @multictr2:nn:nn
+        foreign c print_int(~a##7:wybe.int, ~tmp#35##0:wybe.phantom, ?tmp#36##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#36##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
         wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #38 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#38##0:wybe.phantom) @int:nn:nn
-        foreign c print_int(~b##0:wybe.int, ~tmp#38##0:wybe.phantom, ?tmp#39##0:wybe.phantom) @int:nn:nn
-        foreign lpvm store(~%tmp#39##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#38##0:wybe.phantom) @multictr2:nn:nn
+        foreign c print_int(~b##0:wybe.int, ~tmp#38##0:wybe.phantom, ?tmp#39##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#39##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
         wybe.string.print<0>(", ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #40 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#41##0:wybe.phantom) @float:nn:nn
-        foreign c print_float(~c##0:wybe.float, ~tmp#41##0:wybe.phantom, ?tmp#42##0:wybe.phantom) @float:nn:nn
-        foreign lpvm store(~%tmp#42##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @float:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#41##0:wybe.phantom) @multictr2:nn:nn
+        foreign c print_float(~c##0:wybe.float, ~tmp#41##0:wybe.phantom, ?tmp#42##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#42##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
         wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #42 @multictr2:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#43##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#43##0:wybe.phantom, ?tmp#44##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#44##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#43##0:wybe.phantom) @multictr2:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#43##0:wybe.phantom, ?tmp#44##0:wybe.phantom) @multictr2:nn:nn
+        foreign lpvm store(~%tmp#44##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multictr2:nn:nn
 
 
   LLVM code       :

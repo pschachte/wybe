@@ -28,8 +28,8 @@ foo1(x1##0:multi_specz_cyclic_lib.position, x2##0:multi_specz_cyclic_lib.positio
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1,InterestingUnaliased 2,InterestingUnaliased 3]
   MultiSpeczDepInfo: [(2,(multi_specz_cyclic_lib.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [0]])),(3,(multi_specz_cyclic_lib.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [1]])),(4,(multi_specz_cyclic_lib.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [2]])),(5,(multi_specz_cyclic_lib.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [3]])),(6,(multi_specz_cyclic_lib2.foo2<0>,fromList [NonAliasedParamCond 0 [1],NonAliasedParamCond 1 [2],NonAliasedParamCond 2 [3],NonAliasedParamCond 3 [0]]))]
-    foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
-    foreign llvm icmp_slt(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @multi_specz_cyclic_lib:nn:nn
+    foreign llvm icmp_slt(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @multi_specz_cyclic_lib:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
         multi_specz_cyclic_lib2.foo2<0>(~x2##0:multi_specz_cyclic_lib.position, ~x3##0:multi_specz_cyclic_lib.position, ~x4##0:multi_specz_cyclic_lib.position, ~x1##0:multi_specz_cyclic_lib.position, ~tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @multi_specz_cyclic_lib:nn:nn
@@ -58,18 +58,18 @@ printPosition(pos##0:multi_specz_cyclic_lib.position)<{<<wybe.io.io>>}; {<<wybe.
   InterestingCallProperties: []
     wybe.string.print<0>(" (":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @multi_specz_cyclic_lib:nn:nn
     foreign lpvm access(pos##0:multi_specz_cyclic_lib.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @multi_specz_cyclic_lib:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @int:nn:nn
-    foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
+    foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
     wybe.string.print<0>(",":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @multi_specz_cyclic_lib:nn:nn
     foreign lpvm access(~pos##0:multi_specz_cyclic_lib.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @multi_specz_cyclic_lib:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @int:nn:nn
-    foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
-    wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
+    foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
+    wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @multi_specz_cyclic_lib:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
+    foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @multi_specz_cyclic_lib:nn:nn
 
   LLVM code       :
 
@@ -415,8 +415,8 @@ foo2(x1##0:multi_specz_cyclic_lib.position, x2##0:multi_specz_cyclic_lib.positio
   AliasPairs: []
   InterestingCallProperties: [InterestingUnaliased 0,InterestingUnaliased 1,InterestingUnaliased 2,InterestingUnaliased 3]
   MultiSpeczDepInfo: [(2,(multi_specz_cyclic_lib.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [0]])),(3,(multi_specz_cyclic_lib.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [1]])),(4,(multi_specz_cyclic_lib.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [2]])),(5,(multi_specz_cyclic_lib.modifyAndPrint<0>,fromList [NonAliasedParamCond 0 [3]])),(6,(multi_specz_cyclic_lib.foo1<0>,fromList [NonAliasedParamCond 0 [1],NonAliasedParamCond 1 [2],NonAliasedParamCond 2 [3],NonAliasedParamCond 3 [0]]))]
-    foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @int:nn:nn
-    foreign llvm icmp_slt(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#0##0:wybe.int) @multi_specz_cyclic_lib2:nn:nn
+    foreign llvm icmp_slt(tmp#0##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @multi_specz_cyclic_lib2:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
         multi_specz_cyclic_lib.foo1<0>(~x2##0:multi_specz_cyclic_lib.position, ~x3##0:multi_specz_cyclic_lib.position, ~x4##0:multi_specz_cyclic_lib.position, ~x1##0:multi_specz_cyclic_lib.position, ~tmp#0##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @multi_specz_cyclic_lib2:nn:nn
