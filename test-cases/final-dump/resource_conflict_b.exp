@@ -1,0 +1,27 @@
+======================================================================
+AFTER EVERYTHING:
+ Module resource_conflict_b
+  representation  : (not a type)
+  public submods  : 
+  public resources: res: resource_conflict_b.res
+  public procs    : 
+  imports         : use wybe
+  resources       : res: fromList [(resource_conflict_b.res,wybe.char = 'c' @resource_conflict_b:nn:nn @resource_conflict_b:nn:nn)]
+  procs           : 
+
+
+  LLVM code       :
+
+; ModuleID = 'resource_conflict_b'
+
+
+ 
+
+
+@"resource#resource_conflict_b.res" =    global i8 undef
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    

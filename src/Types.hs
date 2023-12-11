@@ -35,6 +35,7 @@ import           Util
 import           Config
 import           Snippets
 import           Blocks              (llvmMapBinop, llvmMapUnop)
+import Data.Tuple.HT (mapSnd)
 
 
 ----------------------------------------------------------------
@@ -1187,8 +1188,19 @@ typecheckProcDecl' pdef = do
         mapM_ (addDeclaredType name pos (length params)) $ zip params [1..]
         logTyped $ "Recording resource types: "
                    ++ intercalate ", " (show <$> Set.toList resources)
+        let (overloaded,okResources) =
+              List.partition ((>1) . length . snd)
+              $ List.map (mapSnd Set.toList)
+              $ Map.toList
+                $ List.foldl (\map spec ->
+                                setMapInsert (resourceName spec) spec map)
+                    Map.empty $ resourceFlowRes <$> Set.toList resources
+        lift
+         $ mapM_ (errmsg pos . ("Overloaded resources "++) .
+                intercalate ", " . (show <$>) . snd)
+            overloaded
         mapM_ (uncurry $ addResourceType (ReasonResourceDef name))
-            $ (, pos) . resourceFlowRes <$> Set.toList resources
+            $ (, pos) <$> concat (snd <$> okResources)
         ifOK pdef $ do
             mapM_ (placedApply (recordCasts name)) calls
             logTyping "*** Before calls "
@@ -1199,12 +1211,12 @@ typecheckProcDecl' pdef = do
             calls' <- mapM (callInfos assignedVars) procCalls
             logTyping $ "  With calls:\n  " ++ intercalate "\n    " (show <$> calls')
             let badCalls = List.map typingStmt
-                         $ List.filter (List.null . typingInfos) calls'
+                        $ List.filter (List.null . typingInfos) calls'
             mapM_ (\pcall -> case content pcall of
                     ProcCall (First _ callee _) _ _ _ ->
                         typeError $ ReasonUndef name callee $ place pcall
                     _ -> shouldnt "typecheckProcDecl'"
-                  ) badCalls
+                ) badCalls
             ifOK pdef $ do
                 typecheckCalls calls' [] False
                     $ List.filter (isForeign . content) calls
