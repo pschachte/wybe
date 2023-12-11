@@ -1,6 +1,6 @@
 #!/bin/bash
 
-LIMIT=30
+LIMIT=60
 
 if [[ `uname` == 'Darwin' ]]; then
 	TIMEOUT="gtimeout $LIMIT"

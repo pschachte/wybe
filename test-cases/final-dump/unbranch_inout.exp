@@ -19,7 +19,7 @@ module top-level code > public {inline,semipure} (0 calls)
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
 
 
-bug > {inline} (1 calls)
+proc bug > {inline} (1 calls)
 0: unbranch_inout.bug<0>
 bug(i##0:wybe.int, ?i##1:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -27,7 +27,7 @@ bug(i##0:wybe.int, ?i##1:wybe.int)<{}; {}; {}>:
     foreign llvm move(~i##0:wybe.int, ?i##1:wybe.int)
 
 
-bug#cont#1 > {inline} (1 calls)
+proc bug#cont#1 > {inline} (1 calls)
 0: unbranch_inout.bug#cont#1<0>
 bug#cont#1(i##0:wybe.int, [?i##0:wybe.int])<{}; {}; {}>:
   AliasPairs: []

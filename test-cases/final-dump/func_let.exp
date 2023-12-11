@@ -20,7 +20,7 @@ module top-level code > public {inline,semipure} (0 calls)
     foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
 
 
-quad > public {inline} (1 calls)
+proc quad > public {inline} (1 calls)
 0: func_let.quad<0>
 quad(x##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []

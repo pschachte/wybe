@@ -1,0 +1,2 @@
+use mutual_res_a
+pub resource b_res:char = 'c'

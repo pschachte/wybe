@@ -54,7 +54,9 @@ module AST (
   emptyInterface, emptyImplementation,
   getParams, getPrimParams, getDetism, getProcDef, getProcPrimProto,
   mkTempName, updateProcDef, updateProcDefM,
-  ModSpec, maybeModPrefix, ProcImpln(..), ProcDef(..), procInline, procCallCount,
+  ModSpec, validModuleName, maybeModPrefix, 
+  ProcImpln(..), ProcDef(..), procInline, procCallCount,
+  transformModuleProcs,
   getProcGlobalFlows,
   primImpurity, flagsImpurity, flagsDetism,
   AliasMap, aliasMapToAliasPairs, ParameterID, parameterIDToVarName,
@@ -100,7 +102,7 @@ module AST (
   genProcName, addImport, doImport, importFromSupermodule, lookupType, lookupType',
   typeIsUnique,
   ResourceName, ResourceSpec(..), ResourceFlowSpec(..), ResourceImpln(..),
-  initialisedResources,
+  initialisedResources, initialisedVisibleResources,
   addSimpleResource, lookupResource,
   specialResources, specialResourcesSet, isSpecialResource,
   publicResource, resourcefulName,
@@ -108,10 +110,10 @@ module AST (
   setDetism, setInline, setImpurity, setVariant,
   ProcVariant(..), Inlining(..), Impurity(..),
   addProc, addProcDef, lookupProc, publicProc, callTargets,
-  specialChar, specialName, specialName2,
   outputVariableName, outputStatusName,
   envParamName, envPrimParam, makeGlobalResourceName,
-  showBody, showPlacedPrims, showStmt, showBlock, showProcDef, showProcName,
+  showBody, showPlacedPrims, showStmt, showBlock, showProcDef,
+  showProcIdentifier, showProcName,
   showModSpec, showModSpecs, showResources, showOptPos, showProcDefs, showUse,
   shouldnt, nyi, checkError, checkValue, trustFromJust, trustFromJustM,
   flowPrefix, showProcModifiers, showProcModifiers', showFlags, showFlags',
@@ -125,7 +127,8 @@ module AST (
   ) where
 
 import           Config (magicVersion, wordSize, objectExtension,
-                         sourceExtension, currentModuleAlias)
+                         sourceExtension, currentModuleAlias,
+                         specialChar, specialName, specialName2,)
 import           Control.Monad
 import           Control.Monad.Extra
 import           Control.Monad.Trans (lift,liftIO)
@@ -647,9 +650,9 @@ getSpecModule context getter spec = do
     let msg = context ++ " looking up module " ++ showModSpec spec
     underComp <- gets underCompilation
     let curr = List.filter ((==spec) . modSpec) underComp
-    logAST $ "Under compilation: " ++ showModSpecs (modSpec <$> underComp)
-    logAST $ "found " ++ show (length curr) ++
-      " matching modules under compilation"
+    -- logAST $ "Under compilation: " ++ showModSpecs (modSpec <$> underComp)
+    -- logAST $ "found " ++ show (length curr) ++
+    --   " matching modules under compilation"
     case curr of
         []    -> gets (maybe (error msg) getter . Map.lookup spec . modules)
         [mod] -> return $ getter mod
@@ -937,10 +940,10 @@ lookupType' context pos ty@HigherOrderType{higherTypeParams=typeFlows} = do
     (msgs, types) <- unzip <$> mapM (lookupType' context pos . typeFlowType) typeFlows
     return (concat msgs,
             ty{higherTypeParams=zipWith TypeFlow types (typeFlowMode <$> typeFlows)})
-lookupType' context pos ty@(TypeSpec [] typename args)
+lookupType' context pos (TypeSpec [] typename args)
   | typename == currentModuleAlias = do
     currMod <- getModuleSpec
-    return ([], TypeSpec (init currMod) (last currMod) args)
+    lookupType' context pos $ TypeSpec (init currMod) (last currMod) args
 lookupType' context pos ty@(TypeSpec mod name args) = do
     currMod <- getModuleSpec
     logAST $ "In module " ++ showModSpec currMod
@@ -1697,6 +1700,12 @@ instance Show TypeVarName where
 type ModSpec = [Ident]
 
 
+-- |Check that a module name component is valid (ie, does not contain invalid
+-- characters).  Currently only period (.) and hash (#) are considered invalid.
+validModuleName :: Ident -> Bool
+validModuleName = not . any (`elem` ['.',specialChar])
+
+
 -- |The uses one module makes of another; first the public imports,
 --  then the privates.  Each is either Nothing, meaning all exported
 --  names are imported, or Just a set of the specific names to import.
@@ -1727,8 +1736,11 @@ combineImportSpecs (ImportSpec pub1 priv1) (ImportSpec pub2 priv2) =
     ImportSpec (USet.union pub1 pub2) (USet.union priv1 priv2)
 
 
--- |Actually import into the current module.  The ImportSpec says what
--- to import.
+-- |Actually import the specified module into the current module.  The
+-- ImportSpec says what to import.  This is called after dependencies
+-- have been loaded and their imports have been handled.  The case of
+-- mutual dependencies is handled by repeating this until a fixed point
+-- is reached.
 doImport :: ModSpec -> (ImportSpec, InterfaceHash) -> Compiler ()
 doImport mod (imports, _) = do
     currMod <- getModuleSpec
@@ -1753,7 +1765,7 @@ doImport mod (imports, _) = do
     logAST $ "    importing resources: "
              ++ intercalate ", " (Map.keys importedResources)
     logAST $ "    importing procs    : "
-             ++ intercalate ", " (Map.keys importedProcs)
+             ++ intercalate ", " (showProcName <$> Map.keys importedProcs)
     -- XXX Must report error for imports of non-exported items
     let knownTypes = Map.unionWith Set.union (modKnownTypes impl)
                      $ Map.fromAscList
@@ -1885,16 +1897,31 @@ data ResourceImpln =
         resourceType::TypeSpec,
         resourceInit::Maybe (Placed Exp),
         resourcePos::OptPos
-        } deriving (Generic)
+        } deriving (Generic, Eq)
 
 
--- | A list of the initialised resources defined by the current module.
+-- | Return the initialised resources *defined* by the current module.
 initialisedResources :: Compiler ResourceDef
 initialisedResources = do
-    modRes <- getModuleImplementationField modResources
-    logAST $ "Getting initialised resources = " ++ show modRes
-    logAST $ "                       unions = " ++ show (Map.unions modRes)
-    return $ Map.filter (isJust . resourceInit) $ Map.unions modRes
+    currMod <- getModuleSpec
+    localRes <- getModuleImplementationField modResources
+    let localDefs = Map.filter (isJust . resourceInit) $ Map.unions localRes
+    logAST $ "      local resources = " ++ show localRes
+    logAST $ "    local initialised = " ++ show localDefs
+    return localDefs
+
+
+-- | Return the initialised resources *visible* to the current module.
+initialisedVisibleResources :: Compiler ResourceDef
+initialisedVisibleResources = do
+    visableRes <- Set.toList . Set.unions . Map.elems
+                 <$> getModuleImplementationField modKnownResources
+    visibleDefs <- Map.filter (isJust . resourceInit) . Map.unions . catMaybes
+               <$> mapM lookupResource visableRes
+    logAST $ "    visible resources = " ++ show visableRes
+    logAST $ "  visible initialised = " ++ show visibleDefs
+    return visibleDefs
+
 
 -- |A proc definition, including the ID, prototype, the body,
 --  normalised to a list of primitives, and an optional source
@@ -1929,6 +1956,22 @@ data ProcDef = ProcDef {
 }
              deriving (Eq, Generic)
 
+-- | Takes in a monadic function that transforms a ProcDef, and a module spec
+--   whose ProcDefs we apply the transforming function on.
+transformModuleProcs :: (ProcDef -> Int -> Compiler ProcDef) -> ModSpec ->
+                        Compiler ()
+transformModuleProcs trans thisMod = do
+    reenterModule thisMod
+    -- (names, procs) <- :: StateT CompilerState IO ([Ident], [[ProcDef]])
+    (names,procs) <- unzip <$>
+                     getModuleImplementationField (Map.toList . modProcs)
+    -- for each name we have a list of procdefs, so we must double map
+    procs' <- mapM (zipWithM (flip trans) [0..]) procs
+    updateImplementation
+        (\imp -> imp { modProcs = Map.union
+                                  (Map.fromList $ zip names procs')
+                                  (modProcs imp) })
+    reexitModule
 
 -- |Whether this proc should definitely be inlined, either because the user said
 -- to, or because we inferred it would be a good idea.
@@ -2932,8 +2975,7 @@ instance Show Stmt where
 -- |Produce a single statement comprising the conjunctions of the statements
 --  in the supplied list.
 seqToStmt :: [Placed Stmt] -> Placed Stmt
-seqToStmt [] = Unplaced $ TestBool
-               $ Typed (IntValue 1) AnyType $ Just $ TypeSpec ["wybe"] "bool" []
+seqToStmt [] = Unplaced Nop
 seqToStmt [stmt] = stmt
 seqToStmt stmts = Unplaced $ And stmts
 
@@ -3580,23 +3622,6 @@ varsInPrimArg _ ArgUndef{}    = Set.empty
 ----------------------------------------------------------------
 --                       Generating Symbols
 
--- | The character we include in every generated identifier to prevent capturing
--- a user identifier.  It should not be possible for the user to include this
--- character in an identifier.
-specialChar :: Char
-specialChar = '#' -- note # is not allowed in backquoted strings
-
-
--- | Construct a name can't be a valid Wybe symbol from one user string.
-specialName :: String -> String
-specialName = (specialChar:)
-
-
--- | Construct a name that can't be a valid Wybe symbol from two user strings.
-specialName2 :: String -> String -> String
-specialName2 front back = front ++ specialChar:back
-
-
 -- | The full name to give to a PrimVarName, including the variable number
 -- suffix.  Use two specialChars to distinguish from special separator.
 numberedVarName :: String -> Int -> String
@@ -3856,10 +3881,17 @@ showProcDef thisID
     ++ show def
 
 
+-- | A printable version of a proc name or HO term or foreign proc name.  First
+-- argument specifies what kind of proc it is.  Handles special empty proc
+-- name.
+showProcIdentifier :: String -> ProcName -> String
+showProcIdentifier _ ""       = "module top-level code"
+showProcIdentifier kind name = kind ++ " " ++ name
+
+
 -- | A printable version of a proc name; handles special empty proc name.
 showProcName :: ProcName -> String
-showProcName "" = "module top-level code"
-showProcName name = name
+showProcName = showProcIdentifier "proc"
 
 
 -- |How to show a type specification.

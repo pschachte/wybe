@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-+ > public {inline} (0 calls)
+proc + > public {inline} (0 calls)
 0: representation.+<0>
 +(x##0:representation, y##0:representation, ?#result##0:representation)<{}; {}; {}>:
   AliasPairs: []

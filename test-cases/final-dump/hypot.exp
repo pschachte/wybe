@@ -103,7 +103,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#114##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-area > {inline} (1 calls)
+proc area > {inline} (1 calls)
 0: hypot.area<0>
 area(r##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
@@ -112,7 +112,7 @@ area(r##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
     foreign llvm fmul(3.141592653589793:wybe.float, ~tmp#2##0:wybe.float, ?#result##0:wybe.float) @float:nn:nn
 
 
-hypot > {inline} (1 calls)
+proc hypot > {inline} (1 calls)
 0: hypot.hypot<0>
 hypot(s1##0:wybe.float, s2##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []

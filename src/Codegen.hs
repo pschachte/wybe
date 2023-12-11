@@ -44,7 +44,7 @@ module Codegen (
 import           Data.Function
 import           Data.List
 import qualified Data.Map                        as Map
-import           Data.Maybe                      (fromMaybe)
+import           Data.Maybe                      (fromMaybe, isJust)
 import           Data.String
 import           Data.Word
 
@@ -260,8 +260,9 @@ makeGlobalResourceVariable spec@(ResourceSpec mod nm) ty = do
     when (ty == VoidType)
         $ shouldnt $ "global resource " ++ show spec ++ " cant have voidtype"
     let ref = Name $ fromString $ makeGlobalResourceName spec
-    thisMod <- getModuleSpec
-    let init = if thisMod == mod
+    rootMod <- getModule modRootModSpec
+    resRoot <- (>>= modRootModSpec) <$> getLoadingModule mod
+    let init = if isJust rootMod && rootMod == resRoot
                then Just $ C.Undef ty
                else Nothing
     -- XXX this may be affected by multiprocessing

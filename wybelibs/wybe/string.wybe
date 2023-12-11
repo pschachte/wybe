@@ -42,7 +42,7 @@ pub def c_string(s:_):c_string = str where {
        | else :: 
             ?len = length(s) + 1
             foreign lpvm alloc(len, ?str)
-            foreign lpvm mutate(str, ?str, len, true, len, 0, '\0')
+            foreign lpvm mutate(str, ?str, len - 1, true, len, 0, '\0')
             ?offset = 0
             pack(s, !str, len, !offset)
     }
@@ -65,6 +65,16 @@ pub def (x:_ ,, y:_):_ =
     if { x = empty :: y 
        | y = empty :: x
        | else :: concat(x, y)
+       }
+
+pub def (x:char ,, y:_):_ =
+    if { y = empty :: singleton(x)
+       | else      :: concat(singleton(x), y)
+       }
+
+pub def (x:_ ,, y:char):_ =
+    if { x = empty :: singleton(y)
+       | else      :: concat(x,singleton(y))
        }
 
 # Reverse-mode cons
@@ -136,6 +146,9 @@ pub def (x:_ <=> y:_):comparison = c where {
     }
 }
 
+## Formatting
+pub def fmt(x:_):_ = x
+
 
 ## I/O
 
@@ -167,7 +180,6 @@ def pack(s:_, !raw:c_string, size:int, !offset:int) {
       | concat(?left, ?right) :: 
             pack(left, !raw, size, !offset)
             pack(right, !raw, size, !offset)
-            incr(!offset)
       | slice(_, _) :: 
             for ?c in s {
                 foreign lpvm mutate(raw, ?raw, offset, true, size, 0, c)

@@ -10,7 +10,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-= > public (2 calls)
+proc = > public (2 calls)
 0: explicit_type_warning.=<0>
 =(#left##0:explicit_type_warning, #right##0:explicit_type_warning, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -43,7 +43,7 @@ AFTER EVERYTHING:
 
 
 
-h > {inline} (0 calls)
+proc h > {inline} (0 calls)
 0: explicit_type_warning.h<0>
 h(#rec##0:explicit_type_warning, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -58,7 +58,7 @@ h(#rec##0:explicit_type_warning, ?#result##0:wybe.int, ?#success##0:wybe.bool)<{
         foreign lpvm access(~#rec##0:explicit_type_warning, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @explicit_type_warning:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-h > {inline} (0 calls)
+proc h > {inline} (0 calls)
 1: explicit_type_warning.h<1>
 h(#rec##0:explicit_type_warning, ?#rec##1:explicit_type_warning, #field##0:wybe.int, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -75,7 +75,7 @@ h(#rec##0:explicit_type_warning, ?#rec##1:explicit_type_warning, #field##0:wybe.
 
 
 
-mt > {inline} (0 calls)
+proc mt > {inline} (0 calls)
 0: explicit_type_warning.mt<0>
 mt(?#result##0:explicit_type_warning)<{}; {}; {}>:
   AliasPairs: []
@@ -83,7 +83,7 @@ mt(?#result##0:explicit_type_warning)<{}; {}; {}>:
     foreign llvm move(0:explicit_type_warning, ?#result##0:explicit_type_warning)
 
 
-oops > {inline} (0 calls)
+proc oops > {inline} (0 calls)
 0: explicit_type_warning.oops<0>
 oops(h##0:wybe.int, t##0:explicit_type_warning, ?#result##0:explicit_type_warning)<{}; {}; {}>:
   AliasPairs: []
@@ -91,7 +91,7 @@ oops(h##0:wybe.int, t##0:explicit_type_warning, ?#result##0:explicit_type_warnin
     foreign lpvm alloc(16:wybe.int, ?#rec##0:explicit_type_warning) @explicit_type_warning:nn:nn
     foreign lpvm mutate(~#rec##0:explicit_type_warning, ?#rec##1:explicit_type_warning, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~h##0:wybe.int) @explicit_type_warning:nn:nn
     foreign lpvm mutate(~#rec##1:explicit_type_warning, ?#result##0:explicit_type_warning, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~t##0:explicit_type_warning) @explicit_type_warning:nn:nn
-oops > {inline} (15 calls)
+proc oops > {inline} (15 calls)
 1: explicit_type_warning.oops<1>
 oops(?h##0:wybe.int, ?t##0:explicit_type_warning, #result##0:explicit_type_warning, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -110,7 +110,7 @@ oops(?h##0:wybe.int, ?t##0:explicit_type_warning, #result##0:explicit_type_warni
 
 
 
-oops2 > (1 calls)
+proc oops2 > (1 calls)
 0: explicit_type_warning.oops2<0>
 oops2(l##0:explicit_type_warning, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -127,7 +127,7 @@ oops2(l##0:explicit_type_warning, ?#result##0:wybe.int)<{}; {}; {}>:
 
 
 
-t > {inline} (0 calls)
+proc t > {inline} (0 calls)
 0: explicit_type_warning.t<0>
 t(#rec##0:explicit_type_warning, ?#result##0:explicit_type_warning, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -142,7 +142,7 @@ t(#rec##0:explicit_type_warning, ?#result##0:explicit_type_warning, ?#success##0
         foreign lpvm access(~#rec##0:explicit_type_warning, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?#result##0:explicit_type_warning) @explicit_type_warning:nn:nn
         foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
-t > {inline} (0 calls)
+proc t > {inline} (0 calls)
 1: explicit_type_warning.t<1>
 t(#rec##0:explicit_type_warning, ?#rec##1:explicit_type_warning, #field##0:explicit_type_warning, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -159,7 +159,7 @@ t(#rec##0:explicit_type_warning, ?#rec##1:explicit_type_warning, #field##0:expli
 
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: explicit_type_warning.~=<0>
 ~=(#left##0:explicit_type_warning, #right##0:explicit_type_warning, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

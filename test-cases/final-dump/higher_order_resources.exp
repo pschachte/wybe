@@ -93,14 +93,14 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~tmp#29##0:wybe.int, <<higher_order_resources.maximum>>:wybe.int) @higher_order_resources:nn:nn
 
 
-#anon#1 > {inline} (1 calls)
+proc #anon#1 > {inline} (1 calls)
 0: higher_order_resources.#anon#1<0>
 #anon#1(anon#1#1##0:wybe.list(wybe.int))<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     wybe.list.length1<0>(~anon#1#1##0:wybe.list(T), 0:wybe.int, ?tmp#10##0:wybe.int) #2 @list:nn:nn
     higher_order_resources.take_max<0>(~tmp#10##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}> #1 @higher_order_resources:nn:nn
-#anon#1 > {inline} (1 calls)
+proc #anon#1 > {inline} (1 calls)
 1: higher_order_resources.#anon#1<1>
 #anon#1(anon#1#1##0:wybe.list(wybe.int))<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}>:
   AliasPairs: []
@@ -109,7 +109,7 @@ module top-level code > public {semipure} (0 calls)
     higher_order_resources.take_max<0>(~tmp#1##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}> #2 @higher_order_resources:nn:nn
 
 
-#anon#2 > {inline} (1 calls)
+proc #anon#2 > {inline} (1 calls)
 0: higher_order_resources.#anon#2<0>
 #anon#2(anon#2#1##0:wybe.list(wybe.int))<{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -126,7 +126,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~tmp#32##0:wybe.int, <<higher_order_resources.maximum>>:wybe.int) @higher_order_resources:nn:nn
     wybe.list.length1<0>(~anon#2#1##0:wybe.list(T), 0:wybe.int, ?tmp#28##0:wybe.int) #6 @list:nn:nn
     higher_order_resources.take_max<0>(~tmp#28##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}> #4 @higher_order_resources:nn:nn
-#anon#2 > {inline} (1 calls)
+proc #anon#2 > {inline} (1 calls)
 1: higher_order_resources.#anon#2<1>
 #anon#2(anon#2#1##0:wybe.list(wybe.int))<{<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {<<higher_order_resources.maximum>>, <<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -145,7 +145,7 @@ module top-level code > public {semipure} (0 calls)
     higher_order_resources.take_max<0>(~tmp#6##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}> #4 @higher_order_resources:nn:nn
 
 
-#anon#2#closure#1 > {inline} (1 calls)
+proc #anon#2#closure#1 > {inline} (1 calls)
 0: higher_order_resources.#anon#2#closure#1<0>
 #anon#2#closure#1(i##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}>:
   AliasPairs: []
@@ -153,7 +153,7 @@ module top-level code > public {semipure} (0 calls)
     higher_order_resources.take_max<0>(~i##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}> #0
 
 
-take_max > (3 calls)
+proc take_max > (3 calls)
 0: higher_order_resources.take_max<0>
 take_max(i##0:wybe.int)<{<<higher_order_resources.maximum>>}; {<<higher_order_resources.maximum>>}; {}>:
   AliasPairs: []

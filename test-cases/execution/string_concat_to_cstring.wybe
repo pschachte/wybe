@@ -1,0 +1,3 @@
+?str = ("0" ,, "1") ,, "2"
+
+!println(c_string(str))

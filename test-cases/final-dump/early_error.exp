@@ -22,7 +22,7 @@ module top-level code > public {semipure} (0 calls)
     foreign c {terminal,semipure} exit(1:wybe.int) @early_error:nn:nn
 
 
-my_error > {terminal,inline,semipure} (1 calls)
+proc my_error > {terminal,inline,semipure} (1 calls)
 0: early_error.my_error<0>
 my_error(msg##0:wybe.string)<{}; {}; {}>:
   AliasPairs: []

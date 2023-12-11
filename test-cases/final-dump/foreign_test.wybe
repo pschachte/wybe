@@ -1,0 +1,11 @@
+pub def {test} lt(x:int, y:int) { foreign llvm {test} icmp_slt(x,y) }
+
+pub def {test} neq(x:c_string, y:c_string) {
+    foreign c {test} strcmp(x, y)
+}
+
+if { lt(1,2) :: !println("lt(1,2)") }
+if { lt(2,1) :: !println("lt(2,1)") }
+
+if { neq(c"string", c"string") :: !println("neq(c\"string\", c\"string\")") }
+if { neq(c"string", c"strong") :: !println("neq(c\"string\", c\"strong\")") }

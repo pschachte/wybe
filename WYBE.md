@@ -3,16 +3,26 @@
 # The Wybe Programming Language
 
 
-The Wybe programming language is intended to be easy to learn and easy to use,
+The [Wybe](README.md) programming language is intended to be easy to learn and easy to use,
 but powerful and efficient enough for practical use.  It is intended to
 support best programming practice, but not necessarily *common* practice.
 
 Wybe combines the best features of declarative and imperative languages,
 in particular borrowing features from functional, logic, imperative, and
 object-oriented languages, but does not neatly fit into any of these
-paradigms.  Its main organising principle is that *values* are
-immutable, but *variables* may be reassigned.  This means that values
-may be passed around at will without worrying that they may be modified.
+paradigms.  Its main organising principle is **interface integrity**, which
+indicates that all information that flows between a procedure or function and
+its caller must be part of the interface (the signature) of that procedure or
+function.  Semantically, *values* are immutable (Wybe has
+[*value semantics*](https://en.wikipedia.org/wiki/Value_semantics)),
+but *variables* may be reassigned.  This means that data structures
+may be passed around at will without worrying that they may be unexpectedly
+modified, yet conventional looping constructs can be used freely.
+
+In some cases the compiler can arrange for values to be destructively
+updated in place, as long as it can be sure that the original value of the
+data structure will never be accessed again.  Thus the compiler can generate
+efficient executables while ensuring that interface integrity is maintained.  
 
 
 ## <a name="hello-world"></a>Hello, World!
@@ -190,22 +200,61 @@ the following character:
 | `a`       | Alert or bell (ASCII code 0x07)         |
 | `b`       | Backspace (ASCII code 0x08)             |
 | `e`       | Escape (ASCII code 0x1b)                |
-| `f`       | Form feed (ASCII code 0x0c)              |
+| `f`       | Form feed (ASCII code 0x0c)             |
 | `n`       | Newline or Line feed (ASCII code 0x0a)  |
 | `r`       | Carriage return (ASCII code 0x0d)       |
 | `t`       | Horizontal tab (ASCII code 0x09)        |
 | `v`       | Vertical tab (ASCII code 0x0b)          |
+| `x`       | Introduce a hexadecimal character code  |
 
-If the character following the backslash is an `x` or `X`, the following two
-characters must be hexadecimal characters, in which case the hexadecimal number
+The two characters following `\x` (or `\X`) must be hexadecimal characters,
+in which case the hexadecimal number
 specifies the character code.  For example `'\x20'` specifies character code 32,
 which is the space character.
+Additionally, within strings, the dollar sign (`$`) character is special;
+see the discussion of [string interpolation](#string-interpolation) below.
 
 Any other character following a backslash is interpreted as itself. In
 particular, `\'` specifies a single quote character, `\"`
-specifies one double-quote character, and `\\` specifies a single
-backslash character.
+specifies one double-quote character, `\$` specifies a dollar sign character,
+and `\\` specifies a single backslash character.
 
+
+## <a name="string-interpolation">String interpolation
+
+Values of variables and expressions can be included within a string through
+*string interpolation*.  To include the value of a variable within a string,
+place the variable name within the string preceded by a dollar sign (`$`)
+character.  For example, if the variable `name` holds the string `"Wybe"`,
+then
+
+> `"Hello, $name!"`
+
+denotes the string `"Hello, Wybe!"`, and if the variable `number` holds the value 42, then
+
+> `"$number is the answer"`
+
+denotes `"42 is the answer"`
+
+More generally, the values of Wybe expressions can be included in strings by
+placing them within parentheses immediately preceded by a dollar sign.  For
+example, if `base` is 2 and `bits` is 63, then
+
+> `"maxint is $(base**bits-1) and minint is $(base**bits)"`
+
+denotes the string
+`"maxint is 9223372036854775807 and minint is -9223372036854775808"`
+
+Interpolated expressions can be arbitrarily complex, involving nested
+subexpressions, nested parentheses, and even nested quotes.
+
+Variables and expressions used in string interpolations are converted to
+strings using the `fmt` function, which is defined for all primitive types,
+and can be defined for user types to allow them to be interpolated.  Note
+that `fmt` applied to strings returns the strings as is, without surrounding
+them with quotation marks.  Then
+string concatenation (`,,`) is used to assemble the string from its fixed
+parts and the results of the call(s) to `fmt`.
 
 ## Procedure calls
 
@@ -241,7 +290,7 @@ any number of letters, digits, and underscores.
 A variable mention may *use* or *assign* its value.  If the variable
 name is preceded by a question mark (`?`), the mention assigns the
 variable a (new) value; without the question mark prefix, the mention
-uses the variable's current value.  It does not matter which side of an
+uses the variable's current value.  It does not matter on which side of an
 equal sign the variable appears; only its prefix determines whether the
 variable is assigned or used.
 
@@ -299,7 +348,8 @@ Function calls may have one of the following forms:
     output.  In this case, the function is run "backwards", working from the
     result to determine the output arguments.  So the value of the function must
     be supplied by the context in which it is called, and then the function is
-    called to produce the values for the outputs.
+    called to produce the values for the outputs.  One common use of this form
+    is for [*pattern matching*](#pattern-matching) (accessing the members of a data structure).
 
   - A call where one or more arguments are input/outputs (prefixed with `!`),
     and all others, if any, are inputs.  This form of expression is itself
@@ -315,7 +365,7 @@ Expressions containing both output and input/output arguments are not permitted.
 
 If a function call is made with *fewer* arguments than is dictated by the
 definition of procedure/function, the procedure is considered a partial
-application. The mode of all arguments must be an input (as the procedure is
+application. The mode of all arguments must be inputs (as the procedure is
 not called where used to produce any outputs).
 
 This binds the output name to a "partial application" of the procedure. The type
@@ -374,7 +424,7 @@ semicolon, left parenthesis, bracket, or brace, or one of the keywords
 `in`, `is`, `where`, `pub`, `def`, `type`, `constructor`, or `constructors`,
 then the line break is not considered to be a separator.  Likewise, if what
 follows is an operator symbol other than `?`, `!`, or `~`, a comma, semicolon, a
-right parenthesis, bracket, or brace, or one of the keywords
+right parenthesis, bracket, brace, or one of the keywords
 `in`, `is`, or `where`, then the line break is not considered to be a separator.
 Otherwise, the line break is treated as a separator, as if you had written an
 explicit semicolon.
@@ -442,7 +492,9 @@ pub def toCelsius(f:float):float = (f - 32.0) / 1.8
 ```
 is exactly equivalent to
 ```
-pub def toCelsius(f:float, ?result:float) { ?result = (f - 32.0) / 1.8 }
+pub def toCelsius(f:float, ?result:float) {
+    ?result = (f - 32.0) / 1.8
+}
 ```
 
 Likewise, every function call is transformed into a procedure call, so:
@@ -752,35 +804,97 @@ actually replace the second statement with
 
 ## <a name="tests"></a>Tests and partial functions
 
-Some procedure and function calls are *tests*.  This means that instead
-of returning whatever outputs they ordinarily produce, they can *fail*,
-in which case they do not produce their usual output(s).  Functions
-that may fail to produce a result are also known as *partial* functions.
+Some procedure or function calls are *tests*.  This means that they can return
+whatever output(s) they are meant to produce, assigning or reassigning variables
+as specified, or instead they can *fail*, in which case they do not produce
+their usual output(s), leaving all variables and resources as they were before
+the test began.
+Functions that may fail to produce a result for some inputs are also known as
+*partial* functions.
 
 Test procedures and functions must be explicitly declared by inserting
 the modifier `test`, enclosed within curly braces, after the `def` keyword.
-You can also use the modifier `partial` in place of `test`.  For example:
+You can instead use the modifier `partial` in place of `test`.  For example:
 
 ```
-def {test} even_number(num:int) { ... }
+def {test} even_number(num:int) { num % 2 = 0 }
 def {partial} lookup(key:int, table:map) = ...
 ```
 
-Calls to test (partial) procedures and functions are only permitted in two
-contexts:  in a conditional, described [below](#conditionals),
-or in the definition of a test/partial procedure or function.
+Calls to test (partial) procedures and functions are only permitted in three
+contexts:  in a [conditional](#conditionals), in the definition
+of a test/partial procedure or function, or in a
+[reified expression](reification).
 
-Any procedure or function call can also become a test if an input is provided
-where an output argument is expected.  In this case, the call is made
-producing the output, and then the output is compared for equality with
-supplied input.  Equality (`=`) with two input arguments is a test, so
-these two calls are equivalent tests (in fact, the former is transformed to the
-latter):
+Tests can take several forms:
+  *  A call to a test procedure is a test.
+  *  Any procedure call containing one or more partial function calls is also a
+     test; it succeeds only if all the partial function calls succeed, and when
+     any call fails the test fails immediately.
+  * A sequence of statements including one or more tests is a test; it
+    succeeds if and only if all the tests succeed, and fails immediately if
+    any test fails.
+  * Any procedure or function call is a test if an input is provided
+    where an output argument is expected.  In this case, the call is made
+    producing the output, and then the output is compared for equality with
+    supplied input.  Equality (`=`) with two input arguments is a test, so
+    these two calls are equivalent tests (in fact, the former is transformed to the
+    latter):
+
+    ```
+    add(x, y, xy)
+    xy = add(x, y)
+    ```
+  * A foreign language call can be a test; see the [foreign language
+    interface](#foreign-language-interface) section for details. 
+  * Finally, a Boolean value by itself can also be used as a test, in which case
+    `true` succeeds and `false` fails.  This applies both to Boolean variables
+    and Boolean-valued functions.  However, tests are a more general facility
+    than Boolean-valued functions, because they can produce other outputs aside
+    from success or failure.  
+
+This flexibility makes Wybe tests more general than Boolean-valued functions.
+Because nested partial function calls and compound statements involving tests
+are considered to be tests, one can carry out a computation in which any of
+several steps may fail, and handle all possible failures together.  For example,
+taking the head of a list is a partial function, as is looking up a value in a
+table, so `lookup(head(list), table)` will immediately fail if `list` is empty,
+and if not, will fail if the head of the list is not present in the table.
+
+Because deconstructors are tests for types with multiple constructors, Wybe also
+naturally provides [pattern matching](#pattern-matching).  For example,
 
 ```
-add(x, y, xy)
-xy = add(x, y)
+xs = [0 | ?rest]
 ```
+
+would succeed if `xs` is currently a list whose head is `0`, and would assign
+`rest` to the tail.  It would fail if `xs` does not match that pattern, either
+because it is an empty list or because its head is not `0`.
+
+Note that all effects of a test are reverted if the test fails, including
+reassignments of variables or modifications of resources.  However, some
+effects, such as performing input/output, cannot be reverted, and therefore
+these effects cannot be performed within a test.  The compiler will issue an
+error message in such cases.
+
+
+## <a name="reification"></a>Reification of tests
+
+Wybe allows a call to a test procedure to be reified into a Boolean value, as
+long as the call does not produce any outputs.  This allows you to save the
+success or otherwise of a test in a Boolean variable for later use.  For
+example, with the definition of `even_number` shown in the
+[Tests and partial functions](#tests) section, the following code will save
+whether or not a number is even in a variable for later use as a test.
+
+```
+?is_even = even_number(n)
+```
+
+Combined with the fact that Boolean values can be used as test, this makes test
+procedures with no outputs effectively interchangeable with Boolean valued
+functions.
 
 
 ## <a name="disjunction"></a>Disjunction
@@ -838,7 +952,7 @@ pub def saturating_tail(lst:list(T)):list(T) = (tail(lst) | [])
 ```
 
 
-## <a name="pattern matching"></a>Pattern matching
+## <a name="pattern-matching"></a>Pattern matching
 
 Like procedures, some Wybe functions can be "run backwards", where the function
 result is supplied as input and some or all of its arguments are produced as
@@ -966,7 +1080,7 @@ again, this must appear in a test context, such as a conditional.
 
 ## <a name="conditionals"></a>Conditional statements
 
-Wybe's conditional construct has the form:
+Wybe's main conditional construct has the form:
 
 > `if` `{` *cases* `}`
 
@@ -994,6 +1108,11 @@ if { x < 0 :: !println("negative")
    | else  :: !println("positive")
 }
 ```
+
+Other conditional constructs include [case statements](#cases),
+[conditional and case expressions](#conditional-and-case-expressions),
+and loop control tests, as discussed in the
+[iteration statements](#iteration-statements) section.
 
 
 ## <a name="cases"></a>Case statements
@@ -1036,7 +1155,7 @@ Wybe's conditional and case constructs can also be used as expressions.  Both
 have the same form as their statement versions, except that instead of each case
 providing one or more statements, they provide a single expression.
 
-Note that in both case, the `else` case is required.
+Note that for both `if` and `case` expressions, the `else` is required.
 
 For example:
 ```
@@ -1056,6 +1175,9 @@ println(
 })
 ```
 
+Note that where an `if` or `case` expression is used as an argument of another
+expression, it must be enclosed within parentheses.
+
 
 ## `terminal` and `failing` procedures
 A procedure is considered to be *terminal* if a call to it will never return (it
@@ -1070,7 +1192,7 @@ may fail or never return.  Wybe has a single built-in failing proc, named
 `fail`, with no parameters.
 
 
-## Iteration statements
+## <a name="iteration-statements"></a>Iteration statements
 
 Iteration is specified with the `do` and `for` statements, of the form:
 
@@ -1437,10 +1559,15 @@ A resource can be declared at the level of a module, as follows:
 
 > `resource` *name*`:`*type*
 
-It may optionally specify an initial value, in which case the resource is
-defined throughout the execution of the program.
+It may optionally specify an initial value:
 
 > `resource` *name*`:`*type* `=` *expr*
+
+In this case, the resource is
+defined in any top level code in that module, as well as any top level code in
+any module that `use`s this module, but not in any module that this module
+`use`s.  The latter restriction is necessary because when two modules depend on
+one another, the order in which their resources are initialised is unspecified.
 
 A resource may be exported, allowing it to be referred to in other modules, by
 preceding the `resource` declaration with the `pub` keyword.
@@ -1709,14 +1836,14 @@ configured when Wybe is installed, but can be overridden with the `--libdir` or
 
 Wybe code is mostly purely logical, and the Wybe compiler takes advantage of
 this.  For example, if none of the outputs of a proc call are actually used, 
-the compiler will eliminate the call.  
+the compiler will eliminate the call.
 A proc call may also be omitted if a proc call with the same inputs has previously 
-been made; in this case, the compiler will assume the output(s) will be identical.  
+been made; in this case, the compiler will assume the output(s) will be identical.
 The compiler may also reorder calls however it likes, as long as all the inputs 
 to a proc are available when the proc is called.  As long as your code is purely 
 logical, all of these optimisations and more are perfectly safe.
 
-However, occasionally it is important that the compiler not perform such optimisations.  
+However, occasionally it is important that the compiler not perform such optimisations.
 For example, the `exit` command has no outputs, it is only executed for its effect 
 (terminating the program prematurely).  In some cases, purely logical Wybe procs 
 can be written based on impure building blocks, particularly when interfacing to 
@@ -1728,12 +1855,12 @@ which tells the Wybe compiler (and other programmers) to treat them more careful
 
 Wybe supports the following three levels of purity:
 
-- *pure*
+- *pure*  
 the default purity level.  An ordinary procedure or function, calls to which 
 are subject to all optimisations.
 
-- *impure*
-an impure procedure, calls to which should not be reordered or omitted.  
+- *impure*  
+an impure procedure, calls to which should not be reordered or omitted.
 Impure procs must be declared to be so, and in general, a proc that calls an 
 impure proc must itself be impure.  The bodies of impure procs are also not 
 optimised as extensively as pure and semipure procs.  Even calls to pure procs 
@@ -1741,11 +1868,11 @@ appearing in the bodies of impure procs will not be optimised.  This provides
 a way to prevent unwanted optimisation in a fine-grained way, such as for the 
 purposes of benchmarking.
 
-- *semipure*
+- *semipure*  
 a proc that is not pure, so calls to it must not be reordered or omitted, 
 however its impurity is not "contagious".  It may be called from an ordinary, 
-pure proc without that proc becoming impure.  It may also call impure procs.  
-Note that calls to pure procs in the bodies of semipure procs are optimised as usual; 
+pure proc without that proc becoming impure.  It may also call impure procs.
+Note that calls to pure procs in the bodies of semipure procs are optimised as usual;
 it is only in the bodies of *impure* procs that calls to ordinary pure procs are 
 not optimised.
 
@@ -1892,7 +2019,11 @@ information.  Supported modifiers in foreign calls are:
 - **unique**:  do not report [uniqueness errors](#unique-types) arising from use
   of unique arguments to the call (but do note the use or definition of unique
   arguments)
-
+- **test**:  the call is a [test](#tests); that is, it has one extra output argument,
+  beyond those explicitly provided, which indicates whether the call succeeds.
+  Where *language* is `llvm`, the output argument is a 1 bit integer; otherwise
+  the output argument is an `int`, which indicates success for any value other
+  than 0.
 
 For example, the `exit` proc in the standard library is implemented as
 follows:
@@ -1901,6 +2032,10 @@ follows:
 pub def {terminal,semipure} exit(code:int) {
     foreign c {terminal,semipure} exit(code)
 }
+```
+and the less than test for integers is defined as
+```
+pub def {test} (x:_ <  y:_) { foreign llvm {test} icmp_slt(x,y) }
 ```
 
 

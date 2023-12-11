@@ -1,0 +1,88 @@
+======================================================================
+AFTER EVERYTHING:
+ Module inline_rename
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : inline_rename.<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+module top-level code > public {semipure} (0 calls)
+0: inline_rename.<0>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    inline_rename.eq<0>(0:wybe.int, ?b##0:wybe.int) #2 @inline_rename:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#0##0:wybe.phantom) @int:nn:nn
+    foreign c print_int(b##0:wybe.int, ~tmp#0##0:wybe.phantom, ?tmp#1##0:wybe.phantom) @int:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(~b##0:wybe.int, ~tmp#2##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @int:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+
+
+proc eq > {noinline} (1 calls)
+0: inline_rename.eq<0>
+eq(x##0:wybe.int, ?y##0:wybe.int)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(~x##0:wybe.int, ?y##0:wybe.int) @inline_rename:nn:nn
+
+
+proc foo > {inline} (1 calls)
+0: inline_rename.foo<0>
+foo(?bar##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    inline_rename.eq<0>(0:wybe.int, ?bar##0:wybe.int) #0 @inline_rename:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @int:nn:nn
+    foreign c print_int(bar##0:wybe.int, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @int:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#2##0:wybe.phantom, ?tmp#3##0:wybe.phantom) @io:nn:nn
+    foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+
+  LLVM code       :
+
+; ModuleID = 'inline_rename'
+
+
+ 
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external ccc  void @print_int(i64)    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  void @"inline_rename.<0>"()    {
+entry:
+  %0 = tail call fastcc  i64  @"inline_rename.eq<0>"(i64  0)  
+  tail call ccc  void  @print_int(i64  %0)  
+  tail call ccc  void  @putchar(i8  10)  
+  tail call ccc  void  @print_int(i64  %0)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+}
+
+
+define external fastcc  i64 @"inline_rename.eq<0>"(i64  %"x##0") noinline   {
+entry:
+  ret i64 %"x##0" 
+}
+
+
+define external fastcc  i64 @"inline_rename.foo<0>"() alwaysinline   {
+entry:
+  %0 = tail call fastcc  i64  @"inline_rename.eq<0>"(i64  0)  
+  tail call ccc  void  @print_int(i64  %0)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret i64 %0 
+}

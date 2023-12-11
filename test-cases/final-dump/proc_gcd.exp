@@ -22,7 +22,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#4##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
 
 
-gcd > public {inline} (1 calls)
+proc gcd > public {inline} (1 calls)
 0: proc_gcd.gcd<0>
 gcd(a##0:wybe.int, b##0:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -30,7 +30,7 @@ gcd(a##0:wybe.int, b##0:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.i
     proc_gcd.gcd#cont#1<0>(_:wybe.int, ~a##0:wybe.int, ~b##0:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @proc_gcd:nn:nn
 
 
-gcd#cont#1 > (2 calls)
+proc gcd#cont#1 > (2 calls)
 0: proc_gcd.gcd#cont#1<0>
 gcd#cont#1([t##0:wybe.int], x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -46,7 +46,7 @@ gcd#cont#1([t##0:wybe.int], x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int)<{<<wyb
 
 
 
-gcd#cont#2 > {inline} (1 calls)
+proc gcd#cont#2 > {inline} (1 calls)
 0: proc_gcd.gcd#cont#2<0>
 gcd#cont#2([t##0:wybe.int], x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -55,7 +55,7 @@ gcd#cont#2([t##0:wybe.int], x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int)<{<<wyb
     proc_gcd.gcd#cont#1<0>(_:wybe.int, ~y##0:wybe.int, ~y##1:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @proc_gcd:nn:nn
 
 
-mod > public (1 calls)
+proc mod > public (1 calls)
 0: proc_gcd.mod<0>
 mod(x##0:wybe.int, y##0:wybe.int, ?r##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

@@ -1,0 +1,2 @@
+use resource_conflict_a, resource_conflict_b
+?c = 0

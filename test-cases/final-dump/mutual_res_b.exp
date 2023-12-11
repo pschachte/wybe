@@ -1,0 +1,55 @@
+======================================================================
+AFTER EVERYTHING:
+ Module mutual_res_a
+  representation  : (not a type)
+  public submods  : 
+  public resources: a_res: mutual_res_a.a_res
+  public procs    : 
+  imports         : use mutual_res_b
+                    use wybe
+  resources       : a_res: fromList [(mutual_res_a.a_res,wybe.int = 42 @mutual_res_a:nn:nn @mutual_res_a:nn:nn)]
+  procs           : 
+
+
+  LLVM code       :
+
+; ModuleID = 'mutual_res_a'
+
+
+ 
+
+
+@"resource#mutual_res_a.a_res" =    global i64 undef
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+--------------------------------------------------
+ Module mutual_res_b
+  representation  : (not a type)
+  public submods  : 
+  public resources: b_res: mutual_res_b.b_res
+  public procs    : 
+  imports         : use mutual_res_a
+                    use wybe
+  resources       : b_res: fromList [(mutual_res_b.b_res,wybe.char = 'c' @mutual_res_b:nn:nn @mutual_res_b:nn:nn)]
+  procs           : 
+
+
+  LLVM code       :
+
+; ModuleID = 'mutual_res_b'
+
+
+ 
+
+
+@"resource#mutual_res_b.b_res" =    global i8 undef
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    

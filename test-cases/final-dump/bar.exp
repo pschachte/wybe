@@ -81,7 +81,7 @@ module top-level code > public {inline,semipure} (0 calls)
     foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-factorial > public (1 calls)
+proc factorial > public (1 calls)
 0: numbers.factorial<0>
 factorial(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -98,7 +98,7 @@ factorial(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
 
 
 
-toCelsius > public {inline} (0 calls)
+proc toCelsius > public {inline} (0 calls)
 0: numbers.toCelsius<0>
 toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []

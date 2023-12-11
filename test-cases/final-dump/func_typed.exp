@@ -9,7 +9,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-plus > public {inline} (0 calls)
+proc plus > public {inline} (0 calls)
 0: func_typed.plus<0>
 plus(a##0:wybe.int, b##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []

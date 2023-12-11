@@ -12,7 +12,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-fold_add > public {inline} (3 calls)
+proc fold_add > public {inline} (3 calls)
 0: constfold.fold_add<0>
 fold_add(?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -20,7 +20,7 @@ fold_add(?#result##0:wybe.int)<{}; {}; {}>:
     foreign llvm move(42:wybe.int, ?#result##0:wybe.int) @constfold:nn:nn
 
 
-fold_mult > public {inline} (3 calls)
+proc fold_mult > public {inline} (3 calls)
 0: constfold.fold_mult<0>
 fold_mult(?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -28,7 +28,7 @@ fold_mult(?#result##0:wybe.int)<{}; {}; {}>:
     foreign llvm move(42:wybe.int, ?#result##0:wybe.int) @constfold:nn:nn
 
 
-fold_test > public {inline} (0 calls)
+proc fold_test > public {inline} (0 calls)
 0: constfold.fold_test<0>
 fold_test(?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -36,7 +36,7 @@ fold_test(?#result##0:wybe.int)<{}; {}; {}>:
     foreign llvm move(42:wybe.int, ?#result##0:wybe.int) @constfold:nn:nn
 
 
-fortytwo > public {inline} (0 calls)
+proc fortytwo > public {inline} (0 calls)
 0: constfold.fortytwo<0>
 fortytwo(?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []

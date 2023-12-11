@@ -25,7 +25,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-= > public (2 calls)
+proc = > public (2 calls)
 0: ctor_char.=<0>
 =(#left##0:ctor_char, #right##0:ctor_char, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -93,7 +93,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-c > {inline} (0 calls)
+proc c > {inline} (0 calls)
 0: ctor_char.c<0>
 c(#rec##0:ctor_char, ?#result##0:wybe.char, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -119,7 +119,7 @@ c(#rec##0:ctor_char, ?#result##0:wybe.char, ?#success##0:wybe.bool)<{}; {}; {}>:
             foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
 
 
-c > {inline} (0 calls)
+proc c > {inline} (0 calls)
 1: ctor_char.c<1>
 c(#rec##0:ctor_char, ?#rec##2:ctor_char, #field##0:wybe.char, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -147,7 +147,7 @@ c(#rec##0:ctor_char, ?#rec##2:ctor_char, #field##0:wybe.char, ?#success##0:wybe.
 
 
 
-const > {inline} (0 calls)
+proc const > {inline} (0 calls)
 0: ctor_char.const<0>
 const(?#result##0:ctor_char)<{}; {}; {}>:
   AliasPairs: []
@@ -155,14 +155,14 @@ const(?#result##0:ctor_char)<{}; {}; {}>:
     foreign llvm move(0:ctor_char, ?#result##0:ctor_char)
 
 
-ctor > {inline} (1 calls)
+proc ctor > {inline} (1 calls)
 0: ctor_char.ctor<0>
 ctor(c##0:wybe.char, ?#result##3:ctor_char)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign llvm shl(~c##0:ctor_char, 1:ctor_char, ?#temp##0:ctor_char) @ctor_char:nn:nn
     foreign llvm or(~#temp##0:ctor_char, 512:ctor_char, ?#result##3:ctor_char) @ctor_char:nn:nn
-ctor > {inline} (13 calls)
+proc ctor > {inline} (13 calls)
 1: ctor_char.ctor<1>
 ctor(?c##0:wybe.char, #result##0:ctor_char, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -190,7 +190,7 @@ ctor(?c##0:wybe.char, #result##0:ctor_char, ?#success##0:wybe.bool)<{}; {}; {}>:
 
 
 
-foo > (1 calls)
+proc foo > (1 calls)
 0: ctor_char.foo<0>
 foo(this##0:ctor_char, ?#result##0:wybe.char)<{}; {}; {}>:
   AliasPairs: []
@@ -215,7 +215,7 @@ foo(this##0:ctor_char, ?#result##0:wybe.char)<{}; {}; {}>:
 
 
 
-other_ctor > {inline} (0 calls)
+proc other_ctor > {inline} (0 calls)
 0: ctor_char.other_ctor<0>
 other_ctor(other_ctor#1##0:ctor_char, ?#result##0:ctor_char)<{}; {}; {}>:
   AliasPairs: []
@@ -223,7 +223,7 @@ other_ctor(other_ctor#1##0:ctor_char, ?#result##0:ctor_char)<{}; {}; {}>:
     foreign lpvm alloc(8:wybe.int, ?#rec##0:ctor_char) @ctor_char:nn:nn
     foreign lpvm mutate(~#rec##0:ctor_char, ?#rec##1:ctor_char, 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, ~other_ctor#1##0:ctor_char) @ctor_char:nn:nn
     foreign llvm or(~#rec##1:ctor_char, 1:wybe.int, ?#result##0:ctor_char) @ctor_char:nn:nn
-other_ctor > {inline} (5 calls)
+proc other_ctor > {inline} (5 calls)
 1: ctor_char.other_ctor<1>
 other_ctor(?other_ctor#1##0:ctor_char, #result##0:ctor_char, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -249,7 +249,7 @@ other_ctor(?other_ctor#1##0:ctor_char, #result##0:ctor_char, ?#success##0:wybe.b
 
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: ctor_char.~=<0>
 ~=(#left##0:ctor_char, #right##0:ctor_char, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

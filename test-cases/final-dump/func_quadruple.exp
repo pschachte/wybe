@@ -10,7 +10,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-double > public {inline} (2 calls)
+proc double > public {inline} (2 calls)
 0: func_quadruple.double<0>
 double(a##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -18,7 +18,7 @@ double(a##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
     foreign llvm add(~a##0:wybe.int, ~a##0:wybe.int, ?#result##0:wybe.int) @int:nn:nn
 
 
-quadruple > public {inline} (0 calls)
+proc quadruple > public {inline} (0 calls)
 0: func_quadruple.quadruple<0>
 quadruple(a##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []

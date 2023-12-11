@@ -3,7 +3,7 @@
 ----------------------------------------------------------------------
 (0, 0, 0) #0
 (-1, -6, 3) #100
-** malloc count: 202
+** malloc count: 201
 
 ----------------------------------------------------------------------
 
@@ -13,7 +13,7 @@
 ----------------------------------------------------------------------
 (0, 0, 0) #0
 (-1, -6, 3) #100
-** malloc count: 2
+** malloc count: 1
 
 ----------------------------------------------------------------------
 
@@ -30,8 +30,10 @@ AFTER BUILDING MAIN:
   public procs    : 
   imports         : use command_line
                     use drone
+                    use drone.drone_info
                     use wybe
                     use wybe.array
+                    use wybe.array.raw_array
                     use wybe.bool
                     use wybe.c_string
                     use wybe.char
@@ -53,17 +55,23 @@ AFTER BUILDING MAIN:
 
 module top-level code > {terminal,inline,impure} (0 calls)
 0: .<0>
-(%argc##0:wybe.int, %argv##0:wybe.array.raw_array(wybe.c_string), %?exit_code##0:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
+(%argc##0:wybe.int, %argv##0:wybe.array.raw_array, %?exit_code##1:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm store(~%argc##0:wybe.int, <<command_line.argc>>:wybe.int)
-    foreign lpvm store(~%argv##0:wybe.array.raw_array(wybe.c_string), <<command_line.argv>>:wybe.array.raw_array(wybe.c_string))
-    foreign c {impure} gc_init @memory_management:nn:nn
+    foreign lpvm store(%argc##0:wybe.int, <<command_line.argc>>:wybe.int)
+    foreign lpvm store(%argv##0:wybe.array.raw_array, <<command_line.argv>>:wybe.array.raw_array)
     foreign lpvm store(0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    command_line.<0><{<<command_line.argc>>, <<command_line.argv>>}; {<<command_line.arguments>>, <<command_line.command>>, <<command_line.exit_code>>}; {}> #2
-    drone.<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
-    foreign lpvm load(<<command_line.exit_code>>:wybe.int, ?%exit_code##0:wybe.int)
-    foreign c {semipure,terminal} exit(exit_code##0:wybe.int)
+    foreign c {impure} gc_init @memory_management:nn:nn
+    drone.<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1
+    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.array(T)) @array:nn:nn
+    foreign lpvm mutate(~tmp#9##0:wybe.array(T), ?tmp#10##0:wybe.array(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argc##0:wybe.int) @array:nn:nn
+    foreign lpvm mutate(~tmp#10##0:wybe.array(T), ?tmp#0##0:wybe.array(wybe.c_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argv##0:wybe.array.raw_array) @array:nn:nn
+    foreign lpvm store(~tmp#0##0:wybe.array(wybe.c_string), <<command_line.arguments>>:wybe.array(wybe.c_string)) @command_line:nn:nn
+    foreign lpvm store(c"":wybe.c_string, <<command_line.command>>:wybe.c_string) @command_line:nn:nn
+    foreign lpvm store(0:wybe.int, <<command_line.exit_code>>:wybe.int) @command_line:nn:nn
+    command_line.<0><{<<command_line.arguments>>, <<command_line.command>>}; {<<command_line.arguments>>, <<command_line.command>>}; {}> #3
+    foreign llvm move(0:wybe.int, ?%exit_code##1:wybe.int)
+    foreign c {semipure,terminal} exit(0:wybe.int)
 
 LLVM code       : None
 
@@ -81,37 +89,30 @@ LLVM code       : None
   imports         : use wybe
   resources       : argc: fromList [(command_line.argc,wybe.int @command_line:nn:nn)]
                     arguments: fromList [(command_line.arguments,wybe.array(wybe.c_string) = array(argc @command_line:nn:nn, argv @command_line:nn:nn) @command_line:nn:nn @command_line:nn:nn)]
-                    argv: fromList [(command_line.argv,wybe.array.raw_array(wybe.c_string) @command_line:nn:nn)]
+                    argv: fromList [(command_line.argv,wybe.array.raw_array @command_line:nn:nn)]
                     command: fromList [(command_line.command,wybe.c_string = c"" @command_line:nn:nn @command_line:nn:nn)]
                     exit_code: fromList [(command_line.exit_code,wybe.int = 0 @command_line:nn:nn @command_line:nn:nn)]
   procs           : 
 
 module top-level code > public {semipure} (0 calls)
 0: command_line.<0>
-()<{<<command_line.argc>>, <<command_line.argv>>}; {<<command_line.arguments>>, <<command_line.command>>, <<command_line.exit_code>>}; {}>:
+()<{<<command_line.arguments>>, <<command_line.command>>}; {<<command_line.arguments>>, <<command_line.command>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(1,(wybe.array.[|]<0>,fromList [NonAliasedParamCond 2 []]))]
-    foreign lpvm load(<<command_line.argc>>:wybe.int, ?%tmp#1##0:wybe.int) @command_line:nn:nn
-    foreign lpvm load(<<command_line.argv>>:wybe.array.raw_array(wybe.c_string), ?%tmp#3##0:wybe.array.raw_array(wybe.c_string)) @command_line:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.array(T)) @array:nn:nn
-    foreign lpvm mutate(~tmp#10##0:wybe.array(T), ?tmp#11##0:wybe.array(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.int) @array:nn:nn
-    foreign lpvm mutate(~tmp#11##0:wybe.array(T), ?tmp#0##0:wybe.array(wybe.c_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.array.raw_array(T)) @array:nn:nn
-    foreign lpvm store(tmp#0##0:wybe.array(wybe.c_string), <<command_line.arguments>>:wybe.array(wybe.c_string)) @command_line:nn:nn
-    foreign lpvm store(c"":wybe.c_string, <<command_line.command>>:wybe.c_string) @command_line:nn:nn
-    wybe.array.[|]<0>[785a827a1b](?command##1:wybe.c_string, ?arguments##2:wybe.array(wybe.c_string), ~tmp#0##0:wybe.array(wybe.c_string), ?tmp#7##0:wybe.bool) #1 @command_line:nn:nn
-    case ~tmp#7##0:wybe.bool of
+  MultiSpeczDepInfo: [(0,(wybe.array.[|]<0>,fromList [NonAliasedParamCond 2 []]))]
+    foreign lpvm load(<<command_line.arguments>>:wybe.array(wybe.c_string), ?%arguments##0:wybe.array(wybe.c_string))
+    wybe.array.[|]<0>[785a827a1b](?command##1:wybe.c_string, ?arguments##2:wybe.array(wybe.c_string), ~arguments##0:wybe.array(wybe.c_string), ?tmp#8##0:wybe.bool) #0 @command_line:nn:nn
+    case ~tmp#8##0:wybe.bool of
     0:
         foreign c {terminal,semipure} error_exit(c"command_line:18:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @control:nn:nn
 
     1:
         foreign lpvm store(~%arguments##2:wybe.array(wybe.c_string), <<command_line.arguments>>:wybe.array(wybe.c_string)) @command_line:nn:nn
         foreign lpvm store(~%command##1:wybe.c_string, <<command_line.command>>:wybe.c_string) @command_line:nn:nn
-        foreign lpvm store(0:wybe.int, <<command_line.exit_code>>:wybe.int) @command_line:nn:nn
 
 
 
-set_exit_code > public {inline} (0 calls)
+proc set_exit_code > public {inline} (0 calls)
 0: command_line.set_exit_code<0>
 set_exit_code(code##0:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
   AliasPairs: []
@@ -141,13 +142,10 @@ set_exit_code(code##0:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
 @"resource#command_line.exit_code" =    global i64 undef
 
 
-@command_line.0 =    constant [?? x i8] c"\00"
+@command_line.1 =    constant [?? x i8] c"Erroneous program argument vector\00"
 
 
-@command_line.2 =    constant [?? x i8] c"Erroneous program argument vector\00"
-
-
-@command_line.1 =    constant [?? x i8] c"command_line:18:15\00"
+@command_line.0 =    constant [?? x i8] c"command_line:18:15\00"
 
 
 declare external ccc  void @error_exit(i64, i64)    
@@ -164,30 +162,18 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  void @"command_line.<0>"()    {
 entry:
-  %0 = load  i64, i64* @"resource#command_line.argc" 
-  %1 = load  i64, i64* @"resource#command_line.argv" 
-  %2 = trunc i64 16 to i32  
-  %3 = tail call ccc  i8*  @wybe_malloc(i32  %2)  
-  %4 = ptrtoint i8* %3 to i64 
-  %5 = inttoptr i64 %4 to i64* 
-  store  i64 %0, i64* %5 
-  %6 = add   i64 %4, 8 
-  %7 = inttoptr i64 %6 to i64* 
-  store  i64 %1, i64* %7 
-  store  i64 %4, i64* @"resource#command_line.arguments" 
-  store  i64 ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @command_line.0, i32 0, i32 0) to i64), i64* @"resource#command_line.command" 
-  %8 = tail call fastcc  {i64, i64, i1}  @"wybe.array.[|]<0>[785a827a1b]"(i64  %4)  
-  %9 = extractvalue {i64, i64, i1} %8, 0 
-  %10 = extractvalue {i64, i64, i1} %8, 1 
-  %11 = extractvalue {i64, i64, i1} %8, 2 
-  br i1 %11, label %if.then, label %if.else 
+  %0 = load  i64, i64* @"resource#command_line.arguments" 
+  %1 = tail call fastcc  {i64, i64, i1}  @"wybe.array.[|]<0>[785a827a1b]"(i64  %0)  
+  %2 = extractvalue {i64, i64, i1} %1, 0 
+  %3 = extractvalue {i64, i64, i1} %1, 1 
+  %4 = extractvalue {i64, i64, i1} %1, 2 
+  br i1 %4, label %if.then, label %if.else 
 if.then:
-  store  i64 %10, i64* @"resource#command_line.arguments" 
-  store  i64 %9, i64* @"resource#command_line.command" 
-  store  i64 0, i64* @"resource#command_line.exit_code" 
+  store  i64 %3, i64* @"resource#command_line.arguments" 
+  store  i64 %2, i64* @"resource#command_line.command" 
   ret void 
 if.else:
-  tail call ccc  void  @error_exit(i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @command_line.1, i32 0, i32 0) to i64), i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @command_line.2, i32 0, i32 0) to i64))  
+  tail call ccc  void  @error_exit(i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @command_line.0, i32 0, i32 0) to i64), i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @command_line.1, i32 0, i32 0) to i64))  
   ret void 
 }
 
@@ -232,7 +218,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-#cont#1 > (2 calls)
+proc #cont#1 > {semipure} (2 calls)
 0: drone.#cont#1<0>
 #cont#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -245,7 +231,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-do_action > (2 calls)
+proc do_action > (2 calls)
 0: drone.do_action<0>
 do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?success##2:wybe.bool)<{}; {}; {}>:
   AliasPairs: [(d##0,d##2)]
@@ -321,7 +307,7 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
 
 
-do_action#cont#1 > (7 calls)
+proc do_action#cont#1 > (7 calls)
 0: drone.do_action#cont#1<0>
 do_action#cont#1(d##0:drone.drone_info, success##0:wybe.bool, ?d##1:drone.drone_info, [?success##0:wybe.bool])<{}; {}; {}>:
   AliasPairs: [(d##0,d##1)]
@@ -337,7 +323,7 @@ do_action#cont#1(d##0:drone.drone_info, success##0:wybe.bool, ?d##1:drone.drone_
 
 
 
-drone_init > (3 calls)
+proc drone_init > (3 calls)
 0: drone.drone_init<0>
 drone_init(?#result##0:drone.drone_info)<{}; {}; {}>:
   AliasPairs: []
@@ -349,7 +335,7 @@ drone_init(?#result##0:drone.drone_info)<{}; {}; {}>:
     foreign lpvm mutate(~tmp#8##0:drone.drone_info, ?#result##0:drone.drone_info, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 0:wybe.int) @drone:nn:nn
 
 
-loop > (2 calls)
+proc loop > (2 calls)
 0: drone.loop<0>
 loop(d##0:drone.drone_info, ch##0:wybe.char)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -407,7 +393,7 @@ loop(d##0:drone.drone_info, ch##0:wybe.char)<{<<wybe.io.io>>}; {<<wybe.io.io>>};
 
 
 
-loop#cont#1 > (4 calls)
+proc loop#cont#1 > (4 calls)
 0: drone.loop#cont#1<0>
 loop#cont#1([ch##0:wybe.char], d##0:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -426,7 +412,7 @@ loop#cont#1([ch##0:wybe.char], d##0:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.
 
 
 
-print_info > {inline} (1 calls)
+proc print_info > {inline} (1 calls)
 0: drone.print_info<0>
 print_info(d##0:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -477,7 +463,7 @@ LLVM code       : None
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls)
+proc = > public {inline} (1 calls)
 0: drone.drone_info.=<0>
 =(#left##0:drone.drone_info, #right##0:drone.drone_info, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -514,13 +500,13 @@ LLVM code       : None
 
 
 
-count > public {inline} (0 calls)
+proc count > public {inline} (0 calls)
 0: drone.drone_info.count<0>
 count(#rec##0:drone.drone_info, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @drone:nn:nn
-count > public {inline} (0 calls)
+proc count > public {inline} (0 calls)
 1: drone.drone_info.count<1>
 count(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -528,7 +514,7 @@ count(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int)<{
     foreign lpvm {noalias} mutate(~#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, 24:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @drone:nn:nn
 
 
-drone_info > public {inline} (0 calls)
+proc drone_info > public {inline} (0 calls)
 0: drone.drone_info.drone_info<0>
 drone_info(x##0:wybe.int, y##0:wybe.int, z##0:wybe.int, count##0:wybe.int, ?#result##0:drone.drone_info)<{}; {}; {}>:
   AliasPairs: []
@@ -538,7 +524,7 @@ drone_info(x##0:wybe.int, y##0:wybe.int, z##0:wybe.int, count##0:wybe.int, ?#res
     foreign lpvm mutate(~#rec##1:drone.drone_info, ?#rec##2:drone.drone_info, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~y##0:wybe.int) @drone:nn:nn
     foreign lpvm mutate(~#rec##2:drone.drone_info, ?#rec##3:drone.drone_info, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~z##0:wybe.int) @drone:nn:nn
     foreign lpvm mutate(~#rec##3:drone.drone_info, ?#result##0:drone.drone_info, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~count##0:wybe.int) @drone:nn:nn
-drone_info > public {inline} (14 calls)
+proc drone_info > public {inline} (14 calls)
 1: drone.drone_info.drone_info<1>
 drone_info(?x##0:wybe.int, ?y##0:wybe.int, ?z##0:wybe.int, ?count##0:wybe.int, #result##0:drone.drone_info)<{}; {}; {}>:
   AliasPairs: []
@@ -549,13 +535,13 @@ drone_info(?x##0:wybe.int, ?y##0:wybe.int, ?z##0:wybe.int, ?count##0:wybe.int, #
     foreign lpvm access(~#result##0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?count##0:wybe.int) @drone:nn:nn
 
 
-x > public {inline} (0 calls)
+proc x > public {inline} (0 calls)
 0: drone.drone_info.x<0>
 x(#rec##0:drone.drone_info, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @drone:nn:nn
-x > public {inline} (0 calls)
+proc x > public {inline} (0 calls)
 1: drone.drone_info.x<1>
 x(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -563,13 +549,13 @@ x(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int)<{}; {
     foreign lpvm {noalias} mutate(~#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, 0:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @drone:nn:nn
 
 
-y > public {inline} (0 calls)
+proc y > public {inline} (0 calls)
 0: drone.drone_info.y<0>
 y(#rec##0:drone.drone_info, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @drone:nn:nn
-y > public {inline} (0 calls)
+proc y > public {inline} (0 calls)
 1: drone.drone_info.y<1>
 y(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -577,13 +563,13 @@ y(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int)<{}; {
     foreign lpvm {noalias} mutate(~#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, 8:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @drone:nn:nn
 
 
-z > public {inline} (0 calls)
+proc z > public {inline} (0 calls)
 0: drone.drone_info.z<0>
 z(#rec##0:drone.drone_info, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @drone:nn:nn
-z > public {inline} (0 calls)
+proc z > public {inline} (0 calls)
 1: drone.drone_info.z<1>
 z(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -591,7 +577,7 @@ z(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int)<{}; {
     foreign lpvm {noalias} mutate(~#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, 16:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @drone:nn:nn
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: drone.drone_info.~=<0>
 ~=(#left##0:drone.drone_info, #right##0:drone.drone_info, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -642,8 +628,10 @@ AFTER EVERYTHING:
   public procs    : 
   imports         : use command_line
                     use drone
+                    use drone.drone_info
                     use wybe
                     use wybe.array
+                    use wybe.array.raw_array
                     use wybe.bool
                     use wybe.c_string
                     use wybe.char
@@ -665,17 +653,23 @@ AFTER EVERYTHING:
 
 module top-level code > {terminal,inline,impure} (0 calls)
 0: .<0>
-(%argc##0:wybe.int, %argv##0:wybe.array.raw_array(wybe.c_string), %?exit_code##0:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
+(%argc##0:wybe.int, %argv##0:wybe.array.raw_array, %?exit_code##1:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm store(~%argc##0:wybe.int, <<command_line.argc>>:wybe.int)
-    foreign lpvm store(~%argv##0:wybe.array.raw_array(wybe.c_string), <<command_line.argv>>:wybe.array.raw_array(wybe.c_string))
-    foreign c {impure} gc_init @memory_management:nn:nn
+    foreign lpvm store(%argc##0:wybe.int, <<command_line.argc>>:wybe.int)
+    foreign lpvm store(%argv##0:wybe.array.raw_array, <<command_line.argv>>:wybe.array.raw_array)
     foreign lpvm store(0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    command_line.<0><{<<command_line.argc>>, <<command_line.argv>>}; {<<command_line.arguments>>, <<command_line.command>>, <<command_line.exit_code>>}; {}> #2
-    drone.<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3
-    foreign lpvm load(<<command_line.exit_code>>:wybe.int, ?%exit_code##0:wybe.int)
-    foreign c {semipure,terminal} exit(exit_code##0:wybe.int)
+    foreign c {impure} gc_init @memory_management:nn:nn
+    drone.<0><{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1
+    foreign lpvm alloc(16:wybe.int, ?tmp#9##0:wybe.array(T)) @array:nn:nn
+    foreign lpvm mutate(~tmp#9##0:wybe.array(T), ?tmp#10##0:wybe.array(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argc##0:wybe.int) @array:nn:nn
+    foreign lpvm mutate(~tmp#10##0:wybe.array(T), ?tmp#0##0:wybe.array(wybe.c_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~argv##0:wybe.array.raw_array) @array:nn:nn
+    foreign lpvm store(~tmp#0##0:wybe.array(wybe.c_string), <<command_line.arguments>>:wybe.array(wybe.c_string)) @command_line:nn:nn
+    foreign lpvm store(c"":wybe.c_string, <<command_line.command>>:wybe.c_string) @command_line:nn:nn
+    foreign lpvm store(0:wybe.int, <<command_line.exit_code>>:wybe.int) @command_line:nn:nn
+    command_line.<0><{<<command_line.arguments>>, <<command_line.command>>}; {<<command_line.arguments>>, <<command_line.command>>}; {}> #3
+    foreign llvm move(0:wybe.int, ?%exit_code##1:wybe.int)
+    foreign c {semipure,terminal} exit(0:wybe.int)
 
   LLVM code       :
 
@@ -688,19 +682,28 @@ module top-level code > {terminal,inline,impure} (0 calls)
 @"resource#command_line.argc" = external   global i64 
 
 
+@"resource#command_line.arguments" = external   global i64 
+
+
 @"resource#command_line.argv" = external   global i64 
+
+
+@"resource#command_line.command" = external   global i64 
 
 
 @"resource#command_line.exit_code" = external   global i64 
 
 
+@.0 =    constant [?? x i8] c"\00"
+
+
 declare external ccc  void @exit(i64)    
 
 
-declare external fastcc  void @"drone.<0>"()    
-
-
 declare external fastcc  void @"command_line.<0>"()    
+
+
+declare external fastcc  void @"drone.<0>"()    
 
 
 declare external ccc  void @gc_init()    
@@ -717,11 +720,21 @@ entry:
   store  i64 %"argc##0", i64* @"resource#command_line.argc" 
   store  i64 %"argv##0", i64* @"resource#command_line.argv" 
   tail call ccc  void  @gc_init()  
-  tail call fastcc  void  @"command_line.<0>"()  
   tail call fastcc  void  @"drone.<0>"()  
-  %0 = load  i64, i64* @"resource#command_line.exit_code" 
-  tail call ccc  void  @exit(i64  %0)  
-  ret i64 %0 
+  %0 = trunc i64 16 to i32  
+  %1 = tail call ccc  i8*  @wybe_malloc(i32  %0)  
+  %2 = ptrtoint i8* %1 to i64 
+  %3 = inttoptr i64 %2 to i64* 
+  store  i64 %"argc##0", i64* %3 
+  %4 = add   i64 %2, 8 
+  %5 = inttoptr i64 %4 to i64* 
+  store  i64 %"argv##0", i64* %5 
+  store  i64 %2, i64* @"resource#command_line.arguments" 
+  store  i64 ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @.0, i32 0, i32 0) to i64), i64* @"resource#command_line.command" 
+  store  i64 0, i64* @"resource#command_line.exit_code" 
+  tail call fastcc  void  @"command_line.<0>"()  
+  tail call ccc  void  @exit(i64  0)  
+  ret i64 0 
 }
 --------------------------------------------------
  Module command_line
@@ -737,37 +750,30 @@ entry:
   imports         : use wybe
   resources       : argc: fromList [(command_line.argc,wybe.int @command_line:nn:nn)]
                     arguments: fromList [(command_line.arguments,wybe.array(wybe.c_string) = array(argc @command_line:nn:nn, argv @command_line:nn:nn) @command_line:nn:nn @command_line:nn:nn)]
-                    argv: fromList [(command_line.argv,wybe.array.raw_array(wybe.c_string) @command_line:nn:nn)]
+                    argv: fromList [(command_line.argv,wybe.array.raw_array @command_line:nn:nn)]
                     command: fromList [(command_line.command,wybe.c_string = c"" @command_line:nn:nn @command_line:nn:nn)]
                     exit_code: fromList [(command_line.exit_code,wybe.int = 0 @command_line:nn:nn @command_line:nn:nn)]
   procs           : 
 
 module top-level code > public {semipure} (0 calls)
 0: command_line.<0>
-()<{<<command_line.argc>>, <<command_line.argv>>}; {<<command_line.arguments>>, <<command_line.command>>, <<command_line.exit_code>>}; {}>:
+()<{<<command_line.arguments>>, <<command_line.command>>}; {<<command_line.arguments>>, <<command_line.command>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-  MultiSpeczDepInfo: [(1,(wybe.array.[|]<0>,fromList [NonAliasedParamCond 2 []]))]
-    foreign lpvm load(<<command_line.argc>>:wybe.int, ?%tmp#1##0:wybe.int) @command_line:nn:nn
-    foreign lpvm load(<<command_line.argv>>:wybe.array.raw_array(wybe.c_string), ?%tmp#3##0:wybe.array.raw_array(wybe.c_string)) @command_line:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#10##0:wybe.array(T)) @array:nn:nn
-    foreign lpvm mutate(~tmp#10##0:wybe.array(T), ?tmp#11##0:wybe.array(T), 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.int) @array:nn:nn
-    foreign lpvm mutate(~tmp#11##0:wybe.array(T), ?tmp#0##0:wybe.array(wybe.c_string), 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#3##0:wybe.array.raw_array(T)) @array:nn:nn
-    foreign lpvm store(tmp#0##0:wybe.array(wybe.c_string), <<command_line.arguments>>:wybe.array(wybe.c_string)) @command_line:nn:nn
-    foreign lpvm store(c"":wybe.c_string, <<command_line.command>>:wybe.c_string) @command_line:nn:nn
-    wybe.array.[|]<0>[785a827a1b](?command##1:wybe.c_string, ?arguments##2:wybe.array(wybe.c_string), ~tmp#0##0:wybe.array(wybe.c_string), ?tmp#7##0:wybe.bool) #1 @command_line:nn:nn
-    case ~tmp#7##0:wybe.bool of
+  MultiSpeczDepInfo: [(0,(wybe.array.[|]<0>,fromList [NonAliasedParamCond 2 []]))]
+    foreign lpvm load(<<command_line.arguments>>:wybe.array(wybe.c_string), ?%arguments##0:wybe.array(wybe.c_string))
+    wybe.array.[|]<0>[785a827a1b](?command##1:wybe.c_string, ?arguments##2:wybe.array(wybe.c_string), ~arguments##0:wybe.array(wybe.c_string), ?tmp#8##0:wybe.bool) #0 @command_line:nn:nn
+    case ~tmp#8##0:wybe.bool of
     0:
         foreign c {terminal,semipure} error_exit(c"command_line:18:15":wybe.c_string, c"Erroneous program argument vector":wybe.c_string) @control:nn:nn
 
     1:
         foreign lpvm store(~%arguments##2:wybe.array(wybe.c_string), <<command_line.arguments>>:wybe.array(wybe.c_string)) @command_line:nn:nn
         foreign lpvm store(~%command##1:wybe.c_string, <<command_line.command>>:wybe.c_string) @command_line:nn:nn
-        foreign lpvm store(0:wybe.int, <<command_line.exit_code>>:wybe.int) @command_line:nn:nn
 
 
 
-set_exit_code > public {inline} (0 calls)
+proc set_exit_code > public {inline} (0 calls)
 0: command_line.set_exit_code<0>
 set_exit_code(code##0:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
   AliasPairs: []
@@ -797,13 +803,10 @@ set_exit_code(code##0:wybe.int)<{}; {<<command_line.exit_code>>}; {}>:
 @"resource#command_line.exit_code" =    global i64 undef
 
 
-@command_line.0 =    constant [?? x i8] c"\00"
+@command_line.1 =    constant [?? x i8] c"Erroneous program argument vector\00"
 
 
-@command_line.2 =    constant [?? x i8] c"Erroneous program argument vector\00"
-
-
-@command_line.1 =    constant [?? x i8] c"command_line:18:15\00"
+@command_line.0 =    constant [?? x i8] c"command_line:18:15\00"
 
 
 declare external ccc  void @error_exit(i64, i64)    
@@ -820,30 +823,18 @@ declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)
 
 define external fastcc  void @"command_line.<0>"()    {
 entry:
-  %0 = load  i64, i64* @"resource#command_line.argc" 
-  %1 = load  i64, i64* @"resource#command_line.argv" 
-  %2 = trunc i64 16 to i32  
-  %3 = tail call ccc  i8*  @wybe_malloc(i32  %2)  
-  %4 = ptrtoint i8* %3 to i64 
-  %5 = inttoptr i64 %4 to i64* 
-  store  i64 %0, i64* %5 
-  %6 = add   i64 %4, 8 
-  %7 = inttoptr i64 %6 to i64* 
-  store  i64 %1, i64* %7 
-  store  i64 %4, i64* @"resource#command_line.arguments" 
-  store  i64 ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @command_line.0, i32 0, i32 0) to i64), i64* @"resource#command_line.command" 
-  %8 = tail call fastcc  {i64, i64, i1}  @"wybe.array.[|]<0>[785a827a1b]"(i64  %4)  
-  %9 = extractvalue {i64, i64, i1} %8, 0 
-  %10 = extractvalue {i64, i64, i1} %8, 1 
-  %11 = extractvalue {i64, i64, i1} %8, 2 
-  br i1 %11, label %if.then, label %if.else 
+  %0 = load  i64, i64* @"resource#command_line.arguments" 
+  %1 = tail call fastcc  {i64, i64, i1}  @"wybe.array.[|]<0>[785a827a1b]"(i64  %0)  
+  %2 = extractvalue {i64, i64, i1} %1, 0 
+  %3 = extractvalue {i64, i64, i1} %1, 1 
+  %4 = extractvalue {i64, i64, i1} %1, 2 
+  br i1 %4, label %if.then, label %if.else 
 if.then:
-  store  i64 %10, i64* @"resource#command_line.arguments" 
-  store  i64 %9, i64* @"resource#command_line.command" 
-  store  i64 0, i64* @"resource#command_line.exit_code" 
+  store  i64 %3, i64* @"resource#command_line.arguments" 
+  store  i64 %2, i64* @"resource#command_line.command" 
   ret void 
 if.else:
-  tail call ccc  void  @error_exit(i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @command_line.1, i32 0, i32 0) to i64), i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @command_line.2, i32 0, i32 0) to i64))  
+  tail call ccc  void  @error_exit(i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @command_line.0, i32 0, i32 0) to i64), i64  ptrtoint (i8* getelementptr inbounds ([?? x i8], [?? x i8]* @command_line.1, i32 0, i32 0) to i64))  
   ret void 
 }
 
@@ -888,7 +879,7 @@ module top-level code > public {semipure} (0 calls)
 
 
 
-#cont#1 > (2 calls)
+proc #cont#1 > {semipure} (2 calls)
 0: drone.#cont#1<0>
 #cont#1()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -901,7 +892,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-do_action > (2 calls)
+proc do_action > (2 calls)
 0: drone.do_action<0>[410bae77d3]
 do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?success##2:wybe.bool)<{}; {}; {}>:
   AliasPairs: [(d##0,d##2)]
@@ -1046,7 +1037,7 @@ do_action(d##0:drone.drone_info, ?d##2:drone.drone_info, action##0:wybe.char, ?s
 
 
 
-do_action#cont#1 > (7 calls)
+proc do_action#cont#1 > (7 calls)
 0: drone.do_action#cont#1<0>[410bae77d3]
 do_action#cont#1(d##0:drone.drone_info, success##0:wybe.bool, ?d##1:drone.drone_info, [?success##0:wybe.bool])<{}; {}; {}>:
   AliasPairs: [(d##0,d##1)]
@@ -1072,7 +1063,7 @@ do_action#cont#1(d##0:drone.drone_info, success##0:wybe.bool, ?d##1:drone.drone_
 
 
 
-drone_init > (3 calls)
+proc drone_init > (3 calls)
 0: drone.drone_init<0>
 drone_init(?#result##0:drone.drone_info)<{}; {}; {}>:
   AliasPairs: []
@@ -1084,7 +1075,7 @@ drone_init(?#result##0:drone.drone_info)<{}; {}; {}>:
     foreign lpvm mutate(~tmp#8##0:drone.drone_info, ?#result##0:drone.drone_info, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, 0:wybe.int) @drone:nn:nn
 
 
-loop > (2 calls)
+proc loop > (2 calls)
 0: drone.loop<0>[410bae77d3]
 loop(d##0:drone.drone_info, ch##0:wybe.char)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -1193,7 +1184,7 @@ loop(d##0:drone.drone_info, ch##0:wybe.char)<{<<wybe.io.io>>}; {<<wybe.io.io>>};
 
 
 
-loop#cont#1 > (4 calls)
+proc loop#cont#1 > (4 calls)
 0: drone.loop#cont#1<0>[6dacb8fd25]
 loop#cont#1([ch##0:wybe.char], d##0:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -1224,7 +1215,7 @@ loop#cont#1([ch##0:wybe.char], d##0:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.
 
 
 
-print_info > {inline} (1 calls)
+proc print_info > {inline} (1 calls)
 0: drone.print_info<0>
 print_info(d##0:drone.drone_info)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -1805,7 +1796,7 @@ entry:
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls)
+proc = > public {inline} (1 calls)
 0: drone.drone_info.=<0>
 =(#left##0:drone.drone_info, #right##0:drone.drone_info, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -1842,13 +1833,13 @@ entry:
 
 
 
-count > public {inline} (0 calls)
+proc count > public {inline} (0 calls)
 0: drone.drone_info.count<0>
 count(#rec##0:drone.drone_info, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @drone:nn:nn
-count > public {inline} (0 calls)
+proc count > public {inline} (0 calls)
 1: drone.drone_info.count<1>
 count(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -1856,7 +1847,7 @@ count(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int)<{
     foreign lpvm {noalias} mutate(~#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, 24:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @drone:nn:nn
 
 
-drone_info > public {inline} (0 calls)
+proc drone_info > public {inline} (0 calls)
 0: drone.drone_info.drone_info<0>
 drone_info(x##0:wybe.int, y##0:wybe.int, z##0:wybe.int, count##0:wybe.int, ?#result##0:drone.drone_info)<{}; {}; {}>:
   AliasPairs: []
@@ -1866,7 +1857,7 @@ drone_info(x##0:wybe.int, y##0:wybe.int, z##0:wybe.int, count##0:wybe.int, ?#res
     foreign lpvm mutate(~#rec##1:drone.drone_info, ?#rec##2:drone.drone_info, 8:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~y##0:wybe.int) @drone:nn:nn
     foreign lpvm mutate(~#rec##2:drone.drone_info, ?#rec##3:drone.drone_info, 16:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~z##0:wybe.int) @drone:nn:nn
     foreign lpvm mutate(~#rec##3:drone.drone_info, ?#result##0:drone.drone_info, 24:wybe.int, 1:wybe.int, 32:wybe.int, 0:wybe.int, ~count##0:wybe.int) @drone:nn:nn
-drone_info > public {inline} (14 calls)
+proc drone_info > public {inline} (14 calls)
 1: drone.drone_info.drone_info<1>
 drone_info(?x##0:wybe.int, ?y##0:wybe.int, ?z##0:wybe.int, ?count##0:wybe.int, #result##0:drone.drone_info)<{}; {}; {}>:
   AliasPairs: []
@@ -1877,13 +1868,13 @@ drone_info(?x##0:wybe.int, ?y##0:wybe.int, ?z##0:wybe.int, ?count##0:wybe.int, #
     foreign lpvm access(~#result##0:drone.drone_info, 24:wybe.int, 32:wybe.int, 0:wybe.int, ?count##0:wybe.int) @drone:nn:nn
 
 
-x > public {inline} (0 calls)
+proc x > public {inline} (0 calls)
 0: drone.drone_info.x<0>
 x(#rec##0:drone.drone_info, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:drone.drone_info, 0:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @drone:nn:nn
-x > public {inline} (0 calls)
+proc x > public {inline} (0 calls)
 1: drone.drone_info.x<1>
 x(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -1891,13 +1882,13 @@ x(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int)<{}; {
     foreign lpvm {noalias} mutate(~#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, 0:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @drone:nn:nn
 
 
-y > public {inline} (0 calls)
+proc y > public {inline} (0 calls)
 0: drone.drone_info.y<0>
 y(#rec##0:drone.drone_info, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:drone.drone_info, 8:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @drone:nn:nn
-y > public {inline} (0 calls)
+proc y > public {inline} (0 calls)
 1: drone.drone_info.y<1>
 y(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -1905,13 +1896,13 @@ y(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int)<{}; {
     foreign lpvm {noalias} mutate(~#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, 8:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @drone:nn:nn
 
 
-z > public {inline} (0 calls)
+proc z > public {inline} (0 calls)
 0: drone.drone_info.z<0>
 z(#rec##0:drone.drone_info, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:drone.drone_info, 16:wybe.int, 32:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @drone:nn:nn
-z > public {inline} (0 calls)
+proc z > public {inline} (0 calls)
 1: drone.drone_info.z<1>
 z(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -1919,7 +1910,7 @@ z(#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, #field##0:wybe.int)<{}; {
     foreign lpvm {noalias} mutate(~#rec##0:drone.drone_info, ?#rec##1:drone.drone_info, 16:wybe.int, 0:wybe.int, 32:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @drone:nn:nn
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: drone.drone_info.~=<0>
 ~=(#left##0:drone.drone_info, #right##0:drone.drone_info, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

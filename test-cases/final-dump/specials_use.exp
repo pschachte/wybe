@@ -14,7 +14,7 @@ AFTER EVERYTHING:
   resources       : 
   procs           : 
 
-show_column > public {inline} (0 calls)
+proc show_column > public {inline} (0 calls)
 0: specials.show_column<0>
 show_column(%call_source_column_number##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -25,7 +25,7 @@ show_column(%call_source_column_number##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-show_file > public {inline} (0 calls)
+proc show_file > public {inline} (0 calls)
 0: specials.show_file<0>
 show_file(%call_source_file_name##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -36,7 +36,7 @@ show_file(%call_source_file_name##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-show_full_file > public {inline} (0 calls)
+proc show_full_file > public {inline} (0 calls)
 0: specials.show_full_file<0>
 show_full_file(%call_source_file_full_name##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -47,7 +47,7 @@ show_full_file(%call_source_file_full_name##0:wybe.c_string)<{<<wybe.io.io>>}; {
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-show_full_location > public {inline} (0 calls)
+proc show_full_location > public {inline} (0 calls)
 0: specials.show_full_location<0>
 show_full_location(%call_source_full_location##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -58,7 +58,7 @@ show_full_location(%call_source_full_location##0:wybe.c_string)<{<<wybe.io.io>>}
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-show_line > public {inline} (0 calls)
+proc show_line > public {inline} (0 calls)
 0: specials.show_line<0>
 show_line(%call_source_line_number##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
@@ -69,7 +69,7 @@ show_line(%call_source_line_number##0:wybe.int)<{<<wybe.io.io>>}; {<<wybe.io.io>
     foreign lpvm store(~%tmp#3##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-show_location > public {inline} (0 calls)
+proc show_location > public {inline} (0 calls)
 0: specials.show_location<0>
 show_location(%call_source_location##0:wybe.c_string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []

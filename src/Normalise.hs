@@ -13,7 +13,7 @@ module Normalise (normalise, normaliseItem, completeNormalisation) where
 
 import AST
 import Config (wordSize, wordSizeBytes, availableTagBits,
-               tagMask, smallestAllocatedAddress, currentModuleAlias)
+               tagMask, smallestAllocatedAddress, currentModuleAlias, specialName2, specialName, initProcName)
 import Control.Monad
 import Control.Monad.State (gets)
 import Control.Monad.Trans (lift,liftIO)
@@ -26,7 +26,7 @@ import Data.Bits
 import Data.Graph
 import Data.Tuple.HT
 import Data.Tuple.Select
-import Flatten
+import Flatten (flattenProcBody)
 import Options (LogSelection(Normalise))
 import Snippets
 import Util
@@ -55,13 +55,18 @@ normalise items = do
 normaliseItem :: Item -> Compiler ()
 normaliseItem (TypeDecl vis (TypeProto name params) mods
               (TypeRepresentation rep) items pos) = do
+    validateModuleName "type" pos name
     let items' = RepresentationDecl params mods rep pos : items
+    unless (List.null params)
+      $ errmsg pos "types defined by representation cannot have type parameters"
     normaliseSubmodule name vis pos items'
 normaliseItem (TypeDecl vis (TypeProto name params) mods
               (TypeCtors ctorVis ctors) items pos) = do
+    validateModuleName "type" pos name
     let items' = ConstructorDecl ctorVis params mods ctors pos : items
     normaliseSubmodule name vis pos items'
-normaliseItem (ModuleDecl vis name items pos) =
+normaliseItem (ModuleDecl vis name items pos) = do
+    validateModuleName "module" pos name
     normaliseSubmodule name vis pos items
 normaliseItem (RepresentationDecl params mods rep pos) = do
     updateTypeModifiers mods
@@ -74,19 +79,18 @@ normaliseItem (ConstructorDecl vis params mods ctors pos) = do
         Public -> mapM_ (addConstructor Public . snd) ctors
         Private -> mapM_ (uncurry addConstructor) ctors
 normaliseItem (ImportMods vis modspecs pos) =
-    mapM_ (\spec -> addImport spec (importSpec Nothing vis)) modspecs
+    mapM_ (\spec -> validateModSpec pos spec >>
+        addImport spec (importSpec Nothing vis)
+    ) modspecs
 normaliseItem (ImportItems vis modspec imports pos) =
-    addImport modspec (importSpec (Just imports) vis)
+    validateModSpec pos modspec
+     >> addImport modspec (importSpec (Just imports) vis)
 normaliseItem (ImportForeign files _) =
     mapM_ addForeignImport files
 normaliseItem (ImportForeignLib files _) =
     mapM_ addForeignLib files
 normaliseItem (ResourceDecl vis name typ init pos) = do
   addSimpleResource name (SimpleResource typ init pos) vis
-  case init of
-    Nothing  -> return ()
-    Just val -> normaliseItem (StmtDecl (ProcCall (regularProc "=") Det False
-                                         [varSet name `maybePlace` pos, val]) pos)
 normaliseItem (FuncDecl vis mods (ProcProto name params resources) resulttype
     (Placed (Where body (Placed (Var var ParamOut rflow) _)) _) pos) =
     -- Handle special reverse mode case of def foo(...) = var where ....
@@ -108,9 +112,8 @@ normaliseItem (FuncDecl vis mods (ProcProto name params resources)
               pos]
         pos)
 normaliseItem item@ProcDecl{} = do
-    (item',tmpCtr) <- flattenProcDecl item
-    logNormalise $ "Normalised proc:" ++ show item'
-    addProc tmpCtr item'
+    logNormalise $ "Recording proc without flattening:" ++ show item
+    addProc 0 item
 normaliseItem (StmtDecl stmt pos) = do
     logNormalise $ "Normalising statement decl " ++ show stmt
     updateModule (\s -> s { stmtDecls = maybePlace stmt pos : stmtDecls s})
@@ -157,12 +160,14 @@ normaliseSubmodule name vis pos items = do
 --  constructors, deconstructors, accessors, mutators, and auxilliary
 --  procs, and generation of main proc for
 --  the module, which needs to know what resources are available.
+--  Finally, we flatten the body of each proc in the module scc.
 
 completeNormalisation :: [ModSpec] -> Compiler ()
-completeNormalisation mods = do
-    logNormalise $ "Completing normalisation of modules " ++ showModSpecs mods
-    completeTypeNormalisation mods
-    mapM_ (normaliseModMain `inModule`) mods
+completeNormalisation modSCC = do
+    logNormalise $ "Completing normalisation of modules " ++ showModSpecs modSCC
+    completeTypeNormalisation modSCC
+    mapM_ (normaliseModMain modSCC `inModule`) modSCC
+    mapM_ (transformModuleProcs flattenProcBody) modSCC
 
 
 -- | Layout the types on the specified module list, which comprise a strongly
@@ -272,6 +277,18 @@ completeTypeSCC (CyclicSCC modTypeDefs) = do
     -- First set representations to addresses, then layout types
     mapM_ ((setTypeRep Address `inModule`) . fst) modTypeDefs
     mapM_ (uncurry completeType) modTypeDefs
+
+
+-- |Check that the specified module name is valid, reporting and error if not.
+validateModuleName :: String -> OptPos -> Ident -> Compiler ()
+validateModuleName what pos name =
+    unless (validModuleName name)
+     $ errmsg pos $ "invalid character in " ++ what ++ " name `" ++ name ++ "`"
+
+
+-- |Check that the specified module name is valid, reporting and error if not.
+validateModSpec :: OptPos -> ModSpec -> Compiler ()
+validateModSpec pos = mapM_ (validateModuleName "module" pos) 
 
 
 -- | Information about a non-constant constructor
@@ -421,63 +438,66 @@ typeRepresentation _ _          = Address
 
 
 ----------------------------------------------------------------
--- Generating top-level code for the current module
+-- Generating top-level code for the current module, given a list of all the
+-- modules in the same module dependency SCC.  This produces a proc with an
+-- empty proc name, which executes all the top-level code in the module.  This
+-- assumes that all resources in this modules and its dependencies (including
+-- mutual dependencies) have been initialised; therefore this proc considers all
+-- visible resources as both inputs and outputs.  The main executable proc will
+-- call this proc after initialising all initialised resources visible to this
+-- module.  The benefit of this approach is that it handles initialised resouces
+-- in mutually dependendent modules; note that modules are mutually dependent
+-- with their submodules.
 
-normaliseModMain :: Compiler ()
-normaliseModMain = do
+normaliseModMain :: [ModSpec] -> Compiler ()
+normaliseModMain modSCC = do
     stmts <- getModule stmtDecls
     modSpec <- getModuleSpec
     logNormalise $ "Completing main normalisation of module "
                    ++ showModSpec modSpec
-    resources <- initResources
     let initBody = List.reverse stmts
     logNormalise $ "Top-level statements = " ++ show initBody
-    unless (List.null stmts)
-      $ normaliseItem $ ProcDecl Public (setImpurity Semipure defaultProcModifiers)
-                        (ProcProto "" [] resources) initBody Nothing
+    unless (List.null stmts) $ do
+        resources <- initResources modSCC
+        logNormalise $ "Initialised resources in main code for module "
+                        ++ showModSpec modSpec
+                        ++ ": " ++ show resources
+        normaliseItem $ ProcDecl Public (setImpurity Semipure defaultProcModifiers)
+                        (ProcProto initProcName [] resources) initBody Nothing
 
 
--- |The resources available at the top level of this module, plus the
--- initialisations to be performed before executing any code that uses this
--- module.
-initResources :: Compiler (Set ResourceFlowSpec)
-initResources = do
+-- |The resource flows for the initialisation code of the current module.  This
+-- assumes that all resource initialisations have already been completed, and
+-- all are permitted to be modified by the initialisation code, so all
+-- visible initialised resources flow both in and out.
+initResources :: [ModSpec] -> Compiler (Set ResourceFlowSpec)
+initResources modSCC = do
     thisMod <- getModule modSpec
     mods <- getModuleImplementationField (Map.keys . modImports)
     mods' <- (mods ++) . concat <$> mapM descendentModules mods
-    logNormalise $ "in initResources, mods = " ++ showModSpecs mods'
-    importedMods <- catMaybes <$> mapM getLoadingModule mods'
-    let importImplns = catMaybes (modImplementation <$> importedMods)
-    initialisedImports <- Set.toList . Set.unions . (Map.keysSet <$>)
-                          <$> mapM (initialisedResources `inModule`) mods'
-    initialisedLocal <- Set.toList . Map.keysSet <$> initialisedResources
+    logNormalise $ "in initResources for module " ++ showModSpec thisMod
+                   ++ ", mods = " ++ showModSpecs mods'
+    visibleInitialised <- initialisedVisibleResources
+    let visibleInitSet = Map.keysSet visibleInitialised
+    logNormalise $ "in initResources, initialised resources = "
+                   ++ show visibleInitSet
     -- Direct tie-in to command_line library module:  for the command_line
     -- module, or any module that imports it, we add argc and argv as resources.
     -- This is necessary because argc and argv are effectively initialised by
     -- the fact that they're automatically generated as arguments to the
     -- top-level main, but we can't declare them with resource initialisations,
     -- because that would overwrite them.
-    let cmdlineModSpec = ["command_line"]
     let cmdlineResources =
-            if cmdlineModSpec == thisMod
-            then let cmdline = ResourceSpec cmdlineModSpec
+            if cmdLineModSpec == thisMod
+            then let cmdline = ResourceSpec cmdLineModSpec 
                  in [ResourceFlowSpec (cmdline "argc") ParamInOut
                     ,ResourceFlowSpec (cmdline "argv") ParamInOut]
             else []
     let resources = cmdlineResources
-                    ++ ((`ResourceFlowSpec` ParamInOut) <$> initialisedImports)
-                    ++ ((`ResourceFlowSpec` ParamOut) <$> initialisedLocal)
-    -- let inits = [ForeignCall "llvm" "move" []
-    --                 [maybePlace ((content initExp) `withType` resType)
-    --                     (place initExp)
-    --                 , varSet (resourceName resSpec) `maybePlace` pos] 
-    --                  `maybePlace` pos
-    --             | (resSpec, resImpln) <- initialisedLocal
-    --             , let initExp = trustFromJust "initResources"
-    --                             $ resourceInit resImpln
-    --             , let resType = resourceType resImpln]
-    logNormalise $ "In initResources, resources = " ++ show resources
-    -- logNormalise $ "In initResources, initialisations =" ++ showBody 4 inits
+                    ++ ((`ResourceFlowSpec` ParamInOut)
+                         <$> Set.toList visibleInitSet)
+    logNormalise $ "In initResources for module " ++ showModSpec thisMod
+                   ++ ", resources = " ++ show resources
     return (Set.fromList resources)
 
 

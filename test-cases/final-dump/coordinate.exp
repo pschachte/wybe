@@ -45,7 +45,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#23##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
 
 
-fcopy > public {inline} (1 calls)
+proc fcopy > public {inline} (1 calls)
 0: coordinate.fcopy<0>
 fcopy(crd1##0:coordinate.Coordinate, ?#result##0:coordinate.Coordinate)<{}; {}; {}>:
   AliasPairs: []
@@ -140,7 +140,7 @@ entry:
   resources       : 
   procs           : 
 
-= > public {inline} (1 calls)
+proc = > public {inline} (1 calls)
 0: coordinate.Coordinate.=<0>
 =(#left##0:coordinate.Coordinate, #right##0:coordinate.Coordinate, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []
@@ -168,7 +168,7 @@ entry:
 
 
 
-Coordinate > public {inline} (0 calls)
+proc Coordinate > public {inline} (0 calls)
 0: coordinate.Coordinate.Coordinate<0>
 Coordinate(x##0:wybe.int, y##0:wybe.int, z##0:wybe.int, ?#result##0:coordinate.Coordinate)<{}; {}; {}>:
   AliasPairs: []
@@ -177,7 +177,7 @@ Coordinate(x##0:wybe.int, y##0:wybe.int, z##0:wybe.int, ?#result##0:coordinate.C
     foreign lpvm mutate(~#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, 0:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~x##0:wybe.int) @coordinate:nn:nn
     foreign lpvm mutate(~#rec##1:coordinate.Coordinate, ?#rec##2:coordinate.Coordinate, 8:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~y##0:wybe.int) @coordinate:nn:nn
     foreign lpvm mutate(~#rec##2:coordinate.Coordinate, ?#result##0:coordinate.Coordinate, 16:wybe.int, 1:wybe.int, 24:wybe.int, 0:wybe.int, ~z##0:wybe.int) @coordinate:nn:nn
-Coordinate > public {inline} (10 calls)
+proc Coordinate > public {inline} (10 calls)
 1: coordinate.Coordinate.Coordinate<1>
 Coordinate(?x##0:wybe.int, ?y##0:wybe.int, ?z##0:wybe.int, #result##0:coordinate.Coordinate)<{}; {}; {}>:
   AliasPairs: []
@@ -187,13 +187,13 @@ Coordinate(?x##0:wybe.int, ?y##0:wybe.int, ?z##0:wybe.int, #result##0:coordinate
     foreign lpvm access(~#result##0:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?z##0:wybe.int) @coordinate:nn:nn
 
 
-x > public {inline} (0 calls)
+proc x > public {inline} (0 calls)
 0: coordinate.Coordinate.x<0>
 x(#rec##0:coordinate.Coordinate, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:coordinate.Coordinate, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @coordinate:nn:nn
-x > public {inline} (0 calls)
+proc x > public {inline} (0 calls)
 1: coordinate.Coordinate.x<1>
 x(#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -201,13 +201,13 @@ x(#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, #field##0:wybe.
     foreign lpvm {noalias} mutate(~#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, 0:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @coordinate:nn:nn
 
 
-y > public {inline} (0 calls)
+proc y > public {inline} (0 calls)
 0: coordinate.Coordinate.y<0>
 y(#rec##0:coordinate.Coordinate, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:coordinate.Coordinate, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @coordinate:nn:nn
-y > public {inline} (0 calls)
+proc y > public {inline} (0 calls)
 1: coordinate.Coordinate.y<1>
 y(#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -215,13 +215,13 @@ y(#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, #field##0:wybe.
     foreign lpvm {noalias} mutate(~#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, 8:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @coordinate:nn:nn
 
 
-z > public {inline} (0 calls)
+proc z > public {inline} (0 calls)
 0: coordinate.Coordinate.z<0>
 z(#rec##0:coordinate.Coordinate, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
     foreign lpvm access(~#rec##0:coordinate.Coordinate, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?#result##0:wybe.int) @coordinate:nn:nn
-z > public {inline} (0 calls)
+proc z > public {inline} (0 calls)
 1: coordinate.Coordinate.z<1>
 z(#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, #field##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
@@ -229,7 +229,7 @@ z(#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, #field##0:wybe.
     foreign lpvm {noalias} mutate(~#rec##0:coordinate.Coordinate, ?#rec##1:coordinate.Coordinate, 16:wybe.int, 0:wybe.int, 24:wybe.int, 0:wybe.int, ~#field##0:wybe.int) @coordinate:nn:nn
 
 
-~= > public {inline} (0 calls)
+proc ~= > public {inline} (0 calls)
 0: coordinate.Coordinate.~=<0>
 ~=(#left##0:coordinate.Coordinate, #right##0:coordinate.Coordinate, ?#success##0:wybe.bool)<{}; {}; {}>:
   AliasPairs: []

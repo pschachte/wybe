@@ -23,7 +23,7 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm store(~%tmp#0##0:wybe.int, <<out_global_overwritten.res>>:wybe.int) @out_global_overwritten:nn:nn
 
 
-out > {noinline} (1 calls)
+proc out > {noinline} (1 calls)
 0: out_global_overwritten.out<0>
 out()<{}; {<<out_global_overwritten.res>>}; {}>:
   AliasPairs: []
