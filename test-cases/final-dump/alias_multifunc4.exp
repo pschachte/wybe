@@ -18,14 +18,14 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#3##0:position.position) @position:nn:nn
-    foreign lpvm mutate(~tmp#3##0:position.position, ?tmp#4##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int) @position:nn:nn
-    foreign lpvm mutate(~tmp#4##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int) @position:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#3##0:position.position) @alias_multifunc4:nn:nn
+    foreign lpvm mutate(~tmp#3##0:position.position, ?tmp#4##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int) @alias_multifunc4:nn:nn
+    foreign lpvm mutate(~tmp#4##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 10:wybe.int) @alias_multifunc4:nn:nn
     alias_multifunc4.replicate1<0>(tmp#0##0:position.position, ?p2##0:position.position, ?p3##0:position.position) #1 @alias_multifunc4:nn:nn
-    wybe.string.print<0>("--- After calling replicate1:":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #19 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>("--- After calling replicate1:":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #19 @alias_multifunc4:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @alias_multifunc4:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @alias_multifunc4:nn:nn
+    foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias_multifunc4:nn:nn
     wybe.string.print<0>("expect p1(10,10):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @alias_multifunc4:nn:nn
     position.printPosition<0>(~tmp#0##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @alias_multifunc4:nn:nn
     wybe.string.print<0>("expect p2(99,10):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @alias_multifunc4:nn:nn
@@ -33,17 +33,17 @@ module top-level code > public {semipure} (0 calls)
     wybe.string.print<0>("expect p3(10,10):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @alias_multifunc4:nn:nn
     position.printPosition<0>(~p3##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @alias_multifunc4:nn:nn
     alias_multifunc4.replicate21<0>(?p4##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #9 @alias_multifunc4:nn:nn
-    wybe.string.print<0>("--- After calling replicate21:":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #20 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>("--- After calling replicate21:":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #20 @alias_multifunc4:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#9##0:wybe.phantom) @alias_multifunc4:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#9##0:wybe.phantom, ?tmp#10##0:wybe.phantom) @alias_multifunc4:nn:nn
+    foreign lpvm store(~%tmp#10##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias_multifunc4:nn:nn
     wybe.string.print<0>("expect p4(99999,99999):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @alias_multifunc4:nn:nn
     position.printPosition<0>(~p4##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #12 @alias_multifunc4:nn:nn
     alias_multifunc4.replicate22<0>(?p6##0:position.position, ?p7##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #13 @alias_multifunc4:nn:nn
-    wybe.string.print<0>("--- After calling replicate22:":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #21 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#13##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>("--- After calling replicate22:":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #21 @alias_multifunc4:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @alias_multifunc4:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @alias_multifunc4:nn:nn
+    foreign lpvm store(~%tmp#13##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias_multifunc4:nn:nn
     wybe.string.print<0>("expect p6(99999,99999):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #15 @alias_multifunc4:nn:nn
     position.printPosition<0>(~p6##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #16 @alias_multifunc4:nn:nn
     wybe.string.print<0>("expect p7(1111111111,99999):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #17 @alias_multifunc4:nn:nn
@@ -56,11 +56,11 @@ replicate1(pa##0:position.position, ?pb##1:position.position, ?pc##0:position.po
   AliasPairs: [(pa##0,pc##0)]
   InterestingCallProperties: []
     foreign llvm move(pa##0:position.position, ?pc##0:position.position) @alias_multifunc4:nn:nn
-    foreign lpvm alloc(16:wybe.int, ?tmp#4##0:position.position) @position:nn:nn
-    foreign lpvm mutate(~tmp#4##0:position.position, ?tmp#5##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99:wybe.int) @position:nn:nn
-    foreign lpvm mutate(~tmp#5##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99:wybe.int) @position:nn:nn
-    foreign lpvm access(~tmp#0##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @position:nn:nn
-    foreign lpvm {noalias} mutate(~pa##0:position.position, ?pb##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.int) @position:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#4##0:position.position) @alias_multifunc4:nn:nn
+    foreign lpvm mutate(~tmp#4##0:position.position, ?tmp#5##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99:wybe.int) @alias_multifunc4:nn:nn
+    foreign lpvm mutate(~tmp#5##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99:wybe.int) @alias_multifunc4:nn:nn
+    foreign lpvm access(~tmp#0##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @alias_multifunc4:nn:nn
+    foreign lpvm {noalias} mutate(~pa##0:position.position, ?pb##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#1##0:wybe.int) @alias_multifunc4:nn:nn
 
 
 proc replicate21 > public (1 calls)
@@ -68,11 +68,11 @@ proc replicate21 > public (1 calls)
 replicate21(?pb##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#3##0:position.position) @position:nn:nn
-    foreign lpvm mutate(~tmp#3##0:position.position, ?tmp#4##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99999:wybe.int) @position:nn:nn
-    foreign lpvm mutate(~tmp#4##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99999:wybe.int) @position:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#3##0:position.position) @alias_multifunc4:nn:nn
+    foreign lpvm mutate(~tmp#3##0:position.position, ?tmp#4##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99999:wybe.int) @alias_multifunc4:nn:nn
+    foreign lpvm mutate(~tmp#4##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99999:wybe.int) @alias_multifunc4:nn:nn
     foreign llvm move(tmp#0##0:position.position, ?pb##0:position.position) @alias_multifunc4:nn:nn
-    foreign lpvm {noalias} mutate(~tmp#0##0:position.position, ?pc##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 1111111111:wybe.int) @position:nn:nn
+    foreign lpvm {noalias} mutate(~tmp#0##0:position.position, ?pc##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 1111111111:wybe.int) @alias_multifunc4:nn:nn
     wybe.string.print<0>("--- Inside replicate21, expect pc(1111111111,99999): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @alias_multifunc4:nn:nn
     position.printPosition<0>(~pc##1:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @alias_multifunc4:nn:nn
 
@@ -82,13 +82,13 @@ proc replicate22 > public (1 calls)
 replicate22(?pb##0:position.position, ?pc##1:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm alloc(16:wybe.int, ?tmp#3##0:position.position) @position:nn:nn
-    foreign lpvm mutate(~tmp#3##0:position.position, ?tmp#4##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99999:wybe.int) @position:nn:nn
-    foreign lpvm mutate(~tmp#4##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99999:wybe.int) @position:nn:nn
+    foreign lpvm alloc(16:wybe.int, ?tmp#3##0:position.position) @alias_multifunc4:nn:nn
+    foreign lpvm mutate(~tmp#3##0:position.position, ?tmp#4##0:position.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99999:wybe.int) @alias_multifunc4:nn:nn
+    foreign lpvm mutate(~tmp#4##0:position.position, ?tmp#0##0:position.position, 8:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 99999:wybe.int) @alias_multifunc4:nn:nn
     foreign llvm move(tmp#0##0:position.position, ?pb##0:position.position) @alias_multifunc4:nn:nn
     wybe.string.print<0>("--- Inside replicate22, expect pc(99999,99999):":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @alias_multifunc4:nn:nn
     position.printPosition<0>(tmp#0##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #2 @alias_multifunc4:nn:nn
-    foreign lpvm {noalias} mutate(~tmp#0##0:position.position, ?pc##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 1111111111:wybe.int) @position:nn:nn
+    foreign lpvm {noalias} mutate(~tmp#0##0:position.position, ?pc##1:position.position, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, 1111111111:wybe.int) @alias_multifunc4:nn:nn
     wybe.string.print<0>("--- Inside replicate22, after calling x(!pc,1111111111), expect pc(1111111111,99999): ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @alias_multifunc4:nn:nn
     position.printPosition<0>(pc##1:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @alias_multifunc4:nn:nn
 
@@ -332,18 +332,18 @@ printPosition(pos##0:position.position)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   InterestingCallProperties: []
     wybe.string.print<0>(" (":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #0 @position:nn:nn
     foreign lpvm access(pos##0:position.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @position:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @int:nn:nn
-    foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#4##0:wybe.phantom) @position:nn:nn
+    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#5##0:wybe.phantom) @position:nn:nn
+    foreign lpvm store(~%tmp#5##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @position:nn:nn
     wybe.string.print<0>(",":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @position:nn:nn
     foreign lpvm access(~pos##0:position.position, 8:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.int) @position:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @int:nn:nn
-    foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @int:nn:nn
-    wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#8##0:wybe.phantom) @position:nn:nn
+    foreign c print_int(~tmp#1##0:wybe.int, ~tmp#8##0:wybe.phantom, ?tmp#9##0:wybe.phantom) @position:nn:nn
+    foreign lpvm store(~%tmp#9##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @position:nn:nn
+    wybe.string.print<0>(")":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #7 @position:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @position:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @position:nn:nn
+    foreign lpvm store(~%tmp#12##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @position:nn:nn
 
   LLVM code       :
 

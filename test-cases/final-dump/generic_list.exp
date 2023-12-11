@@ -23,7 +23,7 @@ append(x##0:generic_list(T) <{}; {}; {0}>, y##0:generic_list(T) <{}; {}; {1}>, o
   AliasPairs: [(#result##0,y##0)]
   InterestingCallProperties: [InterestingUnaliased 0]
   MultiSpeczDepInfo: [(1,(generic_list.append<0>,fromList [NonAliasedParamCond 0 [0]]))]
-    foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
+    foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @generic_list:nn:nn
     case ~tmp#5##0:wybe.bool of
     0:
         foreign llvm move(~y##0:generic_list(T), ?#result##0:generic_list(T)) @generic_list:nn:nn
@@ -142,14 +142,14 @@ proc length1 > (2 calls)
 length1(x##0:generic_list(T) <{}; {}; {0}>, acc##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool)
+    foreign llvm icmp_ne(x##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @generic_list:nn:nn
     case ~tmp#5##0:wybe.bool of
     0:
         foreign llvm move(~acc##0:wybe.int, ?#result##0:wybe.int) @generic_list:nn:nn
 
     1:
         foreign lpvm access(~x##0:generic_list(T), 8:wybe.int, 16:wybe.int, 0:wybe.int, ?t##0:generic_list(T)) @generic_list:nn:nn
-        foreign llvm add(~acc##0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int) @int:nn:nn
+        foreign llvm add(~acc##0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.int) @generic_list:nn:nn
         generic_list.length1<0>(~t##0:generic_list(T), ~tmp#2##0:wybe.int, ?#result##0:wybe.int) #2 @generic_list:nn:nn
 
 

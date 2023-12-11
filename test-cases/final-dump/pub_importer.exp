@@ -15,7 +15,7 @@ proc fn > public {inline} (0 calls)
 fn(i##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign c ipow(2:wybe.int, ~i##0:wybe.int, ?#result##0:wybe.int) @int:nn:nn
+    foreign c ipow(2:wybe.int, ~i##0:wybe.int, ?#result##0:wybe.int) @exporter:nn:nn
 
 
 proc three > public {inline} (0 calls)

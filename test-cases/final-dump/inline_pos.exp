@@ -108,37 +108,43 @@ entry:
   ret void 
 }
 --------------------------------------------------
- Module main_hello
+ Module inline_pos
   representation  : (not a type)
   public submods  : 
   public resources: 
-  public procs    : main_hello.<0>
+  public procs    : inline_pos.<0>
   imports         : use command_line
                     use wybe
   resources       : 
   procs           : 
 
 module top-level code > public {semipure} (0 calls)
-0: main_hello.<0>
-()<{<<command_line.arguments>>, <<wybe.io.io>>}; {<<command_line.exit_code>>, <<wybe.io.io>>}; {}>:
+0: inline_pos.<0>
+()<{<<command_line.arguments>>, <<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign lpvm store(42:wybe.int, <<command_line.exit_code>>:wybe.int) @main_hello:nn:nn
-    wybe.string.print<0>("hello, world!":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @main_hello:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#3##0:wybe.phantom) @main_hello:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#3##0:wybe.phantom, ?tmp#4##0:wybe.phantom) @main_hello:nn:nn
-    foreign lpvm load(<<command_line.arguments>>:wybe.array(wybe.c_string), ?%arguments##0:wybe.array(wybe.c_string)) @main_hello:nn:nn
-    foreign lpvm access(~arguments##0:wybe.array(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @main_hello:nn:nn
-    foreign c print_int(~tmp#0##0:wybe.int, ~tmp#4##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @main_hello:nn:nn
-    foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @main_hello:nn:nn
-    wybe.string.print<0>(" command line argument(s)":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #6 @main_hello:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @main_hello:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @main_hello:nn:nn
-    foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @main_hello:nn:nn
+  MultiSpeczDepInfo: [(5,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
+    foreign lpvm load(<<command_line.arguments>>:wybe.array(wybe.c_string), ?%arguments##0:wybe.array(wybe.c_string)) @inline_pos:nn:nn
+    foreign lpvm access(~arguments##0:wybe.array(T), 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.int) @inline_pos:nn:nn
+    foreign llvm add(~tmp#0##0:wybe.int, 1:wybe.int, ?v##1:wybe.int) @inline_pos:nn:nn
+    wybe.int.fmt<0>(~v##1:wybe.int, ?tmp#2##0:wybe.string) #2 @inline_pos:nn:nn
+    wybe.string.,,<0>("v = ":wybe.string, ~tmp#2##0:wybe.string, ?tmp#1##0:wybe.string) #3 @inline_pos:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#1##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @inline_pos:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @inline_pos:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @inline_pos:nn:nn
+    foreign lpvm store(~%tmp#7##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @inline_pos:nn:nn
+
+
+proc myincr > {inline} (1 calls)
+0: inline_pos.myincr<0>
+myincr(x##0:wybe.int, ?x##1:wybe.int)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm add(~x##0:wybe.int, 1:wybe.int, ?x##1:wybe.int) @inline_pos:nn:nn
 
   LLVM code       :
 
-; ModuleID = 'main_hello'
+; ModuleID = 'inline_pos'
 
 
  
@@ -147,28 +153,22 @@ module top-level code > public {semipure} (0 calls)
 @"resource#command_line.arguments" = external   global i64 
 
 
-@"resource#command_line.exit_code" = external   global i64 
+@inline_pos.1 =    constant {i64, i64} { i64 4, i64 ptrtoint ([?? x i8]* @inline_pos.0 to i64) }
 
 
-@main_hello.1 =    constant {i64, i64} { i64 13, i64 ptrtoint ([?? x i8]* @main_hello.0 to i64) }
-
-
-@main_hello.3 =    constant {i64, i64} { i64 25, i64 ptrtoint ([?? x i8]* @main_hello.2 to i64) }
-
-
-@main_hello.2 =    constant [?? x i8] c" command line argument(s)\00"
-
-
-@main_hello.0 =    constant [?? x i8] c"hello, world!\00"
+@inline_pos.0 =    constant [?? x i8] c"v = \00"
 
 
 declare external ccc  void @putchar(i8)    
 
 
-declare external fastcc  void @"wybe.string.print<0>"(i64)    
+declare external fastcc  void @"wybe.string.print<0>[410bae77d3]"(i64)    
 
 
-declare external ccc  void @print_int(i64)    
+declare external fastcc  i64 @"wybe.string.,,<0>"(i64, i64)    
+
+
+declare external fastcc  i64 @"wybe.int.fmt<0>"(i64)    
 
 
 declare external ccc  i8* @wybe_malloc(i32)    
@@ -177,16 +177,22 @@ declare external ccc  i8* @wybe_malloc(i32)
 declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
 
 
-define external fastcc  void @"main_hello.<0>"()    {
+define external fastcc  void @"inline_pos.<0>"()    {
 entry:
-  store  i64 42, i64* @"resource#command_line.exit_code" 
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @main_hello.1, i32 0, i32 0) to i64))  
-  tail call ccc  void  @putchar(i8  10)  
   %0 = load  i64, i64* @"resource#command_line.arguments" 
   %1 = inttoptr i64 %0 to i64* 
   %2 = load  i64, i64* %1 
-  tail call ccc  void  @print_int(i64  %2)  
-  tail call fastcc  void  @"wybe.string.print<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @main_hello.3, i32 0, i32 0) to i64))  
+  %3 = add   i64 %2, 1 
+  %4 = tail call fastcc  i64  @"wybe.int.fmt<0>"(i64  %3)  
+  %5 = tail call fastcc  i64  @"wybe.string.,,<0>"(i64  ptrtoint (i64* getelementptr inbounds ({i64, i64}, {i64, i64}* @inline_pos.1, i32 0, i32 0) to i64), i64  %4)  
+  tail call fastcc  void  @"wybe.string.print<0>[410bae77d3]"(i64  %5)  
   tail call ccc  void  @putchar(i8  10)  
   ret void 
+}
+
+
+define external fastcc  i64 @"inline_pos.myincr<0>"(i64  %"x##0") alwaysinline   {
+entry:
+  %0 = add   i64 %"x##0", 1 
+  ret i64 %0 
 }

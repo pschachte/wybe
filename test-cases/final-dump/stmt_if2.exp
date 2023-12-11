@@ -49,7 +49,7 @@ lookup(key##0:wybe.int, tree##0:stmt_if2.tree, ?#result##0:wybe.bool)<{}; {}; {}
     stmt_if2.tree.=<0>(tree##0:stmt_if2.tree, 0:stmt_if2.tree, ?tmp#13##0:wybe.bool) #1 @stmt_if2:nn:nn
     case ~tmp#13##0:wybe.bool of
     0:
-        foreign llvm icmp_ne(tree##0:wybe.int, 0:wybe.int, ?tmp#15##0:wybe.bool)
+        foreign llvm icmp_ne(tree##0:wybe.int, 0:wybe.int, ?tmp#15##0:wybe.bool) @stmt_if2:nn:nn
         case ~tmp#15##0:wybe.bool of
         0:
             foreign llvm move(0:wybe.bool, ?#result##0:wybe.bool) @stmt_if2:nn:nn
@@ -58,10 +58,10 @@ lookup(key##0:wybe.int, tree##0:stmt_if2.tree, ?#result##0:wybe.bool)<{}; {}; {}
             foreign lpvm access(tree##0:stmt_if2.tree, 0:wybe.int, 24:wybe.int, 0:wybe.int, ?l##0:stmt_if2.tree) @stmt_if2:nn:nn
             foreign lpvm access(tree##0:stmt_if2.tree, 8:wybe.int, 24:wybe.int, 0:wybe.int, ?k##0:wybe.int) @stmt_if2:nn:nn
             foreign lpvm access(~tree##0:stmt_if2.tree, 16:wybe.int, 24:wybe.int, 0:wybe.int, ?r##0:stmt_if2.tree) @stmt_if2:nn:nn
-            foreign llvm icmp_eq(k##0:wybe.int, key##0:wybe.int, ?tmp#11##0:wybe.bool) @int:nn:nn
+            foreign llvm icmp_eq(k##0:wybe.int, key##0:wybe.int, ?tmp#11##0:wybe.bool) @stmt_if2:nn:nn
             case ~tmp#11##0:wybe.bool of
             0:
-                foreign llvm icmp_sgt(~k##0:wybe.int, key##0:wybe.int, ?tmp#10##0:wybe.bool) @int:nn:nn
+                foreign llvm icmp_sgt(~k##0:wybe.int, key##0:wybe.int, ?tmp#10##0:wybe.bool) @stmt_if2:nn:nn
                 case ~tmp#10##0:wybe.bool of
                 0:
                     stmt_if2.lookup<0>(~key##0:wybe.int, ~r##0:stmt_if2.tree, ?#result##0:wybe.bool) #10 @stmt_if2:nn:nn

@@ -16,16 +16,16 @@ module top-level code > public {semipure} (0 calls)
   InterestingCallProperties: []
     foreign lpvm alloc(8:wybe.int, ?tmp#5##0:anon_field_variable(T)) @anon_field_variable:nn:nn
     foreign lpvm mutate(~tmp#5##0:anon_field_variable(T), ?tmp#0##0:anon_field_variable(wybe.bool), 0:wybe.int, 1:wybe.int, 8:wybe.int, 0:wybe.int, 0:T) @anon_field_variable:nn:nn
-    foreign llvm and(~tmp#0##0:wybe.int, 1:wybe.int, ?tmp#7##0:wybe.int)
-    foreign llvm icmp_eq(~tmp#7##0:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.bool)
+    foreign llvm and(~tmp#0##0:wybe.int, 1:wybe.int, ?tmp#7##0:wybe.int) @anon_field_variable:nn:nn
+    foreign llvm icmp_eq(~tmp#7##0:wybe.int, 0:wybe.int, ?tmp#8##0:wybe.bool) @anon_field_variable:nn:nn
     case ~tmp#8##0:wybe.bool of
     0:
 
     1:
-        wybe.string.print<0>("foo":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @string:nn:nn
-        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @io:nn:nn
-        foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @io:nn:nn
-        foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+        wybe.string.print<0>("foo":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #4 @anon_field_variable:nn:nn
+        foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#10##0:wybe.phantom) @anon_field_variable:nn:nn
+        foreign c putchar('\n':wybe.char, ~tmp#10##0:wybe.phantom, ?tmp#11##0:wybe.phantom) @anon_field_variable:nn:nn
+        foreign lpvm store(~%tmp#11##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @anon_field_variable:nn:nn
 
 
 

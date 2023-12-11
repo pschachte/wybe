@@ -16,10 +16,10 @@ module top-level code > public {inline,semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    wybe.string.print<0>("Numbers has been initialised.":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>("Numbers has been initialised.":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #1 @numbers:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#1##0:wybe.phantom) @numbers:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#1##0:wybe.phantom, ?tmp#2##0:wybe.phantom) @numbers:nn:nn
+    foreign lpvm store(~%tmp#2##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @numbers:nn:nn
 
 
 proc factorial > public (1 calls)
@@ -27,12 +27,12 @@ proc factorial > public (1 calls)
 factorial(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_sle(n##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @int:nn:nn
+    foreign llvm icmp_sle(n##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @numbers:nn:nn
     case ~tmp#4##0:wybe.bool of
     0:
-        foreign llvm sub(n##0:wybe.int, 1:wybe.int, ?tmp#3##0:wybe.int) @int:nn:nn
+        foreign llvm sub(n##0:wybe.int, 1:wybe.int, ?tmp#3##0:wybe.int) @numbers:nn:nn
         numbers.factorial<0>(~tmp#3##0:wybe.int, ?tmp#2##0:wybe.int) #2 @numbers:nn:nn
-        foreign llvm mul(~n##0:wybe.int, ~tmp#2##0:wybe.int, ?#result##0:wybe.int) @int:nn:nn
+        foreign llvm mul(~n##0:wybe.int, ~tmp#2##0:wybe.int, ?#result##0:wybe.int) @numbers:nn:nn
 
     1:
         foreign llvm move(1:wybe.int, ?#result##0:wybe.int) @numbers:nn:nn
@@ -44,8 +44,8 @@ proc toCelsius > public {inline} (0 calls)
 toCelsius(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm fsub(~f##0:wybe.float, 32.0:wybe.float, ?tmp#1##0:wybe.float) @float:nn:nn
-    foreign llvm fdiv(~tmp#1##0:wybe.float, 1.8:wybe.float, ?#result##0:wybe.float) @float:nn:nn
+    foreign llvm fsub(~f##0:wybe.float, 32.0:wybe.float, ?tmp#1##0:wybe.float) @numbers:nn:nn
+    foreign llvm fdiv(~tmp#1##0:wybe.float, 1.8:wybe.float, ?#result##0:wybe.float) @numbers:nn:nn
 
   LLVM code       :
 

@@ -17,27 +17,27 @@ module top-level code > public {semipure} (0 calls)
   MultiSpeczDepInfo: [(17,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(18,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []])),(19,(wybe.string.print<0>,fromList [NonAliasedParamCond 0 []]))]
     wybe.string.,,<0>("Wybe":wybe.string, "!":wybe.string, ?tmp#1##0:wybe.string) #1 @string_interpolation:nn:nn
     wybe.string.,,<0>("Hello, ":wybe.string, ~tmp#1##0:wybe.string, ?tmp#0##0:wybe.string) #2 @string_interpolation:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #17 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#17##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#0##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #17 @string_interpolation:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#16##0:wybe.phantom) @string_interpolation:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @string_interpolation:nn:nn
+    foreign lpvm store(~%tmp#17##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string_interpolation:nn:nn
     wybe.int.fmt<0>(42:wybe.int, ?tmp#5##0:wybe.string) #5 @string_interpolation:nn:nn
     wybe.string.,,<0>(~tmp#5##0:wybe.string, " is the answer":wybe.string, ?tmp#4##0:wybe.string) #6 @string_interpolation:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#4##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #18 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#22##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    foreign c ipow(2:wybe.int, 63:wybe.int, ?tmp#10##0:wybe.int) @int:nn:nn
-    foreign llvm sub(tmp#10##0:wybe.int, 1:wybe.int, ?tmp#9##0:wybe.int) @int:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#4##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #18 @string_interpolation:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#21##0:wybe.phantom) @string_interpolation:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#21##0:wybe.phantom, ?tmp#22##0:wybe.phantom) @string_interpolation:nn:nn
+    foreign lpvm store(~%tmp#22##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string_interpolation:nn:nn
+    foreign c ipow(2:wybe.int, 63:wybe.int, ?tmp#10##0:wybe.int) @string_interpolation:nn:nn
+    foreign llvm sub(tmp#10##0:wybe.int, 1:wybe.int, ?tmp#9##0:wybe.int) @string_interpolation:nn:nn
     wybe.int.fmt<0>(~tmp#9##0:wybe.int, ?tmp#8##0:wybe.string) #10 @string_interpolation:nn:nn
     wybe.int.fmt<0>(~tmp#10##0:wybe.int, ?tmp#12##0:wybe.string) #12 @string_interpolation:nn:nn
     wybe.string.,,<0>(" and minint is ":wybe.string, ~tmp#12##0:wybe.string, ?tmp#11##0:wybe.string) #13 @string_interpolation:nn:nn
     wybe.string.,,<0>(~tmp#8##0:wybe.string, ~tmp#11##0:wybe.string, ?tmp#7##0:wybe.string) #14 @string_interpolation:nn:nn
     wybe.string.,,<0>("maxint is ":wybe.string, ~tmp#7##0:wybe.string, ?tmp#6##0:wybe.string) #15 @string_interpolation:nn:nn
-    wybe.string.print<0>[410bae77d3](~tmp#6##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #19 @string:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#30##0:wybe.phantom) @io:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#30##0:wybe.phantom, ?tmp#31##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#31##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    wybe.string.print<0>[410bae77d3](~tmp#6##0:wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #19 @string_interpolation:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#30##0:wybe.phantom) @string_interpolation:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#30##0:wybe.phantom, ?tmp#31##0:wybe.phantom) @string_interpolation:nn:nn
+    foreign lpvm store(~%tmp#31##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @string_interpolation:nn:nn
 
   LLVM code       :
 

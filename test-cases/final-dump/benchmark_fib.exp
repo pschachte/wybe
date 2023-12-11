@@ -97,30 +97,30 @@ module top-level code > public {semipure} (0 calls)
 ()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign c {impure} benchmark_start(c"benchmark_fib:30:2":wybe.c_string) @benchmark:nn:nn
+    foreign c {impure} benchmark_start(c"benchmark_fib:30:2":wybe.c_string) @benchmark_fib:nn:nn
     benchmark_fib.naive_fib<0>(42:wybe.int, ?res##0:wybe.int) #1 @benchmark_fib:nn:nn
-    foreign c {impure} benchmark_end(c"benchmark_fib:32:2":wybe.c_string, ?time##0:wybe.float) @benchmark:nn:nn
+    foreign c {impure} benchmark_end(c"benchmark_fib:32:2":wybe.c_string, ?time##0:wybe.float) @benchmark_fib:nn:nn
     wybe.string.print<0>("Elapsed time (s):  ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #3 @benchmark_fib:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @float:nn:nn
-    foreign c print_float(~time##0:wybe.float, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @float:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    foreign c {impure} benchmark_start(c"benchmark_fib:35:2":wybe.c_string) @benchmark:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#6##0:wybe.phantom) @benchmark_fib:nn:nn
+    foreign c print_float(~time##0:wybe.float, ~tmp#6##0:wybe.phantom, ?tmp#7##0:wybe.phantom) @benchmark_fib:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#7##0:wybe.phantom, ?tmp#8##0:wybe.phantom) @benchmark_fib:nn:nn
+    foreign lpvm store(~%tmp#8##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @benchmark_fib:nn:nn
+    foreign c {impure} benchmark_start(c"benchmark_fib:35:2":wybe.c_string) @benchmark_fib:nn:nn
     benchmark_fib.fib<0>(42:wybe.int, ?res##1:wybe.int) #6 @benchmark_fib:nn:nn
-    foreign c {impure} benchmark_end(c"benchmark_fib:37:2":wybe.c_string, ?time##1:wybe.float) @benchmark:nn:nn
+    foreign c {impure} benchmark_end(c"benchmark_fib:37:2":wybe.c_string, ?time##1:wybe.float) @benchmark_fib:nn:nn
     wybe.string.print<0>("Elapsed time (s):  ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #8 @benchmark_fib:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @float:nn:nn
-    foreign c print_float(~time##1:wybe.float, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @float:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
-    foreign c {impure} benchmark_start(c"benchmark_fib:40:2":wybe.c_string) @benchmark:nn:nn
-    benchmark_fib.#anon#1<0> #0 @benchmark:nn:nn
-    foreign c {impure} benchmark_end(c"benchmark_fib:40:2":wybe.c_string, ?time##2:wybe.float) @benchmark:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#12##0:wybe.phantom) @benchmark_fib:nn:nn
+    foreign c print_float(~time##1:wybe.float, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @benchmark_fib:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#13##0:wybe.phantom, ?tmp#14##0:wybe.phantom) @benchmark_fib:nn:nn
+    foreign lpvm store(~%tmp#14##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @benchmark_fib:nn:nn
+    foreign c {impure} benchmark_start(c"benchmark_fib:40:2":wybe.c_string) @benchmark_fib:nn:nn
+    benchmark_fib.#anon#1<0> #0 @benchmark_fib:nn:nn
+    foreign c {impure} benchmark_end(c"benchmark_fib:40:2":wybe.c_string, ?time##2:wybe.float) @benchmark_fib:nn:nn
     wybe.string.print<0>("Elapsed time (s):  ":wybe.string)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #11 @benchmark_fib:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom) @float:nn:nn
-    foreign c print_float(~time##2:wybe.float, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @float:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#18##0:wybe.phantom) @benchmark_fib:nn:nn
+    foreign c print_float(~time##2:wybe.float, ~tmp#18##0:wybe.phantom, ?tmp#19##0:wybe.phantom) @benchmark_fib:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#19##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @benchmark_fib:nn:nn
+    foreign lpvm store(~%tmp#20##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @benchmark_fib:nn:nn
 
 
 proc #anon#1 > {inline,semipure} (1 calls)
@@ -142,16 +142,16 @@ proc fib > (1 calls)
 fib(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_sle(n##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @int:nn:nn
+    foreign llvm icmp_sle(n##0:wybe.int, 0:wybe.int, ?tmp#4##0:wybe.bool) @benchmark_fib:nn:nn
     case ~tmp#4##0:wybe.bool of
     0:
-        foreign llvm icmp_eq(n##0:wybe.int, 1:wybe.int, ?tmp#3##0:wybe.bool) @int:nn:nn
+        foreign llvm icmp_eq(n##0:wybe.int, 1:wybe.int, ?tmp#3##0:wybe.bool) @benchmark_fib:nn:nn
         case ~tmp#3##0:wybe.bool of
         0:
-            foreign llvm icmp_eq(n##0:wybe.int, 2:wybe.int, ?tmp#2##0:wybe.bool) @int:nn:nn
+            foreign llvm icmp_eq(n##0:wybe.int, 2:wybe.int, ?tmp#2##0:wybe.bool) @benchmark_fib:nn:nn
             case ~tmp#2##0:wybe.bool of
             0:
-                foreign llvm sub(~n##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int) @int:nn:nn
+                foreign llvm sub(~n##0:wybe.int, 3:wybe.int, ?tmp#1##0:wybe.int) @benchmark_fib:nn:nn
                 benchmark_fib.fib1<0>(1:wybe.int, 1:wybe.int, ~tmp#1##0:wybe.int, ?#result##0:wybe.int) #5 @benchmark_fib:nn:nn
 
             1:
@@ -163,7 +163,7 @@ fib(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
 
 
     1:
-        foreign c {terminal,semipure} error_exit(c"benchmark_fib:18:21":wybe.c_string, c"n should be strictly positive":wybe.c_string) @control:nn:nn
+        foreign c {terminal,semipure} error_exit(c"benchmark_fib:18:21":wybe.c_string, c"n should be strictly positive":wybe.c_string) @benchmark_fib:nn:nn
         foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
 
@@ -173,15 +173,15 @@ proc fib1 > (2 calls)
 fib1(pprev##0:wybe.int, prev##0:wybe.int, n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_eq(n##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @int:nn:nn
+    foreign llvm icmp_eq(n##0:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.bool) @benchmark_fib:nn:nn
     case ~tmp#5##0:wybe.bool of
     0:
-        foreign llvm add(~pprev##0:wybe.int, prev##0:wybe.int, ?tmp#3##0:wybe.int) @int:nn:nn
-        foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#4##0:wybe.int) @int:nn:nn
+        foreign llvm add(~pprev##0:wybe.int, prev##0:wybe.int, ?tmp#3##0:wybe.int) @benchmark_fib:nn:nn
+        foreign llvm sub(~n##0:wybe.int, 1:wybe.int, ?tmp#4##0:wybe.int) @benchmark_fib:nn:nn
         benchmark_fib.fib1<0>(~prev##0:wybe.int, ~tmp#3##0:wybe.int, ~tmp#4##0:wybe.int, ?#result##0:wybe.int) #4 @benchmark_fib:nn:nn
 
     1:
-        foreign llvm add(~pprev##0:wybe.int, ~prev##0:wybe.int, ?#result##0:wybe.int) @int:nn:nn
+        foreign llvm add(~pprev##0:wybe.int, ~prev##0:wybe.int, ?#result##0:wybe.int) @benchmark_fib:nn:nn
 
 
 
@@ -190,13 +190,13 @@ proc naive_fib > (2 calls)
 naive_fib(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_sle(n##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @int:nn:nn
+    foreign llvm icmp_sle(n##0:wybe.int, 0:wybe.int, ?tmp#1##0:wybe.bool) @benchmark_fib:nn:nn
     case ~tmp#1##0:wybe.bool of
     0:
         benchmark_fib.naive_fib1<0>(~n##0:wybe.int, ?#result##0:wybe.int) #2 @benchmark_fib:nn:nn
 
     1:
-        foreign c {terminal,semipure} error_exit(c"benchmark_fib:5:21":wybe.c_string, c"n should be strictly positive":wybe.c_string) @control:nn:nn
+        foreign c {terminal,semipure} error_exit(c"benchmark_fib:5:21":wybe.c_string, c"n should be strictly positive":wybe.c_string) @benchmark_fib:nn:nn
         foreign llvm move(undef:wybe.int, ?#result##0:wybe.int)
 
 
@@ -206,17 +206,17 @@ proc naive_fib1 > (3 calls)
 naive_fib1(n##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm icmp_eq(n##0:wybe.int, 1:wybe.int, ?tmp#7##0:wybe.bool) @int:nn:nn
+    foreign llvm icmp_eq(n##0:wybe.int, 1:wybe.int, ?tmp#7##0:wybe.bool) @benchmark_fib:nn:nn
     case ~tmp#7##0:wybe.bool of
     0:
-        foreign llvm icmp_eq(n##0:wybe.int, 2:wybe.int, ?tmp#6##0:wybe.bool) @int:nn:nn
+        foreign llvm icmp_eq(n##0:wybe.int, 2:wybe.int, ?tmp#6##0:wybe.bool) @benchmark_fib:nn:nn
         case ~tmp#6##0:wybe.bool of
         0:
-            foreign llvm sub(n##0:wybe.int, 1:wybe.int, ?tmp#3##0:wybe.int) @int:nn:nn
+            foreign llvm sub(n##0:wybe.int, 1:wybe.int, ?tmp#3##0:wybe.int) @benchmark_fib:nn:nn
             benchmark_fib.naive_fib1<0>(~tmp#3##0:wybe.int, ?tmp#2##0:wybe.int) #3 @benchmark_fib:nn:nn
-            foreign llvm sub(~n##0:wybe.int, 2:wybe.int, ?tmp#5##0:wybe.int) @int:nn:nn
+            foreign llvm sub(~n##0:wybe.int, 2:wybe.int, ?tmp#5##0:wybe.int) @benchmark_fib:nn:nn
             benchmark_fib.naive_fib1<0>(~tmp#5##0:wybe.int, ?tmp#4##0:wybe.int) #5 @benchmark_fib:nn:nn
-            foreign llvm add(~tmp#2##0:wybe.int, ~tmp#4##0:wybe.int, ?#result##0:wybe.int) @int:nn:nn
+            foreign llvm add(~tmp#2##0:wybe.int, ~tmp#4##0:wybe.int, ?#result##0:wybe.int) @benchmark_fib:nn:nn
 
         1:
             foreign llvm move(1:wybe.int, ?#result##0:wybe.int) @benchmark_fib:nn:nn

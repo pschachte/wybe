@@ -46,14 +46,14 @@ module top-level code > public {semipure} (0 calls)
     foreign lpvm {noalias} mutate(~tmp#15##0:alias_type3.posrec, ?rec##1:alias_type3.posrec, 0:wybe.int, 0:wybe.int, 16:wybe.int, 0:wybe.int, ~tmp#20##0:alias_type3.position) @alias_type3:nn:nn
     foreign lpvm {noalias} mutate(~tmp#10##0:alias_type3.position, ?pos##1:alias_type3.position, 0:wybe.int, 1:wybe.int, 16:wybe.int, 0:wybe.int, 200:wybe.int) @alias_type3:nn:nn
     foreign lpvm access(~pos##1:alias_type3.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#3##0:wybe.int) @alias_type3:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#27##0:wybe.phantom) @int:nn:nn
-    foreign c print_int(~tmp#3##0:wybe.int, ~tmp#27##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @int:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#28##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#27##0:wybe.phantom) @alias_type3:nn:nn
+    foreign c print_int(~tmp#3##0:wybe.int, ~tmp#27##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @alias_type3:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#28##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @alias_type3:nn:nn
     foreign lpvm access(~rec##1:alias_type3.posrec, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#4##0:alias_type3.position) @alias_type3:nn:nn
     foreign lpvm access(~tmp#4##0:alias_type3.position, 0:wybe.int, 16:wybe.int, 0:wybe.int, ?tmp#5##0:wybe.int) @alias_type3:nn:nn
-    foreign c print_int(~tmp#5##0:wybe.int, ~tmp#29##0:wybe.phantom, ?tmp#34##0:wybe.phantom) @int:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#34##0:wybe.phantom, ?tmp#35##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#35##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign c print_int(~tmp#5##0:wybe.int, ~tmp#29##0:wybe.phantom, ?tmp#34##0:wybe.phantom) @alias_type3:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#34##0:wybe.phantom, ?tmp#35##0:wybe.phantom) @alias_type3:nn:nn
+    foreign lpvm store(~%tmp#35##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @alias_type3:nn:nn
 
   LLVM code       :
 

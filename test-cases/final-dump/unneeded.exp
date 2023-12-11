@@ -14,7 +14,7 @@ proc unneeded > {inline} (0 calls)
 unneeded(x##0:wybe.int, [y##0:wybe.int], ?z##0:wybe.int, q##0:wybe.int, [?q##0:wybe.int])<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm add(~x##0:wybe.int, 1:wybe.int, ?z##0:wybe.int) @int:nn:nn
+    foreign llvm add(~x##0:wybe.int, 1:wybe.int, ?z##0:wybe.int) @unneeded:nn:nn
 
   LLVM code       :
 

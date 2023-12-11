@@ -15,25 +15,25 @@ module top-level code > public {semipure} (0 calls)
   AliasPairs: []
   InterestingCallProperties: []
     higher_order_refs.app<0>(higher_order_refs.#anon#1<1><>:(wybe.float, ?wybe.float), 1.0:wybe.float, ?tmp#0##0:wybe.float) #0 @higher_order_refs:nn:nn
-    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @float:nn:nn
-    foreign c print_float(~tmp#0##0:wybe.float, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @float:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @io:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#11##0:wybe.phantom) @higher_order_refs:nn:nn
+    foreign c print_float(~tmp#0##0:wybe.float, ~tmp#11##0:wybe.phantom, ?tmp#12##0:wybe.phantom) @higher_order_refs:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#12##0:wybe.phantom, ?tmp#13##0:wybe.phantom) @higher_order_refs:nn:nn
     higher_order_refs.app<0>(higher_order_refs.#anon#2<1><>:(wybe.float, ?wybe.float), 1.0:wybe.float, ?tmp#1##0:wybe.float) #2 @higher_order_refs:nn:nn
-    foreign c print_float(~tmp#1##0:wybe.float, ~tmp#13##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @float:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @io:nn:nn
+    foreign c print_float(~tmp#1##0:wybe.float, ~tmp#13##0:wybe.phantom, ?tmp#16##0:wybe.phantom) @higher_order_refs:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#16##0:wybe.phantom, ?tmp#17##0:wybe.phantom) @higher_order_refs:nn:nn
     higher_order_refs.app<0>(higher_order_refs.#anon#3<1><0.5:wybe.float>:(wybe.float, ?wybe.float), 1.0:wybe.float, ?tmp#3##0:wybe.float) #4 @higher_order_refs:nn:nn
-    foreign c print_float(~tmp#3##0:wybe.float, ~tmp#17##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @float:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @io:nn:nn
+    foreign c print_float(~tmp#3##0:wybe.float, ~tmp#17##0:wybe.phantom, ?tmp#20##0:wybe.phantom) @higher_order_refs:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#20##0:wybe.phantom, ?tmp#21##0:wybe.phantom) @higher_order_refs:nn:nn
     higher_order_refs.app<0>(higher_order_refs.#closure#1<0><>:(wybe.float, ?wybe.float), 1.0:wybe.float, ?tmp#5##0:wybe.float) #6 @higher_order_refs:nn:nn
-    foreign c print_float(~tmp#5##0:wybe.float, ~tmp#21##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @float:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#24##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @io:nn:nn
+    foreign c print_float(~tmp#5##0:wybe.float, ~tmp#21##0:wybe.phantom, ?tmp#24##0:wybe.phantom) @higher_order_refs:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#24##0:wybe.phantom, ?tmp#25##0:wybe.phantom) @higher_order_refs:nn:nn
     higher_order_refs.app<0>(higher_order_refs.#closure#2<0><>:(wybe.int, ?wybe.int), 1:wybe.int, ?tmp#6##0:wybe.int) #8 @higher_order_refs:nn:nn
-    foreign c print_int(~tmp#6##0:wybe.int, ~tmp#25##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @int:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#28##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @io:nn:nn
+    foreign c print_int(~tmp#6##0:wybe.int, ~tmp#25##0:wybe.phantom, ?tmp#28##0:wybe.phantom) @higher_order_refs:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#28##0:wybe.phantom, ?tmp#29##0:wybe.phantom) @higher_order_refs:nn:nn
     higher_order_refs.app<0>(higher_order_refs.#closure#3<0><_:wybe.int>:(wybe.int, ?wybe.int), 1:wybe.int, ?tmp#8##0:wybe.int) #10 @higher_order_refs:nn:nn
-    foreign c print_int(~tmp#8##0:wybe.int, ~tmp#29##0:wybe.phantom, ?tmp#32##0:wybe.phantom) @int:nn:nn
-    foreign c putchar('\n':wybe.char, ~tmp#32##0:wybe.phantom, ?tmp#33##0:wybe.phantom) @io:nn:nn
-    foreign lpvm store(~%tmp#33##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @io:nn:nn
+    foreign c print_int(~tmp#8##0:wybe.int, ~tmp#29##0:wybe.phantom, ?tmp#32##0:wybe.phantom) @higher_order_refs:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#32##0:wybe.phantom, ?tmp#33##0:wybe.phantom) @higher_order_refs:nn:nn
+    foreign lpvm store(~%tmp#33##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @higher_order_refs:nn:nn
 
 
 proc #anon#1 > {inline} (1 calls)
@@ -69,13 +69,13 @@ proc #anon#3 > {inline} (1 calls)
 #anon#3(^y##0:wybe.float, anon#3#1##0:wybe.float, ?anon#3#2##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm fsub(~anon#3#1##0:wybe.float, ~y##0:wybe.float, ?anon#3#2##0:wybe.float) @float:nn:nn
+    foreign llvm fsub(~anon#3#1##0:wybe.float, ~y##0:wybe.float, ?anon#3#2##0:wybe.float) @higher_order_refs:nn:nn
 proc #anon#3 > {inline} (1 calls)
 1: higher_order_refs.#anon#3<1>
 #anon#3(^y##0:wybe.float, anon#3#1##0:wybe.float, ?anon#3#2##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm fsub(~anon#3#1##0:wybe.float, ~^y##0:wybe.float, ?anon#3#2##0:wybe.float) @float:nn:nn
+    foreign llvm fsub(~anon#3#1##0:wybe.float, ~^y##0:wybe.float, ?anon#3#2##0:wybe.float) @higher_order_refs:nn:nn
 
 
 proc #closure#1 > {inline} (1 calls)
@@ -91,7 +91,7 @@ proc #closure#2 > {inline} (1 calls)
 #closure#2(i##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @int:nn:nn
+    foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @higher_order_refs:nn:nn
 
 
 proc #closure#3 > {inline} (1 calls)
@@ -107,13 +107,13 @@ proc add_one > {inline} (1 calls)
 add_one(i##0:wybe.int, ?#result##0:wybe.int)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @int:nn:nn
+    foreign llvm add(~i##0:wybe.int, 1:wybe.int, ?#result##0:wybe.int) @higher_order_refs:nn:nn
 proc add_one > {inline} (0 calls)
 1: higher_order_refs.add_one<1>
 add_one(f##0:wybe.float, ?#result##0:wybe.float)<{}; {}; {}>:
   AliasPairs: []
   InterestingCallProperties: []
-    foreign llvm fadd(~f##0:wybe.float, 1.0:wybe.float, ?#result##0:wybe.float) @float:nn:nn
+    foreign llvm fadd(~f##0:wybe.float, 1.0:wybe.float, ?#result##0:wybe.float) @higher_order_refs:nn:nn
 
 
 proc app > {noinline} (6 calls)

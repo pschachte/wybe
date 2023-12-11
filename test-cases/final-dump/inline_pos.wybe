@@ -1,0 +1,14 @@
+# Test case for what happens to source locations in inlined code.
+# Since source locations within procedures that are inlined may be meaningless
+# to the programmer of the caller, we want source locations after inlining
+# to refer to the location of the inlined call.
+
+use command_line
+
+def {inline} myincr(!x:int) {
+    ?x = x + 1
+}
+
+?v = length(arguments)
+myincr(!v)
+!println("v = $v")
