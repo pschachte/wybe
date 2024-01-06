@@ -18,6 +18,10 @@ pub def {terminal,semipure} error(message:string) use call_source_location {
     foreign c {terminal,semipure} error_exit(call_source_location, c_string(message))
 }
 
+pub def {terminal,semipure} error(message:string, result:T) use call_source_location {
+    !error(message)
+}
+
 pub def {terminal,semipure} error(message:c_string) use call_source_location {
     foreign c {terminal,semipure} error_exit(call_source_location, message)
 }
