@@ -1,0 +1,35 @@
+======================================================================
+AFTER EVERYTHING:
+ Module save_restore_disj
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : save_restore_disj.<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+module top-level code > public {inline,semipure} (0 calls)
+0: save_restore_disj.<0>
+()<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+
+  LLVM code       :
+
+; ModuleID = 'save_restore_disj'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  void @"save_restore_disj.<0>"() alwaysinline   {
+entry:
+  ret void 
+}
