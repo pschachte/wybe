@@ -2290,6 +2290,7 @@ modecheckStmt final
     stmt@(Cond tstStmt thnStmts elsStmts _ _ res) pos = do
     logModed $ "Mode checking conditional " ++ show stmt
     initialState <- get
+    boundVarsBeforeCond <- gets (USet.toSet Set.empty . bindingVars)
     (tstStmt',condReassigns)
         <- withReassignments $ withDeterminism SemiDet
             $ placedApplyM (modecheckStmt False) tstStmt
@@ -2299,8 +2300,11 @@ modecheckStmt final
     bound <- gets bindingVars
     condBindings <- lift $ mapFromUnivSetM ultimateVarType Set.empty bound
     logModed $ "Reassigned by test: " ++ showSet show condReassigns
+    -- Only save/restore variables bound before the cond
     (saves,restores) <- unzip <$>
-             lift (mapM saveRestore $ Set.toList condReassigns)
+             lift (mapM saveRestore
+                    $ Set.toList
+                    $ Set.intersection boundVarsBeforeCond condReassigns)
     forceDet
     thnStmts' <- modecheckStmts final thnStmts
     logAssigned "Assigned by then branch: "
@@ -2492,10 +2496,14 @@ modecheckDisj final preRestores disjAssigned (stmt:stmts) = do
     beforeDisj <- get
     detism <- getsTy tyDeterminism
     let detism1 = if List.null stmts then detism else SemiDet
+    boundVarsBeforeDisj <- gets (USet.toSet Set.empty . bindingVars)
     (disj1, reassigns) <- withReassignments $ withDeterminism detism1
                 $ placedApply (modecheckStmt final) stmt
+    -- Only save/restore variables bound before the disj
     (saves,restores) <- unzip <$>
-             lift (mapM saveRestore $ Set.toList reassigns)
+             lift (mapM saveRestore
+                    $ Set.toList
+                    $ Set.intersection boundVarsBeforeDisj reassigns)
     let saves' = if List.null stmts then [] else saves
     -- XXX Must handle rolling back reassignments
     afterDisjunct <- get
