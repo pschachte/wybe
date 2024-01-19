@@ -291,7 +291,10 @@ transformStmt stmt@(ProcCall fn@(First m n mbId) d resourceful args) pos = do
     let callParamTys = paramType . content <$> procProtoParams proto
     let hasResfulHigherArgs = any isResourcefulHigherOrder callParamTys
     let usesResources = not (List.null callResFlows) || hasResfulHigherArgs
-    unless (resourceful || not usesResources)
+    let usesOrdinaryResources =
+            hasResfulHigherArgs
+            || not (all (isSpecialResource . resourceFlowRes) callResFlows)
+    unless (resourceful || not usesOrdinaryResources)
         $ lift $ errmsg pos
                $ "Call to resourceful proc without ! resource marker: "
                     ++ showStmt 4 stmt
