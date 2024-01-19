@@ -1678,6 +1678,14 @@ context in which it is called simply by using the appropriate resources.
 However, if that procedure is called from another procedure that uses that
 resource, the caller's caller's calling context will be used instead.
 
+Because implicit resources are read-only and available everywhere, a
+call to a 
+procedure that uses only implicit resources need not be preceded with an
+exclamation mark.  Similarly, a procedure that uses no non-implicit resources
+can be called using function application syntax.  However, because the `use`
+syntax is not permitted in function declarations, it must be defined as a
+procedure (see the [Functions are Procedures](#functions-are-procedures) section).
+
 The implicit resources supported by Wybe are:
 
 | Resource Name                | Type       | Meaning                                            |

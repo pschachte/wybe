@@ -1,0 +1,21 @@
+# Test for the control.error function.
+
+type coord {
+    constructors pub polar(r:float, theta:float)
+               | pub cartesian(x:float, y:float)
+
+    pub def radius(c:_):float =
+        case c in { 
+            cartesian(?x,?y) :: sqrt(x**2.0 + y**2.0) 
+          | polar(?r,_)      :: r 
+          | else             :: error("should not be possible") 
+        }
+}
+
+!print("radius of cartesian(1,1) = ")
+!println(radius(cartesian(1.0,1.0)))
+!print("radius of polar(10,90) = ")
+!println(radius(polar(10.0,90.0)))
+
+!println("Now print out an error message:  ")
+?z:int = error("This is an error message!")

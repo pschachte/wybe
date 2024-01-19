@@ -1022,20 +1022,20 @@ typecheckProcDecl (RoughProc m name) = do
 
 -- |An individual call, and information that is related to this call
 data CallInfo
-    = FirstInfo {
-        fiProc         :: ProcSpec
-      , fiTypes        :: [TypeSpec]
-      , fiFlows        :: [FlowDirection]
-      , fiDetism       :: Determinism
-      , fiImpurity     :: Impurity
-      , fiInRes        :: Set ResourceSpec
-      , fiOutRes       :: Set ResourceSpec
-      , fiNeedsResBang :: Bool
-      , fiPartial      :: Bool
-    } | HigherInfo {
-        hiFunc :: Exp
-    } | TestInfo {
-        tiVar :: Exp
+    = FirstInfo {                            -- A first order call
+        fiProc         :: ProcSpec           -- ^the called proc
+      , fiTypes        :: [TypeSpec]         -- ^its formal param types
+      , fiFlows        :: [FlowDirection]    -- ^its formal param flows
+      , fiDetism       :: Determinism        -- ^its determinism
+      , fiImpurity     :: Impurity           -- ^its impurity
+      , fiInRes        :: Set ResourceSpec   -- ^its input resources
+      , fiOutRes       :: Set ResourceSpec   -- ^its output resources
+      , fiNeedsResBang :: Bool               -- ^whether its calls need a bang
+      , fiPartial      :: Bool               -- ^whether this call is partial
+    } | HigherInfo {                         -- A higher order call
+        hiFunc         :: Exp                -- ^variable being called
+    } | TestInfo {                           -- A test call
+        tiVar          :: Exp                -- ^variable holding test result
     }
    deriving (Eq, Ord)
 
@@ -1110,7 +1110,7 @@ procToPartial callFlows hasBang info@FirstInfo{fiPartial=False,
                                                fiImpurity=impurity}
     | not hasBang && not (List.null callFlows) && last callFlows == ParamOut
                   && (length callFlows < length tys
-                      || length callFlows <= length tys + 1 && usesResources)
+                     || length callFlows <= length tys + 1 && usesResources)
         = (Just info{fiPartial=True,
                      fiTypes=closedTys ++ [higherTy],
                      fiFlows=closedFls ++ [ParamOut]}, needsBang)
@@ -1305,7 +1305,8 @@ recordCast mbLang caller callee pexp argNum =
         _   -> return ()
     where pos = place pexp
 
-recordCast' :: Maybe Ident -> ProcName -> Ident -> Int -> TypeSpec -> Exp -> OptPos -> Typed ()
+recordCast' :: Maybe Ident -> ProcName -> Ident -> Int -> TypeSpec -> Exp 
+            -> OptPos -> Typed ()
 recordCast' _ caller callee argNum ty (Var name _ _) pos
     = constrainVarType (ReasonArgType False callee argNum pos) name ty
 -- ignore all non-variable casts in foreigns, except for llvm moves
@@ -1442,7 +1443,8 @@ firstInfo def proc = do
         outResources = Set.fromList
                         $ resourceFlowRes <$>
                             List.filter (flowsOut . resourceFlowFlow) resources
-        needsResBang = not (List.null resources) || any isResourcefulHigherOrder types
+        needsResBang = not (all (isSpecialResource . resourceFlowRes) resources)
+                         || any isResourcefulHigherOrder types
         detism = procDetism def
         imp = procImpurity def
     types' <- refreshTypes types
@@ -2579,7 +2581,7 @@ finaliseCall resourceful final pos args
         logModed $ "Available resources:  " ++ simpleShowSet (bindingResources assigned)
         let specialInstrs =
                 [ move (s `withType` ty) (varSetTyped r ty)
-                | resourceful -- no specials unless resourceful
+                | True -- resourceful -- no specials unless resourceful
                 , r <- Set.elems $ specials Set.\\ avail
                 , let (f,ty) = fromMaybe (const $ StringValue "Unknown" CString,
                                         cStringType)

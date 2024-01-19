@@ -1,0 +1,4 @@
+# see bug #418
+use weird_err_d
+
+?b:weird_err_d = empty:weird_err_d
