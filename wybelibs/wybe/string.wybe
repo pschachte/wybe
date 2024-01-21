@@ -97,6 +97,11 @@ pub def {test} `[|]`(?head:char, ?tail:_, s:_) {
     }
 }
 
+# Prepend a character to a string
+pub def `[|]`(head:char, tail:_, ?s:_) {
+    ?s = singleton(head) ,, tail
+}
+
 # String indexing
 pub def {test} [](s:_, idx:int, ?c:char) {
     case s in { 
