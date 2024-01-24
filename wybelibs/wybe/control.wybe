@@ -27,6 +27,14 @@ pub def {terminal,semipure} error(message:c_string) use call_source_location {
 }
 
 
+pub def {terminal,semipure} shouldnt use call_source_location {
+    !error("shouldn't happen!")
+}
+
+pub def {terminal,pure} shouldnt(?result:T) use call_source_location {
+    !error("shouldn't happen!")
+}
+
 pub def {semipure} assert(condition:bool) use call_source_location {
     if { ~condition :: !error(c"assertion failed") }
 }

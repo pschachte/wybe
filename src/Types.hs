@@ -403,7 +403,7 @@ typeErrorMessage (ReasonDeterminism kind name stmtDetism contextDetism pos) =
         ++ " in a " ++ determinismFullName contextDetism ++ " context"
 typeErrorMessage (ReasonWeakDetism name actualDetism expectedDetism pos) =
     Message Error pos $
-        name ++ " has " ++ determinismFullName actualDetism
+        showProcName name ++ " has " ++ determinismFullName actualDetism
         ++ " determinism, but declared " ++ determinismFullName expectedDetism
 typeErrorMessage (ReasonPurity kind name stmtPurity contextPurity pos) =
     Message Error pos $
@@ -1791,17 +1791,20 @@ data BindingState = BindingState {
         -- | The variables defined at the current loop exit
         bindingBreakVars :: UnivSet VarName,
         -- | The variables that could have been re-assigned
-        bindingReassigned:: Set VarName
+        bindingReassigned:: Set VarName,
+        -- | The name of the proc being analysed
+        bindingProcName :: Ident
         }
 
 
 instance Show BindingState where
-    show (BindingState detism impurity resources boundVars breakVars reass) =
+    show (BindingState detism impurity resources boundVars breakVars reass proc) =
         impurityFullName impurity ++ " " ++ determinismFullName detism
         ++ " computation binding " ++ showUnivSet id boundVars
         ++ ", reassigning = " ++ showSet show reass
         ++ ", break set = " ++ showUnivSet id breakVars
         ++ ", with resources " ++ showSet show resources
+        ++ ", in defn of " ++ showProcName proc
 
 
 -- | Record that the specified set of variables are bound.  Also note any
@@ -1854,10 +1857,11 @@ mustFail = gets $ (==Failure) . bindingDetism
 -- and no breaks seen.
 initBindingState :: ProcDef -> BindingState
 initBindingState pdef =
-    BindingState Det impurity resources emptyUnivSet UniversalSet Set.empty
+    BindingState Det impurity resources emptyUnivSet UniversalSet Set.empty proc
     where impurity = expectedImpurity $ procImpurity pdef
           resources = Set.map resourceFlowRes
                         (procProtoResources $ procProto pdef)
+          proc = procName pdef
 
 
 -- | BindingState for a failing computation (every possible variable is bound if
@@ -1865,7 +1869,7 @@ initBindingState pdef =
 failingBindingState :: BindingState -> BindingState
 failingBindingState state =
     BindingState Failure Pure (bindingResources state) UniversalSet UniversalSet
-                 Set.empty
+                 Set.empty (bindingProcName state)
 
 
 -- | BindingState at the top of a loop, based on state before the loop.
@@ -1902,10 +1906,23 @@ intersectMaybeSets (Just mset1) (Just mset2) =
 
 -- | the join of two BindingStates.
 joinState :: BindingState -> BindingState -> BindingState
-joinState (BindingState detism1 impurity1 resources1 boundVs1 breakVs1 reass1)
-          (BindingState detism2 impurity2 resources2 boundVs2 breakVs2 reass2) =
-           BindingState detism  impurity  resources  boundVs  breakVs reass
+joinState (BindingState detism1 impurity1 resources1 boundVs1 breakVs1 reass1 p)
+          (BindingState detism2 impurity2 resources2 boundVs2 breakVs2 reass2 _) =
+           BindingState detism  impurity  resources  boundVs  breakVs reass p
   where detism    = determinismJoin detism1 detism2
+        impurity  = max impurity1 impurity2
+        resources = resources1 `Set.intersection` resources2
+        breakVs = breakVs1 `USet.intersection` breakVs2
+        boundVs = boundVs1 `USet.intersection` boundVs2
+        reass     = reass1 `Set.union` reass2
+
+
+-- | Combine the two BindingStates of a disjunction.
+disjunctionState :: BindingState -> BindingState -> BindingState
+disjunctionState (BindingState detism1 impurity1 resources1 boundVs1 breakVs1 reass1 p)
+          (BindingState detism2 impurity2 resources2 boundVs2 breakVs2 reass2 _) =
+           BindingState detism  impurity  resources  boundVs  breakVs reass p
+  where detism    = disjunctionDeterminism detism1 detism2
         impurity  = max impurity1 impurity2
         resources = resources1 `Set.intersection` resources2
         breakVs = breakVs1 `USet.intersection` breakVs2
@@ -2082,6 +2099,7 @@ modeCheckProcDecl pdef = do
             [ReasonOutputUndef name param pos
             | param <- Set.toList
                         $ missingBindings outParams assigned]
+            ++ detismCheck name pos detism (bindingDetism assigned)
     typeErrors modeErrs
     params' <- updateParamTypes posParams
     let proto' = proto { procProtoParams = params' }
@@ -2120,16 +2138,12 @@ modecheckStmts final [] = do
     actualDetism <- gets bindingDetism
     name <- getsTy tyProcName
     pos <- getsTy tyPos
-    logModed $ "Mode check end of " ++ show declDetism ++ " " ++ showProcName name
-    when final
-        $ modeErrors $ detismCheck name pos declDetism actualDetism
+    logModed $ "Mode check "
+        ++ (if final then "end of " else "stmt sequence in ")++ show declDetism ++ " " ++ showProcName name
     return []
 modecheckStmts final (pstmt:pstmts) = do
     logModed $ "Mode check stmt " ++ showStmt 16 (content pstmt)
     name <- getsTy tyProcName
-    detism <- gets bindingDetism
-    when (detism == Terminal)
-        $ modeErrors [ReasonUnnreachable name (place pstmt)]
     let final' = final && List.null pstmts
     pstmt' <- placedApply (modecheckStmt final') pstmt
     logAssigned "Now assigned = "
@@ -2164,6 +2178,11 @@ modecheckStmt final
     stmt@(ProcCall (First cmod cname pid) d resourceful args) pos = do
     logModed $ "Mode checking call   : " ++ show stmt
     logAssigned "    with assigned    : "
+
+    detism <- gets bindingDetism
+    proc <- gets bindingProcName
+    when (detism == Terminal)
+        $ modeErrors [ReasonUnnreachable proc pos]
 
     -- Find arg types and expand type variables
     args' <- modeCheckExps args
@@ -2216,6 +2235,11 @@ modecheckStmt final stmt@(ProcCall (Higher fn) d resourceful args)
         pos = do
     logModed $ "Mode checking higher : " ++ show stmt
     logAssigned "    with assigned    : "
+
+    detism <- gets bindingDetism
+    when (detism == Terminal)
+        $ modeErrors [ReasonUnnreachable (show fn) pos]
+
     fnArgs' <- modeCheckExps (fn:args)
     actualTypes@(fnTy:_) <- lift $ mapM (expType >=> ultimateType) fnArgs'
     logModed $ "    actual types     : " ++ show actualTypes
@@ -2511,7 +2535,7 @@ modecheckDisj final preRestores disjAssigned (stmt:stmts) = do
     afterDisjunct <- get
     put beforeDisj
     let disj1' = seqToStmt $ preRestores ++ saves' ++ disj1
-    let disjAssigned' = joinState disjAssigned afterDisjunct
+    let disjAssigned' = disjunctionState disjAssigned afterDisjunct
     (disj1':) <$> modecheckDisj final restores disjAssigned' stmts
 
 
@@ -2659,9 +2683,9 @@ detismCheck :: ProcName -> OptPos -> Determinism -> Determinism -> [TypeError]
 detismCheck name pos expectedDetism actualDetism
     -- XXX Report ReasonUndeclaredTerminal if appropriate, when terminalness is
     -- analysed correctly.
-    | actualDetism `determinismLEQ` expectedDetism = []
-    | Det `determinismLEQ` expectedDetism = []
-    | otherwise = [ReasonWeakDetism name actualDetism expectedDetism pos]
+    | not (actualDetism `determinismLEQ` expectedDetism)
+      = [ReasonWeakDetism name actualDetism expectedDetism pos]
+    | otherwise = []
 
 
 ----------------------------------------------------------------

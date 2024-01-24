@@ -4,7 +4,7 @@
 pragma no_standard_library
 
 use wybe.c_string, wybe.range, wybe.int, wybe.char, wybe.bool, wybe.comparison
-use wybe.io 
+use wybe.control, wybe.io 
 
 # Private constructors.
 # This ensures that strings can only be manipulated with public procedures,
@@ -158,6 +158,7 @@ pub def print(x:_) use !io {
       | concat(?left, ?right) :: !print(left); !print(right)
       | slice(_, _) :: for ?c in x { !print(c) }
       | singleton(?c) :: !print(c)
+      | else :: !shouldnt
     }
 }
 
@@ -188,6 +189,7 @@ def pack(s:_, !raw:c_string, size:int, !offset:int) {
       | singleton(?c) ::
             foreign lpvm mutate(raw, ?raw, offset, true, size, 0, c)
             incr(!offset)
+      | else :: !shouldnt
     }
 }
 

@@ -1,4 +1,5 @@
 Error detected during type checking of module(s) error_mode, error_mode.tree
-[91mfinal-dump/error_mode.wybe:8:40: Calling test proc error_mode.tree.left<0> in a normal (total) context
+[91mfinal-dump/error_mode.wybe:5:5: proc lookup has test determinism, but declared normal (total)
+[0m[91mfinal-dump/error_mode.wybe:8:40: Calling test proc error_mode.tree.left<0> in a normal (total) context
 [0m[91mfinal-dump/error_mode.wybe:9:30: Calling test proc error_mode.tree.right<0> in a normal (total) context
 [0m

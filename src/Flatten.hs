@@ -446,7 +446,7 @@ flattenAssignment var varArg value pos = do
 
 translateCases :: Placed Exp -> OptPos -> [(Placed Exp,[Placed Stmt])]
                -> Maybe [Placed Stmt] -> [Placed Stmt]
-translateCases val pos [] Nothing = [Unplaced Fail]
+translateCases val pos [] Nothing = [Unplaced Nop]
 translateCases val pos [] (Just deflt) = deflt
 translateCases val pos ((key,body):rest) deflt =
     [maybePlace
