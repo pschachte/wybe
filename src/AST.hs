@@ -18,7 +18,7 @@ module AST (
   -- *Types just for parsing
   Item(..), Visibility(..), isPublic,
   Determinism(..), determinismLEQ, determinismJoin, determinismMeet,
-  determinismFail, determinismSucceed,
+  disjunctionDeterminism, determinismFail, determinismSucceed,
   determinismSeq, determinismProceding, determinismName, determinismCanFail,
   impurityName, impuritySeq, expectedImpurity,
   inliningName,
@@ -137,7 +137,7 @@ import           Crypto.Hash
 import qualified Data.Binary
 import qualified Data.ByteString.Lazy as BL
 import           Data.List as List
-import           Data.List.Extra (nubOrd,splitOn)
+import           Data.List.Extra (nubOrd,splitOn, disjoint)
 import           Data.Map as Map
 import           Data.Maybe
 import           Data.Set as Set
@@ -243,11 +243,20 @@ determinismJoin det1 det2 = max det1 det2
 determinismSeq :: Determinism -> Determinism -> Determinism
 determinismSeq Terminal _        = Terminal
 determinismSeq Failure  _        = Failure
--- NonDet Failure = Failure
--- NonDet Terminal = Failure
+-- determinismSeq NonDet Failure = Failure
+-- determinismSeq NonDet Terminal = Failure
 determinismSeq _        Terminal = Terminal
 determinismSeq _        Failure  = Failure
 determinismSeq det1     det2     = max det1 det2
+
+
+-- |Determinism of a disjunction.  This is rather different from a join;
+-- it is not commutative because of sequencing.
+disjunctionDeterminism :: Determinism -> Determinism -> Determinism
+disjunctionDeterminism Terminal _ = Terminal
+disjunctionDeterminism Det _ = Det
+disjunctionDeterminism Failure detism = detism
+disjunctionDeterminism SemiDet detism = determinismJoin Det detism
 
 
 -- |Does this determinism reflect a state that could continue to the next

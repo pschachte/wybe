@@ -9,6 +9,7 @@ pub type suit { pub constructors
         |   diamonds :: 'D'
         |   hearts   :: 'H'
         |   spades   :: 'S'
+        |   else     :: shouldnt
         }
 
     pub def print(r:_) use !io {
@@ -38,6 +39,7 @@ pub type rank { pub constructors
         |   queen :: 'Q'
         |   king  :: 'K'
         |   ace   :: 'A'
+        |   else  :: shouldnt
         }
 
     pub def print(r:_) use !io {

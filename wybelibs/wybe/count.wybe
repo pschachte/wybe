@@ -90,8 +90,7 @@ pub def {partial} decr(!x:_) { ?x = x - 1:_ }
 ## Formatting
 pub def fmt(x:_):string = s where
     { ?s = (if {x >= 10:_ :: fmt(x/10:_) | else :: ""})
-         ,, chr(ord('0')+int(x%10:_))
-    | !error("can't happen!")
+           ,, ( chr(ord('0')+int(x%10:_)) | shouldnt )
     }
 
 

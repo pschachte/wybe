@@ -3,7 +3,7 @@
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
-use wybe.bool, wybe.int, wybe.comparison, wybe.string, wybe.io
+use wybe.bool, wybe.count, wybe.int, wybe.comparison, wybe.string, wybe.io
 
 representation is 8 bit unsigned
 
@@ -29,8 +29,14 @@ pub def (x:_ <=> y:_):comparison =
 # Int ordinal of a char
 pub def ord(c:_):int = foreign lpvm cast(c)
 
-# Char of an integer character code
+# Count (unsigned) ordinal of a char
+pub def ord(c:_):count = foreign lpvm cast(c)
+
+# Char of an int character code
 pub def {test} chr(i:int):_ = foreign lpvm cast(i) where { 0 <= i ; i <= 255 }
+
+# Char of a count (unsigned) character code
+pub def {test} chr(i:count):_ = foreign lpvm cast(i) where { i <= 255:count }
 
 ## Formatting
 pub def fmt(x:_):string = string(x)

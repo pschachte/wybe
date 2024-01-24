@@ -1,4 +1,5 @@
 Error detected during type checking of module(s) alias_recursion2, alias_recursion2.mynode
-[91mfinal-dump/alias_recursion2.wybe:18:20: Calling test proc alias_recursion2.mynode.next<1> in a normal (total) context
+[91mfinal-dump/alias_recursion2.wybe:12:5: proc reverseList has test determinism, but declared normal (total)
+[0m[91mfinal-dump/alias_recursion2.wybe:18:20: Calling test proc alias_recursion2.mynode.next<1> in a normal (total) context
 [0m[91mfinal-dump/alias_recursion2.wybe:19:20: Calling test proc alias_recursion2.mynode.next<1> in a normal (total) context
 [0m
