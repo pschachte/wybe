@@ -1777,7 +1777,7 @@ doImport mod (imports, _) = do
              ++ intercalate ", " (showProcName <$> Map.keys importedProcs)
     -- XXX Must report error for imports of non-exported items
     let knownTypes = Map.unionWith Set.union (modKnownTypes impl)
-                     $ Map.fromAscList
+                     $ Map.fromList
                      $ List.map (mapSnd Set.singleton) importedTypesAssoc
     let knownResources =
             Map.unionWith Set.union (modKnownResources impl) $

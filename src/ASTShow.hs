@@ -11,6 +11,7 @@ module ASTShow (
 
 import AST
 import Options (optDumpLib, LogSelection)
+import UnivSet (showSet)
 import Data.List as List
 import Data.Set  as Set
 import Data.Map  as Map
@@ -41,7 +42,7 @@ instance Show Module where
            "\n  public submods  : " ++
            showMap "" "\n                    " "" (++ " -> ")
                    showModSpec (pubSubmods int) ++
-           "\n  public resources: " ++ showMapLines (pubResources int) ++
+           "\n  public resources: " ++ showMapLines show (pubResources int) ++
            "\n  public procs    : " ++
            intercalate "\n                    "
            (List.map show $ Set.toList $ Set.unions $
@@ -53,7 +54,11 @@ instance Show Module where
                  intercalate "\n                    "
                  [showUse 20 mod dep |
                   (mod,(dep,_)) <- Map.assocs $ modImports impl] ++
-                 "\n  resources       : " ++ showMapLines (modResources impl) ++
+                 -- Keep this around in case it's needed again:
+                --  "\n  types           : " ++
+                --  showMapLines (showSet showModSpec) (modKnownTypes impl) ++
+                 "\n  resources       : " ++
+                 showMapLines show (modResources impl) ++
                  (if Map.null (modSubmods impl)
                   then ""
                   else "\n  submodules      : " ++
@@ -68,14 +73,8 @@ instance Show Module where
 
 
 -- |How to show a map, one line per item.
-showMapLines :: Show v => Map Ident v -> String
-showMapLines = showMap "" "\n                    " "" (++": ") show
-
-showSetMapItems :: (Show b, Ord b) => (Map a (Set b)) -> String
-showSetMapItems setMap =
-    intercalate ", " $
-    List.map show $ Set.toList $
-    List.foldr Set.union Set.empty $ Map.elems setMap
+showMapLines :: (v -> String) -> Map Ident v -> String
+showMapLines = showMap "" "\n                    " "" (++": ")
 
 
 -- |How to show a map to source positions, one line per item.
