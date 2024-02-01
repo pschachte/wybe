@@ -1,0 +1,9 @@
+use position
+
+?x = 1
+!x + 1    # increment x
+!println x
+?p = position(5,10)
+!p^y * 2  # double p^y
+!print "p ="
+!printPosition p

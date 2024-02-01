@@ -1305,7 +1305,7 @@ recordCast mbLang caller callee pexp argNum =
         _   -> return ()
     where pos = place pexp
 
-recordCast' :: Maybe Ident -> ProcName -> Ident -> Int -> TypeSpec -> Exp 
+recordCast' :: Maybe Ident -> ProcName -> Ident -> Int -> TypeSpec -> Exp
             -> OptPos -> Typed ()
 recordCast' _ caller callee argNum ty (Var name _ _) pos
     = constrainVarType (ReasonArgType False callee argNum pos) name ty
@@ -1603,6 +1603,11 @@ matchTypes caller callee pos hasBang callTypes callFlows
     -- Handle case where the call is partial
     | isJust partialCallInfo
     = matchTypeList callee pos callTypes calleeInfo'''
+    -- Handle call with one in/out arg to proc with no in/out params, and
+    -- one too few args.
+    | notElem ParamInOut (fiFlows calleeInfo) && 1 == length extraTypes
+      && sameLength callTypes' tys
+    = matchTypeList callee pos callTypes' calleeInfo
     -- Else, we must have an arity error
     | otherwise = return $ Err [ReasonArity caller callee pos
                                 (length callTypes) (length tys)]
@@ -1612,6 +1617,14 @@ matchTypes caller callee pos hasBang callTypes callFlows
           calleeInfo'' = fromJust detCallInfo
           (partialCallInfo, needsBang) = procToPartial callFlows hasBang calleeInfo
           calleeInfo''' = fromJust partialCallInfo
+          extraTypes = catMaybes
+                       $ zipWith
+                         (\t f -> if f==ParamInOut then Just t else Nothing)
+                         callTypes callFlows
+          callTypes' = callTypes ++ extraTypes
+          callFlows' = List.map (\f -> if f==ParamInOut then ParamIn else f)
+                        callFlows
+                       ++ [ParamOut]
 matchTypes caller callee pos _ callTypes callFlows
         calleeInfo@(HigherInfo fn) = do
     let callTFs = zipWith TypeFlow callTypes callFlows
@@ -1812,7 +1825,7 @@ instance Show BindingState where
 bindVars :: Set VarName -> Moded ()
 bindVars vars = do
     reassigning <- gets (USet.toSet Set.empty
-                        . USet.intersection (USet.fromSet vars) 
+                        . USet.intersection (USet.fromSet vars)
                         . bindingVars)
     modify $ addBindings vars
     modify $ \st -> st { bindingReassigned =
@@ -2022,9 +2035,10 @@ actualFormalModes _ info = shouldnt $ "actualFormalModes on " ++ show info
 -- if the corresponding parameter is an input.
 matchModeList :: [(FlowDirection,Bool,Maybe VarName)]
               -> CallInfo -> Bool
-matchModeList modes info@FirstInfo{fiPartial=False}
+matchModeList modes info@FirstInfo{fiPartial=False, fiFlows=flows}
     -- Check that no param is in where actual is out
-    = (ParamIn,ParamOut) `notElem` actualFormalModes modes info
+    = sameLength modes flows
+      && (ParamIn,ParamOut) `notElem` actualFormalModes modes info
 matchModeList _ _ = False
 
 
@@ -2175,7 +2189,7 @@ modecheckStmts final (pstmt:pstmts) = do
 
 modecheckStmt :: Bool -> Stmt -> OptPos -> Moded [Placed Stmt]
 modecheckStmt final
-    stmt@(ProcCall (First cmod cname pid) d resourceful args) pos = do
+    stmt@(ProcCall pspec@(First cmod cname pid) d resourceful args) pos = do
     logModed $ "Mode checking call   : " ++ show stmt
     logAssigned "    with assigned    : "
 
@@ -2206,28 +2220,36 @@ modecheckStmt final
                 = List.filter (exactModeMatch actualModes . fst) typeMatches
         logModed $ "Exact mode matches: " ++ show exactMatches
         let stmt' = ProcCall (First cmod cname pid) d resourceful args'
-        case (exactMatches,modeMatches) of
-            ((match,typing):rest, _) -> do
+        case (exactMatches, modeMatches, cmod, cname, actualModes, args) of
+            ((match,typing):rest, _, _, _, _, _) -> do
                 lift $ put typing
                 unless (List.null rest) $
                     modeError $ ReasonWarnMultipleMatches match (fst <$> rest) pos
                 finaliseCall resourceful final pos args' match stmt'
-            ([], (match,typing):rest) -> do
+            ([], (match,typing):rest, _, _, _, _) -> do
                 lift $ put typing
                 unless (List.null rest) $
                     modeError $ ReasonWarnMultipleMatches match (fst <$> rest) pos
                 finaliseCall resourceful final pos args' match stmt'
-            ([],[]) -> do
-                case (cmod, cname, actualModes, args) of
                     -- Special cases to handle = as assignment when one argument is
                     -- known to be defined and the other is an output or unknown.
-                    ([], "=", [(ParamIn,True,_),(ParamOut,_,_)],[arg1,arg2]) ->
-                        modecheckStmt final
-                            (ForeignCall "llvm" "move" [] [arg1, arg2]) pos
-                    ([], "=", [(ParamOut,_,_),(ParamIn,True,_)],[arg1,arg2]) ->
-                        modecheckStmt final
-                            (ForeignCall "llvm" "move" [] [arg2, arg1]) pos
-                    _ -> do
+            ([],[], [], "=", [(ParamIn,True,_),(ParamOut,_,_)],[arg1,arg2]) ->
+                modecheckStmt final
+                    (ForeignCall "llvm" "move" [] [arg1, arg2]) pos
+            ([],[], [], "=", [(ParamOut,_,_),(ParamIn,True,_)],[arg1,arg2]) ->
+                modecheckStmt final
+                    (ForeignCall "llvm" "move" [] [arg2, arg1]) pos
+            _ -> do
+                -- XXX handle case of !var for an input, with missing output arg
+                logModed $ "Checking for !arg in function call"
+                let (regularArgs,extraArgs) =
+                        unzip $ List.map (placedApply splitInOutArgs) args'
+                let extraArgs' = catMaybes extraArgs
+                let args'' = regularArgs ++ extraArgs'
+                if length extraArgs' == 1
+                    then modecheckStmt final
+                        (ProcCall pspec d resourceful args'') pos
+                    else do
                         logModed $ "Mode errors in call"
                         modeError $ ReasonUndefinedFlow cname pos
                         return []
@@ -2359,7 +2381,7 @@ modecheckStmt final
         logAssigned "Assigned by conditional: "
         finalVars <- gets bindingVars
         bindings <- lift $ mapFromUnivSetM ultimateVarType Set.empty finalVars
-        return $ saves 
+        return $ saves
                  ++  [maybePlace (Cond (seqToStmt tstStmt') thnStmts'
                             (restores ++ elsStmts')
                             (Just condBindings) (Just bindings) res)
@@ -2444,6 +2466,26 @@ modecheckStmt final Next pos = do
     logAssigned "Mode checking continue with assigned="
     bindingStateAfterNext
     return [maybePlace Next pos]
+
+
+-- |Split a FlowsInOut argument into a FlowsIn and a FlowsOut argument.
+-- Arguments that are not FlowsInOut are returned as (arg,Nothing), while
+-- those that are are returned as (arg1, Just arg2), where arg1 is the FlowsIn
+-- version of the arg and arg2 is the FlowsOut version.
+splitInOutArgs :: Exp -> OptPos -> (Placed Exp, Maybe (Placed Exp))
+splitInOutArgs (Var v ParamInOut ft) pos =
+    (maybePlace (Var v ParamIn ft) pos,
+     Just (maybePlace (Var v ParamOut ft) pos))
+splitInOutArgs (Typed (Var v ParamInOut ft) ty cty) pos =
+    (maybePlace (Typed (Var v ParamIn ft) ty cty) pos,
+     Just (maybePlace (Typed (Var v ParamOut ft) ty cty) pos))
+splitInOutArgs (AnonParamVar i ParamInOut) pos =
+    (maybePlace (AnonParamVar i ParamIn) pos,
+     Just (maybePlace (AnonParamVar i ParamOut) pos))
+splitInOutArgs (Typed (AnonParamVar i ParamInOut) ty cty) pos =
+    (maybePlace (Typed (AnonParamVar i ParamIn) ty cty) pos,
+     Just (maybePlace (Typed (AnonParamVar i ParamOut) ty cty) pos))
+splitInOutArgs exp pos = (maybePlace exp pos, Nothing)
 
 
 -- | Mode check a list of Placed Exps,

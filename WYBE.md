@@ -481,8 +481,7 @@ For example:
 pub def incr(!x:int) { ?x = x + 1 }
 ```
 
-
-## Functions *are* procedures
+## <a name="functions-are-procedures"></a> Functions *are* procedures
 
 Wybe functions are the same as procedures with one extra output
 argument, and in fact the compiler implements them that way.  Therefore,
@@ -518,6 +517,29 @@ is always equivalent to
 ```
 f(x, ?y)
 ```
+
+Alternatively, a function can be called as a statement to update one of the
+function's arguments by preceding that argument with an exclamation point (!).
+Of course, the type of the input to be updated must be the same as that of the
+function's output.  In the above example, if the input and output of `f` are
+the same type,
+```
+f(!x)
+```
+applies `f` to `x`, storing the result in `x`.  For example,
+```
+!x * 2
+```
+or
+```
+2 * !X
+```
+would double the value of `x`, and
+```
+1 / !x
+```
+would take the reciprocal of `x`.
+
 
 ## Anonymous procedures
 
@@ -767,8 +789,8 @@ otherwise indicated, they are infix operators.
 ## <a name="modes"></a>Modes
 
 It is permitted to define multiple procedures with the same name, as
-long as all of them have the same number and types of arguments in the
-same order, and different *modes*.  A mode is a combination of argument
+long as each of them have different parameter *types*
+or *modes*, or different arities.  A mode is a combination of argument
 directions.  This can be used to carry out computations in different
 directions.  For example:
 
@@ -801,6 +823,7 @@ actually replace the second statement with
 ```
 ?z = a
 ```
+
 
 ## <a name="tests"></a>Tests and partial functions
 
