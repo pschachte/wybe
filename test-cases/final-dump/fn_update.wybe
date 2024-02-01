@@ -1,0 +1,8 @@
+use position
+
+?x = 1
+!x + 1
+!println x
+# ?p = position(5,10)
+# !p^y * 2
+# !println "position($(p^x),$(p^y))"
