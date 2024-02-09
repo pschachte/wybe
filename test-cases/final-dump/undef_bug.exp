@@ -1,0 +1,153 @@
+======================================================================
+AFTER EVERYTHING:
+ Module undef_bug
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : undef_bug.<0>
+  imports         : use wybe
+  resources       : 
+  procs           : 
+
+module top-level code > public {semipure} (0 calls)
+0: undef_bug.<0>
+()<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+  MultiSpeczDepInfo: [(4,(undef_bug.is_true#cont#1<0>,fromList [NonAliasedParamCond 2 []]))]
+    wybe.range...<0>(0:wybe.int, 1:wybe.int, ?tmp#3##0:wybe.range) #3 @undef_bug:nn:nn
+    undef_bug.is_true#cont#1<0>[785a827a1b](0:wybe.bool, 0:wybe.bool, ~tmp#3##0:wybe.range, ?tmp#0##0:wybe.bool) #4 @undef_bug:nn:nn
+    wybe.bool.print<0>(~tmp#0##0:wybe.bool)<{<<wybe.io.io>>}; {<<wybe.io.io>>}; {}> #5 @undef_bug:nn:nn
+    foreign lpvm load(<<wybe.io.io>>:wybe.phantom, ?%tmp#5##0:wybe.phantom) @undef_bug:nn:nn
+    foreign c putchar('\n':wybe.char, ~tmp#5##0:wybe.phantom, ?tmp#6##0:wybe.phantom) @undef_bug:nn:nn
+    foreign lpvm store(~%tmp#6##0:wybe.phantom, <<wybe.io.io>>:wybe.phantom) @undef_bug:nn:nn
+
+
+proc is_true > {inline} (1 calls)
+0: undef_bug.is_true<0>
+is_true(check##0:wybe.bool, ?res##1:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    wybe.range...<0>(0:wybe.int, 1:wybe.int, ?tmp#2##0:wybe.range) #1 @undef_bug:nn:nn
+    undef_bug.is_true#cont#1<0>(~check##0:wybe.bool, 0:wybe.bool, ~tmp#2##0:wybe.range, ?res##1:wybe.bool) #2 @undef_bug:nn:nn
+
+
+proc is_true#cont#1 > (2 calls)
+0: undef_bug.is_true#cont#1<0>[785a827a1b]
+is_true#cont#1(check##0:wybe.bool, res##0:wybe.bool, tmp#1##0:wybe.range, ?res##1:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: [InterestingUnaliased 2]
+  MultiSpeczDepInfo: [(0,(wybe.range.[|]<0>,fromList [NonAliasedParamCond 2 [2]])),(2,(undef_bug.is_true#cont#1<0>,fromList [NonAliasedParamCond 2 []]))]
+    wybe.range.[|]<0>(?i##0:wybe.int, ?tmp#1##1:wybe.range, ~tmp#1##0:wybe.range, ?tmp#5##0:wybe.bool) #0 @undef_bug:nn:nn
+    case ~tmp#5##0:wybe.bool of
+    0:
+        foreign llvm move(~res##0:wybe.bool, ?res##1:wybe.bool)
+
+    1:
+        case ~check##0:wybe.bool of
+        0:
+            undef_bug.is_true#cont#1<0>[785a827a1b](0:wybe.bool, ~res##0:wybe.bool, ~tmp#1##1:wybe.range, ?res##1:wybe.bool) #2 @undef_bug:nn:nn
+
+        1:
+            foreign llvm move(1:wybe.bool, ?res##1:wybe.bool) @undef_bug:nn:nn
+
+
+ [785a827a1b] [NonAliasedParam 2] :
+    wybe.range.[|]<0>[785a827a1b](?i##0:wybe.int, ?tmp#1##1:wybe.range, ~tmp#1##0:wybe.range, ?tmp#5##0:wybe.bool) #0 @undef_bug:nn:nn
+    case ~tmp#5##0:wybe.bool of
+    0:
+        foreign llvm move(~res##0:wybe.bool, ?res##1:wybe.bool)
+
+    1:
+        case ~check##0:wybe.bool of
+        0:
+            undef_bug.is_true#cont#1<0>[785a827a1b](0:wybe.bool, ~res##0:wybe.bool, ~tmp#1##1:wybe.range, ?res##1:wybe.bool) #2 @undef_bug:nn:nn
+
+        1:
+            foreign llvm move(1:wybe.bool, ?res##1:wybe.bool) @undef_bug:nn:nn
+
+
+
+  LLVM code       :
+
+; ModuleID = 'undef_bug'
+
+
+ 
+
+
+declare external fastcc  {i64, i64, i1} @"wybe.range.[|]<0>[785a827a1b]"(i64)    
+
+
+declare external fastcc  {i64, i64, i1} @"wybe.range.[|]<0>"(i64)    
+
+
+declare external fastcc  i64 @"wybe.range...<0>"(i64, i64)    
+
+
+declare external ccc  void @putchar(i8)    
+
+
+declare external fastcc  void @"wybe.bool.print<0>"(i1)    
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  void @"undef_bug.<0>"()    {
+entry:
+  %0 = tail call fastcc  i64  @"wybe.range...<0>"(i64  0, i64  1)  
+  %1 = tail call fastcc  i1  @"undef_bug.is_true#cont#1<0>[785a827a1b]"(i1  0, i1  0, i64  %0)  
+  tail call fastcc  void  @"wybe.bool.print<0>"(i1  %1)  
+  tail call ccc  void  @putchar(i8  10)  
+  ret void 
+}
+
+
+define external fastcc  i1 @"undef_bug.is_true<0>"(i1  %"check##0") alwaysinline   {
+entry:
+  %0 = tail call fastcc  i64  @"wybe.range...<0>"(i64  0, i64  1)  
+  %1 = tail call fastcc  i1  @"undef_bug.is_true#cont#1<0>"(i1  %"check##0", i1  0, i64  %0)  
+  ret i1 %1 
+}
+
+
+define external fastcc  i1 @"undef_bug.is_true#cont#1<0>"(i1  %"check##0", i1  %"res##0", i64  %"tmp#1##0")    {
+entry:
+  %0 = tail call fastcc  {i64, i64, i1}  @"wybe.range.[|]<0>"(i64  %"tmp#1##0")  
+  %1 = extractvalue {i64, i64, i1} %0, 0 
+  %2 = extractvalue {i64, i64, i1} %0, 1 
+  %3 = extractvalue {i64, i64, i1} %0, 2 
+  br i1 %3, label %if.then, label %if.else 
+if.then:
+  br i1 %"check##0", label %if.then1, label %if.else1 
+if.else:
+  ret i1 %"res##0" 
+if.then1:
+  ret i1 1 
+if.else1:
+  %4 = musttail call fastcc  i1  @"undef_bug.is_true#cont#1<0>[785a827a1b]"(i1  0, i1  %"res##0", i64  %2)  
+  ret i1 %4 
+}
+
+
+define external fastcc  i1 @"undef_bug.is_true#cont#1<0>[785a827a1b]"(i1  %"check##0", i1  %"res##0", i64  %"tmp#1##0")    {
+entry:
+  %0 = tail call fastcc  {i64, i64, i1}  @"wybe.range.[|]<0>[785a827a1b]"(i64  %"tmp#1##0")  
+  %1 = extractvalue {i64, i64, i1} %0, 0 
+  %2 = extractvalue {i64, i64, i1} %0, 1 
+  %3 = extractvalue {i64, i64, i1} %0, 2 
+  br i1 %3, label %if.then, label %if.else 
+if.then:
+  br i1 %"check##0", label %if.then1, label %if.else1 
+if.else:
+  ret i1 %"res##0" 
+if.then1:
+  ret i1 1 
+if.else1:
+  %4 = musttail call fastcc  i1  @"undef_bug.is_true#cont#1<0>[785a827a1b]"(i1  0, i1  %"res##0", i64  %2)  
+  ret i1 %4 
+}

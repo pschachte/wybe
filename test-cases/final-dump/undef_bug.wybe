@@ -1,0 +1,12 @@
+def is_true(check:bool, ?res:bool) {
+    ?res = false
+    for ?i in 0..1 {
+        if {
+            check ::
+                ?res = true
+                break
+        }
+    }
+}
+
+!println(is_true(false))  # prints true in my PC, should print false
