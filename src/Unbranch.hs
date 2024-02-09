@@ -902,7 +902,10 @@ factorLoopProc break inVars pos res stmts = do
     alt <- gets brAlternate
     let stmtsIns = stmtsInputs $ break ++ stmts ++ alt
     inOuts <- gets brInOutVars
-    let usedVars = Map.filterWithKey (const . (`Set.member` (stmtsIns `Set.union` inOuts))) inVars
+    outs <- gets $ Set.fromList . List.map (paramName . content) . brOutParams
+    let usedVars = Map.filterWithKey
+                    (const . (`Set.member` (stmtsIns `Set.union` inOuts `Set.union` outs)))
+                    inVars
     next <- newProcCall pname usedVars pos Det -- Continuation procs always Det
     let loopinfo = Just (LoopInfo next break)
     oldLoopinfo <- gets brLoopInfo
