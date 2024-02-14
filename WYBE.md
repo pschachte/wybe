@@ -13,17 +13,46 @@ object-oriented languages, but does not neatly fit into any of these
 paradigms.  Its main organising principle is **interface integrity**, which
 indicates that all information that flows between a procedure or function and
 its caller must be part of the interface (the signature) of that procedure or
-function.  Semantically, *values* are immutable (Wybe has
-[*value semantics*](https://en.wikipedia.org/wiki/Value_semantics)),
-but *variables* may be reassigned.  This means that data structures
+function.
+That is, Wybe does not have global or static variables, and all *values* are immutable (Wybe has
+[*value semantics*](https://en.wikipedia.org/wiki/Value_semantics)), ensuring that data structures
 may be passed around at will without worrying that they may be unexpectedly
-modified, yet conventional looping constructs can be used freely.
+modified.  In this way, Wybe is akin to a
+[functional](https://en.wikipedia.org/wiki/Functional_programming) or
+[logic](https://en.wikipedia.org/wiki/Logic_programming) programming language.
 
+However, Wybe allows variables to be reassigned,
+supports conventional looping constructs,
+and allows procedures to be defined as sequential
+computations.
+In place of global variables, Wybe supports [*resources*](#resources), which
+provide a syntactically lightweight way to pass information bidirectionally
+between a procedure and its callers.
+In these ways, Wybe is like an
+[imperative](https://en.wikipedia.org/wiki/Imperative_programming) programming
+language.
+
+A Wybe type is a module containing functions and procedures that operate on
+values of that type, and is thus an
+[abstract data type](https://en.wikipedia.org/wiki/Abstract_data_type).
+A Wybe type may specify any number of constructors,
+and Wybe ensures that code can only access the members of a datum that were provided in the constructor used
+to create that datum, and is therefore also an
+[algebraic data type](https://en.wikipedia.org/wiki/Algebraic_data_type).
+
+The Wybe compiler provides a few features to ensure high performance.
+First, it is a native code compiler, bypassing the interpretation or virtual machine overhead of
+some languages.
 In some cases the compiler can arrange for values to be destructively
 updated in place, as long as it can be sure that the original value of the
-data structure will never be accessed again.  Thus the compiler can generate
-efficient executables while ensuring that interface integrity is maintained.  
-
+data structure will never be accessed again.
+This still maintains interface integrity, while mitigating some of the
+performance penalty of declarative languages.
+The compiler employs *multiple specialisation*, automatically generating more efficient specialised versions
+of procedures and functions for use in contexts where conditions allow.
+The compiler also takes advantage of the language's interface integrity, such as
+by avoiding repeating a previous computation or carrying out a computation whose
+result is not needed.
 
 ## <a name="hello-world"></a>Hello, World!
 
