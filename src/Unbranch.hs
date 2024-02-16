@@ -878,7 +878,8 @@ factorContinuationProc inVars pos res stmts = do
     detism <- gets brDetism
     name <- newProcName continutationProcName
     logUnbranch $ "Factoring " ++ show detism ++ " continuation proc "
-                  ++ name ++ ":" ++ showBody 4 stmts
+                  ++ name ++ " with available vars: " ++ show inVars
+                  ++ "\n  body:" ++ showBody 4 stmts
     stmts' <- unbranchStmts stmts
     inOuts <- gets brInOutVars
     let stmtsIns = stmtsInputs stmts'

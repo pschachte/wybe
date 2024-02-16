@@ -2344,7 +2344,7 @@ modecheckStmt final
             $ placedApplyM (modecheckStmt False) tstStmt
     testSucceeds <- mustSucceed
     testFails <- mustFail
-    logAssigned "Assigned by test: "
+    logAssigned "Assigned after test: "
     bound <- gets bindingVars
     condBindings <- lift $ mapFromUnivSetM ultimateVarType Set.empty bound
     logModed $ "Reassigned by test: " ++ showSet show condReassigns
@@ -2355,12 +2355,12 @@ modecheckStmt final
                     $ Set.intersection boundVarsBeforeCond condReassigns)
     forceDet
     thnStmts' <- modecheckStmts final thnStmts
-    logAssigned "Assigned by then branch: "
+    logAssigned "Assigned after then branch: "
     afterThen <- get
     put initialState
     elsStmts' <- modecheckStmts final elsStmts
     afterElse <- get
-    logAssigned "Assigned by else branch: "
+    logAssigned "Assigned after else branch: "
     if testSucceeds -- is condition guaranteed to succeed?
       then do
         put afterThen
@@ -2378,7 +2378,7 @@ modecheckStmt final
             else return elsStmts'
       else do
         put $ afterThen `joinState` afterElse
-        logAssigned "Assigned by conditional: "
+        logAssigned "Assigned after conditional: "
         finalVars <- gets bindingVars
         bindings <- lift $ mapFromUnivSetM ultimateVarType Set.empty finalVars
         return $ saves
