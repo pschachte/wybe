@@ -1,0 +1,70 @@
+======================================================================
+AFTER EVERYTHING:
+ Module unbranch_issue
+  representation  : (not a type)
+  public submods  : 
+  public resources: 
+  public procs    : 
+  imports         : use wybe
+  resources       : n: fromList [(unbranch_issue.n,wybe.int = 0 @unbranch_issue:nn:nn @unbranch_issue:nn:nn)]
+  procs           : 
+
+proc test > {inline} (0 calls)
+0: unbranch_issue.test<0>
+test(?#success##0:wybe.bool)<{<<unbranch_issue.n>>}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign lpvm load(<<unbranch_issue.n>>:wybe.int, ?%tmp#2##0:wybe.int) @unbranch_issue:nn:nn
+    unbranch_issue.test#cont#1<0>(0:wybe.bool, ~tmp#2##0:wybe.int, ~tmp#2##0:wybe.int, ?#success##0:wybe.bool)<{}; {<<unbranch_issue.n>>}; {}> #2
+
+
+proc test#cont#1 > (1 calls)
+0: unbranch_issue.test#cont#1<0>
+test#cont#1(b##0:wybe.bool, tmp#2##0:wybe.int, tmp#3##0:wybe.int, ?#success##0:wybe.bool)<{}; {<<unbranch_issue.n>>}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    case ~b##0:wybe.bool of
+    0:
+        foreign lpvm store(~%tmp#2##0:wybe.int, <<unbranch_issue.n>>:wybe.int) @unbranch_issue:nn:nn
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+    1:
+        foreign lpvm store(~%tmp#3##0:wybe.int, <<unbranch_issue.n>>:wybe.int) @unbranch_issue:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+  LLVM code       :
+
+; ModuleID = 'unbranch_issue'
+
+
+ 
+
+
+@"resource#unbranch_issue.n" =    global i64 undef
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  i1 @"unbranch_issue.test<0>"() alwaysinline   {
+entry:
+  %0 = load  i64, i64* @"resource#unbranch_issue.n" 
+  %1 = tail call fastcc  i1  @"unbranch_issue.test#cont#1<0>"(i1  0, i64  %0, i64  %0)  
+  ret i1 %1 
+}
+
+
+define external fastcc  i1 @"unbranch_issue.test#cont#1<0>"(i1  %"b##0", i64  %"tmp#2##0", i64  %"tmp#3##0")    {
+entry:
+  br i1 %"b##0", label %if.then, label %if.else 
+if.then:
+  store  i64 %"tmp#3##0", i64* @"resource#unbranch_issue.n" 
+  ret i1 1 
+if.else:
+  store  i64 %"tmp#2##0", i64* @"resource#unbranch_issue.n" 
+  ret i1 0 
+}
