@@ -1,0 +1,5 @@
+representation is 1 bit unsigned
+
+resource res:_ = 0:_
+
+pass
