@@ -81,16 +81,41 @@ checkResourceDef name def = do
         unzip3 <$> mapM (uncurry checkResourceImpln) (Map.toList def)
     return (or chg, concat errs, (name,Map.fromList m))
 
--- |Check a resource implmentation
+-- |Check a resource implementation
 checkResourceImpln :: ResourceSpec -> ResourceImpln
                  -> Compiler (Bool,[(String,OptPos)],
                               (ResourceSpec,ResourceImpln))
-checkResourceImpln rspec impln@(SimpleResource ty init pos) = do
+checkResourceImpln rspec impln@(SimpleResource ty mbPInit pos) = do
     logResources $ "Check resource " ++ show rspec
                  ++ " with implementation " ++ show impln
     ty' <- lookupType "resource declaration" pos ty
     logResources $ "Actual type is " ++ show ty'
-    return (ty' /= ty,[],(rspec,SimpleResource ty' init pos))
+
+    (initChg, mbPInit') <-
+        if maybe False (isTyped . content) mbPInit
+        then do
+            let pInit = trustFromJust "checkResourceImpln" mbPInit
+            let initTy = typedTy $ content pInit
+            let pInitExp = contentApply typedExp pInit
+            initTy' <- lookupType "resource initialisation" pos initTy
+            return (initTy /= initTy',
+                    Just $ contentApply (`withType` initTy') pInitExp)
+        else do
+            return (False, mbPInit)
+    logResources $ "Actual initialisation is " ++ show mbPInit'
+
+    return (ty' /= ty || initChg, [],
+            (rspec,SimpleResource ty' mbPInit' pos))
+    where
+        isTyped Typed{} = True
+        isTyped _ = False
+
+        typedTy (Typed _ t _) = t
+        typedTy _ = shouldnt "typedTy on a non-Typed exp"
+
+        typedExp (Typed e _ _) = e
+        typedExp _ = shouldnt "typedExp on a non-Typed exp"
+
 -- checkOneResource rspec Nothing = do
 --     -- XXX don't currently handle compound resources
 --     nyi "compound resources"
