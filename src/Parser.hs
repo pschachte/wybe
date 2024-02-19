@@ -1123,7 +1123,7 @@ termToExp (Call pos [] ":" ParamIn [exp,ty]) = do
         Typed exp'' ty'' (Just AnyType) -> -- already cast, but not typed
             return $ Placed (Typed exp'' ty'' $ Just ty') pos
         Typed exp'' _ _ -> -- already typed, whether casted or not
-            syntaxError (termPos ty) $ "repeated type constraint" ++ show ty
+            syntaxError (termPos ty) $ "repeated type constraint " ++ show ty
         _ -> -- no cast, no type
             return $ Placed (Typed exp'  ty' Nothing) pos
 termToExp (Call pos [] ":!" ParamIn [exp,ty]) = do

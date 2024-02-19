@@ -1,0 +1,10 @@
+constructor ctor
+
+resource res:_ = ctor:_
+
+if {
+    res = ctor ::
+        !println("res = ctor")
+|   else ::
+        !println("res ~= ctor")
+}
