@@ -1,0 +1,10 @@
+def foo(?ret:int) {
+    if { test :: ?ret = 10 | else :: ?ret = 20 }
+    ?x = 41
+    ?x = 42
+    ?x = 43
+}
+
+def test = false
+
+!println(foo)

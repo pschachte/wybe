@@ -649,6 +649,7 @@ maybeFactorContinuation vars res stmts = do
     logUnbranch $ "Maybe factor " ++ show detism ++ " continuation: "
                   ++ showBody 4 stmts
     logUnbranch $ "  with brVars: " ++ showVarMap vars
+    -- XXX Need a better test to decide whether to factor.
     withVars vars
       $ if length stmts <= 2 && all (flatStmt . content) stmts
         then unbranchStmts stmts
@@ -882,8 +883,13 @@ factorContinuationProc inVars pos res stmts = do
                   ++ "\n  body:" ++ showBody 4 stmts
     stmts' <- unbranchStmts stmts
     inOuts <- gets brInOutVars
+    outParams <- gets (Set.fromList . (paramName . content <$>) . brOutParams)
     let stmtsIns = stmtsInputs stmts'
-    let usedVars = Map.filterWithKey (const . (`Set.member` (stmtsIns `Set.union` inOuts))) inVars
+    let usedVars = Map.filterWithKey
+                    (const . (`Set.member`
+                            (stmtsIns `Set.union` inOuts
+                             `Set.union` outParams)))
+                    inVars
     proto <- newProcProto name usedVars res
     genProc proto Det stmts' -- Continuation procs are always Det
     newProcCall name usedVars pos Det
