@@ -2960,7 +2960,8 @@ data Stmt
      -- |A test that succeeds iff all of the enclosed tests succeed
      | And [Placed Stmt]
      -- |A test that succeeds iff any of the enclosed tests succeed; the VarDict
-     -- indicates the variables defined after all disjuncts
+     -- indicates the variables defined after all disjuncts.  Transformed into
+     -- a Cond during flattening.
      | Or [Placed Stmt] (Maybe VarDict) (Maybe (Set ResourceSpec))
      -- |A test that succeeds iff the enclosed test fails
      | Not (Placed Stmt)

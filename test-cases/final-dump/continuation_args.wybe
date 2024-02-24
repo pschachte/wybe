@@ -1,0 +1,17 @@
+constructors a | b(c:d)
+
+type d {
+    pub e | f
+}
+
+def foo:_ = bar where {
+    ?bar = a
+    (
+        (pass | pass)
+        !bar^c = e
+    |
+        pass
+    )
+}
+
+# pass
