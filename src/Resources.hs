@@ -131,23 +131,22 @@ canonicaliseResourceFlow pos name spec = do
 
 -- | Data type to store the necessary data for adding resources to a proc
 data ResourceState = ResourceState {
+    -- | The set of resources and their types that are currently in scope
     resResources      :: Map ResourceSpec TypeSpec,
-    -- ^ The set of resources and their types that are currently in scope
+    -- | Tmp variables for resources that have been generated so far
     resTmpVars        :: VarDict,
-    -- ^ Tmp variables that have been generated so far
+    -- | The current tmp variable counter
     resTmpCtr         :: Int,
-    -- ^ The current tmp variable counter
+    -- | The set of resources that flow into the current stmt
     resIn             :: Map ResourceSpec TypeSpec,
-    -- ^ The set of resources that flow into the current stmt
+    -- | The set of resources that flow out of the current stmt
     resOut            :: Map ResourceSpec TypeSpec,
-    -- ^ The set of resources that flow out of the current stmt
+    -- | The set of resources that have been mentioned anywhere in this proc
     resMentioned      :: Map ResourceSpec TypeSpec,
-    -- ^ The set of resources that have been mentioned anywhere
-    -- in this procedure
+    -- | The tmp vars that are used to restore resources when breaking a loop
     resLoopTmps       :: Map ResourceSpec (VarName, TypeSpec),
-    -- ^ The tmp vars that are used to restore resources when breaking a loop
+    -- | Are we currently transforming the executable main procedure?
     resIsExecMain     :: Bool
-    -- ^ Are we currently transforming the executable main procedure
 }
 
 -- | Initial ResourceState given a tmpCtr
@@ -255,7 +254,7 @@ transformProc pos name variant detism params ress body = do
                 body''' <- fst <$> transformStmts
                      [UseResources ress' (Just Map.empty) body `maybePlace` pos]
                 -- XXX (Just tmpVars) is wrong here:  it should include ALL
-                -- variables assigned by body'
+                -- variables assigned by body', but we don't have that
                 return $ saves
                       ++ [Unplaced $ Cond (seqToStmt body''')
                             []
@@ -346,20 +345,8 @@ transformStmt (Cond tst thn els condVars exitVars _) pos = do
 transformStmt (And stmts) pos = do
     (stmts', globals) <- transformStmts stmts
     return ([And stmts' `maybePlace` pos], globals)
-transformStmt (Or disjs vars _) pos = do
-    (disjs', globals) <- unzip <$> mapM (placedApply transformStmt) disjs
-    -- we only need to save resources, and restore before each disj if
-    -- any of the init use globals
-    -- the last's restoration is handled implicity
-    oldResTmpVars <- gets resTmpVars
-    (saves, restores) <- loadStoreResourcesIf pos $ or $ init globals
-    let disjs'' = seqToStmt (head disjs')
-                : (seqToStmt . (restores ++) <$> tail disjs')
-    vars' <- fixVarDict vars
-    res <- gets resResources
-    modify $ \s -> s { resTmpVars = oldResTmpVars }
-    return (saves ++ [Or disjs'' vars' (Just $ Map.keysSet res) `maybePlace` pos],
-            or globals)
+transformStmt (Or disjs vars _) pos =
+    shouldnt "Disjunction should have been flattened into conditional."
 transformStmt (Not stmt) pos = do
     ([stmt'], globals) <- transformStmts [stmt]
     return ([Not stmt' `maybePlace` pos], globals)
@@ -428,6 +415,30 @@ transformStmt Next pos = do
     return (restores ++ [Next `maybePlace` pos], False)
 transformStmt Case{} _ = shouldnt "case in transform"
 transformStmt For{} _ = shouldnt "for in transform"
+
+
+-- |Transform all the disjuncts in a disjunction.  In particular, ensure that
+-- resources assigned in each disjunct are saved before they are changed and
+-- then restored at the start of the next disjunct.  But it's not necessary to
+-- save resources assigned in the last disjunct, because there's no next
+-- disjunct to restore them for; those resources will be restored at a higher
+-- level.
+transformDisjunction :: [Placed Stmt] -> [Placed Stmt]
+                     -> Resourcer ([Placed Stmt], Bool)
+transformDisjunction [] [] = do
+    return ([], False)
+transformDisjunction [] restores = do
+    vars <- gets resTmpVars
+    return ([seqToStmt $ restores ++ [Unplaced Fail]], False)
+transformDisjunction (disj1:disjs) restores1 = do
+    tmps <- gets resTmpVars
+    (disj1', globals1) <- placedApply transformStmt disj1
+    ress1 <- gets $ Map.keysSet . resResources
+    modify $ \s -> s {resTmpVars=tmps}
+    (saves, restores) <- loadStoreResourcesIf (place disj1) globals1
+    (disjs', globals) <- transformDisjunction disjs restores
+    let disj1'' = seqToStmt $ restores1 ++ saves ++ disj1'
+    return (disj1'':disjs', globals1 || globals)
 
 
 -- | Restore global variables for a loop

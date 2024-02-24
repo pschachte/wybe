@@ -1,0 +1,320 @@
+======================================================================
+AFTER EVERYTHING:
+ Module continuation_args
+  representation  : address
+  public submods  : 
+  public resources: 
+  public procs    : continuation_args.=<0>
+                    continuation_args.~=<0>
+  imports         : use continuation_args.d
+                    use wybe
+  resources       : 
+  submodules      : continuation_args.d
+  procs           : 
+
+proc = > public (1 calls)
+0: continuation_args.=<0>
+=(#left##0:continuation_args, #right##0:continuation_args, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#left##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm icmp_eq(~#right##0:continuation_args, 0:continuation_args, ?#success##0:wybe.bool)
+
+    1:
+        foreign llvm and(~#left##0:continuation_args, 1:continuation_args, ?tmp#7##0:continuation_args) @continuation_args:nn:nn
+        foreign lpvm cast(~tmp#7##0:continuation_args, ?#left#c##0:continuation_args.d) @continuation_args:nn:nn
+        foreign llvm icmp_ne(#right##0:wybe.int, 0:wybe.int, ?tmp#9##0:wybe.bool)
+        case ~tmp#9##0:wybe.bool of
+        0:
+            foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+
+        1:
+            foreign llvm and(~#right##0:continuation_args, 1:continuation_args, ?tmp#10##0:continuation_args) @continuation_args:nn:nn
+            foreign lpvm cast(~tmp#10##0:continuation_args, ?#right#c##0:continuation_args.d) @continuation_args:nn:nn
+            foreign llvm icmp_eq(~#left#c##0:continuation_args.d, ~#right#c##0:continuation_args.d, ?#success##0:wybe.bool)
+
+
+
+
+proc a > {inline} (3 calls)
+0: continuation_args.a<0>
+a(?#result##0:continuation_args)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(0:continuation_args, ?#result##0:continuation_args)
+
+
+proc b > {inline} (0 calls)
+0: continuation_args.b<0>
+b(c##0:continuation_args.d, ?#result##3:continuation_args)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm or(~c##0:continuation_args, 2:continuation_args, ?#result##3:continuation_args) @continuation_args:nn:nn
+proc b > {inline} (8 calls)
+1: continuation_args.b<1>
+b(?c##0:continuation_args.d, #result##0:continuation_args, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#result##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:continuation_args.d, ?c##0:continuation_args.d)
+
+    1:
+        foreign llvm and(~#result##0:continuation_args, 1:continuation_args, ?#temp2##0:continuation_args) @continuation_args:nn:nn
+        foreign lpvm cast(~#temp2##0:continuation_args, ?c##0:continuation_args.d) @continuation_args:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+proc c > {inline} (0 calls)
+0: continuation_args.c<0>
+c(#rec##0:continuation_args, ?#result##0:continuation_args.d, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(undef:continuation_args.d, ?#result##0:continuation_args.d)
+
+    1:
+        foreign llvm and(~#rec##0:continuation_args, 1:continuation_args, ?#field##0:continuation_args) @continuation_args:nn:nn
+        foreign lpvm cast(~#field##0:continuation_args, ?#result##0:continuation_args.d) @continuation_args:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+proc c > {inline} (3 calls)
+1: continuation_args.c<1>
+c(#rec##0:continuation_args, ?#rec##2:continuation_args, #field##0:continuation_args.d, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_ne(#rec##0:wybe.int, 0:wybe.int, ?tmp#0##0:wybe.bool)
+    case ~tmp#0##0:wybe.bool of
+    0:
+        foreign llvm move(0:wybe.bool, ?#success##0:wybe.bool)
+        foreign llvm move(0:continuation_args, ?#rec##2:continuation_args)
+
+    1:
+        foreign llvm and(~#rec##0:continuation_args, -2:continuation_args, ?#rec##1:continuation_args) @continuation_args:nn:nn
+        foreign llvm or(~#field##0:continuation_args, ~#rec##1:continuation_args, ?#rec##2:continuation_args) @continuation_args:nn:nn
+        foreign llvm move(1:wybe.bool, ?#success##0:wybe.bool)
+
+
+
+proc foo > {inline} (0 calls)
+0: continuation_args.foo<0>
+foo(?#result##0:continuation_args)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(0:continuation_args, ?#result##0:continuation_args) @continuation_args:nn:nn
+
+
+proc ~= > public {inline} (0 calls)
+0: continuation_args.~=<0>
+~=(#left##0:continuation_args, #right##0:continuation_args, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    continuation_args.=<0>(~#left##0:continuation_args, ~#right##0:continuation_args, ?tmp#0##0:wybe.bool) #0
+    foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
+
+  LLVM code       :
+
+; ModuleID = 'continuation_args'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  i1 @"continuation_args.=<0>"(i64  %"#left##0", i64  %"#right##0")    {
+entry:
+  %0 = icmp ne i64 %"#left##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#left##0", 1 
+  %2 = trunc i64 %1 to i1  
+  %3 = icmp ne i64 %"#right##0", 0 
+  br i1 %3, label %if.then1, label %if.else1 
+if.else:
+  %7 = icmp eq i64 %"#right##0", 0 
+  ret i1 %7 
+if.then1:
+  %4 = and i64 %"#right##0", 1 
+  %5 = trunc i64 %4 to i1  
+  %6 = icmp eq i1 %2, %5 
+  ret i1 %6 
+if.else1:
+  ret i1 0 
+}
+
+
+define external fastcc  i64 @"continuation_args.a<0>"() alwaysinline   {
+entry:
+  ret i64 0 
+}
+
+
+define external fastcc  i64 @"continuation_args.b<0>"(i1  %"c##0") alwaysinline   {
+entry:
+  %0 = zext i1 %"c##0" to i64  
+  %1 = or i64 %0, 2 
+  ret i64 %1 
+}
+
+
+define external fastcc  {i1, i1} @"continuation_args.b<1>"(i64  %"#result##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#result##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#result##0", 1 
+  %2 = trunc i64 %1 to i1  
+  %3 = insertvalue {i1, i1} undef, i1 %2, 0 
+  %4 = insertvalue {i1, i1} %3, i1 1, 1 
+  ret {i1, i1} %4 
+if.else:
+  %5 = insertvalue {i1, i1} undef, i1 undef, 0 
+  %6 = insertvalue {i1, i1} %5, i1 0, 1 
+  ret {i1, i1} %6 
+}
+
+
+define external fastcc  {i1, i1} @"continuation_args.c<0>"(i64  %"#rec##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#rec##0", 1 
+  %2 = trunc i64 %1 to i1  
+  %3 = insertvalue {i1, i1} undef, i1 %2, 0 
+  %4 = insertvalue {i1, i1} %3, i1 1, 1 
+  ret {i1, i1} %4 
+if.else:
+  %5 = insertvalue {i1, i1} undef, i1 undef, 0 
+  %6 = insertvalue {i1, i1} %5, i1 0, 1 
+  ret {i1, i1} %6 
+}
+
+
+define external fastcc  {i64, i1} @"continuation_args.c<1>"(i64  %"#rec##0", i1  %"#field##0") alwaysinline   {
+entry:
+  %0 = icmp ne i64 %"#rec##0", 0 
+  br i1 %0, label %if.then, label %if.else 
+if.then:
+  %1 = and i64 %"#rec##0", -2 
+  %2 = zext i1 %"#field##0" to i64  
+  %3 = or i64 %2, %1 
+  %4 = insertvalue {i64, i1} undef, i64 %3, 0 
+  %5 = insertvalue {i64, i1} %4, i1 1, 1 
+  ret {i64, i1} %5 
+if.else:
+  %6 = insertvalue {i64, i1} undef, i64 0, 0 
+  %7 = insertvalue {i64, i1} %6, i1 0, 1 
+  ret {i64, i1} %7 
+}
+
+
+define external fastcc  i64 @"continuation_args.foo<0>"() alwaysinline   {
+entry:
+  ret i64 0 
+}
+
+
+define external fastcc  i1 @"continuation_args.~=<0>"(i64  %"#left##0", i64  %"#right##0") alwaysinline   {
+entry:
+  %0 = tail call fastcc  i1  @"continuation_args.=<0>"(i64  %"#left##0", i64  %"#right##0")  
+  %1 = xor i1 %0, 1 
+  ret i1 %1 
+}
+--------------------------------------------------
+ Module continuation_args.d
+  representation  : 1 bit unsigned
+  public submods  : 
+  public resources: 
+  public procs    : continuation_args.d.=<0>
+                    continuation_args.d.e<0>
+                    continuation_args.d.~=<0>
+  imports         : use continuation_args
+                    use wybe
+  resources       : 
+  procs           : 
+
+proc = > public {inline} (1 calls)
+0: continuation_args.d.=<0>
+=(#left##0:continuation_args.d, #right##0:continuation_args.d, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_eq(~#left##0:continuation_args.d, ~#right##0:continuation_args.d, ?#success##0:wybe.bool)
+
+
+proc e > public {inline} (0 calls)
+0: continuation_args.d.e<0>
+e(?#result##0:continuation_args.d)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(0:continuation_args.d, ?#result##0:continuation_args.d)
+
+
+proc f > {inline} (0 calls)
+0: continuation_args.d.f<0>
+f(?#result##0:continuation_args.d)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm move(1:continuation_args.d, ?#result##0:continuation_args.d)
+
+
+proc ~= > public {inline} (0 calls)
+0: continuation_args.d.~=<0>
+~=(#left##0:continuation_args.d, #right##0:continuation_args.d, ?#success##0:wybe.bool)<{}; {}; {}>:
+  AliasPairs: []
+  InterestingCallProperties: []
+    foreign llvm icmp_eq(~#left##0:continuation_args.d, ~#right##0:continuation_args.d, ?tmp#0##0:wybe.bool)
+    foreign llvm xor(~tmp#0##0:wybe.bool, 1:wybe.bool, ?#success##0:wybe.bool)
+
+  LLVM code       :
+
+; ModuleID = 'continuation_args.d'
+
+
+ 
+
+
+declare external ccc  i8* @wybe_malloc(i32)    
+
+
+declare external ccc  void @llvm.memcpy.p0i8.p0i8.i32(i8*, i8*, i32, i1)    
+
+
+define external fastcc  i1 @"continuation_args.d.=<0>"(i1  %"#left##0", i1  %"#right##0") alwaysinline   {
+entry:
+  %0 = icmp eq i1 %"#left##0", %"#right##0" 
+  ret i1 %0 
+}
+
+
+define external fastcc  i1 @"continuation_args.d.e<0>"() alwaysinline   {
+entry:
+  ret i1 0 
+}
+
+
+define external fastcc  i1 @"continuation_args.d.f<0>"() alwaysinline   {
+entry:
+  ret i1 1 
+}
+
+
+define external fastcc  i1 @"continuation_args.d.~=<0>"(i1  %"#left##0", i1  %"#right##0") alwaysinline   {
+entry:
+  %0 = icmp eq i1 %"#left##0", %"#right##0" 
+  %1 = xor i1 %0, 1 
+  ret i1 %1 
+}

@@ -2443,6 +2443,7 @@ modecheckStmt final stmt@(And stmts) pos = do
         else return [maybePlace (And stmts') pos]
 modecheckStmt final stmt@(Or disj _ res) pos = do
     logModed $ "Mode checking disjunction " ++ show stmt
+    logAssigned "With assigned: "
     failingState <- gets failingBindingState
     disj' <- modecheckDisj final [] failingState disj
     vars <- gets bindingVars
