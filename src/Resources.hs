@@ -417,30 +417,6 @@ transformStmt Case{} _ = shouldnt "case in transform"
 transformStmt For{} _ = shouldnt "for in transform"
 
 
--- |Transform all the disjuncts in a disjunction.  In particular, ensure that
--- resources assigned in each disjunct are saved before they are changed and
--- then restored at the start of the next disjunct.  But it's not necessary to
--- save resources assigned in the last disjunct, because there's no next
--- disjunct to restore them for; those resources will be restored at a higher
--- level.
-transformDisjunction :: [Placed Stmt] -> [Placed Stmt]
-                     -> Resourcer ([Placed Stmt], Bool)
-transformDisjunction [] [] = do
-    return ([], False)
-transformDisjunction [] restores = do
-    vars <- gets resTmpVars
-    return ([seqToStmt $ restores ++ [Unplaced Fail]], False)
-transformDisjunction (disj1:disjs) restores1 = do
-    tmps <- gets resTmpVars
-    (disj1', globals1) <- placedApply transformStmt disj1
-    ress1 <- gets $ Map.keysSet . resResources
-    modify $ \s -> s {resTmpVars=tmps}
-    (saves, restores) <- loadStoreResourcesIf (place disj1) globals1
-    (disjs', globals) <- transformDisjunction disjs restores
-    let disj1'' = seqToStmt $ restores1 ++ saves ++ disj1'
-    return (disj1'':disjs', globals1 || globals)
-
-
 -- | Restore global variables for a loop
 restoreLoopGlobals :: OptPos -> Resourcer [Placed Stmt]
 restoreLoopGlobals pos = do
