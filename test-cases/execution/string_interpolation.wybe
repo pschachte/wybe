@@ -6,3 +6,10 @@
 
 ?base = 2 ; ?bits = 63
 !println("maxint is $(base**bits-1) and minint is $(base**bits)")
+
+!println("pi = $pi")
+!println("e*100_000 = $(e*100_000.0)")
+!println("1/pi = $(1.0/pi)")
+!println("2.0 = $(10.0/5.0)")
+!println("1/8 = $(1.0/8.0)")
+!println("e**100 = $(e ** 100.0)")
