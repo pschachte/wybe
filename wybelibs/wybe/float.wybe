@@ -140,7 +140,7 @@ pub def log2(x:_):_ = foreign c `llvm.log2.f64`(x)
 pub def fmt(x:_):string = s where {
     ?s = "" ; ?suffix = ""
     if { x < 0.0 :: ?s = "-" ; ?x = -x }
-    if { (x >= 1e10 | x < 1e-10) ::
+    if { (x >= 1e10 | x < 1e-4) ::
         ?exponent = floor(log10(x))
         !x / (10.0**exponent)
         ?suffix = "e" ,, fmt(ifloor(exponent))
