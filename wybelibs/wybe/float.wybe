@@ -3,7 +3,8 @@
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
-use wybe.bool, wybe.int, wybe.comparison, wybe.io
+use wybe.bool, wybe.int, wybe.count
+use wybe.control, wybe.comparison, wybe.io, wybe.string, wybe.char
 
 representation is 64 bit float
 
@@ -14,6 +15,9 @@ pub def pi:_ = 3.14159265358979323846264338327950288
 
 # The base of natural logarithms.  e = exp(1.0).
 pub def e:_ = 2.71828182845904523536028747135266250
+
+# The largest finite float; the smallest is its negative
+def magnitude_maximum = 1.7976931348623157e308
 
 
 ## Common floating point operations
@@ -101,6 +105,10 @@ pub def iceil(x:_):int = foreign llvm fptosi(ceil(x))
 # The largest whole number less than or equal to the input, as an int.
 pub def ifloor(x:_):int = foreign llvm fptosi(floor(x))
 
+# Convert integers to floats
+pub def float(x:int):_   = foreign llvm sitofp(x)
+pub def float(x:count):_ = foreign llvm uitofp(x)
+
 
 ## Transcendental functions
 
@@ -127,6 +135,34 @@ pub def log10(x:_):_ = foreign c `llvm.log10.f64`(x)
 
 # Base 2 logarithm.
 pub def log2(x:_):_ = foreign c `llvm.log2.f64`(x)
+
+## Formatting
+pub def fmt(x:_):string = s where {
+    ?s = "" ; ?suffix = ""
+    if { x < 0.0 :: ?s = "-" ; ?x = -x }
+    if { (x >= 1e10 | x < 1e-4) ::
+        ?exponent = floor(log10(x))
+        !x / (10.0**exponent)
+        ?suffix = "e" ,, fmt(ifloor(exponent))
+    }
+    ?base = ifloor(x)
+    !s ,, fmt(base) ,, "."
+    ?x = x - float(base)
+    ?digits = 6
+    ?x = x + 0.0000005 # round to 6 digit precision
+    ?precision_limit = 0.000001
+    do {
+        decr(!digits)
+        !x * 10.0
+        ?digit = floor(x)
+        !s ,, (chr(ord('0')+ifloor(digit)) | shouldnt)
+        ?x = x - digit
+        !precision_limit * 10.0
+        # stop after 6 characters or when rest will all be 0s
+        while x > precision_limit & digits > 0
+    }
+    !s ,, suffix
+}
 
 ## I/O
 
