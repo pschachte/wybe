@@ -7,6 +7,15 @@ use wybe.c_string, wybe.string, wybe.io
 
 pub constructors false | true
 
+## Constants
+
+def bound_minimum:_ = false
+def bound_maximum:_ = true
+
+# Overloaded versions based on an argument
+def bound_minimum(x:_):_ = bound_minimum
+def bound_maximum(x:_):_ = bound_maximum
+
 ## Common Boolean operations
 
 # Logical and
