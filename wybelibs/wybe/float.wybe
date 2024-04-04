@@ -145,11 +145,11 @@ pub def fmt(x:_):string = s where {
         !x / (10.0**exponent)
         ?suffix = "e" ,, fmt(ifloor(exponent))
     }
+    ?x = x + 0.0000005 # round to 6 digit precision
     ?base = ifloor(x)
     !s ,, fmt(base) ,, "."
     ?x = x - float(base)
     ?digits = 6
-    ?x = x + 0.0000005 # round to 6 digit precision
     ?precision_limit = 0.000001
     do {
         decr(!digits)
