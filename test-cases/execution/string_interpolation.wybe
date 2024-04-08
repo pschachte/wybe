@@ -13,3 +13,4 @@
 !println("2.0 = $(10.0/5.0)")
 !println("1/8 = $(1.0/8.0)")
 !println("e**100 = $(e ** 100.0)")
+!println("1/8 (4 digits precision) = $(1.0/8.0,4)")
