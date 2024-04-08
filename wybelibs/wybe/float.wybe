@@ -115,7 +115,7 @@ pub def float(x:count):_ = foreign llvm uitofp(x)
 # Square root.
 pub def sqrt(x:_):_ = foreign c `llvm.sqrt.f64`(x)
 
-# Raise `x` to the `n` power.  These two functions 
+# Raise `x` to the `n` power.
 pub def power(x:_,n:_):_ = foreign c `llvm.pow.f64`(x,n)
 pub def (x:_ ** n:_):_ = foreign c `llvm.pow.f64`(x,n)
 
@@ -136,8 +136,14 @@ pub def log10(x:_):_ = foreign c `llvm.log10.f64`(x)
 # Base 2 logarithm.
 pub def log2(x:_):_ = foreign c `llvm.log2.f64`(x)
 
-## Formatting
-pub def fmt(x:_):string = s where {
+## Formatting 6 digits precision, trimming trailing 0s
+pub def fmt(x:_):string = fmt(x, 6, true)
+
+## Formatting with explict precision
+pub def fmt(x:_, precision:int):string = fmt(x, precision, false)
+
+## Formatting with maximum precision
+pub def fmt(x:_, precision:int, trim:bool):string = s where {
     ?s = "" ; ?suffix = ""
     if { x < 0.0 :: ?s = "-" ; ?x = -x }
     if { (x >= 1e10 | x < 1e-4) ::
@@ -145,21 +151,20 @@ pub def fmt(x:_):string = s where {
         !x / (10.0**exponent)
         ?suffix = "e" ,, fmt(ifloor(exponent))
     }
-    ?x = x + 0.0000005 # round to 6 digit precision
+    ?precision_limit = 10.0 ** float(-precision)
+    ?x = x + precision_limit/2.0 # round to precision
     ?base = ifloor(x)
     !s ,, fmt(base) ,, "."
     ?x = x - float(base)
-    ?digits = 6
-    ?precision_limit = 0.000001
     do {
-        decr(!digits)
+        decr(!precision)
         !x * 10.0
         ?digit = floor(x)
         !s ,, (chr(ord('0')+ifloor(digit)) | shouldnt)
         ?x = x - digit
         !precision_limit * 10.0
         # stop after 6 characters or when rest will all be 0s
-        while x > precision_limit & digits > 0
+        while precision > 0 & (~trim | x > precision_limit)
     }
     !s ,, suffix
 }
