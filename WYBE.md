@@ -269,7 +269,7 @@ More generally, the values of Wybe expressions can be included in strings by
 placing them within parentheses immediately preceded by a dollar sign.  For
 example, if `base` is 2 and `bits` is 63, then
 
-> `"maxint is $(base**bits-1) and minint is $(base**bits)"`
+> `"maxint is $(base**bits-1) and minint is $(-base**bits)"`
 
 denotes the string
 `"maxint is 9223372036854775807 and minint is -9223372036854775808"`
@@ -284,6 +284,31 @@ that `fmt` applied to strings returns the strings as is, without surrounding
 them with quotation marks.  Then
 string concatenation (`,,`) is used to assemble the string from its fixed
 parts and the results of the call(s) to `fmt`.
+
+The `$(`...`)` form can pass extra arguments to the `fmt` function simply by
+following the expression by a comma and the extra arguments to pass.
+There are overloaded versions of `fmt` that additionally take a field width
+argument, right justifying the value to be formatted in a field of (at least)
+that width.
+There are also versions that additionally take a fill character, which will be
+used to fill the field where the value is smaller than the specified field.
+For example,
+```
+!println "-6*7 = $(-6*7,5)"
+!println "-6*7 = $(-6*7,5,'0')"
+!println "-6*7 = $(-6*7,5,'*')"
+```
+will print:
+```
+-6*7 =   -42
+-6*7 = -0042
+-6*7 = **-42
+```
+
+There are overloaded versions of ```fmt``` with higher arities for some specific
+types; see the documentation for the types of interest to see what's available.
+You can interpolate your own types by defining a function `fmt` with your type
+as first argument and returning a `string`.
 
 ## Procedure calls
 

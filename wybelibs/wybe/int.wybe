@@ -130,10 +130,23 @@ pub def abs(x:_):_ = if {x < 0 :: -x | else :: x}
 pub def abs(x:_):count = if {x < 0 :: count(-x) | else :: count(x)}
 
 ## Formatting
-pub def fmt(x:_):string =
-    if {x >= 0 :: fmt(count(x))
-       | else  :: '-' ,, fmt(count(-x))
+pub def fmt(x:_):string = fmt(x, 0)
+
+pub def fmt(x:_, minlength:_):string = fmt(x, minlength, ' ')
+
+pub def fmt(x:_, minlength:_, fill:char):string = result where {
+    if { x >= 0 :: 
+            ?result = fmt(count(x))
+            repetition(fill, minlength-length(result)) ,, !result
+       | else  ::
+            ?result = fmt(count(-x))
+            if { fill = '0' :: # - sign goes before fill
+                ('-' ,, repetition(fill, minlength-length(result)-1)) ,, !result
+               | else ::
+                (repetition(fill, minlength-length(result)-1) ,, '-') ,, !result
+            }
     }
+}
 
 ## I/O
 
