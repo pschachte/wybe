@@ -41,6 +41,11 @@ pub def {test} chr(i:count):_ = foreign lpvm cast(i) where { i <= 255:count }
 ## Formatting
 pub def fmt(x:_):string = string(x)
 
+pub def fmt(x:_):string = string(x)
+pub def fmt(x:_, minlength:int):string = fmt(x, minlength, ' ')
+pub def fmt(x:_, minlength:int, fill:_):string =
+    fmt(string(x), minlength, fill)
+
 
 ## I/O
 

@@ -3,7 +3,7 @@
 
 pragma no_standard_library  # Standard library can't depend on itself!
 
-use wybe.bool
+use wybe.bool, wybe.string, wybe.control
 
 pub constructors lesser | equal | greater
 
@@ -13,3 +13,10 @@ pub def (x:_ <  y:_):bool = foreign llvm icmp_ult(x, y)
 pub def (x:_ <= y:_):bool = foreign llvm icmp_ule(x, y)
 pub def (x:_ >  y:_):bool = foreign llvm icmp_ugt(x, y)
 pub def (x:_ >= y:_):bool = foreign llvm icmp_uge(x, y)
+
+pub def fmt(x:_):string = case x in {
+    lesser  :: "lesser"
+|   equal   :: "equal"
+|   greater :: "greater"
+|   else :: shouldnt
+}

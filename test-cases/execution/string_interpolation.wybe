@@ -13,4 +13,18 @@
 !println("2.0 = $(10.0/5.0)")
 !println("1/8 = $(1.0/8.0)")
 !println("e**100 = $(e ** 100.0)")
-!println("1/8 (4 digits precision) = $(1.0/8.0,4)")
+!println("     (field of 10                              ) = XXXXXXXXXX")
+!println("-1/8 (field of 10                              ) = $(-1.0/8.0, 10)")
+!println("-1/8 (field of 10, 4 digits precision          ) = $(-1.0/8.0,10,' ',4)")
+!println("-1/8 (field of 10, 4 digits precision, 0 filled) = $(-1.0/8.0,10,'0',4)")
+!println("-1/8 (field of 10, 4 digits precision, trimmed ) = $(-1.0/8.0,10,' ',4,true)")
+
+!println "1 = 1 is $(1=1,7,'.')"
+?str = "forty-two"
+!println "the answer is:$(str,11)"
+!println "6*7  =$(6:count*7:count,4,'x')"
+!println "7 =$(7:count,4,'y')"
+
+!println "-6*7 = $(-6*7,5)"
+!println "-6*7 = $(-6*7,5,'0')"
+!println "-6*7 = $(-6*7,5,'*')"

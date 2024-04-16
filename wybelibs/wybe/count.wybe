@@ -98,10 +98,21 @@ pub def incr(!x:_) { ?x = x + 1:_ }
 pub def {partial} decr(!x:_) { ?x = x - 1:_ }
 
 ## Formatting
-pub def fmt(x:_):string = s where
-    { ?s = (if {x >= 10:_ :: fmt(x/10:_) | else :: ""})
-           ,, ( chr(ord('0')+int(x%10:_)) | shouldnt )
-    }
+pub def fmt(x:_):string = fmt(x, 0)
+
+pub def fmt(x:_, minlength:int):string = fmt(x, minlength, ' ')
+
+pub def fmt(n:_, minlength:int, fill:char):string =
+    (if { n = 0:_ :: "0"
+        | else    :: fmtnz(n, minlength, fill)
+    })
+
+def fmtnz(n:_, minlength:int, fill:char):string =
+    (if { n = 0:_ :: repetition(fill, max(0,minlength))
+        | else    ::
+            fmtnz(n/10:_, minlength-1, fill) ,,
+                (chr(ord('0')+int(n%10:_)) | shouldnt)
+    })
 
 
 ## I/O

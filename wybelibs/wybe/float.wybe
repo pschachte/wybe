@@ -137,15 +137,22 @@ pub def log10(x:_):_ = foreign c `llvm.log10.f64`(x)
 pub def log2(x:_):_ = foreign c `llvm.log2.f64`(x)
 
 ## Formatting 6 digits precision, trimming trailing 0s
-pub def fmt(x:_):string = fmt(x, 6, true)
+pub def fmt(x:_):string = fmt(x, 0, ' ', 6, true)
+
+pub def fmt(x:_, minlength:int):string = fmt(x, minlength, ' ', 6, true)
+
+pub def fmt(x:_, minlength:int, fill:char):string =
+    fmt(x, minlength, fill, 6, true)
 
 ## Formatting with explict precision
-pub def fmt(x:_, precision:int):string = fmt(x, precision, false)
+pub def fmt(x:_, minlength:int, fill:char, precision:int):string =
+    fmt(x, minlength, fill, precision, false)
 
 ## Formatting with maximum precision
-pub def fmt(x:_, precision:int, trim:bool):string = s where {
-    ?s = "" ; ?suffix = ""
-    if { x < 0.0 :: ?s = "-" ; ?x = -x }
+pub def fmt(x:_, minlength:int, fill:char, precision:int, trim:bool):string =
+  s where {
+    ?prefix = "" ; ?suffix = ""
+    if { x < 0.0 :: ?prefix = "-" ; ?x = -x }
     if { (x >= 1e10 | x < 1e-4) ::
         ?exponent = floor(log10(x))
         !x / (10.0**exponent)
@@ -154,7 +161,7 @@ pub def fmt(x:_, precision:int, trim:bool):string = s where {
     ?precision_limit = 10.0 ** float(-precision)
     ?x = x + precision_limit/2.0 # round to precision
     ?base = ifloor(x)
-    !s ,, fmt(base) ,, "."
+    ?s = (fmt(base) ,, ".")
     ?x = x - float(base)
     do {
         decr(!precision)
@@ -167,6 +174,10 @@ pub def fmt(x:_, precision:int, trim:bool):string = s where {
         while precision > 0 & (~trim | x > precision_limit)
     }
     !s ,, suffix
+    ?padding = repetition(fill, minlength-length(s)-length(prefix))
+    ?s = if { fill = '0' :: prefix ,, padding ,, s
+            | else       :: padding ,, prefix ,, s
+    }
 }
 
 ## I/O
