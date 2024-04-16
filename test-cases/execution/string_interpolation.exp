@@ -7,4 +7,15 @@ e*100_000 = 271828.182846
 2.0 = 2.0
 1/8 = 0.125
 e**100 = 2.688117e43
-1/8 (4 digits precision) = 0.1250
+     (field of 10                              ) = XXXXXXXXXX
+-1/8 (field of 10                              ) =     -0.125
+-1/8 (field of 10, 4 digits precision          ) =    -0.1250
+-1/8 (field of 10, 4 digits precision, 0 filled) = -0000.1250
+-1/8 (field of 10, 4 digits precision, trimmed ) =     -0.125
+1 = 1 is ...true
+the answer is:  forty-two
+6*7  =xx42
+7 =yyy7
+-6*7 =   -42
+-6*7 = -0042
+-6*7 = **-42
