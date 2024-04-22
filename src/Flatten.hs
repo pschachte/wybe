@@ -515,6 +515,9 @@ flattenExp expr@(Var "_" flow _) ty castFrom pos = do
                               ++ flowPrefix flow ++ " mode prefix"
     dummyName <- tempVar
     return $ typeAndPlace (Var dummyName ParamOut Ordinary) ty castFrom pos
+flattenExp FailExpr ty castFrom pos = do
+    emit pos Fail
+    return $ typeAndPlace FailExpr ty castFrom pos
 flattenExp expr@(Var name dir flowType) ty castFrom pos = do
     logFlatten $ "  Flattening arg " ++ show expr
     defd <- gets (Set.member name . defdVars)
