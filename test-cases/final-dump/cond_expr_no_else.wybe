@@ -1,0 +1,19 @@
+# Test conditional partial expression with no else
+
+def {partial} to_count(i:int):count =
+    (if {i>=0 :: i:!count})
+
+!println "5:int -> $((to_count(5)|10:count))"
+!println "-5:int -> $((to_count(-5)|10:count))"
+
+def {partial} vowel_num(c:char):int =
+    (case c in {
+        'a' :: 1
+    |   'e' :: 2
+    |   'i' :: 3
+    |   'o' :: 4
+    |   'u' :: 5
+    })
+
+!println "e is vowel number $((vowel_num('e')|0))"
+!println "f is vowel number $((vowel_num('f')|0))"

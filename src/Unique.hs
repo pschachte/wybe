@@ -349,6 +349,7 @@ uniquenessCheckExp CharValue{} _ = return ()
 uniquenessCheckExp StringValue{} _ = return ()
 uniquenessCheckExp var@Var{} _ =
     shouldnt $ "Untyped variable " ++ show var ++ " in uniqueness checking"
+uniquenessCheckExp FailExpr _ = return ()
 uniquenessCheckExp (Where stmts exp) pos = do
     uniquenessCheckStmts stmts
     defaultPlacedApply uniquenessCheckExp pos exp

@@ -1110,7 +1110,7 @@ termToCases caseTrans (Call _ [] "::" ParamIn [val,thn]) = do
     val' <- termToExp val
     thn' <- caseTrans thn
     return ([(val',thn')], Nothing)
-termToCases _ other =
+termToCases _ other = do
     syntaxError (termPos other) $ "invalid case body " ++ show other
 
 
@@ -1136,6 +1136,7 @@ termToExp (Call pos [] ":!" ParamIn [exp,ty]) = do
             return $ Placed (Typed exp'' ty' $ Just inner) pos
         _  ->
             return $ Placed (Typed exp'  ty' $ Just AnyType) pos
+termToExp (Call pos [] "fail" ParamIn []) = return $ Placed FailExpr pos
 termToExp (Call pos [] "where" ParamIn [exp,body]) = do
     exp' <- termToExp exp
     body' <- termToBody body
@@ -1246,9 +1247,13 @@ termToConditionalExp'
 termToConditionalExp'
         (Call pos [] "::" ParamIn [Call _ [] guard ParamIn [],body])
     | defaultGuard guard = termToExp body
+termToConditionalExp' (Call pos [] "::" ParamIn [test,body]) = do
+    -- implicit "else :: fail"
+    test' <- termToStmt test
+    body' <- termToExp body
+    return $ Placed (CondExp test' body' (Unplaced FailExpr)) pos
 termToConditionalExp' term =
-    syntaxError (termPos term)
-          $ "missing 'else ::' in if expression: " ++ show term
+    syntaxError (termPos term) "expecting conditional case"
 
 
 -- |Convert a Term to a TypeSpec, or produce an error

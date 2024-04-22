@@ -2544,6 +2544,7 @@ foldExp' _   _   val FloatValue{} pos = val
 foldExp' _   _   val StringValue{} pos = val
 foldExp' _   _   val CharValue{} pos = val
 foldExp' _   _   val Var{} pos = val
+foldExp' _   _   val FailExpr pos = val
 foldExp' _   _   val (Global _) pos = val
 foldExp' sfn efn val (Closure _ es) pos = foldExps sfn efn pos val es
 foldExp' sfn efn val (AnonProc _ _ pstmts _ _) pos = foldStmts sfn efn val pstmts
@@ -3043,6 +3044,7 @@ data Exp
       | FloatValue Double
       | CharValue Char
       | StringValue String StringVariant
+      | FailExpr -- ^ an expression with no value, because it always fails
       | Var VarName FlowDirection ArgFlowType
       | Closure ProcSpec [Placed Exp]
       | Typed Exp TypeSpec (Maybe TypeSpec)
@@ -3098,6 +3100,7 @@ flattenedExpFlow AnonProc{}            = ParamIn
 flattenedExpFlow (Closure _ _)         = ParamIn
 flattenedExpFlow (Var _ flow _)        = flow
 flattenedExpFlow (AnonParamVar _ flow) = flow
+flattenedExpFlow FailExpr              = ParamIn
 flattenedExpFlow (Typed exp _ _)       = flattenedExpFlow exp
 flattenedExpFlow otherExp =
     shouldnt $ "Getting flow direction of unflattened exp " ++ show otherExp
@@ -3494,12 +3497,14 @@ expToStmt (ForeignFn lang name flags args) =
     ForeignCall lang name flags args
 expToStmt (Var name ParamIn _) = ProcCall (First [] name Nothing) Det False []
 expToStmt (Var name ParamInOut _) = ProcCall (First [] name Nothing) Det True []
+expToStmt FailExpr = Fail
 expToStmt expr = shouldnt $ "non-Fncall expr " ++ show expr
 
 
 procCallToExp :: Stmt -> Exp
 procCallToExp (ProcCall (First maybeMod name Nothing) _ bang args) =
     Fncall maybeMod name bang args
+procCallToExp Fail = FailExpr
 procCallToExp stmt =
     shouldnt $ "converting non-proccall to expr " ++ showStmt 4 stmt
 
@@ -3521,6 +3526,7 @@ expOutputs (CharValue _) = Set.empty
 expOutputs (Var "_" ParamIn _) = Set.singleton "_" -- special _ variable is out
 expOutputs (Var name flow _) =
     if flowsOut flow then Set.singleton name else Set.empty
+expOutputs FailExpr = Set.empty
 expOutputs (AnonParamVar mbNum flow) =
     if flowsOut flow then Set.singleton ("@" ++ maybe "" show mbNum) else Set.empty
 expOutputs (Global _) = Set.empty
@@ -3552,6 +3558,7 @@ expInputs (CharValue _) = Set.empty
 expInputs (Var "_" ParamIn _) = Set.empty
 expInputs (Var name flow _) =
     if flowsIn flow then Set.singleton name else Set.empty
+expInputs FailExpr = Set.empty
 expInputs (AnonParamVar mbNum flow) =
     if flowsIn flow then Set.singleton (show mbNum) else Set.empty
 expInputs (Global _) = Set.empty
@@ -4128,6 +4135,7 @@ instance Show Exp where
   show (StringValue s v) = show v ++ show s
   show (CharValue c) = show c
   show (Var name dir flowtype) = show flowtype ++ flowPrefix dir ++ name
+  show FailExpr = "fail"
   show (Global info) = show info
   show (AnonProc mods params ss _ _) =
       showProcModifiers mods

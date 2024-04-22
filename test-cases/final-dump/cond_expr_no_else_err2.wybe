@@ -1,0 +1,8 @@
+def vowel_num(c:char):int =
+    (case c in {
+        'a' :: 1
+    |   'e' :: 2
+    |   'i' :: 3
+    |   'o' :: 4
+    |   'u' :: 5
+    })

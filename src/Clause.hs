@@ -318,6 +318,7 @@ compileArg' typ (Closure ms es) _ = do
     unless (sameLength es as)
            $ shouldnt "compileArg' Closure with in/out args"
     return [ArgClosure ms as typ]
+compileArg' typ FailExpr _ = return [ArgInt 0 typ]
 compileArg' typ var@(Var name flow flowType) pos = do
     inArg <- if flowsIn flow
         then do

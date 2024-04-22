@@ -876,6 +876,7 @@ expType' (Closure pspec closed) _ = do
     else do
         typeError ReasonShouldnt
         return InvalidType
+expType' FailExpr _                   = return AnyType
 expType' (Var name _ _) _             = ultimateVarType name
 expType' (Typed _ typ _) pos          =
     lookupTyped "typed expression" pos typ
@@ -900,6 +901,7 @@ expMode' AnonProc{} = return (ParamIn, True, Nothing)
 expMode' (Var name flow _) = do
     assigned <- get
     return (flow, name `assignedIn` assigned, Nothing)
+expMode' FailExpr = return (ParamIn, True, Nothing)
 expMode' (Typed expr _ _) = expMode' expr
 expMode' expr =
     shouldnt $ "Expression '" ++ show expr ++ "' left after flattening"
@@ -2978,9 +2980,10 @@ checkArgTyped callerName callerPos calleeName callPos (n,arg) =
 checkExpTyped :: ProcName -> OptPos -> String -> Exp ->
                  Compiler ()
 checkExpTyped callerName callerPos msg (Typed expr ty _)
-    | ty /= AnyType = return ()
-checkExpTyped callerName callerPos msg _ =
-    reportUntyped callerName callerPos msg
+    | ty /= AnyType || expr == FailExpr = return ()
+-- checkExpTyped callerName callerPos msg FailExpr = return ()
+checkExpTyped callerName callerPos msg exp =
+    reportUntyped callerName callerPos (msg ++ " " ++ show exp)
 
 
 reportUntyped :: ProcName -> OptPos -> String -> Compiler ()
