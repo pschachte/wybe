@@ -1493,7 +1493,10 @@ typecheckCalls [] residue False foreigns = do
     case List.filter (List.null . typingErrs) $ snd <$> typings' of
         [typing] -> put typing
         _ -> do
-            typeErrors $ overloadErr <$> residue
+            typeErrors $ overloadErr
+                 <$> case residue of
+                    [] -> []
+                    (e:_) -> [e]
             typecheckCalls [] [] False foreigns
 typecheckCalls (stmtTyping@(StmtTypings pstmt typs):calls)
         residue chg foreigns = do
