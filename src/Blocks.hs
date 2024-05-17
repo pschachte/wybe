@@ -38,18 +38,18 @@ import           Data.Functor                    ((<&>))
 import           Data.Word                       (Word32)
 import           Data.Maybe                      (fromMaybe, isJust, catMaybes, isNothing, maybeToList)
 import           Flow                            ((|>))
-import qualified LLVM.AST                        as LLVMAST
-import qualified LLVM.AST.Constant               as C
-import qualified LLVM.AST.Float                  as F
-import qualified LLVM.AST.FloatingPointPredicate as FP
-import qualified LLVM.AST.Global                 as G
-import           LLVM.AST.Instruction
-import qualified LLVM.AST.IntegerPredicate       as IP
-import           LLVM.AST.Operand                hiding (PointerType, operands)
-import           LLVM.AST.Type
-import           LLVM.AST.Typed
-import qualified LLVM.AST.Attribute              as A (FunctionAttribute(..))
-import           LLVM.Pretty                     (ppllvm)
+-- import qualified LLVM.AST                        as LLVMAST
+-- import qualified LLVM.AST.Constant               as C
+-- import qualified LLVM.AST.Float                  as F
+-- import qualified LLVM.AST.FloatingPointPredicate as FP
+-- import qualified LLVM.AST.Global                 as G
+-- import           LLVM.AST.Instruction
+-- import qualified LLVM.AST.IntegerPredicate       as IP
+-- import           LLVM.AST.Operand                hiding (PointerType, operands)
+-- import           LLVM.AST.Type
+-- import           LLVM.AST.Typed
+-- import qualified LLVM.AST.Attribute              as A (FunctionAttribute(..))
+-- import           LLVM.Pretty                     (ppllvm)
 
 import qualified Data.ByteString                 as BS
 import qualified Data.ByteString.Char8           as B8

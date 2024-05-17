@@ -26,13 +26,12 @@ import           Data.List                  as List
 import           Data.Map                   as Map
 import qualified Data.Text.Lazy             as TL
 import           Distribution.System        (buildOS, OS (..))
-import qualified LLVM.AST                   as LLVMAST
-import           LLVM.Context
-import           LLVM.Module                as Mod
-import           LLVM.PassManager
-import           LLVM.Pretty                (ppllvm)
-import           LLVM.Target
-import           LLVM.Analysis              (verify)
+-- import qualified LLVM.AST                   as LLVMAST
+-- import           LLVM.Context
+-- import           LLVM.Module                as Mod
+-- import           LLVM.PassManager
+-- -- import           LLVM.Target
+-- import           LLVM.Analysis              (verify)
 import           ObjectInterface
 import           Options                    (LogSelection (Blocks,Builder,Emit),
                                              Options(..), optNoVerifyLLVM, optLLVMOptLevel,
@@ -321,13 +320,13 @@ logLLVMString :: ModSpec -> Compiler ()
 logLLVMString thisMod = do
     reenterModule thisMod
     maybeLLMod <- getModuleImplementationField modLLVM
-    case maybeLLMod of
-        (Just llmod) -> do
-            let llstr = ppllvm llmod
-            logEmit $ replicate 80 '-'
-            logEmit $ TL.unpack llstr
-            logEmit $ replicate 80 '-'
-        Nothing -> error "No LLVM Module Implementation"
+    -- case maybeLLMod of
+    --     (Just llmod) -> do
+    --         let llstr = ppllvm llmod
+    --         logEmit $ replicate 80 '-'
+    --         logEmit $ TL.unpack llstr
+    --         logEmit $ replicate 80 '-'
+    --     Nothing -> error "No LLVM Module Implementation"
     reexitModule
     return ()
 

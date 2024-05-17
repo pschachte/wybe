@@ -20,7 +20,7 @@ import Data.Maybe
 import Control.Monad.Trans (lift,liftIO)
 import Control.Monad.Trans.State
 import System.IO
-import LLVM.Pretty (ppllvm)
+-- import LLVM.Pretty (ppllvm)
 import qualified Data.Text.Lazy as TL
 
 
@@ -67,9 +67,10 @@ instance Show Module where
                  "\n  procs           : " ++ "\n" ++
                  (showMap "" "\n\n" "" (const "") (showProcDefs 0)
                   (modProcs impl)) ++
-                 (maybe "\n\nLLVM code       : None\n"
-                  (("\n\n  LLVM code       :\n\n" ++) . TL.unpack . ppllvm)
-                  $ modLLVM impl)
+                  ""
+                --  (maybe "\n\nLLVM code       : None\n"
+                --   (("\n\n  LLVM code       :\n\n" ++) . TL.unpack . ppllvm)
+                --   $ modLLVM impl)
 
 
 -- |How to show a map, one line per item.
