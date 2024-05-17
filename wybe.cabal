@@ -38,8 +38,8 @@ executable wybemk
                , ansi-terminal
                , utility-ht
                , Diff
-  other-modules: AST, BinaryFactory, Blocks, BodyBuilder, Builder, Callers,
-                 Clause, Codegen, Config, Emit, Expansion, Flatten,
+  other-modules: AST, BinaryFactory, BodyBuilder, Builder, Callers,
+                 Clause, LLVM, Config, Emit, Expansion, Flatten,
                  Macho, Parser, Normalise, ObjectInterface, Optimise,
                  Analysis, AliasAnalysis, Transform,
                  Options, Resources, Scanner, Snippets, Types, Unbranch, UnivSet, Util,
@@ -68,8 +68,8 @@ test-suite wybe-test
                   , ansi-terminal
                   , utility-ht
                   , Diff
-  other-modules: AST, BinaryFactory, Blocks, BodyBuilder, Builder, Callers,
-                 Clause, Codegen, Config, Emit, Expansion, Flatten,
+  other-modules: AST, BinaryFactory, BodyBuilder, Builder, Callers,
+                 Clause, LLVM, Config, Emit, Expansion, Flatten,
                  Macho, Parser, Normalise, ObjectInterface, Optimise,
                  Analysis, AliasAnalysis, Transform,
                  Options, Resources, Scanner, Snippets, Types, Unbranch, Util,

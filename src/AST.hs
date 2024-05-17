@@ -160,7 +160,7 @@ import           System.Console.ANSI
 
 import           GHC.Generics (Generic)
 
-import qualified LLVM.AST as LLVMAST
+-- import qualified LLVM.AST as LLVMAST
 import Data.Binary (Binary)
 
 ----------------------------------------------------------------
@@ -1592,15 +1592,15 @@ data ModuleImplementation = ModuleImplementation {
                                               -- ^Resources visible to this mod
     modKnownProcs:: Map Ident (Set ProcSpec), -- ^Procs visible to this module
     modForeignObjects:: Set FilePath,         -- ^Foreign object files used
-    modForeignLibs:: Set String,              -- ^Foreign libraries used
-    modLLVM :: Maybe LLVMAST.Module           -- ^Module's LLVM representation
+    modForeignLibs:: Set String               -- ^Foreign libraries used
+    -- modLLVM :: Maybe LLVMAST.Module           -- ^Module's LLVM representation
     } deriving (Generic)
 
 emptyImplementation :: ModuleImplementation
 emptyImplementation =
     ModuleImplementation Set.empty Map.empty Nothing Map.empty Map.empty
                          Map.empty Nothing Map.empty Map.empty Map.empty
-                         Set.empty Set.empty Nothing
+                         Set.empty Set.empty -- Nothing
 
 
 -- These functions hack around Haskell's terrible setter syntax

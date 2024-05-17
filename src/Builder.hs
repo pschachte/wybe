@@ -194,8 +194,8 @@ module Builder (buildTargets) where
 import           Analysis
 import           AST
 import           ASTShow                   (logDump, logDumpWith)
-import           Blocks                    (blockTransformModule,
-                                            concatLLVMASTModules)
+-- import           Blocks                    (blockTransformModule,
+--                                             concatLLVMASTModules)
 import           Callers                   (collectCallers)
 import           Clause                    (compileProc)
 import           Config
@@ -238,7 +238,7 @@ import           Snippets
 import           Text.Parsec.Error
 import           BinaryFactory
 import qualified Data.ByteString.Char8 as BS
-import qualified LLVM.AST              as LLVMAST
+-- import qualified LLVM.AST              as LLVMAST
 
 import           Debug.Trace
 import LastCallAnalysis (lastCallAnalyseMod)
@@ -1052,7 +1052,7 @@ buildExecutable orderedSCCs targetMod target = do
             let tmpMainOFile = tmpDir </> "tmpMain.o"
             -- main module only contain a single proc that doesn't have a specz
             -- version, we build it first.
-            blockTransformModule mainMod
+            -- blockTransformModule mainMod
             stopOnError $ "translating " ++ showModSpecs [mainMod]
             emitObjectFile mainMod tmpMainOFile
 
@@ -1274,7 +1274,7 @@ multiSpeczTopDownPass orderedSCCs = do
         -- XXX we can do a bit better by handling modules that has llvm code
         -- with some new specz versions.
         let scc' = List.filter (`Set.notMember` unchanged) scc
-        mapM_ blockTransformModule scc'
+        -- mapM_ blockTransformModule scc'
         logBuild $ "Finished block transform SCC:  " ++ showModSpecs scc'
         stopOnError $ "translating: " ++ showModSpecs scc'
         ) (List.reverse orderedSCCs)

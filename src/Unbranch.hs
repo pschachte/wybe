@@ -82,7 +82,6 @@ import Data.Maybe
 import Data.Tuple.HT             (mapFst)
 import Options                   (LogSelection(Unbranch))
 import Util
-import LLVM.Internal.Function (getPrefixData)
 
 
 -- |Transform away all loops, and all conditionals other than as the final

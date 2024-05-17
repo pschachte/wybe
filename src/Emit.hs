@@ -13,7 +13,7 @@ where
 
 import           AST
 import           BinaryFactory              (encodeModule)
-import           Blocks                     (concatLLVMASTModules)
+-- import           Blocks                     (concatLLVMASTModules)
 import           Config
 import Control.Monad ( (>=>), unless )
 import           Control.Monad.Trans        (liftIO)
@@ -41,12 +41,20 @@ import           System.Process
 import           System.FilePath            ((-<.>))
 import           System.Directory           (getPermissions, writable, doesFileExist)
 import           Util                       (createLocalCacheFile)
-import LLVM.AST (Module(moduleDefinitions), Definition (GlobalDefinition), Type (ArrayType, IntegerType))
-import LLVM.AST.Global
-import qualified LLVM.AST.Global as G
-import qualified LLVM.AST.Constant as C
+-- import LLVM.AST (Module(moduleDefinitions), Definition (GlobalDefinition), Type (ArrayType, IntegerType))
+-- import LLVM.AST.Global
+-- import qualified LLVM.AST.Global as G
+-- import qualified LLVM.AST.Constant as C
 import Data.String
 import Config (lpvmSectionName)
+
+----------------------------------------------------------------------------
+-- For now, make placebo definitions of LLVM-related types
+----------------------------------------------------------------------------
+
+type LLVMModule = ()
+type Definition = ()
+type PassSetSpec = [String]
 
 
 -- This does not check the permission if the file does not exists.
@@ -115,53 +123,57 @@ emitAssemblyFile m f = do
     llmod <- descendentModuleLLVM m
     logEmit $ "===> Writing assembly file " ++ filename
     opts <- gets options
-    let withMod = if optimisationEnabled LLVMOpt opts then withOptimisedModule else withModule 
-    liftIO $ withMod opts llmod
-        (\mm -> withHostTargetMachineDefault $ \_ ->
-            writeLLVMAssemblyToFile (File filename) mm)
+    return ()
+    -- let withMod = if optimisationEnabled LLVMOpt opts then withOptimisedModule else withModule 
+    -- liftIO $ withMod opts llmod
+    --     (\mm -> withHostTargetMachineDefault $ \_ ->
+    --         writeLLVMAssemblyToFile (File filename) mm)
 
--- | Concatenate the LLVMAST.Module implementations of the descendents of
+-- | Concatenate the LLVMModule implementations of the descendents of
 -- the given module.
-descendentModuleLLVM :: ModSpec -> Compiler LLVMAST.Module
+descendentModuleLLVM :: ModSpec -> Compiler LLVMModule
 descendentModuleLLVM mspec = do
-    someMods <- sameOriginModules mspec
-    unless (List.null someMods) $
-        logEmit $ "### Combining descendents of " ++ showModSpec mspec
-                   ++ ": " ++ showModSpecs someMods
-    llmod <- concatLLVMASTModules mspec someMods
-    modBS <- encodeModule mspec
-    logEmit $ "### flattened LPVM module to " ++ show modBS
-    addLPVMtoLLVM mspec llmod modBS
+    return ()
+    -- someMods <- sameOriginModules mspec
+    -- unless (List.null someMods) $
+    --     logEmit $ "### Combining descendents of " ++ showModSpec mspec
+    --                ++ ": " ++ showModSpecs someMods
+    -- llmod <- concatLLVMASTModules mspec someMods
+    -- modBS <- encodeModule mspec
+    -- logEmit $ "### flattened LPVM module to " ++ show modBS
+    -- addLPVMtoLLVM mspec llmod modBS
 
 
 -- | Create a definition to hold the encoded LPVM for a module as LLVM data
 lpvmDefine :: ModSpec -> BL.ByteString -> Definition
 lpvmDefine mspec modBS
-             = GlobalDefinition $ globalVariableDefaults {
-                      name = LLVMAST.Name $ fromString $ show mspec
-                    , isConstant = True
-                    , G.type' = ArrayType (fromIntegral $ BL.length modBS) (IntegerType 8)
-                    , initializer = Just $ C.Array (IntegerType 8)
-                                         $ List.map (C.Int 8 . fromIntegral)
-                                         $ BL.unpack modBS
-                    , section = Just $ fromString lpvmSectionName
-                    }
+    = ()
+            --  = GlobalDefinition $ globalVariableDefaults {
+            --           name = fromString $ show mspec
+            --         , isConstant = True
+            --         , G.type' = ArrayType (fromIntegral $ BL.length modBS) (IntegerType 8)
+            --         , initializer = Just $ C.Array (IntegerType 8)
+            --                              $ List.map (C.Int 8 . fromIntegral)
+            --                              $ BL.unpack modBS
+            --         , section = Just $ fromString lpvmSectionName
+            --         }
 
 
 -- | Inject the linearised LPVM byte string into the LLVM code, so that it can
 -- later be extracted from the generated object file.
-addLPVMtoLLVM :: ModSpec -> LLVMAST.Module -> BL.ByteString -> Compiler LLVMAST.Module
+addLPVMtoLLVM :: ModSpec -> LLVMModule -> BL.ByteString -> Compiler LLVMModule
 addLPVMtoLLVM mspec llmod modBS = do
-    return $ llmod { moduleDefinitions = lpvmDefine mspec modBS:moduleDefinitions llmod}
+    return ()
+    -- return $ llmod { moduleDefinitions = lpvmDefine mspec modBS:moduleDefinitions llmod}
 
 
 -- | Handle the ExceptT monad. If there is an error, it is better to fail.
 liftError :: ExceptT String IO a -> IO a
 liftError = runExceptT >=> either fail return
 
--- | Return string form LLVM IR represenation of a LLVMAST.Module
-codeemit :: Options -> LLVMAST.Module -> IO BS.ByteString
-codeemit opts llmod = withOptimisedModule opts llmod moduleLLVMAssembly
+-- | Return string form LLVM IR represenation of a LLVMModule
+-- codeemit :: Options -> LLVMModule -> IO BS.ByteString
+-- codeemit opts llmod = withOptimisedModule opts llmod moduleLLVMAssembly
 -- codeemit noVerify llmod = withModule noVerify llmod moduleLLVMAssembly
 
 
@@ -172,12 +184,13 @@ codeemit opts llmod = withOptimisedModule opts llmod moduleLLVMAssembly
 -- | Setup the set of passes for optimisations.
 -- Currently using the curated set provided by LLVM.
 passes :: Word -> PassSetSpec
-passes lvl = defaultCuratedPassSetSpec { optLevel = Just lvl }
+-- passes lvl = defaultCuratedPassSetSpec { optLevel = Just lvl }
+passes lvl = ["-O" ++ show lvl]
 
 
--- -- | Return a string LLVM IR representation of a LLVMAST.Module after
+-- -- | Return a string LLVM IR representation of a LLVMModule after
 -- -- a curated set of passes has been executed on the C++ Module form.
--- codeEmitWithPasses :: LLVMAST.Module -> IO BS.ByteString
+-- codeEmitWithPasses :: LLVMModule -> IO BS.ByteString
 -- codeEmitWithPasses llmod =
 --     withContext $ \context ->
 --         withModuleFromAST context llmod $ \m ->
@@ -188,7 +201,7 @@ passes lvl = defaultCuratedPassSetSpec { optLevel = Just lvl }
 --                     else error "Running of optimisation passes not successful!"
 
 -- -- | Testing function to analyse optimisation passes.
--- testOptimisations :: LLVMAST.Module -> IO ()
+-- testOptimisations :: LLVMModule -> IO ()
 -- testOptimisations llmod = do
 --     llstr <- codeEmitWithPasses llmod
 --     putStrLn $ replicate 80 '-'
@@ -199,25 +212,25 @@ passes lvl = defaultCuratedPassSetSpec { optLevel = Just lvl }
 
 
 -- | Using a bracket pattern, perform an action on the C++ Module
--- representation of a LLVMAST.Module after the C++ module has been through
+-- representation of a LLVMModule after the C++ module has been through
 -- a set of curated passes.
-withOptimisedModule :: Options -> LLVMAST.Module -> (Mod.Module -> IO a) -> IO a
-withOptimisedModule opts@Options{optLLVMOptLevel=lvl} llmod action =
-    withModule opts llmod $ \m -> do
-        withPassManager (passes lvl) $ \pm -> do
-            success <- runPassManager pm m
-            if success
-            then action m
-            else error "Running of optimisation passes not successful"
+-- withOptimisedModule :: Options -> LLVMModule -> (LLVMModule -> IO a) -> IO a
+-- withOptimisedModule opts@Options{optLLVMOptLevel=lvl} llmod action =
+--     withModule opts llmod $ \m -> do
+--         withPassManager (passes lvl) $ \pm -> do
+--             success <- runPassManager pm m
+--             if success
+--             then action m
+--             else error "Running of optimisation passes not successful"
 
 
--- | Bracket pattern to run an [action] on the [LLVMAST.Module].
-withModule :: Options -> LLVMAST.Module -> (Mod.Module -> IO a) -> IO a
-withModule Options{optNoVerifyLLVM=noVerify} llmod action =
-    withContext $ \context ->
-        withModuleFromAST context llmod $ \m -> do
-            unless noVerify $ verify m
-            action m
+-- -- | Bracket pattern to run an [action] on the [LLVMModule].
+-- withModule :: Options -> LLVMModule -> (LLVMModule -> IO a) -> IO a
+-- withModule Options{optNoVerifyLLVM=noVerify} llmod action =
+--     withContext $ \context ->
+--         withModuleFromAST context llmod $ \m -> do
+--             unless noVerify $ verify m
+--             action m
 
 
 
@@ -227,23 +240,25 @@ withModule Options{optNoVerifyLLVM=noVerify} llmod action =
 
 -- | Use the bitcode wrapper structure to wrap both the AST.Module
 -- (serialised) and the bitcode generated for the Module
-makeWrappedBCFile :: Options -> FilePath -> LLVMAST.Module -> BL.ByteString -> IO ()
+makeWrappedBCFile :: Options -> FilePath -> LLVMModule -> BL.ByteString -> IO ()
 makeWrappedBCFile opts file llmod modBS =
-    withOptimisedModule opts llmod $ \m -> do
-        bc <- moduleBitcode m
-        let wrapped = getWrappedBitcode (BL.fromStrict bc) modBS
-        BL.writeFile file wrapped
+    return ()
+    -- withOptimisedModule opts llmod $ \m -> do
+    --     bc <- moduleBitcode m
+    --     let wrapped = getWrappedBitcode (BL.fromStrict bc) modBS
+    --     BL.writeFile file wrapped
 
 -- | Create a Macho-O object file and embed a 'AST.Module' bytestring
 -- representation into the '__lpvm' section in it.
-makeWrappedObjFile :: FilePath -> LLVMAST.Module -> BL.ByteString -> Compiler ()
+makeWrappedObjFile :: FilePath -> LLVMModule -> BL.ByteString -> Compiler ()
 makeWrappedObjFile file llmod modBS = do
-    tmpDir <- gets tmpDir
-    opts <- gets options
-    liftIO $ withContext $ \_ ->
-        withOptimisedModule opts llmod $ \m -> do
-            withHostTargetMachineDefault $ \tm ->
-                writeObjectToFile tm (File file) m
+    return ()
+    -- tmpDir <- gets tmpDir
+    -- opts <- gets options
+    -- liftIO $ withContext $ \_ ->
+    --     withOptimisedModule opts llmod $ \m -> do
+    --         withHostTargetMachineDefault $ \tm ->
+    --             writeObjectToFile tm (File file) m
 
 
 ----------------------------------------------------------------------------
@@ -318,8 +333,8 @@ logEmit = logMsg Emit
 -- | Log LLVM IR representation of the given module.
 logLLVMString :: ModSpec -> Compiler ()
 logLLVMString thisMod = do
-    reenterModule thisMod
-    maybeLLMod <- getModuleImplementationField modLLVM
+    -- reenterModule thisMod
+    -- maybeLLMod <- getModuleImplementationField modLLVM
     -- case maybeLLMod of
     --     (Just llmod) -> do
     --         let llstr = ppllvm llmod
@@ -327,17 +342,18 @@ logLLVMString thisMod = do
     --         logEmit $ TL.unpack llstr
     --         logEmit $ replicate 80 '-'
     --     Nothing -> error "No LLVM Module Implementation"
-    reexitModule
+    -- reexitModule
     return ()
 
 -- | Pull the LLVMAST representation of the module and generate the LLVM
 -- IR String for it, if it exists.
 extractLLVM :: AST.Module -> Compiler String
 extractLLVM thisMod = do
-    opts <- gets options
-    case modImplementation thisMod >>= modLLVM of
-        Just llmod -> liftIO $ B8.unpack <$> codeemit opts llmod
-        Nothing    -> return "No LLVM IR generated."
+    return "No LLVM generation yet"
+    -- opts <- gets options
+    -- case modImplementation thisMod >>= modLLVM of
+    --     Just llmod -> liftIO $ B8.unpack <$> codeemit opts llmod
+    --     Nothing    -> return "No LLVM IR generated."
 
 -- | Log the LLVMIR strings for all the modules compiled, except the standard
 -- library.

@@ -34,7 +34,7 @@ import           Resources
 import           Util
 import           Config
 import           Snippets
-import           Blocks              (llvmMapBinop, llvmMapUnop)
+import           LLVM                (llvmMapBinop, llvmMapUnop)
 import Data.Tuple.HT (mapSnd)
 
 
@@ -2787,7 +2787,7 @@ validateForeignCall "llvm" name flags argReps stmt pos = do
     case argReps of
         [inRep1,inRep2,outRep] ->
           case Map.lookup name llvmMapBinop of
-             Just (_,fam,outTy) -> do
+             Just (fam,outTy) -> do
                reportErrorUnless (ReasonWrongFamily name 1 fam pos)
                                  (fam == typeFamily inRep1)
                reportErrorUnless (ReasonWrongFamily name 2 fam pos)
@@ -2800,7 +2800,7 @@ validateForeignCall "llvm" name flags argReps stmt pos = do
                else typeError (ReasonBadForeign "llvm" name pos)
         [inRep,outRep] ->
           case Map.lookup name llvmMapUnop of
-             Just (_,famIn,famOut) ->
+             Just (famIn,famOut) ->
                reportErrorUnless (ReasonWrongFamily name 1 famIn pos)
                                  (famIn == typeFamily inRep)
              Nothing ->
