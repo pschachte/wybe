@@ -45,7 +45,7 @@ executable wybemk
                  Options, Resources, Scanner, Snippets, Types, Unbranch, UnivSet, Util,
                  Version, ASTShow, Unique, LastCallAnalysis
   extra-libraries: gc
-
+  extra-lib-dirs:/opt/homebrew/lib
 
 test-suite wybe-test
   type:             exitcode-stdio-1.0
@@ -74,3 +74,5 @@ test-suite wybe-test
                  Analysis, AliasAnalysis, Transform,
                  Options, Resources, Scanner, Snippets, Types, Unbranch, Util,
                  Version, ASTShow, Unique
+  extra-libraries: gc
+  extra-lib-dirs:/opt/homebrew/lib

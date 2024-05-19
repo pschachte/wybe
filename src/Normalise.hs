@@ -22,7 +22,7 @@ import Data.List as List
 import Data.Map as Map
 import Data.Maybe
 import Data.Set as Set
-import Data.Bits
+import Data.Bits (complement, bit, shiftL)
 import Data.Graph
 import Data.Tuple.HT
 import Data.Tuple.Select

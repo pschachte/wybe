@@ -7,6 +7,10 @@
 INSTALLBIN=/usr/local/bin
 INSTALLLIB=/usr/local/lib/wybe
 
+# Configure any extra C library and include directories
+EXTRALIBS=-L /usr/local/lib -L /opt/homebrew/lib
+EXTRAINCLUDES=-I /usr/local/include -I /opt/homebrew/include
+
 
 # You shouldn't need to edit anything below here
 VERSION = 0.1
@@ -53,7 +57,7 @@ $(LIBDIR)/wybe.o:	wybemk $(LIBDIR)/wybe/*.wybe
 
 
 $(LIBDIR)/wybe/cbits.o: $(LIBDIR)/wybe/cbits.c
-	clang $(ISSYSROOT) -I /usr/local/include -c "$<" -o "$@"
+	clang $(ISSYSROOT) $(EXTRAINCLUDES) -c "$<" -o "$@"
 
 
 $(SRCDIR)/Version.lhs:	$(addprefix $(SRCDIR)/,*.hs)
@@ -61,11 +65,14 @@ $(SRCDIR)/Version.lhs:	$(addprefix $(SRCDIR)/,*.hs)
 	@rm -f "$@"
 	@printf "Version.lhs automatically generated:  DO NOT EDIT\n" > "$@"
 	@printf "\n" >> "$@"
-	@printf "> module Version (version,gitHash,buildDate,libDir) where\n\n" >> "$@"
+	@printf "> module Version (version,gitHash,buildDate,libDir,defaultTriple) where\n\n" >> "$@"
 	@printf "> version :: String\n> version = \"%s\"\n\n" "$(VERSION)" >> "$@"
 	@printf "> gitHash :: String\n> gitHash = \"%s\"\n\n" "`git rev-parse --short HEAD`" >> "$@"
 	@printf "> buildDate :: String\n> buildDate = \"%s\"\n\n" "`date`" >> "$@"
 	@printf "> libDir :: String\n> libDir = \"%s\"\n\n" "$(INSTALLLIB)" >> "$@"
+	@printf "> defaultTriple :: String\n> defaultTriple = \"" >> "$@"
+	@clang --version | sed -n 's/Target: *\(.*\)/\1\"/p' >> "$@"
+	@printf "\n\n" >> "$@"
 
 .PHONY:	doc
 doc:	src/README.md

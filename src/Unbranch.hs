@@ -470,7 +470,7 @@ unbranchStmt stmt@(ProcCall func calldetism r args) pos stmts = do
       Terminal -> return [maybePlace stmt' pos] -- no execution after Terminal
       Failure  -> return [maybePlace stmt' pos] -- no execution after Failure
       Det      -> leaveStmtAsIs stmt' pos stmts
-      SemiDet  -> shouldnt "SemiDet case already covered!"
+    --   SemiDet case already covered
 unbranchStmt stmt@(ForeignCall l nm fs args) pos stmts = do
     alt <- gets brAlternate
     logUnbranch $ "Unbranching foreign call " ++ showStmt 4 stmt
